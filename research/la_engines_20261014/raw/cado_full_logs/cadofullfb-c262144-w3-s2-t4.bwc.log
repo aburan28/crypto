@@ -1,8 +1,8 @@
-Listing files in /tmp/cb/cado-full.k8BSjE/wdir via readdir
+Listing files in /tmp/cb/cado-full.EdFrnH/wdir via readdir
 #############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/prep m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 rhs=/tmp/cb/cado-full.k8BSjE/rhs.txt matrix=/tmp/cb/cado-full.k8BSjE/small.bin
-/home/user/ext/cado-nfs/build/linalg/bwc/bwc.pl :complete prime=4611686018427387847 matrix=/tmp/cb/cado-full.k8BSjE/small.bin rhs=/tmp/cb/cado-full.k8BSjE/rhs.txt nullspace=right mpi=1x1 thr=2x2 m=4 n=4 wdir=/tmp/cb/cado-full.k8BSjE/wdir
-/tmp/cb/cado-full.k8BSjE/rhs.txt is ascii file with header. Getting nrhs=1 from there
+/home/user/ext/cado-nfs/build/linalg/bwc/prep n=4 rhs=/tmp/cb/cado-full.EdFrnH/rhs.txt thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir
+/home/user/ext/cado-nfs/build/linalg/bwc/bwc.pl :complete prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin rhs=/tmp/cb/cado-full.EdFrnH/rhs.txt nullspace=right mpi=1x1 thr=2x2 m=4 n=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir
+/tmp/cb/cado-full.EdFrnH/rhs.txt is ascii file with header. Getting nrhs=1 from there
 ## Entering task: [01;34mprep[0m
 ## [01;33mCheck for prep[0m: none of the output files for prep have been found, need to run prep now. We want to create files:
 ## [01;33mCheck for prep[0m: 	X
@@ -10,11 +10,11 @@ Listing files in /tmp/cb/cado-full.k8BSjE/wdir via readdir
 ## [01;33mCheck for prep[0m: 	V1-2.0
 ## [01;33mCheck for prep[0m: 	V2-3.0
 ## [01;33mCheck for prep[0m: 	V3-4.0
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/prep m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 rhs=/tmp/cb/cado-full.k8BSjE/rhs.txt matrix=/tmp/cb/cado-full.k8BSjE/small.bin
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/prep n=4 rhs=/tmp/cb/cado-full.EdFrnH/rhs.txt thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/prep m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 rhs=/tmp/cb/cado-full.k8BSjE/rhs.txt matrix=/tmp/cb/cado-full.k8BSjE/small.bin
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/prep n=4 rhs=/tmp/cb/cado-full.EdFrnH/rhs.txt thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
@@ -28,88 +28,88 @@ cpubinding: no mapping found
 Now trying to load matrix cache files
 J0 vm done reading (result=0)
 Matrix dispatching starts
-Beginning balancing with 1 readers for file /tmp/cb/cado-full.k8BSjE/small.bin
+Beginning balancing with 1 readers for file /tmp/cb/cado-full.EdFrnH/small.bin
 Job 0 is reader number 0
-Job 0 (reader number 0) reads rows 0 to 3250 and expects 1.87 MB
-Job 0 (reader number 0) reads rows 0 to 3250 and expects 1.87 MB (1955936 bytes) from offset 0
-pass 1, J0 (reader 0/1): 16.71 kB in 0.0s, 0.57 GB/s
-pass 1, J0 (reader 0/1): 32.20 kB in 0.0s, 0.53 GB/s
-pass 1, J0 (reader 0/1): 64.23 kB in 0.0s, 0.55 GB/s
-pass 1, J0 (reader 0/1): 128.32 kB in 0.0s, 0.63 GB/s
-pass 1, J0 (reader 0/1): 257.18 kB in 0.0s, 0.61 GB/s
-pass 1, J0 (reader 0/1): 385.61 kB in 0.0s, 0.59 GB/s
-pass 1, J0 (reader 0/1): 0.50 MB in 0.0s, 480.96 MB/s
-pass 1, J0 (reader 0/1): 0.63 MB in 0.0s, 0.51 GB/s
-pass 1, J0 (reader 0/1): 0.75 MB in 0.0s, 0.57 GB/s
-pass 1, J0 (reader 0/1): 0.88 MB in 0.0s, 0.61 GB/s
-pass 1, J0 (reader 0/1): 1.00 MB in 0.0s, 0.56 GB/s
+Job 0 (reader number 0) reads rows 0 to 3257 and expects 1.83 MB
+Job 0 (reader number 0) reads rows 0 to 3257 and expects 1.83 MB (1914244 bytes) from offset 0
+pass 1, J0 (reader 0/1): 16.26 kB in 0.0s, 0.52 GB/s
+pass 1, J0 (reader 0/1): 32.11 kB in 0.0s, 481.53 MB/s
+pass 1, J0 (reader 0/1): 64.31 kB in 0.0s, 0.51 GB/s
+pass 1, J0 (reader 0/1): 128.46 kB in 0.0s, 0.56 GB/s
+pass 1, J0 (reader 0/1): 257.36 kB in 0.0s, 0.56 GB/s
+pass 1, J0 (reader 0/1): 386.52 kB in 0.0s, 0.53 GB/s
+pass 1, J0 (reader 0/1): 0.50 MB in 0.0s, 479.86 MB/s
+pass 1, J0 (reader 0/1): 0.63 MB in 0.0s, 0.54 GB/s
+pass 1, J0 (reader 0/1): 0.75 MB in 0.0s, 0.60 GB/s
+pass 1, J0 (reader 0/1): 0.88 MB in 0.0s, 0.64 GB/s
+pass 1, J0 (reader 0/1): 1.00 MB in 0.0s, 0.57 GB/s
 pass 1, J0 (reader 0/1): 1.13 MB in 0.0s, 0.59 GB/s
-pass 1, J0 (reader 0/1): 1.25 MB in 0.0s, 0.63 GB/s
-pass 1, J0 (reader 0/1): 1.38 MB in 0.0s, 0.66 GB/s
-pass 1, J0 (reader 0/1): 1.50 MB in 0.0s, 0.62 GB/s
-pass 1, J0 (reader 0/1): 1.63 MB in 0.0s, 0.64 GB/s
-pass 1, J0 (reader 0/1): 1.75 MB in 0.0s, 0.67 GB/s
-pass 1, J0 (reader 0/1): 1.87 MB in 0.0s, 0.68 GB/s (done)
-pass 2, J0 (reader 0/1): 16.71 kB in 0.0s, 0.57 GB/s
-pass 2, J0 (reader 0/1): 32.20 kB in 0.0s, 0.57 GB/s
-pass 2, J0 (reader 0/1): 64.23 kB in 0.0s, 0.55 GB/s
-pass 2, J0 (reader 0/1): 128.32 kB in 0.0s, 0.53 GB/s
-pass 2, J0 (reader 0/1): 257.18 kB in 0.0s, 153.27 MB/s
-pass 2, J0 (reader 0/1): 385.61 kB in 0.0s, 206.85 MB/s
-pass 2, J0 (reader 0/1): 0.50 MB in 0.0s, 167.49 MB/s
-pass 2, J0 (reader 0/1): 0.63 MB in 0.0s, 201.18 MB/s
-pass 2, J0 (reader 0/1): 0.75 MB in 0.0s, 173.07 MB/s
-pass 2, J0 (reader 0/1): 0.88 MB in 0.0s, 196.04 MB/s
-pass 2, J0 (reader 0/1): 1.00 MB in 0.0s, 176.20 MB/s
-pass 2, J0 (reader 0/1): 1.13 MB in 0.0s, 193.17 MB/s
-pass 2, J0 (reader 0/1): 1.25 MB in 0.0s, 175.11 MB/s
-pass 2, J0 (reader 0/1): 1.38 MB in 0.0s, 187.95 MB/s
-pass 2, J0 (reader 0/1): 1.50 MB in 0.0s, 176.00 MB/s
-pass 2, J0 (reader 0/1): 1.63 MB in 0.0s, 187.95 MB/s
-pass 2, J0 (reader 0/1): 1.75 MB in 0.0s, 176.81 MB/s
-pass 2, J0 (reader 0/1): 1.87 MB in 0.0s, 185.66 MB/s (done)
-Matrix: total 3250 rows 3250 cols 242867 coeffs
-Matrix rank is at most 3250 (based on zero columns and rows encountered)
-// Random generator seeded with 1792015916
-// Creating V0-1.0 (extraction from /tmp/cb/cado-full.k8BSjE/rhs.txt)
-Saving V0-1.0 ... done [25.39 kB in 0.00, 12.91 MB/s]
+pass 1, J0 (reader 0/1): 1.25 MB in 0.0s, 0.62 GB/s
+pass 1, J0 (reader 0/1): 1.38 MB in 0.0s, 0.65 GB/s
+pass 1, J0 (reader 0/1): 1.50 MB in 0.0s, 0.61 GB/s
+pass 1, J0 (reader 0/1): 1.63 MB in 0.0s, 0.63 GB/s
+pass 1, J0 (reader 0/1): 1.76 MB in 0.0s, 0.65 GB/s
+pass 1, J0 (reader 0/1): 1.83 MB in 0.0s, 0.66 GB/s (done)
+pass 2, J0 (reader 0/1): 16.26 kB in 0.0s, 0.51 GB/s
+pass 2, J0 (reader 0/1): 32.11 kB in 0.0s, 0.50 GB/s
+pass 2, J0 (reader 0/1): 64.31 kB in 0.0s, 0.51 GB/s
+pass 2, J0 (reader 0/1): 128.46 kB in 0.0s, 0.49 GB/s
+pass 2, J0 (reader 0/1): 257.36 kB in 0.0s, 147.72 MB/s
+pass 2, J0 (reader 0/1): 386.52 kB in 0.0s, 191.07 MB/s
+pass 2, J0 (reader 0/1): 0.50 MB in 0.0s, 156.68 MB/s
+pass 2, J0 (reader 0/1): 0.63 MB in 0.0s, 188.59 MB/s
+pass 2, J0 (reader 0/1): 0.75 MB in 0.0s, 166.57 MB/s
+pass 2, J0 (reader 0/1): 0.88 MB in 0.0s, 187.94 MB/s
+pass 2, J0 (reader 0/1): 1.00 MB in 0.0s, 168.59 MB/s
+pass 2, J0 (reader 0/1): 1.13 MB in 0.0s, 185.53 MB/s
+pass 2, J0 (reader 0/1): 1.25 MB in 0.0s, 172.42 MB/s
+pass 2, J0 (reader 0/1): 1.38 MB in 0.0s, 186.43 MB/s
+pass 2, J0 (reader 0/1): 1.50 MB in 0.0s, 175.19 MB/s
+pass 2, J0 (reader 0/1): 1.63 MB in 0.0s, 186.64 MB/s
+pass 2, J0 (reader 0/1): 1.76 MB in 0.0s, 175.17 MB/s
+pass 2, J0 (reader 0/1): 1.83 MB in 0.0s, 180.58 MB/s (done)
+Matrix: total 3257 rows 3257 cols 237652 coeffs
+Matrix rank is at most 3257 (based on zero columns and rows encountered)
+// Random generator seeded with 1792023341
+// Creating V0-1.0 (extraction from /tmp/cb/cado-full.EdFrnH/rhs.txt)
+Saving V0-1.0 ... done [25.45 kB in 0.00, 16.22 MB/s]
 // Generating new vectors for x and y[1:] (trial # 0)
 // Choosing new projection vectors with 4 non-zero coordinates per x vector
-Creating random vector V1-2.0... done [25.39 kB in 0.00, 272.62 MB/s]
-Loading V1-2.0 ... done [25.39 kB in 0.00, 15.26 MB/s]
+Creating random vector V1-2.0... done [25.45 kB in 0.00, 208.81 MB/s]
+Loading V1-2.0 ... done [25.45 kB in 0.00, 14.18 MB/s]
 // generated V1-2.0
-Creating random vector V2-3.0... done [25.39 kB in 0.00, 0.64 GB/s]
-Loading V2-3.0 ... done [25.39 kB in 0.00, 14.94 MB/s]
+Creating random vector V2-3.0... done [25.45 kB in 0.00, 271.34 MB/s]
+Loading V2-3.0 ... done [25.45 kB in 0.00, 15.68 MB/s]
 // generated V2-3.0
-Creating random vector V3-4.0... done [25.39 kB in 0.00, 0.64 GB/s]
-Loading V3-4.0 ... done [25.39 kB in 0.00, 16.35 MB/s]
+Creating random vector V3-4.0... done [25.45 kB in 0.00, 370.69 MB/s]
+Loading V3-4.0 ... done [25.45 kB in 0.00, 14.22 MB/s]
 // generated V3-4.0
-Loading V0-1.0 ... done [25.39 kB in 0.00, 13.18 MB/s]
-Loading V1-2.0 ... done [25.39 kB in 0.00, 16.89 MB/s]
-Loading V2-3.0 ... done [25.39 kB in 0.00, 15.31 MB/s]
-Loading V3-4.0 ... done [25.39 kB in 0.00, 16.06 MB/s]
+Loading V0-1.0 ... done [25.45 kB in 0.00, 13.78 MB/s]
+Loading V1-2.0 ... done [25.45 kB in 0.00, 15.04 MB/s]
+Loading V2-3.0 ... done [25.45 kB in 0.00, 16.19 MB/s]
+Loading V3-4.0 ... done [25.45 kB in 0.00, 12.31 MB/s]
 // Dimension of kernel: 0
 // Found good x,y vector pair after 1 trials
 Timings for prep: (wct) 0.09
 Timings for prep: (cpu) 0.12 (aggregated over all threads and 1 MPI jobs)
-Listing files in /tmp/cb/cado-full.k8BSjE/wdir via readdir
+Listing files in /tmp/cb/cado-full.EdFrnH/wdir via readdir
 #############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/secure m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 matrix=/tmp/cb/cado-full.k8BSjE/small.bin check_stops=0,16,64,80
+/home/user/ext/cado-nfs/build/linalg/bwc/secure n=4 thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir check_stops=0,16,64,80
 ## Entering task: [01;34mkrylov[0m
-## [01;33mCheck for krylov[0m: missing check vector Cv0-1.0
 ## [01;33mCheck for krylov[0m: missing check vector Cv0-1.16
 ## [01;33mCheck for krylov[0m: missing check vector Cd0-1.16
-## [01;33mCheck for krylov[0m: missing check vector Cv0-1.80
-## [01;33mCheck for krylov[0m: missing check vector Cd0-1.80
+## [01;33mCheck for krylov[0m: missing check vector Cv0-1.0
 ## [01;33mCheck for krylov[0m: missing check vector Cv0-1.64
 ## [01;33mCheck for krylov[0m: missing check vector Cd0-1.64
+## [01;33mCheck for krylov[0m: missing check vector Cv0-1.80
+## [01;33mCheck for krylov[0m: missing check vector Cd0-1.80
 ## [01;33mCheck for krylov[0m: missing check vector Cr0-1.0-1
 ## [01;33mCheck for krylov[0m: missing check vector Ct0-1.0-4
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/secure m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 matrix=/tmp/cb/cado-full.k8BSjE/small.bin check_stops=0,16,64,80
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/secure n=4 thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir check_stops=0,16,64,80
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/secure m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 matrix=/tmp/cb/cado-full.k8BSjE/small.bin check_stops=0,16,64,80
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/secure n=4 thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir check_stops=0,16,64,80
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
@@ -121,28 +121,28 @@ cpubinding: Hardware: Package:1 [NUMANode] L3Cache:1 L2Cache:4 L1dCache:1 Core:1
 cpubinding: Target split: 2x2
 cpubinding: no mapping found
 Now trying to load matrix cache files
-[vm] J0: read cache small.2x2/small.2x2.3949165824.h0.v0-zone.bin (and others) in 0.00s
+[vm] J0: read cache small.2x2/small.2x2.487934720.h0.v0-zone.bin (and others) in 0.00s
 J0 vm done reading (result=1)
-Matrix: total 3250 rows 3250 cols 242867 coeffs
+Matrix: total 3257 rows 3257 cols 237652 coeffs
 // Random generator seeded with 0
 Saved Ct0-1.0-4
 We have start=0: creating Cv0-1.0 as an expanded copy of X*T
-Saving Cv0-1.0 ... done [25.39 kB in 0.00, 15.61 MB/s]
+Saving Cv0-1.0 ... done [25.45 kB in 0.00, 14.56 MB/s]
 Setting interval value to default 0
 Computing trsp(x)*M^k for check stops k=0,16,64,80
-................Saving Cv0-1.16 ... done [25.39 kB in 0.00, 14.69 MB/s]
-Saving Cd0-1.16 ... done [25.39 kB in 0.00, 14.77 MB/s]
-................................................Saving Cv0-1.64 ... done [25.39 kB in 0.00, 16.28 MB/s]
-Saving Cd0-1.64 ... done [25.39 kB in 0.00, 16.55 MB/s]
-................Saving Cv0-1.80 ... done [25.39 kB in 0.00, 16.37 MB/s]
-Saving Cd0-1.80 ... done [25.39 kB in 0.00, 15.93 MB/s]
+................Saving Cv0-1.16 ... done [25.45 kB in 0.00, 15.62 MB/s]
+Saving Cd0-1.16 ... done [25.45 kB in 0.00, 15.29 MB/s]
+................................................Saving Cv0-1.64 ... done [25.45 kB in 0.00, 15.43 MB/s]
+Saving Cd0-1.64 ... done [25.45 kB in 0.00, 16.71 MB/s]
+................Saving Cv0-1.80 ... done [25.45 kB in 0.00, 13.40 MB/s]
+Saving Cd0-1.80 ... done [25.45 kB in 0.00, 17.23 MB/s]
 Timings for secure: (wct) 0.11
-Timings for secure: (cpu) 0.20 (aggregated over all threads and 1 MPI jobs)
-Listing files in /tmp/cb/cado-full.k8BSjE/wdir via readdir
+Timings for secure: (cpu) 0.19 (aggregated over all threads and 1 MPI jobs)
+Listing files in /tmp/cb/cado-full.EdFrnH/wdir via readdir
 Use of uninitialized value in concatenation (.) or string at /home/user/ext/cado-nfs/build/linalg/bwc/bwc.pl line 1227, <F> line 1.
 #############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/krylov m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 matrix=/tmp/cb/cado-full.k8BSjE/small.bin ys=0..1 start=0
-## krylov max iteration is 1640
+/home/user/ext/cado-nfs/build/linalg/bwc/krylov n=4 thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir ys=0..1 start=0
+## krylov max iteration is 1644
 ## complete range list for krylov: 0-1 1-2 2-3 3-4
 ## V files for 0..1: last krylov checkpoint is 0
 ## V files for 1..2: last krylov checkpoint is 0
@@ -156,314 +156,11 @@ Use of uninitialized value in concatenation (.) or string at /home/user/ext/cado
 ## [01;33mCheck for krylov[0m: 	ys=3..4 start=0
 ## Entering task: [01;34mkrylov[0m
 ## Check for krylov[0m: Found no way to verify that the starting point is consistent
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 matrix=/tmp/cb/cado-full.k8BSjE/small.bin ys=0..1 start=0
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov n=4 thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir ys=0..1 start=0
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 matrix=/tmp/cb/cado-full.k8BSjE/small.bin ys=0..1 start=0
-# Compiled with gcc 13.3.0
-# Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-1 nodes on vm
- vm  .
-  .  .
-cpubinding messages on vm:
-cpubinding: Hardware: Package:1 [NUMANode] L3Cache:1 L2Cache:4 L1dCache:1 Core:1 PU:1 
-cpubinding: Target split: 2x2
-cpubinding: no mapping found
-Now trying to load matrix cache files
-[vm] J0: read cache small.2x2/small.2x2.3949165824.h0.v0-zone.bin (and others) in 0.00s
-J0 vm done reading (result=1)
-Matrix: total 3250 rows 3250 cols 242867 coeffs
-c1  1/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-c0  0/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-r0  0/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-r1  1/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-Loading V0-1.0 ... done [25.39 kB in 0.00, 15.48 MB/s]
-Setting interval value to default 0
-Target iteration is 1664
-Loading Cv0-1.64 ... done [25.39 kB in 0.00, 17.96 MB/s]
-loaded Ct0-1.0-4
-Each thread allocates 2 kb for the A matrices
-iteration 1
-+-----------------------------------+
-|0.00@14%+0.00@11% 0.00@8%+0.00@7%  |
-|0.00@16%+0.00@17% 0.00@5%+0.00@4%  |
-+-----------------------------------+
-iteration 2
-+-----------------------------------+
-|0.00@27%+0.00@25% 0.00@7%+0.00@7%  |
-|0.00@15%+0.00@16% 0.00@5%+0.00@4%  |
-+-----------------------------------+
-iteration 3
-+-----------------------------------+
-|0.00@29%+0.00@30% 0.00@8%+0.00@7%  |
-|0.00@15%+0.00@15% 0.00@5%+0.00@4%  |
-+-----------------------------------+
-iteration 4
-+-----------------------------------+
-|0.00@31%+0.00@31% 0.00@8%+0.00@7%  |
-|0.00@14%+0.00@15% 0.00@5%+0.00@4%  |
-+-----------------------------------+
-iteration 5
-+-----------------------------------+
-|0.00@32%+0.00@32% 0.00@8%+0.00@7%  |
-|0.00@14%+0.00@15% 0.00@5%+0.00@4%  |
-+-----------------------------------+
-iteration 10
-+-----------------------------------+
-|0.00@37%+0.00@37% 0.00@15%+0.00@23%|
-|0.00@20%+0.00@28% 0.00@6%+0.00@4%  |
-+-----------------------------------+
-iteration 15
-+-----------------------------------+
-|0.00@41%+0.00@39% 0.00@23%+0.00@22%|
-|0.00@23%+0.00@21% 0.00@5%+0.00@2%  |
-+-----------------------------------+
-iteration 20
-+-----------------------------------+
-|0.00@46%+0.00@41% 0.00@31%+0.00@24%|
-|0.00@24%+0.00@20% 0.00@10%+0.00@7% |
-+-----------------------------------+
-iteration 40
-+-----------------------------------+
-|0.00@53%+0.00@47% 0.00@45%+0.00@29%|
-|0.00@32%+0.00@22% 0.00@31%+0.00@18%|
-+-----------------------------------+
-iteration 60
-+-----------------------------------+
-|0.00@44%+0.00@37% 0.00@34%+0.00@20%|
-|0.00@24%+0.00@15% 0.00@23%+0.00@13%|
-+-----------------------------------+
-Saving V0-1.64 ... done [25.39 kB in 0.00, 14.45 MB/s]
-N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 5.61 ns/0.0Gitems
-N=64 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=64 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=64 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=64 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-iteration 80
-+-----------------------------------+
-|0.00@40%+0.00@34% 0.00@34%+0.00@18%|
-|0.00@26%+0.00@17% 0.00@30%+0.00@14%|
-+-----------------------------------+
-iteration 100
-+-----------------------------------+
-|0.00@41%+0.00@34% 0.00@32%+0.00@16%|
-|0.00@28%+0.00@17% 0.00@36%+0.00@17%|
-+-----------------------------------+
-Saving V0-1.128 ... done [25.39 kB in 0.00, 14.12 MB/s]
-N=128 ; CPU0: 0.00 s/iter [0.000..0.000], 5.34 ns/0.0Gitems
-N=128 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=128 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=128 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=128 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-Saving V0-1.192 ... done [25.39 kB in 0.00, 14.79 MB/s]
-N=192 ; CPU0: 0.00 s/iter [0.000..0.000], 5.16 ns/0.0Gitems
-N=192 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=192 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=192 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=192 ; ETA (N=1664): Wed Oct 14 22:11:58 2026 [0.001 s/iter]
-iteration 200
-+-----------------------------------+
-|0.00@33%+0.00@26% 0.00@25%+0.00@11%|
-|0.00@27%+0.00@18% 0.00@28%+0.00@13%|
-+-----------------------------------+
-Saving V0-1.256 ... done [25.39 kB in 0.00, 9.33 MB/s]
-N=256 ; CPU0: 0.00 s/iter [0.000..0.000], 5.05 ns/0.0Gitems
-N=256 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=256 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=256 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=256 ; ETA (N=1664): Wed Oct 14 22:11:58 2026 [0.001 s/iter]
-iteration 300
-+-----------------------------------+
-|0.00@34%+0.00@26% 0.00@27%+0.00@13%|
-|0.00@29%+0.00@21% 0.00@31%+0.00@15%|
-+-----------------------------------+
-Saving V0-1.320 ... done [25.39 kB in 0.00, 17.23 MB/s]
-N=320 ; CPU0: 0.00 s/iter [0.000..0.000], 4.93 ns/0.0Gitems
-N=320 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=320 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=320 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=320 ; ETA (N=1664): Wed Oct 14 22:11:58 2026 [0.001 s/iter]
-Saving V0-1.384 ... done [25.39 kB in 0.00, 14.77 MB/s]
-N=384 ; CPU0: 0.00 s/iter [0.000..0.000], 4.80 ns/0.0Gitems
-N=384 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=384 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=384 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=384 ; ETA (N=1664): Wed Oct 14 22:11:58 2026 [0.001 s/iter]
-iteration 400
-+-----------------------------------+
-|0.00@30%+0.00@23% 0.00@24%+0.00@12%|
-|0.00@29%+0.00@20% 0.00@29%+0.00@13%|
-+-----------------------------------+
-Saving V0-1.448 ... done [25.39 kB in 0.00, 16.44 MB/s]
-N=448 ; CPU0: 0.00 s/iter [0.000..0.000], 4.73 ns/0.0Gitems
-N=448 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=448 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=448 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=448 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-iteration 500
-+-----------------------------------+
-|0.00@32%+0.00@25% 0.00@27%+0.00@13%|
-|0.00@30%+0.00@21% 0.00@30%+0.00@14%|
-+-----------------------------------+
-Saving V0-1.512 ... done [25.39 kB in 0.00, 16.76 MB/s]
-N=512 ; CPU0: 0.00 s/iter [0.000..0.000], 4.65 ns/0.0Gitems
-N=512 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=512 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=512 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=512 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-Saving V0-1.576 ... done [25.39 kB in 0.00, 14.54 MB/s]
-N=576 ; CPU0: 0.00 s/iter [0.000..0.000], 4.58 ns/0.0Gitems
-N=576 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=576 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=576 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=576 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-iteration 600
-+-----------------------------------+
-|0.00@33%+0.00@26% 0.00@28%+0.00@14%|
-|0.00@30%+0.00@22% 0.00@30%+0.00@14%|
-+-----------------------------------+
-Saving V0-1.640 ... done [25.39 kB in 0.00, 15.22 MB/s]
-N=640 ; CPU0: 0.00 s/iter [0.000..0.000], 4.55 ns/0.0Gitems
-N=640 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=640 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=640 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=640 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-iteration 700
-+-----------------------------------+
-|0.00@33%+0.00@26% 0.00@30%+0.00@14%|
-|0.00@31%+0.00@23% 0.00@30%+0.00@14%|
-+-----------------------------------+
-Saving V0-1.704 ... done [25.39 kB in 0.00, 16.44 MB/s]
-N=704 ; CPU0: 0.00 s/iter [0.000..0.000], 4.54 ns/0.0Gitems
-N=704 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=704 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=704 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=704 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-Saving V0-1.768 ... done [25.39 kB in 0.00, 15.17 MB/s]
-N=768 ; CPU0: 0.00 s/iter [0.000..0.000], 4.49 ns/0.0Gitems
-N=768 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=768 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=768 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=768 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-iteration 800
-+-----------------------------------+
-|0.00@35%+0.00@28% 0.00@31%+0.00@15%|
-|0.00@30%+0.00@23% 0.00@30%+0.00@14%|
-+-----------------------------------+
-Saving V0-1.832 ... done [25.39 kB in 0.00, 17.57 MB/s]
-N=832 ; CPU0: 0.00 s/iter [0.000..0.000], 4.45 ns/0.0Gitems
-N=832 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=832 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=832 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=832 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-Saving V0-1.896 ... done [25.39 kB in 0.00, 16.02 MB/s]
-N=896 ; CPU0: 0.00 s/iter [0.000..0.000], 4.39 ns/0.0Gitems
-N=896 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=896 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=896 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=896 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-iteration 900
-+-----------------------------------+
-|0.00@35%+0.00@28% 0.00@30%+0.00@15%|
-|0.00@29%+0.00@23% 0.00@31%+0.00@15%|
-+-----------------------------------+
-Saving V0-1.960 ... done [25.39 kB in 0.00, 15.66 MB/s]
-N=960 ; CPU0: 0.00 s/iter [0.000..0.000], 4.35 ns/0.0Gitems
-N=960 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=960 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=960 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=960 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-iteration 1000
-+-----------------------------------+
-|0.00@33%+0.00@27% 0.00@29%+0.00@15%|
-|0.00@29%+0.00@23% 0.00@30%+0.00@14%|
-+-----------------------------------+
-Saving V0-1.1024 ... done [25.39 kB in 0.00, 14.07 MB/s]
-N=1024 ; CPU0: 0.00 s/iter [0.000..0.000], 4.33 ns/0.0Gitems
-N=1024 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1024 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1024 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1024 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-Saving V0-1.1088 ... done [25.39 kB in 0.00, 17.31 MB/s]
-N=1088 ; CPU0: 0.00 s/iter [0.000..0.000], 4.31 ns/0.0Gitems
-N=1088 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1088 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1088 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1088 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-Saving V0-1.1152 ... done [25.39 kB in 0.00, 16.49 MB/s]
-N=1152 ; CPU0: 0.00 s/iter [0.000..0.000], 4.27 ns/0.0Gitems
-N=1152 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1152 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1152 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1152 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-Saving V0-1.1216 ... done [25.39 kB in 0.00, 18.23 MB/s]
-N=1216 ; CPU0: 0.00 s/iter [0.000..0.000], 4.25 ns/0.0Gitems
-N=1216 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1216 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1216 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1216 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-Saving V0-1.1280 ... done [25.39 kB in 0.00, 15.49 MB/s]
-N=1280 ; CPU0: 0.00 s/iter [0.000..0.000], 4.24 ns/0.0Gitems
-N=1280 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1280 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1280 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1280 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-Saving V0-1.1344 ... done [25.39 kB in 0.00, 17.88 MB/s]
-N=1344 ; CPU0: 0.00 s/iter [0.000..0.000], 4.22 ns/0.0Gitems
-N=1344 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1344 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1344 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1344 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-Saving V0-1.1408 ... done [25.39 kB in 0.00, 15.47 MB/s]
-N=1408 ; CPU0: 0.00 s/iter [0.000..0.000], 4.25 ns/0.0Gitems
-N=1408 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1408 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1408 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1408 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-Saving V0-1.1472 ... done [25.39 kB in 0.00, 16.67 MB/s]
-N=1472 ; CPU0: 0.00 s/iter [0.000..0.000], 4.23 ns/0.0Gitems
-N=1472 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1472 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1472 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1472 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-Saving V0-1.1536 ... done [25.39 kB in 0.00, 17.45 MB/s]
-N=1536 ; CPU0: 0.00 s/iter [0.000..0.000], 4.19 ns/0.0Gitems
-N=1536 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1536 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1536 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1536 ; ETA (N=1664): Wed Oct 14 22:11:57 2026 [0.001 s/iter]
-Saving V0-1.1600 ... done [25.39 kB in 0.00, 17.60 MB/s]
-N=1600 ; CPU0: 0.00 s/iter [0.000..0.000], 4.17 ns/0.0Gitems
-N=1600 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1600 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1600 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1600 ; ETA (N=1664): Wed Oct 14 22:11:58 2026 [0.001 s/iter]
-Saving V0-1.1664 ... done [25.39 kB in 0.00, 16.79 MB/s]
-N=1664 ; CPU0: 0.00 s/iter [0.000..0.000], 4.17 ns/0.0Gitems
-N=1664 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1664 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1664 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1664 ; ETA (N=1664): Wed Oct 14 22:11:58 2026 [0.001 s/iter]
-krylov done N=1664 ; CPU0: 0.00 s/iter [0.000..0.000], 4.18 ns/0.0Gitems
-krylov done N=1664 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-krylov done N=1664 ; COMM0: 0.00 s/iter [0.000..0.000]
-krylov done N=1664 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-Done krylov.
-Timings for krylov: (wct) 1.73
-Timings for krylov: (cpu) 2.88 (aggregated over all threads and 1 MPI jobs)
-Listing files in /tmp/cb/cado-full.k8BSjE/wdir via readdir
-Use of uninitialized value in concatenation (.) or string at /home/user/ext/cado-nfs/build/linalg/bwc/bwc.pl line 1227, <F> line 1.
-#############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/krylov m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 matrix=/tmp/cb/cado-full.k8BSjE/small.bin ys=1..2 start=0
-## Entering task: [01;34mkrylov[0m
-## Check for krylov[0m: Found no way to verify that the starting point is consistent
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 matrix=/tmp/cb/cado-full.k8BSjE/small.bin ys=1..2 start=0
-# Compiled with gcc 13.3.0
-# Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 matrix=/tmp/cb/cado-full.k8BSjE/small.bin ys=1..2 start=0
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov n=4 thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir ys=0..1 start=0
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
@@ -475,918 +172,1221 @@ cpubinding: Hardware: Package:1 [NUMANode] L3Cache:1 L2Cache:4 L1dCache:1 Core:1
 cpubinding: Target split: 2x2
 cpubinding: no mapping found
 Now trying to load matrix cache files
-[vm] J0: read cache small.2x2/small.2x2.3949165824.h0.v0-zone.bin (and others) in 0.00s
+[vm] J0: read cache small.2x2/small.2x2.487934720.h0.v0-zone.bin (and others) in 0.00s
 J0 vm done reading (result=1)
-Matrix: total 3250 rows 3250 cols 242867 coeffs
-c0  0/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+Matrix: total 3257 rows 3257 cols 237652 coeffs
 c1  1/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+c0  0/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
 r0  0/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
 r1  1/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-Loading V1-2.0 ... done [25.39 kB in 0.00, 17.30 MB/s]
+Loading V0-1.0 ... done [25.45 kB in 0.00, 18.42 MB/s]
 Setting interval value to default 0
 Target iteration is 1664
-Loading Cv0-1.64 ... done [25.39 kB in 0.00, 19.15 MB/s]
+Loading Cv0-1.64 ... done [25.45 kB in 0.00, 17.16 MB/s]
 loaded Ct0-1.0-4
 Each thread allocates 2 kb for the A matrices
 iteration 1
 +-----------------------------------+
-|0.00@12%+0.00@17% 0.00@4%+0.00@3%  |
-|0.00@10%+0.00@10% 0.00@4%+0.00@1%  |
+|0.00@10%+0.00@11% 0.00@12%+0.00@6% |
+|0.00@11%+0.00@15% 0.00@6%+0.00@4%  |
 +-----------------------------------+
 iteration 2
 +-----------------------------------+
-|0.00@12%+0.00@15% 0.00@4%+0.00@3%  |
-|0.00@10%+0.00@9%  0.00@2%+0.00@1%  |
+|0.00@11%+0.00@10% 0.00@12%+0.00@6% |
+|0.00@12%+0.00@17% 0.00@6%+0.00@4%  |
 +-----------------------------------+
 iteration 3
 +-----------------------------------+
-|0.00@13%+0.00@14% 0.00@5%+0.00@4%  |
-|0.00@10%+0.00@10% 0.00@2%+0.00@1%  |
+|0.00@10%+0.00@10% 0.00@11%+0.00@6% |
+|0.00@13%+0.00@18% 0.00@6%+0.00@4%  |
 +-----------------------------------+
 iteration 4
 +-----------------------------------+
-|0.00@12%+0.00@13% 0.00@5%+0.00@3%  |
-|0.00@10%+0.00@11% 0.00@1%+0.00@0%  |
+|0.00@10%+0.00@10% 0.00@9%+0.00@4%  |
+|0.00@10%+0.00@13% 0.00@6%+0.00@4%  |
 +-----------------------------------+
 iteration 5
-+-----------------------------------+
-|0.00@13%+0.00@13% 0.00@5%+0.00@4%  |
-|0.00@9%+0.00@10%  0.00@1%+0.00@0%  |
-+-----------------------------------+
++---------------------------------+
+|0.00@10%+0.00@9% 0.00@7%+0.00@3% |
+|0.00@8%+0.00@10% 0.00@6%+0.00@4% |
++---------------------------------+
 iteration 10
 +---------------------------------+
-|0.00@9%+0.00@7%  0.00@6%+0.00@4% |
-|0.00@10%+0.00@9% 0.00@1%+0.00@0% |
+|0.00@11%+0.00@9% 0.00@5%+0.00@2% |
+|0.00@6%+0.00@5%  0.00@6%+0.00@4% |
 +---------------------------------+
 iteration 15
-+-----------------------------------+
-|0.00@13%+0.00@12% 0.00@11%+0.00@9% |
-|0.00@15%+0.00@16% 0.00@1%+0.00@0%  |
-+-----------------------------------+
++---------------------------------+
+|0.00@11%+0.00@9% 0.00@4%+0.00@1% |
+|0.00@5%+0.00@4%  0.00@7%+0.00@4% |
++---------------------------------+
 iteration 20
-+-----------------------------------+
-|0.00@20%+0.00@19% 0.00@18%+0.00@15%|
-|0.00@22%+0.00@22% 0.00@1%+0.00@1%  |
-+-----------------------------------+
++---------------------------------+
+|0.00@11%+0.00@8% 0.00@3%+0.00@1% |
+|0.00@4%+0.00@3%  0.00@7%+0.00@4% |
++---------------------------------+
 iteration 40
 +-----------------------------------+
-|0.00@35%+0.00@29% 0.00@34%+0.00@23%|
-|0.00@35%+0.00@33% 0.00@13%+0.00@11%|
+|0.00@19%+0.00@16% 0.00@11%+0.00@7% |
+|0.00@14%+0.00@13% 0.00@20%+0.00@13%|
 +-----------------------------------+
 iteration 60
 +-----------------------------------+
-|0.00@33%+0.00@30% 0.00@31%+0.00@22%|
-|0.00@34%+0.00@36% 0.00@18%+0.00@13%|
+|0.00@26%+0.00@21% 0.00@21%+0.00@13%|
+|0.00@25%+0.00@25% 0.00@31%+0.00@20%|
 +-----------------------------------+
-Saving V1-2.64 ... done [25.39 kB in 0.00, 18.09 MB/s]
-N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 5.39 ns/0.0Gitems
+Saving V0-1.64 ... done [25.45 kB in 0.00, 16.75 MB/s]
+N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 5.09 ns/0.0Gitems
 N=64 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=64 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=64 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=64 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
+krylov: N=64 ; ETA (N=1664): Thu Oct 15 00:15:43 2026 [0.001 s/iter]
 iteration 80
 +-----------------------------------+
-|0.00@38%+0.00@32% 0.00@33%+0.00@22%|
-|0.00@38%+0.00@37% 0.00@18%+0.00@12%|
+|0.00@27%+0.00@24% 0.00@21%+0.00@14%|
+|0.00@22%+0.00@22% 0.00@35%+0.00@22%|
 +-----------------------------------+
 iteration 100
 +-----------------------------------+
-|0.00@41%+0.00@35% 0.00@35%+0.00@21%|
-|0.00@39%+0.00@35% 0.00@17%+0.00@10%|
+|0.00@29%+0.00@25% 0.00@25%+0.00@17%|
+|0.00@25%+0.00@24% 0.00@38%+0.00@25%|
 +-----------------------------------+
-Saving V1-2.128 ... done [25.39 kB in 0.00, 15.30 MB/s]
-N=128 ; CPU0: 0.00 s/iter [0.000..0.000], 4.72 ns/0.0Gitems
+Saving V0-1.128 ... done [25.45 kB in 0.00, 14.82 MB/s]
+N=128 ; CPU0: 0.00 s/iter [0.000..0.000], 4.60 ns/0.0Gitems
 N=128 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=128 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=128 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=128 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
-Saving V1-2.192 ... done [25.39 kB in 0.00, 17.32 MB/s]
-N=192 ; CPU0: 0.00 s/iter [0.000..0.000], 4.44 ns/0.0Gitems
+krylov: N=128 ; ETA (N=1664): Thu Oct 15 00:15:43 2026 [0.001 s/iter]
+Saving V0-1.192 ... done [25.45 kB in 0.00, 16.73 MB/s]
+N=192 ; CPU0: 0.00 s/iter [0.000..0.000], 4.74 ns/0.0Gitems
 N=192 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=192 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=192 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=192 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
+krylov: N=192 ; ETA (N=1664): Thu Oct 15 00:15:43 2026 [0.001 s/iter]
 iteration 200
 +-----------------------------------+
-|0.00@46%+0.00@38% 0.00@44%+0.00@27%|
-|0.00@37%+0.00@32% 0.00@29%+0.00@18%|
+|0.00@22%+0.00@20% 0.00@20%+0.00@14%|
+|0.00@24%+0.00@21% 0.00@29%+0.00@20%|
 +-----------------------------------+
-Saving V1-2.256 ... done [25.39 kB in 0.00, 15.18 MB/s]
-N=256 ; CPU0: 0.00 s/iter [0.000..0.000], 4.40 ns/0.0Gitems
+Saving V0-1.256 ... done [25.45 kB in 0.00, 17.84 MB/s]
+N=256 ; CPU0: 0.00 s/iter [0.000..0.000], 4.52 ns/0.0Gitems
 N=256 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=256 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=256 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=256 ; ETA (N=1664): Wed Oct 14 22:11:58 2026 [0.001 s/iter]
+krylov: N=256 ; ETA (N=1664): Thu Oct 15 00:15:42 2026 [0.001 s/iter]
 iteration 300
 +-----------------------------------+
-|0.00@44%+0.00@36% 0.00@45%+0.00@27%|
-|0.00@35%+0.00@29% 0.00@32%+0.00@20%|
+|0.00@24%+0.00@19% 0.00@18%+0.00@11%|
+|0.00@29%+0.00@24% 0.00@28%+0.00@18%|
 +-----------------------------------+
-Saving V1-2.320 ... done [25.39 kB in 0.00, 17.89 MB/s]
-N=320 ; CPU0: 0.00 s/iter [0.000..0.000], 4.33 ns/0.0Gitems
+Saving V0-1.320 ... done [25.45 kB in 0.00, 17.76 MB/s]
+N=320 ; CPU0: 0.00 s/iter [0.000..0.000], 4.35 ns/0.0Gitems
 N=320 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=320 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=320 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=320 ; ETA (N=1664): Wed Oct 14 22:11:58 2026 [0.001 s/iter]
-Saving V1-2.384 ... done [25.39 kB in 0.00, 17.29 MB/s]
+krylov: N=320 ; ETA (N=1664): Thu Oct 15 00:15:42 2026 [0.001 s/iter]
+Saving V0-1.384 ... done [25.45 kB in 0.00, 15.24 MB/s]
 N=384 ; CPU0: 0.00 s/iter [0.000..0.000], 4.20 ns/0.0Gitems
 N=384 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=384 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=384 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=384 ; ETA (N=1664): Wed Oct 14 22:11:58 2026 [0.001 s/iter]
+krylov: N=384 ; ETA (N=1664): Thu Oct 15 00:15:42 2026 [0.001 s/iter]
 iteration 400
 +-----------------------------------+
-|0.00@44%+0.00@36% 0.00@39%+0.00@23%|
-|0.00@35%+0.00@28% 0.00@31%+0.00@19%|
+|0.00@24%+0.00@19% 0.00@17%+0.00@10%|
+|0.00@30%+0.00@24% 0.00@26%+0.00@16%|
 +-----------------------------------+
-Saving V1-2.448 ... done [25.39 kB in 0.00, 16.68 MB/s]
-N=448 ; CPU0: 0.00 s/iter [0.000..0.000], 4.10 ns/0.0Gitems
+Saving V0-1.448 ... done [25.45 kB in 0.00, 18.20 MB/s]
+N=448 ; CPU0: 0.00 s/iter [0.000..0.000], 4.13 ns/0.0Gitems
 N=448 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=448 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=448 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=448 ; ETA (N=1664): Wed Oct 14 22:11:58 2026 [0.001 s/iter]
+krylov: N=448 ; ETA (N=1664): Thu Oct 15 00:15:42 2026 [0.001 s/iter]
 iteration 500
 +-----------------------------------+
-|0.00@46%+0.00@36% 0.00@38%+0.00@22%|
-|0.00@37%+0.00@30% 0.00@34%+0.00@20%|
+|0.00@25%+0.00@19% 0.00@15%+0.00@9% |
+|0.00@30%+0.00@23% 0.00@24%+0.00@14%|
 +-----------------------------------+
-Saving V1-2.512 ... done [25.39 kB in 0.00, 18.24 MB/s]
+Saving V0-1.512 ... done [25.45 kB in 0.00, 19.03 MB/s]
 N=512 ; CPU0: 0.00 s/iter [0.000..0.000], 4.06 ns/0.0Gitems
 N=512 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=512 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=512 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=512 ; ETA (N=1664): Wed Oct 14 22:11:58 2026 [0.001 s/iter]
-Saving V1-2.576 ... done [25.39 kB in 0.00, 16.62 MB/s]
-N=576 ; CPU0: 0.00 s/iter [0.000..0.000], 4.03 ns/0.0Gitems
+krylov: N=512 ; ETA (N=1664): Thu Oct 15 00:15:42 2026 [0.001 s/iter]
+Saving V0-1.576 ... done [25.45 kB in 0.00, 17.13 MB/s]
+N=576 ; CPU0: 0.00 s/iter [0.000..0.000], 3.99 ns/0.0Gitems
 N=576 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=576 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=576 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=576 ; ETA (N=1664): Wed Oct 14 22:11:58 2026 [0.001 s/iter]
+krylov: N=576 ; ETA (N=1664): Thu Oct 15 00:15:42 2026 [0.001 s/iter]
 iteration 600
 +-----------------------------------+
-|0.00@39%+0.00@31% 0.00@32%+0.00@19%|
-|0.00@34%+0.00@28% 0.00@31%+0.00@19%|
+|0.00@25%+0.00@19% 0.00@17%+0.00@9% |
+|0.00@27%+0.00@22% 0.00@23%+0.00@14%|
 +-----------------------------------+
-Saving V1-2.640 ... done [25.39 kB in 0.00, 15.61 MB/s]
-N=640 ; CPU0: 0.00 s/iter [0.000..0.000], 4.08 ns/0.0Gitems
+Saving V0-1.640 ... done [25.45 kB in 0.00, 17.90 MB/s]
+N=640 ; CPU0: 0.00 s/iter [0.000..0.000], 3.95 ns/0.0Gitems
 N=640 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=640 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=640 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=640 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
+krylov: N=640 ; ETA (N=1664): Thu Oct 15 00:15:42 2026 [0.001 s/iter]
 iteration 700
 +-----------------------------------+
-|0.00@37%+0.00@29% 0.00@32%+0.00@19%|
-|0.00@33%+0.00@27% 0.00@30%+0.00@18%|
+|0.00@25%+0.00@20% 0.00@17%+0.00@10%|
+|0.00@28%+0.00@23% 0.00@24%+0.00@14%|
 +-----------------------------------+
-Saving V1-2.704 ... done [25.39 kB in 0.00, 16.33 MB/s]
-N=704 ; CPU0: 0.00 s/iter [0.000..0.000], 4.09 ns/0.0Gitems
+Saving V0-1.704 ... done [25.45 kB in 0.00, 18.22 MB/s]
+N=704 ; CPU0: 0.00 s/iter [0.000..0.000], 3.91 ns/0.0Gitems
 N=704 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=704 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=704 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=704 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
-Saving V1-2.768 ... done [25.39 kB in 0.00, 15.95 MB/s]
-N=768 ; CPU0: 0.00 s/iter [0.000..0.000], 4.07 ns/0.0Gitems
+krylov: N=704 ; ETA (N=1664): Thu Oct 15 00:15:42 2026 [0.001 s/iter]
+Saving V0-1.768 ... done [25.45 kB in 0.00, 18.91 MB/s]
+N=768 ; CPU0: 0.00 s/iter [0.000..0.000], 3.87 ns/0.0Gitems
 N=768 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=768 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=768 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=768 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
+krylov: N=768 ; ETA (N=1664): Thu Oct 15 00:15:42 2026 [0.001 s/iter]
 iteration 800
 +-----------------------------------+
-|0.00@36%+0.00@27% 0.00@32%+0.00@19%|
-|0.00@34%+0.00@27% 0.00@30%+0.00@18%|
+|0.00@27%+0.00@21% 0.00@21%+0.00@12%|
+|0.00@31%+0.00@24% 0.00@24%+0.00@14%|
 +-----------------------------------+
-Saving V1-2.832 ... done [25.39 kB in 0.00, 14.43 MB/s]
-N=832 ; CPU0: 0.00 s/iter [0.000..0.000], 4.08 ns/0.0Gitems
+Saving V0-1.832 ... done [25.45 kB in 0.00, 18.87 MB/s]
+N=832 ; CPU0: 0.00 s/iter [0.000..0.000], 3.86 ns/0.0Gitems
 N=832 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=832 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=832 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=832 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
-Saving V1-2.896 ... done [25.39 kB in 0.00, 17.09 MB/s]
-N=896 ; CPU0: 0.00 s/iter [0.000..0.000], 4.08 ns/0.0Gitems
+krylov: N=832 ; ETA (N=1664): Thu Oct 15 00:15:42 2026 [0.001 s/iter]
+Saving V0-1.896 ... done [25.45 kB in 0.00, 18.19 MB/s]
+N=896 ; CPU0: 0.00 s/iter [0.000..0.000], 3.82 ns/0.0Gitems
 N=896 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=896 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=896 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=896 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
+krylov: N=896 ; ETA (N=1664): Thu Oct 15 00:15:42 2026 [0.001 s/iter]
 iteration 900
 +-----------------------------------+
-|0.00@35%+0.00@26% 0.00@32%+0.00@19%|
-|0.00@35%+0.00@27% 0.00@29%+0.00@17%|
+|0.00@27%+0.00@21% 0.00@22%+0.00@12%|
+|0.00@31%+0.00@24% 0.00@23%+0.00@14%|
 +-----------------------------------+
-Saving V1-2.960 ... done [25.39 kB in 0.00, 17.84 MB/s]
-N=960 ; CPU0: 0.00 s/iter [0.000..0.000], 4.05 ns/0.0Gitems
+Saving V0-1.960 ... done [25.45 kB in 0.00, 14.55 MB/s]
+N=960 ; CPU0: 0.00 s/iter [0.000..0.000], 3.94 ns/0.0Gitems
 N=960 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=960 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=960 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=960 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
+krylov: N=960 ; ETA (N=1664): Thu Oct 15 00:15:42 2026 [0.001 s/iter]
 iteration 1000
 +-----------------------------------+
-|0.00@36%+0.00@26% 0.00@34%+0.00@19%|
-|0.00@36%+0.00@28% 0.00@30%+0.00@18%|
+|0.00@29%+0.00@22% 0.00@25%+0.00@13%|
+|0.00@31%+0.00@23% 0.00@24%+0.00@14%|
 +-----------------------------------+
-Saving V1-2.1024 ... done [25.39 kB in 0.00, 17.47 MB/s]
-N=1024 ; CPU0: 0.00 s/iter [0.000..0.000], 4.05 ns/0.0Gitems
+Saving V0-1.1024 ... done [25.45 kB in 0.00, 17.70 MB/s]
+N=1024 ; CPU0: 0.00 s/iter [0.000..0.000], 3.98 ns/0.0Gitems
 N=1024 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=1024 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=1024 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1024 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
-Saving V1-2.1088 ... done [25.39 kB in 0.00, 17.04 MB/s]
-N=1088 ; CPU0: 0.00 s/iter [0.000..0.000], 4.03 ns/0.0Gitems
+krylov: N=1024 ; ETA (N=1664): Thu Oct 15 00:15:42 2026 [0.001 s/iter]
+Saving V0-1.1088 ... done [25.45 kB in 0.00, 17.84 MB/s]
+N=1088 ; CPU0: 0.00 s/iter [0.000..0.000], 3.95 ns/0.0Gitems
 N=1088 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=1088 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=1088 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1088 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
-Saving V1-2.1152 ... done [25.39 kB in 0.00, 15.54 MB/s]
-N=1152 ; CPU0: 0.00 s/iter [0.000..0.000], 4.03 ns/0.0Gitems
+krylov: N=1088 ; ETA (N=1664): Thu Oct 15 00:15:42 2026 [0.001 s/iter]
+Saving V0-1.1152 ... done [25.45 kB in 0.00, 18.47 MB/s]
+N=1152 ; CPU0: 0.00 s/iter [0.000..0.000], 3.91 ns/0.0Gitems
 N=1152 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=1152 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=1152 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1152 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
-Saving V1-2.1216 ... done [25.39 kB in 0.00, 16.12 MB/s]
-N=1216 ; CPU0: 0.00 s/iter [0.000..0.000], 4.03 ns/0.0Gitems
+krylov: N=1152 ; ETA (N=1664): Thu Oct 15 00:15:42 2026 [0.001 s/iter]
+Saving V0-1.1216 ... done [25.45 kB in 0.00, 16.43 MB/s]
+N=1216 ; CPU0: 0.00 s/iter [0.000..0.000], 3.89 ns/0.0Gitems
 N=1216 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=1216 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=1216 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1216 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
-Saving V1-2.1280 ... done [25.39 kB in 0.00, 16.76 MB/s]
-N=1280 ; CPU0: 0.00 s/iter [0.000..0.000], 4.04 ns/0.0Gitems
+krylov: N=1216 ; ETA (N=1664): Thu Oct 15 00:15:42 2026 [0.001 s/iter]
+Saving V0-1.1280 ... done [25.45 kB in 0.00, 16.15 MB/s]
+N=1280 ; CPU0: 0.00 s/iter [0.000..0.000], 3.89 ns/0.0Gitems
 N=1280 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=1280 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=1280 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1280 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
-Saving V1-2.1344 ... done [25.39 kB in 0.00, 13.42 MB/s]
-N=1344 ; CPU0: 0.00 s/iter [0.000..0.000], 4.02 ns/0.0Gitems
+krylov: N=1280 ; ETA (N=1664): Thu Oct 15 00:15:42 2026 [0.001 s/iter]
+Saving V0-1.1344 ... done [25.45 kB in 0.00, 13.43 MB/s]
+N=1344 ; CPU0: 0.00 s/iter [0.000..0.000], 3.93 ns/0.0Gitems
 N=1344 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=1344 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=1344 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1344 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
-Saving V1-2.1408 ... done [25.39 kB in 0.00, 17.17 MB/s]
-N=1408 ; CPU0: 0.00 s/iter [0.000..0.000], 4.01 ns/0.0Gitems
+krylov: N=1344 ; ETA (N=1664): Thu Oct 15 00:15:42 2026 [0.001 s/iter]
+Saving V0-1.1408 ... done [25.45 kB in 0.00, 13.78 MB/s]
+N=1408 ; CPU0: 0.00 s/iter [0.000..0.000], 3.96 ns/0.0Gitems
 N=1408 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=1408 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=1408 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1408 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
-Saving V1-2.1472 ... done [25.39 kB in 0.00, 19.08 MB/s]
+krylov: N=1408 ; ETA (N=1664): Thu Oct 15 00:15:43 2026 [0.001 s/iter]
+Saving V0-1.1472 ... done [25.45 kB in 0.00, 16.02 MB/s]
 N=1472 ; CPU0: 0.00 s/iter [0.000..0.000], 3.99 ns/0.0Gitems
 N=1472 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=1472 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=1472 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1472 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
-Saving V1-2.1536 ... done [25.39 kB in 0.00, 18.68 MB/s]
-N=1536 ; CPU0: 0.00 s/iter [0.000..0.000], 3.97 ns/0.0Gitems
+krylov: N=1472 ; ETA (N=1664): Thu Oct 15 00:15:43 2026 [0.001 s/iter]
+Saving V0-1.1536 ... done [25.45 kB in 0.00, 15.60 MB/s]
+N=1536 ; CPU0: 0.00 s/iter [0.000..0.000], 4.00 ns/0.0Gitems
 N=1536 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=1536 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=1536 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1536 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
-Saving V1-2.1600 ... done [25.39 kB in 0.00, 17.94 MB/s]
-N=1600 ; CPU0: 0.00 s/iter [0.000..0.000], 3.95 ns/0.0Gitems
+krylov: N=1536 ; ETA (N=1664): Thu Oct 15 00:15:43 2026 [0.001 s/iter]
+Saving V0-1.1600 ... done [25.45 kB in 0.00, 15.15 MB/s]
+N=1600 ; CPU0: 0.00 s/iter [0.000..0.000], 4.02 ns/0.0Gitems
 N=1600 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=1600 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=1600 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1600 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
-Saving V1-2.1664 ... done [25.39 kB in 0.00, 17.67 MB/s]
-N=1664 ; CPU0: 0.00 s/iter [0.000..0.000], 3.96 ns/0.0Gitems
+krylov: N=1600 ; ETA (N=1664): Thu Oct 15 00:15:43 2026 [0.001 s/iter]
+Saving V0-1.1664 ... done [25.45 kB in 0.00, 14.13 MB/s]
+N=1664 ; CPU0: 0.00 s/iter [0.000..0.000], 4.04 ns/0.0Gitems
 N=1664 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=1664 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=1664 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1664 ; ETA (N=1664): Wed Oct 14 22:11:59 2026 [0.001 s/iter]
-krylov done N=1664 ; CPU0: 0.00 s/iter [0.000..0.000], 3.97 ns/0.0Gitems
-krylov done N=1664 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-krylov done N=1664 ; COMM0: 0.00 s/iter [0.000..0.000]
-krylov done N=1664 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-Done krylov.
-Timings for krylov: (wct) 1.66
-Timings for krylov: (cpu) 2.73 (aggregated over all threads and 1 MPI jobs)
-Listing files in /tmp/cb/cado-full.k8BSjE/wdir via readdir
-Use of uninitialized value in concatenation (.) or string at /home/user/ext/cado-nfs/build/linalg/bwc/bwc.pl line 1227, <F> line 1.
-#############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/krylov m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 matrix=/tmp/cb/cado-full.k8BSjE/small.bin ys=2..3 start=0
-## Entering task: [01;34mkrylov[0m
-## Check for krylov[0m: Found no way to verify that the starting point is consistent
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 matrix=/tmp/cb/cado-full.k8BSjE/small.bin ys=2..3 start=0
-# Compiled with gcc 13.3.0
-# Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 matrix=/tmp/cb/cado-full.k8BSjE/small.bin ys=2..3 start=0
-# Compiled with gcc 13.3.0
-# Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-1 nodes on vm
- vm  .
-  .  .
-cpubinding messages on vm:
-cpubinding: Hardware: Package:1 [NUMANode] L3Cache:1 L2Cache:4 L1dCache:1 Core:1 PU:1 
-cpubinding: Target split: 2x2
-cpubinding: no mapping found
-Now trying to load matrix cache files
-[vm] J0: read cache small.2x2/small.2x2.3949165824.h0.v0-zone.bin (and others) in 0.00s
-J0 vm done reading (result=1)
-Matrix: total 3250 rows 3250 cols 242867 coeffs
-c0  0/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-c1  1/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-r0  0/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-r1  1/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-Loading V2-3.0 ... done [25.39 kB in 0.00, 18.59 MB/s]
-Setting interval value to default 0
-Target iteration is 1664
-Loading Cv0-1.64 ... done [25.39 kB in 0.00, 18.12 MB/s]
-loaded Ct0-1.0-4
-Each thread allocates 2 kb for the A matrices
-iteration 1
-+-----------------------------------+
-|0.00@7%+0.00@7%   0.00@9%+0.00@6%  |
-|0.00@11%+0.00@13% 0.00@8%+0.00@6%  |
-+-----------------------------------+
-iteration 2
-+-----------------------------------+
-|0.00@7%+0.00@3%   0.00@9%+0.00@6%  |
-|0.00@12%+0.00@12% 0.00@8%+0.00@3%  |
-+-----------------------------------+
-iteration 3
-+-----------------------------------+
-|0.00@5%+0.00@2%   0.00@9%+0.00@6%  |
-|0.00@12%+0.00@12% 0.00@6%+0.00@2%  |
-+-----------------------------------+
-iteration 4
-+-----------------------------------+
-|0.00@4%+0.00@2%   0.00@9%+0.00@6%  |
-|0.00@12%+0.00@12% 0.00@5%+0.00@1%  |
-+-----------------------------------+
-iteration 5
-+-----------------------------------+
-|0.00@3%+0.00@1%   0.00@8%+0.00@6%  |
-|0.00@12%+0.00@12% 0.00@4%+0.00@1%  |
-+-----------------------------------+
-iteration 10
-+-----------------------------------+
-|0.00@10%+0.00@20% 0.00@9%+0.00@6%  |
-|0.00@18%+0.00@23% 0.00@3%+0.00@1%  |
-+-----------------------------------+
-iteration 15
-+-----------------------------------+
-|0.00@17%+0.00@27% 0.00@8%+0.00@4%  |
-|0.00@24%+0.00@26% 0.00@3%+0.00@1%  |
-+-----------------------------------+
-iteration 20
-+-----------------------------------+
-|0.00@23%+0.00@30% 0.00@9%+0.00@4%  |
-|0.00@29%+0.00@29% 0.00@5%+0.00@3%  |
-+-----------------------------------+
-iteration 40
-+-----------------------------------+
-|0.00@33%+0.00@31% 0.00@21%+0.00@12%|
-|0.00@40%+0.00@33% 0.00@20%+0.00@13%|
-+-----------------------------------+
-iteration 60
-+-----------------------------------+
-|0.00@33%+0.00@28% 0.00@23%+0.00@12%|
-|0.00@46%+0.00@35% 0.00@23%+0.00@14%|
-+-----------------------------------+
-Saving V2-3.64 ... done [25.39 kB in 0.00, 18.35 MB/s]
-N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 4.45 ns/0.0Gitems
-N=64 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=64 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=64 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=64 ; ETA (N=1664): Wed Oct 14 22:12:01 2026 [0.001 s/iter]
-iteration 80
-+-----------------------------------+
-|0.00@29%+0.00@23% 0.00@24%+0.00@12%|
-|0.00@45%+0.00@36% 0.00@21%+0.00@13%|
-+-----------------------------------+
-iteration 100
-+-----------------------------------+
-|0.00@31%+0.00@24% 0.00@21%+0.00@10%|
-|0.00@47%+0.00@36% 0.00@19%+0.00@11%|
-+-----------------------------------+
-Saving V2-3.128 ... done [25.39 kB in 0.00, 18.34 MB/s]
-N=128 ; CPU0: 0.00 s/iter [0.000..0.000], 4.00 ns/0.0Gitems
-N=128 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=128 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=128 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=128 ; ETA (N=1664): Wed Oct 14 22:12:00 2026 [0.001 s/iter]
-Saving V2-3.192 ... done [25.39 kB in 0.00, 17.50 MB/s]
-N=192 ; CPU0: 0.00 s/iter [0.000..0.000], 3.83 ns/0.0Gitems
-N=192 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=192 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=192 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=192 ; ETA (N=1664): Wed Oct 14 22:12:00 2026 [0.001 s/iter]
-iteration 200
-+-----------------------------------+
-|0.00@26%+0.00@21% 0.00@16%+0.00@9% |
-|0.00@35%+0.00@27% 0.00@17%+0.00@9% |
-+-----------------------------------+
-Saving V2-3.256 ... done [25.39 kB in 0.00, 16.16 MB/s]
-N=256 ; CPU0: 0.00 s/iter [0.000..0.000], 3.85 ns/0.0Gitems
-N=256 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=256 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=256 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=256 ; ETA (N=1664): Wed Oct 14 22:12:00 2026 [0.001 s/iter]
-iteration 300
-+-----------------------------------+
-|0.00@33%+0.00@28% 0.00@23%+0.00@13%|
-|0.00@37%+0.00@28% 0.00@23%+0.00@13%|
-+-----------------------------------+
-Saving V2-3.320 ... done [25.39 kB in 0.00, 15.15 MB/s]
-N=320 ; CPU0: 0.00 s/iter [0.000..0.000], 3.86 ns/0.0Gitems
-N=320 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=320 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=320 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=320 ; ETA (N=1664): Wed Oct 14 22:12:00 2026 [0.001 s/iter]
-Saving V2-3.384 ... done [25.39 kB in 0.00, 17.81 MB/s]
-N=384 ; CPU0: 0.00 s/iter [0.000..0.000], 3.79 ns/0.0Gitems
-N=384 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=384 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=384 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=384 ; ETA (N=1664): Wed Oct 14 22:12:00 2026 [0.001 s/iter]
-iteration 400
-+-----------------------------------+
-|0.00@29%+0.00@24% 0.00@22%+0.00@12%|
-|0.00@36%+0.00@28% 0.00@20%+0.00@12%|
-+-----------------------------------+
-Saving V2-3.448 ... done [25.39 kB in 0.00, 17.83 MB/s]
-N=448 ; CPU0: 0.00 s/iter [0.000..0.000], 3.75 ns/0.0Gitems
-N=448 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=448 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=448 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=448 ; ETA (N=1664): Wed Oct 14 22:12:00 2026 [0.001 s/iter]
-iteration 500
-+-----------------------------------+
-|0.00@28%+0.00@21% 0.00@21%+0.00@11%|
-|0.00@36%+0.00@27% 0.00@21%+0.00@12%|
-+-----------------------------------+
-Saving V2-3.512 ... done [25.39 kB in 0.00, 14.34 MB/s]
-N=512 ; CPU0: 0.00 s/iter [0.000..0.000], 3.74 ns/0.0Gitems
-N=512 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=512 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=512 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=512 ; ETA (N=1664): Wed Oct 14 22:12:00 2026 [0.001 s/iter]
-Saving V2-3.576 ... done [25.39 kB in 0.00, 18.08 MB/s]
-N=576 ; CPU0: 0.00 s/iter [0.000..0.000], 3.74 ns/0.0Gitems
-N=576 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=576 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=576 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=576 ; ETA (N=1664): Wed Oct 14 22:12:00 2026 [0.001 s/iter]
-iteration 600
-+-----------------------------------+
-|0.00@30%+0.00@23% 0.00@24%+0.00@13%|
-|0.00@34%+0.00@26% 0.00@24%+0.00@14%|
-+-----------------------------------+
-Saving V2-3.640 ... done [25.39 kB in 0.00, 14.50 MB/s]
-N=640 ; CPU0: 0.00 s/iter [0.000..0.000], 3.78 ns/0.0Gitems
-N=640 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=640 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=640 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=640 ; ETA (N=1664): Wed Oct 14 22:12:00 2026 [0.001 s/iter]
-iteration 700
-+-----------------------------------+
-|0.00@31%+0.00@24% 0.00@24%+0.00@13%|
-|0.00@33%+0.00@25% 0.00@26%+0.00@14%|
-+-----------------------------------+
-Saving V2-3.704 ... done [25.39 kB in 0.00, 19.24 MB/s]
-N=704 ; CPU0: 0.00 s/iter [0.000..0.000], 3.75 ns/0.0Gitems
-N=704 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=704 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=704 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=704 ; ETA (N=1664): Wed Oct 14 22:12:00 2026 [0.001 s/iter]
-Saving V2-3.768 ... done [25.39 kB in 0.00, 18.05 MB/s]
-N=768 ; CPU0: 0.00 s/iter [0.000..0.000], 3.72 ns/0.0Gitems
-N=768 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=768 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=768 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=768 ; ETA (N=1664): Wed Oct 14 22:12:00 2026 [0.001 s/iter]
-iteration 800
-+-----------------------------------+
-|0.00@28%+0.00@22% 0.00@25%+0.00@14%|
-|0.00@29%+0.00@22% 0.00@25%+0.00@14%|
-+-----------------------------------+
-Saving V2-3.832 ... done [25.39 kB in 0.00, 17.70 MB/s]
-N=832 ; CPU0: 0.00 s/iter [0.000..0.000], 3.74 ns/0.0Gitems
-N=832 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=832 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=832 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=832 ; ETA (N=1664): Wed Oct 14 22:12:00 2026 [0.001 s/iter]
-Saving V2-3.896 ... done [25.39 kB in 0.00, 17.48 MB/s]
-N=896 ; CPU0: 0.00 s/iter [0.000..0.000], 3.74 ns/0.0Gitems
-N=896 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=896 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=896 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=896 ; ETA (N=1664): Wed Oct 14 22:12:00 2026 [0.001 s/iter]
-iteration 900
-+-----------------------------------+
-|0.00@28%+0.00@21% 0.00@26%+0.00@14%|
-|0.00@28%+0.00@22% 0.00@23%+0.00@13%|
-+-----------------------------------+
-Saving V2-3.960 ... done [25.39 kB in 0.00, 16.84 MB/s]
-N=960 ; CPU0: 0.00 s/iter [0.000..0.000], 3.74 ns/0.0Gitems
-N=960 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=960 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=960 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=960 ; ETA (N=1664): Wed Oct 14 22:12:00 2026 [0.001 s/iter]
-iteration 1000
-+-----------------------------------+
-|0.00@28%+0.00@21% 0.00@27%+0.00@15%|
-|0.00@28%+0.00@22% 0.00@22%+0.00@13%|
-+-----------------------------------+
-Saving V2-3.1024 ... done [25.39 kB in 0.00, 13.96 MB/s]
-N=1024 ; CPU0: 0.00 s/iter [0.000..0.000], 3.77 ns/0.0Gitems
-N=1024 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1024 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1024 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1024 ; ETA (N=1664): Wed Oct 14 22:12:00 2026 [0.001 s/iter]
-Saving V2-3.1088 ... done [25.39 kB in 0.00, 18.74 MB/s]
-N=1088 ; CPU0: 0.00 s/iter [0.000..0.000], 3.75 ns/0.0Gitems
-N=1088 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1088 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1088 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1088 ; ETA (N=1664): Wed Oct 14 22:12:00 2026 [0.001 s/iter]
-Saving V2-3.1152 ... done [25.39 kB in 0.00, 18.63 MB/s]
-N=1152 ; CPU0: 0.00 s/iter [0.000..0.000], 3.75 ns/0.0Gitems
-N=1152 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1152 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1152 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1152 ; ETA (N=1664): Wed Oct 14 22:12:00 2026 [0.001 s/iter]
-Saving V2-3.1216 ... done [25.39 kB in 0.00, 18.27 MB/s]
-N=1216 ; CPU0: 0.00 s/iter [0.000..0.000], 3.73 ns/0.0Gitems
-N=1216 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1216 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1216 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1216 ; ETA (N=1664): Wed Oct 14 22:12:01 2026 [0.001 s/iter]
-Saving V2-3.1280 ... done [25.39 kB in 0.00, 18.77 MB/s]
-N=1280 ; CPU0: 0.00 s/iter [0.000..0.000], 3.71 ns/0.0Gitems
-N=1280 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1280 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1280 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1280 ; ETA (N=1664): Wed Oct 14 22:12:01 2026 [0.001 s/iter]
-Saving V2-3.1344 ... done [25.39 kB in 0.00, 17.09 MB/s]
-N=1344 ; CPU0: 0.00 s/iter [0.000..0.000], 3.70 ns/0.0Gitems
-N=1344 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1344 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1344 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1344 ; ETA (N=1664): Wed Oct 14 22:12:01 2026 [0.001 s/iter]
-Saving V2-3.1408 ... done [25.39 kB in 0.00, 17.34 MB/s]
-N=1408 ; CPU0: 0.00 s/iter [0.000..0.000], 3.70 ns/0.0Gitems
-N=1408 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1408 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1408 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1408 ; ETA (N=1664): Wed Oct 14 22:12:01 2026 [0.001 s/iter]
-Saving V2-3.1472 ... done [25.39 kB in 0.00, 13.69 MB/s]
-N=1472 ; CPU0: 0.00 s/iter [0.000..0.000], 3.73 ns/0.0Gitems
-N=1472 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1472 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1472 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1472 ; ETA (N=1664): Wed Oct 14 22:12:01 2026 [0.001 s/iter]
-Saving V2-3.1536 ... done [25.39 kB in 0.00, 14.21 MB/s]
-N=1536 ; CPU0: 0.00 s/iter [0.000..0.000], 3.79 ns/0.0Gitems
-N=1536 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1536 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1536 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1536 ; ETA (N=1664): Wed Oct 14 22:12:01 2026 [0.001 s/iter]
-Saving V2-3.1600 ... done [25.39 kB in 0.00, 8.71 MB/s]
-N=1600 ; CPU0: 0.00 s/iter [0.000..0.000], 3.84 ns/0.0Gitems
-N=1600 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1600 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1600 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1600 ; ETA (N=1664): Wed Oct 14 22:12:01 2026 [0.001 s/iter]
-Saving V2-3.1664 ... done [25.39 kB in 0.00, 14.40 MB/s]
-N=1664 ; CPU0: 0.00 s/iter [0.000..0.000], 3.85 ns/0.0Gitems
-N=1664 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1664 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1664 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1664 ; ETA (N=1664): Wed Oct 14 22:12:01 2026 [0.001 s/iter]
-krylov done N=1664 ; CPU0: 0.00 s/iter [0.000..0.000], 3.86 ns/0.0Gitems
-krylov done N=1664 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-krylov done N=1664 ; COMM0: 0.00 s/iter [0.000..0.000]
-krylov done N=1664 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-Done krylov.
-Timings for krylov: (wct) 1.60
-Timings for krylov: (cpu) 2.68 (aggregated over all threads and 1 MPI jobs)
-Listing files in /tmp/cb/cado-full.k8BSjE/wdir via readdir
-Use of uninitialized value in concatenation (.) or string at /home/user/ext/cado-nfs/build/linalg/bwc/bwc.pl line 1227, <F> line 1.
-#############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/krylov m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 matrix=/tmp/cb/cado-full.k8BSjE/small.bin ys=3..4 start=0
-## Entering task: [01;34mkrylov[0m
-## Check for krylov[0m: Found no way to verify that the starting point is consistent
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 matrix=/tmp/cb/cado-full.k8BSjE/small.bin ys=3..4 start=0
-# Compiled with gcc 13.3.0
-# Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 matrix=/tmp/cb/cado-full.k8BSjE/small.bin ys=3..4 start=0
-# Compiled with gcc 13.3.0
-# Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-1 nodes on vm
- vm  .
-  .  .
-cpubinding messages on vm:
-cpubinding: Hardware: Package:1 [NUMANode] L3Cache:1 L2Cache:4 L1dCache:1 Core:1 PU:1 
-cpubinding: Target split: 2x2
-cpubinding: no mapping found
-Now trying to load matrix cache files
-[vm] J0: read cache small.2x2/small.2x2.3949165824.h0.v0-zone.bin (and others) in 0.00s
-J0 vm done reading (result=1)
-Matrix: total 3250 rows 3250 cols 242867 coeffs
-c1  1/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-c0  0/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-r1  1/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-r0  0/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-Loading V3-4.0 ... done [25.39 kB in 0.00, 14.72 MB/s]
-Setting interval value to default 0
-Target iteration is 1664
-Loading Cv0-1.64 ... done [25.39 kB in 0.00, 15.67 MB/s]
-loaded Ct0-1.0-4
-Each thread allocates 2 kb for the A matrices
-iteration 1
-+-------------------------------+
-|0.00@0%+0.00@0% 0.00@3%+0.00@3%|
-|0.00@8%+0.00@8% 0.00@4%+0.00@3%|
-+-------------------------------+
-iteration 2
-+---------------------------------+
-|0.00@0%+0.00@0%  0.00@3%+0.00@2% |
-|0.00@9%+0.00@10% 0.00@5%+0.00@3% |
-+---------------------------------+
-iteration 3
-+-------------------------------+
-|0.00@0%+0.00@0% 0.00@3%+0.00@2%|
-|0.00@9%+0.00@9% 0.00@5%+0.00@2%|
-+-------------------------------+
-iteration 4
-+-------------------------------+
-|0.00@0%+0.00@0% 0.00@3%+0.00@2%|
-|0.00@9%+0.00@9% 0.00@4%+0.00@1%|
-+-------------------------------+
-iteration 5
-+---------------------------------+
-|0.00@0%+0.00@0%  0.00@3%+0.00@2% |
-|0.00@9%+0.00@10% 0.00@3%+0.00@1% |
-+---------------------------------+
-iteration 10
-+-----------------------------------+
-|0.00@7%+0.00@19%  0.00@4%+0.00@2%  |
-|0.00@17%+0.00@25% 0.00@2%+0.00@1%  |
-+-----------------------------------+
-iteration 15
-+-----------------------------------+
-|0.00@18%+0.00@30% 0.00@8%+0.00@6%  |
-|0.00@29%+0.00@33% 0.00@10%+0.00@8% |
-+-----------------------------------+
-iteration 20
-+-----------------------------------+
-|0.00@25%+0.00@35% 0.00@14%+0.00@9% |
-|0.00@34%+0.00@37% 0.00@19%+0.00@15%|
-+-----------------------------------+
-iteration 40
-+-----------------------------------+
-|0.00@37%+0.00@39% 0.00@27%+0.00@16%|
-|0.00@35%+0.00@32% 0.00@16%+0.00@8% |
-+-----------------------------------+
-iteration 60
-+-----------------------------------+
-|0.00@40%+0.00@41% 0.00@30%+0.00@18%|
-|0.00@36%+0.00@31% 0.00@13%+0.00@6% |
-+-----------------------------------+
-Saving V3-4.64 ... done [25.39 kB in 0.00, 18.09 MB/s]
-N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 5.23 ns/0.0Gitems
-N=64 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=64 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=64 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=64 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-iteration 80
-+-----------------------------------+
-|0.00@44%+0.00@43% 0.00@34%+0.00@21%|
-|0.00@30%+0.00@27% 0.00@17%+0.00@9% |
-+-----------------------------------+
-iteration 100
-+-----------------------------------+
-|0.00@46%+0.00@44% 0.00@37%+0.00@22%|
-|0.00@30%+0.00@26% 0.00@20%+0.00@11%|
-+-----------------------------------+
-Saving V3-4.128 ... done [25.39 kB in 0.00, 18.18 MB/s]
-N=128 ; CPU0: 0.00 s/iter [0.000..0.000], 4.48 ns/0.0Gitems
-N=128 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=128 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=128 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=128 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-Saving V3-4.192 ... done [25.39 kB in 0.00, 17.94 MB/s]
-N=192 ; CPU0: 0.00 s/iter [0.000..0.000], 4.16 ns/0.0Gitems
-N=192 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=192 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=192 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=192 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-iteration 200
-+-----------------------------------+
-|0.00@48%+0.00@40% 0.00@44%+0.00@25%|
-|0.00@33%+0.00@28% 0.00@28%+0.00@17%|
-+-----------------------------------+
-Saving V3-4.256 ... done [25.39 kB in 0.00, 17.38 MB/s]
-N=256 ; CPU0: 0.00 s/iter [0.000..0.000], 4.05 ns/0.0Gitems
-N=256 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=256 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=256 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=256 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-iteration 300
-+-----------------------------------+
-|0.00@48%+0.00@37% 0.00@43%+0.00@24%|
-|0.00@37%+0.00@31% 0.00@29%+0.00@16%|
-+-----------------------------------+
-Saving V3-4.320 ... done [25.39 kB in 0.00, 15.28 MB/s]
-N=320 ; CPU0: 0.00 s/iter [0.000..0.000], 4.17 ns/0.0Gitems
-N=320 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=320 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=320 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=320 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-Saving V3-4.384 ... done [25.39 kB in 0.00, 14.22 MB/s]
-N=384 ; CPU0: 0.00 s/iter [0.000..0.000], 4.35 ns/0.0Gitems
-N=384 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=384 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=384 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=384 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-iteration 400
-+-----------------------------------+
-|0.00@37%+0.00@31% 0.00@33%+0.00@18%|
-|0.00@33%+0.00@27% 0.00@24%+0.00@14%|
-+-----------------------------------+
-Saving V3-4.448 ... done [25.39 kB in 0.00, 15.67 MB/s]
-N=448 ; CPU0: 0.00 s/iter [0.000..0.000], 4.37 ns/0.0Gitems
-N=448 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=448 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=448 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=448 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-iteration 500
-+-----------------------------------+
-|0.00@35%+0.00@28% 0.00@29%+0.00@16%|
-|0.00@34%+0.00@29% 0.00@24%+0.00@13%|
-+-----------------------------------+
-Saving V3-4.512 ... done [25.39 kB in 0.00, 17.16 MB/s]
-N=512 ; CPU0: 0.00 s/iter [0.000..0.000], 4.36 ns/0.0Gitems
-N=512 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=512 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=512 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=512 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-Saving V3-4.576 ... done [25.39 kB in 0.00, 16.32 MB/s]
-N=576 ; CPU0: 0.00 s/iter [0.000..0.000], 4.27 ns/0.0Gitems
-N=576 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=576 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=576 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=576 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-iteration 600
-+-----------------------------------+
-|0.00@37%+0.00@29% 0.00@29%+0.00@16%|
-|0.00@35%+0.00@29% 0.00@25%+0.00@14%|
-+-----------------------------------+
-Saving V3-4.640 ... done [25.39 kB in 0.00, 18.06 MB/s]
-N=640 ; CPU0: 0.00 s/iter [0.000..0.000], 4.20 ns/0.0Gitems
-N=640 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=640 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=640 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=640 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-iteration 700
-+-----------------------------------+
-|0.00@35%+0.00@27% 0.00@29%+0.00@16%|
-|0.00@34%+0.00@28% 0.00@24%+0.00@13%|
-+-----------------------------------+
-Saving V3-4.704 ... done [25.39 kB in 0.00, 17.52 MB/s]
-N=704 ; CPU0: 0.00 s/iter [0.000..0.000], 4.16 ns/0.0Gitems
-N=704 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=704 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=704 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=704 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-Saving V3-4.768 ... done [25.39 kB in 0.00, 17.11 MB/s]
-N=768 ; CPU0: 0.00 s/iter [0.000..0.000], 4.10 ns/0.0Gitems
-N=768 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=768 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=768 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=768 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-iteration 800
-+-----------------------------------+
-|0.00@33%+0.00@26% 0.00@27%+0.00@15%|
-|0.00@32%+0.00@27% 0.00@24%+0.00@13%|
-+-----------------------------------+
-Saving V3-4.832 ... done [25.39 kB in 0.00, 13.15 MB/s]
-N=832 ; CPU0: 0.00 s/iter [0.000..0.000], 4.08 ns/0.0Gitems
-N=832 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=832 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=832 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=832 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-Saving V3-4.896 ... done [25.39 kB in 0.00, 17.14 MB/s]
-N=896 ; CPU0: 0.00 s/iter [0.000..0.000], 4.05 ns/0.0Gitems
-N=896 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=896 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=896 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=896 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-iteration 900
-+-----------------------------------+
-|0.00@32%+0.00@25% 0.00@26%+0.00@14%|
-|0.00@31%+0.00@27% 0.00@25%+0.00@14%|
-+-----------------------------------+
-Saving V3-4.960 ... done [25.39 kB in 0.00, 16.64 MB/s]
-N=960 ; CPU0: 0.00 s/iter [0.000..0.000], 4.03 ns/0.0Gitems
-N=960 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=960 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=960 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=960 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-iteration 1000
-+-----------------------------------+
-|0.00@33%+0.00@26% 0.00@26%+0.00@14%|
-|0.00@31%+0.00@27% 0.00@25%+0.00@14%|
-+-----------------------------------+
-Saving V3-4.1024 ... done [25.39 kB in 0.00, 17.65 MB/s]
-N=1024 ; CPU0: 0.00 s/iter [0.000..0.000], 4.01 ns/0.0Gitems
-N=1024 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1024 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1024 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1024 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-Saving V3-4.1088 ... done [25.39 kB in 0.00, 16.16 MB/s]
-N=1088 ; CPU0: 0.00 s/iter [0.000..0.000], 3.99 ns/0.0Gitems
-N=1088 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1088 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1088 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1088 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-Saving V3-4.1152 ... done [25.39 kB in 0.00, 17.22 MB/s]
-N=1152 ; CPU0: 0.00 s/iter [0.000..0.000], 3.99 ns/0.0Gitems
-N=1152 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1152 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1152 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1152 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-Saving V3-4.1216 ... done [25.39 kB in 0.00, 18.05 MB/s]
-N=1216 ; CPU0: 0.00 s/iter [0.000..0.000], 3.98 ns/0.0Gitems
-N=1216 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1216 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1216 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1216 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-Saving V3-4.1280 ... done [25.39 kB in 0.00, 17.42 MB/s]
-N=1280 ; CPU0: 0.00 s/iter [0.000..0.000], 3.97 ns/0.0Gitems
-N=1280 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1280 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1280 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1280 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-Saving V3-4.1344 ... done [25.39 kB in 0.00, 16.26 MB/s]
-N=1344 ; CPU0: 0.00 s/iter [0.000..0.000], 3.95 ns/0.0Gitems
-N=1344 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1344 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1344 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1344 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-Saving V3-4.1408 ... done [25.39 kB in 0.00, 17.06 MB/s]
-N=1408 ; CPU0: 0.00 s/iter [0.000..0.000], 3.94 ns/0.0Gitems
-N=1408 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1408 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1408 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1408 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-Saving V3-4.1472 ... done [25.39 kB in 0.00, 18.43 MB/s]
-N=1472 ; CPU0: 0.00 s/iter [0.000..0.000], 3.92 ns/0.0Gitems
-N=1472 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1472 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1472 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1472 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-Saving V3-4.1536 ... done [25.39 kB in 0.00, 14.70 MB/s]
-N=1536 ; CPU0: 0.00 s/iter [0.000..0.000], 3.90 ns/0.0Gitems
-N=1536 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1536 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1536 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1536 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-Saving V3-4.1600 ... done [25.39 kB in 0.00, 16.61 MB/s]
-N=1600 ; CPU0: 0.00 s/iter [0.000..0.000], 3.89 ns/0.0Gitems
-N=1600 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1600 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1600 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1600 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-Saving V3-4.1664 ... done [25.39 kB in 0.00, 16.40 MB/s]
-N=1664 ; CPU0: 0.00 s/iter [0.000..0.000], 3.90 ns/0.0Gitems
-N=1664 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=1664 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=1664 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=1664 ; ETA (N=1664): Wed Oct 14 22:12:02 2026 [0.001 s/iter]
-krylov done N=1664 ; CPU0: 0.00 s/iter [0.000..0.000], 3.91 ns/0.0Gitems
+krylov: N=1664 ; ETA (N=1664): Thu Oct 15 00:15:43 2026 [0.001 s/iter]
+krylov done N=1664 ; CPU0: 0.00 s/iter [0.000..0.000], 4.05 ns/0.0Gitems
 krylov done N=1664 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 krylov done N=1664 ; COMM0: 0.00 s/iter [0.000..0.000]
 krylov done N=1664 ; comm-wait0: 0.00 s/iter [0.000..0.000]
 Done krylov.
 Timings for krylov: (wct) 1.63
-Timings for krylov: (cpu) 2.73 (aggregated over all threads and 1 MPI jobs)
-Listing files in /tmp/cb/cado-full.k8BSjE/wdir via readdir
+Timings for krylov: (cpu) 2.74 (aggregated over all threads and 1 MPI jobs)
+Listing files in /tmp/cb/cado-full.EdFrnH/wdir via readdir
+Use of uninitialized value in concatenation (.) or string at /home/user/ext/cado-nfs/build/linalg/bwc/bwc.pl line 1227, <F> line 1.
 #############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/acollect m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 --remove-old
-## Entering task: [01;34mlingen[0m
-## [01;33mCheck for lingen[0m: Running acollect to create A0-4.0-1664
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/acollect m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 --remove-old
+/home/user/ext/cado-nfs/build/linalg/bwc/krylov n=4 thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir ys=1..2 start=0
+## Entering task: [01;34mkrylov[0m
+## Check for krylov[0m: Found no way to verify that the starting point is consistent
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov n=4 thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir ys=1..2 start=0
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/acollect m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 --remove-old
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov n=4 thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir ys=1..2 start=0
+# Compiled with gcc 13.3.0
+# Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
+# Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
+1 nodes on vm
+ vm  .
+  .  .
+cpubinding messages on vm:
+cpubinding: Hardware: Package:1 [NUMANode] L3Cache:1 L2Cache:4 L1dCache:1 Core:1 PU:1 
+cpubinding: Target split: 2x2
+cpubinding: no mapping found
+Now trying to load matrix cache files
+[vm] J0: read cache small.2x2/small.2x2.487934720.h0.v0-zone.bin (and others) in 0.00s
+J0 vm done reading (result=1)
+Matrix: total 3257 rows 3257 cols 237652 coeffs
+c1  1/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+c0  0/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+r1  1/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+r0  0/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+Loading V1-2.0 ... done [25.45 kB in 0.00, 15.56 MB/s]
+Setting interval value to default 0
+Target iteration is 1664
+Loading Cv0-1.64 ... done [25.45 kB in 0.00, 16.19 MB/s]
+loaded Ct0-1.0-4
+Each thread allocates 2 kb for the A matrices
+iteration 1
++-----------------------------------+
+|0.00@13%+0.00@14% 0.00@5%+0.00@4%  |
+|0.00@10%+0.00@11% 0.00@6%+0.00@4%  |
++-----------------------------------+
+iteration 2
++-----------------------------------+
+|0.00@13%+0.00@14% 0.00@5%+0.00@4%  |
+|0.00@10%+0.00@11% 0.00@6%+0.00@4%  |
++-----------------------------------+
+iteration 3
++-----------------------------------+
+|0.00@13%+0.00@12% 0.00@5%+0.00@3%  |
+|0.00@10%+0.00@8%  0.00@6%+0.00@3%  |
++-----------------------------------+
+iteration 4
++---------------------------------+
+|0.00@10%+0.00@9% 0.00@5%+0.00@3% |
+|0.00@9%+0.00@9%  0.00@6%+0.00@3% |
++---------------------------------+
+iteration 5
++-----------------------------------+
+|0.00@9%+0.00@8%   0.00@5%+0.00@3%  |
+|0.00@10%+0.00@10% 0.00@6%+0.00@4%  |
++-----------------------------------+
+iteration 10
++-----------------------------------+
+|0.00@6%+0.00@4%   0.00@6%+0.00@3%  |
+|0.00@10%+0.00@10% 0.00@6%+0.00@4%  |
++-----------------------------------+
+iteration 15
++---------------------------------+
+|0.00@5%+0.00@3%  0.00@6%+0.00@3% |
+|0.00@10%+0.00@8% 0.00@6%+0.00@3% |
++---------------------------------+
+iteration 20
++-------------------------------+
+|0.00@4%+0.00@2% 0.00@6%+0.00@3%|
+|0.00@8%+0.00@6% 0.00@5%+0.00@2%|
++-------------------------------+
+iteration 40
++-----------------------------------+
+|0.00@12%+0.00@12% 0.00@14%+0.00@9% |
+|0.00@18%+0.00@18% 0.00@11%+0.00@9% |
++-----------------------------------+
+iteration 60
++-----------------------------------+
+|0.00@17%+0.00@13% 0.00@22%+0.00@14%|
+|0.00@22%+0.00@20% 0.00@9%+0.00@6%  |
++-----------------------------------+
+Saving V1-2.64 ... done [25.45 kB in 0.00, 16.05 MB/s]
+N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 5.26 ns/0.0Gitems
+N=64 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=64 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=64 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=64 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+iteration 80
++-----------------------------------+
+|0.00@15%+0.00@12% 0.00@17%+0.00@12%|
+|0.00@15%+0.00@15% 0.00@7%+0.00@6%  |
++-----------------------------------+
+iteration 100
++-----------------------------------+
+|0.00@18%+0.00@14% 0.00@20%+0.00@14%|
+|0.00@13%+0.00@12% 0.00@9%+0.00@7%  |
++-----------------------------------+
+Saving V1-2.128 ... done [25.45 kB in 0.00, 14.96 MB/s]
+N=128 ; CPU0: 0.00 s/iter [0.000..0.000], 4.78 ns/0.0Gitems
+N=128 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=128 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=128 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=128 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+Saving V1-2.192 ... done [25.45 kB in 0.00, 14.86 MB/s]
+N=192 ; CPU0: 0.00 s/iter [0.000..0.000], 4.52 ns/0.0Gitems
+N=192 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=192 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=192 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=192 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+iteration 200
++-----------------------------------+
+|0.00@30%+0.00@23% 0.00@26%+0.00@15%|
+|0.00@24%+0.00@25% 0.00@20%+0.00@13%|
++-----------------------------------+
+Saving V1-2.256 ... done [25.45 kB in 0.00, 13.54 MB/s]
+N=256 ; CPU0: 0.00 s/iter [0.000..0.000], 4.44 ns/0.0Gitems
+N=256 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=256 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=256 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=256 ; ETA (N=1664): Thu Oct 15 00:15:43 2026 [0.001 s/iter]
+iteration 300
++-----------------------------------+
+|0.00@32%+0.00@26% 0.00@24%+0.00@14%|
+|0.00@28%+0.00@26% 0.00@21%+0.00@12%|
++-----------------------------------+
+Saving V1-2.320 ... done [25.45 kB in 0.00, 16.02 MB/s]
+N=320 ; CPU0: 0.00 s/iter [0.000..0.000], 4.44 ns/0.0Gitems
+N=320 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=320 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=320 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=320 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+Saving V1-2.384 ... done [25.45 kB in 0.00, 17.99 MB/s]
+N=384 ; CPU0: 0.00 s/iter [0.000..0.000], 4.29 ns/0.0Gitems
+N=384 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=384 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=384 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=384 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+iteration 400
++-----------------------------------+
+|0.00@36%+0.00@27% 0.00@23%+0.00@14%|
+|0.00@29%+0.00@27% 0.00@23%+0.00@13%|
++-----------------------------------+
+Saving V1-2.448 ... done [25.45 kB in 0.00, 7.84 MB/s]
+N=448 ; CPU0: 0.00 s/iter [0.000..0.000], 4.31 ns/0.0Gitems
+N=448 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=448 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=448 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=448 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+iteration 500
++-----------------------------------+
+|0.00@31%+0.00@23% 0.00@24%+0.00@14%|
+|0.00@26%+0.00@24% 0.00@23%+0.00@14%|
++-----------------------------------+
+Saving V1-2.512 ... done [25.45 kB in 0.00, 14.95 MB/s]
+N=512 ; CPU0: 0.00 s/iter [0.000..0.000], 4.28 ns/0.0Gitems
+N=512 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=512 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=512 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=512 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+Saving V1-2.576 ... done [25.45 kB in 0.00, 17.77 MB/s]
+N=576 ; CPU0: 0.00 s/iter [0.000..0.000], 4.21 ns/0.0Gitems
+N=576 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=576 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=576 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=576 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+iteration 600
++-----------------------------------+
+|0.00@33%+0.00@25% 0.00@25%+0.00@15%|
+|0.00@28%+0.00@25% 0.00@26%+0.00@15%|
++-----------------------------------+
+Saving V1-2.640 ... done [25.45 kB in 0.00, 18.21 MB/s]
+N=640 ; CPU0: 0.00 s/iter [0.000..0.000], 4.15 ns/0.0Gitems
+N=640 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=640 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=640 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=640 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+iteration 700
++-----------------------------------+
+|0.00@36%+0.00@27% 0.00@29%+0.00@17%|
+|0.00@31%+0.00@28% 0.00@29%+0.00@17%|
++-----------------------------------+
+Saving V1-2.704 ... done [25.45 kB in 0.00, 17.62 MB/s]
+N=704 ; CPU0: 0.00 s/iter [0.000..0.000], 4.11 ns/0.0Gitems
+N=704 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=704 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=704 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=704 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+Saving V1-2.768 ... done [25.45 kB in 0.00, 16.53 MB/s]
+N=768 ; CPU0: 0.00 s/iter [0.000..0.000], 4.07 ns/0.0Gitems
+N=768 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=768 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=768 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=768 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+iteration 800
++-----------------------------------+
+|0.00@34%+0.00@25% 0.00@30%+0.00@17%|
+|0.00@33%+0.00@29% 0.00@29%+0.00@17%|
++-----------------------------------+
+Saving V1-2.832 ... done [25.45 kB in 0.00, 16.89 MB/s]
+N=832 ; CPU0: 0.00 s/iter [0.000..0.000], 4.06 ns/0.0Gitems
+N=832 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=832 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=832 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=832 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+Saving V1-2.896 ... done [25.45 kB in 0.00, 18.00 MB/s]
+N=896 ; CPU0: 0.00 s/iter [0.000..0.000], 4.02 ns/0.0Gitems
+N=896 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=896 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=896 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=896 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+iteration 900
++-----------------------------------+
+|0.00@35%+0.00@26% 0.00@29%+0.00@17%|
+|0.00@33%+0.00@28% 0.00@29%+0.00@17%|
++-----------------------------------+
+Saving V1-2.960 ... done [25.45 kB in 0.00, 15.07 MB/s]
+N=960 ; CPU0: 0.00 s/iter [0.000..0.000], 4.03 ns/0.0Gitems
+N=960 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=960 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=960 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=960 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+iteration 1000
++-----------------------------------+
+|0.00@35%+0.00@26% 0.00@31%+0.00@18%|
+|0.00@33%+0.00@28% 0.00@30%+0.00@17%|
++-----------------------------------+
+Saving V1-2.1024 ... done [25.45 kB in 0.00, 16.06 MB/s]
+N=1024 ; CPU0: 0.00 s/iter [0.000..0.000], 4.05 ns/0.0Gitems
+N=1024 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1024 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1024 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1024 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+Saving V1-2.1088 ... done [25.45 kB in 0.00, 17.14 MB/s]
+N=1088 ; CPU0: 0.00 s/iter [0.000..0.000], 4.06 ns/0.0Gitems
+N=1088 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1088 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1088 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1088 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+Saving V1-2.1152 ... done [25.45 kB in 0.00, 15.64 MB/s]
+N=1152 ; CPU0: 0.00 s/iter [0.000..0.000], 4.04 ns/0.0Gitems
+N=1152 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1152 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1152 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1152 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+Saving V1-2.1216 ... done [25.45 kB in 0.00, 16.31 MB/s]
+N=1216 ; CPU0: 0.00 s/iter [0.000..0.000], 4.03 ns/0.0Gitems
+N=1216 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1216 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1216 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1216 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+Saving V1-2.1280 ... done [25.45 kB in 0.00, 17.20 MB/s]
+N=1280 ; CPU0: 0.00 s/iter [0.000..0.000], 4.00 ns/0.0Gitems
+N=1280 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1280 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1280 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1280 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+Saving V1-2.1344 ... done [25.45 kB in 0.00, 11.44 MB/s]
+N=1344 ; CPU0: 0.00 s/iter [0.000..0.000], 3.99 ns/0.0Gitems
+N=1344 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1344 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1344 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1344 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+Saving V1-2.1408 ... done [25.45 kB in 0.00, 15.73 MB/s]
+N=1408 ; CPU0: 0.00 s/iter [0.000..0.000], 3.99 ns/0.0Gitems
+N=1408 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1408 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1408 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1408 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+Saving V1-2.1472 ... done [25.45 kB in 0.01, 3.15 MB/s]
+N=1472 ; CPU0: 0.00 s/iter [0.000..0.000], 4.05 ns/0.0Gitems
+N=1472 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1472 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1472 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1472 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+Saving V1-2.1536 ... done [25.45 kB in 0.00, 15.40 MB/s]
+N=1536 ; CPU0: 0.00 s/iter [0.000..0.000], 4.09 ns/0.0Gitems
+N=1536 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1536 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1536 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1536 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+Saving V1-2.1600 ... done [25.45 kB in 0.00, 17.17 MB/s]
+N=1600 ; CPU0: 0.00 s/iter [0.000..0.000], 4.08 ns/0.0Gitems
+N=1600 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1600 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1600 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1600 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+Saving V1-2.1664 ... done [25.45 kB in 0.00, 14.95 MB/s]
+N=1664 ; CPU0: 0.00 s/iter [0.000..0.000], 4.08 ns/0.0Gitems
+N=1664 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1664 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1664 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1664 ; ETA (N=1664): Thu Oct 15 00:15:44 2026 [0.001 s/iter]
+krylov done N=1664 ; CPU0: 0.00 s/iter [0.000..0.000], 4.09 ns/0.0Gitems
+krylov done N=1664 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+krylov done N=1664 ; COMM0: 0.00 s/iter [0.000..0.000]
+krylov done N=1664 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+Done krylov.
+Timings for krylov: (wct) 1.64
+Timings for krylov: (cpu) 2.75 (aggregated over all threads and 1 MPI jobs)
+Listing files in /tmp/cb/cado-full.EdFrnH/wdir via readdir
+Use of uninitialized value in concatenation (.) or string at /home/user/ext/cado-nfs/build/linalg/bwc/bwc.pl line 1227, <F> line 1.
+#############################################################################
+/home/user/ext/cado-nfs/build/linalg/bwc/krylov n=4 thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir ys=2..3 start=0
+## Entering task: [01;34mkrylov[0m
+## Check for krylov[0m: Found no way to verify that the starting point is consistent
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov n=4 thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir ys=2..3 start=0
+# Compiled with gcc 13.3.0
+# Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
+# Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov n=4 thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir ys=2..3 start=0
+# Compiled with gcc 13.3.0
+# Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
+# Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
+1 nodes on vm
+ vm  .
+  .  .
+cpubinding messages on vm:
+cpubinding: Hardware: Package:1 [NUMANode] L3Cache:1 L2Cache:4 L1dCache:1 Core:1 PU:1 
+cpubinding: Target split: 2x2
+cpubinding: no mapping found
+Now trying to load matrix cache files
+[vm] J0: read cache small.2x2/small.2x2.487934720.h0.v0-zone.bin (and others) in 0.00s
+J0 vm done reading (result=1)
+Matrix: total 3257 rows 3257 cols 237652 coeffs
+c0  0/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+c1  1/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+r1  1/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+r0  0/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+Loading V2-3.0 ... done [25.45 kB in 0.00, 12.21 MB/s]
+Setting interval value to default 0
+Target iteration is 1664
+Loading Cv0-1.64 ... done [25.45 kB in 0.00, 15.54 MB/s]
+loaded Ct0-1.0-4
+Each thread allocates 2 kb for the A matrices
+iteration 1
++-----------------------------------+
+|0.00@8%+0.00@10%  0.00@10%+0.00@9% |
+|0.00@12%+0.00@12% 0.00@0%+0.00@0%  |
++-----------------------------------+
+iteration 2
++-----------------------------------+
+|0.00@9%+0.00@10%  0.00@10%+0.00@8% |
+|0.00@13%+0.00@13% 0.00@0%+0.00@0%  |
++-----------------------------------+
+iteration 3
++-----------------------------------+
+|0.00@9%+0.00@9%   0.00@11%+0.00@8% |
+|0.00@13%+0.00@12% 0.00@0%+0.00@0%  |
++-----------------------------------+
+iteration 4
++---------------------------------+
+|0.00@9%+0.00@10% 0.00@9%+0.00@6% |
+|0.00@10%+0.00@9% 0.00@0%+0.00@0% |
++---------------------------------+
+iteration 5
++---------------------------------+
+|0.00@9%+0.00@10% 0.00@7%+0.00@5% |
+|0.00@9%+0.00@7%  0.00@0%+0.00@0% |
++---------------------------------+
+iteration 10
++-----------------------------------+
+|0.00@12%+0.00@18% 0.00@5%+0.00@3%  |
+|0.00@7%+0.00@4%   0.00@0%+0.00@0%  |
++-----------------------------------+
+iteration 15
++-----------------------------------+
+|0.00@18%+0.00@25% 0.00@5%+0.00@5%  |
+|0.00@7%+0.00@8%   0.00@3%+0.00@6%  |
++-----------------------------------+
+iteration 20
++-----------------------------------+
+|0.00@22%+0.00@28% 0.00@12%+0.00@11%|
+|0.00@13%+0.00@15% 0.00@13%+0.00@14%|
++-----------------------------------+
+iteration 40
++-----------------------------------+
+|0.00@31%+0.00@32% 0.00@22%+0.00@15%|
+|0.00@21%+0.00@20% 0.00@16%+0.00@12%|
++-----------------------------------+
+iteration 60
++-----------------------------------+
+|0.00@38%+0.00@36% 0.00@30%+0.00@18%|
+|0.00@23%+0.00@20% 0.00@22%+0.00@15%|
++-----------------------------------+
+Saving V2-3.64 ... done [25.45 kB in 0.00, 16.00 MB/s]
+N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 4.90 ns/0.0Gitems
+N=64 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=64 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=64 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=64 ; ETA (N=1664): Thu Oct 15 00:15:46 2026 [0.001 s/iter]
+iteration 80
++-----------------------------------+
+|0.00@36%+0.00@36% 0.00@29%+0.00@19%|
+|0.00@25%+0.00@23% 0.00@21%+0.00@15%|
++-----------------------------------+
+iteration 100
++-----------------------------------+
+|0.00@33%+0.00@31% 0.00@28%+0.00@17%|
+|0.00@25%+0.00@22% 0.00@19%+0.00@13%|
++-----------------------------------+
+Saving V2-3.128 ... done [25.45 kB in 0.00, 16.45 MB/s]
+N=128 ; CPU0: 0.00 s/iter [0.000..0.000], 4.48 ns/0.0Gitems
+N=128 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=128 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=128 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=128 ; ETA (N=1664): Thu Oct 15 00:15:46 2026 [0.001 s/iter]
+Saving V2-3.192 ... done [25.45 kB in 0.00, 16.65 MB/s]
+N=192 ; CPU0: 0.00 s/iter [0.000..0.000], 4.31 ns/0.0Gitems
+N=192 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=192 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=192 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=192 ; ETA (N=1664): Thu Oct 15 00:15:46 2026 [0.001 s/iter]
+iteration 200
++-----------------------------------+
+|0.00@29%+0.00@25% 0.00@31%+0.00@17%|
+|0.00@27%+0.00@19% 0.00@18%+0.00@11%|
++-----------------------------------+
+Saving V2-3.256 ... done [25.45 kB in 0.00, 15.93 MB/s]
+N=256 ; CPU0: 0.00 s/iter [0.000..0.000], 4.20 ns/0.0Gitems
+N=256 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=256 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=256 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=256 ; ETA (N=1664): Thu Oct 15 00:15:45 2026 [0.001 s/iter]
+iteration 300
++-----------------------------------+
+|0.00@25%+0.00@21% 0.00@33%+0.00@18%|
+|0.00@27%+0.00@21% 0.00@20%+0.00@13%|
++-----------------------------------+
+Saving V2-3.320 ... done [25.45 kB in 0.00, 15.43 MB/s]
+N=320 ; CPU0: 0.00 s/iter [0.000..0.000], 4.18 ns/0.0Gitems
+N=320 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=320 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=320 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=320 ; ETA (N=1664): Thu Oct 15 00:15:45 2026 [0.001 s/iter]
+Saving V2-3.384 ... done [25.45 kB in 0.00, 15.31 MB/s]
+N=384 ; CPU0: 0.00 s/iter [0.000..0.000], 4.15 ns/0.0Gitems
+N=384 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=384 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=384 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=384 ; ETA (N=1664): Thu Oct 15 00:15:45 2026 [0.001 s/iter]
+iteration 400
++-----------------------------------+
+|0.00@24%+0.00@21% 0.00@32%+0.00@18%|
+|0.00@32%+0.00@26% 0.00@24%+0.00@15%|
++-----------------------------------+
+Saving V2-3.448 ... done [25.45 kB in 0.00, 9.27 MB/s]
+N=448 ; CPU0: 0.00 s/iter [0.000..0.000], 4.27 ns/0.0Gitems
+N=448 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=448 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=448 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=448 ; ETA (N=1664): Thu Oct 15 00:15:45 2026 [0.001 s/iter]
+iteration 500
++-----------------------------------+
+|0.00@27%+0.00@23% 0.00@34%+0.00@20%|
+|0.00@34%+0.00@27% 0.00@28%+0.00@17%|
++-----------------------------------+
+Saving V2-3.512 ... done [25.45 kB in 0.00, 16.37 MB/s]
+N=512 ; CPU0: 0.00 s/iter [0.000..0.000], 4.23 ns/0.0Gitems
+N=512 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=512 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=512 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=512 ; ETA (N=1664): Thu Oct 15 00:15:45 2026 [0.001 s/iter]
+Saving V2-3.576 ... done [25.45 kB in 0.00, 17.24 MB/s]
+N=576 ; CPU0: 0.00 s/iter [0.000..0.000], 4.16 ns/0.0Gitems
+N=576 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=576 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=576 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=576 ; ETA (N=1664): Thu Oct 15 00:15:45 2026 [0.001 s/iter]
+iteration 600
++-----------------------------------+
+|0.00@27%+0.00@23% 0.00@33%+0.00@19%|
+|0.00@35%+0.00@28% 0.00@28%+0.00@17%|
++-----------------------------------+
+Saving V2-3.640 ... done [25.45 kB in 0.00, 15.69 MB/s]
+N=640 ; CPU0: 0.00 s/iter [0.000..0.000], 4.11 ns/0.0Gitems
+N=640 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=640 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=640 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=640 ; ETA (N=1664): Thu Oct 15 00:15:45 2026 [0.001 s/iter]
+iteration 700
++-----------------------------------+
+|0.00@26%+0.00@23% 0.00@32%+0.00@19%|
+|0.00@35%+0.00@29% 0.00@28%+0.00@16%|
++-----------------------------------+
+Saving V2-3.704 ... done [25.45 kB in 0.00, 16.96 MB/s]
+N=704 ; CPU0: 0.00 s/iter [0.000..0.000], 4.08 ns/0.0Gitems
+N=704 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=704 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=704 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=704 ; ETA (N=1664): Thu Oct 15 00:15:45 2026 [0.001 s/iter]
+Saving V2-3.768 ... done [25.45 kB in 0.00, 15.47 MB/s]
+N=768 ; CPU0: 0.00 s/iter [0.000..0.000], 4.06 ns/0.0Gitems
+N=768 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=768 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=768 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=768 ; ETA (N=1664): Thu Oct 15 00:15:45 2026 [0.001 s/iter]
+iteration 800
++-----------------------------------+
+|0.00@26%+0.00@22% 0.00@31%+0.00@18%|
+|0.00@35%+0.00@28% 0.00@29%+0.00@17%|
++-----------------------------------+
+Saving V2-3.832 ... done [25.45 kB in 0.00, 12.57 MB/s]
+N=832 ; CPU0: 0.00 s/iter [0.000..0.000], 4.07 ns/0.0Gitems
+N=832 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=832 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=832 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=832 ; ETA (N=1664): Thu Oct 15 00:15:45 2026 [0.001 s/iter]
+Saving V2-3.896 ... done [25.45 kB in 0.00, 15.16 MB/s]
+N=896 ; CPU0: 0.00 s/iter [0.000..0.000], 4.07 ns/0.0Gitems
+N=896 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=896 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=896 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=896 ; ETA (N=1664): Thu Oct 15 00:15:46 2026 [0.001 s/iter]
+iteration 900
++-----------------------------------+
+|0.00@25%+0.00@22% 0.00@28%+0.00@17%|
+|0.00@32%+0.00@25% 0.00@27%+0.00@16%|
++-----------------------------------+
+Saving V2-3.960 ... done [25.45 kB in 0.00, 15.81 MB/s]
+N=960 ; CPU0: 0.00 s/iter [0.000..0.000], 4.08 ns/0.0Gitems
+N=960 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=960 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=960 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=960 ; ETA (N=1664): Thu Oct 15 00:15:46 2026 [0.001 s/iter]
+iteration 1000
++-----------------------------------+
+|0.00@26%+0.00@22% 0.00@30%+0.00@17%|
+|0.00@33%+0.00@26% 0.00@28%+0.00@16%|
++-----------------------------------+
+Saving V2-3.1024 ... done [25.45 kB in 0.00, 15.29 MB/s]
+N=1024 ; CPU0: 0.00 s/iter [0.000..0.000], 4.07 ns/0.0Gitems
+N=1024 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1024 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1024 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1024 ; ETA (N=1664): Thu Oct 15 00:15:46 2026 [0.001 s/iter]
+Saving V2-3.1088 ... done [25.45 kB in 0.00, 15.81 MB/s]
+N=1088 ; CPU0: 0.00 s/iter [0.000..0.000], 4.06 ns/0.0Gitems
+N=1088 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1088 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1088 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1088 ; ETA (N=1664): Thu Oct 15 00:15:46 2026 [0.001 s/iter]
+Saving V2-3.1152 ... done [25.45 kB in 0.00, 16.18 MB/s]
+N=1152 ; CPU0: 0.00 s/iter [0.000..0.000], 4.07 ns/0.0Gitems
+N=1152 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1152 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1152 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1152 ; ETA (N=1664): Thu Oct 15 00:15:46 2026 [0.001 s/iter]
+Saving V2-3.1216 ... done [25.45 kB in 0.00, 13.95 MB/s]
+N=1216 ; CPU0: 0.00 s/iter [0.000..0.000], 4.07 ns/0.0Gitems
+N=1216 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1216 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1216 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1216 ; ETA (N=1664): Thu Oct 15 00:15:46 2026 [0.001 s/iter]
+Saving V2-3.1280 ... done [25.45 kB in 0.00, 15.66 MB/s]
+N=1280 ; CPU0: 0.00 s/iter [0.000..0.000], 4.08 ns/0.0Gitems
+N=1280 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1280 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1280 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1280 ; ETA (N=1664): Thu Oct 15 00:15:46 2026 [0.001 s/iter]
+Saving V2-3.1344 ... done [25.45 kB in 0.00, 15.83 MB/s]
+N=1344 ; CPU0: 0.00 s/iter [0.000..0.000], 4.07 ns/0.0Gitems
+N=1344 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1344 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1344 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1344 ; ETA (N=1664): Thu Oct 15 00:15:46 2026 [0.001 s/iter]
+Saving V2-3.1408 ... done [25.45 kB in 0.00, 17.77 MB/s]
+N=1408 ; CPU0: 0.00 s/iter [0.000..0.000], 4.05 ns/0.0Gitems
+N=1408 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1408 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1408 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1408 ; ETA (N=1664): Thu Oct 15 00:15:46 2026 [0.001 s/iter]
+Saving V2-3.1472 ... done [25.45 kB in 0.00, 18.29 MB/s]
+N=1472 ; CPU0: 0.00 s/iter [0.000..0.000], 4.03 ns/0.0Gitems
+N=1472 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1472 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1472 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1472 ; ETA (N=1664): Thu Oct 15 00:15:46 2026 [0.001 s/iter]
+Saving V2-3.1536 ... done [25.45 kB in 0.00, 17.53 MB/s]
+N=1536 ; CPU0: 0.00 s/iter [0.000..0.000], 4.01 ns/0.0Gitems
+N=1536 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1536 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1536 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1536 ; ETA (N=1664): Thu Oct 15 00:15:46 2026 [0.001 s/iter]
+Saving V2-3.1600 ... done [25.45 kB in 0.00, 17.94 MB/s]
+N=1600 ; CPU0: 0.00 s/iter [0.000..0.000], 3.99 ns/0.0Gitems
+N=1600 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1600 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1600 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1600 ; ETA (N=1664): Thu Oct 15 00:15:46 2026 [0.001 s/iter]
+Saving V2-3.1664 ... done [25.45 kB in 0.00, 16.90 MB/s]
+N=1664 ; CPU0: 0.00 s/iter [0.000..0.000], 3.98 ns/0.0Gitems
+N=1664 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1664 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1664 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1664 ; ETA (N=1664): Thu Oct 15 00:15:46 2026 [0.001 s/iter]
+krylov done N=1664 ; CPU0: 0.00 s/iter [0.000..0.000], 3.99 ns/0.0Gitems
+krylov done N=1664 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+krylov done N=1664 ; COMM0: 0.00 s/iter [0.000..0.000]
+krylov done N=1664 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+Done krylov.
+Timings for krylov: (wct) 1.66
+Timings for krylov: (cpu) 2.74 (aggregated over all threads and 1 MPI jobs)
+Listing files in /tmp/cb/cado-full.EdFrnH/wdir via readdir
+Use of uninitialized value in concatenation (.) or string at /home/user/ext/cado-nfs/build/linalg/bwc/bwc.pl line 1227, <F> line 1.
+#############################################################################
+/home/user/ext/cado-nfs/build/linalg/bwc/krylov n=4 thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir ys=3..4 start=0
+## Entering task: [01;34mkrylov[0m
+## Check for krylov[0m: Found no way to verify that the starting point is consistent
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov n=4 thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir ys=3..4 start=0
+# Compiled with gcc 13.3.0
+# Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
+# Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov n=4 thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir ys=3..4 start=0
+# Compiled with gcc 13.3.0
+# Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
+# Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
+1 nodes on vm
+ vm  .
+  .  .
+cpubinding messages on vm:
+cpubinding: Hardware: Package:1 [NUMANode] L3Cache:1 L2Cache:4 L1dCache:1 Core:1 PU:1 
+cpubinding: Target split: 2x2
+cpubinding: no mapping found
+Now trying to load matrix cache files
+[vm] J0: read cache small.2x2/small.2x2.487934720.h0.v0-zone.bin (and others) in 0.00s
+J0 vm done reading (result=1)
+Matrix: total 3257 rows 3257 cols 237652 coeffs
+c1  1/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+c0  0/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+r0  0/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+r1  1/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+Loading V3-4.0 ... done [25.45 kB in 0.00, 16.39 MB/s]
+Setting interval value to default 0
+Target iteration is 1664
+Loading Cv0-1.64 ... done [25.45 kB in 0.00, 16.71 MB/s]
+loaded Ct0-1.0-4
+Each thread allocates 2 kb for the A matrices
+iteration 1
++-----------------------------------+
+|0.00@12%+0.00@11% 0.00@4%+0.00@2%  |
+|0.00@6%+0.00@8%   0.00@1%+0.00@1%  |
++-----------------------------------+
+iteration 2
++-------------------------------+
+|0.00@8%+0.00@6% 0.00@3%+0.00@2%|
+|0.00@7%+0.00@8% 0.00@1%+0.00@1%|
++-------------------------------+
+iteration 3
++-------------------------------+
+|0.00@6%+0.00@4% 0.00@3%+0.00@2%|
+|0.00@7%+0.00@8% 0.00@1%+0.00@1%|
++-------------------------------+
+iteration 4
++-------------------------------+
+|0.00@5%+0.00@3% 0.00@3%+0.00@2%|
+|0.00@7%+0.00@8% 0.00@1%+0.00@1%|
++-------------------------------+
+iteration 5
++-------------------------------+
+|0.00@4%+0.00@2% 0.00@3%+0.00@2%|
+|0.00@7%+0.00@9% 0.00@1%+0.00@1%|
++-------------------------------+
+iteration 10
++-------------------------------+
+|0.00@3%+0.00@1% 0.00@3%+0.00@2%|
+|0.00@5%+0.00@4% 0.00@1%+0.00@0%|
++-------------------------------+
+iteration 15
++-------------------------------+
+|0.00@4%+0.00@3% 0.00@3%+0.00@1%|
+|0.00@4%+0.00@3% 0.00@1%+0.00@0%|
++-------------------------------+
+iteration 20
++-------------------------------+
+|0.00@5%+0.00@4% 0.00@2%+0.00@1%|
+|0.00@5%+0.00@5% 0.00@0%+0.00@0%|
++-------------------------------+
+iteration 40
++-----------------------------------+
+|0.00@9%+0.00@13%  0.00@8%+0.00@5%  |
+|0.00@12%+0.00@15% 0.00@4%+0.00@3%  |
++-----------------------------------+
+iteration 60
++-----------------------------------+
+|0.00@19%+0.00@22% 0.00@18%+0.00@15%|
+|0.00@21%+0.00@22% 0.00@11%+0.00@8% |
++-----------------------------------+
+Saving V3-4.64 ... done [25.45 kB in 0.00, 14.72 MB/s]
+N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 5.64 ns/0.0Gitems
+N=64 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=64 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=64 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=64 ; ETA (N=1664): Thu Oct 15 00:15:48 2026 [0.001 s/iter]
+iteration 80
++-----------------------------------+
+|0.00@24%+0.00@23% 0.00@23%+0.00@16%|
+|0.00@27%+0.00@24% 0.00@15%+0.00@9% |
++-----------------------------------+
+iteration 100
++-----------------------------------+
+|0.00@25%+0.00@22% 0.00@27%+0.00@17%|
+|0.00@29%+0.00@24% 0.00@20%+0.00@13%|
++-----------------------------------+
+Saving V3-4.128 ... done [25.45 kB in 0.00, 14.94 MB/s]
+N=128 ; CPU0: 0.00 s/iter [0.000..0.000], 5.16 ns/0.0Gitems
+N=128 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=128 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=128 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=128 ; ETA (N=1664): Thu Oct 15 00:15:48 2026 [0.001 s/iter]
+Saving V3-4.192 ... done [25.45 kB in 0.00, 15.79 MB/s]
+N=192 ; CPU0: 0.00 s/iter [0.000..0.000], 4.88 ns/0.0Gitems
+N=192 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=192 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=192 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=192 ; ETA (N=1664): Thu Oct 15 00:15:48 2026 [0.001 s/iter]
+iteration 200
++-----------------------------------+
+|0.00@28%+0.00@23% 0.00@26%+0.00@15%|
+|0.00@28%+0.00@23% 0.00@22%+0.00@14%|
++-----------------------------------+
+Saving V3-4.256 ... done [25.45 kB in 0.00, 14.96 MB/s]
+N=256 ; CPU0: 0.00 s/iter [0.000..0.000], 4.74 ns/0.0Gitems
+N=256 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=256 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=256 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=256 ; ETA (N=1664): Thu Oct 15 00:15:48 2026 [0.001 s/iter]
+iteration 300
++-----------------------------------+
+|0.00@26%+0.00@22% 0.00@24%+0.00@14%|
+|0.00@27%+0.00@21% 0.00@18%+0.00@10%|
++-----------------------------------+
+Saving V3-4.320 ... done [25.45 kB in 0.00, 16.51 MB/s]
+N=320 ; CPU0: 0.00 s/iter [0.000..0.000], 4.64 ns/0.0Gitems
+N=320 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=320 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=320 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=320 ; ETA (N=1664): Thu Oct 15 00:15:48 2026 [0.001 s/iter]
+Saving V3-4.384 ... done [25.45 kB in 0.00, 16.91 MB/s]
+N=384 ; CPU0: 0.00 s/iter [0.000..0.000], 4.48 ns/0.0Gitems
+N=384 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=384 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=384 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=384 ; ETA (N=1664): Thu Oct 15 00:15:47 2026 [0.001 s/iter]
+iteration 400
++-----------------------------------+
+|0.00@27%+0.00@22% 0.00@25%+0.00@13%|
+|0.00@25%+0.00@20% 0.00@18%+0.00@10%|
++-----------------------------------+
+Saving V3-4.448 ... done [25.45 kB in 0.00, 16.40 MB/s]
+N=448 ; CPU0: 0.00 s/iter [0.000..0.000], 4.40 ns/0.0Gitems
+N=448 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=448 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=448 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=448 ; ETA (N=1664): Thu Oct 15 00:15:47 2026 [0.001 s/iter]
+iteration 500
++-----------------------------------+
+|0.00@30%+0.00@25% 0.00@28%+0.00@15%|
+|0.00@29%+0.00@23% 0.00@24%+0.00@14%|
++-----------------------------------+
+Saving V3-4.512 ... done [25.45 kB in 0.00, 17.00 MB/s]
+N=512 ; CPU0: 0.00 s/iter [0.000..0.000], 4.33 ns/0.0Gitems
+N=512 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=512 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=512 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=512 ; ETA (N=1664): Thu Oct 15 00:15:47 2026 [0.001 s/iter]
+Saving V3-4.576 ... done [25.45 kB in 0.00, 15.51 MB/s]
+N=576 ; CPU0: 0.00 s/iter [0.000..0.000], 4.26 ns/0.0Gitems
+N=576 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=576 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=576 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=576 ; ETA (N=1664): Thu Oct 15 00:15:47 2026 [0.001 s/iter]
+iteration 600
++-----------------------------------+
+|0.00@31%+0.00@24% 0.00@28%+0.00@15%|
+|0.00@29%+0.00@24% 0.00@25%+0.00@14%|
++-----------------------------------+
+Saving V3-4.640 ... done [25.45 kB in 0.00, 16.52 MB/s]
+N=640 ; CPU0: 0.00 s/iter [0.000..0.000], 4.26 ns/0.0Gitems
+N=640 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=640 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=640 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=640 ; ETA (N=1664): Thu Oct 15 00:15:47 2026 [0.001 s/iter]
+iteration 700
++-----------------------------------+
+|0.00@29%+0.00@23% 0.00@26%+0.00@14%|
+|0.00@29%+0.00@23% 0.00@24%+0.00@13%|
++-----------------------------------+
+Saving V3-4.704 ... done [25.45 kB in 0.00, 17.17 MB/s]
+N=704 ; CPU0: 0.00 s/iter [0.000..0.000], 4.21 ns/0.0Gitems
+N=704 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=704 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=704 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=704 ; ETA (N=1664): Thu Oct 15 00:15:47 2026 [0.001 s/iter]
+Saving V3-4.768 ... done [25.45 kB in 0.00, 12.47 MB/s]
+N=768 ; CPU0: 0.00 s/iter [0.000..0.000], 4.20 ns/0.0Gitems
+N=768 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=768 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=768 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=768 ; ETA (N=1664): Thu Oct 15 00:15:47 2026 [0.001 s/iter]
+iteration 800
++-----------------------------------+
+|0.00@29%+0.00@23% 0.00@27%+0.00@14%|
+|0.00@30%+0.00@24% 0.00@24%+0.00@13%|
++-----------------------------------+
+Saving V3-4.832 ... done [25.45 kB in 0.00, 14.75 MB/s]
+N=832 ; CPU0: 0.00 s/iter [0.000..0.000], 4.20 ns/0.0Gitems
+N=832 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=832 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=832 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=832 ; ETA (N=1664): Thu Oct 15 00:15:47 2026 [0.001 s/iter]
+Saving V3-4.896 ... done [25.45 kB in 0.00, 17.81 MB/s]
+N=896 ; CPU0: 0.00 s/iter [0.000..0.000], 4.17 ns/0.0Gitems
+N=896 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=896 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=896 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=896 ; ETA (N=1664): Thu Oct 15 00:15:47 2026 [0.001 s/iter]
+iteration 900
++-----------------------------------+
+|0.00@29%+0.00@24% 0.00@27%+0.00@14%|
+|0.00@30%+0.00@24% 0.00@24%+0.00@13%|
++-----------------------------------+
+Saving V3-4.960 ... done [25.45 kB in 0.00, 17.50 MB/s]
+N=960 ; CPU0: 0.00 s/iter [0.000..0.000], 4.14 ns/0.0Gitems
+N=960 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=960 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=960 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=960 ; ETA (N=1664): Thu Oct 15 00:15:47 2026 [0.001 s/iter]
+iteration 1000
++-----------------------------------+
+|0.00@30%+0.00@25% 0.00@29%+0.00@15%|
+|0.00@30%+0.00@25% 0.00@25%+0.00@14%|
++-----------------------------------+
+Saving V3-4.1024 ... done [25.45 kB in 0.00, 15.69 MB/s]
+N=1024 ; CPU0: 0.00 s/iter [0.000..0.000], 4.13 ns/0.0Gitems
+N=1024 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1024 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1024 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1024 ; ETA (N=1664): Thu Oct 15 00:15:47 2026 [0.001 s/iter]
+Saving V3-4.1088 ... done [25.45 kB in 0.00, 17.06 MB/s]
+N=1088 ; CPU0: 0.00 s/iter [0.000..0.000], 4.12 ns/0.0Gitems
+N=1088 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1088 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1088 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1088 ; ETA (N=1664): Thu Oct 15 00:15:47 2026 [0.001 s/iter]
+Saving V3-4.1152 ... done [25.45 kB in 0.00, 16.13 MB/s]
+N=1152 ; CPU0: 0.00 s/iter [0.000..0.000], 4.11 ns/0.0Gitems
+N=1152 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1152 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1152 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1152 ; ETA (N=1664): Thu Oct 15 00:15:47 2026 [0.001 s/iter]
+Saving V3-4.1216 ... done [25.45 kB in 0.00, 14.84 MB/s]
+N=1216 ; CPU0: 0.00 s/iter [0.000..0.000], 4.13 ns/0.0Gitems
+N=1216 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1216 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1216 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1216 ; ETA (N=1664): Thu Oct 15 00:15:47 2026 [0.001 s/iter]
+Saving V3-4.1280 ... done [25.45 kB in 0.00, 14.84 MB/s]
+N=1280 ; CPU0: 0.00 s/iter [0.000..0.000], 4.14 ns/0.0Gitems
+N=1280 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1280 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1280 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1280 ; ETA (N=1664): Thu Oct 15 00:15:47 2026 [0.001 s/iter]
+Saving V3-4.1344 ... done [25.45 kB in 0.00, 14.93 MB/s]
+N=1344 ; CPU0: 0.00 s/iter [0.000..0.000], 4.15 ns/0.0Gitems
+N=1344 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1344 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1344 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1344 ; ETA (N=1664): Thu Oct 15 00:15:48 2026 [0.001 s/iter]
+Saving V3-4.1408 ... done [25.45 kB in 0.00, 15.61 MB/s]
+N=1408 ; CPU0: 0.00 s/iter [0.000..0.000], 4.16 ns/0.0Gitems
+N=1408 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1408 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1408 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1408 ; ETA (N=1664): Thu Oct 15 00:15:48 2026 [0.001 s/iter]
+Saving V3-4.1472 ... done [25.45 kB in 0.00, 16.05 MB/s]
+N=1472 ; CPU0: 0.00 s/iter [0.000..0.000], 4.17 ns/0.0Gitems
+N=1472 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1472 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1472 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1472 ; ETA (N=1664): Thu Oct 15 00:15:48 2026 [0.001 s/iter]
+Saving V3-4.1536 ... done [25.45 kB in 0.00, 18.54 MB/s]
+N=1536 ; CPU0: 0.00 s/iter [0.000..0.000], 4.14 ns/0.0Gitems
+N=1536 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1536 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1536 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1536 ; ETA (N=1664): Thu Oct 15 00:15:48 2026 [0.001 s/iter]
+Saving V3-4.1600 ... done [25.45 kB in 0.00, 17.52 MB/s]
+N=1600 ; CPU0: 0.00 s/iter [0.000..0.000], 4.11 ns/0.0Gitems
+N=1600 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1600 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1600 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1600 ; ETA (N=1664): Thu Oct 15 00:15:48 2026 [0.001 s/iter]
+Saving V3-4.1664 ... done [25.45 kB in 0.00, 17.31 MB/s]
+N=1664 ; CPU0: 0.00 s/iter [0.000..0.000], 4.10 ns/0.0Gitems
+N=1664 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=1664 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=1664 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=1664 ; ETA (N=1664): Thu Oct 15 00:15:48 2026 [0.001 s/iter]
+krylov done N=1664 ; CPU0: 0.00 s/iter [0.000..0.000], 4.10 ns/0.0Gitems
+krylov done N=1664 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+krylov done N=1664 ; COMM0: 0.00 s/iter [0.000..0.000]
+krylov done N=1664 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+Done krylov.
+Timings for krylov: (wct) 1.69
+Timings for krylov: (cpu) 2.79 (aggregated over all threads and 1 MPI jobs)
+Listing files in /tmp/cb/cado-full.EdFrnH/wdir via readdir
+#############################################################################
+/home/user/ext/cado-nfs/build/linalg/bwc/acollect n=4 nullspace=right prime=4611686018427387847 m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir --remove-old
+## Entering task: [01;34mlingen[0m
+## [01;33mCheck for lingen[0m: Running acollect to create A0-4.0-1664
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/acollect n=4 nullspace=right prime=4611686018427387847 m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir --remove-old
+# Compiled with gcc 13.3.0
+# Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
+# Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/acollect n=4 nullspace=right prime=4611686018427387847 m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir --remove-old
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 A0-4.0-1664
 Timings for acollect: (wct) 0.00
 Timings for acollect: (cpu) 0.01 (aggregated over all threads and 1 MPI jobs)
-Listing files in /tmp/cb/cado-full.k8BSjE/wdir via readdir
+Listing files in /tmp/cb/cado-full.EdFrnH/wdir via readdir
 #############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/lingen_pz split-output-file=1 afile=A0-4.0-1664 ffile=F m=4 prime=4611686018427387847 wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 rhs=/tmp/cb/cado-full.k8BSjE/rhs.txt thr=1x1 tuning_thresholds=recursive:10,flint:10,notiming:0
+/home/user/ext/cado-nfs/build/linalg/bwc/lingen_pz split-output-file=1 afile=A0-4.0-1664 ffile=F thr=1x1 n=4 rhs=/tmp/cb/cado-full.EdFrnH/rhs.txt prime=4611686018427387847 m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir tuning_thresholds=recursive:10,flint:10,notiming:0
 ## [01;33mCheck for lingen[0m: lingen has not run yet. Running now.
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/lingen_pz split-output-file=1 afile=A0-4.0-1664 ffile=F m=4 prime=4611686018427387847 wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 rhs=/tmp/cb/cado-full.k8BSjE/rhs.txt thr=1x1 tuning_thresholds=recursive:10,flint:10,notiming:0
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/lingen_pz split-output-file=1 afile=A0-4.0-1664 ffile=F thr=1x1 n=4 rhs=/tmp/cb/cado-full.EdFrnH/rhs.txt prime=4611686018427387847 m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir tuning_thresholds=recursive:10,flint:10,notiming:0
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/lingen_pz split-output-file=1 afile=A0-4.0-1664 ffile=F m=4 prime=4611686018427387847 wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 rhs=/tmp/cb/cado-full.k8BSjE/rhs.txt thr=1x1 tuning_thresholds=recursive:10,flint:10,notiming:0
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/lingen_pz split-output-file=1 afile=A0-4.0-1664 ffile=F thr=1x1 n=4 rhs=/tmp/cb/cado-full.EdFrnH/rhs.txt prime=4611686018427387847 m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir tuning_thresholds=recursive:10,flint:10,notiming:0
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
@@ -1404,7 +1404,7 @@ Found satisfactory init data for t0=1
 (4,4,1,-1.0,0.0)
 # Estimated memory for JUST transforms (per node): 0.81 MB
 # Estimated peak total memory (per node): max at depth 0: 6.53 MB
-Read 1662 coefficients (99.9%) in 0.0 s (250.5 MB/s)
+Read 1662 coefficients (99.9%) in 0.0 s (426.5 MB/s)
 0* [1662, recursive] 0/1
 1* [831, recursive] 0/2
 2* [416, recursive] 0/4
@@ -1414,58 +1414,58 @@ Read 1662 coefficients (99.9%) in 0.0 s (250.5 MB/s)
 6* [26, recursive] 0/64
 7* [13, recursive] 0/126
 --* [7, recursive_threshold] 0/126
-8 [7-7, basecase] 1/126 0.00057 -> 0.1  (total: 0.1 wct)
+8 [7-7, basecase] 1/126 0.00035 -> 0.0  (total: 0.0 wct)
 
 lingen ETA: not available yet
 Transform size for MUL with input operand sizes (8, 8) is (1584,80,160), which exceeds expected (1440,72,144) (anticipated for operand sizes (8, 7). Adjusting memory
 Transform size for MP with input operand sizes (39, 14) is (1872,96,192), which exceeds expected (1728,88,176) (anticipated for operand sizes (38, 14). Adjusting memory
 Transform size for MP with input operand sizes (78, 27) is (3312,176,352), which exceeds expected (3168,168,336) (anticipated for operand sizes (77, 27). Adjusting memory
-t=1625, canceled columns: 6 7.
-t=1626, canceled columns: 4 5 6 7.
-t=1627, canceled columns: 4 5 6 7.
-t=1628, canceled columns: 4 5 6 7, complete generator found, for sure.
-0 [1662-1662, recursive] 1/1 0.082 -> 0.1  (total: 0.1 wct)
-1 [831-831, recursive] 2/2 0.048 -> 0.1  (total: 0.2 wct)
-2 [415-416, recursive] 4/4 0.02 -> 0.1  (total: 0.3 wct)
-3 [207-208, recursive] 8/8 0.01 -> 0.1  (total: 0.3 wct)
-4 [103-104, recursive] 16/16 0.0044 -> 0.1  (total: 0.4 wct)
-5 [51-52, recursive] 32/32 0.002 -> 0.1  (total: 0.5 wct)
-6 [25-26, recursive] 63/64 0.0018 -> 0.1  (total: 0.6 wct)
-7a [12-12, recursive] 1/2 0.0027 -> 0.0  (total: 0.6 wct)
-7b [13-13, recursive] 125/126 0.0016 -> 0.2  (total: 0.8 wct)
--- [6-6, recursive_threshold] 126/130 4e-06 -> 0.0  (total: 0.8 wct)
--- [7-7, recursive_threshold] 125/126 5.3e-06 -> 0.0  (total: 0.8 wct)
-8a [6-6, basecase] 126/130 0.00028 -> 0.0  (total: 0.8 wct)
-8b [7-7, basecase] 125/126 0.00038 -> 0.0  (total: 0.9 wct)
+t=1629, canceled columns: 5 6 7.
+t=1630, canceled columns: 4 5 6 7.
+t=1631, canceled columns: 4 5 6 7.
+t=1632, canceled columns: 4 5 6 7, complete generator found, for sure.
+0 [1662-1662, recursive] 1/1 0.08 -> 0.1  (total: 0.1 wct)
+1 [831-831, recursive] 2/2 0.039 -> 0.1  (total: 0.2 wct)
+2 [415-416, recursive] 4/4 0.019 -> 0.1  (total: 0.2 wct)
+3 [207-208, recursive] 8/8 0.0093 -> 0.1  (total: 0.3 wct)
+4 [103-104, recursive] 16/16 0.0041 -> 0.1  (total: 0.4 wct)
+5 [51-52, recursive] 32/32 0.0018 -> 0.1  (total: 0.4 wct)
+6 [25-26, recursive] 63/64 0.0016 -> 0.1  (total: 0.5 wct)
+7a [12-12, recursive] 1/2 0.0015 -> 0.0  (total: 0.5 wct)
+7b [13-13, recursive] 125/126 0.0015 -> 0.2  (total: 0.7 wct)
+-- [6-6, recursive_threshold] 127/130 3.7e-06 -> 0.0  (total: 0.7 wct)
+-- [7-7, recursive_threshold] 125/126 4.5e-06 -> 0.0  (total: 0.7 wct)
+8a [6-6, basecase] 127/130 0.00026 -> 0.0  (total: 0.8 wct)
+8b [7-7, basecase] 125/126 0.00036 -> 0.0  (total: 0.8 wct)
 
-lingen ETA: Wed Oct 14 22:12:03 2026
-lingen done at: Wed Oct 14 22:12:03 2026
-Final, t=1628: delta = 817 [2] 816 [2] 813 [2] 812 [2]
-(pi.alloc = 817)
+lingen ETA: Thu Oct 15 00:15:49 2026
+lingen done at: Thu Oct 15 00:15:49 2026
+Final, t=1632: delta = 819 [3] 818 815 814 [3]
+(pi.alloc = 819)
 Number of lucky columns: 4 (4 wanted)
 Reordered solutions:
  0 (col 4 in pi, weight 1 on rhs vectors)
  1 (col 5 in pi, weight 1 on rhs vectors)
  2 (col 6 in pi, weight 1 on rhs vectors)
  3 (col 7 in pi, weight 1 on rhs vectors)
-Written 814 coefficients (99.5%) in 0.0 s (22.7 MB/s)
-Timings for lingen_pz: (wct) 0.89
-Timings for lingen_pz: (cpu) 0.89 (aggregated over all threads and 1 MPI jobs)
-Listing files in /tmp/cb/cado-full.k8BSjE/wdir via readdir
+Written 816 coefficients (99.5%) in 0.0 s (23.3 MB/s)
+Timings for lingen_pz: (wct) 0.81
+Timings for lingen_pz: (cpu) 0.81 (aggregated over all threads and 1 MPI jobs)
+Listing files in /tmp/cb/cado-full.EdFrnH/wdir via readdir
 #############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/mksol m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 matrix=/tmp/cb/cado-full.k8BSjE/small.bin solutions=0-1 start=0
+/home/user/ext/cado-nfs/build/linalg/bwc/mksol n=4 thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir solutions=0-1 start=0
 ## Entering task: [01;34mmksol[0m
 ## [00;32mCheck for mksol[0m: All auxiliary files for checkpointing are here, good (wanted: 0, 16, 64, 80).
-## mksol max iteration is 814
+## mksol max iteration is 816
 ## main solution ranges for mksol 0-1
 ## S files for 0-1 --> last mksol checkpoint is 0
 ## [01;33mCheck for mksol[0m: Pending tasks for mksol:
 ## [01;33mCheck for mksol[0m: 	solutions=0-1 start=0
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/mksol m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 matrix=/tmp/cb/cado-full.k8BSjE/small.bin solutions=0-1 start=0
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/mksol n=4 thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir solutions=0-1 start=0
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/mksol m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 matrix=/tmp/cb/cado-full.k8BSjE/small.bin solutions=0-1 start=0
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/mksol n=4 thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir solutions=0-1 start=0
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
@@ -1477,276 +1477,276 @@ cpubinding: Hardware: Package:1 [NUMANode] L3Cache:1 L2Cache:4 L1dCache:1 Core:1
 cpubinding: Target split: 2x2
 cpubinding: no mapping found
 Now trying to load matrix cache files
-[vm] J0: read cache small.2x2/small.2x2.3949165824.h0.v0-zone.bin (and others) in 0.00s
+[vm] J0: read cache small.2x2/small.2x2.487934720.h0.v0-zone.bin (and others) in 0.00s
 J0 vm done reading (result=1)
-Matrix: total 3250 rows 3250 cols 242867 coeffs
-c1  1/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+Matrix: total 3257 rows 3257 cols 237652 coeffs
 c0  0/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+c1  1/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
 r0  0/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
 r1  1/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
 Setting interval value to default 0
 Target iteration is unspecified ; going to end of F file
 Each thread allocates 1*4*1*8*64=2.00 kB for the F matrices
-Loading V0-1.0 ... done [25.39 kB in 0.00, 14.29 MB/s]
-Loading V1-2.0 ... done [25.39 kB in 0.00, 15.78 MB/s]
-Loading V2-3.0 ... done [25.39 kB in 0.00, 15.44 MB/s]
-Loading V3-4.0 ... done [25.39 kB in 0.00, 15.29 MB/s]
+Loading V0-1.0 ... done [25.45 kB in 0.00, 5.24 MB/s]
+Loading V1-2.0 ... done [25.45 kB in 0.00, 9.59 MB/s]
+Loading V2-3.0 ... done [25.45 kB in 0.00, 10.57 MB/s]
+Loading V3-4.0 ... done [25.45 kB in 0.00, 17.23 MB/s]
 about to do 63 iterations starting from vectors at iteration 0 to handle the coefficients of degree [0..63] in F
 iteration 1
-+-----------------------------------+
-|0.01@25%+0.00@15% 0.01@37%+0.00@24%|
-|0.01@5%+0.00@9%   0.01@0%+0.00@1%  |
-+-----------------------------------+
++-------------------------------+
+|0.02@0%+0.00@9% 0.02@0%+0.00@0%|
+|0.02@0%+0.00@0% 0.02@0%+0.00@0%|
++-------------------------------+
 iteration 2
-+-----------------------------------+
-|0.01@24%+0.00@14% 0.01@35%+0.00@14%|
-|0.01@6%+0.00@8%   0.01@0%+0.00@1%  |
-+-----------------------------------+
++-------------------------------+
+|0.01@1%+0.00@9% 0.01@0%+0.00@0%|
+|0.01@0%+0.00@0% 0.01@0%+0.00@0%|
++-------------------------------+
 iteration 3
-+-----------------------------------+
-|0.01@28%+0.00@29% 0.01@38%+0.00@23%|
-|0.01@8%+0.00@15%  0.01@3%+0.00@6%  |
-+-----------------------------------+
++---------------------------------+
+|0.01@4%+0.00@20% 0.01@3%+0.00@10%|
+|0.01@3%+0.00@13% 0.01@2%+0.00@10%|
++---------------------------------+
 iteration 4
-+-----------------------------------+
-|0.00@31%+0.00@34% 0.00@40%+0.00@25%|
-|0.00@10%+0.00@18% 0.00@6%+0.00@10% |
-+-----------------------------------+
++---------------------------------+
+|0.01@6%+0.00@29% 0.01@5%+0.00@15%|
+|0.01@5%+0.00@21% 0.01@5%+0.00@13%|
++---------------------------------+
 iteration 5
-+-----------------------------------+
-|0.00@34%+0.00@27% 0.00@41%+0.00@26%|
-|0.00@13%+0.00@19% 0.00@8%+0.00@13% |
-+-----------------------------------+
++---------------------------------+
+|0.00@8%+0.00@30% 0.00@8%+0.00@18%|
+|0.00@7%+0.00@26% 0.00@7%+0.00@17%|
++---------------------------------+
 iteration 10
 +-----------------------------------+
-|0.00@29%+0.00@19% 0.00@42%+0.00@22%|
-|0.00@18%+0.00@25% 0.00@15%+0.00@16%|
+|0.00@14%+0.00@31% 0.00@13%+0.00@18%|
+|0.00@6%+0.00@13%  0.00@14%+0.00@25%|
 +-----------------------------------+
 iteration 15
 +-----------------------------------+
-|0.00@36%+0.00@30% 0.00@48%+0.00@26%|
-|0.00@22%+0.00@26% 0.00@20%+0.00@18%|
+|0.00@14%+0.00@24% 0.00@12%+0.00@12%|
+|0.00@7%+0.00@13%  0.00@14%+0.00@17%|
 +-----------------------------------+
 iteration 20
 +-----------------------------------+
-|0.00@41%+0.00@36% 0.00@51%+0.00@27%|
-|0.00@25%+0.00@28% 0.00@23%+0.00@18%|
+|0.00@16%+0.00@25% 0.00@13%+0.00@14%|
+|0.00@10%+0.00@17% 0.00@14%+0.00@14%|
 +-----------------------------------+
 iteration 40
 +-----------------------------------+
-|0.00@46%+0.00@35% 0.00@48%+0.00@22%|
-|0.00@32%+0.00@30% 0.00@28%+0.00@18%|
+|0.00@29%+0.00@31% 0.00@25%+0.00@19%|
+|0.00@23%+0.00@26% 0.00@24%+0.00@18%|
 +-----------------------------------+
 iteration 60
 +-----------------------------------+
-|0.00@47%+0.00@35% 0.00@46%+0.00@21%|
-|0.00@40%+0.00@33% 0.00@29%+0.00@17%|
+|0.00@39%+0.00@37% 0.00@34%+0.00@22%|
+|0.00@31%+0.00@31% 0.00@32%+0.00@21%|
 +-----------------------------------+
-N=64 ; CPU0: 0.00 s/iter [0.001..0.001], 15.75 ns/0.0Gitems
+N=64 ; CPU0: 0.00 s/iter [0.001..0.001], 15.53 ns/0.0Gitems
 N=64 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=64 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=64 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-mksol: N=64 ; ETA (N=832): Wed Oct 14 22:12:05 2026 [0.001 s/iter]
-Saving S.sols0-1.0-64 ... done [25.39 kB in 0.00, 16.70 MB/s]
-Loading V0-1.64 ... done [25.39 kB in 0.00, 18.72 MB/s]
-Loading V1-2.64 ... done [25.39 kB in 0.00, 18.94 MB/s]
-Loading V2-3.64 ... done [25.39 kB in 0.00, 19.02 MB/s]
-Loading V3-4.64 ... done [25.39 kB in 0.00, 17.82 MB/s]
+mksol: N=64 ; ETA (N=832): Thu Oct 15 00:15:49 2026 [0.001 s/iter]
+Saving S.sols0-1.0-64 ... done [25.45 kB in 0.00, 15.82 MB/s]
+Loading V0-1.64 ... done [25.45 kB in 0.00, 18.83 MB/s]
+Loading V1-2.64 ... done [25.45 kB in 0.00, 18.64 MB/s]
+Loading V2-3.64 ... done [25.45 kB in 0.00, 16.97 MB/s]
+Loading V3-4.64 ... done [25.45 kB in 0.00, 16.63 MB/s]
 about to do 63 iterations starting from vectors at iteration 64 to handle the coefficients of degree [64..127] in F
 iteration 80
 +-----------------------------------+
-|0.00@40%+0.00@33% 0.00@40%+0.00@20%|
-|0.00@35%+0.00@30% 0.00@32%+0.00@17%|
+|0.00@36%+0.00@33% 0.00@36%+0.00@21%|
+|0.00@31%+0.00@30% 0.00@35%+0.00@23%|
 +-----------------------------------+
 iteration 100
 +-----------------------------------+
-|0.00@41%+0.00@32% 0.00@40%+0.00@20%|
-|0.00@35%+0.00@28% 0.00@30%+0.00@16%|
+|0.00@34%+0.00@29% 0.00@32%+0.00@17%|
+|0.00@30%+0.00@26% 0.00@37%+0.00@23%|
 +-----------------------------------+
-N=128 ; CPU0: 0.00 s/iter [0.001..0.001], 14.19 ns/0.0Gitems
+N=128 ; CPU0: 0.00 s/iter [0.001..0.001], 16.43 ns/0.0Gitems
 N=128 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=128 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=128 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-mksol: N=128 ; ETA (N=832): Wed Oct 14 22:12:04 2026 [0.001 s/iter]
-Saving S.sols0-1.64-128 ... done [25.39 kB in 0.00, 17.18 MB/s]
-Loading V0-1.128 ... done [25.39 kB in 0.00, 12.78 MB/s]
-Loading V1-2.128 ... done [25.39 kB in 0.00, 19.07 MB/s]
-Loading V2-3.128 ... done [25.39 kB in 0.00, 18.10 MB/s]
-Loading V3-4.128 ... done [25.39 kB in 0.00, 13.37 MB/s]
+mksol: N=128 ; ETA (N=832): Thu Oct 15 00:15:49 2026 [0.001 s/iter]
+Saving S.sols0-1.64-128 ... done [25.45 kB in 0.00, 15.05 MB/s]
+Loading V0-1.128 ... done [25.45 kB in 0.00, 16.46 MB/s]
+Loading V1-2.128 ... done [25.45 kB in 0.00, 15.31 MB/s]
+Loading V2-3.128 ... done [25.45 kB in 0.00, 15.85 MB/s]
+Loading V3-4.128 ... done [25.45 kB in 0.00, 16.89 MB/s]
 about to do 63 iterations starting from vectors at iteration 128 to handle the coefficients of degree [128..191] in F
-N=192 ; CPU0: 0.00 s/iter [0.001..0.001], 15.29 ns/0.0Gitems
+N=192 ; CPU0: 0.00 s/iter [0.001..0.001], 16.73 ns/0.0Gitems
 N=192 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=192 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=192 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-mksol: N=192 ; ETA (N=832): Wed Oct 14 22:12:04 2026 [0.001 s/iter]
-Saving S.sols0-1.128-192 ... done [25.39 kB in 0.00, 15.85 MB/s]
-Loading V0-1.192 ... done [25.39 kB in 0.00, 16.20 MB/s]
-Loading V1-2.192 ... done [25.39 kB in 0.00, 16.74 MB/s]
-Loading V2-3.192 ... done [25.39 kB in 0.00, 15.33 MB/s]
-Loading V3-4.192 ... done [25.39 kB in 0.00, 12.79 MB/s]
+mksol: N=192 ; ETA (N=832): Thu Oct 15 00:15:49 2026 [0.001 s/iter]
+Saving S.sols0-1.128-192 ... done [25.45 kB in 0.00, 12.74 MB/s]
+Loading V0-1.192 ... done [25.45 kB in 0.00, 16.26 MB/s]
+Loading V1-2.192 ... done [25.45 kB in 0.00, 15.70 MB/s]
+Loading V2-3.192 ... done [25.45 kB in 0.00, 16.47 MB/s]
+Loading V3-4.192 ... done [25.45 kB in 0.00, 13.84 MB/s]
 about to do 63 iterations starting from vectors at iteration 192 to handle the coefficients of degree [192..255] in F
 iteration 200
 +-----------------------------------+
-|0.00@32%+0.00@26% 0.00@43%+0.00@20%|
-|0.00@35%+0.00@28% 0.00@31%+0.00@16%|
+|0.00@33%+0.00@29% 0.00@30%+0.00@15%|
+|0.00@29%+0.00@24% 0.00@37%+0.00@20%|
 +-----------------------------------+
-N=256 ; CPU0: 0.00 s/iter [0.001..0.001], 15.15 ns/0.0Gitems
+N=256 ; CPU0: 0.00 s/iter [0.001..0.001], 16.62 ns/0.0Gitems
 N=256 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=256 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=256 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-mksol: N=256 ; ETA (N=832): Wed Oct 14 22:12:04 2026 [0.001 s/iter]
-Saving S.sols0-1.192-256 ... done [25.39 kB in 0.00, 13.07 MB/s]
-Loading V0-1.256 ... done [25.39 kB in 0.00, 27.27 MB/s]
-Loading V1-2.256 ... done [25.39 kB in 0.00, 17.52 MB/s]
-Loading V2-3.256 ... done [25.39 kB in 0.00, 16.48 MB/s]
-Loading V3-4.256 ... done [25.39 kB in 0.00, 14.03 MB/s]
+mksol: N=256 ; ETA (N=832): Thu Oct 15 00:15:49 2026 [0.001 s/iter]
+Saving S.sols0-1.192-256 ... done [25.45 kB in 0.00, 15.72 MB/s]
+Loading V0-1.256 ... done [25.45 kB in 0.00, 16.65 MB/s]
+Loading V1-2.256 ... done [25.45 kB in 0.00, 17.59 MB/s]
+Loading V2-3.256 ... done [25.45 kB in 0.00, 16.60 MB/s]
+Loading V3-4.256 ... done [25.45 kB in 0.00, 15.93 MB/s]
 about to do 63 iterations starting from vectors at iteration 256 to handle the coefficients of degree [256..319] in F
 iteration 300
 +-----------------------------------+
-|0.00@32%+0.00@27% 0.00@44%+0.00@22%|
-|0.00@37%+0.00@30% 0.00@32%+0.00@18%|
+|0.00@36%+0.00@30% 0.00@33%+0.00@18%|
+|0.00@37%+0.00@32% 0.00@37%+0.00@20%|
 +-----------------------------------+
-N=320 ; CPU0: 0.00 s/iter [0.001..0.001], 15.80 ns/0.0Gitems
+N=320 ; CPU0: 0.00 s/iter [0.001..0.001], 16.41 ns/0.0Gitems
 N=320 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=320 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=320 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-mksol: N=320 ; ETA (N=832): Wed Oct 14 22:12:04 2026 [0.001 s/iter]
-Saving S.sols0-1.256-320 ... done [25.39 kB in 0.00, 14.32 MB/s]
-Loading V0-1.320 ... done [25.39 kB in 0.00, 12.78 MB/s]
-Loading V1-2.320 ... done [25.39 kB in 0.00, 14.32 MB/s]
-Loading V2-3.320 ... done [25.39 kB in 0.00, 15.35 MB/s]
-Loading V3-4.320 ... done [25.39 kB in 0.00, 10.43 MB/s]
+mksol: N=320 ; ETA (N=832): Thu Oct 15 00:15:50 2026 [0.001 s/iter]
+Saving S.sols0-1.256-320 ... done [25.45 kB in 0.00, 15.39 MB/s]
+Loading V0-1.320 ... done [25.45 kB in 0.00, 17.47 MB/s]
+Loading V1-2.320 ... done [25.45 kB in 0.00, 17.41 MB/s]
+Loading V2-3.320 ... done [25.45 kB in 0.00, 17.21 MB/s]
+Loading V3-4.320 ... done [25.45 kB in 0.00, 17.45 MB/s]
 about to do 63 iterations starting from vectors at iteration 320 to handle the coefficients of degree [320..383] in F
-N=384 ; CPU0: 0.00 s/iter [0.001..0.001], 16.15 ns/0.0Gitems
+N=384 ; CPU0: 0.00 s/iter [0.001..0.001], 16.87 ns/0.0Gitems
 N=384 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=384 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=384 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-mksol: N=384 ; ETA (N=832): Wed Oct 14 22:12:04 2026 [0.001 s/iter]
-Saving S.sols0-1.320-384 ... done [25.39 kB in 0.00, 14.40 MB/s]
-Loading V0-1.384 ... done [25.39 kB in 0.00, 16.43 MB/s]
-Loading V1-2.384 ... done [25.39 kB in 0.00, 14.83 MB/s]
-Loading V2-3.384 ... done [25.39 kB in 0.00, 17.54 MB/s]
-Loading V3-4.384 ... done [25.39 kB in 0.00, 17.39 MB/s]
+mksol: N=384 ; ETA (N=832): Thu Oct 15 00:15:50 2026 [0.001 s/iter]
+Saving S.sols0-1.320-384 ... done [25.45 kB in 0.00, 16.02 MB/s]
+Loading V0-1.384 ... done [25.45 kB in 0.00, 16.98 MB/s]
+Loading V1-2.384 ... done [25.45 kB in 0.00, 12.69 MB/s]
+Loading V2-3.384 ... done [25.45 kB in 0.00, 18.51 MB/s]
+Loading V3-4.384 ... done [25.45 kB in 0.00, 16.54 MB/s]
 about to do 63 iterations starting from vectors at iteration 384 to handle the coefficients of degree [384..447] in F
 iteration 400
 +-----------------------------------+
-|0.00@34%+0.00@29% 0.00@43%+0.00@21%|
-|0.00@35%+0.00@29% 0.00@35%+0.00@19%|
+|0.00@36%+0.00@31% 0.00@31%+0.00@17%|
+|0.00@36%+0.00@32% 0.00@36%+0.00@20%|
 +-----------------------------------+
-N=448 ; CPU0: 0.00 s/iter [0.001..0.001], 15.72 ns/0.0Gitems
+N=448 ; CPU0: 0.00 s/iter [0.001..0.001], 16.69 ns/0.0Gitems
 N=448 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=448 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=448 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-mksol: N=448 ; ETA (N=832): Wed Oct 14 22:12:05 2026 [0.001 s/iter]
-Saving S.sols0-1.384-448 ... done [25.39 kB in 0.00, 17.92 MB/s]
-Loading V0-1.448 ... done [25.39 kB in 0.00, 16.44 MB/s]
-Loading V1-2.448 ... done [25.39 kB in 0.00, 18.98 MB/s]
-Loading V2-3.448 ... done [25.39 kB in 0.00, 19.18 MB/s]
-Loading V3-4.448 ... done [25.39 kB in 0.00, 17.41 MB/s]
+mksol: N=448 ; ETA (N=832): Thu Oct 15 00:15:50 2026 [0.001 s/iter]
+Saving S.sols0-1.384-448 ... done [25.45 kB in 0.00, 15.01 MB/s]
+Loading V0-1.448 ... done [25.45 kB in 0.00, 17.14 MB/s]
+Loading V1-2.448 ... done [25.45 kB in 0.00, 12.89 MB/s]
+Loading V2-3.448 ... done [25.45 kB in 0.00, 14.66 MB/s]
+Loading V3-4.448 ... done [25.45 kB in 0.00, 15.68 MB/s]
 about to do 63 iterations starting from vectors at iteration 448 to handle the coefficients of degree [448..511] in F
 iteration 500
 +-----------------------------------+
-|0.00@36%+0.00@30% 0.00@42%+0.00@21%|
-|0.00@38%+0.00@31% 0.00@36%+0.00@19%|
+|0.00@38%+0.00@31% 0.00@32%+0.00@17%|
+|0.00@39%+0.00@32% 0.00@36%+0.00@19%|
 +-----------------------------------+
-N=512 ; CPU0: 0.00 s/iter [0.001..0.001], 15.60 ns/0.0Gitems
+N=512 ; CPU0: 0.00 s/iter [0.001..0.001], 16.40 ns/0.0Gitems
 N=512 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=512 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=512 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-mksol: N=512 ; ETA (N=832): Wed Oct 14 22:12:05 2026 [0.001 s/iter]
-Saving S.sols0-1.448-512 ... done [25.39 kB in 0.00, 15.35 MB/s]
-Loading V0-1.512 ... done [25.39 kB in 0.00, 16.39 MB/s]
-Loading V1-2.512 ... done [25.39 kB in 0.00, 16.52 MB/s]
-Loading V2-3.512 ... done [25.39 kB in 0.00, 14.40 MB/s]
-Loading V3-4.512 ... done [25.39 kB in 0.00, 14.62 MB/s]
+mksol: N=512 ; ETA (N=832): Thu Oct 15 00:15:50 2026 [0.001 s/iter]
+Saving S.sols0-1.448-512 ... done [25.45 kB in 0.00, 15.52 MB/s]
+Loading V0-1.512 ... done [25.45 kB in 0.00, 16.77 MB/s]
+Loading V1-2.512 ... done [25.45 kB in 0.00, 17.08 MB/s]
+Loading V2-3.512 ... done [25.45 kB in 0.00, 15.86 MB/s]
+Loading V3-4.512 ... done [25.45 kB in 0.00, 15.28 MB/s]
 about to do 63 iterations starting from vectors at iteration 512 to handle the coefficients of degree [512..575] in F
-N=576 ; CPU0: 0.00 s/iter [0.001..0.001], 15.70 ns/0.0Gitems
+N=576 ; CPU0: 0.00 s/iter [0.001..0.001], 16.35 ns/0.0Gitems
 N=576 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=576 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=576 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-mksol: N=576 ; ETA (N=832): Wed Oct 14 22:12:05 2026 [0.001 s/iter]
-Saving S.sols0-1.512-576 ... done [25.39 kB in 0.00, 16.17 MB/s]
-Loading V0-1.576 ... done [25.39 kB in 0.00, 17.47 MB/s]
-Loading V1-2.576 ... done [25.39 kB in 0.00, 17.95 MB/s]
-Loading V2-3.576 ... done [25.39 kB in 0.00, 17.15 MB/s]
-Loading V3-4.576 ... done [25.39 kB in 0.00, 16.46 MB/s]
+mksol: N=576 ; ETA (N=832): Thu Oct 15 00:15:50 2026 [0.001 s/iter]
+Saving S.sols0-1.512-576 ... done [25.45 kB in 0.00, 15.42 MB/s]
+Loading V0-1.576 ... done [25.45 kB in 0.00, 12.92 MB/s]
+Loading V1-2.576 ... done [25.45 kB in 0.00, 17.69 MB/s]
+Loading V2-3.576 ... done [25.45 kB in 0.00, 15.83 MB/s]
+Loading V3-4.576 ... done [25.45 kB in 0.00, 17.16 MB/s]
 about to do 63 iterations starting from vectors at iteration 576 to handle the coefficients of degree [576..639] in F
 iteration 600
 +-----------------------------------+
-|0.00@36%+0.00@29% 0.00@42%+0.00@22%|
-|0.00@36%+0.00@30% 0.00@33%+0.00@18%|
+|0.00@37%+0.00@30% 0.00@32%+0.00@17%|
+|0.00@38%+0.00@32% 0.00@35%+0.00@19%|
 +-----------------------------------+
-N=640 ; CPU0: 0.00 s/iter [0.001..0.001], 15.65 ns/0.0Gitems
+N=640 ; CPU0: 0.00 s/iter [0.001..0.001], 16.22 ns/0.0Gitems
 N=640 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=640 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=640 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-mksol: N=640 ; ETA (N=832): Wed Oct 14 22:12:05 2026 [0.001 s/iter]
-Saving S.sols0-1.576-640 ... done [25.39 kB in 0.00, 16.72 MB/s]
-Loading V0-1.640 ... done [25.39 kB in 0.00, 14.58 MB/s]
-Loading V1-2.640 ... done [25.39 kB in 0.00, 12.59 MB/s]
-Loading V2-3.640 ... done [25.39 kB in 0.00, 15.93 MB/s]
-Loading V3-4.640 ... done [25.39 kB in 0.00, 15.71 MB/s]
+mksol: N=640 ; ETA (N=832): Thu Oct 15 00:15:50 2026 [0.001 s/iter]
+Saving S.sols0-1.576-640 ... done [25.45 kB in 0.00, 13.72 MB/s]
+Loading V0-1.640 ... done [25.45 kB in 0.00, 16.21 MB/s]
+Loading V1-2.640 ... done [25.45 kB in 0.00, 16.02 MB/s]
+Loading V2-3.640 ... done [25.45 kB in 0.00, 16.88 MB/s]
+Loading V3-4.640 ... done [25.45 kB in 0.00, 16.54 MB/s]
 about to do 63 iterations starting from vectors at iteration 640 to handle the coefficients of degree [640..703] in F
 iteration 700
 +-----------------------------------+
-|0.00@35%+0.00@29% 0.00@41%+0.00@21%|
 |0.00@37%+0.00@30% 0.00@33%+0.00@18%|
+|0.00@39%+0.00@32% 0.00@35%+0.00@19%|
 +-----------------------------------+
-N=704 ; CPU0: 0.00 s/iter [0.001..0.001], 15.59 ns/0.0Gitems
+N=704 ; CPU0: 0.00 s/iter [0.001..0.001], 16.12 ns/0.0Gitems
 N=704 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=704 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=704 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-mksol: N=704 ; ETA (N=832): Wed Oct 14 22:12:05 2026 [0.001 s/iter]
-Saving S.sols0-1.640-704 ... done [25.39 kB in 0.00, 16.71 MB/s]
-Loading V0-1.704 ... done [25.39 kB in 0.00, 17.33 MB/s]
-Loading V1-2.704 ... done [25.39 kB in 0.00, 18.69 MB/s]
-Loading V2-3.704 ... done [25.39 kB in 0.00, 17.62 MB/s]
-Loading V3-4.704 ... done [25.39 kB in 0.00, 16.34 MB/s]
+mksol: N=704 ; ETA (N=832): Thu Oct 15 00:15:50 2026 [0.001 s/iter]
+Saving S.sols0-1.640-704 ... done [25.45 kB in 0.00, 16.04 MB/s]
+Loading V0-1.704 ... done [25.45 kB in 0.00, 14.52 MB/s]
+Loading V1-2.704 ... done [25.45 kB in 0.00, 17.52 MB/s]
+Loading V2-3.704 ... done [25.45 kB in 0.00, 16.60 MB/s]
+Loading V3-4.704 ... done [25.45 kB in 0.00, 17.28 MB/s]
 about to do 63 iterations starting from vectors at iteration 704 to handle the coefficients of degree [704..767] in F
-N=768 ; CPU0: 0.00 s/iter [0.001..0.001], 15.40 ns/0.0Gitems
+N=768 ; CPU0: 0.00 s/iter [0.001..0.001], 16.09 ns/0.0Gitems
 N=768 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=768 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=768 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-mksol: N=768 ; ETA (N=832): Wed Oct 14 22:12:05 2026 [0.001 s/iter]
-Saving S.sols0-1.704-768 ... done [25.39 kB in 0.00, 17.28 MB/s]
-Loading V0-1.768 ... done [25.39 kB in 0.00, 16.84 MB/s]
-Loading V1-2.768 ... done [25.39 kB in 0.00, 17.04 MB/s]
-Loading V2-3.768 ... done [25.39 kB in 0.00, 16.01 MB/s]
-Loading V3-4.768 ... done [25.39 kB in 0.00, 17.47 MB/s]
+mksol: N=768 ; ETA (N=832): Thu Oct 15 00:15:50 2026 [0.001 s/iter]
+Saving S.sols0-1.704-768 ... done [25.45 kB in 0.00, 13.40 MB/s]
+Loading V0-1.768 ... done [25.45 kB in 0.00, 17.17 MB/s]
+Loading V1-2.768 ... done [25.45 kB in 0.00, 15.88 MB/s]
+Loading V2-3.768 ... done [25.45 kB in 0.00, 15.69 MB/s]
+Loading V3-4.768 ... done [25.45 kB in 0.00, 16.35 MB/s]
 about to do 63 iterations starting from vectors at iteration 768 to handle the coefficients of degree [768..831] in F
-We read 814 coefficients from F in total
+We read 816 coefficients from F in total
 iteration 800
 +-----------------------------------+
-|0.00@35%+0.00@30% 0.00@40%+0.00@21%|
-|0.00@37%+0.00@31% 0.00@34%+0.00@18%|
+|0.00@35%+0.00@30% 0.00@33%+0.00@18%|
+|0.00@36%+0.00@30% 0.00@35%+0.00@19%|
 +-----------------------------------+
-N=814 ; CPU0: 0.00 s/iter [0.001..0.001], 15.56 ns/0.0Gitems
-N=814 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=814 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=814 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-mksol: N=814 ; ETA (N=832): Wed Oct 14 22:12:05 2026 [0.001 s/iter]
-Saving S.sols0-1.768-832 ... done [25.39 kB in 0.00, 15.30 MB/s]
-mksol done N=832 ; CPU0: 0.00 s/iter [0.001..0.001], 15.30 ns/0.0Gitems
+N=816 ; CPU0: 0.00 s/iter [0.001..0.001], 16.28 ns/0.0Gitems
+N=816 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=816 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=816 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+mksol: N=816 ; ETA (N=832): Thu Oct 15 00:15:50 2026 [0.001 s/iter]
+Saving S.sols0-1.768-832 ... done [25.45 kB in 0.00, 14.04 MB/s]
+mksol done N=832 ; CPU0: 0.00 s/iter [0.001..0.001], 16.04 ns/0.0Gitems
 mksol done N=832 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 mksol done N=832 ; COMM0: 0.00 s/iter [0.000..0.000]
 mksol done N=832 ; comm-wait0: 0.00 s/iter [0.000..0.000]
 Done mksol.
-Timings for mksol: (wct) 1.66
-Timings for mksol: (cpu) 2.94 (aggregated over all threads and 1 MPI jobs)
-Listing files in /tmp/cb/cado-full.k8BSjE/wdir via readdir
+Timings for mksol: (wct) 1.69
+Timings for mksol: (cpu) 2.92 (aggregated over all threads and 1 MPI jobs)
+Listing files in /tmp/cb/cado-full.EdFrnH/wdir via readdir
 #############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/gather m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 rhs=/tmp/cb/cado-full.k8BSjE/rhs.txt matrix=/tmp/cb/cado-full.k8BSjE/small.bin solutions=0-1
+/home/user/ext/cado-nfs/build/linalg/bwc/gather n=4 rhs=/tmp/cb/cado-full.EdFrnH/rhs.txt thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir solutions=0-1
 ## Entering task: [01;34mgather[0m
 ## [01;33mCheck for gather[0m: Need to run gather to create the files: K.sols0-1.0
-## mksol max iteration is 814
+## mksol max iteration is 816
 ## Number of S files found:
 ##        0-1 | 13
 ## [00;32mCheck for gather[0m: All required files for gather seem to be present, good.
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/gather m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 rhs=/tmp/cb/cado-full.k8BSjE/rhs.txt matrix=/tmp/cb/cado-full.k8BSjE/small.bin solutions=0-1
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/gather n=4 rhs=/tmp/cb/cado-full.EdFrnH/rhs.txt thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir solutions=0-1
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/gather m=4 prime=4611686018427387847 nullspace=right wdir=/tmp/cb/cado-full.k8BSjE/wdir n=4 thr=2x2 rhs=/tmp/cb/cado-full.k8BSjE/rhs.txt matrix=/tmp/cb/cado-full.k8BSjE/small.bin solutions=0-1
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/gather n=4 rhs=/tmp/cb/cado-full.EdFrnH/rhs.txt thr=2x2 nullspace=right prime=4611686018427387847 matrix=/tmp/cb/cado-full.EdFrnH/small.bin m=4 wdir=/tmp/cb/cado-full.EdFrnH/wdir solutions=0-1
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
@@ -1758,52 +1758,52 @@ cpubinding: Hardware: Package:1 [NUMANode] L3Cache:1 L2Cache:4 L1dCache:1 Core:1
 cpubinding: Target split: 2x2
 cpubinding: no mapping found
 Now trying to load matrix cache files
-[vm] J0: read cache small.2x2/small.2x2.3949165824.h0.v0-zone.bin (and others) in 0.00s
+[vm] J0: read cache small.2x2/small.2x2.487934720.h0.v0-zone.bin (and others) in 0.00s
 J0 vm done reading (result=1)
-Matrix: total 3250 rows 3250 cols 242867 coeffs
+Matrix: total 3257 rows 3257 cols 237652 coeffs
 ** Informational note about GF(p) inhomogeneous system:
-   Original matrix dimensions: 3250 3250
-   We expect to obtain a vector of size 3251
+   Original matrix dimensions: 3257 3257
+   We expect to obtain a vector of size 3258
    which we hope will be a kernel vector for (M_square||RHS).
    We will discard the coefficients which correspond to padding columns
    This entails keeping coordinates in the intervals
-   [0..3250[ and [3250..3251[
+   [0..3257[ and [3257..3258[
    in the result.
 ** end note.
 loading F.sols0-1.0-1.rhs
 Trying to build solutions 0..1
 loading contributions from iterations 0-64
-Loading S.sols0-1.0-64 ... done [25.39 kB in 0.00, 16.49 MB/s]
+Loading S.sols0-1.0-64 ... done [25.45 kB in 0.00, 16.91 MB/s]
 loading contributions from iterations 64-128
-Loading S.sols0-1.64-128 ... done [25.39 kB in 0.00, 18.61 MB/s]
+Loading S.sols0-1.64-128 ... done [25.45 kB in 0.00, 15.30 MB/s]
 loading contributions from iterations 128-192
-Loading S.sols0-1.128-192 ... done [25.39 kB in 0.00, 18.31 MB/s]
+Loading S.sols0-1.128-192 ... done [25.45 kB in 0.00, 15.82 MB/s]
 loading contributions from iterations 192-256
-Loading S.sols0-1.192-256 ... done [25.39 kB in 0.00, 18.66 MB/s]
+Loading S.sols0-1.192-256 ... done [25.45 kB in 0.00, 16.54 MB/s]
 loading contributions from iterations 256-320
-Loading S.sols0-1.256-320 ... done [25.39 kB in 0.00, 18.18 MB/s]
+Loading S.sols0-1.256-320 ... done [25.45 kB in 0.00, 15.67 MB/s]
 loading contributions from iterations 320-384
-Loading S.sols0-1.320-384 ... done [25.39 kB in 0.00, 17.30 MB/s]
+Loading S.sols0-1.320-384 ... done [25.45 kB in 0.00, 17.61 MB/s]
 loading contributions from iterations 384-448
-Loading S.sols0-1.384-448 ... done [25.39 kB in 0.00, 19.48 MB/s]
+Loading S.sols0-1.384-448 ... done [25.45 kB in 0.00, 15.99 MB/s]
 loading contributions from iterations 448-512
-Loading S.sols0-1.448-512 ... done [25.39 kB in 0.00, 19.41 MB/s]
+Loading S.sols0-1.448-512 ... done [25.45 kB in 0.00, 16.87 MB/s]
 loading contributions from iterations 512-576
-Loading S.sols0-1.512-576 ... done [25.39 kB in 0.00, 17.93 MB/s]
+Loading S.sols0-1.512-576 ... done [25.45 kB in 0.00, 16.54 MB/s]
 loading contributions from iterations 576-640
-Loading S.sols0-1.576-640 ... done [25.39 kB in 0.00, 19.18 MB/s]
+Loading S.sols0-1.576-640 ... done [25.45 kB in 0.00, 15.42 MB/s]
 loading contributions from iterations 640-704
-Loading S.sols0-1.640-704 ... done [25.39 kB in 0.00, 17.63 MB/s]
+Loading S.sols0-1.640-704 ... done [25.45 kB in 0.00, 17.17 MB/s]
 loading contributions from iterations 704-768
-Loading S.sols0-1.704-768 ... done [25.39 kB in 0.00, 18.17 MB/s]
+Loading S.sols0-1.704-768 ... done [25.45 kB in 0.00, 16.13 MB/s]
 loading contributions from iterations 768-832
-Loading S.sols0-1.768-832 ... done [25.39 kB in 0.00, 18.56 MB/s]
-Hamming weight of sum: 3250
-Loading V0-1.0 ... done [25.39 kB in 0.00, 14.61 MB/s]
-Saving K.sols0-1.0 ... done [25.39 kB in 0.00, 12.46 MB/s]
+Loading S.sols0-1.768-832 ... done [25.45 kB in 0.00, 15.47 MB/s]
+Hamming weight of sum: 3257
+Loading V0-1.0 ... done [25.45 kB in 0.00, 16.33 MB/s]
+Saving K.sols0-1.0 ... done [25.45 kB in 0.00, 13.27 MB/s]
 M^1 * V + R is zero
 Expanding K.sols0-1.0 so as to include the coefficients for the 1 RHS columns
-K.sols0-1.0 is now a right nullspace vector for (M|RHS) (for a square M of dimension 3250x3250).
-K.sols0-1.0.txt (in ascii) is now a right nullspace vector for (M|RHS) (for the original M, of dimension 3250x3250).
-Timings for gather: (wct) 0.04
+K.sols0-1.0 is now a right nullspace vector for (M|RHS) (for a square M of dimension 3257x3257).
+K.sols0-1.0.txt (in ascii) is now a right nullspace vector for (M|RHS) (for the original M, of dimension 3257x3257).
+Timings for gather: (wct) 0.05
 Timings for gather: (cpu) 0.06 (aggregated over all threads and 1 MPI jobs)
