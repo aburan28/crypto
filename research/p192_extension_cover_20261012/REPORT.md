@@ -13,6 +13,14 @@ point against the old three-sum support. The 64 forced rows bring 64 private
 columns and leave the 16 old logarithms unconstrained. Its Lean theorem
 formalizes the unique extension of any old-log assignment.
 
+**Short-sum collision screen:** The [new exact audit](reports/run-20261015T1955Z/REPORT.md)
+tests the 64 selected adaptive points against all two- and four-sums of the
+160 signed old classes. It finds zero hits in 64 direct pair lookups and
+824,320 pair-complement tests, independently replayed in Python. Together
+with the earlier one- and three-sum tests, the minimum old-base sum length
+for each selected new point is at least five. Lean checks the group identity
+that would turn such a collision into an old-base equation.
+
 **Continuation:** The [three-branch follow-up](BRANCH_CONTINUATION.md) proves
 that the nonsplit-quadratic direct genus-3 branch is excluded as well,
 constructs a descended Type I nonhyperelliptic genus-3 cover and a
