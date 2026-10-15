@@ -164,6 +164,7 @@ pub mod ffd_harness;
 pub mod fghr_full;
 pub mod fghr_line;
 pub mod fght_snfs;
+pub mod fp_backend;
 pub(crate) mod fx_hash;
 pub mod gaudry_cubic;
 pub mod gaudry_quartic;
