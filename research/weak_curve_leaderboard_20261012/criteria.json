@@ -168,6 +168,18 @@
     "url": "https://github.com/aburan28/crypto/blob/codex/p192-quotient-reduction-20261015/research/p192_extension_cover_20261012/reports/run-20261015T2235Z/REPORT.md"
   },
   {
+    "id": "ic_three_sum_support_capacity",
+    "name": "Three-sum support capacity and scalar-query overlap",
+    "method": "Exact multiset-image bound, subgroup support census, and query-law denominator",
+    "domain": "A prime-order elliptic subgroup with generator G, an actual distinct usable base of B subgroup classes, and a frozen known-scalar three-sum query law",
+    "recognition": "Enumerate or certify the distinct nonidentity three-sum support M and collision-row rank. The universal cap is M <= binomial(B+2,3). For ideal uniform nonzero scalar a with target -2[a]G in an odd prime-order subgroup, one-query overlap probability is exactly M/(r-1), and q-query success is at most qM/(r-1). A geometry-conditioned law requires the support count and ambient subgroup population in each selected cell; a larger eligible support share alone is not a measured hit-rate gain. Keep base construction, relation rank, target descent, and complete one-target cost separate.",
+    "witness": "Exact curve and subgroup generator, base-point digest and usable count, complete pair/triple support count and sorted-point digest or a sound exhaustive certificate, identity exclusion, independently replayed point additions and r-torsion checks, collision-row rank, frozen scalar stream, per-cell support and population when conditioned, and verified relation and target-cost receipts.",
+    "construction": "Build a usable subgroup base, enumerate distinct three-sum targets and additive collisions, apply the uniform multiset capacity bound, then sample or certify the chosen geometry-cell denominator and relation yield under a frozen known-scalar law. Promote a danger finding only after useful rank, descent, and complete matched cost are verified.",
+    "status": "general_three_sum_capacity_theorem_p192_141_exact_support",
+    "source": "P-192 Type I exact three-sum support and Lean capacity theorem (2026)",
+    "url": "https://github.com/aburan28/crypto/blob/codex/p192-three-sum-capacity-20261015/research/p192_extension_cover_20261012/reports/run-20261015T2255Z/REPORT.md"
+  },
+  {
     "id": "ic_scalar_anchor_overlap",
     "name": "Known-scalar anchor overlap for index-calculus relations",
     "method": "Exact support collision and relation-row test",
