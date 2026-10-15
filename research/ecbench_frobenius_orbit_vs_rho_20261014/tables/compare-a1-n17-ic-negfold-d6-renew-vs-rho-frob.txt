@@ -1,0 +1,25 @@
+ops (ok): ic-negfold-d6-renew / rho-frob = 7.3593 [3.368, 12.554] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 0.1218 [0.109, 0.130]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 0.00%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-negfold-d6-renew / rho-frob | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m17-tm101-00378d4e | 16.00 | 16 | 7.3593 | [3.3681, 12.5542] | cluster |
+
+| workload | curve | log2 r | rho-frob mean S | ic-negfold-d6-renew mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W00cea0167a03 | icv1-f2m17-tm101-00378d4e | 16.00 | 1.1534 | 10.8411 | 9.3992 |
+| W02c8f6044adb | icv1-f2m17-tm101-00378d4e | 16.00 | 0.9373 | 11.5925 | 12.3681 |
+| W0e5cd594b7e8 | icv1-f2m17-tm101-00378d4e | 16.00 | 1.0590 | 11.1653 | 10.5427 |
+| W22f4e3f37be7 | icv1-f2m17-tm101-00378d4e | 16.00 | 0.9245 | 10.1428 | 10.9713 |
+| W33a23d35d53c | icv1-f2m17-tm101-00378d4e | 16.00 | 0.9151 | 12.5404 | 13.7034 |
+| W401368f39862 | icv1-f2m17-tm101-00378d4e | 16.00 | 0.9836 | 11.0332 | 11.2176 |
+| W4a1147cacd58 | icv1-f2m17-tm101-00378d4e | 16.00 | 9.9160 | 11.2741 | 1.1370 |
+| W6c2e632db8ff | icv1-f2m17-tm101-00378d4e | 16.00 | 0.8453 | 12.6743 | 14.9945 |
+| W6d93ce543ab7 | icv1-f2m17-tm101-00378d4e | 16.00 | 1.0013 | 11.1859 | 11.1715 |
+| W73f2f403ab7a | icv1-f2m17-tm101-00378d4e | 16.00 | 0.8930 | 11.7967 | 13.2103 |
+| W87e0f8f15da6 | icv1-f2m17-tm101-00378d4e | 16.00 | 0.9193 | 11.1037 | 12.0783 |
+| W8f4b05efef4e | icv1-f2m17-tm101-00378d4e | 16.00 | 0.9746 | 9.8856 | 10.1437 |
+| W8fce223f47aa | icv1-f2m17-tm101-00378d4e | 16.00 | 1.1560 | 11.3757 | 9.8407 |
+| Waf40807c76a4 | icv1-f2m17-tm101-00378d4e | 16.00 | 0.9767 | 11.6130 | 11.8895 |
+| Wd7ac0fa1971c | icv1-f2m17-tm101-00378d4e | 16.00 | 0.8667 | 11.7930 | 13.6072 |
+| Wff6eb135a8e0 | icv1-f2m17-tm101-00378d4e | 16.00 | 0.8591 | 9.4087 | 10.9512 |

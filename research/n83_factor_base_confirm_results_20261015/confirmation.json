@@ -1,0 +1,28 @@
+{
+  "analysis_sha256": "4e2981b86236586a1beeb7f3fe5ce7eacff9e97635e1ac3438daea1d80932699",
+  "artifact_sha256": "b2f46a1b15138a68f8c504f310287ef165515c5260c50800a3ec3bf7831383a3",
+  "candidate_id_descriptive": "IC1N83Ckb1a1fb547800PDP4rootRCguidedLAgaussTDdirectISO0h0f8ab8bfcff7",
+  "candidate_manifest_sha256": "bf102583b9352a6a692a66551c763f274ab34ff91956ce1e465501e75ce39785",
+  "confirmation_status": "PASS_K3300_FASTER",
+  "frozen_base_matches": {
+    "k3100_root22": true,
+    "k3300_root11": true
+  },
+  "mean_online_ms_exploratory": 37.03458161975,
+  "paired_difference": {
+    "contiguous_block_bootstrap_95pct_ms": [
+      3.3864914262499997,
+      6.91526987625
+    ],
+    "contiguous_block_size": 50,
+    "contrast": "k3100_root22_minus_k3300_root11",
+    "mean_ms": 5.12565665375
+  },
+  "schema": "n83.factor-base-confirmation/v1",
+  "selected_arm_descriptive": "k3300_root11",
+  "source_base_hash_blake3": "a4ba33098d2776520b98a326585a2301f8ccd5bc005df7c1a70fbe8496c61d8b",
+  "source_commit": "e65f35916dfe4791a60b938b8ab0bdc875d0ae7b",
+  "source_sha256": "5e9fd826d22816b429a82e658c517d9387916aabe7660f708e4c29901cce647e",
+  "status": "CONFIRMATION_RECORDED",
+  "workload_id": "12e14f274f8c"
+}

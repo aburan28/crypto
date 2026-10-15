@@ -1,0 +1,36 @@
+{
+  "_note": "Quoted values only, copied from the files named in each row's source. Nothing here is recomputed except the ecbench x-rho ratios, which are the RESULTS.md column. Ratios are against each source's own matched rho at that source's size; rows are not mutually comparable.",
+  "cost_vs_rho": [
+    {"regime": "prime", "label": "A1 small abscissae, mitm m=3 (r=2^23.4)", "lo": 14.5, "hi": 14.5, "verdict": "refuted", "source": "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md §2"},
+    {"regime": "prime", "label": "A1 small abscissae, AR ALPF-022 m=3 (12-18 bits)", "lo": 478.63, "hi": 2109.18, "verdict": "refuted", "source": "AR:experiments/EXP-ALPF-022/source/round011_exp022_solvegate_ic_vs_rho_result.md"},
+    {"regime": "prime", "label": "A3 glv-orbit (ecbench 20-bit smoke)", "lo": 24.309, "hi": 24.309, "verdict": "engineering", "source": "research/ecbench_factor_bases_20261013/RESULTS.md"},
+    {"regime": "prime", "label": "0.1 PKM Kummer tower, ecbench (20-28 bits)", "lo": 29.4, "hi": 140.6, "verdict": "open", "source": "research/pkm_tower_ecbench_20261013/README.md"},
+    {"regime": "prime", "label": "A5b P-256 Dickson torus (round 24)", "lo": 394.5, "hi": 394.5, "verdict": "refuted", "source": "research/icv1-fp256-...-round24"},
+    {"regime": "prime", "label": "A7 P-256 PGL2 root orbit (round 23)", "lo": 491.494, "hi": 491.494, "verdict": "refuted", "source": "research/icv1-fp256-...root_orbit_fb_round23_20261006"},
+    {"regime": "extension", "label": "B1 Gaudry k=3, best plain variant", "lo": 528, "hi": 528, "verdict": "refuted", "source": "research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md §11"},
+    {"regime": "extension", "label": "B2 psi-folded j=0 E(F_p^3)", "lo": 220, "hi": 540, "verdict": "engineering", "source": "research/notes/index-calculus/RESEARCH_GLV_INDEX_CALCULUS.md"},
+    {"regime": "extension", "label": "B2 FGHR Y-line + tau_T fold (E13)", "lo": 267, "hi": 267, "verdict": "engineering", "source": "RESEARCH_GLV_INVARIANT_FACTOR_BASES.md E13"},
+    {"regime": "binary", "label": "C1 coordinate window, mitm m=3 (n=27)", "lo": 89, "hi": 89, "verdict": "refuted", "source": "RESEARCH_IC_BOUNDARY_LEDGER.md char-2 rows"},
+    {"regime": "binary", "label": "C1 model-selected subspace (CA fb-search)", "lo": 3900, "hi": 44000, "verdict": "refuted", "source": "CA:experiments/fb-search/README.md"},
+    {"regime": "koblitz", "label": "D1 koblitz-orbit (n=41)", "lo": 300, "hi": 300, "verdict": "engineering", "source": "RESEARCH_IC_BOUNDARY_LEDGER.md"},
+    {"regime": "koblitz", "label": "D2 compact-orbit-scan (ecbench n=17)", "lo": 9.985, "hi": 9.985, "verdict": "engineering", "source": "research/ecbench_factor_bases_20261013/RESULTS.md"},
+    {"regime": "koblitz", "label": "D3 Z[tau] closure, 2 cols norm 64", "lo": 4.5, "hi": 4.5, "verdict": "engineering", "source": "research/ic_leads_20261010/RESULTS_ROUND2.md L391"},
+    {"regime": "koblitz", "label": "D4 cyclotomic w=1 (ecbench n=23)", "lo": 9.933, "hi": 9.933, "verdict": "open", "source": "research/ecbench_factor_bases_20261013/RESULTS.md"},
+    {"regime": "koblitz", "label": "D5 koblitz-symmetrised (all arms)", "lo": 990, "hi": 63500, "verdict": "refuted", "source": "RESEARCH_EXOTIC_COORDINATES.md §20"},
+    {"regime": "jacobian", "label": "E1 genus-3 degree-1 places (p=61..401)", "lo": 0.23, "hi": 0.66, "verdict": "not-ECDLP", "source": "RESEARCH_HYPERELLIPTIC_IC_RHO.md"},
+    {"regime": "jacobian", "label": "E2 Joux-Vitse g3 cover sieve (weak class)", "lo": 0.0122, "hi": 0.069, "verdict": "below-rho-weak-class", "source": "RESEARCH_COVER_DECOMPOSITION_LEDGER.md L324, L462"}
+  ],
+  "pkm_solving_degree": {
+    "_source": "research/notes/index-calculus/RESEARCH_PKM_TOWER_ORACLE.md A1 table (L1506-1513), §10.2 (L906-923), §12, §16; pdp_root_finder_requirements_20261012/README.md L238-255",
+    "admissible_m4_deployed": 3,
+    "series": [
+      {"label": "Kummer m=2, p0 (raw, XV1/K0)", "family": "kummer", "N": [2,4,6,8,10,12,14,16,18,20], "D": [3,4,4,4,4,5,5,5,5,6]},
+      {"label": "Isogeny m=2, p0 (raw, XV1/I0)", "family": "isogeny", "N": [2,4,6,8,10,12,14,16,18,20], "D": [3,5,5,5,5,5,5,5,5,6]},
+      {"label": "Kummer m=2, p1 (K1)", "family": "kummer", "N": [12,14,16,18,20,22], "D": [5,5,5,5,6,6]},
+      {"label": "Kummer m=3, p1", "family": "kummer", "N": [9,12,15,18], "D": [6,6,7,7]},
+      {"label": "Isogeny m=3, p0 (pilot chain)", "family": "isogeny", "N": [6,9,12], "D": [6,6,6]},
+      {"label": "Kummer m=4, p1", "family": "kummer", "N": [8,12,16], "D": [6,7,7]},
+      {"label": "Isogeny m=4, p0 (pilot chain)", "family": "isogeny", "N": [8,12], "D": [6,7]}
+    ]
+  }
+}

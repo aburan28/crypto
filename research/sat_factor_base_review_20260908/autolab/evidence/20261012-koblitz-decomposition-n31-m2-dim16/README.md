@@ -3,6 +3,10 @@
 Status **`PENDING_INDEPENDENT_VALIDATION`**. Public synthetic Semaev
 decomposition oracle panel only. No ledger promotion.
 
+**Later single-target replay:**
+[`../20261014-koblitz-decomposition-n31-m2-dim16/`](../20261014-koblitz-decomposition-n31-m2-dim16/)
+(run `20261014T043448Z-f2b0ba0fd2`, `--fixtures 1`).
+
 Control-plane launch of
 `koblitz.decomposition.n31_m2_dim16` with `--fixtures 8` after wiring the
 decomposition stage into `boundary_autolab.py` (producer
