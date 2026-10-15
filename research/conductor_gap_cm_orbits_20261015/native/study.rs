@@ -1,6 +1,9 @@
 //! Native input preparation and analysis. Python is used only for rendering.
+mod campaign_analysis;
 mod certificates;
 mod index;
+mod replay_campaign;
+mod replication;
 use crypto_lib::cryptanalysis::{
     ecbench::{
         canonical::{canonical, sha256_hex},
@@ -29,10 +32,46 @@ fn main() {
     let args: Vec<_> = std::env::args().collect();
     match args[1].as_str() {
         "prepare" => prepare(&args[2]),
+        "campaign-analysis" => campaign_analysis::run(),
+        "replay-campaign" => replay_campaign::run(),
+        "cold-batches" => cold_batches(),
         "index" => index::run(),
         "browser" => index::browser(),
         "leaderboard" => index::leaderboard(),
+        "dashboard" => index::dashboard(),
         "certificates" => certificates::run(),
+        "replication" => replication::run(&args[2], &args[3]),
+        "upper-ids" => replication::upper_ids(),
+        "controls" => replication::controls(&args[2], &args[3]),
+        "recurrence-inputs" => replication::recurrence_inputs(),
+        "torsion-inputs" => replication::torsion_inputs(),
+        "certified-floor-inputs" => {
+            let input =
+                fs::read_to_string(Path::new(ROOT).join("prepared/torsion-structure.gpvec"))
+                    .unwrap();
+            let mut out = String::new();
+            for line in input.lines() {
+                let v: Value = serde_json::from_str(line).unwrap();
+                out += &format!(
+                    "[{},{},{},{},{},{},{},{},{}]\n",
+                    v[0],
+                    v[2],
+                    v[12],
+                    v[13],
+                    v[3],
+                    v[1],
+                    1 - 4 * v[4].as_i64().unwrap(),
+                    v[10],
+                    v[11]
+                );
+            }
+            fs::write(
+                Path::new(ROOT).join("prepared/all-certified-floors.gpvec"),
+                out,
+            )
+            .unwrap();
+        }
+        "recurrence-controls" => replication::recurrence_controls(&args[2]),
         "summarize" => summarize(&args[2], &args[3]),
         _ => panic!("prepare BACKEND | summarize JSONL OUT"),
     }
@@ -172,26 +211,53 @@ fn summarize(input: &str, out: &str) {
         );
     }
     let mut identical = 0;
+    let mut recurrence_matches = 0;
     for ((pair, role, rep), h) in &fingerprints {
         if *role == 0 {
             assert_eq!(Some(h), fingerprints.get(&(*pair, 2, *rep)));
             identical += 1;
         }
+        if *role == 4 || *role == 5 {
+            let direct = if *role == 4 { 0 } else { 1 };
+            assert_eq!(Some(h), fingerprints.get(&(*pair, direct, *rep)));
+            recurrence_matches += 1;
+        }
     }
     let mean = |a: &[f64]| a.iter().sum::<f64>() / a.len() as f64;
     let data:Vec<_>=groups.iter().map(|((pair,role),v)|json!({"pair":pair,"role":role,"repetitions":v.len(),"mean_cpu_seconds":mean(v),"min_cpu_seconds":v.iter().cloned().fold(f64::INFINITY,f64::min),"max_cpu_seconds":v.iter().cloned().fold(0.,f64::max)})).collect();
     let mut aggregate = Vec::new();
-    for role in 0..4 {
+    for role in 0..6 {
         let vals: Vec<f64> = rows
             .iter()
             .filter(|v| n(v, "role") == role)
             .map(|v| v["orbit_cpu_seconds"].as_f64().unwrap())
             .collect();
+        if vals.is_empty() {
+            continue;
+        }
         aggregate.push(json!({"role":role,"mean_cpu_seconds":mean(&vals),"runs":vals.len()}));
+        let last = aggregate.last_mut().unwrap();
+        last["points_per_construction"] = json!(8192);
+        last["orbit_steps_per_construction"] = json!(8188);
+        last["amortized_cpu_seconds_per_orbit_step"] = json!(mean(&vals) / 8188.0);
+        let first: Vec<_> = rows
+            .iter()
+            .filter(|v| n(v, "role") == role && n(v, "repeat") == 0)
+            .map(|v| v["orbit_cpu_seconds"].as_f64().unwrap())
+            .collect();
+        let later: Vec<_> = rows
+            .iter()
+            .filter(|v| n(v, "role") == role && n(v, "repeat") > 0)
+            .map(|v| v["orbit_cpu_seconds"].as_f64().unwrap())
+            .collect();
+        let last = aggregate.last_mut().unwrap();
+        last["first_pass_mean_cpu_seconds"] = json!(mean(&first));
+        last["later_pass_mean_cpu_seconds"] = json!(mean(&later));
+        last["pass_scope"]=json!("First observed model/arm pass versus later shuffled passes in one fresh process; not a fresh process or cache flush per arm.");
     }
     write(
         out,
-        &json!({"schema":"cm-orbits.summary/v1","source_sha256":sha256_hex(text.as_bytes()),"runs":rows.len(),"identical_same_crater_pairs":identical,"fingerprint":"FNV64 over all serialized point/column/coefficient records; noncryptographic equality diagnostic","isolation":"L0; descriptive CPU observations only","per_pair":data,"aggregate":aggregate,"not_measured":"ECDLP hardness or a complete online IC/rho comparison"}),
+        &json!({"schema":"cm-orbits.summary/v1","source_sha256":sha256_hex(text.as_bytes()),"runs":rows.len(),"identical_same_crater_pairs":identical,"recurrence_same_endpoint_matches":recurrence_matches,"fingerprint":"FNV64 supplementary diagnostic; backend separately compares complete vectors in memory","isolation":"L0; descriptive CPU observations only","per_pair":data,"aggregate":aggregate,"not_measured":"ECDLP hardness or a complete online IC/rho comparison"}),
     );
     println!(
         "{} construction runs, {} matching crater comparisons",
@@ -199,4 +265,50 @@ fn summarize(input: &str, out: &str) {
         identical
     );
     let _ = canonical(&json!({"v":1}));
+}
+
+fn cold_batches() {
+    let root = Path::new(ROOT);
+    let mut rows = Vec::new();
+    let mut orbit_cpu = BTreeMap::<u64, f64>::new();
+    for line in fs::read_to_string(root.join("results/cold-orbits.jsonl"))
+        .unwrap()
+        .lines()
+    {
+        let v: Value = serde_json::from_str(line).unwrap();
+        *orbit_cpu.entry(n(&v, "repeat")).or_default() += v["orbit_cpu_seconds"].as_f64().unwrap();
+    }
+    for pass in 0..20 {
+        let path = root.join(format!("results/cold-passes/{pass}-time.txt"));
+        let text = fs::read_to_string(&path).unwrap();
+        let field = |key: &str| {
+            text.lines()
+                .find_map(|line| line.trim().strip_prefix(key))
+                .unwrap()
+                .trim()
+                .to_string()
+        };
+        assert_eq!(field("Exit status:"), "0");
+        let cpu = field("User time (seconds):").parse::<f64>().unwrap()
+            + field("System time (seconds):").parse::<f64>().unwrap();
+        let elapsed_line = text
+            .lines()
+            .find(|line| line.trim().starts_with("Elapsed (wall clock)"))
+            .unwrap();
+        let parts: Vec<f64> = elapsed_line
+            .rsplit_once(": ")
+            .unwrap()
+            .1
+            .split(':')
+            .map(|v| v.parse().unwrap())
+            .collect();
+        let wall = parts.into_iter().fold(0.0, |sum, v| 60.0 * sum + v);
+        rows.push(json!({"pass":pass,"process_cpu_seconds":cpu,"wall_seconds":wall,"native_orbit_cpu_seconds":orbit_cpu[&pass],"outside_orbit_cpu_seconds":cpu-orbit_cpu[&pass],"time_source":path.to_str().unwrap(),"time_source_sha256":sha256_hex(text.as_bytes())}));
+    }
+    let mean =
+        |key: &str| rows.iter().map(|r| r[key].as_f64().unwrap()).sum::<f64>() / rows.len() as f64;
+    write(
+        root.join("results/cold-batches.json"),
+        &json!({"schema":"conductor-gap.cold-batches/v1","processes":20,"jobs_per_process":600,"mean_process_cpu_seconds":mean("process_cpu_seconds"),"mean_native_orbit_cpu_seconds":mean("native_orbit_cpu_seconds"),"mean_outside_orbit_cpu_seconds":mean("outside_orbit_cpu_seconds"),"mean_wall_seconds":mean("wall_seconds"),"scope":"Fresh process per 600-job batch, not per arm. Precomputed CM-map parameter files; excludes prior map derivation. Outside-orbit CPU includes parsing, hashing, equality checks, serialization and thread/process housekeeping. L0 co-scheduled; no causal cold/warm timing or ECDLP speed claim.","batches":rows}),
+    );
 }

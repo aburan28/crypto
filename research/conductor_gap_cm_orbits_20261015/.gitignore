@@ -2,3 +2,13 @@
 sessions/primary-*/
 campaign-logs/primary-*.log
 results/cargo-test-release-lib.log
+sessions/rep-*/
+campaign-logs/rep-*.log
+results/replication-claims/
+results/full-suite-final.log
+results/clippy-*.log
+sessions/recurrence-pilot-*/
+results/large-batched-100*
+results/batched-large-pre-run.sha256
+results/expanded-96*
+results/cold-passes/*.jsonl

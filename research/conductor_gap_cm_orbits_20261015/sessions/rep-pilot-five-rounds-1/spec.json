@@ -1,0 +1,53 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "ic.cm_folded_native_v1",
+        "params": {
+          "backend": "/workspace/native-deps/cm-folded",
+          "backend_sha256": "577002d0898b1d39c61f5f6daa01c549403832379c7ada2e9098f0f5fbf0a730",
+          "mode": "scalar"
+        }
+      },
+      "name": "scalar",
+      "role": "baseline"
+    },
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho",
+      "role": "reference"
+    }
+  ],
+  "description": "Matched explicit public regression point; validation scalar excluded",
+  "label": "Conductor-gap replication pilot-five-rounds-1",
+  "measurement": {
+    "isolation_required": "L0",
+    "order": "alternate",
+    "rounds": 5,
+    "seed": 20261017,
+    "timeout_seconds": 1900,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 2087370704375809,
+        "b": 1402887937802154,
+        "group_order": 5947697996161643,
+        "gx": 0,
+        "gy": 1789653625547868,
+        "kind": "prime_public_fixture",
+        "p": 5947698030651343,
+        "qx": 1152820452555926,
+        "qy": 4742550619855044,
+        "r": 5947697996161643
+      }
+    ],
+    "target_kind": "public",
+    "target_seed": 20261016,
+    "targets_per_curve": 1
+  }
+}

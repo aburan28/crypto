@@ -1,0 +1,10 @@
+    Finished `release` profile [optimized] target(s) in 0.12s
+     Running unittests src/lib.rs (target/release/deps/crypto_lib-dc60caf0642b04d8)
+
+running 3 tests
+test cryptanalysis::ecbench::workload::tests::public_fixture_rejects_a_singular_additive_group_despite_hasse_witness ... ok
+test cryptanalysis::ecbench::workload::tests::public_fixture_rejects_composite_or_impossible_order_claims ... ok
+test cryptanalysis::ecbench::workload::tests::fixture_rejects_invalid_points_and_reuse_as_planted_or_multiple_targets ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 4232 filtered out; finished in 0.08s
+

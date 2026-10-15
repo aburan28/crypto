@@ -25,3 +25,21 @@ theorem same_iterates {P : Type} (fast slow : P → P)
 
 #print axioms norm_lower_bound
 #print axioms same_iterates
+
+-- This is the actual two-state recurrence invariant, conditional on the
+-- one-step algebraic identity. No elliptic-curve classification is assumed.
+def pairOrbit {P : Type} (step : P → P → P) (x y : P) : Nat → P × P
+  | 0 => (x,y)
+  | n+1 => let z := pairOrbit step x y n; (z.2, step z.2 z.1)
+
+theorem recurrence_matches_orbit {P : Type} (f : P → P)
+    (step : P → P → P) (h : ∀ z, step (f z) z = f (f z)) (x : P) :
+    ∀ n, pairOrbit step x (f x) n = (orbit f x n, f (orbit f x n)) := by
+  intro n
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+    simp only [pairOrbit, ih, orbit]
+    rw [h]
+
+#print axioms recurrence_matches_orbit

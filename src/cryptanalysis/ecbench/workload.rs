@@ -129,6 +129,31 @@ impl CurveSpec {
                 if r != group_order {
                     return Err("public fixture requires cofactor one".into());
                 }
+                if p < 5
+                    || !crate::prime_hyperelliptic::fp2::is_prime_u64(p)
+                    || !crate::prime_hyperelliptic::fp2::is_prime_u64(r)
+                {
+                    return Err(
+                        "public fixture requires a prime field and prime group order".into(),
+                    );
+                }
+                let trace = p as i128 + 1 - r as i128;
+                if trace.unsigned_abs().pow(2) > 4 * p as u128
+                    || (r as u128).pow(2) <= 16 * p as u128
+                {
+                    return Err(
+                        "public fixture order needs a Hasse-unique prime-order witness".into(),
+                    );
+                }
+                let a2 = (a as u128 * a as u128) % p as u128;
+                let a3 = (a2 * a as u128) % p as u128;
+                let b2 = (b as u128 * b as u128) % p as u128;
+                if (4 * a3 + 27 * b2).is_multiple_of(p as u128) || gx >= p || gy >= p {
+                    return Err(
+                        "public fixture requires a nonsingular curve and canonical generator"
+                            .into(),
+                    );
+                }
                 let inst = CurveSpec::PrimeExplicit {
                     p,
                     a,
@@ -895,30 +920,73 @@ mod tests {
     use super::*;
 
     fn public_fixture() -> CurveSpec {
-        CurveSpec::PrimePublicFixture { p:343073,a:36086,b:72172,
-            group_order:342833,r:342833,gx:0,gy:2882,qx:314327,qy:50562 }
+        CurveSpec::PrimePublicFixture {
+            p: 343073,
+            a: 36086,
+            b: 72172,
+            group_order: 342833,
+            r: 342833,
+            gx: 0,
+            gy: 2882,
+            qx: 314327,
+            qy: 50562,
+        }
     }
 
     #[test]
     fn public_fixture_survives_measured_child_normalization() {
-        let spec=public_fixture();
-        let (parent,inst)=Workload::build(&spec,7,0,TargetKind::Public).unwrap();
-        let child=spec.for_child(&inst);
-        let rebuilt=Workload::build(&child,7,0,TargetKind::Public).unwrap().0;
-        assert_eq!(parent.workload_id,rebuilt.workload_id);
-        assert_eq!(parent.target,rebuilt.target);
-        assert_eq!(rebuilt.kind(),TargetKind::Public);
+        let spec = public_fixture();
+        let (parent, inst) = Workload::build(&spec, 7, 0, TargetKind::Public).unwrap();
+        let child = spec.for_child(&inst);
+        let rebuilt = Workload::build(&child, 7, 0, TargetKind::Public).unwrap().0;
+        assert_eq!(parent.workload_id, rebuilt.workload_id);
+        assert_eq!(parent.target, rebuilt.target);
+        assert_eq!(rebuilt.kind(), TargetKind::Public);
         assert!(rebuilt.planted.is_none());
     }
 
     #[test]
     fn fixture_rejects_invalid_points_and_reuse_as_planted_or_multiple_targets() {
-        let spec=public_fixture();
-        assert!(Workload::build(&spec,7,0,TargetKind::Planted).is_err());
-        assert!(Workload::build(&spec,7,1,TargetKind::Public).is_err());
-        let mut value=serde_json::to_value(spec).unwrap();
-        value["qx"]=json!(343073);
-        assert!(serde_json::from_value::<CurveSpec>(value).unwrap().build().is_err());
+        let spec = public_fixture();
+        assert!(Workload::build(&spec, 7, 0, TargetKind::Planted).is_err());
+        assert!(Workload::build(&spec, 7, 1, TargetKind::Public).is_err());
+        let mut value = serde_json::to_value(spec).unwrap();
+        value["qx"] = json!(343073);
+        assert!(serde_json::from_value::<CurveSpec>(value)
+            .unwrap()
+            .build()
+            .is_err());
+    }
+
+    #[test]
+    fn public_fixture_rejects_composite_or_impossible_order_claims() {
+        for (key, value) in [("p", 343075u64), ("r", 342835), ("r", 17)] {
+            let mut v = serde_json::to_value(public_fixture()).unwrap();
+            v[key] = json!(value);
+            if key == "r" {
+                v["group_order"] = json!(value);
+            }
+            assert!(serde_json::from_value::<CurveSpec>(v)
+                .unwrap()
+                .build()
+                .is_err());
+        }
+    }
+
+    #[test]
+    fn public_fixture_rejects_a_singular_additive_group_despite_hasse_witness() {
+        let mut v = serde_json::to_value(public_fixture()).unwrap();
+        v["a"] = json!(0);
+        v["b"] = json!(0);
+        v["r"] = v["p"].clone();
+        v["group_order"] = v["p"].clone();
+        for key in ["gx", "gy", "qx", "qy"] {
+            v[key] = json!(1);
+        }
+        assert!(serde_json::from_value::<CurveSpec>(v)
+            .unwrap()
+            .build()
+            .is_err());
     }
 
     #[test]

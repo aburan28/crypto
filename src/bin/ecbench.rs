@@ -521,7 +521,7 @@ fn binary_plugins() -> crypto_lib::cryptanalysis::ecbench::methods::BinaryPlugin
     }
 }
 
-fn main() -> ExitCode {
+pub fn main() -> ExitCode {
     // Oracles this binary links that the library cannot name (see
     // `pdp3_koblitz`); registered before any run, child or replay.
     crypto_lib::cryptanalysis::ecbench::methods::register_binary_plugins(binary_plugins());

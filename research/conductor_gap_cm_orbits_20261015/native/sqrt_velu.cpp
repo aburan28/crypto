@@ -24,6 +24,7 @@ Poly product(const Poly&u,const Poly&v){Poly w{};for(unsigned i=0;i<7;i++)for(un
 void add_scaled(Poly&u,const Poly&v,unsigned c){for(unsigned i=0;i<7;i++)u[i]=red(u[i]+c*v[i]);}
 void set(fmpz_t f,const Z&z){fmpz_set_mpz(f,z.get_mpz_t());}
 Z get(const fmpz_t f){Z z;fmpz_get_mpz(z.get_mpz_t(),f);return z;}
+#ifndef CM_CONSTRUCTOR_LIBRARY
 int main(){try{uint64_t id,ell;Z kx,ky,d,a0,b0,expected_a,expected_b;while(std::cin>>id>>ell>>p>>a>>b>>kx>>ky>>d>>a0>>b0>>expected_a>>expected_b){auto start=std::chrono::steady_clock::now();P K{kx,ky,false};if(red(ky*ky)!=rhs(kx)||times(K,ell).inf==false)throw std::runtime_error("invalid prime-kernel witness");
 uint64_t n=(ell-1)/2,B=std::max<uint64_t>(1,std::sqrt(n/2.0)),G=n/(2*B);if(G==0){B=1;G=0;}
 fmpz_t mod;fmpz_init(mod);set(mod,p);fmpz_mod_ctx_t ctx;fmpz_mod_ctx_init(ctx,mod);fmpz_mod_poly_t H,D;fmpz_mod_poly_init(H,ctx);fmpz_mod_poly_init(D,ctx);
@@ -37,3 +38,4 @@ v=times(K,4*B*G+1);for(uint64_t index=4*B*G+1;index<ell;index+=2){if(v.inf)throw
 Z dp=d;for(unsigned k=0;k<3;k++){moments[k]=red(moments[k]*dp);dp=red(dp*d);}Z T=red(3*moments[1]+a0*n),W=red(5*moments[2]+3*a0*moments[0]+2*b0*n),a1=red(a0-10*T),b1=red(b0-14*W);bool same=(expected_a<0||(a1==expected_a&&b1==expected_b));double seconds=std::chrono::duration<double>(std::chrono::steady_clock::now()-start).count();std::cout<<"{\"id\":"<<id<<",\"ell\":"<<ell<<",\"p\":\""<<p<<"\",\"a\":\""<<a1<<"\",\"b\":\""<<b1<<"\",\"baby_points\":"<<B<<",\"giant_points\":"<<G<<",\"covered_kernel_pairs\":"<<n<<",\"reference_supplied\":"<<(expected_a>=0?"true":"false")<<",\"matches_direct_codomain\":"<<(expected_a<0?"null":same?"true":"false")<<",\"wall_seconds\":"<<seconds<<"}"<<std::endl;
 for(auto e:eval)_fmpz_vec_clear(e,G);_fmpz_vec_clear(giant,G);fmpz_mod_poly_clear(H,ctx);fmpz_mod_poly_clear(D,ctx);fmpz_mod_ctx_clear(ctx);fmpz_clear(mod);if(!same)return 3;}
 }catch(const std::exception&e){std::cerr<<e.what()<<"\n";return 2;}}
+#endif

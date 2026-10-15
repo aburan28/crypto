@@ -1,0 +1,107 @@
+name: Conductor-gap native controls
+on:
+  pull_request:
+    paths:
+      - 'research/conductor_gap_cm_orbits_20261015/**'
+      - 'src/cryptanalysis/ecbench/**'
+      - 'src/cryptanalysis/ic_framework/cm_orbit.rs'
+      - 'src/bin/ecbench.rs'
+      - '.github/workflows/conductor-gap-controls.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: conductor-gap-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  native-controls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /Cargo.toml
+            /Cargo.lock
+            /.cargo/
+            /build.rs
+            /rust-toolchain*
+            /.github/scripts/
+            /src/
+            /tests/
+            /examples/
+            /benches/
+            /research/conductor_gap_cm_orbits_20261015/
+            /scripts/build_lab_browser.py
+            /scripts/test_lab_browser_cost_admission.py
+      - name: Materialize compile-time inputs without research archives
+        run: node .github/scripts/ci-scope.mjs --materialize
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+      - uses: Swatinem/rust-cache@v2
+      - run: sudo apt-get update && sudo apt-get install -y pari-gp
+      - name: Public fixture and CM map tests
+        run: |
+          cargo test --release --lib cm_orbit
+          cargo test --release --lib public_fixture
+          cargo test --release --lib fixture_rejects
+      - name: Independent arithmetic certificates
+        shell: bash
+        run: |
+          set -euo pipefail
+          study=research/conductor_gap_cm_orbits_20261015
+          gp -q -f "$study/native/verify_pairs.gp" > /tmp/pairs.jsonl 2> /tmp/pairs.stderr
+          test "$(wc -l < /tmp/pairs.jsonl)" -eq 100
+          ! grep -E 'user error|at top-level|syntax error' /tmp/pairs.stderr
+          gp -q -f "$study/native/torsion_structure.gp" > /tmp/torsion.jsonl 2> /tmp/torsion.stderr
+          test "$(wc -l < /tmp/torsion.jsonl)" -eq 136
+          ! grep -E 'user error|at top-level|syntax error' /tmp/torsion.stderr
+          CM_FLOOR_INPUT="$study/prepared/all-certified-floors.gpvec" gp -q -f "$study/native/verify_floors.gp" > /tmp/floors.jsonl 2> /tmp/floors.stderr
+          test "$(wc -l < /tmp/floors.jsonl)" -eq 136
+          ! grep -E 'user error|at top-level|syntax error' /tmp/floors.stderr
+      - name: Independent public-base, relation, matrix and target replay
+        run: cargo run --release --example conductor_gap_study -- replay-campaign
+      - name: Fresh measured-child controls on both families and recurrence
+        shell: bash
+        run: |
+          set -euo pipefail
+          study=research/conductor_gap_cm_orbits_20261015
+          for variant in folded folded_d43 folded_recurrence; do
+            g++ -std=c++20 -O3 -pthread "$study/native/$variant.cpp" -o "target/cm-$variant"
+          done
+          cargo build --release --bin ecbench
+          for run_name in control-fixture-fix control-q5-floor control-q11-crater control-q11-floor control-recurrence-0 control-recurrence-1; do
+            case "$run_name" in
+              *q11*) backend="$PWD/target/cm-folded_d43" ;;
+              *recurrence*) backend="$PWD/target/cm-folded_recurrence" ;;
+              *) backend="$PWD/target/cm-folded" ;;
+            esac
+            digest=$(sha256sum "$backend" | cut -d' ' -f1)
+            jq --arg backend "$backend" --arg digest "$digest" '.arms |= map(if .method.params.backend? then .method.params.backend=$backend | .method.params.backend_sha256=$digest else . end)' \
+              "$study/sessions/$run_name/spec.json" > "/tmp/cm-$run_name.json"
+            target/release/ecbench run --spec "/tmp/cm-$run_name.json" --out "/tmp/cm-$run_name" --cpus none --lock "/tmp/cm-$run_name.lock" --allow-busy --settle 0.1 --quiet
+            target/release/ecbench verify --dir "/tmp/cm-$run_name" --exit-code --replay-all
+          done
+      - name: Browser keeps unpriced native work out of S rankings
+        run: python3 scripts/test_lab_browser_cost_admission.py
+  conditional-proofs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: /research/conductor_gap_cm_orbits_20261015/lean/
+      - name: Install hash-pinned Lean 4.34.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 https://github.com/leanprover/lean4/releases/download/v4.34.1/lean-4.34.1-linux.tar.zst -o /tmp/lean.tar.zst
+          echo '47bf4bbd78f70c2e9670598ab7124d92b6efb7330ff33e5fbb4030f6fd72e4e4  /tmp/lean.tar.zst' | sha256sum --check
+          mkdir /tmp/lean
+          tar --zstd -xf /tmp/lean.tar.zst -C /tmp/lean --strip-components=1
+          /tmp/lean/bin/lean research/conductor_gap_cm_orbits_20261015/lean/OrbitControls.lean

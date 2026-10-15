@@ -1,0 +1,27 @@
+error[E0603]: function `is_prime_u64` is private
+   --> /workspace/crypto/src/cryptanalysis/ecbench/workload.rs:133:58
+    |
+133 |                     || !crate::prime_hyperelliptic::fp2::is_prime_u64(p)
+    |                                                          ^^^^^^^^^^^^ private function
+    |
+note: the function `is_prime_u64` is defined here
+   --> src/prime_hyperelliptic/fp2.rs:53:1
+    |
+ 53 | pub(crate) fn is_prime_u64(n: u64) -> bool {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0603]: function `is_prime_u64` is private
+   --> /workspace/crypto/src/cryptanalysis/ecbench/workload.rs:134:58
+    |
+134 |                     || !crate::prime_hyperelliptic::fp2::is_prime_u64(r)
+    |                                                          ^^^^^^^^^^^^ private function
+    |
+note: the function `is_prime_u64` is defined here
+   --> src/prime_hyperelliptic/fp2.rs:53:1
+    |
+ 53 | pub(crate) fn is_prime_u64(n: u64) -> bool {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0603`.

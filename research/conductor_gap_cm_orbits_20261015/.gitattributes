@@ -3,3 +3,11 @@
 # Preserve original receipt bytes, including CRLF in historical CSV inputs.
 inputs/*.csv -whitespace
 *.stderr -whitespace
+results/*.log -whitespace
+# Generated receipts remain downloadable; source and prose use normal diffs.
+sessions/** linguist-generated=true
+prepared/** linguist-generated=true
+results/*.json* linguist-generated=true
+reports/**/process-cpu.svg linguist-generated=true
+reports/**/*.json* linguist-generated=true
+inputs/*.json linguist-generated=true

@@ -1,0 +1,53 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "ic.cm_folded_recurrence_v1",
+        "params": {
+          "backend": "/workspace/native-deps/cm-folded-recurrence",
+          "backend_sha256": "7876845e85763d52ca1d1ecb5de5c990489220fd0781362f50df471a3551be44",
+          "mode": "scalar"
+        }
+      },
+      "name": "recurrence",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho",
+      "role": "reference"
+    }
+  ],
+  "description": "One target per workload; L0 descriptive native costs, no eligible speedup claim.",
+  "label": "Generic recurrence pair-46 endpoint 1, same primary public point and query seed",
+  "measurement": {
+    "isolation_required": "L0",
+    "order": "shuffle",
+    "rounds": 1,
+    "seed": 20261015,
+    "timeout_seconds": 1900,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 2087370704375809,
+        "b": 1402887937802154,
+        "group_order": 5947697996161643,
+        "gx": 0,
+        "gy": 1789653625547868,
+        "kind": "prime_public_fixture",
+        "p": 5947698030651343,
+        "qx": 1152820452555926,
+        "qy": 4742550619855044,
+        "r": 5947697996161643
+      }
+    ],
+    "target_kind": "public",
+    "target_seed": 20261015,
+    "targets_per_curve": 1
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "ic.cm_folded_native_v1",
+        "params": {
+          "backend": "/workspace/native-deps/cm-folded",
+          "backend_sha256": "577002d0898b1d39c61f5f6daa01c549403832379c7ada2e9098f0f5fbf0a730",
+          "mode": "scalar"
+        }
+      },
+      "name": "scalar",
+      "role": "baseline"
+    },
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "ic.cm_folded_native_v1",
+        "params": {
+          "backend": "/workspace/native-deps/cm-folded",
+          "backend_sha256": "577002d0898b1d39c61f5f6daa01c549403832379c7ada2e9098f0f5fbf0a730",
+          "mode": "velu"
+        }
+      },
+      "name": "velu",
+      "role": "candidate"
+    }
+  ],
+  "description": "Fresh public hash-to-subgroup targets; no logarithm supplied or computed during preparation",
+  "label": "Conductor-gap replication fresh-crater-2",
+  "measurement": {
+    "isolation_required": "L0",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261017,
+    "timeout_seconds": 1900,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 5713016550846251,
+        "b": 542606045643857,
+        "group_order": 5750662274380843,
+        "gx": 1,
+        "gy": 2711448524987645,
+        "kind": "prime_explicit",
+        "p": 5750662308294443,
+        "r": 5750662274380843
+      },
+      {
+        "a": 5778552365832515,
+        "b": 2690869507236239,
+        "group_order": 5816198089174411,
+        "gx": 1,
+        "gy": 1047291969225494,
+        "kind": "prime_explicit",
+        "p": 5816198123280707,
+        "r": 5816198089174411
+      }
+    ],
+    "target_kind": "public",
+    "target_seed": 20261016,
+    "targets_per_curve": 2
+  }
+}

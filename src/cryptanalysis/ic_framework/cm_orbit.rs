@@ -137,6 +137,9 @@ impl CmMap {
 
 /// Recover the public scalar action from pi=(t+f sqrt(-d))/2 and pi=1 on E[r].
 pub fn action(inst: &PrimeInstance, abs_d: u64) -> Result<(u64, u64, u64), String> {
+    if inst.r < 3 || inst.r.is_multiple_of(2) {
+        return Err("CM action requires an odd prime-order subgroup".into());
+    }
     if !matches!(abs_d, 19 | 43) {
         return Err("CM orbit currently supports fundamental discriminants -19 and -43".into());
     }
@@ -148,7 +151,7 @@ pub fn action(inst: &PrimeInstance, abs_d: u64) -> Result<(u64, u64, u64), Strin
     }
     let square = (disc / abs_d as i128) as u128;
     let ell = isqrt(square);
-    if (ell as u128).pow(2) != square || ell == 0 || ell % inst.r == 0 {
+    if (ell as u128).pow(2) != square || ell == 0 || ell.is_multiple_of(inst.r) {
         return Err("CM Frobenius conductor is not an invertible integer".into());
     }
     let residue = (2 - t).rem_euclid(inst.r as i128) as u64;
@@ -158,7 +161,7 @@ pub fn action(inst: &PrimeInstance, abs_d: u64) -> Result<(u64, u64, u64), Strin
             mul(residue, pow(ell, inst.r - 2, inst.r), inst.r),
             inst.r,
         ),
-        (inst.r + 1) / 2,
+        inst.r.div_ceil(2),
         inst.r,
     );
     let q = (abs_d + 1) / 4;
@@ -303,6 +306,9 @@ impl FactorBaseBuilder<PrimeCurve> for CmOrbitBase<'_> {
         params: &Params,
         ops: &mut GroupOps,
     ) -> Result<FactorBase<PrimePoint>, String> {
+        if self.instance.cofactor != 1 || self.instance.group_order != self.instance.r {
+            return Err("CM scalar-orbit bases require a cofactor-one prime-order curve".into());
+        }
         if params
             .0
             .keys()
@@ -414,17 +420,27 @@ mod tests {
     use super::*;
     #[test]
     fn degree_eleven_second_family_map_matches_scalar_action() {
-        let inst=PrimeInstance{name:"D=-43 independent PARI control".into(),
-            curve:PrimeCurve{p:5325000452995313,a:130015040327813,b:260030080655626},
-            group_order:5325000430993249,r:5325000430993249,cofactor:1,
-            generator:(4,437435961147748)};
-        let mut ops=GroupOps::default();
-        let map=derive_map(&inst,43,&mut ops).unwrap();
-        assert_eq!(map.degree,11);
-        for k in [1,2,7,19,12345] {
-            let p=inst.curve.mul(&mut ops,inst.generator_point(),k);
-            assert_eq!(map.apply(&inst.curve,p,&mut FieldOps::default()).unwrap(),
-                inst.curve.mul(&mut ops,p,map.lambda));
+        let inst = PrimeInstance {
+            name: "D=-43 independent PARI control".into(),
+            curve: PrimeCurve {
+                p: 5325000452995313,
+                a: 130015040327813,
+                b: 260030080655626,
+            },
+            group_order: 5325000430993249,
+            r: 5325000430993249,
+            cofactor: 1,
+            generator: (4, 437435961147748),
+        };
+        let mut ops = GroupOps::default();
+        let map = derive_map(&inst, 43, &mut ops).unwrap();
+        assert_eq!(map.degree, 11);
+        for k in [1, 2, 7, 19, 12345] {
+            let p = inst.curve.mul(&mut ops, inst.generator_point(), k);
+            assert_eq!(
+                map.apply(&inst.curve, p, &mut FieldOps::default()).unwrap(),
+                inst.curve.mul(&mut ops, p, map.lambda)
+            );
         }
     }
     fn instance() -> PrimeInstance {

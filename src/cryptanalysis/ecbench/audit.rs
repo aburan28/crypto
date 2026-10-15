@@ -36,7 +36,7 @@ use crate::cryptanalysis::ecbench::record::{
 };
 use crate::cryptanalysis::ecbench::runner::{read_record_lines, read_session, PlanDoc};
 use crate::cryptanalysis::ecbench::spec::{plan, Arm, Spec};
-use crate::cryptanalysis::ecbench::workload::{CurveSpec, Workload};
+use crate::cryptanalysis::ecbench::workload::Workload;
 
 /// Replay every measured deterministic run.
 pub const REPLAY_ALL: usize = usize::MAX;

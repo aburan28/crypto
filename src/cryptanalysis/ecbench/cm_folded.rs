@@ -39,6 +39,10 @@ pub fn solve(
     q: PrimePoint,
     seed: u64,
 ) -> Result<SolveReport, String> {
+    if inst.cofactor != 1 || inst.group_order != inst.r {
+        return Err("CM folded controls require a cofactor-one prime-order curve".into());
+    }
+    let recurrence = m.id == "ic.cm_folded_recurrence_v1";
     let start = Instant::now();
     let bytes = fs::read(&m.params["backend"]).map_err(|e| format!("native backend: {e}"))?;
     if sha256_hex(&bytes) != m.params["backend_sha256"] {
@@ -48,7 +52,7 @@ pub fn solve(
     let limit: u64 = m.params["query_limit"]
         .parse()
         .map_err(|_| "bad query cap")?;
-    if size < 4 || size > 16384 || size % 4 != 0 || limit >= inst.r {
+    if !(4..=16384).contains(&size) || !size.is_multiple_of(4) || limit >= inst.r {
         return Err("unsupported CM base or noninjective query cap".into());
     }
     let seconds: f64 = m.params["seconds"]
@@ -57,10 +61,15 @@ pub fn solve(
     if !seconds.is_finite() || seconds <= 0.0 {
         return Err("watchdog must be finite and positive".into());
     }
-    let (_, lambda, _) = action(inst, 19)?;
+    let abs_d = if m.id == "ic.cm_folded_native_d43_v1" {
+        43
+    } else {
+        19
+    };
+    let (_, lambda, degree) = action(inst, abs_d)?;
     let mut prep_ops = GroupOps::default();
     let map = match m.params["mode"].as_str() {
-        "velu" => Some(derive_map(inst, 19, &mut prep_ops)?),
+        "velu" if !recurrence => Some(derive_map(inst, abs_d, &mut prep_ops)?),
         "scalar" => None,
         _ => return Err("CM mode must be velu or scalar".into()),
     };
@@ -84,17 +93,35 @@ pub fn solve(
                 v.inv_cu,
             )
         })
-        .unwrap_or((vec![0; 2], vec![0; 2], vec![0; 2], 1, 1));
+        .unwrap_or((
+            vec![0; ((degree - 1) / 2) as usize],
+            vec![0; ((degree - 1) / 2) as usize],
+            vec![0; ((degree - 1) / 2) as usize],
+            1,
+            1,
+        ));
+    let mut values = vec![inst.curve.p, inst.r, 0, lambda, ic, icu];
+    values.extend(xs);
+    values.extend(ts);
+    values.extend(ys);
     let params = format!(
-        "{} {} 0 {} {} {} {} {} {} {} {} {}\n",
-        inst.curve.p, inst.r, lambda, ic, icu, xs[0], xs[1], ts[0], ts[1], ys[0], ys[1]
+        "{}\n",
+        values
+            .iter()
+            .map(u64::to_string)
+            .collect::<Vec<_>>()
+            .join(" ")
     );
     fs::write(dir.0.join("params"), params).map_err(|e| e.to_string())?;
     fs::write(
         dir.0.join("work.csv"),
         format!(
             "job,pair,role,p,r,a,b,Gx,Gy,Qx,Qy,seed,repeat\n0,0,{},{},{},{},{},{},{},{},{},{},0\n",
-            u8::from(map.is_none()),
+            if recurrence {
+                4
+            } else {
+                u8::from(map.is_none())
+            },
             inst.curve.p,
             inst.r,
             inst.curve.a,

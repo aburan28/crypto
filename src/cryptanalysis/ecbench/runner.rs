@@ -49,7 +49,7 @@ use crate::cryptanalysis::ecbench::record::{
 };
 use crate::cryptanalysis::ecbench::signals;
 use crate::cryptanalysis::ecbench::spec::{plan, Execution, Plan, Spec};
-use crate::cryptanalysis::ecbench::workload::{CurveSpec, Workload};
+use crate::cryptanalysis::ecbench::workload::Workload;
 
 pub const SESSION_SCHEMA: &str = "ecbench.session/v1";
 

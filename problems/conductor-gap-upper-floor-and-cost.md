@@ -35,7 +35,8 @@ exponentiation, table/hash work, allocation and elimination still lack a complet
 common price. A zero charged-GAE lower bound is not zero work. No eligible
 IC/rho speedup is asserted. The five online phases include independent replay.
 
-Lean proves conditional map-iteration equality and a norm-numerator bound.
+Lean proves conditional map-iteration equality, a norm-numerator bound and
+scalar-orbit recurrence equality.
 The CM norm identification, endomorphism-order lattice, actual rational-map
 homomorphism and order classification are unformalized bridges, listed in
 `lean/README.md`. No impossibility or general ECDLP hardness gap is established.
@@ -54,10 +55,11 @@ homomorphism and order classification are unformalized bridges, listed in
 
 ## Next discriminating step
 
-Retry the version-2 precomputed-remainder-tree constructor after the primary
-pair-table campaign releases memory. Use the original prepared inputs and a
-recorded per-process memory cap. Success requires independent PARI checks;
-a cap is a bounded negative result and leaves the exact floor requirement open.
+The bounded-batch constructor matched all 100 reference codomains. Its first
+95/96-bit attempts hit the recorded 1,800-second or 6-GiB limits. A separate
+11-GiB, 3,600-second retry of the exact 96-bit input is in progress; see
+`results/expanded-96-*`. Success requires independent PARI checks; a cap leaves
+the exact floor requirement open.
 
 For the older candidate, test the proposed construction's rational-kernel
 prerequisite before spending on point-based evaluation. Recheck this record
@@ -67,4 +69,10 @@ when a new floor, a complete native cost ledger, or a CM proof dependency lands.
 
 2026-10-15: first native implementation, 100-reference equality checks, 15 new
 floor certificates, 8,000 orbit controls and conditional Lean proofs recorded.
-Full end-to-end and replication campaigns remain governed by the study ledger.
+The subsequent full campaign verified all 500 primary and 265 replication
+attempts. All 47 session audits passed. Independent replay checked 473 IC
+records and 797 target recoveries, including controls. Orbit controls now total
+44,000 trials, including a pinned local repeat and 20 fresh-process batches.
+The primary floor/crater CPU ratio is 0.980 [0.866, 1.111]; endpoint execution
+waves and shared-host activity confound timing. Complete common pricing, upper
+floor construction and the stated CM proof bridges remain open independently.

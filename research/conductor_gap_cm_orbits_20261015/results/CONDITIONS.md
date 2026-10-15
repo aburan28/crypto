@@ -30,3 +30,25 @@ also get both map and scalar implementations. This is 200 endpoint targets,
 All arms are requested at L0. The command and executable/spec hashes are in
 `campaign-pre-run.sha256`; per-shard logs retain failures. The co-scheduling
 is a deliberate counts/correctness campaign, not an isolated timing claim.
+
+Endpoint-wave confound: primary shards 0–3 contain craters and shards 4–7
+contain floors. The four-slot queue therefore ran the strata mostly in
+different waves. Compilation, larger construction and replication overlapped
+parts of those waves. Replication also queues endpoint-specific shards.
+Whole-gap bootstrap intervals do not remove host/wave confounding. CPU
+comparisons are descriptive conditional on these runs; deterministic query
+counts, bases, relations and recoveries are the stronger controls. A causal
+timing follow-up needs interleaved/randomized endpoint blocks and earned
+isolation, including the D = −43 exploratory subset.
+
+The final orbit-only repeat reserved CPU 0 and moved 51 threads. Its native
+local monitor marked the 300.43-second run uncontended (0.34 other CPU
+seconds). Docker/containerd threads remained eligible on the reserved CPU;
+physical-host placement and frequency isolation are unverified. Do not turn
+this local reservation receipt into an L2/full-pipeline wall claim.
+
+Cold-process batches restart the native process once per 600-job pass,
+using precomputed CM parameters. They overlapped validation/construction at
+L0; individual model/arm jobs do not each get a fresh process or cache flush.
+Whole-process CPU includes parsing, hashing, equality checks, serialization
+and housekeeping; prior CM-map derivation is outside these microbenchmarks.

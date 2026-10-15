@@ -1,0 +1,77 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "ic.cm_folded_native_v1",
+        "params": {
+          "backend": "/workspace/native-deps/cm-folded",
+          "backend_sha256": "577002d0898b1d39c61f5f6daa01c549403832379c7ada2e9098f0f5fbf0a730",
+          "mode": "scalar"
+        }
+      },
+      "name": "scalar",
+      "role": "baseline"
+    },
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "ic.cm_folded_native_v1",
+        "params": {
+          "backend": "/workspace/native-deps/cm-folded",
+          "backend_sha256": "577002d0898b1d39c61f5f6daa01c549403832379c7ada2e9098f0f5fbf0a730",
+          "mode": "velu"
+        }
+      },
+      "name": "velu",
+      "role": "candidate"
+    }
+  ],
+  "description": "Matched explicit public regression point; validation scalar excluded",
+  "label": "Conductor-gap replication isomorphic-crater-2",
+  "measurement": {
+    "isolation_required": "L0",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261017,
+    "timeout_seconds": 1900,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 5148330189123371,
+        "b": 222813071440190,
+        "group_order": 5750662274380843,
+        "gx": 4,
+        "gy": 4439601275017831,
+        "kind": "prime_public_fixture",
+        "p": 5750662308294443,
+        "qx": 5470784740128697,
+        "qy": 1584222686333992,
+        "r": 5750662274380843
+      },
+      {
+        "a": 5213866004109635,
+        "b": 3545902887978793,
+        "group_order": 5816198089174411,
+        "gx": 4,
+        "gy": 2562137630523245,
+        "kind": "prime_public_fixture",
+        "p": 5816198123280707,
+        "qx": 2795887514274800,
+        "qy": 5568184309375533,
+        "r": 5816198089174411
+      }
+    ],
+    "target_kind": "public",
+    "target_seed": 20261016,
+    "targets_per_curve": 1
+  }
+}

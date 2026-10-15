@@ -1,4 +1,12 @@
 # Preserve solver output byte-for-byte; upstream tools intentionally pad fields.
+# Canonical catalog data is rebuilt by the repository's metadata tools.
+docs/browser/data.json linguist-generated=true
+docs/curves/registry.json linguist-generated=true
+docs/curves/covers.json linguist-generated=true
+docs/curves/cover-links.yaml linguist-generated=true
+docs/ic/leaderboard.json linguist-generated=true
+src/cryptanalysis/curve_aliases.json linguist-generated=true
+benchmarks/20261015-conductor-gap-cm-orbits/**/*.svg linguist-generated=true
 research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/**/*.stdout -whitespace
 research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/**/*.stderr -whitespace
 research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-wdsat-correction-20260909/**/*.stdout -whitespace

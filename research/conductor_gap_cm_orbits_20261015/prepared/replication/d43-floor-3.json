@@ -1,0 +1,61 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "ic.cm_folded_native_d43_v1",
+        "params": {
+          "backend": "/workspace/native-deps/cm-folded-d43",
+          "backend_sha256": "d9ec271db44abdcc30747a60bac22080e4c6010f88f40921fbdf83bf4ea67fb1",
+          "mode": "scalar"
+        }
+      },
+      "name": "scalar",
+      "role": "baseline"
+    },
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho",
+      "role": "reference"
+    }
+  ],
+  "description": "Fresh public hash-to-subgroup targets; no logarithm supplied or computed during preparation",
+  "label": "Conductor-gap replication d43-floor-3",
+  "measurement": {
+    "isolation_required": "L0",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261017,
+    "timeout_seconds": 1900,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 4209399994703104,
+        "b": 627303274137016,
+        "group_order": 5338626303715217,
+        "gx": 2,
+        "gy": 842246713152744,
+        "kind": "prime_explicit",
+        "p": 5338626325745413,
+        "r": 5338626303715217
+      },
+      {
+        "a": 1906719221497721,
+        "b": 2459492363158571,
+        "group_order": 5358535456803857,
+        "gx": 1,
+        "gy": 2652703285992966,
+        "kind": "prime_explicit",
+        "p": 5358535478875093,
+        "r": 5358535456803857
+      }
+    ],
+    "target_kind": "public",
+    "target_seed": 20261016,
+    "targets_per_curve": 1
+  }
+}

@@ -38,7 +38,7 @@ COVER_LINKS = "docs/curves/cover-links.yaml"
 STANDARDS_COVERAGE = "docs/curves/standards/coverage.json"
 LEADERBOARD = "docs/ic/leaderboard.json"
 TOURNAMENT_RUNS = "research/ic_candidate_tournament_20260915/runs"
-ECBENCH_SESSIONS_GLOBS = ("research/ecbench_*/sessions/*", "research/isogeny_conductor_gap_*/sessions/*", "research/fiber_ic_scaling_*/sessions/*")
+ECBENCH_SESSIONS_GLOBS = ("research/ecbench_*/sessions/*", "research/isogeny_conductor_gap_*/sessions/*", "research/fiber_ic_scaling_*/sessions/*", "research/conductor_gap_cm_orbits_20261015/sessions/*")
 IC1_SCAN_GLOBS = (
     "docs/ic/**/*.json",
     "docs/ic/**/*.md",
@@ -205,7 +205,7 @@ def curve_rows(registry: dict, leaderboard: dict) -> list[dict]:
 
 def ecbench_sessions(curves_by_slug: dict) -> tuple[list[dict], list[dict], list[dict]]:
     sessions, methods, fbs, yields = [], {}, {}, []
-    per_curve_arm = defaultdict(lambda: {"n": 0, "verified": 0, "s_sum": 0.0, "floor_sum": 0.0})
+    per_curve_arm = defaultdict(lambda: {"n": 0, "verified": 0, "s_sum": 0.0, "floor_sum": 0.0, "unpriced_zero_runs": 0})
     for sdir in sorted(d for g in ECBENCH_SESSIONS_GLOBS for d in glob.glob(os.path.join(ROOT, g))):
         session_path = os.path.join(sdir, "session.json")
         records_path = os.path.join(sdir, "records.jsonl")
@@ -255,6 +255,10 @@ def ecbench_sessions(curves_by_slug: dict) -> tuple[list[dict], list[dict], list
                     agg["verified"] += 1
                     agg["s_sum"] += float(r["cost"]["s"])
                     agg["floor_sum"] += float(r["boundaries"]["floor_s"])
+                    # A zero charged lower bound with unpriced native work is
+                    # not a complete zero-cost solve or a sortable S=0 result.
+                    if r["cost"].get("unpriced") and r["cost"].get("total_gae") == 0:
+                        agg["unpriced_zero_runs"] += 1
         sessions.append(
             {
                 "session_id": s["session_id"],
@@ -282,8 +286,9 @@ def ecbench_sessions(curves_by_slug: dict) -> tuple[list[dict], list[dict], list
                     "method_id": agg["method_id"],
                     "runs": agg["n"],
                     "verified": agg["verified"],
-                    "mean_s": round(agg["s_sum"] / agg["verified"], 4) if agg["verified"] else None,
-                    "mean_ratio_to_floor": round(agg["s_sum"] / agg["floor_sum"], 3) if agg["floor_sum"] else None,
+                    "mean_s": round(agg["s_sum"] / agg["verified"], 4) if agg["verified"] and not agg["unpriced_zero_runs"] else None,
+                    "mean_ratio_to_floor": round(agg["s_sum"] / agg["floor_sum"], 3) if agg["floor_sum"] and not agg["unpriced_zero_runs"] else None,
+                    **({"unpriced_zero_runs": agg["unpriced_zero_runs"], "score_status": "unknown complete price; zero charged lower bound"} if agg["unpriced_zero_runs"] else {}),
                 }
             )
     for f in fbs.values():
@@ -324,6 +329,8 @@ def yield_row(r: dict, session_id: str) -> dict:
     workload = r["workload"]
     curve = workload.get("curve") or {}
     phase_gae = {p["name"]: p.get("gae") for p in r.get("phases", [])}
+    cost = r.get("cost") or {}
+    uninformative_zero = bool(cost.get("unpriced")) and cost.get("total_gae") == 0
     return {
         "run_id": r["run_id"],
         "record_id": r["record_id"],
@@ -359,8 +366,9 @@ def yield_row(r: dict, session_id: str) -> dict:
         "matrix_rank": la.get("rank"),
         "row_ops": la.get("row_ops"),
         "gae": {k: phase_gae.get(k) for k in ("factor_base", "oracle_setup", "relations", "linear_algebra", "verify")},
-        "total_gae": (r.get("cost") or {}).get("total_gae"),
-        "s": (r.get("cost") or {}).get("s"),
+        "total_gae": None if uninformative_zero else cost.get("total_gae"),
+        "s": None if uninformative_zero else cost.get("s"),
+        **({"charged_gae_lower_bound": 0, "charged_s_lower_bound": 0, "score_status": "unknown complete price; zero charged lower bound", "unpriced": cost["unpriced"]} if uninformative_zero else {}),
         "deterministic": (r.get("cost") or {}).get("deterministic"),
         "solver": r.get("solver"),
     }

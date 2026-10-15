@@ -1,0 +1,89 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "ic.cm_folded_native_v1",
+        "params": {
+          "backend": "/workspace/native-deps/cm-folded",
+          "backend_sha256": "577002d0898b1d39c61f5f6daa01c549403832379c7ada2e9098f0f5fbf0a730",
+          "mode": "scalar"
+        }
+      },
+      "name": "scalar",
+      "role": "baseline"
+    },
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "ic.cm_folded_native_v1",
+        "params": {
+          "backend": "/workspace/native-deps/cm-folded",
+          "backend_sha256": "577002d0898b1d39c61f5f6daa01c549403832379c7ada2e9098f0f5fbf0a730",
+          "mode": "velu"
+        }
+      },
+      "name": "velu",
+      "role": "candidate"
+    }
+  ],
+  "description": "Matched explicit public regression point; validation scalar excluded",
+  "label": "Conductor-gap replication isomorphic-crater-1",
+  "measurement": {
+    "isolation_required": "L0",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261017,
+    "timeout_seconds": 1900,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 771218644352348,
+        "b": 2776734357121823,
+        "group_order": 6074954227511371,
+        "gx": 4,
+        "gy": 2068526613487896,
+        "kind": "prime_public_fixture",
+        "p": 6074954262368087,
+        "qx": 3409447268483614,
+        "qy": 1137362312578972,
+        "r": 6074954227511371
+      },
+      {
+        "a": 5843275564074395,
+        "b": 4889285273127107,
+        "group_order": 5993858559243883,
+        "gx": 0,
+        "gy": 5788152526181810,
+        "kind": "prime_public_fixture",
+        "p": 5993858593867163,
+        "qx": 3601428237206944,
+        "qy": 496949077739452,
+        "r": 5993858559243883
+      },
+      {
+        "a": 2849893576059655,
+        "b": 2727799191229806,
+        "group_order": 5899199895014411,
+        "gx": 0,
+        "gy": 2892580749821019,
+        "kind": "prime_public_fixture",
+        "p": 5899199929363207,
+        "qx": 1821873383743500,
+        "qy": 3884519554015638,
+        "r": 5899199895014411
+      }
+    ],
+    "target_kind": "public",
+    "target_seed": 20261016,
+    "targets_per_curve": 1
+  }
+}
