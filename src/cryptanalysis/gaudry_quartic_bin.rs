@@ -2180,6 +2180,7 @@ pub struct BinD4Solve {
 /// the split `w_i` (roots of `X⁴ + s₁X³ + s₂X² + s₃X + s₄`), `t_i² + t_i =
 /// w_i` with `Σ t_i = π`, and the check that the points sum to `r`.
 /// `Err` carries what an unsolved attempt cost.
+#[allow(clippy::result_large_err)]
 pub fn solve_d4_bin(
     curve: &CurveB,
     pre: &SymmetrisedBin,
