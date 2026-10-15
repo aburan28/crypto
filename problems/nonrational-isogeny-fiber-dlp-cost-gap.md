@@ -13,6 +13,7 @@
   [quadratic-extension cold DLP comparison](../research/isogeny_torsion_fibers_20261012/extension_field_20261014/REPORT.md),
   [exact pairing-transfer cost result](../research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/RESULTS.md),
   [2026-10-15 χ polynomial run](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1651Z/REPORT.md),
+  [public-only direct-root repeat](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1851Z/REPORT.md),
   [different-j relation and fiber controls](../research/isogeny_torsion_fibers_20261012/different_j_20261015/reports/run-20261015T1713Z/REPORT.md),
   and [three-arm pairing batch cost report](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1740Z/REPORT.md)
 - **Next action owner:** unassigned
@@ -141,6 +142,21 @@ cannot map to their fixed non-isomorphic destinations.
   pipeline CPU for each polynomial arm exceeds rho on the
   four frozen cells, but the formal counted `S` for the polynomial
   primitive is still incomplete.
+- **Observed with public-only solver input:** the
+  [V3 custody gate](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1850Z/REPORT.md)
+  rejected an answer-bearing solver input with exit 101, then matched
+  independent signed-pair enumeration in 22/22 target sets with 144
+  decompositions and 2,992 pair/map checks. The
+  [V3 full relation run](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1851Z/REPORT.md)
+  used a framework path without a planted answer. Both direct root arms
+  solved 12/12 rounds; independent replay checked 123/132 recovered
+  scalar rows across all arms, and nine raw-pair rows hit their inherited
+  cap. All 132 normalized relation, rank, trial, recovery and status rows
+  matched V2. Paired source-root/rho pipeline CPU ratio medians were
+  13.237, 8.254, 13.427 and 21.844 on the four frozen cells. The
+  redaction and checker processes read the private fixture; the solver
+  did not. The frozen protocol's narrower custody sentence is corrected
+  in the [versioned note](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/PUBLIC_ONLY_PROTOCOL_V3_CORRECTION.md).
 - **Observed on a different-j extension-field pair:** the
   [explicit degree-three map](../research/isogeny_torsion_fibers_20261012/different_j_20261015/reports/run-20261015T1713Z/REPORT.md)
   connects `j=7` and `j=11` curves over `F_(67²)`, with order-61 target
@@ -245,6 +261,11 @@ cannot map to their fixed non-isomorphic destinations.
   paired relation solves and independent replay. See the
   [V2 exactness](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1827Z/REPORT.md)
   and [solve](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1828Z/REPORT.md) reports.
+- [x] Repeat the direct-root and quotient controls with public-only
+  solver input, reject a private answer-bearing input, and replay recovered
+  scalars in a separate process. See the
+  [V3 custody](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1850Z/REPORT.md)
+  and [solve](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1851Z/REPORT.md) reports.
 - [ ] Implement a direct resultant/root solver in the χ coordinate,
   derive a portable counted cost for each polynomial primitive, and
   repeat on isolated and independent hosts. The earlier χ finite scan

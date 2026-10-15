@@ -13,6 +13,8 @@ the copies after generation. The source directories remain authoritative.
 | `chi-solve` | [χ paired relation solve](../../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1651Z/REPORT.md) |
 | `chi-roots-exact` | [Direct Semaev and quotient polynomial exactness](../../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1827Z/REPORT.md) |
 | `chi-roots-solve` | [Direct Semaev and quotient polynomial relation solve](../../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1828Z/REPORT.md) |
+| `chi-public-exact` | [Public-only χ root input and exactness gate](../../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1850Z/REPORT.md) |
+| `chi-public-solve` | [Public-only direct Semaev and quotient relation solve](../../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1851Z/REPORT.md) |
 | `different-j-selector` | [Different-j selector](../../research/isogeny_torsion_fibers_20261012/different_j_20261015/reports/run-20261015T1648Z/REPORT.md) |
 | `different-j-solve` | [Paired different-j relation solve](../../research/isogeny_torsion_fibers_20261012/different_j_20261015/reports/run-20261015T1713Z/REPORT.md) |
 | `different-j-fibers` | [Exhaustive rational-fiber audit](../../research/isogeny_torsion_fibers_20261012/different_j_20261015/reports/run-20261015T1738Z/REPORT.md) |

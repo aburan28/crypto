@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="570" viewBox="0 0 900 570" role="img" aria-label="Public-only fixture removes four answer fields; solver rejects private fixture; source and quotient roots match 22 exhaustive target sets; source and quotient polynomial calls are 320 and 288">
+<rect width="900" height="570" fill="#fff"/>
+<g font-family="Arial,Helvetica,sans-serif" fill="#183148">
+<text x="30" y="44" font-size="23" font-weight="700">Answer separation survives the same exactness gate</text>
+<text x="30" y="72" font-size="15" fill="#52697a">Four frozen cells · one solver input without answers · separate answer checker</text>
+<rect x="35" y="108" width="240" height="92" rx="8" fill="#f5eee8" stroke="#bd896d" stroke-width="2"/>
+<text x="155" y="139" font-size="17" text-anchor="middle" font-weight="700">Private checker fixture</text>
+<text x="155" y="168" font-size="15" text-anchor="middle">4 answer fields retained</text>
+<path d="M275 153 L330 153" fill="none" stroke="#8aa4b1" stroke-width="3"/>
+<rect x="330" y="108" width="240" height="92" rx="8" fill="#eaf2f6" stroke="#7da5b7" stroke-width="2"/>
+<text x="450" y="139" font-size="17" text-anchor="middle" font-weight="700">Public solver fixture</text>
+<text x="450" y="168" font-size="15" text-anchor="middle">same G, Q, base and seeds</text>
+<path d="M570 153 L625 153" fill="none" stroke="#8aa4b1" stroke-width="3"/>
+<rect x="625" y="108" width="240" height="92" rx="8" fill="#e9f4ef" stroke="#519472" stroke-width="2"/>
+<text x="745" y="139" font-size="17" text-anchor="middle" font-weight="700">Public-only solver</text>
+<text x="745" y="168" font-size="15" text-anchor="middle">private input exit 101</text>
+<path d="M745 200 L745 244 L450 244" fill="none" stroke="#8aa4b1" stroke-width="3"/>
+<rect x="175" y="244" width="550" height="92" rx="8" fill="#e9f4ef" stroke="#519472" stroke-width="2"/>
+<text x="450" y="276" font-size="18" text-anchor="middle" font-weight="700">Public-only source and quotient S3 roots</text>
+<text x="450" y="307" font-size="16" text-anchor="middle">22/22 exact target sets each · 144 decompositions</text>
+<path d="M450 336 L450 361" fill="none" stroke="#8aa4b1" stroke-width="3"/>
+<rect x="225" y="361" width="450" height="58" rx="8" fill="#f5f2e7" stroke="#b5a15c" stroke-width="2"/>
+<text x="450" y="387" font-size="16" text-anchor="middle" font-weight="700">Separate checker: 2,992 pair/map checks</text>
+<text x="450" y="408" font-size="13" text-anchor="middle">private fixture: redaction and checker processes only</text>
+<text x="35" y="449" font-size="15" font-weight="700">Polynomial calls over 22 target sets</text>
+<text x="205" y="484" font-size="14" text-anchor="end">Source S3 roots</text>
+<rect x="230" y="463" width="320" height="27" fill="#cc7a13"/>
+<text x="560" y="483" font-size="14">320</text>
+<text x="205" y="524" font-size="14" text-anchor="end">Quotient S3 roots</text>
+<rect x="230" y="503" width="288" height="27" fill="#6a4fd5"/>
+<text x="528" y="523" font-size="14">288</text>
+<path d="M230 540 L550 540" fill="none" stroke="#52697a" stroke-width="1"/>
+<text x="230" y="558" font-size="12" text-anchor="middle">0</text>
+<text x="390" y="558" font-size="12" text-anchor="middle">160</text>
+<text x="550" y="558" font-size="12" text-anchor="middle">320 calls</text>
+</g></svg>
