@@ -113,8 +113,8 @@ def run(archives: Path, output: Path) -> dict:
         versions[label] = subprocess.run([str(path), "--version"], cwd=ROOT,
                                          capture_output=True, text=True, check=True,
                                          timeout=10).stdout.strip()
-    require(versions["cargo"].startswith("cargo 1.98.0 ")
-            and versions["rustc"].startswith("rustc 1.98.0 "),
+    require(versions["cargo"] == "cargo 1.98.1 (797e8a9bc 2026-08-05)"
+            and versions["rustc"] == "rustc 1.98.1 (48a229cea 2026-09-01)",
             "native toolchain version changed")
     output.mkdir(parents=True, exist_ok=False)
     plan_sha256 = sha256(preflight.PLAN)
