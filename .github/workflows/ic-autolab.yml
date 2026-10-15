@@ -22,7 +22,9 @@ concurrency:
 jobs:
   linux-integration:
     runs-on: ubuntu-24.04
-    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
+    # Two PR attempts reached the 25-minute cap after the replay stage passed.
+    # Keep the full regression suite instead of cancelling its release checks.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
