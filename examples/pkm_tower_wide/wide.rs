@@ -198,14 +198,18 @@ fn s3<F: PrimeField>(
         .add(f, &WPol::constant(f, n, f.double(b)));
     let t2 = inner.mul(f, x3).scale(f, f.neg(f.from_u64(2)));
     let q = pr.sub(f, &WPol::constant(f, n, a));
-    let t3 = q
-        .mul(f, &q)
-        .sub(f, &sm.scale(f, f.mul(f.from_u64(4), b)));
+    let t3 = q.mul(f, &q).sub(f, &sm.scale(f, f.mul(f.from_u64(4), b)));
     t1.add(f, &t2).add(f, &t3)
 }
 
 /// The roots `z` of `S₃(x1, x2, z)`, a quadratic in `z`.
-fn s3_roots<F: PrimeField>(f: &F, x1: F::Elem, x2: F::Elem, a: F::Elem, b: F::Elem) -> Vec<F::Elem> {
+fn s3_roots<F: PrimeField>(
+    f: &F,
+    x1: F::Elem,
+    x2: F::Elem,
+    a: F::Elem,
+    b: F::Elem,
+) -> Vec<F::Elem> {
     let d = f.sub(x1, x2);
     let qa = f.sqr(d);
     let sm = f.add(x1, x2);
@@ -333,11 +337,7 @@ impl<E: Copy + PartialEq + std::hash::Hash + Eq> WTower<E> {
         for &x in &self.v {
             let y = self.values(f, x);
             for (j, e) in eqs.iter().enumerate() {
-                assert!(
-                    f.is_zero(e.eval(f, &y)),
-                    "{:?}: level {j} fails",
-                    self.kind
-                );
+                assert!(f.is_zero(e.eval(f, &y)), "{:?}: level {j} fails", self.kind);
             }
         }
     }
@@ -357,7 +357,10 @@ fn kummer<F: PrimeField>(f: &F, t: usize, rng: &mut StdRng) -> WTower<F::Elem> {
         }
     };
     assert!(f.is_one(f.pow_u64(zeta, 1 << t)));
-    assert!(!f.is_one(f.pow_u64(zeta, 1 << (t - 1))), "ζ of exact order 2^t");
+    assert!(
+        !f.is_one(f.pow_u64(zeta, 1 << (t - 1))),
+        "ζ of exact order 2^t"
+    );
     let g = elem(f, 2, rng);
     let mut v = Vec::with_capacity(1 << t);
     let mut w = g;
@@ -621,7 +624,11 @@ fn plant<F: PrimeField>(
     })
 }
 
-fn random_target<F: PrimeField>(f: &F, curve: &WCurve<F::Elem>, rng: &mut StdRng) -> WTarget<F::Elem> {
+fn random_target<F: PrimeField>(
+    f: &F,
+    curve: &WCurve<F::Elem>,
+    rng: &mut StdRng,
+) -> WTarget<F::Elem> {
     loop {
         let x = elem(f, 0, rng);
         let r = curve.rhs(f, x);
@@ -860,7 +867,8 @@ pub fn run_cell<F: PrimeField>(f: &F, cell: &WCell, a: &WArgs) -> (Vec<Value>, b
     let mut rows = Vec::new();
     let mut any_finished = false;
     for (k, target) in targets.iter().enumerate() {
-        let (eqs, n, sol, towers) = system(f, cell.control, &tower, &curve, cell.m, target, &mut rng);
+        let (eqs, n, sol, towers) =
+            system(f, cell.control, &tower, &curve, cell.m, target, &mut rng);
         if a.targets.as_ref().is_some_and(|ts| !ts.contains(&k)) {
             continue;
         }
@@ -898,8 +906,7 @@ pub fn run_cell<F: PrimeField>(f: &F, cell: &WCell, a: &WArgs) -> (Vec<Value>, b
             .filter(|g| !g.is_empty())
             .collect();
         let ring_degrees: Vec<u32> = input.iter().map(GPoly::degree).collect();
-        let mut opts =
-            TowerF4Options::new(max_degree).with_budget(Duration::from_secs(a.budget));
+        let mut opts = TowerF4Options::new(max_degree).with_budget(Duration::from_secs(a.budget));
         if let Some(c) = a.max_nnz {
             opts = opts.with_max_nnz(c);
         }
@@ -917,9 +924,9 @@ pub fn run_cell<F: PrimeField>(f: &F, cell: &WCell, a: &WArgs) -> (Vec<Value>, b
         let r = &rep.stats;
         let finished = !(r.timed_out || r.oversize);
         any_finished |= finished;
-        let planted_ok = sol.as_ref().map(|s| {
-            !r.inconsistent && rep.basis.iter().all(|g| f.is_zero(ring.eval(g, s)))
-        });
+        let planted_ok = sol
+            .as_ref()
+            .map(|s| !r.inconsistent && rep.basis.iter().all(|g| f.is_zero(ring.eval(g, s))));
         let lms: Vec<u128> = rep.basis.iter().filter_map(GPoly::lm).collect();
         let pure = |k: usize| {
             lms.iter().any(|&mo| {
@@ -956,9 +963,7 @@ pub fn run_cell<F: PrimeField>(f: &F, cell: &WCell, a: &WArgs) -> (Vec<Value>, b
                 checked += 1;
             }
             let stair = (!r.inconsistent && zero_dim)
-                .then(|| {
-                    staircase(&lms, ring.n_tower(), ring.n_free, 1 << 20)
-                })
+                .then(|| staircase(&lms, ring.n_tower(), ring.n_free, 1 << 20))
                 .flatten();
             let distinct: HashSet<Vec<String>> = sols
                 .iter()
@@ -1118,6 +1123,9 @@ mod tests {
         let want = strip(run_cell(&Fp32::new(p), &cell, &a).0);
         assert!(want.iter().all(|r| r["verify"]["ok"] == json!(true)));
         assert_eq!(strip(run_cell(&Fp64::new(p), &cell, &a).0), want);
-        assert_eq!(strip(run_cell(&FpWide::<4>::new(&BigUint::from(p)), &cell, &a).0), want);
+        assert_eq!(
+            strip(run_cell(&FpWide::<4>::new(&BigUint::from(p)), &cell, &a).0),
+            want
+        );
     }
 }

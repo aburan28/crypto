@@ -246,8 +246,7 @@ impl PrimeField for Fp52 {
         let (lo, hi) = (w[0], w[1]);
         let l = u128::from(lo) + (u128::from(hi & 0xfff) << 52);
         let h1 = hi >> 12;
-        self.inner
-            .add(self.inner.redc(l), self.reduce_u64(h1))
+        self.inner.add(self.inner.redc(l), self.reduce_u64(h1))
     }
     #[inline]
     fn row_axpy(&self, acc: &mut [[u64; 2]], c: u64, row: &[u64]) {
@@ -311,10 +310,27 @@ mod tests {
     /// Small, 31-bit, 32-bit, the `k = 40, 48` Kummer primes and the
     /// largest prime below `2⁵²`.
     fn primes() -> Vec<u64> {
-        let proth = |k: u32| (1u64..).step_by(2).map(|c| (c << k) + 1).find(|&p| is_prime(p)).unwrap();
+        let proth = |k: u32| {
+            (1u64..)
+                .step_by(2)
+                .map(|c| (c << k) + 1)
+                .find(|&p| is_prime(p))
+                .unwrap()
+        };
         let top = (1u64 << 52) - 1;
-        let below = (0..1000u64).map(|i| top - 2 * i).find(|&p| is_prime(p)).unwrap();
-        vec![3, 786_433, 2_013_265_921, 3_221_225_473, proth(40), proth(48), below]
+        let below = (0..1000u64)
+            .map(|i| top - 2 * i)
+            .find(|&p| is_prime(p))
+            .unwrap();
+        vec![
+            3,
+            786_433,
+            2_013_265_921,
+            3_221_225_473,
+            proth(40),
+            proth(48),
+            below,
+        ]
     }
 
     /// Every operation against `BigUint`, and the row kernels (both
@@ -347,12 +363,17 @@ mod tests {
                 for trial in 0..4 {
                     let n = rng.gen_range(1..40usize);
                     let cap = f.lazy_capacity() as usize;
-                    let k = if trial == 0 { cap } else { rng.gen_range(1..300) };
+                    let k = if trial == 0 {
+                        cap
+                    } else {
+                        rng.gen_range(1..300)
+                    };
                     let worst = trial % 2 == 0;
                     let draw = |rng: &mut StdRng| if worst { p - 1 } else { rng.gen_range(0..p) };
                     let init: Vec<u64> = (0..n).map(|_| draw(&mut rng)).collect();
                     let mut exact: Vec<BigUint> = init.iter().map(|&x| BigUint::from(x)).collect();
-                    let mut acc: Vec<[u64; 2]> = init.iter().map(|&x| f.wide_from(f.from_u64(x))).collect();
+                    let mut acc: Vec<[u64; 2]> =
+                        init.iter().map(|&x| f.wide_from(f.from_u64(x))).collect();
                     for _ in 0..k {
                         let c = draw(&mut rng);
                         let row: Vec<u64> = (0..n).map(|_| draw(&mut rng)).collect();

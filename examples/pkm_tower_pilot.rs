@@ -78,9 +78,9 @@ use crypto_lib::cryptanalysis::f4_fp_tower::{self, RPoly, SquareRule, TowerF4Opt
 use crypto_lib::cryptanalysis::f4_tower_generic::{f4_tower_generic, GPoly, GTowerRing};
 use crypto_lib::cryptanalysis::fp_backend::{Fp224, Fp256, Fp32, Fp64, FpP192, FpWide, PrimeField};
 use crypto_lib::cryptanalysis::fp_backend_ifma::Fp52;
-use num_bigint::BigUint;
 use crypto_lib::cryptanalysis::ic_boundary::{CountedGroup, GroupOps, PrimeCurve, PrimePoint};
 use crypto_lib::cryptanalysis::sig_fp_tower;
+use num_bigint::BigUint;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use serde_json::{json, Value};
@@ -1439,14 +1439,21 @@ fn measure_generic<F: PrimeField>(
     let p = ring.p;
     if let Some(s) = sol {
         for (k, e) in eqs.iter().enumerate() {
-            assert_eq!(e.eval(s, p), 0, "equation {k} does not vanish at the planted solution");
+            assert_eq!(
+                e.eval(s, p),
+                0,
+                "equation {k} does not vanish at the planted solution"
+            );
         }
     }
     let backend = f.name();
     let gring = GTowerRing::from_tower_ring(f, ring);
     let f = &gring.field;
     let raw = |e: &Pol| -> Vec<(Vec<u32>, F::Elem)> {
-        e.terms.iter().map(|(k, &v)| (k.clone(), f.from_u64(v))).collect()
+        e.terms
+            .iter()
+            .map(|(k, &v)| (k.clone(), f.from_u64(v)))
+            .collect()
     };
     for k in towers.clone() {
         assert!(
@@ -1552,9 +1559,10 @@ fn run_wide(a: &Args, sink: &mut Sink) {
         max_nnz: a.max_nnz,
         max_dense: a.max_dense,
         full_rank_exit: a.full_rank_exit,
-        trace: a
-            .trace
-            .then_some((print_tower_step as fn(usize, &f4_fp_tower::StepTrace), print_stopped_step as fn(usize, bool, &f4_fp_tower::StepTrace))),
+        trace: a.trace.then_some((
+            print_tower_step as fn(usize, &f4_fp_tower::StepTrace),
+            print_stopped_step as fn(usize, bool, &f4_fp_tower::StepTrace),
+        )),
         targets: a.targets.clone(),
         verify: a.verify,
         label: a.p_label.clone(),
@@ -1789,7 +1797,6 @@ fn resolve_backend(b: Backend, p: &BigUint) -> Backend {
         Backend::Wide4
     }
 }
-
 
 /// Rows as they are measured: every row reaches `--out` and is flushed
 /// before the next system is built, so a run that exhausts memory on a

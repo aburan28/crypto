@@ -274,13 +274,7 @@ impl<F: PrimeField> GTowerRing<F> {
     }
 
     /// `coef · y^ma · y^mb` in normal form (tower parts only).
-    fn mask_product_into(
-        &self,
-        ma: u64,
-        mb: u64,
-        coef: F::Elem,
-        out: &mut Vec<(u64, F::Elem)>,
-    ) {
+    fn mask_product_into(&self, ma: u64, mb: u64, coef: F::Elem, out: &mut Vec<(u64, F::Elem)>) {
         let common = ma & mb;
         if common == 0 {
             out.push((ma | mb, coef));
@@ -1691,7 +1685,14 @@ mod tests {
     }
 
     /// A random `u32`-engine ring: general rules or Kummer-like ones.
-    fn random_ring(rng: &mut StdRng, p: u64, blocks: usize, t: usize, n_free: usize, general: bool) -> TowerRing {
+    fn random_ring(
+        rng: &mut StdRng,
+        p: u64,
+        blocks: usize,
+        t: usize,
+        n_free: usize,
+        general: bool,
+    ) -> TowerRing {
         let mut rules = Vec::new();
         for b in 0..blocks {
             for j in 0..t {
@@ -1742,7 +1743,13 @@ mod tests {
         let gring = GTowerRing::from_tower_ring(f.clone(), ring);
         let ginput: Vec<GPoly<F::Elem>> = input.iter().map(|g| GPoly::from_rpoly(&f, g)).collect();
         let got = f4_tower_generic(&ginput, &gring, opts);
-        assert_eq!(fingerprint(&got.stats), fingerprint(&want), "{} p = {}", f.name(), ring.p);
+        assert_eq!(
+            fingerprint(&got.stats),
+            fingerprint(&want),
+            "{} p = {}",
+            f.name(),
+            ring.p
+        );
         let got_basis: Vec<RPoly> = got.basis.iter().map(|g| g.to_rpoly(&f).unwrap()).collect();
         assert_eq!(got_basis, want.basis, "{} p = {}", f.name(), ring.p);
     }
@@ -1773,8 +1780,24 @@ mod tests {
                 same_as_u32(Fp224::new(&BigUint::from(p)), &ring, &input, &opts);
                 same_as_u32(Fp52::new(p), &ring, &input, &opts);
                 same_as_u32(Fp52::new_scalar(p), &ring, &input, &opts);
-                same_as_u32(SmallCap { inner: Fp32::new(p), cap: 1 }, &ring, &input, &opts);
-                same_as_u32(SmallCap { inner: Fp52::new(p), cap: 3 }, &ring, &input, &opts);
+                same_as_u32(
+                    SmallCap {
+                        inner: Fp32::new(p),
+                        cap: 1,
+                    },
+                    &ring,
+                    &input,
+                    &opts,
+                );
+                same_as_u32(
+                    SmallCap {
+                        inner: Fp52::new(p),
+                        cap: 3,
+                    },
+                    &ring,
+                    &input,
+                    &opts,
+                );
             }
         }
     }
@@ -1847,7 +1870,13 @@ mod tests {
         fn row_axpy(&self, acc: &mut [F::Wide], c: F::Elem, row: &[F::Elem]) {
             self.inner.row_axpy(acc, c, row)
         }
-        fn row_scatter_axpy(&self, acc: &mut [F::Wide], c: F::Elem, cols: &[u32], vals: &[F::Elem]) {
+        fn row_scatter_axpy(
+            &self,
+            acc: &mut [F::Wide],
+            c: F::Elem,
+            cols: &[u32],
+            vals: &[F::Elem],
+        ) {
             self.inner.row_scatter_axpy(acc, c, cols, vals)
         }
     }
@@ -1907,9 +1936,15 @@ mod tests {
                         }
                     }
                 }
-                let rep = f4_tower_generic(std::slice::from_ref(&g), &ring, &TowerF4Options::new(64));
+                let rep =
+                    f4_tower_generic(std::slice::from_ref(&g), &ring, &TowerF4Options::new(64));
                 assert!(!rep.stats.timed_out && rep.stats.pairs_above_bound == 0);
-                assert_eq!(rep.stats.inconsistent, zeros.is_empty(), "{} t {t}", f.name());
+                assert_eq!(
+                    rep.stats.inconsistent,
+                    zeros.is_empty(),
+                    "{} t {t}",
+                    f.name()
+                );
                 if !rep.stats.inconsistent {
                     for z in &zeros {
                         for b in &rep.basis {
@@ -1917,7 +1952,10 @@ mod tests {
                         }
                     }
                     let lms: Vec<Mono> = rep.basis.iter().map(|b| b.lm().unwrap()).collect();
-                    assert_eq!(staircase_at_most(&lms, ring.n_tower(), 0, 1 << 12), Some(zeros.len()));
+                    assert_eq!(
+                        staircase_at_most(&lms, ring.n_tower(), 0, 1 << 12),
+                        Some(zeros.len())
+                    );
                 }
             }
         }
@@ -1925,7 +1963,11 @@ mod tests {
 
     /// One system over another backend (rules and input moved through
     /// canonical integers), fingerprinted with its basis.
-    fn rerun<F: PrimeField, G: PrimeField>(ring: &GTowerRing<F>, g_field: &G, input: &[GPoly<F::Elem>]) -> String {
+    fn rerun<F: PrimeField, G: PrimeField>(
+        ring: &GTowerRing<F>,
+        g_field: &G,
+        input: &[GPoly<F::Elem>],
+    ) -> String {
         let f = &ring.field;
         let mv = |x: F::Elem| g_field.from_biguint(&f.to_biguint(x));
         let gring = GTowerRing {
@@ -1933,16 +1975,29 @@ mod tests {
             rules: ring
                 .rules
                 .iter()
-                .map(|r| GSquareRule { next: r.next, a: mv(r.a), b: mv(r.b), c: mv(r.c), d: mv(r.d) })
+                .map(|r| GSquareRule {
+                    next: r.next,
+                    a: mv(r.a),
+                    b: mv(r.b),
+                    c: mv(r.c),
+                    d: mv(r.d),
+                })
                 .collect(),
             n_free: ring.n_free,
         };
         let ginput: Vec<GPoly<G::Elem>> = input
             .iter()
-            .map(|g| GPoly { monos: g.monos.clone(), coefs: g.coefs.iter().map(|&c| mv(c)).collect() })
+            .map(|g| GPoly {
+                monos: g.monos.clone(),
+                coefs: g.coefs.iter().map(|&c| mv(c)).collect(),
+            })
             .collect();
         let rep = f4_tower_generic(&ginput, &gring, &TowerF4Options::new(64));
-        format!("{}|{:?}", fingerprint(&rep.stats), canonical(g_field, &rep.basis))
+        format!(
+            "{}|{:?}",
+            fingerprint(&rep.stats),
+            canonical(g_field, &rep.basis)
+        )
     }
 
     #[test]
@@ -1968,33 +2023,86 @@ mod tests {
         let t = 4;
         let (r0, _) = kummer_block(&f, t, 0, &mut rng);
         let (r1, _) = kummer_block(&f, t, t, &mut rng);
-        let ring = GTowerRing { field: f.clone(), rules: [r0, r1].concat(), n_free: 0 };
+        let ring = GTowerRing {
+            field: f.clone(),
+            rules: [r0, r1].concat(),
+            n_free: 0,
+        };
         let g = biquadratic(&ring, t, &mut rng, None);
         let want = rerun(&ring, &f, std::slice::from_ref(&g));
-        assert_eq!(rerun(&ring, &FpWide::<1>::new(&BigUint::from(p)), std::slice::from_ref(&g)), want);
-        assert_eq!(rerun(&ring, &FpWide::<4>::new(&BigUint::from(p)), std::slice::from_ref(&g)), want);
-        assert_eq!(rerun(&ring, &Fp224::new(&BigUint::from(p)), std::slice::from_ref(&g)), want);
+        assert_eq!(
+            rerun(
+                &ring,
+                &FpWide::<1>::new(&BigUint::from(p)),
+                std::slice::from_ref(&g)
+            ),
+            want
+        );
+        assert_eq!(
+            rerun(
+                &ring,
+                &FpWide::<4>::new(&BigUint::from(p)),
+                std::slice::from_ref(&g)
+            ),
+            want
+        );
+        assert_eq!(
+            rerun(
+                &ring,
+                &Fp224::new(&BigUint::from(p)),
+                std::slice::from_ref(&g)
+            ),
+            want
+        );
         for k in [40u32, 48] {
             let q = proth_prime(k);
             let f = Fp64::new(q);
             let (r0, _) = kummer_block(&f, t, 0, &mut rng);
             let (r1, _) = kummer_block(&f, t, t, &mut rng);
-            let ring = GTowerRing { field: f.clone(), rules: [r0, r1].concat(), n_free: 0 };
+            let ring = GTowerRing {
+                field: f.clone(),
+                rules: [r0, r1].concat(),
+                n_free: 0,
+            };
             let g = biquadratic(&ring, t, &mut rng, None);
             let want = rerun(&ring, &f, std::slice::from_ref(&g));
             assert_eq!(rerun(&ring, &Fp52::new(q), std::slice::from_ref(&g)), want);
-            assert_eq!(rerun(&ring, &SmallCap { inner: Fp52::new(q), cap: 2 }, std::slice::from_ref(&g)), want);
-            assert_eq!(rerun(&ring, &Fp224::new(&BigUint::from(q)), std::slice::from_ref(&g)), want);
+            assert_eq!(
+                rerun(
+                    &ring,
+                    &SmallCap {
+                        inner: Fp52::new(q),
+                        cap: 2
+                    },
+                    std::slice::from_ref(&g)
+                ),
+                want
+            );
+            assert_eq!(
+                rerun(
+                    &ring,
+                    &Fp224::new(&BigUint::from(q)),
+                    std::slice::from_ref(&g)
+                ),
+                want
+            );
         }
 
         let big = p224();
         let f = Fp224::new(&big);
         let (r0, _) = kummer_block(&f, t, 0, &mut rng);
         let (r1, _) = kummer_block(&f, t, t, &mut rng);
-        let ring = GTowerRing { field: f.clone(), rules: [r0, r1].concat(), n_free: 0 };
+        let ring = GTowerRing {
+            field: f.clone(),
+            rules: [r0, r1].concat(),
+            n_free: 0,
+        };
         let g = biquadratic(&ring, t, &mut rng, None);
         let want = rerun(&ring, &f, std::slice::from_ref(&g));
-        assert_eq!(rerun(&ring, &FpWide::<4>::new(&big), std::slice::from_ref(&g)), want);
+        assert_eq!(
+            rerun(&ring, &FpWide::<4>::new(&big), std::slice::from_ref(&g)),
+            want
+        );
     }
 
     /// `from_raw`, `mul_mono` and `eval` agree with the `u32` ring's.
@@ -2010,13 +2118,24 @@ mod tests {
             let raw = random_raw(&mut rng, n, p, 6);
             let want = ring.from_raw(&raw);
             let graw: Vec<(Vec<u32>, u64)> = raw.clone();
-            let got = gring.from_raw(&graw.iter().map(|(e, c)| (e.clone(), f.from_u64(*c))).collect::<Vec<_>>());
+            let got = gring.from_raw(
+                &graw
+                    .iter()
+                    .map(|(e, c)| (e.clone(), f.from_u64(*c)))
+                    .collect::<Vec<_>>(),
+            );
             assert_eq!(got.to_rpoly(&f).unwrap(), want);
             let u = mono(rng.gen_range(0..64), [rng.gen_range(0..2), 0, 0, 0]);
-            assert_eq!(gring.mul_mono(&got, u).to_rpoly(&f).unwrap(), ring.mul_mono(&want, u));
+            assert_eq!(
+                gring.mul_mono(&got, u).to_rpoly(&f).unwrap(),
+                ring.mul_mono(&want, u)
+            );
             let x: Vec<u64> = (0..n).map(|_| rng.gen_range(0..p)).collect();
             let gx: Vec<u64> = x.iter().map(|&v| f.from_u64(v)).collect();
-            assert_eq!(f.to_u64(gring.eval(&got, &gx)).unwrap(), ring.eval(&want, &x));
+            assert_eq!(
+                f.to_u64(gring.eval(&got, &gx)).unwrap(),
+                ring.eval(&want, &x)
+            );
         }
     }
 }
