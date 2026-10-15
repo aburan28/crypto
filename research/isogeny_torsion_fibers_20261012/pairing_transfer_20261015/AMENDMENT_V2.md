@@ -1,0 +1,7 @@
+# V2 phase-accounting amendment, before the V2 run
+
+The first committed run at `47deb8dccaff455c41500a00b99bf208c5ab2a0c` completed the exact two-cell pairing solve and paired rho controls. Its source charged every operation inside the cold interval but combined candidate search, Miller evaluation, and the final exponentiation into one `selection_and_pairings` phase. Preserve `runs/` and `SUMMARY.json` as V1 evidence.
+
+V2 changes only instrumentation in the same native solver: accumulate current-thread CPU, extension multiplications/squarings/inversions, and base-field multiplications/inversions separately for candidate search, Miller evaluation (including denominator inversion), and final exponentiation. The selected field, candidate stream, stopping caps, frozen H values, multiplicative BSGS, verifier, rho seeds, same-target controls, three rounds, and CPU-total definition remain fixed. Any changed answer, H, pairing value, or deterministic primitive total fails the run. V2 records go to `runs_v2/` with a new source and binary hash in `FREEZE_V2.md`; V1 bytes are never overwritten.
+
+The resulting phase subtotals must be reconciled against each cold interval. The same separate scalar replay and public-multiple pairing checks remain charged in the complete one-target total. A new `SUMMARY_V2.json`, run report, result report, graph, PDF, and benchmark copy will be derived from the V2 raw files. Timing remains shared-host L0 and descriptive; a smaller stage alone is never a complete-method advantage.
