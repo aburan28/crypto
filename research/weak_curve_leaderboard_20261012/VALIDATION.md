@@ -13,6 +13,15 @@
   isolate the field without replacing the snapshot on a guess. Its
   deliberately altered-snapshot control is in
   `validation/ghs128_mismatch_diagnostic_control.log`.
+- The mismatch was traced to newer `main` copies of the curve registry and
+  Jacobian-transfer registry in the PR merge checkout. Both were copied
+  byte-for-byte into the feature branch. The rebuilt snapshot changes only
+  their two source hashes; the native GHS audit changes only the transfer
+  registry hash. The graph and decomposition exports change their pinned
+  snapshot hash, with the same node, class, edge, property and finding counts.
+  The [refresh run](reports/run-20261015T0929Z/REPORT.md) preserves the
+  quantitative comparison and inspected PDF. Current-head clean CI remains
+  the final gate.
 
 - `cargo run --release --locked --bin ghs_genus128_cost_audit -- --check` recomputes exact
   irreducible-polynomial and smoothness counts for all 84 degree bounds in

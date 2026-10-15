@@ -6,7 +6,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 HERE = Path(__file__).resolve().parent
-receipt = json.loads((HERE.parents[1] / "ghs_genus128_cost_audit.json").read_text())
+receipt = json.loads((HERE / "ghs_genus128_cost_audit.json").read_text())
 fig, ax = plt.subplots(figsize=(8.2, 4.6))
 for curve, color in zip(receipt["curves"], ["#176a9c", "#b45625"]):
     rows = [row for row in curve["audit"]["sweep"] if row["degree_bound"] <= 30]

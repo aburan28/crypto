@@ -106,6 +106,9 @@ parameters.
 The [run report](reports/run-20261015T0854Z/REPORT.md),
 [cost graph](reports/run-20261015T0854Z/ghs_cost_sweep.svg), and
 [PDF](reports/run-20261015T0854Z/report.pdf) retain this model-stage evidence.
+The [later source-lock refresh](reports/run-20261015T0929Z/REPORT.md)
+updates the registry hashes and dependent site exports while preserving the
+same model prices.
 
 | Source curve | Nominal half-split base | Model smoothness | Model relation queries | Model total log2 bit cost | Registry cost |
 | --- | ---: | ---: | ---: | ---: | ---: |
