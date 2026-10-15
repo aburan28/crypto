@@ -76,7 +76,11 @@ actual reduced-divisor support: squarefreeness, rational splitting types,
 shared residual points, and the accepted rank-bearing target set after any
 splitting filter. In the [P-192 Type I support audit](../p192_extension_cover_20261012/reports/run-20261015T2042Z/REPORT.md),
 the 160 degree-three residual supports are pairwise disjoint by their
-\(x\)-polynomials. Restricting to the 20 fully split classes leaves 143
+\(x\)-polynomials. The [nonspeciality certificate](../p192_extension_cover_20261012/reports/run-20261015T2117Z/REPORT.md)
+also checks all 160 interpolation quadratics have nonzero leading coefficient.
+Consequently each residual triple is noncollinear and is the unique effective
+degree-three divisor in its fixed-origin class. Restricting to the 20 fully
+split classes leaves 143
 accepted rank-bearing three-sum targets and zero hits in 64 frozen fresh
 known-scalar queries. This is evidence about the specified reduction and
 collector policy; the registry requires relation rank and complete cost

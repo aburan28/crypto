@@ -215,6 +215,15 @@ the Type I branch still needs a relation method and complete target cost;
 generic plane-quartic divisor reduction remains available as a separate
 implementation route.
 
+The [fixed-origin nonspeciality certificate](reports/run-20261015T2117Z/REPORT.md)
+now checks all 160 signed Type I degree-three representatives. Their
+squarefree residual (x)-cubics and nonzero quadratic (y)-coefficients
+make every residual triple noncollinear, so Riemann--Roch gives a unique
+effective degree-three divisor in each fixed-origin class. This identifies
+the exact geometry constraint on a collector that tries to vary those
+representatives while keeping the same origin; it does not replace the
+separate generic Jacobian arithmetic gate.
+
 ## Reproduction
 
 From this repository's root:
