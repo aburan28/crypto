@@ -74,3 +74,18 @@ JOB 108s --bits 19 --curve 1 --kappa 1.8849 --cx 8 --streams sched --las lpsgebw
 {"bits":19,"curve":2,"kappa":1.8849,"arm":"sched:lpsgebw2@8","correct":true,"cost":8725514503,"la_cost":3170197491,"cols":10465,"nnz":159794,"checks":1,"la_wall":25.7,"wall":109.6}
 {"bits":19,"curve":2,"arm":"sched:lpsgebw2@8+R1","cost":5809315245,"rel_cost":2639117754}
 JOB 110s --bits 19 --curve 2 --kappa 1.8849 --cx 8 --streams sched --las lpsgebw2@8 --out results/run/b19_c2_sched.jsonl
+{"bits":20,"curve":0,"kappa":1.739,"arm":"sched:lpsgebw2@8","correct":true,"cost":23033756567,"la_cost":8077243075,"cols":16720,"nnz":254885,"checks":1,"la_wall":53.6,"wall":227.7}
+{"bits":20,"curve":0,"arm":"sched:lpsgebw2@8+R1","cost":15165760682,"rel_cost":7088517607}
+JOB 228s --bits 20 --curve 0 --kappa 1.7390 --cx 8 --streams sched --las lpsgebw2@8 --out results/run/b20_c0_sched.jsonl
+{"bits":20,"curve":1,"kappa":1.739,"arm":"sched:lpsgebw2@8","correct":true,"cost":22996576697,"la_cost":8065983830,"cols":16722,"nnz":254390,"checks":1,"la_wall":52.6,"wall":206.2}
+{"bits":20,"curve":1,"arm":"sched:lpsgebw2@8+R1","cost":15141742208,"rel_cost":7075758378}
+JOB 209s --bits 20 --curve 1 --kappa 1.7390 --cx 8 --streams sched --las lpsgebw2@8 --out results/run/b20_c1_sched.jsonl
+{"bits":20,"curve":2,"kappa":1.739,"arm":"sched:lpsgebw2@8","correct":true,"cost":23157433635,"la_cost":8187896919,"cols":17009,"nnz":252592,"checks":1,"la_wall":51.1,"wall":205.0}
+{"bits":20,"curve":2,"arm":"sched:lpsgebw2@8+R1","cost":15281869428,"rel_cost":7093972509}
+JOB 206s --bits 20 --curve 2 --kappa 1.7390 --cx 8 --streams sched --las lpsgebw2@8 --out results/run/b20_c2_sched.jsonl
+{"bits":21,"curve":0,"kappa":1.6043,"arm":"sched:lpsgebw2@8","correct":true,"cost":60749861268,"la_cost":20514129445,"cols":26649,"nnz":406296,"checks":1,"la_wall":135.7,"wall":649.3}
+{"bits":21,"curve":0,"arm":"sched:lpsgebw2@8+R1","cost":39485079170,"rel_cost":18970949725}
+JOB 654s --bits 21 --curve 0 --kappa 1.6043 --cx 8 --streams sched --las lpsgebw2@8 --out results/run/b21_c0_sched.jsonl
+{"bits":21,"curve":1,"kappa":1.6043,"arm":"sched:lpsgebw2@8","correct":true,"cost":60654356680,"la_cost":20361776714,"cols":26493,"nnz":406107,"checks":1,"la_wall":127.7,"wall":646.9}
+{"bits":21,"curve":1,"arm":"sched:lpsgebw2@8+R1","cost":39357772270,"rel_cost":18995995556}
+JOB 648s --bits 21 --curve 1 --kappa 1.6043 --cx 8 --streams sched --las lpsgebw2@8 --out results/run/b21_c1_sched.jsonl
