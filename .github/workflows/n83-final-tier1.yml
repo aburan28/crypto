@@ -19,7 +19,7 @@ jobs:
   five-same-point-pairs:
     if: github.repository == 'aburan28/crypto'
     runs-on: ubuntu-24.04
-    timeout-minutes: 180
+    timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4
 
