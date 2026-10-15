@@ -1,0 +1,48 @@
+# Lean proof gate
+
+`proof-gate.sh` checks every Lean target in the repository. CI runs it through
+[`lean-proof-gate.yml`](../../.github/workflows/lean-proof-gate.yml): on any
+change to a `.lean` file, lakefile, toolchain or manifest, on pushes to `main`,
+and weekly.
+
+| target | how it is checked |
+|:--|:--|
+| Lake project (directory with `lakefile.toml` / `lakefile.lean`) | `lake exe cache get` if it uses Mathlib, then `lake build`, then an audit of every module the project built |
+| standalone `.lean` file outside any Lake project | `lean -o` against the core library under its directory's `lean-toolchain`, then an audit of that module |
+
+The audit, [`AuditAxioms.lean`](AuditAxioms.lean), imports the modules and
+collects each theorem's **transitive** axioms. Only `propext`,
+`Classical.choice` and `Quot.sound` are accepted. A grep cannot do this
+check, because a `sorry` or axiom can be several imports away.
+
+| outcome | meaning |
+|:--|:--|
+| `ok` | kernel-checked on the standard foundations |
+| `TRUST` | closed by `native_decide` (the compiler is trusted, not only the kernel), and listed in [`trusted-native.txt`](trusted-native.txt) with the reason and where the study records that decision |
+| `FAIL` | `sorryAx`, an unlisted `native_decide`, or any other axiom |
+
+A target also fails when it doesn't build, when its build log reports
+`declaration uses 'sorry'`, or when it contains no theorems. A gate that
+audits nothing must not pass. A failure to fetch the Mathlib cache exits 3. It
+is an infrastructure failure and never evidence about a proof.
+
+```sh
+tools/lean/proof-gate.sh --list                  # what would be checked
+tools/lean/proof-gate.sh                         # check everything
+tools/lean/proof-gate.sh research/<study>/lean   # one target
+tools/lean/proof-gate.sh --out receipts          # keep build and audit logs
+```
+
+## What passing does not mean
+
+The gate shows that each theorem is proved from the standard foundations. It
+does **not** show that the Lean statement is the report's theorem. That
+fidelity check (quantifiers, hypotheses, the bridge to the real objects) is
+still the proof map and review AGENTS.md requires.
+
+## Adding to `trusted-native.txt`
+
+Only add an entry when the study itself records the decision to trust the
+compiler, for example a registered replay. Never add one for a theorem a
+report or paper states as proved. Prefer `decide` or `decide +kernel` when
+they finish in reasonable time.
