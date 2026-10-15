@@ -6,6 +6,8 @@ BIN=$1; OUT=$2
 mkdir -p "$OUT"
 run() {
   local name=$1; shift
+  # resumable: a cell already finished is not run again
+  if grep -q " $name ok$" "$OUT/progress.txt" 2>/dev/null; then return; fi
   echo "$(date -u +%FT%TZ) $name start" >>"$OUT/progress.txt"
   RAYON_NUM_THREADS=2 nice -n 10 prlimit --as=4294967296 -- \
     "$BIN" --engine generic --ladder-t none --budget 10800 --planted 0 --random 1 "$@" \
