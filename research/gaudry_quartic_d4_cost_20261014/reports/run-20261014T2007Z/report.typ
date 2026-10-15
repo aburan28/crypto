@@ -6,13 +6,13 @@
 
 Spec `specs/SPEC-k4-p29-d4cost.json` (id `ECS1h9deb3f4c9890`). Command `ecbench run --cpus auto --wait --allow-busy`; binary sha256 `67b8cc95…3e22`, commit `2b49f38d1`. Host: Xeon \@ 2.10 GHz, 4 vCPU, one reserved core. The ladder ran beside the session on the other cores.
 
-Workloads: `fp4_torsion(29, 1, 16)`, `icv1-fp5k4-tm926-7bc5b359`, $r = 44263$, targets `Wc87e324798ff` and `W1016932647b2` (seed 202610134029). One round, alternate order. 8 executions requested, 8 completed, 8 verified.
+Workloads: `fp4_torsion(29, 1, 16)` (ICV1 id in `plan.json`; not registered), $r = 44263$, targets `Wc87e324798ff` and `W1016932647b2` (seed 202610134029). One round, alternate order. 8 executions requested, 8 completed, 8 verified.
 
 #table(columns: 6, align: (left, left, right, right, right, left),
   [arm], [method], [target 0 $S$], [target 1 $S$], [wall (s)], [level],
   [rho-neg], [rho.negation], [1.065], [1.412], [0.01], [L2],
   [ic-d4-committed], [`gaudry-d4:macaulay=14,charge_unsolved=1`], [657,144,598], [722,837,732], [7,321 / 7,928], [L1],
-  [ic-d4-chains], [`…macaulay=26,weighted=1,chains=1,sparsest=1,replay=1,charge_unsolved=1`], [1,653,062], [1,779,983], [221 / 235], [L1],
+  [ic-d4-chains], [`gaudry-d4:macaulay=26,weighted=1,` \ `chains=1,sparsest=1,replay=1,` \ `charge_unsolved=1`], [1,653,062], [1,779,983], [221 / 235], [L1],
   [rho-neg-aa], [rho.negation], [1.065], [1.412], [0.01], [L2],
 )
 

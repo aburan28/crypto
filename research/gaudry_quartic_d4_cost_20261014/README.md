@@ -83,7 +83,7 @@ to 0.3–0.4 s (3 threads, beside the session; descriptive).
 
 ## Part B — ecbench session (`sessions/k4-p29-d4cost/`, `ECBS1h4687f1d786c2`)
 
-`fp4_torsion(29, 1, 16)` (`icv1-fp5k4-tm926-7bc5b359`, `#E = 16 · 44,263`),
+`fp4_torsion(29, 1, 16)` (`#E = 16 · 44,263`; its ICV1 id is in `sessions/k4-p29-d4cost/plan.json`, not yet in the registry),
 two targets. Target 0 is the sealed `k4-p29-zero` target. Both IC arms use
 `fghr-y-line:zero=1` and charge unsolved systems. All 8 runs verified.
 
