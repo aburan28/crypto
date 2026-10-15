@@ -21,8 +21,8 @@
 //!   It then checks the one thing that can be checked without trusting F4: a
 //!   refuted system has no solution on the grid, a system F4 did not refute
 //!   has one, and a planted one has one. `V` is the row's own for isogeny
-//!   towers, and rebuilt from `g, zeta` (Kummer) or `u, zeta` (Dickson)
-//!   otherwise. The null, naive and ladder controls are skipped, since their
+//!   towers, and rebuilt from `g, zeta` (Kummer), `u, zeta` (Dickson) or
+//!   the `F_{p²}` pairs `u, zeta` (`dickson-torus`) otherwise. The null, naive and ladder controls are skipped, since their
 //!   systems are not the summation system.
 //! - **`analyze FILE…`** prints, per (engine, kind, `m`, control, `p`):
 //!   - one row per `N`;
@@ -661,8 +661,8 @@ fn res_zero(f: Fp, g: &[u64], h: &[u64]) -> bool {
     false
 }
 
-/// The tower's `V`: the row's own, or rebuilt from `g, zeta` (Kummer) or
-/// `u, zeta` (Dickson).
+/// The tower's `V`: the row's own, or rebuilt from `g, zeta` (Kummer),
+/// `u, zeta` (Dickson) or `u, zeta` in `F_{p²}` (`dickson-torus`).
 fn tower_v(row: &Value) -> Option<Vec<u64>> {
     let info = field(row, "tower");
     let p = int(row, "p") as u64;
@@ -687,6 +687,35 @@ fn tower_v(row: &Value) -> Option<Vec<u64>> {
                     })
                     .collect(),
             )
+        }
+        "dickson-torus" => {
+            // u, ζ ∈ T ⊂ F_{p²} = F_p(i), i² = −1; V = {w + w^{−1}}, with
+            // the inverse taken as x̄/N(x) and the i-part required to vanish.
+            let pair = |k: &str| -> (u64, u64) {
+                let a = info
+                    .get(k)
+                    .and_then(Value::as_array)
+                    .expect("a torus field");
+                (a[0].as_u64().expect("re"), a[1].as_u64().expect("im"))
+            };
+            let mul = |x: (u64, u64), y: (u64, u64)| {
+                (
+                    f.sub(f.mul(x.0, y.0), f.mul(x.1, y.1)),
+                    f.add(f.mul(x.0, y.1), f.mul(x.1, y.0)),
+                )
+            };
+            let (u, z) = (pair("u"), pair("zeta"));
+            let mut w = u;
+            let mut v = Vec::with_capacity(1 << t);
+            for _ in 0..1u64 << t {
+                let ni = f.inv(f.add(f.mul(w.0, w.0), f.mul(w.1, w.1)));
+                let wi = (f.mul(w.0, ni), f.mul(f.neg(w.1), ni));
+                assert_eq!(f.add(w.1, wi.1), 0, "a torus V element is not in F_p");
+                v.push(f.add(w.0, wi.0));
+                w = mul(w, z);
+            }
+            assert_eq!(w, u, "ζ^(2^t) ≠ 1");
+            Some(v)
         }
         _ => None,
     }
