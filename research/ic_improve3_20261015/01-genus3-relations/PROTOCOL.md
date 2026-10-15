@@ -206,3 +206,14 @@ The schedule is **ln kappa_R2(b) = 0.2669 - 0.0941 (b - 20)**, i.e. kappa_R2(b) 
 | kappa_R2(b) | 2.771 | 2.296 | 1.902 | 1.576 | 1.306 | 1.189 | 1.082 |
 
 Stored in `r2.env`. cx(b) is the incumbent's.
+
+## Amendment C2 (2026-10-15 17:44, after `sched` b = 12..21 on curves 0-2 completed; no candidate verdict computed)
+
+The remaining jobs run through a slot scheduler (`run_slots.sh`, queue `queue2.txt`) that keeps exactly 2 of this item's jobs
+running, so that no slot sits idle while the third b = 22 job runs.
+
+The order of priority 3 changes: `r2` at b = 22 moves after `sched` and `r2` on curves 3 and 4 (b = 18..21), because each
+b = 22 job takes about 30 minutes. Order: `sched` b = 22 curve 2; `r2` 12..21; `aa` 12..21; `sched` and `r2` curves 3-4 at 18..21;
+`r2` b = 22.
+
+A preliminary `analyze` over 12..20 (incumbent and R1 only) was run to check the pipeline. The decision rules are unchanged.
