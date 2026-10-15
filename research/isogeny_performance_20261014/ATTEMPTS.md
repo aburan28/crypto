@@ -77,3 +77,11 @@ increase in multiplication calls beside reduced inversion counts.
     T-15 in the current coordinator. A registered interactive work shell now
     maintains the real publication/validation claim. Stale MCP credentials
     returned 401; the configured CLI supplied the current authenticated access.
+
+16. The source SSD filled during a kernel-adapter edit. The file retained its
+    previous complete bytes; a second-SSD copy was made before the corrected
+    edit. Headroom subsequently recovered without deleting any research data
+    or the earlier campaign executable. The first adapter compile also found
+    a private helper path and an unimported point-access trait; the adapter now
+    uses the public curve helper and an explicit affine-point match. Neither
+    attempt produced an accepted benchmark.

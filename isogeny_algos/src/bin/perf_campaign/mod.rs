@@ -10,6 +10,12 @@ pub fn run(args: &[String]) -> Result<(), String> {
     }
     let base = std::fs::canonicalize(&args[0]).map_err(|e| e.to_string())?;
     let candidate = std::fs::canonicalize(&args[1]).map_err(|e| e.to_string())?;
+    let hash = |path: &Path| {
+        std::fs::read(path)
+            .map(|bytes| super::sha256_hex(&bytes))
+            .map_err(|e| e.to_string())
+    };
+    let binary_hashes = [hash(&base)?, hash(&candidate)?];
     let isolator = if args.len() == 7 {
         Some(std::fs::canonicalize(&args[5]).map_err(|e| e.to_string())?)
     } else {
@@ -64,9 +70,18 @@ pub fn run(args: &[String]) -> Result<(), String> {
                 let started = std::time::Instant::now();
                 let status = cmd.status();
                 let exit = status.as_ref().ok().and_then(|s| s.code());
-                let qualified = isolator.is_some() && exit == Some(0) && isolation_pass(&isolation);
                 let valid = exit == Some(0)
-                    && load_cases(output.to_str().ok_or("non-UTF8 output path")?).is_ok();
+                    && load_cases(output.to_str().ok_or("non-UTF8 output path")?).is_ok_and(
+                        |(header, rows)| {
+                            campaign_identity(
+                                &header,
+                                &rows,
+                                &binary_hashes[usize::from(!is_base)],
+                                revision,
+                            )
+                        },
+                    );
+                let qualified = valid && isolator.is_some() && isolation_pass(&isolation);
                 attempts.push(Json::obj(vec![
                     ("name", Json::str(&name)),
                     ("phase", Json::str(phase)),
@@ -209,6 +224,19 @@ pub fn run(args: &[String]) -> Result<(), String> {
     }
     Ok(())
 }
+fn campaign_identity(header: &Json, rows: &[Json], binary_hash: &str, revision: &str) -> bool {
+    header.get("binary_sha256").and_then(Json::as_str) == Some(binary_hash)
+        && header
+            .get("source_revision_supplied_by_launcher")
+            .and_then(Json::as_str)
+            == Some(revision)
+        && rows.len() == 64
+        && rows.iter().all(|row| {
+            ["192", "224", "256", "511"]
+                .contains(&row.get("bits").and_then(Json::as_str).unwrap_or(""))
+                && ["7", "31"].contains(&row.get("ell").and_then(Json::as_str).unwrap_or(""))
+        })
+}
 fn write_json(path: &Path, j: &Json) -> Result<(), String> {
     let mut f = std::fs::OpenOptions::new()
         .write(true)
@@ -279,5 +307,41 @@ mod tests {
         )]);
         assert_eq!(median_samples(&row).unwrap(), 3.0);
         assert!(median_samples(&Json::Null).is_err());
+    }
+    #[test]
+    fn a_different_executable_or_revision_is_not_the_requested_arm() {
+        let header = Json::obj(vec![
+            ("binary_sha256", Json::str("ab".repeat(32))),
+            (
+                "source_revision_supplied_by_launcher",
+                Json::str("cd".repeat(20)),
+            ),
+        ]);
+        // The full loader checks distinct methods and complete matrix cells.
+        let rows = vec![Json::obj(vec![("bits", Json::str(192)), ("ell", Json::str(7))]); 64];
+        assert!(campaign_identity(
+            &header,
+            &rows,
+            &"ab".repeat(32),
+            &"cd".repeat(20)
+        ));
+        assert!(!campaign_identity(
+            &header,
+            &rows,
+            &"ef".repeat(32),
+            &"cd".repeat(20)
+        ));
+        assert!(!campaign_identity(
+            &header,
+            &rows,
+            &"ab".repeat(32),
+            &"de".repeat(20)
+        ));
+        assert!(!campaign_identity(
+            &header,
+            &rows[..63],
+            &"ab".repeat(32),
+            &"cd".repeat(20)
+        ));
     }
 }

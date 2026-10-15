@@ -41,6 +41,14 @@ Those exploratory rows retain failed verification flags and lack full output
 digests; they cannot establish an optimization speedup. Actual run receipts,
 rather than the implemented workflow, determine which groups were measured.
 
+The next exact-fixture adapter is `isogeny-perf kernels`, documented in
+`KERNEL_BASELINE_PROTOCOL.md`: affine/cyclic Vélu, two x-only variants, two
+square-root variants, and supplied-kernel Kohel. Its 84-row matrix is separate
+from the 96-row BMSS series. It verifies degree/codomain and deterministic
+point-transport fingerprints against both Kohel and Vélu; it does not claim
+the BMSS series' full coefficient comparison. Current implementation and test
+progress do not establish a completed per-CPU baseline or a kernel speedup.
+
 CPU plan: Apple M4 Pro locally; GitHub native Linux x86-64, Linux ARM64,
 Apple ARM64 and Intel macOS runners. Runner labels select architecture/OS,
 not a guaranteed processor model. Each result records the actual CPU and

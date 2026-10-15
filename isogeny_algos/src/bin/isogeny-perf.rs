@@ -18,6 +18,10 @@ use std::time::Instant;
 
 #[path = "perf_campaign/mod.rs"]
 mod campaign;
+#[path = "perf_kernel/mod.rs"]
+mod kernel_suite;
+
+const COUNT_MODEL: &str = "generic Field calls; inversions opaque; setup and verification excluded";
 
 #[derive(Clone)]
 struct Counted<F> {
@@ -273,12 +277,7 @@ fn run<const N: usize>(
                 ("input", input.clone()),
                 ("input_sha256", Json::str(&input_sha)),
                 ("output_sha256", Json::str(sha256_hex(expected.as_bytes()))),
-                (
-                    "count_model",
-                    Json::str(
-                        "generic Field calls; inversions opaque; setup and verification excluded",
-                    ),
-                ),
+                ("count_model", Json::str(COUNT_MODEL)),
                 ("operations", counts),
                 ("diagnostic_ns", Json::Arr(raw)),
                 ("qualified_timing", Json::Bool(false)),
@@ -299,7 +298,7 @@ fn main_run() -> Result<(), String> {
         return campaign::run(&args[1..]);
     }
     if args.is_empty() || args.iter().any(|a| a == "--help") {
-        println!("isogeny-perf --out FRESH.jsonl --revision SOURCE_SHA [--bits 192,224,256,511] [--ells 7,31,101] [--samples 5] [--diagnostic-timing]\nisogeny-perf compare BASELINE.jsonl CANDIDATE.jsonl FRESH_COMPARISON.json\nAll eight BMSS methods; exact kernel/map equality and four point transports.\nCounts are an abstract arithmetic model. Timing is unreserved, diagnostic only.\nSynthetic supersingular fixtures at the requested field widths, not named NIST curves.");
+        println!("isogeny-perf [kernels] --out FRESH.jsonl --revision SOURCE_SHA [--bits 192,224,256,511] [--ells 7,31,101] [--samples 5] [--diagnostic-timing]\nisogeny-perf compare BASELINE.jsonl CANDIDATE.jsonl FRESH_COMPARISON.json\nisogeny-perf campaign BASE_BINARY CANDIDATE_BINARY BASE_SHA CANDIDATE_SHA FRESH_DIR [ISOLATED_BENCH CPU_LIST]\nDefault: eight BMSS methods, exact kernel/map coefficients and four point transports.\nkernels: seven kernel constructors, exact codomain and deterministic point-transport fingerprints.\nCounts are an abstract arithmetic model. Timing is unreserved, diagnostic only.\nSynthetic supersingular fixtures at the requested field widths, not named NIST curves.");
         return Ok(());
     }
     let (mut path, mut revision, mut bits, mut ells, mut samples, mut timing) = (
@@ -310,7 +309,8 @@ fn main_run() -> Result<(), String> {
         5usize,
         false,
     );
-    let mut i = 0;
+    let kernels = args.first().is_some_and(|a| a == "kernels");
+    let mut i = usize::from(kernels);
     while i < args.len() {
         let a = &args[i];
         if a == "--diagnostic-timing" {
@@ -388,9 +388,9 @@ fn main_run() -> Result<(), String> {
     writeln!(out, "{}", header.dump()).map_err(|e| e.to_string())?;
     for width in bits {
         match width {
-            192 => run::<3>(&mut out, width, &ells, samples, timing)?,
-            511 => run::<8>(&mut out, width, &ells, samples, timing)?,
-            _ => run::<4>(&mut out, width, &ells, samples, timing)?,
+            192 => run_suite::<3>(&mut out, width, &ells, samples, timing, kernels)?,
+            511 => run_suite::<8>(&mut out, width, &ells, samples, timing, kernels)?,
+            _ => run_suite::<4>(&mut out, width, &ells, samples, timing, kernels)?,
         }
     }
     writeln!(
@@ -405,10 +405,31 @@ fn main_run() -> Result<(), String> {
     .map_err(|e| e.to_string())?;
     Ok(())
 }
+fn run_suite<const N: usize>(
+    out: &mut std::fs::File,
+    bits: usize,
+    ells: &[u64],
+    samples: usize,
+    timing: bool,
+    kernels: bool,
+) -> Result<(), String> {
+    if kernels {
+        kernel_suite::run::<N>(out, bits, ells, samples, timing)
+    } else {
+        run::<N>(out, bits, ells, samples, timing)
+    }
+}
 fn text_field<'a>(j: &'a Json, key: &str) -> Result<&'a str, String> {
     j.get(key)
         .and_then(Json::as_str)
         .ok_or_else(|| format!("missing string field {key}"))
+}
+fn hex_field<'a>(j: &'a Json, key: &str, digits: usize) -> Result<&'a str, String> {
+    let value = text_field(j, key)?;
+    if value.len() != digits || !value.bytes().all(|b| b.is_ascii_hexdigit()) {
+        return Err(format!("invalid {key}"));
+    }
+    Ok(value)
 }
 fn load_cases(path: &str) -> Result<(Json, Vec<Json>), String> {
     let raw = std::fs::read_to_string(path).map_err(|e| e.to_string())?;
@@ -429,6 +450,8 @@ fn load_cases(path: &str) -> Result<(Json, Vec<Json>), String> {
     if text_field(&header, "schema")? != "isogeny-perf.run/v1" {
         return Err("incorrect run schema".into());
     }
+    hex_field(&header, "binary_sha256", 64)?;
+    let revision = hex_field(&header, "source_revision_supplied_by_launcher", 40)?;
     let Some(Json::Arr(args)) = header.get("args") else {
         return Err("missing requested cases".into());
     };
@@ -437,8 +460,17 @@ fn load_cases(path: &str) -> Result<(Json, Vec<Json>), String> {
             .find(|a| a[0].as_str() == Some(flag))
             .and_then(|a| a[1].as_str())
     };
+    if arg_value("--revision") != Some(revision) {
+        return Err("launcher revision differs from requested revision".into());
+    }
     let expected_bits: Vec<usize> = csv(arg_value("--bits").unwrap_or("192,224"))?;
     let expected_ells: Vec<u64> = csv(arg_value("--ells").unwrap_or("7,31"))?;
+    let kernels = args.first().and_then(Json::as_str) == Some("kernels");
+    let methods: Vec<&str> = if kernels {
+        kernel_suite::METHODS.to_vec()
+    } else {
+        Method::ALL.iter().map(|m| m.name()).collect()
+    };
     let mut keys = std::collections::BTreeSet::new();
     for row in &rows {
         if text_field(row, "schema")? != "isogeny-perf.case/v1"
@@ -446,15 +478,19 @@ fn load_cases(path: &str) -> Result<(Json, Vec<Json>), String> {
         {
             return Err("unverified case".into());
         }
-        if !Method::ALL
-            .iter()
-            .any(|m| Some(m.name()) == row.get("algorithm").and_then(Json::as_str))
-        {
+        if !methods.contains(&text_field(row, "algorithm")?) {
             return Err("unknown algorithm".into());
         }
+        if kernels && text_field(row, "output_check")? != kernel_suite::OUTPUT_CHECK {
+            return Err("unknown kernel output check".into());
+        }
         let input = row.get("input").ok_or("missing input")?;
-        if sha256_hex(input.dump().as_bytes()) != text_field(row, "input_sha256")? {
+        if sha256_hex(input.dump().as_bytes()) != hex_field(row, "input_sha256", 64)? {
             return Err("input digest mismatch".into());
+        }
+        hex_field(row, "output_sha256", 64)?;
+        if text_field(row, "count_model")? != COUNT_MODEL {
+            return Err("unknown arithmetic count model".into());
         }
         if !keys.insert((
             text_field(row, "bits")?,
@@ -480,17 +516,13 @@ fn load_cases(path: &str) -> Result<(Json, Vec<Json>), String> {
                 .map_err(|_| "invalid operation count")?;
         }
     }
-    if keys.len() != expected_bits.len() * expected_ells.len() * Method::ALL.len() {
+    if keys.len() != expected_bits.len() * expected_ells.len() * methods.len() {
         return Err("missing requested field-width/degree cell".into());
     }
-    // Each field-width/degree cell must contain all eight distinct BMSS methods.
+    // Each requested cell must contain every distinct method in its suite.
     for row in &rows {
-        for method in Method::ALL {
-            if !keys.contains(&(
-                text_field(row, "bits")?,
-                text_field(row, "ell")?,
-                method.name(),
-            )) {
+        for method in &methods {
+            if !keys.contains(&(text_field(row, "bits")?, text_field(row, "ell")?, *method)) {
                 return Err("missing algorithm in cell".into());
             }
         }
@@ -614,13 +646,25 @@ mod tests {
         let input = Json::obj(vec![("p", Json::str(101))]);
         let header = Json::obj(vec![
             ("schema", Json::str("isogeny-perf.run/v1")),
+            ("binary_sha256", Json::str("ab".repeat(32))),
+            (
+                "source_revision_supplied_by_launcher",
+                Json::str("cd".repeat(20)),
+            ),
             (
                 "args",
                 Json::Arr(
-                    ["--bits", "192", "--ells", "7"]
-                        .into_iter()
-                        .map(Json::str)
-                        .collect(),
+                    [
+                        "--bits",
+                        "192",
+                        "--ells",
+                        "7",
+                        "--revision",
+                        &"cd".repeat(20),
+                    ]
+                    .into_iter()
+                    .map(Json::str)
+                    .collect(),
                 ),
             ),
         ]);
@@ -632,6 +676,8 @@ mod tests {
                 ("bits", Json::str(192)),
                 ("ell", Json::str(7)),
                 ("algorithm", Json::str(method.name())),
+                ("output_sha256", Json::str("ef".repeat(32))),
+                ("count_model", Json::str(COUNT_MODEL)),
                 ("input", input.clone()),
                 (
                     "input_sha256",
@@ -678,6 +724,34 @@ mod tests {
             .1 = Json::str("00");
         write(&mutated);
         assert!(load_cases(path.to_str().unwrap()).is_err());
+        for (index, key) in [
+            (0, "binary_sha256"),
+            (0, "source_revision_supplied_by_launcher"),
+            (1, "output_sha256"),
+            (1, "count_model"),
+        ] {
+            let mut missing = rows.clone();
+            let Json::Obj(fields) = &mut missing[index] else {
+                unreachable!()
+            };
+            fields.retain(|(name, _)| name != key);
+            write(&missing);
+            assert!(load_cases(path.to_str().unwrap()).is_err(), "missing {key}");
+        }
+        for (index, key, value) in [
+            (0, "binary_sha256", "not-a-digest".to_string()),
+            (0, "source_revision_supplied_by_launcher", "de".repeat(20)),
+            (1, "output_sha256", "00".to_string()),
+            (1, "count_model", "another model".to_string()),
+        ] {
+            let mut malformed = rows.clone();
+            let Json::Obj(fields) = &mut malformed[index] else {
+                unreachable!()
+            };
+            fields.iter_mut().find(|(name, _)| name == key).unwrap().1 = Json::str(value);
+            write(&malformed);
+            assert!(load_cases(path.to_str().unwrap()).is_err(), "invalid {key}");
+        }
         std::fs::remove_file(path).unwrap();
     }
 }

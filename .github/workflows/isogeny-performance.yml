@@ -62,6 +62,7 @@ jobs:
           git archive "$BASE_SHA" isogeny_algos | tar -x -C "$RUNNER_TEMP/isogeny-base"
           cp isogeny_algos/src/bin/isogeny-perf.rs "$RUNNER_TEMP/isogeny-base/isogeny_algos/src/bin/"
           cp -R isogeny_algos/src/bin/perf_campaign "$RUNNER_TEMP/isogeny-base/isogeny_algos/src/bin/"
+          cp -R isogeny_algos/src/bin/perf_kernel "$RUNNER_TEMP/isogeny-base/isogeny_algos/src/bin/"
           git rev-parse HEAD > evidence/HEAD_SHA.txt
           printf '%s\n' "$BASE_SHA" > evidence/BASE_SHA.txt
           rustc --version --verbose > evidence/compiler.txt
@@ -81,6 +82,18 @@ jobs:
           "$BASE" --out evidence/baseline.jsonl --revision "$BASE_SHA" --bits 192,224,256,511 --ells 7,31,101
           "$HEAD" --out evidence/candidate.jsonl --revision "$HEAD_SHA" --bits 192,224,256,511 --ells 7,31,101
           "$HEAD" compare evidence/baseline.jsonl evidence/candidate.jsonl evidence/COMPARISON.json
+      - name: Seven kernel constructor baselines with explicit input boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="$RUNNER_TEMP/isogeny-base/isogeny_algos/target/release/isogeny-perf"
+          HEAD="$GITHUB_WORKSPACE/isogeny_algos/target/release/isogeny-perf"
+          "$BASE" kernels --out evidence/kernel-baseline.jsonl --revision "$BASE_SHA" --bits 192,224,256,511 --ells 7,31,101
+          "$HEAD" kernels --out evidence/kernel-candidate.jsonl --revision "$HEAD_SHA" --bits 192,224,256,511 --ells 7,31,101
+          "$HEAD" compare evidence/kernel-baseline.jsonl evidence/kernel-candidate.jsonl evidence/KERNEL_COMPARISON.json
+          # This first kernel series records baselines and output identity.
+          # Supplied-kernel and supplied-generator boundaries remain separate;
+          # these records establish no kernel wall-time speedup.
       - name: Five A/A pairs and five interleaved A/B pairs
         shell: bash
         run: |
