@@ -80,7 +80,7 @@ jobs:
         run: lake env lean AxiomAudit.lean
   p192-lean-proof:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: ${{ github.event_name == 'workflow_dispatch' && 35 || 25 }}
     defaults:
       run:
         working-directory: research/p192_extension_cover_20261012/lean
