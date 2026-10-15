@@ -23,8 +23,9 @@ was 1,200 seconds; the observed peak RSS values were 10,792,984,576 and
 The selected combined candidate is
 `IC1N83Ckb1a1fb547800PDP4rootRCguidedLAgaussTDdirectISO0h2aa3ee55ba07`.
 This panel is a secondary, reused-point cloud-instance diagnostic. The
-five fresh, alternating same-point Tier 1 IC/rho pairs are recorded in the
-separate Bloom reserve study when its run completes.
+five fresh, alternating same-point Tier 1 IC/rho pairs for this combined
+candidate completed with independent replay and are recorded in
+[PR #1876](https://github.com/aburan28/crypto/pull/1876).
 
 The producer was GitHub Actions run `38679320666`, artifact `11948835612`.
 Its archived ZIP SHA-256 is
