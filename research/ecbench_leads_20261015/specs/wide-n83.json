@@ -1,0 +1,55 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "ic.orbit_rank_v1",
+        "params": {
+          "columns": "4",
+          "max_pair_visits": "1000000",
+          "max_trials": "256",
+          "raw_x_cap": "4096",
+          "table_mode": "orbit"
+        }
+      },
+      "name": "orbit-c4",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.orbit_rank_v1",
+        "params": {
+          "columns": "16",
+          "max_pair_visits": "1000000",
+          "max_trials": "256",
+          "raw_x_cap": "4096",
+          "table_mode": "orbit"
+        }
+      },
+      "name": "orbit-c16",
+      "role": "candidate"
+    }
+  ],
+  "description": "PROTOCOL-v1.md; fresh public single-target workloads, cold bounded counts; no wall or asymptotic claim",
+  "label": "Exact E0 N83 ordinary-IC bounded diagnostic",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261015,
+    "timeout_seconds": 180,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 0,
+        "kind": "koblitz",
+        "n": 83
+      }
+    ],
+    "target_kind": "public",
+    "target_seed": 20261015,
+    "targets_per_curve": 2
+  }
+}

@@ -50,6 +50,7 @@ pub mod host;
 pub mod isolab;
 pub mod isolation;
 pub mod methods;
+pub mod orbit_ic;
 pub mod record;
 pub mod resources;
 pub mod runner;

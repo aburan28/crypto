@@ -1,0 +1,71 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "params": {}
+      },
+      "name": "rho",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "params": {}
+      },
+      "name": "rho-aa",
+      "role": "control"
+    },
+    {
+      "method": {
+        "id": "ic.orbit_rank_v1",
+        "params": {
+          "columns": "4",
+          "max_pair_visits": "1000000",
+          "max_trials": "2048",
+          "raw_x_cap": "4096",
+          "table_mode": "orbit"
+        }
+      },
+      "name": "orbit-c4",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.orbit_rank_v1",
+        "params": {
+          "columns": "8",
+          "max_pair_visits": "1000000",
+          "max_trials": "2048",
+          "raw_x_cap": "4096",
+          "table_mode": "orbit"
+        }
+      },
+      "name": "orbit-c8",
+      "role": "candidate"
+    }
+  ],
+  "description": "PROTOCOL-v1.md; fresh public single-target workloads, cold bounded counts; no wall or asymptotic claim",
+  "label": "Held-out degree37 rank/yield diagnostic",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261015,
+    "timeout_seconds": 180,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 0,
+        "kind": "koblitz",
+        "n": 37
+      }
+    ],
+    "target_kind": "public",
+    "target_seed": 20261015,
+    "targets_per_curve": 4
+  }
+}

@@ -936,12 +936,22 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
             .map(|(i, p)| (point_key(p), i))
             .collect();
         self.st = Some(FieldStructure::new(kc.n, &kc.curve.irreducible));
-        // Every system on one base has one shape: m·d unknowns and n
-        // equations.  The degree columns stay empty; the solver reports
-        // the degree it built in `extra`.
+        // Preserve the historical summand-only description for old IDs.
+        // v2 includes the actual chain's intermediate field coordinates
+        // and all coordinate-equation blocks. Solver calls are unchanged.
+        let versioned_shape = self.name.ends_with("-v2");
         self.shape = Some(SystemShape {
-            n_vars: (self.summands * frob.ell) as usize,
-            n_equations: kc.n as usize,
+            n_vars: (self.summands * frob.ell) as usize
+                + if versioned_shape {
+                    (self.summands as usize - 2) * kc.n as usize
+                } else {
+                    0
+                },
+            n_equations: if versioned_shape {
+                (self.summands as usize - 1) * kc.n as usize
+            } else {
+                kc.n as usize
+            },
             degrees: Vec::new(),
             semi_regular_degree: None,
         });
@@ -1066,7 +1076,12 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
 const BASE_NAMES: [&str; 2] = ["koblitz-standard-subspace", "binary-standard-subspace"];
 
 /// The oracle's names, likewise.
-const ORACLE_NAMES: [&str; 2] = ["pdp3-koblitz", "pdp3-binary"];
+const ORACLE_NAMES: [&str; 4] = [
+    "pdp3-koblitz",
+    "pdp3-binary",
+    "pdp3-koblitz-v2",
+    "pdp3-binary-v2",
+];
 
 /// This module's plug-ins, for `methods::register_binary_plugins`.
 pub fn plugins() -> BinaryPlugins {

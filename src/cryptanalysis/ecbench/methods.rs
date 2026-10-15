@@ -142,6 +142,20 @@ const IC_COUNTED_PARAMS: &[ParamDecl] = &[
 pub fn registry() -> &'static [MethodDecl] {
     &[
         MethodDecl {
+            id: "ic.orbit_rank_v1",
+            family: "ic",
+            summary: "bounded width-generic IC with unknown orbit logs, exact direct/quotient pair witnesses, modular rank and target pinning; native work remains unpriced",
+            entry: "ecbench::orbit_ic::solve_narrow/solve_wide",
+            applies: Applies::KoblitzOnly,
+            params: &[
+                ParamDecl { name: "columns", default: None, help: "distinct projected signed-Frobenius orbit columns, 1..64" },
+                ParamDecl { name: "raw_x_cap", default: None, help: "raw x values scanned from1, at most1000000" },
+                ParamDecl { name: "max_trials", default: None, help: "ordinary random aG+bQ query cap, at most1000000" },
+                ParamDecl { name: "max_pair_visits", default: None, help: "pair descriptor cap, at most2000000; unfinished setup exhausts with counts" },
+                ParamDecl { name: "table_mode", default: None, help: "direct full-point table or orbit signed-Frobenius quotient table" },
+            ],
+        },
+        MethodDecl {
             id: "rho.frozen_reference",
             family: "rho",
             summary: "the frozen r-adding walk every ledger row was priced against through §17 (A = 1); the historical \"before\" mark",
@@ -925,11 +939,13 @@ fn parse_hex_wide(s: &str) -> Result<u128, String> {
 fn solve_wide(
     m: &ResolvedMethod,
     wi: &WideInstance,
+    curve: &CurveFacts,
     tx: u128,
     ty: u128,
     seed: u64,
 ) -> Result<SolveReport, String> {
     match m.id.as_str() {
+        "ic.orbit_rank_v1" => super::orbit_ic::solve_wide(m, wi, curve, RawPointG::Affine { x: tx, y: ty }, seed),
         "rho.signed_frobenius_strong" | "rho.signed_frobenius_strong_escape" => {
             solve_strong_wide(m, wi, tx, ty, seed)
         }
@@ -972,7 +988,7 @@ pub fn solve(
     let session = measurement::Session::begin().ok();
     let mut rep = if let Instance::Wide(wi) = inst {
         let (tx, ty) = (parse_hex_wide(&target[0])?, parse_hex_wide(&target[1])?);
-        solve_wide(m, wi, tx, ty, seed)?
+        solve_wide(m, wi, curve, tx, ty, seed)?
     } else {
         let (tx, ty) = (parse_hex(&target[0])?, parse_hex(&target[1])?);
         solve_inner(m, inst, curve, d, tx, ty, seed)?
@@ -1001,6 +1017,9 @@ fn solve_inner(
         return Err("a wide instance goes through solve_wide".into());
     }
     match (inst, d.family) {
+        (Instance::Binary(i), _) if m.id == "ic.orbit_rank_v1" => {
+            super::orbit_ic::solve_narrow(m, i, curve, FastPoint::affine(tx, ty), seed)
+        }
         (Instance::Binary(i), _) if m.id == "ic.large_prime" => {
             solve_large_prime(m, i, curve, FastPoint::affine(tx, ty), seed)
         }

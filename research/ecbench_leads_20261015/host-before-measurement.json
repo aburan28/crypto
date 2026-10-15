@@ -1,0 +1,177 @@
+{
+  "schema": "ecbench.host/v1",
+  "env_class_id": "ECBENV2h96c931cc33fa",
+  "env_class_sha256": "96c931cc33fa1fb6d957c4cb5f39914acd2ed68b112a57b8a29b38fa280d9377",
+  "stable": {
+    "os": "linux",
+    "arch": "x86_64",
+    "kernel_release": "6.18.44",
+    "cpu_vendor": "AuthenticAMD",
+    "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+    "cpu_signature": "26/2/1",
+    "microcode": "0x1000065",
+    "features": [
+      "adx",
+      "aes",
+      "avx",
+      "avx2",
+      "avx512bw",
+      "avx512dq",
+      "avx512f",
+      "avx512ifma",
+      "avx512vbmi",
+      "avx512vl",
+      "bmi1",
+      "bmi2",
+      "fma",
+      "gfni",
+      "pclmulqdq",
+      "popcnt",
+      "sha",
+      "sse4.2",
+      "vaes",
+      "vpclmulqdq"
+    ],
+    "flags_sha256": "85347520b9aeea4d7b793025393d72a6f0de80e3ed48c88cdfa20e7d5fc3cc05",
+    "logical_cpus": 5,
+    "physical_cores": 5,
+    "packages": 1,
+    "numa_nodes": 1,
+    "topology": {
+      "cpus": [
+        {
+          "cpu": 0,
+          "core_id": 0,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            0
+          ]
+        },
+        {
+          "cpu": 1,
+          "core_id": 1,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            1
+          ]
+        },
+        {
+          "cpu": 2,
+          "core_id": 2,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            2
+          ]
+        },
+        {
+          "cpu": 3,
+          "core_id": 3,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            3
+          ]
+        },
+        {
+          "cpu": 4,
+          "core_id": 4,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            4
+          ]
+        }
+      ],
+      "nodes": [
+        {
+          "node": 0,
+          "cpus": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "mem_total_kib": 18440136,
+          "distances": [
+            10
+          ]
+        }
+      ]
+    },
+    "perf_levels": [],
+    "mem_total_kib": 18440136,
+    "cpu_settings": {
+      "0": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": false,
+        "smt_control": "notsupported"
+      },
+      "1": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": false,
+        "smt_control": "notsupported"
+      },
+      "2": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": false,
+        "smt_control": "notsupported"
+      },
+      "3": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": false,
+        "smt_control": "notsupported"
+      },
+      "4": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": false,
+        "smt_control": "notsupported"
+      }
+    },
+    "transparent_hugepages": "always [madvise] never",
+    "virtualization": {
+      "cpu_flag": "hypervisor",
+      "systemd_detect_virt_vm": "kvm"
+    },
+    "rustc_vv": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1"
+  },
+  "build": {
+    "binary_path": "/workspace/crypto/target/release/ecbench",
+    "binary_sha256": "5da1c6de930ce367613a4fb7eb0e31abab45f0186ec0dca1a6da43e54a8e9d93",
+    "git_commit": "321a7a5e4b875e4b84702d67af2975d5a835014c",
+    "git_dirty": true,
+    "git_commit_source": "runtime_worktree",
+    "runtime_git_commit": "321a7a5e4b875e4b84702d67af2975d5a835014c",
+    "runtime_git_dirty": true,
+    "debug_assertions": false,
+    "target_os": "linux",
+    "target_arch": "x86_64",
+    "build_env": {}
+  },
+  "process_affinity": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "captured_unix_ms": 1792038368071
+}

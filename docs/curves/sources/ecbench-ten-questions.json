@@ -1,0 +1,118 @@
+{
+  "curves": [
+    {
+      "aliases": [
+        "EC1P19Cecbenchgaph46d7cde3ef50"
+      ],
+      "end": "unk",
+      "family": "prime",
+      "icv1": "ICV1:fp-343073:241:342833:144483:unk:unk:r:6012dab82087",
+      "j": "144483",
+      "model_json": "{\"a\":\"139295\",\"b\":\"279002\",\"field\":\"fp-343073\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"343073\",\"v\":\"1\"}",
+      "order": "342833",
+      "params": {
+        "a": "139295",
+        "b": "279002",
+        "generator_call": "conductor_gap::crater(params(263,241), seed59297 where applicable)",
+        "p": "343073"
+      },
+      "representations": [
+        {
+          "curve": {
+            "coefficients": [
+              0,
+              0,
+              0,
+              139295,
+              279002
+            ],
+            "cofactor": 1,
+            "generator": [
+              "0x0",
+              "0x29150"
+            ],
+            "model": "short Weierstrass",
+            "subgroup_order": "342833",
+            "target_group": "prime-order subgroup"
+          },
+          "curve_uid": "urn:ec-record:1:sha256:46d7cde3ef50c9d142c6603936ab36a6fdd322bed2fc9c9fbf7ea50a77a8b9ce",
+          "ec1": "EC1P19Cecbenchgaph46d7cde3ef50",
+          "field": {
+            "characteristic": 343073,
+            "degree": 1,
+            "element_encoding": "hex integer modulo the characteristic",
+            "representation": "prime"
+          },
+          "field_sha256": "1bb90e52346915991b8754b546f406c8920f85d30acf606cf0c3022aad34e7c5",
+          "sources": [
+            "docs/curves/sources/ecbench-ten-questions.json"
+          ]
+        }
+      ],
+      "slug": "icv1-fp19-t241-6012dab8",
+      "sources": [
+        "docs/curves/sources/ecbench-ten-questions.json"
+      ],
+      "standard_names": [],
+      "trace": 241
+    },
+    {
+      "aliases": [
+        "EC1P19Cecbenchgaphef2b50bd2e27"
+      ],
+      "end": "unk",
+      "family": "prime",
+      "icv1": "ICV1:fp-343073:241:342833:1187:unk:unk:r:b992f548cf44",
+      "j": "1187",
+      "model_json": "{\"a\":\"109202\",\"b\":\"285915\",\"field\":\"fp-343073\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"343073\",\"v\":\"1\"}",
+      "order": "342833",
+      "params": {
+        "a": "109202",
+        "b": "285915",
+        "generator_call": "conductor_gap::floor(params(263,241), seed59297 where applicable)",
+        "p": "343073"
+      },
+      "representations": [
+        {
+          "curve": {
+            "coefficients": [
+              0,
+              0,
+              0,
+              109202,
+              285915
+            ],
+            "cofactor": 1,
+            "generator": [
+              "0x0",
+              "0x1690f"
+            ],
+            "model": "short Weierstrass",
+            "subgroup_order": "342833",
+            "target_group": "prime-order subgroup"
+          },
+          "curve_uid": "urn:ec-record:1:sha256:ef2b50bd2e27724e2f728f507003460be3a107ec7fd995a57379220809b7b762",
+          "ec1": "EC1P19Cecbenchgaphef2b50bd2e27",
+          "field": {
+            "characteristic": 343073,
+            "degree": 1,
+            "element_encoding": "hex integer modulo the characteristic",
+            "representation": "prime"
+          },
+          "field_sha256": "1bb90e52346915991b8754b546f406c8920f85d30acf606cf0c3022aad34e7c5",
+          "sources": [
+            "docs/curves/sources/ecbench-ten-questions.json"
+          ]
+        }
+      ],
+      "slug": "icv1-fp19-t241-b992f548",
+      "sources": [
+        "docs/curves/sources/ecbench-ten-questions.json"
+      ],
+      "standard_names": [],
+      "trace": 241
+    }
+  ],
+  "generated_by": "examples/ecbench_leads.rs register",
+  "schema": "ecbench-native-registry-additions/v1"
+}
