@@ -17,3 +17,22 @@ independent replay of all `3*3*66=594` outputs. Any failed arm or scalar
 mismatch censors its round. Stop after three rounds and one replay. Write
 new `*_V7B` files; never overwrite V7. This remains shared-host L0, so
 other host activity and a portable counted-`S` conversion stay unresolved.
+
+From the repository root, execute rounds sequentially, writing each to
+`COMPACT_BSGS_401_R<round>_V7B.jsonl` and `.stderr`, concatenate the three
+JSONL rows to `COMPACT_BSGS_401_V7B.jsonl`, and run the separate checker:
+
+```sh
+target/release/examples/torsion_pairing_batch compact-bsgs-run \
+  research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/INPUTS_V4.jsonl 2 \
+  "$round" research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/PUBLIC_401.json \
+  research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/SELECTION_401_V1.json
+target/release/examples/torsion_pairing_batch compact-verify \
+  research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/INPUTS_V4.jsonl 2 \
+  research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/PUBLIC_401.json \
+  research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/ANSWERS_401.json \
+  research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/COMPACT_BSGS_401_V7B.jsonl
+```
+
+Cell index two and all named files were checked against V7 before the
+repeat. The answer file is read only by `compact-verify`.
