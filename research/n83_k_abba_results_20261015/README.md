@@ -18,5 +18,23 @@ The sealer requires the exact raw ZIP and independently generated analysis
 digests. It checks source, fixture, base, resource, and analysis identities
 before writing canonical candidate, workload, measurement, selection, and
 index records. Repeating the command verifies byte equality of existing
-records. The source-pinned CI workflow and result report name the artifact
-and exact replay command after the experiment completes.
+records. The [result report](RESULT.md) records the bounded comparison and raw
+receipts. Download artifact `11964534821` from run `38713270151`, then
+verify its ZIP SHA-256
+`62f5c35620f993203a6842f1ac643c56b05067db881214d5298177ccfff65bdc`.
+The independently replayed `analysis.json` SHA-256 is
+`65e66d4c5f3052eadc3dd3c23ca2df3d2203c67d10b08d2c7cba205936f59cde`.
+The source-pinned CI workflow regenerates the fixtures, replays the raw
+artifact, and requires byte-identical current-head records.
+
+```sh
+python3 research/n83_k3250_sparse_fresh_20261015/generate.py
+python3 research/n83_k3350_sparse_fresh_20261015/generate.py
+python3 research/n83_k_abba_20261015/generate.py
+python3 research/n83_k_abba_20261015/verify.py /path/to/results
+python3 research/n83_k_abba_results_20261015/materialize.py \
+  --artifact-zip /path/to/raw.zip \
+  --artifact-sha256 62f5c35620f993203a6842f1ac643c56b05067db881214d5298177ccfff65bdc \
+  --analysis-sha256 65e66d4c5f3052eadc3dd3c23ca2df3d2203c67d10b08d2c7cba205936f59cde \
+  /path/to/results
+```
