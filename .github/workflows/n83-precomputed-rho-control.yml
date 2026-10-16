@@ -59,9 +59,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          paths="Cargo.toml Cargo.lock src examples experiments benches tests docs/curves/registry.json
-            research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-v3-control-v1/controls/pipeline.stdout
-            research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/instance.anf"
+          # Everything the library and the three examples include at compile time.
+          g=research/ic_candidate_tournament_20260915/goal_20260924
+          paths="Cargo.toml Cargo.lock src examples experiments benches tests
+            docs/curves/registry.json docs/curves/traits.json docs/ecbench/schema.sql
+            docs/ic/boundary_targets.json docs/ic/calibration.json
+            docs/identity-certificates/schoenhage-10mult.json
+            $g/prepared-f5-runtime-v1/mathematics.json
+            $g/prepared-f5-v3-control-v1/controls/pipeline.stdout
+            $g/prepared-ic-state-v1/f5-preparation.json $g/prepared-ic-state-v1/sat-preparation.json
+            $g/prepared-report-contract-v1/sat-source-check"
           frozen() {  # <commit> <dir>
             git fetch --no-tags --depth=1 origin "$1"
             test "$(git rev-parse FETCH_HEAD)" = "$1"
