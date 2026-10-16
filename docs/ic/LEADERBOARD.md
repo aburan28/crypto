@@ -254,6 +254,6 @@ Profiles verified: 100/100; comparison status: admissible_implementation_diagnos
 - `research/ecbench_conductor_gap_20261012/analysis.json` — sha256 `0ff9b20fd773ea67…`
 - `research/ecbench_conductor_gap_ir_20261014/analysis.json` — sha256 `c211baf8a91f79d4…`
 - `research/ecbench_frontier_20261013/frontier-data.json` — sha256 `765f6e8d05ebbf75…`
-- `docs/curves/registry.json` — sha256 `85300a415cfaef50…`
+- `docs/curves/registry.json` — sha256 `22b2ffef99720f2b…`
 - `docs/curves/ic/curves.schema.json` — sha256 `42cd9793dd299384…`
 - `docs/curves/ic/curves.yaml` — sha256 `ab4891397fe07fca…`

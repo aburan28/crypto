@@ -1,0 +1,24 @@
+{
+  "schema": "n83.k600-retained-object-inputs/v1",
+  "checked_utc_date": "2026-10-12",
+  "objects": [
+    {
+      "label": "small",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e.jsonl.gz",
+      "compressed_blake3": "b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e",
+      "local_sha256": "3e85c9e419fcddd3c9faed3c84470bf96fcad9178e48e1d73629369335841ecf",
+      "content_length": 3025798,
+      "etag": "\"359c027f8c0be18a8e41696f6c5c7aed\"",
+      "last_modified": "2026-10-09T17:03:04+00:00"
+    },
+    {
+      "label": "envelope",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v2-size-frontier/a0/objects/82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851.jsonl.gz",
+      "compressed_blake3": "82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851",
+      "local_sha256": "aacb62784dee0c9f5e06328dbb85a4b6a1c7243e778328da82900e7284f3a74a",
+      "content_length": 10313647,
+      "etag": "\"96006317b77bf3a271eb8330ab209ce5-2\"",
+      "last_modified": "2026-10-10T18:17:29+00:00"
+    }
+  ]
+}

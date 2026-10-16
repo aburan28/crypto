@@ -1,0 +1,36 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "IC frontier campaign Phase 0: pricing audit, Koblitz E_0 n=13, every arm",
+  "description": "Phase 0 step 2 of research/ic_frontier_campaign_20261015/PROTOCOL.md: one execution per arm on two public train targets to list every uncharged counter. Not a measurement; parameters are the 2026-10-14 best settings. Public synthetic; no security claim.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 13}],
+    "targets_per_curve": 2,
+    "target_seed": 20261015100,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+    {"name": "rho-frob", "role": "baseline", "method": {"id": "rho.signed_frobenius"}},
+    {"name": "bsgs-neg", "role": "baseline", "method": {"id": "bsgs.negation"}},
+    {"name": "ic-compact", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "compact-orbit-scan:columns=2,raw_x_cap=10000",
+      "oracle": "mitm-frobenius-counted:m=2",
+      "linalg": "incremental-gauss-full-rank-checked",
+      "max_trials": "200000"}}},
+    {"name": "ic-negfold", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+      "linalg": "incremental-gauss-full-rank-checked",
+      "max_trials": "200000"}}},
+    {"name": "ic-f4", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=3,engine=inherited-f4,degree=3,node_budget=8192",
+      "linalg": "incremental-gauss-full-rank-checked",
+      "max_trials": "200000"}}},
+    {"name": "ic-shared", "role": "candidate", "method": {"id": "ic.shared_rank", "params": {
+      "factor_base": "compact-orbit-scan:columns=8,raw_x_cap=1000000",
+      "rank_seed": "20261015101", "rank_max_trials": "100000", "target_max_attempts": "512"}}}
+  ],
+  "measurement": {"rounds": 1, "warmup": 0, "order": "alternate", "seed": 20261015102,
+                  "isolation_required": "L0", "timeout_seconds": 600}
+}
