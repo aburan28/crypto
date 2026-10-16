@@ -2777,7 +2777,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
   <div class="panel" id="ic-tool-programme-20261001">
     <div class="panel-head">
       <h2>The <code>ic</code> tool programme, baseline by baseline <span class="chip">engineering</span></h2>
-  <p class="panel-summary">Tracks ic tool cold speed against frozen baselines: Round 3's construction fix and Round 5's presence filter accepted as baselines, the wide-kernel round rejected on its holdout and its re-test withdrawn on v3, and Round 7 re-basing the programme on main's head as v3, where the rule's comparison leaves rho 5.2-21.0x faster cold; Rounds 6 and 8 are declared and wait for a host of their class.</p>
+  <p class="panel-summary">Tracks ic tool cold speed against frozen baselines: Round 3's construction fix and Round 5's presence filter accepted as baselines, the wide-kernel round rejected on its holdout and its re-test withdrawn on v3, and Round 7 re-basing the programme on main's head as v3, where the rule's comparison leaves rho 5.2-21.0x faster cold, and Round 10 re-basing it on main's head again as v4, within 3% of v3; Rounds 6 and 8 are declared and are to be ported onto v4.</p>
       <p>The programme makes the <code>ic</code> tool faster, round after round, against frozen baselines
         (<a href="https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/IC_TOOL_PROGRAM.md">plan</a>,
         #1103). &ldquo;Faster&rdquo; means faster than its previous baseline, end to end and cold, with identical
@@ -2813,7 +2813,15 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           Cold time ran 1.135&times; [1.104, 1.167], 1.483&times; [1.452, 1.514] and 1.526&times; [1.507, 1.546]
           faster than v2 at the three largest sizes, 1.170&times;, 1.483&times; and 1.539&times; on fresh
           holdouts, and 1.110&ndash;1.287&times; at the eight other sizes, with every pinned output
-          v0&rsquo;s. The gain is main&rsquo;s, not a lever of the programme&rsquo;s. It is the newest baseline.</li>
+          v0&rsquo;s. The gain is main&rsquo;s, not a lever of the programme&rsquo;s.</li>
+        <li><b>Round 10 (baseline v4)</b> re-based the programme on main&rsquo;s head again, <code>92246530</code>,
+          about 1,450 commits after v3, on an Emerald Rapids host of the reference class. Both arms were built
+          here with one compiler; the rebuilt v3 and main both give v0&rsquo;s outputs on all 90 pinned rows, and
+          both recover the same logarithm under callgrind. Cold time ran 1.017&times; [0.990, 1.045],
+          1.034&times; [1.012, 1.055] and 1.007&times; [0.992, 1.022] faster than v3 at the three largest sizes,
+          0.992&times;, 1.013&times; and 1.011&times; on fresh holdouts, and no size regressed beyond its A/A
+          band. It was accepted on its pin and bands, with no minimum gain; any gain is main&rsquo;s. It is the
+          newest baseline.</li>
         <li><b>The rule at v3</b> re-ran &sect;23&rsquo;s single-target comparison on v3: the same six sizes,
           64 targets and four A/A repeats a size, 408 of 408 rows checked and every logarithm &sect;23&rsquo;s.
           Online the index calculus is 10.2&ndash;26.5&times; faster than rho on the same point (&sect;23:
@@ -2826,6 +2834,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         <code>rounds/R04-scan-probes/analysis.json</code>
         with <code>filter_check.json</code>, <code>rounds/R05-presence-filter/analysis.json</code>
         with <code>prediction.json</code>, <code>rounds/R07-main-head/analysis.json</code>,
+        <code>rounds/R10-main-head/analysis.json</code>,
         <code>rule/v3/analysis.json</code>,
         <code>explorations/R02b-go-no-go-20261006/pairs.tsv</code>,
         <code>explorations/scan-stages-v3-20261006/stages.tsv</code>,
@@ -2873,7 +2882,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
       <span><b>Declared, not yet run: R06 and R08.</b> R06 changes the scan&rsquo;s key (GFNI and funnel shifts) and R08 its subtraction (two carry-less folds a product, eight lanes, with the negated base as coordinate slices), each with the same outputs by construction. R08&rsquo;s exploration on R06&rsquo;s candidate read 1.293, 1.223 and 1.362 in cold time at the three largest sizes, with the subtraction at 4.7&ndash;4.9&nbsp;ns a summand against v3&rsquo;s 11.3&ndash;12.1. Neither is a measurement until its round runs. Both need the reference class, and on 2026-10-07 the container moved to a Cascade Lake host without GFNI, VBMI2 or VPCLMULQDQ, so R06 waits for a host of its class, and <code>icprog</code> now refuses a round&rsquo;s timed steps outside its class.</span>
       <span><b>Declared on this host&rsquo;s class, running: R09.</b> On the Cascade Lake host the scan&rsquo;s subtraction is the scalar product at every size, and a scanned summand costs 38&ndash;41&nbsp;ns: 15.3&ndash;15.5 to subtract, 12.0&ndash;13.7 to key (stage diagnostic). R09 keys each rest from its slope, <code>c + rotl(c) + d + e</code> with <code>c = coords(&lambda;)</code>, so the squaring, the abscissa and its store go for every summand the filter rejects; it adds eight inversion chains, a cheaper rotation step, a run&rsquo;s scans in three stages, and the build keyed the same way, with the same keys. Its exploration read 1.119 [1.093, 1.146], 1.112 [1.060, 1.166] and 1.103 [1.071, 1.136] in cold time at the three largest sizes, eight pairs each, every logarithm v3&rsquo;s; it is not a measurement until the round runs. Its class is its own: AVX-512F and PCLMULQDQ without VPCLMULQDQ. Pipelining alone and A2 re-checked there moved cold time by nothing reliable.</span>
       <span><b>Explored, not declared.</b> Huge pages advised on the pair tables (A2) halve the minor faults and leave cold time where it was, 0.960&ndash;1.068: the scan&rsquo;s misses are cache misses. On R08&rsquo;s candidate, the build&rsquo;s partition streams and per-run filters (A1) make the build 1.40&ndash;1.47&times; faster, and prefetching each admitted key&rsquo;s run (A13) makes collection 1.12&ndash;1.29&times; faster; each reads 1.07&ndash;1.12&times; in cold time on two rows a size. These are explorations, to be declared on the baseline R08 decides.</span>
-      <span><span class="chip">accounting</span> v0 is a baseline, not a change. Round 2 would have been <span class="chip">engineering</span>; it is rejected, and the kernel is kept on record as <code>candidate.patch</code>. Round 4 is <span class="chip">accounting</span>, a stage diagnostic: it changed no timed code, and nothing in it is a speedup. Round 3 is <span class="chip">engineering</span>: the factors are identical, so the ratio to the floor is flat. Round 5 is <span class="chip">engineering</span>: nothing the pipeline decides changes, so the ratio to the floor is flat. Round 7 is <span class="chip">engineering</span>, credited to main: every pinned output is v0&rsquo;s, so the ratio to the floor is flat, and v3 is the newest baseline. The rule at v3 is <span class="chip">accounting</span>: it re-measures the comparison at the newest baseline and changes no algorithm.</span>
+      <span><span class="chip">accounting</span> v0 is a baseline, not a change. Round 2 would have been <span class="chip">engineering</span>; it is rejected, and the kernel is kept on record as <code>candidate.patch</code>. Round 4 is <span class="chip">accounting</span>, a stage diagnostic: it changed no timed code, and nothing in it is a speedup. Round 3 is <span class="chip">engineering</span>: the factors are identical, so the ratio to the floor is flat. Round 5 is <span class="chip">engineering</span>: nothing the pipeline decides changes, so the ratio to the floor is flat. Round 7 is <span class="chip">engineering</span>, credited to main: every pinned output is v0&rsquo;s, so the ratio to the floor is flat. Round 10 is <span class="chip">engineering</span>, credited to main, on the same grounds, and v4 is the newest baseline. The rule at v3 is <span class="chip">accounting</span>: it re-measures the comparison at the newest baseline and changes no algorithm.</span>
     </div>
   </div>
 

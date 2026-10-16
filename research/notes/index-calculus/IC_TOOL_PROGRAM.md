@@ -613,6 +613,22 @@ nothing missing. R09's class excludes it.
 - **Then R06,** ported onto R10's outcome by an amendment before any run,
   on this host; R08 follows R06's decision.
 
+**R10 accepted: v4 is main's head (2026-10-16).**
+- **The pin held.** The rebuilt v3 and main both give v0's outputs on all
+  90 rows, and both recover the same logarithm under callgrind.
+- **Main costs what v3 costs.** Cold time, v3 over main, read
+  1.017 [0.990, 1.045], 1.034 [1.012, 1.055] and 1.007 [0.992, 1.022] at
+  `2^44.3`, `2^44.5` and `2^47.2` on the suite rows, and 0.992, 1.013 and
+  1.011 on the fresh holdouts. No size regresses beyond the round's own
+  A/A band. That matches the prediction: the drift on the timed path was
+  housekeeping.
+- **The class is engineering, credited to main.** The ledger moves to v4
+  ([results](../../ic_tool_program/rounds/R10-main-head/README.md),
+  `baselines.json`), and the distance to rho is the rule at v3's,
+  within these few percent.
+- **Next:** R06's amendment ports its candidate onto v4, then R06 runs
+  here.
+
 ## 9. Track B: generality and robustness
 
 **Where the tool stands (at `0bf67f16`).**
