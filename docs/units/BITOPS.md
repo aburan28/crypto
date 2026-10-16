@@ -123,6 +123,13 @@ above the reference walk's is doing work its counters miss: an F4 elimination
 that counts its XORs but not its symbolic preprocessing, for example. A
 record that fails the audit is not admitted as a bound.
 
+Work that was uncounted when sessions were committed is counted in a phase's
+`work_native` map, never in `native`, so committed records keep replaying
+exactly. The code that counts an item of a family's uncounted list also writes
+the marker `counted:<item>`; a record that carries the marker leaves the item
+off its `known_uncounted` list, and a record without it (every record written
+before the counter existed) keeps it.
+
 A record whose counters include one with no `bitop/v1` rule has no total. Its
 `work.complete` is `false` and the unpriced counters are named. An unknown
 cost is never written as zero.

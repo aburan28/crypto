@@ -651,6 +651,18 @@ pub struct FrobeniusCanon {
     /// `tables[i][b]`: the normal coordinates of the field element whose
     /// `i`-th byte is `b` and whose other bytes are zero.
     tables: Vec<[u64; 256]>,
+    /// What [`FrobeniusCanon::new`] did, for a caller that counts it.
+    build: CanonBuildWork,
+}
+
+/// The work of building a [`FrobeniusCanon`]: the normal-element search
+/// (`n` squarings per candidate, a Gauss–Jordan inversion over `F_2`)
+/// and the byte tables.  `word_ops` counts single-word steps (a bit
+/// gather, a test, an XOR, a swap); `field_sqrs` the squarings.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct CanonBuildWork {
+    pub word_ops: u64,
+    pub field_sqrs: u64,
 }
 
 impl FrobeniusCanon {
@@ -662,6 +674,7 @@ impl FrobeniusCanon {
             return None;
         }
         let mask = (1u64 << n) - 1;
+        let mut build = CanonBuildWork::default();
         // A normal element: one whose Frobenius orbit is a basis.
         let mut inverse = None;
         let mut candidate = 2u64;
@@ -680,7 +693,8 @@ impl FrobeniusCanon {
                     c
                 })
                 .collect();
-            if let Some(inv) = invert_f2(&columns, n) {
+            build.field_sqrs += u64::from(n);
+            if let Some(inv) = invert_f2(&columns, n, &mut build.word_ops) {
                 inverse = Some(inv);
                 break;
             }
@@ -691,7 +705,11 @@ impl FrobeniusCanon {
         let by_bit: Vec<u64> = (0..n)
             .map(|j| (0..n).fold(0u64, |acc, i| acc | (((inverse[i as usize] >> j) & 1) << i)))
             .collect();
+        // The transpose: `n²` bit gathers.
+        build.word_ops += u64::from(n) * u64::from(n);
         let bytes = n.div_ceil(8) as usize;
+        // Each table slot tests eight bits and XORs the set ones in.
+        build.word_ops += bytes as u64 * 256 * 8;
         let tables = (0..bytes)
             .map(|bi| {
                 let mut table = [0u64; 256];
@@ -708,7 +726,17 @@ impl FrobeniusCanon {
                 table
             })
             .collect();
-        Some(Self { n, mask, tables })
+        Some(Self {
+            n,
+            mask,
+            tables,
+            build,
+        })
+    }
+
+    /// The work [`new`](Self::new) did building this instance.
+    pub fn build_work(&self) -> CanonBuildWork {
+        self.build
     }
 
     /// The normal coordinates of a field element.
@@ -1082,20 +1110,29 @@ unsafe fn least_rotation16_avx512(c: &[u64; 16], n: u32, mask: u64) -> [u64; 16]
 
 /// Invert an `n × n` matrix over `F_2` given as its columns, returning
 /// the rows of the inverse; `None` when the columns are dependent.
-fn invert_f2(columns: &[u64], n: u32) -> Option<Vec<u64>> {
+/// `ops` counts single-word steps: the `n²` bit gathers of the
+/// transpose, the pivot search's tests, the two swaps, and per column a
+/// test of every row and two XORs per row it clears.
+fn invert_f2(columns: &[u64], n: u32, ops: &mut u64) -> Option<Vec<u64>> {
     // Row `i` carries, in bit `k`, the `i`-th bit of column `k`.
     let mut a: Vec<u64> = (0..n)
         .map(|i| (0..n).fold(0u64, |acc, k| acc | (((columns[k as usize] >> i) & 1) << k)))
         .collect();
+    *ops += u64::from(n) * u64::from(n);
     let mut inv: Vec<u64> = (0..n).map(|i| 1u64 << i).collect();
     for c in 0..n as usize {
-        let pivot = (c..n as usize).find(|&r| (a[r] >> c) & 1 == 1)?;
+        let pivot = (c..n as usize).find(|&r| {
+            *ops += 1;
+            (a[r] >> c) & 1 == 1
+        })?;
         a.swap(c, pivot);
         inv.swap(c, pivot);
+        *ops += 2 + u64::from(n);
         for r in 0..n as usize {
             if r != c && (a[r] >> c) & 1 == 1 {
                 a[r] ^= a[c];
                 inv[r] ^= inv[c];
+                *ops += 2;
             }
         }
     }
@@ -1360,6 +1397,7 @@ mod tests {
                 n,
                 mask,
                 tables: Vec::new(),
+                build: CanonBuildWork::default(),
             };
             let mut words = vec![0, mask, 1, 1 << (n - 1), mask ^ 1, mask >> 1];
             for period in 1..=n.min(12) {

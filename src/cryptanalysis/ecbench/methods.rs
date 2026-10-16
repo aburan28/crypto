@@ -1786,7 +1786,7 @@ fn phase_of(name: &str, p: &PhaseCost) -> PhaseRecord {
         gae: p.gae,
         wall_ns: Some(p.wall_ns),
         native: p.native.clone(),
-        work_native: BTreeMap::new(),
+        work_native: p.work_native.clone(),
     }
 }
 

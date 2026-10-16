@@ -695,6 +695,11 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for CompactOrbitScanBase<'_> {
             |p| inst.fast.neg(*p).pack(),
             |p| p.x,
         )?;
+        // `from_column_map`'s inserts, lookups and negations are in this
+        // builder's `hash_probes_uncharged` and `point_negations_uncharged`
+        // below; only its abscissa sort is new.
+        fb.cost.work_native.remove("index_inserts");
+        fb.cost.work_native.remove("index_point_negations");
         fb.cost.count("abscissae_scanned_uncharged", scanned);
         fb.cost.count("inversions", scanned);
         fb.cost.count("legacy_as_solves_uncharged", scanned);
@@ -990,6 +995,13 @@ impl FactorBaseBuilder<Fp2Curve> for GlsLineBase<'_> {
 
 // ── Decomposition oracles ──────────────────────────────────────────
 
+/// `counters` with the marker that says the oracle's set-up counts all
+/// its table work (`ecbench::work::known_uncounted`).
+fn table_counted(mut counters: BTreeMap<String, u64>) -> BTreeMap<String, u64> {
+    counters.insert("counted:table_insert_attempts".to_string(), 1);
+    counters
+}
+
 /// Test `R − P ∈ F` for every signed base point: no table, `|F|` group
 /// operations a target, and the honest baseline every table oracle is
 /// an improvement on.
@@ -1006,6 +1018,11 @@ impl<G: CountedGroup> DecompositionOracle<G> for SubtractOracle {
 
     fn describe(&self, _params: &Params) -> String {
         "for each signed base point P, test whether R − P is in the base".into()
+    }
+
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        // No table: nothing is inserted.
+        table_counted(BTreeMap::new())
     }
 
     fn decompose(
@@ -1086,6 +1103,15 @@ impl<G: CountedGroup> DecompositionOracle<G> for MitmOracle {
         Ok(())
     }
 
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        table_counted(
+            self.table
+                .as_ref()
+                .map(PairTable::work_counters)
+                .unwrap_or_default(),
+        )
+    }
+
     fn decompose(
         &mut self,
         ctx: &InstanceCtx<G>,
@@ -1151,6 +1177,15 @@ impl DecompositionOracle<PrimeCurve> for PrimeBatchMitmOracle {
         Ok(())
     }
 
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        table_counted(
+            self.table
+                .as_ref()
+                .map(PairTable::work_counters)
+                .unwrap_or_default(),
+        )
+    }
+
     fn decompose(
         &mut self,
         ctx: &InstanceCtx<PrimeCurve>,
@@ -1206,6 +1241,13 @@ pub struct RootfindSubtractOracle<'i> {
     /// Hits whose summands did not re-add to the target in the group.
     /// Must stay zero.
     pub mismatches: u64,
+    /// `bitop/v1`-only work of the sweep (`relation_work_native`): the
+    /// batched inversion's `3k` products and the two conversions into
+    /// Montgomery form a target, and the `k` differences `x_R − x_i`.
+    /// The candidate points' own products are inside the group addition
+    /// each is charged as.
+    sweep_field_muls: u64,
+    sweep_field_adds: u64,
 }
 
 impl<'i> RootfindSubtractOracle<'i> {
@@ -1220,6 +1262,8 @@ impl<'i> RootfindSubtractOracle<'i> {
             degenerate: Vec::new(),
             scratch: Vec::new(),
             mismatches: 0,
+            sweep_field_muls: 0,
+            sweep_field_adds: 0,
         }
     }
 }
@@ -1313,6 +1357,33 @@ impl DecompositionOracle<PrimeCurve> for RootfindSubtractOracle<'_> {
         Ok(())
     }
 
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        let mut out = self
+            .table
+            .as_ref()
+            .map(PairTable::work_counters)
+            .unwrap_or_default();
+        // The sweep's `x_index` read per abscissa, and its two
+        // conversions into Montgomery form.
+        let k = self.reps.len() as u64;
+        if k > 0 {
+            *out.entry("lookups".to_string()).or_insert(0) += k;
+            out.insert("montgomery_conversions".to_string(), 2 * k);
+        }
+        table_counted(out)
+    }
+
+    fn relation_work_native(&self) -> BTreeMap<String, u64> {
+        let mut out = BTreeMap::new();
+        if self.sweep_field_muls > 0 {
+            out.insert("sweep_field_muls".to_string(), self.sweep_field_muls);
+        }
+        if self.sweep_field_adds > 0 {
+            out.insert("sweep_field_adds".to_string(), self.sweep_field_adds);
+        }
+        out
+    }
+
     fn decompose(
         &mut self,
         ctx: &InstanceCtx<PrimeCurve>,
@@ -1344,6 +1415,8 @@ impl DecompositionOracle<PrimeCurve> for RootfindSubtractOracle<'_> {
         counters.inversions += 1;
         ops.field_ops.invs += 1;
         ops.field_ops.muls += 3 * k as u64;
+        self.sweep_field_muls += 2 + 3 * k as u64;
+        self.sweep_field_adds += k as u64;
         for i in 0..k {
             let rep = self.reps[i];
             if self.degenerate[i] {
@@ -1539,6 +1612,26 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for FrobeniusMitmOracle<'_> {
         ops.merge(table.build_ops);
         self.table = Some(table);
         Ok(())
+    }
+
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        // The large-prime collector builds its own tables, which this
+        // does not count: its records keep `table_insert_attempts` listed.
+        if self.large.is_some() {
+            return BTreeMap::new();
+        }
+        let Some(table) = &self.table else {
+            return BTreeMap::new();
+        };
+        let mut out = table.work_counters();
+        if !self.count_setup {
+            // The uncounted variant's `setup_native` leaves the build's
+            // canonicalisations, Frobenius maps and orbit lookups out.
+            for (name, v) in table.build_counters() {
+                *out.entry(name).or_insert(0) += v;
+            }
+        }
+        table_counted(out)
     }
 
     fn setup_native(&self) -> BTreeMap<String, u64> {

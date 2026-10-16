@@ -230,6 +230,15 @@ pub trait DecompositionOracle<G: CountedGroup> {
         BTreeMap::new()
     }
 
+    /// Work performed by `prepare` that only `bitop/v1` prices (table
+    /// insert attempts, canonicalisation tables), by `ecbench::work`
+    /// counter name; kept out of `setup_native` so committed records
+    /// replay.  An oracle whose set-up work is all counted also returns
+    /// the marker `counted:table_insert_attempts`.
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        BTreeMap::new()
+    }
+
     /// Decompose `point`, or decide it does not decompose.
     fn decompose(
         &mut self,
@@ -272,6 +281,12 @@ pub trait DecompositionOracle<G: CountedGroup> {
     /// counters by name.  The large-prime collector reports its partials,
     /// merges and verification work here.
     fn relation_counters(&self) -> BTreeMap<String, u64> {
+        BTreeMap::new()
+    }
+
+    /// Relation-phase work that only `bitop/v1` prices, as
+    /// [`setup_work_native`](Self::setup_work_native) is for set-up.
+    fn relation_work_native(&self) -> BTreeMap<String, u64> {
         BTreeMap::new()
     }
 
