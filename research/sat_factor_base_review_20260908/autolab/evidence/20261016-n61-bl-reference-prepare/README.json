@@ -11,6 +11,6 @@
     "equal_advice": "ic_next10_09_equal_advice targets|bl with point files + table_bytes",
     "launcher": "use launch-equal-advice; launch-panel rejects this beat"
   },
-  "next_command": "CARGO_TARGET_DIR=/Volumes/SSD990/tmp/cargo-bl-n61 PYTHONUNBUFFERED=1 python3 -u research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch-equal-advice --beat koblitz.compact_orbit.n61_bl_reference --targets 1024",
+  "next_command": "Landed paired IC: evidence/20261016-n61-bl-ic-pair-l1024 (run 20261016T074400Z-n61-bl-ic-pair; 1024/1024 verified; claim-check still FAIL). Next: co-measure + IC1 manifests/replay for PASS; do not promote ledger.",
   "claim_boundary": "diagnostic/reference-arm; fail-closed vs_rho; no ledger promotion; public synthetic only; PENDING_INDEPENDENT_VALIDATION at most"
 }
