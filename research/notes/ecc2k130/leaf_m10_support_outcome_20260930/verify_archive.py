@@ -45,8 +45,12 @@ def main() -> None:
         else:
             assert item["provenance"] == "mac_replay"
             assert item["path"] == "mac_replay.json"
+    # run_36707051160/ is a second, separately sealed archive (its own
+    # SHA256SUMS and README replay command) that landed beside this one in
+    # the union-resolve merge of #1062; it is not part of this manifest.
     assert paths == {path.relative_to(EVIDENCE).as_posix()
-                     for path in EVIDENCE.rglob("*") if path.is_file()}
+                     for path in EVIDENCE.rglob("*") if path.is_file()
+                     and "run_36707051160" not in path.relative_to(EVIDENCE).parts}
     assert hosted_files == manifest["hosted_artifact_files"] == 101
     assert hosted_bytes == manifest["hosted_artifact_bytes"]
     print(f"PASS {len(paths)} files, {hosted_bytes} hosted bytes")

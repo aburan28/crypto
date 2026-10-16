@@ -72,6 +72,7 @@ SOURCES = {
     "n41_n53_counted": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
     "conductor_gap_counts": "research/ecbench_conductor_gap_20261012/analysis.json",
     "frontier_audit": "research/ecbench_frontier_20261013/frontier-data.json",
+    "n83_tier1_cold_holdout": "research/n83_e2e_holdout_20261016/ic1_rows_38955665283.json",
     "registry": "docs/curves/registry.json",
     "curves_schema": "docs/curves/ic/curves.schema.json",
     "curves_yaml": "docs/curves/ic/curves.yaml",
@@ -643,6 +644,15 @@ def latest_frontier_audit() -> dict:
 def build() -> dict:
     names = Names()
     frontier_audit = latest_frontier_audit()
+    n83_holdout = load(SOURCES["n83_tier1_cold_holdout"])
+    if (n83_holdout["schema"] != "n83.e2e-holdout-ic1/v1"
+            or n83_holdout["evidence_status"] != "PASS_INDEPENDENT_REPLAY"
+            or n83_holdout["hardware_tier"] != "cloud_instance_tier1"
+            or len(n83_holdout["workloads"]) != 5
+            or len(n83_holdout["rows"]) != 25
+            or set(n83_holdout["pipeline_summaries"]) !=
+            {"k1104", "k1108", "k1120", "k1152"}):
+        raise ValueError("N83 cold holdout source is incomplete")
     small_rows = [json.loads(line) for line in (REPO / SOURCES["f6_small_cold_rows"]).read_text().splitlines() if line]
     small_replay = load(SOURCES["f6_small_cold_replay"])
     small_by_arm = {row["arm"]: row for row in small_rows}
@@ -949,6 +959,16 @@ def build() -> dict:
         "f6_ecbench_ladder_diagnostic": ladder_diagnostic,
         "f4_f5_f6_cross_family_diagnostic": cross_diagnostic,
         "latest_frontier_audit": frontier_audit,
+        "n83_tier1_cold_holdout": {
+            "source": SOURCES["n83_tier1_cold_holdout"],
+            "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+            "selection_status": n83_holdout["selection_status"],
+            "selected_candidate_id": n83_holdout["selected_candidate_id"],
+            "selection_admitted": n83_holdout["selection_admitted"],
+            "pipelines": n83_holdout["pipeline_summaries"],
+            "paired_intervals": n83_holdout["paired_intervals"],
+            "aa_controls": n83_holdout["aa_controls"],
+        },
         "curve_records": {
             "registry": SOURCES["registry"], "schema": SOURCES["curves_schema"], "yaml": SOURCES["curves_yaml"],
             "yaml_records": n_records,
@@ -1260,6 +1280,42 @@ def markdown(doc: dict) -> str:
         observed = session["arms"]["ic-mitm"]["cross_curve"]
         L.append(f"| {session['ell']} | {observed['ratio_floor_over_crater']:.6f} | "
                  f"{observed['ci99'][0]:.6f} to {observed['ci99'][1]:.6f} |")
+    n83 = doc["n83_tier1_cold_holdout"]
+    ab = n83["paired_intervals"]["k1120|k1152"]
+    close = n83["paired_intervals"]["k1120|k1104"]
+    L += ["", "## N83 Tier 1 one-target cold factor-base holdout", "",
+          "Five sealed public points, one fresh process per IC arm, and a same-point rho "
+          "solve per point completed on one GitHub-hosted cloud instance. Each of the 25 IC "
+          "arms and five rho arms passed independent replay. K1152 ran twice per point as "
+          "the local A/A control. The selected candidate is `" +
+          (n83["selected_candidate_id"] or "null") + "`; the frozen decision is `" +
+          n83["selection_status"] + "`.", "",
+          f"K1120 saves {ab['mean_ms'] / 1000:.3f} s against K1152 "
+          f"(paired 95% [{ab['lower_95_ms'] / 1000:.3f}, "
+          f"{ab['upper_95_ms'] / 1000:.3f}] s). Its advantage over K1104 is "
+          f"{close['mean_ms'] / 1000:.3f} s "
+          f"[{close['lower_95_ms'] / 1000:.3f}, "
+          f"{close['upper_95_ms'] / 1000:.3f}] s. These are cold-process "
+          "differences on the same five points.", "",
+          "| K | actual usable points | folded columns | mean cold s | setup s | rank s | target s | mean same-point rho online s | cold IC / rho online | peak RSS MiB |",
+          "|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
+    for k in (1104, 1108, 1120, 1152):
+        item = n83["pipelines"][f"k{k}"]
+        L.append(f"| {k} | {item['actual_usable_points']:,} | "
+                 f"{item['effective_columns']:,} | "
+                 f"{item['mean_cold_process_ms'] / 1000:.3f} | "
+                 f"{item['mean_setup_ms'] / 1000:.3f} | "
+                 f"{item['mean_rank_stage_ms'] / 1000:.3f} | "
+                 f"{item['mean_targets_total_ms'] / 1000:.3f} | "
+                 f"{item['mean_rho_online_ms'] / 1000:.3f} | "
+                 f"{item['mean_cold_over_rho_online']:.3f} | "
+                 f"{item['max_peak_rss_bytes'] / 1048576:.1f} |")
+    L += ["", f"[Frozen IC1 rows and candidate identities](../../{n83['source']}). "
+          "The cold process includes base and index construction, relation rank, "
+          "target recovery and producer verification. Rho's interval starts with "
+          "its target-dependent walk and ends with scalar verification. "
+          "This wall-time panel is kept separate from Tables A–C and their "
+          "operation-unit S rankings.", ""]
     L += ["", "## Sources", ""]
     for k, v in doc["sources"].items():
         L.append(f"- `{v['path']}` — sha256 `{v['sha256'][:16]}…`")
@@ -1866,6 +1922,43 @@ def page(doc: dict, standalone: bool) -> str:
         P.append(f'<tr><td>{session["ell"]}</td><td>{observed["ratio_floor_over_crater"]:.6f}</td>'
                  f'<td>{observed["ci99"][0]:.6f} to {observed["ci99"][1]:.6f}</td></tr>')
     P.append('</tbody></table>' + gh(SOURCES["conductor_gap_counts"], 'Native analysis and source records') + '</section>')
+
+    n83 = doc["n83_tier1_cold_holdout"]
+    baseline = n83["paired_intervals"]["k1120|k1152"]
+    close = n83["paired_intervals"]["k1120|k1104"]
+    P.append('<section id="n83-tier1-cold-20261016"><h2>N83 Tier 1 cold factor-base holdout</h2>'
+             '<p>Five sealed one-target points; 25 independently replayed IC arms and five '
+             'same-point rho solves on one GitHub-hosted cloud instance. K1152 ran A/B on '
+             'each point. The frozen selection status is <code>' +
+             esc(n83["selection_status"]) + '</code>; selected candidate <code>' +
+             esc(n83["selected_candidate_id"] or "null") + '</code>.</p>'
+             f'<p>K1120 saves {baseline["mean_ms"] / 1000:.3f} s against K1152 '
+             f'(paired 95% {baseline["lower_95_ms"] / 1000:.3f} to '
+             f'{baseline["upper_95_ms"] / 1000:.3f} s). Its {close["mean_ms"] / 1000:.3f} s '
+             f'advantage over K1104 has a 95% interval of '
+             f'{close["lower_95_ms"] / 1000:.3f} to '
+             f'{close["upper_95_ms"] / 1000:.3f} s.</p>'
+             '<div class="scroll"><table><thead><tr><th>K</th><th>Usable points</th>'
+             '<th>Columns</th><th>Cold s</th><th>Setup s</th><th>Rank s</th>'
+             '<th>Target s</th><th>Rho online s</th><th>Cold IC / rho online</th>'
+             '<th>Peak RSS MiB</th></tr></thead><tbody>')
+    for k in (1104, 1108, 1120, 1152):
+        item = n83["pipelines"][f"k{k}"]
+        P.append(f'<tr><td>{k}</td><td>{item["actual_usable_points"]:,}</td>'
+                 f'<td>{item["effective_columns"]:,}</td>'
+                 f'<td>{item["mean_cold_process_ms"] / 1000:.3f}</td>'
+                 f'<td>{item["mean_setup_ms"] / 1000:.3f}</td>'
+                 f'<td>{item["mean_rank_stage_ms"] / 1000:.3f}</td>'
+                 f'<td>{item["mean_targets_total_ms"] / 1000:.3f}</td>'
+                 f'<td>{item["mean_rho_online_ms"] / 1000:.3f}</td>'
+                 f'<td>{item["mean_cold_over_rho_online"]:.3f}</td>'
+                 f'<td>{item["max_peak_rss_bytes"] / 1048576:.1f}</td></tr>')
+    P.append('</tbody></table></div><p>The cold interval includes base and index '
+             'construction, relation rank, target recovery and producer verification. '
+             'Rho starts with its target-dependent walk and ends after scalar verification. '
+             'This Tier 1 wall-time panel uses its own unit and sits outside the '
+             'operation-unit S rankings.</p>' +
+             gh(n83["source"], 'Frozen IC1 rows and candidate identities') + '</section>')
 
     # Footer.
     P.append('<footer><p><strong>What this is not.</strong> A view of frozen measurements, class accounting: no row '

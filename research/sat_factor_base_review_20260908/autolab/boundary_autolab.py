@@ -3256,9 +3256,13 @@ def launch_equal_advice(arguments: argparse.Namespace) -> dict[str, Any]:
     """Diagnostic Bernstein–Lange equal-advice reference arm (not KS batch rho).
 
     Drives ``ic_next10_09_equal_advice`` via its ``targets`` / ``bl`` subcommands.
-    Fail-closed for vs_rho ledger promotion: claim draft is SCHEMA_INCOMPLETE
+    Optional ``--reuse-bl-archive`` + ``--pair-ic`` reuses a hash-verified BL
+    corpus and measures compact-orbit IC online on the same public points.
+    Fail-closed for vs_rho ledger promotion: claim draft stays SCHEMA_INCOMPLETE
     until a schema-complete equal-advice paired report exists.
     """
+    import equal_advice_pair
+
     protocol = load_protocol()
     ledger = load_ledger(protocol)
     beat_id = arguments.beat
@@ -3273,9 +3277,19 @@ def launch_equal_advice(arguments: argparse.Namespace) -> dict[str, Any]:
     require(targets >= minimum, f"equal-advice targets must be >= {minimum} (no small-L panels)")
     table_bytes = int(arguments.table_bytes or beat.get("table_bytes_default", 5711008))
     label = str(arguments.label or beat.get("target_label_default", "autolab-n61-bl-ref-eval-v1"))
+    pair_ic = bool(getattr(arguments, "pair_ic", False))
+    reuse_archive = getattr(arguments, "reuse_bl_archive", None)
+    ic_k = int(getattr(arguments, "ic_k", None) or beat.get("ic_k_default", 256))
+    ic_rank_seed = int(getattr(arguments, "ic_rank_seed", None) or beat.get("ic_rank_seed", 7))
+    ic_target_count = getattr(arguments, "ic_target_count", None)
     n, a = int(beat["n"]), int(beat["a"])
     producers = beat["panel_producers"]
     bl_prod = producers["bl"]
+    ic_prod = producers["ic"]
+    if pair_ic:
+        require("ic" in producers, f"{beat_id} has no IC panel producer")
+    if reuse_archive:
+        require(pair_ic or arguments.prepare_only, "--reuse-bl-archive requires --pair-ic (or --prepare-only)")
 
     with RunnerLock():
         # prepare-only must work in the Python-only harness (no cargo/rustc).
@@ -3305,6 +3319,24 @@ def launch_equal_advice(arguments: argparse.Namespace) -> dict[str, Any]:
                     "detail": git_head_proc.stdout.strip(),
                 }
             )
+            if reuse_archive:
+                try:
+                    archive = equal_advice_pair.resolve_bl_archive(Path(reuse_archive))
+                    checks.append(
+                        {
+                            "name": "reuse_bl_archive",
+                            "ok": True,
+                            "detail": str(archive),
+                        }
+                    )
+                except (OSError, ValueError) as exc:
+                    checks.append(
+                        {
+                            "name": "reuse_bl_archive",
+                            "ok": False,
+                            "detail": str(exc),
+                        }
+                    )
             preflight_receipt = {
                 "schema_version": "1.0",
                 "task_id": TASK_ID,
@@ -3357,7 +3389,10 @@ def launch_equal_advice(arguments: argparse.Namespace) -> dict[str, Any]:
         points_path = run / "inputs/points.txt"
         scalars_path = run / "inputs/scalars.txt"
         bl_out = run / "logs/bl.jsonl"
-        bl_bin = str((REPO / "target/release/examples" / bl_prod["example"]).resolve())
+        # Prefer CARGO_TARGET_DIR when set (autolab worktrees often redirect builds).
+        cargo_target = Path(os.environ.get("CARGO_TARGET_DIR", str(REPO / "target")))
+        bl_bin = str((cargo_target / "release/examples" / bl_prod["example"]).resolve())
+        ic_bin = str((cargo_target / "release/examples" / ic_prod["example"]).resolve())
         targets_cmd = [
             bl_bin,
             "targets",
@@ -3377,11 +3412,25 @@ def launch_equal_advice(arguments: argparse.Namespace) -> dict[str, Any]:
             str(points_path),
             str(bl_out),
         ]
-        commands = {
-            "build": ["cargo", "build", "--release", "--example", bl_prod["example"]],
+        build_examples = [bl_prod["example"]]
+        if pair_ic:
+            build_examples.append(ic_prod["example"])
+        commands: dict[str, Any] = {
+            "build": ["cargo", "build", "--release"]
+            + [item for example in build_examples for item in ("--example", example)],
             "targets": targets_cmd,
             "bl": bl_cmd,
         }
+        if pair_ic:
+            commands["ic"] = [
+                ic_bin,
+                f"construct:{n}:{a}:{ic_k}",
+                str(run / "inputs/ic_points.txt"),
+                str(ic_rank_seed),
+                str(run / "logs/ic.jsonl"),
+            ]
+        if reuse_archive:
+            commands["reuse_bl_archive"] = str(Path(reuse_archive).resolve())
         write_json(run / "artifacts/commands.json", commands)
 
         state: dict[str, Any] = {
@@ -3397,6 +3446,10 @@ def launch_equal_advice(arguments: argparse.Namespace) -> dict[str, Any]:
             "targets": targets,
             "table_bytes": table_bytes,
             "target_label": label,
+            "pair_ic": pair_ic,
+            "reuse_bl_archive": bool(reuse_archive),
+            "ic_k": ic_k if pair_ic else None,
+            "ic_rank_seed": ic_rank_seed if pair_ic else None,
             "diagnostic_only": True,
             "reference_arm": "bernstein_lange_equal_advice",
             "existing_study": beat.get("existing_study"),
@@ -3422,6 +3475,8 @@ def launch_equal_advice(arguments: argparse.Namespace) -> dict[str, Any]:
                     "n": n,
                     "targets": targets,
                     "table_bytes": table_bytes,
+                    "pair_ic": pair_ic,
+                    "reuse_bl_archive": bool(reuse_archive),
                     "claim_boundary": state["claim_boundary"],
                 },
             )
@@ -3435,39 +3490,62 @@ def launch_equal_advice(arguments: argparse.Namespace) -> dict[str, Any]:
             )
             return state
 
-        state.update(phase="build", updated_at=now())
-        write_json(run / "state.json", state)
-        built = subprocess.run(commands["build"], cwd=REPO, capture_output=True, text=True)
-        require(built.returncode == 0, "cargo build failed:\n" + built.stderr[-4000:])
-        write_json(
-            run / "artifacts/binaries.json",
-            {
-                "paths": {"bl": bl_bin},
-                "hashes": {
-                    "bl_binary_sha256": sha256(bl_bin),
-                    "bl_source_sha256": sha256(REPO / bl_prod["source"]),
-                    "git_head": git_head,
+        pin: dict[str, Any] | None = None
+        if reuse_archive:
+            state.update(phase="reuse_bl", updated_at=now())
+            write_json(run / "state.json", state)
+            try:
+                pin = equal_advice_pair.materialize_bl_archive(
+                    archive=Path(reuse_archive),
+                    run=run,
+                    lab=sys.modules[__name__],
+                    targets=targets,
+                    table_bytes=table_bytes,
+                )
+            except (OSError, ValueError, FileNotFoundError) as exc:
+                require(False, f"reuse-bl-archive failed: {exc}")
+        else:
+            state.update(phase="build", updated_at=now())
+            write_json(run / "state.json", state)
+            built = subprocess.run(commands["build"], cwd=REPO, capture_output=True, text=True)
+            require(built.returncode == 0, "cargo build failed:\n" + built.stderr[-4000:])
+            write_json(
+                run / "artifacts/binaries.json",
+                {
+                    "paths": {"bl": bl_bin, **({"ic": ic_bin} if pair_ic else {})},
+                    "hashes": {
+                        "bl_binary_sha256": sha256(bl_bin),
+                        "bl_source_sha256": sha256(REPO / bl_prod["source"]),
+                        **(
+                            {
+                                "ic_binary_sha256": sha256(ic_bin),
+                                "ic_source_sha256": sha256(REPO / ic_prod["source"]),
+                            }
+                            if pair_ic
+                            else {}
+                        ),
+                        "git_head": git_head,
+                    },
                 },
-            },
-        )
+            )
 
-        state.update(phase="targets", updated_at=now())
-        write_json(run / "state.json", state)
-        gen = subprocess.run(targets_cmd, cwd=REPO, capture_output=True, text=True)
-        (run / "logs/targets.stdout").write_text(gen.stdout)
-        (run / "logs/targets.stderr").write_text(gen.stderr)
-        require(gen.returncode == 0, "targets generation failed:\n" + gen.stderr[-2000:])
-        require(points_path.is_file() and scalars_path.is_file(), "targets mode did not write point/scalar files")
-        point_lines = [ln for ln in points_path.read_text().splitlines() if ln.strip()]
-        require(len(point_lines) == targets, f"expected {targets} points, got {len(point_lines)}")
+            state.update(phase="targets", updated_at=now())
+            write_json(run / "state.json", state)
+            gen = subprocess.run(targets_cmd, cwd=REPO, capture_output=True, text=True)
+            (run / "logs/targets.stdout").write_text(gen.stdout)
+            (run / "logs/targets.stderr").write_text(gen.stderr)
+            require(gen.returncode == 0, "targets generation failed:\n" + gen.stderr[-2000:])
+            require(points_path.is_file() and scalars_path.is_file(), "targets mode did not write point/scalar files")
+            point_lines = [ln for ln in points_path.read_text().splitlines() if ln.strip()]
+            require(len(point_lines) == targets, f"expected {targets} points, got {len(point_lines)}")
 
-        state.update(phase="bl", updated_at=now())
-        write_json(run / "state.json", state)
-        bl_run = subprocess.run(bl_cmd, cwd=REPO, capture_output=True, text=True)
-        (run / "logs/bl.stdout").write_text(bl_run.stdout)
-        (run / "logs/bl.stderr").write_text(bl_run.stderr)
-        require(bl_run.returncode == 0, "BL producer failed:\n" + bl_run.stderr[-4000:])
-        require(bl_out.is_file(), "BL producer did not write jsonl")
+            state.update(phase="bl", updated_at=now())
+            write_json(run / "state.json", state)
+            bl_run = subprocess.run(bl_cmd, cwd=REPO, capture_output=True, text=True)
+            (run / "logs/bl.stdout").write_text(bl_run.stdout)
+            (run / "logs/bl.stderr").write_text(bl_run.stderr)
+            require(bl_run.returncode == 0, "BL producer failed:\n" + bl_run.stderr[-4000:])
+            require(bl_out.is_file(), "BL producer did not write jsonl")
 
         records = parse_json_lines(bl_out.read_text())
         summary = next((r for r in records if r.get("kind") == "bl_summary" or r.get("kind") == "bl_level_summary"), None)
@@ -3482,47 +3560,149 @@ def launch_equal_advice(arguments: argparse.Namespace) -> dict[str, Any]:
             for r in online_rows
             if r.get("solved") or r.get("verified") or r.get("verified_vs_truth")
         )
-        claim_draft = {
-            "beat_id": beat_id,
-            "stage": "vs_rho",
-            "status": "SCHEMA_INCOMPLETE",
-            "diagnostic_only": True,
-            "reference_arm": "bernstein_lange_equal_advice",
-            "n": n,
-            "a": a,
-            "targets": targets,
-            "table_bytes": table_bytes,
-            "target_label": label,
-            "bl_records": len(records),
-            "bl_online_rows": len(online_rows),
-            "bl_solved_or_verified_rows": solved,
-            "bl_precompute": precompute,
-            "bl_summary": summary,
-            "existing_study": beat.get("existing_study"),
-            "timing_class": beat.get("timing_class_goal"),
-            "claim_boundary": state["claim_boundary"],
-            "missing_vs_rho_fields_note": (
-                "Equal-advice BL reference smoke does not emit the full vs_rho "
-                "paired IC/rho schema; fail-closed until a schema-complete report."
-            ),
-            "independent_replay_pointer": None,
-            "verdict": "DIAGNOSTIC_REFERENCE_ARM_ONLY",
-        }
-        write_json(run / "artifacts/claim_draft.json", claim_draft)
-        # Fail-closed: do not pretend vs_rho is complete.
-        check = {
-            "status": "FAIL",
-            "stage": "vs_rho",
-            "reason": "diagnostic equal-advice BL reference; vs_rho schema incomplete by design",
-            "claim_draft_status": claim_draft["status"],
-        }
-        write_json(run / "artifacts/claim_check.json", check)
+
+        claim_draft: dict[str, Any]
+        check: dict[str, Any]
+        if pair_ic:
+            state.update(phase="build_ic", updated_at=now())
+            write_json(run / "state.json", state)
+            built = subprocess.run(commands["build"], cwd=REPO, capture_output=True, text=True)
+            require(built.returncode == 0, "cargo build failed:\n" + built.stderr[-4000:])
+            binaries = {"bl": bl_bin, "ic": ic_bin}
+            write_json(
+                run / "artifacts/binaries.json",
+                {
+                    "paths": binaries,
+                    "hashes": {
+                        "bl_binary_sha256": sha256(bl_bin) if Path(bl_bin).is_file() else None,
+                        "ic_binary_sha256": sha256(ic_bin),
+                        "bl_source_sha256": sha256(REPO / bl_prod["source"]),
+                        "ic_source_sha256": sha256(REPO / ic_prod["source"]),
+                        "git_head": git_head,
+                    },
+                },
+            )
+            points = equal_advice_pair.parse_points_file(points_path)
+            scalars = equal_advice_pair.parse_scalars_file(scalars_path)
+            count = int(ic_target_count) if ic_target_count is not None else len(points)
+            require(1 <= count <= len(points), f"ic_target_count must be in 1..{len(points)}")
+            state.update(phase="ic", updated_at=now(), ic_target_count=count)
+            write_json(run / "state.json", state)
+            try:
+                ic_obs = equal_advice_pair.run_ic_arm(
+                    lab=sys.modules[__name__],
+                    run=run,
+                    binaries=binaries,
+                    n=n,
+                    a=a,
+                    k=ic_k,
+                    rank_seed=ic_rank_seed,
+                    points=points,
+                    ic_target_count=count,
+                )
+            except (OSError, RuntimeError, ValueError) as exc:
+                require(False, f"paired IC arm failed: {exc}")
+            write_json(
+                run / "artifacts/ic_arm.json",
+                {
+                    "exit_code": ic_obs["exit_code"],
+                    "ic_target_count": ic_obs["ic_target_count"],
+                    "k": ic_obs["k"],
+                    "rank_seed": ic_obs["rank_seed"],
+                    "points_sha256": ic_obs["points_sha256"],
+                    "ic_jsonl_sha256": ic_obs["ic_jsonl_sha256"],
+                    "summary": ic_obs["summary"],
+                },
+            )
+            if pin is None:
+                pin = {
+                    "kind": "fresh_bl_measurement",
+                    "archive_run_id": None,
+                    "points_sha256": sha256(points_path),
+                    "scalars_sha256": sha256(scalars_path),
+                    "bl_jsonl_sha256": sha256(bl_out),
+                    "remeasured": True,
+                }
+            claim_draft = equal_advice_pair.draft_paired_vs_rho_slice(
+                lab=sys.modules[__name__],
+                beat=beat,
+                beat_id=beat_id,
+                run=run,
+                pin=pin,
+                ic_obs=ic_obs,
+                bl_records=records,
+                points=points,
+                scalars=scalars,
+                table_bytes=table_bytes,
+                binaries=binaries,
+                git_head=git_head,
+            )
+            claim_draft["bl_records"] = len(records)
+            claim_draft["bl_online_rows"] = len(online_rows)
+            claim_draft["bl_solved_or_verified_rows"] = solved
+            claim_draft["bl_precompute"] = precompute
+            claim_draft["bl_summary"] = summary
+            claim_draft["target_label"] = label
+            panel = equal_advice_pair.panel_pairing_summary(
+                ic_obs=ic_obs,
+                bl_records=records,
+                points=points,
+                scalars=scalars,
+                table_bytes=table_bytes,
+            )
+            write_json(run / "artifacts/panel_pairing.json", panel)
+            claim_draft["panel_pairing"] = {
+                "paired_targets": panel["paired_targets"],
+                "verified_pairs": panel["verified_pairs"],
+                "online_speedup_bl_over_ic": panel["online_speedup_bl_over_ic"],
+            }
+            write_json(run / "artifacts/claim_draft.json", claim_draft)
+            check = validate_claim(claim_draft, stage="vs_rho", ledger=ledger)
+            write_json(run / "artifacts/claim_check.json", check)
+            write_json(run / "artifacts/claim_check_tool.json", check)
+        else:
+            claim_draft = {
+                "beat_id": beat_id,
+                "stage": "vs_rho",
+                "status": "SCHEMA_INCOMPLETE",
+                "diagnostic_only": True,
+                "reference_arm": "bernstein_lange_equal_advice",
+                "n": n,
+                "a": a,
+                "targets": targets,
+                "table_bytes": table_bytes,
+                "target_label": label,
+                "bl_records": len(records),
+                "bl_online_rows": len(online_rows),
+                "bl_solved_or_verified_rows": solved,
+                "bl_precompute": precompute,
+                "bl_summary": summary,
+                "existing_study": beat.get("existing_study"),
+                "timing_class": beat.get("timing_class_goal"),
+                "claim_boundary": state["claim_boundary"],
+                "missing_vs_rho_fields_note": (
+                    "Equal-advice BL reference smoke does not emit the full vs_rho "
+                    "paired IC/rho schema; fail-closed until a schema-complete report."
+                ),
+                "independent_replay_pointer": None,
+                "verdict": "DIAGNOSTIC_REFERENCE_ARM_ONLY",
+            }
+            write_json(run / "artifacts/claim_draft.json", claim_draft)
+            check = {
+                "status": "FAIL",
+                "stage": "vs_rho",
+                "reason": "diagnostic equal-advice BL reference; vs_rho schema incomplete by design",
+                "claim_draft_status": claim_draft["status"],
+            }
+            write_json(run / "artifacts/claim_check.json", check)
+
         state.update(
             status="PENDING_INDEPENDENT_VALIDATION",
             phase="done",
             updated_at=now(),
             claim_check_status=check["status"],
-            claim_draft_status=claim_draft["status"],
+            claim_draft_status=claim_draft.get("status"),
+            remaining_schema_gaps=claim_draft.get("remaining_schema_gaps"),
         )
         write_json(run / "state.json", state)
         write_json(CURRENT_PATH, {"run_id": run_id, "beat_id": beat_id, "updated_at": now()})
@@ -3610,6 +3790,34 @@ def parser() -> argparse.ArgumentParser:
         "--prepare-only",
         action="store_true",
         help="Scaffold run dir + commands.json without building or executing producers",
+    )
+    equal.add_argument(
+        "--reuse-bl-archive",
+        metavar="PATH",
+        help=(
+            "Hash-verify and reuse an archived BL run (inputs/points.txt + logs/bl.jsonl) "
+            "instead of remeasuring BL; requires --pair-ic"
+        ),
+    )
+    equal.add_argument(
+        "--pair-ic",
+        action="store_true",
+        help="Measure koblitz_orbit_dlp_fast_online on the same public points as the BL arm",
+    )
+    equal.add_argument(
+        "--ic-k",
+        type=int,
+        help="Orbit columns K for construct:n:a:K (default: beat ic_k_default / 256 for n61 equal-advice)",
+    )
+    equal.add_argument(
+        "--ic-rank-seed",
+        type=int,
+        help="Rank seed for the IC online producer (default: beat ic_rank_seed / 7)",
+    )
+    equal.add_argument(
+        "--ic-target-count",
+        type=int,
+        help="How many leading archived points to solve with IC (default: all)",
     )
 
     for name in ("status", "verify"):

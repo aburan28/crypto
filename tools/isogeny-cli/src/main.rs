@@ -1,6 +1,18 @@
 //! Installed isogeny construction, screening, and independent certificate replay.
 #![allow(dead_code)]
 mod catalog;
+mod compact_cm;
+mod compact_cm_verify;
+#[path = "../../../src/cryptanalysis/identity_certificate.rs"]
+mod identity_certificate;
+mod hash {
+    pub mod sha256 {
+        pub fn sha256(bytes: &[u8]) -> [u8; 32] {
+            use sha2::Digest;
+            sha2::Sha256::digest(bytes).into()
+        }
+    }
+}
 mod challenge;
 mod constructor;
 #[path = "../../../src/cryptanalysis/isogeny_walk/curve.rs"]
@@ -25,6 +37,7 @@ mod verification_field;
 mod replay {
     include!(concat!(env!("OUT_DIR"), "/verification_engines.rs"));
 }
+mod replay_trace;
 mod supervisor;
 mod walk;
 #[cfg(test)]
@@ -62,6 +75,9 @@ const HELP: &str = "isogeny — public-curve isogeny search and independent veri
   isogeny walk --curve p224 --ell 1117 --count 50 --out RESULTS
   isogeny verify-walk --input RESULTS
   isogeny screen --curve p192 --from 1010 --to 65537 [--max-order 8]
+  isogeny compact-cm construct --exponent 3 --out FRESH_COMPACT
+  isogeny compact-cm verify --input FRESH_COMPACT/certificate.json --out FRESH_REPLAY
+  isogeny compact-cm evaluate --input CERTIFICATE --x X --y Y --mode geometric|subgroup
   isogeny version
   isogeny curves                 full pinned catalogue and operation capabilities
   isogeny challenge policy       frozen largest-prime-degree rules and curve roster
@@ -265,6 +281,7 @@ fn execute(args: &[String]) -> Result<(Value, i32), String> {
     let command = args.first().map(String::as_str).unwrap_or("help");
     match command {
         "challenge" => challenge::execute(&args[1..]),
+        "compact-cm" => compact_cm::execute(&args[1..]),
         "curves" => Ok((catalog::inventory(), 0)),
         "version" | "--version" | "-V" => {
             Ok((json!({"schema":"isogeny-tool/v1","tool":provenance()}), 0))

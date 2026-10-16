@@ -134,13 +134,9 @@ where
     //   (a, b)   — current exponents s.t. x = g^a · h^b (mod n)
     let step = |x: &G, a: &BigUint, b: &BigUint| -> (G, BigUint, BigUint) {
         match partition(x) % 3 {
-            0 => (op(x, g), (a + BigUint::one()) % n, b.clone()),
-            1 => (op(x, h), a.clone(), (b + BigUint::one()) % n),
-            _ => (
-                op(x, x),
-                (a * BigUint::from(2u32)) % n,
-                (b * BigUint::from(2u32)) % n,
-            ),
+            0 => (op(x, g), increment_mod(a, n), b.clone()),
+            1 => (op(x, h), a.clone(), increment_mod(b, n)),
+            _ => (op(x, x), double_mod(a, n), double_mod(b, n)),
         }
     };
 
@@ -269,18 +265,40 @@ fn floyd_collision(
     Ok(Some((&lhs * &rhs_inv) % n))
 }
 
-/// Compute `(a − b) mod n` for `BigUint`.
+/* Rho exponents are always in [0, n).  Each step adds at most n, so
+ * conditional subtraction avoids a multiprecision division. */
+#[inline]
+fn increment_mod(x: &BigUint, n: &BigUint) -> BigUint {
+    debug_assert!(x < n);
+    let mut next = x + 1u32;
+    if &next >= n {
+        next -= n;
+    }
+    next
+}
+
+#[inline]
+fn double_mod(x: &BigUint, n: &BigUint) -> BigUint {
+    debug_assert!(x < n);
+    let mut next = x << 1usize;
+    if &next >= n {
+        next -= n;
+    }
+    next
+}
+
+#[inline]
+fn low_byte(x: &BigUint) -> u8 {
+    x.iter_u32_digits().next().unwrap_or(0) as u8
+}
+
+/// Compute `(a − b) mod n` for reduced rho exponents.
 fn sub_mod(a: &BigUint, b: &BigUint, n: &BigUint) -> BigUint {
+    debug_assert!(a < n && b < n);
     if a >= b {
-        (a - b) % n
+        a - b
     } else {
-        // a − b mod n  =  n − (b − a) mod n
-        let diff = (b - a) % n;
-        if diff.is_zero() {
-            BigUint::zero()
-        } else {
-            n - diff
-        }
+        n - (b - a)
     }
 }
 
@@ -442,11 +460,7 @@ fn dp_walks_big(
     let mut tables: Vec<Table> = vec![HashMap::new(); m];
     let mut solutions: Vec<Option<BigUint>> = vec![None; m];
 
-    let partition = |x: &BigUint| -> u8 {
-        let bytes = x.to_bytes_be();
-        let last = *bytes.last().unwrap_or(&0);
-        last % 3
-    };
+    let partition = |x: &BigUint| -> u8 { low_byte(x) % 3 };
     let pow = |base: &BigUint, k: &BigUint| -> BigUint { crate::utils::mod_pow(base, k, p) };
 
     for _walker in 0..opts.max_walkers {
@@ -462,16 +476,16 @@ fn dp_walks_big(
         for _step in 0..opts.max_steps_per_walker {
             match partition(&x) % 3 {
                 0 => {
-                    a = (&a + BigUint::one()) % n;
+                    a = increment_mod(&a, n);
                     x = (&x * g) % p;
                 }
                 1 => {
-                    b = (&b + BigUint::one()) % n;
+                    b = increment_mod(&b, n);
                     x = (&x * h) % p;
                 }
                 _ => {
-                    a = (&a * BigUint::from(2u32)) % n;
-                    b = (&b * BigUint::from(2u32)) % n;
+                    a = double_mod(&a, n);
+                    b = double_mod(&b, n);
                     x = (&x * &x) % p;
                 }
             }
@@ -530,26 +544,31 @@ fn dp_rule(dp_bits: u8) -> (u8, u8) {
     (dp_mask, dp_bytes_zero)
 }
 
-/// The distinguished-point test on the big-endian serialisation of `x`.
-/// This is the definition; [`WordDp`] restates it on a machine word.
+/// The distinguished-point test on the low bytes of `x`, without allocating
+/// its big-endian serialisation.  [`WordDp`] restates it on a machine word.
 fn is_distinguished_be(x: &BigUint, dp_mask: u8, dp_bytes_zero: u8) -> bool {
-    let bytes = x.to_bytes_be();
-    // Require the low `dp_bytes_zero` bytes to be zero, then
-    // the next byte to satisfy `& dp_mask == 0` for any
-    // remaining bits.
-    if bytes.len() <= dp_bytes_zero as usize {
+    if dp_mask != 0xFF {
+        return low_byte(x) & dp_mask == 0;
+    }
+    let mut remaining = dp_bytes_zero as usize;
+    // The serialized-byte rule treats values no longer than the requested
+    // zero-byte suffix as distinguished, even when the value is nonzero.
+    if x.bits() <= 8 * remaining as u64 {
         return true;
     }
-    let lowbyte_idx = bytes.len() - 1;
-    for b in 0..(dp_bytes_zero as usize) {
-        if bytes[lowbyte_idx - b] != 0 {
+    for word in x.iter_u32_digits() {
+        let bytes = remaining.min(4);
+        let mask = if bytes == 4 {
+            u32::MAX
+        } else {
+            (1u32 << (8 * bytes)) - 1
+        };
+        if word & mask != 0 {
             return false;
         }
-    }
-    if dp_mask != 0xFF {
-        let next_idx = lowbyte_idx - dp_bytes_zero as usize;
-        if dp_mask != 0 && (bytes[next_idx] & dp_mask) != 0 {
-            return false;
+        remaining -= bytes;
+        if remaining == 0 {
+            return true;
         }
     }
     true
@@ -622,9 +641,7 @@ fn rho_floyd_big(
             // Lightweight 3-way partition: hash via the low byte
             // mod 3.  Deterministic, well-distributed for random
             // group elements.
-            let bytes = x.to_bytes_be();
-            let last = *bytes.last().unwrap_or(&0);
-            last % 3
+            low_byte(x) % 3
         },
         |base, k| crate::utils::mod_pow(base, k, p),
         opts,
@@ -1374,6 +1391,34 @@ mod tests {
                     is_distinguished_be(&BigUint::from(x), dp_mask, dp_bytes_zero),
                     "dp_bits {dp_bits}, x {x:#x}"
                 );
+            }
+        }
+    }
+
+    #[test]
+    fn rho_big_dp_test_matches_serialized_byte_rule() {
+        let mut rng = StdRng::seed_from_u64(0xb16_b17e);
+        for bits in [0, 1, 63, 64, 65, 127, 128, 129, 256] {
+            for _ in 0..16 {
+                let x = rng.gen_biguint(bits);
+                let bytes = x.to_bytes_be();
+                assert_eq!(low_byte(&x), *bytes.last().unwrap_or(&0));
+                for dp_bits in 0..=u8::MAX {
+                    let (mask, zero_bytes) = dp_rule(dp_bits);
+                    let z = zero_bytes as usize;
+                    let expected = if bytes.len() <= z {
+                        true
+                    } else if bytes[bytes.len() - z..].iter().any(|&b| b != 0) {
+                        false
+                    } else {
+                        mask == 0xFF || bytes[bytes.len() - z - 1] & mask == 0
+                    };
+                    assert_eq!(
+                        is_distinguished_be(&x, mask, zero_bytes),
+                        expected,
+                        "bits={bits}, dp_bits={dp_bits}, x={x}"
+                    );
+                }
             }
         }
     }

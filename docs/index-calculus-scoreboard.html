@@ -806,6 +806,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 <p class="dash-footnote" id="n41-n53-cold-online-20261004"><strong>n41/n53 compact S3 root-index cold and online diagnostic (4 October 2026):</strong> six fresh-process pairs per curve solved one fixed public Q and independently replayed every rank row, base log and scalar. K85 at n41 means 6,970 usable points and 85 folded columns; K220 at n53 means 23,320 and 220. Median paired IC/rho <em>online</em> was 0.186966 and 0.049714, but median paired IC/rho <em>in-process cold</em> was 23.969714 and 46.186164. At both fixed K values, even zero-cost rank PDP would leave other charged stages above the largest observed rho cold cost. These are unisolated example-runner wall diagnostics without an <code>ecbench</code> session, operation-unit calibration or an isolation receipt; controlled speedup and ECC2K-130 transfer remain unknown. <a href="https://github.com/aburan28/crypto/blob/main/experiments/koblitz-n41-n53-single-target-20261004/RESULT.md">Protocol, all raw pairs, replay, hashes and decision</a>.</p>
 <p class="dash-footnote" id="n41-n53-base-size-cold-20261004"><strong>n41/n53 held-out compact-orbit base-size panel (4 October 2026):</strong> the protocol froze five K values per curve before point generation, kept 30 pilot pairs including three n41/K20 target failures, then selected the fastest eligible smaller K without looking at the held-out point. All 24 held-out baseline/smaller pairs independently replayed. Smaller K cut the index and matrix but raised rank probes: median within-repeat smaller/baseline IC cold was <strong>1.186</strong> at n41 (K64/K85) and <strong>1.636</strong> at n53 (K160/K220), with all 12 ratios above one. The online IC/rho points are shown separately below. Host noise, absent <code>ecbench</code> calibration and absent CPU isolation prevent a controlled speedup or ECC2K-130 transfer claim. <a href="https://github.com/aburan28/crypto/blob/main/experiments/koblitz-base-size-cold-panel-20261004/RESULT.md">Frozen protocol, pilot selection, all raw pairs, replay, hashes and decision</a>.</p>
 <details class="dash-details"><summary>Every plotted point as a table</summary><div class="dash-detail-body"><table><caption>IC over rho by date, with reference quality, class and sources</caption><thead><tr><th>Date</th><th>Series</th><th>Result</th><th>IC / rho</th><th>Reference</th><th>Class</th><th>Links</th></tr></thead><tbody>
+<tr><td>2026-10-16</td><td>Elliptic curve, whole method, cold, one target</td><td>n83 K1120 five-point Tier 1 cold factor-base holdout; selected ID null</td><td class="n">55.368&times; <small>mean cold IC / mean same-point rho online</small></td><td>matched</td><td><span class="chip">engineering</span></td><td><a href="#n83-tier1-cold-20261016">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/n83_e2e_holdout_20261016/RESULT.md">source</a></td></tr>
 <tr><td>2026-09-16</td><td>Elliptic curve, whole method, cold, one target</td><td>Tournament round 0007, five Koblitz cells</td><td class="n">0.7376&times;</td><td>unmatched</td><td><span class="chip">engineering</span></td><td><a href="#ic-tournament-round-0007">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0007/REPORT.md">source</a></td></tr>
 <tr><td>2026-09-21</td><td>Elliptic curve, whole method, cold, one target</td><td>Tournament round 0019, eight cells, strict win promoted</td><td class="n">0.6751&times;</td><td>unmatched</td><td><span class="chip">engineering</span></td><td><a href="#ic-tournament-round-0019">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0019/REPORT.md">source</a></td></tr>
 <tr><td>2026-09-23</td><td>Elliptic curve, whole method, cold, one target</td><td>Control: rho given the IC arm&#x27;s orbit naming</td><td class="n">1.192&times;</td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#ic-triple-counted-20260923">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_counted_20260923/RESULTS.md">source</a></td></tr>
@@ -1011,6 +1012,17 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           "class": "accounting",
           "anchor": "#lab-ecbench-all",
           "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_frobenius_orbit_vs_rho_20261014/README.md"
+        },
+        {
+          "date": "2026-10-16",
+          "value": 55.36777360324759,
+          "reference": "matched",
+          "unit": "Tier 1 cloud-instance cold IC / same-point rho online wall",
+          "label": "n83 K1120 five-point cold factor-base holdout, selected ID null",
+          "detail": "On five sealed public points, 25/25 IC and 5/5 same-point rho arms replayed. K1120 mean cold process 119.826 s divided by mean rho online 2.164 s gives 55.368. K1120 saves 2.645 s [2.085, 3.205] against K1152; its 0.401 s advantage over K1104 has interval [-0.236, 1.038], so the frozen selection remains BOUNDED_UNKNOWN. Tier 1 GitHub cloud instance, A/A and topology gates passed.",
+          "class": "engineering",
+          "anchor": "#n83-tier1-cold-20261016",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/n83_e2e_holdout_20261016/RESULT.md"
         }
       ]
     },
@@ -1722,7 +1734,8 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
       ]
     }
   ]
-}</script>
+}
+</script>
 <script>
 (function () {
   var el = document.getElementById('progress-chart'); if (!el) return;
@@ -1805,7 +1818,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 </section></div></details>
 </main>
 <!-- END IC DASHBOARD OVERVIEW -->
-<div class="dash-section" id="n83-retained-gates-20261010" style="max-width:1180px;margin:24px auto;padding:18px" aria-labelledby="n83-retained-gates-title"><div class="dash-section-head"><div><p class="dash-kicker">Degree-83 Koblitz / source and capacity / 2026-10-10</p><h2 id="n83-retained-gates-title">Structured-orbit and K2048 bases verified; bounded N83 gates retained.</h2></div><span class="status neutral">Engineering · L0</span></div><details class="dash-details"><summary>N83 retained-domain capacity and structured-orbit S3 storage, 2026-10-10</summary><div class="dash-detail-body"><p>The primary 81-bit model <code>icv1-f2m83-tm6151469093347-debefd74</code> has 57 constructed factor bases stored with verified S3 round-trips, including K1182 and K2048 signed-Frobenius bases with 196,212 and 339,968 point records and a source-derived dimension-12 closure with 332,166 point records in 2,001 orbit columns. Generic multi-limb arithmetic replay checked every point on these three additional bases; the structured object also passed a second replay after S3 download. These are engineering construction and storage observations at L0, not complete cold index-calculus runtimes.</p><div class="table-scroll"><table><caption>Guarded construction or exact preflight per N83 model; cgroup peaks under a 4 GiB zero-swap limit.</caption><thead><tr><th>Retained model</th><th>SAT variables</th><th>Clauses</th><th>Cgroup peak, bytes</th><th>Search outcome</th></tr></thead><tbody><tr><td>K64 factored S4</td><td>127,404</td><td>1,490,138</td><td>642,768,896</td><td>Construction only; search not run</td></tr><tr><td>K64 chained S3, m5</td><td>84,743</td><td>2,100,012</td><td>736,542,720</td><td>One SAT call hit 10,000 conflicts; <code>UNKNOWN_solver_cap</code>, zero relations</td></tr><tr><td>K64 chained S3, m6</td><td>105,908</td><td>2,532,398</td><td>841,170,944</td><td>Docker daemon EOF during trial; producer failure, no solver verdict</td></tr><tr><td>K256 chained S3, m5</td><td>84,743</td><td>7,443,537</td><td>1,960,288,256</td><td>Separate 8M domain-clause gate passed; one SAT call hit 10,000 conflicts, <code>UNKNOWN_solver_cap</code>, zero relations</td></tr><tr><td>K1182 chained S3, m5</td><td>84,743 required</td><td>32,142,830 required</td><td>232,259,584, preflight only</td><td><code>UNKNOWN_domain_clause_cap</code> at 12M; model and search not run</td></tr></tbody></table></div><p class="dash-footnote">The K1182 m5 gate stopped before installing a model; its 32,142,830 required domain clauses exceed the frozen 12M cap. A read-only K2048 preflight later counted 55,017,910 required clauses under the same explicit-domain encoding, also above 12M. The dimension-12 closure retains compact source-coordinate and phase structure. An exact phase-aware chained-S3 x-domain now passes small-field membership and cap tests; its N83 source preflight counts 26,265 additional variables, 872,260 clauses and 3,320 native XOR rows for m5, but no N83 model or search has been measured with it. The first K256 3M domain-clause gate returned <code>UNKNOWN_domain_clause_cap</code> at 7,195,450 required clauses. The six-summand container was later audited and removed; its original cleanup flag was invalid. Shared-host emulated-worker timings are budget diagnostics only. Complete single-target cold runtime, natural rank, matched rho and the selected base remain unmeasured. Source: <a href="https://github.com/aburan28/crypto/pull/1599">PR #1599</a>, <code>research/koblitz_n83_factor_base_sweep_20261008/verification/two-hour-extension-20261010/REPORT.md</code>, <code>verification/remaining-budget-k1182-20261010/RESULT.md</code>, <code>verification/remaining-budget-k2048-20261010/RESULT.md</code> <code>verification/structured-d12-orbit-20261010/RESULT.md</code> and the worker/outer/storage receipts. The canonical progress timeline and cold leaderboard receive no point from these stage-only observations.</p></div></details></div>
+<div class="dash-section" id="n83-retained-gates-20261010" style="max-width:1180px;margin:24px auto;padding:18px" aria-labelledby="n83-retained-gates-title"><div class="dash-section-head"><div><p class="dash-kicker">Degree-83 Koblitz / source and capacity / 2026-10-10</p><h2 id="n83-retained-gates-title">Structured-orbit and K2048 bases verified; bounded N83 gates retained.</h2></div><span class="status neutral">Engineering · L0</span></div><details class="dash-details"><summary>N83 retained-domain capacity and structured-orbit S3 storage, 2026-10-10</summary><div class="dash-detail-body"><p>The primary 81-bit model <code>icv1-f2m83-tm6151469093347-debefd74</code> has 57 constructed factor bases stored with verified S3 round-trips, including K1182 and K2048 signed-Frobenius bases with 196,212 and 339,968 point records and a source-derived dimension-12 closure with 332,166 point records in 2,001 orbit columns. Generic multi-limb arithmetic replay checked every point on these three additional bases; the structured object also passed a second replay after S3 download. These are engineering construction and storage observations at L0, not complete cold index-calculus runtimes.</p><div class="table-scroll"><table><caption>Guarded construction or exact preflight per N83 model; cgroup peaks under a 4 GiB zero-swap limit.</caption><thead><tr><th>Retained model</th><th>SAT variables</th><th>Clauses</th><th>Cgroup peak, bytes</th><th>Search outcome</th></tr></thead><tbody><tr><td>K64 factored S4</td><td>127,404</td><td>1,490,138</td><td>642,768,896</td><td>Construction only; search not run</td></tr><tr><td>K64 chained S3, m5</td><td>84,743</td><td>2,100,012</td><td>736,542,720</td><td>One SAT call hit 10,000 conflicts; <code>UNKNOWN_solver_cap</code>, zero relations</td></tr><tr><td>K64 chained S3, m6</td><td>105,908</td><td>2,532,398</td><td>841,170,944</td><td>Docker daemon EOF during trial; producer failure, no solver verdict</td></tr><tr><td>K256 chained S3, m5</td><td>84,743</td><td>7,443,537</td><td>1,960,288,256</td><td>Separate 8M domain-clause gate passed; one SAT call hit 10,000 conflicts, <code>UNKNOWN_solver_cap</code>, zero relations</td></tr><tr><td>K1182 chained S3, m5</td><td>84,743 required</td><td>32,142,830 required</td><td>232,259,584, preflight only</td><td><code>UNKNOWN_domain_clause_cap</code> at 12M; model and search not run</td></tr></tbody></table></div><p class="dash-footnote">The K1182 m5 gate stopped before installing a model; its 32,142,830 required domain clauses exceed the frozen 12M cap. A read-only K2048 preflight later counted 55,017,910 required clauses under the same explicit-domain encoding, also above 12M. The dimension-12 closure retains compact source-coordinate and phase structure. An exact phase-aware chained-S3 x-domain now passes small-field membership and cap tests; its N83 source preflight counts 26,265 additional variables, 872,260 clauses and 3,320 native XOR rows for m5, but no N83 model or search has been measured with it. The first K256 3M domain-clause gate returned <code>UNKNOWN_domain_clause_cap</code> at 7,195,450 required clauses. The six-summand container was later audited and removed; its original cleanup flag was invalid. Shared-host emulated-worker timings are budget diagnostics only. Complete single-target cold runtime, natural rank, and matched rho for these retained SAT/S3 variants remain unmeasured; the root-index holdout above supplies separate Tier 1 evidence and leaves its K1104/K1120 selector unresolved. Source: <a href="https://github.com/aburan28/crypto/pull/1599">PR #1599</a>, <code>research/koblitz_n83_factor_base_sweep_20261008/verification/two-hour-extension-20261010/REPORT.md</code>, <code>verification/remaining-budget-k1182-20261010/RESULT.md</code>, <code>verification/remaining-budget-k2048-20261010/RESULT.md</code> <code>verification/structured-d12-orbit-20261010/RESULT.md</code> and the worker/outer/storage receipts. The canonical progress timeline and cold leaderboard receive no point from these stage-only observations.</p></div></details></div>
 <!-- BEGIN IC EVIDENCE LIBRARY -->
 <details class="dash-library" id="evidence-library"><summary>Open the full historical ledger</summary><div id="legacy-evidence">
 <div class="wrap">
@@ -4543,38 +4556,44 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 
   <div class="panel" id="ecc2k130-descent-degree-20260930">
     <div class="panel-head">
-      <h2>ECC2K-130 descent route: the solving degree grows with &ell; and tracks the semi-regular reference, so the route has no crossover to wait for</h2>
-  <p class="panel-summary">Finds the refutation degree rises with &ell; at m = 3 and, measured since 2026-10-06, at m = 4 (one degree higher, flat in n), leaving m = 3 above rho with a free oracle; n = 131 prices derived not measured.</p>
+      <h2>ECC2K-130 descent route: XL's refutation degree grows with &ell;; the MutantXL closure refutes at 3&ndash;4 much longer, but rises past 4 at m&thinsp;=&thinsp;3, &ell;&thinsp;=&thinsp;7</h2>
+  <p class="panel-summary">Finds XL's refutation degree rises with &ell; at m = 3 and m = 4; MutantXL closure refutes at 3&ndash;4 to &ell; = 6 (m = 3) and &ell; = 4, N = 42 (m = 4), then exceeds 4 at m = 3, &ell; = 7 (2026-10-16); no derived row beats rho; n = 131 prices derived not measured.</p>
       <p>Class <span class="chip">accounting</span>. There is no new <code>S</code> and no cost moves: the ECC2K-130
         verdict was already set by the product law and the oracle budget above. This panel adds what the
         refutation degree of the <code>m</code>&thinsp;=&thinsp;3 chained S<sub>3</sub> system does as &ell; grows,
         measured in <code>RESEARCH_DREG_MEASUREMENT.md</code> Results&nbsp;4&ndash;9, the m&thinsp;=&thinsp;4 chain added on
-        2026-10-06 (Result&nbsp;10), and the price that implies at
+        2026-10-06 (Result&nbsp;10), the MutantXL closure degree of the same draws measured on 2026-10-16
+        (Result&nbsp;11), and the price that implies at
         n&thinsp;=&thinsp;131 under each degree model. Every n&thinsp;=&thinsp;131 figure is <b>derived, not
         measured</b>. Sources: <code>research/dreg_degree7_ell5_20260930/</code>,
-        <code>research/dreg_m4_chain_20261006/</code> and
+        <code>research/dreg_m4_chain_20261006/</code>, <code>research/dreg_closure_mutantxl_20261016/</code> and
         <code>research/notes/ecc2k130/RESEARCH_ECC2K130_DESCENT_DEGREE.md</code>.</p>
     </div>
     <div class="table-scroll"><table>
       <caption>The refutation degree, four unsatisfiable draws per cell: the degree at which the constant 1
         enters the Macaulay row space. &ldquo;&ge;D&rdquo; is a lower bound. The first fall degree is 3 in every
         cell. D<sub>reg</sub> is the semi-regular degree of regularity of the cell's shape, a formula
-        (<code>dreg_score semireg</code>, native; <code>semireg.py</code> was the 2026-09-30 tool and agrees on every cell).</caption>
+        (<code>dreg_score semireg</code>, native; <code>semireg.py</code> was the 2026-09-30 tool and agrees on every cell).
+        &ldquo;Closure&rdquo; is the first degree at which the MutantXL fall closure (falls times monomials, saturated) refutes the same
+        draw (<code>dreg_score closure</code>, 2026-10-16); blank where not measured.</caption>
       <thead>
         <tr><th scope="col">&ell;</th><th scope="col">cells (n, &ell;)</th><th scope="col">unknowns</th>
-          <th scope="col">measured</th><th scope="col">semi-regular D<sub>reg</sub></th></tr>
+          <th scope="col">measured</th><th scope="col">semi-regular D<sub>reg</sub></th><th scope="col">closure (2026-10-16)</th></tr>
       </thead>
       <tbody>
-        <tr class="group"><td colspan="5">m&thinsp;=&thinsp;3, the chained S<sub>3</sub> with one intermediate point</td></tr>
-        <tr><td>2</td><td>(5,2) (7,2) (8,2) (10,2) (12,2)</td><td class="n">11&ndash;18</td><td>5 in every draw</td><td>5</td></tr>
-        <tr><td>3</td><td>(4,3) (5,3) (7,3) (9,3)</td><td class="n">13&ndash;18</td><td>5; 6; 6; 6</td><td>5; 5; 6; 6</td></tr>
-        <tr><td>4</td><td>(7,4) (8,4) (11,4) (13,4)</td><td class="n">19&ndash;25</td><td>7767; 6767; 6666; 6666</td><td>6; 6; 7; 7</td></tr>
-        <tr><td>5</td><td>(10,5)</td><td class="n">25</td><td><b>7 7 7 7</b>: exactly 7, the degree-7 study</td><td>7</td></tr>
-        <tr><td>5</td><td>(11,5) (13,5) (15,5)</td><td class="n">26&ndash;30</td><td>&ge;7 in every draw; degree 7 needs hosts of about 24, 64 and 128 GB</td><td>7; 7; 8</td></tr>
-        <tr class="group"><td colspan="5">m&thinsp;=&thinsp;4, two intermediate points (2026-10-06)</td></tr>
-        <tr><td>1</td><td>(4,1) (5,1) (6,1)</td><td class="n">12&ndash;16</td><td>5 in every draw</td><td>5</td></tr>
-        <tr><td>2</td><td>(5,2) (6,2) (7,2) (8,2)</td><td class="n">18&ndash;24</td><td><b>6 in every draw</b>: one above m&thinsp;=&thinsp;3</td><td>6; 7; 7; 7</td></tr>
-        <tr><td>3</td><td>(9,3) (10,3)</td><td class="n">30, 32</td><td><b>&ge;7 &ge;7 &ge;7 &ge;7; &ge;7 &ge;7 &ge;7 &ge;7</b> (degree 6 in full)</td><td>8; 9</td></tr>
+        <tr class="group"><td colspan="6">m&thinsp;=&thinsp;3, the chained S<sub>3</sub> with one intermediate point</td></tr>
+        <tr><td>2</td><td>(5,2) (7,2) (8,2) (10,2) (12,2)</td><td class="n">11&ndash;18</td><td>5 in every draw</td><td>5</td><td>4 3 4 4; 4 4 4 3; 4 4 4 4; 4 4 4 4; <b>3 3 3 3</b></td></tr>
+        <tr><td>3</td><td>(4,3) (5,3) (7,3) (9,3)</td><td class="n">13&ndash;18</td><td>5; 6; 6; 6</td><td>5; 5; 6; 6</td><td>4 in all 16 draws</td></tr>
+        <tr><td>4</td><td>(7,4) (8,4) (11,4) (13,4)</td><td class="n">19&ndash;25</td><td>7767; 6767; 6666; 6666</td><td>6; 6; 7; 7</td><td><b>4 in all 16 draws</b></td></tr>
+        <tr><td>5</td><td>(10,5)</td><td class="n">25</td><td><b>7 7 7 7</b>: exactly 7, the degree-7 study</td><td>7</td><td><b>4 4 4 4</b>, three below XL</td></tr>
+        <tr><td>5</td><td>(11,5) (13,5) (15,5)</td><td class="n">26&ndash;30</td><td>&ge;7 in every draw; degree 7 needs hosts of about 24, 64 and 128 GB</td><td>7; 7; 8</td><td>4 in all 12 draws (scale study)</td></tr>
+        <tr><td>6</td><td>(16,6) (18,6), fresh draws</td><td class="n">34, 36</td><td>&ge;4 (XL built to 3 only)</td><td>&mdash;</td><td>4 in all 8 draws</td></tr>
+        <tr><td>7</td><td>(19,7) (21,7), fresh draws</td><td class="n">40, 42</td><td>&ge;4 (XL built to 3 only); not at 4</td><td>&mdash;</td><td><b>&gt;4 in all 8 draws</b>: degree 4 saturated without 1</td></tr>
+        <tr class="group"><td colspan="6">m&thinsp;=&thinsp;4, two intermediate points (2026-10-06)</td></tr>
+        <tr><td>1</td><td>(4,1) (5,1) (6,1)</td><td class="n">12&ndash;16</td><td>5 in every draw</td><td>5</td><td>4 3 4 4; 4 4 4 3; 3 4 4 3</td></tr>
+        <tr><td>2</td><td>(5,2) (6,2) (7,2) (8,2)</td><td class="n">18&ndash;24</td><td><b>6 in every draw</b>: one above m&thinsp;=&thinsp;3</td><td>6; 7; 7; 7</td><td>3&ndash;4 in every draw</td></tr>
+        <tr><td>3</td><td>(9,3) (10,3)</td><td class="n">30, 32</td><td><b>&ge;7 &ge;7 &ge;7 &ge;7; &ge;7 &ge;7 &ge;7 &ge;7</b> (degree 6 in full)</td><td>8; 9</td><td><b>4 in all eight draws</b></td></tr>
+        <tr><td>3, 4</td><td>(12,3) (14,3) (13,4), fresh draws</td><td class="n">36&ndash;42</td><td>&ge;4 (XL built to 3 only); not at 4</td><td>&mdash;</td><td><b>4 in all 12 draws</b> (scale study)</td></tr>
       </tbody>
     </table></div>
     <div class="table-scroll"><table>
@@ -4598,6 +4617,11 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <tr><td>4</td><td>D&thinsp;=&thinsp;7, constant (borrowed from m&thinsp;=&thinsp;3; m&thinsp;=&thinsp;4 already reaches 7 at &ell;&thinsp;=&thinsp;3, far below the &ell;&thinsp;=&thinsp;34 priced here, so this row assumes its rise stops at once)</td><td class="n">1</td><td class="n">82.11</td><td class="n">+21.30</td><td><span class="chip">extrapolation</span></td></tr>
         <tr><td>4</td><td>&ell;&thinsp;+&thinsp;4, the measured m&thinsp;=&thinsp;4 fit (minimum at &ell;&thinsp;=&thinsp;4) &mdash; 2026-10-06</td><td class="n">1</td><td class="n">173.13</td><td class="n">+112.32</td><td><span class="chip">extrapolation</span></td></tr>
         <tr><td>4</td><td>semi-regular D<sub>reg</sub>(N) of the m&thinsp;=&thinsp;4 shape (55 at &ell;&thinsp;=&thinsp;27) &mdash; 2026-10-06</td><td class="n">1</td><td class="n">275.14</td><td class="n">+214.33</td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>3</td><td>D&thinsp;=&thinsp;4, constant (&ell;&thinsp;=&thinsp;40) &mdash; <b>withdrawn</b>: the closure exceeds 4 at &ell;&thinsp;=&thinsp;7</td><td class="n">1</td><td class="n">82.27</td><td class="n">+21.46</td><td><span class="chip">withdrawn</span></td></tr>
+        <tr><td>3</td><td>D&thinsp;=&thinsp;5, constant: the closure's next degree (&ell;&thinsp;=&thinsp;41) &mdash; 2026-10-16</td><td class="n">1</td><td class="n">85.18</td><td class="n">+24.37</td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>4</td><td>D&thinsp;=&thinsp;4, constant: the measured MutantXL closure degree (&ell;&thinsp;=&thinsp;33) &mdash; 2026-10-16</td><td class="n">1</td><td class="n">68.43</td><td class="n">+7.62</td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>4</td><td>D&thinsp;=&thinsp;4, constant: the closure (&ell;&thinsp;=&thinsp;34), w&thinsp;=&thinsp;2, which its counted work tracks &mdash; 2026-10-16</td><td class="n">2</td><td class="n">93.91</td><td class="n">+33.10</td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>4</td><td>D&thinsp;=&thinsp;5, constant: the closure's next degree (&ell;&thinsp;=&thinsp;34) &mdash; 2026-10-16</td><td class="n">1</td><td class="n">71.13</td><td class="n">+10.32</td><td><span class="chip">extrapolation</span></td></tr>
       </tbody>
     </table></div>
     <div class="panel-head">
@@ -4622,6 +4646,22 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         (m&thinsp;=&thinsp;4), above an exhaustive search of the subgroup; below the searched range (&ell;&thinsp;&lt;&thinsp;4)
         they price 2<sup>158.12</sup>&ndash;2<sup>170.90</sup> with target counts past the 2<sup>129</sup> subgroup, still above
         that search. Those are extrapolations of three-rung fits, marked as such; the verdict against rho is unchanged.</p>
+      <p><b>The growth is XL's, not the ideal's (2026-10-16).</b> Every degree above is plain XL's. Saturating each
+        degree under MutantXL's fall closure refutes all 92 committed unsatisfiable draws below XL, at 3 or 4, in every
+        cell, with no growth in &ell; (1&ndash;5), m (3, 4) or unknowns (11&ndash;32); 58 of 84 resolved draws are two or
+        more degrees below. XL identity held on every degree built, and the closure refuted none of the committed
+        satisfiable draws (a soundness control added after measurement, disclosed). Held at 4 to n&thinsp;=&thinsp;131 the
+        best m&thinsp;=&thinsp;4 row is 2<sup>68.43</sup> (w&thinsp;=&thinsp;1), 7.62 bits over rho in unconverted units,
+        against 2<sup>173.13</sup> under the XL fit: the constant-degree case is back as an <b>open extrapolation</b> from
+        N&thinsp;&le;&thinsp;32 to N&thinsp;&asymp;&thinsp;400, not a measurement. The free-oracle floor still leaves 2<sup>5.71</sup>
+        per target, so no row beats rho. Next: a sparse degree-4 closure at N&thinsp;&asymp;&thinsp;40&ndash;50.</p>
+      <p><b>At scale (2026-10-16).</b> A pre-registered run on 40 more unsatisfiable draws at degree 4, N&thinsp;=&thinsp;26&ndash;42
+        (<code>research/dreg_closure_scale_20261016/</code>), found the closure still refutes at 4 at m&thinsp;=&thinsp;3 for &ell;&thinsp;=&thinsp;5, 6 and
+        at m&thinsp;=&thinsp;4 for &ell;&thinsp;=&thinsp;3, 4 up to N&thinsp;=&thinsp;42, but at m&thinsp;=&thinsp;3, &ell;&thinsp;=&thinsp;7 (N&thinsp;=&thinsp;40, 42) all eight
+        draws saturate at degree 4 without refuting. The rise follows &ell; rather than N (m&thinsp;=&thinsp;4 holds at the same N); a
+        descriptive, unregistered reading is that it is set by m&middot;&ell;. The m&thinsp;=&thinsp;3 degree-4 row is withdrawn; the
+        m&thinsp;=&thinsp;4 one keeps measured support to &ell;&thinsp;=&thinsp;4 only. Held at 5, the best m&thinsp;=&thinsp;4 row is
+        2<sup>71.13</sup>, 10.32 bits over rho in unconverted units. XL refuted at degree 4 on none of the 40 draws.</p>
     </div>
   </div>
 

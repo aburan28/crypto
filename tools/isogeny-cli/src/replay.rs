@@ -54,13 +54,17 @@ pub fn verify_with_registry(out: &Path, write_certificate: bool, registry: &Valu
     verify_detail(out, write_certificate, registry).0
 }
 pub fn verify_detail(out: &Path, write_certificate: bool, registry: &Value) -> (Value, Value) {
+    let field_setup = crate::replay_trace::stage("setup/field_parsing");
     let summary: Value =
         serde_json::from_slice(&fs::read(out.join("search.json")).unwrap()).unwrap();
+    field_setup.finish();
     let output_suffix = "";
     let mut coverage = None;
     let mut replayed = vec![];
     let mut curves = vec![];
-    for attempt in summary["attempts"].as_array().unwrap() {
+    for (attempt_index, attempt) in summary["attempts"].as_array().unwrap().iter().enumerate() {
+        let attempt_stage = crate::replay_trace::stage(format!("attempt_{attempt_index}"));
+        let source_setup = crate::replay_trace::stage("source_loading_and_registry");
         let preset = attempt["curve"].as_str().unwrap();
         let ell = attempt["ell"].as_u64().unwrap();
         assert_eq!(attempt["receipt"]["stdout"], format!("ell-{ell}.json"));
@@ -78,6 +82,8 @@ pub fn verify_detail(out: &Path, write_certificate: bool, registry: &Value) -> (
             attempt["receipt"]["stderr_sha256"].as_str().unwrap()
         );
         if attempt["receipt"]["status"] != "PASS" {
+            source_setup.finish();
+            attempt_stage.finish();
             continue;
         }
         assert_eq!(attempt["receipt"]["exit_code"], 0);
@@ -116,8 +122,11 @@ pub fn verify_detail(out: &Path, write_certificate: bool, registry: &Value) -> (
             f.from_big(&integer(&standard["curve"]["generator"][0])),
             f.from_big(&integer(&standard["curve"]["generator"][1])),
         );
+        source_setup.finish();
+        let source_order = crate::replay_trace::stage("source_generator_subgroup_order");
         assert!(source.on_curve(&f, &g.0, &g.1));
         assert!(curve::scalar_mul(&f, &source, &g.0, &g.1, &n).is_none());
+        source_order.finish();
         let isos = doc["result"]["isogenies"].as_array().unwrap();
         let partial = doc["scope"] == "one_frobenius_eigenline";
         let expected = if partial { "PARTIAL" } else { "COMPLETE" };
@@ -136,14 +145,28 @@ pub fn verify_detail(out: &Path, write_certificate: bool, registry: &Value) -> (
         }
         coverage = Some(expected);
         for (index, iso) in isos.iter().enumerate() {
+            let map_stage = crate::replay_trace::stage(format!("map_{index}"));
+            let coefficient_setup = crate::replay_trace::stage("coefficient_parsing");
             assert_eq!(iso["verified"], true);
             let h = coeffs(&f, &iso["kernel"]);
             let num = coeffs(&f, &iso["x_map"]["num"]);
             let den = coeffs(&f, &iso["x_map"]["den"]);
-            let cod = kernel::verify_kernel(&f, &source, ell, &h)
-                .expect("independent kernel certificate failed");
+            coefficient_setup.finish();
+            let kernel_stage = crate::replay_trace::stage("kernel_validation");
+            let cod = kernel::verify_kernel_with_observer(
+                &f,
+                &source,
+                ell,
+                &h,
+                crate::replay_trace::event,
+            )
+            .expect("independent kernel certificate failed");
+            kernel_stage.finish();
+            let codomain_binding = crate::replay_trace::stage("codomain_binding");
             assert_eq!(f.to_big(&cod.a), integer(&iso["codomain"]["a"]));
             assert_eq!(f.to_big(&cod.b), integer(&iso["codomain"]["b"]));
+            codomain_binding.finish();
+            let denominator_stage = crate::replay_trace::stage("denominator_kernel_square");
             assert_eq!(
                 poly::mul(&f, &h, &h),
                 den,
@@ -151,21 +174,33 @@ pub fn verify_detail(out: &Path, write_certificate: bool, registry: &Value) -> (
             );
             assert_eq!(num.len(), ell as usize + 1);
             assert_eq!(num.last(), Some(&f.one()));
+            denominator_stage.finish();
+            let numerator_gcd = crate::replay_trace::stage("numerator_denominator_gcd");
             assert_eq!(poly::degree(&poly::gcd(&f, &num, &den)), Some(0));
+            numerator_gcd.finish();
+            let substitution = crate::replay_trace::stage("exact_rational_map_substitution");
             assert!(
                 map_identity::check(&f, &source, &cod, &num, &den),
                 "rational map fails exact curve-equation substitution"
             );
+            substitution.finish();
+            let generator_stage = crate::replay_trace::stage("target_generator_subgroup_order");
             let gp = eval(&f, &num, &den, Some(g))
                 .expect("prime subgroup generator cannot lie in the small-degree kernel");
             assert!(cod.on_curve(&f, &gp.0, &gp.1));
             assert!(curve::scalar_mul(&f, &cod, &gp.0, &gp.1, &n).is_none());
+            generator_stage.finish();
             let mut point_checks = 0;
-            for seed_x in [101, 1009, 10007, 65537] {
+            for (seed_index, seed_x) in [101, 1009, 10007, 65537].into_iter().enumerate() {
+                let seed_stage =
+                    crate::replay_trace::stage(format!("point_seed_setup_{seed_index}"));
                 let q = curve::least_point(&f, &source, seed_x);
                 let iq = eval(&f, &num, &den, Some(q)).unwrap();
                 assert!(cod.on_curve(&f, &iq.0, &iq.1));
+                seed_stage.finish();
                 for k in [2, 3, 17, 65537, ell] {
+                    let transport =
+                        crate::replay_trace::stage(format!("point_transport_{point_checks:02}"));
                     let k = BigUint::from(k);
                     let left = eval(
                         &f,
@@ -176,6 +211,7 @@ pub fn verify_detail(out: &Path, write_certificate: bool, registry: &Value) -> (
                     let right = curve::scalar_mul(&f, &cod, &iq.0, &iq.1, &k);
                     assert_eq!(left, right, "public scalar transport failed");
                     point_checks += 1;
+                    transport.finish();
                 }
             }
             assert!(eval(&f, &num, &den, None).is_none());
@@ -187,7 +223,8 @@ pub fn verify_detail(out: &Path, write_certificate: bool, registry: &Value) -> (
                 &crate::catalog::integer(&Value::String(target_a.to_string())),
                 &crate::catalog::integer(&Value::String(target_b.to_string())),
                 &crate::catalog::integer(&Value::String(group_order.to_string())),
-            ).unwrap();
+            )
+            .unwrap();
             assert_eq!(target_id["slug"], target_identity.slug);
             assert_eq!(target_id["icv1"], target_identity.icv1);
             assert_eq!(target_id["model_json"], target_identity.model_json);
@@ -210,13 +247,16 @@ pub fn verify_detail(out: &Path, write_certificate: bool, registry: &Value) -> (
             curves.push(json!({"name":target_id["slug"],"icv1":target_id["icv1"],"p":p.to_string(),"a":target_a.to_string(),"b":target_b.to_string(),
                 "group_order":group_order.to_string(),"subgroup_order":n.to_string(),"cofactor":json_number(&cofactor_big),"j":iso["codomain"]["j"],"generator":[format!("0x{:x}",f.to_big(&gp.0)),format!("0x{:x}",f.to_big(&gp.1))],
                 "source":source_slug,"ell":ell,"index":index,"target_ec1":ec1,"target_curve_uid":uid,"model_json":target_id["model_json"]}));
+            map_stage.finish();
         }
         eprintln!(
             "replayed {preset} ell={ell}: {} certified maps; coverage {}",
             isos.len(),
             coverage.unwrap()
         );
+        attempt_stage.finish();
     }
+    let output_stage = crate::replay_trace::stage("output_serialization");
     assert!(!replayed.is_empty(), "no completed construction to certify");
     let receipt = json!({"schema":"large-degree-isogeny-replay/v1","method":"existing walker kernel verifier, separate field and polynomial implementation",
         "scope":"same-host independent implementation","degree_coverage":coverage.unwrap(),"expected_total_eigenlines":2,"records":replayed,"status":"PASS"});
@@ -238,5 +278,10 @@ pub fn verify_detail(out: &Path, write_certificate: bool, registry: &Value) -> (
         )
         .unwrap();
     }
-    (receipt, json!({"schema":"large-degree-isogeny-curves/v1","curves":curves}))
+    let result = (
+        receipt,
+        json!({"schema":"large-degree-isogeny-curves/v1","curves":curves}),
+    );
+    output_stage.finish();
+    result
 }

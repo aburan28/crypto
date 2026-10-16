@@ -1225,6 +1225,61 @@ class EqualAdviceBlTests(unittest.TestCase):
         self.assertEqual(check["status"], "FAIL")
         self.assertTrue((run / "artifacts/commands.json").is_file())
 
+    def test_prepare_only_pair_ic_reuses_archive_pin(self) -> None:
+        archive = (
+            lab.HERE
+            / "evidence"
+            / "20261016-n61-bl-reference-l1024"
+            / "20261016T063525Z-842e1c174e"
+        )
+        self.assertTrue((archive / "logs" / "bl.jsonl").is_file())
+        run_id = f"test-bl-pair-prepare-{lab.now().replace(':', '').replace('+', '')}"
+        args = lab.parser().parse_args([
+            "launch-equal-advice",
+            "--beat", self.BEAT,
+            "--run-id", run_id,
+            "--prepare-only",
+            "--pair-ic",
+            "--reuse-bl-archive", str(archive),
+            "--ic-k", "256",
+            "--ic-target-count", "1",
+        ])
+        state = lab.launch_equal_advice(args)
+        self.assertEqual(state["status"], "PREPARE_ONLY")
+        self.assertTrue(state["pair_ic"])
+        commands = lab.read_json(lab.RUNS_DIR / run_id / "artifacts/commands.json")
+        self.assertIn("ic", commands)
+        self.assertEqual(self.beat.get("ic_k_default"), 256)
+
+    def test_equal_advice_pair_helpers_pin_archive(self) -> None:
+        import equal_advice_pair
+
+        archive = (
+            lab.HERE
+            / "evidence"
+            / "20261016-n61-bl-reference-l1024"
+            / "20261016T063525Z-842e1c174e"
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            run = Path(tmp) / "run"
+            pin = equal_advice_pair.materialize_bl_archive(
+                archive=archive,
+                run=run,
+                lab=lab,
+                targets=1024,
+                table_bytes=5711008,
+            )
+            self.assertEqual(pin["targets"], 1024)
+            self.assertFalse(pin["remeasured"])
+            self.assertEqual(
+                pin["points_sha256"],
+                lab.sha256(archive / "inputs" / "points.txt"),
+            )
+            self.assertEqual(
+                pin["bl_jsonl_sha256"],
+                lab.sha256(archive / "logs" / "bl.jsonl"),
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

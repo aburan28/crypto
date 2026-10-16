@@ -841,6 +841,56 @@ pub fn kernel_from_x(curve: &PrimeCurve, x0: &Int, ell: u64) -> Option<Vec<Int>>
 
 // ------------------------------------------------------------------ modular polynomials
 
+/// CM volcano interpolation and streaming explicit CRT modulo any positive m.
+/// Unlike the q-expansion API, m may be composite or smaller than ell.
+/// See `find::sutherland::cm::CmPlan` for the bounded implementation's limits.
+pub fn modular_polynomial_cm(m: &Int, ell: usize, seed: u64) -> Result<Vec<Vec<Int>>, String> {
+    if *m <= Int::zero() {
+        return Err("modulus must be positive".into());
+    }
+    crate::find::sutherland::cm::CmPlan::new(ell)?.phi_mod_m(m, &mut Rng::new(seed))
+}
+
+/// Signed integer coefficients from the CM volcano/explicit CRT method.
+pub fn modular_polynomial_integer_cm(ell: usize, seed: u64) -> Result<Vec<Vec<Int>>, String> {
+    crate::find::sutherland::cm::CmPlan::new(ell)?.phi_integer(&mut Rng::new(seed))
+}
+
+/// Evaluate a CM-computed modular polynomial at j and find its roots over F_p.
+pub fn modular_polynomial_cm_at(
+    p: &Int,
+    ell: usize,
+    j: &Int,
+    seed: u64,
+) -> Result<(Vec<Int>, Vec<Int>), String> {
+    if p.bits() > 640 {
+        return Err("root extraction supports prime moduli up to 640 bits".into());
+    }
+    if !p.is_probable_prime() {
+        return Err("root extraction requires a prime modulus".into());
+    }
+    let c = modular_polynomial_cm(p, ell, seed)?;
+    struct T<'a>(&'a [Vec<Int>], &'a Int, u64);
+    impl FieldTask for T<'_> {
+        type Out = (Vec<Int>, Vec<Int>);
+        fn run<F: PrimeFieldInt>(self, f: &F) -> Self::Out {
+            let j = f.elem(self.1);
+            let g: Vec<_> = self
+                .0
+                .iter()
+                .map(|row| poly::eval(f, &row.iter().map(|x| f.elem(x)).collect(), j))
+                .collect();
+            let mut roots: Vec<_> = poly::roots(f, &g, &mut Rng::new(self.2))
+                .into_iter()
+                .map(|x| f.int(x))
+                .collect();
+            roots.sort();
+            (g.iter().map(|&x| f.int(x)).collect(), roots)
+        }
+    }
+    Ok(with_field(p, T(&c, j, seed)))
+}
+
 /// Phi_l mod p as the (l+2) x (l+2) matrix c[i][j] of X^i Y^j (Hecke/Newton; char > l + 1).
 pub fn modular_polynomial(p: &Int, ell: usize) -> Result<Vec<Vec<Int>>, String> {
     if *p <= Int::from(ell as i64 + 1) {

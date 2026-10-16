@@ -48,7 +48,7 @@ python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py \
 | `launch --beat …` | Lock → run dir → build producers → measure → claim draft + schema check |
 | `launch-panel --beat … [--targets L] [--blocks B] [--k K \| --k-candidates …] [--cpu N] [--resume RUN_ID]` | Multi-target batch panel beats only (see below); `launch` rejects them |
 | `launch-single --beat … [--workloads W] [--tune-workloads T] [--k K \| --k-candidates …] [--cpu N] [--resume RUN_ID]` | One-target online panel beats only (see below) |
-| `launch-equal-advice --beat … [--targets L] [--table-bytes B] [--prepare-only]` | Diagnostic Bernstein–Lange equal-advice reference (`koblitz.compact_orbit.n61_bl_reference`); not KS batch rho; fail-closed `vs_rho` |
+| `launch-equal-advice --beat … [--targets L] [--table-bytes B] [--prepare-only] [--reuse-bl-archive PATH --pair-ic [--ic-k K] [--ic-target-count N]]` | Diagnostic Bernstein–Lange equal-advice reference (`koblitz.compact_orbit.n61_bl_reference`); optional hash-verified BL reuse + paired IC online; not KS batch rho; fail-closed `vs_rho` |
 | `status [--run-id]` | Print `runs/<id>/state.json` (default: `runs/current.json`) |
 | `verify [--run-id]` | Rehash review manifest |
 | `claim-check --report PATH --stage STAGE` | Fail-closed measurement-schema validation |
@@ -190,6 +190,27 @@ primary `table_bytes=5711008` recovered 1024/1024 held-back scalars;
 `PENDING_INDEPENDENT_VALIDATION`; claim-check `FAIL` / `SCHEMA_INCOMPLETE`
 by design (no paired IC arm, no full `vs_rho` schema). Do not promote the
 ledger.
+
+Paired IC advance (same points, no ledger promotion): reuse the archived BL
+corpus and measure `koblitz_orbit_dlp_fast_online` at K=256 (equal-advice
+advice match):
+
+```bash
+python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py \
+  launch-equal-advice --beat koblitz.compact_orbit.n61_bl_reference \
+  --reuse-bl-archive research/sat_factor_base_review_20260908/autolab/evidence/20261016-n61-bl-reference-l1024/20261016T063525Z-842e1c174e \
+  --pair-ic --ic-k 256 --ic-target-count 1024
+```
+
+Point-file APIs match (`[x,y]` lines). Landed run
+`20261016T074400Z-n61-bl-ic-pair`
+(`evidence/20261016-n61-bl-ic-pair-l1024/`): **1024/1024** verified pairs at
+primary `table_bytes=5711008`; one-target schema slice has measured IC/BL
+online walls; panel median `BL/IC ≈ 0.044`. Claim-check `FAIL` /
+`SCHEMA_INCOMPLETE` remains fail-closed (missing IC1 manifests, co-measured
+`same_resource_envelope`, replay certs, `rho_policy`, declared BL phases).
+See `evidence/20261016-n61-bl-ic-pair-l1024/SCHEMA_GAPS.json`. Do not invent
+those fields; do not promote `boundary_targets.json`.
 
 One run:
 

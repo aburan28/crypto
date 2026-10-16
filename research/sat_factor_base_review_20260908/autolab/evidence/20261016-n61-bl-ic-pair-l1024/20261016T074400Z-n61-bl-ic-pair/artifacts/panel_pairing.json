@@ -1,0 +1,29 @@
+{
+  "bl_online_ms": {
+    "count": 1024,
+    "max": 17.829583,
+    "mean": 3.3661805654296875,
+    "median": 2.7796875,
+    "min": 0.178708
+  },
+  "ic_K": 256,
+  "ic_online_ms": {
+    "count": 1024,
+    "max": 3138.718459,
+    "mean": 111.44883299902344,
+    "median": 62.875666499999994,
+    "min": 0.076334
+  },
+  "kind": "equal_advice_ic_bl_panel_pairing",
+  "note": "Secondary multi-target pairing stats; primary vs_rho schema still requires target_count=1 with co-measured envelopes and identity manifests.",
+  "online_speedup_bl_over_ic": {
+    "count": 1024,
+    "max": 24.19129783043766,
+    "mean": 0.24043302785839143,
+    "median": 0.044389535969357394,
+    "min": 0.0011552488722945317
+  },
+  "paired_targets": 1024,
+  "table_bytes": 5711008,
+  "verified_pairs": 1024
+}
