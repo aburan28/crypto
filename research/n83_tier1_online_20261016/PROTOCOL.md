@@ -26,8 +26,18 @@ points, then lexicographic layout name. Require the winning arm's exact
 base dump, source, flags and IC1 manifest to replay and hash before writing
 `selection.json`. The four-point cold reserve panel remains independent
 evidence about setup cost. If the online control or identity gate fails,
-or no winning arm can be materialized, leave selection unknown and do not
-start the Tier 1 panel.
+use the separately frozen mirrored K3072/K2543 same-source rescreen in
+`research/n83_online_rescreen_20261016/PROTOCOL.md`. It runs four fresh
+processes per finalist in adjacent A/A pairs and mirrored order, requires
+each pair's online spread to be at most 10%, identical base and exact-index
+identities, full independent replay and resource admission, and strict
+separation of all four online intervals by more than the largest adjacent
+A/A difference. This fallback is declared before the rescreen runs and
+does not reinterpret the failed expanded-screen control. A rescreen winner
+must likewise have its exact base dump, source, flags and IC1 manifest
+replayed and hashed before `selection.json` is versioned. If the rescreen
+gate also fails, or no winning arm can be materialized, leave selection
+unknown and do not start the five-point Tier 1 panel.
 
 The approved allocation is one `g5g.metal` Spot instance in `us-east-1b`,
 for at most 165 minutes and $5 total. Before launch, check current Spot
