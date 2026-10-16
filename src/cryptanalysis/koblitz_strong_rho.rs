@@ -133,10 +133,22 @@ pub trait RhoField: Send + Sync {
     fn mul(&self, a: Self::E, b: Self::E) -> Self::E;
     fn sqr(&self, a: Self::E) -> Self::E;
     fn batch_inv(&self, xs: &mut [Self::E], scratch: &mut Vec<Self::E>);
+    /// Whether this field's products are `pclmulqdq` target-feature
+    /// functions, which inline only into code compiled with that feature
+    /// (true for [`Gf2`] on a folding field, which implies the CPU has it).
+    /// [`StrongRhoG::solve`] then runs its walk compiled with it.
+    #[inline(always)]
+    fn clmul_walk(&self) -> bool {
+        false
+    }
 }
 
 impl RhoField for Gf2 {
     type E = u64;
+    #[inline(always)]
+    fn clmul_walk(&self) -> bool {
+        cfg!(target_arch = "x86_64") && self.folds()
+    }
     #[inline(always)]
     fn degree(&self) -> u32 {
         self.n
@@ -1146,6 +1158,37 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
         }
     }
 
+    /// `ahead[j] = base + multiples[j]` for every `j`, with one batched
+    /// inversion; the group law's special cases fall back to [`Self::add`].
+    #[inline(always)]
+    fn starts_ahead(
+        &self,
+        base: RawPointG<F::E>,
+        multiples: &[RawPointG<F::E>],
+        ahead: &mut [RawPointG<F::E>],
+        inverses: &mut [F::E],
+        scratch: &mut Vec<F::E>,
+    ) {
+        let zero = F::E::default();
+        for (inverse, &m) in inverses.iter_mut().zip(multiples) {
+            *inverse = match (base, m) {
+                (RawPointG::Affine { x: x1, .. }, RawPointG::Affine { x: x2, .. }) => x1 ^ x2,
+                _ => zero,
+            };
+        }
+        self.gf.batch_inv(inverses, scratch);
+        for ((out, &inverse), &m) in ahead.iter_mut().zip(inverses.iter()).zip(multiples) {
+            *out = match (base, m) {
+                (RawPointG::Affine { x: x1, y: y1 }, RawPointG::Affine { x: x2, y: y2 })
+                    if inverse != zero =>
+                {
+                    self.add_with_slope(x1, y1, x2, self.mul(y1 ^ y2, inverse))
+                }
+                _ => self.add(base, m),
+            };
+        }
+    }
+
     #[inline(always)]
     fn add_with_slope(&self, x1: F::E, y1: F::E, x2: F::E, lambda: F::E) -> RawPointG<F::E> {
         let x3 = self.sqr(lambda) ^ lambda ^ x1 ^ x2 ^ self.curve_a;
@@ -1257,6 +1300,46 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
         jumps: &[JumpG<F::E, S>],
         start_rng: &mut StdRng,
         params: &StrongRhoParams,
+        charges: StrongRhoCharges,
+    ) -> Option<StrongRhoOutcomeG<S>> {
+        #[cfg(target_arch = "x86_64")]
+        if self.gf.clmul_walk() {
+            // SAFETY: `clmul_walk` holds only for a field built after
+            // `pclmulqdq` was detected.
+            return unsafe { self.solve_clmul(q, jumps, start_rng, params, charges) };
+        }
+        self.solve_impl(q, jumps, start_rng, params, charges)
+    }
+
+    /// [`Self::solve_impl`] compiled with `pclmulqdq`: the walk inlines into
+    /// it, and with it every field product, which is a target-feature
+    /// function that inlines only into code compiled with the feature.
+    ///
+    /// # Safety
+    ///
+    /// The CPU must support `pclmulqdq`.
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "pclmulqdq")]
+    unsafe fn solve_clmul(
+        &self,
+        q: RawPointG<F::E>,
+        jumps: &[JumpG<F::E, S>],
+        start_rng: &mut StdRng,
+        params: &StrongRhoParams,
+        charges: StrongRhoCharges,
+    ) -> Option<StrongRhoOutcomeG<S>> {
+        self.solve_impl(q, jumps, start_rng, params, charges)
+    }
+
+    /// [`Self::solve`]'s body, always inlined into [`Self::solve_clmul`] or
+    /// [`Self::solve`].
+    #[inline(always)]
+    fn solve_impl(
+        &self,
+        q: RawPointG<F::E>,
+        jumps: &[JumpG<F::E, S>],
+        start_rng: &mut StdRng,
+        params: &StrongRhoParams,
         mut charges: StrongRhoCharges,
     ) -> Option<StrongRhoOutcomeG<S>> {
         assert_eq!(jumps.len(), JUMPS, "jump table must have JUMPS entries");
@@ -1296,6 +1379,17 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
         let mut jump_index = vec![0usize; lanes_n];
         let mut active: Vec<usize> = Vec::with_capacity(lanes_n);
         let mut scratch: Vec<F::E> = Vec::new();
+        // Walk starts are cursor, cursor + stride, cursor + 2·stride, …; they
+        // are formed `lanes_n` at a time as `base + (j+1)·stride` with one
+        // batched inversion, instead of one inversion per start.  `ahead[j]`
+        // holds `base + (j+1)·stride`; the last becomes the next base.
+        let multiples: Vec<RawPointG<F::E>> =
+            std::iter::successors(Some(stride), |&m| Some(self.add(m, stride)))
+                .take(lanes_n)
+                .collect();
+        let mut ahead = vec![RawPointG::Infinity; lanes_n];
+        let mut ahead_inv = vec![zero; lanes_n];
+        let mut ahead_used = lanes_n;
         let (mut steps, mut walks, mut fruitless, mut capped, mut wasted) = (0u64, 0u64, 0, 0, 0);
         let mut escapes = 0u64;
         let mut dp_trail_lengths: Vec<u32> = Vec::new();
@@ -1306,9 +1400,20 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
             for lane in lanes.iter_mut().filter(|lane| !lane.live) {
                 loop {
                     walks += 1;
+                    if ahead_used == lanes_n {
+                        self.starts_ahead(
+                            cursor,
+                            &multiples,
+                            &mut ahead,
+                            &mut ahead_inv,
+                            &mut scratch,
+                        );
+                        ahead_used = 0;
+                    }
                     let start = cursor;
                     let start_a = cursor_a;
-                    cursor = self.add(cursor, stride);
+                    cursor = ahead[ahead_used];
+                    ahead_used += 1;
                     cursor_a = S::add_mod(cursor_a, stride_a, modulus);
                     charges.group_additions += 1;
                     if start == RawPointG::Infinity {
@@ -1590,6 +1695,33 @@ mod tests {
             let r = lib_point(&curve, 91);
             assert_eq!(rho.add(p, r), lib_point(&curve, 128));
             assert_eq!(rho.add(p, p), lib_point(&curve, 74));
+        }
+    }
+
+    #[test]
+    fn batched_starts_match_the_sequential_chain() {
+        for curve in curves() {
+            let rho = StrongRho::new(&curve);
+            let g = rho.generator();
+            let r = rho.modulus();
+            let stride = rho.scalar_mul(g, 5);
+            let multiples: Vec<_> =
+                std::iter::successors(Some(stride), |&m| Some(rho.add(m, stride)))
+                    .take(8)
+                    .collect();
+            // Bases where a sum is infinity (−3·stride), a doubling
+            // (2·stride), infinity itself, and a generic point.
+            for base_k in [r - 15, 10, 0, 1234] {
+                let base = rho.scalar_mul(g, base_k);
+                let mut ahead = vec![RawPointG::Infinity; 8];
+                let mut inverses = vec![0u64; 8];
+                rho.starts_ahead(base, &multiples, &mut ahead, &mut inverses, &mut Vec::new());
+                let mut cursor = base;
+                for (j, &point) in ahead.iter().enumerate() {
+                    cursor = rho.add(cursor, stride);
+                    assert_eq!(point, cursor, "n={} base={base_k} j={j}", curve.n);
+                }
+            }
         }
     }
 
