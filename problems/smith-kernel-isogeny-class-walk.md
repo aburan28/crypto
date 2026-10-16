@@ -7,7 +7,7 @@
 - **Affected work:** [weak isogeny classes study, 2026-10-13](../research/weak_isogeny_classes_20261013/REPORT.md),
   lead 2; [Smith Prop. 2/4 native study, 2026-10-14](../research/smith_prop24_native_20261014/REPORT.pdf)
 - **Next action owner:** unassigned
-- **Last updated:** 2026-10-14
+- **Last updated:** 2026-10-15
 
 ## Problem
 
@@ -96,9 +96,18 @@ open.
   `research/smith_prop24_native_20261014/data/` give the reachable set
   exactly, so a walk that reaches beyond `C` or misses a class it should reach
   is a bug.
-- **Also open:** why a minority of small classes holds no `full_success`
-  curve (a structural invariant of the class, or the sparsity of small
-  classes); and Smith's Remark 5 alternative (descending `X` when the trigonal
+- **Narrowed (2026-10-15,
+  [study](../research/smith_iso_granularity_20261015/REPORT.pdf)):** why a
+  minority of classes holds no `full_success` curve. Sparsity is not the
+  answer: counting `F_p`-isomorphism classes of curves instead of models
+  (34,227 at `p = 7`, 324,562 at `p = 11`; `full_success` checked constant on
+  every model) moves the null median of `C` from `U` to 0.4579 / 0.4864, but
+  the observed 0.4304 / 0.4750 stays below all 999 permutations at both
+  primes (frozen verdict: residual deficit beyond granularity). Empty
+  tractable classes: 560 vs 395 expected and 1,210 vs 720, in excess at every
+  class size. Successes are positively correlated within an `L`-class; the
+  2-adic valuation of `#J(F_p)` does not explain it (post hoc). Still open:
+  which finer invariant (candidate: the Galois module `J[4]`) is shared; and Smith's Remark 5 alternative (descending `X` when the trigonal
   map is not rational, which would raise the direct rate to 31.13% under his
   hypotheses) as a route that needs no walk.
 - **Outcomes:** short walks with cheap steps make the extension a practical
@@ -114,3 +123,6 @@ open.
   10^6 curves; class-level success near the ceiling at `p = 7` (`r = 0.811`)
   and `p = 11` (`r = 0.938`). Unblock items 1 and 2 done; the walk's cost
   stays open.
+- 2026-10-15: isomorphism-class granularity tested under a frozen protocol;
+  it explains 54% (`p = 7`) and 41% (`p = 11`) of the gap `U − C`, and the
+  rest is a within-class correlation not yet named.
