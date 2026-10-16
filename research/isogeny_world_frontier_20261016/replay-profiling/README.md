@@ -53,9 +53,10 @@ already passed4148 tests, zero failed,117 ignored (../root-release-retry2.log).
 No Python suite or example source changed in this implementation.
 
 The public fixture is P-192 degree13, source
-icv1-fp192-t31607402316713927207482677199-52e4af59, with targets
-icv1-fp192-t31607402316713927207482677199-cca00332 and
-icv1-fp192-t31607402316713927207482677199-e157377d.
+icv1-fp192-t31607402316713927207482677199-52e4af59. Its two derived
+codomain models and complete identities are retained in the
+[frozen native fixture](trace-controls-final-v1/public-p192-13/construction/p192/ell-13.json).
+They are raw control outputs; this report makes no registry-entry claim for them.
 Trace-off/on native verification.json bytes are identical. Both accept the valid
 map and reject all nine existing adversarial cases: composite/inflated degree,
 wrong source/kernel/numerator, compact-only record, path traversal, missing hash,
