@@ -67,3 +67,11 @@ The one-page report.pdf was rendered with Typst 0.15.1 and visually inspected
 in full. The precommit control binary's real dirty-tree provenance and SHA256
 are retained in tested-binary-version.json and tested-binary.sha256; clean
 scientific execution will use a separately built and pinned committed executable.
+
+The subsequent clean build is pinned to commit
+9a2e133099eb4b10ed182e25384bd53fca262146 and executable SHA256
+d7e53928e57bde96f9b6846333fd1190c3650ee57b6a060a2ab7e81d22252474,
+with dirty=false. Its complete passing native control retake and build receipts
+are under clean-build-9a2e133099/. Remote custody is pending explicit approval
+following automatic approval review's external-transfer rejection. No target
+execution is authorized by the local retake alone.

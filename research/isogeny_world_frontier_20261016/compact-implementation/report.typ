@@ -22,3 +22,5 @@ The exact SEC2 secp256k1 tuple is checked against the pinned registry; p,n prima
 = Provenance and next gate
 
 Source hashes, logs and the editable SVG are beside this report. Mathematical review and implementation handoff are in #link("https://github.com/aburan28/crypto-autoresearcher/pull/2221")[PR2221]; implementation publication is #link("https://github.com/aburan28/crypto/pull/1976")[PR1976]. The exact identity and proof basis are in `docs/identity-certificates/cm-eisenstein-norm.{json,md}`. The next scientific gate requires a clean executable, immutable custody and a frozen target protocol. No worldwide record, new expanded-map value or comparative timing result is established by these controls.
+
+The clean retake uses source `9a2e133099` and executable SHA256 prefix `d7e53928e57b`, with dirty=false. One complete native CLI integration passed (exit 0). Raw receipts are under `clean-build-9a2e133099/`. Remote custody awaits explicit upload approval after automatic review rejected the external transfer; no target launch is authorized yet.
