@@ -120,6 +120,13 @@ enum Cmd {
         /// Smallest margin an effect must clear.
         #[arg(long, default_value_t = 0.02)]
         floor: f64,
+        /// Claim `ID:PREFIX:MIN_BATCH:T`: max(r1, r2) over the arms named
+        /// `PREFIX…` (with batch ≥ MIN_BATCH where the arm has one) is ≤ T.
+        #[arg(long = "max-ratio")]
+        max_ratio: Vec<String>,
+        /// Claim `ID:PREFIX:MIN_BATCH:T`: max |r_k − 1| over those arms is ≤ T.
+        #[arg(long = "max-dev")]
+        max_dev: Vec<String>,
         #[arg(long)]
         out: PathBuf,
     },
@@ -370,6 +377,8 @@ fn run() -> Result<(), String> {
             base,
             cand,
             floor,
+            max_ratio,
+            max_dev,
             out,
         } => {
             if base.len() != 2 || cand.len() != 2 {
@@ -416,26 +425,39 @@ fn run() -> Result<(), String> {
                 .filter(|p| p.batch >= 4096 && base_names.contains(&p.run))
                 .collect();
             let worst = f1.iter().map(|p| p.ratio).fold(f64::MIN, f64::max);
-            let f1c = fit::Claim::at_most(
-                "F1",
-                &format!(
-                    "worst fp64bf/fp64 kernel ratio at B ≥ 4096 in the baseline runs ({} cells)",
-                    f1.len()
-                ),
-                if f1.is_empty() { f64::NAN } else { worst },
-                0.85,
-            );
-            println!(
-                "{} {}: {:.4} (threshold 0.85)",
-                f1c.id, f1c.verdict, f1c.value
-            );
+            let mut claims = Vec::new();
+            // F1 (round 2) only where the runs measured `fp64bf`.
+            if !f1.is_empty() {
+                claims.push(fit::Claim::at_most(
+                    "F1",
+                    &format!(
+                        "worst fp64bf/fp64 kernel ratio at B ≥ 4096 in the baseline runs ({} cells)",
+                        f1.len()
+                    ),
+                    worst,
+                    0.85,
+                ));
+            }
+            for (spec, dev) in max_ratio
+                .iter()
+                .map(|s| (s, false))
+                .chain(max_dev.iter().map(|s| (s, true)))
+            {
+                claims.push(compare::ratio_claim(&rows, spec, dev)?);
+            }
+            for c in &claims {
+                println!(
+                    "{} {}: {:.4} (threshold {}) {}",
+                    c.id, c.verdict, c.value, c.threshold, c.statement
+                );
+            }
             let classes: Vec<serde_json::Value> = counts
                 .iter()
                 .map(|((g, c), n)| serde_json::json!({"group": g, "class": c, "arms": n}))
                 .collect();
             write(
                 &out.join("summary.json"),
-                &json(&serde_json::json!({"classes": classes, "claims": [f1c]})),
+                &json(&serde_json::json!({"classes": classes, "claims": claims})),
             )?;
         }
         Cmd::Pair {
