@@ -49,15 +49,18 @@ done | jq -sc '. as $a | {arms: $a, identical: ($a | map(.output_digest) | uniqu
 
 q4_time=null
 if ls "$runs"/q4/time/*/*.jsonl > /dev/null 2>&1; then
+    contended=$(cat "$runs"/q4/time/*/isolation.jsonl | jq -sc 'map(select(.run.contended == true) | .label)')
     q4_time=$(for f in "$runs"/q4/time/*/*.jsonl; do
-        jq -sc --arg file "$(basename "$f")" --arg phase "$(basename "$(dirname "$f")")" '
+        jq -sc --arg file "$(basename "$f")" --arg phase "$(basename "$(dirname "$f")")" --argjson contended "$contended" '
             {phase: $phase, file: $file,
+             contended: (("q4/" + $phase + "/" + ($file | sub("\\.jsonl$"; ""))) as $l | $contended | index($l) != null),
              arm: ($file | capture("-(?<a>baseline|candidate)-r").a),
              slug: ($file | capture("^(?<s>icv1-[^-]+-[^-]+-[0-9a-f]{8})").s),
              ns_per_step: ((map(.walk_ms) | add) * 1e6 / (map(.walk_steps) | add)),
              identity: (map(del(.peak_rss_bytes) | with_entries(select(.key | endswith("_ms") | not))) | tostring)}' "$f"
     done | jq -sc '
         def med: sort | if length % 2 == 1 then .[length / 2 | floor] else (.[length / 2 - 1] + .[length / 2]) / 2 end;
+        map(select(.contended | not)) |
         group_by(.slug) | map({slug: .[0].slug,
             aa_spread: (map(select(.phase == "aa") | .ns_per_step) | (max / min - 1)),
             baseline_ns: (map(select(.phase == "ab" and .arm == "baseline") | .ns_per_step) | {median: med, min: min, max: max, n: length}),

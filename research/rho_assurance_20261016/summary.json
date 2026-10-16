@@ -1349,5 +1349,52 @@
     "final_ratio": 1.2744038802232374,
     "first_part_ratio": 1.1790336251242248
   },
-  "q4_native_time": null
+  "q4_native_time": {
+    "cells": [
+      {
+        "slug": "icv1-f2m53-tm56619371-dac20a85",
+        "aa_spread": 0.10722651861164367,
+        "baseline_ns": {
+          "median": 144.40664724759546,
+          "min": 139.42140219359268,
+          "max": 168.5174419026164,
+          "n": 4
+        },
+        "candidate_ns": {
+          "median": 141.20600176505056,
+          "min": 127.28759712556442,
+          "max": 151.84396340189437,
+          "n": 5
+        },
+        "identical": true,
+        "ratio": 1.0226664974755846
+      },
+      {
+        "slug": "icv1-f2m61-t158598901-ab42b6c5",
+        "aa_spread": 0.18258107833995574,
+        "baseline_ns": {
+          "median": 168.38562665743092,
+          "min": 154.43696924011994,
+          "max": 193.31427153400995,
+          "n": 5
+        },
+        "candidate_ns": {
+          "median": 139.23195006117567,
+          "min": 135.7780836561893,
+          "max": 166.76491815135128,
+          "n": 4
+        },
+        "identical": true,
+        "ratio": 1.2093892715245727
+      }
+    ],
+    "isolation": {
+      "runs": 32,
+      "contended": [
+        "q4/ab/icv1-f2m53-tm56619371-dac20a85-baseline-r1",
+        "q4/ab/icv1-f2m61-t158598901-ab42b6c5-candidate-r3"
+      ],
+      "nonzero_exit": 0
+    }
+  }
 }
