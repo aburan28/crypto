@@ -75,3 +75,10 @@ with dirty=false. Its complete passing native control retake and build receipts
 are under clean-build-9a2e133099/. Remote custody is pending explicit approval
 following automatic approval review's external-transfer rejection. No target
 execution is authorized by the local retake alone.
+
+A subsequent resource-admission repair rejects zero RSS after acknowledgement,
+with four deterministic missing/zero telemetry controls. The complete native
+suite now passes 91 tests, zero failures; see resource-repair.md and the fresh
+native-tests-resource-retake-v1.log. Historical clean build9a2 remains intact
+but is superseded for the proposed target. A new clean build and resource-joint
+retake are required before scientific approval. The target remains unexecuted.
