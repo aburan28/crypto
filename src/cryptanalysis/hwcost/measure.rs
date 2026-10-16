@@ -19,7 +19,7 @@ use rand::rngs::StdRng;
 use rand::SeedableRng;
 use serde::{Deserialize, Serialize};
 
-use super::kernel::{self, Counted, LowWord, OpTally, Plain, Walks};
+use super::kernel::{self, Arith, Counted, LowWord, OpTally, Walks};
 use crate::cryptanalysis::ecc2k130_guard::is_probable_prime;
 use crate::cryptanalysis::fp_backend::PrimeField;
 
@@ -32,7 +32,9 @@ pub const DP_MASK: u64 = (1 << 16) - 1;
 /// The fields measured.  `w1 … w4` are one implementation (`FpWide<N>`,
 /// Montgomery CIOS) at 1–4 limbs, with primes filling every limb, so cost
 /// can be fitted against the limb count; `fp64` is the dedicated one-word
-/// backend.
+/// backend and `fp64bf` the same field and representation through
+/// [`kernel::Fp64Bf`] (no data-dependent branch in subtraction or
+/// reduction).
 #[derive(Clone, Copy, Debug)]
 pub struct FieldSpec {
     pub name: &'static str,
@@ -42,10 +44,17 @@ pub struct FieldSpec {
     pub prime_label: &'static str,
 }
 
-pub const FIELDS: [FieldSpec; 5] = [
+pub const FIELDS: [FieldSpec; 6] = [
     FieldSpec {
         name: "fp64",
         backend: "Fp64",
+        limbs: 1,
+        prime_hex: "7fffffffffffffe7",
+        prime_label: "2^63-25",
+    },
+    FieldSpec {
+        name: "fp64bf",
+        backend: "Fp64, branch-free sub/redc (hwcost::kernel::Fp64Bf)",
         limbs: 1,
         prime_hex: "7fffffffffffffe7",
         prime_label: "2^63-25",
@@ -85,7 +94,7 @@ pub fn field_spec(name: &str) -> Result<FieldSpec, String> {
         .iter()
         .copied()
         .find(|f| f.name == name)
-        .ok_or_else(|| format!("unknown field `{name}` (have fp64, w1, w2, w3, w4)"))
+        .ok_or_else(|| format!("unknown field `{name}` (have fp64, fp64bf, w1, w2, w3, w4)"))
 }
 
 impl FieldSpec {
@@ -100,33 +109,49 @@ impl FieldSpec {
     }
 }
 
-/// Run `$body` with `$f` bound to the field named by `$spec`.
+/// Run `$body` with `$f` bound to the field named by `$spec` (its
+/// `PrimeField`, for setup and counting) and, in the three-name form, `$a`
+/// to the owned arithmetic that is timed ([`kernel::Owned`] of the field,
+/// or [`kernel::Fp64Bf`] for `fp64bf`).
 #[macro_export]
 macro_rules! hwcost_with_field {
-    ($spec:expr, $f:ident => $body:expr) => {{
+    ($spec:expr, $f:ident => $body:expr) => {
+        $crate::hwcost_with_field!($spec, $f, _unused_arith => $body)
+    };
+    ($spec:expr, $f:ident, $a:ident => $body:expr) => {{
+        use $crate::cryptanalysis::fp_backend::{Fp64, FpWide};
+        use $crate::cryptanalysis::hwcost::kernel::{Fp64Bf, Owned};
         let spec: $crate::cryptanalysis::hwcost::measure::FieldSpec = $spec;
         let p = spec.prime();
         match spec.name {
             "fp64" => {
-                let $f = $crate::cryptanalysis::fp_backend::Fp64::new(
-                    num_traits::ToPrimitive::to_u64(&p).unwrap(),
-                );
+                let $f = Fp64::new(num_traits::ToPrimitive::to_u64(&p).unwrap());
+                let $a = Owned($f.clone());
+                $body
+            }
+            "fp64bf" => {
+                let $f = Fp64::new(num_traits::ToPrimitive::to_u64(&p).unwrap());
+                let $a = Fp64Bf::new(&$f);
                 $body
             }
             "w1" => {
-                let $f = $crate::cryptanalysis::fp_backend::FpWide::<1>::new(&p);
+                let $f = FpWide::<1>::new(&p);
+                let $a = Owned($f.clone());
                 $body
             }
             "w2" => {
-                let $f = $crate::cryptanalysis::fp_backend::FpWide::<2>::new(&p);
+                let $f = FpWide::<2>::new(&p);
+                let $a = Owned($f.clone());
                 $body
             }
             "w3" => {
-                let $f = $crate::cryptanalysis::fp_backend::FpWide::<3>::new(&p);
+                let $f = FpWide::<3>::new(&p);
+                let $a = Owned($f.clone());
                 $body
             }
             "w4" => {
-                let $f = $crate::cryptanalysis::fp_backend::FpWide::<4>::new(&p);
+                let $f = FpWide::<4>::new(&p);
+                let $a = Owned($f.clone());
                 $body
             }
             other => panic!("unknown field {other}"),
@@ -458,14 +483,16 @@ fn random_elems<F: PrimeField>(f: &F, k: usize, rng: &mut StdRng) -> Vec<F::Elem
         .collect()
 }
 
-fn op_arms<F>(f: F, name: &str, seed: u64) -> Vec<Arm>
+/// Microbenchmarks of `arith`'s operations on random elements of `f`.
+fn op_arms<F, A>(f: &F, arith: A, name: &str, seed: u64) -> Vec<Arm>
 where
-    F: PrimeField + 'static,
+    F: PrimeField,
     F::Elem: 'static,
+    A: Arith<E = F::Elem> + Clone + 'static,
 {
     let mut rng = StdRng::seed_from_u64(seed);
-    let a0 = random_elems(&f, 8, &mut rng);
-    let b0 = random_elems(&f, 8, &mut rng);
+    let a0 = random_elems(f, 8, &mut rng);
+    let b0 = random_elems(f, 8, &mut rng);
     let mut arms = Vec::new();
     let mk = |op: &str, mode: &str, run: Run| Arm {
         group: "op",
@@ -477,7 +504,7 @@ where
     };
     macro_rules! chains {
         ($k:expr, |$f:ident, $a:ident, $b:ident| $e:expr) => {{
-            let ff = f.clone();
+            let ff = arith.clone();
             let (mut a, b) = (a0.clone(), b0.clone());
             Box::new(move |n: u64| {
                 let $f = &ff;
@@ -614,10 +641,13 @@ where
     (Walks::new(f, xs, ys), t)
 }
 
-fn kernel_arm<F>(f: F, name: &str, b: usize, seed: u64) -> (Arm, KernelCounts)
+/// The rho kernel over `f`'s walks, timed through `arith` (which must
+/// compute exactly what `f` computes; `run` checks it).
+fn kernel_arm<F, A>(f: F, arith: A, name: &str, b: usize, seed: u64) -> (Arm, KernelCounts)
 where
     F: PrimeField + 'static,
     F::Elem: LowWord + 'static,
+    A: Arith<E = F::Elem> + 'static,
 {
     let (mut w, t) = walks_for_timing(&f, b, seed);
     // One counted step on the very walks that are timed.
@@ -639,10 +669,9 @@ where
     };
     let arm_name = format!("kernel.{name}.{b}");
     let run: Run = Box::new(move |n| {
-        let p = Plain(&f);
         let t0 = Instant::now();
         for _ in 0..n {
-            kernel::step(&p, &mut w, &t, DP_MASK);
+            kernel::step(&arith, &mut w, &t, DP_MASK);
         }
         let ns = t0.elapsed().as_nanos() as f64;
         assert_eq!(w.degenerate, 0, "degenerate step while timing");
@@ -662,10 +691,11 @@ where
     )
 }
 
-fn scaling_arm<F>(f: F, name: &str, b: usize, threads: usize, seed: u64) -> Arm
+fn scaling_arm<F, A>(f: F, arith: A, name: &str, b: usize, threads: usize, seed: u64) -> Arm
 where
     F: PrimeField + 'static,
     F::Elem: LowWord + 'static,
+    A: Arith<E = F::Elem> + Sync + 'static,
 {
     // Each thread owns its walks, built once, outside the timing.
     let mut sets: Vec<_> = (0..threads)
@@ -673,18 +703,17 @@ where
         .collect();
     let run: Run = Box::new(move |n| {
         let barrier = Barrier::new(threads);
-        let fr = &f;
+        let ar = &arith;
         let times: Vec<f64> = std::thread::scope(|sc| {
             let hs: Vec<_> = sets
                 .iter_mut()
                 .map(|(w, t)| {
                     let barrier = &barrier;
                     sc.spawn(move || {
-                        let p = Plain(fr);
                         barrier.wait();
                         let t0 = Instant::now();
                         for _ in 0..n {
-                            kernel::step(&p, w, t, DP_MASK);
+                            kernel::step(ar, w, t, DP_MASK);
                         }
                         let ns = t0.elapsed().as_nanos() as f64;
                         assert_eq!(w.degenerate, 0);
@@ -775,10 +804,17 @@ pub fn run(params: Params, log: &mut dyn FnMut(String)) -> Result<Measurements, 
         if !is_probable_prime(&spec.prime()) {
             return Err(format!("{name}: {} is not prime", spec.prime_label));
         }
-        let r = crate::hwcost_with_field!(spec, f => kernel::check(&f, 33, 4, params.seed));
+        let r = crate::hwcost_with_field!(spec, f, a => {
+            kernel::check(&f, 33, 4, params.seed)
+                .and_then(|_| kernel::check_same_walk(&f, &a, 33, 4, params.seed))
+        });
         r?;
+        if spec.name == "fp64bf" {
+            let p = num_traits::ToPrimitive::to_u64(&spec.prime()).unwrap();
+            kernel::check_wrappers(&crate::cryptanalysis::fp_backend::Fp64::new(p), params.seed)?;
+        }
         log(format!(
-            "{name} ({}, {}): batched walk == unbatched reference, on curve",
+            "{name} ({}, {}): batched walk == unbatched reference, on curve; timed arithmetic == field",
             spec.backend, spec.prime_label
         ));
     }
@@ -796,7 +832,7 @@ pub fn run(params: Params, log: &mut dyn FnMut(String)) -> Result<Measurements, 
     let mut arms = Vec::new();
     for name in &params.fields {
         let spec = field_spec(name)?;
-        let mut v = crate::hwcost_with_field!(spec, f => op_arms(f, name, params.seed));
+        let mut v = crate::hwcost_with_field!(spec, f, a => op_arms(&f, a, name, params.seed));
         arms.append(&mut v);
     }
     run_group(&mut arms, reps, target, &mut samples, log);
@@ -817,8 +853,10 @@ pub fn run(params: Params, log: &mut dyn FnMut(String)) -> Result<Measurements, 
     for name in &params.fields {
         let spec = field_spec(name)?;
         for &b in &params.batches {
-            let (a, c) = crate::hwcost_with_field!(spec, f => kernel_arm(f, name, b, params.seed ^ b as u64));
-            arms.push(a);
+            let (arm, c) = crate::hwcost_with_field!(spec, f, a => {
+                kernel_arm(f, a, name, b, params.seed ^ b as u64)
+            });
+            arms.push(arm);
             counts.push(c);
         }
         log(format!(
@@ -834,7 +872,9 @@ pub fn run(params: Params, log: &mut dyn FnMut(String)) -> Result<Measurements, 
     for name in &params.fields {
         let spec = field_spec(name)?;
         for &t in &params.threads {
-            arms.push(crate::hwcost_with_field!(spec, f => scaling_arm(f, name, params.scaling_batch, t, params.seed)));
+            arms.push(crate::hwcost_with_field!(spec, f, a => {
+                scaling_arm(f, a, name, params.scaling_batch, t, params.seed)
+            }));
         }
     }
     run_group(&mut arms, reps, target, &mut samples, log);
