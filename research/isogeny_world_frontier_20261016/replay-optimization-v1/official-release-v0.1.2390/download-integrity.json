@@ -1,0 +1,66 @@
+{
+  "schema": "isogeny-published-download-integrity/v1",
+  "tag": "v0.1.2390",
+  "release_id": 415072624,
+  "release_url": "https://github.com/aburan28/crypto/releases/tag/v0.1.2390",
+  "all_four_archives_match": true,
+  "archives": [
+    {
+      "name": "isogeny-v0.1.2390-x86_64-unknown-linux-gnu.tar.gz",
+      "target": "x86_64-unknown-linux-gnu",
+      "sha256": "0dba5245855dcdedab8bf51216f5afd4ec0512847efac9a947ff6843ea0cf0a1",
+      "bytes": 7815886,
+      "asset_id": 647639327,
+      "api_digest": "sha256:0dba5245855dcdedab8bf51216f5afd4ec0512847efac9a947ff6843ea0cf0a1",
+      "archive_members": [
+        "isogeny-v0.1.2390-x86_64-unknown-linux-gnu",
+        "isogeny-v0.1.2390-x86_64-unknown-linux-gnu/BUILD.json",
+        "isogeny-v0.1.2390-x86_64-unknown-linux-gnu/isogeny",
+        "isogeny-v0.1.2390-x86_64-unknown-linux-gnu/README.md"
+      ]
+    },
+    {
+      "name": "isogeny-v0.1.2390-x86_64-unknown-linux-musl.tar.gz",
+      "target": "x86_64-unknown-linux-musl",
+      "sha256": "9b02dc179b360ceaeb3c6b8c349ea36fa33ad7a890ed4a67cb8a6154e0632767",
+      "bytes": 7851821,
+      "asset_id": 647639339,
+      "api_digest": "sha256:9b02dc179b360ceaeb3c6b8c349ea36fa33ad7a890ed4a67cb8a6154e0632767",
+      "archive_members": [
+        "isogeny-v0.1.2390-x86_64-unknown-linux-musl",
+        "isogeny-v0.1.2390-x86_64-unknown-linux-musl/BUILD.json",
+        "isogeny-v0.1.2390-x86_64-unknown-linux-musl/isogeny",
+        "isogeny-v0.1.2390-x86_64-unknown-linux-musl/README.md"
+      ]
+    },
+    {
+      "name": "isogeny-v0.1.2390-aarch64-apple-darwin.tar.gz",
+      "target": "aarch64-apple-darwin",
+      "sha256": "cc88bac7575f51ea56dafeed98e40520cab5d5daac818d30e1bb4c293b6ec779",
+      "bytes": 7658155,
+      "asset_id": 647639282,
+      "api_digest": "sha256:cc88bac7575f51ea56dafeed98e40520cab5d5daac818d30e1bb4c293b6ec779",
+      "archive_members": [
+        "isogeny-v0.1.2390-aarch64-apple-darwin",
+        "isogeny-v0.1.2390-aarch64-apple-darwin/README.md",
+        "isogeny-v0.1.2390-aarch64-apple-darwin/BUILD.json",
+        "isogeny-v0.1.2390-aarch64-apple-darwin/isogeny"
+      ]
+    },
+    {
+      "name": "isogeny-v0.1.2390-x86_64-pc-windows-msvc.zip",
+      "target": "x86_64-pc-windows-msvc",
+      "sha256": "342ab3531e93e3f5cd33ec787d5438501c9f94bc0aebe3fabfd7aaa806c77ebb",
+      "bytes": 7158547,
+      "asset_id": 647639312,
+      "api_digest": "sha256:342ab3531e93e3f5cd33ec787d5438501c9f94bc0aebe3fabfd7aaa806c77ebb",
+      "archive_members": [
+        "isogeny-v0.1.2390-x86_64-pc-windows-msvc/",
+        "isogeny-v0.1.2390-x86_64-pc-windows-msvc/BUILD.json",
+        "isogeny-v0.1.2390-x86_64-pc-windows-msvc/isogeny.exe",
+        "isogeny-v0.1.2390-x86_64-pc-windows-msvc/README.md"
+      ]
+    }
+  ],
+  "executable_execution_performed": false
+}
