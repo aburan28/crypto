@@ -41,3 +41,7 @@ safety-net check-ins (about 50 minutes, then about 4 hours; stop after 3 quiet
 check-ins), and never busy-poll, sleep in a loop, or re-read job logs faster
 than that cadence. AGENTS.md, "Default workflow: open the PR, check in, and
 land it".
+
+Every cross-method ECDLP comparison prices the unpriced native work of
+every arm, rho references included, at 0, 0.1 and 1 GAE per operation and
+ranks two arms only where the order holds across that band (AGENTS.md §5a).

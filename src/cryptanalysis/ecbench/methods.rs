@@ -1756,7 +1756,7 @@ fn pinned_only_calibration(regime: &str, slug: &str) -> Calibration {
 
 /// Native counters the calibration prices, with the unit field that
 /// prices each (`price_phase`'s table).
-const PRICED_NATIVE: &[(&str, &str)] = &[
+pub const PRICED_NATIVE: &[(&str, &str)] = &[
     ("sqrt_solves", "ns_per_sqrt"),
     ("as_solves", "ns_per_as_solve"),
     ("s4_pairs", "ns_per_s4_pair"),
