@@ -1,0 +1,208 @@
+{
+  "answer_sidecar_sha256": "1dbd4250796de4434badc2458089d7ad9fe63cc59d7b9d3f6825ad431476a13b",
+  "candidate_order": [
+    {
+      "actual_usable_points": 547800,
+      "arm_names": [
+        "wide3_a",
+        "wide3_b"
+      ],
+      "base_hash": "a4ba33098d2776520b98a326585a2301f8ccd5bc005df7c1a70fbe8496c61d8b",
+      "bloom_profile": "wide3",
+      "candidate_id": "IC1N83Ckb1a1fb547800PDP4rootRCguidedLAgaussTDdirectISO0h92bbacde47fc",
+      "candidate_manifest_sha256": "f3f6e718302c2f5f91bb24f6a62deca7022e7a45ed9600a15884725ea7ec7874",
+      "k": 3300,
+      "origin": "control",
+      "pipeline": "wide3",
+      "position": 0,
+      "root_table_entries": 903852075,
+      "screen_mean_online_ms": 35.648396639625,
+      "screen_peak_rss_bytes": 11868045312,
+      "source_sha256": "f2745227d95e36ef45c73c5104a23ada6cebb0794405368581d2be17044845dc",
+      "variant": "root11"
+    },
+    {
+      "actual_usable_points": 596936,
+      "arm_names": [
+        "root4k3596_a",
+        "root4k3596_b"
+      ],
+      "base_hash": "9bdadb868c18ccaad3446a62316356e3fe21ecc76512c0c27ccc1fa24d661bc1",
+      "bloom_profile": "off",
+      "candidate_id": "IC1N83Ckb1a1fb596936PDP4rootRCguidedLAgaussTDdirectISO0hb79b691bff0b",
+      "candidate_manifest_sha256": "cbc33522598e025ed575e55fb2d4d3faa0f612b59560f4e2680e7c90fdb56bc5",
+      "k": 3596,
+      "origin": "control",
+      "pipeline": "root4k3596",
+      "position": 1,
+      "root_table_entries": 1073268803,
+      "screen_mean_online_ms": 40.353200268125,
+      "screen_peak_rss_bytes": 14988857344,
+      "source_sha256": "f2745227d95e36ef45c73c5104a23ada6cebb0794405368581d2be17044845dc",
+      "variant": "root4"
+    },
+    {
+      "actual_usable_points": 568550,
+      "arm_names": [
+        "root4k3425std_a",
+        "root4k3425std_b"
+      ],
+      "base_hash": "47e4eb7a1ef7e596f3505e9a1997b60dab56f9f306ad6b969f5c452923f772c6",
+      "bloom_profile": "standard",
+      "candidate_id": "IC1N83Ckb1a1fb568550PDP4rootRCguidedLAgaussTDdirectISO0ha1124f2f2b09",
+      "candidate_manifest_sha256": "50a5b8d96ca627f9cdadc24f50ddf48aff124648226e1207796bd9b140243cf8",
+      "k": 3425,
+      "origin": "root4_bloom",
+      "pipeline": "root4k3425std",
+      "position": 2,
+      "root_table_entries": 973622246,
+      "screen_mean_online_ms": 26.2186103715,
+      "screen_peak_rss_bytes": 15488450560,
+      "source_sha256": "f2745227d95e36ef45c73c5104a23ada6cebb0794405368581d2be17044845dc",
+      "variant": "root4"
+    },
+    {
+      "actual_usable_points": 572700,
+      "arm_names": [
+        "root11k3450wide3_a",
+        "root11k3450wide3_b"
+      ],
+      "base_hash": "ae75c86565f5fa12fb6f30a5539f6f4638bcf1ca8b347a5cefa20f5073a9f572",
+      "bloom_profile": "wide3",
+      "candidate_id": "IC1N83Ckb1a1fb572700PDP4rootRCguidedLAgaussTDdirectISO0h7ecaf3f009df",
+      "candidate_manifest_sha256": "b5ad19e27592364a50888ba2b2c4b78d295101e0317e6723d79ffa3f55b8e242",
+      "k": 3450,
+      "origin": "root11_highk",
+      "pipeline": "root11k3450wide3",
+      "position": 3,
+      "root_table_entries": 987887478,
+      "screen_mean_online_ms": 33.304923231,
+      "screen_peak_rss_bytes": 12351021056,
+      "source_sha256": "f2745227d95e36ef45c73c5104a23ada6cebb0794405368581d2be17044845dc",
+      "variant": "root11"
+    }
+  ],
+  "mirrored_arm_order": [
+    "wide3",
+    "root4k3596",
+    "root4k3425std",
+    "root11k3450wide3",
+    "root11k3450wide3",
+    "root4k3425std",
+    "root4k3596",
+    "wide3"
+  ],
+  "schema": "n83.final-tournament-admission/v1",
+  "source_screens": [
+    {
+      "analysis_sha256": "59e2a1cd6bf404ed46a4e82694d5ecde61f191f5e97142ad27282948cae568a7",
+      "artifact_sha256": "b77c196d6c2fcc3227cf3d0a1e0cacb893210fb53e95d23a2dbd01b398a54851",
+      "eligible_pipeline_count": 3,
+      "representative": {
+        "actual_usable_points": 547800,
+        "arm_names": [
+          "wide3_a",
+          "wide3_b"
+        ],
+        "base_hash": "a4ba33098d2776520b98a326585a2301f8ccd5bc005df7c1a70fbe8496c61d8b",
+        "bloom_profile": "wide3",
+        "candidate_id": "IC1N83Ckb1a1fb547800PDP4rootRCguidedLAgaussTDdirectISO0h92bbacde47fc",
+        "candidate_manifest_sha256": "f3f6e718302c2f5f91bb24f6a62deca7022e7a45ed9600a15884725ea7ec7874",
+        "k": 3300,
+        "pipeline": "wide3",
+        "root_table_entries": 903852075,
+        "screen_mean_online_ms": 35.648396639625,
+        "screen_peak_rss_bytes": 11868045312,
+        "variant": "root11"
+      },
+      "run_id": 38768544528,
+      "screen": "direct",
+      "source_commit": "ae6a10b641e17629bd282d8205787ede129dbf98",
+      "source_selected_pipeline": "wide3",
+      "source_status": "COMPLETE"
+    },
+    {
+      "analysis_sha256": "7d10662fe9987fd1766734188855a57f355b4244f26a815c5e065d7a93f85551",
+      "artifact_sha256": "e14fbbaff7afbc0ee0bf4cc815cce4cc5323492eed584d14f6fe9e1f92f39aad",
+      "eligible_pipeline_count": 4,
+      "representative": {
+        "actual_usable_points": 547800,
+        "arm_names": [
+          "root11k3300wide3_a",
+          "root11k3300wide3_b"
+        ],
+        "base_hash": "a4ba33098d2776520b98a326585a2301f8ccd5bc005df7c1a70fbe8496c61d8b",
+        "bloom_profile": "wide3",
+        "candidate_id": "IC1N83Ckb1a1fb547800PDP4rootRCguidedLAgaussTDdirectISO0h5d050a00f5f6",
+        "candidate_manifest_sha256": "a4fcb0c589df4253911bbde229d8699be28719ef40c4e31043f08be70ac34ac3",
+        "k": 3300,
+        "pipeline": "root11k3300wide3",
+        "root_table_entries": 903852075,
+        "screen_mean_online_ms": 28.770549436,
+        "screen_peak_rss_bytes": 11867877376,
+        "variant": "root11"
+      },
+      "run_id": 38770004923,
+      "screen": "legacy",
+      "source_commit": "d6293e278a037ef34a6de0101844fcfbf97703e2",
+      "source_selected_pipeline": "root11k3300wide3",
+      "source_status": "COMPLETE"
+    },
+    {
+      "analysis_sha256": "15b47de167f99e004bccada699f739ff7d0d7e7f7e7960239d63b4b00183e547",
+      "artifact_sha256": "8687a0ad20ec1a0525a437f172801278a1a931771e88bef404c3559c77ed7626",
+      "eligible_pipeline_count": 4,
+      "representative": {
+        "actual_usable_points": 568550,
+        "arm_names": [
+          "root4k3425std_a",
+          "root4k3425std_b"
+        ],
+        "base_hash": "47e4eb7a1ef7e596f3505e9a1997b60dab56f9f306ad6b969f5c452923f772c6",
+        "bloom_profile": "standard",
+        "candidate_id": "IC1N83Ckb1a1fb568550PDP4rootRCguidedLAgaussTDdirectISO0ha1124f2f2b09",
+        "candidate_manifest_sha256": "50a5b8d96ca627f9cdadc24f50ddf48aff124648226e1207796bd9b140243cf8",
+        "k": 3425,
+        "pipeline": "root4k3425std",
+        "root_table_entries": 973622246,
+        "screen_mean_online_ms": 26.2186103715,
+        "screen_peak_rss_bytes": 15488450560,
+        "variant": "root4"
+      },
+      "run_id": 38772262240,
+      "screen": "root4_bloom",
+      "source_commit": "afea7179c40c9e00f8701a32c596e47cd8129f62",
+      "source_selected_pipeline": null,
+      "source_status": "COMPLETE"
+    },
+    {
+      "analysis_sha256": "f5547c4516c9ea29965fe624d677f8677222b0d02918684691dcf92746360fec",
+      "artifact_sha256": "dce8c2bf021d3058bc9b5fc61a4be6cbac4fdaa06b40ab9b178924ccca853ad8",
+      "eligible_pipeline_count": 4,
+      "representative": {
+        "actual_usable_points": 572700,
+        "arm_names": [
+          "root11k3450wide3_a",
+          "root11k3450wide3_b"
+        ],
+        "base_hash": "ae75c86565f5fa12fb6f30a5539f6f4638bcf1ca8b347a5cefa20f5073a9f572",
+        "bloom_profile": "wide3",
+        "candidate_id": "IC1N83Ckb1a1fb572700PDP4rootRCguidedLAgaussTDdirectISO0h7ecaf3f009df",
+        "candidate_manifest_sha256": "b5ad19e27592364a50888ba2b2c4b78d295101e0317e6723d79ffa3f55b8e242",
+        "k": 3450,
+        "pipeline": "root11k3450wide3",
+        "root_table_entries": 987887478,
+        "screen_mean_online_ms": 33.304923231,
+        "screen_peak_rss_bytes": 12351021056,
+        "variant": "root11"
+      },
+      "run_id": 38773883285,
+      "screen": "root11_highk",
+      "source_commit": "e66475a416dead205ec797ca16f025abcea34d16",
+      "source_selected_pipeline": null,
+      "source_status": "COMPLETE"
+    }
+  ],
+  "status": "FROZEN_ADMISSION",
+  "target_sha256": "cfa943ae538fcc41d2af8bb8fd1c8fc0f29adc340b55644e90382da25b213424"
+}

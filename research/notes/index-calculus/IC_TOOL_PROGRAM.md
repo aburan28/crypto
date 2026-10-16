@@ -592,6 +592,27 @@ These are stage diagnostics.
   decomposition and the strong rho changed), so R09's protocol discloses
   it and checks it with a pin of main's head instead.
 
+**A reference-class host, and R10 declared (2026-10-16).** The container
+was replaced, not restarted, and the new one is of the programme's
+reference class: an Emerald Rapids (family 6 model 207) with AVX-512
+VBMI2, GFNI and VPCLMULQDQ, where `icprog host-class r06` and `r08` find
+nothing missing. R09's class excludes it.
+- **What went with the old container:** R09's runs (its drift pin and pin
+  had held; its A/A had started), Track B's campaign (about 906 of 1,100
+  chain processes) and two unpushed exploratory candidates. None had a
+  committed result; R10's protocol lists them.
+- **Main has moved again,** to `92246530`: about 1,450 commits past v3,
+  44 of them on the three files every timed phase runs. That is not off
+  the timed path, so the standing rule applies: **R10, a drift round on
+  R07's design**, runs first
+  ([protocol](../../ic_tool_program/rounds/R10-main-head/PROTOCOL.md)).
+  Both arms are built here with `rustc 1.97.0`; the base is a rebuild
+  of v3, because v3's binary and lock went with the scratch directory.
+  A one-process diagnostic read 1.03, 1.02 and 0.95 at the three target
+  sizes, with every logarithm equal.
+- **Then R06,** ported onto R10's outcome by an amendment before any run,
+  on this host; R08 follows R06's decision.
+
 ## 9. Track B: generality and robustness
 
 **Where the tool stands (at `0bf67f16`).**

@@ -261,7 +261,7 @@ pub(crate) fn coprime(a: Mono, b: Mono) -> bool {
 }
 
 #[inline]
-fn add_free(a: [u8; MAX_FREE], b: [u8; MAX_FREE]) -> [u8; MAX_FREE] {
+pub(crate) fn add_free(a: [u8; MAX_FREE], b: [u8; MAX_FREE]) -> [u8; MAX_FREE] {
     let mut f = [0u8; MAX_FREE];
     for k in 0..MAX_FREE {
         f[k] = a[k]
@@ -1504,7 +1504,7 @@ struct State {
 
 /// Every monomial `L'` with `lo | L' | L`, `L'` ≠ `L`, is passed to `f`
 /// until it returns `true`; returns whether one did.
-fn any_between(lo: Mono, l: Mono, mut f: impl FnMut(Mono) -> bool) -> bool {
+pub(crate) fn any_between(lo: Mono, l: Mono, mut f: impl FnMut(Mono) -> bool) -> bool {
     let (lo_mask, l_mask) = (mask_of(lo), mask_of(l));
     let extra = l_mask & !lo_mask;
     let (lo_f, l_f) = (free_of(lo), free_of(l));
