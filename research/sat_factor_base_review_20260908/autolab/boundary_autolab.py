@@ -791,6 +791,7 @@ def plan(protocol: dict[str, Any], ledger: dict[str, Any]) -> dict[str, Any]:
             "n41_charged": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat koblitz.vs_rho.n41_charged",
             "n53_factor_base": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat koblitz.factor_base.n53",
             "n37_single_target": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat koblitz.vs_rho.n37_wall --fixtures 1",
+            "n61_bl_reference": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch-equal-advice --beat koblitz.compact_orbit.n61_bl_reference --targets 1024",
             "claim_check": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py claim-check --report PATH --stage vs_rho",
         },
     }
@@ -2107,6 +2108,10 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
         f"{beat_id} is a single-target panel; use launch-single",
     )
     require(
+        beat.get("launch_mode") != "equal_advice_bl",
+        f"{beat_id} is an equal-advice BL reference beat; use launch-equal-advice",
+    )
+    require(
         beat.get("launch_mode", "single_target") == "single_target",
         f"{beat_id} is a multi-target batch panel; use launch-panel",
     )
@@ -3247,6 +3252,240 @@ def claim_check(arguments: argparse.Namespace) -> dict[str, Any]:
     return result
 
 
+def launch_equal_advice(arguments: argparse.Namespace) -> dict[str, Any]:
+    """Diagnostic Bernstein–Lange equal-advice reference arm (not KS batch rho).
+
+    Drives ``ic_next10_09_equal_advice`` via its ``targets`` / ``bl`` subcommands.
+    Fail-closed for vs_rho ledger promotion: claim draft is SCHEMA_INCOMPLETE
+    until a schema-complete equal-advice paired report exists.
+    """
+    protocol = load_protocol()
+    ledger = load_ledger(protocol)
+    beat_id = arguments.beat
+    require(beat_id in protocol["beats"], f"unknown beat id: {beat_id}")
+    beat = protocol["beats"][beat_id]
+    require(
+        beat.get("launch_mode") == "equal_advice_bl",
+        f"{beat_id} is not an equal_advice_bl beat",
+    )
+    targets = int(arguments.targets or beat.get("targets_default", 1024))
+    minimum = int(beat.get("targets_minimum", 1024))
+    require(targets >= minimum, f"equal-advice targets must be >= {minimum} (no small-L panels)")
+    table_bytes = int(arguments.table_bytes or beat.get("table_bytes_default", 5711008))
+    label = str(arguments.label or beat.get("target_label_default", "autolab-n61-bl-ref-eval-v1"))
+    n, a = int(beat["n"]), int(beat["a"])
+    producers = beat["panel_producers"]
+    bl_prod = producers["bl"]
+
+    with RunnerLock():
+        preflight_receipt = preflight(protocol, ledger)
+        for arm, producer in producers.items():
+            source = REPO / producer["source"]
+            preflight_receipt["checks"].append(
+                {
+                    "name": f"equal_advice_producer_source_{arm}",
+                    "ok": source.is_file(),
+                    "detail": str(source),
+                }
+            )
+        preflight_receipt["ok"] = all(
+            c["ok"] for c in preflight_receipt["checks"] if c["name"] != "cryptominisat5_optional"
+        )
+        require(preflight_receipt["ok"], "preflight failed")
+        git_head = next(c["detail"] for c in preflight_receipt["checks"] if c["name"] == "git_head")
+        run_id = arguments.run_id or make_run_id(beat_id)
+        run = RUNS_DIR / run_id
+        require(not run.exists(), f"run already exists: {run}")
+        for name in ("artifacts", "inputs", "logs", "receipts"):
+            (run / name).mkdir(parents=True, exist_ok=True)
+        write_json(CURRENT_PATH, {"run_id": run_id, "beat_id": beat_id, "updated_at": now()})
+        write_json(run / "artifacts/preflight.json", preflight_receipt)
+        write_json(run / "inputs/protocol.json", protocol)
+        write_json(run / "inputs/boundary_targets.json", ledger)
+        write_json(
+            run / "inputs/ledger_pin.json",
+            {
+                "path": protocol["ledger"]["path"],
+                "sha256": sha256(ledger_path(protocol)),
+                "schema_version": ledger["schema_version"],
+            },
+        )
+
+        points_path = run / "inputs/points.txt"
+        scalars_path = run / "inputs/scalars.txt"
+        bl_out = run / "logs/bl.jsonl"
+        bl_bin = str((REPO / "target/release/examples" / bl_prod["example"]).resolve())
+        targets_cmd = [
+            bl_bin,
+            "targets",
+            str(n),
+            str(a),
+            str(targets),
+            label,
+            str(points_path),
+            str(scalars_path),
+        ]
+        bl_cmd = [
+            bl_bin,
+            "bl",
+            str(n),
+            str(a),
+            str(table_bytes),
+            str(points_path),
+            str(bl_out),
+        ]
+        commands = {
+            "build": ["cargo", "build", "--release", "--example", bl_prod["example"]],
+            "targets": targets_cmd,
+            "bl": bl_cmd,
+        }
+        write_json(run / "artifacts/commands.json", commands)
+
+        state: dict[str, Any] = {
+            "schema_version": "1.0",
+            "task_id": TASK_ID,
+            "run_id": run_id,
+            "beat_id": beat_id,
+            "launch_mode": "equal_advice_bl",
+            "status": "PREPARE_ONLY" if arguments.prepare_only else "ACTIVE",
+            "phase": "prepare",
+            "n": n,
+            "a": a,
+            "targets": targets,
+            "table_bytes": table_bytes,
+            "target_label": label,
+            "diagnostic_only": True,
+            "reference_arm": "bernstein_lange_equal_advice",
+            "existing_study": beat.get("existing_study"),
+            "git_head": git_head,
+            "created_at": now(),
+            "updated_at": now(),
+            "claim_boundary": (
+                "Diagnostic Bernstein–Lange equal-advice reference arm; public synthetic "
+                "only; fail-closed for vs_rho ledger promotion; PENDING_INDEPENDENT_VALIDATION "
+                "at most; not a KS v2 batch comparator and not an asymptotic sub-rho claim."
+            ),
+        }
+        write_json(run / "state.json", state)
+        if arguments.prepare_only:
+            write_json(
+                run / "artifacts/claim_draft.json",
+                {
+                    "beat_id": beat_id,
+                    "stage": "vs_rho",
+                    "status": "SCHEMA_INCOMPLETE",
+                    "diagnostic_only": True,
+                    "reason": "prepare-only; producers not executed",
+                    "n": n,
+                    "targets": targets,
+                    "table_bytes": table_bytes,
+                    "claim_boundary": state["claim_boundary"],
+                },
+            )
+            write_json(
+                run / "artifacts/claim_check.json",
+                {
+                    "status": "FAIL",
+                    "stage": "vs_rho",
+                    "reason": "prepare-only scaffolding; vs_rho remains fail-closed",
+                },
+            )
+            return state
+
+        state.update(phase="build", updated_at=now())
+        write_json(run / "state.json", state)
+        built = subprocess.run(commands["build"], cwd=REPO, capture_output=True, text=True)
+        require(built.returncode == 0, "cargo build failed:\n" + built.stderr[-4000:])
+        write_json(
+            run / "artifacts/binaries.json",
+            {
+                "paths": {"bl": bl_bin},
+                "hashes": {
+                    "bl_binary_sha256": sha256(bl_bin),
+                    "bl_source_sha256": sha256(REPO / bl_prod["source"]),
+                    "git_head": git_head,
+                },
+            },
+        )
+
+        state.update(phase="targets", updated_at=now())
+        write_json(run / "state.json", state)
+        gen = subprocess.run(targets_cmd, cwd=REPO, capture_output=True, text=True)
+        (run / "logs/targets.stdout").write_text(gen.stdout)
+        (run / "logs/targets.stderr").write_text(gen.stderr)
+        require(gen.returncode == 0, "targets generation failed:\n" + gen.stderr[-2000:])
+        require(points_path.is_file() and scalars_path.is_file(), "targets mode did not write point/scalar files")
+        point_lines = [ln for ln in points_path.read_text().splitlines() if ln.strip()]
+        require(len(point_lines) == targets, f"expected {targets} points, got {len(point_lines)}")
+
+        state.update(phase="bl", updated_at=now())
+        write_json(run / "state.json", state)
+        bl_run = subprocess.run(bl_cmd, cwd=REPO, capture_output=True, text=True)
+        (run / "logs/bl.stdout").write_text(bl_run.stdout)
+        (run / "logs/bl.stderr").write_text(bl_run.stderr)
+        require(bl_run.returncode == 0, "BL producer failed:\n" + bl_run.stderr[-4000:])
+        require(bl_out.is_file(), "BL producer did not write jsonl")
+
+        records = parse_json_lines(bl_out.read_text())
+        summary = next((r for r in records if r.get("kind") == "bl_summary" or r.get("kind") == "bl_level_summary"), None)
+        precompute = next((r for r in records if r.get("kind") == "bl_precompute"), None)
+        online_rows = [
+            r
+            for r in records
+            if r.get("kind") in ("bl_online", "bl_online_target", "bl_target", "bl_level_target")
+        ]
+        solved = sum(
+            1
+            for r in online_rows
+            if r.get("solved") or r.get("verified") or r.get("verified_vs_truth")
+        )
+        claim_draft = {
+            "beat_id": beat_id,
+            "stage": "vs_rho",
+            "status": "SCHEMA_INCOMPLETE",
+            "diagnostic_only": True,
+            "reference_arm": "bernstein_lange_equal_advice",
+            "n": n,
+            "a": a,
+            "targets": targets,
+            "table_bytes": table_bytes,
+            "target_label": label,
+            "bl_records": len(records),
+            "bl_online_rows": len(online_rows),
+            "bl_solved_or_verified_rows": solved,
+            "bl_precompute": precompute,
+            "bl_summary": summary,
+            "existing_study": beat.get("existing_study"),
+            "timing_class": beat.get("timing_class_goal"),
+            "claim_boundary": state["claim_boundary"],
+            "missing_vs_rho_fields_note": (
+                "Equal-advice BL reference smoke does not emit the full vs_rho "
+                "paired IC/rho schema; fail-closed until a schema-complete report."
+            ),
+            "independent_replay_pointer": None,
+            "verdict": "DIAGNOSTIC_REFERENCE_ARM_ONLY",
+        }
+        write_json(run / "artifacts/claim_draft.json", claim_draft)
+        # Fail-closed: do not pretend vs_rho is complete.
+        check = {
+            "status": "FAIL",
+            "stage": "vs_rho",
+            "reason": "diagnostic equal-advice BL reference; vs_rho schema incomplete by design",
+            "claim_draft_status": claim_draft["status"],
+        }
+        write_json(run / "artifacts/claim_check.json", check)
+        state.update(
+            status="PENDING_INDEPENDENT_VALIDATION",
+            phase="done",
+            updated_at=now(),
+            claim_check_status=check["status"],
+            claim_draft_status=claim_draft["status"],
+        )
+        write_json(run / "state.json", state)
+        write_json(CURRENT_PATH, {"run_id": run_id, "beat_id": beat_id, "updated_at": now()})
+        return state
+
+
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(description=__doc__)
     sub = result.add_subparsers(dest="command", required=True)
@@ -3312,6 +3551,24 @@ def parser() -> argparse.ArgumentParser:
     single.add_argument("--cpu", type=int, help="Pin every producer to this CPU with taskset (Linux)")
     single.add_argument("--resume", metavar="RUN_ID", help="Continue an interrupted single-target run")
 
+    equal = sub.add_parser(
+        "launch-equal-advice",
+        help=(
+            "Diagnostic Bernstein–Lange equal-advice reference arm "
+            "(ic_next10_09_equal_advice); not a KS batch panel; fail-closed vs_rho"
+        ),
+    )
+    equal.add_argument("--beat", required=True, help="equal_advice_bl beat id from protocol.json")
+    equal.add_argument("--run-id")
+    equal.add_argument("--targets", type=int, help="Public synthetic targets (default: beat targets_default, >=1024)")
+    equal.add_argument("--table-bytes", type=int, help="BL table budget bytes (default: beat table_bytes_default)")
+    equal.add_argument("--label", help="Target corpus label for targets mode")
+    equal.add_argument(
+        "--prepare-only",
+        action="store_true",
+        help="Scaffold run dir + commands.json without building or executing producers",
+    )
+
     for name in ("status", "verify"):
         command = sub.add_parser(name)
         command.add_argument("--run-id")
@@ -3354,6 +3611,13 @@ def main() -> int:
             state = single_target_panel.launch_single(arguments, sys.modules[__name__])
             print(json.dumps(state, indent=2, sort_keys=True))
             return 0 if state.get("status") == "PENDING_INDEPENDENT_VALIDATION" else 3
+        if arguments.command == "launch-equal-advice":
+            state = launch_equal_advice(arguments)
+            print(json.dumps(state, indent=2, sort_keys=True))
+            return 0 if state.get("status") in (
+                "PENDING_INDEPENDENT_VALIDATION",
+                "PREPARE_ONLY",
+            ) else 3
         if arguments.command == "status":
             status(arguments)
             return 0

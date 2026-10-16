@@ -48,6 +48,7 @@ python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py \
 | `launch --beat …` | Lock → run dir → build producers → measure → claim draft + schema check |
 | `launch-panel --beat … [--targets L] [--blocks B] [--k K \| --k-candidates …] [--cpu N] [--resume RUN_ID]` | Multi-target batch panel beats only (see below); `launch` rejects them |
 | `launch-single --beat … [--workloads W] [--tune-workloads T] [--k K \| --k-candidates …] [--cpu N] [--resume RUN_ID]` | One-target online panel beats only (see below) |
+| `launch-equal-advice --beat … [--targets L] [--table-bytes B] [--prepare-only]` | Diagnostic Bernstein–Lange equal-advice reference (`koblitz.compact_orbit.n61_bl_reference`); not KS batch rho; fail-closed `vs_rho` |
 | `status [--run-id]` | Print `runs/<id>/state.json` (default: `runs/current.json`) |
 | `verify [--run-id]` | Rehash review manifest |
 | `claim-check --report PATH --stage STAGE` | Fail-closed measurement-schema validation |
@@ -168,6 +169,19 @@ target with no known scalar, solved by a fresh process in each arm:
   check separately.
 
 The frozen originals are untouched, so older evidence keeps verifying.
+
+### Equal-advice Bernstein–Lange reference (diagnostic)
+
+`koblitz.compact_orbit.n61_bl_reference` (`launch_mode: equal_advice_bl`) is a
+diagnostic/reference arm, not a KS v2 batch comparator. It drives
+`examples/ic_next10_09_equal_advice.rs` (`targets` + `bl`) via
+`launch-equal-advice`. That CLI takes point files and a `table_bytes` budget;
+`launch-panel` still expects `<n> <a> signed_frobenius <L> <batch_seed>` plus
+`KIC_RHO_GENERATE_ONLY`, so it must not run this beat. Reuses
+`research/ic_next10_20261014/09-equal-advice/` rather than a parallel
+scoreboard. Claim drafts stay `SCHEMA_INCOMPLETE` / claim-check `FAIL` for
+`vs_rho` (fail-closed; no ledger promotion). Prefer `--prepare-only` first,
+then `--targets 1024` for a bounded BL reference smoke.
 
 One run:
 
