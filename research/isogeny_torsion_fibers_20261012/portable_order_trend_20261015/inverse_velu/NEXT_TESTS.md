@@ -92,6 +92,20 @@ gate statuses, not promotions.
    support an exponent fit. The Linux full-image order-2,437 cell is
    censored at the frozen cap, so a memory-bounded constructor is the
    next implementation requirement for its paired cost.
+5. **Test the factor-base scaling mechanism.** Preregister a supported
+   grid of base sizes, beginning with 8, 16, 32 and 64 where the
+   subgroup has enough signed orbits. Use the same public target and
+   selected projected columns for direct-pair and χ decomposition
+   controls at each size, with destination-direct and inverse-Vélu
+   construction priced separately. Recompute pair support by independent
+   enumeration, collect enough relations for useful rank, solve each
+   target, and replay every scalar and witness. Charge polynomial calls,
+   failed roots, base setup, matrix work and target descent in one cold
+   `S` alongside same-target rho, BSGS and rho A/A. The test asks whether
+   a growing base changes *priced useful relations per unit work*;
+   relation count alone cannot establish an ECDLP crossover. Freeze the
+   exact orders, targets, seeds, caps and selection rule in a new protocol
+   before running this grid.
 
 The larger-picture target is a **cold unknown-scalar ECDLP result**:
 an explicit map and subgroup-preserving transfer, a useful
