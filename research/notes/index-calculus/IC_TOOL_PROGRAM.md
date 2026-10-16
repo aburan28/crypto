@@ -696,6 +696,25 @@ nothing missing. R09's class excludes it.
   algebra) before choosing the next lever. The remaining 7.4–12.1× at the
   top sizes is the target.
 
+**R11 accepted: v7 is v6 plus the streamed pair-table build (2026-10-16).**
+- **Why the build.** At v6 the set-up at the three target sizes is
+  collection 53–78% and build 18–35%; the linear algebra is under 0.5%
+  (R08's candidate arm, every repetition).
+- **The port.** A1's exploration on R08's candidate said a round was owed
+  on R08's baseline. Its patch ported onto v6 without a conflict (the same
+  lines). The tests and the pin held.
+- **The gain.** Cold time, v6 over the candidate: 1.134 [1.107, 1.162],
+  1.124 [1.100, 1.148] and 1.071 [1.049, 1.093] at `2^44.3`, `2^44.5` and
+  `2^47.2` on the suite rows; 1.126, 1.157 and 1.065 on fresh holdouts.
+  Every interval lies above the declared 1.03. The build ran 1.50–1.51×
+  faster, and collection did not move.
+- **Chained with R06 and R08,** cold time is 1.80–1.86× faster than v4 (a
+  product of paired ratios)
+  ([results](../../ic_tool_program/rounds/R11-build-streams/README.md)).
+- **Next:** land R11 in the tool, then measure v7's set-up again.
+  Collection is now the larger share at every target size, so the next
+  lever is the scan again. The rule at v7 measures the new distance.
+
 ## 9. Track B: generality and robustness
 
 **Where the tool stands (at `0bf67f16`).**
