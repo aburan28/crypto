@@ -1,0 +1,19 @@
+G1 t = 4 systems against the F4 rows (fb_designs_slope compare-rows F4 G1): same construction, so G1 measured exactly the systems F4 stopped at 300 s. target_redraws = 0 on every G1 row (G2 redrew nothing).
+
+compare-rows
+  A = research/factor_base_designs_20261015/runs/F4-A0-m4.jsonl
+  B = research/factor_base_designs_20261015/runs/G1-A0-m4.jsonl
+  status A0 m=4 t=4 target=0: A "timeout" (D 7, 317.683265436 s), B "aborted" (D null, 404.016879118 s); construction identical
+  status A0 m=4 t=4 target=1: A "timeout" (D 7, 319.038530546 s), B "aborted" (D null, 406.635244633 s); construction identical
+  shared 2: identical 0, status differs 2, disagree 0
+  only in A: A0 m=4 t=2 target=0; A0 m=4 t=2 target=1; A0 m=4 t=3 target=0; A0 m=4 t=3 target=1
+  only in B: none
+
+compare-rows
+  A = research/factor_base_designs_20261015/runs/F4-A11-m4.jsonl
+  B = research/factor_base_designs_20261015/runs/G1-A11-m4.jsonl
+  status A11 m=4 t=4 target=0: A "timeout" (D 6, 303.510827087 s), B "ok" (D 6, 751.889051438 s); construction identical
+  status A11 m=4 t=4 target=1: A "timeout" (D 6, 302.024419353 s), B "ok" (D 6, 738.562503912 s); construction identical
+  shared 2: identical 0, status differs 2, disagree 0
+  only in A: A11 m=4 t=2 target=0; A11 m=4 t=2 target=1; A11 m=4 t=3 target=0; A11 m=4 t=3 target=1
+  only in B: A11 m=4 t=5 target=0; A11 m=4 t=5 target=1

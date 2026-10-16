@@ -1,0 +1,11 @@
+Kernel log (dmesg) for the G1 SIGKILLs, captured 2026-10-16T06:39Z on the G1 host (Xeon @ 2.10 GHz, 4 cores, 15 GB, no swap).
+The memory-cgroup OOM killer (CONSTRAINT_MEMCG) ended both A11 m = 4 t = 5 systems, below ulimit -v 15000000 (anon-rss about 14 GB).
+[ 2676.772711] fb_designs_slop invoked oom-killer: gfp_mask=0xcc0(GFP_KERNEL), order=0, oom_score_adj=0
+[ 2676.875239] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/process_api/01a14346-0d20-71f3-ad6f-d696e42b8fd0/claude-code-bash,task_memcg=/process_api/01a14346-0d20-71f3-ad6f-d696e42b8fd0/claude-code-bash,task=fb_designs_slop,pid=2079,uid=0
+[ 2676.880675] Memory cgroup out of memory: Killed process 2079 (fb_designs_slop) total-vm:14257388kB, anon-rss:13972740kB, file-rss:2124kB, shmem-rss:0kB, UID:0 pgtables:27636kB oom_score_adj:0
+[ 2742.776404] fb_designs_slop invoked oom-killer: gfp_mask=0x100cca(GFP_HIGHUSER_MOVABLE), order=0, oom_score_adj=0
+[ 2742.891648] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/process_api/01a14346-0d20-71f3-ad6f-d696e42b8fd0/claude-code-bash,task_memcg=/process_api/01a14346-0d20-71f3-ad6f-d696e42b8fd0/claude-code-bash,task=fb_designs_slop,pid=2311,uid=0
+[ 2742.897626] Memory cgroup out of memory: Killed process 2311 (fb_designs_slop) total-vm:14257392kB, anon-rss:13972744kB, file-rss:2380kB, shmem-rss:0kB, UID:0 pgtables:27624kB oom_score_adj:0
+[ 2742.902389] fb_designs_slop invoked oom-killer: gfp_mask=0x100cca(GFP_HIGHUSER_MOVABLE), order=0, oom_score_adj=0
+[ 2743.018851] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/process_api/01a14346-0d20-71f3-ad6f-d696e42b8fd0/claude-code-bash,task_memcg=/process_api/01a14346-0d20-71f3-ad6f-d696e42b8fd0/claude-code-bash,task=bash,pid=2384,uid=0
+[ 2743.023853] Memory cgroup out of memory: Killed process 2384 (bash) total-vm:4476kB, anon-rss:384kB, file-rss:2940kB, shmem-rss:0kB, UID:0 pgtables:56kB oom_score_adj:0

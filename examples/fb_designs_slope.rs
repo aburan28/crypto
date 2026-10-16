@@ -2209,7 +2209,7 @@ impl Cell2 {
 /// committed p₁ rows of the first run.
 fn group_of(file: &str) -> &str {
     match file.get(..3) {
-        Some(g @ ("F1-" | "F2-" | "F3-" | "F4-")) => &g[..2],
+        Some(g @ ("F1-" | "F2-" | "F3-" | "F4-" | "G1-")) => &g[..2],
         _ => "p1",
     }
 }
@@ -2299,6 +2299,61 @@ fn print_fits(f: &Fits) {
 
 fn find(cells: &[Cell2], t: usize) -> Option<&Cell2> {
     cells.iter().find(|c| c.t == t && c.complete())
+}
+
+/// Amendment 4, G1: each arm's `m = 4` series is its F4 rows at `t ≤ 3`
+/// plus its G1 rows; σ verdicts of §1, the secondary width slope, and A11's
+/// cell `max_cols` over A0's at shared completed `t`.
+fn analyze4(dir: &str) {
+    let rows = read_rows(dir);
+    println!("Factor-base designs, Amendment 4 (G1): m = 4 on p1 = {P1}; rows from {dir}");
+    println!("(series = F4 rows at t ≤ 3 + G1 rows at t ≥ 4; a cell is completed when both systems are `ok`;");
+    println!(" a cell's D and max_cols are means over its systems; σ and Δlog₂ max_cols/Δb are least-squares slopes on b)");
+    let mut series: Vec<(&str, Vec<Cell2>, Fits)> = Vec::new();
+    for a in ["A0", "A11"] {
+        let mut cells: Vec<Cell2> = cells2(&rows, "F4", a, 4)
+            .into_iter()
+            .filter(|c| c.t <= 3)
+            .collect();
+        cells.extend(cells2(&rows, "G1", a, 4));
+        cells.sort_by_key(|c| c.t);
+        let f = show_series(&format!("{a} m = 4 p1 (F4 t ≤ 3, G1 t ≥ 4)"), &cells);
+        series.push((a, cells, f));
+    }
+    println!();
+    println!("A11 max_cols / A0 max_cols at shared completed t (secondary, descriptive)");
+    let (a0, a11) = (&series[0].1, &series[1].1);
+    let mut shared = 0;
+    for c in a11.iter().filter(|c| c.complete()) {
+        if let Some(z) = find(a0, c.t) {
+            shared += 1;
+            println!(
+                "  t={} A11 {:.0} / A0 {:.0} = {:.4}",
+                c.t,
+                c.cols_mean(),
+                z.cols_mean(),
+                c.cols_mean() / z.cols_mean()
+            );
+        }
+    }
+    if shared == 0 {
+        println!("  none");
+    }
+    println!();
+    println!("Predictions (Amendment 4)");
+    let a0n = series[0].2 .0;
+    let a0s = series[0].2 .1.map(|x| x.0);
+    println!(
+        "  A0 σ ≥ 0.5 at m = 4: {}",
+        match a0s {
+            Some(s) if a0n >= 3 => format!(
+                "σ = {s:.4} on {a0n} cells → {}",
+                if s >= 0.5 { "held" } else { "did not hold" }
+            ),
+            _ => format!("not decided ({a0n} completed cells)"),
+        }
+    );
+    println!("  A11: no prediction");
 }
 
 fn analyze2(dir: &str) {
@@ -2730,7 +2785,9 @@ fn main() {
         }
         "analyze" => {
             let dir = args.get(1).expect("a runs directory");
-            if args.iter().any(|a| a == "--amendment2") {
+            if args.iter().any(|a| a == "--amendment4") {
+                analyze4(dir);
+            } else if args.iter().any(|a| a == "--amendment2") {
                 analyze2(dir);
             } else {
                 analyze(dir, flag(&args, "--pilot").as_deref());

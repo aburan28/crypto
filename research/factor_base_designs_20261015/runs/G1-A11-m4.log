@@ -1,3 +1,7 @@
 == A11 m=4 p1: commit 113f31659af224c2e8eb46ebf86e5a18fb0993a3, budget 3600 s, grace 300 s, ulimit -v 15000000, started 2026-10-16T06:12:16Z
 A11  m=4 t= 4 target=0 b=4.000 |V|=16 n_vars=35 n_eqs=36 D=6 reached=6 751.9 s ok
 A11  m=4 t= 4 target=1 b=4.000 |V|=16 n_vars=35 n_eqs=36 D=6 reached=6 738.6 s ok
+A11  m=4 t= 5 target=0 b=5.000 |V|=32 n_vars=42 n_eqs=43 D=null reached=null 73.5 s aborted (child exited: signal: 9 (SIGKILL); stderr: )
+A11  m=4 t= 5 target=1 b=5.000 |V|=32 n_vars=42 n_eqs=43 D=null reached=null 65.9 s aborted (child exited: signal: 9 (SIGKILL); stderr: )
+-- A11 m=4: a system at t = 5 hit a limit or failed; the series stops
+== A11 m=4: ended 2026-10-16T06:39:27Z

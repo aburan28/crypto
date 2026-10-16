@@ -1,0 +1,26 @@
+Factor-base designs, Amendment 4 (G1): m = 4 on p1 = 786433; rows from research/factor_base_designs_20261015/runs
+(series = F4 rows at t ≤ 3 + G1 rows at t ≥ 4; a cell is completed when both systems are `ok`;
+ a cell's D and max_cols are means over its systems; σ and Δlog₂ max_cols/Δb are least-squares slopes on b)
+
+── A0 m = 4 p1 (F4 t ≤ 3, G1 t ≥ 4)
+  t   b      n_vars n_eqs  D per system  max_cols per system   time per system (s)   status
+  2   2.000  10     11     [6, 6]        1911,1911            0.3,0.3               ok,ok
+  3   3.000  14     15     [7, 7]        21619,21619          96.4,93.8             ok,ok
+  4   4.000  18     19     []            -,-                  404.0,406.6           aborted,aborted
+  completed cells 2: σ = 1.0000  →  inconclusive (fewer than 3 completed cells);  Δlog₂ max_cols/Δb = 3.500 (secondary, descriptive)
+
+── A11 m = 4 p1 (F4 t ≤ 3, G1 t ≥ 4)
+  t   b      n_vars n_eqs  D per system  max_cols per system   time per system (s)   status
+  2   2.000  21     22     [3, 3]        34,34                0.0,0.0               ok,ok
+  3   3.000  28     29     [5, 5]        2159,2159            0.3,0.3               ok,ok
+  4   4.000  35     36     [6, 6]        88740,88740          751.9,738.6           ok,ok
+  5   5.000  42     43     []            -,-                  73.5,65.9             aborted,aborted
+  completed cells 3: σ = 1.5000  →  no middle ground at this arity (σ ≥ 0.5);  Δlog₂ max_cols/Δb = 5.675 (secondary, descriptive)
+
+A11 max_cols / A0 max_cols at shared completed t (secondary, descriptive)
+  t=2 A11 34 / A0 1911 = 0.0178
+  t=3 A11 2159 / A0 21619 = 0.0999
+
+Predictions (Amendment 4)
+  A0 σ ≥ 0.5 at m = 4: not decided (2 completed cells)
+  A11: no prediction
