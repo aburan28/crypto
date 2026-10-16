@@ -6,7 +6,9 @@
 //!   here and is listed as a note), plus `W · 2^d` for the `W` concurrent
 //!   walks to reach a distinguished point after it.
 //! - Distinguished-point bits `d`: the largest with `W · 2^d ≤ 1%` of the
-//!   expected iterations, so the tail stays a 1% overhead.
+//!   expected iterations, so the tail stays a 1% overhead.  No upper cap:
+//!   a deployment tests `d` bits of a hash of `x`, not the low word the
+//!   timed kernel tests.
 //! - Start points: `W` scalar multiplications at about `1.5 log₂ n` group
 //!   operations each, priced at the same per-iteration operations.
 //! - Each distinguished point uploads `x` plus a 16-byte walk seed and an
@@ -65,7 +67,7 @@ pub fn shape(p: &RhoParams) -> Result<RhoShape, String> {
     let c = if p.negation_map { 4.0 } else { 2.0 };
     let expected = 0.5 * (n_log2 + (PI / c).log2());
     let walks = p.batch as f64 * p.machines * f64::from(p.cores_per_machine);
-    let d = ((expected + 0.01f64.log2() - walks.log2()).floor()).clamp(0.0, 64.0) as u32;
+    let d = (expected + 0.01f64.log2() - walks.log2()).floor().max(0.0) as u32;
     let tail = walks.log2() + d as f64;
     let iters = (expected.exp2() + tail.exp2()).log2();
     Ok(RhoShape {
@@ -181,6 +183,22 @@ mod tests {
             2.0 * tail > 0.01 * s.expected_iterations_log2.exp2(),
             "d is the largest such"
         );
+    }
+
+    #[test]
+    fn large_groups_get_as_many_dp_bits_as_the_one_percent_rule_allows() {
+        let p = RhoParams {
+            field: "w4".into(),
+            group_log2: 256.0,
+            batch: 1024,
+            machines: 1.0,
+            cores_per_machine: 4,
+            negation_map: false,
+            dp_per_message: 1024.0,
+        };
+        let s = shape(&p).unwrap();
+        assert!(s.dp_bits > 64);
+        assert!(s.distinguished_points_log2 < 20.0);
     }
 
     #[test]

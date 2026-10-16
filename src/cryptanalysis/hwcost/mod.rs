@@ -462,7 +462,7 @@ pub fn predict(hw: &Hardware, wl: &Workload, dep: Deployment) -> Result<Predicti
         let mut ops = Vec::new();
         for (op, &n) in &ph.ops_per_iteration {
             let c = op_cycles(hw, op).map_err(|e| format!("{e} (phase {})", ph.name))?;
-            if unmeasured(&c.1) {
+            if unmeasured(c.1) {
                 note(format!("{op} = {} cycles: {}", c.0, c.1));
             }
             cyc += n * c.0;
@@ -649,7 +649,7 @@ pub fn render(p: &Prediction) -> String {
         for o in &ph.ops {
             let _ = writeln!(
                 s,
-                "      {:<14} {:>9.4}/iter {:>10.1} cycles {:>6.1}%",
+                "      {:<18} {:>9.4}/iter {:>10.1} cycles {:>6.1}%",
                 o.op,
                 o.per_iteration,
                 o.cycles_per_iteration,

@@ -153,16 +153,13 @@ pub fn memory_levels(m: &Measurements) -> Vec<MemLevel> {
         let shared = !c.shared_cpu_list.is_empty()
             && (c.shared_cpu_list.contains('-') || c.shared_cpu_list.contains(','));
         let cap = c.size_bytes as f64;
-        let one = sizes.iter().filter(|&&s| (s as f64) <= cap / 2.0).last();
+        let one = sizes.iter().rev().find(|&&s| (s as f64) <= cap / 2.0);
         let per_thread_all = if shared {
             cap / 2.0 / all as f64
         } else {
             cap / 2.0
         };
-        let multi = sizes
-            .iter()
-            .filter(|&&s| (s as f64) <= per_thread_all)
-            .last();
+        let multi = sizes.iter().rev().find(|&&s| (s as f64) <= per_thread_all);
         let (Some(&s1), Some(&sa)) = (one, multi) else {
             continue;
         };
@@ -234,7 +231,7 @@ fn compute_ns(
         + c.inv * lat("inv")
 }
 
-fn level_for<'a>(levels: &'a [MemLevel], ws: f64) -> Option<&'a MemLevel> {
+fn level_for(levels: &[MemLevel], ws: f64) -> Option<&MemLevel> {
     // Validation runs one thread, so a shared level is all its own.
     levels
         .iter()
