@@ -18,13 +18,13 @@ run() { # name args...
 K=(--kinds kummer --controls tower --t-min 1)
 # small planted runs (planted_ok and the verifier's planted check)
 for p in 29686813949953 proth:48 proth:56; do
-  run "planted-$p" --p $p "${K[@]}" --m 2,3 --max-t 4 --max-t-m3 3 --planted 1 --random 0
+  run "planted-${p//:/-}" --p $p "${K[@]}" --m 2,3 --max-t 4 --max-t-m3 3 --planted 1 --random 0
 done
 run planted-P-224 --p P-224 "${K[@]}" --m 2,3 --max-t 4 --max-t-m3 3 --planted 1 --random 0 --verify
 run planted-P-192 --p P-192 --kinds dickson-torus --controls tower --t-min 1 --m 2,3 --max-t 4 --max-t-m3 3 --planted 1 --random 0 --verify
 # the measured cells
 for p in 29686813949953 proth:48 proth:56; do
-  run "kummer-$p" --p $p "${K[@]}" --m 2,3,4 --max-t 9 --max-t-m3 4 --max-t-m4 2 --planted 0 --random 2
+  run "kummer-${p//:/-}" --p $p "${K[@]}" --m 2,3,4 --max-t 9 --max-t-m3 4 --max-t-m4 2 --planted 0 --random 2
 done
 run kummer-P-224 --p P-224 "${K[@]}" --m 2,3,4 --max-t 9 --max-t-m3 4 --max-t-m4 2 --planted 0 --random 2 --verify
 run torus-P-192 --p P-192 --kinds dickson-torus --controls tower,null --t-min 1 --m 2,3 --max-t 9 --max-t-m3 4 --planted 0 --random 2 --verify
