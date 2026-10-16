@@ -368,20 +368,66 @@ fn invert(gf: &Gf2, basis: &NormalBasis, a: u64) -> u64 {
 struct RootBloom {
     words: Vec<u64>,
     bit_mask: usize,
+    hashes: usize,
+    profile: RootBloomProfile,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum RootBloomProfile {
+    Standard,
+    Wide3,
+    Wide5,
+}
+
+impl RootBloomProfile {
+    fn from_env() -> Self {
+        match std::env::var("KIC_ROOT_BLOOM_PROFILE").as_deref() {
+            Err(_) | Ok("standard") => Self::Standard,
+            Ok("wide3") => Self::Wide3,
+            Ok("wide5") => Self::Wide5,
+            _ => panic!("KIC_ROOT_BLOOM_PROFILE must be standard, wide3 or wide5"),
+        }
+    }
+
+    fn bits_per_request(self) -> usize {
+        match self {
+            Self::Standard => 8,
+            Self::Wide3 | Self::Wide5 => 16,
+        }
+    }
+
+    fn hashes(self) -> usize {
+        match self {
+            Self::Standard | Self::Wide3 => 3,
+            Self::Wide5 => 5,
+        }
+    }
+
+    fn name(self) -> &'static str {
+        match self {
+            Self::Standard => "standard",
+            Self::Wide3 => "wide3",
+            Self::Wide5 => "wide5",
+        }
+    }
 }
 
 impl RootBloom {
-    const HASHES: usize = 3;
-
     fn with_capacity(keys: usize) -> Self {
+        Self::with_profile(keys, RootBloomProfile::from_env())
+    }
+
+    fn with_profile(keys: usize, profile: RootBloomProfile) -> Self {
         let bits = keys
-            .checked_mul(8)
+            .checked_mul(profile.bits_per_request())
             .and_then(usize::checked_next_power_of_two)
             .expect("root Bloom size overflow")
             .max(64);
         Self {
             words: vec![0; bits / 64],
             bit_mask: bits - 1,
+            hashes: profile.hashes(),
+            profile,
         }
     }
 
@@ -398,7 +444,7 @@ impl RootBloom {
     #[inline(always)]
     fn insert(&mut self, key: u128) {
         let (first, step) = Self::hash_pair(key);
-        for index in 0..Self::HASHES {
+        for index in 0..self.hashes {
             let bit =
                 first.wrapping_add((index as u64).wrapping_mul(step)) as usize & self.bit_mask;
             self.words[bit >> 6] |= 1u64 << (bit & 63);
@@ -408,7 +454,7 @@ impl RootBloom {
     #[inline(always)]
     fn contains(&self, key: u128) -> bool {
         let (first, step) = Self::hash_pair(key);
-        for index in 0..Self::HASHES {
+        for index in 0..self.hashes {
             let bit =
                 first.wrapping_add((index as u64).wrapping_mul(step)) as usize & self.bit_mask;
             if self.words[bit >> 6] & (1u64 << (bit & 63)) == 0 {
@@ -504,7 +550,7 @@ impl RootTable {
 
 #[cfg(test)]
 mod root_bloom_table_tests {
-    use super::{mix_root_bloom, RootBloom, RootTable};
+    use super::{mix_root_bloom, RootBloom, RootBloomProfile, RootTable};
 
     #[test]
     fn canonical_u64_lookup_matches_unscreened_table() {
@@ -527,6 +573,24 @@ mod root_bloom_table_tests {
             if key != u64::MAX {
                 assert!(screened.bloom.as_ref().unwrap().contains(key as u128));
                 assert_eq!(screened.get(key), Some(value));
+            }
+        }
+    }
+
+    #[test]
+    fn every_bloom_profile_preserves_all_inserted_keys() {
+        for profile in [
+            RootBloomProfile::Standard,
+            RootBloomProfile::Wide3,
+            RootBloomProfile::Wide5,
+        ] {
+            let mut bloom = RootBloom::with_profile(4096, profile);
+            let keys: Vec<_> = (0..4096u64).map(|i| mix_root_bloom(i) as u128).collect();
+            for &key in &keys {
+                bloom.insert(key);
+            }
+            for key in keys {
+                assert!(bloom.contains(key), "missing key under {profile:?}");
             }
         }
     }
@@ -1865,9 +1929,11 @@ mod wide {
             assert!(states.len() > 100);
             let mut packed = RootTable128::with_capacity(states.len() * 2, 83, reps.len(), true);
             let mut indexed = RootTable128::with_capacity_indexed83(states.len() * 2);
+            let mut indexed_bloom = RootTable128::with_capacity_indexed83(states.len() * 2);
             let mut indexed26 = RootTable128::with_capacity_indexed83(states.len() * 2);
             packed.bloom = None;
             indexed.bloom = None;
+            indexed_bloom.bloom = Some(RootBloom::with_capacity(states.len() * 2));
             indexed26.bloom = None;
             let mut inserted_keys = Vec::new();
             for index in 0..states.len() {
@@ -1884,6 +1950,16 @@ mod wide {
                             .canonical_selected(states.root_at(state_index, root_selector))
                             .0
                     });
+                    indexed_bloom.insert_indexed83(
+                        key,
+                        index,
+                        selector,
+                        |state_index, root_selector| {
+                            basis
+                                .canonical_selected(states.root_at(state_index, root_selector))
+                                .0
+                        },
+                    );
                     indexed26.insert_indexed83(
                         key,
                         index,
@@ -1897,10 +1973,15 @@ mod wide {
                 }
             }
             assert_eq!(indexed.len, packed.len);
+            assert_eq!(indexed_bloom.len, packed.len);
             assert_eq!(indexed26.len, packed.len);
             for key in inserted_keys {
                 assert_eq!(
                     indexed.get_with_context(key, &states, &basis),
+                    packed.get(key)
+                );
+                assert_eq!(
+                    indexed_bloom.get_with_context(key, &states, &basis),
                     packed.get(key)
                 );
                 assert_eq!(
@@ -1914,6 +1995,10 @@ mod wide {
                     .0;
                 assert_eq!(
                     indexed.get_with_context(key, &states, &basis),
+                    packed.get(key)
+                );
+                assert_eq!(
+                    indexed_bloom.get_with_context(key, &states, &basis),
                     packed.get(key)
                 );
                 assert_eq!(
@@ -2016,6 +2101,8 @@ mod wide {
                 RootTable128::with_capacity_indexed83(quotient.states.len() * 2);
             let mut single_root_four =
                 RootTable128::with_capacity_indexed83_four(quotient.states.len() * 2);
+            let mut two_root_four =
+                RootTable128::with_capacity_indexed83_four(quotient.states.len() * 2);
             for (states, table) in [
                 (&full.states, &mut full_indexed),
                 (&quotient.states, &mut quotient_indexed),
@@ -2085,10 +2172,23 @@ mod wide {
                                 .0
                         },
                     );
+                    two_root_four.insert_indexed83(
+                        key,
+                        index,
+                        selector,
+                        |prior_index, prior_selector| {
+                            basis
+                                .canonical_selected(
+                                    root_only21.root_at(prior_index, prior_selector),
+                                )
+                                .0
+                        },
+                    );
                 }
             }
             assert_eq!(single_root_indexed.len, quotient_indexed.len);
             assert_eq!(single_root_four.len, quotient_indexed.len);
+            assert_eq!(two_root_four.len, quotient_indexed.len);
             assert!(
                 dense_quotient_indexed.layout_receipt().2 < quotient_indexed.layout_receipt().2
             );
@@ -2133,6 +2233,11 @@ mod wide {
                         quotient_indexed.get_with_context(key, &quotient.states, &basis),
                         "four-byte first witness differs for key {key}",
                     );
+                    assert_eq!(
+                        two_root_four.get_with_context(key, &root_only21, &basis),
+                        quotient_indexed.get_with_context(key, &quotient.states, &basis),
+                        "four-byte 21-byte-state first witness differs for key {key}",
+                    );
                 }
             }
             for probe in 1..2048u128 {
@@ -2163,6 +2268,11 @@ mod wide {
                     single_root_four.get_with_context(key, &root_only11, &basis),
                     quotient_indexed.get_with_context(key, &quotient.states, &basis),
                     "four-byte probe differs for key {key}",
+                );
+                assert_eq!(
+                    two_root_four.get_with_context(key, &root_only21, &basis),
+                    quotient_indexed.get_with_context(key, &quotient.states, &basis),
+                    "four-byte 21-byte-state probe differs for key {key}",
                 );
             }
         }
@@ -2860,6 +2970,7 @@ mod wide {
         indexed4_table: bool,
         indexed5_load75: bool,
         indexed5_fixed30: bool,
+        indexed4_fixed30: bool,
         indexed4_fixed31: bool,
         root_table_request_entries: usize,
     }
@@ -3102,7 +3213,12 @@ mod wide {
         let root_only21 = std::env::var("KIC_ROOT_ONLY21").as_deref() == Ok("1");
         let root_only11 = std::env::var("KIC_ROOT_ONLY11").as_deref() == Ok("1");
         let indexed4_table = std::env::var("KIC_INDEXED_ROOT4").as_deref() == Ok("1");
+        let indexed4_fixed30 = std::env::var("KIC_INDEXED4_FIXED30").as_deref() == Ok("1");
         let indexed4_fixed31 = std::env::var("KIC_INDEXED4_FIXED31").as_deref() == Ok("1");
+        assert!(
+            !(indexed4_fixed30 && indexed4_fixed31),
+            "select one four-byte root table capacity"
+        );
         assert!(
             (packed_state83 as u8
                 + packed_state26 as u8
@@ -3147,12 +3263,12 @@ mod wide {
                 ((std::env::var("KIC_INDEXED_ROOT5").as_deref() == Ok("1")
                     && std::env::var("KIC_INDEXED5_FIXED30").as_deref() == Ok("1")
                     && !indexed4_table)
-                    || (indexed4_table && indexed4_fixed31
+                    || (indexed4_table
+                        && indexed4_fixed31
                         && std::env::var("KIC_INDEXED_ROOT5").as_deref() != Ok("1")))
                     && std::env::var("KIC_PACKED_ROOT_TABLE").as_deref() == Ok("1")
-                    && !indexed5_load75
-                    && !root_bloom_enabled(),
-                "one-root states require exact indexed fixed30 or fixed31 slots without a Bloom filter"
+                    && !indexed5_load75,
+                "one-root states require exact indexed fixed30 or fixed31 slots"
             );
             assert!(
                 max_states.checked_mul(2).unwrap()
@@ -3290,8 +3406,10 @@ mod wide {
         let indexed5_table = std::env::var("KIC_INDEXED_ROOT5").as_deref() == Ok("1");
         let indexed5_fixed30 = std::env::var("KIC_INDEXED5_FIXED30").as_deref() == Ok("1");
         assert!(
-            !indexed4_table || (root_only11 && !indexed5_table && indexed4_fixed31),
-            "four-byte root slots require one-root states and fixed31 request"
+            !indexed4_table
+                || (!indexed5_table
+                    && ((root_only11 && indexed4_fixed31) || (root_only21 && indexed4_fixed30))),
+            "four-byte root slots require one-root/fixed31 or 21-byte/fixed30 states"
         );
         assert!(
             !(dense_table || load75_table) || packed,
@@ -3337,12 +3455,21 @@ mod wide {
                 "fixed 2^31 four-byte table cannot encode all state roots"
             );
         }
+        if indexed4_fixed30 {
+            assert!(
+                indexed4_table
+                    && root_only21
+                    && max_states < (1usize << 29)
+                    && max_states.checked_mul(2).unwrap() < (1usize << 30),
+                "fixed 2^30 four-byte table cannot encode all state roots"
+            );
+        }
         // The symmetric quotient retains almost two distinct canonical root
         // keys per state.  Requesting 4*S/3 therefore targets at most 75%
         // occupancy after the constructor doubles the request.
         let root_table_request_entries = if indexed4_fixed31 {
             1usize << 30
-        } else if indexed5_fixed30 {
+        } else if indexed4_fixed30 || indexed5_fixed30 {
             1usize << 29
         } else if indexed5_load75 {
             states
@@ -3374,7 +3501,10 @@ mod wide {
         };
         if !root_only11 {
             for state_index in 0..states.len() {
-                if indexed5_table {
+                if matches!(
+                    &table.slots,
+                    RootSlots128::Indexed83(_) | RootSlots128::Indexed83Four(_)
+                ) {
                     for root_selector in 0..2 {
                         let canonical = basis
                             .canonical_selected(states.root_at(state_index, root_selector))
@@ -3411,6 +3541,7 @@ mod wide {
             indexed4_table,
             indexed5_load75,
             indexed5_fixed30,
+            indexed4_fixed30,
             indexed4_fixed31,
             root_table_request_entries,
         }
@@ -4116,11 +4247,24 @@ mod wide {
             "target_threads":target_threads,
             "scope":"public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
         });
+        summary["root_bloom_profile"] = json!(index
+            .table
+            .bloom
+            .as_ref()
+            .map_or("none", |bloom| bloom.profile.name()));
+        summary["root_bloom_hashes"] =
+            json!(index.table.bloom.as_ref().map_or(0, |bloom| bloom.hashes));
+        summary["root_bloom_bits_per_request"] = json!(index
+            .table
+            .bloom
+            .as_ref()
+            .map_or(0, |bloom| bloom.profile.bits_per_request()));
         summary["symmetric_s3_states_enabled"] = json!(index.symmetric_states);
         summary["root_table_indexed4_enabled"] = json!(index.indexed4_table);
         summary["indexed5_load75_enabled"] = json!(index.indexed5_load75);
         summary["indexed5_fixed30_enabled"] = json!(index.indexed5_fixed30);
         summary["indexed4_fixed31_enabled"] = json!(index.indexed4_fixed31);
+        summary["indexed4_fixed30_enabled"] = json!(index.indexed4_fixed30);
         summary["root_only11_enabled"] =
             json!(matches!(&index.states, StateStore128::RootOnly11 { .. }));
         println!("{summary}");
@@ -4587,7 +4731,7 @@ fn main() {
     let mut sorted = target_query_ms.clone();
     sorted.sort_by(|x, y| x.partial_cmp(y).unwrap());
     let median = sorted.get(sorted.len() / 2).copied();
-    let summary = json!({
+    let mut summary = json!({
         "kind":"compact_orbit_dlp_summary",
         "schema_version":"1.0",
         "n":n, "a":a,
@@ -4628,6 +4772,18 @@ fn main() {
         "threads":1,
         "scope":"public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
     });
+    summary["root_bloom_profile"] = json!(index
+        .table
+        .bloom
+        .as_ref()
+        .map_or("none", |bloom| bloom.profile.name()));
+    summary["root_bloom_hashes"] =
+        json!(index.table.bloom.as_ref().map_or(0, |bloom| bloom.hashes));
+    summary["root_bloom_bits_per_request"] = json!(index
+        .table
+        .bloom
+        .as_ref()
+        .map_or(0, |bloom| bloom.profile.bits_per_request()));
     println!("{summary}");
     if let Ok(path) = std::env::var("KIC_DUMP_BASE") {
         let dump = json!({

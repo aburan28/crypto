@@ -1,0 +1,25 @@
+{
+  "additional_authorized_seconds": "2400",
+  "additional_unspent_seconds": "2400",
+  "authorization_sha256": "71f53f5e60ad024fd4b49929fecc7014f65eebf0bc88b44dacdb1a5b415ddf5d",
+  "build_dir_absent": true,
+  "conservative_build_charge_seconds": 0,
+  "conservative_run_charge_seconds": 0,
+  "frozen_inputs_status": "PASS",
+  "host_top_lines": [
+    "Load Avg: 41.10, 50.04, 52.59 ",
+    "CPU usage: 62.31% user, 37.68% sys, 0.0% idle ",
+    "PhysMem: 38G used (4286M wired, 8173M compressor), 9342M unused."
+  ],
+  "host_uptime": "13:22  up  9:38, 10 users, load averages: 41.10 50.04 52.59",
+  "note": "The source protocol has no numeric host-admission threshold. This is an explicit resource judgment because CPU idle is zero and load greatly exceeds 14 logical CPUs; no worker or timed stage was launched. The scratch lease expired and may require a fresh reservation and run-specific authorization before later launch.",
+  "pinned_image_status": "PASS",
+  "prior_import_status": "PASS",
+  "run_dir_absent": true,
+  "schema": "n83.first-mixed-orbit-host-admission/v1",
+  "selected_best_total_runtime": null,
+  "source_commit": "cecb1523a6c04b982d167e344f256f500e8646ad",
+  "status": "DEFERRED_RESOURCE_JUDGMENT_NO_STAGE_LAUNCH",
+  "system_scratch_free_bytes": 13836804096,
+  "timestamp_utc": "2026-10-15T20:22:24Z"
+}

@@ -6,8 +6,8 @@
 pub mod adx_gen;
 pub mod api;
 pub mod bigint;
-pub mod cm;
 pub mod binary;
+pub mod cm;
 pub mod curve;
 /// Research-only Eigen-Séta design helpers.  This module is deliberately not
 /// a cryptographic encryption implementation; see its module documentation.
@@ -18,12 +18,12 @@ pub mod ext;
 pub mod field;
 pub mod find;
 pub mod fp2;
-pub mod gls_loop;
 pub mod fpm;
 pub mod fpr;
 pub mod genus2;
 pub mod gf2n;
 pub mod gf3n;
+pub mod gls_loop;
 pub mod icv1;
 pub mod int;
 pub mod json;

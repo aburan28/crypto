@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "/usr/bin/time",
+    "-l",
+    "uv",
+    "run",
+    "--with",
+    "blake3",
+    "python",
+    "-B",
+    "/Volumes/SSD990/crypto/worktrees/codex-n83-mixed-orbit-worker-20261012/research/koblitz_n83_factor_base_sweep_20261008/verification/pareto-shape-native-import-20261015/audit.py",
+    "--run-dir",
+    "/private/tmp/n83-pareto-shape-native-import-20261015",
+    "--binary",
+    "/private/tmp/n83-native-k600-import-20261014/koblitz_n83_mixed_orbit_worker.preserved",
+    "--output",
+    "/private/tmp/n83-pareto-shape-native-import-20261015/audit.json"
+  ],
+  "cap_seconds": 600,
+  "elapsed_wall_seconds_L0": 9.813004958996316,
+  "exit_code": 0,
+  "schema": "n83.pareto-shape-native-audit-stage/v1",
+  "source_sha256": "bc1e06cb4a448082a5c6188b9e784684842d7054ab9623d939738888a03a7fce",
+  "started_utc": "2026-10-15T05:37:34.149252+00:00",
+  "stderr_sha256": "8862fdee595aa644f6c0ee9fffb45e316bf75ac67fa59aad0c084fa619062af5",
+  "stdout_sha256": "aed1f5a8d5ed72205615e59f207f6d41c95749c9a44839790df33f50d40ea10b",
+  "timed_out": false
+}

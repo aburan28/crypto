@@ -300,7 +300,8 @@ def replay_certificate(path: Path, digest: str, fixture: dict[str, Any],
             total = curve.add(total, point)
         checks["relation_points_on_curve"] = all(
             p is not None and curve.decode([p[0], p[1]]) == p for p in points)
-        checks["relation_x_codes_match_points"] = [p[0] if p else None for p in points] == cert["relation"]["x_codes"]
+        checks["relation_x_codes_match_points"] = [str(p[0]) if p else None for p in points] == [
+            str(x) for x in cert["relation"]["x_codes"]]
         checks["relation_sums_to_target"] = total == target
     return {"arm": cert["arm"], "digest_recomputed": recomputed, "checks": checks,
             "statement_holds": all(checks.values()), "checker": "oracle.py (pure-Python field arithmetic)"}
@@ -606,7 +607,8 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
         base_rows = lab.read_jsonl(base_path)[:1]
         lab.require(bool(base_rows), f"base dump missing: {base_path}")
         base = base_rows[0]
-        base_points = [tuple(p) if p else None for p in base["factor_base_point_coordinates"]]
+        base_points = [tuple(int(c) for c in p) if p else None
+                      for p in base["factor_base_point_coordinates"]]
         representatives = [list(p) for p in base["factor_base_representatives"]]
         curve_ids = lab.read_json(REPO / beat["curve_ids"])
         curve_rec = next(c for c in curve_ids["curves"] if (c["a"], c["n"]) == (a, n))
@@ -676,7 +678,7 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                                       "target_scalar_constructed": False}
             producers_ok = row["ic"]["exit_code"] == 0 and row["rho"]["exit_code"] == 0
             ic_ok = bool(ic_record) and ic_record.get("group_verified") is True and same_point(ic_record["target"], row["target"])
-            rho_ok = bool(rho_record) and rho_record.get("verified") is True and rho_record["published_q"] == row["target"]
+            rho_ok = bool(rho_record) and rho_record.get("verified") is True and same_point(rho_record["published_q"], row["target"])
             verify: dict[str, Any] = {"workload": seed, "producers_ok": producers_ok, "ic_ok": ic_ok, "rho_ok": rho_ok,
                                       "base_hash": (row["ic_summary"] or {}).get("base_hash")}
             if not (producers_ok and ic_ok and rho_ok):
