@@ -5,7 +5,15 @@ on:
     branches: [codex/n83-cold-factor-base-20261016]
     paths:
       - .github/workflows/n83-cold-factor-base.yml
-      - research/n83_cold_factor_base_20261016/**
+      - research/n83_cold_factor_base_20261016/PROTOCOL.md
+      - research/n83_cold_factor_base_20261016/run.py
+      - research/n83_cold_factor_base_20261016/verify.py
+      - research/n83_cold_factor_base_20261016/generate.py
+      - research/n83_cold_factor_base_20261016/prior_manifest.json
+      - research/n83_cold_factor_base_20261016/targets.jsonl
+      - research/n83_cold_factor_base_20261016/answers.jsonl
+      - research/n83_cold_factor_base_20261016/reserve_targets.jsonl
+      - research/n83_cold_factor_base_20261016/reserve_answers.jsonl
   workflow_dispatch:
 
 permissions:
