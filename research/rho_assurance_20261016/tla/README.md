@@ -11,7 +11,7 @@ distinguished-point table, collisions, fruitless cycles in both modes, and
 the walk and step caps. TLC checks it exhaustively on small instances.
 
 Run everything with `./run_tlc.sh` (or `./run_tlc.sh a.cfg b.cfg` for a
-subset). The script downloads `tla2tools.jar` (the v1.8.0 release URL) into
+subset). The script downloads `tla2tools.jar` (the immutable v1.7.4 release) into
 `/tmp/claude-0/tla/` if it is missing, checks its pinned SHA-256, runs TLC
 with 2 workers on every `*.cfg`, writes each output to `out/<config>.txt`
 and a table to `out/SUMMARY.txt`, and exits nonzero when any config misses

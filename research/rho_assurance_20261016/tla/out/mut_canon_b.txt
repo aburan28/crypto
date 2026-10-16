@@ -1,25 +1,18 @@
-TLC2 Version 2026.10.15.145915 (rev: 932d35e)
-Running breadth-first search Model-Checking with fp 128 and seed 2366808780726627095 with 2 workers on 4 cores with 3040MB heap and 64MB offheap memory [pid: 9674] (Linux 6.18.44-fc-v139 amd64, Ubuntu 21.0.12.1 64bit, MSBDiskFPSet, DiskStateQueue).
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 3 and seed 4308713346492252583 with 4 workers on 4 cores with 3040MB heap and 64MB offheap memory [pid: 17781] (Linux 6.18.44-fc-v139 amd64, Ubuntu 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).
 Parsing file /home/user/crypto/research/rho_assurance_20261016/tla/StrongRho.tla
-Parsing file /tmp/tlc-17856089747103299526/Integers.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
-Parsing file /tmp/tlc-17856089747103299526/Sequences.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
-Parsing file /tmp/tlc-17856089747103299526/FiniteSets.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
-Parsing file /tmp/tlc-17856089747103299526/TLC.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
-Parsing file /tmp/tlc-17856089747103299526/_TLCTrace.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
-Parsing file /tmp/tlc-17856089747103299526/Naturals.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
-Parsing file /tmp/tlc-17856089747103299526/TLCExt.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/Integers.tla
+Parsing file /tmp/Sequences.tla
+Parsing file /tmp/FiniteSets.tla
+Parsing file /tmp/TLC.tla
+Parsing file /tmp/Naturals.tla
 Semantic processing of module Naturals
 Semantic processing of module Integers
 Semantic processing of module Sequences
 Semantic processing of module FiniteSets
 Semantic processing of module TLC
-Semantic processing of module TLCExt
-Semantic processing of module _TLCTrace
 Semantic processing of module StrongRho
-Linting of module TLCExt
-Linting of module _TLCTrace
-Linting of module StrongRho
-Starting... (2026-10-16 17:32:58)
+Starting... (2026-10-16 17:54:26)
 Computing initial states...
 Computed 2 initial states...
 Computed 4 initial states...
@@ -35,7 +28,7 @@ Computed 2048 initial states...
 Computed 4096 initial states...
 Computed 8192 initial states...
 Computed 16384 initial states...
-Finished computing initial states: 28830 distinct states generated at 2026-10-16 17:32:59.
+Finished computing initial states: 28830 distinct states generated at 2026-10-16 17:54:27.
 Error: Invariant RepInv is violated.
 Error: The behavior up to this point is:
 State 1: <Initial predicate>
@@ -57,7 +50,7 @@ State 1: <Initial predicate>
      nprev |-> 0,
      len |-> 0,
      live |-> FALSE ] >>
-/\ cursorA = 5
+/\ cursorA = 4
 /\ wasted = 0
 /\ d = 1
 /\ strideA = 1
@@ -66,7 +59,7 @@ State 1: <Initial predicate>
 /\ walks = 0
 /\ table = <<>>
 /\ longest = 0
-/\ cursor = 6
+/\ cursor = 5
 /\ failed = 0
 /\ sentinel = 0
 /\ result = 0
@@ -91,7 +84,7 @@ State 2: <Begin line 118, col 5 to line 125, col 79 of module StrongRho>
      nprev |-> 0,
      len |-> 0,
      live |-> FALSE ] >>
-/\ cursorA = 5
+/\ cursorA = 4
 /\ wasted = 0
 /\ d = 1
 /\ strideA = 1
@@ -100,19 +93,19 @@ State 2: <Begin line 118, col 5 to line 125, col 79 of module StrongRho>
 /\ walks = 0
 /\ table = <<>>
 /\ longest = 0
-/\ cursor = 6
+/\ cursor = 5
 /\ failed = 0
 /\ sentinel = 0
 /\ result = 0
 /\ status = "running"
 
-State 3: <StartLane(1) line 129, col 5 to line 142, col 70 of module StrongRho>
+State 3: <StartLane line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
 /\ steps = 0
 /\ lane = << [ b |-> 1,
-     a |-> 6,
+     a |-> 7,
      pt |-> 1,
      prev |-> <<0, 0, 0, 0>>,
      nprev |-> 0,
@@ -125,7 +118,7 @@ State 3: <StartLane(1) line 129, col 5 to line 142, col 70 of module StrongRho>
      nprev |-> 0,
      len |-> 0,
      live |-> FALSE ] >>
-/\ cursorA = 6
+/\ cursorA = 5
 /\ wasted = 0
 /\ d = 1
 /\ strideA = 1
@@ -134,13 +127,13 @@ State 3: <StartLane(1) line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ walks = 1
 /\ table = <<>>
 /\ longest = 0
-/\ cursor = 7
+/\ cursor = 6
 /\ failed = 0
 /\ sentinel = 0
 /\ result = 0
 /\ status = "running"
 
-58596 states generated, 58596 distinct states found, 28828 states left on queue.
+58599 states generated, 58599 distinct states found, 28826 states left on queue.
 The depth of the complete state graph search is 3.
-Finished in 01s at (2026-10-16 17:33:00)
-Trace exploration spec path: ./StrongRho_TTrace_1792171978.tla
+The average outdegree of the complete state graph is 1 (minimum is 1, the maximum 1 and the 95th percentile is 1).
+Finished in 01s at (2026-10-16 17:54:28)

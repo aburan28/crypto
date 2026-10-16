@@ -15,10 +15,10 @@ set -u -o pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CACHE="${TLA_CACHE:-/tmp/claude-0/tla}"
 JAR="$CACHE/tla2tools.jar"
-JAR_URL="https://github.com/tlaplus/tlaplus/releases/download/v1.8.0/tla2tools.jar"
-# Pinned after the first download on 2026-10-16 (the jar reports
-# "TLC2 Version 2026.10.15.145915 (rev: 932d35e)").
-JAR_SHA256="15d103b7e5617780bcc904c0af12f1ad242e2b345c0301136c5be4588f17edac"
+JAR_URL="https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar"
+# v1.7.4 is an immutable release (TLC "Version 2.19 of 08 August 2024");
+# the v1.8.0 URL serves a rolling pre-release whose hash changes.
+JAR_SHA256="936a262061c914694dfd669a543be24573c45d5aa0ff20a8b96b23d01e050e88"
 WORKERS="${TLC_WORKERS:-2}"   # shared machine: at most 2
 # TLC spills its state queue and fingerprints to -metadir; keep that in RAM
 # (tmpfs) when there is one, since the shared disk can fill up mid-run.
@@ -48,7 +48,7 @@ for cfg in "${cfgs[@]}"; do
     out="$HERE/out/$name.txt"
     meta="$(mktemp -d "$META_ROOT/strongrho-tlc.XXXXXX")"
     start=$(date +%s)
-    java -XX:+UseParallelGC -cp "$JAR" tlc2.TLC -workers "$WORKERS" -metadir "$meta" -noGenerateSpecTE \
+    java -XX:+UseParallelGC -cp "$JAR" tlc2.TLC -workers "$WORKERS" -metadir "$meta" \
         -config "$cfg" StrongRho.tla 2>&1 | grep -v '^Picked up JAVA_TOOL_OPTIONS' > "$out"
     secs=$(( $(date +%s) - start ))
     rm -rf "$meta"

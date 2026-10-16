@@ -1,25 +1,18 @@
-TLC2 Version 2026.10.15.145915 (rev: 932d35e)
-Running breadth-first search Model-Checking with fp 29 and seed -4469942405788375023 with 2 workers on 4 cores with 3040MB heap and 64MB offheap memory [pid: 9720] (Linux 6.18.44-fc-v139 amd64, Ubuntu 21.0.12.1 64bit, MSBDiskFPSet, DiskStateQueue).
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 106 and seed -4786198743276741813 with 4 workers on 4 cores with 3040MB heap and 64MB offheap memory [pid: 17833] (Linux 6.18.44-fc-v139 amd64, Ubuntu 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).
 Parsing file /home/user/crypto/research/rho_assurance_20261016/tla/StrongRho.tla
-Parsing file /tmp/tlc-17664571835955722335/Integers.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
-Parsing file /tmp/tlc-17664571835955722335/Sequences.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
-Parsing file /tmp/tlc-17664571835955722335/FiniteSets.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
-Parsing file /tmp/tlc-17664571835955722335/TLC.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
-Parsing file /tmp/tlc-17664571835955722335/_TLCTrace.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
-Parsing file /tmp/tlc-17664571835955722335/Naturals.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
-Parsing file /tmp/tlc-17664571835955722335/TLCExt.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/Integers.tla
+Parsing file /tmp/Sequences.tla
+Parsing file /tmp/FiniteSets.tla
+Parsing file /tmp/TLC.tla
+Parsing file /tmp/Naturals.tla
 Semantic processing of module Naturals
 Semantic processing of module Integers
 Semantic processing of module Sequences
 Semantic processing of module FiniteSets
 Semantic processing of module TLC
-Semantic processing of module TLCExt
-Semantic processing of module _TLCTrace
 Semantic processing of module StrongRho
-Linting of module TLCExt
-Linting of module _TLCTrace
-Linting of module StrongRho
-Starting... (2026-10-16 17:33:00)
+Starting... (2026-10-16 17:54:28)
 Computing initial states...
 Computed 2 initial states...
 Computed 4 initial states...
@@ -35,8 +28,8 @@ Computed 2048 initial states...
 Computed 4096 initial states...
 Computed 8192 initial states...
 Computed 16384 initial states...
-Finished computing initial states: 28830 distinct states generated at 2026-10-16 17:33:01.
-Progress(7) at 2026-10-16 17:33:04: 178,721 states generated (178,721 s/min), 178,721 distinct states found (178,721 ds/min), 28,828 states left on queue.
+Finished computing initial states: 28830 distinct states generated at 2026-10-16 17:54:29.
+Progress(9) at 2026-10-16 17:54:32: 234,323 states generated (234,323 s/min), 234,320 distinct states found (234,320 ds/min), 28,826 states left on queue.
 Error: Invariant NoFailedCollision is violated.
 Error: The behavior up to this point is:
 State 1: <Initial predicate>
@@ -107,7 +100,7 @@ State 2: <Begin line 118, col 5 to line 125, col 79 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 3: <StartLane(1) line 129, col 5 to line 142, col 70 of module StrongRho>
+State 3: <StartLane line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -141,7 +134,7 @@ State 3: <StartLane(1) line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 4: <StartLane(2) line 129, col 5 to line 142, col 70 of module StrongRho>
+State 4: <StartLane line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -209,7 +202,7 @@ State 5: <EndStart line 145, col 5 to line 147, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 6: <DpLane(1) line 151, col 5 to line 179, col 116 of module StrongRho>
+State 6: <DpLane line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -243,7 +236,7 @@ State 6: <DpLane(1) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 7: <DpLane(2) line 151, col 5 to line 179, col 116 of module StrongRho>
+State 7: <DpLane line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -311,7 +304,7 @@ State 8: <EndDp line 182, col 5 to line 184, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 9: <StepLane(1) line 188, col 5 to line 228, col 101 of module StrongRho>
+State 9: <StepLane line 188, col 5 to line 228, col 101 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -413,7 +406,7 @@ State 11: <Begin line 118, col 5 to line 125, col 79 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 12: <StartLane(2) line 129, col 5 to line 142, col 70 of module StrongRho>
+State 12: <StartLane line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -481,7 +474,7 @@ State 13: <EndStart line 145, col 5 to line 147, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 14: <DpLane(1) line 151, col 5 to line 179, col 116 of module StrongRho>
+State 14: <DpLane line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -515,7 +508,7 @@ State 14: <DpLane(1) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 15: <DpLane(2) line 151, col 5 to line 179, col 116 of module StrongRho>
+State 15: <DpLane line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -583,7 +576,7 @@ State 16: <EndDp line 182, col 5 to line 184, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 17: <StepLane(1) line 188, col 5 to line 228, col 101 of module StrongRho>
+State 17: <StepLane line 188, col 5 to line 228, col 101 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 1
@@ -617,7 +610,7 @@ State 17: <StepLane(1) line 188, col 5 to line 228, col 101 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 18: <StepLane(2) line 188, col 5 to line 228, col 101 of module StrongRho>
+State 18: <StepLane line 188, col 5 to line 228, col 101 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 1
@@ -753,7 +746,7 @@ State 21: <EndStart line 145, col 5 to line 147, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 22: <DpLane(1) line 151, col 5 to line 179, col 116 of module StrongRho>
+State 22: <DpLane line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 1
@@ -787,7 +780,7 @@ State 22: <DpLane(1) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-606380 states generated, 606380 distinct states found, 28828 states left on queue.
+606433 states generated, 606433 distinct states found, 28826 states left on queue.
 The depth of the complete state graph search is 22.
-Finished in 09s at (2026-10-16 17:33:10)
-Trace exploration spec path: ./StrongRho_TTrace_1792171980.tla
+The average outdegree of the complete state graph is 1 (minimum is 1, the maximum 1 and the 95th percentile is 1).
+Finished in 07s at (2026-10-16 17:54:36)

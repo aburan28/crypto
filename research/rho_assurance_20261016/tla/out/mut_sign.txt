@@ -1,19 +1,18 @@
-TLC2 Version 2026.10.15.145915 (rev: 932d35e)
-Running breadth-first search Model-Checking with fp 1 and seed 7024120349810586360 with 2 workers on 4 cores with 3040MB heap and 64MB offheap memory [pid: 13784] (Linux 6.18.44-fc-v139 amd64, Ubuntu 21.0.12.1 64bit, MSBDiskFPSet, DiskStateQueue).
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 106 and seed -1987689706817755451 with 4 workers on 4 cores with 3040MB heap and 64MB offheap memory [pid: 18438] (Linux 6.18.44-fc-v139 amd64, Ubuntu 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).
 Parsing file /home/user/crypto/research/rho_assurance_20261016/tla/StrongRho.tla
-Parsing file /tmp/tlc-11790638176132857423/Integers.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
-Parsing file /tmp/tlc-11790638176132857423/Sequences.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
-Parsing file /tmp/tlc-11790638176132857423/FiniteSets.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
-Parsing file /tmp/tlc-11790638176132857423/TLC.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
-Parsing file /tmp/tlc-11790638176132857423/Naturals.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /tmp/Integers.tla
+Parsing file /tmp/Sequences.tla
+Parsing file /tmp/FiniteSets.tla
+Parsing file /tmp/TLC.tla
+Parsing file /tmp/Naturals.tla
 Semantic processing of module Naturals
 Semantic processing of module Integers
 Semantic processing of module Sequences
 Semantic processing of module FiniteSets
 Semantic processing of module TLC
 Semantic processing of module StrongRho
-Linting of module StrongRho
-Starting... (2026-10-16 17:49:10)
+Starting... (2026-10-16 17:55:06)
 Computing initial states...
 Computed 2 initial states...
 Computed 4 initial states...
@@ -29,7 +28,7 @@ Computed 2048 initial states...
 Computed 4096 initial states...
 Computed 8192 initial states...
 Computed 16384 initial states...
-Finished computing initial states: 28830 distinct states generated at 2026-10-16 17:49:11.
+Finished computing initial states: 28830 distinct states generated at 2026-10-16 17:55:07.
 Error: Invariant NoFailedCollision is violated.
 Error: The behavior up to this point is:
 State 1: <Initial predicate>
@@ -100,7 +99,7 @@ State 2: <Begin line 118, col 5 to line 125, col 79 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 3: <StartLane(1) line 129, col 5 to line 142, col 70 of module StrongRho>
+State 3: <StartLane line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -134,7 +133,7 @@ State 3: <StartLane(1) line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 4: <StartLane(2) line 129, col 5 to line 142, col 70 of module StrongRho>
+State 4: <StartLane line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -202,7 +201,7 @@ State 5: <EndStart line 145, col 5 to line 147, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 6: <DpLane(1) line 151, col 5 to line 179, col 116 of module StrongRho>
+State 6: <DpLane line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -236,7 +235,7 @@ State 6: <DpLane(1) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 7: <DpLane(2) line 151, col 5 to line 179, col 116 of module StrongRho>
+State 7: <DpLane line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -270,6 +269,7 @@ State 7: <DpLane(2) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-173933 states generated, 173933 distinct states found, 28828 states left on queue.
+173970 states generated, 173970 distinct states found, 28826 states left on queue.
 The depth of the complete state graph search is 7.
-Finished in 04s at (2026-10-16 17:49:14)
+The average outdegree of the complete state graph is 1 (minimum is 1, the maximum 1 and the 95th percentile is 1).
+Finished in 03s at (2026-10-16 17:55:10)
