@@ -15,6 +15,10 @@ use rand::rngs::StdRng;
 use rand::SeedableRng;
 use rayon::prelude::*;
 
+#[path = "../research/iso1_weak_classes_20261007/census_runtime/src/certified.rs"]
+mod certified;
+use certified::certified_order;
+
 fn factors(mut n: u128) -> Vec<(u128, u32)> {
     let mut out = Vec::new();
     let mut d = 2;
@@ -162,8 +166,10 @@ fn census(
     orbit_quotient: bool,
     absolute_orbit_quotient: bool,
     exact_squares: bool,
+    certified: bool,
 ) {
     assert!(!(orbit_quotient && absolute_orbit_quotient));
+    assert!(!(certified && exact_squares));
     assert!(!(orbit_quotient || absolute_orbit_quotient) || derive_twists);
     let start = Instant::now();
     let f = Fq3::new(p);
@@ -188,7 +194,62 @@ fn census(
         .into_iter()
         .flat_map(|(branch, val)| (0..q).map(move |a0| (branch, val, a0)))
         .collect();
-    let (mut weak, mut reps, calls, muls, witness) = jobs
+    // ISO1_CHECKPOINT=FILE makes the run resumable: every finished job appends
+    // one line `branch nonsquare a0 reps calls muls extra|t:c,t:c,...`, and a
+    // restarted run reloads those lines and skips their jobs. Job results do
+    // not depend on scheduling (each job seeds its own RNG), so a resumed run
+    // writes the same CSV as an uninterrupted one.
+    let checkpoint = env::var("ISO1_CHECKPOINT").ok();
+    assert!(
+        checkpoint.is_none() || verify_trace.is_none(),
+        "checkpointing does not keep witnesses"
+    );
+    let mut resumed = (BTreeMap::<i128, u64>::new(), 0_u64, 0_u64, 0_u64, 0_u64);
+    let mut done = HashSet::<(bool, bool, u64)>::new();
+    if let Some(path) = &checkpoint {
+        if let Ok(file) = File::open(path) {
+            for line in BufReader::new(file).lines() {
+                let line = line.unwrap();
+                let Some((head, tail)) = line.split_once('|') else {
+                    continue; // a torn final line from an interrupted write
+                };
+                let h: Vec<u64> = head.split(' ').map(|x| x.parse().unwrap()).collect();
+                if h.len() != 7 {
+                    continue;
+                }
+                if !done.insert((h[0] == 1, h[1] == 1, h[2])) {
+                    continue;
+                }
+                resumed.1 += h[3];
+                resumed.2 += h[4];
+                resumed.3 += h[5];
+                resumed.4 += h[6];
+                for pair in tail.split(',').filter(|x| !x.is_empty()) {
+                    let (t, c) = pair.split_once(':').unwrap();
+                    *resumed.0.entry(t.parse().unwrap()).or_default() += c.parse::<u64>().unwrap();
+                }
+            }
+        }
+        eprintln!(
+            "checkpoint {path}: resumed {} of {} jobs",
+            done.len(),
+            jobs.len()
+        );
+    }
+    let log = checkpoint.as_ref().map(|path| {
+        std::sync::Mutex::new(
+            std::fs::OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(path)
+                .expect("open checkpoint"),
+        )
+    });
+    let jobs: Vec<_> = jobs
+        .into_iter()
+        .filter(|&(branch, val, a0)| !done.contains(&(branch, val == w, a0)))
+        .collect();
+    let (mut weak, mut reps, calls, muls, witness, extra_points) = jobs
         .into_par_iter()
         .map(|(branch, val, a0)| {
             let f = Fq3::new(p);
@@ -196,6 +257,11 @@ fn census(
             let mut witness = None;
             let mut reps = 0_u64;
             let mut calls = 0_u64;
+            let mut extra_points = 0_u64;
+            let nonsquare = (1..)
+                .map(|k: u64| E6([e2(k % q), e2(k / q), E2::ZERO]))
+                .find(|x| *x != E6::ZERO && !f.is_square(x))
+                .unwrap();
             let mut rng = StdRng::seed_from_u64(
                 0x1501_u64
                     ^ p.wrapping_mul(0x9e3779b1)
@@ -253,6 +319,18 @@ fn census(
                 };
                 let order = match &squares {
                     Some(table) => exact_order_with_squares(&f, &c, table),
+                    None if certified => {
+                        let u = f.sub(&c.e[1], &c.e[0]);
+                        let v = f.sub(&c.e[2], &c.e[0]);
+                        let a2 = f.neg(&f.add(&u, &v));
+                        let a4 = f.mul(&u, &v);
+                        let cert = certified_order(&f, a2, a4, &nonsquare, &mut rng, 16)
+                            .unwrap_or_else(|| {
+                                panic!("p={p}: order not isolated for alpha={alpha:?}")
+                            });
+                        extra_points += (cert.curve_points + cert.twist_points - 1) as u64;
+                        cert.order
+                    }
                     None => curve_order(&f, &c, &mut rng),
                 };
                 let trace = q3 + 1 - order as i128;
@@ -263,17 +341,40 @@ fn census(
                 *weak.entry(trace).or_default() += weight;
                 reps += weight;
             }
-            (weak, reps, calls, f.muls(), witness)
+            if let Some(log) = &log {
+                let counts: Vec<String> = weak.iter().map(|(t, c)| format!("{t}:{c}")).collect();
+                let line = format!(
+                    "{} {} {a0} {reps} {calls} {} {extra_points}|{}\n",
+                    u8::from(branch),
+                    u8::from(val == w),
+                    f.muls(),
+                    counts.join(",")
+                );
+                log.lock()
+                    .unwrap()
+                    .write_all(line.as_bytes())
+                    .expect("write checkpoint");
+            }
+            (weak, reps, calls, f.muls(), witness, extra_points)
         })
         .reduce(
-            || (BTreeMap::new(), 0, 0, 0, None),
-            |(mut a, na, ca, ma, wa), (b, nb, cb, mb, wb)| {
+            || (BTreeMap::new(), 0, 0, 0, None, 0),
+            |(mut a, na, ca, ma, wa, xa), (b, nb, cb, mb, wb, xb)| {
                 for (t, c) in b {
                     *a.entry(t).or_default() += c;
                 }
-                (a, na + nb, ca + cb, ma + mb, wa.or(wb))
+                (a, na + nb, ca + cb, ma + mb, wa.or(wb), xa + xb)
             },
         );
+    for (t, c) in resumed.0 {
+        *weak.entry(t).or_default() += c;
+    }
+    reps += resumed.1;
+    let (calls, muls, extra_points) = (
+        calls + resumed.2,
+        muls + resumed.3,
+        extra_points + resumed.4,
+    );
     if derive_twists {
         for (t, count) in weak.clone() {
             *weak.entry(-t).or_default() += count;
@@ -314,8 +415,8 @@ fn census(
             c.e
         );
     }
-    eprintln!("p={p} q={q} reps={reps} expected={} point_counts={calls} weak_classes={} ordinary_traces={ordinary} all_traces={} muls={} wall_s={:.3} method={} counter={} output={output}",
-        2*q*q+2*q, weak.len(), lim / 2 + 1, muls, start.elapsed().as_secs_f64(), if absolute_orbit_quotient { "absolute-orbit" } else if orbit_quotient { "twist-orbit" } else if derive_twists { "twist-derived" } else { "full" }, if exact_squares { "exact-squares" } else { "randomized-two-point" });
+    eprintln!("p={p} q={q} reps={reps} expected={} point_counts={calls} weak_classes={} ordinary_traces={ordinary} all_traces={} muls={} wall_s={:.3} method={} counter={} extra_isolation_points={extra_points} output={output}",
+        2*q*q+2*q, weak.len(), lim / 2 + 1, muls, start.elapsed().as_secs_f64(), if absolute_orbit_quotient { "absolute-orbit" } else if orbit_quotient { "twist-orbit" } else if derive_twists { "twist-derived" } else { "full" }, if exact_squares { "exact-squares" } else if certified { "certified-unique-candidate" } else { "randomized-two-point" });
     assert_eq!(reps, 2 * q * q + 2 * q);
     assert_eq!(
         calls,
@@ -561,6 +662,7 @@ fn main() {
     let orbit_quotient = rest.iter().any(|x| x == "--orbit-quotient");
     let absolute_orbit_quotient = rest.iter().any(|x| x == "--absolute-orbit-quotient");
     let exact_squares = rest.iter().any(|x| x == "--exact-squares");
+    let certified = rest.iter().any(|x| x == "--certified");
     let positional: Vec<_> = rest
         .iter()
         .filter(|x| {
@@ -568,6 +670,7 @@ fn main() {
                 && x.as_str() != "--orbit-quotient"
                 && x.as_str() != "--absolute-orbit-quotient"
                 && x.as_str() != "--exact-squares"
+                && x.as_str() != "--certified"
         })
         .collect();
     assert!(
@@ -577,7 +680,8 @@ fn main() {
                     + usize::from(derive_twists)
                     + usize::from(orbit_quotient)
                     + usize::from(absolute_orbit_quotient)
-                    + usize::from(exact_squares),
+                    + usize::from(exact_squares)
+                    + usize::from(certified),
         "unexpected argument"
     );
     let verify_trace = positional.first().map(|t| t.parse().expect("verify trace"));
@@ -589,5 +693,6 @@ fn main() {
         orbit_quotient,
         absolute_orbit_quotient,
         exact_squares,
+        certified,
     );
 }

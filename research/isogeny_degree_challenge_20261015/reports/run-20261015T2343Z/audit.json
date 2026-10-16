@@ -1,0 +1,121 @@
+{
+  "anchor_attempt_statuses": [
+    "ACCEPTED",
+    "ACCEPTED",
+    "ACCEPTED"
+  ],
+  "binary_sha256": "b8ce9c6f2adca6bec7c1623ee3fdd18c0756fc197f86a178feaf2c4e56bfcf7e",
+  "candidate_degree_interval": [
+    10454,
+    65537
+  ],
+  "command_count": 15,
+  "construction_models": 47,
+  "forged_score_rejected": true,
+  "known_answer_controls": [
+    {
+      "prime_degree": "13",
+      "source_icv1": "icv1-fp192-t31607402316713927207482677199-52e4af59",
+      "status": "ACCEPTED"
+    },
+    {
+      "prime_degree": "7",
+      "source_icv1": "icv1-fp521-t657877501894328237357444332315020117536923257219387276263472201219398408051703-f767e0d1",
+      "status": "ACCEPTED"
+    }
+  ],
+  "new_discovery_count": 0,
+  "registered_prime_models": 54,
+  "rejected_mutations": [
+    {
+      "control": "composite",
+      "reason": "only odd prime degrees score; chain products and composites are excluded",
+      "status": "REJECTED"
+    },
+    {
+      "control": "inflated-degree",
+      "reason": "FAIL",
+      "status": "REJECTED"
+    },
+    {
+      "control": "source",
+      "reason": "FAIL",
+      "status": "REJECTED"
+    },
+    {
+      "control": "kernel",
+      "reason": "FAIL",
+      "status": "REJECTED"
+    },
+    {
+      "control": "map",
+      "reason": "FAIL",
+      "status": "REJECTED"
+    },
+    {
+      "control": "compact-only",
+      "reason": "FAIL",
+      "status": "REJECTED"
+    },
+    {
+      "control": "traversal",
+      "reason": "use the constructor's canonical curve label",
+      "status": "REJECTED"
+    },
+    {
+      "control": "missing-hash",
+      "reason": "construction bytes differ from receipt hashes",
+      "status": "REJECTED"
+    }
+  ],
+  "replay_models": 47,
+  "resource_stress_accepted": 20,
+  "resource_stress_censored": 0,
+  "resource_stress_count": 20,
+  "schema": "isogeny-degree-challenge-audit/v1",
+  "season": "19f4503758a3dc2d9764f2283b4c92c7a35651e75ee7157f546b2563fcbf5c30",
+  "short_budget_control": {
+    "reason": "TIMEOUT",
+    "score": null,
+    "status": "CENSORED"
+  },
+  "shortlisted_candidates": 157,
+  "source_commit": "ff71f577203179760211cdc1dc3da7a33fc77ec1",
+  "starting_curve_rows": [
+    {
+      "coverage": "PARTIAL",
+      "map_count": 1,
+      "map_sha256": "aff763af2e9adb95765a7f29223aed7dc46c81f488301a3ba06db10de5595f29",
+      "prime_degree": "10453",
+      "source_icv1": "icv1-fp192-t31607402316713927207482677199-52e4af59",
+      "targets": [
+        "icv1-fp192-t31607402316713927207482677199-e2f29854"
+      ]
+    },
+    {
+      "coverage": "PARTIAL",
+      "map_count": 1,
+      "map_sha256": "ecf1109dbff2a72000fd84d9939127db68e2287e55e4ec10d143229874c230c8",
+      "prime_degree": "1471",
+      "source_icv1": "icv1-fp224-t4733100108545601916421827343930821-fec01e99",
+      "targets": [
+        "icv1-fp224-t4733100108545601916421827343930821-5a35f6f7"
+      ]
+    },
+    {
+      "coverage": "COMPLETE",
+      "map_count": 2,
+      "map_sha256": "ddaf6a6c08b7b588952ef0dbbc256edf75316dbcef21b9196a5172336055a9c6",
+      "prime_degree": "7",
+      "source_icv1": "icv1-fp521-t657877501894328237357444332315020117536923257219387276263472201219398408051703-f767e0d1",
+      "targets": [
+        "icv1-fp521-t657877501894328237357444332315020117536923257219387276263472201219398408051703-5014bab6",
+        "icv1-fp521-t657877501894328237357444332315020117536923257219387276263472201219398408051703-e804740d"
+      ]
+    }
+  ],
+  "status": "PASS",
+  "timing_claim": null,
+  "unavailable_replay_models": 7,
+  "verified_source_rows": 2
+}

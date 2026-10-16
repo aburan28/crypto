@@ -1,0 +1,50 @@
+name: N83 opt-in 30-bit indexed root state
+
+on:
+  push:
+    branches: [codex/n83-indexed5-id30-20261016]
+    paths:
+      - examples/koblitz_orbit_dlp_fast.rs
+      - research/n83_indexed5_id30_20261016/**
+      - .github/workflows/n83-indexed5-id30.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-root-example:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check formatting and exact-root example tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustfmt --check --edition 2021 examples/koblitz_orbit_dlp_fast.rs
+          cargo test --release --locked --example koblitz_orbit_dlp_fast
+
+  state-id-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache the pinned Lean toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan/toolchains
+          key: ${{ runner.os }}-n83-id30-lean-${{ hashFiles('research/n83_indexed5_id30_20261016/lean-toolchain') }}
+      - name: Check round trip, capacity bound and axioms
+        shell: bash
+        working-directory: research/n83_indexed5_id30_20261016
+        run: |
+          set -euo pipefail
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/n83-id30-elan-init.sh
+          sh /tmp/n83-id30-elan-init.sh -y --default-toolchain none
+          export PATH="$HOME/.elan/bin:$PATH"
+          lean StateId30Capacity.lean > /tmp/n83-id30-proof-check.log
+          diff -u proof_check.log /tmp/n83-id30-proof-check.log
+          if rg -n '\b(sorry|admit|sorryAx)\b' StateId30Capacity.lean; then
+            exit 1
+          fi
