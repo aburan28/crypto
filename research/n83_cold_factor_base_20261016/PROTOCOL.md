@@ -74,3 +74,9 @@ rho's same-point online interval beside each IC online interval; a promoted
 Tier 1 speedup still requires alternating same-point pairs and the tier's
 calibration gate. Operation-normalized `S` requires a complete operation
 counter and conversion boundary in the confirmation run.
+
+The verifier exits successfully when at least one complete arm and the rho
+answer independently replay, and every remaining arm has either replayed or
+recorded its timeout. Its `evidence_status` reports this integrity check.
+The separate `status` remains `BOUNDED_UNKNOWN` if any arm times out or the
+A/A noise gate fails; workflow success does not select a factor base.

@@ -251,6 +251,10 @@ def main():
                 and rho["status"] == "PASS_INDEPENDENT_REPLAY"
                 and rho["resources"]["status"] == "PASS"
                 and aa is not None and aa["status"] == "PASS_10_PERCENT")
+    evidence_valid = (len(accepted) > 0
+                      and all(row["status"] in ("PASS_INDEPENDENT_REPLAY", "TIMEOUT")
+                              for row in arms)
+                      and rho["status"] == "PASS_INDEPENDENT_REPLAY")
     cold_by_pipeline = {}
     if len(accepted) == len(runner.ARMS):
         for row in accepted:
@@ -266,6 +270,8 @@ def main():
         "workload_role": "one_fresh_public_point_cold_factor_base_screen",
         "target_count": 1, "arm_order": source["arm_order"],
         "status": "SCREEN_COMPLETE" if complete else "BOUNDED_UNKNOWN",
+        "evidence_status": ("PASS_INDEPENDENT_REPLAY" if evidence_valid
+                            else "VERIFICATION_FAILED"),
         "selected_factor_base": None,
         "descriptive_cold_process_ms_by_pipeline": cold_by_pipeline,
         "confirmation_candidates": ranked[:2] if complete else [],
@@ -275,7 +281,7 @@ def main():
     (output / "analysis.json").write_text(json.dumps(analysis, indent=2,
                                                     sort_keys=True) + "\n")
     print(json.dumps(analysis, sort_keys=True))
-    return 0 if complete else 1
+    return 0 if evidence_valid else 1
 
 
 if __name__ == "__main__":
