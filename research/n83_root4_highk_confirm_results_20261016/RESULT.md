@@ -57,7 +57,8 @@ contiguous 25-point blocks 10,000 times with its frozen seeds.
 executed source commit `adf9ca9b254ac7de8bb777446e74788d25e369a8`.
 Artifact `12021760871` ZIP SHA-256 is
 `4a752ba2910ef52773de7128d933df9c7e8f7aad36c6eda3a561f921041d0a78`,
-matching GitHub's artifact digest. Its cloud `analysis.json` SHA-256 is
+matching GitHub's artifact digest. The cloud checker and separate local
+independent replay produced the same `analysis.json` SHA-256,
 `eb212870d61ddeaab1e5e18f6b7a95ffc83d16ee9dafc5c3986ad705d208c6f6`.
 The archived ZIP and raw receipts live at
 `/Volumes/SSD990-2/n83-archive-20261015/raw/n83-root4-highk-confirm-38835419672`.
