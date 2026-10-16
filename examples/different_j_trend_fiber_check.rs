@@ -208,7 +208,13 @@ fn main() {
     let p = receipt["p"].as_u64().unwrap();
     let r = receipt["r"].as_u64().unwrap();
     let h = receipt["h"].as_u64().unwrap();
-    assert!([(409, 433, 387), (421, 457, 387), (457, 421, 495)].contains(&(p, r, h)));
+    assert!([
+        (409, 433, 387),
+        (421, 457, 387),
+        (457, 421, 495),
+        (1237, 1201, 1275)
+    ]
+    .contains(&(p, r, h)));
     let nu = (2..p)
         .find(|&n| {
             let candidate = Field { p, nu: n };

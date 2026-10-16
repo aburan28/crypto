@@ -10,7 +10,13 @@ use serde_json::{json, Value};
 type E = [u64; 2];
 static CELL: OnceLock<(u64, u64, u64)> = OnceLock::new();
 fn set_cell(p: u64, r: u64, h: u64) {
-    assert!([(409, 433, 387), (421, 457, 387), (457, 421, 495)].contains(&(p, r, h)));
+    assert!([
+        (409, 433, 387),
+        (421, 457, 387),
+        (457, 421, 495),
+        (1237, 1201, 1275)
+    ]
+    .contains(&(p, r, h)));
     assert!(CELL.set((p, r, h)).is_ok());
 }
 fn p() -> u64 {

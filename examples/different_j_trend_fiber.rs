@@ -83,7 +83,13 @@ fn main() {
     let p: u64 = args[2].parse().unwrap();
     let r: u64 = args[3].parse().unwrap();
     let h: u64 = args[4].parse().unwrap();
-    assert!([(409, 433, 387), (421, 457, 387), (457, 421, 495)].contains(&(p, r, h)));
+    assert!([
+        (409, 433, 387),
+        (421, 457, 387),
+        (457, 421, 495),
+        (1237, 1201, 1275)
+    ]
+    .contains(&(p, r, h)));
     let wall = Instant::now();
     let f = Fp2::new(p).unwrap();
     let src = Curve {
