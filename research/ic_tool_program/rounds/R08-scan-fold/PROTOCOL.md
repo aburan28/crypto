@@ -254,8 +254,11 @@ accepted, the candidate becomes **v6**.
   `31982fde53e6e6aa536c9981d5d2d7c15709a08331d4c2b31ddf93d14a51eddc`
   (from local commit `ab211e39`, tree `6896b5c8`).
 - **The candidate:** v5 plus `candidate-v5.patch`, built with
-  `rustc 1.97.0` and main's lock. SHA-256 recorded here, and in the
-  manifest, before the first step runs.
+  `rustc 1.97.0` and main's lock. SHA-256
+  `4ccb1951134ff31b5183fc00033933b9add2e3c0c52003f9041fd04bac1f4012`,
+  from local commit `3d4c5c0ef88057e8ece09dcc91e8fad4ff7e781a`. The tests
+  passed on its tree (206 of 206, among them the three above;
+  [`tests.log`](tests.log)).
 
 **Everything else stands as declared:**
 - the tests (`cargo test --release --locked --lib -- koblitz_fast
