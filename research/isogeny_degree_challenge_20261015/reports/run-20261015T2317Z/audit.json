@@ -1,0 +1,81 @@
+{
+  "anchor_attempt_statuses": [],
+  "binary_sha256": "dc1c9fde4cc45d80631e01ec14b211b58db2206aa4def8ac3f727463df899638",
+  "candidate_degree_interval": [
+    10454,
+    65537
+  ],
+  "command_count": 15,
+  "construction_models": 47,
+  "forged_score_rejected": true,
+  "known_answer_controls": [
+    {
+      "prime_degree": "13",
+      "source_icv1": "icv1-fp192-t31607402316713927207482677199-52e4af59",
+      "status": "ACCEPTED"
+    },
+    {
+      "prime_degree": "7",
+      "source_icv1": "icv1-fp521-t657877501894328237357444332315020117536923257219387276263472201219398408051703-f767e0d1",
+      "status": "ACCEPTED"
+    }
+  ],
+  "new_discovery_count": 0,
+  "registered_prime_models": 54,
+  "rejected_mutations": [
+    {
+      "control": "composite",
+      "reason": "only odd prime degrees score; chain products and composites are excluded",
+      "status": "REJECTED"
+    },
+    {
+      "control": "inflated-degree",
+      "reason": "FAIL",
+      "status": "REJECTED"
+    },
+    {
+      "control": "source",
+      "reason": "FAIL",
+      "status": "REJECTED"
+    },
+    {
+      "control": "kernel",
+      "reason": "FAIL",
+      "status": "REJECTED"
+    },
+    {
+      "control": "map",
+      "reason": "FAIL",
+      "status": "REJECTED"
+    },
+    {
+      "control": "compact-only",
+      "reason": "FAIL",
+      "status": "REJECTED"
+    },
+    {
+      "control": "traversal",
+      "reason": "use the constructor's canonical curve label",
+      "status": "REJECTED"
+    },
+    {
+      "control": "missing-hash",
+      "reason": "construction bytes differ from receipt hashes",
+      "status": "REJECTED"
+    }
+  ],
+  "replay_models": 47,
+  "resource_stress_accepted": 0,
+  "resource_stress_censored": 0,
+  "resource_stress_count": 0,
+  "schema": "isogeny-degree-challenge-audit/v1",
+  "season": "a3c89b0d55e5dafa1efb7da649a515d3c593da303afa78c154b60a29757088c0",
+  "short_budget_control": null,
+  "shortlisted_candidates": 157,
+  "source_commit": "7e96187d3b819ecb6b5554d2024260bfe9eb0cba",
+  "starting_curve_rows": [],
+  "status": "PASS",
+  "timing_claim": null,
+  "unavailable_replay_models": 7,
+  "verified_source_rows": 2
+}

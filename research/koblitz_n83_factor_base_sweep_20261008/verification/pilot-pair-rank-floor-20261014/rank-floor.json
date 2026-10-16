@@ -1,0 +1,201 @@
+{
+  "admissible_pair_count": 558,
+  "all_pair_shape_floors_sha256": "7d0c56c1e3878d8bac2d5af5b5fff23788d48fc875a7816bbbbf25fb61dc34f2",
+  "new_n83_solver_search_executed": false,
+  "pair_shape_count": 2232,
+  "parent_support_sha256": "2c2229b9bfc78935cbc6c3ca7c6612f8fade2a40a0e0592f93a99b855d41dd45",
+  "proof_scope": {
+    "K": "hypothetical independent-row goal equal to small-base orbit-column count, not a proof that every one-target algorithm needs K rows",
+    "decomposition_count": "each point multiset contributes at most one folded relation row; rank cannot exceed decomposition count",
+    "excluded": [
+      "nonuniform or target-adaptive query schedules",
+      "additional relation sources or combined search shapes",
+      "observed yield, useful rank or solver throughput",
+      "a cold-runtime or factor-base winner"
+    ],
+    "floor": "ceil(K*(r-1)/(2*M)) queries are necessary before this upper bound permits probability one half",
+    "markov": "Pr(at least K decompositions after A queries) <= min(1,A*M/((r-1)*K))",
+    "query_law": "each query has a uniform nonidentity marginal conditional on fixed archived domains; independence between queries is unnecessary"
+  },
+  "schema": "n83.pilot-pair-K-decomposition-query-floor/v1",
+  "selected_best_total_runtime": null,
+  "selected_same_base_contrast": [
+    {
+      "base_object_blake3": "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0",
+      "base_orbits": 600,
+      "base_policy": "public_x_sequential",
+      "base_seed": 2026100802,
+      "half_K_decomposition_query_floor": 33975,
+      "pool_object_blake3": "966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47",
+      "pool_orbits": 600,
+      "pool_policy": "public_x_gray_prefix",
+      "pool_seed": 2026100801,
+      "residual_orbits": 97,
+      "residual_summands": 2,
+      "summands": 5
+    },
+    {
+      "base_object_blake3": "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0",
+      "base_orbits": 600,
+      "base_policy": "public_x_sequential",
+      "base_seed": 2026100802,
+      "half_K_decomposition_query_floor": 889,
+      "pool_object_blake3": "b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e",
+      "pool_orbits": 600,
+      "pool_policy": "public_x_hash",
+      "pool_seed": 2026100801,
+      "residual_orbits": 600,
+      "residual_summands": 2,
+      "summands": 5
+    }
+  ],
+  "shape_and_K_summaries": [
+    {
+      "desired_decompositions_K": 64,
+      "lower_median_query_floor": 3428036,
+      "maximum_query_floor": 438788556,
+      "minimum_query_floor": 1462629,
+      "pair_count": 206,
+      "pairs_with_floor_at_least_100": 206,
+      "pairs_with_floor_at_least_1000": 206,
+      "residual_summands": 1,
+      "summands": 5,
+      "upper_median_query_floor": 3428036
+    },
+    {
+      "desired_decompositions_K": 256,
+      "lower_median_query_floor": 53586,
+      "maximum_query_floor": 6858976,
+      "minimum_query_floor": 22864,
+      "pair_count": 186,
+      "pairs_with_floor_at_least_100": 186,
+      "pairs_with_floor_at_least_1000": 186,
+      "residual_summands": 1,
+      "summands": 5,
+      "upper_median_query_floor": 53586
+    },
+    {
+      "desired_decompositions_K": 600,
+      "lower_median_query_floor": 4163,
+      "maximum_query_floor": 532796,
+      "minimum_query_floor": 1776,
+      "pair_count": 166,
+      "pairs_with_floor_at_least_100": 166,
+      "pairs_with_floor_at_least_1000": 166,
+      "residual_summands": 1,
+      "summands": 5,
+      "upper_median_query_floor": 4163
+    },
+    {
+      "desired_decompositions_K": 64,
+      "lower_median_query_floor": 428616,
+      "maximum_query_floor": 7001510487,
+      "minimum_query_floor": 78029,
+      "pair_count": 206,
+      "pairs_with_floor_at_least_100": 206,
+      "pairs_with_floor_at_least_1000": 206,
+      "residual_summands": 2,
+      "summands": 5,
+      "upper_median_query_floor": 428616
+    },
+    {
+      "desired_decompositions_K": 256,
+      "lower_median_query_floor": 26795,
+      "maximum_query_floor": 437687082,
+      "minimum_query_floor": 4878,
+      "pair_count": 186,
+      "pairs_with_floor_at_least_100": 186,
+      "pairs_with_floor_at_least_1000": 186,
+      "residual_summands": 2,
+      "summands": 5,
+      "upper_median_query_floor": 26795
+    },
+    {
+      "desired_decompositions_K": 600,
+      "lower_median_query_floor": 4878,
+      "maximum_query_floor": 79681727,
+      "minimum_query_floor": 889,
+      "pair_count": 166,
+      "pairs_with_floor_at_least_100": 166,
+      "pairs_with_floor_at_least_1000": 124,
+      "residual_summands": 2,
+      "summands": 5,
+      "upper_median_query_floor": 4878
+    },
+    {
+      "desired_decompositions_K": 64,
+      "lower_median_query_floor": 1613,
+      "maximum_query_floor": 206431,
+      "minimum_query_floor": 689,
+      "pair_count": 206,
+      "pairs_with_floor_at_least_100": 206,
+      "pairs_with_floor_at_least_1000": 134,
+      "residual_summands": 1,
+      "summands": 6,
+      "upper_median_query_floor": 1613
+    },
+    {
+      "desired_decompositions_K": 256,
+      "lower_median_query_floor": 7,
+      "maximum_query_floor": 807,
+      "minimum_query_floor": 3,
+      "pair_count": 186,
+      "pairs_with_floor_at_least_100": 7,
+      "pairs_with_floor_at_least_1000": 0,
+      "residual_summands": 1,
+      "summands": 6,
+      "upper_median_query_floor": 7
+    },
+    {
+      "desired_decompositions_K": 600,
+      "lower_median_query_floor": 1,
+      "maximum_query_floor": 27,
+      "minimum_query_floor": 1,
+      "pair_count": 166,
+      "pairs_with_floor_at_least_100": 0,
+      "pairs_with_floor_at_least_1000": 0,
+      "residual_summands": 1,
+      "summands": 6,
+      "upper_median_query_floor": 1
+    },
+    {
+      "desired_decompositions_K": 64,
+      "lower_median_query_floor": 162,
+      "maximum_query_floor": 2635367,
+      "minimum_query_floor": 30,
+      "pair_count": 206,
+      "pairs_with_floor_at_least_100": 134,
+      "pairs_with_floor_at_least_1000": 62,
+      "residual_summands": 2,
+      "summands": 6,
+      "upper_median_query_floor": 162
+    },
+    {
+      "desired_decompositions_K": 256,
+      "lower_median_query_floor": 3,
+      "maximum_query_floor": 41196,
+      "minimum_query_floor": 1,
+      "pair_count": 186,
+      "pairs_with_floor_at_least_100": 30,
+      "pairs_with_floor_at_least_1000": 3,
+      "residual_summands": 2,
+      "summands": 6,
+      "upper_median_query_floor": 3
+    },
+    {
+      "desired_decompositions_K": 600,
+      "lower_median_query_floor": 1,
+      "maximum_query_floor": 3200,
+      "minimum_query_floor": 1,
+      "pair_count": 166,
+      "pairs_with_floor_at_least_100": 22,
+      "pairs_with_floor_at_least_1000": 4,
+      "residual_summands": 2,
+      "summands": 6,
+      "upper_median_query_floor": 1
+    }
+  ],
+  "source_sha256": "9e9770203a1b54aa2cb2c522520aeb3ff56078e5c83e8e53f2bc5e2ce39d8521",
+  "status": "EXACT_CONDITIONAL_MARKOV_FLOOR",
+  "subgroup_order": "2417851639230796216685689"
+}

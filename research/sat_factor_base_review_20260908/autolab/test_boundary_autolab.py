@@ -1179,5 +1179,107 @@ class SingleTargetPanelTests(unittest.TestCase):
 
 
 
+
+
+class EqualAdviceBlTests(unittest.TestCase):
+    BEAT = "koblitz.compact_orbit.n61_bl_reference"
+
+    def setUp(self) -> None:
+        self.protocol = lab.load_protocol()
+        self.ledger = lab.load_ledger(self.protocol)
+        self.beat = self.protocol["beats"][self.BEAT]
+
+    def test_bl_reference_beat_is_diagnostic_only(self) -> None:
+        self.assertEqual(self.beat["launch_mode"], "equal_advice_bl")
+        self.assertEqual(self.beat["stage"], "vs_rho")
+        self.assertTrue(self.beat["diagnostic_only"])
+        self.assertFalse(self.beat["primary_speedup_eligible"])
+        self.assertGreaterEqual(self.beat["targets_minimum"], 1024)
+        self.assertEqual(self.beat["panel_producers"]["bl"]["example"], "ic_next10_09_equal_advice")
+        rows = {row["beat_id"]: row for row in lab.plan(self.protocol, self.ledger)["beats"]}
+        self.assertFalse(rows[self.BEAT]["primary_speedup_eligible"])
+        self.assertIn("n61_bl_reference", lab.plan(self.protocol, self.ledger)["commands"])
+
+    def test_launch_and_panel_reject_equal_advice_beat(self) -> None:
+        args = lab.parser().parse_args(["launch", "--beat", self.BEAT])
+        with self.assertRaisesRegex(lab.AutolabError, "launch-equal-advice"):
+            lab.launch(args)
+        args = lab.parser().parse_args(["launch-panel", "--beat", self.BEAT])
+        with self.assertRaisesRegex(lab.AutolabError, "not a batch panel"):
+            lab.launch_panel(args)
+
+    def test_prepare_only_scaffolds_fail_closed_claim(self) -> None:
+        run_id = f"test-bl-ref-prepare-{lab.now().replace(':', '').replace('+', '')}"
+        args = lab.parser().parse_args([
+            "launch-equal-advice",
+            "--beat", self.BEAT,
+            "--run-id", run_id,
+            "--prepare-only",
+        ])
+        state = lab.launch_equal_advice(args)
+        self.assertEqual(state["status"], "PREPARE_ONLY")
+        run = lab.RUNS_DIR / run_id
+        draft = lab.read_json(run / "artifacts/claim_draft.json")
+        check = lab.read_json(run / "artifacts/claim_check.json")
+        self.assertEqual(draft["status"], "SCHEMA_INCOMPLETE")
+        self.assertEqual(check["status"], "FAIL")
+        self.assertTrue((run / "artifacts/commands.json").is_file())
+
+    def test_prepare_only_pair_ic_reuses_archive_pin(self) -> None:
+        archive = (
+            lab.HERE
+            / "evidence"
+            / "20261016-n61-bl-reference-l1024"
+            / "20261016T063525Z-842e1c174e"
+        )
+        self.assertTrue((archive / "logs" / "bl.jsonl").is_file())
+        run_id = f"test-bl-pair-prepare-{lab.now().replace(':', '').replace('+', '')}"
+        args = lab.parser().parse_args([
+            "launch-equal-advice",
+            "--beat", self.BEAT,
+            "--run-id", run_id,
+            "--prepare-only",
+            "--pair-ic",
+            "--reuse-bl-archive", str(archive),
+            "--ic-k", "256",
+            "--ic-target-count", "1",
+        ])
+        state = lab.launch_equal_advice(args)
+        self.assertEqual(state["status"], "PREPARE_ONLY")
+        self.assertTrue(state["pair_ic"])
+        commands = lab.read_json(lab.RUNS_DIR / run_id / "artifacts/commands.json")
+        self.assertIn("ic", commands)
+        self.assertEqual(self.beat.get("ic_k_default"), 256)
+
+    def test_equal_advice_pair_helpers_pin_archive(self) -> None:
+        import equal_advice_pair
+
+        archive = (
+            lab.HERE
+            / "evidence"
+            / "20261016-n61-bl-reference-l1024"
+            / "20261016T063525Z-842e1c174e"
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            run = Path(tmp) / "run"
+            pin = equal_advice_pair.materialize_bl_archive(
+                archive=archive,
+                run=run,
+                lab=lab,
+                targets=1024,
+                table_bytes=5711008,
+            )
+            self.assertEqual(pin["targets"], 1024)
+            self.assertFalse(pin["remeasured"])
+            self.assertEqual(
+                pin["points_sha256"],
+                lab.sha256(archive / "inputs" / "points.txt"),
+            )
+            self.assertEqual(
+                pin["bl_jsonl_sha256"],
+                lab.sha256(archive / "logs" / "bl.jsonl"),
+            )
+
+
 if __name__ == "__main__":
     unittest.main()

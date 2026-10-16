@@ -1,0 +1,85 @@
+name: N83 three-pipeline end-to-end factor-base comparison
+
+on:
+  push:
+    branches: [codex/n83-best-e2e-20261015]
+    paths:
+      - .github/workflows/n83-best-e2e.yml
+      - research/n83_best_e2e_20261015/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: n83-best-e2e-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  six-arm-pipeline-confirmation:
+    if: github.repository == 'aburan28/crypto'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Freeze 4000 new public points and source preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/n83-best-e2e"
+          python3 research/n83_k3250_sparse_fresh_20261015/generate.py > \
+            "$RUNNER_TEMP/n83-best-e2e/prior-fixture-check.json"
+          python3 research/n83_k3350_sparse_fresh_20261015/generate.py > \
+            "$RUNNER_TEMP/n83-best-e2e/prior-k3350-fixture-check.json"
+          python3 research/n83_k_abba_20261015/generate.py > \
+            "$RUNNER_TEMP/n83-best-e2e/prior-abba-fixture-check.json"
+          python3 research/n83_root4_highk_20261015/generate.py > \
+            "$RUNNER_TEMP/n83-best-e2e/prior-highk-fixture-check.json"
+          python3 research/n83_best_e2e_20261015/generate.py > \
+            "$RUNNER_TEMP/n83-best-e2e/fixture-check.json"
+          python3 research/n83_best_e2e_20261015/run.py --preflight > \
+            "$RUNNER_TEMP/n83-best-e2e/preflight.json"
+          rustc --version > "$RUNNER_TEMP/n83-best-e2e/rustc-version.txt"
+          cargo --version > "$RUNNER_TEMP/n83-best-e2e/cargo-version.txt"
+
+      - name: Build and test exact N83 producer
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-best-e2e-target"
+          export CARGO_BUILD_JOBS=2
+          cargo test --release --locked --example koblitz_orbit_dlp_fast > \
+            "$RUNNER_TEMP/n83-best-e2e/example-tests.log" 2>&1
+          cargo build --release --locked --example koblitz_orbit_dlp_fast > \
+            "$RUNNER_TEMP/n83-best-e2e/build.log" 2>&1
+
+      - name: Run six bounded complete pipeline arms
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-best-e2e-target"
+          python3 research/n83_best_e2e_20261015/run.py \
+            --binary "$CARGO_TARGET_DIR/release/examples/koblitz_orbit_dlp_fast" \
+            --output "$RUNNER_TEMP/n83-best-e2e/results" \
+            2>&1 | tee "$RUNNER_TEMP/n83-best-e2e/run.log"
+
+      - name: Independently replay six bases and all 24000 targets
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -d "$RUNNER_TEMP/n83-best-e2e/results" ]; then
+            python3 research/n83_best_e2e_20261015/verify.py \
+              "$RUNNER_TEMP/n83-best-e2e/results" \
+              2>&1 | tee "$RUNNER_TEMP/n83-best-e2e/verify.log"
+          fi
+
+      - name: Preserve all raw rows and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-best-e2e-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-best-e2e/
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,40 @@
+{
+  "elapsed_ms_operational_only": 0,
+  "error": "LL recurrence digest mismatch",
+  "input_sha256": "6a36ebbfd479aca3f233a7210a1276a9a1f760fd665a22263d09f2e84d959106",
+  "resources": {
+    "command": [
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/compact-implementation/release/isogeny",
+      "compact-cm",
+      "__worker",
+      "verify",
+      "--input",
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/compact-controls-final-v1/ll-states_sha256.json",
+      "--out",
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/compact-controls-final-v1/judged-ll-states_sha256/artifact",
+      "--rss-ready",
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/compact-controls-final-v1/judged-ll-states_sha256/resources-ready"
+    ],
+    "elapsed_ms_operational_only": 26,
+    "exit_code": 1,
+    "map_count": null,
+    "memory_monitor_grace_ms": 100,
+    "memory_sampling_interval_ms": 25,
+    "resident_memory_limit_bytes": "8589934592",
+    "sampled_peak_resident_bytes": "32768",
+    "status": "FAIL",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout": "native.json",
+    "stdout_sha256": "3fa7c8dd6413c63e47545fc104aea5599b2af24bcd007e8f389cda8e84c771b6",
+    "unavailable_memory_samples": 0
+  },
+  "score": null,
+  "status": "REJECTED",
+  "tool": {
+    "git_commit": "300e867ca999a7506c2a52bf192df424b758010f",
+    "git_dirty": "true",
+    "name": "isogeny",
+    "standards_sha256": "22b2ffef99720f2b2c7396a267412d2241a868e038a835c4fb1fd12209b102bf",
+    "version": "0.1.0"
+  }
+}
