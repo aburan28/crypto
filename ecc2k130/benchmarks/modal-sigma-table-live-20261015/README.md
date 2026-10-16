@@ -53,3 +53,19 @@ the launchers saved here use the existing call state and uploader offset state
 under `/Volumes/SSD990-2/cryptanalysis/ecc2k130/runner/research/production/2026-10-15-modal-restart-runtime/`.
 
 No attack-cost or end-to-end performance claim is made from this rollout.
+
+## Local release test gate
+
+The first `cargo test --release --lib` run finished with 4,116 passed, 13
+failed and 117 ignored. Nine Pollard collaboration tests failed because this
+sandbox refused local socket operations (`Operation not permitted`). Four
+isogeny-cover tests timed out while the suite ran concurrently. The original
+output is retained in `release-suite.log`; the full-suite outcome is failed.
+
+The Pollard collaboration group was rerun with loopback access and one test
+thread: 37 passed. The isogeny-cover group was rerun with one test thread:
+14 passed and one intentionally ignored, including all four original timeout
+failures. The exact rerun outputs are `release-pollard-collab-rerun.log` and
+`release-jv-cover-rerun.log`. `release-test-receipt.json` records the commands,
+outcomes and scope. These reruns explain the 13 failures but do not turn the
+original parallel, sandboxed full-suite run into a green result.
