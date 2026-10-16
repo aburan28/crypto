@@ -72,6 +72,7 @@ use std::collections::BTreeMap;
 use std::time::{Duration, Instant};
 
 use super::stages::{BooleanSystem, Params, SolverCost, SolverVerdict, SystemShape, SystemSolver};
+use crate::cryptanalysis::bitop_tally;
 use crate::cryptanalysis::koblitz_groebner::{
     f4_word_ops_thread, solve_boolean_system, SolveOptions, SolverEngine, SplitRule,
 };
@@ -163,6 +164,7 @@ impl SystemSolver for F4F2 {
         budget: Option<Duration>,
     ) -> (SolverVerdict, SolverCost) {
         let started = Instant::now();
+        let tally_before = bitop_tally::snapshot();
         let (gb, st) = groebner_basis_f4(system.equations.clone(), system.n_vars, budget);
         let mut tests = 0u64;
         let mut extra = BTreeMap::new();
@@ -276,6 +278,15 @@ impl SystemSolver for F4F2 {
             }
         };
         cost.extra.insert("extraction_tests".into(), tests);
+        // The whole run in `bitop/v1` primitives: the XORs the eliminations
+        // performed (M4RI tables included), every other word operation and
+        // hash probe `pq_f4_f2` tallies (products, symbolic preprocessing,
+        // pair selection, column sort and index, packing, lead scans,
+        // read-back, interreduction), and the extraction's monomial tests,
+        // one word operation each.
+        bitop_tally::snapshot()
+            .since(tally_before)
+            .put_complete(&mut cost.extra, st.word_xors_performed + tests);
         cost.wall_ns = started.elapsed().as_nanos() as u64;
         (verdict, cost)
     }
@@ -390,11 +401,21 @@ impl SystemSolver for HybridF4 {
         // another's.
         let resolved = opts.resolve();
         let before = f4_word_ops_thread();
+        let tally_before = bitop_tally::snapshot();
         let (points, st) = solve_boolean_system(&system.equations, system.n_vars, &opts);
         let ops = f4_word_ops_thread().wrapping_sub(before);
         let mut tests = 0u64;
         let points = verified(points, system, &mut tests);
         let mut extra = BTreeMap::new();
+        // The whole run in `bitop/v1` primitives: the engine's word XORs
+        // (`ops`), every other word operation and hash probe the splitting
+        // solve tallied (Macaulay builds, column sorts and indexes,
+        // packing, pivot searches, read-back, substitutions and scans, the
+        // inherited bases' layouts), and the verification's monomial
+        // tests, a word operation each.
+        bitop_tally::snapshot()
+            .since(tally_before)
+            .put_complete(&mut extra, ops + tests);
         for (k, v) in [
             ("reductions", st.reductions as u64),
             ("infeasible_branches", st.infeasible_branches as u64),
@@ -1326,6 +1347,48 @@ mod tests {
             assert!(!cost.op_unit.is_empty());
         }
         answered
+    }
+
+    /// **The F4 family counts its whole run** in `bitop/v1` primitives
+    /// (`bitop_complete = 1`), more than its native unit, and the count is
+    /// a function of the system: the same on a fresh thread (the engines'
+    /// layout and template caches are per thread, as in a replay).
+    #[test]
+    fn the_f4_family_reports_its_whole_run() {
+        use rand::SeedableRng;
+        let mut rng = rand::rngs::StdRng::seed_from_u64(20261016);
+        let sys = random_quadratic(10, 9, &mut rng);
+        for name in ["f4-f2", "matrix-f4", "matrix-f5", "inherited-f4"] {
+            let run = || {
+                let sys = sys.clone();
+                std::thread::spawn(move || {
+                    let solver = solver_registry()
+                        .into_iter()
+                        .find(|s| s.name() == name)
+                        .expect("registered");
+                    solver.solve(&sys, &Params::default(), None).1
+                })
+                .join()
+                .unwrap()
+            };
+            let (a, b) = (run(), run());
+            assert_eq!(a.extra.get("bitop_complete"), Some(&1), "{name}");
+            let bitops = |c: &SolverCost| -> Vec<(String, u64)> {
+                c.extra
+                    .iter()
+                    .filter(|(k, _)| k.starts_with("bitop_"))
+                    .map(|(k, v)| (k.clone(), *v))
+                    .collect()
+            };
+            assert_eq!(bitops(&a), bitops(&b), "{name} is deterministic");
+            assert!(
+                a.extra["bitop_word_ops"] > a.ops,
+                "{name}: {} word operations against {} {}",
+                a.extra["bitop_word_ops"],
+                a.ops,
+                a.op_unit
+            );
+        }
     }
 
     /// **The new engines against the reference, on random quadratic

@@ -175,6 +175,10 @@ fn rank_row_basis_with_config(
     let reuse_table = std::env::var("KIC_GF2_REUSE_TABLE").as_deref() == Ok("1");
     let mut table = Vec::new();
     let mut rank = 0usize;
+    // `bitop/v1` word operations besides the XORs `word_ops` counts: the
+    // tests of the candidate search, the swaps and the reordering of each
+    // block (`clear_block` charges its own patterns)
+    let mut aux = 0u64;
 
     for word in 0..words {
         if rank == rows {
@@ -195,6 +199,8 @@ fn rank_row_basis_with_config(
             let mut candidate = rank;
             let mut pivot_bits = Vec::<u32>::with_capacity(block_cap);
             while candidate < rows && pivot_bits.len() < block_cap {
+                // the candidate's word, one test a pivot bit so far
+                aux += 1 + pivot_bits.len() as u64;
                 let mut value = matrix[candidate][word] & valid_mask;
                 for (offset, &bit) in pivot_bits.iter().enumerate() {
                     if value >> bit & 1 != 0 {
@@ -216,6 +222,7 @@ fn rank_row_basis_with_config(
                         }
                     }
                     debug_assert!(matrix[rank][word] >> bit & 1 != 0);
+                    aux += 1 + pivot_bits.len() as u64 + (rank - start) as u64;
                     // Keep block pivot rows mutually reduced on their bits.
                     for previous in start..rank {
                         if matrix[previous][word] >> bit & 1 != 0 {
@@ -235,6 +242,8 @@ fn rank_row_basis_with_config(
             // clear_block indexes pivot rows in increasing pivot-column
             // order. Swapping Vec headers leaves their words untouched.
             let mut sorted = pivot_bits.clone();
+            aux += crate::cryptanalysis::bitop_tally::sort_cost(sorted.len())
+                + (sorted.len() * sorted.len()) as u64;
             sorted.sort_unstable();
             for i in 0..pivot_bits.len() {
                 if pivot_bits[i] != sorted[i] {
@@ -267,6 +276,7 @@ fn rank_row_basis_with_config(
             }
         }
     }
+    crate::cryptanalysis::bitop_tally::word_ops(aux);
     rank
 }
 
@@ -403,9 +413,16 @@ fn eliminate_with(
     let (mut pivot_row, mut word) = start.unwrap_or((0, 0));
     // Columns of the current word below `low` are already decided.
     let mut low = 0u32;
+    // `bitop/v1` word operations besides the XORs `word_ops` counts:
+    // loading the strip, every strip word the pivot search reads, the
+    // swaps, the bit tests of the block's earlier pivots, and the strip
+    // clear (one masked XOR a remaining row); `clear_block` and the
+    // deferred tables charge their own pattern extraction
+    let mut aux = rows as u64; // the zeroed strip
     while pivot_row < rows && word < pivot_words {
         let block_start = pivot_row;
         pivot_cols.clear();
+        aux += (rows - block_start) as u64;
         // The strip: each unpivoted row's current word, in reduced form
         // with respect to the (so far empty) block.
         for (s, row) in strip[block_start..].iter_mut().zip(&matrix[block_start..]) {
@@ -423,6 +440,7 @@ fn eliminate_with(
             let mut best = u32::MAX;
             let mut best_row = usize::MAX;
             for (i, &s) in strip[pivot_row..].iter().enumerate() {
+                aux += 1;
                 let v = s & mask;
                 if v != 0 {
                     let tz = v.trailing_zeros();
@@ -440,6 +458,10 @@ fn eliminate_with(
                 break;
             }
             let col = word * 64 + best as usize;
+            aux += 2
+                + pivot_cols.len() as u64
+                + (pivot_row - block_start) as u64
+                + (rows - pivot_row - 1) as u64;
             matrix.swap(pivot_row, best_row);
             strip.swap(pivot_row, best_row);
             // Reduce the new pivot row in full by the block's earlier
@@ -560,10 +582,14 @@ fn eliminate_with(
                         *word_ops += block.apply(row, simd);
                     }
                 }
+                // one pattern gather a row and table applied
+                aux += ((batch[0].0 + batch.iter().map(|b| b.1.len()).sum::<usize>())
+                    * prepared.len()) as u64;
             }
             end = first;
         }
     }
+    crate::cryptanalysis::bitop_tally::word_ops(aux);
     pivot_row
 }
 
@@ -765,6 +791,11 @@ fn clear_block(
     } else {
         &mut []
     };
+    // `bitop/v1`: one pattern gather a target row and one index a table,
+    // charged by this thread whichever threads clear the rows
+    crate::cryptanalysis::bitop_tally::word_ops(
+        ((above.len() + below.len()) * (1 + n_tables)) as u64,
+    );
     if (above.len() + below.len()) * suffix >= config.parallel_words {
         *word_ops += above
             .par_iter_mut()
