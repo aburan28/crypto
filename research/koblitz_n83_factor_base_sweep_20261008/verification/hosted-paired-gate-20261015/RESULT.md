@@ -23,7 +23,8 @@ into the earlier local Linux or macOS timing series.
 
 The revised [manual workflow](../../../../.github/workflows/n83-hosted-paired-gate.yml)
 uses `workflow_dispatch` on the guarded research branch or `main`. It checks
-out a source commit carrying this revision while retaining the frozen Rust
+out source commit `cb98e85d1c1c1afdd5000bc70eea00969ee86c6c`, which carries
+the selector and runner revision while retaining the frozen Rust
 source tree and mathematical plan. It no longer consumes AWS secrets. Instead,
 it builds the checked-in exporter in the pinned image, regenerates the complete
 54-base public pilot in an isolated networkless container, and selects the
@@ -33,6 +34,9 @@ plain BLAKE3 and copy integrity against the frozen manifest. The preparation
 receipt binds the producer commit and workflow-dispatch commit, and the runner
 rejects a mismatched receipt before any worker stage. This is a byte-equivalent
 input route to the three archived S3 objects, whose storage remains separate.
+An independent selector rehearsal against the three live S3 archive bytes
+passed all frozen compressed and plain hashes; the first hosted regeneration
+and search remain to be measured.
 The job then prepares an offline Cargo registry, separately builds each
 arm, verifies the imported signed-orbit domains, and runs one bounded natural
 trial per arm. Each search runs inside a networkless 4 GiB, zero-swap Docker

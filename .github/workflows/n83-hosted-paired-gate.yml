@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: cb98e85d1c1c1afdd5000bc70eea00969ee86c6c
           fetch-depth: 1
       - name: Set task-owned runner paths
         run: |
