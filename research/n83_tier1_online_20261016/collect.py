@@ -38,10 +38,12 @@ def safe_extract(archive, destination):
         for member in bundle.getmembers():
             path = Path(member.name)
             if (path.is_absolute() or ".." in path.parts
-                    or member.issym() or member.islnk()
+                    or not (member.isfile() or member.isdir())
                     or not path.parts or path.parts[0] != "evidence"):
                 raise ValueError(f"unexpected archive member: {member.name}")
-        bundle.extractall(destination, filter="data")
+        # Python 3.9 has no tarfile extraction filter. The member check above
+        # permits only ordinary files and directories inside a new destination.
+        bundle.extractall(destination)
 
 
 def main():
