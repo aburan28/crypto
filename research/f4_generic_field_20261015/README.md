@@ -207,11 +207,13 @@ reference in `D`, width and steps.
 | Kummer m = 4, N = 12 | v₂ = 40 (Fp52) | 7 / 9452 / 29 | 7 / 9452 / 29 (M4) | 5.160·10¹⁰ | 16 s | verify agrees |
 | Kummer m = 4, N = 12 | P-224 (Fp224) | 7 / 9452 / 29 | 7 / 9452 / 29 (M4) | 5.160·10¹⁰ | 383 s | `--verify` ok |
 | Kummer m = 2, N = 20 | P-224 (Fp224) | 6 / 33446 / 24 | 6 / 33446 / 24 (K1) | 4.820·10¹¹ | 3690 s | `--verify` ok |
-| torus m = 2, N = 20 | P-192 | re-running (interrupted twice) | 6 / 33426 / 24 (T31, R1) | | | |
+| torus m = 2, N = 20 | P-192 (FpP192) | 6 / 33426 / 24 | 6 / 33426 / 24 (T31, R1) | 4.789·10¹¹ | 1905 s | `--verify` ok |
 
-All finished extension cells equal their reference in `D`, width and steps
+All eight extension cells equal their reference in `D`, width and steps
 (H_same supported). The P-192 `N = 20` cell was interrupted by container restarts (the engine
-does not checkpoint) and re-run last; see §5.
+does not checkpoint) and re-run last; see §5. At `N = 20` the Kummer
+multiply-add count is again identical at v40, v48, v56 and P-224
+(481,961,879,776).
 
 
 **Reading under PROTOCOL §6.** H_same is supported in every series: no valued

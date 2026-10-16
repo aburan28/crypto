@@ -10,9 +10,9 @@
 | 4222124650659841 | kummer | 3 | tower | 3 | 0 | 0 | H_same supported |  |
 | 4222124650659841 | kummer | 4 | tower | 1 | 0 | 0 | H_same supported |  |
 | P-192 | dickson-torus | 2 | null | 0 | 0 | 9 | not valued |  |
-| P-192 | dickson-torus | 2 | tower | 9 | 0 | 0 | H_same supported |  |
+| P-192 | dickson-torus | 2 | tower | 10 | 0 | 0 | H_same supported |  |
 | P-192 | dickson-torus | 3 | tower | 3 | 0 | 0 | H_same supported |  |
-| P-224 | kummer | 2 | tower | 9 | 0 | 0 | H_same supported |  |
+| P-224 | kummer | 2 | tower | 10 | 0 | 0 | H_same supported |  |
 | P-224 | kummer | 3 | tower | 3 | 0 | 0 | H_same supported |  |
 | P-224 | kummer | 4 | tower | 2 | 0 | 0 | H_same supported |  |
 | P-256 | dickson-torus | 2 | tower | 8 | 0 | 0 | H_same supported |  |

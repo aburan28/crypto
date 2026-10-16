@@ -6,7 +6,7 @@
 # G2: Kummer p2 at Fp32 vs Fp64, Fp52, FpWide<4> (backend ignored)
 ## fp64: 22 rows compared, 0 differences
 ## fp52: 22 rows compared, 0 differences
-## wide4: 22 rows compared, 4 differences
+## wide4: 22 rows compared, 0 differences
 # G4: pkm_tower_check verify on the u64-builder depth rows
 ## depth/kummer-29686813949953.jsonl
 checked 26 tower rows against exhaustive search; 26 agree; 0 skipped (no V); 0 stopped at their degree bound, with no verdict to check.
@@ -22,11 +22,22 @@ checked 6 tower rows against exhaustive search; 6 agree; 0 skipped (no V); 0 sto
 checked 6 tower rows against exhaustive search; 6 agree; 0 skipped (no V); 0 stopped at their degree bound, with no verdict to check.
 ## depth/planted-proth:56.jsonl
 checked 6 tower rows against exhaustive search; 6 agree; 0 skipped (no V); 0 stopped at their degree bound, with no verdict to check.
+## ext/m2N20-v48.jsonl
+checked 1 tower rows against exhaustive search; 1 agree; 0 skipped (no V); 0 stopped at their degree bound, with no verdict to check.
+## ext/m2N20-v56.jsonl
+checked 1 tower rows against exhaustive search; 1 agree; 0 skipped (no V); 0 stopped at their degree bound, with no verdict to check.
+## ext/m3N15-v40.jsonl
+checked 1 tower rows against exhaustive search; 1 agree; 0 skipped (no V); 0 stopped at their degree bound, with no verdict to check.
+## ext/m4N12-v40.jsonl
+checked 1 tower rows against exhaustive search; 1 agree; 0 skipped (no V); 0 stopped at their degree bound, with no verdict to check.
 # G4: wide-builder inline verification (finished tower rows)
 ## depth/kummer-P-224.jsonl: verified rows 26, ok 26, failed 0
 ## depth/planted-P-192.jsonl: verified rows 6, ok 6, failed 0
 ## depth/planted-P-224.jsonl: verified rows 6, ok 6, failed 0
 ## depth/torus-P-192.jsonl: verified rows 24, ok 24, failed 0
 ## depth/torus-P-256.jsonl: verified rows 20, ok 20, failed 0
+## ext/m2N20-P-192.jsonl: verified rows 1, ok 1, failed 0
+## ext/m2N20-P-224.jsonl: verified rows 1, ok 1, failed 0
+## ext/m4N12-P-224.jsonl: verified rows 1, ok 1, failed 0
 # planted_ok false anywhere:
 none
