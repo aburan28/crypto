@@ -1,0 +1,192 @@
+m=4 n=11 d=3: |F|=3 decomposable 9/1024 floor 1.1 µs/target, exhaustive checks 12
+  f4-chain k=990 truth=true verdict="yes" 0.001s
+  f4-chain k=630 truth=false verdict="no" 0.004s
+  f4-chain k=990 truth=true verdict="yes" 0.002s
+  f4-chain k=915 truth=false verdict="no" 0.004s
+  f4-chain k=495 truth=true verdict="yes" 0.001s
+  f4-chain k=948 truth=false verdict="no" 0.004s
+  f4-chain k=989 truth=true verdict="yes" 0.003s
+  f4-chain k=926 truth=false verdict="no" 0.003s
+  f4-chain k=990 truth=true verdict="yes" 0.002s
+  f4-chain k=522 truth=false verdict="no" 0.005s
+  f4-chain k=990 truth=true verdict="yes" 0.001s
+  f4-chain k=6 truth=false verdict="no" 0.004s
+  f6-ic k=990 truth=true verdict="yes" 0.002s
+  f6-ic k=630 truth=false verdict="no" 0.003s
+  f6-ic k=990 truth=true verdict="yes" 0.001s
+  f6-ic k=915 truth=false verdict="no" 0.003s
+  f6-ic k=495 truth=true verdict="yes" 0.002s
+  f6-ic k=948 truth=false verdict="no" 0.004s
+  f6-ic k=989 truth=true verdict="yes" 0.003s
+  f6-ic k=926 truth=false verdict="no" 0.003s
+  f6-ic k=990 truth=true verdict="yes" 0.001s
+  f6-ic k=522 truth=false verdict="no" 0.004s
+  f6-ic k=990 truth=true verdict="yes" 0.002s
+  f6-ic k=6 truth=false verdict="no" 0.003s
+  sat k=990 truth=true verdict="yes" 0.003s
+  sat k=630 truth=false verdict="no" 0.031s
+  sat k=990 truth=true verdict="yes" 0.001s
+  sat k=915 truth=false verdict="no" 0.051s
+  sat k=495 truth=true verdict="yes" 0.010s
+  sat k=948 truth=false verdict="no" 0.020s
+  sat k=989 truth=true verdict="yes" 0.021s
+  sat k=926 truth=false verdict="no" 0.030s
+  sat k=990 truth=true verdict="yes" 0.002s
+  sat k=522 truth=false verdict="no" 0.037s
+  sat k=990 truth=true verdict="yes" 0.002s
+  sat k=6 truth=false verdict="no" 0.036s
+  s22-hybrid-g8 k=990 truth=true verdict="yes" 0.014s
+  s22-hybrid-g8 k=630 truth=false verdict="no" 0.440s
+  s22-hybrid-g8 k=990 truth=true verdict="yes" 0.011s
+  s22-hybrid-g8 k=915 truth=false verdict="no" 0.399s
+  s22-hybrid-g8 k=495 truth=true verdict="yes" 0.013s
+  s22-hybrid-g8 k=948 truth=false verdict="no" 0.432s
+  s22-hybrid-g8 k=989 truth=true verdict="yes" 0.280s
+  s22-hybrid-g8 k=926 truth=false verdict="no" 0.430s
+  s22-hybrid-g8 k=990 truth=true verdict="yes" 0.016s
+  s22-hybrid-g8 k=522 truth=false verdict="no" 0.455s
+  s22-hybrid-g8 k=990 truth=true verdict="yes" 0.011s
+  s22-hybrid-g8 k=6 truth=false verdict="no" 0.416s
+m=4 n=13 d=4: |F|=19 decomposable 575/1024 floor 10.4 µs/target, exhaustive checks 12
+  f4-chain k=1847 truth=true verdict="yes" 0.030s
+  f4-chain k=1112 truth=false verdict="no" 0.063s
+  f4-chain k=688 truth=true verdict="yes" 0.020s
+  f4-chain k=592 truth=false verdict="no" 0.067s
+  f4-chain k=549 truth=true verdict="yes" 0.013s
+  f4-chain k=1095 truth=false verdict="no" 0.057s
+  f4-chain k=773 truth=true verdict="yes" 0.018s
+  f4-chain k=667 truth=false verdict="no" 0.070s
+  f4-chain k=1494 truth=true verdict="yes" 0.019s
+  f4-chain k=1973 truth=false verdict="no" 0.077s
+  f4-chain k=1482 truth=true verdict="yes" 0.004s
+  f4-chain k=1210 truth=false verdict="no" 0.061s
+  f6-ic k=1847 truth=true verdict="yes" 0.037s
+  f6-ic k=1112 truth=false verdict="no" 0.059s
+  f6-ic k=688 truth=true verdict="yes" 0.015s
+  f6-ic k=592 truth=false verdict="no" 0.057s
+  f6-ic k=549 truth=true verdict="yes" 0.012s
+  f6-ic k=1095 truth=false verdict="no" 0.055s
+  f6-ic k=773 truth=true verdict="yes" 0.015s
+  f6-ic k=667 truth=false verdict="no" 0.060s
+  f6-ic k=1494 truth=true verdict="yes" 0.013s
+  f6-ic k=1973 truth=false verdict="no" 0.060s
+  f6-ic k=1482 truth=true verdict="yes" 0.005s
+  f6-ic k=1210 truth=false verdict="no" 0.058s
+  sat k=1847 truth=true verdict="yes" 11.917s
+  sat k=1112 truth=false verdict="none" 120.035s
+  sat k=688 truth=true verdict="yes" 3.400s
+  sat k=592 truth=false verdict="no" 28.697s
+  sat k=549 truth=true verdict="yes" 7.874s
+  sat k=1095 truth=false verdict="no" 30.541s
+  sat k=773 truth=true verdict="yes" 8.908s
+  sat k=667 truth=false verdict="no" 38.037s
+  sat k=1494 truth=true verdict="yes" 1.534s
+  sat k=1973 truth=false verdict="no" 49.475s
+  sat k=1482 truth=true verdict="yes" 0.941s
+  sat k=1210 truth=false verdict="no" 36.537s
+  s22-hybrid-g8 k=1847 truth=true verdict="yes" 92.279s
+  s22-hybrid-g8 k=1112 truth=false verdict="none" 120.004s
+  s22-hybrid-g8 k=688 truth=true verdict="yes" 36.687s
+  s22-hybrid-g8 k=592 truth=false verdict="none" 120.002s
+  s22-hybrid-g8 k=549 truth=true verdict="yes" 44.531s
+  s22-hybrid-g8 k=1095 truth=false verdict="none" 120.002s
+  s22-hybrid-g8 k=773 truth=true verdict="yes" 33.821s
+  s22-hybrid-g8 k=667 truth=false verdict="none" 120.002s
+  s22-hybrid-g8 k=1494 truth=true verdict="yes" 32.317s
+  s22-hybrid-g8 k=1973 truth=false verdict="none" 120.002s
+  s22-hybrid-g8 k=1482 truth=true verdict="yes" 10.448s
+  s22-hybrid-g8 k=1210 truth=false verdict="none" 120.007s
+m=4 n=17 d=5: |F|=29 decomposable 185/1024 floor 22.0 µs/target, exhaustive checks 12
+  f4-chain k=49434 truth=true verdict="yes" 0.009s
+  f4-chain k=64833 truth=false verdict="no" 0.282s
+  f4-chain k=33667 truth=true verdict="yes" 0.014s
+  f4-chain k=44029 truth=false verdict="no" 0.302s
+  f4-chain k=37736 truth=true verdict="yes" 0.036s
+  f4-chain k=3049 truth=false verdict="no" 0.333s
+  f4-chain k=9822 truth=true verdict="yes" 0.050s
+  f4-chain k=9178 truth=false verdict="no" 0.289s
+  f4-chain k=36780 truth=true verdict="yes" 0.006s
+  f4-chain k=59890 truth=false verdict="no" 0.301s
+  f4-chain k=53125 truth=true verdict="yes" 0.096s
+  f4-chain k=46891 truth=false verdict="no" 0.294s
+  f6-ic k=49434 truth=true verdict="yes" 0.009s
+  f6-ic k=64833 truth=false verdict="no" 0.262s
+  f6-ic k=33667 truth=true verdict="yes" 0.009s
+  f6-ic k=44029 truth=false verdict="no" 0.273s
+  f6-ic k=37736 truth=true verdict="yes" 0.043s
+  f6-ic k=3049 truth=false verdict="no" 0.261s
+  f6-ic k=9822 truth=true verdict="yes" 0.045s
+  f6-ic k=9178 truth=false verdict="no" 0.277s
+  f6-ic k=36780 truth=true verdict="yes" 0.005s
+  f6-ic k=59890 truth=false verdict="no" 0.303s
+  f6-ic k=53125 truth=true verdict="yes" 0.066s
+  f6-ic k=46891 truth=false verdict="no" 0.288s
+  sat k=49434 truth=true verdict="none" 120.053s
+  sat k=64833 truth=false verdict="none" 120.057s
+  sat k=33667 truth=true verdict="yes" 50.624s
+  sat k=44029 truth=false verdict="none" 120.052s
+  sat k=37736 truth=true verdict="none" 120.048s
+  sat k=3049 truth=false verdict="none" 120.045s
+  sat k=9822 truth=true verdict="yes" 42.000s
+  sat k=9178 truth=false verdict="none" 120.044s
+  sat k=36780 truth=true verdict="yes" 11.210s
+  sat k=59890 truth=false verdict="none" 120.047s
+  sat k=53125 truth=true verdict="none" 120.045s
+  sat k=46891 truth=false verdict="none" 120.077s
+  s22-hybrid-g8 k=49434 truth=true verdict="none" 120.011s
+  s22-hybrid-g8 k=64833 truth=false verdict="none" 120.011s
+  s22-hybrid-g8 k=33667 truth=true verdict="none" 120.012s
+  s22-hybrid-g8 k=44029 truth=false verdict="none" 120.013s
+  s22-hybrid-g8: early stop at n=17
+m=4 n=19 d=5: |F|=35 decomposable 95/1024 floor 33.1 µs/target, exhaustive checks 12
+  f4-chain k=73645 truth=true verdict="yes" 0.142s
+  f4-chain k=246450 truth=false verdict="no" 0.480s
+  f4-chain k=219377 truth=true verdict="yes" 0.053s
+  f4-chain k=25589 truth=false verdict="no" 0.481s
+  f4-chain k=44475 truth=true verdict="yes" 0.077s
+  f4-chain k=249950 truth=false verdict="no" 0.512s
+  f4-chain k=249530 truth=true verdict="yes" 0.103s
+  f4-chain k=14521 truth=false verdict="no" 0.462s
+  f4-chain k=148482 truth=true verdict="yes" 0.251s
+  f4-chain k=78043 truth=false verdict="no" 0.426s
+  f4-chain k=36068 truth=true verdict="yes" 0.120s
+  f4-chain k=12308 truth=false verdict="no" 0.436s
+  f6-ic k=73645 truth=true verdict="yes" 0.117s
+  f6-ic k=246450 truth=false verdict="no" 0.469s
+  f6-ic k=219377 truth=true verdict="yes" 0.053s
+  f6-ic k=25589 truth=false verdict="no" 0.459s
+  f6-ic k=44475 truth=true verdict="yes" 0.067s
+  f6-ic k=249950 truth=false verdict="no" 0.438s
+  f6-ic k=249530 truth=true verdict="yes" 0.091s
+  f6-ic k=14521 truth=false verdict="no" 0.487s
+  f6-ic k=148482 truth=true verdict="yes" 0.257s
+  f6-ic k=78043 truth=false verdict="no" 0.446s
+  f6-ic k=36068 truth=true verdict="yes" 0.125s
+  f6-ic k=12308 truth=false verdict="no" 0.463s
+  sat k=73645 truth=true verdict="none" 120.080s
+  sat k=246450 truth=false verdict="none" 120.081s
+  sat k=219377 truth=true verdict="none" 120.130s
+  sat k=25589 truth=false verdict="none" 120.077s
+  sat: early stop at n=19
+  s22-hybrid-g8: skipped (stopped at a smaller cell)
+m=4 n=23 d=6: |F|=53 decomposable 27/1024 floor 66.2 µs/target, exhaustive checks 12
+  f4-chain k=984645 truth=true verdict="none" 0.000s
+  f4-chain: unsupported at n=23 (encoder or variable limit)
+  f6-ic k=984645 truth=true verdict="none" 0.000s
+  f6-ic: unsupported at n=23 (encoder or variable limit)
+  sat: skipped (stopped at a smaller cell)
+  s22-hybrid-g8: skipped (stopped at a smaller cell)
+m=4 n=29 d=8: |F|=253 decomposable 288/1024 floor 1009.5 µs/target, exhaustive checks 0
+  f4-chain k=13489 truth=true verdict="none" 0.000s
+  f4-chain: unsupported at n=29 (encoder or variable limit)
+  f6-ic k=13489 truth=true verdict="none" 0.000s
+  f6-ic: unsupported at n=29 (encoder or variable limit)
+  sat: skipped (stopped at a smaller cell)
+  s22-hybrid-g8: skipped (stopped at a smaller cell)
+m=4 n=31 d=8: |F|=261 decomposable 84/1024 floor 1168.6 µs/target, exhaustive checks 0
+  f4-chain k=524198 truth=true verdict="none" 0.000s
+  f4-chain: unsupported at n=31 (encoder or variable limit)
+  f6-ic k=524198 truth=true verdict="none" 0.000s
+  f6-ic: unsupported at n=31 (encoder or variable limit)
+  sat: skipped (stopped at a smaller cell)
+  s22-hybrid-g8: skipped (stopped at a smaller cell)
