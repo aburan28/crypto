@@ -35,9 +35,31 @@ separation of all four online intervals by more than the largest adjacent
 A/A difference. This fallback is declared before the rescreen runs and
 does not reinterpret the failed expanded-screen control. A rescreen winner
 must likewise have its exact base dump, source, flags and IC1 manifest
-replayed and hashed before `selection.json` is versioned. If the rescreen
-gate also fails, or no winning arm can be materialized, leave selection
-unknown and do not start the five-point Tier 1 panel.
+replayed and hashed before `selection.json` is versioned. The mirrored cloud
+rescreen's K3072 first adjacent pair had a 15.8% spread, so it left selection
+unknown. The next frozen selector runs on the same approved Tier 1 allocation
+before any fresh-point producer starts. Its four fresh processes use the
+previously exposed public point in order K3072 A/B, K2543 A/B, all with the
+exact one-root dynamic index and the same four pinned physical cores. Each
+process has a 900-second cap; a same-point rho solve follows. Require both
+adjacent pairs to have identical base hashes and exact index-entry counts,
+independent base/relation/scalar replay, resource admission and an online
+spread of at most 10% of their pair mean. Select a candidate only if its
+slower interval is faster than the other's faster interval by more than the
+largest observed absolute A/A difference. Otherwise archive the bounded
+screen and stop before the five-point panel.
+
+On a selected screen, construct the exact IC1 manifest from both matching
+base dumps, write `selection.json`, and upload the screen, manifest and
+selection as one encrypted object into the dedicated versioned S3 bucket.
+Require a nonempty S3 VersionId and confirm that exact version by HEAD before
+loading the sealed five-point fixture on the instance. Record the object key,
+VersionId, SHA-256 and seal time in the final artifact. The selected record
+is thus immutable before the first fresh-point producer runs; the local
+collector independently replays the screen and adds the exact manifest and
+selection to this PR afterward. A missing S3 version or failed replay stops
+the panel. This host selector and panel share the one 165-minute allocation
+and its watchdog. The earlier GitHub screen receipts remain separate.
 
 The approved allocation is one `g5g.metal` Spot instance in `us-east-1b`,
 for at most 165 minutes and $5 total. Before launch, check current Spot
