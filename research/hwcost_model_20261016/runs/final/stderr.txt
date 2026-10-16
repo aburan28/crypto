@@ -1,0 +1,60 @@
+fp64 (Fp64, 2^63-25): batched walk == unbatched reference, on curve
+w1 (FpWide<1>, 2^64-59): batched walk == unbatched reference, on curve
+w2 (FpWide<2>, 2^128-159): batched walk == unbatched reference, on curve
+w3 (FpWide<3>, P-192): batched walk == unbatched reference, on curve
+w4 (FpWide<4>, P-256): batched walk == unbatched reference, on curve
+clock
+  rep 1/7 of 2 arms
+  rep 2/7 of 2 arms
+  rep 3/7 of 2 arms
+  rep 4/7 of 2 arms
+  rep 5/7 of 2 arms
+  rep 6/7 of 2 arms
+  rep 7/7 of 2 arms
+field operations
+  rep 1/7 of 40 arms
+  rep 2/7 of 40 arms
+  rep 3/7 of 40 arms
+  rep 4/7 of 40 arms
+  rep 5/7 of 40 arms
+  rep 6/7 of 40 arms
+  rep 7/7 of 40 arms
+memory read bandwidth, 1 thread(s)
+  rep 1/7 of 10 arms
+  rep 2/7 of 10 arms
+  rep 3/7 of 10 arms
+  rep 4/7 of 10 arms
+  rep 5/7 of 10 arms
+  rep 6/7 of 10 arms
+  rep 7/7 of 10 arms
+memory read bandwidth, 4 thread(s)
+  rep 1/7 of 10 arms
+  rep 2/7 of 10 arms
+  rep 3/7 of 10 arms
+  rep 4/7 of 10 arms
+  rep 5/7 of 10 arms
+  rep 6/7 of 10 arms
+  rep 7/7 of 10 arms
+rho kernel
+  fp64: 10 batch sizes set up
+  w1: 10 batch sizes set up
+  w2: 10 batch sizes set up
+  w3: 10 batch sizes set up
+  w4: 10 batch sizes set up
+  rep 1/7 of 50 arms
+  rep 2/7 of 50 arms
+  rep 3/7 of 50 arms
+  rep 4/7 of 50 arms
+  rep 5/7 of 50 arms
+  rep 6/7 of 50 arms
+  rep 7/7 of 50 arms
+thread scaling
+  rep 1/7 of 15 arms
+  rep 2/7 of 15 arms
+  rep 3/7 of 15 arms
+  rep 4/7 of 15 arms
+  rep 5/7 of 15 arms
+  rep 6/7 of 15 arms
+  rep 7/7 of 15 arms
+wrote research/hwcost_model_20261016/runs/final
+exit 0
