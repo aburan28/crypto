@@ -1,0 +1,1533 @@
+{
+  "c1": {
+    "z2xz2/baseline": {
+      "draws_per_rep": 65536,
+      "max_us": 25.716587158203122,
+      "median_us": 24.742687561035158,
+      "min_us": 23.998199493408205,
+      "reps": 7
+    },
+    "z2xz2/fast": {
+      "draws_per_rep": 65536,
+      "max_us": 14.961507751464843,
+      "median_us": 13.889871551513671,
+      "min_us": 13.520867523193358,
+      "reps": 7
+    },
+    "z2xz2/fast-chi": {
+      "draws_per_rep": 65536,
+      "max_us": 17.628734558105467,
+      "median_us": 16.812811935424804,
+      "min_us": 16.697492797851563,
+      "reps": 7
+    },
+    "z2xz8/baseline": {
+      "draws_per_rep": 65536,
+      "max_us": 32.04909912109375,
+      "median_us": 30.83286378479004,
+      "min_us": 29.30298167419434,
+      "reps": 7
+    },
+    "z2xz8/fast": {
+      "draws_per_rep": 65536,
+      "max_us": 10.193388626098633,
+      "median_us": 10.063241119384765,
+      "min_us": 9.783329238891602,
+      "reps": 7
+    },
+    "z2xz8/fast-chi": {
+      "draws_per_rep": 65536,
+      "max_us": 13.299273605346679,
+      "median_us": 12.4784119720459,
+      "min_us": 12.149125732421876,
+      "reps": 7
+    }
+  },
+  "claims": {
+    "S1": {
+      "pass": true,
+      "ratio": 0.3263803579720998,
+      "spread_overlap": false,
+      "threshold": 0.4
+    },
+    "S2": {
+      "pass": true,
+      "ratio": 0.8064520663309087,
+      "spread_overlap": false,
+      "threshold": 0.85
+    },
+    "S3": {
+      "median_us": 10.063241119384765,
+      "pass": true,
+      "threshold": 12.0
+    },
+    "S4": {
+      "pass": true,
+      "ratio": 0.561372790132446,
+      "spread_overlap": false,
+      "threshold": 0.65
+    }
+  },
+  "distributions": {
+    "z2xz2": {
+      "cell": "c3",
+      "deepest": [
+        [
+          9224385,
+          25
+        ],
+        [
+          26072879,
+          25
+        ]
+      ],
+      "draws": 33554432,
+      "elapsed_s": 476.62361621,
+      "gaps": {
+        "16": {
+          "first_seed": 28247,
+          "mean_gap": 22395.2625250501,
+          "model": 21845.333333333332,
+          "se": 589.0501703757768,
+          "successes": 1498
+        },
+        "20": {
+          "first_seed": 544573,
+          "mean_gap": 343620.8020833333,
+          "model": 349525.3333333333,
+          "se": 34858.693678228214,
+          "successes": 97
+        },
+        "24": {
+          "first_seed": 2608710,
+          "mean_gap": 5905718.4,
+          "model": 5592405.333333333,
+          "se": 1494872.8591178113,
+          "successes": 6
+        },
+        "28": {
+          "first_seed": null,
+          "successes": 0
+        }
+      },
+      "hist_depth": [
+        0,
+        8387239,
+        12584971,
+        6290313,
+        3146426,
+        1573382,
+        785583,
+        393156,
+        196444,
+        98611,
+        49223,
+        24482,
+        12334,
+        6174,
+        3074,
+        1522,
+        750,
+        361,
+        173,
+        117,
+        53,
+        27,
+        10,
+        1,
+        4,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "max_b": 25,
+      "model_consistent": true,
+      "rows": [
+        {
+          "count_ge": 33554432,
+          "draws_per_success": 1.0,
+          "draws_per_success_95": [
+            0.9996617388909051,
+            1.0003384901051717
+          ],
+          "frac_ge": 1.0,
+          "inside": true,
+          "model_count": 33554432.0,
+          "model_draws_per_success": 1.0,
+          "model_frac_ge": 1.0,
+          "model_interval_999": [
+            33535371,
+            33573493
+          ],
+          "ratio_obs_model": 1.0,
+          "t": 1,
+          "tested": false
+        },
+        {
+          "count_ge": 25167193,
+          "draws_per_success": 1.3332608050488586,
+          "draws_per_success_95": [
+            1.332740094084186,
+            1.3337819230634693
+          ],
+          "frac_ge": 0.7500407993793488,
+          "inside": true,
+          "model_count": 25165824.0,
+          "model_draws_per_success": 1.3333333333333333,
+          "model_frac_ge": 0.75,
+          "model_interval_999": [
+            25149316,
+            25182332
+          ],
+          "ratio_obs_model": 1.000054399172465,
+          "t": 2,
+          "tested": true
+        },
+        {
+          "count_ge": 12582222,
+          "draws_per_success": 2.666812904747667,
+          "draws_per_success_95": [
+            2.66534002426688,
+            2.6682874139710253
+          ],
+          "frac_ge": 0.3749794363975525,
+          "inside": true,
+          "model_count": 12582912.0,
+          "model_draws_per_success": 2.6666666666666665,
+          "model_frac_ge": 0.375,
+          "model_interval_999": [
+            12571239,
+            12594585
+          ],
+          "ratio_obs_model": 0.9999451637268066,
+          "t": 3,
+          "tested": true
+        },
+        {
+          "count_ge": 6291909,
+          "draws_per_success": 5.332949348123122,
+          "draws_per_success_95": [
+            5.328785010098739,
+            5.337120199930268
+          ],
+          "frac_ge": 0.18751350045204163,
+          "inside": true,
+          "model_count": 6291456.0,
+          "model_draws_per_success": 5.333333333333333,
+          "model_frac_ge": 0.1875,
+          "model_interval_999": [
+            6283202,
+            6299710
+          ],
+          "ratio_obs_model": 1.0000720024108887,
+          "t": 4,
+          "tested": true
+        },
+        {
+          "count_ge": 3145483,
+          "draws_per_success": 10.667497487667235,
+          "draws_per_success_95": [
+            10.655718713480006,
+            10.679302331058565
+          ],
+          "frac_ge": 0.09374269843101501,
+          "inside": true,
+          "model_count": 3145728.0,
+          "model_draws_per_success": 10.666666666666666,
+          "model_frac_ge": 0.09375,
+          "model_interval_999": [
+            3139891,
+            3151565
+          ],
+          "ratio_obs_model": 0.9999221165974935,
+          "t": 5,
+          "tested": true
+        },
+        {
+          "count_ge": 1572101,
+          "draws_per_success": 21.343687205847463,
+          "draws_per_success_95": [
+            21.31036817292969,
+            21.37711059138925
+          ],
+          "frac_ge": 0.04685226082801819,
+          "inside": true,
+          "model_count": 1572864.0,
+          "model_draws_per_success": 21.333333333333332,
+          "model_frac_ge": 0.046875,
+          "model_interval_999": [
+            1568737,
+            1576991
+          ],
+          "ratio_obs_model": 0.9995148976643881,
+          "t": 6,
+          "tested": true
+        },
+        {
+          "count_ge": 786518,
+          "draws_per_success": 42.66200137822656,
+          "draws_per_success_95": [
+            42.56788331724298,
+            42.75653655360299
+          ],
+          "frac_ge": 0.023440062999725342,
+          "inside": true,
+          "model_count": 786432.0,
+          "model_draws_per_success": 42.666666666666664,
+          "model_frac_ge": 0.0234375,
+          "model_interval_999": [
+            783513,
+            789351
+          ],
+          "ratio_obs_model": 1.000109354654948,
+          "t": 7,
+          "tested": true
+        },
+        {
+          "count_ge": 393362,
+          "draws_per_success": 85.30166106537997,
+          "draws_per_success_95": [
+            85.03576352282865,
+            85.56922668897208
+          ],
+          "frac_ge": 0.011723101139068604,
+          "inside": true,
+          "model_count": 393216.0,
+          "model_draws_per_success": 85.33333333333333,
+          "model_frac_ge": 0.01171875,
+          "model_interval_999": [
+            391152,
+            395280
+          ],
+          "ratio_obs_model": 1.0003712972005208,
+          "t": 8,
+          "tested": true
+        },
+        {
+          "count_ge": 196918,
+          "draws_per_success": 170.39799307325893,
+          "draws_per_success_95": [
+            169.64847210144194,
+            171.1541663266139
+          ],
+          "frac_ge": 0.0058686137199401855,
+          "inside": true,
+          "model_count": 196608.0,
+          "model_draws_per_success": 170.66666666666666,
+          "model_frac_ge": 0.005859375,
+          "model_interval_999": [
+            195148,
+            198068
+          ],
+          "ratio_obs_model": 1.0015767415364583,
+          "t": 9,
+          "tested": true
+        },
+        {
+          "count_ge": 98307,
+          "draws_per_success": 341.3229169845484,
+          "draws_per_success_95": [
+            339.2009057641374,
+            343.4716455799861
+          ],
+          "frac_ge": 0.002929776906967163,
+          "inside": true,
+          "model_count": 98304.0,
+          "model_draws_per_success": 341.3333333333333,
+          "model_frac_ge": 0.0029296875,
+          "model_interval_999": [
+            97272,
+            99336
+          ],
+          "ratio_obs_model": 1.000030517578125,
+          "t": 10,
+          "tested": true
+        },
+        {
+          "count_ge": 49084,
+          "draws_per_success": 683.6124195257111,
+          "draws_per_success_95": [
+            677.6072214705466,
+            689.7250097638183
+          ],
+          "frac_ge": 0.0014628171920776367,
+          "inside": true,
+          "model_count": 49152.0,
+          "model_draws_per_success": 682.6666666666666,
+          "model_frac_ge": 0.00146484375,
+          "model_interval_999": [
+            48422,
+            49882
+          ],
+          "ratio_obs_model": 0.9986165364583334,
+          "t": 11,
+          "tested": true
+        },
+        {
+          "count_ge": 24602,
+          "draws_per_success": 1363.890415413381,
+          "draws_per_success_95": [
+            1347.0265756724207,
+            1381.1818556022063
+          ],
+          "frac_ge": 0.0007331967353820801,
+          "inside": true,
+          "model_count": 24576.0,
+          "model_draws_per_success": 1365.3333333333333,
+          "model_frac_ge": 0.000732421875,
+          "model_interval_999": [
+            24060,
+            25092
+          ],
+          "ratio_obs_model": 1.0010579427083333,
+          "t": 12,
+          "tested": true
+        },
+        {
+          "count_ge": 12268,
+          "draws_per_success": 2735.1183567003586,
+          "draws_per_success_95": [
+            2687.3644081371135,
+            2784.6001659751037
+          ],
+          "frac_ge": 0.0003656148910522461,
+          "inside": true,
+          "model_count": 12288.0,
+          "model_draws_per_success": 2730.6666666666665,
+          "model_frac_ge": 0.0003662109375,
+          "model_interval_999": [
+            11923,
+            12653
+          ],
+          "ratio_obs_model": 0.9983723958333334,
+          "t": 13,
+          "tested": true
+        },
+        {
+          "count_ge": 6094,
+          "draws_per_success": 5506.142435182146,
+          "draws_per_success_95": [
+            5370.427656850192,
+            5648.894276094276
+          ],
+          "frac_ge": 0.00018161535263061523,
+          "inside": true,
+          "model_count": 6144.0,
+          "model_draws_per_success": 5461.333333333333,
+          "model_frac_ge": 0.00018310546875,
+          "model_interval_999": [
+            5886,
+            6402
+          ],
+          "ratio_obs_model": 0.9918619791666666,
+          "t": 14,
+          "tested": true
+        },
+        {
+          "count_ge": 3020,
+          "draws_per_success": 11110.739072847682,
+          "draws_per_success_95": [
+            10727.120204603581,
+            11522.813186813188
+          ],
+          "frac_ge": 0.00009000301361083984,
+          "inside": true,
+          "model_count": 3072.0,
+          "model_draws_per_success": 10922.666666666666,
+          "model_frac_ge": 0.000091552734375,
+          "model_interval_999": [
+            2889,
+            3255
+          ],
+          "ratio_obs_model": 0.9830729166666666,
+          "t": 15,
+          "tested": true
+        },
+        {
+          "count_ge": 1498,
+          "draws_per_success": 22399.487316421895,
+          "draws_per_success_95": [
+            21317.936467598476,
+            23596.646976090015
+          ],
+          "frac_ge": 0.00004464387893676758,
+          "inside": true,
+          "model_count": 1536.0,
+          "model_draws_per_success": 21845.333333333332,
+          "model_frac_ge": 0.0000457763671875,
+          "model_interval_999": [
+            1407,
+            1665
+          ],
+          "ratio_obs_model": 0.9752604166666666,
+          "t": 16,
+          "tested": true
+        },
+        {
+          "count_ge": 748,
+          "draws_per_success": 44858.866310160425,
+          "draws_per_success_95": [
+            41838.44389027431,
+            48349.32564841498
+          ],
+          "frac_ge": 0.000022292137145996094,
+          "inside": true,
+          "model_count": 768.0,
+          "model_draws_per_success": 43690.666666666664,
+          "model_frac_ge": 0.00002288818359375,
+          "model_interval_999": [
+            676,
+            860
+          ],
+          "ratio_obs_model": 0.9739583333333334,
+          "t": 17,
+          "tested": true
+        },
+        {
+          "count_ge": 387,
+          "draws_per_success": 86703.95865633075,
+          "draws_per_success_95": [
+            78766.27230046949,
+            96144.50429799427
+          ],
+          "frac_ge": 0.000011533498764038086,
+          "inside": true,
+          "model_count": 384.0,
+          "model_draws_per_success": 87381.33333333333,
+          "model_frac_ge": 0.000011444091796875,
+          "model_interval_999": [
+            321,
+            450
+          ],
+          "ratio_obs_model": 1.0078125,
+          "t": 18,
+          "tested": true
+        },
+        {
+          "count_ge": 214,
+          "draws_per_success": 156796.41121495326,
+          "draws_per_success_95": [
+            138084.08230452676,
+            180400.17204301077
+          ],
+          "frac_ge": 6.377696990966797e-6,
+          "inside": true,
+          "model_count": 192.0,
+          "model_draws_per_success": 174762.66666666666,
+          "model_frac_ge": 5.7220458984375e-6,
+          "model_interval_999": [
+            148,
+            239
+          ],
+          "ratio_obs_model": 1.1145833333333333,
+          "t": 19,
+          "tested": true
+        },
+        {
+          "count_ge": 97,
+          "draws_per_success": 345921.9793814433,
+          "draws_per_success_95": [
+            286790.0170940171,
+            430185.0256410256
+          ],
+          "frac_ge": 2.8908252716064453e-6,
+          "inside": true,
+          "model_count": 96.0,
+          "model_draws_per_success": 349525.3333333333,
+          "model_frac_ge": 2.86102294921875e-6,
+          "model_interval_999": [
+            65,
+            130
+          ],
+          "ratio_obs_model": 1.0104166666666667,
+          "t": 20,
+          "tested": true
+        },
+        {
+          "count_ge": 44,
+          "draws_per_success": 762600.7272727273,
+          "draws_per_success_95": [
+            588674.245614035,
+            1082401.0322580645
+          ],
+          "frac_ge": 1.3113021850585938e-6,
+          "inside": true,
+          "model_count": 48.0,
+          "model_draws_per_success": 699050.6666666666,
+          "model_frac_ge": 1.430511474609375e-6,
+          "model_interval_999": [
+            27,
+            72
+          ],
+          "ratio_obs_model": 0.9166666666666666,
+          "t": 21,
+          "tested": true
+        },
+        {
+          "count_ge": 17,
+          "draws_per_success": 1973790.1176470588,
+          "draws_per_success_95": [
+            1290555.076923077,
+            3728270.222222222
+          ],
+          "frac_ge": 5.066394805908203e-7,
+          "inside": true,
+          "model_count": 24.0,
+          "model_draws_per_success": 1398101.3333333333,
+          "model_frac_ge": 7.152557373046875e-7,
+          "model_interval_999": [
+            10,
+            42
+          ],
+          "ratio_obs_model": 0.7083333333333334,
+          "t": 22,
+          "tested": true
+        },
+        {
+          "count_ge": 7,
+          "draws_per_success": 4793490.285714285,
+          "draws_per_success_95": [
+            2581110.153846154,
+            16777216.0
+          ],
+          "frac_ge": 2.086162567138672e-7,
+          "inside": true,
+          "model_count": 12.0,
+          "model_draws_per_success": 2796202.6666666665,
+          "model_frac_ge": 3.5762786865234375e-7,
+          "model_interval_999": [
+            2,
+            25
+          ],
+          "ratio_obs_model": 0.5833333333333334,
+          "t": 23,
+          "tested": false
+        },
+        {
+          "count_ge": 6,
+          "draws_per_success": 5592405.333333333,
+          "draws_per_success_95": [
+            3050402.909090909,
+            16777216.0
+          ],
+          "frac_ge": 1.7881393432617188e-7,
+          "inside": true,
+          "model_count": 6.0,
+          "model_draws_per_success": 5592405.333333333,
+          "model_frac_ge": 1.7881393432617188e-7,
+          "model_interval_999": [
+            0,
+            16
+          ],
+          "ratio_obs_model": 1.0,
+          "t": 24,
+          "tested": false
+        },
+        {
+          "count_ge": 2,
+          "draws_per_success": 16777216.0,
+          "draws_per_success_95": [
+            6710886.4,
+            null
+          ],
+          "frac_ge": 5.960464477539063e-8,
+          "inside": true,
+          "model_count": 3.0,
+          "model_draws_per_success": 11184810.666666666,
+          "model_frac_ge": 8.940696716308594e-8,
+          "model_interval_999": [
+            0,
+            10
+          ],
+          "ratio_obs_model": 0.6666666666666666,
+          "t": 25,
+          "tested": false
+        }
+      ],
+      "singular": 0,
+      "us_per_draw_long_run": 14.204490667879583
+    },
+    "z2xz8": {
+      "cell": "c4",
+      "deepest": [
+        [
+          196253408,
+          38
+        ]
+      ],
+      "draws": 268435456,
+      "elapsed_s": 2738.568666143,
+      "gaps": {
+        "16": {
+          "first_seed": 999,
+          "mean_gap": 8160.83738181376,
+          "model": 8192.0,
+          "se": 45.00546229075797,
+          "successes": 32894
+        },
+        "20": {
+          "first_seed": 35504,
+          "mean_gap": 127621.0409134158,
+          "model": 131072.0,
+          "se": 2772.4941266687442,
+          "successes": 2103
+        },
+        "24": {
+          "first_seed": 634230,
+          "mean_gap": 1822411.4794520547,
+          "model": 2097152.0,
+          "se": 157207.9359885463,
+          "successes": 147
+        },
+        "28": {
+          "first_seed": 14661491,
+          "mean_gap": 22575048.09090909,
+          "model": 33554432.0,
+          "se": 5172756.682821344,
+          "successes": 12
+        }
+      },
+      "hist_depth": [
+        0,
+        0,
+        0,
+        134227953,
+        67100753,
+        33549276,
+        16779688,
+        8390155,
+        4192253,
+        2098082,
+        1048002,
+        524497,
+        261790,
+        131625,
+        65531,
+        32957,
+        16480,
+        8258,
+        4123,
+        1930,
+        992,
+        541,
+        269,
+        154,
+        63,
+        43,
+        18,
+        11,
+        6,
+        2,
+        2,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "max_b": 38,
+      "model_consistent": true,
+      "rows": [
+        {
+          "count_ge": 134207503,
+          "draws_per_success": 2.0001523759815427,
+          "draws_per_success_95": [
+            1.9998140359000707,
+            2.0004908305670424
+          ],
+          "frac_ge": 0.4999619089066982,
+          "inside": true,
+          "model_count": 134217728.0,
+          "model_draws_per_success": 2.0,
+          "model_frac_ge": 0.5,
+          "model_interval_999": [
+            134179606,
+            134255850
+          ],
+          "ratio_obs_model": 0.9999238178133965,
+          "t": 4,
+          "tested": true
+        },
+        {
+          "count_ge": 67106750,
+          "draws_per_success": 4.000126008188446,
+          "draws_per_success_95": [
+            3.999169164650238,
+            4.001083309706112
+          ],
+          "frac_ge": 0.24999212473630905,
+          "inside": true,
+          "model_count": 67108864.0,
+          "model_draws_per_success": 4.0,
+          "model_frac_ge": 0.25,
+          "model_interval_999": [
+            67081908,
+            67135820
+          ],
+          "ratio_obs_model": 0.9999684989452362,
+          "t": 5,
+          "tested": true
+        },
+        {
+          "count_ge": 33557474,
+          "draws_per_success": 7.99927479642836,
+          "draws_per_success_95": [
+            7.99656919806673,
+            8.001982226260443
+          ],
+          "frac_ge": 0.12501133233308792,
+          "inside": true,
+          "model_count": 33554432.0,
+          "model_draws_per_success": 8.0,
+          "model_frac_ge": 0.125,
+          "model_interval_999": [
+            33535371,
+            33573493
+          ],
+          "ratio_obs_model": 1.0000906586647034,
+          "t": 6,
+          "tested": true
+        },
+        {
+          "count_ge": 16777786,
+          "draws_per_success": 15.999456424107448,
+          "draws_per_success_95": [
+            15.991803555561646,
+            16.007116620711916
+          ],
+          "frac_ge": 0.06250212341547012,
+          "inside": true,
+          "model_count": 16777216.0,
+          "model_draws_per_success": 16.0,
+          "model_frac_ge": 0.0625,
+          "model_interval_999": [
+            16763738,
+            16790694
+          ],
+          "ratio_obs_model": 1.000033974647522,
+          "t": 7,
+          "tested": true
+        },
+        {
+          "count_ge": 8387631,
+          "draws_per_success": 32.00372739334861,
+          "draws_per_success_95": [
+            31.98208096259544,
+            32.02540314585358
+          ],
+          "frac_ge": 0.031246360391378403,
+          "inside": true,
+          "model_count": 8388608.0,
+          "model_draws_per_success": 32.0,
+          "model_frac_ge": 0.03125,
+          "model_interval_999": [
+            8379077,
+            8398139
+          ],
+          "ratio_obs_model": 0.9998835325241089,
+          "t": 8,
+          "tested": true
+        },
+        {
+          "count_ge": 4195378,
+          "draws_per_success": 63.983616255793876,
+          "draws_per_success_95": [
+            63.92244212437369,
+            64.04490758734092
+          ],
+          "frac_ge": 0.015629000961780548,
+          "inside": true,
+          "model_count": 4194304.0,
+          "model_draws_per_success": 64.0,
+          "model_frac_ge": 0.015625,
+          "model_interval_999": [
+            4187565,
+            4201043
+          ],
+          "ratio_obs_model": 1.000256061553955,
+          "t": 9,
+          "tested": true
+        },
+        {
+          "count_ge": 2097296,
+          "draws_per_success": 127.99121154095559,
+          "draws_per_success_95": [
+            127.81819073535749,
+            128.16470139993325
+          ],
+          "frac_ge": 0.007813036441802979,
+          "inside": true,
+          "model_count": 2097152.0,
+          "model_draws_per_success": 128.0,
+          "model_frac_ge": 0.0078125,
+          "model_interval_999": [
+            2092386,
+            2101918
+          ],
+          "ratio_obs_model": 1.0000686645507812,
+          "t": 10,
+          "tested": true
+        },
+        {
+          "count_ge": 1049294,
+          "draws_per_success": 255.824826978902,
+          "draws_per_success_95": [
+            255.33619835213858,
+            256.31532933697196
+          ],
+          "frac_ge": 0.003908924758434296,
+          "inside": true,
+          "model_count": 1048576.0,
+          "model_draws_per_success": 256.0,
+          "model_frac_ge": 0.00390625,
+          "model_interval_999": [
+            1045206,
+            1051946
+          ],
+          "ratio_obs_model": 1.0006847381591797,
+          "t": 11,
+          "tested": true
+        },
+        {
+          "count_ge": 524797,
+          "draws_per_success": 511.50341179541806,
+          "draws_per_success_95": [
+            510.12311650896874,
+            512.891196976558
+          ],
+          "frac_ge": 0.001955021172761917,
+          "inside": true,
+          "model_count": 524288.0,
+          "model_draws_per_success": 512.0,
+          "model_frac_ge": 0.001953125,
+          "model_interval_999": [
+            521905,
+            526671
+          ],
+          "ratio_obs_model": 1.0009708404541016,
+          "t": 12,
+          "tested": true
+        },
+        {
+          "count_ge": 263007,
+          "draws_per_success": 1020.6399677575122,
+          "draws_per_success_95": [
+            1016.750902417684,
+            1024.558898630158
+          ],
+          "frac_ge": 0.0009797774255275726,
+          "inside": true,
+          "model_count": 262144.0,
+          "model_draws_per_success": 1024.0,
+          "model_frac_ge": 0.0009765625,
+          "model_interval_999": [
+            260459,
+            263829
+          ],
+          "ratio_obs_model": 1.0032920837402344,
+          "t": 13,
+          "tested": true
+        },
+        {
+          "count_ge": 131382,
+          "draws_per_success": 2043.1676789819,
+          "draws_per_success_95": [
+            2032.1701831285534,
+            2054.284852798249
+          ],
+          "frac_ge": 0.0004894360899925232,
+          "inside": true,
+          "model_count": 131072.0,
+          "model_draws_per_success": 2048.0,
+          "model_frac_ge": 0.00048828125,
+          "model_interval_999": [
+            129880,
+            132264
+          ],
+          "ratio_obs_model": 1.0023651123046875,
+          "t": 14,
+          "tested": true
+        },
+        {
+          "count_ge": 65851,
+          "draws_per_success": 4076.406675676907,
+          "draws_per_success_95": [
+            4045.505259667842,
+            4107.783803635918
+          ],
+          "frac_ge": 0.0002453140914440155,
+          "inside": true,
+          "model_count": 65536.0,
+          "model_draws_per_success": 4096.0,
+          "model_frac_ge": 0.000244140625,
+          "model_interval_999": [
+            64693,
+            66379
+          ],
+          "ratio_obs_model": 1.0048065185546875,
+          "t": 15,
+          "tested": true
+        },
+        {
+          "count_ge": 32894,
+          "draws_per_success": 8160.62066030279,
+          "draws_per_success_95": [
+            8073.246796992481,
+            8249.906447845597
+          ],
+          "frac_ge": 0.0001225396990776062,
+          "inside": true,
+          "model_count": 32768.0,
+          "model_draws_per_success": 8192.0,
+          "model_frac_ge": 0.0001220703125,
+          "model_interval_999": [
+            32172,
+            33364
+          ],
+          "ratio_obs_model": 1.00384521484375,
+          "t": 16,
+          "tested": true
+        },
+        {
+          "count_ge": 16414,
+          "draws_per_success": 16354.054831241623,
+          "draws_per_success_95": [
+            16106.771630865234,
+            16609.049375077342
+          ],
+          "frac_ge": 0.00006114691495895386,
+          "inside": true,
+          "model_count": 16384.0,
+          "model_draws_per_success": 16384.0,
+          "model_frac_ge": 0.00006103515625,
+          "model_interval_999": [
+            15962,
+            16806
+          ],
+          "ratio_obs_model": 1.0018310546875,
+          "t": 17,
+          "tested": true
+        },
+        {
+          "count_ge": 8156,
+          "draws_per_success": 32912.635605689065,
+          "draws_per_success_95": [
+            32209.67794576434,
+            33646.96114314364
+          ],
+          "frac_ge": 0.00003038346767425537,
+          "inside": true,
+          "model_count": 8192.0,
+          "model_draws_per_success": 32768.0,
+          "model_frac_ge": 0.000030517578125,
+          "model_interval_999": [
+            7894,
+            8490
+          ],
+          "ratio_obs_model": 0.99560546875,
+          "t": 18,
+          "tested": true
+        },
+        {
+          "count_ge": 4033,
+          "draws_per_success": 66559.74609471858,
+          "draws_per_success_95": [
+            64558.79172679173,
+            68688.70419651996
+          ],
+          "frac_ge": 0.0000150240957736969,
+          "inside": true,
+          "model_count": 4096.0,
+          "model_draws_per_success": 65536.0,
+          "model_frac_ge": 0.0000152587890625,
+          "model_interval_999": [
+            3885,
+            4307
+          ],
+          "ratio_obs_model": 0.984619140625,
+          "t": 19,
+          "tested": true
+        },
+        {
+          "count_ge": 2103,
+          "draws_per_success": 127644.05896338564,
+          "draws_per_success_95": [
+            122405.58869129047,
+            133350.94684550422
+          ],
+          "frac_ge": 7.834285497665405e-6,
+          "inside": true,
+          "model_count": 2048.0,
+          "model_draws_per_success": 131072.0,
+          "model_frac_ge": 7.62939453125e-6,
+          "model_interval_999": [
+            1899,
+            2197
+          ],
+          "ratio_obs_model": 1.02685546875,
+          "t": 20,
+          "tested": true
+        },
+        {
+          "count_ge": 1111,
+          "draws_per_success": 241616.0720072007,
+          "draws_per_success_95": [
+            228067.50722175022,
+            256876.03444976077
+          ],
+          "frac_ge": 4.1387975215911865e-6,
+          "inside": true,
+          "model_count": 1024.0,
+          "model_draws_per_success": 262144.0,
+          "model_frac_ge": 3.814697265625e-6,
+          "model_interval_999": [
+            918,
+            1130
+          ],
+          "ratio_obs_model": 1.0849609375,
+          "t": 21,
+          "tested": true
+        },
+        {
+          "count_ge": 570,
+          "draws_per_success": 470939.3964912281,
+          "draws_per_success_95": [
+            435065.56888168555,
+            513260.9101338432
+          ],
+          "frac_ge": 2.123415470123291e-6,
+          "inside": true,
+          "model_count": 512.0,
+          "model_draws_per_success": 524288.0,
+          "model_frac_ge": 1.9073486328125e-6,
+          "model_interval_999": [
+            437,
+            587
+          ],
+          "ratio_obs_model": 1.11328125,
+          "t": 22,
+          "tested": true
+        },
+        {
+          "count_ge": 301,
+          "draws_per_success": 891812.146179402,
+          "draws_per_success_95": [
+            801299.8686567164,
+            1005376.2397003745
+          ],
+          "frac_ge": 1.1213123798370361e-6,
+          "inside": true,
+          "model_count": 256.0,
+          "model_draws_per_success": 1048576.0,
+          "model_frac_ge": 9.5367431640625e-7,
+          "model_interval_999": [
+            205,
+            310
+          ],
+          "ratio_obs_model": 1.17578125,
+          "t": 23,
+          "tested": true
+        },
+        {
+          "count_ge": 147,
+          "draws_per_success": 1826091.537414966,
+          "draws_per_success_95": [
+            1569797.9883040935,
+            2164802.064516129
+          ],
+          "frac_ge": 5.476176738739014e-7,
+          "inside": true,
+          "model_count": 128.0,
+          "model_draws_per_success": 2097152.0,
+          "model_frac_ge": 4.76837158203125e-7,
+          "model_interval_999": [
+            92,
+            167
+          ],
+          "ratio_obs_model": 1.1484375,
+          "t": 24,
+          "tested": true
+        },
+        {
+          "count_ge": 84,
+          "draws_per_success": 3195660.1904761903,
+          "draws_per_success_95": [
+            2631720.156862745,
+            4006499.343283582
+          ],
+          "frac_ge": 3.129243850708008e-7,
+          "inside": true,
+          "model_count": 64.0,
+          "model_draws_per_success": 4194304.0,
+          "model_frac_ge": 2.384185791015625e-7,
+          "model_interval_999": [
+            39,
+            92
+          ],
+          "ratio_obs_model": 1.3125,
+          "t": 25,
+          "tested": true
+        },
+        {
+          "count_ge": 41,
+          "draws_per_success": 6547206.243902439,
+          "draws_per_success_95": [
+            4971026.962962963,
+            9256395.034482758
+          ],
+          "frac_ge": 1.5273690223693848e-7,
+          "inside": true,
+          "model_count": 32.0,
+          "model_draws_per_success": 8388608.0,
+          "model_frac_ge": 1.1920928955078125e-7,
+          "model_interval_999": [
+            15,
+            52
+          ],
+          "ratio_obs_model": 1.28125,
+          "t": 26,
+          "tested": true
+        },
+        {
+          "count_ge": 23,
+          "draws_per_success": 11671106.782608695,
+          "draws_per_success_95": [
+            8134407.757575758,
+            19173961.14285714
+          ],
+          "frac_ge": 8.568167686462402e-8,
+          "inside": true,
+          "model_count": 16.0,
+          "model_draws_per_success": 16777216.0,
+          "model_frac_ge": 5.960464477539063e-8,
+          "model_interval_999": [
+            5,
+            31
+          ],
+          "ratio_obs_model": 1.4375,
+          "t": 27,
+          "tested": false
+        },
+        {
+          "count_ge": 12,
+          "draws_per_success": 22369621.333333332,
+          "draws_per_success_95": [
+            14128181.894736841,
+            44739242.666666664
+          ],
+          "frac_ge": 4.470348358154297e-8,
+          "inside": true,
+          "model_count": 8.0,
+          "model_draws_per_success": 33554432.0,
+          "model_frac_ge": 2.9802322387695312e-8,
+          "model_interval_999": [
+            1,
+            19
+          ],
+          "ratio_obs_model": 1.5,
+          "t": 28,
+          "tested": false
+        },
+        {
+          "count_ge": 6,
+          "draws_per_success": 44739242.666666664,
+          "draws_per_success_95": [
+            24403223.272727273,
+            134217728.0
+          ],
+          "frac_ge": 2.2351741790771484e-8,
+          "inside": true,
+          "model_count": 4.0,
+          "model_draws_per_success": 67108864.0,
+          "model_frac_ge": 1.4901161193847656e-8,
+          "model_interval_999": [
+            0,
+            12
+          ],
+          "ratio_obs_model": 1.5,
+          "t": 29,
+          "tested": false
+        },
+        {
+          "count_ge": 4,
+          "draws_per_success": 67108864.0,
+          "draws_per_success_95": [
+            33554432.0,
+            268435456.0
+          ],
+          "frac_ge": 1.4901161193847656e-8,
+          "inside": true,
+          "model_count": 2.0,
+          "model_draws_per_success": 134217728.0,
+          "model_frac_ge": 7.450580596923828e-9,
+          "model_interval_999": [
+            0,
+            8
+          ],
+          "ratio_obs_model": 2.0,
+          "t": 30,
+          "tested": false
+        },
+        {
+          "count_ge": 2,
+          "draws_per_success": 134217728.0,
+          "draws_per_success_95": [
+            53687091.2,
+            null
+          ],
+          "frac_ge": 7.450580596923828e-9,
+          "inside": true,
+          "model_count": 1.0,
+          "model_draws_per_success": 268435456.0,
+          "model_frac_ge": 3.725290298461914e-9,
+          "model_interval_999": [
+            0,
+            6
+          ],
+          "ratio_obs_model": 2.0,
+          "t": 31,
+          "tested": false
+        },
+        {
+          "count_ge": 1,
+          "draws_per_success": 268435456.0,
+          "draws_per_success_95": [
+            89478485.33333333,
+            null
+          ],
+          "frac_ge": 3.725290298461914e-9,
+          "inside": true,
+          "model_count": 0.5,
+          "model_draws_per_success": 536870912.0,
+          "model_frac_ge": 1.862645149230957e-9,
+          "model_interval_999": [
+            0,
+            4
+          ],
+          "ratio_obs_model": 2.0,
+          "t": 32,
+          "tested": false
+        },
+        {
+          "count_ge": 1,
+          "draws_per_success": 268435456.0,
+          "draws_per_success_95": [
+            89478485.33333333,
+            null
+          ],
+          "frac_ge": 3.725290298461914e-9,
+          "inside": true,
+          "model_count": 0.25,
+          "model_draws_per_success": 1073741824.0,
+          "model_frac_ge": 9.313225746154785e-10,
+          "model_interval_999": [
+            0,
+            3
+          ],
+          "ratio_obs_model": 4.0,
+          "t": 33,
+          "tested": false
+        },
+        {
+          "count_ge": 1,
+          "draws_per_success": 268435456.0,
+          "draws_per_success_95": [
+            89478485.33333333,
+            null
+          ],
+          "frac_ge": 3.725290298461914e-9,
+          "inside": true,
+          "model_count": 0.125,
+          "model_draws_per_success": 2147483648.0,
+          "model_frac_ge": 4.656612873077393e-10,
+          "model_interval_999": [
+            0,
+            2
+          ],
+          "ratio_obs_model": 8.0,
+          "t": 34,
+          "tested": false
+        },
+        {
+          "count_ge": 1,
+          "draws_per_success": 268435456.0,
+          "draws_per_success_95": [
+            89478485.33333333,
+            null
+          ],
+          "frac_ge": 3.725290298461914e-9,
+          "inside": true,
+          "model_count": 0.0625,
+          "model_draws_per_success": 4294967296.0,
+          "model_frac_ge": 2.3283064365386963e-10,
+          "model_interval_999": [
+            0,
+            2
+          ],
+          "ratio_obs_model": 16.0,
+          "t": 35,
+          "tested": false
+        },
+        {
+          "count_ge": 1,
+          "draws_per_success": 268435456.0,
+          "draws_per_success_95": [
+            89478485.33333333,
+            null
+          ],
+          "frac_ge": 3.725290298461914e-9,
+          "inside": true,
+          "model_count": 0.03125,
+          "model_draws_per_success": 8589934592.0,
+          "model_frac_ge": 1.1641532182693481e-10,
+          "model_interval_999": [
+            0,
+            1
+          ],
+          "ratio_obs_model": 32.0,
+          "t": 36,
+          "tested": false
+        },
+        {
+          "count_ge": 1,
+          "draws_per_success": 268435456.0,
+          "draws_per_success_95": [
+            89478485.33333333,
+            null
+          ],
+          "frac_ge": 3.725290298461914e-9,
+          "inside": true,
+          "model_count": 0.015625,
+          "model_draws_per_success": 17179869184.0,
+          "model_frac_ge": 5.820766091346741e-11,
+          "model_interval_999": [
+            0,
+            1
+          ],
+          "ratio_obs_model": 64.0,
+          "t": 37,
+          "tested": false
+        },
+        {
+          "count_ge": 1,
+          "draws_per_success": 268435456.0,
+          "draws_per_success_95": [
+            89478485.33333333,
+            null
+          ],
+          "frac_ge": 3.725290298461914e-9,
+          "inside": true,
+          "model_count": 0.0078125,
+          "model_draws_per_success": 34359738368.0,
+          "model_frac_ge": 2.9103830456733704e-11,
+          "model_interval_999": [
+            0,
+            1
+          ],
+          "ratio_obs_model": 128.0,
+          "t": 38,
+          "tested": false
+        }
+      ],
+      "singular": 0,
+      "us_per_draw_long_run": 10.201963283654303
+    }
+  },
+  "schema": "pkm_isogeny_tower_p192.derived/v1",
+  "t48": {
+    "card_previous_est_core_hours": 39094,
+    "core_hours": 98352.44999001884,
+    "core_hours_max": 99624.43840742286,
+    "core_hours_min": 95616.74894686436,
+    "core_years": 11.219763859230987,
+    "draws": 35184372088832.0,
+    "label": "derived (H2 model draws x C1 fast median)",
+    "z2xz2_core_hours": 362004.7473589179,
+    "z2xz2_draws": 93824992236885.33
+  },
+  "verdicts": {
+    "H1": {
+      "consistent": true
+    },
+    "H1_b_eq_1": {
+      "count": 8387239,
+      "inside": true,
+      "interval_999": [
+        8379077,
+        8398139
+      ],
+      "model": 8388608.0
+    },
+    "H2": {
+      "consistent": true
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "base_object_blake3": "b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e",
+  "base_object_sha256": "3e85c9e419fcddd3c9faed3c84470bf96fcad9178e48e1d73629369335841ecf",
+  "conservative_charge_seconds": 2400,
+  "cumulative_conservative_charge_seconds": 19800,
+  "elapsed_supervisor_seconds_L0": 486.2325755000056,
+  "pool_object_blake3": "e5600aa76a88246a4c3f73fce83ba73479e79c34e88d6205fffdb91ce09e0a99",
+  "pool_object_sha256": "74841a1e290e84904f898a9c952e91a795e34498f48e4529ca1c621a503b62cc",
+  "raw_sha256": {
+    "budget.json": "aab1eeff9c02cd9afced71f883748c0b6fc58f7acc98631415336b57ee5d023d",
+    "build/build.stderr": "87ab7527f4ba727e33aff9035d30c962b72f5085444eaf655515bc2d261aef0c",
+    "build/build.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/worker": "b2a8967666fcfadea0824faa330900a8c434611c51098ac908709832df3843f0",
+    "config.json": "8b9c4197c3bdd196329ce09da15c580392296ce5ddfbe5dd3a7accb45e763d41",
+    "outer.json": "4cddcd1d34848d45a8e00d8b7ed1cc6d290c185032fe28d0e1b922aa9ed0ecfe",
+    "run/search.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "run/search.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "run/search/config.json": "6619acbfe7f573f8b8eded0965e1a2ca1da6bdf1515e3de99f84e06a71b58032",
+    "run/search/result.json": "4a7a0d79417c868d71bf95e116eab7b92da1d87a911456d38ef23098512429dd",
+    "run/verify.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "run/verify.stdout": "553eee5404383d7c2473a8f8d19049afac9f3308a742015ad19dd3c123b731bb"
+  },
+  "residual_signed_orbits": 600,
+  "schema": "n83.cross-stream-first-gate-audit/v1",
+  "search_candidate": null,
+  "search_conflicts": 5000,
+  "search_models": 0,
+  "search_status": "UNKNOWN_search_cap",
+  "selected_best_total_runtime": null,
+  "shared_signed_orbits": 0,
+  "source_commit": "0764901992591c39566d720ae812c54cdc09ab75",
+  "status": "PASS_receipts_with_censored_search"
+}

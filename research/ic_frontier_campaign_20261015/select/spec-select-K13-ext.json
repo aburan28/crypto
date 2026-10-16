@@ -1,0 +1,70 @@
+{
+ "schema": "ecbench.spec/v1",
+ "label": "IC frontier campaign Phase 0 step 3: parameter selection, Koblitz a=0 n=13 (grid extension)",
+ "description": "Grid extension after the first selection pass put every optimum on a grid edge (compact columns=2, negfold top dimension): compact columns=1 and larger negfold dimensions, same train targets and seed. Not a measurement.",
+ "workloads": {
+  "curves": [
+   {
+    "kind": "koblitz",
+    "a": 0,
+    "n": 13
+   }
+  ],
+  "targets_per_curve": 4,
+  "target_seed": 20261015100,
+  "target_kind": "public"
+ },
+ "arms": [
+  {
+   "name": "rho-strong",
+   "role": "reference",
+   "method": {
+    "id": "rho.signed_frobenius_strong"
+   }
+  },
+  {
+   "name": "compact-c1",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "compact-orbit-scan:columns=1,raw_x_cap=1000000",
+     "oracle": "mitm-frobenius-counted:m=2",
+     "max_trials": "50000000"
+    }
+   }
+  },
+  {
+   "name": "negfold-d6",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "koblitz-standard-subspace:dimension=6",
+     "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+     "max_trials": "50000000"
+    }
+   }
+  },
+  {
+   "name": "negfold-d7",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "koblitz-standard-subspace:dimension=7",
+     "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+     "max_trials": "50000000"
+    }
+   }
+  }
+ ],
+ "measurement": {
+  "rounds": 1,
+  "warmup": 0,
+  "order": "alternate",
+  "seed": 20261015103,
+  "isolation_required": "L0",
+  "timeout_seconds": 900
+ }
+}

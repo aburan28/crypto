@@ -1,0 +1,99 @@
+{
+  "candidates": [
+    "IC1N83Ckb1a1fb169984PDP4rootRCguidedLAgaussTDdirectISO0h8eb8e220bff6",
+    "IC1N83Ckb1a1fb169984PDP4rootRCguidedLAgaussTDdirectISO0hd0bd0a9c5003"
+  ],
+  "rows": [
+    {
+      "actual_usable_points": 169984,
+      "analysis_sha256": "69f77eaaae6e08185046c1701450e03e032c5892e6644dc370e2d15c07e58552",
+      "arm": "legacy_id29",
+      "base_hash": "f3bb5adfd099df1be8e90edf56c9a764028e060d7e0c3a97759e9b699c423629",
+      "candidate_id": "IC1N83Ckb1a1fb169984PDP4rootRCguidedLAgaussTDdirectISO0h8eb8e220bff6",
+      "effective_columns": 1024,
+      "executed_binary_sha256": "4f13fb3fc42fb7c7a9983eb830f484bd5f196c6419c6512cb8acb622e40aef03",
+      "hardware_tier": "local_correctness_control",
+      "one_target_online_ms_exploratory": 56.979957999999996,
+      "online_phases_ms": {
+        "target_descent_ms": 0.000959,
+        "target_pdp_ms": 56.756291999999995,
+        "target_query_ms": 0.0,
+        "target_recovery_check_ms": 0.15725,
+        "target_relation_check_ms": 0.065125
+      },
+      "outer_cold_wall_seconds_exploratory": 226.7856019589999,
+      "performance_claim": null,
+      "point_indices": [
+        25135,
+        120536,
+        27047,
+        45109
+      ],
+      "raw_archive_sha256": "f831bdb50bff9dd27e47c5e21554aed6358d42b5d62859e10cc4ba147c85ddf7",
+      "recovered_scalar": 3640978018804724,
+      "root_table_entries": 87028652,
+      "run_id": "IC1N83Ckb1a1fb169984PDP4rootRCguidedLAgaussTDdirectISO0h8eb8e220bff6Weebf98ee1031R1",
+      "source_sha256": "f14d9747cd24627d39d7cae4c9bef69ed2819544125ef15f31306ce5d75f3fc7",
+      "status": "PASS_INDEPENDENT_REPLAY",
+      "workload_id": "eebf98ee1031"
+    },
+    {
+      "actual_usable_points": 169984,
+      "analysis_sha256": "69f77eaaae6e08185046c1701450e03e032c5892e6644dc370e2d15c07e58552",
+      "arm": "opt_in_id30",
+      "base_hash": "f3bb5adfd099df1be8e90edf56c9a764028e060d7e0c3a97759e9b699c423629",
+      "candidate_id": "IC1N83Ckb1a1fb169984PDP4rootRCguidedLAgaussTDdirectISO0hd0bd0a9c5003",
+      "effective_columns": 1024,
+      "executed_binary_sha256": "4f13fb3fc42fb7c7a9983eb830f484bd5f196c6419c6512cb8acb622e40aef03",
+      "hardware_tier": "local_correctness_control",
+      "one_target_online_ms_exploratory": 65.05570800000001,
+      "online_phases_ms": {
+        "target_descent_ms": 0.001041,
+        "target_pdp_ms": 64.916958,
+        "target_query_ms": 4.2e-05,
+        "target_recovery_check_ms": 0.105208,
+        "target_relation_check_ms": 0.03225
+      },
+      "outer_cold_wall_seconds_exploratory": 127.69323250000161,
+      "performance_claim": null,
+      "point_indices": [
+        25135,
+        120536,
+        27047,
+        45109
+      ],
+      "raw_archive_sha256": "f831bdb50bff9dd27e47c5e21554aed6358d42b5d62859e10cc4ba147c85ddf7",
+      "recovered_scalar": 3640978018804724,
+      "root_table_entries": 87028652,
+      "run_id": "IC1N83Ckb1a1fb169984PDP4rootRCguidedLAgaussTDdirectISO0hd0bd0a9c5003Weebf98ee1031R1",
+      "source_sha256": "f14d9747cd24627d39d7cae4c9bef69ed2819544125ef15f31306ce5d75f3fc7",
+      "status": "PASS_INDEPENDENT_REPLAY",
+      "workload_id": "eebf98ee1031"
+    }
+  ],
+  "schema": "n83.id30-control-ic1/v1",
+  "selected_candidate_id": null,
+  "selection_status": "PASS_EXACT_PARITY",
+  "workload": {
+    "cold_or_warm": "one_public_point_per_fresh_process_empty_base_index_and_logs",
+    "curve_id": "EC1N83Ckb1a1haacb69ee9f37",
+    "input_law": {
+      "answer_sidecar_sha256": "b71c5a8bfdae603931fa6c03fc6f6faa3b261288cf787ac682bf8a3e3afe262d",
+      "domain": "n83-cold-factor-base-one-plus-four-20261016-v1",
+      "fixture_index": 0,
+      "generator_sha256": "1807dadb4dc423850f32742faa03beb5774dacb4d3c17618502b6debb623ca58",
+      "scalar_rule": "1+(little_endian(SHA256(domain||u32_le(index))) mod (r-1))",
+      "seed_sha256": "77e724f4d6656a0c6710a6fa1877da77ebf4d4ea8dd189f45ceb45819d88ad30"
+    },
+    "public_targets": [
+      [
+        "2975338143493000733320472",
+        "7892490597757834798312085"
+      ]
+    ],
+    "schema_version": 1,
+    "target_count": 1,
+    "target_sha256": "2c068d2f659588edcdbaa685fc73bb146e2bfee3be123d377d537658f8021c6d",
+    "workload_id": "eebf98ee1031"
+  }
+}

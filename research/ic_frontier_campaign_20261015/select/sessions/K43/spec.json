@@ -1,0 +1,142 @@
+{
+ "schema": "ecbench.spec/v1",
+ "label": "IC frontier campaign Phase 0 step 3: parameter selection, Koblitz a=1 n=43",
+ "description": "Train panel for per-size parameter selection (research/ic_frontier_campaign_20261015/PROTOCOL.md Phase 0 step 3): compact-orbit column counts {2..64} and negfold subspace dimensions around round(log2 r / 3) on four public train targets, one round. Selection by mean S priced across the AGENTS.md 5a band. Not a measurement.",
+ "workloads": {
+  "curves": [
+   {
+    "kind": "koblitz",
+    "a": 1,
+    "n": 43
+   }
+  ],
+  "targets_per_curve": 4,
+  "target_seed": 20261015100,
+  "target_kind": "public"
+ },
+ "arms": [
+  {
+   "name": "rho-strong",
+   "role": "reference",
+   "method": {
+    "id": "rho.signed_frobenius_strong"
+   }
+  },
+  {
+   "name": "compact-c2",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "compact-orbit-scan:columns=2,raw_x_cap=1000000",
+     "oracle": "mitm-frobenius-counted:m=2",
+     "max_trials": "50000000"
+    }
+   }
+  },
+  {
+   "name": "compact-c4",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "compact-orbit-scan:columns=4,raw_x_cap=1000000",
+     "oracle": "mitm-frobenius-counted:m=2",
+     "max_trials": "50000000"
+    }
+   }
+  },
+  {
+   "name": "compact-c8",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "compact-orbit-scan:columns=8,raw_x_cap=1000000",
+     "oracle": "mitm-frobenius-counted:m=2",
+     "max_trials": "50000000"
+    }
+   }
+  },
+  {
+   "name": "compact-c16",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "compact-orbit-scan:columns=16,raw_x_cap=1000000",
+     "oracle": "mitm-frobenius-counted:m=2",
+     "max_trials": "50000000"
+    }
+   }
+  },
+  {
+   "name": "compact-c32",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "compact-orbit-scan:columns=32,raw_x_cap=1000000",
+     "oracle": "mitm-frobenius-counted:m=2",
+     "max_trials": "50000000"
+    }
+   }
+  },
+  {
+   "name": "compact-c64",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "compact-orbit-scan:columns=64,raw_x_cap=1000000",
+     "oracle": "mitm-frobenius-counted:m=2",
+     "max_trials": "50000000"
+    }
+   }
+  },
+  {
+   "name": "negfold-d10",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "koblitz-standard-subspace:dimension=10",
+     "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+     "max_trials": "50000000"
+    }
+   }
+  },
+  {
+   "name": "negfold-d11",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "koblitz-standard-subspace:dimension=11",
+     "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+     "max_trials": "50000000"
+    }
+   }
+  },
+  {
+   "name": "negfold-d12",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "koblitz-standard-subspace:dimension=12",
+     "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+     "max_trials": "50000000"
+    }
+   }
+  }
+ ],
+ "measurement": {
+  "rounds": 1,
+  "warmup": 0,
+  "order": "alternate",
+  "seed": 20261015103,
+  "isolation_required": "L0",
+  "timeout_seconds": 900
+ }
+}

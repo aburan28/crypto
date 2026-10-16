@@ -1,0 +1,568 @@
+{
+  "algebraic": [
+    {
+      "attempts": 96,
+      "bits": 16,
+      "completed": 89,
+      "fields": 6,
+      "found": 58,
+      "generic_cpu": 0.026495717000001084,
+      "generic_rank": 41,
+      "generic_rank_per_cpu": 1547.4199094139751,
+      "max_worker_cap_overshoot": 0.35870199999999997,
+      "norm_over_join": {
+        "bootstrap_draws": 10000,
+        "fields": 6,
+        "lower": 0.0014753330447672252,
+        "ratio": 0.0029876885282070905,
+        "upper": 0.008222194539089754
+      },
+      "oracle_positive": 59,
+      "rank": 39,
+      "rank_per_cpu": 4.623208711675389,
+      "timeouts": 7,
+      "total_cpu": 8.435699625999996,
+      "worker_cpu": 6.394861,
+      "wrapper_cpu": 1.9359678239999984
+    },
+    {
+      "attempts": 96,
+      "bits": 20,
+      "completed": 84,
+      "fields": 6,
+      "found": 93,
+      "generic_cpu": 0.09608389099997439,
+      "generic_rank": 253,
+      "generic_rank_per_cpu": 2633.1156801306834,
+      "max_worker_cap_overshoot": 0.26730999999999994,
+      "norm_over_join": {
+        "bootstrap_draws": 10000,
+        "fields": 6,
+        "lower": 0.00138358628228602,
+        "ratio": 0.0017620838928111566,
+        "upper": 0.002259003430009882
+      },
+      "oracle_positive": 93,
+      "rank": 248,
+      "rank_per_cpu": 4.639770727866772,
+      "timeouts": 9,
+      "total_cpu": 53.45091698399999,
+      "worker_cpu": 45.935331999999995,
+      "wrapper_cpu": 7.428143361
+    },
+    {
+      "attempts": 96,
+      "bits": 24,
+      "completed": 0,
+      "fields": 6,
+      "found": 76,
+      "generic_cpu": 0.2684687709999949,
+      "generic_rank": 115,
+      "generic_rank_per_cpu": 428.35522199340716,
+      "max_worker_cap_overshoot": 0.507336,
+      "norm_over_join": {
+        "bootstrap_draws": 10000,
+        "fields": 6,
+        "lower": 0.00048530892949539477,
+        "ratio": 0.0009138932605661117,
+        "upper": 0.0012162618377096954
+      },
+      "oracle_positive": 84,
+      "rank": 90,
+      "rank_per_cpu": 0.39147095050807545,
+      "timeouts": 96,
+      "total_cpu": 229.902116321,
+      "worker_cpu": 196.227429,
+      "wrapper_cpu": 33.56131825400001
+    }
+  ],
+  "contrasts": [
+    {
+      "bits": 16,
+      "control": "low_x",
+      "coverage": {
+        "bootstrap_draws": 10000,
+        "fields": 8,
+        "lower": 0.923265306122449,
+        "ratio": 0.973170731707317,
+        "upper": 1.019544771003927
+      },
+      "throughput": {
+        "bootstrap_draws": 10000,
+        "fields": 8,
+        "lower": 0.691545888435179,
+        "ratio": 0.8030419385223255,
+        "upper": 0.9011861765701551
+      }
+    },
+    {
+      "bits": 16,
+      "control": "low_digit_weight",
+      "coverage": {
+        "bootstrap_draws": 10000,
+        "fields": 8,
+        "lower": 0.9422294548413345,
+        "ratio": 0.9835661462612982,
+        "upper": 1.0228671943711523
+      },
+      "throughput": {
+        "bootstrap_draws": 10000,
+        "fields": 8,
+        "lower": 1.2253422693327551,
+        "ratio": 1.4556134155489853,
+        "upper": 1.7616098795953419
+      }
+    },
+    {
+      "bits": 16,
+      "control": "random",
+      "coverage": {
+        "bootstrap_draws": 10000,
+        "fields": 8,
+        "lower": 0.9384088964927289,
+        "ratio": 0.9771428571428571,
+        "upper": 1.020618965799378
+      },
+      "throughput": {
+        "bootstrap_draws": 10000,
+        "fields": 8,
+        "lower": 0.6846775030984111,
+        "ratio": 0.8358234020407422,
+        "upper": 0.9674424077537865
+      }
+    },
+    {
+      "bits": 20,
+      "control": "low_x",
+      "coverage": {
+        "bootstrap_draws": 10000,
+        "fields": 8,
+        "lower": 0.999493670886076,
+        "ratio": 1.0135205408216328,
+        "upper": 1.0292849597603284
+      },
+      "throughput": {
+        "bootstrap_draws": 10000,
+        "fields": 8,
+        "lower": 0.9051518934806887,
+        "ratio": 0.9633804134790711,
+        "upper": 1.010642427527575
+      }
+    },
+    {
+      "bits": 20,
+      "control": "low_digit_weight",
+      "coverage": {
+        "bootstrap_draws": 10000,
+        "fields": 8,
+        "lower": 0.997,
+        "ratio": 1.004639175257732,
+        "upper": 1.013164823591364
+      },
+      "throughput": {
+        "bootstrap_draws": 10000,
+        "fields": 8,
+        "lower": 0.9564766389652567,
+        "ratio": 1.0051759408216074,
+        "upper": 1.0524706665408847
+      }
+    },
+    {
+      "bits": 20,
+      "control": "random",
+      "coverage": {
+        "bootstrap_draws": 10000,
+        "fields": 8,
+        "lower": 0.9908303616912888,
+        "ratio": 0.9974411463664279,
+        "upper": 1.0031760570607553
+      },
+      "throughput": {
+        "bootstrap_draws": 10000,
+        "fields": 8,
+        "lower": 0.8765980543296784,
+        "ratio": 0.9633250477867417,
+        "upper": 1.039282596333009
+      }
+    },
+    {
+      "bits": 24,
+      "control": "low_x",
+      "coverage": {
+        "bootstrap_draws": 10000,
+        "fields": 8,
+        "lower": 0.9307157997230807,
+        "ratio": 0.960161662817552,
+        "upper": 0.9830510949627753
+      },
+      "throughput": {
+        "bootstrap_draws": 10000,
+        "fields": 8,
+        "lower": 0.808344731563492,
+        "ratio": 0.8633761265396258,
+        "upper": 0.9071500414351126
+      }
+    },
+    {
+      "bits": 24,
+      "control": "low_digit_weight",
+      "coverage": {
+        "bootstrap_draws": 10000,
+        "fields": 8,
+        "lower": 0.9519756838905775,
+        "ratio": 0.9765120375807399,
+        "upper": 0.9988479759541874
+      },
+      "throughput": {
+        "bootstrap_draws": 10000,
+        "fields": 8,
+        "lower": 1.226854247380751,
+        "ratio": 1.3587973450509672,
+        "upper": 1.4625553887951281
+      }
+    },
+    {
+      "bits": 24,
+      "control": "random",
+      "coverage": {
+        "bootstrap_draws": 10000,
+        "fields": 8,
+        "lower": 0.9487492373398414,
+        "ratio": 0.9674229203025014,
+        "upper": 0.9847328244274809
+      },
+      "throughput": {
+        "bootstrap_draws": 10000,
+        "fields": 8,
+        "lower": 0.9589928997390555,
+        "ratio": 1.0196596343653122,
+        "upper": 1.0829654492091687
+      }
+    }
+  ],
+  "gates": [
+    {
+      "bits": 16,
+      "fields": 2,
+      "known_negative_uniform": {
+        "attempts": 16,
+        "cpu": 0.4463091360000003,
+        "successes": 16,
+        "timeouts": 0
+      },
+      "known_positive_uniform": {
+        "attempts": 16,
+        "cpu": 0.24228156900000067,
+        "successes": 16,
+        "timeouts": 0
+      },
+      "passed": true,
+      "planted": {
+        "attempts": 16,
+        "cpu": 0.2808588360000005,
+        "successes": 16,
+        "timeouts": 0
+      }
+    },
+    {
+      "bits": 20,
+      "fields": 2,
+      "known_negative_uniform": {
+        "attempts": 16,
+        "cpu": 7.969692030999998,
+        "successes": 16,
+        "timeouts": 0
+      },
+      "known_positive_uniform": {
+        "attempts": 16,
+        "cpu": 4.056831787,
+        "successes": 15,
+        "timeouts": 1
+      },
+      "passed": true,
+      "planted": {
+        "attempts": 16,
+        "cpu": 1.0356898179999994,
+        "successes": 16,
+        "timeouts": 0
+      }
+    },
+    {
+      "bits": 24,
+      "fields": 2,
+      "known_negative_uniform": {
+        "attempts": 16,
+        "cpu": 36.964352936999994,
+        "successes": 0,
+        "timeouts": 16
+      },
+      "known_positive_uniform": {
+        "attempts": 16,
+        "cpu": 8.876373715000005,
+        "successes": 16,
+        "timeouts": 0
+      },
+      "passed": true,
+      "planted": {
+        "attempts": 16,
+        "cpu": 14.986440600000003,
+        "successes": 14,
+        "timeouts": 2
+      }
+    }
+  ],
+  "generic": [
+    {
+      "base_cpu": 0.05583144300000109,
+      "bits": 16,
+      "cases": 32,
+      "checkpoints_reached": 30,
+      "coverage": 0.58447265625,
+      "covered": 1197,
+      "decompositions": 1844,
+      "fields": 8,
+      "kind": "coset",
+      "m_max": 39,
+      "m_min": 22,
+      "median_checkpoint_cpu": 0.002849404000000222,
+      "pair_cpu": 0.011745241000002293,
+      "rank": 602,
+      "rank_per_cpu": 3466.021782415191,
+      "saturated": 3,
+      "search_verify_rank_cpu": 0.10610947200000731,
+      "targets": 2048,
+      "total_cpu": 0.1736861560000107
+    },
+    {
+      "base_cpu": 0.03344237899999758,
+      "bits": 16,
+      "cases": 32,
+      "checkpoints_reached": 31,
+      "coverage": 0.6005859375,
+      "covered": 1230,
+      "decompositions": 1951,
+      "fields": 8,
+      "kind": "low_x",
+      "m_max": 39,
+      "m_min": 22,
+      "median_checkpoint_cpu": 0.0022285220000002326,
+      "pair_cpu": 0.010356739999999087,
+      "rank": 663,
+      "rank_per_cpu": 4316.115530395591,
+      "saturated": 5,
+      "search_verify_rank_cpu": 0.10981122699999402,
+      "targets": 2048,
+      "total_cpu": 0.15361034599999068
+    },
+    {
+      "base_cpu": 0.15597234100000112,
+      "bits": 16,
+      "cases": 32,
+      "checkpoints_reached": 29,
+      "coverage": 0.59423828125,
+      "covered": 1217,
+      "decompositions": 1907,
+      "fields": 8,
+      "kind": "low_digit_weight",
+      "m_max": 39,
+      "m_min": 22,
+      "median_checkpoint_cpu": 0.005651716000000251,
+      "pair_cpu": 0.013260164000000296,
+      "rank": 627,
+      "rank_per_cpu": 2381.141685966105,
+      "saturated": 1,
+      "search_verify_rank_cpu": 0.0940865590000084,
+      "targets": 2048,
+      "total_cpu": 0.2633190640000098
+    },
+    {
+      "base_cpu": 0.03257036099999766,
+      "bits": 16,
+      "cases": 32,
+      "checkpoints_reached": 30,
+      "coverage": 0.59814453125,
+      "covered": 1225,
+      "decompositions": 1954,
+      "fields": 8,
+      "kind": "random",
+      "m_max": 39,
+      "m_min": 22,
+      "median_checkpoint_cpu": 0.002401043500000588,
+      "pair_cpu": 0.013148338000000148,
+      "rank": 635,
+      "rank_per_cpu": 4146.83505385536,
+      "saturated": 5,
+      "search_verify_rank_cpu": 0.10741013100003638,
+      "targets": 2048,
+      "total_cpu": 0.1531288300000342
+    },
+    {
+      "base_cpu": 0.12130780500000515,
+      "bits": 20,
+      "cases": 32,
+      "checkpoints_reached": 32,
+      "coverage": 0.95166015625,
+      "covered": 1949,
+      "decompositions": 6973,
+      "fields": 8,
+      "kind": "coset",
+      "m_max": 153,
+      "m_min": 112,
+      "median_checkpoint_cpu": 0.012097736500000345,
+      "pair_cpu": 0.2191590169999973,
+      "rank": 3764,
+      "rank_per_cpu": 2241.5509140702525,
+      "saturated": 12,
+      "search_verify_rank_cpu": 1.3387276929999956,
+      "targets": 2048,
+      "total_cpu": 1.679194514999998
+    },
+    {
+      "base_cpu": 0.0996878949999962,
+      "bits": 20,
+      "cases": 32,
+      "checkpoints_reached": 32,
+      "coverage": 0.93896484375,
+      "covered": 1923,
+      "decompositions": 6834,
+      "fields": 8,
+      "kind": "low_x",
+      "m_max": 153,
+      "m_min": 112,
+      "median_checkpoint_cpu": 0.010388360499999472,
+      "pair_cpu": 0.18292448999999777,
+      "rank": 3699,
+      "rank_per_cpu": 2326.755747478095,
+      "saturated": 11,
+      "search_verify_rank_cpu": 1.3071548280000131,
+      "targets": 2048,
+      "total_cpu": 1.5897672130000071
+    },
+    {
+      "base_cpu": 0.21482035600000415,
+      "bits": 20,
+      "cases": 32,
+      "checkpoints_reached": 32,
+      "coverage": 0.947265625,
+      "covered": 1940,
+      "decompositions": 6854,
+      "fields": 8,
+      "kind": "low_digit_weight",
+      "m_max": 153,
+      "m_min": 112,
+      "median_checkpoint_cpu": 0.014318071999998239,
+      "pair_cpu": 0.2052134470000011,
+      "rank": 3707,
+      "rank_per_cpu": 2230.0085219290672,
+      "saturated": 12,
+      "search_verify_rank_cpu": 1.2422916830000492,
+      "targets": 2048,
+      "total_cpu": 1.6623254860000545
+    },
+    {
+      "base_cpu": 0.10298436199999195,
+      "bits": 20,
+      "cases": 32,
+      "checkpoints_reached": 32,
+      "coverage": 0.9541015625,
+      "covered": 1954,
+      "decompositions": 6817,
+      "fields": 8,
+      "kind": "random",
+      "m_max": 153,
+      "m_min": 112,
+      "median_checkpoint_cpu": 0.011921872000000278,
+      "pair_cpu": 0.22120897499999614,
+      "rank": 3678,
+      "rank_per_cpu": 2326.8894743474802,
+      "saturated": 12,
+      "search_verify_rank_cpu": 1.2564575879999653,
+      "targets": 2048,
+      "total_cpu": 1.5806509249999534
+    },
+    {
+      "base_cpu": 0.24753961299999716,
+      "bits": 24,
+      "cases": 32,
+      "checkpoints_reached": 32,
+      "coverage": 0.81201171875,
+      "covered": 1663,
+      "decompositions": 3876,
+      "fields": 8,
+      "kind": "coset",
+      "m_max": 276,
+      "m_min": 225,
+      "median_checkpoint_cpu": 0.04410210500000389,
+      "pair_cpu": 1.015852901999999,
+      "rank": 2210,
+      "rank_per_cpu": 1166.959464188826,
+      "saturated": 0,
+      "search_verify_rank_cpu": 0.6304179109998564,
+      "targets": 2048,
+      "total_cpu": 1.8938104259998525
+    },
+    {
+      "base_cpu": 0.21250789300004413,
+      "bits": 24,
+      "cases": 32,
+      "checkpoints_reached": 32,
+      "coverage": 0.845703125,
+      "covered": 1732,
+      "decompositions": 3941,
+      "fields": 8,
+      "kind": "low_x",
+      "m_max": 276,
+      "m_min": 225,
+      "median_checkpoint_cpu": 0.03521840699999679,
+      "pair_cpu": 0.792648264000011,
+      "rank": 2207,
+      "rank_per_cpu": 1351.62350257002,
+      "saturated": 0,
+      "search_verify_rank_cpu": 0.6276950000000561,
+      "targets": 2048,
+      "total_cpu": 1.6328511570001112
+    },
+    {
+      "base_cpu": 0.9952454939999988,
+      "bits": 24,
+      "cases": 32,
+      "checkpoints_reached": 32,
+      "coverage": 0.83154296875,
+      "covered": 1703,
+      "decompositions": 3928,
+      "fields": 8,
+      "kind": "low_digit_weight",
+      "m_max": 276,
+      "m_min": 225,
+      "median_checkpoint_cpu": 0.07234838100000296,
+      "pair_cpu": 0.9743841920000165,
+      "rank": 2220,
+      "rank_per_cpu": 858.8178865959253,
+      "saturated": 0,
+      "search_verify_rank_cpu": 0.6153188050000473,
+      "targets": 2048,
+      "total_cpu": 2.5849484910000626
+    },
+    {
+      "base_cpu": 0.2184954489999953,
+      "bits": 24,
+      "cases": 32,
+      "checkpoints_reached": 32,
+      "coverage": 0.83935546875,
+      "covered": 1719,
+      "decompositions": 3829,
+      "fields": 8,
+      "kind": "random",
+      "m_max": 276,
+      "m_min": 225,
+      "median_checkpoint_cpu": 0.04334843399999855,
+      "pair_cpu": 1.0207634999999833,
+      "rank": 2108,
+      "rank_per_cpu": 1144.4598029176673,
+      "saturated": 0,
+      "search_verify_rank_cpu": 0.6026580799999905,
+      "targets": 2048,
+      "total_cpu": 1.8419170289999691
+    }
+  ]
+}

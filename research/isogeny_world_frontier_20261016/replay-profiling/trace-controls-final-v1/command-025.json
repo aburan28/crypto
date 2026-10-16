@@ -1,0 +1,11 @@
+{
+  "args": [
+    "verify",
+    "--input",
+    "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/trace-controls-final-v1/public-p192-13/construction"
+  ],
+  "exit_code": 1,
+  "stderr": "\nthread 'main' (494818) panicked at src/replay_trace.rs:135:14:\nrequested replay trace needs an absent file and an available parent directory: Os { code: 2, kind: NotFound, message: \"No such file or directory\" }\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n",
+  "stdout": "{\n  \"error\": \"construction or independent verification failed; inspect retained run records\",\n  \"status\": \"FAIL\"\n}\n",
+  "trace": "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/trace-controls-final-v1/missing-parent/trace.jsonl"
+}

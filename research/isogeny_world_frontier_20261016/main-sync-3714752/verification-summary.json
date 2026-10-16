@@ -1,0 +1,37 @@
+{
+  "merge_commit": "3b7b24b1620f92d9d9c108e18f1688041a14ad2a",
+  "parents": [
+    "a5c1c39d3122be85c4fad62eb980ba25dfe428a0",
+    "3714752ee6a9686e0fce79cb308423d9fd09cde9"
+  ],
+  "manual_conflict": ".github/workflows/release.yml",
+  "resolution": "fully prefixed version; draft true; binary upload/checks precede publishing",
+  "root_gate": {
+    "exit_code": 0,
+    "passed": 4148,
+    "failed": 0,
+    "ignored": 117,
+    "test_execution_seconds_operational": 325.17,
+    "binary_sha256": "e6b0366e26794fe703741ba309cd3c7cb168150c827fa2a23ba068038aec7399",
+    "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)"
+  },
+  "release_transport_final": {
+    "passed_cases": 9,
+    "exit_code": 0
+  },
+  "shellcheck_final_exit": 0,
+  "retained_operational_failures": [
+    "initial staged-whitespace check stopped on preexisting upstream SVG/PDF whitespace before tests",
+    "first shell checks exit127/2 because sparse checkout removed tracked helpers; no source missing from Git"
+  ],
+  "sparse_helpers_restored_with_exact_source_hashes": true,
+  "scientific_run_restarted": false,
+  "world_record_or_speed_claim": false,
+  "current_head_CI": "pending push and remote checks",
+  "publication_helper_CI": {
+    "job": "release-assets",
+    "runs_on_PR_and_main": true,
+    "official_release_depends_on_job": true,
+    "workflow_sha256": "e36fb80c370a9c415c9f8e4cd9203808df7b4bb539725564d044a1890e18de6e"
+  }
+}

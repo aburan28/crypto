@@ -1,0 +1,46 @@
+{
+  "all_selected_terms_in_archived_domains_by_fixture": true,
+  "all_selected_terms_phase_zero": true,
+  "chain": {
+    "identity_mask": 0,
+    "intermediate_x": [
+      "6074522724576400135011444",
+      "4229099761816125480084059",
+      "976447405114368105838624"
+    ],
+    "s3_residues": [
+      "0",
+      "0",
+      "0",
+      "0"
+    ],
+    "target_x": "6595116073687692399614168"
+  },
+  "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
+  "envelope_archive_sha256": "aacb62784dee0c9f5e06328dbb85a4b6a1c7243e778328da82900e7284f3a74a",
+  "first_pair_swapped_for_lex_order": true,
+  "fixture_sha256": "fc203db28eed0164e47b0c755c3d9a09f80df1acd5e4c7e09dfe172fa5f0a538",
+  "frozen_source_commit": "f3d27f68b68cda907e0668042ac7fa13ae6b579d",
+  "frozen_source_sha256": {
+    "examples/koblitz_n83_mixed_orbit_worker.rs": "e8781e8ba5c06528b1a8967312c5621084c0c3f8e3705e0882f849f4b1b9a152",
+    "src/cryptanalysis/binary_semaev_chain_sat.rs": "0031972aab435d963af54a5f28f0510e45e5301f00c49466661191815becc06e",
+    "src/cryptanalysis/koblitz_large_prime.rs": "accd5cf0ef7c738aedce38a21d172eeda1b309eaf9c8f4848030dac9d4421ddd"
+  },
+  "k600_audit_sha256": "387d393b9805f35ee1ca6328e8602133a1b9bc036088b1be1a3ba5a29bb8469c",
+  "natural_relation_yield": null,
+  "ordered_global_point_indices": [
+    166,
+    0,
+    332,
+    196212,
+    196378
+  ],
+  "sat_model_constructed": false,
+  "sat_search_executed": false,
+  "schema": "n83.mixed-orbit-control-chain-preflight/v1",
+  "scope": "known_answer_control_only",
+  "small_archive_sha256": "eb342b574e244e1e67e8e78c805f33ee88edcdb4f3a14d4114e6f413beede380",
+  "source_sha256": "a77021ae23fd2a8ec5c57a0c0312acc1295fd8c9483bf3713c1e88530ffa08a7",
+  "status": "PASS_all_affine_chain_witness",
+  "total_index_calculus_runtime_ms": null
+}

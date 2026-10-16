@@ -1,0 +1,26 @@
+{
+  "build": "cargo build --release --example symmetrised_oracle_bench",
+  "custom_example": "symmetrised_oracle_bench",
+  "direct": "/Volumes/SSD990/ic-auto-202610132132/target/release/examples/symmetrised_oracle_bench --only 0 31 2 --targets 1 --no-sat --node-budget 50000",
+  "direct_argv": [
+    "/Volumes/SSD990/ic-auto-202610132132/target/release/examples/symmetrised_oracle_bench",
+    "--only",
+    "0",
+    "31",
+    "2",
+    "--targets",
+    "1",
+    "--no-sat",
+    "--node-budget",
+    "50000"
+  ],
+  "direct_producer_fixture_count": 1,
+  "env": {},
+  "fixtures": 1,
+  "online_target_count": 1,
+  "precompute_fixtures": 0,
+  "rho": null,
+  "rho_argv": null,
+  "rho_producer_fixture_count": 0,
+  "stage": "decomposition"
+}

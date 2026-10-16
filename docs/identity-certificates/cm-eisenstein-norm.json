@@ -1,0 +1,193 @@
+{
+  "id": "IDC1hf56b3716b0a7eb8b",
+  "independence": "native issuer; exact integer expansion separately checked; no formal proof pointer",
+  "modulus": 2305843009213693951,
+  "points": 32,
+  "proof": null,
+  "schema": "identity.certificate/v1",
+  "seed": 20261016,
+  "statement": {
+    "degree_bound": 4,
+    "lhs": {
+      "args": [
+        {
+          "args": [
+            {
+              "args": "a",
+              "op": "var"
+            },
+            {
+              "args": [
+                {
+                  "args": "b",
+                  "op": "var"
+                },
+                {
+                  "args": "t",
+                  "op": "var"
+                }
+              ],
+              "op": "mul"
+            }
+          ],
+          "op": "add"
+        },
+        {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": "a",
+                  "op": "var"
+                },
+                {
+                  "args": {
+                    "args": "b",
+                    "op": "var"
+                  },
+                  "op": "neg"
+                }
+              ],
+              "op": "add"
+            },
+            {
+              "args": {
+                "args": [
+                  {
+                    "args": "b",
+                    "op": "var"
+                  },
+                  {
+                    "args": "t",
+                    "op": "var"
+                  }
+                ],
+                "op": "mul"
+              },
+              "op": "neg"
+            }
+          ],
+          "op": "add"
+        }
+      ],
+      "op": "mul"
+    },
+    "name": "Eisenstein endomorphism norm before specialization",
+    "rhs": {
+      "args": [
+        {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": "a",
+                      "op": "var"
+                    },
+                    {
+                      "args": "a",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": {
+                    "args": [
+                      {
+                        "args": "a",
+                        "op": "var"
+                      },
+                      {
+                        "args": "b",
+                        "op": "var"
+                      }
+                    ],
+                    "op": "mul"
+                  },
+                  "op": "neg"
+                }
+              ],
+              "op": "add"
+            },
+            {
+              "args": [
+                {
+                  "args": "b",
+                  "op": "var"
+                },
+                {
+                  "args": "b",
+                  "op": "var"
+                }
+              ],
+              "op": "mul"
+            }
+          ],
+          "op": "add"
+        },
+        {
+          "args": {
+            "args": [
+              {
+                "args": [
+                  {
+                    "args": "b",
+                    "op": "var"
+                  },
+                  {
+                    "args": "b",
+                    "op": "var"
+                  }
+                ],
+                "op": "mul"
+              },
+              {
+                "args": [
+                  {
+                    "args": [
+                      {
+                        "args": [
+                          {
+                            "args": "t",
+                            "op": "var"
+                          },
+                          {
+                            "args": "t",
+                            "op": "var"
+                          }
+                        ],
+                        "op": "mul"
+                      },
+                      {
+                        "args": "t",
+                        "op": "var"
+                      }
+                    ],
+                    "op": "add"
+                  },
+                  {
+                    "args": 1,
+                    "op": "const"
+                  }
+                ],
+                "op": "add"
+              }
+            ],
+            "op": "mul"
+          },
+          "op": "neg"
+        }
+      ],
+      "op": "add"
+    },
+    "source": "MIT 18.783 Lecture 12 dual identities; independent review TASK-20261016-3b4ca9",
+    "variables": [
+      "a",
+      "b",
+      "t"
+    ]
+  },
+  "value_digest": "374fe9bf226aacbfbc71434e1d4bd9fecfafabff6054bcd5a5f06fe2f2a3ff1b"
+}

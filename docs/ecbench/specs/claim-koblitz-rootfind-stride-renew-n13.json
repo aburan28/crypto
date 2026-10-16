@@ -1,0 +1,99 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "rootfind stride-renew claim (Amendment 1): public E_0 n=13",
+  "description": "Frozen in research/ecbench_rootfind_speedup_20261014/AMENDMENT_1.md before any of its data. stride-renew renews the stride after every relation and steps past repeats. H4: renew-d5 vs walk-d5. H6: renew-d4 vs rho-strong. Engineering; no security claim.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 13
+      }
+    ],
+    "targets_per_curve": 32,
+    "target_seed": 202610141600,
+    "target_kind": "public"
+  },
+  "arms": [
+    {
+      "name": "rho-strong",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius_strong"
+      }
+    },
+    {
+      "name": "rho-frob",
+      "role": "baseline",
+      "method": {
+        "id": "rho.signed_frobenius"
+      }
+    },
+    {
+      "name": "ic-negfold-m2-d5-walk",
+      "role": "baseline",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=5",
+          "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-negfold-m2-d5-stride",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=5",
+          "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+          "max_trials": "200000",
+          "targets": "stride"
+        }
+      }
+    },
+    {
+      "name": "ic-negfold-m2-d5-renew",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=5",
+          "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+          "max_trials": "200000",
+          "targets": "stride-renew"
+        }
+      }
+    },
+    {
+      "name": "ic-negfold-m2-d4-renew",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=4",
+          "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+          "max_trials": "200000",
+          "targets": "stride-renew"
+        }
+      }
+    },
+    {
+      "name": "rho-strong-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.signed_frobenius_strong"
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 3,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 202610141601,
+    "isolation_required": "L0",
+    "timeout_seconds": 1800
+  }
+}

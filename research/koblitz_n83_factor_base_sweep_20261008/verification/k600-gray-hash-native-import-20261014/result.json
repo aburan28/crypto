@@ -1,0 +1,105 @@
+{
+  "binary_sha256": "c5b9af9930f293533de819c0a673a0b7149ad2418800fa3fee7509d772d207e7",
+  "graph_rows": null,
+  "input_sha256": {
+    "/private/tmp/n83-k600-paired-archives-20261014/3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0.jsonl.gz": "8463aaf30365d6f6f5d6b189aff4e8afcb6c8305ec27c216700776cbdccba29d",
+    "/private/tmp/n83-k600-paired-archives-20261014/966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47.jsonl.gz": "df02963d1706fa7a64fd7558d88db79b23ea34801ac58062c4c500113e8c57fe",
+    "/private/tmp/n83-k600-paired-archives-20261014/b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e.jsonl.gz": "3e85c9e419fcddd3c9faed3c84470bf96fcad9178e48e1d73629369335841ecf"
+  },
+  "matrix_rank": null,
+  "native_import_source_sha256": "69414c682031bc91247e7738073f931ca0319ed8b459c5b35a66a7982f18297a",
+  "plan_sha256": "fbd3fb943bc0f181797d106c41ee9961b8d70768b5c65a5584002e3c1b5e488f",
+  "replay_error": null,
+  "schema": "n83.k600-gray-hash-native-import/v1",
+  "selected_best_total_runtime": null,
+  "solver_search_executed": false,
+  "source_commit": "ec2b665457c9c4e76b48481af35c2318510a4c00",
+  "source_sha256": {
+    "Cargo.lock": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+    "Cargo.toml": "49b5f9478f133f905d5388d8c609d097830d69fe912c46dbc95b387b5d14a3de",
+    "examples/koblitz_n83_mixed_orbit_worker.rs": "5f310f7495989a94004a6545bed5682d54d3bc4b4f41db543ed24408a1fa1b7b",
+    "research/koblitz_n83_factor_base_sweep_20261008/chain_search_supervisor.py": "fa0443e453e5fb7011019a08b61a219834e1594acc99e007f405f27e44b97a66",
+    "research/koblitz_n83_factor_base_sweep_20261008/compact_probe_supervisor.py": "4a9c363d8164f000ac3a6b654e37d001375d64744173bd90d7ad3dd2be692d37",
+    "research/koblitz_n83_factor_base_sweep_20261008/k600_mixed_orbit_supervisor.py": "3747ad6f6d7b472ab2ebf723e1b93b7167fca1e36e468565cf92a68f598cbe43",
+    "research/koblitz_n83_factor_base_sweep_20261008/pilot-01/manifest.json": "5bd862987844f709e03beeab9fd265e3d2024011bcadcb82f5af9c72018df6a6",
+    "research/koblitz_n83_factor_base_sweep_20261008/pilot-01/probe-corpus.json": "760ae5c2e88615152e2569653a0e0c0cf3b2f84691f2b0731247f9ee3759dcbd",
+    "research/koblitz_n83_factor_base_sweep_20261008/structured_orbit_search_supervisor.py": "045d2eed66f2ae49ec3be7564dee3a2f563e89151d2f682cf7587d321b2145f7",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/k600-gray-hash-paired-protocol-20261014/plan.json": "fbd3fb943bc0f181797d106c41ee9961b8d70768b5c65a5584002e3c1b5e488f",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/k600-gray-hash-paired-protocol-20261014/preflight.py": "4122150c4fd05ac290a4aa753e1d1438f21f20185b405e43da405d02dc0e2c4e",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/k600-gray-hash-paired-protocol-20261014/receipt_audit.py": "13670f64cd4ba7c1fa1a29d88044795352cd79d4db0909b4efaa9cb0cc9eafad",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/k600-gray-hash-paired-protocol-20261014/supervisor.py": "448b3f4556e8f46b486f89a1da57181bc6b04bc092417df9ed2085ababf83895",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/paired-capacity-screen-20261013/screen.py": "116617e9de7552e48b548e632e80121508515e7079878305de0b975c8a924c5d",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/pilot-pair-live-s3-20261014/audit.json": "0c281fcc873eb914686c6e4ef3ef2bba51347c9cd88ddaad117e3b0c3f83b78e",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/pilot-pair-live-s3-20261014/audit.py": "705737152725f5630eb7da5ab9f6d3b3f67cb54259f5fc81ba06595de049d030",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/pilot-pair-support-screen-20261014/screen.json": "2c2229b9bfc78935cbc6c3ca7c6612f8fade2a40a0e0592f93a99b855d41dd45",
+    "src:git-tree": "f5dac3ceb6d264227ef74b197e49f3cf01d1164e"
+  },
+  "stages": [
+    {
+      "argv": [
+        "/Users/adamburan/.rustup/toolchains/1.98-aarch64-apple-darwin/bin/cargo",
+        "build",
+        "--release",
+        "--offline",
+        "--locked",
+        "--no-default-features",
+        "--example",
+        "koblitz_n83_mixed_orbit_worker"
+      ],
+      "cap_seconds": 1200,
+      "elapsed_wall_seconds_L0": 863.0806133330043,
+      "exit_code": 0,
+      "maximum_resident_set_size_bytes_L0": 3996385280,
+      "name": "build",
+      "stderr_sha256": "870c85c2bcc9308d468ed4138173f2051b2d66aea6bdcb9cd46de752216c1319",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/private/tmp/n83-native-k600-import-20261014/target/release/examples/koblitz_n83_mixed_orbit_worker",
+        "verify-cross-pilot",
+        "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0",
+        "/Volumes/SSD990/crypto/worktrees/codex-n83-mixed-orbit-worker-20261012/research/koblitz_n83_factor_base_sweep_20261008/pilot-01/manifest.json",
+        "/private/tmp/n83-k600-paired-archives-20261014/3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0.jsonl.gz",
+        "966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47",
+        "/Volumes/SSD990/crypto/worktrees/codex-n83-mixed-orbit-worker-20261012/research/koblitz_n83_factor_base_sweep_20261008/pilot-01/manifest.json",
+        "/private/tmp/n83-k600-paired-archives-20261014/966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47.jsonl.gz"
+      ],
+      "cap_seconds": 360,
+      "elapsed_wall_seconds_L0": 31.481940666999435,
+      "exit_code": 0,
+      "maximum_resident_set_size_bytes_L0": 150241280,
+      "name": "gray_pool",
+      "stderr_sha256": "806b526adc0139b29035c0996efea4fb7ebb4c5b2b4ee4abab066bf8e17474b5",
+      "stdout_sha256": "a6752d7254a6df5105935cd5eeb95956321a7eada6a5355ddc50a0c1febc7fd9",
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/private/tmp/n83-native-k600-import-20261014/target/release/examples/koblitz_n83_mixed_orbit_worker",
+        "verify-cross-pilot",
+        "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0",
+        "/Volumes/SSD990/crypto/worktrees/codex-n83-mixed-orbit-worker-20261012/research/koblitz_n83_factor_base_sweep_20261008/pilot-01/manifest.json",
+        "/private/tmp/n83-k600-paired-archives-20261014/3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0.jsonl.gz",
+        "b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e",
+        "/Volumes/SSD990/crypto/worktrees/codex-n83-mixed-orbit-worker-20261012/research/koblitz_n83_factor_base_sweep_20261008/pilot-01/manifest.json",
+        "/private/tmp/n83-k600-paired-archives-20261014/b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e.jsonl.gz"
+      ],
+      "cap_seconds": 360,
+      "elapsed_wall_seconds_L0": 20.816944459002116,
+      "exit_code": 0,
+      "maximum_resident_set_size_bytes_L0": 167804928,
+      "name": "hash_pool",
+      "stderr_sha256": "9ccc9b807b0755eaee959d87405bb5a5d6074b2fbf967d70cebcd29ba6946fd5",
+      "stdout_sha256": "4c6c8b82cd4eea924afb178b7ffc45813edd79563cee283a10c9f60f85c15e46",
+      "timed_out": false
+    }
+  ],
+  "status": "PASS_NATIVE_IMPORT_ONLY",
+  "toolchain_versions": {
+    "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+    "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+  },
+  "total_index_calculus_runtime_ms": null
+}
