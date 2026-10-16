@@ -31,3 +31,22 @@
      `p = 71` seed 1, `p = 41` seed 1.
    - The two seed-1 arms restart from trial 0 and are deterministic, so they
      replay the killed runs' relations first.
+
+4. **Resumable DLP driver (protocol addendum, 2026-10-16 ~03:30Z, before
+   the arms it affects start).** After two container restarts, `dlp` mode
+   writes a checkpoint after every batch (`<record>.ckpt`), and `--resume`
+   continues from it.
+   - A resumed run rebuilds the deterministic set-up, skips the rows it
+     already wrote, and fast-forwards the target generator past the
+     completed batches. It therefore draws the same targets in the same
+     order as an uninterrupted run.
+   - The record's counts, relations and answer are those of an uninterrupted
+     run; only wall time (summed over segments) and a `resume` row differ.
+   - Without a checkpoint the run starts fresh and truncates its record
+     itself.
+   - The trial, the trace, the linear algebra, rho and the accounting are
+     unchanged. Equivalence was checked before use: an uninterrupted run and
+     a split-and-resumed run of the same arm, compared row for row (see the
+     run report).
+   - The arm running at the time (`dlp_p31_s2`) continues on the old binary;
+     later arms run the new one.

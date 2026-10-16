@@ -13,7 +13,7 @@
 
 use std::collections::{BTreeMap, HashMap};
 use std::env;
-use std::fs::OpenOptions;
+use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::time::Instant;
 
@@ -29,7 +29,7 @@ use crypto_lib::cryptanalysis::jv_quintic_edwards::{
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use rayon::prelude::*;
-use serde_json::json;
+use serde_json::{json, Value};
 
 fn arg<T: std::str::FromStr>(args: &[String], k: &str, d: T) -> T {
     args.iter()
@@ -160,39 +160,97 @@ fn dlp_mode(args: &[String]) {
         .iter()
         .position(|a| a == "--json")
         .map(|i| args[i + 1].clone());
+    // Checkpoint after every batch (`<json>.ckpt`); `--resume` continues from
+    // it.  A resumed run draws the same targets in the same order (the target
+    // generator is fast-forwarded past the completed batches), so its record
+    // is the one an uninterrupted run would write; only wall time differs.
+    let ckpt_path = json.as_ref().map(|j| format!("{j}.ckpt"));
+    let resume = args.iter().any(|a| a == "--resume");
+    let ck: Option<Value> = if resume {
+        ckpt_path
+            .as_ref()
+            .and_then(|c| fs::read_to_string(c).ok())
+            .and_then(|t| serde_json::from_str(&t).ok())
+    } else {
+        None
+    };
+    if ck.is_none() {
+        if let Some(j) = &json {
+            fs::File::create(j).expect("truncate the record");
+        }
+    }
     let s = setup(p, seed);
-    emit(&json, &s.row);
     let curve = &s.inst.curve;
     let (n, g, q, d) = (s.inst.n, s.inst.g, s.inst.q, curve.d);
-    emit(
-        &json,
-        &json!({"kind": "instance", "p": p, "seed": seed, "n": n.to_string(),
-                "k_secret": s.inst.d.to_string()}),
-    );
-    // Rho on the same target.
-    let rc = Ed5::with_params(p, d);
-    let mut rrng = StdRng::seed_from_u64(seed ^ 0x5EED);
-    let m0 = rc.f.muls();
-    let (k_rho, rho_ops) = rho(&rc, &g, &q, n, &mut rrng);
-    let rho_muls = rc.f.muls() - m0;
-    let rho_ok = k_rho.map(|k| rc.mul(&g, k) == q).unwrap_or(false);
-    let per_op = rho_muls as f64 / rho_ops.max(1) as f64;
-    emit(
-        &json,
-        &json!({"kind": "rho", "p": p, "seed": seed, "k": k_rho.map(|k| k.to_string()),
-                "verified": rho_ok, "group_ops": rho_ops, "fp_muls": rho_muls,
-                "fp_muls_per_op": per_op,
-                "expected_walk_ops": (std::f64::consts::PI * n as f64 / 2.0).sqrt()}),
-    );
+    let (rho_muls, per_op) = match &ck {
+        Some(c) => (
+            c["rho_fp_muls"].as_u64().unwrap(),
+            c["rho_fp_muls_per_op"].as_f64().unwrap(),
+        ),
+        None => {
+            emit(&json, &s.row);
+            emit(
+                &json,
+                &json!({"kind": "instance", "p": p, "seed": seed, "n": n.to_string(),
+                        "k_secret": s.inst.d.to_string()}),
+            );
+            // Rho on the same target.
+            let rc = Ed5::with_params(p, d);
+            let mut rrng = StdRng::seed_from_u64(seed ^ 0x5EED);
+            let m0 = rc.f.muls();
+            let (k_rho, rho_ops) = rho(&rc, &g, &q, n, &mut rrng);
+            let rho_muls = rc.f.muls() - m0;
+            let rho_ok = k_rho.map(|k| rc.mul(&g, k) == q).unwrap_or(false);
+            let per_op = rho_muls as f64 / rho_ops.max(1) as f64;
+            emit(
+                &json,
+                &json!({"kind": "rho", "p": p, "seed": seed, "k": k_rho.map(|k| k.to_string()),
+                        "verified": rho_ok, "group_ops": rho_ops, "fp_muls": rho_muls,
+                        "fp_muls_per_op": per_op,
+                        "expected_walk_ops": (std::f64::consts::PI * n as f64 / 2.0).sqrt()}),
+            );
+            (rho_muls, per_op)
+        }
+    };
     // Index calculus, trials in parallel batches; F4 counted over the batch.
     let opts = trial_options();
     let m = s.base.len();
     let mut tgen = StdRng::seed_from_u64(seed ^ 0xD1D1);
     let mut rows: Vec<(Vec<(usize, i8)>, u128, u128)> = Vec::new();
-    let mut agg = BTreeMap::<&str, u64>::new();
+    let mut agg = BTreeMap::<String, u64>::new();
     let (mut trials, mut la_ops, mut disagree, mut unverified) = (0usize, 0u64, 0u64, 0u64);
     let mut k_ic: Option<u128> = None;
-    let batch = 4 * rayon::current_num_threads();
+    let mut batch = 4 * rayon::current_num_threads();
+    let (mut batches_done, mut wall_before, mut resumes) = (0u64, 0f64, 0u64);
+    if let Some(c) = &ck {
+        batch = c["batch"].as_u64().unwrap() as usize;
+        batches_done = c["batches_done"].as_u64().unwrap();
+        trials = c["trials"].as_u64().unwrap() as usize;
+        la_ops = c["la_ops"].as_u64().unwrap();
+        disagree = c["disagree"].as_u64().unwrap();
+        unverified = c["unverified"].as_u64().unwrap();
+        wall_before = c["wall_ms"].as_f64().unwrap();
+        resumes = c["resumes"].as_u64().unwrap() + 1;
+        agg = serde_json::from_value(c["agg"].clone()).unwrap();
+        for r in c["rows"].as_array().unwrap() {
+            let terms: Vec<(usize, i8)> = serde_json::from_value(r["terms"].clone()).unwrap();
+            let a: u128 = r["a"].as_str().unwrap().parse().unwrap();
+            let b: u128 = r["b"].as_str().unwrap().parse().unwrap();
+            rows.push((terms, a, b));
+        }
+        // the draws of the completed batches, in the loop's order
+        for _ in 0..batches_done * batch as u64 {
+            let _: (u64, u64, u64) = (tgen.gen_range(0..n), tgen.gen_range(0..n), tgen.gen());
+        }
+        emit(
+            &json,
+            &json!({"kind": "resume", "p": p, "seed": seed, "batches_done": batches_done,
+                    "trials": trials, "relations": rows.len()}),
+        );
+    }
+    let bump = |agg: &mut BTreeMap<String, u64>, k: &str, v: u64| {
+        *agg.entry(k.to_string()).or_default() += v;
+    };
     let t0 = Instant::now();
     while trials < max_trials && k_ic.is_none() {
         let jobs: Vec<(u64, u64, u64)> = (0..batch)
@@ -221,18 +279,18 @@ fn dlp_mode(args: &[String]) {
                 (a, b, qs, t, agree, verified, gen)
             })
             .collect();
-        *agg.entry("f4_muls").or_default() += f4_fp::field_ops_total() - f4_0;
+        bump(&mut agg, "f4_muls", f4_fp::field_ops_total() - f4_0);
         for (a, b, qs, t, agree, verified, gen) in done {
             trials += 1;
-            *agg.entry("target_gen_muls").or_default() += gen;
-            *agg.entry("weil_muls").or_default() += t.weil_muls;
-            *agg.entry("roots_muls").or_default() += t.roots_muls;
-            *agg.entry("resolve_group_ops").or_default() += t.group_ops;
-            *agg.entry("consistent").or_default() += t.consistent as u64;
-            *agg.entry("replay_mismatch").or_default() += t.replay_mismatch as u64;
-            *agg.entry("e_solutions").or_default() += t.e_solutions as u64;
-            *agg.entry("not_split").or_default() += t.not_split as u64;
-            *agg.entry("undetermined").or_default() += t.undetermined as u64;
+            bump(&mut agg, "target_gen_muls", gen);
+            bump(&mut agg, "weil_muls", t.weil_muls);
+            bump(&mut agg, "roots_muls", t.roots_muls);
+            bump(&mut agg, "resolve_group_ops", t.group_ops);
+            bump(&mut agg, "consistent", t.consistent as u64);
+            bump(&mut agg, "replay_mismatch", t.replay_mismatch as u64);
+            bump(&mut agg, "e_solutions", t.e_solutions as u64);
+            bump(&mut agg, "not_split", t.not_split as u64);
+            bump(&mut agg, "undetermined", t.undetermined as u64);
             disagree += (!agree) as u64;
             unverified += (!verified) as u64;
             for qd in &qs {
@@ -250,8 +308,22 @@ fn dlp_mode(args: &[String]) {
                 k_ic = k;
             }
         }
+        batches_done += 1;
+        if let Some(cp) = &ckpt_path {
+            let ck = json!({
+                "p": p, "seed": seed, "batch": batch, "batches_done": batches_done,
+                "trials": trials, "la_ops": la_ops, "disagree": disagree,
+                "unverified": unverified, "agg": agg, "resumes": resumes,
+                "wall_ms": wall_before + t0.elapsed().as_secs_f64() * 1e3,
+                "rho_fp_muls": rho_muls, "rho_fp_muls_per_op": per_op,
+                "rows": rows.iter().map(|(t, a, b)| json!({"terms": t, "a": a.to_string(), "b": b.to_string()})).collect::<Vec<_>>(),
+            });
+            let tmp = format!("{cp}.tmp");
+            fs::write(&tmp, ck.to_string()).expect("write checkpoint");
+            fs::rename(&tmp, cp).expect("commit checkpoint");
+        }
     }
-    let ic_ms = t0.elapsed().as_secs_f64() * 1e3;
+    let ic_ms = wall_before + t0.elapsed().as_secs_f64() * 1e3;
     let k_ic = k_ic.map(|k| k as u64);
     let ic_ok = k_ic.map(|k| curve.mul(&g, k) == q).unwrap_or(false);
     // the resolve's group operations at the measured cost of one
@@ -270,7 +342,7 @@ fn dlp_mode(args: &[String]) {
                 "unknowns": m + 1, "agg": agg, "resolve_muls": resolve_muls,
                 "linear_algebra_mulmods": la_ops, "oracle_disagree": disagree,
                 "relations_unverified": unverified, "online_muls": online,
-                "ms": ic_ms,
+                "ms": ic_ms, "resumes": resumes,
                 "ratio_online_ic_over_rho": online as f64 / rho_muls.max(1) as f64,
                 "ratio_online_ic_over_expected_rho_walk": online as f64 / expected_rho}),
     );

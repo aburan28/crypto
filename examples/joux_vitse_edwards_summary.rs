@@ -126,7 +126,9 @@ fn main() {
                 continue;
             };
             c_add.push(u(&rho["fp_muls_per_op"]));
-            let ic = rs.iter().find(|r| r["kind"] == "ic").cloned();
+            // the last `ic` row: a resumed run may carry an earlier one from a
+            // segment that stopped at `--max-trials`
+            let ic = rs.iter().rev().find(|r| r["kind"] == "ic").cloned();
             let n = u(&setup["n"]);
             let base = u(&setup["base_points"]);
             // the census expectation (RESEARCH_K5 §3): 8 subgroup points per
