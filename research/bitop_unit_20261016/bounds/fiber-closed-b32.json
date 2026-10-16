@@ -1,0 +1,405 @@
+{
+  "admissibility": {
+    "bounded": false,
+    "deterministic": true,
+    "reasons": [],
+    "status": "admissible",
+    "unpriced": []
+  },
+  "bound_id": "ECBND1h89921ee14707",
+  "constant": {
+    "declared_ratio_to_floor": null,
+    "ratio_to_floor": {
+      "ci95": [
+        28.10408510812248,
+        114.09479441296241
+      ],
+      "ci_method": "cluster",
+      "value": 65.19908121292366
+    },
+    "s": {
+      "ci95": [
+        24.28699216839042,
+        101.02361796861089
+      ],
+      "ci_method": "cluster",
+      "value": 57.781181285674
+    }
+  },
+  "dimensions": {
+    "memory": {
+      "ci95": null,
+      "known": false,
+      "lower_is_better": true,
+      "source": "first of counters.inserts_uncharged, counters.table_inserts_uncharged, counters.table_entries, counters.distinguished_points",
+      "statistic": "mean table entries / sqrt(r) over verified runs",
+      "value": null
+    },
+    "ops": {
+      "ci95": [
+        28.10408510812248,
+        114.09479441296241
+      ],
+      "known": true,
+      "lower_is_better": true,
+      "source": "cost.total_gae, workload.curve.r, automorphisms_available",
+      "statistic": "mean S / sqrt(pi / 2A) over verified runs",
+      "value": 65.19908121292366
+    },
+    "uncharged": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "known": true,
+      "lower_is_better": true,
+      "source": "counters.*_uncharged",
+      "statistic": "mean sum of *_uncharged counters / sqrt(r) over verified runs",
+      "value": 0.0
+    }
+  },
+  "domain": {
+    "envelope": {
+      "precomputation": "none",
+      "targets": 1,
+      "threads": 1
+    },
+    "family": "prime",
+    "problem": "ecdlp.single_target",
+    "target_kind": "planted",
+    "tier": "toy",
+    "unit": "bitop/v1"
+  },
+  "domain_id": "ECDOM1hfe7b93f4aab0",
+  "fit": {
+    "alpha": 0.8261599006724902,
+    "alpha_agrees_with_declared": null,
+    "alpha_ci95": [
+      0.6296032948042739,
+      1.0088036969761265
+    ],
+    "alpha_in_additions": 0.7060055193464898,
+    "alpha_in_additions_ci95": [
+      0.49521477678843223,
+      0.9026706251768004
+    ],
+    "ci_method": "cluster",
+    "declared_alpha": null,
+    "log2_c": 13.379693175836582,
+    "model": "bitops = C * r^alpha",
+    "points": 48,
+    "r_squared": 0.9495372438033188,
+    "scaling_claim": true,
+    "size_parameter": "r",
+    "sizes": 8
+  },
+  "fit_options": {
+    "curves": [],
+    "resamples": 2000,
+    "seed": 20261005,
+    "tier": null,
+    "unit": "bitop/v1"
+  },
+  "improves_on": [],
+  "label": "ic.pipeline on 8 prime curves, toy tier",
+  "level": "exponent",
+  "method": {
+    "entry": "ic_framework::run_pipeline",
+    "family": "ic",
+    "id": "ic.pipeline",
+    "method_id": "ECM1hf40610498117",
+    "params": {
+      "factor_base": "prime-abscissa:size=32",
+      "linalg": "incremental-gauss",
+      "max_trials": "100000000",
+      "oracle": "mitm-fiber:fiber=closed,negation_folded=1,fiber_gen=coset",
+      "solver": "",
+      "solver_budget_seconds": "0",
+      "targets": "walk"
+    }
+  },
+  "notes": "",
+  "provenance": {
+    "audits": [],
+    "records": 48,
+    "sessions": [
+      {
+        "arm": "closed-b32",
+        "binary_sha256": "9d0112f51a12a5985b1c6ecb580c4398de22e929208e598f345cf07e0fa42c3e",
+        "dir": "research/bitop_unit_20261016/sessions/prime-fiber-scaling",
+        "env_class_id": "ECBENV2he1389885ccd0",
+        "git_commit": null,
+        "records_sha256": "e06ca790f492b07194ba4c3d9982575e8c0056ddb20a1f27dfc1061fc0fff4cf",
+        "role": "candidate",
+        "session_id": "ECBS1hef866ef12457",
+        "spec_id": "ECS1hc2fa45322438",
+        "status": "complete"
+      }
+    ],
+    "statuses": {
+      "verified": 48
+    },
+    "verified": 48
+  },
+  "schema": "ecbench.bound/v1",
+  "sizes": [
+    {
+      "automorphisms_available": 2,
+      "declared_ratio_to_floor": null,
+      "declared_s": null,
+      "field_bits": 18,
+      "floor_s": 0.8862269254527579,
+      "levels": {
+        "L0": 6
+      },
+      "log2_r": 15.576631962754833,
+      "mean_gae": 132830411.66666667,
+      "mean_s": 27.748701176060663,
+      "memory_entries_per_sqrt_r": null,
+      "r": 48869,
+      "ratio_to_floor": 31.311056321025603,
+      "runs": 6,
+      "s_ci95": [
+        26.51856792920942,
+        29.06964925003848
+      ],
+      "slug": "icv1-fp18-t334-97871af7",
+      "uncharged_per_sqrt_r": 0.0,
+      "verified": 6,
+      "workloads": 3
+    },
+    {
+      "automorphisms_available": 2,
+      "declared_ratio_to_floor": null,
+      "declared_s": null,
+      "field_bits": 18,
+      "floor_s": 0.8862269254527579,
+      "levels": {
+        "L0": 6
+      },
+      "log2_r": 15.82855800222502,
+      "mean_gae": 142942630.0,
+      "mean_s": 27.364546966941834,
+      "memory_entries_per_sqrt_r": null,
+      "r": 58193,
+      "ratio_to_floor": 30.877584714503865,
+      "runs": 6,
+      "s_ci95": [
+        26.91678948454369,
+        27.938010456956672
+      ],
+      "slug": "icv1-fp18-tm204-54b2fadf",
+      "uncharged_per_sqrt_r": 0.0,
+      "verified": 6,
+      "workloads": 3
+    },
+    {
+      "automorphisms_available": 2,
+      "declared_ratio_to_floor": null,
+      "declared_s": null,
+      "field_bits": 22,
+      "floor_s": 0.8862269254527579,
+      "levels": {
+        "L0": 6
+      },
+      "log2_r": 19.082702610117575,
+      "mean_gae": 384694476.0,
+      "mean_s": 16.17308670635175,
+      "memory_entries_per_sqrt_r": null,
+      "r": 555221,
+      "ratio_to_floor": 18.249374107076697,
+      "runs": 6,
+      "s_ci95": [
+        13.287022544572372,
+        19.027392347112148
+      ],
+      "slug": "icv1-fp22-tm2826-0afa05b6",
+      "uncharged_per_sqrt_r": 0.0,
+      "verified": 6,
+      "workloads": 3
+    },
+    {
+      "automorphisms_available": 2,
+      "declared_ratio_to_floor": null,
+      "declared_s": null,
+      "field_bits": 22,
+      "floor_s": 0.8862269254527579,
+      "levels": {
+        "L0": 6
+      },
+      "log2_r": 19.340765051011893,
+      "mean_gae": 457173046.3333333,
+      "mean_s": 17.575808608157697,
+      "memory_entries_per_sqrt_r": null,
+      "r": 663973,
+      "ratio_to_floor": 19.832176278303123,
+      "runs": 6,
+      "s_ci95": [
+        14.478255711810455,
+        21.468198076393165
+      ],
+      "slug": "icv1-fp22-tm1214-827be133",
+      "uncharged_per_sqrt_r": 0.0,
+      "verified": 6,
+      "workloads": 3
+    },
+    {
+      "automorphisms_available": 2,
+      "declared_ratio_to_floor": null,
+      "declared_s": null,
+      "field_bits": 26,
+      "floor_s": 0.8862269254527579,
+      "levels": {
+        "L0": 6
+      },
+      "log2_r": 23.366855382840328,
+      "mean_gae": 4195740252.6666665,
+      "mean_s": 28.878835717706313,
+      "memory_entries_per_sqrt_r": null,
+      "r": 10817437,
+      "ratio_to_floor": 32.58627659383359,
+      "runs": 6,
+      "s_ci95": [
+        16.007520352403645,
+        41.27662192469439
+      ],
+      "slug": "icv1-fp26-t374-04f2b312",
+      "uncharged_per_sqrt_r": 0.0,
+      "verified": 6,
+      "workloads": 3
+    },
+    {
+      "automorphisms_available": 2,
+      "declared_ratio_to_floor": null,
+      "declared_s": null,
+      "field_bits": 26,
+      "floor_s": 0.8862269254527579,
+      "levels": {
+        "L0": 6
+      },
+      "log2_r": 23.799571452854693,
+      "mean_gae": 6942223653.333333,
+      "mean_s": 41.12817402528915,
+      "memory_entries_per_sqrt_r": null,
+      "r": 14601077,
+      "ratio_to_floor": 46.408174750815064,
+      "runs": 6,
+      "s_ci95": [
+        18.9520670039552,
+        60.34606678962834
+      ],
+      "slug": "icv1-fp26-tm7664-a6fbaf53",
+      "uncharged_per_sqrt_r": 0.0,
+      "verified": 6,
+      "workloads": 3
+    },
+    {
+      "automorphisms_available": 2,
+      "declared_ratio_to_floor": null,
+      "declared_s": null,
+      "field_bits": 30,
+      "floor_s": 0.8862269254527579,
+      "levels": {
+        "L0": 6
+      },
+      "log2_r": 27.34281418720579,
+      "mean_gae": 103587171141.66667,
+      "mean_s": 135.92994737140145,
+      "memory_entries_per_sqrt_r": null,
+      "r": 170218687,
+      "ratio_to_floor": 153.38052079827884,
+      "runs": 6,
+      "s_ci95": [
+        96.34906620170342,
+        172.8636640157416
+      ],
+      "slug": "icv1-fp30-t8770-57966dac",
+      "uncharged_per_sqrt_r": 0.0,
+      "verified": 6,
+      "workloads": 3
+    },
+    {
+      "automorphisms_available": 2,
+      "declared_ratio_to_floor": null,
+      "declared_s": null,
+      "field_bits": 30,
+      "floor_s": 0.8862269254527579,
+      "levels": {
+        "L0": 6
+      },
+      "log2_r": 27.46772401697402,
+      "mean_gae": 133253211913.66667,
+      "mean_s": 167.45034971348318,
+      "memory_entries_per_sqrt_r": null,
+      "r": 185613193,
+      "ratio_to_floor": 188.94748613955247,
+      "runs": 6,
+      "s_ci95": [
+        130.01591723079048,
+        213.3804480000114
+      ],
+      "slug": "icv1-fp30-tm29402-75bd2650",
+      "uncharged_per_sqrt_r": 0.0,
+      "verified": 6,
+      "workloads": 3
+    }
+  ],
+  "stages": [
+    {
+      "alpha": 0.17742415171721737,
+      "alpha_ci95": [
+        0.15663350596018433,
+        0.19478018218319262
+      ],
+      "mean_gae": 13313113.0,
+      "name": "factor_base",
+      "share_of_gae": 0.00042756571496025536,
+      "sizes_with_work": 8
+    },
+    {
+      "alpha": 0.12424807252677302,
+      "alpha_ci95": [
+        0.10840614588906776,
+        0.13531151191174465
+      ],
+      "mean_gae": 171381514.75,
+      "name": "oracle_setup",
+      "share_of_gae": 0.00550411161424494,
+      "sizes_with_work": 8
+    },
+    {
+      "alpha": 0.9846310918126501,
+      "alpha_ci95": [
+        0.8579191423053891,
+        1.0852431945237964
+      ],
+      "mean_gae": 30948602086.0,
+      "name": "relations",
+      "share_of_gae": 0.9939494375148052,
+      "sizes_with_work": 8
+    },
+    {
+      "alpha": 0.10703227863460517,
+      "alpha_ci95": [
+        0.019500705933344596,
+        0.15481703726911086
+      ],
+      "mean_gae": 2339275.75,
+      "name": "linear_algebra",
+      "share_of_gae": 0.00007512849237724773,
+      "sizes_with_work": 8
+    },
+    {
+      "alpha": 0.20115888773961388,
+      "alpha_ci95": [
+        0.17930470075136354,
+        0.224885675115705
+      ],
+      "mean_gae": 1362451.1666666667,
+      "name": "verify",
+      "share_of_gae": 0.00004375666361235478,
+      "sizes_with_work": 8
+    }
+  ],
+  "verdict_id": null
+}

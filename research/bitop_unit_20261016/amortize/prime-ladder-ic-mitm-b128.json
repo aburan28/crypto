@@ -1,0 +1,570 @@
+{
+  "arm": "ic-mitm-b128",
+  "curves": [
+    {
+      "arm": {
+        "complete": true,
+        "per_target_bitops": 24783854.0,
+        "reusable_bitops": 301586944.0,
+        "runs": 8
+      },
+      "at": [
+        {
+          "arm_bitops": 326370798.0,
+          "rho_bitops": 7214764.0,
+          "targets": 1
+        },
+        {
+          "arm_bitops": 698128608.0,
+          "rho_bitops": 23419228.414665103,
+          "targets": 16
+        },
+        {
+          "arm_bitops": 6646253568.0,
+          "rho_bitops": 86621781.34365621,
+          "targets": 256
+        },
+        {
+          "arm_bitops": 101816252928.0,
+          "rho_bitops": 338972597.24977785,
+          "targets": 4096
+        },
+        {
+          "arm_bitops": 1624536242688.0,
+          "rho_bitops": 1348260397.3552136,
+          "targets": 65536
+        },
+        {
+          "arm_bitops": 25988056078848.0,
+          "rho_bitops": 5385382722.65649,
+          "targets": 1048576
+        }
+      ],
+      "break_even_window": null,
+      "cold_ratio": 45.23651750771058,
+      "curve": "icv1-fp16-t29-45da980f",
+      "log2_r": 15.401779506003574,
+      "per_target_ratio": 5.320021894989911,
+      "reference": {
+        "complete": true,
+        "per_target_bitops": 4658600.0,
+        "reusable_bitops": 2556164.0,
+        "runs": 8
+      }
+    },
+    {
+      "arm": {
+        "complete": true,
+        "per_target_bitops": 33808319.375,
+        "reusable_bitops": 339632238.0,
+        "runs": 8
+      },
+      "at": [
+        {
+          "arm_bitops": 373440557.375,
+          "rho_bitops": 10529224.125,
+          "targets": 1
+        },
+        {
+          "arm_bitops": 880565348.0,
+          "rho_bitops": 37013739.57930975,
+          "targets": 16
+        },
+        {
+          "arm_bitops": 8994561998.0,
+          "rho_bitops": 140311753.44546497,
+          "targets": 256
+        },
+        {
+          "arm_bitops": 138818508398.0,
+          "rho_bitops": 552752974.1330712,
+          "targets": 4096
+        },
+        {
+          "arm_bitops": 2216001650798.0,
+          "rho_bitops": 2202329143.743928,
+          "targets": 65536
+        },
+        {
+          "arm_bitops": 35450931929198.0,
+          "rho_bitops": 8800586628.799494,
+          "targets": 1048576
+        }
+      ],
+      "break_even_window": null,
+      "cold_ratio": 35.46705369185975,
+      "curve": "icv1-fp17-tm563-91c1544a",
+      "log2_r": 16.66571064497437,
+      "per_target_ratio": 4.440284626411623,
+      "reference": {
+        "complete": true,
+        "per_target_bitops": 7613998.25,
+        "reusable_bitops": 2915225.875,
+        "runs": 8
+      }
+    },
+    {
+      "arm": {
+        "complete": true,
+        "per_target_bitops": 37656855.25,
+        "reusable_bitops": 380345616.0,
+        "runs": 8
+      },
+      "at": [
+        {
+          "arm_bitops": 418002471.25,
+          "rho_bitops": 13098881.25,
+          "targets": 1
+        },
+        {
+          "arm_bitops": 982855300.0,
+          "rho_bitops": 47387970.229723185,
+          "targets": 16
+        },
+        {
+          "arm_bitops": 10020500560.0,
+          "rho_bitops": 181126297.2531424,
+          "targets": 256
+        },
+        {
+          "arm_bitops": 154622824720.0,
+          "rho_bitops": 715107511.2746228,
+          "targets": 4096
+        },
+        {
+          "arm_bitops": 2468260011280.0,
+          "rho_bitops": 2850788043.4028172,
+          "targets": 65536
+        },
+        {
+          "arm_bitops": 39486454996240.0,
+          "rho_bitops": 11393449071.372583,
+          "targets": 1048576
+        }
+      ],
+      "break_even_window": null,
+      "cold_ratio": 31.911310841908733,
+      "curve": "icv1-fp18-tm679-ecb3c996",
+      "log2_r": 17.309645098932773,
+      "per_target_ratio": 3.820035170894785,
+      "reference": {
+        "complete": true,
+        "per_target_bitops": 9857724.75,
+        "reusable_bitops": 3241156.5,
+        "runs": 8
+      }
+    },
+    {
+      "arm": {
+        "complete": true,
+        "per_target_bitops": 53538223.125,
+        "reusable_bitops": 423155544.0,
+        "runs": 8
+      },
+      "at": [
+        {
+          "arm_bitops": 476693767.125,
+          "rho_bitops": 11994191.75,
+          "targets": 1
+        },
+        {
+          "arm_bitops": 1279767114.0,
+          "rho_bitops": 40656077.3232939,
+          "targets": 16
+        },
+        {
+          "arm_bitops": 14128940664.0,
+          "rho_bitops": 152446525.53776103,
+          "targets": 256
+        },
+        {
+          "arm_bitops": 219715717464.0,
+          "rho_bitops": 598795755.2773663,
+          "targets": 4096
+        },
+        {
+          "arm_bitops": 3509104146264.0,
+          "rho_bitops": 2383988446.432496,
+          "targets": 65536
+        },
+        {
+          "arm_bitops": 56139319007064.0,
+          "rho_bitops": 9524708137.757563,
+          "targets": 1048576
+        }
+      ],
+      "break_even_window": null,
+      "cold_ratio": 39.7437173809565,
+      "curve": "icv1-fp19-t441-568295e0",
+      "log2_r": 18.315268991569212,
+      "per_target_ratio": 6.497382802177315,
+      "reference": {
+        "complete": true,
+        "per_target_bitops": 8239967.5,
+        "reusable_bitops": 3754224.25,
+        "runs": 8
+      }
+    },
+    {
+      "arm": {
+        "complete": true,
+        "per_target_bitops": 100756776.5,
+        "reusable_bitops": 468803488.0,
+        "runs": 8
+      },
+      "at": [
+        {
+          "arm_bitops": 569560264.5,
+          "rho_bitops": 32480932.5,
+          "targets": 1
+        },
+        {
+          "arm_bitops": 2080911912.0,
+          "rho_bitops": 131392124.47067651,
+          "targets": 16
+        },
+        {
+          "arm_bitops": 26262538272.0,
+          "rho_bitops": 517177157.8926208,
+          "targets": 256
+        },
+        {
+          "arm_bitops": 413168560032.0,
+          "rho_bitops": 2057513163.9045231,
+          "targets": 4096
+        },
+        {
+          "arm_bitops": 6603664908192.0,
+          "rho_bitops": 8218152404.75127,
+          "targets": 65536
+        },
+        {
+          "arm_bitops": 105651606478752.0,
+          "rho_bitops": 32860533115.93328,
+          "targets": 1048576
+        }
+      ],
+      "break_even_window": null,
+      "cold_ratio": 17.53521899348179,
+      "curve": "icv1-fp20-t799-65c15bd4",
+      "log2_r": 19.65431611045009,
+      "per_target_ratio": 3.543301338214027,
+      "reference": {
+        "complete": true,
+        "per_target_bitops": 28435847.5,
+        "reusable_bitops": 4045085.0,
+        "runs": 8
+      }
+    },
+    {
+      "arm": {
+        "complete": true,
+        "per_target_bitops": 126047698.5,
+        "reusable_bitops": 516170484.0,
+        "runs": 8
+      },
+      "at": [
+        {
+          "arm_bitops": 642218182.5,
+          "rho_bitops": 24672501.0,
+          "targets": 1
+        },
+        {
+          "arm_bitops": 2532933660.0,
+          "rho_bitops": 94557967.41279155,
+          "targets": 16
+        },
+        {
+          "arm_bitops": 32784381300.0,
+          "rho_bitops": 367133461.23314524,
+          "targets": 256
+        },
+        {
+          "arm_bitops": 516807543540.0,
+          "rho_bitops": 1455454186.8035302,
+          "targets": 4096
+        },
+        {
+          "arm_bitops": 8261178139380.0,
+          "rho_bitops": 5808239126.198051,
+          "targets": 65536
+        },
+        {
+          "arm_bitops": 132171107672820.0,
+          "rho_bitops": 23219254353.20173,
+          "targets": 1048576
+        }
+      ],
+      "break_even_window": null,
+      "cold_ratio": 26.029715532284303,
+      "curve": "icv1-fp21-tm633-da00b24a",
+      "log2_r": 20.079254292132745,
+      "per_target_ratio": 6.273751484016004,
+      "reference": {
+        "complete": true,
+        "per_target_bitops": 20091280.125,
+        "reusable_bitops": 4581220.875,
+        "runs": 8
+      }
+    },
+    {
+      "arm": {
+        "complete": true,
+        "per_target_bitops": 224020859.0,
+        "reusable_bitops": 566863512.0,
+        "runs": 8
+      },
+      "at": [
+        {
+          "arm_bitops": 790884371.0,
+          "rho_bitops": 63918492.0,
+          "targets": 1
+        },
+        {
+          "arm_bitops": 4151197256.0,
+          "rho_bitops": 268671767.22451067,
+          "targets": 16
+        },
+        {
+          "arm_bitops": 57916203416.0,
+          "rho_bitops": 1067274509.2595901,
+          "targets": 256
+        },
+        {
+          "arm_bitops": 918156301976.0,
+          "rho_bitops": 4255880731.6037674,
+          "targets": 4096
+        },
+        {
+          "arm_bitops": 14681997878936.0,
+          "rho_bitops": 17008846669.10835,
+          "targets": 65536
+        },
+        {
+          "arm_bitops": 234903463110296.0,
+          "rho_bitops": 68020345564.396736,
+          "targets": 1048576
+        }
+      ],
+      "break_even_window": null,
+      "cold_ratio": 12.373326501507576,
+      "curve": "icv1-fp22-tm829-94351bac",
+      "log2_r": 21.185685464565008,
+      "per_target_ratio": 3.805720238733536,
+      "reference": {
+        "complete": true,
+        "per_target_bitops": 58864247.75,
+        "reusable_bitops": 5054244.25,
+        "runs": 8
+      }
+    },
+    {
+      "arm": {
+        "complete": true,
+        "per_target_bitops": 553818691.125,
+        "reusable_bitops": 619359906.0,
+        "runs": 8
+      },
+      "at": [
+        {
+          "arm_bitops": 1173178597.125,
+          "rho_bitops": 82216849.375,
+          "targets": 1
+        },
+        {
+          "arm_bitops": 9480458964.0,
+          "rho_bitops": 322689382.0904725,
+          "targets": 16
+        },
+        {
+          "arm_bitops": 142396944834.0,
+          "rho_bitops": 1260608562.1383808,
+          "targets": 256
+        },
+        {
+          "arm_bitops": 2269060718754.0,
+          "rho_bitops": 5005467897.251133,
+          "targets": 4096
+        },
+        {
+          "arm_bitops": 36295681101474.0,
+          "rho_bitops": 19983191771.329433,
+          "targets": 65536
+        },
+        {
+          "arm_bitops": 580721607224994.0,
+          "rho_bitops": 79893658763.91838,
+          "targets": 1048576
+        }
+      ],
+      "break_even_window": null,
+      "cold_ratio": 14.269320778445362,
+      "curve": "icv1-fp23-t1981-4b1c5501",
+      "log2_r": 22.539554768086866,
+      "per_target_ratio": 8.010901475569316,
+      "reference": {
+        "complete": true,
+        "per_target_bitops": 69133129.75,
+        "reusable_bitops": 13083719.625,
+        "runs": 8
+      }
+    },
+    {
+      "arm": {
+        "complete": true,
+        "per_target_bitops": 950575521.0,
+        "reusable_bitops": 674575488.0,
+        "runs": 8
+      },
+      "at": [
+        {
+          "arm_bitops": 1625151009.0,
+          "rho_bitops": 93354960.0,
+          "targets": 1
+        },
+        {
+          "arm_bitops": 15883783824.0,
+          "rho_bitops": 368285237.0345341,
+          "targets": 16
+        },
+        {
+          "arm_bitops": 244021908864.0,
+          "rho_bitops": 1440600553.4439871,
+          "targets": 256
+        },
+        {
+          "arm_bitops": 3894231909504.0,
+          "rho_bitops": 5722067558.559724,
+          "targets": 4096
+        },
+        {
+          "arm_bitops": 62297591919744.0,
+          "rho_bitops": 22845976586.9531,
+          "targets": 65536
+        },
+        {
+          "arm_bitops": 996751352083584.0,
+          "rho_bitops": 91341122795.7284,
+          "targets": 1048576
+        }
+      ],
+      "break_even_window": null,
+      "cold_ratio": 17.408298487836106,
+      "curve": "icv1-fp24-tm4427-ca3e410c",
+      "log2_r": 23.133496741623187,
+      "per_target_ratio": 12.026612430890587,
+      "reference": {
+        "complete": true,
+        "per_target_bitops": 79039341.0,
+        "reusable_bitops": 14315619.0,
+        "runs": 8
+      }
+    },
+    {
+      "arm": {
+        "complete": true,
+        "per_target_bitops": 2219699535.875,
+        "reusable_bitops": 731928428.0,
+        "runs": 8
+      },
+      "at": [
+        {
+          "arm_bitops": 2951627963.875,
+          "rho_bitops": 299729718.75,
+          "targets": 1
+        },
+        {
+          "arm_bitops": 36247121002.0,
+          "rho_bitops": 1288315813.3955913,
+          "targets": 16
+        },
+        {
+          "arm_bitops": 568975009612.0,
+          "rho_bitops": 5144115263.031021,
+          "targets": 256
+        },
+        {
+          "arm_bitops": 9092621227372.0,
+          "rho_bitops": 20539286691.929935,
+          "targets": 4096
+        },
+        {
+          "arm_bitops": 145470960711532.0,
+          "rho_bitops": 82112928322.23827,
+          "targets": 65536
+        },
+        {
+          "arm_bitops": 2327524392458092.0,
+          "rho_bitops": 328405733258.402,
+          "targets": 1048576
+        }
+      ],
+      "break_even_window": null,
+      "cold_ratio": 9.847631980520784,
+      "curve": "icv1-fp25-t2119-a77ec6c5",
+      "log2_r": 24.574443335021645,
+      "per_target_ratio": 7.810142410351915,
+      "reference": {
+        "complete": true,
+        "per_target_bitops": 284207306.25,
+        "reusable_bitops": 15522412.5,
+        "runs": 8
+      }
+    },
+    {
+      "arm": {
+        "complete": true,
+        "per_target_bitops": 6232684948.0,
+        "reusable_bitops": 792734168.0,
+        "runs": 8
+      },
+      "at": [
+        {
+          "arm_bitops": 7025419116.0,
+          "rho_bitops": 382117589.75,
+          "targets": 1
+        },
+        {
+          "arm_bitops": 100515693336.0,
+          "rho_bitops": 1653099113.758942,
+          "targets": 16
+        },
+        {
+          "arm_bitops": 1596360080856.0,
+          "rho_bitops": 6610330342.595276,
+          "targets": 256
+        },
+        {
+          "arm_bitops": 25529870281176.0,
+          "rho_bitops": 26403222991.055634,
+          "targets": 4096
+        },
+        {
+          "arm_bitops": 408466033486296.0,
+          "rho_bitops": 105565737315.23859,
+          "targets": 65536
+        },
+        {
+          "arm_bitops": 6535444644768216.0,
+          "rho_bitops": 422213529819.7701,
+          "targets": 1048576
+        }
+      ],
+      "break_even_window": null,
+      "cold_ratio": 18.385489975995014,
+      "curve": "icv1-fp26-t13593-44bdbe6d",
+      "log2_r": 25.779099505315788,
+      "per_target_ratio": 17.05749278678988,
+      "reference": {
+        "complete": true,
+        "per_target_bitops": 365392794.0,
+        "reusable_bitops": 16724795.75,
+        "runs": 8
+      }
+    }
+  ],
+  "model": "arm: reusable once + per_target each; rho: reusable once + per_target * sum_{k<T} C(2k,k)/4^k (Kuhn-Struik, no detection lag)",
+  "reference": "rho-neg",
+  "schema": "ecbench.amortize/v1",
+  "unit": "bitop/v1"
+}

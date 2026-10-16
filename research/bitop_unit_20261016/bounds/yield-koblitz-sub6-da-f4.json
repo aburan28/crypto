@@ -1,0 +1,302 @@
+{
+  "admissibility": {
+    "bounded": false,
+    "deterministic": true,
+    "reasons": [],
+    "status": "admissible",
+    "unpriced": []
+  },
+  "bound_id": "ECBND1h7a9e17174bf4",
+  "constant": {
+    "declared_ratio_to_floor": null,
+    "ratio_to_floor": {
+      "ci95": [
+        10175.297475510928,
+        21628.84125323227
+      ],
+      "ci_method": "cluster",
+      "value": 16017.662553172704
+    },
+    "s": {
+      "ci95": [
+        2252.9607953134428,
+        4310.782624289556
+      ],
+      "ci_method": "cluster",
+      "value": 3340.7292640394767
+    }
+  },
+  "dimensions": {
+    "memory": {
+      "ci95": null,
+      "known": false,
+      "lower_is_better": true,
+      "source": "first of counters.inserts_uncharged, counters.table_inserts_uncharged, counters.table_entries, counters.distinguished_points",
+      "statistic": "mean table entries / sqrt(r) over verified runs",
+      "value": null
+    },
+    "ops": {
+      "ci95": [
+        10175.297475510928,
+        21628.84125323227
+      ],
+      "known": true,
+      "lower_is_better": true,
+      "source": "cost.total_gae, workload.curve.r, automorphisms_available",
+      "statistic": "mean S / sqrt(pi / 2A) over verified runs",
+      "value": 16017.662553172704
+    },
+    "uncharged": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "known": true,
+      "lower_is_better": true,
+      "source": "counters.*_uncharged",
+      "statistic": "mean sum of *_uncharged counters / sqrt(r) over verified runs",
+      "value": 0.0
+    }
+  },
+  "domain": {
+    "envelope": {
+      "precomputation": "none",
+      "targets": 1,
+      "threads": 1
+    },
+    "family": "koblitz",
+    "problem": "ecdlp.single_target",
+    "target_kind": "planted",
+    "tier": "toy",
+    "unit": "bitop/v1"
+  },
+  "domain_id": "ECDOM1h92defeaedfc6",
+  "fit": {
+    "alpha": 0.6706283174519097,
+    "alpha_agrees_with_declared": null,
+    "alpha_ci95": [
+      0.3444723958838456,
+      2.0812082167501984
+    ],
+    "alpha_in_additions": 0.5098624518122419,
+    "alpha_in_additions_ci95": [
+      0.19828469505721863,
+      1.7687569034942074
+    ],
+    "ci_method": "cluster",
+    "declared_alpha": null,
+    "log2_c": 20.945198337316654,
+    "model": "bitops = C * r^alpha",
+    "points": 16,
+    "r_squared": 0.8991080036191829,
+    "scaling_claim": true,
+    "size_parameter": "r",
+    "sizes": 4
+  },
+  "fit_options": {
+    "curves": [],
+    "resamples": 2000,
+    "seed": 20261005,
+    "tier": null,
+    "unit": "bitop/v1"
+  },
+  "improves_on": [],
+  "label": "ic.pipeline on 4 koblitz curves, toy tier",
+  "level": "exponent",
+  "method": {
+    "entry": "ic_framework::run_pipeline",
+    "family": "ic",
+    "id": "ic.pipeline",
+    "method_id": "ECM1h5419a6e9f1f2",
+    "params": {
+      "factor_base": "binary-subspace:dimension=6",
+      "linalg": "incremental-gauss",
+      "max_trials": "100000000",
+      "oracle": "descent-algebraic:m=2",
+      "solver": "f4-f2",
+      "solver_budget_seconds": "0",
+      "targets": "walk"
+    }
+  },
+  "notes": "",
+  "provenance": {
+    "audits": [],
+    "records": 16,
+    "sessions": [
+      {
+        "arm": "sub6-da-f4",
+        "binary_sha256": "075998919b648823b0d584ab8e0b68de06c23de1e74283d50163de60e72aff95",
+        "dir": "research/bitop_unit_20261016/sessions/yield-koblitz",
+        "env_class_id": "ECBENV2he1389885ccd0",
+        "git_commit": null,
+        "records_sha256": "4687fe68dfd70c5f42ee970e5832d0019330630e5301571741ed8fb87d4a5d76",
+        "role": "candidate",
+        "session_id": "ECBS1hcef6f6e686f1",
+        "spec_id": "ECS1hf2c57cdb9b66",
+        "status": "complete"
+      }
+    ],
+    "statuses": {
+      "verified": 16
+    },
+    "verified": 16
+  },
+  "schema": "ecbench.bound/v1",
+  "sizes": [
+    {
+      "automorphisms_available": 26,
+      "declared_ratio_to_floor": null,
+      "declared_s": null,
+      "field_bits": 13,
+      "floor_s": 0.24579512472436318,
+      "levels": {
+        "L0": 4
+      },
+      "log2_r": 10.967946705812707,
+      "mean_gae": 448153324.25,
+      "mean_s": 3885.722025067645,
+      "memory_entries_per_sqrt_r": null,
+      "r": 2003,
+      "ratio_to_floor": 15808.783959507447,
+      "runs": 4,
+      "s_ci95": [
+        3405.7118069644507,
+        4365.73224317084
+      ],
+      "slug": "icv1-f2m13-t181-515ee569",
+      "uncharged_per_sqrt_r": 0.0,
+      "verified": 4,
+      "workloads": 4
+    },
+    {
+      "automorphisms_available": 34,
+      "declared_ratio_to_floor": null,
+      "declared_s": null,
+      "field_bits": 17,
+      "floor_s": 0.21494160128871234,
+      "levels": {
+        "L0": 4
+      },
+      "log2_r": 16.001122266128682,
+      "mean_gae": 1842049558.0,
+      "mean_s": 1663.0538621650558,
+      "memory_entries_per_sqrt_r": null,
+      "r": 65587,
+      "ratio_to_floor": 7737.23584542957,
+      "runs": 4,
+      "s_ci95": [
+        948.3553490498455,
+        2719.9467015038063
+      ],
+      "slug": "icv1-f2m17-tm101-00378d4e",
+      "uncharged_per_sqrt_r": 0.0,
+      "verified": 4,
+      "workloads": 4
+    },
+    {
+      "automorphisms_available": 38,
+      "declared_ratio_to_floor": null,
+      "declared_s": null,
+      "field_bits": 19,
+      "floor_s": 0.2033144004785961,
+      "levels": {
+        "L0": 4
+      },
+      "log2_r": 16.997807964508816,
+      "mean_gae": 6937845789.25,
+      "mean_s": 3573.2879772635497,
+      "memory_entries_per_sqrt_r": null,
+      "r": 130873,
+      "ratio_to_floor": 17575.183896724164,
+      "runs": 4,
+      "s_ci95": [
+        2785.3905950397557,
+        4186.641704877817
+      ],
+      "slug": "icv1-f2m19-t797-b6cf2467",
+      "uncharged_per_sqrt_r": 0.0,
+      "verified": 4,
+      "workloads": 4
+    },
+    {
+      "automorphisms_available": 46,
+      "declared_ratio_to_floor": null,
+      "declared_s": null,
+      "field_bits": 23,
+      "floor_s": 0.1847910880823847,
+      "levels": {
+        "L0": 4
+      },
+      "log2_r": 20.999106101271966,
+      "mean_gae": 47808357401.5,
+      "mean_s": 4240.853191661656,
+      "memory_entries_per_sqrt_r": null,
+      "r": 2095853,
+      "ratio_to_floor": 22949.446511029648,
+      "runs": 4,
+      "s_ci95": [
+        2911.0958660100478,
+        5570.610517313264
+      ],
+      "slug": "icv1-f2m23-t5197-69e76b73",
+      "uncharged_per_sqrt_r": 0.0,
+      "verified": 4,
+      "workloads": 4
+    }
+  ],
+  "stages": [
+    {
+      "alpha": 0.15590328816000162,
+      "alpha_ci95": [
+        0.13352240967814552,
+        0.31477822070832845
+      ],
+      "mean_gae": 368498.0,
+      "name": "factor_base",
+      "share_of_gae": 0.00002584300276762636,
+      "sizes_with_work": 4
+    },
+    {
+      "alpha": null,
+      "alpha_ci95": null,
+      "mean_gae": 0.0,
+      "name": "oracle_setup",
+      "share_of_gae": 0.0,
+      "sizes_with_work": 0
+    },
+    {
+      "alpha": 0.6708546294321766,
+      "alpha_ci95": [
+        0.36571400095994044,
+        2.193999682154925
+      ],
+      "mean_gae": 14257634357.9375,
+      "name": "relations",
+      "share_of_gae": 0.9998971070995867,
+      "sizes_with_work": 4
+    },
+    {
+      "alpha": 0.14603480030695645,
+      "alpha_ci95": [
+        -0.06530383541302684,
+        1.116168272231524
+      ],
+      "mean_gae": 975470.375,
+      "name": "linear_algebra",
+      "share_of_gae": 0.00006841036749415879,
+      "sizes_with_work": 4
+    },
+    {
+      "alpha": 0.278715396118328,
+      "alpha_ci95": [
+        0.2192463760049522,
+        0.39996187080417045
+      ],
+      "mean_gae": 123191.9375,
+      "name": "verify",
+      "share_of_gae": 8.63953015148455e-6,
+      "sizes_with_work": 4
+    }
+  ],
+  "verdict_id": null
+}

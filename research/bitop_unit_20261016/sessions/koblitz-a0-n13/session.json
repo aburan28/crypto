@@ -1,0 +1,52 @@
+{
+  "schema": "ecbench.session/v1",
+  "session_id": "ECBS1he3b1257b7a99",
+  "label": "Frobenius-orbit IC, fully priced, vs rho: Koblitz a=0 n=13",
+  "spec_id": "ECS1h1dc0f0b15606",
+  "spec_sha256": "1dc0f0b1560601173b3140b328032d78414d20c205ccfd065d5edd5e7dc1dfb7",
+  "env_class_id": "ECBENV2he1389885ccd0",
+  "host_sha256": "64ff55b679c3696d51437969661df33bd3ddff4501983beb7bb59ed1397a4dc4",
+  "plan_sha256": "8ebf0703f2aba4ebfdbdcad33209d72adae474cf6f4d852d43f0c97fba9fa666",
+  "binary_sha256": "075998919b648823b0d584ab8e0b68de06c23de1e74283d50163de60e72aff95",
+  "git_commit": null,
+  "git_dirty": null,
+  "options": {
+    "cpus": "none",
+    "lock_path": "/tmp/bench-F.lock",
+    "wait_for_lock": false,
+    "allow_busy": true,
+    "thresholds": {
+      "settle_seconds": 2.0,
+      "max_other_cpu": 0.1,
+      "max_psi": 5.0,
+      "max_preemptions_per_second": 50.0
+    },
+    "exe": "/proc/self/exe"
+  },
+  "cpu_plan": null,
+  "preflight": null,
+  "eviction": null,
+  "runner_on_run_cpu": false,
+  "runner_cpus": null,
+  "ticks_per_second": 100,
+  "grading_version": 2,
+  "child_env_sha256": "db1325aca1b2e904875cd5890b474cc8090bafbf32b676ceb75a94f11fadbc5d",
+  "child_env": {
+    "HOME": "/root",
+    "LC_ALL": "C",
+    "OMP_NUM_THREADS": "1",
+    "PATH": "/nix/var/nix/profiles/default/bin:/root/.local/bin:/root/.cargo/bin:/usr/local/go/bin:/opt/node22/bin:/opt/maven/bin:/opt/gradle/bin:/opt/rbenv/bin:/root/.bun/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "RAYON_NUM_THREADS": "1",
+    "RUST_BACKTRACE": "0",
+    "RUST_MIN_STACK": "8388608"
+  },
+  "started_unix_ms": 1792125238907,
+  "finished_unix_ms": 1792125254237,
+  "status": "complete",
+  "executions_planned": 384,
+  "records_written": 384,
+  "records_sha256": "e73400e4a943c04ba5d7a02643f24c718c77a01b4373bb1fca04247b1b2fd8ed",
+  "status_counts": {
+    "verified": 384
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "schema": "ecbench.session/v1",
+  "session_id": "ECBS1hbb2dee034578",
+  "label": "budget-qualified counted SAT/PDP panel on eight public icv1-f2m17-tm101-00378d4e targets",
+  "spec_id": "ECS1hab4965979156",
+  "spec_sha256": "ab496597915646afba9b7905a2046ea896c6317cd0c69737b3193773e0751b00",
+  "env_class_id": "ECBENV2he1389885ccd0",
+  "host_sha256": "02b7d80974d58f22133ebce589fce6830510bbd56a820fcd49e12716b5783a13",
+  "plan_sha256": "da30fd3f9509395db8ed439f4a645a38b7ca8d4ae9a783c8a96555b79ac6a295",
+  "binary_sha256": "075998919b648823b0d584ab8e0b68de06c23de1e74283d50163de60e72aff95",
+  "git_commit": null,
+  "git_dirty": null,
+  "options": {
+    "cpus": "none",
+    "lock_path": "/tmp/bench-F.lock",
+    "wait_for_lock": false,
+    "allow_busy": true,
+    "thresholds": {
+      "settle_seconds": 2.0,
+      "max_other_cpu": 0.1,
+      "max_psi": 5.0,
+      "max_preemptions_per_second": 50.0
+    },
+    "exe": "/proc/self/exe"
+  },
+  "cpu_plan": null,
+  "preflight": null,
+  "eviction": null,
+  "runner_on_run_cpu": false,
+  "runner_cpus": null,
+  "ticks_per_second": 100,
+  "grading_version": 2,
+  "child_env_sha256": "db1325aca1b2e904875cd5890b474cc8090bafbf32b676ceb75a94f11fadbc5d",
+  "child_env": {
+    "HOME": "/root",
+    "LC_ALL": "C",
+    "OMP_NUM_THREADS": "1",
+    "PATH": "/nix/var/nix/profiles/default/bin:/root/.local/bin:/root/.cargo/bin:/usr/local/go/bin:/opt/node22/bin:/opt/maven/bin:/opt/gradle/bin:/opt/rbenv/bin:/root/.bun/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "RAYON_NUM_THREADS": "1",
+    "RUST_BACKTRACE": "0",
+    "RUST_MIN_STACK": "8388608"
+  },
+  "started_unix_ms": 1792124823147,
+  "finished_unix_ms": 1792124859260,
+  "status": "complete",
+  "executions_planned": 240,
+  "records_written": 240,
+  "records_sha256": "d10fdb8630041a895c1e3c27d60a4d6acecebf8039a141cba4a3bd45d1427596",
+  "status_counts": {
+    "verified": 240
+  }
+}

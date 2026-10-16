@@ -83,4 +83,26 @@ depend on the host or on isolation, and wall time is not used.
 
 ## Deviations
 
-None yet.
+1. **Sessions re-run after fixes.** Four fixes landed after the first
+   sessions ran:
+   - the fiber oracles' tables counted their insert attempts;
+   - oracles with no table (descent, pdp-split, and pdp3's algebraic
+     engines) declared their set-up counted;
+   - pdp3's root-finding engine charged its table's inserts.
+
+   Sessions that had already run on the earlier binary were discarded
+   uncommitted and re-run unchanged from their frozen specs: the fiber
+   ladder, the four Koblitz specs, SAT, F4 K13 and the yield sweep. The
+   prime ladder ran once; its arms use none of the changed code.
+
+   A later fix is to the reader only. The binary that ran these sessions
+   writes `null` for the logarithm of a phase with zero gates, and `ecbench`
+   now reads that as absent instead of failing to parse it. Records are
+   unchanged.
+2. **Instruction-audit panel.** The audit draws on the committed specs of
+   the studies whose engines it checks, not on this study's sessions, so
+   that each audited run has a committed record to compare with. A second
+   audit covers the prime ladder: one run per arm on its largest curve.
+3. **Koblitz index-calculus arms.** These arms are tuned per curve size,
+   each with a different base, so they have one constant-only bound per
+   size. Only the two rho arms are fitted across the four sizes.

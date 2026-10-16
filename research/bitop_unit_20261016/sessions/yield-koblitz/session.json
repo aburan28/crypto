@@ -1,0 +1,53 @@
+{
+  "schema": "ecbench.session/v1",
+  "session_id": "ECBS1hcef6f6e686f1",
+  "label": "yield sweep, Koblitz: every oracle and solver on the same subspace bases and targets",
+  "spec_id": "ECS1hf2c57cdb9b66",
+  "spec_sha256": "f2c57cdb9b66acb22c888cc6c67f4e073f1e7b93605a3055c22120febd68a079",
+  "env_class_id": "ECBENV2he1389885ccd0",
+  "host_sha256": "4cdbe98872a82030acbbaf212db10452d15e1dfc1f32a0986da6da8ef15b067f",
+  "plan_sha256": "c77347fc8e1489fb58ce6fdfb34d9bddd57954e5d48cbeaa8b810d8ea47be23d",
+  "binary_sha256": "075998919b648823b0d584ab8e0b68de06c23de1e74283d50163de60e72aff95",
+  "git_commit": null,
+  "git_dirty": null,
+  "options": {
+    "cpus": "none",
+    "lock_path": "/tmp/bench-E.lock",
+    "wait_for_lock": false,
+    "allow_busy": true,
+    "thresholds": {
+      "settle_seconds": 2.0,
+      "max_other_cpu": 0.1,
+      "max_psi": 5.0,
+      "max_preemptions_per_second": 50.0
+    },
+    "exe": "/proc/self/exe"
+  },
+  "cpu_plan": null,
+  "preflight": null,
+  "eviction": null,
+  "runner_on_run_cpu": false,
+  "runner_cpus": null,
+  "ticks_per_second": 100,
+  "grading_version": 2,
+  "child_env_sha256": "db1325aca1b2e904875cd5890b474cc8090bafbf32b676ceb75a94f11fadbc5d",
+  "child_env": {
+    "HOME": "/root",
+    "LC_ALL": "C",
+    "OMP_NUM_THREADS": "1",
+    "PATH": "/nix/var/nix/profiles/default/bin:/root/.local/bin:/root/.cargo/bin:/usr/local/go/bin:/opt/node22/bin:/opt/maven/bin:/opt/gradle/bin:/opt/rbenv/bin:/root/.bun/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "RAYON_NUM_THREADS": "1",
+    "RUST_BACKTRACE": "0",
+    "RUST_MIN_STACK": "8388608"
+  },
+  "started_unix_ms": 1792124823268,
+  "finished_unix_ms": 1792129443362,
+  "status": "complete",
+  "executions_planned": 208,
+  "records_written": 208,
+  "records_sha256": "4687fe68dfd70c5f42ee970e5832d0019330630e5301571741ed8fb87d4a5d76",
+  "status_counts": {
+    "timeout": 11,
+    "verified": 197
+  }
+}
