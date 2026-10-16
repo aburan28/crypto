@@ -106,8 +106,25 @@ open.
   primes (frozen verdict: residual deficit beyond granularity). Empty
   tractable classes: 560 vs 395 expected and 1,210 vs 720, in excess at every
   class size. Successes are positively correlated within an `L`-class; the
-  2-adic valuation of `#J(F_p)` does not explain it (post hoc). Still open:
-  which finer invariant (candidate: the Galois module `J[4]`) is shared; and Smith's Remark 5 alternative (descending `X` when the trigonal
+  2-adic valuation of `#J(F_p)` does not explain it (post hoc).
+- **Narrowed further (2026-10-16,
+  [study](../research/smith_class_invariant_20261015/REPORT.pdf)):** the
+  shared factor is not a 2-adic Galois-module invariant of `J_H` at the
+  levels tested. Under a frozen protocol, conditioning the iso-level null on
+  the Frobenius cycle type on `J[2]` (the finest `J[2]` invariant for a
+  hyperelliptic curve), the 2-Sylow subgroup of `J(F_p)` (class group,
+  certified on all 16,823 / 160,010 tractable classes) or the corrected
+  `J[4]` descent invariants leaves `C` below all 999 permutations at both
+  primes; at most 9% of the gap closes (verdict: does not explain, all
+  valid candidates). The frozen `J[4]` descent instrument was invalid
+  (order-2 descent kernel on all-even factorizations; Amendment 1).
+  Next discriminating step: compute, per rational tractable subgroup `S`,
+  the `F_p`-isomorphism class of the quotient curve `X` (or of the
+  p.p.a.v. `J_H/S`, e.g. Dixmier–Ohno invariants with the twist bit) and
+  test whether `full_success` within an `L`-class is explained by shared
+  quotients (Serre's obstruction on a common target); control: the
+  `#X(F_p)` point count already checked in `smith_prop24::x_check`.
+  Still open: Smith's Remark 5 alternative (descending `X` when the trigonal
   map is not rational, which would raise the direct rate to 31.13% under his
   hypotheses) as a route that needs no walk.
 - **Outcomes:** short walks with cheap steps make the extension a practical
@@ -126,3 +143,7 @@ open.
 - 2026-10-15: isomorphism-class granularity tested under a frozen protocol;
   it explains 54% (`p = 7`) and 41% (`p = 11`) of the gap `U − C`, and the
   rest is a within-class correlation not yet named.
+- 2026-10-16: candidate invariants of `J_H` tested (cycle type on `J[2]`,
+  2-Sylow of `J(F_p)`, `J[4]` descent data); none explains the within-class
+  correlation at `p = 7, 11`. Unresolved; next step is the quotient-curve
+  class.
