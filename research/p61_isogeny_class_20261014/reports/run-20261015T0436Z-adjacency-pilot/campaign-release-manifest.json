@@ -1,0 +1,62 @@
+{
+  "schema": "ec-hardness/p61-adjacency-campaign-release/v1",
+  "created_utc": "2026-10-15T05:34:53Z",
+  "status": "running_at_observation",
+  "scope": {
+    "field_p": "2305843009213693951",
+    "root_id": "p61-i0025",
+    "class_vertices": 358094304,
+    "selected_degrees": [5, 13, 37, 59],
+    "complete_directed_edges": 2506660128,
+    "source_x_start": 16704,
+    "source_x_end": 19894128,
+    "window_vertices": 4096,
+    "prefix": "adjacency-v2"
+  },
+  "producer": {
+    "source_commit": "f9b48fcf916bfa2b0b6fbec06e8b7c4137ceef96",
+    "path": "/Volumes/data/ec-hardness-atlas-20261012/p61-selected-adjacency-v1/bin/p61_isogeny_adjacency-darwin-arm64-f9b48fcf9",
+    "sha256": "a69def0c21dc455077abb8bef86d828c13dfcbea8f45382f71614fdf260d7c78"
+  },
+  "verifier": {
+    "source_commit": "92a62be6471358edb3f9becaeb56c94c24a90b7e",
+    "path": "/Volumes/data/ec-hardness-atlas-20261012/p61-selected-adjacency-v1/bin/p61_isogeny_adjacency-darwin-arm64-92a62be64",
+    "sha256": "85b1265b187ecd2bbd2ff7fd0f7c9608d3ccd2e4a7234f73ee1b2863be599208"
+  },
+  "supervisor": {
+    "source_commit": "bd5ee73323c1ec956084fb429606a077cdd10844",
+    "durable_path": "/Volumes/data/ec-hardness-atlas-20261012/p61-selected-adjacency-v1/supervisor/run_adjacency_campaign-bd5ee733.py",
+    "sha256": "96582a616059bc59fe3060dfd99666f022748ec59b580aba66d9c512a3b2613a"
+  },
+  "launcher": {
+    "source_commit": "01466723a7f81db72387bd5c110408a3f8d61f73",
+    "durable_path": "/Volumes/data/ec-hardness-atlas-20261012/p61-selected-adjacency-v1/supervisor/launch_adjacency_campaign-01466723.sh",
+    "sha256": "e0bdd3d56e55b0d3f01e141dbb7b1e42a297186b7952f086af51060578361b1b"
+  },
+  "inputs": {
+    "vertex_manifest_directory": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-streaming-v1/manifests",
+    "vertex_manifest_pattern": "campaign-v1-admission-*.json",
+    "class_number_receipt_sha256": "44e202b8eb9cdad3ef09fb50e416cc8bdcf0942a6f140e24db587a3c4d44493f"
+  },
+  "guards": {
+    "threads": 4,
+    "follow": true,
+    "poll_seconds": 60,
+    "minimum_free_bytes": 1500000000000,
+    "maximum_logical_bytes": 6000000000000,
+    "create_only_admission": true,
+    "independent_replay_required": true
+  },
+  "first_production_admission": {
+    "vertices": 4096,
+    "directed_edges": 28672,
+    "manifest": "/Volumes/data/ec-hardness-atlas-20261012/p61-selected-adjacency-v1/manifests/adjacency-v2-x000000016704-000000033088-r000000000000-000000004096-admission.json",
+    "sha256": "be33159cc6fb7bc3460c6626c827d2e01ea2cf46ada017fb8acafc19b21e26e8"
+  },
+  "health_observation": {
+    "observed_utc": "2026-10-15T05:34:53Z",
+    "state": "generating source-record window 4096..8192",
+    "log": "/Users/adamburan/Library/Logs/CryptoP61Campaign/adjacency-v2-from-x000000016704.log"
+  },
+  "completion_boundary": "The campaign is active. This release manifest is not a terminal class, graph, dense-join, or ML-corpus completion receipt."
+}

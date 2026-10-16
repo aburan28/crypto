@@ -1,0 +1,99 @@
+{
+  "schema": "ec-hardness/p61-adjacency-calibration/v1",
+  "run_id": "p61-adjacency-pilot-20261015T0436Z",
+  "started_utc": "2026-10-15T04:36:55Z",
+  "completed_utc": "2026-10-15T05:16:38Z",
+  "host": "macOS 26.6 arm64 shared interactive host",
+  "isolation": "unisolated; the 8-thread p61 vertex census remained active during the 64- and 4096-vertex measurements",
+  "field": {
+    "p": "2305843009213693951",
+    "root_id": "p61-i0025",
+    "trace": -704859453,
+    "fundamental_discriminant": "-8726545188371316595",
+    "class_vertices": 358094304,
+    "selected_degrees": [5, 13, 37, 59],
+    "directed_edges_per_vertex": 7,
+    "complete_directed_edges": 2506660128,
+    "kernel_coefficients_per_vertex": 115,
+    "complete_kernel_coefficients": 41180844960
+  },
+  "release": {
+    "producer_source_commit": "f9b48fcf916bfa2b0b6fbec06e8b7c4137ceef96",
+    "producer_binary_sha256": "a69def0c21dc455077abb8bef86d828c13dfcbea8f45382f71614fdf260d7c78",
+    "verifier_source_commit": "92a62be6471358edb3f9becaeb56c94c24a90b7e",
+    "verifier_binary_sha256": "85b1265b187ecd2bbd2ff7fd0f7c9608d3ccd2e4a7234f73ee1b2863be599208",
+    "class_number_receipt_sha256": "44e202b8eb9cdad3ef09fb50e416cc8bdcf0942a6f140e24db587a3c4d44493f"
+  },
+  "calibrations": [
+    {
+      "label": "path smoke",
+      "vertices": 1,
+      "directed_edges": 7,
+      "kernel_coefficients": 115,
+      "generation_elapsed_ms": 18703,
+      "verification_elapsed_ms": 21446,
+      "logical_uncompressed_bytes": 12227,
+      "stored_gzip_bytes": 3593,
+      "generation_receipt_sha256": "c24ba921742149ea18657a9061558b8a7d1cce1c1ecf14340c040ab8638c5c53",
+      "verification_receipt_sha256": "d00a7bc8d63e2858fef8b0d8b7069c038f2560dcc372f3b6a2d94a976032de66",
+      "shard_sha256": "a534407ae4e9a477ba2cd9d1484a54100aad1963f66b18e0504bdca8f18baba5",
+      "record_chain_sha256": "cf3a8603f09db5920f3dc3aec488a514c69eeb75f70655fc1885ca9537a5eb06",
+      "admission_manifest_sha256": null,
+      "status": "pass"
+    },
+    {
+      "label": "supervisor admission",
+      "vertices": 64,
+      "directed_edges": 448,
+      "kernel_coefficients": 7360,
+      "generation_elapsed_ms": 24347,
+      "verification_elapsed_ms": 23712,
+      "logical_uncompressed_bytes": 649507,
+      "stored_gzip_bytes": 135394,
+      "generation_receipt_sha256": "f0cfdddaeabbfb8aa60a77e15473bd11939a070796c95e1a1ce066a6ddb2b0f5",
+      "verification_receipt_sha256": "64aac96b79ffe89cf16d1c630699f8225aba4271456147d24f99abb89fa1bd47",
+      "shard_sha256": "0a676bd386d048b70dfb7fa34a36c6b42d0589ceb707c2f36fb9a7ca07f48f57",
+      "record_chain_sha256": "0a4e1fe4d96a0b9429ec5e20717bde0ff1fcde197a27d3819c59cde3a22cde2e",
+      "admission_manifest_sha256": "26b4358961f6cf3b58767b454a5272b101ea520a14ebb95ad409ded7bc37685f",
+      "status": "pass"
+    },
+    {
+      "label": "production window",
+      "vertices": 4096,
+      "directed_edges": 28672,
+      "kernel_coefficients": 471040,
+      "generation_elapsed_ms": 191551,
+      "verification_elapsed_ms": 296931,
+      "logical_uncompressed_bytes": 41543871,
+      "stored_gzip_bytes": 8552556,
+      "generation_receipt_sha256": "81fc61cf45c2718acd74236ebff5201f1e751c570c57afc86cdd1491a0526cbf",
+      "verification_receipt_sha256": "5755b14028bcf7bf51e19870ae3fa8e6422661e9836a6fc8780ead7e8878870e",
+      "shard_sha256": "ce0fd43d317b56e386462b7cb8ebd5605bba1195efaa57ba1e36819c5917bbc1",
+      "record_chain_sha256": "a5f4b1feaeffaf9e0a90e1a50f4630f0ace20a16556e1ab60fa22cfb25b09598",
+      "admission_manifest_sha256": "be33159cc6fb7bc3460c6626c827d2e01ea2cf46ada017fb8acafc19b21e26e8",
+      "status": "pass"
+    }
+  ],
+  "projection_from_production_window": {
+    "logical_bytes_per_vertex": 10142.546630859375,
+    "stored_bytes_per_vertex": 2088.0263671875,
+    "complete_graph_logical_bytes": 3631988176565,
+    "complete_graph_stored_bytes": 747710348692,
+    "logical_corpus_cap_bytes": 6000000000000,
+    "logical_headroom_after_adjacency_bytes": 2368011823435,
+    "minimum_free_space_bytes": 1500000000000,
+    "free_space_after_production_admission_bytes": 7766315634688,
+    "interpretation": "Single-window descriptive projection; dense target joins, labels, masks, and ML-ready products are additional, while physical gzip bytes are substantially smaller than logical JSONL bytes."
+  },
+  "snapshot": {
+    "vertex_census_x_end": 147776,
+    "vertex_records_with_per_segment_replay": 2659968,
+    "vertex_replay_coverage_percent": 0.742812150399354,
+    "global_uniqueness_x_end": 33088,
+    "globally_deduplicated_vertex_records": 595584,
+    "globally_deduplicated_coverage_percent": 0.16632043384862106,
+    "production_adjacency_vertices": 4096,
+    "production_adjacency_coverage_percent": 0.001143832770933994,
+    "calibration_overlap_rule": "The 1- and 64-vertex calibrations overlap the production source population and are excluded from production coverage."
+  }
+}
