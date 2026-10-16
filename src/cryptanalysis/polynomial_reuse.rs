@@ -3,6 +3,7 @@
 //! coefficient polynomials, not target answers. No specialization denominators.
 use super::{
     algebra_cache::{self, Layer},
+    bitop_tally,
     koblitz_groebner::*,
     pq_groebner_f2::{read_columns, F2BoolMono, F2BoolPoly, MonoColumns},
 };
@@ -271,6 +272,15 @@ impl DecompositionTemplate {
             }
             _ => self.instantiate_by_adds(bits),
         };
+        // `bitop/v1`: the read-back's extractions, and the copy of the
+        // prefix, one word a term
+        bitop_tally::word_ops(
+            self.prefix
+                .iter()
+                .chain(&last)
+                .map(|p| p.terms.len() as u64)
+                .sum(),
+        );
         let mut equations = self.prefix.clone();
         equations.extend(last);
         DecompositionSystem {
@@ -282,6 +292,11 @@ impl DecompositionTemplate {
     }
 
     fn instantiate_link(&self, link: &LastLink, bits: u64) -> Vec<F2BoolPoly> {
+        // `bitop/v1`: the copy of the constant row, one XOR a word for each
+        // set target bit, and the read-back (a test a word, an extraction a
+        // set bit)
+        let words = link.constant.len() as u64;
+        bitop_tally::word_ops(words * (2 + u64::from(bits.count_ones())));
         let mut row = link.constant.clone();
         for k in 0..self.n as usize {
             if bits & (1u64 << k) != 0 {
@@ -309,6 +324,7 @@ impl DecompositionTemplate {
         for k in 0..self.n as usize {
             if bits & (1u64 << k) != 0 {
                 for (p, c) in last.iter_mut().zip(&self.coefficients[k]) {
+                    bitop_tally::word_ops(bitop_tally::poly::add(p.terms.len(), c.terms.len()));
                     *p = p.add(c);
                 }
             }
@@ -436,6 +452,12 @@ pub fn build_decomposition_system_reusing(
             return build_decomposition_system(basis, x_r, b, m, st);
         }
         let key = local_template_key(basis, b, m, st);
+        // `bitop/v1`: hashing the inputs and comparing them with the
+        // memo's, a word each (the structure constants, basis and `b`)
+        let input_words =
+            (st.squares.len() + st.reduced.iter().map(Vec::len).sum::<usize>() + basis.len() + 2)
+                as u64;
+        bitop_tally::word_ops(2 * input_words);
         let hit = TEMPLATES.with(|t| {
             t.borrow()
                 .iter()

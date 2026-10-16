@@ -2354,6 +2354,7 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for SymmetrisedOracle<'_> {
         let kc = self.instance.koblitz.as_ref()?;
         let target = self.instance.fast.lower(point);
         let before = f4_word_ops_thread();
+        let tally_before = crate::cryptanalysis::bitop_tally::snapshot();
         let started = Instant::now();
         let outcome = symmetrised_groebner_decompose(
             kc,
@@ -2374,6 +2375,12 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for SymmetrisedOracle<'_> {
         extra.insert("splits".to_string(), out.effort);
         extra.insert("oversize".to_string(), out.oversize as u64);
         extra.insert("used_t".to_string(), u64::from(out.used_t));
+        // The whole call in `bitop/v1` primitives: the engine's word XORs
+        // and everything else `bitop_tally` saw on this thread (the
+        // system's build, the solver's matrices, scans and lifts).
+        crate::cryptanalysis::bitop_tally::snapshot()
+            .since(tally_before)
+            .put_complete(&mut extra, word_xors);
         let cost = SolverCost {
             ops: word_xors,
             // The same unit string as the `inherited-f4` adapter, so the

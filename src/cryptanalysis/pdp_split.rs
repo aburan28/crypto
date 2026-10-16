@@ -118,6 +118,9 @@ pub fn build_split_system_bases(
     let ell = bases[0].len();
     let k = plan.len();
     let n_vars = m * ell + (k - 1) * n as usize;
+    // `bitop/v1`: the symbolic build is charged by `SymElement` and the
+    // Semaev links; here, the scan that drops zero equations
+    crate::cryptanalysis::bitop_tally::word_ops(n as u64 * plan.len() as u64);
     if n_vars > MAX_VARS {
         return Err(format!(
             "{n_vars} Boolean unknowns exceed the cap {MAX_VARS}"
@@ -191,6 +194,8 @@ pub struct BranchOutcome {
     pub matrix_rows_max: u64,
     pub matrix_cols_max: u64,
     pub word_xors: u64,
+    /// The XORs the eliminations performed, tables included (`F4Stats`).
+    pub word_xors_performed: u64,
     pub peak_matrix_bytes: u64,
     pub steps: u64,
     pub wall_ns: u64,
@@ -199,6 +204,17 @@ pub struct BranchOutcome {
 /// Specialise the first `g` unknowns to `guess` and adjoin their linear
 /// pins, so the reduced basis still determines every unknown.
 pub fn specialise(sys: &SplitSystem, g: usize, guess: u64) -> Vec<F2BoolPoly> {
+    // `bitop/v1`: `g` substitutions of every equation (each at most its
+    // terms), and the pins
+    crate::cryptanalysis::bitop_tally::word_ops(
+        sys.equations
+            .iter()
+            .map(|p| {
+                1 + g as u64 * crate::cryptanalysis::bitop_tally::poly::substitute(p.terms.len())
+            })
+            .sum::<u64>()
+            + 3 * g as u64,
+    );
     let mut eqs: Vec<F2BoolPoly> = sys
         .equations
         .iter()
@@ -236,6 +252,11 @@ pub fn solutions_from_basis(
     n_vars: usize,
     max_free: usize,
 ) -> Option<Vec<u64>> {
+    // `bitop/v1`: the linearity test and fold of every term, one word
+    // operation a pivot test of the echelon, and per enumerated point one
+    // a free variable and pivot, and one a term evaluated
+    let mut ops: u64 = basis.iter().map(|p| 2 * p.terms.len() as u64).sum();
+    let mut tally = crate::cryptanalysis::bitop_tally::Pending::default();
     // A linear row: variable mask and constant bit.
     let mut rows: Vec<(u64, bool)> = basis
         .iter()
@@ -257,6 +278,7 @@ pub fn solutions_from_basis(
     let mut pivots: Vec<(u32, u64, bool)> = Vec::new();
     for i in 0..rows.len() {
         let (mut mask, mut c) = rows[i];
+        ops += 2 * pivots.len() as u64 + 1;
         for &(pv, pm, pc) in &pivots {
             if (mask >> pv) & 1 == 1 {
                 mask ^= pm;
@@ -279,6 +301,7 @@ pub fn solutions_from_basis(
         pivots.push((pv, mask, c));
         rows[i] = (mask, c);
     }
+    tally.word_ops += ops;
     let pivot_mask: u64 = pivots.iter().fold(0, |a, p| a | (1u64 << p.0));
     let free: Vec<usize> = (0..n_vars)
         .filter(|&v| (pivot_mask >> v) & 1 == 0)
@@ -302,7 +325,11 @@ pub fn solutions_from_basis(
                 point |= 1u64 << pv;
             }
         }
-        if basis.iter().all(|g| g.eval(point) == 0) {
+        tally.word_ops += (free.len() + pivots.len()) as u64;
+        if basis.iter().all(|g| {
+            tally.word_ops += g.terms.len() as u64;
+            g.eval(point) == 0
+        }) {
             out.push(point);
         }
     }
@@ -334,6 +361,7 @@ pub fn solve_branch(
         matrix_rows_max: st.matrix_rows_max,
         matrix_cols_max: st.matrix_cols_max,
         word_xors: st.word_xors,
+        word_xors_performed: st.word_xors_performed,
         peak_matrix_bytes: st.peak_matrix_bytes,
         steps: st.steps,
         wall_ns: st.wall_ns,

@@ -6653,14 +6653,31 @@ pub(crate) fn lift_candidate(
     ) -> bool {
         if depth == xs.len() {
             let _check = measurement::relation_check_scope();
+            // `bitop/v1`: comparing two points, an addition a coordinate
+            crate::cryptanalysis::bitop_tally::field_ops(2, 0, 0, 0);
             return acc == target;
         }
+        // `bitop/v1` for `points_with_x`: an inversion, the right-hand
+        // side (two multiplications, a squaring, two additions), the
+        // Artin–Schreier solve (`n − 1` squarings and `(n − 1)/2 + 1`
+        // additions of the half-trace and its check), the ordinate and
+        // the negation
+        let n = u64::from(kc.n);
+        crate::cryptanalysis::bitop_tally::field_ops(
+            2 + n.saturating_sub(1) / 2 + 1 + 1,
+            3,
+            1 + n.saturating_sub(1),
+            1,
+        );
         for p in points_with_x(&kc.curve, &xs[depth]) {
+            crate::cryptanalysis::bitop_tally::hash_probes(1);
             let idx = match index_of.get(&point_key(&p)) {
                 Some(i) => *i,
                 None => continue,
             };
             chosen.push(idx);
+            // an affine addition: `I + 2M + S + 9A` (docs/units/BITOPS.md)
+            crate::cryptanalysis::bitop_tally::field_ops(9, 2, 1, 1);
             let next = kc.add(acc, &fb.points[idx]);
             if walk(kc, fb, index_of, xs, depth + 1, &next, chosen, target) {
                 return true;

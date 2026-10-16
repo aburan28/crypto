@@ -340,6 +340,19 @@ impl SolverTotals {
         self.shape = Some(shape.clone());
         self.budget_exceeded += u64::from(budget_exceeded);
         let Some(c) = cost else { return };
+        // `bitop_complete` is a flag, not a count: the run is complete only
+        // while every call that reported a cost said so.  A call without the
+        // key clears it for good, and a call that sets it after an uncounted
+        // one cannot set it again.  (The first cost is the one that finds no
+        // unit recorded yet.)  The other `bitop_*` keys are totals.
+        let complete = c.extra.get("bitop_complete") == Some(&1);
+        if !complete {
+            if let Some(flag) = self.extra.get_mut("bitop_complete") {
+                *flag = 0;
+            }
+        } else if self.op_unit.is_empty() && !self.extra.contains_key("bitop_complete") {
+            self.extra.insert("bitop_complete".into(), 1);
+        }
         self.ops += c.ops;
         if self.op_unit.is_empty() {
             self.op_unit = c.op_unit.clone();
@@ -354,6 +367,9 @@ impl SolverTotals {
         // A key that names a maximum (`*_max`) is the maximum over
         // calls; every other key is a total over the run.
         for (k, v) in &c.extra {
+            if k == "bitop_complete" {
+                continue;
+            }
             let entry = self.extra.entry(k.clone()).or_insert(0);
             if k.ends_with("_max") {
                 *entry = (*entry).max(*v);
@@ -606,7 +622,45 @@ impl Targets {
 
 #[cfg(test)]
 mod tests {
-    use super::Params;
+    use super::{Params, SolverCost, SolverTotals, SystemShape};
+
+    /// `bitop_complete` survives the totals only while every call set it;
+    /// the other `bitop_*` keys add up.
+    #[test]
+    fn bitop_complete_is_a_flag_over_calls() {
+        let shape = SystemShape {
+            n_vars: 2,
+            n_equations: 1,
+            degrees: Vec::new(),
+            semi_regular_degree: None,
+        };
+        let cost = |complete: bool| {
+            let mut c = SolverCost {
+                ops: 1,
+                op_unit: "word XORs (elimination only)".into(),
+                ..Default::default()
+            };
+            c.extra.insert("bitop_word_ops".into(), 5);
+            if complete {
+                c.extra.insert("bitop_complete".into(), 1);
+            }
+            c
+        };
+        let mut all = SolverTotals::default();
+        for _ in 0..3 {
+            all.absorb(&shape, Some(&cost(true)), false);
+        }
+        assert_eq!(all.extra["bitop_complete"], 1);
+        assert_eq!(all.extra["bitop_word_ops"], 15);
+        all.absorb(&shape, Some(&cost(false)), false);
+        assert_eq!(all.extra["bitop_complete"], 0);
+        all.absorb(&shape, Some(&cost(true)), false);
+        assert_eq!(all.extra["bitop_complete"], 0);
+        let mut late = SolverTotals::default();
+        late.absorb(&shape, Some(&cost(false)), false);
+        late.absorb(&shape, Some(&cost(true)), false);
+        assert!(!late.extra.contains_key("bitop_complete"));
+    }
 
     #[test]
     fn a_plugin_spec_splits_into_name_and_parameters() {

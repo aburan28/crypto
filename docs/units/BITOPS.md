@@ -130,6 +130,20 @@ the marker `counted:<item>`; a record that carries the marker leaves the item
 off its `known_uncounted` list, and a record without it (every record written
 before the counter existed) keeps it.
 
+An algebraic engine whose native unit counts one kind of work (the
+elimination's word XORs, say) reports its whole run beside it, in
+`SolverStats.extra`: `bitop_complete = 1` and the `bitop_word_ops`,
+`bitop_hash_probes` and `bitop_field_*` counts of every primitive it
+performed. The F4 family (`f4-f2`, `matrix-f4`, `matrix-f5`, `inherited-f4`,
+`f6-ic`, and the `pdp3-*`, `pdp-split` and symmetrised oracles around them)
+gathers those counts in `src/cryptanalysis/bitop_tally.rs`, one unit per
+inner-loop iteration that touches a matrix word or a monomial mask: the
+Macaulay and symbolic-preprocessing builds, monomial sorts (`k·⌈log₂ k⌉`
+comparisons), hashing and column indexes, packing, pivot searches and lead
+scans, read-back, the splitting tree's substitutions and scans, and the
+`F_{2^n}` operations of the summation-polynomial build and of each lift.
+Across calls the flag holds only while every call set it.
+
 A record whose counters include one with no `bitop/v1` rule has no total. Its
 `work.complete` is `false` and the unpriced counters are named. An unknown
 cost is never written as zero.

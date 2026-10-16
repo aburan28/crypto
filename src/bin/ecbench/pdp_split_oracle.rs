@@ -23,7 +23,11 @@
 //! (`ic_boundary::lift_abscissae`).  Counted, not charged: F4's word XORs,
 //! under the `f4-f2` adapter's unit (elimination only, so not a whole-run
 //! count and never priced), with branches, systems, solutions and the
-//! largest solving degree in `solver.extra`.  `S` is a lower bound.
+//! largest solving degree in `solver.extra`.  `S` is a lower bound.  The
+//! whole query — the symbolic build of each split system, each branch's
+//! specialisation, F4 end to end and the read-out — is also reported in
+//! `bitop/v1` primitives through the `bitop_*` keys of `solver.extra`
+//! with `bitop_complete = 1` (`crypto_lib::cryptanalysis::bitop_tally`).
 //!
 //! The `koblitz-closure` base (`ic_framework::plugins::KoblitzClosureBase`)
 //! is resolved here too, so `ic.pipeline` can reach it from ecbench.
@@ -31,6 +35,7 @@
 use std::collections::BTreeMap;
 use std::time::Instant;
 
+use crypto_lib::cryptanalysis::bitop_tally;
 use crypto_lib::cryptanalysis::ic_boundary::{
     lift_abscissae, BinaryGroup, BinaryInstance, FactorBase, GroupOps, OracleCounters,
 };
@@ -251,6 +256,8 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for PdpSplitOracle<'_> {
         let b = inst.gf.to_element(inst.b);
         let xr = inst.gf.to_element(point.x);
         let started = Instant::now();
+        let tally_before = bitop_tally::snapshot();
+        let mut performed = 0u64;
         let (mut xors, mut systems, mut branches, mut solutions) = (0u64, 0u64, 0u64, 0u64);
         let (mut sd_max, mut deg_max, mut timed_out) = (0u32, 0u32, false);
         let mut found = None;
@@ -259,6 +266,15 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for PdpSplitOracle<'_> {
                 .iter()
                 .map(|&j| rotate_words(inst, &self.v, j))
                 .collect();
+            // `bitop/v1`: each rotation is `j` squarings a basis word, and
+            // every basis word is converted to a field element
+            bitop_tally::field_ops(
+                0,
+                0,
+                slots.iter().map(|&j| u64::from(j)).sum::<u64>() * self.v.len() as u64,
+                0,
+            );
+            bitop_tally::word_ops((slots.len() * self.v.len()) as u64);
             let bases: Vec<_> = words
                 .iter()
                 .map(|w| w.iter().map(|&x| inst.gf.to_element(x)).collect::<Vec<_>>())
@@ -271,6 +287,7 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for PdpSplitOracle<'_> {
                 let bo = solve_branch(&sys, self.guess, guess, None, self.max_free);
                 branches += 1;
                 xors += bo.word_xors;
+                performed += bo.word_xors_performed;
                 sd_max = sd_max.max(bo.solving_degree);
                 deg_max = deg_max.max(bo.degree_reached);
                 timed_out |= bo.timed_out;
@@ -280,6 +297,10 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for PdpSplitOracle<'_> {
                 };
                 for a in sols {
                     solutions += 1;
+                    // one test and at most one `F_{2^n}` addition a
+                    // coordinate of every summand
+                    bitop_tally::word_ops((sys.m * sys.ell) as u64);
+                    bitop_tally::field_ops((sys.m * sys.ell) as u64, 0, 0, 0);
                     let xs = summands_of_bases(&sys, &words, a);
                     match lift_abscissae(ctx.group, fb, ops, &xs, point) {
                         Some(idx) => {
@@ -296,6 +317,17 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for PdpSplitOracle<'_> {
         extra.insert("branches".to_string(), branches);
         extra.insert("algebraic_solutions".to_string(), solutions);
         extra.insert("solving_degree_max".to_string(), u64::from(sd_max));
+        // The whole query in `bitop/v1` primitives: the XORs F4's
+        // eliminations performed (`ops` counts the logical ones), and
+        // everything else `bitop_tally` saw on this thread — the symbolic
+        // `F_{2^n}` build of each split system, the specialisation of each
+        // branch, F4's products, symbolic preprocessing, pair selection,
+        // sorts, packing, lead scans and read-back, and each branch's
+        // read-out.  The sign lift's group additions are charged to `ops`
+        // of the group, not here.
+        bitop_tally::snapshot()
+            .since(tally_before)
+            .put_complete(&mut extra, performed);
         let cost = SolverCost {
             ops: xors,
             op_unit: F4_UNIT.into(),
