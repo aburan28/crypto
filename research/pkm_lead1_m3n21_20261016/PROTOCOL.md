@@ -1,7 +1,7 @@
 # PKM lead 1 at `m = 3`, `N = 21`: protocol
 
-**Status: draft.** It is frozen by a later commit that changes this line, after
-the identity run of §7 and before any `N = 21` system runs. Card:
+**Status: frozen** by the commit that adds this line, after the identity run
+of §7 and before any `N = 21` system has run. Card:
 [`backlog/XP-20261015-pkm-m3-n21-m4-n20`](../../backlog/XP-20261015-pkm-m3-n21-m4-n20/README.md),
 cell `m3-n21`. Encyclopedia §8 lead 1. Background:
 [`RESEARCH_PKM_TOWER_ORACLE.md`](../notes/index-calculus/RESEARCH_PKM_TOWER_ORACLE.md)
@@ -134,5 +134,26 @@ attempt's files are kept.
 
 ## 7. Pre-freeze identity run on the authoring container
 
-Filled in before the freeze commit; see `runs/identity-N15-t0-<host>.jsonl`
-and `progress.txt`.
+Run on the authoring container (4 vCPU, 15 GB; `runs/host-vm.txt`), commit
+`7513735f1`, binary sha256 `0aa2184a…8570f`, 2026-10-16 20:38–20:44 UTC,
+`A = 15,161,070 KiB`, `C = 1.9·10⁹`. Row: `runs/identity-N15-t0-vm.jsonl`; trace:
+`runs/identity-N15-t0-vm.log`.
+
+**Result: the identity check passes.** Against round 6's committed row
+(`replay/M3-kummer-m3-p1.jsonl`, `N = 15`, target 0), every compared field is
+equal:
+
+| field | new | recorded |
+|:--|--:|--:|
+| `solving_degree_max` | 7 | 7 |
+| `max_cols` | 31,397 | 31,397 |
+| `steps` | 24 | 24 |
+| `inconsistent` (refuted) | true | true |
+| `muladds` | 3,185,681,037,100 | 3,185,681,037,100 |
+| `max_rows` | 52,129 | 52,129 |
+| `max_residual_rows` | 30,474 | 30,474 |
+
+The wall clock differs, as §3 allows: 371.8 s against 363.0 s. The native
+checker agrees with the row (1 tower row checked against exhaustive search, 1
+agrees). The protocol is frozen here. The measuring host repeats the identity
+run (`run.sh identity`) before `main`.
