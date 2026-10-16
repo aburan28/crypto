@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import statistics
 import subprocess
 import sys
 import zipfile
@@ -77,17 +78,30 @@ def main():
     parser.add_argument("--provider-sha256", required=True)
     parser.add_argument("--run-id", type=int, required=True)
     parser.add_argument("--head-sha", required=True)
+    parser.add_argument("--reuse-local-replay", action="store_true",
+                        help="use a completed verifier log bound to this exact analysis")
     args = parser.parse_args()
     results = args.results.resolve()
     cloud_analysis, archive_sha = archive_analysis(
         args.artifact_zip.resolve(), args.provider_sha256)
     if (results / "analysis.json").read_bytes() != cloud_analysis:
         raise ValueError("extracted holdout analysis differs from exact ZIP")
-    replay = subprocess.run([sys.executable, str(HERE / "verify.py"), str(results)],
-                            cwd=ROOT, capture_output=True, text=True, check=False)
-    (results.parent / "local_replay.stdout.txt").write_text(replay.stdout)
-    (results.parent / "local_replay.stderr.txt").write_text(replay.stderr)
-    if replay.returncode != 0 or (results / "analysis.json").read_bytes() != cloud_analysis:
+    if args.reuse_local_replay:
+        status = (results.parent / "local_replay.exit_status.txt").read_text().strip()
+        stdout = (results.parent / "local_replay.stdout.txt").read_text()
+        stderr = (results.parent / "local_replay.stderr.txt").read_text()
+        if status != "0" or stderr or json.loads(stdout) != json.loads(cloud_analysis):
+            raise ValueError("completed local replay log differs from cloud analysis")
+    else:
+        replay = subprocess.run([sys.executable, str(HERE / "verify.py"), str(results)],
+                                cwd=ROOT, capture_output=True, text=True, check=False)
+        (results.parent / "local_replay.stdout.txt").write_text(replay.stdout)
+        (results.parent / "local_replay.stderr.txt").write_text(replay.stderr)
+        (results.parent / "local_replay.exit_status.txt").write_text(
+            str(replay.returncode) + "\n")
+        if replay.returncode != 0:
+            raise ValueError("local independent holdout replay failed")
+    if (results / "analysis.json").read_bytes() != cloud_analysis:
         raise ValueError("local independent holdout replay differs from cloud")
     analysis = json.loads(cloud_analysis)
     source = panel.read(results / "source.json")
@@ -185,6 +199,66 @@ def main():
         if len(chosen) != 1:
             raise ValueError("selected pipeline lacks exact candidate")
         selected_id = chosen[0]
+    pipeline_summaries = {}
+    rho_by_point = {row["point_index"]: row["rho"]["online_ms"]
+                    for row in analysis["point_rows"]}
+    for pipeline in ("k1152", *(f"k{k}" for k in challengers)):
+        per_point = []
+        for point_index in range(1, 6):
+            prefix = f"p{point_index}_{pipeline}"
+            matched = [row for row in rows if row["arm"] == prefix
+                       or row["arm"] in (prefix + "_a", prefix + "_b")]
+            expected_count = 2 if pipeline == "k1152" else 1
+            if len(matched) != expected_count:
+                raise ValueError(f"{prefix}: incomplete pipeline repetitions")
+            if (len({row["candidate_id"] for row in matched}) != 1
+                    or len({row["actual_usable_points"] for row in matched}) != 1
+                    or len({row["effective_columns"] for row in matched}) != 1):
+                raise ValueError(f"{prefix}: identity or base size differs")
+            per_point.append({
+                "point_index": point_index,
+                "candidate_id": matched[0]["candidate_id"],
+                "actual_usable_points": matched[0]["actual_usable_points"],
+                "effective_columns": matched[0]["effective_columns"],
+                "peak_rss_bytes": max(row["peak_rss_bytes"] for row in matched),
+                "cold_process_ms": statistics.mean(
+                    row["cold_process_ms"] for row in matched),
+                "setup_ms": statistics.mean(row["setup_ms"] for row in matched),
+                "rank_stage_ms": statistics.mean(
+                    row["rank_stage_ms"] for row in matched),
+                "targets_total_ms": statistics.mean(
+                    row["targets_total_ms"] for row in matched),
+                "one_target_online_ms": statistics.mean(
+                    row["one_target_online_ms"] for row in matched),
+                "rho_online_ms": rho_by_point[point_index],
+            })
+        pipeline_summaries[pipeline] = {
+            "candidate_id": per_point[0]["candidate_id"],
+            "actual_usable_points": per_point[0]["actual_usable_points"],
+            "effective_columns": per_point[0]["effective_columns"],
+            "max_peak_rss_bytes": max(point["peak_rss_bytes"]
+                                      for point in per_point),
+            "per_point": per_point,
+            "mean_cold_process_ms": statistics.mean(
+                point["cold_process_ms"] for point in per_point),
+            "mean_setup_ms": statistics.mean(point["setup_ms"] for point in per_point),
+            "mean_rank_stage_ms": statistics.mean(
+                point["rank_stage_ms"] for point in per_point),
+            "mean_targets_total_ms": statistics.mean(
+                point["targets_total_ms"] for point in per_point),
+            "mean_one_target_online_ms": statistics.mean(
+                point["one_target_online_ms"] for point in per_point),
+            "mean_rho_online_ms": statistics.mean(
+                point["rho_online_ms"] for point in per_point),
+        }
+        pipeline_summaries[pipeline]["mean_cold_over_rho_online"] = (
+            pipeline_summaries[pipeline]["mean_cold_process_ms"] /
+            pipeline_summaries[pipeline]["mean_rho_online_ms"])
+        if analysis["selection_admitted"]:
+            frozen_mean = analysis["mean_cold_process_ms_by_pipeline"][pipeline]
+            if abs(pipeline_summaries[pipeline]["mean_cold_process_ms"]
+                   - frozen_mean) > 1e-6:
+                raise ValueError(f"{pipeline}: materialized mean differs from replay")
     output = {
         "schema": "n83.e2e-holdout-ic1/v1",
         "source_commit": runner.SCREEN_HEAD_SHA,
@@ -195,6 +269,10 @@ def main():
         "candidates": sorted(manifests), "rows": rows,
         "selection_status": analysis["status"],
         "selected_candidate_id": selected_id,
+        "evidence_status": analysis["evidence_status"],
+        "selection_admitted": analysis["selection_admitted"],
+        "hardware_tier": analysis["hardware_tier"],
+        "pipeline_summaries": pipeline_summaries,
         "aa_controls": [row["aa_control"] for row in analysis["point_rows"]],
         "paired_intervals": analysis["paired_intervals"],
         "same_point_rho": [row["rho"] for row in analysis["point_rows"]],
