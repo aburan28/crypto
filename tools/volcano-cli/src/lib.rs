@@ -273,8 +273,8 @@ pub fn plan(mut input: Input, degree_text: &str) -> Result<Plan> {
     input.a %= input.p;
     input.b %= input.p;
     if let Some(n) = input.order {
-        let t = input.p as i128 + 1 - n as i128;
-        if n == 0 || t * t > 4 * input.p as i128 {
+        let t = (input.p as i128 + 1 - n as i128).unsigned_abs();
+        if n == 0 || t * t > 4 * input.p as u128 {
             return Err("supplied group order violates the Hasse interval".into());
         }
     }
@@ -1220,6 +1220,9 @@ mod tests {
         let mut bad = control(113, -3375);
         bad.order = Some(0);
         assert!(plan(bad, "auto").is_err());
+        let mut oversized = control(113, -3375);
+        oversized.order = Some(u64::MAX);
+        assert!(plan(oversized, "auto").is_err());
         assert!(plan(
             Input {
                 p: 9,

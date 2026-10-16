@@ -70,6 +70,10 @@ native arithmetic with construction: independent implementation replay is
 explicitly **NOT_RUN**. The small controls also compare every vertex against an
 independent exhaustive census of all nonsingular models.
 
+`verify` refreshes conductor labels and the audit receipt inside the database.
+Use a working copy when auditing a byte-frozen snapshot; check its file hash
+before that update.
+
 SQLite is the lossless graph export: `nodes(id,a,b,j,expanded,conductor)` and
 `edges(source,ell,kernel,target,u)`, with the full plan and replay receipt in
 `metadata`. `kernel` lists ascending coefficients. Reconstruct the normalized

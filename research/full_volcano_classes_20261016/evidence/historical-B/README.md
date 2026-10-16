@@ -13,6 +13,7 @@ additional prime-degree maps if the finite degree set is enlarged.
 - `drive_file_index.json`: canonical 79-part URLs, bytes and part hashes.
 - `parts_manifest.json`: exact concatenation order and compressed-file hash.
 - `dataset_manifest.json`: raw/compressed hashes and record schema.
+- `checkpoint.txt`: completed native checkpoint, including both root horizontal kernels.
 - `native_validation.json`, `validation.json`: historical audit coverage.
 
 Preserve the extra remote retry copy of part 0038; it was renamed
