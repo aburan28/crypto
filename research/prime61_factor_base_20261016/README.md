@@ -85,9 +85,11 @@ failed on an absent tracked identity-certificate fixture; it was materialized
 and the full suite then passed. Both logs are retained in `results/`.
 The example test target compiled successfully (zero unit tests); behavioral
 validation is the verified CLI control and complete byte replay above.
-`rustfmt --check`, `git diff --check`, shell syntax, all recorded SHA-256s and
+`rustfmt --check`, the source/documentation `git diff --check`, shell syntax, all recorded SHA-256s and
 the native backlog-card validator passed. Conductor is not installed, and
 the referenced `.conductor/WORKFLOW.md` is not tracked at the source pin.
+The unrestricted diff check reports whitespace in verbatim compiler/test logs
+(compiler spacer lines and final blank lines); those frozen bytes are retained.
 
 [Run report](reports/run-20261016T0720Z/report.typ),
 [PDF](reports/run-20261016T0720Z/report.pdf), and
