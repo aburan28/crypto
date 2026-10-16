@@ -285,9 +285,14 @@ e = 24 over F_{p²}: naive 263 µs, balanced 81 µs, cost model 96 µs; GHS / Ga
   (E, Ẽ) → isogeny in small characteristic; radical isogenies other than N = 3, 5, 7 (N = 13 needs the genus-2 X₁(13)); Jacobi-quartic models;
   Enge's quasi-linear Φ_ℓ evaluation. Atkin-prime isogeny cycles over F_{pʳ} towers (t mod ℓ,
   verified against BSGS, tower degree ≤ 6) and Sutherland's volcano/CRT Φ_ℓ (verified equal to the
-  q-expansion Φ_ℓ) are now implemented; the latter finds its curves by X₁(ℓ) or uniform sampling plus
-  isogeny walks rather than from CM orders with a known volcano, and stays 8–13× slower than the
-  q-expansion Φ_ℓ for the ℓ measured. Not implementable here (resource limit): quantum algorithms.
+  q-expansion Φ_ℓ) are implemented. The original graph sampler remains available;
+  `find/sutherland/cm.rs` adds CM orders, Hilbert roots, paired class-group walks,
+  floor-to-surface projection and streaming explicit CRT. It supports odd prime
+  degrees 3–31 within documented resource limits; the paper's optimized
+  large-degree parameter selection and polycyclic presentations remain gaps.
+  See [usage](docs/USAGE.md#cm-implementation-limits-and-api) and the
+  [validation report](../research/cm_volcano_crt_20261016/REPORT.md).
+  Not implementable here (resource limit): quantum algorithms.
 * The BMSS methods and √élu use Karatsuba, not FFT multiplication, so the papers' M(ℓ) bounds are not reached.
 * The assembly multiplier gains 9 % at 512 bits and nothing at 256 bits; the CSIDH-512 action is variable-time.
 * KLPT is for left O₀-ideals with ℓ = 2 and p ≡ 3 mod 4; e/log₂p ≈ 3.8 at 128 bits, above the ≈ 3.5 heuristic.

@@ -1,0 +1,72 @@
+{
+  "schema": "hwcost.workload.v1",
+  "name": "rho 2^128-159 n=2^112 B=1024 (1000×4 cores)",
+  "phases": [
+    {
+      "name": "start-points",
+      "iterations": 688128000.0,
+      "ops_per_iteration": {
+        "w2.add": 6.0,
+        "w2.inv@latency": 0.0009765625,
+        "w2.mul": 3.0,
+        "w2.mul@latency": 2.0,
+        "w2.rho_residual": 1.0,
+        "w2.sqr": 1.0
+      },
+      "overhead_cycles_per_iteration": 0.0,
+      "overhead_source": "",
+      "bytes_per_iteration": 192.0,
+      "working_set_bytes_per_core": 66560.0,
+      "parallel_fraction": 1.0
+    },
+    {
+      "name": "walk",
+      "iterations": {
+        "log2": 56.3345036696798
+      },
+      "ops_per_iteration": {
+        "w2.add": 6.0,
+        "w2.inv@latency": 0.0009765625,
+        "w2.mul": 3.0,
+        "w2.mul@latency": 2.0,
+        "w2.rho_residual": 1.0,
+        "w2.sqr": 1.0
+      },
+      "overhead_cycles_per_iteration": 0.0,
+      "overhead_source": "",
+      "bytes_per_iteration": 192.0,
+      "working_set_bytes_per_core": 66560.0,
+      "parallel_fraction": 1.0
+    }
+  ],
+  "transfers": [
+    {
+      "name": "dp-upload",
+      "channel": "network",
+      "bytes": {
+        "log2": 34.65643176456716
+      },
+      "messages": {
+        "log2": 19.334503669679798
+      },
+      "overlaps_compute": true,
+      "per_machine_links": true
+    }
+  ],
+  "storage": [
+    {
+      "name": "dp-table",
+      "bytes": {
+        "log2": 34.65643176456716
+      },
+      "months": null
+    }
+  ],
+  "egress_bytes": 0.0,
+  "notes": [
+    "expected 2^56.33 iterations + 4096000 walks × 2^27 tail; 2^29.33 distinguished points of 40 B",
+    "server-side collision lookup and the final logarithm are not priced (negligible beside the walk)",
+    "start points: about 1.5 log2(n) group operations each, priced as walk iterations (approximate)",
+    "no negation map"
+  ]
+}
