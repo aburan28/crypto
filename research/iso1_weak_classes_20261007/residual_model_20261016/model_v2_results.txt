@@ -5,6 +5,7 @@ p=11: 605 ordinary rows, 0 mismatches, 0 unexpected traces, nonordinary traces w
 p=13: 1014 ordinary rows, 0 mismatches, 0 unexpected traces, nonordinary traces with 8th-power lambda [] -> PASS
 p=17: 2312 ordinary rows, 0 mismatches, 0 unexpected traces, nonordinary traces with 8th-power lambda [(9826, 8)] -> PASS
 p=19: 3249 ordinary rows, 0 mismatches, 0 unexpected traces, nonordinary traces with 8th-power lambda [] -> PASS
+p=23: 5819 ordinary rows, 0 mismatches, 0 unexpected traces, nonordinary traces with 8th-power lambda [(24334, 11)] -> PASS
 ## Test B pristine holdouts
 p=53 rows=36517 zeros obs=247 exp=240.4 [213.8,266.9] PASS dispersion=1.005 (n=33243) auc=0.9818 weak_total obs=7893290 pred=7893291
    P(zero) in [1.01e-6,1.39e-5]: exp=0.0 obs=0
@@ -35,6 +36,42 @@ p=67 rows=74068 zeros obs=320 exp=301.1 [271.5,330.8] PASS dispersion=0.996 (n=7
    P(zero) in [2.54e-4,2.10e-3]: exp=5.1 obs=7
    P(zero) in [2.10e-3,9.45e-1]: exp=295.1 obs=311
    P(zero) <= 1e-6: obs=0
+p=71 rows=88217 zeros obs=317 exp=317.9 [287.5,348.3] PASS dispersion=1.000 (n=84101) auc=0.9893 weak_total obs=25416722 pred=25416723
+   P(zero) in [1.00e-6,6.57e-6]: exp=0.0 obs=0
+   P(zero) in [6.57e-6,3.65e-5]: exp=0.1 obs=0
+   P(zero) in [3.65e-5,2.03e-4]: exp=0.7 obs=0
+   P(zero) in [2.03e-4,1.77e-3]: exp=4.7 obs=8
+   P(zero) in [1.77e-3,9.49e-1]: exp=312.4 obs=309
+   P(zero) <= 1e-6: obs=0
+p=73 rows=95922 zeros obs=311 exp=327.1 [296.3,357.9] PASS dispersion=1.011 (n=91714) auc=0.9889 weak_total obs=28403570 pred=28403571
+   P(zero) in [1.00e-6,6.31e-6]: exp=0.0 obs=0
+   P(zero) in [6.31e-6,3.38e-5]: exp=0.1 obs=0
+   P(zero) in [3.38e-5,1.87e-4]: exp=0.6 obs=2
+   P(zero) in [1.87e-4,1.67e-3]: exp=4.5 obs=6
+   P(zero) in [1.67e-3,9.25e-1]: exp=321.8 obs=303
+   P(zero) <= 1e-6: obs=0
+p=79 rows=121699 zeros obs=373 exp=353.5 [321.5,385.5] PASS dispersion=0.998 (n=117149) auc=0.9925 weak_total obs=38956322 pred=38956323
+   P(zero) in [1.00e-6,5.07e-6]: exp=0.0 obs=0
+   P(zero) in [5.07e-6,2.65e-5]: exp=0.1 obs=0
+   P(zero) in [2.65e-5,1.45e-4]: exp=0.6 obs=0
+   P(zero) in [1.45e-4,1.42e-3]: exp=4.2 obs=4
+   P(zero) in [1.42e-3,9.52e-1]: exp=348.6 obs=369
+   P(zero) <= 1e-6: obs=0
+p=83 rows=141224 zeros obs=399 exp=372.6 [339.7,405.4] PASS dispersion=1.001 (n=136485) auc=0.9925 weak_total obs=47465210 pred=47465211
+   P(zero) in [1.00e-6,4.68e-6]: exp=0.0 obs=0
+   P(zero) in [4.68e-6,2.32e-5]: exp=0.1 obs=0
+   P(zero) in [2.32e-5,1.31e-4]: exp=0.5 obs=1
+   P(zero) in [1.32e-4,1.29e-3]: exp=4.1 obs=5
+   P(zero) in [1.29e-3,9.46e-1]: exp=367.8 obs=393
+   P(zero) <= 1e-6: obs=0
+p=89 rows=174262 zeros obs=404 exp=397.8 [363.9,431.7] PASS dispersion=1.000 (n=169205) auc=0.9946 weak_total obs=62750162 pred=62750163
+   P(zero) in [1.00e-6,4.40e-6]: exp=0.0 obs=0
+   P(zero) in [4.40e-6,2.02e-5]: exp=0.1 obs=0
+   P(zero) in [2.02e-5,1.13e-4]: exp=0.5 obs=0
+   P(zero) in [1.13e-4,1.20e-3]: exp=4.0 obs=3
+   P(zero) in [1.20e-3,9.45e-1]: exp=393.2 obs=401
+   P(zero) <= 1e-6: obs=0
+## Pooled check over scored primes 53-89: obs-exp = +62.4, sd = 46.4, z = 1.34 (not significant)
 ## Non-pristine (seen during V1 diagnosis)
 p=37 rows=12321 zeros obs=145 exp=168.8 [146.5,191.1] FAIL dispersion=0.981 (n=9870) auc=0.9590 weak_total obs=1875530 pred=1875531
    P(zero) in [1.02e-6,4.79e-5]: exp=0.0 obs=0

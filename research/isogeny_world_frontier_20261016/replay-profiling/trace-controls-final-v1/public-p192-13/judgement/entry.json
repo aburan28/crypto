@@ -1,0 +1,45 @@
+{
+  "construction_accounting": "external constructor receipts retained; costs are not independently attested by this judge",
+  "degree_coverage": "COMPLETE",
+  "judge_binary_sha256": "14ecb8e1fb82300127f5224a02918ebf4107847cb088dd635a4f75eb95a3b5af",
+  "map_sha256": "7a1809d56cb774f681e06ecf1dad9e04d97abe70a3eb2738bff9d54affc861d1",
+  "prime_degree": "13",
+  "representation": "expanded rational map",
+  "schema": "isogeny-challenge-entry/v1",
+  "score": "13",
+  "season": "ff4f7c405146fbd26faa63cb6fb9d1513eada31d15f3998368005fd5f05db3e0",
+  "snapshot_search_sha256": "aab456bc28750b095e11ffadfe6d8050203934e401ff29d656a003035da65f7e",
+  "source_icv1": "icv1-fp192-t31607402316713927207482677199-52e4af59",
+  "source_submission": "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/trace-controls-final-v1/public-p192-13/construction",
+  "status": "ACCEPTED",
+  "tool": {
+    "git_commit": "300e867ca999a7506c2a52bf192df424b758010f",
+    "git_dirty": "true",
+    "name": "isogeny",
+    "standards_sha256": "22b2ffef99720f2b2c7396a267412d2241a868e038a835c4fb1fd12209b102bf",
+    "version": "0.1.0"
+  },
+  "verification": {
+    "command": [
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/compact-implementation/release/isogeny",
+      "challenge",
+      "__judge",
+      "--input",
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/trace-controls-final-v1/public-p192-13/judgement/artifact",
+      "--rss-ready",
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/trace-controls-final-v1/public-p192-13/judgement/resources-ready"
+    ],
+    "elapsed_ms_operational_only": 35,
+    "exit_code": 0,
+    "map_count": null,
+    "memory_monitor_grace_ms": 100,
+    "memory_sampling_interval_ms": 25,
+    "resident_memory_limit_bytes": "8589934592",
+    "sampled_peak_resident_bytes": "81920",
+    "status": "PASS",
+    "stderr_sha256": "9f78f671f2dba353a94e16d9bafb8ac60c2000819ce0f492aed378bde34c87ea",
+    "stdout": "verification.json",
+    "stdout_sha256": "a74e65094cfaf563de1595cb1292d98435ad476f47aa5307315d9f6a50eeb7f8",
+    "unavailable_memory_samples": 0
+  }
+}

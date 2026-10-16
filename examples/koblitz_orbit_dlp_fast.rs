@@ -322,22 +322,118 @@ impl S3Solver {
     /// Same roots, in the same order, as `s3_x_roots` on the generic branch.
     #[inline(always)]
     fn roots(&self, gf: &Gf2, basis: &NormalBasis, left: u64, right: u64) -> Option<[u64; 2]> {
-        let s = left ^ right;
-        let a = self.square.apply(s);
+        let prepared = self.prepare(gf, left, right);
+        let inverse = if prepared.denominator == 0 {
+            0
+        } else {
+            invert(gf, basis, prepared.denominator)
+        };
+        self.finish(gf, prepared, inverse)
+    }
+
+    /// Everything up to the shared inversion: `a = (left+right)^2`,
+    /// `p = left·right`, `ps = p^2`, and the denominator `a·ps` (zero marks
+    /// the exceptional path, which `finish` routes to the direct solver
+    /// exactly as the scalar `roots` did).
+    #[inline(always)]
+    fn prepare(&self, gf: &Gf2, left: u64, right: u64) -> PreparedRoot {
+        let a = self.square.apply(left ^ right);
         let p = gf.mul(left, right);
         let ps = self.square.apply(p);
-        if a == 0 || ps == 0 {
-            return s3_x_roots(gf, self.b, left, right);
+        let denominator = if a == 0 || ps == 0 { 0 } else { gf.mul(a, ps) };
+        PreparedRoot {
+            left,
+            right,
+            a,
+            p,
+            ps,
+            denominator,
         }
-        let inv_combined = invert(gf, basis, gf.mul(a, ps));
-        let q = gf.mul(p, gf.mul(ps, inv_combined));
-        let c = ps ^ self.b;
-        let d = gf.mul(gf.mul(c, a), gf.mul(a, inv_combined));
+    }
+
+    /// Everything after the inversion, given `inverse = denominator^{-1}`
+    /// (ignored on the exceptional path).
+    #[inline(always)]
+    fn finish(&self, gf: &Gf2, prepared: PreparedRoot, inverse: u64) -> Option<[u64; 2]> {
+        if prepared.denominator == 0 {
+            return s3_x_roots(gf, self.b, prepared.left, prepared.right);
+        }
+        let q = gf.mul(prepared.p, gf.mul(prepared.ps, inverse));
+        let c = prepared.ps ^ self.b;
+        let d = gf.mul(gf.mul(c, prepared.a), gf.mul(prepared.a, inverse));
         if (d & self.trace_mask).count_ones() & 1 == 1 {
             return None;
         }
         let first = gf.mul(q, self.half_trace.apply(d));
         Some([first, first ^ q])
+    }
+}
+
+#[derive(Clone, Copy)]
+struct PreparedRoot {
+    left: u64,
+    right: u64,
+    a: u64,
+    p: u64,
+    ps: u64,
+    denominator: u64,
+}
+
+/// Reusable scratch for solving many u64 S3 root pairs with one shared
+/// field inversion (Montgomery's trick over the non-exceptional
+/// denominators), the u64 twin of the wide path's `RootBatch128`.
+/// `results[i]` equals `solver.roots(inputs[i])` for every `i`; only the
+/// inversion count changes.
+struct RootBatch {
+    prepared: Vec<PreparedRoot>,
+    inverses: Vec<u64>,
+    prefixes: Vec<u64>,
+    regular: Vec<usize>,
+    results: Vec<Option<[u64; 2]>>,
+}
+
+impl RootBatch {
+    fn with_capacity(entries: usize) -> Self {
+        Self {
+            prepared: Vec::with_capacity(entries),
+            inverses: Vec::with_capacity(entries),
+            prefixes: Vec::with_capacity(entries),
+            regular: Vec::with_capacity(entries),
+            results: Vec::with_capacity(entries),
+        }
+    }
+
+    fn solve(&mut self, gf: &Gf2, basis: &NormalBasis, solver: &S3Solver, inputs: &[(u64, u64)]) {
+        self.prepared.clear();
+        self.inverses.clear();
+        self.prefixes.clear();
+        self.regular.clear();
+        self.results.clear();
+        self.inverses.resize(inputs.len(), 0);
+        self.prefixes.resize(inputs.len(), 0);
+        for (index, &(left, right)) in inputs.iter().enumerate() {
+            let prepared = solver.prepare(gf, left, right);
+            if prepared.denominator != 0 {
+                self.regular.push(index);
+            }
+            self.prepared.push(prepared);
+        }
+        if !self.regular.is_empty() {
+            let mut product = 1u64;
+            for &index in &self.regular {
+                self.prefixes[index] = product;
+                product = gf.mul(product, self.prepared[index].denominator);
+            }
+            // A product of non-zero field elements is non-zero.
+            let mut inverse_product = invert(gf, basis, product);
+            for &index in self.regular.iter().rev() {
+                self.inverses[index] = gf.mul(inverse_product, self.prefixes[index]);
+                inverse_product = gf.mul(inverse_product, self.prepared[index].denominator);
+            }
+        }
+        for (prepared, &inverse) in self.prepared.iter().zip(&self.inverses) {
+            self.results.push(solver.finish(gf, *prepared, inverse));
+        }
     }
 }
 
@@ -374,6 +470,7 @@ struct RootBloom {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum RootBloomProfile {
+    Compact4,
     Standard,
     Wide3,
     Wide5,
@@ -383,14 +480,16 @@ impl RootBloomProfile {
     fn from_env() -> Self {
         match std::env::var("KIC_ROOT_BLOOM_PROFILE").as_deref() {
             Err(_) | Ok("standard") => Self::Standard,
+            Ok("compact4") => Self::Compact4,
             Ok("wide3") => Self::Wide3,
             Ok("wide5") => Self::Wide5,
-            _ => panic!("KIC_ROOT_BLOOM_PROFILE must be standard, wide3 or wide5"),
+            _ => panic!("KIC_ROOT_BLOOM_PROFILE must be compact4, standard, wide3 or wide5"),
         }
     }
 
     fn bits_per_request(self) -> usize {
         match self {
+            Self::Compact4 => 4,
             Self::Standard => 8,
             Self::Wide3 | Self::Wide5 => 16,
         }
@@ -398,13 +497,14 @@ impl RootBloomProfile {
 
     fn hashes(self) -> usize {
         match self {
-            Self::Standard | Self::Wide3 => 3,
+            Self::Compact4 | Self::Standard | Self::Wide3 => 3,
             Self::Wide5 => 5,
         }
     }
 
     fn name(self) -> &'static str {
         match self {
+            Self::Compact4 => "compact4",
             Self::Standard => "standard",
             Self::Wide3 => "wide3",
             Self::Wide5 => "wide5",
@@ -477,7 +577,10 @@ fn mix_root_bloom(mut value: u64) -> u64 {
 }
 
 fn root_bloom_enabled() -> bool {
-    std::env::var("KIC_ROOT_BLOOM").as_deref() == Ok("1")
+    // Enabled by default (opt out with KIC_ROOT_BLOOM=0): most root-table
+    // probe keys miss, and the Bloom prefilter avoids a random DRAM walk per
+    // miss. Exactness is unchanged; a Bloom pass still probes the table.
+    std::env::var("KIC_ROOT_BLOOM").as_deref() != Ok("0")
 }
 
 /// Open-addressing u64 -> u64 table; keys are < 2^63 so u64::MAX marks empty.
@@ -549,6 +652,53 @@ impl RootTable {
 }
 
 #[cfg(test)]
+mod root_batch_tests {
+    use super::{Gf2, NormalBasis, RootBatch, S3Solver};
+    use crypto_lib::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
+
+    /// The batched u64 root solve (one shared inversion per batch) must
+    /// return exactly the scalar `S3Solver::roots` result, in input order,
+    /// including the exceptional zero-denominator paths.
+    #[test]
+    fn batched_roots_match_scalar_roots_in_order() {
+        let curve = KoblitzCurve::new(0, 41).expect("admitted Koblitz rung");
+        let gf = Gf2::new(&curve.curve.irreducible);
+        let basis = NormalBasis::new(&gf);
+        let b = gf.from_element(&curve.curve.b);
+        let solver = S3Solver::new(&gf, b);
+        let mut seed = 0x9E37_79B9_7F4A_7C15u64;
+        let mut next = move || {
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
+            seed
+        };
+        let mut inputs = Vec::new();
+        for i in 0..4096usize {
+            let x = next() & basis.mask;
+            let y = next() & basis.mask;
+            inputs.push(match i % 7 {
+                0 => (x, x),
+                1 => (0, y),
+                2 => (x, 0),
+                _ => (x, y),
+            });
+        }
+        let mut batch = RootBatch::with_capacity(83);
+        let mut regular = 0usize;
+        for chunk in inputs.chunks(83) {
+            batch.solve(&gf, &basis, &solver, chunk);
+            assert_eq!(batch.results.len(), chunk.len());
+            regular += batch.regular.len();
+            for (k, &(left, right)) in chunk.iter().enumerate() {
+                assert_eq!(batch.results[k], solver.roots(&gf, &basis, left, right));
+            }
+        }
+        assert!(regular > 0 && regular < inputs.len());
+    }
+}
+
+#[cfg(test)]
 mod root_bloom_table_tests {
     use super::{mix_root_bloom, RootBloom, RootBloomProfile, RootTable};
 
@@ -580,6 +730,7 @@ mod root_bloom_table_tests {
     #[test]
     fn every_bloom_profile_preserves_all_inserted_keys() {
         for profile in [
+            RootBloomProfile::Compact4,
             RootBloomProfile::Standard,
             RootBloomProfile::Wide3,
             RootBloomProfile::Wide5,
@@ -601,6 +752,71 @@ struct State {
     right: u16,
     relative: u16,
     normal_roots: [u64; 2],
+}
+
+/// Reusable scratch for [`batch_adds`]: result slots, Montgomery-batch
+/// denominators/prefixes and the materialized choice points, all reused
+/// across calls so the hot lift loop performs no allocations.
+#[derive(Default)]
+struct LiftScratch {
+    results: Vec<FastPoint>,
+    denominators: Vec<u64>,
+    prefixes: Vec<u64>,
+    regular: Vec<usize>,
+}
+
+impl LiftScratch {
+    /// Affine batch addition of one fixed point against a list of points
+    /// with a single shared field inversion (Montgomery's trick).
+    /// `results[i]` equals `fast.add(base, points[i])`, in order; the
+    /// exceptional same-x paths (doubling, the point at infinity) fall back
+    /// to the scalar `add`.
+    fn batch_adds(&mut self, fast: &FastBinaryCurve, base: FastPoint, points: &[FastPoint]) {
+        let gf = &fast.gf;
+        self.results.clear();
+        self.results.extend(std::iter::repeat_n(None, points.len()));
+        self.denominators.clear();
+        self.prefixes.clear();
+        self.prefixes.resize(points.len(), 0);
+        self.regular.clear();
+        self.regular.reserve(points.len());
+        for (i, &q) in points.iter().enumerate() {
+            match (base, q) {
+                (None, r) | (r, None) => self.results[i] = r,
+                (Some((x1, _)), Some((x2, _))) => {
+                    if x1 == x2 {
+                        self.results[i] = fast.add(base, q);
+                    } else {
+                        self.denominators.push(x1 ^ x2);
+                        self.regular.push(i);
+                    }
+                }
+            }
+        }
+        if self.regular.is_empty() {
+            return;
+        }
+        let mut product = 1u64;
+        for (k, &d) in self.denominators.iter().enumerate() {
+            self.prefixes[k] = product;
+            product = gf.mul(product, d);
+        }
+        let mut inverse_product = gf.inv(product);
+        for k in (0..self.denominators.len()).rev() {
+            let inverse = gf.mul(inverse_product, self.prefixes[k]);
+            inverse_product = gf.mul(inverse_product, self.denominators[k]);
+            let i = self.regular[k];
+            let (Some((x1, y1)), Some((x2, y2))) = (base, points[i]) else {
+                unreachable!("regular slots hold affine pairs");
+            };
+            let dy = y1 ^ y2;
+            let lambda = gf.mul(dy, inverse);
+            let lambda_sq = gf.sqr(lambda);
+            let x3 = lambda_sq ^ lambda ^ x1 ^ x2 ^ fast.a;
+            let y3 = gf.mul(lambda, x1 ^ x3) ^ x3 ^ y1;
+            self.results[i] = Some((x3, y3));
+        }
+    }
 }
 
 struct Index {
@@ -703,19 +919,31 @@ fn lift(
     base: &Base,
     codes: &[u64; 4],
     target: FastPoint,
+    scratch: &mut LiftScratch,
 ) -> Option<[usize; 4]> {
     let choices: Vec<&Vec<usize>> = codes
         .iter()
         .map(|code| base.by_x.get(code))
         .collect::<Option<_>>()?;
+    let b_points: Vec<FastPoint> = choices[1].iter().map(|&i| base.points[i]).collect();
+    let c_points: Vec<FastPoint> = choices[2].iter().map(|&i| base.points[i]).collect();
+    let d_points: Vec<FastPoint> = choices[3].iter().map(|&i| base.points[i]).collect();
+    // Batched affine adds level by level: for each fixed left point, the
+    // next level's adds against the choice points share one field
+    // inversion (Montgomery's trick). The iteration order and the first
+    // lifted match are exactly those of the per-candidate add loop this
+    // replaces.
     for &a in choices[0] {
-        for &b in choices[1] {
-            let ab = fast.add(base.points[a], base.points[b]);
-            for &c in choices[2] {
-                let abc = fast.add(ab, base.points[c]);
-                for &d in choices[3] {
-                    if fast.add(abc, base.points[d]) == target {
-                        return Some([a, b, c, d]);
+        scratch.batch_adds(fast, base.points[a], &b_points);
+        let abs = scratch.results.clone();
+        for (bi, &ab) in abs.iter().enumerate() {
+            scratch.batch_adds(fast, ab, &c_points);
+            let abcs = scratch.results.clone();
+            for (ci, &abc) in abcs.iter().enumerate() {
+                scratch.batch_adds(fast, abc, &d_points);
+                for (di, &result) in scratch.results.iter().enumerate() {
+                    if result == target {
+                        return Some([a, choices[1][bi], choices[2][ci], choices[3][di]]);
                     }
                 }
             }
@@ -740,16 +968,34 @@ fn extract(
     // Callers provide a rotating, target-dependent origin so rank-stage rows
     // do not concentrate on the same early columns.
     let start = start % index.states.len().max(1);
+    let mut scan_inputs: Vec<(u64, u64)> = Vec::with_capacity(n as usize);
+    let mut scan = RootBatch::with_capacity(n as usize);
+    let mut lift_scratch = LiftScratch::default();
     for state in index.states[start..].iter().chain(&index.states[..start]) {
+        // Collect this state's (shift, root) candidate inputs and share one
+        // field inversion across them (Montgomery's trick); the candidate
+        // order and the published relation are exactly those of the
+        // per-candidate solver.roots loop this replaces.
+        scan_inputs.clear();
+        for shift in 0..n {
+            for &normal_root in &state.normal_roots {
+                let absolute = basis.to_poly.apply(basis.rotate(normal_root, shift));
+                scan_inputs.push((absolute, target_x));
+            }
+        }
+        scan.solve(gf, basis, solver, &scan_inputs);
+        let mut candidate = 0usize;
         for shift in 0..n {
             let left_x = index.shifted[state.left as usize][shift as usize];
             let right_x = index.shifted[state.right as usize]
                 [(shift as usize + state.relative as usize) % n as usize];
-            for &normal_root in &state.normal_roots {
-                let absolute = basis.to_poly.apply(basis.rotate(normal_root, shift));
-                let Some(partners) = solver.roots(gf, basis, absolute, target_x) else {
+            for _ in 0..state.normal_roots.len() {
+                let absolute = scan_inputs[candidate].0;
+                let Some(partners) = scan.results[candidate] else {
+                    candidate += 1;
                     continue;
                 };
+                candidate += 1;
                 for partner in partners {
                     probes += 1;
                     let (canonical, partner_shift) =
@@ -766,7 +1012,8 @@ fn extract(
                         index.shifted[left2][left_shift2],
                         index.shifted[right2][right_shift2],
                     ];
-                    if let Some(point_indices) = lift(fast, base, &codes, target) {
+                    if let Some(point_indices) = lift(fast, base, &codes, target, &mut lift_scratch)
+                    {
                         return Some(Relation {
                             point_indices,
                             x_codes: codes,
@@ -1485,10 +1732,16 @@ mod wide {
         len: usize,
         bloom: Option<RootBloom>,
         packed_layout: Option<PackedRootLayout>,
+        indexed83_id30: bool,
     }
 
     impl RootTable128 {
+        #[allow(dead_code)]
         fn with_capacity_indexed83(entries: usize) -> Self {
+            Self::with_capacity_indexed83_mode(entries, false)
+        }
+
+        fn with_capacity_indexed83_mode(entries: usize, indexed83_id30: bool) -> Self {
             let slots = entries
                 .checked_mul(2)
                 .expect("indexed root table request exceeds usize")
@@ -1500,6 +1753,7 @@ mod wide {
                 len: 0,
                 bloom: root_bloom_enabled().then(|| RootBloom::with_capacity(entries)),
                 packed_layout: None,
+                indexed83_id30,
             }
         }
 
@@ -1515,6 +1769,7 @@ mod wide {
                 len: 0,
                 bloom: root_bloom_enabled().then(|| RootBloom::with_capacity(entries)),
                 packed_layout: None,
+                indexed83_id30: false,
             }
         }
 
@@ -1545,6 +1800,36 @@ mod wide {
                 ((token >> 1) - 1) as usize,
                 (token & 1) as usize,
                 word >> 30,
+            )
+        }
+
+        #[inline(always)]
+        fn indexed83_id30_encode(
+            state_index: usize,
+            root_selector: usize,
+            fingerprint: u64,
+        ) -> [u8; 5] {
+            assert!(
+                state_index + 1 < 1 << 30,
+                "indexed root state id exceeds 30 bits"
+            );
+            assert!(root_selector < 2);
+            let word = ((fingerprint & 0x1ff) << 31)
+                | (((state_index + 1) as u64) << 1)
+                | root_selector as u64;
+            let bytes = word.to_le_bytes();
+            [bytes[0], bytes[1], bytes[2], bytes[3], bytes[4]]
+        }
+
+        #[inline(always)]
+        fn indexed83_id30_decode(bytes: [u8; 5]) -> (usize, usize, u64) {
+            let word =
+                u64::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], 0, 0, 0]);
+            let token = word & ((1 << 31) - 1);
+            (
+                ((token >> 1) - 1) as usize,
+                (token & 1) as usize,
+                word >> 31,
             )
         }
 
@@ -1592,6 +1877,7 @@ mod wide {
                 len: 0,
                 bloom: root_bloom_enabled().then(|| RootBloom::with_capacity(entries)),
                 packed_layout,
+                indexed83_id30: false,
             }
         }
 
@@ -1613,7 +1899,11 @@ mod wide {
                     slots.len() * std::mem::size_of::<u128>(),
                 ),
                 RootSlots128::Indexed83(slots) => (
-                    "indexed83_5byte_exact",
+                    if self.indexed83_id30 {
+                        "indexed83_5byte_exact_id30"
+                    } else {
+                        "indexed83_5byte_exact"
+                    },
                     std::mem::size_of::<[u8; 5]>(),
                     slots.len() * std::mem::size_of::<[u8; 5]>(),
                 ),
@@ -1667,6 +1957,8 @@ mod wide {
                     slot = (slot + 1) & mask;
                 }
             }
+            let id30 = self.indexed83_id30;
+            let fingerprint = fingerprint & if id30 { 0x1ff } else { 0x3ff };
             let mask = match &self.slots {
                 RootSlots128::Indexed83(slots) => slots.len() - 1,
                 _ => unreachable!("indexed insertion needs five-byte slots"),
@@ -1678,7 +1970,11 @@ mod wide {
             loop {
                 let existing = slots[slot];
                 if existing == [0; 5] {
-                    slots[slot] = Self::indexed83_encode(state_index, root_selector, fingerprint);
+                    slots[slot] = if id30 {
+                        Self::indexed83_id30_encode(state_index, root_selector, fingerprint)
+                    } else {
+                        Self::indexed83_encode(state_index, root_selector, fingerprint)
+                    };
                     self.len += 1;
                     assert!(
                         self.len < slots.len(),
@@ -1689,7 +1985,11 @@ mod wide {
                     }
                     return;
                 }
-                let (old_state, old_root, old_fingerprint) = Self::indexed83_decode(existing);
+                let (old_state, old_root, old_fingerprint) = if id30 {
+                    Self::indexed83_id30_decode(existing)
+                } else {
+                    Self::indexed83_decode(existing)
+                };
                 if old_fingerprint == fingerprint && key_of(old_state, old_root) == key {
                     return;
                 }
@@ -1730,15 +2030,19 @@ mod wide {
                 unreachable!("indexed lookup needs five-byte slots");
             };
             let mask = slots.len() - 1;
-            let fingerprint = Self::indexed83_fingerprint(key);
+            let id30 = self.indexed83_id30;
+            let fingerprint = Self::indexed83_fingerprint(key) & if id30 { 0x1ff } else { 0x3ff };
             let mut slot = self.slot(key);
             loop {
                 let existing = slots[slot];
                 if existing == [0; 5] {
                     return None;
                 }
-                let (state_index, root_selector, old_fingerprint) =
-                    Self::indexed83_decode(existing);
+                let (state_index, root_selector, old_fingerprint) = if id30 {
+                    Self::indexed83_id30_decode(existing)
+                } else {
+                    Self::indexed83_decode(existing)
+                };
                 if old_fingerprint == fingerprint && key_of(state_index, root_selector) == key {
                     return Some((state_index, root_selector));
                 }
@@ -2393,6 +2697,78 @@ mod wide {
         }
 
         #[test]
+        fn indexed_five_byte_id30_preserves_large_ids_and_exact_keys() {
+            let boundary = RootTable128::indexed83_id30_encode((1 << 30) - 2, 1, 0x1ff);
+            assert_eq!(
+                RootTable128::indexed83_id30_decode(boundary),
+                ((1 << 30) - 2, 1, 0x1ff)
+            );
+            let mut table = RootTable128::with_capacity_indexed83_mode(64, true);
+            table.bloom = None;
+            assert_eq!(
+                table.layout_receipt(),
+                ("indexed83_5byte_exact_id30", 5, 640)
+            );
+            let keys: Vec<u128> = (0..96u64)
+                .map(|i| (mix_root_bloom(i) as u128) << 19 | i as u128)
+                .collect();
+            for (i, &key) in keys.iter().enumerate() {
+                table.insert_indexed83(key, i / 2, i % 2, |state, root| keys[2 * state + root]);
+            }
+            table.insert_indexed83(keys[0], 48, 0, |state, root| {
+                if state == 48 {
+                    keys[0]
+                } else {
+                    keys[2 * state + root]
+                }
+            });
+            assert_eq!(table.len, keys.len());
+            for (i, &key) in keys.iter().enumerate() {
+                assert_eq!(
+                    table.get_indexed83(key, |state, root| keys[2 * state + root]),
+                    Some((i / 2, i % 2))
+                );
+            }
+            assert_eq!(
+                table.get_indexed83(u128::MAX, |state, root| keys[2 * state + root]),
+                None
+            );
+
+            // Equal slot and nine-bit fingerprint still require full root equality.
+            let mut seen = std::collections::HashMap::new();
+            let mut pair = None;
+            for i in 1..20_000u64 {
+                let key = (mix_root_bloom(i) as u128) << 19 | i as u128;
+                let signature = (
+                    table.slot(key),
+                    RootTable128::indexed83_fingerprint(key) & 0x1ff,
+                );
+                if let Some(&prior) = seen.get(&signature) {
+                    if prior != key {
+                        pair = Some((prior, key));
+                        break;
+                    }
+                } else {
+                    seen.insert(signature, key);
+                }
+            }
+            let (first, second) = pair.expect("deterministic ID30 slot/fingerprint collision");
+            let pair_keys = [first, second];
+            let mut collided = RootTable128::with_capacity_indexed83_mode(64, true);
+            collided.bloom = None;
+            collided.insert_indexed83(first, 0, 0, |_, root| pair_keys[root]);
+            collided.insert_indexed83(second, 0, 1, |_, root| pair_keys[root]);
+            assert_eq!(
+                collided.get_indexed83(first, |_, root| pair_keys[root]),
+                Some((0, 0))
+            );
+            assert_eq!(
+                collided.get_indexed83(second, |_, root| pair_keys[root]),
+                Some((0, 1))
+            );
+        }
+
+        #[test]
         fn canonical_u128_lookup_matches_unscreened_table() {
             let mut reference = RootTable128::with_capacity(4096, 83, 900, false);
             reference.bloom = None;
@@ -2967,6 +3343,7 @@ mod wide {
         dense_table: bool,
         load75_table: bool,
         indexed5_table: bool,
+        indexed5_id30: bool,
         indexed4_table: bool,
         indexed5_load75: bool,
         indexed5_fixed30: bool,
@@ -3212,6 +3589,7 @@ mod wide {
         let root_only83 = std::env::var("KIC_ROOT_ONLY22").as_deref() == Ok("1");
         let root_only21 = std::env::var("KIC_ROOT_ONLY21").as_deref() == Ok("1");
         let root_only11 = std::env::var("KIC_ROOT_ONLY11").as_deref() == Ok("1");
+        let indexed5_id30 = std::env::var("KIC_INDEXED5_ID30").as_deref() == Ok("1");
         let indexed4_table = std::env::var("KIC_INDEXED_ROOT4").as_deref() == Ok("1");
         let indexed4_fixed30 = std::env::var("KIC_INDEXED4_FIXED30").as_deref() == Ok("1");
         let indexed4_fixed31 = std::env::var("KIC_INDEXED4_FIXED31").as_deref() == Ok("1");
@@ -3261,26 +3639,56 @@ mod wide {
         if root_only11 {
             assert!(
                 ((std::env::var("KIC_INDEXED_ROOT5").as_deref() == Ok("1")
-                    && std::env::var("KIC_INDEXED5_FIXED30").as_deref() == Ok("1")
+                    && (std::env::var("KIC_INDEXED5_FIXED30").as_deref() == Ok("1")
+                        || indexed5_load75)
                     && !indexed4_table)
                     || (indexed4_table
                         && indexed4_fixed31
-                        && std::env::var("KIC_INDEXED_ROOT5").as_deref() != Ok("1")))
-                    && std::env::var("KIC_PACKED_ROOT_TABLE").as_deref() == Ok("1")
-                    && !indexed5_load75,
-                "one-root states require exact indexed fixed30 or fixed31 slots"
+                        && std::env::var("KIC_INDEXED_ROOT5").as_deref() != Ok("1")
+                        && !indexed5_load75))
+                    && std::env::var("KIC_PACKED_ROOT_TABLE").as_deref() == Ok("1"),
+                "one-root states require exact indexed fixed30, fixed31, or load75 slots"
             );
             assert!(
                 max_states.checked_mul(2).unwrap()
-                    < (1usize << if indexed4_table { 31 } else { 30 }),
+                    < (1usize
+                        << if indexed4_table || indexed5_id30 {
+                            31
+                        } else {
+                            30
+                        }),
                 "one-root complete key bound exceeds fixed indexed slots"
             );
         }
-        let mut early_root11_table = root_only11.then(|| {
+        assert!(
+            !indexed5_id30
+                || (root_only11
+                    && !indexed4_table
+                    && indexed5_load75
+                    && std::env::var("KIC_INDEXED_ROOT5").as_deref() == Ok("1")),
+            "30-bit indexed state IDs require one-root five-byte load75 slots"
+        );
+        // One-root states insert their exact keys while each second root is
+        // still available.  The retained state count is known from the
+        // symmetric traversal, so load75 can size this early table exactly.
+        let root11_request_entries = root_only11.then(|| {
             if indexed4_table {
-                RootTable128::with_capacity_indexed83_four(1usize << 30)
+                1usize << 30
+            } else if indexed5_load75 {
+                max_states
+                    .checked_mul(4)
+                    .and_then(|count| count.checked_add(2))
+                    .expect("one-root indexed request exceeds usize")
+                    / 3
             } else {
-                RootTable128::with_capacity_indexed83(1usize << 29)
+                1usize << 29
+            }
+        });
+        let mut early_root11_table = root11_request_entries.map(|entries| {
+            if indexed4_table {
+                RootTable128::with_capacity_indexed83_four(entries)
+            } else {
+                RootTable128::with_capacity_indexed83_mode(entries, indexed5_id30)
             }
         });
         let mut states83 = if packed_state83 {
@@ -3467,7 +3875,9 @@ mod wide {
         // The symmetric quotient retains almost two distinct canonical root
         // keys per state.  Requesting 4*S/3 therefore targets at most 75%
         // occupancy after the constructor doubles the request.
-        let root_table_request_entries = if indexed4_fixed31 {
+        let root_table_request_entries = if let Some(entries) = root11_request_entries {
+            entries
+        } else if indexed4_fixed31 {
             1usize << 30
         } else if indexed4_fixed30 || indexed5_fixed30 {
             1usize << 29
@@ -3495,7 +3905,7 @@ mod wide {
         } else if indexed4_table {
             RootTable128::with_capacity_indexed83_four(root_table_request_entries)
         } else if indexed5_table {
-            RootTable128::with_capacity_indexed83(root_table_request_entries)
+            RootTable128::with_capacity_indexed83_mode(root_table_request_entries, indexed5_id30)
         } else {
             RootTable128::with_capacity(root_table_request_entries, gf.n, reps.len(), packed)
         };
@@ -3538,6 +3948,7 @@ mod wide {
             dense_table,
             load75_table,
             indexed5_table,
+            indexed5_id30,
             indexed4_table,
             indexed5_load75,
             indexed5_fixed30,
@@ -3552,7 +3963,6 @@ mod wide {
         base: &Base128,
         codes: &[u128; 4],
         target: FastPoint128,
-        relation_check_ns: &mut u128,
     ) -> Option<[usize; 4]> {
         let choices: Vec<&Vec<usize>> = codes
             .iter()
@@ -3564,10 +3974,7 @@ mod wide {
                 for &c in choices[2] {
                     let abc = fast.add(ab, base.points[c]);
                     for &d in choices[3] {
-                        let check_started = Instant::now();
-                        let matches = fast.add(abc, base.points[d]) == target;
-                        *relation_check_ns += check_started.elapsed().as_nanos();
-                        if matches {
+                        if fast.add(abc, base.points[d]) == target {
                             return Some([a, b, c, d]);
                         }
                     }
@@ -3638,7 +4045,7 @@ mod wide {
                 for partner in partners {
                     *probes += 1;
                     let (canonical, partner_shift) =
-                        basis.canonical(basis.to_normal.apply(partner));
+                        basis.canonical_selected(basis.to_normal.apply(partner));
                     let Some(value) = index
                         .table
                         .get_with_context(canonical, &index.states, basis)
@@ -3654,9 +4061,12 @@ mod wide {
                         index.shifted[left2][left_shift2],
                         index.shifted[right2][right_shift2],
                     ];
-                    if let Some(point_indices) =
-                        lift128(fast, base, &codes, target, relation_check_ns)
-                    {
+                    // Time the whole lift once per candidate instead of one
+                    // Instant::now() per innermost add.
+                    let lift_started = Instant::now();
+                    let lifted = lift128(fast, base, &codes, target);
+                    *relation_check_ns += lift_started.elapsed().as_nanos();
+                    if let Some(point_indices) = lifted {
                         return Some(Relation128 {
                             point_indices,
                             x_codes: codes,
@@ -4261,6 +4671,7 @@ mod wide {
             .map_or(0, |bloom| bloom.profile.bits_per_request()));
         summary["symmetric_s3_states_enabled"] = json!(index.symmetric_states);
         summary["root_table_indexed4_enabled"] = json!(index.indexed4_table);
+        summary["root_table_indexed5_id30_enabled"] = json!(index.indexed5_id30);
         summary["indexed5_load75_enabled"] = json!(index.indexed5_load75);
         summary["indexed5_fixed30_enabled"] = json!(index.indexed5_fixed30);
         summary["indexed4_fixed31_enabled"] = json!(index.indexed4_fixed31);

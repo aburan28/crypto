@@ -1454,6 +1454,87 @@ pub fn ladder_draw_m(
     ladder_measure_m(m, n, &basis, &x_r, 1, d_max, ffd_max)
 }
 
+/// One degree of a [`closure_refutation_scan`]: the plain degree-`D`
+/// Macaulay row space (XL) and the same space saturated under MutantXL's
+/// fixed-degree step (every degree fall times every monomial that keeps the
+/// product within degree `D`, repeated until nothing new falls).
+#[derive(Clone, Debug)]
+pub struct ClosureDegree {
+    pub degree: u32,
+    /// The plain row space contains `1`.
+    pub xl_refuted: bool,
+    /// The saturated row space contains `1`.
+    pub closure_refuted: bool,
+    /// The closure stopped with no degree fall left unmultiplied (or on `1`).
+    pub saturated: bool,
+    pub xl_rank: usize,
+    pub closure_rank: usize,
+    pub columns: usize,
+    pub closure_products: u64,
+    /// Word operations the closed build charged ([`InheritCost::word_ops`]).
+    pub closure_word_ops: u64,
+    pub secs: f64,
+}
+
+/// The XL and the closure refutation degrees of `system`, scanned from
+/// `d_min` to `d_max`: the first degree whose plain Macaulay row space
+/// contains `1`, and the first whose closure under degree falls does.  Every
+/// closure product lies in the ideal, so the closure degree is never above
+/// the XL degree; where it is below, the system refutes at a smaller
+/// matrix than XL needs.  The scan stops once both have refuted, or at the
+/// first degree whose matrix exceeds the F4 size caps (the remaining
+/// degrees are then not measured).  The closure is full MutantXL
+/// ([`ReducedBasis::from_system_closed_full`]): linear falls are multiplied
+/// out too.  Degree 1 builds no closure, so it reports XL's outcome for
+/// both.
+///
+/// [`InheritCost::word_ops`]: crate::cryptanalysis::inherited_f4::InheritCost::word_ops
+/// [`ReducedBasis::from_system_closed_full`]: crate::cryptanalysis::inherited_f4::ReducedBasis::from_system_closed_full
+pub fn closure_refutation_scan(
+    system: &[F2BoolPoly],
+    n_vars: usize,
+    d_min: u32,
+    d_max: u32,
+) -> Vec<ClosureDegree> {
+    use crate::cryptanalysis::inherited_f4::ReducedBasis;
+    const ROUNDS: u32 = 1_000_000;
+    let mut out = Vec::new();
+    let (mut xl_done, mut closure_done) = (false, false);
+    for degree in d_min..=d_max {
+        let started = Instant::now();
+        // The plain basis is read and dropped before the closure is built,
+        // so the two dense matrices are never held at once.
+        let Some((xl_refuted, xl_rank)) = ReducedBasis::from_system(system, n_vars, degree)
+            .map(|(xl, _)| (xl.is_refuted(), xl.rank()))
+        else {
+            break;
+        };
+        let Some((closed, cost)) =
+            ReducedBasis::from_system_closed_full(system, n_vars, degree, ROUNDS)
+        else {
+            break;
+        };
+        out.push(ClosureDegree {
+            degree,
+            xl_refuted,
+            closure_refuted: closed.is_refuted(),
+            saturated: closed.is_refuted() || closed.pending_falls() == 0,
+            xl_rank,
+            closure_rank: closed.rank(),
+            columns: closed.columns(),
+            closure_products: cost.closure_products,
+            closure_word_ops: cost.word_ops(),
+            secs: started.elapsed().as_secs_f64(),
+        });
+        xl_done |= xl_refuted;
+        closure_done |= closed.is_refuted();
+        if xl_done && closure_done {
+            break;
+        }
+    }
+    out
+}
+
 /// The infeasible null object for a ladder cell: same unknowns, degree and
 /// term density as the cell's systems, `n_vars + 4` equations, run to
 /// `d_max` exactly like a draw.  See [`random_control_system`].
@@ -1900,6 +1981,69 @@ mod tests {
             }
         }
         assert!(sat > 0 && measured > 0, "{sat} sat, {measured} measured");
+    }
+
+    /// Positive control for the closure scan: a system whose degree fall
+    /// `x7 + 1` (the sum of two cubics) times `x8 x9` meets a third cubic in
+    /// `1`.  The closure refutes at degree 3; plain XL needs degree 4, where
+    /// `x7 · f3 = x7` is a row and meets the fall.
+    #[test]
+    fn closure_scan_refutes_below_xl_on_the_constructed_control() {
+        let n = 9;
+        let m = |vars: &[u32]| F2BoolMono::from_mask(vars.iter().fold(0, |a, &v| a | 1 << v));
+        let f1 = F2BoolPoly::from_monos(vec![m(&[0, 1, 2]), m(&[3, 4, 5])], n);
+        let f2 = F2BoolPoly::from_monos(
+            vec![m(&[0, 1, 2]), m(&[3, 4, 5]), m(&[6]), F2BoolMono::one()],
+            n,
+        );
+        let f3 = F2BoolPoly::from_monos(vec![m(&[6, 7, 8]), m(&[7, 8]), F2BoolMono::one()], n);
+        let scan = closure_refutation_scan(&[f1.clone(), f2.clone(), f3.clone()], n, 3, 6);
+        let first = |f: fn(&ClosureDegree) -> bool| scan.iter().find(|d| f(d)).map(|d| d.degree);
+        assert_eq!(first(|d| d.closure_refuted), Some(3));
+        assert_eq!(first(|d| d.xl_refuted), Some(4));
+        // The plain basis agrees with the repository's XL engine.
+        let (xl, _) = crate::cryptanalysis::koblitz_groebner::solving_degree(&[f1, f2, f3], n, 6);
+        assert_eq!(xl, Some(4));
+    }
+
+    /// On unsatisfiable chained draws the closure never refutes later than
+    /// XL, saturates, and the plain basis refutes exactly where the
+    /// repository's XL engine does.
+    #[test]
+    fn closure_scan_is_never_above_xl_on_chained_draws() {
+        use crate::cryptanalysis::koblitz_groebner::solving_degree;
+        use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+        let mut checked = 0;
+        for (m, n, ell, seed) in [(3usize, 5u32, 2usize, 11u64), (3, 7, 2, 12), (4, 4, 1, 13)] {
+            let irr = find_irreducible_sparse(n).unwrap();
+            let st = FieldStructure::new(n, &irr);
+            let b = F2mElement::one(n);
+            let mut rng = StdRng::seed_from_u64(seed);
+            let mut taken = 0;
+            while taken < 2 {
+                let (basis, x_r) = ladder_sample(n, ell, &mut rng);
+                if chained_solution_count(m, &basis, &x_r, &b, &irr) > 0 {
+                    continue;
+                }
+                let sys = build_decomposition_system(&basis, &x_r, &b, m, &st).unwrap();
+                let scan = closure_refutation_scan(&sys.equations, sys.n_vars, 3, 7);
+                let xl = scan.iter().find(|d| d.xl_refuted).map(|d| d.degree);
+                let cl = scan.iter().find(|d| d.closure_refuted).map(|d| d.degree);
+                assert!(scan.iter().all(|d| d.saturated));
+                assert!(
+                    cl.is_some() && cl <= xl.or(Some(u32::MAX)),
+                    "m={m} n={n}: {cl:?} {xl:?}"
+                );
+                assert_eq!(
+                    xl,
+                    solving_degree(&sys.equations, sys.n_vars, 7).0,
+                    "m={m} n={n}"
+                );
+                taken += 1;
+                checked += 1;
+            }
+        }
+        assert_eq!(checked, 6);
     }
 
     #[test]

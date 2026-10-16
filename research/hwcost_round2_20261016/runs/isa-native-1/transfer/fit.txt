@@ -1,0 +1,16 @@
+clock 2.833 GHz; residual ns/iter {"fp64": 28.700097424141532, "fp64bf": 25.60327433877996, "w1": 1.4127021009521874, "w2": 21.51775710512481, "w3": 26.388815537116255, "w4": 21.71266300607713}
+scaling {"fp64": {1: 1.0, 2: 1.0040876862178039, 4: 0.9557944179265568}, "fp64bf": {1: 1.0, 2: 0.9714361336008304, 4: 0.8340887141388998}, "w1": {1: 1.0, 2: 0.8799528111770809, 4: 0.8414092381689245}, "w2": {1: 1.0, 2: 0.9013547824594921, 4: 0.9179737349685083}, "w3": {1: 1.0, 2: 0.8834432130295411, 4: 0.7955517507780406}, "w4": {1: 1.0, 2: 0.9931831053801681, 4: 0.9445270842988778}}
+C0       PASS 0.0010 (threshold 0.05) clock: add-chain and imul-chain estimates agree, |relative difference|
+V1.fp64  FAIL 1.5061 (threshold 0.3) fp64: calibrated model, test batches, median |error|
+V1.fp64bf FAIL 1.3207 (threshold 0.3) fp64bf: calibrated model, test batches, median |error|
+V1.w1    PASS 0.0185 (threshold 0.3) w1: calibrated model, test batches, median |error|
+V1.w2    PASS 0.0148 (threshold 0.3) w2: calibrated model, test batches, median |error|
+V1.w3    PASS 0.0374 (threshold 0.3) w3: calibrated model, test batches, median |error|
+V1.w4    PASS 0.0294 (threshold 0.3) w4: calibrated model, test batches, median |error|
+V2.fp64  PASS 0.1451 (threshold 0.3) fp64: a priori model (no fitted parameter), all batches, median |error|
+V2.fp64bf PASS 0.0953 (threshold 0.3) fp64bf: a priori model (no fitted parameter), all batches, median |error|
+V2.w1    PASS 0.0235 (threshold 0.3) w1: a priori model (no fitted parameter), all batches, median |error|
+V2.w2    PASS 0.2313 (threshold 0.3) w2: a priori model (no fitted parameter), all batches, median |error|
+V2.w3    PASS 0.1453 (threshold 0.3) w3: a priori model (no fitted parameter), all batches, median |error|
+V2.w4    PASS 0.0843 (threshold 0.3) w4: a priori model (no fitted parameter), all batches, median |error|
+V3.w4    PASS 0.0562 (threshold 0.3) w4: size-extrapolated model (fitted on smaller limb counts), all batches, median |error|

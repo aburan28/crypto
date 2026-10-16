@@ -4,19 +4,19 @@ This round answers the two open items in the [main report](../REPORT.md):
 the zero labels were probabilistic, and the high-depth classes with no weak
 representative had no explanation beyond an association with class number.
 
-1. **Every census label through p = 67 is now certified.** A new counter
+1. **Every census label through p = 89 is now certified.** A new counter
    returns a group order only when it is the unique Hasse-interval candidate
    compatible with the tested points on the curve and its twist. Reruns at
    p = 7, 13, 37, 41, 43, 47, 53 and 59 reproduce every retained CSV byte for
-   byte. p = 61 and 67 are new. The queue continues through p = 199.
+   byte. p = 61, 67, 71, 73, 79, 83 and 89 are new. The queue continues through p = 199.
 2. **The number of 8th-power Legendre parameters in a class is an exact
    2-adic formula times a Hurwitz class number.** The formula reproduces
-   exhaustive censuses at p = 7, 11, 13, 17 and the held-out p = 19
-   (0 mismatches in 7,327 rows).
+   exhaustive censuses at p = 7, 11, 13, 17 and the registered holdouts
+   p = 19 and 23 (0 mismatches in 13,146 rows).
 3. **Beyond that 2-adic structure, the norm-one torus samples a class at
    random.** A parameter-free binomial thinning predicts the residual zero
-   count. It passes at the pristine holdouts p = 53 and 59, and at p = 61
-   and 67, which were predicted before their censuses finished. The dispersion is
+   count. It passes at the pristine holdouts p = 53 and 59, and at p = 61,
+   67, 71, 73, 79, 83 and 89, which were predicted before their censuses finished. The dispersion is
    1.00 ± 0.01 throughout.
 
 The consequence for the original request: past the proved obstruction
@@ -63,6 +63,11 @@ threads, against 1,107 s for the original direct run.
 | 59 | 1,010,651 | 23 | 941 | identical to the retained p59 run |
 | **61** | **1,154,751** | **41** | **1,265** | **new**: 111,084 / 223,260 ordinary rows weak; 0 / 111,630 depth-1 weak; 546 / 111,630 high-depth zero |
 | **67** | **1,680,383** | **30** | **1,448** | **new**: 147,496 / 296,274 ordinary rows weak; 0 / 148,138 depth-1 weak; 640 / 148,136 high-depth zero |
+| **71** | **2,118,901** | **34** | resumed\* | **new**: 175,800 / 352,870 ordinary rows weak; 0 / 176,436 depth-1 weak; 634 / 176,434 high-depth zero |
+| **73** | **2,367,853** | **27** | resumed\* | **new**: 191,222 / 383,688 ordinary rows weak; 0 / 191,844 depth-1 weak; 622 / 191,844 high-depth zero |
+| **79** | **3,247,401** | **35** | resumed\* | **new**: 242,652 / 486,798 ordinary rows weak; 0 / 243,400 depth-1 weak; 746 / 243,398 high-depth zero |
+| **83** | **3,956,583** | **33** | resumed\* | **new**: 281,650 / 564,898 ordinary rows weak; 0 / 282,450 depth-1 weak; 798 / 282,448 high-depth zero |
+| **89** | **5,230,501** | **53** | resumed\* | **new**: 347,716 / 697,048 ordinary rows weak; 0 / 348,524 depth-1 weak; 808 / 348,524 high-depth zero |
 
 "Extra isolation points" counts the points needed beyond the first, summed
 over all point counts. Almost every order is isolated by one scan.
@@ -72,7 +77,11 @@ per-prime stderr receipts and CSV hashes, the
 [queue script](../certified_20261016/queue.sh) and its
 [status log](../certified_20261016/queue_status.tsv), and the
 [p = 61](../certified_20261016/p61_cert.csv.gz) and
-[p = 67](../certified_20261016/p67_cert.csv.gz) CSVs. The unit test
+[p = 67](../certified_20261016/p67_cert.csv.gz) and
+[p = 71](../certified_20261016/p71_cert.csv.gz) CSVs. \*p = 71, 73, 79, 83 and 89 ran in
+several container sessions with `ISO1_CHECKPOINT`; its job log is
+[p71_cert.ckpt.gz](../certified_20261016/p71_cert.ckpt.gz), and its
+wall time is not a single measurement. The unit test
 `certified_order_matches_exhaustive_count_at_p7` compares 12 random p = 7
 curves with brute-force counts.
 
@@ -113,7 +122,7 @@ The results:
 
 The model below therefore uses 8th powers, `|T| / |(F_Q^*)^8| = 8/(q−1)`.
 
-## 3. The 8th-power mass formula (conjecture, exact on five primes)
+## 3. The 8th-power mass formula (conjecture, exact on six primes)
 
 Write `Δ = t² − 4Q = f_π² D_K`, `k = v₂(f_π)`, and `s = (D_K/2)`. Let
 `H_odd(t) = (h_K/(w_K/2)) · Σ_{d | f_odd} d ∏_{ℓ|d}(1 − (D_K/ℓ)/ℓ)` be the
@@ -143,7 +152,7 @@ not checked curve by curve.
 |:--|:--|---:|---:|
 | derivation (exhaustive 8th-power census) | 7, 11, 13, 17 (e = 4, 3, 3, 5) | 4,078 | 0 |
 | registered exactness holdout | 19 | 3,249 | 0 |
-| registered exactness holdout | 23 (e = 4) | *running* | |
+| registered exactness holdout | 23 (e = 4) | 5,819 | 0 |
 | consistency at large p: `(8/(q−1))·Σ N₈` against the exact weak total `q²+q` | 37–83 | all | off by 1 at each prime, from the `λ = 1` and special-orbit terms |
 
 The formula was read off the exhaustive tables; it is not proved. A proof
@@ -172,7 +181,18 @@ are reported but are not pristine.
 | **59** | pristine holdout | 50,474 | **270** | 265.9 [238.0, 293.8] | **pass** | 1.001 | 0.986 |
 | **61** | forward prediction | 55,815 | **273** | 275.3 [247.0, 303.6] | **pass** | 0.992 | 0.984 |
 | **67** | forward prediction | 74,068 | **320** | 301.1 [271.5, 330.8] | **pass** | 0.996 | 0.987 |
-| 71, 73, 79, 83 | forward predictions | | *census running* | see [predictions_v2.txt](predictions_v2.txt) | | | |
+| **71** | forward prediction (e = 4) | 88,217 | **317** | 317.9 [287.5, 348.3] | **pass** | 1.000 | 0.989 |
+| **73** | forward prediction (e = 4) | 95,922 | **311** | 327.1 [296.3, 357.9] | **pass** | 1.011 | 0.989 |
+| **79** | forward prediction (e = 5) | 121,699 | **373** | 353.5 [321.5, 385.5] | **pass** | 0.998 | 0.993 |
+| **83** | forward prediction (e = 3) | 141,224 | **399** | 372.6 [339.7, 405.4] | **pass** | 1.001 | 0.993 |
+| **89** | forward prediction (e = 4) | 174,262 | **404** | 397.8 [363.9, 431.7] | **pass** | 1.000 | 0.995 |
+
+**Pooled check.** Over the nine scored primes 53–89, observed minus
+predicted zero rows is +62.4 with standard deviation 46.4 (z = 1.34, not
+significant). Three of the four largest scored primes (67, 79, 83) lie above
+their means and one (73) below; the pooled excess is recorded as a watch
+item for the next forward predictions.
+| 97, 101, 103 | forward predictions | | *census running* | see [predictions_v2.txt](predictions_v2.txt) | | | |
 
 ![Observed residual zero classes against the registered V2 predictions](figures/zero_rows.svg)
 
@@ -215,8 +235,8 @@ rows.
 
 * Proved (THEOREM.pdf): no ordinary class with `v₂(f_π) = 1` is weak, at
   every odd `p`.
-* Exact for p ≤ 67: the class labels, certified.
-* Conjectured, exact on five primes: the `N₈` formula.
+* Exact for p ≤ 89: the class labels, certified.
+* Conjectured, exact on six primes: the `N₈` formula.
 * Measured, three pristine or forward holdouts passed: inside high-depth
   classes, weakness is a binomial thinning of the 8th-power mass. No
   further deterministic invariant is needed to explain the data, and none
@@ -224,7 +244,7 @@ rows.
   `h_K`) separates the residual zeros.
 * Not shown: that no exotic arithmetic criterion exists. A future failure of
   the forward predictions would be evidence for one.
-* Census status: p ≤ 67 complete and certified; the queue runs the remaining
+* Census status: p ≤ 89 complete and certified; the queue runs the remaining
   primes through 199 in order. At the measured rate, p = 199 alone needs
   about 4 days on 4 threads.
 
