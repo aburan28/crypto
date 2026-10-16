@@ -110,6 +110,8 @@ not exercise an escape that moves the walk. The R = 31 LAM = 5, R = 61 and
 R = 113 sets do.
 
 ## Results
+**TLC version.** The table below was produced with the rolling TLC 2026.10.15 build that the v1.8.0 URL served during development. `run_tlc.sh` now pins the immutable v1.7.4 release (TLC 2.19), and `out/` holds its run: all 41 configs meet the same declared verdicts. A few distinct-state counts differ slightly between the two TLC versions (for example `wit_wasted`: 354,981 vs 355,138).
+
 
 Final run (`out/SUMMARY.txt`, TLC 2026.10.15 from the v1.8.0 release URL,
 2 workers). "Distinct" and "depth" are TLC's distinct states and the depth
