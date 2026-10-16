@@ -1305,6 +1305,192 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
     }
 }
 
+/// Counters for [`StrongRhoG::dp_walks`].
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct DpWalkStats {
+    /// Walk steps (one group addition each), escapes excluded.
+    pub steps: u64,
+    /// Walks started.
+    pub walks: u64,
+    /// Walks that reached a distinguished point.
+    pub distinguished: u64,
+    /// Fruitless cycles escaped by doubling.
+    pub escapes: u64,
+    /// Walks abandoned at the length cap.
+    pub capped: u64,
+}
+
+/// Table fingerprint of a canonical (distinguished) point, independent of
+/// [`partition`] and [`dp_hash`]: two walks reach the same canonical point
+/// exactly when their fingerprints agree, up to a 2^-64 false match that a
+/// caller rules out by checking the recovered scalar.
+pub fn dp_fingerprint<E: FieldWord>(point: RawPointG<E>) -> u64 {
+    let (_, x, y) = point.key();
+    let mut v = x.fold64() ^ y.fold64().rotate_left(41) ^ 0x6a09_e667_f3bc_c909;
+    v ^= v >> 31;
+    v = v.wrapping_mul(0x7fb5_d329_728e_a185);
+    v ^= v >> 27;
+    v = v.wrapping_mul(0x81da_def4_bc2d_d44d);
+    v ^ (v >> 33)
+}
+
+impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
+    /// Lockstep distinguished-point walks for a precomputed-table
+    /// (Bernstein–Lange) rho, on the step function of [`Self::solve`]:
+    /// the same jumps, [`partition`], [`dp_hash`], canonicalization and
+    /// batched slope inversion.  The walk is a function of the canonical
+    /// point alone, so a walk from a `Q`-dependent start that meets a
+    /// precomputed `G`-only trail follows it to the same distinguished point.
+    ///
+    /// `next_start` supplies raw start states (`None`: start no more walks);
+    /// each is canonicalized here.  `on_distinguished` receives every walk
+    /// that ends on a distinguished point with its length and returns `true`
+    /// to stop all walks.  The call returns when stopped or when no walk is
+    /// live and no start is supplied.
+    ///
+    /// A fruitless cycle (the next point equal to the current one or one of
+    /// the four before it) is escaped to the canonical form of `[2]M`, where
+    /// `M` is the least (by point key) of the current and next point: for a
+    /// 2-cycle that choice is independent of which cycle point the walk
+    /// entered by, so two walks caught in one cycle leave it alike.  A walk
+    /// longer than `walk_cap` steps is abandoned.
+    #[allow(clippy::too_many_arguments)]
+    pub fn dp_walks<St, Dp>(
+        &self,
+        jumps: &[JumpG<F::E, S>],
+        lanes_n: usize,
+        dp_bits: u32,
+        walk_cap: u64,
+        mut next_start: St,
+        mut on_distinguished: Dp,
+        stats: &mut DpWalkStats,
+    ) where
+        St: FnMut() -> Option<WalkStateG<F::E, S>>,
+        Dp: FnMut(WalkStateG<F::E, S>, u64) -> bool,
+    {
+        assert_eq!(jumps.len(), JUMPS, "jump table must have JUMPS entries");
+        assert!(dp_bits < 32, "dp_bits must be below 32");
+        let modulus = self.modulus;
+        let dp_mask = (1u64 << dp_bits) - 1;
+        let lanes_n = lanes_n.max(1);
+        let mut lanes = vec![
+            Lane {
+                state: WalkStateG {
+                    point: RawPointG::Infinity,
+                    a: S::zero(),
+                    b: S::zero(),
+                },
+                previous: [RawPointG::Infinity; 4],
+                length: 0,
+                live: false,
+            };
+            lanes_n
+        ];
+        let zero = F::E::default();
+        let mut denominators = vec![zero; lanes_n];
+        let mut jump_index = vec![0usize; lanes_n];
+        let mut active: Vec<usize> = Vec::with_capacity(lanes_n);
+        let mut scratch: Vec<F::E> = Vec::new();
+        let mut starts_open = true;
+        loop {
+            if starts_open {
+                for lane in lanes.iter_mut().filter(|lane| !lane.live) {
+                    let Some(start) = next_start() else {
+                        starts_open = false;
+                        break;
+                    };
+                    if start.point == RawPointG::Infinity {
+                        continue;
+                    }
+                    stats.walks += 1;
+                    lane.state = self.canonicalize(start);
+                    lane.previous = [RawPointG::Infinity; 4];
+                    lane.length = 0;
+                    lane.live = true;
+                }
+            }
+            for lane in lanes.iter_mut() {
+                if lane.live && dp_hash(lane.state.point) & dp_mask == 0 {
+                    lane.live = false;
+                    stats.distinguished += 1;
+                    if on_distinguished(lane.state, lane.length) {
+                        return;
+                    }
+                }
+            }
+            if starts_open && lanes.iter().any(|lane| !lane.live) {
+                continue;
+            }
+            active.clear();
+            for (li, lane) in lanes.iter().enumerate() {
+                if !lane.live {
+                    continue;
+                }
+                let ji = partition(lane.state.point);
+                let j = active.len();
+                jump_index[j] = ji;
+                denominators[j] = match (lane.state.point, jumps[ji].point) {
+                    (RawPointG::Affine { x: x1, .. }, RawPointG::Affine { x: x2, .. }) => x1 ^ x2,
+                    _ => zero,
+                };
+                active.push(li);
+            }
+            if active.is_empty() {
+                return;
+            }
+            self.gf
+                .batch_inv(&mut denominators[..active.len()], &mut scratch);
+            for (j, &li) in active.iter().enumerate() {
+                let lane = &mut lanes[li];
+                let jump = &jumps[jump_index[j]];
+                let sum = match (lane.state.point, jump.point) {
+                    (RawPointG::Affine { x: x1, y: y1 }, RawPointG::Affine { x: x2, y: y2 })
+                        if denominators[j] != zero =>
+                    {
+                        let slope = self.mul(y1 ^ y2, denominators[j]);
+                        self.add_with_slope(x1, y1, x2, slope)
+                    }
+                    _ => self.add(lane.state.point, jump.point),
+                };
+                let next = self.canonicalize(WalkStateG {
+                    point: sum,
+                    a: S::add_mod(lane.state.a, jump.a, modulus),
+                    b: lane.state.b,
+                });
+                stats.steps += 1;
+                lane.length += 1;
+                if next.point == lane.state.point || lane.previous.contains(&next.point) {
+                    stats.escapes += 1;
+                    let least = if next.point.key() <= lane.state.point.key() {
+                        next
+                    } else {
+                        lane.state
+                    };
+                    lane.state = self.canonicalize(WalkStateG {
+                        point: self.add(least.point, least.point),
+                        a: S::add_mod(least.a, least.a, modulus),
+                        b: S::add_mod(least.b, least.b, modulus),
+                    });
+                    lane.previous = [RawPointG::Infinity; 4];
+                    continue;
+                }
+                if lane.length > walk_cap {
+                    stats.capped += 1;
+                    lane.live = false;
+                    continue;
+                }
+                lane.previous = [
+                    lane.state.point,
+                    lane.previous[0],
+                    lane.previous[1],
+                    lane.previous[2],
+                ];
+                lane.state = next;
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1724,5 +1910,111 @@ mod tests {
                 curve.n
             );
         }
+    }
+
+    /// A precomputed `G`-only distinguished-point table solves targets by
+    /// lookup: the online walks from `c·G + Q` merge into precomputed trails,
+    /// every recovered scalar is checked against the library curve, and the
+    /// online walks take far fewer steps than an empty-table solve needs.
+    #[test]
+    fn dp_walks_precomputed_table_solves_by_lookup() {
+        let curve = curves()
+            .into_iter()
+            .filter(|c| c.n >= 37)
+            .max_by_key(|c| c.subgroup_order.clone())
+            .unwrap();
+        let rho = StrongRho::new(&curve);
+        let r = rho.modulus();
+        let mut charges = StrongRhoCharges::default();
+        let jumps = rho.jumps(0x6270_7265_636f_6d70, &mut charges);
+        let dp_bits = 5;
+        let walk_cap = 16u64 << dp_bits;
+        let mut rng = StdRng::seed_from_u64(41);
+        let stride_a = rng.gen_range(1..r);
+        let stride = rho.scalar_mul(rho.generator(), stride_a);
+        let mut cursor_a = rng.gen_range(0..r);
+        let mut cursor = rho.scalar_mul(rho.generator(), cursor_a);
+        let target_entries = 4_000usize;
+        let mut table: HashMap<u64, u64> = HashMap::new();
+        let mut stats = DpWalkStats::default();
+        rho.dp_walks(
+            &jumps,
+            32,
+            dp_bits,
+            walk_cap,
+            || {
+                let start = WalkStateG {
+                    point: cursor,
+                    a: cursor_a,
+                    b: 0,
+                };
+                cursor = rho.add(cursor, stride);
+                cursor_a = add_mod(cursor_a, stride_a, r);
+                Some(start)
+            },
+            |state, _| {
+                assert_eq!(state.b, 0);
+                assert_eq!(rho.scalar_mul(rho.generator(), state.a), state.point);
+                table.insert(dp_fingerprint(state.point), state.a);
+                table.len() >= target_entries
+            },
+            &mut stats,
+        );
+        assert!(stats.steps > 0 && stats.distinguished as usize >= table.len());
+        let precompute_steps = stats.steps as f64;
+        let mut online_steps = Vec::new();
+        for t in 0..12u64 {
+            let d = rng.gen_range(1..r);
+            let q = rho.scalar_mul(rho.generator(), d);
+            let stride_a = rng.gen_range(1..r);
+            let stride = rho.scalar_mul(rho.generator(), stride_a);
+            let mut cursor_a = rng.gen_range(0..r);
+            let mut cursor = rho.add(rho.scalar_mul(rho.generator(), cursor_a), q);
+            let mut found = None;
+            let mut online = DpWalkStats::default();
+            rho.dp_walks(
+                &jumps,
+                8,
+                dp_bits,
+                walk_cap,
+                || {
+                    let start = WalkStateG {
+                        point: cursor,
+                        a: cursor_a,
+                        b: 1,
+                    };
+                    cursor = rho.add(cursor, stride);
+                    cursor_a = add_mod(cursor_a, stride_a, r);
+                    Some(start)
+                },
+                |state, _| {
+                    let Some(&hit_a) = table.get(&dp_fingerprint(state.point)) else {
+                        return false;
+                    };
+                    let inv = inverse_mod(state.b, r).unwrap();
+                    let candidate = mul_mod(sub_mod(hit_a, state.a, r), inv, r);
+                    if rho.scalar_mul(rho.generator(), candidate) == q {
+                        found = Some(candidate);
+                        return true;
+                    }
+                    false
+                },
+                &mut online,
+            );
+            assert_eq!(found, Some(d), "target {t} n={}", curve.n);
+            assert_eq!(lib_point(&curve, d), q);
+            online_steps.push(online.steps as f64);
+        }
+        let mean_online = online_steps.iter().sum::<f64>() / online_steps.len() as f64;
+        // An empty-table walk needs about sqrt(pi r / 2A) steps; the table
+        // covers about precompute_steps classes of r / A, so a lookup needs
+        // about (r / A) / precompute_steps + 2^dp_bits.
+        let classes = r as f64 / rho.automorphisms() as f64;
+        let predicted = classes / precompute_steps + (1u64 << dp_bits) as f64;
+        assert!(
+            mean_online < 4.0 * predicted && mean_online < rho.ideal_steps(),
+            "mean online {mean_online} predicted {predicted} ideal {}",
+            rho.ideal_steps()
+        );
     }
 }
