@@ -27,6 +27,7 @@
 #include <cstring>
 #include <cmath>
 #include <algorithm>
+#include <chrono>
 #include <string>
 #include <vector>
 
@@ -34,6 +35,24 @@
 #include "kernels_bsgs.cuh"
 #include "rho_host.hpp"
 #include "bsgs_host.hpp"
+
+static unsigned long long g_transfer_ns = 0;
+static unsigned long long g_h2d_bytes = 0, g_d2h_bytes = 0, g_d2d_bytes = 0;
+
+static cudaError_t tracked_cudaMemcpy(void *dst, const void *src, size_t bytes,
+                                      cudaMemcpyKind kind) {
+    auto start = std::chrono::steady_clock::now();
+    cudaError_t e = cudaMemcpy(dst, src, bytes, kind);
+    g_transfer_ns += (unsigned long long)std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::steady_clock::now() - start).count();
+    if (e == cudaSuccess) {
+        if (kind == cudaMemcpyHostToDevice) g_h2d_bytes += bytes;
+        else if (kind == cudaMemcpyDeviceToHost) g_d2h_bytes += bytes;
+        else if (kind == cudaMemcpyDeviceToDevice) g_d2d_bytes += bytes;
+    }
+    return e;
+}
+#define cudaMemcpy(dst, src, bytes, kind) tracked_cudaMemcpy(dst, src, bytes, kind)
 
 #define CU(call) do { \
     cudaError_t e_ = (call); \
@@ -720,9 +739,20 @@ struct BsgsOpts {
      * the host round-trip alone. */
     uint32_t threads = 0, iters = 256, w = 16, neg = 1, wbits = 40, targets = 1;
     std::string variant = "reg";
+    bool external_target = false;
+    uint64_t target_x = 0, target_y = 0;
 };
 
 static void bench_bsgs(BsgsOpts o) {
+    auto host_start = std::chrono::steady_clock::now();
+    if (!o.w || !o.iters || o.neg > 1 || (o.variant != "reg" && o.variant != "ref")) {
+        fprintf(stderr, "invalid BSGS walks/iterations/negation/variant option\n");
+        exit(2);
+    }
+    if (o.external_target && (ModN::bits() > 63 || ModP::bits() > 63 || o.targets != 1)) {
+        fprintf(stderr, "EC Bench target requires a one-word prime curve and one target\n");
+        exit(2);
+    }
     if (!o.threads) o.threads = (uint32_t)g_dev.sms * 2048 / o.w;
     o.threads = (o.threads + BSGS_BLOCK - 1) / BSGS_BLOCK * BSGS_BLOCK;
     const uint32_t T = o.threads, W = o.w;
@@ -734,32 +764,49 @@ static void bench_bsgs(BsgsOpts o) {
         for (int l = 1; l >= 0; l--) n = (n << 32) | ModN::limb(l);
         if (width > n) { width = n; printf("  width clamped to the group order n = %llu\n", (unsigned long long)n); }
     }
+    if (o.external_target) {
+        width = (uint64_t)ModN::limb(0) | ((uint64_t)ModN::limb(1) << 32);
+        uint64_t p = (uint64_t)ModP::limb(0) | ((uint64_t)ModP::limb(1) << 32);
+        if (o.target_x >= p || o.target_y >= p) {
+            fprintf(stderr, "EC Bench target coordinates must be canonical\n");
+            exit(2);
+        }
+        const uint32_t a[8] = CURVE_A_LIMBS, b[8] = CURVE_B_LIMBS;
+        const uint32_t gx[8] = CURVE_GX_LIMBS, gy[8] = CURVE_GY_LIMBS;
+        printf("ECBENCH_CURVE p=%llu a=%llu b=%llu r=%llu gx=%llu gy=%llu cofactor=%u\n",
+               (unsigned long long)p,
+               (unsigned long long)((uint64_t)a[0] | ((uint64_t)a[1] << 32)),
+               (unsigned long long)((uint64_t)b[0] | ((uint64_t)b[1] << 32)),
+               (unsigned long long)width,
+               (unsigned long long)((uint64_t)gx[0] | ((uint64_t)gx[1] << 32)),
+               (unsigned long long)((uint64_t)gy[0] | ((uint64_t)gy[1] << 32)),
+               (unsigned)CURVE_COFACTOR);
+    }
 
-    /* interval start and a planted secret inside it */
+    /* The external point searches [0,n); the original mode keeps its
+     * generated interval and target sequence. */
     uint64_t seed = 0xB5B5 + o.wbits;
     uint32_t x0[8];
-    rho_scalar_from_seed(seed, x0);
-    x0[7] &= 0x3FFFFFFFu;                 /* comfortably below n on a 256-bit curve */
-    if (ModN::bits() <= 63) { x0[0] = 0; x0[1] = 0; for (int l = 2; l < 8; l++) x0[l] = 0; }
-    uint64_t r = rho_splitmix64(seed) % width;
-    uint32_t xs[8]; memcpy(xs, x0, sizeof(xs));
-    {
-        uint64_t carry = r;
-        for (int l = 0; l < 8 && carry; l++) {
-            uint64_t s = (uint64_t)xs[l] + (carry & 0xFFFFFFFFu);
-            xs[l] = (uint32_t)s;
-            carry = (carry >> 32) + (s >> 32);
+    if (o.external_target) {
+        memset(x0, 0, sizeof(x0));
+    } else {
+        rho_scalar_from_seed(seed, x0);
+        x0[7] &= 0x3FFFFFFFu; /* comfortably below n on a 256-bit curve */
+        if (ModN::bits() <= 63) {
+            x0[0] = 0; x0[1] = 0;
+            for (int l = 2; l < 8; l++) x0[l] = 0;
         }
     }
+    uint64_t r = o.external_target ? 0 : rho_splitmix64(seed) % width;
     affine_pt G = Curve::generator();
-    (void)xs;   /* the per-target loop below re-derives each target from x0 */
 
     BsgsPlan p = bsgs_plan(width, o.neg, T, W, x0);
     BsgsHost h;
     h.setup(G, p);
     double sqrt_w = sqrt((double)width);
-    printf("  interval 2^%u, neg=%u: m = %llu baby, stride M = %llu, %llu giants; table 2^%u slots "
-           "(%.1f MB, load %.2f)\n", o.wbits, o.neg, (unsigned long long)p.m,
+    std::string width_label = o.external_target ? std::to_string(width) : "2^" + std::to_string(o.wbits);
+    printf("  interval %s, neg=%u: m = %llu baby, stride M = %llu, %llu giants; table 2^%u slots "
+           "(%.1f MB, load %.2f)\n", width_label.c_str(), o.neg, (unsigned long long)p.m,
            (unsigned long long)p.M, (unsigned long long)p.giant_count, p.table_bits,
            (double)(8ull << p.table_bits) / 1e6, (double)p.m / (double)(1ull << p.table_bits));
     printf("  %u chains (%u threads x %u), Lb = %llu, Lg = %llu, %u steps per launch, variant=%s\n",
@@ -774,6 +821,9 @@ static void bench_bsgs(BsgsOpts o) {
     d.alloc_table(p.table_bits);
     Timer tm;
     BsgsStats st;
+    double setup_seconds = std::chrono::duration<double>(
+        std::chrono::steady_clock::now() - host_start).count();
+    unsigned long long verify_ns = 0;
 
     /* baby phase */
     h.fill_baby_ctx(d.c);
@@ -811,7 +861,20 @@ static void bench_bsgs(BsgsOpts o) {
                 carry = (carry >> 32) + (s >> 32);
             }
         }
-        affine_pt Qt = Curve::to_affine(Curve::scalar_mul(G, xs_t, 0));
+        affine_pt Qt;
+        if (o.external_target) {
+            uint32_t tx[8] = {(uint32_t)o.target_x, (uint32_t)(o.target_x >> 32)};
+            uint32_t ty[8] = {(uint32_t)o.target_y, (uint32_t)(o.target_y >> 32)};
+            Qt.x = Fp::from_limbs(tx);
+            Qt.y = Fp::from_limbs(ty);
+            Qt.inf = 0;
+            if (!Curve::affine_on_curve(Qt)) {
+                fprintf(stderr, "EC Bench target is not on the compiled curve\n");
+                exit(2);
+            }
+        } else {
+            Qt = Curve::to_affine(Curve::scalar_mul(G, xs_t, 0));
+        }
         h.set_target(Qt);
         d.reset_counters();
         h.fill_giant_ctx(d.c);
@@ -836,7 +899,11 @@ static void bench_bsgs(BsgsOpts o) {
                               cudaMemcpyDeviceToHost));
                 for (auto &cd : dc) {
                     consumed++; st.candidates++;
-                    if (h.verify(cd, k)) { ok = true; break; }
+                    auto verify_start = std::chrono::steady_clock::now();
+                    bool matched = h.verify(cd, k);
+                    verify_ns += (unsigned long long)std::chrono::duration_cast<std::chrono::nanoseconds>(
+                        std::chrono::steady_clock::now() - verify_start).count();
+                    if (matched) { ok = true; break; }
                     st.false_candidates++;
                 }
             }
@@ -849,12 +916,24 @@ static void bench_bsgs(BsgsOpts o) {
         unsigned long long steps = d.steps_taken();
         giant_all += steps;
         per_target.push_back(steps);
-        if (ok && Fn::eq(Fn::from_limbs(xs_t), Fn::from_limbs(k))) {
+        if (ok && (o.external_target || Fn::eq(Fn::from_limbs(xs_t), Fn::from_limbs(k)))) {
             solved++;
             if (o.targets == 1) {
                 printf("  SOLVED: k = 0x");
                 for (int l = 7; l >= 0; l--) printf("%08x", k[l]);
                 printf("\n");
+            }
+            if (o.external_target) {
+                printf("ECBENCH_RESULT k=0x");
+                for (int l = 7; l >= 0; l--) printf("%08x", k[l]);
+                double host_seconds = std::chrono::duration<double>(
+                    std::chrono::steady_clock::now() - host_start).count();
+                printf(" baby_steps=%llu giant_steps=%llu seed_ops=%llu device_seconds=%.9f host_seconds=%.9f setup_seconds=%.9f candidate_verification_seconds=%.9f transfer_seconds=%.9f h2d_bytes=%llu d2h_bytes=%llu d2d_bytes=%llu\n",
+                       st.baby_steps, steps, st.seed_ops,
+                       t_seed + t_baby + t_gseed_all + t_giant_all,
+                       host_seconds, setup_seconds, (double)verify_ns / 1e9,
+                       (double)g_transfer_ns / 1e9,
+                       g_h2d_bytes, g_d2h_bytes, g_d2d_bytes);
             }
         } else {
             printf("  target %u: %s\n", tgt,
@@ -886,6 +965,7 @@ int main(int argc, char **argv) {
     std::string cmd = argc > 1 ? argv[1] : "selftest";
     RhoOpts o;
     BsgsOpts b;
+    bool have_target_x = false, have_target_y = false;
     for (int i = 2; i < argc; i++) {
         std::string a = argv[i];
         auto next = [&]() { return (i + 1 < argc) ? (uint32_t)strtoul(argv[++i], nullptr, 0) : 0u; };
@@ -899,10 +979,21 @@ int main(int argc, char **argv) {
         else if (a == "--max-steps") o.max_steps = next();
         else if (a == "--wbits") b.wbits = next();
         else if (a == "--targets") b.targets = next();
+        else if ((a == "--ecbench-target-x" || a == "--ecbench-target-y") && i + 1 < argc) {
+            char *end = nullptr;
+            const char *raw = argv[++i];
+            unsigned long long v = strtoull(raw, &end, 0);
+            if (!raw[0] || !end || *end) { fprintf(stderr, "invalid EC Bench coordinate\n"); return 2; }
+            if (a == "--ecbench-target-x") { b.target_x = v; have_target_x = true; }
+            else { b.target_y = v; have_target_y = true; }
+        }
         else if (a == "--variant" && i + 1 < argc) o.variant = b.variant = argv[++i];
         else if (a == "--solve") o.solve = true;
         else { fprintf(stderr, "unknown option %s\n", a.c_str()); return 2; }
     }
+    if (have_target_x != have_target_y) { fprintf(stderr, "both EC Bench coordinates are required\n"); return 2; }
+    b.external_target = have_target_x && have_target_y;
+    if (b.external_target && cmd != "bsgs") { fprintf(stderr, "EC Bench target requires bsgs\n"); return 2; }
     if (cmd == "selftest") selftest();
     else if (cmd == "field") bench_field();
     else if (cmd == "mul") bench_mul();
