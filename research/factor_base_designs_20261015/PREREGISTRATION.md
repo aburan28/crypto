@@ -263,3 +263,75 @@ corrects a statement in it that cannot hold.
    coefficients are ordered `q₀, c₁, c₂`, with
    `P(X) = Q(x_R)·y(−R) + c₁(X − x_R) + c₂(X² − x_R²)`. The excess
    (`norm_chain_excess`) is asserted to be 1 at every `m`.
+
+### Amendment 4, 2026-10-16: cost score, a third m = 4 cell, a small-prime instrument, and an ablation of A11 (C1–C4), before any of their rows
+
+Registered after Amendment 2's run (`reports/run-20261015T2052Z`, review in
+`reports/review-20261016T0130Z`) and before any row of C1–C4 exists. It adds
+experiments and one score. It changes no existing row, verdict, threshold or
+prediction. Instrument, per-system limits, stop rule, completed-cell rule and
+seeds are those of Amendments 1–3, except as stated. Seeds take a new prime
+index p₃ = 2 and new arm indices H1 = 7, H2 = 8.
+
+**Why.** D misread A1 on p₁, and on A11 it hides that the width grows at least
+as fast per bit as A0's (Amendment 2, secondary). The F4 trace was identical on
+p₁ and p₂ in every completed system, so the trace is a function of the
+system's shape. m = 4, where the §1 threshold was derived, has only 2 completed
+cells per arm. Nothing yet says which part of A11 makes it cheaper.
+
+- **C1, cost score.** Every row records `field_ops`, F4's count of `F_p`
+  multiplications in row reduction (`F4Report::field_ops`; symbolic
+  preprocessing is not counted). Every committed completed system of the first
+  run, F1, F2, F3 and F4 is rebuilt from its seed and measured again
+  (`rescore`), and the regenerated row must equal the committed one on D,
+  `max_cols`, `max_rows` and `steps`. A mismatch is recorded and that system's
+  cost is not used. The score is **κ = Δlog₂ field_ops / Δb**, the least-squares
+  slope of log₂ of the cell's mean `field_ops` on b, over completed cells, per
+  (arm, m, prime). Reasoning: one more bit per summand buys m bits of yield per
+  trial and needs one more bit of relations (§1), so relation collection gets
+  cheaper exactly when κ < m − 1 (linear algebra not counted).
+  *Verdicts:* **cost-favourable** if κ < m − 1 on ≥ 3 completed cells;
+  **cost-unfavourable** if κ ≥ m − 1 on ≥ 3; otherwise **inconclusive**. These
+  are read at the sizes measured and are not extrapolated.
+- **C2, the third m = 4 cell on p₁.** A0 and A11 at m = 4, t = 4, 2 targets,
+  F4 budget 3600 s and hard kill 3900 s, memory limit unchanged
+  (`ulimit -v 13000000`). Amendment 2 asked for a bigger machine. The lab
+  runner (isolab) has no CLI or credentials in this container, so the cell
+  runs here, and that blocker is recorded. If both systems of an arm complete,
+  the cell joins F4's σ and C1's κ for that arm.
+- **C3, small-prime instrument p₃ = 40961 = 5·2^13 + 1.** Below 2^16, so F4
+  takes its narrow 32-bit path, which uses half the memory per entry. *Check
+  first:* every completed cell measured on p₁ (first run, F2, F3, F4, C2, and
+  H1/H2 below) is rebuilt with p₃ seeds and compared system by system on D,
+  `max_cols`, `max_rows` and `steps`. **p₃ is admitted** only if every
+  compared system matches. A cell whose t exceeds 13 (`2^13 ∥ p₃ − 1`) is not
+  compared. *If admitted:* A0 m = 3, t = 5; A11 m = 3, t = 6; A0 and A11 m = 4,
+  t = 4 are run on p₃ with budget 3600 s and hard kill 3900 s, 2 targets each,
+  as single cells. They are reported as p₃ readings beside the p₁ series. They
+  extend a p₁ fit only through the admission rule (same trace) and are labelled
+  as such. If p₃ is not admitted, the extension is not run, and the mismatches
+  are reported.
+- **C4, ablation of A11 (p₁, m ∈ {2, 3}, t rising from 2).** Two hybrids on
+  the coset `g·μ_{2^t}`, each with excess 1 (checked):
+  - **H1, A11's curve relation with Kummer towers on the roots.** The
+    unknowns are A11's function coefficients and a Kummer tower `z_i = y_{i,0}`,
+    `y_{i,j+1} = y_{i,j}²`, `y_{i,t−1}² = 1` per summand. The equations are A11's
+    coefficient equations `lead(G)·g^{m−i}·s_i − G_i = 0` with `s_i` replaced by
+    `(−1)^{m−i}·e_{m−i}(z_1, …, z_m)` (Vieta for `G_s = ∏(X − z_i)`), plus the
+    towers. No summation polynomial and no chain.
+  - **H2, A0's summation with A11's chain.** The unknowns are `z_i` (`x_i =
+    g·z_i`), A0's intermediates `u`, and the chain. The equations are A0's `S₃`
+    summation in the `x_i`, and the squaring chain `r_0 = X`,
+    `r_j² = q_j·G_s + r_{j+1}`, `r_t = 1` modulo `G_s = ∏(X − z_i)` (Vieta in
+    the `z_i`). No Kummer tower and no function.
+
+  *Decision rule (m = 3, over t where A0, A11, H1 and H2 all completed, at
+  least 2 such t, else inconclusive), applied to cell D and, separately, to
+  log₂ of the cell's mean `field_ops`:* **the curve relation carries it** if
+  H1 ≤ A11 and H2 ≥ A0 at every such t; **the chain carries it** if H2 ≤ A11
+  and H1 ≥ A0 at every such t; otherwise **mixed**, reported cell by cell.
+  m = 2 is reported descriptively.
+
+**Predictions.** C1: every arm cost-unfavourable at m ∈ {2, 3}. C2: A11's
+cell completes and A0's does not. C3: p₃ admitted. C4: the curve relation
+carries it.

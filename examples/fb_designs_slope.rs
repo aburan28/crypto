@@ -80,24 +80,30 @@ const P1: u64 = 786_433;
 /// `p₂ = 15·2^27 + 1`, the replication prime (§5, Amendment 2).
 const P2: u64 = 2_013_265_921;
 
-/// A prime by its index in the seed rule (Amendment 2): `p₁ = 0`, `p₂ = 1`.
+/// `p₃ = 5·2^13 + 1`, below 2^16: F4's narrow path (Amendment 4, C3).
+const P3: u64 = 40_961;
+
+/// A prime by its index in the seed rule (Amendments 2 and 4): `p₁ = 0`,
+/// `p₂ = 1`, `p₃ = 2`.
 fn prime_of(idx: usize) -> u64 {
     match idx {
         0 => P1,
         1 => P2,
+        2 => P3,
         _ => panic!("unknown prime index {idx}"),
     }
 }
 
 fn prime_label(idx: usize) -> &'static str {
-    ["p1", "p2"][idx]
+    ["p1", "p2", "p3"][idx]
 }
 
 fn parse_prime(s: &str) -> usize {
     match s {
         "p1" => 0,
         "p2" => 1,
-        _ => panic!("unknown prime `{s}` (p1 or p2)"),
+        "p3" => 2,
+        _ => panic!("unknown prime `{s}` (p1, p2 or p3)"),
     }
 }
 /// "FBDS", the preregistered seed base.
@@ -347,10 +353,12 @@ enum Arm {
     A4,
     A11,
     N11,
+    H1,
+    H2,
 }
 
 impl Arm {
-    const ALL: [Arm; 7] = [
+    const ALL: [Arm; 9] = [
         Arm::A0,
         Arm::N,
         Arm::A1z,
@@ -358,6 +366,8 @@ impl Arm {
         Arm::A4,
         Arm::A11,
         Arm::N11,
+        Arm::H1,
+        Arm::H2,
     ];
 
     fn name(self) -> &'static str {
@@ -369,6 +379,8 @@ impl Arm {
             Arm::A4 => "A4",
             Arm::A11 => "A11",
             Arm::N11 => "N11",
+            Arm::H1 => "H1",
+            Arm::H2 => "H2",
         }
     }
 
@@ -677,7 +689,7 @@ fn parallel_design(p: u64, t: usize, rng: &mut StdRng) -> Design {
 
 fn build_design(arm: Arm, p: u64, t: usize, rng: &mut StdRng) -> Design {
     let d = match arm {
-        Arm::A0 | Arm::N | Arm::A11 | Arm::N11 => kummer_design(p, t, rng),
+        Arm::A0 | Arm::N | Arm::A11 | Arm::N11 | Arm::H1 | Arm::H2 => kummer_design(p, t, rng),
         Arm::A1z => interval_design(p, t, false, rng),
         Arm::A1g => interval_design(p, t, true, rng),
         Arm::A4 => parallel_design(p, t, rng),
@@ -1087,6 +1099,187 @@ fn norm_chain_system(
     Some((eqs, n, sol, info))
 }
 
+// ── Amendment 4, C4: the ablation hybrids ──────────────────────────
+
+/// Coefficients (low to high, monic) of `∏(X − z_i)` for polynomial roots.
+fn vieta(zs: &[Pol], n: usize, p: u64) -> Vec<Pol> {
+    let mut c = vec![Pol::constant(n, 1, p)];
+    for z in zs {
+        let mut next = vec![Pol::zero(n); c.len() + 1];
+        for (k, ck) in c.iter().enumerate() {
+            next[k + 1] = next[k + 1].add(ck, p);
+            next[k] = next[k].sub(&ck.mul(z, p), p);
+        }
+        c = next;
+    }
+    c
+}
+
+/// `f` with variable `i` replaced by `images[i]`, a polynomial in `n_new`
+/// variables.
+fn compose(f: &Pol, images: &[Pol], n_new: usize, p: u64) -> Pol {
+    let mut out = Pol::zero(n_new);
+    for (e, c) in &f.terms {
+        let mut term = Pol::constant(n_new, *c, p);
+        for (i, &k) in e.iter().enumerate() {
+            for _ in 0..k {
+                term = term.mul(&images[i], p);
+            }
+        }
+        out = out.add(&term, p);
+    }
+    out
+}
+
+/// The squaring chain of the norm chain (`r_0 = X`, `r_j² = q_j·G_s +
+/// r_{j+1}`, `r_t = 1`) modulo the monic `G_s` with coefficients `gs`
+/// (length `m + 1`); step `j` has `q_j` (`m − 1` unknowns) then `r_{j+1}`
+/// (`m`) from `base + (2m − 1)·j`, as in [`norm_chain_system`].
+fn chain_eqs(n: usize, gs: &[Pol], base: usize, m: usize, t: usize, p: u64) -> Vec<Pol> {
+    let mut eqs = Vec::new();
+    let mut r: Vec<Pol> = (0..m)
+        .map(|k| Pol::constant(n, u64::from(k == 1), p))
+        .collect();
+    for j in 0..t {
+        let b = base + (2 * m - 1) * j;
+        let q: Vec<Pol> = (0..m - 1).map(|k| Pol::var(n, b + k)).collect();
+        let rn: Vec<Pol> = (0..m).map(|k| Pol::var(n, b + m - 1 + k)).collect();
+        let mut lhs = vec![Pol::zero(n); 2 * m - 1];
+        for (i, ri) in r.iter().enumerate() {
+            for (k, rk) in r.iter().enumerate() {
+                lhs[i + k] = lhs[i + k].add(&ri.mul(rk, p), p);
+            }
+        }
+        let mut rhs = vec![Pol::zero(n); 2 * m - 1];
+        for (i, qi) in q.iter().enumerate() {
+            for (k, gk) in gs.iter().enumerate() {
+                rhs[i + k] = rhs[i + k].add(&qi.mul(gk, p), p);
+            }
+        }
+        for (k, rk) in rn.iter().enumerate() {
+            rhs[k] = rhs[k].add(rk, p);
+        }
+        for k in (0..2 * m - 1).rev() {
+            eqs.push(lhs[k].sub(&rhs[k], p));
+        }
+        r = rn;
+    }
+    for (k, rk) in r.iter().enumerate() {
+        eqs.push(rk.sub(&Pol::constant(n, u64::from(k == 0), p), p));
+    }
+    eqs
+}
+
+/// The chain's values at a numeric monic `G_s`: per step `q_j` then
+/// `r_{j+1}`. Panics unless `X^{2^t} ≡ 1 mod G_s`.
+fn chain_values(gsn: &[u64], m: usize, t: usize, p: u64) -> Vec<u64> {
+    let mut out = Vec::new();
+    let mut rv: Vec<u64> = (0..m).map(|k| u64::from(k == 1)).collect();
+    for _ in 0..t {
+        let (q, rn) = npdivmod_monic(&npmul(&rv, &rv, p), gsn, p);
+        out.extend_from_slice(&q);
+        out.extend_from_slice(&rn);
+        rv = rn;
+    }
+    assert!(
+        rv[0] == 1 && rv[1..].iter().all(|&c| c == 0),
+        "X^(2^t) ≢ 1 mod G_s at the planted solution"
+    );
+    out
+}
+
+/// **H1**: A11's coefficient equations, with `s_i` replaced by Vieta in the
+/// roots `z_i = y_{i,0}` of Kummer towers (Amendment 4, C4). Unknowns: the
+/// function's `m − 1` coefficients, then `t` per summand. `None` when A11
+/// would replant.
+fn hybrid_h1(
+    g: u64,
+    t: usize,
+    curve: &PrimeCurve,
+    m: usize,
+    target: &Target,
+) -> Option<(Vec<Pol>, usize, Vec<u64>, Value)> {
+    let p = curve.p;
+    let (eqs0, n0, sol0, _) = norm_chain_system(g, t, curve, m, target)?;
+    let n_c = m - 1;
+    let n = n_c + m * t;
+    let zs: Vec<Pol> = (0..m).map(|i| Pol::var(n, n_c + i * t)).collect();
+    let gs = vieta(&zs, n, p);
+    let mut images: Vec<Pol> = (0..n_c).map(|i| Pol::var(n, i)).collect();
+    images.extend(gs[..m].iter().cloned());
+    for f in &eqs0[..m] {
+        assert!(
+            f.terms.keys().all(|e| e[n_c + m..].iter().all(|&k| k == 0)),
+            "a coefficient equation uses a chain unknown"
+        );
+    }
+    images.resize(n0, Pol::zero(n));
+    let mut eqs: Vec<Pol> = eqs0[..m]
+        .iter()
+        .map(|f| compose(f, &images, n, p))
+        .collect();
+    for i in 0..m {
+        eqs.extend(kummer_eqs(n, n_c + i * t, t, p));
+    }
+    let mut sol = sol0[..n_c].to_vec();
+    for pt in &target.pts {
+        sol.extend(kummer_values(mulm(pt.x, invm(g, p), p), t, p));
+    }
+    assert_eq!(eqs.len(), n + 1, "H1's excess is not 1");
+    let info = json!({"hybrid": "A11 coefficient equations with Kummer towers on the roots",
+                      "n_c": n_c, "excess": 1});
+    Some((eqs, n, sol, info))
+}
+
+/// **H2**: A0's `S₃` summation in `x_i = g·z_i`, with A11's squaring chain
+/// modulo `G_s = ∏(X − z_i)` (Amendment 4, C4). Unknowns: `z_1 … z_m`, the
+/// `m − 2` intermediates `u`, then the chain.
+fn hybrid_h2(
+    g: u64,
+    t: usize,
+    curve: &PrimeCurve,
+    m: usize,
+    target: &Target,
+) -> (Vec<Pol>, usize, Vec<u64>, Value) {
+    let p = curve.p;
+    let (a, b) = (curve.a, curve.b);
+    let base = m + (m - 2);
+    let n = base + (2 * m - 1) * t;
+    let zs: Vec<Pol> = (0..m).map(|i| Pol::var(n, i)).collect();
+    let x = |i: usize| zs[i].scale(g, p);
+    let xr = Pol::constant(n, target.x_r, p);
+    let mut eqs = if m == 2 {
+        vec![s3(&x(0), &x(1), &xr, a, b, p)]
+    } else {
+        let u = |k: usize| Pol::var(n, m + k);
+        let mut e = vec![s3(&x(0), &x(1), &u(0), a, b, p)];
+        for k in 1..m - 2 {
+            e.push(s3(&u(k - 1), &x(k + 1), &u(k), a, b, p));
+        }
+        e.push(s3(&u(m - 3), &x(m - 1), &xr, a, b, p));
+        e
+    };
+    let gs = vieta(&zs, n, p);
+    eqs.extend(chain_eqs(n, &gs, base, m, t, p));
+    let zv: Vec<u64> = target
+        .pts
+        .iter()
+        .map(|pt| mulm(pt.x, invm(g, p), p))
+        .collect();
+    let mut gsn = vec![1u64];
+    for &z in &zv {
+        gsn = npmul(&gsn, &[subm(0, z, p), 1], p);
+    }
+    let mut sol = zv.clone();
+    sol.extend_from_slice(&target.partial[..m - 2]);
+    sol.extend(chain_values(&gsn, m, t, p));
+    assert_eq!(sol.len(), n);
+    assert_eq!(eqs.len(), n + 1, "H2's excess is not 1");
+    let info = json!({"hybrid": "A0 summation with the A11 squaring chain on G_s = ∏(X − z_i)",
+                      "excess": 1});
+    (eqs, n, sol, info)
+}
+
 /// The norm chain's presentation on `V`: for random `m`-subsets of `V`,
 /// `X^{2^t} ≡ 1 mod ∏(X − v/g)`; with one element outside `V`, not.
 /// Every element of `V` is `g` times a `2^t`-th root of unity.
@@ -1180,6 +1373,7 @@ fn measure(eqs: &[Pol], n: usize, p: u64, sol: &[u64], budget: Duration) -> Valu
         "steps": r.steps,
         "max_rows": r.max_rows,
         "max_cols": r.max_cols,
+        "field_ops": r.field_ops,
         "f4_ms": r.ms,
         "time": wall,
         "timed_out": r.timed_out,
@@ -1269,11 +1463,26 @@ fn build_system(
             extra = info;
             break (eqs, n, sol, tg);
         }
+        if arm == Arm::H1 || arm == Arm::H2 {
+            let Shape::Kummer { g } = d.shape else {
+                unreachable!()
+            };
+            let built = if arm == Arm::H1 {
+                hybrid_h1(g, t, &curve, m, &tg)
+            } else {
+                Some(hybrid_h2(g, t, &curve, m, &tg))
+            };
+            let Some((eqs, n, sol, info)) = built else {
+                continue;
+            };
+            extra = info;
+            break (eqs, n, sol, tg);
+        }
         let null = (arm == Arm::N).then_some(&mut trng);
         let (eqs, n, sol) = tower_system(&d, &curve, m, &tg, null);
         break (eqs, n, sol, tg);
     };
-    if arm == Arm::A11 || arm == Arm::N11 {
+    if arm == Arm::A11 || arm == Arm::N11 || arm == Arm::H2 {
         check_norm_chain(&d, m, p, &mut StdRng::seed_from_u64(ts ^ 0xC4EC));
     }
     let row = json!({
@@ -2151,7 +2360,7 @@ impl Cell2 {
 /// committed p₁ rows of the first run.
 fn group_of(file: &str) -> &str {
     match file.get(..3) {
-        Some(g @ ("F1-" | "F2-" | "F3-" | "F4-")) => &g[..2],
+        Some(g @ ("F1-" | "F2-" | "F3-" | "F4-" | "C1-" | "C2-" | "C3-" | "C4-")) => &g[..2],
         _ => "p1",
     }
 }
@@ -2507,6 +2716,537 @@ fn analyze2(dir: &str) {
     );
 }
 
+// ── Amendment 4: replays (C1 rescore, C3 trace check) and analysis ─
+
+/// The prime index a row was measured at (`prime` absent: the first run, p₁).
+fn row_prime(r: &Value) -> usize {
+    r["prime"].as_str().map_or(0, parse_prime)
+}
+
+/// Rows of `groups` that belong to a completed cell (every system of the
+/// cell `ok`), with their file names.
+fn completed_rows<'a>(rows: &'a [(String, Value)], groups: &[&str]) -> Vec<&'a (String, Value)> {
+    let mut cell_ok: BTreeMap<(String, String, u64, u64, usize), bool> = BTreeMap::new();
+    let key = |f: &str, r: &Value| {
+        (
+            f.to_string(),
+            r["arm"].as_str().unwrap_or("").to_string(),
+            r["m"].as_u64().unwrap_or(0),
+            r["t"].as_u64().unwrap_or(0),
+            row_prime(r),
+        )
+    };
+    for (f, r) in rows {
+        if groups.contains(&group_of(f)) {
+            let e = cell_ok.entry(key(f, r)).or_insert(true);
+            *e &= r["status"] == "ok";
+        }
+    }
+    rows.iter()
+        .filter(|(f, r)| groups.contains(&group_of(f)) && cell_ok[&key(f, r)])
+        .collect()
+}
+
+/// Re-measure every system of a completed cell in `groups`, in a child
+/// process under the same limits as its committed row, at the row's own
+/// prime (`prime = None`, C1) or at another prime (`Some`, C3). Each new row
+/// carries `replay_of` (file), the committed trace and `trace_matches` (D,
+/// `max_cols`, `max_rows` and `steps` all equal).
+fn replay(dir: &str, out: &str, groups: &[&str], prime: Option<usize>, only_prime: Option<usize>) {
+    let rows = read_rows(dir);
+    let mut sel = completed_rows(&rows, groups);
+    if let Some(op) = only_prime {
+        sel.retain(|(_, r)| row_prime(r) == op);
+    }
+    if let Some(np) = prime {
+        let two = (prime_of(np) - 1).trailing_zeros() as u64;
+        sel.retain(|(_, r)| r["t"].as_u64().unwrap_or(0) <= two);
+    }
+    let commit = git_commit();
+    let host = host();
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(format!("{dir}/{out}.jsonl"))
+        .expect("open rows");
+    let mut log = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(format!("{dir}/{out}.log"))
+        .expect("open log");
+    writeln!(
+        log,
+        "== replay of {} systems from groups {groups:?} at {}: commit {commit}, started {}",
+        sel.len(),
+        prime.map_or("each row's own prime".to_string(), |p| prime_label(p)
+            .to_string()),
+        utc_now()
+    )
+    .ok();
+    let (mut matched, mut total) = (0usize, 0usize);
+    for (f, c) in sel {
+        let arm = Arm::parse(c["arm"].as_str().expect("an arm"));
+        let m = c["m"].as_u64().expect("m") as usize;
+        let t = c["t"].as_u64().expect("t") as usize;
+        let k = c["target"].as_u64().expect("a target") as usize;
+        let budget = c["budget_s"].as_u64().unwrap_or(300);
+        let a = RunArgs {
+            arms: vec![arm],
+            ms: vec![m],
+            t_min: t,
+            t_max: t,
+            targets: 1,
+            budget,
+            vmem_kb: 13_000_000,
+            grace: if budget > 300 { 300 } else { 120 },
+            out_dir: dir.to_string(),
+            prime: prime.unwrap_or_else(|| row_prime(c)),
+            file: String::new(),
+        };
+        let mut row = run_child(&a, arm, m, t, k, &mut log);
+        let fields = ["D", "max_cols", "max_rows", "steps"];
+        let same = row["status"] == "ok" && fields.iter().all(|x| row[*x] == c[*x]);
+        total += 1;
+        matched += usize::from(same);
+        merge(
+            &mut row,
+            &json!({"git_commit": commit, "host": host, "replay_of": f,
+                    "replay_of_prime": prime_label(row_prime(c)),
+                    "committed": {"D": c["D"], "max_cols": c["max_cols"], "max_rows": c["max_rows"],
+                                  "steps": c["steps"]},
+                    "trace_matches": same}),
+        );
+        let line = format!(
+            "{f} {} m={m} t={t} target={k} at {}: D {} (was {}), max_cols {} (was {}), field_ops {}, {:.1} s, {} {}",
+            arm.name(),
+            prime_label(a.prime),
+            row["D"],
+            c["D"],
+            row["max_cols"],
+            c["max_cols"],
+            row["field_ops"],
+            row["time"].as_f64().unwrap_or(f64::NAN),
+            row["status"].as_str().unwrap_or("?"),
+            if same { "MATCH" } else { "MISMATCH" }
+        );
+        eprintln!("{line}");
+        writeln!(log, "{line}").ok();
+        writeln!(file, "{row}").expect("write a row");
+        file.flush().ok();
+        log.flush().ok();
+    }
+    let msg = format!(
+        "== {matched} of {total} systems match the committed trace; ended {}",
+        utc_now()
+    );
+    eprintln!("{msg}");
+    writeln!(log, "{msg}").ok();
+}
+
+/// A cell for Amendment 4: D, width and `field_ops` per system.
+struct Cell4 {
+    t: usize,
+    b: f64,
+    d: Vec<u64>,
+    cols: Vec<u64>,
+    fops: Vec<u64>,
+    status: Vec<String>,
+}
+
+impl Cell4 {
+    fn complete(&self) -> bool {
+        !self.status.is_empty() && self.status.iter().all(|s| s == "ok")
+    }
+    fn d(&self) -> f64 {
+        mean(&self.d)
+    }
+    fn cols(&self) -> f64 {
+        mean(&self.cols)
+    }
+    fn lf(&self) -> f64 {
+        mean(&self.fops).log2()
+    }
+}
+
+/// Cells from rows; a replayed row counts as `ok` only when its trace
+/// matched the committed one.
+fn cells4<'a>(rows: impl Iterator<Item = &'a Value>) -> Vec<Cell4> {
+    let mut by_t: BTreeMap<usize, Cell4> = BTreeMap::new();
+    for r in rows {
+        let t = r["t"].as_u64().unwrap_or(0) as usize;
+        let e = by_t.entry(t).or_insert(Cell4 {
+            t,
+            b: r["b"].as_f64().unwrap_or(f64::NAN),
+            d: Vec::new(),
+            cols: Vec::new(),
+            fops: Vec::new(),
+            status: Vec::new(),
+        });
+        let ok = r["status"] == "ok" && r["trace_matches"] != false && r["field_ops"].is_u64();
+        if ok {
+            e.d.push(r["D"].as_u64().unwrap_or(0));
+            e.cols.push(r["max_cols"].as_u64().unwrap_or(0));
+            e.fops.push(r["field_ops"].as_u64().unwrap_or(0));
+        }
+        e.status.push(if ok {
+            "ok".into()
+        } else {
+            r["status"].as_str().unwrap_or("?").to_string()
+        });
+    }
+    by_t.into_values().collect()
+}
+
+fn kappa_verdict(cells: usize, kappa: Option<f64>, m: usize) -> &'static str {
+    match kappa {
+        _ if cells < 3 => "inconclusive (fewer than 3 completed cells)",
+        Some(k) if k < m as f64 - 1.0 => "cost-favourable (κ < m − 1)",
+        Some(_) => "cost-unfavourable (κ ≥ m − 1)",
+        None => "inconclusive (no slope)",
+    }
+}
+
+/// `(completed cells, σ, κ)`, printed with the series' cells.
+fn show4(title: &str, m: usize, cells: &[Cell4]) -> (usize, Option<f64>, Option<f64>) {
+    println!();
+    println!("── {title}");
+    println!(
+        "  t   b      D per system   max_cols per system   field_ops per system        status"
+    );
+    for c in cells {
+        println!(
+            "  {:<3} {:<6.3} {:<14} {:<21} {:<27} {}",
+            c.t,
+            c.b,
+            format!("{:?}", c.d),
+            format!("{:?}", c.cols),
+            format!("{:?}", c.fops),
+            c.status.join(",")
+        );
+    }
+    let done: Vec<&Cell4> = cells.iter().filter(|c| c.complete()).collect();
+    let s = lsq(&done.iter().map(|c| (c.b, c.d())).collect::<Vec<_>>()).map(|x| x.0);
+    let k = lsq(&done.iter().map(|c| (c.b, c.lf())).collect::<Vec<_>>()).map(|x| x.0);
+    println!(
+        "  completed cells {}: κ = Δlog₂ field_ops/Δb = {} against m − 1 = {}  →  {};  σ = {}  →  {}",
+        done.len(),
+        k.map_or("-".into(), |x| format!("{x:.3}")),
+        m - 1,
+        kappa_verdict(done.len(), k, m),
+        s.map_or("-".into(), |x| format!("{x:.4}")),
+        verdict(done.len(), s)
+    );
+    (done.len(), s, k)
+}
+
+fn analyze4(dir: &str) {
+    let rows = read_rows(dir);
+    let in_group = |g: &'static str| rows.iter().filter(move |(f, _)| group_of(f) == g);
+    println!("Factor-base designs, Amendment 4 (C1–C4): rows from {dir}");
+    println!("(field_ops = F_p multiplications in F4's row reduction; κ = least-squares slope of log₂ of a cell's mean");
+    println!(" field_ops on b; σ as before. A replayed system counts only if its trace matched the committed row.)");
+
+    // C1: the replays, as series by (source group, arm, m, prime).
+    let c1: Vec<&Value> = in_group("C1").map(|(_, r)| r).collect();
+    let c2: Vec<&Value> = in_group("C2").map(|(_, r)| r).collect();
+    let c4: Vec<&Value> = in_group("C4").map(|(_, r)| r).collect();
+    let (n_rep, n_match) = (
+        c1.len(),
+        c1.iter().filter(|r| r["trace_matches"] == true).count(),
+    );
+    println!();
+    println!(
+        "════ C1: cost score κ against m − 1 (replayed systems: {n_rep}, trace matched: {n_match})"
+    );
+    let src = |r: &Value| group_of(r["replay_of"].as_str().unwrap_or("")).to_string();
+    let mut verdicts: Vec<(String, usize, usize, Option<f64>, Option<f64>)> = Vec::new();
+    let mut series = |name: String, m: usize, cells: Vec<Cell4>| {
+        let (n, s, k) = show4(&name, m, &cells);
+        verdicts.push((name, m, n, s, k));
+    };
+    for a in ["A0", "N", "A1z", "A1g", "A4", "A11"] {
+        for m in [2usize, 3] {
+            let rs = c1
+                .iter()
+                .copied()
+                .filter(|r| r["arm"] == a && r["m"] == m && (src(r) == "p1" || (src(r) == "F3")));
+            let cells = cells4(rs);
+            if !cells.is_empty() {
+                series(
+                    format!("{a} m = {m} p1 (first run; F3's t = 5 cell where completed)"),
+                    m,
+                    cells,
+                );
+            }
+        }
+    }
+    for a in ["A0", "A11"] {
+        for m in [2usize, 3] {
+            let rs = c1
+                .iter()
+                .copied()
+                .filter(|r| r["arm"] == a && r["m"] == m && src(r) == "F1");
+            series(format!("{a} m = {m} p2 (F1)"), m, cells4(rs));
+        }
+    }
+    for m in [2usize, 3] {
+        let rs = c1
+            .iter()
+            .copied()
+            .filter(|r| r["arm"] == "N11" && r["m"] == m);
+        series(format!("N11 m = {m} p1 (F2)"), m, cells4(rs));
+    }
+    for a in ["A0", "A11"] {
+        let rs = c1
+            .iter()
+            .copied()
+            .filter(|r| r["arm"] == a && src(r) == "F4")
+            .chain(c2.iter().copied().filter(|r| r["arm"] == a));
+        series(
+            format!("{a} m = 4 p1 (F4, with C2's t = 4 cell)"),
+            4,
+            cells4(rs),
+        );
+    }
+    for a in ["H1", "H2"] {
+        for m in [2usize, 3] {
+            let rs = c4.iter().copied().filter(|r| r["arm"] == a && r["m"] == m);
+            series(format!("{a} m = {m} p1 (C4)"), m, cells4(rs));
+        }
+    }
+
+    // C2.
+    println!();
+    println!("════ C2: m = 4, t = 4 on p1, budget 3600 s, hard kill 3900 s (isolab unavailable: run here)");
+    let mut c2_done = BTreeMap::new();
+    for a in ["A0", "A11"] {
+        let cells = cells4(c2.iter().copied().filter(|r| r["arm"] == a));
+        let done = cells
+            .first()
+            .is_some_and(|c| c.complete() && c.status.len() == 2);
+        let recorded = cells.first().is_some_and(|c| c.status.len() == 2);
+        for r in c2.iter().filter(|r| r["arm"] == a) {
+            println!(
+                "  {a} target {}: D {}, max_cols {}, field_ops {}, time {:.1} s, {} {}",
+                r["target"],
+                r["D"],
+                r["max_cols"],
+                r["field_ops"],
+                r["time"].as_f64().unwrap_or(f64::NAN),
+                r["status"].as_str().unwrap_or("?"),
+                r["failure_reason"].as_str().unwrap_or("")
+            );
+        }
+        c2_done.insert(a, recorded.then_some(done));
+        let f4: Vec<Cell2> = cells2(&rows, "F4", a, 4);
+        let mut pts: Vec<(f64, f64)> = f4
+            .iter()
+            .filter(|c| c.complete())
+            .map(|c| (c.b, c.d_mean()))
+            .collect();
+        if done {
+            pts.extend(cells.iter().map(|c| (c.b, c.d())));
+        }
+        let s = lsq(&pts).map(|x| x.0);
+        println!(
+            "  {a} m = 4 σ with {}: {} on {} cells  →  {}",
+            if done {
+                "C2's cell"
+            } else {
+                "F4's cells only (C2's cell not completed)"
+            },
+            s.map_or("-".into(), |x| format!("{x:.4}")),
+            pts.len(),
+            verdict(pts.len(), s)
+        );
+    }
+
+    // C3.
+    println!();
+    println!("════ C3: p3 = {P3} as an instrument (F4's narrow path)");
+    let c3: Vec<&(String, Value)> = in_group("C3").collect();
+    let trace: Vec<&Value> = c3
+        .iter()
+        .filter(|(f, _)| f.starts_with("C3-trace"))
+        .map(|(_, r)| r)
+        .collect();
+    let matched = trace.iter().filter(|r| r["trace_matches"] == true).count();
+    let admitted = !trace.is_empty() && matched == trace.len();
+    println!(
+        "  trace check: {matched} of {} systems match their p1 row on D, max_cols, max_rows and steps  →  p3 {}",
+        trace.len(),
+        if trace.is_empty() {
+            "NOT CHECKED"
+        } else if admitted {
+            "ADMITTED"
+        } else {
+            "NOT ADMITTED"
+        }
+    );
+    for r in trace.iter().filter(|r| r["trace_matches"] != true) {
+        println!(
+            "    mismatch: {} {} m={} t={} target {}: p3 D {} max_cols {} max_rows {} steps {} ({}) vs p1 {}",
+            r["replay_of"], r["arm"], r["m"], r["t"], r["target"], r["D"], r["max_cols"], r["max_rows"],
+            r["steps"], r["status"].as_str().unwrap_or("?"), r["committed"]
+        );
+    }
+    let mut ext: Vec<&(String, Value)> = c3
+        .iter()
+        .copied()
+        .filter(|(f, _)| !f.starts_with("C3-trace"))
+        .collect();
+    ext.sort_by(|a, b| a.0.cmp(&b.0));
+    if ext.is_empty() {
+        println!("  extension: no rows");
+    }
+    for (f, r) in ext {
+        println!(
+            "  extension {f}: {} m={} t={} target {}: D {}, max_cols {}, field_ops {}, time {:.1} s, {} {}",
+            r["arm"],
+            r["m"],
+            r["t"],
+            r["target"],
+            r["D"],
+            r["max_cols"],
+            r["field_ops"],
+            r["time"].as_f64().unwrap_or(f64::NAN),
+            r["status"].as_str().unwrap_or("?"),
+            r["failure_reason"].as_str().unwrap_or("")
+        );
+    }
+
+    // C4.
+    println!();
+    println!("════ C4: which part of A11 makes it cheaper (m = 3 rule; D and log₂ field_ops)");
+    let base = |a: &str, m: usize| {
+        cells4(
+            c1.iter()
+                .copied()
+                .filter(|r| r["arm"] == a && r["m"] == m && src(r) == "p1"),
+        )
+    };
+    let hyb =
+        |a: &str, m: usize| cells4(c4.iter().copied().filter(|r| r["arm"] == a && r["m"] == m));
+    let mut c4_verdict = BTreeMap::new();
+    for m in [2usize, 3] {
+        let (a0, a11, h1, h2) = (base("A0", m), base("A11", m), hyb("H1", m), hyb("H2", m));
+        let at = |cs: &[Cell4], t: usize| {
+            cs.iter()
+                .find(|c| c.t == t && c.complete())
+                .map(|c| (c.d(), c.lf(), c.cols()))
+        };
+        println!("  m = {m}:  t   A0 (D, log₂ ops, cols)       A11                       H1                        H2");
+        let mut shared = Vec::new();
+        for t in 2..=18 {
+            let v = [at(&a0, t), at(&a11, t), at(&h1, t), at(&h2, t)];
+            if v.iter().all(Option::is_none) {
+                continue;
+            }
+            let f = |x: Option<(f64, f64, f64)>| {
+                x.map_or("-".to_string(), |(d, l, c)| {
+                    format!("{d:.1}, {l:.2}, {c:.0}")
+                })
+            };
+            println!(
+                "        {t:<3} {:<26} {:<25} {:<25} {}",
+                f(v[0]),
+                f(v[1]),
+                f(v[2]),
+                f(v[3])
+            );
+            if let [Some(x), Some(y), Some(z), Some(w)] = v {
+                shared.push((x, y, z, w));
+            }
+        }
+        if m != 3 {
+            continue;
+        }
+        for (label, pick) in [("D", 0usize), ("log₂ field_ops", 1)] {
+            let g = |x: (f64, f64, f64)| if pick == 0 { x.0 } else { x.1 };
+            let v = if shared.len() < 2 {
+                "INCONCLUSIVE (fewer than 2 shared completed t)"
+            } else if shared
+                .iter()
+                .all(|&(a0, a11, h1, h2)| g(h1) <= g(a11) && g(h2) >= g(a0))
+            {
+                "THE CURVE RELATION CARRIES IT"
+            } else if shared
+                .iter()
+                .all(|&(a0, a11, h1, h2)| g(h2) <= g(a11) && g(h1) >= g(a0))
+            {
+                "THE CHAIN CARRIES IT"
+            } else {
+                "MIXED (cell by cell above)"
+            };
+            println!("  m = 3 rule on {label}, {} shared t: {v}", shared.len());
+            c4_verdict.insert(label, v);
+        }
+    }
+
+    // Scorecard.
+    println!();
+    println!("════ Predictions scorecard (Amendment 4)");
+    let c1_series: Vec<&(String, usize, usize, Option<f64>, Option<f64>)> =
+        verdicts.iter().filter(|v| v.1 <= 3 && v.2 >= 3).collect();
+    let unfav = c1_series
+        .iter()
+        .filter(|v| v.4.is_some_and(|k| k >= v.1 as f64 - 1.0))
+        .count();
+    println!(
+        "  C1: every arm cost-unfavourable at m ∈ {{2, 3}}: {unfav} of {} decided series unfavourable  →  {}",
+        c1_series.len(),
+        if c1_series.is_empty() {
+            "not decided"
+        } else if unfav == c1_series.len() {
+            "held"
+        } else {
+            "did not hold"
+        }
+    );
+    let show = |b: Option<bool>| b.map_or("not recorded".to_string(), |x| x.to_string());
+    let c2_held = match (
+        c2_done.get("A11").copied().flatten(),
+        c2_done.get("A0").copied().flatten(),
+    ) {
+        (Some(a11), Some(a0)) => {
+            if a11 && !a0 {
+                "held"
+            } else {
+                "did not hold"
+            }
+        }
+        _ => "not decided",
+    };
+    println!(
+        "  C2: A11's cell completes and A0's does not: A11 {}, A0 {}  →  {c2_held}",
+        show(c2_done.get("A11").copied().flatten()),
+        show(c2_done.get("A0").copied().flatten())
+    );
+    println!(
+        "  C3: p3 admitted: {}  →  {}",
+        admitted,
+        if trace.is_empty() {
+            "not decided"
+        } else if admitted {
+            "held"
+        } else {
+            "did not hold"
+        }
+    );
+    for (label, v) in &c4_verdict {
+        println!(
+            "  C4 ({label}): the curve relation carries it: {v}  →  {}",
+            if v.starts_with("THE CURVE") {
+                "held"
+            } else if v.starts_with("INCONCLUSIVE") {
+                "not decided"
+            } else {
+                "did not hold"
+            }
+        );
+    }
+}
+
 // ── Arguments ──────────────────────────────────────────────────────
 
 fn flag(args: &[String], name: &str) -> Option<String> {
@@ -2571,11 +3311,24 @@ fn main() {
         }
         "analyze" => {
             let dir = args.get(1).expect("a runs directory");
-            if args.iter().any(|a| a == "--amendment2") {
+            if args.iter().any(|a| a == "--amendment4") {
+                analyze4(dir);
+            } else if args.iter().any(|a| a == "--amendment2") {
                 analyze2(dir);
             } else {
                 analyze(dir, flag(&args, "--pilot").as_deref());
             }
+        }
+        "replay" => {
+            // C1: `replay R --out C1-rescore --groups p1,F1,F2,F3,F4`;
+            // C3: `replay R --out C3-trace-p3 --groups p1,F2,F3,F4,C2,C4 --only-prime p1 --prime p3`.
+            let dir = args.get(1).expect("a runs directory");
+            let out = flag(&args, "--out").expect("--out");
+            let groups = flag(&args, "--groups").expect("--groups");
+            let groups: Vec<&str> = groups.split(',').collect();
+            let prime = flag(&args, "--prime").map(|s| parse_prime(&s));
+            let only = flag(&args, "--only-prime").map(|s| parse_prime(&s));
+            replay(dir, &out, &groups, prime, only);
         }
         "check-p2" => {
             let budget = flag(&args, "--budget").map_or(300, |s| s.parse().unwrap());
