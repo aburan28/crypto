@@ -143,12 +143,30 @@ def main():
     host = one_json(output / "host.json")
     source = one_json(output / "source.json")
     cpus = host["cpu_affinity"]
+    identity = host["instance_identity"]
+    provider = host["provider"]
+    aws_host = (provider == "aws_ec2_spot"
+                and identity.get("availabilityZone") == runner.EXPECTED_AZ
+                and identity.get("instanceType") == runner.EXPECTED_TYPE)
+    github_host = (provider == "github_actions"
+                   and identity.get("repository") == "aburan28/crypto"
+                   and identity.get("runnerOS") == "Linux"
+                   and identity.get("sha") == host["git_sha"]
+                   and isinstance(identity.get("runId"), int)
+                   and identity["runId"] > 0
+                   and isinstance(identity.get("runAttempt"), int)
+                   and identity["runAttempt"] > 0
+                   and identity.get("instanceId") == host["instance_id"]
+                   and host.get("run_url") ==
+                   f"https://github.com/aburan28/crypto/actions/runs/{identity['runId']}")
+    if github_host:
+        seal = runner.github_seal_preflight(selection, identity)
+        github_host = (seal["selector_cpus"] == cpus
+                       and host["visible_affinity"] == cpus)
     schedule = [{"point_index": i, "pair_order": ["ic", "rho"] if i % 2 else
                  ["rho", "ic"]} for i in range(1, 6)]
     if (host["schema"] != "n83.tier1-online-host/v1"
-            or host["provider"] != "aws_ec2_spot"
-            or host["instance_identity"]["availabilityZone"] != runner.EXPECTED_AZ
-            or host["instance_identity"]["instanceType"] != runner.EXPECTED_TYPE
+            or not (aws_host or github_host)
             or len(cpus) != 4 or len(set(cpus)) != 4
             or source["schema"] != "n83.tier1-online-source/v1"
             or source["hashes"] != hashes
@@ -166,7 +184,7 @@ def main():
             or source["schedule"] != schedule
             or source["rho_seed_base"] != runner.RHO_SEED_BASE
             or source["calibration_seed"] != runner.CALIBRATION_SEED):
-        raise ValueError("AWS allocation, selected candidate, source or binary differs")
+        raise ValueError("cloud allocation, selected candidate, source or binary differs")
     point_inputs = []
     for index, encoded in enumerate(encoded_points, start=1):
         path = output / "inputs" / f"point_{index}.jsonl"
@@ -240,7 +258,8 @@ def main():
               "VALID_PAIRS_NO_SPEEDUP" if full_panel else "BOUNDED_UNKNOWN")
     analysis = {
         "schema": "n83.tier1-online-analysis/v1",
-        "hardware_tier": "tier1_aws_ec2_spot",
+        "hardware_tier": ("tier1_github_hosted_runner" if github_host
+                          else "tier1_aws_ec2_spot"),
         "instance_id": host["instance_id"],
         "candidate_id": selection["candidate_id"],
         "workload_role": "five_fresh_single_target_online_pairs",

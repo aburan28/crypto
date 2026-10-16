@@ -113,6 +113,49 @@ def imds_identity():
         return json.load(response)
 
 
+def github_identity():
+    if (os.environ.get("GITHUB_ACTIONS") != "true"
+            or os.environ.get("GITHUB_REPOSITORY") != "aburan28/crypto"
+            or os.environ.get("RUNNER_OS") != "Linux"):
+        raise ValueError("GitHub-hosted Tier 1 identity is unavailable")
+    commit = subprocess.check_output(["git", "rev-parse", "HEAD"],
+                                     cwd=ROOT, text=True).strip()
+    run_id = os.environ.get("GITHUB_RUN_ID", "")
+    attempt = os.environ.get("GITHUB_RUN_ATTEMPT", "")
+    if (not run_id.isdecimal() or not attempt.isdecimal()
+            or os.environ.get("GITHUB_SHA") != commit
+            or not os.environ.get("RUNNER_NAME")):
+        raise ValueError("GitHub run, attempt, commit or runner differs")
+    return {"provider": "github_actions", "repository": "aburan28/crypto",
+            "runId": int(run_id), "runAttempt": int(attempt),
+            "sha": commit, "runnerName": os.environ["RUNNER_NAME"],
+            "runnerOS": "Linux",
+            "instanceId": f"github-actions-{run_id}-{attempt}"}
+
+
+def github_seal_preflight(selection, identity):
+    path = HERE / "github_artifact_seal.json"
+    if not path.exists():
+        raise ValueError("GitHub selector artifact is not sealed")
+    seal = one_json(path)
+    if (seal.get("schema") != "n83.tier1-github-selector-seal/v1"
+            or seal.get("artifact_id", 0) <= 0
+            or seal.get("artifact_digest") is None
+            or seal.get("selection_sha256") != parent.digest(
+                HERE / "selection.json")
+            or seal.get("candidate_manifest_sha256") != selection[
+                "candidate_manifest_sha256"]
+            or seal.get("selector_host_sha256") != selection[
+                "screen_host_sha256"]
+            or len(seal.get("selector_cpus", [])) != 4
+            or seal.get("run_id") != identity["runId"]
+            or seal.get("run_attempt") != identity["runAttempt"]
+            or seal.get("head_sha") != identity["sha"]
+            or seal.get("repository") != identity["repository"]):
+        raise ValueError("GitHub selector artifact receipt differs")
+    return seal
+
+
 def cpu_list(value):
     result = set()
     for part in value.strip().split(","):
@@ -191,16 +234,25 @@ def make_inputs(output, points):
     return result
 
 
-def run(binary, rho_binary, output):
-    hashes, points = fixture_preflight()
-    selection, candidate_path = selection_preflight()
+def run(binary, rho_binary, output, github_host=False):
     if output.exists():
         raise ValueError("output directory already exists")
-    identity = imds_identity()
-    if (identity.get("availabilityZone") != EXPECTED_AZ
-            or identity.get("instanceType") != EXPECTED_TYPE):
-        raise ValueError("AWS allocation type or zone differs")
+    if github_host:
+        identity = github_identity()
+        selection, candidate_path = selection_preflight()
+        github_seal_preflight(selection, identity)
+        hashes, points = fixture_preflight()
+    else:
+        identity = imds_identity()
+        if (identity.get("availabilityZone") != EXPECTED_AZ
+                or identity.get("instanceType") != EXPECTED_TYPE):
+            raise ValueError("AWS allocation type or zone differs")
+        hashes, points = fixture_preflight()
+        selection, candidate_path = selection_preflight()
     cpus, node = choose_cpus()
+    if github_host and cpus != github_seal_preflight(selection, identity)[
+            "selector_cpus"]:
+        raise ValueError("selector and panel CPU allocation differs")
     os.sched_setaffinity(0, cpus)
     output.mkdir(parents=True)
     group = parent.cgroup_root()
@@ -213,7 +265,8 @@ def run(binary, rho_binary, output):
         selected_topology[str(cpu)] = {
             name: parent.read_text(root / name) for name in
             ("core_id", "physical_package_id", "thread_siblings_list")}
-    host.update({"schema": "n83.tier1-online-host/v1", "provider": "aws_ec2_spot",
+    provider = "github_actions" if github_host else "aws_ec2_spot"
+    host.update({"schema": "n83.tier1-online-host/v1", "provider": provider,
                  "instance_identity": identity, "instance_id": identity["instanceId"],
                  "cpu_affinity": cpus, "numa_node": node,
                  "selected_cpu_topology": selected_topology,
@@ -223,7 +276,8 @@ def run(binary, rho_binary, output):
                  "cpuinfo_sha256": parent.digest(Path("/proc/cpuinfo")),
                  "clock_ticks_per_second": os.sysconf("SC_CLK_TCK"),
                  "recorded_start_utc": parent.now()})
-    host["run_url"] = None
+    host["run_url"] = (f"https://github.com/aburan28/crypto/actions/runs/"
+                       f"{identity['runId']}" if github_host else None)
     parent.write_json(output / "host.json", host)
     memory_max = (host["cgroup_before"]["memory.max"] or "").strip()
     if (host["mem_total_kib"] is None
@@ -286,6 +340,7 @@ def run(binary, rho_binary, output):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--fixture-preflight", action="store_true")
+    parser.add_argument("--github-host", action="store_true")
     parser.add_argument("--binary", type=Path)
     parser.add_argument("--rho-binary", type=Path)
     parser.add_argument("--output", type=Path)
@@ -298,7 +353,7 @@ def main():
     if not args.binary or not args.rho_binary or not args.output:
         parser.error("--binary, --rho-binary and --output are required")
     return run(args.binary.resolve(), args.rho_binary.resolve(),
-               args.output.resolve())
+               args.output.resolve(), args.github_host)
 
 
 if __name__ == "__main__":
