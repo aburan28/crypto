@@ -55,6 +55,8 @@ pub struct SqrtVeluIso<F: Field> {
     xs_i: Vec<F::E>,
     xs_k: Vec<F::E>,
     d0: F::E,
+    /// (x+ + x-, x+ x-) for each pair {x(P_i + P_j), x(P_i - P_j)}, i in I, j in J (`sqrt_velu_fast`)
+    pairs: Vec<(F::E, F::E)>,
 }
 
 fn pt_x<F: Field>(p: &Pt<F::E>) -> F::E {
@@ -252,6 +254,7 @@ pub fn sqrt_velu<F: Field>(f: &F, e: &Curve<F::E>, p: &Pt<F::E>, ell: u64) -> Sq
         xs_i,
         xs_k,
         d0,
+        pairs: vec![],
     }
 }
 
@@ -471,6 +474,7 @@ pub fn sqrt_velu_fast<F: Field>(
             xs_i: vec![],
             xs_k: xs,
             d0: f.one(),
+            pairs: vec![],
         });
     }
     let p = (x0, f.one());
@@ -528,44 +532,24 @@ pub fn sqrt_velu_fast<F: Field>(
     let xs_j = xs[..b].to_vec();
     let xs_i = xs[b..b + bp].to_vec();
     let xs_k = xs[b + bp..].to_vec();
-    let m = 4;
-    let tree_i = crate::poly::subproduct_tree(f, &xs_i);
-    // D0 = prod_c h_J(x_c)^2
-    let hj = crate::poly::from_roots(f, &xs_j);
-    let hv = if xs_i.len() <= 8 {
-        xs_i.iter()
-            .map(|&x| crate::poly::eval(f, &hj, x))
-            .collect::<Vec<_>>()
-    } else {
-        crate::poly::multipoint_eval_tree(f, &hj, &tree_i)
-    };
-    let mut d0 = f.one();
-    for v in hv {
-        d0 = f.mul(d0, f.sq(v));
+    // power sums p_k = sum over S of x^k: the pairs through their sums and products, the
+    // centres and K one by one
+    let pairs = pair_sums(f, e, &xs_j, &xs_i)?;
+    let (mut p1, mut p2, mut p3) = (f.zero(), f.zero(), f.zero());
+    for &(s, q) in &pairs {
+        // x+^2 + x-^2 = s^2 - 2q, x+^3 + x-^3 = s (s^2 - 3q)
+        let s2 = f.sq(s);
+        p1 = f.add(p1, s);
+        p2 = f.add(p2, f.sub(s2, f.add(q, q)));
+        p3 = f.add(p3, f.mul(s, f.sub(s2, f.add(f.add(q, q), q))));
     }
-    let mut prod = sconst(f, f.one(), m);
-    let ij = ij_product_fast(f, e, &xs_j, &xs_i, m, true, f.zero(), &tree_i);
-    let inv0 = f.inv(ij[0]);
-    prod = smul(
-        f,
-        &prod,
-        &ij.iter().map(|&c| f.mul(c, inv0)).collect::<Vec<_>>(),
-    );
     for &x in xs_i.iter().chain(xs_k.iter()) {
-        prod = smul(f, &prod, &vec![f.one(), f.neg(x), f.zero(), f.zero()]);
+        let x2 = f.sq(x);
+        p1 = f.add(p1, x);
+        p2 = f.add(p2, x2);
+        p3 = f.add(p3, f.mul(x2, x));
     }
-    let (e1, e2, e3) = (f.neg(prod[1]), prod[2], f.neg(prod[3]));
-    let p1 = e1;
-    let p2 = f.sub(f.mul(e1, e1), f.mul(f.from_u64(2), e2));
-    let p3 = f.add(
-        f.sub(
-            f.mul(e1, f.mul(e1, e1)),
-            f.mul(f.from_u64(3), f.mul(e1, e2)),
-        ),
-        f.mul(f.from_u64(3), e3),
-    );
     let cod = super::kohel::codomain_from_sums(f, e, n, (p1, p2, p3));
-    let _ = d0;
     Some(SqrtVeluIso {
         dom: *e,
         cod,
@@ -575,13 +559,62 @@ pub fn sqrt_velu_fast<F: Field>(
         xs_j,
         xs_i,
         xs_k,
-        d0,
+        d0: f.one(),
+        pairs,
     })
+}
+
+/// For every i in I, j in J: (x+ + x-, x+ x-) with x+- = x(P_i +- P_j), from the Weierstrass
+/// biquadratic relation:
+///   x+ + x- = 2 ((x_i x_j + A)(x_i + x_j) + 2B) / (x_i - x_j)^2,
+///   x+ x-   = ((x_i x_j - A)^2 - 4B (x_i + x_j)) / (x_i - x_j)^2,
+/// with one batch inversion of all differences: about eight multiplications per pair plus three
+/// for the inversion, i.e. under six per kernel point (x-only Velu needs a differential addition,
+/// a share of an inversion and the sums for each). None if two abscissae coincide (P of order
+/// below l).
+fn pair_sums<F: Field>(
+    f: &F,
+    e: &Curve<F::E>,
+    xs_j: &[F::E],
+    xs_i: &[F::E],
+) -> Option<Vec<(F::E, F::E)>> {
+    let b2 = f.add(e.b, e.b);
+    let b4 = f.add(b2, b2);
+    let bj: Vec<F::E> = xs_j.iter().map(|&x| f.mul(b4, x)).collect();
+    let bi: Vec<F::E> = xs_i.iter().map(|&x| f.mul(b4, x)).collect();
+    let mut deltas = Vec::with_capacity(xs_i.len() * xs_j.len());
+    for &xi in xs_i {
+        for &xj in xs_j {
+            deltas.push(f.sub(xi, xj));
+        }
+    }
+    if deltas.iter().any(|&d| f.is_zero(d)) {
+        return None;
+    }
+    let inv = f.batch_inv(&deltas);
+    let mut out = Vec::with_capacity(deltas.len());
+    let mut k = 0;
+    for (i, &xi) in xs_i.iter().enumerate() {
+        for (j, &xj) in xs_j.iter().enumerate() {
+            let pi = f.mul(xi, xj);
+            let id = f.sq(inv[k]);
+            k += 1;
+            let n1 = f.mul(f.add(pi, e.a), f.add(xi, xj));
+            let n1 = f.add(f.add(n1, n1), b4);
+            let n2 = f.sub(f.sq(f.sub(pi, e.a)), f.add(bi[i], bj[j]));
+            out.push((f.mul(n1, id), f.mul(n2, id)));
+        }
+    }
+    Some(out)
 }
 
 impl<F: Field> SqrtVeluIso<F> {
     /// (f(x), f'(x)) for x outside the kernel.
     fn eval_xd(&self, f: &F, alpha: F::E) -> Option<(F::E, F::E)> {
+        if !self.pairs.is_empty() {
+            let (s1, s2, s3) = self.log_sums_pairs(f, alpha)?;
+            return Some(self.finish_eval(f, alpha, s1, s2, s3));
+        }
         let e = &self.dom;
         let m = 4;
         // h(alpha+delta) = prod_{k in S}(alpha + delta - x_k)
@@ -613,6 +646,47 @@ impl<F: Field> SqrtVeluIso<F> {
         ];
         let l = smul(f, &hp, &sinv(f, &h));
         let (s1, s2, s3) = (l[0], f.neg(l[1]), l[2]);
+        Some(self.finish_eval(f, alpha, s1, s2, s3))
+    }
+
+    /// s_k = sum over S of 1/(alpha - x)^k, k = 1, 2, 3, from the pairs: with D = (alpha - x+)(alpha - x-)
+    /// = alpha^2 - s alpha + q, T = 2 alpha - s, u = 1/D and r = T u, a pair adds r, r^2 - 2u and
+    /// r (r^2 - 3u). One batch inversion for all pairs and single points. None if alpha is the
+    /// abscissa of a kernel point.
+    fn log_sums_pairs(&self, f: &F, alpha: F::E) -> Option<(F::E, F::E, F::E)> {
+        let al2 = f.sq(alpha);
+        let two_al = f.add(alpha, alpha);
+        let singles = self.xs_i.iter().chain(self.xs_k.iter());
+        let mut dens: Vec<F::E> = self
+            .pairs
+            .iter()
+            .map(|&(s, q)| f.add(f.sub(al2, f.mul(s, alpha)), q))
+            .collect();
+        dens.extend(singles.clone().map(|&x| f.sub(alpha, x)));
+        if dens.iter().any(|&d| f.is_zero(d)) {
+            return None;
+        }
+        let inv = f.batch_inv(&dens);
+        let (mut s1, mut s2, mut s3) = (f.zero(), f.zero(), f.zero());
+        for (&(s, _), &u) in self.pairs.iter().zip(&inv) {
+            let r = f.mul(f.sub(two_al, s), u);
+            let r2 = f.sq(r);
+            s1 = f.add(s1, r);
+            s2 = f.add(s2, f.sub(r2, f.add(u, u)));
+            s3 = f.add(s3, f.mul(r, f.sub(r2, f.add(f.add(u, u), u))));
+        }
+        for &v in &inv[self.pairs.len()..] {
+            let v2 = f.sq(v);
+            s1 = f.add(s1, v);
+            s2 = f.add(s2, v2);
+            s3 = f.add(s3, f.mul(v2, v));
+        }
+        Some((s1, s2, s3))
+    }
+
+    /// (f(alpha), f'(alpha)) from s_k = sum over S of 1/(alpha - x)^k.
+    fn finish_eval(&self, f: &F, alpha: F::E, s1: F::E, s2: F::E, s3: F::E) -> (F::E, F::E) {
+        let e = &self.dom;
         let c = |v: u64| f.from_u64(v);
         let al2 = f.mul(alpha, alpha);
         let fa = f.add(f.mul(f.add(al2, e.a), alpha), e.b);
@@ -635,7 +709,7 @@ impl<F: Field> SqrtVeluIso<F> {
                 f.neg(f.mul(c(8), f.mul(fa, s3))),
             ),
         );
-        Some((fx, fpx))
+        (fx, fpx)
     }
 }
 
