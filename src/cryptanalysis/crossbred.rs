@@ -163,6 +163,14 @@ pub struct ExtractStats {
     pub filters: usize,
     /// 64-bit word XORs performed in the kernel elimination.
     pub word_ops: u64,
+    /// Every 64-bit word operation of the extraction (`bitop/v1`'s
+    /// `word_op`; a monomial is one word): `word_ops` plus the Macaulay
+    /// build (multiplier enumeration, shifted rows and their sorts), the
+    /// column sort, index and packing, the pivot searches and tests, and
+    /// the rebuild of the kernel polynomials.  One count per inner-loop
+    /// iteration that touches a word, `x·lg x` comparisons per sort of `x`
+    /// entries; the constants are at each site.
+    pub bitop_word_ops: u64,
 }
 
 /// The crossbred polynomials of one system, with the parameters that
@@ -203,6 +211,20 @@ fn mask_of(k: usize) -> u64 {
     }
 }
 
+/// Bit length of `x`: the depth factor of a sort of `x` entries.
+fn lg(x: usize) -> u64 {
+    (usize::BITS - x.leading_zeros()) as u64
+}
+
+/// Word operations of sorting `x` one-word entries: `x·lg x` comparisons.
+fn sort_ops(x: usize) -> u64 {
+    x as u64 * lg(x)
+}
+
+/// Word operations of a hash-map probe on a one-word key: the hash and
+/// the key comparison.
+const MAP_PROBE_WORD_OPS: u64 = 2;
+
 /// Degree of a Boolean monomial in the variables that are *not*
 /// enumerated.
 fn specialised_degree(mask: u64, enum_mask: u64) -> u32 {
@@ -217,17 +239,22 @@ fn specialised_degree(mask: u64, enum_mask: u64) -> u32 {
 /// subsets by size.  Kept local to this module rather than shared with
 /// `koblitz_groebner`, which has its own copy, because the two want
 /// different orderings.
-fn monomials_up_to(n_vars: usize, deg: u32) -> Vec<u64> {
+fn monomials_up_to(n_vars: usize, deg: u32, ops: &mut u64) -> Vec<u64> {
     let mut out = vec![0u64];
     let mut level = vec![0u64];
     for _ in 0..deg {
         let mut next = Vec::new();
         for &m in &level {
+            // The leading-zero count, then an OR and a store per child
+            // (counted with the copy into `out` below).
+            *ops += 1;
             let top = 64 - m.leading_zeros();
             for v in top..n_vars as u32 {
                 next.push(m | (1u64 << v));
             }
         }
+        // Each child: built, then copied into `out`.
+        *ops += 2 * next.len() as u64;
         out.extend(next.iter().copied());
         level = next;
         if level.is_empty() {
@@ -235,6 +262,12 @@ fn monomials_up_to(n_vars: usize, deg: u32) -> Vec<u64> {
         }
     }
     out
+}
+
+/// Word operations of [`shift_row`] on `l` terms: the OR a term, the sort,
+/// and the cancelling pass (a compare a term and a store).
+fn shift_row_ops(l: usize) -> u64 {
+    3 * l as u64 + sort_ops(l)
 }
 
 /// One Macaulay row, as the set of monomials it contains.
@@ -272,6 +305,19 @@ pub fn extract_crossbred(
     n_vars: usize,
     params: &CrossbredParams,
 ) -> Option<CrossbredSystem> {
+    extract_crossbred_counted(system, n_vars, params, &mut 0)
+}
+
+/// [`extract_crossbred`], adding every word operation it performs to
+/// `ops` — also when it gives up at [`CrossbredParams::max_rows`], whose
+/// partial Macaulay build is work done.  On success the same total is
+/// `stats.bitop_word_ops`.
+pub fn extract_crossbred_counted(
+    system: &[F2BoolPoly],
+    n_vars: usize,
+    params: &CrossbredParams,
+    ops: &mut u64,
+) -> Option<CrossbredSystem> {
     if params.enumerated >= n_vars || n_vars > 64 {
         return None;
     }
@@ -280,6 +326,8 @@ pub fn extract_crossbred(
     // 1. Macaulay rows: every product `p · m` with `deg(p·m) ≤ D`.
     let mut rows_monos: Vec<Vec<u64>> = Vec::new();
     for p in system {
+        // The degree scan: a popcount a term.
+        *ops += p.terms.len() as u64;
         let pdeg = p
             .terms
             .iter()
@@ -289,7 +337,8 @@ pub fn extract_crossbred(
         if pdeg > params.macaulay_degree {
             continue;
         }
-        for mult in monomials_up_to(n_vars, params.macaulay_degree - pdeg) {
+        for mult in monomials_up_to(n_vars, params.macaulay_degree - pdeg, ops) {
+            *ops += shift_row_ops(p.terms.len());
             let row = shift_row(p, mult);
             if !row.is_empty() {
                 rows_monos.push(row);
@@ -305,7 +354,10 @@ pub fn extract_crossbred(
             n_vars,
             enumerated: params.enumerated,
             target_degree: params.target_degree,
-            stats: ExtractStats::default(),
+            stats: ExtractStats {
+                bitop_word_ops: *ops,
+                ..ExtractStats::default()
+            },
         });
     }
 
@@ -313,6 +365,7 @@ pub fn extract_crossbred(
     //    irrelevant to the kernel; it is fixed only so the run is
     //    reproducible.
     let mut cols: Vec<u64> = rows_monos.iter().flatten().copied().collect();
+    let entries = cols.len();
     cols.sort_unstable();
     cols.dedup();
     cols.sort_by_key(|&m| {
@@ -325,6 +378,13 @@ pub fn extract_crossbred(
         .count();
     let index: std::collections::HashMap<u64, usize> =
         cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
+    // The copy, its sort and dedup pass; the keyed sort, whose key (a
+    // masked popcount, two words) is computed per comparison; the bad
+    // column count; the index build.
+    *ops += 2 * entries as u64
+        + sort_ops(entries)
+        + 2 * sort_ops(cols.len())
+        + cols.len() as u64 * (1 + MAP_PROBE_WORD_OPS);
 
     let n_rows = rows_monos.len();
 
@@ -338,6 +398,9 @@ pub fn extract_crossbred(
         .enumerate()
         .map(|(r, monos)| {
             let mut row = vec![0u64; words];
+            // The zeroed row, then per monomial a probe and a bit set,
+            // then the identity bit.
+            *ops += words as u64 + monos.len() as u64 * (MAP_PROBE_WORD_OPS + 1) + 1;
             for m in monos {
                 let c = index[m];
                 if c < n_bad {
@@ -356,11 +419,19 @@ pub fn extract_crossbred(
     let mut pivot_row = 0usize;
     for c in 0..n_bad {
         let (w, bit) = (c / 64, 1u64 << (c % 64));
-        let piv = match (pivot_row..n_rows).find(|&r| aug[r][w] & bit != 0) {
+        let found = (pivot_row..n_rows).find(|&r| aug[r][w] & bit != 0);
+        // The pivot search: a word test a row scanned.
+        *ops += match found {
+            Some(p) => (p - pivot_row + 1) as u64,
+            None => (n_rows - pivot_row) as u64,
+        };
+        let piv = match found {
             Some(p) => p,
             None => continue,
         };
         aug.swap(pivot_row, piv);
+        // The swap, then a word test a row below the pivot.
+        *ops += 1 + (n_rows - pivot_row - 1) as u64;
         for r in (pivot_row + 1)..n_rows {
             if aug[r][w] & bit != 0 {
                 let (lo, hi) = aug.split_at_mut(r);
@@ -384,6 +455,8 @@ pub fn extract_crossbred(
     let mut polys = Vec::new();
     for row in aug.iter().skip(pivot_row) {
         let mut acc: Vec<u64> = Vec::new();
+        // A bit test a Macaulay row.
+        *ops += n_rows as u64;
         for r in 0..n_rows {
             let c = n_bad + r;
             if row[c / 64] & (1u64 << (c % 64)) != 0 {
@@ -391,6 +464,8 @@ pub fn extract_crossbred(
             }
         }
         acc.sort_unstable();
+        // The gathered copy, its sort and the cancelling pass.
+        *ops += 2 * acc.len() as u64 + sort_ops(acc.len());
         let mut monos: Vec<F2BoolMono> = Vec::new();
         let mut i = 0;
         while i < acc.len() {
@@ -410,18 +485,22 @@ pub fn extract_crossbred(
         debug_assert!(monos
             .iter()
             .all(|m| specialised_degree(m.mask, enum_mask) <= params.target_degree));
+        // `from_monos`: a key a term, the sort, the cancelling pass.
+        *ops += 2 * monos.len() as u64 + sort_ops(monos.len());
         polys.push(F2BoolPoly::from_monos(monos, n_vars));
     }
 
     let filters = polys
         .iter()
         .filter(|p| {
-            p.terms
-                .iter()
-                .all(|t| specialised_degree(t.mask, enum_mask) == 0)
+            p.terms.iter().all(|t| {
+                *ops += 1;
+                specialised_degree(t.mask, enum_mask) == 0
+            })
         })
         .count();
 
+    *ops += word_ops;
     Some(CrossbredSystem {
         stats: ExtractStats {
             macaulay_rows: n_rows,
@@ -430,6 +509,7 @@ pub fn extract_crossbred(
             kernel_dim: polys.len(),
             filters,
             word_ops,
+            bitop_word_ops: *ops,
         },
         polys,
         n_vars,
@@ -530,6 +610,14 @@ pub struct SearchStats {
     pub filter_word_ops: u64,
     /// Row operations in the per-point linear solves.
     pub solve_row_ops: u64,
+    /// Every 64-bit word operation of the search (`bitop/v1`'s `word_op`):
+    /// the table build, `transform_word_ops`, `filter_word_ops`, the
+    /// per-survivor row assembly, the linear solves (pivot searches, row
+    /// tests, `solve_row_ops`, the free-variable enumeration) and the
+    /// verification of each candidate.  Not serialised, so committed
+    /// statistics read as before.
+    #[serde(skip)]
+    pub bitop_word_ops: u64,
     /// Set if a search limit or unsupported input left the solution list
     /// incomplete. Check `unsupported` to distinguish encoding rejection.
     pub exhausted: bool,
@@ -580,8 +668,12 @@ pub fn solve_crossbred(
     let mut filter_tables: Vec<Vec<u64>> = Vec::new();
     let mut linear_tables: Vec<Vec<u64>> = Vec::new();
 
+    let mut ops = 0u64;
     for p in &xb.polys {
         let mut slots: Vec<Vec<u64>> = vec![vec![0u64; words]; n_slots];
+        // The zeroed tables, then per term the split (two masks), the
+        // popcount and the bit flip.
+        ops += (n_slots * words) as u64 + 4 * p.terms.len() as u64;
         let mut is_filter = true;
         for t in &p.terms {
             let rest = t.mask & !enum_mask;
@@ -596,6 +688,7 @@ pub fn solve_crossbred(
                 // a refusal rather than a panic.
                 _ => {
                     stats.exhausted = true;
+                    stats.bitop_word_ops = ops + stats.transform_word_ops;
                     return (Vec::new(), stats);
                 }
             };
@@ -609,6 +702,8 @@ pub fn solve_crossbred(
             filter_tables.push(std::mem::take(&mut slots[0]));
         } else {
             let mut flat = vec![0u64; words * n_slots];
+            // Zeroed, then a word moved a slot word.
+            ops += 2 * (words * n_slots) as u64;
             for (j, slot) in slots.iter().enumerate() {
                 for (w, &word) in slot.iter().enumerate() {
                     flat[w * n_slots + j] = word;
@@ -620,6 +715,7 @@ pub fn solve_crossbred(
 
     // Alive mask: a point survives iff every filter vanishes on it.
     let mut alive = vec![u64::MAX; words];
+    ops += words as u64;
     if !n_points.is_multiple_of(64) {
         let last = n_points / 64;
         alive[last] = mask_of(n_points % 64);
@@ -638,14 +734,21 @@ pub fn solve_crossbred(
     let mut rows: Vec<(u64, bool)> = Vec::with_capacity(linear_tables.len());
     'points: for w in 0..words {
         let mut live = alive[w];
+        // The word load and its zero test.
+        ops += 1;
         while live != 0 {
             let bit = live.trailing_zeros() as usize;
             live &= live - 1;
             let point = (w * 64 + bit) as u64;
             stats.survivors += 1;
+            // The trailing-zero count, the clear, the point, the test.
+            ops += 4;
 
             // Assemble the linear system at this assignment.
             rows.clear();
+            // Per table a shift-and-mask of each slot word, and the test
+            // and store of the row.
+            ops += linear_tables.len() as u64 * (n_slots as u64 + 1);
             for flat in &linear_tables {
                 let block = &flat[w * n_slots..(w + 1) * n_slots];
                 let rhs = (block[0] >> bit) & 1 != 0;
@@ -669,8 +772,16 @@ pub fn solve_crossbred(
             for y in solutions {
                 let full = point | (y << xb.enumerated);
                 stats.candidates += 1;
-                if original.iter().all(|p| p.eval(full) == 0) {
+                // The full point, then a word test a term evaluated; an
+                // equation that fails stops the check.
+                ops += 1;
+                if original.iter().all(|p| {
+                    ops += p.terms.len() as u64;
+                    p.eval(full) == 0
+                }) {
                     stats.verified += 1;
+                    // The duplicate scan.
+                    ops += out.len() as u64;
                     if !out.contains(&full) {
                         out.push(full);
                         if opts.max_solutions != 0 && out.len() >= opts.max_solutions {
@@ -682,6 +793,8 @@ pub fn solve_crossbred(
         }
     }
 
+    // `solve_linear_f2` added its own share.
+    stats.bitop_word_ops += ops + stats.transform_word_ops + stats.filter_word_ops;
     (out, stats)
 }
 
@@ -698,16 +811,26 @@ fn solve_linear_f2(
 ) -> Option<Vec<u64>> {
     let mut pivot_col_of_row: Vec<usize> = Vec::new();
     let mut r = 0usize;
+    let mut ops = 0u64;
     for c in 0..n {
         let bit = 1u64 << c;
         let piv = (r..rows.len()).find(|&i| rows[i].0 & bit != 0);
+        // The pivot search: a word test a row scanned.
+        ops += match piv {
+            Some(p) => (p - r + 1) as u64,
+            None => (rows.len() - r) as u64,
+        };
         let piv = match piv {
             Some(p) => p,
             None => continue,
         };
         rows.swap(r, piv);
+        // The swap, a word test a row, and a row operation (the
+        // coefficient word and the right-hand side) per row cleared.
+        ops += 1 + rows.len() as u64;
         for i in 0..rows.len() {
             if i != r && rows[i].0 & bit != 0 {
+                ops += 2;
                 let (c0, r0) = rows[r];
                 rows[i].0 ^= c0;
                 rows[i].1 ^= r0;
@@ -721,19 +844,32 @@ fn solve_linear_f2(
         }
     }
     // Inconsistent: a row `0 = 1`.
-    if rows.iter().any(|&(c, rhs)| c == 0 && rhs) {
+    let mut scanned = 0u64;
+    let inconsistent = rows.iter().any(|&(c, rhs)| {
+        scanned += 1;
+        c == 0 && rhs
+    });
+    ops += scanned;
+    if inconsistent {
+        stats.bitop_word_ops += ops;
         return Some(Vec::new());
     }
 
     let pivots: std::collections::HashSet<usize> = pivot_col_of_row.iter().copied().collect();
     let free: Vec<usize> = (0..n).filter(|c| !pivots.contains(c)).collect();
+    // The pivot set's inserts and a probe a column.
+    ops += (pivot_col_of_row.len() + n) as u64 * MAP_PROBE_WORD_OPS;
     if free.len() as u32 > opts.max_kernel_dim {
+        stats.bitop_word_ops += ops;
         return None;
     }
 
     let mut out = Vec::with_capacity(1 << free.len());
     for assign in 0..(1u64 << free.len()) {
         let mut y = 0u64;
+        // A bit test and set a free variable, a load and mask per pivot
+        // row, and the store.
+        ops += free.len() as u64 + 2 * pivot_col_of_row.len() as u64 + 1;
         for (i, &c) in free.iter().enumerate() {
             if assign & (1 << i) != 0 {
                 y |= 1u64 << c;
@@ -749,6 +885,7 @@ fn solve_linear_f2(
                 let j = rest.trailing_zeros();
                 rest &= rest - 1;
                 v ^= y & (1u64 << j) != 0;
+                ops += 1;
             }
             if v {
                 y |= 1u64 << c;
@@ -756,6 +893,7 @@ fn solve_linear_f2(
         }
         out.push(y);
     }
+    stats.bitop_word_ops += ops;
     Some(out)
 }
 

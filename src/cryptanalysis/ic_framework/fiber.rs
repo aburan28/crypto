@@ -29,7 +29,7 @@
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::time::Duration;
 
-use super::plugins::SolverHarness;
+use super::plugins::{charge_lift, charge_system_build, lift_probes, SolverHarness};
 use super::stages::{
     BooleanSystem, DecompositionOracle, InstanceCtx, Params, SolverTotals, SolverVerdict,
     SystemShape, SystemSolver,
@@ -913,6 +913,9 @@ impl<'i> FiberDescentOracle<'i> {
         let verdict = self.harness.solve(&system);
         let exceeded = matches!(verdict, SolverVerdict::BudgetExceeded);
         self.totals.absorb(&shape, self.harness.cost(), exceeded);
+        // The descent (counted on this thread since `decompose` began),
+        // the copy, and two shape computations (here and in the harness).
+        charge_system_build(&mut self.totals.extra, &system, &shape, 2);
         let SolverVerdict::Solved(solutions) = verdict else {
             return None;
         };
@@ -921,14 +924,45 @@ impl<'i> FiberDescentOracle<'i> {
             // The combined system names the lift it found; the plain one
             // is checked against every lift it was asked about.
             let candidates: Vec<FastPoint> = if self.mode == FiberMode::Combined {
+                // `lift_target` reads `n` bits (a word op each); the lookup
+                // compares the abscissa of every lift (a field add each).
+                *self
+                    .totals
+                    .extra
+                    .entry("bitop_word_ops".to_string())
+                    .or_insert(0) += u64::from(sys.n);
+                *self
+                    .totals
+                    .extra
+                    .entry("bitop_field_adds".to_string())
+                    .or_insert(0) += all_targets.len() as u64;
                 targets_by_x(sys.lift_target(v))
             } else {
                 all_targets.to_vec()
             };
+            let mut lift_pending = true;
             for t in candidates {
-                if let Some(indices) = lift_abscissae(g, fb, ops, &xs, t) {
+                let lifted = lift_abscissae(g, fb, ops, &xs, t);
+                // The lift's share of the descent counter is charged once,
+                // with the first candidate; each candidate probes the base.
+                if lift_pending {
+                    charge_lift(&mut self.totals.extra, fb, &xs, lifted.is_some());
+                    lift_pending = false;
+                } else {
+                    *self
+                        .totals
+                        .extra
+                        .entry("bitop_hash_probes".to_string())
+                        .or_insert(0) += lift_probes(fb, &xs, lifted.is_some());
+                }
+                if let Some(indices) = lifted {
                     return Some(indices);
                 }
+            }
+            if lift_pending {
+                // No candidate: the lift itself is still work done.
+                crate::cryptanalysis::pq_descent_symbolic::take_descent_work()
+                    .charge(&mut self.totals.extra);
             }
             counters.lift_failures += 1;
         }
@@ -1006,18 +1040,26 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for FiberDescentOracle<'_> {
             .iter()
             .map(|k| ctx.group.add(ops, ctx.generator, *k).x)
             .collect();
-        let shape = match self.mode {
+        let _ = crate::cryptanalysis::pq_descent_symbolic::take_descent_work();
+        let probe = match self.mode {
             FiberMode::Combined => BooleanSystem {
                 equations: self.descend_combined(&probe_xs).equations,
                 n_vars: self.summands as usize * basis.len() + self.instance.n as usize,
-            }
-            .shape(),
+            },
             _ => BooleanSystem {
                 equations: self.descend_plain(self.instance.generator.x).equations,
                 n_vars: self.summands as usize * basis.len(),
-            }
-            .shape(),
+            },
         };
+        let shape = probe.shape();
+        // The probe system moves (no copy): its descent and one shape.
+        crate::cryptanalysis::pq_descent_symbolic::take_descent_work()
+            .charge(&mut self.totals.extra);
+        *self
+            .totals
+            .extra
+            .entry("bitop_word_ops".to_string())
+            .or_insert(0) += probe.shape_word_ops(&shape);
         if !self.harness.solver.accepts(&shape) {
             return Err(format!(
                 "solver `{}` declines a system of {} unknowns and {} equations",
@@ -1047,6 +1089,9 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for FiberDescentOracle<'_> {
         }
         let g = ctx.group;
         let fiber = self.fiber.clone()?;
+        // Work left on this thread's descent counter by anything else is
+        // not this target's.
+        let _ = crate::cryptanalysis::pq_descent_symbolic::take_descent_work();
         let all: Vec<FastPoint> = match self.mode {
             FiberMode::Blind => vec![point],
             _ => lifts(g, &fiber, ops, point),

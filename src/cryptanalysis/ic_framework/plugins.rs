@@ -1732,6 +1732,10 @@ impl<'i> DescentAlgebraicOracle<'i> {
     /// The descent with summand 2 over `σ^{j}(V)`: the τ-slot system.
     fn descend_slot(&self, x_r: u64, j: u32) -> SymbolicDescent {
         let gf = &self.instance.gf;
+        // The `j` squarings of each basis element (field squarings, put
+        // through the descent's own counter so they reach the same
+        // block) and the copies of the bases.
+        charge_slot_bases(self.v_basis.len() as u64, j, self.summands);
         let shifted: Vec<u64> = self
             .v_basis
             .iter()
@@ -1773,6 +1777,67 @@ fn system_of(sys: &SymbolicDescent) -> BooleanSystem {
         equations: sys.equations.clone(),
         n_vars: sys.n_vars,
     }
+}
+
+/// The descent's slot bases, as primitives: `n'·j` squarings and the
+/// `(m + 1)·n'` words of the basis copies.
+fn charge_slot_bases(n_prime: u64, j: u32, summands: u32) {
+    crate::cryptanalysis::pq_descent_symbolic::add_descent_work(
+        crate::cryptanalysis::pq_descent_symbolic::DescentWork {
+            field_sqrs: n_prime * u64::from(j),
+            word_ops: n_prime * (1 + u64::from(summands)),
+            ..Default::default()
+        },
+    );
+}
+
+/// The work an algebraic oracle does on one descended system outside the
+/// descent and the solver, in `bitop/v1` primitives added to `extra`
+/// (the oracle's solver block, so that the relation phase is complete
+/// when the solver's count is): the descent's own counters
+/// ([`take_descent_work`](crate::cryptanalysis::pq_descent_symbolic::take_descent_work)),
+/// the copy of the equations into the [`BooleanSystem`] (a word a term)
+/// and `shape_calls` shape computations ([`BooleanSystem::shape_word_ops`]).
+pub(crate) fn charge_system_build(
+    extra: &mut BTreeMap<String, u64>,
+    system: &BooleanSystem,
+    shape: &SystemShape,
+    shape_calls: u64,
+) {
+    crate::cryptanalysis::pq_descent_symbolic::take_descent_work().charge(extra);
+    let terms: u64 = system.equations.iter().map(|p| p.terms.len() as u64).sum();
+    *extra.entry("bitop_word_ops".to_string()).or_insert(0) +=
+        terms + shape_calls * system.shape_word_ops(shape);
+}
+
+/// The hash probes of one `lift_abscissae` call on `xs`: one per
+/// abscissa looked up, stopping at the first the base does not hold.
+/// (The additions it performs are charged to `ops` already.)
+pub(crate) fn lift_probes(fb: &FactorBase<FastPoint>, xs: &[u64], lifted: bool) -> u64 {
+    if lifted {
+        return xs.len() as u64;
+    }
+    let mut probes = 0u64;
+    for x in xs {
+        probes += 1;
+        if !fb.x_index.contains_key(x) {
+            break;
+        }
+    }
+    probes
+}
+
+/// Charge one lift of a solution to `extra`: the descent counter's share
+/// ([`SymbolicDescent::lift`]'s bit tests and field adds) and the probes
+/// of [`lift_probes`].
+pub(crate) fn charge_lift(
+    extra: &mut BTreeMap<String, u64>,
+    fb: &FactorBase<FastPoint>,
+    xs: &[u64],
+    lifted: bool,
+) {
+    crate::cryptanalysis::pq_descent_symbolic::take_descent_work().charge(extra);
+    *extra.entry("bitop_hash_probes".to_string()).or_insert(0) += lift_probes(fb, xs, lifted);
 }
 
 impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
@@ -1844,7 +1909,10 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
         // abscissa now and let the engine decline the shape here, once,
         // with a reason a sweep can report — rather than target by
         // target, which would run the whole relation phase for nothing.
-        let shape = system_of(&self.descend(self.instance.generator.x)).shape();
+        let _ = crate::cryptanalysis::pq_descent_symbolic::take_descent_work();
+        let probe = system_of(&self.descend(self.instance.generator.x));
+        let shape = probe.shape();
+        charge_system_build(&mut self.totals.extra, &probe, &shape, 1);
         if !self.harness.solver.accepts(&shape) {
             return Err(format!(
                 "solver `{}` declines a system of {} unknowns and {} equations; \
@@ -1872,6 +1940,9 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
         // with slots, one system per rotation of the second summand.
         let rotations = self.slot_rotations.unwrap_or(1);
         for j in 0..rotations {
+            // Work left on this thread's descent counter by anything else
+            // is not this target's.
+            let _ = crate::cryptanalysis::pq_descent_symbolic::take_descent_work();
             let sys = if self.slot_rotations.is_some() {
                 self.descend_slot(point.x, j)
             } else {
@@ -1882,15 +1953,20 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
             let verdict = self.harness.solve(&system);
             let exceeded = matches!(verdict, SolverVerdict::BudgetExceeded);
             self.totals.absorb(&shape, self.harness.cost(), exceeded);
+            // The descent, the copy, and two shape computations (here and
+            // in the harness).
+            charge_system_build(&mut self.totals.extra, &system, &shape, 2);
             *self.totals.extra.entry("slot_systems".into()).or_insert(0) += 1;
             let SolverVerdict::Solved(solutions) = verdict else {
                 continue;
             };
             for v in solutions {
                 let xs = sys.lift(v);
-                if let Some(indices) = crate::cryptanalysis::ic_boundary::lift_abscissae(
+                let lifted = crate::cryptanalysis::ic_boundary::lift_abscissae(
                     ctx.group, fb, ops, &xs, point,
-                ) {
+                );
+                charge_lift(&mut self.totals.extra, fb, &xs, lifted.is_some());
+                if let Some(indices) = lifted {
                     *self.totals.extra.entry("slot_hits".into()).or_insert(0) += 1;
                     *self
                         .totals

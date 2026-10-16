@@ -36,6 +36,96 @@
 use crate::cryptanalysis::fx_hash::MaskMap;
 use crate::cryptanalysis::pq_groebner_f2::{mono_key, F2BoolMono, F2BoolPoly};
 use crate::cryptanalysis::semaev_decomp::Gf2;
+use std::cell::Cell;
+use std::collections::BTreeMap;
+
+// ── The work counters ──────────────────────────────────────────────
+
+/// The `bitop/v1` primitives the descent performs, counted on the calling
+/// thread as it runs (`docs/units/BITOPS.md`; the field is the curve's
+/// `F_{2^n}`).  One count per inner-loop iteration:
+///
+/// - `field_muls`, `field_sqrs`: each `Gf2::mul` and `Gf2::sqr` of a
+///   coefficient;
+/// - `field_adds`: each coefficient XOR (and each zero test of a
+///   coefficient, an `n`-bit compare);
+/// - `hash_probes`: each lookup, insert or remove of a coefficient map
+///   keyed by a monomial;
+/// - `word_ops`: each 64-bit word operation on a monomial mask or a word
+///   copied — the union of two monomials, a map entry copied by a clone,
+///   the key, the sort (`x·lg x` comparisons) and the bit dealing of
+///   [`FieldBoolPoly::split`], and the basis copies.
+///
+/// The counters never steer the computation; reading them with
+/// [`take_descent_work`] resets them.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct DescentWork {
+    pub field_adds: u64,
+    pub field_muls: u64,
+    pub field_sqrs: u64,
+    pub hash_probes: u64,
+    pub word_ops: u64,
+}
+
+thread_local! {
+    static WORK: Cell<DescentWork> = const { Cell::new(DescentWork {
+        field_adds: 0,
+        field_muls: 0,
+        field_sqrs: 0,
+        hash_probes: 0,
+        word_ops: 0,
+    }) };
+}
+
+#[inline]
+fn note(f: impl FnOnce(&mut DescentWork)) {
+    WORK.with(|w| {
+        let mut v = w.get();
+        f(&mut v);
+        w.set(v);
+    });
+}
+
+/// Add `extra` to this thread's descent counters: work a caller does on
+/// the descent's behalf (the slot bases' squarings, say), so that it is
+/// read back with the rest.
+pub fn add_descent_work(extra: DescentWork) {
+    note(|w| {
+        w.field_adds += extra.field_adds;
+        w.field_muls += extra.field_muls;
+        w.field_sqrs += extra.field_sqrs;
+        w.hash_probes += extra.hash_probes;
+        w.word_ops += extra.word_ops;
+    });
+}
+
+/// The descent work counted on this thread since the last call, and
+/// reset to zero.
+pub fn take_descent_work() -> DescentWork {
+    WORK.with(|w| w.replace(DescentWork::default()))
+}
+
+impl DescentWork {
+    /// Add these counts to a solver block's `bitop_*` keys.
+    pub fn charge(&self, extra: &mut BTreeMap<String, u64>) {
+        for (k, v) in [
+            ("bitop_field_adds", self.field_adds),
+            ("bitop_field_muls", self.field_muls),
+            ("bitop_field_sqrs", self.field_sqrs),
+            ("bitop_hash_probes", self.hash_probes),
+            ("bitop_word_ops", self.word_ops),
+        ] {
+            if v != 0 {
+                *extra.entry(k.to_string()).or_insert(0) += v;
+            }
+        }
+    }
+}
+
+/// Bit length of `x`: the depth factor of a sort of `x` entries.
+fn lg(x: usize) -> u64 {
+    (usize::BITS - x.leading_zeros()) as u64
+}
 
 /// The most boolean variables a system may have: one bit of a
 /// [`F2BoolMono`] mask per variable.
@@ -64,7 +154,9 @@ impl FieldBoolPoly {
     /// The constant `c`.
     pub fn constant(c: u64) -> Self {
         let mut p = Self::default();
+        note(|w| w.field_adds += 1);
         if c != 0 {
+            note(|w| w.hash_probes += 1);
             p.terms.insert(0, c);
         }
         p
@@ -73,6 +165,12 @@ impl FieldBoolPoly {
     /// The linear form `Σ_k v_{offset + k} · basis[k]`.
     pub fn linear(offset: u32, basis: &[u64]) -> Self {
         let mut p = Self::default();
+        let inserted = basis.iter().filter(|&&e| e != 0).count() as u64;
+        note(|w| {
+            w.field_adds += basis.len() as u64;
+            w.word_ops += inserted;
+            w.hash_probes += inserted;
+        });
         for (k, &e) in basis.iter().enumerate() {
             if e != 0 {
                 p.terms.insert(1u64 << (offset + k as u32), e);
@@ -81,8 +179,13 @@ impl FieldBoolPoly {
         p
     }
 
+    /// Counted: the zero test of `coeff` (a field add), then a probe,
+    /// and when the key is present the XOR (a field add) and its zero
+    /// test (a field add), and the removal (a probe) when it cancels; an
+    /// insertion is a second probe.
     fn add_term(&mut self, mask: u64, coeff: u64) {
         if coeff == 0 {
+            note(|w| w.field_adds += 1);
             return;
         }
         match self.terms.get_mut(&mask) {
@@ -90,16 +193,36 @@ impl FieldBoolPoly {
                 *c ^= coeff;
                 if *c == 0 {
                     self.terms.remove(&mask);
+                    note(|w| {
+                        w.field_adds += 3;
+                        w.hash_probes += 2;
+                    });
+                } else {
+                    note(|w| {
+                        w.field_adds += 3;
+                        w.hash_probes += 1;
+                    });
                 }
             }
             None => {
                 self.terms.insert(mask, coeff);
+                note(|w| {
+                    w.field_adds += 1;
+                    w.hash_probes += 2;
+                });
             }
         }
     }
 
+    /// A clone of the map, counted: a word for the key and one for the
+    /// coefficient of every entry.
+    fn counted_clone(&self) -> Self {
+        note(|w| w.word_ops += 2 * self.terms.len() as u64);
+        self.clone()
+    }
+
     pub fn add(&self, other: &Self) -> Self {
-        let mut out = self.clone();
+        let mut out = self.counted_clone();
         for (&m, &c) in &other.terms {
             out.add_term(m, c);
         }
@@ -109,6 +232,13 @@ impl FieldBoolPoly {
     /// `M · N = M ∪ N` in the boolean ring.
     pub fn mul(&self, other: &Self, gf: &Gf2) -> Self {
         let mut out = Self::default();
+        // Per pair of terms: the union (a word op) and the coefficient
+        // product, then `add_term`.
+        let pairs = (self.terms.len() * other.terms.len()) as u64;
+        note(|w| {
+            w.word_ops += pairs;
+            w.field_muls += pairs;
+        });
         for (&ma, &ca) in &self.terms {
             for (&mb, &cb) in &other.terms {
                 out.add_term(ma | mb, gf.mul(ca, cb));
@@ -119,6 +249,11 @@ impl FieldBoolPoly {
 
     /// `(Σ c_M M)² = Σ c_M² M`: the Frobenius on the coefficients.
     pub fn sqr(&self, gf: &Gf2) -> Self {
+        // Per term: the square and an insertion into the new map.
+        note(|w| {
+            w.field_sqrs += self.terms.len() as u64;
+            w.hash_probes += self.terms.len() as u64;
+        });
         Self {
             terms: self.terms.iter().map(|(&m, &c)| (m, gf.sqr(c))).collect(),
         }
@@ -126,6 +261,7 @@ impl FieldBoolPoly {
 
     pub fn scale(&self, c: u64, gf: &Gf2) -> Self {
         let mut out = Self::default();
+        note(|w| w.field_muls += self.terms.len() as u64);
         for (&m, &a) in &self.terms {
             out.add_term(m, gf.mul(a, c));
         }
@@ -162,10 +298,17 @@ impl FieldBoolPoly {
             .map(|(&m, &c)| (mono_key(F2BoolMono::from_mask(m)), c))
             .collect();
         keyed.sort_unstable_by_key(|a| std::cmp::Reverse(a.0));
+        // Per term the key (a popcount and a complement) and its copy,
+        // the sort's comparisons (two-word keys), and per term the mask
+        // and the zero test of the coefficient's bits.
+        let l = keyed.len();
+        note(|w| w.word_ops += 2 * l as u64 + 2 * l as u64 * lg(l) + 2 * l as u64);
+        let mut dealt = 0u64;
         let mut monos: Vec<Vec<F2BoolMono>> = (0..n).map(|_| Vec::new()).collect();
         for &(key, c) in &keyed {
             let m = F2BoolMono::from_mask(!(key as u64));
             let mut bits = c;
+            dealt += u64::from(c.count_ones());
             while bits != 0 {
                 let j = bits.trailing_zeros();
                 if j < n {
@@ -174,6 +317,9 @@ impl FieldBoolPoly {
                 bits &= bits - 1;
             }
         }
+        // Per set bit: the trailing-zero count, the clear, and the store
+        // of the monomial into its equation.
+        note(|w| w.word_ops += 3 * dealt);
         monos
             .into_iter()
             .map(|terms| F2BoolPoly { terms, n_vars })
@@ -243,6 +389,18 @@ impl SymbolicDescent {
     /// own summand's span.
     pub fn lift(&self, v: u64) -> Vec<u64> {
         let np = self.n_prime as usize;
+        // A bit test a variable, and a field add a set one.
+        let vars = (self.summands as usize * np).min(64);
+        let set = (v & if vars == 64 {
+            u64::MAX
+        } else {
+            (1u64 << vars) - 1
+        })
+        .count_ones();
+        note(|w| {
+            w.word_ops += vars as u64;
+            w.field_adds += u64::from(set);
+        });
         (0..self.summands as usize)
             .map(|i| {
                 let basis = &self.summand_bases[i];
@@ -265,6 +423,7 @@ pub fn descend(
     summands: u32,
 ) -> Result<SymbolicDescent, String> {
     let bases: Vec<Vec<u64>> = (0..summands).map(|_| v_basis.to_vec()).collect();
+    note(|w| w.word_ops += summands as u64 * v_basis.len() as u64);
     descend_with_bases(gf, b, x_r, &bases)
 }
 
@@ -287,6 +446,9 @@ pub fn descend_with_bases(
         return Err("every summand's basis must have the same dimension".into());
     }
     let v_basis = bases.first().cloned().unwrap_or_default();
+    // The copies of the bases (here and into the result): a word an
+    // element.
+    note(|w| w.word_ops += (n_prime as u64) * (1 + summands as u64));
     if !(2..=3).contains(&summands) {
         return Err(format!(
             "the symbolic descent takes 2 or 3 summands, not {summands}"
@@ -354,6 +516,9 @@ pub fn descend_fiber(
         ));
     }
     let n_vars = n_vars_u32 as usize;
+    // The standard basis built, and the copies of `v_basis` into the
+    // result: a word an element.
+    note(|w| w.word_ops += n as u64 + (n_prime as u64) * (1 + summands as u64));
     let standard: Vec<u64> = (0..n).map(|k| 1u64 << k).collect();
     let x_free = FieldBoolPoly::linear(summands * n_prime, &standard);
     let poly = match summands {
@@ -437,7 +602,7 @@ fn s4_symbolic_poly(
     let x1 = FieldBoolPoly::linear(0, b1);
     let x2 = FieldBoolPoly::linear(np, b2);
     let x3 = FieldBoolPoly::linear(2 * np, b3);
-    let x4 = x_r.clone();
+    let x4 = x_r.counted_clone();
     let bconst = FieldBoolPoly::constant(b);
     let s3_in_x3 = |p: &FieldBoolPoly, q: &FieldBoolPoly| {
         let a = p.add(q).sqr(gf);
