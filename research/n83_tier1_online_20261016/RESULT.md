@@ -76,5 +76,13 @@ has that same SHA-256 and passed ZIP integrity. Its analysis SHA-256 is
 Independent local replay on the executed source recreated the analysis byte
 for byte; replay log SHA-256 is
 `4834db768b3888e60b6fcfe0e7c57aa5cfa77538161d2ce2cd722e31770ac637`.
+Independent selector materialization on the exact launch commit reproduced
+the [candidate manifest](candidate_IC1N83Ckb1a1fb509952PDP4rootRCguidedLAgaussTDdirectISO0ha2d30fb17dd0.json),
+[selection](selection.json), and [selector seal](seal_selector_38921627515.json)
+byte for byte against the uploaded artifact; its local select log SHA-256 is
+`139c810e74d2eb99d713de7cd34666fc7fcc182e908b9f6cc70cf14088856e9d`.
+The [versioned selector analysis](analysis_selector_38921627515.json)
+matches the raw SHA-256 above. The exact selection and candidate files are
+now versioned with the PR.
 The selector measures an exposed point. The five fresh-point same-host panel
 is still running and will supply the separate Tier 1 online comparison.
