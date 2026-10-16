@@ -640,3 +640,15 @@ while retaining its L1 descriptive timing limit. The order-1,201
 second-host run has a separate frozen workflow. A disjoint complete
 portable price, L2 physical-core timing, direct χ resultant/root oracle
 and faithful curve-level Lean bridge remain open.
+
+2026-10-16 fifth price-sensitivity update: the separately frozen
+[native 60-row derivation](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/sensitivity_five/RESULTS.md)
+rechecked all five complete-solve run hashes, independent scalar replay
+receipts, and 420 child group totals. Its first 48 rows and four N64
+summaries match the earlier V1 output byte for byte. For order 1,201
+at N64, the median extra omitted rho charge needed to tie the
+full-image group-count lower bound is 1,390.865 GAE per observed rho
+step, with three-round range 1,266.482–1,575.602, **if all omitted
+full-image work costs zero**. This is a threshold, not a measured price
+or complete portable `S`; the disjoint native-instrumentation and
+cross-host conversion exit criterion remains unchanged.

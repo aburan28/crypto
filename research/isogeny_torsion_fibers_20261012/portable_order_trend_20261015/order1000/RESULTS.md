@@ -69,9 +69,11 @@ Shared-host median N64 process CPU was 2.724 seconds for full image,
 L0 descriptions with no isolation receipt. The portable operation
 comparison remains **partial** until field work outside group calls,
 square-root branches, hash/table work, rows, allocation and I/O receive
-disjoint counts and pinned common prices. The [four-order sensitivity
-result](../sensitivity/RESULTS.md) gives a missing-price threshold, not
-that conversion. The independent Linux replay and physical-core timing
+disjoint counts and pinned common prices. The later
+[five-order sensitivity result](../sensitivity_five/RESULTS.md) adds an
+order-1,201 N64 median threshold of 1,390.865 extra omitted rho GAE
+per observed step under zero omitted full-image cost. It remains a
+threshold, not that conversion. The independent Linux replay and physical-core timing
 have their own admission gates.
 
 The next structural test is the direct `chi`-coordinate

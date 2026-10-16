@@ -59,10 +59,11 @@ failure is a censored cost result, not an absent curve or failed theorem.
 This experiment is distinct from the completed five-order descriptive
 count panel.
 
-The [frozen price-sensitivity result](sensitivity/RESULTS.md) shows that
-at 64 targets the omitted rho work would need to add 112.973–334.844
-group-addition equivalents per observed step across the four earlier
-orders to tie their full-image group-count lower bounds *if omitted
+The [five-order frozen price-sensitivity result](sensitivity_five/RESULTS.md)
+shows that at 64 targets the omitted rho work would need to add
+112.973, 303.573, 334.844, 288.595 and 1,390.865 group-addition
+equivalents per observed step across orders 229, 421, 433, 457 and
+1,201 to tie the full-image group-count lower bounds *if omitted
 full-image work were free*. This is an algebraic threshold, not a
 measured native price. The **pricing gate** is a pinned conversion from every counted native
 category (field arithmetic outside group calls, square roots, hash/table
