@@ -19,8 +19,9 @@ and the frozen 10% rho-calibration A/A gate. The exact candidate is
 
 The mean online intervals were 6.398990 ms for IC and 1010.641645 ms for
 rho. These clocks start with target-dependent computation after the reusable
-base, root index and factor-base logs are ready, and stop after independently
-verified scalar recovery. Each IC point ran in a fresh process with empty
+base, root index and factor-base logs are ready, and stop after the producer's
+scalar recovery and check. The separate independent replay is outside both
+online intervals. Each IC point ran in a fresh process with empty
 caches for source/base identity checks: the supplementary outer cold-process
 walls were 374.825, 376.332, 374.818, 378.335 and 376.333 seconds. Their
 setup and relation-rank phases are retained separately in the
