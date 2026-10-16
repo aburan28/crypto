@@ -1,0 +1,11 @@
+   Compiling crypto v0.1.0 (/workspace/crypto)
+    Finished `release` profile [optimized] target(s) in 2.14s
+     Running unittests research/conductor_gap_followups_20261016/native/followups.rs (target/release/examples/conductor_gap_followups-8060044290b84db5)
+
+running 3 tests
+test tests::independent_replay_rejects_corrupt_relation_and_query ... ok
+test tests::targets_and_partition_canonicalization ... ok
+test tests::workload_counts_and_crossover_matching ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

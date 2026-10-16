@@ -1,0 +1,109 @@
+{
+  "schema": "backlog.card/v1",
+  "id": "XP-20261016-conductor-orbit-overlap",
+  "title": "Audit orbit geometry and factor-base overlap",
+  "created": "2026-10-16",
+  "authors": [
+    "conductor-gap research lane"
+  ],
+  "status": "blocked",
+  "status_note": "Distributed handoff remains blocked pending reviewed code and execution-layer setup. User authorized local candidate-code execution on 16 October; actual per-experiment local status is tracked in research/conductor_gap_followups_20261016/README.md and results/execution.jsonl. No shared lease or funding action is claimed.",
+  "blocked_on": [
+    "pr:1888 code and frozen protocols must be reviewed and merged for distributed handoff",
+    "note:Local conductor and cairn binaries are absent; configure the lab and resumable handoff before ready promotion."
+  ],
+  "links": {
+    "lead": "research/conductor_gap_followups_20261016/README.md",
+    "notes": [
+      "research/conductor_gap_cm_orbits_20261015/REVIEW.md",
+      "research/conductor_gap_cm_orbits_20261015/results/replication-metrics.json",
+      "research/conductor_gap_cm_orbits_20261015/results/upper-96-floor-certificate.jsonl",
+      "research/conductor_gap_followups_20261016/protocols/PROTOCOL.md"
+    ],
+    "prs": [
+      1888
+    ]
+  },
+  "question": "Do short scalar-orbit periods or signed collisions explain unusual relation yields?",
+  "decision_value": "The linked factor base may have different effective size when scalar powers overlap or repeat. Detecting this mechanism would explain solver variation without attributing it directly to the conductor, and would guide seed and orbit-length choices.",
+  "protocol": {
+    "path": null,
+    "blob": null
+  },
+  "code": {
+    "repo": "crypto",
+    "commit": null,
+    "branch": "research/conductor-gap-cm-orbits-20261015",
+    "build": [
+      [
+        "cargo",
+        "build",
+        "--release",
+        "--example",
+        "conductor_gap_followups"
+      ]
+    ]
+  },
+  "resources": {
+    "cpus": 1,
+    "ram_gb": 4,
+    "disk_gb": 32,
+    "gpu": null,
+    "est_core_hours": 6,
+    "est_wall_hours": 6,
+    "notes": "Proposal only. Initial design has 40 IC or rho attempts as specified in README.md; pilot calibration is required. 6 core-hours is a provisional scheduling allowance based on the existing small-field attempts, with setup/replay overhead; it is not a measured bound."
+  },
+  "run": {
+    "argv": [
+      "target/release/examples/conductor_gap_followups",
+      "campaign"
+    ],
+    "env": {
+      "RAYON_NUM_THREADS": "1"
+    },
+    "timeout_per_shard_s": 172800
+  },
+  "shards": {
+    "count": 1,
+    "scheme": "single",
+    "params": {},
+    "stop": "all"
+  },
+  "checkpoint": {
+    "file": null,
+    "resume_flag": null
+  },
+  "outputs": {
+    "result_schema": "conductor-gap.followup-bundle/v1",
+    "verify": [
+      "target/release/examples/conductor_gap_followups",
+      "audit-all"
+    ],
+    "land": "research/conductor_gap_followups_20261016"
+  },
+  "cairn": {
+    "mode": "lab-task",
+    "space": "TBD",
+    "tasks": [
+      "XP-20261016-conductor-orbit-overlap"
+    ],
+    "ttl_s": 86400,
+    "env": {
+      "name": "crypto-conductor-review",
+      "recipe": "Build from the reviewed merged code commit with Rust 1.98 and the declared native dependencies. No environment or task has been published by this card."
+    },
+    "exec": {
+      "cpus": 1,
+      "memory_mb": 4096,
+      "timeout_s": 172800,
+      "sandbox": "auto",
+      "publish": "runs/XP-20261016-conductor-orbit-overlap"
+    },
+    "notes": "Funding is a priority proposal for review, not a remote funding action. Select the lab, implement resumable execution and independently verify the driver before ready promotion.",
+    "funding": {
+      "units": 170000,
+      "rationale": "Provisional relative priority only; no funds have been posted. Reassess after protocol freeze and pilot costing."
+    }
+  },
+  "owner_hint": "native cryptanalysis research"
+}

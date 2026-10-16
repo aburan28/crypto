@@ -1,0 +1,26 @@
+   Compiling crypto v0.1.0 (/workspace/crypto)
+    Finished `release` profile [optimized] target(s) in 1.95s
+     Running unittests research/conductor_gap_followups_20261016/native/followups.rs (target/release/examples/conductor_gap_followups-8060044290b84db5)
+
+running 3 tests
+test tests::independent_replay_rejects_corrupt_relation_and_query ... FAILED
+test tests::targets_and_partition_canonicalization ... ok
+test tests::workload_counts_and_crossover_matching ... ok
+
+failures:
+
+---- tests::independent_replay_rejects_corrupt_relation_and_query stdout ----
+
+thread 'tests::independent_replay_rejects_corrupt_relation_and_query' (8576) panicked at research/conductor_gap_followups_20261016/native/followups.rs:466:13:
+assertion `left == right` failed
+  left: Object {"Rx": Number(271234), "Ry": Number(115262), "alpha": Number(12366), "i": Number(6), "independent": Bool(true), "j": Number(57), "query": Number(21), "rank": Number(1), "si": Number(1), "sj": Number(-1)}
+ right: Object {"Rx": Number(271234), "Ry": Number(115262), "alpha": Number(12366), "beta": Number(1), "i": Number(6), "independent": Bool(true), "j": Number(57), "query": Number(21), "rank": Number(1), "si": Number(1), "sj": Number(-1)}
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::independent_replay_rejects_corrupt_relation_and_query
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+error: test failed, to rerun pass `--example conductor_gap_followups`

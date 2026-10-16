@@ -1,0 +1,53 @@
+    Checking crypto v0.1.0 (/workspace/crypto)
+error: unused import: `super::*`
+ --> research/conductor_gap_followups_20261016/native/tests.rs:1:5
+  |
+1 | use super::*;
+  |     ^^^^^^^^
+  |
+help: if this is a test module, consider adding a `#[cfg(test)]` to the containing module
+ --> research/conductor_gap_followups_20261016/native/followups.rs:4:1
+  |
+4 | mod tests;
+  | ^^^^^^^^^^
+  = note: `-D unused-imports` implied by `-D warnings`
+  = help: to override `-D warnings` add `#[allow(unused_imports)]`
+
+error[E0433]: cannot find module or crate `analysis` in this scope
+   --> research/conductor_gap_followups_20261016/native/followups.rs:703:23
+    |
+703 |         "progress" => analysis::progress(),
+    |                       ^^^^^^^^ use of unresolved module or unlinked crate `analysis`
+    |
+note: found an item that was configured out
+   --> research/conductor_gap_followups_20261016/native/followups.rs:3:5
+    |
+  2 | #[cfg(test)]
+    |       ---- the item is gated here
+  3 | mod analysis;
+    |     ^^^^^^^^
+help: to make use of source file research/conductor_gap_followups_20261016/native/analysis.rs, use `mod analysis` in this file to declare the module
+    |
+  2 + mod analysis;
+    |
+
+error[E0433]: cannot find module or crate `analysis` in this scope
+   --> research/conductor_gap_followups_20261016/native/followups.rs:704:22
+    |
+704 |         "analyze" => analysis::analyze(),
+    |                      ^^^^^^^^ use of unresolved module or unlinked crate `analysis`
+    |
+note: found an item that was configured out
+   --> research/conductor_gap_followups_20261016/native/followups.rs:3:5
+    |
+  2 | #[cfg(test)]
+    |       ---- the item is gated here
+  3 | mod analysis;
+    |     ^^^^^^^^
+help: to make use of source file research/conductor_gap_followups_20261016/native/analysis.rs, use `mod analysis` in this file to declare the module
+    |
+  2 + mod analysis;
+    |
+
+For more information about this error, try `rustc --explain E0433`.
+error: could not compile `crypto` (example "conductor_gap_followups") due to 3 previous errors

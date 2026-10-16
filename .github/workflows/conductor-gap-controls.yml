@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'research/conductor_gap_cm_orbits_20261015/**'
+      - 'research/conductor_gap_followups_20261016/**'
       - 'src/cryptanalysis/ecbench/**'
       - 'src/cryptanalysis/ic_framework/cm_orbit.rs'
       - 'src/bin/ecbench.rs'
@@ -34,6 +35,7 @@ jobs:
             /examples/
             /benches/
             /research/conductor_gap_cm_orbits_20261015/
+            /research/conductor_gap_followups_20261016/
             /scripts/build_lab_browser.py
             /scripts/test_lab_browser_cost_admission.py
       - name: Materialize compile-time inputs without research archives
@@ -77,6 +79,33 @@ jobs:
         run: |
           cargo run --release --example conductor_gap_study -- replay-campaign
           cargo run --release --example conductor_gap_study -- rho-analysis
+      - name: Follow-up protocols, certificates and verifier rejection tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          study=research/conductor_gap_followups_20261016
+          cargo test --release --example conductor_gap_followups
+          gp -q -f "$study/native/certify_dose.gp" > /tmp/followup-dose.jsonl 2> /tmp/followup-dose.stderr
+          test "$(wc -l < /tmp/followup-dose.jsonl)" -eq 32
+          ! grep -E 'user error|at top-level|syntax error|incorrect type' /tmp/followup-dose.stderr
+          gp -q -f "$study/native/certify_orbit_orders.gp" > /tmp/followup-orders.jsonl 2> /tmp/followup-orders.stderr
+          test "$(wc -l < /tmp/followup-orders.jsonl)" -eq 100
+          ! grep -E 'user error|at top-level|syntax error|incorrect type' /tmp/followup-orders.stderr
+          cargo build --release --example conductor_gap_followups
+          for degree in 5 11; do
+            g++ -std=c++17 -O3 -pthread -DCM_Q="$degree" -I research/conductor_gap_cm_orbits_20261015/native "$study/native/folded_events.cpp" -o "target/cm-events-q$degree"
+          done
+          for control in 0000 0002 0004; do
+            source="$study/runs/control-$control"
+            output="/tmp/followup-control-$control"
+            degree=$(jq -r .degree "$source/input.json")
+            mkdir -p "$output/factor-bases" "$output/relations"
+            cp "$source/input.json" "$output/input.json"
+            "target/cm-events-q$degree" "$source/work.csv" 64 300000 180 1 "$output" "$study/prepared/control-params.txt" > "$output/stdout.json"
+            jq -n --slurpfile native "$output/stdout.json" '{result:{native:$native[0]}}' > "$output/result.json"
+            target/release/examples/conductor_gap_followups replay "$output"
+            jq -e '.ok and .recovery_verified' "$output/audit.json"
+          done
       - name: Fresh measured-child controls on both families and recurrence
         shell: bash
         run: |
