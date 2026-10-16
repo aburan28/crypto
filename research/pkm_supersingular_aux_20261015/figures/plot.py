@@ -92,11 +92,11 @@ def q1():
                     ha="center", va="bottom", fontsize=6)
     ax.set_xticks(ts)
     ax.set_xticklabels([f"t = {t}" for t in ts])
-    ax.set_ylim(0, 1.35)
+    ax.set_ylim(0, 1.6)
     ax.set_ylabel("fraction of sets Möbius-equivalent\nto some set of the target family")
     ax.set_title("Q1: tower sets up to x ↦ (αx+β)/(γx+δ) over F_p, pooled over primes "
                  "p ≡ 3 mod 4, 100 ≤ p ≤ 3000 (exact)", fontsize=9)
-    ax.legend(fontsize=7, ncol=2, loc="upper right")
+    ax.legend(fontsize=7, ncol=3, loc="upper center")
     ax.grid(axis="y", alpha=0.3)
     fig.tight_layout()
     save(fig, "q1_equivalence")

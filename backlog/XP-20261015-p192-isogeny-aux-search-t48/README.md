@@ -162,9 +162,10 @@ supersingular `y² = x³ + x`, which over the P-192 prime gives a point of order
 `2^48` in one draw?
 
 - **Structure (exact, small primes).** The supersingular tower set
-  `x(R' + ⟨Q⟩)` is *not* the Dickson torus set under any Möbius change of `x`
-  (no coincidence at `t ≥ 3`); it is an ordinary-looking Vélu tower, like the
-  searched curve's. So it does not inherit the torus family's behaviour.
+  `x(R' + ⟨Q⟩)` on `y² = x³ + x` is *not* the Dickson torus set under any
+  Möbius change of `x` (no match in 6,507 sets at `t = 3…5` over 103 primes;
+  one isolated match for the twist `y² = x³ − x`). It is a Vélu tower like the
+  searched curve's, so it does not inherit the torus family's behaviour.
 - **F4 solving degree (measured, `p < 2^31`, `N ≤ 20`).** The supersingular
   tower gives exactly the ordinary isogeny tower's `D` (and width and step
   count to within one column) in every cell, for `y² = x³ ± x`, `y² = x³ + 1`

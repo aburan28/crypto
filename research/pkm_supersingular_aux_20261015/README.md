@@ -36,7 +36,7 @@ or a calculation shown here.
 
 | question | verdict | class |
 |:--|:--|:--|
-| **Q1**: is `V_ss` the Dickson torus set up to a Möbius change of `x`? | **H1_distinct — no.** Q1_SUMMARY | exact |
+| **Q1**: is `V_ss` the Dickson torus set up to a Möbius change of `x`? | **No; by the letter of the rule *partial*.** Over 103 primes `p ≡ 3 mod 4` (103–2999) and `t = 3, 4, 5`, none of the 6,507 `y² = x³ + x` sets and none of the 6,768 `j = 0` sets (both twists) is Möbius-equivalent to any torus set; 2 of the 12,969 `y² = x³ − x` sets are, at one cell (`p = 383, t = 3`, one shared class), which the pre-registered rule counts as *partial* rather than H1_distinct. Ordinary curves: 0 of 24,580. At `t = 2` every family, ordinary included, matches 75 % of the time (one modulus). So the supersingular route does not inherit round 8's verdict through Q1. | exact |
 | **Q2**: F4 solving degree, supersingular vs ordinary vs torus | **H_same fails; H2a holds, H2b fails.** The supersingular tower gives the ordinary isogeny tower's `D` in every one of the 14 `(m, N)` cells and at all three primes, for all four supersingular curves (`y² = x³ ± x`, `y² = x³ + 1`, `y² = x³ + d³`): `D = 3, 5, 5, 5, 5, 5, 5, 5, 5` at `m = 2, N = 2…18`, `6` at `N = 20`, with widths equal to the ordinary tower's to within one column. The Dickson torus gives `4` at `N = 4…10` (and `5` vs `6` at `m = 3, N = 6`). | measured |
 | **Q3**: relation phase, charged | **The search cost disappears and nothing is lost per base element.** With `aux=supersingular` the auxiliary work is 0.9–1.9 % of `S` (the build alone) against 10–27 % for the searched ordinary curve; `S` is within 1.3–2.2 % of a plain base of the same size, and the relation yield is unchanged. On s22 and s24 the supersingular arm costs 0.82× and 0.74× the ordinary arm; on s20 it costs 1.11×, because its base is 15 % larger (141 against 123 abscissae; the plain bases of the two sizes differ by 1.21×). H3a, H3d and both controls hold; H3b and H3c fail on s20 by the letter of the rule. | measured |
 
@@ -60,11 +60,33 @@ tower set of every family and compares their complete `PGL₂(F_p)` invariants
 (the least image of the set under the Möbius maps sending an ordered triple
 of its points to `(0, 1, ∞)`).
 
-Q1_TABLE
+| `t` | cells `(p, t)` | `y² = x³ + x` → torus | `y² = x³ − x` → torus | `y² = x³ + 1` → torus | `y² = x³ + d³` → torus | ordinary (3 curves) → torus | positive control → `y² = x³ + x` |
+|--:|--:|--:|--:|--:|--:|--:|--:|
+| 2 | 103 | 13,965 / 18,617 | 27,883 / 37,181 | 7,221 / 9,638 | 7,186 / 9,638 | 54,738 / 72,689 | 18,617 / 18,617 |
+| 3 | 53 | 0 / 4,993 | **2** / 9,959 | 0 / 2,593 | 0 / 2,593 | 0 / 18,763 | 4,993 / 4,993 |
+| 4 | 27 | 0 / 1,256 | 0 / 2,500 | 0 / 650 | 0 / 650 | 0 / 4,944 | 1,256 / 1,256 |
+| 5 | 12 | 0 / 258 | 0 / 510 | 0 / 141 | 0 / 141 | 0 / 873 | 258 / 258 |
+
+Entries: sets equivalent to some set of the target family / all sets, pooled
+over the cells (`q1/pooled.tsv`; per cell in `q1/vs_torus.tsv`). The `j = 0`
+columns cover the 52 / 26 / 13 / 6 cells with `p ≡ 2 mod 3`. The torus family
+has 18,617, 4,993, 1,256 and 258 sets at `t = 2…5`.
+
+**The one exception.** At `p = 383`, `t = 3`, one Möbius class is shared by a
+torus set and two `y² = x³ − x` sets. No other `(p, t ≥ 3)` cell has any match for any supersingular
+family, and `y² = x³ + x`, the P-192 curve, has none at all. The rule of
+PROTOCOL.md (H1_distinct needs zero matches) therefore reads *partial*; the
+match is isolated, not family-wide, and is not explained here.
+
+**Other equivalences found (expected).** Ordinary control curves with equal
+`j` (isomorphic: `p = 127, t = 4`, `j = 1`; `p = 1151, t = 3`, `j = 24`;
+`p = 1663, t = 4`, `j = 32`) share classes, as the positive control predicts.
+No supersingular family matches another (`y² = x³ + x` against
+`y² = x³ − x`: 0 at `t ≥ 3`).
 
 **Checks.** The positive control (`y² = x³ + 16x`, isomorphic to `y² = x³ + x`
-by `(x, y) ↦ (4x, 8y)`) Q1_POSCTL. The canonical form agreed with a brute-force
-search over all of `PGL₂(F_p)` on Q1_BRUTE checked sets at `p ≤ 131`. The
+by `(x, y) ↦ (4x, 8y)`) matched 100 % of its sets in all 195 `(p, t)` cells: **passed**. The canonical form agreed with a brute-force
+search over all of `PGL₂(F_p)` on all 906 checked (set, family) pairs at `p ≤ 131`. The
 counts of `y² = x³ + x` cosets equal `(p + 1 − 2^{t+1})/2^{t+1}` (unit test).
 
 **Why (derived).** A Möbius map taking one fibre of a degree-`2^t` map onto a
@@ -76,8 +98,8 @@ The supersingular set is a fibre of the composed Vélu x-map `Φ` of a cyclic
 when `2P ∈ K`, so every ramification index of `Φ` is at most 2, and `Φ` is not
 Möbius-conjugate to `D_{2^t}` for `t ≥ 2`. At `t = 2` a 4-point set has one
 modulus, and every pair of families (ordinary ones included) shares classes
-by coincidence; from `t = 3` on the computation finds no coincidence at all
-between the supersingular and torus families. Supersingularity does not make
+by coincidence; from `t = 3` on the computation finds one isolated
+coincidence (above) and nothing family-wide. Supersingularity does not make
 `V` a torus set: `y² = x³ + x` and the torus both have `p + 1` rational points,
 but one is a genus-1 group and the other a conic, and no algebraic map carries
 cosets of one onto cosets of the other. The supersingular route therefore does
@@ -226,7 +248,7 @@ not about any IC exponent; every arm is far above rho.
   forms and supports) is the argument that it continues.
 - **Q1 is exact on the primes run**, not a proof for all `p`; the
   ramification argument is the proof sketch that the torus and Vélu maps are
-  not conjugate.
+  not conjugate. The `p = 383` coincidence is recorded, not explained.
 - **Container restarts.** Two: one before the protocol (no data), and one that
   killed `run_q2.sh` during `T31-ordinary-m34` (its 8 partial rows kept in
   `q2/interrupted/`; the run was repeated whole, and `run_q2.sh`'s 180-minute
