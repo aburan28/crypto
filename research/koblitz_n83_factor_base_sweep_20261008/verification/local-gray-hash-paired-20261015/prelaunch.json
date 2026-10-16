@@ -1,0 +1,112 @@
+{
+  "archive_sha256": {
+    "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0.jsonl.gz": "8463aaf30365d6f6f5d6b189aff4e8afcb6c8305ec27c216700776cbdccba29d",
+    "966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47.jsonl.gz": "df02963d1706fa7a64fd7558d88db79b23ea34801ac58062c4c500113e8c57fe",
+    "b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e.jsonl.gz": "3e85c9e419fcddd3c9faed3c84470bf96fcad9178e48e1d73629369335841ecf"
+  },
+  "authorization_sha256": "5544acbcf9bb825f2b7eebc38778bc37cf7b8a4e9e8c081bd4b572a94996a265",
+  "conservative_charge_seconds": 0,
+  "measured": {
+    "idle_percent": 0.0,
+    "load_1m": 87.64,
+    "logical_cpus": 14,
+    "other_containers": [],
+    "system_free_bytes": 25685487616
+  },
+  "n83_solver_launched": false,
+  "observed_at_utc": "2026-10-15T16:29:19.822553+00:00",
+  "plan_sha256": "fbd3fb943bc0f181797d106c41ee9961b8d70768b5c65a5584002e3c1b5e488f",
+  "probes": {
+    "cgroup": {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--pull",
+        "never",
+        "--platform",
+        "linux/arm64",
+        "--network",
+        "none",
+        "--cpus",
+        "1",
+        "--memory",
+        "4096m",
+        "--memory-swap",
+        "4096m",
+        "sha256:7c4ae649a84014c467d79319bbf17ce2632ae8b8be123ac2fb2ea5be46823f31",
+        "sh",
+        "-c",
+        "cat /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.swap.max"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "4294967296\n0\n",
+      "wall_seconds_L0": 0.5103484579999531
+    },
+    "containers": {
+      "argv": [
+        "docker",
+        "ps",
+        "--format",
+        "{{.Names}}"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "conductor-db\n",
+      "wall_seconds_L0": 0.1276944999999614
+    },
+    "cores": {
+      "argv": [
+        "sysctl",
+        "-n",
+        "hw.logicalcpu"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "14\n",
+      "wall_seconds_L0": 0.015799750000041968
+    },
+    "image": {
+      "argv": [
+        "docker",
+        "image",
+        "inspect",
+        "sha256:7c4ae649a84014c467d79319bbf17ce2632ae8b8be123ac2fb2ea5be46823f31",
+        "--format",
+        "{{.Id}} {{.Architecture}} {{.Os}}"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "sha256:7c4ae649a84014c467d79319bbf17ce2632ae8b8be123ac2fb2ea5be46823f31 arm64 linux\n",
+      "wall_seconds_L0": 0.0513018340002418
+    },
+    "load": {
+      "argv": [
+        "sysctl",
+        "-n",
+        "vm.loadavg"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{ 87.64 73.00 63.95 }\n",
+      "wall_seconds_L0": 0.014284332999977778
+    },
+    "top": {
+      "argv": [
+        "top",
+        "-l",
+        "1",
+        "-n",
+        "0"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "Processes: 894 total, 32 running, 2 stuck, 860 sleeping, 7167 threads \n2026/10/15 09:29:19\nLoad Avg: 87.64, 73.00, 63.95 \nCPU usage: 66.86% user, 33.13% sys, 0.0% idle \nSharedLibs: 503M resident, 61M data, 66M linkedit.\nMemRegions: 1202521 total, 8904M resident, 142M private, 4200M shared.\nPhysMem: 46G used (4955M wired, 24G compressor), 1820M unused.\nVM: 465T vsize, 6144M framework vsize, 17204(0) swapins, 329656(0) swapouts.\nNetworks: packets: 7472266/6998M in, 5871233/5236M out.\nDisks: 63702257/762G read, 3107407/57G written.\n\n\n",
+      "wall_seconds_L0": 7.834603165999852
+    }
+  },
+  "schema": "n83.local-paired-prelaunch/v1",
+  "source_commit": "6bfd5792fead10c034ce43dd11bab221b446db5f",
+  "status": "HOST_BUSY_NO_SOLVER_LAUNCH"
+}

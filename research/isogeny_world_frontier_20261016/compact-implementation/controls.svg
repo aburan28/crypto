@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="390" viewBox="0 0 1000 390">
+<defs><marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8" fill="#245674"/></marker></defs>
+<rect width="1000" height="390" fill="#ffffff"/>
+<g font-family="Arial, sans-serif" fill="#183044">
+<text x="500" y="29" text-anchor="middle" font-size="25" font-weight="bold">Native compact-CM controls: degree proof and point replay</text>
+<rect x="45" y="60" width="910" height="105" rx="12" fill="#edf5fa" stroke="#245674" stroke-width="2"/>
+<text x="500" y="90" text-anchor="middle" font-size="22">secp256k1 source = target, trusted SEC2 domain</text>
+<text x="500" y="121" text-anchor="middle" font-size="18">icv1-fp256-t432420386565659656852420866390673177327-76dadd18</text>
+<text x="500" y="149" text-anchor="middle" font-size="18">compact self-map control: e=3, prime degree 7; independent replay PASS</text>
+<path d="M820,165 C980,190 980,210 820,222" fill="none" stroke="#245674" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="35" y="224" width="285" height="100" rx="10" fill="#f0f8ed" stroke="#477b36" stroke-width="2"/>
+<text x="177" y="254" text-anchor="middle" font-size="20">Producer</text><text x="177" y="282" text-anchor="middle" font-size="18">LL + Cornacchia + integers</text><text x="177" y="309" text-anchor="middle" font-size="18">num-bigint / Jacobian</text>
+<rect x="357" y="224" width="285" height="100" rx="10" fill="#edf5fa" stroke="#245674" stroke-width="2"/>
+<text x="499" y="254" text-anchor="middle" font-size="20">Independent degree checks</text><text x="499" y="282" text-anchor="middle" font-size="18">exact Z norm + primality</text><text x="499" y="309" text-anchor="middle" font-size="18">repository limb integers</text>
+<rect x="680" y="224" width="285" height="100" rx="10" fill="#f0f8ed" stroke="#477b36" stroke-width="2"/>
+<text x="822" y="254" text-anchor="middle" font-size="20">Independent point checks</text><text x="822" y="282" text-anchor="middle" font-size="18">8 inputs + both dual orders</text><text x="822" y="309" text-anchor="middle" font-size="18">fixed-limb field / affine</text>
+<path d="M320,274 L350,274 M642,274 L673,274" stroke="#245674" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="500" y="356" text-anchor="middle" font-size="19">91 native tests pass; four telemetry-loss cases fail closed.</text>
+<text x="500" y="382" text-anchor="middle" font-size="18">Correctness controls only. M8191 unexecuted. Expanded-map score unchanged.</text>
+</g></svg>

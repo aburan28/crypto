@@ -1,0 +1,29 @@
+{
+  "checker_sha256": "44d5eefb615ce4002840624094a1b7945a889c0ef8a9d1d5c5c5cf26c8c8fd0f",
+  "conservative_new_charge_seconds": 900,
+  "cumulative_charged_seconds": 23100,
+  "domains_sha256": "63accc5b9dc9de6327c5b07e93b3e62717f8376a96c3f91f7bb70b77095f23bb",
+  "exit_sha256": "334f95ecbe4cfc2cf534d3ea397f7c377e32ce1c6a26dd968adad84470e840f7",
+  "launch_sha256": "6a68f2c7c8705f62d6cc922b7a0fc9827a92d5dbfbb4e6493001e37fdbe4b3ae",
+  "launcher_sha256": "ec80c194768078889a1b688f8a44a778075bae7455ab7ad4717efe9ec6667a8a",
+  "mode": "full_domain",
+  "natural_relations": null,
+  "schema": "n83.fixed-witness-stage-launch-audit/v1",
+  "selected_best_total_runtime": null,
+  "source_sha256": "f13751653b2470ade38279945b999ba825e10c39cae905682992d4f49a01ff33",
+  "status": "PASS_fixed_witness_encoding_only",
+  "stderr_sha256": "a671c396dbdf43e327d42e5746316adfc4169c8ff5b87923bf5a813181334ccd",
+  "stdout_sha256": "5b3be90b9f3f356a85499a63fa2f2c13322ed0259e313224c5337b2c747103cb",
+  "total_index_calculus_runtime_ms": null,
+  "trace": {
+    "input_blake3": "22eb1821dd401063417260041017c43cd416a8f4fc1abea2e9946507029c6d4a",
+    "last_completed_stage": "model_checked",
+    "marker_count": 9,
+    "natural_relations": null,
+    "selected_best_total_runtime": null,
+    "solver_entry_marker_seen": true,
+    "status": "PASS_fixed_witness_encoding_only"
+  },
+  "trace_error": null,
+  "worker_sha256": "5c87e73d6e786588178e4c04ea447b2d115b2933c2cd77b675d7ee4c97c8c92c"
+}

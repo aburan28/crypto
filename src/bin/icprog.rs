@@ -122,6 +122,7 @@ enum Round {
     R07,
     R08,
     R09,
+    R10,
 }
 
 #[derive(Clone, Copy, PartialEq, ValueEnum)]
@@ -648,6 +649,7 @@ fn round_dir(round: Round, root: &std::path::Path) -> Result<(PathBuf, PathBuf),
         Round::R07 => "R07-main-head",
         Round::R08 => "R08-scan-fold",
         Round::R09 => "R09-slope-keys",
+        Round::R10 => "R10-main-head",
     };
     let round_dir = programme.join("rounds").join(dir);
     Ok((programme, round_dir))
@@ -689,6 +691,7 @@ fn round_spec(round: Round) -> Option<&'static rounds::Spec> {
         Round::R07 => Some(&rounds::r07::SPEC),
         Round::R08 => Some(&rounds::r08::SPEC),
         Round::R09 => Some(&rounds::r09::SPEC),
+        Round::R10 => Some(&rounds::r10::SPEC),
     }
 }
 
@@ -788,6 +791,7 @@ fn run(round: Round, step: &str, args: RunArgs) -> Result<String, String> {
         Round::R07 => rounds::r07::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R08 => rounds::r08::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R09 => rounds::r09::run(&ctx, step, &b, &arms, &root, &commits)?,
+        Round::R10 => rounds::r10::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R03 => return Err("R03 is complete; its runs are frozen".into()),
     };
     Ok(match doc {
@@ -946,6 +950,7 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
         Round::R07 => rounds::r07::analyse(&ctx)?,
         Round::R08 => rounds::r08::analyse(&ctx)?,
         Round::R09 => rounds::r09::analyse(&ctx)?,
+        Round::R10 => rounds::r10::analyse(&ctx)?,
     };
     Ok(json::dumps(&doc, 1))
 }
@@ -1688,9 +1693,13 @@ fn main() -> ExitCode {
             },
         ),
         Command::Table { round, analysis } => json::read(&analysis).and_then(|doc| match round {
-            Round::R05 | Round::R02b | Round::R06 | Round::R07 | Round::R08 | Round::R09 => {
-                report::r05(&doc)
-            }
+            Round::R05
+            | Round::R02b
+            | Round::R06
+            | Round::R07
+            | Round::R08
+            | Round::R09
+            | Round::R10 => report::r05(&doc),
             Round::R03 => Err("R03's tables are in its README, written before icprog".into()),
         }),
         Command::Holdouts {

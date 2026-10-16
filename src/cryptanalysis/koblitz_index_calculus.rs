@@ -7649,6 +7649,13 @@ fn groebner_decompose_with_geometry(
         }
         None => &sys.equations,
     };
+    // Opt-in gated fall-row augmentation (`KIC_FALLROW_GATE=1`); same roots.
+    let augmented = crate::cryptanalysis::koblitz_groebner::fall_row_gate_enabled()
+        .then(|| {
+            crate::cryptanalysis::koblitz_groebner::fall_row_gate_augment(equations, sys.n_vars)
+        })
+        .flatten();
+    let equations = augmented.as_ref().unwrap_or(equations);
     let back = order.as_deref().map(invert_permutation);
     let mut accept_root = |root| {
         let root = back

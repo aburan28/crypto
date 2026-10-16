@@ -1,0 +1,105 @@
+{
+  "_comment": "Recorded values only, each with the committed artefact it is copied from. make_figures.py plots these values and computes nothing new except the weekly commit tally (git log keyword match, see weekly_commits._method).",
+  "weekly_commits": {
+    "_source": "git log --since=2026-07-01 on main at the paper's base commit; themes are case-insensitive keyword matches on the commit subject (a commit can match several themes or none)",
+    "_method": "regular expressions listed in ../README.md (Reproduction); requires a full (unshallow) clone",
+    "weeks": ["W27","W28","W29","W30","W31","W32","W34","W36","W37","W38","W39","W40","W41","W42"],
+    "total": [6,14,28,18,12,13,1,14,909,339,1438,2176,1368,545],
+    "themes": {
+      "Koblitz / binary IC":        [0,0,2,1,0,0,0,1,259,28,148,260,175,99],
+      "Gröbner F4/F5/F6":       [0,0,0,0,0,0,0,0,18,6,151,334,142,26],
+      "root finding / PDP":         [0,0,0,0,0,0,0,0,30,6,42,99,35,92],
+      "ecbench / measurement":      [0,0,1,0,0,0,0,1,74,15,154,344,162,100],
+      "isogeny / transfer":         [3,2,4,2,0,1,0,0,18,12,32,46,215,54],
+      "prime-field IC":             [1,3,3,1,0,0,0,1,22,3,67,43,115,35]
+    }
+  },
+  "rootfinding_oracle": {
+    "_source": "RESEARCH_SEMAEV_ROOTFIND_VS_GROEBNER.md §0; papers/rootfinding-decomposition/README.md; research/semaev_rootfind_nist_20261012; research/semaev_rootfind_e2e_20261012",
+    "rows": [
+      {"label": "Koblitz F_2^9, m=2 (vs matrix-F4)", "ratio": 383, "kind": "per decomposition"},
+      {"label": "Koblitz F_2^13, m=2 (vs matrix-F4)", "ratio": 1535, "kind": "per decomposition"},
+      {"label": "prime 16-bit, m=2 (vs groebner_f4)", "ratio": 35592, "kind": "per decomposition"},
+      {"label": "prime 20-bit, m=2 (vs groebner_f4)", "ratio": 34602, "kind": "per decomposition"},
+      {"label": "prime 24-bit, m=2 (vs groebner_f4)", "ratio": 46911, "kind": "per decomposition"},
+      {"label": "NIST P-192..P-521 (vs Buchberger), low", "ratio": 3021, "kind": "per decomposition"},
+      {"label": "NIST P-192..P-521 (vs Buchberger), high", "ratio": 5802, "kind": "per decomposition"},
+      {"label": "prime end-to-end vs msolve, low (24-bit)", "ratio": 50, "kind": "end to end"},
+      {"label": "prime end-to-end vs msolve, high (20-bit)", "ratio": 105, "kind": "end to end"},
+      {"label": "binary end-to-end, n=23 (vs F4)", "ratio": 122, "kind": "end to end"}
+    ]
+  },
+  "k13_rootfind_progression": {
+    "_source": "research/ecbench_rootfind_engine_20261012/README.md; research/ecbench_rootfind_improve_20261013/README.md; research/ecbench_rootfind_parity_20261013/README.md; research/ecbench_rootfind_faster_20261014/README.md",
+    "_unit": "mean cold S (counted GAE / sqrt r), Koblitz E_0 n=13, 8 public targets x 3 rounds, L0",
+    "rows": [
+      {"step": "rootfind m=3 (PR 1765)", "S": 38.822, "complete": true},
+      {"step": "rootfind m=2 (PR 1765)", "S": 28.383, "complete": true},
+      {"step": "window m=3 (improve)", "S": 32.671, "complete": true},
+      {"step": "m=2, d=4 (improve)", "S": 28.461, "complete": true},
+      {"step": "negfold m=2 d=5 (parity)", "S": 23.220, "complete": true},
+      {"step": "negfold m=2 d=5 (faster v3)", "S": 22.972, "complete": true}
+    ],
+    "references": [
+      {"label": "strong signed-Frobenius rho (claim v3)", "S": 14.822},
+      {"label": "inherited F4 m=3, XOR-priced (claim v3)", "S": 421.369},
+      {"label": "inherited F4 m=3, XORs unpriced (lower bound, claim v2)", "S": 16.749}
+    ]
+  },
+  "cold_gap": {
+    "_source": "research/ecbench_frontier_20261013/README.md (candidate census and cold-gap figure); research/ecbench_rootfinding_assessment_20261012/REPORT.md; research/pkm_tower_ecbench_20261013/README.md; research/ecbench_rootfind_faster_20261014/README.md",
+    "_unit": "candidate S / matched rho S (cold, one target); >1 means rho is cheaper",
+    "rows": [
+      {"label": "matrix F4/F5, K13 (vs rho-negation)", "ratio": 6.97, "lower_bound": true},
+      {"label": "compact orbit, Koblitz n=17", "ratio": 9.985, "lower_bound": true},
+      {"label": "compact orbit, Koblitz n=23 a=0", "ratio": 8.360, "lower_bound": true},
+      {"label": "prime abscissa base, 20-bit", "ratio": 12.300, "lower_bound": true},
+      {"label": "Frobenius pair table, Koblitz n=17", "ratio": 5.033, "lower_bound": false},
+      {"label": "prime pair table, 20-bit", "ratio": 19.640, "lower_bound": true},
+      {"label": "rootfind-negfold m=2, K13 (vs strong rho)", "ratio": 1.55, "lower_bound": false},
+      {"label": "PKM tower + rootfind, 20-bit", "ratio": 34.0, "lower_bound": false},
+      {"label": "PKM tower + rootfind, 28-bit", "ratio": 140.6, "lower_bound": false}
+    ]
+  },
+  "koblitz_online": {
+    "_source": "docs/ic/boundary_targets.json regimes.koblitz.records.vs_rho (current + history); docs/ic/PLAN_IC_ACCOUNTING_FIXES_20261007.md; research/n83_dense_root_20261013",
+    "_unit": "rho online wall / IC online wall on the same public point (reusable IC setup excluded)",
+    "rows": [
+      {"n": 61, "ratio": 124.85, "status": "exploratory (single fresh reproduction, no isolation receipt)"},
+      {"n": 71, "ratio": 2864.1, "status": "exploratory (3 repeats of one point, no isolation receipt)"},
+      {"n": 73, "ratio": 1189.7, "status": "exploratory (3 repeats, shared host)"},
+      {"n": 83, "ratio": 8.2, "status": "exploratory (3 repeats, shared host)"},
+      {"n": 83, "ratio": 18.528, "status": "exploratory dense root index K1798, one point"},
+      {"n": 61, "ratio": 13.94, "lo": 9.808, "hi": 19.128, "status": "admitted: 64 one-target workloads, pinned x86_64, claim-check 64/64"}
+    ],
+    "cold_ratio_n61_ic_over_rho": 83.373
+  },
+  "gaudry_quartic": {
+    "_source": "research/gaudry_quartic_d4_20261013/README.md; benchmarks/20261013-gaudry-quartic-solve-speed",
+    "C4_S4": 1.22e12,
+    "C4_D4": 2.54e10,
+    "quotient_dim": {"S4": 4096, "D4": 512},
+    "wall_s": {"S4_before_029309579": 1800, "S4_after": 183, "D4": 4.9},
+    "crossover_bits": {"S4_x_line_h1": [149.4, 152.7], "D4_Y_line_h2": [135.1, 135.8]}
+  },
+  "pkm": {
+    "_source": "research/pkm_tower_ecbench_20261013/README.md (paired ecbench compare, 95% cluster bootstrap)",
+    "bits": [20, 22, 24, 26, 28],
+    "ratio": [34.0, 41.9, 29.4, 96.6, 140.6],
+    "lo":    [27.9, 34.3, 23.7, 77.8, 113.0],
+    "hi":    [42.6, 53.4, 37.3, 124.1, 182.3]
+  },
+  "engine": {
+    "_source": "research/f4_fp_msolve_parity_20261011/README.md; research/inherited_f4_eager_rewrite_20261011; research/f4_f5_f6_cross_family_20261011 via research/ecbench_frontier_20261013/README.md",
+    "rows": [
+      {"label": "f4_fp main/new, quad n9", "ratio": 29.8},
+      {"label": "f4_fp main/new, quad n10", "ratio": 54.1},
+      {"label": "f4_fp main/new, cubic n6", "ratio": 47.0},
+      {"label": "matrix F4 / inherited F4 work, K13", "ratio": 198.6},
+      {"label": "matrix F4 / inherited F4 work, R13", "ratio": 222.1},
+      {"label": "inherited F4 lazy/eager, F6-IC dim 8", "ratio": 1.62},
+      {"label": "matrix F4 / F5 word XORs, K13", "ratio": 1.547},
+      {"label": "inherited F4 / F6-IC word XORs, m=19", "ratio": 1.29}
+    ]
+  }
+}

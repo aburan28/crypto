@@ -1,0 +1,25 @@
+ops (ok): ic-cyc-w2 / ic-cos-c17 = 1.1221 [1.120, 1.125] (cluster) over 32 pairs on 16 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.1702 [0.825, 1.365]
+measurement quality: 0 / 100; paired attempts 32, verified 32, admitted 0; levels {"L0": 32}; p95 foreign busy unknown%, p95 run queue 1563.04%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-cyc-w2 / ic-cos-c17 | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m23-t5197-69e76b73 | 21.00 | 16 | 1.1221 | [1.1196, 1.1248] | cluster |
+
+| workload | curve | log2 r | ic-cos-c17 mean S | ic-cyc-w2 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W097b65939e60 | icv1-f2m23-t5197-69e76b73 | 21.00 | 6.2593 | 7.0896 | 1.1326 |
+| W0bc4e6f44014 | icv1-f2m23-t5197-69e76b73 | 21.00 | 6.2990 | 7.0338 | 1.1166 |
+| W15ea8df31c09 | icv1-f2m23-t5197-69e76b73 | 21.00 | 6.3144 | 7.0321 | 1.1137 |
+| W35ad8d7bf3d7 | icv1-f2m23-t5197-69e76b73 | 21.00 | 6.2569 | 7.0203 | 1.1220 |
+| W3e97957c8e9f | icv1-f2m23-t5197-69e76b73 | 21.00 | 6.2821 | 7.0339 | 1.1197 |
+| W41938b93e0cf | icv1-f2m23-t5197-69e76b73 | 21.00 | 6.2672 | 7.0177 | 1.1198 |
+| W5bb695f1b263 | icv1-f2m23-t5197-69e76b73 | 21.00 | 6.2867 | 7.0236 | 1.1172 |
+| W60fb480f9b28 | icv1-f2m23-t5197-69e76b73 | 21.00 | 6.2851 | 7.0576 | 1.1229 |
+| W7121566cb80a | icv1-f2m23-t5197-69e76b73 | 21.00 | 6.2603 | 7.0473 | 1.1257 |
+| W7650b3c238de | icv1-f2m23-t5197-69e76b73 | 21.00 | 6.2846 | 7.0510 | 1.1219 |
+| W81578276046d | icv1-f2m23-t5197-69e76b73 | 21.00 | 6.2678 | 7.0600 | 1.1264 |
+| W890bdd5f1fae | icv1-f2m23-t5197-69e76b73 | 21.00 | 6.2855 | 7.0665 | 1.1242 |
+| Wa173c2f6f884 | icv1-f2m23-t5197-69e76b73 | 21.00 | 6.2925 | 7.0556 | 1.1213 |
+| Waead5d5232aa | icv1-f2m23-t5197-69e76b73 | 21.00 | 6.2834 | 7.0317 | 1.1191 |
+| Wba0795d4edb3 | icv1-f2m23-t5197-69e76b73 | 21.00 | 6.2160 | 7.0412 | 1.1328 |
+| Wc5dd28fadbba | icv1-f2m23-t5197-69e76b73 | 21.00 | 6.2770 | 7.0160 | 1.1177 |

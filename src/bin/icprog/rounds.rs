@@ -1631,3 +1631,65 @@ pub mod r09 {
         }
     }
 }
+
+// ── R10: the programme re-based on main's head, again ───────────────
+
+pub mod r10 {
+    use super::*;
+
+    pub const SPEC: Spec = Spec {
+        targets: &[(0, 53), (1, 59), (0, 61)],
+        holdouts: &[
+            (230, 151),
+            (230, 152),
+            (231, 153),
+            (231, 154),
+            (232, 155),
+            (232, 156),
+            (233, 157),
+            (233, 158),
+        ],
+        what_this_is: "R10, the programme re-based on main's head again (`92246530`): every figure the README, the ledger and the scoreboard quote",
+        callgrind: &[(0, 61), (0, 53)],
+        callgrind_role: CallgrindRole::CrossCheck,
+        accept: Accept::Pinned,
+        resumed_note: "the host R10 resumed on after its container changed",
+        requires: REFERENCE_CLASS,
+    };
+
+    pub fn analyse(c: &Ctx) -> Result<J, String> {
+        speed::analyse(c, &SPEC)
+    }
+
+    /// One of R10's declared steps: R07's, with the callgrind
+    /// profiles as plan §5's cross-check rather than a control.
+    pub fn run(
+        c: &Ctx,
+        step: &str,
+        b: &Bench,
+        arms: &[Arm],
+        root: &Path,
+        commits: &[Option<String>],
+    ) -> Result<J, String> {
+        if let Some(done) = speed::run_common(c, &SPEC, step, b, arms) {
+            return done;
+        }
+        match step {
+            "manifest" => speed::manifest(
+                c,
+                b,
+                arms,
+                root,
+                commits,
+                "the host R10 ran on, at the round's start",
+            ),
+            "manifest-resumed" => speed::manifest_resumed(c, &SPEC, b, arms, root),
+            "pin" => pin::pin(&c.programme, &c.runs, &arms[1].binary),
+            "aa" => speed::aa(c, b, arms),
+            "callgrind" => speed::callgrind_step(c, &SPEC, arms),
+            other => Err(format!(
+                "unknown step `{other}`; try plan, manifest, pin, aa, compare, holdout, extend, callgrind or manifest-resumed"
+            )),
+        }
+    }
+}

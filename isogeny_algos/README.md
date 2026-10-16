@@ -39,7 +39,7 @@ problems, different algorithms; they are benchmarked per problem, not against ea
 | auxiliary | dual isogeny `find/dual.rs`, Kohel's End(E) conductor `path/endo.rs` (V2) |
 | arithmetic (V3) | `fpm.rs` Montgomery F_p (1–8 limbs, MULX/ADCX/ADOX assembly for 512 bits, Pornin inversion) · `fp2.rs` F_{p²} over any of them · `gf2n.rs` GF(2ⁿ) · `gf3n.rs` GF(3ⁿ) · `ext.rs` F_{p⁴} · `int.rs`, `bigint.rs` big integers · `poly.rs`, `series.rs` Karatsuba, Newton |
 
-## Correctness checks (`cargo test --release`: 109 tests, all pass)
+## Correctness checks (`cargo test --release`: 110 tests, all pass)
 
 Each algorithm is checked against an independent computation, not only against itself. From V1/V2:
 Vélu = Kohel = √élu = x-only = Montgomery on common kernels; all eight BMSS methods reproduce Kohel's
@@ -190,6 +190,24 @@ Selected V3 measurements (medians unless stated; all records `verified: true`):
   Weierstrass √élu (three power sums) is slower than x-only Vélu at 256 bits for every ℓ measured and
   at 511 bits up to ℓ = 4001; at 511 bits ℓ = 10007 it is faster (13.9 vs 18.6 ms). The commit
   message of `774cdfd6` said "never" and "1.67×"; the recorded run says the above.
+* **Large prime degree, round 4** (`results/p13-large-ell.txt`, one run per setting; the bullet above
+  is the earlier state). With S = (I ± J) ∪ K, at x = ±1 every factor of E_J is palindromic in Z, so
+  E_J(Z) = Z^b G(Z + 1/Z) and h_S(±1) is a product over pairs of (c2_j w_i + c1_j), w_i = x_i + 1/x_i:
+  taken pair by pair this is one multiplication per pair (about ℓ/2 for the codomain against ~8 per
+  kernel point for Vélu). Point images take five multiplications per pair (2.5 per kernel point
+  against 4). Montgomery √élu vs projective Vélu, codomain: 256 bits ℓ = 1009 2.15×, 4001 4.37×,
+  10007 5.58×; 511 bits 2.10×, 4.03×, 5.27× (crossover now near ℓ = 150; before 1.51× and 1.62× at
+  ℓ = 10007); one image 1.27–1.51× at ℓ ≥ 1009 (before 0.5–1.25×). Short Weierstrass √élu now takes
+  each pair's x₊ + x₋ and x₊x₋ from the biquadratic relation (one batch inversion) and gets the
+  power sums and the image sums Σ 1/(α − x)ᵏ from them: vs x-only Vélu (itself 15–25% faster, cheaper
+  differential addition and sums) codomain 1.6–2.8× and image 1.3–2.0× for ℓ = 401..10007; at 256 bits
+  ℓ = 10007 √élu went 5.13 → 1.16 ms. A scaled remainder tree (Bernstein; `poly::EvalTree`) and the
+  W = Z + 1/Z product make the Õ(√ℓ) path 2.1–2.8× faster than before, but the pair-by-pair products
+  still beat it up to ℓ = 250007 (0.36–0.59× its codomain time), because the lazy multiply-accumulate
+  under the polynomial products costs 0.85–1.1 field multiplications per term (a product-scanning
+  variant was 1.1–1.9 and was dropped). CSIDH-512 with √élu leaves from ℓ = 151 or 263: no change
+  outside the noise (31–32 ms either way, 12 keys, alternating), so `Csidh::sqrt_velu_min` stays off by
+  default.
 * **Field**: CSIDH-512 multiplication 85 ns (portable) / 78 ns (assembly); inversion 75.5 → 8.0 µs;
   512-bit sqrt 370 → 57 µs; P-256 inversion 13.1 → 3.2 µs. 256-bit assembly multiplication was not faster.
 * **Φ_ℓ mod p (61 bits), Hecke/Newton vs dense linear algebra**: ℓ = 11 0.56 vs 1.94 ms (3.5×), ℓ = 23
@@ -245,9 +263,14 @@ e = 24 over F_{p²}: naive 263 µs, balanced 81 µs, cost model 96 µs; GHS / Ga
   (E, Ẽ) → isogeny in small characteristic; radical isogenies other than N = 3, 5, 7 (N = 13 needs the genus-2 X₁(13)); Jacobi-quartic models;
   Enge's quasi-linear Φ_ℓ evaluation. Atkin-prime isogeny cycles over F_{pʳ} towers (t mod ℓ,
   verified against BSGS, tower degree ≤ 6) and Sutherland's volcano/CRT Φ_ℓ (verified equal to the
-  q-expansion Φ_ℓ) are now implemented; the latter finds its curves by X₁(ℓ) or uniform sampling plus
-  isogeny walks rather than from CM orders with a known volcano, and stays 8–13× slower than the
-  q-expansion Φ_ℓ for the ℓ measured. Not implementable here (resource limit): quantum algorithms.
+  q-expansion Φ_ℓ) are implemented. The original graph sampler remains available;
+  `find/sutherland/cm.rs` adds CM orders, Hilbert roots, paired class-group walks,
+  floor-to-surface projection and streaming explicit CRT. It supports odd prime
+  degrees 3–31 within documented resource limits; the paper's optimized
+  large-degree parameter selection and polycyclic presentations remain gaps.
+  See [usage](docs/USAGE.md#cm-implementation-limits-and-api) and the
+  [validation report](../research/cm_volcano_crt_20261016/REPORT.md).
+  Not implementable here (resource limit): quantum algorithms.
 * The BMSS methods and √élu use Karatsuba, not FFT multiplication, so the papers' M(ℓ) bounds are not reached.
 * The assembly multiplier gains 9 % at 512 bits and nothing at 256 bits; the CSIDH-512 action is variable-time.
 * KLPT is for left O₀-ideals with ℓ = 2 and p ≡ 3 mod 4; e/log₂p ≈ 3.8 at 128 bits, above the ≈ 3.5 heuristic.

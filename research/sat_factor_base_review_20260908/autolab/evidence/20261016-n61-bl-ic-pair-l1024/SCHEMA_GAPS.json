@@ -1,0 +1,68 @@
+{
+  "advanced": [
+    "paired IC online on same 1024 public points as archived BL L=1024",
+    "hash-verified BL reuse (points+bl.jsonl)",
+    "measured ic_online_* / bl online_* / online_speedup on schema slice target_index=0",
+    "1024/1024 verified scalar pairs at primary table_bytes",
+    "automorphism_discount formula recorded",
+    "operation_accounting native counters recorded"
+  ],
+  "beat_id": "koblitz.compact_orbit.n61_bl_reference",
+  "five_line_patch_plan_for_pass": [
+    "1. Add launch-equal-advice --co-measure so BL+IC share one process envelope (no archive reuse for PASS).",
+    "2. Mint IC1 candidate/workload/run manifests via identity.py as launch-single does.",
+    "3. Write oracle.py replay certificates for IC relation + BL [d]G=Q scalar check; set independent_validation.",
+    "4. Emit rho_policy from measured bl_precompute (table_bytes, dp_bits, map_seed, automorphism_size=2n) and matching resource envelopes.",
+    "5. Set timing_class=single_target_online + record_class=verified_answer_exploratory_wall; require BL phase markers or extend schema for single-interval BL online."
+  ],
+  "honest_non_claims": [
+    "not key recovery",
+    "not asymptotic sub-sqrt",
+    "not imported/external points",
+    "not a KS v2 batch rho comparator",
+    "not same_resource_envelope (archived BL + later IC)",
+    "not ledger promotion until schema-complete co-measured pair and independent-host replay"
+  ],
+  "kind": "vs_rho_schema_gaps_after_bl_ic_pair",
+  "pairing_errors": [
+    "same-target charged intervals are not confirmed"
+  ],
+  "run_id": "20261016T074400Z-n61-bl-ic-pair",
+  "still_blocking_claim_check_pass": [
+    "candidate_id",
+    "candidate_manifest_sha256",
+    "ic_replay_certificate_sha256",
+    "ic_resource_envelope",
+    "independent_replay_pointer",
+    "record_class",
+    "rho_policy",
+    "rho_replay_certificate_sha256",
+    "rho_resource_envelope",
+    "run_id",
+    "same_resource_envelope",
+    "workload_id",
+    "workload_manifest_sha256"
+  ],
+  "validation_errors": [
+    "all_stages_charged_same_series must be true when present",
+    "candidate_id must be a nonempty string",
+    "workload_id must be a nonempty string",
+    "run_id must be a nonempty string",
+    "candidate_manifest_sha256 must be a full SHA-256 hex digest",
+    "workload_manifest_sha256 must be a full SHA-256 hex digest",
+    "timing_class must be single_target_online for a primary vs_rho claim",
+    "record_class must identify exploratory or controlled wall evidence",
+    "same_resource_envelope must be true",
+    "independent_validation must be true",
+    "ic_replay_certificate_sha256 must be a full lowercase SHA-256 digest",
+    "rho_replay_certificate_sha256 must be a full lowercase SHA-256 digest",
+    "ic_resource_envelope must be a nonempty object",
+    "rho_resource_envelope must be a nonempty object",
+    "rho_online_phase_ms must contain exactly the declared phases",
+    "online_interval.rho_start_event is missing or invalid",
+    "online_interval.rho_stop_event is missing or invalid",
+    "online_interval.ic_included_stages is missing or invalid",
+    "online_interval.rho_included_stages is missing or invalid",
+    "rho_policy must be an object"
+  ]
+}
