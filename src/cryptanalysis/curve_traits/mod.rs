@@ -1211,11 +1211,18 @@ fn endomorphism(
                         "Frobenius is not a scalar on E[ℓ]: the floor".into(),
                     )
                 }
-                None => (
-                    None,
-                    e,
-                    "not tested (ℓ too large for the division-polynomial test)".into(),
-                ),
+                None => {
+                    let why = match (&c.model, small) {
+                        (Model::Other { .. } | Model::Extension { .. }, _) => {
+                            "not tested: no field arithmetic for this model"
+                        }
+                        (_, Some(l)) if l <= torsion::SCALAR_TEST_MAX_ELL => {
+                            "not tested: beyond the scalar test's cost limit"
+                        }
+                        _ => "not tested: ℓ above the scalar test's range",
+                    };
+                    (None, e, why.into())
+                }
             }
         };
         bound *= ell.pow(at_most);

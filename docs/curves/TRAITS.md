@@ -186,11 +186,14 @@ certify its coordinates or group order.
 
 In the current file (2112 registry curves and 176 from the sources: 175
 walked curves of the P-256 and P-224 isogeny classes and the ECC2K-130
-degree-263 descendant), `End(E)` is established for 668 curves (509
-maximal, 159 non-maximal) and unresolved for 698; 922 have a `Δ` that did
-not factor. The volcano levels behind it: 355 decided by the scalar test,
-13 walker certificates (each agreeing with the test), 104 from a certified
-`End(E)`, 198 where `f₀` is already prime to `ℓ`. P-256's `Δ` factors with
+degree-263 descendant), `End(E)` is established for 716 curves (542
+maximal, 174 non-maximal) and unresolved for 1537; 35 have a `Δ` that did
+not factor. Of the unresolved, 1321 are curves over `GF(p^k)`, `k > 1`,
+for which the scalar test has no field arithmetic yet; most of the rest
+have a prime of `v` beyond its reach. The volcano levels behind it: 373
+decided by the scalar test, 13 walker certificates (each agreeing with the
+test), 111 from a certified `End(E)`, 228 where `f₀` is already prime to
+`ℓ`. P-256's `Δ` factors with
 the committed hints as `−3·5·456597257999·p81·p136` (squarefree), so
 `v = 1`, `d_K = Δ` and `End(E) = O_K`, probable through its 136-bit prime
 (the 81-bit one is below the Miller–Rabin proof bound); every walked curve
