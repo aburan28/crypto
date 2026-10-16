@@ -374,6 +374,7 @@ struct RootBloom {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum RootBloomProfile {
+    Compact4,
     Standard,
     Wide3,
     Wide5,
@@ -383,14 +384,16 @@ impl RootBloomProfile {
     fn from_env() -> Self {
         match std::env::var("KIC_ROOT_BLOOM_PROFILE").as_deref() {
             Err(_) | Ok("standard") => Self::Standard,
+            Ok("compact4") => Self::Compact4,
             Ok("wide3") => Self::Wide3,
             Ok("wide5") => Self::Wide5,
-            _ => panic!("KIC_ROOT_BLOOM_PROFILE must be standard, wide3 or wide5"),
+            _ => panic!("KIC_ROOT_BLOOM_PROFILE must be compact4, standard, wide3 or wide5"),
         }
     }
 
     fn bits_per_request(self) -> usize {
         match self {
+            Self::Compact4 => 4,
             Self::Standard => 8,
             Self::Wide3 | Self::Wide5 => 16,
         }
@@ -398,13 +401,14 @@ impl RootBloomProfile {
 
     fn hashes(self) -> usize {
         match self {
-            Self::Standard | Self::Wide3 => 3,
+            Self::Compact4 | Self::Standard | Self::Wide3 => 3,
             Self::Wide5 => 5,
         }
     }
 
     fn name(self) -> &'static str {
         match self {
+            Self::Compact4 => "compact4",
             Self::Standard => "standard",
             Self::Wide3 => "wide3",
             Self::Wide5 => "wide5",
@@ -580,6 +584,7 @@ mod root_bloom_table_tests {
     #[test]
     fn every_bloom_profile_preserves_all_inserted_keys() {
         for profile in [
+            RootBloomProfile::Compact4,
             RootBloomProfile::Standard,
             RootBloomProfile::Wide3,
             RootBloomProfile::Wide5,
