@@ -1,3 +1,5 @@
+import Lean
+
 /-!
 Exact N83 root-state and table-slot capacity arithmetic for the bounded
 online range. The implementation bridge is the pinned source's state-count
@@ -52,6 +54,16 @@ theorem k3584_fixed_fits_capacity_model :
 theorem k3584_fixed_root_count_fits :
     2 * stateCount 3584 < 2 ^ 30 := by decide
 
+theorem k3596_state_id_fits : stateCount 3596 < 2 ^ 29 := by decide
+theorem k3597_state_id_exceeds : 2 ^ 29 ≤ stateCount 3597 := by decide
+
+theorem packed_state_id_excluded_above_3596 (k : Nat) (hk : 3597 ≤ k) :
+    2 ^ 29 ≤ stateCount k := by
+  have hsub : 3596 ≤ k - 1 := by omega
+  have hmul : 3597 * 3596 ≤ k * (k - 1) := Nat.mul_le_mul hk hsub
+  unfold stateCount
+  omega
+
 #print axioms k3450_state_count
 #print axioms k3584_state_count
 #print axioms k4096_state_count
@@ -63,5 +75,8 @@ theorem k3584_fixed_root_count_fits :
 #print axioms k3450_fixed_root_count_fits
 #print axioms k3584_fixed_fits_capacity_model
 #print axioms k3584_fixed_root_count_fits
+#print axioms k3596_state_id_fits
+#print axioms k3597_state_id_exceeds
+#print axioms packed_state_id_excluded_above_3596
 
 end N83OnlineRange

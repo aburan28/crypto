@@ -87,14 +87,19 @@ def unsupported_cells():
         core_bytes = 11 * states + 5 * slots
         if core_bytes + working_reserve_bytes <= runner.cold.RSS_CAP_BYTES:
             raise ValueError(f"K{k} dynamic capacity exclusion no longer applies")
+        if (k == 3450 and not states < (1 << 29)) or (
+                k == 4096 and not states >= (1 << 29)):
+            raise ValueError(f"K{k} packed state-ID boundary differs")
         cells.append({"k": k, "layout": "root11_dynamic",
+                      "state_count": states, "state_id_limit": 1 << 29,
                       "request_entries": request, "allocated_slots": slots,
                       "root_state_bytes": 11 * states,
                       "root_table_bytes": 5 * slots,
                       "core_bytes_before_base": core_bytes,
                       "working_reserve_bytes": working_reserve_bytes,
                       "rss_cap_bytes": runner.cold.RSS_CAP_BYTES,
-                      "status": "UNSUPPORTED_CAPACITY"})
+                      "status": ("UNSUPPORTED_STATE_ID_AND_CAPACITY" if k == 4096
+                                 else "UNSUPPORTED_CAPACITY")})
     return cells
 
 

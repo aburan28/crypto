@@ -49,10 +49,13 @@ outer monotonic wall, process CPU, RSS, page faults and throttle/OOM deltas.
 Use the producer dump and independent replay for the actual usable-point
 count and candidate identity of each completed arm.
 
-K4096/root11 with dynamic load-75 allocation is a documented unsupported
-cell under this envelope: its exact slot formula allocates 10 GiB for the
-root table and approximately 7.13 GiB for root states before the base and
-other working memory. K3450 under that same dynamic policy requires about
+K4096 exceeds the packed root-state ID field: both current four- and
+five-byte exact slots require fewer than 2²⁹ retained states, while K4096
+requires 696,256,512. The exact supported upper boundary for this encoding
+is K3596; every K ≥ 3597 fails the state-ID condition. K4096/root11 dynamic
+also exceeds this allocation's capacity model: its exact slot formula
+allocates 10 GiB for the table and approximately 7.13 GiB for root states
+before the base and other working memory. K3450 under the dynamic policy requires about
 15.06 GiB for table plus states before other memory. The protocol reserves
 1 GiB for the base and other working memory when admitting a layout, so
 both dynamic cells exceed the 15.25 GiB guard; K3450 instead uses its
