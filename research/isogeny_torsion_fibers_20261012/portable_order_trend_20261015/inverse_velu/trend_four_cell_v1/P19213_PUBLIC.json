@@ -1,0 +1,1625 @@
+{
+  "cofactor": 19179,
+  "destination_curve": {
+    "a": [
+      19132,
+      0
+    ],
+    "b": [
+      18970,
+      0
+    ],
+    "j": [
+      6912,
+      0
+    ]
+  },
+  "fiber_points_per_target": 3,
+  "field_nu": 2,
+  "generator": {
+    "infinity": false,
+    "x": [
+      6343,
+      0
+    ],
+    "y": [
+      0,
+      13739
+    ]
+  },
+  "generator_attempts": 1,
+  "generator_seed": 1796692760,
+  "kernel": [
+    {
+      "infinity": false,
+      "x": [
+        3,
+        0
+      ],
+      "y": [
+        1,
+        0
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        3,
+        0
+      ],
+      "y": [
+        19212,
+        0
+      ]
+    }
+  ],
+  "mapped_generator": {
+    "infinity": false,
+    "x": [
+      7263,
+      0
+    ],
+    "y": [
+      0,
+      14634
+    ]
+  },
+  "p": 19213,
+  "r": 19249,
+  "schema": "different_j_inverse_trend_public/v1",
+  "screen_raw_sha256": "71c1926fee540df9566537ae60b063fc276f93b6b6d6c5f24ce8d69225305afa",
+  "source": {
+    "a": [
+      19192,
+      0
+    ],
+    "b": [
+      37,
+      0
+    ],
+    "j": [
+      2539,
+      0
+    ]
+  },
+  "target_count": 64,
+  "target_order_domain": "different-j-inverse-trend-target-v1:17",
+  "targets": [
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          18079,
+          0
+        ],
+        "y": [
+          0,
+          11006
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          2707,
+          0
+        ],
+        "y": [
+          0,
+          2708
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          10468,
+          0
+        ],
+        "y": [
+          0,
+          7099
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          12328,
+          0
+        ],
+        "y": [
+          0,
+          11980
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          4177,
+          0
+        ],
+        "y": [
+          0,
+          5910
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          11499,
+          0
+        ],
+        "y": [
+          0,
+          13661
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          13865,
+          0
+        ],
+        "y": [
+          0,
+          8116
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          1819,
+          0
+        ],
+        "y": [
+          0,
+          11695
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          2045,
+          0
+        ],
+        "y": [
+          0,
+          6840
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          12970,
+          0
+        ],
+        "y": [
+          0,
+          1791
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          9828,
+          0
+        ],
+        "y": [
+          0,
+          12718
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          7385,
+          0
+        ],
+        "y": [
+          0,
+          13933
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          5345,
+          0
+        ],
+        "y": [
+          0,
+          5554
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          8739,
+          0
+        ],
+        "y": [
+          0,
+          11922
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          13753,
+          0
+        ],
+        "y": [
+          0,
+          16564
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          16085,
+          0
+        ],
+        "y": [
+          0,
+          11259
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          2182,
+          0
+        ],
+        "y": [
+          0,
+          16065
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          7447,
+          0
+        ],
+        "y": [
+          0,
+          7160
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          10218,
+          0
+        ],
+        "y": [
+          0,
+          16268
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          3348,
+          0
+        ],
+        "y": [
+          0,
+          14314
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          16949,
+          0
+        ],
+        "y": [
+          0,
+          6381
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          12610,
+          0
+        ],
+        "y": [
+          0,
+          3052
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          1964,
+          0
+        ],
+        "y": [
+          0,
+          1078
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          8344,
+          0
+        ],
+        "y": [
+          0,
+          1279
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          4024,
+          0
+        ],
+        "y": [
+          0,
+          3866
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          12847,
+          0
+        ],
+        "y": [
+          0,
+          13855
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          3164,
+          0
+        ],
+        "y": [
+          0,
+          13765
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          1735,
+          0
+        ],
+        "y": [
+          0,
+          13978
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          17897,
+          0
+        ],
+        "y": [
+          0,
+          16368
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          2949,
+          0
+        ],
+        "y": [
+          0,
+          15887
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          7988,
+          0
+        ],
+        "y": [
+          0,
+          9051
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          15182,
+          0
+        ],
+        "y": [
+          0,
+          18933
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          12245,
+          0
+        ],
+        "y": [
+          0,
+          18647
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          12188,
+          0
+        ],
+        "y": [
+          0,
+          12126
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          3884,
+          0
+        ],
+        "y": [
+          0,
+          6424
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          7680,
+          0
+        ],
+        "y": [
+          0,
+          4040
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          715,
+          0
+        ],
+        "y": [
+          0,
+          8090
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          949,
+          0
+        ],
+        "y": [
+          0,
+          9261
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          8895,
+          0
+        ],
+        "y": [
+          0,
+          11407
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          10467,
+          0
+        ],
+        "y": [
+          0,
+          5999
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          11769,
+          0
+        ],
+        "y": [
+          0,
+          3707
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          12659,
+          0
+        ],
+        "y": [
+          0,
+          4100
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          1970,
+          0
+        ],
+        "y": [
+          0,
+          14079
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          8689,
+          0
+        ],
+        "y": [
+          0,
+          16934
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          11852,
+          0
+        ],
+        "y": [
+          0,
+          14998
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          17277,
+          0
+        ],
+        "y": [
+          0,
+          819
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          15246,
+          0
+        ],
+        "y": [
+          0,
+          998
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          2919,
+          0
+        ],
+        "y": [
+          0,
+          10533
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          2248,
+          0
+        ],
+        "y": [
+          0,
+          17826
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          12359,
+          0
+        ],
+        "y": [
+          0,
+          15695
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          16723,
+          0
+        ],
+        "y": [
+          0,
+          1407
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          18735,
+          0
+        ],
+        "y": [
+          0,
+          7956
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          3742,
+          0
+        ],
+        "y": [
+          0,
+          15829
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          7196,
+          0
+        ],
+        "y": [
+          0,
+          18124
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          5114,
+          0
+        ],
+        "y": [
+          0,
+          4000
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          64,
+          0
+        ],
+        "y": [
+          0,
+          7121
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          13267,
+          0
+        ],
+        "y": [
+          0,
+          8377
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          15169,
+          0
+        ],
+        "y": [
+          0,
+          6946
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          10323,
+          0
+        ],
+        "y": [
+          0,
+          15674
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          16488,
+          0
+        ],
+        "y": [
+          0,
+          6029
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          10339,
+          0
+        ],
+        "y": [
+          0,
+          16592
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          294,
+          0
+        ],
+        "y": [
+          0,
+          17230
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          14845,
+          0
+        ],
+        "y": [
+          0,
+          2238
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          659,
+          0
+        ],
+        "y": [
+          0,
+          6550
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          1190,
+          0
+        ],
+        "y": [
+          0,
+          7637
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          15034,
+          0
+        ],
+        "y": [
+          0,
+          6705
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          1478,
+          0
+        ],
+        "y": [
+          0,
+          17091
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          676,
+          0
+        ],
+        "y": [
+          0,
+          6808
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          38,
+          0
+        ],
+        "y": [
+          0,
+          13033
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          8861,
+          0
+        ],
+        "y": [
+          0,
+          1808
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          3618,
+          0
+        ],
+        "y": [
+          0,
+          2853
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          16273,
+          0
+        ],
+        "y": [
+          0,
+          6671
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          14744,
+          0
+        ],
+        "y": [
+          0,
+          5321
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          4531,
+          0
+        ],
+        "y": [
+          0,
+          3249
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          13786,
+          0
+        ],
+        "y": [
+          0,
+          4869
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          15381,
+          0
+        ],
+        "y": [
+          0,
+          1604
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          316,
+          0
+        ],
+        "y": [
+          0,
+          10760
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          10844,
+          0
+        ],
+        "y": [
+          0,
+          18003
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          3127,
+          0
+        ],
+        "y": [
+          0,
+          18990
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          8746,
+          0
+        ],
+        "y": [
+          0,
+          14658
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          10210,
+          0
+        ],
+        "y": [
+          0,
+          7035
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          9792,
+          0
+        ],
+        "y": [
+          0,
+          1207
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          5491,
+          0
+        ],
+        "y": [
+          0,
+          18867
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          6677,
+          0
+        ],
+        "y": [
+          0,
+          5315
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          5096,
+          0
+        ],
+        "y": [
+          0,
+          4056
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          18713,
+          0
+        ],
+        "y": [
+          0,
+          1579
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          5722,
+          0
+        ],
+        "y": [
+          0,
+          6455
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          14117,
+          0
+        ],
+        "y": [
+          0,
+          3888
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          8542,
+          0
+        ],
+        "y": [
+          0,
+          17874
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          18188,
+          0
+        ],
+        "y": [
+          0,
+          12495
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          104,
+          0
+        ],
+        "y": [
+          0,
+          4260
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          4252,
+          0
+        ],
+        "y": [
+          0,
+          10051
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          13774,
+          0
+        ],
+        "y": [
+          0,
+          12048
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          229,
+          0
+        ],
+        "y": [
+          0,
+          4290
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          8758,
+          0
+        ],
+        "y": [
+          0,
+          7096
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          8542,
+          0
+        ],
+        "y": [
+          0,
+          10270
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          16272,
+          0
+        ],
+        "y": [
+          0,
+          11456
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          11009,
+          0
+        ],
+        "y": [
+          0,
+          2201
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          9924,
+          0
+        ],
+        "y": [
+          0,
+          17823
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          1780,
+          0
+        ],
+        "y": [
+          0,
+          15893
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          7936,
+          0
+        ],
+        "y": [
+          0,
+          17425
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          14243,
+          0
+        ],
+        "y": [
+          0,
+          5201
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          12561,
+          0
+        ],
+        "y": [
+          0,
+          5481
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          9233,
+          0
+        ],
+        "y": [
+          0,
+          12079
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          972,
+          0
+        ],
+        "y": [
+          0,
+          9029
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          14783,
+          0
+        ],
+        "y": [
+          0,
+          12604
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          628,
+          0
+        ],
+        "y": [
+          0,
+          13645
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          3948,
+          0
+        ],
+        "y": [
+          0,
+          2522
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          5509,
+          0
+        ],
+        "y": [
+          0,
+          12426
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          16605,
+          0
+        ],
+        "y": [
+          0,
+          9957
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          19033,
+          0
+        ],
+        "y": [
+          0,
+          13486
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          10754,
+          0
+        ],
+        "y": [
+          0,
+          2000
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          13176,
+          0
+        ],
+        "y": [
+          0,
+          10324
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          4802,
+          0
+        ],
+        "y": [
+          0,
+          4214
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          3762,
+          0
+        ],
+        "y": [
+          0,
+          13682
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          6462,
+          0
+        ],
+        "y": [
+          0,
+          5157
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          13574,
+          0
+        ],
+        "y": [
+          0,
+          14245
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          16320,
+          0
+        ],
+        "y": [
+          0,
+          1566
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          11621,
+          0
+        ],
+        "y": [
+          0,
+          7951
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          4023,
+          0
+        ],
+        "y": [
+          0,
+          3183
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          2152,
+          0
+        ],
+        "y": [
+          0,
+          17578
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          3734,
+          0
+        ],
+        "y": [
+          0,
+          13321
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          18244,
+          0
+        ],
+        "y": [
+          0,
+          2798
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          15212,
+          0
+        ],
+        "y": [
+          0,
+          15131
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          629,
+          0
+        ],
+        "y": [
+          0,
+          13741
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          6882,
+          0
+        ],
+        "y": [
+          0,
+          1381
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          15750,
+          0
+        ],
+        "y": [
+          0,
+          8979
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          11538,
+          0
+        ],
+        "y": [
+          0,
+          10784
+        ]
+      }
+    }
+  ]
+}

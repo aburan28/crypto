@@ -1,0 +1,14 @@
+{
+  "schema": "different_j_chi_s3_exhaustive_spec/v1",
+  "source_sha256": "6faf9c7537737ce4aac8bb436d9e94b55e00457cc8d8808ec728737623af3deb",
+  "binary_sha256": "751d153306b09118c857959ea817ef58b6decb7cc5159de60c461653bea4b96a",
+  "public_sha256": "e1969305462131722556dead399593b77a919a8017f0e035e3019986b645958e",
+  "source_curve": "y^2=x^3-21x+37 over F_(211^2)",
+  "quotient_curve": "y^2=x^3+130x+179 over F_(211^2)",
+  "subgroup_order": 229,
+  "factor_base": "same eight cofactor-projected source witnesses and their signed degree-three images",
+  "cases_per_curve": 229,
+  "reference": "direct unordered signed-pair enumeration for every subgroup point",
+  "acceptance": "exact source and quotient pair-set equality on all cases, including zero support and infinity",
+  "wall_limit_seconds": 300
+}

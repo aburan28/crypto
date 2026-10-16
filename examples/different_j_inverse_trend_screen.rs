@@ -1,8 +1,11 @@
 //! Four-bin direct inverse-Velu order screen for the explicit different-j family.
 //! See research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/FOUR_GATE_PROTOCOL_V1.md.
 
+use std::fs;
+use std::path::Path;
 use std::time::Instant;
 
+use crypto_lib::cryptanalysis::ecbench::canonical::sha256_hex;
 use crypto_lib::cryptanalysis::ext_curve::{
     jacobi, random_point, ExtCurve, ExtField, ExtPoint, Fp2,
 };
@@ -158,8 +161,111 @@ fn row(p: u64) -> Value {
     })
 }
 
+fn point_tuple(point: Point) -> String {
+    format!("{},{},{},{},{}",
+        u64::from(point.infinity),point.x[0],point.x[1],point.y[0],point.y[1])
+}
+
+fn freeze_trend(p: u64, r: u64, h: u64, screen_path: &str,
+    public_path: &str, checker_path: &str) {
+    assert!(!Path::new(public_path).exists() && !Path::new(checker_path).exists());
+    assert!([(2473,2437,2511),(5521,5569,5475),
+        (9619,9679,9561),(19213,19249,19179)].contains(&(p,r,h)));
+    let screen_bytes=fs::read(screen_path).unwrap();
+    let record:Value=screen_bytes.split(|&byte| byte==b'\n')
+        .filter(|line| !line.is_empty())
+        .map(|line| serde_json::from_slice::<Value>(line).unwrap())
+        .find(|row| row["p"]==p && row["status"]=="accept")
+        .expect("selected screen row");
+    assert_eq!(record["n2"].as_u64(),Some(r*h));
+    assert!(record["eligible_orders"].as_array().unwrap().iter().any(|v|v==r));
+    let src=source(p);
+    let t=Point::affine(src.f.from_fp(3),src.f.one());
+    let dst=destination(&src,t);
+    assert_eq!(record["field_nu"],src.f.nu);
+    assert_eq!(record["source"]["j"],json!(j(&src).unwrap()));
+    assert_eq!(record["destination"]["j"],json!(j(&dst).unwrap()));
+    let mut rng=StdRng::seed_from_u64(0x2026_1015u64 ^ p ^ (r<<16));
+    let mut ops=GroupOps::default();
+    let mut attempts=0u64;
+    let g=loop {
+        attempts+=1;
+        assert!(attempts<=4096,"generator search cap");
+        let raw=random_point(&src,&mut rng);
+        let candidate=src.mul(&mut ops,raw,h);
+        if !candidate.infinity && src.mul(&mut ops,candidate,r).infinity {
+            break candidate;
+        }
+    };
+    let mapped_g=velu(&src,t,g,&mut ops);
+    assert!(!mapped_g.infinity && dst.is_on_curve(mapped_g));
+    assert!(dst.mul(&mut ops,mapped_g,r).infinity);
+    let g_plus=src.add(&mut ops,g,t);
+    let g_minus=src.add(&mut ops,g,src.neg(t));
+    assert_eq!(velu(&src,t,g_plus,&mut ops),mapped_g);
+    assert_eq!(velu(&src,t,g_minus,&mut ops),mapped_g);
+    let mut entries=Vec::with_capacity((r-1) as usize);
+    let mut current=src.identity();
+    let mut image=dst.identity();
+    for scalar in 1..r {
+        current=src.add(&mut ops,current,g);
+        image=dst.add(&mut ops,image,mapped_g);
+        assert!(!current.infinity && src.is_on_curve(current));
+        assert_eq!(velu(&src,t,current,&mut ops),image);
+        let key=point_tuple(current);
+        let digest=sha256_hex(format!("different-j-inverse-trend-target-v1:17:{key}").as_bytes());
+        entries.push((digest,key,current,image,scalar));
+    }
+    current=src.add(&mut ops,current,g);
+    assert!(current.infinity);
+    entries.sort_by(|a,b|(&a.0,&a.1).cmp(&(&b.0,&b.1)));
+    let mut targets=Vec::new();
+    let mut scalars=Vec::new();
+    for entry in entries.iter().take(64) {
+        let point=entry.2;
+        let mapped=entry.3;
+        let orbit=[point,src.add(&mut ops,point,t),
+            src.add(&mut ops,point,src.neg(t))];
+        assert!(orbit.iter().all(|&preimage|velu(&src,t,preimage,&mut ops)==mapped));
+        assert_eq!(orbit.iter().map(|q|src.key(q))
+            .collect::<std::collections::BTreeSet<_>>().len(),3);
+        targets.push(json!({"source":point,"destination":mapped}));
+        scalars.push(entry.4);
+    }
+    assert_eq!(targets.len(),64);
+    let public=json!({"schema":"different_j_inverse_trend_public/v1",
+        "p":p,"r":r,"cofactor":h,"field_nu":src.f.nu,
+        "source":{"a":src.a,"b":src.b,"j":j(&src).unwrap()},
+        "destination_curve":{"a":dst.a,"b":dst.b,"j":j(&dst).unwrap()},
+        "kernel":[t,src.neg(t)],"generator":g,"mapped_generator":mapped_g,
+        "target_order_domain":"different-j-inverse-trend-target-v1:17",
+        "target_count":64,"targets":targets,
+        "screen_raw_sha256":sha256_hex(&screen_bytes),
+        "generator_seed":0x2026_1015u64 ^ p ^ (r<<16),
+        "generator_attempts":attempts,"fiber_points_per_target":3});
+    assert!(public.get("scalars").is_none());
+    fs::write(public_path,format!("{}\n",serde_json::to_string_pretty(&public).unwrap())).unwrap();
+    let public_hash=sha256_hex(&fs::read(public_path).unwrap());
+    let checker=json!({"schema":"different_j_inverse_trend_checker/v1",
+        "public_sha256":public_hash,"p":p,"r":r,"target_count":64,"scalars":scalars});
+    fs::write(checker_path,format!("{}\n",serde_json::to_string_pretty(&checker).unwrap())).unwrap();
+    println!("{}",json!({"schema":"different_j_inverse_trend_freeze/v1",
+        "p":p,"r":r,"cofactor":h,"screen_raw_sha256":sha256_hex(&screen_bytes),
+        "public_sha256":public_hash,
+        "checker_sha256":sha256_hex(&fs::read(checker_path).unwrap()),
+        "generator_attempts":attempts,"fiber_replays":64*3,
+        "target_count":64,"group_ops":ops,"status":"pass"}));
+}
+
 fn main() {
-    let extension = match std::env::args().nth(1).as_deref() {
+    let args:Vec<String>=std::env::args().collect();
+    if args.get(1).map(String::as_str)==Some("freeze-trend") {
+        assert_eq!(args.len(),8);
+        freeze_trend(args[2].parse().unwrap(),args[3].parse().unwrap(),
+            args[4].parse().unwrap(),&args[5],&args[6],&args[7]);
+        return;
+    }
+    let extension = match args.get(1).map(String::as_str) {
         Some("screen-inverse-trend") => false,
         Some("screen-inverse-trend-extension") => true,
         _ => panic!("expected screen-inverse-trend or screen-inverse-trend-extension"),

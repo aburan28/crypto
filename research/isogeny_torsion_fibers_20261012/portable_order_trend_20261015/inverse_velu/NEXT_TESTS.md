@@ -10,6 +10,29 @@ not complete portable `S`. The [V2 result](RESULTS.md) and
 state the remaining gap. Each experiment below requires a versioned
 frozen spec before execution and belongs in a focused follow-on PR.
 
+**2026-10-16 execution status.** The [four-gate frozen
+protocol](FOUR_GATE_PROTOCOL_V1.md) is committed. Gate 1 remains
+an implementation and conversion gap: the current Fp counters
+overlap group work and omit base-field square-root internals,
+allocation and process I/O. Gate 2 has an
+[exhaustively checked direct χ resultant](../../chi_polynomial_20261015/different_j_resultant_20261016/RESULTS_V1.md)
+and a [nine-arm held-out solve
+panel](../../chi_polynomial_20261015/different_j_resultant_20261016/HELDOUT_RESULTS_V4.md)
+after exhaustive source and quotient S3 pair checks. All 108 scalars
+and 996 relation witnesses replayed, with identical six-arm relation
+support. This completes Gate 2's matched order-229 row controls;
+the complete price remains required. Gate 3's independent Linux V2
+and nine-arm V4 workflows are prepared with frozen source checks and
+await executed host artifacts; L2 access remains open. Gate 4 has
+[four checked structural cells and 96 complete four-arm
+children](trend_four_cell_v1/TREND_RESULTS_V1.md), while the
+full-image arm under a hard memory cap and portable pricing
+remain open. A [Linux p2473 N1 full-image
+probe](trend_four_cell_v1/FULL_IMAGE_LINUX_SPEC_V1.json) is versioned
+and awaits execution; it preserves resource-censored outcomes and
+independently replays any complete child. These are partial gate
+statuses, not promotions.
+
 1. **Complete the price of the working inverse oracle.** Add disjoint
    counters for field arithmetic inside and outside group calls,
    `sqrt_mod` branch and exponentiation work, polynomial gcd and split,

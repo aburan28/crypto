@@ -168,8 +168,93 @@ fn check_case(f: Field, a: El, signed: &[Point], target: Point, label: Value, ro
     reported.len()
 }
 
+fn check_s3(public_path: &str, raw_path: &str) {
+    let public_bytes=fs::read(public_path).unwrap();
+    let public:Value=serde_json::from_slice(&public_bytes).unwrap();
+    assert_eq!(public["p"],211);
+    assert_eq!(public["r"],229);
+    let f=Field{p:211,nu:2};
+    let source_a=[190,0];
+    let quotient_a=[130,0];
+    let g=point(&public["generator"]);
+    let mapped_g=point(&public["mapped_generator"]);
+    let t=Point{x:[3,0],y:[1,0],infinity:false};
+    let mut signed=Vec::new();
+    for witness in public["full_base_witness_source"].as_array().unwrap() {
+        let projected=scalar_mul(f,source_a,point(witness),195);
+        signed.push(projected);
+        signed.push(neg(f,projected));
+    }
+    let mapped:Vec<Point>=signed.iter().map(|&q|{
+        if q.infinity || q==t || q==neg(f,t) {return identity();}
+        let plus=add(f,source_a,q,t);
+        let minus=add(f,source_a,q,neg(f,t));
+        Point{x:f.sub(f.add(f.add(q.x,plus.x),minus.x),f.scale(t.x,2)),
+            y:f.add(f.add(q.y,plus.y),minus.y),infinity:false}
+    }).collect();
+    let bytes=fs::read(raw_path).unwrap();
+    let mut rows=bytes.split(|&byte|byte==b'\n').filter(|row|!row.is_empty())
+        .map(|row|serde_json::from_slice::<Value>(row).unwrap());
+    let mut source_target=identity();
+    let mut quotient_target=identity();
+    let mut source_pairs=0u64;
+    let mut quotient_pairs=0u64;
+    let mut zero_source=0u64;
+    let mut zero_quotient=0u64;
+    for scalar in 0..229 {
+        let row=rows.next().unwrap();
+        assert_eq!(row["schema"],"different_j_chi_s3_case/v2");
+        assert_eq!(row["scalar_label"],scalar);
+        assert_eq!(point(&row["source_target"]),source_target);
+        assert_eq!(point(&row["quotient_target"]),quotient_target);
+        assert_eq!(row["status"],"pass");
+        let expected_source=expected_pairs(f,source_a,&signed,source_target);
+        let expected_quotient=expected_pairs(f,quotient_a,&mapped,quotient_target);
+        let parse_pairs=|v:&Value| -> BTreeSet<(usize,usize)> {
+            v.as_array().unwrap().iter().map(|pair|
+                (pair[0].as_u64().unwrap() as usize,
+                 pair[1].as_u64().unwrap() as usize)).collect()
+        };
+        let actual_source=parse_pairs(&row["source_pairs"]);
+        let actual_quotient=parse_pairs(&row["quotient_pairs"]);
+        assert_eq!(actual_source,expected_source);
+        assert_eq!(actual_quotient,expected_quotient);
+        assert_eq!(actual_source,actual_quotient);
+        source_pairs+=actual_source.len() as u64;
+        quotient_pairs+=actual_quotient.len() as u64;
+        zero_source+=u64::from(actual_source.is_empty());
+        zero_quotient+=u64::from(actual_quotient.is_empty());
+        source_target=add(f,source_a,source_target,g);
+        quotient_target=add(f,quotient_a,quotient_target,mapped_g);
+    }
+    assert_eq!(source_target,identity());
+    assert_eq!(quotient_target,identity());
+    let summary=rows.next().unwrap();
+    assert!(rows.next().is_none());
+    assert_eq!(summary["schema"],"different_j_chi_s3_exhaustive/v2");
+    assert_eq!(summary["public_sha256"],sha256_hex(&public_bytes));
+    assert_eq!(summary["source_cases"],229);
+    assert_eq!(summary["quotient_cases"],229);
+    assert_eq!(summary["source_pairs"],source_pairs);
+    assert_eq!(summary["quotient_pairs"],quotient_pairs);
+    assert_eq!(summary["source_zero_cases"],zero_source);
+    assert_eq!(summary["quotient_zero_cases"],zero_quotient);
+    assert_eq!(summary["status"],"pass");
+    println!("{}",json!({"schema":"different_j_chi_s3_check/v2",
+        "status":"pass","source_cases":229,"quotient_cases":229,
+        "source_pairs":source_pairs,"quotient_pairs":quotient_pairs,
+        "source_zero_cases":zero_source,"quotient_zero_cases":zero_quotient,
+        "public_sha256":sha256_hex(&public_bytes),
+        "raw_sha256":sha256_hex(&bytes)}));
+}
+
 fn main() {
     let args: Vec<_> = std::env::args().collect();
+    if args.get(1).map(String::as_str)==Some("check-s3") {
+        assert_eq!(args.len(),4);
+        check_s3(&args[2],&args[3]);
+        return;
+    }
     assert_eq!(args.len(), 3, "usage: checker PUBLIC.json EXHAUSTIVE.jsonl");
     let public_bytes = fs::read(&args[1]).unwrap();
     let public: Value = serde_json::from_slice(&public_bytes).unwrap();

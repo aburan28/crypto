@@ -34,11 +34,17 @@ jobs:
             examples/different_j_inverse_velu_check.rs
             examples/different_j_order_process_meter.rs
             research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/RUN_SPEC_V2.json
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/FROZEN_RUNNER_V2.rs
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/FROZEN_CHECKER_V2.rs
             research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/run_panel_linux_v1.sh
             research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/order1000/BATCH_1237_1201_V2.public.json
             research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/order1000/BATCH_1237_1201_V2.checker.json
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
+      - name: Restore the byte-identical V2 runner and checker snapshots
+        run: |
+          cp research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/FROZEN_RUNNER_V2.rs examples/different_j_inverse_velu_oracle.rs
+          cp research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/FROZEN_CHECKER_V2.rs examples/different_j_inverse_velu_check.rs
       - name: Build native solver, independent checker, and process meter
         run: cargo build --release --locked --example different_j_inverse_velu_oracle --example different_j_inverse_velu_check --example different_j_order_process_meter
       - name: Execute all 60 cold children and replay every result

@@ -683,3 +683,77 @@ still missing. This closes the source-census construction subtask at
 this exact cell; it leaves complete disjoint native pricing, a direct
 `χ` decomposition oracle, inverse-arm second-host replay, L2 wall
 admission and broad order trend as [explicit next tests](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/NEXT_TESTS.md).
+
+2026-10-16 four-gate follow-on: a [direct χ chord
+resultant](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/RESULTS_V1.md)
+matched independently enumerated unordered pair sets in all 231
+order-229 subgroup and torsion cases. The checked Lean declaration
+proves the conditional eliminated-chord identity over integers;
+finite-field root completeness and the exceptional branches are
+still a separate proof obligation. On four held-out targets, the
+[corrected five-arm run](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/HELDOUT_RESULTS_V2.md)
+completed 60/60 verified scalars and 332 independently replayed
+relation witnesses. The χ and direct-pair rows had identical
+relation trials, useful ranks and answers; mean cold counted-group
+`S_group` was 140.672 for χ, 88.908 for direct pair and 7.979
+for same-target signed rho. The first five-arm run is retained
+with its setup-charging defect; V2 corrects it. Source and quotient
+`S_3`, direct inverse-Vélu and full-image arms on these held-out
+targets remain required by the eight-arm protocol.
+
+The [four-order direct-inverse
+panel](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/trend_four_cell_v1/TREND_RESULTS_V1.md)
+froze public 64-target sets at subgroup orders 2,437, 5,569, 9,679
+and 19,249. Its 96 Darwin children solved and independently checked
+3,120 scalars and 9,565 relation witnesses, including random
+streams. Cold N1 inverse/rho counted-group ratios were 97.505,
+92.994, 218.951 and 184.163. These selected cells give a
+descriptive counted-group trend and do not determine an exponent
+or a portable primitive cost. The full-image controls remain
+unexecuted because their all-field-element square maps require
+a hard 512 MiB process cap; Darwin `RLIMIT_AS` and
+`RLIMIT_DATA` both returned `EINVAL`. A Linux memory-capped
+run can distinguish feasible completion from resource censorship.
+The frozen order-1,201 inverse-arm Linux L1 workflow, independent
+[nine-arm Linux replay](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/LINUX_REPLAY_SPEC_V1.json),
+and [hard-capped p2473 full-image Linux
+probe](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/trend_four_cell_v1/FULL_IMAGE_LINUX_SPEC_V1.json)
+are prepared but have not yet returned host artifacts. The latter
+probe independently checks a completed child and preserves a
+resource-censored outcome. L2 admission still requires an available
+reserved physical core and its telemetry.
+
+The [seven-arm held-out extension](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/HELDOUT_RESULTS_V3.md)
+independently replayed the source and quotient S3 pair sets on all
+229 subgroup elements (136 pairs and 130 zero-pair cases per curve),
+then solved 84/84 children and checked 664 relation witnesses.
+All four relation arms had identical trials, relations, rank-nine
+solves and scalars in 12/12 paired cells. Mean cold counted-group
+`S_group` for both S3 arms was 87.470 against rho 7.979, a ratio
+of 10.962; χ remained 140.672. Whole-child CPU source S3/rho
+was 5.824/5.791 ms, while rho A/A/rho was 1.058 on the shared
+Darwin host. This near CPU parity is dominated by process overhead
+and noise and is not an isolated wall or complete portable `S`
+result. The historical five-arm run remains separate.
+
+The [nine-arm held-out panel](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/HELDOUT_RESULTS_V4.md)
+then added cold inverse-Vélu and full-image construction on those
+same four targets. Both constructed the same eight destination
+columns as the polynomial controls; all six relation arms had
+identical trials, relations, useful rank and verified scalars in
+12/12 paired cells. The separate checker replayed 108/108 scalars
+and 996 witnesses. Mean cold counted-group `S_group` was 104.663
+for inverse, 5,990.706 for full image, 7.979 for matched rho and
+4.361 for BSGS. The full/inverse group-count ratio was 57.238;
+inverse/rho was 13.117. The order-229 relation-control exit
+criterion is met, while the portable-cost and isolation exit
+criteria remain open.
+
+The present exit criteria remain: disjoint instrumentation
+and calibrated conversion of every primitive into a complete
+portable `S`; Linux full-image resource results and order-1,201
+inverse replay; and an admitted L2 paired wall session.
+The next discriminating action is the Linux V2 replay and
+hard-cap full-image control, followed by the missing native
+primitive ledger. None of these gaps is a proof of an
+isogeny or torsion-fiber obstruction.

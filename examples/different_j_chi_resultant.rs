@@ -1,8 +1,9 @@
 //! A direct chi-coordinate chord resultant on the frozen different-j cell.
 //! This correctness gate does not use a pair-sum table or scan base pairs
 //! inside the polynomial oracle. It tests every point of the order-229 group.
+#![recursion_limit = "256"]
 
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::Path;
 use std::time::Instant;
@@ -12,6 +13,9 @@ use crypto_lib::cryptanalysis::ext_curve::{
     take_field_counters, ExtCurve, ExtField, ExtPoint, Fp2,
 };
 use crypto_lib::cryptanalysis::ic_boundary::{CountedGroup, GroupOps};
+use crypto_lib::cryptanalysis::ic_boundary::rho_reference_negation;
+use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
 use serde_json::{json, Value};
 
 type El = [u64; 2];
@@ -158,6 +162,88 @@ struct Stats {
     infinity_cases: u64,
     exceptional_chi_cases: u64,
     multiple_resultant_roots: u64,
+}
+
+#[derive(Default)]
+struct S3Stats {
+    quadratics: u64,
+    roots: u64,
+    lift_scans: u64,
+    exact_checks: u64,
+    false_candidates: u64,
+    degenerate: u64,
+    sqrt_failures: u64,
+    infinity_cases: u64,
+}
+
+fn s3_coefficients(curve: &Curve, x: El, z: El) -> [El; 3] {
+    let f=&curve.f;
+    let x2=f.sqr(x);
+    let z2=f.sqr(z);
+    let leading=f.sqr(f.sub(z,x));
+    let middle=f.neg(f.scale(f.add(
+        f.add(f.mul(x,z2),f.mul(f.add(x2,curve.a),z)),
+        f.add(f.mul(x,curve.a),f.scale(curve.b,2))),2));
+    let constant=f.sub(
+        f.sub(f.mul(x2,z2),
+            f.scale(f.mul(f.add(f.mul(x,curve.a),f.scale(curve.b,2)),z),2)),
+        f.sub(f.scale(f.mul(curve.b,x),4),f.sqr(curve.a)));
+    [constant,middle,leading]
+}
+
+fn s3_pairs(curve: &Curve, signed: &[Point], target: Point,
+    ops: &mut GroupOps, stats: &mut S3Stats) -> BTreeSet<(usize,usize)> {
+    let f=&curve.f;
+    let mut out=BTreeSet::new();
+    if target.infinity {
+        stats.infinity_cases+=1;
+        for (i,&p) in signed.iter().enumerate() {
+            for (j,&q) in signed.iter().enumerate().skip(i) {
+                stats.exact_checks+=1;
+                if curve.add(ops,p,q).infinity { out.insert((i,j)); }
+            }
+        }
+        return out;
+    }
+    for (i,&p) in signed.iter().enumerate() {
+        let [c,b,a]=s3_coefficients(curve,p.x,target.x);
+        stats.quadratics+=1;
+        let mut roots=Vec::new();
+        if a==f.zero() {
+            stats.degenerate+=1;
+            if b!=f.zero() {
+                roots.push(f.mul(f.neg(c),f.inv(b).unwrap()));
+            } else if c==f.zero() {
+                roots.extend(signed.iter().map(|q|q.x));
+            }
+        } else {
+            let discriminant=f.sub(f.sqr(b),f.scale(f.mul(a,c),4));
+            if let Some(square_root)=f.sqrt(discriminant) {
+                let inv=f.inv(f.scale(a,2)).unwrap();
+                roots.push(f.mul(f.add(f.neg(b),square_root),inv));
+                roots.push(f.mul(f.sub(f.neg(b),square_root),inv));
+            } else {
+                stats.sqrt_failures+=1;
+            }
+        }
+        roots.sort_unstable();
+        roots.dedup();
+        stats.roots+=roots.len() as u64;
+        for root in roots {
+            for (j,&q) in signed.iter().enumerate() {
+                stats.lift_scans+=1;
+                if q.x==root {
+                    stats.exact_checks+=1;
+                    if curve.add(ops,p,q)==target {
+                        out.insert((i.min(j),i.max(j)));
+                    } else {
+                        stats.false_candidates+=1;
+                    }
+                }
+            }
+        }
+    }
+    out
 }
 
 fn all_roots(f: &Fp2, polynomial: &Poly, stats: &mut Stats) -> Vec<El> {
@@ -401,6 +487,328 @@ fn direct_pairs(
     out
 }
 
+fn modmul(a: u64, b: u64) -> u64 {
+    ((a as u128 * b as u128) % 229) as u64
+}
+
+fn insert_relation(pivots: &mut [Option<Vec<u64>>; 9], mut row: Vec<u64>) -> bool {
+    for col in 0..9 {
+        if row[col] == 0 {
+            continue;
+        }
+        if let Some(pivot) = &pivots[col] {
+            let factor = row[col];
+            for j in col..10 {
+                row[j] = (row[j] + 229 - modmul(factor, pivot[j])) % 229;
+            }
+        } else {
+            let inverse = crypto_lib::cryptanalysis::residual_walk::pow_mod(row[col], 227, 229);
+            for item in row.iter_mut().skip(col) {
+                *item = modmul(*item, inverse);
+            }
+            pivots[col] = Some(row);
+            return true;
+        }
+    }
+    assert_eq!(row[9], 0);
+    false
+}
+
+fn recover(pivots: &[Option<Vec<u64>>; 9]) -> Option<[u64; 9]> {
+    if pivots.iter().any(Option::is_none) {
+        return None;
+    }
+    let mut output = [0u64; 9];
+    for col in (0..9).rev() {
+        let row = pivots[col].as_ref().unwrap();
+        let mut rhs = row[9];
+        for j in col + 1..9 {
+            rhs = (rhs + 229 - modmul(row[j], output[j])) % 229;
+        }
+        output[col] = rhs;
+    }
+    Some(output)
+}
+
+fn thread_cpu_ns() -> u64 {
+    let mut ts = libc::timespec { tv_sec: 0, tv_nsec: 0 };
+    assert_eq!(unsafe { libc::clock_gettime(libc::CLOCK_THREAD_CPUTIME_ID, &mut ts) }, 0);
+    ts.tv_sec as u64 * 1_000_000_000 + ts.tv_nsec as u64
+}
+
+fn peak_rss_bytes() -> u64 {
+    let mut usage = std::mem::MaybeUninit::<libc::rusage>::zeroed();
+    assert_eq!(unsafe { libc::getrusage(libc::RUSAGE_SELF, usage.as_mut_ptr()) }, 0);
+    let raw = unsafe { usage.assume_init() }.ru_maxrss as u64;
+    if cfg!(target_os = "macos") { raw } else { raw * 1024 }
+}
+
+fn run_heldout(path: &str, round: u64, arm: &str, position: usize) {
+    assert!(round < 3 && position < 4);
+    assert!(["chi-resultant", "direct-pair", "source-s3", "quotient-s3",
+        "source-bsgs", "rho-negation", "rho-negation-aa"].contains(&arm));
+    let bytes = fs::read(path).unwrap();
+    let public: Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(public["schema"], "different_j_chi_heldout_public/v1");
+    assert_eq!((public["p"].as_u64(), public["r"].as_u64()), (Some(211), Some(229)));
+    assert!(public.get("scalars").is_none() && public.get("answer_scalar").is_none());
+    assert_eq!(public["selection_positions_zero_indexed"], json!([64, 65, 66, 67]));
+    let f = Fp2::new(211).unwrap();
+    let source = Curve { f, a: [190, 0], b: [37, 0] };
+    let destination = Curve { f, a: [130, 0], b: [179, 0] };
+    let g = parse_point(&public["generator"]);
+    let mapped_g = parse_point(&public["mapped_generator"]);
+    let t = Point::affine([3, 0], [1, 0]);
+    let q = parse_point(&public["targets"][position]["source"]);
+    let mapped_q = parse_point(&public["targets"][position]["destination"]);
+    let wall = Instant::now();
+    let cpu = thread_cpu_ns();
+    take_field_counters();
+    let mut setup_ops = GroupOps::default();
+    assert!(source.is_on_curve(g) && source.is_on_curve(q));
+    assert!(destination.is_on_curve(mapped_g) && destination.is_on_curve(mapped_q));
+    assert_eq!(velu(&source, t, g, &mut setup_ops), mapped_g);
+    assert_eq!(velu(&source, t, q, &mut setup_ops), mapped_q);
+    assert!(source.mul(&mut setup_ops, g, 229).infinity);
+    assert!(source.mul(&mut setup_ops, q, 229).infinity);
+    let relation_arm = ["chi-resultant","direct-pair","source-s3","quotient-s3"].contains(&arm);
+    let mut signed = Vec::new();
+    let mut mapped_signed=Vec::new();
+    if relation_arm {
+        for witness in public["full_base_witness_source"].as_array().unwrap() {
+            let projected = source.mul(&mut setup_ops, parse_point(witness), 195);
+            assert!(!projected.infinity && source.mul(&mut setup_ops, projected, 229).infinity);
+            signed.push(projected);
+            signed.push(source.neg(projected));
+        }
+        assert_eq!(signed.len(), 16);
+        mapped_signed = signed.iter().map(|&p| velu(&source, t, p, &mut setup_ops)).collect();
+        let expected_destination = public["full_base_projected"].as_array().unwrap();
+        for index in 0..8 {
+            assert_eq!(mapped_signed[2 * index], parse_point(&expected_destination[index]));
+        }
+    }
+    let base = if arm == "chi-resultant" { chi_base(&source, &signed) } else { Vec::new() };
+    let mut table = BTreeMap::<u64, Vec<(usize, usize)>>::new();
+    if arm == "direct-pair" {
+        for i in 0..16 {
+            for j in i..16 {
+                let sum = source.add(&mut setup_ops, signed[i], signed[j]);
+                if !sum.infinity {
+                    table.entry(source.key(&sum)).or_default().push((i, j));
+                }
+            }
+        }
+    }
+    let mut baby = BTreeMap::<u64, u64>::new();
+    let mut giant_step = source.identity();
+    if arm == "source-bsgs" {
+        let mut cursor = source.identity();
+        for small in 0..16 {
+            baby.insert(source.key(&cursor), small);
+            cursor = source.add(&mut setup_ops, cursor, g);
+        }
+        giant_step = source.neg(source.mul(&mut setup_ops, g, 16));
+    }
+    let setup_cpu_ns = thread_cpu_ns() - cpu;
+    let setup_fp = take_field_counters();
+    let seed = (0x2026_1015u64 ^ 211)
+        .wrapping_add(round.wrapping_mul(0x9e37_79b9))
+        .wrapping_add(((position + 64) as u64).wrapping_mul(0x0123_4567));
+    let query_cpu_start = thread_cpu_ns();
+    let mut ops = GroupOps::default();
+    let mut stats = Stats::default();
+    let mut s3_stats=S3Stats::default();
+    let mut witnesses = Vec::new();
+    let mut trials = 0u64;
+    let mut relations = 0u64;
+    let mut rank = 0u64;
+    let mut recovered = None;
+    let mut rho_attempts = Vec::new();
+    if relation_arm {
+        let mut rng = StdRng::seed_from_u64(seed);
+        let mut pivots: [Option<Vec<u64>>; 9] = std::array::from_fn(|_| None);
+        let quotient=arm=="quotient-s3";
+        let query_curve=if quotient {&destination} else {&source};
+        let query_g=if quotient {mapped_g} else {g};
+        let query_q=if quotient {mapped_q} else {q};
+        for _ in 0..1832 {
+            trials += 1;
+            let a = rng.gen_range(0..229u64);
+            let b = rng.gen_range(0..229u64);
+            let a_g = query_curve.mul(&mut ops, query_g, a);
+            let b_q = query_curve.mul(&mut ops, query_q, b);
+            let candidate = query_curve.add(&mut ops, a_g, b_q);
+            let projected = query_curve.mul(&mut ops, candidate, 195);
+            if projected.infinity { continue; }
+            let pairs = if arm == "chi-resultant" {
+                polynomial_pairs(&source, &signed, &base, projected, &mut ops, &mut stats)
+            } else if arm=="source-s3" {
+                s3_pairs(&source,&signed,projected,&mut ops,&mut s3_stats)
+            } else if arm=="quotient-s3" {
+                s3_pairs(&destination,&mapped_signed,projected,&mut ops,&mut s3_stats)
+            } else {
+                let mut out = BTreeSet::new();
+                if let Some(entries) = table.get(&source.key(&projected)) {
+                    for &(i,j) in entries {
+                        if source.add(&mut ops, signed[i], signed[j]) == projected {
+                            out.insert((i,j));
+                        }
+                    }
+                }
+                out
+            };
+            if let Some(&(i, j)) = pairs.first() {
+                let mut row = vec![0u64; 10];
+                for index in [i,j] {
+                    let column = index / 2;
+                    let coefficient = if index % 2 == 0 { 1 } else { 228 };
+                    row[column] = (row[column] + coefficient) % 229;
+                }
+                row[8] = (229 - modmul(195, b)) % 229;
+                row[9] = modmul(195, a);
+                witnesses.push(json!({"a":a,"b":b,"i":i,"j":j,"projected":projected}));
+                relations += 1;
+                if insert_relation(&mut pivots, row) { rank += 1; }
+                if rank == 9 { break; }
+            }
+        }
+        recovered = recover(&pivots).map(|sol| sol[8]);
+    } else if arm == "source-bsgs" {
+        let mut cursor = q;
+        for giant in 0..15u64 {
+            trials += 1;
+            if let Some(&small) = baby.get(&source.key(&cursor)) {
+                recovered = Some((giant * 16 + small) % 229);
+                break;
+            }
+            cursor = source.add(&mut ops, cursor, giant_step);
+        }
+    } else {
+        for retry in 0..32u64 {
+            let try_seed = seed.wrapping_add(retry * 0x0100_0000);
+            let result = rho_reference_negation(&source, g, q, 229, try_seed, 4580);
+            ops.merge(result.group_ops);
+            rho_attempts.push(json!({"retry":retry,"seed":try_seed,"steps":result.steps,
+                "walks":result.walks,"group_ops":result.group_ops,"recovered":result.recovered,
+                "verified":result.verified}));
+            if result.verified { recovered = result.recovered; break; }
+        }
+    }
+    let query_cpu_ns = thread_cpu_ns() - query_cpu_start;
+    let query_fp = take_field_counters();
+    let mut verify_ops = GroupOps::default();
+    let verified = recovered.is_some_and(|scalar| {
+        source.mul(&mut verify_ops, g, scalar) == q
+            && destination.mul(&mut verify_ops, mapped_g, scalar) == mapped_q
+    });
+    let verify_fp = take_field_counters();
+    let peak_rss = peak_rss_bytes();
+    let result = json!({"schema":"different_j_chi_heldout_run/v3",
+        "public_sha256":sha256_hex(&bytes),"round":round,"arm":arm,"position":position,
+        "seed":seed,"target":q,"mapped_target":mapped_q,
+        "setup_group_ops":setup_ops,"query_group_ops":ops,"verify_group_ops":verify_ops,
+        "setup_fp_muls":setup_fp.0,"setup_fp_invs":setup_fp.1,
+        "query_fp_muls":query_fp.0,"query_fp_invs":query_fp.1,
+        "verify_fp_muls":verify_fp.0,"verify_fp_invs":verify_fp.1,
+        "setup_cpu_ns":setup_cpu_ns,"query_cpu_ns":query_cpu_ns,
+        "total_cpu_ns":thread_cpu_ns()-cpu,"total_wall_ns":wall.elapsed().as_nanos(),
+        "peak_rss_bytes":peak_rss,"trials":trials,"relations":relations,
+        "rank":rank,"recovered":recovered,"verified":verified,
+        "relation_witnesses":witnesses,"rho_attempts":rho_attempts,
+        "chi_stats":{"resultants":stats.resultants,"gcds":stats.gcds,
+          "split_attempts":stats.split_attempts,
+          "exhaustive_fallback_evaluations":stats.exhaustive_fallback_evaluations,
+          "root_candidates":stats.root_candidates,"chi_lift_scans":stats.chi_lift_scans,
+          "exact_checks":stats.exact_checks,"false_candidates":stats.false_candidates,
+          "vertical_cases":stats.vertical_cases,"tangent_cases":stats.tangent_cases,
+          "horizontal_cases":stats.horizontal_cases,"infinity_cases":stats.infinity_cases,
+          "exceptional_chi_cases":stats.exceptional_chi_cases,
+          "multiple_resultant_roots":stats.multiple_resultant_roots},
+        "s3_stats":{"quadratics":s3_stats.quadratics,"roots":s3_stats.roots,
+          "lift_scans":s3_stats.lift_scans,"exact_checks":s3_stats.exact_checks,
+          "false_candidates":s3_stats.false_candidates,
+          "degenerate":s3_stats.degenerate,"sqrt_failures":s3_stats.sqrt_failures,
+          "infinity_cases":s3_stats.infinity_cases}});
+    println!("{result}");
+    assert!(verified && peak_rss <= 512 * 1024 * 1024);
+}
+
+fn exhaustive_s3(path: &str) {
+    let bytes=fs::read(path).unwrap();
+    let public:Value=serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(public["p"],211);
+    assert_eq!(public["r"],229);
+    let f=Fp2::new(211).unwrap();
+    let source=Curve{f,a:[190,0],b:[37,0]};
+    let destination=Curve{f,a:[130,0],b:[179,0]};
+    let g=parse_point(&public["generator"]);
+    let mg=parse_point(&public["mapped_generator"]);
+    let t=Point::affine([3,0],[1,0]);
+    let mut ops=GroupOps::default();
+    let mut signed=Vec::new();
+    for witness in public["full_base_witness_source"].as_array().unwrap() {
+        let projected=source.mul(&mut ops,parse_point(witness),195);
+        signed.push(projected);
+        signed.push(source.neg(projected));
+    }
+    let mapped:Vec<Point>=signed.iter().map(|&q|velu(&source,t,q,&mut ops)).collect();
+    take_field_counters();
+    let start=Instant::now();
+    let mut source_stats=S3Stats::default();
+    let mut quotient_stats=S3Stats::default();
+    let mut zero_source=0u64;
+    let mut zero_quotient=0u64;
+    let mut pairs_source=0u64;
+    let mut pairs_quotient=0u64;
+    let mut sq=source.identity();
+    let mut dq=destination.identity();
+    for scalar_label in 0..229 {
+        let expected_source=direct_pairs(&source,&signed,sq,&mut ops);
+        let actual_source=s3_pairs(&source,&signed,sq,&mut ops,&mut source_stats);
+        assert_eq!(actual_source,expected_source);
+        let expected_quotient=direct_pairs(&destination,&mapped,dq,&mut ops);
+        let actual_quotient=s3_pairs(&destination,&mapped,dq,&mut ops,&mut quotient_stats);
+        assert_eq!(actual_quotient,expected_quotient);
+        assert_eq!(actual_source,actual_quotient);
+        println!("{}",json!({"schema":"different_j_chi_s3_case/v2",
+            "scalar_label":scalar_label,"source_target":sq,
+            "quotient_target":dq,
+            "source_pairs":actual_source.iter().copied().collect::<Vec<_>>(),
+            "quotient_pairs":actual_quotient.iter().copied().collect::<Vec<_>>(),
+            "status":"pass"}));
+        zero_source+=u64::from(actual_source.is_empty());
+        zero_quotient+=u64::from(actual_quotient.is_empty());
+        pairs_source+=actual_source.len() as u64;
+        pairs_quotient+=actual_quotient.len() as u64;
+        sq=source.add(&mut ops,sq,g);
+        dq=destination.add(&mut ops,dq,mg);
+    }
+    assert!(sq.infinity && dq.infinity);
+    let fp=take_field_counters();
+    println!("{}",json!({"schema":"different_j_chi_s3_exhaustive/v2",
+        "public_sha256":sha256_hex(&bytes),"source_cases":229,
+        "quotient_cases":229,"source_pairs":pairs_source,
+        "quotient_pairs":pairs_quotient,"source_zero_cases":zero_source,
+        "quotient_zero_cases":zero_quotient,
+        "source_s3":{"quadratics":source_stats.quadratics,
+          "roots":source_stats.roots,"lift_scans":source_stats.lift_scans,
+          "exact_checks":source_stats.exact_checks,
+          "false_candidates":source_stats.false_candidates,
+          "degenerate":source_stats.degenerate,
+          "sqrt_failures":source_stats.sqrt_failures,
+          "infinity_cases":source_stats.infinity_cases},
+        "quotient_s3":{"quadratics":quotient_stats.quadratics,
+          "roots":quotient_stats.roots,"lift_scans":quotient_stats.lift_scans,
+          "exact_checks":quotient_stats.exact_checks,
+          "false_candidates":quotient_stats.false_candidates,
+          "degenerate":quotient_stats.degenerate,
+          "sqrt_failures":quotient_stats.sqrt_failures,
+          "infinity_cases":quotient_stats.infinity_cases},
+        "group_ops":ops,"fp_muls":fp.0,"fp_invs":fp.1,
+        "wall_ns":start.elapsed().as_nanos(),"status":"pass"}));
+}
+
 fn polynomial_pairs(
     curve: &Curve,
     signed: &[Point],
@@ -496,6 +904,16 @@ fn main() {
     if args.get(1).map(String::as_str) == Some("freeze-targets") {
         assert_eq!(args.len(), 5);
         freeze_targets(&args[2], &args[3], &args[4]);
+        return;
+    }
+    if args.get(1).map(String::as_str) == Some("run-heldout") {
+        assert_eq!(args.len(), 6);
+        run_heldout(&args[2], args[3].parse().unwrap(), &args[4], args[5].parse().unwrap());
+        return;
+    }
+    if args.get(1).map(String::as_str) == Some("exhaustive-s3") {
+        assert_eq!(args.len(),3);
+        exhaustive_s3(&args[2]);
         return;
     }
     assert_eq!(args.get(1).map(String::as_str), Some("exhaustive"));

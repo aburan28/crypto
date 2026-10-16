@@ -1,0 +1,20 @@
+{
+  "schema": "different_j_nine_arm_linux_replay_spec/v1",
+  "predecessor": "HELDOUT_NINE_ARM_SPEC_V4.json",
+  "workflow": ".github/workflows/isogeny-fiber-nine-arm-linux.yml",
+  "orchestration_sha256": "74937aaa447613f47d63187f88d845e39ff77bd5554a4f4461aff18fedd30694",
+  "chi_solver_source_sha256": "c3cb3b06fd5d90708334d6b88ad878a780ddbd34979e8da88dfc363e41a74319",
+  "inverse_solver_source_sha256": "185004244350c0a29306e232f9a13d3942cf6630923f2024cdb1bc02a4ddbcbc",
+  "checker_source_sha256": "78966d5663e17aa43aeb2b1e3ac44ef605c64241db8fd88f0d79b6e97f8ef314",
+  "summary_source_sha256": "063c599c967fa5eb58a024b2b12c7e5133263868ccb2c862aba8040ced35c73e",
+  "meter_source_sha256": "3e478aa3edea464e97326cd4a4c6e34010a49bc18a3217ce5a809702bf0c2d7a",
+  "public_sha256": "e1969305462131722556dead399593b77a919a8017f0e035e3019986b645958e",
+  "checker_input_sha256": "16612e5a002fe85c62648ce62ec4cc2432868c02b83dff20174f5ff46493ebf9",
+  "arms": ["chi-resultant", "direct-pair", "source-s3", "quotient-s3", "inverse-velu", "full-image", "source-bsgs", "rho-negation", "rho-negation-aa"],
+  "rounds": 3,
+  "targets_per_arm_round": 4,
+  "child_wall_cap_seconds": 300,
+  "linux_rlimit_as_bytes": 536870912,
+  "acceptance": "108 successful children, 108 independently replayed scalars, every relation stream and witness checked, and exact same-target support; preserve every failed child and host receipt",
+  "measurement_class": "independent Ubuntu hosted L1 descriptive process CPU/wall; no reserved physical core or L2 wall admission"
+}

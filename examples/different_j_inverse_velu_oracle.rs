@@ -24,10 +24,15 @@ type Curve = ExtCurve<Fp2>;
 static CELL: OnceLock<(u64, u64, u64)> = OnceLock::new();
 fn set_cell(p: u64, r: u64, h: u64) {
     assert!([
+        (211, 229, 195),
         (409, 433, 387),
         (421, 457, 387),
         (457, 421, 495),
-        (1237, 1201, 1275)
+        (1237, 1201, 1275),
+        (2473, 2437, 2511),
+        (5521, 5569, 5475),
+        (9619, 9679, 9561),
+        (19213, 19249, 19179)
     ]
     .contains(&(p, r, h)));
     assert!(CELL.set((p, r, h)).is_ok());
@@ -56,6 +61,10 @@ fn j_pair() -> (u64, u64) {
         421 => (55, 176),
         457 => (119, 57),
         1237 => (1066, 727),
+        2473 => (1385, 1966),
+        5521 => (769, 1391),
+        9619 => (1514, 6912),
+        19213 => (2539, 6912),
         _ => unreachable!(),
     }
 }
@@ -91,7 +100,7 @@ fn destination(src: &Curve, t: Point) -> Curve {
         f.scale(f.mul(src.a, t.x), 42),
     );
     let dst = Curve { f: *f, a, b };
-    assert_eq!((dst.a, dst.b), ([p() - 81, 0], [p() - 243, 0]));
+    assert_eq!((dst.a, dst.b), ([p() - 81, 0], [p() - (243 % p()), 0]));
     dst
 }
 
@@ -533,7 +542,8 @@ fn assert_public(v: &Value) {
         }
     }
     walk(v);
-    assert_eq!(v["schema"], "different_j_trend_batch_public/v1");
+    assert!(v["schema"] == "different_j_trend_batch_public/v1"
+        || v["schema"] == "different_j_inverse_trend_public/v1");
     assert_eq!((v["p"].as_u64(), v["r"].as_u64()), (Some(p()), Some(r())));
     assert_eq!(v["targets"].as_array().unwrap().len(), N);
 }
@@ -685,16 +695,19 @@ fn prepare_relation(
     arm: &str,
     ops: &mut GroupOps,
 ) -> RelationSetup {
+    let historical = public["schema"] == "different_j_trend_batch_public/v1";
     let (raw, base, scan_count, image_points, candidate_count, oracle) = match arm {
         "inverse-velu" => {
             let (raw, base, witnesses, stats) = inverse_velu_base(src, dst, t, ops);
-            assert_eq!(raw, points(&public["full_base_raw"]));
-            assert_eq!(base, points(&public["full_base_projected"]));
-            assert_eq!(witnesses, points(&public["full_base_witness_source"]));
-            assert_eq!(
-                stats.accepted_image_points,
-                public["full_candidate_count"].as_u64().unwrap()
-            );
+            if historical {
+                assert_eq!(raw, points(&public["full_base_raw"]));
+                assert_eq!(base, points(&public["full_base_projected"]));
+                assert_eq!(witnesses, points(&public["full_base_witness_source"]));
+                assert_eq!(
+                    stats.accepted_image_points,
+                    public["full_candidate_count"].as_u64().unwrap()
+                );
+            }
             let scan = stats.destination_points;
             let candidates = stats.accepted_image_points;
             (raw, base, scan, candidates, candidates, Some(stats))
@@ -702,9 +715,11 @@ fn prepare_relation(
         "full-image" => {
             let (raw, base, witnesses, scan, images, candidates) =
                 full_image_base(src, dst, t, ops);
-            assert_eq!(raw, points(&public["full_base_raw"]));
-            assert_eq!(base, points(&public["full_base_projected"]));
-            assert_eq!(witnesses, points(&public["full_base_witness_source"]));
+            if historical {
+                assert_eq!(raw, points(&public["full_base_raw"]));
+                assert_eq!(base, points(&public["full_base_projected"]));
+                assert_eq!(witnesses, points(&public["full_base_witness_source"]));
+            }
             (raw, base, scan, images, candidates, None)
         }
         "destination-direct" => {
@@ -827,7 +842,7 @@ fn solve_relation(
         }
         row[8] = (r() - modmul(h() % r(), b)) % r();
         row[9] = modmul(h() % r(), a);
-        witnesses.push(json!({"a":a,"b":b,"i":i,"j":j}));
+        witnesses.push(json!({"a":a,"b":b,"i":i,"j":j,"projected":searched}));
         relations += 1;
         let la_start = thread_cpu_ns();
         if insert_relation(&mut pivots, row) {
@@ -1063,6 +1078,7 @@ fn run(path: &str, round: u64, arm: &str, prefix_length: usize) {
         "support_keys":setup.table.keys().copied().collect::<Vec<_>>(),
         "scan_count":setup.scan_count,"image_points":setup.image_points,
         "candidate_count":setup.candidate_count,
+        "signed_points":setup.signed,
         "oracle":setup.oracle.as_ref().map(|stats| json!({
             "destination_points":stats.destination_points,
             "polynomial_calls":stats.polynomial_calls,
@@ -1093,11 +1109,96 @@ fn run(path: &str, round: u64, arm: &str, prefix_length: usize) {
     assert!(peak_rss <= 512 * 1024 * 1024, "RSS ceiling");
 }
 
+fn run_heldout(path: &str, round: u64, arm: &str, position: usize) {
+    assert!(round < 3 && position < 4);
+    assert!(["inverse-velu", "full-image"].contains(&arm));
+    let wall = Instant::now();
+    let cpu = thread_cpu_ns();
+    take_field_counters();
+    let bytes = fs::read(path).unwrap();
+    let public: Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(public["schema"], "different_j_chi_heldout_public/v1");
+    assert_eq!(public["selection_positions_zero_indexed"], json!([64, 65, 66, 67]));
+    assert!(public.get("scalars").is_none() && public.get("answer_scalar").is_none());
+    set_cell(211, 229, 195);
+    assert_eq!((public["p"].as_u64(), public["r"].as_u64(),
+        public["cofactor"].as_u64()), (Some(p()), Some(r()), Some(h())));
+    let src = source();
+    let t = kernel(&src);
+    let dst = destination(&src, t);
+    let g = parse_point(&public["generator"]);
+    let mapped_g = parse_point(&public["mapped_generator"]);
+    let q = parse_point(&public["targets"][position]["source"]);
+    let mapped_q = parse_point(&public["targets"][position]["destination"]);
+    let mut setup_ops = GroupOps::default();
+    assert!(src.is_on_curve(g) && src.is_on_curve(q));
+    assert!(dst.is_on_curve(mapped_g) && dst.is_on_curve(mapped_q));
+    assert_eq!(velu(&src, t, g, &mut setup_ops), mapped_g);
+    assert_eq!(velu(&src, t, q, &mut setup_ops), mapped_q);
+    assert!(src.mul(&mut setup_ops, g, r()).infinity);
+    assert!(src.mul(&mut setup_ops, q, r()).infinity);
+    let relation = prepare_relation(&public, &src, &dst, t, arm, &mut setup_ops);
+    let signed_public: Vec<Point> = points(&public["full_base_projected"])
+        .into_iter().flat_map(|point| [point, dst.neg(point)]).collect();
+    assert_eq!(relation.signed, signed_public, "different factor base");
+    let setup_cpu_ns = thread_cpu_ns() - cpu;
+    let setup_fp = take_field_counters();
+    let seed = (0x2026_1015u64 ^ p())
+        .wrapping_add(round.wrapping_mul(0x9e37_79b9))
+        .wrapping_add(((position + 64) as u64).wrapping_mul(0x0123_4567));
+    let solve = solve_relation(&src, &dst, t, g, q, mapped_g, mapped_q,
+        arm, &relation, seed);
+    let query_fp = take_field_counters();
+    let peak_rss = peak_rss_bytes();
+    let oracle = relation.oracle.as_ref().map(|stats| json!({
+        "destination_points":stats.destination_points,
+        "polynomial_calls":stats.polynomial_calls,
+        "split_attempts":stats.split_attempts,
+        "rational_x_roots":stats.rational_x_roots,
+        "rejected_no_root":stats.rejected_no_root,
+        "rejected_no_lift":stats.rejected_no_lift,
+        "exact_map_checks":stats.exact_map_checks,
+        "rejected_map_mismatch":stats.rejected_map_mismatch,
+        "accepted_image_points":stats.accepted_image_points
+    }));
+    let relation_setup = json!({
+        "pair_entries":relation.pair_entries,
+        "pair_keys":relation.table.len(),
+        "scan_count":relation.scan_count,
+        "image_points":relation.image_points,
+        "candidate_count":relation.candidate_count,
+        "oracle":oracle
+    });
+    let result = json!({
+        "schema":"different_j_chi_heldout_run/v4",
+        "public_sha256":sha256_hex(&bytes),"round":round,"arm":arm,
+        "position":position,"seed":seed,"target":q,"mapped_target":mapped_q,
+        "setup_group_ops":setup_ops,
+        "query_group_ops":solve["query_group_ops"],
+        "verify_group_ops":solve["verify_group_ops"],
+        "setup_fp_muls":setup_fp.0,"setup_fp_invs":setup_fp.1,
+        "query_fp_muls":query_fp.0,"query_fp_invs":query_fp.1,
+        "verify_fp_muls":0,"verify_fp_invs":0,
+        "setup_cpu_ns":setup_cpu_ns,"query_cpu_ns":thread_cpu_ns()-cpu-setup_cpu_ns,
+        "total_cpu_ns":thread_cpu_ns()-cpu,"total_wall_ns":wall.elapsed().as_nanos(),
+        "peak_rss_bytes":peak_rss,
+        "trials":solve["trials"],"relations":solve["relations"],
+        "rank":solve["rank"],"recovered":solve["recovered"],
+        "verified":solve["verified"],
+        "relation_witnesses":solve["relation_witnesses"],
+        "relation_setup":relation_setup
+    });
+    println!("{result}");
+    assert_eq!(solve["verified"], true);
+    assert!(peak_rss <= 512 * 1024 * 1024);
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     match args.get(1).map(String::as_str) {
         Some("freeze") if args.len()==5 => freeze(&args[2],&args[3],&args[4]),
         Some("run" | "batch-run") if args.len()==6 => run(&args[2],args[3].parse().unwrap(),&args[4],args[5].parse().unwrap()),
+        Some("run-heldout") if args.len()==6 => run_heldout(&args[2],args[3].parse().unwrap(),&args[4],args[5].parse().unwrap()),
         _ => panic!("usage: different_j_trend_batch freeze FIBER.json PUBLIC.json CHECKER.json | run PUBLIC.json ROUND ARM PREFIX")
     }
 }
