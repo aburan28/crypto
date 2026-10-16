@@ -1,5 +1,18 @@
 # RTX PRO 6000 benchmark and audit preset
 
+For the DP32 Modal campaign, `./run.sh deploy` and `./run.sh fleet` now select
+the verified same-walk sigma-table build: `PACKED_INLINE_POLY=3`,
+`SIGMA_FUSED=1`, `PACKED_SIGMA_TABLE=1`, batch 16, 512 block threads and one
+block per SM. The matched 385,024-worker headline panel measured 15.884369
+B/s versus 15.513653 B/s for the fused control, with replay and identical
+DP corpora; see [SIGMA-TABLE.md](SIGMA-TABLE.md). Modal's image records these
+flags and bakes that exact geometry. Existing campaign run IDs retain their
+385,024-worker, batch-16 checkpoint shape when a pass resumes.
+
+The historical `bench-rtx-pro6000` and `audit-rtx-pro6000` targets below
+still select their original build. Benchmark rates are device-local and do
+not by themselves establish a campaign-level gain.
+
 The current confirmed sigma benchmark reaches **15.436677 B/s** with inline
 polynomial products and the fused reverse/next-prefix schedule. Use
 `make gpu-rtx-pro6000-sigma-fused` for that exact native build or
