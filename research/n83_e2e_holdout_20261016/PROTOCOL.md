@@ -30,6 +30,13 @@ screen. Each fresh IC child has a 480-second cap and each rho child has a
 120-second cap; the allocation must expose at least four CPUs, 15.5 GiB RAM
 and 2 GiB free disk. Retain each target-dependent online interval separately
 from its full cold interval.
+The host receipt includes visible CPU core, package and sibling topology,
+online NUMA nodes, effective cpuset and `lscpu` output. Every IC and rho arm
+also retains before/after `/proc/stat` CPU-steal and interrupt counters,
+available CPU-frequency readings and CPU pressure. These fields describe
+the observed cloud envelope; the existing K1152 A/A and resource gates
+remain the timing acceptance rule. Missing required topology or counter
+receipts makes the independent replay incomplete.
 
 Before selecting challengers, `materialize_selection.py` checks the exact
 GitHub artifact SHA-256, ZIP integrity, frozen run ID and executed commit,

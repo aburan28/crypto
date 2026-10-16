@@ -5,6 +5,7 @@ import argparse
 import importlib.util
 import json
 import os
+import subprocess
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -29,6 +30,55 @@ spec.loader.exec_module(screen)
 dynamic = screen.dynamic
 parent = screen.parent
 cold = screen.cold
+
+
+def read_optional(path):
+    try:
+        return Path(path).read_text().strip()
+    except OSError:
+        return None
+
+
+def cpu_telemetry():
+    stat = read_optional("/proc/stat") or ""
+    cpu = next((line.split()[1:] for line in stat.splitlines()
+                if line.startswith("cpu ")), [])
+    interrupts = next((line.split()[1] for line in stat.splitlines()
+                       if line.startswith("intr ")), None)
+    return {"recorded_utc": parent.now(),
+            "cpu_jiffies": [int(value) for value in cpu],
+            "steal_jiffies": int(cpu[7]) if len(cpu) > 7 else None,
+            "interrupts_total": int(interrupts) if interrupts else None,
+            "frequency_khz_by_visible_cpu": {
+                str(i): read_optional(f"/sys/devices/system/cpu/cpu{i}/cpufreq/scaling_cur_freq")
+                for i in sorted(os.sched_getaffinity(0))},
+            "cpu_pressure": read_optional("/proc/pressure/cpu")}
+
+
+def topology_receipt(visible_cpus):
+    command = subprocess.run(["lscpu", "-J"], capture_output=True,
+                             text=True, check=False)
+    return {"lscpu_json": command.stdout if command.returncode == 0 else None,
+            "lscpu_exit_status": command.returncode,
+            "online_cpus": read_optional("/sys/devices/system/cpu/online"),
+            "online_numa_nodes": read_optional("/sys/devices/system/node/online"),
+            "cgroup_effective_cpus": read_optional(
+                "/sys/fs/cgroup/cpuset.cpus.effective"),
+            "visible_cpu_topology": {
+                str(i): {name: read_optional(
+                    f"/sys/devices/system/cpu/cpu{i}/topology/{name}")
+                    for name in ("core_id", "physical_package_id",
+                                 "thread_siblings_list")}
+                for i in visible_cpus}}
+
+
+def run_with_telemetry(folder, command, environment, cap_seconds, group):
+    before = cpu_telemetry()
+    usage = parent.one_run(folder, command, environment, cap_seconds, group)
+    after = cpu_telemetry()
+    parent.write_json(folder / "host_telemetry.json", {"before": before,
+                                                      "after": after})
+    return usage
 
 
 def fixture():
@@ -98,9 +148,9 @@ def run_ic(output, binary, point_index, point_file, arm, group):
     command = [str(binary), f"construct:83:1:{k}", str(point_file),
                "29", str(folder / "targets_result.jsonl")]
     print(f"starting {name} at {parent.now()}", flush=True)
-    usage = parent.one_run(folder, command,
-                           dynamic.environment(folder, "root11_dynamic"),
-                           IC_CAP_SECONDS, group)
+    usage = run_with_telemetry(folder, command,
+                               dynamic.environment(folder, "root11_dynamic"),
+                               IC_CAP_SECONDS, group)
     print(f"{name}: {usage['status']} after {usage['wall_seconds']:.3f}s",
           flush=True)
 
@@ -110,9 +160,9 @@ def run_rho(output, binary, point_index, point_file, group):
     folder = output / "runs" / name
     command = [str(binary), str(point_file), str(RHO_SEED_BASE + point_index),
                str(cold.RHO_CONFIG), str(folder / "receipt.json")]
-    usage = parent.one_run(folder, command,
-                           {"PATH": os.environ.get("PATH", "/usr/bin:/bin")},
-                           RHO_CAP_SECONDS, group)
+    usage = run_with_telemetry(folder, command,
+                               {"PATH": os.environ.get("PATH", "/usr/bin:/bin")},
+                               RHO_CAP_SECONDS, group)
     print(f"{name}: {usage['status']} after {usage['wall_seconds']:.3f}s",
           flush=True)
 
@@ -126,6 +176,8 @@ def run(binary, rho_binary, output):
     group = parent.cgroup_root()
     host = parent.host_receipt(group)
     host["schema"] = "n83.e2e-holdout-host/v1"
+    host["topology"] = topology_receipt(host["visible_affinity"] or [])
+    host["cpu_telemetry_before"] = cpu_telemetry()
     parent.write_json(output / "host.json", host)
     memory_max = (host["cgroup_before"]["memory.max"] or "").strip()
     memory_too_small = memory_max.isdigit() and int(memory_max) < cold.RSS_CAP_BYTES
@@ -162,6 +214,7 @@ def run(binary, rho_binary, output):
             run_ic(output, binary, i, paths[i], arm, group)
         if not row["rho_first"]:
             run_rho(output, rho_binary, i, paths[i], group)
+    parent.write_json(output / "host_telemetry_after.json", cpu_telemetry())
     return 0
 
 

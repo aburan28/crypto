@@ -34,6 +34,32 @@ def one_json(path):
     return json.loads(path.read_text())
 
 
+def telemetry_receipt(output, name):
+    path = output / "runs" / name / "host_telemetry.json"
+    if not path.exists():
+        return {"status": "MISSING"}
+    value = one_json(path)
+    before, after = value["before"], value["after"]
+    valid = (len(before["cpu_jiffies"]) >= 8
+             and len(after["cpu_jiffies"]) >= 8
+             and before["steal_jiffies"] is not None
+             and after["steal_jiffies"] is not None
+             and after["steal_jiffies"] >= before["steal_jiffies"]
+             and before["interrupts_total"] is not None
+             and after["interrupts_total"] is not None
+             and after["interrupts_total"] >= before["interrupts_total"]
+             and before["frequency_khz_by_visible_cpu"]
+             and set(before["frequency_khz_by_visible_cpu"]) ==
+             set(after["frequency_khz_by_visible_cpu"]))
+    return {"status": "PASS" if valid else "INVALID",
+            "steal_jiffies_delta": (after["steal_jiffies"] -
+                                      before["steal_jiffies"] if valid else None),
+            "interrupts_delta": (after["interrupts_total"] -
+                                  before["interrupts_total"] if valid else None),
+            "frequency_khz_before": before["frequency_khz_by_visible_cpu"],
+            "frequency_khz_after": after["frequency_khz_by_visible_cpu"]}
+
+
 def points_and_answers():
     hashes = runner.fixture()
     points = [json.loads(line) for line in runner.TARGETS.read_text().splitlines()]
@@ -135,6 +161,16 @@ def main():
         ic = [f"p{i}_{arm}" for arm in row["ic_order"]]
         ordered_events.extend(([rho] if row["rho_first"] else []) + ic
                               + ([] if row["rho_first"] else [rho]))
+    topology = host.get("topology", {})
+    topology_status = ("PASS" if topology.get("lscpu_json")
+                       and len(topology.get("visible_cpu_topology", {})) >= 4
+                       and (output / "host_telemetry_after.json").exists()
+                       else "MISSING")
+    telemetry = {name: telemetry_receipt(output, name)
+                 for name in ordered_events}
+    telemetry_status = ("PASS" if topology_status == "PASS" and
+                        all(item["status"] == "PASS"
+                            for item in telemetry.values()) else "INCOMPLETE")
     finished = []
     for name in ordered_events:
         path = output / "runs" / name / "usage.json"
@@ -181,7 +217,7 @@ def main():
         identities[pipeline] = {"identities": [list(pair) for pair in pairs],
                                 "status": "PASS" if len(pairs) == 1 else
                                 "MISSING" if not pairs else "MISMATCH"}
-    evidence_valid = (order_status == "PASS" and all(
+    evidence_valid = (order_status == "PASS" and telemetry_status == "PASS" and all(
         all(item["status"] in ("PASS_INDEPENDENT_REPLAY", "TIMEOUT")
             for item in row["arms"])
         and row["rho"]["status"] == "PASS_INDEPENDENT_REPLAY"
@@ -240,6 +276,9 @@ def main():
         "selection_admitted": admitted,
         "selected_pipeline": winner, "selected_candidate_id": None,
         "execution_order_status": order_status,
+        "topology_status": topology_status,
+        "telemetry_status": telemetry_status,
+        "host_telemetry_by_arm": telemetry,
         "ordered_events": ordered_events,
         "cross_point_base_identity": identities,
         "cold_process_ms_by_point": times_by_point,
