@@ -245,6 +245,18 @@ fn main() {
             "ic": ic.clone().unwrap_or(Value::Null),
             "relations_recorded": relations,
             "ratio_online_ic_over_rho": ic.as_ref().map(|i| i["ratio_online_ic_over_rho"].clone()),
+            "unpriced_band": ic.as_ref().map(|i| {
+                let ops = u(&rho["group_ops"]);
+                let rho_m = u(&rho["fp_muls"]);
+                let per_op = u(&rho["fp_muls_per_op"]);
+                let ic_m = u(&i["online_muls"]);
+                [0.0, 0.1, 1.0]
+                    .iter()
+                    .map(|w| json!({"gae_weight": w,
+                        "rho_fp_muls_priced": rho_m + w * 2.0 * ops * per_op,
+                        "ic_over_rho": ic_m / (rho_m + w * 2.0 * ops * per_op)}))
+                    .collect::<Vec<_>>()
+            }),
             // against the expected walk alone (no multiplier set-up), at the
             // measured cost of one group operation
             "ratio_online_ic_over_expected_rho_walk": ic.as_ref().map(|i| {

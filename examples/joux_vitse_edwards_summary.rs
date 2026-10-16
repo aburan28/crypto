@@ -149,6 +149,20 @@ fn main() {
                     // measured to the census trials per relation, 95 %
                     let (lo, hi) = poisson95(rels as u64);
                     let ratio_ci = [rels / hi, rels / lo.max(1e-300)];
+                    let band = {
+                        let ops = u(&rho["group_ops"]);
+                        let rho_m = u(&rho["fp_muls"]);
+                        let per_op = u(&rho["fp_muls_per_op"]);
+                        let ic_m = u(&ic["online_muls"]);
+                        [0.0, 0.1, 1.0]
+                            .iter()
+                            .map(|w| {
+                                json!({"gae_weight": w,
+                                "rho_fp_muls_priced": rho_m + w * 2.0 * ops * per_op,
+                                "ic_over_rho": ic_m / (rho_m + w * 2.0 * ops * per_op)})
+                            })
+                            .collect::<Vec<_>>()
+                    };
                     json!({
                         "file": name, "p": setup["p"], "seed": setup["seed"], "n": setup["n"],
                         "log2_n": setup["log2_n"], "base_points": base,
@@ -162,6 +176,8 @@ fn main() {
                         "rho_fp_muls": rho["fp_muls"], "rho_expected_walk_ops": rho["expected_walk_ops"],
                         "ratio_online_ic_over_rho": ic["ratio_online_ic_over_rho"],
                         "ratio_online_ic_over_expected_rho_walk": ic["ratio_online_ic_over_expected_rho_walk"],
+                        "unpriced_band": band,
+                        "unpriced": {"rho": "partition hash and cycle comparison per walk step (2 per step; bounded above by group_ops)", "ic": "F4 symbolic preprocessing (monomial hashing, pair selection) not emitted: IC is a lower bound"},
                         "agg": ic["agg"], "oracle_disagree": ic["oracle_disagree"],
                     })
                 }
