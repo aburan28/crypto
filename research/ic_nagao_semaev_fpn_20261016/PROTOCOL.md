@@ -162,3 +162,54 @@ Both systems have the same Bézout number when `m = n`: `2^{m(m−1)}`.
   its deadline once per process, so every target after the first had no budget. Both
   defects are instrument defects, not properties of either system. The registered
   instrument is `solve_zero_dim` with a per-solve deadline.
+
+## 7. Amendment 1 (2026-10-16): external engines, an F5-family solver included
+
+Registered before any external-engine data. The F4 run of §1–§6 was in progress and
+nearly complete when this amendment was written. Its finished cells were seen; its
+outcome is not changed by this amendment. The owner asked for an F5 run. The F4
+result is specific to one engine (`f4_fp`, F4 without signatures), and §5 says so.
+This amendment asks whether the ranking survives a stronger engine.
+
+- **Systems.** The registered systems themselves. The harness at this amendment's
+  commit, with `--dump-dir … --dump-only` and the same seed, cells and per-kind target
+  counts as §2, writes every `sem` and `rr` system. The target streams are those of
+  the registered run. `systems.sha256` hashes every file.
+- **Engines.** One process per system, one at a time, single-threaded, under the §3
+  caps: `prlimit --as=6 GB`, wall `3600 s`.
+  - **Singular 4.4.1 `sba(i)`**, the signature-based Gröbner basis algorithm (F5
+    family), under `dp` (grevlex). Defaults: `sbaOrder` and the rewrite criterion
+    are Singular's own.
+  - **msolve 0.11.0** (commit `a18d0de`, built from source against the Sage
+    environment's FLINT/GMP/MPFR), `-g 2 -t 1`, the reduced grevlex basis. msolve is
+    F4, not F5. It is included as the reference state-of-the-art grevlex engine, so
+    that `sba`'s reading is not compared with a weak F4 alone.
+- **Scope.** Gröbner basis only; no solution extraction. Extraction is the
+  `lin_muls` stage of §4, which depends on `delta` and not on the arm. Singular's
+  `vdim` must equal the §3 solver's `delta` wherever both exist (a consistency check).
+- **Metrics.**
+  - Wall seconds and peak RSS (`/usr/bin/time`).
+  - Each engine's own time: msolve's "overall time"; for `sba`, Singular's `rtimer`
+    around the `sba` call, in ms.
+  - msolve's zero reductions, rows reduced and widest matrix.
+  - Exit code: 124 = wall timeout; out of memory under the cap is an allocation
+    failure.
+
+  Wall time is recorded on the shared, non-isolated two-core host. It is used only as
+  the within-engine ratio `rr/sem` on the same system pair, run back to back, never
+  as an absolute speed. Times below 0.05 s are reported as "below resolution" and
+  carry no ratio.
+- **Decision rule.** Per engine and cell: `ρ_engine = median(engine_time)_rr /
+  median(engine_time)_sem` with min–max ranges. A failed arm is "> cap" (memory) or
+  "> 3600 s".
+- **Predictions.**
+  - Under `sba` the `rr` disadvantage shrinks relative to `f4_fp`, because F5 removes
+    the reductions to zero that a square, many-variable quadratic system produces.
+  - `ρ_sba > 1` remains at (4,3).
+  - `rr` at `m = 4` stays out of reach for at least one engine.
+- **Falsifiers.**
+  - `ρ_engine < 1` (rr cheaper) at any cell with `n ≥ 3` where both arms complete
+    every target. This would reverse the §5 ranking for that engine.
+  - `rr` completing at `m = 4` within the caps under either engine. This would turn
+    the F4 run's out-of-memory rows from "beyond reach" into "beyond `f4_fp`'s
+    reach".

@@ -1455,6 +1455,53 @@ fn validate(p: u64, seed: u64, targets: usize, cells: &[(usize, usize)], arms: &
     }
 }
 
+/// One system in msolve's input format (variables, characteristic, then the
+/// polynomials) and as a Singular script that runs the signature-based `sba`
+/// (the F5 family) on it and prints the quotient dimension.
+fn dump_system(dir: &str, tag: &str, sys: &System, p: u64) {
+    std::fs::create_dir_all(dir).unwrap();
+    let vars: Vec<String> = (1..=sys.n_vars).map(|i| format!("z{i}")).collect();
+    let render = |poly: &Poly| -> String {
+        poly.iter()
+            .map(|(e, c)| {
+                let mono: Vec<String> = e
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, &k)| k > 0)
+                    .map(|(i, &k)| {
+                        if k == 1 {
+                            vars[i].clone()
+                        } else {
+                            format!("{}^{}", vars[i], k)
+                        }
+                    })
+                    .collect();
+                if mono.is_empty() {
+                    format!("{c}")
+                } else {
+                    format!("{c}*{}", mono.join("*"))
+                }
+            })
+            .collect::<Vec<_>>()
+            .join("+")
+    };
+    let polys: Vec<String> = sys.polys.iter().map(render).collect();
+    std::fs::write(
+        format!("{dir}/{tag}.ms"),
+        format!("{}\n{p}\n{}\n", vars.join(","), polys.join(",\n")),
+    )
+    .unwrap();
+    std::fs::write(
+        format!("{dir}/{tag}.sing"),
+        format!(
+            "system(\"--ticks-per-sec\",1000);\nring r={p},({}),dp;\nideal i={};\nint t0=rtimer;\nideal g=sba(i);\nint t1=rtimer;\n\"sba_ms \",(t1-t0);\nattrib(g,\"isSB\",1);\n\"vdim \",vdim(g);\n\"gb_size \",size(g);\nquit;\n",
+            vars.join(","),
+            polys.join(",\n")
+        ),
+    )
+    .unwrap();
+}
+
 /// The 12- and 15-unknown `rr` systems overflow the default 8 MB main stack
 /// inside F4; the whole run goes on one thread with a 1 GB stack.
 fn main() {
@@ -1527,6 +1574,10 @@ fn real_main() {
     let dmax: u32 = arg(&args, "--dmax", 60);
     let arms: String = arg(&args, "--arms", "sem,rr".to_string());
     let out_path: String = arg(&args, "--out", String::new());
+    // `--dump-dir D`: write every system as `D/<tag>.ms` (msolve) and
+    // `D/<tag>.sing` (Singular); with `--dump-only`, write and do not solve.
+    let dump_dir: String = arg(&args, "--dump-dir", String::new());
+    let dump_only = args.iter().any(|a| a == "--dump-only");
     // `--only K`: draw targets 0..=K from the same stream, solve only K (one
     // process per target, so an out-of-memory kill loses one row, not a cell).
     let only: Option<usize> = args
@@ -1576,17 +1627,27 @@ fn real_main() {
         });
         let mut arms_out = Vec::new();
         for arm in arms.split(',') {
-            let a = match arm {
-                "sem" => {
-                    let ss = sem_system(&f, &t, xr);
-                    run_arm(&c, r, &ss, &sem_to_g(p), o, &mut rng)
-                }
+            let (sys, rr_g) = match arm {
+                "sem" => (sem_system(&f, &t, xr), None),
                 "rr" => {
                     let rs = rr_system(&c, m, xr, yr);
-                    let to_g = rr_to_g(&f, &rs.g);
-                    run_arm(&c, r, &rs.sys, &to_g, o, &mut rng)
+                    (rs.sys, Some(rs.g))
                 }
                 other => panic!("unknown arm {other}"),
+            };
+            if !dump_dir.is_empty() {
+                let tag = format!("n{n}m{m}_{kind}_{ti}_{arm}");
+                dump_system(&dump_dir, &tag, &sys, p);
+                if dump_only {
+                    continue;
+                }
+            }
+            let a = match &rr_g {
+                None => run_arm(&c, r, &sys, &sem_to_g(p), o, &mut rng),
+                Some(g) => {
+                    let to_g = rr_to_g(&f, g);
+                    run_arm(&c, r, &sys, &to_g, o, &mut rng)
+                }
             };
             let mut j = arm_json(arm, &a);
             if let Some(px) = &plant {
