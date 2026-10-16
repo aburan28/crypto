@@ -531,6 +531,105 @@ pub fn multipoint_eval_tree<F: Field>(f: &F, a: &Poly<F>, tree: &[Vec<Poly<F>>])
         .collect()
 }
 
+/// Multipoint evaluation at a fixed point set by Bernstein's scaled remainder tree ("Scaled
+/// remainder trees", 2004). For a node Q of the subproduct tree, s_Q holds the coefficients of
+/// x^-1 .. x^-deg Q of A/Q; for Q = Q1 Q2, the coefficients of x^-1 .. x^-deg Q1 of s_Q Q2 are
+/// s_Q1 (a middle product: deg Q1 dot products of length deg Q2 + 1), and at a leaf x - r the one
+/// coefficient is A(r). At the root, s_P comes from the series quotient rev(A) / rev(P) (P is
+/// monic), and every product is a lazily reduced dot product.
+pub struct EvalTree<F: Field> {
+    /// subproduct tree, level 0 = leaves (x - r_i), last level = the root
+    pub tree: Vec<Vec<Poly<F>>>,
+    /// each node polynomial reversed (the middle products read it backwards)
+    rev: Vec<Vec<Poly<F>>>,
+}
+
+impl<F: Field> EvalTree<F> {
+    /// Tree for the points `roots` (not empty).
+    pub fn new(f: &F, roots: &[F::E]) -> Self {
+        let tree = subproduct_tree(f, roots);
+        let rev = tree
+            .iter()
+            .map(|lvl| {
+                lvl.iter()
+                    .map(|q| q.iter().rev().copied().collect())
+                    .collect()
+            })
+            .collect::<Vec<Vec<Poly<F>>>>();
+        EvalTree { tree, rev }
+    }
+
+    pub fn len(&self) -> usize {
+        self.tree[0].len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.tree[0].is_empty()
+    }
+
+    /// The values a(r_i) in the order of the roots.
+    pub fn eval(&self, f: &F, a: &Poly<F>) -> Vec<F::E> {
+        let top = self.tree.len() - 1;
+        let n = self.tree[top][0].len() - 1;
+        let la = a.len();
+        if la == 0 {
+            return vec![f.zero(); self.len()];
+        }
+        // root: the coefficient of x^-m in A/P is S_{la-1-n+m}, S = rev(A) / rev(P) as a power
+        // series; rev(P) has constant term 1, so S_k = rev(A)_k - sum_{j=1..} rev(P)_j S_{k-j}
+        let pr = &self.rev[top][0];
+        let mut sq: Vec<F::E> = Vec::with_capacity(la);
+        for k in 0..la {
+            let m = k.min(n);
+            let t = f.dot_rev(&pr[1..=m], &sq[k - m..k]);
+            sq.push(f.sub(a[la - 1 - k], t));
+        }
+        let s: Vec<F::E> = (1..=n)
+            .map(|m| {
+                let k = la as isize - 1 - n as isize + m as isize;
+                if k < 0 {
+                    f.zero()
+                } else {
+                    sq[k as usize]
+                }
+            })
+            .collect();
+        let mut cur: Vec<Vec<F::E>> = vec![s];
+        for lvl in (0..top).rev() {
+            let nodes = &self.tree[lvl];
+            let mut next: Vec<Vec<F::E>> = Vec::with_capacity(nodes.len());
+            for (i, sq) in cur.iter().enumerate() {
+                let (l, r) = (2 * i, 2 * i + 1);
+                if r >= nodes.len() {
+                    // odd node carried up unchanged
+                    next.push(sq.clone());
+                    continue;
+                }
+                for (child, sib) in [(l, r), (r, l)] {
+                    let d1 = nodes[child].len() - 1;
+                    let qr = &self.rev[lvl][sib]; // reversed sibling, length d2 + 1
+                    let d2 = qr.len() - 1;
+                    // coefficient m: sum_j q_j s_{m+j} = dot_rev(rev(q), s[m-1 ..= m-1+d2])
+                    next.push(
+                        (1..=d1)
+                            .map(|m| f.dot_rev(qr, &sq[m - 1..m + d2]))
+                            .collect(),
+                    );
+                }
+            }
+            cur = next;
+        }
+        cur.into_iter().map(|v| v[0]).collect()
+    }
+
+    /// prod_i a(r_i).
+    pub fn prod(&self, f: &F, a: &Poly<F>) -> F::E {
+        self.eval(f, a)
+            .into_iter()
+            .fold(f.one(), |acc, v| f.mul(acc, v))
+    }
+}
+
 /// Product of (x - r) over the given roots.
 pub fn from_roots<F: Field>(f: &F, roots: &[F::E]) -> Poly<F> {
     let mut p = vec![f.one()];

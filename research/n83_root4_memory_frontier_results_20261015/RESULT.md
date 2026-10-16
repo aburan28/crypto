@@ -1,0 +1,21 @@
+# K3596 advances the N83 root4 factor-base frontier
+
+The K3596/root4/standard-Bloom pipeline averaged **25.951214 ms** of target-online work across 1,000 fresh public subgroup points, with two mirrored fresh-process runs per point. K3425 averaged **30.685722 ms** under the same 15.25 GiB RSS guard. The paired K3596-minus-K3425 mean was **−4.734508 ms**; its preregistered two-sided 99% contiguous-block interval was **[−7.905468, −1.511426] ms**. This is a **15.43% lower** online mean for the larger base on this allocation. K3500 averaged **27.153329 ms**; its 1.202116 ms difference from K3596 had a 99% interval of **[−1.464910, +4.129151] ms**, leaving the frozen three-way selector at `BOUNDED_UNKNOWN` between K3500 and K3596.
+
+| Exact root4 standard-Bloom pipeline | Usable base points | Folded columns | Exact root keys | Mirrored online mean (ms) | Mean probes per target | Mean setup (s) | Max RSS (GiB) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| K3425 | 568,550 | 3,425 | 973,622,246 | 30.685722 | 56,225.4 | 582.492 | 14.427 |
+| K3500 | 581,000 | 3,500 | 1,016,729,255 | 27.153329 | 49,730.1 | 574.303 | 14.656 |
+| K3596 | 596,936 | 3,596 | 1,073,268,803 | **25.951214** | 46,786.8 | 615.915 | 14.817 |
+
+The lower probe count explains the measured direction: mean target-decomposition time fell from **30.542011 ms** at K3425 to **27.009442 ms** at K3500 and **25.807621 ms** at K3596. The corresponding mean target recovery checks were about 0.128 ms. Setup was outside every target-online interval and is retained above as a separate cost. All six arms had full column rank, independently replayed factor-base points, four-point relations and scalar answers, zero new cgroup CPU-throttled periods and OOM kills, and peaks below the common guard.
+
+The curve is `EC1N83Ckb1a1haacb69ee9f37`: polynomial-basis `GF(2^83)` with modulus bitmask `9671406556917033397649557`, model `y²+xy=x³+x²+1`, subgroup order `8569786107849059`, and cofactor `1128547018`. The public-point workload ID is `5374a1014b74`; its target file SHA-256 is `0626a709fc285817b63c1a6a46310cfe3577824ff7a02ba5f0c9d6f2a7b120c3`. The six process arms ran K3425, K3500, K3596, K3596, K3500, K3425 with empty indexes and logs. For each pipeline, the two times were averaged per point; 40 contiguous blocks of 25 points were resampled 10,000 times with the frozen pairwise seeds. The benchmark is a secondary cloud-instance factor-base comparison, so its online means are paired only within this allocation.
+
+The canonical candidate manifests are [K3425](candidate_K3425_root4_standard.json), [K3500](candidate_K3500_root4_standard.json), and [K3596](candidate_K3596_root4_standard.json). Their IDs are respectively `IC1N83Ckb1a1fb568550PDP4rootRCguidedLAgaussTDdirectISO0h35d84f95ea88`, `IC1N83Ckb1a1fb581000PDP4rootRCguidedLAgaussTDdirectISO0h57c64cbf727e`, and `IC1N83Ckb1a1fb596936PDP4rootRCguidedLAgaussTDdirectISO0hdc4e8584585d`. [selection.json](selection.json) retains every ordered contrast and the unresolved selector; [records_index.json](records_index.json) hashes the lossless compressed workload and six measurement rows.
+
+## Source and replay
+
+[GitHub Actions run 38825895649](https://github.com/aburan28/crypto/actions/runs/38825895649) executed source commit `9c4a60cf5b49ad926e7eb391b2b80bd016893245` on one Linux x86-64 allocation. Artifact `12018223495` has ZIP SHA-256 `5c51d8782e594377ccbaa09f66b69228bbc941ccdb247f91e4fff8bf39824a1f`, matching the GitHub artifact digest. The cloud checker and a separate local replay of the archived ZIP produced the same `analysis.json` SHA-256, `34caec6034b5f3b904280097211848ce3100af744be5dbac52411810718894fe`. Both replayed all six bases and 6,000 target records. The archive remains at `/Volumes/SSD990-2/n83-archive-20261015/raw/n83-root4-memory-frontier-38825895649.zip`; the versioned compressed records preserve all online phases, setup, RSS, rank and resource receipts.
+
+The next experiment is a fresh, larger paired K3500/K3596 confirmation under the same 15.25 GiB guard. Its purpose is to resolve the 1.202 ms gap at the stated 99% rule. The selected complete pipeline then receives five fresh one-target same-point IC/rho pairs under the Tier 1 contract.
