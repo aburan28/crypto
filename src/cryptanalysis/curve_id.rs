@@ -290,6 +290,15 @@ pub fn normalise(name: &str) -> String {
 }
 
 /// Every name the registry knows, normalised, mapped to its curve's slug.
+/// Parse the alias table now.  The measured `ecbench` child calls this
+/// before its solve marker: the table is about 750 KB of JSON, and parsing
+/// it on first use inside a solve (an index-calculus method looks its
+/// calibration row up by name) put some 24 million instructions of
+/// harness work into the method's set-up.
+pub fn warm() {
+    let _ = aliases();
+}
+
 fn aliases() -> &'static HashMap<String, String> {
     static MAP: OnceLock<HashMap<String, String>> = OnceLock::new();
     MAP.get_or_init(|| {

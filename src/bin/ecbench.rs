@@ -78,6 +78,17 @@ enum Cmd {
         #[arg(last = true)]
         gpu_args: Vec<String>,
     },
+    /// Price every record of the given session directories in bitop/v1
+    /// (docs/units/BITOPS.md): one JSON line per record on stdout.
+    Work {
+        #[arg(num_args = 1.., required = true)]
+        sessions: Vec<PathBuf>,
+        /// Only verified, non-warm-up records.
+        #[arg(long)]
+        counted: bool,
+    },
+    /// Print the bitop/v1 test vectors (docs/units/bitop-v1.vectors.json).
+    BitopVectors,
     /// List every method with its parameters.
     Methods {
         #[arg(long)]
@@ -153,6 +164,18 @@ enum Cmd {
         spec: PathBuf,
         #[arg(long)]
         seq: u64,
+    },
+    /// Replay planned executions of a spec under Callgrind and set each
+    /// solve's instructions beside its bitop/v1 work (docs/units/BITOPS.md,
+    /// "What the unit leaves out"): one JSON line per sequence number.
+    AuditIr {
+        #[arg(long)]
+        spec: PathBuf,
+        #[arg(long, num_args = 1.., required = true)]
+        seq: Vec<u64>,
+        /// A directory for the inputs, outputs and Callgrind parts.
+        #[arg(long)]
+        out: PathBuf,
     },
     /// Sum the Callgrind Ir parts inside the solve markers.
     CallgrindIr {
@@ -595,6 +618,28 @@ fn emit_claim(
 fn run(cli: Cli) -> Result<ExitCode, String> {
     match cli.cmd {
         Cmd::Store(args) => crypto_lib::store::cli::run(&args)?,
+        Cmd::Work { sessions, counted } => {
+            use std::io::Write;
+            let stdout = std::io::stdout();
+            let mut out = stdout.lock();
+            for dir in &sessions {
+                let records = crypto_lib::cryptanalysis::ecbench::runner::read_records(dir)
+                    .map_err(|e| format!("{}: {e}", dir.display()))?;
+                for r in records {
+                    if counted && !r.counts() {
+                        continue;
+                    }
+                    let line = crypto_lib::cryptanalysis::ecbench::work::work_line(&r);
+                    writeln!(
+                        out,
+                        "{}",
+                        serde_json::to_string(&line).map_err(|e| e.to_string())?
+                    )
+                    .map_err(|e| e.to_string())?;
+                }
+            }
+        }
+        Cmd::BitopVectors => print_json(&crypto_lib::cryptanalysis::bitops::vectors())?,
         Cmd::Methods { json } => {
             if json {
                 let v: Vec<_> = methods::registry()
@@ -846,32 +891,22 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
             );
         }
         Cmd::ProfileInput { spec: path, seq } => {
-            let source =
-                std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
-            let p = spec::plan(spec::Spec::from_json(&source)?)?;
-            let ex = p
-                .executions
-                .get(usize::try_from(seq).map_err(|_| "sequence does not fit usize")?)
-                .filter(|ex| ex.seq == seq)
-                .ok_or_else(|| format!("sequence {seq} is not in the plan"))?;
-            let arm = &p.arms[ex.arm];
-            let w = &p.workloads[ex.workload];
-            let input = record::ChildInput {
-                schema: record::CHILD_INPUT_SCHEMA.into(),
-                curve: workload::CurveSpec::explicit(p.instance(ex.workload))
-                    .unwrap_or_else(|| w.curve_spec.clone()),
-                target_seed: w.target_seed,
-                target_index: w.target_index,
-                target_kind: w.kind(),
-                expected_workload_id: w.workload_id.clone(),
-                method: methods::MethodSpec {
-                    id: arm.method.id.clone(),
-                    params: arm.method.params.clone(),
-                },
-                expected_method_id: arm.method.method_id.clone(),
-                algorithm_seed: ex.algorithm_seed,
-            };
-            print_json(&input)?;
+            print_json(&profile_input(&path, seq)?)?;
+        }
+        Cmd::AuditIr {
+            spec: path,
+            seq,
+            out,
+        } => {
+            std::fs::create_dir_all(&out).map_err(|e| format!("{}: {e}", out.display()))?;
+            let me = std::env::current_exe().map_err(|e| e.to_string())?;
+            for s in seq {
+                let line = audit_ir_one(&me, &path, s, &out)?;
+                println!(
+                    "{}",
+                    serde_json::to_string(&line).map_err(|e| e.to_string())?
+                );
+            }
         }
         Cmd::CallgrindIr { prefix } => {
             print_json(&callgrind::solve_ir(&prefix)?)?;
@@ -1417,6 +1452,108 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
         },
     }
     Ok(ExitCode::SUCCESS)
+}
+
+/// The exact measured-child input of `seq` in the spec at `path`.
+fn profile_input(path: &Path, seq: u64) -> Result<record::ChildInput, String> {
+    let source = std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()))?;
+    let p = spec::plan(spec::Spec::from_json(&source)?)?;
+    let ex = p
+        .executions
+        .get(usize::try_from(seq).map_err(|_| "sequence does not fit usize")?)
+        .filter(|ex| ex.seq == seq)
+        .ok_or_else(|| format!("sequence {seq} is not in the plan"))?;
+    let arm = &p.arms[ex.arm];
+    let w = &p.workloads[ex.workload];
+    Ok(record::ChildInput {
+        schema: record::CHILD_INPUT_SCHEMA.into(),
+        curve: workload::CurveSpec::explicit(p.instance(ex.workload))
+            .unwrap_or_else(|| w.curve_spec.clone()),
+        target_seed: w.target_seed,
+        target_index: w.target_index,
+        target_kind: w.kind(),
+        expected_workload_id: w.workload_id.clone(),
+        method: methods::MethodSpec {
+            id: arm.method.id.clone(),
+            params: arm.method.params.clone(),
+        },
+        expected_method_id: arm.method.method_id.clone(),
+        algorithm_seed: ex.algorithm_seed,
+    })
+}
+
+/// One execution under Callgrind, priced.
+fn audit_ir_one(
+    me: &Path,
+    spec_path: &Path,
+    seq: u64,
+    out: &Path,
+) -> Result<serde_json::Value, String> {
+    use crypto_lib::cryptanalysis::ecbench::work;
+    use std::io::Write;
+    let input = profile_input(spec_path, seq)?;
+    let input_text = serde_json::to_string(&input).map_err(|e| e.to_string())?;
+    std::fs::write(out.join(format!("{seq}.input.json")), &input_text)
+        .map_err(|e| e.to_string())?;
+    let prefix = out.join(format!("{seq}.callgrind"));
+    let mut child = std::process::Command::new("valgrind")
+        .args(["--tool=callgrind", "--cache-sim=no", "--branch-sim=no"])
+        .arg(format!("--callgrind-out-file={}", prefix.display()))
+        .arg(me)
+        .arg("exec")
+        .env("ECBENCH_CALLGRIND_SOLVE", "1")
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::null())
+        .spawn()
+        .map_err(|e| format!("valgrind: {e}"))?;
+    child
+        .stdin
+        .take()
+        .expect("piped")
+        .write_all(input_text.as_bytes())
+        .map_err(|e| e.to_string())?;
+    let output = child.wait_with_output().map_err(|e| e.to_string())?;
+    std::fs::write(out.join(format!("{seq}.output.json")), &output.stdout)
+        .map_err(|e| e.to_string())?;
+    let child_out: record::ChildOutput =
+        serde_json::from_slice(&output.stdout).map_err(|e| format!("child output: {e}"))?;
+    let report = child_out
+        .report
+        .ok_or_else(|| format!("seq {seq}: {}", child_out.error.unwrap_or_default()))?;
+    let (w, _) = workload::Workload::build(
+        &input.curve,
+        input.target_seed,
+        input.target_index,
+        input.target_kind,
+    )?;
+    let ir = callgrind::solve_ir(&prefix)?;
+    let block = work::price(&work::Priceable {
+        method_id: &input.method.id,
+        method_params: &input.method.params,
+        curve: &w.curve,
+        phases: &report.phases,
+        counters: &report.counters,
+        solver: report.solver.as_ref(),
+    })?;
+    let bitops: f64 = block.bitops.parse().unwrap_or(f64::NAN);
+    Ok(serde_json::json!({
+        "schema": "ecbench.audit_ir/v1",
+        "seq": seq,
+        "method": input.method.id,
+        "params": input.method.params,
+        "curve": w.curve.slug,
+        "family": w.curve.family,
+        "log2_r": (w.curve.r as f64).log2(),
+        "recovered": report.recovered.map(|x| x.to_string()),
+        "solve_ir": ir.solve_ir,
+        "bitops": block.bitops,
+        "ir_per_kilo_bitop": ir.solve_ir as f64 / bitops * 1000.0,
+        "total_gae": report.total_gae,
+        "ir_per_gae": ir.solve_ir as f64 / report.total_gae,
+        "work": block,
+        "ir_parts": ir.parts,
+    }))
 }
 
 fn write_or_print(out: Option<&Path>, text: &str) -> Result<(), String> {

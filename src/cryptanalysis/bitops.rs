@@ -94,7 +94,10 @@ pub enum Prim {
     /// algorithm: 64 gates.
     WordOp,
     /// A hash-table probe or insert of a key as wide as a field element:
-    /// a multiply-shift hash and a key comparison.
+    /// a fold-XOR hash, a key comparison and a select, `4κ` gates.  The
+    /// keys are field elements, already uniform, so no multiplier is needed;
+    /// what a table really costs is memory, which the unit reports beside
+    /// the gates and never folds in.
     HashProbe,
 }
 
@@ -158,7 +161,12 @@ pub struct NoPrice {
 
 impl std::fmt::Display for NoPrice {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} has no bitop/v1 price over {:?}", self.prim.name(), self.field)
+        write!(
+            f,
+            "{} has no bitop/v1 price over {:?}",
+            self.prim.name(),
+            self.field
+        )
     }
 }
 
@@ -241,14 +249,34 @@ struct GroupFormula {
 
 /// `y² = x³ + ax + b`, affine: `λ = (y₂−y₁)/(x₂−x₁)`, `x₃ = λ² − x₁ − x₂`,
 /// `y₃ = λ(x₁ − x₃) − y₁`.
-const PRIME_ADD: GroupFormula = GroupFormula { inv: 1, mul: 2, sqr: 1, add: 6 };
+const PRIME_ADD: GroupFormula = GroupFormula {
+    inv: 1,
+    mul: 2,
+    sqr: 1,
+    add: 6,
+};
 /// `λ = (3x₁² + a)/2y₁`, `x₃ = λ² − 2x₁`, `y₃ = λ(x₁ − x₃) − y₁`.
-const PRIME_DOUBLE: GroupFormula = GroupFormula { inv: 1, mul: 2, sqr: 2, add: 8 };
+const PRIME_DOUBLE: GroupFormula = GroupFormula {
+    inv: 1,
+    mul: 2,
+    sqr: 2,
+    add: 8,
+};
 /// `y² + xy = x³ + ax² + b`, affine: `λ = (y₁+y₂)/(x₁+x₂)`,
 /// `x₃ = λ² + λ + x₁ + x₂ + a`, `y₃ = λ(x₁ + x₃) + x₃ + y₁`.
-const BINARY_ADD: GroupFormula = GroupFormula { inv: 1, mul: 2, sqr: 1, add: 9 };
+const BINARY_ADD: GroupFormula = GroupFormula {
+    inv: 1,
+    mul: 2,
+    sqr: 1,
+    add: 9,
+};
 /// `λ = x₁ + y₁/x₁`, `x₃ = λ² + λ + a`, `y₃ = x₁² + (λ + 1)x₃`.
-const BINARY_DOUBLE: GroupFormula = GroupFormula { inv: 1, mul: 2, sqr: 2, add: 5 };
+const BINARY_DOUBLE: GroupFormula = GroupFormula {
+    inv: 1,
+    mul: 2,
+    sqr: 2,
+    add: 5,
+};
 /// `E(F_{p⁴})`: one group operation is 97 `F_p` products, the convention of
 /// `ecbench::fp4` (`C_ADD`), which charges the extension inversion through
 /// the norm.
@@ -285,10 +313,14 @@ impl Widths {
                 Prim::FieldSqrt => fp::sqrt(b),
                 Prim::Legendre => fp::legendre(b),
                 Prim::GroupAdd => group(&PRIME_ADD, fp::inv(b), fp::mul(b), fp::sqr(b), fp::add(b)),
-                Prim::GroupDouble => {
-                    group(&PRIME_DOUBLE, fp::inv(b), fp::mul(b), fp::sqr(b), fp::add(b))
-                }
-                Prim::HashProbe => int_mul(b) + 2 * b as u128,
+                Prim::GroupDouble => group(
+                    &PRIME_DOUBLE,
+                    fp::inv(b),
+                    fp::mul(b),
+                    fp::sqr(b),
+                    fp::add(b),
+                ),
+                Prim::HashProbe => 4 * b as u128,
                 Prim::AsSolve | Prim::Canon => return Err(none()),
                 Prim::ModrMul | Prim::ModrAdd | Prim::WordOp => unreachable!(),
             },
@@ -302,10 +334,14 @@ impl Widths {
                 Prim::GroupAdd => {
                     group(&BINARY_ADD, f2::inv(n), f2::mul(n), f2::sqr(n), f2::add(n))
                 }
-                Prim::GroupDouble => {
-                    group(&BINARY_DOUBLE, f2::inv(n), f2::mul(n), f2::sqr(n), f2::add(n))
-                }
-                Prim::HashProbe => int_mul(n) + 2 * n as u128,
+                Prim::GroupDouble => group(
+                    &BINARY_DOUBLE,
+                    f2::inv(n),
+                    f2::mul(n),
+                    f2::sqr(n),
+                    f2::add(n),
+                ),
+                Prim::HashProbe => 4 * n as u128,
                 Prim::FieldSqrt | Prim::Legendre => return Err(none()),
                 Prim::ModrMul | Prim::ModrAdd | Prim::WordOp => unreachable!(),
             },
@@ -313,7 +349,7 @@ impl Widths {
                 Prim::FieldAdd => 4 * fp::add(b),
                 Prim::FieldMul | Prim::FieldSqr => FP4_MUL_FP_MULS * fp::mul(b),
                 Prim::GroupAdd | Prim::GroupDouble => FP4_GROUP_OP_FP_MULS * fp::mul(b),
-                Prim::HashProbe => int_mul(4 * b) + 8 * b as u128,
+                Prim::HashProbe => 16 * b as u128,
                 Prim::FieldInv | Prim::FieldSqrt | Prim::Legendre | Prim::AsSolve | Prim::Canon => {
                     return Err(none())
                 }

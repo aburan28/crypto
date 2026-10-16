@@ -155,6 +155,9 @@ pub fn child_main(input: &str) -> ChildOutput {
                 m.method_id, job.expected_method_id
             ));
         }
+        // Harness tables a solve may consult by name are loaded outside
+        // the measured interval.
+        crate::cryptanalysis::curve_id::warm();
         let counters = HwCounters::open();
         let before = schedstat();
         // Profiling is opt-in and the environment lookup is outside both
