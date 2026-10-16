@@ -14,6 +14,9 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "volcano-diagram"))
+from volcano_diagram import render  # noqa: E402
+
 run = Path(sys.argv[1])
 R = json.loads((run / "results.json").read_text())
 rows = list(csv.DictReader(open(run / "trials.csv")))
@@ -30,61 +33,29 @@ def save(fig, name):
     plt.close(fig)
 
 
-# 1. The volcano: measured-radius vertices by level, edges, measured curves marked.
-verts = {v["id"]: v for v in R["vertices"] if v["level"] is not None}
+# 1. The volcano, in the repository's standard diagram (tools/volcano-diagram).
 arms = {a["vertex"]: a for a in R["arms"] if a["vertex"] is not None}
-crater = sorted(v for v in verts if verts[v]["level"] == 0)
-# Tree layout: each lower vertex hangs under its first neighbour one level up;
-# leaves take consecutive x, parents sit over their children's mean.
-children = defaultdict(list)
-for v, d in sorted(verts.items()):
-    if d["level"] > 0:
-        ups = sorted(w for w in d["nbrs"] if w in verts and verts[w]["level"] == d["level"] - 1)
-        if ups:
-            children[ups[0]].append(v)
-xpos = {}
-cursor = [0.0]
-
-
-def place(v):
-    if not children[v]:
-        xpos[v] = cursor[0]
-        cursor[0] += 1.0
-    else:
-        for c in children[v]:
-            place(c)
-        xpos[v] = sum(xpos[c] for c in children[v]) / len(children[v])
-
-
-for c in crater:
-    place(c)
-    cursor[0] += 0.6
-fig, ax = plt.subplots(figsize=(min(18, max(8, cursor[0] * 0.12)), 4.8))
-for v, d in verts.items():
-    for w in d["nbrs"]:
-        if w in xpos and v in xpos and v < w:
-            ax.plot([xpos[v], xpos[w]], [-d["level"], -verts[w]["level"]], color="#bbbbbb", lw=0.7, zorder=1)
-means = [a["summary"]["iters"]["mean"] for a in arms.values()]
-lo, hi = min(means), max(means)
-cmap = plt.get_cmap("viridis")
-for v in xpos:
-    d = verts[v]
-    if v in arms:
-        m = arms[v]["summary"]["iters"]["mean"]
-        ax.scatter(xpos[v], -d["level"], s=70, color=cmap((m - lo) / (hi - lo or 1)), edgecolor="k", zorder=3)
-        floor = d["level"] == depth
-        ax.annotate(f"v{v}", (xpos[v], -d["level"]), textcoords="offset points", xytext=(0, -9 if floor else 7),
-                    ha="center", va="top" if floor else "bottom", fontsize=6, rotation=90 if floor else 0)
-    else:
-        ax.scatter(xpos[v], -d["level"], s=12, color="#dddddd", edgecolor="#999999", zorder=2)
-    if v == 0:
-        ax.scatter(xpos[v], -d["level"], s=200, facecolor="none", edgecolor="red", lw=1.5, zorder=4)
-sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(lo, hi))
-fig.colorbar(sm, ax=ax, label="mean rho iterations (measured curves)")
-ax.set_yticks([-l for l in range(depth + 1)], ["crater (0)"] + [f"level {l}" for l in range(1, depth)] + [f"floor ({depth})"])
-ax.set_xticks([])
-ax.set_title(f"{ell}-isogeny volcano, depth {depth}, p = {R['problem']['p']} (root v0 circled red)\n{rid}", fontsize=9)
-save(fig, "volcano")
+spec = {
+    "schema": "volcano-diagram/v1",
+    "ell": ell,
+    "depth": depth,
+    "title": f"{ell}-isogeny volcano, depth {depth}, p = {R['problem']['p']}",
+    "subtitle": rid,
+    "value_label": "mean rho iterations (measured curves)",
+    "vertices": [
+        {
+            "id": v["id"],
+            "label": f"v{v['id']}",
+            "level": v["level"],
+            "nbrs": v["nbrs"],
+            "value": arms[v["id"]]["summary"]["iters"]["mean"] if v["id"] in arms else None,
+            "highlight": "root" if v["id"] == 0 else None,
+        }
+        for v in R["vertices"]
+    ],
+}
+(run / "volcano.diagram.json").write_text(json.dumps(spec, indent=1))
+render(spec, str(run / "volcano"))
 
 # 2. Per-curve min / mean / max (and every trial) by level.
 order = sorted(R["arms"], key=lambda a: (a["kind"] != "isogenous", a["level"] if a["level"] is not None else 9, a["arm"]))

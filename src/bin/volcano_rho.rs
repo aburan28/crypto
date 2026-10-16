@@ -473,6 +473,8 @@ struct Args {
     per_level: usize,
     dp_bits: u32,
     max_cofactor: u64,
+    /// `any`, `split`, `inert` or `ramified`: the crater shape the search requires.
+    crater: String,
     controls: usize,
     out: PathBuf,
 }
@@ -487,6 +489,7 @@ fn parse_args() -> Args {
         per_level: 10,
         dp_bits: 8,
         max_cofactor: 64,
+        crater: "any".into(),
         controls: 3,
         out: PathBuf::from("volcano-rho-out"),
     };
@@ -503,12 +506,13 @@ fn parse_args() -> Args {
             "--per-level" => a.per_level = val.parse().unwrap(),
             "--dp-bits" => a.dp_bits = val.parse().unwrap(),
             "--max-cofactor" => a.max_cofactor = val.parse().unwrap(),
+            "--crater" => a.crater = val.clone(),
             "--controls" => a.controls = val.parse().unwrap(),
             "--out" => a.out = PathBuf::from(val),
             "-h" | "--help" => {
                 println!(
                     "volcano-rho [--bits 40] [--ell 3] [--depth 3] [--seed 1] [--trials 100] \
-                     [--per-level 10] [--dp-bits 8] [--max-cofactor 64] [--controls 3] [--out DIR]"
+                     [--per-level 10] [--dp-bits 8] [--max-cofactor 64] [--crater any|split|inert|ramified] [--controls 3] [--out DIR]"
                 );
                 std::process::exit(0);
             }
@@ -517,6 +521,10 @@ fn parse_args() -> Args {
         i += 2;
     }
     assert!(a.ell == 2 || a.ell == 3, "--ell must be 2 or 3");
+    assert!(
+        ["any", "split", "inert", "ramified"].contains(&a.crater.as_str()),
+        "--crater must be any, split, inert or ramified"
+    );
     assert!(a.depth >= 1 && (20..=60).contains(&a.bits));
     a
 }
@@ -586,6 +594,11 @@ fn search(args: &Args, rng: &mut SmallRng) -> Found {
             }
             let n = factor(order).last().unwrap().0;
             if order / n > args.max_cofactor || n.is_multiple_of(args.ell) || n < (1 << 20) {
+                continue;
+            }
+            if args.crater != "any"
+                && !crater_kind(fundamental(d_abs).0, args.ell).starts_with(args.crater.as_str())
+            {
                 continue;
             }
             return Found {
@@ -943,7 +956,7 @@ fn main() {
     let out = json!({
         "schema": "volcano-rho/v1",
         "command": std::env::args().collect::<Vec<_>>().join(" "),
-        "params": {"bits": args.bits, "ell": ell, "depth": args.depth, "seed": args.seed,
+        "params": {"bits": args.bits, "ell": ell, "depth": args.depth, "seed": args.seed, "crater": args.crater,
                    "trials": args.trials, "per_level": args.per_level, "dp_bits": args.dp_bits,
                    "max_cofactor": args.max_cofactor, "controls": args.controls},
         "host": {"cpu": host, "threads": rayon::current_num_threads()},

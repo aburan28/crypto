@@ -97,6 +97,20 @@ are present. Never commit a PDF you have not inspected or present an older
 PDF as current. If no renderer can be installed, commit the complete source
 and graphs and state the exact blocker in the report and the PR.
 
+## Isogeny volcanoes: the standard diagram
+
+Draw every ℓ-isogeny volcano — a walk's result, or measurements placed on
+its curves — with `tools/volcano-diagram/volcano_diagram.py`
+(`volcano-diagram/v1` input, documented in its README). Don't hand-roll a
+new layout. That gives every volcano figure the same reading: strata from
+crater (0) to floor, descending trees under each crater vertex, measured
+vertices on one labelled colour scale with unmeasured ones small and grey,
+unverified edges dashed, the root circled, and the run id in the subtitle.
+Save the input as `<name>.diagram.json` beside the SVG and PNG. Map each
+short vertex label to its full curve id in the report. If a figure needs
+something the renderer lacks, extend the renderer and its schema version
+rather than forking it.
+
 ## Deliverables for each search round
 
 1. Write a dated Markdown report in the relevant `research/` or `docs/`
