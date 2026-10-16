@@ -496,7 +496,8 @@ pub struct StrongRhoOutcomeG<S> {
     pub walk_steps: u64,
     /// Walks started.
     pub walks: u64,
-    /// Walks abandoned in a fruitless cycle (length ≤ 4).
+    /// Walks abandoned in a fruitless cycle: the next point equals the
+    /// current one or one of the four before it, so cycles of length 1–5.
     pub fruitless: u64,
     /// Fruitless cycles escaped by doubling (`escape_fruitless` only).
     pub escapes: u64,

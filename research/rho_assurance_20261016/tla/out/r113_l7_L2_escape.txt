@@ -1,13 +1,13 @@
 TLC2 Version 2026.10.15.145915 (rev: 932d35e)
-Running breadth-first search Model-Checking with fp 48 and seed 3410796151012163440 with 2 workers on 4 cores with 3040MB heap and 64MB offheap memory [pid: 30011] (Linux 6.18.44-fc-v139 amd64, Ubuntu 21.0.12.1 64bit, MSBDiskFPSet, DiskStateQueue).
+Running breadth-first search Model-Checking with fp 88 and seed -6778730370680030598 with 2 workers on 4 cores with 3040MB heap and 64MB offheap memory [pid: 10221] (Linux 6.18.44-fc-v139 amd64, Ubuntu 21.0.12.1 64bit, MSBDiskFPSet, DiskStateQueue).
 Parsing file /home/user/crypto/research/rho_assurance_20261016/tla/StrongRho.tla
-Parsing file /tmp/tlc-10526444373723293466/Integers.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
-Parsing file /tmp/tlc-10526444373723293466/Sequences.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
-Parsing file /tmp/tlc-10526444373723293466/FiniteSets.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
-Parsing file /tmp/tlc-10526444373723293466/TLC.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
-Parsing file /tmp/tlc-10526444373723293466/_TLCTrace.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
-Parsing file /tmp/tlc-10526444373723293466/Naturals.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
-Parsing file /tmp/tlc-10526444373723293466/TLCExt.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/tlc-11794907989521871205/Integers.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
+Parsing file /tmp/tlc-11794907989521871205/Sequences.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
+Parsing file /tmp/tlc-11794907989521871205/FiniteSets.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /tmp/tlc-11794907989521871205/TLC.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /tmp/tlc-11794907989521871205/_TLCTrace.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
+Parsing file /tmp/tlc-11794907989521871205/Naturals.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /tmp/tlc-11794907989521871205/TLCExt.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
 Semantic processing of module Naturals
 Semantic processing of module Integers
 Semantic processing of module Sequences
@@ -19,7 +19,7 @@ Semantic processing of module StrongRho
 Linting of module TLCExt
 Linting of module _TLCTrace
 Linting of module StrongRho
-Starting... (2026-10-16 17:07:40)
+Starting... (2026-10-16 17:34:46)
 Computing initial states...
 Computed 2 initial states...
 Computed 4 initial states...
@@ -35,14 +35,14 @@ Computed 2048 initial states...
 Computed 4096 initial states...
 Computed 8192 initial states...
 Computed 16384 initial states...
-Finished computing initial states: 30736 distinct states generated at 2026-10-16 17:07:41.
-Progress(7) at 2026-10-16 17:07:44: 184,620 states generated (184,620 s/min), 184,620 distinct states found (184,620 ds/min), 30,734 states left on queue.
+Finished computing initial states: 30736 distinct states generated at 2026-10-16 17:34:47.
+Progress(7) at 2026-10-16 17:34:50: 196,210 states generated (196,210 s/min), 196,206 distinct states found (196,206 ds/min), 30,735 states left on queue.
 Model checking completed. No error has been found.
   Estimates of the probability that TLC did not check all reachable states
   because two distinct states had the same fingerprint:
   calculated (optimistic):  val = 2.1E-9
-  based on the actual fingerprints:  val = 1.6E-7
+  based on the actual fingerprints:  val = 5.9E-8
 1311261 states generated, 1280525 distinct states found, 0 states left on queue.
 The depth of the complete state graph search is 78.
 The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 1 and the 95th percentile is 1).
-Finished in 22s at (2026-10-16 17:08:02)
+Finished in 21s at (2026-10-16 17:35:07)

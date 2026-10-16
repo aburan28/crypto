@@ -1,13 +1,13 @@
 TLC2 Version 2026.10.15.145915 (rev: 932d35e)
-Running breadth-first search Model-Checking with fp 117 and seed 6381481053875014895 with 2 workers on 4 cores with 3040MB heap and 64MB offheap memory [pid: 6424] (Linux 6.18.44-fc-v139 amd64, Ubuntu 21.0.12.1 64bit, MSBDiskFPSet, DiskStateQueue).
+Running breadth-first search Model-Checking with fp 83 and seed -840296571856627355 with 2 workers on 4 cores with 3040MB heap and 64MB offheap memory [pid: 12259] (Linux 6.18.44-fc-v139 amd64, Ubuntu 21.0.12.1 64bit, MSBDiskFPSet, DiskStateQueue).
 Parsing file /home/user/crypto/research/rho_assurance_20261016/tla/StrongRho.tla
-Parsing file /tmp/tlc-7728942724832757706/Integers.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
-Parsing file /tmp/tlc-7728942724832757706/Sequences.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
-Parsing file /tmp/tlc-7728942724832757706/FiniteSets.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
-Parsing file /tmp/tlc-7728942724832757706/TLC.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
-Parsing file /tmp/tlc-7728942724832757706/_TLCTrace.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
-Parsing file /tmp/tlc-7728942724832757706/Naturals.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
-Parsing file /tmp/tlc-7728942724832757706/TLCExt.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/tlc-7664279351910831653/Integers.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
+Parsing file /tmp/tlc-7664279351910831653/Sequences.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
+Parsing file /tmp/tlc-7664279351910831653/FiniteSets.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /tmp/tlc-7664279351910831653/TLC.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /tmp/tlc-7664279351910831653/_TLCTrace.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
+Parsing file /tmp/tlc-7664279351910831653/Naturals.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /tmp/tlc-7664279351910831653/TLCExt.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
 Semantic processing of module Naturals
 Semantic processing of module Integers
 Semantic processing of module Sequences
@@ -19,7 +19,7 @@ Semantic processing of module StrongRho
 Linting of module TLCExt
 Linting of module _TLCTrace
 Linting of module StrongRho
-Starting... (2026-10-16 17:24:54)
+Starting... (2026-10-16 17:46:54)
 Computing initial states...
 Computed 2 initial states...
 Computed 4 initial states...
@@ -35,8 +35,7 @@ Computed 2048 initial states...
 Computed 4096 initial states...
 Computed 8192 initial states...
 Computed 16384 initial states...
-Finished computing initial states: 28830 distinct states generated at 2026-10-16 17:24:55.
-Progress(4) at 2026-10-16 17:24:58: 101,006 states generated (101,006 s/min), 101,006 distinct states found (101,006 ds/min), 28,828 states left on queue.
+Finished computing initial states: 28830 distinct states generated at 2026-10-16 17:46:54.
 Error: Invariant W_TableTwo is violated.
 Error: The behavior up to this point is:
 State 1: <Initial predicate>
@@ -73,7 +72,7 @@ State 1: <Initial predicate>
 /\ result = 0
 /\ status = "running"
 
-State 2: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
+State 2: <Begin line 118, col 5 to line 125, col 79 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -107,7 +106,7 @@ State 2: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 3: <StartLane(1) line 123, col 5 to line 136, col 70 of module StrongRho>
+State 3: <StartLane(1) line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -141,7 +140,7 @@ State 3: <StartLane(1) line 123, col 5 to line 136, col 70 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 4: <StartLane(2) line 123, col 5 to line 136, col 70 of module StrongRho>
+State 4: <StartLane(2) line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -175,7 +174,7 @@ State 4: <StartLane(2) line 123, col 5 to line 136, col 70 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 5: <EndStart line 139, col 5 to line 141, col 87 of module StrongRho>
+State 5: <EndStart line 145, col 5 to line 147, col 87 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -209,7 +208,7 @@ State 5: <EndStart line 139, col 5 to line 141, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 6: <DpLane(1) line 145, col 5 to line 173, col 116 of module StrongRho>
+State 6: <DpLane(1) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -243,7 +242,7 @@ State 6: <DpLane(1) line 145, col 5 to line 173, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 7: <DpLane(2) line 145, col 5 to line 173, col 116 of module StrongRho>
+State 7: <DpLane(2) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -277,7 +276,7 @@ State 7: <DpLane(2) line 145, col 5 to line 173, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-172984 states generated, 172984 distinct states found, 28828 states left on queue.
+172987 states generated, 172987 distinct states found, 28828 states left on queue.
 The depth of the complete state graph search is 7.
-Finished in 06s at (2026-10-16 17:25:00)
-Trace exploration spec path: ./StrongRho_TTrace_1792171493.tla
+Finished in 04s at (2026-10-16 17:46:58)
+Trace exploration spec path: ./StrongRho_TTrace_1792172813.tla

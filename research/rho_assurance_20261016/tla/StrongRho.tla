@@ -24,9 +24,14 @@ CONSTANTS
     ESCAPE,     \* params.escape_fruitless
     LaneOrderND,\* TRUE: lanes in a phase are taken in any order; FALSE: in index order (as the Rust)
     StrideLo, StrideHi, CursorLo, CursorHi, DLo, DHi, \* ranges explored by Init
-    MUTANT      \* "none" or a deliberate bug, see below
+    MUTANT      \* "none" or one deliberate bug:
+                \*   "canon_b"       canonicalize multiplies a, not b, by the multiplier
+                \*   "sign"          candidate = (a - hit_a)(b - hit_b)^-1 (wrong sign)
+                \*   "sign_noverify" wrong sign and no [d]G = Q check before returning
+                \*   "escape_b"      the fruitless escape doubles the point and a, not b
 
-ASSUME R > 2 /\ NF >= 1 /\ L >= 1 /\ D >= 1 /\ StepCap >= 1 /\ WalkCap >= 0
+ASSUME R > 2 /\ \A k \in 2..R-1 : R % k # 0   \* R prime
+ASSUME /\ NF >= 1 /\ L >= 1 /\ D >= 1 /\ StepCap >= 1 /\ WalkCap >= 0
 ASSUME NJ \in {2, 3}
 JumpA == SubSeq(<<J1, J2, J3>>, 1, NJ)
 ASSUME \A j \in 1..Len(JumpA) : JumpA[j] \in 1..R-1
@@ -47,6 +52,7 @@ LamPow == [k \in 0..NF-1 |-> Pow(LAM, k)]
 ASSUME Md(LamPow[NF-1] * LAM) = 1     \* "lambda must have order dividing n"
 Mults  == {LamPow[k] : k \in 0..NF-1} \cup {Md(-LamPow[k]) : k \in 0..NF-1}
 A      == Cardinality(Mults)          \* automorphisms
+ASSUME A = 2 * NF                     \* LAM has order exactly NF and -1 is not a power of LAM
 
 Min(S) == CHOOSE x \in S : \A y \in S : x <= y
 

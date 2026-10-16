@@ -1,13 +1,13 @@
 TLC2 Version 2026.10.15.145915 (rev: 932d35e)
-Running breadth-first search Model-Checking with fp 25 and seed -37619923151221109 with 2 workers on 4 cores with 3040MB heap and 64MB offheap memory [pid: 4289] (Linux 6.18.44-fc-v139 amd64, Ubuntu 21.0.12.1 64bit, MSBDiskFPSet, DiskStateQueue).
+Running breadth-first search Model-Checking with fp 84 and seed -9083023002361956729 with 2 workers on 4 cores with 3040MB heap and 64MB offheap memory [pid: 11986] (Linux 6.18.44-fc-v139 amd64, Ubuntu 21.0.12.1 64bit, MSBDiskFPSet, DiskStateQueue).
 Parsing file /home/user/crypto/research/rho_assurance_20261016/tla/StrongRho.tla
-Parsing file /tmp/tlc-4656340186502203929/Integers.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
-Parsing file /tmp/tlc-4656340186502203929/Sequences.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
-Parsing file /tmp/tlc-4656340186502203929/FiniteSets.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
-Parsing file /tmp/tlc-4656340186502203929/TLC.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
-Parsing file /tmp/tlc-4656340186502203929/_TLCTrace.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
-Parsing file /tmp/tlc-4656340186502203929/Naturals.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
-Parsing file /tmp/tlc-4656340186502203929/TLCExt.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/tlc-13206978301583208247/Integers.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
+Parsing file /tmp/tlc-13206978301583208247/Sequences.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
+Parsing file /tmp/tlc-13206978301583208247/FiniteSets.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /tmp/tlc-13206978301583208247/TLC.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /tmp/tlc-13206978301583208247/_TLCTrace.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
+Parsing file /tmp/tlc-13206978301583208247/Naturals.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /tmp/tlc-13206978301583208247/TLCExt.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
 Semantic processing of module Naturals
 Semantic processing of module Integers
 Semantic processing of module Sequences
@@ -19,7 +19,7 @@ Semantic processing of module StrongRho
 Linting of module TLCExt
 Linting of module _TLCTrace
 Linting of module StrongRho
-Starting... (2026-10-16 17:24:07)
+Starting... (2026-10-16 17:46:26)
 Computing initial states...
 Computed 2 initial states...
 Computed 4 initial states...
@@ -35,7 +35,7 @@ Computed 2048 initial states...
 Computed 4096 initial states...
 Computed 8192 initial states...
 Computed 16384 initial states...
-Finished computing initial states: 28830 distinct states generated at 2026-10-16 17:24:08.
+Finished computing initial states: 28830 distinct states generated at 2026-10-16 17:46:27.
 Error: Invariant W_InfinityStart is violated.
 Error: The behavior up to this point is:
 State 1: <Initial predicate>
@@ -72,7 +72,7 @@ State 1: <Initial predicate>
 /\ result = 0
 /\ status = "running"
 
-State 2: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
+State 2: <Begin line 118, col 5 to line 125, col 79 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -108,5 +108,5 @@ State 2: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
 
 28862 states generated, 28862 distinct states found, 28828 states left on queue.
 The depth of the complete state graph search is 2.
-Finished in 02s at (2026-10-16 17:24:09)
-Trace exploration spec path: ./StrongRho_TTrace_1792171446.tla
+Finished in 01s at (2026-10-16 17:46:27)
+Trace exploration spec path: ./StrongRho_TTrace_1792172786.tla

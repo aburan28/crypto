@@ -48,7 +48,7 @@ for cfg in "${cfgs[@]}"; do
     out="$HERE/out/$name.txt"
     meta="$(mktemp -d "$META_ROOT/strongrho-tlc.XXXXXX")"
     start=$(date +%s)
-    java -XX:+UseParallelGC -cp "$JAR" tlc2.TLC -workers "$WORKERS" -metadir "$meta" \
+    java -XX:+UseParallelGC -cp "$JAR" tlc2.TLC -workers "$WORKERS" -metadir "$meta" -noGenerateSpecTE \
         -config "$cfg" StrongRho.tla 2>&1 | grep -v '^Picked up JAVA_TOOL_OPTIONS' > "$out"
     secs=$(( $(date +%s) - start ))
     rm -rf "$meta"

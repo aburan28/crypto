@@ -1,13 +1,13 @@
 TLC2 Version 2026.10.15.145915 (rev: 932d35e)
-Running breadth-first search Model-Checking with fp 16 and seed 4600224554508825703 with 2 workers on 4 cores with 3040MB heap and 64MB offheap memory [pid: 5369] (Linux 6.18.44-fc-v139 amd64, Ubuntu 21.0.12.1 64bit, MSBDiskFPSet, DiskStateQueue).
+Running breadth-first search Model-Checking with fp 5 and seed -8535399409245134544 with 2 workers on 4 cores with 3040MB heap and 64MB offheap memory [pid: 12192] (Linux 6.18.44-fc-v139 amd64, Ubuntu 21.0.12.1 64bit, MSBDiskFPSet, DiskStateQueue).
 Parsing file /home/user/crypto/research/rho_assurance_20261016/tla/StrongRho.tla
-Parsing file /tmp/tlc-12850643979557943430/Integers.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
-Parsing file /tmp/tlc-12850643979557943430/Sequences.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
-Parsing file /tmp/tlc-12850643979557943430/FiniteSets.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
-Parsing file /tmp/tlc-12850643979557943430/TLC.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
-Parsing file /tmp/tlc-12850643979557943430/_TLCTrace.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
-Parsing file /tmp/tlc-12850643979557943430/Naturals.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
-Parsing file /tmp/tlc-12850643979557943430/TLCExt.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/tlc-10227214894262868431/Integers.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
+Parsing file /tmp/tlc-10227214894262868431/Sequences.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
+Parsing file /tmp/tlc-10227214894262868431/FiniteSets.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /tmp/tlc-10227214894262868431/TLC.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /tmp/tlc-10227214894262868431/_TLCTrace.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
+Parsing file /tmp/tlc-10227214894262868431/Naturals.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /tmp/tlc-10227214894262868431/TLCExt.tla (jar:file:/tmp/claude-0/tla/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
 Semantic processing of module Naturals
 Semantic processing of module Integers
 Semantic processing of module Sequences
@@ -19,7 +19,7 @@ Semantic processing of module StrongRho
 Linting of module TLCExt
 Linting of module _TLCTrace
 Linting of module StrongRho
-Starting... (2026-10-16 17:24:32)
+Starting... (2026-10-16 17:46:41)
 Computing initial states...
 Computed 2 initial states...
 Computed 4 initial states...
@@ -35,8 +35,8 @@ Computed 2048 initial states...
 Computed 4096 initial states...
 Computed 8192 initial states...
 Computed 16384 initial states...
-Finished computing initial states: 28830 distinct states generated at 2026-10-16 17:24:33.
-Progress(4) at 2026-10-16 17:24:36: 104,301 states generated (104,301 s/min), 104,297 distinct states found (104,297 ds/min), 28,828 states left on queue.
+Finished computing initial states: 28830 distinct states generated at 2026-10-16 17:46:41.
+Progress(8) at 2026-10-16 17:46:44: 207,673 states generated (207,673 s/min), 207,294 distinct states found (207,294 ds/min), 28,451 states left on queue.
 Error: Invariant W_StepCapped is violated.
 Error: The behavior up to this point is:
 State 1: <Initial predicate>
@@ -73,7 +73,7 @@ State 1: <Initial predicate>
 /\ result = 0
 /\ status = "running"
 
-State 2: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
+State 2: <Begin line 118, col 5 to line 125, col 79 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -107,7 +107,7 @@ State 2: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 3: <StartLane(1) line 123, col 5 to line 136, col 70 of module StrongRho>
+State 3: <StartLane(1) line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -141,7 +141,7 @@ State 3: <StartLane(1) line 123, col 5 to line 136, col 70 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 4: <StartLane(2) line 123, col 5 to line 136, col 70 of module StrongRho>
+State 4: <StartLane(2) line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -175,7 +175,7 @@ State 4: <StartLane(2) line 123, col 5 to line 136, col 70 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 5: <StartLane(2) line 123, col 5 to line 136, col 70 of module StrongRho>
+State 5: <StartLane(2) line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -209,7 +209,7 @@ State 5: <StartLane(2) line 123, col 5 to line 136, col 70 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 6: <EndStart line 139, col 5 to line 141, col 87 of module StrongRho>
+State 6: <EndStart line 145, col 5 to line 147, col 87 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -243,7 +243,7 @@ State 6: <EndStart line 139, col 5 to line 141, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 7: <DpLane(1) line 145, col 5 to line 173, col 116 of module StrongRho>
+State 7: <DpLane(1) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -277,7 +277,7 @@ State 7: <DpLane(1) line 145, col 5 to line 173, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 8: <DpLane(2) line 145, col 5 to line 173, col 116 of module StrongRho>
+State 8: <DpLane(2) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -311,7 +311,7 @@ State 8: <DpLane(2) line 145, col 5 to line 173, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 9: <EndDp line 176, col 5 to line 178, col 87 of module StrongRho>
+State 9: <EndDp line 182, col 5 to line 184, col 87 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -345,7 +345,7 @@ State 9: <EndDp line 176, col 5 to line 178, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 10: <StepLane(1) line 182, col 5 to line 222, col 101 of module StrongRho>
+State 10: <StepLane(1) line 188, col 5 to line 228, col 101 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -379,7 +379,7 @@ State 10: <StepLane(1) line 182, col 5 to line 222, col 101 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 11: <StepLane(2) line 182, col 5 to line 222, col 101 of module StrongRho>
+State 11: <StepLane(2) line 188, col 5 to line 228, col 101 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -413,7 +413,7 @@ State 11: <StepLane(2) line 182, col 5 to line 222, col 101 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 12: <EndStep line 225, col 5 to line 227, col 87 of module StrongRho>
+State 12: <EndStep line 231, col 5 to line 233, col 87 of module StrongRho>
 /\ phase = "begin"
 /\ capped = 0
 /\ escapes = 0
@@ -447,7 +447,7 @@ State 12: <EndStep line 225, col 5 to line 227, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 13: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
+State 13: <Begin line 118, col 5 to line 125, col 79 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -481,7 +481,7 @@ State 13: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 14: <EndStart line 139, col 5 to line 141, col 87 of module StrongRho>
+State 14: <EndStart line 145, col 5 to line 147, col 87 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -515,7 +515,7 @@ State 14: <EndStart line 139, col 5 to line 141, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 15: <DpLane(1) line 145, col 5 to line 173, col 116 of module StrongRho>
+State 15: <DpLane(1) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -549,7 +549,7 @@ State 15: <DpLane(1) line 145, col 5 to line 173, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 16: <DpLane(2) line 145, col 5 to line 173, col 116 of module StrongRho>
+State 16: <DpLane(2) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -583,7 +583,7 @@ State 16: <DpLane(2) line 145, col 5 to line 173, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 17: <EndDp line 176, col 5 to line 178, col 87 of module StrongRho>
+State 17: <EndDp line 182, col 5 to line 184, col 87 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -617,7 +617,7 @@ State 17: <EndDp line 176, col 5 to line 178, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 18: <StepLane(1) line 182, col 5 to line 222, col 101 of module StrongRho>
+State 18: <StepLane(1) line 188, col 5 to line 228, col 101 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -651,7 +651,7 @@ State 18: <StepLane(1) line 182, col 5 to line 222, col 101 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 19: <StepLane(2) line 182, col 5 to line 222, col 101 of module StrongRho>
+State 19: <StepLane(2) line 188, col 5 to line 228, col 101 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -685,7 +685,7 @@ State 19: <StepLane(2) line 182, col 5 to line 222, col 101 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 20: <EndStep line 225, col 5 to line 227, col 87 of module StrongRho>
+State 20: <EndStep line 231, col 5 to line 233, col 87 of module StrongRho>
 /\ phase = "begin"
 /\ capped = 0
 /\ escapes = 0
@@ -719,7 +719,7 @@ State 20: <EndStep line 225, col 5 to line 227, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 21: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
+State 21: <Begin line 118, col 5 to line 125, col 79 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -753,7 +753,7 @@ State 21: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 22: <StartLane(1) line 123, col 5 to line 136, col 70 of module StrongRho>
+State 22: <StartLane(1) line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -787,7 +787,7 @@ State 22: <StartLane(1) line 123, col 5 to line 136, col 70 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 23: <StartLane(2) line 123, col 5 to line 136, col 70 of module StrongRho>
+State 23: <StartLane(2) line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -821,7 +821,7 @@ State 23: <StartLane(2) line 123, col 5 to line 136, col 70 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 24: <EndStart line 139, col 5 to line 141, col 87 of module StrongRho>
+State 24: <EndStart line 145, col 5 to line 147, col 87 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -855,7 +855,7 @@ State 24: <EndStart line 139, col 5 to line 141, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 25: <DpLane(1) line 145, col 5 to line 173, col 116 of module StrongRho>
+State 25: <DpLane(1) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -889,7 +889,7 @@ State 25: <DpLane(1) line 145, col 5 to line 173, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 26: <DpLane(2) line 145, col 5 to line 173, col 116 of module StrongRho>
+State 26: <DpLane(2) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -923,7 +923,7 @@ State 26: <DpLane(2) line 145, col 5 to line 173, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 27: <EndDp line 176, col 5 to line 178, col 87 of module StrongRho>
+State 27: <EndDp line 182, col 5 to line 184, col 87 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -957,7 +957,7 @@ State 27: <EndDp line 176, col 5 to line 178, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 28: <EndStep line 225, col 5 to line 227, col 87 of module StrongRho>
+State 28: <EndStep line 231, col 5 to line 233, col 87 of module StrongRho>
 /\ phase = "begin"
 /\ capped = 0
 /\ escapes = 0
@@ -991,7 +991,7 @@ State 28: <EndStep line 225, col 5 to line 227, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 29: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
+State 29: <Begin line 118, col 5 to line 125, col 79 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -1025,7 +1025,7 @@ State 29: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 30: <StartLane(1) line 123, col 5 to line 136, col 70 of module StrongRho>
+State 30: <StartLane(1) line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -1059,7 +1059,7 @@ State 30: <StartLane(1) line 123, col 5 to line 136, col 70 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 31: <StartLane(2) line 123, col 5 to line 136, col 70 of module StrongRho>
+State 31: <StartLane(2) line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -1093,7 +1093,7 @@ State 31: <StartLane(2) line 123, col 5 to line 136, col 70 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 32: <EndStart line 139, col 5 to line 141, col 87 of module StrongRho>
+State 32: <EndStart line 145, col 5 to line 147, col 87 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -1127,7 +1127,7 @@ State 32: <EndStart line 139, col 5 to line 141, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 33: <DpLane(1) line 145, col 5 to line 173, col 116 of module StrongRho>
+State 33: <DpLane(1) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -1161,7 +1161,7 @@ State 33: <DpLane(1) line 145, col 5 to line 173, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 34: <DpLane(2) line 145, col 5 to line 173, col 116 of module StrongRho>
+State 34: <DpLane(2) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -1195,7 +1195,7 @@ State 34: <DpLane(2) line 145, col 5 to line 173, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 35: <EndDp line 176, col 5 to line 178, col 87 of module StrongRho>
+State 35: <EndDp line 182, col 5 to line 184, col 87 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -1229,7 +1229,7 @@ State 35: <EndDp line 176, col 5 to line 178, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 36: <StepLane(1) line 182, col 5 to line 222, col 101 of module StrongRho>
+State 36: <StepLane(1) line 188, col 5 to line 228, col 101 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -1263,7 +1263,7 @@ State 36: <StepLane(1) line 182, col 5 to line 222, col 101 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 37: <StepLane(2) line 182, col 5 to line 222, col 101 of module StrongRho>
+State 37: <StepLane(2) line 188, col 5 to line 228, col 101 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -1297,7 +1297,7 @@ State 37: <StepLane(2) line 182, col 5 to line 222, col 101 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 38: <EndStep line 225, col 5 to line 227, col 87 of module StrongRho>
+State 38: <EndStep line 231, col 5 to line 233, col 87 of module StrongRho>
 /\ phase = "begin"
 /\ capped = 0
 /\ escapes = 0
@@ -1331,7 +1331,7 @@ State 38: <EndStep line 225, col 5 to line 227, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 39: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
+State 39: <Begin line 118, col 5 to line 125, col 79 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -1365,7 +1365,7 @@ State 39: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 40: <EndStart line 139, col 5 to line 141, col 87 of module StrongRho>
+State 40: <EndStart line 145, col 5 to line 147, col 87 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -1399,7 +1399,7 @@ State 40: <EndStart line 139, col 5 to line 141, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 41: <DpLane(1) line 145, col 5 to line 173, col 116 of module StrongRho>
+State 41: <DpLane(1) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -1433,7 +1433,7 @@ State 41: <DpLane(1) line 145, col 5 to line 173, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 42: <DpLane(2) line 145, col 5 to line 173, col 116 of module StrongRho>
+State 42: <DpLane(2) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -1467,7 +1467,7 @@ State 42: <DpLane(2) line 145, col 5 to line 173, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 43: <EndDp line 176, col 5 to line 178, col 87 of module StrongRho>
+State 43: <EndDp line 182, col 5 to line 184, col 87 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -1501,7 +1501,7 @@ State 43: <EndDp line 176, col 5 to line 178, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 44: <StepLane(1) line 182, col 5 to line 222, col 101 of module StrongRho>
+State 44: <StepLane(1) line 188, col 5 to line 228, col 101 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -1535,7 +1535,7 @@ State 44: <StepLane(1) line 182, col 5 to line 222, col 101 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 45: <StepLane(2) line 182, col 5 to line 222, col 101 of module StrongRho>
+State 45: <StepLane(2) line 188, col 5 to line 228, col 101 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -1569,7 +1569,7 @@ State 45: <StepLane(2) line 182, col 5 to line 222, col 101 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 46: <EndStep line 225, col 5 to line 227, col 87 of module StrongRho>
+State 46: <EndStep line 231, col 5 to line 233, col 87 of module StrongRho>
 /\ phase = "begin"
 /\ capped = 0
 /\ escapes = 0
@@ -1603,7 +1603,7 @@ State 46: <EndStep line 225, col 5 to line 227, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 47: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
+State 47: <Begin line 118, col 5 to line 125, col 79 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -1637,7 +1637,7 @@ State 47: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 48: <StartLane(1) line 123, col 5 to line 136, col 70 of module StrongRho>
+State 48: <StartLane(1) line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -1671,7 +1671,7 @@ State 48: <StartLane(1) line 123, col 5 to line 136, col 70 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 49: <StartLane(2) line 123, col 5 to line 136, col 70 of module StrongRho>
+State 49: <StartLane(2) line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -1705,7 +1705,7 @@ State 49: <StartLane(2) line 123, col 5 to line 136, col 70 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 50: <EndStart line 139, col 5 to line 141, col 87 of module StrongRho>
+State 50: <EndStart line 145, col 5 to line 147, col 87 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -1739,7 +1739,7 @@ State 50: <EndStart line 139, col 5 to line 141, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 51: <DpLane(1) line 145, col 5 to line 173, col 116 of module StrongRho>
+State 51: <DpLane(1) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -1773,7 +1773,7 @@ State 51: <DpLane(1) line 145, col 5 to line 173, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 52: <DpLane(2) line 145, col 5 to line 173, col 116 of module StrongRho>
+State 52: <DpLane(2) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -1807,7 +1807,7 @@ State 52: <DpLane(2) line 145, col 5 to line 173, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 53: <EndDp line 176, col 5 to line 178, col 87 of module StrongRho>
+State 53: <EndDp line 182, col 5 to line 184, col 87 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -1841,7 +1841,7 @@ State 53: <EndDp line 176, col 5 to line 178, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 54: <StepLane(1) line 182, col 5 to line 222, col 101 of module StrongRho>
+State 54: <StepLane(1) line 188, col 5 to line 228, col 101 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -1875,7 +1875,7 @@ State 54: <StepLane(1) line 182, col 5 to line 222, col 101 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 55: <StepLane(2) line 182, col 5 to line 222, col 101 of module StrongRho>
+State 55: <StepLane(2) line 188, col 5 to line 228, col 101 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -1909,7 +1909,7 @@ State 55: <StepLane(2) line 182, col 5 to line 222, col 101 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 56: <EndStep line 225, col 5 to line 227, col 87 of module StrongRho>
+State 56: <EndStep line 231, col 5 to line 233, col 87 of module StrongRho>
 /\ phase = "begin"
 /\ capped = 0
 /\ escapes = 0
@@ -1943,7 +1943,7 @@ State 56: <EndStep line 225, col 5 to line 227, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 57: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
+State 57: <Begin line 118, col 5 to line 125, col 79 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -1977,7 +1977,7 @@ State 57: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 58: <EndStart line 139, col 5 to line 141, col 87 of module StrongRho>
+State 58: <EndStart line 145, col 5 to line 147, col 87 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -2011,7 +2011,7 @@ State 58: <EndStart line 139, col 5 to line 141, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 59: <DpLane(1) line 145, col 5 to line 173, col 116 of module StrongRho>
+State 59: <DpLane(1) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -2045,7 +2045,7 @@ State 59: <DpLane(1) line 145, col 5 to line 173, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 60: <DpLane(2) line 145, col 5 to line 173, col 116 of module StrongRho>
+State 60: <DpLane(2) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -2079,7 +2079,7 @@ State 60: <DpLane(2) line 145, col 5 to line 173, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 61: <EndDp line 176, col 5 to line 178, col 87 of module StrongRho>
+State 61: <EndDp line 182, col 5 to line 184, col 87 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -2113,7 +2113,7 @@ State 61: <EndDp line 176, col 5 to line 178, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 62: <StepLane(1) line 182, col 5 to line 222, col 101 of module StrongRho>
+State 62: <StepLane(1) line 188, col 5 to line 228, col 101 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -2147,7 +2147,7 @@ State 62: <StepLane(1) line 182, col 5 to line 222, col 101 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 63: <StepLane(2) line 182, col 5 to line 222, col 101 of module StrongRho>
+State 63: <StepLane(2) line 188, col 5 to line 228, col 101 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -2181,7 +2181,7 @@ State 63: <StepLane(2) line 182, col 5 to line 222, col 101 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 64: <EndStep line 225, col 5 to line 227, col 87 of module StrongRho>
+State 64: <EndStep line 231, col 5 to line 233, col 87 of module StrongRho>
 /\ phase = "begin"
 /\ capped = 0
 /\ escapes = 0
@@ -2215,7 +2215,7 @@ State 64: <EndStep line 225, col 5 to line 227, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 65: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
+State 65: <Begin line 118, col 5 to line 125, col 79 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -2249,7 +2249,7 @@ State 65: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 66: <StartLane(1) line 123, col 5 to line 136, col 70 of module StrongRho>
+State 66: <StartLane(1) line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -2283,7 +2283,7 @@ State 66: <StartLane(1) line 123, col 5 to line 136, col 70 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 67: <StartLane(2) line 123, col 5 to line 136, col 70 of module StrongRho>
+State 67: <StartLane(2) line 129, col 5 to line 142, col 70 of module StrongRho>
 /\ phase = "start"
 /\ capped = 0
 /\ escapes = 0
@@ -2317,7 +2317,7 @@ State 67: <StartLane(2) line 123, col 5 to line 136, col 70 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 68: <EndStart line 139, col 5 to line 141, col 87 of module StrongRho>
+State 68: <EndStart line 145, col 5 to line 147, col 87 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -2351,7 +2351,7 @@ State 68: <EndStart line 139, col 5 to line 141, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 69: <DpLane(1) line 145, col 5 to line 173, col 116 of module StrongRho>
+State 69: <DpLane(1) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -2385,7 +2385,7 @@ State 69: <DpLane(1) line 145, col 5 to line 173, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 70: <DpLane(2) line 145, col 5 to line 173, col 116 of module StrongRho>
+State 70: <DpLane(2) line 151, col 5 to line 179, col 116 of module StrongRho>
 /\ phase = "dp"
 /\ capped = 0
 /\ escapes = 0
@@ -2419,7 +2419,7 @@ State 70: <DpLane(2) line 145, col 5 to line 173, col 116 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 71: <EndDp line 176, col 5 to line 178, col 87 of module StrongRho>
+State 71: <EndDp line 182, col 5 to line 184, col 87 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -2453,7 +2453,7 @@ State 71: <EndDp line 176, col 5 to line 178, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 72: <StepLane(1) line 182, col 5 to line 222, col 101 of module StrongRho>
+State 72: <StepLane(1) line 188, col 5 to line 228, col 101 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -2487,7 +2487,7 @@ State 72: <StepLane(1) line 182, col 5 to line 222, col 101 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 73: <StepLane(2) line 182, col 5 to line 222, col 101 of module StrongRho>
+State 73: <StepLane(2) line 188, col 5 to line 228, col 101 of module StrongRho>
 /\ phase = "step"
 /\ capped = 0
 /\ escapes = 0
@@ -2521,7 +2521,7 @@ State 73: <StepLane(2) line 182, col 5 to line 222, col 101 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 74: <EndStep line 225, col 5 to line 227, col 87 of module StrongRho>
+State 74: <EndStep line 231, col 5 to line 233, col 87 of module StrongRho>
 /\ phase = "begin"
 /\ capped = 0
 /\ escapes = 0
@@ -2555,7 +2555,7 @@ State 74: <EndStep line 225, col 5 to line 227, col 87 of module StrongRho>
 /\ result = 0
 /\ status = "running"
 
-State 75: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
+State 75: <Begin line 118, col 5 to line 125, col 79 of module StrongRho>
 /\ phase = "begin"
 /\ capped = 0
 /\ escapes = 0
@@ -2589,7 +2589,7 @@ State 75: <Begin line 112, col 5 to line 119, col 79 of module StrongRho>
 /\ result = 0
 /\ status = "capped"
 
-1032675 states generated, 1004961 distinct states found, 1114 states left on queue.
+1032684 states generated, 1004970 distinct states found, 1114 states left on queue.
 The depth of the complete state graph search is 75.
-Finished in 21s at (2026-10-16 17:24:53)
-Trace exploration spec path: ./StrongRho_TTrace_1792171471.tla
+Finished in 12s at (2026-10-16 17:46:53)
+Trace exploration spec path: ./StrongRho_TTrace_1792172800.tla
