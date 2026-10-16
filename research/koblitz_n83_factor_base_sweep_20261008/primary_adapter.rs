@@ -1460,6 +1460,7 @@ mod tests {
             assert_eq!(rank.insert(row), column + 1);
         }
         let mut opts = KoblitzIcOptions::default();
+        opts.strategy = DecompositionStrategy::Enumerate;
         opts.max_trials = 0;
         opts.allow_direct_relation = false;
         let report = koblitz_index_calculus_dlp_with_factor_base(
