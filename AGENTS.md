@@ -25,6 +25,44 @@
   editing; report scope expansion before editing outside reserved paths. Do
   not publish chat transcripts or secrets as task metadata.
 
+## Success criterion: iterative improvement of the index-calculus baseline
+
+Owner's rule, 2026-10-15. It replaces any earlier wording that treats only
+beating rho, or only an "advance", as success.
+
+The long-term goal is an index calculus that beats Pollard rho. That will
+not come from one breakthrough. It comes from many measured improvements,
+each building on the last, until the gap closes. So **the success criterion
+is a verified, measured improvement over the current index-calculus
+baseline. Every such improvement is a success and is reported as one.**
+
+- **Baseline.** For each curve and size, the baseline is the best current
+  verified index-calculus pipeline, frozen with its protocol, receipts and
+  end-to-end `S` (every phase, cold). Name it before you optimise.
+- **Improvement.** The improvement must lower cost against that baseline on
+  the same instances, with every answer verified, under a protocol frozen
+  before timing. A stage-level win is reported as a stage improvement and
+  becomes a pipeline improvement once it moves end-to-end `S`. The
+  measurement rules still apply in full: isolation tiers, A/A and positive
+  controls, matched references, and no combining results from different
+  experiments.
+- **What counts.** Advance and engineering are both successes. Relabelling
+  (the headline count fell while total cost rose) and accounting (the
+  numbers changed but the algorithm did not) are recorded honestly and are
+  not improvements. A negative or null result is a valid outcome to record,
+  but it is not an improvement.
+- **Ratchet.** Each landed improvement becomes the new baseline. Record it
+  with its delta, so progress is cumulative and visible across the
+  sequence.
+- **Distance to rho.** Report the gap to the matched rho on every row,
+  and to precomputation rho (Bernstein–Lange) where setup is excluded. The
+  gap is the distance remaining, not a pass/fail gate. Not beating rho
+  never makes an improvement a failure. A claim to *beat* rho still needs
+  every reference rule: an end-to-end cold `S` below the matched rho's,
+  robust at growing `n`, independently replayed.
+- **Keep going.** After each result, name the next improvement to try, and
+  move on to it.
+
 ## Pointers
 
 - Boundary ledger (machine): `docs/ic/boundary_targets.json`
@@ -559,13 +597,16 @@ Classify every change, in the note, as one of:
 | class | what moved | what it means |
 |:--|:--|:--|
 | **advance** | ratio to the floor fell | the method does something a generic algorithm cannot |
-| **engineering** | `S` fell, ratio to the floor flat | legitimate, bounded, and not a finding |
+| **engineering** | `S` fell, ratio to the floor flat | an improvement to the baseline: a success (see "Success criterion") |
 | **relabelling** | headline count fell, `S` rose | work moved somewhere the headline does not look |
 | **accounting** | numbers changed, algorithm did not | a correction; say so and do not claim the gain |
 
-All four are worth committing.  Only the first is worth calling a
-result.  Label each row, because the failure mode this rule exists to
-prevent is reporting the second or third as the first.
+All four are worth committing.  Advance and engineering are both
+improvements, and every improvement over the baseline is a success
+("Success criterion: iterative improvement of the index-calculus
+baseline").  Label each row, because the failure mode this rule exists
+to prevent is reporting relabelling or accounting as an improvement, or
+engineering as an advance.
 
 The relabelling class is not hypothetical.  In §10.5 of the
 residual-walk note a triple-decomposition oracle cut the walked count
@@ -601,6 +642,40 @@ measured it turned out to grow as `n^{0.68}` against relations at
 `n^{1/3}`, so the method's cost bottoms out near `200×` rho around
 `2^{50}` and rises after.  The `2^96` was a statement about one phase
 and had been read as a statement about the method.
+
+### 5a. Price the unpriced work on every arm, the reference included
+
+Owner rule, 2026-10-15. Almost no ECDLP cost in this repository is
+complete, and the rho baselines are no exception. Rho, BSGS and the
+kangaroo leave canonicalisations, partition hashes, table inserts and
+lookups unpriced. Index-calculus arms are complete only on curves that
+have a pinned timing calibration (`calibration_pinned_units`; in the
+2026-10-15 pilot that was Koblitz `n = 13` and `n = 23` but not `n = 19`).
+A "complete IC against lower-bound rho" comparison is therefore
+lopsided, and before this rule several were reported that way
+(`research/ic_frontier_campaign_20261015/pilot/FINDINGS.md`).
+
+Every cross-method comparison and every ranking must:
+
+- **List every unpriced counter for every arm**, references included,
+  with its count. An arm that names a counter but does not emit its count
+  cannot be ranked. Report it as a lower bound and record the missing
+  emission as an implementation gap to fix.
+- **Price the unpriced work at several weights**: at least 0, 0.1 and 1
+  group-addition equivalents per native operation, applied the same way
+  to every arm. Pinned calibrations may be added as a further point, but
+  they never replace the band.
+- **Rank only where the conclusion holds at every weight in the band.**
+  If the order of two arms changes inside the band, report them as
+  unresolved at that boundary, never as a win for either side.
+- **Never compare a calibrated cost on one side with an uncalibrated one
+  on the other.** If a calibration exists for only some arms or sizes,
+  use the band alone.
+
+This applies to `ecbench compare` read-outs, tables, frontier syntheses,
+ledger rows, papers and PR descriptions. A ratio produced before this rule
+is relabelled as a lower-bound comparison where it is cited again. Its
+frozen evidence is not rewritten.
 
 ### 6. What does not count
 

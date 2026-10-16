@@ -1,0 +1,10 @@
+split           tower m=2 t= 1 N= 2 tgt=0 D=3 width=4 steps=2 inc=true 0.3 ms
+split           tower m=2 t= 1 N= 2 tgt=1 D=3 width=4 steps=2 inc=true 0.2 ms
+split           tower m=2 t= 2 N= 4 tgt=0 D=4 width=16 steps=4 inc=true 0.7 ms
+split           tower m=2 t= 2 N= 4 tgt=1 D=4 width=16 steps=4 inc=true 0.6 ms
+split           tower m=2 t= 3 N= 6 tgt=0 D=4 width=56 steps=6 inc=true 1.6 ms
+split           tower m=2 t= 3 N= 6 tgt=1 D=4 width=56 steps=6 inc=true 1.6 ms
+split           tower m=2 t= 4 N= 8 tgt=0 D=4 width=152 steps=8 inc=true 6.1 ms
+split           tower m=2 t= 4 N= 8 tgt=1 D=4 width=152 steps=8 inc=true 5.9 ms
+split           tower m=2 t= 5 N=10 tgt=0 D=4 width=336 steps=10 inc=true 21.1 ms
+split           tower m=2 t= 5 N=10 tgt=1 D=4 width=336 steps=10 inc=true 21.5 ms

@@ -1,0 +1,15 @@
+{
+  "study": "binary_mitm_oracle_l8_20261015",
+  "git_head": "3066b74c7410bd83e14371d78d83211fef81914b",
+  "command": "cargo run --release --example binary_mitm_oracle_l8",
+  "test_command": "cargo test --release --example binary_mitm_oracle_l8",
+  "host": {
+    "machine": "Apple M4 Pro, arm64, 14 logical cores, macOS 26.6",
+    "isolation": "unpinned, shared host (L0); wall times are practicality notes",
+    "build": "cargo build --release, default toolchain"
+  },
+  "runs": 3,
+  "note": "results.json is the frozen output of the third run; the quiet-host first run and the second contended run are recorded in REPORT.typ and report.md",
+  "budget": "three full 64-target runs plus one n=15 l=5 exhaustive control test",
+  "seed": "0x9E37779B97F4A7C15 (deterministic LCG, fixed in the example)"
+}

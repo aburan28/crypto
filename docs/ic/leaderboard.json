@@ -108,7 +108,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "ff703257ab3f426ec78532a60fe2daefa70f525304b2c24258d02f58fe1dfa6d"
+   "sha256": "22b2ffef99720f2b2c7396a267412d2241a868e038a835c4fb1fd12209b102bf"
   },
   "curves_schema": {
    "path": "docs/curves/ic/curves.schema.json",
@@ -9559,6 +9559,38 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp20-t1143-5bef62bd",
+   "family": "prime",
+   "field": "GF(p), p = 537599",
+   "coefficients": "a = 451926, b = 332081",
+   "order_bits": 20,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp20-t157-e39da206",
+   "family": "prime",
+   "field": "GF(p), p = 550813",
+   "coefficients": "a = 310059, b = 228047",
+   "order_bits": 20,
+   "standard": [],
+   "ec1": [
+    "EC1P20Cfph3457d3ae5cdc"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "generated-20bit-550813"
+   ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp20-t727-cd198a38",
    "family": "prime",
    "field": "GF(p), p = 563153",
@@ -9619,6 +9651,24 @@
     "bench-20bit"
    ],
    "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp20-t383-4f71b2c3",
+   "family": "prime",
+   "field": "GF(p), p = 1048571",
+   "coefficients": "a = 1048568, b = 44",
+   "order_bits": 20,
+   "standard": [],
+   "ec1": [
+    "EC1P20Cfph0cb8fb796d66"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ic-frontier-fp20"
+   ],
+   "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
   },
@@ -10034,6 +10084,20 @@
    "legacy": [
     "isogeny-gap-prime-D4-l3-h6-22b-level-L3"
    ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp22-tm1105-62a9d176",
+   "family": "prime",
+   "field": "GF(p), p = 2511871",
+   "coefficients": "a = 1975157, b = 977806",
+   "order_bits": 22,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
@@ -11027,6 +11091,20 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp24-tm4507-ffb4b7f9",
+   "family": "prime",
+   "field": "GF(p), p = 11750399",
+   "coefficients": "a = 7617878, b = 9089328",
+   "order_bits": 24,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp24-t1465-0b7163ca",
    "family": "prime",
    "field": "GF(p), p = 11921101",
@@ -11089,6 +11167,24 @@
    "ec1_unresolved": null,
    "legacy": [
     "generated-24bit-16483309"
+   ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp24-tm5099-a6f137c6",
+   "family": "prime",
+   "field": "GF(p), p = 16777199",
+   "coefficients": "a = 16777196, b = 31",
+   "order_bits": 25,
+   "standard": [],
+   "ec1": [
+    "EC1P24Cfph095cb65c0da0"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ic-frontier-fp24"
    ],
    "on_board": false,
    "curves_yaml_key": null,
@@ -14095,6 +14191,24 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp28-t28201-65099091",
+   "family": "prime",
+   "field": "GF(p), p = 268435399",
+   "coefficients": "a = 268435396, b = 3",
+   "order_bits": 28,
+   "standard": [],
+   "ec1": [
+    "EC1P28Cfph697ee600b15e"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ic-frontier-fp28"
+   ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp29-t33232-7ef0d9f3",
    "family": "prime",
    "field": "GF(p), p = 278825831",
@@ -14689,6 +14803,24 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp32-t7319-90da43e9",
+   "family": "prime",
+   "field": "GF(p), p = 4294967291",
+   "coefficients": "a = 4294967288, b = 31",
+   "order_bits": 32,
+   "standard": [],
+   "ec1": [
+    "EC1P32Cfph06b9f59ff156"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ic-frontier-fp32"
+   ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp36-tm47184-1daf0972",
    "family": "prime",
    "field": "GF(p), p = 68190058247",
@@ -14698,6 +14830,24 @@
    "ec1": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
    "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp36-t454193-44a20818",
+   "family": "prime",
+   "field": "GF(p), p = 68719476731",
+   "coefficients": "a = 68719476728, b = 33",
+   "order_bits": 36,
+   "standard": [],
+   "ec1": [
+    "EC1P36Cfphfa97d84519ef"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ic-frontier-fp36"
+   ],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
@@ -14810,6 +14960,24 @@
    "ec1": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
    "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp40-tm924137-0ecaaeb9",
+   "family": "prime",
+   "field": "GF(p), p = 1099511627563",
+   "coefficients": "a = 1099511627560, b = 56",
+   "order_bits": 41,
+   "standard": [],
+   "ec1": [
+    "EC1P40Cfphd8c9e6e2886b"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ic-frontier-fp40"
+   ],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"

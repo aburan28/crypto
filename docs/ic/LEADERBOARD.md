@@ -254,6 +254,6 @@ The linear-algebra phase alone, on synthetic m = 3 relation matrices over a 62-b
 - `research/ecbench_conductor_gap_20261012/analysis.json` — sha256 `0ff9b20fd773ea67…`
 - `research/la_engines_20261014/summary.json` — sha256 `b34650a95c5f106c…`
 - `research/ecbench_frontier_20261013/frontier-data.json` — sha256 `765f6e8d05ebbf75…`
-- `docs/curves/registry.json` — sha256 `ff703257ab3f426e…`
+- `docs/curves/registry.json` — sha256 `22b2ffef99720f2b…`
 - `docs/curves/ic/curves.schema.json` — sha256 `42cd9793dd299384…`
 - `docs/curves/ic/curves.yaml` — sha256 `ab4891397fe07fca…`

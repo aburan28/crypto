@@ -4,11 +4,9 @@
   "title": "Kummer tower solving degree at a prime with v2(p - 1) = 40 and at the NIST P-224 prime",
   "created": "2026-10-15",
   "authors": ["backlog lane", "coordinator"],
-  "status": "blocked",
-  "status_note": "Blocked on the generic-field F4 lane (in progress, not yet pushed): today's tower engine works over primes below 2^32, so every recorded Kummer D is at p1 = 15*2^27 + 1 or similar. The argv below uses pkm_tower_pilot's current flags; the generic-field lane may rename them, and PROTOCOL.md fixes the final command.",
-  "blocked_on": [
-    "branch:claude/f4-generic-field generic-field F4 lane, in progress (not yet pushed); needs the tower engine over a 45-bit and a 224-bit prime"
-  ],
+  "status": "draft",
+  "status_note": "Unblocked: the generic-field F4 engine exists on branch claude/f4-generic-field (f4_tower_generic over fp_backend; pkm_tower_pilot --engine generic picks Fp52 at 45 bits and Fp224 at P-224; above 2^63 the wide builder builds the system and --verify checks it exhaustively with BigUint re-checks). research/f4_generic_field_20261015 already measured, at 27*2^40 + 1 and at P-224, m = 2 N <= 18 (N = 20 one target), m = 3 N <= 12 (N = 15 at 27*2^40 + 1), m = 4 N = 8 and 12, all with the recorded p1/p2 D; what this card adds is the second target in those one-target cells and m = 3, N = 15 at P-224 (3.2e12 multiply-adds, about 13 h of one core at the measured 14.5 ns each). Measured cost multiple F (ns per multiply-add against Fp32 at p1, one core): 1.5 at 45 bits (Fp52, AVX-512 IFMA), 30 at P-224. Draft until a PROTOCOL.md is frozen and the engine is merged; the P-224 shard's rows carry p as a string and are verified in-row (--verify), not by pkm_tower_check verify.",
+  "blocked_on": [],
   "links": {
     "lead": "docs/ic/factor-base-encyclopedia/README.md §0.1 (Kummer tower, the P-224 shape: v2(p - 1) = 96)",
     "notes": [
@@ -38,7 +36,7 @@
   "run": {
     "argv": [
       "target/release/examples/pkm_tower_pilot",
-      "--engine", "tower",
+      "--engine", "generic",
       "--p", "{p}",
       "--kinds", "kummer",
       "--m", "2,3,4",
@@ -50,6 +48,7 @@
       "--ladder-t", "none",
       "--planted", "0",
       "--random", "2",
+      "--verify",
       "--out", "{out}/rows.jsonl"
     ],
     "env": {"RAYON_NUM_THREADS": "1"},

@@ -1,0 +1,89 @@
+{
+  "analysis_sha256": "f50192442355a64fd1c4cfd07147f5b35f8aef4ae77d783f1c7614035992c3eb",
+  "artifact_id": 12005586706,
+  "artifact_run_id": 38794757719,
+  "artifact_sha256": "a7bbcefaff56322e234db96ea799771941dab020252e0adc89a6c66190ba62e3",
+  "balanced_comparison": {
+    "contiguous_block_size": 25,
+    "pairwise": {
+      "root11k3450wide3_minus_root11k3500wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -3.1584950579999997,
+          0.5895035165000001
+        ],
+        "mean_ms": -1.4012651565
+      },
+      "root11k3450wide3_minus_root11k3550wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -4.145213853,
+          -0.11375824399999993
+        ],
+        "mean_ms": -2.1707820565
+      },
+      "root11k3500wide3_minus_root11k3450wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.5124303400000001,
+          3.1638450805000002
+        ],
+        "mean_ms": 1.4012651565
+      },
+      "root11k3500wide3_minus_root11k3550wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -2.9057160805,
+          1.358579148
+        ],
+        "mean_ms": -0.7695168999999998
+      },
+      "root11k3550wide3_minus_root11k3450wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          0.18220277249999983,
+          4.252250707
+        ],
+        "mean_ms": 2.1707820565
+      },
+      "root11k3550wide3_minus_root11k3500wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -1.3101781185,
+          2.894667091
+        ],
+        "mean_ms": 0.7695168999999998
+      }
+    },
+    "pipeline_mean_ms": {
+      "root11k3450wide3": 20.4260450525,
+      "root11k3500wide3": 21.827310209,
+      "root11k3550wide3": 22.596827109
+    },
+    "repeatability": {
+      "root11k3450wide3_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.07882341599999992,
+          0.18807156200000008
+        ],
+        "mean_ms": 0.07209775900000005
+      },
+      "root11k3500wide3_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          0.3629792350000002,
+          0.76172914
+        ],
+        "mean_ms": 0.587002482
+      },
+      "root11k3550wide3_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.35939078299999994,
+          0.03239012099999996
+        ],
+        "mean_ms": -0.18542928200000006
+      }
+    },
+    "selected_pipeline": null
+  },
+  "no_new_challenger_under_frozen_confirmation_rule": true,
+  "schema": "n83.root11-edgek-selection/v1",
+  "selected_pipeline": null,
+  "source_commit": "10c7c80d9489ef4fd1f302c9063c7452444aeaee",
+  "source_sha256": "f2745227d95e36ef45c73c5104a23ada6cebb0794405368581d2be17044845dc",
+  "status": "BOUNDED_UNKNOWN",
+  "workload_id": "61c87ff8b60e"
+}
