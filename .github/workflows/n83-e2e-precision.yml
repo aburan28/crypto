@@ -1,0 +1,86 @@
+name: N83 sixteen-point K1104 K1120 cold precision
+
+on:
+  push:
+    branches: [codex/n83-e2e-precision-20261016]
+    paths:
+      - .github/workflows/n83-e2e-precision.yml
+      - research/n83_e2e_precision_20261016/run.py
+      - research/n83_e2e_precision_20261016/verify.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: n83-e2e-precision-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sixteen-point-cold-precision:
+    if: github.repository == 'aburan28/crypto' && github.ref == 'refs/heads/codex/n83-e2e-precision-20261016'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Replay sealed fixture and frozen schedule
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          mkdir -p "$RUNNER_TEMP/n83-e2e-precision"
+          python3 research/n83_e2e_precision_20261016/generate.py --verify-sealed > \
+            "$RUNNER_TEMP/n83-e2e-precision/fixture-check.json"
+          python3 research/n83_e2e_precision_20261016/run.py --preflight > \
+            "$RUNNER_TEMP/n83-e2e-precision/preflight.json"
+          python3 -c 'import json,sys; x=json.load(open(sys.argv[1])); assert len(x["schedule"]) == 16 and sum(len(r["ic_order"]) for r in x["schedule"]) == 64' \
+            "$RUNNER_TEMP/n83-e2e-precision/preflight.json"
+          rustc --version > "$RUNNER_TEMP/n83-e2e-precision/rustc-version.txt"
+          cargo --version > "$RUNNER_TEMP/n83-e2e-precision/cargo-version.txt"
+
+      - name: Build and check exact IC and same-point rho producers
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-e2e-precision-target"
+          export CARGO_BUILD_JOBS=2
+          cargo test --release --locked --example koblitz_orbit_dlp_fast > \
+            "$RUNNER_TEMP/n83-e2e-precision/ic-tests.log" 2>&1
+          cargo test --release --locked --example n83_rho_optimization_eval > \
+            "$RUNNER_TEMP/n83-e2e-precision/rho-tests.log" 2>&1
+          cargo build --release --locked --example koblitz_orbit_dlp_fast > \
+            "$RUNNER_TEMP/n83-e2e-precision/ic-build.log" 2>&1
+          cargo build --release --locked --example n83_rho_optimization_eval > \
+            "$RUNNER_TEMP/n83-e2e-precision/rho-build.log" 2>&1
+
+      - name: Run sixteen sealed matched one-point panels
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-e2e-precision-target"
+          python3 research/n83_e2e_precision_20261016/run.py \
+            --binary "$CARGO_TARGET_DIR/release/examples/koblitz_orbit_dlp_fast" \
+            --rho-binary "$CARGO_TARGET_DIR/release/examples/n83_rho_optimization_eval" \
+            --output "$RUNNER_TEMP/n83-e2e-precision/results" \
+            2>&1 | tee "$RUNNER_TEMP/n83-e2e-precision/run.log"
+
+      - name: Independently replay all bases relations scalars and resources
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -d "$RUNNER_TEMP/n83-e2e-precision/results" ]; then
+            python3 research/n83_e2e_precision_20261016/verify.py \
+              "$RUNNER_TEMP/n83-e2e-precision/results" \
+              2>&1 | tee "$RUNNER_TEMP/n83-e2e-precision/verify.log"
+          fi
+
+      - name: Preserve raw receipts and every failed arm
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-e2e-precision-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-e2e-precision/
+          if-no-files-found: error
+          retention-days: 14
