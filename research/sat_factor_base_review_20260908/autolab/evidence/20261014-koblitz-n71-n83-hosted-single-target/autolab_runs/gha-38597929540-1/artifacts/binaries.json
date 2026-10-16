@@ -1,0 +1,29 @@
+{
+  "hashes": {
+    "frozen_ic_binary_sha256": "f2e182475997d34fc0c6f4d4208e7a0952a041546e212d7b93cfe48026339522",
+    "frozen_rho_binary_sha256": "99edfc417b2d33de401d2c218c2b3621de5d825334f0e578a32d03b8f7483b74",
+    "git_head": "eaa754944c432b773db968f909dcf0dd36b57036",
+    "ic_binary_sha256": "ccdbee6391337d5cf00e078d56d9ffaf0ec28ca4aa3ca323555b245cce3c9c12",
+    "ic_source_manifest_sha256": "29846cec8ff9449835799b5375a25a50201c970ad44541c6cf0ddc13fe1f669c",
+    "rho_binary_sha256": "08cf0f1bcc5ae30366a7eb47c397ec032d9a4736dbd74a00433d7928620a737c",
+    "rho_source_manifest_sha256": "4c8ccfb580a61f90031ede1f9346706e24b316687fe861fd092764d4c0ff98b1",
+    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)"
+  },
+  "ic_sources": {
+    "examples/koblitz_orbit_dlp_fast_online.rs": "4729f3b9aac5d20e36a2560aabae76c40ab4baf2c88cf6da9bd7bcb3c17550e2",
+    "src/cryptanalysis/koblitz_fast_arith.rs": "ab156d57e983a8f248bf4fd6c2f6d46d2c38da813a4eadd31e715fc443ad7c1a",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "d91b0a845f41886ad50f6e5a0d13a4cf53d996655464bf315bdaf2d27d638f2b",
+    "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+  },
+  "paths": {
+    "frozen_ic": "/home/runner/work/crypto/crypto/target/release/examples/koblitz_orbit_dlp_fast",
+    "frozen_rho": "/home/runner/work/crypto/crypto/target/release/examples/koblitz_rho_batch_ks_strong",
+    "ic": "/home/runner/work/crypto/crypto/target/release/examples/koblitz_orbit_dlp_fast_online",
+    "rho": "/home/runner/work/crypto/crypto/target/release/examples/koblitz_rho_batch_ks_strong_online"
+  },
+  "rho_sources": {
+    "examples/koblitz_rho_batch_ks_strong_online.rs": "9a62bdcdf17c7bd05c38ce75190d163e6ee108950f7eca7a8002e2c7fb7bf634",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "d91b0a845f41886ad50f6e5a0d13a4cf53d996655464bf315bdaf2d27d638f2b",
+    "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+  }
+}

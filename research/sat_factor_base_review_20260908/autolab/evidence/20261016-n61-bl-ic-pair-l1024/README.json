@@ -1,0 +1,112 @@
+{
+  "api_match": {
+    "bl_reuse": "hash-verified archive; BL not co-measured => same_resource_envelope unset",
+    "ic": "koblitz_orbit_dlp_fast_online accepts [x,y] point lines (same as BL targets mode)"
+  },
+  "beat_id": "koblitz.compact_orbit.n61_bl_reference",
+  "bl_jsonl_sha256": "186eac8be8ea5c92404e5f7becbb4dd3002e429f1625164df7c1a353f2d679b6",
+  "claim_boundary": "Diagnostic equal-advice BL reference with paired compact-orbit IC online on the same public synthetic points. BL arm reused from archive (not co-measured). Fail-closed for vs_rho ledger promotion; not KS batch rho; not asymptotic sub-rho; PENDING_INDEPENDENT_VALIDATION at most.",
+  "claim_check": "FAIL",
+  "claim_check_missing_stage_fields": [
+    "candidate_id",
+    "candidate_manifest_sha256",
+    "ic_replay_certificate_sha256",
+    "ic_resource_envelope",
+    "independent_replay_pointer",
+    "record_class",
+    "rho_policy",
+    "rho_replay_certificate_sha256",
+    "rho_resource_envelope",
+    "run_id",
+    "same_resource_envelope",
+    "workload_id",
+    "workload_manifest_sha256"
+  ],
+  "claim_check_pairing_errors": [
+    "same-target charged intervals are not confirmed"
+  ],
+  "claim_check_validation_errors": [
+    "all_stages_charged_same_series must be true when present",
+    "candidate_id must be a nonempty string",
+    "workload_id must be a nonempty string",
+    "run_id must be a nonempty string",
+    "candidate_manifest_sha256 must be a full SHA-256 hex digest",
+    "workload_manifest_sha256 must be a full SHA-256 hex digest",
+    "timing_class must be single_target_online for a primary vs_rho claim",
+    "record_class must identify exploratory or controlled wall evidence",
+    "same_resource_envelope must be true",
+    "independent_validation must be true",
+    "ic_replay_certificate_sha256 must be a full lowercase SHA-256 digest",
+    "rho_replay_certificate_sha256 must be a full lowercase SHA-256 digest",
+    "ic_resource_envelope must be a nonempty object",
+    "rho_resource_envelope must be a nonempty object",
+    "rho_online_phase_ms must contain exactly the declared phases",
+    "online_interval.rho_start_event is missing or invalid",
+    "online_interval.rho_stop_event is missing or invalid",
+    "online_interval.ic_included_stages is missing or invalid",
+    "online_interval.rho_included_stages is missing or invalid",
+    "rho_policy must be an object"
+  ],
+  "claim_draft_status": "SCHEMA_INCOMPLETE",
+  "ic_K": 256,
+  "ic_rank_seed": 7,
+  "kind": "equal_advice_bl_ic_pair_archive",
+  "next_command": "Co-measure IC+BL in one session with shared resource envelope, mint IC1 candidate/workload manifests + oracle replay certs, emit BL rho_policy from measured bl_precompute, then re-run claim-check --stage vs_rho. Do not promote ledger.",
+  "panel_pairing": {
+    "bl_online_ms": {
+      "count": 1024,
+      "max": 17.829583,
+      "mean": 3.3661805654296875,
+      "median": 2.7796875,
+      "min": 0.178708
+    },
+    "ic_K": 256,
+    "ic_online_ms": {
+      "count": 1024,
+      "max": 3138.718459,
+      "mean": 111.44883299902344,
+      "median": 62.875666499999994,
+      "min": 0.076334
+    },
+    "kind": "equal_advice_ic_bl_panel_pairing",
+    "note": "Secondary multi-target pairing stats; primary vs_rho schema still requires target_count=1 with co-measured envelopes and identity manifests.",
+    "online_speedup_bl_over_ic": {
+      "count": 1024,
+      "max": 24.19129783043766,
+      "mean": 0.24043302785839143,
+      "median": 0.044389535969357394,
+      "min": 0.0011552488722945317
+    },
+    "paired_targets": 1024,
+    "table_bytes": 5711008,
+    "verified_pairs": 1024
+  },
+  "points_sha256": "654720ad678fa496dbebad065505ebd5e9d8a18aff3cec99531a52abd8908e85",
+  "reused_bl_archive_run_id": "20261016T063525Z-842e1c174e",
+  "run_id": "20261016T074400Z-n61-bl-ic-pair",
+  "schema_slice": {
+    "ic_online_wall_ms": 51.089375,
+    "ic_scalar_verified": true,
+    "online_speedup_bl_over_ic": 0.14534577884344838,
+    "rho_online_wall_ms": 7.425625,
+    "rho_scalar_verified": true,
+    "target_count": 1,
+    "target_index": 0
+  },
+  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "table_bytes": 5711008,
+  "targets": 1024,
+  "verified_pairs": 1024,
+  "vs_rho_schema_gap": [
+    "candidate_id / candidate_manifest_sha256 (IC1 identity manifests not minted)",
+    "workload_id / workload_manifest_sha256",
+    "run_id (IC1W\u2026R\u2026 form)",
+    "rho_policy (BL equal-advice is not KS batch rho; policy object not minted)",
+    "same_resource_envelope (BL reused from archive; not co-measured)",
+    "independent_validation / replay certificates",
+    "ic_resource_envelope / rho_resource_envelope matched pair",
+    "rho_online_phase_ms declared KS phases (BL emits one online interval only)",
+    "timing_class single_target_online primary (beat goal is single_target_online_wall)",
+    "record_class from vs_rho enum"
+  ]
+}

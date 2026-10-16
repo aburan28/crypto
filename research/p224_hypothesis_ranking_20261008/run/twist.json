@@ -1,0 +1,100 @@
+[
+  {
+    "curve": "P-224",
+    "order": "26959946667150639794667015087019635406658024805628224565337410229703",
+    "factorization": {
+      "factors": [
+        {
+          "prime": "3",
+          "exponent": 2,
+          "bits": 1.584962500721156,
+          "certainty": "proved"
+        },
+        {
+          "prime": "11",
+          "exponent": 1,
+          "bits": 3.4594316186372973,
+          "certainty": "proved"
+        },
+        {
+          "prime": "47",
+          "exponent": 1,
+          "bits": 5.554588851677638,
+          "certainty": "proved"
+        },
+        {
+          "prime": "3015283",
+          "exponent": 1,
+          "bits": 21.52386198224099,
+          "certainty": "proved"
+        },
+        {
+          "prime": "40375823",
+          "exponent": 1,
+          "bits": 25.266988331471165,
+          "certainty": "proved"
+        },
+        {
+          "prime": "267983539294927",
+          "exponent": 1,
+          "bits": 47.92913771527437,
+          "certainty": "proved"
+        },
+        {
+          "prime": "177594041488131583478651368420021457",
+          "exponent": 1,
+          "bits": 117.09606649925622,
+          "certainty": "probable"
+        }
+      ],
+      "unfactored": [],
+      "complete": true,
+      "rho_iterations": 51075834
+    },
+    "largest_prime_bits": 117.09606649925622,
+    "rho_bits_largest": 58.37378131436427
+  },
+  {
+    "curve": "P-256",
+    "order": "115792089210356248762697446949407573530175331606444868048645003556665683663535",
+    "factorization": {
+      "factors": [
+        {
+          "prime": "3",
+          "exponent": 1,
+          "bits": 1.584962500721156,
+          "certainty": "proved"
+        },
+        {
+          "prime": "5",
+          "exponent": 1,
+          "bits": 2.321928094887362,
+          "certainty": "proved"
+        },
+        {
+          "prime": "13",
+          "exponent": 1,
+          "bits": 3.700439718141092,
+          "certainty": "proved"
+        },
+        {
+          "prime": "179",
+          "exponent": 1,
+          "bits": 7.483815777264256,
+          "certainty": "proved"
+        },
+        {
+          "prime": "3317349640749355357762425066592395746459685764401801118712075735758936647",
+          "exponent": 1,
+          "bits": 240.90885390865023,
+          "certainty": "probable"
+        }
+      ],
+      "unfactored": [],
+      "complete": true,
+      "rho_iterations": 0
+    },
+    "largest_prime_bits": 240.90885390865023,
+    "rho_bits_largest": 120.28017501906128
+  }
+]
