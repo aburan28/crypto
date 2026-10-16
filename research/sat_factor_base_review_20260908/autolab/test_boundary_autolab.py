@@ -1179,5 +1179,52 @@ class SingleTargetPanelTests(unittest.TestCase):
 
 
 
+
+
+class EqualAdviceBlTests(unittest.TestCase):
+    BEAT = "koblitz.compact_orbit.n61_bl_reference"
+
+    def setUp(self) -> None:
+        self.protocol = lab.load_protocol()
+        self.ledger = lab.load_ledger(self.protocol)
+        self.beat = self.protocol["beats"][self.BEAT]
+
+    def test_bl_reference_beat_is_diagnostic_only(self) -> None:
+        self.assertEqual(self.beat["launch_mode"], "equal_advice_bl")
+        self.assertEqual(self.beat["stage"], "vs_rho")
+        self.assertTrue(self.beat["diagnostic_only"])
+        self.assertFalse(self.beat["primary_speedup_eligible"])
+        self.assertGreaterEqual(self.beat["targets_minimum"], 1024)
+        self.assertEqual(self.beat["panel_producers"]["bl"]["example"], "ic_next10_09_equal_advice")
+        rows = {row["beat_id"]: row for row in lab.plan(self.protocol, self.ledger)["beats"]}
+        self.assertFalse(rows[self.BEAT]["primary_speedup_eligible"])
+        self.assertIn("n61_bl_reference", lab.plan(self.protocol, self.ledger)["commands"])
+
+    def test_launch_and_panel_reject_equal_advice_beat(self) -> None:
+        args = lab.parser().parse_args(["launch", "--beat", self.BEAT])
+        with self.assertRaisesRegex(lab.AutolabError, "launch-equal-advice"):
+            lab.launch(args)
+        args = lab.parser().parse_args(["launch-panel", "--beat", self.BEAT])
+        with self.assertRaisesRegex(lab.AutolabError, "not a batch panel"):
+            lab.launch_panel(args)
+
+    def test_prepare_only_scaffolds_fail_closed_claim(self) -> None:
+        run_id = f"test-bl-ref-prepare-{lab.now().replace(':', '').replace('+', '')}"
+        args = lab.parser().parse_args([
+            "launch-equal-advice",
+            "--beat", self.BEAT,
+            "--run-id", run_id,
+            "--prepare-only",
+        ])
+        state = lab.launch_equal_advice(args)
+        self.assertEqual(state["status"], "PREPARE_ONLY")
+        run = lab.RUNS_DIR / run_id
+        draft = lab.read_json(run / "artifacts/claim_draft.json")
+        check = lab.read_json(run / "artifacts/claim_check.json")
+        self.assertEqual(draft["status"], "SCHEMA_INCOMPLETE")
+        self.assertEqual(check["status"], "FAIL")
+        self.assertTrue((run / "artifacts/commands.json").is_file())
+
+
 if __name__ == "__main__":
     unittest.main()

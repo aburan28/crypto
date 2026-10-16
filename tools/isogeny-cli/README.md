@@ -127,3 +127,15 @@ The package links the existing standalone algorithms and the independently valid
 field, polynomial, and kernel verification implementations. The dated research sources
 and evidence remain frozen. Dependencies are pinned to the independent replay study's
 lockfile versions. Runtime curve data and version/source provenance are embedded.
+
+## Largest prime-degree challenge
+
+`isogeny challenge policy` prints the pinned **Prime Degree Frontier** rules
+and all registered standard prime-field models. Each exact source curve ranks separately;
+unsupported models stay visible. `challenge plan --curve all` creates a
+candidate-only ladder. `challenge run`, `challenge judge` and
+`challenge leaderboard` construct or independently replay explicit maps in
+fresh directories. Saved scores are not accepted as submissions. See
+[challenge rules and commands](../../docs/challenges/isogeny-prime-degree/README.md).
+The new command is included by the existing ReleaseMe build; actual new-asset
+publication remains a separate release gate.

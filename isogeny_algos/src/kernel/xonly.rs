@@ -170,6 +170,22 @@ pub fn xadd_c<F: Field>(
     (f.mul(d.1, num), f.mul(d.0, den))
 }
 
+/// `xadd_c` with Q affine (Z_Q = 1): seven multiplications and two squarings.
+pub fn xadd_c1<F: Field>(
+    f: &F,
+    c: &XConst<F>,
+    p: (F::E, F::E),
+    xq: F::E,
+    d: (F::E, F::E),
+) -> (F::E, F::E) {
+    let (x1, z1) = p;
+    let x2z1 = f.mul(xq, z1);
+    let t = f.sub(f.mul(x1, xq), f.mul(c.a, z1));
+    let num = f.sub(f.sq(t), f.mul(c.b4, f.mul(z1, f.add(x1, x2z1))));
+    let den = f.sq(f.sub(x1, x2z1));
+    (f.mul(d.1, num), f.mul(d.0, den))
+}
+
 pub fn xdbl_w<F: Field>(f: &F, e: &Curve<F::E>, p: (F::E, F::E)) -> (F::E, F::E) {
     xdbl_c(f, &XConst::new(f, e), p)
 }
@@ -201,7 +217,7 @@ pub fn multiples_x_fast<F: Field>(f: &F, e: &Curve<F::E>, x0: F::E, n: usize) ->
         if f.is_zero(d.0) {
             return multiples_x(f, e, x0, n);
         }
-        let next = xadd_c(f, &c, pts[k - 1], p1, d);
+        let next = xadd_c1(f, &c, pts[k - 1], x0, d);
         pts.push(next);
     }
     let zs: Vec<F::E> = pts.iter().map(|q| q.1).collect();
@@ -216,13 +232,17 @@ pub fn multiples_x_fast<F: Field>(f: &F, e: &Curve<F::E>, x0: F::E, n: usize) ->
 pub fn velu_xonly_fast<F: Field>(f: &F, e: &Curve<F::E>, x0: F::E, ell: u64) -> Option<VeluIso<F>> {
     let n = ((ell - 1) / 2) as usize;
     let xs = multiples_x_fast(f, e, x0, n)?;
-    let (c2, c4, c6) = (f.from_u64(2), f.from_u64(4), f.from_u64(6));
+    let a2 = f.add(e.a, e.a);
     let (mut t, mut w) = (f.zero(), f.zero());
     let mut reps = Vec::with_capacity(n);
     for &x in &xs {
+        // v = 6 x^2 + 2A, u = 4 (x^3 + A x + B): small multiples by additions
         let x2 = f.sq(x);
-        let v = f.add(f.mul(c6, x2), f.mul(c2, e.a));
-        let u = f.mul(c4, f.add(f.mul(f.add(x2, e.a), x), e.b));
+        let x2_3 = f.add(f.add(x2, x2), x2);
+        let v = f.add(f.add(x2_3, x2_3), a2);
+        let g = f.add(f.mul(f.add(x2, e.a), x), e.b);
+        let g2 = f.add(g, g);
+        let u = f.add(g2, g2);
         t = f.add(t, v);
         w = f.add(w, f.add(u, f.mul(x, v)));
         reps.push((x, v, u));
