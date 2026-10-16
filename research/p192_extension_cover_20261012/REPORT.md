@@ -297,6 +297,18 @@ unknown as another column. A cached quartic inverse matches all three
 quotient images on 80 frozen points; its local timing is diagnostic
 pending isolated paired measurement.
 
+The [complete 9,925-point collinearity census](reports/run-20261016T0141Z/REPORT.md)
+visits all 49,247,850 unordered pairs of frozen affine quartic points.
+Exactly the 4,892 original split quartets contain three or more selected
+points; every one has four, with two old and two line-derived points.
+An independent reverse-order, block-inversion implementation reproduces
+every canonical line key and incidence set. The full selected-endpoint
+tangency census finds zero tangent pairs. For any other line with four
+distinct intersection points, at least two lie outside the frozen set;
+a fresh-checked Lean theorem proves this implication from the complete
+census and distinct-cut hypotheses. Residual ramification and reuse of
+points introduced by later cuts remain separate collector questions.
+
 ## Reproduction
 
 From this repository's root:
