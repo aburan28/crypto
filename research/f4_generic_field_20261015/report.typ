@@ -99,7 +99,7 @@ $N = 2 dots 8$ ($m = 2$) and $N = 6$ ($m = 3$) also equal (README §4).
 Kummer $m=2, N=20$ at $v_2 = 40, 48, 56$: 6/33446/24 (4.82·10¹¹ multiply-adds; 166, 216, 614 s);
 $m=3, N=15$ at $v_2=40$: 7/31397/24 (3.19·10¹², 1330 s);
 $m=4, N=12$ at $v_2=40$ and P-224: 7/9452/29 (5.16·10¹⁰; 16 s and 383 s).
-Kummer $m=2, N=20$ at P-224 and torus $m=2, N=20$ at P-192: interrupted by container restarts, re-running (README §4).
+Kummer $m=2, N=20$ at P-224: 6/33446/24 (4.82·10¹¹, 3690 s, `--verify` ok). Torus $m=2, N=20$ at P-192: see README §4.
 
 #figure(image("fig_d_vs_n.svg", width: 95%), caption: [Solving degree against $N$; line: recorded small-prime $D$.])
 #figure(image("fig_time_vs_n.svg", width: 80%), caption: [F4 time per system against $N$, $m = 2$ (two threads, shared host).])

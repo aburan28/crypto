@@ -206,12 +206,12 @@ reference in `D`, width and steps.
 | Kummer m = 3, N = 15 | v₂ = 40 (Fp52) | 7 / 31397 / 24 | 7 / 31397 / 24 (M3) | 3.186·10¹² | 1330 s | verify agrees |
 | Kummer m = 4, N = 12 | v₂ = 40 (Fp52) | 7 / 9452 / 29 | 7 / 9452 / 29 (M4) | 5.160·10¹⁰ | 16 s | verify agrees |
 | Kummer m = 4, N = 12 | P-224 (Fp224) | 7 / 9452 / 29 | 7 / 9452 / 29 (M4) | 5.160·10¹⁰ | 383 s | `--verify` ok |
-| Kummer m = 2, N = 20 | P-224 | re-running (interrupted twice) | 6 / 33446 / 24 | | | |
+| Kummer m = 2, N = 20 | P-224 (Fp224) | 6 / 33446 / 24 | 6 / 33446 / 24 (K1) | 4.820·10¹¹ | 3690 s | `--verify` ok |
 | torus m = 2, N = 20 | P-192 | re-running (interrupted twice) | 6 / 33426 / 24 (T31, R1) | | | |
 
 All finished extension cells equal their reference in `D`, width and steps
-(H_same supported). The two N = 20 wide-field cells were interrupted twice by
-container restarts (the engine does not checkpoint); see §5.
+(H_same supported). The P-192 `N = 20` cell was interrupted by container restarts (the engine
+does not checkpoint) and re-run last; see §5.
 
 
 **Reading under PROTOCOL §6.** H_same is supported in every series: no valued
