@@ -272,6 +272,18 @@ pub struct PinOutcome {
 /// no entry for it — a new size or a freshly generated curve.  The table
 /// predates ICV1 and is keyed by the names curves had then; an instance
 /// named by its slug finds its row through the curve registry.
+/// The pinned ratios (GAE per native operation, with `ns_per_add = 1`)
+/// for `regime/instance`, as [`Calibration::pin`] reads them; `None` when
+/// the table has no row for the curve.  Public so that a pricing band can
+/// take calibration-priced work back out of a record and price it alike on
+/// every arm (AGENTS.md §5a, `ecbench::band`).
+pub fn pinned_calibration_ratios(
+    regime: &str,
+    instance: &str,
+) -> Option<serde_json::Map<String, serde_json::Value>> {
+    pinned_ratios(regime, instance)
+}
+
 fn pinned_ratios(
     regime: &str,
     instance: &str,

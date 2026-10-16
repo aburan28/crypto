@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="518.4pt" height="244.8pt" viewBox="0 0 518.4 244.8" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-15T21:09:39.965599</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 244.8 
+L 518.4 244.8 
+L 518.4 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="text_1">
+    <g id="patch_2">
+     <path d="M 24.6888 86.641886 
+L 132.375909 86.641886 
+Q 134.625909 86.641886 134.625909 84.391886 
+L 134.625909 57.167764 
+Q 134.625909 54.917764 132.375909 54.917764 
+L 24.6888 54.917764 
+Q 22.4388 54.917764 22.4388 57.167764 
+L 22.4388 84.391886 
+Q 22.4388 86.641886 24.6888 86.641886 
+z
+" style="fill: #eef3fa; stroke: #1f6fb4; stroke-linejoin: miter"/>
+    </g>
+    <text style="font-size: 7.5px; font-family: 'Inter', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(24.6888 64.433389)">1. draw m (seed → SplitMix64)</text>
+    <text style="font-size: 7.5px; font-family: 'Inter', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(24.6888 73.508096)">Y² = X(X + B⁴)(X + A⁴)</text>
+    <text style="font-size: 7.5px; font-family: 'Inter', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(24.6888 82.582804)">A = m² − 1, B = 2m, C = m² + 1</text>
+   </g>
+   <g id="text_2">
+    <g id="patch_3">
+     <path d="M 274.1688 86.641886 
+L 420.782081 86.641886 
+Q 423.032081 86.641886 423.032081 84.391886 
+L 423.032081 57.167764 
+Q 423.032081 54.917764 420.782081 54.917764 
+L 274.1688 54.917764 
+Q 271.9188 54.917764 271.9188 57.167764 
+L 271.9188 84.391886 
+Q 271.9188 86.641886 274.1688 86.641886 
+z
+" style="fill: #eef3fa; stroke: #1f6fb4; stroke-linejoin: miter"/>
+    </g>
+    <text style="font-size: 7.5px; font-family: 'Inter', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(274.1688 64.433389)">2. H₄ = (A²B², A²B²C²), order 4</text>
+    <text style="font-size: 7.5px; font-family: 'Inter', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(274.1688 73.508096)">roots r = (AB, BC, AC): free</text>
+    <text style="font-size: 7.5px; font-family: 'Inter', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(274.1688 82.582804)">⇒ b ≥ 3 for every member; η = χ(A² − B²)</text>
+   </g>
+   <g id="text_3">
+    <g id="patch_4">
+     <path d="M 24.6888 187.749686 
+L 197.073956 187.749686 
+Q 199.323956 187.749686 199.323956 185.499686 
+L 199.323956 158.275564 
+Q 199.323956 156.025564 197.073956 156.025564 
+L 24.6888 156.025564 
+Q 22.4388 156.025564 22.4388 158.275564 
+L 22.4388 185.499686 
+Q 22.4388 187.749686 24.6888 187.749686 
+z
+" style="fill: #eef3fa; stroke: #1f6fb4; stroke-linejoin: miter"/>
+    </g>
+    <text style="font-size: 7.5px; font-family: 'Inter', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(24.6888 165.541189)">3. half H of P_j (signs of r):</text>
+    <text style="font-size: 7.5px; font-family: 'Inter', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(24.6888 174.615896)">x_H = x + r₁r₂ + r₁r₃ + r₂r₃</text>
+    <text style="font-size: 7.5px; font-family: 'Inter', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(24.6888 183.690604)">i_k = (x_H − e_k)^((p−3)/4)  [one exponentiation]</text>
+   </g>
+   <g id="text_4">
+    <g id="patch_5">
+     <path d="M 274.1688 187.749686 
+L 430.726612 187.749686 
+Q 432.976612 187.749686 432.976612 185.499686 
+L 432.976612 158.275564 
+Q 432.976612 156.025564 430.726612 156.025564 
+L 274.1688 156.025564 
+Q 271.9188 156.025564 271.9188 158.275564 
+L 271.9188 185.499686 
+Q 271.9188 187.749686 274.1688 187.749686 
+z
+" style="fill: #eef3fa; stroke: #1f6fb4; stroke-linejoin: miter"/>
+    </g>
+    <text style="font-size: 7.5px; font-family: 'Inter', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(274.1688 165.541189)">4. i_k²·(x_H − e_k) ≠ 1 ⇒ stop, b = j + 1</text>
+    <text style="font-size: 7.5px; font-family: 'Inter', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(274.1688 174.615896)">else u = ((x_H − e_k)(x_H − e_o))^((p−3)/4)</text>
+    <text style="font-size: 7.5px; font-family: 'Inter', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(274.1688 183.690604)">selects H or H + T_n; next roots r_k, r_o, r_m</text>
+   </g>
+   <g id="patch_6">
+    <path d="M 236.251616 70.779825 
+Q 251.716567 70.779825 266.063484 70.779825 
+" style="fill: none; stroke: #000000; stroke-linecap: round"/>
+    <path d="M 262.463484 68.979825 
+L 266.063484 70.779825 
+L 262.463484 72.579825 
+" style="fill: none; stroke: #000000; stroke-linecap: round"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 357.035705 100.673359 
+Q 246.727666 123.439794 137.514584 145.98024 
+" style="fill: none; stroke: #000000; stroke-linecap: round"/>
+    <path d="M 141.404109 147.01542 
+L 137.514584 145.98024 
+L 140.676443 143.489728 
+" style="fill: none; stroke: #000000; stroke-linecap: round"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 246.232034 171.887625 
+Q 256.707001 171.887625 266.063933 171.887625 
+" style="fill: none; stroke: #000000; stroke-linecap: round"/>
+    <path d="M 262.463933 170.087625 
+L 266.063933 171.887625 
+L 262.463933 173.687625 
+" style="fill: none; stroke: #000000; stroke-linecap: round"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 382.084965 202.114398 
+Q 246.728049 255.525193 112.411133 202.526379 
+" style="fill: none; stroke: #777777; stroke-linecap: round"/>
+    <path d="M 115.099198 205.522094 
+L 112.411133 202.526379 
+L 116.420544 202.173356 
+" style="fill: none; stroke: #777777; stroke-linecap: round"/>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 7.5px; font-family: 'Inter', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #777777" x="259.2" y="230.867175" transform="rotate(-0 259.2 230.867175)">level j → j + 1 (P ≈ 1/2 per level, model H2); b ≥ t ⇒ Q = P_t has order exactly 2^t</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 9px; font-family: 'Inter', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="259.2" y="18.43875" transform="rotate(-0 259.2 18.43875)">One draw of the fast arm (2-Sylow Z/2 × Z/2^b, p ≡ 3 mod 4)</text>
+   </g>
+  </g>
+ </g>
+</svg>

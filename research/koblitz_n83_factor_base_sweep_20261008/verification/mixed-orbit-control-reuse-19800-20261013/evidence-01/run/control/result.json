@@ -1,0 +1,31 @@
+{
+  "base_import_elapsed_ms_L0": 7143.179169999999,
+  "candidate": null,
+  "memory_cgroup_peak_bytes": 442339328,
+  "natural_relations": null,
+  "schema": "n83.mixed-orbit-known-witness-result/v1",
+  "scope": "known_answer_control_only",
+  "search": {
+    "conflicts": 5000,
+    "domain_clauses": 465738,
+    "exhausted": true,
+    "group_rejected_models": 0,
+    "invalid_models": 0,
+    "models": 0,
+    "patterns_attempted": 1,
+    "patterns_refuted": 0,
+    "peak_clauses": 714072,
+    "peak_variables": 101636,
+    "peak_xors": 4980,
+    "refuted": false,
+    "solver_calls": 1
+  },
+  "selected_best_total_runtime": null,
+  "status": "UNKNOWN_search_cap",
+  "target": [
+    "6595116073687692399614168",
+    "9473620351503970875544348"
+  ],
+  "total_index_calculus_runtime_ms": null,
+  "worker_wall_ms_L0": 471164.56746500003
+}

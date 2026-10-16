@@ -1,0 +1,592 @@
+{
+  "additional_archive_count": 3,
+  "archive_count": 57,
+  "archives": [
+    {
+      "compressed_blake3": "0b06b75e26cff57a62c28c2502c85f3fc3f1a5027e5620d90969ecae0947b045",
+      "compressed_bytes": 1293310,
+      "compressed_sha256": "d5f9e2810de46b6237ee5bc68f750fdf044b7afa2a33b520e92bf2bb089fb03c",
+      "pilot_manifest_member": true,
+      "plain_blake3": "40fed0d71c3dad61f9bd3843f3d0c92495af58f77957be4ec4853496d5b67419",
+      "plain_bytes": 6369088,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/0b06b75e26cff57a62c28c2502c85f3fc3f1a5027e5620d90969ecae0947b045.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "0f312bc5c887b6fb4b552bd3861a5d27a34b2daa7442dc7ab97fec3dc775ae69",
+      "compressed_bytes": 325543,
+      "compressed_sha256": "2de26ba832263fa0bea963eb99493d875dda3e8259368722bdfe6ed588a8af16",
+      "pilot_manifest_member": true,
+      "plain_blake3": "473051359f1d70099451377b8c07541121a12a96f60b224cfc137ba05d3f0a13",
+      "plain_bytes": 1584942,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/0f312bc5c887b6fb4b552bd3861a5d27a34b2daa7442dc7ab97fec3dc775ae69.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "1340d5f8ad072b0a36a357f58849635a50de79f13318a26fde0ceceffdffcf69",
+      "compressed_bytes": 1290354,
+      "compressed_sha256": "52179ceb0f02e6d184101d06667cedbbeeab6d245fac45f8a49ae4b93ef7fa15",
+      "pilot_manifest_member": true,
+      "plain_blake3": "829abdab6472305048257c0a45e58384c16ad7fc8b2907e1745012707aab2b15",
+      "plain_bytes": 6363577,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/1340d5f8ad072b0a36a357f58849635a50de79f13318a26fde0ceceffdffcf69.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "156ee3ac73c68d72443e41c77b12016af16561627d8cfdd78187e21a311b8727",
+      "compressed_bytes": 325006,
+      "compressed_sha256": "2f625f061f7f2588430e191d80dc286bc523a93b8b4c4b07b7bc004f22a6c8a4",
+      "pilot_manifest_member": true,
+      "plain_blake3": "e28f95802d3b58a3fc361696b687953d0946871a0e72511e6bdfacfe3fb237ab",
+      "plain_bytes": 1583656,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/156ee3ac73c68d72443e41c77b12016af16561627d8cfdd78187e21a311b8727.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "1d0a6695564972f61db13c62c60a300da0cfa7bcd9b363c2e553a34345fae176",
+      "compressed_bytes": 325672,
+      "compressed_sha256": "fad209b66910988e0d7a91781f6516712acfd3c782555a39e43322616d9bba37",
+      "pilot_manifest_member": true,
+      "plain_blake3": "f17c5f6bca0eaa9b8c9cfc0d025ed4bd33dcbd2c5311755a7cb35e8fc93fa551",
+      "plain_bytes": 1585096,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/1d0a6695564972f61db13c62c60a300da0cfa7bcd9b363c2e553a34345fae176.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0",
+      "compressed_bytes": 3020401,
+      "compressed_sha256": "8463aaf30365d6f6f5d6b189aff4e8afcb6c8305ec27c216700776cbdccba29d",
+      "pilot_manifest_member": true,
+      "plain_blake3": "d8130c5d79ec780c2c290bfb1ea43fe31b51bb8d38869746f6f40badaf90f155",
+      "plain_bytes": 14938421,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "6102d118c386b616e57f9f9f60a8261e190409290d6c446052f008a9d279cea5",
+      "compressed_bytes": 3019689,
+      "compressed_sha256": "9790f83e5bf3e245b06491eab6dc900893f5d0eda78cee228349d0e085d264ec",
+      "pilot_manifest_member": true,
+      "plain_blake3": "898b6fb6d4ddea9f73ed2901be96f57fc7c60cb33bfffc5f994f4164ff629f27",
+      "plain_bytes": 14938408,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/6102d118c386b616e57f9f9f60a8261e190409290d6c446052f008a9d279cea5.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "64b8bf78ba68cb2787348f19bba6434ea90c0473f3509d3a2bcaa992d903bb02",
+      "compressed_bytes": 1290826,
+      "compressed_sha256": "8f072a6b2c7ef54bc017a1e734f37dd7920f22b6f26e3459bc51abdf97738d81",
+      "pilot_manifest_member": true,
+      "plain_blake3": "959b22ce7f7c51cf3f1b9f21257d58fe0ec4c6550e65817c0a70b5a3efc17004",
+      "plain_bytes": 6363764,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/64b8bf78ba68cb2787348f19bba6434ea90c0473f3509d3a2bcaa992d903bb02.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "696827db1f96dfdd3a11f35d0552efbb12280fec8ebbefcae9409fc5f9d46046",
+      "compressed_bytes": 324961,
+      "compressed_sha256": "1bd3cdef6d8658318b11f4889f592daa925a3cef656476229326bbfb6394ca02",
+      "pilot_manifest_member": true,
+      "plain_blake3": "e1eb14263dcea950c02b48db6f933162d0fcf777bb599c4f4f63892150538957",
+      "plain_bytes": 1583557,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/696827db1f96dfdd3a11f35d0552efbb12280fec8ebbefcae9409fc5f9d46046.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "77ea50c6bfdec27946dbcce7e734e391255021bfc0c787f950a3c450815c5593",
+      "compressed_bytes": 1290867,
+      "compressed_sha256": "b7899e9cc0b6e62383e15e263c325759706815346728a06b5fa426132455ee91",
+      "pilot_manifest_member": true,
+      "plain_blake3": "89fb61b6b374f1ed6163a5717d8f64aaf09eb33ee9fcd4e31532364d28195ce7",
+      "plain_bytes": 6363772,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/77ea50c6bfdec27946dbcce7e734e391255021bfc0c787f950a3c450815c5593.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "7b9eeddb516d4058d12dfd1ca8ded4b4c1086e5be3bb13b7d56542610587a4a1",
+      "compressed_bytes": 325011,
+      "compressed_sha256": "d12b135b5b442a646ae1cb2f55dad566ccae8ace511b7d274a41d68f37bbabc4",
+      "pilot_manifest_member": true,
+      "plain_blake3": "0b01d8523c028bb2442f6e27267fac5093cc9e64b3246b727914daace0aadbce",
+      "plain_bytes": 1583650,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/7b9eeddb516d4058d12dfd1ca8ded4b4c1086e5be3bb13b7d56542610587a4a1.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "7e75c868c4086da4812b9293d1bd80fe1427bdeecb86ef6873a6d9ba1607aeea",
+      "compressed_bytes": 3020358,
+      "compressed_sha256": "afba3860159449b988ce8c25b1e58833760f0d3a265f9964c31128a67d3860e0",
+      "pilot_manifest_member": true,
+      "plain_blake3": "87ebd0163a898b15e164e47a91eaa6ef90d952096bc5590123f3f5ce0db79270",
+      "plain_bytes": 14938407,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/7e75c868c4086da4812b9293d1bd80fe1427bdeecb86ef6873a6d9ba1607aeea.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "8208e5e9e378c8e65a621fffec6ce49b0f6adcfc846b61fdbf1e05d0eda9cfa9",
+      "compressed_bytes": 324874,
+      "compressed_sha256": "b53af5b48b7fb5d7c6dfc2168d1a8cec36ed267962dd79582c7decef12663164",
+      "pilot_manifest_member": true,
+      "plain_blake3": "e1e5502090acd240928a72e5c20528177a7188b142c28e48acd9f119bc48be9d",
+      "plain_bytes": 1583557,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/8208e5e9e378c8e65a621fffec6ce49b0f6adcfc846b61fdbf1e05d0eda9cfa9.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "86e42e891fce80cbbb6705cb4b24648d43cb5383854a53195e785b58e662a7e5",
+      "compressed_bytes": 3025746,
+      "compressed_sha256": "fa110fbfb48c7d3346907aedf176232a8574491480f79b0678a0ee9df681a8cb",
+      "pilot_manifest_member": true,
+      "plain_blake3": "4e591e2c3ade601729585ade08bf41571af9707c64b5e408cedf613499b1929c",
+      "plain_bytes": 14951030,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/86e42e891fce80cbbb6705cb4b24648d43cb5383854a53195e785b58e662a7e5.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "8dd0c4692b9cc8c5ac38cf38dbb81224cb84c6acc0308a62bbf9c0edbfc719d3",
+      "compressed_bytes": 1290472,
+      "compressed_sha256": "81127bdfc3b9609627a53dabb1f7e1a29ef21b0fc08d9dd99c450aa1ea667cac",
+      "pilot_manifest_member": true,
+      "plain_blake3": "41355be398506933086a19925759583497733a68242942b55c74c145d761452b",
+      "plain_bytes": 6363582,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/8dd0c4692b9cc8c5ac38cf38dbb81224cb84c6acc0308a62bbf9c0edbfc719d3.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "8ec78c573a3e135004e877f374a26a464f019b891d158063a7f18c582542b9e7",
+      "compressed_bytes": 325022,
+      "compressed_sha256": "99c1c73ed4e2e9466861008eb5b5274a05ebe38385b1b4f4ac0be0e6f5d56b0b",
+      "pilot_manifest_member": true,
+      "plain_blake3": "1c2f48e83d69160df96f91efc1396f048c51b9a6e6242468b3685c3a2028cee9",
+      "plain_bytes": 1583563,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/8ec78c573a3e135004e877f374a26a464f019b891d158063a7f18c582542b9e7.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "8ecebd133f402a226e25248561e4f32ec3ee25293b7bc01232eb6c378f8be975",
+      "compressed_bytes": 325769,
+      "compressed_sha256": "de4036f52229c0499721223e0c0f1cbdca6463c2b33a29f58676a43f0df462e9",
+      "pilot_manifest_member": true,
+      "plain_blake3": "e83c6bfe4735c250f431cdb955ab4a49924456f4b9e9f450bfb6e890434123f4",
+      "plain_bytes": 1584981,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/8ecebd133f402a226e25248561e4f32ec3ee25293b7bc01232eb6c378f8be975.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47",
+      "compressed_bytes": 3019769,
+      "compressed_sha256": "df02963d1706fa7a64fd7558d88db79b23ea34801ac58062c4c500113e8c57fe",
+      "pilot_manifest_member": true,
+      "plain_blake3": "e7b6e778513807ac10896b314873aa40d9512bf51b5ffce0d72a87015d1de94e",
+      "plain_bytes": 14938418,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "9924a0c8520c15aab23a837e1b2e9aa4134ed3039de6a41f9d474b8000a825c2",
+      "compressed_bytes": 1290834,
+      "compressed_sha256": "1ba79d9359c79470f98016d369cd8ea2112d410ce1bf2392fa32d45bdeac3777",
+      "pilot_manifest_member": true,
+      "plain_blake3": "90fbed0174ae4b57205be10a49259ca7a515def585a688542474bd076e4c1994",
+      "plain_bytes": 6363771,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/9924a0c8520c15aab23a837e1b2e9aa4134ed3039de6a41f9d474b8000a825c2.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "9cda8e35acd428a71c91d04f55499ef1c6708dc1e684bd2e0bfcb740c96d1fb8",
+      "compressed_bytes": 1293298,
+      "compressed_sha256": "75d8d479de87c6f7677c5ced359310aa5d670cc464b82d06fe344c721f634e39",
+      "pilot_manifest_member": true,
+      "plain_blake3": "45228af77afee9527e2ecf7734f32816e418c8a725f395b8f37ec15606a485ab",
+      "plain_bytes": 6368853,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/9cda8e35acd428a71c91d04f55499ef1c6708dc1e684bd2e0bfcb740c96d1fb8.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "9f8355a558a4a6f73c51de4a309c261fd2f47ea69d65d82795f7b598ed51efcf",
+      "compressed_bytes": 3019673,
+      "compressed_sha256": "50dda85d506dec1fd9960b831ecac3b9a7e7204ff1a80ffec11c1658e7ca6fcb",
+      "pilot_manifest_member": true,
+      "plain_blake3": "9aca0a61e485b592476ff14c23bba4529761361a5aeb57a086f2ea0fcef99968",
+      "plain_bytes": 14938414,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/9f8355a558a4a6f73c51de4a309c261fd2f47ea69d65d82795f7b598ed51efcf.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e",
+      "compressed_bytes": 3025798,
+      "compressed_sha256": "3e85c9e419fcddd3c9faed3c84470bf96fcad9178e48e1d73629369335841ecf",
+      "pilot_manifest_member": true,
+      "plain_blake3": "8bc264e9d90ab0a10a0d66fceafd6711c2382e062ee59f5edf91f5463bfffe40",
+      "plain_bytes": 14951450,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "c5c52c2a2feb2abc42968df2777270bf8ca55a7d4e734d48f3a7aaff99addebd",
+      "compressed_bytes": 1290621,
+      "compressed_sha256": "ec4c4972d4fcd9ccc36b930ccf7a16956a694c16d8fca799a0f6e4d0ff7be0cb",
+      "pilot_manifest_member": true,
+      "plain_blake3": "097609706cc31a87217230dba189b3e3290bc19e4baa6ce03c1a41eb8a763db9",
+      "plain_bytes": 6363583,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/c5c52c2a2feb2abc42968df2777270bf8ca55a7d4e734d48f3a7aaff99addebd.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "dbe658b62d852c1511fdd6eca134d414600f873b84aeda77a75c06e67130139f",
+      "compressed_bytes": 324976,
+      "compressed_sha256": "558d227f9dcffea8c6c7af6e530e77fe588f52a8b9b2ac7bcc44266ec6d8ad1c",
+      "pilot_manifest_member": true,
+      "plain_blake3": "ad46821e481eb86415d70be445209245f7033b23b2e2ec079189dea5a506d5a3",
+      "plain_bytes": 1583655,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/dbe658b62d852c1511fdd6eca134d414600f873b84aeda77a75c06e67130139f.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "e3714607e928a7d5597bbfe9f4864888ab3046840fb22784516854506101b3fb",
+      "compressed_bytes": 3026206,
+      "compressed_sha256": "068ee0887dafd063f3ebcd525937930d1abe63f67573c87299907391e2ae95e5",
+      "pilot_manifest_member": true,
+      "plain_blake3": "a95b9c2f1373a5ec1fafd94bca56b8533e452578c146dd79b277e983f7052e52",
+      "plain_bytes": 14951846,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/e3714607e928a7d5597bbfe9f4864888ab3046840fb22784516854506101b3fb.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "e5600aa76a88246a4c3f73fce83ba73479e79c34e88d6205fffdb91ce09e0a99",
+      "compressed_bytes": 3020387,
+      "compressed_sha256": "74841a1e290e84904f898a9c952e91a795e34498f48e4529ca1c621a503b62cc",
+      "pilot_manifest_member": true,
+      "plain_blake3": "4e392e58c6591fb4d0e3a67a9477402d452640e8ea92f9a0eea6391f4e7aa604",
+      "plain_bytes": 14938438,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/e5600aa76a88246a4c3f73fce83ba73479e79c34e88d6205fffdb91ce09e0a99.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "fbf59fc700d0c80bec66ce2af90f9da0ee387bf48ac2267e8754e1431c5390b3",
+      "compressed_bytes": 1293514,
+      "compressed_sha256": "da16bb4a7956ee346c5981301f708a8415dc4ae0dbd8f0bf4b31a64042e3fe6f",
+      "pilot_manifest_member": true,
+      "plain_blake3": "d7c3dab0426c059f7197819363789dd49925ecdf4dabe867d6201d052481784c",
+      "plain_bytes": 6369374,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/fbf59fc700d0c80bec66ce2af90f9da0ee387bf48ac2267e8754e1431c5390b3.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "0171b8afa1d97816e191ee26e0df890033c00fc30f3e7ff3045b9d2bd1a7f13f",
+      "compressed_bytes": 323714,
+      "compressed_sha256": "4c2e0deba9c8c711305bbbe2fa990ab065c95df303d9629b756d8adc7b9ed45d",
+      "pilot_manifest_member": true,
+      "plain_blake3": "506ad008710a4d067f6d0a775db77ba58c8c4f8fd4fcae8163eedb6ed0ee6bfc",
+      "plain_bytes": 1493553,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/0171b8afa1d97816e191ee26e0df890033c00fc30f3e7ff3045b9d2bd1a7f13f.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "18fc535188c6353fad1c46366b6fb52c5d3f2bcd4dfe552c41757003eb47c746",
+      "compressed_bytes": 1285059,
+      "compressed_sha256": "e0ca8db80d5630a3dc794897044880cb58bce9df936c330650b9dd610e2e50b3",
+      "pilot_manifest_member": true,
+      "plain_blake3": "2c275baba363f129ae3d0b0d3eb3f11eb3b223caa89c50d0a60df9fd1d818314",
+      "plain_bytes": 5997990,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/18fc535188c6353fad1c46366b6fb52c5d3f2bcd4dfe552c41757003eb47c746.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "1ca6b661fab3da4613c573e8a4df3536bccb708e8dd446db567c8a70176e7397",
+      "compressed_bytes": 1285297,
+      "compressed_sha256": "bb7d91102353e10c043981f791362665c95c79f8fe5d01df546b9cc3abc8c4b6",
+      "pilot_manifest_member": true,
+      "plain_blake3": "cc2f7526dfe2a8bd9a067f29b3d418526968f93f01ab07a1c9328edcc67e2a43",
+      "plain_bytes": 5998070,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/1ca6b661fab3da4613c573e8a4df3536bccb708e8dd446db567c8a70176e7397.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "2dbf92825b46f30a666216ab3f8bfb36aab6d8f481f9b060f33d3ced02c4151d",
+      "compressed_bytes": 3007856,
+      "compressed_sha256": "5fc6b76a6a26ea42222cfe56a080b0ab2d55bc85c28dfa8c5d07833bea504606",
+      "pilot_manifest_member": true,
+      "plain_blake3": "922aef6db5aa478a8334230e7bf3f161a57922f9b32c1bfa57e2a5aabab843f8",
+      "plain_bytes": 14082072,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/2dbf92825b46f30a666216ab3f8bfb36aab6d8f481f9b060f33d3ced02c4151d.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "33f79a2033ce5fc1d1c861aa39f21fb8ff3aad1dd22b2e3b4bcb4128df8a72b0",
+      "compressed_bytes": 1285301,
+      "compressed_sha256": "c8ff4ee93c478a846b836a01715e067f11ce11f4ce091e98459fd1b6d2314f66",
+      "pilot_manifest_member": true,
+      "plain_blake3": "88ac7b99287bbc01de2fcce8b26a6aa4c4d0468f9b9bd2e73bbc28741666588b",
+      "plain_bytes": 5997989,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/33f79a2033ce5fc1d1c861aa39f21fb8ff3aad1dd22b2e3b4bcb4128df8a72b0.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "3725a0ac4c28af913d08cb3e3f218af4ff56b49fe991eab620d06811f3c554d3",
+      "compressed_bytes": 323129,
+      "compressed_sha256": "c56ce83f5e113dafcee750908f570737719cb2382acdf07101814898738cea04",
+      "pilot_manifest_member": true,
+      "plain_blake3": "8581ec32865045a0bb5ce28ceecbc75bfaa9fc0dc2f7ce81e7149479648f9b02",
+      "plain_bytes": 1492298,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/3725a0ac4c28af913d08cb3e3f218af4ff56b49fe991eab620d06811f3c554d3.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "3b3d37d84d84a596410dc41359307656f8ed3a1910f85409ed1d1d92fcbfb5ce",
+      "compressed_bytes": 323336,
+      "compressed_sha256": "5d2e19cdd40b4f9bd2092e260601e0b51e4054833d7b22f43fd17b48d72c9630",
+      "pilot_manifest_member": true,
+      "plain_blake3": "cbe21cc5b22d020db94cc41b6e940fad6f44f2c3a3bd2a4a5fd6870296429e8b",
+      "plain_bytes": 1492254,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/3b3d37d84d84a596410dc41359307656f8ed3a1910f85409ed1d1d92fcbfb5ce.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "51784c76dea254dec2e37e96575f3d2d150eacf0c10c352a8a00b731d6ffe430",
+      "compressed_bytes": 323850,
+      "compressed_sha256": "dacdcf84837a0c397730cee8ac457376fc0e49408dfc4bc421d2294671e68ec9",
+      "pilot_manifest_member": true,
+      "plain_blake3": "3641ace9547ca86bda88a1d4c4ba75912a743e100a624d2fd7a3d8188c503af1",
+      "plain_bytes": 1493667,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/51784c76dea254dec2e37e96575f3d2d150eacf0c10c352a8a00b731d6ffe430.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "542a2390fe4f9715f0bfdf71a9a711f1a9e36bc1539be37dd29b9ebc191c7910",
+      "compressed_bytes": 323783,
+      "compressed_sha256": "a1326cac2c8c6ecc3cd81b2c25bc070d83bdd956e865a7bedd0120d0808a8119",
+      "pilot_manifest_member": true,
+      "plain_blake3": "849ba51edc2ba6085495ae006297789613635a724c19a42bcd78565717bbacc1",
+      "plain_bytes": 1493876,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/542a2390fe4f9715f0bfdf71a9a711f1a9e36bc1539be37dd29b9ebc191c7910.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "682083e1cac1d829f956b953bb06f47fe6340378ec0a5e357812eca18c93c5b7",
+      "compressed_bytes": 3008353,
+      "compressed_sha256": "406c0ba9ac829e64332ae575905816f4382f83a38e91dc6982833dd771dd11b1",
+      "pilot_manifest_member": true,
+      "plain_blake3": "163e8795f653a7035006170d36fc5e2dfe16ec4efc47d6746520d6f429a60aa3",
+      "plain_bytes": 14082071,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/682083e1cac1d829f956b953bb06f47fe6340378ec0a5e357812eca18c93c5b7.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "78cdf66f6f86246a2452f57a7b7c2da72ecd7e409f5ce48077b8ef9ba9f81ea2",
+      "compressed_bytes": 1285366,
+      "compressed_sha256": "907b420ab927b304c835e7e86c8eef024ed80060d8c0f5cafacb8ba5c987878f",
+      "pilot_manifest_member": true,
+      "plain_blake3": "3e32ed37b61b8643bcd31f40003bcd323cc2328e259768b9cf58dcde8cf21d2c",
+      "plain_bytes": 5997989,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/78cdf66f6f86246a2452f57a7b7c2da72ecd7e409f5ce48077b8ef9ba9f81ea2.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "83b5270f2f6409986809d3dd46b09050032af1d4eb5b0b7729a1dcb9c842a76b",
+      "compressed_bytes": 1287980,
+      "compressed_sha256": "0ff447dc00539fdd3ee2234fa6071c81eedc2026ee0242b2419d832bdde42683",
+      "pilot_manifest_member": true,
+      "plain_blake3": "ddef960fbaee2ff92cc5d87046bb289292f115b65ba288276cd992f9e8d04952",
+      "plain_bytes": 6004157,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/83b5270f2f6409986809d3dd46b09050032af1d4eb5b0b7729a1dcb9c842a76b.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "84e3f5708b13ae9fab7389ab2d5a93c1ceb4cd856563d0d18745b6ac254a9a90",
+      "compressed_bytes": 1285297,
+      "compressed_sha256": "fc3ad7c07411c9df6fb28446bffccf5bae98aee1c20bfe1a1b7f7df411db1f91",
+      "pilot_manifest_member": true,
+      "plain_blake3": "1ff6a88f2c3e683ce0513e67732ffafea21332dc2c680e49673752a824541659",
+      "plain_bytes": 5998073,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/84e3f5708b13ae9fab7389ab2d5a93c1ceb4cd856563d0d18745b6ac254a9a90.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "8ad5539fd5e0ae361b879e5deb533b8a7c9a51702ba9c2683f29ac6b89a07834",
+      "compressed_bytes": 3008374,
+      "compressed_sha256": "2ff1311781c9ad6a3f61aaf1382988b52778203996865e4565ef2227e1c9b938",
+      "pilot_manifest_member": true,
+      "plain_blake3": "e41c4be3ebfb1897bb74ce393e130a828065e79ccd3633db679885d61dfd380a",
+      "plain_bytes": 14082403,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/8ad5539fd5e0ae361b879e5deb533b8a7c9a51702ba9c2683f29ac6b89a07834.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "9add99146671bbf1c12ac6d09d83065202c86280c74e4a094df077b08fa269d1",
+      "compressed_bytes": 323130,
+      "compressed_sha256": "98e4a0bd4d2e11163210fd707dafa630f94d8d26504901001538af6308334a7f",
+      "pilot_manifest_member": true,
+      "plain_blake3": "25802213cc089e6bdcc6999f666d8432fa9a680c7eb52d47bdf48b9bdf8c16f7",
+      "plain_bytes": 1492300,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/9add99146671bbf1c12ac6d09d83065202c86280c74e4a094df077b08fa269d1.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "b067fc3b484b12628fa6d2217239753302e4a1c3f517eb5fa2df5fd5bd4b7765",
+      "compressed_bytes": 323235,
+      "compressed_sha256": "3bbe827a9e13627e15c2071350e7ef5d245e636b135c3653458591ddd3488b34",
+      "pilot_manifest_member": true,
+      "plain_blake3": "94ec56ad980f7873adc0708c5ad2893ceeeeb5d08ee00a534d1e24ae23c92c53",
+      "plain_bytes": 1492254,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/b067fc3b484b12628fa6d2217239753302e4a1c3f517eb5fa2df5fd5bd4b7765.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "b5b3ee0e42da4e5f06e3bd1bd378ed11c2391749387c1c4dbaecae47a9c7c9ed",
+      "compressed_bytes": 3014415,
+      "compressed_sha256": "96d2c2e8e84149a802851ec63472e53f5c17fc8188760f12d5c21c7eef49bec3",
+      "pilot_manifest_member": true,
+      "plain_blake3": "e33c74fad51c52f6b3061dfc21f336a67496409cc90c7030a0182d8839c33efe",
+      "plain_bytes": 14095183,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/b5b3ee0e42da4e5f06e3bd1bd378ed11c2391749387c1c4dbaecae47a9c7c9ed.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "bd4cbb3466c98f6dbf30265fa397d79ed9c1a784fce6472dcb86cb05762fa951",
+      "compressed_bytes": 3008397,
+      "compressed_sha256": "4438c3cffbd6ed8bf8742b82b37c73a612648f01a1283a902f4e1072b0abd390",
+      "pilot_manifest_member": true,
+      "plain_blake3": "fb37ef128832941a52e04dd84237930f883ddaef96d785e92fef437e17ca9a7a",
+      "plain_bytes": 14082406,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/bd4cbb3466c98f6dbf30265fa397d79ed9c1a784fce6472dcb86cb05762fa951.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "c3f303a3013fa19c76a1e3aed7e55fd890e93f3baab6fe394fa5820fd4ab00f5",
+      "compressed_bytes": 1287930,
+      "compressed_sha256": "db343d62d13f254934d578af9d0646d3999b4c2d8156f48dfcc7ab20d689c431",
+      "pilot_manifest_member": true,
+      "plain_blake3": "1a9ab840f00de1dfb3566be76c3e34be9b5dc25edaab0a3915e811a52b11445a",
+      "plain_bytes": 6003713,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/c3f303a3013fa19c76a1e3aed7e55fd890e93f3baab6fe394fa5820fd4ab00f5.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "dd5ce4bd605f3886dd7fa5a7e4c75e06ae77e6ab3a7b08f9074143253cc3ae68",
+      "compressed_bytes": 3008382,
+      "compressed_sha256": "a8df1de5f53b7848b6f726cf2802a20f15308c2d91d5fdab820f723b5273a0f3",
+      "pilot_manifest_member": true,
+      "plain_blake3": "c702f1cdd4000e1244bc07988876a874b316b6617d4c17c33f56e3ccf4bbc755",
+      "plain_bytes": 14082408,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/dd5ce4bd605f3886dd7fa5a7e4c75e06ae77e6ab3a7b08f9074143253cc3ae68.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "e0d7cba5ad48844a06c92a48f47e95ff27dca9e716a73a4b9d7faa44b2fe3884",
+      "compressed_bytes": 1285302,
+      "compressed_sha256": "5027cb8bb152f3dfa50a611580ac1231674034bf5dbe86761200e6676b458249",
+      "pilot_manifest_member": true,
+      "plain_blake3": "62a146398bc0b5a5421dc8f9f3c27a8d34a4cff31471db394b4b08f971535e5d",
+      "plain_bytes": 5998072,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/e0d7cba5ad48844a06c92a48f47e95ff27dca9e716a73a4b9d7faa44b2fe3884.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "e40bd27f5005c1d14e8705d04f12f6eceb676f6cb73b3326543019636a573201",
+      "compressed_bytes": 3014574,
+      "compressed_sha256": "304b48d21f344d396eea09010816f363410ed213784aa77ee354ba7d863858dc",
+      "pilot_manifest_member": true,
+      "plain_blake3": "c3f16e8d4cd952385149e3f7c6f3ef563182ab84e19d11ebc4663e96cae24b72",
+      "plain_bytes": 14095052,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/e40bd27f5005c1d14e8705d04f12f6eceb676f6cb73b3326543019636a573201.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "e5055f1ac70619362625b8f7df2747a9de7df03e3fb1f90dcd035b649e9be42d",
+      "compressed_bytes": 3008249,
+      "compressed_sha256": "6060371d13b1dcc1a0c0be0f2d4757dc0c8df61773590619c109682f9645a0cc",
+      "pilot_manifest_member": true,
+      "plain_blake3": "73be89feccd69c6d165792e16cd3d4a2ffc2a19c08920697eac42c2288782d4c",
+      "plain_bytes": 14082071,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/e5055f1ac70619362625b8f7df2747a9de7df03e3fb1f90dcd035b649e9be42d.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "f22c8a1f5b29638ef05bab8969055685feed657171e422befbd4284da0238f7c",
+      "compressed_bytes": 1288207,
+      "compressed_sha256": "4ad2d66a29c237bf0ab4218ced7e9523647b670311a19082699577b24f6e5269",
+      "pilot_manifest_member": true,
+      "plain_blake3": "f0365b2209240b97e02ec39969c6dd43feb3f0d85a4c56b3b4e895299a2e81b6",
+      "plain_bytes": 6003618,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/f22c8a1f5b29638ef05bab8969055685feed657171e422befbd4284da0238f7c.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "f7d7f032de4bf3e61aef352a41b4d3eef38a4db57e222dde32fd369dc0cd80b4",
+      "compressed_bytes": 323131,
+      "compressed_sha256": "f5145d8293a34d00f8cdadad2d0b37f42426a0363ad0627566d0022d91506912",
+      "pilot_manifest_member": true,
+      "plain_blake3": "cc6446b0f90901f695b3fb16c96b7065496090017cafe531b7c0e663c3e5a924",
+      "plain_bytes": 1492301,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/f7d7f032de4bf3e61aef352a41b4d3eef38a4db57e222dde32fd369dc0cd80b4.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "f8c2a2ca647c5a1b34b8ef573af514d2419e87d4080496482f97dc1749927486",
+      "compressed_bytes": 3014562,
+      "compressed_sha256": "8bfeec8d23f70a2947b0ecb41ce3635b1819958e6bf213adbe9199b363728a96",
+      "pilot_manifest_member": true,
+      "plain_blake3": "d3407ddeebf010f9b86188dcecede72171db71efdaa3c266e886c1ce4321a9f9",
+      "plain_bytes": 14095643,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/f8c2a2ca647c5a1b34b8ef573af514d2419e87d4080496482f97dc1749927486.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "fb43f8a042353926534ccb9b520bcfaec767d230d772f98427e8e721d1716efc",
+      "compressed_bytes": 323158,
+      "compressed_sha256": "a11fbd50fc08f6f9236772ea2aec755a2b9e92b22987d897f38abe2300f88950",
+      "pilot_manifest_member": true,
+      "plain_blake3": "9c58d8b42c2b683db10a2da7106d18b22eed6ff551a228d43d1e7ae614b9f1ad",
+      "plain_bytes": 1492255,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a1/objects/fb43f8a042353926534ccb9b520bcfaec767d230d772f98427e8e721d1716efc.jsonl.gz",
+      "source_manifest": "pilot"
+    },
+    {
+      "compressed_blake3": "76e1cbe4ea5a9d26e5b24a2d27f9401271dc471846529190a0416d8e09837a92",
+      "compressed_bytes": 5956114,
+      "compressed_sha256": "eb342b574e244e1e67e8e78c805f33ee88edcdb4f3a14d4114e6f413beede380",
+      "pilot_manifest_member": false,
+      "plain_blake3": "36c4f5142da17f48e55fbd37c0494e3f9f4858ab8d7399b284325f96c931131c",
+      "plain_bytes": 29502296,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v2-size-frontier/a0/objects/76e1cbe4ea5a9d26e5b24a2d27f9401271dc471846529190a0416d8e09837a92.jsonl.gz",
+      "source_manifest": "v2_k1182"
+    },
+    {
+      "compressed_blake3": "82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851",
+      "compressed_bytes": 10313647,
+      "compressed_sha256": "aacb62784dee0c9f5e06328dbb85a4b6a1c7243e778328da82900e7284f3a74a",
+      "pilot_manifest_member": false,
+      "plain_blake3": "20f2c0d7ac825b46e3297816730abebe7b7d812f8ef77805ed2e48bae592b2d9",
+      "plain_bytes": 51251655,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v2-size-frontier/a0/objects/82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851.jsonl.gz",
+      "source_manifest": "v2_k2048"
+    },
+    {
+      "compressed_blake3": "aea278aff2d79a592d5164d7437ddde8f8e9377fa481058dfc16afa176a31389",
+      "compressed_bytes": 10058074,
+      "compressed_sha256": "c5de0b26e84ad80bfb7be6a214b89c9682e356effb6079c7abf28cd1151ffb03",
+      "pilot_manifest_member": false,
+      "plain_blake3": "c137a82dada17a78f2f5cd2e8b48a1731a76fa4ca9ecfc8971b8f92b9821bc61",
+      "plain_bytes": 50029123,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v3-structured-orbit/a0/objects/aea278aff2d79a592d5164d7437ddde8f8e9377fa481058dfc16afa176a31389.jsonl.gz",
+      "source_manifest": "v3_structured_d12"
+    }
+  ],
+  "bucket": "crypto-autoresearcher",
+  "compressed_bytes": 109656159,
+  "inventory_sha256": "fcad2625bc75e856adc1ec0023a531289f9c5f9fbb3e6643fca543ec2b6315f3",
+  "listed_object_count": 72,
+  "pilot_archive_count": 54,
+  "pilot_manifest_sha256": "5bd862987844f709e03beeab9fd265e3d2024011bcadcb82f5af9c72018df6a6",
+  "plain_bytes": 531027665,
+  "prefix": "factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/",
+  "schema": "n83.live-s3-factor-base-replay/v2",
+  "source_manifest_sha256": {
+    "pilot": "5bd862987844f709e03beeab9fd265e3d2024011bcadcb82f5af9c72018df6a6",
+    "v2_k1182": "2735f6960233749ac887f68705fd514dfc003e2212d722a8e50e5e9738aadcfa",
+    "v2_k2048": "68b43524198394a2f0d112f86df0d1c1f69ea1ff817695cf21efe2767b7d17b8",
+    "v3_structured_d12": "bd4202ed599f2659f6279dd07dbdc6b5948594df79db969e66530c19e3cf5dca"
+  },
+  "status": "PASS_57_LIVE_ARCHIVES_ALL_SOURCE_MANIFESTS"
+}

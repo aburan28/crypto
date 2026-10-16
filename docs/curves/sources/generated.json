@@ -1535,6 +1535,22 @@
       "name": "K_1 / GF(2^59)",
       "slug": "icv1-f2m59-tm943548413-98844ecc",
       "subgroup_order": "25179555920633"
+    },
+    {
+      "a": 310059,
+      "b": 228047,
+      "cofactor": 1,
+      "generator": {
+        "x": 470175,
+        "y": 462863
+      },
+      "generator_call": "find_prime_order_curve(20, 20261015)",
+      "group_order": 550657,
+      "icv1": "ICV1:fp-550813:157:550657:207046:unk:unk:r:e39da206bf24",
+      "name": "generated-20bit-550813",
+      "p": 550813,
+      "slug": "icv1-fp20-t157-e39da206",
+      "subgroup_order": 550657
     }
   ],
   "specs": [
@@ -1611,7 +1627,8 @@
     "koblitz:1:43",
     "koblitz:1:45",
     "koblitz:1:47",
-    "koblitz:1:59"
+    "koblitz:1:59",
+    "prime:20:20261015"
   ],
   "unbuilt": [
     {

@@ -1,0 +1,39 @@
+{
+  "all_affine_core_max_variables": 84743,
+  "conflict_cap_per_trial": 5000,
+  "domain_clause_cap": 12000000,
+  "domain_clause_margin": 11534262,
+  "field_degree": 83,
+  "first_pair_order_extra_variables": 82,
+  "identity_patterns_max": 8,
+  "max_variables_including_domains_and_order": 101636,
+  "phase_bits": 7,
+  "residual": {
+    "domain_clauses": 153684,
+    "domain_xor_rows": 1328,
+    "representatives": 866,
+    "summands": 2,
+    "variables": 5966
+  },
+  "retained_n83_search_executed": false,
+  "schema": "n83.mixed-orbit-source-capacity/v1",
+  "selected_best_total_runtime": null,
+  "small": {
+    "domain_clauses": 312054,
+    "domain_xor_rows": 1992,
+    "representatives": 1182,
+    "summands": 3,
+    "variables": 10845
+  },
+  "source_commit": "1bd12a72fe315fc86b5ab2df8c3071f6db6d32c5",
+  "source_sha256": {
+    "examples/koblitz_n83_mixed_orbit_worker.rs": "e164ef24f465e2dbc90f787160bba43d51dc22e04ad0d66e3fdfd85e7952c78a",
+    "src/cryptanalysis/binary_semaev_chain_sat.rs": "0031972aab435d963af54a5f28f0510e45e5301f00c49466661191815becc06e",
+    "src/cryptanalysis/koblitz_large_prime.rs": "accd5cf0ef7c738aedce38a21d172eeda1b309eaf9c8f4848030dac9d4421ddd"
+  },
+  "summands": 5,
+  "total_domain_clauses": 465738,
+  "total_index_calculus_runtime_ms": null,
+  "variable_cap": 150000,
+  "variable_margin": 48364
+}
