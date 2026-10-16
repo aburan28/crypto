@@ -143,6 +143,8 @@ def materialize(results, archive, provider_sha, run_id, head_sha, reuse):
             or analysis["selection_admitted"] is not True
             or analysis["selected_candidate_id"] is not None
             or analysis["k_grid"] != list(runner.K_GRID)
+            or analysis["arm_order"] != [name for name, _ in runner.ARMS]
+            or analysis["rho"]["status"] != "PASS_INDEPENDENT_REPLAY"
             or len(analysis["arms"]) != len(runner.ARMS)
             or host["git_sha"] != head_sha
             or host["instance_id"] != f"gh-{run_id}-1-adjacent-k-cold-screen"
@@ -150,7 +152,9 @@ def materialize(results, archive, provider_sha, run_id, head_sha, reuse):
             or source["source_sha256"] != runner.SOURCE_SHA256
             or source["runner_sha256"] != sha256(HERE / "run.py")
             or source["target_sha256"] != runner.TARGET_SHA256
-            or source["arm_order"] != [name for name, _ in runner.ARMS]):
+            or source["arm_order"] != [name for name, _ in runner.ARMS]
+            or source["k_grid"] != list(runner.K_GRID)
+            or source["control_ks"] != list(runner.CONTROL_KS)):
         raise ValueError("finegrid source, host, target or admission differs")
     workload_record = workload(source)
     workload_id = workload_record["workload_id"]
@@ -213,9 +217,11 @@ def materialize(results, archive, provider_sha, run_id, head_sha, reuse):
         raise ValueError("candidate or run count differs")
     by_k = {}
     for k in runner.K_GRID:
-        measured = [row for row in rows if row["candidate_id"] == next(
-            row["candidate_id"] for row in rows if row["arm"].startswith(f"k{k}_")
-            or row["arm"] == f"k{k}")]
+        names = ({f"k{k}_a", f"k{k}_b"} if k in runner.CONTROL_KS
+                 else {f"k{k}"})
+        measured = [row for row in rows if row["arm"] in names]
+        if len(measured) != len(names) or len({row["candidate_id"] for row in measured}) != 1:
+            raise ValueError(f"K{k}: missing repeat or candidate identity differs")
         cold_mean = statistics.mean(row["cold_process_ms"] for row in measured)
         if abs(cold_mean - analysis["descriptive_cold_process_ms_by_k"][str(k)]) > 1e-6:
             raise ValueError(f"K{k}: replayed mean differs")
@@ -223,6 +229,8 @@ def materialize(results, archive, provider_sha, run_id, head_sha, reuse):
                         "cold_process_ms": cold_mean,
                         "one_target_online_ms": statistics.mean(
                             row["one_target_online_ms"] for row in measured)}
+    if analysis["descriptive_order"] != sorted(by_k, key=lambda key: by_k[key]["cold_process_ms"]):
+        raise ValueError("descriptive ordering differs from replayed rows")
     output = {
         "schema": "n83.e2e-finegrid-ic1/v1",
         "source_commit": prior.runner.SCREEN_HEAD_SHA,
