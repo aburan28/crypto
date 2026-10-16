@@ -1,0 +1,247 @@
+{
+  "schema": "hwcost.hardware.v1",
+  "name": "Intel(R) Xeon(R) Processor @ 2.10GHz, 4 logical CPUs",
+  "kind": "cpu",
+  "clock_ghz": 2.8214639671300508,
+  "clock_source": "measured: dependent add chain, median of 7 reps",
+  "cores": 4,
+  "isa": [
+    "adx",
+    "aes",
+    "avx",
+    "avx2",
+    "avx512bw",
+    "avx512dq",
+    "avx512f",
+    "avx512ifma",
+    "avx512vbmi",
+    "avx512vl",
+    "bmi1",
+    "bmi2",
+    "fma",
+    "gfni",
+    "pclmulqdq",
+    "popcnt",
+    "sha",
+    "sse4.2",
+    "vaes",
+    "vpclmulqdq"
+  ],
+  "ops": {
+    "fp64.add": {
+      "cycles": 1.340211894041246,
+      "latency_cycles": 3.0156871992813667,
+      "source": "measured: hwcost measure, fp64.add throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "fp64.inv": {
+      "cycles": 1115.5934126983323,
+      "latency_cycles": 1120.4172615087464,
+      "source": "measured: hwcost measure, fp64.inv throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "fp64.mul": {
+      "cycles": 3.7661223054018604,
+      "latency_cycles": 19.083289169664017,
+      "source": "measured: hwcost measure, fp64.mul throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "fp64.rho_residual": {
+      "cycles": 80.97629073533732,
+      "source": "measured: fitted per-iteration residual (measured − a priori) of the rho kernel over batches ≤ 1024 (hwcost fit)"
+    },
+    "fp64.sqr": {
+      "cycles": 3.61750195745023,
+      "latency_cycles": 14.106727404621433,
+      "source": "measured: hwcost measure, fp64.sqr throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "fp64bf.add": {
+      "cycles": 1.3508020642567922,
+      "latency_cycles": 2.2436879620550485,
+      "source": "measured: hwcost measure, fp64bf.add throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "fp64bf.inv": {
+      "cycles": 1121.6952024111185,
+      "latency_cycles": 1114.8587346061342,
+      "source": "measured: hwcost measure, fp64bf.inv throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "fp64bf.mul": {
+      "cycles": 3.942663732621689,
+      "latency_cycles": 19.306258897503707,
+      "source": "measured: hwcost measure, fp64bf.mul throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "fp64bf.rho_residual": {
+      "cycles": 72.23871598741313,
+      "source": "measured: fitted per-iteration residual (measured − a priori) of the rho kernel over batches ≤ 1024 (hwcost fit)"
+    },
+    "fp64bf.sqr": {
+      "cycles": 4.205378874030302,
+      "latency_cycles": 14.368062789237095,
+      "source": "measured: hwcost measure, fp64bf.sqr throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "w1.add": {
+      "cycles": 1.5680484409706978,
+      "latency_cycles": 4.003610359154949,
+      "source": "measured: hwcost measure, w1.add throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "w1.inv": {
+      "cycles": 1854.2683287541017,
+      "latency_cycles": 1859.0608791920488,
+      "source": "measured: hwcost measure, w1.inv throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "w1.mul": {
+      "cycles": 6.710728458022632,
+      "latency_cycles": 24.724088183315427,
+      "source": "measured: hwcost measure, w1.mul throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "w1.rho_residual": {
+      "cycles": 3.985888074125516,
+      "source": "measured: fitted per-iteration residual (measured − a priori) of the rho kernel over batches ≤ 1024 (hwcost fit)"
+    },
+    "w1.sqr": {
+      "cycles": 5.106069650462519,
+      "latency_cycles": 19.745723895514114,
+      "source": "measured: hwcost measure, w1.sqr throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "w2.add": {
+      "cycles": 3.8613283522548327,
+      "latency_cycles": 8.220052278022289,
+      "source": "measured: hwcost measure, w2.add throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "w2.inv": {
+      "cycles": 4259.61757486692,
+      "latency_cycles": 4113.026012795507,
+      "source": "measured: hwcost measure, w2.inv throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "w2.mul": {
+      "cycles": 21.786072360375602,
+      "latency_cycles": 35.49263408738463,
+      "source": "measured: hwcost measure, w2.mul throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "w2.rho_residual": {
+      "cycles": 60.711576325566284,
+      "source": "measured: fitted per-iteration residual (measured − a priori) of the rho kernel over batches ≤ 1024 (hwcost fit)"
+    },
+    "w2.sqr": {
+      "cycles": 19.680658914324894,
+      "latency_cycles": 37.405169873940146,
+      "source": "measured: hwcost measure, w2.sqr throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "w3.add": {
+      "cycles": 7.80011216479862,
+      "latency_cycles": 11.625514019283058,
+      "source": "measured: hwcost measure, w3.add throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "w3.inv": {
+      "cycles": 6842.554729711016,
+      "latency_cycles": 6226.66465155351,
+      "source": "measured: hwcost measure, w3.inv throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "w3.mul": {
+      "cycles": 42.637758745526114,
+      "latency_cycles": 61.53753438164125,
+      "source": "measured: hwcost measure, w3.mul throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "w3.rho_residual": {
+      "cycles": 74.45509217321515,
+      "source": "measured: fitted per-iteration residual (measured − a priori) of the rho kernel over batches ≤ 1024 (hwcost fit)"
+    },
+    "w3.sqr": {
+      "cycles": 39.16640558114973,
+      "latency_cycles": 60.04474619215888,
+      "source": "measured: hwcost measure, w3.sqr throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "w4.add": {
+      "cycles": 8.98097963612369,
+      "latency_cycles": 14.714228041423674,
+      "source": "measured: hwcost measure, w4.add throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "w4.inv": {
+      "cycles": 9431.640009506938,
+      "latency_cycles": 8752.52555515528,
+      "source": "measured: hwcost measure, w4.inv throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "w4.mul": {
+      "cycles": 75.34474968916457,
+      "latency_cycles": 86.64104260373945,
+      "source": "measured: hwcost measure, w4.mul throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    },
+    "w4.rho_residual": {
+      "cycles": 61.26149630208427,
+      "source": "measured: fitted per-iteration residual (measured − a priori) of the rho kernel over batches ≤ 1024 (hwcost fit)"
+    },
+    "w4.sqr": {
+      "cycles": 62.568265404387326,
+      "latency_cycles": 80.1407490129381,
+      "source": "measured: hwcost measure, w4.sqr throughput (8 chains; inv 4) and latency, median of 7 reps, at 2.821 GHz"
+    }
+  },
+  "memory": [
+    {
+      "name": "L1d",
+      "capacity_bytes": 49152.0,
+      "shared": false,
+      "read_gbps_one_core": 66.73531170538031,
+      "read_gbps_all_cores": 178.02807990037326,
+      "source": "measured: sequential read, 16384 B on 1 thread / 16384 B per thread on 4 (median)"
+    },
+    {
+      "name": "L2",
+      "capacity_bytes": 2097152.0,
+      "shared": false,
+      "read_gbps_one_core": 61.90526687380151,
+      "read_gbps_all_cores": 168.89287745387702,
+      "source": "measured: sequential read, 1048576 B on 1 thread / 1048576 B per thread on 4 (median)"
+    },
+    {
+      "name": "L3",
+      "capacity_bytes": 272629760.0,
+      "shared": true,
+      "read_gbps_one_core": 15.091779859430355,
+      "read_gbps_all_cores": 66.51362942450055,
+      "source": "measured: sequential read, 67108864 B on 1 thread / 16777216 B per thread on 4 (median)"
+    },
+    {
+      "name": "DRAM",
+      "capacity_bytes": null,
+      "shared": true,
+      "read_gbps_one_core": 8.696614289742325,
+      "read_gbps_all_cores": 30.291392978261996,
+      "source": "measured: sequential read, 1073741824 B per thread (median)"
+    }
+  ],
+  "scaling": [
+    {
+      "cores": 1,
+      "efficiency": 1.0
+    },
+    {
+      "cores": 2,
+      "efficiency": 0.9125108037790555
+    },
+    {
+      "cores": 4,
+      "efficiency": 0.8665445270615654
+    }
+  ],
+  "scaling_source": "measured: rho kernel, B = 1024 per thread, median efficiency over fields [\"fp64\", \"fp64bf\", \"w1\", \"w2\", \"w3\", \"w4\"]",
+  "channels": {
+    "disk": {
+      "latency_s": 0.001,
+      "bandwidth_bytes_per_s": 125000000.0,
+      "source": "assumed: block-storage baseline 125 MB/s, 1 ms per request (not measured)"
+    },
+    "network": {
+      "latency_s": 0.001,
+      "bandwidth_bytes_per_s": 1250000000.0,
+      "source": "assumed: 10 Gbit/s, 1 ms per message (not measured)"
+    }
+  },
+  "price": {
+    "usd_per_hour": 0.1785,
+    "egress_usd_per_gb": 0.09,
+    "storage_usd_per_gb_month": 0.023,
+    "source": "illustrative: AWS us-east-1 on-demand c7i.xlarge (4 vCPU) $0.1785/h, internet egress $0.09/GB, S3 standard $0.023/GB-month; this host's own cost is not priced"
+  },
+  "notes": [
+    "compiled target features: []",
+    "op costs are for the crate's fp_backend fields as compiled; another ISA build (target-cpu=native, ADX/MULX, AVX-512 IFMA) needs its own measurement"
+  ]
+}

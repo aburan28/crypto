@@ -426,6 +426,148 @@ fn closure(paths: &[String]) {
     }
 }
 
+/// Score `research/dreg_closure_scale_20261016` (its PREREGISTRATION.md):
+/// one `dreg_closure --to 4 --draw K` output file per draw.  An empty file
+/// is a draw the memory or time limit killed (unmeasured, never evidence);
+/// its cell is read from the file name (`fresh-m<M>-<n>-<ℓ>.d<K>` or
+/// `committed-cell-<n>-<ℓ>-*`, which are `m = 3`).  Per draw: closure ≤ 4,
+/// above 4 (degree 4 built and saturated without refuting), or unmeasured;
+/// per cell flat / rises / unmeasured; the study verdict; Q5 (XL never
+/// refutes at 4); Q6 (log₂ word ops ÷ log₂ columns at the refuting degree).
+/// `--satisfiable` outputs are tallied as the soundness control.
+fn scale(paths: &[String]) {
+    #[derive(Default)]
+    struct Cell {
+        n_vars: u64,
+        degrees: Vec<String>,
+        flat: usize,
+        above: usize,
+        unmeasured: usize,
+        xl_at_4: usize,
+        ratios: Vec<f64>,
+        secs: Vec<f64>,
+    }
+    let mut cells: BTreeMap<(u64, u64, u64), Cell> = BTreeMap::new();
+    let (mut sat_draws, mut sat_bad) = (0usize, 0usize);
+    for path in paths {
+        let name = std::path::Path::new(path)
+            .file_name()
+            .and_then(|f| f.to_str())
+            .unwrap_or("");
+        let text = std::fs::read_to_string(path).unwrap_or_default();
+        let line = text.lines().find(|l| !l.trim().is_empty());
+        let Some(line) = line else {
+            // Killed: read the cell from the file name.
+            let key = if let Some(rest) = name.strip_prefix("fresh-m") {
+                let p: Vec<u64> = rest
+                    .split(['-', '.'])
+                    .take(3)
+                    .map(|x| x.parse().expect("fresh-m<M>-<n>-<l>"))
+                    .collect();
+                (p[0], p[1], p[2])
+            } else if let Some(rest) = name.strip_prefix("committed-cell-") {
+                let p: Vec<u64> = rest
+                    .split('-')
+                    .take(2)
+                    .map(|x| x.parse().expect("committed-cell-<n>-<l>"))
+                    .collect();
+                (3, p[0], p[1])
+            } else {
+                panic!("{path}: empty and unnamed");
+            };
+            if !name.starts_with("control-") {
+                let c = cells.entry(key).or_default();
+                c.unmeasured += 1;
+                c.degrees.push("killed".into());
+            }
+            continue;
+        };
+        let v: Value = serde_json::from_str(line).expect("json");
+        let scan = v["scan"].as_array().expect("scan");
+        if let Some(bad) = v["refuted_satisfiable"].as_bool() {
+            sat_draws += 1;
+            sat_bad += bad as usize;
+            continue;
+        }
+        let key = (
+            v["m"].as_u64().unwrap(),
+            v["n"].as_u64().unwrap(),
+            v["ell"].as_u64().unwrap(),
+        );
+        let c = cells.entry(key).or_default();
+        c.n_vars = v["n_vars"].as_u64().unwrap();
+        let at4 = scan.iter().find(|s| s["degree"] == 4);
+        c.xl_at_4 += at4.is_some_and(|s| s["xl_refuted"] == true) as usize;
+        c.secs
+            .push(scan.iter().map(|s| s["secs"].as_f64().unwrap()).sum());
+        match v["closure_degree"].as_u64() {
+            Some(d) if d <= 4 => {
+                c.flat += 1;
+                c.degrees.push(d.to_string());
+                let s = scan.iter().find(|s| s["degree"] == d).unwrap();
+                let cols = s["columns"].as_f64().unwrap();
+                let ops = s["closure_word_ops"].as_f64().unwrap().max(1.0);
+                c.ratios.push(ops.log2() / cols.log2());
+            }
+            _ if at4.is_some_and(|s| s["saturated"] == true) => {
+                c.above += 1;
+                c.degrees.push(">4".into());
+            }
+            _ => {
+                c.unmeasured += 1;
+                c.degrees.push(format!("to {}", v["measured_to"]));
+            }
+        }
+    }
+    println!("| m | (n, ℓ) | N | closure degree per draw | cell | XL refutes at 4 | log₂ ops ÷ log₂ cols | secs per draw |");
+    println!("|--:|---|--:|---|---|--:|---|---|");
+    let (mut flat_max, mut rise_min) = (None::<u64>, None::<u64>);
+    let mut q5 = 0;
+    let mut all_ratios = Vec::new();
+    for ((m, n, ell), c) in &cells {
+        let n_vars = if c.n_vars > 0 {
+            c.n_vars
+        } else {
+            (m - 2) * n + m * ell
+        };
+        let verdict = if c.above > 0 {
+            rise_min = Some(rise_min.map_or(n_vars, |r| r.min(n_vars)));
+            "rises"
+        } else if c.flat >= 3 {
+            flat_max = Some(flat_max.map_or(n_vars, |f| f.max(n_vars)));
+            "flat"
+        } else {
+            "unmeasured"
+        };
+        q5 += c.xl_at_4;
+        all_ratios.extend(c.ratios.iter().copied());
+        let r: Vec<String> = c.ratios.iter().map(|x| format!("{x:.2}")).collect();
+        let t: Vec<String> = c.secs.iter().map(|x| format!("{x:.0}")).collect();
+        println!(
+            "| {m} | ({n}, {ell}) | {n_vars} | {} | {verdict} | {} | {} | {} |",
+            c.degrees.join(" "),
+            c.xl_at_4,
+            r.join(" "),
+            t.join(" ")
+        );
+    }
+    println!();
+    match (rise_min, flat_max) {
+        (Some(y), _) => println!("Study: rises at N = {y}"),
+        (None, Some(x)) => println!("Study: flat to N = {x}"),
+        (None, None) => println!("Study: nothing measured"),
+    }
+    println!("Q5: draws where XL refutes at degree 4: {q5}");
+    let (lo, hi) = all_ratios
+        .iter()
+        .fold((f64::MAX, f64::MIN), |(a, b), &x| (a.min(x), b.max(x)));
+    println!(
+        "Q6: log₂ ops ÷ log₂ cols over {} refuting draws: {lo:.2}–{hi:.2} (registered band 2.0–2.4)",
+        all_ratios.len()
+    );
+    println!("Soundness control: {sat_draws} satisfiable draws, {sat_bad} refuted");
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.first().map(String::as_str) {
@@ -434,9 +576,10 @@ fn main() {
         Some("semireg") if args.len() >= 3 => semireg(args[1].parse().expect("m"), &args[2..]),
         Some("shape") if args.len() >= 3 => shape(args[1].parse().expect("m"), &args[2..]),
         Some("closure") => closure(&args[1..]),
+        Some("scale") => scale(&args[1..]),
         _ => {
             eprintln!(
-                "usage: dreg_score score FILES… | compare REF RERUN | semireg M n:ℓ… | shape M n:ℓ:D… | closure FILES…"
+                "usage: dreg_score score FILES… | compare REF RERUN | semireg M n:ℓ… | shape M n:ℓ:D… | closure FILES… | scale FILES…"
             );
             std::process::exit(2);
         }
