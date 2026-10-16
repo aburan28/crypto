@@ -10,7 +10,9 @@ use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::time::Instant;
 
 use crypto_lib::cryptanalysis::jv_cover::{Fld, Fq3, E2, E6};
-use crypto_lib::cryptanalysis::jv_isogeny_walk::{certified_order, curve_order, random_curve, Curve2};
+use crypto_lib::cryptanalysis::jv_isogeny_walk::{
+    certified_order, curve_order, random_curve, Curve2,
+};
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 use rayon::prelude::*;
@@ -266,7 +268,9 @@ fn census(
                         let a2 = f.neg(&f.add(&u, &v));
                         let a4 = f.mul(&u, &v);
                         let cert = certified_order(&f, a2, a4, &nonsquare, &mut rng, 16)
-                            .unwrap_or_else(|| panic!("p={p}: order not isolated for alpha={alpha:?}"));
+                            .unwrap_or_else(|| {
+                                panic!("p={p}: order not isolated for alpha={alpha:?}")
+                            });
                         extra_points += (cert.curve_points + cert.twist_points - 1) as u64;
                         cert.order
                     }

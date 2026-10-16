@@ -88,7 +88,8 @@ fn main() {
                             .expect("order not isolated")
                             .order;
                         let in_t = f.pow(&lam, (q * q + q + 1) as u128) == E6::ONE;
-                        *m.entry((q3 as i128 + 1 - n as i128, 0, 0, true, in_t)).or_default() += 1;
+                        *m.entry((q3 as i128 + 1 - n as i128, 0, 0, true, in_t))
+                            .or_default() += 1;
                     }
                     lam = f.mul(&lam, &h);
                 }
@@ -132,7 +133,8 @@ fn main() {
                 };
                 let in_omega = f.pow(&lam, (q3 - 1) >> e) == E6::ONE;
                 let in_t = f.pow(&lam, (q * q + q + 1) as u128) == E6::ONE;
-                *m.entry((q3 as i128 + 1 - n as i128, a, b, in_omega, in_t)).or_default() += 1;
+                *m.entry((q3 as i128 + 1 - n as i128, a, b, in_omega, in_t))
+                    .or_default() += 1;
             }
             m
         })

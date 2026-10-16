@@ -121,7 +121,11 @@ fn all_annihilators(ec: &EllE, r: &PtE6, klo: u128, khi: u128, cap: usize) -> Op
         if jp.inf {
             // ord(r) = j < m: list its multiples directly.
             let first = klo.div_ceil(j) * j;
-            let count = if first > khi { 0 } else { (khi - first) / j + 1 };
+            let count = if first > khi {
+                0
+            } else {
+                (khi - first) / j + 1
+            };
             if count as usize > cap {
                 return None;
             }
@@ -232,7 +236,13 @@ mod tests {
         for k in 0..q * q * q {
             let x = E6([e2(k % q), e2((k / q) % q), e2(k / (q * q))]);
             let r = ec.rhs(&x);
-            n += if r == E6::ZERO { 1 } else if f.is_square(&r) { 2 } else { 0 };
+            n += if r == E6::ZERO {
+                1
+            } else if f.is_square(&r) {
+                2
+            } else {
+                0
+            };
         }
         n
     }
@@ -241,7 +251,10 @@ mod tests {
     fn certified_order_matches_exhaustive_count_at_p7() {
         let f = Fq3::new(7);
         let mut rng = StdRng::seed_from_u64(16);
-        let nonsquare = (0..).map(|_| f.random(&mut rng)).find(|x| *x != E6::ZERO && !f.is_square(x)).unwrap();
+        let nonsquare = (0..)
+            .map(|_| f.random(&mut rng))
+            .find(|x| *x != E6::ZERO && !f.is_square(x))
+            .unwrap();
         for _ in 0..12 {
             let c = random_curve(&f, &mut rng);
             let u = f.sub(&c.e[1], &c.e[0]);
