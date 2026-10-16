@@ -500,14 +500,20 @@ mod companion_timeout_controls {
     use std::os::unix::fs::PermissionsExt;
     #[test]
     fn companion_shape_retains_deadline_after_positive_acknowledgement() {
-        let root = std::env::temp_dir().join(format!(
-            "companion-timeout-{}-{}",
-            std::process::id(),
-            std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .unwrap()
-                .as_nanos()
-        ));
+        let retained = std::env::var_os("ISOGENY_TIMEOUT_EVIDENCE");
+        let root = retained
+            .as_ref()
+            .map(std::path::PathBuf::from)
+            .unwrap_or_else(|| {
+                std::env::temp_dir().join(format!(
+                    "companion-timeout-{}-{}",
+                    std::process::id(),
+                    std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .unwrap()
+                        .as_nanos()
+                ))
+            });
         fs::create_dir(&root).unwrap();
         let worker = root.join("waiting-worker.sh");
         fs::write(
@@ -529,6 +535,8 @@ mod companion_timeout_controls {
             Some("TIMEOUT")
         );
         assert!(ready.is_file());
-        fs::remove_dir_all(root).unwrap();
+        if retained.is_none() {
+            fs::remove_dir_all(root).unwrap();
+        }
     }
 }

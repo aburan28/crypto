@@ -74,4 +74,3 @@ formal-series and reversal formalization remains open.
 
 Scientific timing, sealed50341 replay, default activation and board
 promotion require later frozen approval and independent review.
-

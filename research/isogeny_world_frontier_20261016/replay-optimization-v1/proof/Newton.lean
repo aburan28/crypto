@@ -40,4 +40,3 @@ theorem residual_square_precision
 #print axioms newton_scalar
 #print axioms residual_square_precision
 end FixedModulusNewton
-

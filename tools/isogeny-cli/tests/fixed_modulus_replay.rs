@@ -257,14 +257,17 @@ fn companion_waits_for_ack_and_marks_done_even_on_parse_failure() {
         process::Stdio,
         time::{Duration, Instant},
     };
-    let root = std::env::temp_dir().join(format!(
-        "fixed-modulus-worker-control-{}-{}",
-        std::process::id(),
-        std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap()
-            .as_nanos()
-    ));
+    let retained = std::env::var_os("ISOGENY_COMPANION_EVIDENCE");
+    let root = retained.as_ref().map(PathBuf::from).unwrap_or_else(|| {
+        std::env::temp_dir().join(format!(
+            "fixed-modulus-worker-control-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ))
+    });
     fs::create_dir(&root).unwrap();
     let bench = env!("CARGO_BIN_EXE_fixed-modulus-bench");
     for bad_done in [false, true] {
@@ -312,6 +315,14 @@ fn companion_waits_for_ack_and_marks_done_even_on_parse_failure() {
             std::thread::sleep(Duration::from_millis(5));
         }
         let output = child.wait_with_output().unwrap();
+        fs::write(dir.join("stdout.json"), &output.stdout).unwrap();
+        fs::write(dir.join("stderr.txt"), &output.stderr).unwrap();
+        save(
+            &dir.join("control.json"),
+            &json!({"schema":"fixed-modulus-worker-control/v1","bad_done_writer":bad_done,
+            "exit":output.status.code(),"pre_ack_parsing_started":false,"ready":ready,
+            "binary_sha256":sha(&fs::read(bench).unwrap()),"scientific_measurement":false}),
+        );
         assert_eq!(output.status.code(), Some(if bad_done { 2 } else { 1 }));
         assert!(ready.with_extension("done").exists());
         if bad_done {
@@ -352,5 +363,7 @@ fn companion_waits_for_ack_and_marks_done_even_on_parse_failure() {
             > 0
     );
     assert!(out.join("resources-ready").is_file() && out.join("resources-ready.done").is_file());
-    fs::remove_dir_all(root).unwrap();
+    if retained.is_none() {
+        fs::remove_dir_all(root).unwrap();
+    }
 }
