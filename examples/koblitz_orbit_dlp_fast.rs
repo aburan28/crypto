@@ -374,6 +374,7 @@ struct RootBloom {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum RootBloomProfile {
+    Compact4,
     Standard,
     Wide3,
     Wide5,
@@ -383,14 +384,16 @@ impl RootBloomProfile {
     fn from_env() -> Self {
         match std::env::var("KIC_ROOT_BLOOM_PROFILE").as_deref() {
             Err(_) | Ok("standard") => Self::Standard,
+            Ok("compact4") => Self::Compact4,
             Ok("wide3") => Self::Wide3,
             Ok("wide5") => Self::Wide5,
-            _ => panic!("KIC_ROOT_BLOOM_PROFILE must be standard, wide3 or wide5"),
+            _ => panic!("KIC_ROOT_BLOOM_PROFILE must be compact4, standard, wide3 or wide5"),
         }
     }
 
     fn bits_per_request(self) -> usize {
         match self {
+            Self::Compact4 => 4,
             Self::Standard => 8,
             Self::Wide3 | Self::Wide5 => 16,
         }
@@ -398,13 +401,14 @@ impl RootBloomProfile {
 
     fn hashes(self) -> usize {
         match self {
-            Self::Standard | Self::Wide3 => 3,
+            Self::Compact4 | Self::Standard | Self::Wide3 => 3,
             Self::Wide5 => 5,
         }
     }
 
     fn name(self) -> &'static str {
         match self {
+            Self::Compact4 => "compact4",
             Self::Standard => "standard",
             Self::Wide3 => "wide3",
             Self::Wide5 => "wide5",
@@ -477,7 +481,10 @@ fn mix_root_bloom(mut value: u64) -> u64 {
 }
 
 fn root_bloom_enabled() -> bool {
-    std::env::var("KIC_ROOT_BLOOM").as_deref() == Ok("1")
+    // Enabled by default (opt out with KIC_ROOT_BLOOM=0): most root-table
+    // probe keys miss, and the Bloom prefilter avoids a random DRAM walk per
+    // miss. Exactness is unchanged; a Bloom pass still probes the table.
+    std::env::var("KIC_ROOT_BLOOM").as_deref() != Ok("0")
 }
 
 /// Open-addressing u64 -> u64 table; keys are < 2^63 so u64::MAX marks empty.
@@ -580,6 +587,7 @@ mod root_bloom_table_tests {
     #[test]
     fn every_bloom_profile_preserves_all_inserted_keys() {
         for profile in [
+            RootBloomProfile::Compact4,
             RootBloomProfile::Standard,
             RootBloomProfile::Wide3,
             RootBloomProfile::Wide5,
@@ -3552,7 +3560,6 @@ mod wide {
         base: &Base128,
         codes: &[u128; 4],
         target: FastPoint128,
-        relation_check_ns: &mut u128,
     ) -> Option<[usize; 4]> {
         let choices: Vec<&Vec<usize>> = codes
             .iter()
@@ -3564,10 +3571,7 @@ mod wide {
                 for &c in choices[2] {
                     let abc = fast.add(ab, base.points[c]);
                     for &d in choices[3] {
-                        let check_started = Instant::now();
-                        let matches = fast.add(abc, base.points[d]) == target;
-                        *relation_check_ns += check_started.elapsed().as_nanos();
-                        if matches {
+                        if fast.add(abc, base.points[d]) == target {
                             return Some([a, b, c, d]);
                         }
                     }
@@ -3638,7 +3642,7 @@ mod wide {
                 for partner in partners {
                     *probes += 1;
                     let (canonical, partner_shift) =
-                        basis.canonical(basis.to_normal.apply(partner));
+                        basis.canonical_selected(basis.to_normal.apply(partner));
                     let Some(value) = index
                         .table
                         .get_with_context(canonical, &index.states, basis)
@@ -3654,9 +3658,12 @@ mod wide {
                         index.shifted[left2][left_shift2],
                         index.shifted[right2][right_shift2],
                     ];
-                    if let Some(point_indices) =
-                        lift128(fast, base, &codes, target, relation_check_ns)
-                    {
+                    // Time the whole lift once per candidate instead of one
+                    // Instant::now() per innermost add.
+                    let lift_started = Instant::now();
+                    let lifted = lift128(fast, base, &codes, target);
+                    *relation_check_ns += lift_started.elapsed().as_nanos();
+                    if let Some(point_indices) = lifted {
                         return Some(Relation128 {
                             point_indices,
                             x_codes: codes,

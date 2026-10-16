@@ -1,0 +1,228 @@
+{
+  "a": 0,
+  "all_stages_charged_same_series": false,
+  "autolab_run_id": "20261016T074400Z-n61-bl-ic-pair",
+  "automorphism_discount": {
+    "A": 122,
+    "description": "signed Frobenius automorphism discount family used by Koblitz rho control",
+    "formula": "sqrt(2*n)",
+    "n": 61
+  },
+  "beat_id": "koblitz.compact_orbit.n61_bl_reference",
+  "bl_archive_pin": {
+    "archive_run_id": "20261016T063525Z-842e1c174e",
+    "bl_jsonl_sha256": "186eac8be8ea5c92404e5f7becbb4dd3002e429f1625164df7c1a353f2d679b6",
+    "points_sha256": "654720ad678fa496dbebad065505ebd5e9d8a18aff3cec99531a52abd8908e85",
+    "remeasured": false
+  },
+  "bl_online_row": {
+    "online_ms": 7.425625,
+    "online_steps": 8838,
+    "recovered_scalar": 57006236684569,
+    "solved": true,
+    "table_bytes": 5711008
+  },
+  "bl_online_rows": 3072,
+  "bl_precompute": {
+    "a": 0,
+    "bytes_per_entry": 16,
+    "classes_N": 1335147819528.0083,
+    "dp_bits": 11,
+    "entries": 356938,
+    "jumps": 2048,
+    "kind": "bl_precompute",
+    "lookahead": 4,
+    "map_seed": "v1",
+    "n": 61,
+    "ns_per_precompute_step": 147.02648205304982,
+    "online_map_seed": "v1",
+    "precompute_abandoned": 0,
+    "precompute_duplicate_dps": 200319,
+    "precompute_lanes": 256,
+    "precompute_ms": 167647.978875,
+    "precompute_steps": 1140257024,
+    "precompute_walks": 557257,
+    "r": 162888033982417,
+    "setup_ms": 105.807417,
+    "table_bytes_budget": 5711008,
+    "walk_cap": 40960,
+    "walk_len_2t": 2048
+  },
+  "bl_records": 3074,
+  "bl_solved_or_verified_rows": 3072,
+  "bl_summary": {
+    "kind": "bl_summary",
+    "peak_rss_bytes": null,
+    "process_ms": 207209.530584
+  },
+  "candidate_id": null,
+  "candidate_manifest_sha256": null,
+  "claim_boundary": "Diagnostic equal-advice BL reference with paired compact-orbit IC online on the same public synthetic points. BL arm reused from archive (not co-measured). Fail-closed for vs_rho ledger promotion; not KS batch rho; not asymptotic sub-rho; PENDING_INDEPENDENT_VALIDATION at most.",
+  "claim_boundary_non_claims": [
+    "not key recovery",
+    "not asymptotic sub-sqrt",
+    "not imported/external points",
+    "not a KS v2 batch rho comparator",
+    "not same_resource_envelope (archived BL + later IC)",
+    "not ledger promotion until schema-complete co-measured pair and independent-host replay"
+  ],
+  "diagnostic_only": true,
+  "executable_or_source_hash": {
+    "bl_source": "97792c1e412b582eb92db19931edbcea63f23eebc01cd156560a5ca9d8b0e337",
+    "git_head": "0c380a6adb7889bea1914fc604b29c02d1ad541a",
+    "ic": "144549499dd0ba09e6c9482c5bd8e491d81c27cd67b36b701f59e3e2edbbbd07",
+    "ic_source": "37ea77b1df82f29810e29e289cc8cb0ff41dbced6e712cc28d2ec1b562213958"
+  },
+  "existing_study": "research/ic_next10_20261014/09-equal-advice/",
+  "fixture_hash": "552c27fe9605a09bc8195fb9e116e7e6898e3f3ecc379680b54bbfc798d39ba5",
+  "host_id": {
+    "cpu_count": 14,
+    "machine": "arm64",
+    "node": "Adams-MacBook-Pro.local",
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "python": "3.9.10"
+  },
+  "ic_K": 256,
+  "ic_cost": 51.089375,
+  "ic_online_interval": "target_query_begin -> recovery_check_end",
+  "ic_online_ms": 51.089375,
+  "ic_online_phase_ms": {
+    "T_target_PDP_ms": 51.021833,
+    "T_target_descent_ms": 0.001,
+    "T_target_query_ms": 4.2e-05,
+    "T_target_recovery_check_ms": 0.0405,
+    "T_target_relation_check_ms": 0.026
+  },
+  "ic_online_row": {
+    "K": 256,
+    "group_verified": true,
+    "online_ms": 51.089375,
+    "probes": 196925,
+    "recovered_scalar": 57006236684569
+  },
+  "ic_online_wall_ms": 51.089375,
+  "ic_replay_certificate_sha256": null,
+  "ic_resource_envelope": null,
+  "ic_scalar_verified": true,
+  "ic_target_hash": "552c27fe9605a09bc8195fb9e116e7e6898e3f3ecc379680b54bbfc798d39ba5",
+  "ic_verified": true,
+  "independent_replay_pointer": null,
+  "independent_validation": false,
+  "missing_vs_rho_fields_note": "candidate_id / candidate_manifest_sha256 (IC1 identity manifests not minted); workload_id / workload_manifest_sha256; run_id (IC1W\u2026R\u2026 form); rho_policy (BL equal-advice is not KS batch rho; policy object not minted); same_resource_envelope (BL reused from archive; not co-measured); independent_validation / replay certificates; ic_resource_envelope / rho_resource_envelope matched pair; rho_online_phase_ms declared KS phases (BL emits one online interval only); timing_class single_target_online primary (beat goal is single_target_online_wall); record_class from vs_rho enum",
+  "n": 61,
+  "n_or_bits": 61,
+  "online_interval": {
+    "bl_note": "BL producer records online_ms without start/stop event markers; archived arm reused, not co-measured",
+    "ic_start_event": "target_query_begin",
+    "ic_start_ns": 28714444583,
+    "ic_stop_event": "recovery_check_end",
+    "ic_stop_ns": 28765533958
+  },
+  "online_speedup": 0.14534577884344838,
+  "operation_accounting": {
+    "comparison_status": "native_counters_only",
+    "ic_online_operations": 196925,
+    "ic_online_operations_basis": "probes of the one online target",
+    "operation_units": {
+      "ic": "root-index probes",
+      "rho": "BL online walk steps"
+    },
+    "ops_speedup_online": null,
+    "rho_online_operations": 8838,
+    "rho_online_operations_basis": "measured BL online_steps at primary table_bytes",
+    "rho_per_ic_native_counter": 0.04488003046845246,
+    "schema_version": "1.0",
+    "unit_assumption": "IC root-index probes and BL online walk steps are distinct uncalibrated counters"
+  },
+  "paired_ic_target_count": 1024,
+  "paired_target": {
+    "ic_fixture_scalar": 57006236684569,
+    "ic_public_q": [
+      1476716541766059828,
+      2136287485234614203
+    ],
+    "rho_fixture_scalar": 57006236684569,
+    "rho_public_q": [
+      1476716541766059828,
+      2136287485234614203
+    ],
+    "same_fixture_scalar": true,
+    "same_public_point": true,
+    "table_bytes": 5711008,
+    "target_index": 0
+  },
+  "panel_pairing": {
+    "bl_online_ms": {
+      "count": 1024,
+      "max": 17.829583,
+      "mean": 3.3661805654296875,
+      "median": 2.7796875,
+      "min": 0.178708
+    },
+    "ic_online_ms": {
+      "count": 1024,
+      "max": 3138.718459,
+      "mean": 111.44883299902344,
+      "median": 62.875666499999994,
+      "min": 0.076334
+    },
+    "online_speedup_bl_over_ic": {
+      "count": 1024,
+      "max": 24.19129783043766,
+      "mean": 0.24043302785839143,
+      "median": 0.044389535969357394,
+      "min": 0.0011552488722945317
+    },
+    "paired_targets": 1024,
+    "verified_pairs": 1024
+  },
+  "panel_target_count": 1024,
+  "record_class": null,
+  "reference_arm": "bernstein_lange_equal_advice",
+  "regime": "koblitz",
+  "remaining_schema_gaps": [
+    "candidate_id / candidate_manifest_sha256 (IC1 identity manifests not minted)",
+    "workload_id / workload_manifest_sha256",
+    "run_id (IC1W\u2026R\u2026 form)",
+    "rho_policy (BL equal-advice is not KS batch rho; policy object not minted)",
+    "same_resource_envelope (BL reused from archive; not co-measured)",
+    "independent_validation / replay certificates",
+    "ic_resource_envelope / rho_resource_envelope matched pair",
+    "rho_online_phase_ms declared KS phases (BL emits one online interval only)",
+    "timing_class single_target_online primary (beat goal is single_target_online_wall)",
+    "record_class from vs_rho enum"
+  ],
+  "resource_caps": {
+    "common_cap_bytes": null,
+    "rayon_threads": 1
+  },
+  "rho_cost": 7.425625,
+  "rho_online_interval": "BL online_ms (walk through recovery); no exclusive sub-phase markers",
+  "rho_online_ms": 7.425625,
+  "rho_online_phase_ms": {
+    "bl_online": 7.425625
+  },
+  "rho_online_wall_ms": 7.425625,
+  "rho_policy": null,
+  "rho_replay_certificate_sha256": null,
+  "rho_resource_envelope": null,
+  "rho_scalar_verified": true,
+  "rho_target_hash": "552c27fe9605a09bc8195fb9e116e7e6898e3f3ecc379680b54bbfc798d39ba5",
+  "rho_verified": true,
+  "run_id": null,
+  "same_resource_envelope": null,
+  "schema_version": 2,
+  "seeds": {
+    "archive_run_id": "20261016T063525Z-842e1c174e",
+    "ic_rank_seed": 7,
+    "target_label": "autolab-n61-bl-ref-eval-v1"
+  },
+  "stage": "vs_rho",
+  "status": "SCHEMA_INCOMPLETE",
+  "target_count": 1,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "timing_class": "single_target_online_wall",
+  "verdict": "DIAGNOSTIC_PAIRED_IC_SLICE_SCHEMA_INCOMPLETE",
+  "workload_id": null,
+  "workload_manifest_sha256": null
+}

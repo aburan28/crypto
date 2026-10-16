@@ -230,6 +230,17 @@ pub fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) ->
     let mut memory_limited = false;
     let mut monitor_unavailable = false;
     let mut peak_rss = 0;
+    // Challenge replay waits for this acknowledgement before any parsing or
+    // algebra, so a short child cannot exit before the first usable RSS sample.
+    let resource_ready = (args.first().is_some_and(|a| a == "challenge")
+        && args.get(1).is_some_and(|a| a == "__judge"))
+    .then(|| {
+        args.windows(2)
+            .find(|w| w[0] == "--rss-ready")
+            .map(|w| Path::new(&w[1]))
+    })
+    .flatten();
+    let mut resources_released = false;
     let mut unavailable_since = None;
     let mut unavailable_samples = 0;
     let status = loop {
@@ -241,7 +252,13 @@ pub fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) ->
             child.kill().unwrap();
             break child.wait().unwrap();
         }
-        match resident_bytes(child.id()) {
+        if resource_ready.is_some_and(|ready| ready.with_extension("done").is_file()) {
+            thread::sleep(Duration::from_millis(25));
+            continue;
+        }
+        match resident_bytes(child.id())
+            .filter(|rss| resource_ready.is_none() || resources_released || *rss > 0)
+        {
             Some(rss) => {
                 unavailable_since = None;
                 peak_rss = peak_rss.max(rss);
@@ -249,6 +266,14 @@ pub fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) ->
                     memory_limited = true;
                     child.kill().unwrap();
                     break child.wait().unwrap();
+                }
+                if let Some(ready) = resource_ready.filter(|_| !resources_released) {
+                    fs::OpenOptions::new()
+                        .write(true)
+                        .create_new(true)
+                        .open(ready)
+                        .unwrap();
+                    resources_released = true;
                 }
             }
             None => {
