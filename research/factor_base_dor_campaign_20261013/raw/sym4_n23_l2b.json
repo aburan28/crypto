@@ -1,0 +1,330 @@
+{
+  "schema": "factor-base-dor-v1",
+  "curve": "Koblitz y^2+xy=x^3+1 over F_2^23",
+  "field_degree": 23,
+  "dim": 2,
+  "summands": 3,
+  "encoding": "symmetric_s4",
+  "dmax": 5,
+  "targets": 256,
+  "observable": "D* = solving/refutation degree on non-decomposable targets",
+  "results": [
+    {
+      "structure": "geometric",
+      "dim": 2,
+      "summands": 3,
+      "encoding": "symmetric_s4",
+      "space_dims": [
+        2,
+        3,
+        4
+      ],
+      "nvars": 9,
+      "chain_nvars_for_comparison": 29,
+      "equation_degree": 2,
+      "point_decomposable_fraction": 0.00390625,
+      "decomposable_fraction": 0.00390625,
+      "boolean_unsat_fraction": 0.99609375,
+      "spurious_satisfiable": 0,
+      "unsat_targets": 4,
+      "censored_above_dmax": 0,
+      "d_star_min": 3,
+      "d_star_max": 3,
+      "d_star_mean": 3.0,
+      "targets": [
+        {
+          "target": "0x48dbad",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 23,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              23,
+              46
+            ],
+            "3": [
+              230,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x6c78b6",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 23,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              23,
+              46
+            ],
+            "3": [
+              230,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x66b0a0",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 23,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              23,
+              46
+            ],
+            "3": [
+              230,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x61c35e",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 23,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              23,
+              46
+            ],
+            "3": [
+              230,
+              130
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "structure": "standard",
+      "dim": 2,
+      "summands": 3,
+      "encoding": "symmetric_s4",
+      "space_dims": [
+        2,
+        3,
+        4
+      ],
+      "nvars": 9,
+      "chain_nvars_for_comparison": 29,
+      "equation_degree": 2,
+      "point_decomposable_fraction": 0.0,
+      "decomposable_fraction": 0.0,
+      "boolean_unsat_fraction": 1.0,
+      "spurious_satisfiable": 0,
+      "unsat_targets": 4,
+      "censored_above_dmax": 0,
+      "d_star_min": 3,
+      "d_star_max": 3,
+      "d_star_mean": 3.0,
+      "targets": [
+        {
+          "target": "0x1132d9",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 23,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              23,
+              46
+            ],
+            "3": [
+              230,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x48dbad",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 23,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              23,
+              46
+            ],
+            "3": [
+              230,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x6c78b6",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 23,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              23,
+              46
+            ],
+            "3": [
+              230,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x66b0a0",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 23,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              23,
+              46
+            ],
+            "3": [
+              230,
+              130
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "structure": "random",
+      "dim": 2,
+      "summands": 3,
+      "encoding": "symmetric_s4",
+      "space_dims": [
+        2,
+        3,
+        4
+      ],
+      "nvars": 9,
+      "chain_nvars_for_comparison": 29,
+      "equation_degree": 2,
+      "point_decomposable_fraction": 0.0078125,
+      "decomposable_fraction": 0.0078125,
+      "boolean_unsat_fraction": 0.9921875,
+      "spurious_satisfiable": 0,
+      "unsat_targets": 4,
+      "censored_above_dmax": 0,
+      "d_star_min": 3,
+      "d_star_max": 3,
+      "d_star_mean": 3.0,
+      "targets": [
+        {
+          "target": "0x6c78b6",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 23,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              23,
+              46
+            ],
+            "3": [
+              230,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x66b0a0",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 23,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              23,
+              46
+            ],
+            "3": [
+              230,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x61c35e",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 23,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              23,
+              46
+            ],
+            "3": [
+              230,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x813e3",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 23,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              23,
+              46
+            ],
+            "3": [
+              230,
+              130
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "ranking_by_mean_d_star": [
+    {
+      "structure": "geometric",
+      "d_star_mean": 3.0,
+      "d_star_min": 3,
+      "d_star_max": 3,
+      "decomposable_fraction": 0.00390625,
+      "unsat_targets": 4
+    },
+    {
+      "structure": "standard",
+      "d_star_mean": 3.0,
+      "d_star_min": 3,
+      "d_star_max": 3,
+      "decomposable_fraction": 0.0,
+      "unsat_targets": 4
+    },
+    {
+      "structure": "random",
+      "d_star_mean": 3.0,
+      "d_star_min": 3,
+      "d_star_max": 3,
+      "decomposable_fraction": 0.0078125,
+      "unsat_targets": 4
+    }
+  ]
+}

@@ -210,6 +210,22 @@ segfault, preserved in the logs. Drastic-speedup recipe at 131: an m ≥ 3
 oracle with small l (D* ≤ 5) plus orbit-amplified yield; the m = 83 gate
 is the unmet validation step.
 
+**Round 4 (yield is governed by the e-space, not the field):**
+high-precision yield cells (256 targets at l = 2 across n = 23..41;
+128 at l = 3 across n = 29, 37; n = 37 has 131's full-length order
+ord₂(37) = 36). The point-decomposable fraction is *constant in n*:
+random 0.00781 and geometric 0.00391 at l = 2 at every n; random 0.0234
+and geometric 0.0078 at l = 3 at both n = 29 and 37 — the amplification
+A = pfrac·2ⁿ/2^(3l) is exactly 2^(n−13) (random l = 2) / 2^(n−14)
+(geometric l = 2), i.e. the counting is against the symmetric e-space
+(~2¹³–2¹⁴), not 2ⁿ. At n = 37, l = 3 the geometric base refutes at
+D* = 3, *below* the l+1 diagonal, with yield unchanged. Derived
+consequence (F15): per-relation oracle cost — systems per relation ×
+Macaulay cost per system — is independent of the field degree; the
+relation harvest scales with the factor-base size and its Frobenius-orbit
+reduction, not with the subgroup size. Remaining obligations: the
+orbit-reduced linear algebra and the m = 83 gate.
+
 ## `sm2.sage` — SM2 (sm2p256v1, GB/T 32918)
 
 Mirrors `../src/ecc/sm2.rs` and `../src/hash/sm3.rs`. Run:

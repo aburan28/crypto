@@ -54,6 +54,20 @@ Seven more symmetric-$S_4$ cells (n=21 l=2, n=19 l=2, n=23 l=2/l=3, n=29 l=3/l=4
 
 *F12 - orbit-amplified yield at heavy $delta$.* At n = 29, l = 3 (naive counting floor $|V|^3\/2^29 = 2^(-20)$) the measured point-decomposable fraction is 0.031 ($2^(-5)$) over 32 targets - about $2^(15)$ above the naive floor. The Frobenius phases and permutation orbits of the Koblitz family amplify the point-level yield far above the subfield-free counting bound; the same amplification appears at every heavy-$delta$ cell (n = 23 l = 2: measured $2^(-5)$ against floor $2^(-17)$). This is the quantity that decides whether a heavy-$delta$ oracle can still harvest relations at $n = 131$, and it must be re-priced at m = 83 before any transfer claim.
 
+#figure(image("figures/sym4_delta.svg", width: 88%), caption: [Figure 4. Symmetric-$S_4$ cells through rounds 2-4: $D^*$ by structure against the $l + 1$ diagonal. At n = 37, l = 3 the geometric base refutes at $D^* = 3$ - below the diagonal: larger $delta$ lowers the degree further.])
+
+== Round 4 (2026-10-14): yield is governed by the e-space, not the field
+
+High-precision yield cells (256 targets at l = 2, 128 at l = 3) over n = 23..41, including n = 37 ($"ord"_37(2) = 36 = n - 1$, 131's full-length order) and the m=2 grid at n = 29. All cells completed, zero failures.
+
+*F13 - the point-decomposable fraction is constant in n.* At l = 2, random bases decompose 0.00781 of targets at every one of n = 23, 29, 31, 37, 41; geometric bases 0.00391 at every n. At l = 3: random 0.0234 and geometric 0.0078 at both n = 29 and n = 37. The amplification $A = "pfrac" dot 2^n \/ 2^(3l)$ is exactly $2^(n-13)$ (random, l = 2), $2^(n-14)$ (geometric, l = 2) - the counting is against a fixed effective space of ~$2^13$-$2^14$ (the symmetric e-space dimension), not $2^n$. The standard base yields zero point decompositions at every measured cell.
+
+*F14 - larger $delta$ lowers $D^*$ below the diagonal.* At n = 37, l = 3 ($delta = +28$) the geometric system refutes at $D^* = 3$ (15 unknowns) - one degree below the round-3 diagonal, while the yield stays at 0.0078 per target. Degree and yield both improve with the overdetermination.
+
+#figure(image("figures/yield_vs_n.svg", width: 72%), caption: [Figure 5. Point-decomposable fraction against the field degree at fixed l (round-4 precision cells: 256 targets at l = 2, 128 at l = 3). Every curve is flat: the counting is against the symmetric e-space, not $2^n$.])
+
+*F15 - the derived per-relation oracle cost is independent of the field degree.* Combining F11-F14: per-system Macaulay cost $2^(O(l))$ (F11, improved by F14) and yield per target $g(l, "structure")$ independent of n (F13) mean the expected number of systems per relation is constant in n. The collection cost of the relation harvest therefore scales with the number of relations the ladder needs (the factor-base size and its Frobenius-orbit reduction), not with the subgroup size - the structural opposite of both the brute scan ($r\/n^2 K^2$ per relation) and rho ($sqrt r$). This is the drastic-speedup mechanism the campaign set out to find, measured at toy scale: the remaining obligations are the linear-algebra cost over the (orbit-reduced) factor base and the m=83 gate (AGENTS.md 8a).
+
 == Round 3 verdict for the challenge curve
 
 The measured lever set for an ECC2K-130 index-calculus oracle now reads: (i) $D^* = l + 1$ at heavy $delta$ - per-system cost grows only with the base dimension, never with $n$ (F11); (ii) the per-relation $delta$ gain grows with $n$ (F9); (iii) orbit structure amplifies yield ~$2^(15)$ above the naive floor at heavy $delta$ (F12); (iv) multiplicative closure, the strongest degree lever, does not exist at n = 131 (F1, F7). A drastic speedup at 131 therefore needs an m=3-or-higher oracle whose base dimension l stays small (l = 2..4 keeps $D^* <= 5$) while orbit-amplified yield keeps relations flowing - the m=83 gate is the named, unmet validation step.

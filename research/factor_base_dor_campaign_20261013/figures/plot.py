@@ -118,5 +118,71 @@ ax.legend(frameon=False, fontsize=8)
 ax.set_title("At heavy delta D* = l + 1 independent of n (9 <= n <= 29, ord_29(2) = n-1)",
              fontsize=9, color=C["ink"])
 save(fig, "sym4_delta")
+# ── Fig 5: yield per target vs field degree at fixed l ─────────────────
+fig, ax = plt.subplots(figsize=(5.4, 3.0))
+series = [("l=2 random", "sym4_%s_l2" % "x", None)]
+import json as _j
+D2 = _j.load(open(os.path.join(here, "data.json")))["symmetric_s4"]
+pts_r2, pts_g2, pts_r3, pts_g3 = [], [], [], []
+Ns = {"n23": 23, "n29": 29, "n31": 31, "n37": 37, "n41": 41}
+for key, cells in D2.items():
+    if not (key.startswith("sym4_n") and key.endswith(("l2", "l2b", "l3", "l3b"))): continue
+    tag = key[5:].split("_")[0]
+    if tag not in Ns: continue
+    n = Ns[tag]
+    l = 2 if key.endswith(("l2", "l2b")) else 3
+    for r in cells:
+        if r.get("point_decomposable_fraction") in (None, 0.0): continue
+        pt = (n, r["point_decomposable_fraction"])
+        if r["structure"] == "random":
+            (pts_r2 if l == 2 else pts_r3).append(pt)
+        elif r["structure"] == "geometric":
+            (pts_g2 if l == 2 else pts_g3).append(pt)
+for pts, col, mk, lab in ((pts_r2, C["ink2"], "s", "l=2 random"), (pts_g2, C["blue"], "o", "l=2 geometric"),
+                          (pts_r3, C["orange"], "v", "l=3 random"), (pts_g3, C["aqua"], "^", "l=3 geometric")):
+    pts = sorted(set(pts))
+    if pts:
+        xs, ys = zip(*pts)
+        ax.plot(xs, ys, marker=mk, color=col, label=lab, ms=5)
+style(ax)
+ax.set_xlabel("field degree n")
+ax.set_ylabel("point-decomposable fraction")
+ax.set_yscale("log")
+ax.legend(frameon=False, fontsize=8)
+ax.set_title("Yield per target is constant in n (128-256 targets/cell): the counting\nis against the e-space, not the field", fontsize=9, color=C["ink"])
+save(fig, "yield_vs_n")
 print("figures written")
+# ── Fig 5: yield per target vs field degree at fixed l ─────────────────
+fig, ax = plt.subplots(figsize=(5.4, 3.0))
+series = [("l=2 random", "sym4_%s_l2" % "x", None)]
+import json as _j
+D2 = _j.load(open(os.path.join(here, "data.json")))["symmetric_s4"]
+pts_r2, pts_g2, pts_r3, pts_g3 = [], [], [], []
+Ns = {"n23": 23, "n29": 29, "n31": 31, "n37": 37, "n41": 41}
+for key, cells in D2.items():
+    if not (key.startswith("sym4_n") and key.endswith(("l2", "l2b", "l3", "l3b"))): continue
+    tag = key[5:].split("_")[0]
+    if tag not in Ns: continue
+    n = Ns[tag]
+    l = 2 if key.endswith(("l2", "l2b")) else 3
+    for r in cells:
+        if r.get("point_decomposable_fraction") in (None, 0.0): continue
+        pt = (n, r["point_decomposable_fraction"])
+        if r["structure"] == "random":
+            (pts_r2 if l == 2 else pts_r3).append(pt)
+        elif r["structure"] == "geometric":
+            (pts_g2 if l == 2 else pts_g3).append(pt)
+for pts, col, mk, lab in ((pts_r2, C["ink2"], "s", "l=2 random"), (pts_g2, C["blue"], "o", "l=2 geometric"),
+                          (pts_r3, C["orange"], "v", "l=3 random"), (pts_g3, C["aqua"], "^", "l=3 geometric")):
+    pts = sorted(set(pts))
+    if pts:
+        xs, ys = zip(*pts)
+        ax.plot(xs, ys, marker=mk, color=col, label=lab, ms=5)
+style(ax)
+ax.set_xlabel("field degree n")
+ax.set_ylabel("point-decomposable fraction")
+ax.set_yscale("log")
+ax.legend(frameon=False, fontsize=8)
+ax.set_title("Yield per target is constant in n (128-256 targets/cell): the counting\nis against the e-space, not the field", fontsize=9, color=C["ink"])
+save(fig, "yield_vs_n")
 print("figures written")

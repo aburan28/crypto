@@ -1,0 +1,489 @@
+{
+  "schema": "factor-base-dor-v1",
+  "curve": "Koblitz y^2+xy=x^3+1 over F_2^29",
+  "field_degree": 29,
+  "dim": 5,
+  "summands": 2,
+  "encoding": "chained_s3",
+  "dmax": 6,
+  "targets": 16,
+  "observable": "D* = solving/refutation degree on non-decomposable targets",
+  "results": [
+    {
+      "structure": "standard",
+      "dim": 5,
+      "basis": [
+        "0x1",
+        "0x2",
+        "0x4",
+        "0x8",
+        "0x10"
+      ],
+      "basis2": null,
+      "factor_base_points": 38,
+      "decomposable_fraction": 0.0,
+      "unsat_targets": 16,
+      "censored_above_dmax": 0,
+      "d_star_min": 2,
+      "d_star_max": 2,
+      "d_star_mean": 2.0,
+      "targets": [
+        {
+          "target": "0x44cb63f",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 15
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x1236eb0a",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 15
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x1b1e2d5c",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 15
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x19ac27c7",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 15
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x1870d779",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 15
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x204f89b",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 15
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x8298688",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 15
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x3c5fd72",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 15
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0xfda9ab0",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 15
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x1859cde9",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 15
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0xe623b15",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 15
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0xf1ca20d",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 15
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x14d9d984",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 15
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0xc25ced3",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 15
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x193d38c3",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 15
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x6b7f326",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 15
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "structure": "random",
+      "dim": 5,
+      "basis": [
+        "0x44cb63f",
+        "0x1236eb0a",
+        "0x1b1e2d5c",
+        "0x1de091f8",
+        "0x1514a710"
+      ],
+      "basis2": null,
+      "factor_base_points": 30,
+      "decomposable_fraction": 0.0,
+      "unsat_targets": 16,
+      "censored_above_dmax": 0,
+      "d_star_min": 2,
+      "d_star_max": 2,
+      "d_star_mean": 2.0,
+      "targets": [
+        {
+          "target": "0x44cb63f",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 21
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x1236eb0a",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 21
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x1b1e2d5c",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 21
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x19ac27c7",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 21
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x1870d779",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 21
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x204f89b",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 21
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x8298688",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 21
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x3c5fd72",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 21
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0xfda9ab0",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 21
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x1859cde9",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 21
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0xe623b15",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 21
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0xf1ca20d",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 21
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x14d9d984",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 21
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0xc25ced3",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 21
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x193d38c3",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 21
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        },
+        {
+          "target": "0x6b7f326",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 21
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              56
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "ranking_by_mean_d_star": [
+    {
+      "structure": "standard",
+      "d_star_mean": 2.0,
+      "d_star_min": 2,
+      "d_star_max": 2,
+      "decomposable_fraction": 0.0,
+      "unsat_targets": 16
+    },
+    {
+      "structure": "random",
+      "d_star_mean": 2.0,
+      "d_star_min": 2,
+      "d_star_max": 2,
+      "decomposable_fraction": 0.0,
+      "unsat_targets": 16
+    }
+  ]
+}

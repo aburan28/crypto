@@ -1,0 +1,305 @@
+{
+  "schema": "factor-base-dor-v1",
+  "curve": "Koblitz y^2+xy=x^3+1 over F_2^31",
+  "field_degree": 31,
+  "dim": 2,
+  "summands": 3,
+  "encoding": "symmetric_s4",
+  "dmax": 5,
+  "targets": 256,
+  "observable": "D* = solving/refutation degree on non-decomposable targets",
+  "results": [
+    {
+      "structure": "geometric",
+      "dim": 2,
+      "summands": 3,
+      "encoding": "symmetric_s4",
+      "space_dims": [
+        2,
+        3,
+        4
+      ],
+      "nvars": 9,
+      "chain_nvars_for_comparison": 37,
+      "equation_degree": 2,
+      "point_decomposable_fraction": 0.00390625,
+      "decomposable_fraction": 0.00390625,
+      "boolean_unsat_fraction": 0.99609375,
+      "spurious_satisfiable": 0,
+      "unsat_targets": 4,
+      "censored_above_dmax": 0,
+      "d_star_min": 2,
+      "d_star_max": 3,
+      "d_star_mean": 2.75,
+      "targets": [
+        {
+          "target": "0x48dbac26",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 31
+          },
+          "macaulay_shape": {
+            "2": [
+              31,
+              46
+            ]
+          }
+        },
+        {
+          "target": "0x6c78b570",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 30,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              31,
+              46
+            ],
+            "3": [
+              310,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x66b09f19",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 30,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              31,
+              46
+            ],
+            "3": [
+              310,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x61c35de3",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 31,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              31,
+              46
+            ],
+            "3": [
+              310,
+              130
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "structure": "standard",
+      "dim": 2,
+      "summands": 3,
+      "encoding": "symmetric_s4",
+      "space_dims": [
+        2,
+        3,
+        4
+      ],
+      "nvars": 9,
+      "chain_nvars_for_comparison": 37,
+      "equation_degree": 2,
+      "point_decomposable_fraction": 0.0,
+      "decomposable_fraction": 0.0,
+      "boolean_unsat_fraction": 1.0,
+      "spurious_satisfiable": 0,
+      "unsat_targets": 4,
+      "censored_above_dmax": 0,
+      "d_star_min": 2,
+      "d_star_max": 3,
+      "d_star_mean": 2.25,
+      "targets": [
+        {
+          "target": "0x1132d8fb",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 29
+          },
+          "macaulay_shape": {
+            "2": [
+              31,
+              46
+            ]
+          }
+        },
+        {
+          "target": "0x48dbac26",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 29
+          },
+          "macaulay_shape": {
+            "2": [
+              31,
+              46
+            ]
+          }
+        },
+        {
+          "target": "0x6c78b570",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 28,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              31,
+              46
+            ],
+            "3": [
+              310,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x66b09f19",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 29
+          },
+          "macaulay_shape": {
+            "2": [
+              31,
+              46
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "structure": "random",
+      "dim": 2,
+      "summands": 3,
+      "encoding": "symmetric_s4",
+      "space_dims": [
+        2,
+        3,
+        4
+      ],
+      "nvars": 9,
+      "chain_nvars_for_comparison": 37,
+      "equation_degree": 2,
+      "point_decomposable_fraction": 0.0078125,
+      "decomposable_fraction": 0.0078125,
+      "boolean_unsat_fraction": 0.9921875,
+      "spurious_satisfiable": 0,
+      "unsat_targets": 4,
+      "censored_above_dmax": 0,
+      "d_star_min": 2,
+      "d_star_max": 3,
+      "d_star_mean": 2.75,
+      "targets": [
+        {
+          "target": "0x6c78b570",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 30,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              31,
+              46
+            ],
+            "3": [
+              310,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x66b09f19",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 31,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              31,
+              46
+            ],
+            "3": [
+              310,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x61c35de3",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 31
+          },
+          "macaulay_shape": {
+            "2": [
+              31,
+              46
+            ]
+          }
+        },
+        {
+          "target": "0x813e269",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 31,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              31,
+              46
+            ],
+            "3": [
+              310,
+              130
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "ranking_by_mean_d_star": [
+    {
+      "structure": "standard",
+      "d_star_mean": 2.25,
+      "d_star_min": 2,
+      "d_star_max": 3,
+      "decomposable_fraction": 0.0,
+      "unsat_targets": 4
+    },
+    {
+      "structure": "geometric",
+      "d_star_mean": 2.75,
+      "d_star_min": 2,
+      "d_star_max": 3,
+      "decomposable_fraction": 0.00390625,
+      "unsat_targets": 4
+    },
+    {
+      "structure": "random",
+      "d_star_mean": 2.75,
+      "d_star_min": 2,
+      "d_star_max": 3,
+      "decomposable_fraction": 0.0078125,
+      "unsat_targets": 4
+    }
+  ]
+}
