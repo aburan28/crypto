@@ -494,6 +494,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: staging
+      - name: Test binary asset publication
+        run: bash .github/scripts/test_publish_release_assets.sh
       - name: Collect the archives and checksum them
         id: assets
         run: |
@@ -549,7 +551,15 @@ jobs:
         with:
           token: ${{ github.token }}
           prefix: v
-          version: ${{ needs.meta.outputs.release_version }}
-          draft: false
+          version: ${{ needs.meta.outputs.tag }}
+          draft: true
           release-notes: /tmp/notes.md
-          files: ${{ steps.assets.outputs.files }}
+        # The pinned action decodes files as UTF-8. Keep binary transfer in gh.
+        # Publish the draft only after downloaded assets match our manifest.
+      - name: Upload archives as bytes and verify published checksums
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          bash .github/scripts/publish_release_assets.sh
+          "$GITHUB_REPOSITORY" "${{ needs.meta.outputs.tag }}"
+          dist "$RUNNER_TEMP/published-release-assets"
