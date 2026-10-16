@@ -1,0 +1,20 @@
+{
+  "after_ping_immediate": "HTTP/1.1 503 Service Unavailable\r\nContent-Type: text/plain; charset=utf-8\r\nX-Content-Type-Options: nosniff\r\nDate: Thu, 15 Oct 2026 03:23:03 GMT\r\nContent-Length: 36\r\nConnection: close\r\n\r\nDocker Desktop is unable to start\n\n\n",
+  "after_ping_polled": "HTTP/1.1 503 Service Unavailable\r\nContent-Type: text/plain; charset=utf-8\r\nX-Content-Type-Options: nosniff\r\nDate: Thu, 15 Oct 2026 03:24:03 GMT\r\nContent-Length: 36\r\nConnection: close\r\n\r\nDocker Desktop is unable to start\n\n\n",
+  "before_ping": "HTTP/1.1 503 Service Unavailable\r\nContent-Type: text/plain; charset=utf-8\r\nX-Content-Type-Options: nosniff\r\nDate: Thu, 15 Oct 2026 03:23:02 GMT\r\nContent-Length: 36\r\nConnection: close\r\n\r\nDocker Desktop is unable to start\n\n\n",
+  "command": [
+    "docker",
+    "desktop",
+    "start",
+    "--timeout",
+    "180"
+  ],
+  "command_elapsed_seconds_L0": 0.6080099589889869,
+  "ended_utc": "2026-10-15T03:24:03.321502+00:00",
+  "exit_code": 0,
+  "schema": "n83.docker-graceful-start/v1",
+  "started_utc": "2026-10-15T03:23:02.639768+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "dfbca9f23d9ab195576075689e08e9de08374f6a2aea2913472bb4b4a1129ec8",
+  "timed_out": false
+}

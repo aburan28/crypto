@@ -45,6 +45,7 @@ companion as much as a working library.
 | `sage/`, `scripts/`, `secp256k1_cm_audit/`, `cd_attack/`, `quantum_circuit_secp256k1/` | Sage/PARI/Python companions to specific notes |
 | `papers/` | manuscript sources, one directory per paper (`papers/README.md` is the index) |
 | [`problems/`](problems/README.md) | named research and audit blockers, supporting evidence, and concrete conditions for moving past them |
+| [`backlog/`](backlog/README.md) | experiments we would like to run: one validated card each (`backlog validate`), leased and run through cairn, results landed in `research/` by PR |
 | `AGENTS.md` | the reporting convention (boundary, table, ratio) every research thread follows |
 
 ## Quick tour

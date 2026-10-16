@@ -1,0 +1,21 @@
+{
+  "authorization_sha256": null,
+  "conflict_cap": null,
+  "conservative_new_charge_seconds": 0,
+  "launcher_sha256": "ec80c194768078889a1b688f8a44a778075bae7455ab7ad4717efe9ec6667a8a",
+  "logical_command": [
+    "pinned_worker",
+    "self-test-markers"
+  ],
+  "mode": "self_test",
+  "pins": {
+    "checker": "44d5eefb615ce4002840624094a1b7945a889c0ef8a9d1d5c5c5cf26c8c8fd0f",
+    "domains": "63accc5b9dc9de6327c5b07e93b3e62717f8376a96c3f91f7bb70b77095f23bb",
+    "source": "f13751653b2470ade38279945b999ba825e10c39cae905682992d4f49a01ff33",
+    "worker": "5c87e73d6e786588178e4c04ea447b2d115b2933c2cd77b675d7ee4c97c8c92c"
+  },
+  "prior_charged_seconds": 22200,
+  "schema": "n83.fixed-witness-stage-launch/v1",
+  "scope": "known_answer_encoding_control_only",
+  "wall_cap_seconds": 5
+}

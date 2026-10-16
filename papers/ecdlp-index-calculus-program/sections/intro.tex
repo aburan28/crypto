@@ -1,0 +1,113 @@
+\section{Introduction}\label{sec:intro}
+
+For a prime-order subgroup $\langle G\rangle$ of size $r$ on an elliptic
+curve $E/\FF_q$, the best generic algorithm for the discrete-logarithm
+problem is Pollard rho~\cite{pollard1978,vanoorschot1999}, with expected
+cost $\sqrt{\pi r/(2A)}$ group operations when $A$ automorphisms (negation,
+and on a Koblitz curve the Frobenius) can be folded into the
+walk~\cite{wiener1998,gallant2000}. Index calculus, the method that breaks
+finite-field discrete logarithms in subexponential time, was brought to
+elliptic curves by Semaev's summation polynomials~\cite{semaev2004} and by
+Gaudry's and Diem's analyses over extension
+fields~\cite{gaudry2009,diem2011}. Its open question has always been
+\emph{where the crossover is}: on which curves, at which sizes and under
+which accounting does it cost less than rho?
+
+This paper is a survey of where that question stands, in three parts.
+First, the literature (\S\ref{sec:theory}): what is proved, what rests on
+heuristics such as the first-fall-degree assumption, and what the
+experimental record says about those heuristics. Second, a measured
+frontier (\S\ref{sec:frontier}): every method family---rho variants,
+baby-step giant-step, the kangaroo and several index-calculus
+pipelines---run on the same one-target workloads in one counted unit, on
+fixed curve ladders, with the native work that each method leaves unpriced
+priced alike on every arm across a band of weights, and a ranking reported
+only where it holds across that band. Third, open problems, each stated as
+the measurement or proof that would settle it (\S\ref{sec:open}).
+
+The measurements come from one open repository and a programme of work
+there between July and October 2026 (\S\ref{sec:chronology}): about
+6{,}900 commits and 450 dated study directories, a boundary ledger
+(\art{docs/ic/boundary_targets.json}), a native harness
+(\art{src/cryptanalysis/ecbench/}), and the engineering results of
+\S\S\ref{sec:rootfinding}--\ref{sec:transfer}. It is easy, in a body of
+work this size, to improve a headline number by two orders of magnitude
+and establish nothing; this paper is organised to prevent that. Every
+result is stated with the boundary on which it was measured (oracle stage,
+complete solve, cold one-target cost, online cost after retained set-up),
+the unit, the sample, the interval, and the committed artefact that holds
+the records.
+
+\paragraph{The routes measured.} The engineering lines, each a section below:
+\begin{enumerate}
+\item \emph{Root-finding decomposition} (\S\ref{sec:rootfinding}):
+  replacing the Gr\"obner solve of the decomposition step by closed-form
+  roots of $\Sem3$, then by meet-in-the-middle tables for more summands,
+  then by GPU, tower and dense-index variants.
+\item \emph{Gr\"obner-basis engines} (\S\ref{sec:groebner}): matrix F4,
+  F5, an inherited F4 that re-uses its root echelon form, an
+  index-calculus-specific F6-IC, an $\FF_p$ F4 brought to msolve parity,
+  and an audit that found and fixed one soundness bug.
+\item \emph{Koblitz and binary curves} (\S\ref{sec:koblitz}):
+  Frobenius-invariant factor bases~\cite{ggmp2020}, their compact
+  signed-orbit form, SAT oracles~\cite{trimoska2020}, and a ladder of
+  one-target online comparisons with rho from $n=53$ to $n=83$.
+\item \emph{Prime and extension fields} (\S\ref{sec:prime}): $j=0$ and
+  $a=-3$ known-answer ladders, the Kummer-tower factor base of
+  Petit--Kosters--Messeng~\cite{pkm2016}, and Gaudry's $k=4$ index
+  calculus over $\FF_{p^4}$ with the $D_4$ symmetry of
+  Faug\`ere--Gaudry--Huot--Renault~\cite{fghr2014}.
+\item \emph{Isogeny, transfer and structure routes}
+  (\S\ref{sec:transfer}): conductor gaps in the ECC2K-130 isogeny class,
+  isogeny fibres, transfer-aware index calculus, GHS and Weil descent;
+  mostly negative, with one lemma that explains why.
+\item \emph{Literature replication} (\S\ref{sec:prime},
+  \S\ref{sec:transfer}): the \emph{lit2026} programme, which turned each
+  finding of a 2025--26 literature search into a measured change, a
+  diagnostic, or a recorded negative.
+\end{enumerate}
+Underneath all six sits the measurement work of \S\ref{sec:method}: a
+single harness (\emph{ecbench}) that charges rho, BSGS, the kangaroo and
+index calculus in one unit on one-target workloads, and the accounting
+corrections that the harness forced on earlier claims.
+
+\paragraph{Contributions.}
+\begin{itemize}
+\item A survey of elliptic-curve index calculus organised by field type,
+  separating proved results from heuristic ones and recording where the
+  first-fall-degree debate stands (\S\ref{sec:theory}).
+\item A measurement discipline: one unit ($S=\text{group-addition
+  equivalents}/\sqrt r$), one-target cold and online boundaries, sealed
+  and replayable records, and a pricing band that treats the unpriced work
+  of rho and of index calculus alike (\S\ref{sec:method}).
+\item A measured frontier on fixed Koblitz and prime ladders, with
+  parameters chosen on separate training targets and fitted cost exponents
+  per method (\S\ref{sec:frontier}).
+\item The engineering record: root-finding decomposition (with its prior
+  art), Gr\"obner engines, compact-orbit Koblitz bases, $D_4$ symmetry at
+  $k=4$, and the negative results (\S\S\ref{sec:rootfinding}--\ref{sec:transfer}),
+  and the improvement ladder of 14--15 October measured against the
+  index-calculus baseline, with the distance to rho left after each step
+  (\S\ref{sec:ladder}).
+\item Open problems, each with the experiment or proof that would settle it
+  (\S\ref{sec:open}).
+\end{itemize}
+
+\paragraph{What this paper does not claim.} No asymptotic sub-rho
+algorithm, no change to the Gaudry--Diem picture for prime fields, no
+statement about ECC2K-130, P-256 or any deployed curve beyond labelled
+arithmetic on public parameters, no key recovery. Every instance is a
+public synthetic or standard-parameter known-answer instance. Every change
+is classed, in the repository's vocabulary, as an \cls{advance} (an
+exponent or a crossover moves under complete accounting),
+\cls{engineering} (a constant moves), \cls{relabelling}, or
+\cls{accounting}; with one modelled exception (\S\ref{sec:gaudry}) every
+improvement in this paper is \cls{engineering} or \cls{accounting}.
+
+\paragraph{How to read the numbers.} ``$X\times$'' always means
+baseline cost divided by candidate cost on the stated boundary. Stage
+ratios (one decomposition, one Gr\"obner call) are never presented as
+end-to-end speed-ups; wall-time ratios from hosts that did not earn an
+isolation level are labelled \emph{descriptive}; a cost with unpriced work
+is labelled a \emph{lower bound}. Appendix~\ref{app:artefacts} lists the
+artefact behind each table.

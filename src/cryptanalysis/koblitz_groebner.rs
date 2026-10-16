@@ -5655,14 +5655,19 @@ pub fn gate_first_skips_thread() -> (u64, u64) {
 /// equations.
 ///
 /// **On by default** since round 2 item 05
-/// (`research/ic_improve_20261015/05-linear-harvest/`): the default is
+/// (`research/ic_improve_20261015/05-linear-harvest/`), with the gate
+/// widened in round 3 item 02
+/// (`research/ic_improve3_20261015/02-harvest-gate/`): the default is
 /// [`LINEAR_HARVEST_DEFAULT`] — root only, in solves with fewer than
-/// 0.961 non-zero generators per occurring variable — whose frozen θ came
-/// from training and which advanced or matched at every held-out pipeline
-/// cell.  **Opt out with `KIC_LINEAR_HARVEST=0`**, which restores the
-/// previous engine exactly (identical counters); `every` harvests at every
-/// node (measured: regresses), and other specifications are parsed by
-/// [`parse_linear_harvest`].
+/// 0.961 non-zero generators per occurring variable (item 05's gate) **or**
+/// whose root basis has rank ≥ 331 (item 02's frozen size gate, which adds
+/// the large cells where the rebuild is amortised and leaves out the small
+/// over-determined (13,4) m3 system, where it is not).
+/// **Opt out with `KIC_LINEAR_HARVEST=0`**, which restores the
+/// pre-harvest engine exactly (identical counters); `KIC_LINEAR_HARVEST=gpv`
+/// restores item 05's gpv-only gate ([`LINEAR_HARVEST_GPV`]); `every`
+/// harvests at every node (measured: regresses), and other specifications
+/// are parsed by [`parse_linear_harvest`].
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct LinearHarvest {
     /// Harvest rows with at most this many variables (`2..`).
@@ -5675,16 +5680,35 @@ pub struct LinearHarvest {
     /// `gpv_below_milli / 1000` non-zero generators per occurring variable
     /// (`u32::MAX`: no gate).  Counted on the original equations.
     pub gpv_below_milli: u32,
+    /// Also harvest (OR with the gpv gate) in a solve whose input has at
+    /// least this many occurring variables (`u32::MAX`: never by this
+    /// route).  Round 3 item 02.
+    pub or_occ_at_least: u32,
+    /// Also harvest (OR with the gpv gate) where the basis the rows were
+    /// read from has at least this rank (`u32::MAX`: never by this route).
+    /// Round 3 item 02.
+    pub or_rank_at_least: u32,
 }
 
 /// The default harvest (also `KIC_LINEAR_HARVEST=1`): root only, gated on
 /// generators per occurring variable `< 0.961` (item 05's frozen θ =
-/// 0.9607, as `parse_linear_harvest("root,gpv=0.9607")` stores it).
+/// 0.9607) **or** root basis rank `≥ 331` (round 3 item 02's frozen θ), as
+/// `parse_linear_harvest("root,gpv=0.9607,rank=331")` stores it.
 pub const LINEAR_HARVEST_DEFAULT: LinearHarvest = LinearHarvest {
     max_vars: u32::MAX,
     root_only: true,
     min_free: 0,
     gpv_below_milli: 961,
+    or_occ_at_least: u32::MAX,
+    or_rank_at_least: 331,
+};
+
+/// Item 05's default before round 3 item 02 (`KIC_LINEAR_HARVEST=gpv`):
+/// root only, gated on generators per occurring variable `< 0.961` alone,
+/// as `parse_linear_harvest("root,gpv=0.9607")` stores it.
+pub const LINEAR_HARVEST_GPV: LinearHarvest = LinearHarvest {
+    or_rank_at_least: u32::MAX,
+    ..LINEAR_HARVEST_DEFAULT
 };
 
 /// Every node, every multi-variable row, no gate (`KIC_LINEAR_HARVEST=every`);
@@ -5694,6 +5718,8 @@ pub const LINEAR_HARVEST_EVERY_NODE: LinearHarvest = LinearHarvest {
     root_only: false,
     min_free: 0,
     gpv_below_milli: u32::MAX,
+    or_occ_at_least: u32::MAX,
+    or_rank_at_least: u32::MAX,
 };
 
 thread_local! {
@@ -5704,9 +5730,12 @@ thread_local! {
 }
 
 /// Parse a harvest specification: `1` for [`LINEAR_HARVEST_DEFAULT`],
-/// `every` for [`LINEAR_HARVEST_EVERY_NODE`], or modifiers of the latter,
+/// `gpv` for [`LINEAR_HARVEST_GPV`], `every` for
+/// [`LINEAR_HARVEST_EVERY_NODE`], or modifiers of the latter,
 /// comma-separated `k=<max vars>`, `root`, `free=<min free>`,
-/// `gpv=<generators per variable bound>`; `0` or empty is off.
+/// `gpv=<generators per variable bound>`, and the OR-ed size gates
+/// `rank=<root basis rank>` and `occ=<occurring variables>`; `0` or empty
+/// is off.
 pub fn parse_linear_harvest(spec: &str) -> Option<LinearHarvest> {
     let spec = spec.trim();
     if spec.is_empty() || spec == "0" {
@@ -5714,6 +5743,9 @@ pub fn parse_linear_harvest(spec: &str) -> Option<LinearHarvest> {
     }
     if spec == "1" {
         return Some(LINEAR_HARVEST_DEFAULT);
+    }
+    if spec == "gpv" {
+        return Some(LINEAR_HARVEST_GPV);
     }
     let mut h = LINEAR_HARVEST_EVERY_NODE;
     if spec == "every" {
@@ -5730,6 +5762,10 @@ pub fn parse_linear_harvest(spec: &str) -> Option<LinearHarvest> {
         } else if let Some(g) = part.strip_prefix("gpv=") {
             let g: f64 = g.parse().ok()?;
             h.gpv_below_milli = (g * 1000.0).round() as u32;
+        } else if let Some(o) = part.strip_prefix("occ=") {
+            h.or_occ_at_least = o.parse().ok()?;
+        } else if let Some(r) = part.strip_prefix("rank=") {
+            h.or_rank_at_least = r.parse().ok()?;
         } else if part != "1" {
             return None;
         }
@@ -5740,7 +5776,8 @@ pub fn parse_linear_harvest(spec: &str) -> Option<LinearHarvest> {
 /// The harvest in force on this thread: [`set_linear_harvest`]'s override,
 /// else `KIC_LINEAR_HARVEST` (read once): unset means
 /// [`LINEAR_HARVEST_DEFAULT`], `0` turns the harvest off (the engine before
-/// item 05, counter for counter), anything else is [`parse_linear_harvest`]d.
+/// item 05, counter for counter), `gpv` is item 05's gate
+/// ([`LINEAR_HARVEST_GPV`]), anything else is [`parse_linear_harvest`]d.
 pub fn linear_harvest() -> Option<LinearHarvest> {
     static ENV: std::sync::OnceLock<Option<LinearHarvest>> = std::sync::OnceLock::new();
     if let Some(v) = LINEAR_HARVEST_OVERRIDE.with(|c| c.get()) {
@@ -5781,6 +5818,34 @@ fn linear_harvest_gate(system: &[F2BoolPoly], gpv_below_milli: u32) -> bool {
         .fold(0u64, |acc, t| acc | t.mask)
         .count_ones() as u64;
     gens * 1000 < gpv_below_milli as u64 * occurring
+}
+
+/// The harvest's size gate (round 3 item 02), OR-ed with the gpv gate:
+/// the input has at least `or_occ_at_least` occurring variables, or the
+/// node's largest basis has rank at least `or_rank_at_least`.
+fn linear_harvest_size_gate(
+    system: &[F2BoolPoly],
+    bases: &InheritedBases,
+    h: &LinearHarvest,
+) -> bool {
+    if h.or_rank_at_least != u32::MAX
+        && bases
+            .bases
+            .iter()
+            .map(ReducedBasis::rank)
+            .max()
+            .unwrap_or(0) as u64
+            >= h.or_rank_at_least as u64
+    {
+        return true;
+    }
+    h.or_occ_at_least != u32::MAX
+        && system
+            .iter()
+            .flat_map(|p| p.terms.iter())
+            .fold(0u64, |acc, t| acc | t.mask)
+            .count_ones()
+            >= h.or_occ_at_least
 }
 
 /// The decisive-row test of [`ReducedBasis::decisive_rows`]: `1`, or one
@@ -6467,7 +6532,8 @@ fn solve_rec(
                 if !harvested.is_empty()
                     && (!h.root_only || parent.is_none())
                     && assignment.iter().filter(|a| a.is_none()).count() as u32 >= h.min_free
-                    && linear_harvest_gate(original, h.gpv_below_milli)
+                    && (linear_harvest_gate(original, h.gpv_below_milli)
+                        || linear_harvest_size_gate(original, &bases, &h))
                 {
                     // Hand the tail's multi-variable rows to the linear
                     // elimination at the top of the loop.
@@ -8068,9 +8134,13 @@ mod tests {
             for cfg in [
                 None,
                 Some(LINEAR_HARVEST_DEFAULT),
+                Some(LINEAR_HARVEST_GPV),
                 Some(LINEAR_HARVEST_EVERY_NODE),
                 parse_linear_harvest("root"),
                 parse_linear_harvest("k=2"),
+                // The size gates alone (gpv gate closed).
+                parse_linear_harvest("root,gpv=0,rank=1"),
+                parse_linear_harvest("root,gpv=0,occ=1"),
             ] {
                 set_linear_harvest(Some(cfg));
                 linear_harvest_counts_reset();
@@ -8090,8 +8160,13 @@ mod tests {
         assert_eq!(parse_linear_harvest("0"), None);
         assert_eq!(parse_linear_harvest("1"), Some(LINEAR_HARVEST_DEFAULT));
         assert_eq!(
-            parse_linear_harvest("root,gpv=0.9607"),
+            parse_linear_harvest("root,gpv=0.9607,rank=331"),
             Some(LINEAR_HARVEST_DEFAULT)
+        );
+        assert_eq!(parse_linear_harvest("gpv"), Some(LINEAR_HARVEST_GPV));
+        assert_eq!(
+            parse_linear_harvest("root,gpv=0.9607"),
+            Some(LINEAR_HARVEST_GPV)
         );
     }
 
