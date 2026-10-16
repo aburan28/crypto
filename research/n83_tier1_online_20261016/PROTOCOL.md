@@ -15,9 +15,18 @@ with modulus bitmask `9671406556917033397649557`, model
 `y²+xy=x³+x²+1`, subgroup order `8569786107849059` and cofactor
 `1128547018`. The candidate source, exact factor-base manifest, binary,
 flags, and rho reference must be frozen in a versioned selection record
-before any of these five points is executed. The candidate is selected from
-earlier exposed-point and reserve-point screens; an unknown or unverified
-selection prevents the panel from starting.
+before any of these five points is executed. Use the current-source
+one-point online range screen to select it: require independent replay,
+identical K2543 control bases and index sizes, and the predeclared 10%
+online A/A gate. Among resource-admitted completed arms, choose the
+smallest measured one-target online interval; use the K2543 A/B mean for
+that pipeline. Break an exact timing tie by fewer actual usable base
+points, then lexicographic layout name. Require the winning arm's exact
+base dump, source, flags and IC1 manifest to replay and hash before writing
+`selection.json`. The four-point cold reserve panel remains independent
+evidence about setup cost. If the online control or identity gate fails,
+or no winning arm can be materialized, leave selection unknown and do not
+start the Tier 1 panel.
 
 The approved allocation is one `g5g.metal` Spot instance in `us-east-1b`,
 for at most 165 minutes and $5 total. Before launch, check current Spot
