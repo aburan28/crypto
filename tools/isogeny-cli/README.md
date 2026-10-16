@@ -139,3 +139,40 @@ fresh directories. Saved scores are not accepted as submissions. See
 [challenge rules and commands](../../docs/challenges/isogeny-prime-degree/README.md).
 The new command is included by the existing ReleaseMe build; actual new-asset
 publication remains a separate release gate.
+
+## Compact CM expressions on secp256k1
+
+A build whose help lists `compact-cm` can construct and independently check
+compact known-endomorphism self-maps on the exact registered secp256k1 source:
+
+```sh
+isogeny compact-cm construct --exponent 3 --out ./compact-7 --timeout 1800
+isogeny compact-cm verify --input ./compact-7/certificate.json --out ./compact-7-replay --timeout 3600
+```
+
+Both commands require fresh output directories. They run a separate native worker
+with an 8 GiB sampled RSS limit, native watchdog and retained stdout, stderr,
+PID, resource receipt, artifact and input/output hashes. The public construction
+result is `CONSTRUCTED`; independent verification reports `VERIFIED_COMPACT` only
+after its checks pass. Failures and resource censorship keep their receipts.
+
+The geometric map is `[a]+[b]phi`, where `phi(x,y)=(beta*x,y)`, and its degree is
+computed from the exact signed unreduced integers as `a*a-a*b+b*b`. The supported
+constructor uses Mersenne degrees with odd prime exponents in `3..=65536`,
+Lucas-Lehmer certification and Cornacchia. The independent verifier uses a separate
+integer backend, different group arithmetic, exact integer identities, differential
+and subgroup checks, eight fixed public point images and both dual compositions.
+Primality of the standardized field and subgroup parameters is explicitly trusted
+from SEC2; degree primality is independently replayed.
+
+`compact-cm evaluate --input CERTIFICATE --x X --y Y --mode geometric` evaluates
+the unreduced expression. `--mode subgroup` uses the separately checked scalar
+restriction on the rational subgroup. Each evaluation rechecks the certificate;
+the constructor/replay watchdogs apply to `construct` and `verify`. The degree
+proof remains separate from agreement of point outputs. This is a compact
+known-endomorphism category and receives no expanded-map challenge score.
+
+See the source distribution's `docs/identity-certificates/cm-eisenstein-norm.md`
+for its exact proof basis, evaluated IDC1 supplement, controls and representation
+limits. Larger scientific target instances require their own retained execution
+and independent replay; the example above is the fixed degree-7 control.

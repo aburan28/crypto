@@ -232,8 +232,10 @@ pub fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) ->
     let mut peak_rss = 0;
     // Challenge replay waits for this acknowledgement before any parsing or
     // algebra, so a short child cannot exit before the first usable RSS sample.
-    let resource_ready = (args.first().is_some_and(|a| a == "challenge")
+    let resource_ready = ((args.first().is_some_and(|a| a == "challenge")
         && args.get(1).is_some_and(|a| a == "__judge"))
+        || (args.first().is_some_and(|a| a == "compact-cm")
+            && args.get(1).is_some_and(|a| a == "__worker")))
     .then(|| {
         args.windows(2)
             .find(|w| w[0] == "--rss-ready")
