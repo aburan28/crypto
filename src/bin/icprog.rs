@@ -132,6 +132,7 @@ enum Comparison {
     V2,
     V3,
     V6,
+    V7,
 }
 
 #[derive(Subcommand)]
@@ -361,7 +362,7 @@ enum Command {
     Rule {
         /// manifest, pin, size, all, reference, claims or analyse.
         step: String,
-        /// Which comparison: ledger §23's (frozen), or the one at baseline v2, v3 or v6.
+        /// Which comparison: ledger §23's (frozen), or the one at baseline v2, v3, v6 or v7.
         #[arg(long, value_enum, default_value = "s23")]
         comparison: Comparison,
         /// The repository checkout (default: the current directory).
@@ -867,6 +868,7 @@ fn rule(step: &str, args: RuleArgs) -> Result<String, String> {
         Comparison::V2 => ("research/ic_tool_program/rule/v2", &rule::V2),
         Comparison::V3 => ("research/ic_tool_program/rule/v3", &rule::V3),
         Comparison::V6 => ("research/ic_tool_program/rule/v6", &rule::V6),
+        Comparison::V7 => ("research/ic_tool_program/rule/v7", &rule::V7),
     };
     let here = abs(&args.dir.clone().unwrap_or_else(|| root.join(default_dir)))?;
     let comparison = rule::Comparison {

@@ -203,6 +203,18 @@ pub const V6: Constants = Constants {
     frozen: false,
 };
 
+/// The rule's comparison at baseline v7 (`research/ic_tool_program/rule/v7`):
+/// rule v6's protocol on v7's binary, v6 with R11's streamed pair-table
+/// build.  The arms' sources are still §23's list.
+pub const V7: Constants = Constants {
+    what_this_is: "The rule's comparison at baseline v7: §23's figures, from the checked rows.",
+    against: Against::Earlier {
+        analysis: "research/ic_single_target_20260930/analysis.json",
+        key: "s23_then_v7",
+    },
+    ..V6
+};
+
 /// Where a comparison lives and what it writes.
 pub struct Comparison {
     /// The repository: the ledger, and what record paths are relative to.
