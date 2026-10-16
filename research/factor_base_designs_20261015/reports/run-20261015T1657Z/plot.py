@@ -13,8 +13,9 @@ MK = {"A0": "o", "N": "s", "A1z": "^", "A1g": "v", "A4": "D", "A11": "P"}
 OFF = {a: (i - 2.5) * 0.06 for i, a in enumerate(ARMS)}  # horizontal jitter so overlaps stay visible
 
 rows = []
-for f in sorted(glob.glob(os.path.join(runs, "*-m*.jsonl"))):
-    rows += [json.loads(l) for l in open(f) if l.strip()]
+for a in ARMS:  # the six arms' own files, not the F1-F4 files merged later
+    for m in [2, 3]:
+        rows += [json.loads(l) for l in open(os.path.join(runs, f"{a}-m{m}.jsonl")) if l.strip()]
 
 plt.rcParams.update({"font.size": 9, "axes.edgecolor": "#888", "axes.labelcolor": "#222",
                      "xtick.color": "#444", "ytick.color": "#444"})

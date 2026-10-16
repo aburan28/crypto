@@ -16,16 +16,16 @@
 - *Host:* "vm", Intel Xeon @ 2.10 GHz, 4 cores, a Claude Code cloud container. This is a different container and CPU from the p#sub[1] run (2.80 GHz), so times are not comparable across the two runs. *Isolation:* one system at a time, no other work running.
 - *Window:* 2026-10-15 23:07Z to 2026-10-16 about 00:08Z (UTC).
 - *Seeds (Amendment 2):* #raw("0x46424453 ⊕ prime≪48 ⊕ arm≪40 ⊕ m≪32 ⊕ t≪16") with p#sub[2] = 1. Target k is planted from #raw("cell ⊕ (k+1)≪8"). With p#sub[1] = 0, the p#sub[1] seeds are unchanged: A0 and A11 at m = 3, t = 3 were rebuilt and match their committed rows (x#sub[R], D, max_cols).
-- *Records:* #raw("runs/p2/{A0,A11}-m{2,3}.jsonl") and #raw(".log"), #raw("runs/p2/analysis.txt") (native #raw("analyze")) and #raw("runs/p2/instrument-check-p2.txt").
+- *Records (after reconciliation, see below):* every system this run measured is in the F1 rows of record #raw("runs/F1-{A0,A11}-m{2,3}-p2.jsonl"), except A11 m = 2, t = 10 and t = 11, which are in #raw("runs/F1-annex-p2/A11-m2-p2-t10-t11.jsonl"). The annex also holds this run's logs and the row-by-row cross-check (#raw("crosscheck.txt")). The rows as first committed are at #raw("runs/p2/") in commit #raw("cb750c828"), with #raw("analysis.txt") and #raw("instrument-check-p2.txt").
 
 == F1 pre-check
 
-p#sub[2] < 2#super[31], and #raw("f4_fp") reduces modulo p < 2#super[32]. Eight planted systems at t = 2 were built before any p#sub[2] row: A0 and A11, m = 2 and 3, both targets. Each passed the set, presentation and vanishing checks, and each kept its planted solution in F4's basis (#raw("planted_ok") true, not inconsistent). The check is recorded in #raw("instrument-check-p2.txt").
+p#sub[2] < 2#super[31], and #raw("f4_fp") reduces modulo p < 2#super[32]. Eight planted systems at t = 2 were built before any p#sub[2] row: A0 and A11, m = 2 and 3, both targets. Each passed the set, presentation and vanishing checks, and each kept its planted solution in F4's basis (#raw("planted_ok") true, not inconsistent). The check was recorded in #raw("runs/p2/instrument-check-p2.txt") (commit #raw("cb750c828")). The parent lane's own F1 pre-check is #raw("runs/f1-instrument-check-p2.txt").
 
 == Graphs
 
 #figure(image("d_vs_b.svg", width: 100%),
-  caption: [Measured D against b on p#sub[2], A0 and A11, m = 2 (left) and m = 3 (right). Both targets of each cell are plotted (n = 2 per cell; they coincide). Open markers are systems stopped by the 300 s F4 budget, at their partial D. Rows from #raw("runs/p2/*.jsonl").])
+  caption: [Measured D against b on p#sub[2], A0 and A11, m = 2 (left) and m = 3 (right). Both targets of each cell are plotted (n = 2 per cell; they coincide). Open markers are systems stopped by the 300 s F4 budget, at their partial D. Rows from #raw("runs/F1-*-p2.jsonl") and the annex, per #raw("plot.py").])
 
 #figure(image("width_vs_b.svg", width: 100%),
   caption: [Widest F4 matrix (#raw("max_cols"), log#sub[2] scale) against b, A0 and A11 on p#sub[1] (dashed, hollow) and p#sub[2] (solid). The points are offset ±0.08 in b so both primes stay visible. Completed systems only.])
@@ -93,6 +93,12 @@ Target 0 / target 1. Time is F4 wall seconds. Status is ok or timeout (F4 budget
 
 4 series, 27 cells, 54 planted systems: 46 completed and 8 stopped at the F4 budget (A0 m = 2 t = 10, A0 m = 3 t = 5, A11 m = 2 t = 11, A11 m = 3 t = 5, both targets each). The commit that landed these rows (#raw("c195dfa64")) states "50 systems, 42 completed" in its message. That was a miscount; these figures are correct.
 
+== Reconciliation with the parent lane (2026-10-16)
+
+The parent lane ran F1 on its own, earlier (commits #raw("f287673fe") and #raw("fa60aba73")), with the same seed rule. #raw("fb_designs_slope compare-rows") compared the two runs system by system (#raw("runs/F1-annex-p2/crosscheck.txt")). Of 52 shared systems, 50 are identical in construction and F4 output. The other 2, A11 m = 2 t = 10, have identical construction, but the parent's run timed out at 300 s and this run completed (D = 4 in both). This run also has A11 m = 2 t = 11 (timeouts).
+
+The parent's files are the F1 rows of record. This run's duplicate rows were removed, and its extra rows were kept in the annex. Every number in this report is unchanged, and the graphs rebuild byte-identical from the new sources. The F1 verdict (m = 3: replicates) rests on m = 3 rows that are identical in both runs. The σ values above use this run's rows. With the rows of record, A11 m = 2 on p#sub[2] reads σ = 0.1786 on 8 cells, instead of 0.1500 on 9; both are "candidate".
+
 == Deviations
 
-None from Amendment 2 F1. Not run: F2 (the N11 null), F3 (the m = 3, t = 5 cell at 3600 s) and F4 (m = 4). Without F2, whether A11's lower D comes from its structure or only from its equation shape is still open on both primes.
+None from Amendment 2 F1. Not run in this lane: F2 (the N11 null), F3 (the m = 3, t = 5 cell at 3600 s) and F4 (m = 4). The parent lane ran all three (#raw("runs/analysis-amendment2.txt")). F2 reads "shape, not structure": the A11-shaped null has A11's D in every completed cell. So the D difference this run replicates comes from the shape of A11's equations, not from the curve.

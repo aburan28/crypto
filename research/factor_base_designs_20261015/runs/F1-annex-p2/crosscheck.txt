@@ -1,0 +1,36 @@
+F1 on p2, run twice: A = the parent's F1 rows (commit fa60aba73 and earlier), B = run-20261015T2307Z (commit d5f675260, this lane).
+Same seed rule (Amendment 2), different containers. Produced by: fb_designs_slope compare-rows A B
+
+compare-rows
+  A = research/factor_base_designs_20261015/runs/F1-A0-m2-p2.jsonl
+  B = research/factor_base_designs_20261015/runs/p2/A0-m2.jsonl
+  shared 18: identical 18, status differs 0, disagree 0
+  only in A: none
+  only in B: none
+exit 0
+
+compare-rows
+  A = research/factor_base_designs_20261015/runs/F1-A0-m3-p2.jsonl
+  B = research/factor_base_designs_20261015/runs/p2/A0-m3.jsonl
+  shared 8: identical 8, status differs 0, disagree 0
+  only in A: none
+  only in B: none
+exit 0
+
+compare-rows
+  A = research/factor_base_designs_20261015/runs/F1-A11-m2-p2.jsonl
+  B = research/factor_base_designs_20261015/runs/p2/A11-m2.jsonl
+  status A11 m=2 t=10 target=0: A "timeout" (D 4, 305.489609114 s), B "ok" (D 4, 259.453676464 s); construction identical
+  status A11 m=2 t=10 target=1: A "timeout" (D 4, 312.712930238 s), B "ok" (D 4, 255.719427447 s); construction identical
+  shared 18: identical 16, status differs 2, disagree 0
+  only in A: none
+  only in B: A11 m=2 t=11 target=0; A11 m=2 t=11 target=1
+exit 0
+
+compare-rows
+  A = research/factor_base_designs_20261015/runs/F1-A11-m3-p2.jsonl
+  B = research/factor_base_designs_20261015/runs/p2/A11-m3.jsonl
+  shared 8: identical 8, status differs 0, disagree 0
+  only in A: none
+  only in B: none
+exit 0

@@ -58,6 +58,7 @@
 //! $B run --arms A0,A11 --m 4 --file 'F4-{arm}-m{m}' --out-dir $R
 //! $B run --arms A0,A11 --m 3 --t-min 5 --t-max 5 --budget 3600 --grace 300 --file 'F3-{arm}-m3-t5' --out-dir $R
 //! $B analyze $R --amendment2                   # every Amendment 2 decision rule
+//! $B compare-rows A.jsonl B.jsonl               # two runs of the same systems, row by row
 //! ```
 //!
 //! A stage diagnostic of the solver axis (`AGENTS.md` §2): it prices no
@@ -2509,6 +2510,105 @@ fn analyze2(dir: &str) {
 
 // ── Arguments ──────────────────────────────────────────────────────
 
+/// Compare two row files system by system, keyed by (arm, m, t, target):
+/// the construction (seeds, `x_R`, curve, counts) must agree on every
+/// shared row; where both systems completed, so must F4's deterministic
+/// output (D, `degree_reached`, `max_cols`, `inconsistent`, `planted_ok`).
+/// A status that differs (one host finished within the budget, the other
+/// did not) is listed, not counted as a disagreement. Returns false on any
+/// disagreement.
+fn compare_rows(a: &str, b: &str) -> bool {
+    let load = |f: &str| -> BTreeMap<(String, u64, u64, u64), Value> {
+        std::fs::read_to_string(f)
+            .unwrap_or_else(|e| panic!("read {f}: {e}"))
+            .lines()
+            .filter(|l| !l.trim().is_empty())
+            .map(|l| serde_json::from_str::<Value>(l).expect("a JSON row"))
+            .filter(|r| r.get("summary").is_none())
+            .map(|r| {
+                let key = (
+                    r["arm"].as_str().unwrap_or("?").to_string(),
+                    r["m"].as_u64().unwrap_or(0),
+                    r["t"].as_u64().unwrap_or(0),
+                    r["target"].as_u64().unwrap_or(0),
+                );
+                (key, r)
+            })
+            .collect()
+    };
+    let (ra, rb) = (load(a), load(b));
+    const BUILD: [&str; 8] = [
+        "p",
+        "cell_seed",
+        "target_seed",
+        "x_r",
+        "curve",
+        "planted_x",
+        "n_vars",
+        "n_eqs",
+    ];
+    const F4: [&str; 5] = [
+        "D",
+        "degree_reached",
+        "max_cols",
+        "inconsistent",
+        "planted_ok",
+    ];
+    let (mut same, mut differ, mut status) = (0usize, 0usize, 0usize);
+    println!("compare-rows\n  A = {a}\n  B = {b}");
+    for (k, x) in &ra {
+        let Some(y) = rb.get(k) else { continue };
+        let mut bad: Vec<&str> = BUILD.iter().copied().filter(|f| x[*f] != y[*f]).collect();
+        let both_ok = x["status"] == "ok" && y["status"] == "ok";
+        if both_ok {
+            bad.extend(F4.iter().copied().filter(|f| x[*f] != y[*f]));
+        }
+        let label = format!("{} m={} t={} target={}", k.0, k.1, k.2, k.3);
+        if !bad.is_empty() {
+            differ += 1;
+            println!("  DIFFER {label}: {}", bad.join(", "));
+        } else if x["status"] != y["status"] {
+            status += 1;
+            println!(
+                "  status {label}: A {} (D {}, {} s), B {} (D {}, {} s); construction identical",
+                x["status"], x["D"], x["time"], y["status"], y["D"], y["time"]
+            );
+        } else {
+            same += 1;
+        }
+    }
+    let only = |p: &BTreeMap<_, Value>, q: &BTreeMap<_, Value>| -> Vec<String> {
+        p.keys()
+            .filter(|k| !q.contains_key(*k))
+            .map(|k: &(String, u64, u64, u64)| {
+                format!("{} m={} t={} target={}", k.0, k.1, k.2, k.3)
+            })
+            .collect()
+    };
+    let (oa, ob) = (only(&ra, &rb), only(&rb, &ra));
+    println!(
+        "  shared {}: identical {same}, status differs {status}, disagree {differ}",
+        same + status + differ
+    );
+    println!(
+        "  only in A: {}",
+        if oa.is_empty() {
+            "none".into()
+        } else {
+            oa.join("; ")
+        }
+    );
+    println!(
+        "  only in B: {}",
+        if ob.is_empty() {
+            "none".into()
+        } else {
+            ob.join("; ")
+        }
+    );
+    differ == 0
+}
+
 fn flag(args: &[String], name: &str) -> Option<String> {
     args.iter()
         .position(|a| a == name)
@@ -2583,6 +2683,12 @@ fn main() {
                 std::process::exit(1);
             }
         }
+        "compare-rows" => {
+            let (a, b) = (args.get(1).expect("rows A"), args.get(2).expect("rows B"));
+            if !compare_rows(a, b) {
+                std::process::exit(1);
+            }
+        }
         "regress" => {
             let file = flag(&args, "--rows").expect("--rows");
             let arm = Arm::parse(&flag(&args, "--arm").expect("--arm"));
@@ -2595,7 +2701,7 @@ fn main() {
         }
         _ => {
             eprintln!(
-                "usage: fb_designs_slope run|one|repro|analyze|check-p2|regress …  (see the module docs)"
+                "usage: fb_designs_slope run|one|repro|analyze|check-p2|regress|compare-rows …  (see the module docs)"
             );
             std::process::exit(2);
         }

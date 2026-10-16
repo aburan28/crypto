@@ -6,15 +6,21 @@ matplotlib.use("svg")
 import matplotlib.pyplot as plt
 
 here = os.path.dirname(os.path.abspath(__file__))
-runs = os.path.join(here, "..", "..", "runs", "p2")
+runs = os.path.join(here, "..", "..", "runs")
+# This run's rows: identical to the F1 rows of record on every shared system
+# (runs/F1-annex-p2/crosscheck.txt), except A11 m = 2 t = 10, which this run
+# completed; those and its t = 11 rows are in the annex.
 ARMS = ["A0", "N", "A1z", "A1g", "A4", "A11"]
 COL = {"A0": "#2a78d6", "N": "#eb6834", "A1z": "#1baf7a", "A1g": "#eda100", "A4": "#e87ba4", "A11": "#008300"}
 MK = {"A0": "o", "N": "s", "A1z": "^", "A1g": "v", "A4": "D", "A11": "P"}
 OFF = {a: (i - 2.5) * 0.06 for i, a in enumerate(ARMS)}  # horizontal jitter so overlaps stay visible
 
 rows = []
-for f in sorted(glob.glob(os.path.join(runs, "*-m*.jsonl"))):
-    rows += [json.loads(l) for l in open(f) if l.strip()]
+for a in ["A0", "A11"]:
+    for m in [2, 3]:
+        rows += [json.loads(l) for l in open(os.path.join(runs, f"F1-{a}-m{m}-p2.jsonl")) if l.strip()]
+annex = [json.loads(l) for l in open(os.path.join(runs, "F1-annex-p2", "A11-m2-p2-t10-t11.jsonl")) if l.strip()]
+rows = [r for r in rows if not (r["arm"] == "A11" and r["m"] == 2 and r["t"] >= 10)] + annex
 
 plt.rcParams.update({"font.size": 9, "axes.edgecolor": "#888", "axes.labelcolor": "#222",
                      "xtick.color": "#444", "ytick.color": "#444"})
@@ -56,8 +62,9 @@ print("wrote d_vs_b.svg/png from", len(rows), "rows")
 
 # Matrix width (max_cols, log scale) against b, A0 and A11, p1 (dashed, hollow) and p2 (solid).
 p1rows = []
-for f in sorted(glob.glob(os.path.join(here, "..", "..", "runs", "*-m*.jsonl"))):
-    p1rows += [json.loads(l) for l in open(f) if l.strip()]
+for a in ["A0", "A11"]:
+    for m in [2, 3]:
+        p1rows += [json.loads(l) for l in open(os.path.join(runs, f"{a}-m{m}.jsonl")) if l.strip()]
 fig, axes = plt.subplots(1, 2, figsize=(9.5, 4.0), sharey=True)
 for ax, m in zip(axes, [2, 3]):
     for a in ["A0", "A11"]:
