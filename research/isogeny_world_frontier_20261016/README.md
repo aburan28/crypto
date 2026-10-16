@@ -5,8 +5,8 @@ isogenies, with every registered standard prime-field model ranked separately.
 The main challenge requires an expanded rational map and monic kernel. A second
 research category will investigate compact evaluation routes without mixing its
 scores with expanded-map results. The Codex runtime goal is anchored to chat
-`01a11ebd-9436-73b3-b24e-63b10aad80fa`; its frozen harness goal and first batch
-are being prepared separately in Crypto Autoresearcher.
+`01a11ebd-9436-73b3-b24e-63b10aad80fa`; its frozen harness goal is GOAL-ISOU-f30a07. The protocol, ownership and native
+observations are published in [Crypto Autoresearcher PR #2221](https://github.com/aburan28/crypto-autoresearcher/pull/2221).
 
 ## Requirements and present evidence
 
@@ -14,7 +14,7 @@ are being prepared separately in Crypto Autoresearcher.
 |---|---|---|
 | Work toward a world's-largest prime-degree isogeny | Active, no record claimed | Primary-source survey below; category and comparability must be established |
 | All registered standard prime curves ranked separately | Existing implementation verified | Merged PR #1940; 54 exact standard models, 47 adapters, seven visible conversion gaps |
-| Exceed the P192 degree-10453 incumbent | Planned first rung | P192/50341; construction and independent replay must both complete |
+| Exceed the P192 degree-10453 incumbent | Construction completed; independent replay running | P192/50341; RUN-ISOU-f9546d, not admitted yet |
 | Compact evaluation research | Survey only | Separate representation contract and independent evaluator required before execution |
 | Reproducible artifacts and complete costs | Required per attempt | Frozen binary, catalogue, source identity, seed, native receipts and all failed attempts |
 | Durable reviewable work | In progress | This branch and a separate harness protocol PR |
@@ -58,20 +58,27 @@ relations do not discharge the prime-degree construction goal.
 
 ## First bounded execution
 
-The Coordinator freezes the exact protocol and approved execution card before
-any trial. The executable already supports the intended command:
+The Coordinator-approved protocol and execution card were committed and pushed
+before the native trial. The installed executable runs this command:
 
 ```sh
 isogeny challenge run --curve p192 --ell 50341 --out FRESH_ATTEMPT
 ```
 
-Controls: P192 degree 13 and a coefficient-mutation rejection through the
-existing native verifier. The high-degree attempt retains the built-in
+Controls: native P192/13 and P521/7 positives, nine adversarial entries including
+updated-hash kernel and map mutations, and fresh separate-curve leaderboard replay. The high-degree attempt retains the built-in
 1800-second constructor watchdog, 3600-second replay watchdog, 8 GiB sampled RSS
 limit and 256 MiB map limit. Those limits protect the machine; the campaign has
 no fixed batch ceiling. A timeout is an incomplete attempt, not a statement of
 nonexistence. One verified eigenline is sufficient, with coverage explicit.
-The first trial is not launched by this planning document.
+The original relative-path control RUN-ISOU-ea3515 failed at its final leaderboard
+assertion; its raw failure is preserved at harness commit b05e3aeca8. An additive
+approved absolute-path amendment was published at 2e3220d223. The fresh control
+RUN-ISOU-13a6b5 passed in full, then RUN-ISOU-f9546d started on 2026-10-16 at
+06:53:59 UTC. The constructor emitted a 7,656,861-byte artifact, SHA256
+82e3951488c793c5901ecf1dfeb3ab072b7cda16730899330df7caa9832a170c,
+and returned PASS. Independent replay is running; no degree is admitted from
+these interim observations. The finished control is published at 6d9015f199.
 
 All attempts write directly into durable run directories. Every terminal round
 gets raw receipts, a source-linked report, a diagram and inspected PDF. New
@@ -112,11 +119,20 @@ Their custody receipts and the tracked `store/index.json` bind bytes and locatio
 The frozen policy/catalogue season is
 `f045887ec81e41c358ea3fa6f6bf15cfb33b8ed199e6ff589ffad66e8c60b457`.
 See `frozen-policy.json` and `frozen-version.json`. All scientific trials use this
-same executable even if main advances. The separately running official ReleaseMe
-workflow is not treated as a completed publication or substituted into this batch.
+same executable even if main advances. The official ReleaseMe workflow 38857826201 completed every build job, including
+all four isogeny platforms, but its first publication attempt failed while
+pushing tag v0.1.2356 with HTTP 500. A failed-job-only retry was requested on
+2026-10-16 at approximately 06:50 UTC. Publication remains unverified and its
+binaries are not substituted into this frozen batch.
 
 The initial report is one page and was rendered with Typst 0.15.1 and inspected
 as a full-page image. The host has an Apple M4 Pro, 14 logical CPUs and 48 GiB RAM,
-running Darwin 25.6.0 arm64. It is shared, with no isolated speed claim. Current
-source-base release-library validation is running before this branch is pushed;
-its terminal exit code and full log will be retained, whether passing or failing.
+running Darwin 25.6.0 arm64. It is shared, with no isolated speed claim. The source-base release-library gate completed: 4148 passed, zero failed,
+117 ignored; terminal exit code 0. It ran from the unchanged root source at
+05e414f3fd908bde38f0e233b4d850270c025b07 with locked offline dependencies,
+release optimization and one test thread. Root source and Cargo files are
+unchanged by this study. Full terminal output and exit status are retained in
+root-release-retry2.log and root-release-retry2.exit-code.txt. Earlier
+interrupted validation attempts remain in validation-interruption.md and their
+raw logs. The finished installed native control suite also passed in full at
+harness run RUN-ISOU-13a6b5. No examples or Python implementations changed.
