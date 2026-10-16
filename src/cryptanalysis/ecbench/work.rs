@@ -593,14 +593,10 @@ fn solver_prims(s: &SolverStats) -> Option<Vec<(Prim, u128)>> {
     let u = s.op_unit.as_str();
     if u.starts_with("word XORs") || u.starts_with("word operations") {
         // f4-f2 records also carry the XORs actually performed (the logical
-        // count elides M4RI table reuse); charge what was done.
+        // count elides M4RI table reuse; the performed count includes the
+        // tables' own XORs); charge what was done.
         let performed = s.extra.get("word_xors_performed").copied().unwrap_or(s.ops);
-        let tables = s
-            .extra
-            .get("full_m4ri_table_word_xors")
-            .copied()
-            .unwrap_or(0);
-        return Some(vec![(WordOp, (performed + tables) as u128)]);
+        return Some(vec![(WordOp, performed as u128)]);
     }
     if u.starts_with("monomial operations") || u == "monomial tests" {
         // A monomial over at most 64 variables is one word: a term touched
