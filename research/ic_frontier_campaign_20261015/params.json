@@ -1,0 +1,22 @@
+{
+  "_comment": "Frozen Phase 1 parameters, chosen on the train panel (target seed 20261015100) by PROTOCOL.md A4/A4b: per size, the candidate with the smallest mean S at w = 0.1 among candidates verified on all four train targets; grids extended until the optimum was interior. Evidence: select/SELECTION.md (ecbench band over select/sessions/*).",
+  "koblitz": [
+    {"a": 0, "n": 13, "compact_columns": 1,   "negfold_dimension": 4},
+    {"a": 1, "n": 17, "compact_columns": 1,   "negfold_dimension": 6},
+    {"a": 1, "n": 19, "compact_columns": 2,   "negfold_dimension": 7},
+    {"a": 1, "n": 23, "compact_columns": 2,   "negfold_dimension": 8},
+    {"a": 0, "n": 37, "compact_columns": 8,   "negfold_dimension": 11},
+    {"a": 1, "n": 43, "compact_columns": 16,  "negfold_dimension": null},
+    {"a": 1, "n": 47, "compact_columns": 64,  "negfold_dimension": null},
+    {"a": 0, "n": 41, "compact_columns": 128, "negfold_dimension": null}
+  ],
+  "prime": [
+    {"bits": 20, "pair_size": 32},
+    {"bits": 24, "pair_size": 162},
+    {"bits": 28, "pair_size": 407},
+    {"bits": 32, "pair_size": 1024},
+    {"bits": 36, "pair_size": 2581},
+    {"bits": 40, "pair_size": 3251}
+  ],
+  "pkm": [[20, 8], [22, 9], [24, 9], [26, 10], [28, 11]]
+}

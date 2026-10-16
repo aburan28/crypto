@@ -1,0 +1,77 @@
+\section{Open problems and proposed experiments}\label{sec:open}
+
+% Survey section (draft 2026-10-15). Each problem is phrased as the
+% measurement or proof that would settle it, per the repository's
+% "name the obstruction" rule.
+
+\paragraph{1. The solving degree of Weil-descended summation systems.}
+Every subexponential claim for prime-degree binary curves rests on a bound
+for this degree (\S\ref{sec:theory}); none is proved and the experimental
+evidence is contested. \emph{Experiment:} measure first-fall, last-fall
+and solving degree of $\Sem{m+1}$ restricted to $\ell$-dimensional
+subspaces over a grid of $(n,\ell,m)$ with $m\ge3$, at least four values
+of $n$ per $(\ell,m)$, against the semi-regular prediction, with
+multi-graded regularity (one block per summand) as a second model.
+\emph{Settles:} whether the degree grows with $n$ at fixed $(\ell,m)$; a
+growth consistent with zero would revive the Petit--Quisquater and Semaev
+heuristics, a positive slope would close them for this model.
+
+\paragraph{2. Cold index calculus against rho with every operation
+priced.} No measured arm beats matched rho on the cold one-target boundary
+once native work is priced on both sides (\S\ref{sec:frontier}).
+\emph{Experiment:} the frontier campaign of \S\ref{sec:frontier} extended
+to the largest sizes each arm can reach, with exponents fitted per arm and
+the crossover reported only where the fitted exponents separate across the
+whole pricing band. \emph{Settles:} whether any implemented arm has an
+exponent below $1/2$ in $r$ on these families.
+
+\paragraph{3. Relation yield is now the dominant stage.} Root finding made
+the decomposition oracle cheap; what remains is the number of trials per
+relation, governed by the factor-base density. \emph{Experiment:} for each
+factor-base family, the measured trials-per-relation law against $r$ and
+base size, compared with the counting prediction $m!\,r/N^{m-1}$; the
+residual (e.g.\ the unexplained factor 5 in the ECC2K-130 extrapolation,
+\S\ref{sec:koblitz}) is the target.
+
+\paragraph{4. Root finding beyond two summands on prime curves.} The
+two-summand oracle is prior art in mechanism (McGuire--Mueller) and costs
+$\Theta(N)$ per trial; three summands cost a pair table of $N^2$ entries.
+\emph{Question:} is there a sub-$N^2$ structure for $\Sem4$ membership
+over a prime-field base---for example from the $D_m$-invariant coordinates
+of 2-torsion curves---and does it change the $r^{2/3}$ cost of two-summand
+prime index calculus? A negative answer with a counting argument would be
+as useful as a positive one.
+
+\paragraph{5. The preprocessing regime.} Index calculus with a retained
+table beats rho without one, and loses by $53$--$317\times$ to
+Bernstein--Lange rho with an equal or smaller table (\S\ref{sec:ladder}).
+\emph{Experiment:} measure the advice--time curve $(S,T)$ of the
+compact-orbit arm across sizes against preprocessing rho's
+$S\,T^2\approx N$; an index-calculus online result counts only if it lies
+below that curve at equal $S$.
+
+\paragraph{6. Symmetry at $k=4$, end to end.} The $D_4$ reduction and its
+four-unknown weighted form move a \emph{modelled} handover over $\FF_{p^4}$
+from about $2^{150}$ to $2^{119}$--$2^{137}$ depending on frame
+(\S\ref{sec:ladder}).
+\emph{Experiment:} a complete $k=4$ index calculus over $\FF_{p^4}$ at
+several $p$, cold, priced, against rho with the available automorphisms,
+to replace the model by a measured slope.
+
+\paragraph{7. Pricing and calibration infrastructure.} Rankings now
+require every arm's native work to be counted (AGENTS.md \S5a).
+\emph{Work:} count the three uncounted categories of the shared-rank arm;
+calibrate every ladder size on one fixed host; resolve the inherited-F4
+cross-host counter drift; register the $n=83$ dense root index in the
+harness.
+
+\paragraph{8. Genus three after cubic GHS, to the crossover.} The one
+family whose fitted exponent (about $q^{1.4}$) lies below rho's $q^{3/2}$ was
+$1.15\times$ a measured negation-map rho at $q=2^{20}$ before a further
+$0.62\times$ step (\S\ref{sec:ladder}); its local exponents stay near
+$1.4$ because the linear algebra grows faster than $q^{4/3}$.
+\emph{Experiment:} measure negation-map rho on the same instances in the
+latest unit (inversions and mod-$\ell$ multiplications priced), and run
+both past $q=2^{22}$, in the harness and across the pricing band. A measured
+crossover there would be the programme's first \cls{advance} against rho,
+on a narrow and undeployed family.

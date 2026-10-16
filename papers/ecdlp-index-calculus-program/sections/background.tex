@@ -1,0 +1,50 @@
+\section{Background}\label{sec:background}
+
+\paragraph{Rho and its floor.} With $A$ efficiently computable
+automorphisms acting on $\langle G\rangle$, a rho walk on orbit
+representatives has expected cost $\sqrt{\pi r/(2A)}$ group additions.
+$A=2$ (negation) on every curve; $A=2n$ on a Koblitz curve
+$y^2+xy=x^3+ax^2+1$ over $\FF_{2^n}$, where the Frobenius
+$\pi(x,y)=(x^2,y^2)$ acts on $\langle G\rangle$ as a scalar
+$\lambda$~\cite{wiener1998,gallant2000}. ECC2K-130 is the case $a=0$,
+$n=131$ of this family; its record GPU rho attempt is a separate paper in
+this repository (\art{paper/ecc2k130/}).
+
+\paragraph{Index calculus on elliptic curves.} Fix a factor base
+$\Fb\subset E(\FF_q)$. A \emph{relation} is a decomposition
+$aG+bQ=R=P_1+\cdots+P_m$ with $P_i\in\Fb$; once about $\abs{\Fb}$ relations
+are found, linear algebra over $\ZZ/r$ yields $\log_G Q$. The pipeline has
+five stages (factor base, decomposition oracle, relation yield, rank/linear
+algebra, verification) and a sixth, the comparison with rho on the same
+target. The \emph{decomposition oracle} decides whether $R$ splits over
+$\Fb$. Semaev~\cite{semaev2004} reduced it to the roots of the summation
+polynomial $\Sem{m+1}(x_1,\ldots,x_m,x_R)$, which vanishes exactly when
+$\pm P_1\pm\cdots\pm P_m=R$ for points with those abscissae. Over
+$\FF_{2^n}$ or $\FF_{p^k}$ the factor base is chosen as the points whose
+abscissa lies in a subspace or subfield, and Weil restriction turns
+$\Sem{m+1}=0$ into a polynomial system over the base field; the textbook
+oracle solves that system with a Gr\"obner-basis engine (F4/F5,
+\cite{faugere1999,faugere2002}) or a SAT solver~\cite{trimoska2020}.
+Gaudry~\cite{gaudry2009} and Diem~\cite{diem2011} give the asymptotics
+over extension fields; for prime fields no factor base is known that makes
+the method competitive, and summation-polynomial systems over $\FF_p$ are
+the subject of the Kummer-tower and rational-map bases of
+Petit--Kosters--Messeng~\cite{pkm2016}.
+
+\paragraph{Frobenius-invariant bases.} Galbraith, Granger, Merz and
+Petit~\cite{ggmp2020} observe that a factor base with $\pi(\Fb)=\Fb$ splits
+into Frobenius orbits of size dividing $n$, with
+$\log\pi^k(P)=\lambda^k\log P$. The unknowns collapse by $\approx n$, the
+matrix by $\approx n^2$, and ordered decompositions save $m!$---more than
+rho's $\sqrt{2n}$, but from a base too far behind to overtake it at
+deployed sizes. Invariant bases come from linearised polynomials attached
+to the factors of $x^n-1$ over $\FF_2$; the subspace dimension is
+$\ell=\operatorname{ord}_n(2)$, so the base size is fixed by $n$
+(Table~1 of \art{RESEARCH_KOBLITZ_INDEX_CALCULUS.md}).
+
+\paragraph{Symmetries of the system.} The decomposition system is
+invariant under the symmetric group $S_m$; rational 2-torsion adds sign
+changes, and Faug\`ere, Gaudry, Huot and Renault~\cite{fghr2014} show that
+in the coordinate $Y$ with $Y(P+T)=-Y(P)$ the invariance group becomes the
+Weyl group $D_m$, with a much smaller quotient. We measure this at $m=4$
+in \S\ref{sec:gaudry}.
