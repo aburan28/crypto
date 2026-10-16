@@ -36,7 +36,8 @@ def build_receipt(artifact, artifact_id, action_digest, run_id, attempt,
             or workflow.get("head_sha") != commit
             or selection.get("screen_commit") != commit
             or selector_host.get("git_sha") != commit
-            or len(selector_host.get("cpu_affinity", [])) != 4):
+            or len(selector_host.get("cpu_affinity", [])) != 2
+            or selector_host.get("cpu_envelope") != "github_two_core"):
         raise ValueError("uploaded GitHub selector artifact differs from frozen run")
     return {
         "schema": "n83.tier1-github-selector-seal/v1",

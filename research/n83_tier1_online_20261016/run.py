@@ -147,7 +147,7 @@ def github_seal_preflight(selection, identity):
                 "candidate_manifest_sha256"]
             or seal.get("selector_host_sha256") != selection[
                 "screen_host_sha256"]
-            or len(seal.get("selector_cpus", [])) != 4
+            or len(seal.get("selector_cpus", [])) != 2
             or seal.get("run_id") != identity["runId"]
             or seal.get("run_attempt") != identity["runAttempt"]
             or seal.get("head_sha") != identity["sha"]
@@ -166,7 +166,7 @@ def cpu_list(value):
     return result
 
 
-def choose_cpus():
+def choose_cpus(count=4):
     available = set(os.sched_getaffinity(0))
     nodes = sorted(Path("/sys/devices/system/node").glob("node[0-9]*"))
     for node in nodes:
@@ -183,9 +183,9 @@ def choose_cpus():
                 f"/sys/devices/system/cpu/cpu{cpu}/topology/thread_siblings_list"))
             chosen.append(cpu)
             occupied_siblings.update(cpu_list(siblings or str(cpu)))
-            if len(chosen) == 4:
+            if len(chosen) == count:
                 return chosen, node.name
-    raise ValueError("four distinct physical cores on one visible NUMA node required")
+    raise ValueError(f"{count} distinct physical cores on one visible NUMA node required")
 
 
 def host_telemetry(cpus):
@@ -249,7 +249,7 @@ def run(binary, rho_binary, output, github_host=False):
             raise ValueError("AWS allocation type or zone differs")
         hashes, points = fixture_preflight()
         selection, candidate_path = selection_preflight()
-    cpus, node = choose_cpus()
+    cpus, node = choose_cpus(2 if github_host else 4)
     if github_host and cpus != github_seal_preflight(selection, identity)[
             "selector_cpus"]:
         raise ValueError("selector and panel CPU allocation differs")

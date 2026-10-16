@@ -38,11 +38,12 @@ def frozen_inputs():
     return hashes
 
 
-def run(binary, rho_binary, output):
+def run(binary, rho_binary, output, github_two_core=False):
     hashes = frozen_inputs()
     if output.exists():
         raise ValueError("output directory already exists")
-    cpus, node = tier1.choose_cpus()
+    envelope = "github_two_core" if github_two_core else "aws_four_core"
+    cpus, node = tier1.choose_cpus(2 if github_two_core else 4)
     os.sched_setaffinity(0, cpus)
     output.mkdir(parents=True)
     group = parent.cgroup_root()
@@ -50,6 +51,7 @@ def run(binary, rho_binary, output):
     host["schema"] = "n83.tier1-selector-host/v1"
     host["cpu_affinity"] = cpus
     host["numa_node"] = node
+    host["cpu_envelope"] = envelope
     parent.write_json(output / "host.json", host)
     parent.write_json(output / "source.json", {
         "schema": "n83.tier1-selector-source/v1", "hashes": hashes,
@@ -58,6 +60,7 @@ def run(binary, rho_binary, output):
         "rho_binary_sha256": parent.digest(rho_binary),
         "runner_sha256": parent.digest(Path(__file__)),
         "arm_order": [arm for arm, _, _, _ in ARMS],
+        "cpu_envelope": envelope,
         "rho_seed": cold.RHO_SEED,
     })
     memory_max = (host["cgroup_before"]["memory.max"] or "").strip()
@@ -65,7 +68,8 @@ def run(binary, rho_binary, output):
     if (host["mem_total_kib"] is None
             or host["mem_total_kib"] * 1024 < cold.RSS_CAP_BYTES + 256 * 1024**2
             or host["disk_free_bytes"] < 2 * 1024**3
-            or len(host["visible_affinity"] or []) < 4 or memory_too_small):
+            or len(host["visible_affinity"] or []) < len(cpus)
+            or memory_too_small):
         parent.write_json(output / "preflight.json", {
             "status": "REJECTED_HOST_CAPACITY", "host": host})
         return 2
@@ -95,17 +99,20 @@ def run(binary, rho_binary, output):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--preflight", action="store_true")
+    parser.add_argument("--github-two-core", action="store_true")
     parser.add_argument("--binary", type=Path)
     parser.add_argument("--rho-binary", type=Path)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if args.preflight:
-        print(json.dumps({"hashes": frozen_inputs(), "arms": ARMS}, sort_keys=True))
+        print(json.dumps({"hashes": frozen_inputs(), "arms": ARMS,
+                          "cpu_envelope": "github_two_core" if args.github_two_core
+                          else "aws_four_core"}, sort_keys=True))
         return 0
     if not args.binary or not args.rho_binary or not args.output:
         parser.error("--binary, --rho-binary and --output are required")
     return run(args.binary.resolve(), args.rho_binary.resolve(),
-               args.output.resolve())
+               args.output.resolve(), args.github_two_core)
 
 
 if __name__ == "__main__":

@@ -127,10 +127,14 @@ def main():
     hashes, point, scalar = frozen_point()
     host = one_json(output / "host.json")
     source = one_json(output / "source.json")
+    envelope = source.get("cpu_envelope")
+    cpu_count = {"github_two_core": 2, "aws_four_core": 4}.get(envelope)
     if (host["schema"] != "n83.tier1-selector-host/v1"
             or host["git_sha"] is None
-            or len(host["cpu_affinity"]) != 4
+            or cpu_count is None
+            or len(host["cpu_affinity"]) != cpu_count
             or host["visible_affinity"] != host["cpu_affinity"]
+            or host.get("cpu_envelope") != envelope
             or source["schema"] != "n83.tier1-selector-source/v1"
             or source["hashes"] != hashes
             or source["source_sha256"] != runner.SOURCE_SHA256
