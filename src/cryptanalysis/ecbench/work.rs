@@ -68,6 +68,87 @@ pub struct WorkBlock {
     pub known_uncounted: Vec<String>,
     /// `unpriced` and `known_uncounted` are both empty.
     pub complete: bool,
+    /// Gates a second target on the same curve would not repeat: the
+    /// factor base and the oracle's tables, a walk's jump table, a BSGS
+    /// baby-step table, a target-blind rank ([`is_reusable_phase`]).  Read by
+    /// `ecbench amortize`; absent from blocks written before it existed.
+    #[serde(default)]
+    pub reusable_bitops: String,
+    /// The rest: what every further target pays again.
+    #[serde(default)]
+    pub per_target_bitops: String,
+}
+
+/// Whether a phase is work a further target on the same curve reuses.
+/// For the single-target pipeline only the factor base and the oracle's
+/// tables are: its target rides in the relation stream, so its relations
+/// and elimination are per target (an amortised method that solved the
+/// base's logarithms once would do better, and must be measured as such,
+/// as `ic.shared_rank` is).
+pub fn is_reusable_phase(method: &str, phase: &str) -> bool {
+    if method == "ic.shared_rank" {
+        return !phase.starts_with("target_");
+    }
+    matches!(
+        phase,
+        "factor_base" | "oracle_setup" | "setup" | "base" | "table"
+    )
+}
+
+/// The Kuhn–Struik series `Σ_{k<T} C(2k,k)/4^k`: the expected cost of
+/// solving `T` targets with one distinguished-point rho that keeps its
+/// table, in units of one cold target's walk (Kuhn and Struik, SAC 2001).
+/// Detection lag is left out, which is generous to rho.
+pub fn batch_rho_factor(targets: u64) -> f64 {
+    let (mut coeff, mut sum) = (1.0f64, 0.0f64);
+    for k in 0..targets {
+        sum += coeff;
+        coeff *= (2 * k + 1) as f64 / (2 * k + 2) as f64;
+    }
+    sum
+}
+
+/// Targets at which a method with `reusable` gates once and `per_target`
+/// gates a target first costs no more than batch rho (`rho_reusable` once,
+/// then `rho_per_target · batch_rho_factor(T)`), searched over powers of
+/// two up to `2^limit_log2`.  `None` if it never does in that range.
+pub fn break_even_targets(
+    reusable: f64,
+    per_target: f64,
+    rho_reusable: f64,
+    rho_per_target: f64,
+    limit_log2: u32,
+) -> Option<u64> {
+    let cost = |t: u64| reusable + t as f64 * per_target;
+    // Σ c_k ≈ 2·sqrt(T/π) for large T; exact below 2^20.
+    let rho = |t: u64| {
+        let f = if t <= 1 << 20 {
+            batch_rho_factor(t)
+        } else {
+            2.0 * (t as f64 / std::f64::consts::PI).sqrt()
+        };
+        rho_reusable + rho_per_target * f
+    };
+    let mut lo = 0u64;
+    let mut hi = None;
+    for e in 0..=limit_log2 {
+        let t = 1u64 << e;
+        if cost(t) <= rho(t) {
+            hi = Some(t);
+            break;
+        }
+        lo = t;
+    }
+    let mut hi = hi?;
+    while hi - lo > 1 {
+        let mid = lo + (hi - lo) / 2;
+        if cost(mid) <= rho(mid) {
+            hi = mid;
+        } else {
+            lo = mid;
+        }
+    }
+    Some(hi)
 }
 
 /// How one counter is charged.
@@ -234,6 +315,21 @@ fn generic_rule(method: &str, counter: &str) -> Option<Rule> {
     let strong = method.starts_with("rho.signed_frobenius_strong");
     let kangaroo = method.starts_with("kangaroo");
     Some(match counter {
+        // The strong walk hashes every lane's point for the
+        // distinguished-point test (about ten word operations); a wasted
+        // merge pays a failed inversion modulo r.
+        "walk_steps" if strong => Prims(&[(WordOp, 10)]),
+        "wasted_merges" if strong => Prims(&[(ModrInv, 1)]),
+        // A kangaroo step mixes two hashes and updates its distance.
+        "steps" if kangaroo => Prims(&[(WordOp, 2), (ModrAdd, 1)]),
+        // A collision whose coefficients do not solve: an inversion and a
+        // product modulo r.
+        "useless_collisions" => Prims(&[(ModrInv, 1), (ModrMul, 1)]),
+        // BSGS with negation keys every point by its class: a negation and
+        // a comparison before the probe.
+        "inserts_uncharged" | "lookups_uncharged" if method == "bsgs.negation" => {
+            Prims(&[(HashProbe, 1), (FieldAdd, 2)])
+        }
         "walk_steps"
         | "walks"
         | "fruitless_walks"
@@ -259,7 +355,6 @@ fn generic_rule(method: &str, counter: &str) -> Option<Rule> {
         | "cycles_other_length"
         | "walks_abandoned_in_a_cycle"
         | "walks_capped"
-        | "useless_collisions"
         | "seed_orbits"
         | "table_target"
         | "base_points"
@@ -344,14 +439,6 @@ fn known_uncounted(method: &str, solver: Option<&SolverStats>) -> Vec<String> {
         if method == "ic.large_prime" {
             out.push("large_prime_merge_rebuilds");
         }
-    } else if method.starts_with("rho.signed_frobenius_strong") {
-        out.extend(["per_lane_dp_hash", "wasted_merge_inversions"]);
-    } else if method.starts_with("kangaroo") {
-        out.push("per_step_mix_hashes_and_scalar_updates");
-    } else if method == "bsgs.negation" {
-        out.push("class_key_negations");
-    } else if method.starts_with("rho.") && method != "rho.frozen_reference" {
-        out.push("useless_collision_inversions");
     }
     if let Some(s) = solver.filter(|s| !solver_complete(s)) {
         if let Some(gap) = solver_gap(&s.op_unit) {
@@ -619,6 +706,7 @@ pub fn price(x: &Priceable) -> Result<WorkBlock, String> {
 
     let mut out_phases = Vec::new();
     let mut total: u128 = 0;
+    let mut reusable: u128 = 0;
     for (name, prims) in phases {
         let mut gates: u128 = 0;
         for (&p, &c) in &prims {
@@ -628,6 +716,9 @@ pub fn price(x: &Priceable) -> Result<WorkBlock, String> {
             }
         }
         total += gates;
+        if is_reusable_phase(method, &name) {
+            reusable += gates;
+        }
         out_phases.push(PhaseWork {
             name,
             prims: prims
@@ -655,6 +746,8 @@ pub fn price(x: &Priceable) -> Result<WorkBlock, String> {
         floor_bitops: floor,
         ratio_to_floor: total as f64 / floor,
         complete: unpriced.is_empty() && known.is_empty(),
+        reusable_bitops: reusable.to_string(),
+        per_target_bitops: (total - reusable).to_string(),
         unpriced,
         known_uncounted: known,
     })
@@ -798,6 +891,23 @@ mod tests {
             ec1: None,
             curve_uid: None,
         }
+    }
+
+    #[test]
+    fn batch_rho_and_break_even() {
+        assert_eq!(batch_rho_factor(1), 1.0);
+        assert!((batch_rho_factor(2) - 1.5).abs() < 1e-12);
+        // Σ c_k → 2·sqrt(T/π).
+        let t = 1u64 << 16;
+        let approx = 2.0 * (t as f64 / std::f64::consts::PI).sqrt();
+        assert!((batch_rho_factor(t) / approx - 1.0).abs() < 1e-2);
+        // A method that costs 100 once and 1 a target beats a rho of 10 a
+        // target from T with 100 + T <= 10·Σ c_k.
+        let t = break_even_targets(100.0, 1.0, 0.0, 10.0, 30).unwrap();
+        assert!(100.0 + t as f64 <= 10.0 * batch_rho_factor(t));
+        assert!(100.0 + (t - 1) as f64 > 10.0 * batch_rho_factor(t - 1));
+        // Dearer per target than rho's first walk: never.
+        assert_eq!(break_even_targets(0.0, 20.0, 0.0, 10.0, 30), None);
     }
 
     #[test]

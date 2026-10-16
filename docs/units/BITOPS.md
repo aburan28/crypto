@@ -102,6 +102,7 @@ way.
 |---|---|
 | `modr_mul` | `field_mul` of `F_p` at `w` bits |
 | `modr_add` | `field_add` of `F_p` at `w` bits |
+| `modr_inv` | `field_inv` of `F_p` at `w` bits (binary extended Euclid) |
 | a multiply-subtract of elimination (`row_op`) | `modr_mul + modr_add` |
 | `word_op` | 64: one 64-bit XOR, AND or compare of a bit-packed algorithm (F4 and Macaulay rows, Gray-code enumeration) |
 | `hash_probe` | `4κ` with `κ` the bits of a field element: a fold-XOR hash, a key comparison and a select. Keys are field elements, already uniform, so no multiplier is needed. A table's real cost is memory, which is reported beside the unit and never folded in |

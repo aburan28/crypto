@@ -31,6 +31,13 @@
 //! disagreement is not a measurement.  Inconclusive verdicts (budget
 //! spent) are reported as such and never counted as refutations.
 //!
+//! Every target also carries its work in `bitop/v1`
+//! (`crate::cryptanalysis::bitops`, `docs/units/BITOPS.md`), the unit the
+//! whole repository is priced in, or `None` with the reason when part of it
+//! has no bit-operation count (an S₄ pair, the F4 matrix builds, a CDCL
+//! conflict).  The `gae` columns are the legacy conversion with this host's
+//! measured ratios; a missing ratio is no price, never a default.
+//!
 //! The last column is an extrapolation and says so: with the measured
 //! hit rate and the `K + 1` relations the instance needs, the relation
 //! phase would cost `(K+1)/rate` targets at the oracle's mean price —
@@ -43,6 +50,7 @@ use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use serde::Serialize;
 
+use crate::cryptanalysis::bitops::{Field, Prim, Widths};
 use crate::cryptanalysis::ic_boundary::lift_abscissae;
 
 use crate::cryptanalysis::ic_boundary::{
@@ -80,6 +88,10 @@ pub struct TargetPrice {
     pub gae: f64,
     /// Engine detail: F4 reductions/splits, SAT solver calls/models.
     pub extra: BTreeMap<String, u64>,
+    /// The target's work in `bitop/v1` (`crate::cryptanalysis::bitops`),
+    /// or `None` when part of it has no bit-operation count; `gae` above
+    /// is the legacy, host-converted figure.
+    pub bitops: Option<u128>,
 }
 
 fn median(mut xs: Vec<f64>) -> f64 {
@@ -115,11 +127,24 @@ pub struct OraclePrice {
     /// relation phase, where most targets do not decompose.
     pub gae_per_refutation_mean: f64,
     pub extra_totals: BTreeMap<String, u64>,
+    /// Mean `bitop/v1` gates per target, when every target has a count.
+    pub bitops_per_target_mean: Option<f64>,
+    /// Why the oracle has no `bitop/v1` figure, when it has none.
+    pub bitops_missing: Option<String>,
     pub per_target: Vec<TargetPrice>,
 }
 
 impl OraclePrice {
-    fn from_targets(oracle: &str, unit: &str, per_target: Vec<TargetPrice>) -> Self {
+    fn from_targets(
+        oracle: &str,
+        unit: &str,
+        per_target: Vec<TargetPrice>,
+        bitops_missing: Option<&str>,
+    ) -> Self {
+        let priced: Option<Vec<u128>> = per_target.iter().map(|t| t.bitops).collect();
+        let bitops_per_target_mean = priced
+            .filter(|v| !v.is_empty())
+            .map(|v| v.iter().map(|&b| b as f64).sum::<f64>() / v.len() as f64);
         let class = |v: Verdict| per_target.iter().filter(move |t| t.verdict == v);
         let mut extra_totals: BTreeMap<String, u64> = BTreeMap::new();
         for t in &per_target {
@@ -149,6 +174,12 @@ impl OraclePrice {
             gae_per_refutation_mean: refuted.iter().map(|t| t.gae).sum::<f64>()
                 / refuted.len().max(1) as f64,
             extra_totals,
+            bitops_missing: bitops_per_target_mean.is_none().then(|| {
+                bitops_missing
+                    .unwrap_or("a target without a count")
+                    .to_string()
+            }),
+            bitops_per_target_mean,
             per_target,
         }
     }
@@ -164,6 +195,13 @@ pub struct ProjectedRelationPhase {
     pub s_projected: f64,
     pub s_over_rho_floor: f64,
     pub extrapolation: bool,
+    /// The same projection in `bitop/v1`: gates of the relation phase, and
+    /// over the generic floor `√(πr/4n)` additions in gates.  `None` when
+    /// the oracle has no bit-operation price.
+    pub relation_phase_bitops: Option<f64>,
+    pub bitops_over_rho_floor: Option<f64>,
+    /// What the projection leaves out: it prices the relation phase alone.
+    pub covers: String,
 }
 
 /// One instance of the Semaev system, priced by every oracle.
@@ -400,6 +438,12 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
     }
     let algebra = unknowns <= cfg.max_unknowns;
 
+    let widths = Widths {
+        field: Field::Binary { n },
+        r_bits: 64 - r.leading_zeros(),
+    };
+    let gates = |p: Prim| widths.gates(p).expect("binary primitive");
+    let add_gates = gates(Prim::GroupAdd);
     let ns_add = calib.ns_per_add;
     let price =
         |native: u64, ns: f64, adds: u64| -> f64 { native as f64 * ns / ns_add + adds as f64 };
@@ -432,6 +476,7 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
             wall_ns: wall,
             gae: o.gae(),
             extra: BTreeMap::new(),
+            bitops: Some(o.adds as u128 * add_gates + o.doubles as u128 * gates(Prim::GroupDouble)),
         });
 
         // meet in the middle
@@ -454,6 +499,11 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
             wall_ns: wall,
             gae: price(ctr.lookups, calib.ns_per_lookup, o.adds),
             extra: BTreeMap::new(),
+            bitops: Some(
+                ctr.lookups as u128 * gates(Prim::HashProbe)
+                    + o.adds as u128 * add_gates
+                    + o.doubles as u128 * gates(Prim::GroupDouble),
+            ),
         });
 
         // S₄ pairs-and-solve
@@ -493,6 +543,9 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
                 wall_ns: wall,
                 gae: price(pairs, calib.ns_per_s4_pair.unwrap_or(ns_add), o.adds),
                 extra,
+                // One S₄ pair has no bit-operation count yet (the quartic's
+                // build and the subspace-root gcd are not counted).
+                bitops: None,
             });
         }
 
@@ -548,8 +601,15 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
             native: words,
             group_adds: 0,
             wall_ns: wall,
-            gae: price(words, calib.ns_per_word_xor.unwrap_or(1.0), 0),
+            // No measured word-XOR ratio is no price: the old 1 ns default
+            // made one up.
+            gae: calib
+                .ns_per_word_xor
+                .map_or(f64::NAN, |ns| price(words, ns, 0)),
             extra,
+            // The word XORs are the elimination alone; the matrix builds
+            // and the summation polynomial are not counted here.
+            bitops: None,
         });
 
         // CDCL SAT with native parity rows and degree-2 Macaulay rows
@@ -598,6 +658,8 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
             wall_ns: wall,
             gae: price(sstats.conflicts.max(1), ns_per_conflict, 0),
             extra,
+            // A conflict has no bit-operation count.
+            bitops: None,
         });
     }
 
@@ -606,11 +668,13 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
             &format!("enumerate_m{m}"),
             "group_additions",
             enumerate_rows,
+            None,
         ),
         OraclePrice::from_targets(
             &format!("meet_in_the_middle_m{m}"),
             "pair_table_probes",
             mitm_rows,
+            None,
         ),
     ];
     if !s4_rows.is_empty() {
@@ -618,6 +682,7 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
             "semaev_s4_pairs_and_solve",
             "pairs",
             s4_rows,
+            Some("an S4 pair's quartic build and subspace-root gcd are not counted"),
         ));
     }
     if !f4_rows.is_empty() {
@@ -625,6 +690,7 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
             "matrix_f4_splitting",
             "word_xors",
             f4_rows,
+            Some("the word XORs count the elimination only, not the matrix builds or the summation polynomial"),
         ));
     }
     if !sat_rows.is_empty() {
@@ -632,6 +698,7 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
             "cdcl_sat_native_xor",
             "conflicts",
             sat_rows,
+            Some("a CDCL conflict has no bit-operation count"),
         ));
     }
 
@@ -652,6 +719,11 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
                 s_projected: gae / sqrt_r,
                 s_over_rho_floor: gae / sqrt_r / floor,
                 extrapolation: true,
+                relation_phase_bitops: o.bitops_per_target_mean.map(|b| needed * b),
+                bitops_over_rho_floor: o
+                    .bitops_per_target_mean
+                    .map(|b| needed * b / (generic_floor_ops(r as f64, 2.0 * n as f64) * add_gates as f64)),
+                covers: "relation phase only: no factor base, pair table, linear algebra or verification".into(),
             }
         })
         .collect();

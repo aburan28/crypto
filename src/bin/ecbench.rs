@@ -89,6 +89,22 @@ enum Cmd {
     },
     /// Print the bitop/v1 test vectors (docs/units/bitop-v1.vectors.json).
     BitopVectors,
+    /// Amortise an arm against a rho arm on the same curves, in bitop/v1:
+    /// per curve, the mean reusable and per-target gates of each, their
+    /// cost for T targets (rho as one walk that keeps its table, Kuhn and
+    /// Struik), and the fewest targets at which the arm costs no more.
+    Amortize {
+        #[arg(long, num_args = 1.., required = true)]
+        dir: Vec<PathBuf>,
+        #[arg(long)]
+        arm: String,
+        /// The rho arm to amortise against.
+        #[arg(long)]
+        reference: String,
+        /// Search break-even up to 2^this many targets.
+        #[arg(long, default_value_t = 40)]
+        limit_log2: u32,
+    },
     /// List every method with its parameters.
     Methods {
         #[arg(long)]
@@ -644,6 +660,83 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
             }
         }
         Cmd::BitopVectors => print_json(&crypto_lib::cryptanalysis::bitops::vectors())?,
+        Cmd::Amortize {
+            dir,
+            arm,
+            reference,
+            limit_log2,
+        } => {
+            use crypto_lib::cryptanalysis::ecbench::work;
+            // (curve, arm) -> (reusable, per-target) gates of each verified run.
+            let mut by: std::collections::BTreeMap<(String, String), Vec<(f64, f64, bool)>> =
+                Default::default();
+            let mut log2_r: std::collections::BTreeMap<String, f64> = Default::default();
+            for d in &dir {
+                for r in crypto_lib::cryptanalysis::ecbench::runner::read_records(d)
+                    .map_err(|e| format!("{}: {e}", d.display()))?
+                {
+                    if !r.counts() || (r.arm != arm && r.arm != reference) {
+                        continue;
+                    }
+                    let w = match &r.work {
+                        Some(w) if !w.reusable_bitops.is_empty() => w.clone(),
+                        _ => work::price_record(&r)?,
+                    };
+                    let f = |s: &str| s.parse::<f64>().unwrap_or(f64::NAN);
+                    log2_r.insert(
+                        r.workload.curve.slug.clone(),
+                        (r.workload.curve.r as f64).log2(),
+                    );
+                    by.entry((r.workload.curve.slug.clone(), r.arm.clone()))
+                        .or_default()
+                        .push((f(&w.reusable_bitops), f(&w.per_target_bitops), w.complete));
+                }
+            }
+            let mean = |v: &[(f64, f64, bool)]| {
+                let n = v.len() as f64;
+                (
+                    v.iter().map(|x| x.0).sum::<f64>() / n,
+                    v.iter().map(|x| x.1).sum::<f64>() / n,
+                    v.iter().all(|x| x.2),
+                )
+            };
+            let mut rows = Vec::new();
+            for (slug, lr) in &log2_r {
+                let (Some(a), Some(b)) = (
+                    by.get(&(slug.clone(), arm.clone())),
+                    by.get(&(slug.clone(), reference.clone())),
+                ) else {
+                    continue;
+                };
+                let (ra, pa, ca) = mean(a);
+                let (rb, pb, cb) = mean(b);
+                let at = |t: u64| {
+                    serde_json::json!({
+                        "targets": t,
+                        "arm_bitops": ra + t as f64 * pa,
+                        "rho_bitops": rb + pb * work::batch_rho_factor(t),
+                    })
+                };
+                rows.push(serde_json::json!({
+                    "curve": slug,
+                    "log2_r": lr,
+                    "arm": {"runs": a.len(), "reusable_bitops": ra, "per_target_bitops": pa, "complete": ca},
+                    "reference": {"runs": b.len(), "reusable_bitops": rb, "per_target_bitops": pb, "complete": cb},
+                    "cold_ratio": (ra + pa) / (rb + pb),
+                    "per_target_ratio": pa / pb,
+                    "break_even_targets": work::break_even_targets(ra, pa, rb, pb, limit_log2),
+                    "at": [1u64, 16, 256, 4096, 1 << 16, 1 << 20].map(at),
+                }));
+            }
+            print_json(&serde_json::json!({
+                "schema": "ecbench.amortize/v1",
+                "unit": crypto_lib::cryptanalysis::bitops::UNIT,
+                "arm": arm,
+                "reference": reference,
+                "model": "arm: reusable once + per_target each; rho: reusable once + per_target * sum_{k<T} C(2k,k)/4^k (Kuhn-Struik, no detection lag)",
+                "curves": rows,
+            }))?;
+        }
         Cmd::Methods { json } => {
             if json {
                 let v: Vec<_> = methods::registry()

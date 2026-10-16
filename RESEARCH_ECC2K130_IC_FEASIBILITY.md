@@ -54,15 +54,31 @@ Two independent reads of the same cliff:
    `docs/ic/PLAN_IC_ACCOUNTING_FIXES_20261007.md` F5).  The 5× gap at the
    larger rungs is unexplained by the structural model and should be
    reconciled against first-hit distributions over many targets before the
-   fit is extrapolated to n=131.
-   4-tuples of factor-base points summing to it (≈ `B⁴/(24r)` unordered;
-   this document counts ordered tuples unless it says otherwise); the
-   scan space is ≈ `4K²n²` probes per point, so their ratio gives
-   `probes/relation ≈ r/(4n²K²)`, i.e. `C = 0.25`.  This matches the fit's
-   `r/(n²K²)` scaling but not its constant: the fitted `C` is 1.3× (n=61)
-   to 6× (n=71) larger.  The gap is open (heavy-tailed rank distribution,
-   non-uniform hit positions, or scan overlap are candidates); the
-   extrapolation below uses the fit, `C = 1`.
+   fit is extrapolated to n=131.  (≈ `B⁴/(24r)` of the tuples are
+   unordered; this document counts ordered tuples unless it says
+   otherwise.)  Heavy-tailed rank distributions, non-uniform hit positions
+   and scan overlap are candidates for the gap; the extrapolation below
+   uses the fit, `C = 1`.
+
+> **Status 2026-10-16: the n=131 figures below are illustrative, not a
+> bound.**  The repository now prices every cost in one unit, `bitop/v1`
+> (`docs/units/BITOPS.md`), and fits exponents only with intervals.  This
+> extrapolation fails both requirements:
+> - it rests on a constant `C` fitted from three rungs with no interval,
+>   and the fit disagrees with the structural count by up to 6×;
+> - it counts rank probes, not work: a probe and a rho step are different
+>   operations, and neither the canonicalisations behind a probe nor the
+>   sparse linear algebra at `K = 10⁹–10¹²` is costed;
+> - the crossover `K ≈ 1.8·10¹⁶` in §3 inherits all of the above.
+>
+> The qualitative verdict survives any reasonable conversion.  At
+> `K = 10⁹` the probe count exceeds rho's step count by about 2·10⁷.
+> To close that gap a probe would have to cost under 5·10⁻⁸ of a rho step.
+> In `bitop/v1` at n=131 the hash probe alone is 4n = 524 gates and an
+> affine addition 242,471, so 2·10⁻³ of a step, before the canonicalisation
+> each probe also needs.  The crossover
+> column count is withdrawn as a number until `C` has an interval from
+> more rungs and the linear algebra has a bit-operation price.
 
 Extrapolating to n=131 (r = 6.8·10³⁸):
 
@@ -99,13 +115,8 @@ point, as at n=73) needs `K` between 10⁹ and 10¹² — with:
   that is 4·10²⁵ probes — **~2·10⁷ × rho's operation count**.  The
   precompute-only-equals-rho crossover is `K = r/(n²·2^60.9) ≈ 1.8·10¹⁶`
   columns (not the `2.4·10¹⁸` previously stated), still beyond any linear
-  algebra ever contemplated.
-  `r/(n²K)` probes (fit constant `C = 1`): at K = 10⁹ that is 4·10²⁵
-  probes — **~2·10⁷ × rho's operation count**.  The
-  precompute-only-equals-rho crossover is `K = r/(n²·2^60.9) ≈ 1.8·10¹⁶`
-  columns, beyond any linear algebra ever contemplated.  (Corrected
-  2026-10-07: this bullet previously wrote `r/(nK)` and `2.4·10¹⁸`, off
-  by a factor `n`; the tables always used `r/(n²K)`.)
+  algebra ever contemplated.  This number is withdrawn as a bound; see the
+  2026-10-16 status note in §2.
 - Therefore the landed rungs' vs_rho wins are **online-after-precompute**
   (`single_target_online` timing class): legitimate under the frozen
   contract (precompute excluded, logged, reusable across targets), but the

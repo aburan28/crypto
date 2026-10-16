@@ -90,6 +90,8 @@ pub enum Prim {
     ModrMul,
     /// Addition modulo `r`.
     ModrAdd,
+    /// Inversion modulo `r` (binary extended Euclid at `r`'s width).
+    ModrInv,
     /// One 64-bit word operation (XOR, AND, OR, compare) of a bit-packed
     /// algorithm: 64 gates.
     WordOp,
@@ -102,7 +104,7 @@ pub enum Prim {
 }
 
 impl Prim {
-    pub const ALL: [Prim; 14] = [
+    pub const ALL: [Prim; 15] = [
         Prim::FieldAdd,
         Prim::FieldMul,
         Prim::FieldSqr,
@@ -115,6 +117,7 @@ impl Prim {
         Prim::GroupDouble,
         Prim::ModrMul,
         Prim::ModrAdd,
+        Prim::ModrInv,
         Prim::WordOp,
         Prim::HashProbe,
     ];
@@ -133,6 +136,7 @@ impl Prim {
             Prim::GroupDouble => "group_double",
             Prim::ModrMul => "modr_mul",
             Prim::ModrAdd => "modr_add",
+            Prim::ModrInv => "modr_inv",
             Prim::WordOp => "word_op",
             Prim::HashProbe => "hash_probe",
         }
@@ -301,6 +305,7 @@ impl Widths {
         match prim {
             Prim::ModrMul => return Ok(fp::mul(w)),
             Prim::ModrAdd => return Ok(fp::add(w)),
+            Prim::ModrInv => return Ok(fp::inv(w)),
             Prim::WordOp => return Ok(64),
             _ => {}
         }
@@ -322,7 +327,7 @@ impl Widths {
                 ),
                 Prim::HashProbe => 4 * b as u128,
                 Prim::AsSolve | Prim::Canon => return Err(none()),
-                Prim::ModrMul | Prim::ModrAdd | Prim::WordOp => unreachable!(),
+                Prim::ModrMul | Prim::ModrAdd | Prim::ModrInv | Prim::WordOp => unreachable!(),
             },
             Field::Binary { n } => match prim {
                 Prim::FieldAdd => f2::add(n),
@@ -343,7 +348,7 @@ impl Widths {
                 ),
                 Prim::HashProbe => 4 * n as u128,
                 Prim::FieldSqrt | Prim::Legendre => return Err(none()),
-                Prim::ModrMul | Prim::ModrAdd | Prim::WordOp => unreachable!(),
+                Prim::ModrMul | Prim::ModrAdd | Prim::ModrInv | Prim::WordOp => unreachable!(),
             },
             Field::Fp4 { bits: b } => match prim {
                 Prim::FieldAdd => 4 * fp::add(b),
@@ -353,7 +358,7 @@ impl Widths {
                 Prim::FieldInv | Prim::FieldSqrt | Prim::Legendre | Prim::AsSolve | Prim::Canon => {
                     return Err(none())
                 }
-                Prim::ModrMul | Prim::ModrAdd | Prim::WordOp => unreachable!(),
+                Prim::ModrMul | Prim::ModrAdd | Prim::ModrInv | Prim::WordOp => unreachable!(),
             },
         })
     }
@@ -466,6 +471,17 @@ mod tests {
             assert!(add > 4 * w.gates(Prim::FieldMul).unwrap());
             assert!(add > w.gates(Prim::ModrMul).unwrap());
         }
+    }
+
+    /// The committed vectors are what this file computes: bitop/v1 is
+    /// frozen, so a changed formula fails here instead of silently
+    /// repricing history.
+    #[test]
+    fn committed_vectors_are_frozen() {
+        let committed: serde_json::Value =
+            serde_json::from_str(include_str!("../../docs/units/bitop-v1.vectors.json"))
+                .expect("vectors parse");
+        assert_eq!(committed, vectors());
     }
 
     #[test]
