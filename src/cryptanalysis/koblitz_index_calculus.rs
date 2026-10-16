@@ -4056,6 +4056,12 @@ pub struct PairSumTable {
     points: Vec<FastPoint>,
     /// `−P_k` for every base point, the addends of `R − P_k`.
     negated: Vec<FastPoint>,
+    /// The abscissae and ordinates of `negated`, the slices the scans'
+    /// folding kernel reads ([`FastCurve::add_many_lazy_soa`]).  Both
+    /// empty if some base point is `O`, which a slice cannot say; the
+    /// scans then take `negated` itself.
+    negated_x: Vec<u64>,
+    negated_y: Vec<u64>,
     /// `bucket_start[b]..bucket_start[b + 1]` is the run of entries whose
     /// packed sum has `b` as its top bits (`key >> bucket_shift`): a
     /// lookup lands in its bucket with one indexed load instead of
@@ -4138,6 +4144,35 @@ pub struct ScanScratch {
     keys: Vec<u64>,
     /// Pairs recovered for one key.
     pairs: Vec<(u32, u32)>,
+    /// On the folding kernel's path, each rest's abscissa, in place of
+    /// `rests`.
+    x3s: Vec<u64>,
+    /// The coordinates of a [`Scan::Indices`] scan's summands, gathered
+    /// for the folding kernel.
+    gather_x: Vec<u64>,
+    gather_y: Vec<u64>,
+}
+
+/// [`PairSumTable`]'s `negated_x` and `negated_y` of `points`: both empty
+/// if some point is `O`.
+fn coordinate_slices(points: &[FastPoint]) -> (Vec<u64>, Vec<u64>) {
+    if points.iter().any(|p| p.infinity) {
+        return (Vec::new(), Vec::new());
+    }
+    (
+        points.iter().map(|p| p.x).collect(),
+        points.iter().map(|p| p.y).collect(),
+    )
+}
+
+/// Whether a scan on a folded table may subtract by the folding kernel
+/// on coordinate slices and key the abscissae as words
+/// ([`FastCurve::add_many_lazy_soa`]).  `KIC_SCAN_SOA=0` keeps the
+/// point list: a same-binary control for what that path is credited
+/// with, on top of the kernel's own (`KIC_SCAN_FOLD=shift`).
+fn scan_soa_enabled() -> bool {
+    static ON: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ON.get_or_init(|| std::env::var("KIC_SCAN_SOA").as_deref() != Ok("0"))
 }
 
 /// How often each relation-matrix column has been mentioned, and the
@@ -4791,6 +4826,7 @@ impl PairSumTable {
         let curve = FastCurve::new(&kc.curve)?;
         let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
         let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
+        let (negated_x, negated_y) = coordinate_slices(&negated);
         let mut entries: Vec<(u64, u32, u32)> = (0..points.len())
             .into_par_iter()
             .flat_map_iter(|i| {
@@ -4837,6 +4873,8 @@ impl PairSumTable {
             curve,
             points,
             negated,
+            negated_x,
+            negated_y,
             bucket_start,
             bucket_shift,
             present,
@@ -4889,6 +4927,7 @@ impl PairSumTable {
         let buckets = 1usize << bucket_bits;
         let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
         let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
+        let (negated_x, negated_y) = coordinate_slices(&negated);
 
         // A counting sort in two passes over the pairs, both parallel.
         // The bucket of a key is known before any key is compared, so
@@ -4954,6 +4993,8 @@ impl PairSumTable {
             curve,
             points,
             negated,
+            negated_x,
+            negated_y,
             bucket_start,
             bucket_shift,
             present,
@@ -4993,6 +5034,7 @@ impl PairSumTable {
         let buckets = 1usize << bucket_bits;
         let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
         let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
+        let (negated_x, negated_y) = coordinate_slices(&negated);
 
         // Cache the packed sum from the counting pass.  The previous
         // builder recomputed every one of the `|F|(|F|+1)/2` group
@@ -5074,6 +5116,8 @@ impl PairSumTable {
             curve,
             points,
             negated,
+            negated_x,
+            negated_y,
             bucket_start,
             bucket_shift,
             present,
@@ -5325,6 +5369,14 @@ impl PairSumTable {
         // (`KIC_FOLD_BUILD=scalar` keeps the old path, the same-binary
         // control).
         let bulk = bulk && canon.is_some();
+        // The base in the same order as coordinate slices, for the
+        // folding kernel ([`FastCurve::add_many_lazy_soa`]); empty if a
+        // point is `O`, and then every row takes the point list.
+        let (by_orbit_x, by_orbit_y) = if scan_soa_enabled() {
+            coordinate_slices(&by_orbit)
+        } else {
+            (Vec::new(), Vec::new())
+        };
         let each_row = |r: usize, f: &mut dyn FnMut(u64, u32)| {
             let mut sums = Vec::with_capacity(n_points);
             let mut scratch = BatchScratch::default();
@@ -5332,16 +5384,61 @@ impl PairSumTable {
             let from = suffix[orbit as usize] as usize;
             if let (true, Some(canon)) = (bulk, canon.as_ref()) {
                 let mut lambdas = Vec::with_capacity(n_points);
+                // A row opens with its summand's own orbit, which holds
+                // `±` the summand: a sum the vector kernels decline, and
+                // so, added with the rest, a row that never took them.
+                // Past that orbit no abscissa is the summand's, and the
+                // rest of the row takes the folding kernel on coordinate
+                // slices.  The keys go out in the row's order either way.
+                let own_end = if by_orbit_x.is_empty() {
+                    n_points
+                } else {
+                    suffix[orbit as usize + 1] as usize
+                };
                 curve.add_many_lazy(
                     points[rep],
-                    &by_orbit[from..],
+                    &by_orbit[from..own_end],
                     &mut sums,
                     &mut lambdas,
                     &mut scratch,
                 );
                 let mut keys: Vec<u64> = sums.iter().map(|p| p.x).collect();
                 canon.canon_in_place(&mut keys);
-                for (key, p) in keys.into_iter().zip(&sums) {
+                for (key, p) in keys.iter().zip(&sums) {
+                    f(if p.infinity { 0 } else { key + 1 }, orbit);
+                }
+                if own_end == n_points {
+                    return;
+                }
+                let mut x3s = Vec::with_capacity(n_points - own_end);
+                lambdas.clear();
+                if curve.add_many_lazy_soa(
+                    points[rep],
+                    &by_orbit_x[own_end..],
+                    &by_orbit_y[own_end..],
+                    &mut x3s,
+                    &mut lambdas,
+                    &mut scratch,
+                ) {
+                    canon.x_keys(&x3s, &mut keys);
+                    for &key in &keys {
+                        f(key, orbit);
+                    }
+                    return;
+                }
+                sums.clear();
+                lambdas.clear();
+                curve.add_many_lazy(
+                    points[rep],
+                    &by_orbit[own_end..],
+                    &mut sums,
+                    &mut lambdas,
+                    &mut scratch,
+                );
+                keys.clear();
+                keys.extend(sums.iter().map(|p| p.x));
+                canon.canon_in_place(&mut keys);
+                for (key, p) in keys.iter().zip(&sums) {
                     f(if p.infinity { 0 } else { key + 1 }, orbit);
                 }
                 return;
@@ -5435,6 +5532,7 @@ impl PairSumTable {
         tagged: bool,
     ) -> Self {
         let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
+        let (negated_x, negated_y) = coordinate_slices(&negated);
         let index_of_point = PointIndex::build(&points);
         // The orbits flat, in the order `reps` indexes them, so a tag is
         // a slice of `orbit_members` and nothing is allocated per hit.
@@ -5453,6 +5551,8 @@ impl PairSumTable {
             curve,
             points,
             negated,
+            negated_x,
+            negated_y,
             bucket_start: parts.bucket_start,
             bucket_shift: parts.bucket_shift,
             present: parts.present,
@@ -6318,9 +6418,68 @@ impl PairSumTable {
             batch,
             keys,
             pairs,
+            x3s,
+            gather_x,
+            gather_y,
         } = scratch;
         rests.clear();
         lambdas.clear();
+        x3s.clear();
+        // A cyclic window is `negated[start..start + tail]` and then, if it
+        // wraps, `negated[..len − tail]`.
+        let (start, tail) = match scan {
+            Scan::Cyclic { start, len } => {
+                let start = start % base;
+                (start, len.min(base - start))
+            }
+            Scan::Indices(_) => (0, len),
+        };
+        // On a folded table with a basis change, the folding kernel takes
+        // the summands as coordinate slices and leaves each rest as its
+        // abscissa, which is all the key reads (`fused`).  It declines a
+        // degenerate sum, and so do other CPUs; then the point list
+        // below handles every case, as it always has.
+        let canon = self
+            .canon
+            .as_ref()
+            .filter(|_| self.fold && scan_soa_enabled() && !self.negated_x.is_empty());
+        let fused = canon.is_some() && {
+            let (xs, ys) = (&self.negated_x, &self.negated_y);
+            let done = match scan {
+                Scan::Cyclic { .. } => {
+                    let first = start..start + tail;
+                    self.curve.add_many_lazy_soa(
+                        target,
+                        &xs[first.clone()],
+                        &ys[first],
+                        x3s,
+                        lambdas,
+                        batch,
+                    ) && (tail == len
+                        || self.curve.add_many_lazy_soa(
+                            target,
+                            &xs[..len - tail],
+                            &ys[..len - tail],
+                            x3s,
+                            lambdas,
+                            batch,
+                        ))
+                }
+                Scan::Indices(idxs) => {
+                    gather_x.clear();
+                    gather_y.clear();
+                    gather_x.extend(idxs.iter().map(|&i| xs[i as usize]));
+                    gather_y.extend(idxs.iter().map(|&i| ys[i as usize]));
+                    self.curve
+                        .add_many_lazy_soa(target, gather_x, gather_y, x3s, lambdas, batch)
+                }
+            };
+            if !done {
+                x3s.clear();
+                lambdas.clear();
+            }
+            done
+        };
         // On a folded table the key reads only the abscissa, so the rests
         // are formed without their ordinates and only the ones the filter
         // admits are completed, as the full scan does.
@@ -6332,23 +6491,22 @@ impl PairSumTable {
                 self.curve.add_many(target, summands, rests, batch);
             }
         };
-        let mut tail = len;
-        match scan {
-            Scan::Cyclic { start, len } => {
-                let start = start % base;
-                tail = len.min(base - start);
-                add(&self.negated[start..start + tail], rests);
-                if tail < len {
-                    add(&self.negated[..len - tail], rests);
+        if !fused {
+            match scan {
+                Scan::Cyclic { .. } => {
+                    add(&self.negated[start..start + tail], rests);
+                    if tail < len {
+                        add(&self.negated[..len - tail], rests);
+                    }
                 }
-            }
-            Scan::Indices(idxs) => {
-                gather.clear();
-                gather.reserve(idxs.len());
-                for &i in idxs {
-                    gather.push(self.negated[i as usize]);
+                Scan::Indices(idxs) => {
+                    gather.clear();
+                    gather.reserve(idxs.len());
+                    for &i in idxs {
+                        gather.push(self.negated[i as usize]);
+                    }
+                    add(gather, rests);
                 }
-                add(gather, rests);
             }
         }
         // Keys a block at a time: enough to keep `LANES`
@@ -6361,13 +6519,18 @@ impl PairSumTable {
         const BLOCK: usize = 1024;
         const LOOKAHEAD: usize = 32;
         let mut admitted_offsets = Vec::with_capacity(BLOCK / 8);
-        for (b, block) in rests.chunks(BLOCK).enumerate() {
-            self.keys_of(block, keys);
+        let count = if fused { x3s.len() } else { rests.len() };
+        for lo in (0..count).step_by(BLOCK) {
+            let hi = (lo + BLOCK).min(count);
+            match canon {
+                Some(canon) if fused => canon.x_keys(&x3s[lo..hi], keys),
+                _ => self.keys_of(&rests[lo..hi], keys),
+            }
             admitted_offsets.clear();
             for &key in keys.iter().take(LOOKAHEAD) {
                 prefetch(&self.present[self.filter_word(key)]);
             }
-            for within in 0..block.len() {
+            for within in 0..hi - lo {
                 if let Some(&ahead) = keys.get(within + LOOKAHEAD) {
                     prefetch(&self.present[self.filter_word(ahead)]);
                 }
@@ -6378,11 +6541,9 @@ impl PairSumTable {
                 admitted_offsets.push(within);
             }
             for &within in &admitted_offsets {
-                let rest = &block[within];
-                let offset = b * BLOCK + within;
+                let offset = lo + within;
                 let k = match scan {
-                    Scan::Cyclic { start, .. } => {
-                        let start = start % base;
+                    Scan::Cyclic { .. } => {
                         if offset < tail {
                             start + offset
                         } else {
@@ -6391,9 +6552,14 @@ impl PairSumTable {
                     }
                     Scan::Indices(idxs) => idxs[offset] as usize,
                 };
+                let rest = if fused {
+                    FastPoint::affine(x3s[offset], 0)
+                } else {
+                    rests[offset]
+                };
                 let rest = match lambdas.get(offset) {
-                    Some(&lambda) => self.curve.finish_lazy(target, *rest, lambda),
-                    None => *rest,
+                    Some(&lambda) => self.curve.finish_lazy(target, rest, lambda),
+                    None => rest,
                 };
                 self.pairs_for_key(rest, keys[within], pairs);
                 for &(i, j) in pairs.iter() {
@@ -6509,38 +6675,68 @@ impl PairSumTable {
                 let mut scratch = BatchScratch::default();
                 let mut keys = Vec::with_capacity(BLOCK);
                 let mut pairs = Vec::new();
+                // The folding kernel's path, as in
+                // [`Self::witnesses_fast_scan`]: the block's rests as
+                // abscissae, keyed as words.
+                let mut x3s: Vec<u64> = Vec::with_capacity(BLOCK);
+                let canon = self
+                    .canon
+                    .as_ref()
+                    .filter(|_| self.fold && scan_soa_enabled() && !self.negated_x.is_empty());
                 for (b, addends) in self.negated.chunks(BLOCK).enumerate() {
                     // `add_many` appends, so the block starts empty.
                     rests.clear();
                     lambdas.clear();
-                    if self.fold {
-                        self.curve.add_many_lazy(
+                    x3s.clear();
+                    let lo = b * BLOCK;
+                    let hi = lo + addends.len();
+                    let fused = canon.is_some()
+                        && self.curve.add_many_lazy_soa(
                             target,
-                            addends,
-                            &mut rests,
+                            &self.negated_x[lo..hi],
+                            &self.negated_y[lo..hi],
+                            &mut x3s,
                             &mut lambdas,
                             &mut scratch,
                         );
-                    } else {
-                        self.curve
-                            .add_many(target, addends, &mut rests, &mut scratch);
+                    if !fused {
+                        if self.fold {
+                            self.curve.add_many_lazy(
+                                target,
+                                addends,
+                                &mut rests,
+                                &mut lambdas,
+                                &mut scratch,
+                            );
+                        } else {
+                            self.curve
+                                .add_many(target, addends, &mut rests, &mut scratch);
+                        }
                     }
-                    let block = &rests[..];
-                    self.keys_of(block, &mut keys);
+                    let count = if fused { x3s.len() } else { rests.len() };
+                    match canon {
+                        Some(canon) if fused => canon.x_keys(&x3s, &mut keys),
+                        _ => self.keys_of(&rests, &mut keys),
+                    }
                     for &key in keys.iter().take(LOOKAHEAD) {
                         prefetch(&self.present[self.filter_word(key)]);
                     }
-                    for (offset, rest) in block.iter().enumerate() {
+                    for offset in 0..count {
                         if let Some(&ahead) = keys.get(offset + LOOKAHEAD) {
                             prefetch(&self.present[self.filter_word(ahead)]);
                         }
                         if !self.admitted(keys[offset]) {
                             continue;
                         }
-                        let k = b * BLOCK + offset;
+                        let k = lo + offset;
+                        let rest = if fused {
+                            FastPoint::affine(x3s[offset], 0)
+                        } else {
+                            rests[offset]
+                        };
                         let rest = match lambdas.get(offset) {
-                            Some(&lambda) => self.curve.finish_lazy(target, *rest, lambda),
-                            None => *rest,
+                            Some(&lambda) => self.curve.finish_lazy(target, rest, lambda),
+                            None => rest,
                         };
                         self.pairs_for_key(rest, keys[offset], &mut pairs);
                         for &(i, j) in &pairs {
@@ -17309,10 +17505,14 @@ mod tests {
 
     #[test]
     fn the_partitioned_fold_build_stores_the_two_pass_table() {
+        // 2^59 and 2^61 are past `n + deg t = 65`, where the bulk rows
+        // take the folding kernel and the old one never ran.
         for (a, n, seed, points) in [
             (0u8, 23u32, 5u64, 300usize),
             (0, 31, 5, 400),
             (0, 53, 1, 3000),
+            (1, 59, 1, 3000),
+            (0, 61, 1, 3000),
         ] {
             let kc = KoblitzCurve::new(a, n).unwrap();
             let fb = build_subgroup_orbit_factor_base(&kc, seed, points).unwrap();
@@ -18130,6 +18330,108 @@ mod tests {
                 found > 0,
                 "degree {degree}: the scans found nothing to compare"
             );
+        }
+    }
+
+    /// A folded table's scans subtract by the folding kernel on
+    /// coordinate slices and key the rests as words.  They must hand the
+    /// sink exactly what the point list hands it, in the same order: on a
+    /// wrapping window, a scattered index list and the full scan, at
+    /// degrees on both sides of the old kernel's `n + deg t ≤ 65`.  The
+    /// point list is the same table with its coordinate slices emptied,
+    /// which is how a scan falls back to it.  Each target is a sum of
+    /// three base points, so every degree has witnesses to compare.
+    #[test]
+    fn the_folding_kernel_s_scans_hand_the_sink_what_the_point_list_does() {
+        let mut fused = 0;
+        for (degree, points) in [
+            (19u32, 300usize),
+            (31, 400),
+            (53, 600),
+            (59, 600),
+            (61, 600),
+        ] {
+            let Some(kc) = [0u8, 1]
+                .into_iter()
+                .find_map(|a| KoblitzCurve::new(a, degree))
+            else {
+                continue;
+            };
+            let fb = build_subgroup_orbit_factor_base(&kc, 3, points).unwrap();
+            let folded = PairSumTable::build_within(
+                &kc,
+                &fb,
+                PairSumTable::folded_byte_size(fb.signed_orbits.len(), fb.points.len(), kc.n),
+            )
+            .unwrap();
+            assert!(
+                folded.is_folded(),
+                "degree {degree}: expected the fold tier"
+            );
+            let mut point_list = folded.clone();
+            point_list.negated_x.clear();
+            point_list.negated_y.clear();
+            let fc = &folded.curve;
+            let base = folded.points.len();
+            // Whether the folding kernel runs here at all.
+            let probe = folded.points[0];
+            let (mut x3, mut lambdas) = (Vec::new(), Vec::new());
+            if folded.canon.is_some()
+                && fc.add_many_lazy_soa(
+                    fc.double(probe),
+                    &folded.negated_x[1..17],
+                    &folded.negated_y[1..17],
+                    &mut x3,
+                    &mut lambdas,
+                    &mut BatchScratch::default(),
+                )
+            {
+                fused += 1;
+            }
+            let len = base / 4;
+            let idxs: Vec<u32> = (0..base as u32).filter(|i| i % 5 == 2).collect();
+            let (mut scratch_a, mut scratch_b) = (ScanScratch::default(), ScanScratch::default());
+            let mut rng = StdRng::seed_from_u64(0x5ca0 + u64::from(degree));
+            let mut found = 0usize;
+            for _ in 0..60 {
+                let [i, j, k] = std::array::from_fn(|_| rng.gen_range(0..base));
+                let target = fc.add(fc.add(folded.points[i], folded.points[j]), folded.points[k]);
+                for scan in [
+                    Scan::Cyclic {
+                        start: base - len / 2,
+                        len,
+                    },
+                    Scan::Indices(&idxs),
+                    Scan::Cyclic {
+                        start: 0,
+                        len: base,
+                    },
+                ] {
+                    let mut a = Vec::new();
+                    folded.witnesses_fast_scan(target, 3, scan, &mut scratch_a, &mut |w| {
+                        a.push(w.to_vec());
+                        true
+                    });
+                    let mut b = Vec::new();
+                    point_list.witnesses_fast_scan(target, 3, scan, &mut scratch_b, &mut |w| {
+                        b.push(w.to_vec());
+                        true
+                    });
+                    assert_eq!(
+                        a, b,
+                        "degree {degree}, target {i} + {j} + {k}: the scans disagree"
+                    );
+                    found += a.len();
+                }
+            }
+            assert!(
+                found > 0,
+                "degree {degree}: the scans found nothing to compare"
+            );
+        }
+        #[cfg(target_arch = "x86_64")]
+        if is_x86_feature_detected!("avx512f") && is_x86_feature_detected!("vpclmulqdq") {
+            assert!(fused >= 4, "the folding kernel ran at only {fused} degrees");
         }
     }
 
