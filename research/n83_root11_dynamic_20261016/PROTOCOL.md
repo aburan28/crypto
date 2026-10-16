@@ -57,3 +57,9 @@ most 10% of their means before descriptive comparisons are admitted.
 The selected factor-base ID remains null until independent confirmation on
 the four already frozen reserve points. This cloud-instance screen does not
 replace alternating same-point Tier 1 IC/rho pairs for a speedup claim.
+
+The verifier exits successfully when at least one complete IC arm and rho
+independently replay, all other IC arms either replay or record a timeout,
+and repeated bases and indexes agree wherever both repeats complete. Its
+`evidence_status` records integrity separately from `status`; a timed-out
+arm or failed A/A noise gate keeps the aggregate `BOUNDED_UNKNOWN`.
