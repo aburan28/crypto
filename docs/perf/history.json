@@ -22,10 +22,10 @@
    "rev": "6f81260f6ab5673d513fef7b2ef2c16c65cae9eb",
    "committed_at": "2026-10-09T16:37:19+00:00",
    "subject": "Release profile: measure fat LTO + one codegen unit, keep the default",
-   "overall": 1.053914787357725,
+   "overall": 1.0539288195611984,
    "areas": {
     "bool_gb": 0.9993964524917927,
-    "dlp": 0.9992812876114205,
+    "dlp": 0.9994010371281332,
     "ecbench": 1.6028401635538267,
     "field_ec": 1.0029612679023583,
     "fp_gb": 1.0002984392968164,
@@ -39,10 +39,10 @@
    "rev": "8a41eca793207682b53ca35f04fe8ac99ee230f7",
    "committed_at": "2026-10-11T10:31:44-07:00",
    "subject": "Inherited F4: rewrite kept rows eagerly through the step plan (1.4\u20131.6\u00d7 on the n=23/31 probe cells) (#1671)",
-   "overall": 1.1063612553427016,
+   "overall": 1.1061855008839,
    "areas": {
     "bool_gb": 1.0030482095568303,
-    "dlp": 1.0086159246690831,
+    "dlp": 1.007174799267244,
     "ecbench": 1.9036959426680924,
     "field_ec": 1.0672051776407303,
     "fp_gb": 1.101913706595161,
@@ -56,10 +56,10 @@
    "rev": "0cfba41136ff3b8a7ff235cddd04f5b5a1da249f",
    "committed_at": "2026-10-11T11:19:08-07:00",
    "subject": "Throughput: batched wide IC inversions, Gf2_128 fold reduction, gpu/ecc2k CLMAD, kernel_basis_of u128 fix (#1652)",
-   "overall": 1.1079184293179036,
+   "overall": 1.1077785465671066,
    "areas": {
     "bool_gb": 1.0106010807161532,
-    "dlp": 1.0068416204366342,
+    "dlp": 1.0056981084408365,
     "ecbench": 1.9035843240311066,
     "field_ec": 1.07034750222929,
     "fp_gb": 1.1022761635872582,
@@ -73,10 +73,10 @@
    "rev": "f88e5909f6cdebfd5abff102c3d23a45225b287b",
    "committed_at": "2026-10-11T13:40:41-07:00",
    "subject": "N83 IC sweep: S3 bases, cold replay and fixed-prefix bound (#1599)",
-   "overall": 1.106252602759202,
+   "overall": 1.106141800267855,
    "areas": {
     "bool_gb": 1.0028759137640648,
-    "dlp": 1.0054235767723232,
+    "dlp": 1.0045176088849181,
     "ecbench": 1.9036338557850314,
     "field_ec": 1.0677560713694036,
     "fp_gb": 1.1022705116905271,
@@ -90,10 +90,10 @@
    "rev": "fb926c0206ab22825a6b68882a7ee126b25ba8c6",
    "committed_at": "2026-10-11T15:05:42-07:00",
    "subject": "Repair main's CI: clippy 1.98, broken examples, fused registry records (#1679)",
-   "overall": 1.105688264046651,
+   "overall": 1.1055774001256191,
    "areas": {
     "bool_gb": 1.0028135667172653,
-    "dlp": 1.0054293692911709,
+    "dlp": 1.0045224316320363,
     "ecbench": 1.902136234207543,
     "field_ec": 1.0646259334210864,
     "fp_gb": 1.1018532212869032,
@@ -107,10 +107,10 @@
    "rev": "e478b952a8908ab9d0b4d74ff916c87a41b695ec",
    "committed_at": "2026-10-11T15:20:36-07:00",
    "subject": "Freeze native n53 compact-orbit comparison with independent replay (#1601)",
-   "overall": 1.1071131338836553,
+   "overall": 1.1069397162127477,
    "areas": {
     "bool_gb": 1.0036423266931873,
-    "dlp": 1.0084950767748964,
+    "dlp": 1.0070742355756808,
     "ecbench": 1.9021546733378585,
     "field_ec": 1.0703343640446645,
     "fp_gb": 1.103890943634809,
@@ -124,10 +124,10 @@
    "rev": "aa0cee7bd1769222e5706e61b64478d5aad6d573",
    "committed_at": "2026-10-11T16:51:55-07:00",
    "subject": "Restore Rust CI source integrity, repair sparse checkouts and ecbench claims (#1605)",
-   "overall": 1.1073517168487543,
+   "overall": 1.1071736361189923,
    "areas": {
     "bool_gb": 1.002944300766524,
-    "dlp": 1.0087226264207774,
+    "dlp": 1.0072635895633801,
     "ecbench": 1.9021727519227005,
     "field_ec": 1.0673704993541466,
     "fp_gb": 1.1101483496672464,
@@ -141,10 +141,10 @@
    "rev": "81ca1c78df0a9cb3197be68607b8f58c57007c02",
    "committed_at": "2026-10-11T17:18:56-07:00",
    "subject": "store: one abstraction for large files, backed by S3, indexed in Git (#1695)",
-   "overall": 1.1072908669755963,
+   "overall": 1.1071133917505005,
    "areas": {
     "bool_gb": 1.003631479734878,
-    "dlp": 1.0086933169034198,
+    "dlp": 1.00723920023476,
     "ecbench": 1.9051866586720003,
     "field_ec": 1.0673589323447128,
     "fp_gb": 1.1052995691775198,
@@ -158,10 +158,10 @@
    "rev": "a8194d616ed8c04489ec46177d369f1b1670360a",
    "committed_at": "2026-10-11T17:35:23-07:00",
    "subject": "ECDLP across every NIST curve: CPU solver + audit, and a GPU Pollard-rho kernel on the NIST fields (#1622)",
-   "overall": 1.1052078921188164,
+   "overall": 1.1049935361140908,
    "areas": {
     "bool_gb": 1.0033392487476829,
-    "dlp": 1.0105294095795678,
+    "dlp": 1.0087668401317724,
     "ecbench": 1.9029001890021202,
     "field_ec": 1.0643914359139914,
     "fp_gb": 1.1119662810691717,
@@ -175,10 +175,10 @@
    "rev": "5cbe16d515f8020ecf070e9873716c66fa6dca94",
    "committed_at": "2026-10-11T19:59:18-07:00",
    "subject": "lit2026 W5: gate-first F6-IC order (1.57\u20131.78x stage unit), lane-batched F4 roots (negative), F4 cost-model check (#1714)",
-   "overall": 1.1068640984566191,
+   "overall": 1.1066956157747276,
    "areas": {
     "bool_gb": 1.003896619567328,
-    "dlp": 1.0082541816038326,
+    "dlp": 1.0068737684346332,
     "ecbench": 1.902907769726762,
     "field_ec": 1.0672027109963123,
     "fp_gb": 1.102933587542428,
@@ -192,10 +192,10 @@
    "rev": "31088bfce9d9cc86fb55a655b064b5472db263ae",
    "committed_at": "2026-10-11T21:27:24-07:00",
    "subject": "Optimize Boolean F4/F5 construction and F5 hashing; track results (#1677)",
-   "overall": 1.1242338754103711,
+   "overall": 1.124154282701056,
    "areas": {
     "bool_gb": 1.0255910999951547,
-    "dlp": 1.0038305065918014,
+    "dlp": 1.0031910713981118,
     "ecbench": 1.9037664004491894,
     "field_ec": 1.0670841185241557,
     "fp_gb": 1.1039481398823794,
@@ -209,10 +209,10 @@
    "rev": "0d34f782ec21860f400c6c85f77a08aed4c68d6f",
    "committed_at": "2026-10-11T21:35:19-07:00",
    "subject": "isogeny_eval: counted F_p, Karatsuba trees, x-only Montgomery, V\u00e9lu, \u221a\u00e9lu, \u2113\u2208{2,3} with duals (#1699)",
-   "overall": 1.1224815330966644,
+   "overall": 1.122303911135647,
    "areas": {
     "bool_gb": 1.0257845006529838,
-    "dlp": 1.0085822777812197,
+    "dlp": 1.0071468001788315,
     "ecbench": 1.9029271403609425,
     "field_ec": 1.0643877182569914,
     "fp_gb": 1.1086723501517641,
@@ -226,10 +226,10 @@
    "rev": "89e3233c06479d70356436372896a959f0abbdfe",
    "committed_at": "2026-10-11T21:43:26-07:00",
    "subject": "Evaluate N83 K600 against strong rho with native replay and paired evidence (#1719)",
-   "overall": 1.1246321600383808,
+   "overall": 1.124508990094278,
    "areas": {
     "bool_gb": 1.0251281942716655,
-    "dlp": 1.0059319396047017,
+    "dlp": 1.0049408450182546,
     "ecbench": 1.90285918551047,
     "field_ec": 1.0674064088488535,
     "fp_gb": 1.1074775719416772,
@@ -243,10 +243,10 @@
    "rev": "80f5391d4f7074e65571d6f454388b68931fbe6f",
    "committed_at": "2026-10-11T22:20:03-07:00",
    "subject": "Ship isogeny binary, 100 large-prime maps and 449-model catalogue (#1606)",
-   "overall": 1.122600926317526,
+   "overall": 1.1224621315050594,
    "areas": {
     "bool_gb": 1.0257999659904238,
-    "dlp": 1.0066991407493715,
+    "dlp": 1.0055795088195556,
     "ecbench": 1.9026645054397253,
     "field_ec": 1.0670838197312587,
     "fp_gb": 1.108680129608911,
@@ -260,10 +260,10 @@
    "rev": "c62555b7a1746490dba707589d791669a20bb0d0",
    "committed_at": "2026-10-11T23:46:00-07:00",
    "subject": "Optimize N83 rho with frozen tuning and fresh-target evidence (#1722)",
-   "overall": 1.122589655861414,
+   "overall": 1.1224508264501336,
    "areas": {
     "bool_gb": 1.0258010502558568,
-    "dlp": 1.006700883902675,
+    "dlp": 1.0055809598315137,
     "ecbench": 1.9026645054397253,
     "field_ec": 1.0670838197312587,
     "fp_gb": 1.1086760639776911,
@@ -277,10 +277,10 @@
    "rev": "eb70862e4c69b63146508c96c153b4106caa045e",
    "committed_at": "2026-10-12T04:07:12Z",
    "subject": "Scope CI by consumed inputs and bound routine PR checks (#1707)",
-   "overall": 1.106870289220785,
+   "overall": 1.1067017884337502,
    "areas": {
     "bool_gb": 1.0038978430448082,
-    "dlp": 1.0082550259522802,
+    "dlp": 1.0068744710949507,
     "ecbench": 1.902907769726762,
     "field_ec": 1.0672027109963123,
     "fp_gb": 1.102929287510169,
@@ -294,10 +294,10 @@
    "rev": "633d21586f84ec3659ec81f2f8b3b9f82e312a29",
    "committed_at": "2026-10-12T09:32:02-07:00",
    "subject": "Merge pull request #1717 from aburan28/f4-fp-msolve-gap",
-   "overall": 1.1219304234123577,
+   "overall": 1.1217791785494566,
    "areas": {
     "bool_gb": 1.0251786148329878,
-    "dlp": 1.0073066710620202,
+    "dlp": 1.0060851955836199,
     "ecbench": 1.9028444820593218,
     "field_ec": 1.0672117541600976,
     "fp_gb": 1.102135416149262,
@@ -311,10 +311,10 @@
    "rev": "ca0d5f86a961fb85b2a8cad35b28edc615bd148b",
    "committed_at": "2026-10-12T14:22:02-07:00",
    "subject": "Merge pull request #1751 from aburan28/codex/drastic-prime-conductor-gap-20261012",
-   "overall": 1.1273713598768653,
+   "overall": 1.1273338123705272,
    "areas": {
     "bool_gb": 1.0525172124681907,
-    "dlp": 1.0018001375689078,
+    "dlp": 1.0014998897637457,
     "ecbench": 1.9068596896396561,
     "field_ec": 1.064388160095997,
     "fp_gb": 1.09987568878365,
@@ -328,10 +328,10 @@
    "rev": "b5cc6ffcf00ee4da0f37ea6ba5735829d4e70c31",
    "committed_at": "2026-10-12T16:27:16-07:00",
    "subject": "Merge pull request #1754 from aburan28/codex/drastic-gap-round2-j0-crater-20261012",
-   "overall": 1.1265543080923106,
+   "overall": 1.126507909881968,
    "areas": {
     "bool_gb": 1.050064019988443,
-    "dlp": 1.0022265622622493,
+    "dlp": 1.0018551245732645,
     "ecbench": 1.9044712121081127,
     "field_ec": 1.0644611390555296,
     "fp_gb": 1.1010124357719797,
@@ -345,10 +345,10 @@
    "rev": "bf92906bd1eb8d35760102b8874177a4c3df62d7",
    "committed_at": "2026-10-12T18:28:52-07:00",
    "subject": "Merge pull request #1752 from aburan28/claude/pdp-root-finder-measure-20261012",
-   "overall": 1.1265505349601057,
+   "overall": 1.1265041039176606,
    "areas": {
     "bool_gb": 1.050063772672485,
-    "dlp": 1.002228147070269,
+    "dlp": 1.0018564447569822,
     "ecbench": 1.9044712121081127,
     "field_ec": 1.0644611390555296,
     "fp_gb": 1.1010178506151411,
@@ -362,10 +362,10 @@
    "rev": "d85756aad150aa5ddfc47303fa71daea9039c78b",
    "committed_at": "2026-10-12T21:34:47-07:00",
    "subject": "Merge pull request #1764 from aburan28/claude/isogeny-walks-genus3-d4c9g1",
-   "overall": 1.1268848348101794,
+   "overall": 1.126852855054601,
    "areas": {
     "bool_gb": 1.0525499682440567,
-    "dlp": 1.0015336573662093,
+    "dlp": 1.0012778845618941,
     "ecbench": 1.9068431943748454,
     "field_ec": 1.0643919821541201,
     "fp_gb": 1.0988933971137707,
@@ -379,10 +379,10 @@
    "rev": "ab28b57b658460db4d603e7ea6af45f1c884a49b",
    "committed_at": "2026-10-12T21:40:06-07:00",
    "subject": "Merge pull request #1765 from aburan28/feature/ecbench-rootfind-engine-20261012",
-   "overall": 1.127411309390267,
+   "overall": 1.1273889349455473,
    "areas": {
     "bool_gb": 1.0539381701824924,
-    "dlp": 1.0010722614263483,
+    "dlp": 1.0008934713785256,
     "ecbench": 1.9045996599379347,
     "field_ec": 1.0643899615202306,
     "fp_gb": 1.1090431699947465,
@@ -396,10 +396,10 @@
    "rev": "56f66e433d16d7239577ffa0f96bf02450a13fc4",
    "committed_at": "2026-10-13T03:35:05-07:00",
    "subject": "Merge pull request #1779 from aburan28/codex/drastic-gap-round3-paired-20261012",
-   "overall": 1.1284644744822245,
+   "overall": 1.128428790942865,
    "areas": {
     "bool_gb": 1.0539354646898023,
-    "dlp": 1.0017090371688175,
+    "dlp": 1.0014239949414732,
     "ecbench": 1.9043729919115024,
     "field_ec": 1.070137374829795,
     "fp_gb": 1.109028306418125,
@@ -413,10 +413,10 @@
    "rev": "28b1daf2b2f49d8f3a1a621216b0d02e0a44cc04",
    "committed_at": "2026-10-13T10:26:25-07:00",
    "subject": "ecbench factor-base protocol: store dumps, catalog, and cross-family smoke suite. (#1782)",
-   "overall": 1.128475830140398,
+   "overall": 1.1284399693932827,
    "areas": {
     "bool_gb": 1.0539350637925229,
-    "dlp": 1.0017175145264519,
+    "dlp": 1.0014310573909526,
     "ecbench": 1.9045611998886594,
     "field_ec": 1.070137374829795,
     "fp_gb": 1.1090581558450539,
@@ -430,10 +430,10 @@
    "rev": "cc96215953864883d4a1e7cd8dc74ca467d62336",
    "committed_at": "2026-10-13T17:19:20-07:00",
    "subject": "Merge pull request #1771 from aburan28/claude/pdp-root-finder-ecbench-20261012",
-   "overall": 1.1326745974381554,
+   "overall": 1.1326628251389255,
    "areas": {
     "bool_gb": 1.0537371209885218,
-    "dlp": 1.000561402092435,
+    "dlp": 1.0004678131948401,
     "ecbench": 1.9043274875532152,
     "field_ec": 1.0643877132444435,
     "fp_gb": 1.1561364409496826,
@@ -447,10 +447,10 @@
    "rev": "33816db56b1bc29a8b5e6c96b9dd5fa09e964ae2",
    "committed_at": "2026-10-13T17:59:41-07:00",
    "subject": "Merge pull request #1772 from aburan28/feat/wizardly-meitner-s1869s",
-   "overall": 1.132288174569373,
+   "overall": 1.132224605107789,
    "areas": {
     "bool_gb": 1.053053904986414,
-    "dlp": 1.0030363792960808,
+    "dlp": 1.002529676584896,
     "ecbench": 1.9028839182188857,
     "field_ec": 1.0643885866679614,
     "fp_gb": 1.1551468572315435,
@@ -464,10 +464,10 @@
    "rev": "191a07392b371411ab499f0d354528c9e56bfa7a",
    "committed_at": "2026-10-13T18:40:48-07:00",
    "subject": "Merge pull request #1802 from aburan28/codex/ecbench-gpu-fidelity-main",
-   "overall": 1.1338443879422397,
+   "overall": 1.1337794905507352,
    "areas": {
     "bool_gb": 1.061978355052341,
-    "dlp": 1.0030956462083802,
+    "dlp": 1.002579040485587,
     "ecbench": 1.9041594371626158,
     "field_ec": 1.0647197552547556,
     "fp_gb": 1.1550777518408266,
@@ -481,10 +481,10 @@
    "rev": "cd226d0ceabfe3feb8428414490964cf0d8ab007",
    "committed_at": "2026-10-13T22:03:30-07:00",
    "subject": "Merge pull request #1774 from aburan28/feature/ecbench-rootfind-improve-20261013",
-   "overall": 1.1338671609932987,
+   "overall": 1.1338021956985547,
    "areas": {
     "bool_gb": 1.06197750950219,
-    "dlp": 1.00309882800437,
+    "dlp": 1.0025816906159934,
     "ecbench": 1.9042981214587347,
     "field_ec": 1.0647197552547556,
     "fp_gb": 1.1550845376240573,
@@ -498,10 +498,10 @@
    "rev": "b2272a4462e1b2544977f7fd6f596b6a285718e5",
    "committed_at": "2026-10-13T22:03:35-07:00",
    "subject": "Merge pull request #1748 from aburan28/feature/gpu-rootfind-decomposition",
-   "overall": 1.133552348641428,
+   "overall": 1.1334874971495534,
    "areas": {
     "bool_gb": 1.0537331218699781,
-    "dlp": 1.0030942515485948,
+    "dlp": 1.0025778788675193,
     "ecbench": 1.9042395636233143,
     "field_ec": 1.0705279450598573,
     "fp_gb": 1.1554898262284552,
@@ -515,10 +515,10 @@
    "rev": "bc82d128f99086a4517a4b9021d977d1e0374c73",
    "committed_at": "2026-10-14T00:58:13-07:00",
    "subject": "Merge pull request #1766 from aburan28/fix/ci-main-rustfmt-clippy-names-20261012",
-   "overall": 1.1332141969147065,
+   "overall": 1.1331492311934168,
    "areas": {
     "bool_gb": 1.053731890049234,
-    "dlp": 1.0031006367721889,
+    "dlp": 1.0025831971452064,
     "ecbench": 1.9043522730340061,
     "field_ec": 1.0677017063152332,
     "fp_gb": 1.155073280866327,
@@ -532,10 +532,10 @@
    "rev": "912a98edc744d1594e4ebc3d98c8f21a207a0e1a",
    "committed_at": "2026-10-14T01:36:45-07:00",
    "subject": "Merge pull request #1769 from aburan28/codex/ecbench-rootfinding-20261012",
-   "overall": 1.133680627766611,
+   "overall": 1.1336325197543835,
    "areas": {
     "bool_gb": 1.0540481681758638,
-    "dlp": 1.0022941793217923,
+    "dlp": 1.001911450923104,
     "ecbench": 1.9041830330694565,
     "field_ec": 1.0703963177659634,
     "fp_gb": 1.1562539300886263,
@@ -549,10 +549,10 @@
    "rev": "8d8b1295c744dcbbf5e9176defa9220a483c3a32",
    "committed_at": "2026-10-14T08:42:15-07:00",
    "subject": "Merge pull request #1832 from aburan28/codex/cryptopals-fixture-cleanup",
-   "overall": 1.1336692046716335,
+   "overall": 1.1336211993006535,
    "areas": {
     "bool_gb": 1.0540473379637931,
-    "dlp": 1.0022893019484476,
+    "dlp": 1.0019073879956997,
     "ecbench": 1.9041830330694565,
     "field_ec": 1.0703963177659634,
     "fp_gb": 1.1561902495442782,
@@ -566,10 +566,10 @@
    "rev": "b339e84754c2127738ecd6c9a20ec27a0b652185",
    "committed_at": "2026-10-14T12:22:44-07:00",
    "subject": "Smith Prop. 2/4 natively: \u00a78 reproduced; class-level success near the ceiling at p = 7, 11 (#1848)",
-   "overall": 1.1319857541592604,
+   "overall": 1.1319118670077517,
    "areas": {
     "bool_gb": 1.054188099873261,
-    "dlp": 1.0035310309515435,
+    "dlp": 1.0029416611338406,
     "ecbench": 1.9044075431046408,
     "field_ec": 1.0643877809785534,
     "fp_gb": 1.1483739628066547,
@@ -583,10 +583,10 @@
    "rev": "7912faa51f1916de9041e2c50d283ec10bfbb9ee",
    "committed_at": "2026-10-14T17:17:33-07:00",
    "subject": "Merge pull request #1842 from aburan28/claude/rootfind-speedup-20261014",
-   "overall": 1.1327986541510697,
+   "overall": 1.1327249067723486,
    "areas": {
     "bool_gb": 1.054235092124055,
-    "dlp": 1.0035218056952342,
+    "dlp": 1.0029339779293276,
     "ecbench": 1.9042528969830324,
     "field_ec": 1.0643877789388763,
     "fp_gb": 1.1552628721050437,
@@ -600,10 +600,10 @@
    "rev": "3c5d435eea21d1d30ab3ec00544f59d5f60324be",
    "committed_at": "2026-10-14T18:42:17-07:00",
    "subject": "Merge pull request #1851 from aburan28/claude/frobenius-orbit-ic-vs-rho-20261014",
-   "overall": 1.1324080610250016,
+   "overall": 1.1323426242971515,
    "areas": {
     "bool_gb": 1.0545178611191954,
-    "dlp": 1.0031253791861734,
+    "dlp": 1.0026038051452246,
     "ecbench": 1.9029477161443045,
     "field_ec": 1.0643877809785534,
     "fp_gb": 1.1481129941618122,
@@ -617,10 +617,10 @@
    "rev": "f0599bf9055e4ca42e6b152f03031a50a8892209",
    "committed_at": "2026-10-14T19:13:08-07:00",
    "subject": "Merge pull request #1861 from aburan28/feat/sleepy-tesla-1ucug8-code",
-   "overall": 1.1326799583085483,
+   "overall": 1.1326743612547676,
    "areas": {
     "bool_gb": 1.0539274679071529,
-    "dlp": 1.0002668732478204,
+    "dlp": 1.000222389427771,
     "ecbench": 1.9032049229607733,
     "field_ec": 1.0703290564506451,
     "fp_gb": 1.154914522554982,
@@ -634,10 +634,10 @@
    "rev": "3db0ecbc4b937a284400fa628d2448df61f0c364",
    "committed_at": "2026-10-14T20:31:32-07:00",
    "subject": "Price cover_descent rows at the GHS genus floor, not at genus k (#1866)",
-   "overall": 1.1333036794457412,
+   "overall": 1.133256117278889,
    "areas": {
     "bool_gb": 1.0537246039169637,
-    "dlp": 1.0022688742234622,
+    "dlp": 1.001890371349155,
     "ecbench": 1.9030849803278105,
     "field_ec": 1.067406596507191,
     "fp_gb": 1.155729157416287,
@@ -651,10 +651,10 @@
    "rev": "addb6a0212821de9e810d49dac3a2edd883081a1",
    "committed_at": "2026-10-15T10:21:21-07:00",
    "subject": "Merge pull request #1903 from aburan28/claude/experiment-backlog",
-   "overall": 1.1332514806704024,
+   "overall": 1.1332641538680033,
    "areas": {
     "bool_gb": 1.0541622566297588,
-    "dlp": 0.9993963014700701,
+    "dlp": 0.9994968925766204,
     "ecbench": 1.9031320812936623,
     "field_ec": 1.0719761640935512,
     "fp_gb": 1.1545767135693799,
@@ -668,10 +668,10 @@
    "rev": "12348e5010c93d2ba102cdd7aefbf8967ee762d7",
    "committed_at": "2026-10-15T10:37:01-07:00",
    "subject": "Merge pull request #1895 from aburan28/claude/leads-d4-s5",
-   "overall": 1.132943783625833,
+   "overall": 1.1329111263783969,
    "areas": {
     "bool_gb": 1.0537595674714686,
-    "dlp": 1.0015577913425253,
+    "dlp": 1.0012979910323139,
     "ecbench": 1.9028639584336073,
     "field_ec": 1.064707109678728,
     "fp_gb": 1.1566840700422127,
@@ -685,10 +685,10 @@
    "rev": "b906df0247bb30c7a3bdecce5b625ef9479bf1ec",
    "committed_at": "2026-10-15T10:49:20-07:00",
    "subject": "Merge pull request #1889 from aburan28/claude/leads-isogeny-tower",
-   "overall": 1.1332434496573642,
+   "overall": 1.1332134416671813,
    "areas": {
     "bool_gb": 1.0537769607453173,
-    "dlp": 1.0014309476400485,
+    "dlp": 1.0011923142505559,
     "ecbench": 1.90351428538831,
     "field_ec": 1.0674061881043222,
     "fp_gb": 1.1563357246790076,
@@ -702,10 +702,10 @@
    "rev": "cf2745214d83e7bbf737f07d758e486d6af8fa7f",
    "committed_at": "2026-10-15T11:59:38-07:00",
    "subject": "Merge pull request #1918 from aburan28/claude/fp-backend",
-   "overall": 1.1335566974515041,
+   "overall": 1.1335150971728416,
    "areas": {
     "bool_gb": 1.0533356958421087,
-    "dlp": 1.0019837417333184,
+    "dlp": 1.0016528450417468,
     "ecbench": 1.903432804435111,
     "field_ec": 1.06789109699519,
     "fp_gb": 1.1552378582697047,
@@ -719,10 +719,10 @@
    "rev": "1b874fccb87f891f13f0b7ca4da9922fe260c2da",
    "committed_at": "2026-10-15T15:07:00-07:00",
    "subject": "Merge pull request #1739 from aburan28/codex/n83-mixed-orbit-supervisor-20261012",
-   "overall": 1.1302879074767687,
+   "overall": 1.1302633612964776,
    "areas": {
     "bool_gb": 1.0536942467947412,
-    "dlp": 1.00117340515358,
+    "dlp": 1.000977742054945,
     "ecbench": 1.904412113111464,
     "field_ec": 1.067205911688456,
     "fp_gb": 1.1553361818721801,
@@ -736,10 +736,10 @@
    "rev": "700f7d311f05d5a5507041d4eb1238801c91c68c",
    "committed_at": "2026-10-15T15:51:29-07:00",
    "subject": "Merge pull request #1925 from aburan28/claude/isogeny-tower-p192",
-   "overall": 1.1323781361771832,
+   "overall": 1.1324374788972171,
    "areas": {
     "bool_gb": 1.0530826430348776,
-    "dlp": 0.9971741831422751,
+    "dlp": 0.9976445974776195,
     "ecbench": 1.901685319814301,
     "field_ec": 1.0673719335934528,
     "fp_gb": 1.155260861391566,
@@ -753,10 +753,10 @@
    "rev": "289bb5fb9bf1556013392a805f58783266677e61",
    "committed_at": "2026-10-15T16:27:44-07:00",
    "subject": "Merge pull request #1891 from aburan28/feat/brave-bardeen-9jxoaj",
-   "overall": 1.1327916464959016,
+   "overall": 1.1327697453195897,
    "areas": {
     "bool_gb": 1.0538455527469184,
-    "dlp": 1.001044580925105,
+    "dlp": 1.0008704083607607,
     "ecbench": 1.9032659716033131,
     "field_ec": 1.0674062784079197,
     "fp_gb": 1.1545439525701309,
@@ -770,10 +770,10 @@
    "rev": "92246530c4f333724374e70897330bc38fa159a1",
    "committed_at": "2026-10-15T18:02:30-07:00",
    "subject": "Merge pull request #1837 from aburan28/claude/ecdlp-index-calculus-paper-x7pkyz",
-   "overall": 1.13277689349583,
+   "overall": 1.1327586476622122,
    "areas": {
     "bool_gb": 1.0535927853286902,
-    "dlp": 1.0008701727384604,
+    "dlp": 1.0007250913831283,
     "ecbench": 1.9047408517692184,
     "field_ec": 1.0704139847634144,
     "fp_gb": 1.1484509736926198,
@@ -787,10 +787,10 @@
    "rev": "3a4a5cec8d1e98f3467e6a7ebfc808727c3c2f79",
    "committed_at": "2026-10-15T19:04:53-07:00",
    "subject": "Merge pull request #1942 from aburan28/claude/f4-generic-field",
-   "overall": 1.1319714245577388,
+   "overall": 1.1319529024935762,
    "areas": {
     "bool_gb": 1.0528995454302794,
-    "dlp": 1.000883981379645,
+    "dlp": 1.0007365969028585,
     "ecbench": 1.9036264070144975,
     "field_ec": 1.064460082017818,
     "fp_gb": 1.1484527911197608,
@@ -804,10 +804,10 @@
    "rev": "333c08c09796c3806085cd18a365c1be3e9c67be",
    "committed_at": "2026-10-15T19:20:48-07:00",
    "subject": "Merge pull request #1947 from aburan28/claude/pkm-supersingular-aux",
-   "overall": 1.1310462374664474,
+   "overall": 1.1310278211150873,
    "areas": {
     "bool_gb": 1.055589869432941,
-    "dlp": 1.0008796531710809,
+    "dlp": 1.0007329905922115,
     "ecbench": 1.9036351406678518,
     "field_ec": 1.064457952562478,
     "fp_gb": 1.1568531940997366,
@@ -821,10 +821,10 @@
    "rev": "4cfcb94ecfde240b705a8ff3bf951ea8f02f92d0",
    "committed_at": "2026-10-15T19:36:26-07:00",
    "subject": "Merge pull request #1948 from aburan28/claude/index-calculus-benchmarks-3srkjf",
-   "overall": 1.1310430596762993,
+   "overall": 1.1310247297211653,
    "areas": {
     "bool_gb": 1.0555910825178512,
-    "dlp": 1.0008755270949423,
+    "dlp": 1.0007295526980893,
     "ecbench": 1.9036351406678518,
     "field_ec": 1.064457952562478,
     "fp_gb": 1.1568566997567262,
@@ -838,10 +838,10 @@
    "rev": "ca0310ff800a799bb03f51c30a5a5bccfa369e75",
    "committed_at": "2026-10-15T21:05:52-07:00",
    "subject": "Merge pull request #1950 from aburan28/claude/p224-crypto-weaknesses-10gpep",
-   "overall": 1.1321382394450168,
+   "overall": 1.1320863972463413,
    "areas": {
     "bool_gb": 1.0559625381187363,
-    "dlp": 1.0024758522658572,
+    "dlp": 1.0020627849472186,
     "ecbench": 1.9038120563225676,
     "field_ec": 1.067591368258514,
     "fp_gb": 1.1569816501770704,
@@ -855,10 +855,10 @@
    "rev": "de0c9391480155ebdd5a8495d2c79e4508d4795d",
    "committed_at": "2026-10-15T23:52:14-07:00",
    "subject": "Merge pull request #1946 from aburan28/ecdlp-speedups-20261015",
-   "overall": 1.1320648928279324,
+   "overall": 1.132012615963293,
    "areas": {
     "bool_gb": 1.0559324693938117,
-    "dlp": 1.0024967991473728,
+    "dlp": 1.002080233458847,
     "ecbench": 1.9037980641459515,
     "field_ec": 1.067590260957176,
     "fp_gb": 1.1565676764539856,
@@ -872,10 +872,10 @@
    "rev": "7051f4e2d8d35623accd17b0070406d20854e788",
    "committed_at": "2026-10-16T08:36:46-07:00",
    "subject": "Merge pull request #1967 from aburan28/claude/hwcost-calibrated-model",
-   "overall": 1.1328284915861853,
+   "overall": 1.1327798872460564,
    "areas": {
     "bool_gb": 1.0535718312139277,
-    "dlp": 1.0023196217810166,
+    "dlp": 1.0019326448315728,
     "ecbench": 1.9038597498033578,
     "field_ec": 1.0672041485049522,
     "fp_gb": 1.1558312559033985,
@@ -889,10 +889,10 @@
    "rev": "082d5507859860f8a1ac1f20318c49e964d2af02",
    "committed_at": "2026-10-16T09:26:34-07:00",
    "subject": "Merge pull request #1959 from aburan28/claude/ecc2k130-calculus-challenge-3jbkht",
-   "overall": 1.1333332773845153,
+   "overall": 1.1332893975657305,
    "areas": {
     "bool_gb": 1.0535735430234412,
-    "dlp": 1.002092972100026,
+    "dlp": 1.0017438394603837,
     "ecbench": 1.9037198879717665,
     "field_ec": 1.067516026409051,
     "fp_gb": 1.1558291177556248,
@@ -906,10 +906,10 @@
    "rev": "2f02e32c37a49868646e35835c1068e274d2c4fa",
    "committed_at": "2026-10-16T12:34:38-07:00",
    "subject": "hwcost round 2: native ISA, the fp64 branch cost, a GPU profile, IC vs rho in time and dollars (#2003)",
-   "overall": 1.1322813043445543,
+   "overall": 1.1322355288164105,
    "areas": {
     "bool_gb": 1.053322002421936,
-    "dlp": 1.0021855246795102,
+    "dlp": 1.0018209391452004,
     "ecbench": 1.903706780291223,
     "field_ec": 1.06437822682007,
     "fp_gb": 1.1553238226600124,
@@ -923,10 +923,10 @@
    "rev": "6d437f0c28ead00857bd8f71cd5d86bcdf2d734d",
    "committed_at": "2026-10-16T12:35:40-07:00",
    "subject": "Merge pull request #2005 from aburan28/claude/ecc2k130-calculus-challenge-3jbkht",
-   "overall": 1.1322813992493523,
+   "overall": 1.1322355546586422,
    "areas": {
     "bool_gb": 1.0533229173666847,
-    "dlp": 1.0021888255188258,
+    "dlp": 1.0018236888431973,
     "ecbench": 1.903706780291223,
     "field_ec": 1.06437822682007,
     "fp_gb": 1.1552919760010958,
@@ -940,10 +940,10 @@
    "rev": "6bf2bcf0e0d5581575d1d467159d3934a247f5d8",
    "committed_at": "2026-10-16T13:08:06-07:00",
    "subject": "Merge pull request #2008 from aburan28/claude/curve-traits-ingest",
-   "overall": 1.1329630793808483,
+   "overall": 1.1329782106670134,
    "areas": {
     "bool_gb": 1.0530282756059886,
-    "dlp": 0.9992790679192733,
+    "dlp": 0.9993991871626696,
     "ecbench": 1.903748841249734,
     "field_ec": 1.0703399672657317,
     "fp_gb": 1.1549238867997433,
@@ -957,10 +957,10 @@
    "rev": "f8300065804caaa0064c8f68d50f5276e3c85cf5",
    "committed_at": "2026-10-16T13:25:14-07:00",
    "subject": "Strong rho assurance: formal checks, step-count audit, 22% fewer instructions per step, perf IPC skill (#1999)",
-   "overall": 1.1325525285157996,
+   "overall": 1.132526461781472,
    "areas": {
     "bool_gb": 1.0530051073667508,
-    "dlp": 1.001243646476906,
+    "dlp": 1.001036264709294,
     "ecbench": 1.9037569347195331,
     "field_ec": 1.0643845452758047,
     "fp_gb": 1.154926084252452,
@@ -974,10 +974,10 @@
    "rev": "ccf43056549f4adc5bb6d7e2452e6b7f8a70280d",
    "committed_at": "2026-10-16T14:02:52-07:00",
    "subject": "Merge pull request #1835 from aburan28/codex/smt-script-unique-20261014",
-   "overall": 1.1325528829795741,
+   "overall": 1.13252689723577,
    "areas": {
     "bool_gb": 1.0530061773197932,
-    "dlp": 1.0012397795840806,
+    "dlp": 1.0010330429650085,
     "ecbench": 1.9037569347195331,
     "field_ec": 1.0643845452758047,
     "fp_gb": 1.1548894546212494,
@@ -986,14 +986,31 @@
     "relation": 1.005774593967665,
     "sat": 0.9999029444266739
    }
+  },
+  {
+   "rev": "57b028d8d305abb8cae523dae4d411eb2e57d0d8",
+   "committed_at": "2026-10-16T14:03:40-07:00",
+   "subject": "Merge pull request #1875 from aburan28/codex/rho-bsgs-speedups",
+   "overall": 1.1321084548011335,
+   "areas": {
+    "bool_gb": 1.0534869496745414,
+    "dlp": 0.9978350295240073,
+    "ecbench": 1.9038280556338674,
+    "field_ec": 1.0643849691422929,
+    "fp_gb": 1.1560279669717037,
+    "gf2_la": 1.2189995671246885,
+    "pdp": 1.0130082221840973,
+    "relation": 1.004684120711239,
+    "sat": 0.9999160557695288
+   }
   }
  ],
  "kernels": {
   "bool_gb/crossbred_m2_n23": {
    "area": "bool_gb",
-   "latest_ir": 686839328,
-   "latest_wall_ns": 76580591,
-   "index": 0.993664302810569,
+   "latest_ir": 686819950,
+   "latest_wall_ns": 76576662,
+   "index": 0.9936923381448073,
    "series_ir": [
     682487722,
     683319846,
@@ -1052,15 +1069,16 @@
     686840572,
     686845706,
     686853554,
-    686839328
+    686839328,
+    686819950
    ],
    "rebased_at": []
   },
   "bool_gb/f4_basis_m2_n17": {
    "area": "bool_gb",
-   "latest_ir": 1500789069,
-   "latest_wall_ns": 123913647,
-   "index": 1.0004636414366095,
+   "latest_ir": 1500852732,
+   "latest_wall_ns": 123177121,
+   "index": 1.000421203883979,
    "series_ir": [
     1501484897,
     1501358353,
@@ -1119,15 +1137,16 @@
     1501404338,
     1500789016,
     1500789056,
-    1500789069
+    1500789069,
+    1500852732
    ],
    "rebased_at": []
   },
   "bool_gb/f4_basis_random_n18": {
    "area": "bool_gb",
-   "latest_ir": 1544097002,
-   "latest_wall_ns": 119117550,
-   "index": 1.0173539168622778,
+   "latest_ir": 1544106857,
+   "latest_wall_ns": 117185039,
+   "index": 1.0173474237735352,
    "series_ir": [
     1570893133,
     1570541776,
@@ -1186,14 +1205,15 @@
     1544304162,
     1544097002,
     1544097002,
-    1544097002
+    1544097002,
+    1544106857
    ],
    "rebased_at": []
   },
   "bool_gb/fes_gray_m2_n23": {
    "area": "bool_gb",
    "latest_ir": 321420764,
-   "latest_wall_ns": 23580130,
+   "latest_wall_ns": 24099686,
    "index": 1.000008107752491,
    "series_ir": [
     321423370,
@@ -1253,6 +1273,7 @@
     321420764,
     321420764,
     321420764,
+    321420764,
     321420764
    ],
    "rebased_at": []
@@ -1260,7 +1281,7 @@
   "bool_gb/fes_gray_random_n28": {
    "area": "bool_gb",
    "latest_ir": 2567071323,
-   "latest_wall_ns": 187565530,
+   "latest_wall_ns": 191459539,
    "index": 1.00000012153928,
    "series_ir": [
     2567071635,
@@ -1320,6 +1341,7 @@
     2567071323,
     2567071323,
     2567071323,
+    2567071323,
     2567071323
    ],
    "rebased_at": []
@@ -1327,7 +1349,7 @@
   "bool_gb/fes_moebius_random_n22": {
    "area": "bool_gb",
    "latest_ir": 165638306,
-   "latest_wall_ns": 14228276,
+   "latest_wall_ns": 14162775,
    "index": 0.9746949959751462,
    "series_ir": [
     161446828,
@@ -1387,15 +1409,16 @@
     165638306,
     165638306,
     165638306,
+    165638306,
     165638306
    ],
    "rebased_at": []
   },
   "bool_gb/fes_monica_random_n25": {
    "area": "bool_gb",
-   "latest_ir": 501558455,
-   "latest_wall_ns": 137573828,
-   "index": 0.9506744353457262,
+   "latest_ir": 501558436,
+   "latest_wall_ns": 137614958,
+   "index": 0.9506744713591057,
    "series_ir": [
     476818801,
     476813491,
@@ -1454,15 +1477,16 @@
     501558455,
     501558436,
     501558455,
-    501558455
+    501558455,
+    501558436
    ],
    "rebased_at": []
   },
   "bool_gb/fes_wide_random_n30": {
    "area": "bool_gb",
-   "latest_ir": 2051511120,
-   "latest_wall_ns": 462486546,
-   "index": 1.000000046794774,
+   "latest_ir": 2051511119,
+   "latest_wall_ns": 462354966,
+   "index": 1.0000000472822197,
    "series_ir": [
     2051511216,
     2051511424,
@@ -1521,15 +1545,16 @@
     2051511119,
     2051511120,
     2051511120,
-    2051511120
+    2051511120,
+    2051511119
    ],
    "rebased_at": []
   },
   "bool_gb/matrix_f4_deg3_m3_n23": {
    "area": "bool_gb",
-   "latest_ir": 214621557,
-   "latest_wall_ns": 24225931,
-   "index": 1.3375515256372867,
+   "latest_ir": 214576296,
+   "latest_wall_ns": 24589197,
+   "index": 1.3378336580103884,
    "series_ir": [
     287067391,
     287056718,
@@ -1588,15 +1613,16 @@
     214621546,
     214621557,
     214621557,
-    214621557
+    214621557,
+    214576296
    ],
    "rebased_at": []
   },
   "bool_gb/matrix_f4_deg4_m2_n23": {
    "area": "bool_gb",
-   "latest_ir": 679549997,
-   "latest_wall_ns": 86686137,
-   "index": 1.2664761868875412,
+   "latest_ir": 679350531,
+   "latest_wall_ns": 84862865,
+   "index": 1.266848040485303,
    "series_ir": [
     860633889,
     860555567,
@@ -1655,15 +1681,16 @@
     679549984,
     679549997,
     679549997,
-    679549997
+    679549997,
+    679350531
    ],
    "rebased_at": []
   },
   "bool_gb/matrix_f4_deg4_m3_n15": {
    "area": "bool_gb",
-   "latest_ir": 776090999,
-   "latest_wall_ns": 94565384,
-   "index": 1.227256529488496,
+   "latest_ir": 775873723,
+   "latest_wall_ns": 96979574,
+   "index": 1.2276002109173119,
    "series_ir": [
     952462746,
     952357602,
@@ -1722,15 +1749,16 @@
     776090986,
     776090999,
     776090999,
-    776090999
+    776090999,
+    775873723
    ],
    "rebased_at": []
   },
   "bool_gb/matrix_f5_deg4_m2_n23": {
    "area": "bool_gb",
-   "latest_ir": 654669949,
-   "latest_wall_ns": 90253993,
-   "index": 1.1714917878413267,
+   "latest_ir": 654421882,
+   "latest_wall_ns": 88296767,
+   "index": 1.1719358568147638,
    "series_ir": [
     766940469,
     766776087,
@@ -1789,15 +1817,16 @@
     654627503,
     654621861,
     654669949,
-    654669949
+    654669949,
+    654421882
    ],
    "rebased_at": []
   },
   "bool_gb/solve_inherited_m2_n23": {
    "area": "bool_gb",
-   "latest_ir": 1560295585,
-   "latest_wall_ns": 161520219,
-   "index": 0.9895949328570249,
+   "latest_ir": 1560136457,
+   "latest_wall_ns": 160908080,
+   "index": 0.9896958677859979,
    "series_ir": [
     1212390733,
     1222656559,
@@ -1856,7 +1885,8 @@
     1554182768,
     1560295585,
     1560295585,
-    1560295585
+    1560295585,
+    1560136457
    ],
    "rebased_at": [
     "8a41eca793207682b53ca35f04fe8ac99ee230f7"
@@ -1864,9 +1894,9 @@
   },
   "bool_gb/solve_inherited_m3_n15": {
    "area": "bool_gb",
-   "latest_ir": 385316937,
-   "latest_wall_ns": 46246192,
-   "index": 1.018170483119571,
+   "latest_ir": 385244561,
+   "latest_wall_ns": 46078730,
+   "index": 1.018361767083957,
    "series_ir": [
     465583896,
     467287939,
@@ -1925,7 +1955,8 @@
     384445559,
     385316885,
     385316885,
-    385316937
+    385316937,
+    385244561
    ],
    "rebased_at": [
     "8a41eca793207682b53ca35f04fe8ac99ee230f7"
@@ -1933,9 +1964,9 @@
   },
   "bool_gb/solve_matrixf4_m2_n17": {
    "area": "bool_gb",
-   "latest_ir": 1790220548,
-   "latest_wall_ns": 173925679,
-   "index": 1.0786320166849066,
+   "latest_ir": 1787512707,
+   "latest_wall_ns": 173993321,
+   "index": 1.0802659989146575,
    "series_ir": [
     1930989200,
     1929374570,
@@ -1994,15 +2025,16 @@
     1790289796,
     1790220548,
     1790220548,
-    1790220548
+    1790220548,
+    1787512707
    ],
    "rebased_at": []
   },
   "bool_gb/solve_matrixf5_m2_n17": {
    "area": "bool_gb",
-   "latest_ir": 1810482315,
-   "latest_wall_ns": 175927954,
-   "index": 1.0787782768261946,
+   "latest_ir": 1807204760,
+   "latest_wall_ns": 176851399,
+   "index": 1.0807347541514885,
    "series_ir": [
     1953108992,
     1952598745,
@@ -2061,15 +2093,16 @@
     1810551563,
     1809884826,
     1810482315,
-    1810482315
+    1810482315,
+    1807204760
    ],
    "rebased_at": []
   },
   "bool_gb/wide_found_m5_n15": {
    "area": "bool_gb",
-   "latest_ir": 1973203361,
-   "latest_wall_ns": 242505434,
-   "index": 1.001846191361723,
+   "latest_ir": 1970521771,
+   "latest_wall_ns": 241704006,
+   "index": 1.0032095565210586,
    "series_ir": [
     1976846272,
     1977874338,
@@ -2128,15 +2161,16 @@
     1973114803,
     1973198784,
     1973200086,
-    1973203361
+    1973203361,
+    1970521771
    ],
    "rebased_at": []
   },
   "bool_gb/wide_mixed_m4_n15": {
    "area": "bool_gb",
-   "latest_ir": 2380008104,
-   "latest_wall_ns": 289425057,
-   "index": 1.001085411010013,
+   "latest_ir": 2376958505,
+   "latest_wall_ns": 288032346,
+   "index": 1.0023697872672799,
    "series_ir": [
     2382591391,
     2383293851,
@@ -2195,15 +2229,16 @@
     2379919718,
     2380003404,
     2380008815,
-    2380008104
+    2380008104,
+    2376958505
    ],
    "rebased_at": []
   },
   "bool_gb/wide_refute_m3_n31": {
    "area": "bool_gb",
-   "latest_ir": 874380543,
-   "latest_wall_ns": 94816635,
-   "index": 0.9941054509489471,
+   "latest_ir": 873268743,
+   "latest_wall_ns": 94707401,
+   "index": 0.9953710939130685,
    "series_ir": [
     869226464,
     868550987,
@@ -2262,15 +2297,16 @@
     874379975,
     874380557,
     874380629,
-    874380543
+    874380543,
+    873268743
    ],
    "rebased_at": []
   },
   "dlp/aut_folded_rho_j0_p25": {
    "area": "dlp",
-   "latest_ir": 40345473,
-   "latest_wall_ns": 5181913,
-   "index": 1.0013105807434701,
+   "latest_ir": 40451225,
+   "latest_wall_ns": 5156501,
+   "index": 0.9986928455195113,
    "series_ir": [
     40398349,
     40534773,
@@ -2329,15 +2365,16 @@
     40371917,
     40451242,
     40345473,
-    40345473
+    40345473,
+    40451225
    ],
    "rebased_at": []
   },
   "dlp/bsgs_fast_toy40_w1_x4": {
    "area": "dlp",
-   "latest_ir": 655720005,
-   "latest_wall_ns": 132063487,
-   "index": 0.9997354983854737,
+   "latest_ir": 660001839,
+   "latest_wall_ns": 127590609,
+   "index": 0.9932496051726915,
    "series_ir": [
     655546566,
     655546566,
@@ -2396,15 +2433,16 @@
     655720005,
     655720005,
     655720005,
-    655720005
+    655720005,
+    660001839
    ],
    "rebased_at": []
   },
   "dlp/bsgs_fast_toy40_w4_interval38_x8": {
    "area": "dlp",
-   "latest_ir": 953961605,
-   "latest_wall_ns": 194766750,
-   "index": 1.0021431135061254,
+   "latest_ir": 958121459,
+   "latest_wall_ns": 195035885,
+   "index": 0.9977921316967399,
    "series_ir": [
     956006053,
     956006053,
@@ -2463,15 +2501,16 @@
     953961605,
     953961605,
     953961605,
-    953961605
+    953961605,
+    958121459
    ],
    "rebased_at": []
   },
   "dlp/collab_walkers_demo32_x8": {
    "area": "dlp",
-   "latest_ir": 113485740,
-   "latest_wall_ns": 11893009,
-   "index": 0.99060143591609,
+   "latest_ir": 113238940,
+   "latest_wall_ns": 11932969,
+   "index": 0.9927604143945541,
    "series_ir": [
     112419137,
     112334240,
@@ -2530,15 +2569,16 @@
     113485740,
     113485740,
     113485740,
-    113485740
+    113485740,
+    113238940
    ],
    "rebased_at": []
   },
   "dlp/ecc2k130_certify_m131_len12": {
    "area": "dlp",
-   "latest_ir": 25245763,
-   "latest_wall_ns": 2356947,
-   "index": 0.9998276542483578,
+   "latest_ir": 25246696,
+   "latest_wall_ns": 2351348,
+   "index": 0.9997907052867426,
    "series_ir": [
     25241412,
     25241711,
@@ -2597,15 +2637,16 @@
     25246680,
     25245780,
     25246802,
-    25245763
+    25245763,
+    25246696
    ],
    "rebased_at": []
   },
   "dlp/gaudry_schost_negation_demo32": {
    "area": "dlp",
-   "latest_ir": 133932608,
-   "latest_wall_ns": 16424711,
-   "index": 0.9948267340541901,
+   "latest_ir": 133990847,
+   "latest_wall_ns": 16326739,
+   "index": 0.9943943335174237,
    "series_ir": [
     133239739,
     133643871,
@@ -2664,15 +2705,16 @@
     134279382,
     134510227,
     133932298,
-    133932608
+    133932608,
+    133990847
    ],
    "rebased_at": []
   },
   "dlp/koblitz_signed_rho_k0_n41": {
    "area": "dlp",
-   "latest_ir": 233252356,
-   "latest_wall_ns": 46853447,
-   "index": 0.9805173028991832,
+   "latest_ir": 233252040,
+   "latest_wall_ns": 46732373,
+   "index": 0.9805186312625608,
    "series_ir": [
     228707971,
     228708334,
@@ -2731,15 +2773,16 @@
     233252193,
     233251897,
     233251915,
-    233252356
+    233252356,
+    233252040
    ],
    "rebased_at": []
   },
   "dlp/pohlig_hellman_smooth47": {
    "area": "dlp",
-   "latest_ir": 1721826,
-   "latest_wall_ns": 187322,
-   "index": 0.9951621127802692,
+   "latest_ir": 1721868,
+   "latest_wall_ns": 186958,
+   "index": 0.9951378386728831,
    "series_ir": [
     1713496,
     1716728,
@@ -2798,15 +2841,16 @@
     1721826,
     1721826,
     1721826,
-    1721826
+    1721826,
+    1721868
    ],
    "rebased_at": []
   },
   "dlp/rho_dp_zp_multi_q34_x3": {
    "area": "dlp",
-   "latest_ir": 35650278,
-   "latest_wall_ns": 3391981,
-   "index": 1.0198818084952948,
+   "latest_ir": 36009168,
+   "latest_wall_ns": 3319070,
+   "index": 1.0097170253975325,
    "series_ir": [
     36359070,
     36346256,
@@ -2865,15 +2909,84 @@
     35645799,
     35657910,
     35647584,
-    35650278
+    35650278,
+    36009168
+   ],
+   "rebased_at": []
+  },
+  "dlp/rho_dp_zp_wide_q30": {
+   "area": "dlp",
+   "latest_ir": 202898592,
+   "latest_wall_ns": 17631287,
+   "index": 1.0,
+   "series_ir": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    202898592
    ],
    "rebased_at": []
   },
   "dlp/rho_floyd_zp_q36": {
    "area": "dlp",
-   "latest_ir": 107030844,
-   "latest_wall_ns": 9369065,
-   "index": 1.0292640596200475,
+   "latest_ir": 108820866,
+   "latest_wall_ns": 9254250,
+   "index": 1.0123334342882366,
    "series_ir": [
     110163001,
     110163001,
@@ -2932,15 +3045,84 @@
     105688048,
     108373619,
     107030844,
-    107030844
+    107030844,
+    108820866
+   ],
+   "rebased_at": []
+  },
+  "dlp/rho_floyd_zp_wide_q30": {
+   "area": "dlp",
+   "latest_ir": 340421972,
+   "latest_wall_ns": 30771593,
+   "index": 1.0,
+   "series_ir": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    340421972
    ],
    "rebased_at": []
   },
   "ecbench/rho_negation_prime26_p42652151": {
    "area": "ecbench",
-   "latest_ir": 1382042,
-   "latest_wall_ns": 30072981,
-   "index": 3.5117905244558423,
+   "latest_ir": 1381940,
+   "latest_wall_ns": 26770827,
+   "index": 3.5120497271951034,
    "series_ir": [
     4853442,
     1929331,
@@ -2999,15 +3181,16 @@
     1382114,
     1382054,
     1382042,
-    1382042
+    1382042,
+    1381940
    ],
    "rebased_at": []
   },
   "ecbench/rho_signed_frobenius_k0n41": {
    "area": "ecbench",
-   "latest_ir": 127693358,
-   "latest_wall_ns": 59167810,
-   "index": 1.0320349238524988,
+   "latest_ir": 127693242,
+   "latest_wall_ns": 58516511,
+   "index": 1.0320358613809795,
    "series_ir": [
     131784005,
     129040302,
@@ -3066,14 +3249,15 @@
     127693434,
     127693335,
     127693358,
-    127693358
+    127693358,
+    127693242
    ],
    "rebased_at": []
   },
   "field_ec/binary_scalar_mul_sect163k1_x8": {
    "area": "field_ec",
    "latest_ir": 171869207,
-   "latest_wall_ns": 15134461,
+   "latest_wall_ns": 16066482,
    "index": 1.013011941109381,
    "series_ir": [
     174105559,
@@ -3133,6 +3317,7 @@
     171869207,
     171869207,
     171869207,
+    171869207,
     171869207
    ],
    "rebased_at": []
@@ -3140,7 +3325,7 @@
   "field_ec/binary_scalar_mul_sect233k1_x4": {
    "area": "field_ec",
    "latest_ir": 179016382,
-   "latest_wall_ns": 14576552,
+   "latest_wall_ns": 14001607,
    "index": 1.0073995239161968,
    "series_ir": [
     180341018,
@@ -3200,6 +3385,7 @@
     179016382,
     179016382,
     179016382,
+    179016382,
     179016382
    ],
    "rebased_at": []
@@ -3207,7 +3393,7 @@
   "field_ec/ct_scalar_mul_p256_x16": {
    "area": "field_ec",
    "latest_ir": 103430123,
-   "latest_wall_ns": 11112499,
+   "latest_wall_ns": 11107904,
    "index": 1.0000004640814353,
    "series_ir": [
     103430171,
@@ -3267,6 +3453,7 @@
     103430123,
     96110539,
     103430123,
+    103430123,
     103430123
    ],
    "rebased_at": []
@@ -3274,7 +3461,7 @@
   "field_ec/ct_scalar_mul_secp256k1_x16": {
    "area": "field_ec",
    "latest_ir": 70449339,
-   "latest_wall_ns": 7482770,
+   "latest_wall_ns": 7450083,
    "index": 1.0000006813406732,
    "series_ir": [
     70449387,
@@ -3334,15 +3521,16 @@
     70449339,
     65943707,
     70449339,
+    70449339,
     70449339
    ],
    "rebased_at": []
   },
   "field_ec/ecdsa_verify_p256_x4": {
    "area": "field_ec",
-   "latest_ir": 548705347,
-   "latest_wall_ns": 43881141,
-   "index": 0.9948074189260633,
+   "latest_ir": 548705827,
+   "latest_wall_ns": 45600793,
+   "index": 0.9948065486827788,
    "series_ir": [
     545856150,
     545886326,
@@ -3401,15 +3589,16 @@
     548700499,
     548705363,
     548705347,
-    548705347
+    548705347,
+    548705827
    ],
    "rebased_at": []
   },
   "field_ec/ecdsa_verify_secp256k1_x4": {
    "area": "field_ec",
-   "latest_ir": 543213094,
-   "latest_wall_ns": 46778106,
-   "index": 0.9944699713000654,
+   "latest_ir": 543213478,
+   "latest_wall_ns": 47257608,
+   "index": 0.9944692683048629,
    "series_ir": [
     540209110,
     540361275,
@@ -3468,14 +3657,15 @@
     543208470,
     543213102,
     543213094,
-    543213094
+    543213094,
+    543213478
    ],
    "rebased_at": []
   },
   "field_ec/f2m_inv_m163_2k": {
    "area": "field_ec",
    "latest_ir": 189509695,
-   "latest_wall_ns": 16683787,
+   "latest_wall_ns": 16912265,
    "index": 1.0119695090005818,
    "series_ir": [
     191778033,
@@ -3535,6 +3725,7 @@
     189509695,
     189509695,
     189509695,
+    189509695,
     189509695
    ],
    "rebased_at": []
@@ -3542,7 +3733,7 @@
   "field_ec/f2m_mul_sqr_m131_64k": {
    "area": "field_ec",
    "latest_ir": 91872725,
-   "latest_wall_ns": 8152587,
+   "latest_wall_ns": 8220025,
    "index": 1.0238747245169881,
    "series_ir": [
     94066161,
@@ -3602,6 +3793,7 @@
     91872725,
     91872725,
     91872725,
+    91872725,
     91872725
    ],
    "rebased_at": []
@@ -3609,7 +3801,7 @@
   "field_ec/f2m_mul_sqr_m163_64k": {
    "area": "field_ec",
    "latest_ir": 96320401,
-   "latest_wall_ns": 9142810,
+   "latest_wall_ns": 9187953,
    "index": 1.0200560626818818,
    "series_ir": [
     98252209,
@@ -3669,6 +3861,7 @@
     96320401,
     96320401,
     96320401,
+    96320401,
     96320401
    ],
    "rebased_at": []
@@ -3676,7 +3869,7 @@
   "field_ec/f2m_mul_sqr_m233_64k": {
    "area": "field_ec",
    "latest_ir": 114639315,
-   "latest_wall_ns": 9105359,
+   "latest_wall_ns": 9153579,
    "index": 1.0148676655997115,
    "series_ir": [
     116343734,
@@ -3736,6 +3929,7 @@
     114639315,
     114639315,
     114639315,
+    114639315,
     114639315
    ],
    "rebased_at": []
@@ -3743,9 +3937,10 @@
   "field_ec/fastfield_p61_inv": {
    "area": "field_ec",
    "latest_ir": 32546917,
-   "latest_wall_ns": 6274343,
+   "latest_wall_ns": 6289612,
    "index": 1.0,
    "series_ir": [
+    32546917,
     32546917,
     32546917,
     32546917,
@@ -3810,11 +4005,12 @@
   "field_ec/frobenius_canon_n53_bulk_256k": {
    "area": "field_ec",
    "latest_ir": 88234260,
-   "latest_wall_ns": 8298972,
+   "latest_wall_ns": 8309462,
    "index": 1.0433634395528448,
    "series_ir": [
     92060401,
     92060401,
+    88234260,
     88234260,
     88234260,
     88234260,
@@ -3877,11 +4073,12 @@
   "field_ec/frobenius_canon_n53_shift_256k": {
    "area": "field_ec",
    "latest_ir": 68209388,
-   "latest_wall_ns": 7431330,
+   "latest_wall_ns": 7348001,
    "index": 1.015372913183153,
    "series_ir": [
     69257965,
     69257965,
+    68209388,
     68209388,
     68209388,
     68209388,
@@ -3944,7 +4141,7 @@
   "field_ec/gf2_n53_batch_inv_4x64k": {
    "area": "field_ec",
    "latest_ir": 23875540,
-   "latest_wall_ns": 4457405,
+   "latest_wall_ns": 4458120,
    "index": 1.0494090604861712,
    "series_ir": [
     25055208,
@@ -4004,6 +4201,7 @@
     23875540,
     23875540,
     23875540,
+    23875540,
     23875540
    ],
    "rebased_at": []
@@ -4011,11 +4209,12 @@
   "field_ec/gf2_n53_inv_16k": {
    "area": "field_ec",
    "latest_ir": 12369962,
-   "latest_wall_ns": 4407372,
+   "latest_wall_ns": 4424167,
    "index": 0.9986755011858565,
    "series_ir": [
     12353578,
     12353578,
+    12369962,
     12369962,
     12369962,
     12369962,
@@ -4078,11 +4277,12 @@
   "field_ec/gf2_n53_mul_sqr_1m": {
    "area": "field_ec",
    "latest_ir": 53634918,
-   "latest_wall_ns": 6249646,
+   "latest_wall_ns": 6248885,
    "index": 0.9217989295704713,
    "series_ir": [
     49440610,
     49440610,
+    53634918,
     53634918,
     53634918,
     53634918,
@@ -4145,7 +4345,7 @@
   "field_ec/gf3m_mul_m97": {
    "area": "field_ec",
    "latest_ir": 54240322,
-   "latest_wall_ns": 4335947,
+   "latest_wall_ns": 4329232,
    "index": 4.29865722404819,
    "series_ir": [
     233160552,
@@ -4205,15 +4405,16 @@
     54240322,
     54240322,
     54240322,
+    54240322,
     54240322
    ],
    "rebased_at": []
   },
   "field_ec/hyperelliptic_g2_scalar_mul_x4": {
    "area": "field_ec",
-   "latest_ir": 668007649,
-   "latest_wall_ns": 47597682,
-   "index": 0.9869318292790995,
+   "latest_ir": 667999942,
+   "latest_wall_ns": 47786907,
+   "index": 0.9869432159321962,
    "series_ir": [
     659278011,
     659328787,
@@ -4272,18 +4473,20 @@
     668178322,
     668007665,
     668007649,
-    668007649
+    668007649,
+    667999942
    ],
    "rebased_at": []
   },
   "field_ec/isogeny_field_p256_mul_sqr_pow": {
    "area": "field_ec",
    "latest_ir": 327059289,
-   "latest_wall_ns": 36677189,
+   "latest_wall_ns": 36259230,
    "index": 1.0,
    "series_ir": [
     null,
     null,
+    327059289,
     327059289,
     327059289,
     327059289,
@@ -4346,7 +4549,7 @@
   "field_ec/koblitz_curve_mul_n53_1k": {
    "area": "field_ec",
    "latest_ir": 11415267,
-   "latest_wall_ns": 2222340,
+   "latest_wall_ns": 2221517,
    "index": 0.9992823645736886,
    "series_ir": [
     11407075,
@@ -4406,6 +4609,7 @@
     11414243,
     11415267,
     11415267,
+    11415267,
     11415267
    ],
    "rebased_at": []
@@ -4413,7 +4617,7 @@
   "field_ec/koblitz_n53_add_many_lazy_64x2k": {
    "area": "field_ec",
    "latest_ir": 34167536,
-   "latest_wall_ns": 6284202,
+   "latest_wall_ns": 6319316,
    "index": 1.0206306360517194,
    "series_ir": [
     34872434,
@@ -4473,6 +4677,7 @@
     34167536,
     34167536,
     34167536,
+    34167536,
     34167536
    ],
    "rebased_at": []
@@ -4480,11 +4685,12 @@
   "field_ec/koblitz_n53_fast_mul_2k": {
    "area": "field_ec",
    "latest_ir": 26605481,
-   "latest_wall_ns": 5717706,
+   "latest_wall_ns": 5721192,
    "index": 0.9994611636602247,
    "series_ir": [
     26591145,
     26591145,
+    26605481,
     26605481,
     26605481,
     26605481,
@@ -4547,7 +4753,7 @@
   "field_ec/point_scalar_mul_ct_secp256k1_x1": {
    "area": "field_ec",
    "latest_ir": 779674405,
-   "latest_wall_ns": 67503269,
+   "latest_wall_ns": 68536396,
    "index": 1.0028297324958342,
    "series_ir": [
     781880675,
@@ -4607,6 +4813,7 @@
     779674405,
     779674405,
     779674405,
+    779674405,
     779674405
    ],
    "rebased_at": []
@@ -4614,7 +4821,7 @@
   "field_ec/point_scalar_mul_p256_x8": {
    "area": "field_ec",
    "latest_ir": 165962014,
-   "latest_wall_ns": 13351217,
+   "latest_wall_ns": 13888593,
    "index": 0.995158416190346,
    "series_ir": [
     165158495,
@@ -4674,6 +4881,7 @@
     165962014,
     165962014,
     165962014,
+    165962014,
     165962014
    ],
    "rebased_at": []
@@ -4681,7 +4889,7 @@
   "field_ec/point_scalar_mul_secp256k1_x8": {
    "area": "field_ec",
    "latest_ir": 160104012,
-   "latest_wall_ns": 13788870,
+   "latest_wall_ns": 13854230,
    "index": 0.9948098302496002,
    "series_ir": [
     159273045,
@@ -4741,15 +4949,16 @@
     160104012,
     160104012,
     160104012,
+    160104012,
     160104012
    ],
    "rebased_at": []
   },
   "fp_gb/buchberger_katsura3_p32003": {
    "area": "fp_gb",
-   "latest_ir": 469020612,
-   "latest_wall_ns": 41989232,
-   "index": 1.0086391981425336,
+   "latest_ir": 469020579,
+   "latest_wall_ns": 41721247,
+   "index": 1.0086392691097683,
    "series_ir": [
     473072574,
     473101195,
@@ -4808,15 +5017,16 @@
     469019376,
     469020612,
     469020612,
-    469020612
+    469020612,
+    469020579
    ],
    "rebased_at": []
   },
   "fp_gb/f4_autoreduce_pkm_m2_t4_x2": {
    "area": "fp_gb",
-   "latest_ir": 503782903,
-   "latest_wall_ns": 53514742,
-   "index": 1.0313036466821113,
+   "latest_ir": 503121646,
+   "latest_wall_ns": 54127245,
+   "index": 1.0326590977165,
    "series_ir": [
     519553145,
     520054136,
@@ -4875,15 +5085,16 @@
     503782675,
     503782903,
     503782903,
-    503782903
+    503782903,
+    503121646
    ],
    "rebased_at": []
   },
   "fp_gb/f4_cubic_n4_p31": {
    "area": "fp_gb",
-   "latest_ir": 15405698,
-   "latest_wall_ns": 2033526,
-   "index": 1.3829123067947036,
+   "latest_ir": 15392582,
+   "latest_wall_ns": 1926107,
+   "index": 1.3840906846533318,
    "series_ir": [
     175970493,
     176210136,
@@ -4942,7 +5153,8 @@
     15405571,
     15405698,
     15405698,
-    15405698
+    15405698,
+    15392582
    ],
    "rebased_at": [
     "633d21586f84ec3659ec81f2f8b3b9f82e312a29"
@@ -4950,9 +5162,9 @@
   },
   "fp_gb/f4_cyclic5_p65521": {
    "area": "fp_gb",
-   "latest_ir": 5630246,
-   "latest_wall_ns": 1367873,
-   "index": 1.2357081794436902,
+   "latest_ir": 5628066,
+   "latest_wall_ns": 1162946,
+   "index": 1.2361868241204206,
    "series_ir": [
     48767426,
     48820629,
@@ -5011,7 +5223,8 @@
     5630014,
     5630246,
     5630246,
-    5630246
+    5630246,
+    5628066
    ],
    "rebased_at": [
     "633d21586f84ec3659ec81f2f8b3b9f82e312a29"
@@ -5019,9 +5232,9 @@
   },
   "fp_gb/f4_katsura6_p65521": {
    "area": "fp_gb",
-   "latest_ir": 26094612,
-   "latest_wall_ns": 3248011,
-   "index": 1.342387523499568,
+   "latest_ir": 26088283,
+   "latest_wall_ns": 3202113,
+   "index": 1.3427131858145707,
    "series_ir": [
     259940465,
     260143125,
@@ -5080,7 +5293,8 @@
     26094251,
     26094612,
     26094612,
-    26094612
+    26094612,
+    26088283
    ],
    "rebased_at": [
     "633d21586f84ec3659ec81f2f8b3b9f82e312a29"
@@ -5088,9 +5302,9 @@
   },
   "fp_gb/f4_pkm_kummer_m2_t5": {
    "area": "fp_gb",
-   "latest_ir": 246456074,
-   "latest_wall_ns": 28071018,
-   "index": 1.0942887466927025,
+   "latest_ir": 246391268,
+   "latest_wall_ns": 28639079,
+   "index": 1.0945765672680574,
    "series_ir": [
     1430875484,
     1434323552,
@@ -5149,7 +5363,8 @@
     246453985,
     246456074,
     246457031,
-    246456074
+    246456074,
+    246391268
    ],
    "rebased_at": [
     "633d21586f84ec3659ec81f2f8b3b9f82e312a29"
@@ -5157,9 +5372,9 @@
   },
   "fp_gb/f4_pkm_kummer_m3_t2": {
    "area": "fp_gb",
-   "latest_ir": 29343235,
-   "latest_wall_ns": 3787795,
-   "index": 1.16595522485239,
+   "latest_ir": 29332141,
+   "latest_wall_ns": 3788124,
+   "index": 1.1663962123433647,
    "series_ir": [
     177066286,
     177293490,
@@ -5218,7 +5433,8 @@
     29342417,
     29343235,
     29343235,
-    29343235
+    29343235,
+    29332141
    ],
    "rebased_at": [
     "633d21586f84ec3659ec81f2f8b3b9f82e312a29"
@@ -5226,9 +5442,9 @@
   },
   "fp_gb/f4_quad_n7_p65521": {
    "area": "fp_gb",
-   "latest_ir": 80457795,
-   "latest_wall_ns": 9304524,
-   "index": 1.6970383554061192,
+   "latest_ir": 80431650,
+   "latest_wall_ns": 9355060,
+   "index": 1.6975899923276807,
    "series_ir": [
     1214387454,
     1215560093,
@@ -5287,7 +5503,8 @@
     80457013,
     80457795,
     80457795,
-    80457795
+    80457795,
+    80431650
    ],
    "rebased_at": [
     "633d21586f84ec3659ec81f2f8b3b9f82e312a29"
@@ -5295,9 +5512,9 @@
   },
   "fp_gb/f4_solve_cubic_n3_p29": {
    "area": "fp_gb",
-   "latest_ir": 28710592,
-   "latest_wall_ns": 7526218,
-   "index": 1.1522947454440575,
+   "latest_ir": 28727614,
+   "latest_wall_ns": 7337501,
+   "index": 1.1516119751604919,
    "series_ir": [
     47181779,
     47333472,
@@ -5356,7 +5573,8 @@
     28710687,
     28710592,
     28710611,
-    28710592
+    28710592,
+    28727614
    ],
    "rebased_at": [
     "633d21586f84ec3659ec81f2f8b3b9f82e312a29"
@@ -5364,9 +5582,9 @@
   },
   "fp_gb/f4_solve_quad_n4_p31": {
    "area": "fp_gb",
-   "latest_ir": 32402619,
-   "latest_wall_ns": 7811735,
-   "index": 1.1084266359478476,
+   "latest_ir": 32416410,
+   "latest_wall_ns": 7657667,
+   "index": 1.1079550750397655,
    "series_ir": [
     48071233,
     47842336,
@@ -5425,7 +5643,8 @@
     32401430,
     32402513,
     32402579,
-    32402619
+    32402619,
+    32416410
    ],
    "rebased_at": [
     "633d21586f84ec3659ec81f2f8b3b9f82e312a29"
@@ -5433,9 +5652,9 @@
   },
   "fp_gb/f4_solve_quart_n3_p31": {
    "area": "fp_gb",
-   "latest_ir": 91843269,
-   "latest_wall_ns": 17849829,
-   "index": 1.210615753540337,
+   "latest_ir": 90776941,
+   "latest_wall_ns": 19063834,
+   "index": 1.2248364737036346,
    "series_ir": [
     181596003,
     182812942,
@@ -5494,7 +5713,8 @@
     91841435,
     91843274,
     91843255,
-    91843269
+    91843269,
+    90776941
    ],
    "rebased_at": [
     "633d21586f84ec3659ec81f2f8b3b9f82e312a29"
@@ -5502,9 +5722,9 @@
   },
   "fp_gb/gaudry_quartic_generic_d3_p269": {
    "area": "fp_gb",
-   "latest_ir": 59814005,
-   "latest_wall_ns": 14129030,
-   "index": 2.1224552677922177,
+   "latest_ir": 59608354,
+   "latest_wall_ns": 13753013,
+   "index": 2.129777816042363,
    "series_ir": [
     126952550,
     125364200,
@@ -5563,15 +5783,16 @@
     59516601,
     59799031,
     59808598,
-    59814005
+    59814005,
+    59608354
    ],
    "rebased_at": []
   },
   "fp_gb/gaudry_s4_macaulay_p1039": {
    "area": "fp_gb",
-   "latest_ir": 389719200,
-   "latest_wall_ns": 31255198,
-   "index": 1.0063978705693755,
+   "latest_ir": 389380831,
+   "latest_wall_ns": 30658877,
+   "index": 1.0072724227146161,
    "series_ir": [
     392212573,
     384734810,
@@ -5630,15 +5851,16 @@
     389698266,
     389597287,
     389518402,
-    389719200
+    389719200,
+    389380831
    ],
    "rebased_at": []
   },
   "fp_gb/sig_tower_kummer_m2_n12": {
    "area": "fp_gb",
-   "latest_ir": 1056874237,
-   "latest_wall_ns": 110897433,
-   "index": 0.976595944783164,
+   "latest_ir": 1056865529,
+   "latest_wall_ns": 108414224,
+   "index": 0.9766039914052306,
    "series_ir": [
     1032139094,
     1040052967,
@@ -5697,15 +5919,16 @@
     1056802279,
     1056874237,
     1056874237,
-    1056874237
+    1056874237,
+    1056865529
    ],
    "rebased_at": []
   },
   "fp_gb/sig_tower_kummer_m3_n9": {
    "area": "fp_gb",
-   "latest_ir": 1493292609,
-   "latest_wall_ns": 157756557,
-   "index": 0.973318892252014,
+   "latest_ir": 1493285619,
+   "latest_wall_ns": 158487647,
+   "index": 0.9733234483121341,
    "series_ir": [
     1453449908,
     1462018382,
@@ -5764,15 +5987,16 @@
     1493780383,
     1493292609,
     1493292609,
-    1493292609
+    1493292609,
+    1493285619
    ],
    "rebased_at": []
   },
   "fp_gb/tower_f4_kummer_m2_n12": {
    "area": "fp_gb",
-   "latest_ir": 834892207,
-   "latest_wall_ns": 80048496,
-   "index": 0.9870608218528972,
+   "latest_ir": 834897098,
+   "latest_wall_ns": 79438357,
+   "index": 0.9870550394463093,
    "series_ir": [
     824089388,
     823885655,
@@ -5831,15 +6055,16 @@
     834520225,
     834892207,
     834892207,
-    834892207
+    834892207,
+    834897098
    ],
    "rebased_at": []
   },
   "fp_gb/tower_f4_kummer_m2_n12_planted": {
    "area": "fp_gb",
-   "latest_ir": 977850783,
-   "latest_wall_ns": 95186954,
-   "index": 0.9869581359224622,
+   "latest_ir": 977857516,
+   "latest_wall_ns": 94563150,
+   "index": 0.9869513402604967,
    "series_ir": [
     965097786,
     964488085,
@@ -5898,15 +6123,16 @@
     977414112,
     977850783,
     977850783,
-    977850783
+    977850783,
+    977857516
    ],
    "rebased_at": []
   },
   "fp_gb/tower_f4_kummer_m3_n9": {
    "area": "fp_gb",
-   "latest_ir": 1465406164,
-   "latest_wall_ns": 141040426,
-   "index": 0.9881322540963461,
+   "latest_ir": 1465411172,
+   "latest_wall_ns": 139866588,
+   "index": 0.9881288771831472,
    "series_ir": [
     1448015096,
     1447802162,
@@ -5965,15 +6191,16 @@
     1464735510,
     1465406164,
     1465406164,
-    1465406164
+    1465406164,
+    1465411172
    ],
    "rebased_at": []
   },
   "fp_gb/tower_f4_kummer_m4_n8": {
    "area": "fp_gb",
-   "latest_ir": 536391141,
-   "latest_wall_ns": 54420026,
-   "index": 0.987958423422209,
+   "latest_ir": 536396162,
+   "latest_wall_ns": 54082318,
+   "index": 0.9879491755200139,
    "series_ir": [
     529932146,
     529749557,
@@ -6032,15 +6259,16 @@
     536216622,
     536391141,
     536391141,
-    536391141
+    536391141,
+    536396162
    ],
    "rebased_at": []
   },
   "gf2_la/echelon_macaulay_k23m2d4": {
    "area": "gf2_la",
-   "latest_ir": 325668707,
-   "latest_wall_ns": 33871553,
-   "index": 1.0643649682927634,
+   "latest_ir": 325460862,
+   "latest_wall_ns": 31331046,
+   "index": 1.065044690381236,
    "series_ir": [
     346630363,
     346626214,
@@ -6099,15 +6327,16 @@
     325668707,
     325668707,
     325668707,
-    325668707
+    325668707,
+    325460862
    ],
    "rebased_at": []
   },
   "gf2_la/echelon_macaulay_k5m3d5": {
    "area": "gf2_la",
-   "latest_ir": 220760942,
-   "latest_wall_ns": 22103290,
-   "index": 0.9848008258634812,
+   "latest_ir": 220599648,
+   "latest_wall_ns": 19105379,
+   "index": 0.9855208744485398,
    "series_ir": [
     217405558,
     217401654,
@@ -6166,15 +6395,16 @@
     220760942,
     220760942,
     220760942,
-    220760942
+    220760942,
+    220599648
    ],
    "rebased_at": []
   },
   "gf2_la/f5_criterion_k23m2d6": {
    "area": "gf2_la",
-   "latest_ir": 1081293795,
-   "latest_wall_ns": 149871268,
-   "index": 3.0322112622499615,
+   "latest_ir": 1079822684,
+   "latest_wall_ns": 149077206,
+   "index": 3.03634223616662,
    "series_ir": [
     3278711223,
     3277200520,
@@ -6233,15 +6463,16 @@
     1081293795,
     1085926856,
     1081293795,
-    1081293795
+    1081293795,
+    1079822684
    ],
    "rebased_at": []
   },
   "gf2_la/f5_criterion_k5m3d7": {
    "area": "gf2_la",
-   "latest_ir": 89162134,
-   "latest_wall_ns": 12190532,
-   "index": 3.4838865678113984,
+   "latest_ir": 89095092,
+   "latest_wall_ns": 12388398,
+   "index": 3.4865081120293357,
    "series_ir": [
     310630761,
     310660608,
@@ -6300,15 +6531,16 @@
     89162134,
     89451930,
     89162134,
-    89162134
+    89162134,
+    89095092
    ],
    "rebased_at": []
   },
   "gf2_la/legacy_echelon_macaulay_k23m2d3_x16": {
    "area": "gf2_la",
-   "latest_ir": 119387116,
-   "latest_wall_ns": 8329960,
-   "index": 0.974386842309871,
+   "latest_ir": 119097332,
+   "latest_wall_ns": 8257698,
+   "index": 0.976757690690521,
    "series_ir": [
     199046725,
     203931153,
@@ -6367,7 +6599,8 @@
     119387116,
     119387116,
     119387116,
-    119387116
+    119387116,
+    119097332
    ],
    "rebased_at": [
     "8a41eca793207682b53ca35f04fe8ac99ee230f7"
@@ -6376,11 +6609,12 @@
   "gf2_la/legacy_rref_macaulay_k23m3d3": {
    "area": "gf2_la",
    "latest_ir": 107652304,
-   "latest_wall_ns": 10270990,
+   "latest_wall_ns": 10332562,
    "index": 0.9996839454546184,
    "series_ir": [
     107618280,
     107618280,
+    107652304,
     107652304,
     107652304,
     107652304,
@@ -6442,9 +6676,9 @@
   },
   "gf2_la/legacy_rref_macaulay_k5m3d5": {
    "area": "gf2_la",
-   "latest_ir": 1310922420,
-   "latest_wall_ns": 106761541,
-   "index": 0.9252254500308266,
+   "latest_ir": 1295405768,
+   "latest_wall_ns": 104028305,
+   "index": 0.9363080016793628,
    "series_ir": [
     1212898786,
     1245036587,
@@ -6503,14 +6737,15 @@
     1310922420,
     1310922420,
     1310922420,
-    1310922420
+    1310922420,
+    1295405768
    ],
    "rebased_at": []
   },
   "gf2_la/rank_refute_anf_s4_n6l3d4": {
    "area": "gf2_la",
    "latest_ir": 1320032020,
-   "latest_wall_ns": 188784917,
+   "latest_wall_ns": 188489884,
    "index": 1.0000368119858185,
    "series_ir": [
     1320080613,
@@ -6570,15 +6805,16 @@
     1320032020,
     1320032020,
     1320032020,
+    1320032020,
     1320032020
    ],
    "rebased_at": []
   },
   "gf2_la/rref_macaulay_k15m3d4": {
    "area": "gf2_la",
-   "latest_ir": 608697853,
-   "latest_wall_ns": 70989603,
-   "index": 1.089153812080227,
+   "latest_ir": 608494221,
+   "latest_wall_ns": 66456978,
+   "index": 1.089518296345496,
    "series_ir": [
     662965587,
     662957866,
@@ -6637,15 +6873,16 @@
     608697853,
     608697853,
     608697853,
-    608697853
+    608697853,
+    608494221
    ],
    "rebased_at": []
   },
   "gf2_la/rref_macaulay_k17m2d5": {
    "area": "gf2_la",
-   "latest_ir": 878202922,
-   "latest_wall_ns": 103927287,
-   "index": 1.0890987117439814,
+   "latest_ir": 877952267,
+   "latest_wall_ns": 100420303,
+   "index": 1.0894096489644352,
    "series_ir": [
     956449671,
     956443811,
@@ -6704,15 +6941,16 @@
     878202922,
     878202922,
     878202922,
-    878202922
+    878202922,
+    877952267
    ],
    "rebased_at": []
   },
   "gf2_la/rref_macaulay_k23m2d3_x16": {
    "area": "gf2_la",
-   "latest_ir": 123595854,
-   "latest_wall_ns": 8659380,
-   "index": 0.982524947802861,
+   "latest_ir": 123306070,
+   "latest_wall_ns": 8521068,
+   "index": 0.9848339988453125,
    "series_ir": [
     121436010,
     121435070,
@@ -6771,15 +7009,16 @@
     123595854,
     123595854,
     123595854,
-    123595854
+    123595854,
+    123306070
    ],
    "rebased_at": []
   },
   "gf2_la/rref_macaulay_k23m2d4": {
    "area": "gf2_la",
-   "latest_ir": 468983977,
-   "latest_wall_ns": 61726098,
-   "index": 1.1089575476050857,
+   "latest_ir": 468777876,
+   "latest_wall_ns": 53504418,
+   "index": 1.109445107430795,
    "series_ir": [
     520083321,
     520078041,
@@ -6838,15 +7077,16 @@
     468983977,
     468983977,
     468983977,
-    468983977
+    468983977,
+    468777876
    ],
    "rebased_at": []
   },
   "gf2_la/rref_macaulay_k5m3d5": {
    "area": "gf2_la",
-   "latest_ir": 275474595,
-   "latest_wall_ns": 29378466,
-   "index": 1.000702090150999,
+   "latest_ir": 275314954,
+   "latest_wall_ns": 34424031,
+   "index": 1.001282345891026,
    "series_ir": [
     275668003,
     275663026,
@@ -6905,15 +7145,16 @@
     275474595,
     275474595,
     275474595,
-    275474595
+    275474595,
+    275314954
    ],
    "rebased_at": []
   },
   "gf2_la/rref_random_2048": {
    "area": "gf2_la",
-   "latest_ir": 77043759,
-   "latest_wall_ns": 6321541,
-   "index": 1.0422445379384977,
+   "latest_ir": 76962287,
+   "latest_wall_ns": 6321622,
+   "index": 1.0433478542549024,
    "series_ir": [
     80298437,
     80298427,
@@ -6972,15 +7213,16 @@
     77043759,
     77043759,
     77043759,
-    77043759
+    77043759,
+    76962287
    ],
    "rebased_at": []
   },
   "gf2_la/rref_random_4940x8357": {
    "area": "gf2_la",
-   "latest_ir": 629840006,
-   "latest_wall_ns": 87569701,
-   "index": 1.3739968988251277,
+   "latest_ir": 629648151,
+   "latest_wall_ns": 86261044,
+   "index": 1.3744155583171083,
    "series_ir": [
     865398215,
     865393710,
@@ -7039,15 +7281,16 @@
     629840006,
     629840006,
     629840006,
-    629840006
+    629840006,
+    629648151
    ],
    "rebased_at": []
   },
   "gf2_la/rref_random_4940x8357_w17": {
    "area": "gf2_la",
-   "latest_ir": 540745729,
-   "latest_wall_ns": 73102145,
-   "index": 1.3040352168921145,
+   "latest_ir": 540553874,
+   "latest_wall_ns": 72191851,
+   "index": 1.304498048977075,
    "series_ir": [
     705151474,
     705146969,
@@ -7106,15 +7349,16 @@
     540745729,
     540745729,
     540745729,
-    540745729
+    540745729,
+    540553874
    ],
    "rebased_at": []
   },
   "gf2_la/sparse_finish_macaulay_k7m3d5": {
    "area": "gf2_la",
-   "latest_ir": 158341321,
-   "latest_wall_ns": 18479854,
-   "index": 1.7438408512456451,
+   "latest_ir": 158261142,
+   "latest_wall_ns": 18005916,
+   "index": 1.7447243240542265,
    "series_ir": [
     276122064,
     286518048,
@@ -7173,14 +7417,15 @@
     158341321,
     158341321,
     158341321,
-    158341321
+    158341321,
+    158261142
    ],
    "rebased_at": []
   },
   "gf2_la/sparse_high_macaulay_k5m3d5": {
    "area": "gf2_la",
    "latest_ir": 231684670,
-   "latest_wall_ns": 29014421,
+   "latest_wall_ns": 28025243,
    "index": 0.9999865938475773,
    "series_ir": [
     231681564,
@@ -7240,15 +7485,16 @@
     231684670,
     231684670,
     231684670,
+    231684670,
     231684670
    ],
    "rebased_at": []
   },
   "gf2_la/sparse_rank_refute_macaulay_k5m3d5": {
    "area": "gf2_la",
-   "latest_ir": 393174314,
-   "latest_wall_ns": 77973919,
-   "index": 1.0012544232480043,
+   "latest_ir": 393626403,
+   "latest_wall_ns": 78270185,
+   "index": 1.0001044594561908,
    "series_ir": [
     393667521,
     388551997,
@@ -7307,15 +7553,16 @@
     393564350,
     393134910,
     393354107,
-    393174314
+    393174314,
+    393626403
    ],
    "rebased_at": []
   },
   "pdp/build_system_m2_n23": {
    "area": "pdp",
-   "latest_ir": 2519846,
-   "latest_wall_ns": 316586,
-   "index": 1.0087576780485785,
+   "latest_ir": 2522006,
+   "latest_wall_ns": 302444,
+   "index": 1.0078937163511896,
    "series_ir": [
     2541914,
     2553956,
@@ -7374,15 +7621,16 @@
     2519846,
     2519846,
     2519846,
-    2519846
+    2519846,
+    2522006
    ],
    "rebased_at": []
   },
   "pdp/build_system_m3_n15": {
    "area": "pdp",
-   "latest_ir": 13839152,
-   "latest_wall_ns": 1415884,
-   "index": 1.011496874953032,
+   "latest_ir": 13863888,
+   "latest_wall_ns": 1436014,
+   "index": 1.0096921585056085,
    "series_ir": [
     13998259,
     14096012,
@@ -7441,14 +7689,15 @@
     13839152,
     13839152,
     13839152,
-    13839152
+    13839152,
+    13863888
    ],
    "rebased_at": []
   },
   "pdp/descend_s3_n31_np20": {
    "area": "pdp",
    "latest_ir": 66729896,
-   "latest_wall_ns": 9367091,
+   "latest_wall_ns": 9309909,
    "index": 0.9827485869302119,
    "series_ir": [
     65578711,
@@ -7508,6 +7757,7 @@
     66729896,
     66729896,
     66729896,
+    66729896,
     66729896
    ],
    "rebased_at": []
@@ -7515,7 +7765,7 @@
   "pdp/descend_s4_n23_np6": {
    "area": "pdp",
    "latest_ir": 45606947,
-   "latest_wall_ns": 7259938,
+   "latest_wall_ns": 7298225,
    "index": 0.994160933420954,
    "series_ir": [
     45340645,
@@ -7575,15 +7825,16 @@
     45606947,
     45606947,
     45606947,
+    45606947,
     45606947
    ],
    "rebased_at": []
   },
   "pdp/enumerate_m2_n23": {
    "area": "pdp",
-   "latest_ir": 16129756,
-   "latest_wall_ns": 3142472,
-   "index": 1.0086582834855033,
+   "latest_ir": 16332378,
+   "latest_wall_ns": 3190880,
+   "index": 0.9961447132805767,
    "series_ir": [
     16269412,
     16270452,
@@ -7642,15 +7893,16 @@
     16474836,
     16133400,
     16132664,
-    16129756
+    16129756,
+    16332378
    ],
    "rebased_at": []
   },
   "pdp/enumerate_m3_n15": {
    "area": "pdp",
-   "latest_ir": 9136597,
-   "latest_wall_ns": 2195992,
-   "index": 0.9998073681043391,
+   "latest_ir": 9355903,
+   "latest_wall_ns": 2259546,
+   "index": 0.9763714950871125,
    "series_ir": [
     9134837,
     9134665,
@@ -7709,15 +7961,16 @@
     9513343,
     9136489,
     9136621,
-    9136597
+    9136597,
+    9355903
    ],
    "rebased_at": []
   },
   "pdp/groebner_m2_n17": {
    "area": "pdp",
-   "latest_ir": 176721612,
-   "latest_wall_ns": 19181164,
-   "index": 1.003173313063713,
+   "latest_ir": 176628892,
+   "latest_wall_ns": 19410475,
+   "index": 1.0036999213016635,
    "series_ir": [
     177282405,
     179138558,
@@ -7776,15 +8029,16 @@
     176191811,
     176721588,
     176721584,
-    176721612
+    176721612,
+    176628892
    ],
    "rebased_at": []
   },
   "pdp/groebner_m3_n9": {
    "area": "pdp",
-   "latest_ir": 138702773,
-   "latest_wall_ns": 17323158,
-   "index": 1.0818816434189105,
+   "latest_ir": 138698849,
+   "latest_wall_ns": 17261883,
+   "index": 1.081912251485231,
    "series_ir": [
     150059984,
     150067389,
@@ -7843,15 +8097,16 @@
     138667998,
     138702757,
     138702830,
-    138702773
+    138702773,
+    138698849
    ],
    "rebased_at": []
   },
   "pdp/instantiate_m2_n23": {
    "area": "pdp",
-   "latest_ir": 30298833,
-   "latest_wall_ns": 5455664,
-   "index": 1.0008814200863774,
+   "latest_ir": 30296529,
+   "latest_wall_ns": 5485536,
+   "index": 1.000957535432524,
    "series_ir": [
     30325539,
     30342663,
@@ -7910,15 +8165,16 @@
     30296529,
     30298833,
     30298833,
-    30298833
+    30298833,
+    30296529
    ],
    "rebased_at": []
   },
   "pdp/instantiate_m3_n15": {
    "area": "pdp",
-   "latest_ir": 23623599,
-   "latest_wall_ns": 4762800,
-   "index": 1.0003422001871938,
+   "latest_ir": 23621295,
+   "latest_wall_ns": 4765806,
+   "index": 1.000439772671227,
    "series_ir": [
     23631683,
     23647567,
@@ -7977,15 +8233,16 @@
     23621295,
     23623599,
     23623599,
-    23623599
+    23623599,
+    23621295
    ],
    "rebased_at": []
   },
   "pdp/mitm_m3_n31": {
    "area": "pdp",
-   "latest_ir": 214538220,
-   "latest_wall_ns": 28904586,
-   "index": 1.0267285521432965,
+   "latest_ir": 214552923,
+   "latest_wall_ns": 28098580,
+   "index": 1.026658191927779,
    "series_ir": [
     220272516,
     220272537,
@@ -8044,15 +8301,16 @@
     214557447,
     214538220,
     214538220,
-    214538220
+    214538220,
+    214552923
    ],
    "rebased_at": []
   },
   "pdp/mitm_m4_n31": {
    "area": "pdp",
-   "latest_ir": 73062646,
-   "latest_wall_ns": 10755914,
-   "index": 1.0212401560162503,
+   "latest_ir": 73065152,
+   "latest_wall_ns": 10767182,
+   "index": 1.0212051293618065,
    "series_ir": [
     74614508,
     74583403,
@@ -8111,15 +8369,16 @@
     73065920,
     73062646,
     73062646,
-    73062646
+    73062646,
+    73065152
    ],
    "rebased_at": []
   },
   "pdp/pair_table_build_n31_l10": {
    "area": "pdp",
-   "latest_ir": 367018340,
-   "latest_wall_ns": 52320806,
-   "index": 1.0249822856263795,
+   "latest_ir": 367018388,
+   "latest_wall_ns": 52276988,
+   "index": 1.0249821515754673,
    "series_ir": [
     376187297,
     376187799,
@@ -8178,15 +8437,16 @@
     367018339,
     367018340,
     367018340,
-    367018340
+    367018340,
+    367018388
    ],
    "rebased_at": []
   },
   "pdp/relation_solver_u1024": {
    "area": "pdp",
-   "latest_ir": 188107062,
-   "latest_wall_ns": 20523129,
-   "index": 0.9800965207781511,
+   "latest_ir": 188107054,
+   "latest_wall_ns": 21010822,
+   "index": 0.9800965624606505,
    "series_ir": [
     184363077,
     184363540,
@@ -8245,15 +8505,16 @@
     188107062,
     188107062,
     188107062,
-    188107062
+    188107062,
+    188107054
    ],
    "rebased_at": []
   },
   "pdp/sat_m2_n17": {
    "area": "pdp",
-   "latest_ir": 260434850,
-   "latest_wall_ns": 37109290,
-   "index": 1.0079219428582618,
+   "latest_ir": 260434930,
+   "latest_wall_ns": 36627454,
+   "index": 1.0079216332463543,
    "series_ir": [
     262498000,
     262563824,
@@ -8312,15 +8573,16 @@
     260435073,
     260434842,
     260434858,
-    260434850
+    260434850,
+    260434930
    ],
    "rebased_at": []
   },
   "pdp/sat_m6_n7": {
    "area": "pdp",
-   "latest_ir": 102769431,
-   "latest_wall_ns": 12037345,
-   "index": 0.9849883181702149,
+   "latest_ir": 102769422,
+   "latest_wall_ns": 11984547,
+   "index": 0.9849884044302588,
    "series_ir": [
     101226689,
     101323708,
@@ -8379,15 +8641,16 @@
     102769820,
     102769427,
     102769431,
-    102769431
+    102769431,
+    102769422
    ],
    "rebased_at": []
   },
   "pdp/semaev_s5_symbolic": {
    "area": "pdp",
-   "latest_ir": 61951974,
-   "latest_wall_ns": 8157295,
-   "index": 1.000125532723138,
+   "latest_ir": 61942585,
+   "latest_wall_ns": 8052777,
+   "index": 1.00027712760131,
    "series_ir": [
     61959751,
     58479684,
@@ -8446,14 +8709,15 @@
     61920960,
     61937218,
     61963868,
-    61951974
+    61951974,
+    61942585
    ],
    "rebased_at": []
   },
   "pdp/subspace_oracle_n20_l7": {
    "area": "pdp",
    "latest_ir": 140416429,
-   "latest_wall_ns": 18523787,
+   "latest_wall_ns": 18588348,
    "index": 1.0165825111533062,
    "series_ir": [
     142744886,
@@ -8513,15 +8777,16 @@
     140416429,
     140416429,
     140416429,
+    140416429,
     140416429
    ],
    "rebased_at": []
   },
   "pdp/symmetrised_groebner_m2_n17": {
    "area": "pdp",
-   "latest_ir": 1390531589,
-   "latest_wall_ns": 133371455,
-   "index": 1.075490864666722,
+   "latest_ir": 1388326656,
+   "latest_wall_ns": 132814308,
+   "index": 1.0771989535292772,
    "series_ir": [
     1495504021,
     1495770204,
@@ -8580,15 +8845,16 @@
     1390578744,
     1390531577,
     1390531581,
-    1390531589
+    1390531589,
+    1388326656
    ],
    "rebased_at": []
   },
   "pdp/symmetrised_groebner_m3_n15": {
    "area": "pdp",
-   "latest_ir": 681244205,
-   "latest_wall_ns": 83558334,
-   "index": 1.0830594294743399,
+   "latest_ir": 681253561,
+   "latest_wall_ns": 83784533,
+   "index": 1.0830445552709562,
    "series_ir": [
     737827960,
     736368950,
@@ -8647,15 +8913,16 @@
     681579059,
     681244205,
     681244205,
-    681244205
+    681244205,
+    681253561
    ],
    "rebased_at": []
   },
   "pdp/weil_descend_s4_sym_n17_l4": {
    "area": "pdp",
-   "latest_ir": 20348166,
-   "latest_wall_ns": 2511935,
-   "index": 1.0056452262085938,
+   "latest_ir": 20348281,
+   "latest_wall_ns": 2506432,
+   "index": 1.0056395427210787,
    "series_ir": [
     20463036,
     20350633,
@@ -8714,14 +8981,15 @@
     20348230,
     20348230,
     20348166,
-    20348166
+    20348166,
+    20348281
    ],
    "rebased_at": []
   },
   "relation/block_wiedemann_r45_n768_w13": {
    "area": "relation",
    "latest_ir": 487478786,
-   "latest_wall_ns": 43745113,
+   "latest_wall_ns": 43738007,
    "index": 0.9648586472027522,
    "series_ir": [
     470348122,
@@ -8781,15 +9049,16 @@
     487478786,
     487478786,
     487478786,
+    487478786,
     487478786
    ],
    "rebased_at": []
   },
   "relation/koblitz_collect_k0n41_w164_u4096": {
    "area": "relation",
-   "latest_ir": 335171170,
-   "latest_wall_ns": 30832703,
-   "index": 1.0377112953957222,
+   "latest_ir": 335167170,
+   "latest_wall_ns": 31200061,
+   "index": 1.037723679798352,
    "series_ir": [
     347810909,
     347811037,
@@ -8848,15 +9117,16 @@
     335167611,
     335171170,
     335171170,
-    335171170
+    335171170,
+    335167170
    ],
    "rebased_at": []
   },
   "relation/koblitz_collect_k0n53_w477_u1024": {
    "area": "relation",
-   "latest_ir": 243765651,
-   "latest_wall_ns": 21608340,
-   "index": 1.0379270908845148,
+   "latest_ir": 243764675,
+   "latest_wall_ns": 22071311,
+   "index": 1.0379312466008452,
    "series_ir": [
     253010973,
     253011005,
@@ -8915,15 +9185,16 @@
     243764708,
     243765651,
     243765651,
-    243765651
+    243765651,
+    243764675
    ],
    "rebased_at": []
   },
   "relation/koblitz_descent_k0n53_m2_x4": {
    "area": "relation",
-   "latest_ir": 422444568,
-   "latest_wall_ns": 39696134,
-   "index": 1.0380255570004158,
+   "latest_ir": 426772761,
+   "latest_wall_ns": 39713253,
+   "index": 1.0274982334216969,
    "series_ir": [
     438508258,
     438507242,
@@ -8982,15 +9253,16 @@
     426771274,
     422444216,
     422444322,
-    422444568
+    422444568,
+    426772761
    ],
    "rebased_at": []
   },
   "relation/koblitz_pair_table_k0n41_folded": {
    "area": "relation",
-   "latest_ir": 110454909,
-   "latest_wall_ns": 11006677,
-   "index": 1.0326332078187677,
+   "latest_ir": 110459331,
+   "latest_wall_ns": 11006907,
+   "index": 1.0325918685855526,
    "series_ir": [
     114059407,
     114059407,
@@ -9049,15 +9321,16 @@
     110458885,
     110458886,
     110454909,
-    110454909
+    110454909,
+    110459331
    ],
    "rebased_at": []
   },
   "relation/koblitz_rung_k0n31": {
    "area": "relation",
-   "latest_ir": 175774666,
-   "latest_wall_ns": 17434218,
-   "index": 0.970570895580595,
+   "latest_ir": 175778153,
+   "latest_wall_ns": 17467418,
+   "index": 0.9705516418755404,
    "series_ir": [
     170601775,
     170559416,
@@ -9116,14 +9389,15 @@
     175775959,
     175776864,
     175767501,
-    175774666
+    175774666,
+    175778153
    ],
    "rebased_at": []
   },
   "relation/pq_sparse_solve_m127_c640": {
    "area": "relation",
    "latest_ir": 273757780,
-   "latest_wall_ns": 25130559,
+   "latest_wall_ns": 25457765,
    "index": 0.9872203412812598,
    "series_ir": [
     270259249,
@@ -9183,15 +9457,16 @@
     273565344,
     273757780,
     273757780,
+    273757780,
     273757780
    ],
    "rebased_at": []
   },
   "relation/pq_wiedemann_m127_c160": {
    "area": "relation",
-   "latest_ir": 435860446,
-   "latest_wall_ns": 32029885,
-   "index": 0.9987927213748595,
+   "latest_ir": 435602878,
+   "latest_wall_ns": 32318669,
+   "index": 0.9993832983812381,
    "series_ir": [
     435334241,
     432994803,
@@ -9250,15 +9525,16 @@
     435606858,
     435860446,
     435860446,
-    435860446
+    435860446,
+    435602878
    ],
    "rebased_at": []
   },
   "relation/residual_walk_lmw_b22_x3": {
    "area": "relation",
-   "latest_ir": 233437805,
-   "latest_wall_ns": 38750528,
-   "index": 1.0042112202006017,
+   "latest_ir": 233721216,
+   "latest_wall_ns": 38437800,
+   "index": 1.0029935108672383,
    "series_ir": [
     234420863,
     234396907,
@@ -9317,15 +9593,16 @@
     233436192,
     233437760,
     233437805,
-    233437805
+    233437805,
+    233721216
    ],
    "rebased_at": []
   },
   "relation/sparse_solve_r45_c4800_w3": {
    "area": "relation",
-   "latest_ir": 565049884,
-   "latest_wall_ns": 56952294,
-   "index": 0.9894721949894256,
+   "latest_ir": 565043325,
+   "latest_wall_ns": 57429890,
+   "index": 0.9894836807425348,
    "series_ir": [
     559101149,
     559069050,
@@ -9384,14 +9661,15 @@
     565054944,
     565046782,
     565047554,
-    565049884
+    565049884,
+    565043325
    ],
    "rebased_at": []
   },
   "sat/koblitz_bool_cnf_m3_n15_b1500_x2": {
    "area": "sat",
    "latest_ir": 826328659,
-   "latest_wall_ns": 130328433,
+   "latest_wall_ns": 131113851,
    "index": 1.0173452739946662,
    "series_ir": [
     840661556,
@@ -9451,6 +9729,7 @@
     826328659,
     826328659,
     826328659,
+    826328659,
     826328659
    ],
    "rebased_at": []
@@ -9458,7 +9737,7 @@
   "sat/koblitz_bool_native_m2_n19_x2": {
    "area": "sat",
    "latest_ir": 980922647,
-   "latest_wall_ns": 123220274,
+   "latest_wall_ns": 124275229,
    "index": 0.9948789631727204,
    "series_ir": [
     975899306,
@@ -9518,6 +9797,7 @@
     980922647,
     980922647,
     980922647,
+    980922647,
     980922647
    ],
    "rebased_at": []
@@ -9525,7 +9805,7 @@
   "sat/koblitz_bool_native_m3_n15_x3": {
    "area": "sat",
    "latest_ir": 452993474,
-   "latest_wall_ns": 53354961,
+   "latest_wall_ns": 53905340,
    "index": 0.9886647594397795,
    "series_ir": [
     447858684,
@@ -9585,6 +9865,7 @@
     452993474,
     452993474,
     452993474,
+    452993474,
     452993474
    ],
    "rebased_at": []
@@ -9592,7 +9873,7 @@
   "sat/random3sat_n150_r426_x12": {
    "area": "sat",
    "latest_ir": 747779562,
-   "latest_wall_ns": 141746404,
+   "latest_wall_ns": 142773199,
    "index": 1.0148670030112428,
    "series_ir": [
     758896803,
@@ -9652,6 +9933,7 @@
     747779562,
     747779562,
     747779562,
+    747779562,
     747779562
    ],
    "rebased_at": []
@@ -9659,7 +9941,7 @@
   "sat/random3sat_n200_r426_x5": {
    "area": "sat",
    "latest_ir": 716997465,
-   "latest_wall_ns": 136337740,
+   "latest_wall_ns": 136655226,
    "index": 1.0155874470211692,
    "series_ir": [
     728173625,
@@ -9719,15 +10001,16 @@
     716997465,
     716997465,
     716997465,
+    716997465,
     716997465
    ],
    "rebased_at": []
   },
   "sat/semaev_s4_encode_n19l6_x4": {
    "area": "sat",
-   "latest_ir": 60524201,
-   "latest_wall_ns": 6459111,
-   "index": 1.0119079308457126,
+   "latest_ir": 60515468,
+   "latest_wall_ns": 6562674,
+   "index": 1.0120539594934639,
    "series_ir": [
     61244919,
     61112641,
@@ -9786,15 +10069,16 @@
     60523745,
     60532927,
     60524201,
-    60524201
+    60524201,
+    60515468
    ],
    "rebased_at": []
   },
   "sat/semaev_s4_n15l5_cnf_x2": {
    "area": "sat",
-   "latest_ir": 281915855,
-   "latest_wall_ns": 52069434,
-   "index": 1.0185081466950483,
+   "latest_ir": 281915865,
+   "latest_wall_ns": 52660391,
+   "index": 1.0185081105669593,
    "series_ir": [
     287133595,
     287127588,
@@ -9853,15 +10137,16 @@
     281915855,
     281915855,
     281915855,
-    281915855
+    281915855,
+    281915865
    ],
    "rebased_at": []
   },
   "sat/semaev_s4_n15l5_sat_x4": {
    "area": "sat",
-   "latest_ir": 884110810,
-   "latest_wall_ns": 108847593,
-   "index": 0.9929395479283868,
+   "latest_ir": 884110830,
+   "latest_wall_ns": 109346095,
+   "index": 0.9929395254665072,
    "series_ir": [
     877868588,
     877875575,
@@ -9920,14 +10205,15 @@
     884110810,
     884110810,
     884110810,
-    884110810
+    884110810,
+    884110830
    ],
    "rebased_at": []
   },
   "sat/semaev_s4_n15l5_unsat_x1": {
    "area": "sat",
    "latest_ir": 1272381201,
-   "latest_wall_ns": 159062920,
+   "latest_wall_ns": 160238770,
    "index": 0.9930246941773228,
    "series_ir": [
     1263505953,
@@ -9987,15 +10273,16 @@
     1272381201,
     1272381201,
     1272381201,
+    1272381201,
     1272381201
    ],
    "rebased_at": []
   },
   "sat/semaev_s4_n17l6_sat_x1": {
    "area": "sat",
-   "latest_ir": 1288021216,
-   "latest_wall_ns": 150035369,
-   "index": 0.9932081382733998,
+   "latest_ir": 1288021221,
+   "latest_wall_ns": 150073858,
+   "index": 0.9932081344178416,
    "series_ir": [
     1279273154,
     1279270310,
@@ -10054,14 +10341,15 @@
     1288021216,
     1288021216,
     1288021216,
-    1288021216
+    1288021216,
+    1288021221
    ],
    "rebased_at": []
   },
   "sat/xor_planted_n120_x6": {
    "area": "sat",
    "latest_ir": 980037258,
-   "latest_wall_ns": 141527352,
+   "latest_wall_ns": 140963999,
    "index": 0.9596073285205649,
    "series_ir": [
     940450935,
@@ -10115,6 +10403,7 @@
     986469911,
     986469911,
     986469911,
+    980037258,
     980037258,
     980037258,
     980037258,
