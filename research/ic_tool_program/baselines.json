@@ -1220,6 +1220,207 @@
      }
     }
    ]
+  },
+  {
+   "baseline": "v6",
+   "round": "R08",
+   "class": "engineering",
+   "commit": "92246530 + R06 candidate-v4.patch + R08 candidate-v5.patch",
+   "built_from": "3d4c5c0ef88057e8ece09dcc91e8fad4ff7e781a (local; v5, tree 6896b5c8, plus research/ic_tool_program/rounds/R08-scan-fold/candidate-v5.patch)",
+   "base": "v5 (binary 31982fde…)",
+   "binary_sha256": "4ccb1951134ff31b5183fc00033933b9add2e3c0c52003f9041fd04bac1f4012",
+   "host": {
+    "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "logical_cores": 4,
+    "memory": "MemTotal:       16479424 kB",
+    "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+    "cargo_lock_sha256": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+    "transparent_hugepage": {
+     "enabled": "always [madvise] never",
+     "defrag": "always defer defer+madvise [madvise] never"
+    }
+   },
+   "source": "research/ic_tool_program/rounds/R08-scan-fold/analysis.json",
+   "what_changed": "the collection scan's subtraction: each product reduced by two vpclmulqdq folds on eight lanes for every tail and degree that folds, Montgomery's trick in two chains, the negated base as coordinate slices with each rest's abscissa straight into the key, and the build's rows past their own orbit on the same kernel; detected at run time (AVX-512F, VPCLMULQDQ); the same field elements by construction and by test, so every count and output is v5's",
+   "measured": "R08's comparison: M1's two rows at the eight smaller sizes and all eight at the three target sizes, five rounds each (ten at 2^44.3), paired with v5 in the same runs; s_cold is the candidate's median in v0's unit",
+   "sizes": [
+    {
+     "curve_alias": "icv1-f2m19-tm797-9c54981b",
+     "ec1": "EC1N19Ce1h7e63aa468dcc",
+     "curve_uid": "urn:ec-record:1:sha256:7e63aa468dcc9ee8813f014acabe3395ac3e3d9f533d00361a821770038f4d23",
+     "log2_r": 18.002,
+     "rows_measured": 2,
+     "rounds": 5,
+     "s_cold": 141.276,
+     "s_cold_base_same_runs": 129.11,
+     "cold_ratio_over_base": {
+      "geomean": 0.8979,
+      "lo": 0.7685,
+      "hi": 1.049,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m23-tm5197-1f85e9e1",
+     "ec1": "EC1N23Ce1heec6a3619e3f",
+     "curve_uid": "urn:ec-record:1:sha256:eec6a3619e3fdf05035e0ef5d3ec8cf3af507268cf760c77d47518d62141b00f",
+     "log2_r": 22.001,
+     "rows_measured": 2,
+     "rounds": 5,
+     "s_cold": 35.744,
+     "s_cold_base_same_runs": 33.638,
+     "cold_ratio_over_base": {
+      "geomean": 0.9375,
+      "lo": 0.8053,
+      "hi": 1.0915,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m45-tm6236725-40939294",
+     "ec1": "EC1N45Ce1h97bc367649de",
+     "curve_uid": "urn:ec-record:1:sha256:97bc367649ded9e1309ece1e66c630f558ee953b017378c53b2c3cf2896747df",
+     "log2_r": 24.803,
+     "rows_measured": 2,
+     "rounds": 5,
+     "s_cold": 20.748,
+     "s_cold_base_same_runs": 23.996,
+     "cold_ratio_over_base": {
+      "geomean": 1.1315,
+      "lo": 1.0087,
+      "hi": 1.2691,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m37-tm534059-32aad96b",
+     "ec1": "EC1N37Ce0h0c51aa4aa7c3",
+     "curve_uid": "urn:ec-record:1:sha256:0c51aa4aa7c3c76c45885e230d717aedcbefad98e2604d1664ac38b57299f180",
+     "log2_r": 27.781,
+     "rows_measured": 2,
+     "rounds": 5,
+     "s_cold": 9.119,
+     "s_cold_base_same_runs": 11.313,
+     "cold_ratio_over_base": {
+      "geomean": 1.1776,
+      "lo": 1.0553,
+      "hi": 1.3141,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m43-tm998717-e2e742b0",
+     "ec1": "EC1N43Ce1h7d34f0f22c70",
+     "curve_uid": "urn:ec-record:1:sha256:7d34f0f22c707e3756957364281079ea2835960013fd13a1e648b7ff5e5fea8c",
+     "log2_r": 32.113,
+     "rows_measured": 2,
+     "rounds": 5,
+     "s_cold": 4.575,
+     "s_cold_base_same_runs": 5.42,
+     "cold_ratio_over_base": {
+      "geomean": 1.1371,
+      "lo": 0.97,
+      "hi": 1.3329,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m47-t22705043-f4e44623",
+     "ec1": "EC1N47Ce1h9669b6d5105b",
+     "curve_uid": "urn:ec-record:1:sha256:9669b6d5105b035b2ff286a4e32c52725841e8546ab03de8a8077c5114e98b0c",
+     "log2_r": 36.636,
+     "rows_measured": 2,
+     "rounds": 5,
+     "s_cold": 2.762,
+     "s_cold_base_same_runs": 3.267,
+     "cold_ratio_over_base": {
+      "geomean": 1.1854,
+      "lo": 1.0824,
+      "hi": 1.2982,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m57-tm747311035-c1f545af",
+     "ec1": "EC1N57Ce0hb5884395c7f2",
+     "curve_uid": "urn:ec-record:1:sha256:b5884395c7f28d0d22eb1acc451c34ff979b0a40f93629e44b30107592b76695",
+     "log2_r": 38.002,
+     "rows_measured": 2,
+     "rounds": 5,
+     "s_cold": 3.443,
+     "s_cold_base_same_runs": 3.589,
+     "cold_ratio_over_base": {
+      "geomean": 1.1085,
+      "lo": 1.0156,
+      "hi": 1.2098,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m41-tm2308219-7f48b14a",
+     "ec1": "EC1N41Ce0he09550ab560a",
+     "curve_uid": "urn:ec-record:1:sha256:e09550ab560a9bb6de7981f4b47c48235d8553626dc43dbe92bf73262a95a8e1",
+     "log2_r": 39.0,
+     "rows_measured": 2,
+     "rounds": 5,
+     "s_cold": 3.669,
+     "s_cold_base_same_runs": 4.657,
+     "cold_ratio_over_base": {
+      "geomean": 1.2752,
+      "lo": 1.1354,
+      "hi": 1.4323,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m53-tm56619371-dac20a85",
+     "ec1": "EC1N53Ce0hb097de99be9a",
+     "curve_uid": "urn:ec-record:1:sha256:b097de99be9a3af970966707e65d24bf63302ba5324f05b714f916a680651ae6",
+     "log2_r": 44.259,
+     "rows_measured": 8,
+     "rounds": 10,
+     "s_cold": 4.116,
+     "s_cold_base_same_runs": 5.477,
+     "cold_ratio_over_base": {
+      "geomean": 1.3262,
+      "lo": 1.2971,
+      "hi": 1.356,
+      "n": 80
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m59-tm943548413-98844ecc",
+     "ec1": "EC1N59Ce1h20858f64459b",
+     "curve_uid": "urn:ec-record:1:sha256:20858f64459bbef8a18a8b75dbe579ce4cb0901d5c1b70d236ac154427d86980",
+     "log2_r": 44.517,
+     "rows_measured": 8,
+     "rounds": 5,
+     "s_cold": 3.898,
+     "s_cold_base_same_runs": 5.191,
+     "cold_ratio_over_base": {
+      "geomean": 1.3537,
+      "lo": 1.3162,
+      "hi": 1.3922,
+      "n": 40
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m61-t158598901-ab42b6c5",
+     "ec1": "EC1N61Ce0hd8c15448081e",
+     "curve_uid": "urn:ec-record:1:sha256:d8c15448081eb349784c3d5d9d3144eaa4a5252d115f9049e10bbadf373db689",
+     "log2_r": 47.211,
+     "rows_measured": 8,
+     "rounds": 5,
+     "s_cold": 5.023,
+     "s_cold_base_same_runs": 7.08,
+     "cold_ratio_over_base": {
+      "geomean": 1.3975,
+      "lo": 1.3704,
+      "hi": 1.4252,
+      "n": 40
+     }
+    }
+   ]
   }
  ]
 }

@@ -649,6 +649,27 @@ nothing missing. R09's class excludes it.
 - **Next:** R08 (the scan's subtraction by carry-less folds), ported onto
   v5 by an amendment before any run, on this host.
 
+**R08 accepted: v6 is v5 plus the scan's subtraction by carry-less folds
+(2026-10-16).**
+- **The port.** Amendment 1 cherry-picked the frozen candidate from its
+  declared base onto v5 without a conflict (the same lines). The tests
+  passed on its tree, and its pin held on all 90 rows.
+- **The gain.** Cold time, v5 over the candidate: 1.326 [1.297, 1.356],
+  1.354 [1.316, 1.392] and 1.398 [1.370, 1.425] at `2^44.3`, `2^44.5` and
+  `2^47.2` on the suite rows; 1.319, 1.296 and 1.409 on fresh holdouts.
+  Every interval lies above the declared 1.05. Collection ran 1.47–1.53×
+  faster; rho's online interval did not move. Chained with R06, the scan is
+  1.59–1.73× faster cold than v4 (the product of two paired ratios, not a
+  third measurement).
+- **The smallest sizes** (`2^18`, `2^22`) read 0.90 and 0.94, inside the A/A
+  rule and with intervals reaching above 1; whether a fixed cost shows there
+  is open ([results](../../ic_tool_program/rounds/R08-scan-fold/README.md)).
+- **Next: the rule at v6.** R06 and R08 are the programme's first gains since
+  v2 that bear on the distance to rho. The rule's comparison at v3 left rho
+  13.2×, 12.0× and 21.0× faster cold at the three largest sizes. Re-running
+  it at v6, with the unpriced native work priced at 0, 0.1 and 1 GAE, is
+  the measurement that turns these gains into a distance.
+
 ## 9. Track B: generality and robustness
 
 **Where the tool stands (at `0bf67f16`).**
