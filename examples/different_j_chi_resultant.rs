@@ -4,6 +4,7 @@
 
 use std::collections::BTreeSet;
 use std::fs;
+use std::path::Path;
 use std::time::Instant;
 
 use crypto_lib::cryptanalysis::ecbench::canonical::sha256_hex;
@@ -272,6 +273,117 @@ fn parse_point(v: &Value) -> Point {
     )
 }
 
+fn point_tuple(point: Point) -> String {
+    format!(
+        "{},{},{},{},{}",
+        u64::from(point.infinity),
+        point.x[0],
+        point.x[1],
+        point.y[0],
+        point.y[1]
+    )
+}
+
+fn velu(src: &Curve, torsion: Point, point: Point, ops: &mut GroupOps) -> Point {
+    if point.infinity || point == torsion || point == src.neg(torsion) {
+        return src.identity();
+    }
+    let plus = src.add(ops, point, torsion);
+    let minus = src.add(ops, point, src.neg(torsion));
+    assert!(!plus.infinity && !minus.infinity);
+    let f = &src.f;
+    Point::affine(
+        f.sub(
+            f.add(f.add(point.x, plus.x), minus.x),
+            f.scale(torsion.x, 2),
+        ),
+        f.add(f.add(point.y, plus.y), minus.y),
+    )
+}
+
+fn freeze_targets(parent_path: &str, public_path: &str, checker_path: &str) {
+    assert!(!Path::new(public_path).exists() && !Path::new(checker_path).exists());
+    let parent_bytes = fs::read(parent_path).unwrap();
+    let mut public: Value = serde_json::from_slice(&parent_bytes).unwrap();
+    assert_eq!(public["p"], 211);
+    assert_eq!(public["r"], 229);
+    assert_eq!(
+        public["target_order_domain"],
+        "different-j-order-batch-target-v1:13"
+    );
+    assert_eq!(public["targets"].as_array().unwrap().len(), 64);
+    let f = Fp2::new(211).unwrap();
+    let source = Curve {
+        f,
+        a: [190, 0],
+        b: [37, 0],
+    };
+    let destination = Curve {
+        f,
+        a: [130, 0],
+        b: [179, 0],
+    };
+    let g = parse_point(&public["generator"]);
+    let mapped_g = parse_point(&public["mapped_generator"]);
+    let t = Point::affine([3, 0], [1, 0]);
+    let mut ops = GroupOps::default();
+    assert!(source.is_on_curve(g) && destination.is_on_curve(mapped_g));
+    assert_eq!(velu(&source, t, g, &mut ops), mapped_g);
+    let mut entries = Vec::new();
+    for scalar in 1..229u64 {
+        let point = source.mul(&mut ops, g, scalar);
+        let mapped = destination.mul(&mut ops, mapped_g, scalar);
+        assert_eq!(velu(&source, t, point, &mut ops), mapped);
+        let tuple = point_tuple(point);
+        let digest = sha256_hex(format!("different-j-order-batch-target-v1:13:{tuple}").as_bytes());
+        entries.push((digest, tuple, point, mapped, scalar));
+    }
+    entries.sort_by(|a, b| (&a.0, &a.1).cmp(&(&b.0, &b.1)));
+    for (existing, generated) in public["targets"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .zip(entries.iter())
+    {
+        assert_eq!(parse_point(&existing["source"]), generated.2);
+        assert_eq!(parse_point(&existing["destination"]), generated.3);
+    }
+    let held = &entries[64..68];
+    let targets: Vec<Value> = held
+        .iter()
+        .map(|entry| json!({"source":entry.2,"destination":entry.3}))
+        .collect();
+    let scalars: Vec<u64> = held.iter().map(|entry| entry.4).collect();
+    let parent_sha = sha256_hex(&parent_bytes);
+    public["targets"] = json!(targets);
+    public["target_count"] = json!(4);
+    public["schema"] = json!("different_j_chi_heldout_public/v1");
+    public["parent_public_sha256"] = json!(parent_sha);
+    public["selection_positions_zero_indexed"] = json!([64, 65, 66, 67]);
+    assert!(public.get("scalars").is_none() && public.get("answer_scalar").is_none());
+    fs::write(
+        public_path,
+        format!("{}\n", serde_json::to_string_pretty(&public).unwrap()),
+    )
+    .unwrap();
+    let public_sha = sha256_hex(&fs::read(public_path).unwrap());
+    let checker = json!({"schema":"different_j_chi_heldout_checker/v1",
+        "public_sha256":public_sha,"parent_public_sha256":parent_sha,
+        "target_count":4,"scalars":scalars});
+    fs::write(
+        checker_path,
+        format!("{}\n", serde_json::to_string_pretty(&checker).unwrap()),
+    )
+    .unwrap();
+    println!(
+        "{}",
+        json!({"schema":"different_j_chi_heldout_freeze/v1",
+        "public_sha256":public_sha,"checker_sha256":sha256_hex(&fs::read(checker_path).unwrap()),
+        "parent_public_sha256":parent_sha,"selection_positions_zero_indexed":[64,65,66,67],
+        "target_count":4,"source_image_replays":228,"group_ops":ops})
+    );
+}
+
 fn direct_pairs(
     curve: &Curve,
     signed: &[Point],
@@ -380,7 +492,13 @@ fn polynomial_pairs(
 }
 
 fn main() {
-    assert_eq!(std::env::args().nth(1).as_deref(), Some("exhaustive"));
+    let args: Vec<_> = std::env::args().collect();
+    if args.get(1).map(String::as_str) == Some("freeze-targets") {
+        assert_eq!(args.len(), 5);
+        freeze_targets(&args[2], &args[3], &args[4]);
+        return;
+    }
+    assert_eq!(args.get(1).map(String::as_str), Some("exhaustive"));
     let path = std::env::args().nth(2).expect("public input path");
     let bytes = fs::read(&path).unwrap();
     let public: Value = serde_json::from_slice(&bytes).unwrap();

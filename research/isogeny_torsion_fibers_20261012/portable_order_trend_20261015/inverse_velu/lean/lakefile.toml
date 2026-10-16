@@ -1,6 +1,9 @@
 name = "inverse_velu_cubic"
 version = "0.1.0"
-defaultTargets = ["InverseVelu"]
+defaultTargets = ["InverseVelu", "ChiChord"]
 
 [[lean_lib]]
 name = "InverseVelu"
+
+[[lean_lib]]
+name = "ChiChord"
