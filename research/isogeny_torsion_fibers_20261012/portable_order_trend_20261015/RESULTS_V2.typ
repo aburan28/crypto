@@ -76,7 +76,8 @@ run's CPU and wall meters are shared-host L0 descriptions; the
 canonical frontier and scoreboard graphs are unchanged.
 
 The isolated-host access check found no configured isolab and a zero
-Standard On-Demand EC2 vCPU quota in five checked regions. A frozen
+Standard On-Demand EC2 vCPU quota in five checked regions; AWS denied
+the quota-increase request with an AccessDeniedException. A frozen
 Linux hosted-runner protocol is ready for independent-host replay;
 that virtual machine cannot admit L2 wall timing.
 

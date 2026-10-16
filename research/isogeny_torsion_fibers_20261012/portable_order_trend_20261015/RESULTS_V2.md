@@ -117,7 +117,9 @@ Vélu bridge remain open work, not conclusions from this panel.
 An [isolated-host access check](ISOLATION_ACCESS_V1.md) found no configured
 isolab and a zero Standard On-Demand EC2 vCPU quota in five checked regions;
 the requested bare-metal session therefore has no available placement from
-this environment. A [frozen independent Linux replay
+this environment. A quota-increase request was denied with an AWS
+`AccessDeniedException` directing the account to AWS Support, and no
+instance was launched. A [frozen independent Linux replay
 protocol](INDEPENDENT_HOST_PROTOCOL_V1.md) and CI workflow are prepared for
 the exact public inputs. Its hosted VM is a different host class, but its
 timing remains descriptive and does not satisfy the L2 gate.
