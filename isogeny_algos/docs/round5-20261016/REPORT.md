@@ -101,7 +101,7 @@ explain the in-process gap. Change 6 removes that cost entirely.
   `profile_ntt`, `profile_sqr`, `profile_powmod`, `profile_eig` and `profile_sea`.
 - **Benchmark records:** `results/p14-bench/*.jsonl`. Arms: `main`, `round5-pre-bmss`
   (this branch before change 6) and `round5` (`bmss` and `big` after change 6). Compare them
-  with `results/p14-bench/compare.py`.
+  with `cargo run --release --example bench_compare -- results/p14-bench main round5-pre-bmss <groups>`.
 - **Tests:**
   - `tests/ntt.rs`: NTT equals Karatsuba for 1, 2, 4 and 8 limbs, including operands
     equal to p − 1, unbalanced lengths and squarings;
