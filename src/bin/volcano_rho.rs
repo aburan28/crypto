@@ -46,13 +46,25 @@ struct Fp {
 impl Fp {
     fn add(&self, a: u64, b: u64) -> u64 {
         let s = a + b;
-        if s >= self.p { s - self.p } else { s }
+        if s >= self.p {
+            s - self.p
+        } else {
+            s
+        }
     }
     fn sub(&self, a: u64, b: u64) -> u64 {
-        if a >= b { a - b } else { a + self.p - b }
+        if a >= b {
+            a - b
+        } else {
+            a + self.p - b
+        }
     }
     fn neg(&self, a: u64) -> u64 {
-        if a == 0 { 0 } else { self.p - a }
+        if a == 0 {
+            0
+        } else {
+            self.p - a
+        }
     }
     fn mul(&self, a: u64, b: u64) -> u64 {
         ((a as u128 * b as u128) % self.p as u128) as u64
@@ -116,7 +128,7 @@ fn is_prime(n: u64) -> bool {
         return false;
     }
     for q in [2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
-        if n % q == 0 {
+        if n.is_multiple_of(q) {
             return n == q;
         }
     }
@@ -142,9 +154,9 @@ fn factor(mut n: u64) -> Vec<(u64, u32)> {
     let mut out = Vec::new();
     let mut d = 2u64;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             let mut e = 0;
-            while n % d == 0 {
+            while n.is_multiple_of(d) {
                 n /= d;
                 e += 1;
             }
@@ -332,7 +344,10 @@ impl Velu {
         let xx = f.add(x, f.add(f.mul(self.tq, i), f.mul(self.uq, i2)));
         let yy = f.sub(
             y,
-            f.mul(y, f.add(f.mul(f.add(self.uq, self.uq), i3), f.mul(self.tq, i2))),
+            f.mul(
+                y,
+                f.add(f.mul(f.add(self.uq, self.uq), i3), f.mul(self.tq, i2)),
+            ),
         );
         Some((xx, yy))
     }
@@ -389,7 +404,12 @@ fn rho(f: &Fp, inst: &Instance, n: u64, seed: u64, dp_bits: u32) -> Solve {
                     // aP + bQ = O.
                     if b != 0 {
                         let k = mulmod(n - a % n, inv_mod(b, n), n) % n;
-                        return Solve { k: Some(k), iters, restarts, ns: t0.elapsed().as_nanos() };
+                        return Solve {
+                            k: Some(k),
+                            iters,
+                            restarts,
+                            ns: t0.elapsed().as_nanos(),
+                        };
                     }
                     restarts += 1;
                     continue 'restart;
@@ -405,7 +425,12 @@ fn rho(f: &Fp, inst: &Instance, n: u64, seed: u64, dp_bits: u32) -> Solve {
                     };
                     if den != 0 {
                         let k = mulmod(num, inv_mod(den, n), n);
-                        return Solve { k: Some(k), iters, restarts, ns: t0.elapsed().as_nanos() };
+                        return Solve {
+                            k: Some(k),
+                            iters,
+                            restarts,
+                            ns: t0.elapsed().as_nanos(),
+                        };
                     }
                     restarts += 1;
                     continue 'restart;
@@ -498,7 +523,7 @@ fn parse_args() -> Args {
 
 fn vl(mut x: u128, l: u128) -> u32 {
     let mut v = 0;
-    while x > 0 && x % l == 0 {
+    while x > 0 && x.is_multiple_of(l) {
         x /= l;
         v += 1;
     }
@@ -516,7 +541,6 @@ struct Vertex {
     p: (u64, u64),
     q: (u64, u64),
 }
-
 
 struct Found {
     f: Fp,
@@ -543,12 +567,17 @@ fn search(args: &Args, rng: &mut SmallRng) -> Found {
         let f = Fp { p };
         for _ in 0..200 {
             tried += 1;
-            let e = Curve { a: rng.gen_range(1..p), b: rng.gen_range(1..p) };
+            let e = Curve {
+                a: rng.gen_range(1..p),
+                b: rng.gen_range(1..p),
+            };
             match e.j(&f) {
                 Some(j) if j != 0 && j != 1728 % p => {}
                 _ => continue,
             }
-            let Some(order) = group_order(&f, &e, rng) else { continue };
+            let Some(order) = group_order(&f, &e, rng) else {
+                continue;
+            };
             let t = p as i64 + 1 - order as i64;
             let d_abs = (4 * p as i128 - (t as i128) * (t as i128)) as u64;
             let depth = vl(d_abs as u128, args.ell as u128) / 2;
@@ -556,10 +585,19 @@ fn search(args: &Args, rng: &mut SmallRng) -> Found {
                 continue;
             }
             let n = factor(order).last().unwrap().0;
-            if order / n > args.max_cofactor || n % args.ell == 0 || n < (1 << 20) {
+            if order / n > args.max_cofactor || n.is_multiple_of(args.ell) || n < (1 << 20) {
                 continue;
             }
-            return Found { f, root: e, order, n, t, d_abs, depth, tried };
+            return Found {
+                f,
+                root: e,
+                order,
+                n,
+                t,
+                d_abs,
+                depth,
+                tried,
+            };
         }
     }
 }
@@ -669,7 +707,10 @@ fn main() {
                     let isum = iso.map(&f, e.add(&f, pp, qq));
                     assert!(c.on(&f, ip) && c.on(&f, iq), "image off the codomain");
                     assert_eq!(c.add(&f, ip, iq), isum, "Vélu map is not a homomorphism");
-                    assert!(ip.is_some() && c.mul(&f, ip, n).is_none(), "order not preserved");
+                    assert!(
+                        ip.is_some() && c.mul(&f, ip, n).is_none(),
+                        "order not preserved"
+                    );
                     edges_checked += 1;
                     let w = vs.len();
                     vs.push(Vertex {
@@ -718,8 +759,9 @@ fn main() {
         }
         None
     };
-    let levels: Vec<Option<u32>> =
-        (0..vs.len()).map(|v| (vs[v].dist <= r_meas).then(|| level_of(v)).flatten()).collect();
+    let levels: Vec<Option<u32>> = (0..vs.len())
+        .map(|v| (vs[v].dist <= r_meas).then(|| level_of(v)).flatten())
+        .collect();
     for (v, lv) in levels.iter().enumerate() {
         let Some(lv) = lv else { continue };
         for &w in &vs[v].nbrs {
@@ -761,14 +803,21 @@ fn main() {
             label: format!("v{v}"),
             vertex: Some(v),
             level: levels[v],
-            inst: Instance { curve: vs[v].curve, p: vs[v].p, q: vs[v].q },
+            inst: Instance {
+                curve: vs[v].curve,
+                p: vs[v].p,
+                q: vs[v].q,
+            },
         })
         .collect();
     for c in 0..args.controls {
         // Isomorphic model (u⁴a, u⁶b), (x, y) ↦ (u²x, u³y): same curve, new coordinates.
         let u = rng.gen_range(2..f.p);
         let (u2, u3) = (f.mul(u, u), f.mul(f.mul(u, u), u));
-        let cv = Curve { a: f.mul(f.mul(u2, u2), e0.a), b: f.mul(f.mul(u3, u3), e0.b) };
+        let cv = Curve {
+            a: f.mul(f.mul(u2, u2), e0.a),
+            b: f.mul(f.mul(u3, u3), e0.b),
+        };
         let mv = |pt: (u64, u64)| (f.mul(u2, pt.0), f.mul(u3, pt.1));
         let (cp, cq) = (mv(p0), mv(q0));
         assert!(cv.on(&f, Some(cp)) && cv.on(&f, Some(cq)));
@@ -776,16 +825,26 @@ fn main() {
             label: format!("iso{c}"),
             vertex: None,
             level: levels[0],
-            inst: Instance { curve: cv, p: cp, q: cq },
+            inst: Instance {
+                curve: cv,
+                p: cp,
+                q: cq,
+            },
         });
     }
 
     // 4. Pollard rho: every arm × the same trial seeds, interleaved.
-    let mut jobs: Vec<(usize, u64)> =
-        (0..arms.len()).flat_map(|a| (0..args.trials).map(move |s| (a, s))).collect();
+    let mut jobs: Vec<(usize, u64)> = (0..arms.len())
+        .flat_map(|a| (0..args.trials).map(move |s| (a, s)))
+        .collect();
     jobs.shuffle(&mut rng);
     let seed_base = args.seed.wrapping_mul(0x1000_0000_01b3);
-    eprintln!("rho: {} arms x {} trials = {} solves", arms.len(), args.trials, jobs.len());
+    eprintln!(
+        "rho: {} arms x {} trials = {} solves",
+        arms.len(),
+        args.trials,
+        jobs.len()
+    );
     let t_rho = Instant::now();
     let results: Vec<(usize, u64, Solve)> = jobs
         .par_iter()
@@ -844,7 +903,10 @@ fn main() {
             .flat_map(|(i, _)| by_arm[i].iter().copied())
             .collect();
         if !rs.is_empty() {
-            let curves = arms.iter().filter(|a| a.vertex.is_some() && a.level == Some(l)).count();
+            let curves = arms
+                .iter()
+                .filter(|a| a.vertex.is_some() && a.level == Some(l))
+                .count();
             level_json.push(json!({"level": l, "curves": curves, "summary": summarize(&rs)}));
         }
     }
@@ -873,9 +935,11 @@ fn main() {
         })
         .collect();
     let expected = (std::f64::consts::PI * n as f64 / 2.0).sqrt();
-    let host = fs::read_to_string("/proc/cpuinfo")
-        .ok()
-        .and_then(|c| c.lines().find(|l| l.starts_with("model name")).map(|l| l.split(':').nth(1).unwrap().trim().to_string()));
+    let host = fs::read_to_string("/proc/cpuinfo").ok().and_then(|c| {
+        c.lines()
+            .find(|l| l.starts_with("model name"))
+            .map(|l| l.split(':').nth(1).unwrap().trim().to_string())
+    });
     let out = json!({
         "schema": "volcano-rho/v1",
         "command": std::env::args().collect::<Vec<_>>().join(" "),
@@ -900,26 +964,49 @@ fn main() {
         "controls": if ctrl.is_empty() { serde_json::Value::Null } else { summarize(&ctrl) },
         "vertices": vertices,
     });
-    fs::write(args.out.join("results.json"), serde_json::to_string_pretty(&out).unwrap()).unwrap();
+    fs::write(
+        args.out.join("results.json"),
+        serde_json::to_string_pretty(&out).unwrap(),
+    )
+    .unwrap();
 
     println!("\nPollard rho on one instance (k = {k_secret}, n = {n}) across the {ell}-volcano");
-    println!("expected iterations ~ sqrt(pi n / 2) = {expected:.0} (+ DP tail ~2^{})", args.dp_bits);
-    println!("{:<8}{:>6}{:>12}{:>12}{:>12}{:>10}{:>10}{:>10}{:>9}", "arm", "level", "min it", "mean it", "max it", "min ms", "mean ms", "max ms", "ns/op");
+    println!(
+        "expected iterations ~ sqrt(pi n / 2) = {expected:.0} (+ DP tail ~2^{})",
+        args.dp_bits
+    );
+    println!(
+        "{:<8}{:>6}{:>12}{:>12}{:>12}{:>10}{:>10}{:>10}{:>9}",
+        "arm", "level", "min it", "mean it", "max it", "min ms", "mean ms", "max ms", "ns/op"
+    );
     let row = |name: &str, lv: String, s: &serde_json::Value| {
         println!(
             "{:<8}{:>6}{:>12.0}{:>12.0}{:>12.0}{:>10.2}{:>10.2}{:>10.2}{:>9.1}",
-            name, lv, s["iters"]["min"].as_f64().unwrap(), s["iters"]["mean"].as_f64().unwrap(),
-            s["iters"]["max"].as_f64().unwrap(), s["ms"]["min"].as_f64().unwrap(),
-            s["ms"]["mean"].as_f64().unwrap(), s["ms"]["max"].as_f64().unwrap(),
+            name,
+            lv,
+            s["iters"]["min"].as_f64().unwrap(),
+            s["iters"]["mean"].as_f64().unwrap(),
+            s["iters"]["max"].as_f64().unwrap(),
+            s["ms"]["min"].as_f64().unwrap(),
+            s["ms"]["mean"].as_f64().unwrap(),
+            s["ms"]["max"].as_f64().unwrap(),
             s["ns_per_op"]["mean"].as_f64().unwrap()
         );
     };
     for a in &arm_json {
-        row(a["arm"].as_str().unwrap(), a["level"].to_string(), &a["summary"]);
+        row(
+            a["arm"].as_str().unwrap(),
+            a["level"].to_string(),
+            &a["summary"],
+        );
     }
     println!("-- pooled by level --");
     for l in &level_json {
-        row(&format!("L{}", l["level"]), format!("{}c", l["curves"]), &l["summary"]);
+        row(
+            &format!("L{}", l["level"]),
+            format!("{}c", l["curves"]),
+            &l["summary"],
+        );
     }
     row("ALL", "iso".into(), &out["all_isogenous"]);
     if !ctrl.is_empty() {

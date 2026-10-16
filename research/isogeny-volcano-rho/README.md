@@ -148,8 +148,12 @@ python plot.py OUT     # matplotlib, plotting only
 
 The curve, volcano, instance and every solve's iteration count are a
 deterministic function of `--seed`; wall times are not. Run from the
-then-uncommitted `src/bin/volcano_rho.rs` on top of `9b09d308e` (committed
-unchanged in this PR), Intel Xeon @
+then-uncommitted `src/bin/volcano_rho.rs` on top of `9b09d308e` (committed in this PR
+with formatting and lint-only changes), Intel Xeon @
 2.80 GHz, 4 threads, 342.5 s for the rho phase.
+
+**Replay.** The committed binary (formatting and lint fixes only) re-run
+with `--trials 5` reproduces 160/160 iteration counts of the first five
+seeds of every arm exactly.
 
 Report PDF: [`report.pdf`](report.pdf).
