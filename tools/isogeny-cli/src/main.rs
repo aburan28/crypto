@@ -1,6 +1,7 @@
 //! Installed isogeny construction, screening, and independent certificate replay.
 #![allow(dead_code)]
 mod catalog;
+mod challenge;
 mod constructor;
 #[path = "../../../src/cryptanalysis/isogeny_walk/curve.rs"]
 mod curve;
@@ -63,6 +64,11 @@ const HELP: &str = "isogeny — public-curve isogeny search and independent veri
   isogeny screen --curve p192 --from 1010 --to 65537 [--max-order 8]
   isogeny version
   isogeny curves                 full pinned catalogue and operation capabilities
+  isogeny challenge policy       frozen largest-prime-degree rules and curve roster
+  isogeny challenge plan --curve all --from 10454 --to 65537
+  isogeny challenge run --curve p192 --ell 10453 --out ATTEMPT
+  isogeny challenge judge --input RESULTS --out FRESH_JUDGEMENT
+  isogeny challenge leaderboard --input submissions.json --out FRESH_BOARD
 
 search options:
   --method auto|kernel|modpoly  auto selects the validated kernel route for
@@ -258,6 +264,7 @@ fn general_worker(name: &str, ell: u64) -> Result<Json, String> {
 fn execute(args: &[String]) -> Result<(Value, i32), String> {
     let command = args.first().map(String::as_str).unwrap_or("help");
     match command {
+        "challenge" => challenge::execute(&args[1..]),
         "curves" => Ok((catalog::inventory(), 0)),
         "version" | "--version" | "-V" => {
             Ok((json!({"schema":"isogeny-tool/v1","tool":provenance()}), 0))
