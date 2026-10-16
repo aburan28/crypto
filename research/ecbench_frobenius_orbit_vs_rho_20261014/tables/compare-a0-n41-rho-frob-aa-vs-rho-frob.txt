@@ -1,0 +1,25 @@
+ops (ok): rho-frob-aa / rho-frob = 1.0000 [1.000, 1.000] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 0.9532 [0.916, 1.006]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 0.07%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | rho-frob-aa / rho-frob | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m41-tm2308219-7f48b14a | 39.00 | 16 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-frob mean S | rho-frob-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W11c17e62f0e3 | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 0.1337 | 0.1337 | 1.0000 |
+| W40f4e0f993ed | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 0.1102 | 0.1102 | 1.0000 |
+| W500ea583b59d | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 0.0946 | 0.0946 | 1.0000 |
+| W5f9dea23cafa | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 0.1508 | 0.1508 | 1.0000 |
+| W7bdf9e28cbae | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 0.1877 | 0.1877 | 1.0000 |
+| W8a14eef15390 | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 0.1894 | 0.1894 | 1.0000 |
+| Wadbd0cdbddcd | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 0.1823 | 0.1823 | 1.0000 |
+| Wb26fefedb711 | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 0.0939 | 0.0939 | 1.0000 |
+| Wb54a4898b32b | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 0.1261 | 0.1261 | 1.0000 |
+| Wbf533a9bcec3 | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 0.1034 | 0.1034 | 1.0000 |
+| Wd1941f72df1b | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 0.1319 | 0.1319 | 1.0000 |
+| Wd6ae5c3e16da | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 0.1422 | 0.1422 | 1.0000 |
+| Wd713c36c3e24 | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 0.1214 | 0.1214 | 1.0000 |
+| Wdb77c6ce2ca9 | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 0.1165 | 0.1165 | 1.0000 |
+| We45d038dfe33 | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 0.1338 | 0.1338 | 1.0000 |
+| Wece649e9aa79 | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 0.1074 | 0.1074 | 1.0000 |

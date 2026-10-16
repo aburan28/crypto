@@ -1,0 +1,14 @@
+{
+  "schema": "n83.standard-projection-map-lib-validation-attempt/v1",
+  "command": "CARGO_TARGET_DIR=/private/tmp/n83-guarded-cargo-target-20261015 cargo test --release --offline --lib -- --test-threads=2",
+  "sandbox_permissions": "require_escalated_for_local_sockets",
+  "src_git_tree": "f5dac3ceb6d264227ef74b197e49f3cf01d1164e",
+  "exit_code": 0,
+  "elapsed_seconds_reported_by_cargo": 799.39,
+  "passed": 4084,
+  "failed": 0,
+  "ignored": 117,
+  "status": "PASS_FULL_RELEASE_LIBRARY_SUITE",
+  "prior_attempt": "lib-attempt-01.json",
+  "notes": "The full release library suite passed with two test threads and local socket access. All four Joux-Vitse cover tests and the nine socket-dependent collaboration tests that failed in the first sandboxed run passed in this run. The cargo terminal summary was observed in the completed session; full stdout was not written to a durable file."
+}

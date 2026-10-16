@@ -1,0 +1,58 @@
+{
+ "schema": "ecbench.spec/v1",
+ "label": "IC frontier campaign Phase 1: PKM tower ladder, 20-bit",
+ "description": "Phase 1 (PROTOCOL.md): the Kummer-tower arm on its registered 2-adic ladder (research/pkm_tower_ecbench_20261013), t as registered there. Counts only.",
+ "workloads": {
+  "targets_per_curve": 16,
+  "target_seed": 20261015200,
+  "target_kind": "public",
+  "curves": [
+   {
+    "kind": "prime_explicit",
+    "p": 946177,
+    "a": 304973,
+    "b": 530845,
+    "group_order": 946906,
+    "r": 473453,
+    "gx": 507332,
+    "gy": 85990
+   }
+  ]
+ },
+ "arms": [
+  {
+   "name": "rho-neg",
+   "role": "reference",
+   "method": {
+    "id": "rho.negation"
+   }
+  },
+  {
+   "name": "ic-pkm",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "prime-kummer:t=8",
+     "oracle": "rootfind-mitm:m=3",
+     "max_trials": "2000000"
+    }
+   }
+  },
+  {
+   "name": "rho-neg-aa",
+   "role": "control",
+   "method": {
+    "id": "rho.negation"
+   }
+  }
+ ],
+ "measurement": {
+  "rounds": 2,
+  "warmup": 1,
+  "order": "alternate",
+  "seed": 20261015201,
+  "isolation_required": "L0",
+  "timeout_seconds": 3600
+ }
+}

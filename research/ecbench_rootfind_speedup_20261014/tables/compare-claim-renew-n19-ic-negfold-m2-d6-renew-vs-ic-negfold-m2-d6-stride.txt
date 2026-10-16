@@ -1,0 +1,25 @@
+ops (ok): ic-negfold-m2-d6-renew / ic-negfold-m2-d6-stride = 0.6257 [0.545, 0.713] (cluster) over 48 pairs on 16 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 0.6184 [0.596, 0.729]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 1.27%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-negfold-m2-d6-renew / ic-negfold-m2-d6-stride | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m19-t797-b6cf2467 | 17.00 | 16 | 0.6257 | [0.5452, 0.7125] | cluster |
+
+| workload | curve | log2 r | ic-negfold-m2-d6-stride mean S | ic-negfold-m2-d6-renew mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W0923719d9d8f | icv1-f2m19-t797-b6cf2467 | 17.00 | 15.8096 | 11.7913 | 0.7458 |
+| W17d36a54392a | icv1-f2m19-t797-b6cf2467 | 17.00 | 24.8606 | 15.8538 | 0.6377 |
+| W2db40eab3e1e | icv1-f2m19-t797-b6cf2467 | 17.00 | 19.6509 | 15.9542 | 0.8119 |
+| W33527f428771 | icv1-f2m19-t797-b6cf2467 | 17.00 | 24.0000 | 17.4829 | 0.7285 |
+| W417cf4917395 | icv1-f2m19-t797-b6cf2467 | 17.00 | 19.9651 | 15.7589 | 0.7893 |
+| W55ce49ff9c6c | icv1-f2m19-t797-b6cf2467 | 17.00 | 25.2329 | 14.3593 | 0.5691 |
+| W68c1a004b90d | icv1-f2m19-t797-b6cf2467 | 17.00 | 20.4876 | 14.2413 | 0.6951 |
+| W69efefb86dbc | icv1-f2m19-t797-b6cf2467 | 17.00 | 25.2319 | 14.2432 | 0.5645 |
+| W774265ef6ac4 | icv1-f2m19-t797-b6cf2467 | 17.00 | 27.0821 | 14.2036 | 0.5245 |
+| W8934c6d643ae | icv1-f2m19-t797-b6cf2467 | 17.00 | 23.9733 | 10.7953 | 0.4503 |
+| W9e4377a16b90 | icv1-f2m19-t797-b6cf2467 | 17.00 | 25.0523 | 14.3888 | 0.5743 |
+| Wa10f3062002b | icv1-f2m19-t797-b6cf2467 | 17.00 | 27.4774 | 11.4568 | 0.4170 |
+| Wc00a6b407523 | icv1-f2m19-t797-b6cf2467 | 17.00 | 25.3315 | 15.8022 | 0.6238 |
+| Wc4e427fbb636 | icv1-f2m19-t797-b6cf2467 | 17.00 | 26.8112 | 15.3682 | 0.5732 |
+| Wc9ec5feeb46b | icv1-f2m19-t797-b6cf2467 | 17.00 | 27.2038 | 19.2317 | 0.7070 |
+| Wd0ff80f9704d | icv1-f2m19-t797-b6cf2467 | 17.00 | 16.6379 | 13.5816 | 0.8163 |

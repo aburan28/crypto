@@ -1,0 +1,82 @@
+{
+  "format": "correspondence-assessment-v3",
+  "case_id": "replace-with-stable-candidate-id",
+  "authority": "Draft diagnostic assessment; no status promotion.",
+  "source": {
+    "object": "replace with exact source object",
+    "subgroup": "replace with exact order-r subgroup, generator, and target"
+  },
+  "destination": {
+    "object": "replace with exact destination object",
+    "group_object": "replace with the actual group carrying the DLP"
+  },
+  "transformation": {
+    "kind": "replace with typed map or correspondence"
+  },
+  "typed_path": {
+    "nodes": [],
+    "edges": [],
+    "weakest_open_obligation": "replace with the next discriminating check"
+  },
+  "algebraic_screen": {
+    "dimension": {"state":"unknown","evidence":[],"scope":"not assessed"},
+    "group_order": {"state":"unknown","evidence":[],"scope":"not assessed"},
+    "frobenius_or_weil_polynomial": {"state":"unknown","evidence":[],"scope":"not assessed"},
+    "field_of_definition": {"state":"unknown","evidence":[],"scope":"not assessed"},
+    "riemann_hurwitz_or_different": {"state":"unknown","evidence":[],"scope":"not assessed"},
+    "polarization_or_jacobian_locus": {"state":"unknown","evidence":[],"scope":"not assessed"}
+  },
+  "obligations": {
+    "existence": {"state":"unknown","evidence":[],"scope":"not assessed"},
+    "explicit_construction": {"state":"unknown","evidence":[],"scope":"not assessed"},
+    "map_correctness": {"state":"unknown","evidence":[],"scope":"not assessed"},
+    "subgroup_preservation": {"state":"unknown","evidence":[],"scope":"not assessed"},
+    "scalar_recovery": {"state":"unknown","evidence":[],"scope":"not assessed"},
+    "destination_solver_applicability": {"state":"unknown","evidence":[],"scope":"not assessed"},
+    "computational_advantage": {"state":"unknown","evidence":[],"scope":"not assessed"},
+    "scaling_support": {"state":"unknown","evidence":[],"scope":"not assessed"},
+    "novelty_within_boundary": {"state":"unknown","evidence":[],"scope":"not assessed"}
+  },
+  "solver_assessment": {
+    "name": null,
+    "family": "none",
+    "implementation": null,
+    "applicability": {"state":"unknown","evidence":[],"scope":"not assessed"},
+    "image_subgroup_access": {"state":"unknown","evidence":[],"scope":"not assessed"},
+    "relation_or_search_compatibility": {"state":"unknown","evidence":[],"scope":"not assessed"},
+    "individual_log_and_recovery": {"state":"unknown","evidence":[],"scope":"not assessed"}
+  },
+  "cost_comparison": {
+    "accounting_complete": "unknown",
+    "modeled_or_measured": "unmeasured"
+  },
+  "advantage_measurement": {
+    "claim_scope": "unmeasured",
+    "basis": "unmeasured",
+    "unit": null,
+    "target_count": 1,
+    "source_reference": null,
+    "destination_generic_control": null,
+    "destination_candidate": null,
+    "net_speedup": null,
+    "net_speedup_ci95": null,
+    "verified_pairs": 0,
+    "scaling_sizes": 0,
+    "replay_receipts": [],
+    "unpriced_work": [],
+    "resource_envelope": null,
+    "evidence": []
+  },
+  "sources": [
+    {"id":"replace-source-id","uri":"replace-with-repository-path-or-source-uri","revision":"replace-with-revision"}
+  ],
+  "open_obligations": ["Replace with the next check."],
+  "verdicts": {
+    "valid_transfer": "unknown",
+    "algorithmically_relevant": "unknown",
+    "modeled_advantage": "unknown",
+    "measured_advantage": "unknown",
+    "novel_reduction_within_boundary": "unknown"
+  },
+  "official_status_change": "none"
+}

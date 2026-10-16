@@ -470,6 +470,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed sigma fused late y: %d\n", ECC_SIGMA_FUSED_LATE_Y);
         printf("packed sigma fused shared slots: %d\n", ECC_SIGMA_FUSED_SHARED_SLOTS);
         printf("packed witness: %d\n", ECC_WITNESS);
+        printf("packed sigma sign: %d\n", ECC_SIGMA_SIGN);
         printf("packed L2 persist: %d\n", ECC_PACKED_L2_PERSIST);
         printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);
         printf("packed add combine: %d\n", ECC_PACKED_ADD_COMBINE);

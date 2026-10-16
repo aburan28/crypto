@@ -1,0 +1,23 @@
+{
+  "schema": "isogeny-prime-degree-rules/v1",
+  "name": "Prime Degree Frontier",
+  "version": 1,
+  "curve_scope": "every registered standard prime-field curve (nonempty standard_names); one leaderboard per exact ICV1 model",
+  "representation": "full normalized rational map and monic kernel polynomial",
+  "score": "largest independently verified odd prime degree, represented as a decimal integer",
+  "ties": "equal degrees share rank; no timing tiebreak",
+  "construction": "any algorithm; constructor costs are reported separately and are not independently attested for external entries",
+  "construction_adapter_maximum_degree": "1000000",
+  "constructor_timeout_seconds": 1800,
+  "replay_timeout_seconds": 3600,
+  "resident_memory_limit_bytes": "8589934592",
+  "resident_memory_interval": "child parsing and algebra through its completion marker; the process deadline includes output and OS exit cleanup",
+  "maximum_map_bytes": 268435456,
+  "maximum_summary_bytes": 1048576,
+  "maximum_stderr_bytes": 8388608,
+  "verification": ["prime degree", "exact registered source model", "nonzero registered prime subgroup", "squarefree kernel and exact torsion", "kernel subgroup closure", "codomain formulas", "coprime rational map", "exact curve equation", "subgroup order", "20 public scalar transports per map"],
+  "one_verified_eigenline_is_sufficient": true,
+  "coverage_must_remain_explicit": true,
+  "excluded": ["composite degrees and chain products", "multiplication maps", "compact-only or ideal-only claims", "candidate screens without maps", "unreplayed certificates", "custom curves substituted for a registered model"],
+  "record_scope": "this challenge and its pinned catalogue; no worldwide-record or mathematical-maximum claim"
+}

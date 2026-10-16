@@ -1,0 +1,78 @@
+    Checking isogeny_algos v0.1.0 (/workspace/scratch/599516f9ea0d/crypto/isogeny_algos)
+error: unnecessary `>= y + 1` or `x - 1 >=`
+   --> src/find/sutherland/cm.rs:220:16
+    |
+220 |             || t >= p + 1
+    |                ^^^^^^^^^^ help: change it to: `t > p`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#int_plus_one
+    = note: `-D clippy::int-plus-one` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::int_plus_one)]`
+
+error: manual implementation of `.is_multiple_of()`
+   --> src/find/sutherland/cm.rs:218:16
+    |
+218 |             || t % p == 0
+    |                ^^^^^^^^^^ help: replace with: `t.is_multiple_of(p)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#manual_is_multiple_of
+    = note: `-D clippy::manual-is-multiple-of` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::manual_is_multiple_of)]`
+
+error: manual implementation of `.is_multiple_of()`
+   --> src/find/sutherland/cm.rs:219:16
+    |
+219 |             || (-self.d) as u64 % p == 0
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^ help: replace with: `((-self.d) as u64).is_multiple_of(p)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#manual_is_multiple_of
+
+error: manual implementation of `.is_multiple_of()`
+   --> src/find/sutherland/cm.rs:225:12
+    |
+225 |         if n % (ell * ell) != 0 || n % (ell * ell * ell) == 0 {
+    |            ^^^^^^^^^^^^^^^^^^^^ help: replace with: `!n.is_multiple_of(ell * ell)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#manual_is_multiple_of
+
+error: manual implementation of `.is_multiple_of()`
+   --> src/find/sutherland/cm.rs:225:36
+    |
+225 |         if n % (ell * ell) != 0 || n % (ell * ell * ell) == 0 {
+    |                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^ help: replace with: `n.is_multiple_of(ell * ell * ell)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#manual_is_multiple_of
+
+error: manual implementation of `.is_multiple_of()`
+   --> src/find/sutherland/cm.rs:242:16
+    |
+242 |             if norm % 4 == 0 {
+    |                ^^^^^^^^^^^^^ help: replace with: `norm.is_multiple_of(4)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#manual_is_multiple_of
+
+error: manual implementation of `.is_multiple_of()`
+   --> src/find/sutherland/cm.rs:437:12
+    |
+437 |         if rest % q == 0 {
+    |            ^^^^^^^^^^^^^ help: replace with: `rest.is_multiple_of(q)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#manual_is_multiple_of
+
+error: manual implementation of `.is_multiple_of()`
+   --> src/find/sutherland/cm.rs:439:19
+    |
+439 |             while rest % q == 0 {
+    |                   ^^^^^^^^^^^^^ help: replace with: `rest.is_multiple_of(q)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#manual_is_multiple_of
+
+error: manual implementation of `.is_multiple_of()`
+   --> src/find/sutherland/cm.rs:456:19
+    |
+456 |             while order % q == 0 && curve::pmul(f, e, &pt, (order / q) as u128) == Pt::Inf {
+    |                   ^^^^^^^^^^^^^^ help: replace with: `order.is_multiple_of(q)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#manual_is_multiple_of
+
+error: could not compile `isogeny_algos` (lib) due to 9 previous errors

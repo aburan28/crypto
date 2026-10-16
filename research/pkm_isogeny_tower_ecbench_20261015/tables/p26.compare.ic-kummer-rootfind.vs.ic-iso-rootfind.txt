@@ -1,0 +1,18 @@
+saved /home/user/wt/isogeny-tower/research/pkm_isogeny_tower_ecbench_20261015/sessions/p26/comparisons/ic-kummer-rootfind__ic-iso-rootfind.json
+ops (ok): ic-iso-rootfind / ic-kummer-rootfind = 1.1147 [1.097, 1.129] (cluster) over 16 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.0871 [1.050, 1.137]
+measurement quality: 0 / 100; paired attempts 16, verified 16, admitted 0; levels {"L0": 16}; p95 foreign busy unknown%, p95 run queue 19.07%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-iso-rootfind / ic-kummer-rootfind | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp26-t2838-8e779ca8 | 23.28 | 8 | 1.1147 | [1.0969, 1.1288] | cluster |
+
+| workload | curve | log2 r | ic-kummer-rootfind mean S | ic-iso-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W20d829c87466 | icv1-fp26-t2838-8e779ca8 | 23.28 | 95.8143 | 103.3222 | 1.0784 |
+| W459edf43e5a7 | icv1-fp26-t2838-8e779ca8 | 23.28 | 93.7386 | 105.8145 | 1.1288 |
+| W57379abdf921 | icv1-fp26-t2838-8e779ca8 | 23.28 | 96.1351 | 108.5021 | 1.1286 |
+| W7243e01194eb | icv1-fp26-t2838-8e779ca8 | 23.28 | 98.0188 | 106.6426 | 1.0880 |
+| W8e64c636e70a | icv1-fp26-t2838-8e779ca8 | 23.28 | 95.3095 | 107.8399 | 1.1315 |
+| Wba2d4897c8cd | icv1-fp26-t2838-8e779ca8 | 23.28 | 96.8119 | 108.5650 | 1.1214 |
+| Wda47d0f7e67b | icv1-fp26-t2838-8e779ca8 | 23.28 | 96.1746 | 108.4605 | 1.1277 |
+| Wfb330cc2db9c | icv1-fp26-t2838-8e779ca8 | 23.28 | 96.7292 | 107.7789 | 1.1142 |

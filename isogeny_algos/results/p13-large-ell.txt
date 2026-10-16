@@ -1,0 +1,31 @@
+# profile_large_ell (Montgomery: projective Velu vs sqrt-Velu; codomain = setup + codomain; image = one point)
+256 l=   101: codomain velu       14 us, sqrt      16 (new      7 + cod      9)  0.86x | image velu      5 sqrt      5  1.16x
+256 l=   401: codomain velu       54 us, sqrt      29 (new     12 + cod     17)  1.82x | image velu     22 sqrt     16  1.36x
+256 l=  1009: codomain velu      141 us, sqrt      66 (new     33 + cod     32)  2.15x | image velu     58 sqrt     39  1.49x
+256 l=  4001: codomain velu      640 us, sqrt     147 (new     54 + cod     93)  4.37x | image velu    240 sqrt    162  1.48x
+256 l= 10007: codomain velu     1508 us, sqrt     270 (new     69 + cod    201)  5.58x | image velu    608 sqrt    403  1.51x
+511 l=   101: codomain velu       34 us, sqrt      44 (new     19 + cod     25)  0.77x | image velu     15 sqrt     12  1.19x
+511 l=   401: codomain velu      132 us, sqrt      79 (new     32 + cod     47)  1.68x | image velu     59 sqrt     43  1.36x
+511 l=  1009: codomain velu      344 us, sqrt     164 (new     81 + cod     83)  2.10x | image velu    148 sqrt    104  1.43x
+511 l=  4001: codomain velu     1386 us, sqrt     344 (new    115 + cod    229)  4.03x | image velu    610 sqrt    410  1.49x
+511 l= 10007: codomain velu     3752 us, sqrt     712 (new    182 + cod    530)  5.27x | image velu   1621 sqrt   1272  1.27x
+# profile_weier (short Weierstrass: x-only Velu vs sqrt-Velu pairs)
+256 l=   101: codomain xonly       26 sqrt       26 us  1.02x | image xonly      12 sqrt       9 us  1.32x
+256 l=   401: codomain xonly      107 sqrt       68 us  1.57x | image xonly      46 sqrt      29 us  1.60x
+256 l=  1009: codomain xonly      275 sqrt      159 us  1.73x | image xonly     118 sqrt      74 us  1.60x
+256 l=  4001: codomain xonly     1177 sqrt      526 us  2.24x | image xonly     521 sqrt     300 us  1.74x
+256 l= 10007: codomain xonly     3243 sqrt     1156 us  2.81x | image xonly    1395 sqrt     708 us  1.97x
+511 l=   101: codomain xonly       71 sqrt       68 us  1.04x | image xonly      32 sqrt      24 us  1.33x
+511 l=   401: codomain xonly      274 sqrt      167 us  1.64x | image xonly     114 sqrt      73 us  1.56x
+511 l=  1009: codomain xonly      725 sqrt      341 us  2.13x | image xonly     284 sqrt     172 us  1.65x
+511 l=  4001: codomain xonly     2935 sqrt     1226 us  2.39x | image xonly    1158 sqrt     702 us  1.65x
+511 l= 10007: codomain xonly     7861 sqrt     2937 us  2.68x | image xonly    3392 sqrt    1808 us  1.88x
+# profile_tree_vs_direct (Montgomery sqrt-Velu, pair-by-pair vs remainder trees)
+256 l=  10007 b=50 b'=50: codomain direct      211 tree      582 us (0.36) | image direct      433 tree      717 us (0.60)
+256 l=  40009 b=100 b'=100: codomain direct      770 tree     1820 us (0.42) | image direct     1700 tree     2324 us (0.73)
+256 l= 100003 b=158 b'=158: codomain direct     1875 tree     4097 us (0.46) | image direct     4269 tree     5302 us (0.81)
+256 l= 250007 b=250 b'=250: codomain direct     4601 tree     9040 us (0.51) | image direct    10648 tree    12131 us (0.88)
+511 l=  10007 b=50 b'=50: codomain direct      517 tree     1240 us (0.42) | image direct     1016 tree     1541 us (0.66)
+511 l=  40009 b=100 b'=100: codomain direct     1994 tree     4112 us (0.48) | image direct     4251 tree     6052 us (0.70)
+511 l= 100003 b=158 b'=158: codomain direct     4823 tree     9428 us (0.51) | image direct    11046 tree    12806 us (0.86)
+511 l= 250007 b=250 b'=250: codomain direct    11857 tree    20100 us (0.59) | image direct    27023 tree    28725 us (0.94)

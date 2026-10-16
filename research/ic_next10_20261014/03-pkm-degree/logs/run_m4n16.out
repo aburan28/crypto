@@ -1,0 +1,1 @@
+./run.sh: line 14: 31879 Segmentation fault      nice prlimit --as=$CAP -- timeout $WALL msolve -t 1 -v 2 -f systems/$name.ms -o runs/$name.out > runs/$name.log 2>&1

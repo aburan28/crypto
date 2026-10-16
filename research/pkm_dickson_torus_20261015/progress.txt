@@ -1,0 +1,35 @@
+2026-10-15T06:34:03Z start R0-isogeny-m2-p0-poscontrol: --p 786433 --kinds isogeny --m 2 --controls tower --t-min 1 --max-t 5
+2026-10-15T06:34:13Z end R0-isogeny-m2-p0-poscontrol exit 0
+2026-10-15T06:34:13Z start R1-torus-m2-T31: --p 2046820351 --kinds dickson-torus --m 2 --controls tower --t-min 1 --max-t 10
+2026-10-15T06:42:01Z end R1-torus-m2-T31 exit 0
+2026-10-15T06:42:01Z start R2-torus-m2-T24: --p 14680063 --kinds dickson-torus --m 2 --controls tower --t-min 1 --max-t 10
+2026-10-15T06:49:56Z end R2-torus-m2-T24 exit 0
+2026-10-15T06:49:56Z start R3-split-dickson-m2-p1: --p 2013265921 --kinds dickson --m 2 --controls tower --t-min 1 --max-t 10
+2026-10-15T06:58:16Z end R3-split-dickson-m2-p1 exit 0
+2026-10-15T06:58:16Z start R4-torus-m2-T31-null: --p 2046820351 --kinds dickson-torus --m 2 --controls null --t-min 1 --max-t 10
+2026-10-15T07:06:19Z end R4-torus-m2-T31-null exit 0
+2026-10-15T07:06:19Z start R5-torus-m2-T24-null: --p 14680063 --kinds dickson-torus --m 2 --controls null --t-min 1 --max-t 10
+2026-10-15T07:14:25Z end R5-torus-m2-T24-null exit 0
+2026-10-15T07:14:25Z start R6-torus-m34-T31: --p 2046820351 --kinds dickson-torus --m 3,4 --t-min 2 --max-t-m3 4 --max-t-m4 3 --controls tower
+2026-10-15T07:15:26Z end R6-torus-m34-T31 exit 0
+2026-10-15T07:15:26Z start R7-torus-m34-T24: --p 14680063 --kinds dickson-torus --m 3,4 --t-min 2 --max-t-m3 4 --max-t-m4 3 --controls tower
+2026-10-15T07:16:25Z end R7-torus-m34-T24 exit 0
+2026-10-15T07:16:25Z start R8-split-dickson-m34-p1: --p 2013265921 --kinds dickson --m 3,4 --t-min 2 --max-t-m3 4 --max-t-m4 3 --controls tower
+2026-10-15T07:17:32Z end R8-split-dickson-m34-p1 exit 0
+2026-10-15T07:17:32Z start R9-torus-m34-T31-null: --p 2046820351 --kinds dickson-torus --m 3,4 --t-min 2 --max-t-m3 4 --max-t-m4 3 --controls null --null-chain
+2026-10-15T07:18:40Z end R9-torus-m34-T31-null exit 0
+2026-10-15T07:18:40Z start R10-torus-m34-T24-null: --p 14680063 --kinds dickson-torus --m 3,4 --t-min 2 --max-t-m3 4 --max-t-m4 3 --controls null --null-chain
+2026-10-15T07:19:50Z end R10-torus-m34-T24-null exit 0
+2026-10-15T07:19:50Z start R11-kummer-p2-deep: --p 3221225473 --kinds kummer --m 2,3 --controls tower --t-min 1 --max-t 9 --max-t-m3 4
+2026-10-15T07:22:58Z end R11-kummer-p2-deep exit 0
+2026-10-15T07:22:58Z start R11n-kummer-m2-p2-deep-null: --p 3221225473 --kinds kummer --m 2 --controls null --t-min 1 --max-t 9
+2026-10-15T07:25:29Z end R11n-kummer-m2-p2-deep-null exit 0
+2026-10-15T07:25:29Z start R12-torus-m3-N15-T31-t0: --p 2046820351 --kinds dickson-torus --m 3 --t-min 5 --max-t-m3 5 --controls tower --targets 0
+2026-10-15T07:53:04Z end R12-torus-m3-N15-T31-t0 exit 0
+2026-10-15T07:53:04Z start R13-torus-m3-N15-T24-t0: --p 14680063 --kinds dickson-torus --m 3 --t-min 5 --max-t-m3 5 --controls tower --targets 0
+2026-10-15T08:18:12Z end R13-torus-m3-N15-T24-t0 exit 0
+2026-10-15T08:18:12Z start R14-split-dickson-m3-N15-p1-t0: --p 2013265921 --kinds dickson --m 3 --t-min 5 --max-t-m3 5 --controls tower --targets 0
+2026-10-15T08:34:35Z killed R14-split-dickson-m3-N15-p1-t0: the session's background-task time limit (2 h) stopped run.sh at 08:34 during R14's only system; no row was written. R14 is restarted with the rebuilt binary (README §1).
+2026-10-15T08:41:37Z start R14-split-dickson-m3-N15-p1-t0 (restart, binary a889550a…): --p 2013265921 --kinds dickson --m 3 --t-min 5 --max-t-m3 5 --controls tower --targets 0
+2026-10-15T09:06:03Z end R14-split-dickson-m3-N15-p1-t0 exit 0
+2026-10-15T09:06:03Z not run (deadline 09:04Z) R15a-torus-m3-N15-T31-t1, R15b-torus-m3-N15-T24-t1

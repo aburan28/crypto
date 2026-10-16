@@ -1,0 +1,25 @@
+ops (ok): ic-orbit-c1-renew / ic-orbit-c1-walk = 0.4801 [0.464, 0.499] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 0.6692 [0.605, 0.711]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 0.00%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-orbit-c1-renew / ic-orbit-c1-walk | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m29-tm40309-30c52b96 | 15.37 | 16 | 0.4801 | [0.4643, 0.4990] | cluster |
+
+| workload | curve | log2 r | ic-orbit-c1-walk mean S | ic-orbit-c1-renew mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W1e6dc615948d | icv1-f2m29-tm40309-30c52b96 | 15.37 | 5.3061 | 2.6525 | 0.4999 |
+| W417e10523167 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 5.5131 | 2.5399 | 0.4607 |
+| W502ec9b19a73 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 5.3873 | 3.0007 | 0.5570 |
+| W5a87559c0e9b | icv1-f2m29-tm40309-30c52b96 | 15.37 | 5.3609 | 2.4161 | 0.4507 |
+| W5cd9fc3eda17 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 5.4141 | 2.6466 | 0.4888 |
+| W7962be79fb55 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 5.2263 | 2.6123 | 0.4998 |
+| W7ad986f5ce5a | icv1-f2m29-tm40309-30c52b96 | 15.37 | 5.7746 | 2.5590 | 0.4432 |
+| W7de6fa1767fd | icv1-f2m29-tm40309-30c52b96 | 15.37 | 5.2462 | 2.5446 | 0.4850 |
+| W8c8ef1552275 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 5.5243 | 2.5218 | 0.4565 |
+| Wb3068b7612b6 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 5.2801 | 2.5731 | 0.4873 |
+| Wb82e0e8a4fb7 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 5.7763 | 2.5989 | 0.4499 |
+| Wbc87487a57ce | icv1-f2m29-tm40309-30c52b96 | 15.37 | 5.3244 | 2.7018 | 0.5074 |
+| Wbf3dec6c8938 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 5.4548 | 2.6475 | 0.4854 |
+| Wd018224f33ba | icv1-f2m29-tm40309-30c52b96 | 15.37 | 5.2659 | 2.5045 | 0.4756 |
+| We25cdcbabfb7 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 5.5140 | 2.4994 | 0.4533 |
+| Web719bbfc097 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 5.5221 | 2.7006 | 0.4891 |

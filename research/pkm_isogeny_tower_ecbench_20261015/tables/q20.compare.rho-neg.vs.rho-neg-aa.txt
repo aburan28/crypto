@@ -1,0 +1,18 @@
+saved /home/user/wt/isogeny-tower/research/pkm_isogeny_tower_ecbench_20261015/sessions/q20/comparisons/rho-neg__rho-neg-aa.json
+ops (ok): rho-neg-aa / rho-neg = 1.0000 [1.000, 1.000] (cluster) over 16 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 0.9341 [0.865, 1.019]
+measurement quality: 0 / 100; paired attempts 16, verified 16, admitted 0; levels {"L0": 16}; p95 foreign busy unknown%, p95 run queue 11.81%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | rho-neg-aa / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp20-t199-d1684bf5 | 19.89 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | rho-neg-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W1e1cd57792eb | icv1-fp20-t199-d1684bf5 | 19.89 | 1.2859 | 1.2859 | 1.0000 |
+| W6df558a872d6 | icv1-fp20-t199-d1684bf5 | 19.89 | 1.6336 | 1.6336 | 1.0000 |
+| W7c3d6d564f16 | icv1-fp20-t199-d1684bf5 | 19.89 | 2.0535 | 2.0535 | 1.0000 |
+| W7de5f6ebd2b9 | icv1-fp20-t199-d1684bf5 | 19.89 | 1.7692 | 1.7692 | 1.0000 |
+| W83c18927c26f | icv1-fp20-t199-d1684bf5 | 19.89 | 1.4133 | 1.4133 | 1.0000 |
+| W8f255a7af85d | icv1-fp20-t199-d1684bf5 | 19.89 | 2.2276 | 2.2276 | 1.0000 |
+| Wa00389ab3c30 | icv1-fp20-t199-d1684bf5 | 19.89 | 2.0961 | 2.0961 | 1.0000 |
+| Wf2ef2cc68425 | icv1-fp20-t199-d1684bf5 | 19.89 | 2.4048 | 2.4048 | 1.0000 |

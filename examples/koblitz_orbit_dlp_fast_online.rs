@@ -23,7 +23,23 @@
 //! (log combination) and recovery check. Reusable setup (base, index, rank
 //! stage, linear algebra) ends before the first target's interval starts.
 //!
-//! Usage: <base_header.jsonl> <target_points.jsonl|legacy_scalars.txt> <rank_seed> <out.jsonl>
+//! Free relations are ON by default on the `u64` path (n ≤ 63): every
+//! root-table key collision between two pair states that are not swap mates
+//! is a four-point identity `±P1 ± P2 ± P3 ± P4 = O` over the base. Each one
+//! is verified by point additions and kept as a homogeneous log row; the
+//! guided rank stage then starts from those rows and fills only the columns
+//! they leave without a pivot. The summary line gains a `free_relations`
+//! object. `KIC_FREE_RELATIONS=0` restores the previous pipeline exactly
+//! (nothing recorded; counters, logs and output identical to the version
+//! before this default). The wide path (n > 63) has no harvest and refuses
+//! an explicit `KIC_FREE_RELATIONS=1`.
+//! Evidence: research/ic_improve_20261015/02-freerel-production.
+//!
+//! Usage: <base_header.jsonl | construct:<n>:<a>[:<columns>]> <target_points.jsonl|legacy_scalars.txt> <rank_seed> <out.jsonl>
+//! When `:<columns>` is omitted, `construct:` uses the tuned K: 125 / 280 / 500
+//! for n = 41 / 53 / 61 (a = 0); other sizes must pass K explicitly.
+//! Environment: KIC_FREE_RELATIONS=0|1 (default 1), KIC_PAIR_SYMMETRY,
+//! KIC_ROOT_BLOOM, KIC_RANK_PROBE_CAP, KIC_DUMP_RANK, KIC_DUMP_BASE.
 
 #![recursion_limit = "256"]
 
@@ -364,7 +380,8 @@ impl RootTable {
         (key.wrapping_mul(0x9E37_79B9_7F4A_7C15) >> self.shift) as usize
     }
 
-    fn insert_if_absent(&mut self, key: u64, value: u64) {
+    /// Returns the value already stored under `key`, if there was one.
+    fn insert_if_absent(&mut self, key: u64, value: u64) -> Option<u64> {
         let mask = self.slots.len() - 1;
         let mut slot = self.slot(key);
         loop {
@@ -374,10 +391,10 @@ impl RootTable {
                 if let Some(bloom) = &mut self.bloom {
                     bloom.insert(key);
                 }
-                return;
+                return None;
             }
             if self.slots[slot].0 == key {
-                return;
+                return Some(self.slots[slot].1);
             }
             slot = (slot + 1) & mask;
         }
@@ -436,6 +453,15 @@ mod root_bloom_table_tests {
     }
 }
 
+/// `KIC_FREE_RELATIONS`: unset or `1` (default) on, `0` off (previous pipeline).
+fn free_relations_flag() -> bool {
+    match std::env::var("KIC_FREE_RELATIONS").as_deref() {
+        Ok("1") | Err(_) => true,
+        Ok("0") => false,
+        Ok(_) => panic!("KIC_FREE_RELATIONS must be 0 or 1"),
+    }
+}
+
 #[derive(Clone, Copy)]
 struct State {
     left: u16,
@@ -450,6 +476,10 @@ struct Index {
     shifted: Vec<Vec<u64>>,
     pair_candidates: usize,
     counterparts: Option<Vec<u32>>,
+    /// Free-relation harvest only: `(stored, inserting)` packed states of
+    /// every non-mate key collision, and the number of swap-mate collisions.
+    collisions: Vec<(u64, u64)>,
+    mate_collisions: u64,
 }
 
 fn pack(left: u16, right: u16, relative: u16, shift: u32) -> u64 {
@@ -471,6 +501,7 @@ fn build_index(
     solver: &S3Solver,
     reps: &[u64],
     pair_symmetry: bool,
+    harvest: bool,
 ) -> Index {
     let n = gf.n as usize;
     let shifted: Vec<Vec<u64>> = reps
@@ -581,6 +612,8 @@ fn build_index(
         (states, None)
     };
     let mut table = RootTable::with_capacity(pair_candidates * 2);
+    let mut collisions = Vec::new();
+    let mut mate_collisions = 0u64;
     for (index, state) in states.iter().enumerate() {
         if counterparts
             .as_ref()
@@ -590,10 +623,22 @@ fn build_index(
         }
         for &root in &state.normal_roots {
             let (canonical, shift) = basis.canonical(root);
-            table.insert_if_absent(
-                canonical,
-                pack(state.left, state.right, state.relative, shift),
-            );
+            let value = pack(state.left, state.right, state.relative, shift);
+            let stored = table.insert_if_absent(canonical, value);
+            if !harvest {
+                continue;
+            }
+            if let Some(stored) = stored {
+                let (l, r, rel, _) = unpack(stored);
+                let mate = l == state.right as usize
+                    && r == state.left as usize
+                    && rel == (n - state.relative as usize) % n;
+                if mate {
+                    mate_collisions += 1;
+                } else {
+                    collisions.push((stored, value));
+                }
+            }
         }
     }
     Index {
@@ -602,7 +647,90 @@ fn build_index(
         shifted,
         pair_candidates,
         counterparts,
+        collisions,
+        mate_collisions,
     }
+}
+
+/// Counters of the free-relation harvest.
+#[derive(Default)]
+struct Harvest {
+    verified_nonzero: u64,
+    trivial: u64,
+    failed: u64,
+    additions: u64,
+    rank: usize,
+}
+
+/// Verify every recorded root-table collision as a signed four-point identity
+/// over the base and insert each non-zero log row (right-hand side 0) into
+/// `echelon`. Stored and inserting states share one canonical root, so the
+/// inserting state's roots are the stored state's under Frobenius shift `t`.
+fn harvest_free_relations(
+    fast: &FastBinaryCurve,
+    base: &Base,
+    index: &Index,
+    n: usize,
+    r: u64,
+    echelon: &mut Echelon,
+) -> Harvest {
+    let mut out = Harvest::default();
+    for &(stored, inserting) in &index.collisions {
+        let (l1, r1, rel1, s1) = unpack(stored);
+        let (l2, r2, rel2, s2) = unpack(inserting);
+        let t = (s2 as usize + n - s1 as usize) % n;
+        let codes = [
+            index.shifted[l1][0],
+            index.shifted[r1][rel1],
+            index.shifted[l2][t],
+            index.shifted[r2][(rel2 + t) % n],
+        ];
+        let Some(choices) = codes
+            .iter()
+            .map(|code| base.by_x.get(code))
+            .collect::<Option<Vec<&Vec<usize>>>>()
+        else {
+            out.failed += 1;
+            continue;
+        };
+        let mut found: Option<Vec<u64>> = None;
+        let mut any_identity = false;
+        'search: for &p1 in choices[0] {
+            for &p2 in choices[1] {
+                let s12 = fast.add(base.points[p1], base.points[p2]);
+                out.additions += 1;
+                for &p3 in choices[2] {
+                    let s123 = fast.add(s12, base.points[p3]);
+                    out.additions += 1;
+                    for &p4 in choices[3] {
+                        out.additions += 1;
+                        if fast.add(s123, base.points[p4]).is_none() {
+                            any_identity = true;
+                            let mut row = vec![0u64; base.columns + 1];
+                            for i in [p1, p2, p3, p4] {
+                                let (column, coefficient) = base.labels[i];
+                                row[column] = (row[column] + coefficient) % r;
+                            }
+                            if row.iter().any(|&v| v != 0) {
+                                found = Some(row);
+                                break 'search;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        match found {
+            Some(row) => {
+                out.verified_nonzero += 1;
+                echelon.insert(row);
+            }
+            None if any_identity => out.trivial += 1,
+            None => out.failed += 1,
+        }
+    }
+    out.rank = echelon.rank;
+    out
 }
 
 struct Relation {
@@ -1904,18 +2032,15 @@ mod wide {
     /// interval instrumentation of the `u64` flow above (five phase
     /// timers on one clock, hardware counters, relation-check counting).
     pub fn run(arguments: &[String]) -> ! {
+        assert!(
+            std::env::var("KIC_FREE_RELATIONS").as_deref() != Ok("1"),
+            "KIC_FREE_RELATIONS=1 is implemented on the u64 path (n <= 63) only"
+        );
         assert_eq!(arguments.len(), 5);
         let process_started = Instant::now();
-        let constructed: Option<(u32, u8, usize)> =
-            arguments[1].strip_prefix("construct:").map(|spec| {
-                let parts: Vec<&str> = spec.split(':').collect();
-                assert_eq!(parts.len(), 3, "construct:<n>:<a>:<columns>");
-                (
-                    parts[0].parse().unwrap(),
-                    parts[1].parse().unwrap(),
-                    parts[2].parse().unwrap(),
-                )
-            });
+        let constructed: Option<(u32, u8, usize)> = arguments[1]
+            .strip_prefix("construct:")
+            .map(super::parse_construct_spec);
         let header: Value = match constructed {
             Some((n, a, _)) => json!({"n":n, "a":a}),
             None => {
@@ -2372,12 +2497,44 @@ mod wide {
     }
 }
 
+/// Tuned default orbit-column count `K` for `construct:<n>:<a>` when the
+/// caller omits it. Values come from the held-out tuning in
+/// `research/ic_improve_20261015/02-freerel-production` (training seeds
+/// 101–104, a = 0, free relations on). An explicit `:<columns>` always wins,
+/// so frozen experiments that pass K are unchanged.
+fn default_columns(n: u32, a: u8) -> Option<usize> {
+    match (n, a) {
+        (41, 0) => Some(125),
+        (53, 0) => Some(280),
+        (61, 0) => Some(500),
+        _ => None,
+    }
+}
+
+/// Parse `<n>:<a>[:<columns>]` from a `construct:` argument.
+fn parse_construct_spec(spec: &str) -> (u32, u8, usize) {
+    let parts: Vec<&str> = spec.split(':').collect();
+    assert!(
+        parts.len() == 2 || parts.len() == 3,
+        "construct:<n>:<a>[:<columns>]"
+    );
+    let n: u32 = parts[0].parse().unwrap();
+    let a: u8 = parts[1].parse().unwrap();
+    let columns = match parts.get(2) {
+        Some(columns) => columns.parse().unwrap(),
+        None => default_columns(n, a).unwrap_or_else(|| {
+            panic!("no tuned default K for n={n} a={a}; pass construct:{n}:{a}:<columns>")
+        }),
+    };
+    (n, a, columns)
+}
+
 fn main() -> ExitCode {
     let arguments: Vec<String> = std::env::args().collect();
     assert_eq!(
         arguments.len(),
         5,
-        "usage: <base_header.jsonl | construct:<n>:<a>:<columns>> <target_points_or_legacy_scalars.txt> <rank_seed> <out.jsonl>"
+        "usage: <base_header.jsonl | construct:<n>:<a>[:<columns>]> <target_points_or_legacy_scalars.txt> <rank_seed> <out.jsonl>"
     );
     // Wide pipeline (`u128` words) for 64 < n ≤ 127.  The degree is
     // detected here so the `u64` flow below stays byte-identical; the wide
@@ -2397,16 +2554,9 @@ fn main() -> ExitCode {
         }
     }
     let process_started = Instant::now();
-    let constructed: Option<(u32, u8, usize)> =
-        arguments[1].strip_prefix("construct:").map(|spec| {
-            let parts: Vec<&str> = spec.split(':').collect();
-            assert_eq!(parts.len(), 3, "construct:<n>:<a>:<columns>");
-            (
-                parts[0].parse().unwrap(),
-                parts[1].parse().unwrap(),
-                parts[2].parse().unwrap(),
-            )
-        });
+    let constructed: Option<(u32, u8, usize)> = arguments[1]
+        .strip_prefix("construct:")
+        .map(parse_construct_spec);
     let header: Value = match constructed {
         Some((n, a, _)) => json!({"n":n, "a":a}),
         None => {
@@ -2447,6 +2597,7 @@ fn main() -> ExitCode {
         Ok("0") | Err(_) => false,
         Ok(_) => panic!("KIC_PAIR_SYMMETRY must be 0 or 1"),
     };
+    let free_relations = free_relations_flag();
     let mut out = std::fs::File::create(&arguments[4]).expect("create output");
 
     let setup_started = Instant::now();
@@ -2547,9 +2698,27 @@ fn main() -> ExitCode {
     let basis_ms = ms(basis_elapsed);
 
     let index_started = Instant::now();
-    let index = build_index(&gf, &basis, &solver, &reps, pair_symmetry);
+    let index = build_index(&gf, &basis, &solver, &reps, pair_symmetry, free_relations);
     let index_elapsed = index_started.elapsed();
     let index_ms = ms(index_elapsed);
+
+    // Free relations (default on): the guided rank stage below starts from
+    // these homogeneous rows. With KIC_FREE_RELATIONS=0 the echelon starts
+    // empty and nothing runs here.
+    let harvest_started = Instant::now();
+    let mut echelon = Echelon {
+        r,
+        columns: base.columns,
+        pivots: vec![None; base.columns],
+        rank: 0,
+    };
+    let harvest = free_relations
+        .then(|| harvest_free_relations(&fast, &base, &index, n as usize, r, &mut echelon));
+    let harvest_elapsed = if free_relations {
+        harvest_started.elapsed()
+    } else {
+        Duration::ZERO
+    };
     let setup_ms = ms(setup_started.elapsed());
 
     // Rank stage: rows sum(coefficient * L_column) = a for random [a]G.
@@ -2574,12 +2743,6 @@ fn main() -> ExitCode {
         )
         .unwrap();
     }
-    let mut echelon = Echelon {
-        r,
-        columns: base.columns,
-        pivots: vec![None; base.columns],
-        rank: 0,
-    };
     let mut rank_attempts = 0u64;
     let mut rank_failures = 0u64;
     let mut rank_relations = 0u64;
@@ -2726,7 +2889,14 @@ fn main() -> ExitCode {
     let setup_complete_elapsed = process_started.elapsed();
     let setup_complete_ns = setup_complete_elapsed.as_nanos() as u64;
     let input_control_elapsed = setup_complete_elapsed
-        .checked_sub(base_elapsed + basis_elapsed + index_elapsed + rank_elapsed + la_elapsed)
+        .checked_sub(
+            base_elapsed
+                + basis_elapsed
+                + index_elapsed
+                + harvest_elapsed
+                + rank_elapsed
+                + la_elapsed,
+        )
         .expect("setup phase accounting exceeds setup interval");
 
     let targets_started = Instant::now();
@@ -2847,6 +3017,7 @@ fn main() -> ExitCode {
             base_elapsed,
             basis_elapsed,
             index_elapsed,
+            harvest_elapsed,
             rank_query_elapsed,
             rank_pdp_elapsed,
             rank_relation_check_elapsed,
@@ -2868,28 +3039,34 @@ fn main() -> ExitCode {
         assert_eq!(phase_sum, cold_total, "exclusive cold phases differ");
         (
             Some(ms(cold_total)),
-            Some(json!({
-                "setup_input_control":ms(input_control_elapsed),
-                "isogeny":0.0,
-                "factor_base":ms(base_elapsed),
-                "precompute_basis_and_selftest":ms(basis_elapsed),
-                "precompute_index":ms(index_elapsed),
-                "rank_query":ms(rank_query_elapsed),
-                "rank_pdp":ms(rank_pdp_elapsed),
-                "rank_relation_check":ms(rank_relation_check_elapsed),
-                "rank_matrix_build":ms(rank_matrix_elapsed),
-                "relation_la":ms(la_elapsed),
-                "target_query":ms(target_query),
-                "target_pdp":ms(target_pdp),
-                "target_relation_check":ms(target_relation_check),
-                "target_descent":ms(target_descent),
-                "target_recovery_check":ms(target_recovery_check),
-            })),
+            Some({
+                let mut phases = json!({
+                    "setup_input_control":ms(input_control_elapsed),
+                    "isogeny":0.0,
+                    "factor_base":ms(base_elapsed),
+                    "precompute_basis_and_selftest":ms(basis_elapsed),
+                    "precompute_index":ms(index_elapsed),
+                    "rank_query":ms(rank_query_elapsed),
+                    "rank_pdp":ms(rank_pdp_elapsed),
+                    "rank_relation_check":ms(rank_relation_check_elapsed),
+                    "rank_matrix_build":ms(rank_matrix_elapsed),
+                    "relation_la":ms(la_elapsed),
+                    "target_query":ms(target_query),
+                    "target_pdp":ms(target_pdp),
+                    "target_relation_check":ms(target_relation_check),
+                    "target_descent":ms(target_descent),
+                    "target_recovery_check":ms(target_recovery_check),
+                });
+                if free_relations {
+                    phases["free_relation_harvest"] = json!(ms(harvest_elapsed));
+                }
+                phases
+            }),
         )
     } else {
         (None, None)
     };
-    let summary = json!({
+    let mut summary = json!({
         "kind":"compact_orbit_dlp_summary",
         "schema_version":"1.0",
         "producer_version":"compact_orbit_online_pair_symmetry_v1",
@@ -2944,6 +3121,28 @@ fn main() -> ExitCode {
         "threads":1,
         "scope":"public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
     });
+    if let Some(harvest) = &harvest {
+        let logs_hash = {
+            let mut hasher = blake3::Hasher::new();
+            for &log in &logs {
+                hasher.update(&log.to_le_bytes());
+            }
+            hasher.finalize().to_hex().to_string()
+        };
+        summary["free_relations"] = json!({
+            "enabled":true,
+            "policy":"root-table key collisions of non-mate pair states, verified as signed four-point identities, seed the guided rank echelon as homogeneous rows",
+            "collisions_recorded":index.collisions.len(),
+            "mate_collisions":index.mate_collisions,
+            "verified_nonzero":harvest.verified_nonzero,
+            "trivial":harvest.trivial,
+            "failed":harvest.failed,
+            "harvest_additions":harvest.additions,
+            "free_rank":harvest.rank,
+            "harvest_ms":ms(harvest_elapsed),
+            "logs_hash":logs_hash,
+        });
+    }
     println!("{summary}");
     if let Ok(path) = std::env::var("KIC_DUMP_BASE") {
         let dump = json!({
@@ -2978,8 +3177,8 @@ mod pair_symmetry_tests {
         let basis = NormalBasis::new(&gf);
         let solver = S3Solver::new(&gf, gf.from_element(&curve.curve.b));
         let reps = [2, 3, 5, 7, 11];
-        let full = build_index(&gf, &basis, &solver, &reps, false);
-        let folded = build_index(&gf, &basis, &solver, &reps, true);
+        let full = build_index(&gf, &basis, &solver, &reps, false, false);
+        let folded = build_index(&gf, &basis, &solver, &reps, true, false);
         let keys = |index: &Index| {
             let mut roots: Vec<u64> = index
                 .table
@@ -3028,8 +3227,8 @@ mod pair_symmetry_tests {
             .collect();
         let basis = NormalBasis::new(&gf);
         let solver = S3Solver::new(&gf, b);
-        let full = build_index(&gf, &basis, &solver, &reps, false);
-        let folded = build_index(&gf, &basis, &solver, &reps, true);
+        let full = build_index(&gf, &basis, &solver, &reps, false, false);
+        let folded = build_index(&gf, &basis, &solver, &reps, true, false);
         assert_eq!(full.pair_candidates, 2_565_200);
         assert_eq!(folded.pair_candidates, 1_282_710);
         assert_eq!(full.states.len(), folded.states.len());
@@ -3039,5 +3238,73 @@ mod pair_symmetry_tests {
                 assert_eq!(folded.table.get(key), Some(value));
             }
         }
+    }
+
+    #[test]
+    fn free_relation_harvest_leaves_the_index_unchanged_and_verifies() {
+        let curve = KoblitzCurve::new(0, 41).unwrap();
+        let r = curve.subgroup_order.to_u64().unwrap();
+        let fast = FastBinaryCurve::new(&curve.curve.irreducible, 0).unwrap();
+        let gf = Gf2::new(&curve.curve.irreducible);
+        let b = gf.from_element(&curve.curve.b);
+        let (points, labels, representatives, _) = construct_base(&fast, &curve, b, 125, r);
+        let reps: Vec<u64> = representatives
+            .iter()
+            .map(|point| point.unwrap()[0])
+            .collect();
+        let mut by_x: HashMap<u64, Vec<usize>> = HashMap::new();
+        for (index, point) in points.iter().enumerate() {
+            by_x.entry(point.unwrap().0).or_default().push(index);
+        }
+        let base = Base {
+            points,
+            labels,
+            by_x,
+            columns: reps.len(),
+        };
+        let basis = NormalBasis::new(&gf);
+        let solver = S3Solver::new(&gf, b);
+        let plain = build_index(&gf, &basis, &solver, &reps, false, false);
+        let harvested = build_index(&gf, &basis, &solver, &reps, false, true);
+        assert!(plain.collisions.is_empty() && plain.mate_collisions == 0);
+        assert_eq!(plain.table.slots, harvested.table.slots);
+        let mut echelon = Echelon {
+            r,
+            columns: base.columns,
+            pivots: vec![None; base.columns],
+            rank: 0,
+        };
+        let harvest = harvest_free_relations(&fast, &base, &harvested, 41, r, &mut echelon);
+        assert_eq!(harvest.failed, 0);
+        assert!(harvest.verified_nonzero > 0);
+        // Item 03's census at n = 41, K = 125 reproduced by the training runs.
+        assert_eq!(harvest.rank, 5);
+        for pivot in echelon.pivots.iter().flatten() {
+            assert_eq!(pivot[base.columns], 0, "free rows are homogeneous");
+        }
+    }
+}
+
+#[cfg(test)]
+mod construct_spec_tests {
+    use super::parse_construct_spec;
+
+    #[test]
+    fn explicit_columns_win() {
+        assert_eq!(parse_construct_spec("61:0:600"), (61, 0, 600));
+        assert_eq!(parse_construct_spec("41:0:255"), (41, 0, 255));
+    }
+
+    #[test]
+    fn omitted_columns_use_tuned_default() {
+        assert_eq!(parse_construct_spec("41:0"), (41, 0, 125));
+        assert_eq!(parse_construct_spec("53:0"), (53, 0, 280));
+        assert_eq!(parse_construct_spec("61:0"), (61, 0, 500));
+    }
+
+    #[test]
+    #[should_panic(expected = "no tuned default K")]
+    fn untuned_size_requires_columns() {
+        parse_construct_spec("37:0");
     }
 }

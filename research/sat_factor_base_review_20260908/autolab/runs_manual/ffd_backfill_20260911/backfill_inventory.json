@@ -38,7 +38,8 @@
     },
     {
       "claim": "binary subspace SAT FFD",
-      "status": "still_open"
+      "status": "partially_closed_20261012",
+      "note": "Subspace algebraic S4 Macaulay FFD measured in binary_s4_ffd_l8_20260920 (claim-check PASS). Historical SAT conflict/wall rows still lack a registered SAT→FFD beat. See evidence/20261012-ffd-dor-backfill-inventory/."
     }
   ],
   "beat_id": "all.decomposition.ffd_backfill",
@@ -48,5 +49,6 @@
   "created_at": "2026-09-11T06:40:54.776898+00:00",
   "schema_version": "1.0",
   "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
-  "updated_at": "2026-09-11T16:00:00.000000+00:00"
+  "updated_at": "2026-10-12T20:20:00.000000+00:00",
+  "followup_inventory": "research/sat_factor_base_review_20260908/autolab/evidence/20261012-ffd-dor-backfill-inventory/inventory.json"
 }
