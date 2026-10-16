@@ -72,3 +72,11 @@ replay, pair spreads at most 10%, and separation exceeding observed A/A
 noise before it can name the candidate for the sealed Tier 1 panel.
 The recurring admission gap and its exact exit conditions are tracked in
 the [N83 online A/A problem record](../../problems/n83-online-aa-noise.md).
+
+The [mirrored screen result](../n83_online_rescreen_20261016/RESULT.md)
+independently replayed all eight IC arms and rho. Its K2543 adjacent pairs
+passed at 2.22% and 3.07%, while K3072's first pair had a 15.80% spread.
+The predeclared gate therefore retained `BOUNDED_UNKNOWN` and a null
+selection. Two exact candidate manifests and all eight run rows are versioned
+with that result. The next selection screen is on the approved Tier 1 host
+before the five fresh-point panel.
