@@ -1,0 +1,36 @@
+{
+  "command": [
+    "/home/runner/work/crypto/crypto/target/release/examples/koblitz_rho_batch_ks_strong_online",
+    "71",
+    "0",
+    "signed_frobenius",
+    "1",
+    "710008"
+  ],
+  "conditions_after": {
+    "at": "2026-10-14T17:57:01.611632+00:00",
+    "available_memory_bytes": 15703867392,
+    "loadavg": [
+      1.01220703125,
+      1.0068359375,
+      1.0
+    ]
+  },
+  "conditions_before": {
+    "at": "2026-10-14T17:56:55.461539+00:00",
+    "available_memory_bytes": 15705952256,
+    "loadavg": [
+      1.01513671875,
+      1.0078125,
+      1.0
+    ]
+  },
+  "exit_code": 0,
+  "involuntary_context_switches": 48,
+  "max_rss_bytes": 132083712,
+  "pinned_cpu": 3,
+  "sys_s": 0.011999,
+  "user_s": 6.136913,
+  "voluntary_context_switches": 1,
+  "wall_s": 6.14994940699944
+}

@@ -1,0 +1,28 @@
+{
+  "cofactor": "4",
+  "nonidentity_projected_points": 0,
+  "rows": [
+    {
+      "cofactor_four_projection": "identity",
+      "x": "0",
+      "y": "1"
+    },
+    {
+      "cofactor_four_projection": "identity",
+      "x": "1",
+      "y": "0"
+    },
+    {
+      "cofactor_four_projection": "identity",
+      "x": "1",
+      "y": "1"
+    }
+  ],
+  "schema": "n83.standard-subspace-d1-independent-projection/v1",
+  "source_point_count": 3,
+  "source_x_values": [
+    "0",
+    "1"
+  ],
+  "status": "PASS_THREE_SOURCE_POINTS_ALL_PROJECT_TO_IDENTITY"
+}

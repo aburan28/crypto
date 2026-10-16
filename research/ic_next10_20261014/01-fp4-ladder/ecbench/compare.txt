@@ -1,0 +1,148 @@
+ops (ok): ic-k4-plain / rho-neg = 2708132949.3527 [1759468174.651, 3924258863.344] (cluster) over 12 pairs on 12 workloads, 4 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 105.5846 [105.585, 105.585]
+measurement quality: 0 / 100; paired attempts 12, verified 12, admitted 0; levels {"L0": 12}; p95 foreign busy unknown%, p95 run queue 78.27%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-k4-plain / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp4p101-t7230-4648f8e2 | 24.63 | 3 | 3680323721.6641 | [3303089566.1592, 4178486001.1546] | cluster |
+| icv1-fp4p181-tm22754-781f401f | 28.00 | 3 | 4741494870.2335 | [2900834014.9658, 13991887065.6322] | cluster |
+| icv1-fp4p269-tm108482-f98bf277 | 30.29 | 3 | 2984434536.5517 | [2670425978.4255, 3339080362.1818] | cluster |
+| icv1-fp4p397-tm257762-06a9c911 | 32.53 | 3 | 777633165.1331 | [533537476.0326, 1186369468.9232] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-k4-plain mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W023cb0f0854c | icv1-fp4p181-tm22754-781f401f | 28.00 | 0.2023 | 2830720808.3099 | 13991887065.6322 |
+| W0d54e610a22b | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 0.6619 | 1767546022.3670 | 2670425978.4255 |
+| W14c339ec7dbb | icv1-fp4p181-tm22754-781f401f | 28.00 | 0.7073 | 2942178531.4627 | 4159750243.6965 |
+| W1d2a6d1d015d | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 1.5808 | 843410626.2889 | 533537476.0326 |
+| W1e28fb147ed4 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 0.9284 | 3383533568.0318 | 3644585747.1979 |
+| W4c4d881526a0 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 0.8737 | 2885810876.8735 | 3303089566.1592 |
+| W62214040e212 | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 0.4743 | 1583671465.6070 | 3339080362.1818 |
+| W7424a8f9b206 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 0.7282 | 3042728375.5693 | 4178486001.1546 |
+| Wa741af9e0ef1 | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 0.6459 | 766289730.0241 | 1186369468.9232 |
+| Wc2bc0c19ddb0 | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 1.0817 | 963059094.8876 | 890280997.6055 |
+| Wc5a51a216b76 | icv1-fp4p181-tm22754-781f401f | 28.00 | 0.7932 | 2300914918.2610 | 2900834014.9658 |
+| Wfda9bac4061e | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 0.5456 | 1668004908.9090 | 3057083064.0931 |
+----
+ops (ok): ic-k4-d4 / rho-neg = 148434885.2357 [90148992.247, 216978671.519] (cluster) over 12 pairs on 12 workloads, 4 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 194.9182 [194.918, 194.918]
+measurement quality: 0 / 100; paired attempts 12, verified 12, admitted 0; levels {"L0": 12}; p95 foreign busy unknown%, p95 run queue 78.27%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-k4-d4 / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp4p101-t7230-4648f8e2 | 24.63 | 3 | 231256870.7088 | [179408794.3691, 288577156.9276] | cluster |
+| icv1-fp4p181-tm22754-781f401f | 28.00 | 3 | 263385976.3479 | [202180937.7853, 595062065.9703] | cluster |
+| icv1-fp4p269-tm108482-f98bf277 | 30.29 | 3 | 131041920.0731 | [115422975.5132, 165429971.3973] | cluster |
+| icv1-fp4p397-tm257762-06a9c911 | 32.53 | 3 | 34772556.4588 | [20395801.2021, 69732519.1093] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-k4-d4 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W023cb0f0854c | icv1-fp4p181-tm22754-781f401f | 28.00 | 0.2023 | 120387947.9928 | 595062065.9703 |
+| W0d54e610a22b | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 0.6619 | 76398081.3947 | 115422975.5132 |
+| W14c339ec7dbb | icv1-fp4p181-tm22754-781f401f | 28.00 | 0.7073 | 167737450.0509 | 237152807.4401 |
+| W1d2a6d1d015d | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 1.5808 | 32241475.5070 | 20395801.2021 |
+| W1e28fb147ed4 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 0.9284 | 218250648.9147 | 235089496.9291 |
+| W4c4d881526a0 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 0.8737 | 156744114.8135 | 179408794.3691 |
+| W62214040e212 | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 0.4743 | 78460742.7318 | 165429971.3973 |
+| W7424a8f9b206 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 0.7282 | 210138768.8464 | 288577156.9276 |
+| Wa741af9e0ef1 | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 0.6459 | 45041038.7674 | 69732519.1093 |
+| Wc2bc0c19ddb0 | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 1.0817 | 37760705.6950 | 34907140.0861 |
+| Wc5a51a216b76 | icv1-fp4p181-tm22754-781f401f | 28.00 | 0.7932 | 160368064.3353 | 202180937.7853 |
+| Wfda9bac4061e | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 0.5456 | 65527494.3221 | 120097364.2551 |
+----
+ops (ok): ic-k4-dlp / rho-neg = 6249115603.6833 [4339752976.634, 8834019277.821] (cluster) over 12 pairs on 12 workloads, 4 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 199.6950 [199.695, 199.695]
+measurement quality: 0 / 100; paired attempts 12, verified 12, admitted 0; levels {"L0": 12}; p95 foreign busy unknown%, p95 run queue 78.27%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-k4-dlp / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp4p101-t7230-4648f8e2 | 24.63 | 3 | 7412974317.1043 | [6782098691.6208, 8949569528.8267] | cluster |
+| icv1-fp4p181-tm22754-781f401f | 28.00 | 3 | 9920555828.4527 | [6172212517.7416, 30361036483.0691] | cluster |
+| icv1-fp4p269-tm108482-f98bf277 | 30.29 | 3 | 8210174883.2537 | [5780004915.3555, 11295448619.7332] | cluster |
+| icv1-fp4p397-tm257762-06a9c911 | 32.53 | 3 | 2472521408.7671 | [1648294514.0754, 3635759316.5131] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-k4-dlp mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W023cb0f0854c | icv1-fp4p181-tm22754-781f401f | 28.00 | 0.2023 | 6142389323.9947 | 30361036483.0691 |
+| W0d54e610a22b | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 0.6619 | 3825765918.9722 | 5780004915.3555 |
+| W14c339ec7dbb | icv1-fp4p181-tm22754-781f401f | 28.00 | 0.7073 | 5854584107.1580 | 8277406488.4448 |
+| W1d2a6d1d015d | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 1.5808 | 2605607236.3695 | 1648294514.0754 |
+| W1e28fb147ed4 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 0.9284 | 6296314636.7036 | 6782098691.6208 |
+| W4c4d881526a0 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 0.8737 | 5943250264.8059 | 6802624557.3035 |
+| W62214040e212 | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 0.4743 | 5357247424.4413 | 11295448619.7332 |
+| W7424a8f9b206 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 0.7282 | 6516979869.4951 | 8949569528.8267 |
+| Wa741af9e0ef1 | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 0.6459 | 2348378897.1847 | 3635759316.5131 |
+| Wc2bc0c19ddb0 | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 1.0817 | 3226224160.8624 | 2982419334.0563 |
+| Wc5a51a216b76 | icv1-fp4p181-tm22754-781f401f | 28.00 | 0.7932 | 4895742323.5802 | 6172212517.7416 |
+| Wfda9bac4061e | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 0.5456 | 4624859857.2385 | 8476342406.3395 |
+----
+ops (ok): rho-plain / rho-neg = 1.9248 [1.245, 2.797] (cluster) over 12 pairs on 12 workloads, 4 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.6107 [1.611, 1.611]
+measurement quality: 0 / 100; paired attempts 12, verified 12, admitted 0; levels {"L0": 12}; p95 foreign busy unknown%, p95 run queue 80.60%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | rho-plain / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp4p101-t7230-4648f8e2 | 24.63 | 3 | 2.5024 | [0.9663, 3.1263] | cluster |
+| icv1-fp4p181-tm22754-781f401f | 28.00 | 3 | 3.5553 | [1.7833, 9.9466] | cluster |
+| icv1-fp4p269-tm108482-f98bf277 | 30.29 | 3 | 1.1062 | [0.4090, 1.7344] | cluster |
+| icv1-fp4p397-tm257762-06a9c911 | 32.53 | 3 | 1.0600 | [0.6775, 2.1057] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | rho-plain mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W023cb0f0854c | icv1-fp4p181-tm22754-781f401f | 28.00 | 0.2023 | 2.0123 | 9.9466 |
+| W0d54e610a22b | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 0.6619 | 0.8146 | 1.2307 |
+| W14c339ec7dbb | icv1-fp4p181-tm22754-781f401f | 28.00 | 0.7073 | 1.2613 | 1.7833 |
+| W1d2a6d1d015d | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 1.5808 | 1.4141 | 0.8946 |
+| W1e28fb147ed4 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 0.9284 | 2.8967 | 3.1202 |
+| W4c4d881526a0 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 0.8737 | 2.7314 | 3.1263 |
+| W62214040e212 | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 0.4743 | 0.8226 | 1.7344 |
+| W7424a8f9b206 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 0.7282 | 0.7037 | 0.9663 |
+| Wa741af9e0ef1 | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 0.6459 | 1.3601 | 2.1057 |
+| Wc2bc0c19ddb0 | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 1.0817 | 0.7329 | 0.6775 |
+| Wc5a51a216b76 | icv1-fp4p181-tm22754-781f401f | 28.00 | 0.7932 | 2.7803 | 3.5052 |
+| Wfda9bac4061e | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 0.5456 | 0.2232 | 0.4090 |
+----
+ops (ok): ic-k4-d4 / ic-k4-plain = 0.0548 [0.048, 0.061] (cluster) over 12 pairs on 12 workloads, 4 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.7010 [1.701, 1.701]
+measurement quality: 0 / 100; paired attempts 12, verified 12, admitted 0; levels {"L0": 12}; p95 foreign busy unknown%, p95 run queue 66.46%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-k4-d4 / ic-k4-plain | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp4p101-t7230-4648f8e2 | 24.63 | 3 | 0.0628 | [0.0543, 0.0691] | cluster |
+| icv1-fp4p181-tm22754-781f401f | 28.00 | 3 | 0.0555 | [0.0425, 0.0697] | cluster |
+| icv1-fp4p269-tm108482-f98bf277 | 30.29 | 3 | 0.0439 | [0.0393, 0.0495] | cluster |
+| icv1-fp4p397-tm257762-06a9c911 | 32.53 | 3 | 0.0447 | [0.0382, 0.0588] | cluster |
+
+| workload | curve | log2 r | ic-k4-plain mean S | ic-k4-d4 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W023cb0f0854c | icv1-fp4p181-tm22754-781f401f | 28.00 | 2830720808.3099 | 120387947.9928 | 0.0425 |
+| W0d54e610a22b | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 1767546022.3670 | 76398081.3947 | 0.0432 |
+| W14c339ec7dbb | icv1-fp4p181-tm22754-781f401f | 28.00 | 2942178531.4627 | 167737450.0509 | 0.0570 |
+| W1d2a6d1d015d | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 843410626.2889 | 32241475.5070 | 0.0382 |
+| W1e28fb147ed4 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 3383533568.0318 | 218250648.9147 | 0.0645 |
+| W4c4d881526a0 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 2885810876.8735 | 156744114.8135 | 0.0543 |
+| W62214040e212 | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 1583671465.6070 | 78460742.7318 | 0.0495 |
+| W7424a8f9b206 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 3042728375.5693 | 210138768.8464 | 0.0691 |
+| Wa741af9e0ef1 | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 766289730.0241 | 45041038.7674 | 0.0588 |
+| Wc2bc0c19ddb0 | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 963059094.8876 | 37760705.6950 | 0.0392 |
+| Wc5a51a216b76 | icv1-fp4p181-tm22754-781f401f | 28.00 | 2300914918.2610 | 160368064.3353 | 0.0697 |
+| Wfda9bac4061e | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 1668004908.9090 | 65527494.3221 | 0.0393 |
+ops (ok): ic-k4-dlp / ic-k4-plain = 2.3075 [2.102, 2.618] (cluster) over 12 pairs on 12 workloads, 4 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.8658 [1.866, 1.866]
+measurement quality: 0 / 100; paired attempts 12, verified 12, admitted 0; levels {"L0": 12}; p95 foreign busy unknown%, p95 run queue 66.78%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-k4-dlp / ic-k4-plain | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp4p101-t7230-4648f8e2 | 24.63 | 3 | 2.0142 | [1.8609, 2.1418] | cluster |
+| icv1-fp4p181-tm22754-781f401f | 28.00 | 3 | 2.0923 | [1.9899, 2.1699] | cluster |
+| icv1-fp4p269-tm108482-f98bf277 | 30.29 | 3 | 2.7510 | [2.1645, 3.3828] | cluster |
+| icv1-fp4p397-tm257762-06a9c911 | 32.53 | 3 | 3.1795 | [3.0646, 3.3500] | cluster |
+
+| workload | curve | log2 r | ic-k4-plain mean S | ic-k4-dlp mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W023cb0f0854c | icv1-fp4p181-tm22754-781f401f | 28.00 | 2830720808.3099 | 6142389323.9947 | 2.1699 |
+| W0d54e610a22b | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 1767546022.3670 | 3825765918.9722 | 2.1645 |
+| W14c339ec7dbb | icv1-fp4p181-tm22754-781f401f | 28.00 | 2942178531.4627 | 5854584107.1580 | 1.9899 |
+| W1d2a6d1d015d | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 843410626.2889 | 2605607236.3695 | 3.0894 |
+| W1e28fb147ed4 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 3383533568.0318 | 6296314636.7036 | 1.8609 |
+| W4c4d881526a0 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 2885810876.8735 | 5943250264.8059 | 2.0595 |
+| W62214040e212 | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 1583671465.6070 | 5357247424.4413 | 3.3828 |
+| W7424a8f9b206 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 3042728375.5693 | 6516979869.4951 | 2.1418 |
+| Wa741af9e0ef1 | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 766289730.0241 | 2348378897.1847 | 3.0646 |
+| Wc2bc0c19ddb0 | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 963059094.8876 | 3226224160.8624 | 3.3500 |
+| Wc5a51a216b76 | icv1-fp4p181-tm22754-781f401f | 28.00 | 2300914918.2610 | 4895742323.5802 | 2.1277 |
+| Wfda9bac4061e | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 1668004908.9090 | 4624859857.2385 | 2.7727 |

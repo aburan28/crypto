@@ -339,6 +339,48 @@
     "target_group": "prime-order subgroup"
    },
    "group_order": "9671406556910881928556062"
+  },
+  {
+   "label": "K_0/GF(2^73)",
+   "a": 0,
+   "n": 73,
+   "model": "E_0: y^2 + xy = x^3 + 1 (the ECC2K-130 family)",
+   "proper_intermediate_subfields_over_gf2": [],
+   "curve_id": "EC1N73Ce0h243f847bccdd",
+   "curve_sha256": "243f847bccdd57c5fb0e458c368f5dee255dbd26406ce6c72e727b45cede73d3",
+   "curve_uid": "urn:ec-record:1:sha256:243f847bccdd57c5fb0e458c368f5dee255dbd26406ce6c72e727b45cede73d3",
+   "field_sha256": "53eaae78e09a8b7d3f55ca2225a54f311fc322830f413ff9c85a87ad93629e64",
+   "field": {
+    "characteristic": 2,
+    "degree": 73,
+    "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant",
+    "modulus_exponents": [
+     73,
+     4,
+     3,
+     2,
+     0
+    ],
+    "representation": "polynomial"
+   },
+   "curve": {
+    "coefficients": [
+     1,
+     0,
+     0,
+     0,
+     1
+    ],
+    "cofactor": 109796,
+    "generator": [
+     "100b41b4ef74f580836",
+     "101a9d8d6f53966ebe9"
+    ],
+    "model": "binary Weierstrass",
+    "subgroup_order": "86020738150056119",
+    "target_group": "prime-order subgroup"
+   },
+   "group_order": "9444732965923561641724"
   }
  ]
 }

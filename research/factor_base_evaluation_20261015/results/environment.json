@@ -1,0 +1,13 @@
+{
+  "architecture": "x86_64",
+  "cpu_affinity": [
+    0
+  ],
+  "cpu_clock_ticks_per_second": 100,
+  "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+  "preparation_cpu_seconds": 0.753738083,
+  "protocol_sha256": "07b1b92a8008d5c71b93d01155622c474372bfdebc79e5889232fa47b301dc12",
+  "python": "3.12.5 (main, Apr  1 2025, 01:06:51) [GCC 11.4.0]",
+  "sage": "SageMath version 10.6, Release Date: 2025-03-31",
+  "timing": "process CPU; structured solver additionally charges reaped child resource usage and supervisor CPU; worker budget targets have measured monitor/scheduling overshoot"
+}
