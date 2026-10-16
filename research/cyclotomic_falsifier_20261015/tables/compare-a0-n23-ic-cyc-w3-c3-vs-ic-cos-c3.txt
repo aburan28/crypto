@@ -1,0 +1,25 @@
+ops (ok): ic-cyc-w3-c3 / ic-cos-c3 = 0.9772 [0.818, 1.161] (cluster) over 32 pairs on 16 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 18.2385 [13.298, 20.048]
+measurement quality: 0 / 100; paired attempts 32, verified 32, admitted 0; levels {"L0": 32}; p95 foreign busy unknown%, p95 run queue 5673.89%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-cyc-w3-c3 / ic-cos-c3 | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m23-t5197-69e76b73 | 21.00 | 16 | 0.9772 | [0.8183, 1.1613] | cluster |
+
+| workload | curve | log2 r | ic-cos-c3 mean S | ic-cyc-w3-c3 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W097b65939e60 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.9481 | 0.8043 | 0.8483 |
+| W0bc4e6f44014 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.4962 | 1.0159 | 0.6790 |
+| W15ea8df31c09 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1642 | 1.0535 | 0.9049 |
+| W35ad8d7bf3d7 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1638 | 1.2416 | 1.0668 |
+| W3e97957c8e9f | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.7408 | 1.1730 | 1.5836 |
+| W41938b93e0cf | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.9584 | 0.7556 | 0.7884 |
+| W5bb695f1b263 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.8978 | 0.9612 | 1.0707 |
+| W60fb480f9b28 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.0417 | 0.7842 | 0.7528 |
+| W7121566cb80a | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1611 | 1.1898 | 1.0247 |
+| W7650b3c238de | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1097 | 1.0113 | 0.9113 |
+| W81578276046d | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1197 | 1.0057 | 0.8981 |
+| W890bdd5f1fae | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.3813 | 0.9173 | 0.6641 |
+| Wa173c2f6f884 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.8788 | 1.2356 | 1.4059 |
+| Waead5d5232aa | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.9391 | 0.9759 | 1.0392 |
+| Wba0795d4edb3 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.7526 | 0.8909 | 1.1838 |
+| Wc5dd28fadbba | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.0846 | 1.4380 | 1.3259 |

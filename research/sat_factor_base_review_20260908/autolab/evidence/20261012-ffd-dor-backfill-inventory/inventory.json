@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "beat_id": "all.decomposition.ffd_backfill",
+  "priority": "skill agent_priorities #7 / BOUNDARY_TARGETS backfill FFD/DoR",
+  "created_at": "2026-10-12T20:20:17Z",
+  "source_commit": "966a0dbc9",
+  "claim_boundary_non_claims": [
+    "not ledger promotion",
+    "PENDING_INDEPENDENT_VALIDATION",
+    "public synthetic / known-answer only",
+    "no new relation_yield beat invented"
+  ],
+  "ledger_gaps": [
+    {
+      "path": "regimes.binary.records.decomposition.current.metrics.ffd.subspace_sat_pairs_ladder",
+      "status_in_ledger": "unmeasured",
+      "reason_in_ledger": "Frontier SAT/pairs rows historically logged conflicts and wall time only",
+      "fill": [
+        {
+          "component": "pairs_and_solve",
+          "registered_beat": "binary.decomposition.l8_pairs_baseline",
+          "evidence": "runs_manual/binary_decomp_l8_20260911/",
+          "claim_draft": "runs_manual/binary_decomp_l8_20260911/claim_draft_pairs_baseline.json",
+          "ffd_status": "inapplicable",
+          "ffd_reason": "oracle_class=pairs_and_solve enumerates pair space; no Boolean Macaulay/GB system",
+          "claim_check_20261012": "PASS"
+        },
+        {
+          "component": "subspace_algebraic_S4_Macaulay",
+          "registered_beat": "manual.binary.decomposition.l8_s4_subspace_ffd (producer examples/ffd_s4_subspace; not in protocol.json beats map as launchable control-plane beat)",
+          "evidence": "runs_manual/binary_s4_ffd_l8_20260920/",
+          "claim_draft": "runs_manual/binary_s4_ffd_l8_20260920/claim_draft_s4_subspace_ffd.json",
+          "ffd_status": "measured",
+          "ffd_summary": "x1-fixed: min=max=mean=7 over 16 draws; full: no fall through D=8 (censored)",
+          "claim_check_20261012": "PASS",
+          "note": "Closes the subspace FFD-logging sub-gate for l=8. Does not win sub-2^(2l) oracle. Does not measure SAT conflict-to-FFD translation."
+        }
+      ],
+      "still_open": "No registered protocol beat measures FFD of the historical SAT CNF/ANF systems that logged conflicts+wall only. SAT is not a GB/Macaulay oracle; schema allows documenting that SAT frontier rows remain conflict/wall-only unless a Boolean Macaulay FFD harness is registered for those systems."
+    },
+    {
+      "path": "regimes.prime.records.decomposition.history[0] (S3 2-decomp pre-s4-family)",
+      "status_in_ledger": "unmeasured",
+      "reason_in_ledger": "Current bench frontier records wall scaling / alpha fits, not FFD/DoR",
+      "fill": [
+        {
+          "component": "current_S4_3decomp_record",
+          "evidence": "runs_manual/prime_a3_s4_ladder_20261006/",
+          "ffd_status": "inapplicable",
+          "ffd_reason": "direct univariate quartic root finding (Cantor-Zassenhaus); no Boolean/Gr\u00f6bner system"
+        },
+        {
+          "component": "m3_gbrl_toy_field_FFD",
+          "registered_beat_id_in_draft": "prime.decomposition.m3_gbrl_ffd",
+          "evidence": "runs_manual/prime_m3_ffd_20260911/",
+          "ffd_status": "measured",
+          "ffd_summary": "fb=3..6 \u2192 FFD 6,8,10,12 on fixed F_1000003",
+          "claim_check_20261012": "PASS",
+          "note": "Not S3 2-decomp; not a curve-order claim"
+        },
+        {
+          "component": "m3_witness_FFD_ge14",
+          "registered_beat_id_in_draft": "prime.decomposition.m3_witness_ffd_ge14",
+          "evidence": "runs_manual/prime_m3_witness_ffd_20260911/",
+          "ffd_status": "measured",
+          "ffd_summary": "FFD=8 on planted m=3 |E|~2^20; witnesses_sum_in_group",
+          "claim_check_20261012": "PASS",
+          "note": "Not S3 2-decomp frontier; m=3 witness system"
+        }
+      ],
+      "still_open": "No protocol.json beat registers an S3 2-decomposition FFD/DoR sweep for the historical prime wall/alpha frontier. Filling that history cell requires a new registered producer+beat (or an explicit inapplicable+reason if that arm is pure root-finding without a GB system). Do not invent a beat."
+    }
+  ],
+  "claim_check_rerun_20261012": {
+    "binary_decomp_l8_20260911.json": "PASS",
+    "binary_s4_ffd_l8_20260920.json": "PASS",
+    "prime_m3_ffd_20260911.json": "PASS",
+    "prime_m3_witness_ffd_20260911.json": "PASS"
+  },
+  "no_ledger_edit": true,
+  "status": "PENDING_INDEPENDENT_VALIDATION"
+}

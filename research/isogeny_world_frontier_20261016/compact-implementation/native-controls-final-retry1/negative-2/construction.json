@@ -1,0 +1,32 @@
+{
+  "elapsed_ms_operational_only": 0,
+  "error": "exponent must be an odd prime in 3..=65536",
+  "resources": {
+    "command": [
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/compact-implementation/release/isogeny",
+      "compact-cm",
+      "__worker",
+      "construct",
+      "--exponent",
+      "2",
+      "--out",
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/compact-implementation/native-controls-final-retry1/negative-2/artifact",
+      "--rss-ready",
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/compact-implementation/native-controls-final-retry1/negative-2/resources-ready"
+    ],
+    "elapsed_ms_operational_only": 35,
+    "exit_code": 1,
+    "map_count": null,
+    "memory_monitor_grace_ms": 100,
+    "memory_sampling_interval_ms": 25,
+    "resident_memory_limit_bytes": "8589934592",
+    "sampled_peak_resident_bytes": "32768",
+    "status": "FAIL",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout": "native.json",
+    "stdout_sha256": "61a7e378f020e7b15ead7a1dadd528901628ad267198673ccc502911f31e8fc9",
+    "unavailable_memory_samples": 0
+  },
+  "score": null,
+  "status": "REJECTED"
+}

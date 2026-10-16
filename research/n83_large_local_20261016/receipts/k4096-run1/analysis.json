@@ -1,0 +1,35 @@
+{
+  "arm": {
+    "k": 4096,
+    "source_guard": "one-root complete key bound exceeds fixed indexed slots",
+    "state_count": 696256512,
+    "state_id_limit": 536870912,
+    "status": "UNSUPPORTED_STATE_ID"
+  },
+  "binary_sha256": "c10a23dcc822f0232363f2d3b236288ea4ba24155c68118b94d0a07a622e8639",
+  "resource_receipt": {
+    "cgroup_after": {},
+    "cgroup_before": {},
+    "command": [
+      "/Volumes/SSD990-2/n83-online-range-cargo-target/release/examples/koblitz_orbit_dlp_fast",
+      "construct:83:1:4096",
+      "/Volumes/SSD990/crypto/worktrees/n83-online-range-20261016/research/n83_cold_factor_base_20261016/targets.jsonl",
+      "29",
+      "/Volumes/SSD990-2/n83-archive-20261016/local-large/k4096-run1/runs/k4096root11dynamic/targets_result.jsonl"
+    ],
+    "exit_code": 101,
+    "finished_utc": "2026-10-16T11:53:55.579488+00:00",
+    "major_faults": null,
+    "memory_available_after_bytes": 23212720128,
+    "peak_rss_bytes": 52445184,
+    "resource_tier": "local_diagnostic",
+    "started_utc": "2026-10-16T11:53:54.032863+00:00",
+    "status": "FAILED",
+    "wall_seconds": 1.546631875
+  },
+  "schema": "n83.large-local-analysis/v1",
+  "selection_eligible": false,
+  "source_sha256": "3ee6bc11399b382e72789b152043e5a67abc5b783c4e998ad8c534d60baebc03",
+  "status": "UNSUPPORTED_STATE_ID",
+  "tier": "local_diagnostic"
+}

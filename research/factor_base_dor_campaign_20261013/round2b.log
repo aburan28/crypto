@@ -1,0 +1,51 @@
+skip m2_n17_d2_s1
+skip m2_n17_d3_s1
+skip m2_n17_d4_s1
+skip m2_n17_d5_s1
+skip m2_n17_d6_s1
+skip m2_n17_d7_s1
+skip m2_n17_d8_s1
+skip m2_n19_d2_s1
+skip m2_n19_d3_s1
+skip m2_n19_d4_s1
+skip m2_n19_d5_s1
+skip m2_n19_d6_s1
+skip m2_n19_d7_s1
+skip m2_n19_d8_s1
+skip m2_n19_d9_s1
+=== m2_n23_d2_s1 : --field 23 --dim 2 --structures standard,random,nb_window,nb_break --targets 16 --seed 1 --dmax 6
+=== m2_n23_d3_s1 : --field 23 --dim 3 --structures standard,random,nb_window,nb_break --targets 16 --seed 1 --dmax 6
+=== m2_n23_d4_s1 : --field 23 --dim 4 --structures standard,random,nb_window,nb_break --targets 16 --seed 1 --dmax 6
+=== m2_n23_d5_s1 : --field 23 --dim 5 --structures standard,random,nb_window,nb_break --targets 16 --seed 1 --dmax 6
+=== m2_n23_d6_s1 : --field 23 --dim 6 --structures standard,random,nb_window,nb_break --targets 16 --seed 1 --dmax 6
+=== m2_n23_d7_s1 : --field 23 --dim 7 --structures standard,random,nb_window,nb_break --targets 16 --seed 1 --dmax 6
+=== m2_n23_d8_s1 : --field 23 --dim 8 --structures standard,random,nb_window,nb_break --targets 16 --seed 1 --dmax 6
+=== m2_n17_d2_s2 : --field 17 --dim 2 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n17_d3_s2 : --field 17 --dim 3 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n17_d4_s2 : --field 17 --dim 4 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n17_d5_s2 : --field 17 --dim 5 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n17_d6_s2 : --field 17 --dim 6 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n17_d7_s2 : --field 17 --dim 7 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n17_d8_s2 : --field 17 --dim 8 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n19_d2_s2 : --field 19 --dim 2 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n19_d3_s2 : --field 19 --dim 3 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n19_d4_s2 : --field 19 --dim 4 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n19_d5_s2 : --field 19 --dim 5 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n19_d6_s2 : --field 19 --dim 6 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n19_d7_s2 : --field 19 --dim 7 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n19_d8_s2 : --field 19 --dim 8 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n19_d9_s2 : --field 19 --dim 9 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n23_d2_s2 : --field 23 --dim 2 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n23_d3_s2 : --field 23 --dim 3 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n23_d4_s2 : --field 23 --dim 4 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n23_d5_s2 : --field 23 --dim 5 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n23_d6_s2 : --field 23 --dim 6 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n23_d7_s2 : --field 23 --dim 7 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n23_d8_s2 : --field 23 --dim 8 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== delta_n15_m2 : --field 15 --structures standard --delta-sweep=-1,1,3,5 --dmax 6 --targets 16
+=== delta_n17_m2 : --field 17 --structures standard --delta-sweep=-1,1,3,5,7 --dmax 6 --targets 16
+=== delta_n19_m2 : --field 19 --structures standard --delta-sweep=-1,1,3,5,7,9 --dmax 6 --targets 16
+=== sym4_n21_l3 : --field 21 --dim 3 --symmetric-s4 --structures geometric,standard,subfield,random --targets 16 --dmax 5 --dstar-sample 6
+=== sym4_n19_l3 : --field 19 --dim 3 --symmetric-s4 --structures geometric,standard,random --targets 16 --dmax 5 --dstar-sample 6
+=== sym4_n15_l2 : --field 15 --dim 2 --symmetric-s4 --structures geometric,standard,random --targets 16 --dmax 5 --dstar-sample 6
+round2b done

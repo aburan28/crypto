@@ -1,0 +1,32 @@
+release	Publish with ReleaseMe	﻿2026-10-16T08:00:49.6137177Z ##[group]Run dev-build-deploy/release-me@cede87fd8a4829ef571dff6bde807ebbfcaeb3e9
+release	Publish with ReleaseMe	2026-10-16T08:00:49.6137702Z with:
+release	Publish with ReleaseMe	2026-10-16T08:00:49.6140497Z   token: ***
+release	Publish with ReleaseMe	2026-10-16T08:00:49.6140764Z   prefix: v
+release	Publish with ReleaseMe	2026-10-16T08:00:49.6141115Z   version: 0.1.2356
+release	Publish with ReleaseMe	2026-10-16T08:00:49.6141385Z   draft: false
+release	Publish with ReleaseMe	2026-10-16T08:00:49.6141651Z   release-notes: /tmp/notes.md
+release	Publish with ReleaseMe	2026-10-16T08:00:49.6143750Z   files: dist/SHA256SUMS
+release	Publish with ReleaseMe	dist/crypto-v0.1.2356-aarch64-apple-darwin.tar.gz
+release	Publish with ReleaseMe	dist/crypto-v0.1.2356-x86_64-pc-windows-msvc.zip
+release	Publish with ReleaseMe	dist/crypto-v0.1.2356-x86_64-unknown-linux-gnu.tar.gz
+release	Publish with ReleaseMe	dist/ecc2k130-cpu-v0.1.2356-x86_64-linux.tar.gz
+release	Publish with ReleaseMe	dist/ecc2k130-cuda-v0.1.2356-x86_64-linux.tar.gz
+release	Publish with ReleaseMe	dist/isogeny-v0.1.2356-aarch64-apple-darwin.tar.gz
+release	Publish with ReleaseMe	dist/isogeny-v0.1.2356-x86_64-pc-windows-msvc.zip
+release	Publish with ReleaseMe	dist/isogeny-v0.1.2356-x86_64-unknown-linux-gnu.tar.gz
+release	Publish with ReleaseMe	dist/isogeny-v0.1.2356-x86_64-unknown-linux-musl.tar.gz
+release	Publish with ReleaseMe	2026-10-16T08:00:49.6145616Z   config: .github/release.yml
+release	Publish with ReleaseMe	2026-10-16T08:00:49.6145925Z   versioning: semver
+release	Publish with ReleaseMe	2026-10-16T08:00:49.6146194Z   create-release: true
+release	Publish with ReleaseMe	2026-10-16T08:00:49.6146480Z env:
+release	Publish with ReleaseMe	2026-10-16T08:00:49.6146712Z   CARGO_TERM_COLOR: always
+release	Publish with ReleaseMe	2026-10-16T08:00:49.6146996Z   ECC_MARCH: x86-64-v3
+release	Publish with ReleaseMe	2026-10-16T08:00:49.6147262Z   CUDA_PKG_VERSION: 12-8
+release	Publish with ReleaseMe	2026-10-16T08:00:49.6147536Z   CUDA_DIR_VERSION: 12.8
+release	Publish with ReleaseMe	2026-10-16T08:00:49.6147809Z ##[endgroup]
+release	Publish with ReleaseMe	2026-10-16T08:00:49.7846660Z 📄 ReleaseMe - GitHub Release Management
+release	Publish with ReleaseMe	2026-10-16T08:00:49.7851315Z ##[group]🔍 Determining increment type
+release	Publish with ReleaseMe	2026-10-16T08:00:49.7852134Z ℹ️ Using version override: 0.1.2356
+release	Publish with ReleaseMe	2026-10-16T08:00:49.7877377Z ##[error]Incorrect SemVer, missing prefix
+release	Publish with ReleaseMe	2026-10-16T08:00:49.7885559Z (node:2342) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+release	Publish with ReleaseMe	2026-10-16T08:00:49.7886382Z (Use `node --trace-deprecation ...` to show where the warning was created)
