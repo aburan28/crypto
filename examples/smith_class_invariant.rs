@@ -599,7 +599,10 @@ fn descent(sp_: &Split, lc: u64, kk: u64, rng: &mut sp::SplitMix64) -> DescentK 
             } else {
                 // σ^k S = S^c: rational representative 2 D∞ - (R_1 + ... + R_4)
                 // from y - β g_S(x) with β^{q+1} = lc.
-                assert!(m % (2 * kk) == 0, "swap case needs F_(p^2k) inside F_(p^m)");
+                assert!(
+                    m.is_multiple_of(2 * kk),
+                    "swap case needs F_(p^2k) inside F_(p^m)"
+                );
                 let b = *beta.get_or_insert_with(|| find_beta(k, kk as u32, lc, rng));
                 let b2 = k.mul(&b, &b);
                 let gs = |set: u32| {
@@ -618,7 +621,11 @@ fn descent(sp_: &Split, lc: u64, kk: u64, rng: &mut sp::SplitMix64) -> DescentK 
             let g = gcd(m, n) as u32;
             match k.chi_sub(&u, g) {
                 Some(c) if c != 0 => {
-                    let c = if (n / g as u64) % 2 == 0 { 1 } else { c };
+                    let c = if (n / g as u64).is_multiple_of(2) {
+                        1
+                    } else {
+                        c
+                    };
                     chis.push((c, nj));
                 }
                 _ => {
@@ -771,7 +778,7 @@ fn canonical_sets(sets: &[u128], perms: &[[usize; 8]]) -> Vec<u128> {
 }
 
 fn divisors(n: u64) -> Vec<u64> {
-    (1..=n).filter(|d| n % d == 0).collect()
+    (1..=n).filter(|d| n.is_multiple_of(*d)).collect()
 }
 
 struct J4 {
@@ -1409,7 +1416,7 @@ fn compute_cmd(args: &[String]) {
         .map(|&i| {
             let o = compute_one(&rows[i], p, &pl, sample.contains(&i));
             let d = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed) + 1;
-            if d % 5000 == 0 {
+            if d.is_multiple_of(5000) {
                 eprintln!(
                     "p={p}: {d}/{n_tr} classes, {:.0}s",
                     t0.elapsed().as_secs_f64()
