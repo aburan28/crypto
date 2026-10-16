@@ -1,0 +1,165 @@
+Factor-base designs on p1 = 786433: σ = ΔD/Δb by least squares over completed cells
+(D = solving_degree_max of f4_fp grevlex; a cell is completed when every planted system in it is `ok`;
+ a cell's D is the mean over its systems; rows from research/factor_base_designs_20261015/runs)
+
+── A0 m = 2
+  t   b       D per system   status
+  2   2.000   [4, 4]         ok,ok
+  3   3.000   [4, 4]         ok,ok
+  4   4.000   [4, 4]         ok,ok
+  5   5.000   [4, 4]         ok,ok
+  6   6.000   [5, 5]         ok,ok
+  7   7.000   [5, 5]         ok,ok
+  8   8.000   [5, 5]         ok,ok
+  9   9.000   [5, 5]         ok,ok
+  10  10.000  []             timeout,timeout
+  completed cells 8: σ = 0.1905, intercept 3.452  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── A0 m = 3
+  t   b       D per system   status
+  2   2.000   [5, 5]         ok,ok
+  3   3.000   [6, 6]         ok,ok
+  4   4.000   [6, 6]         ok,ok
+  5   5.000   []             timeout,timeout
+  completed cells 3: σ = 0.5000, intercept 4.167  →  no middle ground at this arity (σ ≥ 0.5)
+
+── N m = 2
+  t   b       D per system   status
+  2   2.000   [4, 4]         ok,ok
+  3   3.000   [4, 4]         ok,ok
+  4   4.000   [4, 4]         ok,ok
+  5   5.000   [4, 4]         ok,ok
+  6   6.000   [5, 5]         ok,ok
+  7   7.000   [5, 5]         ok,ok
+  8   8.000   [5, 5]         ok,ok
+  9   9.000   [5, 5]         ok,ok
+  10  10.000  []             timeout,timeout
+  completed cells 8: σ = 0.1905, intercept 3.452  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── N m = 3
+  t   b       D per system   status
+  2   2.000   [5, 5]         ok,ok
+  3   3.000   [6, 6]         ok,ok
+  4   4.000   [6, 6]         ok,ok
+  5   5.000   []             timeout,timeout
+  completed cells 3: σ = 0.5000, intercept 4.167  →  no middle ground at this arity (σ ≥ 0.5)
+
+── A1z m = 2
+  t   b       D per system   status
+  2   2.000   [8, 8]         ok,ok
+  3   3.000   [8, 8]         ok,ok
+  4   4.000   [8, 8]         ok,ok
+  5   5.000   [8, 8]         ok,ok
+  6   6.000   [8, 8]         ok,ok
+  7   7.000   []             aborted,aborted
+  completed cells 5: σ = 0.0000, intercept 8.000  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── A1z m = 3
+  t   b       D per system   status
+  2   2.000   [8, 8]         ok,ok
+  3   3.000   [8, 8]         ok,ok
+  4   4.000   [8, 8]         ok,ok
+  5   5.000   []             timeout,timeout
+  completed cells 3: σ = 0.0000, intercept 8.000  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── A1g m = 2
+  t   b       D per system   status
+  2   2.000   [8, 8]         ok,ok
+  3   3.000   [8, 8]         ok,ok
+  4   4.000   [8, 8]         ok,ok
+  5   5.000   [8, 8]         ok,ok
+  6   6.000   [8, 8]         ok,ok
+  7   7.000   []             timeout,timeout
+  completed cells 5: σ = 0.0000, intercept 8.000  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── A1g m = 3
+  t   b       D per system   status
+  2   2.000   [8, 8]         ok,ok
+  3   3.000   [8, 8]         ok,ok
+  4   4.000   [8, 8]         ok,ok
+  5   5.000   []             aborted,aborted
+  completed cells 3: σ = 0.0000, intercept 8.000  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── A4 m = 2
+  t   b       D per system   status
+  2   2.000   [5, 5]         ok,ok
+  3   3.000   [5, 5]         ok,ok
+  4   4.000   [5, 5]         ok,ok
+  5   5.000   [5, 5]         ok,ok
+  6   6.000   [6, 6]         ok,ok
+  7   7.000   [6, 6]         ok,ok
+  8   8.000   []             timeout,timeout
+  completed cells 6: σ = 0.2286, intercept 4.305  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── A4 m = 3
+  t   b       D per system   status
+  2   2.000   [6, 6]         ok,ok
+  3   3.000   [6, 6]         ok,ok
+  4   4.000   [7, 7]         ok,ok
+  5   5.000   []             timeout,timeout
+  completed cells 3: σ = 0.5000, intercept 4.833  →  no middle ground at this arity (σ ≥ 0.5)
+
+── A11 m = 2
+  t   b       D per system   status
+  2   2.000   [3, 3]         ok,ok
+  3   3.000   [3, 3]         ok,ok
+  4   4.000   [3, 3]         ok,ok
+  5   5.000   [4, 4]         ok,ok
+  6   6.000   [4, 4]         ok,ok
+  7   7.000   [4, 4]         ok,ok
+  8   8.000   [4, 4]         ok,ok
+  9   9.000   [4, 4]         ok,ok
+  10  10.000  []             timeout,timeout
+  completed cells 8: σ = 0.1786, intercept 2.643  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── A11 m = 3
+  t   b       D per system   status
+  2   2.000   [4, 4]         ok,ok
+  3   3.000   [4, 4]         ok,ok
+  4   4.000   [4, 4]         ok,ok
+  5   5.000   []             timeout,timeout
+  completed cells 3: σ = 0.0000, intercept 4.000  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+Summary
+  arm  m  cells  σ        verdict
+  A0   2  8      0.1905   candidate (σ ≤ 0.25 on ≥ 3 cells)
+  A0   3  3      0.5000   no middle ground at this arity (σ ≥ 0.5)
+  N    2  8      0.1905   candidate (σ ≤ 0.25 on ≥ 3 cells)
+  N    3  3      0.5000   no middle ground at this arity (σ ≥ 0.5)
+  A1z  2  5      0.0000   candidate (σ ≤ 0.25 on ≥ 3 cells)
+  A1z  3  3      0.0000   candidate (σ ≤ 0.25 on ≥ 3 cells)
+  A1g  2  5      0.0000   candidate (σ ≤ 0.25 on ≥ 3 cells)
+  A1g  3  3      0.0000   candidate (σ ≤ 0.25 on ≥ 3 cells)
+  A4   2  6      0.2286   candidate (σ ≤ 0.25 on ≥ 3 cells)
+  A4   3  3      0.5000   no middle ground at this arity (σ ≥ 0.5)
+  A11  2  8      0.1786   candidate (σ ≤ 0.25 on ≥ 3 cells)
+  A11  3  3      0.0000   candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+Differences at equal t (completed cells only; prediction in brackets)
+  m=2 t=2  A0 4.0   A1z 8.0   A1g 8.0   A4 5.0   A11 3.0   | A1z−A0 +4.0  [±1]  A1g−A1z +0.0  [±1]  A4−A0(⌈t/2⌉) -     [≤ +1 if depth]  A4−A0(t) +1.0  [0 if Bezout]
+  m=2 t=3  A0 4.0   A1z 8.0   A1g 8.0   A4 5.0   A11 3.0   | A1z−A0 +4.0  [±1]  A1g−A1z +0.0  [±1]  A4−A0(⌈t/2⌉) +1.0  [≤ +1 if depth]  A4−A0(t) +1.0  [0 if Bezout]
+  m=2 t=4  A0 4.0   A1z 8.0   A1g 8.0   A4 5.0   A11 3.0   | A1z−A0 +4.0  [±1]  A1g−A1z +0.0  [±1]  A4−A0(⌈t/2⌉) +1.0  [≤ +1 if depth]  A4−A0(t) +1.0  [0 if Bezout]
+  m=2 t=5  A0 4.0   A1z 8.0   A1g 8.0   A4 5.0   A11 4.0   | A1z−A0 +4.0  [±1]  A1g−A1z +0.0  [±1]  A4−A0(⌈t/2⌉) +1.0  [≤ +1 if depth]  A4−A0(t) +1.0  [0 if Bezout]
+  m=2 t=6  A0 5.0   A1z 8.0   A1g 8.0   A4 6.0   A11 4.0   | A1z−A0 +3.0  [±1]  A1g−A1z +0.0  [±1]  A4−A0(⌈t/2⌉) +2.0  [≤ +1 if depth]  A4−A0(t) +1.0  [0 if Bezout]
+  m=2 t=7  A0 5.0   A1z -     A1g -     A4 6.0   A11 4.0   | A1z−A0 -     [±1]  A1g−A1z -     [±1]  A4−A0(⌈t/2⌉) +2.0  [≤ +1 if depth]  A4−A0(t) +1.0  [0 if Bezout]
+  m=2 t=8  A0 5.0   A1z -     A1g -     A4 -     A11 4.0   | A1z−A0 -     [±1]  A1g−A1z -     [±1]  A4−A0(⌈t/2⌉) -     [≤ +1 if depth]  A4−A0(t) -     [0 if Bezout]
+  m=2 t=9  A0 5.0   A1z -     A1g -     A4 -     A11 4.0   | A1z−A0 -     [±1]  A1g−A1z -     [±1]  A4−A0(⌈t/2⌉) -     [≤ +1 if depth]  A4−A0(t) -     [0 if Bezout]
+  m=3 t=2  A0 5.0   A1z 8.0   A1g 8.0   A4 6.0   A11 4.0   | A1z−A0 +3.0  [±1]  A1g−A1z +0.0  [±1]  A4−A0(⌈t/2⌉) -     [≤ +1 if depth]  A4−A0(t) +1.0  [0 if Bezout]
+  m=3 t=3  A0 6.0   A1z 8.0   A1g 8.0   A4 6.0   A11 4.0   | A1z−A0 +2.0  [±1]  A1g−A1z +0.0  [±1]  A4−A0(⌈t/2⌉) +1.0  [≤ +1 if depth]  A4−A0(t) +0.0  [0 if Bezout]
+  m=3 t=4  A0 6.0   A1z 8.0   A1g 8.0   A4 7.0   A11 4.0   | A1z−A0 +2.0  [±1]  A1g−A1z +0.0  [±1]  A4−A0(⌈t/2⌉) +2.0  [≤ +1 if depth]  A4−A0(t) +1.0  [0 if Bezout]
+
+A0 (FBDS seeds) against the pilot's committed planted Kummer rows at the same (m, t)
+(different seeds, so different towers, curves and targets: a cell-by-cell comparison of D)
+  m=2 t=2  A0 D [4] (ok,ok)  pilot D [4] (6 rows)  same
+  m=2 t=3  A0 D [4] (ok,ok)  pilot D [4] (6 rows)  same
+  m=2 t=4  A0 D [4] (ok,ok)  pilot D [4] (6 rows)  same
+  m=2 t=5  A0 D [4] (ok,ok)  pilot D [4] (6 rows)  same
+  m=2 t=6  A0 D [5] (ok,ok)  pilot D [5] (4 rows)  same
+  m=2 t=7  A0 D [5] (ok,ok)  pilot D [5] (2 rows)  same
+  m=2 t=8  A0 D [5] (ok,ok)  pilot D [] (0 rows)  no pilot cell
+  m=2 t=9  A0 D [5] (ok,ok)  pilot D [] (0 rows)  no pilot cell
+  m=2 t=10 A0 D [] (timeout,timeout)  pilot D [] (0 rows)  no pilot cell
+  m=3 t=2  A0 D [5] (ok,ok)  pilot D [5] (8 rows)  same
+  m=3 t=3  A0 D [6] (ok,ok)  pilot D [6] (8 rows)  same
+  m=3 t=4  A0 D [6] (ok,ok)  pilot D [] (2 rows)  every pilot row at this cell timed out
+  m=3 t=5  A0 D [] (timeout,timeout)  pilot D [] (0 rows)  no pilot cell
