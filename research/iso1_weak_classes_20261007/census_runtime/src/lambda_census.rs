@@ -73,7 +73,44 @@ fn main() {
         let h = f.pow(&g, 1u128 << e);
         let size = (n >> e) as u64;
         let block = 4096u64;
-        let starts: Vec<u64> = (0..size.div_ceil(block)).collect();
+        // ISO1_CHECKPOINT=FILE: each finished block appends `b|t:in_t:count,...`;
+        // a restarted run reloads them and skips those blocks.
+        let checkpoint = std::env::var("ISO1_CHECKPOINT").ok();
+        let mut resumed = BTreeMap::<(i128, u32, u32, bool, bool), u64>::new();
+        let mut done = std::collections::HashSet::<u64>::new();
+        if let Some(path) = &checkpoint {
+            if let Ok(text) = std::fs::read_to_string(path) {
+                for line in text.lines() {
+                    let Some((b, tail)) = line.split_once('|') else {
+                        continue;
+                    };
+                    if !tail.ends_with(';') || !done.insert(b.parse().unwrap()) {
+                        continue; // torn final line, or a duplicate block
+                    }
+                    for item in tail
+                        .trim_end_matches(';')
+                        .split(',')
+                        .filter(|x| !x.is_empty())
+                    {
+                        let v: Vec<i128> = item.split(':').map(|x| x.parse().unwrap()).collect();
+                        *resumed.entry((v[0], 0, 0, true, v[1] == 1)).or_default() += v[2] as u64;
+                    }
+                }
+            }
+            eprintln!("checkpoint {path}: resumed {} blocks", done.len());
+        }
+        let log = checkpoint.as_ref().map(|path| {
+            std::sync::Mutex::new(
+                std::fs::OpenOptions::new()
+                    .create(true)
+                    .append(true)
+                    .open(path)
+                    .unwrap(),
+            )
+        });
+        let starts: Vec<u64> = (0..size.div_ceil(block))
+            .filter(|b| !done.contains(b))
+            .collect();
         let agg = starts
             .into_par_iter()
             .map(|b| {
@@ -93,6 +130,14 @@ fn main() {
                     }
                     lam = f.mul(&lam, &h);
                 }
+                if let Some(log) = &log {
+                    let items: Vec<String> = m
+                        .iter()
+                        .map(|((t, _, _, _, tt), c)| format!("{t}:{}:{c}", u8::from(*tt)))
+                        .collect();
+                    let line = format!("{b}|{};\n", items.join(","));
+                    log.lock().unwrap().write_all(line.as_bytes()).unwrap();
+                }
                 m
             })
             .reduce(BTreeMap::new, |mut x, y| {
@@ -101,6 +146,10 @@ fn main() {
                 }
                 x
             });
+        let mut agg = agg;
+        for (k, v) in resumed {
+            *agg.entry(k).or_default() += v;
+        }
         let mut w = std::io::BufWriter::new(std::fs::File::create(&out).unwrap());
         writeln!(w, "p,e,trace,a,b,in_omega,in_t,count").unwrap();
         for ((t, a, b, o, tt), c) in agg {

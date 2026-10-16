@@ -1,0 +1,185 @@
+{
+  "c5prime_pass": true,
+  "controls": {
+    "c1_census_rows": 21701,
+    "c1_mismatched_rows": 0,
+    "c1_pass": true,
+    "c2_inconsistent_models": 0,
+    "c2_orbit_hits_nonsquarefree": 0,
+    "c2_pass": true,
+    "c3_pass": true,
+    "c3_unvisited_models": 0,
+    "c4_pass": true,
+    "c4_subgroup_counts_inconsistent": 0,
+    "c5_pass": false,
+    "c5_twist_complementarity_violations": 10251,
+    "git_head": "3be2421417df81fbc64a77014ece60f7d7c3aaf9",
+    "iso_classes": 324562,
+    "l_classes": 21701,
+    "models": 35431220,
+    "octics": 19487171,
+    "p": 11,
+    "seconds_analysis": 935.684251291,
+    "seconds_total": 939.871753076,
+    "threads": 2
+  },
+  "h1": {
+    "bins": [
+      {
+        "N1": 0,
+        "degenerate_share": 0.0,
+        "in_test": false,
+        "model_N1_over_2p2": 0.0,
+        "prop2_passes": 3390,
+        "prop4_passes": 0,
+        "r": 0.0
+      },
+      {
+        "N1": 2,
+        "degenerate_share": 0.0,
+        "in_test": false,
+        "model_N1_over_2p2": 0.08333333333333333,
+        "prop2_passes": 46860,
+        "prop4_passes": 690,
+        "r": 0.0147247119078105
+      },
+      {
+        "N1": 4,
+        "degenerate_share": 0.020245071923281843,
+        "in_test": true,
+        "model_N1_over_2p2": 0.16666666666666666,
+        "prop2_passes": 262780,
+        "prop4_passes": 22220,
+        "r": 0.08630466868639788
+      },
+      {
+        "N1": 6,
+        "degenerate_share": 0.0530544379148844,
+        "in_test": true,
+        "model_N1_over_2p2": 0.25,
+        "prop2_passes": 787870,
+        "prop4_passes": 160600,
+        "r": 0.21526130255874112
+      },
+      {
+        "N1": 8,
+        "degenerate_share": 0.05696685670113055,
+        "in_test": true,
+        "model_N1_over_2p2": 0.3333333333333333,
+        "prop2_passes": 2069800,
+        "prop4_passes": 675270,
+        "r": 0.3459569955274119
+      },
+      {
+        "N1": 10,
+        "degenerate_share": 0.06676385951428998,
+        "in_test": true,
+        "model_N1_over_2p2": 0.4166666666666667,
+        "prop2_passes": 3409030,
+        "prop4_passes": 1404200,
+        "r": 0.44137384760940834
+      },
+      {
+        "N1": 12,
+        "degenerate_share": 0.06544008981658633,
+        "in_test": true,
+        "model_N1_over_2p2": 0.5,
+        "prop2_passes": 4364450,
+        "prop4_passes": 2039420,
+        "r": 0.5
+      },
+      {
+        "N1": 14,
+        "degenerate_share": 0.06676385951428998,
+        "in_test": true,
+        "model_N1_over_2p2": 0.5833333333333334,
+        "prop2_passes": 3409030,
+        "prop4_passes": 1777230,
+        "r": 0.5586261523905917
+      },
+      {
+        "N1": 16,
+        "degenerate_share": 0.05696685670113055,
+        "in_test": true,
+        "model_N1_over_2p2": 0.6666666666666666,
+        "prop2_passes": 2069800,
+        "prop4_passes": 1276620,
+        "r": 0.6540430044725881
+      },
+      {
+        "N1": 18,
+        "degenerate_share": 0.0530544379148844,
+        "in_test": true,
+        "model_N1_over_2p2": 0.75,
+        "prop2_passes": 787870,
+        "prop4_passes": 585470,
+        "r": 0.7847386974412589
+      },
+      {
+        "N1": 20,
+        "degenerate_share": 0.020245071923281843,
+        "in_test": true,
+        "model_N1_over_2p2": 0.8333333333333334,
+        "prop2_passes": 262780,
+        "prop4_passes": 235240,
+        "r": 0.9136953313136021
+      },
+      {
+        "N1": 22,
+        "degenerate_share": 0.0,
+        "in_test": false,
+        "model_N1_over_2p2": 0.9166666666666666,
+        "prop2_passes": 46860,
+        "prop4_passes": 46170,
+        "r": 0.9852752880921894
+      },
+      {
+        "N1": 24,
+        "degenerate_share": 0.0,
+        "in_test": false,
+        "model_N1_over_2p2": 1.0,
+        "prop2_passes": 3390,
+        "prop4_passes": 3390,
+        "r": 1.0
+      }
+    ],
+    "max_abs_dev": 0.08036199798026877,
+    "monotone": true,
+    "verdict": "sign law holds"
+  },
+  "h2": {
+    "C": 0.4749660045575625,
+    "U": 0.49429683764770166,
+    "gap_closed_n1": 0.7628172838965405,
+    "gap_closed_random": 0.5160640371432959,
+    "gap_closed_stratum": 0.4065175970740891,
+    "null_stratum": {
+      "frac_le_observed": 0.0,
+      "hi": 0.48707538154204116,
+      "lo": 0.48574649701590855,
+      "median": 0.486438513830458,
+      "perms": 999,
+      "seed": 20261016
+    },
+    "null_stratum_n1_trig": {
+      "frac_le_observed": 0.0,
+      "hi": 0.4803442839394184,
+      "lo": 0.4786651997870804,
+      "median": 0.47955094405442433,
+      "perms": 999,
+      "seed": 20261016
+    },
+    "null_stratum_random_label_trig": {
+      "frac_le_observed": 0.0,
+      "hi": 0.4850498091795879,
+      "lo": 0.48355711431895376,
+      "median": 0.4843208898818612,
+      "perms": 999,
+      "seed": 20261016
+    },
+    "random_label_values": 25,
+    "verdict": "partial: residual clustering remains"
+  },
+  "instrument_valid": true,
+  "p": 11
+}
