@@ -23,7 +23,7 @@ export F4_F2_MAX_ROWS=50000000 F4_F2_MAX_COLS=50000000
 export RAYON_NUM_THREADS=${RAYON_NUM_THREADS:-4}
 SEED=20261017
 # m:n:ell, cheapest first
-FRESH="3:22:6 4:11:5 3:24:6 4:12:5"
+FRESH=${FRESH:-"3:22:6 4:11:5 3:24:6 4:12:5"}
 R=research
 COMMITTED=""
 log() { echo "$(date -u +%FT%TZ) $*" | tee -a "$RUNS/queue.log"; }
