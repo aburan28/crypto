@@ -1,0 +1,762 @@
+{
+  "schema": "ecbench.band/v1",
+  "weights": [
+    0.0,
+    0.1,
+    1.0
+  ],
+  "rows": [
+    {
+      "curve": "icv1-fp20-t383-4f71b2c3",
+      "log2_r": 19.999467443431033,
+      "arm": "bsgs-neg",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        0.9810160103952056,
+        1.0782385429499912,
+        1.9532413359430616
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp20-t383-4f71b2c3",
+      "log2_r": 19.999467443431033,
+      "arm": "ic-pair",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        12.500140190452337,
+        14.469555776050296,
+        32.19429604643194
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp20-t383-4f71b2c3",
+      "log2_r": 19.999467443431033,
+      "arm": "kangaroo",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        2.2205636202940635,
+        2.2461542806274597,
+        2.476470223628022
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp20-t383-4f71b2c3",
+      "log2_r": 19.999467443431033,
+      "arm": "rho-neg",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        1.2729094798230014,
+        1.3839254515531938,
+        2.3830691971249314
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp20-t383-4f71b2c3",
+      "log2_r": 19.999467443431033,
+      "arm": "rho-neg-aa",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        1.2729094798230014,
+        1.3839254515531938,
+        2.3830691971249314
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp24-tm5099-a6f137c6",
+      "log2_r": 24.000437027707278,
+      "arm": "bsgs-neg",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        1.0998089937641216,
+        1.2094969687608832,
+        2.1966887437317344
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp24-tm5099-a6f137c6",
+      "log2_r": 24.000437027707278,
+      "arm": "ic-pair",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        14.348580351157095,
+        15.856365877271195,
+        29.426435612298075
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp24-tm5099-a6f137c6",
+      "log2_r": 24.000437027707278,
+      "arm": "kangaroo",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        2.402910558301561,
+        2.418011420331687,
+        2.5539191786028224
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp24-tm5099-a6f137c6",
+      "log2_r": 24.000437027707278,
+      "arm": "rho-neg",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        1.1865649565185286,
+        1.2961263027470031,
+        2.2821784188032757
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp24-tm5099-a6f137c6",
+      "log2_r": 24.000437027707278,
+      "arm": "rho-neg-aa",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        1.1865649565185286,
+        1.2961263027470031,
+        2.2821784188032757
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp28-t28201-65099091",
+      "log2_r": 27.99984812595114,
+      "arm": "bsgs-neg",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        1.0225681652670542,
+        1.1247456319141214,
+        2.044342831737725
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp28-t28201-65099091",
+      "log2_r": 27.99984812595114,
+      "arm": "ic-pair",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        20.55518194113337,
+        22.627255648355685,
+        41.275919013356535
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp28-t28201-65099091",
+      "log2_r": 27.99984812595114,
+      "arm": "kangaroo",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        2.5747624430378973,
+        2.582415128545331,
+        2.651289298112239
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp28-t28201-65099091",
+      "log2_r": 27.99984812595114,
+      "arm": "rho-neg",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        1.1059141506228214,
+        1.2141666516848006,
+        2.188439161242613
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp28-t28201-65099091",
+      "log2_r": 27.99984812595114,
+      "arm": "rho-neg-aa",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        1.1059141506228214,
+        1.2141666516848006,
+        2.188439161242613
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp32-t7319-90da43e9",
+      "log2_r": 31.99999754017573,
+      "arm": "bsgs-neg",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        0.8889110513844531,
+        0.9777792683197922,
+        1.7775932207378449
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp32-t7319-90da43e9",
+      "log2_r": 31.99999754017573,
+      "arm": "ic-pair",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        32.07333724120967,
+        35.28772205776753,
+        64.2171854067884
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp32-t7319-90da43e9",
+      "log2_r": 31.99999754017573,
+      "arm": "kangaroo",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        1.7923275014874398,
+        1.795165447937578,
+        1.8207069659888269
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp32-t7319-90da43e9",
+      "log2_r": 31.99999754017573,
+      "arm": "rho-neg",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        0.7847125067436292,
+        0.862578221394565,
+        1.5633696532529833
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp32-t7319-90da43e9",
+      "log2_r": 31.99999754017573,
+      "arm": "rho-neg-aa",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        0.7847125067436292,
+        0.862578221394565,
+        1.5633696532529833
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp36-t454193-44a20818",
+      "log2_r": 35.9999904645676,
+      "arm": "bsgs-neg",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        0.9220847561433183,
+        1.0142867467508674,
+        1.84410466221881
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp36-t454193-44a20818",
+      "log2_r": 35.9999904645676,
+      "arm": "ic-pair",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        49.574480093152225,
+        54.409940892940774,
+        97.92908809103773
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp36-t454193-44a20818",
+      "log2_r": 35.9999904645676,
+      "arm": "kangaroo",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        1.8316009969352505,
+        1.8330286044210427,
+        1.8458770717931745
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp36-t454193-44a20818",
+      "log2_r": 35.9999904645676,
+      "arm": "rho-neg",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        0.8525865835465692,
+        0.9376893275561689,
+        1.7036140236425652
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp36-t454193-44a20818",
+      "log2_r": 35.9999904645676,
+      "arm": "rho-neg-aa",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        0.8525865835465692,
+        0.9376893275561689,
+        1.7036140236425652
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp40-tm924137-0ecaaeb9",
+      "log2_r": 40.00000121230319,
+      "arm": "bsgs-neg",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        1.1141544071638718,
+        1.2255679405324276,
+        2.228289740849429
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp40-tm924137-0ecaaeb9",
+      "log2_r": 40.00000121230319,
+      "arm": "ic-pair",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        83.74592361903696,
+        98.47989383140344,
+        231.08562574270135
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp40-tm924137-0ecaaeb9",
+      "log2_r": 40.00000121230319,
+      "arm": "kangaroo",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        2.100552630021102,
+        2.1013795249106493,
+        2.108821578916574
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp40-tm924137-0ecaaeb9",
+      "log2_r": 40.00000121230319,
+      "arm": "rho-neg",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        0.87948312166542,
+        0.9673903841303526,
+        1.7585557463147432
+      ],
+      "uncounted": []
+    },
+    {
+      "curve": "icv1-fp40-tm924137-0ecaaeb9",
+      "log2_r": 40.00000121230319,
+      "arm": "rho-neg-aa",
+      "runs": 32,
+      "verified": 32,
+      "mean_s": [
+        0.87948312166542,
+        0.9673903841303526,
+        1.7585557463147432
+      ],
+      "uncounted": []
+    }
+  ],
+  "ranks": [
+    {
+      "curve": "icv1-fp20-t383-4f71b2c3",
+      "a": "bsgs-neg",
+      "b": "ic-pair",
+      "verdict": "bsgs-neg < ic-pair"
+    },
+    {
+      "curve": "icv1-fp20-t383-4f71b2c3",
+      "a": "bsgs-neg",
+      "b": "kangaroo",
+      "verdict": "bsgs-neg < kangaroo"
+    },
+    {
+      "curve": "icv1-fp20-t383-4f71b2c3",
+      "a": "bsgs-neg",
+      "b": "rho-neg",
+      "verdict": "bsgs-neg < rho-neg"
+    },
+    {
+      "curve": "icv1-fp20-t383-4f71b2c3",
+      "a": "bsgs-neg",
+      "b": "rho-neg-aa",
+      "verdict": "bsgs-neg < rho-neg-aa"
+    },
+    {
+      "curve": "icv1-fp20-t383-4f71b2c3",
+      "a": "ic-pair",
+      "b": "kangaroo",
+      "verdict": "kangaroo < ic-pair"
+    },
+    {
+      "curve": "icv1-fp20-t383-4f71b2c3",
+      "a": "ic-pair",
+      "b": "rho-neg",
+      "verdict": "rho-neg < ic-pair"
+    },
+    {
+      "curve": "icv1-fp20-t383-4f71b2c3",
+      "a": "ic-pair",
+      "b": "rho-neg-aa",
+      "verdict": "rho-neg-aa < ic-pair"
+    },
+    {
+      "curve": "icv1-fp20-t383-4f71b2c3",
+      "a": "kangaroo",
+      "b": "rho-neg",
+      "verdict": "rho-neg < kangaroo"
+    },
+    {
+      "curve": "icv1-fp20-t383-4f71b2c3",
+      "a": "kangaroo",
+      "b": "rho-neg-aa",
+      "verdict": "rho-neg-aa < kangaroo"
+    },
+    {
+      "curve": "icv1-fp20-t383-4f71b2c3",
+      "a": "rho-neg",
+      "b": "rho-neg-aa",
+      "verdict": "unresolved inside the band"
+    },
+    {
+      "curve": "icv1-fp24-tm5099-a6f137c6",
+      "a": "bsgs-neg",
+      "b": "ic-pair",
+      "verdict": "bsgs-neg < ic-pair"
+    },
+    {
+      "curve": "icv1-fp24-tm5099-a6f137c6",
+      "a": "bsgs-neg",
+      "b": "kangaroo",
+      "verdict": "bsgs-neg < kangaroo"
+    },
+    {
+      "curve": "icv1-fp24-tm5099-a6f137c6",
+      "a": "bsgs-neg",
+      "b": "rho-neg",
+      "verdict": "bsgs-neg < rho-neg"
+    },
+    {
+      "curve": "icv1-fp24-tm5099-a6f137c6",
+      "a": "bsgs-neg",
+      "b": "rho-neg-aa",
+      "verdict": "bsgs-neg < rho-neg-aa"
+    },
+    {
+      "curve": "icv1-fp24-tm5099-a6f137c6",
+      "a": "ic-pair",
+      "b": "kangaroo",
+      "verdict": "kangaroo < ic-pair"
+    },
+    {
+      "curve": "icv1-fp24-tm5099-a6f137c6",
+      "a": "ic-pair",
+      "b": "rho-neg",
+      "verdict": "rho-neg < ic-pair"
+    },
+    {
+      "curve": "icv1-fp24-tm5099-a6f137c6",
+      "a": "ic-pair",
+      "b": "rho-neg-aa",
+      "verdict": "rho-neg-aa < ic-pair"
+    },
+    {
+      "curve": "icv1-fp24-tm5099-a6f137c6",
+      "a": "kangaroo",
+      "b": "rho-neg",
+      "verdict": "rho-neg < kangaroo"
+    },
+    {
+      "curve": "icv1-fp24-tm5099-a6f137c6",
+      "a": "kangaroo",
+      "b": "rho-neg-aa",
+      "verdict": "rho-neg-aa < kangaroo"
+    },
+    {
+      "curve": "icv1-fp24-tm5099-a6f137c6",
+      "a": "rho-neg",
+      "b": "rho-neg-aa",
+      "verdict": "unresolved inside the band"
+    },
+    {
+      "curve": "icv1-fp28-t28201-65099091",
+      "a": "bsgs-neg",
+      "b": "ic-pair",
+      "verdict": "bsgs-neg < ic-pair"
+    },
+    {
+      "curve": "icv1-fp28-t28201-65099091",
+      "a": "bsgs-neg",
+      "b": "kangaroo",
+      "verdict": "bsgs-neg < kangaroo"
+    },
+    {
+      "curve": "icv1-fp28-t28201-65099091",
+      "a": "bsgs-neg",
+      "b": "rho-neg",
+      "verdict": "bsgs-neg < rho-neg"
+    },
+    {
+      "curve": "icv1-fp28-t28201-65099091",
+      "a": "bsgs-neg",
+      "b": "rho-neg-aa",
+      "verdict": "bsgs-neg < rho-neg-aa"
+    },
+    {
+      "curve": "icv1-fp28-t28201-65099091",
+      "a": "ic-pair",
+      "b": "kangaroo",
+      "verdict": "kangaroo < ic-pair"
+    },
+    {
+      "curve": "icv1-fp28-t28201-65099091",
+      "a": "ic-pair",
+      "b": "rho-neg",
+      "verdict": "rho-neg < ic-pair"
+    },
+    {
+      "curve": "icv1-fp28-t28201-65099091",
+      "a": "ic-pair",
+      "b": "rho-neg-aa",
+      "verdict": "rho-neg-aa < ic-pair"
+    },
+    {
+      "curve": "icv1-fp28-t28201-65099091",
+      "a": "kangaroo",
+      "b": "rho-neg",
+      "verdict": "rho-neg < kangaroo"
+    },
+    {
+      "curve": "icv1-fp28-t28201-65099091",
+      "a": "kangaroo",
+      "b": "rho-neg-aa",
+      "verdict": "rho-neg-aa < kangaroo"
+    },
+    {
+      "curve": "icv1-fp28-t28201-65099091",
+      "a": "rho-neg",
+      "b": "rho-neg-aa",
+      "verdict": "unresolved inside the band"
+    },
+    {
+      "curve": "icv1-fp32-t7319-90da43e9",
+      "a": "bsgs-neg",
+      "b": "ic-pair",
+      "verdict": "bsgs-neg < ic-pair"
+    },
+    {
+      "curve": "icv1-fp32-t7319-90da43e9",
+      "a": "bsgs-neg",
+      "b": "kangaroo",
+      "verdict": "bsgs-neg < kangaroo"
+    },
+    {
+      "curve": "icv1-fp32-t7319-90da43e9",
+      "a": "bsgs-neg",
+      "b": "rho-neg",
+      "verdict": "rho-neg < bsgs-neg"
+    },
+    {
+      "curve": "icv1-fp32-t7319-90da43e9",
+      "a": "bsgs-neg",
+      "b": "rho-neg-aa",
+      "verdict": "rho-neg-aa < bsgs-neg"
+    },
+    {
+      "curve": "icv1-fp32-t7319-90da43e9",
+      "a": "ic-pair",
+      "b": "kangaroo",
+      "verdict": "kangaroo < ic-pair"
+    },
+    {
+      "curve": "icv1-fp32-t7319-90da43e9",
+      "a": "ic-pair",
+      "b": "rho-neg",
+      "verdict": "rho-neg < ic-pair"
+    },
+    {
+      "curve": "icv1-fp32-t7319-90da43e9",
+      "a": "ic-pair",
+      "b": "rho-neg-aa",
+      "verdict": "rho-neg-aa < ic-pair"
+    },
+    {
+      "curve": "icv1-fp32-t7319-90da43e9",
+      "a": "kangaroo",
+      "b": "rho-neg",
+      "verdict": "rho-neg < kangaroo"
+    },
+    {
+      "curve": "icv1-fp32-t7319-90da43e9",
+      "a": "kangaroo",
+      "b": "rho-neg-aa",
+      "verdict": "rho-neg-aa < kangaroo"
+    },
+    {
+      "curve": "icv1-fp32-t7319-90da43e9",
+      "a": "rho-neg",
+      "b": "rho-neg-aa",
+      "verdict": "unresolved inside the band"
+    },
+    {
+      "curve": "icv1-fp36-t454193-44a20818",
+      "a": "bsgs-neg",
+      "b": "ic-pair",
+      "verdict": "bsgs-neg < ic-pair"
+    },
+    {
+      "curve": "icv1-fp36-t454193-44a20818",
+      "a": "bsgs-neg",
+      "b": "kangaroo",
+      "verdict": "bsgs-neg < kangaroo"
+    },
+    {
+      "curve": "icv1-fp36-t454193-44a20818",
+      "a": "bsgs-neg",
+      "b": "rho-neg",
+      "verdict": "rho-neg < bsgs-neg"
+    },
+    {
+      "curve": "icv1-fp36-t454193-44a20818",
+      "a": "bsgs-neg",
+      "b": "rho-neg-aa",
+      "verdict": "rho-neg-aa < bsgs-neg"
+    },
+    {
+      "curve": "icv1-fp36-t454193-44a20818",
+      "a": "ic-pair",
+      "b": "kangaroo",
+      "verdict": "kangaroo < ic-pair"
+    },
+    {
+      "curve": "icv1-fp36-t454193-44a20818",
+      "a": "ic-pair",
+      "b": "rho-neg",
+      "verdict": "rho-neg < ic-pair"
+    },
+    {
+      "curve": "icv1-fp36-t454193-44a20818",
+      "a": "ic-pair",
+      "b": "rho-neg-aa",
+      "verdict": "rho-neg-aa < ic-pair"
+    },
+    {
+      "curve": "icv1-fp36-t454193-44a20818",
+      "a": "kangaroo",
+      "b": "rho-neg",
+      "verdict": "rho-neg < kangaroo"
+    },
+    {
+      "curve": "icv1-fp36-t454193-44a20818",
+      "a": "kangaroo",
+      "b": "rho-neg-aa",
+      "verdict": "rho-neg-aa < kangaroo"
+    },
+    {
+      "curve": "icv1-fp36-t454193-44a20818",
+      "a": "rho-neg",
+      "b": "rho-neg-aa",
+      "verdict": "unresolved inside the band"
+    },
+    {
+      "curve": "icv1-fp40-tm924137-0ecaaeb9",
+      "a": "bsgs-neg",
+      "b": "ic-pair",
+      "verdict": "bsgs-neg < ic-pair"
+    },
+    {
+      "curve": "icv1-fp40-tm924137-0ecaaeb9",
+      "a": "bsgs-neg",
+      "b": "kangaroo",
+      "verdict": "unresolved inside the band"
+    },
+    {
+      "curve": "icv1-fp40-tm924137-0ecaaeb9",
+      "a": "bsgs-neg",
+      "b": "rho-neg",
+      "verdict": "rho-neg < bsgs-neg"
+    },
+    {
+      "curve": "icv1-fp40-tm924137-0ecaaeb9",
+      "a": "bsgs-neg",
+      "b": "rho-neg-aa",
+      "verdict": "rho-neg-aa < bsgs-neg"
+    },
+    {
+      "curve": "icv1-fp40-tm924137-0ecaaeb9",
+      "a": "ic-pair",
+      "b": "kangaroo",
+      "verdict": "kangaroo < ic-pair"
+    },
+    {
+      "curve": "icv1-fp40-tm924137-0ecaaeb9",
+      "a": "ic-pair",
+      "b": "rho-neg",
+      "verdict": "rho-neg < ic-pair"
+    },
+    {
+      "curve": "icv1-fp40-tm924137-0ecaaeb9",
+      "a": "ic-pair",
+      "b": "rho-neg-aa",
+      "verdict": "rho-neg-aa < ic-pair"
+    },
+    {
+      "curve": "icv1-fp40-tm924137-0ecaaeb9",
+      "a": "kangaroo",
+      "b": "rho-neg",
+      "verdict": "rho-neg < kangaroo"
+    },
+    {
+      "curve": "icv1-fp40-tm924137-0ecaaeb9",
+      "a": "kangaroo",
+      "b": "rho-neg-aa",
+      "verdict": "rho-neg-aa < kangaroo"
+    },
+    {
+      "curve": "icv1-fp40-tm924137-0ecaaeb9",
+      "a": "rho-neg",
+      "b": "rho-neg-aa",
+      "verdict": "unresolved inside the band"
+    }
+  ]
+}

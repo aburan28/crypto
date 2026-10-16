@@ -644,6 +644,40 @@ measured it turned out to grow as `n^{0.68}` against relations at
 `2^{50}` and rises after.  The `2^96` was a statement about one phase
 and had been read as a statement about the method.
 
+### 5a. Price the unpriced work on every arm, the reference included
+
+Owner rule, 2026-10-15. Almost no ECDLP cost in this repository is
+complete, and the rho baselines are no exception. Rho, BSGS and the
+kangaroo leave canonicalisations, partition hashes, table inserts and
+lookups unpriced. Index-calculus arms are complete only on curves that
+have a pinned timing calibration (`calibration_pinned_units`; in the
+2026-10-15 pilot that was Koblitz `n = 13` and `n = 23` but not `n = 19`).
+A "complete IC against lower-bound rho" comparison is therefore
+lopsided, and before this rule several were reported that way
+(`research/ic_frontier_campaign_20261015/pilot/FINDINGS.md`).
+
+Every cross-method comparison and every ranking must:
+
+- **List every unpriced counter for every arm**, references included,
+  with its count. An arm that names a counter but does not emit its count
+  cannot be ranked. Report it as a lower bound and record the missing
+  emission as an implementation gap to fix.
+- **Price the unpriced work at several weights**: at least 0, 0.1 and 1
+  group-addition equivalents per native operation, applied the same way
+  to every arm. Pinned calibrations may be added as a further point, but
+  they never replace the band.
+- **Rank only where the conclusion holds at every weight in the band.**
+  If the order of two arms changes inside the band, report them as
+  unresolved at that boundary, never as a win for either side.
+- **Never compare a calibrated cost on one side with an uncalibrated one
+  on the other.** If a calibration exists for only some arms or sizes,
+  use the band alone.
+
+This applies to `ecbench compare` read-outs, tables, frontier syntheses,
+ledger rows, papers and PR descriptions. A ratio produced before this rule
+is relabelled as a lower-bound comparison where it is cited again. Its
+frozen evidence is not rewritten.
+
 ### 6. What does not count
 
 - A ratio improved by moving the boundary, changing the unit, or
