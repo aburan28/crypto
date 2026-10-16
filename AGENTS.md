@@ -73,6 +73,8 @@ baseline. Every such improvement is a success and is reported as one.**
 - Autolab runner: `research/sat_factor_base_review_20260908/autolab/`
 - Current ladder frontiers: `RESEARCH_KOBLITZ_INDEX_CALCULUS.md`,
   `RESEARCH_ECC2K130_IC_FEASIBILITY.md`
+- Faster checkouts (blobless clone, sparse profiles, cloud-session
+  settings): [docs/sparse-checkout.md](docs/sparse-checkout.md)
 
 For small-prime or pinned GF(2^83) elliptic-curve surface searches, quartic
 subgroup transfers, genus-2+ Jacobian transfers, hyperelliptic covers, Mumford
@@ -83,7 +85,7 @@ commands, and interpretation limits.
 
 ## Reading discipline
 
-`research/` is 4.5 GB in 52,000 files. Read what the current step needs:
+`research/` is most of a 6.6 GB, 100,000-file checkout. Read what the current step needs:
 
 - **Indexes before archives.** Status comes from the pointers above,
   `docs/bounds/frontier.json`, and the ecbench database views; open a session
@@ -1161,6 +1163,40 @@ entry in the PR that lands the result. Objects are immutable and keyed by
 SHA-256; a name is not repointed without `--replace`, which keeps the old
 digest as superseded. Never delete remote objects from an agent session.
 See [docs/store/README.md](docs/store/README.md).
+
+### 13a. Raw run trees land as one archive
+
+A round's or study's raw run tree (per-run reports, stderr, isolation records,
+logs: everything under its `runs/`) lands as one deterministic `runs.tar.xz`
+beside its README, with `runs.tar.xz.sha256` (`sha256sum runs.tar.xz`, so
+`sha256sum -c` checks it in place) and a `.gitignore` there holding `/runs/`. The
+analysis, figures and claims are made from the extracted tree, and the README
+says how to extract and re-check it. Pack it so packing the extracted tree
+again gives the same bytes, as
+`research/ic_tool_program/rounds/R01-baseline-v0/` does:
+
+```sh
+tar --sort=name --mtime='YYYY-MM-DD 00:00:00Z' --owner=0 --group=0 \
+    --numeric-owner --mode='u+rwX,go+rX,go-w' --format=gnu -cf - runs \
+  | xz -6 -T1 > runs.tar.xz
+sha256sum runs.tar.xz > runs.tar.xz.sha256
+```
+
+Use the round's start date for `--mtime`. Raw `.jsonl` and logs compress
+5-20x, and one file costs a checkout one entry instead of thousands.
+
+**Exception: keep it loose when a path must resolve.** When a claim, replay,
+manifest or verifier names individual run records by repository path (the
+`report` fields of `research/ic_tool_program/rule/v*/claims/` point into
+`runs/`; `verify_archive.py`-style checkers hash files in place), those
+records stay committed as loose files. Only the part nothing names goes in the
+archive; say in the README which part is which.
+
+This applies to new run trees. Never re-pack, compress or move a committed
+tree, or rewrite history to slim one: committed evidence stays as it was
+written. A tree too big for Git even compressed goes through the store (§13).
+Checkouts that do not need a research tree leave it off disk instead
+([docs/sparse-checkout.md](docs/sparse-checkout.md)).
 
 ### 14. Experiments to run later go in `backlog/`
 
