@@ -143,7 +143,10 @@ pub fn exhaustive_prime_degree_kernel(
     rng: &mut Rng,
 ) -> Option<KernelMatch> {
     use crate::kernel::velu::velu_from_point;
-    assert!(d % 2 == 1 && (p + 1).is_multiple_of(d), "need odd d | p + 1");
+    assert!(
+        d % 2 == 1 && (p + 1).is_multiple_of(d),
+        "need odd d | p + 1"
+    );
     let r = random_point_f(f2, e1, rng);
     if pmul(f2, e1, &r, (p + 1) as u128) != Pt::Inf {
         return None;
