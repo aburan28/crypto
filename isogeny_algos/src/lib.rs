@@ -17,6 +17,8 @@ pub mod eigen_seta_toy;
 pub mod ext;
 pub mod field;
 pub mod find;
+/// Fixed-degree isogenies between supersingular curves (Benčina–Kutas–Merz–Petit–Stopar–Weitkämper).
+pub mod fixed_degree;
 pub mod fp2;
 pub mod fpm;
 pub mod fpr;
@@ -27,12 +29,18 @@ pub mod gls_loop;
 pub mod icv1;
 pub mod int;
 pub mod json;
+/// Exact integer LLL in any dimension.
+pub mod lattice;
 pub mod kernel;
+/// Multivariate integer polynomials and resultants.
+pub mod mpoly;
 pub mod path;
 pub mod poly;
 pub mod quat;
 pub mod series;
 pub mod sha256;
+/// Strassen's modular factorial and deterministic factoring (BDFLS 2020, section 2).
+pub mod strassen;
 pub mod testdata;
 pub mod theta;
 pub mod theta_g;
