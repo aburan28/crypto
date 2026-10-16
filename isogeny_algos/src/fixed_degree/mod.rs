@@ -5,3 +5,8 @@ pub mod coppersmith;
 pub mod factor;
 pub mod cornacchia;
 pub mod baselines;
+pub mod connecting;
+pub mod endring;
+pub mod hybrid;
+pub mod pipeline;
+pub mod represent;
