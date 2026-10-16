@@ -36,6 +36,19 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  selftest:
+    # Known-good and known-bad fixtures: the gate must pass and fail them
+    # exactly as expected, so it is exercised even with no proofs in the repo.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install elan
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain "$(cat tools/lean/lean-toolchain)"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: tools/lean/selftest/run.sh
+
   discover:
     runs-on: ubuntu-24.04
     outputs:
@@ -44,11 +57,12 @@ jobs:
       - uses: actions/checkout@v4
       - id: list
         run: |
-          echo "targets=$(tools/lean/proof-gate.sh --list | jq -R . | jq -sc .)" >> "$GITHUB_OUTPUT"
-          tools/lean/proof-gate.sh --list
+          echo "targets=$(tools/lean/proof-gate.sh --list | jq -R . | jq -sc 'map(select(length > 0))')" >> "$GITHUB_OUTPUT"
+          tools/lean/proof-gate.sh --list | grep . || echo "no Lean targets in this repository yet; only the self-test runs"
 
   prove:
     needs: discover
+    if: ${{ needs.discover.outputs.targets != '[]' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     strategy:

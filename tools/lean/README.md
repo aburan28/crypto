@@ -33,6 +33,16 @@ tools/lean/proof-gate.sh research/<study>/lean   # one target
 tools/lean/proof-gate.sh --out receipts          # keep build and audit logs
 ```
 
+## Self-test
+
+[`selftest/run.sh`](selftest/run.sh) runs the gate on known fixtures:
+`selftest/pass/` must pass (`Good.lean` is plain kernel proofs,
+`Trusted.lean` is a listed `native_decide`), and `selftest/fail/` must fail
+(a transitive `sorry`, a user axiom, an unlisted `native_decide`, a file with
+no theorems, a build error). CI runs it on every trigger, so the gate stays
+exercised even in a repository with no Lean proofs yet. `LEAN_GATE_TRUSTED`
+points the gate at another trust manifest. The self-test uses its own one.
+
 ## What passing does not mean
 
 The gate shows that each theorem is proved from the standard foundations. It
