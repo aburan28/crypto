@@ -362,6 +362,12 @@ dependencies. Keep the readable mathematical proof in the report.
   concrete missing definition, dependency, proof obligation or failed build.
   Report partial formalization explicitly; keep the full theorem open.
 - Add reproducible proof checks to the relevant CI workflow where practical.
+  Every Lean target is also checked by the repository-wide proof gate
+  (`tools/lean/proof-gate.sh`, workflow `lean-proof-gate.yml`): it builds each
+  Lake project and standalone file and fails any theorem whose transitive
+  axioms include `sorryAx`, an unlisted `native_decide` or a user axiom. A
+  `native_decide` that a study deliberately trusts is recorded with its reason
+  in `tools/lean/trusted-native.txt`. See `tools/lean/README.md`.
   Preserve frozen evidence and attach formalization updates as versioned
   additions rather than rewriting historical verification records.
 
