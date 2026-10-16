@@ -175,8 +175,10 @@ def main():
     print("=" * 76)
     print()
     print("  Enhanced Lemma verified numerically for ell in {3,5,7} (Exp Z')")
-    print(f"  and now for ell in {{11,13}} (Exp Z'').  Grand total: "
-          f"16562 + {grand_total:,} = {16562 + grand_total:,} instances.")
+    # The ell in {3,5,7} count is not hard-coded here: the earlier literal
+    # (16562) matched no script output. Recount: papers/structural-
+    # completeness/recount/ (sheriff case SHF-20261016-3caa6f, P3).
+    print(f"  and now for ell in {{11,13}} (Exp Z''): {grand_total:,} instances.")
     print()
     print("  Residue coverage per ell:")
     print(f"  {'ell':>4}  {'Valid residues (not 0,ell-1)':>30}  "
