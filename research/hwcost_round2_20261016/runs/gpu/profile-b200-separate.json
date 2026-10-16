@@ -1,0 +1,67 @@
+{
+  "schema": "hwcost.hardware.v1",
+  "name": "B200 (sm_100), 148 SMs [separate]",
+  "kind": "gpu",
+  "clock_ghz": 1.965,
+  "clock_source": "measured: SM clock under load (ecc2k130/benchmarks/fast-clmad/probe/summary.json:68-73; ecc2k130/AUTOSWEEP.md:20-21)",
+  "cores": 148,
+  "isa": [],
+  "ops": {
+    "alu": {
+      "cycles": 0.015698587127158554,
+      "pipe": "alu",
+      "source": "63.7 lane-ops per SM-clock: measured: LOP3, ecc2k130/benchmarks/fast-clmad/probe/summary.json:68-73"
+    },
+    "clmad": {
+      "cycles": 0.034364261168384876,
+      "pipe": "clmad",
+      "source": "29.1 lane-ops per SM-clock: measured: CLMAD lo+hi, ecc2k130/benchmarks/fast-clmad/probe/summary.json:68-73"
+    },
+    "fma": {
+      "cycles": 0.015625,
+      "pipe": "fma",
+      "source": "64 lane-ops per SM-clock: assumed: not measured on B200; architectural 64 (ecc2k130/roofline.py)"
+    },
+    "issue": {
+      "cycles": 0.0078125,
+      "pipe": "issue",
+      "source": "128 lane-ops per SM-clock: assumed: 4 schedulers × 32 lanes per SM-clock (architectural; ecc2k130/roofline.py:77-104)"
+    },
+    "lsu": {
+      "cycles": 0.0625,
+      "pipe": "lsu",
+      "source": "16 lane-ops per SM-clock: assumed: not measured on B200; architectural 16"
+    }
+  },
+  "memory": [
+    {
+      "name": "registers",
+      "capacity_bytes": null,
+      "shared": false,
+      "read_gbps_one_core": 1000000.0,
+      "read_gbps_all_cores": 1000000000.0,
+      "source": "assumed: the update is register-resident; no memory term"
+    }
+  ],
+  "scaling": [
+    {
+      "cores": 1,
+      "efficiency": 1.0
+    },
+    {
+      "cores": 148,
+      "efficiency": 1.0
+    }
+  ],
+  "scaling_source": "assumed: SMs are independent (efficiency 1; occupancy and latency are what a calibrated η absorbs)",
+  "channels": {},
+  "price": {
+    "usd_per_hour": 6.25,
+    "egress_usd_per_gb": 0.0,
+    "storage_usd_per_gb_month": 0.0,
+    "source": "measured list price: Modal, 2026-09-19 (ecc2k130/benchmarks/modal-gpus/SURVEY.md:111-122)"
+  },
+  "notes": [
+    "pipe model: separate"
+  ]
+}

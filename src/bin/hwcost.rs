@@ -45,6 +45,9 @@ enum Cmd {
         reps: Option<usize>,
         #[arg(long)]
         target_ms: Option<f64>,
+        /// Measure only these fields (comma-separated; default all).
+        #[arg(long, value_delimiter = ',')]
+        fields: Vec<String>,
     },
     /// Fit a hardware profile from a measurement run and validate the model
     /// against the measured kernel.
@@ -120,6 +123,24 @@ enum Cmd {
         #[arg(long)]
         out: PathBuf,
     },
+    /// Kernel ratio of two fields measured in the same runs, at every
+    /// batch size, and the claim that it stays at or below a threshold.
+    Pair {
+        #[arg(long, value_delimiter = ',')]
+        runs: Vec<PathBuf>,
+        #[arg(long)]
+        a: String,
+        #[arg(long)]
+        b: String,
+        #[arg(long, default_value_t = 4096)]
+        min_batch: usize,
+        #[arg(long, default_value_t = 0.85)]
+        threshold: f64,
+        #[arg(long)]
+        id: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Validate the GPU pipe model against a build sweep's recorded
     /// per-pipe counts and measured rates.
     GpuCheck {
@@ -186,6 +207,7 @@ fn run() -> Result<(), String> {
             quick,
             reps,
             target_ms,
+            fields,
         } => {
             let mut params = measure::default_params(quick);
             if let Some(r) = reps {
@@ -193,6 +215,12 @@ fn run() -> Result<(), String> {
             }
             if let Some(t) = target_ms {
                 params.target_ms = t;
+            }
+            if !fields.is_empty() {
+                for f in &fields {
+                    measure::field_spec(f)?;
+                }
+                params.fields = fields;
             }
             std::fs::create_dir_all(&out).map_err(|e| e.to_string())?;
             let m = measure::run(params, &mut |s| eprintln!("{s}"))?;
@@ -387,16 +415,68 @@ fn run() -> Result<(), String> {
             let worst = f1.iter().map(|p| p.ratio).fold(f64::MIN, f64::max);
             let f1c = fit::Claim::at_most(
                 "F1",
-                &format!("worst fp64bf/fp64 kernel ratio at B ≥ 4096 in the baseline runs ({} cells)", f1.len()),
+                &format!(
+                    "worst fp64bf/fp64 kernel ratio at B ≥ 4096 in the baseline runs ({} cells)",
+                    f1.len()
+                ),
                 if f1.is_empty() { f64::NAN } else { worst },
                 0.85,
             );
-            println!("{} {}: {:.4} (threshold 0.85)", f1c.id, f1c.verdict, f1c.value);
+            println!(
+                "{} {}: {:.4} (threshold 0.85)",
+                f1c.id, f1c.verdict, f1c.value
+            );
             let classes: Vec<serde_json::Value> = counts
                 .iter()
                 .map(|((g, c), n)| serde_json::json!({"group": g, "class": c, "arms": n}))
                 .collect();
-            write(&out.join("summary.json"), &json(&serde_json::json!({"classes": classes, "claims": [f1c]})))?;
+            write(
+                &out.join("summary.json"),
+                &json(&serde_json::json!({"classes": classes, "claims": [f1c]})),
+            )?;
+        }
+        Cmd::Pair {
+            runs,
+            a,
+            b,
+            min_batch,
+            threshold,
+            id,
+            out,
+        } => {
+            let ms: Vec<(String, Measurements)> = runs
+                .iter()
+                .map(|p| {
+                    let n = p
+                        .file_name()
+                        .map(|s| s.to_string_lossy().into_owned())
+                        .unwrap_or_default();
+                    read_json::<Measurements>(&p.join("measurements.json")).map(|m| (n, m))
+                })
+                .collect::<Result<_, _>>()?;
+            let refs: Vec<(String, &Measurements)> =
+                ms.iter().map(|(n, m)| (n.clone(), m)).collect();
+            let rows = compare::field_pairs(&refs, &a, &b);
+            let cells: Vec<&compare::PairRow> =
+                rows.iter().filter(|r| r.batch >= min_batch).collect();
+            let worst = cells.iter().map(|r| r.ratio).fold(f64::MIN, f64::max);
+            let c = fit::Claim::at_most(
+                &id,
+                &format!(
+                    "worst {b}/{a} kernel ratio at B ≥ {min_batch} over {} runs ({} cells)",
+                    ms.len(),
+                    cells.len()
+                ),
+                if cells.is_empty() { f64::NAN } else { worst },
+                threshold,
+            );
+            std::fs::create_dir_all(&out).map_err(|e| e.to_string())?;
+            write(&out.join("pairs.csv"), &compare::pairs_csv(&rows))?;
+            write(&out.join("claims.json"), &json(&vec![c.clone()]))?;
+            println!(
+                "{} {}: {:.4} (threshold {})",
+                c.id, c.verdict, c.value, threshold
+            );
         }
         Cmd::GpuCheck {
             calibration,
@@ -413,7 +493,10 @@ fn run() -> Result<(), String> {
             let claims = gpu::claims(&check);
             write(&out.join("claims.json"), &json(&claims))?;
             for c in &claims {
-                println!("{:<18} {:<6} {:.4} {}", c.id, c.verdict, c.value, c.statement);
+                println!(
+                    "{:<18} {:<6} {:.4} {}",
+                    c.id, c.verdict, c.value, c.statement
+                );
             }
             for id in gpu::gpu_ids() {
                 for m in [gpu::PipeModel::Separate, gpu::PipeModel::SharedInt] {
@@ -457,6 +540,26 @@ fn run() -> Result<(), String> {
             write(&out.join("pairs.json"), &json(&pairs))?;
             write(&out.join("fits.json"), &json(&fits))?;
             write(&out.join("projections.json"), &json(&proj))?;
+            let largest = pairs.last().ok_or("no paired curve")?;
+            let gp = ic::project_gae(&fits, largest.ns_per_gae, &targets, usd_per_core_hour);
+            let mut gcsv = format!(
+                "# post hoc: P(w) fits x ns per GAE of {} at log2 r {:.2}\nlog2_r,w,ns_per_gae,ic_core_years,rho_core_years,ic_usd,rho_usd,ratio\n",
+                largest.rho.arm, largest.log2_r
+            );
+            for g in &gp {
+                gcsv.push_str(&format!(
+                    "{},{},{:.3},{:.6e},{:.6e},{:.6e},{:.6e},{:.4}\n",
+                    g.log2_r,
+                    g.w,
+                    g.ns_per_gae,
+                    g.ic_core_years,
+                    g.rho_core_years,
+                    g.ic_usd,
+                    g.rho_usd,
+                    g.ratio
+                ));
+            }
+            write(&out.join("projections_gae.csv"), &gcsv)?;
             let summary = ic::summary(&pairs);
             write(&out.join("summary.json"), &json(&summary))?;
             for c in &summary {

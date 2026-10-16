@@ -332,24 +332,77 @@ pub fn claims(rows: &[CheckRow]) -> Vec<Claim> {
     let mut out = Vec::new();
     for model in ["separate", "shared-int"] {
         let m = |r: &&CheckRow| r.model == model;
-        let own: Vec<&CheckRow> = rows.iter().filter(m).filter(|r| r.set != "cross-gpu").collect();
-        let same: Vec<&CheckRow> = rows.iter().filter(m).filter(|r| r.set == "same-gpu").collect();
-        let cross: Vec<&CheckRow> = rows.iter().filter(m).filter(|r| r.set == "cross-gpu").collect();
+        let own: Vec<&CheckRow> = rows
+            .iter()
+            .filter(m)
+            .filter(|r| r.set != "cross-gpu")
+            .collect();
+        let same: Vec<&CheckRow> = rows
+            .iter()
+            .filter(m)
+            .filter(|r| r.set == "same-gpu")
+            .collect();
+        let cross: Vec<&CheckRow> = rows
+            .iter()
+            .filter(m)
+            .filter(|r| r.set == "cross-gpu")
+            .collect();
         let g1 = median_abs(own.iter().map(|r| r.err_a_priori));
         let g2 = median_abs(same.iter().map(|r| r.err_calibrated));
         let g3 = median_abs(cross.iter().map(|r| r.err_calibrated));
         let over = own.iter().filter(|r| r.eta > 1.0).count() as f64;
         if model == "separate" {
-            out.push(Claim::at_most("G1", &format!("a priori, all {} builds, median |error|", own.len()), g1, 0.30));
-            out.push(Claim::report("G1.eta>1", "builds measured above the a priori ceiling (η > 1)", over));
-            out.push(Claim::at_most("G2", &format!("η from each GPU's base build, {} other builds, median |error|", same.len()), g2, 0.30));
+            out.push(Claim::at_most(
+                "G1",
+                &format!("a priori, all {} builds, median |error|", own.len()),
+                g1,
+                0.30,
+            ));
+            out.push(Claim::report(
+                "G1.eta>1",
+                "builds measured above the a priori ceiling (η > 1)",
+                over,
+            ));
+            out.push(Claim::at_most(
+                "G2",
+                &format!(
+                    "η from each GPU's base build, {} other builds, median |error|",
+                    same.len()
+                ),
+                g2,
+                0.30,
+            ));
             out.push(Claim::at_most("G2.10", "the same, against 10%", g2, 0.10));
-            out.push(Claim::at_most("G3", &format!("η from the RTX PRO 6000 base build carried to {} B200 builds, median |error|", cross.len()), g3, 0.30));
+            out.push(Claim::at_most(
+                "G3",
+                &format!(
+                    "η from the RTX PRO 6000 base build carried to {} B200 builds, median |error|",
+                    cross.len()
+                ),
+                g3,
+                0.30,
+            ));
         } else {
-            out.push(Claim::report("G1.shared", "shared-int pipes: a priori, median |error|", g1));
-            out.push(Claim::report("G1.shared.eta>1", "shared-int pipes: builds with η > 1", over));
-            out.push(Claim::report("G2.shared", "shared-int pipes: η per GPU, median |error|", g2));
-            out.push(Claim::report("G3.shared", "shared-int pipes: η carried across GPUs, median |error|", g3));
+            out.push(Claim::report(
+                "G1.shared",
+                "shared-int pipes: a priori, median |error|",
+                g1,
+            ));
+            out.push(Claim::report(
+                "G1.shared.eta>1",
+                "shared-int pipes: builds with η > 1",
+                over,
+            ));
+            out.push(Claim::report(
+                "G2.shared",
+                "shared-int pipes: η per GPU, median |error|",
+                g2,
+            ));
+            out.push(Claim::report(
+                "G3.shared",
+                "shared-int pipes: η carried across GPUs, median |error|",
+                g3,
+            ));
         }
     }
     out

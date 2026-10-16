@@ -141,3 +141,46 @@ C=research/ic_frontier_campaign_20261015
 ./target/release/hwcost ic-price --band $C/analysis/band-prime.json --sessions $C/phase1/sessions \
   --ic-arm ic-pair --rho-arm rho-neg --tier 23,41 --targets 48,64,80,96,112,128 --out $D/ic-prime
 ```
+
+## Addendum 1 (frozen before its runs): branch-free code that survives the compiler
+
+Written after parts A–D ran. F3 showed that `Fp64Bf`'s masks did not reach
+the machine code: in the baseline build `step_fp64` and `step_fp64bf` are
+the same instruction sequence up to register allocation (303 instructions,
+32 conditional jumps, 4 `cmov`), so F1 (FAIL, worst ratio 1.05) did not test
+branch removal. The native build, whose `fp64` kernel ran 2.3–2.4× faster,
+emits 22 jumps and 14 `cmov` but also `mulx` and vector code, so it does not
+isolate the branches either.
+
+`fp64cm` (`hwcost::kernel::Fp64Cm`) writes the same two selections with
+`std::hint::select_unpredictable`. **Precondition, checked before freezing**:
+in the baseline build `step_fp64cm` compiles to 285 instructions, 20
+conditional jumps and 12 `cmov` (`objdump -d`), against `step_fp64`'s 303,
+32 and 4; its results are bit for bit `Fp64`'s (unit test and run gate).
+
+Runs, baseline build at this addendum's commit, back to back:
+`hwcost measure --fields fp64,fp64cm --out runs/cm-1`, then `runs/cm-2`
+(all arm groups, round-1 parameters), each fitted with `hwcost fit`.
+
+| id | claim | rule |
+| --- | --- | --- |
+| F1′ | branch-free code costs less on the baseline ISA | `fp64cm` kernel median ≤ 0.85 × `fp64`'s at every B ≥ 4096, in both cm-1 and cm-2 (`hwcost pair --a fp64 --b fp64cm --id F1prime`) |
+| F2′ | the a priori model then explains `fp64cm` | V2 on `fp64cm` ≤ 0.30 in both runs |
+
+F1′ passing supports the branch hypothesis on this ISA and attributes the
+named share of the native build's `fp64` speedup to it; failing rejects it.
+
+**Also post hoc (labelled as such in the report):** part D's fitted wall-time
+exponents for rho are flattened by a fixed per-solve floor (≈3 ms; rho wall
+α 0.26 Koblitz, 0.34 prime, against GAE α 0.46–0.47), so the pre-registered
+wall-time projections understate rho at large r by orders of magnitude.
+`ic-price` now also writes `projections_gae.csv`: the fitted `P(w)` exponents
+converted to time at the matched rho's ns per priced GAE at the largest
+measured size. Both are reported; the pre-registered one with this defect
+named.
+
+```sh
+for n in 1 2; do mkdir -p $D/cm-$n; ./target/release/hwcost measure --fields fp64,fp64cm --out $D/cm-$n 2> $D/cm-$n/stderr.txt; done
+for n in 1 2; do ./target/release/hwcost fit --run $D/cm-$n > $D/cm-$n/fit.txt; done
+mkdir -p $D/cm-pair; ./target/release/hwcost pair --runs $D/cm-1,$D/cm-2 --a fp64 --b fp64cm --min-batch 4096 --threshold 0.85 --id F1prime --out $D/cm-pair > $D/cm-pair/summary.txt
+```

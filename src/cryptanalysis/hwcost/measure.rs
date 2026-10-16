@@ -44,7 +44,7 @@ pub struct FieldSpec {
     pub prime_label: &'static str,
 }
 
-pub const FIELDS: [FieldSpec; 6] = [
+pub const FIELDS: [FieldSpec; 7] = [
     FieldSpec {
         name: "fp64",
         backend: "Fp64",
@@ -55,6 +55,13 @@ pub const FIELDS: [FieldSpec; 6] = [
     FieldSpec {
         name: "fp64bf",
         backend: "Fp64, branch-free sub/redc (hwcost::kernel::Fp64Bf)",
+        limbs: 1,
+        prime_hex: "7fffffffffffffe7",
+        prime_label: "2^63-25",
+    },
+    FieldSpec {
+        name: "fp64cm",
+        backend: "Fp64, sub/redc by select_unpredictable (hwcost::kernel::Fp64Cm)",
         limbs: 1,
         prime_hex: "7fffffffffffffe7",
         prime_label: "2^63-25",
@@ -94,7 +101,9 @@ pub fn field_spec(name: &str) -> Result<FieldSpec, String> {
         .iter()
         .copied()
         .find(|f| f.name == name)
-        .ok_or_else(|| format!("unknown field `{name}` (have fp64, fp64bf, w1, w2, w3, w4)"))
+        .ok_or_else(|| {
+            format!("unknown field `{name}` (have fp64, fp64bf, fp64cm, w1, w2, w3, w4)")
+        })
 }
 
 impl FieldSpec {
@@ -132,6 +141,11 @@ macro_rules! hwcost_with_field {
             "fp64bf" => {
                 let $f = Fp64::new(num_traits::ToPrimitive::to_u64(&p).unwrap());
                 let $a = Fp64Bf::new(&$f);
+                $body
+            }
+            "fp64cm" => {
+                let $f = Fp64::new(num_traits::ToPrimitive::to_u64(&p).unwrap());
+                let $a = $crate::cryptanalysis::hwcost::kernel::Fp64Cm::new(&$f);
                 $body
             }
             "w1" => {

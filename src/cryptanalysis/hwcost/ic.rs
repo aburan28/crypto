@@ -357,12 +357,66 @@ pub fn project(fits: &[Fit], targets: &[f64], usd_per_core_hour: f64) -> Vec<Pro
 pub fn summary(pairs: &[Pair]) -> Vec<super::fit::Claim> {
     use super::fit::Claim;
     let inside = pairs.iter().filter(|p| p.wall_ratio_in_band).count() as f64;
-    let mut ws: Vec<f64> = pairs.iter().map(|p| p.w_star).filter(|w| w.is_finite()).collect();
+    let mut ws: Vec<f64> = pairs
+        .iter()
+        .map(|p| p.w_star)
+        .filter(|w| w.is_finite())
+        .collect();
     let w_med = super::measure::median(&mut ws).unwrap_or(f64::NAN);
     vec![
         Claim::report("D1.in_band", &format!("curves (of {}) whose measured IC/rho wall ratio lies inside the band's ratio range", pairs.len()), inside),
         Claim::report("D1.w_star_median", "median implied weight w* (GAE per unpriced native operation)", w_med),
     ]
+}
+
+/// Projection in GAE (the fitted `P(w)` exponents) converted to time at
+/// `ns_per_gae[w]`, the matched rho's wall ns per priced GAE at the largest
+/// measured size.  Unlike the fitted wall-time exponents this carries no
+/// per-solve floor into the slope.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct GaeProjection {
+    pub log2_r: f64,
+    pub w: f64,
+    pub ns_per_gae: f64,
+    pub ic_core_years: f64,
+    pub rho_core_years: f64,
+    pub ic_usd: f64,
+    pub rho_usd: f64,
+    pub ratio: f64,
+}
+
+pub fn project_gae(
+    fits: &[Fit],
+    ns_per_gae: [f64; 3],
+    targets: &[f64],
+    usd_per_core_hour: f64,
+) -> Vec<GaeProjection> {
+    let at = |q: &str, arm: &str, x: f64| {
+        let f = fits
+            .iter()
+            .find(|f| f.quantity == q && f.arm == arm)
+            .expect("fit");
+        (f.log2_c + f.alpha * x).exp2()
+    };
+    let mut out = Vec::new();
+    for &x in targets {
+        for (i, &w) in WEIGHTS.iter().enumerate() {
+            let q = format!("P(w={w})");
+            let (ic, rho) = (at(&q, "ic", x), at(&q, "rho", x));
+            let s = |g: f64| g * ns_per_gae[i] * 1e-9;
+            out.push(GaeProjection {
+                log2_r: x,
+                w,
+                ns_per_gae: ns_per_gae[i],
+                ic_core_years: s(ic) / (365.25 * 86400.0),
+                rho_core_years: s(rho) / (365.25 * 86400.0),
+                ic_usd: s(ic) / 3600.0 * usd_per_core_hour,
+                rho_usd: s(rho) / 3600.0 * usd_per_core_hour,
+                ratio: ic / rho,
+            });
+        }
+    }
+    out
 }
 
 pub fn pairs_csv(pairs: &[Pair]) -> String {

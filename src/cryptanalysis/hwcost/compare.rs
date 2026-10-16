@@ -89,12 +89,17 @@ pub struct PairRow {
 
 /// `fp64bf / fp64` kernel medians at every batch size of every run.
 pub fn fp64_pairs(runs: &[(String, &Measurements)]) -> Vec<PairRow> {
+    field_pairs(runs, "fp64", "fp64bf")
+}
+
+/// `b / a` kernel medians (two fields of the same runs) at every batch size.
+pub fn field_pairs(runs: &[(String, &Measurements)], a: &str, b_field: &str) -> Vec<PairRow> {
     let mut out = Vec::new();
     for (name, m) in runs {
         for &b in &m.params.batches {
             if let (Some(x), Some(y)) = (
-                m.median(&format!("kernel.fp64.{b}")),
-                m.median(&format!("kernel.fp64bf.{b}")),
+                m.median(&format!("kernel.{a}.{b}")),
+                m.median(&format!("kernel.{b_field}.{b}")),
             ) {
                 out.push(PairRow {
                     run: name.clone(),

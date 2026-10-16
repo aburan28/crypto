@@ -253,6 +253,83 @@ impl Arith for Fp64Bf {
     }
 }
 
+/// `Fp64`'s arithmetic with the reduction's final subtraction and the
+/// subtraction's wrap-around chosen by `std::hint::select_unpredictable`,
+/// which asks the compiler for a conditional move rather than a branch.
+/// [`Fp64Bf`]'s masks did not survive optimisation (the baseline build
+/// emits the same branches for both); this variant is the round-2
+/// follow-up's way of getting branch-free code on the baseline ISA.
+/// Bit for bit `Fp64`'s results.
+#[derive(Clone)]
+pub struct Fp64Cm {
+    p: u64,
+    n_inv: u64,
+    inner: Fp64,
+}
+
+impl Fp64Cm {
+    pub fn new(f: &Fp64) -> Self {
+        let b = Fp64Bf::new(f);
+        Fp64Cm {
+            p: b.p,
+            n_inv: b.n_inv,
+            inner: f.clone(),
+        }
+    }
+
+    #[inline(always)]
+    fn csub(&self, u: u64) -> u64 {
+        let (d, borrow) = u.overflowing_sub(self.p);
+        std::hint::select_unpredictable(borrow, u, d)
+    }
+
+    #[inline(always)]
+    fn redc(&self, t: u128) -> u64 {
+        let lo = t as u64;
+        let m = lo.wrapping_mul(self.n_inv);
+        let mp = u128::from(m) * u128::from(self.p);
+        let u = ((t >> 64) as u64) + ((mp >> 64) as u64) + u64::from(lo != 0);
+        self.csub(u)
+    }
+}
+
+impl Arith for Fp64Cm {
+    type E = u64;
+    #[inline(always)]
+    fn one(&self) -> u64 {
+        self.inner.one()
+    }
+    #[inline(always)]
+    fn is_zero(&self, a: u64) -> bool {
+        a == 0
+    }
+    #[inline(always)]
+    fn add(&self, a: u64, b: u64) -> u64 {
+        self.csub(a + b)
+    }
+    #[inline(always)]
+    fn sub(&self, a: u64, b: u64) -> u64 {
+        let (d, borrow) = a.overflowing_sub(b);
+        std::hint::select_unpredictable(borrow, d.wrapping_add(self.p), d)
+    }
+    #[inline(always)]
+    fn mul(&self, a: u64, b: u64) -> u64 {
+        self.redc(u128::from(a) * u128::from(b))
+    }
+    #[inline(always)]
+    fn sqr(&self, a: u64) -> u64 {
+        self.redc(u128::from(a) * u128::from(a))
+    }
+    #[inline(always)]
+    fn inv(&self, a: u64) -> Option<u64> {
+        self.inner.inv(a)
+    }
+    #[inline(always)]
+    fn low(&self, a: u64) -> u64 {
+        a
+    }
+}
+
 /// Exact tally of the field operations of a run.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct OpTally {
@@ -445,6 +522,12 @@ pub fn step_fp64bf(a: &Fp64Bf, w: &mut Walks<u64>, t: &Table<u64>, dp_mask: u64)
     step(a, w, t, dp_mask)
 }
 
+/// [`step`] through [`Fp64Cm`], as [`step_fp64`].
+#[inline(never)]
+pub fn step_fp64cm(a: &Fp64Cm, w: &mut Walks<u64>, t: &Table<u64>, dp_mask: u64) {
+    step(a, w, t, dp_mask)
+}
+
 /// One step through each wrapper from the same walks must agree (run by
 /// `hwcost measure`'s gate, which also keeps both symbols in the binary).
 pub fn check_wrappers(f: &Fp64, seed: u64) -> Result<(), String> {
@@ -452,10 +535,12 @@ pub fn check_wrappers(f: &Fp64, seed: u64) -> Result<(), String> {
     let (mut v, _) = setup(f, 16, seed);
     step_fp64(&Owned(f.clone()), &mut w, &t, 0);
     step_fp64bf(&Fp64Bf::new(f), &mut v, &t, 0);
-    if (w.xs, w.ys) == (v.xs, v.ys) {
+    let (mut u, _) = setup(f, 16, seed);
+    step_fp64cm(&Fp64Cm::new(f), &mut u, &t, 0);
+    if (&w.xs, &w.ys) == (&v.xs, &v.ys) && (&w.xs, &w.ys) == (&u.xs, &u.ys) {
         Ok(())
     } else {
-        Err("step_fp64 and step_fp64bf disagree".into())
+        Err("step_fp64, step_fp64bf and step_fp64cm disagree".into())
     }
 }
 
@@ -619,6 +704,17 @@ mod tests {
             assert_eq!(a.mul(x, y), f.mul(x, y));
         }
         check_same_walk(&f, &a, 33, 6, 3).unwrap();
+        let c = Fp64Cm::new(&f);
+        let mut rng = StdRng::seed_from_u64(10);
+        for _ in 0..10_000 {
+            let x = f.from_biguint(&rng.gen_biguint_below(f.modulus()));
+            let y = f.from_biguint(&rng.gen_biguint_below(f.modulus()));
+            assert_eq!(c.mul(x, y), f.mul(x, y));
+            assert_eq!(c.sub(x, y), f.sub(x, y));
+            assert_eq!(c.add(x, y), f.add(x, y));
+        }
+        check_same_walk(&f, &c, 33, 6, 5).unwrap();
+        check_wrappers(&f, 6).unwrap();
         // The disassembly wrappers compute the same walk.
         let (mut w, t) = setup(&f, 16, 4);
         let (mut v, _) = setup(&f, 16, 4);

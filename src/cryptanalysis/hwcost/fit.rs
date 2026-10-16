@@ -94,7 +94,12 @@ impl Claim {
             statement: statement.into(),
             value,
             threshold,
-            verdict: if value.is_finite() && value <= threshold { "PASS" } else { "FAIL" }.into(),
+            verdict: if value.is_finite() && value <= threshold {
+                "PASS"
+            } else {
+                "FAIL"
+            }
+            .into(),
         }
     }
     /// A pre-registered quantity reported without a threshold.
