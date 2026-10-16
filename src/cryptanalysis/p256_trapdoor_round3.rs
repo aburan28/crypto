@@ -30,7 +30,7 @@ use crate::cryptanalysis::p256_trapdoor_round2::{
 };
 use crate::hash::sha1::sha1;
 use num_bigint::BigUint;
-use num_traits::{One, Zero};
+use num_traits::One;
 
 /// One honestly generated X9.62 candidate: the seed, its `r`, and the
 /// two square roots `±b` of `−27/r` (empty if `−27/r` is a non-residue,
@@ -45,10 +45,6 @@ pub struct X962Candidate {
 /// runs are exactly reproducible and independent of any RNG library
 /// version.
 fn seed_from_counter(counter: u64) -> [u8; 20] {
-    let mut z = counter.wrapping_add(0x9e37_79b9_7f4a_7c15);
-    z = (z ^ (z >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
-    z = (z ^ (z >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
-    z ^= z >> 31;
     // Two splitmix draws fill 16 bytes; a third fills the rest.
     let mut bytes = Vec::with_capacity(20);
     for c in [
@@ -231,7 +227,6 @@ pub fn p256_trapdoor_round3_report(n_seeds: u64) -> Vec<Round3Record> {
     let cube_rate = b_stats.cube_true as f64 / b_stats.samples as f64;
     let expected = b_stats.cube_true;
     // Two-sided exact binomial against the pooled empirical rate.
-    let sigma = (cube_rate * (1.0 - cube_rate) / 1.0).sqrt();
     records.push(Round3Record {
         name: "cubic residuosity of b against honest ±b pool".into(),
         published: format!("{cube_b}"),
@@ -423,7 +418,7 @@ mod tests {
         // not possible without knowing a preimage, so instead test the
         // machinery against a known pair — SHA-1("abc") vs its digest.
         // We verify the comparator logic with a synthetic target.
-        let phrases = vec!["abc".to_string()];
+        let phrases = ["abc".to_string()];
         // SHA-1("abc") = a9993e364706816aba3e25717850c26c9cd0d89d
         let digest = sha1(b"abc");
         assert_eq!(
