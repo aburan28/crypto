@@ -7,7 +7,9 @@ EVIDENCE="$RUN_ROOT/evidence"
 BUCKET=__BUCKET__
 SOURCE_COMMIT=__COMMIT__
 RUN_TOKEN=__RUN_TOKEN__
+MODE=__MODE__
 S3_KEY="n83-tier1-online-20261016/$RUN_TOKEN.tar.gz"
+SELECTION_KEY="n83-tier1-online-20261016/$RUN_TOKEN-selection.tar.gz"
 mkdir -p "$EVIDENCE/bin"
 exec > >(tee -a /var/log/n83-tier1-bootstrap.log "$EVIDENCE/bootstrap.log") 2>&1
 
@@ -97,8 +99,13 @@ git clone --depth 1 --branch codex/n83-tier1-online-20261016 \
 cd "$RUN_ROOT/src"
 test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
 git rev-parse HEAD > "$EVIDENCE/source-commit.txt"
-python3 research/n83_tier1_online_20261016/run.py --fixture-preflight > \
-  "$EVIDENCE/fixture-preflight.json"
+if [ "$MODE" = selected_panel ]; then
+  python3 research/n83_tier1_online_20261016/run.py --fixture-preflight > \
+    "$EVIDENCE/fixture-preflight.json"
+elif [ "$MODE" != same_instance_selector ]; then
+  echo "REJECTED_ALLOCATION_MODE"
+  exit 2
+fi
 
 export CARGO_TARGET_DIR="$RUN_ROOT/cargo-target"
 export CARGO_BUILD_JOBS=8
@@ -118,6 +125,47 @@ cp "$CARGO_TARGET_DIR/release/examples/n83_rho_optimization_eval" \
   "$EVIDENCE/bin/n83_rho_optimization_eval"
 
 export PYTHONDONTWRITEBYTECODE=1
+if [ "$MODE" = same_instance_selector ]; then
+  mkdir -p "$EVIDENCE/selector/bin"
+  cp "$EVIDENCE/bin/koblitz_orbit_dlp_fast" \
+    "$EVIDENCE/selector/bin/koblitz_orbit_dlp_fast"
+  cp "$EVIDENCE/bin/n83_rho_optimization_eval" \
+    "$EVIDENCE/selector/bin/n83_rho_optimization_eval"
+  timeout 4800 python3 research/n83_tier1_online_20261016/selector_run.py \
+    --binary "$EVIDENCE/selector/bin/koblitz_orbit_dlp_fast" \
+    --rho-binary "$EVIDENCE/selector/bin/n83_rho_optimization_eval" \
+    --output "$EVIDENCE/selector/results" > \
+    "$EVIDENCE/selector/run.log" 2>&1
+  timeout 1200 python3 research/n83_tier1_online_20261016/selector_verify.py \
+    "$EVIDENCE/selector/results" > "$EVIDENCE/selector/verify.log" 2>&1
+  python3 research/n83_tier1_online_20261016/selector_select.py \
+    "$EVIDENCE/selector/results" \
+    --receipt "$EVIDENCE/selector/seal.json" > \
+    "$EVIDENCE/selector/select.log" 2>&1
+  cp research/n83_tier1_online_20261016/selection.json \
+    research/n83_tier1_online_20261016/candidate_*.json \
+    "$EVIDENCE/selector/"
+  python3 research/n83_tier1_online_20261016/run.py --fixture-preflight > \
+    "$EVIDENCE/fixture-preflight.json"
+  test "$(aws s3api get-bucket-versioning --bucket "$BUCKET" \
+    --query Status --output text)" = Enabled
+  tar -C "$EVIDENCE" -czf "$RUN_ROOT/$RUN_TOKEN-selection.tar.gz" selector
+  sha256sum "$RUN_ROOT/$RUN_TOKEN-selection.tar.gz" > \
+    "$EVIDENCE/selector/selection-bundle-sha256.txt"
+  SELECTION_VERSION=$(aws s3api put-object --bucket "$BUCKET" \
+    --key "$SELECTION_KEY" --body "$RUN_ROOT/$RUN_TOKEN-selection.tar.gz" \
+    --server-side-encryption AES256 --query VersionId --output text)
+  if [ -z "$SELECTION_VERSION" ] || [ "$SELECTION_VERSION" = None ]; then
+    echo "SELECTION_VERSION_MISSING"
+    exit 2
+  fi
+  printf '%s\n' "$SELECTION_VERSION" > \
+    "$EVIDENCE/selector/selection-s3-version-id.txt"
+  aws s3api head-object --bucket "$BUCKET" --key "$SELECTION_KEY" \
+    --version-id "$SELECTION_VERSION" > \
+    "$EVIDENCE/selector/selection-s3-head.json"
+  date -u +%FT%TZ > "$EVIDENCE/selector/selection-sealed-utc.txt"
+fi
 timeout 6600 python3 research/n83_tier1_online_20261016/run.py \
   --binary "$EVIDENCE/bin/koblitz_orbit_dlp_fast" \
   --rho-binary "$EVIDENCE/bin/n83_rho_optimization_eval" \

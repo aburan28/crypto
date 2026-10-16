@@ -81,15 +81,26 @@ def current_infra():
             "max_compute_charge_usd": float(MAX_PRICE) * MAX_MINUTES / 60}
 
 
-def source_preflight():
+def source_preflight(mode):
     spec = importlib.util.spec_from_file_location("n83_tier1_runner", RUNNER)
     runner = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(runner)
     runner.fixture_preflight()
-    runner.selection_preflight()
+    if mode == "selected_panel":
+        runner.selection_preflight()
+    elif mode == "same_instance_selector":
+        if (HERE / "selection.json").exists():
+            raise ValueError("host selector allocation requires no prior selection")
+        selector_spec = importlib.util.spec_from_file_location(
+            "n83_tier1_selector_runner", HERE / "selector_run.py")
+        selector = importlib.util.module_from_spec(selector_spec)
+        selector_spec.loader.exec_module(selector)
+        selector.frozen_inputs()
+    else:
+        raise ValueError("unsupported allocation mode")
     head = command("git", "-C", str(ROOT), "rev-parse", "HEAD").stdout.strip()
     dirty = command("git", "-C", str(ROOT), "status", "--porcelain",
-                    "--untracked-files=no").stdout
+                    "--untracked-files=all").stdout
     remote = command("git", "-C", str(ROOT), "ls-remote", "origin",
                      f"refs/heads/{BRANCH}").stdout
     if dirty or not remote or remote.split()[0] != head:
@@ -153,6 +164,11 @@ def ensure_bucket(bucket):
         "--server-side-encryption-configuration", json.dumps({
             "Rules": [{"ApplyServerSideEncryptionByDefault": {
                 "SSEAlgorithm": "AES256"}}]}))
+    aws("s3api", "put-bucket-versioning", "--bucket", bucket,
+        "--versioning-configuration", "Status=Enabled")
+    if aws("s3api", "get-bucket-versioning", "--bucket", bucket).get(
+            "Status") != "Enabled":
+        raise ValueError("selection bucket versioning is not enabled")
 
 
 def ensure_security_group():
@@ -179,7 +195,7 @@ def ensure_security_group():
     return group_id
 
 
-def launch(output, infrastructure, commit):
+def launch(output, infrastructure, commit, mode):
     output.mkdir(parents=True, exist_ok=False)
     (output / "infrastructure-preflight.json").write_text(json.dumps(
         infrastructure, indent=2, sort_keys=True) + "\n")
@@ -192,7 +208,8 @@ def launch(output, infrastructure, commit):
     template = (HERE / "aws_bootstrap.sh").read_text()
     rendered = (template.replace("__BUCKET__", bucket)
                 .replace("__COMMIT__", commit)
-                .replace("__RUN_TOKEN__", token))
+                .replace("__RUN_TOKEN__", token)
+                .replace("__MODE__", mode))
     user_data = output / "user-data.sh"
     user_data.write_text(rendered)
     command("bash", "-n", str(user_data))
@@ -234,6 +251,7 @@ def launch(output, infrastructure, commit):
     launched = aws(*arguments)
     instance = launched["Instances"][0]
     receipt = {"schema": "n83.tier1-allocation/v1", "infrastructure": infrastructure,
+               "allocation_mode": mode,
                "role": role, "bucket": bucket, "security_group": group,
                "client_token": token, "source_commit": commit,
                "instance_id": instance["InstanceId"],
@@ -252,6 +270,7 @@ def main():
     action = parser.add_mutually_exclusive_group(required=True)
     action.add_argument("--infra-preflight", action="store_true")
     action.add_argument("--launch", action="store_true")
+    action.add_argument("--launch-host-screen", action="store_true")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     infrastructure = current_infra()
@@ -259,9 +278,10 @@ def main():
         print(json.dumps(infrastructure, sort_keys=True))
         return 0
     if args.output is None:
-        parser.error("--output is required with --launch")
-    commit = source_preflight()
-    launch(args.output.resolve(), infrastructure, commit)
+        parser.error("--output is required with either launch mode")
+    mode = "same_instance_selector" if args.launch_host_screen else "selected_panel"
+    commit = source_preflight(mode)
+    launch(args.output.resolve(), infrastructure, commit, mode)
     return 0
 
 
