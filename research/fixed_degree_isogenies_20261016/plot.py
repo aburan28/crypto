@@ -41,8 +41,9 @@ labels = []
 for i, r in enumerate(pl):
     bottom = 0.0
     if not r.get("ok"):
-        ax.text(i, 1, "failed", rotation=90, ha="center", va="bottom", fontsize=7)
-        labels.append(f"{r['log_p_d']:.2f}\n{'pl' if r['planted'] else 'rnd'}")
+        ax.text(i, 30, "no solution\nin box", rotation=90, ha="center", va="bottom", fontsize=6.5)
+        s = {"Cornacchia": "Cor", "CoppersmithBivariate": "Coron"}.get(r["solver"], r["solver"])
+        labels.append(f"{r['log_p_d']:.2f}\n{s}\n{'planted' if r['planted'] else 'random'}")
         continue
     for key, lab, col in steps:
         v = r[key]
@@ -107,20 +108,22 @@ ax.legend(fontsize=6.5, frameon=False)
 save(fig, "fig4_baselines")
 
 # 5. diagram of the pipeline (what runs where)
-fig, ax = plt.subplots(figsize=(7.4, 2.6))
+fig, ax = plt.subplots(figsize=(8.2, 2.8))
 ax.axis("off")
-boxes = [("E1, E2, d", 0.02), ("1  End(E1), End(E2)\nBFS on Phi_2 graph\n+ sub-ideal walk", 0.14),
-         ("2  I = N O1 O2\n(Kirschmer-Voight)", 0.31), ("3  Q = 2 Nrd / N(I)\nLLL basis", 0.45),
-         ("4  Q(x) = 2d\nCornacchia | Coron |\ntrivariate", 0.585), ("5  J = I conj(a) / N(I)\nN(J) = d", 0.735),
-         ("6  kernel (smooth d)\nor torsion images\n+ Kani certificate", 0.87)]
-for text, x in boxes:
-    ax.add_patch(FancyBboxPatch((x, 0.35), 0.115, 0.4, boxstyle="round,pad=0.01", fc="#eef3f9", ec="#2f6db3"))
-    ax.text(x + 0.0575, 0.55, text, ha="center", va="center", fontsize=6.3)
-for (_, x), (_, x2) in zip(boxes, boxes[1:]):
-    ax.annotate("", xy=(x2, 0.55), xytext=(x + 0.115, 0.55), arrowprops=dict(arrowstyle="->", lw=0.8))
-ax.text(0.14, 0.18, "Deuring (p < 2^31): steps 1 and 6", fontsize=6.5, color="#4a9a5b")
-ax.text(0.31, 0.10, "pure quaternion arithmetic, any p (tested 61, 127 bits): steps 2-5", fontsize=6.5, color="#d97b29")
-ax.text(0.585, 0.88, "hybrid: guess l^e1 prefix as sub-ideals, then 2-5 on the rest", fontsize=6.5)
+boxes = ["E1, E2, d", "1  End(E1), End(E2)\nBFS on the Phi_2\ngraph + sub-ideal\nwalk",
+         "2  I = N O1 O2\n(Kirschmer-\nVoight)", "3  Q = 2 Nrd/N(I)\non an LLL basis",
+         "4  Q(x) = 2d:\nCornacchia |\nCoron | trivariate", "5  J = I conj(a)/N(I)\nN(J) = d",
+         "6  kernel (smooth d)\nor torsion images\n+ Kani certificate"]
+W, STEP = 0.122, 0.1425
+for i, text in enumerate(boxes):
+    x = 0.004 + i * STEP
+    ax.add_patch(FancyBboxPatch((x, 0.33), W, 0.44, boxstyle="round,pad=0.008", fc="#eef3f9", ec="#2f6db3"))
+    ax.text(x + W / 2, 0.55, text, ha="center", va="center", fontsize=6.2)
+    if i:
+        ax.annotate("", xy=(x - 0.002, 0.55), xytext=(x - STEP + W + 0.012, 0.55), arrowprops=dict(arrowstyle="->", lw=0.8))
+ax.text(0.15, 0.2, "steps 1 and 6 use the Deuring correspondence on E0 over F_(p^4): p < 2^31", fontsize=6.5, color="#4a9a5b")
+ax.text(0.29, 0.1, "steps 2-5 are pure quaternion arithmetic, any p (tested at 61 and 127 bits)", fontsize=6.5, color="#d97b29")
+ax.text(0.15, 0.88, "hybrid (smooth d = l^e): guess an l^e1 prefix as sub-ideals after step 1, run 2-5 on the rest, compose before 6", fontsize=6.5)
 ax.set_xlim(0, 1)
 ax.set_ylim(0, 1)
 save(fig, "fig5_pipeline_diagram")
