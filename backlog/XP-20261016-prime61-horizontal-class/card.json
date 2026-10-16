@@ -1,0 +1,21 @@
+{
+  "schema": "backlog.card/v1",
+  "id": "XP-20261016-prime61-horizontal-class",
+  "title": "Certify and exhaust the prime61 horizontal class with a bounded-memory walker",
+  "created": "2026-10-16",
+  "authors": ["native research lane"],
+  "status": "blocked",
+  "status_note": "Existing retained Node/Edge headers exceed the 16 GiB container even at the certified class-size lower bound. The external-memory executable below is a required implementation, not an existing or scheduled run.",
+  "blocked_on": ["problem:problems/prime61-horizontal-class-memory.md"],
+  "links": {"lead": "research/prime61_isogeny_20261016/README.md", "notes": ["problems/prime61-horizontal-class-memory.md"], "prs": [1977]},
+  "question": "What are the factor-base results over every base-field isomorphism class in the fixed ordinary prime61 trace class?",
+  "decision_value": "Discharges the full-horizontal-class interpretation of the user's request. The degree-61 one-hop panel is complete within its bound but cannot establish a class-wide ranking. A verified resumable traversal would retain every cap and failure rather than infer the unseen results.",
+  "protocol": {"path": null, "blob": null},
+  "code": {"repo": "crypto", "commit": "de0c9391480155ebdd5a8495d2c79e4508d4795d", "branch": null, "build": []},
+  "resources": {"cpus": 1, "ram_gb": 16, "disk_gb": 2, "gpu": null, "est_core_hours": null, "est_wall_hours": null, "notes": "Development envelope for the bounded-memory implementation and small-class controls only. Full-class disk, CPU and runtime sizing remain unknown; freeze and validate a new envelope before readiness. No remote resources are provisioned."},
+  "run": {"argv": ["target/release/isogeny_walk_external", "--p", "2305843009213693951", "--a", "2305843009213693948", "--b", "111", "--order", "2305843010818082053", "--all-horizontal-class", "--transport-frozen-target", "--out", "{out}"], "env": {}, "timeout_per_shard_s": 300},
+  "shards": {"count": 1, "scheme": "single", "params": {}, "stop": "all"},
+  "checkpoint": {"file": null, "resume_flag": null},
+  "outputs": {"result_schema": "To be frozen: certified class coverage, exact deduplicated models, verified ordered maps, transported EC1 workloads and capped relation records", "verify": [], "land": "research/prime61_isogeny_20261016"},
+  "cairn": {"mode": "lab-task", "space": "TBD", "tasks": ["XP-20261016-prime61-horizontal-class"], "ttl_s": 3600, "env": {"name": "crypto-native", "recipe": "Native Rust walker and native class-certificate backend; implementation and complete protocol pending"}, "exec": {"cpus": 1, "memory_mb": 16384, "timeout_s": 300, "sandbox": "auto", "publish": "runs/XP-20261016-prime61-horizontal-class"}, "funding": {"units": 131072, "rationale": "Blocked implementation follow-up priority only; does not schedule or fund an exhaustive remote experiment."}}
+}

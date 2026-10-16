@@ -1,0 +1,10 @@
+   Compiling crypto v0.1.0 (/workspace/crypto-current)
+error: no rules expected `.`
+   --> examples/prime61_isogeny_experiment.rs:155:34
+    |
+155 |         "transported_G":[g.x,g.y].map(|x|c.f.from_mont(x).to_string()),
+    |                                  ^ no rules expected this token in macro call
+    |
+    = note: while trying to match end of macro
+
+error: could not compile `crypto` (example "prime61_isogeny_experiment" test) due to 1 previous error
