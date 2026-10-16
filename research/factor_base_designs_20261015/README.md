@@ -192,6 +192,43 @@ before any row.
   engineering. Whether the constant survives at `m = 4`, `t ≥ 4` needs a
   longer budget and its own amendment.
 
+### Amendment 4: cost score, third `m = 4` cell, small-prime instrument, A11 ablation (run-20261016T0616Z)
+
+Rows: `runs/C*.jsonl`. Analysis: `runs/analysis-amendment4.txt`. Run report:
+[`reports/run-20261016T0616Z/REPORT.pdf`](reports/run-20261016T0616Z/REPORT.pdf).
+Amendment 4 was registered before any of its rows. Every row now records
+`field_ops`, F4's count of `F_p` multiplications in row reduction.
+
+- **C1, cost score: every decided series is cost-unfavourable** (prediction
+  held). The score is κ = Δlog₂ field_ops/Δb, against the break-even
+  `m − 1`. It comes from re-measuring all 192 committed systems, and 192 of
+  192 matched their committed traces. κ is 3.5–6.1 at `m = 2` (break-even 1)
+  and 7.5–9.2 at `m = 3` (break-even 2). σ and κ disagree: arms with σ ≈ 0
+  (A1z, A1g, A11 and N11 at `m = 3`) have κ at or above A0's. A11's κ is
+  above A0's at both arities (4.00 vs 3.59; 8.77 vs 7.47). It starts cheaper
+  and grows faster.
+- **C2, `m = 4`, `t = 4` (3600 s budget; isolab unavailable, so run here):**
+  A11 completes, with D = 6 and about 1030 s per system. A0 exhausts memory.
+  A11 at `m = 4` now has 3 cells: σ = 1.5 (*no middle ground*) and κ = 14.9
+  against 3 (*cost-unfavourable*). A0 at `m = 4` stays *inconclusive*
+  (2 cells).
+- **C3, p₃ = 40961 (F4's narrow path): not admitted.** 192 of 194 systems
+  match their p₁ traces. The two mismatches are A1g at `m = 3`, `t = 3`,
+  whose set has no fixed coset shape. The p₃ extension was not run, as the
+  rule requires.
+- **C4, ablation of A11: mixed** on both D and field_ops (prediction "the
+  curve relation carries it" failed).
+  - H1 (A11's curve relation with Kummer towers) costs more than A0.
+  - H2 (A0's `S₃` with A11's squaring chain) costs between A0 and A11, at
+    A0's D.
+  - Only the combination reaches A11's cost.
+- **Lean:** `quartic_norm_factor` proves Amendment 3's correction (`G` is a
+  monic quartic at `m = 4`).
+- **Reading:** on the measured cost, no arm here has an interior optimum at
+  `m ≤ 4`. A11's advantage is a smaller starting cost from the
+  function-and-chain combination, with a steeper per-bit growth. It is not a
+  slope change.
+
 ## 6. What this round does not establish
 
 - No design here is shown to reduce any cost. The Lean theorems show that
