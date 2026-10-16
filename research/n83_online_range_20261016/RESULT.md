@@ -1,0 +1,55 @@
+# N83 exact-root online factor-base range screens
+
+Two frozen same-point cloud screens independently replayed every completed
+factor base, four-point target relation and scalar, plus the matched rho
+answer. K3072 with one-root dynamic exact slots had the lowest completed
+one-target online interval in both screens: 7.384 ms in the eight-arm screen
+and 7.282 ms in the expanded twelve-arm screen. K2543 with the same one-root
+layout measured 13.896 and 13.882 ms. The expanded screen included the
+K1152/K1536 cold-shortlisted pipelines; their online intervals are retained
+in the [expanded analysis](analysis_38896107047.json).
+
+| Pipeline | Eight-arm online, ms | Expanded online, ms | Status |
+| --- | ---: | ---: | --- |
+| K3072/root11 dynamic | 7.384 | 7.282 | Independently replayed in both |
+| K2543/root11 dynamic | 13.896 | 13.882 | Independently replayed in both |
+| K1024/root22 dynamic | 47.880 | 45.289 | Independently replayed in both |
+| K3450/root11 fixed | 78.146 | 79.161 | Independently replayed in both |
+| K3584/root11 fixed | — | — | 900-second timeout in both |
+
+The predeclared K2543/root22 A/B control was noisy in both runs:
+18.570 versus 14.487 ms (24.70%) in the eight-arm screen and 18.327 versus
+14.120 ms (25.93%) in the expanded screen. Both exceed the 10% gate, so
+their selected pipelines and candidate IDs remain `null` with
+`BOUNDED_UNKNOWN` status. This preserves the directly observed timings
+without promoting either screen to the fresh-point selector. The matched
+rho online intervals were 723.096 and 647.238 ms; these exploratory
+same-point screen rows do not replace the five-point Tier 1 comparison.
+
+The [eight-arm run](https://github.com/aburan28/crypto/actions/runs/38895743960)
+used source commit `e83a78be0b74d22fb34e315006d47e6bd82a1e4c` and
+artifact `12046277866`. Its exact ZIP is
+`/Volumes/SSD990-2/n83-archive-20261016/raw/n83-online-range-eight-38895743960.zip`,
+SHA-256 `41d4aa0d623967ab9c62cc3ded653e01e9ec049e78596d691d87b7f40f4cea45`.
+The [eight-arm analysis](analysis_38895743960.json) SHA-256 is
+`5db680f0423f1e4b4c4138303135e826e543cb90f3b427147977ee9be192927c`.
+Local replay with byte-identical `run.py` and `verify.py` from that commit
+recreated the cloud analysis byte for byte; replay log SHA-256
+`236aa527f3335d52f7083d2aed2539d175b32424edf9cc187922f3390279d5bb`.
+
+The [expanded run](https://github.com/aburan28/crypto/actions/runs/38896107047)
+used source commit `c001093fb47304814bdee2a6b3d31ea8389d9213` and
+artifact `12047173997`. Its exact ZIP is
+`/Volumes/SSD990-2/n83-archive-20261016/raw/n83-online-range-expanded-38896107047.zip`,
+SHA-256 `53cdc2fa1ccc46a4617cf9ccc80609d0bc19a5e6d90b2b6a5d849d33ed8c0606`.
+The expanded analysis SHA-256 is
+`0e33e7ec12ad35f19ec15314455155a86f5137a998535d9144aa77d5c5859717`.
+Local replay with the exact `c001093` producer and verifier scripts
+recreated it byte for byte; replay log SHA-256
+`96f5a578e01269015168b2b10b79a41a8a4f921769fd4746b38e02da2285a3e7`.
+
+The [mirrored rescreen](../n83_online_rescreen_20261016/PROTOCOL.md) now
+measures K3072/root11 and K2543/root11 four times each in adjacent A/A
+pairs and mirrored order. It requires exact base/index identity, full
+replay, pair spreads at most 10%, and separation exceeding observed A/A
+noise before it can name the candidate for the sealed Tier 1 panel.
