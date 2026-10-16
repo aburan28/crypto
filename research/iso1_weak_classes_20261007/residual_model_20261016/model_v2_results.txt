@@ -50,6 +50,13 @@ p=73 rows=95922 zeros obs=311 exp=327.1 [296.3,357.9] PASS dispersion=1.011 (n=9
    P(zero) in [1.87e-4,1.67e-3]: exp=4.5 obs=6
    P(zero) in [1.67e-3,9.25e-1]: exp=321.8 obs=303
    P(zero) <= 1e-6: obs=0
+p=79 rows=121699 zeros obs=373 exp=353.5 [321.5,385.5] PASS dispersion=0.998 (n=117149) auc=0.9925 weak_total obs=38956322 pred=38956323
+   P(zero) in [1.00e-6,5.07e-6]: exp=0.0 obs=0
+   P(zero) in [5.07e-6,2.65e-5]: exp=0.1 obs=0
+   P(zero) in [2.65e-5,1.45e-4]: exp=0.6 obs=0
+   P(zero) in [1.45e-4,1.42e-3]: exp=4.2 obs=4
+   P(zero) in [1.42e-3,9.52e-1]: exp=348.6 obs=369
+   P(zero) <= 1e-6: obs=0
 ## Non-pristine (seen during V1 diagnosis)
 p=37 rows=12321 zeros obs=145 exp=168.8 [146.5,191.1] FAIL dispersion=0.981 (n=9870) auc=0.9590 weak_total obs=1875530 pred=1875531
    P(zero) in [1.02e-6,4.79e-5]: exp=0.0 obs=0
