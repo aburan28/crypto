@@ -211,3 +211,69 @@ separately if at all:
   ([record](../../explorations/A1-build-on-fold-20261006/README.md));
 - the admitted keys' run prefetch
   ([record](../../explorations/A13-admitted-prefetch-20261006/README.md)).
+
+## Amendment 1 (2026-10-16, before any R08 run): ported onto v5, on a host of its class
+
+**No R08 step has run.** This declaration's base was "v4, R06's candidate,
+if R06 accepts it, the binary R06 measured". The programme's numbering
+moved on before R06 ran:
+- R10 accepted main at `92246530` as v4.
+- R06's amendment 2 ported R06's candidate onto that v4, and R06 accepted
+  it as **v5** ([R06's results](../R06-scan-key/README.md)).
+
+So the base named here, R06's candidate as measured, is now v5. If R08 is
+accepted, the candidate becomes **v6**.
+
+**The host.** The same Emerald Rapids as R10 and R06
+(`Intel(R) Xeon(R) Processor @ 2.10GHz`, family 6 model 207, kernel build
+`6.18.44-fc-v139`). `icprog host-class r08` finds nothing missing.
+
+**The port.**
+- `candidate.patch` applies to its declared base: v3 `995ea207` plus R06's
+  `candidate.patch`, rebuilt from the frozen patches.
+- That commit was cherry-picked onto v5's tree, v4 plus
+  `../R06-scan-key/candidate-v4.patch`. It has tree `6896b5c8`, the tree
+  in v5's `baseline.meta.json`.
+- **Both files merged without a conflict.** The ported diff,
+  [`candidate-v5.patch`](candidate-v5.patch) (SHA-256 in
+  `candidate-v5.patch.sha256`), adds and removes exactly the lines
+  `candidate.patch` does; only the context moved.
+- **One interaction was read by hand.** Main's `a8f4bb60` (v3 → v4) stopped
+  zero-filling the batched inversion's `acc` scratch, because the shift
+  kernel stores every prefix before it reads one back. R08's folding path
+  clears and fills `acc` itself and returns before that code. The shift
+  path, R08's fallback and its `KIC_SCAN_FOLD=shift` control, keeps main's
+  change unchanged.
+- The candidate's commit is local (`--cand-commit` records it). The
+  binary's SHA-256 in the manifest identifies it. It is reproduced as v5
+  plus `candidate-v5.patch`, built with `cargo build --release --locked
+  --bin ic` and `IC_BUILD_COMMIT` set.
+
+**The arms, from here.**
+- **The base: v5,** the binary R06 measured, SHA-256
+  `31982fde53e6e6aa536c9981d5d2d7c15709a08331d4c2b31ddf93d14a51eddc`
+  (from local commit `ab211e39`, tree `6896b5c8`).
+- **The candidate:** v5 plus `candidate-v5.patch`, built with
+  `rustc 1.97.0` and main's lock. SHA-256 recorded here, and in the
+  manifest, before the first step runs.
+
+**Everything else stands as declared:**
+- the tests (`cargo test --release --locked --lib -- koblitz_fast
+  koblitz_index_calculus` on the candidate's tree, logged in `tests.log`);
+- the candidate's pin on all 90 rows;
+- the A/A, of v5 against a byte-identical copy;
+- the suite rows;
+- the fresh holdouts (seeds 222–225, `T135`–`T142`, which no round,
+  exploration or diagnostic has run);
+- the extension;
+- the acceptance rule: above 1.05 at each target size, on the suite rows
+  and holdouts separately, and no size beyond its A/A band.
+
+**The prediction stands.** The exploration measured R08's candidate
+against R06's on v3. R06's base here differs from that by main's drift,
+which R10 measured as within about 3% at the target sizes. The prediction
+is not re-drawn.
+
+**The driver** is [`run.sh`](run.sh): `run.sh <scratch dir> <candidate
+commit>`. It runs as a session-tracked task. After a container restart, a
+resume runs `icprog run r08 manifest-resumed` first, as R06's did.
