@@ -31,6 +31,7 @@
 //!
 //! ```bash
 //! cargo run --release --example binary_mitm_oracle_l8
+//! cargo run --release --example binary_mitm_oracle_l8 27 9 48 16 research/binary_mitm_oracle_l9_l10_20261015
 //! ```
 
 use crypto_lib::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, IrreduciblePoly};
@@ -42,18 +43,20 @@ use num_traits::One;
 use std::collections::HashMap;
 use std::time::Instant;
 
-/// Field degree.  Odd, so [`F2mElement::half_trace`] solves `t²+t=c`;
-/// `3ℓ = 24 ≤ 25` keeps the decomposition probability well away from both
-/// 0 and 1, so the 64 targets carry a genuine found/refuted mix.
+/// Default field degree.  Odd, so [`F2mElement::half_trace`] solves
+/// `t²+t=c`; `3ℓ = 24 ≤ 25` keeps the decomposition probability well away
+/// from both 0 and 1, so the 64 targets carry a genuine found/refuted mix.
 const N: u32 = 25;
-/// Factor-base subspace dimension (the fixed ledger rung).
+/// Default factor-base subspace dimension (the fixed ledger rung).
 const L: u32 = 8;
 /// Curve constants: `a = z` (non-Koblitz, `a ∉ F₂`), `b = 1 ≠ 0`.
 const A_BITS: u64 = 0b10;
 const B: u64 = 1;
-/// Number of targets: 48 natural + 16 planted-satisfiable.
+/// Default number of targets: 48 natural + 16 planted-satisfiable.
 const NATURAL_TARGETS: usize = 48;
 const PLANTED_TARGETS: usize = 16;
+/// Default evidence directory.
+const OUT_DIR: &str = "research/binary_mitm_oracle_l8_20261015";
 
 // ── tiny deterministic RNG (same convention as semaev_decomp_bench) ──
 
@@ -67,10 +70,10 @@ impl Rng {
 }
 
 /// Solve `y² + x·y = c` for `y` on a binary curve (both roots, or none).
-fn solve_y(x: &F2mElement, c: &F2mElement, irr: &IrreduciblePoly) -> Vec<F2mElement> {
+fn solve_y(x: &F2mElement, c: &F2mElement, irr: &IrreduciblePoly, n: u32) -> Vec<F2mElement> {
     if x.is_zero() {
         // y² = c: y = c^{2^{n-1}} (square root in characteristic two).
-        let y = c.square_k_times(N - 1, irr);
+        let y = c.square_k_times(n - 1, irr);
         return if y.square(irr) == *c && !y.is_zero() {
             vec![y]
         } else {
@@ -100,19 +103,20 @@ fn solve_y(x: &F2mElement, c: &F2mElement, irr: &IrreduciblePoly) -> Vec<F2mElem
 
 /// Build the curve, its fast (one-word) twin, and the factor-base points
 /// over the low-order `ℓ`-dimensional subspace.
-fn setup() -> (FastCurve, Gf2, SubspaceOracle, Vec<FastPoint>, F2mElement) {
-    let irr = find_irreducible_sparse(N).expect("sparse irreducible of degree 25");
-    let a = F2mElement::from_biguint(&BigUint::from(A_BITS), N);
-    let b_elt = F2mElement::from_biguint(&BigUint::from(B), N);
+fn setup(n: u32, l: u32) -> (FastCurve, Gf2, SubspaceOracle, Vec<FastPoint>, F2mElement) {
+    assert!(n % 2 == 1, "n must be odd so the half-trace lifts y");
+    let irr = find_irreducible_sparse(n).expect("sparse irreducible of the requested degree");
+    let a = F2mElement::from_biguint(&BigUint::from(A_BITS), n);
+    let b_elt = F2mElement::from_biguint(&BigUint::from(B), n);
 
     // A valid on-curve point to satisfy the BinaryCurve struct; the fast
     // twin only reads m, the modulus, a and b.
     let mut generator = None;
     let mut probe = 1u64;
     while generator.is_none() {
-        let x = F2mElement::from_biguint(&BigUint::from(probe), N);
+        let x = F2mElement::from_biguint(&BigUint::from(probe), n);
         let c = curve_rhs(&x, &a, &b_elt, &irr);
-        if let Some(y) = solve_y(&x, &c, &irr).first() {
+        if let Some(y) = solve_y(&x, &c, &irr, n).first() {
             generator = Some(BinaryPoint::Affine {
                 x: x.clone(),
                 y: y.clone(),
@@ -121,7 +125,7 @@ fn setup() -> (FastCurve, Gf2, SubspaceOracle, Vec<FastPoint>, F2mElement) {
         probe += 1;
     }
     let curve = BinaryCurve {
-        m: N,
+        m: n,
         irreducible: irr.clone(),
         a: a.clone(),
         b: b_elt.clone(),
@@ -129,16 +133,16 @@ fn setup() -> (FastCurve, Gf2, SubspaceOracle, Vec<FastPoint>, F2mElement) {
         order: BigUint::one(),
         cofactor: BigUint::one(),
     };
-    let fast = FastCurve::new(&curve).expect("n = 25 fits the packed path");
+    let fast = FastCurve::new(&curve).expect("n fits the packed path");
     let gf = Gf2::new(&irr);
-    let oracle = SubspaceOracle::low_order(L, B, &gf);
+    let oracle = SubspaceOracle::low_order(l, B, &gf);
 
     // Factor base: every curve point whose abscissa lies in the subspace.
     let mut base: Vec<FastPoint> = Vec::new();
-    for v in 0..(1u64 << L) {
-        let x = F2mElement::from_biguint(&BigUint::from(v), N);
+    for v in 0..(1u64 << l) {
+        let x = F2mElement::from_biguint(&BigUint::from(v), n);
         let c = curve_rhs(&x, &a, &b_elt, &irr);
-        for y in solve_y(&x, &c, &irr) {
+        for y in solve_y(&x, &c, &irr, n) {
             let p = FastPoint::affine(gf.from_element(&x), gf.from_element(&y));
             assert!(fast.is_on_curve(p), "lifted base point must be on curve");
             base.push(p);
@@ -230,12 +234,26 @@ fn mitm_decide(
 }
 
 fn main() {
-    let (curve, gf, oracle, base, _b_elt) = setup();
-    println!("binary MITM oracle: n = {N}, ℓ = {L}, non-Koblitz a = z, b = 1");
+    let mut args = std::env::args().skip(1);
+    let n: u32 = args.next().and_then(|a| a.parse().ok()).unwrap_or(N);
+    let l: u32 = args.next().and_then(|a| a.parse().ok()).unwrap_or(L);
+    let natural: usize = args
+        .next()
+        .and_then(|a| a.parse().ok())
+        .unwrap_or(NATURAL_TARGETS);
+    let planted: usize = args
+        .next()
+        .and_then(|a| a.parse().ok())
+        .unwrap_or(PLANTED_TARGETS);
+    let explicit_out = args.next();
+    let default_out = OUT_DIR.to_string();
+    let out_dir = explicit_out.unwrap_or(default_out);
+    let (curve, gf, oracle, base, _b_elt) = setup(n, l);
+    println!("binary MITM oracle: n = {n}, ℓ = {l}, non-Koblitz a = z, b = 1");
     println!(
         "factor base: {} points over the {}-dimensional subspace",
         base.len(),
-        L
+        l
     );
 
     // ── factor-base stage: build the pair table ──────────────────────
@@ -251,20 +269,20 @@ fn main() {
     );
 
     // ── targets ───────────────────────────────────────────────────────
-    let irr = find_irreducible_sparse(N).unwrap();
-    let a = F2mElement::from_biguint(&BigUint::from(A_BITS), N);
-    let b_elt = F2mElement::from_biguint(&BigUint::from(B), N);
+    let irr = find_irreducible_sparse(n).unwrap();
+    let a = F2mElement::from_biguint(&BigUint::from(A_BITS), n);
+    let b_elt = F2mElement::from_biguint(&BigUint::from(B), n);
     let mut rng = Rng(0x9E37_79B9_7F4A_7C15);
 
     let mut targets: Vec<(FastPoint, &'static str)> = Vec::new();
-    while targets.len() < NATURAL_TARGETS {
-        let cand = rng.next() & ((1u64 << N) - 1);
+    while targets.len() < natural {
+        let cand = rng.next() & ((1u64 << n) - 1);
         if cand == 0 {
             continue;
         }
-        let x = F2mElement::from_biguint(&BigUint::from(cand), N);
+        let x = F2mElement::from_biguint(&BigUint::from(cand), n);
         let c = curve_rhs(&x, &a, &b_elt, &irr);
-        let ys = solve_y(&x, &c, &irr);
+        let ys = solve_y(&x, &c, &irr, n);
         if ys.is_empty() {
             continue;
         }
@@ -273,7 +291,7 @@ fn main() {
         assert!(curve.is_on_curve(p));
         targets.push((p, "natural"));
     }
-    for _ in 0..PLANTED_TARGETS {
+    for _ in 0..planted {
         // Sum of three distinct base points: satisfiable by construction.
         let i = (rng.next() as usize) % base.len();
         let j = (rng.next() as usize) % base.len();
@@ -369,14 +387,14 @@ fn main() {
     let report = serde_json::json!({
         "regime": "binary",
         "stage": "decomposition",
-        "claim": "first sub-2^(2l) decomposition oracle at l=8 on a non-Koblitz binary curve",
-        "n": N,
-        "l": L,
+        "claim": format!("sub-2^(2l) MITM decomposition oracle at l={} on a non-Koblitz binary curve", l),
+        "n": n,
+        "l": l,
         "curve": { "model": "y^2+xy=x^3+a*x^2+b", "a": "z", "b": 1, "non_koblitz": true },
         "construction_method": "group-law meet-in-the-middle pair table over subspace factor-base points",
         "oracle_class": "mitm_pair_table",
         "factor_base": {
-            "dimension": L,
+            "dimension": l,
             "points": base.len(),
             "materialized": true,
             "construction_wall_ms": construction_wall_ms,
@@ -385,7 +403,7 @@ fn main() {
             "build_adds": table.build_adds,
         },
         "decomposition": {
-            "unknowns": format!("3*{} = {} point coordinates (group level)", L, 3 * L),
+            "unknowns": format!("3*{} = {} point coordinates (group level)", l, 3 * l),
             "system_degree": "group law (no polynomial system)",
             "oracle_class": "mitm_pair_table",
             "ffd": {
@@ -409,8 +427,12 @@ fn main() {
             "constant-factor win; no asymptotic claim",
         ],
     });
-    let out_dir = std::path::Path::new("research/binary_mitm_oracle_l8_20261015");
-    std::fs::create_dir_all(out_dir).unwrap();
+    let out_dir = if n == N && l == L {
+        std::path::PathBuf::from(&out_dir)
+    } else {
+        std::path::Path::new(&out_dir).join(format!("l{}n{}", l, n))
+    };
+    std::fs::create_dir_all(&out_dir).unwrap();
     let out_path = out_dir.join("results.json");
     std::fs::write(&out_path, serde_json::to_vec_pretty(&report).unwrap()).unwrap();
     println!("\nwrote {}", out_path.display());
@@ -434,7 +456,7 @@ mod tests {
         while generator.is_none() {
             let x = F2mElement::from_biguint(&BigUint::from(probe), 15);
             let c = curve_rhs(&x, &a, &b_elt, &irr);
-            for y in solve_y(&x, &c, &irr) {
+            for y in solve_y(&x, &c, &irr, 15) {
                 generator = Some(BinaryPoint::Affine { x, y });
                 break;
             }
@@ -458,7 +480,7 @@ mod tests {
         for v in 0..(1u64 << 5) {
             let x = F2mElement::from_biguint(&BigUint::from(v), 15);
             let c = curve_rhs(&x, &a, &b_elt, &irr);
-            for y in solve_y(&x, &c, &irr) {
+            for y in solve_y(&x, &c, &irr, 15) {
                 let p = FastPoint::affine(gf.from_element(&x), gf.from_element(&y));
                 assert!(fast.is_on_curve(p));
                 base.push(p);
@@ -489,7 +511,7 @@ mod tests {
             }
             let x = F2mElement::from_biguint(&BigUint::from(cand), 15);
             let c = curve_rhs(&x, &a, &b_elt, &irr);
-            let ys = solve_y(&x, &c, &irr);
+            let ys = solve_y(&x, &c, &irr, 15);
             if ys.is_empty() {
                 continue;
             }

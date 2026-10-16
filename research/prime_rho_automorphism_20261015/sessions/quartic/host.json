@@ -1,0 +1,122 @@
+{
+  "schema": "ecbench.host/v1",
+  "env_class_id": "ECBENV2h0e1f15f7c61e",
+  "env_class_sha256": "0e1f15f7c61ed382f23f7683bcfc085098d41795039584a9d1c6d7ec02aaefc2",
+  "stable": {
+    "os": "linux",
+    "arch": "x86_64",
+    "kernel_release": "6.18.54-121.166.amzn2023.x86_64",
+    "cpu_vendor": "AuthenticAMD",
+    "cpu_model": "AMD EPYC 9R05",
+    "cpu_signature": "26/2/1",
+    "microcode": "0xb002176",
+    "features": [
+      "adx",
+      "aes",
+      "avx",
+      "avx2",
+      "avx512bw",
+      "avx512dq",
+      "avx512f",
+      "avx512ifma",
+      "avx512vbmi",
+      "avx512vl",
+      "bmi1",
+      "bmi2",
+      "fma",
+      "gfni",
+      "pclmulqdq",
+      "popcnt",
+      "sha",
+      "sse4.2",
+      "vaes",
+      "vpclmulqdq"
+    ],
+    "flags_sha256": "c147bdd73e3be10d96654c5b72273cf6312a40fb0608a0f2319a3766904ddb63",
+    "logical_cpus": 2,
+    "physical_cores": 2,
+    "packages": 1,
+    "numa_nodes": 1,
+    "topology": {
+      "cpus": [
+        {
+          "cpu": 0,
+          "core_id": 0,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            0
+          ]
+        },
+        {
+          "cpu": 1,
+          "core_id": 1,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            1
+          ]
+        }
+      ],
+      "nodes": [
+        {
+          "node": 0,
+          "cpus": [
+            0,
+            1
+          ],
+          "mem_total_kib": 7944064,
+          "distances": [
+            10
+          ]
+        }
+      ]
+    },
+    "perf_levels": [],
+    "mem_total_kib": 7944064,
+    "cpu_settings": {
+      "0": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": false,
+        "smt_control": "notsupported"
+      },
+      "1": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": false,
+        "smt_control": "notsupported"
+      }
+    },
+    "transparent_hugepages": "always [madvise] never",
+    "virtualization": {
+      "cpu_flag": "hypervisor",
+      "dmi_product": "m8azn.large",
+      "dmi_vendor": "Amazon EC2",
+      "systemd_detect_virt_vm": "amazon"
+    },
+    "rustc_vv": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1"
+  },
+  "build": {
+    "binary_path": "/home/ec2-user/crypto/target/release/ecbench",
+    "binary_sha256": "0a8a48d7580df43d089a62e02f228e93e27ad4a049285cb28a0f5b87eb1473b6",
+    "git_commit": "c9db37d01bc776a1e8594ce5495e58ba2ccf5a1d",
+    "git_dirty": false,
+    "git_commit_source": "runtime_worktree",
+    "runtime_git_commit": "c9db37d01bc776a1e8594ce5495e58ba2ccf5a1d",
+    "runtime_git_dirty": false,
+    "debug_assertions": false,
+    "target_os": "linux",
+    "target_arch": "x86_64",
+    "build_env": {}
+  },
+  "process_affinity": [
+    0,
+    1
+  ],
+  "captured_unix_ms": 1792105529387
+}

@@ -104,7 +104,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "5d1bd4e059a96c03cdf8dcc349fa3399fcf8e708dc03b9e6ada5893b3f7645b9"
+   "sha256": "22b2ffef99720f2b2c7396a267412d2241a868e038a835c4fb1fd12209b102bf"
   },
   "curves_schema": {
    "path": "docs/curves/ic/curves.schema.json",
@@ -9555,6 +9555,20 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp20-t1143-5bef62bd",
+   "family": "prime",
+   "field": "GF(p), p = 537599",
+   "coefficients": "a = 451926, b = 332081",
+   "order_bits": 20,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp20-t157-e39da206",
    "family": "prime",
    "field": "GF(p), p = 550813",
@@ -10066,6 +10080,20 @@
    "legacy": [
     "isogeny-gap-prime-D4-l3-h6-22b-level-L3"
    ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp22-tm1105-62a9d176",
+   "family": "prime",
+   "field": "GF(p), p = 2511871",
+   "coefficients": "a = 1975157, b = 977806",
+   "order_bits": 22,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
@@ -11049,6 +11077,20 @@
    "family": "prime",
    "field": "GF(p), p = 10940417",
    "coefficients": "a = 10128206, b = 867458",
+   "order_bits": 24,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp24-tm4507-ffb4b7f9",
+   "family": "prime",
+   "field": "GF(p), p = 11750399",
+   "coefficients": "a = 7617878, b = 9089328",
    "order_bits": 24,
    "standard": [],
    "ec1": [],
