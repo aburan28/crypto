@@ -64,6 +64,12 @@ claim, traverse a curve path, or omit a hash. A prewritten PASS and an inflated
 stored score do not change the freshly verified degree. Output-directory
 reuse is refused and the first judgement's bytes remain unchanged.
 
+#if data.rejected_mutations.len() > 8 [
+  The ninth case repeats one valid kernel in both map slots. COMPLETE coverage
+  requires distinct normalized kernels and distinct Frobenius roots; that false
+  completeness claim is rejected. Partial maps remain eligible.
+]
+
 Replay has a 3600-second wall budget and an 8 GiB sampled RSS cap per submission.
 A lower replay timeout is permitted. The bundled constructor has a separate
 1800-second/8 GiB limit. The raw map limit is 256 MiB, summary 1 MiB and stderr
