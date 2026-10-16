@@ -4,19 +4,19 @@ This round answers the two open items in the [main report](../REPORT.md):
 the zero labels were probabilistic, and the high-depth classes with no weak
 representative had no explanation beyond an association with class number.
 
-1. **Every census label through p = 61 is now certified.** A new counter
+1. **Every census label through p = 67 is now certified.** A new counter
    returns a group order only when it is the unique Hasse-interval candidate
    compatible with the tested points on the curve and its twist. Reruns at
    p = 7, 13, 37, 41, 43, 47, 53 and 59 reproduce every retained CSV byte for
-   byte. p = 61 is new. The queue continues through p = 199.
+   byte. p = 61 and 67 are new. The queue continues through p = 199.
 2. **The number of 8th-power Legendre parameters in a class is an exact
    2-adic formula times a Hurwitz class number.** The formula reproduces
    exhaustive censuses at p = 7, 11, 13, 17 and the held-out p = 19
    (0 mismatches in 7,327 rows).
 3. **Beyond that 2-adic structure, the norm-one torus samples a class at
    random.** A parameter-free binomial thinning predicts the residual zero
-   count. It passes at the pristine holdouts p = 53 and 59, and at p = 61,
-   which was predicted before its census finished. The dispersion is
+   count. It passes at the pristine holdouts p = 53 and 59, and at p = 61
+   and 67, which were predicted before their censuses finished. The dispersion is
    1.00 ± 0.01 throughout.
 
 The consequence for the original request: past the proved obstruction
@@ -62,6 +62,7 @@ threads, against 1,107 s for the original direct run.
 | 53 | 658,243 | 27 | 347 | identical |
 | 59 | 1,010,651 | 23 | 941 | identical to the retained p59 run |
 | **61** | **1,154,751** | **41** | **1,265** | **new**: 111,084 / 223,260 ordinary rows weak; 0 / 111,630 depth-1 weak; 546 / 111,630 high-depth zero |
+| **67** | **1,680,383** | **30** | **1,448** | **new**: 147,496 / 296,274 ordinary rows weak; 0 / 148,138 depth-1 weak; 640 / 148,136 high-depth zero |
 
 "Extra isolation points" counts the points needed beyond the first, summed
 over all point counts. Almost every order is isolated by one scan.
@@ -70,7 +71,8 @@ Evidence: [comparison receipt](../certified_20261016/comparison_receipt.txt),
 per-prime stderr receipts and CSV hashes, the
 [queue script](../certified_20261016/queue.sh) and its
 [status log](../certified_20261016/queue_status.tsv), and the
-[p = 61 CSV](../certified_20261016/p61_cert.csv.gz). The unit test
+[p = 61](../certified_20261016/p61_cert.csv.gz) and
+[p = 67](../certified_20261016/p67_cert.csv.gz) CSVs. The unit test
 `certified_order_matches_exhaustive_count_at_p7` compares 12 random p = 7
 curves with brute-force counts.
 
@@ -169,7 +171,15 @@ are reported but are not pristine.
 | **53** | pristine holdout | 36,517 | **247** | 240.4 [213.8, 266.9] | **pass** | 1.005 | 0.982 |
 | **59** | pristine holdout | 50,474 | **270** | 265.9 [238.0, 293.8] | **pass** | 1.001 | 0.986 |
 | **61** | forward prediction | 55,815 | **273** | 275.3 [247.0, 303.6] | **pass** | 0.992 | 0.984 |
-| 67, 71, 73, 79, 83 | forward predictions | | *census running* | see [predictions_v2.txt](predictions_v2.txt) | | | |
+| **67** | forward prediction | 74,068 | **320** | 301.1 [271.5, 330.8] | **pass** | 0.996 | 0.987 |
+| 71, 73, 79, 83 | forward predictions | | *census running* | see [predictions_v2.txt](predictions_v2.txt) | | | |
+
+![Observed residual zero classes against the registered V2 predictions](figures/zero_rows.svg)
+
+The figure plots the recorded values in [figures/zero_rows.csv](figures/zero_rows.csv)
+(source [plot_zero_rows.py](figures/plot_zero_rows.py)). Filled markers are
+scored censuses; hollow markers are forward predictions whose census is
+still running.
 
 The predictions for p = 61, 67 and 71 were committed in `edc0c3ddf`, and
 those for 73, 79 and 83 in `788e11c8c`. Both commits precede the census
@@ -205,7 +215,7 @@ rows.
 
 * Proved (THEOREM.pdf): no ordinary class with `v₂(f_π) = 1` is weak, at
   every odd `p`.
-* Exact for p ≤ 61: the class labels, certified.
+* Exact for p ≤ 67: the class labels, certified.
 * Conjectured, exact on five primes: the `N₈` formula.
 * Measured, three pristine or forward holdouts passed: inside high-depth
   classes, weakness is a binomial thinning of the 8th-power mass. No
@@ -214,7 +224,7 @@ rows.
   `h_K`) separates the residual zeros.
 * Not shown: that no exotic arithmetic criterion exists. A future failure of
   the forward predictions would be evidence for one.
-* Census status: p ≤ 61 complete and certified; the queue runs the remaining
+* Census status: p ≤ 67 complete and certified; the queue runs the remaining
   primes through 199 in order. At the measured rate, p = 199 alone needs
   about 4 days on 4 threads.
 
@@ -229,9 +239,17 @@ ISO1_SKIP_SYLOW=1 $B/iso1_lambda_census 11 lam11.csv                       # all
 ISO1_OMEGA_ONLY=1 ISO1_OMEGA_EXP=3 $B/iso1_lambda_census 17 o8_17.csv     # 8th powers only
 python3 -c "p=19; print('\n'.join(str(t) for t in range(2,2*p**3,4) if t%p))" > t19.txt
 ISO1_P=19 ISO1_TRACES=t19.txt gp -q -f research/iso1_weak_classes_20261007/residual_model_20261016/class_levels.gp > L19.csv
-python3 research/iso1_weak_classes_20261007/residual_model_20261016/model_v2.py exact om19.csv L19.csv
-python3 research/iso1_weak_classes_20261007/residual_model_20261016/model_v2.py holdout 61 p61.csv L61.csv
+$B/iso1_residual_model exact om19.csv L19.csv
+$B/iso1_residual_model holdout 61 p61.csv L61.csv
+$B/iso1_residual_model predict 71 L71.csv
 ```
+
+The model is evaluated natively by `iso1_residual_model`
+([source](../census_runtime/src/residual_model.rs)). The first evaluations and
+the committed predictions came from Python scripts, now kept unchanged in
+[legacy_python/](legacy_python/README.md) as provenance; the native binary
+reproduces every number they printed. A PDF of this report with the figure is
+[REPORT.pdf](REPORT.pdf).
 
 `class_levels.gp` uses `quadclassunit`, so its large-`|D_K|` class
 numbers are GRH-conditional. That affects the model's predictions, not the
