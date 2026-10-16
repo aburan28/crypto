@@ -1,0 +1,9 @@
+error: path `"../architecture.svg"` would escape the project root
+  ┌─ research/isogeny_world_frontier_20261016/replay-optimization-v1/clean-retake-015fa7bb504e/report.typ:8:7
+  │
+8 │ #image("../architecture.svg", width: 100%)
+  │        ^^^^^^^^^^^^^^^^^^^^^
+  │
+  = hint: cannot access files outside of the project sandbox
+  = hint: you can adjust the project root with the `--root` argument
+

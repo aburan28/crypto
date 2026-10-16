@@ -1,0 +1,35 @@
+{
+  "schema": "fixed-modulus-source-gate-status/v1",
+  "source_commit": "015fa7bb504ef63953e0e04e464bb266f4f207bf",
+  "native_each_arm": {
+    "passed": 128,
+    "failed": 0,
+    "ignored": 1,
+    "helper_invoked_by_parent": true
+  },
+  "root_default_parallel": {
+    "passed": 4146,
+    "failed": 2,
+    "ignored": 117
+  },
+  "root_focused_serial": {
+    "passed": 14,
+    "failed": 0,
+    "ignored": 1
+  },
+  "root_full_serial": {
+    "passed": 4148,
+    "failed": 0,
+    "ignored": 117,
+    "raw_exit": 0
+  },
+  "root_executable_sha256": "e6b0366e26794fe703741ba309cd3c7cb168150c827fa2a23ba068038aec7399",
+  "source_library_code_changed": false,
+  "mathematical_output_pairs_equal": 6,
+  "excluded_fields": [],
+  "remote_custody": "LOCAL_ONLY_PENDING_AUTHORIZATION",
+  "remote_uploads_executed": 0,
+  "independent_review": "NOT_STARTED",
+  "scientific_runs": 0,
+  "source_gate_complete": false
+}
