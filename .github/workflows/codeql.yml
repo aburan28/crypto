@@ -80,7 +80,9 @@ jobs:
     #   - https://gh.io/supported-runners-and-hardware-resources
     #   - https://gh.io/using-larger-runners (GitHub.com only)
     # Consider using larger runners or machines with greater resources for possible analysis time improvements.
-    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    # Rust uses the standard public-repository ARM runner with the same four
+    # CPUs and 16 GiB envelope; CodeQL provides a Linux arm64 bundle.
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || (matrix.language == 'rust' && 'ubuntu-24.04-arm') || 'ubuntu-latest' }}
     permissions:
       # required for all workflows
       security-events: write
@@ -126,8 +128,52 @@ jobs:
         echo '::error::CI scope or release metadata failed; refusing to skip validation.'
         exit 1
     - name: Checkout repository
-      if: needs.scope.outputs[matrix.scope] != 'false'
+      if: needs.scope.outputs[matrix.scope] != 'false' && matrix.language != 'rust'
       uses: actions/checkout@v7
+
+    # The repository contains many research receipts that CodeQL does not
+    # parse as Rust. Keep every tracked Rust source and Cargo manifest while
+    # avoiding those unrelated blobs in the time-limited PR scan.
+    - name: Checkout complete Rust source
+      if: needs.scope.outputs[matrix.scope] != 'false' && matrix.language == 'rust'
+      uses: actions/checkout@v7
+      with:
+        filter: blob:none
+        sparse-checkout-cone-mode: false
+        sparse-checkout: |
+          /*.rs
+          /**/*.rs
+          /Cargo.toml
+          /Cargo.lock
+          /**/Cargo.toml
+          /**/Cargo.lock
+          /rust-toolchain*
+          /.cargo/**
+
+    - name: Prove complete Rust source coverage
+      if: needs.scope.outputs[matrix.scope] != 'false' && matrix.language == 'rust'
+      shell: bash
+      run: |
+        python3 - <<'PY'
+        import os
+        import subprocess
+
+        paths = subprocess.check_output(
+            ["git", "ls-tree", "-r", "-z", "--name-only", "HEAD"]
+        ).decode().split("\0")
+        required = [
+            path for path in paths
+            if path.endswith(".rs")
+            or path == "Cargo.toml" or path.endswith("/Cargo.toml")
+            or path == "Cargo.lock" or path.endswith("/Cargo.lock")
+        ]
+        missing = [path for path in required if not os.path.lexists(path)]
+        if missing:
+            raise SystemExit("Rust CodeQL checkout omitted source: " +
+                             ", ".join(missing[:20]))
+        print(f"Rust CodeQL checkout includes all {len(required)} "
+              "tracked Rust sources and Cargo manifests")
+        PY
 
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
