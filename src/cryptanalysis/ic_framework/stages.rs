@@ -314,6 +314,10 @@ pub struct SolverTotals {
     pub extra: BTreeMap<String, u64>,
 }
 
+/// The `SolverCost::extra` flag by which an engine says its `bitop_*`
+/// keys count its whole call (`ecbench::work::SOLVER_BITOP_KEYS`).
+const BITOP_COMPLETE: &str = "bitop_complete";
+
 impl SolverTotals {
     pub fn absorb(
         &mut self,
@@ -324,6 +328,20 @@ impl SolverTotals {
         self.calls += 1;
         self.shape = Some(shape.clone());
         self.budget_exceeded += u64::from(budget_exceeded);
+        // `bitop_complete` is a flag, not a total: the run's `bitop_*`
+        // counts cover all of its work only if every call's did, so it
+        // stays 1 while every call reports 1 and drops to 0 at the first
+        // that does not (an unmeasured call included).
+        let complete = cost.and_then(|c| c.extra.get(BITOP_COMPLETE)).copied() == Some(1);
+        if self.calls == 1 {
+            if complete {
+                self.extra.insert(BITOP_COMPLETE.into(), 1);
+            }
+        } else if !complete {
+            if let Some(flag) = self.extra.get_mut(BITOP_COMPLETE) {
+                *flag = 0;
+            }
+        }
         let Some(c) = cost else { return };
         self.ops += c.ops;
         if self.op_unit.is_empty() {
@@ -339,6 +357,9 @@ impl SolverTotals {
         // A key that names a maximum (`*_max`) is the maximum over
         // calls; every other key is a total over the run.
         for (k, v) in &c.extra {
+            if k == BITOP_COMPLETE {
+                continue;
+            }
             let entry = self.extra.entry(k.clone()).or_insert(0);
             if k.ends_with("_max") {
                 *entry = (*entry).max(*v);

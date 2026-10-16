@@ -905,6 +905,8 @@ fn encode_xor_eq_zero(
     target_parity: bool,
     chain: &[u32],
 ) -> bool {
+    // `bitop/v1`: the literals copied out and walked once by the chain.
+    solver.stats.encode_word_ops += 2 * lits.len() as u64;
     let mut effective: Vec<Lit> = lits.to_vec();
 
     if effective.is_empty() {
@@ -1000,6 +1002,10 @@ fn encode_xor_eq_zero(
 /// Emits exactly `2^{w-1}` clauses, each of length `w`.
 fn emit_direct_xor(solver: &mut Solver, lits: &[Lit], target_parity: bool) {
     let w = lits.len();
+    // `bitop/v1`: one parity test per assignment of the `w` inputs, and
+    // one literal written per input in each of the `2^{w−1}` clauses
+    // (`add_clause` charges its own normalisation).
+    solver.stats.encode_word_ops += (1u64 << w) + (w as u64) * (1u64 << w.saturating_sub(1));
     for assignment in 0..(1u32 << w) {
         // Count bits = parity of this assignment.
         let parity = (assignment.count_ones() % 2) == 1;
@@ -1113,6 +1119,15 @@ pub fn encode_boolean_system_with(
             .all(|t| { n_vars == 64 || (t.mask >> n_vars) == 0 }),
         "monomial references a variable outside the system"
     );
+    // `bitop/v1` accounting of the encoding, in word operations (see
+    // `Solver::word_ops`), added to the solver's `encode_word_ops` once
+    // it exists.  A monomial is one word, so a term touched is one unit;
+    // a probe of the monomial map is charged one comparison per level of
+    // a balanced search over its final size, `⌈log₂ m⌉ + 1`.
+    let n_terms: u64 = equations.iter().map(|eq| eq.terms.len() as u64).sum();
+    let n_eqs = equations.len() as u64;
+    // The range check above: one shift-and-test per term.
+    let mut enc_ops = n_terms;
 
     // One auxiliary per distinct monomial of degree ≥ 2.
     let mut monomial_var: std::collections::BTreeMap<u64, u32> = std::collections::BTreeMap::new();
@@ -1123,6 +1138,16 @@ pub fn encode_boolean_system_with(
             }
         }
     }
+    let n_monomials = monomial_var.len() as u64;
+    let probe = (64 - n_monomials.leading_zeros()) as u64 + 1;
+    let n_wide_terms: u64 = equations
+        .iter()
+        .flat_map(|eq| &eq.terms)
+        .filter(|t| t.mask.count_ones() >= 2)
+        .count() as u64;
+    // Collecting the monomials: a popcount per term and a map probe per
+    // term of degree ≥ 2; then one per monomial numbered.
+    enc_ops += n_terms + n_wide_terms * probe + n_monomials;
     let mut next = n_vars as u32 + 1; // DIMACS variables are 1-indexed
     for v in monomial_var.values_mut() {
         *v = next;
@@ -1146,9 +1171,25 @@ pub fn encode_boolean_system_with(
             .collect();
         xor_chain_aux.push(chain);
     }
+    // Chain auxiliaries: each equation's terms counted, each auxiliary
+    // numbered.
+    enc_ops += n_terms + n_eqs + (next as u64 - 1 - n_vars as u64 - n_monomials);
 
     let mut solver = Solver::new(next - 1);
     let mut trivially_unsat = false;
+    // Each Tseitin definition scans the `n_vars` bits of its mask and
+    // writes its long clause and its binary ones (`add_clause` charges
+    // its own normalisation).
+    enc_ops += monomial_var
+        .keys()
+        .map(|mask| n_vars as u64 + 3 * mask.count_ones() as u64 + 1)
+        .sum::<u64>();
+    // Each equation's literal list: one per term, a map probe per term
+    // of degree ≥ 2, and the native row's variable list.
+    enc_ops += n_eqs + 2 * n_terms + n_wide_terms * probe;
+    // Each blocking clause: one literal per problem variable.
+    enc_ops += blocked.len() as u64 * n_vars as u64;
+    solver.stats.encode_word_ops += enc_ops;
 
     // z ↔ v_{i_1} ∧ … ∧ v_{i_k}.
     for (&mask, &z) in monomial_var.iter() {
