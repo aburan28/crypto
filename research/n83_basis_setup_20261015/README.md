@@ -1,3 +1,11 @@
+# Final publication (16 October2026)
+
+[Final report](REPORT.md) · [109-page comprehensive PDF](reports/final-20261016/unified_curve_basis_report_basis_setup.pdf) · [22-page addendum](reports/final-20261016/n83_basis_setup_addendum.pdf).
+
+Actual55 attempts /50 complete /5 failed,92 canonical answers,30 fullrank/log audits and five identical A/A workpairs. C3 cold611.139215s versus K6001223.782149s and rho2.107724s. C3/rho289.952172 [245.967290,375.396780]; no end-to-end IC win. The8-target cohort rho contract failed in three processes; its matched ratio remains unavailable. This publication preserves that unresolved acceptance requirement.
+
+The historical preparation notes below remain unchanged context, not current running status.
+
 # IC basis and setup study
 
 Status: training and fresh cold holdouts are independently verified. The final

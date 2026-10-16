@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/workspace/repos/crypto-n83-basis/scripts/build_lab_browser.py", line 587, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/repos/crypto-n83-basis/scripts/build_lab_browser.py", line 562, in main
+    fresh = build()
+            ^^^^^^^
+  File "/workspace/repos/crypto-n83-basis/scripts/build_lab_browser.py", line 501, in build
+    rounds = tournament_rounds(curves)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/repos/crypto-n83-basis/scripts/build_lab_browser.py", line 374, in tournament_rounds
+    for d in sorted(os.listdir(base)):
+                    ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/repos/crypto-n83-basis/research/ic_candidate_tournament_20260915/runs'

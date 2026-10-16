@@ -10,6 +10,14 @@
  ],
  "class": "accounting",
  "sources": {
+  "n83_basis_cold": {
+   "path": "research/n83_basis_setup_20261015/reports/run-20261015T1842Z/native_statistics.json",
+   "sha256": "8673fa9e49e806dc9f8c341cb3754456101e00aa0a3e250e190e98ffc93069f2"
+  },
+  "n83_basis_final": {
+   "path": "research/n83_basis_setup_20261015/reports/final-20261016/native_final.json",
+   "sha256": "812f840f5efbf89e4292170f119b68950a66bf9ac770ab4f9d9665f7e1bc788f"
+  },
   "round5": {
    "path": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "sha256": "28aadc91af9e4c0b84eefcd4c940c27f178c5d63a69bc03058eab52d327225c7"
@@ -6447,6 +6455,188 @@
    "missing_target_rows": 0
   },
   "limits": "Eight actual one-target cold pairs and three actual 32-target shared-setup pairs, given retained K600; original base construction and OS-cold caching are unmeasured. Rho reuses curve/basis preparation with fresh seed-specific jumps and fresh DP state. Online is secondary because IC omits validation/output intervals charged by rho. One VM, three preparation clusters, fixed IC rank seed 29; no common S, sealed legacy-wide ecbench admission, physical-host or independent-host claim. Modeled workloads beyond 32 are not measured crossovers."
+ },
+ "n83_basis_setup_diagnostic": {
+  "source": "research/n83_basis_setup_20261015/reports/final-20261016/native_final.json",
+  "cold_source": "research/n83_basis_setup_20261015/reports/run-20261015T1842Z/native_statistics.json",
+  "curve": "icv1-f2m83-t6151469093347-9eba6cd5",
+  "measurement_date": "2026-10-15",
+  "class": "engineering",
+  "admission": "local diagnostic only; no ranked or ledger promotion",
+  "S": null,
+  "ratio_to_floor": null,
+  "cohort_IC_over_rho": null,
+  "counts": {
+   "attempted": 55,
+   "completed": 50,
+   "failed": 5,
+   "canonical_answers": 92,
+   "ic_answers": 72,
+   "rho_answers": 20,
+   "rank_log_audits": 30,
+   "AA_pairs": 5
+  },
+  "cold": {
+   "selected_over_rho": {
+    "mean_cost_ratio": 289.95217199587677,
+    "conditional_95_percent_interval": [
+     245.96728993096033,
+     375.39678030183126
+    ]
+   },
+   "control_over_rho": {
+    "mean_cost_ratio": 580.617776186712,
+    "conditional_95_percent_interval": [
+     489.1802266078212,
+     758.6102917675073
+    ]
+   },
+   "selected_over_control": {
+    "mean_cost_ratio": 0.499385626634062,
+    "conditional_95_percent_interval": [
+     0.48420560974319626,
+     0.5141860897671691
+    ]
+   }
+  },
+  "cold_processes": {
+   "control": {
+    "wall_s": {
+     "n": 8,
+     "mean": 1223.7821487055,
+     "median": 1235.8377116860001,
+     "p90": 1287.7382266906,
+     "p95": 1289.7379050713,
+     "max": 1291.737583452
+    },
+    "cpu_s": {
+     "n": 8,
+     "mean": 1223.690378625,
+     "median": 1235.7439799999997,
+     "p90": 1287.6469786,
+     "p95": 1289.6566863,
+     "max": 1291.666394
+    },
+    "peak_rss_bytes": {
+     "n": 8,
+     "mean": 5834199040,
+     "median": 5834207232,
+     "p90": 5834242457.6,
+     "p95": 5834245324.8,
+     "max": 5834248192
+    },
+    "aligned_online_s": {
+     "n": 8,
+     "mean": 1.355844292125,
+     "median": 0.8412784755,
+     "p90": 2.5518657511999994,
+     "p95": 4.049053987099998,
+     "max": 5.546242223
+    },
+    "producer_preparation_s": {
+     "n": 8,
+     "mean": 1222.170881935625,
+     "median": 1234.4756133239998,
+     "p90": 1286.8737077122,
+     "p95": 1288.7093923756,
+     "max": 1290.5450770389998
+    }
+   },
+   "selected": {
+    "wall_s": {
+     "n": 8,
+     "mean": 611.139215194875,
+     "median": 614.1758795375,
+     "p90": 629.222412225,
+     "p95": 632.2511104465,
+     "max": 635.279808668
+    },
+    "cpu_s": {
+     "n": 8,
+     "mean": 611.079537125,
+     "median": 614.111175,
+     "p90": 629.1613085,
+     "p95": 632.19175025,
+     "max": 635.2221920000001
+    },
+    "peak_rss_bytes": {
+     "n": 8,
+     "mean": 10832451072,
+     "median": 10832455680,
+     "p90": 10832520396.8,
+     "p95": 10832521830.4,
+     "max": 10832523264
+    },
+    "aligned_online_s": {
+     "n": 8,
+     "mean": 0.217069512875,
+     "median": 0.217632638,
+     "p90": 0.31924679,
+     "p95": 0.3772206604999999,
+     "max": 0.435194531
+    },
+    "producer_preparation_s": {
+     "n": 8,
+     "mean": 610.684956138,
+     "median": 613.789503559,
+     "p90": 628.6698197544999,
+     "p95": 631.62816753675,
+     "max": 634.586515319
+    }
+   },
+   "rho": {
+    "wall_s": {
+     "n": 8,
+     "mean": 2.10772421875,
+     "median": 2.358451175,
+     "p90": 2.5734350071,
+     "p95": 2.66618762405,
+     "max": 2.758940241
+    },
+    "cpu_s": {
+     "n": 8,
+     "mean": 2.102675625,
+     "median": 2.3509139999999995,
+     "p90": 2.5695696999999997,
+     "p95": 2.66190985,
+     "max": 2.75425
+    },
+    "peak_rss_bytes": {
+     "n": 8,
+     "mean": 31169536,
+     "median": 36505600,
+     "p90": 36527308.8,
+     "p95": 36550246.4,
+     "max": 36573184
+    },
+    "aligned_online_s": {
+     "n": 8,
+     "mean": 1.878112874,
+     "median": 2.1139242075,
+     "p90": 2.353254678,
+     "p95": 2.449301041,
+     "max": 2.545347404
+    },
+    "producer_preparation_s": {
+     "n": 8,
+     "mean": 0.20759431425,
+     "median": 0.20546519350000003,
+     "p90": 0.2195334377,
+     "p95": 0.22131972884999998,
+     "max": 0.22310602
+    }
+   }
+  },
+  "cohort_selected_over_control": {
+   "mean_cost_ratio": 0.513799569475073,
+   "conditional_95_percent_interval": [
+    0.5055763794851833,
+    0.5224821728249345
+   ],
+   "bootstrap_draws": 20000,
+   "bootstrap_seed": 202610157802
+  },
+  "limits": "C3 selected before fresh holdouts. Eight actual cold blocks; three cohort rho workers rejected8-point input. Fifty complete and five failed processes,92answers. Cohort IC/rho unavailable; no replacement or projected timing. One guest/three prep clusters, no calibrated S/L2/independent-host or security claim. Original retained K600 construction and OS-cache flushing unpriced."
  },
  "curve_records": {
   "registry": "docs/curves/registry.json",
