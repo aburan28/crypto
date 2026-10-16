@@ -14,7 +14,7 @@ use crypto_lib::cryptanalysis::{
         field::{Fe, Field},
         kernel,
         poly::{self, Poly},
-        record::sha256_hex,
+        record::{ec1_identity, ec1_records, sha256_hex},
     },
     prime_fast::{collect_relations, solve_relations, FastCurve, FastFactorBase, Pt},
 };
@@ -148,9 +148,20 @@ fn run_curve(
     for &p in &base.pts {
         assert!(c.is_on_curve(p) && c.mul(Some(p), R).is_none());
     }
+    let (gx, gy) = c.canonical(g);
+    let (field_record, curve_record) = ec1_records(
+        &BigUint::from(P),
+        &BigUint::from(c.f.from_mont(c.a)),
+        &BigUint::from(c.f.from_mont(c.b)),
+        &BigUint::from(R),
+        &BigUint::from(1u8),
+        (&BigUint::from(gx), &BigUint::from(gy)),
+    );
+    let (ec1, uid) = ec1_identity(&BigUint::from(P), &field_record, &curve_record, "fp");
     println!(
         "{}",
         json!({"kind":"curve", "edge_id":id, "degree":ell,
+        "measured_ec1":ec1,"measured_curve_uid":uid,"generator_policy":"image of frozen source G under the recorded map",
         "a":c.f.from_mont(c.a).to_string(),"b":c.f.from_mont(c.b).to_string(),
         "transported_G":([g.x,g.y].map(|x|c.f.from_mont(x).to_string())),
         "transported_Q":([q.x,q.y].map(|x|c.f.from_mont(x).to_string())),
