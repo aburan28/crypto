@@ -48,6 +48,9 @@ enum Cmd {
         /// Measure only these fields (comma-separated; default all).
         #[arg(long, value_delimiter = ',')]
         fields: Vec<String>,
+        /// Also time `prime_fast::rho_parallel` on a curve of this many bits.
+        #[arg(long)]
+        prime_fast_rho_bits: Option<u32>,
     },
     /// Fit a hardware profile from a measurement run and validate the model
     /// against the measured kernel.
@@ -215,8 +218,10 @@ fn run() -> Result<(), String> {
             reps,
             target_ms,
             fields,
+            prime_fast_rho_bits,
         } => {
             let mut params = measure::default_params(quick);
+            params.prime_fast_rho_bits = prime_fast_rho_bits;
             if let Some(r) = reps {
                 params.reps = r;
             }
