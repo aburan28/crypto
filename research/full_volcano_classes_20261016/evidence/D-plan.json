@@ -1,0 +1,638 @@
+{
+  "auto_degrees": [
+    2,
+    3
+  ],
+  "conductor_factors": [
+    [
+      2,
+      10
+    ],
+    [
+      3,
+      12
+    ]
+  ],
+  "degrees": [
+    2,
+    3
+  ],
+  "discriminant": -3257637170096111616,
+  "expected_vertices": 1631523870,
+  "frobenius_conductor": 544195584,
+  "fundamental_discriminant": -11,
+  "input": {
+    "a": 23803279393343871,
+    "b": 223081513837153681,
+    "order": 814409292524040900,
+    "p": 814409292524040673
+  },
+  "maximal_class_number": 1,
+  "order": 814409292524040900,
+  "order_evidence": {
+    "certified": true,
+    "divisor": "814409292524040900",
+    "exact_small_field_enumeration": null,
+    "factor_primality": "native deterministic u64 Miller-Rabin rechecked for discriminant; order certificate uses isogeny_algos certificate backend",
+    "order_method": "Given",
+    "point_samples": [
+      [
+        "94560772462427504",
+        "409171430797503007"
+      ]
+    ],
+    "twist_divisor": "407204646262020224",
+    "via_twist": false
+  },
+  "schema": "ordinary-isogeny-class/v1",
+  "source_code_sha256": "e7bb94cbd04fee896c872195feed0f904ae4aaead399bb0946f039ec7e8e9988",
+  "source_identity": {
+    "curve_uid": null,
+    "ec1": null,
+    "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+    "icv1": "ICV1:fp-814409292524040673:-226:814409292524040900:355790128770897316:unk:unk:r:f2aa35d3d001",
+    "model_json": "{\"a\":\"23803279393343871\",\"b\":\"223081513837153681\",\"field\":\"fp-814409292524040673\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"814409292524040673\",\"v\":\"1\"}",
+    "slug": "icv1-fp60-tm226-f2aa35d3"
+  },
+  "storage": {
+    "bounded_ram": "SQLite pages and one vertex's outgoing kernels; no whole-class HashMap",
+    "fixed_u64_vertex_payload_bytes": 39156572880,
+    "layout_includes": "a,b,j only (3 u64); excludes indexes, maps, journals, free space and DLP evidence; compressed or generative encodings can be smaller",
+    "sqlite_bytes": "not predicted; depends on degree set and SQLite layout"
+  },
+  "strata": [
+    {
+      "conductor": 1,
+      "expected_vertices": 1
+    },
+    {
+      "conductor": 2,
+      "expected_vertices": 3
+    },
+    {
+      "conductor": 3,
+      "expected_vertices": 2
+    },
+    {
+      "conductor": 4,
+      "expected_vertices": 6
+    },
+    {
+      "conductor": 6,
+      "expected_vertices": 6
+    },
+    {
+      "conductor": 8,
+      "expected_vertices": 12
+    },
+    {
+      "conductor": 9,
+      "expected_vertices": 6
+    },
+    {
+      "conductor": 12,
+      "expected_vertices": 12
+    },
+    {
+      "conductor": 16,
+      "expected_vertices": 24
+    },
+    {
+      "conductor": 18,
+      "expected_vertices": 18
+    },
+    {
+      "conductor": 24,
+      "expected_vertices": 24
+    },
+    {
+      "conductor": 27,
+      "expected_vertices": 18
+    },
+    {
+      "conductor": 32,
+      "expected_vertices": 48
+    },
+    {
+      "conductor": 36,
+      "expected_vertices": 36
+    },
+    {
+      "conductor": 48,
+      "expected_vertices": 48
+    },
+    {
+      "conductor": 54,
+      "expected_vertices": 54
+    },
+    {
+      "conductor": 64,
+      "expected_vertices": 96
+    },
+    {
+      "conductor": 72,
+      "expected_vertices": 72
+    },
+    {
+      "conductor": 81,
+      "expected_vertices": 54
+    },
+    {
+      "conductor": 96,
+      "expected_vertices": 96
+    },
+    {
+      "conductor": 108,
+      "expected_vertices": 108
+    },
+    {
+      "conductor": 128,
+      "expected_vertices": 192
+    },
+    {
+      "conductor": 144,
+      "expected_vertices": 144
+    },
+    {
+      "conductor": 162,
+      "expected_vertices": 162
+    },
+    {
+      "conductor": 192,
+      "expected_vertices": 192
+    },
+    {
+      "conductor": 216,
+      "expected_vertices": 216
+    },
+    {
+      "conductor": 243,
+      "expected_vertices": 162
+    },
+    {
+      "conductor": 256,
+      "expected_vertices": 384
+    },
+    {
+      "conductor": 288,
+      "expected_vertices": 288
+    },
+    {
+      "conductor": 324,
+      "expected_vertices": 324
+    },
+    {
+      "conductor": 384,
+      "expected_vertices": 384
+    },
+    {
+      "conductor": 432,
+      "expected_vertices": 432
+    },
+    {
+      "conductor": 486,
+      "expected_vertices": 486
+    },
+    {
+      "conductor": 512,
+      "expected_vertices": 768
+    },
+    {
+      "conductor": 576,
+      "expected_vertices": 576
+    },
+    {
+      "conductor": 648,
+      "expected_vertices": 648
+    },
+    {
+      "conductor": 729,
+      "expected_vertices": 486
+    },
+    {
+      "conductor": 768,
+      "expected_vertices": 768
+    },
+    {
+      "conductor": 864,
+      "expected_vertices": 864
+    },
+    {
+      "conductor": 972,
+      "expected_vertices": 972
+    },
+    {
+      "conductor": 1024,
+      "expected_vertices": 1536
+    },
+    {
+      "conductor": 1152,
+      "expected_vertices": 1152
+    },
+    {
+      "conductor": 1296,
+      "expected_vertices": 1296
+    },
+    {
+      "conductor": 1458,
+      "expected_vertices": 1458
+    },
+    {
+      "conductor": 1536,
+      "expected_vertices": 1536
+    },
+    {
+      "conductor": 1728,
+      "expected_vertices": 1728
+    },
+    {
+      "conductor": 1944,
+      "expected_vertices": 1944
+    },
+    {
+      "conductor": 2187,
+      "expected_vertices": 1458
+    },
+    {
+      "conductor": 2304,
+      "expected_vertices": 2304
+    },
+    {
+      "conductor": 2592,
+      "expected_vertices": 2592
+    },
+    {
+      "conductor": 2916,
+      "expected_vertices": 2916
+    },
+    {
+      "conductor": 3072,
+      "expected_vertices": 3072
+    },
+    {
+      "conductor": 3456,
+      "expected_vertices": 3456
+    },
+    {
+      "conductor": 3888,
+      "expected_vertices": 3888
+    },
+    {
+      "conductor": 4374,
+      "expected_vertices": 4374
+    },
+    {
+      "conductor": 4608,
+      "expected_vertices": 4608
+    },
+    {
+      "conductor": 5184,
+      "expected_vertices": 5184
+    },
+    {
+      "conductor": 5832,
+      "expected_vertices": 5832
+    },
+    {
+      "conductor": 6561,
+      "expected_vertices": 4374
+    },
+    {
+      "conductor": 6912,
+      "expected_vertices": 6912
+    },
+    {
+      "conductor": 7776,
+      "expected_vertices": 7776
+    },
+    {
+      "conductor": 8748,
+      "expected_vertices": 8748
+    },
+    {
+      "conductor": 9216,
+      "expected_vertices": 9216
+    },
+    {
+      "conductor": 10368,
+      "expected_vertices": 10368
+    },
+    {
+      "conductor": 11664,
+      "expected_vertices": 11664
+    },
+    {
+      "conductor": 13122,
+      "expected_vertices": 13122
+    },
+    {
+      "conductor": 13824,
+      "expected_vertices": 13824
+    },
+    {
+      "conductor": 15552,
+      "expected_vertices": 15552
+    },
+    {
+      "conductor": 17496,
+      "expected_vertices": 17496
+    },
+    {
+      "conductor": 19683,
+      "expected_vertices": 13122
+    },
+    {
+      "conductor": 20736,
+      "expected_vertices": 20736
+    },
+    {
+      "conductor": 23328,
+      "expected_vertices": 23328
+    },
+    {
+      "conductor": 26244,
+      "expected_vertices": 26244
+    },
+    {
+      "conductor": 27648,
+      "expected_vertices": 27648
+    },
+    {
+      "conductor": 31104,
+      "expected_vertices": 31104
+    },
+    {
+      "conductor": 34992,
+      "expected_vertices": 34992
+    },
+    {
+      "conductor": 39366,
+      "expected_vertices": 39366
+    },
+    {
+      "conductor": 41472,
+      "expected_vertices": 41472
+    },
+    {
+      "conductor": 46656,
+      "expected_vertices": 46656
+    },
+    {
+      "conductor": 52488,
+      "expected_vertices": 52488
+    },
+    {
+      "conductor": 59049,
+      "expected_vertices": 39366
+    },
+    {
+      "conductor": 62208,
+      "expected_vertices": 62208
+    },
+    {
+      "conductor": 69984,
+      "expected_vertices": 69984
+    },
+    {
+      "conductor": 78732,
+      "expected_vertices": 78732
+    },
+    {
+      "conductor": 82944,
+      "expected_vertices": 82944
+    },
+    {
+      "conductor": 93312,
+      "expected_vertices": 93312
+    },
+    {
+      "conductor": 104976,
+      "expected_vertices": 104976
+    },
+    {
+      "conductor": 118098,
+      "expected_vertices": 118098
+    },
+    {
+      "conductor": 124416,
+      "expected_vertices": 124416
+    },
+    {
+      "conductor": 139968,
+      "expected_vertices": 139968
+    },
+    {
+      "conductor": 157464,
+      "expected_vertices": 157464
+    },
+    {
+      "conductor": 177147,
+      "expected_vertices": 118098
+    },
+    {
+      "conductor": 186624,
+      "expected_vertices": 186624
+    },
+    {
+      "conductor": 209952,
+      "expected_vertices": 209952
+    },
+    {
+      "conductor": 236196,
+      "expected_vertices": 236196
+    },
+    {
+      "conductor": 248832,
+      "expected_vertices": 248832
+    },
+    {
+      "conductor": 279936,
+      "expected_vertices": 279936
+    },
+    {
+      "conductor": 314928,
+      "expected_vertices": 314928
+    },
+    {
+      "conductor": 354294,
+      "expected_vertices": 354294
+    },
+    {
+      "conductor": 373248,
+      "expected_vertices": 373248
+    },
+    {
+      "conductor": 419904,
+      "expected_vertices": 419904
+    },
+    {
+      "conductor": 472392,
+      "expected_vertices": 472392
+    },
+    {
+      "conductor": 531441,
+      "expected_vertices": 354294
+    },
+    {
+      "conductor": 559872,
+      "expected_vertices": 559872
+    },
+    {
+      "conductor": 629856,
+      "expected_vertices": 629856
+    },
+    {
+      "conductor": 708588,
+      "expected_vertices": 708588
+    },
+    {
+      "conductor": 746496,
+      "expected_vertices": 746496
+    },
+    {
+      "conductor": 839808,
+      "expected_vertices": 839808
+    },
+    {
+      "conductor": 944784,
+      "expected_vertices": 944784
+    },
+    {
+      "conductor": 1062882,
+      "expected_vertices": 1062882
+    },
+    {
+      "conductor": 1119744,
+      "expected_vertices": 1119744
+    },
+    {
+      "conductor": 1259712,
+      "expected_vertices": 1259712
+    },
+    {
+      "conductor": 1417176,
+      "expected_vertices": 1417176
+    },
+    {
+      "conductor": 1679616,
+      "expected_vertices": 1679616
+    },
+    {
+      "conductor": 1889568,
+      "expected_vertices": 1889568
+    },
+    {
+      "conductor": 2125764,
+      "expected_vertices": 2125764
+    },
+    {
+      "conductor": 2239488,
+      "expected_vertices": 2239488
+    },
+    {
+      "conductor": 2519424,
+      "expected_vertices": 2519424
+    },
+    {
+      "conductor": 2834352,
+      "expected_vertices": 2834352
+    },
+    {
+      "conductor": 3359232,
+      "expected_vertices": 3359232
+    },
+    {
+      "conductor": 3779136,
+      "expected_vertices": 3779136
+    },
+    {
+      "conductor": 4251528,
+      "expected_vertices": 4251528
+    },
+    {
+      "conductor": 5038848,
+      "expected_vertices": 5038848
+    },
+    {
+      "conductor": 5668704,
+      "expected_vertices": 5668704
+    },
+    {
+      "conductor": 6718464,
+      "expected_vertices": 6718464
+    },
+    {
+      "conductor": 7558272,
+      "expected_vertices": 7558272
+    },
+    {
+      "conductor": 8503056,
+      "expected_vertices": 8503056
+    },
+    {
+      "conductor": 10077696,
+      "expected_vertices": 10077696
+    },
+    {
+      "conductor": 11337408,
+      "expected_vertices": 11337408
+    },
+    {
+      "conductor": 15116544,
+      "expected_vertices": 15116544
+    },
+    {
+      "conductor": 17006112,
+      "expected_vertices": 17006112
+    },
+    {
+      "conductor": 20155392,
+      "expected_vertices": 20155392
+    },
+    {
+      "conductor": 22674816,
+      "expected_vertices": 22674816
+    },
+    {
+      "conductor": 30233088,
+      "expected_vertices": 30233088
+    },
+    {
+      "conductor": 34012224,
+      "expected_vertices": 34012224
+    },
+    {
+      "conductor": 45349632,
+      "expected_vertices": 45349632
+    },
+    {
+      "conductor": 60466176,
+      "expected_vertices": 60466176
+    },
+    {
+      "conductor": 68024448,
+      "expected_vertices": 68024448
+    },
+    {
+      "conductor": 90699264,
+      "expected_vertices": 90699264
+    },
+    {
+      "conductor": 136048896,
+      "expected_vertices": 136048896
+    },
+    {
+      "conductor": 181398528,
+      "expected_vertices": 181398528
+    },
+    {
+      "conductor": 272097792,
+      "expected_vertices": 272097792
+    },
+    {
+      "conductor": 544195584,
+      "expected_vertices": 544195584
+    }
+  ],
+  "trace": -226
+}

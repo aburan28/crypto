@@ -10836,6 +10836,72 @@
    "ec1_unresolved": "roster_prime_instance(8) builds no instance on this roster curve"
   },
   {
+   "slug": "icv1-fp7-t4-0c09e92f",
+   "icv1": "ICV1:fp-67:4:64:42:unk:unk:r:0c09e92f419f",
+   "family": "prime",
+   "params": {
+    "p": "67",
+    "a": "46",
+    "b": "47"
+   },
+   "model_json": "{\"a\":\"46\",\"b\":\"47\",\"field\":\"fp-67\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"67\",\"v\":\"1\"}",
+   "trace": 4,
+   "order": "64",
+   "j": "42",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/full_volcano_classes_20261016/evidence/controls/control-mixed-root.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp7-t2-4910f2d0",
+   "icv1": "ICV1:fp-113:2:112:15:unk:unk:r:4910f2d03111",
+   "family": "prime",
+   "params": {
+    "p": "113",
+    "a": "19",
+    "b": "2"
+   },
+   "model_json": "{\"a\":\"19\",\"b\":\"2\",\"field\":\"fp-113\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"113\",\"v\":\"1\"}",
+   "trace": 2,
+   "order": "112",
+   "j": "15",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/full_volcano_classes_20261016/evidence/controls/control-2-root.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp8-tm1-1ed3feb7",
+   "icv1": "ICV1:fp-223:-1:225:13:unk:unk:r:1ed3feb75d9f",
+   "family": "prime",
+   "params": {
+    "p": "223",
+    "a": "208",
+    "b": "21"
+   },
+   "model_json": "{\"a\":\"208\",\"b\":\"21\",\"field\":\"fp-223\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"223\",\"v\":\"1\"}",
+   "trace": -1,
+   "order": "225",
+   "j": "13",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/full_volcano_classes_20261016/evidence/controls/control-3-root.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-fp10-t5-192cb216",
    "icv1": "ICV1:fp-827:5:823:463:unk:unk:r:192cb216d592",
    "family": "prime",
@@ -28755,6 +28821,125 @@
     "research/drastic_prime_conductor_gap_round3_20261012/sessions/d19-ell4067213-rho/plan.json",
     "research/drastic_prime_conductor_gap_round3_20261012/sessions/d19-ell4067213-rho/spec.json",
     "research/drastic_prime_conductor_gap_round3_20261012/specs/d19-ell4067213-rho.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp56-t5-80dc66ed",
+   "icv1": "ICV1:fp-45862249674083071:5:45862249674083067:18034452475090495:unk:unk:r:80dc66ed4945",
+   "family": "prime",
+   "params": {
+    "p": "45862249674083071",
+    "a": "43891474518286963",
+    "b": "10362796447069720"
+   },
+   "model_json": "{\"a\":\"43891474518286963\",\"b\":\"10362796447069720\",\"field\":\"fp-45862249674083071\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"45862249674083071\",\"v\":\"1\"}",
+   "trace": 5,
+   "order": "45862249674083067",
+   "j": "18034452475090495",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/full_volcano_classes_20261016/evidence/B-plan.json",
+    "research/full_volcano_classes_20261016/inputs/B.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp57-t106-c1aa2a23",
+   "icv1": "ICV1:fp-126100789566376697:106:126100789566376592:30289789144510153:unk:unk:r:c1aa2a2301d3",
+   "family": "prime",
+   "params": {
+    "p": "126100789566376697",
+    "a": "7079035723263497",
+    "b": "123501395685118050"
+   },
+   "model_json": "{\"a\":\"7079035723263497\",\"b\":\"123501395685118050\",\"field\":\"fp-126100789566376697\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"126100789566376697\",\"v\":\"1\"}",
+   "trace": 106,
+   "order": "126100789566376592",
+   "j": "30289789144510153",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/full_volcano_classes_20261016/evidence/A-plan.json",
+    "research/full_volcano_classes_20261016/evidence/validation/volcano-isogeny-entry-plan.json",
+    "research/full_volcano_classes_20261016/evidence/validation/volcano-isogeny-layout-plan.json",
+    "research/full_volcano_classes_20261016/evidence/validation/volcano-root-entry-plan.json",
+    "research/full_volcano_classes_20261016/evidence/validation/volcano-root-layout-plan.json",
+    "research/full_volcano_classes_20261016/inputs/A.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp60-tm226-f2aa35d3",
+   "icv1": "ICV1:fp-814409292524040673:-226:814409292524040900:355790128770897316:unk:unk:r:f2aa35d3d001",
+   "family": "prime",
+   "params": {
+    "p": "814409292524040673",
+    "a": "23803279393343871",
+    "b": "223081513837153681"
+   },
+   "model_json": "{\"a\":\"23803279393343871\",\"b\":\"223081513837153681\",\"field\":\"fp-814409292524040673\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"814409292524040673\",\"v\":\"1\"}",
+   "trace": -226,
+   "order": "814409292524040900",
+   "j": "355790128770897316",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/full_volcano_classes_20261016/evidence/D-plan.json",
+    "research/full_volcano_classes_20261016/inputs/D.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp61-t2-fefb1f9c",
+   "icv1": "ICV1:fp-1637958981148213249:2:1637958981148213248:913494765004474322:unk:unk:r:fefb1f9ce2be",
+   "family": "prime",
+   "params": {
+    "p": "1637958981148213249",
+    "a": "571607911220311176",
+    "b": "29329524900995129"
+   },
+   "model_json": "{\"a\":\"571607911220311176\",\"b\":\"29329524900995129\",\"field\":\"fp-1637958981148213249\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1637958981148213249\",\"v\":\"1\"}",
+   "trace": 2,
+   "order": "1637958981148213248",
+   "j": "913494765004474322",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/full_volcano_classes_20261016/evidence/C-plan.json",
+    "research/full_volcano_classes_20261016/inputs/C.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp61-t110-a96b94ba",
+   "icv1": "ICV1:fp-1975950516940704721:110:1975950516940704612:276911164075148878:unk:unk:r:a96b94baa377",
+   "family": "prime",
+   "params": {
+    "p": "1975950516940704721",
+    "a": "110339798349916108",
+    "b": "405987076462987577"
+   },
+   "model_json": "{\"a\":\"110339798349916108\",\"b\":\"405987076462987577\",\"field\":\"fp-1975950516940704721\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1975950516940704721\",\"v\":\"1\"}",
+   "trace": 110,
+   "order": "1975950516940704612",
+   "j": "276911164075148878",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/full_volcano_classes_20261016/evidence/E-plan.json",
+    "research/full_volcano_classes_20261016/inputs/E.json"
    ],
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"

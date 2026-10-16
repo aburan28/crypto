@@ -147,6 +147,7 @@ result_unit_err = "allow"
 chunks_exact_to_as_chunks = "allow"
 
 [dependencies]
+volcano-cli = { path = "tools/volcano-cli" }
 # Portable CPU-time and peak-RSS measurements for ic research reports.
 libc = "0.2"
 num-bigint = { version = "0.4", features = ["rand"] }

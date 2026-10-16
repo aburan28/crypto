@@ -1,0 +1,72 @@
+{
+  "auto_degrees": [
+    3
+  ],
+  "conductor_factors": [
+    [
+      3,
+      2
+    ]
+  ],
+  "degrees": [
+    3
+  ],
+  "discriminant": -891,
+  "expected_vertices": 9,
+  "frobenius_conductor": 9,
+  "fundamental_discriminant": -11,
+  "input": {
+    "a": 208,
+    "b": 21,
+    "order": null,
+    "p": 223
+  },
+  "maximal_class_number": 1,
+  "order": 225,
+  "order_evidence": {
+    "certified": true,
+    "divisor": "75",
+    "exact_small_field_enumeration": 225,
+    "factor_primality": "native deterministic u64 Miller-Rabin rechecked for discriminant; order certificate uses isogeny_algos certificate backend",
+    "order_method": "Bsgs",
+    "point_samples": [
+      [
+        "220",
+        "183"
+      ]
+    ],
+    "twist_divisor": "223",
+    "via_twist": false
+  },
+  "schema": "ordinary-isogeny-class/v1",
+  "source_code_sha256": "e7bb94cbd04fee896c872195feed0f904ae4aaead399bb0946f039ec7e8e9988",
+  "source_identity": {
+    "curve_uid": null,
+    "ec1": null,
+    "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+    "icv1": "ICV1:fp-223:-1:225:13:unk:unk:r:1ed3feb75d9f",
+    "model_json": "{\"a\":\"208\",\"b\":\"21\",\"field\":\"fp-223\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"223\",\"v\":\"1\"}",
+    "slug": "icv1-fp8-tm1-1ed3feb7"
+  },
+  "storage": {
+    "bounded_ram": "SQLite pages and one vertex's outgoing kernels; no whole-class HashMap",
+    "fixed_u64_vertex_payload_bytes": 216,
+    "layout_includes": "a,b,j only (3 u64); excludes indexes, maps, journals, free space and DLP evidence; compressed or generative encodings can be smaller",
+    "sqlite_bytes": "not predicted; depends on degree set and SQLite layout"
+  },
+  "strata": [
+    {
+      "conductor": 1,
+      "expected_vertices": 1
+    },
+    {
+      "conductor": 3,
+      "expected_vertices": 2
+    },
+    {
+      "conductor": 9,
+      "expected_vertices": 6
+    }
+  ],
+  "trace": -1
+}
