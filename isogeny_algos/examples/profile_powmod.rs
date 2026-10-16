@@ -6,11 +6,11 @@ use isogeny_algos::fpm::FpM;
 use isogeny_algos::poly::{self, POWMOD_TABLE_N};
 use std::time::Instant;
 
-fn run<const N: usize>(name: &str, f: &FpM<N>) {
+fn run<F: Field>(name: &str, f: &F) {
     let mut rng = Rng::new(3);
     println!("# {name}: deg  table_ms  barrett_ms  barrett/table");
     for d in [48, 56, 63, 72, 80, 90, 100, 120, 140, 160, 200, 256] {
-        let mut g: Vec<[u64; N]> = (0..d).map(|_| f.random(&mut rng)).collect();
+        let mut g: Vec<F::E> = (0..d).map(|_| f.random(&mut rng)).collect();
         g.push(f.one());
         let x = poly::x_poly(f);
         let mut best = [f64::MAX; 2];
@@ -38,6 +38,8 @@ fn run<const N: usize>(name: &str, f: &FpM<N>) {
 }
 
 fn main() {
+    run("Zp (40-bit)", &Zp::new(next_prime((1u64 << 39) + 12345)));
+    run("Zp (61-bit)", &Zp::new(next_prime((1u64 << 60) + 12345)));
     run(
         "FpM2 (2^127-1)",
         &FpM::<2>::from_dec("170141183460469231731687303715884105727"),
