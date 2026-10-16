@@ -1,0 +1,18 @@
+saved /home/user/wt/lane-h/research/pkm_supersingular_aux_20261015/q3/sessions/s24/comparisons/rho-neg__ic-ord-rootfind.json
+ops (ok): ic-ord-rootfind / rho-neg = 42.9688 [34.094, 56.525] (cluster) over 16 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 5.4663 [5.310, 5.579]
+measurement quality: 0 / 100; paired attempts 16, verified 16, admitted 0; levels {"L0": 16}; p95 foreign busy unknown%, p95 run queue 0.73%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-ord-rootfind / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 8 | 42.9688 | [34.0935, 56.5254] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-ord-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W17b438bfb12f | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 0.9793 | 45.7066 | 46.6737 |
+| W25cee39ee98f | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 0.9924 | 46.4269 | 46.7822 |
+| W55568eeba98a | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 0.8787 | 46.3348 | 52.7339 |
+| W88ff0ab6e7fd | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 0.9087 | 46.5526 | 51.2301 |
+| Waa0b657ee7a8 | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 1.7449 | 46.6806 | 26.7524 |
+| Wcf04f75e8865 | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 0.5249 | 46.2017 | 88.0270 |
+| Wdb0e2ef40f7f | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 1.3920 | 43.7884 | 31.4574 |
+| We87af70e465e | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 1.1194 | 45.2716 | 40.4418 |
