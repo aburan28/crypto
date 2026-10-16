@@ -85,3 +85,11 @@ scores and canonical IC/rho graphs are unchanged. The PDF was rendered with
 Typst0.15.1 and visually inspected. Next: committed clean build, native installed
 control retake, custody, then Coordinator freezes one separate same-map scientific
 profiling protocol with A/A obligations before any timing comparison.
+
+The corrected committed clean retake is now complete under
+clean-build-e82d80feaf/: sourcee82d80feaf82d3730576ccd9137911b336f9dab8,
+dirty=false, executableb3cbd6ac5d457a0f6d6398d1fcefc408f627e60be52c81c9009406486b61587b,
+full94 tests PASS0, installed/compiled byte equality0. Complete raw archive
+bf0b366d4ce08e7c23ff1287ed8789fa83b36068a758fb6a75ae321d37f3273e and executable
+are remotely verified in the configured owner store. Scientific profiles and
+M8191 still require the separate frozen protocol; none ran in implementation.
