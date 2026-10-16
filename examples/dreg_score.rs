@@ -216,6 +216,216 @@ fn shape(m: usize, cells: &[String]) {
     }
 }
 
+/// Score `dreg_closure` output against PREREGISTRATION.md of
+/// `research/dreg_closure_mutantxl_20261016`: per draw the closure degree
+/// and its gap to the committed XL degree; per cell the Q1 verdict
+/// (below / not below / mixed), or "exploratory" when `C(N, ≤ XL − 1)`
+/// exceeds the column cap (the registered testability rule); then Q1's
+/// study verdict, Q2's gap counts and Q3's per-ℓ medians at m = 3, and the
+/// registered descriptive cost table.  `--satisfiable` output files are
+/// tallied as the soundness control.
+fn closure(paths: &[String]) {
+    struct Draw {
+        xl: u64,
+        known: bool,
+        closure: Option<u64>,
+        measured_to: u64,
+        // At the closure's refuting degree: columns, products, word ops.
+        cost: Option<(u64, u64, u64)>,
+    }
+    let mut cells: BTreeMap<(u64, u64, u64), Vec<Draw>> = BTreeMap::new();
+    let mut max_cols = 0u128;
+    let (mut sat_draws, mut sat_unsound) = (0usize, 0usize);
+    let mut sat_degree: BTreeMap<u64, usize> = BTreeMap::new();
+    for path in paths {
+        let text = std::fs::read_to_string(path).unwrap_or_else(|e| panic!("{path}: {e}"));
+        for line in text.lines().filter(|l| !l.trim().is_empty()) {
+            let v: Value = serde_json::from_str(line).expect("json");
+            if let Some(bad) = v["refuted_satisfiable"].as_bool() {
+                sat_draws += 1;
+                sat_unsound += bad as usize;
+                *sat_degree
+                    .entry(v["measured_to"].as_u64().unwrap())
+                    .or_default() += 1;
+                continue;
+            }
+            max_cols = max_cols.max(v["max_cols"].as_f64().unwrap() as u128);
+            let key = (
+                v["m"].as_u64().unwrap(),
+                v["n"].as_u64().unwrap(),
+                v["ell"].as_u64().unwrap(),
+            );
+            let o = &v["committed_outcome"];
+            let closure = v["closure_degree"].as_u64();
+            let cost = closure.and_then(|c| {
+                v["scan"].as_array().unwrap().iter().find_map(|s| {
+                    (s["degree"].as_u64() == Some(c)).then(|| {
+                        (
+                            s["columns"].as_u64().unwrap(),
+                            s["closure_products"].as_u64().unwrap(),
+                            s["closure_word_ops"].as_u64().unwrap(),
+                        )
+                    })
+                })
+            });
+            cells.entry(key).or_default().push(Draw {
+                xl: o["degree"].as_u64().unwrap(),
+                known: o["kind"] == "resolved",
+                closure,
+                measured_to: v["measured_to"].as_u64().unwrap(),
+                cost,
+            });
+        }
+    }
+    let med = |mut v: Vec<f64>| -> f64 {
+        v.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        let k = v.len();
+        if k == 0 {
+            f64::NAN
+        } else if k % 2 == 1 {
+            v[k / 2]
+        } else {
+            (v[k / 2 - 1] + v[k / 2]) / 2.0
+        }
+    };
+    println!("| m | cell (n, ℓ) | N | committed XL | closure degree | gap XL − closure | Q1 |");
+    println!("|--:|---|--:|---|---|---|---|");
+    let (mut below, mut not_below, mut testable) = (0, 0, 0);
+    let (mut gap1, mut gap2) = (0, 0);
+    let mut by_ell: BTreeMap<u64, Vec<f64>> = BTreeMap::new();
+    let mut cost_rows = Vec::new();
+    for ((m, n, ell), draws) in &cells {
+        let n_vars = (m - 2) * n + m * ell;
+        // Registered rule: testable when the degree XL − 1 fits the cap.
+        let xl_min = draws.iter().map(|d| d.xl).min().unwrap();
+        let fits = monomials_up_to(n_vars as u128, xl_min as i64 - 1) <= max_cols;
+        let k = draws
+            .iter()
+            .filter(|d| matches!(d.closure, Some(c) if c < d.xl))
+            .count();
+        let unmeasured = draws
+            .iter()
+            .any(|d| d.closure.is_none() && d.measured_to + 1 < d.xl - (!d.known) as u64);
+        let verdict = if !fits {
+            if k == draws.len() {
+                "exploratory: below".to_string()
+            } else {
+                "exploratory".into()
+            }
+        } else if unmeasured {
+            "untestable".into()
+        } else {
+            testable += 1;
+            if k == draws.len() {
+                below += 1;
+                "below".into()
+            } else if k == 0 {
+                not_below += 1;
+                "not below".into()
+            } else {
+                "mixed".into()
+            }
+        };
+        for d in draws {
+            if let Some(c) = d.closure {
+                if d.known && c < d.xl {
+                    if d.xl - c == 1 {
+                        gap1 += 1
+                    } else {
+                        gap2 += 1
+                    }
+                }
+                if *m == 3 {
+                    by_ell.entry(*ell).or_default().push(c as f64);
+                }
+            }
+        }
+        let xl: Vec<String> = draws
+            .iter()
+            .map(|d| {
+                if d.known {
+                    d.xl.to_string()
+                } else {
+                    format!("≥{}", d.xl)
+                }
+            })
+            .collect();
+        let cl: Vec<String> = draws
+            .iter()
+            .map(|d| {
+                d.closure
+                    .map_or(format!(">{}", d.measured_to), |c| c.to_string())
+            })
+            .collect();
+        let gaps: Vec<String> = draws
+            .iter()
+            .map(|d| match (d.known, d.closure) {
+                (true, Some(c)) => (d.xl - c).to_string(),
+                (false, Some(c)) => format!("≥{}", d.xl - c),
+                _ => "–".into(),
+            })
+            .collect();
+        println!(
+            "| {m} | ({n}, {ell}) | {n_vars} | {} | {} | {} | {verdict} |",
+            xl.join(" "),
+            cl.join(" "),
+            gaps.join(" ")
+        );
+        let lg = |d: u64| (monomials_up_to(n_vars as u128, d as i64) as f64).log2();
+        let costed: Vec<&Draw> = draws.iter().filter(|d| d.cost.is_some()).collect();
+        cost_rows.push(format!(
+            "| {m} | ({n}, {ell}) | {n_vars} | {:.1} | {:.1} | {:.1} | {:.1} | {:.1} |",
+            med(draws.iter().map(|d| d.xl as f64).collect()),
+            med(draws.iter().map(|d| lg(d.xl)).collect()),
+            med(costed.iter().map(|d| lg(d.closure.unwrap())).collect()),
+            med(costed
+                .iter()
+                .map(|d| (d.cost.unwrap().1.max(1) as f64).log2())
+                .collect()),
+            med(costed
+                .iter()
+                .map(|d| (d.cost.unwrap().2.max(1) as f64).log2())
+                .collect()),
+        ));
+    }
+    let study = if 3 * below >= 2 * testable {
+        "closure lowers"
+    } else if 3 * not_below >= 2 * testable {
+        "no effect"
+    } else {
+        "mixed"
+    };
+    println!();
+    println!("Q1: {below} of {testable} testable cells below, {not_below} not below → {study}");
+    println!("Q2: gaps among resolved-XL draws refuted below XL: {gap1} of 1, {gap2} of ≥ 2");
+    let medians: Vec<String> = by_ell
+        .iter()
+        .map(|(ell, v)| format!("ℓ={ell}: {} (n={})", med(v.clone()), v.len()))
+        .collect();
+    println!(
+        "Q3: m = 3 closure-degree medians by ℓ: {}",
+        medians.join(", ")
+    );
+    if sat_draws > 0 {
+        let to: Vec<String> = sat_degree
+            .iter()
+            .map(|(d, k)| format!("{k} to degree {d}"))
+            .collect();
+        println!(
+            "Soundness control: {sat_draws} satisfiable draws ({}), {sat_unsound} refuted",
+            to.join(", ")
+        );
+    }
+    println!();
+    println!("Descriptive cost, cell medians (log2; columns are C(N, ≤D)):");
+    println!();
+    println!("| m | cell (n, ℓ) | N | XL degree | log2 cols at XL | log2 cols at closure | log2 closure products | log2 closure word ops |");
+    println!("|--:|---|--:|--:|--:|--:|--:|--:|");
+    for r in cost_rows {
+        println!("{r}");
+    }
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.first().map(String::as_str) {
@@ -223,9 +433,10 @@ fn main() {
         Some("compare") if args.len() == 3 => compare(&args[1], &args[2]),
         Some("semireg") if args.len() >= 3 => semireg(args[1].parse().expect("m"), &args[2..]),
         Some("shape") if args.len() >= 3 => shape(args[1].parse().expect("m"), &args[2..]),
+        Some("closure") => closure(&args[1..]),
         _ => {
             eprintln!(
-                "usage: dreg_score score FILES… | compare REF RERUN | semireg M n:ℓ… | shape M n:ℓ:D…"
+                "usage: dreg_score score FILES… | compare REF RERUN | semireg M n:ℓ… | shape M n:ℓ:D… | closure FILES…"
             );
             std::process::exit(2);
         }
