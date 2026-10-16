@@ -97,3 +97,58 @@ take under an hour, and the reference check's 48 walks take minutes.
     icprog rule reference --comparison v6 --fixture <koblitz_rho_fixture> --fixture-commit 3d4c5c0ef88057e8ece09dcc91e8fad4ff7e781a --isolate <isolated_bench>
     icprog rule claims --comparison v6
     icprog rule analyse --comparison v6 > research/ic_tool_program/rule/v6/analysis.json
+
+## Amendment 1 (2026-10-16, after the rows, before any figure was read): the claims and the reference walk
+
+The 408 rows ran as declared, 15:40–16:56 UTC. Two tools then failed for
+reasons that lie outside the measurement. Both are fixed without
+re-timing any row.
+
+**The claims.** `icprog rule claims` wrote claims that the current
+`vs_rho` checker rejected: 0 of 408 passed.
+- No row had a validation error, and every row passed independent
+  validation.
+- Each claim lacked the same five stage fields: `rho_online_phase_ms`,
+  `ic_online_interval`, `rho_online_interval`, `operation_accounting` and
+  `record_class`.
+- The ledger (`docs/ic/boundary_targets.json`) began requiring them on
+  2026-10-13 (`e2b865e4`), a week after rule v3 ran. The rule's claim
+  writer was never updated.
+
+`icprog` now writes all five fields from what each run record already
+holds:
+- **Rho's phases:** `rho_solve` and `recovery_check`, in milliseconds.
+- **The intervals:** each arm's recorded start and stop events.
+- **The operation accounting:** each arm's native counter, kept distinct
+  (the descent's trials and rho's walk steps), with no operation ratio.
+- **The record class:** `controlled` when all five of the index
+  calculus's exclusive target phases have a cost, `exploratory`
+  otherwise.
+
+With the rewritten claims, 408 of 408 rows pass, all of them
+`verified_answer_controlled_wall`. The rows and their timings are
+unchanged.
+
+**The reference walk.** `koblitz_rho_fixture strong`, built from v6's
+tree, refused `n = 47`, `57` and `59` with
+`assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53 | 61))`.
+- The gate is not in v3's fixture, whose walk the rule v3 reference ran
+  at all six sizes.
+- It came back with a union-resolve merge (`fe07f6088`) from a branch
+  line (`c72806c87`).
+- No code after it depends on `n`. The single-word walk is v3's, and
+  wider rungs return before the gate.
+
+The gate now reads `2 <= n <= 63`. The walk is otherwise byte for byte
+v6's: local commit `e095054a` is v6's tree plus that one change, and the
+fixture's SHA-256 is
+`5259f49cdf188adb4fc16749ec49f40f8fdd3edae3853285720aed390f82b5a4`.
+
+**The reference check re-runs at all six sizes** with that one build:
+- The refused attempts stay on record under
+  `runs/reference-refused-size-gate/`.
+- In those attempts the three sizes the gate let through were admissible:
+  rho at 0.65–0.75 of the strong walk's time a step. They are not pooled
+  with the re-run.
+- If the re-run finds the comparison's rho slower a step than the strong
+  walk at any size, that size is reported as not run, as declared.

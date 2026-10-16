@@ -687,7 +687,18 @@ impl Comparison {
                 "ic_online_phases_not_entered".into(),
                 m.at("ic_online_phases_not_entered")?.clone(),
             ),
+            ("rho_online_phase_ms".into(), rho_online_phase_ms(m)?),
+            (
+                "ic_online_interval".into(),
+                J::Str(interval(rep.at("online_interval")?, "ic")?),
+            ),
+            (
+                "rho_online_interval".into(),
+                J::Str(interval(rep.at("online_interval")?, "rho")?),
+            ),
             ("online_interval".into(), rep.at("online_interval")?.clone()),
+            ("operation_accounting".into(), operation_accounting(rep)?),
+            ("record_class".into(), J::Str(record_class(m)?.into())),
             ("same_resource_envelope".into(), J::Bool(true)),
             ("independent_validation".into(), J::Bool(independent)),
             (
@@ -1148,6 +1159,94 @@ fn py_median(mut v: Vec<J>) -> Result<J, String> {
         (J::Int(a), J::Int(b)) => (a + b) as f64 / 2.0,
         (a, b) => (a.as_f64().unwrap() + b.as_f64().unwrap()) / 2.0,
     }))
+}
+
+/// Rho's online phases in the ledger's names (`rho_online_phase_fields`):
+/// the walk with its collision, and the recovery check, in milliseconds
+/// from the run's medians.
+fn rho_online_phase_ms(m: &J) -> Result<J, String> {
+    let ns = m.at("rho_online_phases_ns")?;
+    let ms = |key: &str| -> Result<J, String> {
+        let v = ns
+            .at(key)?
+            .as_f64()
+            .ok_or(format!("{key} is not a number"))?;
+        Ok(J::Float(v / 1e6))
+    };
+    Ok(J::Obj(vec![
+        ("walk_and_collision_ms".into(), ms("rho_solve")?),
+        ("recovery_check_ms".into(), ms("recovery_check")?),
+    ]))
+}
+
+/// One arm's online interval as the ledger states it: from its start event
+/// to its stop event, as the run recorded them.
+fn interval(online: &J, arm: &str) -> Result<String, String> {
+    let event = |which: &str| -> Result<String, String> {
+        let key = format!("{arm}_{which}_event");
+        Ok(online
+            .at(&key)?
+            .as_str()
+            .ok_or(format!("{key} is not a string"))?
+            .to_string())
+    };
+    Ok(format!("{} -> {}", event("start")?, event("stop")?))
+}
+
+/// The ledger's operation accounting: each arm's online native counter,
+/// kept distinct (`operation_accounting_contract`).  The index calculus
+/// counts its descent's trials, rho its walk steps; they are different
+/// operations, so no operation ratio is a speedup.
+fn operation_accounting(rep: &J) -> Result<J, String> {
+    let int = |v: &J, what: &str| v.as_i128().ok_or(format!("{what} is not an integer"));
+    let ic = int(
+        rep.at("counts")?
+            .at("pass")?
+            .at("descent")?
+            .at("trials_total")?,
+        "descent trials_total",
+    )?;
+    let rho = int(rep.at("rho_counts")?.at("steps")?, "rho steps")?;
+    Ok(J::Obj(vec![
+        (
+            "comparison_status".into(),
+            J::Str("native_counters_only".into()),
+        ),
+        ("ic_online_operations".into(), J::Int(ic)),
+        ("rho_online_operations".into(), J::Int(rho)),
+        (
+            "operation_units".into(),
+            J::Obj(vec![
+                ("ic".into(), J::Str("descent trials".into())),
+                ("rho".into(), J::Str("walk steps".into())),
+            ]),
+        ),
+        ("ops_speedup_online".into(), J::Null),
+        (
+            "unit_assumption".into(),
+            J::Str(
+                "IC descent trials and rho walk steps are distinct native counters; \
+                 the speedup is the online wall time, both arms timed in one process"
+                    .into(),
+            ),
+        ),
+    ]))
+}
+
+/// The ledger's record class.  Every row is a checked answer timed on an
+/// isolated core with both arms in one process; it is controlled when the
+/// index calculus's five exclusive target phases all have a cost, and
+/// exploratory otherwise (`controlled_cpu_speedup_requires`).
+fn record_class(m: &J) -> Result<&'static str, String> {
+    let skipped = m
+        .at("ic_online_phases_not_entered")?
+        .as_arr()
+        .ok_or("ic_online_phases_not_entered is not a list")?;
+    Ok(if skipped.is_empty() {
+        "verified_answer_controlled_wall"
+    } else {
+        "verified_answer_exploratory_wall"
+    })
 }
 
 /// `round(x, 2)`: the correctly rounded decimal, read back.
