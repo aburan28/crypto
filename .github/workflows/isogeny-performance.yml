@@ -1,0 +1,213 @@
+name: isogeny-performance
+
+on:
+  # Run the research campaign on its feature branch even while an unrelated
+  # benchmark-index conflict prevents pull_request workflows from starting.
+  push:
+    branches: ['codex/isogeny-performance-20261014']
+    paths:
+      - 'isogeny_algos/**'
+      - 'research/isogeny_performance_20261014/**'
+      - '.github/workflows/isogeny-performance.yml'
+  pull_request:
+    paths:
+      - 'isogeny_algos/**'
+      - 'research/isogeny_performance_20261014/**'
+      - '.github/workflows/isogeny-performance.yml'
+  workflow_dispatch:
+    inputs:
+      baseline:
+        description: 'Full baseline source SHA (before algorithm optimization)'
+        required: true
+        default: '79006eb85a400474e83f6a76fac0dca6b60a8b5d'
+      previous:
+        description: 'Full source SHA for the independently measured previous optimization'
+        required: true
+        default: 'a21306ca20418a4c4bfcc8448de9b8851b8449ed'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: isogeny-performance-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        # Pull requests run the exact-output smoke on three CPUs; the Intel
+        # macOS runner needs about 25 minutes just to build the three binaries,
+        # so it joins the full campaign on push and workflow_dispatch only.
+        runner: ${{ fromJSON(github.event_name == 'pull_request' && '["ubuntu-24.04","ubuntu-24.04-arm","macos-15"]' || '["ubuntu-24.04","ubuntu-24.04-arm","macos-15","macos-15-intel"]') }}
+    runs-on: ${{ matrix.runner }}
+    # Pull requests: build the frozen binaries and check exact outputs and
+    # repeatable counts within the routine 25 minute budget. The twenty-run
+    # timing campaigns and legacy-family census (three binaries, two
+    # independent campaigns per CPU) keep their 60 minutes on push to the
+    # feature branch and workflow_dispatch.
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 60 }}
+    env:
+      BASE_SHA: ${{ inputs.baseline || '79006eb85a400474e83f6a76fac0dca6b60a8b5d' }}
+      PREVIOUS_SHA: ${{ inputs.previous || 'a21306ca20418a4c4bfcc8448de9b8851b8449ed' }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      RAYON_NUM_THREADS: '1'
+      CARGO_TERM_COLOR: never
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /isogeny_algos/
+            /research/isogeny_performance_20261014/isolation/
+            /src/bin/isolated_bench.rs
+            /src/bin/isolated_bench/
+            /src/bin/icprog/json.rs
+      - uses: dtolnay/rust-toolchain@1.98
+      - name: Freeze both baseline algorithms with the same measurement harness
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          for ARM in base previous; do
+            if [ "$ARM" = base ]; then SHA="$BASE_SHA"; else SHA="$PREVIOUS_SHA"; fi
+            git fetch --depth=1 origin "$SHA"
+            mkdir -p "$RUNNER_TEMP/isogeny-$ARM"
+            git archive "$SHA" isogeny_algos > "evidence/$ARM-source.tar"
+            tar -xf "evidence/$ARM-source.tar" -C "$RUNNER_TEMP/isogeny-$ARM"
+            cp isogeny_algos/src/bin/isogeny-perf.rs "$RUNNER_TEMP/isogeny-$ARM/isogeny_algos/src/bin/"
+            cp -R isogeny_algos/src/bin/perf_campaign "$RUNNER_TEMP/isogeny-$ARM/isogeny_algos/src/bin/"
+            cp -R isogeny_algos/src/bin/perf_kernel "$RUNNER_TEMP/isogeny-$ARM/isogeny_algos/src/bin/"
+            cargo build --release --locked --manifest-path "$RUNNER_TEMP/isogeny-$ARM/isogeny_algos/Cargo.toml" --bin isogeny-perf
+          done
+          git rev-parse HEAD > evidence/HEAD_SHA.txt
+          printf '%s\n' "$BASE_SHA" > evidence/BASE_SHA.txt
+          printf '%s\n' "$PREVIOUS_SHA" > evidence/PREVIOUS_SHA.txt
+          rustc --version --verbose > evidence/compiler.txt
+          git diff --no-index /dev/null isogeny_algos/src/bin/isogeny-perf.rs > evidence/harness.patch || test "$?" -eq 1
+          cargo build --release --locked --manifest-path isogeny_algos/Cargo.toml --bin isogeny-perf
+          if [ "$RUNNER_OS" = Linux ]; then
+            cargo build --release --locked --manifest-path "$RUNNER_TEMP/isogeny-base/isogeny_algos/Cargo.toml" --bin bench
+            cargo build --release --locked --manifest-path research/isogeny_performance_20261014/isolation/Cargo.toml
+          fi
+      - name: Exact-output arithmetic counts on every CPU
+        id: matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="$RUNNER_TEMP/isogeny-base/isogeny_algos/target/release/isogeny-perf"
+          HEAD="$GITHUB_WORKSPACE/isogeny_algos/target/release/isogeny-perf"
+          "$BASE" --out evidence/baseline.jsonl --revision "$BASE_SHA" --bits 192,224,256,511 --ells 7,31,101
+          "$HEAD" --out evidence/candidate.jsonl --revision "$HEAD_SHA" --bits 192,224,256,511 --ells 7,31,101
+          "$HEAD" compare evidence/baseline.jsonl evidence/candidate.jsonl evidence/COMPARISON.json
+      - name: Previous optimization output identity
+        id: previous
+        if: always() && steps.matrix.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          PREVIOUS="$RUNNER_TEMP/isogeny-previous/isogeny_algos/target/release/isogeny-perf"
+          HEAD="$GITHUB_WORKSPACE/isogeny_algos/target/release/isogeny-perf"
+          "$PREVIOUS" --out evidence/previous.jsonl --revision "$PREVIOUS_SHA" --bits 192,224,256,511 --ells 7,31,101
+          "$HEAD" compare evidence/previous.jsonl evidence/candidate.jsonl evidence/INCREMENTAL_COMPARISON.json
+      - name: Seven kernel constructor baselines with explicit input boundaries
+        if: always() && steps.build.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="$RUNNER_TEMP/isogeny-base/isogeny_algos/target/release/isogeny-perf"
+          HEAD="$GITHUB_WORKSPACE/isogeny_algos/target/release/isogeny-perf"
+          "$BASE" kernels --out evidence/kernel-baseline.jsonl --revision "$BASE_SHA" --bits 192,224,256,511 --ells 7,31,101
+          "$HEAD" kernels --out evidence/kernel-candidate.jsonl --revision "$HEAD_SHA" --bits 192,224,256,511 --ells 7,31,101
+          "$HEAD" compare evidence/kernel-baseline.jsonl evidence/kernel-candidate.jsonl evidence/KERNEL_COMPARISON.json
+          # This first kernel series records baselines and output identity.
+          # Supplied-kernel and supplied-generator boundaries remain separate;
+          # these records establish no kernel wall-time speedup.
+      - name: Five A/A pairs and five interleaved A/B pairs
+        if: github.event_name != 'pull_request' && always() && steps.matrix.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="$RUNNER_TEMP/isogeny-base/isogeny_algos/target/release/isogeny-perf"
+          HEAD="$GITHUB_WORKSPACE/isogeny_algos/target/release/isogeny-perf"
+          if [ "$RUNNER_OS" = Linux ]; then
+            ISO="$GITHUB_WORKSPACE/research/isogeny_performance_20261014/isolation/target/release/isolated-bench"
+            LAST_CPU=$(($(nproc) - 1))
+            CPUS=$(cat "/sys/devices/system/cpu/cpu$LAST_CPU/topology/thread_siblings_list")
+            # Isolator refusals stay in the campaign receipts. They fail this
+            # measurement job; no unreserved retry is promoted as qualified.
+            "$HEAD" campaign "$BASE" "$HEAD" "$BASE_SHA" "$HEAD_SHA" evidence/campaign "$ISO" "$CPUS"
+          else
+            # macOS: exact repeated counts, with no wall measurements.
+            "$HEAD" campaign "$BASE" "$HEAD" "$BASE_SHA" "$HEAD_SHA" evidence/campaign
+          fi
+      - name: Independently measure the next optimization against the previous version
+        if: github.event_name != 'pull_request' && always() && steps.previous.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          PREVIOUS="$RUNNER_TEMP/isogeny-previous/isogeny_algos/target/release/isogeny-perf"
+          HEAD="$GITHUB_WORKSPACE/isogeny_algos/target/release/isogeny-perf"
+          if [ "$RUNNER_OS" = Linux ]; then
+            ISO="$GITHUB_WORKSPACE/research/isogeny_performance_20261014/isolation/target/release/isolated-bench"
+            LAST_CPU=$(($(nproc) - 1))
+            CPUS=$(cat "/sys/devices/system/cpu/cpu$LAST_CPU/topology/thread_siblings_list")
+            "$HEAD" campaign "$PREVIOUS" "$HEAD" "$PREVIOUS_SHA" "$HEAD_SHA" evidence/incremental-campaign "$ISO" "$CPUS"
+          else
+            "$HEAD" campaign "$PREVIOUS" "$HEAD" "$PREVIOUS_SHA" "$HEAD_SHA" evidence/incremental-campaign
+          fi
+      - name: Explore baselines for the remaining algorithm families
+        if: github.event_name != 'pull_request' && always() && runner.os == 'Linux' && steps.build.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          ISO="$GITHUB_WORKSPACE/research/isogeny_performance_20261014/isolation/target/release/isolated-bench"
+          BENCH="$RUNNER_TEMP/isogeny-base/isogeny_algos/target/release/bench"
+          LAST_CPU=$(($(nproc) - 1))
+          CPUS=$(cat "/sys/devices/system/cpu/cpu$LAST_CPU/topology/thread_siblings_list")
+          # The isolator refuses to reserve every CPU it may run on. A small
+          # runner whose last core's SMT siblings are all of its CPUs cannot
+          # be isolated; keep that refusal as a receipt, as the campaigns do,
+          # and promote no unreserved legacy timing.
+          RESERVED=$(python3 -c 'import sys; n = 0
+          for part in sys.argv[1].strip().split(","):
+              lo, _, hi = part.partition("-")
+              n += int(hi or lo) - int(lo) + 1
+          print(n)' "$CPUS")
+          if [ "$RESERVED" -ge "$(nproc)" ]; then
+            printf 'cpus=%s reserved=%s nproc=%s: reserving every CPU leaves nowhere to move other work; legacy-family isolation not attempted\n' \
+              "$CPUS" "$RESERVED" "$(nproc)" > evidence/family-baselines-isolation-refused.txt
+            echo "::warning::legacy-family census skipped: runner has no CPU to leave free for isolation"
+            exit 0
+          fi
+          # Legacy stage timings lack exact-output digests. Keep every row;
+          # these exploratory records do not establish an optimization gain.
+          "$ISO" run --cpus "$CPUS" --settle 5 --out evidence/family-baselines-isolation.jsonl \
+            --label family-baselines -- "$BENCH" --quick --out evidence/family-baselines.jsonl \
+            kernel find path kernel2 chain bmss csidh v2path p1kernel char2 quat genus2 \
+            phi sea radical relation models theta twopow theta4 nc_fields nc_atkin nc_suth big
+      - name: Keep source, binaries, raw records and censored attempts
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p evidence/binaries
+          cp "$RUNNER_TEMP/isogeny-base/isogeny_algos/target/release/isogeny-perf" evidence/binaries/baseline || true
+          cp "$RUNNER_TEMP/isogeny-previous/isogeny_algos/target/release/isogeny-perf" evidence/binaries/previous || true
+          # The first wave kept only performance executables. Retain the
+          # separately built legacy harness too, so future exploratory rows
+          # can be bound to its actual binary without reconstructing it.
+          if [ "$RUNNER_OS" = Linux ]; then
+            cp "$RUNNER_TEMP/isogeny-base/isogeny_algos/target/release/bench" evidence/binaries/legacy-bench || true
+          fi
+          cp isogeny_algos/target/release/isogeny-perf evidence/binaries/candidate || true
+          git archive HEAD isogeny_algos research/isogeny_performance_20261014/isolation src/bin/isolated_bench.rs src/bin/isolated_bench src/bin/icprog/json.rs > evidence/source.tar
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: isogeny-performance-${{ matrix.runner }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: error

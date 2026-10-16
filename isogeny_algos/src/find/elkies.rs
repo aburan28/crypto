@@ -9,6 +9,30 @@ use crate::poly::{self, Poly};
 
 /// Coefficients c_k (k>=2) of wp(z) = z^-2 (1 + sum_{k>=2} c_k z^{2k}) as U(v) = 1 + sum c_k v^k.
 pub fn u_series<F: Field>(f: &F, e: &Curve<F::E>, n: usize) -> Vec<F::E> {
+    if n < 16 {
+        return u_series_direct(f, e, n);
+    }
+    // Keep the two precision regimes separate: the small loop needs no
+    // Option dispatch, and the batch loop needs no unused denominator conversion.
+    let mut den = vec![f.from_u64(5), f.from_u64(7)];
+    den.extend((4..=n).map(|k| f.from_u64(((2 * k + 1) * (k - 3)) as u64)));
+    let inverses = f.batch_inv(&den);
+    let mut u = vec![f.zero(); n + 1];
+    u[0] = f.one();
+    u[2] = f.neg(f.mul(e.a, inverses[0]));
+    u[3] = f.neg(f.mul(e.b, inverses[1]));
+    for k in 4..=n {
+        let mut s = f.zero();
+        for m in 2..=k - 2 {
+            s = f.add(s, f.mul(u[m], u[k - m]));
+        }
+        u[k] = f.mul(f.mul(f.from_u64(3), s), inverses[k - 2]);
+    }
+    u
+}
+
+#[inline]
+fn u_series_direct<F: Field>(f: &F, e: &Curve<F::E>, n: usize) -> Vec<F::E> {
     let mut u = vec![f.zero(); n + 1];
     u[0] = f.one();
     if n >= 2 {
@@ -71,8 +95,10 @@ pub fn solve_linear<F: Field>(f: &F, mut m: Vec<Vec<F::E>>, mut b: Vec<F::E>) ->
             m[col][c] = f.mul(m[col][c], inv);
         }
         b[col] = f.mul(b[col], inv);
-        for r in 0..n {
-            if r != col && !f.is_zero(m[r][col]) {
+        // Rows above this pivot are needed only during back substitution.
+        // Forward elimination avoids repeatedly updating the solved prefix.
+        for r in col + 1..n {
+            if !f.is_zero(m[r][col]) {
                 let fct = m[r][col];
                 for c in col..n {
                     let t = f.mul(fct, m[col][c]);
@@ -81,6 +107,11 @@ pub fn solve_linear<F: Field>(f: &F, mut m: Vec<Vec<F::E>>, mut b: Vec<F::E>) ->
                 let t = f.mul(fct, b[col]);
                 b[r] = f.sub(b[r], t);
             }
+        }
+    }
+    for row in (0..n).rev() {
+        for col in row + 1..n {
+            b[row] = f.sub(b[row], f.mul(m[row][col], b[col]));
         }
     }
     Some(b)

@@ -6,6 +6,42 @@ use isogeny_algos::kernel::kohel::kohel;
 use isogeny_algos::testdata::*;
 
 #[test]
+fn batched_weierstrass_denominators_match_direct_division() {
+    fn check<F: Field>(f: &F, e: &Curve<F::E>) {
+        for n in [0usize, 1, 2, 3, 15, 16, 17, 31, 102, 255] {
+            let mut reference = vec![f.zero(); n + 1];
+            reference[0] = f.one();
+            if n >= 2 {
+                reference[2] = f.neg(f.div(e.a, f.from_u64(5)));
+            }
+            if n >= 3 {
+                reference[3] = f.neg(f.div(e.b, f.from_u64(7)));
+            }
+            for k in 4..=n {
+                let mut sum = f.zero();
+                for m in 2..=k - 2 {
+                    sum = f.add(sum, f.mul(reference[m], reference[k - m]));
+                }
+                reference[k] = f.div(
+                    f.mul(f.from_u64(3), sum),
+                    f.from_u64(((2 * k + 1) * (k - 3)) as u64),
+                );
+            }
+            assert_eq!(
+                isogeny_algos::find::elkies::u_series(f, e, n),
+                reference,
+                "precision={n}"
+            );
+        }
+    }
+    let small = Zp::new(next_prime(1u64 << 40));
+    check(&small, &Curve::new(small.from_u64(13), small.from_u64(29)));
+    let c = isogeny_algos::api::PrimeCurve::preset("p192").unwrap();
+    let wide = isogeny_algos::fpm::FpM::<3>::new(c.p.mag());
+    check(&wide, &Curve::new(wide.from_u64(13), wide.from_u64(29)));
+}
+
+#[test]
 fn bmss_family_agrees_with_kohel() {
     let mut rng = Rng::new(51);
     let fp = Zp::new(next_prime(1u64 << 30));

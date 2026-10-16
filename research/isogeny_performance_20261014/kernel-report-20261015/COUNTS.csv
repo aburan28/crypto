@@ -1,0 +1,8 @@
+method,supplied_input,multiplication_calls,inversion_calls,repeated_runs
+velu_from_point,affine generator,454,50,2
+velu_cyclic,affine generator,454,50,2
+velu_xonly,generator x,863,49,2
+velu_xonly_fast,generator x,1044,1,2
+sqrt_velu,affine generator,957,15,2
+sqrt_velu_fast,generator x,2532,2,2
+kohel_given_kernel,kernel polynomial,7999,4,2

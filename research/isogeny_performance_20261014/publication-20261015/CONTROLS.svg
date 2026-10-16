@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="440" viewBox="0 0 1040 440">
+<rect width="1040" height="440" fill="white"/>
+<g font-family="Arial,sans-serif" fill="#17324d">
+<text x="28" y="34" font-size="22">Named-curve consumer controls · independent replay PASS</text>
+<text x="28" y="62" font-size="15">Source 6e90a71a72 · public subgroup inputs · no qualified timing comparison</text>
+<rect x="24" y="82" width="992" height="174" rx="8" fill="#edf5fa" stroke="#6c91ac"/>
+<text x="40" y="110" font-size="17">P192 / prime degree 13 · COMPLETE: two rational eigenlines</text>
+<text x="40" y="140" font-size="14">icv1-fp192-t31607402316713927207482677199-52e4af59</text>
+<path d="M 55 155 L 55 207 L 100 207 M 55 173 L 100 173" stroke="#2c647e" fill="none" stroke-width="2"/>
+<text x="110" y="178" font-size="14">→ icv1-fp192-t31607402316713927207482677199-cca00332 · degree 13 · PASS</text>
+<text x="110" y="212" font-size="14">→ icv1-fp192-t31607402316713927207482677199-e157377d · degree 13 · PASS</text>
+<text x="40" y="239" font-size="13">Each map: kernel, codomain, rational map, subgroup and 20 public scalar transports PASS.</text>
+<rect x="24" y="272" width="992" height="128" rx="8" fill="#edf5fa" stroke="#6c91ac"/>
+<text x="40" y="300" font-size="17">P224 / prime degree 1117 · PARTIAL: one rational eigenline</text>
+<text x="40" y="329" font-size="14">icv1-fp224-t4733100108545601916421827343930821-fec01e99</text>
+<text x="65" y="357" font-size="14">→ icv1-fp224-t4733100108545601916421827343930821-a120b97a · degree 1117 · PASS</text>
+<text x="40" y="384" font-size="13">Kernel, codomain, rational map, subgroup and 20 public scalar transports PASS.</text>
+<text x="28" y="426" font-size="13">Sources: p192-13-control/replay.json and p224-1117-control/replay.json. Excluded from 2,000-map novelty count.</text>
+</g></svg>

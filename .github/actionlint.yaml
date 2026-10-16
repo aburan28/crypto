@@ -1,0 +1,6 @@
+# Extend older actionlint runner catalogues with this documented GitHub-hosted
+# Intel label: https://docs.github.com/en/actions/reference/runners/github-hosted-runners
+# This validates the exact label without suppressing runner-label diagnostics.
+self-hosted-runner:
+  labels:
+    - macos-15-intel

@@ -5,6 +5,46 @@ use isogeny_algos::kernel::kohel::kohel;
 use isogeny_algos::testdata::*;
 
 #[test]
+fn linear_solver_preserves_pivoting_and_known_solutions() {
+    fn check<F: Field>(f: &F) {
+        let c = |n| f.from_u64(n);
+        assert_eq!(elkies::solve_linear(f, vec![], vec![]), Some(vec![]));
+        assert_eq!(elkies::solve_linear(f, vec![vec![c(0)]], vec![c(1)]), None);
+        assert_eq!(
+            elkies::solve_linear(
+                f,
+                vec![vec![c(1), c(2)], vec![c(2), c(4)]],
+                vec![c(3), c(6)]
+            ),
+            None
+        );
+        for n in [2usize, 3, 7, 16] {
+            // A reversed upper-triangular matrix forces row pivots, with a
+            // nonzero diagonal and a unique public known solution.
+            let mut matrix = vec![vec![f.zero(); n]; n];
+            for row in 0..n {
+                for col in row..n {
+                    matrix[n - 1 - row][col] = c((row + col + 1) as u64);
+                }
+            }
+            let expected: Vec<_> = (0..n).map(|i| c((i + 11) as u64)).collect();
+            let rhs: Vec<_> = matrix
+                .iter()
+                .map(|row| {
+                    row.iter()
+                        .zip(&expected)
+                        .fold(f.zero(), |s, (&a, &b)| f.add(s, f.mul(a, b)))
+                })
+                .collect();
+            assert_eq!(elkies::solve_linear(f, matrix, rhs), Some(expected));
+        }
+    }
+    check(&Zp::new(next_prime(1u64 << 40)));
+    let p = isogeny_algos::api::PrimeCurve::preset("p192").unwrap();
+    check(&isogeny_algos::fpm::FpM::<3>::new(p.p.mag()));
+}
+
+#[test]
 fn phi2_matches_known() {
     let fp = Zp::new(next_prime(1u64 << 30));
     let phi = Phi::compute(&fp, 2);
