@@ -263,7 +263,8 @@ happened:
   `rustc 1.97.0` and main's committed `Cargo.lock`. SHA-256
   `d8daac9aa75ab26e4bac70810f52d8925d518f2d2645ac2f98306d935f23a653`.
 - **The candidate:** v4 plus `candidate-v4.patch`, with the same
-  toolchain and lock. SHA-256 recorded here, and in the manifest, before the first step runs.
+  toolchain and lock. SHA-256
+  `31982fde53e6e6aa536c9981d5d2d7c15709a08331d4c2b31ddf93d14a51eddc`, from local commit `ab211e39733fd279f2bfab2fe4bfc5d1e7bfc564`. The tests passed on its tree (36 of 36, [`tests.log`](tests.log)).
 
 **Everything else stands as declared:**
 - the tests (`cargo test --release --locked --lib -- koblitz_fast` on the
