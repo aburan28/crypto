@@ -3266,14 +3266,15 @@ mod wide {
         if root_only11 {
             assert!(
                 ((std::env::var("KIC_INDEXED_ROOT5").as_deref() == Ok("1")
-                    && std::env::var("KIC_INDEXED5_FIXED30").as_deref() == Ok("1")
+                    && (std::env::var("KIC_INDEXED5_FIXED30").as_deref() == Ok("1")
+                        || indexed5_load75)
                     && !indexed4_table)
                     || (indexed4_table
                         && indexed4_fixed31
-                        && std::env::var("KIC_INDEXED_ROOT5").as_deref() != Ok("1")))
-                    && std::env::var("KIC_PACKED_ROOT_TABLE").as_deref() == Ok("1")
-                    && !indexed5_load75,
-                "one-root states require exact indexed fixed30 or fixed31 slots"
+                        && std::env::var("KIC_INDEXED_ROOT5").as_deref() != Ok("1")
+                        && !indexed5_load75))
+                    && std::env::var("KIC_PACKED_ROOT_TABLE").as_deref() == Ok("1"),
+                "one-root states require exact indexed fixed30, fixed31, or load75 slots"
             );
             assert!(
                 max_states.checked_mul(2).unwrap()
@@ -3281,11 +3282,27 @@ mod wide {
                 "one-root complete key bound exceeds fixed indexed slots"
             );
         }
-        let mut early_root11_table = root_only11.then(|| {
+        // One-root states insert their exact keys while each second root is
+        // still available.  The retained state count is known from the
+        // symmetric traversal, so load75 can size this early table exactly.
+        let root11_request_entries = root_only11.then(|| {
             if indexed4_table {
-                RootTable128::with_capacity_indexed83_four(1usize << 30)
+                1usize << 30
+            } else if indexed5_load75 {
+                max_states
+                    .checked_mul(4)
+                    .and_then(|count| count.checked_add(2))
+                    .expect("one-root indexed request exceeds usize")
+                    / 3
             } else {
-                RootTable128::with_capacity_indexed83(1usize << 29)
+                1usize << 29
+            }
+        });
+        let mut early_root11_table = root11_request_entries.map(|entries| {
+            if indexed4_table {
+                RootTable128::with_capacity_indexed83_four(entries)
+            } else {
+                RootTable128::with_capacity_indexed83(entries)
             }
         });
         let mut states83 = if packed_state83 {
@@ -3472,7 +3489,9 @@ mod wide {
         // The symmetric quotient retains almost two distinct canonical root
         // keys per state.  Requesting 4*S/3 therefore targets at most 75%
         // occupancy after the constructor doubles the request.
-        let root_table_request_entries = if indexed4_fixed31 {
+        let root_table_request_entries = if let Some(entries) = root11_request_entries {
+            entries
+        } else if indexed4_fixed31 {
             1usize << 30
         } else if indexed4_fixed30 || indexed5_fixed30 {
             1usize << 29
