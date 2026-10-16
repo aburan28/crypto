@@ -1,0 +1,152 @@
+{
+  "admissible_pair_shape_count": 2232,
+  "full_table_sha256": "128a05e5bff8b85a45074dc59974bf72c9ea089423f71b39ff8c08cf0871b9ac",
+  "new_n83_solver_search_executed": false,
+  "parent_support_sha256": "2c2229b9bfc78935cbc6c3ca7c6612f8fade2a40a0e0592f93a99b855d41dd45",
+  "schema": "n83.pilot-pair-residual-nullity-allowance/v1",
+  "selected_best_total_runtime": null,
+  "selected_gray_hash_3_plus_2": [
+    {
+      "base_object_blake3": "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0",
+      "base_orbits": 600,
+      "base_policy": "public_x_sequential",
+      "base_seed": 2026100802,
+      "half_threshold_decomposition_query_floor": 39468,
+      "pool_object_blake3": "966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47",
+      "pool_orbits": 600,
+      "pool_policy": "public_x_gray_prefix",
+      "pool_seed": 2026100801,
+      "residual_nullity_threshold_partials": 697,
+      "residual_orbits": 97,
+      "residual_summands": 2,
+      "summands": 5
+    },
+    {
+      "base_object_blake3": "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0",
+      "base_orbits": 600,
+      "base_policy": "public_x_sequential",
+      "base_seed": 2026100802,
+      "half_threshold_decomposition_query_floor": 1777,
+      "pool_object_blake3": "b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e",
+      "pool_orbits": 600,
+      "pool_policy": "public_x_hash",
+      "pool_seed": 2026100801,
+      "residual_nullity_threshold_partials": 1200,
+      "residual_orbits": 600,
+      "residual_summands": 2,
+      "summands": 5
+    }
+  ],
+  "status": "EXACT_LINEAR_ALGEBRA_AND_CONDITIONAL_COUNTING",
+  "subgroup_order": "2417851639230796216685689",
+  "summaries": [
+    {
+      "base_orbits": 64,
+      "highest_floor": 452500699,
+      "lower_median_floor": 17140178,
+      "lowest_floor": 15174771,
+      "pairs": 206,
+      "residual_summands": 1,
+      "summands": 5
+    },
+    {
+      "base_orbits": 256,
+      "highest_floor": 6912562,
+      "lower_median_floor": 107172,
+      "lowest_floor": 76449,
+      "pairs": 186,
+      "residual_summands": 1,
+      "summands": 5
+    },
+    {
+      "base_orbits": 600,
+      "highest_floor": 534572,
+      "lower_median_floor": 5939,
+      "lowest_floor": 3552,
+      "pairs": 166,
+      "residual_summands": 1,
+      "summands": 5
+    },
+    {
+      "base_orbits": 64,
+      "highest_floor": 7220307690,
+      "lower_median_floor": 2143077,
+      "lowest_floor": 809542,
+      "pairs": 206,
+      "residual_summands": 2,
+      "summands": 5
+    },
+    {
+      "base_orbits": 256,
+      "highest_floor": 441106513,
+      "lower_median_floor": 53589,
+      "lowest_floor": 16311,
+      "pairs": 186,
+      "residual_summands": 2,
+      "summands": 5
+    },
+    {
+      "base_orbits": 600,
+      "highest_floor": 79947333,
+      "lower_median_floor": 6960,
+      "lowest_floor": 1777,
+      "pairs": 166,
+      "residual_summands": 2,
+      "summands": 5
+    },
+    {
+      "base_orbits": 64,
+      "highest_floor": 212882,
+      "lower_median_floor": 8064,
+      "lowest_floor": 7140,
+      "pairs": 206,
+      "residual_summands": 1,
+      "summands": 6
+    },
+    {
+      "base_orbits": 256,
+      "highest_floor": 814,
+      "lower_median_floor": 13,
+      "lowest_floor": 9,
+      "pairs": 186,
+      "residual_summands": 1,
+      "summands": 6
+    },
+    {
+      "base_orbits": 600,
+      "highest_floor": 27,
+      "lower_median_floor": 1,
+      "lowest_floor": 1,
+      "pairs": 166,
+      "residual_summands": 1,
+      "summands": 6
+    },
+    {
+      "base_orbits": 64,
+      "highest_floor": 2717722,
+      "lower_median_floor": 807,
+      "lowest_floor": 305,
+      "pairs": 206,
+      "residual_summands": 2,
+      "summands": 6
+    },
+    {
+      "base_orbits": 256,
+      "highest_floor": 41517,
+      "lower_median_floor": 6,
+      "lowest_floor": 2,
+      "pairs": 186,
+      "residual_summands": 2,
+      "summands": 6
+    },
+    {
+      "base_orbits": 600,
+      "highest_floor": 3211,
+      "lower_median_floor": 1,
+      "lowest_floor": 1,
+      "pairs": 166,
+      "residual_summands": 2,
+      "summands": 6
+    }
+  ]
+}

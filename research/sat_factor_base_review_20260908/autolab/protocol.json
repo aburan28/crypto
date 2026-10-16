@@ -356,8 +356,8 @@
       },
       "acceptance_gates": [
         "pairs wall at l=8 logged",
-        "FFD required for ledger beat — currently unmeasured on this pairs arm (related full-field S3 FFD logged separately)",
-        "sub-2^(2l) requires oracle faster than pairs — not this baseline",
+        "FFD required for ledger beat \u2014 currently unmeasured on this pairs arm (related full-field S3 FFD logged separately)",
+        "sub-2^(2l) requires oracle faster than pairs \u2014 not this baseline",
         "not a ledger promotion"
       ],
       "ledger_next_target": "regimes.binary.stages.decomposition.next_target",
@@ -813,6 +813,111 @@
       "primary_speedup_blocker": "This beat's producers emit the single-target online interval and IC phase split, but the protocol-wide contract stays blocked: rows are PENDING_INDEPENDENT_VALIDATION until an independent-host replay.",
       "result_class": "single_target_online",
       "note": "Option A + C of evidence/20261001-koblitz-n61-compact-orbit-panel/VS_RHO_SINGLE_TARGET_OPTIONS.md. Launch with launch-single. Schema eligibility only: independent-host replay is outstanding and no ledger row is promoted."
+    },
+    "koblitz.compact_orbit.n73_single_target": {
+      "label": "One-target online: a=0 n=73 compact-orbit IC (online split timers) vs strong rho rung 3 on the same public point, W one-target workloads (first n=73 rung; prime degree, r = 86020738150056119 ~ 2^56.3, cofactor 109796)",
+      "regime": "koblitz",
+      "stage": "vs_rho",
+      "priority": 1,
+      "n": 73,
+      "a": 0,
+      "launch_mode": "single_target_panel",
+      "timing_class_goal": "single_target_online_wall",
+      "workloads_default": 16,
+      "workloads_minimum": 16,
+      "tune_workloads_default": 1,
+      "k_candidates": [
+        200,
+        600
+      ],
+      "k_selection": "lowest median whole-process IC wall (reusable setup plus one target, the cold cost of one workload) over the disjoint one-target tune workloads; a K that misses any tune workload is ineligible; candidates whose estimated IC RSS plus headroom exceeds available memory are skipped and recorded",
+      "ic_rss_model": {
+        "kind": "compact_orbit_rss",
+        "state_bytes": 24,
+        "table_slot_bytes": 16,
+        "table_slots_per_state": 4,
+        "fixed_bytes": 67108864,
+        "headroom_bytes": 2147483648
+      },
+      "ic_rank_seed": 7,
+      "rho_seed_base": 730000,
+      "identity_known_scalar": 123456789012345,
+      "target_law": {
+        "domain": "kic-n73-single-target-public-point-v1"
+      },
+      "curve_fixture": {
+        "degree": 73,
+        "curve_a": 0,
+        "irreducible": {
+          "degree": 73,
+          "low_terms": [
+            0,
+            2,
+            3,
+            4
+          ]
+        },
+        "subgroup_order": "86020738150056119",
+        "group_order": "9444732965923561641724",
+        "cofactor": 109796,
+        "generator": [
+          "4735344536444938487862",
+          "4753051995279452466153"
+        ],
+        "lambda": "23307709893564868"
+      },
+      "curve_ids": "research/ic_single_target_20260930/curve_ids.json",
+      "panel_producers": {
+        "ic": {
+          "example": "koblitz_orbit_dlp_fast_online",
+          "source": "examples/koblitz_orbit_dlp_fast_online.rs",
+          "usage": "construct:<n>:<a>:<K> <one-line [x,y] target> <rank_seed> <out.jsonl>"
+        },
+        "rho": {
+          "example": "koblitz_rho_batch_ks_strong_online",
+          "source": "examples/koblitz_rho_batch_ks_strong_online.rs",
+          "usage": "KIC_RHO_TARGET_POINT=<x>,<y> <n> <a> signed_frobenius 1 <seed>",
+          "env": {
+            "KIC_RHO_RUNG": "3",
+            "KIC_RHO_LANES": "32",
+            "KIC_RHO_DP_BITS": "4"
+          }
+        }
+      },
+      "frozen_originals": {
+        "ic": {
+          "example": "koblitz_orbit_dlp_fast",
+          "source": "examples/koblitz_orbit_dlp_fast.rs"
+        },
+        "rho": {
+          "example": "koblitz_rho_batch_ks_strong",
+          "source": "examples/koblitz_rho_batch_ks_strong.rs"
+        }
+      },
+      "ic_sources": [
+        "examples/koblitz_orbit_dlp_fast_online.rs",
+        "src/cryptanalysis/koblitz_fast_arith.rs",
+        "src/cryptanalysis/koblitz_index_calculus.rs",
+        "src/cryptanalysis/semaev_decomp.rs"
+      ],
+      "rho_sources": [
+        "examples/koblitz_rho_batch_ks_strong_online.rs",
+        "src/cryptanalysis/koblitz_index_calculus.rs",
+        "src/cryptanalysis/semaev_decomp.rs"
+      ],
+      "comparator_status": "strong rho rung 3 (koblitz_rho_batch_ks_strong_online: koblitz_rho_batch_ks_strong with its online timer started after Q is built; walk checked bit-identical in every run), the measurement_schema.vs_rho.rho_reference_minimum batch reference run at one target",
+      "acceptance_gates": [
+        "one public hash-to-curve target per workload, no known scalar; tune and eval targets disjoint",
+        "each arm in its own process per workload; rho's distinguished-point table starts empty",
+        "IC reusable setup completes before the online interval starts and is reported beside the claim",
+        "online producers emit untimed records identical to their frozen originals on a known-answer target",
+        "both arms recover the same scalar; both certificates replay in oracle.py",
+        "every workload's vs_rho claim passes claim-check; status stays PENDING_INDEPENDENT_VALIDATION"
+      ],
+      "primary_speedup_eligible": true,
+      "primary_speedup_blocker": "This beat's producers emit the single-target online interval and IC phase split, but the protocol-wide contract stays blocked: rows are PENDING_INDEPENDENT_VALIDATION until an independent-host replay.",
+      "result_class": "single_target_online",
+      "note": "First n=73 rung on the u128 compact-orbit domain; the n=71 record is the rung to beat. Curve fixture from experiments/koblitz-single-target-n73-20261003 (frozen/curve_validation.json)."
     }
   },
   "lock": {
@@ -825,7 +930,7 @@
       "rank": 1,
       "regime": "koblitz",
       "stage": "vs_rho",
-      "beat": "Extend the verified single-target online ladder to n=73, a=0 (prime degree; r=86020738150056119 ~ 2^56.3, cofactor 109796) on the same frozen public point contract with the compact-orbit u128 domain (no explicit pair table, peak RSS under the common cap). The n=71 compact-orbit u128 record (median 2864.1x online across three paired runs, deterministic 14554-probe relation, three Python-replayed runs) is the rung to beat. No new field code is needed — the landed u128 producers already admit n=73."
+      "beat": "Extend the verified single-target online ladder to n=73, a=0 (prime degree; r=86020738150056119 ~ 2^56.3, cofactor 109796) on the same frozen public point contract with the compact-orbit u128 domain (no explicit pair table, peak RSS under the common cap). The n=71 compact-orbit u128 record (median 2864.1x online across three paired runs, deterministic 14554-probe relation, three Python-replayed runs) is the rung to beat. No new field code is needed \u2014 the landed u128 producers already admit n=73."
     },
     {
       "rank": 2,

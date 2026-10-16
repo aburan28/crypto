@@ -1,0 +1,63 @@
+{
+  "manifest_sha256": "5bd862987844f709e03beeab9fd265e3d2024011bcadcb82f5af9c72018df6a6",
+  "new_n83_solver_search_executed": false,
+  "objects": {
+    "base": {
+      "canonical_orbit_key_sha256": "48f4c27e06c23616eb0ef9a7e7f6c290609f6e2add080703a63beb5b9f53ef27",
+      "columns": 600,
+      "compressed_blake3": "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0",
+      "compressed_bytes": 3020401,
+      "compressed_sha256": "8463aaf30365d6f6f5d6b189aff4e8afcb6c8305ec27c216700776cbdccba29d",
+      "points": 99600,
+      "policy": "public_x_sequential",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0.jsonl.gz",
+      "seed": 2026100802
+    },
+    "gray_pool": {
+      "canonical_orbit_key_sha256": "d2f3b5c5ff89e3ae716a3d4e68f5b0ab4c0303d053b4c2740c7159ebee288763",
+      "columns": 600,
+      "compressed_blake3": "966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47",
+      "compressed_bytes": 3019769,
+      "compressed_sha256": "df02963d1706fa7a64fd7558d88db79b23ea34801ac58062c4c500113e8c57fe",
+      "points": 99600,
+      "policy": "public_x_gray_prefix",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47.jsonl.gz",
+      "seed": 2026100801
+    },
+    "hash_pool": {
+      "canonical_orbit_key_sha256": "8e345433356a7ff4167db81789b406ab604561ab5c17038362f72dacbc9a3634",
+      "columns": 600,
+      "compressed_blake3": "b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e",
+      "compressed_bytes": 3025798,
+      "compressed_sha256": "3e85c9e419fcddd3c9faed3c84470bf96fcad9178e48e1d73629369335841ecf",
+      "points": 99600,
+      "policy": "public_x_hash",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e.jsonl.gz",
+      "seed": 2026100801
+    }
+  },
+  "pairs": {
+    "gray_pool": {
+      "literal_header_representatives_shared": 489,
+      "parent_support_row_matched": true,
+      "residual_points": 16102,
+      "residual_signed_orbits": 97,
+      "shared_points": 83498,
+      "shared_signed_orbits": 503
+    },
+    "hash_pool": {
+      "literal_header_representatives_shared": 0,
+      "parent_support_row_matched": true,
+      "residual_points": 99600,
+      "residual_signed_orbits": 600,
+      "shared_points": 0,
+      "shared_signed_orbits": 0
+    }
+  },
+  "s3_head_sha256": "7ad34583455dc7c88fb0a4a4c60064caafc274cb4f89f6076a2de2f2929cfe07",
+  "schema": "n83.live-s3-selected-pair-audit/v1",
+  "selected_best_total_runtime": null,
+  "source_sha256": "705737152725f5630eb7da5ab9f6d3b3f67cb54259f5fc81ba06595de049d030",
+  "status": "PASS_ARCHIVE_BYTES_AND_ORBIT_OVERLAP",
+  "support_screen_sha256": "2c2229b9bfc78935cbc6c3ca7c6612f8fade2a40a0e0592f93a99b855d41dd45"
+}
