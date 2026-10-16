@@ -1,0 +1,96 @@
+name: N83 hosted K600 Gray/hash paired first trial
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: n83-hosted-pair-first-trial
+  cancel-in-progress: false
+
+jobs:
+  paired-first-trial:
+    if: github.repository == 'aburan28/crypto' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 90
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      RAYON_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      IMAGE_REF: rust:1.98.1-bookworm@sha256:93ce27a88655056a51dbdd8f5f2d7ddc071c7b0070fb288a37b5a285fc83971e
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 9c92a5f5c02d4163466be4ee7edb557a468a9c2d
+          fetch-depth: 1
+      - name: Set task-owned runner paths
+        run: |
+          printf 'CARGO_HOME=%s/n83-cargo\nARCHIVE_DIR=%s/n83-archives\nOUT_DIR=%s/n83-hosted-pair\nSCRATCH_DIR=%s/n83-hosted-scratch\n' \
+            "$RUNNER_TEMP" "$RUNNER_TEMP" "$RUNNER_TEMP" "$RUNNER_TEMP" >> "$GITHUB_ENV"
+      - name: Record runner and immutable image
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/n83-setup"
+          {
+            uname -a
+            docker version
+            docker pull --platform linux/arm64 "$IMAGE_REF"
+            docker image inspect "$IMAGE_REF" --format '{{.Id}} {{.Architecture}} {{.Os}} {{json .RepoDigests}}'
+          } > "$RUNNER_TEMP/n83-setup/image.stdout" 2> "$RUNNER_TEMP/n83-setup/image.stderr"
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+      - name: Fetch and hash the three frozen public factor bases
+        run: |
+          set -euo pipefail
+          mkdir -p "$ARCHIVE_DIR" "$RUNNER_TEMP/n83-setup"
+          prefix='s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects'
+          for hash in \
+            3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0 \
+            966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47 \
+            b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e; do
+            aws s3 cp --only-show-errors "$prefix/$hash.jsonl.gz" "$ARCHIVE_DIR/$hash.jsonl.gz"
+          done
+          printf '%s  %s\n' \
+            8463aaf30365d6f6f5d6b189aff4e8afcb6c8305ec27c216700776cbdccba29d "$ARCHIVE_DIR/3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0.jsonl.gz" \
+            df02963d1706fa7a64fd7558d88db79b23ea34801ac58062c4c500113e8c57fe "$ARCHIVE_DIR/966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47.jsonl.gz" \
+            3e85c9e419fcddd3c9faed3c84470bf96fcad9178e48e1d73629369335841ecf "$ARCHIVE_DIR/b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e.jsonl.gz" \
+            | sha256sum -c | tee "$RUNNER_TEMP/n83-setup/archive-hashes.stdout"
+      - name: Prepare pinned Python audit dependency and offline Cargo registry
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: \
+            --target "$RUNNER_TEMP/n83-pydeps" 'blake3==1.0.8' \
+            > "$RUNNER_TEMP/n83-setup/python.stdout" 2> "$RUNNER_TEMP/n83-setup/python.stderr"
+          mkdir -p "$CARGO_HOME"
+          docker run --rm --pull never --platform linux/arm64 \
+            --user "$(id -u):$(id -g)" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/src,readonly" \
+            --mount "type=bind,src=$CARGO_HOME,dst=/cargo" \
+            --env CARGO_HOME=/cargo --workdir /src "$IMAGE_REF" \
+            cargo fetch --locked --target aarch64-unknown-linux-gnu \
+            > "$RUNNER_TEMP/n83-setup/cargo-fetch.stdout" 2> "$RUNNER_TEMP/n83-setup/cargo-fetch.stderr"
+      - name: Run separately cold bounded Gray and hash arms
+        env:
+          PYTHONPATH: ${{ runner.temp }}/n83-pydeps
+        run: |
+          set -euo pipefail
+          python3 research/koblitz_n83_factor_base_sweep_20261008/verification/hosted-paired-gate-20261015/run.py \
+            --archives "$ARCHIVE_DIR" --output "$OUT_DIR" --scratch "$SCRATCH_DIR" \
+            > "$RUNNER_TEMP/n83-setup/run.stdout" 2> "$RUNNER_TEMP/n83-setup/run.stderr"
+      - name: Preserve setup, raw stages and audited outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-hosted-pair-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/n83-setup/
+            ${{ runner.temp }}/n83-hosted-pair/
+            ${{ runner.temp }}/n83-hosted-scratch/*/build/build.stdout
+            ${{ runner.temp }}/n83-hosted-scratch/*/build/build.stderr
+          if-no-files-found: warn
+          retention-days: 90

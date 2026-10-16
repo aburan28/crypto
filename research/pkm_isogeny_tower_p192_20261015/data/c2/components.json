@@ -1,0 +1,92 @@
+{
+  "components": [
+    {
+      "inputs": 4096,
+      "max_ns": 13.980712890625,
+      "median_ns": 10.568359375,
+      "min_ns": 10.158203125,
+      "op": "mul",
+      "reps": 11
+    },
+    {
+      "inputs": 4096,
+      "max_ns": 5.139404296875,
+      "median_ns": 5.110107421875,
+      "min_ns": 5.0927734375,
+      "op": "sqr (dedicated)",
+      "reps": 11
+    },
+    {
+      "inputs": 4096,
+      "max_ns": 3804.010986328125,
+      "median_ns": 1807.91748046875,
+      "min_ns": 1767.151123046875,
+      "op": "isqrt addition chain",
+      "reps": 11
+    },
+    {
+      "inputs": 4096,
+      "max_ns": 2220.8291015625,
+      "median_ns": 2184.763671875,
+      "min_ns": 2126.043212890625,
+      "op": "sqrt (PrimeField::sqrt, window)",
+      "reps": 11
+    },
+    {
+      "inputs": 4096,
+      "max_ns": 1845.249267578125,
+      "median_ns": 1792.506591796875,
+      "min_ns": 1724.41015625,
+      "op": "legendre (jacobi_limbs binary)",
+      "reps": 11
+    },
+    {
+      "inputs": 4096,
+      "max_ns": 1972.2412109375,
+      "median_ns": 1951.8466796875,
+      "min_ns": 1923.3996582031252,
+      "op": "jacobi posdivsteps (fast)",
+      "reps": 11
+    },
+    {
+      "inputs": 4096,
+      "max_ns": 2005.49951171875,
+      "median_ns": 1956.855224609375,
+      "min_ns": 1942.6301269531252,
+      "op": "chi via HalvingField",
+      "reps": 11
+    },
+    {
+      "inputs": 4096,
+      "max_ns": 2341.59423828125,
+      "median_ns": 2152.55322265625,
+      "min_ns": 2133.565185546875,
+      "op": "inv (bingcd)",
+      "reps": 11
+    },
+    {
+      "inputs": 4096,
+      "max_ns": 152.552001953125,
+      "median_ns": 145.841796875,
+      "min_ns": 141.838134765625,
+      "op": "element_from_rng (draw m)",
+      "reps": 11
+    },
+    {
+      "inputs": 4096,
+      "max_ns": 235.636962890625,
+      "median_ns": 232.556640625,
+      "min_ns": 230.100341796875,
+      "op": "draw_curve z2xz8",
+      "reps": 11
+    },
+    {
+      "inputs": 4096,
+      "max_ns": 1.675048828125,
+      "median_ns": 1.594970703125,
+      "min_ns": 1.584228515625,
+      "op": "draw_rng only",
+      "reps": 11
+    }
+  ]
+}

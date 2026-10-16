@@ -1,0 +1,18 @@
+saved /home/user/wt/lane-h/research/pkm_supersingular_aux_20261015/q3/sessions/s24/comparisons/ic-ss-mitm__ic-ss-rootfind.json
+ops (ok): ic-ss-rootfind / ic-ss-mitm = 1.0736 [1.067, 1.081] (cluster) over 16 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.1635 [1.156, 1.190]
+measurement quality: 0 / 100; paired attempts 16, verified 16, admitted 0; levels {"L0": 16}; p95 foreign busy unknown%, p95 run queue 6.10%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-ss-rootfind / ic-ss-mitm | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 8 | 1.0736 | [1.0675, 1.0811] | cluster |
+
+| workload | curve | log2 r | ic-ss-mitm mean S | ic-ss-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W17b438bfb12f | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 32.0350 | 34.3058 | 1.0709 |
+| W25cee39ee98f | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 30.9277 | 33.1361 | 1.0714 |
+| W55568eeba98a | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 32.0849 | 34.0821 | 1.0622 |
+| W88ff0ab6e7fd | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 31.4794 | 34.0128 | 1.0805 |
+| Waa0b657ee7a8 | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 30.7981 | 32.8103 | 1.0653 |
+| Wcf04f75e8865 | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 30.9827 | 33.7044 | 1.0878 |
+| Wdb0e2ef40f7f | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 32.8801 | 35.2806 | 1.0730 |
+| We87af70e465e | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 30.2661 | 32.6401 | 1.0784 |

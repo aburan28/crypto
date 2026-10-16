@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 444" font-family="Helvetica,Arial,sans-serif" font-size="13">
+<rect width="940" height="444" fill="#fff"/>
+<text x="470.0" y="24" text-anchor="middle" font-size="16" font-weight="bold">Candidate cost / incumbent cost, paired (log scale; &lt;1 = improvement)</text>
+<line x1="462.835355921138" y1="50" x2="462.835355921138" y2="354" stroke="#e5e7eb"/><text x="462.835355921138" y="370" text-anchor="middle" fill="#374151" font-size="11">0.03x</text>
+<line x1="530.6418008071902" y1="50" x2="530.6418008071902" y2="354" stroke="#e5e7eb"/><text x="530.6418008071902" y="370" text-anchor="middle" fill="#374151" font-size="11">0.1x</text>
+<line x1="592.514455517543" y1="50" x2="592.514455517543" y2="354" stroke="#e5e7eb"/><text x="592.514455517543" y="370" text-anchor="middle" fill="#374151" font-size="11">0.3x</text>
+<line x1="660.320900403595" y1="50" x2="660.320900403595" y2="354" stroke="#e5e7eb"/><text x="660.320900403595" y="370" text-anchor="middle" fill="#374151" font-size="11">1x</text>
+<line x1="722.1935551139479" y1="50" x2="722.1935551139479" y2="354" stroke="#e5e7eb"/><text x="722.1935551139479" y="370" text-anchor="middle" fill="#374151" font-size="11">3x</text>
+<line x1="790.0" y1="50" x2="790.0" y2="354" stroke="#e5e7eb"/><text x="790.0" y="370" text-anchor="middle" fill="#374151" font-size="11">10x</text>
+<line x1="660.320900403595" y1="50" x2="660.320900403595" y2="354" stroke="#111" stroke-dasharray="4,3"/>
+<text x="430" y="74" text-anchor="end">04 Genus-3 IC: 2LP vs full base, at q=2^18</text>
+<line x1="471.5169553213059" y1="70" x2="474.5169553213059" y2="70" stroke="#15803d" stroke-width="10" stroke-linecap="round"/><circle cx="473.1035086135154" cy="70" r="6" fill="#fff" stroke="#15803d" stroke-width="2"/>
+<text x="485.1035086135154" y="74" fill="#374151">0.036x</text>
+<text x="430" y="112" text-anchor="end">04 Genus-3 IC: 2LP vs full base, at q=2^10</text>
+<line x1="631.9259677591111" y1="108" x2="635.010221760318" y2="108" stroke="#15803d" stroke-width="10" stroke-linecap="round"/><circle cx="633.3984416289977" cy="108" r="6" fill="#fff" stroke="#15803d" stroke-width="2"/>
+<text x="647.010221760318" y="112" fill="#374151">0.62x</text>
+<text x="430" y="150" text-anchor="end">03 Koblitz IC: + free relations, complete solve</text>
+<line x1="657.075291159475" y1="146" x2="660.075291159475" y2="146" stroke="#15803d" stroke-width="10" stroke-linecap="round"/><circle cx="657.845577681456" cy="146" r="6" fill="#fff" stroke="#15803d" stroke-width="2"/>
+<text x="670.6054708140198" y="150" fill="#374151">0.957x</text>
+<text x="430" y="188" text-anchor="end">03 Koblitz IC: + trace-zero pre-filter</text>
+<line x1="660.3223365176777" y1="184" x2="663.3223365176777" y2="184" stroke="#6b7280" stroke-width="10" stroke-linecap="round"/><circle cx="660.3225899457733" cy="184" r="6" fill="#fff" stroke="#6b7280" stroke-width="2"/>
+<text x="672.3233727498002" y="188" fill="#374151">1x</text>
+<text x="430" y="226" text-anchor="end">01 k=4 IC: D4+2LP vs D4, linear algebra</text>
+<line x1="647.8943187644287" y1="222" x2="651.36643293914" y2="222" stroke="#15803d" stroke-width="10" stroke-linecap="round"/><circle cx="649.6230891607051" cy="222" r="6" fill="#fff" stroke="#15803d" stroke-width="2"/>
+<text x="663.36643293914" y="226" fill="#374151">0.827x</text>
+<text x="430" y="264" text-anchor="end">01 k=4 IC: D4+2LP vs D4, whole solve</text>
+<line x1="661.2148702431593" y1="260" x2="664.2148702431593" y2="260" stroke="#b91c1c" stroke-width="10" stroke-linecap="round"/><circle cx="661.7115616117933" cy="260" r="6" fill="#fff" stroke="#b91c1c" stroke-width="2"/>
+<text x="674.367075324877" y="264" fill="#374151">1.02x</text>
+<text x="430" y="302" text-anchor="end">02 Oracle: equivariant vs incumbent, n=13 (CPU)</text>
+<line x1="504.5248030640088" y1="298" x2="507.5248030640088" y2="298" stroke="#15803d" stroke-width="10" stroke-linecap="round"/><circle cx="505.95975756381205" cy="298" r="6" fill="#fff" stroke="#15803d" stroke-width="2"/>
+<text x="519.4322314336987" y="302" fill="#374151">0.0645x</text>
+<text x="430" y="340" text-anchor="end">02 Oracle: equivariant vs incumbent, n=7 (CPU)</text>
+<line x1="748.2148919863166" y1="336" x2="775.2239286678534" y2="336" stroke="#b91c1c" stroke-width="10" stroke-linecap="round"/><circle cx="760.1155913727027" cy="336" r="6" fill="#fff" stroke="#b91c1c" stroke-width="2"/>
+<text x="787.2239286678534" y="340" fill="#374151">5.88x</text>
+<text x="20" y="418" fill="#374151">Exponent: genus-3 2LP q^1.385 vs incumbent q^1.910 (Δ −0.525); D4+2LP Δ +0.0055 (regress).</text>
+<text x="20" y="436" fill="#6b7280" font-size="11">95% CIs. Green: improvement; red: regression; grey: no effect. Shared 4-core host, L0, counted units (item 02: CPU time).</text></svg>

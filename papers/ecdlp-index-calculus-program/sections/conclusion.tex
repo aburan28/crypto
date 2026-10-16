@@ -1,0 +1,39 @@
+\section{Conclusion}\label{sec:conclusion}
+
+Fourteen weeks of work produced three kinds of result. The first is
+infrastructure: a single unit and harness in which rho, BSGS, the kangaroo
+and every index-calculus variant are charged the same way on the same
+one-target workloads, with sealed records, exact replays and admitted
+intervals; and a ledger that refuses a claim with a missing field. The
+second is a set of constant-factor improvements, the largest of which---the
+closed-form roots of $\Sem3$---began as one sentence in a manuscript we were
+asked to check, and ended as a proved identity, an oracle family covering
+prime and binary fields, two to four summands, CPU and GPU, plain, tower
+and dense-index bases, and the default decomposition strategy of the
+codebase. The third is a map of what does not work, which is longer than
+the list of what does: SAT that does not scale, symmetry that pays at
+$n=17$ and costs at $n=31$, transfers that provably cannot change
+decomposition counts, fibre-aware bases whose gap to rho grows as
+$\#E^{1/6}$, literature attacks that are exhaustive search.
+
+The honest summary is the campaign of \S\ref{sec:campaign}. On the
+question the survey asks---does index calculus solve one unseen
+elliptic-curve target, cold, for less than rho?---the answer on every curve
+we measured, at every weight of the pricing band, is no. The closest arm is
+a compact Frobenius-orbit Koblitz index calculus at $4$--$18\times$
+signed-Frobenius rho, prime-field index calculus falls behind as $r^{1/6}$,
+and no fitted exponent of an index-calculus arm lies below rho's. The
+online $13.9\times$ at $n=61$ compared a table against no table and loses
+$53$--$317\times$ to preprocessing rho with equal advice; it is retired.
+
+Measured against its own baseline, which is the criterion the programme now
+works to, index calculus keeps improving: about twenty changes landed on
+14--15 October, among them a genus-3 index calculus after cubic GHS
+whose exponent (about $q^{1.4}$) lies below rho's $q^{3/2}$, an $18\times$ cheaper
+$k=4$ ladder and a further $18\times$ cheaper $k=4$ solve, and production
+free relations on Koblitz curves ($0.960\times$). The genus-3 family is
+the nearest to rho: $1.15\times$ a measured negation-map rho at $q=2^{20}$
+after the second round, with a further $0.62\times$ step not yet matched
+against rho. The stages that now
+dominate are relation yield, factor-base size and linear algebra, and the
+open problems of \S\ref{sec:open} say what would move them.

@@ -1,0 +1,171 @@
+#!/usr/bin/env python3
+"""Bounded local K4096 ID30 feasibility diagnostic with memory guard."""
+
+from datetime import datetime, timezone
+import importlib.util
+import json
+import os
+from pathlib import Path
+import platform
+import re
+import shutil
+import signal
+import subprocess
+import time
+
+HERE = Path(__file__).resolve().parent
+CONTROL = HERE / "run_control.py"
+K = 4096
+CAP_SECONDS = 900
+RSS_CAP_BYTES = 32 * 1024**3
+MIN_START_FREE_PERCENT = 50
+MIN_RUNNING_FREE_PERCENT = 15
+
+spec = importlib.util.spec_from_file_location("n83_id30_k4096_control", CONTROL)
+control = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(control)
+
+
+def free_percent():
+    output = subprocess.check_output(["/usr/bin/memory_pressure", "-Q"], text=True)
+    match = re.search(r"System-wide memory free percentage:\s*(\d+)%", output)
+    if not match:
+        raise ValueError("memory_pressure free percentage unavailable")
+    return int(match.group(1)), output
+
+
+def rss_bytes(pid):
+    result = subprocess.run(["/bin/ps", "-o", "rss=", "-p", str(pid)],
+                            check=False, capture_output=True, text=True)
+    if result.returncode != 0 or not result.stdout.strip().isdigit():
+        raise ValueError("process RSS telemetry unavailable")
+    return int(result.stdout.strip()) * 1024
+
+
+def stop(process):
+    try:
+        os.killpg(process.pid, signal.SIGTERM)
+    except ProcessLookupError:
+        return
+    try:
+        process.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        os.killpg(process.pid, signal.SIGKILL)
+        process.wait()
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--binary", required=True, type=Path)
+    parser.add_argument("--output", required=True, type=Path)
+    args = parser.parse_args()
+    output = args.output.resolve()
+    binary = args.binary.resolve()
+    dynamic = control.dynamic_runner()
+    hashes = dynamic.frozen_inputs()
+    if (output.exists() or control.digest(control.SOURCE) != control.SOURCE_SHA256
+            or not binary.is_file()):
+        raise ValueError("source, binary or fresh output preflight failed")
+    physical = int(subprocess.check_output(
+        ["/usr/sbin/sysctl", "-n", "hw.memsize"], text=True).strip())
+    start_free, start_pressure = free_percent()
+    output.mkdir(parents=True)
+    control.write(output / "host.json", {
+        "schema": "n83.id30-k4096-local-host/v1",
+        "platform": platform.uname()._asdict(),
+        "physical_memory_bytes": physical,
+        "memory_pressure_before": start_pressure,
+        "free_percent_before": start_free,
+        "rss_cap_bytes": RSS_CAP_BYTES,
+        "min_start_free_percent": MIN_START_FREE_PERCENT,
+        "min_running_free_percent": MIN_RUNNING_FREE_PERCENT,
+    })
+    if physical < 40 * 1024**3 or start_free < MIN_START_FREE_PERCENT:
+        control.write(output / "preflight.json", {
+            "status": "REJECTED_HOST_CAPACITY", "physical_memory_bytes": physical,
+            "free_percent_before": start_free})
+        return 2
+    control.write(output / "preflight.json", {"status": "PASS_CAPACITY_PREFLIGHT"})
+    copied = output / "koblitz_orbit_dlp_fast"
+    shutil.copy2(binary, copied)
+    control.write(output / "source.json", {
+        "schema": "n83.id30-k4096-source/v1", "hashes": hashes,
+        "source_sha256": control.SOURCE_SHA256,
+        "binary_sha256": control.digest(copied),
+        "runner_sha256": control.digest(Path(__file__)),
+        "control_module_sha256": control.digest(CONTROL),
+        "public_input_sha256": control.digest(dynamic.cold.TARGETS),
+        "k": K, "cap_seconds": CAP_SECONDS,
+        "rss_cap_bytes": RSS_CAP_BYTES,
+    })
+    folder = output / "runs" / "opt_in_id30"
+    folder.mkdir(parents=True)
+    environment = {key: value for key, value in os.environ.items()
+                   if not key.startswith("KIC_")}
+    environment.update(dynamic.environment(folder, "root11_dynamic"))
+    environment["KIC_INDEXED5_ID30"] = "1"
+    command = [str(copied), f"construct:83:1:{K}",
+               str(dynamic.cold.TARGETS), "29",
+               str(folder / "targets_result.jsonl")]
+    started = datetime.now(timezone.utc).isoformat()
+    t0 = time.monotonic()
+    peak_rss = 0
+    min_free = start_free
+    status = "FAILED"
+    with (folder / "stdout.jsonl").open("wb") as stdout, (
+            folder / "stderr.log").open("wb") as stderr:
+        process = subprocess.Popen(command, cwd=control.ROOT, env=environment,
+                                   stdout=stdout, stderr=stderr,
+                                   start_new_session=True)
+        while process.poll() is None:
+            elapsed = time.monotonic() - t0
+            if elapsed > CAP_SECONDS:
+                status = "TIMEOUT"
+                stop(process)
+                break
+            try:
+                peak_rss = max(peak_rss, rss_bytes(process.pid))
+                current_free, _ = free_percent()
+                min_free = min(min_free, current_free)
+            except (ValueError, subprocess.CalledProcessError):
+                if process.poll() is not None:
+                    status = "PASS_PRODUCER" if process.returncode == 0 else "FAILED"
+                    break
+                status = "TELEMETRY_FAILURE"
+                stop(process)
+                break
+            if peak_rss > RSS_CAP_BYTES:
+                status = "RSS_CAP"
+                stop(process)
+                break
+            if current_free < MIN_RUNNING_FREE_PERCENT:
+                status = "HOST_MEMORY_PRESSURE"
+                stop(process)
+                break
+            time.sleep(1)
+        else:
+            status = "PASS_PRODUCER" if process.returncode == 0 else "FAILED"
+    finish_free, finish_pressure = free_percent()
+    control.write(folder / "usage.json", {
+        "status": status, "exit_code": process.returncode,
+        "started_utc": started,
+        "finished_utc": datetime.now(timezone.utc).isoformat(),
+        "wall_seconds": time.monotonic() - t0,
+        "command": command,
+        "algorithm_flags": {key: environment[key] for key in sorted(environment)
+                            if key.startswith("KIC_")},
+        "peak_sampled_rss_bytes": peak_rss,
+        "min_sampled_free_percent": min_free,
+        "finish_free_percent": finish_free,
+        "memory_pressure_after": finish_pressure,
+        "hardware_tier": "local_correctness_diagnostic",
+    })
+    print(json.dumps({"status": status, "exit_code": process.returncode,
+                      "peak_sampled_rss_bytes": peak_rss,
+                      "min_sampled_free_percent": min_free}, sort_keys=True))
+    return 0 if status == "PASS_PRODUCER" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

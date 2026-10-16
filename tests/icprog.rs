@@ -546,6 +546,7 @@ fn icprog_reports_and_enforces_each_round_s_hardware_class() {
     for (round, class) in [
         ("r05", reference),
         ("r07", reference),
+        ("r10", reference),
         ("r06", r06),
         ("r08", r06),
         ("r09", &["avx512f", "pclmulqdq", "!vpclmulqdq"]),

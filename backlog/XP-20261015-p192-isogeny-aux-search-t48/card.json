@@ -1,0 +1,172 @@
+{
+  "schema": "backlog.card/v1",
+  "id": "XP-20261015-p192-isogeny-aux-search-t48",
+  "title": "Auxiliary curve over the NIST P-192 prime with a rational point of order 2^48 (PKM isogeny-tower factor base, t = 48)",
+  "created": "2026-10-15",
+  "authors": [
+    "backlog lane",
+    "coordinator"
+  ],
+  "status": "blocked",
+  "status_note": "Blocked on the wide-field tower builder and the 192-bit field backend (both in progress, not yet pushed) and on PR #1889. Runs as cairn lab tasks with the native checker deciding `found` (first_success); posting it as a cairn objective is the upgrade path once cairn can pin a native checker. Recommended gate: run only after lead 1 (XP-20261015-pkm-m3-n21-m4-n20) gives a bounded F4 solving degree, or run it explicitly as an infrastructure/feasibility measurement.",
+  "blocked_on": [
+    "note:decision — the supersingular curve y^2 = x^3 + x over the P-192 prime (#E = p + 1, cyclic 2-Sylow of order 2^64) already gives a point of order exactly 2^48 in one draw, and backlog_check_aux2t accepts it; decide whether the PKM relation phase may use a supersingular E' (then this search is unnecessary) or the checker must require an ordinary curve (then this card runs as specified, ~98,000 core-hours measured)",
+    "pr:1918 merged; the solver and 2-Sylow halving filter are on branch claude/isogeny-tower-p192 (PR pending merge)",
+    "note:lead 1 of the factor-base encyclopedia (bounded F4 solving degree) is unresolved; see decision_value"
+  ],
+  "links": {
+    "lead": "docs/ic/factor-base-encyclopedia/README.md §0.2 (isogeny tower, the P-192 shape)",
+    "notes": [
+      "research/pkm_isogeny_tower_ecbench_20261015/README.md on branch claude/leads-isogeny-tower (panel 3: curves tried / 2^t, pooled C = 1.05 over 224 builds, t = 8..14; projection to P-192 size)",
+      "research/notes/index-calculus/RESEARCH_PKM_TOWER_ORACLE.md §10.10 (P-192: v2(p-1) = 1, v2(p+1) = 64)"
+    ],
+    "prs": [
+      1889
+    ]
+  },
+  "question": "How many auxiliary curves over the NIST P-192 prime must be drawn, and at what wall cost per draw, before one has a rational point of order 2^48, using a curve family that forces k bits of 2-power torsion and a halving filter that rejects most draws after O(1) square roots?",
+  "decision_value": "This run prices the construction of a P-192-size isogeny-tower factor base; it does not by itself say anything about P-192 security. The base is useful only if the tower's F4 solving degree stays bounded as the tower grows (encyclopedia §8 lead 1), which is unresolved and trending negative (D rises at m = 2, N = 20). If lead 1 comes back bounded, a curve found here is the input the relation phase needs and the measured trials-per-success fixes the construction's share of the cost; if lead 1 stays unbounded, this run only measures a feasibility constant and should be scheduled as infrastructure work, not as attack evidence. A failure to find a curve within the seed space is a bounded negative result about this family and filter, not about the tower.",
+  "protocol": {
+    "path": null,
+    "blob": null
+  },
+  "code": {
+    "repo": "crypto",
+    "commit": null,
+    "branch": "claude/isogeny-tower-p192",
+    "build": [
+      [
+        "cargo",
+        "build",
+        "--release",
+        "--bin",
+        "pkm-aux-search"
+      ]
+    ]
+  },
+  "resources": {
+    "cpus": 1,
+    "ram_gb": 1,
+    "disk_gb": 1,
+    "gpu": null,
+    "est_core_hours": 98352,
+    "est_wall_hours": null,
+    "notes": "Measured 2026-10-15 (research/pkm_isogeny_tower_p192_20261015, branch claude/isogeny-tower-p192): pkm-aux-search costs 10.06 us per draw at P-192 (fast arm, z2xz8 family = X1(2,8), median of 7 x 65,536 draws, min-max 9.78-10.19, one core of a shared host; z2xz2 13.89 us). Measured depth distribution (2^28 z2xz8 draws, 2^25 z2xz2 draws) is consistent with P(b >= t) = 2^(3-t) for z2xz8 and 3*2^(-t) for z2xz2 at every tested t (pre-registered H1/H2), so t = 48 needs about 2^45 z2xz8 draws (derived): 98,352 core-hours = 11.2 core-years (range 95,617-99,624 from the timing spread); z2xz2 would need 2^48/3 draws, 362,005 core-hours. The earlier 39,094 assumed 2^46 draws at 2 us. Per shard of 2^32 z2xz8 draws: about 12.0 core-hours. Largest ordinary curve found in the 45.6-minute run: b = 38 (seed 196253408, checker accepts t = 38). Note: the supersingular curve y^2 = x^3 + x over this prime has #E = p + 1 and a cyclic 2-Sylow of order 2^64; pkm-aux-search --family supersingular-j1728 --t 48 returns a point of order 2^48 in one draw (7 ms) and backlog_check_aux2t --expect-t 48 accepts it. Whether a supersingular E' suits the PKM relation phase is untested."
+  },
+  "run": {
+    "argv": [
+      "target/release/pkm-aux-search",
+      "--prime",
+      "nist-p192",
+      "--t",
+      "48",
+      "--family",
+      "z2xz2",
+      "--seed-lo",
+      "{seed_lo}",
+      "--seed-hi",
+      "{seed_hi}",
+      "--out",
+      "{out}/found/artifact.json",
+      "--checkpoint",
+      "{checkpoint}"
+    ],
+    "env": {
+      "RAYON_NUM_THREADS": "1"
+    },
+    "timeout_per_shard_s": 172800
+  },
+  "shards": {
+    "count": 65536,
+    "scheme": "seed_range",
+    "params": {
+      "seed_lo": "0",
+      "range_size": "4294967296",
+      "seed_hi": "281474976710656",
+      "seed_meaning": "seed s deterministically derives one curve draw (a, b) of the family; the derivation is fixed in PROTOCOL.md before the card leaves blocked"
+    },
+    "stop": "first_success"
+  },
+  "checkpoint": {
+    "file": "checkpoint.json",
+    "resume_flag": "--resume"
+  },
+  "outputs": {
+    "result_schema": "the solver's result JSON: {a, b, Q: [x, y], t, seed, draws, cpu_seconds}, frozen in PROTOCOL.md",
+    "verify": [
+      "target/release/backlog_check_aux2t",
+      "{out}/found/artifact.json",
+      "--expect-t",
+      "48"
+    ],
+    "land": "research/pkm_aux_search_p192_t48"
+  },
+  "cairn": {
+    "mode": "lab-task",
+    "notes": "One lab task per seed range; stop rule first_success (backlog/README.md): before each claim a runner checks `backlog cairn-found <ID> --lab DIR` (exit 3 = stop); a run that finds a curve writes {out}/found/artifact.json, which `cairn lab exec --publish runs/<ID>/shard-<k>` publishes, and the runner, still holding the lease, records it with `backlog cairn-found <ID> --lab DIR --lab-path runs/<ID>/shard-<k>/found/artifact.json --claim C --holder H --identity I --checker-bin <pinned build>/backlog_check_aux2t` (the checker decides on the lab copy). Re-claim every 2 h (ttl 6 h). Resumable from checkpoint.json, so preemptible. Upgrade path: a cairn objective once cairn can pin a native checker (problems/cairn-certificate-checker-python-only.md).",
+    "space": "TBD",
+    "tasks": [
+      "XP-20261015-p192-isogeny-aux-search-t48/shard-{k}"
+    ],
+    "ttl_s": 21600,
+    "env": {
+      "name": "crypto-aux-search",
+      "recipe": "A rust:1.98 image built at the builder lane merge commit with `cargo build --release --bin pkm-aux-search --bin backlog_check_aux2t`, imported with `cairn lab env import crypto-aux-search-<sha> --docker <image>`"
+    },
+    "exec": {
+      "cpus": 1,
+      "memory_mb": 1024,
+      "timeout_s": 172800,
+      "sandbox": "auto",
+      "publish": "runs/XP-20261015-p192-isogeny-aux-search-t48"
+    },
+    "checker": {
+      "status": "available",
+      "bin": "backlog_check_aux2t (src/bin/backlog_check_aux2t.rs)",
+      "argv": [
+        "backlog_check_aux2t",
+        "{artifact}",
+        "--expect-t",
+        "48"
+      ],
+      "artifact_schema": {
+        "type": "object",
+        "required": [
+          "p",
+          "a",
+          "b",
+          "Qx",
+          "Qy",
+          "t"
+        ],
+        "properties": {
+          "p": {
+            "type": "string",
+            "description": "decimal or 0x-hex; must be the NIST P-192 prime"
+          },
+          "a": {
+            "type": "string"
+          },
+          "b": {
+            "type": "string"
+          },
+          "Qx": {
+            "type": "string"
+          },
+          "Qy": {
+            "type": "string"
+          },
+          "t": {
+            "const": 48
+          }
+        },
+        "checks": "t = 48 (the checker is run with --expect-t 48); p is the NIST P-192 prime; 4a^3 + 27b^2 != 0 mod p; Q on y^2 = x^3 + ax + b; [2^47]Q != O and [2^48]Q = O; exit 0 accept, 1 reject, 2 bad input"
+      }
+    },
+    "funding": {
+      "units": 131072,
+      "rationale": "Lowest of the four: gated on lead 1 (the base only matters if the F4 solving degree is bounded), and 1-45 core-years of construction that by itself says nothing about P-192 security."
+    }
+  },
+  "owner_hint": "the wide-field isogeny-tower builder lane"
+}

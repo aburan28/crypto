@@ -1,0 +1,95 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "prime rho automorphism baseline: rho.cubic vs rho.negation on the round-2 E2 crater curves",
+  "description": "Matched rho on the j-invariant's full order-6 group {±ζ₃^i} against the negation-only reference used in round 2, on the six E2 crater curves with this automorphism. Workloads, target seed, rounds and isolation copied from round 2 E2.",
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "rho-cubic",
+      "role": "candidate",
+      "method": {
+        "id": "rho.cubic"
+      }
+    }
+  ],
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 3,
+    "seed": 1,
+    "timeout_seconds": 900,
+    "warmup": 1
+  },
+  "workloads": {
+    "curves": [
+      {
+        "a": 0,
+        "b": 43,
+        "group_order": 22784275,
+        "gx": 20775195,
+        "gy": 18276976,
+        "kind": "prime_explicit",
+        "p": 22793761,
+        "r": 911371
+      },
+      {
+        "a": 0,
+        "b": 15,
+        "group_order": 2342739,
+        "gx": 947244,
+        "gy": 1525967,
+        "kind": "prime_explicit",
+        "p": 2345743,
+        "r": 15937
+      },
+      {
+        "a": 0,
+        "b": 1,
+        "group_order": 23727108,
+        "gx": 19157303,
+        "gy": 13563414,
+        "kind": "prime_explicit",
+        "p": 23736841,
+        "r": 1977259
+      },
+      {
+        "a": 0,
+        "b": 3,
+        "group_order": 89642725,
+        "gx": 16759995,
+        "gy": 71173427,
+        "kind": "prime_explicit",
+        "p": 89661631,
+        "r": 3585709
+      },
+      {
+        "a": 0,
+        "b": 4,
+        "group_order": 154904043,
+        "gx": 153834594,
+        "gy": 109834404,
+        "kind": "prime_explicit",
+        "p": 154928929,
+        "r": 1053769
+      },
+      {
+        "a": 0,
+        "b": 14,
+        "group_order": 57172516,
+        "gx": 48316013,
+        "gy": 45510044,
+        "kind": "prime_explicit",
+        "p": 57187633,
+        "r": 14293129
+      }
+    ],
+    "target_seed": 20261011,
+    "targets_per_curve": 4
+  }
+}
