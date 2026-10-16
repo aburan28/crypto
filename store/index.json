@@ -31,6 +31,50 @@
       "description": "Frozen final native challenge judge with passing admission and twenty resource stress controls",
       "provenance": "cargo test --release --locked --offline --manifest-path tools/isogeny-cli/Cargo.toml from clean source ff71f577203179760211cdc1dc3da7a33fc77ec1; installed native controls and bounded historical-map replay; experimental binary, not a ReleaseMe publication"
     },
+    "evidence/isogeny-world-frontier-20261016/compact-cm-clean-controls-9a2e133099": {
+      "sha256": "c5ef1a02d2bbaa29361d1638192be5823dbdcd70d2b8b8800de0bc625f236559",
+      "bytes": 20370,
+      "description": "Historical complete native public-fixture clean controls and build/version receipts from public source9a2e133099",
+      "provenance": "Exact20KB archive c5ef1a02d2bbaa29361d1638192be5823dbdcd70d2b8b8800de0bc625f236559; public P192/SEC2 mathematical fixtures, command paths and operational receipts; credential-pattern scan no matches; authenticated bucket ownership verified"
+    },
+    "evidence/isogeny-world-frontier-20261016/compact-trace-clean-controls-e82d80feaf": {
+      "sha256": "bf0b366d4ce08e7c23ff1287ed8789fa83b36068a758fb6a75ae321d37f3273e",
+      "bytes": 110195,
+      "description": "Complete public-fixture clean94-test retake, source/version/build, installed equality and deterministic resource/trace control receipts",
+      "provenance": "Public source e82d80feaf82d3730576ccd9137911b336f9dab8; exact110195-byte archive bf0b366d4ce08e7c23ff1287ed8789fa83b36068a758fb6a75ae321d37f3273e; public SEC2/P192 controls and operational receipts only, no scientific large target executed"
+    },
+    "evidence/isogeny-world-frontier-20261016/isogeny-6547d252-macos-arm64": {
+      "sha256": "8e0ab524008d41098a816d117d563bbefa456959bb790a78e41efc41b05e6cc1",
+      "bytes": 31426032,
+      "description": "Frozen native isogeny challenge executable for standard-curve prime-degree frontier first batch",
+      "tags": [
+        "frontier",
+        "isogeny"
+      ],
+      "provenance": "GitHub Actions Release dry run 38832940208 artifact12018586693; synthetic merge6547d252889ac0e1089a0497bf80f05b884ab24e; parents92246530c4f333724374e70897330bc38fa159a1 and a9a806ee7a6d807e9987279aa7115f8b289bedf8; installed archive verified and public P192/13 accepted"
+    },
+    "evidence/isogeny-world-frontier-20261016/isogeny-compact-cm-9a2e133099-macos-arm64": {
+      "sha256": "d7e53928e57bde96f9b6846333fd1190c3650ee57b6a060a2ab7e81d22252474",
+      "bytes": 35981008,
+      "description": "Historical clean executable built solely from public crypto source commit9a2e133099; superseded resource admission, not a target result",
+      "provenance": "Public repository aburan28/crypto private=false verified live; public commit9a2e133099eb4b10ed182e25384bd53fca262146; bucket ownership head-bucket expected authenticated STS account succeeded; exact file SHA d7e53928e57bde96f9b6846333fd1190c3650ee57b6a060a2ab7e81d22252474"
+    },
+    "evidence/isogeny-world-frontier-20261016/isogeny-compact-trace-e82d80feaf-macos-arm64": {
+      "sha256": "b3cbd6ac5d457a0f6d6398d1fcefc408f627e60be52c81c9009406486b61587b",
+      "bytes": 36087488,
+      "description": "Corrected clean dedicated native isogeny executable with supervised compact CM and durable independent replay stage tracing",
+      "provenance": "Public source e82d80feaf82d3730576ccd9137911b336f9dab8, git_dirty=false, clean94-test retake exit0, installed byte equality0; exact binary b3cbd6ac5d457a0f6d6398d1fcefc408f627e60be52c81c9009406486b61587b; authenticated owner bucket verified"
+    },
+    "evidence/isogeny-world-frontier-20261016/native-challenge-controls-macos-arm64": {
+      "sha256": "ccf19b8fdb15fb055059f9e2db7412a11d44fa526b080ae09462dc659debb527",
+      "bytes": 1289792,
+      "description": "Frozen native end-to-end challenge controls including exact-map and kernel mutations",
+      "tags": [
+        "controls",
+        "isogeny"
+      ],
+      "provenance": "Native tools/isogeny-cli/tests/challenge_cli.rs release integration test executable from source9bb7cbce2b84151eff6846b02da842a8ef019343; ISOGENY_CHALLENGE_BINARY override selects the separately pinned frontier executable"
+    },
     "factor-base-traces/historical-20261015/all-384.zip": {
       "sha256": "531fd60acf09a591c097608f5496b8b5dc4551621b1a2d462a4dcffc6fdc1b85",
       "bytes": 2462002,
