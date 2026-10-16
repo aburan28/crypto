@@ -625,14 +625,17 @@
       "table_bytes_default": 5711008,
       "table_bytes_note": "Frozen equal-advice n=61 bl_precompute.table_bytes_budget (1/64 of K=256 IC advice); same instrument as research/ic_next10_20261014/09-equal-advice/",
       "target_label_default": "autolab-n61-bl-ref-eval-v1",
+      "ic_k_default": 256,
+      "ic_rank_seed": 7,
+      "ic_k_note": "K=256 matches the equal-advice study advice budget whose 1/64 is table_bytes_default; not the KS-panel tuned K",
       "existing_study": "research/ic_next10_20261014/09-equal-advice/",
       "existing_producer": "examples/ic_next10_09_equal_advice.rs",
       "panel_producers": {
         "ic": {
           "example": "koblitz_orbit_dlp_fast_online",
           "source": "examples/koblitz_orbit_dlp_fast_online.rs",
-          "usage": "construct:<n>:<a>:<K> <one-line [x,y] target> <rank_seed> <out.jsonl>",
-          "note": "Optional paired IC arm for equal-advice audit; not required for BL-only reference smoke"
+          "usage": "construct:<n>:<a>:<K> <points.txt with [x,y] lines> <rank_seed> <out.jsonl>",
+          "note": "Paired IC arm via launch-equal-advice --pair-ic [--reuse-bl-archive PATH]; same [x,y] point-file API as BL targets mode"
         },
         "bl": {
           "example": "ic_next10_09_equal_advice",
