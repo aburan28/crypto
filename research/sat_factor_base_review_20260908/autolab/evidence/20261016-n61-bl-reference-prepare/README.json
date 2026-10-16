@@ -1,0 +1,16 @@
+{
+  "kind": "equal_advice_bl_reference_archive",
+  "beat_id": "koblitz.compact_orbit.n61_bl_reference",
+  "status": "PREPARE_ONLY_PLUS_EXISTING_STUDY",
+  "prepare_only_run": "20261016T050621Z-363bc50e99",
+  "existing_study": "research/ic_next10_20261014/09-equal-advice/",
+  "existing_n61_targets": 64,
+  "existing_n61_table_bytes": 5711008,
+  "api_mismatch": {
+    "ks_batch": "<n> <a> signed_frobenius <L> <batch_seed> + KIC_RHO_GENERATE_ONLY",
+    "equal_advice": "ic_next10_09_equal_advice targets|bl with point files + table_bytes",
+    "launcher": "use launch-equal-advice; launch-panel rejects this beat"
+  },
+  "next_command": "Landed paired IC: evidence/20261016-n61-bl-ic-pair-l1024 (run 20261016T074400Z-n61-bl-ic-pair; 1024/1024 verified; claim-check still FAIL). Next: co-measure + IC1 manifests/replay for PASS; do not promote ledger.",
+  "claim_boundary": "diagnostic/reference-arm; fail-closed vs_rho; no ledger promotion; public synthetic only; PENDING_INDEPENDENT_VALIDATION at most"
+}

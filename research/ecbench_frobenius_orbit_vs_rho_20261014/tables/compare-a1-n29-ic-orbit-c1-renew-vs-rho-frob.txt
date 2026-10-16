@@ -1,0 +1,25 @@
+ops (ok): ic-orbit-c1-renew / rho-frob = 1.5663 [0.992, 2.347] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 0.0404 [0.038, 0.042]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 0.00%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-orbit-c1-renew / rho-frob | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m29-tm40309-30c52b96 | 15.37 | 16 | 1.5663 | [0.9918, 2.3470] | cluster |
+
+| workload | curve | log2 r | rho-frob mean S | ic-orbit-c1-renew mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W1e6dc615948d | icv1-f2m29-tm40309-30c52b96 | 15.37 | 1.0102 | 2.6525 | 2.6257 |
+| W417e10523167 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 0.9933 | 2.5399 | 2.5570 |
+| W502ec9b19a73 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 0.9995 | 3.0007 | 3.0021 |
+| W5a87559c0e9b | icv1-f2m29-tm40309-30c52b96 | 15.37 | 1.0092 | 2.4161 | 2.3942 |
+| W5cd9fc3eda17 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 2.8775 | 2.6466 | 0.9198 |
+| W7962be79fb55 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 1.6717 | 2.6123 | 1.5627 |
+| W7ad986f5ce5a | icv1-f2m29-tm40309-30c52b96 | 15.37 | 5.7239 | 2.5590 | 0.4471 |
+| W7de6fa1767fd | icv1-f2m29-tm40309-30c52b96 | 15.37 | 1.0458 | 2.5446 | 2.4331 |
+| W8c8ef1552275 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 1.0168 | 2.5218 | 2.4803 |
+| Wb3068b7612b6 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 1.0914 | 2.5731 | 2.3576 |
+| Wb82e0e8a4fb7 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 2.4173 | 2.5989 | 1.0751 |
+| Wbc87487a57ce | icv1-f2m29-tm40309-30c52b96 | 15.37 | 2.3399 | 2.7018 | 1.1546 |
+| Wbf3dec6c8938 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 0.9593 | 2.6475 | 2.7598 |
+| Wd018224f33ba | icv1-f2m29-tm40309-30c52b96 | 15.37 | 1.1142 | 2.5045 | 2.2478 |
+| We25cdcbabfb7 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 0.9149 | 2.4994 | 2.7318 |
+| Web719bbfc097 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 1.4509 | 2.7006 | 1.8614 |

@@ -1,0 +1,18 @@
+saved /home/user/wt/isogeny-tower/research/pkm_isogeny_tower_ecbench_20261015/sessions/q24/comparisons/rho-neg__ic-iso-mitm.json
+ops (ok): ic-iso-mitm / rho-neg = 36.1692 [25.531, 54.920] (cluster) over 16 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 2.2096 [1.810, 2.314]
+measurement quality: 0 / 100; paired attempts 16, verified 16, admitted 0; levels {"L0": 16}; p95 foreign busy unknown%, p95 run queue 15.44%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-iso-mitm / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp24-t4451-d5368b2d | 23.65 | 8 | 36.1692 | [25.5310, 54.9201] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-iso-mitm mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W1de40772b111 | icv1-fp24-t4451-d5368b2d | 23.65 | 0.4975 | 36.6737 | 73.7099 |
+| W208669d784c8 | icv1-fp24-t4451-d5368b2d | 23.65 | 0.8265 | 36.2613 | 43.8746 |
+| W2965b70b34e9 | icv1-fp24-t4451-d5368b2d | 23.65 | 1.3377 | 38.1266 | 28.5021 |
+| W29ffa6852f30 | icv1-fp24-t4451-d5368b2d | 23.65 | 0.6962 | 36.3652 | 52.2319 |
+| W7cd2ca08eaa9 | icv1-fp24-t4451-d5368b2d | 23.65 | 0.8452 | 36.2573 | 42.8959 |
+| W80a621a8f577 | icv1-fp24-t4451-d5368b2d | 23.65 | 1.5598 | 36.7674 | 23.5716 |
+| W918e5af8247a | icv1-fp24-t4451-d5368b2d | 23.65 | 0.6566 | 37.4538 | 57.0397 |
+| Wbf74530fb5c1 | icv1-fp24-t4451-d5368b2d | 23.65 | 1.7368 | 37.1068 | 21.3646 |

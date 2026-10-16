@@ -1,0 +1,541 @@
+parse	Set up job	﻿2026-10-16T11:12:29.3970377Z Current runner version: '2.337.0'
+parse	Set up job	2026-10-16T11:12:29.3992639Z ##[group]Runner Image Provisioner
+parse	Set up job	2026-10-16T11:12:29.3993253Z Hosted Compute Agent
+parse	Set up job	2026-10-16T11:12:29.3993608Z Version: 20261012.601
+parse	Set up job	2026-10-16T11:12:29.3994030Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+parse	Set up job	2026-10-16T11:12:29.3994456Z Build Date: 2026-10-12T17:48:21Z
+parse	Set up job	2026-10-16T11:12:29.3994880Z Worker ID: {37d16c1b-58a8-4d13-a3d1-b55ed1f0bd05}
+parse	Set up job	2026-10-16T11:12:29.3995345Z Region: westus3
+parse	Set up job	2026-10-16T11:12:29.3995677Z Cloud: Azure
+parse	Set up job	2026-10-16T11:12:29.3996076Z ##[endgroup]
+parse	Set up job	2026-10-16T11:12:29.3997178Z ##[group]Operating System
+parse	Set up job	2026-10-16T11:12:29.3997577Z Ubuntu
+parse	Set up job	2026-10-16T11:12:29.3997959Z 24.04.5
+parse	Set up job	2026-10-16T11:12:29.3998269Z LTS
+parse	Set up job	2026-10-16T11:12:29.3998606Z ##[endgroup]
+parse	Set up job	2026-10-16T11:12:29.3998948Z ##[group]Runner Image
+parse	Set up job	2026-10-16T11:12:29.3999364Z Image: ubuntu-24.04
+parse	Set up job	2026-10-16T11:12:29.3999743Z Version: 20261012.334.1
+parse	Set up job	2026-10-16T11:12:29.4000373Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+parse	Set up job	2026-10-16T11:12:29.4001512Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+parse	Set up job	2026-10-16T11:12:29.4002108Z ##[endgroup]
+parse	Set up job	2026-10-16T11:12:29.4002838Z ##[group]GITHUB_TOKEN Permissions
+parse	Set up job	2026-10-16T11:12:29.4004299Z Contents: read
+parse	Set up job	2026-10-16T11:12:29.4004727Z Metadata: read
+parse	Set up job	2026-10-16T11:12:29.4005095Z ##[endgroup]
+parse	Set up job	2026-10-16T11:12:29.4006762Z Secret source: Actions
+parse	Set up job	2026-10-16T11:12:29.4007307Z Cache mode: write
+parse	Set up job	2026-10-16T11:12:29.4007745Z Prepare workflow directory
+parse	Set up job	2026-10-16T11:12:29.4303916Z Prepare all required actions
+parse	Set up job	2026-10-16T11:12:29.4338407Z Getting action download info
+parse	Set up job	2026-10-16T11:12:29.7252074Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+parse	Set up job	2026-10-16T11:12:30.0832153Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+parse	Set up job	2026-10-16T11:12:30.7712304Z Complete job name: parse
+parse	Run actions/checkout@v4	﻿2026-10-16T11:12:30.8321720Z ##[group]Run actions/checkout@v4
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.8322321Z with:
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.8322626Z   filter: blob:none
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.8322960Z   sparse-checkout-cone-mode: false
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.8323934Z   sparse-checkout: /.github/workflows/
+parse	Run actions/checkout@v4	/.github/scripts/
+parse	Run actions/checkout@v4	/scripts/test_workflows_parse.py
+parse	Run actions/checkout@v4	/research/weak_curve_properties_lean_20261011/EVIDENCE_SHA256.tsv
+parse	Run actions/checkout@v4	/research/weak_curve_conjectures_20261012/EVIDENCE_SHA256SUMS
+parse	Run actions/checkout@v4	
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.8324946Z   repository: aburan28/crypto
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.8327453Z   token: ***
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.8327753Z   ssh-strict: true
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.8328061Z   ssh-user: git
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.8328371Z   persist-credentials: true
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.8328708Z   clean: true
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.8329001Z   fetch-depth: 1
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.8329303Z   fetch-tags: false
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.8329612Z   show-progress: true
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.8329954Z   lfs: false
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.8330251Z   submodules: false
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.8330573Z   set-safe-directory: true
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.8330972Z   allow-unsafe-pr-checkout: false
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.8331441Z ##[endgroup]
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9066677Z Syncing repository: aburan28/crypto
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9068117Z ##[group]Getting Git version info
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9068564Z Working directory is '/home/runner/work/crypto/crypto'
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9069273Z [command]/usr/bin/git version
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9124603Z git version 2.55.0
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9138361Z ##[endgroup]
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9148872Z Temporarily overriding HOME='/home/runner/work/_temp/879599e2-4ac5-4819-8bff-3fea6dc19f6f' before making global git config changes
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9149835Z Adding repository directory to the temporary git global config as a safe directory
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9153415Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/crypto/crypto
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9200899Z Deleting the contents of '/home/runner/work/crypto/crypto'
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9204586Z ##[group]Initializing the repository
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9207966Z [command]/usr/bin/git init /home/runner/work/crypto/crypto
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9387659Z hint: Using 'master' as the name for the initial branch. This default branch name
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9388866Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9389457Z hint: to use in all of your new repositories, which will suppress this warning,
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9389928Z hint: call:
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9390216Z hint:
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9390603Z hint: 	git config --global init.defaultBranch <name>
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9391004Z hint:
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9391416Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9391995Z hint: 'development'. The just-created branch can be renamed via this command:
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9392475Z hint:
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9392752Z hint: 	git branch -m <name>
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9393065Z hint:
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9393468Z hint: Disable this message with "git config set advice.defaultBranchName false"
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9397368Z Initialized empty Git repository in /home/runner/work/crypto/crypto/.git/
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9407731Z [command]/usr/bin/git remote add origin https://github.com/aburan28/crypto
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9547972Z ##[endgroup]
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9548604Z ##[group]Disabling automatic garbage collection
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9552018Z [command]/usr/bin/git config --local gc.auto 0
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9582371Z ##[endgroup]
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9582975Z ##[group]Setting up auth
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9587984Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9619056Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9925455Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+parse	Run actions/checkout@v4	2026-10-16T11:12:30.9953218Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+parse	Run actions/checkout@v4	2026-10-16T11:12:31.0132314Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+parse	Run actions/checkout@v4	2026-10-16T11:12:31.0159850Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+parse	Run actions/checkout@v4	2026-10-16T11:12:31.0336080Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+parse	Run actions/checkout@v4	2026-10-16T11:12:31.0368843Z ##[endgroup]
+parse	Run actions/checkout@v4	2026-10-16T11:12:31.0369504Z ##[group]Fetching the repository
+parse	Run actions/checkout@v4	2026-10-16T11:12:31.0375381Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --filter=blob:none --depth=1 origin +921e2a69fbc519963e69031501a6dfe9a66205ec:refs/remotes/pull/1976/merge
+parse	Run actions/checkout@v4	2026-10-16T11:12:32.1046812Z From https://github.com/aburan28/crypto
+parse	Run actions/checkout@v4	2026-10-16T11:12:32.1049359Z  * [new ref]         921e2a69fbc519963e69031501a6dfe9a66205ec -> pull/1976/merge
+parse	Run actions/checkout@v4	2026-10-16T11:12:32.1053117Z ##[endgroup]
+parse	Run actions/checkout@v4	2026-10-16T11:12:32.1054460Z ##[group]Determining the checkout info
+parse	Run actions/checkout@v4	2026-10-16T11:12:32.1055937Z ##[endgroup]
+parse	Run actions/checkout@v4	2026-10-16T11:12:32.1057338Z ##[group]Setting up sparse checkout
+parse	Run actions/checkout@v4	2026-10-16T11:12:32.1059821Z [command]/usr/bin/git config core.sparseCheckout true
+parse	Run actions/checkout@v4	2026-10-16T11:12:32.1091416Z [command]/usr/bin/git rev-parse --git-path info/sparse-checkout
+parse	Run actions/checkout@v4	2026-10-16T11:12:32.1110638Z .git/info/sparse-checkout
+parse	Run actions/checkout@v4	2026-10-16T11:12:32.1117504Z ##[endgroup]
+parse	Run actions/checkout@v4	2026-10-16T11:12:32.1118470Z ##[group]Checking out the ref
+parse	Run actions/checkout@v4	2026-10-16T11:12:32.1120612Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/1976/merge
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3382120Z Updating files:   0% (1/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3382766Z Updating files:   1% (5/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3383695Z Updating files:   2% (9/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3386505Z Updating files:   3% (13/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3387760Z Updating files:   4% (17/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3389694Z Updating files:   5% (22/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3390495Z Updating files:   6% (26/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3391447Z Updating files:   7% (30/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3392508Z Updating files:   8% (34/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3394699Z Updating files:   9% (38/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3396857Z Updating files:  10% (43/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3398301Z Updating files:  11% (47/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3400297Z Updating files:  12% (51/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3401819Z Updating files:  13% (55/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3403700Z Updating files:  14% (60/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3405780Z Updating files:  15% (64/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3408440Z Updating files:  16% (68/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3410051Z Updating files:  17% (72/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3412162Z Updating files:  18% (76/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3414221Z Updating files:  19% (81/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3416007Z Updating files:  20% (85/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3417647Z Updating files:  21% (89/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3419789Z Updating files:  22% (93/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3421264Z Updating files:  23% (98/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3422694Z Updating files:  24% (102/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3424025Z Updating files:  25% (106/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3425604Z Updating files:  26% (110/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3427988Z Updating files:  27% (114/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3429415Z Updating files:  28% (119/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3431094Z Updating files:  29% (123/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3432208Z Updating files:  30% (127/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3433481Z Updating files:  31% (131/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3434735Z Updating files:  32% (136/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3436673Z Updating files:  33% (140/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3437935Z Updating files:  34% (144/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3439103Z Updating files:  35% (148/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3440767Z Updating files:  36% (152/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3442015Z Updating files:  37% (157/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3443646Z Updating files:  38% (161/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3445350Z Updating files:  39% (165/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3447518Z Updating files:  40% (169/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3449372Z Updating files:  41% (174/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3450825Z Updating files:  42% (178/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3452599Z Updating files:  43% (182/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3454167Z Updating files:  44% (186/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3457058Z Updating files:  45% (190/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3458624Z Updating files:  46% (195/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3459940Z Updating files:  47% (199/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3461064Z Updating files:  48% (203/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3462230Z Updating files:  49% (207/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3463910Z Updating files:  50% (211/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3465003Z Updating files:  51% (216/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3466327Z Updating files:  52% (220/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3467525Z Updating files:  53% (224/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3469042Z Updating files:  54% (228/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3470091Z Updating files:  55% (233/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3471386Z Updating files:  56% (237/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3472350Z Updating files:  57% (241/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3473594Z Updating files:  58% (245/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3475009Z Updating files:  59% (249/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3476481Z Updating files:  60% (254/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3478011Z Updating files:  61% (258/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3479508Z Updating files:  62% (262/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3481477Z Updating files:  63% (266/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3482885Z Updating files:  64% (271/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3484314Z Updating files:  65% (275/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3485627Z Updating files:  66% (279/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3487011Z Updating files:  67% (283/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3488633Z Updating files:  68% (287/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3489648Z Updating files:  69% (292/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3491098Z Updating files:  70% (296/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3492322Z Updating files:  71% (300/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3493848Z Updating files:  72% (304/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3495176Z Updating files:  73% (309/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3496827Z Updating files:  74% (313/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3498444Z Updating files:  75% (317/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3500280Z Updating files:  76% (321/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3502696Z Updating files:  77% (325/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3504237Z Updating files:  78% (330/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3506715Z Updating files:  79% (334/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3508960Z Updating files:  80% (338/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3511162Z Updating files:  81% (342/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3512874Z Updating files:  82% (347/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3516027Z Updating files:  83% (351/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3516685Z Updating files:  84% (355/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3517716Z Updating files:  85% (359/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3519491Z Updating files:  86% (363/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3520755Z Updating files:  87% (368/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3522304Z Updating files:  88% (372/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3524112Z Updating files:  89% (376/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3525694Z Updating files:  90% (380/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3527526Z Updating files:  91% (385/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3528951Z Updating files:  92% (389/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3531216Z Updating files:  93% (393/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3533646Z Updating files:  94% (397/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3535590Z Updating files:  95% (401/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3537156Z Updating files:  96% (406/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3597507Z Updating files:  97% (410/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.3598276Z Updating files:  98% (414/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7088691Z Updating files:  99% (418/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7089300Z Updating files: 100% (422/422)
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7089548Z Updating files: 100% (422/422), done.
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7645315Z Note: switching to 'refs/remotes/pull/1976/merge'.
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7645842Z 
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7645966Z You are in 'detached HEAD' state. You can look around, make experimental
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7646230Z changes and commit them, and you can discard any commits you make in this
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7646878Z state without impacting any branches by switching back to a branch.
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7647046Z 
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7647173Z If you want to create a new branch to retain commits you create, you may
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7647419Z do so (now or later) by using -c with the switch command. Example:
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7647569Z 
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7647633Z   git switch -c <new-branch-name>
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7647734Z 
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7647793Z Or undo this operation with:
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7647879Z 
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7647928Z   git switch -
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7647996Z 
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7648112Z Turn off this advice by setting config variable advice.detachedHead to false
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7648276Z 
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7648457Z HEAD is now at 921e2a6 Merge 2f3fad538b4c5955cd8ee0867d0022c70c94f649 into 1e03f1d0b9c77d72ee281561fd7f58405c4ae0b0
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7670632Z ##[endgroup]
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7706674Z [command]/usr/bin/git log -1 --format=%H
+parse	Run actions/checkout@v4	2026-10-16T11:12:33.7726264Z 921e2a69fbc519963e69031501a6dfe9a66205ec
+parse	Run actions/setup-python@v5	﻿2026-10-16T11:12:33.7914937Z ##[group]Run actions/setup-python@v5
+parse	Run actions/setup-python@v5	2026-10-16T11:12:33.7915110Z with:
+parse	Run actions/setup-python@v5	2026-10-16T11:12:33.7915230Z   python-version: 3.12
+parse	Run actions/setup-python@v5	2026-10-16T11:12:33.7915356Z   check-latest: false
+parse	Run actions/setup-python@v5	2026-10-16T11:12:33.7916973Z   token: ***
+parse	Run actions/setup-python@v5	2026-10-16T11:12:33.7917089Z   update-environment: true
+parse	Run actions/setup-python@v5	2026-10-16T11:12:33.7917224Z   allow-prereleases: false
+parse	Run actions/setup-python@v5	2026-10-16T11:12:33.7917349Z   freethreaded: false
+parse	Run actions/setup-python@v5	2026-10-16T11:12:33.7917467Z ##[endgroup]
+parse	Run actions/setup-python@v5	2026-10-16T11:12:33.8811221Z ##[group]Installed versions
+parse	Run actions/setup-python@v5	2026-10-16T11:12:33.8874704Z (node:2102) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+parse	Run actions/setup-python@v5	2026-10-16T11:12:33.8875362Z (Use `node --trace-deprecation ...` to show where the warning was created)
+parse	Run actions/setup-python@v5	2026-10-16T11:12:33.8875831Z Successfully set up CPython (3.12.15)
+parse	Run actions/setup-python@v5	2026-10-16T11:12:33.8876264Z ##[endgroup]
+parse	Run pip install --quiet pyyaml	﻿2026-10-16T11:12:33.9009183Z ##[group]Run pip install --quiet pyyaml
+parse	Run pip install --quiet pyyaml	2026-10-16T11:12:33.9009467Z ^[[36;1mpip install --quiet pyyaml^[[0m
+parse	Run pip install --quiet pyyaml	2026-10-16T11:12:33.9236836Z shell: /usr/bin/bash -e {0}
+parse	Run pip install --quiet pyyaml	2026-10-16T11:12:33.9237071Z env:
+parse	Run pip install --quiet pyyaml	2026-10-16T11:12:33.9237255Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run pip install --quiet pyyaml	2026-10-16T11:12:33.9237507Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+parse	Run pip install --quiet pyyaml	2026-10-16T11:12:33.9237740Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run pip install --quiet pyyaml	2026-10-16T11:12:33.9237946Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run pip install --quiet pyyaml	2026-10-16T11:12:33.9238150Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run pip install --quiet pyyaml	2026-10-16T11:12:33.9238361Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+parse	Run pip install --quiet pyyaml	2026-10-16T11:12:33.9238538Z ##[endgroup]
+parse	Run python3 -B scripts/test_workflows_parse.py -v	﻿2026-10-16T11:12:34.9077110Z ##[group]Run python3 -B scripts/test_workflows_parse.py -v
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:34.9077415Z ^[[36;1mpython3 -B scripts/test_workflows_parse.py -v^[[0m
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:34.9128748Z shell: /usr/bin/bash -e {0}
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:34.9128897Z env:
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:34.9129055Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:34.9129317Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:34.9129567Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:34.9129795Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:34.9130056Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:34.9130273Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:34.9130460Z ##[endgroup]
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:35.0473960Z test_a_trailing_colon_in_a_run_step_is_caught (__main__.WorkflowsParse.test_a_trailing_colon_in_a_run_step_is_caught)
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:35.0479686Z The check discriminates: this is the exact text that broke main. ... ok
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:35.8315562Z test_every_workflow_declares_a_trigger_and_a_job (__main__.WorkflowsParse.test_every_workflow_declares_a_trigger_and_a_job) ... ok
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:36.6078923Z test_every_workflow_parses_as_yaml (__main__.WorkflowsParse.test_every_workflow_parses_as_yaml) ... ok
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:36.7630898Z test_historical_koblitz_stages_are_manual_only (__main__.WorkflowsParse.test_historical_koblitz_stages_are_manual_only) ... ok
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:36.7631475Z 
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:36.7631812Z ----------------------------------------------------------------------
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:36.7632145Z Ran 4 tests in 1.716s
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:36.7632281Z 
+parse	Run python3 -B scripts/test_workflows_parse.py -v	2026-10-16T11:12:36.7632352Z OK
+parse	Run node --test .github/scripts/test-ci-scope.mjs	﻿2026-10-16T11:12:36.7768095Z ##[group]Run node --test .github/scripts/test-ci-scope.mjs
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:36.7768384Z ^[[36;1mnode --test .github/scripts/test-ci-scope.mjs^[[0m
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:36.7822450Z shell: /usr/bin/bash -e {0}
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:36.7822621Z env:
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:36.7822788Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:36.7823044Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:36.7823286Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:36.7823504Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:36.7823744Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:36.7823974Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:36.7824159Z ##[endgroup]
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.0668064Z TAP version 13
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.3107969Z # ::warning::CI scope comparison unavailable; running all checks (Command failed: git fetch --no-tags --depth=1 origin ffffffffffffffffffffffffffffffffffffffff)
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.3150851Z # ::warning::CI scope comparison unavailable; running all checks (Command failed: git diff --name-only -z --no-renames 5635c04ab3b4825d50a396574e9d273dd89d782c missing-ref --)
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.3796663Z # materialized 2 compile-time inputs
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.4460294Z # materialized 1 compile-time inputs
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5049945Z # materialized 1 compile-time inputs
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5206935Z # ::warning::CI scope comparison unavailable; running all checks (missing Rust source dependency in examples/check.rs: research/study/reference.rs)
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5429774Z # ::warning::CI scope comparison unavailable; running all checks (missing Rust source dependency in research/study/reference.rs: research/study/render.inc)
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5653097Z # ::warning::CI scope comparison unavailable; running all checks (missing Rust source dependency in research/study/reference.rs: research/study/arithmetic.rs)
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5946045Z # Subtest: prose does not run compilers, profiling or CodeQL
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5952457Z ok 1 - prose does not run compilers, profiling or CodeQL
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5952805Z   ---
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5952997Z   duration_ms: 6.178363
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5953294Z   type: 'test'
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5953546Z   ...
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5953775Z # Subtest: crates and languages select their own checks
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5957586Z ok 2 - crates and languages select their own checks
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5958052Z   ---
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5958258Z   duration_ms: 0.363193
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5977351Z   type: 'test'
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5977627Z   ...
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5977959Z # Subtest: dependencies, workflow edits and frozen evidence remain applicable
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5978456Z ok 3 - dependencies, workflow edits and frozen evidence remain applicable
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5978808Z   ---
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5978997Z   duration_ms: 0.151477
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5979204Z   type: 'test'
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5979381Z   ...
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5979661Z # Subtest: isogeny release inputs select the Rust package lane
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5980060Z ok 4 - isogeny release inputs select the Rust package lane
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5980366Z   ---
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5980549Z   duration_ms: 0.200901
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5980733Z   type: 'test'
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5980910Z   ...
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5981202Z # Subtest: real git diffs include renames, deletes, unusual names and over 300 files
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5981700Z ok 5 - real git diffs include renames, deletes, unusual names and over 300 files
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5982076Z   ---
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5982260Z   duration_ms: 215.071617
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5982466Z   type: 'test'
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5982640Z   ...
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5982963Z # Subtest: sparse compilation restores only embedded inputs, preserving archived files off disk
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5983541Z ok 6 - sparse compilation restores only embedded inputs, preserving archived files off disk
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5983885Z   ---
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5984453Z   duration_ms: 55.256973
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5984638Z   type: 'test'
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5984794Z   ...
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5985101Z # Subtest: new Cargo targets and source modules survive sparse checkouts without loading archives
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5985591Z ok 7 - new Cargo targets and source modules survive sparse checkouts without loading archives
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5985810Z   ---
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5985910Z   duration_ms: 68.246975
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5986034Z   type: 'test'
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5986140Z   ...
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5986305Z # Subtest: external Rust path modules and includes are followed recursively
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5986717Z ok 8 - external Rust path modules and includes are followed recursively
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5986907Z   ---
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5987008Z   duration_ms: 142.151906
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5987128Z   type: 'test'
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.5987227Z   ...
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.6057994Z 1..8
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.6058304Z # tests 8
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.6058497Z # suites 0
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.6058700Z # pass 8
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.6058831Z # fail 0
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.6061431Z # cancelled 0
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.6061729Z # skipped 0
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.6062807Z # todo 0
+parse	Run node --test .github/scripts/test-ci-scope.mjs	2026-10-16T11:12:37.6063050Z # duration_ms 567.333099
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	﻿2026-10-16T11:12:37.6140953Z ##[group]Run node --test .github/scripts/test-frozen-workflow-check.mjs
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:37.6141277Z ^[[36;1mnode --test .github/scripts/test-frozen-workflow-check.mjs^[[0m
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:37.6194536Z shell: /usr/bin/bash -e {0}
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:37.6194721Z env:
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:37.6194909Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:37.6195372Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:37.6195639Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:37.6195890Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:37.6196131Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:37.6196460Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:37.6196668Z ##[endgroup]
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:37.6557915Z TAP version 13
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:37.7358714Z # FROZEN_WORKFLOW_METADATA_VIEW {"workflow":".github/workflows/study.yml","revision":"c545540fe36ea9cc8021449ed9f035e83e107e52","live_workflow_sha256":"d5c76ee3c79e755e2131e9380a9cd87320b0e9935ca20a000ef806c5c5571c13","view_workflow_sha256":"7ae1f1786552665b1da73ae15c0eb2fd48bae57021a2f93c9f3931579bdf0efa","pinned_input_views":[],"scope":"workflow metadata and explicitly pinned historical inputs are substituted in an isolated view; current checkout and evidence remain unchanged"}
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:37.8211325Z # FROZEN_WORKFLOW_METADATA_VIEW {"workflow":".github/workflows/study.yml","revision":"c545540fe36ea9cc8021449ed9f035e83e107e52","live_workflow_sha256":"d5c76ee3c79e755e2131e9380a9cd87320b0e9935ca20a000ef806c5c5571c13","view_workflow_sha256":"7ae1f1786552665b1da73ae15c0eb2fd48bae57021a2f93c9f3931579bdf0efa","pinned_input_views":[],"scope":"workflow metadata and explicitly pinned historical inputs are substituted in an isolated view; current checkout and evidence remain unchanged"}
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.0780622Z # FROZEN_WORKFLOW_METADATA_VIEW {"workflow":".github/workflows/study.yml","revision":"c545540fe36ea9cc8021449ed9f035e83e107e52","live_workflow_sha256":"d5c76ee3c79e755e2131e9380a9cd87320b0e9935ca20a000ef806c5c5571c13","view_workflow_sha256":"7ae1f1786552665b1da73ae15c0eb2fd48bae57021a2f93c9f3931579bdf0efa","pinned_input_views":[],"scope":"workflow metadata and explicitly pinned historical inputs are substituted in an isolated view; current checkout and evidence remain unchanged"}
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.4859758Z # FROZEN_WORKFLOW_METADATA_VIEW {"workflow":".github/workflows/study.yml","revision":"f25c1c8fde543a21345eb3c4c7fa352765a066a6","live_workflow_sha256":"d5c76ee3c79e755e2131e9380a9cd87320b0e9935ca20a000ef806c5c5571c13","view_workflow_sha256":"7ae1f1786552665b1da73ae15c0eb2fd48bae57021a2f93c9f3931579bdf0efa","pinned_input_views":[{"target":"research/archive/Cargo.lock","revision":"f25c1c8fde543a21345eb3c4c7fa352765a066a6","source_path":"research/archive/Cargo.lock","sha256":"a997fbf69c20e594ba6e60e22a803d4a5323f280e3a1114cd7e527f808e65cf8","original_manifest":"research/rotation/FROZEN.json","original_manifest_sha256":"397635d9c4f2ce4944817f2e0e7f7f9728e9f2c19ca94424ba297e10e763eae0","original_source_key":"cargo_lock","live_target_sha256":"2816d634069f997bc4a85e6e199459fdc79fe5444722fea579441653b8f3be91","current_sources":{"research/archive/Cargo.lock":"2816d634069f997bc4a85e6e199459fdc79fe5444722fea579441653b8f3be91","Cargo.lock":"2816d634069f997bc4a85e6e199459fdc79fe5444722fea579441653b8f3be91"},"view_sha256":"a997fbf69c20e594ba6e60e22a803d4a5323f280e3a1114cd7e527f808e65cf8"}],"scope":"workflow metadata and explicitly pinned historical inputs are substituted in an isolated view; current checkout and evidence remain unchanged"}
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7836851Z # Subtest: historical metadata is isolated while current source and live checkout are retained
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7860849Z ok 1 - historical metadata is isolated while current source and live checkout are retained
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7861732Z   ---
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7862049Z   duration_ms: 91.470367
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7862385Z   type: 'test'
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7863201Z   ...
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7871187Z # Subtest: a validator failure remains a failed status and cleans its source view
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7871852Z ok 2 - a validator failure remains a failed status and cleans its source view
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7872318Z   ---
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7872926Z   duration_ms: 73.199845
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7873248Z   type: 'test'
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7873543Z   ...
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7873954Z # Subtest: workflow CLI arguments reach the isolated validator
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7874458Z ok 3 - workflow CLI arguments reach the isolated validator
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7874881Z   ---
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7875179Z   duration_ms: 108.579362
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7875506Z   type: 'test'
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7875789Z   ...
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7876189Z # Subtest: a shallow checkout fetches its exact missing pin and keeps current source
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7876931Z ok 4 - a shallow checkout fetches its exact missing pin and keeps current source
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7877392Z   ---
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7877684Z   duration_ms: 167.138605
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7877991Z   type: 'test'
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7878270Z   ...
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7878714Z # Subtest: coordinated manifest and frozen-source replacement fails pinned manifest custody
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7879368Z ok 5 - coordinated manifest and frozen-source replacement fails pinned manifest custody
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7879858Z   ---
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7880138Z   duration_ms: 42.7856
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7880448Z   type: 'test'
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7880728Z   ...
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7881115Z # Subtest: changed frozen evidence is rejected without changing the live workflow
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7881686Z ok 6 - changed frozen evidence is rejected without changing the live workflow
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7882136Z   ---
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7882410Z   duration_ms: 66.75528
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7882723Z   type: 'test'
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7883011Z   ...
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7883327Z # Subtest: deleted frozen evidence fails closed
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7883736Z ok 7 - deleted frozen evidence fails closed
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7884083Z   ---
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7884347Z   duration_ms: 55.86322
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7884642Z   type: 'test'
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7884917Z   ...
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7885207Z # Subtest: deleted manifest fails closed
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7885582Z ok 8 - deleted manifest fails closed
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7885918Z   ---
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7886193Z   duration_ms: 51.28446
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7886635Z   type: 'test'
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7886900Z   ...
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7887291Z # Subtest: a revision with mismatched workflow bytes cannot satisfy the freeze
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7887840Z ok 9 - a revision with mismatched workflow bytes cannot satisfy the freeze
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7888244Z   ---
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7888512Z   duration_ms: 44.316376
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7888806Z   type: 'test'
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7889062Z   ...
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7889369Z # Subtest: paths outside the source view are rejected
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7889761Z ok 10 - paths outside the source view are rejected
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7890113Z   ---
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7890373Z   duration_ms: 48.648746
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7890660Z   type: 'test'
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7890985Z   ...
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7891389Z # Subtest: released input overlay is isolated and records current lock provenance
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7891964Z ok 11 - released input overlay is isolated and records current lock provenance
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7892431Z   ---
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7892720Z   duration_ms: 92.483006
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7893042Z   type: 'test'
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7893332Z   ...
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7893694Z # Subtest: historical Git input must match the original freeze digest
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7894205Z ok 12 - historical Git input must match the original freeze digest
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7894641Z   ---
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7894913Z   duration_ms: 70.66562
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7895232Z   type: 'test'
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7895525Z   ...
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7895935Z # Subtest: current nested/root lock drift fails before the historical overlay
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7896990Z ok 13 - current nested/root lock drift fails before the historical overlay
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7897433Z   ---
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7897692Z   duration_ms: 40.906855
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7898015Z   type: 'test'
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7898313Z   ...
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7898881Z # Subtest: current lock comparison cannot be reduced to a self-comparison
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7899430Z ok 14 - current lock comparison cannot be reduced to a self-comparison
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7900015Z   ---
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7900313Z   duration_ms: 54.631858
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7900634Z   type: 'test'
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7900928Z   ...
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7901345Z # Subtest: pinned input digest cannot diverge from the original frozen manifest
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7901897Z ok 15 - pinned input digest cannot diverge from the original frozen manifest
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7902356Z   ---
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7902625Z   duration_ms: 47.365708
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7902971Z   type: 'test'
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7903276Z   ...
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7903666Z # Subtest: a changed original source manifest rejects the pinned input view
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7904227Z ok 16 - a changed original source manifest rejects the pinned input view
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7904659Z   ---
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7904962Z   duration_ms: 39.061044
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7905288Z   type: 'test'
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7905567Z   ...
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7952806Z 1..16
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7953074Z # tests 16
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7953280Z # suites 0
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7953467Z # pass 16
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7953762Z # fail 0
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7954178Z # cancelled 0
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7954398Z # skipped 0
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7954673Z # todo 0
+parse	Run node --test .github/scripts/test-frozen-workflow-check.mjs	2026-10-16T11:12:38.7955003Z # duration_ms 1147.317865
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	﻿2026-10-16T11:12:38.8038739Z ##[group]Run python3 -B .github/scripts/test-pr-budgets.py -v
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8039184Z ^[[36;1mpython3 -B .github/scripts/test-pr-budgets.py -v^[[0m
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8103609Z shell: /usr/bin/bash -e {0}
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8103789Z env:
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8103955Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8104204Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8104449Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8104673Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8104884Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8105095Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8105276Z ##[endgroup]
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8880456Z test_dependencies_inherit_manual_only_admission (__main__.BudgetPolicyTests.test_dependencies_inherit_manual_only_admission) ... ok
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8881134Z test_explicit_labeled_experiments_are_not_automatic_merge_checks (__main__.BudgetPolicyTests.test_explicit_labeled_experiments_are_not_automatic_merge_checks) ... ok
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8917002Z test_frozen_lean_exceptions_are_exact_and_seal_bound (__main__.BudgetPolicyTests.test_frozen_lean_exceptions_are_exact_and_seal_bound) ... ok
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8918583Z test_github_string_comparisons_ignore_case (__main__.BudgetPolicyTests.test_github_string_comparisons_ignore_case) ... ok
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8920785Z test_job_labels_do_not_exempt_automatic_or_branches (__main__.BudgetPolicyTests.test_job_labels_do_not_exempt_automatic_or_branches) ... ok
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8921859Z test_long_and_missing_automatic_budgets_fail (__main__.BudgetPolicyTests.test_long_and_missing_automatic_budgets_fail) ... ok
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8923903Z test_manual_and_disabled_jobs_keep_long_budgets (__main__.BudgetPolicyTests.test_manual_and_disabled_jobs_keep_long_budgets) ... ok
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8924913Z test_merge_group_requires_its_own_bounded_branch (__main__.BudgetPolicyTests.test_merge_group_requires_its_own_bounded_branch) ... ok
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8925475Z test_metadata_is_not_executed (__main__.BudgetPolicyTests.test_metadata_is_not_executed) ... ok
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8926580Z test_multiline_conditions_preserve_manual_only_routing (__main__.BudgetPolicyTests.test_multiline_conditions_preserve_manual_only_routing) ... ok
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8927809Z test_pr_full_event_expression_preserves_long_manual_lane (__main__.BudgetPolicyTests.test_pr_full_event_expression_preserves_long_manual_lane) ... ok
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8928729Z test_short_budgets_pass (__main__.BudgetPolicyTests.test_short_budgets_pass) ... ok
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8929848Z test_unknown_budgets_fail_closed (__main__.BudgetPolicyTests.test_unknown_budgets_fail_closed) ... ok
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8932882Z test_unknown_or_conditions_cannot_hide_applicable_jobs (__main__.BudgetPolicyTests.test_unknown_or_conditions_cannot_hide_applicable_jobs) ... ok
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8933401Z 
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8933570Z ----------------------------------------------------------------------
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8933889Z Ran 14 tests in 0.006s
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8934017Z 
+parse	Run python3 -B .github/scripts/test-pr-budgets.py -v	2026-10-16T11:12:38.8934091Z OK
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	﻿2026-10-16T11:12:38.9078029Z ##[group]Run python3 -B .github/scripts/check-pr-budgets.py
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9078302Z ^[[36;1mpython3 -B .github/scripts/check-pr-budgets.py^[[0m
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9130704Z shell: /usr/bin/bash -e {0}
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9130847Z env:
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9131001Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9131237Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9131467Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9131678Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9131885Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9132094Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9132268Z ##[endgroup]
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:39.7599552Z .github/workflows/codeql.yml: analyze can run on pull_request/opened without a proven 1–25 minute timeout
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:39.7600247Z Checked routine PR/merge-group budgets in 406 workflows: 4 violations
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:39.7600932Z .github/workflows/codeql.yml: analyze can run on pull_request/synchronize without a proven 1–25 minute timeout
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:39.7601578Z .github/workflows/codeql.yml: analyze can run on pull_request/reopened without a proven 1–25 minute timeout
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:39.7602248Z .github/workflows/codeql.yml: analyze can run on merge_group/checks_requested without a proven 1–25 minute timeout
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:39.7670304Z ##[error]Process completed with exit code 1.
+parse	Post Run actions/checkout@v4	﻿2026-10-16T11:12:39.7758814Z Post job cleanup.
+parse	Post Run actions/checkout@v4	2026-10-16T11:12:39.8325980Z [command]/usr/bin/git version
+parse	Post Run actions/checkout@v4	2026-10-16T11:12:39.8357116Z git version 2.55.0
+parse	Post Run actions/checkout@v4	2026-10-16T11:12:39.8381153Z Temporarily overriding HOME='/home/runner/work/_temp/5bcc556c-d8fe-4a24-b136-35ebaf51bd7c' before making global git config changes
+parse	Post Run actions/checkout@v4	2026-10-16T11:12:39.8381844Z Adding repository directory to the temporary git global config as a safe directory
+parse	Post Run actions/checkout@v4	2026-10-16T11:12:39.8385295Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/crypto/crypto
+parse	Post Run actions/checkout@v4	2026-10-16T11:12:39.8420337Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+parse	Post Run actions/checkout@v4	2026-10-16T11:12:39.8473908Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+parse	Post Run actions/checkout@v4	2026-10-16T11:12:39.8713073Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+parse	Post Run actions/checkout@v4	2026-10-16T11:12:39.8735785Z http.https://github.com/.extraheader
+parse	Post Run actions/checkout@v4	2026-10-16T11:12:39.8744191Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+parse	Post Run actions/checkout@v4	2026-10-16T11:12:39.8772963Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+parse	Post Run actions/checkout@v4	2026-10-16T11:12:39.9008343Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+parse	Post Run actions/checkout@v4	2026-10-16T11:12:39.9037695Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+parse	Complete job	﻿2026-10-16T11:12:39.9389830Z Cleaning up orphan processes
+parse	Complete job	2026-10-16T11:12:39.9607910Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

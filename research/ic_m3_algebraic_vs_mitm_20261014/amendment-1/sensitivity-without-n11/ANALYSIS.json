@@ -1,0 +1,279 @@
+{
+  "boot": 2000,
+  "by_m": {
+    "4": {
+      "arms": {
+        "wide-chain": {
+          "cells": [
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 69393264.87826087,
+              "counted_per_relation": 349.52,
+              "counted_unit": "search_nodes",
+              "d": 4,
+              "disagreements": 0,
+              "log2_ci": [
+                25.811094612856433,
+                26.26553972519475
+              ],
+              "n": 13,
+              "ratio_to_floor": 2127.6875790228305,
+              "status": "measured",
+              "stopped": false,
+              "targets": 12,
+              "yes_targets": 6
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 967408790.9747748,
+              "counted_per_relation": 3835.6432432432434,
+              "counted_unit": "search_nodes",
+              "d": 5,
+              "disagreements": 0,
+              "log2_ci": [
+                29.632240074342846,
+                30.093088908018057
+              ],
+              "n": 17,
+              "ratio_to_floor": 7595.804924960583,
+              "status": "measured",
+              "stopped": false,
+              "targets": 12,
+              "yes_targets": 6
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 5181013620.159649,
+              "counted_per_relation": 13492.978947368421,
+              "counted_unit": "search_nodes",
+              "d": 5,
+              "disagreements": 0,
+              "log2_ci": [
+                31.967388638397196,
+                32.579666084285954
+              ],
+              "n": 19,
+              "ratio_to_floor": 15291.384008072659,
+              "status": "measured",
+              "stopped": false,
+              "targets": 12,
+              "yes_targets": 6
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 66812744038.93827,
+              "counted_per_relation": 150853.25925925927,
+              "counted_unit": "search_nodes",
+              "d": 6,
+              "disagreements": 0,
+              "log2_ci": [
+                35.45811499742279,
+                36.59912403418247
+              ],
+              "n": 23,
+              "ratio_to_floor": 30523.262239417905,
+              "status": "measured",
+              "stopped": false,
+              "targets": 12,
+              "yes_targets": 6
+            },
+            {
+              "bad_witness": 0,
+              "censored": 7,
+              "cost_per_relation_ns": 409938707599.03705,
+              "counted_per_relation": 87092.66666666667,
+              "counted_unit": "search_nodes",
+              "d": 8,
+              "disagreements": 0,
+              "log2_ci": [
+                38.37933212144469,
+                38.77343473967826
+              ],
+              "n": 29,
+              "ratio_to_floor": 122322.4442425417,
+              "status": "lower_bound",
+              "stopped": false,
+              "targets": 12,
+              "yes_targets": 6
+            },
+            {
+              "bad_witness": 0,
+              "censored": 8,
+              "cost_per_relation_ns": 1572789561816.9365,
+              "counted_per_relation": 73455.33333333333,
+              "counted_unit": "search_nodes",
+              "d": 8,
+              "disagreements": 0,
+              "log2_ci": [
+                40.21834821185663,
+                40.84325986817189
+              ],
+              "n": 31,
+              "ratio_to_floor": 134598.65052695604,
+              "status": "lower_bound",
+              "stopped": false,
+              "targets": 12,
+              "yes_targets": 6
+            }
+          ],
+          "delta_ci": [
+            0.3687562449141253,
+            0.41042122357601296
+          ],
+          "delta_lower_bound_ci": [
+            0.3204256925596127,
+            0.3378439877397267
+          ],
+          "floor_slope_same_cells": 0.6106614943025395,
+          "lower_bound_cells": [
+            29,
+            31
+          ],
+          "lower_bound_fit_valid": true,
+          "measured_cells": [
+            13,
+            17,
+            19,
+            23
+          ],
+          "slope_lower_bound_fit": 0.7729664459747425,
+          "slope_measured": 0.9995499342490667,
+          "slope_measured_ci": [
+            0.9447736537207857,
+            1.0631567565026212
+          ],
+          "verdict": "grows faster than the floor"
+        }
+      },
+      "cells": [
+        {
+          "columns": 10.0,
+          "d": 4,
+          "decomps_per_target": 1.0078125,
+          "exhaustive_checked": 12,
+          "exhaustive_equal": 12,
+          "fb_points": 19,
+          "floor_amortized_adds": 571.1356521739131,
+          "floor_amortized_ns": 32614.4052173913,
+          "floor_log2_ci": [
+            14.927861705253347,
+            15.061948651556845
+          ],
+          "floor_online_ns": 20725.005217391303,
+          "n": 13,
+          "p_decomposable": 0.5615234375,
+          "pool": 1024,
+          "table_build_ns": 118894.0
+        },
+        {
+          "columns": 15.0,
+          "d": 5,
+          "decomps_per_target": 0.22265625,
+          "exhaustive_checked": 12,
+          "exhaustive_equal": 12,
+          "fb_points": 29,
+          "floor_amortized_adds": 4596.816216216216,
+          "floor_amortized_ns": 127360.93153153153,
+          "floor_log2_ci": [
+            16.797125702174803,
+            17.147060650923688
+          ],
+          "floor_online_ns": 116690.46486486486,
+          "n": 17,
+          "p_decomposable": 0.1806640625,
+          "pool": 1024,
+          "table_build_ns": 160057.0
+        },
+        {
+          "columns": 18.0,
+          "d": 5,
+          "decomps_per_target": 0.1025390625,
+          "exhaustive_checked": 12,
+          "exhaustive_equal": 12,
+          "fb_points": 35,
+          "floor_amortized_adds": 13282.810526315789,
+          "floor_amortized_ns": 338819.1426900585,
+          "floor_log2_ci": [
+            18.095884020102314,
+            18.654852927621512
+          ],
+          "floor_online_ns": 329408.0315789474,
+          "n": 19,
+          "p_decomposable": 0.0927734375,
+          "pool": 1024,
+          "table_build_ns": 169400.0
+        },
+        {
+          "columns": 27.0,
+          "d": 6,
+          "decomps_per_target": 0.0263671875,
+          "exhaustive_checked": 12,
+          "exhaustive_equal": 12,
+          "fb_points": 53,
+          "floor_amortized_adds": 107577.22222222222,
+          "floor_amortized_ns": 2188912.296296296,
+          "floor_log2_ci": [
+            20.567089684788908,
+            21.655371341282336
+          ],
+          "floor_online_ns": 2179034.6666666665,
+          "n": 23,
+          "p_decomposable": 0.0263671875,
+          "pool": 1024,
+          "table_build_ns": 266696.0
+        },
+        {
+          "columns": 127.0,
+          "d": 8,
+          "decomps_per_target": 0.3330078125,
+          "exhaustive_checked": 0,
+          "exhaustive_equal": 0,
+          "fb_points": 253,
+          "floor_amortized_adds": 206856.75,
+          "floor_amortized_ns": 3351295.914151356,
+          "floor_log2_ci": [
+            21.519825901956253,
+            21.839959687748877
+          ],
+          "floor_online_ns": 3338768.347222222,
+          "n": 29,
+          "p_decomposable": 0.28125,
+          "pool": 1024,
+          "table_build_ns": 1591001.0
+        },
+        {
+          "columns": 131.0,
+          "d": 8,
+          "decomps_per_target": 0.0849609375,
+          "exhaustive_checked": 0,
+          "exhaustive_equal": 0,
+          "fb_points": 261,
+          "floor_amortized_adds": 812735.5476190476,
+          "floor_amortized_ns": 11685032.17275536,
+          "floor_log2_ci": [
+            23.19238196704212,
+            23.795455700004553
+          ],
+          "floor_online_ns": 11670317.226190476,
+          "n": 31,
+          "p_decomposable": 0.08203125,
+          "pool": 1024,
+          "table_build_ns": 1927658.0
+        }
+      ],
+      "floor_slope_amortized": 0.44413391217518583,
+      "floor_slope_amortized_ci": [
+        0.43159059273594896,
+        0.4585050367215059
+      ],
+      "floor_slope_counted_adds": 0.539315599141113,
+      "floor_slope_online": 0.4708803483171166
+    }
+  },
+  "protocol": "research/ic_m3_algebraic_vs_mitm_20261014/PROTOCOL.md",
+  "seed": 20261014
+}

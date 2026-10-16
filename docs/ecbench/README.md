@@ -425,6 +425,26 @@ frozen-source replays rebuild it against pre-F6 snapshots of
 evaluations, and the tournament admits no root build script. It also
 refuses to run while a `KIC_*`, `F4_*` or `SOLVER_*` tuning override is set.
 
+`prime-kummer:t=T[,g=G]` and `prime-isogeny:t=T[,seed=S]` are Petit,
+Kosters and Messeng's tower bases for prime curves
+(`ic_framework::prime_tower`): every point whose abscissa lies in a set `V`
+of `2^t` elements that is the zero set of `t` composed degree-2 maps, both
+signs, one column an abscissa.  The Kummer base needs `2^t | p − 1` and
+costs `2^t` Legendre symbols and square roots.  The isogeny base,
+`V = x(R' + ⟨Q⟩)` for `Q` of order `2^t` on an auxiliary curve `E'/F_p`,
+needs no condition on `p`; `E'` is searched from the public seed, and the
+search is **charged to the factor-base phase**: on every curve tried, a
+baby-step giant-step over the multiples of `2^t` in the Hasse interval
+filters out curves with `2^t ∤ #E'`, and the survivors' orders are computed
+by Mestre's baby-step giant-step; with `Q`, `⟨Q⟩`, `R'`, `V` and the Vélu
+chain's kernels, every addition and doubling on `E'` is charged in the unit
+(a curve over the same field).  The phase records `aux_curves_tried`,
+`aux_search_gae`, `aux_count_gae` and `aux_tower_build_gae` apart; the
+Legendre symbols and square roots of point sampling join the phase's
+`legendre_symbols` and `sqrt_solves` (unpriced, as for every prime base),
+and the `2t` Vélu evaluations are `velu_evaluations_uncharged`
+(`research/pkm_isogeny_tower_ecbench_20261015/`).
+
 `rootfind-mitm:m=3` and `rootfind-pairs:m=3` are the root-finding
 decomposition oracles of `research/pdp_root_finder_20261012` as plug-ins
 (`ic_framework::rootfind`), on any base and both tracks. `rootfind-mitm`
@@ -533,6 +553,20 @@ Two consequences to read every table with:
   The ratio of two such lower bounds is **not** a bound on the ratio of
   full costs. Read it as a counted-work diagnostic until both arms have
   complete, calibrated costs; do not infer an end-to-end speedup from it.
+
+- **Full pricing is opt-in.** `ic.pipeline_full`,
+  `rho.signed_frobenius_full` and `rho.signed_frobenius_strong_full` run
+  their base method unchanged, then price every native counter (field
+  multiplications, squarings and inversions, Artin–Schreier solves, hash
+  probes, canonicalisations, row operations, word XORs) from
+  `src/cryptanalysis/ecbench/full_prices.json`, one host's measured ratios to an affine
+  addition, written by `ecbench price-units --curve a:n …`.
+  `src/cryptanalysis/ecbench/full_price.rs` gives each counter an explicit
+  rule. A counter without a rule stays unpriced, so the record is still
+  marked a lower bound. The pinned `docs/ic/calibration.json` and every
+  other method are unchanged. `ecbench trend --compare …` fits how a paired
+  ratio moves with `ln r` and `ln n` across curves. First use:
+  `research/ecbench_frobenius_orbit_vs_rho_20261014/`.
 
 `ecbench resources --dir SESSION --out resources.json` reports, for every
 measured attempt including failures, the native integer counters by phase,

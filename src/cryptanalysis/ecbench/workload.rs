@@ -19,6 +19,7 @@ use serde_json::{json, Value};
 use crate::binary_ecc::IrreduciblePoly;
 use crate::cryptanalysis::ecbench::canonical::{bare_id, compat_u128, derive_u128, derive_u64};
 use crate::cryptanalysis::ecbench::conductor_gap::{self, GapLevel};
+use crate::cryptanalysis::ecbench::fp4::Fp4Instance;
 use crate::cryptanalysis::ecbench_large_prime::binary_explicit_instance;
 use crate::cryptanalysis::ic_boundary::{
     find_prime_order_curve, koblitz_instance, random_binary_instance, roster_prime_instance,
@@ -87,6 +88,12 @@ pub enum CurveSpec {
         gx: u64,
         gy: u64,
     },
+    /// `ecbench::fp4::Fp4Instance::build(p, seed)`: a curve over
+    /// `F_{p⁴}` with rational 2-torsion `T = (x₀, 0)`, `f'(x₀) = c²`
+    /// (`quartic_folds::generate_translation_instance(p, seed, 16)`),
+    /// `p ≡ 1 (mod 4)`, `p < 2^15`.  Unregistered: ICV1 has no
+    /// extension-field form.
+    Fp4Translation { p: u64, seed: u64 },
 }
 
 impl CurveSpec {
@@ -186,6 +193,9 @@ impl CurveSpec {
                 gy,
             } => binary_explicit_instance(n, modulus, a, b, group_order, r, gx, gy)
                 .map(|i| Instance::Binary(Box::new(i))),
+            CurveSpec::Fp4Translation { p, seed } => {
+                Fp4Instance::build(p, seed).map(|i| Instance::Fp4(Box::new(i)))
+            }
         }
     }
 
@@ -222,7 +232,7 @@ impl CurveSpec {
             // Preserve the original Koblitz constructor: it carries the
             // certified Frobenius action and endomorphism identity that a
             // generic explicit binary instance intentionally does not claim.
-            Instance::Binary(_) | Instance::Wide(_) => None,
+            Instance::Binary(_) | Instance::Wide(_) | Instance::Fp4(_) => None,
         }
     }
 
@@ -257,6 +267,9 @@ impl CurveSpec {
             CurveSpec::BinaryExplicit {
                 n, modulus, a, b, ..
             } => format!("binary_explicit_instance({n}, 0x{modulus:x}, 0x{a:x}, 0x{b:x}, ...)"),
+            CurveSpec::Fp4Translation { p, seed } => {
+                format!("quartic_folds::generate_translation_instance({p}, {seed}, 16)")
+            }
         }
     }
 }
@@ -267,6 +280,9 @@ pub enum Instance {
     Binary(Box<BinaryInstance>),
     /// A Koblitz curve past one word (`64 ≤ n ≤ 127`).
     Wide(Box<WideInstance>),
+    /// A curve over `F_{p⁴}` (`ecbench::fp4`); a point is one 64-bit word
+    /// per coordinate, four 16-bit limbs.
+    Fp4(Box<Fp4Instance>),
 }
 
 /// A wide Koblitz curve and the strong reference's arithmetic on it, which
@@ -377,10 +393,31 @@ impl Instance {
             Instance::Prime(i) => u128::from(i.r),
             Instance::Binary(i) => u128::from(i.r),
             Instance::Wide(i) => i.kc.r,
+            Instance::Fp4(i) => u128::from(i.r),
         }
     }
 
     pub fn facts(&self, spec: &CurveSpec) -> CurveFacts {
+        if let Instance::Fp4(i) = self {
+            let (icv1, slug) = i.names();
+            let g = Fp4Instance::encode(&i.g).unwrap_or_default();
+            return CurveFacts {
+                slug,
+                icv1,
+                family: "fp4".into(),
+                construction: spec.call(),
+                field_degree: None,
+                field_bits: Some(64 - i.p.leading_zeros()),
+                group_order: u128::from(i.group_order),
+                r: u128::from(i.r),
+                cofactor: u128::from(i.cofactor),
+                generator: g,
+                automorphisms_available: 2,
+                registered: false,
+                ec1: None,
+                curve_uid: None,
+            };
+        }
         let (id, family, degree, bits, order, r, h, gx, gy, aut) = match self {
             Instance::Prime(i) => (
                 i.curve_id(),
@@ -410,6 +447,7 @@ impl Instance {
                 u128::from(i.generator.y),
                 if i.koblitz.is_some() { 2 * i.n } else { 2 },
             ),
+            Instance::Fp4(_) => unreachable!("returned above"),
             Instance::Wide(i) => (
                 i.kc.curve_id(),
                 "koblitz",
@@ -459,6 +497,9 @@ impl Instance {
         // A one-word instance's subgroup order fits a word, so a reduced
         // scalar does too.
         let k = u64::try_from(k % self.r()).ok()?;
+        if let Instance::Fp4(i) = self {
+            return i.mul_generator_hex(k);
+        }
         match self {
             Instance::Prime(i) => {
                 let p = i.curve.mul(&mut scratch, i.generator_point(), k);
@@ -469,7 +510,7 @@ impl Instance {
                 let p = g.mul(&mut scratch, i.generator, k);
                 (!p.infinity).then(|| [format!("0x{:x}", p.x), format!("0x{:x}", p.y)])
             }
-            Instance::Wide(_) => unreachable!("returned above"),
+            Instance::Wide(_) | Instance::Fp4(_) => unreachable!("returned above"),
         }
     }
 }
@@ -489,6 +530,10 @@ impl Instance {
     ) -> Option<([String; 2], u64)> {
         let model = model_hash(curve);
         let mut scratch = GroupOps::default();
+        if let Instance::Fp4(_) = self {
+            // Planted targets only on E(F_{p⁴}): no public-target law yet.
+            return None;
+        }
         if let Instance::Wide(i) = self {
             // PUBLIC_TARGET_LAW_WIDE: the same inputs as decimal strings, a
             // 128-bit draw, its top bit choosing the ordinate.
@@ -534,7 +579,7 @@ impl Instance {
                         return Some(([format!("0x{:x}", q.x), format!("0x{:x}", q.y)], counter));
                     }
                 }
-                Instance::Wide(_) => unreachable!("handled above"),
+                Instance::Wide(_) | Instance::Fp4(_) => unreachable!("handled above"),
                 Instance::Binary(i) => {
                     let mask = if i.n >= 64 {
                         u64::MAX

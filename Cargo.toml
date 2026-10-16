@@ -31,6 +31,10 @@ name = "ic"
 path = "src/bin/ic.rs"
 
 [[bin]]
+name = "pkm-aux-search"
+path = "src/bin/pkm_aux_search.rs"
+
+[[bin]]
 name = "quartic-ic"
 path = "src/bin/quartic_ic.rs"
 
@@ -96,6 +100,15 @@ path = "src/bin/cryptopro_b_glv_bench.rs"
 name = "cryptopro-b-chain-sweep"
 path = "src/bin/cryptopro_b_chain_sweep.rs"
 
+# `endo-chain-bench` — the curve-generic form of `cryptopro-b-chain-sweep`:
+# GLV-2 via a frozen isogeny-chain endomorphism against width-w NAF on any
+# short Weierstrass curve (Bandersnatch, Tom-384, CP6-782; CryptoPro-B as the
+# positive control); counting run with --features endo-chain-opcount
+# (research/endo_native_bench_20261016).
+[[bin]]
+name = "endo-chain-bench"
+path = "src/bin/endo_chain_bench.rs"
+
 [lib]
 name = "crypto_lib"
 path = "src/lib.rs"
@@ -115,6 +128,9 @@ rho_debug = []
 # Field-operation counters in the CryptoPro-B field (`cryptopro_b_field::opcount`),
 # for the counting run of `cryptopro-b-chain-sweep`; timing builds leave it off.
 cryptopro-b-opcount = []
+# Field-operation counters in the curve-generic field (`endo_generic_field::opcount`),
+# for the counting run of `endo-chain-bench`; timing builds leave it off.
+endo-chain-opcount = []
 # Field-operation counters in the one-word field of `semaev_decomp` (`semaev_decomp::opcount`),
 # for PS-0 of research/pdp_oracle_speedup_20261011; timing builds leave it off.
 pdp-opcount = []

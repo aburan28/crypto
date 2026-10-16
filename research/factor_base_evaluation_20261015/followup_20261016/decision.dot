@@ -1,0 +1,16 @@
+digraph followup {
+  graph [rankdir=TB, bgcolor="white", pad="0.2", label="Prime-field factor-base follow-up: proposed, not run", labelloc=t, fontname="DejaVu Sans", fontsize=13];
+  node [shape=box, style="rounded,filled", fillcolor="#edf5f4", color="#1d6b73", fontname="DejaVu Sans", fontsize=11, margin="0.15,0.12"];
+  edge [color="#1d6b73", fontname="DejaVu Sans", fontsize=10];
+  baseline [label="1. Freeze native incumbent\nKeep low-x control\nPENDING"];
+  screen [label="2. Tune base size + oracle\nCharge setup, rank, memory\nPENDING"];
+  holdout [label="3. Freeze selection\nFresh one-target holdouts\nIndependent replay\nPENDING"];
+  decision [label="Lower full IC cost?\nRobust to pricing band\nPENDING", shape=diamond, fillcolor="#f8f1e8"];
+  promote [label="Verified improvement\nPromote as new baseline\nReport gap to rho\nPENDING"];
+  retain [label="Null or unresolved\nRetain incumbent + evidence\nPENDING", fillcolor="#f4f4f4"];
+  { rank=same; baseline; screen; holdout; }
+  { rank=same; promote; retain; }
+  baseline -> screen -> holdout -> decision;
+  decision -> promote [label="yes"];
+  decision -> retain [label="no / unclear"];
+}

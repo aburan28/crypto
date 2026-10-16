@@ -161,6 +161,19 @@ fn resident_bytes(_: u32) -> Option<u64> {
     None
 }
 pub fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) -> Json {
+    run_with_sampler(cli, dir, args, stem, timeout, resident_bytes)
+}
+
+// The sampler is an internal dependency, never a CLI or environment override.
+// Deterministic native controls exercise telemetry loss through this same loop.
+fn run_with_sampler(
+    cli: &Path,
+    dir: &Path,
+    args: &[String],
+    stem: &str,
+    timeout: u64,
+    mut sample_resident: impl FnMut(u32) -> Option<u64>,
+) -> Json {
     let stdout_path = dir.join(format!("{stem}.json"));
     let stderr_path = dir.join(format!("{stem}.stderr.txt"));
     let receipt_path = dir.join(format!("{stem}.receipt.json"));
@@ -230,6 +243,19 @@ pub fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) ->
     let mut memory_limited = false;
     let mut monitor_unavailable = false;
     let mut peak_rss = 0;
+    // Challenge replay waits for this acknowledgement before any parsing or
+    // algebra, so a short child cannot exit before the first usable RSS sample.
+    let resource_ready = ((args.first().is_some_and(|a| a == "challenge")
+        && args.get(1).is_some_and(|a| a == "__judge"))
+        || (args.first().is_some_and(|a| a == "compact-cm")
+            && args.get(1).is_some_and(|a| a == "__worker")))
+    .then(|| {
+        args.windows(2)
+            .find(|w| w[0] == "--rss-ready")
+            .map(|w| Path::new(&w[1]))
+    })
+    .flatten();
+    let mut resources_released = false;
     let mut unavailable_since = None;
     let mut unavailable_samples = 0;
     let status = loop {
@@ -241,7 +267,13 @@ pub fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) ->
             child.kill().unwrap();
             break child.wait().unwrap();
         }
-        match resident_bytes(child.id()) {
+        if resource_ready.is_some_and(|ready| ready.with_extension("done").is_file()) {
+            thread::sleep(Duration::from_millis(25));
+            continue;
+        }
+        // Zero RSS cannot establish usable telemetry during supervised algebra,
+        // including after the initial positive acknowledgement.
+        match sample_resident(child.id()).filter(|rss| resource_ready.is_none() || *rss > 0) {
             Some(rss) => {
                 unavailable_since = None;
                 peak_rss = peak_rss.max(rss);
@@ -249,6 +281,14 @@ pub fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) ->
                     memory_limited = true;
                     child.kill().unwrap();
                     break child.wait().unwrap();
+                }
+                if let Some(ready) = resource_ready.filter(|_| !resources_released) {
+                    fs::OpenOptions::new()
+                        .write(true)
+                        .create_new(true)
+                        .open(ready)
+                        .unwrap();
+                    resources_released = true;
                 }
             }
             None => {
@@ -357,4 +397,94 @@ pub fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) ->
     );
     std::io::stdout().flush().unwrap();
     result
+}
+
+#[cfg(all(test, unix))]
+mod tests {
+    use super::*;
+    use std::{os::unix::fs::PermissionsExt, time::SystemTime};
+
+    #[test]
+    fn missing_and_zero_rss_fail_closed_before_and_after_acknowledgement() {
+        let retained = std::env::var_os("ISOGENY_MONITOR_EVIDENCE");
+        let root = retained
+            .as_ref()
+            .map(std::path::PathBuf::from)
+            .unwrap_or_else(|| {
+                std::env::temp_dir().join(format!(
+                    "isogeny-rss-controls-{}-{}",
+                    std::process::id(),
+                    SystemTime::now()
+                        .duration_since(SystemTime::UNIX_EPOCH)
+                        .unwrap()
+                        .as_nanos()
+                ))
+            });
+        fs::create_dir(&root).unwrap();
+        let root = fs::canonicalize(root).unwrap();
+        let worker = root.join("waiting-worker.sh");
+        // This fixture performs no cryptographic work. It waits for exactly the
+        // acknowledgement used by public compact workers, records entry, and
+        // stays alive until the real supervisor rejects the injected telemetry.
+        fs::write(&worker, "#!/bin/sh\nwhile test ! -f \"$4\"; do :; done\nprintf 'entered\\n' > \"$6\"\nwhile :; do :; done\n").unwrap();
+        fs::set_permissions(&worker, fs::Permissions::from_mode(0o700)).unwrap();
+        for after_ack in [false, true] {
+            for zero in [false, true] {
+                let name = format!(
+                    "{}-{}",
+                    if after_ack { "after" } else { "before" },
+                    if zero { "zero" } else { "missing" }
+                );
+                let dir = root.join(name);
+                fs::create_dir(&dir).unwrap();
+                let ready = dir.join("resources-ready");
+                let entered = dir.join("worker-entered");
+                let args = vec![
+                    "compact-cm".into(),
+                    "__worker".into(),
+                    "--rss-ready".into(),
+                    ready.to_string_lossy().into_owned(),
+                    "--fixture-entered".into(),
+                    entered.to_string_lossy().into_owned(),
+                ];
+                let receipt = run_with_sampler(&worker, &dir, &args, "native", 5, |_| {
+                    if after_ack && !entered.is_file() {
+                        Some(4096)
+                    } else if zero {
+                        Some(0)
+                    } else {
+                        None
+                    }
+                });
+                assert_eq!(
+                    receipt.get("status").and_then(Json::as_str),
+                    Some("RESOURCE_MONITOR_UNAVAILABLE")
+                );
+                assert_eq!(ready.is_file(), after_ack);
+                assert_eq!(entered.is_file(), after_ack);
+                assert_eq!(
+                    receipt
+                        .get("sampled_peak_resident_bytes")
+                        .and_then(Json::as_str),
+                    Some(if after_ack { "4096" } else { "0" })
+                );
+                let unavailable = receipt.get("unavailable_memory_samples").unwrap();
+                assert!(matches!(unavailable, Json::Num(n) if *n > 0));
+                write_json(
+                    &dir.join("fixture.json"),
+                    &Json::obj(vec![
+                        ("schema", Json::str("isogeny-rss-injection-control/v1")),
+                        ("synthetic_rss_injection", Json::Bool(true)),
+                        ("cryptographic_work", Json::Bool(false)),
+                        ("loss_after_acknowledgement", Json::Bool(after_ack)),
+                        ("zero_instead_of_missing", Json::Bool(zero)),
+                        ("expected_status", Json::str("RESOURCE_MONITOR_UNAVAILABLE")),
+                    ]),
+                );
+            }
+        }
+        if retained.is_none() {
+            fs::remove_dir_all(root).unwrap();
+        }
+    }
 }

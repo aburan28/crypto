@@ -1,0 +1,17 @@
+[package]
+name = "rho_walk_leads"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# Standalone: no dependencies, so the same source builds unchanged in a bare
+# Rust container on Modal and in this tree.
+[workspace]
+
+[dependencies]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+debug = false

@@ -1,0 +1,33 @@
+{
+  "ic": {
+    "arm": "ic",
+    "checker": "oracle.py (pure-Python field arithmetic)",
+    "checks": {
+      "digest_matches": true,
+      "generator_matches_fixture": true,
+      "relation_points_on_curve": true,
+      "relation_sums_to_target": true,
+      "relation_x_codes_match_points": true,
+      "scalar_in_range": true,
+      "scalar_times_g_is_target": true,
+      "target_in_subgroup": true,
+      "target_is_workload_target": true
+    },
+    "digest_recomputed": "466dfd237bca4bdc85cbb2cbf44281ae4904bce728c29d2eeafd8b7048bd3efe",
+    "statement_holds": true
+  },
+  "rho": {
+    "arm": "rho",
+    "checker": "oracle.py (pure-Python field arithmetic)",
+    "checks": {
+      "digest_matches": true,
+      "generator_matches_fixture": true,
+      "scalar_in_range": true,
+      "scalar_times_g_is_target": true,
+      "target_in_subgroup": true,
+      "target_is_workload_target": true
+    },
+    "digest_recomputed": "3a3a2208c303ba415af5189a45a4afebde7c49b0b7f379848e2de1c8ce7a8c2a",
+    "statement_holds": true
+  }
+}
