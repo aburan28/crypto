@@ -125,6 +125,22 @@ This covers the catalog's ordinary binary models, including ECC2K-130.
 It corrects any inference that the absence of a useful intermediate
 subfield would prevent an ordinary same-field hyperelliptic cover.
 
+### Additional genus-two family when b=1
+
+For `E_a: y^2+x*y=x^3+a*x^2+1`, an additional same-field family is
+`C_a: v^2+u^2*v=u^5+a*u^4+u^3+u`, with the degree-three map
+
+`(x,y)=(u^3/(u+1)^2,(u*(u+1)*v+u^2+u+1)/(u+1)^3)`.
+
+The Artin–Schreier poles have orders 3 and 1, giving genus two. Source
+infinity and the points above u=1 map to O; (0,0) maps to (0,1).
+The [construction report](../../research/binary_genus2_cover_20261014/REPORT.md)
+gives the smoothness/degree proof, reduced Jacobian pullback, image inverse,
+native checks for both pinned n=83 subgroups, and the partial Lean proof map.
+Use [binary_genus2_check](../../tools/binary-genus2-cover/README.md) for that
+execution. This separate entry point does not change the catalog constructor's
+binary genus-three selection or its historical not-tested fields.
+
 ## Interpretation and scope
 
 These elementary same-field constructions establish existence. They
