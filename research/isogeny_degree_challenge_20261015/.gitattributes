@@ -1,0 +1,4 @@
+# Preserve rendered documents, compressed evidence and raw logs byte for byte.
+*.pdf binary
+*.gz binary
+controls.log -text -diff

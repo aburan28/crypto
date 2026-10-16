@@ -1,0 +1,33 @@
+{
+  "arm_order": [
+    "k2543root22_a",
+    "k256root22",
+    "k512root22",
+    "k768root22",
+    "k1024root22",
+    "k1536root22",
+    "k2048root22",
+    "k3450root11wide3",
+    "k2543root22_b"
+  ],
+  "binary_sha256": "9511bb1daf00010c22a2cf89417cb233980541b89b2dbd88e93163dcba56fa8c",
+  "hashes": {
+    "Cargo.lock": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+    "examples/koblitz_orbit_dlp_fast.rs": "f78382ada0ee4eabfa6820d805d0e51598dbed82154b43ea309bcd489305e2aa",
+    "examples/n83_rho_optimization_eval.rs": "fb14072f4fa5d08e18d8b79130b6d58a220adae0f76369cc9be949691c83eaa0",
+    "research/n83_cold_factor_base_20261016/answers.jsonl": "b71c5a8bfdae603931fa6c03fc6f6faa3b261288cf787ac682bf8a3e3afe262d",
+    "research/n83_cold_factor_base_20261016/generate.py": "1807dadb4dc423850f32742faa03beb5774dacb4d3c17618502b6debb623ca58",
+    "research/n83_cold_factor_base_20261016/prior_manifest.json": "f0b29cb6e7d0081711ccb4b5ff54455f06198a2a3562d4654fbe7e81d07b1c8b",
+    "research/n83_cold_factor_base_20261016/reserve_answers.jsonl": "b21d3a1d54c701255a079a3f1d88940f46563a2f857303b4e3bb98ac40483f39",
+    "research/n83_cold_factor_base_20261016/reserve_targets.jsonl": "6ab08db41c5e86c96162f538a0c45d53331c2f9f823a66eea9bf0b458dd3554d",
+    "research/n83_cold_factor_base_20261016/targets.jsonl": "2c068d2f659588edcdbaa685fc73bb146e2bfee3be123d377d537658f8021c6d",
+    "research/n83_compact4_crosslayout_results_20261016/selection.json": "75a8f9f7638839d1d3d37e91576a490597f97fb0dfa5cab8b7526d38176415be",
+    "research/n83_dense_root_20261013/rho_config.json": "cf76ebb5372acfc1355b88374f875980be66cdffba1a82cb6e4c2f28bcfa723b",
+    "research/n83_indexed5_20261013/answer.jsonl": "651eb7d0ef08a1655036746311b19b6989e340ca4752b6d675606055e59c12a1",
+    "research/n83_indexed5_20261013/primary_target.jsonl": "21c8dfc7d488909e5c4a42c839fcc01bdefa9821c11ba001626a1d15697240e8"
+  },
+  "rho_binary_sha256": "e5e0adc87e6cc150fc10578ce4f20e851b888ee82b9543b1899906f0caba8ae8",
+  "rho_seed": "2026101601",
+  "runner_sha256": "e991aec1f9017f09538d809c14a70515b8341f0f5b86345ed49f7d82ffff19be",
+  "schema": "n83.cold-factor-base-source/v1"
+}

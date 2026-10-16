@@ -1,0 +1,316 @@
+{
+  "arm_order": [
+    "k1271fixed_a",
+    "k1271dynamic_a",
+    "k1271root22",
+    "k1024dynamic",
+    "k1536dynamic",
+    "k1271dynamic_b",
+    "k1271fixed_b"
+  ],
+  "arms": [
+    {
+      "actual_factor_base_points": 210986,
+      "arm": "k1271fixed_a",
+      "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+      "cold_process_ms_exploratory": 158352.297065,
+      "cold_unattributed_ms": 3.7628029999887644,
+      "effective_columns": 1271,
+      "full_child_wall_seconds": 159.155515078,
+      "k": 1271,
+      "layout": "root11_fixed",
+      "one_target_online_ms": 262.841732,
+      "online_phases_ms": {
+        "target_descent_ms": 0.00042,
+        "target_pdp_ms": 262.701232,
+        "target_query_ms": 2.9999999999999997e-05,
+        "target_recovery_check_ms": 0.117715,
+        "target_relation_check_ms": 0.021614
+      },
+      "rank_attempts": 1271,
+      "rank_relations": 1271,
+      "rank_stage_ms": 88879.099583,
+      "resources": {
+        "cpu_throttled_periods_delta": 0,
+        "major_faults": 3,
+        "oom_events_delta": 0,
+        "oom_kills_delta": 0,
+        "peak_rss_bytes": 6255316992,
+        "status": "PASS"
+      },
+      "root_state_allocated_bytes": 737455807,
+      "root_table_allocated_bytes": 5368709120,
+      "root_table_entries": 134077589,
+      "setup_ms": 69206.348564,
+      "status": "PASS_INDEPENDENT_REPLAY",
+      "target_probes": 458595,
+      "targets_total_ms": 263.086115
+    },
+    {
+      "actual_factor_base_points": 210986,
+      "arm": "k1271dynamic_a",
+      "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+      "cold_process_ms_exploratory": 153107.68714700002,
+      "cold_unattributed_ms": 3.6612810000119396,
+      "effective_columns": 1271,
+      "full_child_wall_seconds": 153.620740113,
+      "k": 1271,
+      "layout": "root11_dynamic",
+      "one_target_online_ms": 224.06598599999998,
+      "online_phases_ms": {
+        "target_descent_ms": 0.00054,
+        "target_pdp_ms": 223.918257,
+        "target_query_ms": 2.9999999999999997e-05,
+        "target_recovery_check_ms": 0.12485600000000001,
+        "target_relation_check_ms": 0.021622
+      },
+      "rank_attempts": 1271,
+      "rank_relations": 1271,
+      "rank_stage_ms": 89643.050338,
+      "resources": {
+        "cpu_throttled_periods_delta": 0,
+        "major_faults": 0,
+        "oom_events_delta": 0,
+        "oom_kills_delta": 0,
+        "peak_rss_bytes": 2231951360,
+        "status": "PASS"
+      },
+      "root_state_allocated_bytes": 737455807,
+      "root_table_allocated_bytes": 1342177280,
+      "root_table_entries": 134077589,
+      "setup_ms": 63236.663016,
+      "status": "PASS_INDEPENDENT_REPLAY",
+      "target_probes": 458595,
+      "targets_total_ms": 224.312512
+    },
+    {
+      "actual_factor_base_points": 210986,
+      "arm": "k1271root22",
+      "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+      "cold_process_ms_exploratory": 152778.917211,
+      "cold_unattributed_ms": 3.668931999988928,
+      "effective_columns": 1271,
+      "full_child_wall_seconds": 153.1190016280002,
+      "k": 1271,
+      "layout": "root22_dynamic",
+      "one_target_online_ms": 223.361739,
+      "online_phases_ms": {
+        "target_descent_ms": 0.000701,
+        "target_pdp_ms": 223.220969,
+        "target_query_ms": 2.9999999999999997e-05,
+        "target_recovery_check_ms": 0.11773499999999999,
+        "target_relation_check_ms": 0.021623
+      },
+      "rank_attempts": 1271,
+      "rank_relations": 1271,
+      "rank_stage_ms": 88890.563328,
+      "resources": {
+        "cpu_throttled_periods_delta": 0,
+        "major_faults": 0,
+        "oom_events_delta": 0,
+        "oom_kills_delta": 0,
+        "peak_rss_bytes": 2966638592,
+        "status": "PASS"
+      },
+      "root_state_allocated_bytes": 1474911614,
+      "root_table_allocated_bytes": 1342177280,
+      "root_table_entries": 134077589,
+      "setup_ms": 63661.077437,
+      "status": "PASS_INDEPENDENT_REPLAY",
+      "target_probes": 458595,
+      "targets_total_ms": 223.607514
+    },
+    {
+      "actual_factor_base_points": 169984,
+      "arm": "k1024dynamic",
+      "base_hash": "f3bb5adfd099df1be8e90edf56c9a764028e060d7e0c3a97759e9b699c423629",
+      "cold_process_ms_exploratory": 151015.606956,
+      "cold_unattributed_ms": 2.466308000006009,
+      "effective_columns": 1024,
+      "full_child_wall_seconds": 151.631876681,
+      "k": 1024,
+      "layout": "root11_dynamic",
+      "one_target_online_ms": 74.418542,
+      "online_phases_ms": {
+        "target_descent_ms": 0.00042100000000000004,
+        "target_pdp_ms": 74.28092600000001,
+        "target_query_ms": 2e-05,
+        "target_recovery_check_ms": 0.117864,
+        "target_relation_check_ms": 0.01857
+      },
+      "rank_attempts": 1024,
+      "rank_relations": 1024,
+      "rank_stage_ms": 109490.462795,
+      "resources": {
+        "cpu_throttled_periods_delta": 0,
+        "major_faults": 0,
+        "oom_events_delta": 0,
+        "oom_kills_delta": 0,
+        "peak_rss_bytes": 1272754176,
+        "status": "PASS"
+      },
+      "root_state_allocated_bytes": 478680576,
+      "root_table_allocated_bytes": 671088640,
+      "root_table_entries": 87028652,
+      "setup_ms": 41448.00988,
+      "status": "PASS_INDEPENDENT_REPLAY",
+      "target_probes": 138584,
+      "targets_total_ms": 74.667973
+    },
+    {
+      "actual_factor_base_points": 254976,
+      "arm": "k1536dynamic",
+      "base_hash": "c7c782d5759187b8d4fe71751579def0757d8c912bdefcd5ef6de908c72a7b4b",
+      "cold_process_ms_exploratory": 170651.882691,
+      "cold_unattributed_ms": 5.3758049999925674,
+      "effective_columns": 1536,
+      "full_child_wall_seconds": 171.13807816400004,
+      "k": 1536,
+      "layout": "root11_dynamic",
+      "one_target_online_ms": 436.327258,
+      "online_phases_ms": {
+        "target_descent_ms": 0.00042100000000000004,
+        "target_pdp_ms": 436.169322,
+        "target_query_ms": 2.9999999999999997e-05,
+        "target_recovery_check_ms": 0.13172499999999998,
+        "target_relation_check_ms": 0.02486
+      },
+      "rank_attempts": 1536,
+      "rank_relations": 1536,
+      "rank_stage_ms": 76974.556473,
+      "resources": {
+        "cpu_throttled_periods_delta": 0,
+        "major_faults": 0,
+        "oom_events_delta": 0,
+        "oom_kills_delta": 0,
+        "peak_rss_bytes": 2613067776,
+        "status": "PASS"
+      },
+      "root_state_allocated_bytes": 1077027072,
+      "root_table_allocated_bytes": 1342177280,
+      "root_table_entries": 195816567,
+      "setup_ms": 93235.38132500001,
+      "status": "PASS_INDEPENDENT_REPLAY",
+      "target_probes": 847208,
+      "targets_total_ms": 436.569088
+    },
+    {
+      "actual_factor_base_points": 210986,
+      "arm": "k1271dynamic_b",
+      "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+      "cold_process_ms_exploratory": 153094.15978699998,
+      "cold_unattributed_ms": 3.724986999988346,
+      "effective_columns": 1271,
+      "full_child_wall_seconds": 153.64059099700012,
+      "k": 1271,
+      "layout": "root11_dynamic",
+      "one_target_online_ms": 225.48321299999998,
+      "online_phases_ms": {
+        "target_descent_ms": 0.000561,
+        "target_pdp_ms": 225.342454,
+        "target_query_ms": 2.9999999999999997e-05,
+        "target_recovery_check_ms": 0.11773499999999999,
+        "target_relation_check_ms": 0.021623
+      },
+      "rank_attempts": 1271,
+      "rank_relations": 1271,
+      "rank_stage_ms": 89557.21726,
+      "resources": {
+        "cpu_throttled_periods_delta": 0,
+        "major_faults": 0,
+        "oom_events_delta": 0,
+        "oom_kills_delta": 0,
+        "peak_rss_bytes": 2231308288,
+        "status": "PASS"
+      },
+      "root_state_allocated_bytes": 737455807,
+      "root_table_allocated_bytes": 1342177280,
+      "root_table_entries": 134077589,
+      "setup_ms": 63307.476584,
+      "status": "PASS_INDEPENDENT_REPLAY",
+      "target_probes": 458595,
+      "targets_total_ms": 225.74095599999998
+    },
+    {
+      "actual_factor_base_points": 210986,
+      "arm": "k1271fixed_b",
+      "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+      "cold_process_ms_exploratory": 152830.465231,
+      "cold_unattributed_ms": 3.66773100000259,
+      "effective_columns": 1271,
+      "full_child_wall_seconds": 153.13812897900016,
+      "k": 1271,
+      "layout": "root11_fixed",
+      "one_target_online_ms": 221.494189,
+      "online_phases_ms": {
+        "target_descent_ms": 0.000501,
+        "target_pdp_ms": 221.35349700000003,
+        "target_query_ms": 3.1e-05,
+        "target_recovery_check_ms": 0.11773399999999999,
+        "target_relation_check_ms": 0.021675
+      },
+      "rank_attempts": 1271,
+      "rank_relations": 1271,
+      "rank_stage_ms": 87617.203305,
+      "resources": {
+        "cpu_throttled_periods_delta": 0,
+        "major_faults": 0,
+        "oom_events_delta": 0,
+        "oom_kills_delta": 0,
+        "peak_rss_bytes": 6258503680,
+        "status": "PASS"
+      },
+      "root_state_allocated_bytes": 737455807,
+      "root_table_allocated_bytes": 5368709120,
+      "root_table_entries": 134077589,
+      "setup_ms": 64987.851026000004,
+      "status": "PASS_INDEPENDENT_REPLAY",
+      "target_probes": 458595,
+      "targets_total_ms": 221.743169
+    }
+  ],
+  "controlled_online_speedup": null,
+  "descriptive_cold_process_ms_by_pipeline": {
+    "k1024root11_dynamic": 151015.606956,
+    "k1271root11_dynamic": 153100.92346700002,
+    "k1271root11_fixed": 155591.38114800001,
+    "k1271root22_dynamic": 152778.917211,
+    "k1536root11_dynamic": 170651.882691
+  },
+  "dynamic_aa_control": {
+    "cold_process_ms": [
+      153107.68714700002,
+      153094.15978699998
+    ],
+    "relative_difference": 8.835583544309688e-05,
+    "status": "PASS_10_PERCENT"
+  },
+  "evidence_status": "PASS_INDEPENDENT_REPLAY",
+  "fixed_aa_control": {
+    "cold_process_ms": [
+      158352.297065,
+      152830.465231
+    ],
+    "relative_difference": 0.03548931690983296,
+    "status": "PASS_10_PERCENT"
+  },
+  "hardware_tier": "cloud_instance_exploratory",
+  "rho": {
+    "full_child_wall_seconds": 1.0005246560001524,
+    "online_ms": 633.415236,
+    "resources": {
+      "cpu_throttled_periods_delta": 0,
+      "major_faults": 0,
+      "oom_events_delta": 0,
+      "oom_kills_delta": 0,
+      "peak_rss_bytes": 21082112,
+      "status": "PASS"
+    },
+    "status": "PASS_INDEPENDENT_REPLAY"
+  },
+  "schema": "n83.root11-dynamic-analysis/v1",
+  "selected_factor_base": null,
+  "status": "SCREEN_COMPLETE",
+  "target_count": 1,
+  "workload_role": "one_fresh_public_point_root_layout_screen"
+}
