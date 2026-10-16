@@ -434,6 +434,28 @@ impl BooleanSystem {
             degrees,
         }
     }
+
+    /// 64-bit word operations (`bitop/v1`'s `word_op`) of one
+    /// [`shape`](Self::shape) call that returned `shape`: a popcount a
+    /// term and a store an equation for the degrees; then the
+    /// semi-regular series on `i128` coefficients (two words each), with
+    /// `top = n_vars + 1` — the numerator's `n_vars · top` additions, the
+    /// denominator's `top − d + 1` additions per positive degree `d`, and
+    /// the long division's multiply-subtracts (six words each) up to the
+    /// degree it stops at.
+    pub fn shape_word_ops(&self, shape: &SystemShape) -> u64 {
+        let terms: u64 = self.equations.iter().map(|p| p.terms.len() as u64).sum();
+        let v = self.n_vars as u64;
+        let top = v + 1;
+        let den: u64 = shape
+            .degrees
+            .iter()
+            .filter(|&&d| d > 0 && u64::from(d) <= top)
+            .map(|&d| top - u64::from(d) + 1)
+            .sum();
+        let stop = shape.semi_regular_degree.map_or(top, u64::from);
+        terms + self.equations.len() as u64 + 2 * (v * top + den) + 6 * (stop * (stop + 1) / 2)
+    }
 }
 
 /// What a solver concluded.

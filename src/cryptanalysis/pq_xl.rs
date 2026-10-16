@@ -55,7 +55,9 @@
 //! - **G. Bard**, *Algebraic Cryptanalysis*, Springer 2009 — chapter
 //!   14 for an XL exposition specialised to `F_2`.
 
-use crate::cryptanalysis::pq_groebner_f2::{cmp_mono, F2BoolMono, F2BoolPoly};
+use crate::cryptanalysis::pq_groebner_f2::{
+    cmp_mono, mul_mono_word_ops, solve_system_f2_counted, F2BoolMono, F2BoolPoly,
+};
 use std::cmp::Ordering;
 
 // ── Sparse F_2 rows ────────────────────────────────────────────────
@@ -111,7 +113,7 @@ impl F2SparseRow {
 /// Enumerate every boolean monomial of degree `≤ max_deg` in `n_vars`
 /// variables, sorted **descending** by [`cmp_mono`] (so index 0 is the
 /// largest monomial).
-fn enumerate_monomials(n_vars: usize, max_deg: u32) -> Vec<F2BoolMono> {
+fn enumerate_monomials(n_vars: usize, max_deg: u32, ops: &mut u64) -> Vec<F2BoolMono> {
     assert!(n_vars <= 32, "XL capped at 32 variables");
     let total = 1u64 << n_vars;
     let mut out: Vec<F2BoolMono> = (0..total)
@@ -119,11 +121,23 @@ fn enumerate_monomials(n_vars: usize, max_deg: u32) -> Vec<F2BoolMono> {
         .filter(|m| m.degree() <= max_deg)
         .collect();
     out.sort_by(|a, b| cmp_mono(*b, *a));
+    // A popcount a mask, then the sort's comparisons.
+    *ops += total + out.len() as u64 * lg(out.len());
     out
 }
 
+/// Bit length of `x`: the depth factor of a sort of `x` entries.
+fn lg(x: usize) -> u64 {
+    (usize::BITS - x.leading_zeros()) as u64
+}
+
+/// Word operations of a hash-map probe on a one-word key: the hash and
+/// the key comparison.
+const MAP_PROBE_WORD_OPS: u64 = 2;
+
 /// Index from monomial to its column in the [`enumerate_monomials`] list.
-fn mono_index(monos: &[F2BoolMono]) -> std::collections::HashMap<F2BoolMono, usize> {
+fn mono_index(monos: &[F2BoolMono], ops: &mut u64) -> std::collections::HashMap<F2BoolMono, usize> {
+    *ops += monos.len() as u64 * MAP_PROBE_WORD_OPS;
     monos.iter().enumerate().map(|(i, m)| (*m, i)).collect()
 }
 
@@ -134,6 +148,7 @@ fn mono_index(monos: &[F2BoolMono]) -> std::collections::HashMap<F2BoolMono, usi
 fn poly_to_row(
     p: &F2BoolPoly,
     mono_to_col: &std::collections::HashMap<F2BoolMono, usize>,
+    ops: &mut u64,
 ) -> F2SparseRow {
     let mut cols: Vec<usize> = p
         .terms
@@ -141,12 +156,18 @@ fn poly_to_row(
         .filter_map(|m| mono_to_col.get(m).copied())
         .collect();
     cols.sort_unstable();
+    // A probe a term, then the sort's comparisons.
+    *ops += p.terms.len() as u64 * MAP_PROBE_WORD_OPS + cols.len() as u64 * lg(cols.len());
     F2SparseRow { cols }
 }
 
 /// Convert a sparse row back to a polynomial.
-fn row_to_poly(r: &F2SparseRow, monos: &[F2BoolMono], n_vars: usize) -> F2BoolPoly {
+fn row_to_poly(r: &F2SparseRow, monos: &[F2BoolMono], n_vars: usize, ops: &mut u64) -> F2BoolPoly {
     let monos: Vec<F2BoolMono> = r.cols.iter().map(|&c| monos[c]).collect();
+    // The gather, then `from_monos`: a key a term, its sort, and the
+    // cancelling pass.
+    let l = monos.len() as u64;
+    *ops += 3 * l + l * lg(monos.len());
     F2BoolPoly::from_monos(monos, n_vars)
 }
 
@@ -160,6 +181,7 @@ fn build_macaulay_matrix(
     monos: &[F2BoolMono],
     mono_to_col: &std::collections::HashMap<F2BoolMono, usize>,
     max_deg: u32,
+    ops: &mut u64,
 ) -> Vec<F2SparseRow> {
     let mut rows = Vec::new();
     for f in polys {
@@ -171,15 +193,19 @@ fn build_macaulay_matrix(
         }
         // Headroom: how high a `t` we can multiply by.
         let headroom = max_deg - lt_deg;
+        *ops += 1;
         for t in monos {
+            // The degree test: a popcount.
+            *ops += 1;
             if t.degree() > headroom {
                 continue;
             }
             let product = f.mul_mono(*t);
+            *ops += mul_mono_word_ops(f.terms.len());
             if product.is_zero() {
                 continue;
             }
-            rows.push(poly_to_row(&product, mono_to_col));
+            rows.push(poly_to_row(&product, mono_to_col, ops));
         }
     }
     rows
@@ -190,12 +216,16 @@ fn build_macaulay_matrix(
 /// Reduce a list of sparse `F_2` rows to row-echelon form in place.
 /// Standard column-by-column elimination: find a pivot row for each
 /// column, XOR it into every row below to clear that column.
-fn gaussian_eliminate_sparse(rows: &mut Vec<F2SparseRow>, n_cols: usize) {
+fn gaussian_eliminate_sparse(rows: &mut Vec<F2SparseRow>, n_cols: usize, ops: &mut u64) {
     // Process columns from smallest (= largest monomial) upward.
     // For each column, find a row whose leading entry is this column.
     let mut pivot_idx_for_col: Vec<Option<usize>> = vec![None; n_cols];
+    // The pivot table's initialisation.
+    *ops += n_cols as u64;
     let mut next_row = 0;
     while next_row < rows.len() {
+        // The lead and the pivot lookup.
+        *ops += 2;
         let lead = match rows[next_row].lead() {
             Some(c) => c,
             None => {
@@ -208,6 +238,8 @@ fn gaussian_eliminate_sparse(rows: &mut Vec<F2SparseRow>, n_cols: usize) {
             // into pivot's clone (or vice versa).  Since we want pivot
             // to keep its smaller index, XOR into next_row and re-scan.
             let pivot_row = rows[piv_idx].clone();
+            // The copy (a word a column), then the merge (a step a column).
+            *ops += 2 * pivot_row.cols.len() as u64 + rows[next_row].cols.len() as u64;
             rows[next_row].xor_assign(&pivot_row);
             // Don't advance — the new leading column may collide again.
         } else {
@@ -216,6 +248,7 @@ fn gaussian_eliminate_sparse(rows: &mut Vec<F2SparseRow>, n_cols: usize) {
         }
     }
     // Drop empty rows.
+    *ops += rows.len() as u64;
     rows.retain(|r| !r.is_zero());
 }
 
@@ -233,14 +266,27 @@ fn gaussian_eliminate_sparse(rows: &mut Vec<F2SparseRow>, n_cols: usize) {
 /// `D` reaches `n_vars` (where the boolean ring has 2^n monomials
 /// and we can't do better).
 pub fn boolean_xl(polys: Vec<F2BoolPoly>, n_vars: usize, max_deg: u32) -> Vec<F2BoolPoly> {
+    boolean_xl_counted(polys, n_vars, max_deg, &mut 0)
+}
+
+/// [`boolean_xl`], adding its 64-bit word operations (`bitop/v1`'s
+/// `word_op`; a monomial or a column index is one word) to `ops`: one per
+/// inner-loop iteration that touches a word, with the constants at each
+/// site, and `x·lg x` comparisons for each sort of `x` entries.
+pub fn boolean_xl_counted(
+    polys: Vec<F2BoolPoly>,
+    n_vars: usize,
+    max_deg: u32,
+    ops: &mut u64,
+) -> Vec<F2BoolPoly> {
     assert!(n_vars <= 24, "XL toy implementation capped at 24 variables");
-    let monos = enumerate_monomials(n_vars, max_deg);
-    let mono_to_col = mono_index(&monos);
+    let monos = enumerate_monomials(n_vars, max_deg, ops);
+    let mono_to_col = mono_index(&monos, ops);
     let n_cols = monos.len();
-    let mut rows = build_macaulay_matrix(&polys, &monos, &mono_to_col, max_deg);
-    gaussian_eliminate_sparse(&mut rows, n_cols);
+    let mut rows = build_macaulay_matrix(&polys, &monos, &mono_to_col, max_deg, ops);
+    gaussian_eliminate_sparse(&mut rows, n_cols, ops);
     rows.into_iter()
-        .map(|r| row_to_poly(&r, &monos, n_vars))
+        .map(|r| row_to_poly(&r, &monos, n_vars, ops))
         .collect()
 }
 
@@ -297,8 +343,15 @@ fn cmp_mono_owned(a: &F2BoolMono, b: &F2BoolMono) -> Ordering {
 /// The classical XL "iterate while D grows" loop is therefore
 /// redundant here — we collapse it to one matrix.
 pub fn boolean_xl_solve(polys: Vec<F2BoolPoly>, n_vars: usize) -> Vec<u64> {
-    let reduced = boolean_xl(polys, n_vars, n_vars as u32);
-    crate::cryptanalysis::pq_groebner_f2::solve_system_f2(&reduced, n_vars)
+    boolean_xl_solve_counted(polys, n_vars, &mut 0)
+}
+
+/// [`boolean_xl_solve`], adding its word operations to `ops`: the XL
+/// pass ([`boolean_xl_counted`]) and the enumeration
+/// ([`solve_system_f2_counted`]).
+pub fn boolean_xl_solve_counted(polys: Vec<F2BoolPoly>, n_vars: usize, ops: &mut u64) -> Vec<u64> {
+    let reduced = boolean_xl_counted(polys, n_vars, n_vars as u32, ops);
+    solve_system_f2_counted(&reduced, n_vars, ops)
 }
 
 // ── Tests ──────────────────────────────────────────────────────────
@@ -324,7 +377,7 @@ mod tests {
     /// `enumerate_monomials(n, max)` returns the right count.
     #[test]
     fn enumerate_monomials_size() {
-        let m = enumerate_monomials(4, 2);
+        let m = enumerate_monomials(4, 2, &mut 0);
         // C(4, 0) + C(4, 1) + C(4, 2) = 1 + 4 + 6 = 11.
         assert_eq!(m.len(), 11);
     }
