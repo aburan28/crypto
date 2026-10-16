@@ -1,0 +1,91 @@
+{
+ "schema": "ecbench.spec/v1",
+ "label": "IC frontier campaign Phase 0: feasibility, 24-bit prime (PKM ladder curve)",
+ "description": "Phase 0 feasibility probe (PROTOCOL.md): one public train target per arm. Curve from research/pkm_tower_ecbench_20261013/curves.jsonl. Not a measurement.",
+ "workloads": {
+  "curves": [
+   {
+    "kind": "prime_explicit",
+    "p": 10940417,
+    "a": 10128206,
+    "b": 867458,
+    "group_order": 10937713,
+    "r": 10937713,
+    "gx": 3240781,
+    "gy": 414610
+   }
+  ],
+  "targets_per_curve": 1,
+  "target_seed": 20261015100,
+  "target_kind": "public"
+ },
+ "arms": [
+  {
+   "name": "rho-neg",
+   "role": "reference",
+   "method": {
+    "id": "rho.negation"
+   }
+  },
+  {
+   "name": "bsgs-neg",
+   "role": "baseline",
+   "method": {
+    "id": "bsgs.negation"
+   }
+  },
+  {
+   "name": "kangaroo",
+   "role": "baseline",
+   "method": {
+    "id": "kangaroo.vow"
+   }
+  },
+  {
+   "name": "ic-pair",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "prime-abscissa:size=64",
+     "oracle": "mitm:negation_folded=1",
+     "linalg": "incremental-gauss",
+     "max_trials": "2000000"
+    }
+   }
+  },
+  {
+   "name": "ic-rootfind",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "prime-abscissa:size=64",
+     "oracle": "rootfind-subtract:m=2",
+     "linalg": "incremental-gauss",
+     "max_trials": "2000000"
+    }
+   }
+  },
+  {
+   "name": "ic-pkm",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "prime-kummer:t=9",
+     "oracle": "rootfind-mitm:m=3",
+     "max_trials": "2000000"
+    }
+   }
+  }
+ ],
+ "measurement": {
+  "rounds": 1,
+  "warmup": 0,
+  "order": "alternate",
+  "seed": 20261015102,
+  "isolation_required": "L0",
+  "timeout_seconds": 900
+ }
+}
