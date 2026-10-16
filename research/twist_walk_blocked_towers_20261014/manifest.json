@@ -1,0 +1,22 @@
+{
+  "study": "twist_walk_blocked_towers_20261014",
+  "date_utc": "2026-10-14",
+  "protocol_version": 1,
+  "protocol_sha256": "86a67503d4b5c4c56bce0eba1cd9d76a36b198e5058dad3ec2fbb9143211705e",
+  "protocol_frozen_in_commit": "94ec3411d6602a64c085a46fc782cd587847c6a5",
+  "base_main_commit": "79006eb85a400474e83f6a76fac0dca6b60a8b5d",
+  "registry_sha256": "03f63efa54482b2ea37baed22da046202cd67739c76d9b43f569e2375f025ca4",
+  "instrument": "examples/twist_walk_blocked_towers.rs",
+  "instrument_note": "control, catalog and null modes are as committed in the freeze commit. The summary and classes modes were added after the catalog and null runs and do not touch the walk or evaluation code.",
+  "toolchain": "rustc 1.97.0",
+  "host": "cloud container, no isolation; timings are incidental and not a performance claim",
+  "runs": [
+    {"mode": "control", "args": "--seed 20261014", "result": "A PASS (46 roots, 8 draws with >= 2 roots); B PASS (10 starts with neighbours)", "elapsed_s": 29.4, "output": "control_out.txt"},
+    {"mode": "catalog", "args": "--registry docs/curves/registry.json", "elapsed_s": 0.1, "output": "catalog_towers.csv"},
+    {"mode": "null", "args": "--registry docs/curves/registry.json --samples 2000 --seed 20261014", "elapsed_s": 206.4, "estimated_s_in_protocol": 270, "output": "null_towers.csv"},
+    {"mode": "summary", "args": "--catalog catalog_towers.csv --null null_towers.csv", "output": "summary.csv"},
+    {"mode": "classes", "args": "--min-n 8 --max-n 22", "elapsed_s": 3.3, "output": "class_ceiling.csv"}
+  ],
+  "figures": ["escape_by_config.svg", "class_ceiling.svg"],
+  "figure_script": "plot_figs.py (layout only)"
+}

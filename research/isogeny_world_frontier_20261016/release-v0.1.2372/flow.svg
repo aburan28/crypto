@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1050" height="360" viewBox="0 0 1050 360">
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="#354659"/></marker></defs>
+<rect width="1050" height="360" fill="#fff"/>
+<g font-family="Arial,sans-serif" fill="#182c41">
+<text x="25" y="29" font-size="20" font-weight="bold">v0.1.2372: correct CI payload, corrupted release upload</text>
+<rect x="25" y="54" width="280" height="86" rx="9" fill="#e5f3eb" stroke="#2c8153"/>
+<text x="42" y="80" font-size="17">Original CI archive</text><text x="42" y="105" font-size="15">Checksum + native control PASS</text><text x="42" y="126" font-size="14">source 3714752 / P192 degree 13</text>
+<rect x="366" y="54" width="290" height="86" rx="9" fill="#fff0d9" stroke="#b77b26"/>
+<text x="383" y="81" font-size="17">ReleaseMe UTF8 file decoding</text><text x="383" y="106" font-size="15">Byte roundtrip exactly reproduces</text><text x="383" y="126" font-size="14">the corrupt macOS asset hash</text>
+<rect x="717" y="54" width="308" height="86" rx="9" fill="#fbe7e7" stroke="#ac4444"/>
+<text x="734" y="81" font-size="17">4 public archives: checksum FAIL</text><text x="734" y="106" font-size="15">Downloaded hashes match GitHub</text><text x="734" y="126" font-size="14">No failed download was executed</text>
+<path d="M305 97H358" stroke="#354659" stroke-width="2" marker-end="url(#arrow)"/><path d="M656 97H709" stroke="#354659" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="25" y="184" font-size="20" font-weight="bold">Proposed repair: publish only after downloaded bytes match</text>
+<rect x="25" y="206" width="280" height="90" rx="9" fill="#eaf0f8" stroke="#426995"/>
+<text x="42" y="234" font-size="17">ReleaseMe creates draft</text><text x="42" y="260" font-size="15">gh uploads original binary files</text><text x="42" y="281" font-size="14">No asset overwrite</text>
+<rect x="366" y="206" width="290" height="90" rx="9" fill="#eaf0f8" stroke="#426995"/>
+<text x="383" y="234" font-size="17">Download to fresh directory</text><text x="383" y="260" font-size="15">Compare original manifest + hashes</text><text x="383" y="281" font-size="14">Any mismatch leaves draft</text>
+<rect x="717" y="206" width="308" height="90" rx="9" fill="#e5f3eb" stroke="#2c8153" stroke-dasharray="6 4"/>
+<text x="734" y="234" font-size="17">Publish verified draft as latest</text><text x="734" y="260" font-size="15">9 local transport cases PASS</text><text x="734" y="281" font-size="14">Live workflow remains unexecuted</text>
+<path d="M305 251H358" stroke="#354659" stroke-width="2" marker-end="url(#arrow)"/><path d="M656 251H709" stroke="#354659" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="25" y="333" font-size="14">Evidence: workflow38873645089, immutable action cede87f, exact digests in verification-summary.json.</text>
+</g></svg>

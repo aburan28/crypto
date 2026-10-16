@@ -1,0 +1,21 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "IC improve 01: D4 Y-line vs D4 + double large primes (frozen lp_exponent 0.95) on E(F_p^4)",
+  "description": "Operation counts only (no wall-time claim). fp4_translation curves (h = 4), planted single targets. ic.k4_gaudry charges each trial C4(D4) = 2.54e10 F_p mults (97 per GAE); its exact-enumeration stand-in oracle is counted uncharged, so IC records are lower bounds. Candidate parameters frozen on a training split (seeds 4,5). PROTOCOL: research/ic_improve_20261014/01-d4-2lp/PROTOCOL.md",
+  "workloads": {
+    "curves": [
+      {"kind": "fp4_translation", "p": 101, "seed": 1},
+      {"kind": "fp4_translation", "p": 181, "seed": 1},
+      {"kind": "fp4_translation", "p": 269, "seed": 1},
+      {"kind": "fp4_translation", "p": 397, "seed": 1}
+    ],
+    "targets_per_curve": 3,
+    "target_seed": 20261014
+  },
+  "arms": [
+    {"name": "ic-k4-d4", "role": "baseline", "method": {"id": "ic.k4_gaudry", "params": {"base": "yline-d4", "large_primes": "0", "c4": "2.54e10"}}},
+    {"name": "ic-k4-d4-2lp", "role": "candidate", "method": {"id": "ic.k4_gaudry", "params": {"base": "yline-d4-lp", "large_primes": "2", "lp_exponent": "0.95", "c4": "2.54e10"}}},
+    {"name": "ic-k4-d4-2lp-gaudry", "role": "candidate", "method": {"id": "ic.k4_gaudry", "params": {"base": "yline-d4-lp", "large_primes": "2", "lp_exponent": "0.75", "c4": "2.54e10"}}}
+  ],
+  "measurement": {"rounds": 1, "warmup": 0, "order": "alternate", "seed": 1, "isolation_required": "L0", "timeout_seconds": 1800}
+}

@@ -1,0 +1,26 @@
+{
+  "archive_source": "18 existing content-addressed local S3 downloads",
+  "audit_sha256": "9951647faf4f502c6adf25886b1786c41d2eaed792d48cdd639f4b7d84bb84be",
+  "command": [
+    "uv",
+    "run",
+    "--with",
+    "blake3",
+    "python",
+    "-B",
+    "/Volumes/SSD990/crypto/worktrees/codex-n83-mixed-orbit-worker-20261012/research/koblitz_n83_factor_base_sweep_20261008/verification/pareto-shape-native-import-20261015/audit.py",
+    "--run-dir",
+    "/private/tmp/n83-pareto-retained-replay-20261015",
+    "--binary",
+    "/private/tmp/n83-native-k600-import-20261014/koblitz_n83_mixed_orbit_worker.preserved",
+    "--output",
+    "/private/tmp/n83-pareto-retained-replay-20261015/audit.json"
+  ],
+  "elapsed_wall_seconds_L0": 5.2485702090052655,
+  "exit_code": 0,
+  "raw_logs_tar_sha256": "9a489ce9a2ccec5a6cbe68aa4eae00cf26523f0f3ff2159adcca17d503b1929f",
+  "schema": "n83.pareto-shape-retained-replay/v1",
+  "source_sha256": "bc1e06cb4a448082a5c6188b9e784684842d7054ab9623d939738888a03a7fce",
+  "status": "PASS_RETAINED_TAR_AND_RESULT_REPLAY",
+  "utc": "2026-10-15T05:40:07.380328+00:00"
+}

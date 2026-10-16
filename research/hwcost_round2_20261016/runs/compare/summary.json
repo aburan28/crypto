@@ -1,0 +1,123 @@
+{
+  "claims": [
+    {
+      "id": "F1",
+      "statement": "worst fp64bf/fp64 kernel ratio at B ≥ 4096 in the baseline runs (12 cells)",
+      "threshold": 0.85,
+      "value": 1.0498506264856087,
+      "verdict": "FAIL"
+    }
+  ],
+  "classes": [
+    {
+      "arms": 2,
+      "class": "no detected effect",
+      "group": "clock"
+    },
+    {
+      "arms": 3,
+      "class": "candidate slower",
+      "group": "fp64"
+    },
+    {
+      "arms": 5,
+      "class": "no detected effect",
+      "group": "fp64"
+    },
+    {
+      "arms": 1,
+      "class": "candidate slower",
+      "group": "fp64bf"
+    },
+    {
+      "arms": 7,
+      "class": "no detected effect",
+      "group": "fp64bf"
+    },
+    {
+      "arms": 22,
+      "class": "candidate faster",
+      "group": "kernel"
+    },
+    {
+      "arms": 1,
+      "class": "candidate slower",
+      "group": "kernel"
+    },
+    {
+      "arms": 37,
+      "class": "no detected effect",
+      "group": "kernel"
+    },
+    {
+      "arms": 9,
+      "class": "candidate faster",
+      "group": "mem"
+    },
+    {
+      "arms": 1,
+      "class": "candidate slower",
+      "group": "mem"
+    },
+    {
+      "arms": 10,
+      "class": "no detected effect",
+      "group": "mem"
+    },
+    {
+      "arms": 9,
+      "class": "candidate faster",
+      "group": "scaling"
+    },
+    {
+      "arms": 9,
+      "class": "no detected effect",
+      "group": "scaling"
+    },
+    {
+      "arms": 3,
+      "class": "candidate slower",
+      "group": "w1"
+    },
+    {
+      "arms": 5,
+      "class": "no detected effect",
+      "group": "w1"
+    },
+    {
+      "arms": 1,
+      "class": "candidate faster",
+      "group": "w2"
+    },
+    {
+      "arms": 7,
+      "class": "no detected effect",
+      "group": "w2"
+    },
+    {
+      "arms": 1,
+      "class": "candidate faster",
+      "group": "w3"
+    },
+    {
+      "arms": 7,
+      "class": "no detected effect",
+      "group": "w3"
+    },
+    {
+      "arms": 1,
+      "class": "candidate faster",
+      "group": "w4"
+    },
+    {
+      "arms": 3,
+      "class": "candidate slower",
+      "group": "w4"
+    },
+    {
+      "arms": 4,
+      "class": "no detected effect",
+      "group": "w4"
+    }
+  ]
+}

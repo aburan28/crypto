@@ -1,0 +1,272 @@
+{
+  "C": 0.4749660045575625,
+  "D": 0.1804995707175762,
+  "U": 0.49429683764770166,
+  "by_k": {
+    "  1": {
+      "classes": 252,
+      "expected_no_full": 179.09816300306787,
+      "no_full": 187
+    },
+    "  2": {
+      "classes": 256,
+      "expected_no_full": 133.18120073329843,
+      "no_full": 167
+    },
+    "  3": {
+      "classes": 330,
+      "expected_no_full": 116.17564820927434,
+      "no_full": 151
+    },
+    "  4": {
+      "classes": 356,
+      "expected_no_full": 95.49862106537869,
+      "no_full": 158
+    },
+    "  5": {
+      "classes": 330,
+      "expected_no_full": 61.30927738482889,
+      "no_full": 112
+    },
+    "  6": {
+      "classes": 322,
+      "expected_no_full": 43.19600420350889,
+      "no_full": 95
+    },
+    "  7": {
+      "classes": 264,
+      "expected_no_full": 23.928846578440254,
+      "no_full": 61
+    },
+    "  8": {
+      "classes": 305,
+      "expected_no_full": 21.32019548862442,
+      "no_full": 55
+    },
+    "  9": {
+      "classes": 296,
+      "expected_no_full": 15.836426858746504,
+      "no_full": 57
+    },
+    "10+": {
+      "classes": 4720,
+      "expected_no_full": 30.738749219550694,
+      "no_full": 167
+    }
+  },
+  "controls": {
+    "c1_census_rows": 21701,
+    "c1_mismatched_rows": 0,
+    "c1_pass": true,
+    "c2_inconsistent_models": 0,
+    "c2_orbit_hits_nonsquarefree": 0,
+    "c2_pass": true,
+    "c3_pass": true,
+    "c3_unvisited_models": 0,
+    "git_head": "05f3d9203b5c744346c6a7c57e76ece2b2268ea4",
+    "iso_classes": 324562,
+    "l_classes": 21701,
+    "models": 35431220,
+    "octics": 19487171,
+    "p": 11,
+    "seconds_analysis": 904.573889132,
+    "seconds_total": 908.471599344,
+    "threads": 2
+  },
+  "full_iso_classes": 58053,
+  "instrument_valid": true,
+  "iso_classes": 324562,
+  "iso_level_success_by_stratum": {
+    "#S(H)=1": {
+      "full": 29921,
+      "iso_classes": 115599,
+      "rate": 0.2588344189828632
+    },
+    "#S(H)=105": {
+      "full": 3,
+      "iso_classes": 3,
+      "rate": 1.0
+    },
+    "#S(H)=15": {
+      "full": 67,
+      "iso_classes": 93,
+      "rate": 0.7204301075268817
+    },
+    "#S(H)=25": {
+      "full": 612,
+      "iso_classes": 632,
+      "rate": 0.9683544303797469
+    },
+    "#S(H)=3": {
+      "full": 16539,
+      "iso_classes": 29317,
+      "rate": 0.5641436709076645
+    },
+    "#S(H)=5": {
+      "full": 7673,
+      "iso_classes": 10394,
+      "rate": 0.7382143544352511
+    },
+    "#S(H)=7": {
+      "full": 2243,
+      "iso_classes": 2773,
+      "rate": 0.8088712585647313
+    },
+    "#S(H)=9": {
+      "full": 995,
+      "iso_classes": 1199,
+      "rate": 0.8298582151793161
+    }
+  },
+  "l_classes": 21701,
+  "median_tractable_iso_classes_per_tractable_l_class": 14,
+  "models": 35431220,
+  "null_primary": {
+    "frac_le_observed": 0.0,
+    "hi": 0.48707063996102873,
+    "lo": 0.48577683748964895,
+    "median": 0.48641621711022087,
+    "perms": 999,
+    "seed": 20261015
+  },
+  "null_secondary": {
+    "frac_le_observed": 0.0,
+    "hi": 0.4867024265605305,
+    "lo": 0.48545910922626995,
+    "median": 0.4860569294537416,
+    "perms": 999,
+    "seed": 20261015
+  },
+  "p": 11,
+  "post_hoc_by_stratum_and_v2_of_J": {
+    "s105_v2_6": [
+      3,
+      3
+    ],
+    "s15_v2_5": [
+      35,
+      26
+    ],
+    "s15_v2_6": [
+      58,
+      41
+    ],
+    "s1_v2_1": [
+      34936,
+      8361
+    ],
+    "s1_v2_2": [
+      34561,
+      9208
+    ],
+    "s1_v2_3": [
+      21906,
+      5944
+    ],
+    "s1_v2_4": [
+      11898,
+      3185
+    ],
+    "s1_v2_5": [
+      6102,
+      1589
+    ],
+    "s1_v2_6": [
+      6196,
+      1634
+    ],
+    "s25_v2_4": [
+      196,
+      192
+    ],
+    "s25_v2_5": [
+      168,
+      163
+    ],
+    "s25_v2_6": [
+      268,
+      257
+    ],
+    "s3_v2_1": [
+      4146,
+      2391
+    ],
+    "s3_v2_2": [
+      4607,
+      2662
+    ],
+    "s3_v2_3": [
+      8485,
+      4694
+    ],
+    "s3_v2_4": [
+      5532,
+      3094
+    ],
+    "s3_v2_5": [
+      2986,
+      1744
+    ],
+    "s3_v2_6": [
+      3561,
+      1954
+    ],
+    "s5_v2_2": [
+      5016,
+      3785
+    ],
+    "s5_v2_3": [
+      1924,
+      1365
+    ],
+    "s5_v2_4": [
+      1584,
+      1140
+    ],
+    "s5_v2_5": [
+      913,
+      706
+    ],
+    "s5_v2_6": [
+      957,
+      677
+    ],
+    "s7_v2_3": [
+      1288,
+      1027
+    ],
+    "s7_v2_4": [
+      592,
+      499
+    ],
+    "s7_v2_5": [
+      421,
+      339
+    ],
+    "s7_v2_6": [
+      472,
+      378
+    ],
+    "s9_v2_4": [
+      398,
+      334
+    ],
+    "s9_v2_5": [
+      362,
+      290
+    ],
+    "s9_v2_6": [
+      439,
+      371
+    ]
+  },
+  "r": 0.9383970635587351,
+  "tractable_iso_classes": 160010,
+  "tractable_l_classes": 7431,
+  "tractable_l_classes_without_full": {
+    "expected_independent_iso": 720.2831327447188,
+    "observed": 1210
+  },
+  "verdict": "residual deficit beyond granularity",
+  "verdict_secondary": "residual deficit beyond granularity"
+}

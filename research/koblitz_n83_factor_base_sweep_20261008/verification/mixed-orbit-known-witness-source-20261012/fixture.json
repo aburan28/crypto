@@ -1,0 +1,98 @@
+{
+  "archive": {
+    "envelope": {
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v2-size-frontier/a0/objects/82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851.jsonl.gz",
+      "sha256": "aacb62784dee0c9f5e06328dbb85a4b6a1c7243e778328da82900e7284f3a74a",
+      "size_bytes": 10313647
+    },
+    "small": {
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v2-size-frontier/a0/objects/76e1cbe4ea5a9d26e5b24a2d27f9401271dc471846529190a0416d8e09837a92.jsonl.gz",
+      "sha256": "eb342b574e244e1e67e8e78c805f33ee88edcdb4f3a14d4114e6f413beede380",
+      "size_bytes": 5956114
+    }
+  },
+  "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
+  "equation": {
+    "a": "0",
+    "b": "1",
+    "residual_summands": 2,
+    "small_summands": 3,
+    "target": [
+      "6595116073687692399614168",
+      "9473620351503970875544348"
+    ]
+  },
+  "prior_search_audit_sha256": "32420a62bb6ccf8f9df7f03dea9040e518606740968110dc8c0ac47cb50cafd5",
+  "schema": "n83.mixed-orbit-known-witness/v1",
+  "scope": "known_answer_control_only",
+  "subgroup_order": "2417851639230796216685689",
+  "terms": [
+    {
+      "coefficient": "1",
+      "column": 0,
+      "domain": "small",
+      "global_point_index": 0,
+      "negative": false,
+      "phase": 0,
+      "point": [
+        "6322576162995772655031682",
+        "7602502822968073983643739"
+      ]
+    },
+    {
+      "coefficient": "1",
+      "column": 1,
+      "domain": "small",
+      "global_point_index": 166,
+      "negative": false,
+      "phase": 0,
+      "point": [
+        "3190528981678629953846779",
+        "9566461183009654662464871"
+      ]
+    },
+    {
+      "coefficient": "1",
+      "column": 2,
+      "domain": "small",
+      "global_point_index": 332,
+      "negative": false,
+      "phase": 0,
+      "point": [
+        "8674926856113960796960747",
+        "5602555052975088916282841"
+      ]
+    },
+    {
+      "coefficient": "1",
+      "column": 1182,
+      "domain": "residual",
+      "global_point_index": 196212,
+      "negative": false,
+      "phase": 0,
+      "point": [
+        "2356799046069879186945790",
+        "2134737345184672131579291"
+      ]
+    },
+    {
+      "coefficient": "1",
+      "column": 1183,
+      "domain": "residual",
+      "global_point_index": 196378,
+      "negative": false,
+      "phase": 0,
+      "point": [
+        "668067089966811331796550",
+        "8843538469571057712039919"
+      ]
+    }
+  ],
+  "verification": {
+    "nested_point_prefix_equal": true,
+    "nonidentity_target_on_curve_and_in_subgroup": true,
+    "ordered_selected_point_sum_equals_target": true,
+    "selected_columns_distinct": true,
+    "selected_points_on_curve_and_in_subgroup": true
+  }
+}

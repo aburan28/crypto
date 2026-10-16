@@ -1,0 +1,107 @@
+{
+  "agent_priorities": [
+    {
+      "beat": "Retain the n=61/n=71/n=73/n=83 claim-check failures with their missing fields explicit. Obtain a new verified one-target online IC/rho pair on the same point with complete phases and a qualifying CPU-isolation receipt. Higher-n rho projections remain secondary estimates.",
+      "rank": 1,
+      "regime": "koblitz",
+      "stage": "vs_rho"
+    },
+    {
+      "beat": "Advance the representative-plus-Frobenius factor-base construction under its memory gate; report setup separately from one-target online cost.",
+      "rank": 2,
+      "regime": "koblitz",
+      "stage": "factor_base"
+    },
+    {
+      "beat": "Measure the selected n=31 dim-16 m=2 decomposition policy on a frozen single target first; multi-target distribution work is secondary and cannot stand in for one-target online cost.",
+      "rank": 3,
+      "regime": "koblitz",
+      "stage": "decomposition"
+    },
+    {
+      "beat": "sub-2^(2l) oracle at l=8 with FFD logged on a single frozen target.",
+      "rank": 4,
+      "regime": "binary",
+      "stage": "decomposition"
+    },
+    {
+      "beat": "Extend the j=0 known-answer IC ladder to >=20 bits with split stage timers; pair each one-target result on the identical public point with rho.",
+      "rank": 5,
+      "regime": "prime",
+      "stage": "end_to_end_dlp"
+    },
+    {
+      "beat": "Publish single-target query yield and rank distributions first; label any multi-target summaries as secondary.",
+      "rank": 6,
+      "regime": "binary_and_prime",
+      "stage": "relation_yield"
+    }
+  ],
+  "checks": [
+    {
+      "detail": "schema_version=2",
+      "name": "ledger_schema_v2",
+      "ok": true
+    },
+    {
+      "detail": "/home/runner/.cargo/bin/cargo",
+      "name": "cargo",
+      "ok": true
+    },
+    {
+      "detail": "/home/runner/.cargo/bin/rustc",
+      "name": "rustc",
+      "ok": true
+    },
+    {
+      "detail": "absent",
+      "name": "cryptominisat5_optional",
+      "ok": false
+    },
+    {
+      "detail": "/home/runner/work/crypto/crypto/examples/koblitz_rank_fixture.rs",
+      "name": "producer_source_direct",
+      "ok": true
+    },
+    {
+      "detail": "/home/runner/work/crypto/crypto/examples/koblitz_rho_fixture.rs",
+      "name": "producer_source_rho",
+      "ok": true
+    },
+    {
+      "detail": "700f7d311f05d5a5507041d4eb1238801c91c68c",
+      "name": "git_head",
+      "ok": true
+    },
+    {
+      "detail": "0 dirty paths",
+      "name": "git_status_recorded",
+      "ok": true
+    },
+    {
+      "detail": "/home/runner/work/crypto/crypto/examples/koblitz_orbit_dlp_fast.rs",
+      "name": "panel_producer_source_ic",
+      "ok": true
+    },
+    {
+      "detail": "/home/runner/work/crypto/crypto/examples/koblitz_rho_batch_ks_v2_n61.rs",
+      "name": "panel_producer_source_rho",
+      "ok": true
+    }
+  ],
+  "claim_boundary": "preflight only; not a fixed-arm cost, relation, rank, memory, rho, or crossover result",
+  "created_at": "2026-10-15T23:24:33.513458+00:00",
+  "host": {
+    "cpu_count": 4,
+    "machine": "x86_64",
+    "node": "runnervm8k3b6",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "kind": "local_autolab_preflight",
+  "ledger_sha256": "ae92e100d7b4899b5d8f0b6a01a3304664433d9920a15cc4ea350407c224a8d5",
+  "ok": true,
+  "protocol_sha256": "0bef75cff7cd47a747041a933b1781b9f633ddb8bc6d085404992b39c32009dd",
+  "schema_version": "1.0",
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910"
+}
