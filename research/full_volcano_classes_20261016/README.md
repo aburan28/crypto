@@ -6,6 +6,12 @@ the full acceptance criteria. The [PDF report](reports/run-20261016T1700Z/report
 and [source-linked coverage graph](reports/run-20261016T1700Z/coverage.svg) distinguish
 exact preflight counts, completed controls, partial prefixes and historical output.
 
+[Download the Linux executable, sources and verified graph snapshots](https://drive.google.com/file/d/13WS9DBYgY8-ltKTFMUMSQ0PCnZZPfVcR/view?usp=drivesdk)
+or the [PDF report](https://drive.google.com/file/d/17aVS0cU-bz1l1suvFpzbxDyjI_UNt-bY/view?usp=drivesdk).
+The [delivery receipt](delivery.json) records the source commit, bytes and hashes.
+The bundle contains three complete small controls and five partial large-case
+graphs; the complete historical B data remain a separate download.
+
 ## Fixed input models and full-class preflights
 
 The case letters below preserve the earlier frozen filenames. The ICV1 slug
