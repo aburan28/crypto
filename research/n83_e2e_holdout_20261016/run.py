@@ -173,9 +173,11 @@ def main():
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if args.preflight:
-        print(json.dumps({"hashes": fixture(), "selection_pending":
-                          not (SELECTION.exists() and SCREEN_ANALYSIS.exists())},
-                         sort_keys=True))
+        hashes = fixture()
+        pending = not (SELECTION.exists() and SCREEN_ANALYSIS.exists())
+        challengers = None if pending else finalists()[0]
+        print(json.dumps({"hashes": hashes, "selection_pending": pending,
+                          "challenger_ks": challengers}, sort_keys=True))
         return 0
     if not args.binary or not args.rho_binary or not args.output:
         parser.error("--binary, --rho-binary and --output are required")
