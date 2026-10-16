@@ -92,7 +92,7 @@ impl Field for ZnRing {
     /// Inverse of a unit; panics on a non-unit (never reached by the monic-tree code).
     fn inv(&self, a: u64) -> u64 {
         self.try_inv(a)
-            .unwrap_or_else(|| panic!("ZnRing: {a} is not a unit mod {}", self.n))
+            .expect("ZnRing: inverse of a non-unit (the monic-tree code never asks for one)")
     }
     fn from_u64(&self, v: u64) -> u64 {
         v % self.n

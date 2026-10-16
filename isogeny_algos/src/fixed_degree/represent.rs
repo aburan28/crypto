@@ -221,7 +221,7 @@ pub enum Repr {
         a: u32,
         basis: [Pt4; 2],
         images: [Pt4; 2],
-        certificate: Certificate,
+        kani: KaniCheck,
     },
 }
 
@@ -229,16 +229,16 @@ pub enum Repr {
 /// of X x E_2 with kernel {(g(S), chi(S)) : S in E_1[2^n]} splits and the twisted control
 /// (chi S_2 -> chi S_2 + 2 chi S_1) does not; None if a chain step could not be evaluated.
 #[derive(Clone, Debug)]
-pub enum Certificate {
+pub enum KaniCheck {
     /// no certificate (d >= 2^a, or the auxiliary degree could not be factored)
     None,
     /// dimension 2 with an auxiliary isogeny g : E_1 -> X of degree c = 2^n - d
     Kani2 { n: u32, c: Int, ok: Option<bool> },
 }
 
-impl Certificate {
-    pub fn certified(&self) -> bool {
-        matches!(self, Certificate::Kani2 { ok: Some(true), .. })
+impl KaniCheck {
+    pub fn passed(&self) -> bool {
+        matches!(self, KaniCheck::Kani2 { ok: Some(true), .. })
     }
 }
 
@@ -620,7 +620,7 @@ pub fn ideal_to_isogeny(
         // isogeny of a random left O_R(I_1)-ideal J_aux of norm c, evaluated the same way
         // (g(S_i) = phi_{K_aux}(R_i), K_aux = I_1 J_aux xi); gcd(c, d) = gcd(2^a, d) = 1.
         let two_a = Int::from(1i64 << a);
-        let mut cert = Certificate::None;
+        let mut kani_status = KaniCheck::None;
         if d < two_a {
             let c = &two_a - &d;
             if let Some(fac) = super::factor::factor_bounded(&c, 1 << 22) {
@@ -638,7 +638,7 @@ pub fn ideal_to_isogeny(
                     trace("aux images done");
                     let ok = kani_check(f, &xcur, &cod, &chi, &[gimg[0], gimg[1]], a);
                     trace(&format!("Kani check {ok:?}"));
-                    cert = Certificate::Kani2 { n: a, c, ok };
+                    kani_status = KaniCheck::Kani2 { n: a, c, ok };
                 }
             }
         }
@@ -657,7 +657,7 @@ pub fn ideal_to_isogeny(
                 a,
                 basis: s,
                 images: chi,
-                certificate: cert,
+                kani: kani_status,
             },
             j_ok: false,
             pairing_ok,

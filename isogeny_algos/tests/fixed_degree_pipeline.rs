@@ -171,8 +171,8 @@ fn pipeline_cornacchia_prime_degree_kani() {
         assert!(rep.j_ok);
         assert_eq!(jinv(&f, &rep.codomain), f.embed(j2));
         match &rep.repr {
-            Repr::Torsion { certificate, .. } => {
-                assert!(certificate.certified(), "Kani certificate: {certificate:?}")
+            Repr::Torsion { kani, .. } => {
+                assert!(kani.passed(), "Kani certificate: {kani:?}")
             }
             _ => panic!("expected the torsion representation"),
         }
@@ -312,7 +312,7 @@ fn pipeline_coppersmith_bivariate() {
     assert!(sol.isogeny.j_ok);
     assert_eq!(sol.isogeny.pairing_ok, Some(true));
     match &sol.isogeny.repr {
-        Repr::Torsion { certificate, .. } => assert!(certificate.certified(), "{certificate:?}"),
+        Repr::Torsion { kani, .. } => assert!(kani.passed(), "{kani:?}"),
         _ => panic!("expected the torsion representation"),
     }
     eprintln!(
@@ -350,7 +350,7 @@ fn hybrid_three_power_degree() {
     assert!(rep.j_ok);
     assert_eq!(rep.pairing_ok, Some(true));
     match &rep.repr {
-        Repr::Torsion { certificate, .. } => assert!(certificate.certified(), "{certificate:?}"),
+        Repr::Torsion { kani, .. } => assert!(kani.passed(), "{kani:?}"),
         _ => panic!("expected the torsion representation"),
     }
 }

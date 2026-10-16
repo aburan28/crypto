@@ -99,19 +99,19 @@ fn pipeline_records() {
         let total = ms(t);
         match res {
             Ok(sol) => {
-                let (repr, cert) = match &sol.isogeny.repr {
+                let (repr, kani_label) = match &sol.isogeny.repr {
                     Repr::Kernel { .. } => ("kernel".to_string(), "n/a".to_string()),
-                    Repr::Torsion { certificate, .. } => (
+                    Repr::Torsion { kani, .. } => (
                         "torsion".to_string(),
-                        if certificate.certified() {
+                        if kani.passed() {
                             "kani2_certified".to_string()
                         } else {
-                            format!("{certificate:?}").replace('"', "'")
+                            format!("{kani:?}").replace('"', "'")
                         },
                     ),
                 };
                 println!(
-                    "{{\"kind\":\"pipeline\",\"case\":{idx},\"p\":{P},\"solver\":\"{solver:?}\",\"planted\":{planted},\"d\":{d},\"log_p_d\":{:.4},\"ok\":true,\"end_ring_ms\":{:.1},\"connecting_ms\":{:.2},\"solve_ms\":{:.2},\"isogeny_ms\":{:.1},\"total_ms\":{:.1},\"path1\":{},\"path2\":{},\"graph_vertices\":{},\"deuring_evals\":{},\"n_conn\":{},\"x\":\"{:?}\",\"repr\":\"{repr}\",\"certificate\":\"{cert}\",\"pairing_ok\":{},\"j_ok\":{}}}",
+                    "{{\"kind\":\"pipeline\",\"case\":{idx},\"p\":{P},\"solver\":\"{solver:?}\",\"planted\":{planted},\"d\":{d},\"log_p_d\":{:.4},\"ok\":true,\"end_ring_ms\":{:.1},\"connecting_ms\":{:.2},\"solve_ms\":{:.2},\"isogeny_ms\":{:.1},\"total_ms\":{:.1},\"path1\":{},\"path2\":{},\"graph_vertices\":{},\"deuring_evals\":{},\"n_conn\":{},\"x\":\"{:?}\",\"repr\":\"{repr}\",\"certificate\":\"{kani_label}\",\"pairing_ok\":{},\"j_ok\":{}}}",
                     (d as f64).ln() / lp,
                     sol.times.end_ring_ms,
                     sol.times.connecting_ms,
