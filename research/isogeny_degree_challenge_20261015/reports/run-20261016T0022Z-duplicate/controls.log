@@ -1,0 +1,64 @@
+
+running 1 test
+
+thread 'native_challenge_replays_maps_rejects_forgery_and_ranks_curves_separately' (3162056) panicked at tools/isogeny-cli/tests/challenge_cli.rs:35:5:
+assertion `left == right` failed: stderr: verification: PASS (35 ms)
+
+stdout: {
+  "construction_accounting": "external constructor receipts retained; costs are not independently attested by this judge",
+  "degree_coverage": "COMPLETE",
+  "judge_binary_sha256": "b8ce9c6f2adca6bec7c1623ee3fdd18c0756fc197f86a178feaf2c4e56bfcf7e",
+  "map_sha256": "014125aab029259e8585a0da57cbc589c01886b48ba39d3b765c5b09770a1cfd",
+  "prime_degree": "13",
+  "representation": "expanded rational map",
+  "schema": "isogeny-challenge-entry/v1",
+  "score": "13",
+  "season": "19f4503758a3dc2d9764f2283b4c92c7a35651e75ee7157f546b2563fcbf5c30",
+  "snapshot_search_sha256": "b34fe9058df2eab1dd5c4af7d40003b1ebab0d62cd62b830130d2e7cbae5ba44",
+  "source_icv1": "icv1-fp192-t31607402316713927207482677199-52e4af59",
+  "source_submission": "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/duplicate-before-fix/bad-duplicate-kernel",
+  "status": "ACCEPTED",
+  "tool": {
+    "git_commit": "ff71f577203179760211cdc1dc3da7a33fc77ec1",
+    "git_dirty": "false",
+    "name": "isogeny",
+    "standards_sha256": "ff703257ab3f426ec78532a60fe2daefa70f525304b2c24258d02f58fe1dfa6d",
+    "version": "0.1.0"
+  },
+  "verification": {
+    "command": [
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/installed-ff71f5772/isogeny",
+      "challenge",
+      "__judge",
+      "--input",
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/duplicate-before-fix/judged-duplicate-kernel/artifact",
+      "--rss-ready",
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/duplicate-before-fix/judged-duplicate-kernel/resources-ready"
+    ],
+    "elapsed_ms_operational_only": 35,
+    "exit_code": 0,
+    "map_count": null,
+    "memory_monitor_grace_ms": 100,
+    "memory_sampling_interval_ms": 25,
+    "resident_memory_limit_bytes": "8589934592",
+    "sampled_peak_resident_bytes": "32768",
+    "status": "PASS",
+    "stderr_sha256": "9f78f671f2dba353a94e16d9bafb8ac60c2000819ce0f492aed378bde34c87ea",
+    "stdout": "verification.json",
+    "stdout_sha256": "860d9db899db0ce858b34c8bec2667a453ebf514d0dd7247c273d17106c7aad8",
+    "unavailable_memory_samples": 0
+  }
+}
+
+  left: Some(0)
+ right: Some(1)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native_challenge_replays_maps_rejects_forgery_and_ranks_curves_separately ... FAILED
+
+failures:
+
+failures:
+    native_challenge_replays_maps_rejects_forgery_and_ranks_curves_separately
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.44s
+

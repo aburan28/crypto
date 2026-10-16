@@ -1,0 +1,18 @@
+{
+  "args": [
+    "challenge",
+    "run",
+    "--curve",
+    "p192",
+    "--ell",
+    "13",
+    "--timeout",
+    "60",
+    "--out",
+    "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/trace-controls-retry1/public-p192-13"
+  ],
+  "exit_code": 0,
+  "stderr": "ell-13: PASS (78 ms)\nverification: PASS (104 ms)\n",
+  "stdout": "{\n  \"construction_accounting\": \"external constructor receipts retained; costs are not independently attested by this judge\",\n  \"degree_coverage\": \"COMPLETE\",\n  \"judge_binary_sha256\": \"f5bba10e10e1f118aec9de9398681ded83331b2dcc13fdc26c4863e51aab8eef\",\n  \"map_sha256\": \"7a1809d56cb774f681e06ecf1dad9e04d97abe70a3eb2738bff9d54affc861d1\",\n  \"prime_degree\": \"13\",\n  \"representation\": \"expanded rational map\",\n  \"schema\": \"isogeny-challenge-entry/v1\",\n  \"score\": \"13\",\n  \"season\": \"ff4f7c405146fbd26faa63cb6fb9d1513eada31d15f3998368005fd5f05db3e0\",\n  \"snapshot_search_sha256\": \"3cd6ea8c37f99a60c42eeff94837748949850fa982468efa7ac5e499eb9f5c4f\",\n  \"source_icv1\": \"icv1-fp192-t31607402316713927207482677199-52e4af59\",\n  \"source_submission\": \"/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/trace-controls-retry1/public-p192-13/construction\",\n  \"status\": \"ACCEPTED\",\n  \"tool\": {\n    \"git_commit\": \"300e867ca999a7506c2a52bf192df424b758010f\",\n    \"git_dirty\": \"true\",\n    \"name\": \"isogeny\",\n    \"standards_sha256\": \"22b2ffef99720f2b2c7396a267412d2241a868e038a835c4fb1fd12209b102bf\",\n    \"version\": \"0.1.0\"\n  },\n  \"verification\": {\n    \"command\": [\n      \"/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/compact-implementation/release/isogeny\",\n      \"challenge\",\n      \"__judge\",\n      \"--input\",\n      \"/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/trace-controls-retry1/public-p192-13/judgement/artifact\",\n      \"--rss-ready\",\n      \"/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/trace-controls-retry1/public-p192-13/judgement/resources-ready\"\n    ],\n    \"elapsed_ms_operational_only\": 104,\n    \"exit_code\": 0,\n    \"map_count\": null,\n    \"memory_monitor_grace_ms\": 100,\n    \"memory_sampling_interval_ms\": 25,\n    \"resident_memory_limit_bytes\": \"8589934592\",\n    \"sampled_peak_resident_bytes\": \"32423936\",\n    \"status\": \"PASS\",\n    \"stderr_sha256\": \"9f78f671f2dba353a94e16d9bafb8ac60c2000819ce0f492aed378bde34c87ea\",\n    \"stdout\": \"verification.json\",\n    \"stdout_sha256\": \"a74e65094cfaf563de1595cb1292d98435ad476f47aa5307315d9f6a50eeb7f8\",\n    \"unavailable_memory_samples\": 0\n  }\n}\n",
+  "trace": null
+}
