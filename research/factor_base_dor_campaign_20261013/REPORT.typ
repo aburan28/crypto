@@ -56,6 +56,12 @@ Seven more symmetric-$S_4$ cells (n=21 l=2, n=19 l=2, n=23 l=2/l=3, n=29 l=3/l=4
 
 #figure(image("figures/sym4_delta.svg", width: 88%), caption: [Figure 4. Symmetric-$S_4$ cells through rounds 2-4: $D^*$ by structure against the $l + 1$ diagonal. At n = 37, l = 3 the geometric base refutes at $D^* = 3$ - below the diagonal: larger $delta$ lowers the degree further.])
 
+== Correction (2026-10-15): F12/F13 withdrawn - the measured yield carried a seed-overlap artefact
+
+`F12` (orbit-amplified yield) and `F13` (constant-in-n point-decomposable fraction) are *withdrawn*: the engine drew the random targets and the random/geometric structure elements from the *same* `rng_for(seed)` stream, so the first structure draws coincided with the first targets (verified directly at n = 29, seed 1: target[0] = 0x44cb63f = $theta$ of the geometric base, target[1] = g−1). A target that is itself a base element is trivially decomposable, which produced the constant "1 hit per 16-256 targets" the two findings rested on. With an independent target RNG the same cells give 0/256 and 0/4096 decomposable targets.
+
+What replaces them is an #emph[exact] yield measurement, now built into the engine (`reachable_set_size`): enumerating the full reachable target set of the label. At (n = 15, l = 2) the reachable set has 16 elements - exact yield $2^(-11)$, where the artefact had measured $2^(-4)$. The yield therefore decays with n as the naive counting always said; the round-4 claim that it does not was the artefact. `F15` is reclassified accordingly: the per-system degree law (F11, $D^* = l + 1$) is unaffected - `D*` is measured on #emph[non-decomposable] targets and the overlap targets were exactly the decomposable ones - but the derived "per-relation cost independent of n" needs the relation count, which scales with $2^n \/ norm(S)$, and so the harvest cost is #emph[not] independent of n. The corrected fractions, reachable-set sizes and re-derived work-per-relation optima from the full rerun with the fixed engine land in the follow-up commit; the preserved seed-overlap era data is in `raw_v1_seedoverlap/`.
+
 == Round 4 (2026-10-14): yield is governed by the e-space, not the field
 
 High-precision yield cells (256 targets at l = 2, 128 at l = 3) over n = 23..41, including n = 37 ($"ord"_37(2) = 36 = n - 1$, 131's full-length order) and the m=2 grid at n = 29. All cells completed, zero failures.

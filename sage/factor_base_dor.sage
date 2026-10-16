@@ -56,6 +56,17 @@ def rng_for(seed):
     return random.Random(int(seed))
 
 
+def struct_rng_for(seed, tag):
+    """RNG for factor-base structure draws (random generators, geometric
+    theta/g, normal elements). Must NOT reuse the target stream: with
+    rng_for(seed) on both sides the first structure draws coincide with the
+    first targets, so a target can land inside the base it is tested
+    against and inflate the decomposable fraction (measured 2026-10-14:
+    target[0] == theta at seed 1). A distinct string tag breaks the
+    overlap while staying deterministic per cell."""
+    return random.Random("%s|%s" % (int(seed), tag))
+
+
 # ── GF(2^n) as F_2-coordinate vectors over the polynomial basis ────────
 
 class BinaryField:
@@ -393,7 +404,7 @@ def structure_basis(field, name, dim, seed):
         distinct = sorted(set(candidates))
         return list(rng_for(seed).choice(distinct)), None
     if name == "random":
-        rng = rng_for(seed)
+        rng = struct_rng_for(seed, ("bases", field.n, name, dim))
         for _ in range(256):
             gens = [field.from_int(rng.randrange(1, 2**n)) for _ in range(dim)]
             basis = subspace_from_generators(field, gens)
@@ -437,6 +448,52 @@ def span_members(basis_ints):
                 v ^^= basis_ints[i]
         members.append(v)
     return members
+
+
+def reachable_targets_m2(field, basis1, basis2, b_int):
+    """Exact reachable set of the m=2 label: every t with a decomposition
+    over span(basis1) x span(basis2). For a target t, decomposability is
+    the condition s = (X1+X2)^2 t^2 + X1 X2 t + (X1 X2)^2 + b == 0 for some
+    pair; solving the same equation for t per pair enumerates the set, so
+    the yield is measured exactly where sampling cannot see it."""
+    K = field.K
+    T = PolynomialRing(K, "T").gen()
+    members1 = [field.from_int(v) for v in span_members(basis1)]
+    members2 = [field.from_int(v) for v in span_members(basis2)]
+    b = field.from_int(b_int)
+    S = set()
+    for X1 in members1:
+        for X2 in members2:
+            c2 = (X1 + X2)**2
+            c1 = X1 * X2
+            c0 = (X1 * X2)**2 + b
+            for r, _ in (c2 * T**2 + c1 * T + c0).roots():
+                S.add(field.to_int(r))
+    return S
+
+
+def reachable_targets_m3(field, basis1, basis2, basis3, b_int):
+    """Exact reachable set of the chained m=3 label (label_targets_m3):
+    every target t with a 3-decomposition over the three spans."""
+    K = field.K
+    T = PolynomialRing(K, "T").gen()
+    m1 = [field.from_int(v) for v in span_members(basis1)]
+    m2 = [field.from_int(v) for v in span_members(basis2)]
+    m3 = [field.from_int(v) for v in span_members(basis3)]
+    b = field.from_int(b_int)
+    roots_u = []
+    for x1 in m1:
+        for x2 in m2:
+            poly = (x1 + x2)**2 * T**2 + x1 * x2 * T + (x1 * x2)**2 + b
+            roots_u.extend(r for r, _ in poly.roots())
+    roots_u = list(set(roots_u))
+    S = set()
+    for u in roots_u:
+        for x3 in m3:
+            p = (u + x3)**2 * T**2 + u * x3 * T + (u * x3)**2 + b
+            for r, _ in p.roots():
+                S.add(field.to_int(r))
+    return S
 
 
 def label_targets(field, basis1, basis2, targets_int, b_int):
@@ -554,7 +611,7 @@ def verify_frobenius_windows(n, dim, m, seed, tries=400):
     which needs each base to be Frobenius-invariant. Uses a random normal
     element so it runs at n = 131."""
     field = BinaryField(n)
-    rng = rng_for(seed)
+    rng = struct_rng_for(seed, ("normal", n))
     conj = None
     for _ in range(tries):
         theta = field.from_int(rng.randrange(1, 2**n))
@@ -816,7 +873,7 @@ def symmetric_spaces(field, name, dim, seed):
     subfield:  V = F_{2^dim}, closed under products, so W_k = V.
     random:    V random, W2 = span(V.V), W3 = span(V.V.V)."""
     K, z, n = field.K, field.z, field.n
-    rng = rng_for(seed)
+    rng = struct_rng_for(seed, ("sym", field.n, name, dim))
     if name in ("geometric", "standard"):
         if name == "standard":
             theta, g = K(1), z
@@ -966,6 +1023,8 @@ def measure_symmetric_s4(field, name, dim, dmax, targets_int, seed, dstar_sample
             field, *spaces, targets_int[0], b_int)[0]), default=0),
         "point_decomposable_fraction": sum(1 for t in targets_int if not point_unsat[t]) / len(targets_int),
         "decomposable_fraction": sum(1 for t in targets_int if not point_unsat[t]) / len(targets_int),
+        "reachable_set_size": len(reachable_targets_m3(field, v, v, v, b_int)),
+        "exact_yield": len(reachable_targets_m3(field, v, v, v, b_int)) / float(2**field.n),
         "boolean_unsat_fraction": bool_unsat_count / len(targets_int),
         "spurious_satisfiable": spurious,
         "unsat_targets": len(results),
@@ -1090,6 +1149,7 @@ def measure_structure(field, name, dim, dmax, targets_int, seed):
         "decomposable_fraction": decomposable / len(targets_int),
         "unsat_targets": len(results),
         "censored_above_dmax": censored,
+        "reachable_set_size": len(reachable_targets_m2(field, basis1, basis2, b_int)),
     }
     if solved:
         solved_sorted = sorted(solved)

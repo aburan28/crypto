@@ -23,6 +23,7 @@
       "decomposable_fraction": 0.041666666666666664,
       "unsat_targets": 23,
       "censored_above_dmax": 0,
+      "reachable_set_size": 140,
       "d_star_min": 2,
       "d_star_max": 3,
       "d_star_mean": 2.652173913043478,
@@ -407,19 +408,20 @@
       "structure": "random",
       "dim": 4,
       "basis": [
-        "0x48e",
-        "0x114",
-        "0x6c8",
-        "0x1b0"
+        "0x201",
+        "0x644",
+        "0x288",
+        "0x110"
       ],
       "basis2": null,
-      "factor_base_points": 12,
+      "factor_base_points": 14,
       "decomposable_fraction": 0.041666666666666664,
       "unsat_targets": 23,
       "censored_above_dmax": 0,
+      "reachable_set_size": 123,
       "d_star_min": 2,
       "d_star_max": 3,
-      "d_star_mean": 2.8260869565217392,
+      "d_star_mean": 2.9565217391304346,
       "targets": [
         {
           "target": "0x114",
@@ -477,14 +479,19 @@
         },
         {
           "target": "0x66c",
-          "d_star": 2,
+          "d_star": 3,
           "rank_profile": {
-            "2": 11
+            "2": 11,
+            "3": 76
           },
           "macaulay_shape": {
             "2": [
               11,
               37
+            ],
+            "3": [
+              99,
+              93
             ]
           }
         },
@@ -507,15 +514,38 @@
           }
         },
         {
-          "target": "0x20b",
-          "d_star": 2,
+          "target": "0x82",
+          "d_star": 3,
           "rank_profile": {
-            "2": 11
+            "2": 11,
+            "3": 77
           },
           "macaulay_shape": {
             "2": [
               11,
               37
+            ],
+            "3": [
+              99,
+              93
+            ]
+          }
+        },
+        {
+          "target": "0x20b",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 11,
+            "3": 77
+          },
+          "macaulay_shape": {
+            "2": [
+              11,
+              37
+            ],
+            "3": [
+              99,
+              93
             ]
           }
         },
@@ -524,7 +554,7 @@
           "d_star": 3,
           "rank_profile": {
             "2": 11,
-            "3": 76
+            "3": 77
           },
           "macaulay_shape": {
             "2": [
@@ -614,7 +644,7 @@
           "d_star": 3,
           "rank_profile": {
             "2": 11,
-            "3": 76
+            "3": 77
           },
           "macaulay_shape": {
             "2": [
@@ -668,7 +698,7 @@
           "d_star": 3,
           "rank_profile": {
             "2": 11,
-            "3": 76
+            "3": 77
           },
           "macaulay_shape": {
             "2": [
@@ -700,28 +730,20 @@
           }
         },
         {
-          "target": "0x3e8",
-          "d_star": 2,
-          "rank_profile": {
-            "2": 11
-          },
-          "macaulay_shape": {
-            "2": [
-              11,
-              37
-            ]
-          }
-        },
-        {
           "target": "0x3b",
-          "d_star": 2,
+          "d_star": 3,
           "rank_profile": {
-            "2": 11
+            "2": 11,
+            "3": 77
           },
           "macaulay_shape": {
             "2": [
               11,
               37
+            ],
+            "3": [
+              99,
+              93
             ]
           }
         },
@@ -729,7 +751,7 @@
           "target": "0x726",
           "d_star": 3,
           "rank_profile": {
-            "2": 10,
+            "2": 11,
             "3": 77
           },
           "macaulay_shape": {
@@ -781,6 +803,19 @@
         },
         {
           "target": "0x377",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 11
+          },
+          "macaulay_shape": {
+            "2": [
+              11,
+              37
+            ]
+          }
+        },
+        {
+          "target": "0x4dd",
           "d_star": 3,
           "rank_profile": {
             "2": 11,
@@ -793,24 +828,6 @@
             ],
             "3": [
               99,
-              93
-            ]
-          }
-        },
-        {
-          "target": "0x4dd",
-          "d_star": 3,
-          "rank_profile": {
-            "2": 18,
-            "3": 86
-          },
-          "macaulay_shape": {
-            "2": [
-              19,
-              37
-            ],
-            "3": [
-              126,
               93
             ]
           }
@@ -831,6 +848,7 @@
       "decomposable_fraction": 0.0,
       "unsat_targets": 24,
       "censored_above_dmax": 0,
+      "reachable_set_size": 128,
       "d_star_min": 2,
       "d_star_max": 3,
       "d_star_mean": 2.9166666666666665,
@@ -1278,6 +1296,7 @@
       "decomposable_fraction": 0.16666666666666666,
       "unsat_targets": 20,
       "censored_above_dmax": 0,
+      "reachable_set_size": 261,
       "d_star_min": 3,
       "d_star_max": 3,
       "d_star_mean": 3.0,
@@ -1655,20 +1674,20 @@
       "unsat_targets": 23
     },
     {
-      "structure": "random",
-      "d_star_mean": 2.8260869565217392,
-      "d_star_min": 2,
-      "d_star_max": 3,
-      "decomposable_fraction": 0.041666666666666664,
-      "unsat_targets": 23
-    },
-    {
       "structure": "nb_window",
       "d_star_mean": 2.9166666666666665,
       "d_star_min": 2,
       "d_star_max": 3,
       "decomposable_fraction": 0.0,
       "unsat_targets": 24
+    },
+    {
+      "structure": "random",
+      "d_star_mean": 2.9565217391304346,
+      "d_star_min": 2,
+      "d_star_max": 3,
+      "decomposable_fraction": 0.041666666666666664,
+      "unsat_targets": 23
     },
     {
       "structure": "nb_break",

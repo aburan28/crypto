@@ -21,6 +21,7 @@
       "decomposable_fraction": 0.0,
       "unsat_targets": 24,
       "censored_above_dmax": 0,
+      "reachable_set_size": 12,
       "d_star_min": 2,
       "d_star_max": 2,
       "d_star_mean": 2.0,
@@ -343,20 +344,34 @@
       "structure": "random",
       "dim": 2,
       "basis": [
-        "0x48e",
-        "0x114"
+        "0x2cd",
+        "0x452"
       ],
       "basis2": null,
       "factor_base_points": 4,
       "decomposable_fraction": 0.0,
       "unsat_targets": 24,
       "censored_above_dmax": 0,
+      "reachable_set_size": 8,
       "d_star_min": 2,
       "d_star_max": 2,
       "d_star_mean": 2.0,
       "targets": [
         {
           "target": "0x114",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 10
+          },
+          "macaulay_shape": {
+            "2": [
+              19,
+              11
+            ]
+          }
+        },
+        {
+          "target": "0x48e",
           "d_star": 2,
           "rank_profile": {
             "2": 6
@@ -369,7 +384,7 @@
           }
         },
         {
-          "target": "0x48e",
+          "target": "0x6c8",
           "d_star": 2,
           "rank_profile": {
             "2": 9
@@ -377,19 +392,6 @@
           "macaulay_shape": {
             "2": [
               15,
-              11
-            ]
-          }
-        },
-        {
-          "target": "0x6c8",
-          "d_star": 2,
-          "rank_profile": {
-            "2": 6
-          },
-          "macaulay_shape": {
-            "2": [
-              10,
               11
             ]
           }
@@ -415,7 +417,7 @@
           },
           "macaulay_shape": {
             "2": [
-              10,
+              11,
               11
             ]
           }
@@ -424,11 +426,11 @@
           "target": "0x82",
           "d_star": 2,
           "rank_profile": {
-            "2": 6
+            "2": 9
           },
           "macaulay_shape": {
             "2": [
-              11,
+              15,
               11
             ]
           }
@@ -441,7 +443,7 @@
           },
           "macaulay_shape": {
             "2": [
-              19,
+              18,
               11
             ]
           }
@@ -450,11 +452,11 @@
           "target": "0xf2",
           "d_star": 2,
           "rank_profile": {
-            "2": 9
+            "2": 6
           },
           "macaulay_shape": {
             "2": [
-              15,
+              11,
               11
             ]
           }
@@ -463,11 +465,11 @@
           "target": "0x3f7",
           "d_star": 2,
           "rank_profile": {
-            "2": 9
+            "2": 6
           },
           "macaulay_shape": {
             "2": [
-              15,
+              11,
               11
             ]
           }
@@ -480,7 +482,7 @@
           },
           "macaulay_shape": {
             "2": [
-              15,
+              14,
               11
             ]
           }
@@ -489,11 +491,11 @@
           "target": "0x399",
           "d_star": 2,
           "rank_profile": {
-            "2": 6
+            "2": 9
           },
           "macaulay_shape": {
             "2": [
-              11,
+              19,
               11
             ]
           }
@@ -528,11 +530,11 @@
           "target": "0x30a",
           "d_star": 2,
           "rank_profile": {
-            "2": 9
+            "2": 10
           },
           "macaulay_shape": {
             "2": [
-              15,
+              19,
               11
             ]
           }
@@ -541,11 +543,11 @@
           "target": "0x650",
           "d_star": 2,
           "rank_profile": {
-            "2": 11
+            "2": 8
           },
           "macaulay_shape": {
             "2": [
-              21,
+              14,
               11
             ]
           }
@@ -554,7 +556,7 @@
           "target": "0x1ae",
           "d_star": 2,
           "rank_profile": {
-            "2": 10
+            "2": 9
           },
           "macaulay_shape": {
             "2": [
@@ -567,11 +569,11 @@
           "target": "0xc1",
           "d_star": 2,
           "rank_profile": {
-            "2": 11
+            "2": 9
           },
           "macaulay_shape": {
             "2": [
-              25,
+              15,
               11
             ]
           }
@@ -584,7 +586,7 @@
           },
           "macaulay_shape": {
             "2": [
-              11,
+              10,
               11
             ]
           }
@@ -593,11 +595,11 @@
           "target": "0x3b",
           "d_star": 2,
           "rank_profile": {
-            "2": 9
+            "2": 6
           },
           "macaulay_shape": {
             "2": [
-              15,
+              11,
               11
             ]
           }
@@ -606,11 +608,11 @@
           "target": "0x726",
           "d_star": 2,
           "rank_profile": {
-            "2": 9
+            "2": 11
           },
           "macaulay_shape": {
             "2": [
-              21,
+              20,
               11
             ]
           }
@@ -632,7 +634,7 @@
           "target": "0x31f",
           "d_star": 2,
           "rank_profile": {
-            "2": 8
+            "2": 9
           },
           "macaulay_shape": {
             "2": [
@@ -645,11 +647,11 @@
           "target": "0x377",
           "d_star": 2,
           "rank_profile": {
-            "2": 9
+            "2": 10
           },
           "macaulay_shape": {
             "2": [
-              15,
+              19,
               11
             ]
           }
@@ -658,11 +660,11 @@
           "target": "0x4dd",
           "d_star": 2,
           "rank_profile": {
-            "2": 9
+            "2": 6
           },
           "macaulay_shape": {
             "2": [
-              19,
+              11,
               11
             ]
           }
@@ -681,6 +683,7 @@
       "decomposable_fraction": 0.0,
       "unsat_targets": 24,
       "censored_above_dmax": 0,
+      "reachable_set_size": 12,
       "d_star_min": 2,
       "d_star_max": 2,
       "d_star_mean": 2.0,
@@ -1014,6 +1017,7 @@
       "decomposable_fraction": 0.0,
       "unsat_targets": 24,
       "censored_above_dmax": 0,
+      "reachable_set_size": 23,
       "d_star_min": 2,
       "d_star_max": 3,
       "d_star_mean": 2.0833333333333335,

@@ -1,0 +1,270 @@
+{
+  "schema": "factor-base-dor-v1",
+  "curve": "Koblitz y^2+xy=x^3+1 over F_2^37",
+  "field_degree": 37,
+  "dim": 1,
+  "summands": 3,
+  "encoding": "symmetric_s4",
+  "dmax": 4,
+  "targets": 512,
+  "observable": "D* = solving/refutation degree on non-decomposable targets",
+  "results": [
+    {
+      "structure": "geometric",
+      "dim": 1,
+      "summands": 3,
+      "encoding": "symmetric_s4",
+      "space_dims": [
+        1,
+        1,
+        1
+      ],
+      "nvars": 3,
+      "chain_nvars_for_comparison": 40,
+      "equation_degree": 2,
+      "point_decomposable_fraction": 0.001953125,
+      "decomposable_fraction": 0.001953125,
+      "boolean_unsat_fraction": 0.998046875,
+      "spurious_satisfiable": 0,
+      "unsat_targets": 4,
+      "censored_above_dmax": 0,
+      "d_star_min": 2,
+      "d_star_max": 2,
+      "d_star_mean": 2.0,
+      "targets": [
+        {
+          "target": "0x19d8f16ae0",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 7
+          },
+          "macaulay_shape": {
+            "2": [
+              62,
+              7
+            ]
+          }
+        },
+        {
+          "target": "0x2c386bbc5",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 7
+          },
+          "macaulay_shape": {
+            "2": [
+              54,
+              7
+            ]
+          }
+        },
+        {
+          "target": "0x3414c343d",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 7
+          },
+          "macaulay_shape": {
+            "2": [
+              51,
+              7
+            ]
+          }
+        },
+        {
+          "target": "0x187ed4d57c",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 7
+          },
+          "macaulay_shape": {
+            "2": [
+              62,
+              7
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "structure": "standard",
+      "dim": 1,
+      "summands": 3,
+      "encoding": "symmetric_s4",
+      "space_dims": [
+        1,
+        1,
+        1
+      ],
+      "nvars": 3,
+      "chain_nvars_for_comparison": 40,
+      "equation_degree": 2,
+      "point_decomposable_fraction": 0.0,
+      "decomposable_fraction": 0.0,
+      "boolean_unsat_fraction": 1.0,
+      "spurious_satisfiable": 0,
+      "unsat_targets": 4,
+      "censored_above_dmax": 0,
+      "d_star_min": 2,
+      "d_star_max": 2,
+      "d_star_mean": 2.0,
+      "targets": [
+        {
+          "target": "0x122265b1f6",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 7
+          },
+          "macaulay_shape": {
+            "2": [
+              55,
+              7
+            ]
+          }
+        },
+        {
+          "target": "0x19d8f16ae0",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 7
+          },
+          "macaulay_shape": {
+            "2": [
+              58,
+              7
+            ]
+          }
+        },
+        {
+          "target": "0x2c386bbc5",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 7
+          },
+          "macaulay_shape": {
+            "2": [
+              61,
+              7
+            ]
+          }
+        },
+        {
+          "target": "0x3414c343d",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 7
+          },
+          "macaulay_shape": {
+            "2": [
+              58,
+              7
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "structure": "random",
+      "dim": 1,
+      "summands": 3,
+      "encoding": "symmetric_s4",
+      "space_dims": [
+        1,
+        1,
+        1
+      ],
+      "nvars": 3,
+      "chain_nvars_for_comparison": 40,
+      "equation_degree": 2,
+      "point_decomposable_fraction": 0.001953125,
+      "decomposable_fraction": 0.001953125,
+      "boolean_unsat_fraction": 0.998046875,
+      "spurious_satisfiable": 0,
+      "unsat_targets": 4,
+      "censored_above_dmax": 0,
+      "d_star_min": 2,
+      "d_star_max": 2,
+      "d_star_mean": 2.0,
+      "targets": [
+        {
+          "target": "0x19d8f16ae0",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 7
+          },
+          "macaulay_shape": {
+            "2": [
+              62,
+              7
+            ]
+          }
+        },
+        {
+          "target": "0x2c386bbc5",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 7
+          },
+          "macaulay_shape": {
+            "2": [
+              54,
+              7
+            ]
+          }
+        },
+        {
+          "target": "0x3414c343d",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 7
+          },
+          "macaulay_shape": {
+            "2": [
+              51,
+              7
+            ]
+          }
+        },
+        {
+          "target": "0x187ed4d57c",
+          "d_star": 2,
+          "rank_profile": {
+            "2": 7
+          },
+          "macaulay_shape": {
+            "2": [
+              62,
+              7
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "ranking_by_mean_d_star": [
+    {
+      "structure": "geometric",
+      "d_star_mean": 2.0,
+      "d_star_min": 2,
+      "d_star_max": 2,
+      "decomposable_fraction": 0.001953125,
+      "unsat_targets": 4
+    },
+    {
+      "structure": "standard",
+      "d_star_mean": 2.0,
+      "d_star_min": 2,
+      "d_star_max": 2,
+      "decomposable_fraction": 0.0,
+      "unsat_targets": 4
+    },
+    {
+      "structure": "random",
+      "d_star_mean": 2.0,
+      "d_star_min": 2,
+      "d_star_max": 2,
+      "decomposable_fraction": 0.001953125,
+      "unsat_targets": 4
+    }
+  ]
+}
