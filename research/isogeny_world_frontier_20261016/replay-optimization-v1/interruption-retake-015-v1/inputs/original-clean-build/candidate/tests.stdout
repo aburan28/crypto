@@ -1,0 +1,256 @@
+
+running 3 tests
+test original::tests::arithmetic_matches_biguint_on_p224_and_small_primes ... ok
+test tests::small_and_full_width_fields ... ok
+test tests::wider_standard_fields ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
+
+
+running 13 tests
+test catalog::tests::all_models_are_accounted_for_with_operation_capabilities ... ok
+test catalog::tests::common_standard_names_resolve_without_merging_different_models ... ok
+test modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test modular_polynomial::tests::modular_polynomial_storage_scaling_barrier ... 
+=== Modular polynomial Φ_l storage requirements (log_2 scale) ===
+
+       log_2(l)     log_2(num_coefs)    log_2(total_bits)
+              1                    2                    5
+              2                    4                   10
+              3                    6                   15
+              4                    8                   19
+              8                   16                   36
+             16                   32                   69
+             32                   64                  134
+             64                  128                  263
+            128                  256                  520
+            256                  512                 1033
+
+For P-256, l = p ≈ 2²⁵⁶ ⇒ log_2(l) = 256.
+Storage in bits ≈ 2^1033
+
+That's more bits than there are particles in 10⁵⁰⁰ universes.
+
+Conclusion: Φ_p is COMPUTATIONALLY INACCESSIBLE at P-256 scale.
+Any canonical-lift attack on P-256 must avoid materialising Φ_p.
+Known approaches: Satoh-Skjernaa-Taguchi uses Φ_l for small l
+via a modular tower — but only works for F_{p^n}, not F_p
+with prime p.
+
+**This module ships Φ_2 and Φ_3 as fully-instantiated polynomials.**
+Higher Φ_l (Φ_5, Φ_7, Φ_11, Φ_13, Φ_17) computable via q-series
+but require ~hours of compute and large coefficient tables.
+ok
+test modular_polynomial::tests::phi_2_basic_properties ... ok
+test modular_polynomial::tests::phi_3_basic_properties ... ok
+test receipt_tests::os_cpu_is_actual_user_plus_system_not_stage_estimates ... ok
+test supervisor::companion_timeout_controls::companion_shape_retains_deadline_after_positive_acknowledgement ... ok
+test supervisor::tests::missing_and_zero_rss_fail_closed_before_and_after_acknowledgement ... ok
+test tests::deterministic_dataset_controls_are_bounded_and_match_both_reducers ... ok
+test tests::native_percentile_uses_maximum_of_eight_and_refuses_missing_samples ... ok
+test tests::p192_and_small_prime_reduction_controls ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.04s
+
+
+running 86 tests
+test catalog::tests::all_models_are_accounted_for_with_operation_capabilities ... ok
+test catalog::tests::common_standard_names_resolve_without_merging_different_models ... ok
+test challenge::tests::catalogue_has_every_standard_prime_model_and_no_research_descendants ... ok
+test challenge::tests::plan_rejects_unbounded_ranges_and_nonprime_models ... ok
+test challenge::tests::policy_identifies_rules_and_catalogue ... ok
+test cli_tests::degree_three_screening_uses_the_characteristic_three_residue_field ... ok
+test cli_tests::execution_index_preserves_each_canonical_curve_and_its_subgroup ... ok
+test cli_tests::known_small_extension_candidates_have_exact_eigenvalue_orders ... ok
+test cli_tests::receipt_hashes_match_the_independent_reference_at_padding_boundaries ... ok
+test cli_tests::usage_failures_precede_output_creation ... ok
+test compact_cm_verify::tests::adding_subgroup_order_preserves_points_and_changes_geometric_degree ... ok
+test compact_cm_verify::tests::complete_control_and_other_primitive_root_are_accepted_but_wrong_pairing_is_rejected ... ok
+test compact_cm_verify::tests::exact_integer_checker_catches_modulus_sized_error_that_evaluated_idc_accepts ... ok
+test compact_cm_verify::tests::exact_source_tuple_matches_the_registered_standard ... ok
+test compact_cm_verify::tests::signed_zero_and_negative_geometric_expressions_replay_independently ... ok
+test compact_cm_verify::tests::small_positive_rungs_and_distinct_composite_controls ... ok
+test constructor::extension::tests::extension_point_count_matches_the_known_base_trace ... ok
+test constructor::extension::tests::large_prime_extension_arithmetic ... ok
+test constructor::extension::tests::rejects_a_reducible_modulus ... ok
+test constructor::extension::tests::small_extension_arithmetic ... ok
+test constructor::tests::every_enabled_extension_passes_field_laws ... ok
+test constructor::tests::selections_keep_old_routes_and_enable_new_degree_nine_routes ... ok
+test field::tests::arithmetic_matches_biguint_on_p224_and_small_primes ... ok
+test hash_sha256::tests::sha224_abc ... ok
+test hash_sha256::tests::sha224_empty ... ok
+test hash_sha256::tests::sha256_abc ... ok
+test hash_sha256::tests::sha256_block_boundary_55 ... ok
+test hash_sha256::tests::sha256_empty ... ok
+test hash_sha256::tests::sha256_fips180_112byte ... ok
+test hash_sha256::tests::sha256_fips180_56byte ... ok
+test hash_sha256::tests::sha256_hello_world ... ok
+test hash_sha256::tests::sha256_million_a ... ok
+test hash_sha256::tests::sha256_two_blocks_64 ... ok
+test hash_sha256::tests::streaming_matches_one_shot_at_every_split ... ok
+test hash_sha256::tests::streaming_million_a ... ok
+test identity_certificate::tests::canonical_bytes_are_sorted_and_round_trip ... ok
+test identity_certificate::tests::committed_schoenhage_certificate_still_checks ... ok
+test identity_certificate::tests::degree_bound_is_checked_syntactically_not_trusted ... ok
+test identity_certificate::tests::field_arithmetic_agrees_with_u128_reference ... ok
+test identity_certificate::tests::points_depend_on_the_id_so_the_author_cannot_pre_pick_them ... ok
+test identity_certificate::tests::schoenhage_identity_certifies_and_checks ... ok
+test identity_certificate::tests::swapping_the_statement_under_a_sealed_id_is_malformed ... ok
+test identity_certificate::tests::tampering_with_the_digest_is_detected ... ok
+test identity_certificate::tests::the_identity_without_its_error_term_is_false_and_cannot_be_issued ... ok
+test map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test modular_polynomial::tests::modular_polynomial_storage_scaling_barrier ... 
+=== Modular polynomial Φ_l storage requirements (log_2 scale) ===
+
+       log_2(l)     log_2(num_coefs)    log_2(total_bits)
+              1                    2                    5
+              2                    4                   10
+              3                    6                   15
+              4                    8                   19
+              8                   16                   36
+             16                   32                   69
+             32                   64                  134
+             64                  128                  263
+            128                  256                  520
+            256                  512                 1033
+
+For P-256, l = p ≈ 2²⁵⁶ ⇒ log_2(l) = 256.
+Storage in bits ≈ 2^1033
+
+That's more bits than there are particles in 10⁵⁰⁰ universes.
+
+Conclusion: Φ_p is COMPUTATIONALLY INACCESSIBLE at P-256 scale.
+Any canonical-lift attack on P-256 must avoid materialising Φ_p.
+Known approaches: Satoh-Skjernaa-Taguchi uses Φ_l for small l
+via a modular tower — but only works for F_{p^n}, not F_p
+with prime p.
+
+**This module ships Φ_2 and Φ_3 as fully-instantiated polynomials.**
+Higher Φ_l (Φ_5, Φ_7, Φ_11, Φ_13, Φ_17) computable via q-series
+but require ~hours of compute and large coefficient tables.
+ok
+test modular_polynomial::tests::phi_2_basic_properties ... ok
+test modular_polynomial::tests::phi_3_basic_properties ... ok
+test replay::n10::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n10::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n10::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n1::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n1::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n1::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n2::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n2::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n2::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n3::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n3::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n3::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n4::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n4::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n4::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n5::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n5::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n5::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n6::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n6::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n6::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n7::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n7::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n7::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n8::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n8::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n8::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n9::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n9::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n9::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay_trace::tests::flushed_begin_survives_bounded_child_interruption ... ok
+test replay_trace::tests::interruption_worker ... ignored, child fixture selected by the interruption control
+test replay_trace::write_failure_tests::requested_trace_write_failure_propagates_without_double_panic ... ok
+test supervisor::companion_timeout_controls::companion_shape_retains_deadline_after_positive_acknowledgement ... ok
+test supervisor::tests::missing_and_zero_rss_fail_closed_before_and_after_acknowledgement ... ok
+test walk::tests::large_walk_requests_have_matching_construction_and_replay_bounds ... ok
+
+test result: ok. 85 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 3.36s
+
+
+running 4 tests
+test tests::a_conflicting_historical_identity_is_rejected ... ok
+test tests::both_frozen_agm_identities_and_orders_match_the_native_adapter ... ok
+test tests::composite_fields_and_singular_models_are_rejected ... ok
+test tests::translated_coordinates_are_a_bijection_on_small_fields ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.40s
+
+
+running 1 test
+test native_challenge_replays_maps_rejects_forgery_and_ranks_curves_separately ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+
+
+running 1 test
+test installed_compact_command_retains_controls_and_rejects_forged_certificates ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.70s
+
+
+running 20 tests
+test accepted_p224_1471_cache_control_and_rehashed_negatives ... ok
+test catalog::tests::all_models_are_accounted_for_with_operation_capabilities ... ok
+test catalog::tests::common_standard_names_resolve_without_merging_different_models ... ok
+test companion_waits_for_ack_and_marks_done_even_on_parse_failure ... ok
+test identity_certificate::tests::canonical_bytes_are_sorted_and_round_trip ... ok
+test identity_certificate::tests::committed_schoenhage_certificate_still_checks ... ok
+test identity_certificate::tests::degree_bound_is_checked_syntactically_not_trusted ... ok
+test identity_certificate::tests::field_arithmetic_agrees_with_u128_reference ... ok
+test identity_certificate::tests::points_depend_on_the_id_so_the_author_cannot_pre_pick_them ... ok
+test identity_certificate::tests::schoenhage_identity_certifies_and_checks ... ok
+test identity_certificate::tests::swapping_the_statement_under_a_sealed_id_is_malformed ... ok
+test identity_certificate::tests::tampering_with_the_digest_is_detected ... ok
+test identity_certificate::tests::the_identity_without_its_error_term_is_false_and_cannot_be_issued ... ok
+test modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test modular_polynomial::tests::modular_polynomial_storage_scaling_barrier ... 
+=== Modular polynomial Φ_l storage requirements (log_2 scale) ===
+
+       log_2(l)     log_2(num_coefs)    log_2(total_bits)
+              1                    2                    5
+              2                    4                   10
+              3                    6                   15
+              4                    8                   19
+              8                   16                   36
+             16                   32                   69
+             32                   64                  134
+             64                  128                  263
+            128                  256                  520
+            256                  512                 1033
+
+For P-256, l = p ≈ 2²⁵⁶ ⇒ log_2(l) = 256.
+Storage in bits ≈ 2^1033
+
+That's more bits than there are particles in 10⁵⁰⁰ universes.
+
+Conclusion: Φ_p is COMPUTATIONALLY INACCESSIBLE at P-256 scale.
+Any canonical-lift attack on P-256 must avoid materialising Φ_p.
+Known approaches: Satoh-Skjernaa-Taguchi uses Φ_l for small l
+via a modular tower — but only works for F_{p^n}, not F_p
+with prime p.
+
+**This module ships Φ_2 and Φ_3 as fully-instantiated polynomials.**
+Higher Φ_l (Φ_5, Φ_7, Φ_11, Φ_13, Φ_17) computable via q-series
+but require ~hours of compute and large coefficient tables.
+ok
+test modular_polynomial::tests::phi_2_basic_properties ... ok
+test modular_polynomial::tests::phi_3_basic_properties ... ok
+test newton_identity_native_issue_recheck_and_optional_export ... ok
+test p521_arithmetic_and_kernel_reference_controls ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.13s
+
+
+running 1 test
+test tracing_preserves_fixed_map_and_adversarial_verdicts_and_refuses_bad_evidence_paths ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.23s
+

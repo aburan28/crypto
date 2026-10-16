@@ -1,0 +1,25 @@
+{
+  "schema": "isogeny-trace-custody-verification/v1",
+  "utc": "2026-10-16T22:31:08.700422+00:00",
+  "status": "VERIFIED_REMOTE_AND_FULL_READBACK",
+  "logical_names": 1,
+  "distinct_objects": 1,
+  "logical": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/interruption-retake-v1",
+  "remote": "s3://crypto-autoresearcher/store",
+  "archive": {
+    "sha256": "3e6ccad8ab3441f53e5f5781dc15272218884b241f300f0da0fa418d481a6044",
+    "bytes": 683995,
+    "regular_members": 112
+  },
+  "readback_path": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/interruption-retake-015-v1/custody-readback-cache/sha256/3e/3e6ccad8ab3441f53e5f5781dc15272218884b241f300f0da0fa418d481a6044",
+  "native_remote_verification": "cache ok, remote ok",
+  "independent_sha256": "PASS",
+  "full_byte_equality": "PASS",
+  "payload_members_match_archive_and_worktree": "PASS",
+  "native_store_client_sha256": "aab28a781f807f4f3ef364336b04d2ff18a2bb8483e1c6d1494baf5c1c3a561a",
+  "store_client_build_source": "not independently established",
+  "unit_executable_payloads": 0,
+  "scientific_runs": 0,
+  "source_gate_complete": false,
+  "historical_raw_restored": false
+}

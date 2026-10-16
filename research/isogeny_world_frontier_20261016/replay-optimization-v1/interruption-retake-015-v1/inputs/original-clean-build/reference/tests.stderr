@@ -1,0 +1,356 @@
+   Compiling isogeny-cli v0.1.0 (/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/tools/isogeny-cli)
+warning: unused import: `num_bigint::BigUint`
+ --> src/bin/field_checks.rs:5:5
+  |
+5 | use num_bigint::BigUint;
+  |     ^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused imports: `One` and `Zero`
+ --> src/bin/field_checks.rs:6:18
+  |
+6 | use num_traits::{One, Zero};
+  |                  ^^^  ^^^^
+
+warning: struct `Element` is never constructed
+ --> src/bin/../verification_field.rs:8:12
+  |
+8 | pub struct Element<const N: usize>(pub [u64; N]);
+  |            ^^^^^^^
+  |
+  = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: struct `PrimeField` is never constructed
+  --> src/bin/../verification_field.rs:12:12
+   |
+12 | pub struct PrimeField<const N: usize> {
+   |            ^^^^^^^^^^
+
+warning: function `to_limbs` is never used
+  --> src/bin/../verification_field.rs:31:4
+   |
+31 | fn to_limbs<const N: usize>(v: &BigUint) -> [u64; N] {
+   |    ^^^^^^^^
+
+warning: function `from_limbs` is never used
+  --> src/bin/../verification_field.rs:39:4
+   |
+39 | fn from_limbs<const N: usize>(v: &[u64; N]) -> BigUint {
+   |    ^^^^^^^^^^
+
+warning: function `geq` is never used
+  --> src/bin/../verification_field.rs:47:4
+   |
+47 | fn geq<const N: usize>(a: &[u64; N], b: &[u64; N]) -> bool {
+   |    ^^^
+
+warning: function `sub_limbs` is never used
+  --> src/bin/../verification_field.rs:56:4
+   |
+56 | fn sub_limbs<const N: usize>(a: &[u64; N], b: &[u64; N]) -> ([u64; N], bool) {
+   |    ^^^^^^^^^
+
+warning: function `add_limbs` is never used
+  --> src/bin/../verification_field.rs:68:4
+   |
+68 | fn add_limbs<const N: usize>(a: &[u64; N], b: &[u64; N]) -> ([u64; N], bool) {
+   |    ^^^^^^^^^
+
+warning: function `shr1` is never used
+  --> src/bin/../verification_field.rs:80:4
+   |
+80 | fn shr1<const N: usize>(a: &mut [u64; N], carry: bool) {
+   |    ^^^^
+
+warning: multiple associated items are never used
+   --> src/bin/../verification_field.rs:93:12
+    |
+ 89 | impl<const N: usize> PrimeField<N> {
+    | ---------------------------------- associated items in this implementation
+...
+ 93 |     pub fn new(p: &BigUint) -> Option<Self> {
+    |            ^^^
+...
+135 |     pub fn modulus(&self) -> &BigUint {
+    |            ^^^^^^^
+...
+140 |     pub fn least_nonresidue(&self) -> u64 {
+    |            ^^^^^^^^^^^^^^^^
+...
+145 |     pub fn zero(&self) -> Element<N> {
+    |            ^^^^
+...
+150 |     pub fn one(&self) -> Element<N> {
+    |            ^^^
+...
+155 |     pub fn is_zero(&self, a: &Element<N>) -> bool {
+    |            ^^^^^^^
+...
+160 |     pub fn mul(&self, a: &Element<N>, b: &Element<N>) -> Element<N> {
+    |            ^^^
+...
+198 |     pub fn sqr(&self, a: &Element<N>) -> Element<N> {
+    |            ^^^
+...
+203 |     pub fn add(&self, a: &Element<N>, b: &Element<N>) -> Element<N> {
+    |            ^^^
+...
+213 |     pub fn sub(&self, a: &Element<N>, b: &Element<N>) -> Element<N> {
+    |            ^^^
+...
+222 |     pub fn neg(&self, a: &Element<N>) -> Element<N> {
+    |            ^^^
+...
+226 |     pub fn from_u64(&self, v: u64) -> Element<N> {
+    |            ^^^^^^^^
+...
+236 |     pub fn from_i64(&self, v: i64) -> Element<N> {
+    |            ^^^^^^^^
+...
+245 |     pub fn from_u128(&self, v: u128) -> Element<N> {
+    |            ^^^^^^^^^
+...
+249 |     pub fn from_big(&self, v: &BigUint) -> Element<N> {
+    |            ^^^^^^^^
+...
+254 |     pub fn to_big(&self, a: &Element<N>) -> BigUint {
+    |            ^^^^^^
+...
+262 |     pub fn pow(&self, a: &Element<N>, e: &BigUint) -> Element<N> {
+    |            ^^^
+...
+274 |     pub fn inv(&self, a: &Element<N>) -> Option<Element<N>> {
+    |            ^^^
+...
+310 |     fn half_coefficient(&self, mut a: Element<N>) -> Element<N> {
+    |        ^^^^^^^^^^^^^^^^
+...
+321 |     pub fn div(&self, a: &Element<N>, b: &Element<N>) -> Option<Element<N>> {
+    |            ^^^
+...
+326 |     pub fn legendre(&self, a: &Element<N>) -> i32 {
+    |            ^^^^^^^^
+...
+338 |     pub fn sqrt(&self, a: &Element<N>) -> Option<Element<N>> {
+    |            ^^^^
+...
+368 |     pub fn hex(&self, a: &Element<N>) -> String {
+    |            ^^^
+
+warning: function `is_probable_prime` is never used
+   --> src/bin/../verification_field.rs:375:8
+    |
+375 | pub fn is_probable_prime(n: &BigUint) -> bool {
+    |        ^^^^^^^^^^^^^^^^^
+
+warning: struct `Fe` is never constructed
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:13:12
+   |
+13 | pub struct Fe(pub [u64; 4]);
+   |            ^^
+
+warning: struct `Field` is never constructed
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:17:12
+   |
+17 | pub struct Field {
+   |            ^^^^^
+
+warning: function `to_limbs` is never used
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:36:4
+   |
+36 | fn to_limbs(v: &BigUint) -> [u64; 4] {
+   |    ^^^^^^^^
+
+warning: function `from_limbs` is never used
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:44:4
+   |
+44 | fn from_limbs(v: &[u64; 4]) -> BigUint {
+   |    ^^^^^^^^^^
+
+warning: function `geq` is never used
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:52:4
+   |
+52 | fn geq(a: &[u64; 4], b: &[u64; 4]) -> bool {
+   |    ^^^
+
+warning: function `sub_limbs` is never used
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:61:4
+   |
+61 | fn sub_limbs(a: &[u64; 4], b: &[u64; 4]) -> ([u64; 4], bool) {
+   |    ^^^^^^^^^
+
+warning: function `add_limbs` is never used
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:73:4
+   |
+73 | fn add_limbs(a: &[u64; 4], b: &[u64; 4]) -> ([u64; 4], bool) {
+   |    ^^^^^^^^^
+
+warning: multiple associated items are never used
+   --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:89:12
+    |
+ 85 | impl Field {
+    | ---------- associated items in this implementation
+...
+ 89 |     pub fn new(p: &BigUint) -> Option<Self> {
+    |            ^^^
+...
+125 |     pub fn modulus(&self) -> &BigUint {
+    |            ^^^^^^^
+...
+130 |     pub fn least_nonresidue(&self) -> u64 {
+    |            ^^^^^^^^^^^^^^^^
+...
+134 |     pub fn zero(&self) -> Fe {
+    |            ^^^^
+...
+138 |     pub fn one(&self) -> Fe {
+    |            ^^^
+...
+142 |     pub fn is_zero(&self, a: &Fe) -> bool {
+    |            ^^^^^^^
+...
+146 |     pub fn mul(&self, a: &Fe, b: &Fe) -> Fe {
+    |            ^^^
+...
+182 |     pub fn sqr(&self, a: &Fe) -> Fe {
+    |            ^^^
+...
+186 |     pub fn add(&self, a: &Fe, b: &Fe) -> Fe {
+    |            ^^^
+...
+195 |     pub fn sub(&self, a: &Fe, b: &Fe) -> Fe {
+    |            ^^^
+...
+204 |     pub fn neg(&self, a: &Fe) -> Fe {
+    |            ^^^
+...
+208 |     pub fn from_u64(&self, v: u64) -> Fe {
+    |            ^^^^^^^^
+...
+212 |     pub fn from_i64(&self, v: i64) -> Fe {
+    |            ^^^^^^^^
+...
+221 |     pub fn from_u128(&self, v: u128) -> Fe {
+    |            ^^^^^^^^^
+...
+225 |     pub fn from_big(&self, v: &BigUint) -> Fe {
+    |            ^^^^^^^^
+...
+230 |     pub fn to_big(&self, a: &Fe) -> BigUint {
+    |            ^^^^^^
+...
+234 |     pub fn pow(&self, a: &Fe, e: &BigUint) -> Fe {
+    |            ^^^
+...
+246 |     pub fn inv(&self, a: &Fe) -> Option<Fe> {
+    |            ^^^
+...
+253 |     pub fn div(&self, a: &Fe, b: &Fe) -> Option<Fe> {
+    |            ^^^
+...
+258 |     pub fn legendre(&self, a: &Fe) -> i32 {
+    |            ^^^^^^^^
+...
+270 |     pub fn sqrt(&self, a: &Fe) -> Option<Fe> {
+    |            ^^^^
+...
+300 |     pub fn hex(&self, a: &Fe) -> String {
+    |            ^^^
+
+warning: function `is_probable_prime` is never used
+   --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:307:8
+    |
+307 | pub fn is_probable_prime(n: &BigUint) -> bool {
+    |        ^^^^^^^^^^^^^^^^^
+
+warning: `isogeny-cli` (bin "field_checks") generated 21 warnings (run `cargo fix --bin "field_checks" -p isogeny-cli` to apply 2 suggestions)
+warning: multiple methods are never used
+   --> src/bin/../verification_field.rs:135:12
+    |
+ 89 | impl<const N: usize> PrimeField<N> {
+    | ---------------------------------- methods in this implementation
+...
+135 |     pub fn modulus(&self) -> &BigUint {
+    |            ^^^^^^^
+...
+140 |     pub fn least_nonresidue(&self) -> u64 {
+    |            ^^^^^^^^^^^^^^^^
+...
+222 |     pub fn neg(&self, a: &Element<N>) -> Element<N> {
+    |            ^^^
+...
+236 |     pub fn from_i64(&self, v: i64) -> Element<N> {
+    |            ^^^^^^^^
+...
+245 |     pub fn from_u128(&self, v: u128) -> Element<N> {
+    |            ^^^^^^^^^
+...
+321 |     pub fn div(&self, a: &Element<N>, b: &Element<N>) -> Option<Element<N>> {
+    |            ^^^
+...
+338 |     pub fn sqrt(&self, a: &Element<N>) -> Option<Element<N>> {
+    |            ^^^^
+...
+368 |     pub fn hex(&self, a: &Element<N>) -> String {
+    |            ^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: methods `modulus`, `neg`, `from_i64`, `from_u128`, `div`, and `hex` are never used
+   --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:125:12
+    |
+ 85 | impl Field {
+    | ---------- methods in this implementation
+...
+125 |     pub fn modulus(&self) -> &BigUint {
+    |            ^^^^^^^
+...
+204 |     pub fn neg(&self, a: &Fe) -> Fe {
+    |            ^^^
+...
+212 |     pub fn from_i64(&self, v: i64) -> Fe {
+    |            ^^^^^^^^
+...
+221 |     pub fn from_u128(&self, v: u128) -> Fe {
+    |            ^^^^^^^^^
+...
+253 |     pub fn div(&self, a: &Fe, b: &Fe) -> Option<Fe> {
+    |            ^^^
+...
+300 |     pub fn hex(&self, a: &Fe) -> String {
+    |            ^^^
+
+warning: `isogeny-cli` (bin "field_checks" test) generated 2 warnings
+    Finished `release` profile [optimized] target(s) in 47.32s
+     Running unittests src/bin/field_checks.rs (/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/clean-retake-v1/reference/target/release/deps/field_checks-7bcfafe5b5b34c9d)
+     Running unittests src/bin/fixed_modulus_bench.rs (/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/clean-retake-v1/reference/target/release/deps/fixed_modulus_bench-f8d9ccfd1dbc952c)
+native: TIMEOUT (1034 ms)
+native: RESOURCE_MONITOR_UNAVAILABLE (116 ms)
+native: RESOURCE_MONITOR_UNAVAILABLE (121 ms)
+native: RESOURCE_MONITOR_UNAVAILABLE (164 ms)
+native: RESOURCE_MONITOR_UNAVAILABLE (134 ms)
+native: RESOURCE_MONITOR_UNAVAILABLE (138 ms)
+native: RESOURCE_MONITOR_UNAVAILABLE (113 ms)
+native: RESOURCE_MONITOR_UNAVAILABLE (167 ms)
+native: RESOURCE_MONITOR_UNAVAILABLE (151 ms)
+     Running unittests src/main.rs (/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/clean-retake-v1/reference/target/release/deps/isogeny-8734bd11e3dad22d)
+
+thread 'replay_trace::write_failure_tests::requested_trace_write_failure_propagates_without_double_panic' (1325406) panicked at src/replay_trace.rs:102:12:
+requested replay trace could not be written/flushed: Os { code: 9, kind: Uncategorized, message: "Bad file descriptor" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+requested replay trace failed during terminal recording: Bad file descriptor (os error 9)
+native: TIMEOUT (1004 ms)
+native: RESOURCE_MONITOR_UNAVAILABLE (128 ms)
+native: RESOURCE_MONITOR_UNAVAILABLE (124 ms)
+native: RESOURCE_MONITOR_UNAVAILABLE (136 ms)
+native: RESOURCE_MONITOR_UNAVAILABLE (159 ms)
+native: RESOURCE_MONITOR_UNAVAILABLE (103 ms)
+native: RESOURCE_MONITOR_UNAVAILABLE (121 ms)
+native: RESOURCE_MONITOR_UNAVAILABLE (152 ms)
+native: RESOURCE_MONITOR_UNAVAILABLE (136 ms)
+     Running unittests src/bin/registry_models.rs (/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/clean-retake-v1/reference/target/release/deps/registry_models-14786ddc59768d85)
+     Running tests/challenge_cli.rs (/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/clean-retake-v1/reference/target/release/deps/challenge_cli-3342f347a9c56355)
+     Running tests/compact_cm_cli.rs (/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/clean-retake-v1/reference/target/release/deps/compact_cm_cli-6485341f7fb74883)
+     Running tests/fixed_modulus_replay.rs (/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/clean-retake-v1/reference/target/release/deps/fixed_modulus_replay-df8b92c9bfc1708a)
+     Running tests/replay_trace_cli.rs (/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/clean-retake-v1/reference/target/release/deps/replay_trace_cli-594605af53c6325e)

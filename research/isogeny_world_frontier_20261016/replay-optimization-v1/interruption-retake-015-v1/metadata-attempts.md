@@ -1,0 +1,3 @@
+The first metadata inspector required128filtered from aggregate multi-executable suite totals; raw parent logs actually contain1selected/85filtered. Original metadata.py/control-check.json/logs are retained; correct-log-count.py reparses originals without native rerun.
+
+A later JavaScript orchestration call failed during parsing before any command or file write: SyntaxError: Unexpected token '%'. Its raw tagged template contained the shell parameter expansion ${actual%% *}; JavaScript treated it as template interpolation. The corrected shell driver uses awk to extract the hash. No package, transfer, or native control was executed by that failed call.
