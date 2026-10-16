@@ -1,0 +1,29 @@
+n=2 m=2 t=0 planted=true truth=3 sem=3(solved,{"nosplit": 1, "relation": 3}) rr=3(solved,{"nosplit": 1, "relation": 3}) ok
+n=2 m=2 t=1 planted=false truth=2 sem=2(solved,{"relation": 2}) rr=2(solved,{"relation": 2}) ok
+n=2 m=2 t=2 planted=true truth=4 sem=4(solved,{"relation": 4}) rr=4(solved,{"relation": 4}) ok
+n=2 m=2 t=3 planted=false truth=0 sem=0(inconsistent,{}) rr=0(inconsistent,{}) ok
+n=2 m=2 t=4 planted=true truth=1 sem=1(solved,{"relation": 1}) rr=1(solved,{"relation": 1}) ok
+n=2 m=2 t=5 planted=false truth=0 sem=0(inconsistent,{}) rr=0(inconsistent,{}) ok
+n=2 m=2: |T| = 9 terms, deg_e = 2, build 0.0 ms
+n=3 m=2 t=0 planted=true truth=1 sem=1(solved,{"relation": 1}) rr=1(solved,{"relation": 1}) ok
+n=3 m=2 t=1 planted=false truth=0 sem=0(inconsistent,{}) rr=0(inconsistent,{}) ok
+n=3 m=2 t=2 planted=true truth=1 sem=1(solved,{"relation": 1}) rr=1(solved,{"relation": 1}) ok
+n=3 m=2 t=3 planted=false truth=0 sem=0(inconsistent,{}) rr=0(inconsistent,{}) ok
+n=3 m=2 t=4 planted=true truth=1 sem=1(solved,{"relation": 1}) rr=1(solved,{"relation": 1}) ok
+n=3 m=2 t=5 planted=false truth=0 sem=0(inconsistent,{}) rr=0(inconsistent,{}) ok
+n=3 m=2: |T| = 9 terms, deg_e = 2, build 0.0 ms
+n=3 m=3 t=0 planted=true truth=1 sem=1(solved,{"relation": 1}) rr=1(solved,{"relation": 1}) ok
+n=3 m=3 t=1 planted=false truth=0 sem=0(solved,{"nosplit": 1}) rr=0(solved,{"nosplit": 1}) ok
+n=3 m=3 t=2 planted=true truth=1 sem=1(solved,{"nosplit": 3, "relation": 1}) rr=1(solved,{"nosplit": 3, "relation": 1}) ok
+n=3 m=3 t=3 planted=false truth=0 sem=0(solved,{"nosplit": 3}) rr=0(solved,{"nosplit": 3}) ok
+n=3 m=3 t=4 planted=true truth=1 sem=1(solved,{"nosplit": 1, "relation": 1}) rr=1(solved,{"nosplit": 1, "relation": 1}) ok
+n=3 m=3 t=5 planted=false truth=0 sem=0(inconsistent,{}) rr=0(inconsistent,{}) ok
+n=3 m=3: |T| = 118 terms, deg_e = 4, build 4.9 ms
+n=4 m=3 t=0 planted=true truth=1 sem=1(solved,{"relation": 1}) rr=1(solved,{"relation": 1}) ok
+n=4 m=3 t=1 planted=false truth=0 sem=0(inconsistent,{}) rr=0(inconsistent,{}) ok
+n=4 m=3 t=2 planted=true truth=1 sem=1(solved,{"relation": 1}) rr=1(solved,{"relation": 1}) ok
+n=4 m=3 t=3 planted=false truth=0 sem=0(inconsistent,{}) rr=0(inconsistent,{}) ok
+n=4 m=3 t=4 planted=true truth=1 sem=1(solved,{"relation": 1}) rr=1(solved,{"relation": 1}) ok
+n=4 m=3 t=5 planted=false truth=0 sem=0(inconsistent,{}) rr=0(inconsistent,{}) ok
+n=4 m=3: |T| = 118 terms, deg_e = 4, build 5.9 ms
+VALIDATION PASSED

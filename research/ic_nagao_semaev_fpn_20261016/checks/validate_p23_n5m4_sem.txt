@@ -1,0 +1,8 @@
+n=5 m=4 t=0 planted=true truth=1 sem=1(solved,{"relation": 1}) ok
+n=5 m=4 t=1 planted=false truth=0 sem=0(inconsistent,{}) ok
+n=5 m=4 t=2 planted=true truth=1 sem=1(solved,{"relation": 1}) ok
+n=5 m=4 t=3 planted=false truth=0 sem=0(inconsistent,{}) ok
+n=5 m=4 t=4 planted=true truth=1 sem=1(solved,{"relation": 1}) ok
+n=5 m=4 t=5 planted=false truth=0 sem=0(inconsistent,{}) ok
+n=5 m=4: |T| = 3957 terms, deg_e = 8, build 6018.4 ms
+VALIDATION PASSED
