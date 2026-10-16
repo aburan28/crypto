@@ -1,6 +1,6 @@
 name = "p192_extension_cover"
 version = "0.1.0"
-defaultTargets = ["CrossRatio", "SignedBase", "ScalarAnchor", "AdaptiveBase", "ShortSums", "DivisorSupport", "NonspecialSupport", "LinePointInverse", "LineSupport", "LineFiberDescent", "ThreeSumCapacity", "LineLeafRank", "LineClosure", "LineCenter", "FullCollinearity", "ResidualDiscriminant", "PencilThreeSum", "FourCellDensity", "TraceProjection", "TraceThree", "FullLineCapacity", "PivotGuided"]
+defaultTargets = ["CrossRatio", "SignedBase", "ScalarAnchor", "AdaptiveBase", "ShortSums", "DivisorSupport", "NonspecialSupport", "LinePointInverse", "LineSupport", "LineFiberDescent", "ThreeSumCapacity", "LineLeafRank", "LineClosure", "LineCenter", "FullCollinearity", "ResidualDiscriminant", "PencilThreeSum", "FourCellDensity", "TraceProjection", "TraceThree", "FullLineCapacity", "PivotGuided", "CubicCoefficientRows"]
 
 [[require]]
 name = "mathlib"
@@ -72,3 +72,6 @@ name = "FullLineCapacity"
 
 [[lean_lib]]
 name = "PivotGuided"
+
+[[lean_lib]]
+name = "CubicCoefficientRows"

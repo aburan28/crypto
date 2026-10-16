@@ -37,8 +37,24 @@ theorem two_pivot_guided_hit_bound_certificate :
       1569275433846670190958947353987675545133315652035359680560 := by
   norm_num
 
+/-- Even if all selected and two-fan columns were materialized as
+    29,935 distinct usable point classes after four exact overlaps, their unordered three-sum support is
+    bounded by this exact capacity. -/
+theorem full_two_pivot_base_three_sum_capacity :
+    29935 * 29936 * 29937 / 6 = 4471261391320 := by
+  norm_num
+
+/-- The resulting fixed-base ideal-uniform accepted-query hit bound is
+    below `2^-147`, using the certified accepted-set lower bound. -/
+theorem full_two_pivot_base_hit_bound_certificate :
+    4471261391320 * (2 ^ 147 : ℕ) <
+      1569275433846670190958947353987675545133315652035359680560 := by
+  norm_num
+
 end P192ExtensionCover
 
 #print axioms P192ExtensionCover.guided_scalar_three_sum_log_equation
 #print axioms P192ExtensionCover.two_pivot_48_class_three_sum_capacity
 #print axioms P192ExtensionCover.two_pivot_guided_hit_bound_certificate
+#print axioms P192ExtensionCover.full_two_pivot_base_three_sum_capacity
+#print axioms P192ExtensionCover.full_two_pivot_base_hit_bound_certificate
