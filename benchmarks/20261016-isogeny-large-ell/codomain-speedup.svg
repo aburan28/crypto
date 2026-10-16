@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="460" viewBox="0 0 820 460" font-family="sans-serif" font-size="12">
+<rect width="100%" height="100%" fill="white"/>
+<text x="70" y="22" font-size="15" font-weight="bold">sqrt-Velu codomain speedup over Velu (time Velu / time sqrt-Velu)</text>
+<line x1="70" x2="550" y1="400.0" y2="400.0" stroke="#ddd"/><text x="64" y="404.0" text-anchor="end">0×</text>
+<line x1="70" x2="550" y1="340.0" y2="340.0" stroke="#ddd"/><text x="64" y="344.0" text-anchor="end">1×</text>
+<line x1="70" x2="550" y1="280.0" y2="280.0" stroke="#ddd"/><text x="64" y="284.0" text-anchor="end">2×</text>
+<line x1="70" x2="550" y1="220.0" y2="220.0" stroke="#ddd"/><text x="64" y="224.0" text-anchor="end">3×</text>
+<line x1="70" x2="550" y1="160.0" y2="160.0" stroke="#ddd"/><text x="64" y="164.0" text-anchor="end">4×</text>
+<line x1="70" x2="550" y1="100.0" y2="100.0" stroke="#ddd"/><text x="64" y="104.0" text-anchor="end">5×</text>
+<line x1="70" x2="550" y1="40.0" y2="40.0" stroke="#ddd"/><text x="64" y="44.0" text-anchor="end">6×</text>
+<line x1="70" x2="550" y1="340.0" y2="340.0" stroke="#555" stroke-dasharray="2,2"/><text x="510" y="336.0" fill="#555">parity</text>
+<line x1="301.8" x2="301.8" y1="40" y2="400" stroke="#ddd"/><text x="301.8" y="416" text-anchor="middle">1009</text>
+<line x1="531.8" x2="531.8" y1="40" y2="400" stroke="#ddd"/><text x="531.8" y="416" text-anchor="middle">10007</text>
+<line x1="209.2" x2="209.2" y1="40" y2="400" stroke="#ddd"/><text x="209.2" y="416" text-anchor="middle">401</text>
+<line x1="71.0" x2="71.0" y1="40" y2="400" stroke="#ddd"/><text x="71.0" y="416" text-anchor="middle">101</text>
+<line x1="439.9" x2="439.9" y1="40" y2="400" stroke="#ddd"/><text x="439.9" y="416" text-anchor="middle">4001</text>
+<text x="310" y="444" text-anchor="middle">isogeny degree ℓ (log scale)</text>
+<text transform="translate(18,220) rotate(-90)" text-anchor="middle">speedup</text>
+<polyline fill="none" stroke="#1f6feb" stroke-width="2" points="71.0,348.4 209.2,290.8 301.8,271.0 439.9,137.8 531.8,65.2 "/>
+<circle cx="301.8" cy="271.0" r="3" fill="#1f6feb"/>
+<circle cx="531.8" cy="65.2" r="3" fill="#1f6feb"/>
+<circle cx="209.2" cy="290.8" r="3" fill="#1f6feb"/>
+<circle cx="71.0" cy="348.4" r="3" fill="#1f6feb"/>
+<circle cx="439.9" cy="137.8" r="3" fill="#1f6feb"/>
+<line x1="580" x2="605" y1="50" y2="50" stroke="#1f6feb" stroke-width="2"/><text x="610" y="54" font-size="11">Montgomery, now · 256-bit p</text>
+<polyline fill="none" stroke="#0b3d91" stroke-width="2" points="71.0,353.8 209.2,299.2 301.8,274.0 439.9,158.2 531.8,83.8 "/>
+<circle cx="301.8" cy="274.0" r="3" fill="#0b3d91"/>
+<circle cx="531.8" cy="83.8" r="3" fill="#0b3d91"/>
+<circle cx="209.2" cy="299.2" r="3" fill="#0b3d91"/>
+<circle cx="71.0" cy="353.8" r="3" fill="#0b3d91"/>
+<circle cx="439.9" cy="158.2" r="3" fill="#0b3d91"/>
+<line x1="580" x2="605" y1="68" y2="68" stroke="#0b3d91" stroke-width="2"/><text x="610" y="72" font-size="11">Montgomery, now · 511-bit p</text>
+<polyline fill="none" stroke="#d4580d" stroke-width="2" points="71.0,338.8 209.2,305.8 301.8,296.2 439.9,265.6 531.8,231.4 "/>
+<circle cx="301.8" cy="296.2" r="3" fill="#d4580d"/>
+<circle cx="531.8" cy="231.4" r="3" fill="#d4580d"/>
+<circle cx="209.2" cy="305.8" r="3" fill="#d4580d"/>
+<circle cx="71.0" cy="338.8" r="3" fill="#d4580d"/>
+<circle cx="439.9" cy="265.6" r="3" fill="#d4580d"/>
+<line x1="580" x2="605" y1="86" y2="86" stroke="#d4580d" stroke-width="2"/><text x="610" y="90" font-size="11">Weierstrass, now · 256-bit p</text>
+<polyline fill="none" stroke="#8a3300" stroke-width="2" points="71.0,337.6 209.2,301.6 301.8,272.2 439.9,256.6 531.8,239.2 "/>
+<circle cx="301.8" cy="272.2" r="3" fill="#8a3300"/>
+<circle cx="531.8" cy="239.2" r="3" fill="#8a3300"/>
+<circle cx="209.2" cy="301.6" r="3" fill="#8a3300"/>
+<circle cx="71.0" cy="337.6" r="3" fill="#8a3300"/>
+<circle cx="439.9" cy="256.6" r="3" fill="#8a3300"/>
+<line x1="580" x2="605" y1="104" y2="104" stroke="#8a3300" stroke-width="2"/><text x="610" y="108" font-size="11">Weierstrass, now · 511-bit p</text>
+<polyline fill="none" stroke="#1f6feb" stroke-width="2" stroke-dasharray="6,4" points="301.8,341.8 439.9,322.0 531.8,309.4 "/>
+<circle cx="531.8" cy="309.4" r="3" fill="#1f6feb"/>
+<circle cx="439.9" cy="322.0" r="3" fill="#1f6feb"/>
+<circle cx="301.8" cy="341.8" r="3" fill="#1f6feb"/>
+<line x1="580" x2="605" y1="122" y2="122" stroke="#1f6feb" stroke-width="2" stroke-dasharray="6,4"/><text x="610" y="126" font-size="11">Montgomery, before · 256-bit p</text>
+<polyline fill="none" stroke="#0b3d91" stroke-width="2" stroke-dasharray="6,4" points="301.8,338.8 439.9,315.4 531.8,302.8 "/>
+<circle cx="531.8" cy="302.8" r="3" fill="#0b3d91"/>
+<circle cx="439.9" cy="315.4" r="3" fill="#0b3d91"/>
+<circle cx="301.8" cy="338.8" r="3" fill="#0b3d91"/>
+<line x1="580" x2="605" y1="140" y2="140" stroke="#0b3d91" stroke-width="2" stroke-dasharray="6,4"/><text x="610" y="144" font-size="11">Montgomery, before · 511-bit p</text>
+<polyline fill="none" stroke="#d4580d" stroke-width="2" stroke-dasharray="6,4" points="301.8,376.0 439.9,367.6 531.8,362.8 "/>
+<circle cx="531.8" cy="362.8" r="3" fill="#d4580d"/>
+<circle cx="439.9" cy="367.6" r="3" fill="#d4580d"/>
+<circle cx="301.8" cy="376.0" r="3" fill="#d4580d"/>
+<line x1="580" x2="605" y1="158" y2="158" stroke="#d4580d" stroke-width="2" stroke-dasharray="6,4"/><text x="610" y="162" font-size="11">Weierstrass, before · 256-bit p</text>
+<polyline fill="none" stroke="#8a3300" stroke-width="2" stroke-dasharray="6,4" points="301.8,370.0 439.9,359.8 531.8,319.6 "/>
+<circle cx="531.8" cy="319.6" r="3" fill="#8a3300"/>
+<circle cx="439.9" cy="359.8" r="3" fill="#8a3300"/>
+<circle cx="301.8" cy="370.0" r="3" fill="#8a3300"/>
+<line x1="580" x2="605" y1="176" y2="176" stroke="#8a3300" stroke-width="2" stroke-dasharray="6,4"/><text x="610" y="180" font-size="11">Weierstrass, before · 511-bit p</text>
+<text x="580" y="204" font-size="10" fill="#555">Montgomery: vs projective Vélu</text>
+<text x="580" y="218" font-size="10" fill="#555">Weierstrass: vs x-only Vélu</text>
+<text x="580" y="232" font-size="10" fill="#555">one run per point, 4-vCPU VM</text>
+<text x="580" y="246" font-size="10" fill="#555">now: results/p13-large-ell.txt</text>
+<text x="580" y="260" font-size="10" fill="#555">before: results/p2-big.jsonl</text>
+</svg>
