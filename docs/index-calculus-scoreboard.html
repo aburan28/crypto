@@ -1003,6 +1003,26 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           "source": "https://github.com/aburan28/crypto/blob/main/research/ic_tool_program/rule/v3/README.md"
         },
         {
+          "date": "2026-10-16",
+          "value": 3.780,
+          "reference": "matched",
+          "label": "Rule v6: the Koblitz descent at baseline v6, one target cold, closest size 2^36.6",
+          "detail": "Ledger section 23's single-target comparison re-run at the ic tool programme's baseline v6 (main's 92246530 with R06's scan key and R08's folding subtraction): six sizes 2^36.6-2^47.2, 64 public points and four A/A repeats a size, 408/408 rows checked, every logarithm section 23's. With the reusable set-up charged the index calculus costs 3.78-12.06x rho cold on the same point (rule v3: 5.23-20.97x): 3.78x [3.48, 4.13] at 2^36.6, and 7.90x, 7.40x and 12.06x at the three largest sizes. Rho is still faster at every size, and the cold ratio grows as r^0.14. Both arms are timed in one process, so no native work is unpriced on either arm.",
+          "class": "accounting",
+          "anchor": "#ic-tool-programme-20261001",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ic_tool_program/rule/v6/README.md"
+        },
+        {
+          "date": "2026-10-16",
+          "value": 3.430,
+          "reference": "matched",
+          "label": "Rule v7: the Koblitz descent at baseline v7, one target cold, closest size 2^36.6",
+          "detail": "The same comparison at baseline v7 (v6 with R11's streamed pair-table build): 408/408 rows checked, every logarithm section 23's. Cold the index calculus costs 3.43-11.51x rho on the same point (rule v6: 3.78-12.06x; rule v3: 5.23-20.97x): 3.43x [3.16, 3.75] at 2^36.6, and 7.03x, 6.37x and 11.51x at the three largest sizes. Rho is still faster at every size. Both arms are timed in one process, so no native work is unpriced on either arm.",
+          "class": "accounting",
+          "anchor": "#ic-tool-programme-20261001",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ic_tool_program/rule/v7/README.md"
+        },
+        {
           "date": "2026-10-14",
           "value": 1.566,
           "reference": "matched",
@@ -1528,6 +1548,28 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           "class": "accounting",
           "anchor": "#ic-tool-programme-20261001",
           "source": "https://github.com/aburan28/crypto/blob/main/research/ic_tool_program/rule/v3/README.md"
+        },
+        {
+          "date": "2026-10-16",
+          "value": 0.0275,
+          "reference": "matched",
+          "unit": "online wall time",
+          "label": "Rule v6: the Koblitz descent at baseline v6, online only, closest size 2^44.5",
+          "detail": "Mean index-calculus online over mean rho online on the same 64 public points: 0.0275 [0.0211, 0.0355] at 2^44.5 and 0.027-0.070 across the six sizes 2^36.6-2^47.2 (rho/IC 14.2-36.4x; rule v3: 10.2-26.5x). Every target's online speedup is above 1. Cold, with its set-up charged, the same method is 3.78-12.06x slower (cold series).",
+          "class": "accounting",
+          "anchor": "#ic-tool-programme-20261001",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ic_tool_program/rule/v6/README.md"
+        },
+        {
+          "date": "2026-10-16",
+          "value": 0.0271,
+          "reference": "matched",
+          "unit": "online wall time",
+          "label": "Rule v7: the Koblitz descent at baseline v7, online only, closest size 2^44.5",
+          "detail": "Mean index-calculus online over mean rho online on the same 64 public points at baseline v7: 0.0271 [0.0207, 0.0348] at 2^44.5 and 0.027-0.071 across the six sizes (rho/IC 14.1-37.0x). R11 changed only the set-up, and the online interval did not move. Every target's online speedup is above 1. Cold, the same method is 3.43-11.51x slower (cold series).",
+          "class": "accounting",
+          "anchor": "#ic-tool-programme-20261001",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ic_tool_program/rule/v7/README.md"
         }
       ]
     },
@@ -1906,7 +1948,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
       href="#koblitz-single-target-20261001">the round</a>). At baseline v3 (2026-10-06), after the
       <code>ic</code> tool programme&rsquo;s rounds and main&rsquo;s carry-less folds, the same comparison on
       408 rows reads 10.2&ndash;26.5&times; faster online and 5.2&ndash;21.0&times; slower cold: rho is
-      still faster cold at every size, and the gap still grows with the size. At baseline v6 (2026-10-16), with the programme&rsquo;s scan key and folding subtraction, it reads 14.2&ndash;36.4&times; faster online and 3.78&ndash;12.06&times; slower cold, the distance to rho about 40% smaller (<a
+      still faster cold at every size, and the gap still grows with the size. At baseline v6 (2026-10-16), with the programme&rsquo;s scan key and folding subtraction, it reads 14.2&ndash;36.4&times; faster online and 3.78&ndash;12.06&times; slower cold, the distance to rho about 40% smaller; at v7, after the streamed build, rho leads by 3.43&ndash;11.51&times; cold (<a
       href="#ic-tool-programme-20261001">the programme</a>). The first two were
       3.55&times; and 16.0&times; until the reference was matched (ledger &sect;18, 2026-09-23): the
       prime and binary rows had been priced against a walk that used no automorphism and paid
@@ -2790,7 +2832,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
   <div class="panel" id="ic-tool-programme-20261001">
     <div class="panel-head">
       <h2>The <code>ic</code> tool programme, baseline by baseline <span class="chip">engineering</span></h2>
-  <p class="panel-summary">Tracks ic tool cold speed against frozen baselines: Round 3's construction fix and Round 5's presence filter accepted as baselines, the wide-kernel round rejected on its holdout and its re-test withdrawn on v3, and Round 7 re-basing the programme on main's head as v3, where the rule's comparison left rho 5.2-21.0x faster cold, Round 10 re-basing it on main's head again as v4, within 3% of v3, and Round 6's scan key by GFNI and funnel shifts accepted as v5, 1.20-1.24x faster cold than v4 at the three largest sizes, and Round 8's carry-less folds accepted as v6, 1.33-1.40x faster again, 1.59-1.73x over v4; the rule at v6 leaves rho 3.78-12.06x faster cold; and Round 11's streamed build accepted as v7, 1.07-1.13x faster again, 1.80-1.86x over v4.</p>
+  <p class="panel-summary">Tracks ic tool cold speed against frozen baselines: Round 3's construction fix and Round 5's presence filter accepted as baselines, the wide-kernel round rejected on its holdout and its re-test withdrawn on v3, and Round 7 re-basing the programme on main's head as v3, where the rule's comparison left rho 5.2-21.0x faster cold, Round 10 re-basing it on main's head again as v4, within 3% of v3, and Round 6's scan key by GFNI and funnel shifts accepted as v5, 1.20-1.24x faster cold than v4 at the three largest sizes, and Round 8's carry-less folds accepted as v6, 1.33-1.40x faster again, 1.59-1.73x over v4; the rule at v6 leaves rho 3.78-12.06x faster cold; and Round 11's streamed build accepted as v7, 1.07-1.13x faster again, 1.80-1.86x over v4; the rule at v7 leaves rho 3.43-11.51x faster cold.</p>
       <p>The programme makes the <code>ic</code> tool faster, round after round, against frozen baselines
         (<a href="https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/IC_TOOL_PROGRAM.md">plan</a>,
         #1103). &ldquo;Faster&rdquo; means faster than its previous baseline, end to end and cold, with identical
@@ -2868,6 +2910,11 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           and 12.06&times; at the three largest sizes, 1.63&ndash;1.74&times; closer. Rho is still faster at every size, and
           the gap grows as r<sup>0.14</sup> [0.11, 0.18]. Both arms are timed in one process, so no native work is
           unpriced on either.</li>
+        <li><b>The rule at v7</b> re-ran it on v7, after Round 11: 408 of 408 rows checked, every logarithm
+          &sect;23&rsquo;s, the reference admissible at every size. Cold the index calculus costs
+          3.43&ndash;11.51&times; rho&rsquo;s (v6: 3.78&ndash;12.06&times;; v3: 5.23&ndash;20.97&times;): 7.03, 6.37 and
+          11.51&times; at the three largest sizes. Online it is 14.1&ndash;37.0&times; faster, as at v6. Rho is still
+          faster cold at every size.</li>
       </ul>
       <p>Frozen source: <code>research/ic_tool_program/</code> (<code>rounds/R01-baseline-v0/analysis.json</code>,
         <code>rounds/R02-wide-tail-kernel/analysis.json</code>, <code>rounds/R03-curve-construction/analysis.json</code>,
@@ -2875,7 +2922,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         with <code>filter_check.json</code>, <code>rounds/R05-presence-filter/analysis.json</code>
         with <code>prediction.json</code>, <code>rounds/R07-main-head/analysis.json</code>,
         <code>rounds/R10-main-head/analysis.json</code>, <code>rounds/R06-scan-key/analysis.json</code>, <code>rounds/R08-scan-fold/analysis.json</code>, <code>rounds/R11-build-streams/analysis.json</code>,
-        <code>rule/v3/analysis.json</code>, <code>rule/v6/analysis.json</code>,
+        <code>rule/v3/analysis.json</code>, <code>rule/v6/analysis.json</code>, <code>rule/v7/analysis.json</code>,
         <code>explorations/R02b-go-no-go-20261006/pairs.tsv</code>,
         <code>explorations/scan-stages-v3-20261006/stages.tsv</code>,
         <code>explorations/R08-fold-kernel-20261006/pairs-sub.tsv</code> with <code>stages.tsv</code>,
@@ -2922,7 +2969,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
       <span><b>Rounds 6, 8 and 11, graded.</b> R06 changes the scan&rsquo;s key (GFNI and funnel shifts) and R08 its subtraction (two carry-less folds a product, eight lanes, with the negated base as coordinate slices), each with the same outputs by construction. R06 ran on an Emerald Rapids host of its class, ported onto v4 unchanged: collection ran 1.255, 1.302 and 1.283&times; faster at the three largest sizes, cold time 1.197, 1.220 and 1.241&times; on the suite rows and 1.174, 1.202 and 1.268&times; on fresh holdouts, above the predicted 1.08&ndash;1.15, 1.07&ndash;1.13 and 1.15&ndash;1.22, with rho&rsquo;s online interval unmoved. Below 2<sup>36</sup> the key is a small share and the intervals straddle 1; no size regresses beyond its A/A band. R08 ran next, on v5: collection ran 1.468, 1.529 and 1.486&times; faster, cold time 1.326, 1.354 and 1.398&times; on the suite rows and 1.319, 1.296 and 1.409&times; on fresh holdouts, against the predicted 1.25&ndash;1.33, 1.16&ndash;1.29 and 1.27&ndash;1.46. At 2<sup>18</sup> and 2<sup>22</sup> it read 0.90 and 0.94, inside the A/A rule with intervals reaching above 1; whether a fixed cost shows at those sizes is open. R11 then streamed the build on v6: the build ran 1.50, 1.51 and 1.51&times; faster, collection did not move, and cold time read 1.134, 1.124 and 1.071&times; on the suite rows and 1.126, 1.157 and 1.065&times; on fresh holdouts, against the predicted 1.08&ndash;1.12, 1.08&ndash;1.12 and 1.04&ndash;1.07.</span>
       <span><b>Declared on this host&rsquo;s class, running: R09.</b> On the Cascade Lake host the scan&rsquo;s subtraction is the scalar product at every size, and a scanned summand costs 38&ndash;41&nbsp;ns: 15.3&ndash;15.5 to subtract, 12.0&ndash;13.7 to key (stage diagnostic). R09 keys each rest from its slope, <code>c + rotl(c) + d + e</code> with <code>c = coords(&lambda;)</code>, so the squaring, the abscissa and its store go for every summand the filter rejects; it adds eight inversion chains, a cheaper rotation step, a run&rsquo;s scans in three stages, and the build keyed the same way, with the same keys. Its exploration read 1.119 [1.093, 1.146], 1.112 [1.060, 1.166] and 1.103 [1.071, 1.136] in cold time at the three largest sizes, eight pairs each, every logarithm v3&rsquo;s; it is not a measurement until the round runs. Its class is its own: AVX-512F and PCLMULQDQ without VPCLMULQDQ. Pipelining alone and A2 re-checked there moved cold time by nothing reliable.</span>
       <span><b>Explored, not declared.</b> Huge pages advised on the pair tables (A2) halve the minor faults and leave cold time where it was, 0.960&ndash;1.068: the scan&rsquo;s misses are cache misses. On R08&rsquo;s candidate, the build&rsquo;s partition streams and per-run filters (A1) make the build 1.40&ndash;1.47&times; faster, and prefetching each admitted key&rsquo;s run (A13) makes collection 1.12&ndash;1.29&times; faster; each reads 1.07&ndash;1.12&times; in cold time on two rows a size. These are explorations, to be declared on the baseline R08 decides.</span>
-      <span><span class="chip">accounting</span> v0 is a baseline, not a change. Round 2 would have been <span class="chip">engineering</span>; it is rejected, and the kernel is kept on record as <code>candidate.patch</code>. Round 4 is <span class="chip">accounting</span>, a stage diagnostic: it changed no timed code, and nothing in it is a speedup. Round 3 is <span class="chip">engineering</span>: the factors are identical, so the ratio to the floor is flat. Round 5 is <span class="chip">engineering</span>: nothing the pipeline decides changes, so the ratio to the floor is flat. Round 7 is <span class="chip">engineering</span>, credited to main: every pinned output is v0&rsquo;s, so the ratio to the floor is flat. Round 10 is <span class="chip">engineering</span>, credited to main, on the same grounds. Round 6 is <span class="chip">engineering</span>: the keys are identical, so the ratio to the floor is flat. Round 8 is <span class="chip">engineering</span>: the field elements are identical. Round 11 is <span class="chip">engineering</span>: the table is word for word the same, and v7 is the newest baseline. The rule at v3 is <span class="chip">accounting</span>: it re-measures the comparison at the newest baseline and changes no algorithm. The rule at v6 is <span class="chip">accounting</span> on the same grounds.</span>
+      <span><span class="chip">accounting</span> v0 is a baseline, not a change. Round 2 would have been <span class="chip">engineering</span>; it is rejected, and the kernel is kept on record as <code>candidate.patch</code>. Round 4 is <span class="chip">accounting</span>, a stage diagnostic: it changed no timed code, and nothing in it is a speedup. Round 3 is <span class="chip">engineering</span>: the factors are identical, so the ratio to the floor is flat. Round 5 is <span class="chip">engineering</span>: nothing the pipeline decides changes, so the ratio to the floor is flat. Round 7 is <span class="chip">engineering</span>, credited to main: every pinned output is v0&rsquo;s, so the ratio to the floor is flat. Round 10 is <span class="chip">engineering</span>, credited to main, on the same grounds. Round 6 is <span class="chip">engineering</span>: the keys are identical, so the ratio to the floor is flat. Round 8 is <span class="chip">engineering</span>: the field elements are identical. Round 11 is <span class="chip">engineering</span>: the table is word for word the same, and v7 is the newest baseline. The rule at v3 is <span class="chip">accounting</span>: it re-measures the comparison at the newest baseline and changes no algorithm. The rules at v6 and v7 are <span class="chip">accounting</span> on the same grounds.</span>
     </div>
   </div>
 

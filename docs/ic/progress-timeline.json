@@ -126,6 +126,26 @@
           "source": "https://github.com/aburan28/crypto/blob/main/research/ic_tool_program/rule/v3/README.md"
         },
         {
+          "date": "2026-10-16",
+          "value": 3.780,
+          "reference": "matched",
+          "label": "Rule v6: the Koblitz descent at baseline v6, one target cold, closest size 2^36.6",
+          "detail": "Ledger section 23's single-target comparison re-run at the ic tool programme's baseline v6 (main's 92246530 with R06's scan key and R08's folding subtraction): six sizes 2^36.6-2^47.2, 64 public points and four A/A repeats a size, 408/408 rows checked, every logarithm section 23's. With the reusable set-up charged the index calculus costs 3.78-12.06x rho cold on the same point (rule v3: 5.23-20.97x): 3.78x [3.48, 4.13] at 2^36.6, and 7.90x, 7.40x and 12.06x at the three largest sizes. Rho is still faster at every size, and the cold ratio grows as r^0.14. Both arms are timed in one process, so no native work is unpriced on either arm.",
+          "class": "accounting",
+          "anchor": "#ic-tool-programme-20261001",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ic_tool_program/rule/v6/README.md"
+        },
+        {
+          "date": "2026-10-16",
+          "value": 3.430,
+          "reference": "matched",
+          "label": "Rule v7: the Koblitz descent at baseline v7, one target cold, closest size 2^36.6",
+          "detail": "The same comparison at baseline v7 (v6 with R11's streamed pair-table build): 408/408 rows checked, every logarithm section 23's. Cold the index calculus costs 3.43-11.51x rho on the same point (rule v6: 3.78-12.06x; rule v3: 5.23-20.97x): 3.43x [3.16, 3.75] at 2^36.6, and 7.03x, 6.37x and 11.51x at the three largest sizes. Rho is still faster at every size. Both arms are timed in one process, so no native work is unpriced on either arm.",
+          "class": "accounting",
+          "anchor": "#ic-tool-programme-20261001",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ic_tool_program/rule/v7/README.md"
+        },
+        {
           "date": "2026-10-14",
           "value": 1.566,
           "reference": "matched",
@@ -651,6 +671,28 @@
           "class": "accounting",
           "anchor": "#ic-tool-programme-20261001",
           "source": "https://github.com/aburan28/crypto/blob/main/research/ic_tool_program/rule/v3/README.md"
+        },
+        {
+          "date": "2026-10-16",
+          "value": 0.0275,
+          "reference": "matched",
+          "unit": "online wall time",
+          "label": "Rule v6: the Koblitz descent at baseline v6, online only, closest size 2^44.5",
+          "detail": "Mean index-calculus online over mean rho online on the same 64 public points: 0.0275 [0.0211, 0.0355] at 2^44.5 and 0.027-0.070 across the six sizes 2^36.6-2^47.2 (rho/IC 14.2-36.4x; rule v3: 10.2-26.5x). Every target's online speedup is above 1. Cold, with its set-up charged, the same method is 3.78-12.06x slower (cold series).",
+          "class": "accounting",
+          "anchor": "#ic-tool-programme-20261001",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ic_tool_program/rule/v6/README.md"
+        },
+        {
+          "date": "2026-10-16",
+          "value": 0.0271,
+          "reference": "matched",
+          "unit": "online wall time",
+          "label": "Rule v7: the Koblitz descent at baseline v7, online only, closest size 2^44.5",
+          "detail": "Mean index-calculus online over mean rho online on the same 64 public points at baseline v7: 0.0271 [0.0207, 0.0348] at 2^44.5 and 0.027-0.071 across the six sizes (rho/IC 14.1-37.0x). R11 changed only the set-up, and the online interval did not move. Every target's online speedup is above 1. Cold, the same method is 3.43-11.51x slower (cold series).",
+          "class": "accounting",
+          "anchor": "#ic-tool-programme-20261001",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ic_tool_program/rule/v7/README.md"
         }
       ]
     },

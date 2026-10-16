@@ -715,6 +715,20 @@ nothing missing. R09's class excludes it.
   Collection is now the larger share at every target size, so the next
   lever is the scan again. The rule at v7 measures the new distance.
 
+**The rule at v7: rho's cold lead narrower again (2026-10-16).**
+- **What ran.** §23's comparison re-ran on v7: 408 of 408 rows checked,
+  every logarithm §23's, and the reference admissible at every size.
+- **The distance remaining.** Rho is 3.43–11.51× faster cold (v6:
+  3.78–12.06×; v3: 5.23–20.97×). At the three largest sizes it is 7.03×,
+  6.37× and 11.51×, against the predicted 7.0×, 6.6× and 11.3×.
+- **Online** the index calculus is 14.1–37.0× faster, as at v6: R11
+  changed only the set-up.
+- **Since v3,** rho's cold lead has narrowed 1.52–1.89× at every size
+  ([results](../../ic_tool_program/rule/v7/README.md)). The leaderboard's
+  table A now reads rule v7.
+- **Next:** R12, the admitted keys' runs prefetched (A13), declared on v7
+  ([protocol](../../ic_tool_program/rounds/R12-admitted-prefetch/PROTOCOL.md)).
+
 ## 9. Track B: generality and robustness
 
 **Where the tool stands (at `0bf67f16`).**
