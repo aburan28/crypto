@@ -1,0 +1,116 @@
+{
+  "schema": "ec-hardness/p61-parallel-verifier-release/v1",
+  "created_utc": "2026-10-15T00:13:33Z",
+  "release_id": "p61-parallel-verifier-d06472954",
+  "claim_scope": "Reproducible release identity and correctness evidence for the d06472954 parallel segment replay path over the admitted x=0..16704 prefix.",
+  "source": {
+    "commit": "d064729541f9c9cea2dc50b4a36572971cd2b099",
+    "bundle": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-streaming-v1/source/crypto-p61-d06472954-incremental-from-1e9f40817.bundle",
+    "bundle_base_commit": "1e9f40817f9ff0e37d365b79f9dbcccaf743be1d",
+    "bundle_sha256": "d5fd5a15bb1c51e0b764bb66870ca94dd0d587890e0b460b16fe062ce5850cb2",
+    "bundle_bytes": 1437
+  },
+  "binary": {
+    "platform": "darwin-arm64",
+    "path": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-streaming-v1/bin/p61_isogeny_class-darwin-arm64-d06472954",
+    "sha256": "81c1a5b8897bcc39fd20c6427e17eb73d9160d838bb001f82810de4272579e82",
+    "bytes": 2093568,
+    "build_command": "env CARGO_TARGET_DIR=/Volumes/SSD990-2/crypto/target-p61-d064-20261014 cargo build --release --bin p61_isogeny_class",
+    "build_status": "pass"
+  },
+  "preserved_build_failure": {
+    "command": "cargo build --release --bin p61_isogeny_class",
+    "status": "infrastructure_failure",
+    "error": "No space left on device (os error 28)",
+    "available_bytes_human": "187 MiB",
+    "details": "build-attempts.json"
+  },
+  "tests": {
+    "touched_binaries": {
+      "command": "cargo test --release --bin p61_isogeny_class --bin p61_isogeny_audit",
+      "status": "pass",
+      "auditor_passed": 6,
+      "failed": 0
+    },
+    "continuation_runner": {
+      "command": "python3 -m unittest -v test_run_remaining_census.py",
+      "status": "pass",
+      "passed": 3,
+      "failed": 0,
+      "plan_only_smoke": "pass"
+    },
+    "whole_library_default_parallel": {
+      "status": "non_green",
+      "attempts": 2,
+      "failure_counts": [2, 3],
+      "isolated_replays_of_all_exposed_failures": "pass"
+    },
+    "whole_library_serial": {
+      "command": "cargo test --release --lib -- --test-threads=1",
+      "status": "pass",
+      "passed": 4079,
+      "failed": 0,
+      "ignored": 114,
+      "elapsed_seconds": 2765.68
+    },
+    "details": "test-results.json"
+  },
+  "replay_configuration": {
+    "threads": 8,
+    "audit_points": 2,
+    "audit_seed_x": 7,
+    "distinct_from_generation_audit": true
+  },
+  "admitted_replays": [
+    {
+      "x_start": 0,
+      "x_end": 32,
+      "records": 576,
+      "receipt": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-streaming-v1/verification-d064/pilot-v4-parallel-verify-000000000000-000000000032.json",
+      "receipt_sha256": "b24697c9e8fbb53e594864406c3f4c98a6aeb5cd2d349b9c3b3951e0e06f79a3"
+    },
+    {
+      "x_start": 32,
+      "x_end": 64,
+      "records": 576,
+      "receipt": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-streaming-v1/verification-d064/pilot-v4-parallel-verify-000000000032-000000000064.json",
+      "receipt_sha256": "696d05717de484db6fe2dd92abbf6cf5fd2563e565555d7f560351cb7f5a0a8d"
+    },
+    {
+      "x_start": 64,
+      "x_end": 320,
+      "records": 4608,
+      "receipt": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-streaming-v1/verification/certified-v1-verify-000000000064-000000000320.json",
+      "receipt_sha256": "2b11175e2cd775cac030fa5e38ef11f67b536a42a69a56bd01c646500f0da8a6"
+    },
+    {
+      "x_start": 320,
+      "x_end": 16704,
+      "records": 294912,
+      "receipt": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-streaming-v1/verification/certified-v2-verify-000000000320-000000016704.json",
+      "receipt_sha256": "93a36eeccdf6b821d4ffd8bebd552975ea2e0daa826672b2eb0dc88f95751dd8"
+    }
+  ],
+  "admission": {
+    "prefix_records": 300672,
+    "prefix_x_start": 0,
+    "prefix_x_end": 16704,
+    "class_order": 358094304,
+    "coverage_fraction": 0.00083964474341,
+    "complete_class_coverage": false,
+    "prefix_manifest_sha256": "e26e618df5f47feabdf50534eccbe6fec7e1ba2b20581fedffec3f8a5b22a1b4",
+    "audit_receipt_sha256": "f014b8202ad435367824a5960387676bb3d568015e5e864f58cdde8c2bc069b1",
+    "duplicates": 0
+  },
+  "performance_interpretation": {
+    "status": "diagnostic_only",
+    "statement": "The large-segment replay establishes sustained operation and exact digest agreement. Shared-host variance and the missing matched c9 replay on x=320..16704 preclude a general speedup claim."
+  },
+  "nonclaims": [
+    "This release manifest does not certify complete selected-class coverage.",
+    "It does not certify selected-degree adjacency.",
+    "It does not enumerate every curve or every isogeny class over the field.",
+    "It does not establish geometry-specific incremental M7 signal.",
+    "It does not establish a general replay speedup."
+  ]
+}
