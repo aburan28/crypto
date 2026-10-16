@@ -26,6 +26,11 @@ costs.
   the line through `−R` with slope `λ` has
   `X³ + AX + B − (λ(X − x_R) + y_R)² = (X − x_R)(X² + e₁X + e₀)`, where
   `e₁ = x_R − λ²` and `e₀ = x_R² + λ²x_R + A − 2λy_R`.
+* **#11, `m = 4` function** (`quartic_norm_factor`, Amendment 3): with
+  `Q = X + q₀` and `P = (x_R + q₀)·y₀ + c₁(X − x_R) + c₂(X² − x_R²)` through
+  `−R = (x_R, y₀)`, `Q²(X³ + AX + B) − P² = (X − x_R)·G` with `G` the monic
+  quartic `quarticG`. So the leading coefficient of `G` is 1 identically,
+  not `1 − c₂²` as Amendment 2 stated.
 * **#11 counting** (`norm_chain_excess`): with `m − 1` free coefficients of
   `f`, `m` coefficients of `G`, and `2m − 1` chain unknowns and equations per
   step, there is exactly one more equation than unknown.
@@ -127,5 +132,25 @@ and `t`: exactly the single `F_p`-condition that makes relations rare. -/
 theorem norm_chain_excess (m t : Nat) (hm : 1 ≤ m) :
     chainEquations m t = chainUnknowns m t + 1 := by
   unfold chainEquations chainUnknowns; omega
+
+/-- `G = N / (X − x_R)` at `m = 4`, by synthetic division: a monic quartic. -/
+def quarticG (A B xR y0 q0 c1 c2 X : α) : α :=
+  let p0 := (xR + q0) * y0 - c1 * xR - c2 * xR ^ 2
+  let g3 := 2 * q0 - c2 ^ 2 + xR
+  let g2 := q0 ^ 2 + A - 2 * c1 * c2 + xR * g3
+  let g1 := 2 * q0 * A + B - c1 ^ 2 - 2 * c2 * p0 + xR * g2
+  let g0 := q0 ^ 2 * A + 2 * q0 * B - 2 * c1 * p0 + xR * g1
+  X ^ 4 + g3 * X ^ 3 + g2 * X ^ 2 + g1 * X + g0
+
+/-- **#11, `m = 4` norm factorization.** On `y² = x³ + Ax + B` with
+`−R = (x_R, y₀)` on the curve, the function `(X + q₀)·y − P(X)` through `−R`
+has norm `(X − x_R)·G` with `G` monic of degree 4. -/
+theorem quartic_norm_factor (A B xR y0 q0 c1 c2 X : α)
+    (hR : y0 * y0 = xR ^ 3 + A * xR + B) :
+    (X + q0) ^ 2 * (X ^ 3 + A * X + B)
+        - (c2 * X ^ 2 + c1 * X + ((xR + q0) * y0 - c1 * xR - c2 * xR ^ 2)) ^ 2 =
+      (X - xR) * quarticG A B xR y0 q0 c1 c2 X := by
+  unfold quarticG
+  grind
 
 end FactorBaseDesigns

@@ -42,6 +42,7 @@ open FactorBaseDesigns
 #print axioms lucas_double_succ
 #print axioms chain_sound
 #print axioms pencil_norm_factor
+#print axioms quartic_norm_factor
 #print axioms norm_chain_excess
 -- break-even model instances
 #print axioms BreakEven.binom_sanity

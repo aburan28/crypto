@@ -35,6 +35,7 @@
 'FactorBaseDesigns.lucas_double_succ' depends on axioms: [propext, Classical.choice, Quot.sound]
 'FactorBaseDesigns.chain_sound' depends on axioms: [propext, Classical.choice, Quot.sound]
 'FactorBaseDesigns.pencil_norm_factor' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FactorBaseDesigns.quartic_norm_factor' depends on axioms: [propext, Classical.choice, Quot.sound]
 'FactorBaseDesigns.norm_chain_excess' depends on axioms: [propext, Quot.sound]
 'FactorBaseDesigns.BreakEven.binom_sanity' does not depend on any axioms
 'FactorBaseDesigns.BreakEven.slope_one_loses' does not depend on any axioms
