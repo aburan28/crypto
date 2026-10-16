@@ -66,7 +66,7 @@ Status vocabulary:
 
 | # | design | status | Lean | experiment |
 |:--|:--|:--|:--|:--|
-| 11 | Norm-divisibility chain over a Kummer fibre (prime) | **measured: open, replication owed** (§5: at `m = 3`, D 4 vs 6 and ≈ 4× narrower matrices, same growth per bit) | `chain_sound` (soundness at each root), `pencil_norm_factor` (the `m = 2` norm factorization), `norm_chain_excess` (one more equation than unknown, every `m`) | A11 |
+| 11 | Norm-divisibility chain over a Kummer fibre (prime) | **open: better presentation, no slope change** (§5: replicates on p₂; equals its own shape null; growth per bit no flatter, steeper at `m = 4`) | `chain_sound` (soundness at each root), `pencil_norm_factor` (the `m = 2` norm factorization), `norm_chain_excess` (one more equation than unknown, every `m`) | A11, F1–F4 |
 | 12 | Binary norm chain as an auxiliary-variable solver input (credits `research/nagao_relations/` open item 1) | open | `chain_sound` applies verbatim | E12 |
 | 13 | Algebraic large prime (partial divisibility) | open | — | E13 |
 
@@ -165,6 +165,31 @@ solution checked.
 - **Owed before any further statement** (each by dated amendment): §5
   replication of A11 at `m = 3` on p₂; an A11-shape null; the `t = 5` cell
   completed; an `m = 4` series.
+
+### Amendment 2: A11 follow-up (run-20261015T2052Z)
+
+Rows: `runs/F*.jsonl`. Analysis: `runs/analysis-amendment2.txt`. Run report:
+[`reports/run-20261015T2052Z/REPORT.pdf`](reports/run-20261015T2052Z/REPORT.pdf).
+Review: [`reports/review-20261016T0130Z/REVIEW.pdf`](reports/review-20261016T0130Z/REVIEW.pdf).
+The p₂ instrument check passed. The p₁ regression is byte-identical.
+Amendment 3 fixed a wrong statement in Amendment 2 (`G` is monic at `m = 4`)
+before any row.
+
+- **F1, A11 replicates on p₂ at `m = 3`** (D 4 vs 5, 6, 6; widths about 4–6×
+  narrower). Every p₂ series has the same widths and D as on p₁, so at these
+  sizes cost is set by a system's shape, not by the prime or the curve.
+- **F2, shape, not structure:** the A11-shape null N11 matches A11's D in all
+  11 shared cells.
+- **F3:** at `m = 3, t = 5`, A11 completes (D = 5, 565 s). A0 exhausts memory.
+  With this fourth cell, A11's `m = 3` σ is 0.30 (*weak*), not 0.
+- **F4, `m = 4`: inconclusive** (2 completed cells each). A11 starts far
+  narrower, but its width grows 6.0 bits per bit against A0's 3.5, and both
+  time out at `t = 4`.
+- **Reading:** A11 is a better presentation of the Kummer fibre at small
+  depth, a constant factor that does not depend on the prime. It is not curve
+  structure, and nothing shows it changing the slope. It stays open as
+  engineering. Whether the constant survives at `m = 4`, `t ≥ 4` needs a
+  longer budget and its own amendment.
 
 ## 6. What this round does not establish
 
