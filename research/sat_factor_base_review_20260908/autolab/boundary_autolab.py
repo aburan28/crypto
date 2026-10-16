@@ -3278,19 +3278,60 @@ def launch_equal_advice(arguments: argparse.Namespace) -> dict[str, Any]:
     bl_prod = producers["bl"]
 
     with RunnerLock():
-        preflight_receipt = preflight(protocol, ledger)
-        for arm, producer in producers.items():
-            source = REPO / producer["source"]
-            preflight_receipt["checks"].append(
+        # prepare-only must work in the Python-only harness (no cargo/rustc).
+        # Full execution still requires a complete preflight.
+        if arguments.prepare_only:
+            checks: list[dict[str, Any]] = []
+            for arm, producer in producers.items():
+                source = REPO / producer["source"]
+                checks.append(
+                    {
+                        "name": f"equal_advice_producer_source_{arm}",
+                        "ok": source.is_file(),
+                        "detail": str(source),
+                    }
+                )
+            git_head_proc = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=REPO,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            checks.append(
                 {
-                    "name": f"equal_advice_producer_source_{arm}",
-                    "ok": source.is_file(),
-                    "detail": str(source),
+                    "name": "git_head",
+                    "ok": git_head_proc.returncode == 0,
+                    "detail": git_head_proc.stdout.strip(),
                 }
             )
-        preflight_receipt["ok"] = all(
-            c["ok"] for c in preflight_receipt["checks"] if c["name"] != "cryptominisat5_optional"
-        )
+            preflight_receipt = {
+                "schema_version": "1.0",
+                "task_id": TASK_ID,
+                "kind": "equal_advice_prepare_only_preflight",
+                "ok": all(c["ok"] for c in checks),
+                "checks": checks,
+                "claim_boundary": (
+                    "prepare-only scaffolding; cargo/rustc not required; "
+                    "not a fixed-arm measurement"
+                ),
+            }
+        else:
+            preflight_receipt = preflight(protocol, ledger)
+            for arm, producer in producers.items():
+                source = REPO / producer["source"]
+                preflight_receipt["checks"].append(
+                    {
+                        "name": f"equal_advice_producer_source_{arm}",
+                        "ok": source.is_file(),
+                        "detail": str(source),
+                    }
+                )
+            preflight_receipt["ok"] = all(
+                c["ok"]
+                for c in preflight_receipt["checks"]
+                if c["name"] != "cryptominisat5_optional"
+            )
         require(preflight_receipt["ok"], "preflight failed")
         git_head = next(c["detail"] for c in preflight_receipt["checks"] if c["name"] == "git_head")
         run_id = arguments.run_id or make_run_id(beat_id)
