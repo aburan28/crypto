@@ -1,0 +1,114 @@
+{
+  "schema": "ecbench.plan/v1",
+  "spec_id": "ECS1hc87634c94a65",
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation",
+        "family": "rho",
+        "params": {
+          "cap_multiple": "64"
+        },
+        "method_id": "ECM1hefea4e0ebe79",
+        "method_sha256": "efea4e0ebe79dadfedeb75106dab92e25fc26bfe282155ee0326380d4184e995",
+        "entry": "ic_boundary::rho_walk_with(NegationClasses, RhoWalk::negation())"
+      }
+    }
+  ],
+  "workloads": [
+    {
+      "workload_id": "Wd5f7dba84d0e",
+      "workload_sha256": "d5f7dba84d0ef6445edb7571e2b93e311cae77a2f3131cfe4c503dedb74958e2",
+      "curve_spec": {
+        "kind": "f2m4_torsion",
+        "m": 17,
+        "seed": 1,
+        "max_cofactor": 2
+      },
+      "curve": {
+        "slug": "icv1-f2m68-t21557348131-6341760d",
+        "icv1": "ICV1:f2m-68-f3d861aa:21557348131:295147905157795477726:0x77d0af0426d2f0a33:unk:unk:r:6341760db7cc",
+        "family": "extension",
+        "construction": "gaudry_quartic_bin::find_bin_curve(17, 1, 2)",
+        "field_degree": null,
+        "field_bits": 17,
+        "group_order": "295147905157795477726",
+        "r": "147573952578897738863",
+        "cofactor": 2,
+        "generator": [
+          "0xdf8903a99d94f737e",
+          "0x6117449cde8e1777"
+        ],
+        "automorphisms_available": 2,
+        "registered": false,
+        "ec1": null,
+        "curve_uid": null
+      },
+      "target_law": "uniform_scalar_sha256_v2",
+      "target_seed": 202610150301,
+      "target_index": 0,
+      "target": [
+        "0x8e1cddcd9dbc11e1e",
+        "0x7da10ba85a823b63a"
+      ],
+      "planted": 11381960025337385012
+    },
+    {
+      "workload_id": "W652ef8c5cfb7",
+      "workload_sha256": "652ef8c5cfb770c4d12ded7c47351ad0fc2e367bdfe29bcc9d2977815ac65225",
+      "curve_spec": {
+        "kind": "f2m4_torsion",
+        "m": 17,
+        "seed": 1,
+        "max_cofactor": 2
+      },
+      "curve": {
+        "slug": "icv1-f2m68-t21557348131-6341760d",
+        "icv1": "ICV1:f2m-68-f3d861aa:21557348131:295147905157795477726:0x77d0af0426d2f0a33:unk:unk:r:6341760db7cc",
+        "family": "extension",
+        "construction": "gaudry_quartic_bin::find_bin_curve(17, 1, 2)",
+        "field_degree": null,
+        "field_bits": 17,
+        "group_order": "295147905157795477726",
+        "r": "147573952578897738863",
+        "cofactor": 2,
+        "generator": [
+          "0xdf8903a99d94f737e",
+          "0x6117449cde8e1777"
+        ],
+        "automorphisms_available": 2,
+        "registered": false,
+        "ec1": null,
+        "curve_uid": null
+      },
+      "target_law": "uniform_scalar_sha256_v2",
+      "target_seed": 202610150301,
+      "target_index": 1,
+      "target": [
+        "0x559a15baab4e756a5",
+        "0x6fa6daf28979d7a1f"
+      ],
+      "planted": "49686867454117762437"
+    }
+  ],
+  "executions": [
+    {
+      "seq": 0,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 17619941755832365511
+    },
+    {
+      "seq": 1,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 1,
+      "algorithm_seed": 3778716907206883881
+    }
+  ]
+}
