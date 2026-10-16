@@ -53,6 +53,7 @@ cargo build --release --bin hwcost
 ./target/release/hwcost pair --runs runs/r1,runs/r2 --a fp64 --b fp64cm --min-batch 4096 \
     --threshold 0.85 --id F1prime --out runs/pair
 ./target/release/hwcost measure --fields fp64,fp64cm --out runs/r1   # a subset of fields
+./target/release/hwcost measure --fields pf64 --prime-fast-rho-bits 44 --out runs/r2  # + prime_fast::rho_parallel
 ./target/release/hwcost fit --run runs/b1 --residual-from runs/a1   # carry fitted residuals across builds
 
 # GPU profiles (SMs as cores, overlapping pipes) checked against recorded builds.
@@ -67,7 +68,13 @@ cargo build --release --bin hwcost
 Fields `fp64bf` and `fp64cm` are `Fp64` with the reduction's and the
 subtraction's selections written as masks and as
 `std::hint::select_unpredictable`; results are bit for bit `Fp64`'s. Only
-`fp64cm` changes the machine code (round 2, F3).
+`fp64cm` changes the machine code (round 2, F3), and production `Fp64` has
+used the same selections since
+[`research/fp64_branchfree_20261016/`](../../research/fp64_branchfree_20261016/).
+Field `pf64` times `prime_fast::Fp64` (`p < 2⁶²`, the production prime-field
+rho's arithmetic) at 2⁶² − 57, and `--prime-fast-rho-bits` adds an arm
+`pfrho.<bits>`: `prime_fast::rho_parallel` end to end, ns per walk step.
+`hwcost rho` prices groups on `fp64` and `w1`–`w4` only.
 
 ## Profile (`hwcost.hardware.v1`)
 

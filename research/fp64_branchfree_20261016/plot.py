@@ -124,7 +124,10 @@ if any(samples.values()):
 dis = RUNS / "disasm" / "counts.csv"
 if dis.exists():
     cnt = read_csv(dis)
-    fig, ax = plt.subplots(figsize=(8, 3.6))
+    rw = RUNS / "disasm" / "rho_worker_counts.csv"
+    if rw.exists():
+        cnt += [x for x in read_csv(rw) if "closure" not in x["function"]]
+    fig, ax = plt.subplots(figsize=(9, 3.8))
     w = 0.25
     xs = range(len(cnt))
     for k, (col, c) in enumerate([("jcc", "#d1495b"), ("cmov", "#2e8540"), ("mulx", "#e1a100")]):
@@ -132,10 +135,10 @@ if dis.exists():
     for i, x in enumerate(cnt):
         ax.text(i, max(int(x["jcc"]), int(x["cmov"])) + 1, f"{x['instructions']} ins", ha="center", fontsize=6.5)
     ax.set_xticks(list(xs))
-    ax.set_xticklabels([f"{x['label']}\n{x['function']}" for x in cnt], fontsize=7)
+    ax.set_xticklabels([f"{x['label']}\n{x['function'].replace('prime_fast::', '')}" for x in cnt], fontsize=7)
     ax.set_ylim(0, 1.2 * max(int(x[k]) for x in cnt for k in ("jcc", "cmov")) + 3)
     ax.set_ylabel("instructions in the function")
-    ax.set_title("objdump -d of the non-inlined kernel step (runs/disasm)", fontsize=8)
+    ax.set_title("objdump -d (runs/disasm): hwcost's non-inlined kernel step, and prime_fast::rho_worker\n(the production rho's loop; step_pf64 is linked in neither binary)", fontsize=8)
     ax.legend(fontsize=7)
     ax.grid(axis="y", alpha=0.3)
     save(fig, "fig_disasm")

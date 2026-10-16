@@ -571,12 +571,6 @@ pub fn step_fp64cm(a: &Fp64Cm, w: &mut Walks<u64>, t: &Table<u64>, dp_mask: u64)
     step(a, w, t, dp_mask)
 }
 
-/// [`step`] through [`PrimeFast`], as [`step_fp64`].
-#[inline(never)]
-pub fn step_pf64(a: &PrimeFast, w: &mut Walks<u64>, t: &Table<u64>, dp_mask: u64) {
-    step(a, w, t, dp_mask)
-}
-
 /// One step through each wrapper from the same walks must agree (run by
 /// `hwcost measure`'s gate, which also keeps both symbols in the binary).
 pub fn check_wrappers(f: &Fp64, seed: u64) -> Result<(), String> {
