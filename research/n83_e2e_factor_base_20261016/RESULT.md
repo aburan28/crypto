@@ -2,8 +2,9 @@
 
 K1104 with the dynamic exact one-root index completed one fresh-process
 single-target solve in **97.394 s** on the GitHub Actions cloud allocation.
-The K1152 A/B control averaged **100.694 s**, a 3.301 s or 3.28% longer
-cold process interval on this exposed point. K1108 (98.097 s) and K1120
+The K1152 A/B control averaged **100.694 s**; K1104 was 3.301 s or 3.28%
+below that baseline on this exposed point (cold-time ratio 1.0339). K1108
+(98.097 s) and K1120
 (98.387 s) are the next two values under the frozen ranking rule. All 21
 IC arms, the same-point rho arm, source/resource checks, complete factor-base
 reconstruction, four-point relation checks and scalar replay passed. The
