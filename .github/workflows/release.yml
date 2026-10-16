@@ -268,6 +268,7 @@ jobs:
       # Keep Cargo output outside the package tree while it is fingerprinted.
       # `runner.temp` is not available in job-level `env`, so set it per job.
       - name: Keep Cargo output outside the package tree
+        shell: bash
         run: echo "CARGO_TARGET_DIR=$RUNNER_TEMP/isogeny-target" >> "$GITHUB_ENV"
       - name: Require successful scope classification
         if: needs.scope.result != 'success' || needs.meta.result != 'success'
