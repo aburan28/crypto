@@ -478,8 +478,18 @@ jobs:
           path: dist/*
           if-no-files-found: error
 
+  release-assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test binary asset publication
+        run: |
+          bash -n .github/scripts/publish_release_assets.sh .github/scripts/test_publish_release_assets.sh
+          bash .github/scripts/test_publish_release_assets.sh
+
   release:
-    needs: [meta, rust, native, cuda, isogeny]
+    needs: [meta, rust, native, cuda, isogeny, release-assets]
     # Dry runs build and stage everything, then stop short of publishing.
     # The ref test is not redundant with the event test: workflow_dispatch
     # can be started from any branch, and a release tagged `-main.` that
@@ -494,8 +504,6 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: staging
-      - name: Test binary asset publication
-        run: bash .github/scripts/test_publish_release_assets.sh
       - name: Collect the archives and checksum them
         id: assets
         run: |
