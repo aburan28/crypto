@@ -4,51 +4,53 @@
   "complete_primary_expected": 2160,
   "groups": {
     "crossover/crater-cm": {
-      "attempts": 6,
-      "completed": 6,
+      "attempts": 60,
+      "completed": 60,
       "mean_group_ops_per_sqrt_r": null,
-      "mean_native_cpu_seconds": 86.997726829,
-      "mean_observed_queries": 186028274.5,
+      "mean_native_cpu_seconds": 96.63521000045002,
+      "mean_observed_queries": 203375024.48333332,
       "mean_process_cpu_per_group_op": null,
-      "mean_process_cpu_seconds": 87.185,
-      "restricted_mean_query_lower": 186028274.5,
-      "restricted_mean_query_upper": 186028274.5,
+      "mean_process_cpu_seconds": 96.80833333333337,
+      "restricted_mean_query_lower": 203375024.48333332,
+      "restricted_mean_query_upper": 220221524.75,
       "statuses": {
-        "PASS": 6
+        "PASS": 58,
+        "TIME_LIMIT": 2
       },
-      "verified": 6
+      "verified": 58
     },
     "crossover/crater-recurrence": {
-      "attempts": 6,
-      "completed": 6,
+      "attempts": 61,
+      "completed": 61,
       "mean_group_ops_per_sqrt_r": null,
-      "mean_native_cpu_seconds": 88.29746921166667,
-      "mean_observed_queries": 186028274.5,
+      "mean_native_cpu_seconds": 96.46789181378688,
+      "mean_observed_queries": 202772901.96721312,
       "mean_process_cpu_per_group_op": null,
-      "mean_process_cpu_seconds": 88.48833333333333,
-      "restricted_mean_query_lower": 186028274.5,
-      "restricted_mean_query_upper": 186028274.5,
+      "mean_process_cpu_seconds": 96.63950819672131,
+      "restricted_mean_query_lower": 202772901.96721312,
+      "restricted_mean_query_upper": 219010753.24590164,
       "statuses": {
-        "PASS": 6
+        "PASS": 59,
+        "TIME_LIMIT": 2
       },
-      "verified": 6
+      "verified": 59
     },
     "crossover/floor-recurrence": {
-      "attempts": 5,
-      "completed": 5,
+      "attempts": 61,
+      "completed": 61,
       "mean_group_ops_per_sqrt_r": null,
-      "mean_native_cpu_seconds": 89.646870015,
-      "mean_observed_queries": 199536800.8,
+      "mean_native_cpu_seconds": 102.53718465508193,
+      "mean_observed_queries": 217696910.80327868,
       "mean_process_cpu_per_group_op": null,
-      "mean_process_cpu_seconds": 89.85199999999999,
-      "restricted_mean_query_lower": 199536800.8,
-      "restricted_mean_query_upper": 199536800.8,
+      "mean_process_cpu_seconds": 102.71606557377045,
+      "restricted_mean_query_lower": 217696910.80327868,
+      "restricted_mean_query_upper": 217696910.80327868,
       "statuses": {
-        "PASS": 5
+        "PASS": 61
       },
-      "verified": 5
+      "verified": 61
     }
   },
   "schema": "conductor-followup.progress/v1",
-  "sealed_attempts": 17
+  "sealed_attempts": 182
 }
