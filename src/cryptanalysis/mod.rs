@@ -323,6 +323,7 @@ pub mod subfield_fp3;
 pub mod symmetrized_semaev;
 pub mod tls12_kdf;
 pub mod tls13_kdf;
+pub mod two_sylow_search;
 pub mod visual_demos;
 pub mod visualize;
 pub mod wdsat_oracle;
