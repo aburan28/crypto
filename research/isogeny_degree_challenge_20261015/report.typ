@@ -1,9 +1,15 @@
 #set page(paper: "us-letter", margin: 0.7in, numbering: "1")
-#set text(font: "DejaVu Sans", size: 10pt)
+#set text(font: "Libertinus Serif", size: 10pt)
 #set par(justify: false)
 #let run = sys.inputs.at("run")
 #let data = json(run + "/audit.json")
 #let freeze = json(run + "/freeze.json")
+#let wrapped_id(value) = {
+  for start in range(0, value.len(), step: 36) {
+    text(size: 8pt, value.slice(start, calc.min(start + 36, value.len())))
+    if start + 36 < value.len() { linebreak() }
+  }
+}
 #align(center)[#text(size: 22pt, weight: "bold")[Prime Degree Frontier]\
 Native challenge and admission controls · 15 October 2026]
 
@@ -20,6 +26,7 @@ leaderboard build runs fresh independent replay; saved scores never enter rankin
   [Run host], [#freeze.host],
   [Run scope], [Correctness/admission controls on a shared host; no throughput comparison.],
 )
+#link("https://github.com/aburan28/crypto/blob/" + freeze.source_commit + "/tools/isogeny-cli/src/challenge.rs")[Frozen judge source] · #link("audit.json")[Native audit] · #link("raw.tar.gz")[Raw packet]
 
 = Observed coverage and controls
 #table(columns: (3fr, 1fr), inset: 5pt,
@@ -42,7 +49,7 @@ These controls contribute zero new discoveries. A forged saved score is rejected
   #text(size: 8pt)[Exact source: #control.source_icv1; verified degree #control.prime_degree.]\
 ]
 
-#figure(image(run + "/admission.svg", width: 100%),
+#figure(image(run + "/admission.svg", width: 78%),
   caption: [Native admission-control flow. Roster and control counts come from audit.json.])
 
 #pagebreak()
@@ -69,6 +76,32 @@ u64 prime degrees only when the full explicit artifact fits the byte and
 verification limits. These implementation limits do not prove nonexistence.
 External constructor costs are not independently attested or used as a tiebreak.
 
+#if data.starting_curve_rows.len() > 0 [
+  #pagebreak()
+  = Fresh starting leaderboard
+  These historical maps were replayed again under this run's pinned season.
+  Each degree scores only its own exact source. The short-budget P192/10453
+  control returned #data.short_budget_control.status with no score; the
+  full-budget leaderboard used a separate fresh replay.
+  #table(columns: (3fr, 0.7fr, 0.9fr, 0.5fr), inset: 5pt,
+    [Exact source ICV1], [Prime degree], [Coverage], [Maps],
+    ..data.starting_curve_rows.map(r => (wrapped_id(r.source_icv1), r.prime_degree, r.coverage, str(r.map_count))).flatten(),
+  )
+  Every admitted map passed the independent kernel, codomain and exact-map
+  checks plus twenty public scalar transports. Re-admitting an existing map
+  contributes zero additional discoveries. The other roster rows stay unscored.
+  #link("raw.tar.gz")[Raw packet and fresh per-entry certificates]
+  #parbreak()
+  #for row in data.starting_curve_rows [
+    #text(size: 8pt)[Degree #row.prime_degree: #row.source_icv1]
+    #linebreak()
+    #for target in row.targets [
+      #text(size: 8pt)[→ #target]
+      #linebreak()
+    ]
+  ]
+]
+
 = Reproduction and evidence
 Use the dedicated ReleaseMe #raw("isogeny") executable. The runtime embeds its
 catalogue, rules, constructor and replay engines and requires no Cargo checkout.
@@ -77,9 +110,10 @@ Publication of this new command remains subject to the main release workflow.
 #raw("isogeny challenge policy\nisogeny challenge plan --curve all --from 10454 --to 65537\nisogeny challenge run --curve p192 --ell 13 --out fresh-control\nisogeny challenge judge --input submission --out fresh-judge\nisogeny challenge leaderboard --input submissions.json --out fresh-board", block: true)
 
 Source-linked evidence lives beside this report: audit.json, freeze.json,
-policy.json, plan.json, raw native control packets, the fresh historical-anchor
-replay and validation logs. The Markdown report identifies exact archive paths
-and test outcomes. audit.rs reproduces coverage and rejection counts.
+compressed policy/plan JSON and the complete raw archive. That archive contains
+the native control packets, historical-anchor replay and attempt receipts.
+The Markdown report identifies exact archive paths and test outcomes.
+audit.rs reproduces coverage and rejection counts.
 
 = Limits and related graphics
 This is a challenge for pinned registered models, not a worldwide-record claim

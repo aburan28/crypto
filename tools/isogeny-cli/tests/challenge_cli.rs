@@ -180,6 +180,7 @@ fn native_challenge_replays_maps_rejects_forgery_and_ranks_curves_separately() {
         "compact-only",
         "traversal",
         "missing-hash",
+        "duplicate-kernel",
     ] {
         let input = clone_artifact(&original, &root.join(format!("bad-{kind}")));
         match kind {
@@ -204,6 +205,9 @@ fn native_challenge_replays_maps_rejects_forgery_and_ranks_curves_separately() {
             }),
             "compact-only" => alter_map(&input, |j| {
                 j["result"]["isogenies"][0]["x_map"] = json!({"ideal":"claimed compact map"});
+            }),
+            "duplicate-kernel" => alter_map(&input, |j| {
+                j["result"]["isogenies"][1] = j["result"]["isogenies"][0].clone();
             }),
             "traversal" => {
                 let mut j = read(&input.join("search.json"));

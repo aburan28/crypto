@@ -50,3 +50,9 @@ admission controls, not distinct discoveries. Also judge the historical
 P192/10453 artifact with a one-second replay budget before its full-budget
 leaderboard admission; retain the actual result, including censorship, without
 changing its mathematical validity classification.
+
+The final starting leaderboard also includes the committed P224/1471 artifact
+alongside P192/10453 and the P521/7 control. Each is freshly replayed from its
+raw map under the final rules. The historical map sources are pinned to commit
+3515af45efc81beadc1ce213fa88a7eb7419487f. These re-admissions seed separate curve
+rows and do not count as additional discoveries.

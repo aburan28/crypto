@@ -1,10 +1,10 @@
 #set page(paper: "us-letter", margin: 0.7in, numbering: "1")
-#set text(font: "DejaVu Sans", size: 10pt)
+#set text(font: "Libertinus Serif", size: 10pt)
 #let run = sys.inputs.at("run")
 #let freeze = json(run + "/freeze.json")
 #let entry = json(run + "/controls/p192/RESULT.json")
 #let child = json(run + "/controls/p192/judgement/verification.json")
-#let policy = json(run + "/policy.json")
+#let policy = json(run + "/policy-summary.json")
 #align(center)[#text(size: 21pt, weight: "bold")[Prime Degree Frontier]\
 Failed admission-control run · 2026-10-15T23:25Z]
 
@@ -24,6 +24,7 @@ passing packet and later corrected rerun are separate evidence.
   [Resource receipt], [#entry.verification.status],
   [Replay child output], [#child.status],
 )
+#link("https://github.com/aburan28/crypto/blob/" + freeze.source_commit + "/tools/isogeny-cli/src/challenge.rs")[Frozen judge source] · #link("raw.tar.gz")[Raw failed packet] · #link("controls/p192/judgement/verification.json")[Exact source/target certificate]
 
 = Observations and cause
 The child emitted a passing independent certificate, but the supervising parent

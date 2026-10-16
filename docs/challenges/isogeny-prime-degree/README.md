@@ -11,6 +11,11 @@ The roster is the pinned catalogue's prime-field models with nonempty
 Registered research descendants and benchmark models do not enter the standard
 curve leaderboard. The complete catalogue remains available through `isogeny curves`.
 
+The [starting leaderboard](leaderboard.json) has all 54 standard prime models.
+Fresh replay admits the historical P192/10453, P224/1471 and P521/7 entries;
+the other rows remain unscored. The [native evidence report](../../../research/isogeny_degree_challenge_20261015/README.md)
+retains the exact source/target identities, rules, raw maps and certificates.
+
 This is an open-ended computational challenge. There is no finite largest
 isogeny degree in mathematics. A result here is a record for the pinned
 challenge catalogue and verifier, not a worldwide record or an upper bound.
