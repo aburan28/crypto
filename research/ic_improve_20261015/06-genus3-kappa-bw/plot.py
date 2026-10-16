@@ -84,7 +84,7 @@ ax3.set_xscale("log", base=2)
 ax3.set_xlabel("kappa (factor base = kappa q^(2/3))")
 ax3.set_ylabel("training whole cost / minimum at that size")
 import math
-sched = ", ".join(f"{b}: {math.exp(T['alpha'] + T['beta'] * (b - 20)):.2f}" for b in (12, 16, 20, 22))
+sched = ", ".join(f"{b}: {math.exp(T['alpha'] + T['beta'] * (b - 20)):.2f}" for b in (12, 16, 20, 21))
 ax3.set_title(f"(d) Training curves 5-7: kappa(b) = {math.exp(T['alpha']):.3f} x {math.exp(T['beta']):.3f}^(b-20)\n(b {sched})", fontsize=10)
 ax3.legend(fontsize=7)
 ax3.grid(alpha=0.3, which="both")
