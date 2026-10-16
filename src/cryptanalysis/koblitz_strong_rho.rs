@@ -190,6 +190,12 @@ pub trait RhoScalar:
     fn bit(self, i: u32) -> bool;
     fn mul_ctx(m: Self) -> Self::MulCtx;
     fn mul_in(ctx: &Self::MulCtx, a: Self, b: Self) -> Self;
+    /// A multiplier fixed in advance, for many products `a·w mod m` with one
+    /// `w` (the orbit multipliers `±λ^k`).
+    type Fixed: Copy + Send + Sync;
+    fn fixed(ctx: &Self::MulCtx, w: Self) -> Self::Fixed;
+    /// `a·w mod m` for `a < m`: the same value as `mul_in(ctx, a, w)`.
+    fn mul_fixed(ctx: &Self::MulCtx, a: Self, w: Self::Fixed) -> Self;
     fn mul_mod(a: Self, b: Self, m: Self) -> Self;
     fn add_mod(a: Self, b: Self, m: Self) -> Self;
     fn sub_mod(a: Self, b: Self, m: Self) -> Self;
@@ -230,6 +236,34 @@ impl RhoScalar for u64 {
     #[inline(always)]
     fn mul_in(ctx: &MulMod, a: Self, b: Self) -> Self {
         ctx.mul(a, b)
+    }
+    /// `w` with Shoup's `w' = ⌊w·2^64 / m⌋` when `m < 2^63` (else 0, unused).
+    type Fixed = (u64, u64);
+    fn fixed(ctx: &MulMod, w: Self) -> (u64, u64) {
+        debug_assert!(w < ctx.m);
+        let shoup = if ctx.m < 1 << 63 {
+            ((u128::from(w) << 64) / u128::from(ctx.m)) as u64
+        } else {
+            0
+        };
+        (w, shoup)
+    }
+    /// Shoup's fixed-operand product: `q = ⌊a·w' / 2^64⌋` undercounts `⌊a·w / m⌋`
+    /// by at most one, so `a·w − q·m` lies in `[0, 2m)` and one conditional
+    /// subtraction finishes it.  Exact, for `a, w < m < 2^63`.
+    #[inline(always)]
+    fn mul_fixed(ctx: &MulMod, a: Self, (w, shoup): (u64, u64)) -> Self {
+        debug_assert!(a < ctx.m && w < ctx.m);
+        if ctx.m >= 1 << 63 {
+            return ctx.mul(a, w);
+        }
+        let q = ((u128::from(a) * u128::from(shoup)) >> 64) as u64;
+        let r = a.wrapping_mul(w).wrapping_sub(q.wrapping_mul(ctx.m));
+        if r >= ctx.m {
+            r - ctx.m
+        } else {
+            r
+        }
     }
     fn mul_mod(a: Self, b: Self, m: Self) -> Self {
         mul_mod(a, b, m)
@@ -324,6 +358,14 @@ impl RhoScalar for u128 {
     #[inline(always)]
     fn mul_in(m: &u128, a: Self, b: Self) -> Self {
         mul_mod_u128(a, b, *m)
+    }
+    type Fixed = u128;
+    fn fixed(_: &u128, w: Self) -> u128 {
+        w
+    }
+    #[inline(always)]
+    fn mul_fixed(m: &u128, a: Self, w: u128) -> Self {
+        mul_mod_u128(a, w, *m)
     }
     fn mul_mod(a: Self, b: Self, m: Self) -> Self {
         mul_mod_u128(a % m, b % m, m)
@@ -655,11 +697,12 @@ impl<E: FieldWord> NormalBasis<E> {
         unreachable!("every finite field has a normal basis")
     }
 
+    /// `v` rotated left by `k` within `n` bits, for `v < 2^n` and `k ≤ n`:
+    /// at `k = 0` the right shift by `n < BITS` contributes nothing, so no
+    /// branch is needed.
     #[inline(always)]
     fn rotate(&self, v: E, k: u32) -> E {
-        if k == 0 {
-            return v;
-        }
+        debug_assert!(k <= self.n && v & self.mask == v);
         ((v << k) | (v >> (self.n - k))) & self.mask
     }
 
@@ -739,7 +782,10 @@ impl MulMod {
         if !self.fast {
             return ((a as u128 * b as u128) % self.m as u128) as u64;
         }
-        let q = ((a as f64) * (b as f64) * self.inv) as u64;
+        // Every operand and the quotient are below 2^50, so they convert
+        // through `i64` exactly, and that is one instruction each way on
+        // baseline x86-64 where `u64` <-> `f64` is a branchy sequence.
+        let q = ((a as i64 as f64) * (b as i64 as f64) * self.inv) as i64 as u64;
         let r = a.wrapping_mul(b).wrapping_sub(q.wrapping_mul(self.m)) as i64;
         let m = self.m as i64;
         (if r < 0 {
@@ -876,7 +922,10 @@ pub struct StrongRhoG<F: RhoField, S: RhoScalar> {
     lambda: S,
     automorphisms: usize,
     generator: RawPointG<F::E>,
-    lam_pow: Vec<S>,
+    /// `λ^k` and `−λ^k`, the orbit multipliers, prepared for
+    /// [`RhoScalar::mul_fixed`].
+    lam_fixed: Vec<S::Fixed>,
+    neg_lam_fixed: Vec<S::Fixed>,
     mm: S::MulCtx,
 }
 
@@ -919,6 +968,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
     ) -> Self {
         let n = gf.degree();
         let nb = NormalBasis::new(&gf);
+        let mm = S::mul_ctx(modulus);
         let mut lam_pow = Vec::with_capacity(n as usize);
         let mut cur = S::one();
         let mut orbit = BTreeSet::new();
@@ -938,8 +988,12 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
             lambda,
             automorphisms: orbit.len(),
             generator,
-            lam_pow,
-            mm: S::mul_ctx(modulus),
+            lam_fixed: lam_pow.iter().map(|&l| S::fixed(&mm, l)).collect(),
+            neg_lam_fixed: lam_pow
+                .iter()
+                .map(|&l| S::fixed(&mm, S::sub_mod(S::zero(), l, modulus)))
+                .collect(),
+            mm,
         }
     }
 
@@ -954,6 +1008,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
     ) -> Self {
         let n = gf.degree();
         let nb = NormalBasis::new(&gf);
+        let mm = S::mul_ctx(modulus);
         Self {
             n,
             curve_a,
@@ -963,8 +1018,12 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
             lambda: S::one(),
             automorphisms: 2,
             generator,
-            lam_pow: vec![S::one(); n as usize],
-            mm: S::mul_ctx(modulus),
+            lam_fixed: vec![S::fixed(&mm, S::one()); n as usize],
+            neg_lam_fixed: vec![
+                S::fixed(&mm, S::sub_mod(S::zero(), S::one(), modulus));
+                n as usize
+            ],
+            mm,
         }
     }
 
@@ -1141,6 +1200,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
 
     /// Canonical representative of the signed-Frobenius orbit of the state's
     /// point, with `a, b` multiplied by the orbit multiplier `±λ^k`.
+    #[inline(always)]
     pub fn canonicalize(&self, state: WalkStateG<F::E, S>) -> WalkStateG<F::E, S> {
         let RawPointG::Affine { x, y } = state.point else {
             return state;
@@ -1148,26 +1208,26 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
         let nb = &self.nb;
         let (xc, yc) = nb.to_normal.apply2(x, y);
         let (best, best_k, tie) = nb.least_rotation(xc);
-        let (k, negated) = if tie {
-            self.choice_exhaustive(xc, yc)
+        // Outside a tie the least rotation is `x_k` itself and the sign test
+        // has already rotated `y`, so neither is computed twice.
+        let (k, negated, xk, yk) = if tie {
+            let (k, negated) = self.choice_exhaustive(xc, yc);
+            (k, negated, nb.rotate(xc, k), nb.rotate(yc, k))
         } else {
             let yk = nb.rotate(yc, best_k);
-            (best_k, (yk ^ best) < yk)
+            (best_k, (yk ^ best) < yk, best, yk)
         };
-        let xk = nb.rotate(xc, k);
-        let yk = nb.rotate(yc, k);
         let yk = if negated { yk ^ xk } else { yk };
-        let lam = self.lam_pow[k as usize];
         let multiplier = if negated {
-            S::sub_mod(S::zero(), lam, self.modulus)
+            self.neg_lam_fixed[k as usize]
         } else {
-            lam
+            self.lam_fixed[k as usize]
         };
         let (x, y) = nb.to_poly.apply2(xk, yk);
         WalkStateG {
             point: RawPointG::Affine { x, y },
-            a: S::mul_in(&self.mm, state.a, multiplier),
-            b: S::mul_in(&self.mm, state.b, multiplier),
+            a: S::mul_fixed(&self.mm, state.a, multiplier),
+            b: S::mul_fixed(&self.mm, state.b, multiplier),
         }
     }
 
@@ -1558,6 +1618,51 @@ mod tests {
                 assert_eq!(mm.mul(a, b), mul_mod(a, b, m), "m={m}");
             }
             assert_eq!(mm.mul(m - 1, m - 1), mul_mod(m - 1, m - 1, m));
+        }
+    }
+
+    /// Shoup's fixed-operand product equals the plain product, on both sides
+    /// of the `2^63` bound where it hands over to [`MulMod`] and at the
+    /// extreme operands; the wide scalar's `Fixed` is the plain product.
+    #[test]
+    fn fixed_multipliers_match_the_plain_product() {
+        let mut rng = StdRng::seed_from_u64(11);
+        for m in [
+            3u64,
+            97,
+            1 << 20,
+            (1 << 50) - 3,
+            (1 << 62) + 7,
+            (1 << 63) - 25,
+            (1 << 63) + 29,
+            u64::MAX - 58,
+        ] {
+            let mm = <u64 as RhoScalar>::mul_ctx(m);
+            let extremes = [0, 1, m / 2, m - 2, m - 1];
+            let mut ws: Vec<u64> = extremes.to_vec();
+            ws.extend((0..40).map(|_| rng.gen_range(0..m)));
+            for &w in &ws {
+                let fw = <u64 as RhoScalar>::fixed(&mm, w);
+                let mut avs: Vec<u64> = extremes.to_vec();
+                avs.extend((0..500).map(|_| rng.gen_range(0..m)));
+                for a in avs {
+                    assert_eq!(
+                        <u64 as RhoScalar>::mul_fixed(&mm, a, fw),
+                        mul_mod(a, w, m),
+                        "m={m} a={a} w={w}"
+                    );
+                }
+            }
+        }
+        let m: u128 = (1 << 100) + 277;
+        let ctx = <u128 as RhoScalar>::mul_ctx(m);
+        for _ in 0..2_000 {
+            let (a, w) = (rng.gen_range(0..m), rng.gen_range(0..m));
+            let fw = <u128 as RhoScalar>::fixed(&ctx, w);
+            assert_eq!(
+                <u128 as RhoScalar>::mul_fixed(&ctx, a, fw),
+                mul_mod_u128(a, w, m)
+            );
         }
     }
 

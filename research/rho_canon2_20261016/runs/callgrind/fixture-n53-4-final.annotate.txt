@@ -1,0 +1,36 @@
+--------------------------------------------------------------------------------
+Profile data file 'final.cg' (creator: callgrind-3.22.0)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 0 - 262960243
+Trigger: Program termination
+Profiled target:  koblitz_rho_fixture-inline 53 0 signed_frobenius 4 strong (PID 7339, part 1)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       99.5
+Include dirs:     
+User annotated:   
+Auto-annotation:  on
+
+--------------------------------------------------------------------------------
+Ir                     
+--------------------------------------------------------------------------------
+2,369,298,800 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                      file:function
+--------------------------------------------------------------------------------
+1,724,668,699 (72.79%)  ???:<crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::solve 
+  202,328,052 ( 8.54%)  ???:<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::batch_inv_clmul 
+  178,012,155 ( 7.51%)  ???:<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::mul_fold 
+  130,033,238 ( 5.49%)  ???:<crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::inv 
+   70,301,335 ( 2.97%)  ???:<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::inv_clmul 
+   20,181,813 ( 0.85%)  ???:<hashbrown::map::HashMap<(u8, u64, u64), (u64, u64), core::hash::BuildHasherDefault<crypto_lib::cryptanalysis::koblitz_strong_rho::KeyHasher>>>::insert 
+   13,816,019 ( 0.58%)  ???:<crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::add 
+   12,750,520 ( 0.54%)  ???:<hashbrown::raw::RawTable<((u8, u64, u64), (u64, u64))>>::reserve_rehash::<hashbrown::map::make_hasher<(u8, u64, u64), (u64, u64), core::hash::BuildHasherDefault<crypto_lib::cryptanalysis::koblitz_strong_rho::KeyHasher>>::{closure#0}> 
+    3,529,085 ( 0.15%)  ???:crypto_lib::binary_ecc::f2m::reduce_words 
+    1,921,907 ( 0.08%)  ???:<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::inv 
+
