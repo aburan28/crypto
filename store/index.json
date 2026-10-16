@@ -1,6 +1,18 @@
 {
   "schema": "crypto.store-index/v1",
   "entries": {
+    "factor-base-traces/historical-20261015/all-384.zip": {
+      "sha256": "531fd60acf09a591c097608f5496b8b5dc4551621b1a2d462a4dcffc6fdc1b85",
+      "bytes": 2462002,
+      "description": "Exact historical ordered representatives and signed lookup caches; not a new research run",
+      "provenance": "Frozen PR 1898 results/generic.json SHA256 07ee0c22dcb48969581739bdc91e4ff6c78a4ad86d52ba6792d773fa3778e248; additive native import"
+    },
+    "factor-base-traces/historical-20261015/registered-20261016.zip": {
+      "sha256": "923579b932103882f85b4475118a5edc7404fa4138823c1bdd59a633ca6f9c9c",
+      "bytes": 2462662,
+      "description": "Public PR 1898 historical points and lookup caches with registered ICV1 model metadata",
+      "provenance": "Public GitHub source archive blob 1bcddc5fb363a0f9813b9f5fffff79d8454fbe18 at PR 1898 merge 1f7e567ab4adad212253d2b56c906c5342dbec3e; frozen generic source SHA256 07ee0c22dcb48969581739bdc91e4ff6c78a4ad86d52ba6792d773fa3778e248; point/order/cache bytes unchanged; new immutable object only, no replacement"
+    },
     "factor-bases/icv1-f2m11-t67-05f5aa36/FB1h5862f57f8b31.json": {
       "sha256": "861f6cc20ba939db435cd220411cfe86eb1722d12e04456494130745340c7d80",
       "bytes": 3051,
