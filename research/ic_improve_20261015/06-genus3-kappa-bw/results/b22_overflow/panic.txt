@@ -1,0 +1,8 @@
+thread 'main' (10972) panicked at examples/ic_improve2_06_genus3_kappa_bw.rs:885:27:
+called `Result::unwrap()` on an `Err` value: ParseIntError { kind: PosOverflow }
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+   1: core::panicking::panic_fmt
+   2: core::result::unwrap_failed
+   3: ic_improve2_06_genus3_kappa_bw::build_instance
+--

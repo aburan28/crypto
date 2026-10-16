@@ -1,0 +1,25 @@
+ops (ok): ic-orbit-c2-renew / ic-orbit-c2-walk = 0.5556 [0.525, 0.591] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 0.7505 [0.688, 0.814]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 0.00%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-orbit-c2-renew / ic-orbit-c2-walk | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m19-t797-b6cf2467 | 17.00 | 16 | 0.5556 | [0.5247, 0.5908] | cluster |
+
+| workload | curve | log2 r | ic-orbit-c2-walk mean S | ic-orbit-c2-renew mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W0a738a7d0e53 | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.9988 | 2.0707 | 0.5178 |
+| W14f4a4fdca25 | icv1-f2m19-t797-b6cf2467 | 17.00 | 4.6165 | 2.2770 | 0.4932 |
+| W25a3e0cf977d | icv1-f2m19-t797-b6cf2467 | 17.00 | 4.2703 | 2.3285 | 0.5453 |
+| W2827f3bfad98 | icv1-f2m19-t797-b6cf2467 | 17.00 | 4.2678 | 2.2894 | 0.5364 |
+| W34cdc85097e5 | icv1-f2m19-t797-b6cf2467 | 17.00 | 4.2383 | 2.9411 | 0.6939 |
+| W3cb61bad8eb2 | icv1-f2m19-t797-b6cf2467 | 17.00 | 4.7576 | 2.3060 | 0.4847 |
+| W5f779cd8cf3d | icv1-f2m19-t797-b6cf2467 | 17.00 | 4.1044 | 2.2847 | 0.5567 |
+| W60091a63ce70 | icv1-f2m19-t797-b6cf2467 | 17.00 | 4.0141 | 2.1366 | 0.5323 |
+| W7aeaafc4e8ce | icv1-f2m19-t797-b6cf2467 | 17.00 | 4.1462 | 2.4004 | 0.5789 |
+| W7cc38a840464 | icv1-f2m19-t797-b6cf2467 | 17.00 | 4.2299 | 2.4065 | 0.5689 |
+| W8464f1e5e90b | icv1-f2m19-t797-b6cf2467 | 17.00 | 4.0828 | 2.3687 | 0.5802 |
+| Wd21a364daa18 | icv1-f2m19-t797-b6cf2467 | 17.00 | 4.1108 | 2.1820 | 0.5308 |
+| Wf2e7b2ea689b | icv1-f2m19-t797-b6cf2467 | 17.00 | 4.0534 | 2.4997 | 0.6167 |
+| Wfb323ae3daa9 | icv1-f2m19-t797-b6cf2467 | 17.00 | 4.1581 | 2.4676 | 0.5934 |
+| Wfe3d110a6044 | icv1-f2m19-t797-b6cf2467 | 17.00 | 4.1519 | 2.3446 | 0.5647 |
+| Wff11ed3f6a94 | icv1-f2m19-t797-b6cf2467 | 17.00 | 4.2767 | 2.1841 | 0.5107 |

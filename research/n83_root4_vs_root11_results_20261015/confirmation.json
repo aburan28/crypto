@@ -1,0 +1,29 @@
+{
+  "analysis_sha256": "e3906ebcd2bc55ffcf613f114299433ee808570f65d4e8a4c2b826b442a432cf",
+  "artifact_sha256": "9abb1d09c3e52440bf0b39aeec04bf2653e6cbf998c1b2830f2d6868832db2cb",
+  "candidate_id_descriptive": "IC1N83Ckb1a1fb547800PDP4rootRCguidedLAgaussTDdirectISO0h0f8ab8bfcff7",
+  "candidate_manifest_sha256": "bf102583b9352a6a692a66551c763f274ab34ff91956ce1e465501e75ce39785",
+  "confirmation_status": "PASS_ROOT11_FASTER",
+  "frozen_base_matches": {
+    "k3300_root11": true,
+    "k3300_root4": true
+  },
+  "mean_online_ms_exploratory": 24.7816366645,
+  "paired_difference": {
+    "contiguous_block_bootstrap_95pct_ms": [
+      -5.322116331,
+      -4.662193449
+    ],
+    "contiguous_block_size": 50,
+    "contrast": "k3300_root11_minus_k3300_root4",
+    "mean_ms": -4.986641173
+  },
+  "same_base_and_key_count": true,
+  "schema": "n83.root4-vs-root11-confirmation/v1",
+  "selected_arm_descriptive": "k3300_root11",
+  "source_base_hash_blake3": "a4ba33098d2776520b98a326585a2301f8ccd5bc005df7c1a70fbe8496c61d8b",
+  "source_commit": "009a3025fe362c85e46170e30648edaaec11c6b3",
+  "source_sha256": "5e9fd826d22816b429a82e658c517d9387916aabe7660f708e4c29901cce647e",
+  "status": "CONFIRMATION_RECORDED",
+  "workload_id": "b3757b0c7e01"
+}

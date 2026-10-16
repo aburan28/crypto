@@ -1,0 +1,27 @@
+{
+  "budget_seconds": 1150,
+  "conflict_budget_per_trial": 5000,
+  "envelope_manifest_blake3": "fdda3f52e3294877ab5b170e1d9ddcb94f9833b8c90bc3b322dbd26839466ac7",
+  "envelope_object_blake3": "82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851",
+  "graph_limits": {
+    "max_merge_depth": 32,
+    "max_pivots": 1000000,
+    "max_row_terms": 4096
+  },
+  "max_domain_clauses": 12000000,
+  "max_models_per_trial": 32,
+  "max_trials": 1,
+  "max_variables": 150000,
+  "memory_cgroup_limit_bytes": 4294967296,
+  "memory_cgroup_swap_limit_bytes": 0,
+  "order_first_pair": true,
+  "public_corpus_canonical_json_blake3": "831eaa7be2387634fd610f6706103b2af9b4e274f0db59923c0280af3cbed74b",
+  "public_corpus_path": "/corpus.json",
+  "residual_summands": 2,
+  "schema": "n83.mixed-orbit-partial-config/v1",
+  "small_manifest_blake3": "503c705e0ce5a8f032a22629d541d6bc0db19d247fc9a0cef1e303d6eb27db37",
+  "small_object_blake3": "76e1cbe4ea5a9d26e5b24a2d27f9401271dc471846529190a0416d8e09837a92",
+  "small_summands": 3,
+  "source_blake3": "ffc4d0adf29b76c88495efd25049bff59bb794f5fdd431b07db46e202ef8e6f3",
+  "study": "koblitz_n83_factor_base_sweep_20261008"
+}

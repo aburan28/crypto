@@ -1,0 +1,10 @@
+{
+  "sha256": "dc1c9fde4cc45d80631e01ec14b211b58db2206aa4def8ac3f727463df899638",
+  "bytes": 31421328,
+  "description": "Frozen native judge from the initial admission control packet",
+  "provenance": "cargo test --release --locked --offline --manifest-path tools/isogeny-cli/Cargo.toml; clean source 7e96187d3b819ecb6b5554d2024260bfe9eb0cba; experimental judge, not a release publication",
+  "name": "evidence/isogeny-degree-challenge-20261015/isogeny-7e96187d3-macos-arm64",
+  "reference": "store:evidence/isogeny-degree-challenge-20261015/isogeny-7e96187d3-macos-arm64",
+  "source_commit": "7e96187d3b819ecb6b5554d2024260bfe9eb0cba",
+  "freeze_local_only_note": "Freeze records describe initial local custody; this index reference records subsequent immutable archival."
+}

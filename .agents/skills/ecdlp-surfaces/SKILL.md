@@ -200,6 +200,33 @@ kernel checks, unsupported operations, and complete solver-cost accounting.
   a faster target solver with complete transport costs are separate claims.
   The point arithmetic is variable-time demonstration code.
 
+## Hand off to transfer and solver measurement
+
+Use the checked construction as input to
+[`docs/transfer-assessment/METHODOLOGY.md`](../../../docs/transfer-assessment/METHODOLOGY.md),
+not as an advantage claim. Use the `transfer` assessment profile to type the
+correspondence, bind the source subgroup, prove recovery, and record open
+obligations. The matching machine record requires a named
+`solver_assessment`; “higher genus,” “surface,” “lattice,” or “index calculus”
+alone is not a solver.
+
+After the transfer is executable and the destination solver has a checked
+adapter for the image subgroup, follow
+[`MEASUREMENT.md`](../../../docs/transfer-assessment/MEASUREMENT.md): compare
+the strongest direct source solver, the destination generic control, and the
+specialized destination pipeline on identical one-target workloads. Use the
+`ecbench-measure` skill for the native matched run. Use `ecbench-bounds` only
+after a replayable end-to-end session exists to determine whether the result
+moves an exponent, constant, primitive-operation axis, or only makes a trade.
+Stage-only relation, arithmetic, or map improvements do not establish net
+transfer advantage.
+
+Use `curve-algebra` when the route or baseline depends on CM,
+endomorphisms, GLV/GLS, Frobenius, or automorphism actions. Apply
+`report-evidence` to every implementation and experiment, and
+`research-visuals` to each search round, run, or result PR. The skills route
+work; they do not replace certificates, replay, or cost accounting.
+
 ## Validate and hand off
 
 Run the existing package checks after changing the tool or its fixtures:
