@@ -66,6 +66,8 @@
 //!     --controls tower --t-min 8 --max-t 8 --planted 0 --random 1 --ladder-t none --trace
 //! ```
 
+#![recursion_limit = "256"]
+
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Write;
@@ -73,11 +75,63 @@ use std::time::{Duration, Instant};
 
 use crypto_lib::cryptanalysis::f4_fp::{self, F4Options, F4Report, Ordering, Poly};
 use crypto_lib::cryptanalysis::f4_fp_tower::{self, RPoly, SquareRule, TowerF4Options, TowerRing};
+use crypto_lib::cryptanalysis::f4_tower_generic::{f4_tower_generic, GPoly, GTowerRing};
+use crypto_lib::cryptanalysis::fp_backend::{Fp224, Fp256, Fp32, Fp64, FpP192, FpWide, PrimeField};
+use crypto_lib::cryptanalysis::fp_backend_ifma::Fp52;
 use crypto_lib::cryptanalysis::ic_boundary::{CountedGroup, GroupOps, PrimeCurve, PrimePoint};
 use crypto_lib::cryptanalysis::sig_fp_tower;
+use num_bigint::BigUint;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use serde_json::{json, Value};
+
+#[path = "pkm_tower_wide/wide.rs"]
+mod wide;
+
+/// Runs `$body` with `$f` bound to the backend `$b` at the prime `$p`
+/// (a `BigUint`).
+macro_rules! with_backend {
+    ($b:expr, $p:expr, |$f:ident| $body:expr) => {{
+        let p_big: &BigUint = $p;
+        let small = || u64::try_from(p_big).expect("the backend needs p below 2^64");
+        match resolve_backend($b, p_big) {
+            Backend::Fp32 => {
+                let $f = Fp32::new(small());
+                $body
+            }
+            Backend::Fp64 => {
+                let $f = Fp64::new(small());
+                $body
+            }
+            Backend::Fp52 => {
+                let $f = Fp52::new(small());
+                $body
+            }
+            Backend::Wide1 => {
+                let $f = FpWide::<1>::new(p_big);
+                $body
+            }
+            Backend::Wide3 => {
+                let $f = FpWide::<3>::new(p_big);
+                $body
+            }
+            Backend::P192 => {
+                assert_eq!(Some(p_big), nist("P-192").as_ref(), "FpP192 is P-192 only");
+                let $f = FpP192::new();
+                $body
+            }
+            Backend::Fp224 => {
+                let $f = Fp224::new(p_big);
+                $body
+            }
+            Backend::Wide4 => {
+                let $f = Fp256::new(p_big);
+                $body
+            }
+            Backend::Auto => unreachable!(),
+        }
+    }};
+}
 
 // ── Field arithmetic ───────────────────────────────────────────────
 
@@ -1364,6 +1418,200 @@ fn measure_tower(
     (out, r.basis)
 }
 
+/// Run `f4_tower_generic` over the backend `f` on a system of the `u64`
+/// builder (`p < 2⁶³`): `measure_tower` with the generic engine. The basis
+/// comes back as `RPoly` when its coefficients fit (`p < 2³²`), for
+/// `--dump`; empty otherwise.
+#[allow(clippy::too_many_arguments)]
+fn measure_generic<F: PrimeField>(
+    f: F,
+    eqs: &[Pol],
+    towers: std::ops::Range<usize>,
+    ring: &TowerRing,
+    sol: Option<&[u64]>,
+    max_degree: u32,
+    budget: Duration,
+    max_nnz: Option<u64>,
+    max_dense: Option<u64>,
+    trace: bool,
+    full_rank_exit: bool,
+) -> (Outcome, Vec<RPoly>) {
+    let p = ring.p;
+    if let Some(s) = sol {
+        for (k, e) in eqs.iter().enumerate() {
+            assert_eq!(
+                e.eval(s, p),
+                0,
+                "equation {k} does not vanish at the planted solution"
+            );
+        }
+    }
+    let backend = f.name();
+    let gring = GTowerRing::from_tower_ring(f, ring);
+    let f = &gring.field;
+    let raw = |e: &Pol| -> Vec<(Vec<u32>, F::Elem)> {
+        e.terms
+            .iter()
+            .map(|(k, &v)| (k.clone(), f.from_u64(v)))
+            .collect()
+    };
+    for k in towers.clone() {
+        assert!(
+            gring.from_raw(&raw(&eqs[k])).is_empty(),
+            "tower equation {k} is not zero in the ring: the square rules are wrong"
+        );
+    }
+    let input: Vec<GPoly<F::Elem>> = eqs
+        .iter()
+        .enumerate()
+        .filter(|(k, _)| !towers.contains(k))
+        .map(|(_, e)| gring.from_raw(&raw(e)))
+        .filter(|g| !g.is_empty())
+        .collect();
+    let ring_degrees: Vec<u32> = input.iter().map(GPoly::degree).collect();
+    let mut opts = TowerF4Options::new(max_degree).with_budget(budget);
+    if let Some(c) = max_nnz {
+        opts = opts.with_max_nnz(c);
+    }
+    if let Some(c) = max_dense {
+        opts = opts.with_max_dense(c);
+    }
+    opts.full_rank_exit = full_rank_exit;
+    if trace {
+        opts = opts.on_step(print_tower_step);
+        opts.on_stop = Some(print_stopped_step);
+    }
+    let rep = f4_tower_generic(&input, &gring, &opts);
+    let r = &rep.stats;
+    let planted_ok = sol.map(|s| {
+        let x: Vec<F::Elem> = s.iter().map(|&v| f.from_u64(v)).collect();
+        !r.inconsistent && rep.basis.iter().all(|g| f.is_zero(gring.eval(g, &x)))
+    });
+    let lms: Vec<u128> = rep.basis.iter().filter_map(GPoly::lm).collect();
+    let pure = |k: usize| {
+        lms.iter().any(|&m| {
+            let fr = f4_fp_tower::free_of(m);
+            f4_fp_tower::mask_of(m) == 0
+                && (0..f4_fp_tower::MAX_FREE).all(|i| (i == k) == (fr[i] > 0))
+        })
+    };
+    let zero_dim = r.inconsistent || (0..ring.n_free).all(pure);
+    let linear = lms
+        .iter()
+        .filter(|&&m| f4_fp_tower::degree_of(m) == 1)
+        .count();
+    let out = Outcome {
+        solving_degree_max: r.solving_degree_max,
+        last_productive_degree: r.last_productive_degree,
+        degree_reached: r.degree_reached,
+        max_cols_to_solution: r.max_cols_to_solution,
+        steps_to_solution: r.steps_to_solution,
+        inconsistent: r.inconsistent,
+        zero_dim,
+        linear,
+        basis_len: rep.basis.len(),
+        steps: r.steps,
+        max_rows: r.max_rows,
+        max_cols: r.max_cols,
+        ms: r.ms,
+        timed_out: r.timed_out || r.oversize,
+        pairs_above_bound: r.pairs_above_bound,
+        staircase_at_stop: r.staircase_at_stop,
+        planted_ok,
+        extra: json!({
+            "engine": "f4_tower_generic",
+            "backend": backend,
+            "builder": "u64",
+            "input_ring_degrees": ring_degrees,
+            "muladds": r.muladds,
+            "max_nnz": r.max_nnz,
+            "max_residual_rows": r.max_residual_rows,
+            "full_rank_exit": full_rank_exit,
+            "rows_skipped_full_rank": r.rows_skipped,
+            "max_dense_entries": r.max_dense_entries,
+            "stopped_step": r.stopped_step,
+            "oversize": r.oversize,
+            "critical_pairs_reduced": r.critical_pairs_reduced,
+            "tower_pairs_reduced": r.tower_pairs_reduced,
+            "pairs_product_skipped": r.pairs_product_skipped,
+            "pairs_chain_skipped": r.pairs_chain_skipped,
+            "reducer_rows": r.reducer_rows,
+        }),
+    };
+    let basis = rep
+        .basis
+        .iter()
+        .map(|g| g.to_rpoly(f))
+        .collect::<Option<Vec<RPoly>>>()
+        .unwrap_or_default();
+    (out, basis)
+}
+
+/// The tower cells on the wide builder (`pkm_tower_wide`): Kummer and the
+/// Dickson torus, the tower control and the null, `t` upward until a whole
+/// cell stops.
+fn run_wide(a: &Args, sink: &mut Sink) {
+    let wa = wide::WArgs {
+        seed: a.seed,
+        planted: a.planted,
+        random: a.random,
+        budget: a.budget,
+        max_nnz: a.max_nnz,
+        max_dense: a.max_dense,
+        full_rank_exit: a.full_rank_exit,
+        trace: a.trace.then_some((
+            print_tower_step as fn(usize, &f4_fp_tower::StepTrace),
+            print_stopped_step as fn(usize, bool, &f4_fp_tower::StepTrace),
+        )),
+        targets: a.targets.clone(),
+        verify: a.verify,
+        label: a.p_label.clone(),
+    };
+    for &kind in &a.kinds {
+        let wk = match kind {
+            Kind::Kummer => wide::WKind::Kummer,
+            Kind::DicksonTorus => wide::WKind::DicksonTorus,
+            other => panic!("the wide builder has no {} tower", other.name()),
+        };
+        for &m in &a.ms {
+            let max_t = match m {
+                2 => a.max_t,
+                3 => a.max_t_m3,
+                _ => a.max_t_m4,
+            };
+            let t_min = if m >= 3 { a.t_min.max(2) } else { a.t_min };
+            for &control in &a.controls {
+                let wc = match control {
+                    Control::Tower => wide::WControl::Tower,
+                    Control::Null if m == 2 || a.null_chain => wide::WControl::Null,
+                    _ => continue,
+                };
+                for t in t_min..=max_t {
+                    let cell = wide::WCell {
+                        kind: wk,
+                        m,
+                        control: wc,
+                        t,
+                    };
+                    let (rows, finished) =
+                        with_backend!(a.backend, &a.p_big, |f| wide::run_cell(&f, &cell, &wa));
+                    for r in rows {
+                        sink.push(r);
+                    }
+                    if !finished {
+                        eprintln!(
+                            "-- {} m={m} {}: every run at t = {t} stopped; stopping",
+                            kind.name(),
+                            control.name()
+                        );
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
 // ── Driver ─────────────────────────────────────────────────────────
 
 struct Args {
@@ -1420,6 +1668,19 @@ struct Args {
     /// target and system is still drawn, in order, so each one measured is
     /// the system a run without the flag gives it.
     targets: Option<Vec<usize>>,
+    /// The prime as given (`--p` takes a decimal number or `P-192`,
+    /// `P-224`, `P-256`); `p` is it when it fits the `u64` builder
+    /// (`p < 2⁶³`), else 0.
+    p_big: BigUint,
+    /// The prime's label in rows (`--p` as given).
+    p_label: String,
+    /// `--engine generic` only: the backend.
+    backend: Backend,
+    /// `--builder wide`: build the systems over the backend
+    /// (`pkm_tower_wide`), Kummer and torus only; forced above `2⁶³`.
+    wide: bool,
+    /// `--verify`: wide builder only, the exhaustive and `BigUint` checks.
+    verify: bool,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -1427,6 +1688,114 @@ enum Engine {
     F4,
     Tower,
     Sig,
+    /// `f4_tower_generic`, over the backend `--backend` picks.
+    Generic,
+}
+
+/// The prime-field backend of `--engine generic`. `Auto` picks by the
+/// prime's size: `Fp32` below `2³²`, `Fp52` below `2⁵²` on a CPU with
+/// AVX-512 IFMA, `Fp64` below `2⁶³`, `FpP192` at
+/// NIST P-192, `FpWide<3>` to 192 bits, `Fp224` (`FpWide<4>` with a spare
+/// top bit) to 255 bits, `FpWide<4>` above.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Backend {
+    Auto,
+    Fp32,
+    Fp52,
+    Fp64,
+    Wide1,
+    Wide3,
+    P192,
+    Fp224,
+    Wide4,
+}
+
+fn nist(name: &str) -> Option<BigUint> {
+    let one = BigUint::from(1u32);
+    match name {
+        "P-192" | "p192" => Some((&one << 192u32) - (&one << 64u32) - 1u32),
+        "P-224" | "p224" => Some((&one << 224u32) - (&one << 96u32) + 1u32),
+        "P-256" | "p256" => {
+            Some((&one << 256u32) - (&one << 224u32) + (&one << 192u32) + (&one << 96u32) - 1u32)
+        }
+        _ => None,
+    }
+}
+
+/// Deterministic Miller–Rabin for `n < 2⁶⁴` (the first twelve prime bases).
+fn is_prime_u64(n: u64) -> bool {
+    if n < 2 {
+        return false;
+    }
+    const BASES: [u64; 12] = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37];
+    for q in BASES {
+        if n.is_multiple_of(q) {
+            return n == q;
+        }
+    }
+    let mulm = |a: u64, b: u64| ((u128::from(a) * u128::from(b)) % u128::from(n)) as u64;
+    let powm = |mut a: u64, mut e: u64| {
+        let mut r = 1u64;
+        while e > 0 {
+            if e & 1 == 1 {
+                r = mulm(r, a);
+            }
+            a = mulm(a, a);
+            e >>= 1;
+        }
+        r
+    };
+    let s = (n - 1).trailing_zeros();
+    let d = (n - 1) >> s;
+    'bases: for a in BASES {
+        let mut x = powm(a, d);
+        if x == 1 || x == n - 1 {
+            continue;
+        }
+        for _ in 1..s {
+            x = mulm(x, x);
+            if x == n - 1 {
+                continue 'bases;
+            }
+        }
+        return false;
+    }
+    true
+}
+
+/// `proth:K`: the smallest prime `c·2^K + 1` with `c` odd (so
+/// `v₂(p − 1) = K` exactly), for `K ≤ 61`.
+fn proth(spec: &str) -> Option<BigUint> {
+    let k: u32 = spec.strip_prefix("proth:")?.parse().ok()?;
+    assert!((2..=61).contains(&k), "proth:K needs 2 <= K <= 61");
+    (1u64..)
+        .step_by(2)
+        .map(|c| (c << k) + 1)
+        .take_while(|&p| p < 1 << 63)
+        .find(|&p| is_prime_u64(p))
+        .map(BigUint::from)
+}
+
+fn resolve_backend(b: Backend, p: &BigUint) -> Backend {
+    if b != Backend::Auto {
+        return b;
+    }
+    let bits = p.bits();
+    if bits <= 32 {
+        Backend::Fp32
+    } else if bits <= 52 && Fp52::new(u64::try_from(p).unwrap()).uses_ifma() {
+        Backend::Fp52
+    } else if bits <= 63 {
+        Backend::Fp64
+    } else if Some(p) == nist("P-192").as_ref() {
+        Backend::P192
+    } else if bits <= 192 {
+        Backend::Wide3
+    } else if p < &((BigUint::from((1u64 << 63) - 1)) << 192u32) {
+        Backend::Fp224
+    } else {
+        Backend::Wide4
+    }
 }
 
 /// Rows as they are measured: every row reaches `--out` and is flushed
@@ -1476,6 +1845,11 @@ fn parse_args() -> Args {
         full_rank_exit: true,
         sig: sig_fp_tower::SigOptions::default(),
         targets: None,
+        p_big: BigUint::from(786_433u32),
+        p_label: "786433".into(),
+        backend: Backend::Auto,
+        wide: false,
+        verify: false,
     };
     let args: Vec<String> = std::env::args().skip(1).collect();
     let list = |s: &str| -> Vec<usize> {
@@ -1501,9 +1875,44 @@ fn parse_args() -> Args {
             i += 1;
             continue;
         }
+        if args[i] == "--verify" {
+            a.verify = true;
+            i += 1;
+            continue;
+        }
         let v = args.get(i + 1).cloned().unwrap_or_default();
         match args[i].as_str() {
-            "--p" => a.p = v.parse().expect("--p"),
+            "--p" => {
+                a.p_big = nist(&v)
+                    .or_else(|| proth(&v))
+                    .unwrap_or_else(|| v.parse().expect("--p"));
+                a.p_label = v.clone();
+                a.p = u64::try_from(&a.p_big)
+                    .ok()
+                    .filter(|&p| p < 1 << 63)
+                    .unwrap_or(0);
+            }
+            "--backend" => {
+                a.backend = match v.as_str() {
+                    "auto" => Backend::Auto,
+                    "fp32" => Backend::Fp32,
+                    "fp64" => Backend::Fp64,
+                    "fp52" => Backend::Fp52,
+                    "wide1" => Backend::Wide1,
+                    "wide3" => Backend::Wide3,
+                    "p192" => Backend::P192,
+                    "fp224" => Backend::Fp224,
+                    "wide4" => Backend::Wide4,
+                    other => panic!("unknown backend `{other}`"),
+                }
+            }
+            "--builder" => {
+                a.wide = match v.as_str() {
+                    "wide" => true,
+                    "u64" => false,
+                    other => panic!("unknown builder `{other}`"),
+                }
+            }
             "--kinds" => {
                 a.kinds = v
                     .split(',')
@@ -1547,6 +1956,7 @@ fn parse_args() -> Args {
                     "f4" | "f4_fp" => Engine::F4,
                     "tower" | "f4_fp_tower" => Engine::Tower,
                     "sig" | "f4_fp_tower_sig" => Engine::Sig,
+                    "generic" | "f4_tower_generic" => Engine::Generic,
                     other => panic!("unknown engine `{other}`"),
                 }
             }
@@ -1579,6 +1989,16 @@ fn parse_args() -> Args {
             other => panic!("unknown flag `{other}`"),
         }
         i += 2;
+    }
+    if a.p == 0 {
+        // Above 2^63 only the wide builder holds the prime.
+        a.wide = true;
+    }
+    if a.wide {
+        assert!(
+            matches!(a.engine, Engine::Generic),
+            "the wide builder runs `--engine generic` only"
+        );
     }
     a
 }
@@ -1678,6 +2098,23 @@ fn run_cell(cell: &Cell, a: &Args, sink: &mut Sink) -> bool {
                 );
                 let out = Outcome::from_f4(&m);
                 (out, Dumpable::Raw(m.report.basis))
+            }
+            Engine::Generic => {
+                let ring = tower_ring(&tower, cell.m, p);
+                let (out, basis) = with_backend!(a.backend, &a.p_big, |f| measure_generic(
+                    f,
+                    &eqs,
+                    towers,
+                    &ring,
+                    sol.as_deref(),
+                    max_degree,
+                    Duration::from_secs(a.budget),
+                    a.max_nnz,
+                    a.max_dense,
+                    a.trace,
+                    a.full_rank_exit,
+                ));
+                (out, Dumpable::Ring(basis))
             }
             Engine::Tower | Engine::Sig => {
                 let ring = tower_ring(&tower, cell.m, p);
@@ -1986,9 +2423,12 @@ fn main() {
             .as_ref()
             .map(|path| File::create(path).expect("create --out")),
     };
+    if a.wide {
+        run_wide(&a, &mut sink);
+    }
     // The tower systems and their naive and null controls, t upward until
     // a whole cell times out.
-    for &kind in &a.kinds {
+    for &kind in a.kinds.iter().filter(|_| !a.wide) {
         for &m in &a.ms {
             let max_t = match m {
                 2 => a.max_t,
@@ -2032,7 +2472,7 @@ fn main() {
         }
     }
     // The generator-count ladder, on planted targets.
-    for &kind in &a.kinds {
+    for &kind in a.kinds.iter().filter(|_| !a.wide) {
         for &t in &a.ladder_ts {
             for &g in &a.ladder_gs {
                 let cell = Cell {
@@ -2048,7 +2488,7 @@ fn main() {
     }
     let rows = &sink.rows;
     let summary = json!({
-        "p": a.p,
+        "p": if a.p != 0 { json!(a.p) } else { json!(a.p_label) },
         "budget_seconds": a.budget,
         "seed": a.seed,
         "planted_per_cell": a.planted,

@@ -1,0 +1,18 @@
+saved /home/user/wt/lane-h/research/pkm_supersingular_aux_20261015/q3/sessions/s24/comparisons/rho-neg__rho-neg-aa.json
+ops (ok): rho-neg-aa / rho-neg = 1.0000 [1.000, 1.000] (cluster) over 16 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 0.9696 [0.938, 1.021]
+measurement quality: 0 / 100; paired attempts 16, verified 16, admitted 0; levels {"L0": 16}; p95 foreign busy unknown%, p95 run queue 0.73%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | rho-neg-aa / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | rho-neg-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W17b438bfb12f | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 0.9793 | 0.9793 | 1.0000 |
+| W25cee39ee98f | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 0.9924 | 0.9924 | 1.0000 |
+| W55568eeba98a | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 0.8787 | 0.8787 | 1.0000 |
+| W88ff0ab6e7fd | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 0.9087 | 0.9087 | 1.0000 |
+| Waa0b657ee7a8 | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 1.7449 | 1.7449 | 1.0000 |
+| Wcf04f75e8865 | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 0.5249 | 0.5249 | 1.0000 |
+| Wdb0e2ef40f7f | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 1.3920 | 1.3920 | 1.0000 |
+| We87af70e465e | icv1-fp24-tm4507-ffb4b7f9 | 23.49 | 1.1194 | 1.1194 | 1.0000 |

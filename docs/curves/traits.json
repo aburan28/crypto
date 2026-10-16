@@ -2,7 +2,7 @@
   "schema": "curve-traits/1",
   "generated_by": "cargo run --release --bin curve_traits -- build",
   "what_this_is": "Traits derived from each registered curve's model and order, with the status of each value; see docs/curves/TRAITS.md.",
-  "registry_sha256": "5d1bd4e059a96c03cdf8dcc349fa3399fcf8e708dc03b9e6ada5893b3f7645b9",
+  "registry_sha256": "22b2ffef99720f2b2c7396a267412d2241a868e038a835c4fb1fd12209b102bf",
   "factor_budget": 262144,
   "default_signature": [
     "char",
@@ -30694,6 +30694,167 @@
       }
     },
     {
+      "slug": "icv1-fp20-t1143-5bef62bd",
+      "family": "prime",
+      "field": {
+        "kind": "prime",
+        "degree": 1,
+        "size_bits": 20
+      },
+      "trace": "1143",
+      "order": "536457",
+      "order_check": {
+        "status": "proved",
+        "method": "exhaustive point count"
+      },
+      "ordinary": true,
+      "anomalous": false,
+      "trace_ratio": 0.779448,
+      "frobenius": {
+        "disc": "-843947",
+        "disc_primes": [
+          [
+            "13",
+            1
+          ],
+          [
+            "64919",
+            1
+          ]
+        ],
+        "disc_unfactored": [],
+        "disc_status": "proved",
+        "cm_disc": "-843947",
+        "conductor": "1",
+        "conductor_bits": 1,
+        "conductor_primes": [],
+        "conductor_unfactored": [],
+        "conductor_fraction": 0.0,
+        "status": "proved",
+        "class_number": 248,
+        "class_number_status": "proved"
+      },
+      "endomorphism": {
+        "conductor_divides": "1",
+        "maximal": true,
+        "status": "proved",
+        "contains": [
+          "Z[π]"
+        ]
+      },
+      "small_primes": [
+        {
+          "ell": 2,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 3,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 5,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 7,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 11,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 13,
+          "depth": 0,
+          "splitting": "ramified",
+          "rational_isogenies": 1
+        },
+        {
+          "ell": 17,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 19,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 23,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 29,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 31,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        }
+      ],
+      "subfield": {
+        "j_field_degree": null,
+        "definition_degree": null,
+        "base_trace": null,
+        "base_trace_sign_free": false,
+        "status": "not_applicable",
+        "method": "a prime field has no proper subfield"
+      },
+      "subgroup": {
+        "order": "178819",
+        "bits": 18,
+        "cofactor": "3",
+        "status": "proved",
+        "source": "largest prime factor of the order"
+      },
+      "embedding": {
+        "degree": "89409",
+        "lower_bound": null,
+        "complement_bits": 2,
+        "status": "proved"
+      },
+      "twist": {
+        "order": "538743",
+        "largest_prime_bits": 18,
+        "cofactor": "3",
+        "status": "proved"
+      },
+      "keys": {
+        "char": "p",
+        "cm": "-843947",
+        "cofactor": "3",
+        "conductor": "1",
+        "depth": "2:0,3:0,5:0,7:0",
+        "descent": "none",
+        "descent_signed": "none",
+        "embedding": "large",
+        "end_order": "maximal",
+        "family": "prime",
+        "jfield": "full",
+        "ordinary": "yes",
+        "split": "3s5i7s11i13r",
+        "twist_cofactor": "3"
+      }
+    },
+    {
       "slug": "icv1-fp20-t157-e39da206",
       "family": "prime",
       "field": {
@@ -35672,6 +35833,175 @@
         "ordinary": "yes",
         "split": "3i5s7i11i13s",
         "twist_cofactor": "194"
+      }
+    },
+    {
+      "slug": "icv1-fp22-tm1105-62a9d176",
+      "family": "prime",
+      "field": {
+        "kind": "prime",
+        "degree": 1,
+        "size_bits": 22
+      },
+      "trace": "-1105",
+      "order": "2512977",
+      "order_check": {
+        "status": "proved",
+        "method": "exhaustive point count"
+      },
+      "ordinary": true,
+      "anomalous": false,
+      "trace_ratio": -0.348605,
+      "frobenius": {
+        "disc": "-8826459",
+        "disc_primes": [
+          [
+            "3",
+            1
+          ],
+          [
+            "47",
+            1
+          ],
+          [
+            "59",
+            1
+          ],
+          [
+            "1061",
+            1
+          ]
+        ],
+        "disc_unfactored": [],
+        "disc_status": "proved",
+        "cm_disc": "-8826459",
+        "conductor": "1",
+        "conductor_bits": 1,
+        "conductor_primes": [],
+        "conductor_unfactored": [],
+        "conductor_fraction": 0.0,
+        "status": "proved",
+        "class_number": 720,
+        "class_number_status": "proved"
+      },
+      "endomorphism": {
+        "conductor_divides": "1",
+        "maximal": true,
+        "status": "proved",
+        "contains": [
+          "Z[π]"
+        ]
+      },
+      "small_primes": [
+        {
+          "ell": 2,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 3,
+          "depth": 0,
+          "splitting": "ramified",
+          "rational_isogenies": 1
+        },
+        {
+          "ell": 5,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 7,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 11,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 13,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 17,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 19,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 23,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 29,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 31,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        }
+      ],
+      "subfield": {
+        "j_field_degree": null,
+        "definition_degree": null,
+        "base_trace": null,
+        "base_trace_sign_free": false,
+        "status": "not_applicable",
+        "method": "a prime field has no proper subfield"
+      },
+      "subgroup": {
+        "order": "837659",
+        "bits": 20,
+        "cofactor": "3",
+        "status": "proved",
+        "source": "largest prime factor of the order"
+      },
+      "embedding": {
+        "degree": "418829",
+        "lower_bound": null,
+        "complement_bits": 2,
+        "status": "proved"
+      },
+      "twist": {
+        "order": "2510767",
+        "largest_prime_bits": 19,
+        "cofactor": "7",
+        "status": "proved"
+      },
+      "keys": {
+        "char": "p",
+        "cm": "large",
+        "cofactor": "3",
+        "conductor": "1",
+        "depth": "2:0,3:0,5:0,7:0",
+        "descent": "none",
+        "descent_signed": "none",
+        "embedding": "large",
+        "end_order": "maximal",
+        "family": "prime",
+        "jfield": "full",
+        "ordinary": "yes",
+        "split": "3r5s7s11i13i",
+        "twist_cofactor": "7"
       }
     },
     {
@@ -45071,6 +45401,167 @@
         "ordinary": "yes",
         "split": "3i5i7i11i13s",
         "twist_cofactor": "1153"
+      }
+    },
+    {
+      "slug": "icv1-fp24-tm4507-ffb4b7f9",
+      "family": "prime",
+      "field": {
+        "kind": "prime",
+        "degree": 1,
+        "size_bits": 24
+      },
+      "trace": "-4507",
+      "order": "11754907",
+      "order_check": {
+        "status": "unknown",
+        "method": "recorded order; no usable generator and the field is too large to count"
+      },
+      "ordinary": true,
+      "anomalous": false,
+      "trace_ratio": -0.657402,
+      "frobenius": {
+        "disc": "-26688547",
+        "disc_primes": [
+          [
+            "317",
+            1
+          ],
+          [
+            "84191",
+            1
+          ]
+        ],
+        "disc_unfactored": [],
+        "disc_status": "proved",
+        "cm_disc": "-26688547",
+        "conductor": "1",
+        "conductor_bits": 1,
+        "conductor_primes": [],
+        "conductor_unfactored": [],
+        "conductor_fraction": 0.0,
+        "status": "proved",
+        "class_number": null,
+        "class_number_status": "not_evaluated"
+      },
+      "endomorphism": {
+        "conductor_divides": "1",
+        "maximal": true,
+        "status": "proved",
+        "contains": [
+          "Z[π]"
+        ]
+      },
+      "small_primes": [
+        {
+          "ell": 2,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 3,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 5,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 7,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 11,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 13,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 17,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 19,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 23,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 29,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 31,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        }
+      ],
+      "subfield": {
+        "j_field_degree": null,
+        "definition_degree": null,
+        "base_trace": null,
+        "base_trace_sign_free": false,
+        "status": "not_applicable",
+        "method": "a prime field has no proper subfield"
+      },
+      "subgroup": {
+        "order": "11754907",
+        "bits": 24,
+        "cofactor": "1",
+        "status": "proved",
+        "source": "largest prime factor of the order"
+      },
+      "embedding": {
+        "degree": "11754906",
+        "lower_bound": null,
+        "complement_bits": 1,
+        "status": "proved"
+      },
+      "twist": {
+        "order": "11745893",
+        "largest_prime_bits": 19,
+        "cofactor": "23",
+        "status": "proved"
+      },
+      "keys": {
+        "char": "p",
+        "cm": "large",
+        "cofactor": "1",
+        "conductor": "1",
+        "depth": "2:0,3:0,5:0,7:0",
+        "descent": "none",
+        "descent_signed": "none",
+        "embedding": "large",
+        "end_order": "maximal",
+        "family": "prime",
+        "jfield": "full",
+        "ordinary": "yes",
+        "split": "3i5i7i11s13i",
+        "twist_cofactor": "23"
       }
     },
     {
