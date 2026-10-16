@@ -80,3 +80,31 @@ The predeclared gate therefore retained `BOUNDED_UNKNOWN` and a null
 selection. Two exact candidate manifests and all eight run rows are versioned
 with that result. The next selection screen is on the approved Tier 1 host
 before the five fresh-point panel.
+
+The [current-source expanded rerun](https://github.com/aburan28/crypto/actions/runs/38897449665)
+used source commit `f0a5fce29a441566811f9afc260bc30a59f18144` and
+artifact `12050929059`. Its exact ZIP is
+`/Volumes/SSD990-2/n83-archive-20261016/raw/n83-online-range-current-38897449665.zip`,
+SHA-256 `c6fbc8567699767a89095aae793ffe2394658cdfaaa33a76e10e8243ca85e594`.
+The [analysis](analysis_38897449665.json) SHA-256 is
+`49e71b6542b655b4097700fb6e8d98d595da23acac17061c9d1167f60b2f9965`.
+Local replay recreated the cloud analysis byte for byte; its log SHA-256 is
+`f872f2bfccefaec99097c5e817d0d4254add2fa45096d6b5edc178961277551e`.
+All 11 completed IC arms and same-point rho passed independent replay; the
+K3584 arm reached its 900-second cap. The K2543/root22 A/B control measured
+18.355451 and 14.125281 ms, a 26.05% spread above the frozen 10% gate.
+K3072/root11 measured 7.376757 ms and K2543/root11 14.076503 ms as stage
+diagnostics, with rho at 654.993539 ms. Selection remains `null` with
+`BOUNDED_UNKNOWN` status. The [12 IC1 rows](ic1_rows_38897449665.json)
+bind the completed arms to 10 exact source-specific candidate manifests and
+retain the timeout as a null-identity row. The materializer checked the raw
+ZIP, replay analysis, historical source and runner hashes, exact base dumps,
+usable point counts, and arm order; a second run left every record unchanged.
+
+The same-instance Tier 1 selector was frozen in
+[its protocol](../n83_tier1_online_20261016/PROTOCOL.md) after these screen
+results. Its approved EC2 allocation attempt returned AWS account-level
+`Blocked` at `RunInstances`, before any instance was created. The attempted
+client token was `n83tier1-20261016-1854bb9d`; the EC2 lookup for that token
+returned an empty instance set. The separate Tier 1 panel therefore awaits
+an available authorized host.
