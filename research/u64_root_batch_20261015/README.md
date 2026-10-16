@@ -81,3 +81,29 @@ because probes and lifts dominate after the change).
   bottleneck).
 - Precomposed twisted-linear byte tables (`to_poly ∘ rotate_k ∘ to_normal`)
   for both pipelines.
+
+## Addendum: Montgomery-batched affine adds in `lift` (same PR)
+
+The u64 `lift` previously paid one full field inversion **per affine group
+add** across its 4-deep nested choice loops. A new `LiftScratch::batch_adds`
+shares one inversion per level (fixed left point against the level's choice
+points), with the exceptional same-x paths (doubling, infinity) falling back
+to the scalar `fast.add`. Iteration order and the first lifted match are
+unchanged; recovered scalars, relations and probe counts remain identical.
+
+Matched A/B vs the same `origin/main` baseline (`9f7fb66e6b`), same n=41
+workload, 3 interleaved reps. The host was heavily contended during this
+round (baseline spread 46–167 s across reps, far above the earlier round's
+A/A spread) — medians are reported with that caveat and the min-to-min
+pairing is the least-contended estimate:
+
+| arm | process_total (s), 3 reps | median | min |
+|---|---|---|---|
+| baseline (main `9f7fb66e6b`) | 166.95 / 122.10 / 45.99 | 122.10 | 45.99 |
+| candidate (root-batch + lift-batch) | 87.32 / 34.65 / 33.05 | 34.65 | 33.05 |
+| ratio | — | **3.52×** | **1.39×** |
+
+Outputs identical on all reps (3/3, diff-verified including per-target
+probe counts). Class: **engineering**. The candidate binary here includes
+both the u64 `RootBatch` change and the lift batching; the two changes are
+separate commits on the branch so each can be bisected.
