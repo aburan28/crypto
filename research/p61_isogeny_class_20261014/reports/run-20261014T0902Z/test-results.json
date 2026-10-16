@@ -1,0 +1,102 @@
+{
+  "schema": "ec-hardness/p61-release-test-results/v1",
+  "source_commit": "d064729541f9c9cea2dc50b4a36572971cd2b099",
+  "target_directory": "/Volumes/SSD990-2/crypto/target-p61-d064-20261014",
+  "whole_library_attempts": [
+    {
+      "sequence": 1,
+      "command": "cargo test --release --lib",
+      "exit_code": 101,
+      "elapsed_seconds": 544.23,
+      "passed": 4077,
+      "failed": 2,
+      "ignored": 114,
+      "status": "failed",
+      "failures": [
+        "cryptanalysis::jv_cover::tests::replayed_f4_agrees_with_the_full_solver_and_the_oracle",
+        "cryptanalysis::jv_cover::tests::stopped_f4_agrees_with_the_full_solver_and_the_oracle"
+      ]
+    },
+    {
+      "sequence": 2,
+      "command": "cargo test --release --lib",
+      "exit_code": 101,
+      "elapsed_seconds": 733.17,
+      "passed": 4076,
+      "failed": 3,
+      "ignored": 114,
+      "status": "failed",
+      "failures": [
+        "cryptanalysis::jv_cover::tests::replayed_f4_agrees_with_the_full_solver_and_the_oracle",
+        "cryptanalysis::jv_cover::tests::stopped_f4_agrees_with_the_full_solver_and_the_oracle",
+        "cryptanalysis::jv_cover::tests::the_solver_loses_no_rational_solution_at_small_p"
+      ],
+      "observed_internal_timeout": {
+        "test": "cryptanalysis::jv_cover::tests::the_solver_loses_no_rational_solution_at_small_p",
+        "trial": 108,
+        "total_ms": 14.301333,
+        "timed_out": true
+      }
+    },
+    {
+      "sequence": 3,
+      "command": "cargo test --release --lib -- --test-threads=1",
+      "execution_mode": "serial_low_concurrency",
+      "exit_code": 0,
+      "elapsed_seconds": 2765.68,
+      "passed": 4079,
+      "failed": 0,
+      "ignored": 114,
+      "status": "pass"
+    }
+  ],
+  "exact_failure_replays": [
+    {
+      "test": "cryptanalysis::jv_cover::tests::stopped_f4_agrees_with_the_full_solver_and_the_oracle",
+      "exit_code": 0,
+      "elapsed_seconds": 19.67,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "test": "cryptanalysis::jv_cover::tests::replayed_f4_agrees_with_the_full_solver_and_the_oracle",
+      "exit_code": 0,
+      "elapsed_seconds": 54.22,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "test": "cryptanalysis::jv_cover::tests::the_solver_loses_no_rational_solution_at_small_p",
+      "exit_code": 0,
+      "elapsed_seconds": 9.05,
+      "passed": 1,
+      "failed": 0
+    }
+  ],
+  "touched_binary_gate": {
+    "command": "cargo test --release --bin p61_isogeny_class --bin p61_isogeny_audit",
+    "exit_code": 0,
+    "status": "pass",
+    "p61_isogeny_class": {
+      "passed": 0,
+      "failed": 0
+    },
+    "p61_isogeny_audit": {
+      "passed": 6,
+      "failed": 0
+    }
+  },
+  "continuation_runner_gate": {
+    "command": "python3 -m unittest -v test_run_remaining_census.py",
+    "exit_code": 0,
+    "status": "pass",
+    "passed": 3,
+    "failed": 0,
+    "plan_only_smoke": "pass"
+  },
+  "conclusion": {
+    "p61_specific_gates": "pass",
+    "whole_library_gate": "pass_serial_default_parallel_non_green",
+    "interpretation": "Two default-parallel aggregate runs failed in the pre-existing jv_cover module with varying failure sets. Every exposed failure passed in an exact isolated replay, and the complete low-concurrency serial library run passed 4079 tests with zero failures. This supports contention or order sensitivity in the default-parallel runs rather than a p61-module regression; the failed aggregate attempts remain preserved and are not relabeled as passes."
+  }
+}

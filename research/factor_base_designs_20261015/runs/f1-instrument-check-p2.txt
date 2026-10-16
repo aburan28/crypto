@@ -1,0 +1,32 @@
+Amendment 2, F1: instrument check at p2 = 2013265921, before any p2 row
+the prime
+  [ok] p2 = 15·2^27 + 1
+  [ok] p2 is prime (trial division by every q ≤ √p2)
+  [ok] 2^27 ∥ p2 − 1 (v2 = 27), so t ≤ 27
+field arithmetic
+  [ok] p2 < 2^31 < 2^32, the bound f4_fp's Barrett::new asserts
+  [ok] p2 > 2^16: f4_fp takes the wide path (one Barrett reduction per update), as at p1; the 32-bit and lazy-accumulation paths are for p ≤ 2^16 only
+  [ok] largest wide-path operand x + (p − f)·y ≤ (p−1) + (p−1)² = 4053239666646712320 < 2^64
+  [ok] harness arithmetic on 100 000 random pairs: a·b against a u128 product, a·a⁻¹ = 1, a^(p−1) = 1
+planted systems at t = 2 (the p2 seeds of F1, target 0)
+  A0 m=2 t=2: n_vars 4, n_eqs 5, cell_seed 281484745262163, curve {"a":1461778108,"b":1878733009}, x_r 1940321920, D 4, max_cols 37, status "ok", planted_ok true
+  [ok] every equation vanishes at the planted solution (checked before F4)
+  [ok] F4 finished, consistent, the planted solution satisfies its basis
+  [ok] no pair above the degree bound, and every input reduces to 0 modulo F4's basis
+  [ok] a second F4 run gives the same D
+  A11 m=2 t=2: n_vars 9, n_eqs 10, cell_seed 286982303401043, curve {"a":1056639171,"b":753624664}, x_r 662941857, D 3, max_cols 31, status "ok", planted_ok true
+  [ok] every equation vanishes at the planted solution (checked before F4)
+  [ok] F4 finished, consistent, the planted solution satisfies its basis
+  [ok] no pair above the degree bound, and every input reduces to 0 modulo F4's basis
+  [ok] a second F4 run gives the same D
+  A0 m=3 t=2: n_vars 7, n_eqs 8, cell_seed 281489040229459, curve {"a":90719255,"b":1973922628}, x_r 1150465184, D 5, max_cols 368, status "ok", planted_ok true
+  [ok] every equation vanishes at the planted solution (checked before F4)
+  [ok] F4 finished, consistent, the planted solution satisfies its basis
+  [ok] no pair above the degree bound, and every input reduces to 0 modulo F4's basis
+  [ok] a second F4 run gives the same D
+  A11 m=3 t=2: n_vars 15, n_eqs 16, cell_seed 286986598368339, curve {"a":925225600,"b":801540292}, x_r 1042845232, D 4, max_cols 62, status "ok", planted_ok true
+  [ok] every equation vanishes at the planted solution (checked before F4)
+  [ok] F4 finished, consistent, the planted solution satisfies its basis
+  [ok] no pair above the degree bound, and every input reduces to 0 modulo F4's basis
+  [ok] a second F4 run gives the same D
+instrument check at p2: PASS: F1 may run
