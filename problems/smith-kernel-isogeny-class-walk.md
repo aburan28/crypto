@@ -7,7 +7,7 @@
 - **Affected work:** [weak isogeny classes study, 2026-10-13](../research/weak_isogeny_classes_20261013/REPORT.md),
   lead 2; [Smith Prop. 2/4 native study, 2026-10-14](../research/smith_prop24_native_20261014/REPORT.pdf)
 - **Next action owner:** unassigned
-- **Last updated:** 2026-10-15
+- **Last updated:** 2026-10-16
 
 ## Problem
 
@@ -124,6 +124,30 @@ open.
   test whether `full_success` within an `L`-class is explained by shared
   quotients (Serre's obstruction on a common target); control: the
   `#X(F_p)` point count already checked in `smith_prop24::x_check`.
+- **Largely explained (2026-10-16,
+  [study](../research/smith_serre_sign_20261016/REPORT.pdf)):** the clustering
+  is mostly in the Prop. 4 sign (Serre's obstruction), which is biased by
+  `N1 = #H(F_p)`, an `L`-class invariant. Twisting preserves Prop. 2 and flips
+  Prop. 4 (except on degenerate subgroups), so `X` has either `N1` or
+  `2p + 2 − N1` rational points. Among non-degenerate Prop. 2 passes the
+  Prop. 4 rate rises with `N1`, close to `N1 / (2p + 2)`. This was found at
+  `p = 7` and confirmed on held-out `p = 11` (max deviation 0.080, frozen bar
+  0.10). Conditioning the iso-level null on `(stratum, N1, any Prop. 2 pass)`
+  closes 80% / 76% of `U − C`, against 63% / 52% for a random class label.
+  The remaining ~24% is open. For the walk: a walk inside an `L`-class
+  cannot change `N1`, so classes with few rational points are poor targets
+  and their twist classes good ones. The asymptotic extrapolation (bias
+  `O(1/√p)`, Smith's fair coin recovered) is untested.
+- **Scaling settled (2026-10-16,
+  [study](../research/smith_sign_scaling_20261016/REPORT.pdf)):** on 10^6
+  random curves at each of `p = 101, 1009, 10007` the Prop. 4 rate is
+  `1/2 + β a1/(2p+2)` with `β` = 1.02, 1.09, 0.94. The scaling exponent of `β`
+  in `p` is `γ = 0.019` [−0.014, 0.051] (frozen verdict: bias shrinks like
+  `1/√p`). So the sign bias and the clustering it causes are small-prime
+  effects, and Smith's fair coin holds asymptotically. The rule
+  `r ≈ #H(F_p)/(2p+2)` holds over the whole range; its mechanism is not
+  identified. A post hoc check found that the Prop. 2 count adds nothing to
+  the residual quarter of the clustering, and `N3` at most a few points.
   Still open: Smith's Remark 5 alternative (descending `X` when the trigonal
   map is not rational, which would raise the direct rate to 31.13% under his
   hypotheses) as a route that needs no walk.
@@ -147,3 +171,7 @@ open.
   2-Sylow of `J(F_p)`, `J[4]` descent data); none explains the within-class
   correlation at `p = 7, 11`. Unresolved; next step is the quotient-curve
   class.
+- 2026-10-16: the Prop. 4 sign follows `#H(F_p)` (confirmed at `p = 11`);
+  with Prop. 2 this accounts for about three quarters of the clustering.
+- 2026-10-16: the Prop. 4 sign bias shrinks like `1/√p` (`β` bounded at
+  `p = 101, 1009, 10007`); the clustering is a small-prime effect.

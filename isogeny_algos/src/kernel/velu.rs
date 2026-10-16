@@ -63,12 +63,12 @@ impl<F: Field> Isogeny<F> for VeluIso<F> {
         let inv = f.batch_inv(&ds);
         let mut fx = x;
         let mut fd = f.one();
-        let two = f.from_u64(2);
         for (&(_, v, u), &di) in self.reps.iter().zip(&inv) {
-            let di2 = f.sq(di);
-            let di3 = f.mul(di2, di);
-            fx = f.add(fx, f.add(f.mul(v, di), f.mul(u, di2)));
-            fd = f.sub(fd, f.add(f.mul(v, di2), f.mul(two, f.mul(u, di3))));
+            // fx += v d + u d^2 = d (v + u d),  fd -= v d^2 + 2 u d^3 = d^2 (v + 2 u d)
+            let ud = f.mul(u, di);
+            let vu = f.add(v, ud);
+            fx = f.add(fx, f.mul(di, vu));
+            fd = f.sub(fd, f.mul(f.sq(di), f.add(vu, ud)));
         }
         Pt::Aff(fx, f.mul(y, fd))
     }

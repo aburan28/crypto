@@ -1,0 +1,32 @@
+{
+  "elapsed_ms_operational_only": 0,
+  "error": "Lucas-Lehmer rejects M11; terminal 1736",
+  "resources": {
+    "command": [
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/compact-implementation/release/isogeny",
+      "compact-cm",
+      "__worker",
+      "construct",
+      "--exponent",
+      "11",
+      "--out",
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/compact-implementation/native-controls-resource-retake-v1/negative-11/artifact",
+      "--rss-ready",
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/compact-implementation/native-controls-resource-retake-v1/negative-11/resources-ready"
+    ],
+    "elapsed_ms_operational_only": 33,
+    "exit_code": 1,
+    "map_count": null,
+    "memory_monitor_grace_ms": 100,
+    "memory_sampling_interval_ms": 25,
+    "resident_memory_limit_bytes": "8589934592",
+    "sampled_peak_resident_bytes": "32768",
+    "status": "FAIL",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout": "native.json",
+    "stdout_sha256": "08b6f6bc38e23cb50369697fc9b665fa7781b109eeab67c2d5497ebd6b67ccb5",
+    "unavailable_memory_samples": 0
+  },
+  "score": null,
+  "status": "REJECTED"
+}

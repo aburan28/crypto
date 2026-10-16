@@ -76,25 +76,25 @@ fn main() {
         }
         engines.push_str("pub fn verify(out:&std::path::Path,write:bool)->serde_json::Value { replay::verify(out,write) }\npub fn verify_with_registry(out:&std::path::Path,write:bool,registry:&serde_json::Value)->serde_json::Value { replay::verify_with_registry(out,write,registry) }\npub fn verify_detail(out:&std::path::Path,write:bool,registry:&serde_json::Value)->(serde_json::Value,serde_json::Value) { replay::verify_detail(out,write,registry) }\n}\n");
     }
-    engines.push_str("pub fn verify(out:&std::path::Path,write:bool)->serde_json::Value {\nlet summary:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(\"search.json\")).unwrap()).unwrap();\nlet item=&summary[\"attempts\"][0];\nlet data:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(item[\"curve\"].as_str().unwrap()).join(item[\"receipt\"][\"stdout\"].as_str().unwrap())).unwrap()).unwrap();\nlet p=crate::catalog::integer(&data[\"curve\"][\"p\"]);\nmatch (p.bits()+63)/64 {\n");
+    engines.push_str("pub fn verify(out:&std::path::Path,write:bool)->serde_json::Value {\nlet _trace_session=crate::replay_trace::Session::start();\nlet _trace_setup=crate::replay_trace::stage(\"setup/loading/parsing\");\nlet summary:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(\"search.json\")).unwrap()).unwrap();\nlet item=&summary[\"attempts\"][0];\nlet data:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(item[\"curve\"].as_str().unwrap()).join(item[\"receipt\"][\"stdout\"].as_str().unwrap())).unwrap()).unwrap();\nlet p=crate::catalog::integer(&data[\"curve\"][\"p\"]);\n_trace_setup.finish();\nlet result = match (p.bits()+63)/64 {\n");
     for limbs in 1..=10 {
         engines.push_str(&format!("{limbs} => n{limbs}::verify(out,write),\n"));
     }
-    engines.push_str("_ => panic!(\"unsupported verification field width\") } }\n");
-    engines.push_str("pub fn verify_detail(out:&std::path::Path,write:bool,registry:&serde_json::Value)->(serde_json::Value,serde_json::Value) {\nlet summary:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(\"search.json\")).unwrap()).unwrap();\nlet item=&summary[\"attempts\"][0];\nlet data:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(item[\"curve\"].as_str().unwrap()).join(item[\"receipt\"][\"stdout\"].as_str().unwrap())).unwrap()).unwrap();\nlet p=crate::catalog::integer(&data[\"curve\"][\"p\"]);\nmatch (p.bits()+63)/64 {\n");
+    engines.push_str("_ => panic!(\"unsupported verification field width\") };\n_trace_session.finish();\nresult }\n");
+    engines.push_str("pub fn verify_detail(out:&std::path::Path,write:bool,registry:&serde_json::Value)->(serde_json::Value,serde_json::Value) {\nlet _trace_session=crate::replay_trace::Session::start();\nlet _trace_setup=crate::replay_trace::stage(\"setup/loading/parsing\");\nlet summary:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(\"search.json\")).unwrap()).unwrap();\nlet item=&summary[\"attempts\"][0];\nlet data:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(item[\"curve\"].as_str().unwrap()).join(item[\"receipt\"][\"stdout\"].as_str().unwrap())).unwrap()).unwrap();\nlet p=crate::catalog::integer(&data[\"curve\"][\"p\"]);\n_trace_setup.finish();\nlet result = match (p.bits()+63)/64 {\n");
     for limbs in 1..=10 {
         engines.push_str(&format!(
             "{limbs} => n{limbs}::verify_detail(out,write,registry),\n"
         ));
     }
-    engines.push_str("_ => panic!(\"unsupported verification field width\") } }\n");
-    engines.push_str("pub fn verify_with_registry(out:&std::path::Path,write:bool,registry:&serde_json::Value)->serde_json::Value {\nlet summary:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(\"search.json\")).unwrap()).unwrap();\nlet item=&summary[\"attempts\"][0];\nlet data:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(item[\"curve\"].as_str().unwrap()).join(item[\"receipt\"][\"stdout\"].as_str().unwrap())).unwrap()).unwrap();\nlet p=crate::catalog::integer(&data[\"curve\"][\"p\"]);\nmatch (p.bits()+63)/64 {\n");
+    engines.push_str("_ => panic!(\"unsupported verification field width\") };\n_trace_session.finish();\nresult }\n");
+    engines.push_str("pub fn verify_with_registry(out:&std::path::Path,write:bool,registry:&serde_json::Value)->serde_json::Value {\nlet _trace_session=crate::replay_trace::Session::start();\nlet _trace_setup=crate::replay_trace::stage(\"setup/loading/parsing\");\nlet summary:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(\"search.json\")).unwrap()).unwrap();\nlet item=&summary[\"attempts\"][0];\nlet data:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(item[\"curve\"].as_str().unwrap()).join(item[\"receipt\"][\"stdout\"].as_str().unwrap())).unwrap()).unwrap();\nlet p=crate::catalog::integer(&data[\"curve\"][\"p\"]);\n_trace_setup.finish();\nlet result = match (p.bits()+63)/64 {\n");
     for limbs in 1..=10 {
         engines.push_str(&format!(
             "{limbs} => n{limbs}::verify_with_registry(out,write,registry),\n"
         ));
     }
-    engines.push_str("_ => panic!(\"unsupported verification field width\") } }\n");
+    engines.push_str("_ => panic!(\"unsupported verification field width\") };\n_trace_session.finish();\nresult }\n");
     fs::write(
         Path::new(&env::var("OUT_DIR").unwrap()).join("verification_engines.rs"),
         engines,
