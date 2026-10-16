@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -90,6 +91,23 @@ def checked_plan(archives: Path) -> dict:
     return plan
 
 
+def checked_preparation(path: Path, source_commit: str,
+                        input_sha256: dict[str, str]) -> dict:
+    row = json.loads(path.read_text())
+    by_name = {Path(name).name: digest for name, digest in input_sha256.items()}
+    if (row.get("schema") != "n83.hosted-regenerated-archives/v1"
+            or row.get("status") != "PASS_3_FROZEN_OBJECTS"
+            or row.get("source_commit") != source_commit
+            or row.get("workflow_dispatch_head_sha") != os.environ.get("GITHUB_SHA")
+            or row.get("archive_sha256") != by_name
+            or row.get("pilot_completed_base_count") != 54):
+        raise ValueError("hosted preparation receipt does not bind frozen inputs")
+    seconds = row.get("hosted_preparation_wall_seconds_L0")
+    if not isinstance(seconds, (int, float)) or not 0 <= seconds <= 1800:
+        raise ValueError("hosted preparation exceeded reserved setup envelope")
+    return row
+
+
 def stage_receipt(name: str, arm: dict, checkout: Path, archives: Path,
                   build: Path, run_dir: Path, binary: Path, image_id: str,
                   registry: Path, token: str) -> dict:
@@ -103,7 +121,8 @@ def stage_receipt(name: str, arm: dict, checkout: Path, archives: Path,
     )
 
 
-def run(archives: Path, output: Path, scratch: Path) -> dict:
+def run(archives: Path, output: Path, scratch: Path,
+        preparation_receipt: Path | None = None) -> dict:
     checkout = preflight.ROOT.resolve(strict=True)
     archives = archives.resolve(strict=True)
     output = output.resolve()
@@ -118,6 +137,7 @@ def run(archives: Path, output: Path, scratch: Path) -> dict:
     hosted_sources = {
         str(path.relative_to(checkout)): sha256(path)
         for path in (HERE / "run.py", HERE / "test_run.py",
+                     HERE / "prepare_archives.py",
                      checkout / ".github/workflows/n83-hosted-paired-gate.yml")
     }
     image_id, image = image_identity()
@@ -127,6 +147,9 @@ def run(archives: Path, output: Path, scratch: Path) -> dict:
         raise ValueError("offline Cargo registry missing")
     inputs = {str(archives / f"{digest}.jsonl.gz"): sha256(archives / f"{digest}.jsonl.gz")
               for digest in (preflight.BASE, *preflight.POOLS.values())}
+    if preparation_receipt is None:
+        raise ValueError("hosted preparation receipt required")
+    preparation = checked_preparation(preparation_receipt, commit, inputs)
     started = time.monotonic()
     deadline = started + TOTAL_CAP
     output.mkdir(parents=True)
@@ -142,6 +165,7 @@ def run(archives: Path, output: Path, scratch: Path) -> dict:
         "image": image, "cgroup_probe": cgroup,
         "conservative_full_charge_seconds": TOTAL_CAP,
         "prior_local_charge_seconds": preflight.PRIOR_CHARGE,
+        "preparation": preparation,
         "selected_best_total_runtime": None,
     })
     arms = []
@@ -239,6 +263,10 @@ def run(archives: Path, output: Path, scratch: Path) -> dict:
         "schema": "n83.hosted-gray-hash-paired-outer/v1", "status": status,
         "arms": arms, "elapsed_supervisor_seconds_L0": elapsed,
         "conservative_charge_seconds": len(arms) * sum(preflight.CHARGE_PER_ARM.values()),
+        "preparation_wall_seconds_L0": preparation["hosted_preparation_wall_seconds_L0"],
+        "conservative_charge_including_preparation_seconds_L0": (
+            len(arms) * sum(preflight.CHARGE_PER_ARM.values())
+            + math.ceil(preparation["hosted_preparation_wall_seconds_L0"])),
         "frozen_input_changed": frozen_changed,
         "new_n83_solver_search_executed": any(
             any(stage["name"] == "search" and stage["launch_error"] is None
@@ -255,8 +283,9 @@ def main() -> int:
     parser.add_argument("--archives", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--scratch", type=Path, required=True)
+    parser.add_argument("--preparation-receipt", type=Path, required=True)
     args = parser.parse_args()
-    result = run(args.archives, args.output, args.scratch)
+    result = run(args.archives, args.output, args.scratch, args.preparation_receipt)
     print(json.dumps(result, sort_keys=True))
     return 1 if result["status"].startswith("PRODUCER_FAILURE") else 0
 
