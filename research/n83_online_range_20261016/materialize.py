@@ -2,9 +2,11 @@
 """Bind the replayed expanded N83 online screen to exact IC1 candidates."""
 
 import argparse
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -52,6 +54,9 @@ def main():
     analysis = panel.read(versioned)
     source = panel.read(root / "source.json")
     host = panel.read(root / "host.json")
+    historical_runner = subprocess.check_output(
+        ["git", "show", SOURCE_COMMIT
+         + ":research/n83_online_range_20261016/run.py"], cwd=ROOT)
     if (analysis["status"] != "BOUNDED_UNKNOWN"
             or analysis["evidence_status"] != "PASS_INDEPENDENT_REPLAY"
             or analysis["execution_order_status"] != "PASS"
@@ -60,7 +65,8 @@ def main():
             or source["source_sha256"] != SOURCE_SHA256
             or source["hashes"]["examples/koblitz_orbit_dlp_fast.rs"] != SOURCE_SHA256
             or source["hashes"]["Cargo.lock"] != panel.LOCK_SHA256
-            or source["runner_sha256"] != panel.file_sha(HERE / "run.py")
+            or source["runner_sha256"] != hashlib.sha256(
+                historical_runner).hexdigest()
             or source["arm_order"] != [name for name, _, _, _ in runner.ARMS]):
         raise ValueError("executed source, order or replay differs")
     workload = panel.read(ROOT / "research/n83_root11_dynamic_20261016"

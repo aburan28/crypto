@@ -27,6 +27,12 @@ K3072/root11 resolves to
 The materializer checked the exact raw ZIP and replay hashes, executed source,
 base dumps, usable-point counts and arm order; it ran twice without changing
 any versioned record. The selected candidate remains null under the A/A gate.
+The original eight-arm screen has its own [IC1 rows](ic1_rows_38895743960.json):
+seven completed arms bind to six exact manifests, and the K3584 timeout
+retains a null candidate identity. Its A/B controls also share one exact
+candidate ID. The original materializer checked the historical runner bytes
+from commit `e83a78be0b74d22fb34e315006d47e6bd82a1e4c` and was likewise
+run twice without changing the versioned records.
 
 The predeclared K2543/root22 A/B control was noisy in both runs:
 18.570 versus 14.487 ms (24.70%) in the eight-arm screen and 18.327 versus
