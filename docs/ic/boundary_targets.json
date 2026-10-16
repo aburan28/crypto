@@ -303,45 +303,71 @@
         "decomposition": {
           "status": "record",
           "current": {
-            "summary": "First sub-2^(2l) decomposition oracle at l=8 (2026-10-15): group-law MITM pair table on the non-Koblitz binary curve y^2+xy=x^3+z*x^2+1 over F_(2^25); 64 targets, 0 disagreements vs pairs-and-solve, median 0.120-0.155 ms vs 11.7-42.8 ms (94x-277x, gate passes by 47x-138x); max 1,068 counted point-adds vs 32,896 quartic solves; FFD unmeasured with reason",
+            "summary": "Sub-2^(2l) MITM oracle ladder through l=10 (2026-10-15) on the non-Koblitz curve y^2+xy=x^3+z*x^2+1: l=8 over F_(2^25) (94x-277x, max 1,068 ops vs 32,896 quartic solves), l=9 over F_(2^27) (2,473.9x, 2,076 vs 134,912), l=10 over F_(2^31) (4,244.2x, 4,212 vs 525,312); 0 disagreements vs pairs-and-solve on all 192 targets, all witnesses group-verified; FFD unmeasured with reason",
             "metrics": {
-              "n": 25,
-              "l": 8,
               "oracle_class": "mitm_pair_table",
               "construction_method": "group-law meet-in-the-middle over subspace factor-base points",
-              "targets": 64,
-              "verdict_mix": {
-                "found": 20,
-                "refuted": 44
+              "rungs": {
+                "l8": {
+                  "n": 25,
+                  "points": 256,
+                  "table_entries": 32896,
+                  "construction_wall_ms": 21.1,
+                  "targets": 64,
+                  "verdict_mix": [
+                    20,
+                    44
+                  ],
+                  "median_ms": [
+                    0.12,
+                    0.155
+                  ],
+                  "pairs_median_ms": [
+                    11.7,
+                    42.8
+                  ],
+                  "ratio_range": [
+                    94.0,
+                    276.7
+                  ],
+                  "max_counted_ops": 1068,
+                  "quartic_solves": 32896
+                },
+                "l9": {
+                  "n": 27,
+                  "points": 519,
+                  "table_entries": 134594,
+                  "construction_wall_ms": 601.6,
+                  "targets": 64,
+                  "verdict_mix": [
+                    24,
+                    40
+                  ],
+                  "median_ms_mitm": 0.293,
+                  "pairs_median_ms": 724.9,
+                  "ratio": 2473.9,
+                  "max_counted_ops": 2076,
+                  "quartic_solves": 134912
+                },
+                "l10": {
+                  "n": 31,
+                  "points": 1053,
+                  "table_entries": 554304,
+                  "construction_wall_ms": 4826.6,
+                  "targets": 64,
+                  "verdict_mix": [
+                    20,
+                    44
+                  ],
+                  "median_ms_mitm": 0.735,
+                  "pairs_median_ms": 3119.2,
+                  "ratio": 4244.2,
+                  "max_counted_ops": 4212,
+                  "quartic_solves": 525312
+                }
               },
               "disagreements": 0,
-              "median_ms_per_target": {
-                "mitm_pair_table": [
-                  0.12,
-                  0.124,
-                  0.155
-                ],
-                "pairs_and_solve": [
-                  11.66,
-                  12.117,
-                  42.764
-                ]
-              },
-              "median_ratio_range": [
-                94.0,
-                276.7
-              ],
-              "gate_median_le_half_pairs": "PASS",
-              "counted_ops_per_target_max": 1068,
-              "pairs_per_target_refuting": 32896,
-              "factor_base": {
-                "dimension": 8,
-                "points": 256,
-                "materialized": true,
-                "table_entries": 32896,
-                "construction_wall_ms": 21.1,
-                "retained_bytes": 1052672
-              },
+              "gate_median_le_half_pairs": "PASS at every rung",
               "ffd": {
                 "status": "unmeasured",
                 "reason": "group-law MITM; no polynomial system is built or solved"
@@ -355,7 +381,7 @@
             }
           },
           "next_target": {
-            "summary": "Extend the MITM pair-table design to l=9 or l=10 on a fresh frozen base (table stays cheap to 2^20 entries), and add an FFD-logged algebraic control on the same systems",
+            "summary": "Extend the MITM ladder to l=11/l=12 (table to 2^22 entries stays under ~300 MiB; the pairs reference arm nears its wall-clock ceiling) and add an FFD-logged algebraic control on the same systems",
             "acceptance_gates": [
               "zero disagreements vs exhaustive or group check",
               "budget and host recorded",
@@ -364,6 +390,7 @@
           },
           "evidence": [
             "research/binary_mitm_oracle_l8_20261015/",
+            "research/binary_mitm_oracle_l9_l10_20261015/",
             "examples/binary_mitm_oracle_l8.rs",
             "RESEARCH_SAT_SEMAEV.md",
             "RESEARCH_SEMAEV_DECOMPOSITION.md",
@@ -399,6 +426,60 @@
                   }
                 }
               }
+            },
+            {
+              "recorded": "2026-10-15-l8-only",
+              "summary": "First sub-2^(2l) decomposition oracle at l=8 (2026-10-15): group-law MITM pair table on the non-Koblitz binary curve y^2+xy=x^3+z*x^2+1 over F_(2^25); 64 targets, 0 disagreements vs pairs-and-solve, median 0.120-0.155 ms vs 11.7-42.8 ms (94x-277x, gate passes by 47x-138x); max 1,068 counted point-adds vs 32,896 quartic solves; FFD unmeasured with reason",
+              "metrics": {
+                "n": 25,
+                "l": 8,
+                "oracle_class": "mitm_pair_table",
+                "construction_method": "group-law meet-in-the-middle over subspace factor-base points",
+                "targets": 64,
+                "verdict_mix": {
+                  "found": 20,
+                  "refuted": 44
+                },
+                "disagreements": 0,
+                "median_ms_per_target": {
+                  "mitm_pair_table": [
+                    0.12,
+                    0.124,
+                    0.155
+                  ],
+                  "pairs_and_solve": [
+                    11.66,
+                    12.117,
+                    42.764
+                  ]
+                },
+                "median_ratio_range": [
+                  94.0,
+                  276.7
+                ],
+                "gate_median_le_half_pairs": "PASS",
+                "counted_ops_per_target_max": 1068,
+                "pairs_per_target_refuting": 32896,
+                "factor_base": {
+                  "dimension": 8,
+                  "points": 256,
+                  "materialized": true,
+                  "table_entries": 32896,
+                  "construction_wall_ms": 21.1,
+                  "retained_bytes": 1052672
+                },
+                "ffd": {
+                  "status": "unmeasured",
+                  "reason": "group-law MITM; no polynomial system is built or solved"
+                },
+                "exhaustive_control": {
+                  "n": 15,
+                  "l": 5,
+                  "targets": 200,
+                  "agreed_with": "complete triple enumeration and pairs-and-solve"
+                }
+              },
+              "note": "the first sub-2^(2l) landing at l=8 (PR #1919) before the l=9/l=10 ladder"
             }
           ]
         },

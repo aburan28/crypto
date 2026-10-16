@@ -513,6 +513,26 @@ pub fn isogeny_tower(
             None => cost.two_sylow_rejected += 1,
         }
     };
+    finish_tower(p, t, aux, n, q, &mut rng, ops, cost)
+}
+
+/// The build on an accepted auxiliary curve, shared by the searched
+/// (ordinary) and the supersingular towers: `⟨Q⟩` by `2^t − 1`
+/// additions, `R'` with `2R' ∉ ⟨Q⟩`, `V = x(R' + ⟨Q⟩)` by `2^t`
+/// additions, and the Vélu chain with `c = x(Φ(R'))`.
+#[allow(clippy::too_many_arguments)]
+fn finish_tower(
+    p: u64,
+    t: u32,
+    aux: PrimeCurve,
+    n: u64,
+    q: PrimePoint,
+    rng: &mut SplitMix,
+    ops: &mut GroupOps,
+    mut cost: IsogenyTowerCost,
+) -> Result<IsogenyTower, String> {
+    let two_t = 1u64 << t;
+    let gae = |o: &GroupOps| o.adds + o.doubles;
     let build_before = gae(ops);
     // ⟨Q⟩ by successive additions.
     let mut multiples = Vec::with_capacity(two_t as usize);
@@ -527,7 +547,7 @@ pub fn isogeny_tower(
     }
     let keys: std::collections::HashSet<u64> = multiples.iter().map(|m| aux.key(m)).collect();
     let r0 = loop {
-        let r = random_point(&aux, &mut rng, &mut cost);
+        let r = random_point(&aux, rng, &mut cost);
         let r2 = aux.double(ops, r);
         if !keys.contains(&aux.key(&r2)) {
             break r;
@@ -591,6 +611,168 @@ pub fn isogeny_tower(
     Ok(tower)
 }
 
+// ── Supersingular auxiliary curves (`aux=supersingular`) ─────────────
+
+/// Which auxiliary curve the isogeny tower is built on.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum AuxKind {
+    /// A curve found by the seeded search of [`isogeny_tower`].
+    Ordinary,
+    /// `y² = x³ + x` (`j = 1728`), supersingular for `p ≡ 3 (mod 4)`;
+    /// one rational 2-torsion point, so the 2-Sylow subgroup is cyclic of
+    /// order `2^{v₂(p+1)}`.
+    SsJ1728,
+    /// `y² = x³ − x`, its other quartic twist class (`−1` is a non-square
+    /// for `p ≡ 3 mod 4`); full rational 2-torsion, 2-Sylow
+    /// `Z/2 × Z/2^{v₂(p+1)−1}`.
+    SsJ1728Twist,
+    /// `y² = x³ + 1` (`j = 0`), supersingular for `p ≡ 2 (mod 3)`; one
+    /// rational 2-torsion point (cubing is a bijection), cyclic 2-Sylow.
+    SsJ0,
+    /// `y² = x³ + d³` for the least non-square `d`, the quadratic twist of
+    /// [`AuxKind::SsJ0`].
+    SsJ0Twist,
+}
+
+impl AuxKind {
+    /// The `aux=` parameter value: `ordinary` (default), `supersingular`
+    /// (`ss-j1728` when `p ≡ 3 mod 4`, else `ss-j0` when `p ≡ 2 mod 3`),
+    /// or one of `ss-j1728`, `ss-j1728-twist`, `ss-j0`, `ss-j0-twist`.
+    pub fn parse(s: &str, p: u64) -> Result<Self, String> {
+        Ok(match s {
+            "ordinary" => AuxKind::Ordinary,
+            "supersingular" => {
+                if p % 4 == 3 {
+                    AuxKind::SsJ1728
+                } else if p % 3 == 2 {
+                    AuxKind::SsJ0
+                } else {
+                    return Err(format!(
+                        "aux=supersingular needs p ≡ 3 (mod 4) or p ≡ 2 (mod 3); p = {p}"
+                    ));
+                }
+            }
+            "ss-j1728" => AuxKind::SsJ1728,
+            "ss-j1728-twist" => AuxKind::SsJ1728Twist,
+            "ss-j0" => AuxKind::SsJ0,
+            "ss-j0-twist" => AuxKind::SsJ0Twist,
+            _ => return Err(format!("unknown aux = {s}")),
+        })
+    }
+
+    pub fn name(self) -> &'static str {
+        match self {
+            AuxKind::Ordinary => "ordinary",
+            AuxKind::SsJ1728 => "ss-j1728",
+            AuxKind::SsJ1728Twist => "ss-j1728-twist",
+            AuxKind::SsJ0 => "ss-j0",
+            AuxKind::SsJ0Twist => "ss-j0-twist",
+        }
+    }
+}
+
+/// The supersingular auxiliary curve of `kind` over `F_p`, after the
+/// condition on `p` that makes it supersingular (Deuring: `j = 1728` iff
+/// `p ≡ 3 mod 4`, `j = 0` iff `p ≡ 2 mod 3`). Its order is `p + 1`
+/// (`p > 3`); the tests count it at small `p`.
+pub fn supersingular_aux(p: u64, kind: AuxKind) -> Result<PrimeCurve, String> {
+    let need = |ok: bool, what: &str| {
+        if ok {
+            Ok(())
+        } else {
+            Err(format!(
+                "{} is not supersingular at p = {p} ({what})",
+                kind.name()
+            ))
+        }
+    };
+    match kind {
+        AuxKind::Ordinary => Err("not a supersingular kind".into()),
+        AuxKind::SsJ1728 | AuxKind::SsJ1728Twist => {
+            need(p % 4 == 3, "needs p ≡ 3 mod 4")?;
+            let a = if kind == AuxKind::SsJ1728 { 1 } else { p - 1 };
+            Ok(PrimeCurve { p, a, b: 0 })
+        }
+        AuxKind::SsJ0 | AuxKind::SsJ0Twist => {
+            need(p % 3 == 2 && p > 3, "needs p ≡ 2 mod 3")?;
+            let b = if kind == AuxKind::SsJ0 {
+                1
+            } else {
+                let e = PrimeCurve { p, a: 0, b: 1 };
+                let d = (2..p).find(|&d| e.legendre(d) < 0).ok_or("no non-square")?;
+                mul(mul(d, d, p), d, p)
+            };
+            Ok(PrimeCurve { p, a: 0, b })
+        }
+    }
+}
+
+/// The isogeny tower on a supersingular auxiliary curve: no search and
+/// no point count (`#E' = p + 1`). `Q` is drawn as `[2^{k−t}]·[n₀]P`
+/// for random `P`, where `n₀` is the odd part of `p + 1` and `2^k` the
+/// order of `[n₀]P`, until `k ≥ t`; every group operation of that draw
+/// and of the build is charged to `ops` (`build_gae`), and
+/// `curves_tried = 1`. The rest is [`isogeny_tower`]'s build.
+pub fn supersingular_tower(
+    p: u64,
+    t: u32,
+    seed: u64,
+    kind: AuxKind,
+    ops: &mut GroupOps,
+) -> Result<IsogenyTower, String> {
+    if !(1..=20).contains(&t) {
+        return Err(format!("t = {t} is outside 1 … 20"));
+    }
+    if p < 64 || (1u64 << t) > p / 4 {
+        return Err(format!("p = {p} is too small for t = {t}"));
+    }
+    let aux = supersingular_aux(p, kind)?;
+    let n = p + 1;
+    let v = n.trailing_zeros();
+    let odd = n >> v;
+    if v < t {
+        return Err(format!(
+            "v₂(p + 1) = {v} < t = {t}: {} has no point of order 2^{t}",
+            kind.name()
+        ));
+    }
+    let mut rng = SplitMix(
+        p.wrapping_mul(0x9E37_79B9_7F4A_7C15)
+            ^ (u64::from(t) << 56)
+            ^ seed.rotate_left(17)
+            ^ 0x5353_0000_0000_0000,
+    );
+    let mut cost = IsogenyTowerCost {
+        curves_tried: 1,
+        ..Default::default()
+    };
+    let gae = |o: &GroupOps| o.adds + o.doubles;
+    let before = gae(ops);
+    let mut q = None;
+    for _ in 0..64 {
+        let q0 = aux.mul(ops, random_point(&aux, &mut rng, &mut cost), odd);
+        // k = log₂ ord(q0), by doubling (at most v doublings).
+        let mut k = 0u32;
+        let mut acc = q0;
+        while !aux.is_identity(&acc) && k <= v {
+            acc = aux.double(ops, acc);
+            k += 1;
+        }
+        if k >= t {
+            let mut c = q0;
+            for _ in 0..k - t {
+                c = aux.double(ops, c);
+            }
+            q = Some(c);
+            break;
+        }
+        cost.two_sylow_rejected += 1;
+    }
+    cost.build_gae += gae(ops) - before;
+    let q = q.ok_or_else(|| format!("no point of order 2^{t} on {} in 64 draws", kind.name()))?;
+    finish_tower(p, t, aux, n, q, &mut rng, ops, cost)
+}
+
 /// The isogeny tower base: every point of the curve whose abscissa is in
 /// `V = x(R' + ⟨Q⟩)`, both signs, one column an abscissa.
 pub struct PrimeIsogenyBase<'i> {
@@ -603,13 +785,23 @@ impl FactorBaseBuilder<PrimeCurve> for PrimeIsogenyBase<'_> {
     }
 
     fn describe(&self, params: &Params) -> String {
-        format!(
-            "PKM's isogeny tower: every point with x ∈ x(R' + ⟨Q⟩) for Q of order 2^t on a searched \
-             auxiliary curve, the zeros of a chain of t Vélu 2-isogeny x-maps, t = {}, seed = {}; \
-             the search is charged to the factor-base phase",
-            params.get("t").unwrap_or("?"),
-            params.get("seed").unwrap_or("0")
-        )
+        match params.get("aux") {
+            None | Some("ordinary") => format!(
+                "PKM's isogeny tower: every point with x ∈ x(R' + ⟨Q⟩) for Q of order 2^t on a searched \
+                 auxiliary curve, the zeros of a chain of t Vélu 2-isogeny x-maps, t = {}, seed = {}; \
+                 the search is charged to the factor-base phase",
+                params.get("t").unwrap_or("?"),
+                params.get("seed").unwrap_or("0")
+            ),
+            Some(aux) => format!(
+                "PKM's isogeny tower on a supersingular auxiliary curve ({aux}, #E' = p + 1, no \
+                 search): every point with x ∈ x(R' + ⟨Q⟩) for Q of order 2^t, the zeros of a chain \
+                 of t Vélu 2-isogeny x-maps, t = {}, seed = {}; drawing Q and the build are charged \
+                 to the factor-base phase",
+                params.get("t").unwrap_or("?"),
+                params.get("seed").unwrap_or("0")
+            ),
+        }
     }
 
     fn parameters(&self) -> &[(&str, &str)] {
@@ -618,6 +810,12 @@ impl FactorBaseBuilder<PrimeCurve> for PrimeIsogenyBase<'_> {
             (
                 "seed",
                 "public seed of the auxiliary-curve search, default 0",
+            ),
+            (
+                "aux",
+                "ordinary (default: the charged search), supersingular (y² = x³ + x when p ≡ 3 mod 4, \
+                 else y² = x³ + 1 when p ≡ 2 mod 3; #E' = p + 1, no search), ss-j1728, \
+                 ss-j1728-twist, ss-j0, ss-j0-twist",
             ),
         ]
     }
@@ -631,8 +829,13 @@ impl FactorBaseBuilder<PrimeCurve> for PrimeIsogenyBase<'_> {
         let p = self.instance.curve.p;
         let t = params.u64("t")? as u32;
         let seed = params.u64_or("seed", 0)?;
+        let kind = AuxKind::parse(params.get("aux").unwrap_or("ordinary"), p)?;
         let mut aux_ops = GroupOps::default();
-        let tower = isogeny_tower(p, t, seed, &mut aux_ops)?;
+        let tower = if kind == AuxKind::Ordinary {
+            isogeny_tower(p, t, seed, &mut aux_ops)?
+        } else {
+            supersingular_tower(p, t, seed, kind, &mut aux_ops)?
+        };
         let mut xs = tower.v.clone();
         xs.sort_unstable();
         let (aa, ab, an, tried) = (
@@ -642,10 +845,18 @@ impl FactorBaseBuilder<PrimeCurve> for PrimeIsogenyBase<'_> {
             tower.cost.curves_tried,
         );
         let mut fb = lift_abscissae(self.instance, &xs, |columns| {
-            format!(
-                "isogeny tower t = {t}, seed = {seed}, E' = (a' {aa}, b' {ab}), #E' = {an}, \
-                 {tried} auxiliary curves tried, {columns} of 2^{t} abscissae on the curve"
-            )
+            if kind == AuxKind::Ordinary {
+                format!(
+                    "isogeny tower t = {t}, seed = {seed}, E' = (a' {aa}, b' {ab}), #E' = {an}, \
+                     {tried} auxiliary curves tried, {columns} of 2^{t} abscissae on the curve"
+                )
+            } else {
+                format!(
+                    "isogeny tower t = {t}, seed = {seed}, supersingular E' = {} (a' {aa}, b' {ab}), \
+                     #E' = p + 1 = {an}, no search, {columns} of 2^{t} abscissae on the curve",
+                    kind.name()
+                )
+            }
         })?;
         let c = &tower.cost;
         fb.cost.count("legendre_symbols", c.legendre_symbols);
@@ -667,6 +878,9 @@ impl FactorBaseBuilder<PrimeCurve> for PrimeIsogenyBase<'_> {
             ("velu_evaluations_uncharged", c.velu_evaluations),
         ] {
             fb.cost.count(name, v);
+        }
+        if kind != AuxKind::Ordinary {
+            fb.cost.count("aux_supersingular", 1);
         }
         ops.merge(aux_ops);
         Ok(fb)
@@ -858,5 +1072,193 @@ mod tests {
                 &mut ops
             )
             .is_err());
+    }
+
+    /// `p` prime, by trial division (test helper).
+    fn is_prime(n: u64) -> bool {
+        n >= 2
+            && (2..)
+                .take_while(|d| d * d <= n)
+                .all(|d| !n.is_multiple_of(d))
+    }
+
+    /// `L(x)` over `BigUint`, written independently of [`IsogenyTower::eval`].
+    fn big_eval(p: u64, steps: &[VeluStep], x: u64) -> Option<u64> {
+        use num_bigint::BigUint;
+        use num_traits::Zero;
+        let pb = BigUint::from(p);
+        let mut y = BigUint::from(x);
+        for s in steps {
+            let d = (&y + &pb - BigUint::from(s.xi)) % &pb;
+            if d.is_zero() {
+                return None;
+            }
+            let inv = d.modpow(&(&pb - 2u32), &pb);
+            y = (&y + BigUint::from(s.tau) * inv) % &pb;
+        }
+        Some(y.to_u64_digits().first().copied().unwrap_or(0))
+    }
+
+    #[test]
+    fn supersingular_aux_curves_have_p_plus_one_points() {
+        let primes: Vec<u64> = (67..3000u64).filter(|&p| is_prime(p)).collect();
+        let mut checked = 0;
+        for &p in &primes {
+            for kind in [
+                AuxKind::SsJ1728,
+                AuxKind::SsJ1728Twist,
+                AuxKind::SsJ0,
+                AuxKind::SsJ0Twist,
+            ] {
+                match supersingular_aux(p, kind) {
+                    Ok(e) => {
+                        assert_eq!(e.point_count(), p + 1, "{kind:?} at p = {p}");
+                        checked += 1;
+                    }
+                    Err(_) => {
+                        // Refused exactly when the curve is ordinary.
+                        let e = match kind {
+                            AuxKind::SsJ1728 => PrimeCurve { p, a: 1, b: 0 },
+                            AuxKind::SsJ0 => PrimeCurve { p, a: 0, b: 1 },
+                            _ => continue,
+                        };
+                        assert_ne!(e.point_count(), p + 1, "{kind:?} refused at p = {p}");
+                    }
+                }
+            }
+        }
+        assert!(checked > 600);
+        assert_eq!(
+            AuxKind::parse("supersingular", 14_680_063),
+            Ok(AuxKind::SsJ1728)
+        );
+        assert_eq!(
+            AuxKind::parse("supersingular", 786_433),
+            Err("aux=supersingular needs p ≡ 3 (mod 4) or p ≡ 2 (mod 3); p = 786433".into())
+        );
+        assert_eq!(
+            AuxKind::parse("supersingular", 786_437).unwrap(),
+            AuxKind::SsJ0
+        );
+    }
+
+    #[test]
+    fn the_supersingular_tower_has_exactly_two_to_the_t_roots() {
+        use crate::cryptanalysis::two_sylow_search::big_double;
+        use num_bigint::BigUint;
+        // p ≡ 3 mod 4 with v₂(p + 1) ≥ t + 1, some also ≡ 2 mod 3.
+        let cases: Vec<(u64, u32)> = (400..40_000u64)
+            .filter(|&p| is_prime(p) && p % 4 == 3 && (p + 1).trailing_zeros() >= 5)
+            .take(12)
+            .map(|p| (p, ((p + 1).trailing_zeros() - 1).min(6)))
+            .collect();
+        assert!(cases.len() >= 10);
+        let mut towers = 0;
+        for (p, t) in cases {
+            for kind in [
+                AuxKind::SsJ1728,
+                AuxKind::SsJ1728Twist,
+                AuxKind::SsJ0,
+                AuxKind::SsJ0Twist,
+            ] {
+                if supersingular_aux(p, kind).is_err() {
+                    continue;
+                }
+                let mut ops = GroupOps::default();
+                let tower = supersingular_tower(p, t, 3, kind, &mut ops).unwrap();
+                towers += 1;
+                assert_eq!(tower.aux_order, p + 1);
+                assert_eq!(tower.aux.point_count(), p + 1, "{kind:?} p = {p}");
+                let mut v = tower.v.clone();
+                v.sort_unstable();
+                v.dedup();
+                assert_eq!(v.len(), 1 << t, "|V| = 2^t, distinct");
+                for &x in &tower.v {
+                    assert_eq!(tower.eval(x), Some(tower.c));
+                    assert_eq!(big_eval(p, &tower.steps, x), Some(tower.c), "BigUint L(x)");
+                }
+                let roots: Vec<u64> = (0..p).filter(|&x| tower.eval(x) == Some(tower.c)).collect();
+                assert_eq!(roots, v, "the roots of L(x) = c are exactly V (p = {p})");
+                // Q has order exactly 2^t, over BigUint.
+                let (pb, ab) = (BigUint::from(p), BigUint::from(tower.aux.a));
+                let mut q = Some((BigUint::from(tower.q.x), BigUint::from(tower.q.y)));
+                for i in 1..t {
+                    q = big_double(&pb, &ab, &q);
+                    assert!(q.is_some(), "[2^{i}]Q = O");
+                }
+                assert!(big_double(&pb, &ab, &q).is_none(), "[2^t]Q ≠ O");
+                // The charge: one curve, no search, every operation in the build.
+                let c = &tower.cost;
+                assert_eq!(c.curves_tried, 1);
+                assert_eq!(c.search_gae, 0);
+                assert_eq!(ops.adds + ops.doubles, c.build_gae);
+                let again = supersingular_tower(p, t, 3, kind, &mut GroupOps::default()).unwrap();
+                assert_eq!(again.v, tower.v);
+            }
+        }
+        assert!(towers >= 24);
+        // No point of order 2^t beyond the 2-Sylow subgroup.
+        let p = 14_680_063u64; // 7·2^21 − 1
+        assert!(supersingular_tower(p, 20, 0, AuxKind::SsJ1728, &mut GroupOps::default()).is_ok());
+        assert!(
+            supersingular_tower(p, 20, 0, AuxKind::SsJ1728Twist, &mut GroupOps::default()).is_ok()
+        );
+    }
+
+    #[test]
+    fn the_supersingular_base_holds_exactly_the_tower_points_that_lift() {
+        // A prime-order instance over a prime with v₂(p + 1) ≥ 6.
+        let mut seed = 1;
+        let inst = loop {
+            let inst = crate::cryptanalysis::ic_boundary::find_prime_order_curve(16, seed);
+            if inst.curve.p % 4 == 3 && (inst.curve.p + 1).trailing_zeros() >= 6 {
+                break inst;
+            }
+            seed += 1;
+            assert!(seed < 20_000, "no instance found");
+        };
+        let ctx = InstanceCtx {
+            group: &inst.curve,
+            generator: inst.generator_point(),
+            target: inst.generator_point(),
+            r: inst.r,
+            cofactor: inst.cofactor,
+            group_order: inst.group_order,
+            name: inst.name.clone(),
+            field_degree: None,
+        };
+        let t = 5;
+        let (_, params) =
+            Params::parse_spec(&format!("prime-isogeny:t={t},seed=2,aux=supersingular")).unwrap();
+        let mut ops = GroupOps::default();
+        let fb = PrimeIsogenyBase { instance: &inst }
+            .build(&ctx, &params, &mut ops)
+            .unwrap();
+        let p = inst.curve.p;
+        let tower =
+            supersingular_tower(p, t, 2, AuxKind::SsJ1728, &mut GroupOps::default()).unwrap();
+        let mut lifting: Vec<u64> = tower
+            .v
+            .iter()
+            .copied()
+            .filter(|&x| inst.curve.legendre(inst.curve.rhs(x)) >= 0)
+            .collect();
+        lifting.sort_unstable();
+        assert_eq!(fb.abscissa_list, lifting);
+        assert_eq!(ops.adds + ops.doubles, fb.cost.get("aux_tower_build_gae"));
+        assert_eq!(fb.cost.get("aux_search_gae"), 0);
+        assert_eq!(fb.cost.get("aux_supersingular"), 1);
+        // The ordinary default is unchanged by the option.
+        let (_, ord) = Params::parse_spec(&format!("prime-isogeny:t={t},seed=2")).unwrap();
+        let (_, ord2) =
+            Params::parse_spec(&format!("prime-isogeny:t={t},seed=2,aux=ordinary")).unwrap();
+        let a = PrimeIsogenyBase { instance: &inst }
+            .build(&ctx, &ord, &mut GroupOps::default())
+            .unwrap();
+        let b = PrimeIsogenyBase { instance: &inst }
+            .build(&ctx, &ord2, &mut GroupOps::default())
+            .unwrap();
+        assert_eq!(a.abscissa_list, b.abscissa_list);
+        assert_eq!(a.cost.get("aux_supersingular"), 0);
     }
 }
