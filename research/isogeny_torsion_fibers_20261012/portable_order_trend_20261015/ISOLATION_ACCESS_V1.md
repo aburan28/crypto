@@ -29,3 +29,12 @@ an existing authorized bare-metal lab worker would enable an L2 attempt,
 subject to actual host isolation telemetry and A/A admission. GitHub's
 hosted Linux runner is used only for independent-host L1-or-lower replay.
 It cannot discharge the isolated-wall gate.
+
+An authorized attempt to request a 128-vCPU quota increase in `us-west-2`
+with `aws service-quotas request-service-quota-increase --service-code ec2
+--quota-code L-1216C47A --desired-value 128` exited 254 with AWS
+`AccessDeniedException: Unable to perform this operation. Please contact
+AWS Support`. No quota request was created. An account owner or AWS Support
+must enable the quota, or an existing authorized bare-metal worker must be
+provided, before this L2 experiment can be placed. This is an access
+blocker; it supplies no timing data.
