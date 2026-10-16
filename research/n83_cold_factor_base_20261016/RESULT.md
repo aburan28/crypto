@@ -7,7 +7,7 @@ The repeated K2543/root22 control took 346.955 s and 309.133 s, a difference of 
 | Arm | Usable base points | Folded columns | Cold process, s | One-target online, ms | Peak RSS, GiB | Replay status |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
 | K2543/root22 A | 422,138 | 2,543 | 346.955 | 25.173 | 10.80 | pass |
-| K256/root22 | 42,496 | 256 | unknown (900 s outer cap) | unknown | 0.10 sampled | timeout |
+| K256/root22 | unverified (42,496 planned) | 256 planned | unknown (900 s outer cap) | unknown | 0.10 sampled | timeout |
 | K512/root22 | 84,992 | 512 | 378.198 | 321.549 | 0.44 | pass |
 | K768/root22 | 127,488 | 768 | 230.107 | 1,416.595 | 0.90 | pass |
 | K1024/root22 | 169,984 | 1,024 | **162.363** | 72.512 | 1.63 | pass |
