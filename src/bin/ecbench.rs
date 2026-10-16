@@ -308,6 +308,8 @@ enum Cmd {
     },
 }
 
+// Parsed once per process; boxing the fit options would only add noise.
+#[allow(clippy::large_enum_variant)]
 #[derive(Subcommand)]
 enum BoundCmd {
     /// Fit the bound of one arm from one or more sessions of it.
