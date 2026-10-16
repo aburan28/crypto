@@ -482,7 +482,7 @@ pub fn price(x: &Priceable) -> Result<WorkBlock, String> {
                 p.scalar_mults as u128 * 3 * widths.r_bits as u128 / 2;
         }
         if ic {
-            for (name, &count) in &p.native {
+            for (name, &count) in p.native.iter().chain(p.work_native.iter()) {
                 if count == 0 {
                     continue;
                 }
@@ -645,6 +645,58 @@ pub fn price_record(
         counters: &r.counters,
         solver: r.solver.as_ref(),
     })
+}
+
+/// The record as the bound fitter reads it in `bitop/v1`: the cost unit
+/// becomes `bitop/v1`, the total and every phase are gates, `S` is gates
+/// over `√r` times the gates of one affine addition on the curve (so
+/// `S / √(π/2A)` keeps its meaning, the ratio to the generic floor), and a
+/// record whose pricing is incomplete is a lower bound naming what it
+/// misses.  Counts, identities and timings are unchanged.
+pub fn bitop_view(
+    r: &crate::cryptanalysis::ecbench::record::Record,
+) -> Result<crate::cryptanalysis::ecbench::record::Record, String> {
+    let w = match &r.work {
+        Some(w) => w.clone(),
+        None => price_record(r)?,
+    };
+    let mut v = r.clone();
+    let add = w.widths.gates(Prim::GroupAdd).map_err(|e| e.to_string())? as f64;
+    let total: f64 = w.bitops.parse().map_err(|_| "bitops is not an integer")?;
+    let sqrt_r = (r.workload.curve.r as f64).sqrt();
+    v.cost.unit = bitops::UNIT.into();
+    if r.cost.total_gae.is_some() {
+        v.cost.total_gae = Some(total);
+        let s = total / (sqrt_r * add);
+        v.cost.s = Some(s);
+        v.boundaries.ratio_to_floor = Some(s / v.boundaries.floor_s);
+    }
+    v.cost.lower_bound = !w.complete;
+    let mut missing = w.unpriced.clone();
+    missing.extend(w.known_uncounted.iter().cloned());
+    v.cost.unpriced = missing;
+    for p in v.phases.iter_mut() {
+        p.gae = w
+            .phases
+            .iter()
+            .find(|q| q.name == p.name)
+            .and_then(|q| q.bitops.parse::<f64>().ok())
+            .unwrap_or(0.0);
+    }
+    // Native work generic methods count outside their phases is its own
+    // phase in the view, so the stage table accounts for every gate.
+    if let Some(n) = w.phases.iter().find(|q| q.name == "natives") {
+        if !v.phases.iter().any(|p| p.name == "natives") {
+            v.phases
+                .push(crate::cryptanalysis::ecbench::methods::PhaseRecord {
+                    name: "natives".into(),
+                    gae: n.bitops.parse().unwrap_or(0.0),
+                    ..Default::default()
+                });
+        }
+    }
+    v.work = Some(w);
+    Ok(v)
 }
 
 /// One line of `ecbench work`: a record's identity and its work.

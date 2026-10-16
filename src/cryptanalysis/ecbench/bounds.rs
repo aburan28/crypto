@@ -342,6 +342,11 @@ pub struct FitOptions {
     pub curves: Vec<String>,
     pub resamples: usize,
     pub seed: u64,
+    /// `bitop/v1` fits the arm in bit operations (`ecbench::work`); absent
+    /// fits it in the unit its records carry.  Absent is not written, so a
+    /// bound fitted before the option existed re-derives byte for byte.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit: Option<String>,
 }
 
 impl Default for FitOptions {
@@ -351,6 +356,7 @@ impl Default for FitOptions {
             curves: vec![],
             resamples: RESAMPLES,
             seed: SEED,
+            unit: None,
         }
     }
 }
@@ -675,6 +681,17 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
     }
     let method = method.expect("at least one session");
 
+    match opts.unit.as_deref() {
+        None => {}
+        Some(crate::cryptanalysis::bitops::UNIT) => {
+            recs = recs
+                .iter()
+                .map(crate::cryptanalysis::ecbench::work::bitop_view)
+                .collect::<Result<_, _>>()?;
+        }
+        Some(u) => return Err(format!("no unit `{u}`; the fitter knows bitop/v1")),
+    }
+
     // Filters: named curves, then tier.
     if !opts.curves.is_empty() {
         recs.retain(|r| opts.curves.contains(&r.workload.curve.slug));
@@ -842,7 +859,11 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
     let scaling_claim = n_sizes >= MIN_SIZES_FOR_SCALING && alpha.is_some();
     let fit = Fit {
         size_parameter: "r".into(),
-        model: "gae = C * r^alpha".into(),
+        model: if domain.unit == crate::cryptanalysis::bitops::UNIT {
+            "bitops = C * r^alpha".into()
+        } else {
+            "gae = C * r^alpha".into()
+        },
         points: strata.iter().map(|s| s.len() as u64).sum(),
         sizes: n_sizes as u64,
         alpha,
@@ -1066,7 +1087,17 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
     let mut unpriced: Vec<String> = recs.iter().flat_map(|r| r.cost.unpriced.clone()).collect();
     unpriced.sort();
     unpriced.dedup();
-    let admissible = unverified == 0 && audits.iter().all(|a| a.ok);
+    // In bitop/v1 a bound must account for every gate: a lower bound
+    // ranks nothing against a complete one, so it is inadmissible, with
+    // what it misses named (docs/units/BITOPS.md).
+    let incomplete_bitops = domain.unit == crate::cryptanalysis::bitops::UNIT && bounded;
+    if incomplete_bitops {
+        reasons.push(format!(
+            "bitop/v1 pricing is incomplete (missing: {}); a lower bound is not admissible in this unit",
+            unpriced.join(", ")
+        ));
+    }
+    let admissible = unverified == 0 && audits.iter().all(|a| a.ok) && !incomplete_bitops;
     let admissibility = Admissibility {
         status: if admissible {
             "admissible"

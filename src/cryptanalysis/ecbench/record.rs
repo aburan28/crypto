@@ -338,6 +338,12 @@ pub struct Record {
     pub isolation: IsolationRecord,
     pub env_class_id: String,
     pub binary_sha256: Option<String>,
+    /// The run's work in `bitop/v1` (`ecbench::work`), derived from the
+    /// record's own counts.  Written only by runners that price it, so a
+    /// record from before the block existed is byte for byte what it was and
+    /// its seal still checks; `ecbench work` prices those from their counts.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work: Option<crate::cryptanalysis::ecbench::work::WorkBlock>,
 }
 
 impl Record {

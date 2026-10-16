@@ -342,6 +342,10 @@ enum BoundCmd {
         resamples: usize,
         #[arg(long, default_value_t = bounds::SEED)]
         seed: u64,
+        /// Fit in this unit instead of the records' own: `bitop/v1`
+        /// (docs/units/BITOPS.md).
+        #[arg(long)]
+        unit: Option<String>,
         #[arg(long)]
         out: Option<PathBuf>,
     },
@@ -1193,6 +1197,7 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 root,
                 resamples,
                 seed,
+                unit,
                 out,
             } => {
                 let b = bounds::bound_from_sessions(&bounds::FitInputs {
@@ -1207,6 +1212,7 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                         curves: curve,
                         resamples,
                         seed,
+                        unit,
                     },
                 })?;
                 let mut b = b;

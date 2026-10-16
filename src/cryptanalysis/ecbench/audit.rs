@@ -514,6 +514,18 @@ pub fn audit_with(
                     if ints(&rep.phases) != ints(&r.phases) {
                         diffs.push("phase counts");
                     }
+                    // bitop/v1 counters compare only when the committed
+                    // record has them: one written before they existed
+                    // carries none, and unknown is not a disagreement.
+                    if r.phases.iter().any(|p| !p.work_native.is_empty())
+                        && rep
+                            .phases
+                            .iter()
+                            .map(|p| &p.work_native)
+                            .ne(r.phases.iter().map(|p| &p.work_native))
+                    {
+                        diffs.push("work counters");
+                    }
                     if !phases_ok {
                         diffs.push("phase gae");
                     }

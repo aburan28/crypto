@@ -602,6 +602,13 @@ pub struct PhaseRecord {
     pub wall_ns: Option<u64>,
     #[serde(default)]
     pub native: BTreeMap<String, u64>,
+    /// Work counted for `bitop/v1` alone (`ecbench::work`): counters added
+    /// after sessions were committed, kept apart from `native` so a replay
+    /// of a committed record still compares exactly what it recorded.
+    /// Written only when nonempty; the audit compares it only when the
+    /// committed record carries it.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub work_native: BTreeMap<String, u64>,
 }
 
 /// The factor base an index-calculus run used, identified by its points.
@@ -804,6 +811,7 @@ fn ops_phase(name: &str, ops: GroupOps) -> PhaseRecord {
         gae: ops.gae(),
         wall_ns: None,
         native: BTreeMap::new(),
+        work_native: BTreeMap::new(),
     }
 }
 
@@ -1778,6 +1786,7 @@ fn phase_of(name: &str, p: &PhaseCost) -> PhaseRecord {
         gae: p.gae,
         wall_ns: Some(p.wall_ns),
         native: p.native.clone(),
+        work_native: BTreeMap::new(),
     }
 }
 
