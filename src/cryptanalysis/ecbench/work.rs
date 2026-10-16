@@ -368,9 +368,14 @@ fn ic_rule(counter: &str) -> Option<Rule> {
         // A conversion into Montgomery form is a Montgomery product.
         "montgomery_conversions" => Prims(&[(FieldMul, 1)]),
         // rootfind-subtract's sweep: the batched inversion's `3k` products
-        // and the target's two conversions; the `k` differences.
-        "sweep_field_muls" => Prims(&[(FieldMul, 1)]),
-        "sweep_field_adds" => Prims(&[(FieldAdd, 1)]),
+        // and the target's two conversions; the `k` differences.  Each of
+        // the `k` candidates is already charged as a full affine addition,
+        // inversion included, and the batch's three products a candidate
+        // cost less than the inversion they replace, so the products are
+        // inside that charge already: pricing them again would count the
+        // inversion twice.  The differences are the additions' own
+        // `x₂ − x₁`, inside the same charge.
+        "sweep_field_muls" | "sweep_field_adds" => Shape,
         // A base's `point_index` and `x_index`: inserts and the lookups
         // that pair a point with its negative; the negatives formed; the
         // abscissa sort's compares and copies.
