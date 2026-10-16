@@ -263,11 +263,13 @@ fn solve_rows(rows: &[[u64; 10]]) -> Option<([u64; 9], usize)> {
 
 fn base_for(public: &Value, record: &Value, arm: &str) -> Vec<Point> {
     if public["schema"] == "different_j_inverse_trend_public/v1" {
-        let signed=points(&record["relation_setup"]["signed_points"]);
-        assert_eq!(signed.len(),16);
-        let f=Field{nu:public["field_nu"].as_u64().unwrap()};
+        let signed = points(&record["relation_setup"]["signed_points"]);
+        assert_eq!(signed.len(), 16);
+        let f = Field {
+            nu: public["field_nu"].as_u64().unwrap(),
+        };
         for i in 0..8 {
-            assert_eq!(signed[2*i+1],neg(f,signed[2*i]));
+            assert_eq!(signed[2 * i + 1], neg(f, signed[2 * i]));
         }
         return signed.into_iter().step_by(2).collect();
     }
@@ -318,14 +320,14 @@ fn check_relation(
     };
     let mut pair_entries = 0u64;
     let mut pair_keys = BTreeSet::new();
-    let mut pair_table = BTreeMap::<u64,Vec<(usize,usize)>>::new();
+    let mut pair_table = BTreeMap::<u64, Vec<(usize, usize)>>::new();
     for i in 0..16 {
         for j in i..16 {
             let sum = add(f, table_a, table_points[i], table_points[j]);
             if !sum.infinity {
                 pair_entries += 1;
                 pair_keys.insert(key(f, sum));
-                pair_table.entry(key(f,sum)).or_default().push((i,j));
+                pair_table.entry(key(f, sum)).or_default().push((i, j));
             }
         }
     }
@@ -377,29 +379,34 @@ fn check_relation(
     assert_eq!(row["rank"], 9);
     assert_eq!(row["recovered"], solution[8]);
     if public["schema"] == "different_j_inverse_trend_public/v1" {
-        let seed=row["seed"].as_u64().unwrap();
-        let mut rng=StdRng::seed_from_u64(seed);
-        let mut cursor=0usize;
+        let seed = row["seed"].as_u64().unwrap();
+        let mut rng = StdRng::seed_from_u64(seed);
+        let mut cursor = 0usize;
         for _ in 0..row["trials"].as_u64().unwrap() {
-            let a=rng.gen_range(0..r());
-            let b=rng.gen_range(0..r());
-            let query=add(f,query_a,
-                scalar(f,query_a,query_g,a),
-                scalar(f,query_a,query_q,b));
-            let searched=scalar(f,query_a,query,h());
-            if searched.infinity { continue; }
-            if let Some(pairs)=pair_table.get(&key(f,searched)) {
-                let &(i,j)=pairs.first().unwrap();
-                let witness=&witnesses[cursor];
-                assert_eq!(witness["a"],a);
-                assert_eq!(witness["b"],b);
-                assert_eq!(witness["i"],i);
-                assert_eq!(witness["j"],j);
-                assert_eq!(add(f,table_a,table_points[i],table_points[j]),searched);
-                cursor+=1;
+            let a = rng.gen_range(0..r());
+            let b = rng.gen_range(0..r());
+            let query = add(
+                f,
+                query_a,
+                scalar(f, query_a, query_g, a),
+                scalar(f, query_a, query_q, b),
+            );
+            let searched = scalar(f, query_a, query, h());
+            if searched.infinity {
+                continue;
+            }
+            if let Some(pairs) = pair_table.get(&key(f, searched)) {
+                let &(i, j) = pairs.first().unwrap();
+                let witness = &witnesses[cursor];
+                assert_eq!(witness["a"], a);
+                assert_eq!(witness["b"], b);
+                assert_eq!(witness["i"], i);
+                assert_eq!(witness["j"], j);
+                assert_eq!(add(f, table_a, table_points[i], table_points[j]), searched);
+                cursor += 1;
             }
         }
-        assert_eq!(cursor,witnesses.len());
+        assert_eq!(cursor, witnesses.len());
     }
     witnesses.len() as u64
 }
@@ -469,188 +476,240 @@ fn check_bases(f: Field, public: &Value, t: Point) {
 }
 
 fn check_new_panel(public_path: &str, checker_path: &str, runs_path: &str) {
-    let public_bytes=fs::read(public_path).unwrap();
-    let checker_bytes=fs::read(checker_path).unwrap();
-    let public:Value=serde_json::from_slice(&public_bytes).unwrap();
-    let checker:Value=serde_json::from_slice(&checker_bytes).unwrap();
-    assert_eq!(public["schema"],"different_j_inverse_trend_public/v1");
-    assert_eq!(checker["schema"],"different_j_inverse_trend_checker/v1");
-    assert_eq!(checker["public_sha256"],sha256_hex(&public_bytes));
-    set_cell(public["p"].as_u64().unwrap(),public["r"].as_u64().unwrap(),
-        public["cofactor"].as_u64().unwrap());
-    let f=Field{nu:public["field_nu"].as_u64().unwrap()};
-    let source_a=[p()-21,0];
-    let dest_a=[p()-81,0];
-    let g=parse(&public["generator"]);
-    let mg=parse(&public["mapped_generator"]);
-    let t=parse(&public["kernel"][0]);
-    assert!(on_curve(f,source_a,[37,0],g));
-    assert!(on_curve(f,dest_a,[p()-243,0],mg));
-    assert_eq!(velu(f,source_a,t,g),mg);
-    assert!(scalar(f,source_a,g,r()).infinity);
-    assert!(scalar(f,dest_a,mg,r()).infinity);
-    let targets:Vec<(Point,Point)>=public["targets"].as_array().unwrap().iter()
-        .map(|row|(parse(&row["source"]),parse(&row["destination"]))).collect();
-    let answers:Vec<u64>=checker["scalars"].as_array().unwrap().iter()
-        .map(|v|v.as_u64().unwrap()).collect();
-    assert_eq!(targets.len(),64);
-    assert_eq!(answers.len(),64);
-    for (index,&(q,mq)) in targets.iter().enumerate() {
-        assert_eq!(scalar(f,source_a,g,answers[index]),q);
-        assert_eq!(scalar(f,dest_a,mg,answers[index]),mq);
-        assert_eq!(velu(f,source_a,t,q),mq);
+    let public_bytes = fs::read(public_path).unwrap();
+    let checker_bytes = fs::read(checker_path).unwrap();
+    let public: Value = serde_json::from_slice(&public_bytes).unwrap();
+    let checker: Value = serde_json::from_slice(&checker_bytes).unwrap();
+    assert_eq!(public["schema"], "different_j_inverse_trend_public/v1");
+    assert_eq!(checker["schema"], "different_j_inverse_trend_checker/v1");
+    assert_eq!(checker["public_sha256"], sha256_hex(&public_bytes));
+    set_cell(
+        public["p"].as_u64().unwrap(),
+        public["r"].as_u64().unwrap(),
+        public["cofactor"].as_u64().unwrap(),
+    );
+    let f = Field {
+        nu: public["field_nu"].as_u64().unwrap(),
+    };
+    let source_a = [p() - 21, 0];
+    let dest_a = [p() - 81, 0];
+    let g = parse(&public["generator"]);
+    let mg = parse(&public["mapped_generator"]);
+    let t = parse(&public["kernel"][0]);
+    assert!(on_curve(f, source_a, [37, 0], g));
+    assert!(on_curve(f, dest_a, [p() - 243, 0], mg));
+    assert_eq!(velu(f, source_a, t, g), mg);
+    assert!(scalar(f, source_a, g, r()).infinity);
+    assert!(scalar(f, dest_a, mg, r()).infinity);
+    let targets: Vec<(Point, Point)> = public["targets"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|row| (parse(&row["source"]), parse(&row["destination"])))
+        .collect();
+    let answers: Vec<u64> = checker["scalars"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|v| v.as_u64().unwrap())
+        .collect();
+    assert_eq!(targets.len(), 64);
+    assert_eq!(answers.len(), 64);
+    for (index, &(q, mq)) in targets.iter().enumerate() {
+        assert_eq!(scalar(f, source_a, g, answers[index]), q);
+        assert_eq!(scalar(f, dest_a, mg, answers[index]), mq);
+        assert_eq!(velu(f, source_a, t, q), mq);
     }
-    let root=std::path::Path::new(runs_path);
-    let arms=["inverse-velu","source-bsgs","rho-negation","rho-negation-aa"];
-    let mut children=0u64;
-    let mut scalar_replays=0u64;
-    let mut relation_witnesses=0u64;
-    let mut censored=Vec::new();
+    let root = std::path::Path::new(runs_path);
+    let arms = [
+        "inverse-velu",
+        "source-bsgs",
+        "rho-negation",
+        "rho-negation-aa",
+    ];
+    let mut children = 0u64;
+    let mut scalar_replays = 0u64;
+    let mut relation_witnesses = 0u64;
+    let mut censored = Vec::new();
     for round in 0u64..3 {
         for arm in arms {
-            for prefix in [1,64] {
-                let id=format!("p{}_r{round}_{arm}_n{prefix}",p());
-                let exit=fs::read_to_string(root.join(format!("{id}.exit"))).unwrap();
-                if exit.trim()!="0" {
+            for prefix in [1, 64] {
+                let id = format!("p{}_r{round}_{arm}_n{prefix}", p());
+                let exit = fs::read_to_string(root.join(format!("{id}.exit"))).unwrap();
+                if exit.trim() != "0" {
                     censored.push(json!({"id":id,"exit":exit.trim()}));
                     continue;
                 }
-                let record:Value=serde_json::from_slice(
-                    &fs::read(root.join(format!("{id}.json"))).unwrap()).unwrap();
-                let meter:Value=serde_json::from_slice(
-                    &fs::read(root.join(format!("{id}.meter.json"))).unwrap()).unwrap();
-                assert_eq!(record["schema"],"different_j_trend_batch_run/v1");
-                assert_eq!(record["p"],p());
-                assert_eq!(record["r"],r());
-                assert_eq!(record["h"],h());
-                assert_eq!(record["public_sha256"],sha256_hex(&public_bytes));
-                assert_eq!(record["round"],round);
-                assert_eq!(record["arm"],arm);
-                assert_eq!(record["prefix_length"],prefix);
-                assert_eq!(record["relation_cap"],8*r());
-                assert_eq!(record["rho_step_cap"],20*r());
-                assert_eq!(record["all_verified"],true);
-                assert_eq!(meter["exit_code"],0);
-                assert_eq!(meter["arm"],arm);
-                assert_eq!(meter["round"],round);
-                assert_eq!(meter["prefix_length"],prefix);
-                assert!(meter["child_peak_rss_bytes"].as_u64().unwrap()<=512*1024*1024);
-                let rows=record["target_records"].as_array().unwrap();
-                assert_eq!(rows.len(),prefix);
-                if arm=="inverse-velu" {
-                    let oracle=&record["relation_setup"]["oracle"];
-                    let scanned=oracle["destination_points"].as_u64().unwrap();
-                    let roots=oracle["rational_x_roots"].as_u64().unwrap();
-                    let accepted=oracle["accepted_image_points"].as_u64().unwrap();
-                    assert_eq!(oracle["polynomial_calls"],scanned);
-                    assert_eq!(record["relation_setup"]["scan_count"],scanned);
-                    assert_eq!(record["relation_setup"]["candidate_count"],accepted);
-                    assert_eq!(scanned,accepted+
-                        oracle["rejected_no_root"].as_u64().unwrap()+
-                        oracle["rejected_no_lift"].as_u64().unwrap()+
-                        oracle["rejected_map_mismatch"].as_u64().unwrap());
-                    assert_eq!(roots,accepted+
-                        oracle["rejected_no_lift"].as_u64().unwrap()+
-                        oracle["rejected_map_mismatch"].as_u64().unwrap());
+                let record: Value =
+                    serde_json::from_slice(&fs::read(root.join(format!("{id}.json"))).unwrap())
+                        .unwrap();
+                let meter: Value = serde_json::from_slice(
+                    &fs::read(root.join(format!("{id}.meter.json"))).unwrap(),
+                )
+                .unwrap();
+                assert_eq!(record["schema"], "different_j_trend_batch_run/v1");
+                assert_eq!(record["p"], p());
+                assert_eq!(record["r"], r());
+                assert_eq!(record["h"], h());
+                assert_eq!(record["public_sha256"], sha256_hex(&public_bytes));
+                assert_eq!(record["round"], round);
+                assert_eq!(record["arm"], arm);
+                assert_eq!(record["prefix_length"], prefix);
+                assert_eq!(record["relation_cap"], 8 * r());
+                assert_eq!(record["rho_step_cap"], 20 * r());
+                assert_eq!(record["all_verified"], true);
+                assert_eq!(meter["exit_code"], 0);
+                assert_eq!(meter["arm"], arm);
+                assert_eq!(meter["round"], round);
+                assert_eq!(meter["prefix_length"], prefix);
+                assert!(meter["child_peak_rss_bytes"].as_u64().unwrap() <= 512 * 1024 * 1024);
+                let rows = record["target_records"].as_array().unwrap();
+                assert_eq!(rows.len(), prefix);
+                if arm == "inverse-velu" {
+                    let oracle = &record["relation_setup"]["oracle"];
+                    let scanned = oracle["destination_points"].as_u64().unwrap();
+                    let roots = oracle["rational_x_roots"].as_u64().unwrap();
+                    let accepted = oracle["accepted_image_points"].as_u64().unwrap();
+                    assert_eq!(oracle["polynomial_calls"], scanned);
+                    assert_eq!(record["relation_setup"]["scan_count"], scanned);
+                    assert_eq!(record["relation_setup"]["candidate_count"], accepted);
+                    assert_eq!(
+                        scanned,
+                        accepted
+                            + oracle["rejected_no_root"].as_u64().unwrap()
+                            + oracle["rejected_no_lift"].as_u64().unwrap()
+                            + oracle["rejected_map_mismatch"].as_u64().unwrap()
+                    );
+                    assert_eq!(
+                        roots,
+                        accepted
+                            + oracle["rejected_no_lift"].as_u64().unwrap()
+                            + oracle["rejected_map_mismatch"].as_u64().unwrap()
+                    );
                 }
-                for (index,row) in rows.iter().enumerate() {
-                    assert_eq!(row["position"],index);
-                    let scalar_value=row["recovered"].as_u64().unwrap();
-                    assert_eq!(scalar_value,answers[index]);
-                    assert_eq!(scalar(f,source_a,g,scalar_value),targets[index].0);
-                    assert_eq!(scalar(f,dest_a,mg,scalar_value),targets[index].1);
-                    assert_eq!(row["verified"],true);
-                    if arm=="inverse-velu" {
-                        let seed=(0x2026_1015u64^p())
+                for (index, row) in rows.iter().enumerate() {
+                    assert_eq!(row["position"], index);
+                    let scalar_value = row["recovered"].as_u64().unwrap();
+                    assert_eq!(scalar_value, answers[index]);
+                    assert_eq!(scalar(f, source_a, g, scalar_value), targets[index].0);
+                    assert_eq!(scalar(f, dest_a, mg, scalar_value), targets[index].1);
+                    assert_eq!(row["verified"], true);
+                    if arm == "inverse-velu" {
+                        let seed = (0x2026_1015u64 ^ p())
                             .wrapping_add(round.wrapping_mul(0x9e37_79b9))
                             .wrapping_add((index as u64).wrapping_mul(0x0123_4567));
-                        assert_eq!(row["seed"],seed);
-                        relation_witnesses+=check_relation(f,&public,&record,row,arm,
-                            g,targets[index].0,mg,targets[index].1,t);
-                    } else if arm=="rho-negation" || arm=="rho-negation-aa" {
-                        let attempts=row["attempts"].as_array().unwrap();
-                        assert!(!attempts.is_empty() && attempts.len()<=32);
-                        assert_eq!(attempts.last().unwrap()["verified"],true);
+                        assert_eq!(row["seed"], seed);
+                        relation_witnesses += check_relation(
+                            f,
+                            &public,
+                            &record,
+                            row,
+                            arm,
+                            g,
+                            targets[index].0,
+                            mg,
+                            targets[index].1,
+                            t,
+                        );
+                    } else if arm == "rho-negation" || arm == "rho-negation-aa" {
+                        let attempts = row["attempts"].as_array().unwrap();
+                        assert!(!attempts.is_empty() && attempts.len() <= 32);
+                        assert_eq!(attempts.last().unwrap()["verified"], true);
                         for attempt in attempts {
-                            assert!(attempt["steps"].as_u64().unwrap()<=20*r());
+                            assert!(attempt["steps"].as_u64().unwrap() <= 20 * r());
                         }
                     }
-                    scalar_replays+=1;
+                    scalar_replays += 1;
                 }
-                children+=1;
+                children += 1;
             }
         }
     }
-    println!("{}",json!({"schema":"different_j_inverse_trend_run_check/v1",
+    println!(
+        "{}",
+        json!({"schema":"different_j_inverse_trend_run_check/v1",
         "status":if censored.is_empty(){"pass"}else{"partial"},
         "p":p(),"r":r(),"children":children,"scalar_replays":scalar_replays,
         "relation_witnesses":relation_witnesses,"censored":censored,
         "public_sha256":sha256_hex(&public_bytes),
-        "checker_sha256":sha256_hex(&checker_bytes)}));
+        "checker_sha256":sha256_hex(&checker_bytes)})
+    );
 }
 
-fn check_single_full_image(public_path: &str, checker_path: &str,
-    run_path: &str, meter_path: &str) {
-    let public_bytes=fs::read(public_path).unwrap();
-    let checker_bytes=fs::read(checker_path).unwrap();
-    let public:Value=serde_json::from_slice(&public_bytes).unwrap();
-    let checker:Value=serde_json::from_slice(&checker_bytes).unwrap();
-    let record:Value=serde_json::from_slice(&fs::read(run_path).unwrap()).unwrap();
-    let meter:Value=serde_json::from_slice(&fs::read(meter_path).unwrap()).unwrap();
-    assert_eq!(public["schema"],"different_j_inverse_trend_public/v1");
-    assert_eq!(checker["schema"],"different_j_inverse_trend_checker/v1");
-    assert_eq!(checker["public_sha256"],sha256_hex(&public_bytes));
-    set_cell(public["p"].as_u64().unwrap(),public["r"].as_u64().unwrap(),
-        public["cofactor"].as_u64().unwrap());
-    let f=Field{nu:public["field_nu"].as_u64().unwrap()};
-    let source_a=[p()-21,0];
-    let dest_a=[p()-81,0];
-    let g=parse(&public["generator"]);
-    let mg=parse(&public["mapped_generator"]);
-    let q=parse(&public["targets"][0]["source"]);
-    let mq=parse(&public["targets"][0]["destination"]);
-    let t=parse(&public["kernel"][0]);
-    assert!(on_curve(f,source_a,[37,0],g));
-    assert!(on_curve(f,dest_a,[p()-243,0],mg));
-    assert_eq!(velu(f,source_a,t,g),mg);
-    assert_eq!(velu(f,source_a,t,q),mq);
-    assert_eq!(record["schema"],"different_j_trend_batch_run/v1");
-    assert_eq!(record["public_sha256"],sha256_hex(&public_bytes));
-    assert_eq!(record["arm"],"full-image");
-    assert_eq!(record["round"],0);
-    assert_eq!(record["prefix_length"],1);
-    assert_eq!(record["all_verified"],true);
-    assert_eq!(meter["schema"],"different_j_order_prefix_meter/v1");
-    assert_eq!(meter["exit_code"],0);
-    assert_eq!(meter["arm"],"full-image");
-    assert!(meter["child_peak_rss_bytes"].as_u64().unwrap()<=512*1024*1024);
-    let rows=record["target_records"].as_array().unwrap();
-    assert_eq!(rows.len(),1);
-    let row=&rows[0];
-    assert_eq!(row["position"],0);
-    assert_eq!(row["verified"],true);
-    let scalar_value=row["recovered"].as_u64().unwrap();
-    assert_eq!(scalar_value,checker["scalars"][0].as_u64().unwrap());
-    assert_eq!(scalar(f,source_a,g,scalar_value),q);
-    assert_eq!(scalar(f,dest_a,mg,scalar_value),mq);
-    let witnesses=check_relation(f,&public,&record,row,"full-image",g,q,mg,mq,t);
-    println!("{}",json!({"schema":"different_j_full_image_single_check/v1",
+fn check_single_full_image(
+    public_path: &str,
+    checker_path: &str,
+    run_path: &str,
+    meter_path: &str,
+) {
+    let public_bytes = fs::read(public_path).unwrap();
+    let checker_bytes = fs::read(checker_path).unwrap();
+    let public: Value = serde_json::from_slice(&public_bytes).unwrap();
+    let checker: Value = serde_json::from_slice(&checker_bytes).unwrap();
+    let record: Value = serde_json::from_slice(&fs::read(run_path).unwrap()).unwrap();
+    let meter: Value = serde_json::from_slice(&fs::read(meter_path).unwrap()).unwrap();
+    assert_eq!(public["schema"], "different_j_inverse_trend_public/v1");
+    assert_eq!(checker["schema"], "different_j_inverse_trend_checker/v1");
+    assert_eq!(checker["public_sha256"], sha256_hex(&public_bytes));
+    set_cell(
+        public["p"].as_u64().unwrap(),
+        public["r"].as_u64().unwrap(),
+        public["cofactor"].as_u64().unwrap(),
+    );
+    let f = Field {
+        nu: public["field_nu"].as_u64().unwrap(),
+    };
+    let source_a = [p() - 21, 0];
+    let dest_a = [p() - 81, 0];
+    let g = parse(&public["generator"]);
+    let mg = parse(&public["mapped_generator"]);
+    let q = parse(&public["targets"][0]["source"]);
+    let mq = parse(&public["targets"][0]["destination"]);
+    let t = parse(&public["kernel"][0]);
+    assert!(on_curve(f, source_a, [37, 0], g));
+    assert!(on_curve(f, dest_a, [p() - 243, 0], mg));
+    assert_eq!(velu(f, source_a, t, g), mg);
+    assert_eq!(velu(f, source_a, t, q), mq);
+    assert_eq!(record["schema"], "different_j_trend_batch_run/v1");
+    assert_eq!(record["public_sha256"], sha256_hex(&public_bytes));
+    assert_eq!(record["arm"], "full-image");
+    assert_eq!(record["round"], 0);
+    assert_eq!(record["prefix_length"], 1);
+    assert_eq!(record["all_verified"], true);
+    assert_eq!(meter["schema"], "different_j_order_prefix_meter/v1");
+    assert_eq!(meter["exit_code"], 0);
+    assert_eq!(meter["arm"], "full-image");
+    assert!(meter["child_peak_rss_bytes"].as_u64().unwrap() <= 512 * 1024 * 1024);
+    let rows = record["target_records"].as_array().unwrap();
+    assert_eq!(rows.len(), 1);
+    let row = &rows[0];
+    assert_eq!(row["position"], 0);
+    assert_eq!(row["verified"], true);
+    let scalar_value = row["recovered"].as_u64().unwrap();
+    assert_eq!(scalar_value, checker["scalars"][0].as_u64().unwrap());
+    assert_eq!(scalar(f, source_a, g, scalar_value), q);
+    assert_eq!(scalar(f, dest_a, mg, scalar_value), mq);
+    let witnesses = check_relation(f, &public, &record, row, "full-image", g, q, mg, mq, t);
+    println!(
+        "{}",
+        json!({"schema":"different_j_full_image_single_check/v1",
         "status":"pass","p":p(),"r":r(),"scalar_replays":1,
         "relation_witnesses":witnesses,
         "public_sha256":sha256_hex(&public_bytes),
-        "checker_sha256":sha256_hex(&checker_bytes)}));
+        "checker_sha256":sha256_hex(&checker_bytes)})
+    );
 }
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    if args.get(1).map(String::as_str)==Some("check-single-full-image") {
-        assert_eq!(args.len(),6);
-        check_single_full_image(&args[2],&args[3],&args[4],&args[5]);
+    if args.get(1).map(String::as_str) == Some("check-single-full-image") {
+        assert_eq!(args.len(), 6);
+        check_single_full_image(&args[2], &args[3], &args[4], &args[5]);
         return;
     }
-    if args.get(1).map(String::as_str)==Some("check-new-panel") {
-        assert_eq!(args.len(),5);
-        check_new_panel(&args[2],&args[3],&args[4]);
+    if args.get(1).map(String::as_str) == Some("check-new-panel") {
+        assert_eq!(args.len(), 5);
+        check_new_panel(&args[2], &args[3], &args[4]);
         return;
     }
     assert_eq!(

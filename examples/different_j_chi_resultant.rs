@@ -12,8 +12,8 @@ use crypto_lib::cryptanalysis::ecbench::canonical::sha256_hex;
 use crypto_lib::cryptanalysis::ext_curve::{
     take_field_counters, ExtCurve, ExtField, ExtPoint, Fp2,
 };
-use crypto_lib::cryptanalysis::ic_boundary::{CountedGroup, GroupOps};
 use crypto_lib::cryptanalysis::ic_boundary::rho_reference_negation;
+use crypto_lib::cryptanalysis::ic_boundary::{CountedGroup, GroupOps};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use serde_json::{json, Value};
@@ -177,67 +177,81 @@ struct S3Stats {
 }
 
 fn s3_coefficients(curve: &Curve, x: El, z: El) -> [El; 3] {
-    let f=&curve.f;
-    let x2=f.sqr(x);
-    let z2=f.sqr(z);
-    let leading=f.sqr(f.sub(z,x));
-    let middle=f.neg(f.scale(f.add(
-        f.add(f.mul(x,z2),f.mul(f.add(x2,curve.a),z)),
-        f.add(f.mul(x,curve.a),f.scale(curve.b,2))),2));
-    let constant=f.sub(
-        f.sub(f.mul(x2,z2),
-            f.scale(f.mul(f.add(f.mul(x,curve.a),f.scale(curve.b,2)),z),2)),
-        f.sub(f.scale(f.mul(curve.b,x),4),f.sqr(curve.a)));
-    [constant,middle,leading]
+    let f = &curve.f;
+    let x2 = f.sqr(x);
+    let z2 = f.sqr(z);
+    let leading = f.sqr(f.sub(z, x));
+    let middle = f.neg(f.scale(
+        f.add(
+            f.add(f.mul(x, z2), f.mul(f.add(x2, curve.a), z)),
+            f.add(f.mul(x, curve.a), f.scale(curve.b, 2)),
+        ),
+        2,
+    ));
+    let constant = f.sub(
+        f.sub(
+            f.mul(x2, z2),
+            f.scale(f.mul(f.add(f.mul(x, curve.a), f.scale(curve.b, 2)), z), 2),
+        ),
+        f.sub(f.scale(f.mul(curve.b, x), 4), f.sqr(curve.a)),
+    );
+    [constant, middle, leading]
 }
 
-fn s3_pairs(curve: &Curve, signed: &[Point], target: Point,
-    ops: &mut GroupOps, stats: &mut S3Stats) -> BTreeSet<(usize,usize)> {
-    let f=&curve.f;
-    let mut out=BTreeSet::new();
+fn s3_pairs(
+    curve: &Curve,
+    signed: &[Point],
+    target: Point,
+    ops: &mut GroupOps,
+    stats: &mut S3Stats,
+) -> BTreeSet<(usize, usize)> {
+    let f = &curve.f;
+    let mut out = BTreeSet::new();
     if target.infinity {
-        stats.infinity_cases+=1;
-        for (i,&p) in signed.iter().enumerate() {
-            for (j,&q) in signed.iter().enumerate().skip(i) {
-                stats.exact_checks+=1;
-                if curve.add(ops,p,q).infinity { out.insert((i,j)); }
+        stats.infinity_cases += 1;
+        for (i, &p) in signed.iter().enumerate() {
+            for (j, &q) in signed.iter().enumerate().skip(i) {
+                stats.exact_checks += 1;
+                if curve.add(ops, p, q).infinity {
+                    out.insert((i, j));
+                }
             }
         }
         return out;
     }
-    for (i,&p) in signed.iter().enumerate() {
-        let [c,b,a]=s3_coefficients(curve,p.x,target.x);
-        stats.quadratics+=1;
-        let mut roots=Vec::new();
-        if a==f.zero() {
-            stats.degenerate+=1;
-            if b!=f.zero() {
-                roots.push(f.mul(f.neg(c),f.inv(b).unwrap()));
-            } else if c==f.zero() {
-                roots.extend(signed.iter().map(|q|q.x));
+    for (i, &p) in signed.iter().enumerate() {
+        let [c, b, a] = s3_coefficients(curve, p.x, target.x);
+        stats.quadratics += 1;
+        let mut roots = Vec::new();
+        if a == f.zero() {
+            stats.degenerate += 1;
+            if b != f.zero() {
+                roots.push(f.mul(f.neg(c), f.inv(b).unwrap()));
+            } else if c == f.zero() {
+                roots.extend(signed.iter().map(|q| q.x));
             }
         } else {
-            let discriminant=f.sub(f.sqr(b),f.scale(f.mul(a,c),4));
-            if let Some(square_root)=f.sqrt(discriminant) {
-                let inv=f.inv(f.scale(a,2)).unwrap();
-                roots.push(f.mul(f.add(f.neg(b),square_root),inv));
-                roots.push(f.mul(f.sub(f.neg(b),square_root),inv));
+            let discriminant = f.sub(f.sqr(b), f.scale(f.mul(a, c), 4));
+            if let Some(square_root) = f.sqrt(discriminant) {
+                let inv = f.inv(f.scale(a, 2)).unwrap();
+                roots.push(f.mul(f.add(f.neg(b), square_root), inv));
+                roots.push(f.mul(f.sub(f.neg(b), square_root), inv));
             } else {
-                stats.sqrt_failures+=1;
+                stats.sqrt_failures += 1;
             }
         }
         roots.sort_unstable();
         roots.dedup();
-        stats.roots+=roots.len() as u64;
+        stats.roots += roots.len() as u64;
         for root in roots {
-            for (j,&q) in signed.iter().enumerate() {
-                stats.lift_scans+=1;
-                if q.x==root {
-                    stats.exact_checks+=1;
-                    if curve.add(ops,p,q)==target {
-                        out.insert((i.min(j),i.max(j)));
+            for (j, &q) in signed.iter().enumerate() {
+                stats.lift_scans += 1;
+                if q.x == root {
+                    stats.exact_checks += 1;
+                    if curve.add(ops, p, q) == target {
+                        out.insert((i.min(j), i.max(j)));
                     } else {
-                        stats.false_candidates+=1;
+                        stats.false_candidates += 1;
                     }
                 }
             }
@@ -531,31 +545,66 @@ fn recover(pivots: &[Option<Vec<u64>>; 9]) -> Option<[u64; 9]> {
 }
 
 fn thread_cpu_ns() -> u64 {
-    let mut ts = libc::timespec { tv_sec: 0, tv_nsec: 0 };
-    assert_eq!(unsafe { libc::clock_gettime(libc::CLOCK_THREAD_CPUTIME_ID, &mut ts) }, 0);
+    let mut ts = libc::timespec {
+        tv_sec: 0,
+        tv_nsec: 0,
+    };
+    assert_eq!(
+        unsafe { libc::clock_gettime(libc::CLOCK_THREAD_CPUTIME_ID, &mut ts) },
+        0
+    );
     ts.tv_sec as u64 * 1_000_000_000 + ts.tv_nsec as u64
 }
 
 fn peak_rss_bytes() -> u64 {
     let mut usage = std::mem::MaybeUninit::<libc::rusage>::zeroed();
-    assert_eq!(unsafe { libc::getrusage(libc::RUSAGE_SELF, usage.as_mut_ptr()) }, 0);
+    assert_eq!(
+        unsafe { libc::getrusage(libc::RUSAGE_SELF, usage.as_mut_ptr()) },
+        0
+    );
     let raw = unsafe { usage.assume_init() }.ru_maxrss as u64;
-    if cfg!(target_os = "macos") { raw } else { raw * 1024 }
+    if cfg!(target_os = "macos") {
+        raw
+    } else {
+        raw * 1024
+    }
 }
 
 fn run_heldout(path: &str, round: u64, arm: &str, position: usize) {
     assert!(round < 3 && position < 4);
-    assert!(["chi-resultant", "direct-pair", "source-s3", "quotient-s3",
-        "source-bsgs", "rho-negation", "rho-negation-aa"].contains(&arm));
+    assert!([
+        "chi-resultant",
+        "direct-pair",
+        "source-s3",
+        "quotient-s3",
+        "source-bsgs",
+        "rho-negation",
+        "rho-negation-aa"
+    ]
+    .contains(&arm));
     let bytes = fs::read(path).unwrap();
     let public: Value = serde_json::from_slice(&bytes).unwrap();
     assert_eq!(public["schema"], "different_j_chi_heldout_public/v1");
-    assert_eq!((public["p"].as_u64(), public["r"].as_u64()), (Some(211), Some(229)));
+    assert_eq!(
+        (public["p"].as_u64(), public["r"].as_u64()),
+        (Some(211), Some(229))
+    );
     assert!(public.get("scalars").is_none() && public.get("answer_scalar").is_none());
-    assert_eq!(public["selection_positions_zero_indexed"], json!([64, 65, 66, 67]));
+    assert_eq!(
+        public["selection_positions_zero_indexed"],
+        json!([64, 65, 66, 67])
+    );
     let f = Fp2::new(211).unwrap();
-    let source = Curve { f, a: [190, 0], b: [37, 0] };
-    let destination = Curve { f, a: [130, 0], b: [179, 0] };
+    let source = Curve {
+        f,
+        a: [190, 0],
+        b: [37, 0],
+    };
+    let destination = Curve {
+        f,
+        a: [130, 0],
+        b: [179, 0],
+    };
     let g = parse_point(&public["generator"]);
     let mapped_g = parse_point(&public["mapped_generator"]);
     let t = Point::affine([3, 0], [1, 0]);
@@ -571,9 +620,9 @@ fn run_heldout(path: &str, round: u64, arm: &str, position: usize) {
     assert_eq!(velu(&source, t, q, &mut setup_ops), mapped_q);
     assert!(source.mul(&mut setup_ops, g, 229).infinity);
     assert!(source.mul(&mut setup_ops, q, 229).infinity);
-    let relation_arm = ["chi-resultant","direct-pair","source-s3","quotient-s3"].contains(&arm);
+    let relation_arm = ["chi-resultant", "direct-pair", "source-s3", "quotient-s3"].contains(&arm);
     let mut signed = Vec::new();
-    let mut mapped_signed=Vec::new();
+    let mut mapped_signed = Vec::new();
     if relation_arm {
         for witness in public["full_base_witness_source"].as_array().unwrap() {
             let projected = source.mul(&mut setup_ops, parse_point(witness), 195);
@@ -582,13 +631,23 @@ fn run_heldout(path: &str, round: u64, arm: &str, position: usize) {
             signed.push(source.neg(projected));
         }
         assert_eq!(signed.len(), 16);
-        mapped_signed = signed.iter().map(|&p| velu(&source, t, p, &mut setup_ops)).collect();
+        mapped_signed = signed
+            .iter()
+            .map(|&p| velu(&source, t, p, &mut setup_ops))
+            .collect();
         let expected_destination = public["full_base_projected"].as_array().unwrap();
         for index in 0..8 {
-            assert_eq!(mapped_signed[2 * index], parse_point(&expected_destination[index]));
+            assert_eq!(
+                mapped_signed[2 * index],
+                parse_point(&expected_destination[index])
+            );
         }
     }
-    let base = if arm == "chi-resultant" { chi_base(&source, &signed) } else { Vec::new() };
+    let base = if arm == "chi-resultant" {
+        chi_base(&source, &signed)
+    } else {
+        Vec::new()
+    };
     let mut table = BTreeMap::<u64, Vec<(usize, usize)>>::new();
     if arm == "direct-pair" {
         for i in 0..16 {
@@ -618,7 +677,7 @@ fn run_heldout(path: &str, round: u64, arm: &str, position: usize) {
     let query_cpu_start = thread_cpu_ns();
     let mut ops = GroupOps::default();
     let mut stats = Stats::default();
-    let mut s3_stats=S3Stats::default();
+    let mut s3_stats = S3Stats::default();
     let mut witnesses = Vec::new();
     let mut trials = 0u64;
     let mut relations = 0u64;
@@ -628,10 +687,10 @@ fn run_heldout(path: &str, round: u64, arm: &str, position: usize) {
     if relation_arm {
         let mut rng = StdRng::seed_from_u64(seed);
         let mut pivots: [Option<Vec<u64>>; 9] = std::array::from_fn(|_| None);
-        let quotient=arm=="quotient-s3";
-        let query_curve=if quotient {&destination} else {&source};
-        let query_g=if quotient {mapped_g} else {g};
-        let query_q=if quotient {mapped_q} else {q};
+        let quotient = arm == "quotient-s3";
+        let query_curve = if quotient { &destination } else { &source };
+        let query_g = if quotient { mapped_g } else { g };
+        let query_q = if quotient { mapped_q } else { q };
         for _ in 0..1832 {
             trials += 1;
             let a = rng.gen_range(0..229u64);
@@ -640,19 +699,27 @@ fn run_heldout(path: &str, round: u64, arm: &str, position: usize) {
             let b_q = query_curve.mul(&mut ops, query_q, b);
             let candidate = query_curve.add(&mut ops, a_g, b_q);
             let projected = query_curve.mul(&mut ops, candidate, 195);
-            if projected.infinity { continue; }
+            if projected.infinity {
+                continue;
+            }
             let pairs = if arm == "chi-resultant" {
                 polynomial_pairs(&source, &signed, &base, projected, &mut ops, &mut stats)
-            } else if arm=="source-s3" {
-                s3_pairs(&source,&signed,projected,&mut ops,&mut s3_stats)
-            } else if arm=="quotient-s3" {
-                s3_pairs(&destination,&mapped_signed,projected,&mut ops,&mut s3_stats)
+            } else if arm == "source-s3" {
+                s3_pairs(&source, &signed, projected, &mut ops, &mut s3_stats)
+            } else if arm == "quotient-s3" {
+                s3_pairs(
+                    &destination,
+                    &mapped_signed,
+                    projected,
+                    &mut ops,
+                    &mut s3_stats,
+                )
             } else {
                 let mut out = BTreeSet::new();
                 if let Some(entries) = table.get(&source.key(&projected)) {
-                    for &(i,j) in entries {
+                    for &(i, j) in entries {
                         if source.add(&mut ops, signed[i], signed[j]) == projected {
-                            out.insert((i,j));
+                            out.insert((i, j));
                         }
                     }
                 }
@@ -660,7 +727,7 @@ fn run_heldout(path: &str, round: u64, arm: &str, position: usize) {
             };
             if let Some(&(i, j)) = pairs.first() {
                 let mut row = vec![0u64; 10];
-                for index in [i,j] {
+                for index in [i, j] {
                     let column = index / 2;
                     let coefficient = if index % 2 == 0 { 1 } else { 228 };
                     row[column] = (row[column] + coefficient) % 229;
@@ -669,8 +736,12 @@ fn run_heldout(path: &str, round: u64, arm: &str, position: usize) {
                 row[9] = modmul(195, a);
                 witnesses.push(json!({"a":a,"b":b,"i":i,"j":j,"projected":projected}));
                 relations += 1;
-                if insert_relation(&mut pivots, row) { rank += 1; }
-                if rank == 9 { break; }
+                if insert_relation(&mut pivots, row) {
+                    rank += 1;
+                }
+                if rank == 9 {
+                    break;
+                }
             }
         }
         recovered = recover(&pivots).map(|sol| sol[8]);
@@ -692,7 +763,10 @@ fn run_heldout(path: &str, round: u64, arm: &str, position: usize) {
             rho_attempts.push(json!({"retry":retry,"seed":try_seed,"steps":result.steps,
                 "walks":result.walks,"group_ops":result.group_ops,"recovered":result.recovered,
                 "verified":result.verified}));
-            if result.verified { recovered = result.recovered; break; }
+            if result.verified {
+                recovered = result.recovered;
+                break;
+            }
         }
     }
     let query_cpu_ns = thread_cpu_ns() - query_cpu_start;
@@ -735,58 +809,74 @@ fn run_heldout(path: &str, round: u64, arm: &str, position: usize) {
 }
 
 fn exhaustive_s3(path: &str) {
-    let bytes=fs::read(path).unwrap();
-    let public:Value=serde_json::from_slice(&bytes).unwrap();
-    assert_eq!(public["p"],211);
-    assert_eq!(public["r"],229);
-    let f=Fp2::new(211).unwrap();
-    let source=Curve{f,a:[190,0],b:[37,0]};
-    let destination=Curve{f,a:[130,0],b:[179,0]};
-    let g=parse_point(&public["generator"]);
-    let mg=parse_point(&public["mapped_generator"]);
-    let t=Point::affine([3,0],[1,0]);
-    let mut ops=GroupOps::default();
-    let mut signed=Vec::new();
+    let bytes = fs::read(path).unwrap();
+    let public: Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(public["p"], 211);
+    assert_eq!(public["r"], 229);
+    let f = Fp2::new(211).unwrap();
+    let source = Curve {
+        f,
+        a: [190, 0],
+        b: [37, 0],
+    };
+    let destination = Curve {
+        f,
+        a: [130, 0],
+        b: [179, 0],
+    };
+    let g = parse_point(&public["generator"]);
+    let mg = parse_point(&public["mapped_generator"]);
+    let t = Point::affine([3, 0], [1, 0]);
+    let mut ops = GroupOps::default();
+    let mut signed = Vec::new();
     for witness in public["full_base_witness_source"].as_array().unwrap() {
-        let projected=source.mul(&mut ops,parse_point(witness),195);
+        let projected = source.mul(&mut ops, parse_point(witness), 195);
         signed.push(projected);
         signed.push(source.neg(projected));
     }
-    let mapped:Vec<Point>=signed.iter().map(|&q|velu(&source,t,q,&mut ops)).collect();
+    let mapped: Vec<Point> = signed
+        .iter()
+        .map(|&q| velu(&source, t, q, &mut ops))
+        .collect();
     take_field_counters();
-    let start=Instant::now();
-    let mut source_stats=S3Stats::default();
-    let mut quotient_stats=S3Stats::default();
-    let mut zero_source=0u64;
-    let mut zero_quotient=0u64;
-    let mut pairs_source=0u64;
-    let mut pairs_quotient=0u64;
-    let mut sq=source.identity();
-    let mut dq=destination.identity();
+    let start = Instant::now();
+    let mut source_stats = S3Stats::default();
+    let mut quotient_stats = S3Stats::default();
+    let mut zero_source = 0u64;
+    let mut zero_quotient = 0u64;
+    let mut pairs_source = 0u64;
+    let mut pairs_quotient = 0u64;
+    let mut sq = source.identity();
+    let mut dq = destination.identity();
     for scalar_label in 0..229 {
-        let expected_source=direct_pairs(&source,&signed,sq,&mut ops);
-        let actual_source=s3_pairs(&source,&signed,sq,&mut ops,&mut source_stats);
-        assert_eq!(actual_source,expected_source);
-        let expected_quotient=direct_pairs(&destination,&mapped,dq,&mut ops);
-        let actual_quotient=s3_pairs(&destination,&mapped,dq,&mut ops,&mut quotient_stats);
-        assert_eq!(actual_quotient,expected_quotient);
-        assert_eq!(actual_source,actual_quotient);
-        println!("{}",json!({"schema":"different_j_chi_s3_case/v2",
+        let expected_source = direct_pairs(&source, &signed, sq, &mut ops);
+        let actual_source = s3_pairs(&source, &signed, sq, &mut ops, &mut source_stats);
+        assert_eq!(actual_source, expected_source);
+        let expected_quotient = direct_pairs(&destination, &mapped, dq, &mut ops);
+        let actual_quotient = s3_pairs(&destination, &mapped, dq, &mut ops, &mut quotient_stats);
+        assert_eq!(actual_quotient, expected_quotient);
+        assert_eq!(actual_source, actual_quotient);
+        println!(
+            "{}",
+            json!({"schema":"different_j_chi_s3_case/v2",
             "scalar_label":scalar_label,"source_target":sq,
             "quotient_target":dq,
             "source_pairs":actual_source.iter().copied().collect::<Vec<_>>(),
             "quotient_pairs":actual_quotient.iter().copied().collect::<Vec<_>>(),
-            "status":"pass"}));
-        zero_source+=u64::from(actual_source.is_empty());
-        zero_quotient+=u64::from(actual_quotient.is_empty());
-        pairs_source+=actual_source.len() as u64;
-        pairs_quotient+=actual_quotient.len() as u64;
-        sq=source.add(&mut ops,sq,g);
-        dq=destination.add(&mut ops,dq,mg);
+            "status":"pass"})
+        );
+        zero_source += u64::from(actual_source.is_empty());
+        zero_quotient += u64::from(actual_quotient.is_empty());
+        pairs_source += actual_source.len() as u64;
+        pairs_quotient += actual_quotient.len() as u64;
+        sq = source.add(&mut ops, sq, g);
+        dq = destination.add(&mut ops, dq, mg);
     }
     assert!(sq.infinity && dq.infinity);
-    let fp=take_field_counters();
-    println!("{}",json!({"schema":"different_j_chi_s3_exhaustive/v2",
+    let fp = take_field_counters();
+    println!(
+        "{}",
+        json!({"schema":"different_j_chi_s3_exhaustive/v2",
         "public_sha256":sha256_hex(&bytes),"source_cases":229,
         "quotient_cases":229,"source_pairs":pairs_source,
         "quotient_pairs":pairs_quotient,"source_zero_cases":zero_source,
@@ -806,7 +896,8 @@ fn exhaustive_s3(path: &str) {
           "sqrt_failures":quotient_stats.sqrt_failures,
           "infinity_cases":quotient_stats.infinity_cases},
         "group_ops":ops,"fp_muls":fp.0,"fp_invs":fp.1,
-        "wall_ns":start.elapsed().as_nanos(),"status":"pass"}));
+        "wall_ns":start.elapsed().as_nanos(),"status":"pass"})
+    );
 }
 
 fn polynomial_pairs(
@@ -908,11 +999,16 @@ fn main() {
     }
     if args.get(1).map(String::as_str) == Some("run-heldout") {
         assert_eq!(args.len(), 6);
-        run_heldout(&args[2], args[3].parse().unwrap(), &args[4], args[5].parse().unwrap());
+        run_heldout(
+            &args[2],
+            args[3].parse().unwrap(),
+            &args[4],
+            args[5].parse().unwrap(),
+        );
         return;
     }
     if args.get(1).map(String::as_str) == Some("exhaustive-s3") {
-        assert_eq!(args.len(),3);
+        assert_eq!(args.len(), 3);
         exhaustive_s3(&args[2]);
         return;
     }

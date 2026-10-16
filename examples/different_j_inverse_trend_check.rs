@@ -196,94 +196,122 @@ fn point(v: &Value) -> Point {
 }
 
 fn scalar_mul(f: Field, a: E, point: Point, mut scalar: u64) -> Point {
-    let mut result=identity();
-    let mut base=point;
-    while scalar!=0 {
-        if scalar&1!=0 { result=add(f,a,result,base); }
-        base=add(f,a,base,base);
-        scalar>>=1;
+    let mut result = identity();
+    let mut base = point;
+    while scalar != 0 {
+        if scalar & 1 != 0 {
+            result = add(f, a, result, base);
+        }
+        base = add(f, a, base, base);
+        scalar >>= 1;
     }
     result
 }
 
 fn tuple(point: Point) -> String {
-    format!("{},{},{},{},{}",
-        u64::from(point.infinity),point.x[0],point.x[1],point.y[0],point.y[1])
+    format!(
+        "{},{},{},{},{}",
+        u64::from(point.infinity),
+        point.x[0],
+        point.x[1],
+        point.y[0],
+        point.y[1]
+    )
 }
 
 fn check_freeze(public_path: &str, checker_path: &str) {
-    let public_bytes=fs::read(public_path).unwrap();
-    let checker_bytes=fs::read(checker_path).unwrap();
-    let public:Value=serde_json::from_slice(&public_bytes).unwrap();
-    let checker:Value=serde_json::from_slice(&checker_bytes).unwrap();
-    assert_eq!(public["schema"],"different_j_inverse_trend_public/v1");
-    assert_eq!(checker["schema"],"different_j_inverse_trend_checker/v1");
-    assert_eq!(checker["public_sha256"],sha256_hex(&public_bytes));
+    let public_bytes = fs::read(public_path).unwrap();
+    let checker_bytes = fs::read(checker_path).unwrap();
+    let public: Value = serde_json::from_slice(&public_bytes).unwrap();
+    let checker: Value = serde_json::from_slice(&checker_bytes).unwrap();
+    assert_eq!(public["schema"], "different_j_inverse_trend_public/v1");
+    assert_eq!(checker["schema"], "different_j_inverse_trend_checker/v1");
+    assert_eq!(checker["public_sha256"], sha256_hex(&public_bytes));
     assert!(public.get("scalars").is_none());
-    let p=public["p"].as_u64().unwrap();
-    let r=public["r"].as_u64().unwrap();
-    let h=public["cofactor"].as_u64().unwrap();
-    assert!([(2473,2437,2511),(5521,5569,5475),
-        (9619,9679,9561),(19213,19249,19179)].contains(&(p,r,h)));
-    assert!(prime(r) && p!=r);
-    let f=Field{p,nu:first_nonsquare(p)};
-    assert_eq!(public["field_nu"],f.nu);
-    let a=[f.scalar(-21),0];
-    let b=[f.scalar(37),0];
-    let da=[f.scalar(-81),0];
-    let db=[f.scalar(-243),0];
-    assert_eq!(public["source"]["a"],json!(a));
-    assert_eq!(public["source"]["b"],json!(b));
-    assert_eq!(public["source"]["j"],json!([j(a[0],b[0],p).unwrap(),0]));
-    assert_eq!(public["destination_curve"]["a"],json!(da));
-    assert_eq!(public["destination_curve"]["b"],json!(db));
-    assert_eq!(public["destination_curve"]["j"],json!([j(da[0],db[0],p).unwrap(),0]));
-    assert_ne!(j(a[0],b[0],p),j(da[0],db[0],p));
-    assert_eq!(count_fp(a[0],b[0],p),count_fp(da[0],db[0],p));
-    let g=point(&public["generator"]);
-    let mg=point(&public["mapped_generator"]);
-    let t=Point{x:[3,0],y:[1,0],infinity:false};
-    assert!(on_curve(f,a,b,g) && !g.infinity);
-    assert!(on_curve(f,da,db,mg) && !mg.infinity);
-    assert_eq!(scalar_mul(f,a,g,r),identity());
-    assert_eq!(scalar_mul(f,da,mg,r),identity());
-    assert_eq!(velu(f,a,t,g),mg);
-    let mut entries=Vec::new();
-    let mut current=identity();
-    let mut mapped=identity();
+    let p = public["p"].as_u64().unwrap();
+    let r = public["r"].as_u64().unwrap();
+    let h = public["cofactor"].as_u64().unwrap();
+    assert!([
+        (2473, 2437, 2511),
+        (5521, 5569, 5475),
+        (9619, 9679, 9561),
+        (19213, 19249, 19179)
+    ]
+    .contains(&(p, r, h)));
+    assert!(prime(r) && p != r);
+    let f = Field {
+        p,
+        nu: first_nonsquare(p),
+    };
+    assert_eq!(public["field_nu"], f.nu);
+    let a = [f.scalar(-21), 0];
+    let b = [f.scalar(37), 0];
+    let da = [f.scalar(-81), 0];
+    let db = [f.scalar(-243), 0];
+    assert_eq!(public["source"]["a"], json!(a));
+    assert_eq!(public["source"]["b"], json!(b));
+    assert_eq!(public["source"]["j"], json!([j(a[0], b[0], p).unwrap(), 0]));
+    assert_eq!(public["destination_curve"]["a"], json!(da));
+    assert_eq!(public["destination_curve"]["b"], json!(db));
+    assert_eq!(
+        public["destination_curve"]["j"],
+        json!([j(da[0], db[0], p).unwrap(), 0])
+    );
+    assert_ne!(j(a[0], b[0], p), j(da[0], db[0], p));
+    assert_eq!(count_fp(a[0], b[0], p), count_fp(da[0], db[0], p));
+    let g = point(&public["generator"]);
+    let mg = point(&public["mapped_generator"]);
+    let t = Point {
+        x: [3, 0],
+        y: [1, 0],
+        infinity: false,
+    };
+    assert!(on_curve(f, a, b, g) && !g.infinity);
+    assert!(on_curve(f, da, db, mg) && !mg.infinity);
+    assert_eq!(scalar_mul(f, a, g, r), identity());
+    assert_eq!(scalar_mul(f, da, mg, r), identity());
+    assert_eq!(velu(f, a, t, g), mg);
+    let mut entries = Vec::new();
+    let mut current = identity();
+    let mut mapped = identity();
     for scalar in 1..r {
-        current=add(f,a,current,g);
-        mapped=add(f,da,mapped,mg);
-        assert_eq!(velu(f,a,t,current),mapped);
-        let key=tuple(current);
-        let digest=sha256_hex(format!("different-j-inverse-trend-target-v1:17:{key}").as_bytes());
-        entries.push((digest,key,current,mapped,scalar));
+        current = add(f, a, current, g);
+        mapped = add(f, da, mapped, mg);
+        assert_eq!(velu(f, a, t, current), mapped);
+        let key = tuple(current);
+        let digest = sha256_hex(format!("different-j-inverse-trend-target-v1:17:{key}").as_bytes());
+        entries.push((digest, key, current, mapped, scalar));
     }
-    assert_eq!(add(f,a,current,g),identity());
-    entries.sort_by(|x,y|(&x.0,&x.1).cmp(&(&y.0,&y.1)));
-    let targets=public["targets"].as_array().unwrap();
-    let scalars=checker["scalars"].as_array().unwrap();
-    assert_eq!(targets.len(),64);
-    assert_eq!(scalars.len(),64);
-    for (index,entry) in entries.iter().take(64).enumerate() {
-        let q=point(&targets[index]["source"]);
-        let mq=point(&targets[index]["destination"]);
-        assert_eq!(q,entry.2);
-        assert_eq!(mq,entry.3);
-        assert_eq!(scalars[index],entry.4);
-        assert_eq!(scalar_mul(f,a,g,entry.4),q);
-        assert_eq!(scalar_mul(f,da,mg,entry.4),mq);
-        let fiber=[q,add(f,a,q,t),add(f,a,q,negate(f,t))];
-        assert!(fiber.iter().all(|&candidate|velu(f,a,t,candidate)==mq));
-        assert_ne!(fiber[0],fiber[1]);
-        assert_ne!(fiber[0],fiber[2]);
-        assert_ne!(fiber[1],fiber[2]);
+    assert_eq!(add(f, a, current, g), identity());
+    entries.sort_by(|x, y| (&x.0, &x.1).cmp(&(&y.0, &y.1)));
+    let targets = public["targets"].as_array().unwrap();
+    let scalars = checker["scalars"].as_array().unwrap();
+    assert_eq!(targets.len(), 64);
+    assert_eq!(scalars.len(), 64);
+    for (index, entry) in entries.iter().take(64).enumerate() {
+        let q = point(&targets[index]["source"]);
+        let mq = point(&targets[index]["destination"]);
+        assert_eq!(q, entry.2);
+        assert_eq!(mq, entry.3);
+        assert_eq!(scalars[index], entry.4);
+        assert_eq!(scalar_mul(f, a, g, entry.4), q);
+        assert_eq!(scalar_mul(f, da, mg, entry.4), mq);
+        let fiber = [q, add(f, a, q, t), add(f, a, q, negate(f, t))];
+        assert!(fiber
+            .iter()
+            .all(|&candidate| velu(f, a, t, candidate) == mq));
+        assert_ne!(fiber[0], fiber[1]);
+        assert_ne!(fiber[0], fiber[2]);
+        assert_ne!(fiber[1], fiber[2]);
     }
-    println!("{}",json!({"schema":"different_j_inverse_trend_freeze_check/v1",
+    println!(
+        "{}",
+        json!({"schema":"different_j_inverse_trend_freeze_check/v1",
         "status":"pass","p":p,"r":r,"cofactor":h,"targets":64,
         "subgroup_map_replays":r-1,"fiber_replays":192,
         "public_sha256":sha256_hex(&public_bytes),
-        "checker_sha256":sha256_hex(&checker_bytes)}));
+        "checker_sha256":sha256_hex(&checker_bytes)})
+    );
 }
 
 fn verify_row(p: u64, row: &Value) -> (bool, usize) {
@@ -392,10 +420,10 @@ fn verify_row(p: u64, row: &Value) -> (bool, usize) {
 }
 
 fn main() {
-    let args:Vec<String>=std::env::args().collect();
-    if args.get(1).map(String::as_str)==Some("check-freeze") {
-        assert_eq!(args.len(),4);
-        check_freeze(&args[2],&args[3]);
+    let args: Vec<String> = std::env::args().collect();
+    if args.get(1).map(String::as_str) == Some("check-freeze") {
+        assert_eq!(args.len(), 4);
+        check_freeze(&args[2], &args[3]);
         return;
     }
     let path = std::env::args().nth(1).expect("screen JSONL path");

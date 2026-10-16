@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/isogeny-fiber-trend-full-image-linux.yml'
       - 'research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/trend_four_cell_v1/RUN_FULL_IMAGE_LINUX_V1.sh'
+      - 'research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/frozen_linux_sources_v1/**'
   workflow_dispatch:
 
 permissions:
@@ -33,6 +34,7 @@ jobs:
             examples/different_j_inverse_velu_check.rs
             examples/different_j_order_process_meter.rs
             research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/FROZEN_INVERSE_TREND_V1.rs
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/frozen_linux_sources_v1
             research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/trend_four_cell_v1/P2473_PUBLIC.json
             research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/trend_four_cell_v1/P2473_CHECKER.json
             research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/trend_four_cell_v1/FULL_IMAGE_LINUX_SPEC_V1.json
@@ -43,6 +45,7 @@ jobs:
         run: |
           mkdir -p "${RUNNER_TEMP}/isogeny-full-image-p2473-linux-v1"
           cp research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/FROZEN_INVERSE_TREND_V1.rs examples/different_j_inverse_velu_oracle.rs
+          cp research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/frozen_linux_sources_v1/different_j_inverse_velu_check.rs.txt examples/different_j_inverse_velu_check.rs
           uname -a > "${RUNNER_TEMP}/isogeny-full-image-p2473-linux-v1/host.txt"
           lscpu >> "${RUNNER_TEMP}/isogeny-full-image-p2473-linux-v1/host.txt"
           git rev-parse HEAD > "${RUNNER_TEMP}/isogeny-full-image-p2473-linux-v1/head.txt"

@@ -6,6 +6,7 @@ on:
       - '.github/workflows/isogeny-fiber-nine-arm-linux.yml'
       - 'research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/RUN_HELDOUT_NINE_ARM_LINUX_V1.sh'
       - 'research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/HELDOUT_NINE_ARM_SPEC_V4.json'
+      - 'research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/frozen_linux_sources_v1/**'
   workflow_dispatch:
 
 permissions:
@@ -14,7 +15,7 @@ permissions:
 jobs:
   replay:
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,6 +36,7 @@ jobs:
             examples/different_j_chi_heldout_check.rs
             examples/different_j_chi_heldout_summary.rs
             examples/different_j_chi_heldout_meter.rs
+            research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/frozen_linux_sources_v1
             research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/FOUR_TARGET_PUBLIC_V1.json
             research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/FOUR_TARGET_CHECKER_V1.json
             research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/HELDOUT_NINE_ARM_SPEC_V4.json
@@ -42,6 +44,12 @@ jobs:
             research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/RUN_HELDOUT_NINE_ARM_LINUX_V1.sh
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
+      - name: Restore the byte-exact frozen replay sources
+        run: |
+          frozen=research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/frozen_linux_sources_v1
+          for name in different_j_chi_resultant different_j_inverse_velu_oracle different_j_chi_heldout_check different_j_chi_heldout_summary different_j_chi_heldout_meter; do
+            cp "$frozen/$name.rs.txt" "examples/$name.rs"
+          done
       - name: Record host and source receipts
         run: |
           mkdir -p "${RUNNER_TEMP}/isogeny-nine-arm-linux-v1"

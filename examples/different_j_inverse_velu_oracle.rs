@@ -542,8 +542,10 @@ fn assert_public(v: &Value) {
         }
     }
     walk(v);
-    assert!(v["schema"] == "different_j_trend_batch_public/v1"
-        || v["schema"] == "different_j_inverse_trend_public/v1");
+    assert!(
+        v["schema"] == "different_j_trend_batch_public/v1"
+            || v["schema"] == "different_j_inverse_trend_public/v1"
+    );
     assert_eq!((v["p"].as_u64(), v["r"].as_u64()), (Some(p()), Some(r())));
     assert_eq!(v["targets"].as_array().unwrap().len(), N);
 }
@@ -1118,11 +1120,20 @@ fn run_heldout(path: &str, round: u64, arm: &str, position: usize) {
     let bytes = fs::read(path).unwrap();
     let public: Value = serde_json::from_slice(&bytes).unwrap();
     assert_eq!(public["schema"], "different_j_chi_heldout_public/v1");
-    assert_eq!(public["selection_positions_zero_indexed"], json!([64, 65, 66, 67]));
+    assert_eq!(
+        public["selection_positions_zero_indexed"],
+        json!([64, 65, 66, 67])
+    );
     assert!(public.get("scalars").is_none() && public.get("answer_scalar").is_none());
     set_cell(211, 229, 195);
-    assert_eq!((public["p"].as_u64(), public["r"].as_u64(),
-        public["cofactor"].as_u64()), (Some(p()), Some(r()), Some(h())));
+    assert_eq!(
+        (
+            public["p"].as_u64(),
+            public["r"].as_u64(),
+            public["cofactor"].as_u64()
+        ),
+        (Some(p()), Some(r()), Some(h()))
+    );
     let src = source();
     let t = kernel(&src);
     let dst = destination(&src, t);
@@ -1139,28 +1150,33 @@ fn run_heldout(path: &str, round: u64, arm: &str, position: usize) {
     assert!(src.mul(&mut setup_ops, q, r()).infinity);
     let relation = prepare_relation(&public, &src, &dst, t, arm, &mut setup_ops);
     let signed_public: Vec<Point> = points(&public["full_base_projected"])
-        .into_iter().flat_map(|point| [point, dst.neg(point)]).collect();
+        .into_iter()
+        .flat_map(|point| [point, dst.neg(point)])
+        .collect();
     assert_eq!(relation.signed, signed_public, "different factor base");
     let setup_cpu_ns = thread_cpu_ns() - cpu;
     let setup_fp = take_field_counters();
     let seed = (0x2026_1015u64 ^ p())
         .wrapping_add(round.wrapping_mul(0x9e37_79b9))
         .wrapping_add(((position + 64) as u64).wrapping_mul(0x0123_4567));
-    let solve = solve_relation(&src, &dst, t, g, q, mapped_g, mapped_q,
-        arm, &relation, seed);
+    let solve = solve_relation(
+        &src, &dst, t, g, q, mapped_g, mapped_q, arm, &relation, seed,
+    );
     let query_fp = take_field_counters();
     let peak_rss = peak_rss_bytes();
-    let oracle = relation.oracle.as_ref().map(|stats| json!({
-        "destination_points":stats.destination_points,
-        "polynomial_calls":stats.polynomial_calls,
-        "split_attempts":stats.split_attempts,
-        "rational_x_roots":stats.rational_x_roots,
-        "rejected_no_root":stats.rejected_no_root,
-        "rejected_no_lift":stats.rejected_no_lift,
-        "exact_map_checks":stats.exact_map_checks,
-        "rejected_map_mismatch":stats.rejected_map_mismatch,
-        "accepted_image_points":stats.accepted_image_points
-    }));
+    let oracle = relation.oracle.as_ref().map(|stats| {
+        json!({
+            "destination_points":stats.destination_points,
+            "polynomial_calls":stats.polynomial_calls,
+            "split_attempts":stats.split_attempts,
+            "rational_x_roots":stats.rational_x_roots,
+            "rejected_no_root":stats.rejected_no_root,
+            "rejected_no_lift":stats.rejected_no_lift,
+            "exact_map_checks":stats.exact_map_checks,
+            "rejected_map_mismatch":stats.rejected_map_mismatch,
+            "accepted_image_points":stats.accepted_image_points
+        })
+    });
     let relation_setup = json!({
         "pair_entries":relation.pair_entries,
         "pair_keys":relation.table.len(),

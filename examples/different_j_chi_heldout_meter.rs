@@ -15,14 +15,20 @@ fn timeval_us(t: libc::timeval) -> u64 {
 
 fn children() -> libc::rusage {
     let mut raw = std::mem::MaybeUninit::<libc::rusage>::zeroed();
-    assert_eq!(unsafe { libc::getrusage(libc::RUSAGE_CHILDREN, raw.as_mut_ptr()) }, 0);
+    assert_eq!(
+        unsafe { libc::getrusage(libc::RUSAGE_CHILDREN, raw.as_mut_ptr()) },
+        0
+    );
     unsafe { raw.assume_init() }
 }
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    assert_eq!(args.len(), 10,
-        "usage: meter BINARY PUBLIC ROUND ARM POSITION STDOUT STDERR RECEIPT LIMIT_SECONDS");
+    assert_eq!(
+        args.len(),
+        10,
+        "usage: meter BINARY PUBLIC ROUND ARM POSITION STDOUT STDERR RECEIPT LIMIT_SECONDS"
+    );
     let stdout = File::create(&args[6]).unwrap();
     let stderr = File::create(&args[7]).unwrap();
     let wall_limit: u64 = args[9].parse().unwrap();
@@ -30,8 +36,13 @@ fn main() {
     let start = Instant::now();
     let mut command = Command::new(&args[1]);
     command
-        .arg("run-heldout").arg(&args[2]).arg(&args[3]).arg(&args[4]).arg(&args[5])
-        .stdout(Stdio::from(stdout)).stderr(Stdio::from(stderr));
+        .arg("run-heldout")
+        .arg(&args[2])
+        .arg(&args[3])
+        .arg(&args[4])
+        .arg(&args[5])
+        .stdout(Stdio::from(stdout))
+        .stderr(Stdio::from(stderr));
     unsafe {
         command.pre_exec(|| {
             let limit = libc::rlimit {
