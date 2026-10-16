@@ -148,6 +148,28 @@ A record whose counters include one with no `bitop/v1` rule has no total. Its
 `work.complete` is `false` and the unpriced counters are named. An unknown
 cost is never written as zero.
 
+## Relation to the unpriced-work band (AGENTS.md §5a)
+
+§5a requires a comparison in group-addition equivalents to do two things:
+
+- list each arm's unpriced counters;
+- rank the arms only where the order holds with that work weighted at 0, 0.1
+  and 1 GAE per operation.
+
+A comparison in `bitop/v1` between two complete arms has no unpriced counters
+for either side, so the band has nothing to weigh. The listing is
+`work.unpriced` and `work.known_uncounted`, both empty. That leaves two
+conditions for ranking in the unit:
+
+- both arms' records are complete;
+- both arms pass the instruction audit.
+
+When either arm is incomplete, its `bitop/v1` total is a lower bound, as
+§5a says of any partial price. Such an arm has no `bitop/v1` bound
+(`bound fit --unit bitop/v1` refuses it), and its group-addition comparison
+still goes through the band. For the same reason `--unit` and `--weight`
+exclude each other.
+
 ## Changing the convention
 
 A committed figure must reprice to the same integer forever, so this version

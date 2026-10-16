@@ -2138,6 +2138,30 @@ impl FpP192 {
         }
         t
     }
+
+    /// `a²` as six words: three cross products, doubled, plus three squares.
+    #[inline(always)]
+    fn sqr_wide(a: &[u64; 3]) -> [u64; 6] {
+        let (w1, c) = mac(0, a[0], a[1], 0);
+        let (w2, c) = mac(0, a[0], a[2], c);
+        let (w3, w4) = mac(c, a[1], a[2], 0);
+        // Double the cross terms (they sit at words 1..=4).
+        let w5 = w4 >> 63;
+        let w4 = (w4 << 1) | (w3 >> 63);
+        let w3 = (w3 << 1) | (w2 >> 63);
+        let w2 = (w2 << 1) | (w1 >> 63);
+        let w1 = w1 << 1;
+        let (s0, s1) = mac(0, a[0], a[0], 0);
+        let (s2, s3) = mac(0, a[1], a[1], 0);
+        let (s4, s5) = mac(0, a[2], a[2], 0);
+        let (r1, k) = adc(w1, s1, 0);
+        let (r2, k) = adc(w2, s2, k);
+        let (r3, k) = adc(w3, s3, k);
+        let (r4, k) = adc(w4, s4, k);
+        let (r5, k) = adc(w5, s5, k);
+        debug_assert_eq!(k, 0);
+        [s0, r1, r2, r3, r4, r5]
+    }
 }
 
 impl PrimeField for FpP192 {
@@ -2197,6 +2221,11 @@ impl PrimeField for FpP192 {
     #[inline(always)]
     fn mul(&self, a: [u64; 3], b: [u64; 3]) -> [u64; 3] {
         let t = Self::mul_wide(&a, &b);
+        Self::reduce7(&[t[0], t[1], t[2], t[3], t[4], t[5], 0])
+    }
+    #[inline(always)]
+    fn sqr(&self, a: [u64; 3]) -> [u64; 3] {
+        let t = Self::sqr_wide(&a);
         Self::reduce7(&[t[0], t[1], t[2], t[3], t[4], t[5], 0])
     }
     fn inv(&self, a: [u64; 3]) -> Option<[u64; 3]> {

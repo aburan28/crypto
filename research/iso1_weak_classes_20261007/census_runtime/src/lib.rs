@@ -1,6 +1,9 @@
 //! Frozen field and point-count kernel for the ISO-1 class census.
 //! Source provenance is retained beside this package.
 
+extern crate self as crypto_lib;
+
+pub mod certified;
 pub mod field_kernel;
 pub mod point_count_kernel;
 mod scalar_kernel;

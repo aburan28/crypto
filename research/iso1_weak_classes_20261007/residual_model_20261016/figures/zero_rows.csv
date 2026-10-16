@@ -1,0 +1,13 @@
+p,role,observed_zero_rows,predicted,lo95,hi95,dispersion,auc,source
+37,seen,145,168.8,146.5,191.1,0.981,0.9590,model_v2_results.txt
+41,seen,198,186.2,162.8,209.6,0.998,0.9686,model_v2_results.txt
+43,seen,188,195.9,171.9,219.9,1.003,0.9718,model_v2_results.txt
+47,seen,212,212.6,187.6,237.6,0.997,0.9783,model_v2_results.txt
+53,pristine,247,240.4,213.8,266.9,1.005,0.9818,model_v2_results.txt
+59,pristine,270,265.9,238.0,293.8,1.001,0.9861,model_v2_results.txt
+61,forward,273,275.3,247.0,303.6,0.992,0.9841,model_v2_results.txt
+67,forward,320,301.1,271.5,330.8,0.996,0.9870,model_v2_results.txt
+71,pending,,317.9,287.5,348.3,,,predictions_v2.txt
+73,pending,,327.1,296.3,357.9,,,predictions_v2.txt
+79,pending,,353.5,321.5,385.5,,,predictions_v2.txt
+83,pending,,372.6,339.7,405.4,,,predictions_v2.txt

@@ -7,7 +7,7 @@
 - **Affected work:** [weak isogeny classes study, 2026-10-13](../research/weak_isogeny_classes_20261013/REPORT.md),
   lead 2; [Smith Prop. 2/4 native study, 2026-10-14](../research/smith_prop24_native_20261014/REPORT.pdf)
 - **Next action owner:** unassigned
-- **Last updated:** 2026-10-14
+- **Last updated:** 2026-10-16
 
 ## Problem
 
@@ -96,9 +96,49 @@ open.
   `research/smith_prop24_native_20261014/data/` give the reachable set
   exactly, so a walk that reaches beyond `C` or misses a class it should reach
   is a bug.
-- **Also open:** why a minority of small classes holds no `full_success`
-  curve (a structural invariant of the class, or the sparsity of small
-  classes); and Smith's Remark 5 alternative (descending `X` when the trigonal
+- **Narrowed (2026-10-15,
+  [study](../research/smith_iso_granularity_20261015/REPORT.pdf)):** why a
+  minority of classes holds no `full_success` curve. Sparsity is not the
+  answer: counting `F_p`-isomorphism classes of curves instead of models
+  (34,227 at `p = 7`, 324,562 at `p = 11`; `full_success` checked constant on
+  every model) moves the null median of `C` from `U` to 0.4579 / 0.4864, but
+  the observed 0.4304 / 0.4750 stays below all 999 permutations at both
+  primes (frozen verdict: residual deficit beyond granularity). Empty
+  tractable classes: 560 vs 395 expected and 1,210 vs 720, in excess at every
+  class size. Successes are positively correlated within an `L`-class; the
+  2-adic valuation of `#J(F_p)` does not explain it (post hoc).
+- **Narrowed further (2026-10-16,
+  [study](../research/smith_class_invariant_20261015/REPORT.pdf)):** the
+  shared factor is not a 2-adic Galois-module invariant of `J_H` at the
+  levels tested. Under a frozen protocol, conditioning the iso-level null on
+  the Frobenius cycle type on `J[2]` (the finest `J[2]` invariant for a
+  hyperelliptic curve), the 2-Sylow subgroup of `J(F_p)` (class group,
+  certified on all 16,823 / 160,010 tractable classes) or the corrected
+  `J[4]` descent invariants leaves `C` below all 999 permutations at both
+  primes; at most 9% of the gap closes (verdict: does not explain, all
+  valid candidates). The frozen `J[4]` descent instrument was invalid
+  (order-2 descent kernel on all-even factorizations; Amendment 1).
+  Next discriminating step: compute, per rational tractable subgroup `S`,
+  the `F_p`-isomorphism class of the quotient curve `X` (or of the
+  p.p.a.v. `J_H/S`, e.g. Dixmier–Ohno invariants with the twist bit) and
+  test whether `full_success` within an `L`-class is explained by shared
+  quotients (Serre's obstruction on a common target); control: the
+  `#X(F_p)` point count already checked in `smith_prop24::x_check`.
+- **Largely explained (2026-10-16,
+  [study](../research/smith_serre_sign_20261016/REPORT.pdf)):** the clustering
+  is mostly in the Prop. 4 sign (Serre's obstruction), which is biased by
+  `N1 = #H(F_p)`, an `L`-class invariant. Twisting preserves Prop. 2 and flips
+  Prop. 4 (except on degenerate subgroups), so `X` has either `N1` or
+  `2p + 2 − N1` rational points. Among non-degenerate Prop. 2 passes the
+  Prop. 4 rate rises with `N1`, close to `N1 / (2p + 2)`. This was found at
+  `p = 7` and confirmed on held-out `p = 11` (max deviation 0.080, frozen bar
+  0.10). Conditioning the iso-level null on `(stratum, N1, any Prop. 2 pass)`
+  closes 80% / 76% of `U − C`, against 63% / 52% for a random class label.
+  The remaining ~24% is open. For the walk: a walk inside an `L`-class
+  cannot change `N1`, so classes with few rational points are poor targets
+  and their twist classes good ones. The asymptotic extrapolation (bias
+  `O(1/√p)`, Smith's fair coin recovered) is untested.
+  Still open: Smith's Remark 5 alternative (descending `X` when the trigonal
   map is not rational, which would raise the direct rate to 31.13% under his
   hypotheses) as a route that needs no walk.
 - **Outcomes:** short walks with cheap steps make the extension a practical
@@ -114,3 +154,12 @@ open.
   10^6 curves; class-level success near the ceiling at `p = 7` (`r = 0.811`)
   and `p = 11` (`r = 0.938`). Unblock items 1 and 2 done; the walk's cost
   stays open.
+- 2026-10-15: isomorphism-class granularity tested under a frozen protocol;
+  it explains 54% (`p = 7`) and 41% (`p = 11`) of the gap `U − C`, and the
+  rest is a within-class correlation not yet named.
+- 2026-10-16: candidate invariants of `J_H` tested (cycle type on `J[2]`,
+  2-Sylow of `J(F_p)`, `J[4]` descent data); none explains the within-class
+  correlation at `p = 7, 11`. Unresolved; next step is the quotient-curve
+  class.
+- 2026-10-16: the Prop. 4 sign follows `#H(F_p)` (confirmed at `p = 11`);
+  with Prop. 2 this accounts for about three quarters of the clustering.
