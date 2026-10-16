@@ -714,14 +714,19 @@ unexecuted because their all-field-element square maps require
 a hard 512 MiB process cap; Darwin `RLIMIT_AS` and
 `RLIMIT_DATA` both returned `EINVAL`. A Linux memory-capped
 run can distinguish feasible completion from resource censorship.
-The frozen order-1,201 inverse-arm Linux L1 workflow, independent
-[nine-arm Linux replay](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/LINUX_REPLAY_SPEC_V1.json),
-and [hard-capped p2473 full-image Linux
-probe](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/trend_four_cell_v1/FULL_IMAGE_LINUX_SPEC_V1.json)
-are prepared but have not yet returned host artifacts. The latter
-probe independently checks a completed child and preserves a
-resource-censored outcome. L2 admission still requires an available
-reserved physical core and its telemetry.
+The frozen order-1,201 inverse-arm Linux L1 workflow and independent
+[nine-arm Linux replay](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/LINUX_REPLAY_SPEC_V1.json)
+have now returned passing host receipts: the inverse panel checked 60/60
+children, 1,275 scalars and 6,126 relation witnesses; the nine-arm panel
+checked 108/108 children and 996 witnesses. The [hard-capped p2473
+full-image Linux probe](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/trend_four_cell_v1/FULL_IMAGE_LINUX_SPEC_V1.json)
+terminated at its 512 MiB address-space cap after an allocation failure
+(exit 134, signal 6, peak RSS 534,470,656 bytes, 7.170 s wall). This is
+resource censorship, not a completed order-2,437 full-image cost.
+The copied artifacts and verified hash manifests are linked from the
+[primitive report](../research/isogeny_torsion_fibers_20261012/primitive_price_20261016/RESULTS_V1.md).
+L2 admission still requires an available reserved physical core and its
+telemetry.
 
 The [seven-arm held-out extension](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/HELDOUT_RESULTS_V3.md)
 independently replayed the source and quotient S3 pair sets on all
@@ -749,11 +754,24 @@ inverse/rho was 13.117. The order-229 relation-control exit
 criterion is met, while the portable-cost and isolation exit
 criteria remain open.
 
-The present exit criteria remain: disjoint instrumentation
-and calibrated conversion of every primitive into a complete
-portable `S`; Linux full-image resource results and order-1,201
-inverse replay; and an admitted L2 paired wall session.
-The next discriminating action is the Linux V2 replay and
-hard-cap full-image control, followed by the missing native
-primitive ledger. None of these gaps is a proof of an
-isogeny or torsion-fiber obstruction.
+The [disjoint field-call panel](../research/isogeny_torsion_fibers_20261012/primitive_price_20261016/RESULTS_V1.md)
+ran 60/60 new cold children, matched all deterministic V2 rows, and
+independently replayed 1,275 scalars and 6,126 witnesses. At N1, mean
+whole-child `S_group` was 88,499.672 full image, 134.457 inverse-Vélu,
+4.905 rho and 2.972 BSGS. The inverse arm recorded 9,286 Fp² multiply
+calls inside counted group operations and 29,140 outside them; its 34
+outside square-root calls still have unexpanded internals. These counts
+locate work but are not a complete portable `S` conversion.
+
+The remaining exit criteria are a disjoint count and calibrated conversion
+of every native primitive (including square-root internals, polynomial
+and table work, allocation and I/O), an independent counter checker,
+an admitted L2 paired wall session, and a memory-bounded larger-order
+full-image constructor or a recorded infeasibility bound for the stated
+cap. The next discriminating relation experiment should freeze a
+projected destination-base selection rule and compare complete verified
+solves to the existing inverse, destination-direct, BSGS and rho controls.
+A changed factor base must be treated as a new arm, with its own support
+and costs. The Linux L1 replay and hard-cap resource questions are
+resolved within their frozen bounds; they do not resolve the remaining
+portable-price or isolation requirements.
