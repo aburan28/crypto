@@ -3332,7 +3332,9 @@ def launch_equal_advice(arguments: argparse.Namespace) -> dict[str, Any]:
                 for c in preflight_receipt["checks"]
                 if c["name"] != "cryptominisat5_optional"
             )
-        require(preflight_receipt["ok"], "preflight failed")
+        if not preflight_receipt["ok"]:
+            failed = [c for c in preflight_receipt["checks"] if not c["ok"]]
+            require(False, "preflight failed: " + "; ".join(f"{c['name']}={c['detail']}" for c in failed))
         git_head = next(c["detail"] for c in preflight_receipt["checks"] if c["name"] == "git_head")
         run_id = arguments.run_id or make_run_id(beat_id)
         run = RUNS_DIR / run_id
