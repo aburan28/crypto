@@ -152,3 +152,36 @@ the search.
   at the first; to pay once for the first curve, post it without piecework,
   so it settles on its first accepted claim. The validator's
   `funding ≥ piecework.units` rule applies to the piecework form.
+
+## Is the search needed? A supersingular `E'` tested (2026-10-15, Lane H)
+
+Study: [`research/pkm_supersingular_aux_20261015/`](../../research/pkm_supersingular_aux_20261015/README.md)
+(pre-registered protocol, branch `claude/pkm-supersingular-aux`). It answers
+the blocker this card records: may the PKM relation phase use the
+supersingular `y² = x³ + x`, which over the P-192 prime gives a point of order
+`2^48` in one draw?
+
+- **Structure (exact, small primes).** The supersingular tower set
+  `x(R' + ⟨Q⟩)` is *not* the Dickson torus set under any Möbius change of `x`
+  (no coincidence at `t ≥ 3`); it is an ordinary-looking Vélu tower, like the
+  searched curve's. So it does not inherit the torus family's behaviour.
+- **F4 solving degree (measured, `p < 2^31`, `N ≤ 20`).** The supersingular
+  tower gives exactly the ordinary isogeny tower's `D` (and width and step
+  count to within one column) in every cell, for `y² = x³ ± x`, `y² = x³ + 1`
+  and its twist; both differ from the Dickson torus (5 against 4 at
+  `m = 2, N = 4…10`).
+- **Relation phase (measured, ecbench, 20–24-bit P-192-shape curves).** With
+  `prime-isogeny:t=T,aux=supersingular` the auxiliary cost falls from 10–27 %
+  of `S` (the charged search) to 0.9–1.9 % (the build alone), the relation
+  yield is unchanged, and `S` is within 2.2 % of a plain base of the same size.
+
+**What it means for this card (derived).** Nothing measured distinguishes a
+supersingular `E'` from an ordinary one except the cost of finding it, so the
+~11-core-year ordinary search is not needed to supply the relation phase's
+input: `pkm-aux-search --family supersingular-j1728 --t 48` already does, in
+one draw. The card stays `blocked` (its status is not changed here): running
+it would now only measure a construction constant for ordinary curves, and
+the decision whether a reason outside these experiments (none is known) should
+require an ordinary curve rests with the coordinator. Lead 1 (whether `D`
+stays bounded as `N` grows) is untouched and remains the gate for any use of
+the tower at P-192.
