@@ -126,3 +126,8 @@ timing remains descriptive and does not satisfy the L2 gate.
 The [research roadmap](RESEARCH_ROADMAP_V1.md) states how this finite
 fiber result connects to the direct χ oracle, the pairing-transfer
 track, and a complete single-target ECDLP frontier test.
+
+The [local validation receipt](validation/VALIDATION_V1.md) records a failed
+full release library suite under sandbox socket denial and shared-host
+timeouts, followed by passing focused reruns and touched-example checks.
+It is a disclosed validation limit, not a green full-suite result.

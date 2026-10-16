@@ -41,7 +41,11 @@ through that account. This is an access quota, not an experimental result.
 
 The workflow artifact is temporary. After completion, copy the compact
 records and hash manifest into a new versioned directory in this study,
-run the native independent analyzer, update the report and benchmark visual,
+run `different_j_host_performance` with the Linux artifact directory,
+this study directory, an output JSON path and an output SVG path. That
+native analyzer must check all 252 child count vectors and recovered
+scalars against the committed Darwin rows before calculating paired CPU
+and rho A/A ratios. Update the report and benchmark visual,
 and keep the raw artifact SHA-256 and GitHub run URL as provenance. A failed
 workflow remains an infrastructure or implementation result with its exact
 log, and is never called a mathematical miss.

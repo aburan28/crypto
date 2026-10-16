@@ -80,6 +80,8 @@ Standard On-Demand EC2 vCPU quota in five checked regions; AWS denied
 the quota-increase request with an AccessDeniedException. A frozen
 Linux hosted-runner protocol is ready for independent-host replay;
 that virtual machine cannot admit L2 wall timing.
+The full local release suite was red under sandbox socket denial and
+shared-host timeouts; focused reruns passed. See the validation receipt.
 
 Source-linked records, run PDFs, exact hashes and accepted limits:
 `RESULTS_V2.md`, `BATCH_RUN_SPEC_V1.json`, and `TREND_V1.json`.
