@@ -695,6 +695,11 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for CompactOrbitScanBase<'_> {
             |p| inst.fast.neg(*p).pack(),
             |p| p.x,
         )?;
+        // `from_column_map`'s inserts, lookups and negations are in this
+        // builder's `hash_probes_uncharged` and `point_negations_uncharged`
+        // below; only its abscissa sort is new.
+        fb.cost.work_native.remove("index_inserts");
+        fb.cost.work_native.remove("index_point_negations");
         fb.cost.count("abscissae_scanned_uncharged", scanned);
         fb.cost.count("inversions", scanned);
         fb.cost.count("legacy_as_solves_uncharged", scanned);
@@ -990,6 +995,13 @@ impl FactorBaseBuilder<Fp2Curve> for GlsLineBase<'_> {
 
 // ── Decomposition oracles ──────────────────────────────────────────
 
+/// `counters` with the marker that says the oracle's set-up counts all
+/// its table work (`ecbench::work::known_uncounted`).
+fn table_counted(mut counters: BTreeMap<String, u64>) -> BTreeMap<String, u64> {
+    counters.insert("counted:table_insert_attempts".to_string(), 1);
+    counters
+}
+
 /// Test `R − P ∈ F` for every signed base point: no table, `|F|` group
 /// operations a target, and the honest baseline every table oracle is
 /// an improvement on.
@@ -1006,6 +1018,11 @@ impl<G: CountedGroup> DecompositionOracle<G> for SubtractOracle {
 
     fn describe(&self, _params: &Params) -> String {
         "for each signed base point P, test whether R − P is in the base".into()
+    }
+
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        // No table: nothing is inserted.
+        table_counted(BTreeMap::new())
     }
 
     fn decompose(
@@ -1086,6 +1103,15 @@ impl<G: CountedGroup> DecompositionOracle<G> for MitmOracle {
         Ok(())
     }
 
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        table_counted(
+            self.table
+                .as_ref()
+                .map(PairTable::work_counters)
+                .unwrap_or_default(),
+        )
+    }
+
     fn decompose(
         &mut self,
         ctx: &InstanceCtx<G>,
@@ -1151,6 +1177,15 @@ impl DecompositionOracle<PrimeCurve> for PrimeBatchMitmOracle {
         Ok(())
     }
 
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        table_counted(
+            self.table
+                .as_ref()
+                .map(PairTable::work_counters)
+                .unwrap_or_default(),
+        )
+    }
+
     fn decompose(
         &mut self,
         ctx: &InstanceCtx<PrimeCurve>,
@@ -1206,6 +1241,13 @@ pub struct RootfindSubtractOracle<'i> {
     /// Hits whose summands did not re-add to the target in the group.
     /// Must stay zero.
     pub mismatches: u64,
+    /// `bitop/v1`-only work of the sweep (`relation_work_native`): the
+    /// batched inversion's `3k` products and the two conversions into
+    /// Montgomery form a target, and the `k` differences `x_R − x_i`.
+    /// The candidate points' own products are inside the group addition
+    /// each is charged as.
+    sweep_field_muls: u64,
+    sweep_field_adds: u64,
 }
 
 impl<'i> RootfindSubtractOracle<'i> {
@@ -1220,6 +1262,8 @@ impl<'i> RootfindSubtractOracle<'i> {
             degenerate: Vec::new(),
             scratch: Vec::new(),
             mismatches: 0,
+            sweep_field_muls: 0,
+            sweep_field_adds: 0,
         }
     }
 }
@@ -1313,6 +1357,33 @@ impl DecompositionOracle<PrimeCurve> for RootfindSubtractOracle<'_> {
         Ok(())
     }
 
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        let mut out = self
+            .table
+            .as_ref()
+            .map(PairTable::work_counters)
+            .unwrap_or_default();
+        // The sweep's `x_index` read per abscissa, and its two
+        // conversions into Montgomery form.
+        let k = self.reps.len() as u64;
+        if k > 0 {
+            *out.entry("lookups".to_string()).or_insert(0) += k;
+            out.insert("montgomery_conversions".to_string(), 2 * k);
+        }
+        table_counted(out)
+    }
+
+    fn relation_work_native(&self) -> BTreeMap<String, u64> {
+        let mut out = BTreeMap::new();
+        if self.sweep_field_muls > 0 {
+            out.insert("sweep_field_muls".to_string(), self.sweep_field_muls);
+        }
+        if self.sweep_field_adds > 0 {
+            out.insert("sweep_field_adds".to_string(), self.sweep_field_adds);
+        }
+        out
+    }
+
     fn decompose(
         &mut self,
         ctx: &InstanceCtx<PrimeCurve>,
@@ -1344,6 +1415,8 @@ impl DecompositionOracle<PrimeCurve> for RootfindSubtractOracle<'_> {
         counters.inversions += 1;
         ops.field_ops.invs += 1;
         ops.field_ops.muls += 3 * k as u64;
+        self.sweep_field_muls += 2 + 3 * k as u64;
+        self.sweep_field_adds += k as u64;
         for i in 0..k {
             let rep = self.reps[i];
             if self.degenerate[i] {
@@ -1541,6 +1614,26 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for FrobeniusMitmOracle<'_> {
         Ok(())
     }
 
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        // The large-prime collector builds its own tables, which this
+        // does not count: its records keep `table_insert_attempts` listed.
+        if self.large.is_some() {
+            return BTreeMap::new();
+        }
+        let Some(table) = &self.table else {
+            return BTreeMap::new();
+        };
+        let mut out = table.work_counters();
+        if !self.count_setup {
+            // The uncounted variant's `setup_native` leaves the build's
+            // canonicalisations, Frobenius maps and orbit lookups out.
+            for (name, v) in table.build_counters() {
+                *out.entry(name).or_insert(0) += v;
+            }
+        }
+        table_counted(out)
+    }
+
     fn setup_native(&self) -> BTreeMap<String, u64> {
         let mut counts = BTreeMap::new();
         if let Some(lp) = &self.large {
@@ -1732,6 +1825,10 @@ impl<'i> DescentAlgebraicOracle<'i> {
     /// The descent with summand 2 over `σ^{j}(V)`: the τ-slot system.
     fn descend_slot(&self, x_r: u64, j: u32) -> SymbolicDescent {
         let gf = &self.instance.gf;
+        // The `j` squarings of each basis element (field squarings, put
+        // through the descent's own counter so they reach the same
+        // block) and the copies of the bases.
+        charge_slot_bases(self.v_basis.len() as u64, j, self.summands);
         let shifted: Vec<u64> = self
             .v_basis
             .iter()
@@ -1775,7 +1872,74 @@ fn system_of(sys: &SymbolicDescent) -> BooleanSystem {
     }
 }
 
+/// The descent's slot bases, as primitives: `n'·j` squarings and the
+/// `(m + 1)·n'` words of the basis copies.
+fn charge_slot_bases(n_prime: u64, j: u32, summands: u32) {
+    crate::cryptanalysis::pq_descent_symbolic::add_descent_work(
+        crate::cryptanalysis::pq_descent_symbolic::DescentWork {
+            field_sqrs: n_prime * u64::from(j),
+            word_ops: n_prime * (1 + u64::from(summands)),
+            ..Default::default()
+        },
+    );
+}
+
+/// The work an algebraic oracle does on one descended system outside the
+/// descent and the solver, in `bitop/v1` primitives added to `extra`
+/// (the oracle's solver block, so that the relation phase is complete
+/// when the solver's count is): the descent's own counters
+/// ([`take_descent_work`](crate::cryptanalysis::pq_descent_symbolic::take_descent_work)),
+/// the copy of the equations into the [`BooleanSystem`] (a word a term)
+/// and `shape_calls` shape computations ([`BooleanSystem::shape_word_ops`]).
+pub(crate) fn charge_system_build(
+    extra: &mut BTreeMap<String, u64>,
+    system: &BooleanSystem,
+    shape: &SystemShape,
+    shape_calls: u64,
+) {
+    crate::cryptanalysis::pq_descent_symbolic::take_descent_work().charge(extra);
+    let terms: u64 = system.equations.iter().map(|p| p.terms.len() as u64).sum();
+    *extra.entry("bitop_word_ops".to_string()).or_insert(0) +=
+        terms + shape_calls * system.shape_word_ops(shape);
+}
+
+/// The hash probes of one `lift_abscissae` call on `xs`: one per
+/// abscissa looked up, stopping at the first the base does not hold.
+/// (The additions it performs are charged to `ops` already.)
+pub(crate) fn lift_probes(fb: &FactorBase<FastPoint>, xs: &[u64], lifted: bool) -> u64 {
+    if lifted {
+        return xs.len() as u64;
+    }
+    let mut probes = 0u64;
+    for x in xs {
+        probes += 1;
+        if !fb.x_index.contains_key(x) {
+            break;
+        }
+    }
+    probes
+}
+
+/// Charge one lift of a solution to `extra`: the descent counter's share
+/// ([`SymbolicDescent::lift`]'s bit tests and field adds) and the probes
+/// of [`lift_probes`].
+pub(crate) fn charge_lift(
+    extra: &mut BTreeMap<String, u64>,
+    fb: &FactorBase<FastPoint>,
+    xs: &[u64],
+    lifted: bool,
+) {
+    crate::cryptanalysis::pq_descent_symbolic::take_descent_work().charge(extra);
+    *extra.entry("bitop_hash_probes".to_string()).or_insert(0) += lift_probes(fb, xs, lifted);
+}
+
 impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        // No table: the descent builds each target's system in the
+        // relation phase, charged to the solver block.
+        table_counted(BTreeMap::new())
+    }
+
     fn name(&self) -> &str {
         "descent-algebraic"
     }
@@ -1844,7 +2008,10 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
         // abscissa now and let the engine decline the shape here, once,
         // with a reason a sweep can report — rather than target by
         // target, which would run the whole relation phase for nothing.
-        let shape = system_of(&self.descend(self.instance.generator.x)).shape();
+        let _ = crate::cryptanalysis::pq_descent_symbolic::take_descent_work();
+        let probe = system_of(&self.descend(self.instance.generator.x));
+        let shape = probe.shape();
+        charge_system_build(&mut self.totals.extra, &probe, &shape, 1);
         if !self.harness.solver.accepts(&shape) {
             return Err(format!(
                 "solver `{}` declines a system of {} unknowns and {} equations; \
@@ -1872,6 +2039,9 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
         // with slots, one system per rotation of the second summand.
         let rotations = self.slot_rotations.unwrap_or(1);
         for j in 0..rotations {
+            // Work left on this thread's descent counter by anything else
+            // is not this target's.
+            let _ = crate::cryptanalysis::pq_descent_symbolic::take_descent_work();
             let sys = if self.slot_rotations.is_some() {
                 self.descend_slot(point.x, j)
             } else {
@@ -1882,15 +2052,20 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
             let verdict = self.harness.solve(&system);
             let exceeded = matches!(verdict, SolverVerdict::BudgetExceeded);
             self.totals.absorb(&shape, self.harness.cost(), exceeded);
+            // The descent, the copy, and two shape computations (here and
+            // in the harness).
+            charge_system_build(&mut self.totals.extra, &system, &shape, 2);
             *self.totals.extra.entry("slot_systems".into()).or_insert(0) += 1;
             let SolverVerdict::Solved(solutions) = verdict else {
                 continue;
             };
             for v in solutions {
                 let xs = sys.lift(v);
-                if let Some(indices) = crate::cryptanalysis::ic_boundary::lift_abscissae(
+                let lifted = crate::cryptanalysis::ic_boundary::lift_abscissae(
                     ctx.group, fb, ops, &xs, point,
-                ) {
+                );
+                charge_lift(&mut self.totals.extra, fb, &xs, lifted.is_some());
+                if let Some(indices) = lifted {
                     *self.totals.extra.entry("slot_hits".into()).or_insert(0) += 1;
                     *self
                         .totals
@@ -2261,6 +2436,7 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for SymmetrisedOracle<'_> {
         let kc = self.instance.koblitz.as_ref()?;
         let target = self.instance.fast.lower(point);
         let before = f4_word_ops_thread();
+        let tally_before = crate::cryptanalysis::bitop_tally::snapshot();
         let started = Instant::now();
         let outcome = symmetrised_groebner_decompose(
             kc,
@@ -2281,6 +2457,12 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for SymmetrisedOracle<'_> {
         extra.insert("splits".to_string(), out.effort);
         extra.insert("oversize".to_string(), out.oversize as u64);
         extra.insert("used_t".to_string(), u64::from(out.used_t));
+        // The whole call in `bitop/v1` primitives: the engine's word XORs
+        // and everything else `bitop_tally` saw on this thread (the
+        // system's build, the solver's matrices, scans and lifts).
+        crate::cryptanalysis::bitop_tally::snapshot()
+            .since(tally_before)
+            .put_complete(&mut extra, word_xors);
         let cost = SolverCost {
             ops: word_xors,
             // The same unit string as the `inherited-f4` adapter, so the

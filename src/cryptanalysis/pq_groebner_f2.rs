@@ -833,6 +833,16 @@ pub struct GbStats {
     /// `mono_ops - field_pair_ops` is the count the engine reported before
     /// it closed under the field equations.
     pub field_pair_ops: u64,
+    /// Every 64-bit word operation of the run, in `bitop/v1`'s `word_op`
+    /// (one monomial is one word): the terms `mono_ops` counts plus the
+    /// work it leaves out — the sorts inside a monomial multiply, the
+    /// reducer searches over the basis and their memo probes, the
+    /// criteria, the pair queues, the degree scans, the copies and the
+    /// interreduction.  One count per inner-loop iteration that touches a
+    /// word; the constants are at each site.  Not serialised, so every
+    /// report that carries `GbStats` reads as before.
+    #[serde(skip)]
+    pub bitop_word_ops: u64,
 }
 
 impl GbStats {
@@ -842,17 +852,47 @@ impl GbStats {
     }
 }
 
+/// Bit length of `x`: the comparisons of a binary search or a balanced
+/// tree step over `x` entries, and the depth factor of a sort.
+fn lg(x: usize) -> u64 {
+    (usize::BITS - x.leading_zeros()) as u64
+}
+
+/// Word operations of [`F2BoolPoly::add`] on operands of `la` and `lb`
+/// terms: one merge step (key, compare, store) per term consumed.
+pub(crate) fn add_word_ops(la: usize, lb: usize) -> u64 {
+    (la + lb) as u64
+}
+
+/// Word operations of [`F2BoolPoly::mul_mono`] on `l` terms: the OR, the
+/// span fold, the key, the write-back and the cancelling pass, one each a
+/// term (5), plus `l·lg l` comparisons of the sort.
+pub(crate) fn mul_mono_word_ops(l: usize) -> u64 {
+    if l == 0 {
+        return 0;
+    }
+    5 * l as u64 + l as u64 * lg(l)
+}
+
 fn add_counted(a: &F2BoolPoly, b: &F2BoolPoly, st: &mut GbStats) -> F2BoolPoly {
     st.mono_ops += (a.terms.len() + b.terms.len()) as u64;
+    st.bitop_word_ops += add_word_ops(a.terms.len(), b.terms.len());
     a.add(b)
 }
 
 fn mul_mono_counted(a: &F2BoolPoly, m: F2BoolMono, st: &mut GbStats) -> F2BoolPoly {
     st.mono_ops += a.terms.len() as u64;
+    st.bitop_word_ops += mul_mono_word_ops(a.terms.len());
     a.mul_mono(m)
 }
 
+/// Word operations of a probe of an `FxSet` keyed by one or two words:
+/// the hash and the key comparison.
+const SET_PROBE_WORD_OPS: u64 = 2;
+
 fn note_degree(p: &F2BoolPoly, st: &mut GbStats) {
+    // A popcount per term.
+    st.bitop_word_ops += p.terms.len() as u64;
     if let Some(d) = p.terms.iter().map(|t| t.degree()).max() {
         st.max_poly_degree = st.max_poly_degree.max(d);
     }
@@ -861,6 +901,8 @@ fn note_degree(p: &F2BoolPoly, st: &mut GbStats) {
 /// [`reduce`], counting the steps and the monomials they touch.
 fn reduce_counted(r: &F2BoolPoly, basis: &[F2BoolPoly], st: &mut GbStats) -> F2BoolPoly {
     let mut acc = r.clone();
+    // The copy: a word a term.
+    st.bitop_word_ops += r.terms.len() as u64;
     // Sums and monomial multiples of canonical polynomials are canonical,
     // so from a canonical start every `acc` lists its highest degree first.
     let canonical = r.is_canonical();
@@ -873,17 +915,21 @@ fn reduce_counted(r: &F2BoolPoly, basis: &[F2BoolPoly], st: &mut GbStats) -> F2B
         if canonical {
             if let Some(t) = acc.terms.first() {
                 st.max_poly_degree = st.max_poly_degree.max(t.degree());
+                st.bitop_word_ops += 1;
             }
         } else {
             note_degree(&acc, st);
         }
         for term_idx in 0..acc.terms.len() {
             let term = acc.terms[term_idx];
+            st.bitop_word_ops += SET_PROBE_WORD_OPS;
             if irreducible.contains(&term.mask) {
                 continue;
             }
             for b in basis {
                 let Some(blt) = b.lt() else { continue };
+                // The divisibility test: an AND and a compare on one word.
+                st.bitop_word_ops += 1;
                 if blt.divides(term) {
                     let m = term.div(blt);
                     let scaled = mul_mono_counted(b, m, st);
@@ -893,6 +939,7 @@ fn reduce_counted(r: &F2BoolPoly, basis: &[F2BoolPoly], st: &mut GbStats) -> F2B
                 }
             }
             irreducible.insert(term.mask);
+            st.bitop_word_ops += SET_PROBE_WORD_OPS;
         }
         return acc;
     }
@@ -913,6 +960,10 @@ fn queue_field_pairs(i: usize, g: &F2BoolPoly, field: &mut Vec<(usize, u32, u32)
     lm.mask
 }
 
+/// Word operations of [`queue_field_pairs`]: one bit test per variable of
+/// the 64-bit mask.
+const QUEUE_FIELD_PAIRS_WORD_OPS: u64 = 64;
+
 fn basis_monomials(basis: &[F2BoolPoly]) -> u64 {
     basis.iter().map(|p| p.terms.len() as u64).sum()
 }
@@ -931,6 +982,10 @@ struct PairQueue {
     pairs: Vec<(usize, usize, u32)>,
     by_degree: Vec<std::collections::BTreeSet<usize>>,
     queued: crate::cryptanalysis::fx_hash::FxSet<(usize, usize)>,
+    /// Word operations the queue has done: per tree insert or remove the
+    /// `lg` comparisons of its descent, per set probe
+    /// [`SET_PROBE_WORD_OPS`], per stored entry one.
+    work: u64,
 }
 
 impl PairQueue {
@@ -939,6 +994,7 @@ impl PairQueue {
             pairs: Vec::new(),
             by_degree: Vec::new(),
             queued: Default::default(),
+            work: 0,
         }
     }
 
@@ -956,6 +1012,7 @@ impl PairQueue {
         if self.by_degree.len() <= d {
             self.by_degree.resize_with(d + 1, Default::default);
         }
+        self.work += lg(self.by_degree[d].len()) + SET_PROBE_WORD_OPS + 1;
         self.by_degree[d].insert(self.pairs.len());
         self.queued.insert((i, j));
         self.pairs.push((i, j, degree));
@@ -963,25 +1020,33 @@ impl PairQueue {
 
     /// The first entry of smallest degree, removed by `swap_remove`.
     fn pop_min(&mut self) -> (usize, usize, u32) {
+        let mut scanned = 0u64;
         let set = self
             .by_degree
             .iter_mut()
-            .find(|set| !set.is_empty())
+            .find(|set| {
+                scanned += 1;
+                !set.is_empty()
+            })
             .expect("pop from an empty pair queue");
+        self.work += scanned + lg(set.len());
         let idx = set.pop_first().unwrap();
         let last = self.pairs.len() - 1;
         if idx != last {
             // the last entry moves into the hole
             let moved = self.pairs[last].2 as usize;
+            self.work += 2 * lg(self.by_degree[moved].len());
             self.by_degree[moved].remove(&last);
             self.by_degree[moved].insert(idx);
         }
         let p = self.pairs.swap_remove(idx);
         self.queued.remove(&(p.0, p.1));
+        self.work += SET_PROBE_WORD_OPS + 1;
         p
     }
 
     /// Is the pair `{a, b}` still queued?
+    /// Uncounted here: the caller counts [`SET_PROBE_WORD_OPS`] a call.
     fn contains(&self, a: usize, b: usize) -> bool {
         let (a, b) = if a < b { (a, b) } else { (b, a) };
         self.queued.contains(&(a, b))
@@ -1014,11 +1079,14 @@ pub fn groebner_basis_f2_within(
     let mut st = GbStats::default();
     let mut basis: Vec<F2BoolPoly> = initial.into_iter().filter(|p| !p.is_zero()).collect();
     for p in &basis {
+        // A popcount a term.
+        st.bitop_word_ops += p.terms.len() as u64;
         if let Some(d) = p.terms.iter().map(|t| t.degree()).max() {
             st.max_poly_degree = st.max_poly_degree.max(d);
         }
     }
     st.peak_basis_monomials = basis_monomials(&basis);
+    st.bitop_word_ops += basis.len() as u64;
     // Pair queue with **normal selection strategy**: process the pair
     // whose LCM has the smallest total degree first.  This is the
     // Bayer–Stillman recommendation and prevents intermediate-polynomial
@@ -1028,6 +1096,8 @@ pub fn groebner_basis_f2_within(
     for i in 0..basis.len() {
         for j in (i + 1)..basis.len() {
             let lcm_deg = basis[i].lt().unwrap().lcm(basis[j].lt().unwrap()).degree();
+            // The lcm (an OR) and its popcount.
+            st.bitop_word_ops += 2;
             pairs.push(i, j, lcm_deg);
         }
     }
@@ -1040,6 +1110,7 @@ pub fn groebner_basis_f2_within(
     let mut pending: Vec<u64> = Vec::new();
     for (i, p) in basis.iter().enumerate() {
         pending.push(queue_field_pairs(i, p, &mut field));
+        st.bitop_word_ops += QUEUE_FIELD_PAIRS_WORD_OPS;
     }
 
     loop {
@@ -1049,6 +1120,8 @@ pub fn groebner_basis_f2_within(
             break;
         }
         if pairs.is_empty() {
+            // The linear scan for the least degree: a compare an entry.
+            st.bitop_word_ops += field.len() as u64;
             let Some(min_idx) = field
                 .iter()
                 .enumerate()
@@ -1072,11 +1145,16 @@ pub fn groebner_basis_f2_within(
             // at the end carry most of the field pairs: 60 to 2 100 per
             // target on the descent systems, against a final basis of 4 to 9.
             let lm_i = basis[i].lt().unwrap().mask;
-            if (0..basis.len()).any(|j| {
+            let mut tested = 0u64;
+            let chain = (0..basis.len()).any(|j| {
+                // The divisibility test and the pending bit: two words.
+                tested += 2;
                 j != i
                     && basis[j].lt().is_some_and(|l| l.mask & !lm_i == 0)
                     && pending[j] >> k & 1 == 0
-            }) {
+            });
+            st.bitop_word_ops += tested;
+            if chain {
                 st.field_pairs_chain_skipped += 1;
                 continue;
             }
@@ -1084,6 +1162,8 @@ pub fn groebner_basis_f2_within(
             let before = st.mono_ops;
             let product = mul_mono_counted(&basis[i], F2BoolMono::var(k), &mut st);
             // `v_k·g = g` when every term of `g` holds `v_k`: nothing to reduce.
+            // The comparison reads up to the shorter operand.
+            st.bitop_word_ops += 1 + product.terms.len().min(basis[i].terms.len()) as u64;
             let r = if product == basis[i] {
                 F2BoolPoly::zero(n_vars)
             } else {
@@ -1103,6 +1183,10 @@ pub fn groebner_basis_f2_within(
                 pending.push(queue_field_pairs(new_idx, &r, &mut field));
                 basis.push(r);
                 st.peak_basis_monomials = st.peak_basis_monomials.max(basis_monomials(&basis));
+                // The lcms with their popcounts, the field pairs and the
+                // basis size scan.
+                st.bitop_word_ops +=
+                    2 * new_idx as u64 + QUEUE_FIELD_PAIRS_WORD_OPS + basis.len() as u64;
             }
             st.field_pair_ops += st.mono_ops - before;
             continue;
@@ -1114,6 +1198,8 @@ pub fn groebner_basis_f2_within(
         // Criterion 1: coprime leading monomials → S-poly reduces to 0.
         let li = basis[i].lt().unwrap();
         let lj = basis[j].lt().unwrap();
+        // The gcd (an AND) and its test.
+        st.bitop_word_ops += 1;
         if li.gcd(lj) == F2BoolMono::one() {
             st.pairs_coprime_skipped += 1;
             continue;
@@ -1125,14 +1211,22 @@ pub fn groebner_basis_f2_within(
         // reduced and cannot contribute.  Skipping it is exact, not an
         // approximation — the basis returned is the same one.
         let lcm_ij = li.lcm(lj);
-        let queued = |a: usize, b: usize| pairs.contains(a, b);
-        if (0..basis.len()).any(|k| {
+        let mut tested = 1u64;
+        let queued = |a: usize, b: usize, tested: &mut u64| {
+            *tested += SET_PROBE_WORD_OPS;
+            pairs.contains(a, b)
+        };
+        let chain = (0..basis.len()).any(|k| {
+            // The divisibility test, then up to two queue probes.
+            tested += 1;
             k != i
                 && k != j
                 && basis[k].lt().is_some_and(|l| l.divides(lcm_ij))
-                && !queued(i, k)
-                && !queued(j, k)
-        }) {
+                && !queued(i, k, &mut tested)
+                && !queued(j, k, &mut tested)
+        });
+        st.bitop_word_ops += tested;
+        if chain {
             st.pairs_chain_skipped += 1;
             continue;
         }
@@ -1140,6 +1234,12 @@ pub fn groebner_basis_f2_within(
         st.spolys += 1;
         let s = spoly(&basis[i], &basis[j]);
         st.mono_ops += (basis[i].terms.len() + basis[j].terms.len()) as u64 * 2;
+        // Two monomial multiples (and the lcm and quotients, 3) and their
+        // sum, which merges at most the multiples' terms.
+        st.bitop_word_ops += 3
+            + mul_mono_word_ops(basis[i].terms.len())
+            + mul_mono_word_ops(basis[j].terms.len())
+            + add_word_ops(basis[i].terms.len(), basis[j].terms.len());
         note_degree(&s, &mut st);
         let r = reduce_counted(&s, &basis, &mut st);
         if !r.is_zero() {
@@ -1155,12 +1255,15 @@ pub fn groebner_basis_f2_within(
             pending.push(queue_field_pairs(new_idx, &r, &mut field));
             basis.push(r);
             st.peak_basis_monomials = st.peak_basis_monomials.max(basis_monomials(&basis));
+            st.bitop_word_ops +=
+                2 * new_idx as u64 + QUEUE_FIELD_PAIRS_WORD_OPS + basis.len() as u64;
         }
     }
 
     // Inter-reduce to a reduced GB.
     let out = interreduce_counted(basis, n_vars, &mut st);
     st.basis_len = out.len() as u64;
+    st.bitop_word_ops += pairs.work;
     st.wall_ns = started.elapsed().as_nanos() as u64;
     (out, st)
 }
@@ -1191,6 +1294,8 @@ fn interreduce_counted(
             if !keep[j] {
                 continue;
             }
+            // Two divisibility tests.
+            st.bitop_word_ops += 2;
             let ltj = basis[j].lt().unwrap();
             if ltj.divides(lti) {
                 // Includes the equal-LT case: drop i (the earlier).
@@ -1219,12 +1324,15 @@ fn interreduce_counted(
             .filter(|(j, _)| *j != i)
             .map(|(_, q)| q.clone())
             .collect();
+        // The copy of the others: a word a term.
+        st.bitop_word_ops += others.iter().map(|q| q.terms.len() as u64).sum::<u64>();
         let r = reduce_counted(&pruned[i], &others, st);
         if !r.is_zero() {
             final_basis.push(r);
         }
     }
     final_basis.sort_by(|a, b| cmp_mono(b.lt().unwrap(), a.lt().unwrap()));
+    st.bitop_word_ops += final_basis.len() as u64 * lg(final_basis.len());
     let _ = n_vars; // present for API symmetry; representation already enforces v_i² = v_i
     final_basis
 }
@@ -1238,14 +1346,28 @@ fn interreduce_counted(
 /// Returns a `Vec` of bitmasks `v ∈ [0, 2^n)`; `(v >> k) & 1` is the
 /// value of `v_k` in the solution.
 pub fn solve_system_f2(gb: &[F2BoolPoly], n_vars: usize) -> Vec<u64> {
+    solve_system_f2_counted(gb, n_vars, &mut 0)
+}
+
+/// [`solve_system_f2`], adding its word operations to `word_ops`: per
+/// point one for the counter, and per polynomial evaluated one per term
+/// (an AND and a compare on the point word); a point stops at the first
+/// polynomial that does not vanish, and so does the count.
+pub fn solve_system_f2_counted(gb: &[F2BoolPoly], n_vars: usize, word_ops: &mut u64) -> Vec<u64> {
     assert!(n_vars <= 24, "brute-force solve capped at n_vars ≤ 24");
     let total = 1u64 << n_vars;
     let mut sols = Vec::new();
+    let mut ops = 0u64;
     for v in 0u64..total {
-        if gb.iter().all(|p| p.eval(v) == 0) {
+        ops += 1;
+        if gb.iter().all(|p| {
+            ops += p.terms.len() as u64;
+            p.eval(v) == 0
+        }) {
             sols.push(v);
         }
     }
+    *word_ops += ops;
     sols
 }
 

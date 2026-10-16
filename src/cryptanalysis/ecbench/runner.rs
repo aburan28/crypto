@@ -732,7 +732,7 @@ fn assemble(
         timing: &reaped.timing,
         hz: ctx.hz,
     });
-    Record {
+    let mut record = Record {
         schema: RECORD_SCHEMA.into(),
         record_id: String::new(),
         session_id: session_id.into(),
@@ -813,7 +813,14 @@ fn assemble(
         },
         env_class_id: capsule.env_class_id.clone(),
         binary_sha256: capsule.build.binary_sha256.clone(),
+        work: None,
+    };
+    // The record's work in bitop/v1, derived from what it carries; a record
+    // that cannot be priced (no report) carries none.
+    if report.is_some() {
+        record.work = crate::cryptanalysis::ecbench::work::price_record(&record).ok();
     }
+    record
 }
 
 /// Read a session directory's records.

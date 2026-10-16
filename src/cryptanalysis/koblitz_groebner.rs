@@ -128,6 +128,7 @@
 //!   Boolean-ring representation.
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
+use crate::cryptanalysis::bitop_tally;
 use crate::cryptanalysis::inherited_f4::{ChildSystem, InheritCost, ReducedBasis};
 use crate::cryptanalysis::matrix_f5_f2::F5Criterion;
 use crate::cryptanalysis::pq_groebner_f2::{
@@ -238,17 +239,23 @@ impl FieldSum {
     fn of(x: &[F2BoolPoly]) -> Option<Self> {
         let mut support = Vec::with_capacity(x.iter().map(|p| p.terms.len()).sum());
         support.extend(x.iter().flat_map(|p| p.terms.iter().map(|t| t.mask)));
+        // `bitop/v1`: the sort and dedup of the support, then every
+        // compare of the placing walks and one OR a term placed
+        let mut ops = tally_sort_dedup(support.len());
         sort_masks_descending(&mut support);
         support.dedup();
         let mut field = vec![0u64; support.len()];
         for (k, p) in x.iter().enumerate() {
             let mut c = 0;
             for t in &p.terms {
-                c += support.get(c..)?.iter().position(|&u| u == t.mask)?;
+                let step = support.get(c..)?.iter().position(|&u| u == t.mask)?;
+                ops += step as u64 + 2;
+                c += step;
                 field[c] |= 1 << k;
                 c += 1;
             }
         }
+        bitop_tally::word_ops(ops);
         Some(Self(support.into_iter().zip(field).collect()))
     }
 
@@ -268,6 +275,11 @@ impl FieldSum {
         use std::cmp::Ordering;
         let key = |s: u64| mono_key(F2BoolMono::from_mask(s));
         let (a, b) = (&self.0, &other.0);
+        // `bitop/v1`: one compare a merge step; a monomial in both adds its
+        // two coefficients, an `F_{2^n}` addition (at most the shorter
+        // support's length, charged as such)
+        bitop_tally::word_ops((a.len() + b.len()) as u64);
+        bitop_tally::field_ops(a.len().min(b.len()) as u64, 0, 0, 0);
         let mut out = Vec::with_capacity(a.len() + b.len());
         let (mut i, mut j) = (0, 0);
         if !a.is_empty() && !b.is_empty() {
@@ -314,6 +326,8 @@ impl FieldSum {
     /// Field squaring: `A_s² = Σ_{k ∈ A_s} z^{2k} mod f`.
     fn square(&self, st: &FieldStructure) -> Self {
         let reach = coordinate_bits(st);
+        // `bitop/v1`: one `F_{2^n}` squaring a monomial's coefficient
+        bitop_tally::field_ops(0, 0, self.0.len() as u64, 0);
         Self(
             self.0
                 .iter()
@@ -353,6 +367,11 @@ impl FieldSum {
         }
         let width = n.max(1);
         let reach = coordinate_bits(st);
+        // `bitop/v1`: one `F_{2^n}` product a support pair, plus one for the
+        // multiplication table tabulated per monomial of `other`; then one
+        // OR a pair and the collection's sort
+        bitop_tally::field_ops(0, (a.len() * b.len() + b.len()) as u64, 0, 0);
+        bitop_tally::word_ops((a.len() * b.len()) as u64 + tally_sort_dedup(a.len() * b.len()));
         let mut products = Vec::with_capacity(a.len() * b.len());
         for b in b.chunks((max_pairs / width).max(1)) {
             let mut rows = vec![0u64; b.len() * width];
@@ -384,6 +403,14 @@ impl FieldSum {
     /// The `n` coordinates: coordinate `k` holds the monomials whose
     /// coefficient has bit `k`, in support order, which is canonical.
     fn coordinates(&self, n: usize, n_vars: usize) -> Vec<F2BoolPoly> {
+        // `bitop/v1`: two passes over every coefficient bit
+        bitop_tally::word_ops(
+            2 * self
+                .0
+                .iter()
+                .map(|&(_, f)| 1 + u64::from(f.count_ones()))
+                .sum::<u64>(),
+        );
         let mut counts = vec![0usize; n];
         for &(_, f) in &self.0 {
             let mut bits = f;
@@ -407,6 +434,11 @@ impl FieldSum {
     }
 }
 
+/// `bitop/v1` word operations of sorting `k` keys and the dedup scan.
+fn tally_sort_dedup(k: usize) -> u64 {
+    bitop_tally::sort_cost(k) + k as u64
+}
+
 /// The bits of the `n` coordinates of `st`'s field.
 fn coordinate_bits(st: &FieldStructure) -> u64 {
     if st.n >= 64 {
@@ -428,9 +460,15 @@ pub fn poly_mul(p: &F2BoolPoly, q: &F2BoolPoly) -> F2BoolPoly {
         (q, p)
     };
     let mut acc = F2BoolPoly::zero(p.n_vars);
+    let mut ops = 0u64;
     for m in &q.terms {
-        acc = acc.add(&p.mul_mono(*m));
+        let product = p.mul_mono(*m);
+        // `bitop/v1`: the product by the monomial and the merge into the sum
+        ops += bitop_tally::poly::mul_mono(p.terms.len())
+            + bitop_tally::poly::add(acc.terms.len(), product.terms.len());
+        acc = acc.add(&product);
     }
+    bitop_tally::word_ops(ops);
     acc
 }
 
@@ -494,6 +532,14 @@ impl SymElement {
 
     /// Coordinate-wise sum (char 2: also the difference).
     pub fn add(&self, other: &Self) -> Self {
+        // `bitop/v1`: one merge step a term of each coordinate pair
+        bitop_tally::word_ops(
+            self.coords
+                .iter()
+                .zip(&other.coords)
+                .map(|(a, b)| bitop_tally::poly::add(a.terms.len(), b.terms.len()))
+                .sum(),
+        );
         Self {
             coords: self
                 .coords
@@ -565,6 +611,10 @@ impl SymElement {
                 let red = st.reduced[i][j];
                 for (k, coord) in coords.iter_mut().enumerate() {
                     if (red >> k) & 1 == 1 {
+                        bitop_tally::word_ops(bitop_tally::poly::add(
+                            coord.terms.len(),
+                            prod[i][j].terms.len(),
+                        ));
                         *coord = coord.add(&prod[i][j]);
                     }
                 }
@@ -599,9 +649,15 @@ impl SymElement {
                 bits &= bits - 1;
                 image ^= st.reduced[i][j];
             }
+            // `bitop/v1`: the image's XORs (one a constant bit) and each merge
+            bitop_tally::word_ops(u64::from(constant.count_ones()));
             while image != 0 {
                 let k = image.trailing_zeros() as usize;
                 image &= image - 1;
+                bitop_tally::word_ops(bitop_tally::poly::add(
+                    coords[k].terms.len(),
+                    source.terms.len(),
+                ));
                 coords[k] = coords[k].add(source);
             }
         }
@@ -626,6 +682,8 @@ impl SymElement {
             let sq = st.squares[k];
             for (t, coord) in coords.iter_mut().enumerate() {
                 if (sq >> t) & 1 == 1 {
+                    // `bitop/v1`: one merge step a term
+                    bitop_tally::word_ops(bitop_tally::poly::add(coord.terms.len(), c.terms.len()));
                     *coord = coord.add(c);
                 }
             }
@@ -890,7 +948,10 @@ impl DecompositionSystem {
                 }
             }
         }
-        // XOR-fold: a coordinate hit twice cancels.
+        // XOR-fold: a coordinate hit twice cancels.  `bitop/v1`: one
+        // `F_{2^n}` addition a basis element taken, and the bit scans
+        bitop_tally::field_ops(positions.len() as u64, 0, 0, 0);
+        bitop_tally::word_ops(self.ell as u64);
         let mut acc = F2mElement::zero(n);
         for k in positions {
             acc = acc.add(&F2mElement::from_bit_positions(&[k], n));
@@ -1031,6 +1092,14 @@ impl DecompositionSystem {
 
 /// Rename the variables of `p` by `perm[old] = new`.
 pub fn permute_poly(p: &F2BoolPoly, perm: &[u32]) -> F2BoolPoly {
+    // `bitop/v1`: one move a variable of every term, then the rebuild
+    bitop_tally::word_ops(
+        p.terms
+            .iter()
+            .map(|t| 1 + u64::from(t.mask.count_ones()))
+            .sum::<u64>()
+            + bitop_tally::poly::from_monos(p.terms.len()),
+    );
     F2BoolPoly::from_monos(
         p.terms
             .iter()
@@ -1229,6 +1298,8 @@ pub fn matrix_f4_f2_blocked(
 /// `cols.len()` are never read, as before.
 fn row_monos(row: &[u64], cols: &[u64]) -> Vec<F2BoolMono> {
     let set: u32 = row.iter().map(|w| w.count_ones()).sum();
+    // `bitop/v1`: the popcount of every word, then one extraction a set bit
+    bitop_tally::word_ops(row.len() as u64 + u64::from(set));
     let mut monos = Vec::with_capacity(set as usize);
     for (word_index, &packed) in row.iter().enumerate() {
         let mut bits = packed;
@@ -1298,6 +1369,8 @@ pub(crate) fn monomials_up_to_mask(variable_mask: u64, degree: u32) -> Vec<u64> 
             break;
         }
     }
+    // `bitop/v1`: the variable scan and one OR a multiplier generated
+    bitop_tally::word_ops(64 + out.len() as u64);
     out
 }
 
@@ -1574,8 +1647,13 @@ fn matrix_f4_f2_counted_impl(
     let n_vars_out = polys[0].n_vars;
     let t_read = std::time::Instant::now();
     let mut out = Vec::with_capacity(if decisive_only { n_vars + 1 } else { rank });
+    // `bitop/v1` read-back: one test a word scanned, one extraction a set
+    // bit, and the decisiveness test of each polynomial read, one a term
+    let mut tally = bitop_tally::Pending::default();
     if let Some((low, low_rank, low_start)) = linear_tail {
         for row in low.iter().take(low_rank) {
+            tally.word_ops +=
+                row.len() as u64 + 2 * row.iter().map(|w| u64::from(w.count_ones())).sum::<u64>();
             let mut monos = Vec::new();
             for (word_index, &packed) in row.iter().enumerate() {
                 let mut bits = packed;
@@ -1600,8 +1678,10 @@ fn matrix_f4_f2_counted_impl(
             if decisive_only {
                 let mut monos = Vec::with_capacity(3);
                 'words: for (word_index, &packed) in row.iter().enumerate() {
+                    tally.word_ops += 1;
                     let mut bits = packed;
                     while bits != 0 {
+                        tally.word_ops += 2;
                         let c = word_index * 64 + bits.trailing_zeros() as usize;
                         debug_assert!(c < cols.len());
                         monos.push(F2BoolMono::from_mask(cols[c]));
@@ -1671,14 +1751,20 @@ fn f4_solver_linear_tail_flat(
 ) -> (Vec<Vec<u64>>, usize) {
     let words = matrix.words;
     let mut pivot_row = 0usize;
+    // bit tests of the pivot searches and of the rows below each pivot,
+    // the words of each swap: charged once at the end
+    let mut aux = 0u64;
     for column in 0..low_start {
         let (word, bit) = (column / 64, 1u64 << (column % 64));
         let Some(pivot) =
             (pivot_row..matrix.rows).find(|&row| matrix.data[row * words + word] & bit != 0)
         else {
+            aux += (matrix.rows - pivot_row) as u64;
             continue;
         };
+        aux += (pivot - pivot_row + 1 + matrix.rows - pivot_row - 1) as u64;
         if pivot != pivot_row {
+            aux += words as u64;
             for index in 0..words {
                 matrix
                     .data
@@ -1704,6 +1790,8 @@ fn f4_solver_linear_tail_flat(
 
     let low_width = n_cols - low_start;
     let low_words = low_width.div_ceil(64).max(1);
+    aux += ((matrix.rows - pivot_row) * (2 * low_words + low_width)) as u64;
+    bitop_tally::word_ops(aux);
     let mut low = Vec::with_capacity(matrix.rows - pivot_row);
     for source in matrix.data[pivot_row * words..].chunks_exact(words) {
         let mut row = vec![0u64; low_words];
@@ -1907,8 +1995,13 @@ fn f4_echelon_column(
 ) -> bool {
     let (word, bit) = (column / 64, 1u64 << (column % 64));
     let Some(pivot) = (*pivot_row..matrix.len()).find(|&row| matrix[row][word] & bit != 0) else {
+        // the pivot search tested every remaining row
+        bitop_tally::word_ops((matrix.len() - *pivot_row) as u64);
         return false;
     };
+    // the rows the pivot search tested, the swap, and one bit test of
+    // every row below the pivot
+    bitop_tally::word_ops((pivot - *pivot_row + 2 + matrix.len() - *pivot_row - 1) as u64);
     matrix.swap(*pivot_row, pivot);
     let (head, tail) = matrix.split_at_mut(*pivot_row + 1);
     let pivot = &head[*pivot_row];
@@ -1934,6 +2027,9 @@ fn f4_linear_tail_from_echelon(
     let low_width = n_cols - low_start;
     let low_words = low_width.div_ceil(64).max(1);
     let mut low = Vec::with_capacity(matrix.len() - pivot_row);
+    // per remaining row: the zeroed tail row, one bit test a tail column,
+    // and the non-zero test of the result
+    bitop_tally::word_ops(((matrix.len() - pivot_row) * (2 * low_words + low_width)) as u64);
     for source in &matrix[pivot_row..] {
         let mut row = vec![0u64; low_words];
         for column in low_start..n_cols {
@@ -2119,8 +2215,13 @@ pub(crate) fn f5_rows_monos_with_mask(
 /// Pack monomial rows as bit-rows over `cols` (descending monomial order).
 pub(crate) fn pack_rows(rows_monos: &[Vec<u64>], cols: &[u64]) -> Vec<Vec<u64>> {
     let words = cols.len().div_ceil(64).max(1);
+    // `bitop/v1`: a zeroed row each, an OR and a lookup a monomial (charged
+    // here, whichever threads pack)
+    let nonzeros: u64 = rows_monos.iter().map(|r| r.len() as u64).sum();
+    bitop_tally::word_ops(rows_monos.len() as u64 * words as u64 + nonzeros);
     if std::env::var("KIC_F4_HASH_COLUMN_INDEX").as_deref() != Ok("1") {
         if let Some(index) = F4ColumnIndex::dense_table(cols) {
+            bitop_tally::word_ops(nonzeros);
             return pack_rows_with_lookup(rows_monos, words, |monomial| {
                 let mask = usize::try_from(*monomial).expect("monomial exceeds dense column range");
                 let column = index[mask];
@@ -2129,6 +2230,7 @@ pub(crate) fn pack_rows(rows_monos: &[Vec<u64>], cols: &[u64]) -> Vec<Vec<u64>> 
             });
         }
     }
+    bitop_tally::hash_probes(cols.len() as u64 + nonzeros);
     let index: crate::cryptanalysis::fx_hash::MaskMap<usize> =
         cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
     pack_rows_with_lookup(rows_monos, words, |monomial| index[monomial])
@@ -2480,7 +2582,12 @@ fn visit_macaulay_rows_counted<const COUNT_PRUNED: bool>(
     let mut full_count = 0usize;
     let mut schedules: Vec<Option<std::rc::Rc<[u64]>>> = vec![None; degree as usize + 1];
     let mut all: Vec<u64> = Vec::new();
+    // `bitop/v1`: the degree scan of every generator; per product its ORs,
+    // sort and parity scan (the criterion's test is one more); the copy of
+    // every row the visitor keeps
+    let mut tally = bitop_tally::Pending::default();
     for (i, p) in polys.iter().enumerate() {
+        tally.word_ops += p.terms.len() as u64;
         let pdeg = p
             .terms
             .iter()
@@ -2500,9 +2607,11 @@ fn visit_macaulay_rows_counted<const COUNT_PRUNED: bool>(
         });
         for &mult in multipliers.iter() {
             let pruned = criterion.is_some_and(|c| c.prunes(i, mult));
+            tally.hash_probes += u64::from(criterion.is_some());
             if pruned && !COUNT_PRUNED {
                 continue;
             }
+            tally.word_ops += 2 * p.terms.len() as u64 + bitop_tally::sort_cost(p.terms.len());
             // Multiplying by a monomial is a union of masks, so two
             // distinct terms of `p` can collide — and collide means
             // cancel, in characteristic 2.  Keep the odd multiplicities.
@@ -2527,6 +2636,7 @@ fn visit_macaulay_rows_counted<const COUNT_PRUNED: bool>(
             if !all.is_empty() {
                 full_count += 1;
                 if !pruned {
+                    tally.word_ops += all.len() as u64;
                     visit(&all);
                     selected_count += 1;
                 }
@@ -2549,6 +2659,14 @@ fn visit_macaulay_rows_counted<const COUNT_PRUNED: bool>(
 /// to "this row is a linear consequence".
 pub(crate) fn macaulay_columns(rows_monos: &[Vec<u64>]) -> Option<Vec<u64>> {
     let cap = max_f4_cols();
+    // `bitop/v1`: one hash insertion a nonzero (or, for a single row, the
+    // sort of its monomials), then the keyed sort of the columns
+    let nonzeros: usize = rows_monos.iter().map(Vec::len).sum();
+    if rows_monos.len() <= 1 {
+        bitop_tally::word_ops(2 * nonzeros as u64 + bitop_tally::sort_cost(nonzeros));
+    } else {
+        bitop_tally::hash_probes(nonzeros as u64);
+    }
     let mut cols: Vec<u64> = if rows_monos.len() <= 1 {
         // A single row has no repeated support across rows to eliminate.
         let mut cols: Vec<u64> = rows_monos.iter().flatten().copied().collect();
@@ -2572,6 +2690,7 @@ pub(crate) fn macaulay_columns(rows_monos: &[Vec<u64>]) -> Option<Vec<u64>> {
         return None;
     }
     // `mono_key` orders exactly as `cmp_mono`; the masks are distinct
+    bitop_tally::word_ops(cols.len() as u64 + bitop_tally::sort_cost(cols.len()));
     cols.sort_unstable_by_key(|&m| std::cmp::Reverse(mono_key(F2BoolMono::from_mask(m))));
     Some(cols)
 }
@@ -2983,7 +3102,16 @@ fn pack_rows_with_layout(
     let words = layout.columns.len().div_ceil(64);
     let mut seen = verify_exact_support.then(|| vec![false; layout.columns.len()]);
     let mut matrix = Vec::with_capacity(rows_monos.len());
+    // `bitop/v1`: a zeroed row, then per monomial its column lookup, the OR
+    // and (verifying) the mark; the support check reads the marks a word
+    // (eight) at a time
+    let mut tally = bitop_tally::Pending::default();
+    let hashed = layout.index.hashed();
+    let verify = u64::from(verify_exact_support);
+    tally.word_ops += verify * 2 * (layout.columns.len() as u64).div_ceil(8);
     for monos in rows_monos {
+        tally.word_ops += words as u64 + (1 + verify) * monos.len() as u64;
+        tally.lookup(hashed, monos.len() as u64);
         let mut row = vec![0u64; words];
         for monomial in monos {
             let column = layout.index.get(monomial)?;
@@ -3018,7 +3146,14 @@ fn pack_rows_flat_with_layout(
     let words = layout.columns.len().div_ceil(64);
     let mut seen = verify_exact_support.then(|| vec![false; layout.columns.len()]);
     let mut data = vec![0u64; rows_monos.len() * words];
+    // as in `pack_rows_with_layout`
+    let mut tally = bitop_tally::Pending::default();
+    let hashed = layout.index.hashed();
+    let verify = u64::from(verify_exact_support);
+    tally.word_ops += verify * 2 * (layout.columns.len() as u64).div_ceil(8);
     for (row_index, monos) in rows_monos.iter().enumerate() {
+        tally.word_ops += words as u64 + (1 + verify) * monos.len() as u64;
+        tally.lookup(hashed, monos.len() as u64);
         let row = &mut data[row_index * words..(row_index + 1) * words];
         for monomial in monos {
             let column = layout.index.get(monomial)?;
@@ -3078,6 +3213,13 @@ fn pack_polynomials_flat_fused(
     let row_cap = max_f4_rows();
     let mut data = Vec::with_capacity(estimated_rows.min(row_cap) * words);
     let mut rows = 0usize;
+    // `bitop/v1`: the degree scan of every generator, then per product
+    // its ORs, sort and parity scan, and per surviving row a zeroed row,
+    // one lookup, OR and mark a monomial; the marks are read eight a word
+    let mut tally = bitop_tally::Pending::default();
+    let hashed = layout.index.hashed();
+    tally.word_ops += polys.iter().map(|p| p.terms.len() as u64).sum::<u64>()
+        + 2 * (layout.columns.len() as u64).div_ceil(8);
     for (polynomial, gap) in polys.iter().zip(gaps) {
         let Some(gap) = gap else {
             continue;
@@ -3085,6 +3227,8 @@ fn pack_polynomials_flat_fused(
         let multipliers = schedules[gap].as_ref().unwrap();
         let mut product = Vec::with_capacity(polynomial.terms.len());
         for &multiplier in multipliers.iter() {
+            tally.word_ops +=
+                2 * polynomial.terms.len() as u64 + bitop_tally::sort_cost(polynomial.terms.len());
             product.clear();
             product.extend(polynomial.terms.iter().map(|term| term.mask | multiplier));
             product.sort_unstable();
@@ -3109,6 +3253,8 @@ fn pack_polynomials_flat_fused(
             }
             let start = data.len();
             data.resize(start + words, 0);
+            tally.word_ops += (words + 2 * write) as u64;
+            tally.lookup(hashed, write as u64);
             let row = &mut data[start..start + words];
             for monomial in &product[..write] {
                 let column = layout.index.get(monomial)?;
@@ -3166,6 +3312,13 @@ fn pack_polynomials_nested_fused<const DIRECT: bool>(
         .max()
         .unwrap_or(0);
     let mut product = Vec::with_capacity(if DIRECT { 0 } else { max_terms });
+    // as in `pack_polynomials_flat_fused`; the direct variant instead
+    // XORs every product term in (an OR, a lookup and an XOR a term),
+    // tests the row for zero and marks its bits
+    let mut tally = bitop_tally::Pending::default();
+    let hashed = layout.index.hashed();
+    tally.word_ops += polys.iter().map(|p| 1 + p.terms.len() as u64).sum::<u64>()
+        + 2 * (layout.columns.len() as u64).div_ceil(8);
     for (polynomial, gap) in polys.iter().zip(gaps) {
         let Some(gap) = gap else {
             continue;
@@ -3173,6 +3326,8 @@ fn pack_polynomials_nested_fused<const DIRECT: bool>(
         let multipliers = schedules[gap].as_ref().unwrap();
         for &multiplier in multipliers.iter() {
             if DIRECT {
+                tally.word_ops += 2 * (words + polynomial.terms.len()) as u64;
+                tally.lookup(hashed, polynomial.terms.len() as u64);
                 let mut row = vec![0u64; words];
                 for term in &polynomial.terms {
                     let monomial = term.mask | multiplier;
@@ -3185,6 +3340,7 @@ fn pack_polynomials_nested_fused<const DIRECT: bool>(
                 if matrix.len() == row_cap {
                     return None;
                 }
+                tally.word_ops += row.iter().map(|w| u64::from(w.count_ones())).sum::<u64>();
                 for (word_index, &word) in row.iter().enumerate() {
                     let mut bits = word;
                     while bits != 0 {
@@ -3195,6 +3351,8 @@ fn pack_polynomials_nested_fused<const DIRECT: bool>(
                 matrix.push(row);
                 continue;
             }
+            tally.word_ops +=
+                2 * polynomial.terms.len() as u64 + bitop_tally::sort_cost(polynomial.terms.len());
             product.clear();
             product.extend(polynomial.terms.iter().map(|term| term.mask | multiplier));
             product.sort_unstable();
@@ -3217,6 +3375,8 @@ fn pack_polynomials_nested_fused<const DIRECT: bool>(
             if matrix.len() == row_cap {
                 return None;
             }
+            tally.word_ops += (words + 2 * write) as u64;
+            tally.lookup(hashed, write as u64);
             let mut row = vec![0u64; words];
             for monomial in &product[..write] {
                 let column = layout.index.get(monomial)?;
@@ -3504,6 +3664,7 @@ struct F4ColumnLayout {
 impl F4ColumnLayout {
     fn new(columns: Vec<u64>) -> Self {
         let index = if std::env::var("KIC_F4_STD_COLUMN_HASH").as_deref() == Ok("1") {
+            bitop_tally::hash_probes(columns.len() as u64);
             F4ColumnIndex::Standard(
                 columns
                     .iter()
@@ -3518,6 +3679,7 @@ impl F4ColumnLayout {
         {
             dense
         } else {
+            bitop_tally::hash_probes(columns.len() as u64);
             let mut index = FastColumnMap::with_capacity_and_hasher(
                 columns.len(),
                 std::hash::BuildHasherDefault::default(),
@@ -3568,11 +3730,19 @@ impl F4ColumnIndex {
         if bytes > hash_entry_bytes {
             return None;
         }
+        // the scan for the largest mask, the cleared table (four `u16`
+        // slots a word) and one write a column
+        bitop_tally::word_ops(2 * columns.len() as u64 + (slots as u64).div_ceil(4));
         let mut index = vec![u16::MAX; slots];
         for (column, &monomial) in columns.iter().enumerate() {
             index[monomial as usize] = column as u16;
         }
         Some(index)
+    }
+
+    /// Whether a lookup is a hash probe (else one word operation).
+    fn hashed(&self) -> bool {
+        !matches!(self, Self::Fast(F4FastColumnIndex::Dense(_)))
     }
 
     fn get(&self, monomial: &u64) -> Option<usize> {
@@ -3754,13 +3924,26 @@ fn echelon_f2_suffix_counted(
 ) -> usize {
     let words = n_cols.div_ceil(64);
     let mut pivot_row = 0usize;
+    // `bitop/v1` word operations besides the XORs: every bit test of the
+    // pivot searches and of the rows each pivot is cleared from, and the
+    // swap; charged to this thread's tally once
+    let mut aux = 0u64;
     for c in 0..n_cols {
         let (w, bit) = (c / 64, 1u64 << (c % 64));
         let piv = (pivot_row..matrix.len()).find(|&r| matrix[r][w] & bit != 0);
         let piv = match piv {
             Some(p) => p,
-            None => continue,
+            None => {
+                aux += (matrix.len() - pivot_row) as u64;
+                continue;
+            }
         };
+        aux += (piv - pivot_row + 2) as u64
+            + if reduce_above {
+                matrix.len() - 1
+            } else {
+                matrix.len() - pivot_row - 1
+            } as u64;
         matrix.swap(pivot_row, piv);
         // Earlier columns of this pivot row are zero: previous pivots
         // eliminated them, and skipped columns were zero in all remaining
@@ -3782,6 +3965,7 @@ fn echelon_f2_suffix_counted(
             break;
         }
     }
+    bitop_tally::word_ops(aux);
     pivot_row
 }
 
@@ -3909,6 +4093,10 @@ fn echelon_f2_m4ri_arena_counted_with(
 
     let mut pivot_row = 0usize;
     let mut column = 0usize;
+    // `bitop/v1` word operations besides the XORs: the bit tests of the
+    // pivot searches, of the earlier block rows and of each target row's
+    // pattern, and the copy of each pivot into the block
+    let mut aux = 0u64;
     while pivot_row < rows && column < n_cols {
         let block_start = pivot_row;
         let mut block_rows = 0usize;
@@ -3917,6 +4105,7 @@ fn echelon_f2_m4ri_arena_counted_with(
             let (word, bit) = (column / 64, 1u64 << (column % 64));
             let mut found = None;
             for row in next_pivot..rows {
+                aux += block_rows as u64 + 1;
                 for (index, &pivot_column) in pivot_columns[..block_rows].iter().enumerate() {
                     let (pivot_word, pivot_bit) = (pivot_column / 64, 1u64 << (pivot_column % 64));
                     if matrix[row][pivot_word] & pivot_bit != 0 {
@@ -3935,6 +4124,7 @@ fn echelon_f2_m4ri_arena_counted_with(
                 }
             }
             if let Some(found) = found {
+                aux += (words + block_rows) as u64;
                 matrix.swap(next_pivot, found);
                 block_pivots[block_rows].copy_from_slice(&matrix[next_pivot]);
                 let (previous_pivots, current_pivots) = block_pivots.split_at_mut(block_rows);
@@ -4012,6 +4202,7 @@ fn echelon_f2_m4ri_arena_counted_with(
         let (head, tail) = matrix.split_at_mut(block_start);
         let above = &mut head[first_target.min(block_start)..];
         let below = &mut tail[block_rows..];
+        aux += ((above.len() + below.len()) * (block_rows + 1)) as u64;
         if (above.len() + below.len()) * suffix_words >= parallel_words {
             use rayon::prelude::*;
             *word_ops += above
@@ -4028,6 +4219,7 @@ fn echelon_f2_m4ri_arena_counted_with(
         }
         pivot_row += block_rows;
     }
+    bitop_tally::word_ops(aux);
     pivot_row
 }
 
@@ -4043,6 +4235,8 @@ fn echelon_f2_m4ri_allocating_counted(
     let rows = matrix.len();
     let mut pivot_row = 0usize;
     let mut column = 0usize;
+    // as in `echelon_f2_m4ri_arena_counted_with`
+    let mut aux = 0u64;
     while pivot_row < rows && column < n_cols {
         let block_start = pivot_row;
         let mut pivot_columns = Vec::with_capacity(block_width);
@@ -4052,6 +4246,7 @@ fn echelon_f2_m4ri_allocating_counted(
             let (word, bit) = (column / 64, 1u64 << (column % 64));
             let mut found = None;
             for row in next_pivot..rows {
+                aux += pivot_columns.len() as u64 + 1;
                 for (index, &pivot_column) in pivot_columns.iter().enumerate() {
                     let (pivot_word, pivot_bit) = (pivot_column / 64, 1u64 << (pivot_column % 64));
                     if matrix[row][pivot_word] & pivot_bit != 0 {
@@ -4070,6 +4265,7 @@ fn echelon_f2_m4ri_allocating_counted(
                 }
             }
             if let Some(found) = found {
+                aux += (words + pivot_columns.len()) as u64;
                 matrix.swap(next_pivot, found);
                 let pivot = matrix[next_pivot].clone();
                 for previous in block_start..next_pivot {
@@ -4125,6 +4321,7 @@ fn echelon_f2_m4ri_allocating_counted(
             if (block_start..block_start + block_rows).contains(&row) {
                 continue;
             }
+            aux += block_rows as u64 + 1;
             let mut pattern = 0usize;
             for (index, &pivot_column) in pivot_columns.iter().enumerate() {
                 if matrix[row][pivot_column / 64] & (1u64 << (pivot_column % 64)) != 0 {
@@ -4144,6 +4341,7 @@ fn echelon_f2_m4ri_allocating_counted(
         }
         pivot_row += block_rows;
     }
+    bitop_tally::word_ops(aux);
     pivot_row
 }
 
@@ -4396,6 +4594,8 @@ impl SolvingProfile {
 
 /// Variables occurring in `polys`, as a bitmask.
 pub(crate) fn occurring_vars(polys: &[F2BoolPoly]) -> u64 {
+    // `bitop/v1`: one OR a term
+    bitop_tally::word_ops(polys.iter().map(|p| p.terms.len() as u64).sum());
     polys
         .iter()
         .flat_map(|p| p.terms.iter())
@@ -4404,6 +4604,8 @@ pub(crate) fn occurring_vars(polys: &[F2BoolPoly]) -> u64 {
 
 /// Total degree of a boolean system.
 pub fn system_degree(polys: &[F2BoolPoly]) -> u32 {
+    // `bitop/v1`: one popcount-and-compare a term
+    bitop_tally::word_ops(polys.iter().map(|p| p.terms.len() as u64).sum());
     // Called at every node of the solver, and `count_ones` on the baseline
     // x86-64 target is a dozen-instruction bit trick; where the CPU has
     // `popcnt`, run the same scan compiled with it.  The loop is written
@@ -4727,11 +4929,37 @@ pub fn solving_degree_from(
 /// whose inputs were checked canonical (`canonical`), which then skips the
 /// per-call order check.
 fn substitute_in_solve(p: &F2BoolPoly, var: u32, value: bool, canonical: bool) -> F2BoolPoly {
+    // `bitop/v1`: a test and a merge step a term (and, unchecked, the
+    // order check, one compare a term)
+    bitop_tally::word_ops(
+        bitop_tally::poly::substitute(p.terms.len()) + u64::from(!canonical) * p.terms.len() as u64,
+    );
     if canonical {
         p.substitute_canonical(var, value)
     } else {
         p.substitute(var, value)
     }
+}
+
+/// Charge the scans the splitting tree makes over a system at a node
+/// (`bitop/v1`): one word operation a polynomial for each of `per_poly`
+/// whole-system tests (zero, constant, shape) and one a term for each of
+/// `per_term` term scans.
+fn charge_system_scans(system: &[F2BoolPoly], per_poly: u64, per_term: u64) {
+    let terms: u64 = system.iter().map(|p| p.terms.len() as u64).sum();
+    bitop_tally::word_ops(per_poly * system.len() as u64 + per_term * terms);
+}
+
+/// `equations` all vanish at `point`, charging (`bitop/v1`) one
+/// AND-and-compare a term evaluated.
+fn vanish_at(equations: &[F2BoolPoly], point: u64) -> bool {
+    let mut terms = 0u64;
+    let ok = equations.iter().all(|e| {
+        terms += e.terms.len() as u64;
+        e.eval(point) == 0
+    });
+    bitop_tally::word_ops(terms);
+    ok
 }
 
 /// A basis element that has collapsed to `v_i` or `v_i + 1` forces its
@@ -4996,6 +5224,22 @@ fn choose_split(
     assignment: &[Option<bool>],
     rule: SplitRule,
 ) -> Option<usize> {
+    // `bitop/v1`: the scans of the assignment (eight entries a word); the
+    // scoring rules also read every variable of every term
+    bitop_tally::word_ops(2 * (assignment.len() as u64).div_ceil(8));
+    if !matches!(
+        rule,
+        SplitRule::LowestFree | SplitRule::Auto | SplitRule::HighestFree
+    ) {
+        bitop_tally::word_ops(
+            system
+                .iter()
+                .flat_map(|p| p.terms.iter())
+                .map(|t| 1 + u64::from(t.mask.count_ones()))
+                .sum::<u64>()
+                + assignment.len() as u64,
+        );
+    }
     let lowest = assignment.iter().position(|a| a.is_none())?;
     // `Auto` is resolved by `SolveOptions::resolve` before the solve; an
     // unresolved one behaves as the historical rule.
@@ -6174,6 +6418,11 @@ fn eliminate_linear_generators(system: &[F2BoolPoly], word_ops: &mut u64) -> Lin
                 }
                 terms.extend_from_slice(&expansion);
             }
+            // `bitop/v1`: the pivot test of every term and the canonical
+            // rebuild (the expansion's writes are in the stage unit)
+            bitop_tally::word_ops(
+                p.terms.len() as u64 + bitop_tally::poly::from_monos(terms.len()),
+            );
             let q = F2BoolPoly::from_monos(
                 terms.into_iter().map(F2BoolMono::from_mask).collect(),
                 n_vars,
@@ -6354,11 +6603,13 @@ fn solve_rec(
     if *stop || out.len() >= opts.max_solutions {
         return;
     }
+    // `bitop/v1`: the scan of the assignment (eight entries a word)
+    bitop_tally::word_ops((assignment.len() as u64).div_ceil(8));
     // A fully assigned branch needs no further Macaulay matrix. Verify the
     // complete point directly against the untouched equations.
     if assignment.iter().all(Option::is_some) {
         let point = point_with_definitions(&assignment, &defined);
-        if original.iter().all(|equation| equation.eval(point) == 0) {
+        if vanish_at(original, point) {
             out.push(point);
             if accept(point) {
                 *stop = true;
@@ -6379,6 +6630,7 @@ fn solve_rec(
     // here and there changes the assignment or the definitions.
     let mut oracle_decided = false;
     if parent.is_some() && early_oracle_enabled() {
+        bitop_tally::word_ops(defined.len() as u64);
         let defined_mask = defined
             .iter()
             .fold(0u64, |mask, &(v, _, _)| mask | (1u64 << v));
@@ -6423,6 +6675,7 @@ fn solve_rec(
         if std::mem::take(&mut oracle_decided) {
             // Already asked above, on this same assignment.
         } else {
+            bitop_tally::word_ops(defined.len() as u64);
             let defined_mask = defined
                 .iter()
                 .fold(0u64, |mask, &(v, _, _)| mask | (1u64 << v));
@@ -6439,6 +6692,9 @@ fn solve_rec(
                 }
             }
         }
+        // the zero and constant scans, and the linear-generator test
+        // `eliminate_linear_generators` makes of every term
+        charge_system_scans(&system, 2, u64::from(policy.linear_elimination));
         drop_zeros(&mut system);
         if system.iter().any(is_constant_one) {
             stats.infeasible_branches += 1;
@@ -6488,7 +6744,7 @@ fn solve_rec(
                     bases = InheritedBases::default();
                     if assignment.iter().all(Option::is_some) {
                         let point = point_with_definitions(&assignment, &defined);
-                        if original.iter().all(|equation| equation.eval(point) == 0) {
+                        if vanish_at(original, point) {
                             out.push(point);
                             if accept(point) {
                                 *stop = true;
@@ -6522,6 +6778,8 @@ fn solve_rec(
             Some(r) => r,
             None => break, // no reduction available; split instead
         };
+        // the constant and forced-variable scans of the reduced rows
+        charge_system_scans(&reduced, 1, 1);
         if reduced.iter().any(is_constant_one) {
             stats.infeasible_branches += 1;
             return;
@@ -6570,6 +6828,7 @@ fn solve_rec(
                 stats.exhausted = true;
                 return;
             }
+            bitop_tally::word_ops(defined.len() as u64);
             let defined_mask = defined
                 .iter()
                 .fold(0u64, |mask, &(v, _, _)| mask | (1u64 << v));
@@ -6634,7 +6893,7 @@ fn solve_rec(
         None => {
             let pt = point_with_definitions(&assignment, &defined);
             // Verify against the untouched system before accepting.
-            if original.iter().all(|e| e.eval(pt) == 0) {
+            if vanish_at(original, pt) {
                 out.push(pt);
                 if accept(pt) {
                     *stop = true;
@@ -6644,6 +6903,7 @@ fn solve_rec(
         Some(free) => {
             stats.splits += 1;
             for value in [false, true] {
+                bitop_tally::word_ops((assignment.len() as u64).div_ceil(8));
                 let mut branch = assignment.clone();
                 branch[free] = Some(value);
                 let specialised: Vec<F2BoolPoly> = system

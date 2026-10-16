@@ -602,6 +602,13 @@ pub struct PhaseRecord {
     pub wall_ns: Option<u64>,
     #[serde(default)]
     pub native: BTreeMap<String, u64>,
+    /// Work counted for `bitop/v1` alone (`ecbench::work`): counters added
+    /// after sessions were committed, kept apart from `native` so a replay
+    /// of a committed record still compares exactly what it recorded.
+    /// Written only when nonempty; the audit compares it only when the
+    /// committed record carries it.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub work_native: BTreeMap<String, u64>,
 }
 
 /// The factor base an index-calculus run used, identified by its points.
@@ -804,6 +811,7 @@ fn ops_phase(name: &str, ops: GroupOps) -> PhaseRecord {
         gae: ops.gae(),
         wall_ns: None,
         native: BTreeMap::new(),
+        work_native: BTreeMap::new(),
     }
 }
 
@@ -1778,6 +1786,7 @@ fn phase_of(name: &str, p: &PhaseCost) -> PhaseRecord {
         gae: p.gae,
         wall_ns: Some(p.wall_ns),
         native: p.native.clone(),
+        work_native: p.work_native.clone(),
     }
 }
 
@@ -2106,67 +2115,48 @@ fn solve_ic_binary(
         },
     };
     let ms = spec.oracle_params.u64_or("m", 2)? as u32;
-    let mut subtract = SubtractOracle;
-    let mut mitm = MitmOracle::new(ms);
-    let mut frob = FrobeniusMitmOracle::new(ms, inst);
-    let mut frob_counted = FrobeniusMitmOracle::new_counted(ms, inst);
-    let mut mitm_fiber = FiberMitmOracle::new(ms);
-    let mut frob_fiber = FiberFrobeniusMitmOracle::new(ms, inst);
-    let mut rootfind_mitm = RootfindMitmOracle::new(ms);
-    let mut rootfind_pairs = RootfindPairsOracle::new(ms);
-    let mut descent_fiber = match or_name.as_str() {
-        "descent-algebraic-fiber" => {
-            let name = spec
-                .solver
-                .as_deref()
-                .ok_or("descent-algebraic-fiber needs `solver`")?;
-            let budget = (spec.solver_budget_seconds > 0)
-                .then(|| std::time::Duration::from_secs(spec.solver_budget_seconds));
-            Some(FiberDescentOracle::new(
-                ms,
-                inst,
-                solver_by_name(name)?,
-                spec.solver_params.clone(),
-                budget,
-            ))
-        }
-        _ => None,
+    let budget = (spec.solver_budget_seconds > 0)
+        .then(|| std::time::Duration::from_secs(spec.solver_budget_seconds));
+    let solver_named = || -> Result<_, String> {
+        let name = spec
+            .solver
+            .as_deref()
+            .ok_or_else(|| format!("{or_name} needs `solver`"))?;
+        solver_by_name(name)
     };
-    let mut plugin_oracle = binary_plugins().and_then(|p| (p.oracle)(or_name.as_str(), ms, inst));
-    let mut algebraic = match or_name.as_str() {
-        "descent-algebraic" => {
-            let name = spec
-                .solver
-                .as_deref()
-                .ok_or("descent-algebraic needs `solver`")?;
-            let budget = (spec.solver_budget_seconds > 0)
-                .then(|| std::time::Duration::from_secs(spec.solver_budget_seconds));
-            Some(DescentAlgebraicOracle::new(
-                ms,
-                inst,
-                solver_by_name(name)?,
-                spec.solver_params.clone(),
-                budget,
-            ))
-        }
-        _ => None,
-    };
-    let oracle: &mut dyn DecompositionOracle<BinaryGroup> = match or_name.as_str() {
-        "subtract" => &mut subtract,
-        "mitm" => &mut mitm,
-        "mitm-frobenius" => &mut frob,
-        "mitm-frobenius-counted" => &mut frob_counted,
-        "mitm-fiber" => &mut mitm_fiber,
-        "mitm-frobenius-fiber" => &mut frob_fiber,
-        "rootfind-mitm" => &mut rootfind_mitm,
-        "rootfind-pairs" => &mut rootfind_pairs,
-        "descent-algebraic" => algebraic.as_mut().expect("built above"),
-        "descent-algebraic-fiber" => descent_fiber.as_mut().expect("built above"),
-        other => match plugin_oracle.as_deref_mut() {
+    // Build only the oracle the method names: every constructor runs inside
+    // the measured solve, and building the others (each Frobenius variant
+    // with its own canonicalisation tables) was work no counter saw and the
+    // instruction audit charged to set-up.
+    let mut oracle_box: Box<dyn DecompositionOracle<BinaryGroup> + '_> = match or_name.as_str() {
+        "subtract" => Box::new(SubtractOracle),
+        "mitm" => Box::new(MitmOracle::new(ms)),
+        "mitm-frobenius" => Box::new(FrobeniusMitmOracle::new(ms, inst)),
+        "mitm-frobenius-counted" => Box::new(FrobeniusMitmOracle::new_counted(ms, inst)),
+        "mitm-fiber" => Box::new(FiberMitmOracle::new(ms)),
+        "mitm-frobenius-fiber" => Box::new(FiberFrobeniusMitmOracle::new(ms, inst)),
+        "rootfind-mitm" => Box::new(RootfindMitmOracle::new(ms)),
+        "rootfind-pairs" => Box::new(RootfindPairsOracle::new(ms)),
+        "descent-algebraic" => Box::new(DescentAlgebraicOracle::new(
+            ms,
+            inst,
+            solver_named()?,
+            spec.solver_params.clone(),
+            budget,
+        )),
+        "descent-algebraic-fiber" => Box::new(FiberDescentOracle::new(
+            ms,
+            inst,
+            solver_named()?,
+            spec.solver_params.clone(),
+            budget,
+        )),
+        other => match binary_plugins().and_then(|p| (p.oracle)(or_name.as_str(), ms, inst)) {
             Some(o) => o,
             None => return Err(format!("oracle `{other}` does not run on a binary curve")),
         },
     };
+    let oracle: &mut dyn DecompositionOracle<BinaryGroup> = oracle_box.as_mut();
     let ctx = InstanceCtx {
         group: &g,
         generator: inst.generator,

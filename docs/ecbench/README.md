@@ -321,6 +321,35 @@ L3 needs a lab host, which `isolab` prepares (§9).
 
 ## 7. The unit, and what each method is charged
 
+> **Every record is also priced in `bitop/v1`** (`docs/units/BITOPS.md`):
+> two-input gates per primitive, under frozen formulas, with nothing left
+> unpriced or converted by a host. It is the unit in which methods,
+> repositories and curve families compare.
+>
+> - `ecbench work <sessions…>` prices committed records from their own counts.
+>   `--summary` gives one line per method configuration.
+> - New records carry a `work` block. It holds:
+>   - the total and per-phase gates, and the primitive counts;
+>   - the ratio to the floor in additions;
+>   - the reusable/per-target split;
+>   - `complete`.
+> - `ecbench bound fit --unit bitop/v1` fits an arm in gates, and also in
+>   additions: gates over one addition's gates at each size, where generic
+>   methods have exponent ½. An incomplete pricing is inadmissible in this
+>   unit.
+> - `ecbench audit-ir --spec S --seq N… --out D` replays executions under
+>   Callgrind and sets instructions beside counted gates. An arm far above
+>   same-curve rho's ratio is doing work its counters miss.
+> - `ecbench amortize` compares an arm with batch rho (Kuhn–Struik) per curve
+>   and reports the window of target counts in which the arm costs less.
+>
+> Counters added for `bitop/v1` live in `PhaseRecord.work_native` and in the
+> solver block's `bitop_*` keys. A replay of a committed record ignores
+> both, so committed sessions replay exactly.
+> `research/bitop_unit_20261016/` is the first study in the unit.
+> The group-addition unit below is unchanged, and every committed figure in it
+> stands as recorded.
+
 ```
 S = total group-addition equivalents / √r
 ```

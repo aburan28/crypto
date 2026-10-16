@@ -155,6 +155,9 @@ pub fn child_main(input: &str) -> ChildOutput {
                 m.method_id, job.expected_method_id
             ));
         }
+        // Harness tables a solve may consult by name are loaded outside
+        // the measured interval.
+        crate::cryptanalysis::curve_id::warm();
         let counters = HwCounters::open();
         let before = schedstat();
         // Profiling is opt-in and the environment lookup is outside both
@@ -335,6 +338,12 @@ pub struct Record {
     pub isolation: IsolationRecord,
     pub env_class_id: String,
     pub binary_sha256: Option<String>,
+    /// The run's work in `bitop/v1` (`ecbench::work`), derived from the
+    /// record's own counts.  Written only by runners that price it, so a
+    /// record from before the block existed is byte for byte what it was and
+    /// its seal still checks; `ecbench work` prices those from their counts.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work: Option<crate::cryptanalysis::ecbench::work::WorkBlock>,
 }
 
 impl Record {

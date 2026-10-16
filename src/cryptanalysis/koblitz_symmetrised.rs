@@ -108,12 +108,14 @@ fn from_bits(v: u64, n: u32) -> F2mElement {
 
 /// `u = 1/(x + 1)`; `None` at `x = 1`, where `u = ∞`.
 pub fn u_of_x(x: &F2mElement, kc: &KoblitzCurve) -> Option<F2mElement> {
+    crate::cryptanalysis::bitop_tally::field_ops(1, 0, 0, 1);
     let d = x.add(&F2mElement::one(kc.n));
     d.flt_inverse(&kc.curve.irreducible)
 }
 
 /// `x = 1/u + 1`; `None` at `u = 0`, where `x = ∞`.
 pub fn x_of_u(u: &F2mElement, kc: &KoblitzCurve) -> Option<F2mElement> {
+    crate::cryptanalysis::bitop_tally::field_ops(1, 0, 0, 1);
     Some(
         u.flt_inverse(&kc.curve.irreducible)?
             .add(&F2mElement::one(kc.n)),
@@ -122,6 +124,7 @@ pub fn x_of_u(u: &F2mElement, kc: &KoblitzCurve) -> Option<F2mElement> {
 
 /// `w = u² + u`, the Artin–Schreier invariant of `u ↦ u + 1`.
 pub fn artin_schreier(u: &F2mElement, kc: &KoblitzCurve) -> F2mElement {
+    crate::cryptanalysis::bitop_tally::field_ops(1, 0, 1, 0);
     u.square(&kc.curve.irreducible).add(u)
 }
 
@@ -559,8 +562,10 @@ impl SymmetrisedSystem {
         n: u32,
     ) -> F2mElement {
         let mut acc = F2mElement::zero(n);
+        crate::cryptanalysis::bitop_tally::word_ops(self.ell_w as u64);
         for t in 0..self.ell_w {
             if (root >> (i * self.ell_w + t)) & 1 == 1 {
+                crate::cryptanalysis::bitop_tally::field_ops(1, 0, 0, 0);
                 acc = acc.add(&fb.v_basis[t + 1]);
             }
         }
@@ -740,6 +745,8 @@ pub fn lift_symmetrised_root_accepting(
     let m = sys.m;
     let u0: Vec<F2mElement> = (0..m).map(|i| sys.summand_u0(fb, root, i, kc.n)).collect();
     let parity = sys.parity(root);
+    // an affine addition, `I + 2M + S + 9A` (docs/units/BITOPS.md)
+    crate::cryptanalysis::bitop_tally::field_ops(9, 2, 1, 1);
     let shifted = kc.add(target, &fb.two_torsion);
     for mask in 0..(1u32 << m) {
         if (mask.count_ones() % 2 == 1) != parity {
@@ -750,6 +757,7 @@ pub fn lift_symmetrised_root_accepting(
         for i in 0..m {
             let mut u = u0[i].clone();
             if (mask >> i) & 1 == 1 {
+                crate::cryptanalysis::bitop_tally::field_ops(1, 0, 0, 0);
                 u = u.add(&F2mElement::one(kc.n));
             }
             match x_of_u(&u, kc) {
@@ -798,16 +806,29 @@ fn lift_signs_all(
         out: &mut Vec<Vec<usize>>,
     ) {
         if depth == xs.len() {
+            // `bitop/v1`: comparing two points, an addition a coordinate
+            crate::cryptanalysis::bitop_tally::field_ops(2, 0, 0, 0);
             if acc == target {
                 out.push(chosen.clone());
             }
             return;
         }
+        // `bitop/v1` for `points_with_x`, as in `koblitz_index_calculus`'s
+        // `lift_candidate`
+        let n = u64::from(kc.n);
+        crate::cryptanalysis::bitop_tally::field_ops(
+            2 + n.saturating_sub(1) / 2 + 1 + 1,
+            3,
+            1 + n.saturating_sub(1),
+            1,
+        );
         for p in points_with_x(&kc.curve, &xs[depth]) {
+            crate::cryptanalysis::bitop_tally::hash_probes(1);
             let Some(&idx) = index_of.get(&point_key(&p)) else {
                 continue;
             };
             chosen.push(idx);
+            crate::cryptanalysis::bitop_tally::field_ops(9, 2, 1, 1);
             let next = kc.add(acc, &points[idx]);
             walk(
                 kc,

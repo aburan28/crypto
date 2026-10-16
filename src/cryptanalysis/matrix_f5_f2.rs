@@ -119,6 +119,10 @@ fn poly_degree(p: &F2BoolPoly) -> u32 {
 /// cancelled — the same row construction as the F4 builder, kept here so
 /// the criterion's rows and the matrix's rows cannot disagree.
 fn product_monos(p: &F2BoolPoly, s: u64) -> Vec<u64> {
+    // `bitop/v1`: an OR a term, the sort, the parity scan
+    crate::cryptanalysis::bitop_tally::word_ops(
+        2 * p.terms.len() as u64 + crate::cryptanalysis::bitop_tally::sort_cost(p.terms.len()),
+    );
     let mut all: Vec<u64> = p.terms.iter().map(|t| t.mask | s).collect();
     all.sort_unstable();
     let mut out = Vec::with_capacity(all.len());
@@ -169,6 +173,9 @@ fn leading_column(row: &[u64]) -> Option<usize> {
 
 impl PrefixEchelon {
     fn new(columns: Vec<u64>) -> Self {
+        // `bitop/v1`: the hashed column index and the cleared pivot index
+        crate::cryptanalysis::bitop_tally::hash_probes(columns.len() as u64);
+        crate::cryptanalysis::bitop_tally::word_ops(columns.len() as u64);
         let index = columns.iter().enumerate().map(|(i, &m)| (m, i)).collect();
         let words = columns.len().div_ceil(64).max(1);
         Self {
@@ -185,6 +192,8 @@ impl PrefixEchelon {
     }
 
     fn pack(&self, monos: &[u64]) -> Option<Vec<u64>> {
+        crate::cryptanalysis::bitop_tally::word_ops((self.words + monos.len()) as u64);
+        crate::cryptanalysis::bitop_tally::hash_probes(monos.len() as u64);
         let mut row = vec![0u64; self.words];
         for m in monos {
             let &c = self.index.get(m)?;
@@ -196,6 +205,10 @@ impl PrefixEchelon {
     /// XOR products directly into a reusable row; repeated masks cancel
     /// without temporary monomial lists or sorting.
     fn pack_product(&self, p: &F2BoolPoly, multiplier: u64, row: &mut Vec<u64>) -> bool {
+        // `bitop/v1`: the cleared row and its zero test, an OR, a probe and
+        // an XOR a term
+        crate::cryptanalysis::bitop_tally::word_ops((2 * self.words + 2 * p.terms.len()) as u64);
+        crate::cryptanalysis::bitop_tally::hash_probes(p.terms.len() as u64);
         row.resize(self.words, 0);
         row.fill(0);
         for term in &p.terms {
@@ -219,9 +232,12 @@ impl PrefixEchelon {
     /// leading column or zero.  Returns that column.
     fn reduce_leading(&mut self, row: &mut [u64], extra: Option<&TempEchelon>) -> Option<usize> {
         let mut w = 0;
+        let mut tally = crate::cryptanalysis::bitop_tally::Pending::default();
         loop {
             // Pivots have no bits before their lead, so reduction cannot
             // reintroduce a bit in the already-zero prefix words.
+            // `bitop/v1`: the lead scan's words and the pivot lookups
+            tally.word_ops += 2 + row[w..].iter().take_while(|&&x| x == 0).count() as u64;
             let c = w * 64 + leading_column(&row[w..])?;
             w = c / 64;
             if let Some(r) = self.pivot[c] {
@@ -233,6 +249,7 @@ impl PrefixEchelon {
                 continue;
             }
             if let Some(extra) = extra {
+                tally.hash_probes += 1;
                 if let Some(r) = extra.pivot.get(&c) {
                     let pivot = &extra.rows[*r];
                     for (dst, &src) in row[w..].iter_mut().zip(&pivot[w..]) {
@@ -261,6 +278,15 @@ impl PrefixEchelon {
 
     /// Leading monomials of `V_j(e)` for `j = prefix`.
     fn leading_monomials(&self, prefix: usize) -> impl Iterator<Item = u64> + '_ {
+        // `bitop/v1`: each row's prefix test and lead scan, and the set
+        // insertion of its lead (charged by the caller as a probe)
+        crate::cryptanalysis::bitop_tally::word_ops(
+            self.rows
+                .iter()
+                .map(|r| 2 + r.iter().take_while(|&&w| w == 0).count() as u64)
+                .sum(),
+        );
+        crate::cryptanalysis::bitop_tally::hash_probes(self.rows.len() as u64);
         self.rows
             .iter()
             .zip(&self.created_at)
@@ -319,6 +345,9 @@ impl F5Criterion {
             return out;
         }
         let degrees: Vec<u32> = polys.iter().map(poly_degree).collect();
+        crate::cryptanalysis::bitop_tally::word_ops(
+            polys.iter().map(|p| p.terms.len() as u64).sum(),
+        );
         // A constant generator (`1`, or zero) is outside the criterion's
         // hypotheses; the solver never passes one, so prune nothing.
         if degrees.contains(&0) {
@@ -362,6 +391,7 @@ impl F5Criterion {
                                 temp.rows.push(std::mem::take(&mut row));
                             }
                         }
+                        crate::cryptanalysis::bitop_tally::hash_probes(2 * temp.pivot.len() as u64);
                         for &c in temp.pivot.keys() {
                             if pruned.insert(echelon.columns[c]) {
                                 out.frobenius_pruned += 1;
@@ -389,6 +419,7 @@ impl F5Criterion {
 
     /// Is the row `t·f_i` (generator index `i`, 0-based) pruned?
     pub fn prunes(&self, i: usize, t: u64) -> bool {
+        // (charged by the row visitor, one probe a multiplier)
         self.pruned.get(i).is_some_and(|set| set.contains(&t))
     }
 

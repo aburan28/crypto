@@ -1,0 +1,131 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "bitop/v1 prime ladder: rho, BSGS, kangaroo and index calculus from 16 to 26 bits",
+  "description": "research/bitop_unit_20261016/PROTOCOL.md, frozen before any of its data: eleven prime-order curves, one per bit size 16..26, eight public targets each; every arm priced in bitop/v1 with the instrumented counters.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "prime_search",
+        "bits": 16,
+        "seed": 20261016
+      },
+      {
+        "kind": "prime_search",
+        "bits": 17,
+        "seed": 20261016
+      },
+      {
+        "kind": "prime_search",
+        "bits": 18,
+        "seed": 20261016
+      },
+      {
+        "kind": "prime_search",
+        "bits": 19,
+        "seed": 20261016
+      },
+      {
+        "kind": "prime_search",
+        "bits": 20,
+        "seed": 20261016
+      },
+      {
+        "kind": "prime_search",
+        "bits": 21,
+        "seed": 20261016
+      },
+      {
+        "kind": "prime_search",
+        "bits": 22,
+        "seed": 20261016
+      },
+      {
+        "kind": "prime_search",
+        "bits": 23,
+        "seed": 20261016
+      },
+      {
+        "kind": "prime_search",
+        "bits": 24,
+        "seed": 20261016
+      },
+      {
+        "kind": "prime_search",
+        "bits": 25,
+        "seed": 20261016
+      },
+      {
+        "kind": "prime_search",
+        "bits": 26,
+        "seed": 20261016
+      }
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 20261016,
+    "target_kind": "public"
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "bsgs-neg",
+      "role": "baseline",
+      "method": {
+        "id": "bsgs.negation"
+      }
+    },
+    {
+      "name": "kangaroo",
+      "role": "baseline",
+      "method": {
+        "id": "kangaroo.vow"
+      }
+    },
+    {
+      "name": "ic-mitm-b32",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=32",
+          "oracle": "mitm:negation_folded=1"
+        }
+      }
+    },
+    {
+      "name": "ic-mitm-b128",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=128",
+          "oracle": "mitm:negation_folded=1"
+        }
+      }
+    },
+    {
+      "name": "ic-rootfind-m3-b32",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=32",
+          "oracle": "rootfind-subtract:m=3"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 20261016,
+    "isolation_required": "L0",
+    "timeout_seconds": 900
+  }
+}

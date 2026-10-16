@@ -82,6 +82,14 @@
 //!   that unit unpriced, so `S` is a lower bound and the record says so.
 //!   Reductions, splits, propagations and every F6 gate counter ride in the
 //!   totals' `extra` map.
+//! - The whole of each call — the system's instantiation (and, on the
+//!   first call, its template's symbolic `F_{2^n}` build), the solver's
+//!   Macaulay builds, sorts, indexes, packing, pivot searches, read-back
+//!   and tree scans, the lift of each root and the gate's lookups — is
+//!   also reported in `bitop/v1` primitives through the `bitop_*` keys of
+//!   `extra` with `bitop_complete = 1`
+//!   ([`crypto_lib::cryptanalysis::bitop_tally`]), which is what the
+//!   `bitop/v1` work view prices.
 //!
 //! The word-XOR counter is per thread.  `ic.pipeline` decomposes on its
 //! calling thread, and the elimination runs there.
@@ -112,6 +120,7 @@ use num_traits::One;
 
 use crypto_lib::binary_ecc::{BinaryCurve, F2mElement};
 
+use crypto_lib::cryptanalysis::bitop_tally;
 use crypto_lib::cryptanalysis::ecbench::methods::BinaryPlugins;
 use crypto_lib::cryptanalysis::ic_boundary::{
     decompose_mitm, koblitz_factor_base, lift_abscissae, BinaryGroup, BinaryInstance, ColumnFold,
@@ -980,6 +989,7 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
             _ => groebner_decompose,
         };
         let before = f4_word_ops_thread();
+        let tally_before = bitop_tally::snapshot();
         let started = Instant::now();
         let (indices, stats) = decompose(
             kc,
@@ -995,6 +1005,24 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
         let wall_ns = started.elapsed().as_nanos() as u64;
         // The gate's point additions are group work: charge them.
         ops.adds += stats.geometric_group_additions;
+        // The whole call in `bitop/v1` primitives: the engine's word XORs
+        // (`ops`), everything else `bitop_tally` saw on this thread — the
+        // system's instantiation from its template (and the template's
+        // symbolic `F_{2^n}` build on the first call), the solver's
+        // Macaulay builds, column sorts and indexes, packing, pivot
+        // searches, read-back and splitting-tree scans, and the lift of
+        // each root (`F_{2^n}` operations and base lookups) — and the
+        // F6 gate's lookups, a hash probe each, and support checks, a
+        // word operation a coordinate.  The gate's point additions are
+        // group work, charged to `ops.adds` above, not here.
+        let mut tally = bitop_tally::snapshot().since(tally_before);
+        tally.hash_probes += stats.geometric_residual_lookups
+            + stats.geometric_fast_residual_lookups
+            + stats.geometric_pair_index_lookups;
+        tally.word_ops += (stats.geometric_support_checks + stats.geometric_partial_support_checks)
+            * u64::from(frob.ell);
+        let mut extra = stats_extra(&stats);
+        tally.put_complete(&mut extra, word_xors);
         let cost = SolverCost {
             ops: word_xors,
             op_unit: WORD_XOR_UNIT.into(),
@@ -1003,7 +1031,7 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
             degree_reached: Some(stats.max_degree_built),
             solving_degree: None,
             timed_out: stats.exhausted,
-            extra: stats_extra(&stats),
+            extra,
         };
         self.totals.absorb(shape, Some(&cost), stats.exhausted);
         let indices = indices?;
@@ -1016,6 +1044,22 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
                 None
             }
         }
+    }
+
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        // The full pair-sum table inserts every unordered pair once; the
+        // negation-folded PairTable counts its own attempts; the algebraic
+        // engines build no table.
+        let mut c = match (&self.pair, &self.pair_neg) {
+            (Some(_), _) => {
+                let f = self.pair_table_points as u64;
+                BTreeMap::from([("table_insert_attempts".to_string(), f * (f + 1) / 2)])
+            }
+            (None, Some(t)) => t.work_counters(),
+            (None, None) => BTreeMap::new(),
+        };
+        c.insert("counted:table_insert_attempts".to_string(), 1);
+        c
     }
 
     fn setup_native(&self) -> BTreeMap<String, u64> {

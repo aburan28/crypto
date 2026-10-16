@@ -74,6 +74,7 @@
 //! at `n = 131`, which is bounded by how many candidate tuples must be
 //! ruled out and not by how one node's matrix is reduced.
 
+use crate::cryptanalysis::bitop_tally;
 use crate::cryptanalysis::fx_hash::{FxMap as HashMap, MaskMap};
 use crate::cryptanalysis::koblitz_groebner::{
     all_variable_mask, build_inherited_macaulay, build_inherited_macaulay_support_local,
@@ -192,6 +193,9 @@ impl RootMatrix {
         degree: u32,
         support_local: bool,
     ) -> Option<Self> {
+        // `bitop/v1`: the copy, the degree scan and the support fold, a
+        // word operation a term each (the build itself charges its own)
+        bitop_tally::word_ops(3 * system.iter().map(|p| 1 + p.terms.len() as u64).sum::<u64>());
         let system: Rc<Vec<F2BoolPoly>> =
             Rc::new(system.iter().filter(|p| !p.is_zero()).cloned().collect());
         let generator_degrees: Rc<Vec<u32>> = Rc::new(system.iter().map(poly_degree).collect());
@@ -570,6 +574,8 @@ impl RewritePlan {
     fn segments_into(map: &[u32], w: usize, segments: &mut Vec<Segment>) {
         let base = w * 64;
         let end = (base + 64).min(map.len());
+        // `bitop/v1`: one lookup and test a column of the source word
+        bitop_tally::word_ops(end.saturating_sub(base) as u64);
         let mut current: Option<(Segment, u32)> = None;
         for c in base..end {
             let d = map[c];
@@ -810,6 +816,9 @@ pub struct ChildSystem {
 /// target has no `popcnt` instruction, so where the CPU has one the same
 /// merge runs compiled with it; the layout is identical either way.
 fn fold_layout(columns: &[u64], bit: u64, new_columns: &mut Vec<u64>, map: &mut [u32]) {
+    // `bitop/v1`: each old column is passed by both cursors (a bit test
+    // each) and compared or written once
+    bitop_tally::word_ops(3 * columns.len() as u64);
     #[cfg(target_arch = "x86_64")]
     {
         if std::arch::is_x86_feature_detected!("popcnt") {
@@ -899,6 +908,8 @@ impl ChildSystem {
     /// first, and a generator's degree is its first term's.
     pub(crate) fn from_owned(parent_degrees: &[u32], substituted: Vec<F2BoolPoly>) -> Self {
         debug_assert_eq!(parent_degrees.len(), substituted.len());
+        // `bitop/v1`: the zero test and degree comparison of each generator
+        bitop_tally::word_ops(2 * substituted.len() as u64);
         let mut system = Vec::with_capacity(substituted.len());
         let mut degrees = Vec::with_capacity(substituted.len());
         let mut dropped = Vec::new();
@@ -937,6 +948,13 @@ impl ChildSystem {
     /// `i`-th generator, zero or not.
     pub fn new(parent_degrees: &[u32], substituted: &[F2BoolPoly]) -> Self {
         debug_assert_eq!(parent_degrees.len(), substituted.len());
+        // `bitop/v1`: the degree scan and the copy of every generator
+        bitop_tally::word_ops(
+            substituted
+                .iter()
+                .map(|q| 1 + 2 * q.terms.len() as u64)
+                .sum(),
+        );
         let mut system = Vec::with_capacity(substituted.len());
         let mut degrees = Vec::with_capacity(substituted.len());
         let mut dropped = Vec::new();
@@ -1020,6 +1038,7 @@ impl From<Vec<u64>> for RowWords {
 /// made from a `Vec` would copy it).
 #[allow(dead_code)]
 fn zeroed_words(n: usize) -> Rc<[u64]> {
+    bitop_tally::word_ops(n as u64);
     std::iter::repeat_n(0u64, n).collect()
 }
 
@@ -1071,13 +1090,17 @@ impl Draft {
 
     /// Leading set column at or after word `from` (a layout word).
     fn leading_column_from(&self, from: usize) -> Option<usize> {
-        self.data[from - self.start..]
-            .iter()
-            .position(|&w| w != 0)
-            .map(|i| {
-                let w = from + i;
-                w * 64 + self.data[w - self.start].trailing_zeros() as usize
-            })
+        let found = self.data[from - self.start..].iter().position(|&w| w != 0);
+        // `bitop/v1`: one test a word scanned
+        bitop_tally::word_ops(
+            found.map_or((self.data.len() + self.start - from) as u64, |i| {
+                i as u64 + 1
+            }),
+        );
+        found.map(|i| {
+            let w = from + i;
+            w * 64 + self.data[w - self.start].trailing_zeros() as usize
+        })
     }
 }
 
@@ -1130,6 +1153,10 @@ impl CompletionBatch {
         self.monos.reserve(len);
         self.old_column.reserve(len);
         self.used.reserve(len);
+        // `bitop/v1`: a hash probe a monomial (and one into the layout for
+        // a new one), one parity flip a monomial and one test an occurrence
+        bitop_tally::word_ops(2 * len as u64);
+        let before = self.monos.len();
         for m in monos {
             let next = self.monos.len() as u32;
             let id = *self.ids.entry(m).or_insert(next);
@@ -1145,6 +1172,7 @@ impl CompletionBatch {
             self.parity[id as usize / 64] ^= 1u64 << (id % 64);
             self.scratch.push(id);
         }
+        bitop_tally::hash_probes((len + self.monos.len() - before) as u64);
         // Emit each odd id at its first occurrence and clear its bit; the
         // even ones are already clear.
         let mut row = Vec::with_capacity(len);
@@ -1164,6 +1192,9 @@ impl CompletionBatch {
     /// Grow `basis`'s layout by the monomials the kept rows hold and it
     /// lacks, and return every used id's column in the new layout.
     fn place(&self, basis: &mut ReducedBasis) -> Vec<u32> {
+        // `bitop/v1`: the scan for missing monomials and the remap of every
+        // id (the merge and sort are charged below)
+        bitop_tally::word_ops(2 * self.monos.len() as u64);
         let mut missing: Vec<u64> = (0..self.monos.len())
             .filter(|&i| self.used[i] && self.old_column[i] == DELETED)
             .map(|i| self.monos[i])
@@ -1171,6 +1202,8 @@ impl CompletionBatch {
         if missing.is_empty() {
             return self.old_column.clone();
         }
+        bitop_tally::word_ops(bitop_tally::sort_cost(missing.len()));
+        bitop_tally::hash_probes(missing.len() as u64);
         sort_masks_descending(&mut missing);
         let placed = basis.insert_columns(&missing);
         let step = basis
@@ -1227,6 +1260,9 @@ fn xor_words(dst: &mut [u64], src: &[u64]) {
 /// parity is taken with a small hash table rather than by sorting.
 fn odd_terms(monos: impl ExactSizeIterator<Item = u64>) -> Vec<u64> {
     let len = monos.len();
+    // `bitop/v1`: a hash probe a monomial, and the compaction scan
+    bitop_tally::hash_probes(len as u64);
+    bitop_tally::word_ops(len as u64);
     let mut keys: Vec<u64> = Vec::with_capacity(len);
     let mut odd: Vec<bool> = Vec::with_capacity(len);
     ODD_SLOTS.with(|state| {
@@ -1448,6 +1484,14 @@ impl ReducedBasis {
             refuted: false,
             support_local,
         };
+        // `bitop/v1`: the cleared pivot index, and each row's lead scan
+        bitop_tally::word_ops(
+            out.pivot_of.len() as u64
+                + rows
+                    .iter()
+                    .map(|r| 1 + r.iter().take_while(|&&w| w == 0).count() as u64)
+                    .sum::<u64>(),
+        );
         for row in rows {
             let c = leading_column(&row).expect("rank rows are nonzero");
             debug_assert!(out.pivot_of[c].is_none());
@@ -1661,6 +1705,7 @@ impl ReducedBasis {
     /// Monomial → current column, built on first use after a layout change.
     fn column_index(&mut self) -> &MaskMap<usize> {
         if self.column_index.is_none() {
+            bitop_tally::hash_probes(self.columns.len() as u64);
             self.column_index = Some(
                 self.columns
                     .iter()
@@ -1840,6 +1885,8 @@ impl ReducedBasis {
         // `DELETED` is `u32::MAX`, out of range of every map, so `get`
         // sends it (and only it) to `DELETED` without a separate test
         let map = &step.map[..];
+        // `bitop/v1`: one lookup an entry composed
+        bitop_tally::word_ops(prev.len() as u64);
         // an `Rc<Vec>` takes the collected buffer as it is; an `Rc<[_]>`
         // would copy it into a fresh allocation
         let composed: Rc<Vec<u32>> = Rc::new(
@@ -1913,9 +1960,20 @@ impl ReducedBasis {
                 let staging = &mut staging[..words];
                 // SAFETY: `wordwise_rewrite` checked BMI2 for this process.
                 let lo = unsafe { apply_plan_bmi2(&plan, live, lead, staging) };
+                // `bitop/v1` besides the counted reads and writes: a
+                // gather, spread and XOR a segment of each nonzero word
+                bitop_tally::word_ops(
+                    live.iter()
+                        .enumerate()
+                        .filter(|(_, &w)| w != 0)
+                        .map(|(i, _)| 3 * plan.of(lead + i).len() as u64)
+                        .sum::<u64>(),
+                );
                 if lo == usize::MAX {
                     return None;
                 }
+                // the zero test and the clearing of the image
+                bitop_tally::word_ops(2 * (words - lo) as u64);
                 cost.specialise_word_ops += (words - lo) as u64;
                 let image = &mut staging[lo..];
                 let nonzero = image.iter().any(|&w| w != 0);
@@ -1939,6 +1997,10 @@ impl ReducedBasis {
                     lo = lo.min(w);
                 }
             };
+            // `bitop/v1` besides the counted reads and writes: a map lookup
+            // and a scatter a set bit, and the zero test and clearing of
+            // the image
+            bitop_tally::word_ops(2 * live.iter().map(|w| u64::from(w.count_ones())).sum::<u64>());
             for (i, &word) in live.iter().enumerate() {
                 let base = (lead + i) * 64;
                 let mut bits = word;
@@ -1962,6 +2024,7 @@ impl ReducedBasis {
             if lo == usize::MAX {
                 return None;
             }
+            bitop_tally::word_ops(2 * (words - lo) as u64);
             cost.specialise_word_ops += (words - lo) as u64;
             // staging is zero below `lo`, so its tail is the image
             let image = &mut staging[lo..];
@@ -2001,6 +2064,18 @@ impl ReducedBasis {
                 if off != usize::MAX {
                     let live = row.live();
                     cost.specialise_word_ops += live.len() as u64;
+                    // `bitop/v1`: a gather, spread and XOR a segment of
+                    // each nonzero word
+                    let lead = row.lead as usize;
+                    bitop_tally::word_ops(
+                        live.iter()
+                            .enumerate()
+                            .filter(|(_, &w)| w != 0)
+                            .map(|(i, _)| {
+                                3 * (plan.first[lead + i + 1] - plan.first[lead + i]) as u64
+                            })
+                            .sum::<u64>(),
+                    );
                     let out = &mut data[off..off + words - lo];
                     // SAFETY: `eager_rewrite` checked BMI2 for this process.
                     unsafe { apply_step_bmi2(plan, live, row.lead as usize, out, lo) };
@@ -2017,6 +2092,7 @@ impl ReducedBasis {
                 .iter()
                 .position(|&w| w != 0)
                 .expect("a kept pivot survives");
+            bitop_tally::word_ops(first as u64 + 1);
             cost.specialise_word_ops += (len - first) as u64;
             self.rows[r] = LazyRow {
                 version: to,
@@ -2057,7 +2133,19 @@ impl ReducedBasis {
         let out = Rc::get_mut(&mut data).expect("just allocated");
         // SAFETY: `eager_rewrite` checked BMI2 for this process.
         unsafe { apply_step_bmi2(plan, live, row.lead as usize, out, lo) };
-        let first = out.iter().position(|&w| w != 0)?;
+        // `bitop/v1`: a gather, spread and XOR a segment of each nonzero
+        // word, and the scan for the image's first word
+        let lead = row.lead as usize;
+        let first = out.iter().position(|&w| w != 0);
+        bitop_tally::word_ops(
+            live.iter()
+                .enumerate()
+                .filter(|(_, &w)| w != 0)
+                .map(|(i, _)| 3 * (plan.first[lead + i + 1] - plan.first[lead + i]) as u64)
+                .sum::<u64>()
+                + first.map_or(out.len() as u64, |f| f as u64 + 1),
+        );
+        let first = first?;
         cost.specialise_word_ops += (words - lo - first) as u64;
         Some(Draft { start: lo, data })
     }
@@ -2190,6 +2278,8 @@ impl ReducedBasis {
         loop {
             let c = row.leading_column_from(from)?;
             let w = c / 64;
+            // `bitop/v1`: the pivot lookup and the layout check of the pivot
+            bitop_tally::word_ops(2);
             match self.pivot_of[c] {
                 Some(r) => {
                     // materialise, then borrow: no row handle to clone
@@ -2237,6 +2327,8 @@ impl ReducedBasis {
         };
         self.column_index = None;
         self.words = columns.len().div_ceil(64).max(1);
+        // `bitop/v1`: the cleared pivot index and the remap of every pivot
+        bitop_tally::word_ops((columns.len() + 2 * self.pivot_col.len()) as u64);
         self.pivot_of = vec![None; columns.len()];
         for (r, pc) in self.pivot_col.iter_mut().enumerate() {
             let c = step.map[*pc as usize];
@@ -2328,11 +2420,25 @@ impl ReducedBasis {
         // of them is unchanged), so the new layout is a merge of two sorted
         // lists and the old → new map falls out of the merge.
         let n_old = self.columns.len();
+        // `bitop/v1`: the map (two `u32` entries a word); the split of the
+        // rows into kept and displaced, a test and a move each; the step's
+        // plan, a column each and a word each for its bounds
+        bitop_tally::word_ops(
+            (n_old as u64).div_ceil(2)
+                + 2 * self.rows.len() as u64
+                + self.history.len() as u64
+                + if eager_rewrite() {
+                    2 * n_old.div_ceil(64) as u64
+                } else {
+                    0
+                },
+        );
         let mut map: Vec<u32> = vec![DELETED; n_old];
         let mut new_columns: Vec<u64> = Vec::with_capacity(n_old);
         if value {
             fold_layout(&self.columns, bit, &mut new_columns, &mut map);
         } else {
+            bitop_tally::word_ops(2 * n_old as u64);
             for (k, &m) in self.columns.iter().enumerate() {
                 if m & bit == 0 {
                     map[k] = new_columns.len() as u32;
@@ -2401,6 +2507,7 @@ impl ReducedBasis {
         // its image there too, next to the constant `1`, and inserted
         // first those rows reach `1` before the ones that re-reduce through
         // the whole basis are touched (`RESEARCH_INHERITED_F4.md` §3.7).
+        bitop_tally::word_ops(bitop_tally::sort_cost(displaced.len()));
         displaced.sort_unstable_by_key(|&(pc, _)| std::cmp::Reverse(pc));
         for (_, row) in displaced {
             let image = match &step {
@@ -2426,6 +2533,7 @@ impl ReducedBasis {
         // basis multiplies each dropped generator only within its own
         // support, as its root did.
         if !dropped.is_empty() {
+            bitop_tally::word_ops(out.system.iter().map(|p| p.terms.len() as u64).sum());
             let multiplier_mask = out
                 .system
                 .iter()
@@ -2461,6 +2569,8 @@ impl ReducedBasis {
                     (batch.rows.len() * out.words) as u64,
                 );
                 for ids in &batch.rows {
+                    // `bitop/v1`: the zeroed row, a lookup and an OR an id
+                    bitop_tally::word_ops((out.words + 2 * ids.len()) as u64);
                     let mut row = vec![0u64; out.words];
                     for &id in ids {
                         let c = columns[id as usize] as usize;
@@ -2552,6 +2662,7 @@ impl ReducedBasis {
                 }
                 let gap = self.degree - self.columns[self.pivot_col[r] as usize].count_ones();
                 let q = self.current_row(r, cost);
+                bitop_tally::word_ops(q.live().iter().map(|w| 1 + u64::from(w.count_ones())).sum());
                 let mut q_monos: Vec<u64> = Vec::new();
                 for (i, &word) in q.live().iter().enumerate() {
                     let base = (q.lead as usize + i) * 64;
@@ -2580,6 +2691,8 @@ impl ReducedBasis {
             let words = self.words;
             cost.specialise_word_ops += read_words + (products.len() * words) as u64;
             cost.closure_products += products.len() as u64;
+            bitop_tally::hash_probes(products.iter().map(|p| p.len() as u64).sum());
+            bitop_tally::word_ops(products.iter().map(|p| (words + p.len()) as u64).sum());
             let packed: Vec<Vec<u64>> = {
                 let index = self.column_index();
                 products
@@ -2616,6 +2729,12 @@ impl ReducedBasis {
         self.materialise_all(cost);
         let was_pivot: Vec<bool> = self.pivot_of.iter().map(Option::is_some).collect();
         let words = self.words;
+        // `bitop/v1`: the pivot flags, the widened copy of every row, and
+        // after the elimination the cleared index and each lead scan
+        bitop_tally::word_ops(
+            2 * self.pivot_of.len() as u64
+                + (self.rows.len() + batch.len()) as u64 * 2 * words as u64,
+        );
         let mut matrix: Vec<Vec<u64>> = self
             .rows
             .iter()
@@ -2662,6 +2781,8 @@ impl ReducedBasis {
         // layout's order.
         let mut seen: MaskMap<()> = MaskMap::default();
         let mut missing: Vec<u64> = Vec::new();
+        // `bitop/v1`: a layout probe a monomial and a set probe each absent one
+        bitop_tally::hash_probes(2 * rows_monos.iter().map(|r| r.len() as u64).sum::<u64>());
         for &m in rows_monos.iter().flatten() {
             if !index.contains_key(&m) && seen.insert(m, ()).is_none() {
                 missing.push(m);
@@ -2670,6 +2791,7 @@ impl ReducedBasis {
         if missing.is_empty() {
             return;
         }
+        bitop_tally::word_ops(bitop_tally::sort_cost(missing.len()));
         sort_masks_descending(&mut missing);
         self.insert_columns(&missing);
     }
@@ -2681,6 +2803,8 @@ impl ReducedBasis {
     /// the merge, as in `fold_layout`.
     fn insert_columns(&mut self, missing: &[u64]) -> Vec<u32> {
         let old = &self.columns;
+        // `bitop/v1`: one compare and one write a column of the merge
+        bitop_tally::word_ops(2 * (old.len() + missing.len()) as u64);
         let mut columns = Vec::with_capacity(old.len() + missing.len());
         let mut map = vec![0u32; old.len()];
         let mut placed = Vec::with_capacity(missing.len());
@@ -2716,6 +2840,9 @@ impl ReducedBasis {
         }
         let low_start = self.low_start();
         let low_width = self.columns.len() - low_start;
+        // `bitop/v1`: the scan for the tail's first column and the filter
+        // of the rows by pivot
+        bitop_tally::word_ops((low_start + 1 + self.rows.len()) as u64);
         if low_width == 0 {
             return Vec::new();
         }
@@ -2727,6 +2854,8 @@ impl ReducedBasis {
         for r in tail_rows {
             let row = self.current_row(r, cost);
             let c = self.pivot_col[r] as usize;
+            // the zeroed tail row, and a bit test a column from the pivot
+            bitop_tally::word_ops((low_words + self.columns.len() - c) as u64);
             let mut packed = vec![0u64; low_words];
             for column in c..self.columns.len() {
                 if row.word(column / 64) & (1u64 << (column % 64)) != 0 {
@@ -2741,6 +2870,17 @@ impl ReducedBasis {
         }
         let rank = rref_f2_counted(&mut low, low_width, &mut cost.reduce_word_ops);
         let n_vars = self.n_vars;
+        // `bitop/v1` read-back: a bit test a tail column of each rank row,
+        // and the canonical rebuild of its terms
+        bitop_tally::word_ops(
+            low.iter()
+                .take(rank)
+                .map(|row| {
+                    let k: u32 = row.iter().map(|w| w.count_ones()).sum();
+                    low_width as u64 + bitop_tally::poly::from_monos(k as usize)
+                })
+                .sum(),
+        );
         low.iter()
             .take(rank)
             .map(|row| {
@@ -2756,8 +2896,10 @@ impl ReducedBasis {
     /// The rows the splitting solver acts on: the constant `1`, and every
     /// `v` or `v + 1` of the linear tail.
     pub fn decisive_rows(&mut self, cost: &mut InheritCost) -> Vec<F2BoolPoly> {
-        self.linear_tail(cost)
-            .into_iter()
+        let tail = self.linear_tail(cost);
+        // `bitop/v1`: the shape test, a term each
+        bitop_tally::word_ops(tail.iter().map(|p| 1 + 2 * p.terms.len() as u64).sum());
+        tail.into_iter()
             .filter(|p| {
                 (p.terms.len() == 1 && p.terms[0].mask == 0)
                     || (p.terms.len() <= 2

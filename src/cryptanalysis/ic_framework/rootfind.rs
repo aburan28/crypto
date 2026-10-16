@@ -239,6 +239,20 @@ impl<G: PairedAdd> DecompositionOracle<G> for RootfindMitmOracle<G::Elt> {
         counts
     }
 
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        let mut out = self
+            .table
+            .as_ref()
+            .map(PairTable::work_counters)
+            .unwrap_or_default();
+        // `Reps::of` reads `x_index` once an abscissa.
+        if let Some(reps) = &self.reps {
+            *out.entry("lookups".to_string()).or_insert(0) += reps.index.len() as u64;
+        }
+        out.insert("counted:table_insert_attempts".to_string(), 1);
+        out
+    }
+
     fn decompose(
         &mut self,
         ctx: &InstanceCtx<G>,
@@ -326,6 +340,16 @@ impl<G: PairedAdd> DecompositionOracle<G> for RootfindPairsOracle<G::Elt> {
             counts.insert("abscissae".into(), reps.index.len() as u64);
         }
         counts
+    }
+
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        // No table; `Reps::of` reads `x_index` once an abscissa.
+        let mut out = BTreeMap::new();
+        if let Some(reps) = &self.reps {
+            out.insert("lookups".to_string(), reps.index.len() as u64);
+        }
+        out.insert("counted:table_insert_attempts".to_string(), 1);
+        out
     }
 
     fn decompose(

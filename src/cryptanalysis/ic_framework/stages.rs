@@ -230,6 +230,15 @@ pub trait DecompositionOracle<G: CountedGroup> {
         BTreeMap::new()
     }
 
+    /// Work performed by `prepare` that only `bitop/v1` prices (table
+    /// insert attempts, canonicalisation tables), by `ecbench::work`
+    /// counter name; kept out of `setup_native` so committed records
+    /// replay.  An oracle whose set-up work is all counted also returns
+    /// the marker `counted:table_insert_attempts`.
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        BTreeMap::new()
+    }
+
     /// Decompose `point`, or decide it does not decompose.
     fn decompose(
         &mut self,
@@ -275,6 +284,12 @@ pub trait DecompositionOracle<G: CountedGroup> {
         BTreeMap::new()
     }
 
+    /// Relation-phase work that only `bitop/v1` prices, as
+    /// [`setup_work_native`](Self::setup_work_native) is for set-up.
+    fn relation_work_native(&self) -> BTreeMap<String, u64> {
+        BTreeMap::new()
+    }
+
     /// The algebraic system the last [`decompose`] built, when it built
     /// one.  Table oracles return `None` and their degree columns stay
     /// empty, which is correct: they solve no system.
@@ -314,6 +329,10 @@ pub struct SolverTotals {
     pub extra: BTreeMap<String, u64>,
 }
 
+/// The `SolverCost::extra` flag by which an engine says its `bitop_*`
+/// keys count its whole call (`ecbench::work::SOLVER_BITOP_KEYS`).
+const BITOP_COMPLETE: &str = "bitop_complete";
+
 impl SolverTotals {
     pub fn absorb(
         &mut self,
@@ -324,6 +343,20 @@ impl SolverTotals {
         self.calls += 1;
         self.shape = Some(shape.clone());
         self.budget_exceeded += u64::from(budget_exceeded);
+        // `bitop_complete` is a flag, not a total: the run's `bitop_*`
+        // counts cover all of its work only if every call's did, so it
+        // stays 1 while every call reports 1 and drops to 0 at the first
+        // that does not (an unmeasured call included).
+        let complete = cost.and_then(|c| c.extra.get(BITOP_COMPLETE)).copied() == Some(1);
+        if self.calls == 1 {
+            if complete {
+                self.extra.insert(BITOP_COMPLETE.into(), 1);
+            }
+        } else if !complete {
+            if let Some(flag) = self.extra.get_mut(BITOP_COMPLETE) {
+                *flag = 0;
+            }
+        }
         let Some(c) = cost else { return };
         self.ops += c.ops;
         if self.op_unit.is_empty() {
@@ -339,6 +372,9 @@ impl SolverTotals {
         // A key that names a maximum (`*_max`) is the maximum over
         // calls; every other key is a total over the run.
         for (k, v) in &c.extra {
+            if k == BITOP_COMPLETE {
+                continue;
+            }
             let entry = self.extra.entry(k.clone()).or_insert(0);
             if k.ends_with("_max") {
                 *entry = (*entry).max(*v);
@@ -397,6 +433,28 @@ impl BooleanSystem {
             ),
             degrees,
         }
+    }
+
+    /// 64-bit word operations (`bitop/v1`'s `word_op`) of one
+    /// [`shape`](Self::shape) call that returned `shape`: a popcount a
+    /// term and a store an equation for the degrees; then the
+    /// semi-regular series on `i128` coefficients (two words each), with
+    /// `top = n_vars + 1` — the numerator's `n_vars · top` additions, the
+    /// denominator's `top − d + 1` additions per positive degree `d`, and
+    /// the long division's multiply-subtracts (six words each) up to the
+    /// degree it stops at.
+    pub fn shape_word_ops(&self, shape: &SystemShape) -> u64 {
+        let terms: u64 = self.equations.iter().map(|p| p.terms.len() as u64).sum();
+        let v = self.n_vars as u64;
+        let top = v + 1;
+        let den: u64 = shape
+            .degrees
+            .iter()
+            .filter(|&&d| d > 0 && u64::from(d) <= top)
+            .map(|&d| top - u64::from(d) + 1)
+            .sum();
+        let stop = shape.semi_regular_degree.map_or(top, u64::from);
+        terms + self.equations.len() as u64 + 2 * (v * top + den) + 6 * (stop * (stop + 1) / 2)
     }
 }
 
@@ -591,7 +649,45 @@ impl Targets {
 
 #[cfg(test)]
 mod tests {
-    use super::Params;
+    use super::{Params, SolverCost, SolverTotals, SystemShape};
+
+    /// `bitop_complete` survives the totals only while every call set it;
+    /// the other `bitop_*` keys add up.
+    #[test]
+    fn bitop_complete_is_a_flag_over_calls() {
+        let shape = SystemShape {
+            n_vars: 2,
+            n_equations: 1,
+            degrees: Vec::new(),
+            semi_regular_degree: None,
+        };
+        let cost = |complete: bool| {
+            let mut c = SolverCost {
+                ops: 1,
+                op_unit: "word XORs (elimination only)".into(),
+                ..Default::default()
+            };
+            c.extra.insert("bitop_word_ops".into(), 5);
+            if complete {
+                c.extra.insert("bitop_complete".into(), 1);
+            }
+            c
+        };
+        let mut all = SolverTotals::default();
+        for _ in 0..3 {
+            all.absorb(&shape, Some(&cost(true)), false);
+        }
+        assert_eq!(all.extra["bitop_complete"], 1);
+        assert_eq!(all.extra["bitop_word_ops"], 15);
+        all.absorb(&shape, Some(&cost(false)), false);
+        assert_eq!(all.extra["bitop_complete"], 0);
+        all.absorb(&shape, Some(&cost(true)), false);
+        assert_eq!(all.extra["bitop_complete"], 0);
+        let mut late = SolverTotals::default();
+        late.absorb(&shape, Some(&cost(false)), false);
+        late.absorb(&shape, Some(&cost(true)), false);
+        assert!(!late.extra.contains_key("bitop_complete"));
+    }
 
     #[test]
     fn a_plugin_spec_splits_into_name_and_parameters() {

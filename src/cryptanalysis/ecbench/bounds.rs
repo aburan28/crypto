@@ -252,6 +252,16 @@ pub struct Fit {
     /// At least [`MIN_SIZES_FOR_SCALING`] sizes: the exponent is a result,
     /// not a description.
     pub scaling_claim: bool,
+    /// In `bitop/v1` only: the exponent of `bitops / gates(addition) =
+    /// C·r^α`, the cost in additions of the curve at each size.  Raw gates
+    /// grow with the field's arithmetic, about `(log r)²`, on top of the
+    /// algorithm's own exponent; dividing by one addition's gates at each
+    /// size takes that out, so a generic method's exponent is ½ here.
+    /// Absent outside `bitop/v1`, so earlier bounds keep their bytes.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alpha_in_additions: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alpha_in_additions_ci95: Option<(f64, f64)>,
 }
 
 /// The constant at the declared exponent.
@@ -342,6 +352,11 @@ pub struct FitOptions {
     pub curves: Vec<String>,
     pub resamples: usize,
     pub seed: u64,
+    /// `bitop/v1` fits the arm in bit operations (`ecbench::work`); absent
+    /// fits it in the unit its records carry.  Absent is not written, so a
+    /// bound fitted before the option existed re-derives byte for byte.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit: Option<String>,
     /// Fit the band-priced cost at this weight (GAE per native operation,
     /// AGENTS.md §5a, [`super::band`]) instead of the charged cost.  The
     /// domain's unit then names the weight, so the bound never shares an
@@ -367,6 +382,7 @@ impl Default for FitOptions {
             curves: vec![],
             resamples: RESAMPLES,
             seed: SEED,
+            unit: None,
             weight: None,
             param_rule: None,
         }
@@ -715,6 +731,24 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
     }
     let method = method.expect("at least one session");
 
+    if opts.unit.is_some() && opts.weight.is_some() {
+        return Err(
+            "--unit and --weight exclude each other: bitop/v1 prices every operation, \
+             so there is no unpriced work for a band to weigh"
+                .into(),
+        );
+    }
+    match opts.unit.as_deref() {
+        None => {}
+        Some(crate::cryptanalysis::bitops::UNIT) => {
+            recs = recs
+                .iter()
+                .map(crate::cryptanalysis::ecbench::work::bitop_view)
+                .collect::<Result<_, _>>()?;
+        }
+        Some(u) => return Err(format!("no unit `{u}`; the fitter knows bitop/v1")),
+    }
+
     // Filters: named curves, then tier.
     if !opts.curves.is_empty() {
         recs.retain(|r| opts.curves.contains(&r.workload.curve.slug));
@@ -896,11 +930,41 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
     }
     let n_sizes = sizes.iter().filter(|s| s.verified > 0).count();
     let (alpha, alpha_ci, log2_c, r2, ci_method) = power_law(&strata, opts.resamples, opts.seed);
+    // The same fit in additions, in bitop/v1: each run's gates over one
+    // affine addition's gates on its curve.
+    let (alpha_add, alpha_add_ci) = if domain.unit == crate::cryptanalysis::bitops::UNIT {
+        let add_strata: Vec<Vec<(f64, f64)>> = sizes
+            .iter()
+            .map(|row| {
+                verified
+                    .iter()
+                    .filter(|r| r.workload.curve.slug == row.slug)
+                    .filter_map(|r| {
+                        let w = r.work.as_ref()?;
+                        let add = w
+                            .widths
+                            .gates(crate::cryptanalysis::bitops::Prim::GroupAdd)
+                            .ok()? as f64;
+                        let g = r.cost.total_gae?;
+                        (g > 0.0).then(|| ((row.r as f64).ln(), (g / add).ln()))
+                    })
+                    .collect()
+            })
+            .collect();
+        let (a, ci, _, _, _) = power_law(&add_strata, opts.resamples, opts.seed);
+        (a, ci)
+    } else {
+        (None, None)
+    };
     let declared_alpha = expected_s(&method.id, sizes[0].automorphisms_available).map(|_| 0.5);
     let scaling_claim = n_sizes >= MIN_SIZES_FOR_SCALING && alpha.is_some();
     let fit = Fit {
         size_parameter: "r".into(),
-        model: "gae = C * r^alpha".into(),
+        model: if domain.unit == crate::cryptanalysis::bitops::UNIT {
+            "bitops = C * r^alpha".into()
+        } else {
+            "gae = C * r^alpha".into()
+        },
         points: strata.iter().map(|s| s.len() as u64).sum(),
         sizes: n_sizes as u64,
         alpha,
@@ -914,6 +978,8 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
             _ => None,
         },
         scaling_claim,
+        alpha_in_additions: alpha_add,
+        alpha_in_additions_ci95: alpha_add_ci,
     };
     let none = || Estimate {
         value: f64::NAN,
@@ -1124,7 +1190,17 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
     let mut unpriced: Vec<String> = recs.iter().flat_map(|r| r.cost.unpriced.clone()).collect();
     unpriced.sort();
     unpriced.dedup();
-    let admissible = unverified == 0 && audits.iter().all(|a| a.ok);
+    // In bitop/v1 a bound must account for every gate: a lower bound
+    // ranks nothing against a complete one, so it is inadmissible, with
+    // what it misses named (docs/units/BITOPS.md).
+    let incomplete_bitops = domain.unit == crate::cryptanalysis::bitops::UNIT && bounded;
+    if incomplete_bitops {
+        reasons.push(format!(
+            "bitop/v1 pricing is incomplete (missing: {}); a lower bound is not admissible in this unit",
+            unpriced.join(", ")
+        ));
+    }
+    let admissible = unverified == 0 && audits.iter().all(|a| a.ok) && !incomplete_bitops;
     let admissibility = Admissibility {
         status: if admissible {
             "admissible"

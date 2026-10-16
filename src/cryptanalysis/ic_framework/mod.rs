@@ -347,6 +347,7 @@ pub fn run_pipeline<G: CountedGroup>(
     let mut prep_cost = PhaseCost::default();
     prep_cost.group_ops.merge(prep_ops);
     prep_cost.native = oracle.setup_native();
+    prep_cost.work_native = oracle.setup_work_native();
     prep_cost.wall_ns = prep_started.elapsed().as_nanos() as u64;
 
     // ── Stages 3 and 4: relations, then the matrix ─────────────────
@@ -451,6 +452,7 @@ pub fn run_pipeline<G: CountedGroup>(
     for (name, value) in oracle.relation_counters() {
         outcome.relations.count(&name, value);
     }
+    outcome.relations.work_all(&oracle.relation_work_native());
     // Kept opt-in so the previously recorded full-rank sessions retain
     // byte-identical replay and charging. A checked run cannot claim a
     // verified full-rank solution solely from the target-point check.
@@ -458,6 +460,12 @@ pub fn run_pipeline<G: CountedGroup>(
         measurement::mark(measurement::Phase::RecoveryCheck);
         outcome.verified =
             check_full_rank_base_columns(ctx, &fb, matrix.as_ref(), &mut outcome.verify);
+        // The check's `pinned` scans: the matrix's totals replace the
+        // ones the relation loop recorded.
+        outcome
+            .linear_algebra
+            .work_native
+            .extend(matrix.work_counters());
     }
     measurement::end_online();
 
@@ -708,6 +716,63 @@ mod tests {
         assert!(report.s > 0.0 && report.s.is_finite());
         assert!(report.factor_base.columns > 0);
         assert!(report.decomposition.relations_found >= report.linear_algebra.rank);
+        // Every stage marks the work it now counts for `bitop/v1`, and
+        // counts some: the base's indexes, the table's inserts, the walk's
+        // bookkeeping, the rows and the elimination's scans.
+        let marks = [
+            (
+                &report.factor_base.cost,
+                "counted:base_index_builds",
+                "index_inserts",
+            ),
+            (
+                &report.decomposition.setup,
+                "counted:table_insert_attempts",
+                "table_insert_attempts",
+            ),
+            (
+                &report.decomposition.cost,
+                "counted:walk_bookkeeping",
+                "walk_modr_adds",
+            ),
+            (
+                &report.linear_algebra.cost,
+                "counted:relation_row_construction",
+                "row_build_words",
+            ),
+            (
+                &report.linear_algebra.cost,
+                "counted:gauss_column_scans_and_pivot_inversions",
+                "gauss_entries_scanned",
+            ),
+            (
+                &report.linear_algebra.cost,
+                "counted:gauss_column_scans_and_pivot_inversions",
+                "pivot_inversion_steps",
+            ),
+        ];
+        for (phase, marker, counter) in marks {
+            assert_eq!(phase.work_native.get(marker), Some(&1), "{marker}");
+            assert!(
+                phase.work_native.get(counter).copied().unwrap_or(0) > 0,
+                "{counter}"
+            );
+            // `native` never carries them: committed records replay.
+            assert!(
+                !phase.native.contains_key(counter),
+                "{counter} leaked into native"
+            );
+        }
+        let la = &report.linear_algebra.cost.work_native;
+        assert_eq!(
+            la["pivot_inversion_steps"],
+            report.linear_algebra.rank
+                * crate::cryptanalysis::ic_boundary::pivot_inversion_steps(ctx.r)
+        );
+        assert_eq!(
+            la["row_build_modr_muls"],
+            2 * report.decomposition.relations_found
+        );
     }
 
     /// **The stride reaches the walk's answer without the walk's jump
