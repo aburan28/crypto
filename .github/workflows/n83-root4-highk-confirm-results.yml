@@ -4,9 +4,8 @@ on:
   push:
     branches: [codex/n83-root4-highk-confirm-20261016]
     paths:
-      - research/n83_root4_highk_confirm_results_20261016/records_index.json
-      - research/n83_root4_highk_confirm_results_20261016/selection.json
-      - research/n83_root4_highk_confirm_results_20261016/measurements.json.gz
+      - .github/workflows/n83-root4-highk-confirm-results.yml
+      - research/n83_root4_highk_confirm_results_20261016/**
   workflow_dispatch:
 
 permissions:
