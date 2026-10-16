@@ -875,13 +875,13 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 <tr><td>2026-10-15</td><td>Elliptic curve, complete method-solve simulated instructions</td><td>Conductor gap ell131101-q37, icv1-fp37-t277-91fd6e29, archived eight-target IC/rho census</td><td class="n">47.77148&times; <small>simulated instruction diagnostic</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#conductor-gap-ir-20261014">panel</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md">source</a></td></tr>
 <tr><td>2026-10-15</td><td>Elliptic curve, complete method-solve simulated instructions</td><td>Conductor gap ell131101-q37, icv1-fp37-t277-090dc414, archived eight-target IC/rho census</td><td class="n">47.07830&times; <small>simulated instruction diagnostic</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#conductor-gap-ir-20261014">panel</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md">source</a></td></tr>
 <tr><td>2026-10-14</td><td>Elliptic curve, whole method, cold, one target</td><td>Frobenius-orbit IC, fully priced, stride-renew, vs rho-frob: best cell <code>icv1-f2m29-tm40309-30c52b96</code> (r = 2<sup>15.4</sup>)</td><td class="n">1.566&times; <small>S; [0.992, 2.347]; 18.2&times; at r = 2<sup>39</sup></small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#lab-ecbench-all">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_frobenius_orbit_vs_rho_20261014/README.md">source</a></td></tr>
-</tbody><tr><td>2026-10-15</td><td>Binary decomposition-oracle stage (non-Koblitz, l=8..10)</td><td>MITM oracle ladder to l=10: 2,076 ops at l=9, 4,212 at l=10 vs 134,912 / 525,312 quartic solves, 128 targets, 0 disagreements</td><td class="n">0.0080&times;</td><td>stage</td><td><span class="chip">engineering</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/binary_mitm_oracle_l9_l10_20261015/REPORT.typ">source</a></td></tr><tr><td>2026-10-15</td><td>Binary decomposition-oracle stage (non-Koblitz, l=8)</td><td>First sub-2<sup>2&ell;</sup> oracle at &ell;=8: MITM pair table vs pairs-and-solve, 64 targets, 0 disagreements</td><td class="n">0.0325&times;</td><td>stage</td><td><span class="chip">engineering</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/binary_mitm_oracle_l8_20261015/REPORT.typ">source</a></td></tr></table></div></details>
+</tbody><tr><td>2026-10-16</td><td>Binary decomposition-oracle stage (non-Koblitz, l=8..12)</td><td>MITM oracle ladder to l=12: 8,068 ops at l=11, 16,092 at l=12 vs 2,098,176 / 8,390,656 quartic solves, 128 targets, 0 disagreements</td><td class="n">0.0019&times;</td><td>stage</td><td><span class="chip">engineering</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/binary_mitm_oracle_l11_l12_20261016/REPORT.typ">source</a></td></tr><tr><td>2026-10-15</td><td>Binary decomposition-oracle stage (non-Koblitz, l=8..10)</td><td>MITM oracle ladder to l=10: 2,076 ops at l=9, 4,212 at l=10 vs 134,912 / 525,312 quartic solves, 128 targets, 0 disagreements</td><td class="n">0.0080&times;</td><td>stage</td><td><span class="chip">engineering</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/binary_mitm_oracle_l9_l10_20261015/REPORT.typ">source</a></td></tr><tr><td>2026-10-15</td><td>Binary decomposition-oracle stage (non-Koblitz, l=8)</td><td>First sub-2<sup>2&ell;</sup> oracle at &ell;=8: MITM pair table vs pairs-and-solve, 64 targets, 0 disagreements</td><td class="n">0.0325&times;</td><td>stage</td><td><span class="chip">engineering</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/binary_mitm_oracle_l8_20261015/REPORT.typ">source</a></td></tr></table></div></details>
 <noscript><div class="dash-detail-body"><p>The chart needs JavaScript; the table above lists every plotted point.</p></div></noscript>
 <p class="dash-footnote">What would move the heavy series below the line for good: a cold, one-target, every-phase-priced <code>S</code> below a matched rho&rsquo;s at growing size (AGENTS.md &sect;2, &sect;8). The nearest measured approaches are 1.36&times; (round 0025) and 1.314&times; in CPU time (n41). The exponent story is in the <a href="#boundary-ledger">boundary ledger</a>: no fitted exponent on an elliptic curve sits below rho&rsquo;s one half; the cover route&rsquo;s ratio falls with size but on a weak class.</p>
 <script type="application/json" id="progress-data">
 {
   "schema_version": "ic-progress-timeline/1",
-  "updated": "2026-10-15",
+  "updated": "2026-10-16",
   "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
   "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Direction against 1 is meaningful only for fully priced ratios; a quotient of incomplete lower bounds is diagnostic even when paired. No value on this page is computed from another.",
   "series": [
@@ -1734,7 +1734,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
     },
     {
       "id": "binary-decomp-oracle",
-      "label": "Binary decomposition-oracle stage (non-Koblitz, l=8..10)",
+      "label": "Binary decomposition-oracle stage (non-Koblitz, l=8..12)",
       "role": "context",
       "note": "Per-target oracle work of the sub-2^(2l) binary decomposition-oracle ladder, in counted point-additions divided by the pairs-and-solve pair count on the same 64 targets per rung (non-Koblitz curve y^2+xy=x^3+z*x^2+1 over F_(2^25)/F_(2^27)/F_(2^31)). The 2^(2l)-entry pair tables are target-independent and charged to the factor-base stage; relation collection stays Theta(2^n) overall, so these are stage diagnostics, not attacks or crossovers. FFD unmeasured with reason (group-law oracle).",
       "points": [
@@ -1757,6 +1757,16 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           "class": "engineering",
           "anchor": "#rho-parity-ledger",
           "source": "https://github.com/aburan28/crypto/blob/main/research/binary_mitm_oracle_l9_l10_20261015/REPORT.typ"
+        },
+        {
+          "date": "2026-10-16",
+          "value": 0.0019,
+          "reference": "stage",
+          "label": "MITM oracle ladder to l=12: 8,068 ops at l=11, 16,092 at l=12 against 2,098,176 / 8,390,656 quartic solves",
+          "detail": "The l=11 rung over F_(2^33) (2,017 points, 2,033,876-sum table, 65 MB) reads median 1.746 ms vs 1.62 s (928.0x) and l=12 over F_(2^37) (4,023 points, 8,092,016-sum table, 259 MB) 8.566 ms vs 18.7 s (2,187.2x); 0 disagreements with pairs-and-solve on all 128 targets, all witnesses group-verified. l=12 is the largest rung at which pairs-and-solve was historically usable, decided by the MITM arm for at most 16,092 counted point additions. Class: engineering; no exponent, no vs_rho, no key recovery. Value plotted: max counted MITM ops at l=12 divided by its pairs count (16,092 / 8,390,656 = 0.0019).",
+          "class": "engineering",
+          "anchor": "#rho-parity-ledger",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/binary_mitm_oracle_l11_l12_20261016/REPORT.typ"
         }
       ]
     }
@@ -4565,38 +4575,41 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 
   <div class="panel" id="ecc2k130-descent-degree-20260930">
     <div class="panel-head">
-      <h2>ECC2K-130 descent route: the solving degree grows with &ell; and tracks the semi-regular reference, so the route has no crossover to wait for</h2>
-  <p class="panel-summary">Finds the refutation degree rises with &ell; at m = 3 and, measured since 2026-10-06, at m = 4 (one degree higher, flat in n), leaving m = 3 above rho with a free oracle; n = 131 prices derived not measured.</p>
+      <h2>ECC2K-130 descent route: XL's refutation degree grows with &ell;, but the MutantXL closure refutes the same draws at 3&ndash;4, flat in &ell;</h2>
+  <p class="panel-summary">Finds XL's refutation degree rises with &ell; at m = 3 and m = 4, while MutantXL closure (2026-10-16) refutes all 92 draws at 3&ndash;4, flat in &ell;; held at 4 the best m = 4 row is 2^68.43, still above rho; n = 131 prices derived not measured.</p>
       <p>Class <span class="chip">accounting</span>. There is no new <code>S</code> and no cost moves: the ECC2K-130
         verdict was already set by the product law and the oracle budget above. This panel adds what the
         refutation degree of the <code>m</code>&thinsp;=&thinsp;3 chained S<sub>3</sub> system does as &ell; grows,
         measured in <code>RESEARCH_DREG_MEASUREMENT.md</code> Results&nbsp;4&ndash;9, the m&thinsp;=&thinsp;4 chain added on
-        2026-10-06 (Result&nbsp;10), and the price that implies at
+        2026-10-06 (Result&nbsp;10), the MutantXL closure degree of the same draws measured on 2026-10-16
+        (Result&nbsp;11), and the price that implies at
         n&thinsp;=&thinsp;131 under each degree model. Every n&thinsp;=&thinsp;131 figure is <b>derived, not
         measured</b>. Sources: <code>research/dreg_degree7_ell5_20260930/</code>,
-        <code>research/dreg_m4_chain_20261006/</code> and
+        <code>research/dreg_m4_chain_20261006/</code>, <code>research/dreg_closure_mutantxl_20261016/</code> and
         <code>research/notes/ecc2k130/RESEARCH_ECC2K130_DESCENT_DEGREE.md</code>.</p>
     </div>
     <div class="table-scroll"><table>
       <caption>The refutation degree, four unsatisfiable draws per cell: the degree at which the constant 1
         enters the Macaulay row space. &ldquo;&ge;D&rdquo; is a lower bound. The first fall degree is 3 in every
         cell. D<sub>reg</sub> is the semi-regular degree of regularity of the cell's shape, a formula
-        (<code>dreg_score semireg</code>, native; <code>semireg.py</code> was the 2026-09-30 tool and agrees on every cell).</caption>
+        (<code>dreg_score semireg</code>, native; <code>semireg.py</code> was the 2026-09-30 tool and agrees on every cell).
+        &ldquo;Closure&rdquo; is the first degree at which the MutantXL fall closure (falls times monomials, saturated) refutes the same
+        draw (<code>dreg_score closure</code>, 2026-10-16); blank where not measured.</caption>
       <thead>
         <tr><th scope="col">&ell;</th><th scope="col">cells (n, &ell;)</th><th scope="col">unknowns</th>
-          <th scope="col">measured</th><th scope="col">semi-regular D<sub>reg</sub></th></tr>
+          <th scope="col">measured</th><th scope="col">semi-regular D<sub>reg</sub></th><th scope="col">closure (2026-10-16)</th></tr>
       </thead>
       <tbody>
-        <tr class="group"><td colspan="5">m&thinsp;=&thinsp;3, the chained S<sub>3</sub> with one intermediate point</td></tr>
-        <tr><td>2</td><td>(5,2) (7,2) (8,2) (10,2) (12,2)</td><td class="n">11&ndash;18</td><td>5 in every draw</td><td>5</td></tr>
-        <tr><td>3</td><td>(4,3) (5,3) (7,3) (9,3)</td><td class="n">13&ndash;18</td><td>5; 6; 6; 6</td><td>5; 5; 6; 6</td></tr>
-        <tr><td>4</td><td>(7,4) (8,4) (11,4) (13,4)</td><td class="n">19&ndash;25</td><td>7767; 6767; 6666; 6666</td><td>6; 6; 7; 7</td></tr>
-        <tr><td>5</td><td>(10,5)</td><td class="n">25</td><td><b>7 7 7 7</b>: exactly 7, the degree-7 study</td><td>7</td></tr>
-        <tr><td>5</td><td>(11,5) (13,5) (15,5)</td><td class="n">26&ndash;30</td><td>&ge;7 in every draw; degree 7 needs hosts of about 24, 64 and 128 GB</td><td>7; 7; 8</td></tr>
-        <tr class="group"><td colspan="5">m&thinsp;=&thinsp;4, two intermediate points (2026-10-06)</td></tr>
-        <tr><td>1</td><td>(4,1) (5,1) (6,1)</td><td class="n">12&ndash;16</td><td>5 in every draw</td><td>5</td></tr>
-        <tr><td>2</td><td>(5,2) (6,2) (7,2) (8,2)</td><td class="n">18&ndash;24</td><td><b>6 in every draw</b>: one above m&thinsp;=&thinsp;3</td><td>6; 7; 7; 7</td></tr>
-        <tr><td>3</td><td>(9,3) (10,3)</td><td class="n">30, 32</td><td><b>&ge;7 &ge;7 &ge;7 &ge;7; &ge;7 &ge;7 &ge;7 &ge;7</b> (degree 6 in full)</td><td>8; 9</td></tr>
+        <tr class="group"><td colspan="6">m&thinsp;=&thinsp;3, the chained S<sub>3</sub> with one intermediate point</td></tr>
+        <tr><td>2</td><td>(5,2) (7,2) (8,2) (10,2) (12,2)</td><td class="n">11&ndash;18</td><td>5 in every draw</td><td>5</td><td>4 3 4 4; 4 4 4 3; 4 4 4 4; 4 4 4 4; <b>3 3 3 3</b></td></tr>
+        <tr><td>3</td><td>(4,3) (5,3) (7,3) (9,3)</td><td class="n">13&ndash;18</td><td>5; 6; 6; 6</td><td>5; 5; 6; 6</td><td>4 in all 16 draws</td></tr>
+        <tr><td>4</td><td>(7,4) (8,4) (11,4) (13,4)</td><td class="n">19&ndash;25</td><td>7767; 6767; 6666; 6666</td><td>6; 6; 7; 7</td><td><b>4 in all 16 draws</b></td></tr>
+        <tr><td>5</td><td>(10,5)</td><td class="n">25</td><td><b>7 7 7 7</b>: exactly 7, the degree-7 study</td><td>7</td><td><b>4 4 4 4</b>, three below XL</td></tr>
+        <tr><td>5</td><td>(11,5) (13,5) (15,5)</td><td class="n">26&ndash;30</td><td>&ge;7 in every draw; degree 7 needs hosts of about 24, 64 and 128 GB</td><td>7; 7; 8</td><td></td></tr>
+        <tr class="group"><td colspan="6">m&thinsp;=&thinsp;4, two intermediate points (2026-10-06)</td></tr>
+        <tr><td>1</td><td>(4,1) (5,1) (6,1)</td><td class="n">12&ndash;16</td><td>5 in every draw</td><td>5</td><td>4 3 4 4; 4 4 4 3; 3 4 4 3</td></tr>
+        <tr><td>2</td><td>(5,2) (6,2) (7,2) (8,2)</td><td class="n">18&ndash;24</td><td><b>6 in every draw</b>: one above m&thinsp;=&thinsp;3</td><td>6; 7; 7; 7</td><td>3&ndash;4 in every draw</td></tr>
+        <tr><td>3</td><td>(9,3) (10,3)</td><td class="n">30, 32</td><td><b>&ge;7 &ge;7 &ge;7 &ge;7; &ge;7 &ge;7 &ge;7 &ge;7</b> (degree 6 in full)</td><td>8; 9</td><td><b>4 in all eight draws</b></td></tr>
       </tbody>
     </table></div>
     <div class="table-scroll"><table>
@@ -4620,6 +4633,9 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <tr><td>4</td><td>D&thinsp;=&thinsp;7, constant (borrowed from m&thinsp;=&thinsp;3; m&thinsp;=&thinsp;4 already reaches 7 at &ell;&thinsp;=&thinsp;3, far below the &ell;&thinsp;=&thinsp;34 priced here, so this row assumes its rise stops at once)</td><td class="n">1</td><td class="n">82.11</td><td class="n">+21.30</td><td><span class="chip">extrapolation</span></td></tr>
         <tr><td>4</td><td>&ell;&thinsp;+&thinsp;4, the measured m&thinsp;=&thinsp;4 fit (minimum at &ell;&thinsp;=&thinsp;4) &mdash; 2026-10-06</td><td class="n">1</td><td class="n">173.13</td><td class="n">+112.32</td><td><span class="chip">extrapolation</span></td></tr>
         <tr><td>4</td><td>semi-regular D<sub>reg</sub>(N) of the m&thinsp;=&thinsp;4 shape (55 at &ell;&thinsp;=&thinsp;27) &mdash; 2026-10-06</td><td class="n">1</td><td class="n">275.14</td><td class="n">+214.33</td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>3</td><td>D&thinsp;=&thinsp;4, constant: the measured MutantXL closure degree (&ell;&thinsp;=&thinsp;40) &mdash; 2026-10-16</td><td class="n">1</td><td class="n">82.27</td><td class="n">+21.46</td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>4</td><td>D&thinsp;=&thinsp;4, constant: the measured MutantXL closure degree (&ell;&thinsp;=&thinsp;33) &mdash; 2026-10-16</td><td class="n">1</td><td class="n">68.43</td><td class="n">+7.62</td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>4</td><td>D&thinsp;=&thinsp;4, constant: the closure (&ell;&thinsp;=&thinsp;34), w&thinsp;=&thinsp;2, which its counted work tracks &mdash; 2026-10-16</td><td class="n">2</td><td class="n">93.91</td><td class="n">+33.10</td><td><span class="chip">extrapolation</span></td></tr>
       </tbody>
     </table></div>
     <div class="panel-head">
@@ -4644,6 +4660,15 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         (m&thinsp;=&thinsp;4), above an exhaustive search of the subgroup; below the searched range (&ell;&thinsp;&lt;&thinsp;4)
         they price 2<sup>158.12</sup>&ndash;2<sup>170.90</sup> with target counts past the 2<sup>129</sup> subgroup, still above
         that search. Those are extrapolations of three-rung fits, marked as such; the verdict against rho is unchanged.</p>
+      <p><b>The growth is XL's, not the ideal's (2026-10-16).</b> Every degree above is plain XL's. Saturating each
+        degree under MutantXL's fall closure refutes all 92 committed unsatisfiable draws below XL, at 3 or 4, in every
+        cell, with no growth in &ell; (1&ndash;5), m (3, 4) or unknowns (11&ndash;32); 58 of 84 resolved draws are two or
+        more degrees below. XL identity held on every degree built, and the closure refuted none of the committed
+        satisfiable draws (a soundness control added after measurement, disclosed). Held at 4 to n&thinsp;=&thinsp;131 the
+        best m&thinsp;=&thinsp;4 row is 2<sup>68.43</sup> (w&thinsp;=&thinsp;1), 7.62 bits over rho in unconverted units,
+        against 2<sup>173.13</sup> under the XL fit: the constant-degree case is back as an <b>open extrapolation</b> from
+        N&thinsp;&le;&thinsp;32 to N&thinsp;&asymp;&thinsp;400, not a measurement. The free-oracle floor still leaves 2<sup>5.71</sup>
+        per target, so no row beats rho. Next: a sparse degree-4 closure at N&thinsp;&asymp;&thinsp;40&ndash;50.</p>
     </div>
   </div>
 
