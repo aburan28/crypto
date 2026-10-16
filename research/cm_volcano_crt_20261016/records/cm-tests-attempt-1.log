@@ -1,0 +1,24 @@
+   Compiling isogeny_algos v0.1.0 (/workspace/scratch/599516f9ea0d/crypto/isogeny_algos)
+    Finished `release` profile [optimized] target(s) in 3m 07s
+     Running unittests src/lib.rs (isogeny_algos/target/release/deps/isogeny_algos-65b786a8bd7d996d)
+
+running 6 tests
+test find::sutherland::crt::tests::reconstructs_signed_bounds_for_arbitrary_targets ... ok
+test find::sutherland::crt::tests::rejects_bad_setup_and_push_is_transactional ... ok
+test find::sutherland::cm::tests::rejects_invalid_parameters_and_wrong_norm ... ok
+
+thread 'find::sutherland::cm::tests::selected_degrees_and_v_one_match_hecke' (74) panicked at src/find/sutherland/cm.rs:343:44:
+called `Result::unwrap()` on an `Err` value: "insufficient CM primes below 2^22 for the coefficient bound"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test find::sutherland::cm::tests::selected_degrees_and_v_one_match_hecke ... FAILED
+test find::sutherland::cm::tests::talk_fixture_and_noncyclic_surface_match_hecke ... ok
+test find::sutherland::cm::tests::explicit_cm_crt_matches_integer_q_expansion ... ok
+
+failures:
+
+failures:
+    find::sutherland::cm::tests::selected_degrees_and_v_one_match_hecke
+
+test result: FAILED. 5 passed; 1 failed; 0 ignored; 0 measured; 21 filtered out; finished in 1.90s
+
+error: test failed, to rerun pass `--lib`

@@ -1,0 +1,86 @@
+name: N83 root4 high-K fresh confirmation
+
+on:
+  push:
+    branches: [codex/n83-root4-highk-confirm-20261016]
+    paths:
+      - .github/workflows/n83-root4-highk-confirm.yml
+      - research/n83_root4_highk_confirm_20261016/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: n83-root4-highk-confirm-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  four-arm-highk-confirmation:
+    if: github.repository == 'aburan28/crypto'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Freeze 8000 unseen public points and source preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          mkdir -p "$RUNNER_TEMP/n83-root4-highk-confirm"
+          python3 research/n83_k3250_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k3350_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k_abba_20261015/generate.py > /dev/null
+          python3 research/n83_root4_highk_20261015/generate.py > /dev/null
+          python3 research/n83_best_e2e_20261015/generate.py > /dev/null
+          python3 research/n83_legacy_challenger_20261015/generate.py > /dev/null
+          python3 research/n83_root4_bloom_20261015/generate.py > /dev/null
+          python3 research/n83_root11_highk_20261015/generate.py > /dev/null
+          python3 research/n83_root11_edgek_20261015/generate.py > /dev/null
+          python3 research/n83_final_tournament_20261015/generate.py > /dev/null
+          python3 research/n83_edge_confirmation_20261015/generate.py > /dev/null
+          python3 research/n83_final_tier1_20261015/generate.py > /dev/null
+          python3 research/n83_unresolved_tier1_20261015/generate.py > /dev/null
+          python3 research/n83_root4_highk_confirm_20261016/generate.py > \
+            "$RUNNER_TEMP/n83-root4-highk-confirm/fixture-check.json"
+          python3 research/n83_root4_highk_confirm_20261016/run.py --preflight > \
+            "$RUNNER_TEMP/n83-root4-highk-confirm/preflight.json"
+          rustc --version > "$RUNNER_TEMP/n83-root4-highk-confirm/rustc-version.txt"
+          cargo --version > "$RUNNER_TEMP/n83-root4-highk-confirm/cargo-version.txt"
+      - name: Build and test exact N83 producer
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-root4-highk-confirm-target"
+          export CARGO_BUILD_JOBS=2
+          cargo test --release --locked --example koblitz_orbit_dlp_fast > \
+            "$RUNNER_TEMP/n83-root4-highk-confirm/example-tests.log" 2>&1
+          cargo build --release --locked --example koblitz_orbit_dlp_fast > \
+            "$RUNNER_TEMP/n83-root4-highk-confirm/build.log" 2>&1
+      - name: Run four bounded complete pipeline arms
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-root4-highk-confirm-target"
+          python3 research/n83_root4_highk_confirm_20261016/run.py \
+            --binary "$CARGO_TARGET_DIR/release/examples/koblitz_orbit_dlp_fast" \
+            --output "$RUNNER_TEMP/n83-root4-highk-confirm/results" \
+            2>&1 | tee "$RUNNER_TEMP/n83-root4-highk-confirm/run.log"
+      - name: Independently replay four bases and 32000 target records
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -d "$RUNNER_TEMP/n83-root4-highk-confirm/results" ]; then
+            python3 research/n83_root4_highk_confirm_20261016/verify.py \
+              "$RUNNER_TEMP/n83-root4-highk-confirm/results" \
+              2>&1 | tee "$RUNNER_TEMP/n83-root4-highk-confirm/verify.log"
+          fi
+      - name: Preserve all raw rows and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-root4-highk-confirm-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-root4-highk-confirm/
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,17 @@
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	﻿2026-10-16T11:12:38.9078029Z ##[group]Run python3 -B .github/scripts/check-pr-budgets.py
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9078302Z ^[[36;1mpython3 -B .github/scripts/check-pr-budgets.py^[[0m
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9130704Z shell: /usr/bin/bash -e {0}
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9130847Z env:
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9131001Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9131237Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9131467Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9131678Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9131885Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9132094Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:38.9132268Z ##[endgroup]
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:39.7599552Z .github/workflows/codeql.yml: analyze can run on pull_request/opened without a proven 1–25 minute timeout
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:39.7600247Z Checked routine PR/merge-group budgets in 406 workflows: 4 violations
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:39.7600932Z .github/workflows/codeql.yml: analyze can run on pull_request/synchronize without a proven 1–25 minute timeout
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:39.7601578Z .github/workflows/codeql.yml: analyze can run on pull_request/reopened without a proven 1–25 minute timeout
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:39.7602248Z .github/workflows/codeql.yml: analyze can run on merge_group/checks_requested without a proven 1–25 minute timeout
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-16T11:12:39.7670304Z ##[error]Process completed with exit code 1.
