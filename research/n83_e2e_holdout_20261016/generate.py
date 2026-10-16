@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Freeze five N83 cold-factor-base holdout points before the K-grid result."""
 
+import argparse
 import hashlib
 import importlib.util
 import json
@@ -27,6 +28,48 @@ group = cold.group
 
 def sha256(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def verify_sealed():
+    """Replay committed fixtures on a clean checkout without local archives."""
+    manifest = json.loads((HERE / "fixture_manifest.json").read_text())
+    if (manifest["domain"] != DOMAIN.decode()
+            or manifest["target_count"] != 5
+            or manifest["prior_target_hashes"] != PRIOR_FILES
+            or sha256(HERE / "targets.jsonl") != manifest["targets_sha256"]
+            or sha256(HERE / "answers.jsonl") != manifest["answers_sha256"]):
+        raise ValueError("sealed holdout fixture or manifest differs")
+    prior = set()
+    for relative, expected in PRIOR_FILES.items():
+        path = ROOT / relative
+        if sha256(path) != expected:
+            raise ValueError(f"committed prior target changed: {relative}")
+        for line in path.read_text().splitlines():
+            encoded = json.loads(line)
+            point = group.point_from_json(encoded)
+            if not group.on_curve(point) or group.multiply(point, group.R) is not None:
+                raise ValueError(f"prior point fails subgroup replay: {relative}")
+            prior.add(tuple(encoded))
+    targets = [json.loads(line) for line in
+               (HERE / "targets.jsonl").read_text().splitlines()]
+    answers = [json.loads(line) for line in
+               (HERE / "answers.jsonl").read_text().splitlines()]
+    if len(targets) != 5 or len(answers) != 5:
+        raise ValueError("five sealed public points and answers required")
+    for index, (encoded, answer) in enumerate(zip(targets, answers)):
+        seed = hashlib.sha256(DOMAIN + index.to_bytes(4, "little")).digest()
+        scalar = 1 + int.from_bytes(seed, "little") % (group.R - 1)
+        point = group.point_from_json(encoded)
+        if (encoded != [str(value) for value in group.multiply(group.G, scalar)]
+                or answer != {"fixture_index": index, "point": encoded,
+                              "scalar": str(scalar), "seed_sha256": seed.hex()}
+                or tuple(encoded) in prior or not group.on_curve(point)
+                or group.multiply(point, group.R) is not None):
+            raise ValueError(f"sealed point {index} fails independent replay")
+        prior.add(tuple(encoded))
+    print(json.dumps({"mode": "sealed_replay", "target_count": 5,
+                      "targets_sha256": manifest["targets_sha256"],
+                      "answers_sha256": manifest["answers_sha256"]}, sort_keys=True))
 
 
 def main():
@@ -72,4 +115,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--verify-sealed", action="store_true")
+    args = parser.parse_args()
+    verify_sealed() if args.verify_sealed else main()

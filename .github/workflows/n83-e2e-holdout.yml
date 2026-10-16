@@ -4,6 +4,8 @@ on:
   push:
     branches: [codex/n83-e2e-holdout-freeze-20261016]
     paths:
+      - .github/workflows/n83-e2e-holdout.yml
+      - research/n83_e2e_holdout_20261016/generate.py
       - research/n83_e2e_holdout_20261016/selection.json
       - research/n83_e2e_holdout_20261016/screen_analysis.json
   workflow_dispatch:
@@ -29,7 +31,7 @@ jobs:
           set -euo pipefail
           export PYTHONDONTWRITEBYTECODE=1
           mkdir -p "$RUNNER_TEMP/n83-e2e-holdout"
-          python3 research/n83_e2e_holdout_20261016/generate.py > \
+          python3 research/n83_e2e_holdout_20261016/generate.py --verify-sealed > \
             "$RUNNER_TEMP/n83-e2e-holdout/fixture-check.json"
           python3 research/n83_e2e_holdout_20261016/run.py --preflight > \
             "$RUNNER_TEMP/n83-e2e-holdout/preflight.json"
