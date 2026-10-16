@@ -52,6 +52,25 @@ So the generic field, formulas, evaluators, recoding, tables and
 decomposition reproduce the specialised harness exactly before they are used
 on any new curve.
 
+## Visuals
+
+Drawn only from the committed JSON records by
+[`figures/plot.py`](figures/plot.py); nothing was re-run.
+
+* [`REPORT.pdf`](REPORT.pdf) (source [`REPORT.typ`](REPORT.typ)): results
+  report with the four figures.
+* [`reports/run-20261016T1759Z/report.pdf`](reports/run-20261016T1759Z/report.pdf):
+  run report (what ran, runs completed, isolation, raw-record paths).
+* [`figures/fig_counted_vs_model.svg`](figures/fig_counted_vs_model.svg):
+  counted vs model ratio per curve; every total arm's deviation from the model.
+* [`figures/fig_timed.svg`](figures/fig_timed.svg): declared GLV arm vs the
+  reference, counted / median / min ratio with the A/A floor; per-round times.
+* [`figures/fig_grid.svg`](figures/fig_grid.svg): width × table grid of the
+  declared chain, counted M_eq and median µs.
+* [`figures/fig_phi.svg`](figures/fig_phi.svg): `φ(P)` stage diagnostics,
+  counted M_eq against median µs per chain.
+* Browsing copies: [`benchmarks/20261016-endo-native-bench/`](../../benchmarks/20261016-endo-native-bench/).
+
 ## Headline (counted primary, timed secondary)
 
 | curve | `p` / `n` bits | best baseline (counted) | best GLV-2 (counted) | counted ratio | model ratio | declared GLV, median ratio vs fastest baseline | min ratio | A/A median ratio |
