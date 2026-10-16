@@ -1,0 +1,59 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "rootfind stride scaling check: public E_0 n=19",
+  "description": "Frozen in research/ecbench_rootfind_speedup_20261014/PROTOCOL.md. H3 (descriptive): where the stride stops mattering. Same oracle, dimension 6.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 19
+      }
+    ],
+    "targets_per_curve": 16,
+    "target_seed": 202610141510,
+    "target_kind": "public"
+  },
+  "arms": [
+    {
+      "name": "rho-strong",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius_strong"
+      }
+    },
+    {
+      "name": "ic-negfold-m2-d6-walk",
+      "role": "baseline",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=6",
+          "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-negfold-m2-d6-stride",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=6",
+          "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+          "max_trials": "200000",
+          "targets": "stride"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 2,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 202610141511,
+    "isolation_required": "L0",
+    "timeout_seconds": 1800
+  }
+}

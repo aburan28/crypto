@@ -1,0 +1,83 @@
+{
+ "what_this_is": "The six a=-3 prime-order curves of the frontier campaign, as prime_curves.jsonl (examples/ic_frontier_prime_curves.rs); kept as JSON so the curve registry harvests them.",
+ "curves": [
+  {
+   "name": "ic-frontier-fp20",
+   "p": 1048571,
+   "a": 1048568,
+   "b": 44,
+   "group_order": 1048189,
+   "subgroup_order": 1048189,
+   "cofactor": 1,
+   "generator": {
+    "x": 2,
+    "y": 317355
+   }
+  },
+  {
+   "name": "ic-frontier-fp24",
+   "p": 16777199,
+   "a": 16777196,
+   "b": 31,
+   "group_order": 16782299,
+   "subgroup_order": 16782299,
+   "cofactor": 1,
+   "generator": {
+    "x": 2,
+    "y": 5412647
+   }
+  },
+  {
+   "name": "ic-frontier-fp28",
+   "p": 268435399,
+   "a": 268435396,
+   "b": 3,
+   "group_order": 268407199,
+   "subgroup_order": 268407199,
+   "cofactor": 1,
+   "generator": {
+    "x": 1,
+    "y": 1
+   }
+  },
+  {
+   "name": "ic-frontier-fp32",
+   "p": 4294967291,
+   "a": 4294967288,
+   "b": 31,
+   "group_order": 4294959973,
+   "subgroup_order": 4294959973,
+   "cofactor": 1,
+   "generator": {
+    "x": 2,
+    "y": 2120051858
+   }
+  },
+  {
+   "name": "ic-frontier-fp36",
+   "p": 68719476731,
+   "a": 68719476728,
+   "b": 33,
+   "group_order": 68719022539,
+   "subgroup_order": 68719022539,
+   "cofactor": 1,
+   "generator": {
+    "x": 2,
+    "y": 51741851039
+   }
+  },
+  {
+   "name": "ic-frontier-fp40",
+   "p": 1099511627563,
+   "a": 1099511627560,
+   "b": 56,
+   "group_order": 1099512551701,
+   "subgroup_order": 1099512551701,
+   "cofactor": 1,
+   "generator": {
+    "x": 1,
+    "y": 15267301451
+   }
+  }
+ ]
+}

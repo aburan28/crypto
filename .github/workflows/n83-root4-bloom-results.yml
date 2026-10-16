@@ -1,0 +1,99 @@
+name: N83 root4 Bloom sealed result replay
+
+on:
+  push:
+    branches: [codex/n83-final-tournament-20261015]
+    paths:
+      - .github/workflows/n83-root4-bloom-results.yml
+      - research/n83_root4_bloom_results_20261015/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: n83-root4-bloom-results-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  eight-arm-sealed-replay:
+    if: github.repository == 'aburan28/crypto'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore the exact executed source and regenerate public points
+        shell: bash
+        run: |
+          set -euo pipefail
+          frozen=afea7179c40c9e00f8701a32c596e47cd8129f62
+          git fetch --no-tags --depth=1 origin "$frozen"
+          test "$(git rev-parse FETCH_HEAD)" = "$frozen"
+          git worktree add --detach "$RUNNER_TEMP/n83-frozen-source" "$frozen"
+          cd "$RUNNER_TEMP/n83-frozen-source"
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 research/n83_k3250_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k3350_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k_abba_20261015/generate.py > /dev/null
+          python3 research/n83_root4_highk_20261015/generate.py > /dev/null
+          python3 research/n83_best_e2e_20261015/generate.py > /dev/null
+          python3 research/n83_legacy_challenger_20261015/generate.py > /dev/null
+          python3 research/n83_root4_bloom_20261015/generate.py > \
+            "$RUNNER_TEMP/n83-root4-bloom-fixture.json"
+          test "$(sha256sum research/n83_root4_bloom_20261015/targets.jsonl | cut -d' ' -f1)" = \
+            71b93fd3a397ee2c1204dc14fc451894eee7537b99f50d75c98d65dee6b1e3d1
+          test "$(sha256sum research/n83_root4_bloom_20261015/answers.jsonl | cut -d' ' -f1)" = \
+            5417c1a10a4c2240eaec304627eddfbd287e1d005f674b1a2b17b3b957aa53e5
+          cp research/n83_root4_bloom_20261015/targets.jsonl \
+            "$GITHUB_WORKSPACE/research/n83_root4_bloom_20261015/targets.jsonl"
+          cp research/n83_root4_bloom_20261015/answers.jsonl \
+            "$GITHUB_WORKSPACE/research/n83_root4_bloom_20261015/answers.jsonl"
+
+      - name: Download and hash the exact completed artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/n83-root4-bloom-sealed"
+          gh api repos/aburan28/crypto/actions/artifacts/11999315231/zip > \
+            "$RUNNER_TEMP/n83-root4-bloom-sealed/raw.zip"
+          test "$(sha256sum "$RUNNER_TEMP/n83-root4-bloom-sealed/raw.zip" | cut -d' ' -f1)" = \
+            8687a0ad20ec1a0525a437f172801278a1a931771e88bef404c3559c77ed7626
+          unzip -q "$RUNNER_TEMP/n83-root4-bloom-sealed/raw.zip" -d \
+            "$RUNNER_TEMP/n83-root4-bloom-sealed/raw"
+          test "$(sha256sum "$RUNNER_TEMP/n83-root4-bloom-sealed/raw/results/analysis.json" | cut -d' ' -f1)" = \
+            15b47de167f99e004bccada699f739ff7d0d7e7f7e7960239d63b4b00183e547
+
+      - name: Independently replay eight bases and all 8000 target records
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 "$RUNNER_TEMP/n83-frozen-source/research/n83_root4_bloom_20261015/verify.py" \
+            "$RUNNER_TEMP/n83-root4-bloom-sealed/raw/results" > \
+            "$RUNNER_TEMP/n83-root4-bloom-sealed/local-replay.json"
+          test "$(sha256sum "$RUNNER_TEMP/n83-root4-bloom-sealed/raw/results/analysis.json" | cut -d' ' -f1)" = \
+            15b47de167f99e004bccada699f739ff7d0d7e7f7e7960239d63b4b00183e547
+
+      - name: Reproduce current-head candidate and measurement records
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 research/n83_root4_bloom_results_20261015/materialize.py \
+            --artifact-zip "$RUNNER_TEMP/n83-root4-bloom-sealed/raw.zip" \
+            "$RUNNER_TEMP/n83-root4-bloom-sealed/raw/results"
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+
+      - name: Preserve replay output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-root4-bloom-sealed-replay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-root4-bloom-sealed/local-replay.json
+          if-no-files-found: ignore
+          retention-days: 14

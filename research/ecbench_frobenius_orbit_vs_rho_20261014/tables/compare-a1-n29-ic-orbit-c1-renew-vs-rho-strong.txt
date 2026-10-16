@@ -1,0 +1,25 @@
+ops (ok): ic-orbit-c1-renew / rho-strong = 0.5739 [0.556, 0.593] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 0.0441 [0.040, 0.045]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 0.00%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-orbit-c1-renew / rho-strong | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m29-tm40309-30c52b96 | 15.37 | 16 | 0.5739 | [0.5555, 0.5934] | cluster |
+
+| workload | curve | log2 r | rho-strong mean S | ic-orbit-c1-renew mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W1e6dc615948d | icv1-f2m29-tm40309-30c52b96 | 15.37 | 4.3762 | 2.6525 | 0.6061 |
+| W417e10523167 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 4.8263 | 2.5399 | 0.5263 |
+| W502ec9b19a73 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 4.5462 | 3.0007 | 0.6601 |
+| W5a87559c0e9b | icv1-f2m29-tm40309-30c52b96 | 15.37 | 4.5440 | 2.4161 | 0.5317 |
+| W5cd9fc3eda17 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 4.6670 | 2.6466 | 0.5671 |
+| W7962be79fb55 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 4.3183 | 2.6123 | 0.6049 |
+| W7ad986f5ce5a | icv1-f2m29-tm40309-30c52b96 | 15.37 | 4.6095 | 2.5590 | 0.5552 |
+| W7de6fa1767fd | icv1-f2m29-tm40309-30c52b96 | 15.37 | 4.5454 | 2.5446 | 0.5598 |
+| W8c8ef1552275 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 4.5474 | 2.5218 | 0.5546 |
+| Wb3068b7612b6 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 4.4885 | 2.5731 | 0.5733 |
+| Wb82e0e8a4fb7 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 4.5445 | 2.5989 | 0.5719 |
+| Wbc87487a57ce | icv1-f2m29-tm40309-30c52b96 | 15.37 | 4.6601 | 2.7018 | 0.5798 |
+| Wbf3dec6c8938 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 4.4943 | 2.6475 | 0.5891 |
+| Wd018224f33ba | icv1-f2m29-tm40309-30c52b96 | 15.37 | 4.4309 | 2.5045 | 0.5652 |
+| We25cdcbabfb7 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 4.3183 | 2.4994 | 0.5788 |
+| Web719bbfc097 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 4.7731 | 2.7006 | 0.5658 |

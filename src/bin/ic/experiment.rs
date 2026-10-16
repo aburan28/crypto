@@ -15,8 +15,8 @@ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     LinearAlgebra, LogTableReport, MAX_N, MAX_SUBFIELD_DEGREE,
 };
 use crypto_lib::cryptanalysis::koblitz_sparse_la::{
-    BlockLanczosOptions, BlockWiedemannOptions, SparseCoreSolver, SparseSolveOptions, SpmvBackend,
-    SpmvOptions,
+    BlockLanczosOptions, BlockWiedemannOptions, FilterOptions, SparseCoreSolver,
+    SparseSolveOptions, SpmvBackend, SpmvOptions,
 };
 use num_bigint::BigUint;
 use rand::{rngs::StdRng, Rng, SeedableRng};
@@ -169,6 +169,16 @@ pub enum LinearAlgebraMode {
     Sparse,
 }
 
+/// Relation filter run before the sparse Krylov solve.
+#[derive(Clone, Copy, Debug, ValueEnum)]
+pub enum FilterMode {
+    /// CADO-NFS-style purge and Markowitz/spanning-tree merge
+    /// (`FilterOptions::cado`).
+    Cado,
+    /// The historical filter (`FilterOptions::default`).
+    Legacy,
+}
+
 #[derive(Clone, Copy, Debug, ValueEnum)]
 pub enum SparseSolverMode {
     BlockWiedemann,
@@ -231,8 +241,13 @@ pub(crate) fn sparse_options(
     solver: SparseSolverMode,
     spmv: SpmvMode,
     shards: usize,
+    filter: FilterMode,
 ) -> SparseSolveOptions {
     SparseSolveOptions {
+        filter: match filter {
+            FilterMode::Cado => FilterOptions::cado(),
+            FilterMode::Legacy => FilterOptions::default(),
+        },
         solver: solver.into(),
         spmv: SpmvOptions {
             backend: spmv.into(),
@@ -555,6 +570,10 @@ pub struct LogsArgs {
     /// thread count.
     #[arg(long, default_value_t = 0)]
     pub spmv_shards: usize,
+    /// Relation filter before the Krylov solve: CADO-NFS-style purge and
+    /// merge (default), or the historical filter.
+    #[arg(long, value_enum, default_value_t = FilterMode::Cado)]
+    pub filter_strategy: FilterMode,
     /// Block size of the Wiedemann or Lanczos Krylov sequence.
     #[arg(long,default_value_t=4,value_parser=clap::value_parser!(u8).range(1..=64))]
     pub block_size: u8,
@@ -781,6 +800,7 @@ pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
             args.sparse_solver,
             args.spmv,
             args.spmv_shards,
+            args.filter_strategy,
         ),
     );
     let (table, report) = solve_factor_base_logs(&c, &fb, &opts)

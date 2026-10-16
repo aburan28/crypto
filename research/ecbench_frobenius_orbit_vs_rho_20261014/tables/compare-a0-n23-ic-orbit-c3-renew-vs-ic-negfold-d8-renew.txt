@@ -1,0 +1,25 @@
+ops (ok): ic-orbit-c3-renew / ic-negfold-d8-renew = 0.0645 [0.059, 0.071] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 0.0784 [0.072, 0.084]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 0.22%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-orbit-c3-renew / ic-negfold-d8-renew | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m23-t5197-69e76b73 | 21.00 | 16 | 0.0645 | [0.0587, 0.0711] | cluster |
+
+| workload | curve | log2 r | ic-negfold-d8-renew mean S | ic-orbit-c3-renew mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W08eca30d808d | icv1-f2m23-t5197-69e76b73 | 21.00 | 27.5222 | 1.5988 | 0.0581 |
+| W43c1403e6523 | icv1-f2m23-t5197-69e76b73 | 21.00 | 24.4900 | 1.4686 | 0.0600 |
+| W4abd725f7509 | icv1-f2m23-t5197-69e76b73 | 21.00 | 27.2260 | 1.4923 | 0.0548 |
+| W5a2b6332e5b7 | icv1-f2m23-t5197-69e76b73 | 21.00 | 22.6513 | 1.8216 | 0.0804 |
+| W5af51add3ac1 | icv1-f2m23-t5197-69e76b73 | 21.00 | 27.2662 | 1.4788 | 0.0542 |
+| W66787602faec | icv1-f2m23-t5197-69e76b73 | 21.00 | 26.1157 | 1.8649 | 0.0714 |
+| W74adbac221d7 | icv1-f2m23-t5197-69e76b73 | 21.00 | 21.5828 | 1.2423 | 0.0576 |
+| W7a8b9f9cdfa9 | icv1-f2m23-t5197-69e76b73 | 21.00 | 26.6143 | 1.4749 | 0.0554 |
+| W83078eff0203 | icv1-f2m23-t5197-69e76b73 | 21.00 | 27.7681 | 1.6101 | 0.0580 |
+| W8de5d6956c91 | icv1-f2m23-t5197-69e76b73 | 21.00 | 25.3404 | 1.7558 | 0.0693 |
+| Wb9e3667b1aad | icv1-f2m23-t5197-69e76b73 | 21.00 | 22.2410 | 1.3735 | 0.0618 |
+| Wc1a32e051d3c | icv1-f2m23-t5197-69e76b73 | 21.00 | 23.7152 | 1.7961 | 0.0757 |
+| We9366425a469 | icv1-f2m23-t5197-69e76b73 | 21.00 | 27.4840 | 1.6563 | 0.0603 |
+| Wf658af88683f | icv1-f2m23-t5197-69e76b73 | 21.00 | 21.4036 | 1.2302 | 0.0575 |
+| Wf9f61f36a136 | icv1-f2m23-t5197-69e76b73 | 21.00 | 21.8201 | 1.9420 | 0.0890 |
+| Wfd71e38f7111 | icv1-f2m23-t5197-69e76b73 | 21.00 | 23.6726 | 1.8052 | 0.0763 |
