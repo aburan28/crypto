@@ -13,6 +13,10 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
+EXPECTED_CANDIDATES = {
+    1104: "IC1N83Ckb1a1fb183264PDP4rootRCguidedLAgaussTDdirectISO0h6f30a77abf9e",
+    1120: "IC1N83Ckb1a1fb185920PDP4rootRCguidedLAgaussTDdirectISO0hc922b499a234",
+}
 
 
 def module(name, path):
@@ -169,6 +173,8 @@ def main():
             manifest = dynamic.candidate(k, "root11_dynamic", summary,
                                          folder / "base_dump.jsonl", field, curve)
             candidate_id = manifest["candidate_id"]
+            if candidate_id != EXPECTED_CANDIDATES[k]:
+                raise ValueError(f"{arm}: candidate differs from five-point holdout")
             if candidate_id in manifests and manifests[candidate_id] != manifest:
                 raise ValueError(f"{arm}: candidate identity collision")
             manifests[candidate_id] = manifest
