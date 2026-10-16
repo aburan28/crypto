@@ -74,24 +74,41 @@ fn the_committed_cards_validate() {
     ] {
         assert!(text.contains(&format!("{id}: ok")), "{text}");
     }
-    // `list` orders by funding: lead 1 first, the P-192 search last.
-    let list = stdout(&run(Command::new(bin())
-        .arg("--root")
-        .arg(repo())
-        .arg("list")));
-    let lines: Vec<&str> = list.lines().collect();
-    assert!(
-        lines
-            .first()
-            .unwrap()
-            .starts_with("XP-20261015-pkm-m3-n21-m4-n20"),
-        "{list}"
-    );
-    assert!(
-        lines
-            .last()
-            .unwrap()
-            .starts_with("XP-20261015-p192-isogeny-aux-search-t48"),
+}
+
+#[test]
+fn list_orders_by_funding_then_id_including_unfunded_drafts() {
+    // Use a fixed inventory: adding a committed card must not invalidate
+    // the ordering test. Include zero funding and an equal-funding tie.
+    let root = scratch_root("list-order");
+    for (id, funding) in [
+        ("XP-20261015-zero", 0),
+        ("XP-20261015-tie-b", 800),
+        ("XP-20261015-high", 1600),
+        ("XP-20261015-tie-a", 800),
+    ] {
+        objective_card(&root, id);
+        let path = root.join("backlog").join(id).join("card.json");
+        let mut card: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(&path).unwrap()).unwrap();
+        card["cairn"]["funding"]["units"] = serde_json::json!(funding);
+        fs::write(path, serde_json::to_string_pretty(&card).unwrap()).unwrap();
+    }
+    let out = run(Command::new(bin()).arg("--root").arg(&root).arg("list"));
+    assert!(out.status.success(), "{}", stdout(&out));
+    let list = stdout(&out);
+    let ids: Vec<&str> = list
+        .lines()
+        .map(|line| line.split_whitespace().next().unwrap())
+        .collect();
+    assert_eq!(
+        ids,
+        [
+            "XP-20261015-high",
+            "XP-20261015-tie-a",
+            "XP-20261015-tie-b",
+            "XP-20261015-zero",
+        ],
         "{list}"
     );
 }
