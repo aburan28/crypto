@@ -38,9 +38,12 @@ tools/perf_ipc.sh --repeat 1 -- true; echo $?
   versions. Set `PERF=` to choose a binary.
 - **`perf_event_paranoid` errors.** Counting user-space events of your own
   process needs `/proc/sys/kernel/perf_event_paranoid` ≤ 2. The script counts
-  `:u` events only, so it needs no root at 2. Debian's level 3 forbids
-  counting; ask the host owner to lower it. Do not run benchmarks as root to
-  get around it.
+  `:u` events only, so it needs no root at 2. Levels above 2 forbid it:
+  Debian's 3, and the 4 that GitHub's Ubuntu runners set, where even software
+  events fail. On a machine you administer, `sudo sysctl -w
+  kernel.perf_event_paranoid=2` (as `.github/workflows/rho-formal.yml` does);
+  elsewhere ask the host owner. Do not run benchmarks as root to get around
+  it.
 
 `tools/perf_ipc.sh --selftest -- CMD` exercises the script's parsing and JSON
 with software events on any host. It labels its records `selftest`, and its

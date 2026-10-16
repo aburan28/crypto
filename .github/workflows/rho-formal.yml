@@ -82,6 +82,11 @@ jobs:
           sudo apt-get update -q
           sudo apt-get install -y -q linux-tools-common linux-tools-generic "linux-tools-$(uname -r)" || \
             sudo apt-get install -y -q linux-tools-common linux-tools-generic
+      - name: Allow unprivileged counting of own processes
+        # The runner image sets perf_event_paranoid=4, which forbids every
+        # unprivileged perf_event_open; 2 permits user-space counting of the
+        # job's own processes, which is all the tool asks for.
+        run: sudo sysctl -w kernel.perf_event_paranoid=2
       - name: Selftest (parsing and JSON, software events)
         run: |
           tools/perf_ipc.sh --selftest --repeat 2 --steps 1000 --label ci --out selftest.jsonl -- sleep 0.05
