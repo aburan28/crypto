@@ -1,0 +1,55 @@
+{
+  "attempts": [
+    {
+      "curve": "../../p192",
+      "ell": 13,
+      "receipt": {
+        "command": [
+          "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/development/release/isogeny",
+          "isogenies",
+          "--curve",
+          "p192",
+          "--ell",
+          "13",
+          "--order",
+          "6277101735386680763835789423176059013767194773182842284081",
+          "--seed",
+          "1"
+        ],
+        "elapsed_ms_operational_only": 33,
+        "exit_code": 0,
+        "map_count": 2,
+        "memory_monitor_grace_ms": 100,
+        "memory_sampling_interval_ms": 25,
+        "resident_memory_limit_bytes": "8589934592",
+        "sampled_peak_resident_bytes": "81920",
+        "status": "PASS",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "ell-13.json",
+        "stdout_sha256": "7a1809d56cb774f681e06ecf1dad9e04d97abe70a3eb2738bff9d54affc861d1",
+        "unavailable_memory_samples": 0
+      }
+    }
+  ],
+  "executable_sha256": "c35ec222ee097170500d72681201a2d542a3668d5bd26184be99280d0891ee18",
+  "execution_spec": {
+    "construction_timeout_seconds": 60,
+    "curve": "p192",
+    "ell": 13,
+    "independent_replay": false,
+    "method": "modpoly",
+    "resident_memory_limit_bytes": "8589934592",
+    "seed": 1
+  },
+  "reference_protocol_sha256": "55f6483843623aeb3742b0dd07daf1d3b2a835054e6b9d71c53cf37a647133b6",
+  "schema": "isogeny-search/v1",
+  "source_commit": "1180f89d568c52ac60a022358b6fd70fa9e3bd30",
+  "timeout_seconds": 60,
+  "tool": {
+    "git_commit": "1180f89d568c52ac60a022358b6fd70fa9e3bd30",
+    "git_dirty": "true",
+    "name": "isogeny",
+    "standards_sha256": "22b2ffef99720f2b2c7396a267412d2241a868e038a835c4fb1fd12209b102bf",
+    "version": "0.1.0"
+  }
+}

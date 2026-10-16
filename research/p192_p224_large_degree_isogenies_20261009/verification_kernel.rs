@@ -181,6 +181,28 @@ pub fn verify_kernel_with_observer(
     e: &Model,
     ell: u64,
     h: &Poly,
+    observe: impl FnMut(&'static str, &'static str),
+) -> Result<Model, EdgeError> {
+    verify_kernel_using(f, e, ell, h, false, observe)
+}
+
+/// Candidate entry; acceptance is shared with the independent reference.
+pub fn verify_kernel_cached_with_observer(
+    f: &Field,
+    e: &Model,
+    ell: u64,
+    h: &Poly,
+    observe: impl FnMut(&'static str, &'static str),
+) -> Result<Model, EdgeError> {
+    verify_kernel_using(f, e, ell, h, true, observe)
+}
+
+fn verify_kernel_using(
+    f: &Field,
+    e: &Model,
+    ell: u64,
+    h: &Poly,
+    cached: bool,
     mut observe: impl FnMut(&'static str, &'static str),
 ) -> Result<Model, EdgeError> {
     observe("kernel_degree", "begin");
@@ -196,9 +218,36 @@ pub fn verify_kernel_with_observer(
         return Err(EdgeError::NotSquarefree);
     }
     observe("squarefree_kernel_gcd", "end");
+    let context = if cached {
+        observe("fixed_modulus_context_setup", "begin");
+        match poly::FixedModulus::new(f, h) {
+            Ok(context) => {
+                observe("fixed_modulus_context_setup", "end");
+                Some(context)
+            }
+            Err(_) => {
+                observe("fixed_modulus_context_setup", "error");
+                return Err(EdgeError::WrongDegree);
+            }
+        }
+    } else {
+        None
+    };
+    let mm = |a: &Poly, b: &Poly| match &context {
+        Some(c) => c.mulmod(a, b),
+        None => poly::mulmod(f, a, b, h),
+    };
+    let reduce = |a: &Poly| match &context {
+        Some(c) => c.rem(a),
+        None => poly::rem(f, a, h),
+    };
     observe("selected_division_polynomial_torsion", "begin");
     let g = half_generator(ell) as usize;
-    let fs = division_polys_selected(f, e, &[ell as usize, g - 1, g, g + 1], h);
+    let indices = [ell as usize, g - 1, g, g + 1];
+    let fs = match &context {
+        Some(c) => division_polys_selected_cached(e, &indices, c),
+        None => division_polys_selected(f, e, &indices, h),
+    };
     if !fs[&(ell as usize)].is_empty() {
         observe("selected_division_polynomial_torsion", "error");
         return Err(EdgeError::NotTorsion);
@@ -217,7 +266,6 @@ pub fn verify_kernel_with_observer(
                 f.from_u64(4),
             ],
         );
-        let mm = |x: &Poly, y: &Poly| poly::mulmod(f, x, y, h);
         let mut num = mm(&fs[&(g - 1)], &fs[&(g + 1)]);
         let mut den = mm(&fs[&g], &fs[&g]);
         if g % 2 == 1 {
@@ -235,7 +283,11 @@ pub fn verify_kernel_with_observer(
         let xg = poly::sub(f, &poly::x(f), &mm(&num, &den_inv));
         observe("subgroup_inverse", "end");
         observe("subgroup_modular_composition", "begin");
-        let image = compose_mod(f, h, &poly::rem(f, &xg, h), h);
+        let xg = reduce(&xg);
+        let image = match &context {
+            Some(c) => compose_mod_cached(h, &xg, c),
+            None => compose_mod(f, h, &xg, h),
+        };
         if !image.is_empty() {
             observe("subgroup_modular_composition", "error");
             return Err(EdgeError::NotSubgroup);
@@ -328,6 +380,90 @@ pub fn compose_mod(f: &Field, a: &Poly, x: &Poly, m: &Poly) -> Poly {
         result = poly::add(f, &result, &part);
     }
     poly::rem(f, &result, m)
+}
+
+pub fn division_polys_selected_cached(
+    e: &Model,
+    indices: &[usize],
+    context: &poly::FixedModulus<'_>,
+) -> std::collections::BTreeMap<usize, Poly> {
+    let f = context.field();
+    let m = context.modulus();
+    fn get(
+        context: &poly::FixedModulus<'_>,
+        n: usize,
+        f2: &Poly,
+        v: &mut std::collections::BTreeMap<usize, Poly>,
+    ) -> Poly {
+        let f = context.field();
+        if let Some(value) = v.get(&n) {
+            return value.clone();
+        }
+        let k = n / 2;
+        let mm = |a: &Poly, b: &Poly| context.mulmod(a, b);
+        let km2 = if n % 2 == 0 {
+            get(context, k - 2, f2, v)
+        } else {
+            vec![]
+        };
+        let km1 = get(context, k - 1, f2, v);
+        let mid = get(context, k, f2, v);
+        let kp1 = get(context, k + 1, f2, v);
+        let kp2 = get(context, k + 2, f2, v);
+        let out = if n % 2 == 1 {
+            let t1 = mm(&kp2, &mm(&mm(&mid, &mid), &mid));
+            let t2 = mm(&km1, &mm(&mm(&kp1, &kp1), &kp1));
+            if k % 2 == 0 {
+                poly::sub(f, &mm(f2, &t1), &t2)
+            } else {
+                poly::sub(f, &t1, &mm(f2, &t2))
+            }
+        } else {
+            mm(
+                &mid,
+                &poly::sub(f, &mm(&kp2, &mm(&km1, &km1)), &mm(&km2, &mm(&kp1, &kp1))),
+            )
+        };
+        v.insert(n, out.clone());
+        out
+    }
+    let mut cache: std::collections::BTreeMap<_, _> = division_polys_mod(f, e, 4, m)
+        .into_iter()
+        .enumerate()
+        .collect();
+    let four = f.from_u64(4);
+    let cubic = poly::trim(
+        f,
+        vec![f.mul(&four, &e.b), f.mul(&four, &e.a), f.zero(), four],
+    );
+    let f2 = context.mulmod(&cubic, &cubic);
+    for n in indices {
+        get(context, *n, &f2, &mut cache);
+    }
+    indices.iter().map(|n| (*n, cache[n].clone())).collect()
+}
+
+pub fn compose_mod_cached(a: &Poly, x: &Poly, context: &poly::FixedModulus<'_>) -> Poly {
+    let f = context.field();
+    if a.is_empty() {
+        return vec![];
+    }
+    let block = (a.len() as f64).sqrt().ceil() as usize;
+    let mut powers = vec![vec![f.one()]];
+    for _ in 1..=block {
+        powers.push(context.mulmod(powers.last().unwrap(), x));
+    }
+    let giant = &powers[block];
+    let mut result = vec![];
+    for chunk in a.chunks(block).rev() {
+        result = context.mulmod(&result, giant);
+        let mut part = vec![];
+        for (i, c) in chunk.iter().enumerate() {
+            part = poly::add(f, &part, &poly::scale(f, &powers[i], c));
+        }
+        result = poly::add(f, &result, &part);
+    }
+    context.rem(&result)
 }
 
 /// `℘ = z^{-2} + Σ_{k≥1} c_k z^{2k}` for `y² = x³ + ax + b`, `k = 1..=n`.
@@ -466,4 +602,86 @@ fn kernel_from_sums(f: &Field, e: &Model, e2: &Model, s1: Fe, d: usize) -> Resul
 /// `u²`, or [`EdgeError::NotIsomorphic`].
 pub fn link_to_target(f: &Field, codomain: &Model, target: &Model) -> Result<Fe, EdgeError> {
     curve::isomorphism(f, codomain, target).ok_or(EdgeError::NotIsomorphic)
+}
+
+#[cfg(test)]
+pub fn fixed_modulus_kernel_controls(f: &Field) {
+    let models = [
+        Model {
+            a: f.zero(),
+            b: f.from_u64(7),
+        },
+        Model {
+            a: f.from_u64(5),
+            b: f.zero(),
+        },
+        Model {
+            a: f.from_u64(2),
+            b: f.from_u64(3),
+        },
+    ];
+    for length in [7, 128, 129] {
+        let mut m: Poly = (0..length)
+            .map(|i| f.from_u64(1 + (i % 83) as u64))
+            .collect();
+        *m.last_mut().unwrap() = f.one();
+        let context = poly::FixedModulus::new(f, &m).unwrap();
+        for e in &models {
+            assert!(!f.is_zero(&e.discriminant(f)));
+            for indices in [
+                &[][..],
+                &[0, 1, 2, 3, 4][..],
+                &[17, 8, 17, 5, 12, 7, 6, 0][..],
+            ] {
+                let old = division_polys_selected(f, e, indices, &m);
+                let cached = division_polys_selected_cached(e, indices, &context);
+                assert_eq!(old, cached);
+                let dense = division_polys_mod(f, e, 17, &m);
+                for &i in indices {
+                    assert_eq!(cached[&i], dense[i]);
+                }
+            }
+        }
+        for size in [0, 1, 2, 3, 4, 5, 8, 9, 10, 15, 16, 17, 26] {
+            let a: Poly = (0..size).map(|i| f.from_u64(1 + (i % 79) as u64)).collect();
+            for x in [
+                vec![],
+                vec![f.one()],
+                poly::x(f),
+                vec![f.from_u64(3), f.one(), f.from_u64(2)],
+            ] {
+                assert_eq!(
+                    compose_mod_cached(&a, &x, &context),
+                    compose_mod(f, &a, &x, &m)
+                );
+                assert_eq!(
+                    compose_mod_cached(&a, &x, &context),
+                    poly::eval_mod(f, &a, &x, &m)
+                );
+            }
+        }
+    }
+    // Admission guards remain shared, and context setup is placed after GCD.
+    let e = models[2];
+    let h = vec![f.one(), f.one()];
+    let mut events = vec![];
+    let a = verify_kernel_with_observer(f, &e, 3, &h, |_, _| {});
+    let b = verify_kernel_cached_with_observer(f, &e, 3, &h, |stage, event| {
+        events.push((stage, event))
+    });
+    assert_eq!(a, b);
+    assert!(events.windows(3).any(|w| w
+        == [
+            ("squarefree_kernel_gcd", "end"),
+            ("fixed_modulus_context_setup", "begin"),
+            ("fixed_modulus_context_setup", "end")
+        ]));
+    events.clear();
+    assert_eq!(
+        verify_kernel_cached_with_observer(f, &e, 5, &h, |s, e| events.push((s, e))),
+        Err(EdgeError::WrongDegree)
+    );
+    assert!(!events
+        .iter()
+        .any(|(s, _)| *s == "fixed_modulus_context_setup"));
 }

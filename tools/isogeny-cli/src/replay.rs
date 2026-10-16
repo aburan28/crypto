@@ -153,14 +153,12 @@ pub fn verify_detail(out: &Path, write_certificate: bool, registry: &Value) -> (
             let den = coeffs(&f, &iso["x_map"]["den"]);
             coefficient_setup.finish();
             let kernel_stage = crate::replay_trace::stage("kernel_validation");
-            let cod = kernel::verify_kernel_with_observer(
-                &f,
-                &source,
-                ell,
-                &h,
-                crate::replay_trace::event,
-            )
-            .expect("independent kernel certificate failed");
+            #[cfg(feature = "cached-fixed-modulus-reduction")]
+            use kernel::verify_kernel_cached_with_observer as verify_kernel_policy;
+            #[cfg(not(feature = "cached-fixed-modulus-reduction"))]
+            use kernel::verify_kernel_with_observer as verify_kernel_policy;
+            let cod = verify_kernel_policy(&f, &source, ell, &h, crate::replay_trace::event)
+                .expect("independent kernel certificate failed");
             kernel_stage.finish();
             let codomain_binding = crate::replay_trace::stage("codomain_binding");
             assert_eq!(f.to_big(&cod.a), integer(&iso["codomain"]["a"]));

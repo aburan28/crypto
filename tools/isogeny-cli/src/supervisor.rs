@@ -248,6 +248,8 @@ fn run_with_sampler(
     let resource_ready = ((args.first().is_some_and(|a| a == "challenge")
         && args.get(1).is_some_and(|a| a == "__judge"))
         || (args.first().is_some_and(|a| a == "compact-cm")
+            && args.get(1).is_some_and(|a| a == "__worker"))
+        || (args.first().is_some_and(|a| a == "fixed-modulus-bench")
             && args.get(1).is_some_and(|a| a == "__worker")))
     .then(|| {
         args.windows(2)
@@ -428,63 +430,105 @@ mod tests {
         // stays alive until the real supervisor rejects the injected telemetry.
         fs::write(&worker, "#!/bin/sh\nwhile test ! -f \"$4\"; do :; done\nprintf 'entered\\n' > \"$6\"\nwhile :; do :; done\n").unwrap();
         fs::set_permissions(&worker, fs::Permissions::from_mode(0o700)).unwrap();
-        for after_ack in [false, true] {
-            for zero in [false, true] {
-                let name = format!(
-                    "{}-{}",
-                    if after_ack { "after" } else { "before" },
-                    if zero { "zero" } else { "missing" }
-                );
-                let dir = root.join(name);
-                fs::create_dir(&dir).unwrap();
-                let ready = dir.join("resources-ready");
-                let entered = dir.join("worker-entered");
-                let args = vec![
-                    "compact-cm".into(),
-                    "__worker".into(),
-                    "--rss-ready".into(),
-                    ready.to_string_lossy().into_owned(),
-                    "--fixture-entered".into(),
-                    entered.to_string_lossy().into_owned(),
-                ];
-                let receipt = run_with_sampler(&worker, &dir, &args, "native", 5, |_| {
-                    if after_ack && !entered.is_file() {
-                        Some(4096)
-                    } else if zero {
-                        Some(0)
-                    } else {
-                        None
-                    }
-                });
-                assert_eq!(
-                    receipt.get("status").and_then(Json::as_str),
-                    Some("RESOURCE_MONITOR_UNAVAILABLE")
-                );
-                assert_eq!(ready.is_file(), after_ack);
-                assert_eq!(entered.is_file(), after_ack);
-                assert_eq!(
-                    receipt
-                        .get("sampled_peak_resident_bytes")
-                        .and_then(Json::as_str),
-                    Some(if after_ack { "4096" } else { "0" })
-                );
-                let unavailable = receipt.get("unavailable_memory_samples").unwrap();
-                assert!(matches!(unavailable, Json::Num(n) if *n > 0));
-                write_json(
-                    &dir.join("fixture.json"),
-                    &Json::obj(vec![
-                        ("schema", Json::str("isogeny-rss-injection-control/v1")),
-                        ("synthetic_rss_injection", Json::Bool(true)),
-                        ("cryptographic_work", Json::Bool(false)),
-                        ("loss_after_acknowledgement", Json::Bool(after_ack)),
-                        ("zero_instead_of_missing", Json::Bool(zero)),
-                        ("expected_status", Json::str("RESOURCE_MONITOR_UNAVAILABLE")),
-                    ]),
-                );
+        for worker_shape in ["compact-cm", "fixed-modulus-bench"] {
+            for after_ack in [false, true] {
+                for zero in [false, true] {
+                    let name = format!(
+                        "{}-{}-{}",
+                        worker_shape,
+                        if after_ack { "after" } else { "before" },
+                        if zero { "zero" } else { "missing" }
+                    );
+                    let dir = root.join(name);
+                    fs::create_dir(&dir).unwrap();
+                    let ready = dir.join("resources-ready");
+                    let entered = dir.join("worker-entered");
+                    let args = vec![
+                        worker_shape.into(),
+                        "__worker".into(),
+                        "--rss-ready".into(),
+                        ready.to_string_lossy().into_owned(),
+                        "--fixture-entered".into(),
+                        entered.to_string_lossy().into_owned(),
+                    ];
+                    let receipt = run_with_sampler(&worker, &dir, &args, "native", 5, |_| {
+                        if after_ack && !entered.is_file() {
+                            Some(4096)
+                        } else if zero {
+                            Some(0)
+                        } else {
+                            None
+                        }
+                    });
+                    assert_eq!(
+                        receipt.get("status").and_then(Json::as_str),
+                        Some("RESOURCE_MONITOR_UNAVAILABLE")
+                    );
+                    assert_eq!(ready.is_file(), after_ack);
+                    assert_eq!(entered.is_file(), after_ack);
+                    assert_eq!(
+                        receipt
+                            .get("sampled_peak_resident_bytes")
+                            .and_then(Json::as_str),
+                        Some(if after_ack { "4096" } else { "0" })
+                    );
+                    let unavailable = receipt.get("unavailable_memory_samples").unwrap();
+                    assert!(matches!(unavailable, Json::Num(n) if *n > 0));
+                    write_json(
+                        &dir.join("fixture.json"),
+                        &Json::obj(vec![
+                            ("schema", Json::str("isogeny-rss-injection-control/v1")),
+                            ("synthetic_rss_injection", Json::Bool(true)),
+                            ("cryptographic_work", Json::Bool(false)),
+                            ("loss_after_acknowledgement", Json::Bool(after_ack)),
+                            ("zero_instead_of_missing", Json::Bool(zero)),
+                            ("expected_status", Json::str("RESOURCE_MONITOR_UNAVAILABLE")),
+                        ]),
+                    );
+                }
             }
         }
         if retained.is_none() {
             fs::remove_dir_all(root).unwrap();
         }
+    }
+}
+
+#[cfg(all(test, unix))]
+mod companion_timeout_controls {
+    use super::*;
+    use std::os::unix::fs::PermissionsExt;
+    #[test]
+    fn companion_shape_retains_deadline_after_positive_acknowledgement() {
+        let root = std::env::temp_dir().join(format!(
+            "companion-timeout-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        fs::create_dir(&root).unwrap();
+        let worker = root.join("waiting-worker.sh");
+        fs::write(
+            &worker,
+            "#!/bin/sh\nwhile test ! -f \"$4\"; do :; done\nwhile :; do :; done\n",
+        )
+        .unwrap();
+        fs::set_permissions(&worker, fs::Permissions::from_mode(0o700)).unwrap();
+        let ready = root.join("ready");
+        let args = vec![
+            "fixed-modulus-bench".into(),
+            "__worker".into(),
+            "--rss-ready".into(),
+            ready.to_string_lossy().into_owned(),
+        ];
+        let receipt = run_with_sampler(&worker, &root, &args, "native", 1, |_| Some(4096));
+        assert_eq!(
+            receipt.get("status").and_then(Json::as_str),
+            Some("TIMEOUT")
+        );
+        assert!(ready.is_file());
+        fs::remove_dir_all(root).unwrap();
     }
 }

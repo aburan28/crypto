@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="360" viewBox="0 0 960 360">
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#34516b"/></marker></defs>
+<rect width="960" height="360" rx="16" fill="#f5f8fc"/>
+<g font-family="Arial,sans-serif" text-anchor="middle">
+<text x="480" y="30" font-size="20" font-weight="bold" fill="#15334d">One acceptance algorithm; two compiled reduction policies</text>
+<g fill="white" stroke="#9cb0c2" stroke-width="1.5">
+<rect x="20" y="70" width="178" height="78" rx="8"/><rect x="245" y="70" width="214" height="78" rx="8"/>
+<rect x="510" y="70" width="186" height="78" rx="8"/><rect x="745" y="70" width="194" height="78" rx="8"/>
+<rect x="245" y="218" width="214" height="88" rx="8"/><rect x="510" y="218" width="186" height="88" rx="8"/>
+<rect x="745" y="218" width="194" height="88" rx="8"/>
+</g>
+<g fill="#173a53" font-size="16">
+<text x="109" y="99">Degree + monicity</text><text x="109" y="123">squarefree GCD</text>
+<text x="352" y="98">Reference A</text><text x="352" y="123">inverse per eligible rem</text>
+<text x="603" y="99">Selected torsion</text><text x="603" y="123">same coefficients</text>
+<text x="842" y="99">Subgroup products</text><text x="842" y="123">original invmod</text>
+<text x="352" y="247">Candidate B: default off</text><text x="352" y="274">one borrowed context</text><text x="352" y="295" font-size="13">inverse precision L, zeroes retained</text>
+<text x="603" y="249">Baby / giant compose</text><text x="603" y="275">same remainder</text>
+<text x="842" y="244">Original final checks</text><text x="842" y="268">exact substitution</text><text x="842" y="291">20 point transports</text>
+</g>
+<g stroke="#34516b" stroke-width="2" fill="none" marker-end="url(#arrow)">
+<path d="M198 109 H245"/><path d="M459 109 H510"/><path d="M696 109 H745"/>
+<path d="M109 148 V262 H245"/><path d="M459 260 H484 V135 H510"/>
+<path d="M842 148 V181 H603 V218"/><path d="M696 262 H745"/>
+</g>
+<text x="480" y="340" font-size="13" fill="#4b5f70">Source-only engineering controls. No new degree, benchmark campaign, or full-replay performance claim.</text>
+</g></svg>

@@ -1,0 +1,154 @@
+{
+  "controls": [
+    {
+      "case": "valid",
+      "command": [
+        "challenge",
+        "judge",
+        "--input",
+        "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-02/reference-cache/valid-input",
+        "--out",
+        "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-02/reference-cache/valid-judge"
+      ],
+      "entry": {
+        "construction_accounting": "external constructor receipts retained; costs are not independently attested by this judge",
+        "degree_coverage": "PARTIAL",
+        "judge_binary_sha256": "22dcb7e919773d93755caf60ab120e0bccc603495041d4c1e3d0746d22e1ff5c",
+        "map_sha256": "ecf1109dbff2a72000fd84d9939127db68e2287e55e4ec10d143229874c230c8",
+        "prime_degree": "1471",
+        "representation": "expanded rational map",
+        "schema": "isogeny-challenge-entry/v1",
+        "score": "1471",
+        "season": "ff4f7c405146fbd26faa63cb6fb9d1513eada31d15f3998368005fd5f05db3e0",
+        "snapshot_search_sha256": "a534294119ebd0a257cc37e7f4823f3144409093fe1324b192c661980462da84",
+        "source_icv1": "icv1-fp224-t4733100108545601916421827343930821-fec01e99",
+        "source_submission": "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-02/reference-cache/valid-input",
+        "status": "ACCEPTED",
+        "tool": {
+          "git_commit": "1180f89d568c52ac60a022358b6fd70fa9e3bd30",
+          "git_dirty": "true",
+          "name": "isogeny",
+          "standards_sha256": "22b2ffef99720f2b2c7396a267412d2241a868e038a835c4fb1fd12209b102bf",
+          "version": "0.1.0"
+        },
+        "verification": {
+          "command": [
+            "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/development/release/isogeny",
+            "challenge",
+            "__judge",
+            "--input",
+            "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-02/reference-cache/valid-judge/artifact",
+            "--rss-ready",
+            "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-02/reference-cache/valid-judge/resources-ready"
+          ],
+          "elapsed_ms_operational_only": 7805,
+          "exit_code": 0,
+          "map_count": null,
+          "memory_monitor_grace_ms": 100,
+          "memory_sampling_interval_ms": 25,
+          "resident_memory_limit_bytes": "8589934592",
+          "sampled_peak_resident_bytes": "42123264",
+          "status": "PASS",
+          "stderr_sha256": "a201934d23789f9310504a143a9e230ad24df0830aa4b431492c1a1aa211a9b0",
+          "stdout": "verification.json",
+          "stdout_sha256": "8909b01d3dc1365624b700d920e3644d1b41bd7d82bad1ad675c347fe60e5a17",
+          "unavailable_memory_samples": 0
+        }
+      },
+      "exit": 0,
+      "input_sha256": "ecf1109dbff2a72000fd84d9939127db68e2287e55e4ec10d143229874c230c8",
+      "status": "ACCEPTED"
+    },
+    {
+      "case": "kernel",
+      "command": [
+        "challenge",
+        "judge",
+        "--input",
+        "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-02/reference-cache/kernel-input",
+        "--out",
+        "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-02/reference-cache/kernel-judge"
+      ],
+      "entry": {
+        "reason": "FAIL",
+        "schema": "isogeny-challenge-entry/v1",
+        "score": null,
+        "season": "ff4f7c405146fbd26faa63cb6fb9d1513eada31d15f3998368005fd5f05db3e0",
+        "status": "REJECTED",
+        "verification": {
+          "command": [
+            "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/development/release/isogeny",
+            "challenge",
+            "__judge",
+            "--input",
+            "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-02/reference-cache/kernel-judge/artifact",
+            "--rss-ready",
+            "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-02/reference-cache/kernel-judge/resources-ready"
+          ],
+          "elapsed_ms_operational_only": 7430,
+          "exit_code": 2,
+          "map_count": null,
+          "memory_monitor_grace_ms": 100,
+          "memory_sampling_interval_ms": 25,
+          "resident_memory_limit_bytes": "8589934592",
+          "sampled_peak_resident_bytes": "39944192",
+          "status": "FAIL",
+          "stderr_sha256": "c4910f69aa0e0589ad401dd0ddef5068cd8badd4a0a6c7040a4f35e1063f8034",
+          "stdout": "verification.json",
+          "stdout_sha256": "fd244532de587f9c4f2d4b304148550d9c10b67fed6a894571e43d8440d518a9",
+          "unavailable_memory_samples": 0
+        }
+      },
+      "exit": 1,
+      "input_sha256": "38e87153866e442baaab08dba50cc214e54317b5391db9d540510157d16ee12f",
+      "status": "REJECTED"
+    },
+    {
+      "case": "numerator",
+      "command": [
+        "challenge",
+        "judge",
+        "--input",
+        "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-02/reference-cache/numerator-input",
+        "--out",
+        "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-02/reference-cache/numerator-judge"
+      ],
+      "entry": {
+        "reason": "FAIL",
+        "schema": "isogeny-challenge-entry/v1",
+        "score": null,
+        "season": "ff4f7c405146fbd26faa63cb6fb9d1513eada31d15f3998368005fd5f05db3e0",
+        "status": "REJECTED",
+        "verification": {
+          "command": [
+            "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/development/release/isogeny",
+            "challenge",
+            "__judge",
+            "--input",
+            "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-02/reference-cache/numerator-judge/artifact",
+            "--rss-ready",
+            "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-02/reference-cache/numerator-judge/resources-ready"
+          ],
+          "elapsed_ms_operational_only": 10884,
+          "exit_code": 2,
+          "map_count": null,
+          "memory_monitor_grace_ms": 100,
+          "memory_sampling_interval_ms": 25,
+          "resident_memory_limit_bytes": "8589934592",
+          "sampled_peak_resident_bytes": "41615360",
+          "status": "FAIL",
+          "stderr_sha256": "f4c872f68df30281e8c17d81060a60ee2742bf533bb5eab1266e6e05cca083ea",
+          "stdout": "verification.json",
+          "stdout_sha256": "fd244532de587f9c4f2d4b304148550d9c10b67fed6a894571e43d8440d518a9",
+          "unavailable_memory_samples": 0
+        }
+      },
+      "exit": 1,
+      "input_sha256": "c1050b6e94c3419fb3f64ce1d67ae47ae8b93845f3c6be1770919a1807f0bb17",
+      "status": "REJECTED"
+    }
+  ],
+  "large_target_executed": false,
+  "mathematical_exclusions": [],
+  "schema": "fixed-modulus-public-controls/v1"
+}
