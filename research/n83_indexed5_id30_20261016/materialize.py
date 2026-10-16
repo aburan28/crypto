@@ -2,9 +2,11 @@
 """Materialize the replayed N83 ID29/ID30 control as exact IC1 records."""
 
 import argparse
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -32,13 +34,13 @@ def write_once(path, value):
     path.write_text(blob)
 
 
-def candidate(name, summary, dump_path, field, curve):
+def candidate(name, summary, dump_path, field, curve, k=1024):
     if (summary["root_table_indexed5_id30_enabled"] is not
             (name == "opt_in_id30")):
         raise ValueError(f"{name}: executed ID mode differs")
     template = dict(summary)
     template["root_table_layout"] = "indexed83_5byte_exact"
-    record = dynamic.candidate(1024, "root11_dynamic", template,
+    record = dynamic.candidate(k, "root11_dynamic", template,
                                dump_path, field, curve)
     record["implementation"]["source_commit"] = None
     record["implementation"]["source_sha256"]["ic"] = SOURCE_SHA256
@@ -56,7 +58,7 @@ def candidate(name, summary, dump_path, field, curve):
         record[section][key] = SOURCE_SHA256
     body = {key: value for key, value in record.items() if key != "candidate_id"}
     record["candidate_id"] = (
-        "IC1N83Ckb1a1fb169984PDP4rootRCguidedLAgaussTDdirectISO0h"
+        f"IC1N83Ckb1a1fb{166*k}PDP4rootRCguidedLAgaussTDdirectISO0h"
         + panel.digest(body)[:12])
     return record
 
@@ -68,16 +70,21 @@ def main():
     args = parser.parse_args()
     output = args.results.resolve()
     analysis_path = output / "analysis.json"
+    historical_source = subprocess.check_output(
+        ["git", "show", "5a88a28299de2b1ae82a3a1a6a6a1cd6ed2dc076:examples/koblitz_orbit_dlp_fast.rs"],
+        cwd=ROOT)
     if (panel.file_sha(args.archive) != ARCHIVE_SHA256
             or panel.file_sha(analysis_path) != ANALYSIS_SHA256
             or panel.file_sha(HERE / "analysis_control_20261016.json") != ANALYSIS_SHA256
-            or panel.file_sha(ROOT / "examples/koblitz_orbit_dlp_fast.rs") != SOURCE_SHA256):
+            or hashlib.sha256(historical_source).hexdigest() != SOURCE_SHA256):
         raise ValueError("raw archive, replay or source digest differs")
     analysis = panel.read(analysis_path)
     source = panel.read(output / "source.json")
     if (analysis["status"] != "PASS_EXACT_PARITY"
             or analysis["same_base_index_and_scalar"] is not True
             or source["source_sha256"] != SOURCE_SHA256
+            or source["runner_sha256"] != panel.file_sha(
+                HERE / "evidence_v1/run_control.py.txt")
             or source["arm_order"] != ["legacy_id29", "opt_in_id30"]):
         raise ValueError("control identity or independent replay differs")
     targets = ROOT / "research/n83_cold_factor_base_20261016/targets.jsonl"

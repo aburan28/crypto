@@ -1497,6 +1497,7 @@ mod wide {
     }
 
     impl RootTable128 {
+        #[allow(dead_code)]
         fn with_capacity_indexed83(entries: usize) -> Self {
             Self::with_capacity_indexed83_mode(entries, false)
         }

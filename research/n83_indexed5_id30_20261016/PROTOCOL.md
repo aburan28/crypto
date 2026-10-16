@@ -26,8 +26,33 @@ cap per process, and the source SHA-256
 Each producer receives the public point only. The verifier independently
 replays the factor base, target relation and scalar and requires equal base
 hashes and exact-index entry counts. Shared-host timing is descriptive.
+The executed pre-lint control and first K4096 scripts are preserved byte for
+byte in `evidence_v1/` because the current helper now pins the later
+lint-clean source. The original source is retained at commit
+`5a88a28299de2b1ae82a3a1a6a6a1cd6ed2dc076`; the archive receipts
+record the executed script and binary hashes. The historical materializers
+verify those snapshots rather than silently reading the current helper.
 Then run a bounded
 K4096 feasibility diagnostic on a host with enough RAM, preserving source,
 binary, flags, base, relation, scalar and resource receipts. Any speed claim
 requires a paired Tier 1 online IC/rho panel with same-point replay and
 the declared cloud-instance envelope.
+
+The first K4096 diagnostic used source SHA-256
+`f14d9747cd24627d39d7cae4c9bef69ed2819544125ef15f31306ce5d75f3fc7`.
+The current-head confirmation uses source SHA-256
+`8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12`
+after adding a lint-only dead-code attribute. Both use `run_k4096.py` with
+the same public point and rank seed, `root11_dynamic`, and
+`KIC_INDEXED5_ID30=1`. Each runs one
+fresh process for at most 900 seconds. The state formula gives 696,256,512
+retained states, 679,936 expected usable base points, a 10 GiB exact root
+table and about 7.13 GiB of retained root states before other working
+memory. Admit the local host only with at least 40 GiB physical RAM and 50%
+reported free memory. Sample process RSS and memory pressure each second;
+stop at 32 GiB RSS or below 15% reported free memory. Save the exact
+source/binary/input hashes, flags, stdout, stderr, base dump, target record,
+outer wall and sampled resource receipt, including timeout and resource
+stops. `verify_k4096.py` independently replays the full base, target
+relation and scalar after a completed producer run. This local diagnostic
+tests feasibility and correctness; its wall time is descriptive.

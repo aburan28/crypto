@@ -1,0 +1,57 @@
+{
+  "arm": {
+    "status": "TIMEOUT",
+    "usage": {
+      "algorithm_flags": {
+        "KIC_DUMP_BASE": "/Volumes/SSD990-2/n83-archive-20261016/id30-k4096-postlint-20261016-1256/runs/opt_in_id30/base_dump.jsonl",
+        "KIC_INDEXED4_FIXED31": "0",
+        "KIC_INDEXED5_FIXED30": "0",
+        "KIC_INDEXED5_ID30": "1",
+        "KIC_INDEXED5_LOAD75": "1",
+        "KIC_INDEXED_ROOT4": "0",
+        "KIC_INDEXED_ROOT5": "1",
+        "KIC_PACKED_ROOT_TABLE": "1",
+        "KIC_PACKED_ROOT_TABLE_DENSE": "0",
+        "KIC_PACKED_ROOT_TABLE_LOAD75": "0",
+        "KIC_RANK_THREADS": "4",
+        "KIC_ROOT_BLOOM": "0",
+        "KIC_ROOT_ONLY11": "1",
+        "KIC_ROOT_ONLY21": "0",
+        "KIC_ROOT_ONLY22": "0",
+        "KIC_SPARSE_CANONICAL": "1",
+        "KIC_STATE26": "0",
+        "KIC_STATE28": "0",
+        "KIC_SYMMETRIC_S3": "1",
+        "KIC_TARGET_THREADS": "1"
+      },
+      "command": [
+        "/Volumes/SSD990-2/n83-archive-20261016/id30-k4096-postlint-20261016-1256/koblitz_orbit_dlp_fast",
+        "construct:83:1:4096",
+        "/Volumes/SSD990/crypto/worktrees/n83-indexed5-id30-20261016/research/n83_cold_factor_base_20261016/targets.jsonl",
+        "29",
+        "/Volumes/SSD990-2/n83-archive-20261016/id30-k4096-postlint-20261016-1256/runs/opt_in_id30/targets_result.jsonl"
+      ],
+      "exit_code": -15,
+      "finish_free_percent": 67,
+      "finished_utc": "2026-10-16T13:12:09.809435+00:00",
+      "hardware_tier": "local_correctness_diagnostic",
+      "memory_pressure_after": "The system has 51539607552 (3145728 pages with a page size of 16384).\nSystem-wide memory free percentage: 67%\n",
+      "min_sampled_free_percent": 42,
+      "peak_sampled_rss_bytes": 16766222336,
+      "started_utc": "2026-10-16T12:57:08.823187+00:00",
+      "status": "TIMEOUT",
+      "wall_seconds": 900.9707650829987
+    }
+  },
+  "cap_seconds": 900,
+  "hardware_tier": "local_correctness_diagnostic",
+  "k": 4096,
+  "min_sampled_free_percent": 42,
+  "peak_sampled_rss_bytes": 16766222336,
+  "performance_claim": null,
+  "producer_status": "TIMEOUT",
+  "schema": "n83.id30-k4096-analysis/v1",
+  "selected_factor_base": null,
+  "source_sha256": "8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12",
+  "status": "BOUNDED_UNKNOWN"
+}
