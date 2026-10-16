@@ -156,6 +156,8 @@ fn dlp_mode(args: &[String]) {
     let p: u64 = arg(args, "--p", 31);
     let seed: u64 = arg(args, "--seed", 1);
     let max_trials: usize = arg(args, "--max-trials", 5_000_000);
+    // the protocol's wall-time cap, summed over every segment of a resumed run
+    let max_wall_ms: f64 = arg(args, "--max-wall-hours", f64::INFINITY) * 3.6e6;
     let json: Option<String> = args
         .iter()
         .position(|a| a == "--json")
@@ -252,7 +254,12 @@ fn dlp_mode(args: &[String]) {
         *agg.entry(k.to_string()).or_default() += v;
     };
     let t0 = Instant::now();
+    let mut wall_capped = false;
     while trials < max_trials && k_ic.is_none() {
+        if wall_before + t0.elapsed().as_secs_f64() * 1e3 >= max_wall_ms {
+            wall_capped = true;
+            break;
+        }
         let jobs: Vec<(u64, u64, u64)> = (0..batch)
             .map(|_| (tgen.gen_range(0..n), tgen.gen_range(0..n), tgen.gen()))
             .collect();
@@ -342,7 +349,7 @@ fn dlp_mode(args: &[String]) {
                 "unknowns": m + 1, "agg": agg, "resolve_muls": resolve_muls,
                 "linear_algebra_mulmods": la_ops, "oracle_disagree": disagree,
                 "relations_unverified": unverified, "online_muls": online,
-                "ms": ic_ms, "resumes": resumes,
+                "ms": ic_ms, "resumes": resumes, "wall_capped": wall_capped,
                 "ratio_online_ic_over_rho": online as f64 / rho_muls.max(1) as f64,
                 "ratio_online_ic_over_expected_rho_walk": online as f64 / expected_rho}),
     );
