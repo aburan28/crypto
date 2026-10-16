@@ -183,6 +183,14 @@ scoreboard. Claim drafts stay `SCHEMA_INCOMPLETE` / claim-check `FAIL` for
 `vs_rho` (fail-closed; no ledger promotion). Prefer `--prepare-only` first,
 then `--targets 1024` for a bounded BL reference smoke.
 
+First real L=1024 measurement: run `20261016T063525Z-842e1c174e`
+(`evidence/20261016-n61-bl-reference-l1024/`). Public synthetic targets;
+primary `table_bytes=5711008` recovered 1024/1024 held-back scalars;
+3072/3072 online rows solved across three equal-advice levels. Status
+`PENDING_INDEPENDENT_VALIDATION`; claim-check `FAIL` / `SCHEMA_INCOMPLETE`
+by design (no paired IC arm, no full `vs_rho` schema). Do not promote the
+ledger.
+
 One run:
 
 1. derives disjoint tune and eval targets by hash-to-curve
