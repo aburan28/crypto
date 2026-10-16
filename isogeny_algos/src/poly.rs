@@ -65,6 +65,9 @@ pub fn mul_raw<F: Field>(f: &F, a: &[F::E], b: &[F::E]) -> Vec<F::E> {
     if b.len() < f.karatsuba_threshold() {
         return school(f, a, b);
     }
+    if let Some(r) = f.conv_long(a, b) {
+        return r;
+    }
     if a.len() >= 2 * b.len() {
         // unbalanced: chunk the longer operand
         let mut r = vec![f.zero(); a.len() + b.len() - 1];

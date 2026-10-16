@@ -28,6 +28,7 @@ pub mod icv1;
 pub mod int;
 pub mod json;
 pub mod kernel;
+pub mod ntt;
 pub mod path;
 pub mod poly;
 pub mod quat;

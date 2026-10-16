@@ -139,6 +139,11 @@ pub trait Field: Clone + Send + Sync + 'static {
         }
         r
     }
+    /// Full product of long coefficient vectors by a sub-quadratic method specific to the
+    /// field, or None to use the generic Karatsuba of `poly::mul_raw`. Must equal `conv`.
+    fn conv_long(&self, _a: &[Self::E], _b: &[Self::E]) -> Option<Vec<Self::E>> {
+        None
+    }
     /// First `n` coefficients of the product (truncated power-series multiplication).
     fn conv_trunc(&self, a: &[Self::E], b: &[Self::E], n: usize) -> Vec<Self::E> {
         let mut r = vec![self.zero(); n];
