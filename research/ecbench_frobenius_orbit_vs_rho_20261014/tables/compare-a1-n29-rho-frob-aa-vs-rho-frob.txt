@@ -1,0 +1,25 @@
+ops (ok): rho-frob-aa / rho-frob = 1.0000 [1.000, 1.000] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 1.0073 [0.931, 1.052]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 0.12%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | rho-frob-aa / rho-frob | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m29-tm40309-30c52b96 | 15.37 | 16 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-frob mean S | rho-frob-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W1e6dc615948d | icv1-f2m29-tm40309-30c52b96 | 15.37 | 1.0102 | 1.0102 | 1.0000 |
+| W417e10523167 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 0.9933 | 0.9933 | 1.0000 |
+| W502ec9b19a73 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 0.9995 | 0.9995 | 1.0000 |
+| W5a87559c0e9b | icv1-f2m29-tm40309-30c52b96 | 15.37 | 1.0092 | 1.0092 | 1.0000 |
+| W5cd9fc3eda17 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 2.8775 | 2.8775 | 1.0000 |
+| W7962be79fb55 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 1.6717 | 1.6717 | 1.0000 |
+| W7ad986f5ce5a | icv1-f2m29-tm40309-30c52b96 | 15.37 | 5.7239 | 5.7239 | 1.0000 |
+| W7de6fa1767fd | icv1-f2m29-tm40309-30c52b96 | 15.37 | 1.0458 | 1.0458 | 1.0000 |
+| W8c8ef1552275 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 1.0168 | 1.0168 | 1.0000 |
+| Wb3068b7612b6 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 1.0914 | 1.0914 | 1.0000 |
+| Wb82e0e8a4fb7 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 2.4173 | 2.4173 | 1.0000 |
+| Wbc87487a57ce | icv1-f2m29-tm40309-30c52b96 | 15.37 | 2.3399 | 2.3399 | 1.0000 |
+| Wbf3dec6c8938 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 0.9593 | 0.9593 | 1.0000 |
+| Wd018224f33ba | icv1-f2m29-tm40309-30c52b96 | 15.37 | 1.1142 | 1.1142 | 1.0000 |
+| We25cdcbabfb7 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 0.9149 | 0.9149 | 1.0000 |
+| Web719bbfc097 | icv1-f2m29-tm40309-30c52b96 | 15.37 | 1.4509 | 1.4509 | 1.0000 |

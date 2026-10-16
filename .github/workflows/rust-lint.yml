@@ -53,6 +53,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 2
           filter: blob:none
           sparse-checkout-cone-mode: false
           sparse-checkout: |
@@ -71,7 +72,14 @@ jobs:
         env:
           CI_EVENT: ${{ github.event_name }}
           CI_BASE: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
-        run: node .github/scripts/ci-scope.mjs
+          CI_PR_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$CI_EVENT" = pull_request ]; then
+            test "$(git rev-parse HEAD^2)" = "$CI_PR_HEAD"
+            CI_BASE="$(git rev-parse HEAD^1)"
+            export CI_BASE
+          fi
+          node .github/scripts/ci-scope.mjs
 
   fmt:
     needs: scope
@@ -87,6 +95,7 @@ jobs:
           exit 1
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 2
           filter: blob:none
           sparse-checkout-cone-mode: false
           sparse-checkout: |
@@ -108,16 +117,8 @@ jobs:
         env:
           PR_HEAD: ${{ github.event.pull_request.head.sha }}
         run: |
-          # Checkout uses the PR merge commit. Its first parent is the base
-          # actually used to build this tree, which can be newer than the
-          # base SHA in the event payload when main moves before this job.
-          mapfile -t parents < <(git cat-file -p HEAD | sed -n 's/^parent //p')
-          if [ ${#parents[@]} -ne 2 ] || [ "${parents[1]}" != "$PR_HEAD" ]; then
-            echo '::error::Expected a PR merge commit with the event head as its second parent.'
-            exit 1
-          fi
-          BASE="${parents[0]}"
-          git fetch --no-tags --depth=1 origin "$BASE"
+          test "$(git rev-parse HEAD^2)" = "$PR_HEAD"
+          BASE="$(git rev-parse HEAD^1)"
           git diff --name-only -z --diff-filter=AMR "$BASE" HEAD -- \
             'src/**.rs' 'tests/**.rs' 'examples/**.rs' 'benches/**.rs' 'cd_attack/**.rs' 'build.rs' \
             > "$RUNNER_TEMP/changed-rust-files"

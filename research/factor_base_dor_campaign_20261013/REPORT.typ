@@ -28,11 +28,23 @@ Does the factor base — subspace dimension $n'$, algebraic structure, and Shant
 
 *F7 — $n = 131$ applicability.* The Frobenius-window fold was verified at the challenge degree itself: a normal element exists, $pi^("dim" V_i) = V_(i+1)$ holds, the windows are disjoint (`raw/frobwin_n131.log`). Weight-class invariant bases against windows at n=11/13 cut trials by 10x and 38x respectively (stacking tables) — an unknowns/relation-count lever, not a $D^*$ lever. But $x^131 - 1 = (x+1) dot ("irreducible of degree 130")$: *there is no proper subfield at n=131, so the one structure that measurably crushes $D^*$ (F1) is unavailable on the challenge curve itself.*
 
-#figure(image("figures/dstar_vs_dim.svg", width: 100%), caption: [Figure 1. Mean refutation degree $D^*$ against factor-base dimension $n'$ (3 seeds, 24 targets/cell, m=2). Left: n=11; right: n=13. Structures: standard, random, nb_window, nb_break.])
+#figure(image("figures/dstar_vs_dim.svg", width: 100%), caption: [Figure 1. Mean refutation degree $D^*$ against factor-base dimension $n'$ (3 seeds at n=11/13, 2 at n=17/19; 16-24 targets/cell, m=2). Structures: standard, random, nb_window, nb_break.])
 
-#figure(image("figures/wpr_vs_dim.svg", width: 100%), caption: [Figure 2. Work-per-relation proxy against $n'$ (log scale). The optimum is interior; the largest bases are 20–300x worse per relation than the optimum.])
+#figure(image("figures/wpr_vs_dim.svg", width: 100%), caption: [Figure 2. Work-per-relation proxy against $n'$ (log scale). The optimum is interior; the largest bases are 20-300x worse per relation than the optimum.])
 
-#figure(image("figures/delta_sweep.svg", width: 62%), caption: [Figure 3. Shantz–Teske $delta$ sweep, standard base, m=2. Per-relation work falls 6.5x (n=11) and 11x (n=13) from $delta = -1$ to $delta = +3$.])
+#figure(image("figures/delta_sweep.svg", width: 62%), caption: [Figure 3. Shantz-Teske $delta$ sweep, standard base, m=2, each curve normalized to its own $delta = -1$ cell. The per-relation gain grows with $n$: 6.5x (n=11), 11x (n=13), 14.5x and 246x at $delta = +3$/$+5$ (n=15), 7.9x (n=17), 19.7x (n=19).])
+
+#figure(image("figures/sym4_delta.svg", width: 88%), caption: [Figure 4. Symmetric-$S_4$ (m=3) cells: $D^*$ by structure. The arity+size lever - a heavy $delta$ ($n - 3l$) on the symmetric encoding - drops $D^*$ from 5 (n=15, $l=3$, $delta=+6$) to 3 (n=15, $l=2$, $delta=+9$; and the subfield base at n=21, $l=3$), two degrees ~ two orders of magnitude of Macaulay work per system.])
+
+== Round 2 (2026-10-14): scaling toward n = 131
+
+The grid was extended to $n = 17, 19, 23$ (2 seeds, 16 targets) and the $delta$ sweeps to $n = 15, 17, 19$; three symmetric-$S_4$ cells were added ((n=15, l=2), (n=19, l=3), (n=21, l=3)). All round-2 cells completed after a first pass failed on a full temp volume (failures preserved in the first-pass logs, rerun with redirected `TMPDIR`). $n = 19$ has $"ord"_19(2) = 18 = n - 1$, the same full-length order as $"ord"_131(2) = 130$ - the closest cyclotomic fidelity available at toy scale.
+
+*F8 - the size laws scale toward the challenge degree.* $D^*$ continues to track $n'$ ($r = 0.82$ pooled over all 133 aggregates) and saturates near 4-5 for the window structures; the standard base stays measurably lower (2.77 vs 4.00 at n=19, $n' = 7$). The interior work-per-relation optimum persists and sits at $n' approx n/2.7$: standard best $n' = 4, 3, 5, 7, 7$ at $n = 11, 13, 15, 17, 19$, with 100-875x spreads between the optimum and the largest cell at n=19.
+
+*F9 - the $delta$ gain grows with $n$.* Normalized per-relation gains from $delta = -1$: 6.5x (n=11), 11x (n=13), 14.5x at $delta = +3$ rising to 246x at $delta = +5$ (n=15), 7.9x (n=17), 19.7x (n=19, $delta = +3$: $8.1 times 10^8 -> 4.1 times 10^7$). The yield cost is now visible in the data: at $n >= 17$ and $delta >= 5$ the measured decomposable fraction hits zero within 16 targets (counting floor $2^(-delta)$), so the sweep's usable range ends where the floor bites - exactly the trade the counting boundary predicts.
+
+*F10 - the arity+size lever drops two degrees.* On the symmetric-$S_4$ m=3 encoding, shrinking the base from $l = 3$ to $l = 2$ at $n = 15$ ($delta: +6 -> +9$) drops $D^*$ from 5 to 3; at $n = 19, l = 3$ ($delta = +10$) the standard and geometric systems refute at $D^* = 4$ with 15 unknowns where the prior chained evidence sits at $D^* = 5$, and point-decomposable yield is still 0.0625 per target (geometric). The subfield cell at $n = 21, l = 3$ again refutes at $D^* = 3$ with 9 unknowns. Read together with F1: closure and heavy $delta$ are the only measured levers that move $D^*$ by whole degrees, and heavy $delta$ is the one that exists at $n = 131$.
 
 == What this says about a drastic ECC2K-130 speedup
 

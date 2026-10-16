@@ -1,0 +1,81 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "PKM isogeny-tower index calculus vs rho, 20-bit p, t=8, v2(p-1)=1",
+  "description": "Preregistered (PROTOCOL.md): ic.pipeline with the isogeny tower base prime-isogeny:t=8 (|V| = 2^8, 145 abscissae on the curve, auxiliary-curve search charged to the factor-base phase) and the oracles rootfind-mitm:m=3 and mitm:m=3, a plain prime-abscissa base of the same size, against rho with the negation map and an A/A rho control, eight one-target workloads.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "prime_explicit",
+        "p": 970267,
+        "a": 344324,
+        "b": 727299,
+        "group_order": 970069,
+        "r": 970069,
+        "gx": 572492,
+        "gy": 68468
+      }
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 202610150120
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "ic-iso-rootfind",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-isogeny:t=8",
+          "oracle": "rootfind-mitm:m=3",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-iso-mitm",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-isogeny:t=8",
+          "oracle": "mitm:m=3,negation_folded=1",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-plain",
+      "role": "control",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=145",
+          "oracle": "rootfind-mitm:m=3",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "rho-neg-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.negation"
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 2,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 202610153120,
+    "isolation_required": "L0",
+    "timeout_seconds": 3600
+  }
+}

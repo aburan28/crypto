@@ -757,6 +757,47 @@ ECC2K-130 is below rho. Every degree before this one was `m = 3`'s.
   `research/notes/ecc2k130/RESEARCH_ECC2K130_DESCENT_DEGREE.md` §5. Every
   figure there is an extrapolation.
 
+## Result 11: MutantXL closure refutes at 3–4 where XL needs 5–7, flat in `ℓ`
+
+`research/dreg_closure_mutantxl_20261016/` holds everything, and it was
+pre-registered before any closure was measured. Results 1–10 are all **XL**
+degrees: the first degree whose plain Macaulay row space contains `1`.
+
+This study replays the 92 committed unsatisfiable draws of Results 5–10 (the
+same systems) and saturates each degree under MutantXL's fixed-degree step:
+every degree fall, linear falls included, times every monomial that keeps
+the degree, repeated to saturation.
+
+| | `m = 3`, `ℓ = 2` | `ℓ = 3` | `ℓ = 4` | `ℓ = 5` | `m = 4`, `ℓ = 1` | `ℓ = 2` | `ℓ = 3` |
+|---|---|---|---|---|---|---|---|
+| XL (Results 5–10) | 5 | 5–6 | 6–7 | 7 | 5 | 6 | ≥7 |
+| closure | 3–4 | 4 | 4 | 4 | 3–4 | 3–4 | 4 |
+
+- **Q1: the closure lowers the degree. Held** in all 20 testable cells and
+  in the 3 exploratory ones, on every draw.
+- **Q2: by exactly one degree. Refuted.**
+  - 58 of the 84 resolved draws are two or more below XL.
+  - The gap is 3 where XL is 7.
+- **Q3: the closure still grows with `ℓ`. Refuted.**
+  - The m = 3 median is 4 at every `ℓ` from 2 to 5.
+  - Over 11 to 32 unknowns, the closure degree does not move with `ℓ`,
+    `m`, or `n`.
+- **The growth of Results 7–10 is XL's.** The fits `⌈ℓ/2⌉ + 4` and
+  `ℓ + 4` describe plain XL. They do not describe the ideal's refutation
+  under a fall-aware solver.
+- **Instrument checks.**
+  - XL identity on every degree built: 92 of 92.
+  - Every closure saturated.
+  - A constructed positive control: closure 3, XL 4.
+  - A post-hoc soundness control on every committed satisfiable draw: no
+    refutation. This control was disclosed as added after measurement.
+- **Cost (descriptive).**
+  - The closure's matrix is 2^1 to 2^7 narrower than XL's.
+  - Its counted work grows roughly as columns^2.2.
+- **For ECC2K-130.** A "4, constant" row now sits in
+  `RESEARCH_ECC2K130_DESCENT_DEGREE.md` §6. It is an extrapolation from
+  `N ≤ 32` to `N ≈ 400`, and it still does not beat rho.
+
 ## Reproducing
 
 ```sh

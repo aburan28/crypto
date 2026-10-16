@@ -1,0 +1,8 @@
+backend reference: 8 threads x 16 slots x 1 lanes = 128 walks, dp weight 8, 64 steps per launch
+       2.0 s       0.166 M it/s      335872 iterations        26 dp        26 stored         0 dropped
+collision: seeds 00030000002d0000 and 00030000005c0000 meet after 3706 and 1827 steps
+  recomputed both walks in 0.26 s
+  k = 431511722092
+  verified [k]P == Q
+  matches the planted discrete log: yes
+  solved after 3776 iterations of 128 walks in 3.10 s (34 distinguished points)

@@ -206,8 +206,8 @@ export function select({ event, base, head = 'HEAD', cwd = process.cwd() }) {
   try {
     try { git(['cat-file', '-e', `${base}^{commit}`], cwd); }
     catch { git(['fetch', '--no-tags', '--depth=1', 'origin', base], cwd); }
-    // HEAD is the tested merge result for PRs; comparing it directly to the
-    // event's base also works in shallow checkouts without a merge-base walk.
+    // For PRs, the workflow passes the tested merge commit's first parent as
+    // base. A direct diff works with its shallow, depth-two checkout.
     const files = git(['diff', '--name-only', '-z', '--no-renames', base, head, '--'], cwd)
       .split('\0').filter(Boolean);
     const sources = sourceFiles(cwd);

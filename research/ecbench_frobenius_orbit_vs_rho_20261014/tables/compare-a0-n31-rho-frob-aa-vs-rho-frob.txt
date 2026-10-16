@@ -1,0 +1,25 @@
+ops (ok): rho-frob-aa / rho-frob = 1.0000 [1.000, 1.000] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 0.9750 [0.940, 1.035]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 0.39%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | rho-frob-aa / rho-frob | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m31-tm90707-c95f16f5 | 20.46 | 16 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-frob mean S | rho-frob-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W19adcb2e4609 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3880 | 0.3880 | 1.0000 |
+| W1c7b6f101460 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.2821 | 0.2821 | 1.0000 |
+| W2528df09abe7 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.5313 | 0.5313 | 1.0000 |
+| W2f63a6523c06 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3967 | 0.3967 | 1.0000 |
+| W34fb71c29b0d | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.2982 | 0.2982 | 1.0000 |
+| W398d9675a96f | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3759 | 0.3759 | 1.0000 |
+| W790cc8c1a87b | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.4072 | 0.4072 | 1.0000 |
+| W809ea26e5219 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3649 | 0.3649 | 1.0000 |
+| W8646f72e5ea4 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.2496 | 0.2496 | 1.0000 |
+| Wa94ef5af8a3c | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.5542 | 0.5542 | 1.0000 |
+| Wad7d4cc5c37d | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.2891 | 0.2891 | 1.0000 |
+| Wae2a4bb7b221 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.4128 | 0.4128 | 1.0000 |
+| Wd6e0e88c542c | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3312 | 0.3312 | 1.0000 |
+| We425437057cc | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.7750 | 0.7750 | 1.0000 |
+| We52edfe2425f | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3006 | 0.3006 | 1.0000 |
+| Wfd99a000a544 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3550 | 0.3550 | 1.0000 |

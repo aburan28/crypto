@@ -127,6 +127,15 @@ fn main() {
         } else {
             scenarios.push(("l + 4, the m = 4 fit", Box::new(|l, _| l as u32 + 4)));
         }
+        // The MutantXL closure refutes every committed draw at degree 4 or
+        // below, flat in l (m = 3 to l = 5, m = 4 to l = 3; Result 11,
+        // research/dreg_closure_mutantxl_20261016/), against XL's 5 to 7.
+        // Held at 4 to n = 131 this is an extrapolation, priced as the
+        // closure's matrix width.
+        scenarios.push((
+            "4, constant: the MutantXL closure degree",
+            Box::new(|_, _| 4),
+        ));
         for (name, degree_of) in &scenarios {
             let ws: &[u32] = if name.starts_with("free") {
                 &[1]
