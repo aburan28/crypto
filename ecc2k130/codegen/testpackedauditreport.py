@@ -20,7 +20,8 @@ class PackedAuditCountTests(unittest.TestCase):
         modeNamespace = dict(re=re, PACKED_DIRECT_REDUCE='0', PACKED_GENERATED_PRODUCT='0',
                              PACKED_STATE_TILE='0', PACKED_CLMAD='0', PACKED_CLMAD_SQUARE='0', PACKED_KARAT3='0', PACKED_WEIGHTED_PREFIX='0',
                              PACKED_COMPACT_STATE='0', PACKED_SHARED_SIGMA='0',
-                             PACKED_TOP_CLMAD='0')
+                             PACKED_TOP_CLMAD='0', PACKED_INLINE_POLY='0', SIGMA_FUSED='0',
+                             PACKED_SIGMA_TABLE='0')
         exec(compile(ast.Module(body=[modeHelper], type_ignores=[]), str(modePath), 'exec'), modeNamespace)
         namespace = dict(re=re, client=SimpleNamespace(benchResult=benchResult,
                          checkPackedReduction=modeNamespace['checkPackedReduction']))
@@ -41,6 +42,9 @@ class PackedAuditCountTests(unittest.TestCase):
                 'packed compact state: 0\n'
                 'packed shared sigma: 0\n'
                 'packed top clmad: 0\n'
+                'packed sigma fused: 0\n'
+                'packed sigma table: 0\n'
+                'packed inline polynomial: 0\n'
                 'packed state tile: 0\n'
                 f'1.0 s 6000.000 M it/s {expected // 2} iterations 0 dp 0 stored 0 dropped\n'
                 f'2.0 s 6000.000 M it/s {expected} iterations 0 dp 0 stored 0 dropped\n'
