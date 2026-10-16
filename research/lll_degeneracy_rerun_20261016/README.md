@@ -11,7 +11,7 @@ traced to floating-point Gram–Schmidt bugs and fixed in May 2026.
 
 | Item | Value |
 | --- | --- |
-| Code | commit `97d89f0fd52a`. This is `origin/main` 3e7bcb7 plus a `src/zk`-only change; `src/cryptanalysis/lattice.rs` and `hnp_ecdsa.rs` are untouched. |
+| Code | commit `97d89f0fd52a`. This is `origin/main` `72843c83a` plus a `src/zk`-only change; `src/cryptanalysis/lattice.rs` and `hnp_ecdsa.rs` are untouched. |
 | Probes | `cargo test --release --test lll_degeneracy_probe -- --include-ignored --nocapture --test-threads=1 --skip p521` (`logs/probes.log`) |
 | P-521 probe | `cargo test --release --test lll_degeneracy_probe probe_p521_lll_hp -- --exact --ignored --nocapture` (`logs/p521_hp.log`) |
 | Parameters | `m = 8` signatures, `k_bits = 3/4 · n_bits`, `δ = 0.75`, seeds as in the logs |
