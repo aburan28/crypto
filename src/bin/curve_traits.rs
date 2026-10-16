@@ -146,7 +146,7 @@ fn find<'a>(file: &'a TraitFile, name: &str) -> Result<&'a CurveTraits, String> 
 fn field_label(c: &CurveTraits) -> String {
     match c.field.kind.as_str() {
         "binary" => format!("GF(2^{})", c.field.degree),
-        "prime" if c.field.degree > 1 => {
+        "prime" | "extension" if c.field.degree > 1 => {
             format!("GF(p^{}:{}b)", c.field.degree, c.field.size_bits)
         }
         _ => format!("GF(p:{}b)", c.field.size_bits),
