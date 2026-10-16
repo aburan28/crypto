@@ -1,6 +1,6 @@
 name = "p192_extension_cover"
 version = "0.1.0"
-defaultTargets = ["CrossRatio", "SignedBase", "ScalarAnchor", "AdaptiveBase", "ShortSums", "DivisorSupport", "NonspecialSupport", "LinePointInverse", "LineSupport", "LineFiberDescent", "ThreeSumCapacity", "LineLeafRank", "LineClosure"]
+defaultTargets = ["CrossRatio", "SignedBase", "ScalarAnchor", "AdaptiveBase", "ShortSums", "DivisorSupport", "NonspecialSupport", "LinePointInverse", "LineSupport", "LineFiberDescent", "ThreeSumCapacity", "LineLeafRank", "LineClosure", "LineCenter"]
 
 [[require]]
 name = "mathlib"
@@ -45,3 +45,6 @@ name = "LineLeafRank"
 
 [[lean_lib]]
 name = "LineClosure"
+
+[[lean_lib]]
+name = "LineCenter"

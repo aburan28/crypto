@@ -70,6 +70,7 @@ jobs:
           python3 -B research/p192_extension_cover_20261012/verify_line_leaf_relation.py
           python3 -B research/p192_extension_cover_20261012/prepare_line_second_gen_input.py
           python3 -B research/p192_extension_cover_20261012/verify_line_second_gen_closure.py
+          python3 -B research/p192_extension_cover_20261012/verify_line_full_constant.py
   lean-proof:
     runs-on: ubuntu-latest
     timeout-minutes: ${{ github.event_name == 'workflow_dispatch' && 90 || 25 }}
@@ -178,6 +179,28 @@ jobs:
           leanchecker-args: '--fresh --verbose LineClosure'
       - name: Audit line-closure theorem axioms
         run: lake env lean LineClosure.lean
+  p192-line-center-lean-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: research/p192_extension_cover_20261012/lean
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and fresh-check line-centering theorems
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/p192_extension_cover_20261012/lean
+          auto-config: false
+          use-mathlib-cache: true
+          build: true
+          build-args: 'LineCenter'
+          test: false
+          lint: false
+          leanchecker: true
+          leanchecker-args: '--fresh --verbose LineCenter'
+      - name: Audit line-centering theorem axioms
+        run: lake env lean LineCenter.lean
   leaderboard-lean-proof:
     runs-on: ubuntu-latest
     timeout-minutes: 25

@@ -1,0 +1,20 @@
+{
+  "all_three_quotient_images_equal": true,
+  "alternating_local_elapsed_ns_unisolated": {
+    "cached": 332413243,
+    "legacy": 8362273253
+  },
+  "base_controls": 16,
+  "boundary": "Exact point and all three quotient-image replay on 80 frozen inputs; local alternating elapsed times are exploratory diagnostics without isolation or A/A noise gates.",
+  "cached_source_sha256": "744fd6044d2229dfaab5380829cd9c6c7e07b4c5d44858fb7b7d91621991cbfb",
+  "controls_sha256": "204d2c1220e6fa61fa4a1d319ed6fb4f4414c2b480cb5c08b0952c4a2137cf38",
+  "input_sha256": {
+    "type_i_line_base_points.tsv": "eba1cafb724ce2eec84be550762fb10574980f77f4997143d5c58f0c9467d82c",
+    "type_i_line_new_points.tsv": "2392f42f5fe8ac9d253c321c03312af4a3a287854b128d0019d7388acb5faad5"
+  },
+  "legacy_source_sha256": "22df81d318798ed1385d8ea20e55e02ecf583109ccd9a66ad36bac2dd61c2e80",
+  "new_controls": 64,
+  "runtime_sha256": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+  "source_sha256": "fb611eb4649e4f49a04b93fa3b2575a646d11e95fee30a4fbde5a8ce2689af41",
+  "status": "CACHED_PLANE_INVERSE_EQUIVALENT_80_POINTS"
+}

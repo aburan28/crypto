@@ -282,6 +282,21 @@ closed quartets. Independent GP and prime-field implementations agree;
 a fresh-checked Lean theorem shows duplicate rows cannot enlarge the
 relation span.
 
+The [full split-line constant replay](reports/run-20261016T0116Z/REPORT.md)
+projects all 9,784 new points and verifies that every one of the 4,892
+quartets sums to the same first-quotient subgroup point \(C\). Its unique
+fourth part \(D\) in the odd-order subgroup centers each row to a zero
+sum without changing point-label distinctness or the private-column
+obstruction. Independent prime-field arithmetic replays every sum and
+the full coordinate digest. A checked Lean theorem proves the abstract
+four-point centering identity; the exact finite-field quotient model
+remains a concrete Sage and independent-integer replay. Since centering
+a known-scalar target by \(D\) also changes its scalar anchor, a
+collector must account explicitly for the scalar of \(D\) or carry its
+unknown as another column. A cached quartic inverse matches all three
+quotient images on 80 frozen points; its local timing is diagnostic
+pending isolated paired measurement.
+
 ## Reproduction
 
 From this repository's root:

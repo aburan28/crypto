@@ -204,6 +204,18 @@
     "url": "https://github.com/aburan28/crypto/blob/codex/p192-second-gen-line-closure-20261015/research/p192_extension_cover_20261012/reports/run-20261015T2357Z/REPORT.md"
   },
   {
+    "id": "ic_affine_relation_offset",
+    "name": "Affine geometric relation offset and scalar anchoring",
+    "method": "Common quotient sum, subgroup centering, and known-scalar equation audit",
+    "domain": "A finite family of geometric relations in an odd-order elliptic subgroup with a declared target-query law",
+    "recognition": "Replay every geometric row in the selected subgroup and determine whether the rows share a nonzero constant C. If each row has m points and m is invertible modulo the subgroup order, compute D=[m^{-1}]C and verify that translating each point by -D makes every row homogeneous. Keep the original incidence columns and test core rank after fresh-column elimination. For a known-scalar query [a]G, retain its original scalar equation or supply a certified log_G(D) before treating [a]G-D as a known-scalar anchor; otherwise record the offset as another unknown. Centering alone does not establish useful rank or target yield.",
+    "witness": "Exact curve, subgroup and generator, all row point coordinates, common-sum and center certificates, independent group-law replay, row incidence and private-column rank, a proof map for centering and translation, scalar-of-offset certificate if used, frozen known-scalar query law, useful target overlap, and one-target cost.",
+    "construction": "Enumerate exact geometric cuts, project and replay every point, hash common row sums, center only when the subgroup division is valid, preserve point identities and offset provenance, then collect target-dependent rows while checking scalar equations and rank in the original subgroup.",
+    "status": "p192_4892_common_offset_centered_private_leaf_rank_zero_core",
+    "source": "P-192 Type I full split-line constant replay and Lean centering theorem (2026)",
+    "url": "https://github.com/aburan28/crypto/blob/codex/p192-full-line-constant-20261016/research/p192_extension_cover_20261012/reports/run-20261016T0116Z/REPORT.md"
+  },
+  {
     "id": "ic_scalar_anchor_overlap",
     "name": "Known-scalar anchor overlap for index-calculus relations",
     "method": "Exact support collision and relation-row test",
