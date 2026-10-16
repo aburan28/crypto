@@ -1,0 +1,18 @@
+saved /home/user/wt/isogeny-tower/research/pkm_isogeny_tower_ecbench_20261015/sessions/p26/comparisons/rho-neg__ic-plain.json
+ops (ok): ic-plain / rho-neg = 105.2743 [81.787, 143.319] (cluster) over 16 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 5.6205 [5.118, 6.092]
+measurement quality: 0 / 100; paired attempts 16, verified 16, admitted 0; levels {"L0": 16}; p95 foreign busy unknown%, p95 run queue 13.05%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-plain / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp26-t2838-8e779ca8 | 23.28 | 8 | 105.2743 | [81.7873, 143.3194] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-plain mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W20d829c87466 | icv1-fp26-t2838-8e779ca8 | 23.28 | 0.8572 | 95.5330 | 111.4483 |
+| W459edf43e5a7 | icv1-fp26-t2838-8e779ca8 | 23.28 | 0.4550 | 98.3100 | 216.0849 |
+| W57379abdf921 | icv1-fp26-t2838-8e779ca8 | 23.28 | 0.7658 | 99.6786 | 130.1579 |
+| W7243e01194eb | icv1-fp26-t2838-8e779ca8 | 23.28 | 1.4736 | 99.7318 | 67.6784 |
+| W8e64c636e70a | icv1-fp26-t2838-8e779ca8 | 23.28 | 1.1321 | 99.7772 | 88.1361 |
+| Wba2d4897c8cd | icv1-fp26-t2838-8e779ca8 | 23.28 | 1.0790 | 100.2443 | 92.9011 |
+| Wda47d0f7e67b | icv1-fp26-t2838-8e779ca8 | 23.28 | 0.7794 | 101.7344 | 130.5225 |
+| Wfb330cc2db9c | icv1-fp26-t2838-8e779ca8 | 23.28 | 1.0105 | 100.0938 | 99.0520 |

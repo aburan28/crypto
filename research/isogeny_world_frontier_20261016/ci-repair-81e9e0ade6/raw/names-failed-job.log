@@ -1,0 +1,15 @@
+names	No retired curve name in Markdown or HTML, every slug registered	﻿2026-10-16T09:56:51.9820890Z ##[group]Run python3 scripts/check_curve_names.py
+names	No retired curve name in Markdown or HTML, every slug registered	2026-10-16T09:56:51.9821278Z ^[[36;1mpython3 scripts/check_curve_names.py^[[0m
+names	No retired curve name in Markdown or HTML, every slug registered	2026-10-16T09:56:51.9859934Z shell: /usr/bin/bash -e {0}
+names	No retired curve name in Markdown or HTML, every slug registered	2026-10-16T09:56:51.9860206Z env:
+names	No retired curve name in Markdown or HTML, every slug registered	2026-10-16T09:56:51.9860647Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+names	No retired curve name in Markdown or HTML, every slug registered	2026-10-16T09:56:51.9861079Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+names	No retired curve name in Markdown or HTML, every slug registered	2026-10-16T09:56:51.9861503Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+names	No retired curve name in Markdown or HTML, every slug registered	2026-10-16T09:56:51.9861895Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+names	No retired curve name in Markdown or HTML, every slug registered	2026-10-16T09:56:51.9862285Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+names	No retired curve name in Markdown or HTML, every slug registered	2026-10-16T09:56:51.9862664Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+names	No retired curve name in Markdown or HTML, every slug registered	2026-10-16T09:56:51.9862990Z ##[endgroup]
+names	No retired curve name in Markdown or HTML, every slug registered	2026-10-16T09:56:54.5879965Z curve names: 2 problem(s)
+names	No retired curve name in Markdown or HTML, every slug registered	2026-10-16T09:56:54.5897846Z research/isogeny_world_frontier_20261016/replay-profiling/README.md:57: icv1-fp192-t31607402316713927207482677199-cca00332 is not in docs/curves/registry.json
+names	No retired curve name in Markdown or HTML, every slug registered	2026-10-16T09:56:54.5899228Z research/isogeny_world_frontier_20261016/replay-profiling/README.md:58: icv1-fp192-t31607402316713927207482677199-e157377d is not in docs/curves/registry.json
+names	No retired curve name in Markdown or HTML, every slug registered	2026-10-16T09:56:54.5985009Z ##[error]Process completed with exit code 1.

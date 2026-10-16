@@ -1,0 +1,38 @@
+{
+  "schema": "ec-hardness/p61-adjacency-build-attempts/v1",
+  "attempts": [
+    {
+      "sequence": 1,
+      "source_commit": "f9b48fcf916bfa2b0b6fbec06e8b7c4137ceef96",
+      "method": "extract a full git archive under /private/tmp and build an exact detached producer",
+      "status": "infrastructure_failure",
+      "error": "archive extraction exhausted the system data volume",
+      "classification": "local scratch capacity failure; not a source, mathematical, or verifier failure",
+      "preservation": "The failed attempt is retained in this record. Only the two task-created temporary extraction/target paths were removed after the writer stopped; repository and NAS evidence were untouched."
+    },
+    {
+      "sequence": 2,
+      "source_commit": "f9b48fcf916bfa2b0b6fbec06e8b7c4137ceef96",
+      "command": "cargo build --release --bin p61_isogeny_adjacency",
+      "worktree": "/Volumes/SSD990-2/p61-adj-producer-f9b48fcf9",
+      "target_directory": "/Volumes/SSD990-2/p61-adj-producer-f9b48fcf9/target",
+      "elapsed_seconds": 602,
+      "exit_code": 0,
+      "status": "pass",
+      "binary_sha256": "a69def0c21dc455077abb8bef86d828c13dfcbea8f45382f71614fdf260d7c78",
+      "binary_bytes": 2080336,
+      "identity_check": "byte-for-byte SHA-256 match with the producer used for the first pilot"
+    },
+    {
+      "sequence": 3,
+      "source_commit": "92a62be6471358edb3f9becaeb56c94c24a90b7e",
+      "command": "cargo build --release --bin p61_isogeny_adjacency",
+      "elapsed_seconds": 364,
+      "exit_code": 0,
+      "status": "pass",
+      "binary_sha256": "85b1265b187ecd2bbd2ff7fd0f7c9608d3ccd2e4a7234f73ee1b2863be599208",
+      "binary_bytes": 2106128,
+      "identity_check": "post-copy digest replay passed on the UGREEN volume"
+    }
+  ]
+}

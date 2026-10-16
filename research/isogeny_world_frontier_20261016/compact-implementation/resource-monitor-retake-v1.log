@@ -1,0 +1,13 @@
+   Compiling isogeny-cli v0.1.0 (/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/tools/isogeny-cli)
+    Finished `release` profile [optimized] target(s) in 56.65s
+     Running unittests src/main.rs (/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/compact-implementation/release/deps/isogeny-8734bd11e3dad22d)
+
+running 1 test
+native: RESOURCE_MONITOR_UNAVAILABLE (102 ms)
+native: RESOURCE_MONITOR_UNAVAILABLE (121 ms)
+native: RESOURCE_MONITOR_UNAVAILABLE (161 ms)
+native: RESOURCE_MONITOR_UNAVAILABLE (158 ms)
+test supervisor::tests::missing_and_zero_rss_fail_closed_before_and_after_acknowledgement ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 81 filtered out; finished in 0.55s
+

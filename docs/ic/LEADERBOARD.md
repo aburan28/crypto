@@ -217,6 +217,22 @@ Copied from native analysis: eight independent one-target workloads per fixed cu
 | 8209 | 0.975242 | 0.603463 to 1.450934 |
 | 131101 | 1.127134 | 0.922471 to 1.341694 |
 
+## N83 Tier 1 one-target cold factor-base holdout
+
+Five sealed public points, one fresh process per IC arm, and a same-point rho solve per point completed on one GitHub-hosted cloud instance. Each of the 25 IC arms and five rho arms passed independent replay. K1152 ran twice per point as the local A/A control. The selected candidate is `null`; the frozen decision is `BOUNDED_UNKNOWN`.
+
+K1120 saves 2.645 s against K1152 (paired 95% [2.085, 3.205] s). Its advantage over K1104 is 0.401 s [-0.236, 1.038] s. These are cold-process differences on the same five points.
+
+| K | actual usable points | folded columns | mean cold s | setup s | rank s | target s | mean same-point rho online s | cold IC / rho online | peak RSS MiB |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1104 | 183,264 | 1,104 | 120.227 | 48.728 | 71.320 | 0.176 | 2.164 | 55.553 | 1937.5 |
+| 1108 | 183,928 | 1,108 | 121.296 | 48.955 | 72.171 | 0.167 | 2.164 | 56.047 | 1942.7 |
+| 1120 | 185,920 | 1,120 | 119.826 | 50.081 | 69.525 | 0.216 | 2.164 | 55.368 | 1954.5 |
+| 1152 | 191,232 | 1,152 | 122.471 | 53.067 | 69.255 | 0.144 | 2.164 | 56.590 | 1990.8 |
+
+[Frozen IC1 rows and candidate identities](../../research/n83_e2e_holdout_20261016/ic1_rows_38955665283.json). The cold process includes base and index construction, relation rank, target recovery and producer verification. Rho's interval starts with its target-dependent walk and ends with scalar verification. This wall-time panel is kept separate from Tables A–C and their operation-unit S rankings.
+
+
 ## Sources
 
 - `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json` — sha256 `28aadc91af9e4c0b…`
@@ -242,6 +258,7 @@ Copied from native analysis: eight independent one-target workloads per fixed cu
 - `research/ecbench_n41_n53_shared_rank_20261005/DECISION.json` — sha256 `fe55908f837840ee…`
 - `research/ecbench_conductor_gap_20261012/analysis.json` — sha256 `0ff9b20fd773ea67…`
 - `research/ecbench_frontier_20261013/frontier-data.json` — sha256 `765f6e8d05ebbf75…`
-- `docs/curves/registry.json` — sha256 `03f63efa54482b2e…`
+- `research/n83_e2e_holdout_20261016/ic1_rows_38955665283.json` — sha256 `4c296ed1a4e145cf…`
+- `docs/curves/registry.json` — sha256 `22b2ffef99720f2b…`
 - `docs/curves/ic/curves.schema.json` — sha256 `42cd9793dd299384…`
 - `docs/curves/ic/curves.yaml` — sha256 `ab4891397fe07fca…`

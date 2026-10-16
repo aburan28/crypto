@@ -1,0 +1,18 @@
+saved /home/user/wt/isogeny-tower/research/pkm_isogeny_tower_ecbench_20261015/sessions/p22/comparisons/ic-plain__ic-iso-rootfind.json
+ops (ok): ic-iso-rootfind / ic-plain = 1.1400 [1.134, 1.147] (cluster) over 16 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.4476 [1.379, 1.568]
+measurement quality: 0 / 100; paired attempts 16, verified 16, admitted 0; levels {"L0": 16}; p95 foreign busy unknown%, p95 run queue 17.84%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-iso-rootfind / ic-plain | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp22-tm2947-e15fed69 | 21.19 | 8 | 1.1400 | [1.1337, 1.1467] | cluster |
+
+| workload | curve | log2 r | ic-plain mean S | ic-iso-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W15abd5c646fe | icv1-fp22-tm2947-e15fed69 | 21.19 | 52.9517 | 60.9367 | 1.1508 |
+| W251e2c6702e6 | icv1-fp22-tm2947-e15fed69 | 21.19 | 52.9426 | 60.8572 | 1.1495 |
+| W922bdcc0958f | icv1-fp22-tm2947-e15fed69 | 21.19 | 52.9691 | 60.0617 | 1.1339 |
+| Wc8ca24deff43 | icv1-fp22-tm2947-e15fed69 | 21.19 | 52.5788 | 60.4604 | 1.1499 |
+| Wce40999900d8 | icv1-fp22-tm2947-e15fed69 | 21.19 | 53.3232 | 60.7133 | 1.1386 |
+| Wd5ac0a1d62c6 | icv1-fp22-tm2947-e15fed69 | 21.19 | 53.7096 | 60.4472 | 1.1254 |
+| We4aba132c214 | icv1-fp22-tm2947-e15fed69 | 21.19 | 52.9148 | 60.1148 | 1.1361 |
+| Wf0150ebb311b | icv1-fp22-tm2947-e15fed69 | 21.19 | 53.1793 | 60.4155 | 1.1361 |

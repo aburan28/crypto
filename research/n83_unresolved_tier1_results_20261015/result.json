@@ -1,0 +1,23 @@
+{
+  "analysis_sha256": "c6127202584a3410dc81382af9fbb2f0088dd1a7c4ab111ca62e63c6a5174f26",
+  "artifact_id": 12013488144,
+  "artifact_run_id": 38818664674,
+  "artifact_sha256": "73547413c41f05450e60274e695b94a38b574e10c1be9cffdaf98cf0e6810778",
+  "candidate_order": [
+    "root4k3425std",
+    "root11k3450wide3"
+  ],
+  "descriptive_ic_online_ms": {
+    "root11k3450wide3": 35.623502,
+    "root4k3425std": 10.792847
+  },
+  "factor_base_selection_status": "BOUNDED_UNKNOWN",
+  "online_ratio_rho_over_ic": {
+    "root11k3450wide3": 63.916098310604056,
+    "root4k3425std": 413.33997720897924
+  },
+  "schema": "n83.unresolved-tier1-result/v1",
+  "source_commit": "e1a77618587533364cf2236f09cc41b5bc816429",
+  "status": "PASS_TIER1_SAME_POINT_PAIR_SET",
+  "workload_id": "d20e46bcef1e"
+}

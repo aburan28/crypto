@@ -34,16 +34,38 @@ fn sqrt_velu_mont_matches_velu_on_csidh512() {
         let d = ((ell - 1) / 2) as usize;
         let ms = multiples(f, a24(f, a), k, d);
         let a_ref = velu_codomain(f, a, &ms, ell);
-        let sv = SqrtVeluMont::new(f, a, k, ell).expect("kps");
-        assert_eq!(
-            sv.codomain(f),
-            a_ref,
-            "codomain, l = {ell} (b = {}, b' = {})",
-            sv.b,
-            sv.bp
-        );
+        let k24 = proj24(f, a);
+        let s = f.random(&mut rng);
+        let svp =
+            SqrtVeluMont::new_proj(f, (f.mul(k24.0, s), f.mul(k24.1, s)), k, ell).expect("kps");
+        assert_eq!(svp.codomain(f), a_ref, "new_proj, l = {ell}");
         let u = f.random(&mut rng);
-        assert_eq!(sv.eval(f, u), isog_x(f, &ms, u), "x-map, l = {ell}");
+        // pair-by-pair products and remainder trees
+        for tree in [false, true] {
+            let mut sv = SqrtVeluMont::new(f, a, k, ell).expect("kps");
+            sv.force_tree = Some(tree);
+            assert_eq!(
+                sv.codomain(f),
+                a_ref,
+                "codomain, l = {ell} (b = {}, b' = {}), tree {tree}",
+                sv.b,
+                sv.bp
+            );
+            assert_eq!(
+                sv.eval(f, u),
+                isog_x(f, &ms, u),
+                "x-map, l = {ell}, tree {tree}"
+            );
+            // projective input point and projective curve constant (C != 1)
+            let c = f.random(&mut rng);
+            let (xp, zp) = (f.mul(u, c), c);
+            let img = sv.eval_xz(f, (xp, zp));
+            assert_eq!(
+                f.div(img.0, img.1),
+                isog_x(f, &ms, u),
+                "eval_xz, l = {ell}, tree {tree}"
+            );
+        }
     }
     let _ = Big::from_u64(1);
 }
@@ -67,9 +89,15 @@ fn sqrt_velu_mont_large_degree() {
             }
         };
         let ms = multiples(f, a24(f, a), k, ((ell - 1) / 2) as usize);
-        let sv = SqrtVeluMont::new(f, a, k, ell).unwrap();
-        assert_eq!(sv.codomain(f), velu_codomain(f, a, &ms, ell), "l = {ell}");
         let u = f.random(&mut rng);
-        assert_eq!(sv.eval(f, u), isog_x(f, &ms, u));
+        for tree in [false, true] {
+            let mut sv = SqrtVeluMont::new(f, a, k, ell).unwrap();
+            sv.force_tree = Some(tree);
+            assert_eq!(sv.codomain(f), velu_codomain(f, a, &ms, ell), "l = {ell}");
+            assert_eq!(sv.eval(f, u), isog_x(f, &ms, u));
+            // a second image reuses the lazily built tree
+            let v = f.random(&mut rng);
+            assert_eq!(sv.eval(f, v), isog_x(f, &ms, v));
+        }
     }
 }

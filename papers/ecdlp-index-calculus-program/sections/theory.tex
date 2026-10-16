@@ -1,0 +1,116 @@
+\section{The theory, by field type}\label{sec:theory}
+
+% Survey section (draft 2026-10-15). Sources: LITERATURE.md; every
+% statement below is at abstract level until the full papers are read.
+
+\subsection{What a decomposition costs}
+
+Every index-calculus algorithm for elliptic curves in the literature
+spends its time in three places: finding about $\abs\Fb$ relations (each
+a decomposition of a random combination $aG+bQ$ over $\Fb$), solving the
+sparse linear system over $\ZZ/r$, and, in some variants, a descent of
+the target. The second and third are well understood. The first is the
+crux: a uniformly random point decomposes over a base of size $N$ into $m$
+summands with probability about $N^m/(m!\,r)$, so relations need about
+$m!\,r/N^{m-1}$ trials, and each trial costs whatever the decomposition
+oracle costs. Every result below is a statement about one of three things:
+how large $N$ can be while membership stays algebraically testable, how
+cheap the oracle is, and how the two trade against the linear algebra.
+
+\subsection{Extension fields $\FF_{q^k}$ with $k>1$ fixed or small}
+
+Gaudry~\cite{gaudry2009} takes $\Fb$ to be the points with abscissa in the
+base field $\FF_q$ and decomposes into $m=k$ summands by Weil restriction of
+$\Sem{k+1}$, a system of $k$ equations in $k$ unknowns over $\FF_q$. For
+fixed $k$ this gives $\tilde O(q^{2-2/k})$, asymptotically below rho's
+$q^{k/2}$ for $k\ge3$; the constant hidden in the Gr\"obner solve grows
+very quickly with $k$, which is what makes the crossover large in
+practice (to be quantified from the paper).
+Diem~\cite{diem2011} extends the analysis to families where $k$ grows,
+proving subexponential complexity over sequences of fields with suitably
+balanced $q$ and $k$. Joux and Vitse's work on decomposition and cover
+attacks over small extension fields is to be added here once read. FGHR~\cite{fghr2014} exploit the action of $S_m$ and of
+the 2-torsion to replace $\Sem{m+1}$ by its invariant form, cutting the
+Gr\"obner work by large factors; our measurement at $k=4$
+(\S\ref{sec:gaudry}) is a direct instance.
+
+\subsection{Binary fields $\FF_{2^n}$ with $n$ prime}
+
+Prime $n$ leaves no subfield, so the factor base is taken to be the points
+whose abscissa lies in an $\FF_2$-vector subspace $V$ of dimension $\ell$.
+Weil restriction then gives a quadratic-to-low-degree Boolean system whose
+difficulty is governed by its degree of regularity. The whole debate about
+binary curves is a debate about that degree.
+
+\paragraph{The subexponential claims.} Petit and
+Quisquater~\cite{petit2012} conjectured, from experiments and heuristic
+evidence, that these systems have degrees of regularity only slightly above
+the degrees of their equations (the \emph{first fall degree assumption}),
+and deduced a heuristic $2^{c\,n^{2/3}\log n}$, $c<2$, for a variant of
+Diem's algorithm, beating generic methods only for $n\gtrsim2000$.
+Semaev~\cite{semaev2015} split summation polynomials into cubic Boolean
+systems, argued for regularity degree at most 4 under the same kind of
+assumption, and obtained a heuristic $2^{c\sqrt{n\ln n}}$ with
+$c\approx1.69$; its first version concluded that several FIPS binary curves
+fall faster than Pollard rho, a conclusion its revision says does not hold
+under the weaker assumption that the regularity degree is
+$o(\sqrt{n/\ln n})$.
+
+\paragraph{The evidence against.} Shantz and Teske~\cite{shantz2013}
+tested the Petit--Quisquater heuristics experimentally. Huang, Kosters and
+Yeo~\cite{hky2015} introduced the \emph{last fall degree}, independent of
+the monomial order, gave computational evidence against the first fall
+degree assumption in characteristic~2, and constructed summation-polynomial
+Weil descent systems where it is unlikely to hold. Galbraith and
+Gebregiyorgis~\cite{galbraith2014} improved the variable choice (binary
+Edwards curves), found symmetry-breaking factor bases and SAT solvers
+inconclusive, and concluded that rho remains much faster for prime-degree
+binary fields of reasonable size. The Galbraith--Gaudry
+survey~\cite{galbraith2016} reaches the same verdict for characteristic-two
+curves over prime-degree fields.
+
+\paragraph{Where it stands.} No proof or refutation of a subexponential
+algorithm for prime-degree binary curves exists. The open quantity is the
+solving degree of Weil-descended $\Sem{m+1}$ as $n$ and $m$ grow; recent
+work supplies diagnostics (saturation-exponent bounds, multi-graded
+regularity, tests for where systems stop looking generic) but no bound for
+these systems. Our own registered refutation-degree law at $m=3$
+(\S\ref{sec:groebner}) is one data point and ended inconclusive.
+
+\subsection{Subfield (Koblitz) curves}
+
+When the curve is defined over $\FF_2$ the Frobenius acts on the group,
+and Galbraith, Granger, Merz and Petit~\cite{ggmp2020} show that a
+Frobenius-invariant factor base saves a factor $\approx n$ in relations and
+$\approx n^2$ in linear algebra---more than rho's $\sqrt{2n}$---while
+concluding that Koblitz-curve security is not threatened at deployed sizes.
+Our Koblitz work (\S\ref{sec:koblitz}) builds on this.
+
+\subsection{Prime fields}
+
+Over $\FF_p$ there is no subfield and no subspace, and no factor base is
+known for which membership is both dense enough and algebraically testable.
+Semaev's original small-abscissa base leads to systems of very high degree.
+Petit, Kosters and Messeng~\cite{pkm2016} construct bases from rational maps
+(including the Kummer tower $\mu_{2^t}$) that give the summation system
+extra structure; Amadori, Pintore and Sala~\cite{aps2018} build the base
+from the instance and need only one relation search, improving on both;
+McGuire and Mueller~\cite{mcguire2017} avoid Gr\"obner bases altogether by
+fast evaluation of $\Sem m$ through iterated resultants, and in a second
+variant by summing $m-1$ factor-base points and testing membership of the
+result---the same mechanism as the two-summand root-finding oracle of
+\S\ref{sec:rootfinding}. All of these remain exponential and slower than
+rho; a 2024 analysis again concludes that no subexponential prime-field
+method is known.
+
+\subsection{Lower bounds}
+
+Generic-group lower bounds bound everything that does not use curve
+structure. With preprocessing, Corrigan-Gibbs and
+Kogan~\cite{cgk2018} show $S\,T^2=\tilde\Omega(\varepsilon N)$ for $S$ bits
+of advice and online time $T$; this is the bound against which the
+retained-set-up (online) results of \S\ref{sec:koblitz} must be read. A
+2026 structured-generic-group bound shows that an algorithm exploiting
+structure on only a $\delta$ fraction of elements needs
+$\Omega(\min(\sqrt q,1/\delta))$ time---for index calculus, the
+decomposable set must be dense \emph{and} cheaply testable.

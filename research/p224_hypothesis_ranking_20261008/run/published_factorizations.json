@@ -1,0 +1,48 @@
+[
+  {
+    "curve": "P-224",
+    "source": "https://safecurves.cr.yp.to/ (disc.html, twist.html)",
+    "quantity": "4p - t^2 (= 9 |D_K|)",
+    "factors": [
+      "3",
+      "3",
+      "3",
+      "29",
+      "79",
+      "7523",
+      "40927",
+      "11549194661",
+      "388425074903852603481408727235725774844022299"
+    ],
+    "weakest_certainty": "probable"
+  },
+  {
+    "curve": "P-256",
+    "source": "https://safecurves.cr.yp.to/ (disc.html, twist.html)",
+    "quantity": "4p - t^2 (= |D_K|)",
+    "factors": [
+      "3",
+      "5",
+      "456597257999",
+      "1428624589419343516204097",
+      "46523541035814968339936406074986559003387"
+    ],
+    "weakest_certainty": "probable"
+  },
+  {
+    "curve": "P-224",
+    "source": "https://safecurves.cr.yp.to/ (disc.html, twist.html)",
+    "quantity": "twist order p + 1 + t",
+    "factors": [
+      "3",
+      "3",
+      "11",
+      "47",
+      "3015283",
+      "40375823",
+      "267983539294927",
+      "177594041488131583478651368420021457"
+    ],
+    "weakest_certainty": "probable"
+  }
+]

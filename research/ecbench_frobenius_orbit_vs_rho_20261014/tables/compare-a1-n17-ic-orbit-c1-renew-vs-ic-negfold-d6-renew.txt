@@ -1,0 +1,25 @@
+ops (ok): ic-orbit-c1-renew / ic-negfold-d6-renew = 0.2335 [0.203, 0.270] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 0.2594 [0.234, 0.293]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 1.45%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-orbit-c1-renew / ic-negfold-d6-renew | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m17-tm101-00378d4e | 16.00 | 16 | 0.2335 | [0.2031, 0.2696] | cluster |
+
+| workload | curve | log2 r | ic-negfold-d6-renew mean S | ic-orbit-c1-renew mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W00cea0167a03 | icv1-f2m17-tm101-00378d4e | 16.00 | 10.8411 | 2.6440 | 0.2439 |
+| W02c8f6044adb | icv1-f2m17-tm101-00378d4e | 16.00 | 11.5925 | 2.4537 | 0.2117 |
+| W0e5cd594b7e8 | icv1-f2m17-tm101-00378d4e | 16.00 | 11.1653 | 2.5758 | 0.2307 |
+| W22f4e3f37be7 | icv1-f2m17-tm101-00378d4e | 16.00 | 10.1428 | 2.9274 | 0.2886 |
+| W33a23d35d53c | icv1-f2m17-tm101-00378d4e | 16.00 | 12.5404 | 1.8746 | 0.1495 |
+| W401368f39862 | icv1-f2m17-tm101-00378d4e | 16.00 | 11.0332 | 2.9330 | 0.2658 |
+| W4a1147cacd58 | icv1-f2m17-tm101-00378d4e | 16.00 | 11.2741 | 2.8989 | 0.2571 |
+| W6c2e632db8ff | icv1-f2m17-tm101-00378d4e | 16.00 | 12.6743 | 2.7096 | 0.2138 |
+| W6d93ce543ab7 | icv1-f2m17-tm101-00378d4e | 16.00 | 11.1859 | 2.0004 | 0.1788 |
+| W73f2f403ab7a | icv1-f2m17-tm101-00378d4e | 16.00 | 11.7967 | 2.1151 | 0.1793 |
+| W87e0f8f15da6 | icv1-f2m17-tm101-00378d4e | 16.00 | 11.1037 | 2.9026 | 0.2614 |
+| W8f4b05efef4e | icv1-f2m17-tm101-00378d4e | 16.00 | 9.8856 | 3.3078 | 0.3346 |
+| W8fce223f47aa | icv1-f2m17-tm101-00378d4e | 16.00 | 11.3757 | 2.3198 | 0.2039 |
+| Waf40807c76a4 | icv1-f2m17-tm101-00378d4e | 16.00 | 11.6130 | 2.3141 | 0.1993 |
+| Wd7ac0fa1971c | icv1-f2m17-tm101-00378d4e | 16.00 | 11.7930 | 3.2290 | 0.2738 |
+| Wff6eb135a8e0 | icv1-f2m17-tm101-00378d4e | 16.00 | 9.4087 | 2.6915 | 0.2861 |

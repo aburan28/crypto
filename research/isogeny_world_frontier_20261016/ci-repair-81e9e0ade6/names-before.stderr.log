@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/scripts/check_curve_names.py", line 302, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/scripts/check_curve_names.py", line 289, in main
+    problems = lint(res, pinned_hashes(), args.fix)
+  File "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/scripts/check_curve_names.py", line 223, in lint
+    text = path.read_text(errors="ignore")
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py", line 546, in read_text
+    return PathBase.read_text(self, encoding, errors, newline)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py", line 632, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py", line 537, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/.claude/skills/controlled-experiment/SKILL.md'

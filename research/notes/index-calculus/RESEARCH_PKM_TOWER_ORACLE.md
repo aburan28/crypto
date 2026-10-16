@@ -3221,6 +3221,49 @@ It does not show three things.
 3. **`m = 2` at `N = 28`, and an independent engine's replication** of `D = 6`
    at `m = 2`, `N = 20` and `D = 7` at `m = 4`, `N = 16` (§12.10, items 3–4).
 
+## 17. Round 8, 2026-10-15: the Dickson torus tower, and `v₂(p − 1) = 30`
+
+Data, protocol, graphs and PDF:
+[`research/pkm_dickson_torus_20261015/`](../../pkm_dickson_torus_20261015/README.md).
+The protocol was committed (`9776493c4`) before any measured cell ran. Leads 3
+and 4 of the factor-base encyclopedia §8.
+
+- **The torus case is built.** `examples/pkm_tower_pilot.rs --kinds
+  dickson-torus` builds `V = {w + w^{−1} : w ∈ u·μ_{2^t}}` with `u` and
+  `μ_{2^t}` in the norm-1 torus of `F_{p²}`, so it needs `2^t | p + 1`.
+  `check_torus` enforces the conditions of §2.1: `u² ∉ μ_{2^t}`, `|V| = 2^t`,
+  `V ⊂ F_p`, `y² − 4` a non-residue on `V`, and `c` avoiding `−2` along the
+  chain.
+- **Measured: the torus `D` equals the split `D` in every cell.** This holds
+  at `7·2^21 − 1` and `61·2^25 − 1` for `m = 2`, `N = 2…20` (3 4 4 4 4 5 5 5 5
+  6), `m = 3`, `N = 6, 9, 12, 15` (5 6 6 7; one target at 15) and `m = 4`,
+  `N = 8, 12` (6 7). The width, the step count and, at the 31-bit primes, the
+  multiply-adds equal the split Dickson's at `p₁`, which this round measured
+  on the same build. As with split Dickson and Kummer (§10.2), it is the same
+  F4 computation on different numbers. The shape-matched null, extended to
+  the `m ≥ 3` chain, gives the same `D`. The isogeny positive control gives 5
+  where these towers give 4. `verify` agrees on all 127 tower rows.
+- **Derived: degenerate at infinity.** The torus equations are the split
+  Dickson ones with another `c`. §3.4 applies unchanged, and the
+  Bardet–Faugère–Salvy degree of regularity is `N + 1`.
+- **Measured: 2-adicity at `v₂ = 30`.** Kummer at `3·2^30 + 1` (`m = 2`,
+  `N ≤ 18`; `m = 3`, `N ≤ 12`; null) reproduces the `D` and widths recorded at
+  `p₀` (`v₂ = 18`) and `p₁` (`v₂ = 27`), and the multiply-adds of `p₁` on the
+  same build. `v₂ ≥ 40` (lead 4 as posed) is **blocked**: both F4 engines
+  store 32-bit coefficients and assert `p < 2³²`, and 30 is the largest
+  `v₂(p − 1)` below `2³²`.
+- **Derived: lead 1's next cells.** Projected from the recorded growth
+  ratios, and assuming `D` does not rise again:
+  - `m = 3, N = 21` needs about 130–150 GB and `2.5–7.4·10¹⁵` multiply-adds;
+  - `m = 4, N = 20` needs about 240–380 GB and `0.85–2·10¹⁶` multiply-adds.
+
+  That calls for a 256 GB or 512 GB host, or a disk-backed `B'`, the block
+  that holds about 93% of peak memory (§16.8). Neither cell was run.
+- **What it does not show.** Nothing at P-192, P-224 or P-256 size. Every
+  prime is below `2³²` and `t ≤ 10`. Equal `D` means the torus family
+  inherits lead 1 unchanged, including the rise to `D = 6` at `m = 2`,
+  `N = 20`.
+
 ---
 
 ## References
