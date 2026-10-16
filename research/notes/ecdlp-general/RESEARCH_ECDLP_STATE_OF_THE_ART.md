@@ -298,7 +298,11 @@ provisional** until proceedings are confirmed.
   classical break**; ~128-bit (P-384: ~192-bit) security stands. secp256k1's GLV
   endomorphism is only a ~1-bit constant-factor speedup. The **NIST P-curve seeds remain
   unexplained** (fails SafeCurves "rigidity," a lingering post-Dual_EC trust debate), but
-  **no hidden weakness has ever been shown**; Curve25519 satisfies SafeCurves fully.
+  **no hidden weakness has ever been shown**. *(Update 2026-10-16: the seeds are now
+  explained. They are `drand48` output seeded with UNIX times from 1997–98, which leaves
+  about 30 bits of selection per curve; the base points of P-224/256/384/521 and a skip
+  of about half the valid candidates per run remain unexplained. See
+  `research/nist_seed_provenance_20261016/`.)* Curve25519 satisfies SafeCurves fully.
 - **Consensus:** ECDLP is **not** expected to fall to classical math advances — the
   migration is driven **exclusively by Shor**. Koblitz–Menezes counsel humility given the
   history of special-instance surprises, but no cryptographer is predicting a classical

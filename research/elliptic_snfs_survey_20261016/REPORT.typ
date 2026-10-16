@@ -102,6 +102,20 @@ round (no new run). #strong[PDF:] #link("REPORT.pdf")[`REPORT.pdf`].
 #link("figures/ratio_to_rho.svg")[`figures/ratio_to_rho.svg`] (graph of
 recorded values). #strong[Conductor task:] T-1.
 
+#strong[Correction (2026-10-16, after merge of \#1951).] The first
+version of this report missed four repository studies on shape C:
+
+- `research/pkm_tower_ecbench_20261013`
+- `research/pkm_isogeny_tower_ecbench_20261015`
+- `research/pkm_supersingular_aux_20261015`
+- `research/pkm_dickson_torus_20261015`, together with
+  `research/f4_generic_field_20261015`
+
+It also proposed a test, T1, that those studies had already answered. §0
+(row C), §4C, §6 and §7 are now corrected. T1 is withdrawn, and §7 names
+the one open experiment instead. The figures, data and the other shapes
+are unchanged.
+
 Every statement carries one label: #strong[\[lit\]] taken from a cited
 paper, #strong[\[repo\]] a value already recorded in this repository
 (path given), #strong[\[derived\]] reasoning made in this note and not
@@ -139,8 +153,11 @@ construction supplies all of them for a curve over a prime field:
   \[lit\]],
   [C. Prime-field \"special\" factor base (Petit–Kosters–Messeng 2016)],
   [a smooth subgroup of `F_p^*`. P-224\'s `p − 1 = 2^96·…` qualifies],
-  [#strong[open]: asymptotic cost unknown \[lit\]. The repo\'s toy-scale
-  arm is 27.9–141× matched rho \[repo\]],
+  [#strong[open only in its exponent] \[lit, repo\]. The repo has
+  measured it end to end: 27.9–141× matched rho. A Kummer, isogeny or
+  supersingular base costs the same as a plain base. The solving degree
+  does not depend on how special `p` is, P-224 included. Open: whether
+  that degree stays bounded],
   [D. Lift to a global curve (number field, heights)],
   [a curve over `Q` or `K` with many small-height points],
   [#strong[no working version]: heights grow quadratically, and xedni
@@ -157,6 +174,12 @@ there:
   changes which maps can be used, not whether the attack applies.
 - #strong[\[lit\]] PKM report \"similar\" solving degrees, times and
   memory for the subgroup (special `p`) and isogeny (any `p`) versions.
+- #strong[\[repo\]] The repository measured the same thing, and more
+  (§4C):
+  - A deeper 2-power in `p − 1` does not change the F4 solving degree,
+    from `v₂ = 18` up to the P-224 prime (`v₂ = 96`).
+  - In the table pipeline, every PKM base costs the same as a plain base
+    of the same size.
 
 In SNFS, by contrast, a random `p` simply has no small-coefficient `f`,
 and that gap is the whole source of SNFS\'s advantage.
@@ -333,10 +356,39 @@ balance:    |V|^m ~ m! p ;  wins only if one system solve < p^(1/2 - 1/m)
 
 - #strong[Solver degree.] The PKM tower oracle
   (`research/notes/index-calculus/RESEARCH_PKM_TOWER_ORACLE.md`, rounds
-  1–6) finds that F4\'s solving degree is #strong[not bounded]. At
-  `m = 2` it rises to 6 at `N = 20`. The Kummer (special-prime) family,
-  the isogeny family and the shape-matched null behave the same way.
-  That is the measured counterpart of PKM\'s \"similar\".
+  1–7) finds that F4\'s solving degree is #strong[not bounded at
+  `m = 2`]: it rises to 6 at `N = 20`.
+  - At `m = 3` it reaches 7 at `N = 15` and stays 7 at `N = 18` (round
+    7).
+  - At `m = 4` it is 7 at `N = 12` and `N = 16`.
+  - The Kummer (special-prime) family, the isogeny family and the
+    shape-matched null behave the same way. That is the measured
+    counterpart of PKM\'s \"similar\".
+- #strong[How special `p` is does not matter to the solver.]
+  - `research/pkm_dickson_torus_20261015` finds the same `D` at
+    `v₂ = 18`, 27 and 30.
+  - `research/f4_generic_field_20261015` finds the same `D` at
+    `v₂ = 40`, 48 and 56 and at the NIST P-224 prime (`v₂ = 96`). The
+    cells are `m = 2, N ≤ 18`; `m = 3, N ≤ 12`; and `m = 4, N = 8`. The
+    multiply-add count of a Kummer cell is identical at 45, 52, 61 and
+    224 bits.
+  - The Dickson torus tower (the `p + 1` side, for P-192- and
+    P-256-shaped primes) gives the same `D` as the split tower.
+- #strong[Kummer base against a plain base.] In
+  `research/pkm_tower_ecbench_20261013`, the Kummer base run end to end
+  in ecbench costs 29–141× rho with the negation map, on five curves of
+  20–28 bits (896 runs, all verified). It costs the same as a plain base
+  of the same size, within 1%. The tower structure can only help an
+  algebraic solver, not a table lookup.
+- #strong[Isogeny base for any prime.] In
+  `research/pkm_isogeny_tower_ecbench_20261015` (paired, with the
+  auxiliary-curve search charged), the isogeny base costs 1.00–1.33× a
+  plain base of equal size. The excess is the search, and every arm
+  stays 18–136× rho.
+  - In `research/pkm_supersingular_aux_20261015`, a supersingular
+    auxiliary curve (`y² = x³ + x`, found in one draw) gives the same
+    `D`. It shrinks the auxiliary share of `S` from 10–27% to 0.9–1.9%.
+  - So a special prime is not even needed to build the base cheaply.
 - #strong[End-to-end cost.] In the 2026-10-15 frontier campaign
   (`research/ic_frontier_campaign_20261015`), the `ic-pkm` arm (Kummer
   tower on primes with 2-adicity ≥ 12) costs #strong[27.9–141.3×] the
@@ -422,9 +474,11 @@ with whether it can be seen from public parameters:
   field.] Shape B. The field itself is #emph[visible]. A secret isogeny
   to a GHS-weak curve (Teske) is #emph[not visible], but needs an
   extension field.
-+ #strong[A smooth `p − 1` or `p + 1`.] Shape C. #emph[Visible.] By
-  PKM\'s own isogeny version it is also not exclusive: every prime
-  admits an auxiliary smooth-order curve.
++ #strong[A smooth `p − 1` or `p + 1`.] Shape C. #emph[Visible.] It is
+  also not exclusive: PKM\'s isogeny version works for every prime. A
+  supersingular auxiliary curve makes that base cheap (§4C). And the
+  measured solving degree is the same at a special prime as at a less
+  special one.
 + #strong[A global lift with many small points.] Shape D. No mechanism
   is known.
 
@@ -432,8 +486,10 @@ For prime-field curves with huge `k` (P-256, secp256k1, P-384, P-521),
 only item 3 applies, and only to P-192, P-224 and P-521, the families
 whose `p ± 1` is algebraically smooth
 (`research/notes/cm-isogeny/RESEARCH_NIST_SOLINAS_STRUCTURE.md`). For
-PKM, P-224 is the relevant case. Its status is the open item in shape C.
-That is a research question and not a demonstrated weakness.
+PKM, P-224 is the relevant case. Its solving degree matches the
+small-prime ladder in every measured cell (§4C), so whatever shape C\'s
+exponent turns out to be, P-224\'s smooth `p − 1` has not been shown to
+change it. That is a research question and not a demonstrated weakness.
 
 == 7. Unresolved checks and next discriminating test
 <7-unresolved-checks-and-next-discriminating-test>
@@ -441,23 +497,41 @@ That is a research question and not a demonstrated weakness.
   come from secondary sources. Check them against the
   Barbulescu–Duquesne (2019) and Guillevic (PKC 2020) tables.
 
-- #strong[\[proposed\] T1, the paired special-vs-generic test for shape
-  C.] On one curve whose `p − 1` has a large 2-power, build three factor
-  bases with the same `|V|`:
+- #strong[T1 (withdrawn; already answered).] The first version proposed
+  a paired test: Kummer against isogeny against a plain base, end to
+  end. The repository had already run it, base by base against a plain
+  base of equal size:
 
-  - a Kummer coset of `μ_{2^t}`;
-  - an isogeny-kernel set from an auxiliary smooth-order curve;
-  - a shape-matched random set.
+  - Kummer: within 1%;
+  - isogeny: 1.00–1.33×;
+  - supersingular auxiliary: indistinguishable on two of three curves,
+    and 1–7% higher on the third.
 
-  By the `|V|^m / r` identity, yield cannot differ by more than sum
-  collisions. So price end-to-end `S` under the ecbench band with the
-  same instrument on every arm, and report each arm\'s gap to matched
-  rho.
+  The solver degree was compared against a shape-matched null and across
+  `v₂` up to P-224. See §4C.
 
-  - What is already done: the tower oracle compared the solver degree.
-  - What remains: the paired end-to-end cost.
-  - Follow `controlled-experiment` and `ecbench-measure`. A protocol
-    must be frozen before timing.
+- #strong[The one open experiment in shape C] is
+  `backlog/XP-20261015-pkm-m3-n21-m4-n20` (encyclopedia §8, lead 1). It
+  asks whether the Kummer tower\'s F4 solving degree stays at 7 at
+  `m = 3, N = 21` and at `m = 4, N = 20`. It is the only question in
+  this line that decides an exponent.
+
+  - It is blocked on hardware: about 256 GB for `m = 3` and about 512 GB
+    for `m = 4`. A disk-backed reducer would also unblock it, but none
+    is built.
+  - The P-192 auxiliary-curve search card is gated behind it.
+
+- #strong[\[lit, not covered in the first version\]]
+  Amadori–Pintore–Sala (FFA 2018) and Pintore\'s variant, Momonari–Kudo,
+  and Hu, ePrint 2024/1923. Hu concludes that no subexponential
+  prime-field ECDLP method is known. They are covered in
+  `research/literature_search_20261011` and
+  `research/notes/ecdlp-general/RESEARCH_ECDLP_STATE_OF_THE_ART.md` §8.
+
+- #strong[Shape B, not studied here:] Teske\'s hidden-isogeny trapdoor
+  has no dedicated repository study. The binary GHS tooling
+  (`research/ghs_*`) covers the descent itself. The trapdoor is
+  extension-field only.
 
 - #strong[\[proposed\] T2.] No in-repo work for shape A: ecbench has no
   `F_{p^k}` NFS. If someone wants it, it is a separate study (a pairing
@@ -465,8 +539,8 @@ That is a research question and not a demonstrated weakness.
 
 == 8. Canonical graphs checked
 <8-canonical-graphs-checked>
-This round adds no measured value and changes no conclusion, so these
-graphs were checked and left unchanged:
+This round, and its correction, adds no measured value and changes no
+canonical conclusion, so these graphs were checked and left unchanged:
 
 - `docs/index-calculus-scoreboard.html`
 - `docs/ic/progress-timeline.json`

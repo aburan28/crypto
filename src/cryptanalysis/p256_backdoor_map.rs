@@ -15,6 +15,16 @@
 //!    real P-256 constants.  This is the part of "verifiably random" that
 //!    actually verifies; [`seed_provenance`] records the part that does not
 //!    (nothing constrains the seed itself).
+//!
+//!    **Update 2026-10-16:** the seed is now explained.  It is block 1842 of
+//!    `(int)(drand48() * 256)` output after `srand48(871696354)`
+//!    (1997-08-16 01:52:34 UTC), and every other X9.62 / FIPS 186-2 prime
+//!    seed comes from the same procedure on another 1997–98 date
+//!    (Anthropic Frontier Red Team and F. Valsorda, 2026-10-16;
+//!    re-executed in [`super::nist_seed_provenance`]).  What remains free
+//!    is the start time and the choice among accepted candidates, about 30
+//!    bits, so the seed-grinding hypotheses below are closed for any weak
+//!    class rarer than about 2^−30.
 //! 3. [`p256_trapdoor_hypotheses`] — the four ranked places a hidden
 //!    curve-level weakness would have to live, each with the grind-cost
 //!    model it implies and the public evidence against it.
@@ -159,11 +169,11 @@ pub fn seed_provenance() -> SeedProvenance {
         seed_hex: hex::encode(P256_SEED),
         derivation_verified: verify_p256_seed_derivation().holds,
         what_verifies: "b is the X9.62 A.3.3.1 output of SHA-1 on the published seed with a = −3 and the Solinas prime fixed in advance (r·b² ≡ a³ mod p re-executed here).",
-        what_does_not: "Nothing constrains the seed. The procedure is pseudo-random from the seed onward, so a generator who knew a secret weak class of curves could try seeds until SHA-1 landed in it (Bernstein–Lange, BADA55; Bernstein et al., 'How to manipulate curve standards').",
+        what_does_not: "Until 2026-10-15 nothing constrained the seed, so a generator who knew a secret weak class could have tried seeds until SHA-1 landed in it (Bernstein–Lange, BADA55; Bernstein et al., 'How to manipulate curve standards'). The seed is now known to be block 1842 of drand48 byte output after srand48(871696354) (1997-08-16 01:52:34 UTC; nist_seed_provenance). Still unconstrained: the start time and which accepted candidate was published (about half of the valid candidates in each 1997 run were skipped for an unknown reason), about 30 bits in all.",
         grinding_model: "A weak class of density 2^−k costs ~2^k candidate seeds. Whether that was feasible in 1999 depends entirely on whether membership is testable from (p, a, b) directly (SHA-1 rate) or needs the group order (one SEA point count per candidate); see GrindBudget.",
         counter_argument: "Koblitz–Menezes, 'A riddle wrapped in an enigma' (2015): the weak class would have to stay unknown to the open community for 25 years, and NSA put P-256 and P-384 into Suite B for its own classified traffic, so a deliberately weak curve would have exposed US systems.",
-        mundane_account: "A former NSA IAD technical director has said the seeds were SHA-1 of English phrases that the generator (Jerry Solinas) later lost.",
-        open_bounty: "A public bounty for the seed preimages (announced 2023) was unclaimed as of this writing; a preimage would settle the question in the mundane direction.",
+        mundane_account: "Jerry Solinas recalled the seeds as SHA-1 of English phrases that were later lost. They are in fact drand48 output seeded with the clock on six days between May 1997 and April 1998 (Anthropic Frontier Red Team, 'Claude reveals ECDSA curve origins', 2026-10-16).",
+        open_bounty: "The 2023 public bounty for how the seeds were generated was claimed on 2026-10-15 at 01:07:51 UTC (F. Valsorda, 'NIST Elliptic Curves Seeds Bounty Has Been Claimed', 2026-10-16). It settles the seed question in the mundane direction.",
     }
 }
 
@@ -292,7 +302,7 @@ pub fn p256_trapdoor_hypotheses() -> Vec<TrapdoorHypothesis> {
             requires: "A secret, cheaply testable invariant of (p, a, b) that implies an ECDLP weakness, unknown to the public for 25 years.",
             grind: GrindCostModel::CoefficientTest,
             public_status: PublicResearchStatus::Conjectural,
-            evidence_against: "Every public coefficient-level weak class (anomalous, small embedding degree, small CM discriminant, singular) is checked and absent. Residues b mod q over 10⁵ primes pass a Kolmogorov–Smirnov uniformity test, and Solinas-reduction micro-bit correlations are null, so b shows no detectable algebraic selection.",
+            evidence_against: "Every public coefficient-level weak class (anomalous, small embedding degree, small CM discriminant, singular) is checked and absent. Residues b mod q over 10⁵ primes pass a Kolmogorov–Smirnov uniformity test, and Solinas-reduction micro-bit correlations are null, so b shows no detectable algebraic selection. Update 2026-10-16: the seed is a drand48 block of a 1997 run (nist_seed_provenance), which leaves about 30 bits of selection (start time plus choice among accepted candidates), so a weak class rarer than about 2^−30 could not have been targeted.",
             repo_probe: "b_seed_profile::run_b_seed_profile; solinas_correlations::run_correlation_experiment; p256_structural checks",
             verdict: ProbeVerdict::NoPublicAnomaly,
         },
@@ -316,7 +326,7 @@ pub fn p256_trapdoor_hypotheses() -> Vec<TrapdoorHypothesis> {
             requires: "A point count per candidate (the invariant is the Frobenius trace), plus a weak class of density far above the public ones.",
             grind: GrindCostModel::PointCount,
             public_status: PublicResearchStatus::Conjectural,
-            evidence_against: "Embedding degree is huge, the curve is not anomalous, the CM discriminant and class number are enormous (no CRS/CSIDH-style action to exploit), and the isogeny-class walk found no weak curve at small degree. Point-count-gated grinding also caps the reachable class density near 2^−25 under the 1999 budget.",
+            evidence_against: "Embedding degree is huge, the curve is not anomalous, the CM discriminant and class number are enormous (no CRS/CSIDH-style action to exploit), and the isogeny-class walk found no weak curve at small degree. Point-count-gated grinding also caps the reachable class density near 2^−25 under the 1999 budget. Update 2026-10-16: the seed is a drand48 block of a 1997 run (nist_seed_provenance); the selection actually available was the start time plus the choice among accepted candidates, about 30 bits.",
             repo_probe: "p256_speculation::p256_embedding_degree_probe; p256_isogeny_cover / p256_isogeny_walk; secp256k1_cm_audit method applied to generic j",
             verdict: ProbeVerdict::NoPublicAnomaly,
         },
@@ -364,7 +374,7 @@ pub fn p256_backdoor_assessment() -> BackdoorAssessment {
         hypotheses: p256_trapdoor_hypotheses(),
         overall: "The P-256 curve is almost certainly clean; the documented sabotage was Dual_EC_DRBG plus pressure on implementations and standards. The lasting damage is that the NIST process cannot prove the curve clean, which is why rigid generation (Curve25519, Brainpool, the CFRG requirements) became the expectation.",
         binary_curve_note: "The NIST binary curves all use prime extension degrees (163, 233, 283, 409, 571), which excludes the Teske/GHS magic-number trapdoor implemented in ec_trapdoor.rs (it needs a composite degree). That reads as defensive design, not an attack surface.",
-        what_would_change_it: "A seed preimage (closes the question in the mundane direction); a public ECDLP method that beats rho on generic prime-field curves (opens hypothesis 4); a non-uniform statistic on b or a coefficient-level invariant with an attack behind it (opens hypothesis 1).",
+        what_would_change_it: "A seed preimage (closes the question in the mundane direction; met on 2026-10-15, see nist_seed_provenance, so the seed-grinding hypotheses are closed beyond about 30 bits of selection); a public ECDLP method that beats rho on generic prime-field curves (opens hypothesis 4); a non-uniform statistic on b or a coefficient-level invariant with an attack behind it (opens hypothesis 1).",
     }
 }
 
@@ -391,7 +401,7 @@ pub fn format_backdoor_assessment(a: &BackdoorAssessment) -> String {
             "no"
         }
     ));
-    s.push_str("## Unresolved: the seed\n\n");
+    s.push_str("## The seed (explained 2026-10-15; see nist_seed_provenance)\n\n");
     s.push_str(&format!("- **Seed:** `{}`\n", a.seed.seed_hex));
     s.push_str(&format!(
         "- **X9.62 derivation re-executed:** {}\n",
