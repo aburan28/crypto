@@ -3,7 +3,8 @@
 Five new public points are frozen here before the exposed K-grid screen
 `38940108434` reports any timing. The first 14-value job `38938203526` was
 cancelled while queued, before a producer started; the replacement grid
-brackets the exact K1102 root-table allocation boundary. The generation law is
+brackets the exact K1102 root-table allocation boundary. The executed grid
+commit is `551b9dfc632dce7a5ab8218b1b1dff6ae4b4d785`. The generation law is
 `1 + (little_endian(SHA256(domain || u32_le(index))) mod (r-1))`, with domain
 `n83-e2e-cold-holdout-five-20261016-v1`, subgroup order
 `r = 8569786107849059`, and indices 0 through 4. The generator checks the
@@ -27,8 +28,15 @@ order; alternate rho before and after IC across points. Require the same
 source, host, base/index identity, scalar replay and resource gates as the
 screen. Each fresh IC child has a 480-second cap and each rho child has a
 120-second cap; the allocation must expose at least four CPUs, 15.5 GiB RAM
-and 2 GiB free disk. Retain all five target-dependent online intervals
-separately from the full cold intervals.
+and 2 GiB free disk. Retain each target-dependent online interval separately
+from its full cold interval.
+
+Before selecting challengers, `materialize_selection.py` checks the exact
+GitHub artifact SHA-256, ZIP integrity, frozen run ID and executed commit,
+then replays the complete grid locally and requires byte-identical analysis.
+It seals the raw analysis and the three challenger Ks in versioned files.
+The runner checks those files and their digests before opening any holdout
+point.
 
 Rank the four pipelines by their mean full cold one-target time over the five
 points, using the mean of K1152 A/B on each point. Report all per-point

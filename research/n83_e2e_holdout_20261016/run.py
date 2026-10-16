@@ -17,6 +17,8 @@ SCREEN_ANALYSIS = HERE / "screen_analysis.json"
 SELECTION = HERE / "selection.json"
 TARGET_SHA256 = "722bc60cd010e533cd715a9bfb321fba52d950352c99684cd422b23af7f93d26"
 ANSWER_SHA256 = "b4c2ae858770b7c8842703558984326bc0002b0f1deb3c898d5ac30562de8b96"
+SCREEN_RUN_ID = 38940108434
+SCREEN_HEAD_SHA = "551b9dfc632dce7a5ab8218b1b1dff6ae4b4d785"
 RHO_SEED_BASE = 2026101700
 IC_CAP_SECONDS = 480
 RHO_CAP_SECONDS = 120
@@ -55,6 +57,8 @@ def finalists():
             or selection["schema"] != "n83.e2e-holdout-selection/v1"
             or selection["screen_analysis_sha256"] != parent.digest(SCREEN_ANALYSIS)
             or selection["screen_source_sha256"] != screen.SOURCE_SHA256
+            or selection["screen_run_id"] != SCREEN_RUN_ID
+            or selection["screen_source_commit"] != SCREEN_HEAD_SHA
             or not selection["screen_archive_sha256"]):
         raise ValueError("exposed grid did not admit a frozen holdout selection")
     expected = [int(k) for k in analysis["descriptive_order"]
