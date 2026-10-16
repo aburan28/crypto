@@ -1502,7 +1502,11 @@ pub fn closure_refutation_scan(
     let (mut xl_done, mut closure_done) = (false, false);
     for degree in d_min..=d_max {
         let started = Instant::now();
-        let Some((xl, _)) = ReducedBasis::from_system(system, n_vars, degree) else {
+        // The plain basis is read and dropped before the closure is built,
+        // so the two dense matrices are never held at once.
+        let Some((xl_refuted, xl_rank)) = ReducedBasis::from_system(system, n_vars, degree)
+            .map(|(xl, _)| (xl.is_refuted(), xl.rank()))
+        else {
             break;
         };
         let Some((closed, cost)) =
@@ -1512,17 +1516,17 @@ pub fn closure_refutation_scan(
         };
         out.push(ClosureDegree {
             degree,
-            xl_refuted: xl.is_refuted(),
+            xl_refuted,
             closure_refuted: closed.is_refuted(),
             saturated: closed.is_refuted() || closed.pending_falls() == 0,
-            xl_rank: xl.rank(),
+            xl_rank,
             closure_rank: closed.rank(),
             columns: closed.columns(),
             closure_products: cost.closure_products,
             closure_word_ops: cost.word_ops(),
             secs: started.elapsed().as_secs_f64(),
         });
-        xl_done |= xl.is_refuted();
+        xl_done |= xl_refuted;
         closure_done |= closed.is_refuted();
         if xl_done && closure_done {
             break;

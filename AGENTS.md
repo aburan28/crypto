@@ -16,6 +16,14 @@
   asymptotic sub-rho, or deployed-curve-security claims; multi-target and
   amortized results stay secondary; ledger rows promote only with complete
   measurement fields and independent replay.
+- **Beat the fastest external tool, and show it** (owner's rule,
+  2026-10-16; details in §15): our implementations should be faster than
+  every other implementation of the same computation. Every speed result
+  is compared with the fastest external tool for that computation, for
+  example Magma's F4 and F5 or msolve for Gröbner bases, on the same inputs
+  and host, with the outputs checked equal. A result that has not been
+  compared is not yet a claim of being the fastest, and a loss is reported
+  as a loss.
 - **Conductor:** run `conductor check --summary "…" --scope path:…` before
   editing; report scope expansion before editing outside reserved paths. Do
   not publish chat transcripts or secrets as task metadata.
@@ -1167,6 +1175,84 @@ or for another machine) is written as a card in `backlog/<ID>/` and checked
 with `backlog validate`; leases and runs go through cairn, and results return
 to `research/` by PR. The protocol, including funding as priority, is
 [backlog/README.md](backlog/README.md).
+
+### 15. Compare against the fastest external implementations
+
+Owner's rule, 2026-10-16. The goal is for our implementations to be faster
+than everything else that computes the same thing. A before/after speedup
+against our own previous code (§10) shows progress. It does not show where
+we stand. So every performance result also names the fastest external
+implementation of the same computation and measures against it.
+
+**Which tools.** Compare against the fastest available implementation, not a
+convenient one. As a minimum, for the areas this repository works in:
+
+| computation | compare against |
+|:--|:--|
+| Gröbner bases (F4, F5, decomposition and summation-polynomial systems) | Magma `GroebnerBasis` (its F4, and its F5 where Magma offers it), msolve, FGb; also Singular (`std`, `slimgb`, `modStd`) and OpenF4 where relevant |
+| Sparse or dense linear algebra mod p and over GF(2) | Magma, FLINT, M4RI/M4RIE (GF(2)), and the block Lanczos/Wiedemann solvers of CADO-NFS |
+| Polynomial and field arithmetic (products, powers, roots, factoring) | FLINT (`nmod_poly`, `fmpz_mod_poly`, `fq`), NTL, Magma, PARI/GP |
+| Point counting (SEA), modular polynomials, isogenies | PARI/GP (`ellcard`, `ellap`), Magma (`#E`, `ClassicalModularPolynomial`, `Isogeny`), Sutherland's `classpoly`/`modpoly` and his published tables, Sage where it calls a faster library |
+| Isogeny-based protocols (CSIDH, √élu, SQIsign-style quaternion steps) | the authors' reference and optimised implementations, and published cycle counts on named CPUs |
+| ECDLP (rho, kangaroo, index calculus) | the fastest published implementation or record computation for that curve class, with its hardware stated |
+
+If a faster tool exists than the ones listed, use it and add it to this
+table.
+
+**How to compare.**
+
+- **Same inputs, same answer.**
+  - Run the external tool on exactly the inputs our code runs on, exported
+    by a checked-in script. `examples/gb_cas_export.rs` writes msolve,
+    Singular and Magma inputs for the Gröbner workloads; add an equivalent
+    when a workload has none.
+  - Check that the outputs agree: the same reduced basis and order, the same
+    group order, the same j-invariants, the same kernel. A faster run that
+    computes something different is not comparable.
+  - Record the tool's name, version, options, and the algorithm it actually
+    ran (for example whether Magma used F4 or F5, or which msolve flags
+    were set).
+- **Same host, same conditions.**
+  - Run both sides on the same machine, with the same isolation as §10 and
+    the same thread count. Compare single-threaded with single-threaded and
+    many threads with many.
+  - Do not time the external tool's start-up, licence check or
+    parsing/printing as its algorithm. Use its own internal timer
+    (Magma `Cputime`/`Realtime`, msolve `-v`) when it reports one, and say
+    which was used.
+- **Report the ratio, per size.**
+  - Report our time divided by the external tool's time, at each problem
+    size, with the A/A spread (or another uncertainty) for both sides. Also
+    report how the cost grows with size for both, so a constant-factor win
+    at small sizes is not mistaken for a better exponent.
+  - Say plainly who is faster, at which sizes, and on which hardware class.
+  - "Faster than X" holds only over the sizes and hosts that were measured,
+    and only against the fastest configuration of X that was tried. A loss
+    at large sizes is reported even when small sizes win.
+- **Missing tools are named, not skipped.**
+  - If the fastest tool is unavailable (Magma needs a licence; some tools
+    run only on other platforms), use the fastest open tool available. msolve
+    is the open reference for F4.
+  - Cite the missing tool's published timings with their hardware, labelled
+    "published, not reproduced".
+  - List which comparisons are still missing, and ask the owner for access
+    or a host that has the tool instead of quietly dropping the comparison.
+  - Never present a comparison against a slower tool as "fastest".
+- **A loss is a target.** When an external tool is faster, record the gap,
+  as the ratio and the sizes where it holds, in the study and as a
+  `backlog/` card (§14) or the next round's goal. A later performance PR on
+  the same computation reports the ratio against the external tool before
+  and after.
+- **Where it lands.**
+  - The external comparison goes in the same report and `benchmarks/` entry
+    as the speed result, under the rules of "Performance results also land
+    in `benchmarks/`".
+  - The `benchmarks/README.md` row gives the ratio against the fastest
+    external tool next to the before/after ratio, or says "external
+    comparison: not run" with the reason.
+  - Keep the export and run scripts in the repository. Do not commit
+    proprietary binaries, or output that the tool's licence forbids
+    redistributing.
 
 ## Worked example
 

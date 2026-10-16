@@ -26,7 +26,10 @@
 //! An operation the workload names but the profile does not price is an
 //! error, never a zero.
 
+pub mod compare;
 pub mod fit;
+pub mod gpu;
+pub mod ic;
 pub mod kernel;
 pub mod measure;
 pub mod rho;
@@ -50,6 +53,11 @@ pub struct OpCost {
     /// Cycles per operation in a dependent chain, when known.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub latency_cycles: Option<f64>,
+    /// The issue pipe or port the operation occupies.  In a phase with
+    /// `pipes_overlap`, pipes run concurrently and the busiest one sets the
+    /// time; operations that share a pipe add up on it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pipe: Option<String>,
     pub source: String,
 }
 
@@ -211,6 +219,12 @@ pub struct Phase {
     /// Fraction of the phase that runs in parallel (Amdahl).
     #[serde(default = "one")]
     pub parallel_fraction: f64,
+    /// The operations' pipes run concurrently: cycles per iteration are
+    /// the busiest pipe's, `max_pipe Σ_{op on pipe} count · cycles` (the
+    /// roofline over issue pipes a GPU kernel model uses), not the sum
+    /// over every operation.  Every operation must name its pipe.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub pipes_overlap: bool,
 }
 
 /// A data movement.
@@ -282,6 +296,9 @@ pub struct PhaseResult {
     pub ns_per_iteration_memory: f64,
     pub memory_level: String,
     pub bound: String,
+    /// The busiest pipe, in a phase with `pipes_overlap`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub binding_pipe: Option<String>,
     pub ops: Vec<OpShare>,
     /// One core, alone.
     pub time_one_core_s: f64,
@@ -336,7 +353,10 @@ fn unmeasured(source: &str) -> bool {
 /// operation at its dependent-chain latency, for an operation on the
 /// critical path (the one inversion of a batch); a bare name prices it at
 /// [`OpCost::cycles`].
-pub fn op_cycles<'a>(hw: &'a Hardware, op: &str) -> Result<(f64, &'a str), String> {
+pub fn op_cycles<'a>(
+    hw: &'a Hardware,
+    op: &str,
+) -> Result<(f64, &'a str, Option<&'a str>), String> {
     let (base, latency) = match op.strip_suffix("@latency") {
         Some(b) => (b, true),
         None => (op, false),
@@ -349,9 +369,9 @@ pub fn op_cycles<'a>(hw: &'a Hardware, op: &str) -> Result<(f64, &'a str), Strin
         let l = c
             .latency_cycles
             .ok_or_else(|| format!("{} has no latency for `{base}`", hw.name))?;
-        Ok((l, c.source.as_str()))
+        Ok((l, c.source.as_str(), c.pipe.as_deref()))
     } else {
-        Ok((c.cycles, c.source.as_str()))
+        Ok((c.cycles, c.source.as_str(), c.pipe.as_deref()))
     }
 }
 
@@ -460,18 +480,36 @@ pub fn predict(hw: &Hardware, wl: &Workload, dep: Deployment) -> Result<Predicti
             note(format!("{} overhead: {}", ph.name, ph.overhead_source));
         }
         let mut ops = Vec::new();
+        let mut pipes: BTreeMap<String, f64> = BTreeMap::new();
         for (op, &n) in &ph.ops_per_iteration {
             let c = op_cycles(hw, op).map_err(|e| format!("{e} (phase {})", ph.name))?;
             if unmeasured(c.1) {
                 note(format!("{op} = {} cycles: {}", c.0, c.1));
             }
-            cyc += n * c.0;
+            if ph.pipes_overlap {
+                let pipe = c.2.ok_or_else(|| {
+                    format!("phase {} overlaps pipes but `{op}` names none", ph.name)
+                })?;
+                *pipes.entry(pipe.to_string()).or_default() += n * c.0;
+            } else {
+                cyc += n * c.0;
+            }
             ops.push(OpShare {
                 op: op.clone(),
                 per_iteration: n,
                 cycles_per_iteration: n * c.0,
                 share: 0.0,
             });
+        }
+        let mut binding_pipe = None;
+        if ph.pipes_overlap {
+            let (name, busiest) =
+                pipes.iter().fold(
+                    ("", 0.0f64),
+                    |b, (k, &v)| if v > b.1 { (k.as_str(), v) } else { b },
+                );
+            cyc += busiest;
+            binding_pipe = Some(name.to_string());
         }
         for o in &mut ops {
             o.share = if cyc > 0.0 {
@@ -507,6 +545,7 @@ pub fn predict(hw: &Hardware, wl: &Workload, dep: Deployment) -> Result<Predicti
             ns_per_iteration_memory: ns_mem,
             memory_level: lvl.name.clone(),
             bound: bound.into(),
+            binding_pipe,
             ops,
             time_one_core_s: t1,
             efficiency: eff,
@@ -709,6 +748,7 @@ mod tests {
             OpCost {
                 cycles: 10.0,
                 latency_cycles: None,
+                pipe: None,
                 source: "measured".into(),
             },
         );
@@ -717,6 +757,7 @@ mod tests {
             OpCost {
                 cycles: 1000.0,
                 latency_cycles: None,
+                pipe: None,
                 source: "assumed".into(),
             },
         );
@@ -794,6 +835,7 @@ mod tests {
                 bytes_per_iteration: 100.0,
                 working_set_bytes_per_core: ws,
                 parallel_fraction: 1.0,
+                pipes_overlap: false,
             }],
             transfers: vec![],
             storage: vec![],
