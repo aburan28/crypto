@@ -163,3 +163,20 @@ ratios are exactly paired; C2 and C4 run on other walks and are judged against t
 - **T-C3/C4 grid**: kappa = kappa_R2(b) x {0.8, 1, 1.3, 1.7} at b = 16, 18, 20, 21, curves 5-7, stream `w` with
   W = 32; LA arms `lpsgebw2@cx(b)`, `lpsgebw2o35c@16`, `lpsgebw2o70c@16`, `lpsgebw2o100c@16`, `lpsgebw2o70c@32`.
   The C3 and C4 rules of the protocol pick among these five.
+
+## Amendment D2 (2026-10-16 01:08, training complete, before any test job)
+
+- **Container restart (00:2x).** Every running job was killed: the three b = 21, kappa x 1.7 training jobs (no
+  record written; rerun). The nine b = 21 records written before were complete and are kept. The binary was
+  rebuilt from the final source (doc comments, `rustfmt` and headers changed since the training binary
+  `d3e1d0c5…`; new hash in [binary_sha256_final.txt](results/repro/binary_sha256_final.txt)); it reproduced two
+  earlier records exactly ([results/repro/](results/repro/)). All later training jobs and every test job use it.
+- **Scheduler fix (00:03).** `run_slots.sh` counted the `timeout`/`prlimit` wrapper as a job, so only 2 jobs ran at
+  a time between about 23:40 and 00:03; the pattern is now anchored on the binary. No record is affected.
+- **Training** ([tune.md](results/train/tune.md)): 48/48 jobs, every log verified.
+  - **C3**: `lpsgebw2o70c@32` (ratio 0.9331 to `lpsgebw2@cx(b)` at kappa_R2, geometric mean over 16, 18, 20, 21).
+  - **C4**: arm `lpsgebw2o100c@16+C1C2`, **ln kappa_C4(b) = 0.3478 - 0.1916 (b - 20)**; kappa\*(16) = 3.235 sits at
+    the top of the grid (clamped), the others inside (1.895, 1.382, 1.237 at 18, 20, 21).
+  - Stored in `d2.env`. W = 32.
+- **Order**: inside each priority block the largest size runs first (slot packing); `w` at b = 22 runs last and only
+  if time allows.

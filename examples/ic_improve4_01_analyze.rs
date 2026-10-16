@@ -253,7 +253,17 @@ fn pertrial(dir: &str, prefix: &str, out: &str) {
 /// Training rules (PROTOCOL.md): W for C2, epsilon for C3, epsilon and kappa for C4.
 /// Records: `w` stream (W walks) at kappa = kappa_R2(b) x {grid}, curves 5-7.
 fn tune(dir: &str, out: &str) {
-    let d = load(dir);
+    // every (kappa, curve) record: `load` keys by (arm, b, curve) and would keep one kappa only
+    let mut d: Vec<((String, u64, u64), Value)> = vec![];
+    for (i, rec) in read_jsonl(dir).into_iter().enumerate() {
+        let one = std::env::temp_dir().join(format!("ic4tune_{}_{i}", std::process::id()));
+        fs::create_dir_all(&one).unwrap();
+        fs::write(one.join("r.jsonl"), rec.to_string()).unwrap();
+        for (k, r) in load(one.to_str().unwrap()) {
+            d.push((k, r));
+        }
+        fs::remove_dir_all(&one).unwrap();
+    }
     // (arm without stream, b) -> [(kappa, curve, cost)]
     let mut m: BTreeMap<(String, u64), Vec<(f64, u64, f64)>> = BTreeMap::new();
     for ((arm, b, c), r) in &d {
