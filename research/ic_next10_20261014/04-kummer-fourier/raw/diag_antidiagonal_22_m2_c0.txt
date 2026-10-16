@@ -1,0 +1,10 @@
+Diagnostic (post hoc, 2026-10-14): is the Zt arg-max on the anti-diagonal c = (c, -c) a tower property?
+Cell 22-bit m=2 curve 0 (p=4206593), N=2048. Count of top-10 |Zt| classes with c1 + c2 = 0 mod N, and top 3/4 classes [c1, c2, Zt]:
+tower 9 [[771, 1277, 6.141], [1019, 1029, 5.906], [335, 1713, 5.819], [969, 1079, 5.711]]
+perm  9 [[872, 1176, 6.034], [714, 1334, 5.643], [814, 1234, -5.543]]
+perm  9 [[325, 1723, -6.694], [598, 1450, 6.414], [0, 364, 6.027]]
+perm 10 [[580, 1468, -7.067], [628, 1420, -6.315], [959, 1089, 6.29]]
+rand  9 [[631, 1417, -6.91], [328, 1720, 6.283], [58, 1990, -6.121]]
+rand  9 [[831, 1217, -6.984], [273, 1775, 5.98], [875, 1173, -5.914]]
+Reading: the nulls show the same pattern. For c = (c, -c), the transposition maps c to -c, so f_O(c) is real and
+the cross term has twice the variance the frozen normalisation assumes (sd x sqrt 2). The nulls calibrate it.

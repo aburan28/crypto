@@ -1,0 +1,26 @@
+{
+  "after_ping_immediate": "ConnectionRefusedError: [Errno 61] Connection refused",
+  "after_ping_polled": "ConnectionRefusedError: [Errno 61] Connection refused",
+  "before_ping": "ConnectionRefusedError: [Errno 61] Connection refused",
+  "ended_utc": "2026-10-15T05:52:16.489388+00:00",
+  "schema": "n83.docker-post-term-start/v1",
+  "sigkill_sent": false,
+  "solver_search_executed": false,
+  "start_command": [
+    "docker",
+    "desktop",
+    "start",
+    "--timeout",
+    "180"
+  ],
+  "start_elapsed_wall_seconds_L0": 0.3274587089981651,
+  "start_exit_code": 0,
+  "start_timed_out": false,
+  "started_utc": "2026-10-15T05:50:59.072477+00:00",
+  "status": "PRODUCER_FAILURE_DOCKER_DAEMON_UNAVAILABLE",
+  "status_before_exit_code": 1,
+  "status_before_stderr": "Could not retrieve status. Is Docker Desktop running?\nYou can start Docker Desktop by running 'docker desktop start'.\n",
+  "status_before_stdout": "",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "dfbca9f23d9ab195576075689e08e9de08374f6a2aea2913472bb4b4a1129ec8"
+}

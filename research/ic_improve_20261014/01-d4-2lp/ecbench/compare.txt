@@ -1,0 +1,50 @@
+=== ic-k4-d4-2lp vs ic-k4-d4
+ops (ok): ic-k4-d4-2lp / ic-k4-d4 = 1.0108 [1.001, 1.026] (cluster) over 12 pairs on 12 workloads, 4 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 0.9485 [0.949, 0.949]
+measurement quality: 0 / 100; paired attempts 12, verified 12, admitted 0; levels {"L0": 12}; p95 foreign busy unknown%, p95 run queue 31.93%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-k4-d4-2lp / ic-k4-d4 | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp4p101-t7230-4648f8e2 | 24.63 | 3 | 1.0000 | [1.0000, 1.0000] | cluster |
+| icv1-fp4p181-tm22754-781f401f | 28.00 | 3 | 1.0202 | [1.0000, 1.0564] | cluster |
+| icv1-fp4p269-tm108482-f98bf277 | 30.29 | 3 | 1.0139 | [1.0000, 1.0268] | cluster |
+| icv1-fp4p397-tm257762-06a9c911 | 32.53 | 3 | 1.0235 | [0.9968, 1.0841] | cluster |
+
+| workload | curve | log2 r | ic-k4-d4 mean S | ic-k4-d4-2lp mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W023cb0f0854c | icv1-fp4p181-tm22754-781f401f | 28.00 | 120387947.9928 | 120387947.9337 | 1.0000 |
+| W0d54e610a22b | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 76398081.3947 | 78446267.8740 | 1.0268 |
+| W14c339ec7dbb | icv1-fp4p181-tm22754-781f401f | 28.00 | 167737450.0509 | 167737450.0119 | 1.0000 |
+| W1d2a6d1d015d | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 32241475.5070 | 34952909.4298 | 1.0841 |
+| W1e28fb147ed4 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 218250648.9147 | 218250648.8553 | 1.0000 |
+| W4c4d881526a0 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 156744114.8135 | 156744114.8276 | 1.0000 |
+| W62214040e212 | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 78460742.7318 | 79481217.2568 | 1.0130 |
+| W7424a8f9b206 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 210138768.8464 | 210138768.7936 | 1.0000 |
+| Wa741af9e0ef1 | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 45041038.7674 | 45150692.3019 | 1.0024 |
+| Wc2bc0c19ddb0 | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 37760705.6950 | 37641083.5460 | 0.9968 |
+| Wc5a51a216b76 | icv1-fp4p181-tm22754-781f401f | 28.00 | 160368064.3353 | 169415943.4801 | 1.0564 |
+| Wfda9bac4061e | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 65527494.3221 | 65527494.2844 | 1.0000 |
+=== ic-k4-d4-2lp-gaudry vs ic-k4-d4
+ops (ok): ic-k4-d4-2lp-gaudry / ic-k4-d4 = 1.5839 [1.423, 1.807] (cluster) over 12 pairs on 12 workloads, 4 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.5750 [1.575, 1.575]
+measurement quality: 0 / 100; paired attempts 12, verified 12, admitted 0; levels {"L0": 12}; p95 foreign busy unknown%, p95 run queue 25.50%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-k4-d4-2lp-gaudry / ic-k4-d4 | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp4p101-t7230-4648f8e2 | 24.63 | 3 | 1.3120 | [1.2177, 1.5526] | cluster |
+| icv1-fp4p181-tm22754-781f401f | 28.00 | 3 | 1.6236 | [1.5258, 1.6851] | cluster |
+| icv1-fp4p269-tm108482-f98bf277 | 30.29 | 3 | 1.8365 | [1.7299, 1.9380] | cluster |
+| icv1-fp4p397-tm257762-06a9c911 | 32.53 | 3 | 2.3287 | [1.9852, 2.8017] | cluster |
+
+| workload | curve | log2 r | ic-k4-d4 mean S | ic-k4-d4-2lp-gaudry mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W023cb0f0854c | icv1-fp4p181-tm22754-781f401f | 28.00 | 120387947.9928 | 202010688.4278 | 1.6780 |
+| W0d54e610a22b | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 76398081.3947 | 148062897.2823 | 1.9380 |
+| W14c339ec7dbb | icv1-fp4p181-tm22754-781f401f | 28.00 | 167737450.0509 | 255930293.6153 | 1.5258 |
+| W1d2a6d1d015d | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 32241475.5070 | 90331289.5279 | 2.8017 |
+| W1e28fb147ed4 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 218250648.9147 | 268462159.8389 | 1.2301 |
+| W4c4d881526a0 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 156744114.8135 | 243356404.3366 | 1.5526 |
+| W62214040e212 | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 78460742.7318 | 135730353.6537 | 1.7299 |
+| W7424a8f9b206 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 210138768.8464 | 255883611.5953 | 1.2177 |
+| Wa741af9e0ef1 | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 45041038.7674 | 89417509.7028 | 1.9852 |
+| Wc2bc0c19ddb0 | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 37760705.6950 | 88154832.1377 | 2.3346 |
+| Wc5a51a216b76 | icv1-fp4p181-tm22754-781f401f | 28.00 | 160368064.3353 | 270237452.4063 | 1.6851 |
+| Wfda9bac4061e | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 65527494.3221 | 120937091.2900 | 1.8456 |

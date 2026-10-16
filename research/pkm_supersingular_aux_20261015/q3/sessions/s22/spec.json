@@ -1,0 +1,105 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "PKM isogeny tower on a supersingular vs an ordinary auxiliary curve, 22-bit p, t=9, v2(p+1)=10",
+  "description": "Preregistered (research/pkm_supersingular_aux_20261015/PROTOCOL.md): ic.pipeline with the isogeny tower base on the supersingular auxiliary curve y^2 = x^3 + x (prime-isogeny:t=9,aux=supersingular, 246 abscissae, no search) and on the searched ordinary curve (prime-isogeny:t=9, 235 abscissae, search charged), plain prime-abscissa bases of each size, oracle rootfind-mitm:m=3 (and mitm:m=3 on the supersingular base as positive control), against rho with the negation map and an A/A rho control, eight one-target workloads.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "prime_explicit",
+        "p": 2511871,
+        "a": 1975157,
+        "b": 977806,
+        "group_order": 2512977,
+        "r": 837659,
+        "gx": 522921,
+        "gy": 1923432
+      }
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 202610160122
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "ic-ss-rootfind",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-isogeny:t=9,aux=supersingular",
+          "oracle": "rootfind-mitm:m=3",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-ss-mitm",
+      "role": "control",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-isogeny:t=9,aux=supersingular",
+          "oracle": "mitm:m=3,negation_folded=1",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-ord-rootfind",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-isogeny:t=9",
+          "oracle": "rootfind-mitm:m=3",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-plain-ss",
+      "role": "control",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=246",
+          "oracle": "rootfind-mitm:m=3",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-plain-ord",
+      "role": "control",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=235",
+          "oracle": "rootfind-mitm:m=3",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "rho-neg-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.negation"
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 2,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 202610163122,
+    "isolation_required": "L0",
+    "timeout_seconds": 3600
+  }
+}

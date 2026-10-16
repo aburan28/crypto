@@ -1,0 +1,16 @@
+
+running 2 tests
+test cryptanalysis::smt_oracle::tests::z3_round_trip_bool ... ok
+
+thread 'cryptanalysis::smt_oracle::tests::z3_round_trip_bv1' (1113471) panicked at src/cryptanalysis/smt_oracle.rs:869:65:
+solver runs: "z3 exited with status exit status: 108: (error \"failed to open file '/private/tmp/n83-rust-test-tmp-20261015/smt-pdp-54046-2.smt2'\")"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test cryptanalysis::smt_oracle::tests::z3_round_trip_bv1 ... FAILED
+
+failures:
+
+failures:
+    cryptanalysis::smt_oracle::tests::z3_round_trip_bv1
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 4199 filtered out; finished in 0.12s
+

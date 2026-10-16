@@ -1,0 +1,32 @@
+{
+  "schema": "n83.fixed-witness-validation-attempts/v1",
+  "attempts": [
+    {
+      "label": "initial_release_library",
+      "command": "cargo test --release --lib --offline -- --test-threads=1",
+      "disposition": "INTERRUPTED_NO_TERMINAL_RECEIPT",
+      "observation": "At 2026-10-14 06:02 UTC, the exec handle was missing and no matching process was live; the partial log ended mid-test.",
+      "partial_log": "release-lib-interrupted.log.gz",
+      "compressed_sha256": "cea3c25b8eb065f83544ec3baf7a6b6e48dec19d959e5de24f23eb85adf1ce6d"
+    },
+    {
+      "label": "detached_release_library",
+      "command": "nohup python3 validate_release.py",
+      "disposition": "LAUNCH_FAILURE",
+      "observation": "The shell reported 'nice(5) failed: operation not permitted'; no matching process became live and the log was empty.",
+      "partial_log": "release-lib-background-launch-failed.log.gz",
+      "compressed_sha256": "59869db34853933b239f1e2219cf7d431da006aa919635478511fabbfc8849d2"
+    },
+    {
+      "label": "current_serial_release_library",
+      "command": "cargo test --release --lib --offline -- --test-threads=1",
+      "disposition": "INTERRUPTED_BY_OPERATOR_UNDER_HOST_CONTENTION",
+      "observation": "The process was sent SIGTERM after 1,836 completed test lines; cargo reported exit 101 because its test binary exited on signal 15. The host load average was 228.04 at the decision point, and the suite had accumulated about eight CPU minutes in 44 wall minutes. This is neither a passing full rerun nor a code-test failure.",
+      "partial_log": "release-lib.log.gz",
+      "compressed_sha256": "0c14a9f4516ed2bec1f9a700e7985182723c5248fddf7368946001eaad3ba675",
+      "exit_receipt": "release-lib-exit.json",
+      "exit_receipt_sha256": "e4330b4626eb0ea6cbe2ab4917ebb4def09bca34e82455227a170b64e8ba2b31"
+    }
+  ],
+  "interpretation": "No attempt here is a complete current full-library pass. The earlier complete 4,001-test pass and a current focused terminal pass cover the unchanged production library plus its sole later test addition."
+}

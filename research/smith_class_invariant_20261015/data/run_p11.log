@@ -1,0 +1,72 @@
+p=11: 5000/160010 classes, 360s
+p=11: 10000/160010 classes, 712s
+p=11: 15000/160010 classes, 1061s
+p=11: 20000/160010 classes, 1411s
+p=11: 25000/160010 classes, 1761s
+p=11: 30000/160010 classes, 2110s
+p=11: 35000/160010 classes, 2463s
+p=11: 40000/160010 classes, 2813s
+p=11: 45000/160010 classes, 3164s
+p=11: 50000/160010 classes, 3514s
+p=11: 55000/160010 classes, 3865s
+p=11: 60000/160010 classes, 4215s
+p=11: 65000/160010 classes, 4567s
+p=11: 70000/160010 classes, 4917s
+p=11: 75000/160010 classes, 5266s
+p=11: 80000/160010 classes, 5616s
+p=11: 85000/160010 classes, 5965s
+p=11: 90000/160010 classes, 6315s
+p=11: 95000/160010 classes, 6666s
+p=11: 100000/160010 classes, 7015s
+p=11: 105000/160010 classes, 7367s
+p=11: 110000/160010 classes, 7717s
+p=11: 115000/160010 classes, 8066s
+p=11: 120000/160010 classes, 8419s
+p=11: 125000/160010 classes, 8768s
+p=11: 130000/160010 classes, 9117s
+p=11: 135000/160010 classes, 9467s
+p=11: 140000/160010 classes, 9815s
+p=11: 145000/160010 classes, 10165s
+p=11: 150000/160010 classes, 10512s
+p=11: 155000/160010 classes, 10861s
+p=11: 160000/160010 classes, 11285s
+{
+  "counts": {
+    "j4_instrument_errors": 0,
+    "k2_j4_checked": 160010,
+    "k2_j4_mismatch": 0,
+    "k2_sylow_checked": 1000,
+    "k2_sylow_mismatch": 0,
+    "k3_rank_mismatch": 0,
+    "k3_sum_mismatch": 0,
+    "k3_uncertified": 0,
+    "k4_checked": 160010,
+    "k4_mismatch": 43538,
+    "k4c_checked": 160010,
+    "k4c_mismatch": 0,
+    "k5_failures": 92783,
+    "k5c_failures": 0,
+    "sylow_instrument_errors": 0,
+    "tractable": 160010,
+    "x3c_ambiguous_entries": 46779,
+    "x3c_classes_with_ambiguous_k": 36681
+  },
+  "git_head": "0bff9255bbe0a2830e20ab4da846110b6d45eb59",
+  "iso_classes": 324562,
+  "k2_pass_j4": true,
+  "k2_pass_sylow": true,
+  "k3_pass": true,
+  "k4_pass": false,
+  "k4c_pass": true,
+  "k5_pass": false,
+  "k5c_pass": true,
+  "limit": null,
+  "p": 11,
+  "seconds": 11286.725382016,
+  "threads": 2,
+  "tractable_classes": 160010
+}
+
+real	188m8.957s
+user	369m56.873s
+sys	0m6.893s

@@ -1,0 +1,18 @@
+saved /home/user/wt/isogeny-tower/research/pkm_isogeny_tower_ecbench_20261015/sessions/p20/comparisons/ic-iso-mitm__ic-iso-rootfind.json
+ops (ok): ic-iso-rootfind / ic-iso-mitm = 1.1959 [1.184, 1.205] (cluster) over 16 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.1726 [1.107, 1.231]
+measurement quality: 0 / 100; paired attempts 16, verified 16, admitted 0; levels {"L0": 16}; p95 foreign busy unknown%, p95 run queue 58.50%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-iso-rootfind / ic-iso-mitm | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp20-tm728-d215a2a1 | 18.85 | 8 | 1.1959 | [1.1840, 1.2053] | cluster |
+
+| workload | curve | log2 r | ic-iso-mitm mean S | ic-iso-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W0ef65828562c | icv1-fp20-tm728-d215a2a1 | 18.85 | 33.9568 | 39.6982 | 1.1691 |
+| W34d518f1ba63 | icv1-fp20-tm728-d215a2a1 | 18.85 | 34.5469 | 40.8042 | 1.1811 |
+| W54526e0ea435 | icv1-fp20-tm728-d215a2a1 | 18.85 | 34.0470 | 40.7126 | 1.1958 |
+| W5fa0ccd7cb0f | icv1-fp20-tm728-d215a2a1 | 18.85 | 34.6283 | 41.4058 | 1.1957 |
+| W62af93136693 | icv1-fp20-tm728-d215a2a1 | 18.85 | 33.6567 | 40.5491 | 1.2048 |
+| W91cf98663c8e | icv1-fp20-tm728-d215a2a1 | 18.85 | 33.5877 | 40.5404 | 1.2070 |
+| W957cbe00e31d | icv1-fp20-tm728-d215a2a1 | 18.85 | 32.9977 | 39.9787 | 1.2116 |
+| Wd141cbfa0a83 | icv1-fp20-tm728-d215a2a1 | 18.85 | 33.1655 | 39.9046 | 1.2032 |

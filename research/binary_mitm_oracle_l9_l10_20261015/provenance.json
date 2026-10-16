@@ -1,0 +1,13 @@
+{
+  "study": "binary_mitm_oracle_l9_l10_20261015",
+  "git_head": "to be recorded at commit time",
+  "command": "cargo run --release --example binary_mitm_oracle_l8 27 9 48 16 research/binary_mitm_oracle_l9_l10_20261015 ; cargo run --release --example binary_mitm_oracle_l8 31 10 48 16 research/binary_mitm_oracle_l9_l10_20261015",
+  "test_command": "cargo test --release --example binary_mitm_oracle_l8 (n=15 l=5 exhaustive control, unchanged)",
+  "host": {
+    "machine": "Apple M4 Pro, arm64, 14 logical cores, macOS 26.6",
+    "isolation": "unpinned, shared host, contended by other sessions' cargo builds (L0); wall times are practicality notes",
+    "build": "cargo build --release, default toolchain"
+  },
+  "runs": "one full 64-target run per rung (l9n27, l10n31)",
+  "seed": "0x9E37779B97F4A7C15 (deterministic LCG, fixed in the example, same as the l=8 study)"
+}
