@@ -53,3 +53,5 @@ measures K3072/root11 and K2543/root11 four times each in adjacent A/A
 pairs and mirrored order. It requires exact base/index identity, full
 replay, pair spreads at most 10%, and separation exceeding observed A/A
 noise before it can name the candidate for the sealed Tier 1 panel.
+The recurring admission gap and its exact exit conditions are tracked in
+the [N83 online A/A problem record](../../problems/n83-online-aa-noise.md).
