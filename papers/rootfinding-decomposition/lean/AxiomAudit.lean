@@ -1,5 +1,6 @@
 import S3Roots
 import Lean.Util.CollectAxioms
+import Lean.Elab.Command
 
 /-!
 Axiom audit for `S3Roots.lean` (Proposition 1 of

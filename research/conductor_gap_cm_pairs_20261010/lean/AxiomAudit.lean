@@ -1,6 +1,7 @@
 import GenericInvariance
 import TransferBound
 import Lean.Util.CollectAxioms
+import Lean.Elab.Command
 
 /-!
 Axiom audit for `GenericInvariance.lean` and `TransferBound.lean`. Run
