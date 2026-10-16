@@ -185,6 +185,37 @@ the per-op cost is 622–635 ns on every curve. Per-curve rows are in
   uses that ring (GLV-style speedups exist only for tiny |D_K|, and this
   D_K = −1482974187 is not tiny).
 
+## Run it on your own curve
+
+```sh
+scripts/volcano_ecdlp.sh --curve P,A,B [--order N] [--ell 3] [--seed S] [--trials 100]
+scripts/volcano_ecdlp.sh --ca /path/to/ca --curve P,A,B ...   # cryptanalysis's C rho
+```
+
+`y² = x³ + Ax + B` over `F_P`, any prime `P < 2^62`. Without `--order` the
+tool counts points (baby-step giant-step). It checks the order against
+random points, takes `n` the largest prime factor, draws a generator
+(cofactor × a seeded random point) and a secret `k` from `--seed`, and
+reads the volcano depth `v_ℓ(f)` and the crater shape from `D = t² − 4p`.
+Then it walks, carries `(P, kP)` to every curve and measures. A curve whose
+conductor ℓ does not divide has depth 0, so the walk covers crater curves
+only. Outputs go to `--out` (default `volcano-ecdlp-<UTC>/`):
+`results.json`, `trials.csv`, `instances.jsonl` (every curve's instance in
+`ca` format, ready for `ca solve`) and the standard graphs.
+
+- **Engines.** `native` is this binary's single-walker 32-adding walk with
+  distinguished points. The DP rate defaults to `min(8, log₂n/2 − 6)` bits,
+  so small groups keep every point. With every point distinguished, the
+  x-keyed table also catches `±X` matches, so expect about √(πn/4).
+  `--engine ca` (or `--ca` on the script) runs `ca solve --alg rho` from
+  aburan28/cryptanalysis on each curve, with its defaults (negation map
+  on) plus any `--ca-arg`. Iterations are then `ca`'s reported `ops` and
+  times its reported `seconds`.
+- **Cost.** About √n group operations per solve: n ≈ 2^40 takes a second or
+  so per solve on the native engine. Choose `--trials` with that in mind.
+- **Determinism.** The same command and seed give the same curves, instance
+  and iteration counts; wall times vary.
+
 ## Reproduce
 
 ```sh

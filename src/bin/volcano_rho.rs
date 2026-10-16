@@ -86,10 +86,39 @@ impl Fp {
     fn inv(&self, a: u64) -> u64 {
         inv_mod(a, self.p)
     }
-    /// `p ≡ 3 mod 4`.
+    /// Tonelli–Shanks (a single power when `p ≡ 3 mod 4`); `None` for a
+    /// non-residue.
     fn sqrt(&self, a: u64) -> Option<u64> {
-        let r = self.pow(a, (self.p + 1) / 4);
-        (self.mul(r, r) == a).then_some(r)
+        if a == 0 {
+            return Some(0);
+        }
+        if self.pow(a, (self.p - 1) / 2) != 1 {
+            return None;
+        }
+        if self.p % 4 == 3 {
+            return Some(self.pow(a, (self.p + 1) / 4));
+        }
+        let s = (self.p - 1).trailing_zeros();
+        let q = (self.p - 1) >> s;
+        let mut z = 2;
+        while self.pow(z, (self.p - 1) / 2) != self.p - 1 {
+            z += 1;
+        }
+        let (mut m, mut c) = (s, self.pow(z, q));
+        let (mut t, mut r) = (self.pow(a, q), self.pow(a, q.div_ceil(2)));
+        while t != 1 {
+            let (mut i, mut t2) = (0, t);
+            while t2 != 1 {
+                t2 = self.mul(t2, t2);
+                i += 1;
+            }
+            let b = self.pow(c, 1 << (m - i - 1));
+            m = i;
+            c = self.mul(b, b);
+            t = self.mul(t, c);
+            r = self.mul(r, b);
+        }
+        Some(r)
     }
 }
 
@@ -168,6 +197,58 @@ fn factor(mut n: u64) -> Vec<(u64, u32)> {
         out.push((n, 1));
     }
     out
+}
+
+/// The largest prime factor of `n < 2^64`: trial division to 2^16, then
+/// Pollard–Brent on what is left.
+fn largest_prime_factor(mut n: u64) -> u64 {
+    let mut best = 1;
+    let mut d = 2u64;
+    while d < 1 << 16 && d * d <= n {
+        while n.is_multiple_of(d) {
+            n /= d;
+            best = d;
+        }
+        d += if d == 2 { 1 } else { 2 };
+    }
+    let mut stack = vec![n];
+    while let Some(m) = stack.pop() {
+        if m == 1 {
+            continue;
+        }
+        if is_prime(m) {
+            best = best.max(m);
+            continue;
+        }
+        let g = brent(m);
+        stack.push(g);
+        stack.push(m / g);
+    }
+    best
+}
+
+/// A nontrivial factor of the composite `n` (Pollard–Brent).
+fn brent(n: u64) -> u64 {
+    for c in 1u64.. {
+        let f = |x: u64| (mulmod(x, x, n) + c) % n;
+        let (mut x, mut y, mut g) = (2u64, 2u64, 1u64);
+        while g == 1 {
+            x = f(x);
+            y = f(f(y));
+            g = gcd(x.abs_diff(y), n);
+        }
+        if g != n {
+            return g;
+        }
+    }
+    unreachable!()
+}
+
+fn gcd(mut a: u64, mut b: u64) -> u64 {
+    while b != 0 {
+        (a, b) = (b, a % b);
+    }
+    a
 }
 
 // ---------------------------------------------------------------- curves
@@ -446,6 +527,39 @@ fn rho(f: &Fp, inst: &Instance, n: u64, seed: u64, dp_bits: u32) -> Solve {
     }
 }
 
+/// One solve by the cryptanalysis repository's `ca solve --alg rho`:
+/// group operations and time as `ca` reports them.
+fn rho_ca(ca: &str, extra: &[String], f: &Fp, inst: &Instance, n: u64, seed: u64) -> Solve {
+    let out = std::process::Command::new(ca)
+        .args(["solve", "--alg", "rho", "--group", "ec"])
+        .args(["--p", &f.p.to_string()])
+        .args([
+            "--a",
+            &inst.curve.a.to_string(),
+            "--b",
+            &inst.curve.b.to_string(),
+        ])
+        .args(["--order", &n.to_string()])
+        .args(["--g", &format!("{},{}", inst.p.0, inst.p.1)])
+        .args(["--h", &format!("{},{}", inst.q.0, inst.q.1)])
+        .args(["--seed", &seed.to_string()])
+        .args(extra)
+        .output()
+        .unwrap_or_else(|e| die(&format!("cannot run {ca}: {e}")));
+    let v: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap_or_else(|_| {
+        die(&format!(
+            "{ca} printed no JSON: {}",
+            String::from_utf8_lossy(&out.stderr)
+        ))
+    });
+    Solve {
+        k: v["x"].as_u64(),
+        iters: v["ops"].as_u64().unwrap_or(0),
+        restarts: 0,
+        ns: (v["seconds"].as_f64().unwrap_or(0.0) * 1e9) as u128,
+    }
+}
+
 // ---------------------------------------------------------------- statistics
 
 fn stats(v: &[f64]) -> serde_json::Value {
@@ -471,10 +585,19 @@ struct Args {
     seed: u64,
     trials: u64,
     per_level: usize,
-    dp_bits: u32,
+    /// Distinguished-point bits; `None` picks `min(8, log2(n)/2 − 6)`.
+    dp_bits: Option<u32>,
     max_cofactor: u64,
     /// `any`, `split`, `inert` or `ramified`: the crater shape the search requires.
     crater: String,
+    /// `p,a,b`: measure this curve instead of searching for one.
+    curve: Option<(u64, u64, u64)>,
+    /// `#E(F_p)` for `--curve`; counted when absent.
+    order: Option<u64>,
+    /// `native` (this binary's walk) or `ca` (`ca solve --alg rho`).
+    engine: String,
+    ca: String,
+    ca_args: Vec<String>,
     controls: usize,
     out: PathBuf,
 }
@@ -487,9 +610,14 @@ fn parse_args() -> Args {
         seed: 1,
         trials: 100,
         per_level: 10,
-        dp_bits: 8,
+        dp_bits: None,
         max_cofactor: 64,
         crater: "any".into(),
+        curve: None,
+        order: None,
+        engine: "native".into(),
+        ca: "ca".into(),
+        ca_args: Vec::new(),
         controls: 3,
         out: PathBuf::from("volcano-rho-out"),
     };
@@ -504,28 +632,78 @@ fn parse_args() -> Args {
             "--seed" => a.seed = val.parse().unwrap(),
             "--trials" => a.trials = val.parse().unwrap(),
             "--per-level" => a.per_level = val.parse().unwrap(),
-            "--dp-bits" => a.dp_bits = val.parse().unwrap(),
+            "--dp-bits" => {
+                a.dp_bits = Some(
+                    val.parse()
+                        .unwrap_or_else(|_| die("--dp-bits takes an integer")),
+                )
+            }
             "--max-cofactor" => a.max_cofactor = val.parse().unwrap(),
             "--crater" => a.crater = val.clone(),
+            "--curve" => {
+                let v: Vec<u64> = val
+                    .split(',')
+                    .map(|x| {
+                        x.trim()
+                            .parse()
+                            .unwrap_or_else(|_| die("--curve takes P,A,B in decimal"))
+                    })
+                    .collect();
+                if v.len() != 3 {
+                    die("--curve takes P,A,B");
+                }
+                a.curve = Some((v[0], v[1], v[2]));
+            }
+            "--order" => {
+                a.order = Some(
+                    val.parse()
+                        .unwrap_or_else(|_| die("--order takes a decimal integer")),
+                )
+            }
+            "--engine" => a.engine = val.clone(),
+            "--ca" => a.ca = val.clone(),
+            "--ca-arg" => a.ca_args.push(val.clone()),
             "--controls" => a.controls = val.parse().unwrap(),
             "--out" => a.out = PathBuf::from(val),
             "-h" | "--help" => {
                 println!(
-                    "volcano-rho [--bits 40] [--ell 3] [--depth 3] [--seed 1] [--trials 100] \
-                     [--per-level 10] [--dp-bits 8] [--max-cofactor 64] [--crater any|split|inert|ramified] [--controls 3] [--out DIR]"
+                    "volcano-rho: one ECDLP instance carried to every level of an ell-isogeny volcano,
+Pollard rho measured on each curve.
+
+  your curve:   volcano-rho --curve P,A,B [--order N] [options]
+  search one:   volcano-rho [--bits 40] [--depth 3] [--crater any|split|inert|ramified]
+                            [--max-cofactor 64] [options]
+
+options: [--ell 3] [--seed 1] [--trials 100] [--per-level 10] [--controls 3]
+         [--dp-bits auto] [--engine native|ca] [--ca PATH] [--ca-arg ARG]... [--out DIR]
+
+--curve takes y^2 = x^3 + Ax + B over F_P, P prime < 2^62, in decimal. The
+generator (cofactor times a seeded random point) and the secret k are drawn
+from --seed. --engine ca runs `ca solve --alg rho` from the cryptanalysis
+repository on every curve (--ca-arg passes extra options, e.g. --no-negation).
+Writes results.json, trials.csv and instances.jsonl to --out."
                 );
                 std::process::exit(0);
             }
-            o => panic!("unknown argument {o}"),
+            o => die(&format!("unknown argument {o} (see --help)")),
         }
         i += 2;
     }
-    assert!(a.ell == 2 || a.ell == 3, "--ell must be 2 or 3");
-    assert!(
-        ["any", "split", "inert", "ramified"].contains(&a.crater.as_str()),
-        "--crater must be any, split, inert or ramified"
-    );
-    assert!(a.depth >= 1 && (20..=60).contains(&a.bits));
+    if a.ell != 2 && a.ell != 3 {
+        die("--ell must be 2 or 3");
+    }
+    if !["any", "split", "inert", "ramified"].contains(&a.crater.as_str()) {
+        die("--crater must be any, split, inert or ramified");
+    }
+    if !["native", "ca"].contains(&a.engine.as_str()) {
+        die("--engine must be native or ca");
+    }
+    if a.trials == 0 {
+        die("--trials must be at least 1");
+    }
+    if a.curve.is_none() && (a.depth < 1 || !(20..=60).contains(&a.bits)) {
+        die("search mode needs --depth >= 1 and 20 <= --bits <= 60");
+    }
     a
 }
 
@@ -588,7 +766,7 @@ fn search(args: &Args, rng: &mut SmallRng) -> Found {
             };
             let t = p as i64 + 1 - order as i64;
             let d_abs = (4 * p as i128 - (t as i128) * (t as i128)) as u64;
-            let depth = vl(d_abs as u128, args.ell as u128) / 2;
+            let (depth, kind) = ell_depth(d_abs, args.ell);
             if depth != args.depth {
                 continue;
             }
@@ -596,9 +774,7 @@ fn search(args: &Args, rng: &mut SmallRng) -> Found {
             if order / n > args.max_cofactor || n.is_multiple_of(args.ell) || n < (1 << 20) {
                 continue;
             }
-            if args.crater != "any"
-                && !crater_kind(fundamental(d_abs).0, args.ell).starts_with(args.crater.as_str())
-            {
+            if args.crater != "any" && !kind.starts_with(args.crater.as_str()) {
                 continue;
             }
             return Found {
@@ -612,6 +788,59 @@ fn search(args: &Args, rng: &mut SmallRng) -> Found {
                 tried,
             };
         }
+    }
+}
+
+fn die(msg: &str) -> ! {
+    eprintln!("volcano-rho: {msg}");
+    std::process::exit(2)
+}
+
+/// The caller's curve `y² = x³ + ax + b` over `F_p`: count its points
+/// unless `--order` gives `#E`, check the order, and take `n` the largest
+/// prime factor.
+fn from_curve(args: &Args, (p, a, b): (u64, u64, u64), rng: &mut SmallRng) -> Found {
+    if !(5..1 << 62).contains(&p) || !is_prime(p) {
+        die("--curve needs a prime 5 <= p < 2^62");
+    }
+    let f = Fp { p };
+    let e = Curve { a: a % p, b: b % p };
+    if e.j(&f).is_none() {
+        die("singular curve: 4a^3 + 27b^2 = 0 mod p");
+    }
+    let order = match args.order {
+        Some(o) => o,
+        None => group_order(&f, &e, rng)
+            .unwrap_or_else(|| die("point counting did not converge; pass --order")),
+    };
+    let t = p as i64 + 1 - order as i64;
+    if (t as i128) * (t as i128) > 4 * p as i128 {
+        die("--order is outside the Hasse interval");
+    }
+    for _ in 0..8 {
+        if e.mul(&f, Some(e.random_point(&f, rng)), order).is_some() {
+            die("--order is not #E(F_p): a random point does not vanish under it");
+        }
+    }
+    let n = largest_prime_factor(order);
+    if n.is_multiple_of(args.ell) {
+        die(
+            "ell divides the subgroup order n, so an ell-isogeny can kill <P>; use the other --ell",
+        );
+    }
+    if t == 0 {
+        eprintln!("volcano-rho: warning: t = 0, the curve is supersingular; levels may not follow the ordinary volcano");
+    }
+    let d_abs = (4 * p as i128 - (t as i128) * (t as i128)) as u64;
+    Found {
+        f,
+        root: e,
+        order,
+        n,
+        t,
+        d_abs,
+        depth: ell_depth(d_abs, args.ell).0,
+        tried: 0,
     }
 }
 
@@ -630,20 +859,41 @@ fn fundamental(d_abs: u64) -> (i64, u64) {
     }
 }
 
-fn crater_kind(dk: i64, ell: u64) -> &'static str {
-    let r = if ell == 2 {
-        match dk.rem_euclid(8) {
-            1 => 1,
-            5 => -1,
-            _ => 0,
+/// The `ℓ`-volcano's depth `v_ℓ(f)` and crater shape from `|D|` alone,
+/// `D = t² − 4p = f²·D_K`, with no factorisation: the shape is the
+/// Kronecker symbol `(D_K/ℓ)`, which `D / ℓ^{2·depth}` shares.
+fn ell_depth(d_abs: u64, ell: u64) -> (u32, &'static str) {
+    if ell == 2 {
+        let e = d_abs.trailing_zeros();
+        let m = (d_abs >> e) as i128;
+        if e % 2 == 1 {
+            return ((e - 3) / 2, crater_kind(0));
+        }
+        let d = -m; // D / 4^{e/2}
+        if d.rem_euclid(4) == 1 {
+            let r = match d.rem_euclid(8) {
+                1 => 1,
+                _ => -1,
+            };
+            (e / 2, crater_kind(r))
+        } else {
+            (e / 2 - 1, crater_kind(0))
         }
     } else {
-        match dk.rem_euclid(3) {
-            1 => 1,
-            2 => -1,
-            _ => 0,
-        }
-    };
+        let e = vl(d_abs as u128, ell as u128);
+        let d = -((d_abs / ell.pow(2 * (e / 2))) as i128);
+        let r = if d.rem_euclid(ell as i128) == 0 {
+            0
+        } else if powmod(d.rem_euclid(ell as i128) as u64, (ell - 1) / 2, ell) == 1 {
+            1
+        } else {
+            -1
+        };
+        (e / 2, crater_kind(r))
+    }
+}
+
+fn crater_kind(r: i32) -> &'static str {
     match r {
         1 => "split (crater is a cycle; two horizontal edges per crater vertex)",
         -1 => "inert (crater is one vertex; no horizontal edges)",
@@ -656,15 +906,39 @@ fn main() {
     let mut rng = SmallRng::seed_from_u64(args.seed);
     let ell = args.ell;
     let t_search = Instant::now();
-    let found = search(&args, &mut rng);
+    let found = match args.curve {
+        Some(c) => from_curve(&args, c, &mut rng),
+        None => search(&args, &mut rng),
+    };
     let search_s = t_search.elapsed().as_secs_f64();
     let (f, n, depth) = (found.f, found.n, found.depth);
-    let (dk, cond) = fundamental(found.d_abs);
+    let crater = ell_depth(found.d_abs, ell).1;
+    // Keep 1/θ well below the √n-step walk, so a cycle always holds a DP.
+    let dp_bits = args
+        .dp_bits
+        .unwrap_or(((63 - n.leading_zeros()) / 2).saturating_sub(6).min(8));
+    // Full D_K needs |D| factored; skip it when trial division would be slow.
+    let (dk, cond) = if found.d_abs < 1 << 52 {
+        let (dk, c) = fundamental(found.d_abs);
+        (Some(dk), Some(c))
+    } else {
+        (None, None)
+    };
     let field = Field::new(&BigUint::from(f.p)).expect("p prime");
     eprintln!(
-        "curve: p={} a={} b={} #E={} n={} h={} t={} D=-{} = {}^2*{}  depth={} ({} curves tried, {:.1}s)",
-        f.p, found.root.a, found.root.b, found.order, n, found.order / n, found.t,
-        found.d_abs, cond, dk, depth, found.tried, search_s
+        "curve: p={} a={} b={} #E={} n={} h={} t={} D=-{} depth={} crater: {} ({} curves tried, {:.1}s)",
+        f.p,
+        found.root.a,
+        found.root.b,
+        found.order,
+        n,
+        found.order / n,
+        found.t,
+        found.d_abs,
+        depth,
+        crater,
+        found.tried,
+        search_s
     );
 
     // The instance: P of order n, Q = kP.
@@ -753,6 +1027,9 @@ fn main() {
 
     // Levels: depth − distance to the floor (vertices with one ℓ-kernel).
     let level_of = |v: usize| -> Option<u32> {
+        if depth == 0 {
+            return Some(0); // no ℓ in the conductor: the whole component is crater
+        }
         let mut seen = HashMap::from([(v, 0u32)]);
         let mut q = VecDeque::from([v]);
         while let Some(u) = q.pop_front() {
@@ -846,6 +1123,21 @@ fn main() {
         });
     }
 
+    // Every arm's instance in `ca`'s format, for any external solver.
+    fs::create_dir_all(&args.out).unwrap();
+    let mut jl = String::new();
+    for a in &arms {
+        jl += &json!({
+            "arm": a.label, "vertex": a.vertex, "level": a.level, "group": "ec",
+            "p": f.p, "a": a.inst.curve.a, "b": a.inst.curve.b, "order": n,
+            "g": format!("{},{}", a.inst.p.0, a.inst.p.1),
+            "h": format!("{},{}", a.inst.q.0, a.inst.q.1), "x": k_secret,
+        })
+        .to_string();
+        jl.push('\n');
+    }
+    fs::write(args.out.join("instances.jsonl"), jl).unwrap();
+
     // 4. Pollard rho: every arm × the same trial seeds, interleaved.
     let mut jobs: Vec<(usize, u64)> = (0..arms.len())
         .flat_map(|a| (0..args.trials).map(move |s| (a, s)))
@@ -861,11 +1153,23 @@ fn main() {
     let t_rho = Instant::now();
     let results: Vec<(usize, u64, Solve)> = jobs
         .par_iter()
-        .map(|&(a, s)| (a, s, rho(&f, &arms[a].inst, n, seed_base ^ s, args.dp_bits)))
+        .map(|&(a, s)| {
+            let inst = &arms[a].inst;
+            let r = if args.engine == "ca" {
+                rho_ca(&args.ca, &args.ca_args, &f, inst, n, seed_base ^ s)
+            } else {
+                rho(&f, inst, n, seed_base ^ s, dp_bits)
+            };
+            (a, s, r)
+        })
         .collect();
     let rho_s = t_rho.elapsed().as_secs_f64();
     let wrong = results.iter().filter(|r| r.2.k != Some(k_secret)).count();
-    assert_eq!(wrong, 0, "a rho solve returned the wrong logarithm");
+    if wrong > 0 {
+        die(&format!(
+            "{wrong} rho solves returned no or the wrong logarithm"
+        ));
+    }
 
     // 5. Records and summaries.
     fs::create_dir_all(&args.out).unwrap();
@@ -957,19 +1261,26 @@ fn main() {
         "schema": "volcano-rho/v1",
         "command": std::env::args().collect::<Vec<_>>().join(" "),
         "params": {"bits": args.bits, "ell": ell, "depth": args.depth, "seed": args.seed, "crater": args.crater,
-                   "trials": args.trials, "per_level": args.per_level, "dp_bits": args.dp_bits,
+                   "curve": args.curve.map(|(p, a, b)| [p, a, b]), "order": args.order,
+                   "engine": args.engine, "ca": (args.engine == "ca").then_some(&args.ca), "ca_args": args.ca_args,
+                   "trials": args.trials, "per_level": args.per_level, "dp_bits": dp_bits,
                    "max_cofactor": args.max_cofactor, "controls": args.controls},
         "host": {"cpu": host, "threads": rayon::current_num_threads()},
         "problem": {"p": f.p, "root": {"a": e0.a, "b": e0.b}, "order": found.order, "n": n,
                     "cofactor": found.order / n, "trace": found.t, "disc": -(found.d_abs as i64),
                     "fundamental_disc": dk, "conductor": cond, "volcano_depth": depth,
-                    "crater": crater_kind(dk, ell), "P": [p0.0, p0.1], "Q": [q0.0, q0.1], "k": k_secret,
+                    "crater": crater, "given": args.curve.is_some(), "P": [p0.0, p0.1], "Q": [q0.0, q0.1], "k": k_secret,
                     "search_curves_tried": found.tried, "search_s": search_s},
         "walk": {"radius_measured": r_meas, "radius_explored": r_explore, "vertices": vs.len(),
                  "edges_verified": edges_checked, "special_j_skipped": skipped_special,
                  "per_level_found": per_level.iter().map(|l| l.len()).collect::<Vec<_>>()},
-        "rho": {"walk": "32-adding (Teske), single walker, distinguished points, no negation map",
-                "expected_iters_sqrt_pi_n_over_2": expected, "solves": results.len(),
+        "rho": {"walk": if args.engine == "ca" {
+                    "ca solve --alg rho (cryptanalysis repository; its defaults plus ca_args); iters = its reported ops, time = its reported seconds"
+                } else {
+                    "32-adding (Teske), single walker, distinguished points, no negation map"
+                },
+                "expected_iters_sqrt_pi_n_over_2": expected,
+                "expected_iters_negation_sqrt_pi_n_over_4": (std::f64::consts::PI * n as f64 / 4.0).sqrt(), "solves": results.len(),
                 "all_correct": wrong == 0, "wall_s": rho_s},
         "arms": arm_json,
         "levels": level_json,
@@ -985,8 +1296,9 @@ fn main() {
 
     println!("\nPollard rho on one instance (k = {k_secret}, n = {n}) across the {ell}-volcano");
     println!(
-        "expected iterations ~ sqrt(pi n / 2) = {expected:.0} (+ DP tail ~2^{})",
-        args.dp_bits
+        "engine {}: expected iterations ~ sqrt(pi n / 2) = {expected:.0}, with a negation map sqrt(pi n / 4) = {:.0}",
+        args.engine,
+        (std::f64::consts::PI * n as f64 / 4.0).sqrt()
     );
     println!(
         "{:<8}{:>6}{:>12}{:>12}{:>12}{:>10}{:>10}{:>10}{:>9}",
