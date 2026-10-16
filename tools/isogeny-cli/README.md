@@ -176,3 +176,28 @@ See the source distribution's `docs/identity-certificates/cm-eisenstein-norm.md`
 for its exact proof basis, evaluated IDC1 supplement, controls and representation
 limits. Larger scientific target instances require their own retained execution
 and independent replay; the example above is the fixed degree-7 control.
+
+Opt-in replay stage tracing uses one absolute, absent file per replay process:
+
+```sh
+ISOGENY_REPLAY_TRACE=/absolute/fresh/stages.jsonl \
+  isogeny challenge judge --input /absolute/sealed-map --out /absolute/fresh/judgement
+```
+
+The trace parent directory must exist. The tool refuses an existing trace file,
+a relative path, or a requested trace it cannot write; it never silently disables
+requested evidence. Every begin/end/error boundary is written and flushed as one
+JSONL record with schema, stage and parent IDs, PID and monotonic operational
+milliseconds. Core completion uses terminal status COMPLETED; challenge admission
+still comes from the independently bound public judgment. An outer watchdog can
+leave a durable begin without an end or terminal record: that stage is unfinished,
+and its absent completed duration is not zero. Default runs emit no trace. Tracing
+covers dispatcher parsing, kernel GCD/torsion/subgroup stages, exact map checks and
+each of20 transports per map. It preserves the original arithmetic and admission
+checks. One trace path cannot be shared across multiple replays or walk steps.
+
+Fixed P-192/13 native controls compare trace-off/on verification bytes and all nine
+existing adversarial verdicts. Separate controls cover malformed parsing, trace
+path/write failures, deterministic nesting and a bounded interrupted fixture with
+no cryptographic work. These controls establish no timing advantage; a performance
+comparison requires its own frozen same-map A/A and paired measurements.

@@ -37,6 +37,7 @@ mod verification_field;
 mod replay {
     include!(concat!(env!("OUT_DIR"), "/verification_engines.rs"));
 }
+mod replay_trace;
 mod supervisor;
 mod walk;
 #[cfg(test)]

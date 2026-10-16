@@ -82,3 +82,10 @@ suite now passes 91 tests, zero failures; see resource-repair.md and the fresh
 native-tests-resource-retake-v1.log. Historical clean build9a2 remains intact
 but is superseded for the proposed target. A new clean build and resource-joint
 retake are required before scientific approval. The target remains unexecuted.
+
+Historical custody was subsequently resolved without a destination change:
+automatic review accepted the same artifacts after public-source and authenticated
+bucket-ownership checks. Both remote objects verified successfully; see
+custody-resolution.md and clean-build-9a2e133099/store-remote-verification.txt.
+The earlier upload question is obsolete. The revised final executable still
+requires its own clean provenance, custody and review before target execution.
