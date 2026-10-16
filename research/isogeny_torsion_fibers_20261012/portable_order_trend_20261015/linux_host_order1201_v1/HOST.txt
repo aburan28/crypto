@@ -1,0 +1,113 @@
+576a54a6c8a83a685c1df7bb751d8d3b11d45139
+rustc 1.99.1 (58cf8f9c3 2026-10-13)
+cargo 1.99.1 (5f94df478 2026-08-27)
+Linux runnervm8k3b6 6.17.0-1022-azure #22-Ubuntu SMP Mon Jul 27 17:24:03 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           48 bits physical, 57 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  4
+On-line CPU(s) list:                     0-3
+Vendor ID:                               GenuineIntel
+Model name:                              Intel(R) Xeon(R) 6973P-C
+CPU family:                              6
+Model:                                   173
+Thread(s) per core:                      2
+Core(s) per socket:                      2
+Socket(s):                               1
+Stepping:                                1
+CPU(s) scaling MHz:                      138%
+CPU max MHz:                             2600.0000
+CPU min MHz:                             800.0000
+BogoMIPS:                                5200.00
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch tpr_shadow ept vpid ept_ad fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves user_shstk avx_vnni avx512_bf16 vnmi avx512vbmi umip waitpkg avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid cldemote movdiri movdir64b fsrm serialize tsxldtrk ibt amx_bf16 avx512_fp16 amx_tile amx_int8 arch_capabilities
+Virtualization:                          VT-x
+Hypervisor vendor:                       Microsoft
+Virtualization type:                     full
+L1d cache:                               96 KiB (2 instances)
+L1i cache:                               128 KiB (2 instances)
+L2 cache:                                4 MiB (2 instances)
+L3 cache:                                480 MiB (1 instance)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-3
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Ghostwrite:                Not affected
+Vulnerability Indirect target selection: Mitigation; Aligned branch/return thunks
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Old microcode:             Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Vulnerable
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Vulnerable
+Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; Retpolines; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Retpoline
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Not affected
+4
+Name:	cat
+Umask:	0022
+State:	R (running)
+Tgid:	2633
+Ngid:	0
+Pid:	2633
+PPid:	2595
+TracerPid:	0
+Uid:	1001	1001	1001	1001
+Gid:	1001	1001	1001	1001
+FDSize:	256
+Groups:	4 100 118 999 1001 
+NStgid:	2633
+NSpid:	2633
+NSpgid:	1863
+NSsid:	1863
+Kthread:	0
+VmPeak:	    6272 kB
+VmSize:	    6272 kB
+VmLck:	       0 kB
+VmPin:	       0 kB
+VmHWM:	    1976 kB
+VmRSS:	    1976 kB
+RssAnon:	     120 kB
+RssFile:	    1856 kB
+RssShmem:	       0 kB
+VmData:	     360 kB
+VmStk:	     136 kB
+VmExe:	      20 kB
+VmLib:	    1752 kB
+VmPTE:	      52 kB
+VmSwap:	       0 kB
+HugetlbPages:	       0 kB
+CoreDumping:	0
+THP_enabled:	1
+untag_mask:	0xffffffffffffffff
+Threads:	1
+SigQ:	0/63786
+SigPnd:	0000000000000000
+ShdPnd:	0000000000000000
+SigBlk:	0000000000000000
+SigIgn:	0000000000001000
+SigCgt:	0000000000000000
+CapInh:	0000000000000000
+CapPrm:	0000000000000000
+CapEff:	0000000000000000
+CapBnd:	000001ffffffffff
+CapAmb:	0000000000000000
+NoNewPrivs:	0
+Seccomp:	0
+Seccomp_filters:	0
+Speculation_Store_Bypass:	vulnerable
+SpeculationIndirectBranch:	always enabled
+Cpus_allowed:	f
+Cpus_allowed_list:	0-3
+Mems_allowed:	00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001
+Mems_allowed_list:	0
+voluntary_ctxt_switches:	6
+nonvoluntary_ctxt_switches:	0
+x86_Thread_features:	
+x86_Thread_features_locked:	

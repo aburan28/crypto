@@ -23,9 +23,11 @@
   [four-order counted-cost and full-fiber panel](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/RESULTS_V2.md),
   [native missing-price sensitivity](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/sensitivity/RESULTS.md),
   [selected order-1,201 complete-solve addendum](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/order1000/RESULTS.md),
+  [independent order-1,201 Linux replay](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/reports/run-20261016T0550Z-linux-order1201/REPORT.md),
+  [direct inverse-Vélu result and next gates](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/RESULTS.md),
   and [three-arm pairing batch cost report](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1740Z/REPORT.md)
 - **Next action owner:** unassigned
-- **Last updated:** 2026-10-15
+- **Last updated:** 2026-10-16
 
 ## Problem
 
@@ -657,3 +659,27 @@ The [2026-10-16 isolation access follow-up](../research/isogeny_torsion_fibers_2
 also found zero Spot vCPU quota in the five screened EC2 regions; no
 instance was launched. An authorized reserved-core host or changed
 quota is required before the L2 wall gate can be executed.
+
+2026-10-16 order-1,201 Linux and inverse-Vélu update: the
+[selected-order independent host run](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/reports/run-20261016T0550Z-linux-order1201/REPORT.md)
+completed 84/84 full-image-panel children on an unreserved Azure VM,
+replayed 1,785/1,785 scalars and 12,486 relation witnesses, and matched
+all arithmetic vectors to Darwin. Its N64 median whole-child process
+CPU full-image/rho ratio was 722.485, with rho A/A 1.003. The
+[direct inverse-Vélu cubic run](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/RESULTS.md)
+constructed the same eight image columns after 29 destination checks
+instead of the 1,531,275-point source census. In 60/60 cold children,
+an independent checker replayed 1,275 scalars and 6,126 relation
+witnesses; all 255 paired inverse/full target relation rows matched.
+At N64 the inverse arm's counted-group lower bound `S_group=151.595`
+was 10.108 times lower than the full-image arm's paired group count,
+yet 37.235 times the matched rho group count and 115.266 times BSGS.
+The L0 whole-child CPU full/inverse ratio was 43.664, inverse/rho
+9.159, and rho A/A spanned 0.823–1.054. The earlier V1 split-cap
+failure and its possible base-field-character mechanism are retained.
+The integer inverse-cubic identity has a checked Lean proof, but a
+faithful finite-field morphism and root-completeness formalization is
+still missing. This closes the source-census construction subtask at
+this exact cell; it leaves complete disjoint native pricing, a direct
+`χ` decomposition oracle, inverse-arm second-host replay, L2 wall
+admission and broad order trend as [explicit next tests](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/NEXT_TESTS.md).
