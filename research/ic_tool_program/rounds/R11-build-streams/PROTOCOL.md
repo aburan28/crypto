@@ -157,3 +157,15 @@ or a verification fails.
   session-tracked task.
 - **After a container restart,** a resume runs
   `icprog run r11 manifest-resumed` first.
+
+## Amendment 1 (2026-10-16, before any R11 run): the candidate's binary and tests
+
+- **The candidate's binary:** v6 plus `candidate-v6.patch`, built from
+  local commit `c2af9b7ccd92469830048dc2deaf97e1d194b27a` with
+  `rustc 1.97.0` and main's lock. SHA-256
+  `85116c2a0da19e5e2e31d7ec1ff8d58a28406bbf9ffe30d330476a67a182315a`.
+- **The tests passed on its tree:** 207 of 207 `koblitz_fast` and
+  `koblitz_index_calculus` tests, among them
+  `the_partitioned_fold_build_is_one_table_word_for_word_on_any_thread_count`
+  ([`tests.log`](tests.log)).
+- **`icprog host-class r11`** finds nothing missing on this host.
