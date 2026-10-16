@@ -57,6 +57,7 @@ jobs:
             Cargo.toml
             Cargo.lock
             docs/curves/registry.json
+            docs/curves/standards/parameters.json
             docs/ecbench/schema.sql
             docs/ic/calibration.json
             docs/ic/boundary_targets.json
@@ -110,6 +111,7 @@ jobs:
             Cargo.toml
             Cargo.lock
             docs/curves/registry.json
+            docs/curves/standards/parameters.json
             docs/ecbench/schema.sql
             docs/ic/calibration.json
             docs/ic/boundary_targets.json

@@ -29,7 +29,7 @@ def load(path):
 
 
 main = load("main")
-large = load("k0n37-large")
+large = load("icv1-f2m37-tm534059-32aad96b-large")
 # The large-base run replaces the main run's K0/2^37 points.
 rows = [r for r in main if (r["a"], r["n"]) != (0, 37)] + large
 curves = sorted({(r["a"], r["n"]) for r in rows}, key=lambda k: [r for r in rows if (r["a"], r["n"]) == k][0]["subgroup_bits"])

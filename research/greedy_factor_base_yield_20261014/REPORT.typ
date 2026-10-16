@@ -150,7 +150,7 @@ Every number below is recomputed from the finished base alone by an independent 
 
 #figure(
   image("graphs/fig5_scaling_ratio.svg", width: 100%),
-  caption: [Left: coverage ratio of greedy over random against columns, for eight Koblitz curves ordered by subgroup size, with 95% bootstrap bars over 8 seeds (3 for K₀/2³⁷). Right: the same ratio against the coverage of the random base. Source: `scaling/main/summary.json`, `scaling/k0n37-large/summary.json`; plot `graphs/plot_scaling.py`.],
+  caption: [Left: coverage ratio of greedy over random against columns, for eight Koblitz curves ordered by subgroup size, with 95% bootstrap bars over 8 seeds (3 for K₀/2³⁷). Right: the same ratio against the coverage of the random base. Source: `scaling/main/summary.json`, `scaling/icv1-f2m37-tm534059-32aad96b-large/summary.json`; plot `graphs/plot_scaling.py`.],
 )
 
 #figure(
@@ -222,6 +222,6 @@ cargo run --release --example koblitz_greedy_factor_base_yield -- \
 python3 research/greedy_factor_base_yield_20261014/graphs/plot_yield.py
 ```
 
-The scaling runs are `cargo run --release --example koblitz_greedy_scaling -- research/greedy_factor_base_yield_20261014/scaling/main 17,19,23,31,37,41 8 2400`, then `… scaling/k0n37-large 37 3 8192`, then `… scaling/pool<P> 17,23 6 2400 <P> 16` for P = 8, 64, 512, and `python3 …/graphs/plot_scaling.py`.
+The scaling runs are `cargo run --release --example koblitz_greedy_scaling -- research/greedy_factor_base_yield_20261014/scaling/main 17,19,23,31,37,41 8 2400`, then `… scaling/icv1-f2m37-tm534059-32aad96b-large 37 3 8192`, then `… scaling/pool<P> 17,23 6 2400 <P> 16` for P = 8, 64, 512, and `python3 …/graphs/plot_scaling.py`.
 
 Files: `data/rows.json` (one row per base, 2776 rows), `data/summary.json` (56 column counts), `data/run.log` (the run's stderr), `graphs/plot_yield.py` (the figure source), `graphs/fig*.svg` (vectors) and `graphs/fig*.png` (150 dpi renders).

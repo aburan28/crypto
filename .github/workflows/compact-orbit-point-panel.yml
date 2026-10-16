@@ -42,6 +42,7 @@ jobs:
             docs/ic/boundary_targets.json
             docs/ecbench/schema.sql
             docs/curves/registry.json
+            docs/curves/standards/parameters.json
             src
             examples/koblitz_rho_batch_ks_v2_n61.rs
             research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
@@ -70,6 +71,7 @@ jobs:
             docs/ic/boundary_targets.json
             docs/ecbench/schema.sql
             docs/curves/registry.json
+            docs/curves/standards/parameters.json
             src
             examples/koblitz_orbit_dlp_fast.rs
             examples/koblitz_rho_batch_ks_v2_n61.rs
@@ -124,6 +126,7 @@ jobs:
             docs/ic/boundary_targets.json
             docs/ecbench/schema.sql
             docs/curves/registry.json
+            docs/curves/standards/parameters.json
             src
             examples/koblitz_orbit_dlp_fast.rs
             examples/koblitz_rho_batch_ks_v2_n61.rs

@@ -28,7 +28,7 @@ the subgroup, so it does not yet build cryptographic-size bases.
 | `data/rows.json` | one row per base (2776 rows): arm, seed, columns, points, covered, coverage, expected trials, build and census times, scalar-model count and whether it matches the census |
 | `data/summary.json` | 56 column counts, with means over seeds and 95% bootstrap intervals on the coverage ratio |
 | `data/run.log` | the run's stderr |
-| `scaling/` | the sampled selector past `r = 2²²`: `main`, `k0n37-large` and `pool{8,64,512}` (rows and summaries from `examples/koblitz_greedy_scaling.rs`), `ic-n37` (`ic search` on K₀/2³⁷ and its recipes) |
+| `scaling/` | the sampled selector past `r = 2²²`: `main`, `icv1-f2m37-tm534059-32aad96b-large` and `pool{8,64,512}` (rows and summaries from `examples/koblitz_greedy_scaling.rs`), `ic-n37` (`ic search` on K₀/2³⁷ and its recipes) |
 | `graphs/plot_scaling.py`, `graphs/fig5_*`, `graphs/fig6_*` | the scaling figures and their source |
 | `e2e/E2E.md` | the greedy family run through `ic search`, `run`, `logs`, `solve` and `workflow`, with the saved recipes, workflow params and report |
 | `graphs/plot_yield.py` | the figure source; reads only the two JSON files above |

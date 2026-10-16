@@ -44,12 +44,12 @@ rule is later improved.
 
 ### K₁/2¹⁷ (`r = 65587`, exhaustive targets)
 
-`ic search --degree 17 --curve-a 1 --family greedy --union-min-seed 2 --union-max-seed 5 --exhaustive-cap 70000 --validate-top 2 --holdout 2 --no-saturate --spec-out k1n17.json`
+`ic search --degree 17 --curve-a 1 --family greedy --union-min-seed 2 --union-max-seed 5 --exhaustive-cap 70000 --validate-top 2 --holdout 2 --no-saturate --spec-out icv1-f2m17-tm101-00378d4e.json`
 
 - best expected trials 18.8 (13 columns, 442 points, coverage 0.850). The same search with
   `--family subgroup` (the shipped sampler's candidates, same budgets and seed) scored 19.8,
   about 5% more. Pruning narrows the gap the controlled experiment shows between unpruned bases.
-- `ic run --factor-base k1n17.json --solver pair-table --known-log 4242`: recovered 4242, verified;
+- `ic run --factor-base icv1-f2m17-tm101-00378d4e.json --solver pair-table --known-log 4242`: recovered 4242, verified;
   13 columns, 442 points, 14 relations, 16 trials, 0.009 s
 - `ic logs … --database db17.json`: complete, 13 columns, 59 relations, 64 trials
 - `ic solve --logs db17.json`: `--known-log 40001` and `--random-target --seed 11` both recovered
