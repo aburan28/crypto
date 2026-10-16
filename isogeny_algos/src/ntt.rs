@@ -42,9 +42,9 @@ impl Prime {
         };
         let c = (p - 1) >> MAX_LOG;
         for x in 2u64.. {
-            let w = pr.pow(pr.to_mont(x), c);
+            let w = pr.pow(pr.mont(x), c);
             // order exactly 2^MAX_LOG: w^(2^(MAX_LOG-1)) = -1
-            if pr.pow(w, 1u64 << (MAX_LOG - 1)) != pr.to_mont(1) {
+            if pr.pow(w, 1u64 << (MAX_LOG - 1)) != pr.mont(1) {
                 pr.root = w;
                 break;
             }
@@ -80,11 +80,11 @@ impl Prime {
             a + self.p - b
         }
     }
-    fn to_mont(&self, a: u64) -> u64 {
+    fn mont(&self, a: u64) -> u64 {
         self.mul(a % self.p, self.r2)
     }
     fn pow(&self, mut b: u64, mut e: u64) -> u64 {
-        let mut r = self.to_mont(1);
+        let mut r = self.mont(1);
         while e > 0 {
             if e & 1 == 1 {
                 r = self.mul(r, b);
@@ -96,7 +96,7 @@ impl Prime {
     }
     /// Montgomery form of a^{-1} for a not divisible by p.
     fn inv_mont(&self, a: u64) -> u64 {
-        self.pow(self.to_mont(a), self.p - 2)
+        self.pow(self.mont(a), self.p - 2)
     }
 }
 
@@ -361,7 +361,7 @@ mod tests {
     fn primes_have_roots() {
         for pr in primes() {
             assert_eq!((pr.p - 1) % (1u64 << MAX_LOG), 0);
-            let one = pr.to_mont(1);
+            let one = pr.mont(1);
             assert_eq!(pr.pow(pr.root, 1u64 << MAX_LOG), one);
             assert_ne!(pr.pow(pr.root, 1u64 << (MAX_LOG - 1)), one);
         }

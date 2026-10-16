@@ -534,6 +534,8 @@ impl<F: Field> TableModulus<F> {
 /// g(Y^q) = g(Y)^q = 0 mod g.
 pub struct Composer<F: Field> {
     m: PolyModulus<F>,
+    /// table reducer for the products when the modulus is short (`POWMOD_TABLE_MAX`)
+    tab: Option<TableModulus<F>>,
     n: usize,
     s: usize,
     /// cols[t][s-1-i] = coefficient t of xi^i (reversed for `dot_rev`)
@@ -551,9 +553,20 @@ impl<F: Field> Composer<F> {
         let n = m.m.len() - 1;
         let s = s.clamp(1, n.max(1));
         let xi = rem(f, xi, &m.m);
+        let tab = (n >= 2 && n < powmod_table_max()).then(|| TableModulus::new(f, &m.m));
+        let mul = |a: &Poly<F>, b: &Poly<F>| -> Poly<F> {
+            match &tab {
+                Some(t) if !a.is_empty() && !b.is_empty() => {
+                    let mut r = t.reduce(f, &mul_raw(f, a, b));
+                    trim(f, &mut r);
+                    r
+                }
+                _ => m.mulmod(f, a, b),
+            }
+        };
         let mut pows: Vec<Poly<F>> = vec![constant(f, f.one())];
         for _ in 1..=s {
-            let next = m.mulmod(f, pows.last().unwrap(), &xi);
+            let next = mul(pows.last().unwrap(), &xi);
             pows.push(next);
         }
         let giant = pows.pop().unwrap();
@@ -563,6 +576,7 @@ impl<F: Field> Composer<F> {
             .collect();
         Composer {
             m,
+            tab,
             n,
             s,
             cols,
@@ -588,7 +602,15 @@ impl<F: Field> Composer<F> {
             acc = if acc.is_empty() {
                 block
             } else {
-                add(f, &self.m.mulmod(f, &acc, &self.giant), &block)
+                let prod = match &self.tab {
+                    Some(t) if !self.giant.is_empty() => {
+                        let mut r = t.reduce(f, &mul_raw(f, &acc, &self.giant));
+                        trim(f, &mut r);
+                        r
+                    }
+                    _ => self.m.mulmod(f, &acc, &self.giant),
+                };
+                add(f, &prod, &block)
             };
         }
         acc

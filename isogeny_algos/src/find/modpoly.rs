@@ -238,10 +238,10 @@ impl<F: Field> Phi<F> {
         let bsz = ((l1 as f64).sqrt().ceil() as usize).max(1);
         let mut baby: Vec<Vec<F::E>> = vec![one_series()];
         for a in 1..bsz {
-            let next = series::mul(f, &baby[a - 1], &s, len);
+            let next = series::mul(f, &baby[a - 1], s, len);
             baby.push(next);
         }
-        let step = series::mul(f, &baby[bsz - 1], &s, len); // S^bsz
+        let step = series::mul(f, &baby[bsz - 1], s, len); // S^bsz
         let mut giant: Vec<Vec<F::E>> = vec![one_series()];
         for _ in 1..=l / bsz {
             let next = series::mul(f, giant.last().unwrap(), &step, len);
