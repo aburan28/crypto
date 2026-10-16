@@ -28,3 +28,7 @@ rayon = "1.10"
 
 [dev-dependencies]
 hex = "0.4"
+
+[[bin]]
+name = "iso1_lambda_census"
+path = "src/lambda_census.rs"
