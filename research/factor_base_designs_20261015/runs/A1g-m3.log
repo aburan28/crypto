@@ -1,0 +1,19 @@
+== A1g m=3: commit a698ba0399836c56cba11a622737d6c42f418e11, budget 300 s, ulimit -v 13000000, started 2026-10-15T18:29:38Z
+A1g  m=3 t= 2 target=0 b=2.000 |V|=4 n_vars=10 n_eqs=11 D=8 reached=8 0.0 s ok
+A1g  m=3 t= 2 target=1 b=2.000 |V|=4 n_vars=10 n_eqs=11 D=8 reached=8 0.0 s ok
+A1g  m=3 t= 3 target=0 b=3.000 |V|=8 n_vars=16 n_eqs=17 D=8 reached=8 1.2 s ok
+A1g  m=3 t= 3 target=1 b=3.000 |V|=8 n_vars=16 n_eqs=17 D=8 reached=8 1.1 s ok
+A1g  m=3 t= 4 target=0 b=4.000 |V|=16 n_vars=22 n_eqs=23 D=8 reached=8 281.3 s ok
+A1g  m=3 t= 4 target=1 b=4.000 |V|=16 n_vars=22 n_eqs=23 D=8 reached=8 266.4 s ok
+memory allocation of 112 bytes failed
+stack backtrace:
+memory allocation of 224 bytes failed
+skipping backtrace printing to avoid potential recursion
+A1g  m=3 t= 5 target=0 b=5.000 |V|=32 n_vars=28 n_eqs=29 D=null reached=null 310.8 s aborted (memory allocation failed under ulimit -v 13000000 (signal: 6 (SIGABRT)))
+memory allocation of 112 bytes failed
+stack backtrace:
+memory allocation of 224 bytes failed
+skipping backtrace printing to avoid potential recursion
+A1g  m=3 t= 5 target=1 b=5.000 |V|=32 n_vars=28 n_eqs=29 D=null reached=null 311.6 s aborted (memory allocation failed under ulimit -v 13000000 (signal: 6 (SIGABRT)))
+-- A1g m=3: a system at t = 5 hit a limit or failed; the series stops
+== A1g m=3: ended 2026-10-15T18:49:12Z

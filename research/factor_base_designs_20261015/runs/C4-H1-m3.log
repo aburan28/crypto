@@ -1,0 +1,11 @@
+== H1 m=3 p1: commit 236e3bd5887416b25c865423c90d1ce2f09c3a13, budget 300 s, grace 120 s, ulimit -v 13000000, started 2026-10-16T07:39:54Z
+H1   m=3 t= 2 target=0 b=2.000 |V|=4 n_vars=8 n_eqs=9 D=5 reached=5 0.0 s ok
+H1   m=3 t= 2 target=1 b=2.000 |V|=4 n_vars=8 n_eqs=9 D=5 reached=5 0.0 s ok
+H1   m=3 t= 3 target=0 b=3.000 |V|=8 n_vars=11 n_eqs=12 D=5 reached=5 0.8 s ok
+H1   m=3 t= 3 target=1 b=3.000 |V|=8 n_vars=11 n_eqs=12 D=5 reached=5 0.8 s ok
+H1   m=3 t= 4 target=0 b=4.000 |V|=16 n_vars=14 n_eqs=15 D=6 reached=6 67.6 s ok
+H1   m=3 t= 4 target=1 b=4.000 |V|=16 n_vars=14 n_eqs=15 D=6 reached=6 69.7 s ok
+H1   m=3 t= 5 target=0 b=5.000 |V|=32 n_vars=17 n_eqs=18 D=6 reached=6 304.5 s timeout (F4 budget of 300 s)
+H1   m=3 t= 5 target=1 b=5.000 |V|=32 n_vars=17 n_eqs=18 D=6 reached=6 304.6 s timeout (F4 budget of 300 s)
+-- H1 m=3: a system at t = 5 hit a limit or failed; the series stops
+== H1 m=3: ended 2026-10-16T07:52:26Z

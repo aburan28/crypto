@@ -109,6 +109,7 @@ pub fn workload(p: &RhoParams, counts: &KernelCounts) -> Result<(Workload, RhoSh
         working_set_bytes_per_core: ELEMS_RESIDENT_PER_WALK as f64 * e * p.batch as f64
             + 2.0 * e * TABLE as f64,
         parallel_fraction: 1.0,
+        pipes_overlap: false,
     };
     let start = Phase {
         name: "start-points".into(),
