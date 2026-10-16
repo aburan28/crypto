@@ -174,7 +174,11 @@ supersingular `y² = x³ + x`, which over the P-192 prime gives a point of order
 - **Relation phase (measured, ecbench, 20–24-bit P-192-shape curves).** With
   `prime-isogeny:t=T,aux=supersingular` the auxiliary cost falls from 10–27 %
   of `S` (the charged search) to 0.9–1.9 % (the build alone), the relation
-  yield is unchanged, and `S` is within 2.2 % of a plain base of the same size.
+  yield is unchanged, and `S` is within 2.2 % of a plain base of the same size
+  with unpriced work uncharged; under the AGENTS.md §5a pricing band (0, 0.1, 1
+  GAE per unpriced operation) that comparison is unresolved on two curves and
+  1–7 % dearer on the third, while the supersingular arm stays cheaper than the
+  searched ordinary arm on the two larger curves at every weight.
 
 **What it means for this card (derived).** Nothing measured distinguishes a
 supersingular `E'` from an ordinary one except the cost of finding it, so the

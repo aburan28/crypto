@@ -109,7 +109,7 @@ def q3():
     order = ["ic-ss-rootfind", "ic-plain-ss", "ic-ord-rootfind", "ic-plain-ord", "ic-ss-mitm"]
     colors = {"ic-ss-rootfind": "#1f77b4", "ic-plain-ss": "#aec7e8", "ic-ord-rootfind": "#d62728",
               "ic-plain-ord": "#ff9896", "ic-ss-mitm": "#9467bd"}
-    fig, (a1, a2) = plt.subplots(1, 2, figsize=(13, 4.4))
+    fig, (a1, a2, a3) = plt.subplots(1, 3, figsize=(19, 4.6))
     w = 0.15
     for i, arm in enumerate(order):
         xs, ys, sh = [], [], []
@@ -123,7 +123,7 @@ def q3():
     a1.set_xticks(range(3))
     a1.set_xticklabels(curves)
     a1.set_ylabel("mean S = GAE / √r (ecbench), 16 runs")
-    a1.set_title("Q3: mean S by arm; hatched = auxiliary search + tower build share", fontsize=9)
+    a1.set_title("Q3: mean S by arm at w = 0 (unpriced work uncharged); hatched = aux search + build", fontsize=9)
     a1.legend(fontsize=7)
     a1.grid(axis="y", alpha=0.3)
     pairs = [("ic-ss-rootfind", "ic-plain-ss", "ss ÷ plain(ss size)"),
@@ -143,10 +143,31 @@ def q3():
     a2.set_xticks(range(3))
     a2.set_xticklabels(curves)
     a2.set_ylabel("paired ratio Σ S_B / Σ S_A, 95 % cluster bootstrap")
-    a2.set_title("Q3: paired ratios (16 pairs on 8 workloads per curve; band = H3b's [0.97, 1.03])",
+    a2.set_title("Q3: paired ratios at w = 0 (16 pairs, 8 workloads; grey = H3b's [0.97, 1.03])",
                  fontsize=9)
     a2.legend(fontsize=7)
     a2.grid(axis="y", alpha=0.3)
+    band = rows(STUDY / "q3/band/band-ratios.tsv")
+    bpairs = [("ic-ss-rootfind", "ic-plain-ss", "ss ÷ plain(ss size)"),
+              ("ic-ss-rootfind", "ic-ord-rootfind", "ss ÷ ordinary"),
+              ("ic-ss-rootfind", "ic-ss-mitm", "rootfind ÷ mitm (positive control)")]
+    ws = ["0", "0.1", "1"]
+    marks = {"s20": "o", "s22": "s", "s24": "^"}
+    for i, (b, a, lab) in enumerate(bpairs):
+        for c in curves:
+            r = [x for x in band if x["curve"] == c and x["B"] == b and x["A"] == a][0]
+            ys = [float(r[f"ratio_w{w}"]) for w in ws]
+            ls = "--" if r["band_verdict"].startswith("unresolved") else "-"
+            a3.plot([0, 1, 2], ys, ls, marker=marks[c], color=f"C{[0, 2, 4][i]}", ms=4,
+                    label=f"{lab}, {c}" + (" (unresolved)" if ls == "--" else ""))
+    a3.axhline(1, color="k", lw=0.8)
+    a3.set_xticks([0, 1, 2])
+    a3.set_xticklabels([f"w = {w}" for w in ws])
+    a3.set_xlabel("GAE charged per unpriced native operation (AGENTS.md §5a band)")
+    a3.set_ylabel("ratio of mean priced S (B ÷ A)")
+    a3.set_title("Q3 addendum: ecbench band; dashed = order flips inside the band", fontsize=9)
+    a3.legend(fontsize=6, ncol=1)
+    a3.grid(alpha=0.3)
     fig.tight_layout()
     save(fig, "q3_s_and_ratios")
 

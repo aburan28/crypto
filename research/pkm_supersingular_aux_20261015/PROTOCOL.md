@@ -217,3 +217,21 @@ in `reports/run-<UTC>/`, raw rows (`q1/structure.jsonl`, `q2/runs/*.jsonl`,
 `q3/sessions/*`), and a section in the P-192 backlog card's README (status
 unchanged; `backlog validate --all`). No speed claim, so no `benchmarks/`
 entry.
+
+## Addendum, 2026-10-16: AGENTS.md §5a pricing band (reporting only)
+
+Added after every run and after the README's first verdicts, because
+`AGENTS.md` §5a (owner rule, 2026-10-15, merged to `main` after this
+protocol was frozen) applies to every cross-method comparison. It changes no
+pre-registered rule, run, seed or threshold. It adds a read-out:
+
+- every arm's unpriced counters with their counts, rho included
+  (`q3/band/unpriced.tsv`, `q3/band/unpriced.sh`);
+- `ecbench band --weights 0,0.1,1 --ranks` on each session
+  (`q3/band/<curve>.band.{md,json}`, `ecbench.band/v1`; `band-arms.tsv` and
+  `band-ratios.tsv` by `q3/band/tabulate.sh`);
+- each Q3 verdict, control and rho ratio is kept as a ranking only where the
+  order of the two arms holds at w = 0, 0.1 and 1 GAE per native operation;
+  otherwise it is reported as "unresolved under §5a". Ratios against rho are
+  labelled lower-bound comparisons. The w = 0 verdicts stay in the README as
+  recorded, beside the band reading.

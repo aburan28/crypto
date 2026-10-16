@@ -30,9 +30,10 @@ well on it? Three pre-registered questions:
    (4 against 5 at $m = 2$, $N = 4 dots 10$; 5 against 6 at $m = 3, N = 6$).],
   [measured],
   [Q3: relation phase, charged (ecbench)],
-  [*The search cost goes, nothing else changes.* Aux share 0.9–1.9 % of $S$ (build only) against
-   10–27 % for the searched ordinary curve; $S$ within 2.2 % of a plain base of the same size; yield
-   unchanged. ss ÷ ordinary 1.11 / 0.82 / 0.74 on s20 / s22 / s24 (s20: larger base).],
+  [*The search cost goes.* Aux share 0.9–1.9 % of $S$ (build only) against 10–27 % for the searched
+   ordinary curve; yield unchanged. Under the AGENTS.md §5a band (unpriced work at 0, 0.1, 1 GAE per
+   operation): ss < ordinary on s22, s24 at every weight (0.82–0.92×), ordinary < ss on s20 (larger
+   base); ss vs a plain base of its size *unresolved* on s20, s24 and dearer by 1–7 % on s22.],
   [measured],
 )
 
@@ -107,8 +108,8 @@ Three P-192-shape curves ($v_2(p - 1) = 1$, $v_2(p+1) = 10$, 20–24 bits), one 
 (operation counts only).
 
 #figure(image("figures/q3_s_and_ratios.svg", width: 100%),
-  caption: [Left: mean $S$ per arm (16 runs), hatched = auxiliary search + build. Right: paired ratios
-  with ecbench's 95 % cluster-bootstrap intervals. Source `q3/tables/`.])
+  caption: [Left: mean $S$ per arm at $w = 0$ (16 runs), hatched = auxiliary search + build. Middle: paired ratios at $w = 0$
+  with ecbench's 95 % cluster-bootstrap intervals. Right: the §5a band (addendum). Sources `q3/tables/`, `q3/band/`.])
 
 #table(
   columns: 7,
@@ -118,13 +119,32 @@ Three P-192-shape curves ($v_2(p - 1) = 1$, $v_2(p+1) = 10$, 20–24 bits), one 
   [s24], [1.020 [0.992, 1.048]], [1.388 [1.354, 1.421]], [0.736 [0.715, 0.764]], [1.002], [0.9 % / 27.1 %], [1.074],
 )
 
-Rules: P1 held; H3a held; H3b held on s22, s24 and failed on s20 (2.2 % excess, the build's 1.9 %
-share); H3c held on s22, s24 and failed on s20 (base 141 against 123 abscissae; size-corrected 0.92);
-H3d held (yield within 1.8 %); controls passed (A/A 1.000; rootfind ÷ mitm above 1). Every IC arm is
-29–94× rho with the negation map.
+Rules at weight 0, as pre-registered: P1 held; H3a held; H3b held on s22, s24 and failed on s20; H3c held
+on s22, s24 and failed on s20 (base 141 against 123 abscissae); H3d held (yield within 1.8 %); controls
+passed.
+
+*Addendum 2026-10-16, AGENTS.md §5a.* Every arm's unpriced counters carry counts (IC: row operations,
+lookups, Legendre symbols, square roots, target-guard probes, Vélu evaluations; rho: canonicalisations;
+`q3/band/unpriced.tsv`). `ecbench band` at $w = 0, 0.1, 1$ GAE per operation (ratios of mean priced $S$):
+
+#table(
+  columns: 6,
+  [curve], [pair], [$w = 0$], [$w = 0.1$], [$w = 1$], [order across the band],
+  [s20], [ss ÷ plain(ss)], [1.022], [1.015], [0.981], [*unresolved*],
+  [s22], [ss ÷ plain(ss)], [1.013], [1.023], [1.074], [plain < ss],
+  [s24], [ss ÷ plain(ss)], [1.020], [1.016], [0.999], [*unresolved*],
+  [s20], [ss ÷ ordinary], [1.108], [1.102], [1.072], [ordinary < ss],
+  [s22], [ss ÷ ordinary], [0.824], [0.838], [0.916], [ss < ordinary],
+  [s24], [ss ÷ ordinary], [0.736], [0.762], [0.882], [ss < ordinary],
+  [all], [rootfind ÷ mitm], [1.07–1.26], [1.07–1.25], [1.05–1.25], [mitm < rootfind],
+  [all], [ss ÷ rho (lower bound)], [31.6–77.3], [33.0–77.5], [39.5–78.2], [rho < ss],
+)
+So under §5a: H3a, H3c (held s22/s24, failed s20), H3d and both controls stand at every weight; H3b is
+unresolved on s20 and s24 and not held on s22. Every IC arm is 36–85× rho at $w = 1$ (29–94× at $w = 0$),
+lower-bound comparisons on both sides.
 
 = Scope
 
 Small fields only ($p < 2^31$ for F4, $p < 2^24$ for ecbench); $N <= 20$; one seed per arm in Q3.
 Q1 is exact on the primes run, not a proof for all $p$. The registry gained three curves; its derived
-artifacts are not regenerated in this change. Two container restarts are recorded in `progress.txt`.
+artifacts were regenerated on this branch in `b90b36670`. Two container restarts are recorded in `progress.txt`.
