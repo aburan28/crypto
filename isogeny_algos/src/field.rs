@@ -25,6 +25,10 @@ impl Rng {
     }
 }
 
+/// A fixed operand prepared for repeated products, in a field-specific form
+/// (`Field::prepare`).
+pub type Prepared = std::rc::Rc<dyn std::any::Any>;
+
 pub trait Field: Clone + Send + Sync + 'static {
     type E: Copy + Eq + Hash + Debug + Send + Sync;
     fn zero(&self) -> Self::E;
@@ -139,14 +143,38 @@ pub trait Field: Clone + Send + Sync + 'static {
         }
         r
     }
-    /// Square of a coefficient vector, `conv(a, a)`; multi-limb fields override it to form each
+    /// Square of a coefficient vector, `conv(a, a)`; the prime fields override it to form each
     /// cross product once.
     fn conv_sq(&self, a: &[Self::E]) -> Vec<Self::E> {
         self.conv(a, a)
     }
+    /// Longest modulus (coefficient count) that `poly::powmod` reduces with the table of
+    /// x^k mod m rather than Newton/Barrett: the crossover depends on how fast long products
+    /// are (`examples/profile_powmod.rs`).
+    fn powmod_table_max(&self) -> usize {
+        crate::poly::POWMOD_TABLE_MAX
+    }
     /// Length below which `poly::sqr_raw` squares with `conv_sq` instead of splitting.
     fn sqr_threshold(&self) -> usize {
         self.karatsuba_threshold()
+    }
+    /// Prepares the fixed operand `b` for repeated products ([`Field::conv_prepared`]) with
+    /// operands of at most `max_len` coefficients, mod x^cyc - 1 when `cyc` (a power of two) is
+    /// below the product length (`usize::MAX`: plain products); None when the field has no
+    /// such method or it would not pay.
+    fn prepare(&self, _b: &[Self::E], _max_len: usize, _cyc: usize) -> Option<Prepared> {
+        None
+    }
+    /// The product of `a` with a prepared operand (equal to `conv`, or to its reduction mod
+    /// x^cyc - 1), or None when `a` does not fit the preparation.
+    fn conv_prepared(&self, _a: &[Self::E], _b: &Prepared) -> Option<Vec<Self::E>> {
+        None
+    }
+    /// The product mod x^len - 1 (`len` a power of two, both operands at most `len` + 1 long
+    /// and the product shorter than 2 len) by a transform of `len` points, or None when the
+    /// field has no such method or the operands are too short for it to pay.
+    fn conv_cyclic(&self, _a: &[Self::E], _b: &[Self::E], _len: usize) -> Option<Vec<Self::E>> {
+        None
     }
     /// Full product of long coefficient vectors by a sub-quadratic method specific to the
     /// field, or None to use the generic Karatsuba of `poly::mul_raw`. Must equal `conv`.
@@ -165,6 +193,11 @@ pub trait Field: Clone + Send + Sync + 'static {
             }
         }
         r
+    }
+    /// `dot_rev(a, b)` for each row b (all as long as `a`): a matrix-vector product, which the
+    /// word-size fields run four rows at a time sharing the loads of `a`.
+    fn dot_rev_rows(&self, a: &[Self::E], rows: &[&[Self::E]]) -> Vec<Self::E> {
+        rows.iter().map(|b| self.dot_rev(a, b)).collect()
     }
     /// sum_i a[i] * b[len-1-i] over the common length (reversed dot product).
     fn dot_rev(&self, a: &[Self::E], b: &[Self::E]) -> Self::E {
@@ -254,15 +287,81 @@ pub trait Field: Clone + Send + Sync + 'static {
     }
 }
 
+/// Division-free reduction of 128-bit values modulo an odd word-size p < 2^62 (precomputed
+/// constants; no `u128 %`, which is a library division call). `redc(x)` is x 2^-64 mod p
+/// (Montgomery reduction, any x < 2^128); `reduce(x)` is x mod p.
+#[derive(Clone, Copy, Debug)]
+pub struct Red128 {
+    p: u64,
+    /// -p^{-1} mod 2^64
+    ninv: u64,
+    /// floor((2^64 - 1) / p), for Barrett reduction of one word
+    bar: u64,
+    /// 2^128 mod p
+    r2: u64,
+}
+
+impl Red128 {
+    pub fn new(p: u64) -> Self {
+        assert!(p % 2 == 1 && p < (1u64 << 62), "Red128: odd p < 2^62");
+        let mut inv = 1u64;
+        for _ in 0..6 {
+            inv = inv.wrapping_mul(2u64.wrapping_sub(p.wrapping_mul(inv)));
+        }
+        let r1 = ((1u128 << 64) % p as u128) as u64;
+        Red128 {
+            p,
+            ninv: inv.wrapping_neg(),
+            bar: u64::MAX / p,
+            r2: ((r1 as u128 * r1 as u128) % p as u128) as u64,
+        }
+    }
+    /// x mod p for one word (Barrett; the quotient estimate is short by at most 2).
+    #[inline(always)]
+    pub fn mod_word(&self, x: u64) -> u64 {
+        let q = ((x as u128 * self.bar as u128) >> 64) as u64;
+        let mut r = x - q * self.p;
+        if r >= self.p {
+            r -= self.p;
+        }
+        if r >= self.p {
+            r -= self.p;
+        }
+        r
+    }
+    /// x 2^-64 mod p: with x = h 2^64 + l, that is h + REDC(l), REDC(l) = (l + m p) / 2^64 <= p.
+    #[inline(always)]
+    pub fn redc(&self, x: u128) -> u64 {
+        let h = self.mod_word((x >> 64) as u64);
+        let l = x as u64;
+        let m = l.wrapping_mul(self.ninv);
+        let t = ((l as u128 + m as u128 * self.p as u128) >> 64) as u64;
+        let mut s = h + t;
+        if s >= self.p {
+            s -= self.p;
+        }
+        s
+    }
+    /// x mod p: redc(redc(x) 2^128 mod p) = x.
+    #[inline(always)]
+    pub fn reduce(&self, x: u128) -> u64 {
+        self.redc(self.redc(x) as u128 * self.r2 as u128)
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct Zp {
     pub p: u64,
+    red: Red128,
 }
 
 impl Zp {
     pub fn new(p: u64) -> Self {
         assert!(p > 3 && p < (1u64 << 62));
-        Zp { p }
+        Zp {
+            p,
+            red: Red128::new(p),
+        }
     }
     pub fn legendre(&self, a: u64) -> i32 {
         if a == 0 {
@@ -351,7 +450,7 @@ impl Field for Zp {
         }
     }
     fn mul(&self, a: u64, b: u64) -> u64 {
-        ((a as u128 * b as u128) % (self.p as u128)) as u64
+        self.red.reduce(a as u128 * b as u128)
     }
     fn inv(&self, a: u64) -> u64 {
         assert!(a != 0, "inverse of zero");
@@ -373,13 +472,21 @@ impl Field for Zp {
         Zp::sqrt(self, a)
     }
     fn conv(&self, a: &[u64], b: &[u64]) -> Vec<u64> {
-        lazy_conv(a, b, self.p, a.len() + b.len() - 1, |acc| acc as u64)
+        lazy_conv(a, b, &self.red, a.len() + b.len() - 1, |x| {
+            self.red.reduce(x)
+        })
     }
     fn conv_trunc(&self, a: &[u64], b: &[u64], n: usize) -> Vec<u64> {
-        lazy_conv(a, b, self.p, n, |acc| acc as u64)
+        lazy_conv(a, b, &self.red, n, |x| self.red.reduce(x))
     }
     fn dot_rev(&self, a: &[u64], b: &[u64]) -> u64 {
-        lazy_dot_rev(a, b, self.p) as u64
+        lazy_dot_rev(a, b, &self.red, |x| self.red.reduce(x))
+    }
+    fn dot_rev_rows(&self, a: &[u64], rows: &[&[u64]]) -> Vec<u64> {
+        lazy_dot_rev_rows(a, rows, &self.red, |x| self.red.reduce(x))
+    }
+    fn conv_sq(&self, a: &[u64]) -> Vec<u64> {
+        lazy_sq(a, &self.red, |x| self.red.reduce(x))
     }
 }
 
@@ -408,43 +515,124 @@ fn fits_u64(p: u64, terms: usize) -> bool {
     2 * residue_bits(p) + (usize::BITS - terms.leading_zeros()) <= 64
 }
 
-/// sum a[i] b[len-1-i] mod p with lazy accumulation (p < 2^62): in a u64 when the whole sum
-/// fits, otherwise in a u128 reduced every `lazy_cap(p)` products.
-pub fn lazy_dot_rev(a: &[u64], b: &[u64], p: u64) -> u128 {
+/// sum_i a[i] b[n-1-i] for equal-length slices (p < 2^62), as a u128 congruent to the dot
+/// product: up to `cap` products (`lazy_cap`) in one unreduced accumulator; longer, two u128
+/// accumulators absorbing `cap` products each between reductions, in branch-free blocks
+/// (the result then below 3p).
+#[inline(always)]
+fn dot_core(a: &[u64], b: &[u64], red: &Red128, cap: usize) -> u128 {
+    debug_assert_eq!(a.len(), b.len());
+    let n = a.len();
+    if n <= cap {
+        let mut s = 0u128;
+        for (x, y) in a.iter().zip(b.iter().rev()) {
+            s += *x as u128 * *y as u128;
+        }
+        return s;
+    }
+    let blk = 2 * cap;
+    let mut tot = 0u64;
+    let mut i = 0;
+    while i < n {
+        let m = (n - i).min(blk);
+        let (xa, xb) = (&a[i..i + m], &b[n - i - m..n - i]);
+        let (mut s0, mut s1) = (0u128, 0u128);
+        let mut k = 0;
+        while k + 1 < m {
+            s0 += xa[k] as u128 * xb[m - 1 - k] as u128;
+            s1 += xa[k + 1] as u128 * xb[m - 2 - k] as u128;
+            k += 2;
+        }
+        if k < m {
+            s0 += xa[k] as u128 * xb[m - 1 - k] as u128;
+        }
+        // three values below p: fits a u64 (p < 2^62), and the next mod_word brings it back
+        tot = red.mod_word(tot + red.reduce(s0) + red.reduce(s1));
+        i += m;
+    }
+    tot as u128
+}
+
+/// sum a[i] b[len-1-i] with lazy accumulation (p < 2^62), finished by `fin`, which receives the
+/// unreduced sum (< 2^128, congruent to the dot product mod p): Zp passes `Red128::reduce`,
+/// the Montgomery field `Red128::redc`. The sum stays in a u64 when it cannot overflow,
+/// otherwise in u128 accumulators reduced every `lazy_cap(p)` products (`dot_core`).
+pub fn lazy_dot_rev(a: &[u64], b: &[u64], red: &Red128, fin: impl Fn(u128) -> u64) -> u64 {
     let n = a.len().min(b.len());
     let bl = b.len();
+    let p = red.p;
     if fits_u64(p, n) {
         let mut acc = 0u64;
         for i in 0..n {
             acc += a[i] * b[bl - 1 - i];
         }
-        return (acc % p) as u128;
+        return fin(acc as u128);
     }
-    let pp = p as u128;
-    let cap = lazy_cap(p);
-    let mut acc: u128 = 0;
-    let mut cnt = 0;
-    for i in 0..n {
-        acc += a[i] as u128 * b[bl - 1 - i] as u128;
-        cnt += 1;
-        if cnt == cap {
-            acc %= pp;
-            cnt = 1;
+    fin(dot_core(&a[..n], &b[bl - n..], red, lazy_cap(p)))
+}
+
+/// `lazy_dot_rev(a, b, ..)` for each row b (each exactly as long as `a`), four rows at a time:
+/// one load of a[i] feeds four independent u128 accumulators, each reduced below p every
+/// `lazy_cap(p) - 1` products (so it never holds more than p plus `lazy_cap` products).
+pub fn lazy_dot_rev_rows(
+    a: &[u64],
+    rows: &[&[u64]],
+    red: &Red128,
+    fin: impl Fn(u128) -> u64,
+) -> Vec<u64> {
+    let n = a.len();
+    let p = red.p;
+    if fits_u64(p, n) || rows.len() < 4 {
+        return rows.iter().map(|b| lazy_dot_rev(a, b, red, &fin)).collect();
+    }
+    let step = (lazy_cap(p) - 1).max(1);
+    let mut out = Vec::with_capacity(rows.len());
+    let mut quads = rows.chunks_exact(4);
+    for q in quads.by_ref() {
+        let (b0, b1, b2, b3) = (&q[0][..n], &q[1][..n], &q[2][..n], &q[3][..n]);
+        let mut s = [0u128; 4];
+        let mut i = 0;
+        while i < n {
+            let e = (i + step).min(n);
+            for j in i..e {
+                let x = a[j] as u128;
+                let k = n - 1 - j;
+                s[0] += x * b0[k] as u128;
+                s[1] += x * b1[k] as u128;
+                s[2] += x * b2[k] as u128;
+                s[3] += x * b3[k] as u128;
+            }
+            if e < n {
+                for v in s.iter_mut() {
+                    *v = red.reduce(*v) as u128;
+                }
+            }
+            i = e;
         }
+        out.extend(s.iter().map(|&v| fin(v)));
     }
-    acc % pp
+    for b in quads.remainder() {
+        out.push(lazy_dot_rev(a, b, red, &fin));
+    }
+    out
 }
 
 /// Convolution with lazy accumulation (p < 2^62): each output coefficient is summed in a u64
-/// when that cannot overflow, otherwise in a u128 reduced every `lazy_cap(p)` products; `fin`
-/// maps the reduced accumulator (< p) to the output representation.
-pub fn lazy_conv(a: &[u64], b: &[u64], p: u64, nout: usize, fin: impl Fn(u128) -> u64) -> Vec<u64> {
+/// when that cannot overflow, otherwise by `dot_core`; `fin` maps the unreduced sum (< 2^128)
+/// to the output representation.
+pub fn lazy_conv(
+    a: &[u64],
+    b: &[u64],
+    red: &Red128,
+    nout: usize,
+    fin: impl Fn(u128) -> u64,
+) -> Vec<u64> {
     let (n, m) = (a.len(), b.len());
     let mut r = Vec::with_capacity(nout);
-    let pp = p as u128;
     if n == 0 || m == 0 {
         return vec![fin(0); nout];
     }
+    let p = red.p;
     let small = fits_u64(p, n.min(m));
     let cap = lazy_cap(p);
     for k in 0..nout {
@@ -459,20 +647,46 @@ pub fn lazy_conv(a: &[u64], b: &[u64], p: u64, nout: usize, fin: impl Fn(u128) -
             for i in lo..=hi {
                 acc += a[i] * b[k - i];
             }
-            r.push(fin((acc % p) as u128));
+            r.push(fin(acc as u128));
             continue;
         }
-        let mut acc: u128 = 0;
-        let mut cnt = 0;
-        for i in lo..=hi {
-            acc += a[i] as u128 * b[k - i] as u128;
-            cnt += 1;
-            if cnt == cap {
-                acc %= pp;
-                cnt = 1;
+        r.push(fin(dot_core(&a[lo..=hi], &b[k - hi..=k - lo], red, cap)));
+    }
+    r
+}
+
+/// Square with lazy accumulation (p < 2^62), each cross product formed once: coefficient k is
+/// 2 sum_{i < k - i} a_i a_(k-i) (+ a_(k/2)^2), summed in a u64 when that cannot overflow,
+/// otherwise by `dot_core` with half its cap (so that doubling the sum and adding the square
+/// term stays below 2^128); `fin` maps the unreduced sum to the output representation.
+pub fn lazy_sq(a: &[u64], red: &Red128, fin: impl Fn(u128) -> u64) -> Vec<u64> {
+    let n = a.len();
+    if n == 0 {
+        return vec![];
+    }
+    let p = red.p;
+    let small = fits_u64(p, n + 1);
+    let cap = lazy_cap(p);
+    let mut r = Vec::with_capacity(2 * n - 1);
+    for k in 0..2 * n - 1 {
+        let lo = k.saturating_sub(n - 1);
+        let hi = k.div_ceil(2); // i < k - i
+        let sq = if k % 2 == 0 { a[k / 2] } else { 0 };
+        if small {
+            let mut acc = 0u64;
+            for i in lo..hi {
+                acc += a[i] * a[k - i];
             }
+            r.push(fin((2 * acc + sq * sq) as u128));
+            continue;
         }
-        r.push(fin(acc % pp));
+        // half the cap: the doubled sum plus the square term must still fit a u128
+        let s = if lo < hi {
+            dot_core(&a[lo..hi], &a[k + 1 - hi..=k - lo], red, (cap / 2).max(1))
+        } else {
+            0
+        };
+        r.push(fin(2 * s + sq as u128 * sq as u128));
     }
     r
 }
