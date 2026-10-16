@@ -25,7 +25,7 @@ caches, rank seed 29, one public point, four rank threads, and a 360-second
 child cap. K1152 appears first and last as an A/A control. The other 19 grid
 values run between those bookends in ascending order.
 A same-point strong-rho process follows with seed `2026101601` and a
-120-second cap. The 15 IC arms and rho run on one Ubuntu 24.04 GitHub cloud
+120-second cap. The 21 IC arms and rho run on one Ubuntu 24.04 GitHub cloud
 allocation with at least four visible CPUs, 15.5 GiB RAM and 2 GiB free disk.
 
 The end-to-end metric is the producer's `process_total`: setup, factor-base
