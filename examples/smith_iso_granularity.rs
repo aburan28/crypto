@@ -44,6 +44,10 @@ struct Rec {
     key: [i16; 3],
     stratum: u8,
     full: [bool; 2],
+    /// Rational tractable subgroups passing Prop. 2 (twist-invariant).
+    n_trig: u8,
+    /// Of those, passing Prop. 4 on the curve and on its twist.
+    n_iso: [u8; 2],
 }
 
 fn twisted_key(k: [i16; 3], tw: bool) -> [i16; 3] {
@@ -156,6 +160,8 @@ fn main() {
                 key: [(-e1) as i16, e2 as i16, (-e3) as i16],
                 stratum: sp::STRATA.iter().position(|&x| x == ns).unwrap() as u8,
                 full: [o.full_success(false), o.full_success(true)],
+                n_trig: o.n_trig() as u8,
+                n_iso: [o.n_iso(false) as u8, o.n_iso(true) as u8],
             }
         })
         .collect();
@@ -167,6 +173,11 @@ fn main() {
     let mut rows = String::from("rep_code,rep_twist,a1,a2,a3,stratum,full,size\n");
     let (mut n_iso, mut n_models, mut c2_fail) = (0u64, 0u64, 0u64);
     let mut c2_nonsqfree = 0u64;
+    // `--subgroups`: per-iso-class Prop. 2 / Prop. 4 subgroup counts, with
+    // their orbit constancy (c4) and twist complementarity (c5).
+    let want_sub = args.iter().any(|a| a == "--subgroups");
+    let mut sub = String::from("rep_code,rep_twist,n_trig,n_iso\n");
+    let (mut c4_fail, mut c5_fail) = (0u64, 0u64);
     // per L-key: models, tractable, full (control C1)
     let mut agg: HashMap<[i16; 3], [u64; 3]> = HashMap::new();
     for code in 0..total {
@@ -195,6 +206,16 @@ fn main() {
                 {
                     c2_fail += 1;
                 }
+                if r2.n_trig != r.n_trig || r2.n_iso[t2 as usize] != r.n_iso[tw as usize] {
+                    c4_fail += 1;
+                }
+            }
+            c5_fail += (r.n_iso[0] + r.n_iso[1] != r.n_trig) as u64;
+            if want_sub {
+                sub.push_str(&format!(
+                    "{code},{},{},{}\n",
+                    tw as u8, r.n_trig, r.n_iso[tw as usize]
+                ));
             }
             let size = orb.len() as u64;
             n_iso += 1;
@@ -238,7 +259,16 @@ fn main() {
         .output()
         .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
         .unwrap_or_default();
-    let ctl = json!({
+    if want_sub {
+        let mut gz = GzEncoder::new(Vec::new(), Compression::best());
+        gz.write_all(sub.as_bytes()).unwrap();
+        fs::write(
+            out.join(format!("iso_sub_p{p}.csv.gz")),
+            gz.finish().unwrap(),
+        )
+        .unwrap();
+    }
+    let mut ctl = json!({
         "p": p,
         "git_head": git,
         "octics": total,
@@ -257,6 +287,12 @@ fn main() {
         "seconds_total": secs,
         "threads": rayon::current_num_threads(),
     });
+    if want_sub {
+        ctl["c4_subgroup_counts_inconsistent"] = json!(c4_fail);
+        ctl["c4_pass"] = json!(c4_fail == 0);
+        ctl["c5_twist_complementarity_violations"] = json!(c5_fail);
+        ctl["c5_pass"] = json!(c5_fail == 0);
+    }
     fs::write(
         out.join(format!("controls_p{p}.json")),
         serde_json::to_string_pretty(&ctl).unwrap() + "\n",
