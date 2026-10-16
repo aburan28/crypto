@@ -1,0 +1,438 @@
+{
+  "schema": "factor-base-dor-v1",
+  "curve": "Koblitz y^2+xy=x^3+1 over F_2^21",
+  "field_degree": 21,
+  "dim": 2,
+  "summands": 3,
+  "encoding": "symmetric_s4",
+  "dmax": 5,
+  "targets": 16,
+  "observable": "D* = solving/refutation degree on non-decomposable targets",
+  "results": [
+    {
+      "structure": "geometric",
+      "dim": 2,
+      "summands": 3,
+      "encoding": "symmetric_s4",
+      "space_dims": [
+        2,
+        3,
+        4
+      ],
+      "nvars": 9,
+      "chain_nvars_for_comparison": 27,
+      "equation_degree": 2,
+      "point_decomposable_fraction": 0.0625,
+      "decomposable_fraction": 0.0625,
+      "boolean_unsat_fraction": 0.9375,
+      "spurious_satisfiable": 0,
+      "unsat_targets": 6,
+      "censored_above_dmax": 0,
+      "d_star_min": 3,
+      "d_star_max": 3,
+      "d_star_mean": 3.0,
+      "targets": [
+        {
+          "target": "0x1236ec",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 21,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              21,
+              46
+            ],
+            "3": [
+              210,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x1b1e2e",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 21,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              21,
+              46
+            ],
+            "3": [
+              210,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x19ac28",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 21,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              21,
+              46
+            ],
+            "3": [
+              210,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x1870d8",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 21,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              21,
+              46
+            ],
+            "3": [
+              210,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x204f9",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 21,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              21,
+              46
+            ],
+            "3": [
+              210,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x82987",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 21,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              21,
+              46
+            ],
+            "3": [
+              210,
+              130
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "structure": "standard",
+      "dim": 2,
+      "summands": 3,
+      "encoding": "symmetric_s4",
+      "space_dims": [
+        2,
+        3,
+        4
+      ],
+      "nvars": 9,
+      "chain_nvars_for_comparison": 27,
+      "equation_degree": 2,
+      "point_decomposable_fraction": 0.0,
+      "decomposable_fraction": 0.0,
+      "boolean_unsat_fraction": 1.0,
+      "spurious_satisfiable": 0,
+      "unsat_targets": 6,
+      "censored_above_dmax": 0,
+      "d_star_min": 3,
+      "d_star_max": 3,
+      "d_star_mean": 3.0,
+      "targets": [
+        {
+          "target": "0x44cb7",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 21,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              21,
+              46
+            ],
+            "3": [
+              210,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x1236ec",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 21,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              21,
+              46
+            ],
+            "3": [
+              210,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x1b1e2e",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 21,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              21,
+              46
+            ],
+            "3": [
+              210,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x19ac28",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 21,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              21,
+              46
+            ],
+            "3": [
+              210,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x1870d8",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 21,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              21,
+              46
+            ],
+            "3": [
+              210,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x204f9",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 21,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              21,
+              46
+            ],
+            "3": [
+              210,
+              130
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "structure": "random",
+      "dim": 2,
+      "summands": 3,
+      "encoding": "symmetric_s4",
+      "space_dims": [
+        2,
+        3,
+        4
+      ],
+      "nvars": 9,
+      "chain_nvars_for_comparison": 27,
+      "equation_degree": 2,
+      "point_decomposable_fraction": 0.125,
+      "decomposable_fraction": 0.125,
+      "boolean_unsat_fraction": 0.875,
+      "spurious_satisfiable": 0,
+      "unsat_targets": 6,
+      "censored_above_dmax": 0,
+      "d_star_min": 3,
+      "d_star_max": 3,
+      "d_star_mean": 3.0,
+      "targets": [
+        {
+          "target": "0x1b1e2e",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 21,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              21,
+              46
+            ],
+            "3": [
+              210,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x19ac28",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 21,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              21,
+              46
+            ],
+            "3": [
+              210,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x1870d8",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 21,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              21,
+              46
+            ],
+            "3": [
+              210,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x204f9",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 21,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              21,
+              46
+            ],
+            "3": [
+              210,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x82987",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 21,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              21,
+              46
+            ],
+            "3": [
+              210,
+              130
+            ]
+          }
+        },
+        {
+          "target": "0x3c5fe",
+          "d_star": 3,
+          "rank_profile": {
+            "2": 21,
+            "3": 120
+          },
+          "macaulay_shape": {
+            "2": [
+              21,
+              46
+            ],
+            "3": [
+              210,
+              130
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "ranking_by_mean_d_star": [
+    {
+      "structure": "geometric",
+      "d_star_mean": 3.0,
+      "d_star_min": 3,
+      "d_star_max": 3,
+      "decomposable_fraction": 0.0625,
+      "unsat_targets": 6
+    },
+    {
+      "structure": "standard",
+      "d_star_mean": 3.0,
+      "d_star_min": 3,
+      "d_star_max": 3,
+      "decomposable_fraction": 0.0,
+      "unsat_targets": 6
+    },
+    {
+      "structure": "random",
+      "d_star_mean": 3.0,
+      "d_star_min": 3,
+      "d_star_max": 3,
+      "decomposable_fraction": 0.125,
+      "unsat_targets": 6
+    }
+  ]
+}

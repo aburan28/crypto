@@ -1,0 +1,14 @@
+skip sym4_n21_l2
+=== sym4_n21_l4 : --field 21 --dim 4 --symmetric-s4 --structures geometric,standard,random --targets 16 --dmax 6 --dstar-sample 6
+run_round3.sh: line 12:  5073 Abort trap: 6           sage "$SAGE" "$@" --out "$RAW/$name.json" > "$RAW/$name.log" 2>&1
+FAILED sym4_n21_l4 (see raw/sym4_n21_l4.log)
+skip sym4_n19_l2
+skip sym4_n23_l3
+=== sym4_n23_l2 : --field 23 --dim 2 --symmetric-s4 --structures geometric,standard,random --targets 32 --dmax 5 --dstar-sample 8
+skip sym4_n29_l3
+=== sym4_n29_l4 : --field 29 --dim 4 --symmetric-s4 --structures geometric,standard,random --targets 16 --dmax 6 --dstar-sample 6
+=== m2_n23_d9_s1 : --field 23 --dim 9 --structures standard,random,nb_window,nb_break --targets 16 --seed 1 --dmax 6
+=== m2_n23_d10_s1 : --field 23 --dim 10 --structures standard,random,nb_window,nb_break --targets 16 --seed 1 --dmax 6
+=== m2_n23_d9_s2 : --field 23 --dim 9 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+=== m2_n23_d10_s2 : --field 23 --dim 10 --structures standard,random,nb_window,nb_break --targets 16 --seed 2 --dmax 6
+round3 done

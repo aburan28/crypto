@@ -1,0 +1,438 @@
+{
+  "schema": "factor-base-dor-v1",
+  "curve": "Koblitz y^2+xy=x^3+1 over F_2^29",
+  "field_degree": 29,
+  "dim": 4,
+  "summands": 3,
+  "encoding": "symmetric_s4",
+  "dmax": 6,
+  "targets": 16,
+  "observable": "D* = solving/refutation degree on non-decomposable targets",
+  "results": [
+    {
+      "structure": "geometric",
+      "dim": 4,
+      "summands": 3,
+      "encoding": "symmetric_s4",
+      "space_dims": [
+        4,
+        7,
+        10
+      ],
+      "nvars": 21,
+      "chain_nvars_for_comparison": 41,
+      "equation_degree": 2,
+      "point_decomposable_fraction": 0.0625,
+      "decomposable_fraction": 0.0625,
+      "boolean_unsat_fraction": 0.9375,
+      "spurious_satisfiable": 0,
+      "unsat_targets": 6,
+      "censored_above_dmax": 0,
+      "d_star_min": 5,
+      "d_star_max": 5,
+      "d_star_mean": 5.0,
+      "targets": [
+        {
+          "target": "0x1236eb0a",
+          "d_star": 5,
+          "rank_profile": {
+            "2": 29,
+            "3": 638,
+            "4": 6293,
+            "5": 27358
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              232
+            ],
+            "3": [
+              638,
+              1562
+            ],
+            "4": [
+              6728,
+              7547
+            ],
+            "5": [
+              45298,
+              27896
+            ]
+          }
+        },
+        {
+          "target": "0x1b1e2d5c",
+          "d_star": 5,
+          "rank_profile": {
+            "2": 29,
+            "3": 638,
+            "4": 6293,
+            "5": 27364
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              232
+            ],
+            "3": [
+              638,
+              1562
+            ],
+            "4": [
+              6728,
+              7547
+            ],
+            "5": [
+              45298,
+              27896
+            ]
+          }
+        },
+        {
+          "target": "0x19ac27c7",
+          "d_star": 5,
+          "rank_profile": {
+            "2": 29,
+            "3": 638,
+            "4": 6293,
+            "5": 27364
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              232
+            ],
+            "3": [
+              638,
+              1562
+            ],
+            "4": [
+              6728,
+              7547
+            ],
+            "5": [
+              45298,
+              27896
+            ]
+          }
+        },
+        {
+          "target": "0x1870d779",
+          "d_star": 5,
+          "rank_profile": {
+            "2": 29,
+            "3": 638,
+            "4": 6293,
+            "5": 27364
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              232
+            ],
+            "3": [
+              638,
+              1562
+            ],
+            "4": [
+              6728,
+              7547
+            ],
+            "5": [
+              45298,
+              27896
+            ]
+          }
+        },
+        {
+          "target": "0x204f89b",
+          "d_star": 5,
+          "rank_profile": {
+            "2": 29,
+            "3": 638,
+            "4": 6293,
+            "5": 27364
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              232
+            ],
+            "3": [
+              638,
+              1562
+            ],
+            "4": [
+              6728,
+              7547
+            ],
+            "5": [
+              45298,
+              27896
+            ]
+          }
+        },
+        {
+          "target": "0x8298688",
+          "d_star": 5,
+          "rank_profile": {
+            "2": 29,
+            "3": 638,
+            "4": 6293,
+            "5": 27364
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              232
+            ],
+            "3": [
+              638,
+              1562
+            ],
+            "4": [
+              6728,
+              7547
+            ],
+            "5": [
+              45298,
+              27896
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "structure": "standard",
+      "dim": 4,
+      "summands": 3,
+      "encoding": "symmetric_s4",
+      "space_dims": [
+        4,
+        7,
+        10
+      ],
+      "nvars": 21,
+      "chain_nvars_for_comparison": 41,
+      "equation_degree": 2,
+      "point_decomposable_fraction": 0.0,
+      "decomposable_fraction": 0.0,
+      "boolean_unsat_fraction": 1.0,
+      "spurious_satisfiable": 0,
+      "unsat_targets": 6,
+      "censored_above_dmax": 0,
+      "d_star_min": 5,
+      "d_star_max": 5,
+      "d_star_mean": 5.0,
+      "targets": [
+        {
+          "target": "0x44cb63f",
+          "d_star": 5,
+          "rank_profile": {
+            "2": 29,
+            "3": 638,
+            "4": 6293,
+            "5": 27364
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              232
+            ],
+            "3": [
+              638,
+              1562
+            ],
+            "4": [
+              6728,
+              7547
+            ],
+            "5": [
+              45298,
+              27896
+            ]
+          }
+        },
+        {
+          "target": "0x1236eb0a",
+          "d_star": 5,
+          "rank_profile": {
+            "2": 29,
+            "3": 638,
+            "4": 6293,
+            "5": 27364
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              232
+            ],
+            "3": [
+              638,
+              1562
+            ],
+            "4": [
+              6728,
+              7547
+            ],
+            "5": [
+              45298,
+              27896
+            ]
+          }
+        },
+        {
+          "target": "0x1b1e2d5c",
+          "d_star": 5,
+          "rank_profile": {
+            "2": 29,
+            "3": 638,
+            "4": 6293,
+            "5": 27364
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              232
+            ],
+            "3": [
+              638,
+              1562
+            ],
+            "4": [
+              6728,
+              7547
+            ],
+            "5": [
+              45298,
+              27896
+            ]
+          }
+        },
+        {
+          "target": "0x19ac27c7",
+          "d_star": 5,
+          "rank_profile": {
+            "2": 29,
+            "3": 638,
+            "4": 6293,
+            "5": 27364
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              232
+            ],
+            "3": [
+              638,
+              1562
+            ],
+            "4": [
+              6728,
+              7547
+            ],
+            "5": [
+              45298,
+              27896
+            ]
+          }
+        },
+        {
+          "target": "0x1870d779",
+          "d_star": 5,
+          "rank_profile": {
+            "2": 29,
+            "3": 638,
+            "4": 6293,
+            "5": 27364
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              232
+            ],
+            "3": [
+              638,
+              1562
+            ],
+            "4": [
+              6728,
+              7547
+            ],
+            "5": [
+              45298,
+              27896
+            ]
+          }
+        },
+        {
+          "target": "0x204f89b",
+          "d_star": 5,
+          "rank_profile": {
+            "2": 29,
+            "3": 638,
+            "4": 6293,
+            "5": 27364
+          },
+          "macaulay_shape": {
+            "2": [
+              29,
+              232
+            ],
+            "3": [
+              638,
+              1562
+            ],
+            "4": [
+              6728,
+              7547
+            ],
+            "5": [
+              45298,
+              27896
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "structure": "random",
+      "dim": 4,
+      "summands": 3,
+      "encoding": "symmetric_s4",
+      "space_dims": [
+        4,
+        10,
+        20
+      ],
+      "nvars": 34,
+      "chain_nvars_for_comparison": 41,
+      "equation_degree": 2,
+      "point_decomposable_fraction": 0.25,
+      "decomposable_fraction": 0.25,
+      "boolean_unsat_fraction": 0.0,
+      "spurious_satisfiable": 12,
+      "unsat_targets": 0,
+      "censored_above_dmax": 0,
+      "targets": []
+    }
+  ],
+  "ranking_by_mean_d_star": [
+    {
+      "structure": "geometric",
+      "d_star_mean": 5.0,
+      "d_star_min": 5,
+      "d_star_max": 5,
+      "decomposable_fraction": 0.0625,
+      "unsat_targets": 6
+    },
+    {
+      "structure": "standard",
+      "d_star_mean": 5.0,
+      "d_star_min": 5,
+      "d_star_max": 5,
+      "decomposable_fraction": 0.0,
+      "unsat_targets": 6
+    }
+  ]
+}

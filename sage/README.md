@@ -197,6 +197,19 @@ drops D* by whole degrees — 5 → 3 from (n = 15, l = 3) to (n = 15, l = 2),
 and D* = 4 at (n = 19, l = 3, δ = +10) with yield still 0.0625 — the one
 whole-degree lever that exists at n = 131.
 
+**Round 3 (the arity+size law):** seven more symmetric-S4 cells up to
+n = 29 (ord₂(29) = 28 = n − 1, 131's full-length order). At heavy δ the law
+is `D* = l + 1`, independent of the field degree: D* = 3 at l = 2 for
+n = 19, 21, 23; D* = 4 at l = 3 for n = 19, 23, 29; D* = 5 at l = 4 for
+n = 29 — the m = 3 oracle's per-system Macaulay cost grows only with the
+base dimension, never with n. Measured point-decomposable yield sits far
+above the naive counting floor at heavy δ (2^-5 measured against a 2^-20
+floor at n = 29, l = 3 — Frobenius phases and permutation orbits amplify
+yield ~2^12–2^15). One cell (n = 21, l = 4) was lost to a PolyBoRi
+segfault, preserved in the logs. Drastic-speedup recipe at 131: an m ≥ 3
+oracle with small l (D* ≤ 5) plus orbit-amplified yield; the m = 83 gate
+is the unmet validation step.
+
 ## `sm2.sage` — SM2 (sm2p256v1, GB/T 32918)
 
 Mirrors `../src/ecc/sm2.rs` and `../src/hash/sm3.rs`. Run:

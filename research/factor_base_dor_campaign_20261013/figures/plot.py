@@ -30,8 +30,8 @@ STYLES = {"standard": (C["blue"], "o"), "random": (C["ink2"], "s"),
           "subfield": (C["yellow"], "D")}
 
 # ── Fig 1: D* vs factor-base dimension, n=11, 13, 17, 19 ──────────────
-fig, axes = plt.subplots(2, 2, figsize=(7.4, 5.6), sharey=True)
-for ax, n in zip(axes.flat, (11, 13, 17, 19)):
+fig, axes = plt.subplots(2, 3, figsize=(9.6, 5.6), sharey=True)
+for ax, n in zip(axes.flat, (11, 13, 17, 19, 23)):
     for st in ("standard", "random", "nb_window", "nb_break"):
         pts = sorted([(c["dim"], c["d_star_mean"]) for c in D["m2_grid"]
                      if c["n"] == n and c["structure"] == st])
@@ -51,8 +51,10 @@ fig.suptitle("Degree of regularity rises ~1 degree per +2 dims; structure: closu
 save(fig, "dstar_vs_dim")
 
 # ── Fig 2: work-per-relation proxy vs dimension (log y) ────────────────
-fig, axes = plt.subplots(2, 2, figsize=(7.4, 5.6), sharey=False)
-for ax, n in zip(axes.flat, (11, 13, 17, 19)):
+fig, axes = plt.subplots(2, 3, figsize=(9.6, 5.6), sharey=False)
+for ax, n in zip(axes.flat, (11, 13, 17, 19, 23)):
+    if n == 23:
+        axes.flat[-1].set_visible(False)
     for st in ("standard", "random"):
         pts = sorted([(c["dim"], c["work_per_relation_proxy"]) for c in D["m2_grid"]
                      if c["n"] == n and c["structure"] == st
@@ -95,7 +97,9 @@ save(fig, "delta_sweep")
 # ── Fig 4: symmetric S4, the arity+size lever: D* vs (cell) ────────────
 fig, ax = plt.subplots(figsize=(6.4, 3.0))
 cells = [("n9 l2", "sym4_n9_l2"), ("n15 l2", "sym4_n15_l2"), ("n15 l3", "sym4_n15_l3"),
-        ("n19 l3", "sym4_n19_l3"), ("n21 l3", "sym4_n21_l3")]
+        ("n19 l2", "sym4_n19_l2"), ("n19 l3", "sym4_n19_l3"), ("n21 l2", "sym4_n21_l2"),
+        ("n21 l3", "sym4_n21_l3"), ("n23 l2", "sym4_n23_l2"), ("n23 l3", "sym4_n23_l3"),
+        ("n29 l3", "sym4_n29_l3"), ("n29 l4", "sym4_n29_l4")]
 xpos = range(len(cells))
 for i, (label, key) in enumerate(cells):
     for r in D["symmetric_s4"].get(key, []):
@@ -107,9 +111,11 @@ style(ax)
 ax.set_xticks(list(xpos))
 ax.set_xticklabels([c[0] for c in cells])
 ax.set_ylabel("D* (symmetric S4, m=3)")
-ax.set_xlabel("field and base dim (m*l vs n gives delta; e.g. n=15 l=2 is delta=+9)")
+ax.set_xlabel("field and base dim (delta = n - 3l); the diagonal D* = l + 1 guide is drawn")
+xs = list(range(len(cells)))
+ax.plot(xs, [int(c[0].split(' ')[1][1:]) + 1 for c in cells], ls="--", color=C["ink2"], lw=1)
 ax.legend(frameon=False, fontsize=8)
-ax.set_title("Heavy delta on the symmetric S4 encoding drops D* by 2 degrees (5 -> 3)",
+ax.set_title("At heavy delta D* = l + 1 independent of n (9 <= n <= 29, ord_29(2) = n-1)",
              fontsize=9, color=C["ink"])
 save(fig, "sym4_delta")
 print("figures written")

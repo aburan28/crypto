@@ -112,6 +112,8 @@ n   st         dim nvars D*mean[min..max] cens frac     W(D*)     W/rel     floo
 23  nb_break     6    12  3.00 [3..3]    0 0.0000 8.94e+04  -         0.000
 23  nb_break     7    14  4.00 [4..4]    0 0.0312 3.59e+06  5.74e+07  0.002
 23  nb_break     8    16  4.00 [4..4]    0 0.0312 7.93e+06  1.27e+08  0.008
+23  nb_break     9    18  4.00 [4..4]    0 0.0000 1.6e+07   -         0.031
+23  nb_break    10    20  5.00 [5..5]    0 0.2188 6.74e+08  3.15e+09  0.125
 23  nb_window    2     4  2.00 [2..2]    0 0.0000 333       -         0.000
 23  nb_window    3     6  2.00 [2..2]    0 0.0000 556       -         0.000
 23  nb_window    4     8  2.00 [2..2]    0 0.0000 870       -         0.000
@@ -119,6 +121,8 @@ n   st         dim nvars D*mean[min..max] cens frac     W(D*)     W/rel     floo
 23  nb_window    6    12  2.88 [2..3]    0 0.0000 7.85e+04  -         0.000
 23  nb_window    7    14  3.00 [3..3]    0 0.0000 1.62e+05  -         0.002
 23  nb_window    8    16  4.00 [4..4]    0 0.0000 7.93e+06  -         0.008
+23  nb_window    9    18  4.00 [4..4]    0 0.0312 1.6e+07   2.56e+08  0.031
+23  nb_window   10    20  5.00 [5..5]    0 0.0312 6.74e+08  1.08e+10  0.125
 23  random       2     4  2.00 [2..2]    0 0.0000 360       -         0.000
 23  random       3     6  2.00 [2..2]    0 0.0000 531       -         0.000
 23  random       4     8  2.00 [2..2]    0 0.0000 860       -         0.000
@@ -126,6 +130,8 @@ n   st         dim nvars D*mean[min..max] cens frac     W(D*)     W/rel     floo
 23  random       6    12  2.94 [2..3]    0 0.0000 8.39e+04  -         0.000
 23  random       7    14  3.00 [3..3]    0 0.0000 1.62e+05  -         0.002
 23  random       8    16  4.00 [4..4]    0 0.0000 7.93e+06  -         0.008
+23  random       9    18  4.00 [4..4]    0 0.0312 1.6e+07   2.56e+08  0.031
+23  random      10    20  5.00 [5..5]    0 0.0938 6.74e+08  3.6e+09   0.125
 23  standard     2     4  2.00 [2..2]    0 0.0000 341       -         0.000
 23  standard     3     6  2.00 [2..2]    0 0.0000 555       -         0.000
 23  standard     4     8  2.00 [2..2]    0 0.0000 859       -         0.000
@@ -133,14 +139,16 @@ n   st         dim nvars D*mean[min..max] cens frac     W(D*)     W/rel     floo
 23  standard     6    12  2.03 [2..3]    0 0.0000 4.55e+03  -         0.000
 23  standard     7    14  2.19 [2..3]    0 0.0000 3.24e+04  -         0.002
 23  standard     8    16  2.47 [2..3]    0 0.0000 1.29e+05  -         0.008
+23  standard     9    18  3.00 [2..4]    0 0.0000 1.38e+06  -         0.031
+23  standard    10    20  3.93 [2..4]    0 0.0312 2.91e+07  4.49e+08  0.125
 
 == correlations (m=2, non-subfield structures pooled) ==
-pearson(D*mean, dim)      = 0.8162854570065192
-pearson(D*mean, nvars)    = 0.8162854570065192
-pearson(D*mean, n)        = -0.013384889408566636
-pearson(log W/rel, dim)   = 0.9359059650596102
-pearson(log frac, dim)    = 0.4270521532129501
-pearson(log frac, log floor)= 0.6882205804055307
+pearson(D*mean, dim)      = 0.8348471101864338
+pearson(D*mean, nvars)    = 0.8348471101864338
+pearson(D*mean, n)        = 0.1065651657102097
+pearson(log W/rel, dim)   = 0.9533934101249493
+pearson(log frac, dim)    = 0.3889617614828646
+pearson(log frac, log floor)= 0.6710190998222745
 
 == structure contrasts at matched (n, dim) ==
 n=9 dim=3: subfield D*=2.00 frac=0.0000  vs standard D*=2.45 frac=0.0833
@@ -186,6 +194,9 @@ n=19  nb_window  best dim=8 (D*=4.00, frac=0.1250, W/rel=3.49e+07)
 n=19  random     best dim=8 (D*=4.00, frac=0.0938, W/rel=5.24e+07)
 n=19  standard   best dim=7 (D*=2.77, frac=0.0312, W/rel=1.44e+06)
 n=23  nb_break   best dim=7 (D*=4.00, frac=0.0312, W/rel=5.74e+07)
+n=23  nb_window  best dim=9 (D*=4.00, frac=0.0312, W/rel=2.56e+08)
+n=23  random     best dim=9 (D*=4.00, frac=0.0312, W/rel=2.56e+08)
+n=23  standard   best dim=10 (D*=3.93, frac=0.0312, W/rel=4.49e+08)
 
 == delta_n11_m2.json:  ==
 delta=-1 dim=6 nvars=12 D*mean=4.00 frac=0.8750 W=6.9e+05 W/rel=7.89e+05
@@ -235,16 +246,46 @@ n=15 standard dim=3 nvars=15 D*=5.00 [5..5] point-frac=0.0000 bool-unsat=0.3125 
 n=15 subfield dim=3 nvars=9 D*=3.00 [3..3] point-frac=0.0000 bool-unsat=1.0000 spurious=None eqdeg=2
 n=15 random dim=3 nvars=19 D*=- [-..-] point-frac=0.1875 bool-unsat=0.0000 spurious=None eqdeg=2
 
+== sym4_n19_l2.json (symmetric S4) ==
+n=19 geometric dim=2 nvars=9 D*=3.00 [3..3] point-frac=0.0625 bool-unsat=0.9375 spurious=None eqdeg=2
+n=19 standard dim=2 nvars=9 D*=3.00 [3..3] point-frac=0.0000 bool-unsat=1.0000 spurious=None eqdeg=2
+n=19 random dim=2 nvars=9 D*=3.00 [3..3] point-frac=0.1250 bool-unsat=0.8750 spurious=None eqdeg=2
+
 == sym4_n19_l3.json (symmetric S4) ==
 n=19 geometric dim=3 nvars=15 D*=4.00 [4..4] point-frac=0.0625 bool-unsat=0.9375 spurious=None eqdeg=2
 n=19 standard dim=3 nvars=15 D*=4.00 [4..4] point-frac=0.0000 bool-unsat=0.8750 spurious=None eqdeg=2
 n=19 random dim=3 nvars=19 D*=5.00 [5..5] point-frac=0.1875 bool-unsat=0.1250 spurious=None eqdeg=2
+
+== sym4_n21_l2.json (symmetric S4) ==
+n=21 geometric dim=2 nvars=9 D*=3.00 [3..3] point-frac=0.0625 bool-unsat=0.9375 spurious=None eqdeg=2
+n=21 standard dim=2 nvars=9 D*=3.00 [3..3] point-frac=0.0000 bool-unsat=1.0000 spurious=None eqdeg=2
+n=21 random dim=2 nvars=9 D*=3.00 [3..3] point-frac=0.1250 bool-unsat=0.8750 spurious=None eqdeg=2
 
 == sym4_n21_l3.json (symmetric S4) ==
 n=21 geometric dim=3 nvars=15 D*=4.00 [4..4] point-frac=0.0625 bool-unsat=0.9375 spurious=None eqdeg=2
 n=21 standard dim=3 nvars=15 D*=4.00 [4..4] point-frac=0.0000 bool-unsat=1.0000 spurious=None eqdeg=2
 n=21 subfield dim=3 nvars=9 D*=3.00 [3..3] point-frac=0.0000 bool-unsat=1.0000 spurious=None eqdeg=2
 n=21 random dim=3 nvars=19 D*=5.00 [5..5] point-frac=0.1875 bool-unsat=0.6250 spurious=None eqdeg=2
+
+== sym4_n23_l2.json (symmetric S4) ==
+n=23 geometric dim=2 nvars=9 D*=3.00 [3..3] point-frac=0.0312 bool-unsat=0.9688 spurious=None eqdeg=2
+n=23 standard dim=2 nvars=9 D*=3.00 [3..3] point-frac=0.0000 bool-unsat=1.0000 spurious=None eqdeg=2
+n=23 random dim=2 nvars=9 D*=3.00 [3..3] point-frac=0.0625 bool-unsat=0.9375 spurious=None eqdeg=2
+
+== sym4_n23_l3.json (symmetric S4) ==
+n=23 geometric dim=3 nvars=15 D*=4.00 [4..4] point-frac=0.0625 bool-unsat=0.9375 spurious=None eqdeg=2
+n=23 standard dim=3 nvars=15 D*=4.00 [4..4] point-frac=0.0000 bool-unsat=1.0000 spurious=None eqdeg=2
+n=23 random dim=3 nvars=19 D*=5.00 [5..5] point-frac=0.1875 bool-unsat=0.6875 spurious=None eqdeg=2
+
+== sym4_n29_l3.json (symmetric S4) ==
+n=29 geometric dim=3 nvars=15 D*=4.00 [4..4] point-frac=0.0312 bool-unsat=0.9688 spurious=None eqdeg=2
+n=29 standard dim=3 nvars=15 D*=4.00 [4..4] point-frac=0.0000 bool-unsat=1.0000 spurious=None eqdeg=2
+n=29 random dim=3 nvars=19 D*=4.00 [4..4] point-frac=0.0938 bool-unsat=0.9062 spurious=None eqdeg=2
+
+== sym4_n29_l4.json (symmetric S4) ==
+n=29 geometric dim=4 nvars=21 D*=5.00 [5..5] point-frac=0.0625 bool-unsat=0.9375 spurious=None eqdeg=2
+n=29 standard dim=4 nvars=21 D*=5.00 [5..5] point-frac=0.0000 bool-unsat=1.0000 spurious=None eqdeg=2
+n=29 random dim=4 nvars=34 D*=- [-..-] point-frac=0.2500 bool-unsat=0.0000 spurious=None eqdeg=2
 
 == sym4_n9_l2.json (symmetric S4) ==
 n=9 geometric dim=2 nvars=9 D*=4.00 [4..4] point-frac=0.0625 bool-unsat=0.2500 spurious=None eqdeg=2

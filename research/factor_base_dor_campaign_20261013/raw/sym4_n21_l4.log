@@ -1,0 +1,70 @@
+libc++abi: terminating due to uncaught exception of type polybori::PBoRiError: Built-in matrix-size exceeded!
+------------------------------------------------------------------------
+0   signals.cpython-314-darwin.so       0x000000010470e4ec sigdie + 92
+1   signals.cpython-314-darwin.so       0x000000010470e33c cysigs_signal_handler + 276
+2   libsystem_platform.dylib            0x0000000186811744 _sigtramp + 56
+3   libsystem_pthread.dylib             0x00000001868078d8 pthread_kill + 296
+4   libsystem_c.dylib                   0x000000018670d978 abort + 148
+5   libc++abi.dylib                     0x00000001867be72c _ZN10__cxxabiv116__shim_type_infoD1Ev + 0
+6   libc++abi.dylib                     0x00000001867ab570 _ZL28demangling_terminate_handlerv + 272
+7   libobjc.A.dylib                     0x00000001863b88a4 _ZL15_objc_terminatev + 172
+8   libc++abi.dylib                     0x00000001867bb75c _ZSt11__terminatePFvvE + 16
+9   libc++abi.dylib                     0x00000001867bdbe4 __cxa_get_exception_ptr + 0
+10  libc++abi.dylib                     0x00000001867aa09c __cxa_get_globals + 0
+11  libbrial_groebner.3.0.7.dylib       0x000000011bb06550 _ZN8polybori8groebner20linalg_step_modifiedERNSt3__16vectorINS_15BoolePolynomialENS1_9allocatorIS3_EEEENS_8BooleSetES8_bbPKc + 7952
+12  libbrial_groebner.3.0.7.dylib       0x000000011bb033ec _ZN8polybori8groebner16GroebnerStrategy16faugereStepDenseERKNSt3__16vectorINS_15BoolePolynomialENS2_9allocatorIS4_EEEE + 352
+13  pbori.cpython-314-darwin.so         0x000000011b6669b0 _ZL88__pyx_pw_4sage_5rings_10polynomial_5pbori_5pbori_16GroebnerStrategy_17faugere_step_denseP7_objectPKS0_lS0_ + 516
+14  libpython3.14.dylib                 0x00000001059c4bdc _TAIL_CALL_CALL.llvm.15611777270348804602 + 324
+15  libpython3.14.dylib                 0x0000000105b94018 _PyFunction_Vectorcall + 824
+16  libpython3.14.dylib                 0x00000001059bb3dc _PyObject_Call_Prepend + 300
+17  libpython3.14.dylib                 0x0000000105c7c1d4 slot_tp_call + 456
+18  libpython3.14.dylib                 0x0000000105a0bcec _TAIL_CALL_CALL_FUNCTION_EX.llvm.15611777270348804602 + 2664
+19  libpython3.14.dylib                 0x0000000105b94018 _PyFunction_Vectorcall + 824
+20  libpython3.14.dylib                 0x00000001059bb3dc _PyObject_Call_Prepend + 300
+21  libpython3.14.dylib                 0x0000000105c7c1d4 slot_tp_call + 456
+22  libpython3.14.dylib                 0x0000000105a0bcec _TAIL_CALL_CALL_FUNCTION_EX.llvm.15611777270348804602 + 2664
+23  libpython3.14.dylib                 0x0000000105b94018 _PyFunction_Vectorcall + 824
+24  libpython3.14.dylib                 0x00000001059bb3dc _PyObject_Call_Prepend + 300
+25  libpython3.14.dylib                 0x0000000105c7c1d4 slot_tp_call + 456
+26  libpython3.14.dylib                 0x0000000105a0bcec _TAIL_CALL_CALL_FUNCTION_EX.llvm.15611777270348804602 + 2664
+27  libpython3.14.dylib                 0x0000000105b94018 _PyFunction_Vectorcall + 824
+28  libpython3.14.dylib                 0x00000001059bb3dc _PyObject_Call_Prepend + 300
+29  libpython3.14.dylib                 0x0000000105c7c1d4 slot_tp_call + 456
+30  libpython3.14.dylib                 0x0000000105a0bcec _TAIL_CALL_CALL_FUNCTION_EX.llvm.15611777270348804602 + 2664
+31  libpython3.14.dylib                 0x0000000105b94018 _PyFunction_Vectorcall + 824
+32  libpython3.14.dylib                 0x00000001059bb3dc _PyObject_Call_Prepend + 300
+33  libpython3.14.dylib                 0x0000000105c7c1d4 slot_tp_call + 456
+34  libpython3.14.dylib                 0x0000000105a0bcec _TAIL_CALL_CALL_FUNCTION_EX.llvm.15611777270348804602 + 2664
+35  libpython3.14.dylib                 0x0000000105b94018 _PyFunction_Vectorcall + 824
+36  libpython3.14.dylib                 0x00000001059bb3dc _PyObject_Call_Prepend + 300
+37  libpython3.14.dylib                 0x0000000105c7c1d4 slot_tp_call + 456
+38  libpython3.14.dylib                 0x0000000105a0bcec _TAIL_CALL_CALL_FUNCTION_EX.llvm.15611777270348804602 + 2664
+39  libpython3.14.dylib                 0x0000000105b94018 _PyFunction_Vectorcall + 824
+40  libpython3.14.dylib                 0x00000001059bb3dc _PyObject_Call_Prepend + 300
+41  libpython3.14.dylib                 0x0000000105c7c1d4 slot_tp_call + 456
+42  libpython3.14.dylib                 0x0000000105a0bcec _TAIL_CALL_CALL_FUNCTION_EX.llvm.15611777270348804602 + 2664
+43  libpython3.14.dylib                 0x0000000105b94018 _PyFunction_Vectorcall + 824
+44  libpython3.14.dylib                 0x000000010599e9b4 _PyObject_VectorcallDictTstate + 196
+45  pbori.cpython-314-darwin.so         0x000000011b686230 _ZL90__pyx_pw_4sage_5rings_10polynomial_5pbori_5pbori_22BooleanPolynomialIdeal_7_groebner_basisP7_objectPKS0_lS0_ + 1908
+46  libpython3.14.dylib                 0x0000000105c55d24 method_vectorcall.llvm.17402339509639523859 + 428
+47  libpython3.14.dylib                 0x0000000106215a64 _PyVectorcall_Call + 156
+48  pbori.cpython-314-darwin.so         0x000000011b6b2e08 _ZL89__pyx_pw_4sage_5rings_10polynomial_5pbori_5pbori_22BooleanPolynomialIdeal_5groebner_basisP7_objectPKS0_lS0_ + 2156
+49  libpython3.14.dylib                 0x00000001059c4bdc _TAIL_CALL_CALL.llvm.15611777270348804602 + 324
+50  libpython3.14.dylib                 0x0000000105a975c4 _PyEval_Vector + 780
+51  libpython3.14.dylib                 0x0000000105ab1860 PyEval_EvalCode + 160
+52  libpython3.14.dylib                 0x0000000105abd5e8 run_mod.llvm.14073533226210396525 + 292
+53  libpython3.14.dylib                 0x0000000105a097fc pyrun_file + 164
+54  libpython3.14.dylib                 0x0000000105a08330 _PyRun_SimpleFileObject + 256
+55  libpython3.14.dylib                 0x0000000105a080d4 _PyRun_AnyFileObject + 80
+56  libpython3.14.dylib                 0x0000000105a07fc8 pymain_run_file_obj + 164
+57  libpython3.14.dylib                 0x0000000105b857c8 pymain_run_file + 72
+58  libpython3.14.dylib                 0x0000000105b81dcc Py_RunMain + 1136
+59  libpython3.14.dylib                 0x0000000105b32ee0 pymain_main + 464
+60  libpython3.14.dylib                 0x0000000105b32d04 Py_BytesMain + 36
+61  dyld                                0x000000018643c4e4 start + 6992
+------------------------------------------------------------------------
+Unhandled SIGABRT: An abort() occurred.
+This probably occurred because a *compiled* module has a bug
+in it and is not properly wrapped with sig_on(), sig_off().
+Python will now terminate.
+------------------------------------------------------------------------

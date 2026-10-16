@@ -1,0 +1,10 @@
+=== sym4_n21_l2 : --field 21 --dim 2 --symmetric-s4 --structures geometric,standard,random --targets 16 --dmax 5 --dstar-sample 6
+=== sym4_n21_l4 : --field 21 --dim 4 --symmetric-s4 --structures geometric,standard,random --targets 16 --dmax 6 --dstar-sample 6
+run_round3.sh: line 12: 12857 Terminated: 15          sage "$SAGE" "$@" --out "$RAW/$name.json" > "$RAW/$name.log" 2>&1
+FAILED sym4_n21_l4 (see raw/sym4_n21_l4.log)
+=== sym4_n19_l2 : --field 19 --dim 2 --symmetric-s4 --structures geometric,standard,random --targets 16 --dmax 5 --dstar-sample 6
+=== sym4_n23_l3 : --field 23 --dim 3 --symmetric-s4 --structures geometric,standard,random --targets 16 --dmax 5 --dstar-sample 6
+=== sym4_n23_l2 : --field 23 --dim 2 --symmetric-s4 --structures geometric,standard,random --targets 32 --dmax 5 --dstar-sample 8
+FAILED sym4_n23_l2 (see raw/sym4_n23_l2.log)
+=== sym4_n29_l3 : --field 29 --dim 3 --symmetric-s4 --structures geometric,standard,random --targets 32 --dmax 5 --dstar-sample 8
+=== sym4_n29_l4 : --field 29 --dim 4 --symmetric-s4 --structures geometric,standard,random --targets 16 --dmax 6 --dstar-sample 6

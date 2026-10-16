@@ -1348,6 +1348,30 @@
   },
   {
    "n": 23,
+   "structure": "nb_break",
+   "dim": 9,
+   "seeds": 2,
+   "d_star_mean": 4.0,
+   "d_star_min": 4,
+   "d_star_max": 4,
+   "decomposable_fraction": 0.0,
+   "macaulay_work_at_dstar": 16013888.0,
+   "work_per_relation_proxy": null
+  },
+  {
+   "n": 23,
+   "structure": "nb_break",
+   "dim": 10,
+   "seeds": 2,
+   "d_star_mean": 5.0,
+   "d_star_min": 5,
+   "d_star_max": 5,
+   "decomposable_fraction": 0.21875,
+   "macaulay_work_at_dstar": 674284100.0,
+   "work_per_relation_proxy": 3082441600.0
+  },
+  {
+   "n": 23,
    "structure": "nb_window",
    "dim": 2,
    "seeds": 2,
@@ -1429,6 +1453,30 @@
    "decomposable_fraction": 0.0,
    "macaulay_work_at_dstar": 7931067.0,
    "work_per_relation_proxy": null
+  },
+  {
+   "n": 23,
+   "structure": "nb_window",
+   "dim": 9,
+   "seeds": 2,
+   "d_star_mean": 4.0,
+   "d_star_min": 4,
+   "d_star_max": 4,
+   "decomposable_fraction": 0.03125,
+   "macaulay_work_at_dstar": 16013888.0,
+   "work_per_relation_proxy": 512444416.0
+  },
+  {
+   "n": 23,
+   "structure": "nb_window",
+   "dim": 10,
+   "seeds": 2,
+   "d_star_mean": 5.0,
+   "d_star_min": 5,
+   "d_star_max": 5,
+   "decomposable_fraction": 0.03125,
+   "macaulay_work_at_dstar": 674284100.0,
+   "work_per_relation_proxy": 21577091200.0
   },
   {
    "n": 23,
@@ -1516,6 +1564,30 @@
   },
   {
    "n": 23,
+   "structure": "random",
+   "dim": 9,
+   "seeds": 2,
+   "d_star_mean": 4.0,
+   "d_star_min": 4,
+   "d_star_max": 4,
+   "decomposable_fraction": 0.03125,
+   "macaulay_work_at_dstar": 16013888.0,
+   "work_per_relation_proxy": 512444416.0
+  },
+  {
+   "n": 23,
+   "structure": "random",
+   "dim": 10,
+   "seeds": 2,
+   "d_star_mean": 5.0,
+   "d_star_min": 5,
+   "d_star_max": 5,
+   "decomposable_fraction": 0.09375,
+   "macaulay_work_at_dstar": 674284100.0,
+   "work_per_relation_proxy": 7192363733.333333
+  },
+  {
+   "n": 23,
    "structure": "standard",
    "dim": 2,
    "seeds": 2,
@@ -1597,6 +1669,30 @@
    "decomposable_fraction": 0.0,
    "macaulay_work_at_dstar": 129421.0,
    "work_per_relation_proxy": null
+  },
+  {
+   "n": 23,
+   "structure": "standard",
+   "dim": 9,
+   "seeds": 2,
+   "d_star_mean": 3.0,
+   "d_star_min": 2,
+   "d_star_max": 4,
+   "decomposable_fraction": 0.0,
+   "macaulay_work_at_dstar": 1378901.75,
+   "work_per_relation_proxy": null
+  },
+  {
+   "n": 23,
+   "structure": "standard",
+   "dim": 10,
+   "seeds": 2,
+   "d_star_mean": 3.9333333333333336,
+   "d_star_min": 2,
+   "d_star_max": 4,
+   "decomposable_fraction": 0.03125,
+   "macaulay_work_at_dstar": 29067043.5,
+   "work_per_relation_proxy": 930145392.0
   }
  ],
  "delta_sweeps_m2": {
@@ -1812,6 +1908,29 @@
     "boolean_unsat_fraction": 0.0
    }
   ],
+  "sym4_n19_l2": [
+   {
+    "structure": "geometric",
+    "nvars": 9,
+    "d_star_mean": 3.0,
+    "point_decomposable_fraction": 0.0625,
+    "boolean_unsat_fraction": 0.9375
+   },
+   {
+    "structure": "standard",
+    "nvars": 9,
+    "d_star_mean": 3.0,
+    "point_decomposable_fraction": 0.0,
+    "boolean_unsat_fraction": 1.0
+   },
+   {
+    "structure": "random",
+    "nvars": 9,
+    "d_star_mean": 3.0,
+    "point_decomposable_fraction": 0.125,
+    "boolean_unsat_fraction": 0.875
+   }
+  ],
   "sym4_n19_l3": [
    {
     "structure": "geometric",
@@ -1833,6 +1952,29 @@
     "d_star_mean": 5.0,
     "point_decomposable_fraction": 0.1875,
     "boolean_unsat_fraction": 0.125
+   }
+  ],
+  "sym4_n21_l2": [
+   {
+    "structure": "geometric",
+    "nvars": 9,
+    "d_star_mean": 3.0,
+    "point_decomposable_fraction": 0.0625,
+    "boolean_unsat_fraction": 0.9375
+   },
+   {
+    "structure": "standard",
+    "nvars": 9,
+    "d_star_mean": 3.0,
+    "point_decomposable_fraction": 0.0,
+    "boolean_unsat_fraction": 1.0
+   },
+   {
+    "structure": "random",
+    "nvars": 9,
+    "d_star_mean": 3.0,
+    "point_decomposable_fraction": 0.125,
+    "boolean_unsat_fraction": 0.875
    }
   ],
   "sym4_n21_l3": [
@@ -1863,6 +2005,98 @@
     "d_star_mean": 5.0,
     "point_decomposable_fraction": 0.1875,
     "boolean_unsat_fraction": 0.625
+   }
+  ],
+  "sym4_n23_l2": [
+   {
+    "structure": "geometric",
+    "nvars": 9,
+    "d_star_mean": 3.0,
+    "point_decomposable_fraction": 0.03125,
+    "boolean_unsat_fraction": 0.96875
+   },
+   {
+    "structure": "standard",
+    "nvars": 9,
+    "d_star_mean": 3.0,
+    "point_decomposable_fraction": 0.0,
+    "boolean_unsat_fraction": 1.0
+   },
+   {
+    "structure": "random",
+    "nvars": 9,
+    "d_star_mean": 3.0,
+    "point_decomposable_fraction": 0.0625,
+    "boolean_unsat_fraction": 0.9375
+   }
+  ],
+  "sym4_n23_l3": [
+   {
+    "structure": "geometric",
+    "nvars": 15,
+    "d_star_mean": 4.0,
+    "point_decomposable_fraction": 0.0625,
+    "boolean_unsat_fraction": 0.9375
+   },
+   {
+    "structure": "standard",
+    "nvars": 15,
+    "d_star_mean": 4.0,
+    "point_decomposable_fraction": 0.0,
+    "boolean_unsat_fraction": 1.0
+   },
+   {
+    "structure": "random",
+    "nvars": 19,
+    "d_star_mean": 5.0,
+    "point_decomposable_fraction": 0.1875,
+    "boolean_unsat_fraction": 0.6875
+   }
+  ],
+  "sym4_n29_l3": [
+   {
+    "structure": "geometric",
+    "nvars": 15,
+    "d_star_mean": 4.0,
+    "point_decomposable_fraction": 0.03125,
+    "boolean_unsat_fraction": 0.96875
+   },
+   {
+    "structure": "standard",
+    "nvars": 15,
+    "d_star_mean": 4.0,
+    "point_decomposable_fraction": 0.0,
+    "boolean_unsat_fraction": 1.0
+   },
+   {
+    "structure": "random",
+    "nvars": 19,
+    "d_star_mean": 4.0,
+    "point_decomposable_fraction": 0.09375,
+    "boolean_unsat_fraction": 0.90625
+   }
+  ],
+  "sym4_n29_l4": [
+   {
+    "structure": "geometric",
+    "nvars": 21,
+    "d_star_mean": 5.0,
+    "point_decomposable_fraction": 0.0625,
+    "boolean_unsat_fraction": 0.9375
+   },
+   {
+    "structure": "standard",
+    "nvars": 21,
+    "d_star_mean": 5.0,
+    "point_decomposable_fraction": 0.0,
+    "boolean_unsat_fraction": 1.0
+   },
+   {
+    "structure": "random",
+    "nvars": 34,
+    "d_star_mean": null,
+    "point_decomposable_fraction": 0.25,
+    "boolean_unsat_fraction": 0.0
    }
   ],
   "sym4_n9_l2": [
