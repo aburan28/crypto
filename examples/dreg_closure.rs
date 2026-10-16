@@ -17,6 +17,11 @@
 //! refutes, and builds no degree whose matrix could have more than
 //! `--max-cols` columns (`C(N,≤D)`): the dense basis costs about the cube
 //! of that.  Degrees not built are unmeasured, never refutations.
+//!
+//! `--satisfiable` is the soundness control: it replays the committed
+//! *satisfiable* draws instead, builds every degree from 3 to 5 that fits
+//! the cap, and records whether XL or the closure ever refutes.  Either
+//! refuting a system with a solution is an instrument failure.
 
 use crypto_lib::binary_ecc::F2mElement;
 use crypto_lib::cryptanalysis::koblitz_bench::{closure_refutation_scan, ClosureDegree};
@@ -62,20 +67,20 @@ fn main() {
             .cloned()
     };
     let max_cols: f64 = flag("--max-cols").map_or(70_000.0, |v| v.parse().expect("--max-cols"));
-    let skip = ["--max-cols"];
+    let satisfiable = args.iter().any(|a| a == "--satisfiable");
+    let skip = ["--max-cols", "--satisfiable"];
     let files: Vec<&String> = args
         .iter()
         .enumerate()
-        .filter(|(i, a)| {
-            !skip.contains(&a.as_str()) && !(*i > 0 && skip.contains(&args[i - 1].as_str()))
-        })
+        .filter(|(i, a)| !skip.contains(&a.as_str()) && !(*i > 0 && args[i - 1] == "--max-cols"))
         .map(|(_, a)| a)
         .collect();
     for file in files {
         let text = std::fs::read_to_string(file).unwrap_or_else(|e| panic!("{file}: {e}"));
         for line in text.lines().filter(|l| !l.trim().is_empty()) {
             let v: Value = serde_json::from_str(line).expect("json");
-            if v.get("control").is_some() || v["outcome"]["kind"] == "satisfiable" {
+            let sat = v["outcome"]["kind"] == "satisfiable";
+            if v.get("control").is_some() || sat != satisfiable {
                 continue;
             }
             let m = v.get("m").and_then(Value::as_u64).unwrap_or(3) as usize;
@@ -98,6 +103,25 @@ fn main() {
                 v["n_vars"].as_u64().unwrap(),
                 "{file}: rebuilt shape"
             );
+            if satisfiable {
+                let mut scan = Vec::new();
+                for d in (3..=5).take_while(|&d| monomials_up_to(sys.n_vars as u64, d) <= max_cols)
+                {
+                    scan.extend(closure_refutation_scan(&sys.equations, sys.n_vars, d, d));
+                }
+                let unsound = scan.iter().any(|d| d.xl_refuted || d.closure_refuted);
+                println!(
+                    r#"{{"source":"{file}","cell":"{}","m":{m},"n":{n},"ell":{ell},"draw":{},"n_vars":{},"committed_outcome":{},"solutions":{},"refuted_satisfiable":{unsound},"measured_to":{},"max_cols":{max_cols},"scan":[{}]}}"#,
+                    v["cell"].as_str().unwrap_or(""),
+                    v["draw"],
+                    sys.n_vars,
+                    v["outcome"],
+                    v["solutions"],
+                    scan.last().map(|d| d.degree).unwrap_or(2),
+                    scan.iter().map(degree_json).collect::<Vec<_>>().join(",")
+                );
+                continue;
+            }
             // The committed XL degree: resolved at `D`, or `≥D` (built to D−1).
             let committed = v["outcome"]["degree"].as_u64().expect("committed degree") as u32;
             let xl_known = v["outcome"]["kind"] == "resolved";
