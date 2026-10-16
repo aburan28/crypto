@@ -73,7 +73,10 @@ pub fn solve_degree(
     };
     let alpha = combine(&nf.basis, &x);
     let want = d * &nf.norm;
-    assert!(alg.nrd(&alpha) == (want, Int::one()), "norm equation solution is wrong");
+    assert!(
+        alg.nrd(&alpha) == (want, Int::one()),
+        "norm equation solution is wrong"
+    );
     let ideal = conn.rmul(alg, &alpha.conj().scale(&Int::one(), &nf.norm));
     assert!(ideal.norm(o1) == (d.clone(), Int::one()));
     Some(DegreeSolution {
@@ -130,9 +133,13 @@ pub fn find_isogeny_of_degree(
     let o0 = &dg.o0;
     let mut times = StepTimes::default();
     let t = Instant::now();
-    let end1 = end_ring(dg, graph, inst.j1, rng).ok_or("End(E1) failed")?;
-    let end2 = end_ring(dg, graph, inst.j2, rng).ok_or("End(E2) failed")?;
+    let tr = std::env::var_os("FD_TRACE").is_some();
+    let end1 = end_ring(dg, graph, inst.j1).ok_or("End(E1) failed")?;
+    let end2 = end_ring(dg, graph, inst.j2).ok_or("End(E2) failed")?;
     times.end_ring_ms = ms(t);
+    if tr {
+        eprintln!("[fixed_degree] end rings in {:.0} ms", times.end_ring_ms);
+    }
     let t = Instant::now();
     let o1 = end1.ideal.right_order(alg, o0);
     let o2 = end2.ideal.right_order(alg, o0);
@@ -146,6 +153,12 @@ pub fn find_isogeny_of_degree(
     let degree = solve_degree(alg, &o1, &conn, &inst.d, solver, None)
         .ok_or("no solution of the norm equation in the search box")?;
     times.solve_ms = ms(t);
+    if tr {
+        eprintln!(
+            "[fixed_degree] norm equation solved in {:.0} ms: x = {:?}",
+            times.solve_ms, degree.x
+        );
+    }
     let t = Instant::now();
     let targets = match (&inst.e1, &inst.e2) {
         (Some(a), Some(b)) => Some((a, b)),
@@ -184,37 +197,56 @@ fn rand_int(rng: &mut Rng, q: &Int) -> Int {
 }
 
 /// A random left ideal of the maximal order `o` of prime norm q (q odd): o q + o beta with
-/// beta = sum c_t b_t, (c0, c1, c2) random and c3 solving Nrd(beta) = 0 mod q.
+/// beta = sum c_t b_t, three coordinates random and the fourth (a random slot) solving
+/// Nrd(beta) = 0 mod q (a quadratic, or linear when its leading coefficient vanishes mod q).
 pub fn random_prime_norm_ideal(alg: &Alg, o: &Lattice, q: &Int, rng: &mut Rng) -> Lattice {
     let b = o.basis();
-    // Nrd(sum c_t b_t) * den^2 is a quadratic form in c with Gram bil(b_r, b_s) (integer rows)
+    // 2 Nrd(sum c_t b_t) = sum c_r c_s h_rs with h_rs = 2 bil(row_r, row_s) / den^2 integral
+    // (the den of O may contain q, so the integer rows alone do not give Nrd mod q)
     let rows = o.m.clone();
-    let g = |r: usize, s: usize| alg.bil(&rows[r], &rows[s]);
+    let den2 = &o.den * &o.den;
+    let two = Int::from(2i64);
+    let g = |r: usize, s: usize| {
+        let (h, rem) = (&two * &alg.bil(&rows[r], &rows[s])).divrem_trunc(&den2);
+        assert!(rem.is_zero());
+        h
+    };
     loop {
-        let c: Vec<Int> = (0..3).map(|_| rand_int(rng, q)).collect();
-        // f(t) = A t^2 + B t + C with t = c3
-        let a2 = g(3, 3);
+        let k = rng.below(4) as usize;
+        let mut c: Vec<Int> = (0..4).map(|_| rand_int(rng, q)).collect();
+        // f(t) = A t^2 + B t + C with t = c_k
+        let a2 = g(k, k).modulo(q);
         let mut bb = Int::zero();
         let mut cc = Int::zero();
-        for r in 0..3 {
-            bb = &bb + &(&(&Int::from(2i64) * &c[r]) * &g(r, 3));
-            for s in 0..3 {
-                cc = &cc + &(&(&c[r] * &c[s]) * &g(r, s));
+        for r in (0..4).filter(|&r| r != k) {
+            bb = &bb + &(&(&two * &c[r]) * &g(r, k));
+            for s2 in (0..4).filter(|&s2| s2 != k) {
+                cc = &cc + &(&(&c[r] * &c[s2]) * &g(r, s2));
             }
         }
-        let a2m = a2.modulo(q);
-        if a2m.is_zero() {
-            continue;
-        }
-        let disc = (&(&bb * &bb) - &(&(&Int::from(4i64) * &a2) * &cc)).modulo(q);
-        let Some(s) = sqrt_mod(&disc, q) else {
-            continue;
+        let (bb, cc) = (bb.modulo(q), cc.modulo(q));
+        let t = if a2.is_zero() {
+            if bb.is_zero() {
+                continue;
+            }
+            (&(-&cc) * &bb.inv_mod(q).unwrap()).modulo(q)
+        } else {
+            let disc = (&(&bb * &bb) - &(&(&Int::from(4i64) * &a2) * &cc)).modulo(q);
+            let Some(sq) = sqrt_mod(&disc, q) else {
+                continue;
+            };
+            let sq = if rng.below(2) == 0 {
+                sq
+            } else {
+                (-&sq).modulo(q)
+            };
+            let inv2a = (&two * &a2).inv_mod(q).unwrap();
+            (&(&(-&bb) + &sq) * &inv2a).modulo(q)
         };
-        let inv2a = (&Int::from(2i64) * &a2m).inv_mod(q).unwrap();
-        let c3 = (&(&(-&bb) + &s) * &inv2a).modulo(q);
+        c[k] = t;
         let mut beta = Quat::zero();
-        for (k, cv) in c.iter().chain(std::iter::once(&c3)).enumerate() {
-            beta = beta.add(&b[k].scale(cv, &Int::one()));
+        for (idx, cv) in c.iter().enumerate() {
+            beta = beta.add(&b[idx].scale(cv, &Int::one()));
         }
         let mut gens: Vec<Quat> = b.iter().map(|x| x.scale(q, &Int::one())).collect();
         gens.extend(o.rmul(alg, &beta).basis());

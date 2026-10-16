@@ -33,7 +33,9 @@ pub fn prefixes(alg: &Alg, o0: &Lattice, i1: &Lattice, ell: u64, e1: u32) -> Vec
     for _ in 0..e1 {
         let mut next = vec![];
         for (k, prev) in &layer {
-            let back = prev.as_ref().map(|pv| pv.scale(&Int::from(ell), &Int::one()));
+            let back = prev
+                .as_ref()
+                .map(|pv| pv.scale(&Int::from(ell), &Int::one()));
             for c in sub_ideals(alg, o0, k, ell) {
                 if Some(&c) == back.as_ref() {
                     continue;
@@ -61,9 +63,8 @@ pub fn hybrid_search(
     let o2 = i2.right_order(alg, o0);
     let n1 = i1.norm_int(o0);
     let rest = Int::from(ell).pow(e - e1);
-    let mut guesses = 0usize;
-    for k in prefixes(alg, o0, i1, ell, e1) {
-        guesses += 1;
+    for (idx, k) in prefixes(alg, o0, i1, ell, e1).into_iter().enumerate() {
+        let guesses = idx + 1;
         let ok = k.right_order(alg, o0);
         let conn = connecting_ideal(alg, &ok, &o2);
         let Some(sol) = solve_degree(alg, &ok, &conn, &rest, solver, None) else {

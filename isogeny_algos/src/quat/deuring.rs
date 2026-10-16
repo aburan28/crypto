@@ -180,7 +180,8 @@ impl Deuring {
             Some(t) => t,
             None => {
                 // l^2 entries by running sums (one addition each)
-                let mut t: HashMap<Pt<E2>, (u64, u64)> = HashMap::with_capacity((ell * ell) as usize);
+                let mut t: HashMap<Pt<E2>, (u64, u64)> =
+                    HashMap::with_capacity((ell * ell) as usize);
                 let mut row = Pt::Inf;
                 for s in 0..ell {
                     let mut v = row;

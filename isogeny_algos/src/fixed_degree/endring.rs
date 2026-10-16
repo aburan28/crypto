@@ -188,12 +188,7 @@ pub struct EndRing {
 }
 
 /// Translate a j-path starting at 1728 into the left O_0-ideal of its endpoint.
-pub fn translate_path(
-    dg: &Deuring,
-    path: &[J],
-    ell: u64,
-    rng: &mut Rng,
-) -> Option<(Lattice, usize)> {
+pub fn translate_path(dg: &Deuring, path: &[J], ell: u64) -> Option<(Lattice, usize)> {
     let (alg, o0) = (&dg.alg, &dg.o0);
     let mut ideal = o0.clone();
     let mut evals = 0usize;
@@ -213,11 +208,11 @@ pub fn translate_path(
 }
 
 /// End(E) for the supersingular curve with j-invariant `j` (Step 1 of the slides).
-pub fn end_ring(dg: &Deuring, graph: &mut JGraph, j: J, rng: &mut Rng) -> Option<EndRing> {
+pub fn end_ring(dg: &Deuring, graph: &mut JGraph, j: J) -> Option<EndRing> {
     let j0 = (1728 % dg.p, 0u64);
     let (path, graph_vertices) = bfs_path(graph, j0, j)?;
     let ell = graph.phi.ell as u64;
-    let (ideal, deuring_evals) = translate_path(dg, &path, ell, rng)?;
+    let (ideal, deuring_evals) = translate_path(dg, &path, ell)?;
     Some(EndRing {
         ideal,
         path,
@@ -232,7 +227,11 @@ pub fn random_ss_j(g: &mut JGraph, p: u64, steps: usize, rng: &mut Rng) -> J {
     let mut prev = None;
     let mut cur = (1728 % p, 0u64);
     for _ in 0..steps {
-        let nb: Vec<J> = g.neighbours(cur).into_iter().filter(|&v| Some(v) != prev).collect();
+        let nb: Vec<J> = g
+            .neighbours(cur)
+            .into_iter()
+            .filter(|&v| Some(v) != prev)
+            .collect();
         if nb.is_empty() {
             break;
         }

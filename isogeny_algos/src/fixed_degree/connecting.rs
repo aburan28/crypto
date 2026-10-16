@@ -23,7 +23,10 @@ pub fn connecting_ideal(alg: &Alg, o1: &Lattice, o2: &Lattice) -> Lattice {
     // N(l) = a / b; scaling by t multiplies the norm by t^2: N(t l) = t^2 a / b = N  when t = b / a
     let i = l.scale(&b, &a);
     let (n, d) = i.norm(o1);
-    assert!(d == Int::one(), "connecting ideal not integral: norm {n}/{d}");
+    assert!(
+        d == Int::one(),
+        "connecting ideal not integral: norm {n}/{d}"
+    );
     i
 }
 
@@ -64,7 +67,10 @@ pub fn norm_form(alg: &Alg, o_left: &Lattice, i: &Lattice) -> NormForm {
         })
     });
     NormForm {
-        basis: rb.iter().map(|v| Quat::new(v.clone(), i.den.clone())).collect(),
+        basis: rb
+            .iter()
+            .map(|v| Quat::new(v.clone(), i.den.clone()))
+            .collect(),
         gram,
         norm: n,
     }

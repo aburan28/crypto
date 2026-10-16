@@ -6,7 +6,7 @@
 //! a twisted negative control, and Weil pairings.
 use isogeny_algos::curve::{from_j, jinv, Curve};
 use isogeny_algos::ext::Fp4;
-use isogeny_algos::field::{factor_u64, Field, Rng};
+use isogeny_algos::field::Rng;
 use isogeny_algos::fixed_degree::connecting::{
     combine, connecting_ideal, connecting_via_o0, connects, norm_form,
 };
@@ -16,8 +16,7 @@ use isogeny_algos::fixed_degree::pipeline::{
     find_isogeny_of_degree, plant_ideal, Instance, Solver,
 };
 use isogeny_algos::fixed_degree::represent::{
-    fast_ideal_to_j, ideal_to_isogeny, is_deuring_smooth, two_adic, Repr,
-    ReprOptions, E4,
+    fast_ideal_to_j, ideal_to_isogeny, is_deuring_smooth, two_adic, Repr, ReprOptions, E4,
 };
 use isogeny_algos::int::Int;
 use isogeny_algos::quat::deuring::Deuring;
@@ -27,9 +26,13 @@ use isogeny_algos::quat::deuring::Deuring;
 const P: u64 = 1605631;
 
 fn setup(seed: u64) -> (Deuring, JGraph, Rng) {
+    setup_p(P, seed)
+}
+
+fn setup_p(p: u64, seed: u64) -> (Deuring, JGraph, Rng) {
     let mut rng = Rng::new(seed);
-    let dg = Deuring::new(P, &mut rng);
-    let g = JGraph::new(P, 2);
+    let dg = Deuring::new(p, &mut rng);
+    let g = JGraph::new(p, 2);
     (dg, g, rng)
 }
 
@@ -72,7 +75,7 @@ fn end_ring_of_random_curves() {
     let o0 = &dg.o0;
     for t in 0..4 {
         let j = random_ss_j(&mut g, P, 25 + 5 * t, &mut rng);
-        let er = end_ring(&dg, &mut g, j, &mut rng).expect("end ring");
+        let er = end_ring(&dg, &mut g, j).expect("end ring");
         assert_eq!(fast_ideal_to_j(&dg, &er.ideal), Some(j));
         // the path is a Phi_2 path
         for w in er.path.windows(2) {
@@ -98,8 +101,8 @@ fn connecting_ideal_and_norm_form() {
     for _ in 0..3 {
         let j1 = random_ss_j(&mut g, P, 20, &mut rng);
         let j2 = random_ss_j(&mut g, P, 20, &mut rng);
-        let i1 = end_ring(&dg, &mut g, j1, &mut rng).unwrap().ideal;
-        let i2 = end_ring(&dg, &mut g, j2, &mut rng).unwrap().ideal;
+        let i1 = end_ring(&dg, &mut g, j1).unwrap().ideal;
+        let i2 = end_ring(&dg, &mut g, j2).unwrap().ideal;
         let (o1, o2) = (i1.right_order(alg, o0), i2.right_order(alg, o0));
         let kv = connecting_ideal(alg, &o1, &o2);
         assert!(connects(alg, &kv, &o1, &o2));
@@ -124,14 +127,9 @@ fn connecting_ideal_and_norm_form() {
     }
 }
 
-fn planted(
-    dg: &Deuring,
-    g: &mut JGraph,
-    rng: &mut Rng,
-    primes: &[u64],
-) -> (J, J, Int) {
-    let j1 = random_ss_j(g, P, 30, rng);
-    let i1 = end_ring(dg, g, j1, rng).unwrap().ideal;
+fn planted(dg: &Deuring, g: &mut JGraph, rng: &mut Rng, primes: &[u64]) -> (J, J, Int) {
+    let j1 = random_ss_j(g, dg.p, 30, rng);
+    let i1 = end_ring(dg, g, j1).unwrap().ideal;
     let qs: Vec<Int> = primes.iter().map(|&q| Int::from(q)).collect();
     let jd = plant_ideal(&dg.alg, &dg.o0, &i1, &qs, rng);
     let j2 = fast_ideal_to_j(dg, &i1.mul(&dg.alg, &jd)).unwrap();
@@ -191,37 +189,65 @@ fn pipeline_cornacchia_prime_degree_kani() {
     assert_eq!(done, 3);
 }
 
-/// Smooth d (every prime power has rational torsion): kernel representation, Vélu chain from
-/// the caller's E_1 lands on E_2; random E_2 (no planting) with d > p.
+/// Smooth d (every prime power has rational torsion over F_{p^4}, so `Deuring::kernel_of_ideal`
+/// applies): kernel representation; the Vélu chain from the caller's E_1 with the transported
+/// kernel lands on a curve with j(E_2).
 #[test]
-fn pipeline_smooth_degree_kernel_random_target() {
-    let (dg, mut g, mut rng) = setup(5);
+fn pipeline_smooth_degree_kernel() {
+    // p = 2^10 * 1443 - 1: p + 1 = 2^10 3 13 37, p - 1 = 2 5 7 11 19 101 (t_odd ~ p^1.47)
+    let (dg, mut g, mut rng) = setup_p(1477631, 5);
     let f = dg.f2.clone();
-    // a divisor of t_odd a little above 4p (the isogeny count between two curves is ~ 12 d / p)
-    let mut ds: Vec<u64> = vec![1];
-    for t in &dg.tors {
-        let mut nd = vec![];
-        for &x in &ds {
-            let mut y = x;
-            for _ in 0..=t.e {
-                nd.push(y);
-                y = y.saturating_mul(t.ell);
+    // planted smooth degrees above sqrt(p) ~ 1215 that leave t_odd room for N(I_1')
+    for primes in [vec![3u64, 13, 37], vec![5, 7, 37]] {
+        let (j1, j2, d) = planted(&dg, &mut g, &mut rng, &primes);
+        assert!(is_deuring_smooth(&dg, &d));
+        let inst = Instance {
+            j1,
+            j2,
+            e1: Some(model(&f, j1)),
+            e2: Some(model(&f, j2)),
+            d: d.clone(),
+        };
+        let sol = find_isogeny_of_degree(
+            &dg,
+            &mut g,
+            &inst,
+            Solver::Cornacchia,
+            &ReprOptions::default(),
+            &mut rng,
+        )
+        .expect("pipeline");
+        match &sol.isogeny.repr {
+            Repr::Kernel { gens } => {
+                let order: u64 = gens.iter().map(|g| g.0.pow(g.1)).product();
+                assert_eq!(Int::from(order), d, "kernel order");
             }
+            _ => panic!("expected the kernel representation"),
         }
-        ds = nd;
+        assert!(sol.isogeny.j_ok, "Vélu codomain j");
+        eprintln!(
+            "d = {d} = {primes:?}: x = {:?}, times {:?}",
+            sol.degree.x, sol.times
+        );
     }
-    ds.sort();
-    ds.dedup();
-    let dsel: Vec<u64> = ds
-        .into_iter()
-        .filter(|&x| x > 4 * P && x < 64 * P)
-        .collect();
-    assert!(!dsel.is_empty());
+}
+
+/// Random E_1, E_2 (independent random walks, nothing planted) and a prime d ~ 8p > p, so that
+/// degree-d isogenies E_1 -> E_2 exist generically (about 12 (d + 1) / p of them): the pipeline
+/// finds one. d > 2^a, so the torsion representation carries no Kani certificate; it is checked
+/// by the Deuring codomain j and the Weil pairing.
+#[test]
+fn pipeline_random_target_large_degree() {
+    let (dg, mut g, mut rng) = setup(8);
+    let f = dg.f2.clone();
     let mut ok = 0;
     for t in 0..2 {
         let j1 = random_ss_j(&mut g, P, 30, &mut rng);
         let j2 = random_ss_j(&mut g, P, 31, &mut rng);
-        let d = dsel[rng.below(dsel.len() as u64) as usize];
+        let mut d = 8 * P + rng.below(P);
+        while !is_prime(d) {
+            d += 1;
+        }
         let inst = Instance {
             j1,
             j2,
@@ -238,12 +264,14 @@ fn pipeline_smooth_degree_kernel_random_target() {
             &mut rng,
         ) {
             Ok(sol) => {
-                assert!(matches!(sol.isogeny.repr, Repr::Kernel { .. }));
-                assert!(sol.isogeny.j_ok, "Vélu codomain j");
+                assert!(sol.isogeny.j_ok, "Deuring codomain j");
+                assert_eq!(sol.isogeny.pairing_ok, Some(true));
+                assert_eq!(jinv(&f, &sol.isogeny.codomain), f.embed(j2));
                 eprintln!(
-                    "trial {t}: d = {d} = {:?}, x = {:?}, times {:?}",
-                    factor_u64(d),
+                    "trial {t}: d = {d} (log_p d = {:.3}), x = {:?}, guesses {:?}, times {:?}",
+                    (d as f64).ln() / (P as f64).ln(),
                     sol.degree.x,
+                    sol.degree.cornacchia_stats.as_ref().map(|s| s.guesses),
                     sol.times
                 );
                 ok += 1;
@@ -254,59 +282,148 @@ fn pipeline_smooth_degree_kernel_random_target() {
     assert!(ok >= 1);
 }
 
-/// The Coppersmith solvers inside the pipeline (bivariate: Coron; trivariate), planted d.
+/// Coron's bivariate Coppersmith method inside the full pipeline (planted d).
 #[test]
-fn pipeline_coppersmith_solvers() {
+fn pipeline_coppersmith_bivariate() {
     let (dg, mut g, mut rng) = setup(6);
     let f = dg.f2.clone();
     let sqrt_p = (P as f64).sqrt() as u64;
-    for (solver, lo, hi) in [
-        (Solver::CoppersmithBivariate, sqrt_p, 2 * sqrt_p),
-        (Solver::CoppersmithTrivariate, sqrt_p / 2, sqrt_p),
-    ] {
-        let mut q = lo + rng.below(hi - lo);
-        while !is_prime(q) {
-            q += 1;
-        }
-        let (j1, j2, d) = planted(&dg, &mut g, &mut rng, &[q]);
-        let inst = Instance {
-            j1,
-            j2,
-            e1: Some(model(&f, j1)),
-            e2: Some(model(&f, j2)),
-            d,
-        };
-        let sol = find_isogeny_of_degree(&dg, &mut g, &inst, solver, &ReprOptions::default(), &mut rng)
-            .unwrap_or_else(|e| panic!("{solver:?}: {e}"));
-        assert!(sol.isogeny.j_ok);
-        assert_eq!(sol.isogeny.pairing_ok, Some(true));
-        if let Repr::Torsion { certificate, .. } = &sol.isogeny.repr {
-            assert!(certificate.certified(), "{certificate:?}");
-        }
-        eprintln!("{solver:?}: d = {q}, x = {:?}, times {:?}", sol.degree.x, sol.times);
+    let mut q = sqrt_p + rng.below(sqrt_p);
+    while !is_prime(q) {
+        q += 1;
     }
+    let (j1, j2, d) = planted(&dg, &mut g, &mut rng, &[q]);
+    let inst = Instance {
+        j1,
+        j2,
+        e1: Some(model(&f, j1)),
+        e2: Some(model(&f, j2)),
+        d,
+    };
+    let sol = find_isogeny_of_degree(
+        &dg,
+        &mut g,
+        &inst,
+        Solver::CoppersmithBivariate,
+        &ReprOptions::default(),
+        &mut rng,
+    )
+    .expect("pipeline");
+    assert!(sol.isogeny.j_ok);
+    assert_eq!(sol.isogeny.pairing_ok, Some(true));
+    match &sol.isogeny.repr {
+        Repr::Torsion { certificate, .. } => assert!(certificate.certified(), "{certificate:?}"),
+        _ => panic!("expected the torsion representation"),
+    }
+    eprintln!(
+        "Coron: d = {q}, x = {:?}, times {:?}",
+        sol.degree.x, sol.times
+    );
 }
 
-/// Hybrid: d = 3^e, guess a 3^{e_1} prefix, solve the rest, compose; Deuring image and
-/// isogeny checked.
+/// Hybrid: d = 3^7 = 2187 (sqrt(p) < d < 2^a), guess a 3^2 prefix, solve the 3^5 rest,
+/// compose; the composite's Deuring image is E_2 and its isogeny is Kani-certified.
 #[test]
 fn hybrid_three_power_degree() {
     let (dg, mut g, mut rng) = setup(7);
     let (alg, o0) = (&dg.alg, &dg.o0);
-    // 3^9 = 19683 > sqrt(p) ~ 863; 3^9 exceeds both the rational 3-torsion and 2^a, so the
-    // representation is torsion images checked by the pairing (no Kani certificate)
-    let e = 9u32;
+    let e = 7u32;
     let (j1, j2, _) = planted(&dg, &mut g, &mut rng, &vec![3; e as usize]);
-    let i1 = end_ring(&dg, &mut g, j1, &mut rng).unwrap().ideal;
-    let i2 = end_ring(&dg, &mut g, j2, &mut rng).unwrap().ideal;
-    let res = hybrid_search(alg, o0, &i1, &i2, 3, e, 3, Solver::Cornacchia).expect("hybrid");
+    let i1 = end_ring(&dg, &mut g, j1).unwrap().ideal;
+    let i2 = end_ring(&dg, &mut g, j2).unwrap().ideal;
+    let res = hybrid_search(alg, o0, &i1, &i2, 3, e, 2, Solver::Cornacchia).expect("hybrid");
     assert_eq!(
-        dg.ideal_to_j(&i1.mul(alg, &res.ideal), &mut rng),
+        fast_ideal_to_j(&dg, &i1.mul(alg, &res.ideal)),
         Some(j2),
         "hybrid ideal lands on E_2"
     );
     eprintln!("hybrid: {} prefixes tried", res.guesses);
-    let rep = ideal_to_isogeny(&dg, &i1, &res.ideal, None, &ReprOptions::default(), &mut rng)
-        .expect("isogeny");
+    let rep = ideal_to_isogeny(
+        &dg,
+        &i1,
+        &res.ideal,
+        None,
+        &ReprOptions::default(),
+        &mut rng,
+    )
+    .expect("isogeny");
     assert!(rep.j_ok);
+    assert_eq!(rep.pairing_ok, Some(true));
+    match &rep.repr {
+        Repr::Torsion { certificate, .. } => assert!(certificate.certified(), "{certificate:?}"),
+        _ => panic!("expected the torsion representation"),
+    }
+}
+
+/// Steps 2–5 at cryptographic size (no Deuring step, so p is not limited): O_1 = O_R(I_1) for a
+/// random ideal I_1 of O_0, O_2 = O_R(I_2) with I_2 a reduced ideal equivalent to I_1 J_0 for a
+/// random J_0 of prime norm d (so the Kirschmer–Voight ideal does not reveal d); every solver
+/// must return alpha with Nrd(alpha) = d N(I), and J = I conj(alpha) / N(I) must have norm d,
+/// left order O_1 and right order beta^{-1} O_2 beta (beta = conj(alpha) / N(I)).
+#[test]
+fn steps_two_to_five_cryptographic_size() {
+    use isogeny_algos::fixed_degree::endring::reduce_ideal;
+    use isogeny_algos::fixed_degree::pipeline::{random_prime_norm_ideal, solve_degree};
+    use isogeny_algos::quat::Alg;
+    let mut rng = Rng::new(9);
+    // (p, solver, d / sqrt(p) range): the trivariate solver only reaches |x_i| of a few units,
+    // so it gets the smallest epsilon
+    for (p, cases) in [
+        (
+            Int::from((1i128 << 61) - 1),
+            vec![
+                (Solver::Cornacchia, 100u64),
+                (Solver::CoppersmithBivariate, 100),
+                (Solver::CoppersmithTrivariate, 4),
+            ],
+        ),
+        (
+            &Int::from(1i64).shl(127) - &Int::one(),
+            // (Cornacchia here needs N ~ 2^200 factored: beyond Pollard rho, so it is not run)
+            vec![(Solver::CoppersmithBivariate, 30)],
+        ),
+    ] {
+        let alg = Alg::new(&p);
+        let o0 = alg.o0();
+        let next_prime = |mut v: Int| {
+            while !v.is_probable_prime() {
+                v = &v + &Int::one();
+            }
+            v
+        };
+        for (solver, mult) in cases {
+            let q1 = next_prime(&p.isqrt() * &Int::from(3i64));
+            let i1 = reduce_ideal(
+                &alg,
+                &o0,
+                &random_prime_norm_ideal(&alg, &o0, &q1, &mut rng),
+            )
+            .0;
+            let o1 = i1.right_order(&alg, &o0);
+            // d ~ p^{1/2 + eps} with a small eps (planted)
+            let d = next_prime(&p.isqrt() * &Int::from((mult + rng.below(mult)) as i64));
+            let j0 = random_prime_norm_ideal(&alg, &o1, &d, &mut rng);
+            let i2 = reduce_ideal(&alg, &o0, &i1.mul(&alg, &j0)).0;
+            let o2 = i2.right_order(&alg, &o0);
+            let conn = connecting_ideal(&alg, &o1, &o2);
+            assert!(connects(&alg, &conn, &o1, &o2));
+            let nconn = conn.norm_int(&o1);
+            let t = std::time::Instant::now();
+            let sol = solve_degree(&alg, &o1, &conn, &d, solver, None)
+                .unwrap_or_else(|| panic!("{solver:?} at {} bits", p.bits()));
+            let el = t.elapsed();
+            assert_eq!(sol.ideal.norm(&o1), (d.clone(), Int::one()));
+            assert_eq!(sol.ideal.left_order(&alg, &o1), o1);
+            let beta = sol.alpha.conj().scale(&Int::one(), &nconn);
+            let (bn, bd) = alg.nrd(&beta);
+            let beta_inv = beta.conj().scale(&bd, &bn);
+            let conj_o2 = o2.lmul(&alg, &beta_inv).rmul(&alg, &beta);
+            assert_eq!(sol.ideal.right_order(&alg, &o1), conj_o2);
+            eprintln!(
+                "{} bits, {solver:?}: d = {d}, N(conn) = {nconn}, x = {:?}, {el:?}",
+                p.bits(),
+                sol.x
+            );
+        }
+    }
 }

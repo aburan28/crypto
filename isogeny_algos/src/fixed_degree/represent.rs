@@ -143,13 +143,7 @@ pub fn apply_iso(f: &Fp4, u: E4, p: &Pt4) -> Pt4 {
 
 /// Basis of E[2^m] (two points of order 2^m with distinct halves of order 2) from random points
 /// times the cofactor `cof` = #E(F_{p^4})-part / 2^m.
-pub fn basis_2power(
-    f: &Fp4,
-    e: &Curve<E4>,
-    m: u32,
-    cof: u128,
-    rng: &mut Rng,
-) -> (Pt4, Pt4) {
+pub fn basis_2power(f: &Fp4, e: &Curve<E4>, m: u32, cof: u128, rng: &mut Rng) -> (Pt4, Pt4) {
     let half = 1u128 << (m - 1);
     let pt = |rng: &mut Rng| loop {
         let r = pmul(f, e, &crate::curve::random_point_f(f, e, rng), cof);
@@ -187,10 +181,7 @@ fn miller_2k(f: &Fp4, e: &Curve<E4>, p: &Pt4, q: &Pt4, k: u32) -> Option<E4> {
         let (num, den) = if f.is_zero(yt) {
             (f.sub(xq, xt), f.one())
         } else {
-            let lam = f.div(
-                f.add(f.mul(f.from_u64(3), f.sq(xt)), e.a),
-                f.add(yt, yt),
-            );
+            let lam = f.div(f.add(f.mul(f.from_u64(3), f.sq(xt)), e.a), f.add(yt, yt));
             let num = f.sub(f.sub(yq, yt), f.mul(lam, f.sub(xq, xt)));
             let den = match t2 {
                 Pt::Aff(x2, _) => f.sub(xq, x2),
@@ -221,6 +212,7 @@ pub fn weil_2k(f: &Fp4, e: &Curve<E4>, p: &Pt4, q: &Pt4, k: u32) -> Option<E4> {
 // ------------------------------------------------------------------ representation
 
 #[derive(Clone, Debug)]
+#[allow(clippy::large_enum_variant)]
 pub enum Repr {
     /// chi = Vélu chain from E_1 with these kernel generators (orders l^a)
     Kernel { gens: Vec<(u64, u32, Pt4)> },
@@ -265,6 +257,10 @@ pub fn eval_ideal_on_lifts(
     let ord = 1u128 << (m - 1);
     let (kp, _, theta) = smooth_equivalent_coprime(dg, k, &Int::from(2i64))?;
     let nkp = kp.norm_int(&dg.o0);
+    trace(&format!(
+        "eval_ideal_on_lifts: N(K) = {}, N(K') = {nkp}",
+        k.norm_int(&dg.o0)
+    ));
     let th_r: Vec<Pt4> = lifts
         .iter()
         .map(|l| act_on_double(f, &dg.e0, &theta, l, ord_lift))
@@ -311,7 +307,9 @@ pub fn kani_check(
     };
     let (c1, c2) = (pc(x)?, pc(e2)?);
     let k = [(pp(&aux[0])?, pp(&chi[0])?), (pp(&aux[1])?, pp(&chi[1])?)];
-    let split = crate::theta::chain(&z, &c1, &c2, k, a, &[])?.split.is_some();
+    let split = crate::theta::chain(&z, &c1, &c2, k, a, &[])?
+        .split
+        .is_some();
     let tw = padd(f, e2, &chi[1], &pmul(f, e2, &chi[0], 2));
     let kt = [(pp(&aux[0])?, pp(&chi[0])?), (pp(&aux[1])?, pp(&tw)?)];
     let split_tw = crate::theta::chain(&z, &c1, &c2, kt, a, &[])
@@ -421,7 +419,12 @@ fn enumerate_i128(
         x[iu] = 0;
         false
     }
-    let cx = Ctx { q: &q, rb, p, bound };
+    let cx = Ctx {
+        q: &q,
+        rb,
+        p,
+        bound,
+    };
     rec(3, &mut x, bound, &cx, visit)
 }
 
@@ -458,11 +461,20 @@ pub fn smooth_equivalent_coprime(
     let minn = rbi.iter().map(|v| alg.qf(v)).min().unwrap().to_f64();
     let exact = (t as f64) * (scale as f64);
     let mut bound = minn * 8.0;
+    // total enumeration budget: an equivalent ideal with an admissible norm normally appears
+    // after a few thousand vectors; past the budget the search reports failure instead of
+    // enumerating up to t_odd N(I)
+    let mut visited: u64 = 0;
+    const BUDGET: u64 = 4_000_000;
     loop {
         let b = bound.min(exact);
         let mut best: Option<([i128; 4], i128)> = None;
         let mut found = 0;
         enumerate_i128(&rb, p, b, &mut |v, nv| {
+            visited += 1;
+            if visited > BUDGET {
+                return true;
+            }
             if nv % scale == 0 {
                 let q = nv / scale;
                 if q != 0 && t % q == 0 && gcd(q, av) == 1 {
@@ -479,7 +491,10 @@ pub fn smooth_equivalent_coprime(
             let xi = delta.conj().scale(&Int::one(), &ni);
             return Some((i.rmul(alg, &xi), xi, delta));
         }
-        if b >= exact {
+        if b >= exact || visited > BUDGET {
+            trace(&format!(
+                "smooth equivalent: none within budget (visited {visited})"
+            ));
             return None;
         }
         bound *= 8.0;
@@ -521,6 +536,12 @@ pub struct ReprOptions {
 
 /// Step 6: the isogeny of the left O_R(I_1)-ideal J (norm d, odd). `targets` are the caller's
 /// curve models (E_1, E_2) if any; the result is transported to them by isomorphisms.
+fn trace(msg: &str) {
+    if std::env::var_os("FD_TRACE").is_some() {
+        eprintln!("[fixed_degree] {msg}");
+    }
+}
+
 pub fn ideal_to_isogeny(
     dg: &Deuring,
     i1: &Lattice,
@@ -536,8 +557,13 @@ pub fn ideal_to_isogeny(
     let d = jdl.norm_int(&o1);
     assert!(!d.is_even(), "ideal_to_isogeny: d must be odd");
     // E_1' and phi_1 : E_0 -> E_1'
+    trace(&format!(
+        "ideal_to_isogeny: d = {d}, N(I1) = {}",
+        i1.norm_int(o0)
+    ));
     let (i1s, xi, _) = smooth_equivalent_coprime(dg, i1, &(&d * &Int::from(2i64)))?;
     let n1 = i1s.norm_int(o0);
+    trace(&format!("smooth equivalent of I1: N = {n1}"));
     let k_ideal = i1.mul(alg, jdl).rmul(alg, &xi);
     debug_assert!(i1s.contains_lattice(&k_ideal));
     let gens1 = dg.kernel_of_ideal(&i1s)?;
@@ -587,6 +613,7 @@ pub fn ideal_to_isogeny(
     } else {
         // chi(S_i) = phi_K(R_i), through K' = K conj(theta) / N(K)
         let (cod, images) = eval_ideal_on_lifts(dg, &k_ideal, &lifts, m)?;
+        trace("chi images done");
         let s = [s_pts[0], s_pts[1]];
         let chi = [images[0], images[1]];
         // Kani certificate with an auxiliary isogeny g : E_1' -> X of degree c = 2^a - d, the
@@ -603,10 +630,14 @@ pub fn ideal_to_isogeny(
                         qs.push(q.clone());
                     }
                 }
+                trace(&format!("aux degree c = {c} = {fac:?}"));
                 let jaux = super::pipeline::plant_ideal(alg, o0, i1, &qs, rng);
+                trace("aux ideal planted");
                 let kaux = i1.mul(alg, &jaux).rmul(alg, &xi);
                 if let Some((xcur, gimg)) = eval_ideal_on_lifts(dg, &kaux, &lifts, m) {
+                    trace("aux images done");
                     let ok = kani_check(f, &xcur, &cod, &chi, &[gimg[0], gimg[1]], a);
+                    trace(&format!("Kani check {ok:?}"));
                     cert = Certificate::Kani2 { n: a, c, ok };
                 }
             }
