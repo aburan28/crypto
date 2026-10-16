@@ -46,9 +46,27 @@ CMAP = "viridis"
 EDGE = "#bbbbbb"
 
 
+def _crater_order(verts):
+    """Crater vertices in cycle order: start at an end of the drawn path (a
+    vertex with one crater neighbour) or, for a full cycle, the least id,
+    and follow horizontal edges; remaining pieces follow in id order."""
+    crater = {v for v, d in verts.items() if d["level"] == 0}
+    hn = {v: sorted(w for w in verts[v]["nbrs"] if w in crater and w != v) for v in crater}
+    order, seen = [], set()
+    while len(seen) < len(crater):
+        rest = sorted(crater - seen)
+        ends = [v for v in rest if len([w for w in hn[v] if w not in seen]) <= 1]
+        v = ends[0] if ends else rest[0]
+        while v is not None:
+            order.append(v)
+            seen.add(v)
+            v = next((w for w in hn[v] if w not in seen), None)
+    return order
+
+
 def _layout(verts, depth):
     """x positions: leaves consecutive, parents over their children's mean."""
-    crater = sorted(v for v, d in verts.items() if d["level"] == 0)
+    crater = _crater_order(verts)
     children = defaultdict(list)
     for v, d in sorted(verts.items()):
         if d["level"] > 0:
@@ -88,10 +106,19 @@ def render(spec, out_stem):
         edges[(min(e["a"], e["b"]), max(e["a"], e["b"]))] = e.get("status", "verified")
 
     fig, ax = plt.subplots(figsize=(min(18, max(8, width * 0.12)), 4.8))
+    crater_rank = {v: i for i, v in enumerate(_crater_order(verts))}
     for (v, w), status in edges.items():
-        if v in xpos and w in xpos:
-            ax.plot([xpos[v], xpos[w]], [-verts[v]["level"], -verts[w]["level"]], color=EDGE, lw=0.7,
-                    ls="--" if status != "verified" else "-", zorder=1)
+        if v not in xpos or w not in xpos:
+            continue
+        ls = "--" if status != "verified" else "-"
+        if v in crater_rank and w in crater_rank and abs(crater_rank[v] - crater_rank[w]) > 1:
+            # A horizontal edge between non-adjacent crater positions (e.g. the
+            # edge closing the cycle) arcs above the crater instead of overlapping it.
+            x0, x1 = sorted((xpos[v], xpos[w]))
+            xs = [x0 + (x1 - x0) * t / 40 for t in range(41)]
+            ax.plot(xs, [0.25 * (1 - (2 * t / 40 - 1) ** 2) for t in range(41)], color=EDGE, lw=0.7, ls=ls, zorder=1)
+        else:
+            ax.plot([xpos[v], xpos[w]], [-verts[v]["level"], -verts[w]["level"]], color=EDGE, lw=0.7, ls=ls, zorder=1)
 
     valued = [d["value"] for d in verts.values() if d.get("value") is not None]
     lo, hi = (min(valued), max(valued)) if valued else (0.0, 1.0)

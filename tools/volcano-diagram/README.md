@@ -11,6 +11,8 @@ What it shows:
 
 - **Strata.** Horizontal rows by level: crater (0) on top, the floor at the
   bottom, and every level between labelled.
+- **Crater.** Crater vertices are laid out in cycle order. An edge between
+  non-adjacent crater positions (the one closing a full cycle) arcs above.
 - **Trees.** Each lower vertex hangs under its first neighbour one level up.
   Leaves are spaced evenly and parents sit over their children, so each
   crater vertex's descending tree reads left to right.

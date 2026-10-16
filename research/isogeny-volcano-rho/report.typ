@@ -9,17 +9,19 @@ isogenies to every level of an ℓ-isogeny volcano, and run Pollard rho on
 each curve: does the level (crater → floor), or the particular curve,
 change how fast rho solves it? Report min, max and mean.
 
-#strong[Answer (measured, run `run-20261016T2302Z`).] No measurable
-effect. All 29 isogenous curves and 3 isomorphic controls took the same
-work to within sampling noise. Pooled over the 2,900 isogenous solves:
-min 8,477, mean 659,263 ± 12,422 (95 % CI), max 2,099,707 group
-operations, against √(πn/2) \= 654,547. Every level’s 95 % CI includes
-or touches that value, and per-step cost is flat (641–661 ns/op on every
-curve). That is what theory predicts: isogenous curves over F\_p have
-the same group order, and generic rho depends only on the order of ⟨P⟩.
-The spread #emph[between] curves (per-curve means 572,846 – 733,141)
-matches the spread of 100-trial means of a quantity whose single-solve
-sd is about 341,000 (sd of a mean ≈ 34,000).
+#strong[Answer (measured on two curves: A, `run-20261016T2302Z`,
+ramified crater; B, `run-20261016T2315Z`, split crater).] No measurable
+effect on either. Curve A in detail: All 29 isogenous curves and 3
+isomorphic controls took the same work to within sampling noise. Pooled
+over the 2,900 isogenous solves: min 8,477, mean 659,263 ± 12,422 (95 %
+CI), max 2,099,707 group operations, against √(πn/2) \= 654,547. Every
+level’s 95 % CI includes or touches that value, and per-step cost is
+flat (641–661 ns/op on every curve). That is what theory predicts:
+isogenous curves over F\_p have the same group order, and generic rho
+depends only on the order of ⟨P⟩. The spread #emph[between] curves
+(per-curve means 572,846 – 733,141) matches the spread of 100-trial
+means of a quantity whose single-solve sd is about 341,000 (sd of a mean
+≈ 34,000).
 
 == Method
 <method>
@@ -53,8 +55,8 @@ computed there; `plot.py` only lays out recorded values):
   produces.
 + All 3,200 (arm, seed) jobs shuffled and run on 4 threads.
 
-== The instance
-<the-instance>
+== Curve A: the instance (`run-20261016T2302Z`, ramified crater)
+<curve-a-the-instance-run-20261016t2302z-ramified-crater>
 #align(center)[#table(
   columns: 2,
   align: (col, row) => (left,left,).at(col),
@@ -79,8 +81,9 @@ computed there; `plot.py` only lays out recorded values):
 )
 ]
 
-== Results (iterations \= group operations; time on a shared 4-vCPU VM)
-<results-iterations-group-operations-time-on-a-shared-4-vcpu-vm>
+== Curve A results (iterations \= group operations; time on a shared
+4-vCPU VM)
+<curve-a-results-iterations-group-operations-time-on-a-shared-4-vcpu-vm>
 Pooled by level:
 
 #align(center)[#table(
@@ -349,6 +352,103 @@ Full per-curve rows (with times, ns/op, medians, p10/p90) are in
 #image("runs/run-20261016T2302Z/per_curve.svg")
 #image("runs/run-20261016T2302Z/per_level.svg")
 
+== Curve B: a second volcano with a split crater (`run-20261016T2315Z`)
+<curve-b-a-second-volcano-with-a-split-crater-run-20261016t2315z>
+Same tool, `--crater split --seed 20261017`. This volcano’s crater is a
+cycle, so the walk reaches a long run of crater vertices, each with its
+own depth-3 tree. The cycle is truncated at the walk radius.
+
+#align(center)[#table(
+  columns: 2,
+  align: (col, row) => (left,left,).at(col),
+  inset: 6pt,
+  [p],
+  [714095314843 (40 bits)],
+  [root E],
+  [a \= 354455170800, b \= 66680642576],
+  [\#E],
+  [714094928137 \= n, prime (cofactor 1)],
+  [trace t],
+  [386707],
+  [D \= t² − 4p],
+  [−2706838955523 \= 27² · (−3713084987); v₃(f) \= 3],
+  [crater],
+  [D\_K ≡ 1 (mod 3): split, the crater is a cycle],
+  [k],
+  [661235192333],
+  [walk],
+  [323 curves, 322 edges verified; inside the measured radius 11 crater,
+  18, 42 and 90 floor curves by level],
+  [rho],
+  [41 curves + 3 controls × 100 solves \= 4,400, all correct; 754 s],
+)
+]
+
+#align(center)[#table(
+  columns: 8,
+  align: (col, row) => (left,right,right,right,right,right,right,right,).at(col),
+  inset: 6pt,
+  [level], [curves], [solves], [min], [mean ± 95 % CI], [median], [max],
+  [mean ms ± CI],
+  [0 crater],
+  [10],
+  [1,000],
+  [42,088],
+  [1,091,654 ± 35,041],
+  [1,032,925],
+  [3,188,276],
+  [685.7 ± 22.6],
+  [1],
+  [10],
+  [1,000],
+  [42,018],
+  [1,090,391 ± 34,841],
+  [1,046,357],
+  [3,327,413],
+  [681.2 ± 22.0],
+  [2],
+  [10],
+  [1,000],
+  [44,771],
+  [1,081,516 ± 35,498],
+  [1,012,223],
+  [3,437,779],
+  [678.1 ± 22.7],
+  [3 floor],
+  [11],
+  [1,100],
+  [36,930],
+  [1,099,508 ± 33,756],
+  [1,050,592],
+  [3,110,345],
+  [686.8 ± 21.1],
+  [all isogenous],
+  [41],
+  [4,100],
+  [36,930],
+  [1,090,981 ± 17,380],
+  [1,034,403],
+  [3,437,779],
+  [683.0 ± 11.0],
+  [isomorphic control],
+  [3],
+  [300],
+  [51,690],
+  [1,097,651 ± 60,787],
+  [1,094,657],
+  [2,961,196],
+  [688.9 ± 38.9],
+)
+]
+
+√(πn/2) \= 1,059,102. Per-curve means span 951,361 (v22) to 1,210,896
+(v2); the per-op cost is 622–635 ns on every curve. Per-curve rows are
+in `runs/run-20261016T2315Z/results.json`.
+
+#image("runs/run-20261016T2315Z/volcano.svg")
+#image("runs/run-20261016T2315Z/per_curve.svg")
+#image("runs/run-20261016T2315Z/per_level.svg")
+
 == Reading it
 <reading-it>
 - #strong[Observed:] level means differ by at most 63,000 iterations (L0
@@ -358,6 +458,16 @@ Full per-curve rows (with times, ns/op, medians, p10/p90) are in
   Single solves range over ~250× (8,477 to 2,099,707) on every level and
   on the control, so min and max are the extremes of a wide distribution
   and say little about a curve. The mean is the meaningful statistic.
+- #strong[Curve B] (observed): the level means lie within 1.7 % of each
+  other (1,081,516 to 1,099,508), and every level’s CI overlaps every
+  other’s. All of them, and the control, sit about 3 % above √(πn/2).
+  The pooled mean, 1,090,981 ± 17,380, excludes it. Curve A’s pooled
+  mean sits 0.7 % above (inside its CI). A known heuristic (derived, not
+  measured here) is that an r-adding walk needs about 1/√(1 − 1/r) times
+  a truly random walk’s steps: ×1.016 for r \= 32, or 1,076,000 on B and
+  665,000 on A. Both pooled CIs contain those values. The offset is a
+  property of the walk, shared by every curve and the control, not of
+  any stratum.
 - #strong[Interpretation (derived, not measured):] an ℓ-isogeny with ℓ ∤
   n is a group isomorphism ⟨P⟩ → ⟨φ(P)⟩, so generic rho sees the same
   group of order n on every stratum; what changes between levels is the
@@ -371,14 +481,15 @@ Full per-curve rows (with times, ns/op, medians, p10/p90) are in
 
 == Limits
 <limits>
-- One instance, one 40-bit prime, one volcano (ℓ \= 3, depth 3, ramified
-  crater). The crater has 2 vertices, so L0 has only 200 solves.
+- One instance per curve, two 40-bit primes, two volcanoes (ℓ \= 3,
+  depth 3; one ramified crater with 2 vertices, so A’s L0 has only 200
+  solves; one split crater, truncated at the walk radius).
 - Not an ecbench session: the counted unit is this tool’s group-addition
   count; no isolation (shared 4-vCPU VM, 4 threads, jobs interleaved),
   so wall times are indicative only. Per-op time includes affine
   inversion by `i128` extended Euclid.
-- 29 of the 80 curves measured (root plus up to 10 per level in BFS
-  order).
+- Curves measured: A 29 of 80 (the whole volcano), B 41 of the 323
+  walked (root plus up to 10 per level in BFS order).
 - No negation map and no endomorphism-accelerated rho; a curve at the
   crater with a larger endomorphism ring would only help an algorithm
   that uses that ring (GLV-style speedups exist only for tiny |D\_K|,
@@ -390,6 +501,8 @@ Full per-curve rows (with times, ns/op, medians, p10/p90) are in
 cargo build --release --bin volcano-rho
 ./target/release/volcano-rho --bits 40 --ell 3 --depth 3 --seed 20261016 \
     --trials 100 --per-level 10 --controls 3 --out OUT
+./target/release/volcano-rho --bits 40 --ell 3 --depth 3 --crater split --seed 20261017 \
+    --trials 100 --per-level 10 --controls 3 --out OUT_B
 python plot.py OUT     # matplotlib, plotting only
 ```
 
@@ -398,6 +511,9 @@ deterministic function of `--seed`; wall times are not. Run from the
 then-uncommitted `src/bin/volcano_rho.rs` on top of `9b09d308e`
 (committed in this PR with formatting and lint-only changes), Intel Xeon
 \@ 2.80 GHz, 4 threads, 342.5 s for the rho phase.
+
+Curve B ran on the committed binary (with `--crater`), on the same host,
+in 754.0 s for the rho phase.
 
 #strong[Replay.] The committed binary (formatting and lint fixes only)
 re-run with `--trials 5` reproduces 160/160 iteration counts of the
