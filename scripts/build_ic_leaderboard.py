@@ -56,7 +56,7 @@ SOURCES = {
     "koblitz_s21": "research/ic_constructions_20260926/analysis.json",
     "koblitz_s22": "research/ic_descent_20260930/analysis-isolated.json",
     "koblitz_s23": "research/ic_single_target_20260930/analysis.json",
-    "koblitz_rule_v3": "research/ic_tool_program/rule/v3/analysis.json",
+    "koblitz_rule_v6": "research/ic_tool_program/rule/v6/analysis.json",
     "oracles": "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json",
     "n37_rank_columns": "research/ecbench_n37_rank_columns_20261004/RESULT.json",
     "n37_k8_k16": "research/ecbench_n37_k8_k16_20261004/DECISION.json",
@@ -79,7 +79,7 @@ SOURCES = {
 GITHUB = "https://github.com/aburan28/crypto/blob/main/"
 S22_RUNS = "research/ic_descent_20260930/runs-isolated/main"
 S23_RUNS = "research/ic_single_target_20260930/runs"
-RULE_V3_RUNS = "research/ic_tool_program/rule/v3/runs"
+RULE_V6_RUNS = "research/ic_tool_program/rule/v6/runs"
 
 # Phases, in pipeline order, as the page groups them.
 PHASES = [
@@ -123,16 +123,16 @@ REGIME_NAME = {"prime": "Prime field", "char2": "Random binary", "koblitz": "Kob
 FAMILY_OF = {"koblitz": "A", "prime": "B", "char2": "B", "koblitz_batch": "C"}
 FAMILIES = {
     "A": {
-        "title": "Koblitz, one target", "regimes": ["koblitz"], "section": "§23, re-run at baseline v3",
+        "title": "Koblitz, one target", "regimes": ["koblitz"], "section": "§23, re-run at baseline v6",
         "status": "primary comparison: one target, as AGENTS.md's one-target rule requires",
         "targets": "one unseen public point per process, 64 per size; §23's figures on the same curve are the before marks",
         "unit": "one batched affine addition (`add_many` over 1,024 subgroup points), per √r",
         "unit_how": "A clock reading, not a count: `ic price` times each phase exclusively, on one thread, "
                     "and divides by this unit, measured around each repetition (§20, §23). Each process measures its own "
-                    "unit, which is 2.3–3.2 times cheaper at baseline v3 than in §23's processes, so S here is not "
-                    "compared with §23's; the ratios carry no unit (research/ic_tool_program/rule/v3/README.md).",
+                    "unit, so S here is not "
+                    "compared with §23's; the ratios carry no unit (research/ic_tool_program/rule/v6/README.md).",
         "reference": "One-target rho on the same point, measured as built (its set-up plus its walk), "
-                     "in the same unit and the same process; its answer replayed and verified (§23; rule v3 at baseline v3).",
+                     "in the same unit and the same process; its answer replayed and verified (§23; rule v6 at baseline v6).",
         "floor": "√(π/4n) rho steps per √r: generic, one target, no precomputation, A = 2n by signed "
                  "Frobenius and negation, n the extension degree. Stated in steps and not rescaled to "
                  "units, so × floor here divides units by steps.",
@@ -425,7 +425,7 @@ def koblitz_rows(names: Names) -> list[dict]:
 
 def koblitz_one_target_rows(names: Names) -> list[dict]:
     """Ledger §23's comparison: one unseen public point per process, 64 per
-    size, re-run at the IC tool programme's baseline v3 as rule v3.  The
+    size, re-run at the IC tool programme's baseline v6 as rule v6.  The
     primary comparison under AGENTS.md's one-target rule.  S here is cold,
     the reusable set-up plus the online interval, against one-target rho's
     set-up plus its walk; the online speedup, the canonical-step reading and
@@ -435,13 +435,13 @@ def koblitz_one_target_rows(names: Names) -> list[dict]:
     compared with §23's; the ratios carry no unit."""
     rows = []
     s23 = {(x["a"], x["n"]): x for x in load(SOURCES["koblitz_s23"])["sizes"]}
-    for x in load(SOURCES["koblitz_rule_v3"])["sizes"]:
+    for x in load(SOURCES["koblitz_rule_v6"])["sizes"]:
         a, n = x["a"], x["n"]
         before = s23[(a, n)]
         c = names(before["curve"])
         if c["slug"] != x["curve"]:
-            raise SystemExit(f"rule v3's {x['curve']} is not §23's {before['curve']}")
-        par = json.loads((REPO / RULE_V3_RUNS / f"k{a}n{n}" / "T01.params.json").read_text())
+            raise SystemExit(f"rule v6's {x['curve']} is not §23's {before['curve']}")
+        par = json.loads((REPO / RULE_V6_RUNS / f"k{a}n{n}" / "T01.params.json").read_text())
         columns = int(re.search(r"-c(\d+)-", par["name"]).group(1))
         d = x["diagnostics"]
         sh = d["online_phase_shares"]
@@ -479,11 +479,11 @@ def koblitz_one_target_rows(names: Names) -> list[dict]:
         rows.append({
             "regime": "koblitz", "slug": c["slug"], "ec1": x.get("curve_id") or ec1_of(c),
             "legacy": before["curve"], "log2_r": x["log2_r"], "cofactor": None,
-            "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
+            "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v6)",
             "reference_s": x["s_rho_online_mean"] + x["s_rho_setup"], "floor_s": floor_s,
-            "targets": 1, "recipes": [recipe], "best": recipe, "source": SOURCES["koblitz_rule_v3"],
+            "targets": 1, "recipes": [recipe], "best": recipe, "source": SOURCES["koblitz_rule_v6"],
             "before_source": SOURCES["koblitz_s23"],
-            "round": "rule v3: §23's comparison at baseline v3 (2026-10-06); before marks §23 (2026-09-30)",
+            "round": "rule v6: §23's comparison at baseline v6 (2026-10-16); before marks §23 (2026-09-30)",
             "class": "accounting",
         })
     return rows
@@ -1682,7 +1682,7 @@ def page(doc: dict, standalone: bool) -> str:
              'and floors, stated at the head of each; S, × ref and × floor are comparable inside a table and '
              'nowhere else. Tables A and B solve one target per row, as AGENTS.md\'s one-target rule requires: '
              'A on one unseen public point per process against one-target rho on the same point (§23\'s comparison, '
-             're-run at the ic tool programme\'s baseline v3, 64 points per size, §23\'s figures kept as the '
+             're-run at the ic tool programme\'s baseline v6, 64 points per size, §23\'s figures kept as the '
              'before marks), B against the matched negation-map rho (ledger §18). Table C is a historical 32-target '
              'diagnostic. For the Koblitz rows of A the online interval, the reading with rho at the canonical '
              'step and the generic-precomputation model sit beside the cold ratio, as §23 requires. The bar '

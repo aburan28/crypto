@@ -670,6 +670,32 @@ nothing missing. R09's class excludes it.
   it at v6, with the unpriced native work priced at 0, 0.1 and 1 GAE, is
   the measurement that turns these gains into a distance.
 
+**The rule at v6: the distance to rho is about 40% smaller (2026-10-16).**
+- **What ran.** §23's comparison re-ran on v6:
+  - 408 of 408 rows checked, and every logarithm §23's;
+  - the strong-rho reference admissible at every size (rho at 0.70–0.85 of
+    the strong walk's time a step).
+- **The distance remaining.** Rho is still faster cold at every size:
+  3.78–12.06× (rule v3: 5.23–20.97×). At the three largest sizes it is
+  7.90×, 7.40× and 12.06×, against 13.24×, 12.03× and 20.97×.
+- **Online.** The index calculus is 14.2–36.4× faster than rho on the same
+  point.
+- **The gap still grows with the group,** but more slowly: as
+  `r^0.142` [0.105, 0.178], against `r^0.176` at v3.
+- **Pricing (§5a).** Both arms are timed in one process, so no native work
+  is unpriced on either arm, and the band gives one figure.
+- **Amendment 1** fixed two tools after the rows ran, and re-timed no row:
+  - the claim writer gained the five `vs_rho` fields the ledger has
+    required since 2026-10-13;
+  - the strong-rho fixture lost a size gate that a merge had re-imported,
+    which refused `n = 47, 57, 59`.
+
+  The leaderboard's table A now reads rule v6
+  ([results](../../ic_tool_program/rule/v6/README.md)).
+- **Next.** Measure where v6's set-up now goes (collection, build, linear
+  algebra) before choosing the next lever. The remaining 7.4–12.1× at the
+  top sizes is the target.
+
 ## 9. Track B: generality and robustness
 
 **Where the tool stands (at `0bf67f16`).**
