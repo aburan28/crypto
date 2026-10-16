@@ -1,0 +1,322 @@
+205 distinct systems; 0 repeated measurements (0 disagreeing on a deterministic field); 0 rows in the format before `solving_degree_max`, skipped.
+
+### dickson, m = 2, tower, p = 2013265921, f4_fp_tower
+
+| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |
+|--:|--:|--:|:--|--:|--:|--:|
+| 2 | 2 | 0 | 3 (3–3) | 4 | 2 | 0.2 |
+| 4 | 2 | 0 | 4 (4–4) | 16 | 4 | 0.3 |
+| 6 | 2 | 0 | 4 (4–4) | 56 | 6 | 1.4 |
+| 8 | 2 | 0 | 4 (4–4) | 152 | 8 | 5.8 |
+| 10 | 2 | 0 | 4 (4–4) | 336 | 10 | 24.7 |
+| 12 | 2 | 0 | 5 (5–5) | 1223 | 13 | 96.9 |
+| 14 | 2 | 0 | 5 (5–5) | 2303 | 15 | 545.8 |
+| 16 | 2 | 0 | 5 (5–5) | 4786 | 17 | 4453.0 |
+| 18 | 2 | 0 | 5 (5–5) | 8639 | 20 | 23115.9 |
+| 20 | 2 | 0 | 6 (6–6) | 33426 | 24 | 221508.6 |
+
+D = 3.07 + 0.130·N over N = 2…20 (10 values). Pre-registered bootstrap (targets within N): beta 95% [0.130, 0.130] (degenerate: no variance within any N); rule on it: inconclusive.
+Leave-one-N-out slopes of D: 0.117 to 0.142.
+Slope of D over the upper half, N = 12…20: 0.100.
+Final plateau: D = 6 over N = 20…20, length L = 0.
+A1 (section 11.6): inconclusive (upper-half slope 0.100 over N = 12…20, final plateau L = 0).
+log2(width) slope 0.686 per unit N over the whole range; 0.573 over the upper half.
+
+### dickson, m = 3, tower, p = 2013265921, f4_fp_tower
+
+| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |
+|--:|--:|--:|:--|--:|--:|--:|
+| 6 | 2 | 0 | 5 (5–5) | 164 | 10 | 4.9 |
+| 9 | 2 | 0 | 6 (6–6) | 1184 | 16 | 218.3 |
+| 12 | 2 | 0 | 6 (6–6) | 5018 | 18 | 6899.9 |
+| 15 | 1 | 0 | 7 (7–7) | 31378 | 23 | 1466003.0 |
+
+D = 3.96 + 0.192·N over N = 6…15 (4 values). Pre-registered bootstrap (targets within N): beta 95% [0.192, 0.192] (degenerate: no variance within any N); rule on it: inconclusive.
+Leave-one-N-out slopes of D: 0.167 to 0.214.
+Slope of D over the upper half, N = 12…15: 0.333.
+Final plateau: D = 7 over N = 15…15, length L = 0.
+A1 (section 11.6): H0 (upper-half slope 0.333 over N = 12…15, final plateau L = 0).
+log2(width) slope 0.826 per unit N over the whole range; 0.882 over the upper half.
+
+### dickson, m = 4, tower, p = 2013265921, f4_fp_tower
+
+| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |
+|--:|--:|--:|:--|--:|--:|--:|
+| 8 | 2 | 0 | 6 (6–6) | 1080 | 21 | 92.0 |
+| 12 | 2 | 0 | 7 (7–7) | 9451 | 29 | 26074.5 |
+
+D = 4.00 + 0.250·N over N = 8…12 (2 values). Pre-registered bootstrap (targets within N): beta 95% [0.250, 0.250] (degenerate: no variance within any N); rule on it: inconclusive.
+Final plateau: D = 7 over N = 12…12, length L = 0.
+A1 (section 11.6): inconclusive (only 2 values of N).
+log2(width) slope 0.782 per unit N over the whole range.
+
+### dickson-torus, m = 2, null, p = 14680063, f4_fp_tower
+
+| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |
+|--:|--:|--:|:--|--:|--:|--:|
+| 2 | 2 | 0 | 3 (3–3) | 4 | 2 | 0.1 |
+| 4 | 2 | 0 | 4 (4–4) | 16 | 4 | 0.3 |
+| 6 | 2 | 0 | 4 (4–4) | 56 | 6 | 1.0 |
+| 8 | 2 | 0 | 4 (4–4) | 152 | 8 | 4.5 |
+| 10 | 2 | 0 | 4 (4–4) | 336 | 10 | 17.8 |
+| 12 | 2 | 0 | 5 (5–5) | 1223 | 13 | 99.1 |
+| 14 | 2 | 0 | 5 (5–5) | 2303 | 15 | 453.6 |
+| 16 | 2 | 0 | 5 (5–5) | 4786 | 17 | 3230.0 |
+| 18 | 2 | 0 | 5 (5–5) | 8639 | 20 | 22567.9 |
+| 20 | 2 | 0 | 6 (6–6) | 33426 | 24 | 216812.8 |
+
+D = 3.07 + 0.130·N over N = 2…20 (10 values). Pre-registered bootstrap (targets within N): beta 95% [0.130, 0.130] (degenerate: no variance within any N); rule on it: inconclusive.
+Leave-one-N-out slopes of D: 0.117 to 0.142.
+Slope of D over the upper half, N = 12…20: 0.100.
+Final plateau: D = 6 over N = 20…20, length L = 0.
+A1 (section 11.6): inconclusive (upper-half slope 0.100 over N = 12…20, final plateau L = 0).
+log2(width) slope 0.686 per unit N over the whole range; 0.573 over the upper half.
+
+### dickson-torus, m = 2, null, p = 2046820351, f4_fp_tower
+
+| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |
+|--:|--:|--:|:--|--:|--:|--:|
+| 2 | 2 | 0 | 3 (3–3) | 4 | 2 | 0.2 |
+| 4 | 2 | 0 | 4 (4–4) | 16 | 4 | 0.3 |
+| 6 | 2 | 0 | 4 (4–4) | 56 | 6 | 0.9 |
+| 8 | 2 | 0 | 4 (4–4) | 152 | 8 | 4.4 |
+| 10 | 2 | 0 | 4 (4–4) | 336 | 10 | 22.9 |
+| 12 | 2 | 0 | 5 (5–5) | 1223 | 13 | 115.4 |
+| 14 | 2 | 0 | 5 (5–5) | 2303 | 15 | 463.1 |
+| 16 | 2 | 0 | 5 (5–5) | 4786 | 17 | 3577.0 |
+| 18 | 2 | 0 | 5 (5–5) | 8639 | 20 | 22133.0 |
+| 20 | 2 | 0 | 6 (6–6) | 33426 | 24 | 215171.9 |
+
+D = 3.07 + 0.130·N over N = 2…20 (10 values). Pre-registered bootstrap (targets within N): beta 95% [0.130, 0.130] (degenerate: no variance within any N); rule on it: inconclusive.
+Leave-one-N-out slopes of D: 0.117 to 0.142.
+Slope of D over the upper half, N = 12…20: 0.100.
+Final plateau: D = 6 over N = 20…20, length L = 0.
+A1 (section 11.6): inconclusive (upper-half slope 0.100 over N = 12…20, final plateau L = 0).
+log2(width) slope 0.686 per unit N over the whole range; 0.573 over the upper half.
+
+### dickson-torus, m = 2, tower, p = 14680063, f4_fp_tower
+
+| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |
+|--:|--:|--:|:--|--:|--:|--:|
+| 2 | 2 | 0 | 3 (3–3) | 4 | 2 | 0.2 |
+| 4 | 2 | 0 | 4 (4–4) | 16 | 4 | 0.2 |
+| 6 | 2 | 0 | 4 (4–4) | 56 | 6 | 0.8 |
+| 8 | 2 | 0 | 4 (4–4) | 152 | 8 | 3.9 |
+| 10 | 2 | 0 | 4 (4–4) | 336 | 10 | 14.3 |
+| 12 | 2 | 0 | 5 (5–5) | 1223 | 13 | 91.4 |
+| 14 | 2 | 0 | 5 (5–5) | 2303 | 15 | 441.0 |
+| 16 | 2 | 0 | 5 (5–5) | 4786 | 17 | 3154.8 |
+| 18 | 2 | 0 | 5 (5–5) | 8639 | 20 | 21118.6 |
+| 20 | 2 | 0 | 6 (6–6) | 33426 | 24 | 212437.0 |
+
+D = 3.07 + 0.130·N over N = 2…20 (10 values). Pre-registered bootstrap (targets within N): beta 95% [0.130, 0.130] (degenerate: no variance within any N); rule on it: inconclusive.
+Leave-one-N-out slopes of D: 0.117 to 0.142.
+Slope of D over the upper half, N = 12…20: 0.100.
+Final plateau: D = 6 over N = 20…20, length L = 0.
+A1 (section 11.6): inconclusive (upper-half slope 0.100 over N = 12…20, final plateau L = 0).
+log2(width) slope 0.686 per unit N over the whole range; 0.573 over the upper half.
+
+### dickson-torus, m = 2, tower, p = 2046820351, f4_fp_tower
+
+| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |
+|--:|--:|--:|:--|--:|--:|--:|
+| 2 | 2 | 0 | 3 (3–3) | 4 | 2 | 0.1 |
+| 4 | 2 | 0 | 4 (4–4) | 16 | 4 | 0.3 |
+| 6 | 2 | 0 | 4 (4–4) | 56 | 6 | 1.0 |
+| 8 | 2 | 0 | 4 (4–4) | 152 | 8 | 4.4 |
+| 10 | 2 | 0 | 4 (4–4) | 336 | 10 | 21.0 |
+| 12 | 2 | 0 | 5 (5–5) | 1223 | 13 | 87.4 |
+| 14 | 2 | 0 | 5 (5–5) | 2303 | 15 | 445.3 |
+| 16 | 2 | 0 | 5 (5–5) | 4786 | 17 | 3699.8 |
+| 18 | 2 | 0 | 5 (5–5) | 8639 | 20 | 22225.6 |
+| 20 | 2 | 0 | 6 (6–6) | 33426 | 24 | 207503.1 |
+
+D = 3.07 + 0.130·N over N = 2…20 (10 values). Pre-registered bootstrap (targets within N): beta 95% [0.130, 0.130] (degenerate: no variance within any N); rule on it: inconclusive.
+Leave-one-N-out slopes of D: 0.117 to 0.142.
+Slope of D over the upper half, N = 12…20: 0.100.
+Final plateau: D = 6 over N = 20…20, length L = 0.
+A1 (section 11.6): inconclusive (upper-half slope 0.100 over N = 12…20, final plateau L = 0).
+log2(width) slope 0.686 per unit N over the whole range; 0.573 over the upper half.
+
+### dickson-torus, m = 3, null, p = 14680063, f4_fp_tower
+
+| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |
+|--:|--:|--:|:--|--:|--:|--:|
+| 6 | 2 | 0 | 5 (5–5) | 164 | 10 | 4.1 |
+| 9 | 2 | 0 | 6 (6–6) | 1184 | 16 | 237.2 |
+| 12 | 2 | 0 | 6 (6–6) | 5066 | 16 | 10568.2 |
+
+D = 4.17 + 0.167·N over N = 6…12 (3 values). Pre-registered bootstrap (targets within N): beta 95% [0.167, 0.167] (degenerate: no variance within any N); rule on it: inconclusive.
+Leave-one-N-out slopes of D: 0.000 to 0.333.
+Final plateau: D = 6 over N = 9…12, length L = 3.
+A1 (section 11.6): inconclusive (only 3 values of N).
+log2(width) slope 0.825 per unit N over the whole range.
+
+### dickson-torus, m = 3, null, p = 2046820351, f4_fp_tower
+
+| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |
+|--:|--:|--:|:--|--:|--:|--:|
+| 6 | 2 | 0 | 5 (5–5) | 164 | 10 | 3.6 |
+| 9 | 2 | 0 | 6 (6–6) | 1184 | 16 | 262.2 |
+| 12 | 2 | 0 | 6 (6–6) | 5066 | 16 | 9791.0 |
+
+D = 4.17 + 0.167·N over N = 6…12 (3 values). Pre-registered bootstrap (targets within N): beta 95% [0.167, 0.167] (degenerate: no variance within any N); rule on it: inconclusive.
+Leave-one-N-out slopes of D: 0.000 to 0.333.
+Final plateau: D = 6 over N = 9…12, length L = 3.
+A1 (section 11.6): inconclusive (only 3 values of N).
+log2(width) slope 0.825 per unit N over the whole range.
+
+### dickson-torus, m = 3, tower, p = 14680063, f4_fp_tower
+
+| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |
+|--:|--:|--:|:--|--:|--:|--:|
+| 6 | 2 | 0 | 5 (5–5) | 164 | 10 | 4.2 |
+| 9 | 2 | 0 | 6 (6–6) | 1184 | 16 | 156.3 |
+| 12 | 2 | 0 | 6 (6–6) | 5018 | 18 | 5057.4 |
+| 15 | 1 | 0 | 7 (7–7) | 31378 | 23 | 1508360.0 |
+
+D = 3.96 + 0.192·N over N = 6…15 (4 values). Pre-registered bootstrap (targets within N): beta 95% [0.192, 0.192] (degenerate: no variance within any N); rule on it: inconclusive.
+Leave-one-N-out slopes of D: 0.167 to 0.214.
+Slope of D over the upper half, N = 12…15: 0.333.
+Final plateau: D = 7 over N = 15…15, length L = 0.
+A1 (section 11.6): H0 (upper-half slope 0.333 over N = 12…15, final plateau L = 0).
+log2(width) slope 0.826 per unit N over the whole range; 0.882 over the upper half.
+
+### dickson-torus, m = 3, tower, p = 2046820351, f4_fp_tower
+
+| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |
+|--:|--:|--:|:--|--:|--:|--:|
+| 6 | 2 | 0 | 5 (5–5) | 164 | 10 | 3.3 |
+| 9 | 2 | 0 | 6 (6–6) | 1184 | 16 | 180.9 |
+| 12 | 2 | 0 | 6 (6–6) | 5018 | 18 | 5032.8 |
+| 15 | 1 | 0 | 7 (7–7) | 31378 | 23 | 1654594.6 |
+
+D = 3.96 + 0.192·N over N = 6…15 (4 values). Pre-registered bootstrap (targets within N): beta 95% [0.192, 0.192] (degenerate: no variance within any N); rule on it: inconclusive.
+Leave-one-N-out slopes of D: 0.167 to 0.214.
+Slope of D over the upper half, N = 12…15: 0.333.
+Final plateau: D = 7 over N = 15…15, length L = 0.
+A1 (section 11.6): H0 (upper-half slope 0.333 over N = 12…15, final plateau L = 0).
+log2(width) slope 0.826 per unit N over the whole range; 0.882 over the upper half.
+
+### dickson-torus, m = 4, null, p = 14680063, f4_fp_tower
+
+| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |
+|--:|--:|--:|:--|--:|--:|--:|
+| 8 | 2 | 0 | 6 (6–6) | 952 | 20 | 93.9 |
+| 12 | 2 | 0 | 7 (7–7) | 8944 | 33 | 23713.0 |
+
+D = 4.00 + 0.250·N over N = 8…12 (2 values). Pre-registered bootstrap (targets within N): beta 95% [0.250, 0.250] (degenerate: no variance within any N); rule on it: inconclusive.
+Final plateau: D = 7 over N = 12…12, length L = 0.
+A1 (section 11.6): inconclusive (only 2 values of N).
+log2(width) slope 0.808 per unit N over the whole range.
+
+### dickson-torus, m = 4, null, p = 2046820351, f4_fp_tower
+
+| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |
+|--:|--:|--:|:--|--:|--:|--:|
+| 8 | 2 | 0 | 6 (6–6) | 952 | 20 | 97.0 |
+| 12 | 2 | 0 | 7 (7–7) | 8944 | 33 | 24236.5 |
+
+D = 4.00 + 0.250·N over N = 8…12 (2 values). Pre-registered bootstrap (targets within N): beta 95% [0.250, 0.250] (degenerate: no variance within any N); rule on it: inconclusive.
+Final plateau: D = 7 over N = 12…12, length L = 0.
+A1 (section 11.6): inconclusive (only 2 values of N).
+log2(width) slope 0.808 per unit N over the whole range.
+
+### dickson-torus, m = 4, tower, p = 14680063, f4_fp_tower
+
+| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |
+|--:|--:|--:|:--|--:|--:|--:|
+| 8 | 2 | 0 | 6 (6–6) | 1080 | 21 | 64.4 |
+| 12 | 2 | 0 | 7 (7–7) | 9451 | 29 | 24395.5 |
+
+D = 4.00 + 0.250·N over N = 8…12 (2 values). Pre-registered bootstrap (targets within N): beta 95% [0.250, 0.250] (degenerate: no variance within any N); rule on it: inconclusive.
+Final plateau: D = 7 over N = 12…12, length L = 0.
+A1 (section 11.6): inconclusive (only 2 values of N).
+log2(width) slope 0.782 per unit N over the whole range.
+
+### dickson-torus, m = 4, tower, p = 2046820351, f4_fp_tower
+
+| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |
+|--:|--:|--:|:--|--:|--:|--:|
+| 8 | 2 | 0 | 6 (6–6) | 1080 | 21 | 57.6 |
+| 12 | 2 | 0 | 7 (7–7) | 9451 | 29 | 24849.9 |
+
+D = 4.00 + 0.250·N over N = 8…12 (2 values). Pre-registered bootstrap (targets within N): beta 95% [0.250, 0.250] (degenerate: no variance within any N); rule on it: inconclusive.
+Final plateau: D = 7 over N = 12…12, length L = 0.
+A1 (section 11.6): inconclusive (only 2 values of N).
+log2(width) slope 0.782 per unit N over the whole range.
+
+### isogeny, m = 2, tower, p = 786433, f4_fp_tower
+
+| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |
+|--:|--:|--:|:--|--:|--:|--:|
+| 2 | 2 | 0 | 3 (3–3) | 4 | 2 | 1.4 |
+| 4 | 2 | 0 | 5 (5–5) | 16 | 4 | 0.6 |
+| 6 | 2 | 0 | 5 (5–5) | 57 | 7 | 1.4 |
+| 8 | 2 | 0 | 5 (5–5) | 150 | 9 | 10.3 |
+| 10 | 2 | 0 | 5 (5–5) | 346 | 12 | 16.6 |
+
+D = 3.40 + 0.200·N over N = 2…10 (5 values). Pre-registered bootstrap (targets within N): beta 95% [0.200, 0.200] (degenerate: no variance within any N); rule on it: inconclusive.
+Leave-one-N-out slopes of D: 0.000 to 0.300.
+Slope of D over the upper half, N = 6…10: 0.000.
+Final plateau: D = 5 over N = 4…10, length L = 6.
+A1 (section 11.6): inconclusive (upper-half slope 0.000 over N = 6…10, final plateau L = 6).
+log2(width) slope 0.805 per unit N over the whole range; 0.650 over the upper half.
+
+### kummer, m = 2, null, p = 3221225473, f4_fp_tower
+
+| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |
+|--:|--:|--:|:--|--:|--:|--:|
+| 2 | 2 | 0 | 3 (3–3) | 4 | 2 | 0.2 |
+| 4 | 2 | 0 | 4 (4–4) | 16 | 4 | 0.3 |
+| 6 | 2 | 0 | 4 (4–4) | 56 | 6 | 1.2 |
+| 8 | 2 | 0 | 4 (4–4) | 152 | 8 | 5.9 |
+| 10 | 2 | 0 | 4 (4–4) | 337 | 10 | 28.5 |
+| 12 | 2 | 0 | 5 (5–5) | 1231 | 13 | 182.2 |
+| 14 | 2 | 0 | 5 (5–5) | 2304 | 15 | 1145.3 |
+| 16 | 2 | 0 | 5 (5–5) | 4789 | 17 | 8583.3 |
+| 18 | 2 | 0 | 5 (5–5) | 8644 | 20 | 65607.9 |
+
+D = 3.17 + 0.117·N over N = 2…18 (9 values). Pre-registered bootstrap (targets within N): beta 95% [0.117, 0.117] (degenerate: no variance within any N); rule on it: inconclusive.
+Leave-one-N-out slopes of D: 0.095 to 0.131.
+Slope of D over the upper half, N = 10…18: 0.100.
+Final plateau: D = 5 over N = 12…18, length L = 6.
+A1 (section 11.6): inconclusive (upper-half slope 0.100 over N = 10…18, final plateau L = 6).
+log2(width) slope 0.689 per unit N over the whole range; 0.566 over the upper half.
+
+### kummer, m = 2, tower, p = 3221225473, f4_fp_tower
+
+| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |
+|--:|--:|--:|:--|--:|--:|--:|
+| 2 | 2 | 0 | 3 (3–3) | 4 | 2 | 0.1 |
+| 4 | 2 | 0 | 4 (4–4) | 16 | 4 | 0.2 |
+| 6 | 2 | 0 | 4 (4–4) | 56 | 6 | 0.8 |
+| 8 | 2 | 0 | 4 (4–4) | 152 | 8 | 4.1 |
+| 10 | 2 | 0 | 4 (4–4) | 337 | 10 | 22.1 |
+| 12 | 2 | 0 | 5 (5–5) | 1231 | 13 | 139.9 |
+| 14 | 2 | 0 | 5 (5–5) | 2304 | 15 | 1076.2 |
+| 16 | 2 | 0 | 5 (5–5) | 4789 | 17 | 8243.9 |
+| 18 | 2 | 0 | 5 (5–5) | 8644 | 20 | 68325.7 |
+
+D = 3.17 + 0.117·N over N = 2…18 (9 values). Pre-registered bootstrap (targets within N): beta 95% [0.117, 0.117] (degenerate: no variance within any N); rule on it: inconclusive.
+Leave-one-N-out slopes of D: 0.095 to 0.131.
+Slope of D over the upper half, N = 10…18: 0.100.
+Final plateau: D = 5 over N = 12…18, length L = 6.
+A1 (section 11.6): inconclusive (upper-half slope 0.100 over N = 10…18, final plateau L = 6).
+log2(width) slope 0.689 per unit N over the whole range; 0.566 over the upper half.
+
+### kummer, m = 3, tower, p = 3221225473, f4_fp_tower
+
+| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |
+|--:|--:|--:|:--|--:|--:|--:|
+| 6 | 2 | 0 | 5 (5–5) | 164 | 10 | 2.6 |
+| 9 | 2 | 0 | 6 (6–6) | 1186 | 16 | 294.9 |
+| 12 | 2 | 0 | 6 (6–6) | 5019 | 18 | 15929.0 |
+
+D = 4.17 + 0.167·N over N = 6…12 (3 values). Pre-registered bootstrap (targets within N): beta 95% [0.167, 0.167] (degenerate: no variance within any N); rule on it: inconclusive.
+Leave-one-N-out slopes of D: 0.000 to 0.333.
+Final plateau: D = 6 over N = 9…12, length L = 3.
+A1 (section 11.6): inconclusive (only 3 values of N).
+log2(width) slope 0.823 per unit N over the whole range.
+
+Planted-solution violations: 0 of 205 rows.

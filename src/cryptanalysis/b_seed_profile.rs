@@ -52,7 +52,7 @@ fn p256_b() -> BigUint {
 }
 
 /// Sieve of Eratosthenes returning primes ≤ `bound`.
-fn primes_up_to(bound: u64) -> Vec<u64> {
+pub fn primes_up_to(bound: u64) -> Vec<u64> {
     if bound < 2 {
         return vec![];
     }
@@ -81,13 +81,16 @@ fn primes_up_to(bound: u64) -> Vec<u64> {
 /// Compute `(b mod q) / q ∈ [0, 1)` for each prime `q`.  Returns
 /// the residue ratios.
 pub fn compute_b_residue_ratios(b: &BigUint, primes: &[u64]) -> Vec<f64> {
+    // Horner over b's 64-bit digits, most significant first: exact, and
+    // no BigUint allocation per prime.
+    let digits: Vec<u64> = b.iter_u64_digits().rev().collect();
     primes
         .iter()
         .map(|&q| {
-            let r = b % BigUint::from(q);
-            // r is small (< q), can convert to u64.
-            let r_u64: u64 = r.iter_u64_digits().next().unwrap_or(0);
-            r_u64 as f64 / q as f64
+            let r = digits
+                .iter()
+                .fold(0u128, |r, &d| ((r << 64) | d as u128) % q as u128);
+            r as f64 / q as f64
         })
         .collect()
 }
@@ -147,14 +150,29 @@ pub struct BSeedProfileResult {
 }
 
 pub fn run_b_seed_profile(prime_bound: u64) -> BSeedProfileResult {
-    let b = p256_b();
-    let primes = primes_up_to(prime_bound);
-    // Skip primes 2 and 3 (b mod q for very small q dominates the
-    // KS statistic by discreteness; the interesting analysis is at
-    // larger primes).
-    let primes: Vec<u64> = primes.into_iter().filter(|&p| p >= 5).collect();
+    run_b_residue_profile(&p256_b(), prime_bound)
+}
+
+/// The profile of [`run_b_seed_profile`] for any coefficient `b`.
+pub fn run_b_residue_profile(b: &BigUint, prime_bound: u64) -> BSeedProfileResult {
+    profile_on_primes(b, &profile_primes(prime_bound))
+}
+
+/// The primes `5 ≤ q ≤ bound` the profile uses.  Primes 2 and 3 are
+/// skipped: `b mod q` for very small `q` dominates the KS statistic by
+/// discreteness; the interesting analysis is at larger primes.
+pub fn profile_primes(prime_bound: u64) -> Vec<u64> {
+    primes_up_to(prime_bound)
+        .into_iter()
+        .filter(|&p| p >= 5)
+        .collect()
+}
+
+/// The profile of `b` on an already sieved prime list, so a panel of
+/// coefficients shares one sieve.
+pub fn profile_on_primes(b: &BigUint, primes: &[u64]) -> BSeedProfileResult {
     let max_prime = *primes.last().unwrap_or(&0);
-    let ratios = compute_b_residue_ratios(&b, &primes);
+    let ratios = compute_b_residue_ratios(b, primes);
     let ks = ks_statistic_uniform(&ratios);
     let pval = ks_pvalue(ks, ratios.len());
 

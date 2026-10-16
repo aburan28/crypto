@@ -185,6 +185,18 @@ Findings (all toy-scale stage diagnostics):
   (`raw/frobwin_n131.log`). The m=83 confidence gate of AGENTS.md §8a
   is not yet run for any of these levers.
 
+**Round 2 (scaling, same study directory):** the grid extended to n = 17,
+19, 23 and the δ sweeps to n = 15, 17, 19 (n = 19 shares 131's full-length
+cyclotomic order, ord = n − 1). The size laws scale: D* still tracks n′
+(r = 0.82 over 133 aggregates), the interior work-per-relation optimum sits
+at n′ ≈ n/2.7 with 100–875× spreads at n = 19, and the per-relation δ gain
+*grows* with n (6.5× at n = 11 → 19.7× at n = 19, 246× at n = 15 δ = +5),
+until the counting floor 2^−δ empties the yield (visible at n ≥ 17, δ ≥ 5).
+The new arity+size result: on the symmetric-S4 m = 3 encoding, a heavy δ
+drops D* by whole degrees — 5 → 3 from (n = 15, l = 3) to (n = 15, l = 2),
+and D* = 4 at (n = 19, l = 3, δ = +10) with yield still 0.0625 — the one
+whole-degree lever that exists at n = 131.
+
 ## `sm2.sage` — SM2 (sm2p256v1, GB/T 32918)
 
 Mirrors `../src/ecc/sm2.rs` and `../src/hash/sm3.rs`. Run:

@@ -1,0 +1,23 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "IC next-10 item 1: E(F_p^4) ladder in ecbench (plain k = 4, D4 Y-line, double large primes, rho, rho-negation)",
+  "description": "Operation counts only (no wall-time claim). fp4_translation curves (h = 4), planted single targets. ic.k4_gaudry charges each trial the algebraic solve's measured C4 (S4: 1.213e12, D4: 2.54e10 F_p mults, 97 per GAE); its exact-enumeration stand-in oracle is counted uncharged, so IC records are lower bounds. PROTOCOL: research/ic_next10_20261014/01-fp4-ladder/PROTOCOL.md",
+  "workloads": {
+    "curves": [
+      {"kind": "fp4_translation", "p": 101, "seed": 1},
+      {"kind": "fp4_translation", "p": 181, "seed": 1},
+      {"kind": "fp4_translation", "p": 269, "seed": 1},
+      {"kind": "fp4_translation", "p": 397, "seed": 1}
+    ],
+    "targets_per_curve": 3,
+    "target_seed": 20261014
+  },
+  "arms": [
+    {"name": "rho-neg", "role": "reference", "method": {"id": "rho.negation"}},
+    {"name": "rho-plain", "role": "baseline", "method": {"id": "rho.plain"}},
+    {"name": "ic-k4-plain", "role": "candidate", "method": {"id": "ic.k4_gaudry", "params": {"base": "xline", "large_primes": "0", "c4": "1.213e12"}}},
+    {"name": "ic-k4-d4", "role": "candidate", "method": {"id": "ic.k4_gaudry", "params": {"base": "yline-d4", "large_primes": "0", "c4": "2.54e10"}}},
+    {"name": "ic-k4-dlp", "role": "candidate", "method": {"id": "ic.k4_gaudry", "params": {"base": "xline", "large_primes": "2", "c4": "1.213e12"}}}
+  ],
+  "measurement": {"rounds": 1, "warmup": 0, "order": "alternate", "seed": 1, "isolation_required": "L0", "timeout_seconds": 1200}
+}

@@ -69,9 +69,20 @@ template<class F> void bench(const char*name,int threads,int n,int iters){
  * per-thread den/scratch live in registers/local, not dynamic memory. */
 #define RHO_BENCH_W 8
 /* Compile-time W: the phase arrays unroll into registers; the switch picks
- * the instantiation.  Anything outside {2,4,8,16} falls back to W=8. */
+ * the instantiation.  Anything outside {2,4,8,16,32,64} falls back to W=8. */
 template<class C,int Wc> __global__ void k_rho(rho_ctx<C> c,int iters){
  uint32_t tid=blockIdx.x*blockDim.x+threadIdx.x; if(tid>=c.nthreads) return;
+#if RHO_TABLE_SHARED
+ /* stage the jump table in shared memory once per block; the walk's random
+  * per-step table reads then hit shared instead of global */
+ __shared__ nap<typename C::Field> sT[1u<<RHO_MAX_RBITS];
+ if(c.prm.r_bits<=RHO_MAX_RBITS){
+  uint32_t R=1u<<c.prm.r_bits;
+  for(uint32_t j=threadIdx.x;j<R;j+=blockDim.x) sT[j]=c.table[j];
+  __syncthreads();
+  c.table=sT;
+ }
+#endif
  for(int it=0;it<iters;it++) rho_batch_step_w<C,Wc>(c,tid);
 }
 #define K_RHO_LAUNCH(C,Wc) do{ \
@@ -101,7 +112,7 @@ template<class C> static void rho_bench(const char*name,const nap<typename C::Fi
                                         const nap<typename C::Field>&Q,int threads,int W,int iters){
   typedef typename C::Field F;
   /* Kernel switch only instantiates {2,4,8,16}; snap before alloc, seed, and the step count. */
-  if(W!=2&&W!=4&&W!=8&&W!=16)W=RHO_BENCH_W;
+  if(W!=2&&W!=4&&W!=8&&W!=16&&W!=32&&W!=64)W=RHO_BENCH_W;
   int blocks=1; // tune below
   cudaDeviceProp p{}; CU(cudaGetDeviceProperties(&p,0));
   blocks=p.multiProcessorCount*16;
@@ -124,6 +135,7 @@ template<class C> static void rho_bench(const char*name,const nap<typename C::Fi
   else if(wc==4) K_RHO_LAUNCH(C,4);
   else if(wc==16)K_RHO_LAUNCH(C,16);
   else if(wc==32)K_RHO_LAUNCH(C,32);
+  else if(wc==64)K_RHO_LAUNCH(C,64);
   else           K_RHO_LAUNCH(C,8);
   uint32_t dps=0; CU(cudaMemcpy(&dps,c.dp_count,sizeof(uint32_t),cudaMemcpyDeviceToHost));
   double steps=(double)nw*iters;

@@ -1,0 +1,446 @@
+{
+  "schema": "factor-base-dor-v1",
+  "curve": "Koblitz y^2+xy=x^3+1 over F_2^19",
+  "field_degree": 19,
+  "dim": 3,
+  "summands": 3,
+  "encoding": "symmetric_s4",
+  "dmax": 5,
+  "targets": 16,
+  "observable": "D* = solving/refutation degree on non-decomposable targets",
+  "results": [
+    {
+      "structure": "geometric",
+      "dim": 3,
+      "summands": 3,
+      "encoding": "symmetric_s4",
+      "space_dims": [
+        3,
+        5,
+        7
+      ],
+      "nvars": 15,
+      "chain_nvars_for_comparison": 28,
+      "equation_degree": 2,
+      "point_decomposable_fraction": 0.0625,
+      "decomposable_fraction": 0.0625,
+      "boolean_unsat_fraction": 0.9375,
+      "spurious_satisfiable": 0,
+      "unsat_targets": 6,
+      "censored_above_dmax": 0,
+      "d_star_min": 4,
+      "d_star_max": 4,
+      "d_star_mean": 4.0,
+      "targets": [
+        {
+          "target": "0x48dbb",
+          "d_star": 4,
+          "rank_profile": {
+            "2": 19,
+            "3": 304,
+            "4": 1867
+          },
+          "macaulay_shape": {
+            "2": [
+              19,
+              121
+            ],
+            "3": [
+              304,
+              576
+            ],
+            "4": [
+              2299,
+              1941
+            ]
+          }
+        },
+        {
+          "target": "0x6c78c",
+          "d_star": 4,
+          "rank_profile": {
+            "2": 19,
+            "3": 304,
+            "4": 1861
+          },
+          "macaulay_shape": {
+            "2": [
+              19,
+              121
+            ],
+            "3": [
+              304,
+              576
+            ],
+            "4": [
+              2299,
+              1941
+            ]
+          }
+        },
+        {
+          "target": "0x66b0a",
+          "d_star": 4,
+          "rank_profile": {
+            "2": 19,
+            "3": 304,
+            "4": 1867
+          },
+          "macaulay_shape": {
+            "2": [
+              19,
+              121
+            ],
+            "3": [
+              304,
+              576
+            ],
+            "4": [
+              2299,
+              1941
+            ]
+          }
+        },
+        {
+          "target": "0x61c36",
+          "d_star": 4,
+          "rank_profile": {
+            "2": 19,
+            "3": 304,
+            "4": 1867
+          },
+          "macaulay_shape": {
+            "2": [
+              19,
+              121
+            ],
+            "3": [
+              304,
+              576
+            ],
+            "4": [
+              2299,
+              1941
+            ]
+          }
+        },
+        {
+          "target": "0x813f",
+          "d_star": 4,
+          "rank_profile": {
+            "2": 19,
+            "3": 304,
+            "4": 1867
+          },
+          "macaulay_shape": {
+            "2": [
+              19,
+              121
+            ],
+            "3": [
+              304,
+              576
+            ],
+            "4": [
+              2299,
+              1941
+            ]
+          }
+        },
+        {
+          "target": "0x20a62",
+          "d_star": 4,
+          "rank_profile": {
+            "2": 19,
+            "3": 304,
+            "4": 1867
+          },
+          "macaulay_shape": {
+            "2": [
+              19,
+              121
+            ],
+            "3": [
+              304,
+              576
+            ],
+            "4": [
+              2299,
+              1941
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "structure": "standard",
+      "dim": 3,
+      "summands": 3,
+      "encoding": "symmetric_s4",
+      "space_dims": [
+        3,
+        5,
+        7
+      ],
+      "nvars": 15,
+      "chain_nvars_for_comparison": 28,
+      "equation_degree": 2,
+      "point_decomposable_fraction": 0.0,
+      "decomposable_fraction": 0.0,
+      "boolean_unsat_fraction": 0.875,
+      "spurious_satisfiable": 2,
+      "unsat_targets": 6,
+      "censored_above_dmax": 0,
+      "d_star_min": 4,
+      "d_star_max": 4,
+      "d_star_mean": 4.0,
+      "targets": [
+        {
+          "target": "0x1132e",
+          "d_star": 4,
+          "rank_profile": {
+            "2": 19,
+            "3": 304,
+            "4": 1867
+          },
+          "macaulay_shape": {
+            "2": [
+              19,
+              121
+            ],
+            "3": [
+              304,
+              576
+            ],
+            "4": [
+              2299,
+              1941
+            ]
+          }
+        },
+        {
+          "target": "0x48dbb",
+          "d_star": 4,
+          "rank_profile": {
+            "2": 19,
+            "3": 304,
+            "4": 1867
+          },
+          "macaulay_shape": {
+            "2": [
+              19,
+              121
+            ],
+            "3": [
+              304,
+              576
+            ],
+            "4": [
+              2299,
+              1941
+            ]
+          }
+        },
+        {
+          "target": "0x6c78c",
+          "d_star": 4,
+          "rank_profile": {
+            "2": 19,
+            "3": 304,
+            "4": 1867
+          },
+          "macaulay_shape": {
+            "2": [
+              19,
+              121
+            ],
+            "3": [
+              304,
+              576
+            ],
+            "4": [
+              2299,
+              1941
+            ]
+          }
+        },
+        {
+          "target": "0x66b0a",
+          "d_star": 4,
+          "rank_profile": {
+            "2": 19,
+            "3": 304,
+            "4": 1867
+          },
+          "macaulay_shape": {
+            "2": [
+              19,
+              121
+            ],
+            "3": [
+              304,
+              576
+            ],
+            "4": [
+              2299,
+              1941
+            ]
+          }
+        },
+        {
+          "target": "0x813f",
+          "d_star": 4,
+          "rank_profile": {
+            "2": 19,
+            "3": 304,
+            "4": 1866
+          },
+          "macaulay_shape": {
+            "2": [
+              19,
+              121
+            ],
+            "3": [
+              304,
+              576
+            ],
+            "4": [
+              2299,
+              1941
+            ]
+          }
+        },
+        {
+          "target": "0x20a62",
+          "d_star": 4,
+          "rank_profile": {
+            "2": 19,
+            "3": 304,
+            "4": 1867
+          },
+          "macaulay_shape": {
+            "2": [
+              19,
+              121
+            ],
+            "3": [
+              304,
+              576
+            ],
+            "4": [
+              2299,
+              1941
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "structure": "random",
+      "dim": 3,
+      "summands": 3,
+      "encoding": "symmetric_s4",
+      "space_dims": [
+        3,
+        6,
+        10
+      ],
+      "nvars": 19,
+      "chain_nvars_for_comparison": 28,
+      "equation_degree": 2,
+      "point_decomposable_fraction": 0.1875,
+      "decomposable_fraction": 0.1875,
+      "boolean_unsat_fraction": 0.125,
+      "spurious_satisfiable": 11,
+      "unsat_targets": 2,
+      "censored_above_dmax": 0,
+      "d_star_min": 5,
+      "d_star_max": 5,
+      "d_star_mean": 5.0,
+      "targets": [
+        {
+          "target": "0x66b0a",
+          "d_star": 5,
+          "rank_profile": {
+            "2": 19,
+            "3": 380,
+            "4": 3439,
+            "5": 16538
+          },
+          "macaulay_shape": {
+            "2": [
+              19,
+              191
+            ],
+            "3": [
+              380,
+              1160
+            ],
+            "4": [
+              3629,
+              5036
+            ],
+            "5": [
+              22040,
+              16664
+            ]
+          }
+        },
+        {
+          "target": "0x3c729",
+          "d_star": 5,
+          "rank_profile": {
+            "2": 19,
+            "3": 380,
+            "4": 3439,
+            "5": 16538
+          },
+          "macaulay_shape": {
+            "2": [
+              19,
+              191
+            ],
+            "3": [
+              380,
+              1160
+            ],
+            "4": [
+              3629,
+              5036
+            ],
+            "5": [
+              22040,
+              16664
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "ranking_by_mean_d_star": [
+    {
+      "structure": "geometric",
+      "d_star_mean": 4.0,
+      "d_star_min": 4,
+      "d_star_max": 4,
+      "decomposable_fraction": 0.0625,
+      "unsat_targets": 6
+    },
+    {
+      "structure": "standard",
+      "d_star_mean": 4.0,
+      "d_star_min": 4,
+      "d_star_max": 4,
+      "decomposable_fraction": 0.0,
+      "unsat_targets": 6
+    },
+    {
+      "structure": "random",
+      "d_star_mean": 5.0,
+      "d_star_min": 5,
+      "d_star_max": 5,
+      "decomposable_fraction": 0.1875,
+      "unsat_targets": 2
+    }
+  ]
+}

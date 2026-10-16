@@ -1,0 +1,33 @@
+digraph transfer_validation {
+  graph [rankdir=TB, bgcolor="white", pad="0.2", nodesep="0.30", ranksep="0.38",
+         labelloc="t", fontsize=14, label="ECDLP transfer diagnostic and net-advantage measurement"];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=11,
+        color="#334155", fillcolor="#f8fafc", margin="0.12,0.08"];
+  edge [fontname="DejaVu Sans", fontsize=9, color="#64748b"];
+
+  methodology [label="1. Type the route and exact subgroup\n4-state evidence obligations", fillcolor="#dbeafe"];
+  screens [label="2. Run necessary algebraic screens\ndimension / order / Frobenius / field", fillcolor="#e0e7ff"];
+  transfer [label="3. Establish the transfer\nmap + injectivity + scalar recovery", fillcolor="#ede9fe"];
+  solver [label="4. Name the destination solver\nimage access + search/relations + individual log", fillcolor="#fae8ff"];
+  measurement [label="5. Run the three-arm cold comparison\none target, one unit, nine complete phases", fillcolor="#fce7f3"];
+  verdict [label="6. Evaluate the net result\nratio + replay + interval + scaling", fillcolor="#ffedd5"];
+
+  methodology -> screens -> transfer -> solver -> measurement -> verdict;
+
+  subgraph cluster_arms {
+    label="The three arms answer different questions";
+    color="#cbd5e1";
+    style="rounded,dashed";
+    source [label="Strongest direct source reference\nWhat is the incumbent cost?", fillcolor="#f1f5f9"];
+    generic [label="Generic solver on the destination image\nWhat overhead did transport add?", fillcolor="#f1f5f9"];
+    candidate [label="Specialized destination solver + full route\nDid destination structure lower net cost?", fillcolor="#f1f5f9"];
+    source -> generic -> candidate [style=invis];
+  }
+  measurement -> source [style=dashed];
+  measurement -> generic [style=dashed];
+  measurement -> candidate [style=dashed];
+
+  advantage [label="Known-case replay: 2 valid, 2 unknown, 2 refuted\nNo specialized-solver or net-advantage record", shape=note,
+             color="#92400e", fillcolor="#fff7ed"];
+  transfer -> advantage [style=dashed, label="six public controls"];
+}

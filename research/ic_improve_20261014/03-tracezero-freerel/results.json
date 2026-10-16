@@ -1,0 +1,1475 @@
+{
+  "correctness_failures": [],
+  "n41": {
+    "A_replicates": 12,
+    "F": {
+      "counted_filter_plus_harvest": {
+        "ci95": [
+          null,
+          null
+        ],
+        "mean_A": 0.0,
+        "mean_candidate": 256.0,
+        "ratio": null
+      },
+      "counted_index": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 2666025.0,
+        "mean_candidate": 2666025.0,
+        "ratio": 1.0
+      },
+      "counted_rank": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 326900.1666666667,
+        "mean_candidate": 326900.1666666667,
+        "ratio": 1.0
+      },
+      "counted_target": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 1969.5,
+        "mean_candidate": 1969.5,
+        "ratio": 1.0
+      },
+      "counted_total": {
+        "ci95": [
+          1.0000851444781504,
+          1.0000858140948812
+        ],
+        "mean_A": 2994894.6666666665,
+        "mean_candidate": 2995150.6666666665,
+        "ratio": 1.0000854787992544
+      },
+      "expected_rank_ratio_K_minus_F_over_K": 1.0,
+      "filter_rejections_total": 0.0,
+      "free_rank_mean": 0.0,
+      "rank_attempts": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 255.0,
+        "mean_candidate": 255.0,
+        "ratio": 1.0
+      },
+      "replicates": 12,
+      "verdict_counted_total": "REGRESSES",
+      "wall_harvest_plus_other_setup": {
+        "ci95": [
+          0.4370804635832647,
+          3.042559450311126
+        ],
+        "mean_A": 18.55014491666672,
+        "mean_candidate": 22.980395083333367,
+        "ratio": 1.2388256364879504
+      },
+      "wall_index": {
+        "ci95": [
+          0.8754712328227935,
+          1.2088361601908804
+        ],
+        "mean_A": 4176.4194861666665,
+        "mean_candidate": 4305.860020583333,
+        "ratio": 1.0309931832387542
+      },
+      "wall_la": {
+        "ci95": [
+          0.0666350927043892,
+          4.631181989159355
+        ],
+        "mean_A": 1.6155350833333333,
+        "mean_candidate": 0.61508175,
+        "ratio": 0.38072942911948526
+      },
+      "wall_rank": {
+        "ci95": [
+          0.9283926348257922,
+          1.0873693788426042
+        ],
+        "mean_A": 576.5173059166666,
+        "mean_candidate": 578.1280375833333,
+        "ratio": 1.002793899940446
+      },
+      "wall_target": {
+        "ci95": [
+          0.9169097687580966,
+          1.394583716202933
+        ],
+        "mean_A": 2.898483302083333,
+        "mean_candidate": 3.1802200208333335,
+        "ratio": 1.0972014289499261
+      },
+      "wall_total": {
+        "ci95": [
+          0.8900885361944615,
+          1.192735958326582
+        ],
+        "mean_A": 4776.000955385416,
+        "mean_candidate": 4910.763755020834,
+        "ratio": 1.0282166609459027
+      }
+    },
+    "FR": {
+      "counted_filter_plus_harvest": {
+        "ci95": [
+          null,
+          null
+        ],
+        "mean_A": 0.0,
+        "mean_candidate": 51267.0,
+        "ratio": null
+      },
+      "counted_index": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 2666025.0,
+        "mean_candidate": 2666025.0,
+        "ratio": 1.0
+      },
+      "counted_rank": {
+        "ci95": [
+          0.3382875839500599,
+          0.3850800554805214
+        ],
+        "mean_A": 326900.1666666667,
+        "mean_candidate": 117850.0,
+        "ratio": 0.36050761674945614
+      },
+      "counted_target": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 1969.5,
+        "mean_candidate": 1969.5,
+        "ratio": 1.0
+      },
+      "counted_total": {
+        "ci95": [
+          0.9427541176318278,
+          0.9518441268745583
+        ],
+        "mean_A": 2994894.6666666665,
+        "mean_candidate": 2837111.5,
+        "ratio": 0.9473159545733606
+      },
+      "expected_rank_ratio_K_minus_F_over_K": 0.3686274509803922,
+      "filter_rejections_total": 0.0,
+      "free_rank_mean": 161.0,
+      "rank_attempts": {
+        "ci95": [
+          0.3686274509803922,
+          0.3686274509803922
+        ],
+        "mean_A": 255.0,
+        "mean_candidate": 94.0,
+        "ratio": 0.3686274509803922
+      },
+      "replicates": 12,
+      "verdict_counted_total": "ADVANCES",
+      "wall_harvest_plus_other_setup": {
+        "ci95": [
+          2.371279329225258,
+          7.701497638810665
+        ],
+        "mean_A": 18.55014491666672,
+        "mean_candidate": 74.96242041666672,
+        "ratio": 4.041069261368161
+      },
+      "wall_index": {
+        "ci95": [
+          0.9587506000218319,
+          1.2157374458375159
+        ],
+        "mean_A": 4176.4194861666665,
+        "mean_candidate": 4516.58756325,
+        "ratio": 1.0814496911074316
+      },
+      "wall_la": {
+        "ci95": [
+          0.06436381724205889,
+          1.0647400734597436
+        ],
+        "mean_A": 1.6155350833333333,
+        "mean_candidate": 0.278288,
+        "ratio": 0.17225747857224394
+      },
+      "wall_rank": {
+        "ci95": [
+          0.31607719679537594,
+          0.49126847435137966
+        ],
+        "mean_A": 576.5173059166666,
+        "mean_candidate": 228.10223325000004,
+        "ratio": 0.3956554832075958
+      },
+      "wall_target": {
+        "ci95": [
+          0.620498999690264,
+          1.428900200152307
+        ],
+        "mean_A": 2.898483302083333,
+        "mean_candidate": 2.6885405833333333,
+        "ratio": 0.9275680772081385
+      },
+      "wall_total": {
+        "ci95": [
+          0.8970340715134557,
+          1.1288089967526564
+        ],
+        "mean_A": 4776.000955385416,
+        "mean_candidate": 4822.6190455,
+        "ratio": 1.009760904687847
+      }
+    },
+    "K": 255,
+    "R": {
+      "counted_filter_plus_harvest": {
+        "ci95": [
+          null,
+          null
+        ],
+        "mean_A": 0.0,
+        "mean_candidate": 51172.0,
+        "ratio": null
+      },
+      "counted_index": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 2666025.0,
+        "mean_candidate": 2666025.0,
+        "ratio": 1.0
+      },
+      "counted_rank": {
+        "ci95": [
+          0.3382875839500599,
+          0.3850800554805214
+        ],
+        "mean_A": 326900.1666666667,
+        "mean_candidate": 117850.0,
+        "ratio": 0.36050761674945614
+      },
+      "counted_target": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 1969.5,
+        "mean_candidate": 1969.5,
+        "ratio": 1.0
+      },
+      "counted_total": {
+        "ci95": [
+          0.9427225140730786,
+          0.951812265108563
+        ],
+        "mean_A": 2994894.6666666665,
+        "mean_candidate": 2837016.5,
+        "ratio": 0.9472842339251998
+      },
+      "expected_rank_ratio_K_minus_F_over_K": 0.3686274509803922,
+      "filter_rejections_total": 0.0,
+      "free_rank_mean": 161.0,
+      "rank_attempts": {
+        "ci95": [
+          0.3686274509803922,
+          0.3686274509803922
+        ],
+        "mean_A": 255.0,
+        "mean_candidate": 94.0,
+        "ratio": 0.3686274509803922
+      },
+      "replicates": 12,
+      "verdict_counted_total": "ADVANCES",
+      "wall_harvest_plus_other_setup": {
+        "ci95": [
+          2.5234311422878317,
+          6.674159204921353
+        ],
+        "mean_A": 18.55014491666672,
+        "mean_candidate": 76.41150516666663,
+        "ratio": 4.119186427380052
+      },
+      "wall_index": {
+        "ci95": [
+          0.9320470894691277,
+          1.1575002441481372
+        ],
+        "mean_A": 4176.4194861666665,
+        "mean_candidate": 4341.997359916666,
+        "ratio": 1.03964589148634
+      },
+      "wall_la": {
+        "ci95": [
+          0.06894403430229058,
+          1.183530906077242
+        ],
+        "mean_A": 1.6155350833333333,
+        "mean_candidate": 0.3041559166666666,
+        "ratio": 0.18826945932929032
+      },
+      "wall_rank": {
+        "ci95": [
+          0.3482264412460251,
+          0.5407483523291396
+        ],
+        "mean_A": 576.5173059166666,
+        "mean_candidate": 255.05482175,
+        "ratio": 0.44240618474489857
+      },
+      "wall_target": {
+        "ci95": [
+          0.8177379329308917,
+          1.5493914941027087
+        ],
+        "mean_A": 2.898483302083333,
+        "mean_candidate": 3.246982604166666,
+        "ratio": 1.1202350559800855
+      },
+      "wall_total": {
+        "ci95": [
+          0.8845000418741833,
+          1.0825370634932556
+        ],
+        "mean_A": 4776.000955385416,
+        "mean_candidate": 4677.014825354167,
+        "ratio": 0.9792742650271808
+      }
+    },
+    "distinct_logs_hashes": 1,
+    "inc": {
+      "counted_filter_plus_harvest": {
+        "ci95": [
+          null,
+          null
+        ],
+        "mean_A": 0.0,
+        "mean_candidate": 0.0,
+        "ratio": null
+      },
+      "counted_index": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 2666025.0,
+        "mean_candidate": 2666025.0,
+        "ratio": 1.0
+      },
+      "counted_rank": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 326900.1666666667,
+        "mean_candidate": 326900.1666666667,
+        "ratio": 1.0
+      },
+      "counted_target": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 1969.5,
+        "mean_candidate": 1969.5,
+        "ratio": 1.0
+      },
+      "counted_total": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 2994894.6666666665,
+        "mean_candidate": 2994894.6666666665,
+        "ratio": 1.0
+      },
+      "expected_rank_ratio_K_minus_F_over_K": 1.0,
+      "filter_rejections_total": 0.0,
+      "free_rank_mean": 0.0,
+      "rank_attempts": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 255.0,
+        "mean_candidate": 255.0,
+        "ratio": 1.0
+      },
+      "replicates": 12,
+      "verdict_counted_total": "MATCHES",
+      "wall_harvest_plus_other_setup": {
+        "ci95": [
+          1.0962974802711252,
+          4.352869811229162
+        ],
+        "mean_A": 18.55014491666672,
+        "mean_candidate": 41.96866408333341,
+        "ratio": 2.2624440009428652
+      },
+      "wall_index": {
+        "ci95": [
+          0.8727783021165659,
+          1.127812458405987
+        ],
+        "mean_A": 4176.4194861666665,
+        "mean_candidate": 4125.21291025,
+        "ratio": 0.9877391205346411
+      },
+      "wall_la": {
+        "ci95": [
+          0.06025147258372196,
+          0.9188147379163734
+        ],
+        "mean_A": 1.6155350833333333,
+        "mean_candidate": 0.24780650000000004,
+        "ratio": 0.15338973604256304
+      },
+      "wall_rank": {
+        "ci95": [
+          0.8514335353823094,
+          1.1315663745669244
+        ],
+        "mean_A": 576.5173059166666,
+        "mean_candidate": 563.2620774166668,
+        "ratio": 0.9770080995592596
+      },
+      "wall_target": {
+        "ci95": [
+          0.7837177872552723,
+          1.4589452607168047
+        ],
+        "mean_A": 2.898483302083333,
+        "mean_candidate": 3.1146649375,
+        "ratio": 1.0745843991101425
+      },
+      "wall_total": {
+        "ci95": [
+          0.8856615062119886,
+          1.115165545776727
+        ],
+        "mean_A": 4776.000955385416,
+        "mean_candidate": 4733.806123187501,
+        "ratio": 0.9911652379067604
+      }
+    },
+    "r": 549756390943
+  },
+  "n53": {
+    "A_replicates": 12,
+    "F": {
+      "counted_filter_plus_harvest": {
+        "ci95": [
+          null,
+          null
+        ],
+        "mean_A": 0.0,
+        "mean_candidate": 221.0,
+        "ratio": null
+      },
+      "counted_index": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 2565200.0,
+        "mean_candidate": 2565200.0,
+        "ratio": 1.0
+      },
+      "counted_rank": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 9379961.916666666,
+        "mean_candidate": 9379961.916666666,
+        "ratio": 1.0
+      },
+      "counted_target": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 22139.125,
+        "mean_candidate": 22139.125,
+        "ratio": 1.0
+      },
+      "counted_total": {
+        "ci95": [
+          1.0000180227619941,
+          1.0000189136820452
+        ],
+        "mean_A": 11967301.041666666,
+        "mean_candidate": 11967522.041666666,
+        "ratio": 1.0000184669876049
+      },
+      "expected_rank_ratio_K_minus_F_over_K": 1.0,
+      "filter_rejections_total": 0.0,
+      "free_rank_mean": 0.0,
+      "rank_attempts": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 220.0,
+        "mean_candidate": 220.0,
+        "ratio": 1.0
+      },
+      "replicates": 12,
+      "verdict_counted_total": "REGRESSES",
+      "wall_harvest_plus_other_setup": {
+        "ci95": [
+          0.6933550654632303,
+          1.5653455068478326
+        ],
+        "mean_A": 19.177118833333395,
+        "mean_candidate": 19.9314312500001,
+        "ratio": 1.0393339804181412
+      },
+      "wall_index": {
+        "ci95": [
+          0.9532732661725788,
+          1.1219334588474632
+        ],
+        "mean_A": 2610.749441083333,
+        "mean_candidate": 2690.7110408333333,
+        "ratio": 1.0306278337138397
+      },
+      "wall_la": {
+        "ci95": [
+          0.9604358918067782,
+          8.677599334022792
+        ],
+        "mean_A": 0.21682466666666664,
+        "mean_candidate": 0.8858631666666666,
+        "ratio": 4.085619871047882
+      },
+      "wall_rank": {
+        "ci95": [
+          0.9387697780384036,
+          1.035915704178262
+        ],
+        "mean_A": 10129.261597583334,
+        "mean_candidate": 9980.940684416668,
+        "ratio": 0.9853571840614668
+      },
+      "wall_target": {
+        "ci95": [
+          0.8572220022390137,
+          1.309398758119047
+        ],
+        "mean_A": 24.597772947916667,
+        "mean_candidate": 25.8911613125,
+        "ratio": 1.0525815230233222
+      },
+      "wall_total": {
+        "ci95": [
+          0.9552414967893783,
+          1.0403255959329119
+        ],
+        "mean_A": 12784.002755114583,
+        "mean_candidate": 12718.360180979167,
+        "ratio": 0.9948652565716044
+      }
+    },
+    "FR": {
+      "counted_filter_plus_harvest": {
+        "ci95": [
+          null,
+          null
+        ],
+        "mean_A": 0.0,
+        "mean_candidate": 37403.0,
+        "ratio": null
+      },
+      "counted_index": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 2565200.0,
+        "mean_candidate": 2565200.0,
+        "ratio": 1.0
+      },
+      "counted_rank": {
+        "ci95": [
+          0.8917498912906435,
+          0.9922142392097457
+        ],
+        "mean_A": 9379961.916666666,
+        "mean_candidate": 8810075.083333334,
+        "ratio": 0.9392442273863887
+      },
+      "counted_target": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 22139.125,
+        "mean_candidate": 22139.125,
+        "ratio": 1.0
+      },
+      "counted_total": {
+        "ci95": [
+          0.917158070376547,
+          0.9961506812455257
+        ],
+        "mean_A": 11967301.041666666,
+        "mean_candidate": 11434817.208333334,
+        "ratio": 0.9555051024889087
+      },
+      "expected_rank_ratio_K_minus_F_over_K": 0.9818181818181818,
+      "filter_rejections_total": 0.0,
+      "free_rank_mean": 4.0,
+      "rank_attempts": {
+        "ci95": [
+          0.9818181818181818,
+          0.9818181818181818
+        ],
+        "mean_A": 220.0,
+        "mean_candidate": 216.0,
+        "ratio": 0.9818181818181818
+      },
+      "replicates": 12,
+      "verdict_counted_total": "ADVANCES",
+      "wall_harvest_plus_other_setup": {
+        "ci95": [
+          0.9840038165729462,
+          2.847387543707522
+        ],
+        "mean_A": 19.177118833333395,
+        "mean_candidate": 31.494772333333305,
+        "ratio": 1.6423099114654043
+      },
+      "wall_index": {
+        "ci95": [
+          0.8828052029477805,
+          1.0901462923513856
+        ],
+        "mean_A": 2610.749441083333,
+        "mean_candidate": 2534.015096416667,
+        "ratio": 0.9706083075383806
+      },
+      "wall_la": {
+        "ci95": [
+          0.9878070194609888,
+          1.1937925528738655
+        ],
+        "mean_A": 0.21682466666666664,
+        "mean_candidate": 0.23353958333333333,
+        "ratio": 1.0770895531566214
+      },
+      "wall_rank": {
+        "ci95": [
+          0.8480635359303463,
+          0.9692590023623356
+        ],
+        "mean_A": 10129.261597583334,
+        "mean_candidate": 9179.546174416666,
+        "ratio": 0.9062404091337463
+      },
+      "wall_target": {
+        "ci95": [
+          0.7031065984643301,
+          1.0980367378951186
+        ],
+        "mean_A": 24.597772947916667,
+        "mean_candidate": 21.629030593750002,
+        "ratio": 0.8793084902258151
+      },
+      "wall_total": {
+        "ci95": [
+          0.8629862308526303,
+          0.9809561361787317
+        ],
+        "mean_A": 12784.002755114583,
+        "mean_candidate": 11766.918613343749,
+        "ratio": 0.9204408696357702
+      }
+    },
+    "K": 220,
+    "R": {
+      "counted_filter_plus_harvest": {
+        "ci95": [
+          null,
+          null
+        ],
+        "mean_A": 0.0,
+        "mean_candidate": 37186.0,
+        "ratio": null
+      },
+      "counted_index": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 2565200.0,
+        "mean_candidate": 2565200.0,
+        "ratio": 1.0
+      },
+      "counted_rank": {
+        "ci95": [
+          0.8917498912906435,
+          0.9922142392097457
+        ],
+        "mean_A": 9379961.916666666,
+        "mean_candidate": 8810075.083333334,
+        "ratio": 0.9392442273863887
+      },
+      "counted_target": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 22139.125,
+        "mean_candidate": 22139.125,
+        "ratio": 1.0
+      },
+      "counted_total": {
+        "ci95": [
+          0.9171405065835642,
+          0.9961325005343464
+        ],
+        "mean_A": 11967301.041666666,
+        "mean_candidate": 11434600.208333334,
+        "ratio": 0.9554869697454235
+      },
+      "expected_rank_ratio_K_minus_F_over_K": 0.9818181818181818,
+      "filter_rejections_total": 0.0,
+      "free_rank_mean": 4.0,
+      "rank_attempts": {
+        "ci95": [
+          0.9818181818181818,
+          0.9818181818181818
+        ],
+        "mean_A": 220.0,
+        "mean_candidate": 216.0,
+        "ratio": 0.9818181818181818
+      },
+      "replicates": 12,
+      "verdict_counted_total": "ADVANCES",
+      "wall_harvest_plus_other_setup": {
+        "ci95": [
+          1.3323597843519983,
+          3.3608339297066685
+        ],
+        "mean_A": 19.177118833333395,
+        "mean_candidate": 38.375208083333256,
+        "ratio": 2.0010935123700655
+      },
+      "wall_index": {
+        "ci95": [
+          0.9462041264087574,
+          1.164587910541397
+        ],
+        "mean_A": 2610.749441083333,
+        "mean_candidate": 2732.416813083333,
+        "ratio": 1.046602469806338
+      },
+      "wall_la": {
+        "ci95": [
+          1.0260658733416226,
+          1.2360173585846173
+        ],
+        "mean_A": 0.21682466666666664,
+        "mean_candidate": 0.24325675000000002,
+        "ratio": 1.1219053336490008
+      },
+      "wall_rank": {
+        "ci95": [
+          0.9035515745994328,
+          1.0075004987679446
+        ],
+        "mean_A": 10129.261597583334,
+        "mean_candidate": 9647.547945,
+        "ratio": 0.9524433594746666
+      },
+      "wall_target": {
+        "ci95": [
+          0.7294796566549551,
+          1.0743264927830576
+        ],
+        "mean_A": 24.597772947916667,
+        "mean_candidate": 21.817859031250006,
+        "ratio": 0.8869851379410302
+      },
+      "wall_total": {
+        "ci95": [
+          0.9292620193246991,
+          1.0142403620860134
+        ],
+        "mean_A": 12784.002755114583,
+        "mean_candidate": 12440.401081947917,
+        "ratio": 0.9731225282293374
+      }
+    },
+    "distinct_logs_hashes": 1,
+    "inc": {
+      "counted_filter_plus_harvest": {
+        "ci95": [
+          null,
+          null
+        ],
+        "mean_A": 0.0,
+        "mean_candidate": 0.0,
+        "ratio": null
+      },
+      "counted_index": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 2565200.0,
+        "mean_candidate": 2565200.0,
+        "ratio": 1.0
+      },
+      "counted_rank": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 9379961.916666666,
+        "mean_candidate": 9379961.916666666,
+        "ratio": 1.0
+      },
+      "counted_target": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 22139.125,
+        "mean_candidate": 22139.125,
+        "ratio": 1.0
+      },
+      "counted_total": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 11967301.041666666,
+        "mean_candidate": 11967301.041666666,
+        "ratio": 1.0
+      },
+      "expected_rank_ratio_K_minus_F_over_K": 1.0,
+      "filter_rejections_total": 0.0,
+      "free_rank_mean": 0.0,
+      "rank_attempts": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 220.0,
+        "mean_candidate": 220.0,
+        "ratio": 1.0
+      },
+      "replicates": 12,
+      "verdict_counted_total": "MATCHES",
+      "wall_harvest_plus_other_setup": {
+        "ci95": [
+          0.5348585651595973,
+          1.357582581125953
+        ],
+        "mean_A": 19.177118833333395,
+        "mean_candidate": 15.696827416666679,
+        "ratio": 0.8185185456212889
+      },
+      "wall_index": {
+        "ci95": [
+          0.9407485817645372,
+          1.0793178171845925
+        ],
+        "mean_A": 2610.749441083333,
+        "mean_candidate": 2633.3863985833336,
+        "ratio": 1.0086706740768687
+      },
+      "wall_la": {
+        "ci95": [
+          0.8540696530465008,
+          1.0499014919434142
+        ],
+        "mean_A": 0.21682466666666664,
+        "mean_candidate": 0.20432116666666666,
+        "ratio": 0.9423335905816376
+      },
+      "wall_rank": {
+        "ci95": [
+          0.9609084846987694,
+          1.0632723030669569
+        ],
+        "mean_A": 10129.261597583334,
+        "mean_candidate": 10238.116255333334,
+        "ratio": 1.0107465540998537
+      },
+      "wall_target": {
+        "ci95": [
+          0.7069380870300161,
+          1.0908024284964957
+        ],
+        "mean_A": 24.597772947916667,
+        "mean_candidate": 21.509129708333337,
+        "ratio": 0.8744340292056837
+      },
+      "wall_total": {
+        "ci95": [
+          0.9660552618266844,
+          1.0545372065954814
+        ],
+        "mean_A": 12784.002755114583,
+        "mean_candidate": 12908.912932208334,
+        "ratio": 1.0097708190061034
+      }
+    },
+    "r": 21044858204113
+  },
+  "n61": {
+    "A_replicates": 20,
+    "F": {
+      "counted_filter_plus_harvest": {
+        "ci95": [
+          null,
+          null
+        ],
+        "mean_A": 0.0,
+        "mean_candidate": 501.0,
+        "ratio": null
+      },
+      "counted_index": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 15250000.0,
+        "mean_candidate": 15250000.0,
+        "ratio": 1.0
+      },
+      "counted_rank": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 22791912.4,
+        "mean_candidate": 22791912.4,
+        "ratio": 1.0
+      },
+      "counted_target": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 38391.75,
+        "mean_candidate": 38391.75,
+        "ratio": 1.0
+      },
+      "counted_total": {
+        "ci95": [
+          1.0000130163142196,
+          1.0000133072553803
+        ],
+        "mean_A": 38080304.15,
+        "mean_candidate": 38080805.15,
+        "ratio": 1.000013156407523
+      },
+      "expected_rank_ratio_K_minus_F_over_K": 1.0,
+      "filter_rejections_total": 0.0,
+      "free_rank_mean": 0.0,
+      "rank_attempts": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 500.0,
+        "mean_candidate": 500.0,
+        "ratio": 1.0
+      },
+      "replicates": 20,
+      "verdict_counted_total": "REGRESSES",
+      "wall_harvest_plus_other_setup": {
+        "ci95": [
+          0.5044117031942207,
+          1.658302690488958
+        ],
+        "mean_A": 45.43988844999994,
+        "mean_candidate": 41.28371375000033,
+        "ratio": 0.9085346632271581
+      },
+      "wall_index": {
+        "ci95": [
+          0.7765207921257467,
+          1.0266372666152368
+        ],
+        "mean_A": 15731.807018100002,
+        "mean_candidate": 14440.802850349999,
+        "ratio": 0.9179366892649613
+      },
+      "wall_la": {
+        "ci95": [
+          0.9572456755826554,
+          1.020913787373418
+        ],
+        "mean_A": 1.0114519000000002,
+        "mean_candidate": 0.9999066500000001,
+        "ratio": 0.9885854680781162
+      },
+      "wall_rank": {
+        "ci95": [
+          0.9709829060175151,
+          1.019923038871405
+        ],
+        "mean_A": 24154.1534348,
+        "mean_candidate": 24021.5850348,
+        "ratio": 0.9945115691859022
+      },
+      "wall_target": {
+        "ci95": [
+          0.9084020897678043,
+          1.0289127763866988
+        ],
+        "mean_A": 36.932774743749995,
+        "mean_candidate": 35.727801125,
+        "ratio": 0.9673738670568229
+      },
+      "wall_total": {
+        "ci95": [
+          0.9064166131109505,
+          1.0070484190277613
+        ],
+        "mean_A": 39969.34456799376,
+        "mean_candidate": 38540.39930667499,
+        "ratio": 0.9642489693848264
+      }
+    },
+    "FR": {
+      "counted_filter_plus_harvest": {
+        "ci95": [
+          null,
+          null
+        ],
+        "mean_A": 0.0,
+        "mean_candidate": 85674.0,
+        "ratio": null
+      },
+      "counted_index": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 15250000.0,
+        "mean_candidate": 15250000.0,
+        "ratio": 1.0
+      },
+      "counted_rank": {
+        "ci95": [
+          0.9101295177500975,
+          0.9623691513539846
+        ],
+        "mean_A": 22791912.4,
+        "mean_candidate": 21301178.25,
+        "ratio": 0.9345937223767147
+      },
+      "counted_target": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 38391.75,
+        "mean_candidate": 38391.75,
+        "ratio": 1.0
+      },
+      "counted_total": {
+        "ci95": [
+          0.9480955567719285,
+          0.9797096836543503
+        ],
+        "mean_A": 38080304.15,
+        "mean_candidate": 36675244.0,
+        "ratio": 0.9631027067308757
+      },
+      "expected_rank_ratio_K_minus_F_over_K": 0.95,
+      "filter_rejections_total": 0.0,
+      "free_rank_mean": 25.0,
+      "rank_attempts": {
+        "ci95": [
+          0.95,
+          0.95
+        ],
+        "mean_A": 500.0,
+        "mean_candidate": 475.0,
+        "ratio": 0.95
+      },
+      "replicates": 20,
+      "verdict_counted_total": "ADVANCES",
+      "wall_harvest_plus_other_setup": {
+        "ci95": [
+          0.8147340876052241,
+          2.2504004685752608
+        ],
+        "mean_A": 45.43988844999994,
+        "mean_candidate": 58.15501989999984,
+        "ratio": 1.279823122012966
+      },
+      "wall_index": {
+        "ci95": [
+          0.7836612396668551,
+          1.023822503496542
+        ],
+        "mean_A": 15731.807018100002,
+        "mean_candidate": 14257.749757600002,
+        "ratio": 0.9063008299806854
+      },
+      "wall_la": {
+        "ci95": [
+          0.9660709660964323,
+          1.0315564882269435
+        ],
+        "mean_A": 1.0114519000000002,
+        "mean_candidate": 1.0113526000000002,
+        "ratio": 0.9999018242983182
+      },
+      "wall_rank": {
+        "ci95": [
+          0.8425577788697041,
+          0.9645969778537397
+        ],
+        "mean_A": 24154.1534348,
+        "mean_candidate": 21829.29322985,
+        "ratio": 0.9037490503972513
+      },
+      "wall_target": {
+        "ci95": [
+          0.9442996262851187,
+          1.1778081843029042
+        ],
+        "mean_A": 36.932774743749995,
+        "mean_candidate": 38.782167637499995,
+        "ratio": 1.0500745721539095
+      },
+      "wall_total": {
+        "ci95": [
+          0.8317794953445238,
+          0.9805655512817167
+        ],
+        "mean_A": 39969.34456799376,
+        "mean_candidate": 36184.99152758751,
+        "ratio": 0.9053186115181723
+      }
+    },
+    "K": 500,
+    "R": {
+      "counted_filter_plus_harvest": {
+        "ci95": [
+          null,
+          null
+        ],
+        "mean_A": 0.0,
+        "mean_candidate": 85198.0,
+        "ratio": null
+      },
+      "counted_index": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 15250000.0,
+        "mean_candidate": 15250000.0,
+        "ratio": 1.0
+      },
+      "counted_rank": {
+        "ci95": [
+          0.9101295177500975,
+          0.9623691513539846
+        ],
+        "mean_A": 22791912.4,
+        "mean_candidate": 21301178.25,
+        "ratio": 0.9345937223767147
+      },
+      "counted_target": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 38391.75,
+        "mean_candidate": 38391.75,
+        "ratio": 1.0
+      },
+      "counted_total": {
+        "ci95": [
+          0.9480831726786672,
+          0.9796971095324442
+        ],
+        "mean_A": 38080304.15,
+        "mean_candidate": 36674768.0,
+        "ratio": 0.9630902068307141
+      },
+      "expected_rank_ratio_K_minus_F_over_K": 0.95,
+      "filter_rejections_total": 0.0,
+      "free_rank_mean": 25.0,
+      "rank_attempts": {
+        "ci95": [
+          0.95,
+          0.95
+        ],
+        "mean_A": 500.0,
+        "mean_candidate": 475.0,
+        "ratio": 0.95
+      },
+      "replicates": 20,
+      "verdict_counted_total": "ADVANCES",
+      "wall_harvest_plus_other_setup": {
+        "ci95": [
+          0.8976242420792173,
+          1.782589031803899
+        ],
+        "mean_A": 45.43988844999994,
+        "mean_candidate": 55.87566200000056,
+        "ratio": 1.229661073254695
+      },
+      "wall_index": {
+        "ci95": [
+          0.7731743115841228,
+          1.0197565002262503
+        ],
+        "mean_A": 15731.807018100002,
+        "mean_candidate": 14185.26825315,
+        "ratio": 0.9016935077343211
+      },
+      "wall_la": {
+        "ci95": [
+          0.995246286256669,
+          1.150379866855171
+        ],
+        "mean_A": 1.0114519000000002,
+        "mean_candidate": 1.0731271999999998,
+        "ratio": 1.0609769975220766
+      },
+      "wall_rank": {
+        "ci95": [
+          0.850177821032192,
+          0.9912765365772896
+        ],
+        "mean_A": 24154.1534348,
+        "mean_candidate": 22228.917994150004,
+        "ratio": 0.9202938142358482
+      },
+      "wall_target": {
+        "ci95": [
+          0.9345216023317631,
+          1.3585069192118846
+        ],
+        "mean_A": 36.932774743749995,
+        "mean_candidate": 40.579473387499995,
+        "ratio": 1.0987388212516342
+      },
+      "wall_total": {
+        "ci95": [
+          0.8578438032070194,
+          0.9712271695697653
+        ],
+        "mean_A": 39969.34456799376,
+        "mean_candidate": 36511.714509887504,
+        "ratio": 0.9134929507732029
+      }
+    },
+    "distinct_logs_hashes": 1,
+    "inc": {
+      "counted_filter_plus_harvest": {
+        "ci95": [
+          null,
+          null
+        ],
+        "mean_A": 0.0,
+        "mean_candidate": 0.0,
+        "ratio": null
+      },
+      "counted_index": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 15250000.0,
+        "mean_candidate": 15250000.0,
+        "ratio": 1.0
+      },
+      "counted_rank": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 22791912.4,
+        "mean_candidate": 22791912.4,
+        "ratio": 1.0
+      },
+      "counted_target": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 38391.75,
+        "mean_candidate": 38391.75,
+        "ratio": 1.0
+      },
+      "counted_total": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 38080304.15,
+        "mean_candidate": 38080304.15,
+        "ratio": 1.0
+      },
+      "expected_rank_ratio_K_minus_F_over_K": 1.0,
+      "filter_rejections_total": 0.0,
+      "free_rank_mean": 0.0,
+      "rank_attempts": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "mean_A": 500.0,
+        "mean_candidate": 500.0,
+        "ratio": 1.0
+      },
+      "replicates": 20,
+      "verdict_counted_total": "MATCHES",
+      "wall_harvest_plus_other_setup": {
+        "ci95": [
+          0.4679562451692754,
+          1.4034746260583584
+        ],
+        "mean_A": 45.43988844999994,
+        "mean_candidate": 35.468250949999494,
+        "ratio": 0.7805532134839459
+      },
+      "wall_index": {
+        "ci95": [
+          0.9280773352554569,
+          1.0232873799326339
+        ],
+        "mean_A": 15731.807018100002,
+        "mean_candidate": 15316.61969735,
+        "ratio": 0.9736084150871979
+      },
+      "wall_la": {
+        "ci95": [
+          0.8717017052971939,
+          0.9310573288163657
+        ],
+        "mean_A": 1.0114519000000002,
+        "mean_candidate": 0.9105304499999999,
+        "ratio": 0.9002212067622788
+      },
+      "wall_rank": {
+        "ci95": [
+          1.002344265547764,
+          1.256250325772746
+        ],
+        "mean_A": 24154.1534348,
+        "mean_candidate": 26522.66633925001,
+        "ratio": 1.0980582039790137
+      },
+      "wall_target": {
+        "ci95": [
+          0.9673662249952862,
+          1.4805761436502531
+        ],
+        "mean_A": 36.932774743749995,
+        "mean_candidate": 43.154695275,
+        "ratio": 1.1684661002163916
+      },
+      "wall_total": {
+        "ci95": [
+          0.9947219418927596,
+          1.1206317076686831
+        ],
+        "mean_A": 39969.34456799376,
+        "mean_candidate": 41918.819513275,
+        "ratio": 1.0487742535273477
+      }
+    },
+    "r": 162888033982417
+  },
+  "pooled_size_normalised": {
+    "F.counted_total": {
+      "ci95": [
+        1.000025453573381,
+        1.0000438892672554
+      ],
+      "pairs": 44,
+      "ratio": 1.0000343290361995,
+      "verdict": "REGRESSES"
+    },
+    "F.wall_total": {
+      "ci95": [
+        0.9412843942607756,
+        1.0422716988866647
+      ],
+      "pairs": 44,
+      "ratio": 0.9900445999524234,
+      "verdict": "MATCHES"
+    },
+    "FR.counted_total": {
+      "ci95": [
+        0.9439353498131079,
+        0.9702491863839419
+      ],
+      "pairs": 44,
+      "ratio": 0.9567251549855625,
+      "verdict": "ADVANCES"
+    },
+    "FR.wall_total": {
+      "ci95": [
+        0.8868524566350033,
+        0.9892877701153256
+      ],
+      "pairs": 44,
+      "ratio": 0.9379271255056104,
+      "verdict": "ADVANCES"
+    },
+    "R.counted_total": {
+      "ci95": [
+        0.9439154693861986,
+        0.9702295496980304
+      ],
+      "pairs": 44,
+      "ratio": 0.956705876833222,
+      "verdict": "ADVANCES"
+    },
+    "R.wall_total": {
+      "ci95": [
+        0.9081404972129499,
+        0.9888404937266392
+      ],
+      "pairs": 44,
+      "ratio": 0.9476959212395972,
+      "verdict": "ADVANCES"
+    },
+    "inc.counted_total": {
+      "ci95": [
+        1.0,
+        1.0
+      ],
+      "pairs": 44,
+      "ratio": 1.0,
+      "verdict": "MATCHES"
+    },
+    "inc.wall_total": {
+      "ci95": [
+        0.9790277481518679,
+        1.0698284021374806
+      ],
+      "pairs": 44,
+      "ratio": 1.0224254034886664,
+      "verdict": "MATCHES"
+    }
+  }
+}
