@@ -43,6 +43,23 @@
 //! $B analyze research/factor_base_designs_20261015/runs --pilot research/pkm_tower_pilot_20260924/runs
 //! ```
 //!
+//! Amendment 2 (F1–F4) adds the prime index to the seed (`p₁ = 0`, so every
+//! `p₁` seed is unchanged; `p₂ = 2013265921` is 1), the arm `N11` (A11 with
+//! the equations defining `s_i` given random coefficients on their support
+//! and a planted zero) and the norm chain at `m = 4`
+//! (`f = (X + q_0)·y − P(X)`, `deg P = 2`, quartic `G`):
+//!
+//! ```bash
+//! R=research/factor_base_designs_20261015/runs
+//! $B check-p2                                  # F1's instrument check at p₂
+//! $B regress --rows $R/A11-m3.jsonl --arm A11 --m 3 --t 2   # p₁ rows unchanged
+//! $B run --prime p2 --arms A0,A11 --m 2,3 --file 'F1-{arm}-m{m}-p2' --out-dir $R
+//! $B run --arms N11 --m 2,3 --file 'F2-{arm}-m{m}' --out-dir $R
+//! $B run --arms A0,A11 --m 4 --file 'F4-{arm}-m{m}' --out-dir $R
+//! $B run --arms A0,A11 --m 3 --t-min 5 --t-max 5 --budget 3600 --grace 300 --file 'F3-{arm}-m3-t5' --out-dir $R
+//! $B analyze $R --amendment2                   # every Amendment 2 decision rule
+//! ```
+//!
 //! A stage diagnostic of the solver axis (`AGENTS.md` §2): it prices no
 //! pipeline and reports no `S`.
 
@@ -60,15 +77,27 @@ use serde_json::{json, Value};
 
 /// `p₁ = 3·2^18 + 1`, the pilot's prime.
 const P1: u64 = 786_433;
-/// `p₂ = 15·2^27 + 1`, the replication prime (§5, Amendment 2 F1).
+/// `p₂ = 15·2^27 + 1`, the replication prime (§5, Amendment 2).
 const P2: u64 = 2_013_265_921;
 
-/// The prime index of the seed rule (Amendment 2): `p₁ = 0`, `p₂ = 1`.
-fn prime_index(p: u64) -> u64 {
-    match p {
-        P1 => 0,
-        P2 => 1,
-        _ => panic!("no prime index registered for p = {p}"),
+/// A prime by its index in the seed rule (Amendment 2): `p₁ = 0`, `p₂ = 1`.
+fn prime_of(idx: usize) -> u64 {
+    match idx {
+        0 => P1,
+        1 => P2,
+        _ => panic!("unknown prime index {idx}"),
+    }
+}
+
+fn prime_label(idx: usize) -> &'static str {
+    ["p1", "p2"][idx]
+}
+
+fn parse_prime(s: &str) -> usize {
+    match s {
+        "p1" => 0,
+        "p2" => 1,
+        _ => panic!("unknown prime `{s}` (p1 or p2)"),
     }
 }
 /// "FBDS", the preregistered seed base.
@@ -317,10 +346,19 @@ enum Arm {
     A1g,
     A4,
     A11,
+    N11,
 }
 
 impl Arm {
-    const ALL: [Arm; 6] = [Arm::A0, Arm::N, Arm::A1z, Arm::A1g, Arm::A4, Arm::A11];
+    const ALL: [Arm; 7] = [
+        Arm::A0,
+        Arm::N,
+        Arm::A1z,
+        Arm::A1g,
+        Arm::A4,
+        Arm::A11,
+        Arm::N11,
+    ];
 
     fn name(self) -> &'static str {
         match self {
@@ -330,6 +368,7 @@ impl Arm {
             Arm::A1g => "A1g",
             Arm::A4 => "A4",
             Arm::A11 => "A11",
+            Arm::N11 => "N11",
         }
     }
 
@@ -638,7 +677,7 @@ fn parallel_design(p: u64, t: usize, rng: &mut StdRng) -> Design {
 
 fn build_design(arm: Arm, p: u64, t: usize, rng: &mut StdRng) -> Design {
     let d = match arm {
-        Arm::A0 | Arm::N | Arm::A11 => kummer_design(p, t, rng),
+        Arm::A0 | Arm::N | Arm::A11 | Arm::N11 => kummer_design(p, t, rng),
         Arm::A1z => interval_design(p, t, false, rng),
         Arm::A1g => interval_design(p, t, true, rng),
         Arm::A4 => parallel_design(p, t, rng),
@@ -780,14 +819,65 @@ fn tower_system(
     (eqs, n, sol)
 }
 
-/// The norm-chain system (`A11`) for `m ∈ {2, 3}` on the coset `g·μ_{2^t}`.
+/// Gaussian elimination mod `p` on an augmented `k × (k + 1)` system;
+/// `None` when it is singular.
+fn solve_linear(mut a: Vec<Vec<u64>>, p: u64) -> Option<Vec<u64>> {
+    let k = a.len();
+    for c in 0..k {
+        let r = (c..k).find(|&r| a[r][c] != 0)?;
+        a.swap(c, r);
+        let inv = invm(a[c][c], p);
+        for x in a[c].iter_mut() {
+            *x = mulm(*x, inv, p);
+        }
+        let prow = a[c].clone();
+        for (r, row) in a.iter_mut().enumerate() {
+            if r != c && row[c] != 0 {
+                let f = row[c];
+                for (x, &y) in row.iter_mut().zip(&prow) {
+                    *x = subm(*x, mulm(f, y, p), p);
+                }
+            }
+        }
+    }
+    Some(a.into_iter().map(|row| row[k]).collect())
+}
+
+/// The Lagrange interpolant through `(xs, ys)`, coefficients low to high.
+fn interpolate(xs: &[u64], ys: &[u64], p: u64) -> Vec<u64> {
+    let m = xs.len();
+    let mut pnum = vec![0u64; m];
+    for i in 0..m {
+        let mut basis = vec![1u64];
+        let mut denom = 1u64;
+        for k in 0..m {
+            if k != i {
+                basis = npmul(&basis, &[subm(0, xs[k], p), 1], p);
+                denom = mulm(denom, subm(xs[i], xs[k], p), p);
+            }
+        }
+        let w = mulm(ys[i], invm(denom, p), p);
+        for (c, bk) in pnum.iter_mut().zip(&basis) {
+            *c = addm(*c, mulm(w, *bk, p), p);
+        }
+    }
+    pnum
+}
+
+/// The norm-chain system (`A11`) for `m ∈ {2, 3, 4}` on the coset
+/// `g·μ_{2^t}`.
 ///
 /// Unknowns: `c_1 … c_{m−1}` (the function `f = y − P(X)` through `−R`,
 /// `P(X) = y(−R) + Σ c_i (X^i − x_R^i)`; `c_1 = λ` at `m = 2`), then
 /// `s_0 … s_{m−1}` (`G_s = X^m + Σ s_i X^i`), then per step `j < t` the
 /// quotient `q_j` (`m − 1` coefficients) and `r_{j+1}` (`m` coefficients).
+/// At `m = 4` (Amendment 2, F4) the function is `f = Q(X)·y − P(X)` with
+/// `Q = X + q_0` and `P(X) = Q(x_R)·y(−R) + c_1(X − x_R) + c_2(X² − x_R²)`;
+/// the free coefficients are `q_0, c_1, c_2` in that order, and
+/// `N(X) = Q²(X³ + AX + B) − P²` has degree 5, so `G` is a quartic.
 /// Returns `None` when the planted function has a vanishing leading
-/// coefficient (the caller replants).
+/// coefficient, or at `m = 4` when no such `f` with `Q` monic passes through
+/// the summands (the caller replants).
 fn norm_chain_system(
     g: u64,
     t: usize,
@@ -796,8 +886,8 @@ fn norm_chain_system(
     target: &Target,
 ) -> Option<(Vec<Pol>, usize, Vec<u64>, Value)> {
     assert!(
-        m == 2 || m == 3,
-        "the norm chain is written for m ∈ {{2, 3}}"
+        (2..=4).contains(&m),
+        "the norm chain is written for m ∈ {{2, 3, 4}}"
     );
     let p = curve.p;
     let (ca, cb) = (curve.a, curve.b);
@@ -812,19 +902,43 @@ fn norm_chain_system(
     let step_base = |j: usize| n_c + n_s + per_step * j;
 
     // P(X) and N(X) = X³ + AX + B − P(X)², as coefficient lists of Pol.
-    let mut pc: Vec<Pol> = vec![Pol::constant(n, y0, p)];
-    for i in 1..m {
-        let xri = powm(x_r, i as u64, p);
-        pc[0] = pc[0].sub(&cvar(i).scale(xri, p), p);
-        pc.push(cvar(i));
-    }
-    let deg_n = 3.max(2 * (m - 1));
+    let (pc, deg_n) = if m == 4 {
+        // P(X) = Q(x_R)·y(−R) + c_1(X − x_R) + c_2(X² − x_R²), unknowns
+        // q_0 = var 0, c_1 = var 1, c_2 = var 2.
+        let q0 = Pol::var(n, 0);
+        let (c1, c2) = (Pol::var(n, 1), Pol::var(n, 2));
+        let p0 = Pol::constant(n, mulm(x_r, y0, p), p)
+            .add(&q0.scale(y0, p), p)
+            .sub(&c1.scale(x_r, p), p)
+            .sub(&c2.scale(mulm(x_r, x_r, p), p), p);
+        (vec![p0, c1, c2], 5)
+    } else {
+        let mut pc: Vec<Pol> = vec![Pol::constant(n, y0, p)];
+        for i in 1..m {
+            let xri = powm(x_r, i as u64, p);
+            pc[0] = pc[0].sub(&cvar(i).scale(xri, p), p);
+            pc.push(cvar(i));
+        }
+        (pc, 3.max(2 * (m - 1)))
+    };
     let mut nc: Vec<Pol> = vec![Pol::zero(n); deg_n + 1];
-    nc[3] = nc[3].add(&Pol::constant(n, 1, p), p);
-    nc[1] = nc[1].add(&Pol::constant(n, ca, p), p);
-    nc[0] = nc[0].add(&Pol::constant(n, cb, p), p);
-    for i in 0..m {
-        for j in 0..m {
+    if m == 4 {
+        // Q² · (X³ + AX + B), Q = X + q_0.
+        let q0 = Pol::var(n, 0);
+        let q2 = [q0.mul(&q0, p), q0.scale(2, p), Pol::constant(n, 1, p)];
+        let cubic = [cb, ca, 0, 1];
+        for (i, qi) in q2.iter().enumerate() {
+            for (j, &cj) in cubic.iter().enumerate() {
+                nc[i + j] = nc[i + j].add(&qi.scale(cj, p), p);
+            }
+        }
+    } else {
+        nc[3] = nc[3].add(&Pol::constant(n, 1, p), p);
+        nc[1] = nc[1].add(&Pol::constant(n, ca, p), p);
+        nc[0] = nc[0].add(&Pol::constant(n, cb, p), p);
+    }
+    for i in 0..pc.len() {
+        for j in 0..pc.len() {
             nc[i + j] = nc[i + j].sub(&pc[i].mul(&pc[j], p), p);
         }
     }
@@ -883,29 +997,47 @@ fn norm_chain_system(
     // the s's and the chain's values.
     let xs: Vec<u64> = target.pts.iter().map(|pt| pt.x).collect();
     let ys: Vec<u64> = target.pts.iter().map(|pt| pt.y).collect();
-    let mut pnum = vec![0u64; m];
-    for i in 0..m {
-        let mut basis = vec![1u64];
-        let mut denom = 1u64;
-        for k in 0..m {
-            if k != i {
-                basis = npmul(&basis, &[subm(0, xs[k], p), 1], p);
-                denom = mulm(denom, subm(xs[i], xs[k], p), p);
-            }
-        }
-        let w = mulm(ys[i], invm(denom, p), p);
-        for (c, bk) in pnum.iter_mut().zip(&basis) {
-            *c = addm(*c, mulm(w, *bk, p), p);
-        }
-    }
-    let p_at = |x: u64| {
-        pnum.iter()
-            .rev()
-            .fold(0u64, |acc, &c| addm(mulm(acc, x, p), c, p))
-    };
-    assert_eq!(p_at(x_r), y0, "the planted function misses −R");
     let mut sol = vec![0u64; n];
-    sol[..(m - 1)].copy_from_slice(&pnum[1..m]);
+    if m == 4 {
+        // (x_i + q_0)·y_i = P(x_i) at the four summands: a linear system in
+        // (q_0, P_0, P_1, P_2); singular means no f with Q monic.
+        let rows: Vec<Vec<u64>> = (0..4)
+            .map(|i| {
+                let x2 = mulm(xs[i], xs[i], p);
+                let rhs = subm(0, mulm(xs[i], ys[i], p), p);
+                vec![ys[i], p - 1, subm(0, xs[i], p), subm(0, x2, p), rhs]
+            })
+            .collect();
+        let v = solve_linear(rows, p)?;
+        let (q0, p0, p1, p2) = (v[0], v[1], v[2], v[3]);
+        let at_r = addm(
+            addm(p0, mulm(p1, x_r, p), p),
+            mulm(p2, mulm(x_r, x_r, p), p),
+            p,
+        );
+        assert_eq!(
+            mulm(addm(x_r, q0, p), y0, p),
+            at_r,
+            "the planted function misses −R"
+        );
+        sol[0] = q0;
+        sol[1] = p1;
+        sol[2] = p2;
+        assert_eq!(pc[0].eval(&sol, p), p0, "P_0 is not Q(x_R)·y(−R) + …");
+        assert!(
+            lead.terms.len() == 1 && lead.terms.get(&vec![0; n]) == Some(&1),
+            "lead(G) is not the constant 1 at m = 4"
+        );
+    } else {
+        let pnum = interpolate(&xs, &ys, p);
+        let p_at = |x: u64| {
+            pnum.iter()
+                .rev()
+                .fold(0u64, |acc, &c| addm(mulm(acc, x, p), c, p))
+        };
+        assert_eq!(p_at(x_r), y0, "the planted function misses −R");
+        sol[..(m - 1)].copy_from_slice(&pnum[1..m]);
+    }
     let lead_v = lead.eval(&sol, p);
     if lead_v == 0 {
         return None;
@@ -941,8 +1073,17 @@ fn norm_chain_system(
         rv[0] == 1 && rv[1..].iter().all(|&c| c == 0),
         "X^(2^t) ≢ 1 mod G_s at the planted solution"
     );
-    let info = json!({"y_neg_r": y0, "lead_at_planted": lead_v, "n_c": n_c, "n_s": n_s,
+    // norm_chain_excess (Lean): one equation more than unknowns.
+    assert_eq!(eqs.len(), n + 1, "the norm chain's excess is not 1");
+    let mut info = json!({"y_neg_r": y0, "lead_at_planted": lead_v, "n_c": n_c, "n_s": n_s,
                       "per_step": per_step});
+    if m == 4 {
+        merge(
+            &mut info,
+            &json!({"function": "Q(X)·y − P(X), Q = X + q0, deg P = 2", "q0": sol[0],
+                    "lead_G": "1 (checked symbolically)", "excess": eqs.len() - n}),
+        );
+    }
     Some((eqs, n, sol, info))
 }
 
@@ -1057,10 +1198,10 @@ fn merge(into: &mut Value, from: &Value) {
     }
 }
 
-/// `0x46424453 ⊕ prime≪48 ⊕ arm≪40 ⊕ m≪32 ⊕ t≪16` (Amendments 1 and 2;
-/// every p₁ seed is unchanged).
-fn cell_seed(p: u64, arm: Arm, m: usize, t: usize) -> u64 {
-    SEED ^ (prime_index(p) << 48) ^ (arm.id() << 40) ^ ((m as u64) << 32) ^ ((t as u64) << 16)
+/// Amendment 1 item 3, with Amendment 2's prime index (`p₁ = 0`, so every
+/// `p₁` seed is unchanged).
+fn cell_seed(prime: usize, arm: Arm, m: usize, t: usize) -> u64 {
+    SEED ^ ((prime as u64) << 48) ^ (arm.id() << 40) ^ ((m as u64) << 32) ^ ((t as u64) << 16)
 }
 
 fn target_seed(cell: u64, k: usize) -> u64 {
@@ -1069,8 +1210,28 @@ fn target_seed(cell: u64, k: usize) -> u64 {
 
 /// Build and measure one system; prints a description line (`"phase":
 /// "built"`) before F4 runs, and the row after.
-fn one(p: u64, arm: Arm, m: usize, t: usize, k: usize, budget: Duration) -> Value {
-    let cs = cell_seed(p, arm, m, t);
+fn one(prime: usize, arm: Arm, m: usize, t: usize, k: usize, budget: Duration) -> Value {
+    let (mut row, eqs, n, sol) = build_system(prime, arm, m, t, k);
+    let mut built = row.clone();
+    merge(&mut built, &json!({"phase": "built"}));
+    println!("{built}");
+    std::io::stdout().flush().ok();
+    let r = measure(&eqs, n, prime_of(prime), &sol, budget);
+    merge(&mut row, &r);
+    row
+}
+
+/// One system with every check before measuring: its row so far (no F4
+/// fields), equations, unknown count and planted solution.
+fn build_system(
+    prime: usize,
+    arm: Arm,
+    m: usize,
+    t: usize,
+    k: usize,
+) -> (Value, Vec<Pol>, usize, Vec<u64>) {
+    let p = prime_of(prime);
+    let cs = cell_seed(prime, arm, m, t);
     let mut rng = StdRng::seed_from_u64(cs);
     let d = build_design(arm, p, t, &mut rng);
     let (curve, on) = target_curve(p, &d.v, m.max(2), &mut rng);
@@ -1081,13 +1242,30 @@ fn one(p: u64, arm: Arm, m: usize, t: usize, k: usize, budget: Duration) -> Valu
         let Some(tg) = plant(&curve, m, &on, &mut trng) else {
             continue;
         };
-        if arm == Arm::A11 {
+        if arm == Arm::A11 || arm == Arm::N11 {
             let Shape::Kummer { g } = d.shape else {
                 unreachable!()
             };
-            let Some((eqs, n, sol, info)) = norm_chain_system(g, t, &curve, m, &tg) else {
+            let Some((mut eqs, n, sol, mut info)) = norm_chain_system(g, t, &curve, m, &tg) else {
                 continue;
             };
+            if arm == Arm::N11 {
+                // Amendment 2, F2: the m equations defining s_i from the
+                // function's coefficients get random coefficients on their
+                // own support, shifted to vanish at the planted solution.
+                for f in eqs[..m].iter_mut() {
+                    let mut g = Pol::zero(n);
+                    for e in f.terms.keys() {
+                        g.terms.insert(e.clone(), trng.gen_range(1..p));
+                    }
+                    let c = g.eval(&sol, p);
+                    *f = g.sub(&Pol::constant(n, c, p), p);
+                }
+                merge(
+                    &mut info,
+                    &json!({"null": "s-defining equations randomised", "null_eqs": m}),
+                );
+            }
             extra = info;
             break (eqs, n, sol, tg);
         }
@@ -1095,10 +1273,10 @@ fn one(p: u64, arm: Arm, m: usize, t: usize, k: usize, budget: Duration) -> Valu
         let (eqs, n, sol) = tower_system(&d, &curve, m, &tg, null);
         break (eqs, n, sol, tg);
     };
-    if arm == Arm::A11 {
+    if arm == Arm::A11 || arm == Arm::N11 {
         check_norm_chain(&d, m, p, &mut StdRng::seed_from_u64(ts ^ 0xC4EC));
     }
-    let mut row = json!({
+    let row = json!({
         "arm": arm.name(),
         "m": m,
         "t": t,
@@ -1109,7 +1287,7 @@ fn one(p: u64, arm: Arm, m: usize, t: usize, k: usize, budget: Duration) -> Valu
         "n_vars": n,
         "n_eqs": eqs.len(),
         "p": p,
-        "prime_index": prime_index(p),
+        "prime": prime_label(prime),
         "seed_base": SEED,
         "cell_seed": cs,
         "target_seed": ts,
@@ -1121,13 +1299,7 @@ fn one(p: u64, arm: Arm, m: usize, t: usize, k: usize, budget: Duration) -> Valu
         "engine": "f4_fp",
         "order": "grevlex",
     });
-    let mut built = row.clone();
-    merge(&mut built, &json!({"phase": "built"}));
-    println!("{built}");
-    std::io::stdout().flush().ok();
-    let r = measure(&eqs, n, p, &sol, budget);
-    merge(&mut row, &r);
-    row
+    (row, eqs, n, sol)
 }
 
 // ── The driver: one child process per system ───────────────────────
@@ -1180,7 +1352,6 @@ fn host() -> Value {
 }
 
 struct RunArgs {
-    p: u64,
     arms: Vec<Arm>,
     ms: Vec<usize>,
     t_min: usize,
@@ -1190,6 +1361,10 @@ struct RunArgs {
     vmem_kb: u64,
     grace: u64,
     out_dir: String,
+    /// Prime index (`p1` = 0, `p2` = 1).
+    prime: usize,
+    /// Row file name without extension; `{arm}` and `{m}` are substituted.
+    file: String,
 }
 
 /// Run one system in a child under `ulimit -v` and a hard wall limit of
@@ -1202,8 +1377,8 @@ fn run_child(a: &RunArgs, arm: Arm, m: usize, t: usize, k: usize, log: &mut File
         .arg(&exe)
         .args([
             "one",
-            "--p",
-            &a.p.to_string(),
+            "--prime",
+            prime_label(a.prime),
             "--arm",
             arm.name(),
             "--m",
@@ -1260,7 +1435,8 @@ fn run_child(a: &RunArgs, arm: Arm, m: usize, t: usize, k: usize, log: &mut File
         Some(r) if r.get("phase").is_none() && status.success() => r,
         other => {
             let mut r = other.unwrap_or_else(|| {
-                json!({"arm": arm.name(), "m": m, "t": t, "target": k, "target_kind": "planted"})
+                json!({"arm": arm.name(), "m": m, "t": t, "target": k, "target_kind": "planted",
+                       "p": prime_of(a.prime), "prime": prime_label(a.prime)})
             });
             if let Some(o) = r.as_object_mut() {
                 o.remove("phase");
@@ -1312,7 +1488,11 @@ fn run(a: &RunArgs) {
     eprintln!("commit {commit}, host {host}");
     for &arm in &a.arms {
         for &m in &a.ms {
-            let base = format!("{}/{}-m{m}", a.out_dir, arm.name());
+            let name = a
+                .file
+                .replace("{arm}", arm.name())
+                .replace("{m}", &m.to_string());
+            let base = format!("{}/{name}", a.out_dir);
             let mut out = OpenOptions::new()
                 .create(true)
                 .append(true)
@@ -1325,9 +1505,11 @@ fn run(a: &RunArgs) {
                 .expect("open log");
             writeln!(
                 log,
-                "== {} m={m}: commit {commit}, budget {} s, ulimit -v {}, started {}",
+                "== {} m={m} {}: commit {commit}, budget {} s, grace {} s, ulimit -v {}, started {}",
                 arm.name(),
+                prime_label(a.prime),
                 a.budget,
+                a.grace,
                 a.vmem_kb,
                 utc_now()
             )
@@ -1599,28 +1781,12 @@ fn mean(xs: &[u64]) -> f64 {
     xs.iter().sum::<u64>() as f64 / xs.len() as f64
 }
 
-/// The mean `max_cols` of a completed cell's systems, per `t`.
-fn widths_of(rows: &[(String, Value)], arm: &str, m: usize) -> BTreeMap<usize, f64> {
-    let mut by_t: BTreeMap<usize, Vec<u64>> = BTreeMap::new();
-    for (_, r) in rows {
-        if r["arm"] == arm && r["m"] == m && r["status"] == "ok" {
-            let t = r["t"].as_u64().unwrap_or(0) as usize;
-            by_t.entry(t)
-                .or_default()
-                .push(r["max_cols"].as_u64().expect("an ok row has max_cols"));
-        }
-    }
-    by_t.into_iter().map(|(t, w)| (t, mean(&w))).collect()
-}
-
 fn analyze(dir: &str, pilot: Option<&str>) {
-    let rows = read_rows(dir);
-    let mut primes: Vec<u64> = rows.iter().filter_map(|(_, r)| r["p"].as_u64()).collect();
-    primes.sort_unstable();
-    primes.dedup();
-    println!(
-        "Factor-base designs on p = {primes:?}: σ = ΔD/Δb by least squares over completed cells"
-    );
+    // The first run's rows only: Amendment 2's files (F1-* … F4-*) have their
+    // own analysis (`--amendment2`).
+    let mut rows = read_rows(dir);
+    rows.retain(|(f, _)| group_of(f) == "p1");
+    println!("Factor-base designs on p1 = {P1}: σ = ΔD/Δb by least squares over completed cells");
     println!("(D = solving_degree_max of f4_fp grevlex; a cell is completed when every planted system in it is `ok`;");
     println!(" a cell's D is the mean over its systems; rows from {dir})");
     let mut summary = Vec::new();
@@ -1656,19 +1822,6 @@ fn analyze(dir: &str, pilot: Option<&str>) {
                 ),
                 None => println!("  completed cells {}: no slope  →  {v}", pts.len()),
             }
-            // Secondary, descriptive (Amendment 2): Δ log₂ max_cols / Δb.
-            let widths = widths_of(&rows, arm.name(), m);
-            let wpts: Vec<(f64, f64)> = cells
-                .iter()
-                .filter(|c| complete(c))
-                .filter_map(|c| widths.get(&c.0).map(|w| (c.1, w.log2())))
-                .collect();
-            if let Some((ws, _)) = lsq(&wpts) {
-                println!(
-                    "  width growth Δlog2(max_cols)/Δb = {ws:.4} over {} cells (descriptive)",
-                    wpts.len()
-                );
-            }
             summary.push((arm.name(), m, pts.len(), fit, v));
         }
     }
@@ -1681,62 +1834,6 @@ fn analyze(dir: &str, pilot: Option<&str>) {
             arm,
             fit.map_or("-".to_string(), |f| format!("{:.4}", f.0))
         );
-    }
-
-    // Amendment 2 F1: A11 against A0 at shared completed t (cell D and cell
-    // mean max_cols); the rule is registered for m = 3 on p₂.
-    println!();
-    println!(
-        "A11 against A0 at shared completed t (Amendment 2 F1 rule; registered for m = 3 on p2)"
-    );
-    for m in [2usize, 3] {
-        let a11: BTreeMap<usize, f64> = cells_of(&rows, "A11", m)
-            .into_iter()
-            .filter(complete)
-            .map(|c| (c.0, mean(&c.2)))
-            .collect();
-        let a0: BTreeMap<usize, f64> = cells_of(&rows, "A0", m)
-            .into_iter()
-            .filter(complete)
-            .map(|c| (c.0, mean(&c.2)))
-            .collect();
-        let (w11, w0) = (widths_of(&rows, "A11", m), widths_of(&rows, "A0", m));
-        let shared: Vec<usize> = a11.keys().filter(|t| a0.contains_key(t)).copied().collect();
-        if shared.is_empty() {
-            continue;
-        }
-        let mut all_pass = true;
-        let mut any_fail = false;
-        for t in &shared {
-            let (d11, d0) = (a11[t], a0[t]);
-            let (c11, c0) = (w11[t], w0[t]);
-            let pass = d11 <= d0 - 1.0 && c11 < c0;
-            all_pass &= pass;
-            any_fail |= d11 >= d0;
-            println!(
-                "  m={m} t={t:<2} A11 D {d11:.1} cols {c11:.0} | A0 D {d0:.1} cols {c0:.0} | {}",
-                if pass {
-                    "A11 D ≤ A0 D − 1 and narrower"
-                } else {
-                    "condition not met"
-                }
-            );
-        }
-        let v = if any_fail {
-            "fails to replicate (a shared cell has A11 D ≥ A0 D)"
-        } else if all_pass && shared.len() >= 3 {
-            "replicates"
-        } else {
-            "inconclusive"
-        };
-        if m == 3 {
-            println!("  m={m}: {} shared completed cells → {v}", shared.len());
-        } else {
-            println!(
-                "  m={m}: {} shared completed cells (descriptive: the rule is registered for m = 3)",
-                shared.len()
-            );
-        }
     }
 
     // The preregistered predictions, as differences at equal b.
@@ -1825,6 +1922,591 @@ fn analyze(dir: &str, pilot: Option<&str>) {
     }
 }
 
+// ── Amendment 2: the p₂ instrument check and the p₁ regression ─────
+
+/// F1's instrument check (Amendment 2): `p₂` itself, the arithmetic path
+/// `f4_fp` takes there, and one A0 and one A11 planted system at `t = 2`
+/// (`m = 2` and `m = 3`, target 0), each checked at its planted solution,
+/// measured, and its basis checked to reduce every input to zero.
+fn check_p2(budget: Duration) -> bool {
+    let p = P2;
+    let mut all = true;
+    let mut say = |what: &str, ok: bool| {
+        println!("  [{}] {what}", if ok { "ok" } else { "FAIL" });
+        all &= ok;
+    };
+    println!("Amendment 2, F1: instrument check at p2 = {p}, before any p2 row");
+    println!("the prime");
+    say("p2 = 15·2^27 + 1", p == 15 * (1 << 27) + 1);
+    say(
+        "p2 is prime (trial division by every q ≤ √p2)",
+        (2u64..)
+            .take_while(|q| q * q <= p)
+            .all(|q| !p.is_multiple_of(q)),
+    );
+    say(
+        &format!(
+            "2^27 ∥ p2 − 1 (v2 = {}), so t ≤ 27",
+            (p - 1).trailing_zeros()
+        ),
+        (p - 1).trailing_zeros() == 27,
+    );
+    println!("field arithmetic");
+    say(
+        "p2 < 2^31 < 2^32, the bound f4_fp's Barrett::new asserts",
+        p < 1 << 31,
+    );
+    say(
+        "p2 > 2^16: f4_fp takes the wide path (one Barrett reduction per update), as at p1; the 32-bit and lazy-accumulation paths are for p ≤ 2^16 only",
+        p > 1 << 16,
+    );
+    let worst = u128::from(p - 1) + u128::from(p - 1) * u128::from(p - 1);
+    say(
+        &format!("largest wide-path operand x + (p − f)·y ≤ (p−1) + (p−1)² = {worst} < 2^64"),
+        worst < 1u128 << 64,
+    );
+    let mut rng = StdRng::seed_from_u64(SEED ^ 0xC4EC);
+    let ok = (0..100_000).all(|_| {
+        let a = rng.gen_range(1..p);
+        let b = rng.gen_range(0..p);
+        let exact = (u128::from(a) * u128::from(b) % u128::from(p)) as u64;
+        mulm(a, b, p) == exact && mulm(a, invm(a, p), p) == 1 && powm(a, p - 1, p) == 1
+    });
+    say(
+        "harness arithmetic on 100 000 random pairs: a·b against a u128 product, a·a⁻¹ = 1, a^(p−1) = 1",
+        ok,
+    );
+    println!("planted systems at t = 2 (the p2 seeds of F1, target 0)");
+    for (arm, m) in [(Arm::A0, 2), (Arm::A11, 2), (Arm::A0, 3), (Arm::A11, 3)] {
+        let (row, eqs, n, sol) = build_system(1, arm, m, 2, 0);
+        let r = measure(&eqs, n, p, &sol, budget);
+        let input: Vec<Poly> = eqs
+            .iter()
+            .map(|e| e.to_poly(p))
+            .filter(|f| !f.is_empty())
+            .collect();
+        let d_max = eqs.iter().map(Pol::degree).max().unwrap_or(1);
+        let opts = F4Options::new(Ordering::Grevlex, n as u32 + d_max + 6).with_budget(budget);
+        let f = f4_fp::f4(&input, n, p, &opts);
+        let complete = !f.timed_out && f.pairs_above_bound == 0;
+        let reduce_zero = input
+            .iter()
+            .all(|e| f4_fp::reduce(e, &f.basis, p, Ordering::Grevlex).is_empty());
+        println!(
+            "  {} m={m} t=2: n_vars {n}, n_eqs {}, cell_seed {}, curve {}, x_r {}, D {}, max_cols {}, status {}, planted_ok {}",
+            arm.name(),
+            eqs.len(),
+            row["cell_seed"],
+            row["curve"],
+            row["x_r"],
+            r["D"],
+            r["max_cols"],
+            r["status"],
+            r["planted_ok"]
+        );
+        say(
+            "every equation vanishes at the planted solution (checked before F4)",
+            true,
+        );
+        say(
+            "F4 finished, consistent, the planted solution satisfies its basis",
+            r["status"] == "ok" && r["planted_ok"] == true,
+        );
+        say(
+            "no pair above the degree bound, and every input reduces to 0 modulo F4's basis",
+            complete && reduce_zero,
+        );
+        say(
+            "a second F4 run gives the same D",
+            r["D"] == f.solving_degree_max,
+        );
+    }
+    println!(
+        "instrument check at p2: {}",
+        if all {
+            "PASS: F1 may run"
+        } else {
+            "FAIL: F1 stops"
+        }
+    );
+    all
+}
+
+/// The fields a regenerated row must reproduce exactly: D and the
+/// structural fields (seeds, set, curve, target, system shape, F4 trace).
+const REGRESS_FIELDS: [&str; 27] = [
+    "D",
+    "solving_degree_max",
+    "last_productive_degree",
+    "degree_reached",
+    "max_cols",
+    "max_rows",
+    "max_cols_to_solution",
+    "steps",
+    "steps_to_solution",
+    "basis_len",
+    "inconsistent",
+    "planted_ok",
+    "status",
+    "pairs_above_bound",
+    "input_degrees",
+    "max_degree_bound",
+    "n_vars",
+    "n_eqs",
+    "V_size",
+    "b",
+    "cell_seed",
+    "target_seed",
+    "curve",
+    "x_r",
+    "planted_x",
+    "set",
+    "presentation",
+];
+
+/// Rebuild and measure the committed `p₁` rows of one cell with the current
+/// code; compare each field of [`REGRESS_FIELDS`] as serialised JSON.
+fn regress(file: &str, arm: Arm, m: usize, t: usize, budget: Duration) -> bool {
+    let text = std::fs::read_to_string(file).expect("read the committed rows");
+    let committed: Vec<Value> = text
+        .lines()
+        .filter_map(|l| serde_json::from_str::<Value>(l).ok())
+        .filter(|r| r["arm"] == arm.name() && r["m"] == m && r["t"] == t)
+        .collect();
+    println!(
+        "Regression: {} m={m} t={t} on p1, rebuilt with the current code (prime index 0), against {file}",
+        arm.name()
+    );
+    println!(
+        "fields compared as serialised JSON: {}",
+        REGRESS_FIELDS.join(", ")
+    );
+    let mut all = !committed.is_empty();
+    for c in &committed {
+        let k = c["target"].as_u64().expect("a target") as usize;
+        let (mut row, eqs, n, sol) = build_system(0, arm, m, t, k);
+        merge(&mut row, &measure(&eqs, n, P1, &sol, budget));
+        let differ: Vec<&str> = REGRESS_FIELDS
+            .iter()
+            .copied()
+            .filter(|f| serde_json::to_vec(&c[*f]).ok() != serde_json::to_vec(&row[*f]).ok())
+            .collect();
+        all &= differ.is_empty();
+        println!(
+            "  target {k}: D {} (committed {}), max_cols {} (committed {}), cell_seed {}, target_seed {}: {}",
+            row["D"],
+            c["D"],
+            row["max_cols"],
+            c["max_cols"],
+            row["cell_seed"],
+            row["target_seed"],
+            if differ.is_empty() {
+                "IDENTICAL on every field".to_string()
+            } else {
+                format!("DIFFERS on {}", differ.join(", "))
+            }
+        );
+    }
+    println!(
+        "regression: {}",
+        if all {
+            "PASS (byte-identical on D and the structural fields)"
+        } else {
+            "FAIL"
+        }
+    );
+    all
+}
+
+// ── Amendment 2: analysis ──────────────────────────────────────────
+
+/// A cell of an Amendment 2 series.
+struct Cell2 {
+    t: usize,
+    b: f64,
+    d: Vec<u64>,
+    cols: Vec<Option<u64>>,
+    time: Vec<f64>,
+    status: Vec<String>,
+    shape: (u64, u64),
+}
+
+impl Cell2 {
+    fn complete(&self) -> bool {
+        !self.status.is_empty() && self.status.iter().all(|s| s == "ok")
+    }
+
+    fn d_mean(&self) -> f64 {
+        mean(&self.d)
+    }
+
+    /// The mean of its systems' `max_cols` (completed cells only).
+    fn cols_mean(&self) -> f64 {
+        let c: Vec<u64> = self.cols.iter().flatten().copied().collect();
+        mean(&c)
+    }
+}
+
+/// Which study group a row file belongs to: `F1` … `F4`, or `p1` for the
+/// committed p₁ rows of the first run.
+fn group_of(file: &str) -> &str {
+    match file.get(..3) {
+        Some(g @ ("F1-" | "F2-" | "F3-" | "F4-")) => &g[..2],
+        _ => "p1",
+    }
+}
+
+fn cells2(rows: &[(String, Value)], group: &str, arm: &str, m: usize) -> Vec<Cell2> {
+    let mut by_t: BTreeMap<usize, Cell2> = BTreeMap::new();
+    for (f, r) in rows {
+        if group_of(f) != group || r["arm"] != arm || r["m"] != m {
+            continue;
+        }
+        let t = r["t"].as_u64().unwrap_or(0) as usize;
+        let e = by_t.entry(t).or_insert(Cell2 {
+            t,
+            b: f64::NAN,
+            d: Vec::new(),
+            cols: Vec::new(),
+            time: Vec::new(),
+            status: Vec::new(),
+            shape: (0, 0),
+        });
+        if e.b.is_nan() {
+            e.b = r["b"].as_f64().unwrap_or(f64::NAN);
+        }
+        e.shape = (
+            r["n_vars"].as_u64().unwrap_or(0),
+            r["n_eqs"].as_u64().unwrap_or(0),
+        );
+        let st = r["status"].as_str().unwrap_or("?").to_string();
+        if st == "ok" {
+            e.d.push(r["D"].as_u64().expect("an ok row has D"));
+        }
+        e.cols.push(r["max_cols"].as_u64());
+        e.time.push(r["time"].as_f64().unwrap_or(f64::NAN));
+        e.status.push(st);
+    }
+    by_t.into_values().collect()
+}
+
+/// `(cells, σ fit, Δlog₂ max_cols/Δb fit)` over the completed cells.
+type Fits = (usize, Option<(f64, f64)>, Option<(f64, f64)>);
+
+fn fits(cells: &[&Cell2]) -> Fits {
+    let done: Vec<&&Cell2> = cells.iter().filter(|c| c.complete()).collect();
+    let d: Vec<(f64, f64)> = done.iter().map(|c| (c.b, c.d_mean())).collect();
+    let w: Vec<(f64, f64)> = done.iter().map(|c| (c.b, c.cols_mean().log2())).collect();
+    (done.len(), lsq(&d), lsq(&w))
+}
+
+fn show_series(title: &str, cells: &[Cell2]) -> Fits {
+    println!();
+    println!("── {title}");
+    println!("  t   b      n_vars n_eqs  D per system  max_cols per system   time per system (s)   status");
+    for c in cells {
+        let cols: Vec<String> = c
+            .cols
+            .iter()
+            .map(|x| x.map_or("-".into(), |v| v.to_string()))
+            .collect();
+        let time: Vec<String> = c.time.iter().map(|x| format!("{x:.1}")).collect();
+        println!(
+            "  {:<3} {:<6.3} {:<6} {:<6} {:<13} {:<20} {:<21} {}",
+            c.t,
+            c.b,
+            c.shape.0,
+            c.shape.1,
+            format!("{:?}", c.d),
+            cols.join(","),
+            time.join(","),
+            c.status.join(",")
+        );
+    }
+    let refs: Vec<&Cell2> = cells.iter().collect();
+    let f = fits(&refs);
+    print_fits(&f);
+    f
+}
+
+fn print_fits(f: &Fits) {
+    let (n, s, w) = f;
+    println!(
+        "  completed cells {n}: σ = {}  →  {};  Δlog₂ max_cols/Δb = {} (secondary, descriptive)",
+        s.map_or("-".into(), |x| format!("{:.4}", x.0)),
+        verdict(*n, s.map(|x| x.0)),
+        w.map_or("-".into(), |x| format!("{:.3}", x.0)),
+    );
+}
+
+fn find(cells: &[Cell2], t: usize) -> Option<&Cell2> {
+    cells.iter().find(|c| c.t == t && c.complete())
+}
+
+fn analyze2(dir: &str) {
+    let rows = read_rows(dir);
+    println!("Factor-base designs, Amendment 2 (F1–F4): rows from {dir}");
+    println!("(D = solving_degree_max of f4_fp grevlex; a cell is completed when both of its planted systems are `ok`;");
+    println!(" a cell's D is the mean over its systems, and so is its max_cols (Amendment 2 does not say how a cell's");
+    println!(" width is formed; the mean mirrors the D rule). σ and Δlog₂ max_cols/Δb are least-squares slopes on b");
+    println!(" over completed cells. Groups: p1 = the committed rows of the first run; F1–F4 = files F1-*, …, F4-*.)");
+
+    let s = |g: &str, a: &str, m: usize| cells2(&rows, g, a, m);
+    let mut secondary: Vec<(String, Fits)> = Vec::new();
+
+    println!();
+    println!("════ F1: replication on p2 = {P2} (A0, A11; m = 2, 3)");
+    for (a, m) in [("A0", 2), ("A11", 2), ("A0", 3), ("A11", 3)] {
+        let f = show_series(&format!("F1 {a} m = {m} p2"), &s("F1", a, m));
+        secondary.push((format!("{a} m={m} p2"), f));
+    }
+    println!();
+    println!("════ F2: the A11-shape null N11 on p1 (m = 2, 3); A11 p1 rows (committed) beside it");
+    for m in [2usize, 3] {
+        let f = show_series(&format!("F2 N11 m = {m} p1"), &s("F2", "N11", m));
+        secondary.push((format!("N11 m={m} p1"), f));
+        show_series(
+            &format!("A11 m = {m} p1 (committed, for the rule)"),
+            &s("p1", "A11", m),
+        );
+    }
+    println!();
+    println!("════ F3: the m = 3, t = 5 cell on p1, F4 budget 3600 s, hard kill 3900 s");
+    for a in ["A0", "A11"] {
+        show_series(&format!("F3 {a} m = 3 t = 5 p1"), &s("F3", a, 3));
+    }
+    println!();
+    println!("════ F4: m = 4 on p1 (A0, A11)");
+    for a in ["A0", "A11"] {
+        let f = show_series(&format!("F4 {a} m = 4 p1"), &s("F4", a, 4));
+        secondary.push((format!("{a} m=4 p1"), f));
+    }
+    let a11_m4: Vec<(u64, u64)> = rows
+        .iter()
+        .filter(|(f, r)| group_of(f) == "F4" && r["arm"] == "A11")
+        .filter_map(|(_, r)| Some((r["n_vars"].as_u64()?, r["n_eqs"].as_u64()?)))
+        .collect();
+    let excess_ok = !a11_m4.is_empty() && a11_m4.iter().all(|(n, e)| *e == n + 1);
+    println!(
+        "  A11 m = 4 excess n_eqs − n_vars = 1 on every built row ({} rows): {}",
+        a11_m4.len(),
+        if excess_ok { "yes" } else { "NO" }
+    );
+
+    // ── Decision rules
+    println!();
+    println!("════ Decision rules (PREREGISTRATION.md, Amendment 2)");
+
+    println!();
+    println!("F1. A11 replicates on p2 at m = 3?  Replicates: D(A11) ≤ D(A0) − 1 and max_cols(A11) < max_cols(A0) at every");
+    println!("    shared completed t, with ≥ 3 shared completed cells. Fails: any shared completed cell with D(A11) ≥ D(A0).");
+    let (a0, a11) = (s("F1", "A0", 3), s("F1", "A11", 3));
+    let mut shared = 0usize;
+    let (mut every, mut any_fail) = (true, false);
+    println!("  t   D A0   D A11   max_cols A0   max_cols A11   D ≤ A0 − 1   cols lower");
+    for t in 2..=27 {
+        let (Some(x), Some(y)) = (find(&a0, t), find(&a11, t)) else {
+            continue;
+        };
+        shared += 1;
+        let dcond = y.d_mean() <= x.d_mean() - 1.0;
+        let ccond = y.cols_mean() < x.cols_mean();
+        every &= dcond && ccond;
+        any_fail |= y.d_mean() >= x.d_mean();
+        println!(
+            "  {t:<3} {:<6.1} {:<7.1} {:<13.0} {:<14.0} {:<12} {}",
+            x.d_mean(),
+            y.d_mean(),
+            x.cols_mean(),
+            y.cols_mean(),
+            dcond,
+            ccond
+        );
+    }
+    let f1 = if any_fail {
+        "FAILS TO REPLICATE"
+    } else if shared >= 3 && every {
+        "REPLICATES"
+    } else {
+        "INCONCLUSIVE"
+    };
+    println!("  shared completed cells: {shared}  →  A11 {f1}");
+    println!("  (descriptive, no rule: the same comparison at m = 2 on p2)");
+    let (b0, b11) = (s("F1", "A0", 2), s("F1", "A11", 2));
+    for t in 2..=27 {
+        if let (Some(x), Some(y)) = (find(&b0, t), find(&b11, t)) {
+            println!(
+                "    m=2 t={t:<2} D A0 {:.1}  D A11 {:.1}  max_cols A0 {:.0}  A11 {:.0}",
+                x.d_mean(),
+                y.d_mean(),
+                x.cols_mean(),
+                y.cols_mean()
+            );
+        }
+    }
+
+    println!();
+    println!("F2. Shape or structure?  Shape, not structure: D(N11) = D(A11) in every completed cell of F2.");
+    println!("    Structure beyond shape: D(N11) ≥ D(A11) + 1 in at least 2 completed cells. Otherwise mixed, cell by cell.");
+    println!(
+        "    (A11 = the committed p1 rows; a cell enters when it is completed in both series.)"
+    );
+    let mut f2_cells = 0usize;
+    let (mut f2_equal, mut f2_above) = (true, 0usize);
+    let mut f2_n11_complete = 0usize;
+    for m in [2usize, 3] {
+        let (n11, a11) = (s("F2", "N11", m), s("p1", "A11", m));
+        f2_n11_complete += n11.iter().filter(|c| c.complete()).count();
+        for c in n11.iter().filter(|c| c.complete()) {
+            match find(&a11, c.t) {
+                Some(a) => {
+                    f2_cells += 1;
+                    let diff = c.d_mean() - a.d_mean();
+                    f2_equal &= diff == 0.0;
+                    if diff >= 1.0 {
+                        f2_above += 1;
+                    }
+                    println!(
+                        "  m={m} t={:<2} D N11 {:.1}  D A11 {:.1}  N11 − A11 {diff:+.1}   max_cols N11 {:.0}  A11 {:.0}",
+                        c.t,
+                        c.d_mean(),
+                        a.d_mean(),
+                        c.cols_mean(),
+                        a.cols_mean()
+                    );
+                }
+                None => println!(
+                    "  m={m} t={:<2} D N11 {:.1}  A11 has no completed cell here (not compared)",
+                    c.t,
+                    c.d_mean()
+                ),
+            }
+        }
+    }
+    let f2 = if f2_cells == 0 {
+        "NO SHARED COMPLETED CELL (no verdict)"
+    } else if f2_equal {
+        "SHAPE, NOT STRUCTURE"
+    } else if f2_above >= 2 {
+        "STRUCTURE BEYOND SHAPE"
+    } else {
+        "MIXED (cell by cell above)"
+    };
+    println!("  completed N11 cells {f2_n11_complete}, compared {f2_cells}, N11 above A11 by ≥ 1 in {f2_above}  →  {f2}");
+
+    println!();
+    println!("F3. The m = 3, t = 5 cell on p1, reported as recorded; it joins the m = 3 p1 σ fit only if both systems complete.");
+    let mut f3_both = BTreeMap::new();
+    for a in ["A0", "A11"] {
+        let f3 = s("F3", a, 3);
+        let c = f3.iter().find(|c| c.t == 5);
+        let both = c.is_some_and(|c| c.complete() && c.status.len() == 2);
+        // None until both systems of the cell are recorded.
+        f3_both.insert(a, c.is_some_and(|c| c.status.len() == 2).then_some(both));
+        let old = s("p1", a, 3);
+        let base: Vec<&Cell2> = old.iter().filter(|c| c.t != 5).collect();
+        print!("  {a}: ");
+        match c {
+            Some(c) => println!(
+                "D {:?}, max_cols {:?}, time {:?} s, status {:?}",
+                c.d, c.cols, c.time, c.status
+            ),
+            None => println!("no F3 row"),
+        }
+        print!("    m = 3 p1 fit without F3 (t ≠ 5): ");
+        print_fits(&fits(&base));
+        if both {
+            let mut with = base.clone();
+            with.extend(c);
+            print!("    m = 3 p1 fit with the F3 cell as a fourth point: ");
+            print_fits(&fits(&with));
+        } else {
+            println!("    the F3 cell is not completed: it does not join the fit");
+        }
+    }
+
+    println!();
+    println!("F4. σ verdicts at m = 4 on p1 (thresholds of §1, derived at m = 4)");
+    let mut f4_sigma = BTreeMap::new();
+    for a in ["A0", "A11"] {
+        let c = s("F4", a, 4);
+        let refs: Vec<&Cell2> = c.iter().collect();
+        let f = fits(&refs);
+        print!("  {a} m = 4: ");
+        print_fits(&f);
+        f4_sigma.insert(a, f);
+    }
+
+    println!();
+    println!("════ Secondary (descriptive, not a verdict): Δlog₂ max_cols/Δb per (arm, m, prime), completed cells");
+    for a in ["A0", "N", "A1z", "A1g", "A4", "A11"] {
+        for m in [2usize, 3] {
+            let c = s("p1", a, m);
+            if c.is_empty() {
+                continue;
+            }
+            let refs: Vec<&Cell2> = c.iter().collect();
+            secondary.push((format!("{a} m={m} p1 (committed)"), fits(&refs)));
+        }
+    }
+    secondary.sort_by(|x, y| x.0.cmp(&y.0));
+    println!("  series                       cells  Δlog₂ max_cols/Δb   σ");
+    for (name, (n, s, w)) in &secondary {
+        println!(
+            "  {name:<28} {n:<6} {:<19} {}",
+            w.map_or("-".into(), |x| format!("{:.3}", x.0)),
+            s.map_or("-".into(), |x| format!("{:.4}", x.0)),
+        );
+    }
+
+    println!();
+    println!("════ Predictions scorecard (Amendment 2)");
+    let held = |b: Option<bool>| match b {
+        Some(true) => "held",
+        Some(false) => "did not hold",
+        None => "not decided",
+    };
+    let f1_held = match f1 {
+        "REPLICATES" => Some(true),
+        "FAILS TO REPLICATE" => Some(false),
+        _ => None,
+    };
+    println!(
+        "  F1: A11 replicates                          observed: {f1:<34} {}",
+        held(f1_held)
+    );
+    let f2_held = match f2 {
+        "SHAPE, NOT STRUCTURE" => Some(true),
+        x if x.starts_with("NO SHARED") => None,
+        _ => Some(false),
+    };
+    println!(
+        "  F2: shape, not structure                    observed: {f2:<34} {}",
+        held(f2_held)
+    );
+    let shown = |b: Option<bool>| b.map_or("not recorded".to_string(), |x| x.to_string());
+    println!(
+        "  F3: both A11 systems complete within 3600 s observed: A11 both complete = {:<13} {}  (A0 both complete = {}; \"A0's may not\" is not scored)",
+        shown(f3_both["A11"]),
+        held(f3_both["A11"]),
+        shown(f3_both["A0"])
+    );
+    let (n0, s0, _) = f4_sigma["A0"];
+    let a0_held = if n0 < 3 { None } else { s0.map(|x| x.0 >= 0.5) };
+    println!(
+        "  F4: A0's σ ≥ 0.5 at m = 4                   observed: σ = {} on {n0} cells{:<14} {}",
+        s0.map_or("-".into(), |x| format!("{:.4}", x.0)),
+        "",
+        held(a0_held)
+    );
+    let (n11, s11, _) = f4_sigma["A11"];
+    println!(
+        "  F4: A11 at m = 4, no prediction              observed: σ = {} on {n11} cells, {}",
+        s11.map_or("-".into(), |x| format!("{:.4}", x.0)),
+        verdict(n11, s11.map(|x| x.0))
+    );
+}
+
 // ── Arguments ──────────────────────────────────────────────────────
 
 fn flag(args: &[String], name: &str) -> Option<String> {
@@ -1847,29 +2529,35 @@ fn main() {
             let t: usize = flag(&args, "--t").expect("--t").parse().unwrap();
             let k: usize = flag(&args, "--target").map_or(0, |s| s.parse().unwrap());
             let budget = flag(&args, "--budget").map_or(300, |s| s.parse().unwrap());
-            let p = flag(&args, "--p").map_or(P1, |s| s.parse().unwrap());
-            let row = one(p, arm, m, t, k, Duration::from_secs(budget));
+            let prime = flag(&args, "--prime").map_or(0, |s| parse_prime(&s));
+            let row = one(prime, arm, m, t, k, Duration::from_secs(budget));
             println!("{row}");
         }
         "run" => {
-            let p = flag(&args, "--p").map_or(P1, |s| s.parse().unwrap());
-            let two_adic = (p - 1).trailing_zeros() as usize;
             let a = RunArgs {
-                p,
                 arms: flag(&args, "--arms").map_or(Arm::ALL.to_vec(), |s| {
                     s.split(',').map(Arm::parse).collect()
                 }),
                 ms: flag(&args, "--m").map_or(vec![2, 3], |s| list(&s)),
                 t_min: flag(&args, "--t-min").map_or(2, |s| s.parse().unwrap()),
-                t_max: flag(&args, "--t-max").map_or(two_adic, |s| s.parse().unwrap()),
+                t_max: flag(&args, "--t-max").map_or_else(
+                    || {
+                        let prime = flag(&args, "--prime").map_or(0, |s| parse_prime(&s));
+                        (prime_of(prime) - 1).trailing_zeros() as usize
+                    },
+                    |s| s.parse().unwrap(),
+                ),
                 targets: flag(&args, "--targets").map_or(2, |s| s.parse().unwrap()),
                 budget: flag(&args, "--budget").map_or(300, |s| s.parse().unwrap()),
                 vmem_kb: flag(&args, "--vmem-kb").map_or(13_000_000, |s| s.parse().unwrap()),
                 grace: flag(&args, "--grace").map_or(120, |s| s.parse().unwrap()),
                 out_dir: flag(&args, "--out-dir").expect("--out-dir"),
+                prime: flag(&args, "--prime").map_or(0, |s| parse_prime(&s)),
+                file: flag(&args, "--file").unwrap_or_else(|| "{arm}-m{m}".into()),
             };
             assert!(a.t_min >= 2, "t starts at 2");
-            assert!(a.t_max <= two_adic, "2^t must divide p − 1");
+            let two = (prime_of(a.prime) - 1).trailing_zeros() as usize;
+            assert!(a.t_max <= two, "2^t must divide p − 1 (t ≤ {two})");
             run(&a);
         }
         "repro" => {
@@ -1883,10 +2571,32 @@ fn main() {
         }
         "analyze" => {
             let dir = args.get(1).expect("a runs directory");
-            analyze(dir, flag(&args, "--pilot").as_deref());
+            if args.iter().any(|a| a == "--amendment2") {
+                analyze2(dir);
+            } else {
+                analyze(dir, flag(&args, "--pilot").as_deref());
+            }
+        }
+        "check-p2" => {
+            let budget = flag(&args, "--budget").map_or(300, |s| s.parse().unwrap());
+            if !check_p2(Duration::from_secs(budget)) {
+                std::process::exit(1);
+            }
+        }
+        "regress" => {
+            let file = flag(&args, "--rows").expect("--rows");
+            let arm = Arm::parse(&flag(&args, "--arm").expect("--arm"));
+            let m: usize = flag(&args, "--m").expect("--m").parse().unwrap();
+            let t: usize = flag(&args, "--t").expect("--t").parse().unwrap();
+            let budget = flag(&args, "--budget").map_or(300, |s| s.parse().unwrap());
+            if !regress(&file, arm, m, t, Duration::from_secs(budget)) {
+                std::process::exit(1);
+            }
         }
         _ => {
-            eprintln!("usage: fb_designs_slope run|one|repro|analyze …  (see the module docs)");
+            eprintln!(
+                "usage: fb_designs_slope run|one|repro|analyze|check-p2|regress …  (see the module docs)"
+            );
             std::process::exit(2);
         }
     }

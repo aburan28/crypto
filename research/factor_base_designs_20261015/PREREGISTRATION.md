@@ -162,3 +162,104 @@ changes an arm, a threshold or a prediction.
    unity. On 128 random `m`-subsets, half of them with one element outside
    `V`, `X^{2^t} ≡ 1 mod ∏(X − v/g)` holds exactly when every element is in
    `V`.
+
+### Amendment 2, 2026-10-15: A11 follow-up (F1–F4), before any of its rows
+
+Registered after the p₁ run (`reports/run-20261015T1657Z`, review in
+`reports/review-20261015T2030Z`) and before any row of F1–F4 exists. It adds
+experiments. It changes no p₁ row, verdict, threshold or prediction. The
+instrument, the per-system limits (300 s F4 budget, 420 s hard kill,
+`ulimit -v 13000000`), the stop rule (Amendment 1 item 5), the completed-cell
+rule and the σ fit are those of Amendment 1. The exceptions are stated below.
+
+**Why.** On p₁, A11 at `m = 3` was the one arm below A0 on both D (4 vs 6) and
+matrix width (≈ 4× narrower). That rests on 3 completed cells, one prime and
+no null of its own shape (review, point 4). §5 requires replication. The
+review lists F1–F4 as owed.
+
+**Seeds.** As in Amendment 1 item 3, with a prime index:
+`cell seed = 0x46424453 ⊕ prime≪48 ⊕ arm≪40 ⊕ m≪32 ⊕ t≪16`, where p₁ = 0
+(so every p₁ seed is unchanged) and p₂ = 1. New arm indices: N11 = 6.
+
+- **F1, replication on p₂ = 2013265921 = 15·2^27 + 1.** Arms A0 and A11, at
+  `m = 2` and `m = 3`, with `t` rising from 2 (at most 27) until the stop
+  rule. Before any p₂ row, check that `f4_fp` and the field arithmetic are
+  exact at p₂ (`p₂ < 2^31`): rebuild one A0 and one A11 planted system at
+  `t = 2`, check the planted solution, and record the check. If the
+  instrument cannot run at p₂, F1 stops and the reason is recorded.
+- **F2, A11-shape null (N11), p₁, `m = 2` and `m = 3`.** N11 is A11 with the
+  curve removed, exactly as N is A0 with the curve removed. The equations
+  that define `s_i` from the function's coefficients (Amendment 1 item 9,
+  `lead(G)·g^{m−i}·s_i − G_i = 0`) are replaced by polynomials on the same
+  monomial support, with independent uniform random coefficients, shifted
+  by a constant so they vanish at the planted solution. The chain equations
+  and `r_t = 1` are kept unchanged. The planted solution satisfies every
+  equation, and this is checked. Unknown and equation counts equal A11's.
+- **F3, the `m = 3`, `t = 5` cell, p₁.** Arms A0 and A11, 2 planted targets
+  each, with F4 budget 3600 s and hard kill 3900 s (the only budget change).
+  Memory limit unchanged. A system that still hits a limit is recorded as such.
+- **F4, `m = 4`, p₁.** Arms A0 and A11, with `t` rising from 2 until the
+  stop rule.
+  - A0 at `m = 4` uses the `S₃` chain with two intermediate unknowns, as the
+    pilot does at `m = 3` with one.
+  - A11 at `m = 4` uses `f = Q(X)·y − P(X)` with `Q = X + q₀` and
+    `deg P = 2`, passing through `−R` (3 free coefficients, `= m − 1`).
+    `N(X) = Q²(X³ + AX + B) − P²` has degree 5. Exact division by `X − x_R`
+    gives a quartic `G` with leading coefficient `1 − p₂²`, where `p₂` is the
+    leading coefficient of `P`. Rows where that coefficient vanishes are
+    recorded and redrawn. The chain uses `r_j` of degree 3 and `q_j` of
+    degree 2.
+  - Unknown and equation counts are recorded. The excess must be 1
+    (`norm_chain_excess`), and this is checked.
+
+**Decision rules, fixed now.**
+- *A11 replicates* if, on p₂ at `m = 3`, A11's cell D ≤ A0's cell D − 1 and
+  A11's `max_cols` < A0's at every shared completed `t`, with at least 3
+  shared completed cells. *Fails to replicate* if any shared completed cell
+  has A11's D ≥ A0's. Otherwise: *inconclusive*.
+- *Shape, not structure* if N11's D equals A11's in every completed cell of
+  F2. *Structure beyond shape* if N11's D exceeds A11's by ≥ 1 in at least 2
+  completed cells. Otherwise: *mixed*, reported cell by cell.
+- *F3*: reported as recorded (D, width, time). It adds a fourth A11 and A0
+  cell to the `m = 3` p₁ σ fits only if both of the cell's systems complete.
+- *F4*: σ verdicts as in §1. The threshold was derived at `m = 4`, so here it
+  is used as designed.
+- **Secondary, descriptive (not a verdict):** the per-bit growth of the
+  matrix width, `Δ log₂ max_cols / Δb`, by least squares over completed
+  cells, per (arm, `m`, prime). It is recorded because D alone misread A1 on p₁.
+
+**Predictions.**
+- F1: A11 replicates.
+- F2: shape, not structure. The p₁ null N equalled A0, so the same is
+  expected here.
+- F3: both systems of A11 complete within 3600 s. A0's may not.
+- F4: A0's σ ≥ 0.5. No prediction for A11.
+
+### Amendment 3, 2026-10-15: implementation details of F1–F4, before any of their rows
+
+Registered by the experiment lane (`examples/fb_designs_slope.rs`) before any
+row of F1–F4 exists. It changes no arm, threshold, decision rule or
+prediction. Items 1 and 2 settle what Amendment 2 leaves open; item 3
+corrects a statement in it that cannot hold.
+
+1. **N11's random coefficients** come from the target stream after the
+   target is planted, as N's do (Amendment 1 item 3). The `m` replaced
+   equations are the first `m` of the A11 system, in the same order.
+2. **A cell's `max_cols`** in the F1 rule and the secondary slope is the mean
+   over the cell's two systems, as a cell's D is (Amendment 1 item 4).
+   Amendment 2 does not say how a cell's width is formed.
+3. **The leading coefficient of `G` at `m = 4`.** Amendment 2 says `G` has
+   leading coefficient `1 − p₂²` (`p₂` the leading coefficient of `P`). With
+   `Q = X + q₀` monic and `deg P = 2`,
+   `N(X) = Q²(X³ + AX + B) − P² = X⁵ + (2q₀ − p₂²)X⁴ + …`: `Q²X³` reaches
+   `X⁵` and `P²` only `X⁴`. So `N` is monic and `G = N/(X − x_R)` is a monic
+   quartic. The harness checks symbolically that `lead(G)` is the constant 1
+   in every built system. Consequences: the coefficient equations read
+   `g^{4−i}·s_i − G_i = 0`, and the "leading coefficient vanishes" redraw
+   cannot trigger. The redraw that can trigger is the other degeneracy: when
+   no `f` with `Q` monic passes through the four summands (the 4 × 4 linear
+   system for `(q₀, P)` is singular), the target is replanted from the same
+   stream, as A11 replants on a vanishing lead at `m = 3`. The free
+   coefficients are ordered `q₀, c₁, c₂`, with
+   `P(X) = Q(x_R)·y(−R) + c₁(X − x_R) + c₂(X² − x_R²)`. The excess
+   (`norm_chain_excess`) is asserted to be 1 at every `m`.
