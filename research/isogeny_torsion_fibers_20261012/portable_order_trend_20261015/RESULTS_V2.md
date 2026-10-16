@@ -10,8 +10,8 @@ construction, complete solve, and analysis gates. The new solver processed
 outputs. Independent Rust formulas replayed 37,061 relation witnesses.
 Together with the checked order-229 reference, the
 [native trend derivation](TREND_V1.json) covers 336 children and 7,140
-scalar outputs across four orders. PR review, isolated wall timing and
-second-host performance replay are separate gates.
+scalar outputs across four orders. PR review and isolated wall timing
+are separate gates; the later second-host replay is documented below.
 
 ## Boundary and one counted unit
 
@@ -116,10 +116,10 @@ exact target count. Isogeny transport, relation support, finite-field
 transfer and a practical advantage remain distinct obligations.
 
 For an ECDLP frontier claim, the missing gates are a fully priced portable
-unit with every native category and memory, an L2-or-better interleaved
-wall session with A/A admitted, and a different-host performance replay
-of the exact frozen inputs and binary. The current child CPU timings are
-shared-host L0 descriptions only. No canonical frontier or scoreboard
+unit with every native category and memory and an L2-or-better interleaved
+wall session with A/A admitted. The original child CPU timings are
+shared-host L0 descriptions; the subsequent different-host replay is
+descriptive L1, as documented below. No canonical frontier or scoreboard
 graph is changed by this bounded result; this report and its visuals carry
 the four-order evidence. The direct chi resultant and the curve-level Lean
 Vélu bridge remain open work, not conclusions from this panel.
@@ -130,8 +130,8 @@ the requested bare-metal session therefore has no available placement from
 this environment. A quota-increase request was denied with an AWS
 `AccessDeniedException` directing the account to AWS Support, and no
 instance was launched. A [frozen independent Linux replay
-protocol](INDEPENDENT_HOST_PROTOCOL_V1.md) and CI workflow are prepared for
-the exact public inputs. Its hosted VM is a different host class, but its
+protocol](INDEPENDENT_HOST_PROTOCOL_V1.md) and CI workflow were frozen for
+the exact public inputs. Their hosted VM is a different host class, but its
 timing remains descriptive and does not satisfy the L2 gate.
 The [research roadmap](RESEARCH_ROADMAP_V1.md) states how this finite
 fiber result connects to the direct χ oracle, the pairing-transfer
@@ -141,3 +141,24 @@ The [local validation receipt](validation/VALIDATION_V1.md) records a failed
 full release library suite under sandbox socket denial and shared-host
 timeouts, followed by passing focused reruns and touched-example checks.
 It is a disclosed validation limit, not a green full-suite result.
+
+## 2026-10-16 independent Linux update
+
+The [separate Linux run](reports/run-20261016T0050Z-linux-host/REPORT.md)
+on [GitHub Actions run 38831567671](https://github.com/aburan28/crypto/actions/runs/38831567671)
+completed all 252 frozen cold children. Its independent native checker
+replayed 5,355 scalar outputs and 37,061 relation witnesses; the
+[host analyzer](../../../examples/different_j_host_performance.rs)
+matched every child arithmetic vector and recovered scalar to the
+committed Darwin rows before deriving paired CPU ratios. The
+[durable 1,330,324-byte raw archive and verified 1,533-file manifest](linux_host_v1/README.md)
+preserve the host, build, meters, stderr, exits and replay. At N64, median
+whole-child Linux CPU full-image/rho ratios across orders 421, 433 and
+457 were **68.750, 56.331 and 59.050**, versus full-image/BSGS
+**135.798, 109.094 and 114.506**. Rho A/A medians were 0.994, 1.006 and
+0.994; three-round ranges and the quantitative graph are in the run
+report. This discharges the independent-host correctness and descriptive
+CPU replay for the three new four-order cells. Its Azure hosted VM had
+no reserved physical core; neither L2 wall admission nor complete
+portable addition-equivalent `S` follows. The order-1,201 Linux replay
+has a separate frozen protocol and remains pending its workflow artifact.

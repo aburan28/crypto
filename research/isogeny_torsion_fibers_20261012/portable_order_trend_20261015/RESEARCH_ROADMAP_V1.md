@@ -78,7 +78,10 @@ axis trade needs the conversion.
 The **performance gate** is an interleaved L2-or-better session on a
 reserved physical core, including rho A/A and exact resource receipts.
 The [access check](ISOLATION_ACCESS_V1.md) identifies the current host
-placement blocker. The [independent Linux replay](INDEPENDENT_HOST_PROTOCOL_V1.md)
-checks portability and cross-host performance but cannot substitute for
-that physical isolation. No canonical frontier or security claim follows
-from the present shared-host timings.
+placement blocker. The [independent Linux replay](reports/run-20261016T0050Z-linux-host/REPORT.md)
+has now checked all 252 arithmetic/answer rows on a separate hosted VM;
+its N64 CPU full-image/rho medians at orders 421/433/457 are
+68.750/56.331/59.050, with rho A/A near one. This is descriptive
+cross-host evidence and cannot substitute for physical isolation. A
+separately frozen order-1,201 Linux workflow remains pending. No
+canonical frontier or security claim follows from these timings.

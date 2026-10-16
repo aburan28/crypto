@@ -218,7 +218,7 @@ fn main() {
     )
     .unwrap();
     let mut svg = String::from(
-        r##"<svg xmlns="http://www.w3.org/2000/svg" width="900" height="450" viewBox="0 0 900 450"><rect width="100%" height="100%" fill="white"/><text x="55" y="38" font-size="22">Independent Linux host: descriptive N=64 CPU ratios</text><text x="55" y="65" font-size="14">Three paired rounds per cell; hosted VM without physical-core isolation</text>"##,
+        r##"<svg xmlns="http://www.w3.org/2000/svg" width="900" height="450" viewBox="0 0 900 450"><rect width="100%" height="100%" fill="white"/><text x="55" y="38" font-size="22">Independent Linux host: N=64 CPU ratios</text><text x="55" y="65" font-size="14">Median and paired-round min–max, n=3 per cell; hosted VM without physical-core isolation</text>"##,
     );
     for (ratio, y) in [(1.0, 365.0), (10.0, 276.7), (100.0, 188.3), (1000.0, 100.0)] {
         svg.push_str(&format!(
@@ -226,10 +226,14 @@ fn main() {
             y + 5.0
         ));
     }
-    for (field, color) in [
-        ("median_full_rho_cpu_ratio", "#d95f02"),
-        ("median_full_bsgs_cpu_ratio", "#4477aa"),
-        ("median_rho_aa_cpu_ratio", "#1b9e77"),
+    for (field, round_field, color) in [
+        ("median_full_rho_cpu_ratio", "full_rho_cpu_ratio", "#d95f02"),
+        (
+            "median_full_bsgs_cpu_ratio",
+            "full_bsgs_cpu_ratio",
+            "#4477aa",
+        ),
+        ("median_rho_aa_cpu_ratio", "rho_aa_cpu_ratio", "#1b9e77"),
     ] {
         let mut points = String::new();
         for (i, (_, r)) in CELLS.iter().enumerate() {
@@ -240,9 +244,21 @@ fn main() {
             let ratio = row[field].as_f64().unwrap();
             let x = 170.0 + i as f64 * 270.0;
             let y = 365.0 - (265.0 / 3.0) * ratio.log10();
+            let rounds: Vec<f64> = row["rounds"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|v| v[round_field].as_f64().unwrap())
+                .collect();
+            let low = rounds.iter().copied().fold(f64::INFINITY, f64::min);
+            let high = rounds.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+            assert!(low > 0.0 && high.is_finite());
+            let y_low = 365.0 - (265.0 / 3.0) * low.log10();
+            let y_high = 365.0 - (265.0 / 3.0) * high.log10();
             points.push_str(&format!("{x},{y} "));
             svg.push_str(&format!(
-                r##"<circle cx="{x}" cy="{y}" r="5" fill="{color}"/>"##
+                r##"<line x1="{x}" y1="{y_low}" x2="{x}" y2="{y_high}" stroke="{color}" stroke-width="2"/><line x1="{}" y1="{y_low}" x2="{}" y2="{y_low}" stroke="{color}" stroke-width="2"/><line x1="{}" y1="{y_high}" x2="{}" y2="{y_high}" stroke="{color}" stroke-width="2"/><circle cx="{x}" cy="{y}" r="5" fill="{color}"/>"##,
+                x - 8.0, x + 8.0, x - 8.0, x + 8.0
             ));
         }
         svg.push_str(&format!(

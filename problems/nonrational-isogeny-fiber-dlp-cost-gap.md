@@ -625,3 +625,18 @@ performance open. The EC2 quota/access denial in the
 is an infrastructure obstacle to physical-core admission, not a
 mathematical obstruction. Five non-geometrically spaced orders with
 changing field primes and cofactors do not determine an exponent.
+
+2026-10-16 independent-host update: the separately frozen
+[Linux replay](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/reports/run-20261016T0050Z-linux-host/REPORT.md)
+finished all 252 four-order panel children on an Azure hosted VM. The
+independent checker verified 5,355 scalar outputs and 37,061 relation
+witnesses; the host analyzer matched every counted arithmetic vector
+to the committed Darwin output. At 64 targets, median Linux process CPU
+full-image/rho ratios at orders 421, 433 and 457 were 68.750, 56.331
+and 59.050, with rho A/A 0.994, 1.006 and 0.994. The complete raw
+artifact and a verified 1,533-file manifest are committed beside the
+run. This closes the different-host replay gate for those three cells,
+while retaining its L1 descriptive timing limit. The order-1,201
+second-host run has a separate frozen workflow. A disjoint complete
+portable price, L2 physical-core timing, direct χ resultant/root oracle
+and faithful curve-level Lean bridge remain open.
