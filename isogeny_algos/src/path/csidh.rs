@@ -21,7 +21,12 @@ pub struct Csidh<F: Field> {
     pub primes: Vec<u64>,
     /// p + 1
     pub p1: Big,
+    /// degrees from this one on use sqrt-Velu (pair-by-pair products) in `action_fast`
+    pub sqrt_velu_min: u64,
 }
+
+/// Default `sqrt_velu_min`: below it projective Velu is cheaper.
+pub const SQRT_VELU_MIN: u64 = u64::MAX;
 
 impl Csidh<Zp> {
     /// None unless p = 4 prod(l_i) - 1 is a prime below 2^62.
@@ -35,6 +40,7 @@ impl Csidh<Zp> {
             fp: Zp::new(p as u64),
             primes: primes.to_vec(),
             p1: Big::from_u128(p + 1),
+            sqrt_velu_min: SQRT_VELU_MIN,
         })
     }
 
@@ -73,6 +79,7 @@ impl<const N: usize> Csidh<FpM<N>> {
             fp: f,
             primes: primes.to_vec(),
             p1: prod,
+            sqrt_velu_min: SQRT_VELU_MIN,
         })
     }
 
@@ -259,6 +266,11 @@ impl<F: Field> Csidh<F> {
         let mut split = vec![vec![0usize; n]; n];
         for t in 0..n {
             c[t][t] = 8.0 * d[t] + 3.0 * lg[t] + 10.0;
+            if self.primes[set[t]] >= self.sqrt_velu_min {
+                // sqrt-Velu: b b' ~ l/4 products for each of alpha = +-1, plus the point set
+                let l = self.primes[set[t]] as f64;
+                c[t][t] = 0.5 * l + 12.0 * l.sqrt() + 3.0 * lg[t] + 60.0;
+            }
         }
         for len in 2..=n {
             for i in 0..=n - len {
@@ -300,6 +312,18 @@ impl<F: Field> Csidh<F> {
         if lo == hi {
             let i = set[lo];
             let ell = self.primes[i];
+            if ell >= self.sqrt_velu_min {
+                if let Some(sv) =
+                    crate::kernel::sqrt_velu_mont::SqrtVeluMont::new_proj(f, *k, q, ell)
+                {
+                    *k = sv.codomain_proj(f);
+                    for p in stack.iter_mut() {
+                        *p = sv.eval_xz(f, *p);
+                    }
+                    e[i] -= sign;
+                    return;
+                }
+            }
             let ms = multiples_p(f, *k, q, ((ell - 1) / 2) as usize);
             let pre = kernel_pre(f, &ms);
             *k = velu_codomain_p(f, *k, &pre, ell);

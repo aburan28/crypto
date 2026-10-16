@@ -1,0 +1,17 @@
+# N83 root4 standard-Bloom memory frontier
+
+This frozen secondary screen tests whether more root4 factor-base columns improve the full target-online path when all candidates receive the same larger memory envelope. The K3425/root4/standard pipeline is the previously replayed reference. K3500 tests the interior; K3596 is the last column count admitted by the current exact four-byte root index's 29-bit state ID. Its symmetric state bound is 536,647,262, below `2^29 = 536,870,912`; K3597's bound is 536,945,772 and exceeds that encoding. The source snapshot SHA-256 is `f2745227d95e36ef45c73c5104a23ada6cebb0794405368581d2be17044845dc`.
+
+| Pipeline | Actual usable base points | Folded columns | Exact root index | Bloom |
+| --- | ---: | ---: | --- | --- |
+| K3425/root4/standard | 568,550 | 3,425 | four-byte, `2^31` slots | standard: 1 GiB, three hashes |
+| K3500/root4/standard | 581,000 | 3,500 | four-byte, `2^31` slots | standard: 1 GiB, three hashes |
+| K3596/root4/standard | 596,936 | 3,596 | four-byte, `2^31` slots | standard: 1 GiB, three hashes |
+
+These are screen labels. The result package assigns canonical `IC1` candidate IDs only after the executed base hashes, complete stage settings, and source digests are sealed in immutable manifests; a nominal K alone is not a candidate identity.
+
+Run six fresh processes in **A B C C B A** order on one cloud allocation. Each has a 1,500-second child cap, an empty base/index/log cache, and the same **15.25 GiB observed peak RSS guard**. Require at least four visible CPUs, 15.5 GiB host memory and 2 GiB free disk before starting. Record exposed CPU topology, affinity, cgroup limits, throttling and OOM deltas, per-arm RSS, setup and all target-online phases. An arm outside the guard, incomplete, or on a noisy host remains an explicit bounded result. This cloud-instance panel does not impose Tier 0 physical-host isolation. It asks a different memory-envelope question from earlier 14.5 GiB screens, so no cross-panel wall ratio is formed.
+
+The common 1,000-point panel uses SHA-256 domain `n83-root4-memory-frontier-fresh-1000-20261015-v1` and excludes every earlier N83 factor-base, Bloom, edge, final-tournament, confirmation, and Tier 1 target panel. Known scalars live in a verifier-only sidecar outside producer input and timing. Public-point file SHA-256: `0626a709fc285817b63c1a6a46310cfe3577824ff7a02ba5f0c9d6f2a7b120c3`. Sidecar SHA-256: `be00efb3d0aee19986d237787eb4f36033fb4df76d18e3e5f31c55dc534fd878`.
+
+The independent checker replays every factor-base orbit, recovered scalar and four-point relation, checks source/layout/phase receipts, and requires repeated base digest and root-key count equality for each pipeline. Eligible arms need zero new cgroup throttled periods and OOM kills and must fit the common RSS guard. For a complete panel, average each candidate's two online times per point, form every ordered paired difference, and take two-sided 99% intervals by resampling 40 contiguous blocks of 25 points 10,000 times with seeds `2026101584+i*3+j`. Select the lowest mirrored mean only when its upper paired endpoint is below zero against both alternatives. Repeatability uses seeds `2026101594+i`. Otherwise record `BOUNDED_UNKNOWN`. A selected challenger requires a new fresh-target confirmation and then one-target same-point Tier 1 IC/rho validation before an online speedup claim for that complete pipeline.

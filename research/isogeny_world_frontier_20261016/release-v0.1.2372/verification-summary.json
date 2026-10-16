@@ -1,0 +1,54 @@
+{
+  "recorded_at": "2026-10-16T09:25:53.611917+00:00",
+  "release": "v0.1.2372",
+  "run": 38873645089,
+  "source_commit": "3714752ee6a9686e0fce79cb308423d9fd09cde9",
+  "workflow_conclusion": "success",
+  "release_artifact_admission": "FAILED_CHECKSUMS",
+  "native_execution_of_failed_downloads": false,
+  "original_ci_archive_sha256": "31916732d06a215331654e428c901efd4af3de6a42284001697995e21ade258f",
+  "utf8_roundtrip_matches_published_macos_bytes": true,
+  "verified_original_ci_native_control_exit": 0,
+  "verified_original_ci_independent_replay_exit": 0,
+  "artifacts": [
+    {
+      "asset": "isogeny-v0.1.2372-aarch64-apple-darwin.tar.gz",
+      "download_bytes": 12707811,
+      "expected_manifest_sha256": "31916732d06a215331654e428c901efd4af3de6a42284001697995e21ade258f",
+      "download_sha256": "da8b8e6946a7bdfb067e4daa7d11993be6523bb110f731e6c3343c2df5051b7a",
+      "github_digest": "sha256:da8b8e6946a7bdfb067e4daa7d11993be6523bb110f731e6c3343c2df5051b7a",
+      "download_matches_github_digest": true,
+      "matches_manifest": false
+    },
+    {
+      "asset": "isogeny-v0.1.2372-x86_64-pc-windows-msvc.zip",
+      "download_bytes": 11779964,
+      "expected_manifest_sha256": "aae1c2eed925ef1f65f1c19658fdf25baefbba6eebebebdc4f40702d4bbfd447",
+      "download_sha256": "dbcd67ce73743142ebe2506b81a44835677467ad13e34d3bd644bd5035ef3bc6",
+      "github_digest": "sha256:dbcd67ce73743142ebe2506b81a44835677467ad13e34d3bd644bd5035ef3bc6",
+      "download_matches_github_digest": true,
+      "matches_manifest": false
+    },
+    {
+      "asset": "isogeny-v0.1.2372-x86_64-unknown-linux-gnu.tar.gz",
+      "download_bytes": 12870224,
+      "expected_manifest_sha256": "60ecfc9bd15185c950f287a9a4f70234ef9aa3c97b6859933dc32428abf164bc",
+      "download_sha256": "4cd0590d2261d4e2162601fc91523dbdf9e6a941afb35c3f14ae6341d21497f9",
+      "github_digest": "sha256:4cd0590d2261d4e2162601fc91523dbdf9e6a941afb35c3f14ae6341d21497f9",
+      "download_matches_github_digest": true,
+      "matches_manifest": false
+    },
+    {
+      "asset": "isogeny-v0.1.2372-x86_64-unknown-linux-musl.tar.gz",
+      "download_bytes": 12910249,
+      "expected_manifest_sha256": "f5669d3eedc0dfd262b5a359b5b8c46b7c892e1b8796b184b08aa2cf6fd8c281",
+      "download_sha256": "e92f0706b3468f4b29d2999369b3698fa20a1e0dd4ad619b57353831a7b3e1f8",
+      "github_digest": "sha256:e92f0706b3468f4b29d2999369b3698fa20a1e0dd4ad619b57353831a7b3e1f8",
+      "download_matches_github_digest": true,
+      "matches_manifest": false
+    }
+  ],
+  "repair_status": "local tests passed; not yet published by official workflow",
+  "scientific_primary_run": "RUN-ISOU-93b2b3 remains separate and active",
+  "new_frontier_or_speed_claim": false
+}
