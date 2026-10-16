@@ -19,6 +19,11 @@ The public-point SHA-256 is
 `407cd248797100214ff039193bb04bf89b5c2708a8cd339ca98f7aca98174062`;
 the answer-sidecar SHA-256 is
 `fe771284a3b0e5c0301309f678751f0630f0fa23844dd0ce1dbc9fa47f243076`.
+At checkout commit `93bad20b4916d8e56ac532d7982b25f0f2fa6ebd`, an
+additional read-only inventory compared the sixteen new encoded points with
+all tracked `research/n83*` JSONL target files containing two-string point
+arrays. It inspected 36 files and 32,334 prior point rows and found zero
+collisions. This inventory check supplements the generator's pinned exclusions.
 Run `python3 research/n83_e2e_final_holdout_20261016/generate.py
 --verify-sealed` before using the fixture in a measured job.
 
