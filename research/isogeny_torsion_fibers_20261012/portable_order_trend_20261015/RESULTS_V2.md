@@ -56,6 +56,16 @@ cost ordering when native categories are still unpriced. The largest
 full-image N64 peak RSS in the new cells was 35,110,912 bytes, well below
 the common 512 MiB ceiling.
 
+The [frozen native missing-price sensitivity](sensitivity/RESULTS.md)
+rechecks all 48 matched full-image/rho child pairs. At N64, the median
+extra **omitted rho** cost per observed walk step needed to tie the
+full-image group-count lower bound is 112.973, 303.573, 334.844 and
+288.595 group-addition equivalents across the four orders. This
+calculation sets every omitted full-image cost to zero; it is a threshold,
+not a measured native-operation conversion or complete portable `S`.
+The [run record](sensitivity/RUN.md), [48 rows](sensitivity/SENSITIVITY_V1.json)
+and [visual PDF](sensitivity/RESULTS.pdf) preserve the derivation.
+
 ## Relation geometry and complete recovery
 
 The full-image two-sum table changed support relative to destination-direct

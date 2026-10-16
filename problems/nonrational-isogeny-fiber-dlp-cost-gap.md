@@ -21,6 +21,8 @@
   [selected order-229 full rational-fiber audit](../research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/FIBER_REPORT.md),
   [order-229 64-target cold comparison](../research/isogeny_torsion_fibers_20261012/different_j_order_batch_20261015/RESULTS.md),
   [four-order counted-cost and full-fiber panel](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/RESULTS_V2.md),
+  [native missing-price sensitivity](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/sensitivity/RESULTS.md),
+  [selected order-1,201 complete-solve addendum](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/order1000/RESULTS.md),
   and [three-arm pairing batch cost report](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1740Z/REPORT.md)
 - **Next action owner:** unassigned
 - **Last updated:** 2026-10-15
@@ -37,6 +39,10 @@ verification. It has same-host exact replay and an independent relation
 checker. A portable counted-unit price, L2 isolation, and independent-host
 replay are still missing. The earlier pairs have orders 19 and 211;
 extrapolation from them is not an acceptance criterion.
+The different-`j` extension-field panel now reaches order 1,201 with
+verified complete solves and exact rational fibers. Its cold full-image
+group-count cost remains above same-target direct rho and BSGS; this
+componentwise observation does not provide a complete portable price.
 Both curves admit a rational order-three automorphism. A fixed six-class
 rho control has now been executed and independently checked, but its
 small-order restarts do not calibrate the best available reference.
@@ -590,3 +596,32 @@ independent enumeration, followed by an equally frozen complete cold
 solve; isolated timing and independent-host performance replay require
 admitted host resources and a portable phase price. The curve-level
 Lean bridge remains open.
+
+2026-10-15 price sensitivity and order-1,201 addendum: a native
+[48-row frozen derivation](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/sensitivity/RESULTS.md)
+found N64 median extra omitted rho charges of 112.973, 303.573,
+334.844 and 288.595 GAE per observed step to tie the four full-image
+group-count lower bounds under the favorable assumption that all omitted
+full-image work costs zero. These are thresholds, not measured prices.
+The deterministic extended screen checked 68 primes and 512 map
+witnesses, selecting `(p,r,h)=(1237,1201,1275)`. The
+[full-fiber audit](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/order1000/FIBER_RUN.md)
+and independent checker agreed on 1,531,275 source points, 510,425
+three-point rational image fibers and all 1,442,401 ordered subgroup
+pair identities. The first target-freeze attempt failed on a missing
+`j_pair` match arm before target output; the corrected V2 freeze and
+[84-child run](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/order1000/BATCH_RUN.md)
+were committed and replayed. All 1,785 order-1,201 scalar outputs and
+12,486 relation witnesses passed the independent Rust checker. Across
+five orders the native derivation covers 420 children and 8,925 scalars.
+At order 1,201 and N64, `S_group` was 1,532.302 for full image,
+4.071 for direct rho and 1.315 for BSGS; paired full/rho group ratio
+376.364. Full-image/destination-direct support was 122/128 keys.
+This discharges the selected cell's finite fiber and complete-solve
+gates. It leaves disjoint native-operation pricing, pinned host-class
+conversion, the direct `χ` resultant, L2 timing and second-host
+performance open. The EC2 quota/access denial in the
+[host access receipt](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/ISOLATION_ACCESS_V1.md)
+is an infrastructure obstacle to physical-core admission, not a
+mathematical obstruction. Five non-geometrically spaced orders with
+changing field primes and cofactors do not determine an exponent.

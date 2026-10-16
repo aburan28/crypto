@@ -8,6 +8,14 @@ rounds, relation and rho caps, and 300-second child ceiling. It builds the
 same Rust sources for Linux and records the Linux binary hashes and compiler
 version; a cross-architecture binary hash is expected to differ from the
 Darwin hash in `BATCH_RUN_SPEC_V1.json`.
+The order-1,201 follow-on extended the two shared example files after
+this four-order run was frozen. For the four-order replay, the workflow
+restores exactly those two sources from commit
+`de340fa2161088a5188b841ec82278f5067f8aed` before building and
+checks them against the original pinned source hashes. It records the
+current workflow checkout commit and the actual Linux binary hashes
+separately. This preserves the historical experiment rather than
+quietly changing its runner during the follow-on panel.
 
 The GitHub `ubuntu-24.04` hosted runner is a separate machine and operating
 system, but it is a virtual machine with no exclusive physical-core

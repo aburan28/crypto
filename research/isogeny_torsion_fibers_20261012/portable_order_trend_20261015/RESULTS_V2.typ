@@ -39,6 +39,14 @@ full-image/rho group-count ratios are 22.355, 72.401, 64.275 and
 and rho in each counted arithmetic axis: group work, Fp multiplications
 and Fp inversions. Native categories remain unpriced.
 
+The frozen native missing-price sensitivity rechecks 48 matched
+full-image/rho child pairs. At N64, the median extra *omitted rho*
+charge per observed walk step needed to tie the full-image group-count
+bound is 112.973, 303.573, 334.844 and 288.595 GAE across the four
+orders, setting all omitted full-image work to zero. These are
+thresholds, not measured native-operation prices or complete portable
+S. See `sensitivity/RESULTS.pdf` and `SENSITIVITY_V1.json`.
+
 #image("TREND_V1.svg", width: 100%)
 
 #pagebreak()

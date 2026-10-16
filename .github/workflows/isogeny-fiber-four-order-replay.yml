@@ -25,6 +25,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           filter: blob:none
+          fetch-depth: 0
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
@@ -49,6 +50,12 @@ jobs:
             research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/FIBER_421_457_V1.json
             research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/FIBER_457_421_V1.json
             research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/run_batch_linux_v1.sh
+      - name: Restore the frozen four-order runner and checker sources
+        run: |
+          git show de340fa2161088a5188b841ec82278f5067f8aed:examples/different_j_trend_batch.rs > examples/different_j_trend_batch.rs
+          git show de340fa2161088a5188b841ec82278f5067f8aed:examples/different_j_trend_batch_check.rs > examples/different_j_trend_batch_check.rs
+          test "$(sha256sum examples/different_j_trend_batch.rs | cut -d ' ' -f 1)" = "$(jq -r .runner_source_sha256 research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/BATCH_RUN_SPEC_V1.json)"
+          test "$(sha256sum examples/different_j_trend_batch_check.rs | cut -d ' ' -f 1)" = "$(jq -r .checker_source_sha256 research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/BATCH_RUN_SPEC_V1.json)"
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Build the frozen native runner and independent checker
