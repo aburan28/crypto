@@ -1570,7 +1570,7 @@ mod tests {
             return false;
         }
         for q in [2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
-            if n % q == 0 {
+            if n.is_multiple_of(q) {
                 return n == q;
             }
         }

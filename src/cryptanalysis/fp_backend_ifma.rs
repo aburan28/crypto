@@ -273,7 +273,7 @@ mod tests {
             return false;
         }
         for q in BASES {
-            if n % q == 0 {
+            if n.is_multiple_of(q) {
                 return n == q;
             }
         }
@@ -341,7 +341,7 @@ mod tests {
         for p in primes() {
             let pb = BigUint::from(p);
             for f in [Fp52::new(p), Fp52::new_scalar(p)] {
-                let edge = [0, 1, 2, p - 1, p - 2, p / 2, (p + 1) / 2];
+                let edge = [0, 1, 2, p - 1, p - 2, p / 2, p.div_ceil(2)];
                 let vals: Vec<u64> = edge
                     .iter()
                     .copied()
