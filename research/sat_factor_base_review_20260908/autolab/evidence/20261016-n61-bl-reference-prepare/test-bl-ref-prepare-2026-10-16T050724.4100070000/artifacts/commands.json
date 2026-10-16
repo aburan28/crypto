@@ -1,0 +1,28 @@
+{
+  "bl": [
+    "/Volumes/SSD990/ic-boundary-bl-202610152109/target/release/examples/ic_next10_09_equal_advice",
+    "bl",
+    "61",
+    "0",
+    "5711008",
+    "/Volumes/SSD990/ic-boundary-bl-202610152109/research/sat_factor_base_review_20260908/autolab/runs/test-bl-ref-prepare-2026-10-16T050724.4100070000/inputs/points.txt",
+    "/Volumes/SSD990/ic-boundary-bl-202610152109/research/sat_factor_base_review_20260908/autolab/runs/test-bl-ref-prepare-2026-10-16T050724.4100070000/logs/bl.jsonl"
+  ],
+  "build": [
+    "cargo",
+    "build",
+    "--release",
+    "--example",
+    "ic_next10_09_equal_advice"
+  ],
+  "targets": [
+    "/Volumes/SSD990/ic-boundary-bl-202610152109/target/release/examples/ic_next10_09_equal_advice",
+    "targets",
+    "61",
+    "0",
+    "1024",
+    "autolab-n61-bl-ref-eval-v1",
+    "/Volumes/SSD990/ic-boundary-bl-202610152109/research/sat_factor_base_review_20260908/autolab/runs/test-bl-ref-prepare-2026-10-16T050724.4100070000/inputs/points.txt",
+    "/Volumes/SSD990/ic-boundary-bl-202610152109/research/sat_factor_base_review_20260908/autolab/runs/test-bl-ref-prepare-2026-10-16T050724.4100070000/inputs/scalars.txt"
+  ]
+}
