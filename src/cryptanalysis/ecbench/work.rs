@@ -353,7 +353,7 @@ fn known_uncounted(method: &str, solver: Option<&SolverStats>) -> Vec<String> {
     } else if method.starts_with("rho.") && method != "rho.frozen_reference" {
         out.push("useless_collision_inversions");
     }
-    if let Some(s) = solver {
+    if let Some(s) = solver.filter(|s| !solver_complete(s)) {
         if let Some(gap) = solver_gap(&s.op_unit) {
             out.push(gap);
         }
@@ -378,8 +378,35 @@ fn solver_gap(op_unit: &str) -> Option<&'static str> {
     }
 }
 
+/// The `SolverStats::extra` keys through which an engine reports its whole
+/// run in `bitop/v1` primitives.  An engine that sets `bitop_complete = 1`
+/// is priced from these keys alone and leaves no gap; the instruction audit
+/// is what checks the claim.
+pub const SOLVER_BITOP_KEYS: &[(&str, Prim)] = &[
+    ("bitop_word_ops", Prim::WordOp),
+    ("bitop_hash_probes", Prim::HashProbe),
+    ("bitop_field_adds", Prim::FieldAdd),
+    ("bitop_field_muls", Prim::FieldMul),
+    ("bitop_field_sqrs", Prim::FieldSqr),
+    ("bitop_field_invs", Prim::FieldInv),
+    ("bitop_modr_muls", Prim::ModrMul),
+    ("bitop_modr_adds", Prim::ModrAdd),
+];
+
+fn solver_complete(s: &SolverStats) -> bool {
+    s.extra.get("bitop_complete").copied() == Some(1)
+}
+
 /// Primitives one solver unit stands for, if it has a price.
 fn solver_prims(s: &SolverStats) -> Option<Vec<(Prim, u128)>> {
+    if solver_complete(s) {
+        return Some(
+            SOLVER_BITOP_KEYS
+                .iter()
+                .filter_map(|(k, p)| s.extra.get(*k).map(|c| (*p, *c as u128)))
+                .collect(),
+        );
+    }
     let u = s.op_unit.as_str();
     if u.starts_with("word XORs") || u.starts_with("word operations") {
         // f4-f2 records also carry the XORs actually performed (the logical
