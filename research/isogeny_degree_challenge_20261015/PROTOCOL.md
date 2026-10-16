@@ -56,3 +56,13 @@ alongside P192/10453 and the P521/7 control. Each is freshly replayed from its
 raw map under the final rules. The historical map sources are pinned to commit
 3515af45efc81beadc1ce213fa88a7eb7419487f. These re-admissions seed separate curve
 rows and do not count as additional discoveries.
+
+The final adversarial review adds a duplicate-kernel control: copying one valid
+map into both positions must not substantiate COMPLETE coverage. The ff71f5772
+baseline accepted this claim (degree 13 remained valid; completeness was false),
+and its failing native regression is retained. The corrected judge compares
+kernels modulo the source characteristic and checks distinct Frobenius roots
+before accepting a COMPLETE two-line claim. Partial-map degrees remain eligible;
+repeated-root totals are left unestablished. Rerun the entire native suite,
+nine negative cases, twenty resource controls and three starting entries from
+the next clean source freeze before publication.

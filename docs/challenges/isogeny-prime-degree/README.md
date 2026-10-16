@@ -67,6 +67,10 @@ identity, subgroup order and twenty public scalar transports per map. One
 verified Frobenius eigenline is enough; PARTIAL/COMPLETE enumeration coverage
 stays explicit. No custom curve, twist or derived walk source can replace the
 registered source model. Every leaderboard build performs these checks again.
+COMPLETE two-line coverage requires two distinct normalized kernels and two
+distinct Frobenius roots. Repeating one valid map cannot establish completeness.
+For a partial map with repeated roots, the judge leaves the total eigenline
+count unestablished.
 
 Largest verified prime degree wins **within its exact source curve**. Equal
 degrees share rank. There is no speed tiebreak or cross-curve aggregate score.

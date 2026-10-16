@@ -16,9 +16,10 @@ degrees share rank within a source curve. The judge verifies mathematical maps
 rather than trusting a stored PASS or score. Every leaderboard build replays all
 of its submitted raw artifacts again.
 
-The final executable is frozen at source
-`ff71f577203179760211cdc1dc3da7a33fc77ec1`. Later study/report/index commits leave
-its runtime source unchanged. The final season is
+The resource-lifecycle packet is frozen at source
+`ff71f577203179760211cdc1dc3da7a33fc77ec1`. The subsequent duplicate-kernel
+regression found an overstated completeness label; the final corrected runtime
+and its new freeze will be recorded after its full validation. The season is
 `19f4503758a3dc2d9764f2283b4c92c7a35651e75ee7157f546b2563fcbf5c30`.
 The frozen experimental executable is archived as
 `store:evidence/isogeny-degree-challenge-20261015/isogeny-ff71f5772-macos-arm64`.
@@ -31,7 +32,7 @@ workflow after the PR lands and its release checks pass.
 |---|---|
 | All registered standard prime models ranked separately | Verified: 54 exact source rows in the policy, plan and starting board; canonical roster cross-checked against the full embedded registry |
 | Working native executable | Verified: installed-only directory, 74 package tests, retained command/exit/byte records; no Cargo or source checkout required at runtime |
-| Independent map admission | Verified: P192/13 and P521/7 controls; all eight corrupted-artifact controls rejected after receipt hashes were updated where applicable; forged saved scores rejected |
+| Independent map admission | P192/13 and P521/7 plus the original eight altered-artifact controls verified; the added duplicate-kernel regression is undergoing final corrected-runtime validation |
 | Resource lifecycle | Verified in final packet: 20/20 fresh short-map judgements accepted with positive RSS samples; one-second high-degree control censored with no score |
 | Higher-degree candidate ladder | Verified as a screen: 157 curve-degree pairs from 10454 through 65537, order filter at most 16, descending per source; candidates earn no score |
 | Historical starting scores | Freshly verified: P192/10453 and P224/1471 each have one eigenline, coverage PARTIAL; P521/7 has both eigenlines, coverage COMPLETE |

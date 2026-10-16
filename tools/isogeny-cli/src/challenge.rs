@@ -230,7 +230,40 @@ fn validate_document(s: &Submission) -> Result<(), String> {
             }
         }
     }
+    if maps.len() == 2 {
+        let p = num_bigint::BigInt::parse_bytes(
+            catalog::integer(&source["params"]["p"])
+                .to_string()
+                .as_bytes(),
+            10,
+        )
+        .unwrap();
+        let residue = |v: &Value| {
+            let n = num_bigint::BigInt::parse_bytes(catalog::integer(v).to_string().as_bytes(), 10)
+                .unwrap();
+            ((n % &p) + &p) % &p
+        };
+        let left = maps[0]["kernel"].as_array().unwrap();
+        let right = maps[1]["kernel"].as_array().unwrap();
+        if left
+            .iter()
+            .zip(right)
+            .all(|(a, b)| residue(a) == residue(b))
+        {
+            return Err("duplicate kernels cannot substantiate complete eigenline coverage".into());
+        }
+        if !two_distinct_eigenlines(source, ell)? {
+            return Err("complete two-line coverage requires distinct Frobenius roots".into());
+        }
+    }
     Ok(())
+}
+fn two_distinct_eigenlines(source: &Value, ell: u64) -> Result<bool, String> {
+    let q = catalog::field_order(source)?;
+    let trace = &(&q + &super::Int::one()) - &catalog::integer(&source["order"]);
+    // Called after coefficient-count validation: the artifact byte cap already
+    // bounds ell far below the u64 modular-product limit of this helper.
+    Ok(super::eigenvalues_from_trace(&q, &trace, ell).is_some())
 }
 fn snapshot(s: &Submission, out: &Path) -> Result<(), String> {
     fs::create_dir(out).map_err(|e| e.to_string())?;
@@ -250,7 +283,13 @@ fn snapshot(s: &Submission, out: &Path) -> Result<(), String> {
 fn worker(input: &Path) -> Result<Value, String> {
     let s = preflight(input)?;
     validate_document(&s)?;
-    let certificate = replay::verify(input, false);
+    let mut certificate = replay::verify(input, false);
+    if certificate["degree_coverage"] == "PARTIAL"
+        && !two_distinct_eigenlines(resolve(&s.slug)?, s.ell)?
+    {
+        certificate["expected_total_eigenlines"] = Value::Null;
+        certificate["enumeration_note"] = json!("partial map verified; total eigenline count not established for repeated Frobenius roots");
+    }
     let rows = certificate["records"]
         .as_array()
         .ok_or("missing fresh verification records")?;

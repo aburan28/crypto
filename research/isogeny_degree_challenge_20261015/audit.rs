@@ -58,7 +58,13 @@ fn main() {
         "compact-only",
         "traversal",
         "missing-hash",
+        "duplicate-kernel",
     ] {
+        if label == "duplicate-kernel"
+            && !controls.join("judged-duplicate-kernel/entry.json").exists()
+        {
+            continue;
+        }
         let entry = read(&controls.join(format!("judged-{label}/entry.json")));
         assert_eq!(entry["status"], "REJECTED", "{label}");
         assert!(entry["score"].is_null());
@@ -193,7 +199,7 @@ fn main() {
         serde_json::to_vec_pretty(&summary).unwrap(),
     )
     .unwrap();
-    let mut report = format!("# Native admission observations\n\nSource `{}`; run started `{}`. Exact native counts from the pinned policy, plan, raw control entries and fresh certificates.\n\n| Observation | Count |\n|---|---:|\n| Standard prime models | {} |\n| Construction adapters | {} |\n| Replay adapters | {} |\n| Candidate curve-degree pairs | {} |\n| Corrupted-artifact controls rejected | {} |\n| Resource stress accepted | {} / {} |\n| Resource stress censored | {} |\n| Newly discovered maps | 0 |\n\nP192/13 and P521/7 were admitted as separate known-answer controls. All eight altered artifacts and the forged saved-score submission were rejected. Every leaderboard build performed fresh replay.\n",
+    let mut report = format!("# Native admission observations\n\nSource `{}`; run started `{}`. Exact native counts from the pinned policy, plan, raw control entries and fresh certificates.\n\n| Observation | Count |\n|---|---:|\n| Standard prime models | {} |\n| Construction adapters | {} |\n| Replay adapters | {} |\n| Candidate curve-degree pairs | {} |\n| Corrupted-artifact controls rejected | {} |\n| Resource stress accepted | {} / {} |\n| Resource stress censored | {} |\n| Newly discovered maps | 0 |\n\nP192/13 and P521/7 were admitted as separate known-answer controls. All listed altered artifacts and the forged saved-score submission were rejected. Every leaderboard build performed fresh replay.\n",
         freeze["source_commit"].as_str().unwrap(),freeze["started_utc"].as_str().unwrap(),rows.len(),construction,replay,candidates,negatives.len(),stress_accepted,stress.len(),stress.len()-stress_accepted);
     if !starting.is_empty() {
         report.push_str("\nThe starting leaderboard re-admitted these historical maps. All passed twenty public scalar transports per map.\n\n| Exact source | Degree | Exact target | Coverage |\n|---|---:|---|---|\n");
@@ -224,7 +230,8 @@ fn main() {
     for (x, y, label) in boxes {
         svg.push_str(&format!("<rect x='{x}' y='{y}' width='240' height='60' rx='9' fill='white' stroke='#2463a0'/><text x='{}' y='{}' font-size='17'>{label}</text>",x+12,y+36));
     }
-    svg.push_str("<path d='M270 100H330 M570 100H630 M750 130V190 M750 160H450V190' fill='none' stroke='#2463a0' stroke-width='2'/><text x='30' y='293' font-size='17'>8 altered-artifact controls rejected; forged leaderboard score rejected.</text><text x='30' y='324' font-size='15'>Public fixtures; separate source-curve scores. Candidate screens earn no score.</text></g></svg>");
+    svg.push_str("<path d='M270 100H330 M570 100H630 M750 130V190 M750 160H450V190' fill='none' stroke='#2463a0' stroke-width='2'/><text x='30' y='293' font-size='17'>{} altered-artifact controls rejected; forged leaderboard score rejected.</text><text x='30' y='324' font-size='15'>Public fixtures; separate source-curve scores. Candidate screens earn no score.</text></g></svg>");
+    let svg = svg.replace("{}", &negatives.len().to_string());
     fs::write(out.join("admission.svg"), svg).unwrap();
     println!("{}",serde_json::to_string(&json!({"models":rows.len(),"construction":construction,"replay":replay,"candidates":candidates,"commands":commands.len()})).unwrap());
 }
