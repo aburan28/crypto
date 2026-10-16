@@ -108,17 +108,22 @@ pub fn batch_rho_factor(targets: u64) -> f64 {
     sum
 }
 
-/// Targets at which a method with `reusable` gates once and `per_target`
-/// gates a target first costs no more than batch rho (`rho_reusable` once,
-/// then `rho_per_target · batch_rho_factor(T)`), searched over powers of
-/// two up to `2^limit_log2`.  `None` if it never does in that range.
-pub fn break_even_targets(
+/// The targets at which a method with `reusable` gates once and
+/// `per_target` gates a target costs no more than batch rho
+/// (`rho_reusable` once, then `rho_per_target · batch_rho_factor(T)`):
+/// `(first, last)`, or `None` if there is no such `T` up to
+/// `2^limit_log2`.  Batch rho's total grows like `√T` and the method's
+/// like `T`, so where the method wins at all it wins in a window: past
+/// `last`, rho sharing its table across targets is cheaper again.  A
+/// method whose per-target cost falls below rho's marginal cost would need
+/// a different model, and is reported as winning to the search limit.
+pub fn break_even_window(
     reusable: f64,
     per_target: f64,
     rho_reusable: f64,
     rho_per_target: f64,
     limit_log2: u32,
-) -> Option<u64> {
+) -> Option<(u64, u64)> {
     let cost = |t: u64| reusable + t as f64 * per_target;
     // Σ c_k ≈ 2·sqrt(T/π) for large T; exact below 2^20.
     let rho = |t: u64| {
@@ -129,26 +134,44 @@ pub fn break_even_targets(
         };
         rho_reusable + rho_per_target * f
     };
-    let mut lo = 0u64;
-    let mut hi = None;
-    for e in 0..=limit_log2 {
-        let t = 1u64 << e;
-        if cost(t) <= rho(t) {
-            hi = Some(t);
+    let wins = |t: u64| cost(t) <= rho(t);
+    // The difference rho(T) − cost(T) is concave in T, so the winning set
+    // is an interval: find a winning point on a fine geometric grid, then
+    // bisect each side.
+    let limit = 1u64 << limit_log2;
+    let mut probe = None;
+    let mut t = 1u64;
+    while t <= limit {
+        if wins(t) {
+            probe = Some(t);
             break;
         }
-        lo = t;
+        t = (t + t / 8).max(t + 1);
     }
-    let mut hi = hi?;
+    let p = probe?;
+    let (mut lo, mut hi) = (0u64, p);
     while hi - lo > 1 {
         let mid = lo + (hi - lo) / 2;
-        if cost(mid) <= rho(mid) {
+        if wins(mid) {
             hi = mid;
         } else {
             lo = mid;
         }
     }
-    Some(hi)
+    let first = hi.max(1);
+    if wins(limit) {
+        return Some((first, limit));
+    }
+    let (mut lo, mut hi) = (p, limit);
+    while hi - lo > 1 {
+        let mid = lo + (hi - lo) / 2;
+        if wins(mid) {
+            lo = mid;
+        } else {
+            hi = mid;
+        }
+    }
+    Some((first, lo))
 }
 
 /// How one counter is charged.
@@ -993,13 +1016,17 @@ mod tests {
         let t = 1u64 << 16;
         let approx = 2.0 * (t as f64 / std::f64::consts::PI).sqrt();
         assert!((batch_rho_factor(t) / approx - 1.0).abs() < 1e-2);
-        // A method that costs 100 once and 1 a target beats a rho of 10 a
-        // target from T with 100 + T <= 10·Σ c_k.
-        let t = break_even_targets(100.0, 1.0, 0.0, 10.0, 30).unwrap();
-        assert!(100.0 + t as f64 <= 10.0 * batch_rho_factor(t));
-        assert!(100.0 + (t - 1) as f64 > 10.0 * batch_rho_factor(t - 1));
+        // 100 once and 1 a target against a rho of 100 a target: a window,
+        // because batch rho grows like sqrt(T).
+        let (a, b) = break_even_window(100.0, 1.0, 0.0, 100.0, 30).unwrap();
+        let wins = |t: u64| 100.0 + t as f64 <= 100.0 * batch_rho_factor(t);
+        assert!(wins(a) && !wins(a - 1));
+        assert!(wins(b) && !wins(b + 1));
+        assert!(a < 10 && b > 10_000 && b < 20_000);
+        // 100 once and 1 a target against 10 a target: never.
+        assert_eq!(break_even_window(100.0, 1.0, 0.0, 10.0, 30), None);
         // Dearer per target than rho's first walk: never.
-        assert_eq!(break_even_targets(0.0, 20.0, 0.0, 10.0, 30), None);
+        assert_eq!(break_even_window(0.0, 20.0, 0.0, 10.0, 30), None);
     }
 
     #[test]

@@ -92,7 +92,9 @@ enum Cmd {
     /// Amortise an arm against a rho arm on the same curves, in bitop/v1:
     /// per curve, the mean reusable and per-target gates of each, their
     /// cost for T targets (rho as one walk that keeps its table, Kuhn and
-    /// Struik), and the fewest targets at which the arm costs no more.
+    /// Struik), and the window of target counts in which the arm costs no
+    /// more (batch rho grows like sqrt(T), so a win is a window, not a
+    /// threshold).
     Amortize {
         #[arg(long, num_args = 1.., required = true)]
         dir: Vec<PathBuf>,
@@ -728,7 +730,7 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                     "reference": {"runs": b.len(), "reusable_bitops": rb, "per_target_bitops": pb, "complete": cb},
                     "cold_ratio": (ra + pa) / (rb + pb),
                     "per_target_ratio": pa / pb,
-                    "break_even_targets": work::break_even_targets(ra, pa, rb, pb, limit_log2),
+                    "break_even_window": work::break_even_window(ra, pa, rb, pb, limit_log2),
                     "at": at_rows,
                 }));
             }
