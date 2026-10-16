@@ -53,7 +53,8 @@ pub const SCHEMA: &str = "jacobian-transfers/2";
 /// type of the branch locus, never on `q`.  Every degree-2 function on such
 /// an `E` has a branch set of period exactly `n`, so this is a lower bound on
 /// every GHS cover; whether a particular curve attains it is a separate
-/// question (Joux–Vitse, Eurocrypt 2012, App. C, attain 9 at `n = 6`).
+/// question (Joux–Vitse, Eurocrypt 2012, App. C, shapes 12/13, give 9 as the
+/// minimum at `n = 6`, not a genus-9 cover of any given curve).
 /// Source: `research/odd_char_descent_genus3_20261014/` (Theorem 3 and the
 /// exact enumeration in `results/run-20261014T1800Z/min_genus.csv`).
 const GHS_GENUS_FLOOR: [u32; 14] = [1, 2, 3, 5, 5, 9, 7, 33, 81, 49, 1793, 25, 9217, 41];
@@ -835,6 +836,24 @@ fn extension_routes(
             ("extension_degree", Value::from(k)),
             ("relations_exponent", Value::from(round_to(2.0 - 2.0 / f64::from(k), 3))),
             ("decomposition_bezout_log2", Value::from(k * (k - 1))),
+            (
+                "decomposition_trials_log2",
+                Value::from(round_to(rb.model.log2_extension_trials(p_bits, k), 3)),
+            ),
+            (
+                "decomposition_solve_log2_fp_mults",
+                Value::from(round_to(rb.model.log2_extension_solve_mults(k), 3)),
+            ),
+            (
+                "decomposition_solve_basis",
+                Value::from(
+                    if rb.model.extension_measured_solve_mults.iter().any(|&(kk, _)| kk == k) {
+                        "measured"
+                    } else {
+                        "degree_cubed_floor"
+                    },
+                ),
+            ),
         ]),
         Destination {
             object: format!("E(GF(p^{k}))"),
@@ -849,13 +868,14 @@ fn extension_routes(
         DestinationCost {
             solver: DestinationSolver::ExtensionIndexCalculus,
             log2_cost: dest_log2,
-            log2_leading: (2.0 - 2.0 / f64::from(k)) * p_bits + f64::from(k * (k - 1)),
+            log2_leading: rb.model.log2_extension_trials(p_bits, k)
+                + rb.model.log2_extension_solve_mults(k),
             considered,
             enge_gaudry_hypothesis_holds: false,
         },
         vec![
-            "no transfer: the method works on E itself with a subfield factor base; the decomposition price is the Bézout bound of the Semaev system, a stand-in for the Gröbner solve".into(),
-            "the repository's gaudry_cubic measurements at k = 3 found the solve constant far above this formula; a formula advantage here is a lead, not a measurement".into(),
+            "no transfer: the method works on E itself with a subfield factor base; each of the k! * p^(2-2/k) decomposition attempts is priced at the measured C_k F_p multiplications (k = 3, 4) or, elsewhere, at D^3 with D = 2^(k(k-1)) the Bézout bound of the Semaev system, a floor on the Gröbner/FGLM solve".into(),
+            "until 2026-10-16 the solve was priced at D elliptic operations with no k! trial factor; the measured C_3 = 0.876e6 and C_4 = 1.227e12 lie above D^3, so rows at other k remain lower bounds and a formula advantage here is a lead, not a measurement".into(),
         ],
     ));
     // Descent to a cover over GF(p).  The cheapest genus the literature
@@ -902,7 +922,11 @@ fn extension_routes(
             Value::from(at_k.cost.ratio_log2),
         );
         let attained = if k == 6 {
-            "a GHS cover of genus 9 exists when j(E) is outside GF(p^3) and GF(p^2) (Joux–Vitse, Eurocrypt 2012, App. C)"
+            invariants.insert(
+                "conditional_on".into(),
+                Value::from("a genus-9 cover of this curve being exhibited"),
+            );
+            "Joux–Vitse (Eurocrypt 2012, App. C) shapes 12/13 give 9 as the minimum genus, not the existence of a genus-9 cover for this curve, so the row is conditional on such a cover being exhibited"
         } else {
             "whether this curve attains that genus is not verified"
         };
@@ -1317,6 +1341,12 @@ mod tests {
                         c.slug
                     );
                     assert!(r.notes.last().unwrap().contains("Until 2026-10-15"));
+                    assert_eq!(
+                        r.invariants.contains_key("conditional_on"),
+                        k == 6,
+                        "{} k = {k}",
+                        c.slug
+                    );
                     raised += 1;
                 }
                 None => {

@@ -1,15 +1,38 @@
 # XP-20261015-p192-isogeny-aux-search-t48: an auxiliary curve with a point of order 2^48 over the P-192 prime
 
-**Status: blocked.** Blocked on the wide-field isogeny-tower builder
-(`claude/isogeny-tower-wide`, in progress), on Stage 0's 192-bit field backend
-(`claude/fp-backend`, in progress) and on PR #1889 (open). It runs as cairn
-lab tasks under the first-success stop rule, with the native checker
-`backlog_check_aux2t` deciding a claimed curve.
-**Recommended gate:** run it after lead 1
-([XP-20261015-pkm-m3-n21-m4-n20](../XP-20261015-pkm-m3-n21-m4-n20/README.md))
-comes back with a bounded solving degree, or schedule it explicitly as an
-infrastructure and feasibility measurement. Funding 131,072, the lowest of the
-four seed cards.
+**Status: abandoned (superseded, 2026-10-16 claim audit).** The card is kept
+as the record; do not run it. Three independent reasons, each sufficient:
+
+1. **`t = 48` is not the attack-optimal parameter.** The PKM note's
+   linear-algebra floor
+   ([`RESEARCH_PKM_TOWER_ORACLE.md`](../../research/notes/index-calculus/RESEARCH_PKM_TOWER_ORACLE.md)
+   §3.7) puts the optimal base at `|V| ≈ (m!·r·T)^{1/(m+1)}`, about `2^39`
+   at `m = 4` for a 192-bit `r` (derived). `t = 48` is `192 / m`, the size at
+   which every point decomposes, not the cost optimum, so the card priced a
+   base about `2^9` larger than the one an attack would use. At `t ≈ 39` the
+   ordinary `z2xz8` search is about `2^36` draws, roughly 190 core-hours at
+   the measured 10.06 µs (derived), and the 45.6-minute run below already
+   found `b = 38`.
+2. **The argv contradicted the estimate.** `run.argv` passed
+   `--family z2xz2` while `est_core_hours` (98,352) is the `z2xz8` figure;
+   `z2xz2` at `t = 48` is 362,005 core-hours. The argv now says `z2xz8`, for
+   the record only.
+3. **The search is unnecessary.** The supersingular `y² = x³ + x` gives a
+   point of order `2^t`, every `t ≤ 64`, in one draw, with F4 degree and
+   relation yield indistinguishable from the ordinary tower (Lane H, below);
+   the Dickson torus tower (`2^t | p + 1`) also exists on P-192 for `t ≤ 64`
+   ([`research/pkm_dickson_torus_20261015/`](../../research/pkm_dickson_torus_20261015/README.md), A5c).
+
+The gate the card named, lead 1, has also moved: at `m = 4, N = 20` the F4
+solving degree is **`D ≥ 8`, NEGATIVE** for the `m = 4` plateau
+([`research/ic_next10_20261014/03-pkm-degree/`](../../research/ic_next10_20261014/03-pkm-degree/README.md)).
+Any further P-192 tower work is gated on the `m = 3` cell of
+[XP-20261015-pkm-m3-n21-m4-n20](../XP-20261015-pkm-m3-n21-m4-n20/README.md).
+The text below is the card as written on 2026-10-15.
+
+*Original status line:* blocked on the wide-field isogeny-tower builder, the
+192-bit field backend and PR #1889; recommended to run after lead 1 came back
+bounded. Funding 131,072, the lowest of the four seed cards.
 
 ## Question
 

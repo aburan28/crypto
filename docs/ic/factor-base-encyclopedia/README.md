@@ -12,6 +12,9 @@ they hold a family that is not mirrored here.
 already recorded and runs nothing new. Every number below is quoted from the
 file cited next to it. Numbers marked *derived here* are this note's own
 arithmetic on quoted numbers, and the working is shown.
+**Corrected:** 2026-10-16 (claim audit): §0.1 and §8 lead 1 now cite
+`research/ic_next10_20261014/03-pkm-degree` (`D ≥ 8` at `m = 4, N = 20`,
+NEGATIVE), and the P-192 `t = 48` card is marked superseded.
 **Updated:** 2026-10-15, with the outcomes of the five lead studies that
 merged to `main` at `b906df024` (PRs #1887, #1889, #1892, #1893, #1895). They
 were chased from §8 of the first version; each verdict below is quoted from
@@ -141,6 +144,11 @@ lines 238–255:
 | 4 | 8 | 6 | 1,049 | 4.84e7 | 9 MB | 0.1 s |
 | 4 | 12 | **7** | 9,452 | 8.55e10 | 171 MB | 9.4 s |
 | 4 | 16 | 7 | 76,837 | 2.7e13 | 8.1 GB | 55.5 min |
+| 4 | 20 | **≥ 8** (msolve) | — | — | 5 GB cap | — |
+
+The `m = 4, N = 20` row is msolve 0.6.5 on the raw presentation, not
+`f4_fp_tower`, from [`research/ic_next10_20261014/03-pkm-degree/`](../../../research/ic_next10_20261014/03-pkm-degree/README.md) (2026-10-14; see the
+correction under §0.1 *Status*).
 
 The rounds and controls behind that table:
 
@@ -167,6 +175,13 @@ The rounds and controls behind that table:
   `N = 12`. This is engineering.
 - **Round 7, §16** (2026-10-06): `m = 3`, `N = 18` gives `D = 7`, so the `m = 3`
   line reads 6, 6, 7, 7. `N = 21` needs more than this host's 14 GB.
+- **IC next-10, item 3** (2026-10-14, [`research/ic_next10_20261014/03-pkm-degree/`](../../../research/ic_next10_20261014/03-pkm-degree/README.md)):
+  **NEGATIVE for the `m = 4` plateau.** At `m = 4`, `N = 20`, on both
+  targets, msolve completes three productive degree-8 F4 rounds before its
+  5 GB cap; it reduces every lower-degree pair first, so **`D ≥ 8`**, and the
+  `m = 4` line reads `D = 6, 7, 7, ≥ 8`. `m = 3` stays inconclusive (`D ≥ 7`
+  at `N = 18, 21, 24`, stopped by the wall before any degree-8 round).
+  Caveat: msolve on the raw presentation; `f4_fp_tower` has not run `N = 20`.
 
 **Pre-registered reading** (rule A1, lines 1506–1513 and 3169–3171):
 
@@ -251,8 +266,12 @@ The `prime-kummer:t=8…11` base was run on five curves of 20–28 bits with
   `D = 7` plateau to `L = 6` or show a rise; neither gives H1a, which needs
   `N ≥ 27` at `m = 3`.
 
-**Status.** Open, and inconclusive on the solver axis: at `m ≥ 4` there is no
-data past `N = 16`, and the next cells need a large-memory host (above). Deeper
+**Status.** *Correction (2026-10-16 claim audit):* this paragraph first said
+"at `m ≥ 4` there is no data past `N = 16`". That missed [`research/ic_next10_20261014/03-pkm-degree/`](../../../research/ic_next10_20261014/03-pkm-degree/README.md),
+which measured **`D ≥ 8` at `m = 4, N = 20` (NEGATIVE)**. So the solver
+axis is negative at `m = 4`, the only regime §3.7 allows to beat rho's
+exponent, and inconclusive at `m = 3`, whose next cell needs a large-memory
+host (above). Deeper
 2-adicity up to `v₂ = 30` changes nothing. End to end it is engineering: a
 tower base costs the same as a plain base in a table oracle. It is not run at
 P-224 size.
@@ -316,6 +335,10 @@ priced run must add it.
 `t ≈ 48`, so the note's own estimate (line 246) is about `2^48` SEA point
 counts per factor base. PKM's cheaper alternative builds `E'` by CM through
 `x² − Dy² = 4N` (requirements README lines 110–119). It was not implemented.
+*Correction (2026-10-16):* `t ≈ 48` is `N / m` with `N ≈ 192`, the size at
+which every point decomposes; it is not the cost optimum. The note's own §3.7
+puts the optimal base at `|V| ≈ (m!·r·T)^{1/(m+1)} ≈ 2^39` at `m = 4`
+(derived), i.e. `t ≈ 39`.
 
 **Charged end to end in ecbench (2026-10-15, PR #1889,
 [`research/pkm_isogeny_tower_ecbench_20261015/README.md`](../../../research/pkm_isogeny_tower_ecbench_20261015/README.md)).**
@@ -347,8 +370,10 @@ verified and 720/720 replays identical.
 prime. Priced end to end in ecbench at 20–28 bits since PR #1889 (accounting:
 no gain over a plain base for a table oracle). Not run at P-192 size: the
 plug-in is `u64` (`p < 2^62`) and refuses `t > 20`, and SEA, CM construction
-and 2-Sylow halving are not implemented. The P-192 `t = 48` auxiliary search is
-a blocked backlog card (§8). The autoresearcher program cites the construction
+and 2-Sylow halving are not implemented. The P-192 `t = 48` auxiliary search
+card (§8) is abandoned as superseded: `t = 48` is not the §3.7 optimum
+(`|V| ≈ 2^39` at `m = 4`), and the supersingular `E'` and the Dickson torus
+make the search unnecessary. The autoresearcher program cites the construction
 (`AR:KN-LIT-025`) but never built it: `AR:H-RELN-96e3ba` calls the PKM arm
 "unmaterialised".
 
@@ -1017,20 +1042,27 @@ The first version of this note listed five leads. All five were chased on
 parts that are still open stay open.
 
 1. **The `m ≥ 4` PKM solving degree past `N = 16`.** This decides whether
-   either tower family is subexponential at all. **Still open; costed, not
-   run** (PR #1893,
+   either tower family is subexponential at all. **Answered at `m = 4`,
+   NEGATIVE: `D ≥ 8` at `N = 20`** ([`research/ic_next10_20261014/03-pkm-degree/`](../../../research/ic_next10_20261014/03-pkm-degree/README.md),
+   2026-10-14; msolve, raw presentation). *Correction (2026-10-16):* this item
+   first read "still open" and did not cite that result. Only the `m = 3`,
+   `N = 21` cell remains open (inconclusive at `D ≥ 7`), costed, not run (PR #1893,
    [`research/pkm_dickson_torus_20261015/`](../../../research/pkm_dickson_torus_20261015/README.md)
    §5). *Derived:* `m = 3, N = 21` needs about 130–150 GB peak memory and
    `m = 4, N = 20` about 240–380 GB on the current engine, so a 192–256 GB and
-   a 512 GB host, or a disk-backed reducer block that is not built. This
-   container has about 14 GB.
+   a 512 GB host, or a disk-backed reducer block that is not built (the
+   `m = 4` projection assumed `D` stays at 7 and is moot). This container has
+   about 14 GB.
 2. **An isogeny-tower plug-in that is charged** — **done at toy size; verdict
    accounting** (PR #1889,
    [`research/pkm_isogeny_tower_ecbench_20261015/`](../../../research/pkm_isogeny_tower_ecbench_20261015/README.md)).
    `prime-isogeny` is in ecbench with the auxiliary search charged: 1.002–1.331×
    a plain base of equal size, search share 0.8–25%, curves tried ≈ 1.05·2^t.
    It buys a table oracle nothing over a plain base. *Derived:* the P-192
-   `t = 48` search costs about `2^74` GAE against rho's `2^95.8`. **Still
+   `t = 48` search costs about `2^74` GAE against rho's `2^95.8`; but
+   `t = 48` is not the attack-optimal size (§3.7 puts `|V| ≈ 2^39` at
+   `m = 4`), and the supersingular `E'` and the Dickson torus remove the
+   search at P-192 (see the backlog card below). **Still
    open:** the wide-integer part. The plug-in is `u64` with `t ≤ 20`; no
    P-192-size run exists, and SEA, CM construction of `E'` and 2-Sylow
    halving are not implemented.
@@ -1073,18 +1105,23 @@ parts that are still open stay open.
      `2^118.9`. Engineering; no `k = 4` run below rho exists.
 
 **The experiment backlog.** [`backlog/README.md`](../../../backlog/README.md)
-(PR #1903) holds runnable cards for the heavy runs that are still open. All
-four are `blocked` at the time of writing, each on the blocker it names:
+(PR #1903) holds runnable cards for the heavy runs that are still open. Three
+are `blocked`, each on the blocker it names, and one is `abandoned`
+(2026-10-16 claim audit):
 
 - [`XP-20261015-pkm-m3-n21-m4-n20`](../../../backlog/XP-20261015-pkm-m3-n21-m4-n20/README.md):
-  item 1's cells (a large-memory host);
+  item 1's `m = 3, N = 21` cell (a large-memory host); rescoped 2026-10-16,
+  since the `m = 4, N = 20` cell is answered (`D ≥ 8`);
 - [`XP-20261015-kummer-p224-depth`](../../../backlog/XP-20261015-kummer-p224-depth/README.md):
   item 4 at `v₂ = 40` and at the P-224 prime (the generic-field F4 engine);
 - [`XP-20261015-shape-g1-frozen-cells`](../../../backlog/XP-20261015-shape-g1-frozen-cells/README.md):
   G1's frozen cells (47–50 GB at `(13,5)`, more beyond);
 - [`XP-20261015-p192-isogeny-aux-search-t48`](../../../backlog/XP-20261015-p192-isogeny-aux-search-t48/README.md):
-  item 2's P-192 auxiliary-curve search at `t = 48` (a wide-field builder
-  and a 192-bit prime-field backend, both in progress).
+  item 2's P-192 auxiliary-curve search at `t = 48`, **abandoned
+  (superseded)**: `t = 48` is not attack-optimal (§3.7: `|V| ≈ 2^39` at
+  `m = 4`), its argv's `z2xz2` family contradicted the `z2xz8` estimate, and
+  the supersingular `y² = x³ + x` and the Dickson torus give the tower at
+  P-192 without a search.
 
 ## 9. Method and limits of this note
 

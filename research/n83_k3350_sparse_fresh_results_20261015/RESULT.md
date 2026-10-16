@@ -1,5 +1,19 @@
 # K3350 improves the N83 sparse root11 online stage by 7.18%
 
+> **Superseded ranking (annotation added 2026-10-16, claim audit; the frozen
+> record below is unchanged).** The 7.18% K3350 win did not replicate. With
+> the process order reversed (K3350 first), K3350 was **slower** by
+> +4.346838 ms, 95% interval [+3.654838, +5.043167]
+> (`REPLICATION_NOT_CONFIRMED`,
+> [`../n83_k3350_reverse_results_20261015/RESULT.md`](../n83_k3350_reverse_results_20261015/RESULT.md)).
+> A balanced K3300/K3350/K3350/K3300 run on one allocation gave −0.429354 ms,
+> interval [−2.057542, +1.227720] (`BOUNDED_UNKNOWN`,
+> [`../n83_k_abba_results_20261015/RESULT.md`](../n83_k_abba_results_20261015/RESULT.md)),
+> and K3300's first-versus-second-process shift alone (+3.39 ms) exceeded
+> the balanced difference. The 7.18% is a process-order effect within this
+> run, not a factor-base improvement; K3300 and K3350 are unranked. Read the
+> title and "improves" below as the claim made on 2026-10-15, now withdrawn.
+
 K3350 is the selected factor base in this fresh sparse root11 comparison.
 Both arms solved and independently replayed all 20,000 new public subgroup
 points and their four-summand relations. The paired K3350-minus-K3300 mean
