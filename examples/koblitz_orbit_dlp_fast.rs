@@ -322,22 +322,124 @@ impl S3Solver {
     /// Same roots, in the same order, as `s3_x_roots` on the generic branch.
     #[inline(always)]
     fn roots(&self, gf: &Gf2, basis: &NormalBasis, left: u64, right: u64) -> Option<[u64; 2]> {
-        let s = left ^ right;
-        let a = self.square.apply(s);
+        let prepared = self.prepare(gf, left, right);
+        let inverse = if prepared.denominator == 0 {
+            0
+        } else {
+            invert(gf, basis, prepared.denominator)
+        };
+        self.finish(gf, prepared, inverse)
+    }
+
+    /// Everything up to the shared inversion: `a = (left+right)^2`,
+    /// `p = left·right`, `ps = p^2`, and the denominator `a·ps` (zero marks
+    /// the exceptional path, which `finish` routes to the direct solver
+    /// exactly as the scalar `roots` did).
+    #[inline(always)]
+    fn prepare(&self, gf: &Gf2, left: u64, right: u64) -> PreparedRoot {
+        let a = self.square.apply(left ^ right);
         let p = gf.mul(left, right);
         let ps = self.square.apply(p);
-        if a == 0 || ps == 0 {
-            return s3_x_roots(gf, self.b, left, right);
+        let denominator = if a == 0 || ps == 0 { 0 } else { gf.mul(a, ps) };
+        PreparedRoot {
+            left,
+            right,
+            a,
+            p,
+            ps,
+            denominator,
         }
-        let inv_combined = invert(gf, basis, gf.mul(a, ps));
-        let q = gf.mul(p, gf.mul(ps, inv_combined));
-        let c = ps ^ self.b;
-        let d = gf.mul(gf.mul(c, a), gf.mul(a, inv_combined));
+    }
+
+    /// Everything after the inversion, given `inverse = denominator^{-1}`
+    /// (ignored on the exceptional path).
+    #[inline(always)]
+    fn finish(&self, gf: &Gf2, prepared: PreparedRoot, inverse: u64) -> Option<[u64; 2]> {
+        if prepared.denominator == 0 {
+            return s3_x_roots(gf, self.b, prepared.left, prepared.right);
+        }
+        let q = gf.mul(prepared.p, gf.mul(prepared.ps, inverse));
+        let c = prepared.ps ^ self.b;
+        let d = gf.mul(gf.mul(c, prepared.a), gf.mul(prepared.a, inverse));
         if (d & self.trace_mask).count_ones() & 1 == 1 {
             return None;
         }
         let first = gf.mul(q, self.half_trace.apply(d));
         Some([first, first ^ q])
+    }
+}
+
+#[derive(Clone, Copy)]
+struct PreparedRoot {
+    left: u64,
+    right: u64,
+    a: u64,
+    p: u64,
+    ps: u64,
+    denominator: u64,
+}
+
+/// Reusable scratch for solving many u64 S3 root pairs with one shared
+/// field inversion (Montgomery's trick over the non-exceptional
+/// denominators), the u64 twin of the wide path's `RootBatch128`.
+/// `results[i]` equals `solver.roots(inputs[i])` for every `i`; only the
+/// inversion count changes.
+struct RootBatch {
+    prepared: Vec<PreparedRoot>,
+    inverses: Vec<u64>,
+    prefixes: Vec<u64>,
+    regular: Vec<usize>,
+    results: Vec<Option<[u64; 2]>>,
+}
+
+impl RootBatch {
+    fn with_capacity(entries: usize) -> Self {
+        Self {
+            prepared: Vec::with_capacity(entries),
+            inverses: Vec::with_capacity(entries),
+            prefixes: Vec::with_capacity(entries),
+            regular: Vec::with_capacity(entries),
+            results: Vec::with_capacity(entries),
+        }
+    }
+
+    fn solve(
+        &mut self,
+        gf: &Gf2,
+        basis: &NormalBasis,
+        solver: &S3Solver,
+        inputs: &[(u64, u64)],
+    ) {
+        self.prepared.clear();
+        self.inverses.clear();
+        self.prefixes.clear();
+        self.regular.clear();
+        self.results.clear();
+        self.inverses.resize(inputs.len(), 0);
+        self.prefixes.resize(inputs.len(), 0);
+        for (index, &(left, right)) in inputs.iter().enumerate() {
+            let prepared = solver.prepare(gf, left, right);
+            if prepared.denominator != 0 {
+                self.regular.push(index);
+            }
+            self.prepared.push(prepared);
+        }
+        if !self.regular.is_empty() {
+            let mut product = 1u64;
+            for &index in &self.regular {
+                self.prefixes[index] = product;
+                product = gf.mul(product, self.prepared[index].denominator);
+            }
+            // A product of non-zero field elements is non-zero.
+            let mut inverse_product = invert(gf, basis, product);
+            for &index in self.regular.iter().rev() {
+                self.inverses[index] = gf.mul(inverse_product, self.prefixes[index]);
+                inverse_product = gf.mul(inverse_product, self.prepared[index].denominator);
+            }
+        }
+        for (prepared, &inverse) in self.prepared.iter().zip(&self.inverses) {
+            self.results.push(solver.finish(gf, *prepared, inverse));
+        }
     }
 }
 
@@ -549,6 +651,53 @@ impl RootTable {
 }
 
 #[cfg(test)]
+mod root_batch_tests {
+    use super::{Gf2, NormalBasis, RootBatch, S3Solver};
+    use crypto_lib::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
+
+    /// The batched u64 root solve (one shared inversion per batch) must
+    /// return exactly the scalar `S3Solver::roots` result, in input order,
+    /// including the exceptional zero-denominator paths.
+    #[test]
+    fn batched_roots_match_scalar_roots_in_order() {
+        let curve = KoblitzCurve::new(0, 41).expect("admitted Koblitz rung");
+        let gf = Gf2::new(&curve.curve.irreducible);
+        let basis = NormalBasis::new(&gf);
+        let b = gf.from_element(&curve.curve.b);
+        let solver = S3Solver::new(&gf, b);
+        let mut seed = 0x9E37_79B9_7F4A_7C15u64;
+        let mut next = move || {
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
+            seed
+        };
+        let mut inputs = Vec::new();
+        for i in 0..4096usize {
+            let x = next() & basis.mask;
+            let y = next() & basis.mask;
+            inputs.push(match i % 7 {
+                0 => (x, x),
+                1 => (0, y),
+                2 => (x, 0),
+                _ => (x, y),
+            });
+        }
+        let mut batch = RootBatch::with_capacity(83);
+        let mut regular = 0usize;
+        for chunk in inputs.chunks(83) {
+            batch.solve(&gf, &basis, &solver, chunk);
+            assert_eq!(batch.results.len(), chunk.len());
+            regular += batch.regular.len();
+            for (k, &(left, right)) in chunk.iter().enumerate() {
+                assert_eq!(batch.results[k], solver.roots(&gf, &basis, left, right));
+            }
+        }
+        assert!(regular > 0 && regular < inputs.len());
+    }
+}
+
+#[cfg(test)]
 mod root_bloom_table_tests {
     use super::{mix_root_bloom, RootBloom, RootBloomProfile, RootTable};
 
@@ -740,16 +889,33 @@ fn extract(
     // Callers provide a rotating, target-dependent origin so rank-stage rows
     // do not concentrate on the same early columns.
     let start = start % index.states.len().max(1);
+    let mut scan_inputs: Vec<(u64, u64)> = Vec::with_capacity(n as usize);
+    let mut scan = RootBatch::with_capacity(n as usize);
     for state in index.states[start..].iter().chain(&index.states[..start]) {
+        // Collect this state's (shift, root) candidate inputs and share one
+        // field inversion across them (Montgomery's trick); the candidate
+        // order and the published relation are exactly those of the
+        // per-candidate solver.roots loop this replaces.
+        scan_inputs.clear();
+        for shift in 0..n {
+            for &normal_root in &state.normal_roots {
+                let absolute = basis.to_poly.apply(basis.rotate(normal_root, shift));
+                scan_inputs.push((absolute, target_x));
+            }
+        }
+        scan.solve(gf, basis, solver, &scan_inputs);
+        let mut candidate = 0usize;
         for shift in 0..n {
             let left_x = index.shifted[state.left as usize][shift as usize];
             let right_x = index.shifted[state.right as usize]
                 [(shift as usize + state.relative as usize) % n as usize];
-            for &normal_root in &state.normal_roots {
-                let absolute = basis.to_poly.apply(basis.rotate(normal_root, shift));
-                let Some(partners) = solver.roots(gf, basis, absolute, target_x) else {
+            for _ in 0..state.normal_roots.len() {
+                let absolute = scan_inputs[candidate].0;
+                let Some(partners) = scan.results[candidate] else {
+                    candidate += 1;
                     continue;
                 };
+                candidate += 1;
                 for partner in partners {
                     probes += 1;
                     let (canonical, partner_shift) =
