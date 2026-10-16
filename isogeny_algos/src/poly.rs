@@ -55,12 +55,63 @@ pub fn scale<F: Field>(f: &F, a: &Poly<F>, c: F::E) -> Poly<F> {
 /// Karatsuba threshold (schoolbook below this many coefficients).
 pub const KARATSUBA_THRESHOLD: usize = 32;
 
+/// Longest modulus (coefficient count) `powmod`/`powmod_big` reduce with the table of x^k mod m;
+/// longer ones use the Newton/Barrett `PolyModulus`.
+pub const POWMOD_TABLE_MAX: usize = 160;
+
+thread_local! {
+    /// Override of `POWMOD_TABLE_MAX` (for tuning runs; None = built-in default).
+    pub static POWMOD_TABLE_N: std::cell::Cell<Option<usize>> = const { std::cell::Cell::new(None) };
+}
+
+fn powmod_table_max() -> usize {
+    POWMOD_TABLE_N.with(|k| k.get()).unwrap_or(POWMOD_TABLE_MAX)
+}
+
 fn school<F: Field>(f: &F, a: &[F::E], b: &[F::E]) -> Vec<F::E> {
     f.conv(a, b)
 }
 
-/// Untrimmed product of two non-empty coefficient slices, length a.len() + b.len() - 1.
+/// Untrimmed square of a non-empty coefficient slice (Karatsuba on squares: three half-size
+/// squarings; `Field::conv_sq` at the leaves, the NTT above its threshold).
+pub fn sqr_raw<F: Field>(f: &F, a: &[F::E]) -> Vec<F::E> {
+    if a.len() < f.sqr_threshold() {
+        return f.conv_sq(a);
+    }
+    if let Some(r) = f.conv_long(a, a) {
+        return r;
+    }
+    let h = a.len().div_ceil(2);
+    let (a0, a1) = a.split_at(h);
+    let z0 = sqr_raw(f, a0);
+    let z2 = sqr_raw(f, a1);
+    let s: Vec<F::E> = (0..h)
+        .map(|i| f.add(a0[i], if i < a1.len() { a1[i] } else { f.zero() }))
+        .collect();
+    let mut z1 = sqr_raw(f, &s);
+    for (k, &v) in z0.iter().enumerate() {
+        z1[k] = f.sub(z1[k], v);
+    }
+    for (k, &v) in z2.iter().enumerate() {
+        z1[k] = f.sub(z1[k], v);
+    }
+    let mut r = vec![f.zero(); 2 * a.len() - 1];
+    r[..z0.len()].copy_from_slice(&z0);
+    r[2 * h..2 * h + z2.len()].copy_from_slice(&z2);
+    for (k, &v) in z1.iter().enumerate() {
+        if h + k < r.len() {
+            r[h + k] = f.add(r[h + k], v);
+        }
+    }
+    r
+}
+
+/// Untrimmed product of two non-empty coefficient slices, length a.len() + b.len() - 1. The
+/// same slice twice (a squaring) goes to `sqr_raw`.
 pub fn mul_raw<F: Field>(f: &F, a: &[F::E], b: &[F::E]) -> Vec<F::E> {
+    if std::ptr::eq(a, b) {
+        return sqr_raw(f, a);
+    }
     let (a, b) = if a.len() >= b.len() { (a, b) } else { (b, a) };
     if b.len() < f.karatsuba_threshold() {
         return school(f, a, b);
@@ -145,6 +196,58 @@ pub fn mul_schoolbook<F: Field>(f: &F, a: &Poly<F>, b: &Poly<F>) -> Poly<F> {
     r
 }
 
+/// base^e by left-to-right sliding windows of up to 4 bits (odd powers base^1 .. base^15
+/// precomputed): about nbits squarings and nbits / 5 multiplications, against nbits / 2 for
+/// plain binary powering (all nbits for an all-ones exponent such as (2^127 - 2) / 2). `mul`
+/// multiplies modulo the caller's modulus; a squaring passes the same reference twice.
+fn pow_window<T: Clone>(
+    one: T,
+    base: &T,
+    nbits: usize,
+    bit: impl Fn(usize) -> bool,
+    mut mul: impl FnMut(&T, &T) -> T,
+) -> T {
+    const K: usize = 4;
+    let b2 = mul(base, base);
+    let mut tbl = vec![base.clone()];
+    for i in 1..1 << (K - 1) {
+        let next = mul(&tbl[i - 1], &b2);
+        tbl.push(next);
+    }
+    let mut r = one;
+    let mut started = false;
+    let mut i = nbits as isize - 1;
+    while i >= 0 {
+        if !bit(i as usize) {
+            if started {
+                r = mul(&r, &r);
+            }
+            i -= 1;
+            continue;
+        }
+        // window [j, i]: the lowest set bit at or above i - K + 1
+        let mut j = (i - K as isize + 1).max(0);
+        while !bit(j as usize) {
+            j += 1;
+        }
+        let mut val = 0usize;
+        for t in (j..=i).rev() {
+            val = (val << 1) | bit(t as usize) as usize;
+        }
+        if started {
+            for _ in j..=i {
+                r = mul(&r, &r);
+            }
+            r = mul(&r, &tbl[(val - 1) / 2]);
+        } else {
+            r = tbl[(val - 1) / 2].clone();
+            started = true;
+        }
+        i = j - 1;
+    }
+    r
+}
+
 /// Reducer for a fixed modulus: remainder by two multiplications with a precomputed
 /// inverse of the reversed modulus (Newton/Barrett style division).
 pub struct PolyModulus<F: Field> {
@@ -193,6 +296,9 @@ impl<F: Field> PolyModulus<F> {
     pub fn powmod_big(&self, f: &F, a: &Poly<F>, e: &Big) -> Poly<F> {
         let mut r = constant(f, f.one());
         let b = self.rem(f, &rem(f, a, &self.m));
+        if b.len() > 2 {
+            return pow_window(r, &b, e.bits(), |i| e.bit(i), |x, y| self.mulmod(f, x, y));
+        }
         for i in (0..e.bits()).rev() {
             r = self.mulmod(f, &r, &r);
             if e.bit(i) {
@@ -285,7 +391,7 @@ pub fn mulmod<F: Field>(f: &F, a: &Poly<F>, b: &Poly<F>, m: &Poly<F>) -> Poly<F>
     rem(f, &mul(f, a, b), m)
 }
 pub fn powmod<F: Field>(f: &F, a: &Poly<F>, e: u128, m: &Poly<F>) -> Poly<F> {
-    if m.len() > 64 {
+    if m.len() > powmod_table_max() {
         return PolyModulus::new(f, m).powmod_big(f, a, &Big::from_u128(e));
     }
     if m.len() >= 3 {
@@ -307,7 +413,7 @@ pub fn powmod<F: Field>(f: &F, a: &Poly<F>, e: u128, m: &Poly<F>) -> Poly<F> {
     r
 }
 pub fn powmod_big<F: Field>(f: &F, a: &Poly<F>, e: &Big, m: &Poly<F>) -> Poly<F> {
-    if m.len() > 64 {
+    if m.len() > powmod_table_max() {
         return PolyModulus::new(f, m).powmod_big(f, a, e);
     }
     if m.len() >= 3 {
@@ -389,6 +495,11 @@ impl<F: Field> TableModulus<F> {
         let linear = b[2..].iter().all(|&c| f.is_zero(c));
         let mut r = vec![f.zero(); n];
         r[0] = f.one();
+        if !linear {
+            let mut r = pow_window(r, &b, nbits, bit, |x, y| self.reduce(f, &mul_raw(f, x, y)));
+            trim(f, &mut r);
+            return r;
+        }
         for i in (0..nbits).rev() {
             r = self.reduce(f, &mul_raw(f, &r, &r));
             if bit(i) {

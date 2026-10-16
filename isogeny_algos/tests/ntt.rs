@@ -42,7 +42,8 @@ fn check<const N: usize>(f: &FpM<N>, seed: u64) {
                 .collect();
             NTT_N.with(|k| k.set(Some(usize::MAX)));
             let want = poly::mul_raw(f, &a, &b);
-            let want_sq = poly::mul_raw(f, &a, &a);
+            let a2 = a.clone(); // a distinct slice: the general product, not the squaring path
+            let want_sq = poly::mul_raw(f, &a, &a2);
             NTT_N.with(|k| k.set(Some(1)));
             let got = poly::mul_raw(f, &a, &b);
             let got_sq = poly::mul_raw(f, &a, &a);

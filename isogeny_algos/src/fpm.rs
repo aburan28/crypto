@@ -1357,6 +1357,34 @@ impl<const N: usize> Field for FpM<N> {
         }
         r
     }
+    fn conv_sq(&self, a: &[Self::E]) -> Vec<Self::E> {
+        if N == 1 && self.pbits <= 62 {
+            return self.conv(a, a);
+        }
+        // coefficient k: 2 sum_{i < k - i} a_i a_{k-i} (+ a_{k/2}^2), lazily accumulated
+        let n = a.len();
+        let mut r = Vec::with_capacity(2 * n - 1);
+        for k in 0..2 * n - 1 {
+            let lo = k.saturating_sub(n - 1);
+            let mut acc = [0u64; 2 * MAXN + 2];
+            let mut i = lo;
+            while 2 * i < k {
+                Self::mul_acc(&mut acc, &a[i], &a[k - i]);
+                i += 1;
+            }
+            let mut top = 0u64;
+            for w in acc[..2 * N + 2].iter_mut() {
+                let nt = *w >> 63;
+                *w = (*w << 1) | top;
+                top = nt;
+            }
+            if k % 2 == 0 {
+                Self::mul_acc(&mut acc, &a[k / 2], &a[k / 2]);
+            }
+            r.push(self.redc_wide(&mut acc));
+        }
+        r
+    }
     fn conv_long(&self, a: &[Self::E], b: &[Self::E]) -> Option<Vec<Self::E>> {
         let thr = NTT_N.with(|k| k.get()).unwrap_or(self.ntt_threshold());
         if a.len().min(b.len()) < thr {
@@ -1396,6 +1424,15 @@ impl<const N: usize> Field for FpM<N> {
             out.push(self.redc_wide(&mut acc));
         }
         Some(out)
+    }
+    fn sqr_threshold(&self) -> usize {
+        // schoolbook squares form each cross product once, so they stay ahead of Karatsuba
+        // much longer than general products (examples/profile_sqr.rs)
+        match N {
+            1 if self.pbits <= 62 => self.karatsuba_threshold(),
+            2..=4 => 96,
+            _ => 64,
+        }
     }
     fn karatsuba_threshold(&self) -> usize {
         KARATSUBA_N
