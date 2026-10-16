@@ -97,7 +97,8 @@ def main():
     if (analysis["schema"] != "n83.e2e-holdout-analysis/v1"
             or analysis["status"] not in expected
             or analysis["evidence_status"] != "PASS_INDEPENDENT_REPLAY"
-            or analysis["selection_admitted"] is not True
+            or (analysis["selected_pipeline"] is not None
+                and analysis["selection_admitted"] is not True)
             or host["git_sha"] != args.head_sha
             or host["instance_id"] != f"gh-{args.run_id}-1-five-point-cold-holdout"
             or source["source_sha256"] != runner.screen.SOURCE_SHA256
@@ -117,8 +118,11 @@ def main():
         point_index = point_row["point_index"]
         index = point_index - 1
         point, answer = points[index], answers[index]
+        rho = point_row["rho"]
         if (point_row["public_point"] != point or answer["point"] != point
-                or answer["fixture_index"] != index):
+                or answer["fixture_index"] != index
+                or rho["status"] != "PASS_INDEPENDENT_REPLAY"
+                or rho["resources"]["status"] != "PASS"):
             raise ValueError(f"point {point_index}: frozen fixture differs")
         workload_id, record = workload(index, point, answer, source,
                                        results / "inputs" / f"point_{point_index}.jsonl")
@@ -156,6 +160,9 @@ def main():
                 "raw_artifact_sha256": archive_sha,
                 "cold_process_ms": item["cold_process_ms_exploratory"],
                 "one_target_online_ms": item["one_target_online_ms"],
+                "paired_rho_online_ms": rho["online_ms"],
+                "rho_online_over_ic_online_ratio":
+                    rho["online_ms"] / item["one_target_online_ms"],
                 "online_phases_ms": item["online_phases_ms"],
                 "setup_ms": item["setup_ms"],
                 "rank_stage_ms": item["rank_stage_ms"],
