@@ -107,6 +107,8 @@ jobs:
           name: n83-hosted-pair-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             ${{ runner.temp }}/n83-setup/
+            ${{ runner.temp }}/n83-archives/*.jsonl.gz
+            ${{ runner.temp }}/n83-pilot-parent/panel/manifest.json
             ${{ runner.temp }}/n83-hosted-pair/
             ${{ runner.temp }}/n83-hosted-scratch/*/build/build.stdout
             ${{ runner.temp }}/n83-hosted-scratch/*/build/build.stderr
