@@ -717,6 +717,10 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                         "rho_bitops": rb + pb * work::batch_rho_factor(t),
                     })
                 };
+                let at_rows: Vec<serde_json::Value> = [1u64, 16, 256, 4096, 1 << 16, 1 << 20]
+                    .into_iter()
+                    .map(at)
+                    .collect();
                 rows.push(serde_json::json!({
                     "curve": slug,
                     "log2_r": lr,
@@ -725,7 +729,7 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                     "cold_ratio": (ra + pa) / (rb + pb),
                     "per_target_ratio": pa / pb,
                     "break_even_targets": work::break_even_targets(ra, pa, rb, pb, limit_log2),
-                    "at": [1u64, 16, 256, 4096, 1 << 16, 1 << 20].map(at),
+                    "at": at_rows,
                 }));
             }
             print_json(&serde_json::json!({
