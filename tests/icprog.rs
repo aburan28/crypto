@@ -550,6 +550,7 @@ fn icprog_reports_and_enforces_each_round_s_hardware_class() {
         ("r06", r06),
         ("r08", r06),
         ("r11", r06),
+        ("r12", r06),
         ("r09", &["avx512f", "pclmulqdq", "!vpclmulqdq"]),
     ] {
         // `!name` is a feature the class excludes: failed where the host has it.
