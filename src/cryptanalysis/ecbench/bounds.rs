@@ -252,6 +252,16 @@ pub struct Fit {
     /// At least [`MIN_SIZES_FOR_SCALING`] sizes: the exponent is a result,
     /// not a description.
     pub scaling_claim: bool,
+    /// In `bitop/v1` only: the exponent of `bitops / gates(addition) =
+    /// C·r^α`, the cost in additions of the curve at each size.  Raw gates
+    /// grow with the field's arithmetic, about `(log r)²`, on top of the
+    /// algorithm's own exponent; dividing by one addition's gates at each
+    /// size takes that out, so a generic method's exponent is ½ here.
+    /// Absent outside `bitop/v1`, so earlier bounds keep their bytes.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alpha_in_additions: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alpha_in_additions_ci95: Option<(f64, f64)>,
 }
 
 /// The constant at the declared exponent.
@@ -855,6 +865,32 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
     }
     let n_sizes = sizes.iter().filter(|s| s.verified > 0).count();
     let (alpha, alpha_ci, log2_c, r2, ci_method) = power_law(&strata, opts.resamples, opts.seed);
+    // The same fit in additions, in bitop/v1: each run's gates over one
+    // affine addition's gates on its curve.
+    let (alpha_add, alpha_add_ci) = if domain.unit == crate::cryptanalysis::bitops::UNIT {
+        let add_strata: Vec<Vec<(f64, f64)>> = sizes
+            .iter()
+            .map(|row| {
+                verified
+                    .iter()
+                    .filter(|r| r.workload.curve.slug == row.slug)
+                    .filter_map(|r| {
+                        let w = r.work.as_ref()?;
+                        let add = w
+                            .widths
+                            .gates(crate::cryptanalysis::bitops::Prim::GroupAdd)
+                            .ok()? as f64;
+                        let g = r.cost.total_gae?;
+                        (g > 0.0).then(|| ((row.r as f64).ln(), (g / add).ln()))
+                    })
+                    .collect()
+            })
+            .collect();
+        let (a, ci, _, _, _) = power_law(&add_strata, opts.resamples, opts.seed);
+        (a, ci)
+    } else {
+        (None, None)
+    };
     let declared_alpha = expected_s(&method.id, sizes[0].automorphisms_available).map(|_| 0.5);
     let scaling_claim = n_sizes >= MIN_SIZES_FOR_SCALING && alpha.is_some();
     let fit = Fit {
@@ -877,6 +913,8 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
             _ => None,
         },
         scaling_claim,
+        alpha_in_additions: alpha_add,
+        alpha_in_additions_ci95: alpha_add_ci,
     };
     let none = || Estimate {
         value: f64::NAN,

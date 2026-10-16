@@ -55,6 +55,16 @@ pub struct CofactorFiber<E> {
     pub complete: bool,
     /// Base points whose `[r]P` was taken.
     pub samples: u64,
+    /// Probes and inserts of the generation's key set, for `bitop/v1`
+    /// (`ecbench::work`) only.
+    pub key_probes: u64,
+}
+
+/// The fiber generation's key-set probes, as table insert attempts.
+fn add_fiber_key_probes<E>(c: &mut BTreeMap<String, u64>, fiber: Option<&CofactorFiber<E>>) {
+    if let Some(f) = fiber {
+        *c.entry("table_insert_attempts".to_string()).or_insert(0) += f.key_probes;
+    }
 }
 
 impl<E> CofactorFiber<E> {
@@ -76,6 +86,7 @@ pub fn cofactor_fiber<G: CountedGroup>(
     let mut points = vec![g.identity()];
     let mut keys: HashSet<u64> = HashSet::new();
     keys.insert(g.key(&g.identity()));
+    let mut key_probes = 1u64;
     let mut samples = 0u64;
     if h > 1 {
         for &p in &fb.points {
@@ -84,6 +95,7 @@ pub fn cofactor_fiber<G: CountedGroup>(
             }
             samples += 1;
             let k = g.mul(ops, p, r);
+            key_probes += 1;
             if keys.contains(&g.key(&k)) {
                 continue;
             }
@@ -97,6 +109,7 @@ pub fn cofactor_fiber<G: CountedGroup>(
                 }
                 for &o in &old {
                     let q = g.add(ops, o, mult);
+                    key_probes += 1;
                     if keys.insert(g.key(&q)) {
                         points.push(q);
                     }
@@ -113,6 +126,7 @@ pub fn cofactor_fiber<G: CountedGroup>(
         points,
         h,
         samples,
+        key_probes,
     }
 }
 
@@ -192,6 +206,7 @@ pub fn cofactor_fiber_with<G: CountedGroup>(
     let mut points = vec![g.identity()];
     let mut keys: HashSet<u64> = HashSet::new();
     keys.insert(g.key(&g.identity()));
+    let mut key_probes = 1u64;
     let mut samples = 0u64;
     if h > 1 {
         let mult_by = r.checked_mul(scale).expect("r·d fits a u64");
@@ -201,6 +216,7 @@ pub fn cofactor_fiber_with<G: CountedGroup>(
             }
             samples += 1;
             let k = g.mul(ops, p, mult_by);
+            key_probes += 1;
             if keys.contains(&g.key(&k)) {
                 continue;
             }
@@ -208,13 +224,17 @@ pub fn cofactor_fiber_with<G: CountedGroup>(
             // `⟨old, K⟩`: the first `jK` already in `old` closes the group.
             let old: Vec<G::Elt> = points.clone();
             let mut mult = k;
-            while !keys.contains(&g.key(&mult)) {
+            while {
+                key_probes += 1;
+                !keys.contains(&g.key(&mult))
+            } {
                 for &o in &old {
                     let q = if g.is_identity(&o) {
                         mult
                     } else {
                         g.add(ops, o, mult)
                     };
+                    key_probes += 1;
                     if keys.insert(g.key(&q)) {
                         points.push(q);
                     }
@@ -235,6 +255,7 @@ pub fn cofactor_fiber_with<G: CountedGroup>(
         points,
         h,
         samples,
+        key_probes,
     }
 }
 
@@ -319,6 +340,8 @@ pub struct FiberPairTable {
     pub kind: &'static str,
     pub entries: u64,
     pub build_ops: GroupOps,
+    /// Hash inserts attempted while building, for `bitop/v1` only.
+    pub insert_attempts: u64,
 }
 
 impl FiberPairTable {
@@ -330,6 +353,7 @@ impl FiberPairTable {
     ) -> Self {
         let mut ops = GroupOps::default();
         let mut map: HashMap<u64, (u32, u32, u16)> = HashMap::new();
+        let mut attempts = 0u64;
         let mut insert = |i: usize, j: usize, ops: &mut GroupOps| {
             let s = g.add(ops, fb.points[i], fb.points[j]);
             for (k, &kp) in fiber.points.iter().enumerate() {
@@ -337,6 +361,7 @@ impl FiberPairTable {
                 if g.is_identity(&sk) {
                     continue;
                 }
+                attempts += 1;
                 map.entry(g.key(&sk) >> 1)
                     .or_insert((i as u32, j as u32, k as u16));
             }
@@ -372,6 +397,7 @@ impl FiberPairTable {
             entries: map.len() as u64,
             map,
             build_ops: ops,
+            insert_attempts: attempts,
         }
     }
 
@@ -501,6 +527,19 @@ impl<G: CountedGroup> DecompositionOracle<G> for FiberMitmOracle<G::Elt> {
         c
     }
 
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        let mut c = match (&self.closed, &self.plain) {
+            (Some(t), _) => {
+                BTreeMap::from([("table_insert_attempts".to_string(), t.insert_attempts)])
+            }
+            (None, Some(t)) => t.work_counters(),
+            (None, None) => BTreeMap::new(),
+        };
+        add_fiber_key_probes(&mut c, self.fiber.as_ref());
+        c.insert("counted:table_insert_attempts".to_string(), 1);
+        c
+    }
+
     fn decompose(
         &mut self,
         ctx: &InstanceCtx<G>,
@@ -575,6 +614,8 @@ pub struct FiberFrobeniusPairTable {
     pub entries: u64,
     pub build_ops: GroupOps,
     pub build_canonicalisations: u64,
+    /// Hash inserts attempted while building, for `bitop/v1` only.
+    pub insert_attempts: u64,
 }
 
 impl FiberFrobeniusPairTable {
@@ -617,6 +658,7 @@ impl FiberFrobeniusPairTable {
         }
         let mut ops = GroupOps::default();
         let mut canons = 0u64;
+        let mut attempts = 0u64;
         let mut map: HashMap<u64, (u32, u32, u16)> = HashMap::new();
         for (col, &rep) in rep_of_col.iter().enumerate() {
             if rep == usize::MAX {
@@ -633,6 +675,7 @@ impl FiberFrobeniusPairTable {
                         continue;
                     }
                     canons += 1;
+                    attempts += 1;
                     let (key, t_u) = canon.canon_with_shift(uk.x);
                     map.entry(key).or_insert((
                         rep as u32,
@@ -650,6 +693,7 @@ impl FiberFrobeniusPairTable {
             n: inst.n,
             build_ops: ops,
             build_canonicalisations: canons,
+            insert_attempts: attempts,
         })
     }
 
@@ -772,6 +816,31 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for FiberFrobeniusMitmOracle<'_> {
         if let Some(t) = &self.plain {
             c.insert("pair_table_entries".into(), t.entries);
         }
+        c
+    }
+
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        let mut c = match (&self.closed, &self.plain) {
+            (Some(t), _) => {
+                // The table builds its own canonicalisation tables.
+                let canon = t.canon.build_work();
+                let mut c = BTreeMap::new();
+                for (name, v) in [
+                    ("table_insert_attempts", t.insert_attempts),
+                    ("canon_build_word_ops", canon.word_ops),
+                    ("canon_build_field_sqrs", canon.field_sqrs),
+                ] {
+                    if v > 0 {
+                        c.insert(name.to_string(), v);
+                    }
+                }
+                c
+            }
+            (None, Some(t)) => t.work_counters(),
+            (None, None) => BTreeMap::new(),
+        };
+        add_fiber_key_probes(&mut c, self.fiber.as_ref());
+        c.insert("counted:table_insert_attempts".to_string(), 1);
         c
     }
 

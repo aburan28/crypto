@@ -86,6 +86,12 @@ enum Cmd {
         /// Only verified, non-warm-up records.
         #[arg(long)]
         counted: bool,
+        /// One line per method configuration and curve family instead of
+        /// per record: runs, curves, the log2 r range, how many runs are
+        /// completely priced, the median ratio to the floor, and the union
+        /// of what the incomplete ones miss.
+        #[arg(long)]
+        summary: bool,
     },
     /// Print the bitop/v1 test vectors (docs/units/bitop-v1.vectors.json).
     BitopVectors,
@@ -640,10 +646,27 @@ fn emit_claim(
 fn run(cli: Cli) -> Result<ExitCode, String> {
     match cli.cmd {
         Cmd::Store(args) => crypto_lib::store::cli::run(&args)?,
-        Cmd::Work { sessions, counted } => {
+        Cmd::Work {
+            sessions,
+            counted,
+            summary,
+        } => {
             use std::io::Write;
             let stdout = std::io::stdout();
             let mut out = stdout.lock();
+            if summary {
+                let groups =
+                    crypto_lib::cryptanalysis::ecbench::work::summarise(&sessions, counted)?;
+                for g in groups {
+                    writeln!(
+                        out,
+                        "{}",
+                        serde_json::to_string(&g).map_err(|e| e.to_string())?
+                    )
+                    .map_err(|e| e.to_string())?;
+                }
+                return Ok(ExitCode::SUCCESS);
+            }
             for dir in &sessions {
                 let records = crypto_lib::cryptanalysis::ecbench::runner::read_records(dir)
                     .map_err(|e| format!("{}: {e}", dir.display()))?;

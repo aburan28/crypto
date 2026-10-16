@@ -7844,6 +7844,10 @@ pub struct SatDecompositionStats {
     /// Conflicts across every solve call — a machine-independent
     /// measure of search effort.
     pub conflicts: u64,
+    /// The solver's whole run in `bitop/v1` word operations
+    /// (`sat::Solver::word_ops`: search and encoding), cumulative over the
+    /// calls like `conflicts`.
+    pub word_ops: u64,
 }
 
 /// Encode a finite set of coordinates without enumerating its complement.
@@ -8203,6 +8207,7 @@ pub fn sat_decompose_with(
         let outcome = enc.solver.solve();
         // The solver counter is cumulative across incremental calls.
         stats.conflicts = enc.solver.conflicts();
+        stats.word_ops = enc.solver.word_ops();
         match outcome {
             SolveResult::Unsat => {
                 stats.refuted = true;
@@ -8363,6 +8368,7 @@ fn sat_decompose_union_s4(
         stats.solver_calls += 1;
         let result = enc.solver.solve();
         stats.conflicts = enc.solver.conflicts();
+        stats.word_ops = enc.solver.word_ops();
         match result {
             SolveResult::Unsat => {
                 stats.refuted = true;

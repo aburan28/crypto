@@ -968,6 +968,111 @@ pub fn work_line(r: &crate::cryptanalysis::ecbench::record::Record) -> WorkLine 
     }
 }
 
+/// One method configuration on one curve family, summarised over records.
+#[derive(Debug, Serialize)]
+pub struct WorkSummary {
+    pub method: String,
+    pub params: BTreeMap<String, String>,
+    pub family: String,
+    pub runs: usize,
+    pub curves: usize,
+    pub log2_r_min: f64,
+    pub log2_r_max: f64,
+    /// Runs whose pricing is complete.
+    pub complete_runs: usize,
+    /// Median `ratio_to_floor` over the runs on the largest curve.
+    pub median_ratio_to_floor_at_largest: f64,
+    pub unpriced: Vec<String>,
+    pub known_uncounted: Vec<String>,
+    /// Runs that could not be priced at all, with the first reason.
+    pub errors: usize,
+    pub first_error: Option<String>,
+}
+
+/// Summarise the records of `dirs` by method configuration and family.
+pub fn summarise(
+    dirs: &[std::path::PathBuf],
+    counted_only: bool,
+) -> Result<Vec<WorkSummary>, String> {
+    type Key = (String, String, String);
+    let mut by: BTreeMap<Key, Vec<(f64, Result<WorkBlock, String>, String)>> = BTreeMap::new();
+    let mut params: BTreeMap<Key, BTreeMap<String, String>> = BTreeMap::new();
+    for d in dirs {
+        let records = crate::cryptanalysis::ecbench::runner::read_records(d)
+            .map_err(|e| format!("{}: {e}", d.display()))?;
+        for r in records {
+            if counted_only && !r.counts() {
+                continue;
+            }
+            let key = (
+                r.method.id.clone(),
+                serde_json::to_string(&r.method.params).map_err(|e| e.to_string())?,
+                r.workload.curve.family.clone(),
+            );
+            params.insert(key.clone(), r.method.params.clone());
+            by.entry(key).or_default().push((
+                (r.workload.curve.r as f64).log2(),
+                price_record(&r),
+                r.workload.curve.slug.clone(),
+            ));
+        }
+    }
+    let mut out = Vec::new();
+    for (key, rows) in by {
+        let ok: Vec<(f64, &WorkBlock, &String)> = rows
+            .iter()
+            .filter_map(|(l, w, c)| w.as_ref().ok().map(|w| (*l, w, c)))
+            .collect();
+        let errors: Vec<&String> = rows
+            .iter()
+            .filter_map(|(_, w, _)| w.as_ref().err())
+            .collect();
+        let max = ok.iter().map(|x| x.0).fold(f64::NEG_INFINITY, f64::max);
+        let mut at_max: Vec<f64> = ok
+            .iter()
+            .filter(|x| x.0 == max)
+            .map(|x| x.1.ratio_to_floor)
+            .collect();
+        at_max.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+        let median = if at_max.is_empty() {
+            f64::NAN
+        } else if at_max.len() % 2 == 1 {
+            at_max[at_max.len() / 2]
+        } else {
+            (at_max[at_max.len() / 2 - 1] + at_max[at_max.len() / 2]) / 2.0
+        };
+        let mut unpriced = Vec::new();
+        let mut known = Vec::new();
+        for (_, w, _) in &ok {
+            for u in &w.unpriced {
+                push_unique(&mut unpriced, u);
+            }
+            for k in &w.known_uncounted {
+                push_unique(&mut known, k);
+            }
+        }
+        unpriced.sort();
+        known.sort();
+        let curves: std::collections::BTreeSet<&String> = rows.iter().map(|x| &x.2).collect();
+        out.push(WorkSummary {
+            params: params.remove(&key).unwrap_or_default(),
+            method: key.0,
+            family: key.2,
+            runs: rows.len(),
+            curves: curves.len(),
+            log2_r_min: ok.iter().map(|x| x.0).fold(f64::INFINITY, f64::min),
+            log2_r_max: max,
+            complete_runs: ok.iter().filter(|x| x.1.complete).count(),
+            median_ratio_to_floor_at_largest: median,
+            unpriced,
+            known_uncounted: known,
+            errors: errors.len(),
+            first_error: errors.first().map(|e| e.to_string()),
+        });
+    }
+    Ok(out)
+}
+
 fn push_unique(v: &mut Vec<String>, s: &str) {
     if !v.iter().any(|x| x == s) {
         v.push(s.to_string());

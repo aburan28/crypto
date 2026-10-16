@@ -34,8 +34,7 @@
 //! Every target also carries its work in `bitop/v1`
 //! (`crate::cryptanalysis::bitops`, `docs/units/BITOPS.md`), the unit the
 //! whole repository is priced in, or `None` with the reason when part of it
-//! has no bit-operation count (an S₄ pair, the F4 matrix builds, a CDCL
-//! conflict).  The `gae` columns are the legacy conversion with this host's
+//! has no bit-operation count (an S₄ pair's quartic build and gcd).  The `gae` columns are the legacy conversion with this host's
 //! measured ratios; a missing ratio is no price, never a default.
 //!
 //! The last column is an extrapolation and says so: with the measured
@@ -555,6 +554,7 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
         let target_big = inst.fast.lower(*target);
 
         // matrix-F4 with splitting
+        let tally_before = crate::cryptanalysis::bitop_tally::snapshot();
         let before = f4_word_ops_total();
         let profile_before = f4_profile();
         let t0 = Instant::now();
@@ -570,6 +570,7 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
         );
         let wall = t0.elapsed().as_nanos() as u64;
         let words = f4_word_ops_total() - before;
+        let tally = crate::cryptanalysis::bitop_tally::snapshot().since(tally_before);
         let profile = f4_profile();
         let verdict = match (&by_f4, stats.exhausted) {
             (Some(_), _) => Verdict::Found,
@@ -607,9 +608,17 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
                 .ns_per_word_xor
                 .map_or(f64::NAN, |ns| price(words, ns, 0)),
             extra,
-            // The word XORs are the elimination alone; the matrix builds
-            // and the summation polynomial are not counted here.
-            bitops: None,
+            // The elimination's word XORs and everything else the engine
+            // tallied (`bitop_tally`): matrix builds, the summation
+            // polynomial, the splitting tree, each lift.
+            bitops: Some(
+                (words + tally.word_ops) as u128 * gates(Prim::WordOp)
+                    + tally.hash_probes as u128 * gates(Prim::HashProbe)
+                    + tally.field_adds as u128 * gates(Prim::FieldAdd)
+                    + tally.field_muls as u128 * gates(Prim::FieldMul)
+                    + tally.field_sqrs as u128 * gates(Prim::FieldSqr)
+                    + tally.field_invs as u128 * gates(Prim::FieldInv),
+            ),
         });
 
         // CDCL SAT with native parity rows and degree-2 Macaulay rows
@@ -658,8 +667,9 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
             wall_ns: wall,
             gae: price(sstats.conflicts.max(1), ns_per_conflict, 0),
             extra,
-            // A conflict has no bit-operation count.
-            bitops: None,
+            // The solver's whole run, search and encoding, in word
+            // operations (`sat::Solver::word_ops`).
+            bitops: Some(sstats.word_ops as u128 * gates(Prim::WordOp)),
         });
     }
 
@@ -690,7 +700,7 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
             "matrix_f4_splitting",
             "word_xors",
             f4_rows,
-            Some("the word XORs count the elimination only, not the matrix builds or the summation polynomial"),
+            None,
         ));
     }
     if !sat_rows.is_empty() {
@@ -698,7 +708,7 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
             "cdcl_sat_native_xor",
             "conflicts",
             sat_rows,
-            Some("a CDCL conflict has no bit-operation count"),
+            None,
         ));
     }
 
