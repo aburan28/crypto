@@ -32,7 +32,7 @@ concurrency:
 jobs:
   lean:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: research/rho_assurance_20261016/lean
@@ -47,7 +47,7 @@ jobs:
 
   tla:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 60 }}
     defaults:
       run:
         working-directory: research/rho_assurance_20261016/tla
