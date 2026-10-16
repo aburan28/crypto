@@ -106,6 +106,20 @@ gate statuses, not promotions.
    relation count alone cannot establish an ECDLP crossover. Freeze the
    exact orders, targets, seeds, caps and selection rule in a new protocol
    before running this grid.
+6. **Separate genuine rational torsion fibers from coprime-degree
+   projection.** Search a bounded public field/curve grid for full
+   rational `r`-torsion and a rational degree-`r` kernel line distinct
+   from the target line. Freeze the first qualifying ICV1/EC1 pair,
+   subgroup basis, kernel, target, explicit map and dual, then
+   enumerate each rational fiber independently. Compare a fiber-choice
+   factor base with direct destination and source controls on the same
+   targets and relation caps. Recover and verify scalars in both rows,
+   charging the degree-`r` map, all `r` representatives, selection,
+   failed candidates and linear algebra against matched rho and BSGS.
+   The discriminant is whether preimage choice increases useful
+   relations enough to pay for its construction; fiber multiplicity
+   alone is not an ECDLP cost result. Keep this separate from the
+   degree-three, `gcd(3,r)=1` panel above.
 
 The larger-picture target is a **cold unknown-scalar ECDLP result**:
 an explicit map and subgroup-preserving transfer, a useful
