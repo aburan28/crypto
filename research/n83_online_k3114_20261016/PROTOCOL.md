@@ -14,6 +14,9 @@ The exact producer source SHA-256 is
 the frozen point, curve, subgroup, rho seed, source files and lockfile are
 checked by `run.py --preflight`. The arm order is K3072 A/B, K3114 A/B,
 then one same-point rho solve, all on one GitHub-hosted Ubuntu 24.04 runner.
+The archived workflow can be rerun by manual dispatch; its checkout is pinned
+to executed commit `9abf6afe8bc52ad4f136a19ff1603d60c344f30d`, so
+subsequent changes to the default branch do not alter this screen's producer.
 Every IC arm is a fresh process with an empty base and index, 900-second
 cap and 15.25 GiB process RSS guard. Preserve cap, failure and resource
 outcomes as rows. The rho arm uses the same public point and its frozen

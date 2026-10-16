@@ -1,13 +1,6 @@
 name: N83 K3114 online capacity-frontier screen
 
 on:
-  push:
-    branches: [codex/n83-k3114-online-20261016]
-    paths:
-      - .github/workflows/n83-online-k3114.yml
-      - research/n83_online_k3114_20261016/PROTOCOL.md
-      - research/n83_online_k3114_20261016/run.py
-      - research/n83_online_k3114_20261016/verify.py
   workflow_dispatch:
 
 permissions:
@@ -24,6 +17,8 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: 9abf6afe8bc52ad4f136a19ff1603d60c344f30d
 
       - name: Verify frozen source, point and arm order
         shell: bash
