@@ -1,6 +1,7 @@
 # Standing pieces for `ephemeral run`: nothing here bills by the hour.
 #
-#   S3 bucket        job specs, live logs, outputs (s3://<bucket>/jobs/<id>/)
+#   S3 bucket        job specs, live logs, outputs (s3://<bucket>/jobs/<id>/),
+#                    and the cargo cache (s3://<bucket>/cache/)
 #   runner role      what a runner instance may touch: that bucket, plus SSM
 #   security group   no inbound unless ssh_cidrs is set; all outbound
 #   launch template  shutdown = terminate, IMDSv2, encrypted gp3 root
@@ -23,6 +24,10 @@ locals {
   cpu_ami_param = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
   arm_ami_param = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64"
   gpu_ami_param = "/aws/service/deeplearning/ami/x86_64/base-oss-nvidia-driver-gpu-amazon-linux-2023/latest/ami-id"
+
+  # `ephemeral bake` writes <prefix>/rust-<arch>; the CLI prefers it for the
+  # build and rust toolchains and falls back to the stock image without it.
+  baked_ami_prefix = "/${var.name}/ami"
 
   subnet_ids = length(var.subnet_ids) > 0 ? var.subnet_ids : data.aws_subnets.default[0].ids
 }
@@ -111,16 +116,36 @@ resource "aws_s3_bucket_policy" "tls_only" {
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "runs" {
-  count  = var.results_expire_days > 0 ? 1 : 0
+  count  = var.results_expire_days > 0 || var.cache_expire_days > 0 ? 1 : 0
   bucket = aws_s3_bucket.runs.id
-  rule {
-    id     = "expire-jobs"
-    status = "Enabled"
-    filter {
-      prefix = "jobs/"
+
+  dynamic "rule" {
+    for_each = var.results_expire_days > 0 ? [1] : []
+    content {
+      id     = "expire-jobs"
+      status = "Enabled"
+      filter {
+        prefix = "jobs/"
+      }
+      expiration {
+        days = var.results_expire_days
+      }
     }
-    expiration {
-      days = var.results_expire_days
+  }
+
+  # A cache entry is rewritten whenever a build changes it, so age means
+  # nobody has built that Cargo.lock lately.
+  dynamic "rule" {
+    for_each = var.cache_expire_days > 0 ? [1] : []
+    content {
+      id     = "expire-cache"
+      status = "Enabled"
+      filter {
+        prefix = "cache/"
+      }
+      expiration {
+        days = var.cache_expire_days
+      }
     }
   }
 }
@@ -148,13 +173,13 @@ resource "aws_iam_role_policy" "runner_s3" {
       {
         Effect   = "Allow"
         Action   = ["s3:GetObject", "s3:PutObject"]
-        Resource = "${aws_s3_bucket.runs.arn}/jobs/*"
+        Resource = ["${aws_s3_bucket.runs.arn}/jobs/*", "${aws_s3_bucket.runs.arn}/cache/*"]
       },
       {
         Effect    = "Allow"
         Action    = "s3:ListBucket"
         Resource  = aws_s3_bucket.runs.arn
-        Condition = { StringLike = { "s3:prefix" = ["jobs/*"] } }
+        Condition = { StringLike = { "s3:prefix" = ["jobs/*", "cache/*"] } }
       },
     ]
   })
@@ -318,6 +343,7 @@ resource "aws_ssm_parameter" "config" {
     cpu_ami_param    = local.cpu_ami_param
     arm_ami_param    = local.arm_ami_param
     gpu_ami_param    = local.gpu_ami_param
+    baked_ami_prefix = local.baked_ami_prefix
     managed_tag      = local.managed
     instance_profile = aws_iam_instance_profile.runner.name
   })
@@ -338,6 +364,7 @@ resource "aws_iam_policy" "launcher" {
         Resource = [
           aws_ssm_parameter.config.arn,
           "arn:${local.partition}:ssm:${var.region}::parameter/aws/service/*",
+          "arn:${local.partition}:ssm:${var.region}:${local.account}:parameter${local.baked_ami_prefix}/*",
         ]
       },
       {

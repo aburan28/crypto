@@ -21,6 +21,7 @@ mkdir -p "$FAKE_AWS/bin" "$FAKE_AWS/ssm/ephemeral"
 ln -s "$HERE/fake-aws" "$FAKE_AWS/bin/aws"
 export PATH=$FAKE_AWS/bin:$PATH
 cleanup() {
+    [ -f "$FAKE_AWS/main.rs.orig" ] && cp "$FAKE_AWS/main.rs.orig" "$ROOT/taskq/deploy/ephemeral/tests/cargo-fixture/src/main.rs"
     docker ps -aq --filter name=ephemeral-test- | xargs -r docker rm -f >/dev/null
     # Containers write as root.
     docker run --rm -v "$FAKE_AWS:/x" amazonlinux:2023 rm -rf /x/s3 /x/ec2 >/dev/null 2>&1 || true
@@ -32,7 +33,8 @@ cat >"$FAKE_AWS/ssm/ephemeral/config" <<'EOF'
 {"region":"us-east-1","bucket":"test-runs","launch_template":"lt-0test","security_group":"sg-0test",
  "subnet_ids":["subnet-a","subnet-b"],"repo_url":"https://github.com/aburan28/crypto.git",
  "default_ttl":"4h","max_ttl_hours":48,"managed_tag":"ephemeral:managed",
- "cpu_ami_param":"/cpu","arm_ami_param":"/arm","gpu_ami_param":"/gpu","instance_profile":"ephemeral-runner"}
+ "cpu_ami_param":"/cpu","arm_ami_param":"/arm","gpu_ami_param":"/gpu","instance_profile":"ephemeral-runner",
+ "baked_ami_prefix":"/ephemeral/ami"}
 EOF
 
 pass=0 fail=0
@@ -124,6 +126,52 @@ check "argv quoting kept 'two words' together" grep -qx 'two words' "$out/job.lo
 check "retried the next subnet after a capacity error" test "$(grep -c 'ec2 run-instances' "$FAKE_AWS/calls.log")" -ge 3
 check "failed job still terminated" wait_state "$id" terminated 30
 check "fetched log is complete (final upload before final status)" grep -q terminating "$out/job.log"
+
+echo "== cargo cache: miss, hit, changed source; baked image"
+# The containers stand in for any image, so a baked parameter only changes
+# what run-instances asks for; the runner still installs rust itself.
+mkdir -p "$FAKE_AWS/ssm/ephemeral/ami"
+echo ami-0baked >"$FAKE_AWS/ssm/ephemeral/ami/rust-x86_64"
+fx=taskq/deploy/ephemeral/tests/cargo-fixture
+cargo_run() { # name [options] -> the job's exit status
+    local name=$1
+    shift
+    "$CLI" run --ttl 30m --paths taskq/deploy/ephemeral --cargo-dir "$fx" --name "$name" "$@" -- \
+        "cd $fx && cargo build 2>&1 && ./target/debug/fixture" >/dev/null 2>&1
+}
+log_has() { grep -q -- "$1" "$XDG_CACHE_HOME/ephemeral/runs/$(last)/job.log"; }
+log_lacks() { ! log_has "$1"; }
+last_launch_has() { grep 'ec2 run-instances' "$FAKE_AWS/calls.log" | tail -1 | grep -q -- "$1"; }
+cache_entry() { # the S3 cache holds a tarball and, uploaded last, its manifest
+    local i
+    for ((i = 0; i < 60; i++)); do
+        compgen -G "$FAKE_AWS/s3/test-runs/cache/cargo/*/taskq-deploy-ephemeral-tests-cargo-fixture-*.manifest" >/dev/null &&
+            compgen -G "$FAKE_AWS/s3/test-runs/cache/cargo/*/*.tar.zst" >/dev/null && return 0
+        sleep 1
+    done
+    return 1
+}
+
+check "first rust job succeeds" cargo_run e2e-cache-miss
+check "rust jobs boot the baked image" last_launch_has 'resolve:ssm:/ephemeral/ami/rust-x86_64'
+check "first build is a cache miss" log_has 'cache: miss'
+check "first build compiles the crate" log_has 'Compiling fixture'
+check "the cache entry was saved" cache_entry
+check "second rust job succeeds" cargo_run e2e-cache-hit
+check "second build restores the exact key" log_has "cache: restored taskq-deploy-ephemeral-tests-cargo-fixture-"
+check "unchanged source is not recompiled" log_lacks 'Compiling fixture'
+check "the restored binary runs" log_has 'fixture says one'
+check "an unchanged cache is not uploaded again" log_has 'cache: up to date'
+cp "$fx/src/main.rs" "$FAKE_AWS/main.rs.orig"
+sed -i 's/"one"/"two"/' "$fx/src/main.rs"
+check "rust job on changed source succeeds" cargo_run e2e-cache-changed
+cp "$FAKE_AWS/main.rs.orig" "$fx/src/main.rs"
+check "a changed source file is recompiled" log_has 'Compiling fixture'
+check "the rebuilt binary has the change" log_has 'fixture says two'
+check "--no-cache job succeeds" cargo_run e2e-nocache --no-cache
+check "--no-cache neither restores nor saves" log_lacks 'cache:'
+check "toolchain none job succeeds" bash -c "'$CLI' run --toolchain none --ttl 30m --no-source --name e2e-stock -- true >/dev/null 2>&1"
+check "toolchain none keeps the stock image" last_launch_has 'resolve:ssm:/cpu'
 
 echo "== detach, then kill"
 id=$("$CLI" run --toolchain none --ttl 30m --no-source --detach --name e2e-kill -- sleep 600)

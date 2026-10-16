@@ -10,6 +10,8 @@
 #   ephemeral kill ID                          terminate the runner now
 #   ephemeral shell ID                         Session Manager shell on the runner
 #   ephemeral config                           the settings Terraform published
+#   ephemeral bake [--arch A]                  bake the rust toolchain into an AMI
+#   ephemeral cache                            list the cargo caches in S3
 #
 # ID may be `last` for the most recent job launched from this machine.
 #
@@ -20,7 +22,10 @@
 #   --ttl SPAN        hard lifetime, e.g. 90m, 6h, 2d (default from config).
 #                     The command is stopped 10 min before it to upload results.
 #   --disk GB         root volume size (default 100)
-#   --toolchain P     none | build (gcc, cmake, gmp...) | rust (build + rustup; default)
+#   --toolchain P     none | build (gcc, cmake, gmp...) | rust (build + rustup; default).
+#                     build and rust boot the baked image when `bake` has made one.
+#   --no-cache        rust: do not restore or save the cargo cache
+#   --cargo-dir DIR   rust: the directory holding Cargo.lock (default: the repo root)
 #   --setup CMD       shell command run in the checkout before the job
 #   --env K=V         environment variable for the job (repeatable)
 #   --artifact PATH   file or glob, relative to the checkout, copied to outputs
@@ -33,7 +38,7 @@
 #   --detach          print the job id and return; follow later with `logs -f`
 #   --keep            leave the instance up after the job, until the TTL
 #   --out DIR         where outputs land (default ~/.cache/ephemeral/runs/ID)
-#   --ami ID          explicit AMI (default: resolved for the instance type)
+#   --ami ID          explicit AMI (default: resolved for the instance type and toolchain)
 #
 # By default the job runs exactly what is in your working tree: the newest
 # commit already on a remote, plus a binary patch of everything after it
@@ -58,7 +63,7 @@ POLL=${EPHEMERAL_POLL:-10}
 
 die() { echo "ephemeral: $*" >&2; exit 1; }
 info() { echo "ephemeral: $*" >&2; }
-usage() { sed -n '3,14p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-2}"; }
+usage() { sed -n '3,16p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-2}"; }
 need() { command -v "$1" >/dev/null || die "$1 is required"; }
 
 need aws
@@ -74,6 +79,14 @@ load_config() {
 cfg() { jq -r "$1" <<<"$CONFIG"; }
 
 s3_job() { echo "s3://$BUCKET/jobs/$1"; }
+
+# SSM parameter naming the baked rust image for an architecture, if this
+# deployment publishes a prefix for them.
+baked_param() {
+    local prefix
+    prefix=$(cfg '.baked_ami_prefix // empty')
+    [ -n "$prefix" ] && echo "$prefix/rust-$1"
+}
 
 resolve_id() {
     local id=$1
@@ -170,6 +183,7 @@ worktree_patch() {
 cmd_run() {
     local type=c7i.4xlarge spot=false ttl='' disk=100 toolchain=rust setup='' name='' detach=false
     local keep=false out='' ami='' ref='' source=true untracked=true paths=() artifacts=() envs=()
+    local cache=true cargo_dir=.
     while [ $# -gt 0 ]; do
         case $1 in
         --type) type=$2; shift 2 ;;
@@ -189,6 +203,8 @@ cmd_run() {
         --keep) keep=true; shift ;;
         --out) out=$2; shift 2 ;;
         --ami) ami=$2; shift 2 ;;
+        --no-cache) cache=false; shift ;;
+        --cargo-dir) cargo_dir=${2%/}; shift 2 ;;
         --) shift; break ;;
         -h | --help) usage 0 ;;
         *) die "unknown option $1 (the command goes after --)" ;;
@@ -198,6 +214,7 @@ cmd_run() {
     case $toolchain in none | build | rust) ;; *) die "--toolchain is none, build or rust" ;; esac
     if ! $source && [ -n "$ref" ]; then die "--ref and --no-source contradict each other"; fi
     [[ $disk =~ ^[0-9]+$ ]] || die "--disk wants a number of GB"
+    [[ $cargo_dir != /* && /$cargo_dir/ != */../* ]] || die "--cargo-dir is relative to the checkout"
     load_config
 
     ttl=${ttl:-$(cfg .default_ttl)}
@@ -259,7 +276,7 @@ cmd_run() {
     done
 
     # AMI by architecture and GPU.
-    local arch gpu ami_ref
+    local arch gpu ami_ref baked
     read -r arch gpu < <(aws ec2 describe-instance-types --instance-types "$type" \
         --query 'InstanceTypes[0].[ProcessorInfo.SupportedArchitectures[0], GpuInfo.Gpus[0].Manufacturer]' \
         --output text 2>/dev/null) || die "unknown instance type $type in $REGION"
@@ -268,6 +285,9 @@ cmd_run() {
     elif [ "$gpu" = NVIDIA ]; then
         [ "$arch" = x86_64 ] || die "$type: arm64 GPU instances are not supported"
         ami_ref="resolve:ssm:$(cfg .gpu_ami_param)"
+    elif [ "$toolchain" != none ] && baked=$(baked_param "$arch") \
+        && aws ssm get-parameter --name "$baked" --query Parameter.Value --output text >/dev/null 2>&1; then
+        ami_ref="resolve:ssm:$baked"
     elif [ "$arch" = arm64 ]; then
         ami_ref="resolve:ssm:$(cfg .arm_ami_param)"
     else
@@ -287,11 +307,13 @@ cmd_run() {
         --arg setup "$setup" --arg repo "$repo_url" --arg commit "$commit" --arg head "$head" \
         --argjson patch "$patch" --argjson keep "$keep" --arg display "$display" --arg ami "$ami_ref" \
         --argjson disk "$disk" --argjson paths "$paths_json" --argjson artifacts "$artifacts_json" \
+        --argjson cache "$cache" --arg cargo_dir "$cargo_dir" \
         '{
             id: $id, created: (now | todate), owner: $owner, instance_type: $type, spot: $spot,
             ttl: $ttl, deadline: $deadline, disk_gb: $disk, ami: $ami, toolchain: $toolchain,
             setup: $setup, repo_url: $repo, commit: $commit, local_head: $head, patch: $patch,
-            keep: $keep, command_display: $display, paths: $paths, artifacts: $artifacts
+            keep: $keep, command_display: $display, paths: $paths, artifacts: $artifacts,
+            cache: $cache, cargo_dir: $cargo_dir
         }' >"$stage/job.json"
 
     cp "$HERE/runner.sh" "$stage/runner.sh"
@@ -363,7 +385,7 @@ EOF
     [ -n "$iid" ] || launch_failed "no zone could launch $type (reasons above); try another type, --spot or not, or later"
 
     info "job $id"
-    info "  $type$($spot && echo ' spot') $iid, ttl $ttl (terminates by $(date -u -d "@$deadline" +%FT%TZ))"
+    info "  $type$($spot && echo ' spot') $iid ($ami_ref), ttl $ttl (terminates by $(date -u -d "@$deadline" +%FT%TZ))"
     info "  ${commit:+source ${commit:0:12}$($patch && echo ' + local patch'), }command: $display"
     info "  s3://$BUCKET/jobs/$id/"
     if $detach; then
@@ -499,6 +521,85 @@ cmd_kill() {
     info "terminated $iid ($id)"
 }
 
+# Bake the rust preset into an AMI: run a --keep job on the stock image, snapshot
+# it once the toolchain is installed, and point $prefix/rust-<arch> at it.
+# Needs ec2:CreateImage, DeregisterImage, DeleteSnapshot and ssm:PutParameter
+# on top of the launcher policy (an administrator's job, not every user's).
+cmd_bake() {
+    local arch=x86_64 type='' keep_images=2
+    while [ $# -gt 0 ]; do
+        case $1 in
+        --arch) arch=$2; shift 2 ;;
+        --type) type=$2; shift 2 ;;
+        *) die "usage: ephemeral bake [--arch x86_64|arm64] [--type T]" ;;
+        esac
+    done
+    load_config
+    local stock
+    case $arch in
+    x86_64) type=${type:-c7i.xlarge}; stock=$(cfg .cpu_ami_param) ;;
+    arm64) type=${type:-c7g.xlarge}; stock=$(cfg .arm_ami_param) ;;
+    *) die "--arch is x86_64 or arm64" ;;
+    esac
+    local param
+    param=$(baked_param "$arch") || die "this deployment publishes no baked_ami_prefix: terraform apply first"
+
+    # Always from the stock image, so each bake picks up the current stable.
+    local id
+    id=$("$HERE/ephemeral" run --type "$type" --toolchain rust --no-source --keep --detach --ttl 1h \
+        --disk 20 --ami "resolve:ssm:$stock" --name "bake-$arch" -- \
+        'set -e; . "$HOME/.cargo/env"; rustc -V; cargo -V
+         printf "toolchain=rust\nbaked=%s\nrustc=%s\n" "$(date -u +%FT%TZ)" "$(rustc -V)" >/etc/ephemeral-image
+         dnf clean all -q; sync') || die "bake job did not launch"
+    # Whatever happens next, the bake instance does not outlive this command.
+    BAKE_JOB=$id
+    trap 'i=$(instance_of "$BAKE_JOB" | awk "{print \$1}"); [ -n "$i" ] && [ "$i" != None ] && aws ec2 terminate-instances --instance-ids "$i" >/dev/null' EXIT
+    local iid
+    follow "$id" "" || die "bake job $id did not finish cleanly"
+    iid=$(instance_of "$id" | awk '{print $1}')
+    [ -n "$iid" ] && [ "$iid" != None ] || die "no instance for $id"
+
+    local name ami
+    name="ephemeral-rust-$arch-$(date -u +%Y%m%d-%H%M%S)"
+    info "creating image $name from $iid"
+    ami=$(aws ec2 create-image --instance-id "$iid" --name "$name" --no-reboot \
+        --description "ephemeral runner: AL2023 + build tools + rustup stable (job $id)" \
+        --tag-specifications "ResourceType=image,Tags=[{Key=ephemeral:baked,Value=rust-$arch},{Key=ephemeral:job,Value=$id}]" \
+        "ResourceType=snapshot,Tags=[{Key=ephemeral:baked,Value=rust-$arch}]" \
+        --query ImageId --output text) || die "create-image failed"
+    local i state=pending
+    for ((i = 0; i < 120; i++)); do
+        sleep 15
+        state=$(aws ec2 describe-images --image-ids "$ami" --query 'Images[0].State' --output text)
+        [ "$state" = pending ] || break
+    done
+    [ "$state" = available ] || die "image $ami is $state"
+    aws ec2 terminate-instances --instance-ids "$iid" >/dev/null
+    trap - EXIT
+    aws ssm put-parameter --name "$param" --type String --data-type aws:ec2:image \
+        --value "$ami" --overwrite >/dev/null
+    info "$param -> $ami"
+
+    # Keep the newest $keep_images bakes; jobs already launching hold their own copy.
+    local old snaps
+    aws ec2 describe-images --owners self --filters "Name=tag:ephemeral:baked,Values=rust-$arch" \
+        --query 'sort_by(Images,&CreationDate)[].ImageId' --output text | tr '\t' '\n' |
+        head -n -"$keep_images" | while read -r old; do
+        [ -n "$old" ] || continue
+        snaps=$(aws ec2 describe-images --image-ids "$old" \
+            --query 'Images[0].BlockDeviceMappings[].Ebs.SnapshotId' --output text)
+        aws ec2 deregister-image --image-id "$old"
+        for s in $snaps; do aws ec2 delete-snapshot --snapshot-id "$s"; done
+        info "deregistered $old"
+    done
+    echo "$ami"
+}
+
+cmd_cache() {
+    load_config
+    aws s3 ls --recursive --human-readable "s3://$BUCKET/cache/" || echo "no caches yet"
+}
+
 cmd_shell() {
     local id
     id=$(resolve_id "${1:?usage: ephemeral shell ID}")
@@ -518,6 +619,8 @@ logs) shift; cmd_logs "$@" ;;
 fetch) shift; cmd_fetch "$@" ;;
 kill) shift; cmd_kill "$@" ;;
 shell) shift; cmd_shell "$@" ;;
+bake) shift; cmd_bake "$@" ;;
+cache) shift; cmd_cache "$@" ;;
 config) load_config; jq . <<<"$CONFIG" ;;
 -h | --help | help) usage 0 ;;
 *) usage ;;

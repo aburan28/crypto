@@ -64,6 +64,12 @@ variable "results_expire_days" {
   default     = 0
 }
 
+variable "cache_expire_days" {
+  description = "Delete cargo cache entries (s3://<bucket>/cache/) not rewritten for this many days. 0 keeps them forever."
+  type        = number
+  default     = 30
+}
+
 variable "launcher_role_names" {
   description = "Existing IAM roles to attach the launcher policy to (for example the dev box's InstanceRole)."
   type        = list(string)

@@ -16,13 +16,15 @@ That command:
 2. uploads the job (spec, command, patch, runner) to S3;
 3. launches the instance with a deadline tag and user data whose first act is
    to arm `shutdown -h now` at the deadline (shutdown = terminate);
-4. follows the log as the instance installs the toolchain, shallow-fetches the
-   pinned commit from GitHub, applies the patch and runs the command;
+4. follows the log as the instance installs the toolchain (or finds it baked
+   into the image), shallow-fetches the pinned commit from GitHub, applies the
+   patch, restores the cargo cache and runs the command;
 5. when the command exits, the instance uploads `job.log`, `status.json`,
    `host.txt` (lscpu, free, nvidia-smi), `rusage.txt` (`time -v`) and
    everything in `$EPHEMERAL_OUT`, then **terminates itself**;
 6. the CLI downloads all of it to `~/.cache/ephemeral/runs/<job>/` and exits
-   with the command's exit status.
+   with the command's exit status; the instance saves the cargo cache if the
+   build changed it, then terminates.
 
 Between jobs nothing bills except S3 storage and a Lambda that runs for a
 second every ten minutes.
@@ -52,6 +54,8 @@ $E fetch ID [DIR]                   # download everything the job left
 $E kill ID                          # terminate now
 $E shell ID                         # Session Manager shell (needs session-manager-plugin)
 $E config                           # what Terraform published
+$E bake [--arch x86_64|arm64]       # bake the rust preset into an AMI (admin; see below)
+$E cache                            # list the cargo cache entries
 ```
 
 `ID` can be `last`. One argument after `--` is a shell snippet (pipes,
@@ -63,7 +67,9 @@ $E config                           # what Terraform published
 | `--spot` | on-demand | one-time spot request; cheaper, can be reclaimed |
 | `--ttl SPAN` | `4h` | `90m`, `6h`, `2d`; 15 min to `max_ttl_hours` (48 h) |
 | `--disk GB` | 100 | encrypted gp3 root |
-| `--toolchain P` | `rust` | `none`, `build` (Development Tools, cmake, clang, gmp, mpfr, openssl), `rust` (build + rustup stable) |
+| `--toolchain P` | `rust` | `none`, `build` (Development Tools, cmake, clang, gmp, mpfr, openssl), `rust` (build + rustup stable). `build` and `rust` boot the baked image when there is one |
+| `--no-cache` | | `rust`: neither restore nor save the cargo cache |
+| `--cargo-dir DIR` | repo root | `rust`: the directory with the `Cargo.lock` (and `target/`) to cache |
 | `--setup CMD` | | runs in the checkout before the job |
 | `--env K=V` | | repeatable. Stored in the job's S3 prefix: do not pass long-lived secrets |
 | `--artifact PATH` | | file or glob relative to the checkout, copied into outputs; repeatable |
@@ -104,6 +110,79 @@ measurement needs. A result that lands in the repository still follows the
 evidence and `benchmarks/` rules in AGENTS.md; copy what it needs out of the
 fetched directory.
 
+## Fast Rust jobs: baked image + cargo cache
+
+Two layers, because the two costs differ:
+
+* **Baked image** (fixed cost: dnf + rustup, about 70 s per job).
+  `ephemeral bake` runs a `--keep` job on the stock AL2023 image with the
+  `rust` preset, snapshots it (`create-image --no-reboot`), and writes the AMI
+  id to the SSM parameter `/<name>/ami/rust-<arch>`. `run` uses that parameter
+  for `--toolchain build|rust` when it exists, and the stock image otherwise
+  (and always for GPU types and `--toolchain none`). The runner reads
+  `/etc/ephemeral-image` and skips the install. The image freezes rustup
+  stable at bake time: re-bake to pick up a new release (that also starts a
+  new cache prefix). `bake` keeps the newest two images per architecture and
+  deregisters older ones with their snapshots. It needs `ec2:CreateImage`,
+  `DeregisterImage`, `DeleteSnapshot` and `ssm:PutParameter`, which the
+  launcher policy does not grant: an administrator runs it.
+* **Cargo cache** (per-commit cost: compiling). With the `rust` preset and a
+  `Cargo.lock` (repo root, or `--cargo-dir`), the runner restores
+  `s3://<bucket>/cache/cargo/<arch>-rust-<version>-<commit>/<dir>-<lock hash>.tar.zst`
+  before the setup command: `~/.cargo` registry index and crate files, git
+  checkouts, and `target/` without incremental state. On a miss it takes the
+  newest entry for the same toolchain and directory, since registry crates are
+  keyed by version. After the job's results are final, it saves the cache if
+  the build wrote anything under `target/*/deps`; the CLI does not wait for
+  that upload. Entries expire after `cache_expire_days` (30) without a
+  rewrite. `ephemeral cache` lists them.
+
+**Why mtimes matter.** Cargo rebuilds a workspace crate when any of its
+source files is newer than its last build, and a fresh checkout makes every
+file new, so a restored `target/` alone would still recompile `crypto`. Each
+cache entry therefore carries a manifest of `<blob hash> <path>` for the tree
+it was built from. On restore, every file whose content hash matches gets an
+mtime in 2001, older than any cached artifact; every other file keeps the
+checkout time, so cargo rebuilds exactly what changed. Files the job itself
+modifies are dropped from the saved manifest. When a file cannot be proven
+unchanged, it keeps the new mtime: a mistake costs a rebuild, never a stale
+binary.
+
+### Measured (2026-10-16, c7i.4xlarge on-demand, us-east-1)
+
+Command `time cargo build --release` at commit `dcd655794` (`--ref`), one
+run per row. "Total" runs from job creation to the final status; "setup" is
+the time from the `setup` phase to `fetching`.
+
+| run | job | boot | setup | git fetch | cache restore | `cargo build --release` | **setup + build** | total |
+|---|---|---|---|---|---|---|---|---|
+| before: stock AL2023, no cache | `20261016-222525-baseline-build-5d7705` | 38 s | 71 s | 71 s | | 141 s | **212 s** | 327 s |
+| baked image, cache miss (first run) | `20261016-224718-after-cold-cache-c6ff09` | 69 s | 3 s | 75 s | 3 s (miss) | 151 s | **157 s** | 306 s |
+| baked image, cache hit, same commit | `20261016-225332-after-warm-cache-ab101a` | 48 s | 6 s | 70 s | 7 s | 2.5 s | **16 s** | 141 s |
+| cache hit, `src/main.rs` edited | `20261016-225718-after-src-edit-a64804` | 48 s | 16 s | 73 s | 6 s | 21 s | **43 s** | 171 s |
+| cache hit, `src/lib.rs` edited | `20261016-230228-after-lib-edit-a9ee0d` | 50 s | 18 s | 76 s | 7 s | 164 s | **189 s** | 322 s |
+
+What this shows:
+
+* **Repeat runs of the same code:** setup + build went from 212 s to 16 s,
+  and the whole job from 5 min 27 s to 2 min 21 s.
+* **Editing `src/lib.rs`** still recompiles the whole `crypto` crate (about
+  567k lines in one crate, release builds not incremental). The 129
+  dependencies come from the cache, but they were never the expensive part,
+  so only the setup minute is saved. Splitting the crate is the lever there,
+  not the runner.
+* **Editing a binary's `main.rs`** rebuilds only that binary: 21 s.
+* The cache is 795 MiB of `target/`; restore takes 6 to 7 s and the save
+  2 to 3 s (zstd -3, streamed through `aws s3 cp`).
+* What remains is boot (38 s on the stock image, 48 to 69 s on the baked
+  one) and the shallow `git fetch` of this repository (70 to 75
+  s). With the toolchain and the build cached, the fetch is now the largest
+  fixed cost; `--paths` reduces it for jobs that need part of the tree.
+* Setup on the baked image ranged from 3 to 18 s, all of it between the
+  preset line and `fetching` (sourcing cargo's env and `rustc --version`).
+  The likely cause, not measured here, is first reads of the toolchain from
+  a volume restored from a snapshot, which EBS loads lazily.
+
 ## Deploy (once per account and region)
 
 ```sh
@@ -117,12 +196,13 @@ It creates:
 
 | resource | |
 |---|---|
-| S3 `ephemeral-runs-<account>-<region>` | private, encrypted, TLS-only; `results_expire_days` adds expiry |
-| IAM role + instance profile `ephemeral-runner` | read/write `jobs/*` in that bucket; Session Manager |
+| S3 `ephemeral-runs-<account>-<region>` | private, encrypted, TLS-only; `results_expire_days` expires `jobs/`, `cache_expire_days` (30) expires `cache/` |
+| IAM role + instance profile `ephemeral-runner` | read/write `jobs/*` and `cache/*` in that bucket; Session Manager |
 | security group `ephemeral-runner` | no inbound unless `ssh_cidrs`; all outbound |
 | launch template `ephemeral-runner` | shutdown = terminate, IMDSv2 required, tags in IMDS, encrypted gp3 |
 | Lambda `ephemeral-reaper` + EventBridge rule | the third stop above |
 | SSM parameter `/ephemeral/config` | everything the CLI needs; no local state required |
+| (not Terraform) SSM parameter `/ephemeral/ami/rust-<arch>` | written by `ephemeral bake`; the launcher policy may read it |
 | IAM policy `ephemeral-launcher` | the rights the CLI needs; attach via `launcher_role_names` / `launcher_user_names` |
 
 Requirements: Terraform 1.6 or later, and credentials that can create the above.
@@ -161,6 +241,10 @@ which stores S3 objects in a scratch directory. Its `run-instances` boots an
 `amazonlinux:2023` container that runs the real user data and `runner.sh`: dnf,
 the sparse shallow fetch from GitHub, the patch, the command, log streaming,
 uploads and the self-shutdown. It checks success, failure exit codes, argv
-quoting, the capacity retry across zones, `--detach`, `kill`, `ls` and `logs`.
+quoting, the capacity retry across zones, `--detach`, `kill`, `ls` and `logs`,
+and the cargo cache on [`tests/cargo-fixture`](tests/cargo-fixture): a miss
+saves an entry, a hit does not recompile unchanged source, an edited file is
+recompiled, `--no-cache` turns it off, and rust jobs ask for the baked image
+while `--toolchain none` keeps the stock one.
 It does not cover the parts only AWS has: IAM, the launch template, AMIs,
 spot, the real shutdown, and the reaper's EventBridge wiring.

@@ -74,7 +74,13 @@ case "$svc $op" in
     mapfile -t pos < <(positional)
     d=$(path_of "${pos[0]}")
     [ -d "$d" ] || exit 1
-    for e in "$d"/*/; do [ -d "$e" ] && echo "                           PRE $(basename "$e")/"; done
+    for e in "$d"/*; do
+        if [ -d "$e" ]; then
+            echo "                           PRE $(basename "$e")/"
+        elif [ -f "$e" ]; then
+            echo "$(date -r "$e" '+%F %T') $(stat -c %s "$e") $(basename "$e")"
+        fi
+    done
     ;;
 "s3api get-object")
     p="$FAKE_AWS/s3/$(opt --bucket)/$(opt --key)"

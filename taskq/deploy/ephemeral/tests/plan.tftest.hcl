@@ -76,8 +76,20 @@ run "defaults" {
     error_message = "the reaper runs on a schedule"
   }
   assert {
-    condition     = length(aws_s3_bucket_lifecycle_configuration.runs) == 0
-    error_message = "results are kept by default"
+    condition     = [for r in aws_s3_bucket_lifecycle_configuration.runs[0].rule : r.id] == ["expire-cache"]
+    error_message = "by default results are kept and only the cargo cache expires"
+  }
+  assert {
+    condition     = jsondecode(aws_ssm_parameter.config.value).baked_ami_prefix == "/ephemeral/ami"
+    error_message = "config tells the CLI where baked images are published"
+  }
+  assert {
+    condition     = strcontains(aws_iam_role_policy.runner_s3.policy, "arn:aws:s3:::mock/cache/*")
+    error_message = "runners read and write the cargo cache"
+  }
+  assert {
+    condition     = strcontains(aws_iam_policy.launcher.policy, "parameter/ephemeral/ami/*")
+    error_message = "launchers can resolve baked images"
   }
 }
 
@@ -104,11 +116,24 @@ run "custom_network_and_ssh" {
     error_message = "an empty key_name launches without a key"
   }
   assert {
-    condition     = length(aws_s3_bucket_lifecycle_configuration.runs) == 1
-    error_message = "results_expire_days adds a lifecycle rule"
+    condition     = [for r in aws_s3_bucket_lifecycle_configuration.runs[0].rule : r.id] == ["expire-jobs", "expire-cache"]
+    error_message = "results_expire_days adds a lifecycle rule for jobs/"
   }
   assert {
     condition     = length(aws_iam_role_policy_attachment.launcher) == 1
     error_message = "launcher policy is attached to the named roles"
+  }
+}
+
+run "nothing_expires" {
+  command = apply
+  variables {
+    results_expire_days = 0
+    cache_expire_days   = 0
+  }
+
+  assert {
+    condition     = length(aws_s3_bucket_lifecycle_configuration.runs) == 0
+    error_message = "no lifecycle configuration when nothing expires"
   }
 }
