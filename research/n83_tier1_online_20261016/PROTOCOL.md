@@ -15,8 +15,9 @@ with modulus bitmask `9671406556917033397649557`, model
 `y²+xy=x³+x²+1`, subgroup order `8569786107849059` and cofactor
 `1128547018`. The candidate source, exact factor-base manifest, binary,
 flags, and rho reference must be frozen in a versioned selection record
-before any of these five points is executed. Use the current-source
-one-point online range screen to select it: require independent replay,
+before any of these five points is executed. Use the expanded current-source
+one-point online range screen, which includes the K1152/K1536 cold
+shortlist, to select it: require independent replay,
 identical K2543 control bases and index sizes, and the predeclared 10%
 online A/A gate. Among resource-admitted completed arms, choose the
 smallest measured one-target online interval; use the K2543 A/B mean for
