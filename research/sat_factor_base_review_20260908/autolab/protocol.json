@@ -24,6 +24,11 @@
       "example": "koblitz_rho_fixture",
       "source": "examples/koblitz_rho_fixture.rs",
       "usage": "<n> <a> <mode> <online_targets> [reference|packed] [target_seed]"
+    },
+    "equal_advice_bl": {
+      "example": "ic_next10_09_equal_advice",
+      "source": "examples/ic_next10_09_equal_advice.rs",
+      "usage": "targets <n> <a> <count> <label> <points_out> <scalars_out> | bl <n> <a> <table_bytes> <points> <out.jsonl> | census ..."
     }
   },
   "beats": {
@@ -603,6 +608,57 @@
       "primary_speedup_blocker": "This beat's producers emit the single-target online interval and IC phase split, but the protocol-wide contract stays blocked: rows are PENDING_INDEPENDENT_VALIDATION until an independent-host replay.",
       "result_class": "single_target_online",
       "note": "Option A + C of evidence/20261001-koblitz-n61-compact-orbit-panel/VS_RHO_SINGLE_TARGET_OPTIONS.md. Launch with launch-single. Schema eligibility only: independent-host replay is outstanding and no ledger row is promoted."
+    },
+    "koblitz.compact_orbit.n61_bl_reference": {
+      "label": "Diagnostic/reference-arm only: a=0 n=61 compact-orbit IC online vs Bernstein\u2013Lange equal-advice rho (ic_next10_09_equal_advice); not a KS batch comparator",
+      "regime": "koblitz",
+      "stage": "vs_rho",
+      "priority": 1,
+      "n": 61,
+      "a": 0,
+      "launch_mode": "equal_advice_bl",
+      "timing_class_goal": "single_target_online_wall",
+      "diagnostic_only": true,
+      "reference_arm": "bernstein_lange_equal_advice",
+      "targets_default": 1024,
+      "targets_minimum": 1024,
+      "table_bytes_default": 5711008,
+      "table_bytes_note": "Frozen equal-advice n=61 bl_precompute.table_bytes_budget (1/64 of K=256 IC advice); same instrument as research/ic_next10_20261014/09-equal-advice/",
+      "target_label_default": "autolab-n61-bl-ref-eval-v1",
+      "ic_k_default": 256,
+      "ic_rank_seed": 7,
+      "ic_k_note": "K=256 matches the equal-advice study advice budget whose 1/64 is table_bytes_default; not the KS-panel tuned K",
+      "existing_study": "research/ic_next10_20261014/09-equal-advice/",
+      "existing_producer": "examples/ic_next10_09_equal_advice.rs",
+      "panel_producers": {
+        "ic": {
+          "example": "koblitz_orbit_dlp_fast_online",
+          "source": "examples/koblitz_orbit_dlp_fast_online.rs",
+          "usage": "construct:<n>:<a>:<K> <points.txt with [x,y] lines> <rank_seed> <out.jsonl>",
+          "note": "Paired IC arm via launch-equal-advice --pair-ic [--reuse-bl-archive PATH]; same [x,y] point-file API as BL targets mode"
+        },
+        "bl": {
+          "example": "ic_next10_09_equal_advice",
+          "source": "examples/ic_next10_09_equal_advice.rs",
+          "usage": "targets <n> <a> <L> <label> <points> <scalars>; bl <n> <a> <table_bytes> <points> <out.jsonl>"
+        }
+      },
+      "api_mismatch_vs_ks_batch": {
+        "ks_batch_rho_cli": "<n> <a> signed_frobenius <L> <batch_seed> (+ KIC_RHO_GENERATE_ONLY / KIC_RHO_BATCH_CORPUS)",
+        "equal_advice_bl_cli": "targets|bl subcommands with point files and table_bytes budget",
+        "consequence": "launch-panel cannot drive this beat; use launch-equal-advice"
+      },
+      "acceptance_gates": [
+        "public synthetic targets only from ic_next10_09_equal_advice targets mode",
+        "L>=1024 or prepare-only scaffolding",
+        "BL recovers verified scalars against held-back truth when scalars file present",
+        "claim draft remains fail-closed for vs_rho promotion (diagnostic/reference-arm)",
+        "status PENDING_INDEPENDENT_VALIDATION or SCHEMA_INCOMPLETE; never ledger promotion"
+      ],
+      "primary_speedup_eligible": false,
+      "primary_speedup_blocker": "Diagnostic Bernstein\u2013Lange equal-advice reference arm; vs_rho schema stays fail-closed until a schema-complete equal-advice paired report and independent-host replay. Not interchangeable with KS v2 batched rho.",
+      "result_class": "diagnostic_equal_advice_reference",
+      "note": "Reuses the existing equal-advice producer and study rather than a parallel scoreboard. Does not promote BOUNDARY_TARGETS vs_rho."
     },
     "koblitz.compact_orbit.n71_single_target": {
       "label": "One-target online: a=0 n=71 compact-orbit IC (online split timers) vs strong rho rung 3 on the same public point, W one-target workloads (first n=71 rung)",

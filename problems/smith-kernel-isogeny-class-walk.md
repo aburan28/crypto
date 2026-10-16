@@ -138,6 +138,16 @@ open.
   cannot change `N1`, so classes with few rational points are poor targets
   and their twist classes good ones. The asymptotic extrapolation (bias
   `O(1/√p)`, Smith's fair coin recovered) is untested.
+- **Scaling settled (2026-10-16,
+  [study](../research/smith_sign_scaling_20261016/REPORT.pdf)):** on 10^6
+  random curves at each of `p = 101, 1009, 10007` the Prop. 4 rate is
+  `1/2 + β a1/(2p+2)` with `β` = 1.02, 1.09, 0.94. The scaling exponent of `β`
+  in `p` is `γ = 0.019` [−0.014, 0.051] (frozen verdict: bias shrinks like
+  `1/√p`). So the sign bias and the clustering it causes are small-prime
+  effects, and Smith's fair coin holds asymptotically. The rule
+  `r ≈ #H(F_p)/(2p+2)` holds over the whole range; its mechanism is not
+  identified. A post hoc check found that the Prop. 2 count adds nothing to
+  the residual quarter of the clustering, and `N3` at most a few points.
   Still open: Smith's Remark 5 alternative (descending `X` when the trigonal
   map is not rational, which would raise the direct rate to 31.13% under his
   hypotheses) as a route that needs no walk.
@@ -163,3 +173,5 @@ open.
   class.
 - 2026-10-16: the Prop. 4 sign follows `#H(F_p)` (confirmed at `p = 11`);
   with Prop. 2 this accounts for about three quarters of the clustering.
+- 2026-10-16: the Prop. 4 sign bias shrinks like `1/√p` (`β` bounded at
+  `p = 101, 1009, 10007`); the clustering is a small-prime effect.
