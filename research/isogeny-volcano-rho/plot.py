@@ -1,0 +1,129 @@
+"""Lay out a recorded volcano-rho run: no computation beyond arranging the
+values in results.json / trials.csv (AGENTS.md "Implementation language").
+
+usage: python plot.py RUN_DIR
+"""
+import csv
+import json
+import sys
+from collections import defaultdict
+from pathlib import Path
+
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
+
+run = Path(sys.argv[1])
+R = json.loads((run / "results.json").read_text())
+rows = list(csv.DictReader(open(run / "trials.csv")))
+depth = R["problem"]["volcano_depth"]
+ell = R["params"]["ell"]
+exp = R["rho"]["expected_iters_sqrt_pi_n_over_2"]
+rid = run.name
+LEVEL_C = ["#2a6fdb", "#e07b00", "#2e9e5b", "#b03a8c", "#7a7a7a"]
+
+
+def save(fig, name):
+    fig.savefig(run / f"{name}.svg", bbox_inches="tight")
+    fig.savefig(run / f"{name}.png", dpi=150, bbox_inches="tight")
+    plt.close(fig)
+
+
+# 1. The volcano: measured-radius vertices by level, edges, measured curves marked.
+verts = {v["id"]: v for v in R["vertices"] if v["level"] is not None}
+arms = {a["vertex"]: a for a in R["arms"] if a["vertex"] is not None}
+crater = sorted(v for v in verts if verts[v]["level"] == 0)
+# Tree layout: each lower vertex hangs under its first neighbour one level up;
+# leaves take consecutive x, parents sit over their children's mean.
+children = defaultdict(list)
+for v, d in sorted(verts.items()):
+    if d["level"] > 0:
+        ups = sorted(w for w in d["nbrs"] if w in verts and verts[w]["level"] == d["level"] - 1)
+        if ups:
+            children[ups[0]].append(v)
+xpos = {}
+cursor = [0.0]
+
+
+def place(v):
+    if not children[v]:
+        xpos[v] = cursor[0]
+        cursor[0] += 1.0
+    else:
+        for c in children[v]:
+            place(c)
+        xpos[v] = sum(xpos[c] for c in children[v]) / len(children[v])
+
+
+for c in crater:
+    place(c)
+    cursor[0] += 0.6
+fig, ax = plt.subplots(figsize=(min(18, max(8, cursor[0] * 0.12)), 4.8))
+for v, d in verts.items():
+    for w in d["nbrs"]:
+        if w in xpos and v in xpos and v < w:
+            ax.plot([xpos[v], xpos[w]], [-d["level"], -verts[w]["level"]], color="#bbbbbb", lw=0.7, zorder=1)
+means = [a["summary"]["iters"]["mean"] for a in arms.values()]
+lo, hi = min(means), max(means)
+cmap = plt.get_cmap("viridis")
+for v in xpos:
+    d = verts[v]
+    if v in arms:
+        m = arms[v]["summary"]["iters"]["mean"]
+        ax.scatter(xpos[v], -d["level"], s=70, color=cmap((m - lo) / (hi - lo or 1)), edgecolor="k", zorder=3)
+        ax.annotate(f"v{v}", (xpos[v], -d["level"]), textcoords="offset points", xytext=(0, 7), ha="center", fontsize=6)
+    else:
+        ax.scatter(xpos[v], -d["level"], s=12, color="#dddddd", edgecolor="#999999", zorder=2)
+    if v == 0:
+        ax.scatter(xpos[v], -d["level"], s=200, facecolor="none", edgecolor="red", lw=1.5, zorder=4)
+sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(lo, hi))
+fig.colorbar(sm, ax=ax, label="mean rho iterations (measured curves)")
+ax.set_yticks([-l for l in range(depth + 1)], ["crater (0)"] + [f"level {l}" for l in range(1, depth)] + [f"floor ({depth})"])
+ax.set_xticks([])
+ax.set_title(f"{ell}-isogeny volcano, depth {depth}, p = {R['problem']['p']} (root v0 circled red)\n{rid}", fontsize=9)
+save(fig, "volcano")
+
+# 2. Per-curve min / mean / max (and every trial) by level.
+order = sorted(R["arms"], key=lambda a: (a["kind"] != "isogenous", a["level"] if a["level"] is not None else 9, a["arm"]))
+by_arm = defaultdict(list)
+for r in rows:
+    by_arm[r["arm"]].append(int(r["iters"]))
+fig, ax = plt.subplots(figsize=(max(9, len(order) * 0.28), 4.6))
+for i, a in enumerate(order):
+    s = a["summary"]["iters"]
+    c = LEVEL_C[a["level"] % len(LEVEL_C)] if a["kind"] == "isogenous" else "#000000"
+    ys = by_arm[a["arm"]]
+    ax.scatter([i] * len(ys), ys, s=3, alpha=0.25, color=c)
+    ax.vlines(i, s["min"], s["max"], color=c, lw=1)
+    ax.errorbar(i, s["mean"], yerr=s["ci95_half"], fmt="o", color=c, ms=4, capsize=2)
+ax.axhline(exp, color="red", ls="--", lw=1, label=f"sqrt(pi n/2) = {exp:,.0f}")
+ax.set_xticks(range(len(order)), [a["arm"] for a in order], rotation=90, fontsize=6)
+ax.set_ylabel("group operations to solve (iterations)")
+for lv in range(depth + 1):
+    ax.scatter([], [], color=LEVEL_C[lv], label=f"level {lv}" + (" (crater)" if lv == 0 else " (floor)" if lv == depth else ""))
+ax.scatter([], [], color="k", label="isomorphic control (root rescaled)")
+ax.legend(fontsize=7, ncol=3, loc="upper right")
+ax.set_title(f"Same DLP on every curve: per-curve min-max bar, mean ± 95% CI, {R['params']['trials']} trials each\n{rid}", fontsize=9)
+save(fig, "per_curve")
+
+# 3. Pooled per level: min / mean / max of iterations and of ms.
+fig, axs = plt.subplots(1, 2, figsize=(9, 3.8))
+groups = [(f"L{l['level']}\n({l['curves']} curves)", l["summary"]) for l in R["levels"]]
+groups.append(("all\nisogenous", R["all_isogenous"]))
+if R["controls"]:
+    groups.append(("isomorphic\ncontrol", R["controls"]))
+for ax, key, lab in [(axs[0], "iters", "iterations"), (axs[1], "ms", "wall time per solve (ms)")]:
+    for i, (g, s) in enumerate(groups):
+        v = s[key]
+        ax.vlines(i, v["min"], v["max"], color="#555555")
+        ax.scatter([i, i], [v["min"], v["max"]], marker="_", s=120, color="#555555")
+        ax.errorbar(i, v["mean"], yerr=v["ci95_half"], fmt="o", color="#2a6fdb", capsize=3)
+        ax.annotate(f"{v['mean']:,.0f}" if key == "iters" else f"{v['mean']:.0f}", (i, v["mean"]), xytext=(5, 0), textcoords="offset points", fontsize=7)
+    if key == "iters":
+        ax.axhline(exp, color="red", ls="--", lw=1)
+    ax.set_xticks(range(len(groups)), [g for g, _ in groups], fontsize=7)
+    ax.set_ylabel(lab)
+fig.suptitle(f"Pooled by volcano level: min, max, mean ± 95% CI   ({rid})", fontsize=9)
+save(fig, "per_level")
+print("wrote", run)

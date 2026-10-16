@@ -30,6 +30,12 @@ path = "src/main.rs"
 name = "ic"
 path = "src/bin/ic.rs"
 
+# `volcano-rho` — one ECDLP instance carried by explicit Vélu maps to every
+# curve of an ℓ-isogeny volcano, with Pollard rho timed on each stratum.
+[[bin]]
+name = "volcano-rho"
+path = "src/bin/volcano_rho.rs"
+
 [[bin]]
 name = "pkm-aux-search"
 path = "src/bin/pkm_aux_search.rs"
