@@ -1,0 +1,24 @@
+== 07:50:44 manifest
+   exit 0 {  "host_matches_r01": false,  "aa": "the round's own" } 
+== 07:50:45 pin
+   exit 0 {  "rows": [   {    "row": "icv1-f2m19-tm797-9c54981b/M1-T01",    "suite_id": "k1n19-M1-T01",    "slug": "icv1-f2m19-tm797-9c54981b",    "equal": true,    "differs_in": [],    "names_agree": true   },
+== 07:54:37 aa
+   exit 0 2: complete setup 20.588 online 0.0633 r5 icv1-f2m61-t158598901-ab42b6c5/M1-T02 A: complete setup 19.596 online 0.0274 r5 icv1-f2m61-t158598901-ab42b6c5/M1-T02 A2: complete setup 23.735 online 0.0240 
+== 08:45:50 compare
+== 09:42:59 container restarted; resume
+   manifest-resumed exit 0; relaunch
+== 09:43:07 manifest
+   exit 0 {  "host_matches_r01": false,  "aa": "the round's own" } 
+== 09:43:08 pin
+   exit 0 {  "rows": [   {    "row": "icv1-f2m19-tm797-9c54981b/M1-T01",    "suite_id": "k1n19-M1-T01",    "slug": "icv1-f2m19-tm797-9c54981b",    "equal": true,    "differs_in": [],    "names_agree": true   },
+== 09:43:08 aa
+   exit 0 2: complete setup 20.588 online 0.0633 r5 icv1-f2m61-t158598901-ab42b6c5/M1-T02 A: complete setup 19.596 online 0.0274 r5 icv1-f2m61-t158598901-ab42b6c5/M1-T02 A2: complete setup 23.735 online 0.0240 
+== 09:43:09 compare
+   exit 0 mplete setup 15.263 online 0.0024 r5 icv1-f2m61-t158598901-ab42b6c5/M4-T08 base: complete setup 23.644 online 0.0243 r5 icv1-f2m61-t158598901-ab42b6c5/M4-T08 cand: complete setup 17.531 online 0.0188 
+== 10:08:55 holdout
+   exit 0 te setup 16.834 online 0.0697 r5 icv1-f2m61-t158598901-ab42b6c5/M21-T134 base: complete setup 25.232 online 0.0309 r5 icv1-f2m61-t158598901-ab42b6c5/M21-T134 cand: complete setup 19.455 online 0.0243 
+== 10:51:44 extend
+   exit 0 0113 r10 icv1-f2m53-tm56619371-dac20a85/M21-T134 base: complete setup 16.478 online 0.0097 {  "suite": [   "icv1-f2m59-tm943548413-98844ecc"  ],  "holdouts": [   "icv1-f2m53-tm56619371-dac20a85"  ] } 
+== 11:17:58 analyse
+   exit 0
+== 11:18:02 all done

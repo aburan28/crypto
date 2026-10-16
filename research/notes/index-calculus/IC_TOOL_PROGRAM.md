@@ -629,6 +629,26 @@ nothing missing. R09's class excludes it.
 - **Next:** R06's amendment ports its candidate onto v4, then R06 runs
   here.
 
+**R06 accepted: v5 is v4 plus the scan's key by GFNI and funnel shifts
+(2026-10-16).** The programme's first lever of its own since v2.
+- **The port.** Amendment 2 applied R06's frozen candidate to v4 unchanged
+  (the same lines) before any run. The tests passed on its tree, and its pin
+  held on all 90 rows.
+- **The gain.** Cold time, v4 over the candidate: 1.197 [1.167, 1.228],
+  1.220 [1.197, 1.243] and 1.241 [1.223, 1.260] at `2^44.3`, `2^44.5` and
+  `2^47.2` on the suite rows; 1.174, 1.202 and 1.268 on fresh holdouts.
+  Every interval lies above the declared 1.03, and every figure is above
+  the prediction (1.08–1.15, 1.07–1.13, 1.15–1.22). Collection ran
+  1.26–1.30× faster at those sizes; rho's online interval did not move.
+- **The class is engineering:** the keys are identical, so the counts and
+  the ratio to the floor are unchanged
+  ([results](../../ic_tool_program/rounds/R06-scan-key/README.md)).
+- **The distance to rho** is still the rule at v3's until the rule runs at
+  v5: 13.2×, 12.0× and 21.0× cold at the three largest sizes, before
+  R06's gain.
+- **Next:** R08 (the scan's subtraction by carry-less folds), ported onto
+  v5 by an amendment before any run, on this host.
+
 ## 9. Track B: generality and robustness
 
 **Where the tool stands (at `0bf67f16`).**
