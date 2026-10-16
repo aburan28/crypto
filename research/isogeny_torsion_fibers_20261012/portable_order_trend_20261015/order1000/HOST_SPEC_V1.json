@@ -1,0 +1,17 @@
+{
+  "schema": "different_j_order1201_linux_host_spec/v1",
+  "status": "frozen_before_independent_linux_run",
+  "run_spec_sha256": "6677dd19aef494ce1ebe2abb968a44cac1395bf0e361bde6ea67e44b20268dd1",
+  "workflow_sha256": "5d7c8e0459ba352b4a19d56d3d61836676f31ec9631b1939bb8819a90b199f6a",
+  "linux_script_sha256": "280d9d4cdf394ac1e1a26590679a596b67de5b1d915fe97a11c299a95da984f0",
+  "runner_source_sha256": "5cc117acfeb4a5eb1902053d165f22b12e77bed28bd9e004e603529568b9daea",
+  "checker_source_sha256": "6b0e02688b4adfe2193ca089dcca30a4ee993cd5396ff8b688b796730d6d0319",
+  "meter_source_sha256": "be2539c5dde00df38def5a19866615dce3508eb38ac4150995f724e12d0711c2",
+  "cell": {"p": 1237, "r": 1201, "cofactor": 1275},
+  "child_count": 84,
+  "scalar_outputs": 1785,
+  "local_relation_witnesses": 12486,
+  "output_artifact": "isogeny-fiber-order1201-linux-v1",
+  "host_class": "GitHub ubuntu-24.04 hosted virtual machine, no physical-core reservation",
+  "wall_admission": "ineligible_for_L2"
+}
