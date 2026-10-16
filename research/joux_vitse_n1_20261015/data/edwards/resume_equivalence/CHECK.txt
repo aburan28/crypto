@@ -5,3 +5,7 @@ final ic row identical except wall time and resume count:
 < {"agg":{"consistent":759,"e_solutions":827,"f4_muls":1352037918855,"not_split":802,"replay_mismatch":759,"resolve_group_ops":8,"roots_muls":259839,"target_gen_muls":728159344,"undetermined":0,"weil_muls":346608000},"k":null,"kind":"ic","linear_algebra_mulmods":0,"online_muls":1353112949654,"oracle_disagree":0,"p":31,"ratio_online_ic_over_expected_rho_walk":892711.4465803781,"ratio_online_ic_over_rho":773943.309326125,"relations":1,"relations_unverified":0,"resolve_muls":3616,"seed":1,"trials":24000,"unknowns":8,"verified":false}
 ---
 > {"agg":{"consistent":759,"e_solutions":827,"f4_muls":1352037918855,"not_split":802,"replay_mismatch":759,"resolve_group_ops":8,"roots_muls":259839,"target_gen_muls":728159344,"undetermined":0,"weil_muls":346608000},"k":null,"kind":"ic","linear_algebra_mulmods":0,"online_muls":1353112949654,"oracle_disagree":0,"p":31,"ratio_online_ic_over_expected_rho_walk":892711.4465803781,"ratio_online_ic_over_rho":773943.309326125,"relations":1,"relations_unverified":0,"resolve_muls":3616,"seed":1,"trials":24000,"unknowns":8,"verified":false,"wall_capped":false}
+
+The only difference above is the field `wall_capped`, which the resumed
+segment's binary (commit c2cb903ac) writes and the uninterrupted run's binary
+(commit abea9c787) does not; every count, relation and the answer state match.
