@@ -1,0 +1,109 @@
+name: ECC2K upload gateway and worker image
+
+on:
+  pull_request:
+    paths:
+      - 'ecc2k130/aws/upload_gateway/**'
+      - 'ecc2k130/aws/worker.py'
+      - 'ecc2k130/aws/protocol.py'
+      - 'ecc2k130/aws/seed_registry.py'
+      - 'ecc2k130/aws/test_upload_gateway.py'
+      - 'ecc2k130/aws/test_worker_spool.py'
+      - 'ecc2k130/aws/test_seed_registry.py'
+      - '.github/workflows/ecc2k130-upload-gateway.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ecc2k130/aws/upload_gateway/**'
+      - 'ecc2k130/aws/worker.py'
+      - 'ecc2k130/aws/protocol.py'
+      - 'ecc2k130/aws/seed_registry.py'
+      - 'ecc2k130/aws/test_upload_gateway.py'
+      - 'ecc2k130/aws/test_worker_spool.py'
+      - 'ecc2k130/aws/test_seed_registry.py'
+      - '.github/workflows/ecc2k130-upload-gateway.yml'
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: Deploy the private quarantine and upload API after tests
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && github.workflow_ref || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Validate broker, worker and templates
+        run: |
+          PYTHONPATH=ecc2k130/aws python -m unittest -v \
+            ecc2k130/aws/test_upload_gateway.py \
+            ecc2k130/aws/test_worker_spool.py \
+            ecc2k130/aws/test_seed_registry.py
+          python -m py_compile ecc2k130/aws/upload_gateway/*.py ecc2k130/aws/worker.py ecc2k130/aws/seed_registry.py
+      - name: Build the credential-free worker and gateway images
+        run: |
+          docker build -f ecc2k130/aws/upload_gateway/Dockerfile -t ecc2k130-worker:pr ecc2k130/aws
+          docker build -f ecc2k130/aws/upload_gateway/Dockerfile.gateway -t ecc2k130-gateway:pr ecc2k130/aws
+
+  publish:
+    if: github.event_name == 'push'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: ecc2k130/aws
+          file: ecc2k130/aws/upload_gateway/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/ecc2k130-worker:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/ecc2k130-worker:latest
+      - uses: docker/build-push-action@v6
+        with:
+          context: ecc2k130/aws
+          file: ecc2k130/aws/upload_gateway/Dockerfile.gateway
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/ecc2k130-gateway:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/ecc2k130-gateway:latest
+
+  deploy:
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install boto3==1.35.99
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.ECC2K130_DEPLOY_ROLE_ARN }}
+          aws-region: us-west-2
+      - run: python ecc2k130/aws/upload_gateway/deploy.py deploy --mode external
