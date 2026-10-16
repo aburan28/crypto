@@ -1,0 +1,26 @@
+A0 instrument check: the pilot's seed rule and draw order, against its committed rows
+F4_FP_GM = 0
+criterion: x_r, curve, tower, n_vars, n_equations, D = solving_degree_max, inconsistent and planted_ok equal on every committed row;
+degree_reached (the certification tail, not D) is compared and reported, not scored
+m  t  target  x_r      ours: D reached inconsistent planted_ok | pilot rows (file: D reached)  verdict
+2  1  0       191451   4 4 false true | A1-kummer-m2-tower.jsonl: 4 4; R1-repro-final-build.jsonl: 4 4; smoke2.jsonl: 4 4  MATCH
+2  1  1       187405   4 4 false true | A1-kummer-m2-tower.jsonl: 4 4; R1-repro-final-build.jsonl: 4 4; smoke2.jsonl: 4 4  MATCH
+2  2  0       64013    4 4 false true | A1-kummer-m2-tower.jsonl: 4 4; R1-repro-final-build.jsonl: 4 4; smoke2.jsonl: 4 4  MATCH
+2  2  1       81792    4 4 false true | A1-kummer-m2-tower.jsonl: 4 4; R1-repro-final-build.jsonl: 4 4; smoke2.jsonl: 4 4  MATCH
+2  3  0       369879   4 5 false true | A1-kummer-m2-tower.jsonl: 4 5; R1-repro-final-build.jsonl: 4 5; smoke2.jsonl: 4 5  MATCH
+2  3  1       506193   4 5 false true | A1-kummer-m2-tower.jsonl: 4 5; R1-repro-final-build.jsonl: 4 5; smoke2.jsonl: 4 5  MATCH
+2  4  0       688199   4 6 false true | A1-kummer-m2-tower.jsonl: 4 6; R1-repro-final-build.jsonl: 4 6; smoke2.jsonl: 4 6  MATCH
+2  4  1       464251   4 6 false true | A1-kummer-m2-tower.jsonl: 4 6; R1-repro-final-build.jsonl: 4 6; smoke2.jsonl: 4 6  MATCH
+2  5  0       597010   4 7 false true | A1-kummer-m2-tower.jsonl: 4 7; R1-repro-final-build.jsonl: 4 7; smoke2.jsonl: 4 7  MATCH
+2  5  1       401654   4 7 false true | A1-kummer-m2-tower.jsonl: 4 7; R1-repro-final-build.jsonl: 4 7; smoke2.jsonl: 4 7  MATCH
+2  6  0       80068    5 7 false true | A1-kummer-m2-tower.jsonl: 5 7; smoke2.jsonl: 5 7  MATCH
+2  6  1       620235   5 7 false true | A1-kummer-m2-tower.jsonl: 5 7; smoke2.jsonl: 5 7  MATCH
+2  7  0       659776   5 8 false true | A1-kummer-m2-tower.jsonl: 5 8  MATCH
+2  7  1       366589   5 8 false true | A1-kummer-m2-tower.jsonl: 5 8  MATCH
+3  2  0       666355   5 8 false true | A2-kummer-m3-tower.jsonl: 5 8; R1-repro-final-build.jsonl: 5 8; R3-repro-m3-b4.jsonl: 5 8; smoke2.jsonl: 5 8  MATCH
+3  2  1       132282   5 8 false true | A2-kummer-m3-tower.jsonl: 5 8; R1-repro-final-build.jsonl: 5 8; R3-repro-m3-b4.jsonl: 5 8; smoke2.jsonl: 5 8  MATCH
+3  3  0       223148   6 10 false true | A2-kummer-m3-tower.jsonl: 6 10; R1-repro-final-build.jsonl: 6 10; R3-repro-m3-b4.jsonl: 6 10; smoke2.jsonl: 6 10  MATCH
+3  3  1       349008   6 10 false true | A2-kummer-m3-tower.jsonl: 6 10; R1-repro-final-build.jsonl: 6 10; R3-repro-m3-b4.jsonl: 6 10; smoke2.jsonl: 6 10  MATCH
+3  4  0       775615   6 7 false true | A2-kummer-m3-tower.jsonl: 6 7  MATCH
+3  4  1       542792   6 7 false true | A2-kummer-m3-tower.jsonl: 6 7  MATCH
+instrument check: PASS: every system matches every committed pilot row on the criterion (20 systems; degree_reached differs from the pilot on 0)
