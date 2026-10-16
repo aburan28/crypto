@@ -1934,6 +1934,12 @@ pub(crate) fn charge_lift(
 }
 
 impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        // No table: the descent builds each target's system in the
+        // relation phase, charged to the solver block.
+        table_counted(BTreeMap::new())
+    }
+
     fn name(&self) -> &str {
         "descent-algebraic"
     }

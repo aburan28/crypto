@@ -96,6 +96,11 @@ fn required<'p>(params: &'p Params, key: &str, hint: &str) -> Result<&'p str, St
 }
 
 impl<'a> DecompositionOracle<BinaryGroup<'a>> for PdpSplitOracle<'_> {
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        // No table: each target's split solve is charged to the solver block.
+        BTreeMap::from([("counted:table_insert_attempts".to_string(), 1)])
+    }
+
     fn name(&self) -> &str {
         "pdp-split"
     }

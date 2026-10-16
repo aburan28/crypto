@@ -1046,6 +1046,22 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
         }
     }
 
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        // The full pair-sum table inserts every unordered pair once; the
+        // negation-folded PairTable counts its own attempts; the algebraic
+        // engines build no table.
+        let mut c = match (&self.pair, &self.pair_neg) {
+            (Some(_), _) => {
+                let f = self.pair_table_points as u64;
+                BTreeMap::from([("table_insert_attempts".to_string(), f * (f + 1) / 2)])
+            }
+            (None, Some(t)) => t.work_counters(),
+            (None, None) => BTreeMap::new(),
+        };
+        c.insert("counted:table_insert_attempts".to_string(), 1);
+        c
+    }
+
     fn setup_native(&self) -> BTreeMap<String, u64> {
         let mut counts = BTreeMap::new();
         if let Some(table) = &self.pair {

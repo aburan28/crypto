@@ -1145,6 +1145,14 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for FiberDescentOracle<'_> {
         fiber_counts(self.fiber.as_ref(), self.build)
     }
 
+    fn setup_work_native(&self) -> BTreeMap<String, u64> {
+        // No pair table; the fiber's generation probes its key set.
+        let mut c = BTreeMap::new();
+        add_fiber_key_probes(&mut c, self.fiber.as_ref());
+        c.insert("counted:table_insert_attempts".to_string(), 1);
+        c
+    }
+
     fn decompose(
         &mut self,
         ctx: &InstanceCtx<BinaryGroup<'a>>,
