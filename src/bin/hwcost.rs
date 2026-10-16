@@ -397,7 +397,10 @@ fn run() -> Result<(), String> {
             let pairs = compare::fp64_pairs(&runs);
             std::fs::create_dir_all(&out).map_err(|e| e.to_string())?;
             write(&out.join("compare.csv"), &compare::compare_csv(&rows))?;
-            write(&out.join("fp64_pairs.csv"), &compare::pairs_csv(&pairs))?;
+            write(
+                &out.join("fp64_pairs.csv"),
+                &compare::pairs_csv(&pairs, "fp64", "fp64bf"),
+            )?;
             let mut counts: std::collections::BTreeMap<(String, String), usize> =
                 Default::default();
             for r in &rows {
@@ -471,7 +474,7 @@ fn run() -> Result<(), String> {
                 threshold,
             );
             std::fs::create_dir_all(&out).map_err(|e| e.to_string())?;
-            write(&out.join("pairs.csv"), &compare::pairs_csv(&rows))?;
+            write(&out.join("pairs.csv"), &compare::pairs_csv(&rows, &a, &b))?;
             write(&out.join("claims.json"), &json(&vec![c.clone()]))?;
             println!(
                 "{} {}: {:.4} (threshold {})",

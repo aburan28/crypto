@@ -125,8 +125,9 @@ pub fn compare_csv(rows: &[ArmCompare]) -> String {
     s
 }
 
-pub fn pairs_csv(rows: &[PairRow]) -> String {
-    let mut s = String::from("run,batch,fp64_ns,fp64bf_ns,ratio\n");
+/// The rows as CSV, the two kernel columns named after fields `a` and `b`.
+pub fn pairs_csv(rows: &[PairRow], a: &str, b: &str) -> String {
+    let mut s = format!("run,batch,{a}_ns,{b}_ns,ratio\n");
     for r in rows {
         s.push_str(&format!(
             "{},{},{:.4},{:.4},{:.6}\n",
