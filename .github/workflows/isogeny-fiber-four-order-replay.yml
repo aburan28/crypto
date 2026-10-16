@@ -6,6 +6,7 @@ on:
       - '.github/workflows/isogeny-fiber-four-order-replay.yml'
       - 'examples/different_j_trend_batch.rs'
       - 'examples/different_j_trend_batch_check.rs'
+      - 'examples/different_j_host_performance.rs'
       - 'examples/different_j_order_process_meter.rs'
       - 'research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/BATCH_*_V1.public.json'
       - 'research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/BATCH_*_V1.checker.json'

@@ -28,6 +28,7 @@ The exact follow-up checks were:
 | same exact command for `the_solver_loses_no_rational_solution_at_small_p` | 1 passed, 11.93s |
 | `cargo test --release` on the nine touched example targets | all nine compiled and executed; each has zero unit tests |
 | `cargo test --release --example different_j_host_performance`, followed by a release build and local artifact-shaped self-check | compiled; analyzer matched 252/252 arithmetic rows, 5,355 scalar outputs and 37,061 relation witnesses against the committed Mac records |
+| synthetic tamper of one copied `total_fp_muls` value with the replay hash recomputed | analyzer exited 101 at `arithmetic drift 409:433 (1, 0, "source")`; the original committed run was not changed |
 | `rustfmt --check`, `actionlint`, `bash -n`, and `git diff --check` | passed |
 | native three-cell fiber and batch checkers | 252 new child exits zero, 5,355 new scalar outputs and 37,061 relation witnesses replayed; see `../RESULTS_V2.md` |
 

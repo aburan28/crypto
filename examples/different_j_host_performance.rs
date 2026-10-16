@@ -220,7 +220,7 @@ fn main() {
     let mut svg = String::from(
         r##"<svg xmlns="http://www.w3.org/2000/svg" width="900" height="450" viewBox="0 0 900 450"><rect width="100%" height="100%" fill="white"/><text x="55" y="38" font-size="22">Independent Linux host: descriptive N=64 CPU ratios</text><text x="55" y="65" font-size="14">Three paired rounds per cell; hosted VM without physical-core isolation</text>"##,
     );
-    for (ratio, y) in [(1.0, 365.0), (10.0, 265.0), (100.0, 165.0), (1000.0, 65.0)] {
+    for (ratio, y) in [(1.0, 365.0), (10.0, 276.7), (100.0, 188.3), (1000.0, 100.0)] {
         svg.push_str(&format!(
             r##"<line x1="80" y1="{y}" x2="820" y2="{y}" stroke="#ddd"/><text x="35" y="{}" font-size="14">{ratio}</text>"##,
             y + 5.0
@@ -239,7 +239,7 @@ fn main() {
                 .unwrap();
             let ratio = row[field].as_f64().unwrap();
             let x = 170.0 + i as f64 * 270.0;
-            let y = 365.0 - 100.0 * ratio.log10();
+            let y = 365.0 - (265.0 / 3.0) * ratio.log10();
             points.push_str(&format!("{x},{y} "));
             svg.push_str(&format!(
                 r##"<circle cx="{x}" cy="{y}" r="5" fill="{color}"/>"##
