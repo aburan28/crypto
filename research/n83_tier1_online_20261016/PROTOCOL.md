@@ -33,6 +33,12 @@ the same four exposed CPUs, retains a 15.25 GiB process RSS guard, and
 records topology, affinity, cgroup quota and memory limit, OS, compiler,
 source and binary hashes. The bare-metal instance is reported as Tier 1
 until the separate Tier 0 isolation and noise requirements are checked.
+The bootstrap uploads its complete logs, binaries, producer rows and
+verifier output to the dedicated private S3 bucket before shutting down.
+`collect.py` archives that exact object locally, replays the analysis on the
+same source commit, retains both analysis hashes and requests termination
+if the instance remains active. Delete the temporary IAM, network and S3
+resources after the local archive is independently checked.
 
 Each point is one primary single-target workload. On points 1, 3 and 5,
 run `IC,rho`; on points 2 and 4, run `rho,IC`. Use a fresh process, empty
