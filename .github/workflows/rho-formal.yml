@@ -1,0 +1,105 @@
+name: Strong rho formal checks
+# Re-checks the strong-rho assurance round on every change to the rho or to
+# its formal models (research/rho_assurance_20261016/):
+#   lean     the Lean 4 proofs build with no sorry and standard axioms only;
+#   tla      TLC meets every config's declared verdict, mutants included;
+#   perf-ipc the perf IPC tool parses perf output (selftest) and either counts
+#            or reports the runner's missing PMU as "unsupported".
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/rho-formal.yml'
+      - 'research/rho_assurance_20261016/lean/**'
+      - 'research/rho_assurance_20261016/tla/**'
+      - 'src/cryptanalysis/koblitz_strong_rho.rs'
+      - 'tools/perf_ipc.sh'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/rho-formal.yml'
+      - 'research/rho_assurance_20261016/lean/**'
+      - 'research/rho_assurance_20261016/tla/**'
+      - 'src/cryptanalysis/koblitz_strong_rho.rs'
+      - 'tools/perf_ipc.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lean:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: research/rho_assurance_20261016/lean
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: elan-${{ hashFiles('research/rho_assurance_20261016/lean/lean-toolchain') }}
+      - name: Build the proofs and audit their axioms
+        run: ./check.sh
+
+  tla:
+    runs-on: ubuntu-24.04
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 60 }}
+    defaults:
+      run:
+        working-directory: research/rho_assurance_20261016/tla
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/tla
+          key: tla2tools-${{ hashFiles('research/rho_assurance_20261016/tla/run_tlc.sh') }}
+      - name: Model-check every config against its declared verdict
+        env:
+          TLA_CACHE: ${{ runner.temp }}/tla
+          TLC_WORKERS: '4'
+        run: ./run_tlc.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tlc-out
+          path: research/rho_assurance_20261016/tla/out/
+
+  perf-ipc:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install perf
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q linux-tools-common linux-tools-generic "linux-tools-$(uname -r)" || \
+            sudo apt-get install -y -q linux-tools-common linux-tools-generic
+      - name: Allow unprivileged counting of own processes
+        # The runner image sets perf_event_paranoid=4, which forbids every
+        # unprivileged perf_event_open; 2 permits user-space counting of the
+        # job's own processes, which is all the tool asks for.
+        run: sudo sysctl -w kernel.perf_event_paranoid=2
+      - name: Selftest (parsing and JSON, software events)
+        run: |
+          tools/perf_ipc.sh --selftest --repeat 2 --steps 1000 --label ci --out selftest.jsonl -- sleep 0.05
+          jq -e 'select(.kind == "summary") | .repeats == 2 and .task_clock_ms.n == 2 and .ipc.n == 0' selftest.jsonl
+      - name: Hardware counters, or a recorded "unsupported"
+        run: |
+          set +e
+          tools/perf_ipc.sh --repeat 1 --label ci-probe --out probe.jsonl -- true
+          status=$?
+          set -e
+          cat probe.jsonl
+          case $status in
+            0) jq -e 'select(.kind == "summary") | .ipc.n == 1' probe.jsonl ;;
+            3) jq -e 'select(.kind == "unsupported") | .reason | length > 0' probe.jsonl ;;
+            *) echo "perf_ipc exited $status"; exit 1 ;;
+          esac
