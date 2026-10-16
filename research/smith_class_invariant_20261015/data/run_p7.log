@@ -1,0 +1,43 @@
+p=7: 5000/16823 classes, 70s
+p=7: 10000/16823 classes, 139s
+p=7: 15000/16823 classes, 207s
+{
+  "counts": {
+    "j4_instrument_errors": 0,
+    "k2_j4_checked": 16823,
+    "k2_j4_mismatch": 0,
+    "k2_sylow_checked": 1000,
+    "k2_sylow_mismatch": 0,
+    "k3_rank_mismatch": 0,
+    "k3_sum_mismatch": 0,
+    "k3_uncertified": 0,
+    "k4_checked": 16823,
+    "k4_mismatch": 4405,
+    "k4c_checked": 16823,
+    "k4c_mismatch": 0,
+    "k5_failures": 9512,
+    "k5c_failures": 0,
+    "sylow_instrument_errors": 0,
+    "tractable": 16823,
+    "x3c_ambiguous_entries": 4945,
+    "x3c_classes_with_ambiguous_k": 3901
+  },
+  "git_head": "0bff9255bbe0a2830e20ab4da846110b6d45eb59",
+  "iso_classes": 34227,
+  "k2_pass_j4": true,
+  "k2_pass_sylow": true,
+  "k3_pass": true,
+  "k4_pass": false,
+  "k4c_pass": true,
+  "k5_pass": false,
+  "k5c_pass": true,
+  "limit": null,
+  "p": 7,
+  "seconds": 237.901541337,
+  "threads": 2,
+  "tractable_classes": 16823
+}
+
+real	3m58.121s
+user	7m35.771s
+sys	0m0.189s

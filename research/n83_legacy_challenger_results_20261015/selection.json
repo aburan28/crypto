@@ -1,0 +1,139 @@
+{
+  "analysis_sha256": "7d10662fe9987fd1766734188855a57f355b4244f26a815c5e065d7a93f85551",
+  "artifact_sha256": "e14fbbaff7afbc0ee0bf4cc815cce4cc5323492eed584d14f6fe9e1f92f39aad",
+  "balanced_comparison": {
+    "contiguous_block_size": 25,
+    "pairwise": {
+      "root11k3300wide3_minus_root21k3220": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -9.714319533000001,
+          -2.4637136324999998
+        ],
+        "mean_ms": -5.940631526
+      },
+      "root11k3300wide3_minus_root22k2940wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -14.060125359,
+          -6.328064564
+        ],
+        "mean_ms": -10.086824262
+      },
+      "root11k3300wide3_minus_root4k3596": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -9.1372404135,
+          -1.4553766575
+        ],
+        "mean_ms": -5.274737544
+      },
+      "root21k3220_minus_root11k3300wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          2.511386362,
+          9.6325079845
+        ],
+        "mean_ms": 5.940631526
+      },
+      "root21k3220_minus_root22k2940wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -8.5250811285,
+          0.3430593699999999
+        ],
+        "mean_ms": -4.146192736
+      },
+      "root21k3220_minus_root4k3596": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -3.5913656679999995,
+          4.818949187
+        ],
+        "mean_ms": 0.665893982
+      },
+      "root22k2940wide3_minus_root11k3300wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          6.0674765115,
+          13.9926662975
+        ],
+        "mean_ms": 10.086824262
+      },
+      "root22k2940wide3_minus_root21k3220": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.32229456349999985,
+          8.479045237
+        ],
+        "mean_ms": 4.146192736
+      },
+      "root22k2940wide3_minus_root4k3596": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          0.2512267355000002,
+          9.3982950245
+        ],
+        "mean_ms": 4.812086718000001
+      },
+      "root4k3596_minus_root11k3300wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          1.2806261154999998,
+          9.0452969485
+        ],
+        "mean_ms": 5.274737544
+      },
+      "root4k3596_minus_root21k3220": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -4.9092316645,
+          3.5815805839999997
+        ],
+        "mean_ms": -0.665893982
+      },
+      "root4k3596_minus_root22k2940wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -9.3536016675,
+          -0.37695072300000043
+        ],
+        "mean_ms": -4.812086718000001
+      }
+    },
+    "pipeline_mean_ms": {
+      "root11k3300wide3": 28.770549436,
+      "root21k3220": 34.711180962,
+      "root22k2940wide3": 38.857373698,
+      "root4k3596": 34.04528698
+    },
+    "repeatability": {
+      "root11k3300wide3_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.22245659400000004,
+          0.17976742200000026
+        ],
+        "mean_ms": -0.000649563999999967
+      },
+      "root21k3220_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          1.942247993,
+          2.49170279
+        ],
+        "mean_ms": 2.218634348
+      },
+      "root22k2940wide3_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          1.5757188940000002,
+          2.2321933570000003
+        ],
+        "mean_ms": 1.8976229000000002
+      },
+      "root4k3596_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.2973727760000001,
+          0.07958887599999998
+        ],
+        "mean_ms": -0.099827484
+      }
+    },
+    "selected_pipeline": "root11k3300wide3"
+  },
+  "candidate_id": "IC1N83Ckb1a1fb547800PDP4rootRCguidedLAgaussTDdirectISO0h5d050a00f5f6",
+  "candidate_manifest_sha256": "a4fcb0c589df4253911bbde229d8699be28719ef40c4e31043f08be70ac34ac3",
+  "schema": "n83.legacy-challenger-selection/v1",
+  "selected_pipeline": "root11k3300wide3",
+  "source_base_hash_blake3": "a4ba33098d2776520b98a326585a2301f8ccd5bc005df7c1a70fbe8496c61d8b",
+  "source_commit": "d6293e278a037ef34a6de0101844fcfbf97703e2",
+  "source_sha256": "f2745227d95e36ef45c73c5104a23ada6cebb0794405368581d2be17044845dc",
+  "status": "PANEL_SELECTED",
+  "workload_id": "95bb23959a75"
+}

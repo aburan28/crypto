@@ -1,0 +1,10 @@
+commit: 6979448f00a30c5e29ca7d4d6bf316c69687c2af
+command: taskset -c 3 nice -n 0 prlimit --as=4294967296 -- fp_backend_bench --reps 9 --target-ms 40 --out research/fp_backend_20261015/runs/final
+start: 2026-10-15T18:13Z
+uptime at start:  18:13:04 up  3:16,  0 user,  load average: 1.03, 1.70, 1.33
+cpu: Intel(R) Xeon(R) Processor @ 2.10GHz, 4 vCPU
+rustc: rustc 1.97.0 (2d8144b78 2026-07-07)
+host: shared with another lane, no isolation (L0)
+exit: 0
+end: 2026-10-15T18:14Z
+uptime at end:  18:14:31 up  3:18,  0 user,  load average: 1.04, 1.53, 1.30

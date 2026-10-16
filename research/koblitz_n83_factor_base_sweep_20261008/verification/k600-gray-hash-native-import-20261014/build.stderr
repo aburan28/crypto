@@ -1,0 +1,124 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.26
+   Compiling quote v1.0.47
+   Compiling stable_deref_trait v1.2.1
+   Compiling libc v0.2.190
+   Compiling writeable v0.6.4
+   Compiling litemap v0.8.3
+   Compiling cfg-if v1.0.5
+   Compiling icu_properties_data v2.3.0
+   Compiling icu_normalizer_data v2.3.0
+   Compiling autocfg v1.5.1
+   Compiling utf8_iter v1.0.4
+   Compiling zerocopy v0.8.60
+   Compiling crossbeam-utils v0.8.23
+   Compiling smallvec v1.16.2
+   Compiling crossbeam-epoch v0.9.21
+   Compiling utf8parse v0.2.2
+   Compiling serde_core v1.0.229
+   Compiling find-msvc-tools v0.1.14
+   Compiling crossbeam-deque v0.8.8
+   Compiling shlex v2.0.1
+   Compiling cc v1.6.0
+   Compiling anstyle-parse v1.0.0
+   Compiling crc32fast v1.5.2
+   Compiling num-traits v0.2.19
+   Compiling rayon-core v1.13.0
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling anstyle-query v1.1.5
+   Compiling colorchoice v1.0.5
+   Compiling anstyle v1.0.14
+   Compiling percent-encoding v2.3.2
+   Compiling zmij v1.0.23
+   Compiling memchr v2.8.3
+   Compiling form_urlencoded v1.2.2
+   Compiling adler2 v2.0.1
+   Compiling anstream v1.0.0
+   Compiling serde v1.0.229
+   Compiling itoa v1.0.18
+   Compiling bytes v1.12.1
+   Compiling simd-adler32 v0.3.10
+   Compiling strsim v0.11.1
+   Compiling clap_lex v1.1.1
+   Compiling syn v3.0.6
+   Compiling syn v2.0.119
+   Compiling serde_json v1.0.151
+   Compiling heck v0.5.0
+   Compiling getrandom v0.2.17
+   Compiling socket2 v0.6.5
+   Compiling clap_builder v4.6.7
+   Compiling rand_core v0.6.4
+   Compiling combine v4.6.8
+   Compiling num-integer v0.1.47
+   Compiling miniz_oxide v0.9.1
+   Compiling num-bigint v0.5.1
+   Compiling blake3 v1.8.7
+   Compiling ryu v1.0.23
+   Compiling either v1.18.0
+   Compiling constant_time_eq v0.4.2
+   Compiling sha1_smol v1.0.1
+   Compiling arrayvec v0.7.8
+   Compiling xxhash-rust v0.8.19
+   Compiling arcstr v1.2.0
+   Compiling rayon v1.12.0
+   Compiling flate2 v1.1.10
+   Compiling subtle v2.6.1
+   Compiling hex v0.4.3
+   Compiling base64 v0.21.7
+   Compiling ppv-lite86 v0.2.21
+   Compiling synstructure v0.14.0
+   Compiling rand_chacha v0.3.1
+   Compiling rand v0.8.8
+   Compiling zeroize_derive v1.5.0
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling zerovec-derive v0.11.6
+   Compiling zerofrom v0.1.8
+   Compiling displaydoc v0.2.7
+   Compiling yoke v0.8.3
+   Compiling clap_derive v4.6.7
+   Compiling serde_derive v1.0.229
+   Compiling zeroize v1.9.0
+   Compiling num-bigint v0.4.8
+   Compiling zerotrie v0.2.5
+   Compiling zerovec v0.11.8
+   Compiling tinystr v0.8.4
+   Compiling potential_utf v0.1.6
+   Compiling icu_collections v2.3.0
+   Compiling icu_locale_core v2.3.0
+   Compiling clap v4.6.7
+   Compiling icu_provider v2.3.1
+   Compiling icu_normalizer v2.3.0
+   Compiling icu_properties v2.3.0
+   Compiling idna_adapter v1.2.2
+   Compiling idna v1.1.0
+   Compiling url v2.5.8
+   Compiling redis v1.7.1
+   Compiling crypto v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-n83-mixed-orbit-worker-20261012)
+warning: stripping debug info with `rust-objcopy` failed: signal: 6 (SIGABRT)
+  |
+  = note: dyld[45576]: Library not loaded: @rpath/libLLVM.dylib
+            Referenced from: <AC0D75A8-23BF-301F-B7CE-3E5CC0C1BC06> /Users/adamburan/.rustup/toolchains/1.98-aarch64-apple-darwin/lib/rustlib/aarch64-apple-darwin/bin/rust-objcopy
+            Reason: tried: '/Users/adamburan/.rustup/toolchains/1.98-aarch64-apple-darwin/lib/rustlib/aarch64-apple-darwin/bin/../lib/libLLVM.dylib' (no such file), '/Users/adamburan/.rustup/toolchains/1.98-aarch64-apple-darwin/lib/rustlib/aarch64-apple-darwin/bin/../lib/libLLVM.dylib' (no such file), '/private/tmp/n83-native-k600-import-20261014/target/release/deps/libLLVM.dylib' (no such file), '/Users/adamburan/lib/libLLVM.dylib' (no such file), '/usr/local/lib/libLLVM.dylib' (no such file), '/usr/lib/libLLVM.dylib' (no such file, not in dyld cache)
+          
+
+warning: `crypto` (example "koblitz_n83_mixed_orbit_worker") generated 1 warning
+    Finished `release` profile [optimized] target(s) in 14m 22s
+      863.01 real       561.44 user        43.71 sys
+          3996385280  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+             3953003  page reclaims
+               46574  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                 195  signals received
+               11809  voluntary context switches
+             4307967  involuntary context switches
+          2595273013  instructions retired
+          2065043216  cycles elapsed
+            40026760  peak memory footprint

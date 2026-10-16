@@ -1,0 +1,10 @@
+2026-10-14T08:46:02Z
+ 1:46  up  2:48, 32 users, load averages: 57.15 58.27 67.87
+Load Avg: 57.93, 58.42, 67.86 
+CPU usage: 69.86% user, 30.13% sys, 0.0% idle 
+PhysMem: 39G used (3988M wired, 9996M compressor), 8582M unused.
+Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on
+/dev/disk7s1   1.8Ti   1.8Ti   400Mi   100%     22M  4.1M   84%   /Volumes/SSD990
+/dev/disk3s5   460Gi   421Gi    12Gi    98%    4.2M  124M    3%   /System/Volumes/Data
+52915    00:02   0.0 /bin/zsh -lc { date -u '+%Y-%m-%dT%H:%M:%SZ'; uptime; top -l 1 -n 0 | rg 'Load Avg|CPU usage|PhysMem' | head -4; df -h /Volumes/SSD990/crypto /private/tmp; ps -Ao pid,etime,pcpu,command | rg 'cargo test|crypto_lib' | head -20; } > research/koblitz_n83_factor_base_sweep_20261008/verification/known-witness-stage-native-900-20261014/host-prelaunch.txt
+52937    00:00   0.0 rg cargo test|crypto_lib

@@ -1,0 +1,22 @@
+{
+  "analysis_sha256": "6d555f4d6f8596fda5451b18e9f6cc0451fc63b2f792fd7baf1f33cf1fcf501c",
+  "artifact_sha256": "be12dbe701fbe33092b2bb104d2e4cd07d321374596b1f8c69b83c332ac137fc",
+  "candidate_id": "IC1N83Ckb1a1fb547800PDP4rootRCguidedLAgaussTDdirectISO0h064d6bb97962",
+  "paired_difference": {
+    "bootstrap_95pct_ms": [
+      -8.378936915,
+      -7.12491997
+    ],
+    "confirmed_faster": true,
+    "contiguous_block_size": 50,
+    "definition": "canonical_sparse_minus_canonical_scan_online_ms",
+    "mean_ms": -7.75852847,
+    "resamples": 10000,
+    "seed": 2026101508
+  },
+  "schema": "n83.sparse-canonical-selection/v1",
+  "selected_arm": "canonical_sparse",
+  "source_commit": "39f8c5e74b2916333c6be60f2e653d7651eb7308",
+  "status": "SPARSE_CONFIRMED_IN_REUSED_PANEL",
+  "workload_id": "0d7b05d9fca6"
+}

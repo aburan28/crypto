@@ -1,0 +1,18 @@
+saved /home/user/wt/isogeny-tower/research/pkm_isogeny_tower_ecbench_20261015/sessions/q22/comparisons/rho-neg__ic-iso-mitm.json
+ops (ok): ic-iso-mitm / rho-neg = 47.8805 [40.289, 57.587] (cluster) over 16 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.9888 [1.903, 2.312]
+measurement quality: 0 / 100; paired attempts 16, verified 16, admitted 0; levels {"L0": 16}; p95 foreign busy unknown%, p95 run queue 49.23%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-iso-mitm / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp22-t285-9fc7e3e5 | 21.78 | 8 | 47.8805 | [40.2891, 57.5871] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-iso-mitm mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W28666a8ddc17 | icv1-fp22-t285-9fc7e3e5 | 21.78 | 1.0318 | 53.7233 | 52.0690 |
+| W66859eb861ba | icv1-fp22-t285-9fc7e3e5 | 21.78 | 0.9010 | 53.9815 | 59.9160 |
+| W99fbfdb0bc4d | icv1-fp22-t285-9fc7e3e5 | 21.78 | 0.8946 | 53.4105 | 59.7017 |
+| Wa98d9c5855ae | icv1-fp22-t285-9fc7e3e5 | 21.78 | 0.8590 | 54.2674 | 63.1738 |
+| Wc09859c57b7b | icv1-fp22-t285-9fc7e3e5 | 21.78 | 1.0872 | 54.3787 | 50.0192 |
+| Wda03520853ce | icv1-fp22-t285-9fc7e3e5 | 21.78 | 1.3446 | 54.3313 | 40.4078 |
+| Wf05a6018a2a5 | icv1-fp22-t285-9fc7e3e5 | 21.78 | 1.3828 | 54.1203 | 39.1377 |
+| Wf6a7de492592 | icv1-fp22-t285-9fc7e3e5 | 21.78 | 1.5310 | 54.2413 | 35.4277 |

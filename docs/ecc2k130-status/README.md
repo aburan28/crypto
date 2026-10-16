@@ -55,6 +55,13 @@ The worker table is empty on the live ingest feed: `dp_ingest.py` does
 not publish `per_worker` (`worker_id` is an upload-object name). The
 dashboard names that, instead of "No workers have reported points."
 
+`challenges.html` is the roster of other curves: the Certicom ECC2K, ECC2,
+and ECCp lists, and the families in the cryptanalysis research catalog.
+ECC2K-130 is the only row whose points are the store this dashboard
+counts. The page says so, and `test_build.py` fails if another row is
+marked live. `challenges.json` is the same roster in a form a program
+can read.
+
 The **Contribute compute** section under the worker table is static: it
 carries the [cairn](https://github.com/aburan28/cairn) download link
 (`releases/latest`, plus the one-line installer the cairn README

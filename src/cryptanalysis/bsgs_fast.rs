@@ -681,17 +681,20 @@ impl BsgsFast {
             .into_par_iter()
             .map(|t| {
                 let mut cs: Vec<Chain> = (0..w)
-                    .map(|k| {
+                    .filter_map(|k| {
                         let c = (t * w + k) as u64;
                         let start = c * plan.baby_len;
                         let end = ((c + 1) * plan.baby_len).min(plan.m);
-                        Chain {
+                        (start < end).then(|| Chain {
                             p: curve.scalar_mul(curve.g, start),
                             pos: start,
                             end,
-                        }
+                        })
                     })
                     .collect();
+                if cs.is_empty() {
+                    return 0;
+                }
                 run_kernel(
                     &curve,
                     plan.kernel,
@@ -788,19 +791,24 @@ impl BsgsFast {
             .into_par_iter()
             .map(|t| {
                 let mut cs: Vec<Chain> = (0..w)
-                    .map(|k| {
+                    .filter_map(|k| {
                         let c = (t * w + k) as u64;
                         let start = c * plan.giant_len;
                         let end = ((c + 1) * plan.giant_len).min(plan.giant_count);
                         // Chain c starts at Q' - (c·giant_len)·S.
-                        let off = curve.scalar_mul(self.s, start);
-                        Chain {
-                            p: curve.add(qprime, curve.neg(off)),
-                            pos: start,
-                            end,
-                        }
+                        (start < end).then(|| {
+                            let off = curve.scalar_mul(self.s, start);
+                            Chain {
+                                p: curve.add(qprime, curve.neg(off)),
+                                pos: start,
+                                end,
+                            }
+                        })
                     })
                     .collect();
+                if cs.is_empty() {
+                    return 0;
+                }
                 run_kernel(curve, plan.kernel, plan.pair_k, &mut cs, neg_s, |p, i| {
                     if stop.load(Ordering::Relaxed) {
                         return false;
@@ -1948,6 +1956,23 @@ mod tests {
                         Some(x),
                         "neg={neg_map} width={width} x={x}"
                     );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn sparse_chain_plans_cover_each_interval_position() {
+        let curve = toy40();
+        for kernel in [StepKernel::Chain, StepKernel::Paired, StepKernel::CoZ] {
+            for width in [1u64, 2, 5] {
+                let x0 = 1_234_567u64;
+                let plan = BsgsFastPlan::new(width, x0, true, 4, 16).with_kernel(kernel, 2);
+                let mut solver = BsgsFast::build(curve, plan);
+                for offset in 0..width {
+                    let x = x0 + offset;
+                    let q = curve.scalar_mul(curve.g, x);
+                    assert_eq!(solver.solve(&q), Some(x), "{kernel:?} width={width}");
                 }
             }
         }

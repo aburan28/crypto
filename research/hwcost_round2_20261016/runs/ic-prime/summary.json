@@ -1,0 +1,37 @@
+[
+  {
+    "id": "D1.in_band",
+    "statement": "curves (of 6) whose measured IC/rho wall ratio lies inside the band's ratio range",
+    "value": 0.0,
+    "threshold": null,
+    "verdict": "REPORT"
+  },
+  {
+    "id": "D1.w_star_median",
+    "statement": "median implied weight w* (GAE per unpriced native operation)",
+    "value": -0.9667684916028165,
+    "threshold": null,
+    "verdict": "REPORT"
+  },
+  {
+    "id": "D1.rank.IC>rho",
+    "statement": "curves (of 6) ranked IC > rho (§5a: wall ratio and all three band ratios agree)",
+    "value": 5.0,
+    "threshold": null,
+    "verdict": "REPORT"
+  },
+  {
+    "id": "D1.rank.IC<rho",
+    "statement": "curves (of 6) ranked IC < rho (§5a: wall ratio and all three band ratios agree)",
+    "value": 0.0,
+    "threshold": null,
+    "verdict": "REPORT"
+  },
+  {
+    "id": "D1.rank.unranked",
+    "statement": "curves (of 6) left unranked (wall ratio and band ratios disagree on the order)",
+    "value": 1.0,
+    "threshold": null,
+    "verdict": "REPORT"
+  }
+]

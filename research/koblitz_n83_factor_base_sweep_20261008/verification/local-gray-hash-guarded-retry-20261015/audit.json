@@ -1,0 +1,25 @@
+{
+  "conservative_search_charge_seconds": 0,
+  "elapsed_watch_seconds_L0": 900.0100203750007,
+  "first_sample_utc": "2026-10-15T19:23:57.155164+00:00",
+  "idle_percent_min_max": [
+    0.0,
+    0.4
+  ],
+  "last_sample_utc": "2026-10-15T19:38:40.448167+00:00",
+  "load_1m_min_max": [
+    38.49,
+    63.84
+  ],
+  "max_quiet_streak": 0,
+  "quiet_sample_count": 0,
+  "receipt_sha256": {
+    "config.json": "e46974c318a4c2f9c0a710c5423aaee8bfa9cbbd505dda3452d3ad8aec128e7a",
+    "result.json": "fc79a77a82a8c5397bc3cd6739f949a8f047dbb8798127e8c811fca9017790ad",
+    "samples.jsonl": "b77fe3597ebb28ff8e2fc4b2ba8b4b7c0ab2206b32d67f644b6e30be3ffcc5bd"
+  },
+  "sample_count": 20,
+  "schema": "n83.local-paired-quiet-watch-audit/v1",
+  "source_commit": "7a7f8842bcc0374fbbe01ba1b6afcff706b16e22",
+  "status": "PASS_BOUNDED_NO_LAUNCH_ONLY"
+}

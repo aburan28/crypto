@@ -1,0 +1,304 @@
+{
+  "admissibility": {
+    "bounded": true,
+    "deterministic": true,
+    "reasons": [
+      "2 size(s): below 4, so the exponent is descriptive and this is a constant bound"
+    ],
+    "status": "admissible",
+    "unpriced": [
+      "inserts_uncharged",
+      "lookups_uncharged"
+    ]
+  },
+  "bound_id": "ECBND1h10795e895deb",
+  "constant": {
+    "declared_ratio_to_floor": 1.1283791670955126,
+    "ratio_to_floor": {
+      "ci95": [
+        1.0891369888796052,
+        1.4313333043422654
+      ],
+      "ci_method": "cluster",
+      "value": 1.263702683225852
+    },
+    "s": {
+      "ci95": [
+        0.9630801075442171,
+        1.2716634650788274
+      ],
+      "ci_method": "cluster",
+      "value": 1.1199273436416475
+    }
+  },
+  "dimensions": {
+    "field_invs": {
+      "ci95": [
+        0.8798993221039766,
+        1.1581280007285442
+      ],
+      "known": true,
+      "lower_is_better": true,
+      "source": "field_ops.invs, workload.curve.r",
+      "statistic": "mean field inversions / sqrt(r) over verified runs",
+      "value": 1.0181171974617007
+    },
+    "field_muls": {
+      "ci95": [
+        1.7513604851089812,
+        2.308076998913024
+      ],
+      "known": true,
+      "lower_is_better": true,
+      "source": "field_ops.muls, workload.curve.r",
+      "statistic": "mean field multiplications / sqrt(r) over verified runs",
+      "value": 2.036373154883105
+    },
+    "field_sqrs": {
+      "ci95": [
+        0.8752316758870314,
+        1.1537767539645924
+      ],
+      "known": true,
+      "lower_is_better": true,
+      "source": "field_ops.sqrs, workload.curve.r",
+      "statistic": "mean field squarings / sqrt(r) over verified runs",
+      "value": 1.0181634507816018
+    },
+    "memory": {
+      "ci95": [
+        0.5000016972717412,
+        0.5000054670771233
+      ],
+      "known": true,
+      "lower_is_better": true,
+      "source": "first of counters.inserts_uncharged, counters.table_inserts_uncharged, counters.table_entries, counters.distinguished_points",
+      "statistic": "mean table entries / sqrt(r) over verified runs",
+      "value": 0.5000035821744325
+    },
+    "ops": {
+      "ci95": [
+        1.0891369888796052,
+        1.4313333043422654
+      ],
+      "known": true,
+      "lower_is_better": true,
+      "source": "cost.total_gae, workload.curve.r, automorphisms_available",
+      "statistic": "mean S / sqrt(pi / 2A) over verified runs",
+      "value": 1.263702683225852
+    },
+    "uncharged": {
+      "ci95": [
+        0.8777793760689243,
+        1.1585021620233948
+      ],
+      "known": true,
+      "lower_is_better": true,
+      "source": "counters.*_uncharged",
+      "statistic": "mean sum of *_uncharged counters / sqrt(r) over verified runs",
+      "value": 1.0180776198805244
+    }
+  },
+  "domain": {
+    "envelope": {
+      "precomputation": "none",
+      "targets": 1,
+      "threads": 1
+    },
+    "family": "prime",
+    "problem": "ecdlp.single_target",
+    "target_kind": "public",
+    "tier": "medium",
+    "unit": "ecbench.gae+band(w=0.1)"
+  },
+  "domain_id": "ECDOM1h101c4b001d9e",
+  "fit": {
+    "alpha": 0.5751842064134098,
+    "alpha_agrees_with_declared": true,
+    "alpha_ci95": [
+      0.08823529411764706,
+      0.6192147678561318
+    ],
+    "ci_method": "cluster",
+    "declared_alpha": 0.5,
+    "log2_c": -2.7589614283030346,
+    "model": "gae = C * r^alpha",
+    "points": 64,
+    "r_squared": 0.8790717200675863,
+    "scaling_claim": false,
+    "size_parameter": "r",
+    "sizes": 2
+  },
+  "fit_options": {
+    "curves": [],
+    "resamples": 2000,
+    "seed": 20261005,
+    "tier": "medium",
+    "weight": 0.1
+  },
+  "improves_on": [],
+  "label": "ic-frontier bsgs-neg medium w=0.1",
+  "level": "constant",
+  "method": {
+    "entry": "ecbench::generic::bsgs_negation",
+    "family": "bsgs",
+    "id": "bsgs.negation",
+    "method_id": "ECM1h87f6341629c3",
+    "params": {}
+  },
+  "notes": "",
+  "provenance": {
+    "audits": [],
+    "records": 64,
+    "sessions": [
+      {
+        "arm": "bsgs-neg",
+        "binary_sha256": "79b0b5945fad3da31a775bfc60e1f17c030a0e988c1e184f89422dc16a57f69b",
+        "dir": "research/ic_frontier_campaign_20261015/phase1/sessions/P20",
+        "env_class_id": "ECBENV2hdc4243564840",
+        "git_commit": "9bef57337f5fcaa53e0326b21749a25c145078b8",
+        "records_sha256": "37ea9b6b961bf065779b0ce3ff56de27d346ee744268f17f98510cb92f57fe0a",
+        "role": "baseline",
+        "session_id": "ECBS1hbb6e007c0137",
+        "spec_id": "ECS1hceeb2956757b",
+        "status": "complete"
+      },
+      {
+        "arm": "bsgs-neg",
+        "binary_sha256": "79b0b5945fad3da31a775bfc60e1f17c030a0e988c1e184f89422dc16a57f69b",
+        "dir": "research/ic_frontier_campaign_20261015/phase1/sessions/P24",
+        "env_class_id": "ECBENV2hdc4243564840",
+        "git_commit": "9bef57337f5fcaa53e0326b21749a25c145078b8",
+        "records_sha256": "8a91032a1c3270d720fc0aaca126af71c4cdb94c4ac3eaa493fb6293c02ec7d2",
+        "role": "baseline",
+        "session_id": "ECBS1h91d705c0d26b",
+        "spec_id": "ECS1heb04140c41d1",
+        "status": "complete"
+      },
+      {
+        "arm": "bsgs-neg",
+        "binary_sha256": "79b0b5945fad3da31a775bfc60e1f17c030a0e988c1e184f89422dc16a57f69b",
+        "dir": "research/ic_frontier_campaign_20261015/phase1/sessions/P28",
+        "env_class_id": "ECBENV2hdc4243564840",
+        "git_commit": "9bef57337f5fcaa53e0326b21749a25c145078b8",
+        "records_sha256": "61800ffa68fb8cabf36f1194999b6467fd67d6823f49a798d142b00d40735076",
+        "role": "baseline",
+        "session_id": "ECBS1he9579165d188",
+        "spec_id": "ECS1h253ac2574ebd",
+        "status": "complete"
+      },
+      {
+        "arm": "bsgs-neg",
+        "binary_sha256": "79b0b5945fad3da31a775bfc60e1f17c030a0e988c1e184f89422dc16a57f69b",
+        "dir": "research/ic_frontier_campaign_20261015/phase1/sessions/P32",
+        "env_class_id": "ECBENV2hdc4243564840",
+        "git_commit": "9bef57337f5fcaa53e0326b21749a25c145078b8",
+        "records_sha256": "5cbafef3bf989051c8b4ae221c22a3ce8a50c24a29d42b538c1f2d0395d7482b",
+        "role": "baseline",
+        "session_id": "ECBS1hb4b815bc6f73",
+        "spec_id": "ECS1h0493cab3074b",
+        "status": "complete"
+      },
+      {
+        "arm": "bsgs-neg",
+        "binary_sha256": "79b0b5945fad3da31a775bfc60e1f17c030a0e988c1e184f89422dc16a57f69b",
+        "dir": "research/ic_frontier_campaign_20261015/phase1/sessions/P36",
+        "env_class_id": "ECBENV2hdc4243564840",
+        "git_commit": "9bef57337f5fcaa53e0326b21749a25c145078b8",
+        "records_sha256": "55c9bf5ed4252fb55454427fea12bac11801daf7ce61b8d0ac9c4afc8c71cb44",
+        "role": "baseline",
+        "session_id": "ECBS1he1caa26784c1",
+        "spec_id": "ECS1h14624f4c671b",
+        "status": "complete"
+      },
+      {
+        "arm": "bsgs-neg",
+        "binary_sha256": "7a8f0a63dd91e4f6bed408b57acc90c02f178d368191f14c8dfbaafb03184cf6",
+        "dir": "research/ic_frontier_campaign_20261015/phase1/sessions/P40",
+        "env_class_id": "ECBENV2hdc4243564840",
+        "git_commit": "9bef57337f5fcaa53e0326b21749a25c145078b8",
+        "records_sha256": "4e100d2641c27e6799b68047a20a8bbbfad87bca4c4c7ba195fe497a1e92528d",
+        "role": "baseline",
+        "session_id": "ECBS1hc9abee386b8e",
+        "spec_id": "ECS1hb7352378f50f",
+        "status": "complete"
+      }
+    ],
+    "statuses": {
+      "verified": 64
+    },
+    "verified": 64
+  },
+  "schema": "ecbench.bound/v1",
+  "sizes": [
+    {
+      "automorphisms_available": 2,
+      "declared_ratio_to_floor": 1.1283791670955126,
+      "declared_s": 1.0,
+      "field_bits": 36,
+      "floor_s": 0.8862269254527579,
+      "levels": {
+        "L0": 32
+      },
+      "log2_r": 35.9999904645676,
+      "mean_gae": 265888.30624999997,
+      "mean_s": 1.0142867467508676,
+      "memory_entries_per_sqrt_r": 0.5000054670771233,
+      "r": 68719022539,
+      "ratio_to_floor": 1.1445000344947611,
+      "runs": 32,
+      "s_ci95": [
+        0.8678523020301024,
+        1.1586126302593787
+      ],
+      "slug": "icv1-fp36-t454193-44a20818",
+      "uncharged_per_sqrt_r": 0.9220199060754913,
+      "verified": 32,
+      "workloads": 16
+    },
+    {
+      "automorphisms_available": 2,
+      "declared_ratio_to_floor": 1.1283791670955126,
+      "declared_s": 1.0,
+      "field_bits": 40,
+      "floor_s": 0.8862269254527579,
+      "levels": {
+        "L0": 32
+      },
+      "log2_r": 40.00000121230319,
+      "mean_gae": 1285101.66875,
+      "mean_s": 1.225567940532428,
+      "memory_entries_per_sqrt_r": 0.5000016972717405,
+      "r": 1099512551701,
+      "ratio_to_floor": 1.382905331956944,
+      "runs": 32,
+      "s_ci95": [
+        1.0871589613932824,
+        1.3606067925155514
+      ],
+      "slug": "icv1-fp40-tm924137-0ecaaeb9",
+      "uncharged_per_sqrt_r": 1.1141353336855575,
+      "verified": 32,
+      "workloads": 16
+    }
+  ],
+  "stages": [
+    {
+      "alpha": null,
+      "alpha_ci95": null,
+      "mean_gae": 327701.0,
+      "name": "setup",
+      "share_of_gae": 0.4648260090422355,
+      "sizes_with_work": 2
+    },
+    {
+      "alpha": null,
+      "alpha_ci95": null,
+      "mean_gae": 377296.125,
+      "name": "search",
+      "share_of_gae": 0.5351739909577645,
+      "sizes_with_work": 2
+    }
+  ],
+  "verdict_id": null
+}
