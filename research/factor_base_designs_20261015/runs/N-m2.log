@@ -1,0 +1,21 @@
+== N m=2: commit a698ba0399836c56cba11a622737d6c42f418e11, budget 300 s, ulimit -v 13000000, started 2026-10-15T17:22:07Z
+N    m=2 t= 2 target=0 b=2.000 |V|=4 n_vars=4 n_eqs=5 D=4 reached=4 0.0 s ok
+N    m=2 t= 2 target=1 b=2.000 |V|=4 n_vars=4 n_eqs=5 D=4 reached=4 0.0 s ok
+N    m=2 t= 3 target=0 b=3.000 |V|=8 n_vars=6 n_eqs=7 D=4 reached=4 0.0 s ok
+N    m=2 t= 3 target=1 b=3.000 |V|=8 n_vars=6 n_eqs=7 D=4 reached=4 0.0 s ok
+N    m=2 t= 4 target=0 b=4.000 |V|=16 n_vars=8 n_eqs=9 D=4 reached=4 0.0 s ok
+N    m=2 t= 4 target=1 b=4.000 |V|=16 n_vars=8 n_eqs=9 D=4 reached=4 0.0 s ok
+N    m=2 t= 5 target=0 b=5.000 |V|=32 n_vars=10 n_eqs=11 D=4 reached=4 0.1 s ok
+N    m=2 t= 5 target=1 b=5.000 |V|=32 n_vars=10 n_eqs=11 D=4 reached=4 0.0 s ok
+N    m=2 t= 6 target=0 b=6.000 |V|=64 n_vars=12 n_eqs=13 D=5 reached=5 0.3 s ok
+N    m=2 t= 6 target=1 b=6.000 |V|=64 n_vars=12 n_eqs=13 D=5 reached=5 0.4 s ok
+N    m=2 t= 7 target=0 b=7.000 |V|=128 n_vars=14 n_eqs=15 D=5 reached=5 2.2 s ok
+N    m=2 t= 7 target=1 b=7.000 |V|=128 n_vars=14 n_eqs=15 D=5 reached=5 2.0 s ok
+N    m=2 t= 8 target=0 b=8.000 |V|=256 n_vars=16 n_eqs=17 D=5 reached=5 14.8 s ok
+N    m=2 t= 8 target=1 b=8.000 |V|=256 n_vars=16 n_eqs=17 D=5 reached=5 15.0 s ok
+N    m=2 t= 9 target=0 b=9.000 |V|=512 n_vars=18 n_eqs=19 D=5 reached=5 97.2 s ok
+N    m=2 t= 9 target=1 b=9.000 |V|=512 n_vars=18 n_eqs=19 D=5 reached=5 99.4 s ok
+N    m=2 t=10 target=0 b=10.000 |V|=1024 n_vars=20 n_eqs=21 D=5 reached=6 302.5 s timeout (F4 budget of 300 s)
+N    m=2 t=10 target=1 b=10.000 |V|=1024 n_vars=20 n_eqs=21 D=5 reached=6 302.6 s timeout (F4 budget of 300 s)
+-- N m=2: a system at t = 10 hit a limit or failed; the series stops
+== N m=2: ended 2026-10-15T17:36:08Z
