@@ -27,7 +27,7 @@ concurrency:
 jobs:
   lean-proof:
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ github.event_name == 'pull_request' && 45 || 90 }}
+    timeout-minutes: ${{ github.event_name == 'workflow_dispatch' && 90 || 25 }}
     defaults:
       run:
         working-directory: papers/rootfinding-decomposition/lean
