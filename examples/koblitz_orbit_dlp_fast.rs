@@ -403,13 +403,7 @@ impl RootBatch {
         }
     }
 
-    fn solve(
-        &mut self,
-        gf: &Gf2,
-        basis: &NormalBasis,
-        solver: &S3Solver,
-        inputs: &[(u64, u64)],
-    ) {
+    fn solve(&mut self, gf: &Gf2, basis: &NormalBasis, solver: &S3Solver, inputs: &[(u64, u64)]) {
         self.prepared.clear();
         self.inverses.clear();
         self.prefixes.clear();
@@ -772,15 +766,10 @@ impl LiftScratch {
     /// `results[i]` equals `fast.add(base, points[i])`, in order; the
     /// exceptional same-x paths (doubling, the point at infinity) fall back
     /// to the scalar `add`.
-    fn batch_adds(
-        &mut self,
-        fast: &FastBinaryCurve,
-        base: FastPoint,
-        points: &[FastPoint],
-    ) {
+    fn batch_adds(&mut self, fast: &FastBinaryCurve, base: FastPoint, points: &[FastPoint]) {
         let gf = &fast.gf;
         self.results.clear();
-        self.results.extend(std::iter::repeat(None).take(points.len()));
+        self.results.extend(std::iter::repeat_n(None, points.len()));
         self.denominators.clear();
         self.prefixes.clear();
         self.prefixes.resize(points.len(), 0);
@@ -823,7 +812,6 @@ impl LiftScratch {
             self.results[i] = Some((x3, y3));
         }
     }
-
 }
 
 struct Index {
@@ -1019,7 +1007,8 @@ fn extract(
                         index.shifted[left2][left_shift2],
                         index.shifted[right2][right_shift2],
                     ];
-                    if let Some(point_indices) = lift(fast, base, &codes, target, &mut lift_scratch) {
+                    if let Some(point_indices) = lift(fast, base, &codes, target, &mut lift_scratch)
+                    {
                         return Some(Relation {
                             point_indices,
                             x_codes: codes,
