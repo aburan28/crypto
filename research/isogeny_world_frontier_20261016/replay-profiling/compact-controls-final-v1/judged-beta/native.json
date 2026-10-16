@@ -1,0 +1,17 @@
+{
+  "record": {
+    "elapsed_ms_operational_only": 0,
+    "error": "beta is not a primitive cube root",
+    "input_sha256": "fa3d1682a23445d2ad2fd60296b3eea599c0c279323a6252384c9b275d96c0e9",
+    "score": null,
+    "status": "REJECTED",
+    "tool": {
+      "git_commit": "300e867ca999a7506c2a52bf192df424b758010f",
+      "git_dirty": "true",
+      "name": "isogeny",
+      "standards_sha256": "22b2ffef99720f2b2c7396a267412d2241a868e038a835c4fb1fd12209b102bf",
+      "version": "0.1.0"
+    }
+  },
+  "status": "FAIL"
+}

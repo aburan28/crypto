@@ -7,6 +7,8 @@
 //! is read off directly; interpolating over l+1 such curves (Phi_l is monic of degree l+1 in Y)
 //! recovers the bivariate Phi_l(X, Y) mod p. The result is checked (in tests) for exact equality
 //! against the q-expansion Phi_l.
+pub mod cm;
+pub mod crt;
 use crate::curve::{is_smooth, jinv, rhs, Curve};
 use crate::field::{is_prime, Field, Rng, Zp};
 use crate::find::divpoly::division_poly;

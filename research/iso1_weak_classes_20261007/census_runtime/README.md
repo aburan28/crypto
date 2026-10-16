@@ -69,3 +69,23 @@ The [continuation protocol](../CONTINUATION_PROTOCOL.md) preserves the
 requested complete prime range. Wall seconds in receipts account for
 resources on a contended host; the call-count theorem supplies the
 algorithmic reduction.
+
+## Resumable runs (2026-10-16)
+
+Set `ISO1_CHECKPOINT=FILE` on `iso1_class_census` or on
+`iso1_lambda_census` (with `ISO1_OMEGA_ONLY=1`) to make a run resumable. Each
+finished job or block appends one line to `FILE`. A rerun with the same
+arguments and `FILE` reloads those lines, skips their work and writes the
+same output. Each job seeds its own RNG, so results do not depend on
+scheduling. A torn final line from an interrupted write is ignored. Verified
+by killing runs part-way and resuming:
+
+- A p = 37 certified census, killed after 1,876 of 2,738 jobs, resumed to a
+  CSV byte-identical to `p37_twist_derived.csv`. Its point-count and F_p
+  multiplication totals were identical to the uninterrupted run's.
+- A p = 13 Ω census, killed after 20 blocks, resumed to a CSV byte-identical
+  to `../residual_model_20261016/data/om13.csv`.
+
+The certified queue (`../certified_20261016/queue.sh`) uses this from p = 71
+on, because the cloud container that runs it restarts every few tens of
+minutes.

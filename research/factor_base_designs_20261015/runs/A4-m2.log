@@ -1,0 +1,17 @@
+== A4 m=2: commit a698ba0399836c56cba11a622737d6c42f418e11, budget 300 s, ulimit -v 13000000, started 2026-10-15T18:49:12Z
+A4   m=2 t= 2 target=0 b=2.000 |V|=4 n_vars=6 n_eqs=7 D=5 reached=5 0.0 s ok
+A4   m=2 t= 2 target=1 b=2.000 |V|=4 n_vars=6 n_eqs=7 D=5 reached=5 0.0 s ok
+A4   m=2 t= 3 target=0 b=3.000 |V|=8 n_vars=8 n_eqs=9 D=5 reached=5 0.0 s ok
+A4   m=2 t= 3 target=1 b=3.000 |V|=8 n_vars=8 n_eqs=9 D=5 reached=5 0.0 s ok
+A4   m=2 t= 4 target=0 b=4.000 |V|=16 n_vars=10 n_eqs=11 D=5 reached=5 0.0 s ok
+A4   m=2 t= 4 target=1 b=4.000 |V|=16 n_vars=10 n_eqs=11 D=5 reached=5 0.0 s ok
+A4   m=2 t= 5 target=0 b=5.000 |V|=32 n_vars=12 n_eqs=13 D=5 reached=5 0.5 s ok
+A4   m=2 t= 5 target=1 b=5.000 |V|=32 n_vars=12 n_eqs=13 D=5 reached=5 0.4 s ok
+A4   m=2 t= 6 target=0 b=6.000 |V|=64 n_vars=14 n_eqs=15 D=6 reached=6 2.6 s ok
+A4   m=2 t= 6 target=1 b=6.000 |V|=64 n_vars=14 n_eqs=15 D=6 reached=6 2.3 s ok
+A4   m=2 t= 7 target=0 b=7.000 |V|=128 n_vars=16 n_eqs=17 D=6 reached=6 83.7 s ok
+A4   m=2 t= 7 target=1 b=7.000 |V|=128 n_vars=16 n_eqs=17 D=6 reached=6 79.8 s ok
+A4   m=2 t= 8 target=0 b=8.000 |V|=256 n_vars=18 n_eqs=19 D=6 reached=7 301.1 s timeout (F4 budget of 300 s)
+A4   m=2 t= 8 target=1 b=8.000 |V|=256 n_vars=18 n_eqs=19 D=6 reached=7 301.8 s timeout (F4 budget of 300 s)
+-- A4 m=2: a system at t = 8 hit a limit or failed; the series stops
+== A4 m=2: ended 2026-10-15T19:02:08Z

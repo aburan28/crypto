@@ -1,0 +1,83 @@
+{
+  "schema": "ec-hardness/p61-class-number-certification-run/v1",
+  "status": "certified",
+  "observed_utc": "2026-10-14T15:14:52Z",
+  "supersedes": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-certification-v1/manifests/running-20261014T092705Z.json",
+  "root_id": "p61-i0025",
+  "p": "2305843009213693951",
+  "trace": -704859453,
+  "fundamental_discriminant": "-8726545188371316595",
+  "class_number": 358094304,
+  "cyclic_factors": [
+    179047152,
+    2
+  ],
+  "preflight_receipt": {
+    "path": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-preflight-v1/receipts/preflight_provisional_20261014T011535PDT.json",
+    "sha256": "44e202b8eb9cdad3ef09fb50e416cc8bdcf0942a6f140e24db587a3c4d44493f",
+    "recorded_status": "conditional_grh"
+  },
+  "certification_receipt": {
+    "path": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-certification-v1/receipts/certify-p61-i0025-d2f5f49.json",
+    "sha256": "260382fbce4805ce84ce00fc77baf27c95243220ae88ca7725e31e4f4f9643c9",
+    "bytes": 2530,
+    "receipt_status": "certified",
+    "certification_status": "unconditional",
+    "pari_flag": 0,
+    "pari_result": 1
+  },
+  "event_log": {
+    "path": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-certification-v1/events/certify-p61-i0025-d2f5f49.jsonl",
+    "sha256": "62e7fb0ba7d5124aea3286039727806a7321eb1f0423c75cd0cc7b5f21ee8e65",
+    "bytes": 2371,
+    "events": 7
+  },
+  "source_chain": {
+    "base_commit": "90dec4b779dcc3bdfc63014dd89b56eb19f7bcb4",
+    "base_bundle": "source/ml-cryptanalysis-p61-cert-90dec4b.bundle",
+    "base_bundle_sha256": "c12c3321f796e85b61d593a128861d0ff4d691c67e0c7d3303dce14d39a23c35",
+    "active_commit": "d2f5f49ae851141b50400ccffab5ad43347207fa",
+    "incremental_bundle": "source/ml-cryptanalysis-p61-cert-d2f5f49-incremental-from-90dec4b.bundle",
+    "incremental_bundle_sha256": "4ff8c85be7b6997420564dbea716caadc36c99acde3d5b6ef25171ba1b10e6e1",
+    "active_runner": "source/certify_p61_class_number-d2f5f49.py",
+    "active_runner_sha256": "a8b2ef859b3a94a2d14ae79f86a926880afbed7192f7b47c6480e0cdc851191b"
+  },
+  "timings": {
+    "bnfcertify_seconds": 10365.337374292,
+    "wall_seconds": 10365.721123667
+  },
+  "upgraded_partial_census": {
+    "ledger": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-audit-v1/ledgers/pilot-v4-certified-ledger-000000000000-000000000064.json",
+    "ledger_sha256": "9d76874e4630afe685a2716e3a184a110c582a1bdda3b8c53336e546f18d9230",
+    "audit_receipt": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-audit-v1/receipts/pilot-v4-certified-uniqueness-000000000000-000000000064.json",
+    "audit_receipt_sha256": "811fec7b7b205964288e82f28704e907d9d1f440a12899f0169844ed5b3ee9d8",
+    "records": 1152,
+    "unique_j_invariants": 1152,
+    "duplicate_records": 0,
+    "complete_class_coverage": false,
+    "status": "partial_census_pass"
+  },
+  "durability": {
+    "receipt_sync_status": "fsync_completed",
+    "smb_derived_files_sync_status": "sync_all_unsupported_by_filesystem",
+    "host_sync_barrier": "completed",
+    "post_barrier_digest_replay": "pass"
+  },
+  "preserved_attempts": [
+    {
+      "source_commit": "90dec4b779dcc3bdfc63014dd89b56eb19f7bcb4",
+      "status": "producer_failure",
+      "failure_stage": "bnfinit_before_bnfcertify",
+      "error": "bug in small_norm (precision too low), please report",
+      "failure_receipt": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-certification-v1/failures/certify-p61-i0025-90dec4b.json",
+      "failure_receipt_sha256": "5cd23d139b197335fa05033229fa9b0751b50ff00f0eb134110769a1dc682acc"
+    },
+    {
+      "status": "interrupted_control",
+      "method": "bnfcertify flag 1 quotient-only control",
+      "control_receipt": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-certification-v1/controls/quotient-only-interrupted-20261014T094544Z.json",
+      "control_receipt_sha256": "e1b86d6994830c6090c08b56f5b9c823f8e8f25333c23f20c50884164cf424dd"
+    }
+  ],
+  "interpretation": "The selected class order is unconditionally certified. The graph census remains partial until all 358094304 class vertices are generated, independently replayed, and globally deduplicated; the selected-degree adjacency pass remains separate."
+}

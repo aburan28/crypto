@@ -1,0 +1,11 @@
+== A0 m=3 p2: commit 2ca6973a6abcb4a50790f4ed05f8e7262dc4693c, budget 300 s, grace 120 s, ulimit -v 13000000, started 2026-10-15T21:06:39Z
+A0   m=3 t= 2 target=0 b=2.000 |V|=4 n_vars=7 n_eqs=8 D=5 reached=5 0.0 s ok
+A0   m=3 t= 2 target=1 b=2.000 |V|=4 n_vars=7 n_eqs=8 D=5 reached=5 0.0 s ok
+A0   m=3 t= 3 target=0 b=3.000 |V|=8 n_vars=10 n_eqs=11 D=6 reached=6 0.6 s ok
+A0   m=3 t= 3 target=1 b=3.000 |V|=8 n_vars=10 n_eqs=11 D=6 reached=6 0.7 s ok
+A0   m=3 t= 4 target=0 b=4.000 |V|=16 n_vars=13 n_eqs=14 D=6 reached=6 16.9 s ok
+A0   m=3 t= 4 target=1 b=4.000 |V|=16 n_vars=13 n_eqs=14 D=6 reached=6 16.5 s ok
+A0   m=3 t= 5 target=0 b=5.000 |V|=32 n_vars=16 n_eqs=17 D=6 reached=7 305.4 s timeout (F4 budget of 300 s)
+A0   m=3 t= 5 target=1 b=5.000 |V|=32 n_vars=16 n_eqs=17 D=6 reached=7 305.6 s timeout (F4 budget of 300 s)
+-- A0 m=3: a system at t = 5 hit a limit or failed; the series stops
+== A0 m=3: ended 2026-10-15T21:17:29Z

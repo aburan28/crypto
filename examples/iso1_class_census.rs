@@ -194,6 +194,61 @@ fn census(
         .into_iter()
         .flat_map(|(branch, val)| (0..q).map(move |a0| (branch, val, a0)))
         .collect();
+    // ISO1_CHECKPOINT=FILE makes the run resumable: every finished job appends
+    // one line `branch nonsquare a0 reps calls muls extra|t:c,t:c,...`, and a
+    // restarted run reloads those lines and skips their jobs. Job results do
+    // not depend on scheduling (each job seeds its own RNG), so a resumed run
+    // writes the same CSV as an uninterrupted one.
+    let checkpoint = env::var("ISO1_CHECKPOINT").ok();
+    assert!(
+        checkpoint.is_none() || verify_trace.is_none(),
+        "checkpointing does not keep witnesses"
+    );
+    let mut resumed = (BTreeMap::<i128, u64>::new(), 0_u64, 0_u64, 0_u64, 0_u64);
+    let mut done = HashSet::<(bool, bool, u64)>::new();
+    if let Some(path) = &checkpoint {
+        if let Ok(file) = File::open(path) {
+            for line in BufReader::new(file).lines() {
+                let line = line.unwrap();
+                let Some((head, tail)) = line.split_once('|') else {
+                    continue; // a torn final line from an interrupted write
+                };
+                let h: Vec<u64> = head.split(' ').map(|x| x.parse().unwrap()).collect();
+                if h.len() != 7 {
+                    continue;
+                }
+                if !done.insert((h[0] == 1, h[1] == 1, h[2])) {
+                    continue;
+                }
+                resumed.1 += h[3];
+                resumed.2 += h[4];
+                resumed.3 += h[5];
+                resumed.4 += h[6];
+                for pair in tail.split(',').filter(|x| !x.is_empty()) {
+                    let (t, c) = pair.split_once(':').unwrap();
+                    *resumed.0.entry(t.parse().unwrap()).or_default() += c.parse::<u64>().unwrap();
+                }
+            }
+        }
+        eprintln!(
+            "checkpoint {path}: resumed {} of {} jobs",
+            done.len(),
+            jobs.len()
+        );
+    }
+    let log = checkpoint.as_ref().map(|path| {
+        std::sync::Mutex::new(
+            std::fs::OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(path)
+                .expect("open checkpoint"),
+        )
+    });
+    let jobs: Vec<_> = jobs
+        .into_iter()
+        .filter(|&(branch, val, a0)| !done.contains(&(branch, val == w, a0)))
+        .collect();
     let (mut weak, mut reps, calls, muls, witness, extra_points) = jobs
         .into_par_iter()
         .map(|(branch, val, a0)| {
@@ -286,6 +341,20 @@ fn census(
                 *weak.entry(trace).or_default() += weight;
                 reps += weight;
             }
+            if let Some(log) = &log {
+                let counts: Vec<String> = weak.iter().map(|(t, c)| format!("{t}:{c}")).collect();
+                let line = format!(
+                    "{} {} {a0} {reps} {calls} {} {extra_points}|{}\n",
+                    u8::from(branch),
+                    u8::from(val == w),
+                    f.muls(),
+                    counts.join(",")
+                );
+                log.lock()
+                    .unwrap()
+                    .write_all(line.as_bytes())
+                    .expect("write checkpoint");
+            }
             (weak, reps, calls, f.muls(), witness, extra_points)
         })
         .reduce(
@@ -297,6 +366,15 @@ fn census(
                 (a, na + nb, ca + cb, ma + mb, wa.or(wb), xa + xb)
             },
         );
+    for (t, c) in resumed.0 {
+        *weak.entry(t).or_default() += c;
+    }
+    reps += resumed.1;
+    let (calls, muls, extra_points) = (
+        calls + resumed.2,
+        muls + resumed.3,
+        extra_points + resumed.4,
+    );
     if derive_twists {
         for (t, count) in weak.clone() {
             *weak.entry(-t).or_default() += count;

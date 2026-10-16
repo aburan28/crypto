@@ -4,9 +4,11 @@
 root table in [`koblitz_orbit_dlp_fast_online.rs`](koblitz_orbit_dlp_fast_online.rs).
 The table inserts every exact key into the filter. A negative filter answer
 skips a table probe; a positive answer still goes through the exact table,
-which retains the existing first-witness and shift rules. The option is off
-by default. The summary records `root_bloom_enabled` and
-`root_bloom_bytes`.
+which retains the existing first-witness and shift rules. In
+`koblitz_orbit_dlp_fast_online.rs` the option is off by default; in
+`koblitz_orbit_dlp_fast.rs` it is on by default since 2026-10-15
+(`KIC_ROOT_BLOOM=0` disables it there). The summary records
+`root_bloom_enabled` and `root_bloom_bytes`.
 
 This is a transfer of the opt-in root filter in
 [crypto PR #1659](https://github.com/aburan28/crypto/pull/1659) to the

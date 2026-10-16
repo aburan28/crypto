@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" font-family="Helvetica, Arial, sans-serif" font-size="13">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#333"/></marker>
+  </defs>
+  <rect width="900" height="520" fill="#ffffff"/>
+  <text x="450" y="28" text-anchor="middle" font-size="16" font-weight="bold">Decomposition programme on ECC2K-130: workstreams, gates and outcomes (plan, 2026-10-16)</text>
+  <text x="450" y="48" text-anchor="middle" fill="#555">Planned work only; no box below is a measurement. Gaps are to the matched rho, 2^60.8090.</text>
+
+  <!-- baseline -->
+  <rect x="20" y="70" width="250" height="78" rx="8" fill="#eef2f6" stroke="#556"/>
+  <text x="145" y="92" text-anchor="middle" font-weight="bold">Baseline (frozen, #1442)</text>
+  <text x="145" y="111" text-anchor="middle">linear (A,P) pair oracle, geometric V</text>
+  <text x="145" y="129" text-anchor="middle">gap 42.47 bits / 55.22 charged</text>
+  <text x="145" y="143" text-anchor="middle" fill="#555" font-size="11">closed: XL, trilinear, 3-sum, cycle, invariants, energy</text>
+
+  <!-- W1 -->
+  <rect x="320" y="70" width="260" height="96" rx="8" fill="#e6f2ea" stroke="#3a7a52"/>
+  <text x="450" y="92" text-anchor="middle" font-weight="bold">W1  Ceiling note (do first)</text>
+  <text x="450" y="111" text-anchor="middle">C1 reach: dim(VV) ≥ 2l−1 ⇒ l ≤ (n+1)/3</text>
+  <text x="450" y="128" text-anchor="middle">C2 pair tests are rho-dominated</text>
+  <text x="450" y="145" text-anchor="middle">C3 GHS and MOV closed at n = 131</text>
+  <text x="450" y="160" text-anchor="middle" fill="#555" font-size="11">Rust verifier + IDC1 certificate</text>
+
+  <!-- W4 -->
+  <rect x="630" y="70" width="250" height="78" rx="8" fill="#f4f0e6" stroke="#8a7440"/>
+  <text x="755" y="92" text-anchor="middle" font-weight="bold">W4  Rho constants (optional)</text>
+  <text x="755" y="111" text-anchor="middle">step cost, DP fraction, batching</text>
+  <text x="755" y="129" text-anchor="middle">ecbench measure + bounds</text>
+  <text x="755" y="143" text-anchor="middle" fill="#555" font-size="11">constant-level only; independent</text>
+
+  <!-- W2 -->
+  <rect x="120" y="215" width="300" height="104" rx="8" fill="#e8eef8" stroke="#3f5f93"/>
+  <text x="270" y="237" text-anchor="middle" font-weight="bold">W2  Frobenius-orbit factor base</text>
+  <text x="270" y="256" text-anchor="middle">V plus its 131 conjugates, logs tied by λ</text>
+  <text x="270" y="273" text-anchor="middle">measure excess e(l) of dim(V·V^(2^k))</text>
+  <text x="270" y="290" text-anchor="middle">n = 13, 19; positive control n = 23</text>
+  <text x="270" y="309" text-anchor="middle" fill="#555" font-size="11">kill: e(l) ≥ l−2   reopen: e(l) ≤ 2, flat</text>
+
+  <!-- W3 freeze -->
+  <rect x="480" y="215" width="300" height="104" rx="8" fill="#f6e9ec" stroke="#93404f"/>
+  <text x="630" y="237" text-anchor="middle" font-weight="bold">W3a  Freeze the 4/5-sum budget</text>
+  <text x="630" y="256" text-anchor="middle">from gcost heuristics, in group ops/attempt</text>
+  <text x="630" y="273" text-anchor="middle">same-conjugate m=4: about 2^11 (c≈29)</text>
+  <text x="630" y="290" text-anchor="middle">mixed-conjugate m=4: about 2^34 (c≈27)</text>
+  <text x="630" y="309" text-anchor="middle" fill="#555" font-size="11">scoping figures; the protocol rederives them</text>
+
+  <!-- W3 search -->
+  <rect x="300" y="370" width="300" height="100" rx="8" fill="#f6e9ec" stroke="#93404f"/>
+  <text x="450" y="392" text-anchor="middle" font-weight="bold">W3b  Bounded test search (≤ 6 candidates)</text>
+  <text x="450" y="411" text-anchor="middle">S4 = G², λ-halving trees, S5 prefilters,</text>
+  <text x="450" y="428" text-anchor="middle">λ-aligned mixed test (only if W2 reopens)</text>
+  <text x="450" y="445" text-anchor="middle">negative control: glued pair oracles</text>
+  <text x="450" y="462" text-anchor="middle" fill="#555" font-size="11">gate: analytic count at n=131, then toy cost vs l</text>
+
+  <!-- outcomes -->
+  <rect x="660" y="360" width="220" height="56" rx="8" fill="#e6f2ea" stroke="#3a7a52"/>
+  <text x="770" y="383" text-anchor="middle" font-weight="bold">Improvement</text>
+  <text x="770" y="402" text-anchor="middle">charged gap below 55.22 bits</text>
+  <rect x="660" y="430" width="220" height="56" rx="8" fill="#eeeeee" stroke="#666"/>
+  <text x="770" y="453" text-anchor="middle" font-weight="bold">Branch closed</text>
+  <text x="770" y="472" text-anchor="middle">under known tests; W1 is the boundary</text>
+
+  <!-- arrows -->
+  <line x1="270" y1="109" x2="318" y2="109" stroke="#333" marker-end="url(#a)"/>
+  <line x1="400" y1="166" x2="300" y2="213" stroke="#333" marker-end="url(#a)"/>
+  <line x1="500" y1="166" x2="600" y2="213" stroke="#333" marker-end="url(#a)"/>
+  <line x1="230" y1="319" x2="360" y2="368" stroke="#333" marker-end="url(#a)"/>
+  <text x="352" y="342" fill="#3f5f93" font-size="11" text-anchor="start">decides row and seed 4</text>
+  <line x1="630" y1="319" x2="520" y2="368" stroke="#333" marker-end="url(#a)"/>
+  <line x1="600" y1="405" x2="658" y2="390" stroke="#333" marker-end="url(#a)"/>
+  <line x1="600" y1="440" x2="658" y2="458" stroke="#333" marker-end="url(#a)"/>
+</svg>
