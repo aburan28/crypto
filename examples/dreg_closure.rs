@@ -68,11 +68,21 @@ fn main() {
     };
     let max_cols: f64 = flag("--max-cols").map_or(70_000.0, |v| v.parse().expect("--max-cols"));
     let satisfiable = args.iter().any(|a| a == "--satisfiable");
-    let skip = ["--max-cols", "--satisfiable"];
+    // `--to D`: scan to degree D whatever the committed outcome, for fresh
+    // draws whose committed XL outcome is only a cheap lower bound.
+    let to: Option<u32> = flag("--to").map(|v| v.parse().expect("--to D"));
+    // `--draw K`: only the draw numbered K, so each draw can run in its own
+    // process under its own memory and time limits.
+    let only_draw: Option<u64> = flag("--draw").map(|v| v.parse().expect("--draw K"));
+    let valued = ["--max-cols", "--to", "--draw"];
     let files: Vec<&String> = args
         .iter()
         .enumerate()
-        .filter(|(i, a)| !skip.contains(&a.as_str()) && !(*i > 0 && args[i - 1] == "--max-cols"))
+        .filter(|(i, a)| {
+            !valued.contains(&a.as_str())
+                && a.as_str() != "--satisfiable"
+                && !(*i > 0 && valued.contains(&args[i - 1].as_str()))
+        })
         .map(|(_, a)| a)
         .collect();
     for file in files {
@@ -81,6 +91,9 @@ fn main() {
             let v: Value = serde_json::from_str(line).expect("json");
             let sat = v["outcome"]["kind"] == "satisfiable";
             if v.get("control").is_some() || sat != satisfiable {
+                continue;
+            }
+            if only_draw.is_some_and(|k| v["draw"].as_u64() != Some(k)) {
                 continue;
             }
             let m = v.get("m").and_then(Value::as_u64).unwrap_or(3) as usize;
@@ -105,7 +118,8 @@ fn main() {
             );
             if satisfiable {
                 let mut scan = Vec::new();
-                for d in (3..=5).take_while(|&d| monomials_up_to(sys.n_vars as u64, d) <= max_cols)
+                for d in (3..=to.unwrap_or(5))
+                    .take_while(|&d| monomials_up_to(sys.n_vars as u64, d) <= max_cols)
                 {
                     scan.extend(closure_refutation_scan(&sys.equations, sys.n_vars, d, d));
                 }
@@ -125,7 +139,7 @@ fn main() {
             // The committed XL degree: resolved at `D`, or `≥D` (built to D−1).
             let committed = v["outcome"]["degree"].as_u64().expect("committed degree") as u32;
             let xl_known = v["outcome"]["kind"] == "resolved";
-            let ceiling = if xl_known { committed } else { committed - 1 };
+            let ceiling = to.unwrap_or(if xl_known { committed } else { committed - 1 });
             let top = (3..=ceiling)
                 .take_while(|&d| monomials_up_to(sys.n_vars as u64, d) <= max_cols)
                 .last()
@@ -137,13 +151,16 @@ fn main() {
                     break;
                 };
                 // XL identity: the plain basis refutes exactly at the
-                // committed degree, never below it.
-                assert_eq!(
-                    step.xl_refuted,
-                    xl_known && d >= committed,
-                    "{file} draw {}: XL at degree {d} disagrees with the committed outcome",
-                    v["draw"]
-                );
+                // committed degree, never below it.  Past a `≥D` bound the
+                // committed record says nothing, and XL is a new reading.
+                if d < committed || xl_known {
+                    assert_eq!(
+                        step.xl_refuted,
+                        xl_known && d >= committed,
+                        "{file} draw {}: XL at degree {d} disagrees with the committed outcome",
+                        v["draw"]
+                    );
+                }
                 let done = step.closure_refuted;
                 scan.push(step);
                 if done {

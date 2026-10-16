@@ -1,0 +1,5 @@
+Regression: A11 m=3 t=2 on p1, rebuilt with the current code (prime index 0), against research/factor_base_designs_20261015/runs/A11-m3.jsonl
+fields compared as serialised JSON: D, solving_degree_max, last_productive_degree, degree_reached, max_cols, max_rows, max_cols_to_solution, steps, steps_to_solution, basis_len, inconsistent, planted_ok, status, pairs_above_bound, input_degrees, max_degree_bound, n_vars, n_eqs, V_size, b, cell_seed, target_seed, curve, x_r, planted_x, set, presentation
+  target 0: D 4 (committed 4), max_cols 62 (committed 62), cell_seed 5511621657683, target_seed 5511621657939: IDENTICAL on every field
+  target 1: D 4 (committed 4), max_cols 62 (committed 62), cell_seed 5511621657683, target_seed 5511621658195: IDENTICAL on every field
+regression: PASS (byte-identical on D and the structural fields)

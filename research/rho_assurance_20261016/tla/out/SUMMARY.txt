@@ -1,0 +1,41 @@
+diag_walkcap_abandon               expect=pass                       got=pass                       distinct=1006818     depth=76     11s OK
+diag_walkcap_escape                expect=violate WalkCapRespected   got=violate WalkCapRespected   distinct=855321      depth=31      8s OK
+live_r31_l3_L2_escape              expect=pass                       got=pass                       distinct=1036206     depth=71     44s OK
+live_r31_l5_T2_L2_abandon_nd       expect=pass                       got=pass                       distinct=1194430     depth=39     42s OK
+mut_canon_b                        expect=violate RepInv             got=violate RepInv             distinct=58599       depth=3       2s OK
+mut_canon_b_downstream             expect=violate NoFailedCollision  got=violate NoFailedCollision  distinct=606433      depth=22      8s OK
+mut_canon_b_never_solves           expect=pass                       got=pass                       distinct=2638410     depth=116    25s OK
+mut_escape_b                       expect=violate RepInv             got=violate RepInv             distinct=229646      depth=9       5s OK
+mut_sign                           expect=violate NoFailedCollision  got=violate NoFailedCollision  distinct=173970      depth=7       4s OK
+mut_sign_noverify                  expect=violate SolvedCorrect      got=violate SolvedCorrect      distinct=173967      depth=7       4s OK
+mut_sign_solved                    expect=pass                       got=pass                       distinct=2585778     depth=116    26s OK
+r113_l7_L1_abandon                 expect=pass                       got=pass                       distinct=1586627     depth=113    15s OK
+r113_l7_L2_escape                  expect=pass                       got=pass                       distinct=1280525     depth=78     15s OK
+r31_l3_L1_abandon                  expect=pass                       got=pass                       distinct=1464750     depth=107    13s OK
+r31_l3_L2_abandon                  expect=pass                       got=pass                       distinct=1006818     depth=76     12s OK
+r31_l3_L2_abandon_nd               expect=pass                       got=pass                       distinct=2422650     depth=76     32s OK
+r31_l3_L2_escape                   expect=pass                       got=pass                       distinct=1036206     depth=71     12s OK
+r31_l3_L3_escape                   expect=pass                       got=pass                       distinct=867318      depth=68     14s OK
+r31_l3_T4_L1_abandon               expect=pass                       got=pass                       distinct=2568660     depth=90     20s OK
+r31_l3_T4_L2_escape                expect=pass                       got=pass                       distinct=1731660     depth=61     18s OK
+r31_l5_T2_L1_abandon               expect=pass                       got=pass                       distinct=696570      depth=53      8s OK
+r31_l5_T2_L2_abandon               expect=pass                       got=pass                       distinct=519250      depth=39      7s OK
+r31_l5_T2_L2_escape                expect=pass                       got=pass                       distinct=519250      depth=39      8s OK
+r31_l5_T3_L1_escape                expect=pass                       got=pass                       distinct=2166280     depth=96     19s OK
+r31_l5_T3_L2_abandon               expect=pass                       got=pass                       distinct=980530      depth=78     12s OK
+r31_l5_T3_L2_escape                expect=pass                       got=pass                       distinct=1457310     depth=71     18s OK
+r31_l5_T3_L2_escape_nd             expect=pass                       got=pass                       distinct=3516950     depth=71     58s OK
+r61_l3_L2_abandon                  expect=pass                       got=pass                       distinct=9959592     depth=85     90s OK
+r61_l3_L2_escape                   expect=pass                       got=pass                       distinct=11323674    depth=79    107s OK
+wit_cycle5                         expect=violate W_Cycle5           got=violate W_Cycle5           distinct=864866      depth=31      7s OK
+wit_escape                         expect=violate W_Escape           got=violate W_Escape           distinct=228785      depth=9       4s OK
+wit_fruitless                      expect=violate W_Fruitless        got=violate W_Fruitless        distinct=228790      depth=9       5s OK
+wit_infinity_start                 expect=violate W_InfinityStart    got=violate W_InfinityStart    distinct=28916       depth=2       1s OK
+wit_lane_at_infinity               expect=violate W_LaneAtInfinity   got=violate W_LaneAtInfinity   distinct=227852      depth=9       4s OK
+wit_sentinel                       expect=violate W_Sentinel         got=violate W_Sentinel         distinct=228796      depth=9       5s OK
+wit_solved                         expect=violate W_Solved           got=violate W_Solved           distinct=172994      depth=7       4s OK
+wit_step_capped                    expect=violate W_StepCapped       got=violate W_StepCapped       distinct=1004970     depth=75     10s OK
+wit_table_two                      expect=violate W_TableTwo         got=violate W_TableTwo         distinct=173026      depth=7       4s OK
+wit_walk_capped                    expect=violate W_WalkCapped       got=violate W_WalkCapped       distinct=797938      depth=31      8s OK
+wit_walk_capped_abandon            expect=violate W_WalkCapped       got=violate W_WalkCapped       distinct=6230474     depth=33     46s OK
+wit_wasted                         expect=violate W_Wasted           got=violate W_Wasted           distinct=355138      depth=14      6s OK
