@@ -159,15 +159,21 @@ fn row(p: u64) -> Value {
 }
 
 fn main() {
-    assert_eq!(
-        std::env::args().nth(1).as_deref(),
-        Some("screen-inverse-trend")
-    );
+    let extension = match std::env::args().nth(1).as_deref() {
+        Some("screen-inverse-trend") => false,
+        Some("screen-inverse-trend-extension") => true,
+        _ => panic!("expected screen-inverse-trend or screen-inverse-trend-extension"),
+    };
+    let (min_p, max_p) = if extension {
+        (10009, 30011)
+    } else {
+        (1238, 10007)
+    };
     let start = Instant::now();
     let mut selected: [Option<Value>; 4] = std::array::from_fn(|_| None);
     let mut accepted = 0usize;
     let mut candidates = 0usize;
-    for p in (1238..=10007).filter(|p| p % 3 == 1 && is_prime_u64(*p)) {
+    for p in (min_p..=max_p).filter(|p| p % 3 == 1 && is_prime_u64(*p)) {
         assert!(
             start.elapsed().as_secs() < 3600,
             "whole-screen wall cap exhausted"
@@ -183,6 +189,9 @@ fn main() {
                 .filter_map(Value::as_u64)
             {
                 for (bin, &(lo, hi)) in BINS.iter().enumerate() {
+                    if extension && bin != 3 {
+                        continue;
+                    }
                     if selected[bin].is_none() && lo <= r && r < hi {
                         selected[bin] = Some(
                             json!({"p":p,"r":r,"cofactor":record["n2"].as_u64().unwrap()/r,"bin":[lo,hi]}),
@@ -201,9 +210,11 @@ fn main() {
     assert!(peak_rss_bytes() <= 512 * 1024 * 1024, "RSS cap exhausted");
     println!(
         "{}",
-        json!({"schema":"different_j_inverse_trend_screen_summary/v1",
+        json!({"schema":if extension {"different_j_inverse_trend_screen_summary/v2"}
+                 else {"different_j_inverse_trend_screen_summary/v1"},
         "candidates":candidates,"accepted":accepted,"selected":selected,
-        "min_p":1238,"max_p":10007,"order_bins":BINS,"prime_to_characteristic":true,
+        "min_p":min_p,"max_p":max_p,"order_bins":BINS,"prime_to_characteristic":true,
+        "v1_raw_sha256":if extension {Some("ef232a54b22938239819fd6b14182d1e49de5778e9c00542ce257c54097608a5")} else {None},
         "rss_ceiling_bytes":512*1024*1024,"wall_ceiling_seconds":3600})
     );
 }

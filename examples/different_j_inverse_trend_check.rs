@@ -301,6 +301,12 @@ fn verify_row(p: u64, row: &Value) -> (bool, usize) {
 
 fn main() {
     let path = std::env::args().nth(1).expect("screen JSONL path");
+    let extension = std::env::args().nth(2).as_deref() == Some("check-extension");
+    let (min_p, max_p) = if extension {
+        (10009, 30011)
+    } else {
+        (1238, 10007)
+    };
     let raw = fs::read_to_string(&path).expect("screen JSONL");
     let mut lines = raw
         .lines()
@@ -309,7 +315,7 @@ fn main() {
     let mut witnesses = 0usize;
     let mut selected: [Option<Value>; 4] = std::array::from_fn(|_| None);
     let mut candidates = 0usize;
-    for p in (1238..=10007).filter(|p| p % 3 == 1 && prime(*p)) {
+    for p in (min_p..=max_p).filter(|p| p % 3 == 1 && prime(*p)) {
         let row = lines.next().expect("missing candidate row");
         let (yes, checked) = verify_row(p, &row);
         candidates += 1;
@@ -323,6 +329,9 @@ fn main() {
                 .filter_map(Value::as_u64)
             {
                 for (bin, &(lo, hi)) in BINS.iter().enumerate() {
+                    if extension && bin != 3 {
+                        continue;
+                    }
                     if selected[bin].is_none() && lo <= r && r < hi {
                         selected[bin] = Some(
                             json!({"p":p,"r":r,"cofactor":row["n2"].as_u64().unwrap()/r,"bin":[lo,hi]}),
@@ -336,20 +345,35 @@ fn main() {
     assert!(lines.next().is_none(), "extra screen output rows");
     assert_eq!(
         summary["schema"],
-        "different_j_inverse_trend_screen_summary/v1"
+        if extension {
+            "different_j_inverse_trend_screen_summary/v2"
+        } else {
+            "different_j_inverse_trend_screen_summary/v1"
+        }
     );
     assert_eq!(summary["candidates"].as_u64(), Some(candidates as u64));
     assert_eq!(summary["accepted"].as_u64(), Some(accepted as u64));
     assert_eq!(summary["selected"], json!(selected));
-    assert_eq!(summary["min_p"].as_u64(), Some(1238));
-    assert_eq!(summary["max_p"].as_u64(), Some(10007));
+    assert_eq!(summary["min_p"].as_u64(), Some(min_p));
+    assert_eq!(summary["max_p"].as_u64(), Some(max_p));
     assert_eq!(summary["order_bins"], json!(BINS));
     assert_eq!(summary["prime_to_characteristic"], true);
-    assert_eq!(summary["rss_ceiling_bytes"].as_u64(), Some(512 * 1024 * 1024));
+    assert_eq!(
+        summary["v1_raw_sha256"],
+        if extension {
+            json!("ef232a54b22938239819fd6b14182d1e49de5778e9c00542ce257c54097608a5")
+        } else {
+            Value::Null
+        }
+    );
+    assert_eq!(
+        summary["rss_ceiling_bytes"].as_u64(),
+        Some(512 * 1024 * 1024)
+    );
     assert_eq!(summary["wall_ceiling_seconds"].as_u64(), Some(3600));
     println!(
         "{}",
-        json!({"schema":"different_j_inverse_trend_check/v1","status":"pass",
+        json!({"schema":if extension {"different_j_inverse_trend_check/v2"} else {"different_j_inverse_trend_check/v1"},"status":"pass",
         "candidates":candidates,"accepted":accepted,"selected":selected,
         "map_witnesses":witnesses,"bytes":raw.len()})
     );
