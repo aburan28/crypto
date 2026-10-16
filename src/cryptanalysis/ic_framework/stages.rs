@@ -329,6 +329,10 @@ pub struct SolverTotals {
     pub extra: BTreeMap<String, u64>,
 }
 
+/// The `SolverCost::extra` flag by which an engine says its `bitop_*`
+/// keys count its whole call (`ecbench::work::SOLVER_BITOP_KEYS`).
+const BITOP_COMPLETE: &str = "bitop_complete";
+
 impl SolverTotals {
     pub fn absorb(
         &mut self,
@@ -339,20 +343,21 @@ impl SolverTotals {
         self.calls += 1;
         self.shape = Some(shape.clone());
         self.budget_exceeded += u64::from(budget_exceeded);
-        let Some(c) = cost else { return };
-        // `bitop_complete` is a flag, not a count: the run is complete only
-        // while every call that reported a cost said so.  A call without the
-        // key clears it for good, and a call that sets it after an uncounted
-        // one cannot set it again.  (The first cost is the one that finds no
-        // unit recorded yet.)  The other `bitop_*` keys are totals.
-        let complete = c.extra.get("bitop_complete") == Some(&1);
-        if !complete {
-            if let Some(flag) = self.extra.get_mut("bitop_complete") {
+        // `bitop_complete` is a flag, not a total: the run's `bitop_*`
+        // counts cover all of its work only if every call's did, so it
+        // stays 1 while every call reports 1 and drops to 0 at the first
+        // that does not (an unmeasured call included).
+        let complete = cost.and_then(|c| c.extra.get(BITOP_COMPLETE)).copied() == Some(1);
+        if self.calls == 1 {
+            if complete {
+                self.extra.insert(BITOP_COMPLETE.into(), 1);
+            }
+        } else if !complete {
+            if let Some(flag) = self.extra.get_mut(BITOP_COMPLETE) {
                 *flag = 0;
             }
-        } else if self.op_unit.is_empty() && !self.extra.contains_key("bitop_complete") {
-            self.extra.insert("bitop_complete".into(), 1);
         }
+        let Some(c) = cost else { return };
         self.ops += c.ops;
         if self.op_unit.is_empty() {
             self.op_unit = c.op_unit.clone();
@@ -367,7 +372,7 @@ impl SolverTotals {
         // A key that names a maximum (`*_max`) is the maximum over
         // calls; every other key is a total over the run.
         for (k, v) in &c.extra {
-            if k == "bitop_complete" {
+            if k == BITOP_COMPLETE {
                 continue;
             }
             let entry = self.extra.entry(k.clone()).or_insert(0);

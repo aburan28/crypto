@@ -980,6 +980,17 @@ impl SystemSolver for SatCdcl {
         // cnf_clauses.
         extra.insert("variables_max".into(), u64::from(enc.solver.n_vars()));
         extra.insert("clauses_max".into(), enc.solver.n_clauses() as u64);
+        // The whole run in `bitop/v1` word operations: the encoding and
+        // the search as `Solver::word_ops` counts them, plus reading a
+        // model out (the per-variable assignment, then the problem
+        // variables packed into a word).  No hash map is probed.
+        let model_read = if matches!(verdict, SolveResult::Sat) {
+            u64::from(enc.solver.n_vars()) + system.n_vars as u64
+        } else {
+            0
+        };
+        extra.insert("bitop_word_ops".into(), enc.solver.word_ops() + model_read);
+        extra.insert("bitop_complete".into(), 1);
         let cost = SolverCost {
             ops: st.conflicts,
             op_unit: "conflicts".into(),
@@ -1144,6 +1155,37 @@ mod tests {
         invalid.set("sat_xor_encoding", "nativ");
         assert!(validate_solver_params("sat-cdcl", &invalid).is_err());
         assert!(std::panic::catch_unwind(|| SatCdcl.solve(&sys, &invalid, None)).is_err());
+    }
+
+    /// sat-cdcl prices its whole run in `bitop/v1` word operations, the
+    /// count is deterministic, and the completeness flag survives being
+    /// totalled over calls (it is a flag, not a sum) until a call that
+    /// does not report it.
+    #[test]
+    fn sat_cdcl_reports_complete_bitop_work() {
+        use crate::cryptanalysis::ic_framework::stages::SolverTotals;
+        let sys = fixture();
+        for mode in ["cnf", "native"] {
+            let mut params = Params::default();
+            params.set("sat_xor_encoding", mode);
+            let (_, a) = SatCdcl.solve(&sys, &params, None);
+            let (_, b) = SatCdcl.solve(&sys, &params, None);
+            assert_eq!(a.extra["bitop_complete"], 1);
+            assert!(a.extra["bitop_word_ops"] > 0);
+            assert_eq!(a.extra["bitop_word_ops"], b.extra["bitop_word_ops"]);
+
+            let shape = sys.shape();
+            let mut totals = SolverTotals::default();
+            totals.absorb(&shape, Some(&a), false);
+            totals.absorb(&shape, Some(&b), false);
+            assert_eq!(totals.extra["bitop_complete"], 1);
+            assert_eq!(
+                totals.extra["bitop_word_ops"],
+                2 * a.extra["bitop_word_ops"]
+            );
+            totals.absorb(&shape, None, false);
+            assert_eq!(totals.extra["bitop_complete"], 0);
+        }
     }
 
     /// **Every engine must agree on the answer.**  A framework whose
