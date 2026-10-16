@@ -225,6 +225,77 @@ fn ic_rule(counter: &str) -> Option<Rule> {
         "velu_evaluations_uncharged" => Prims(&[(FieldInv, 1), (FieldMul, 4), (FieldAdd, 3)]),
         // ic.k4_gaudry's oracle: real E(F_{p⁴}) additions it never charged.
         "oracle_table_adds_uncharged" | "oracle_probe_adds_uncharged" => Prims(&[(GroupAdd, 1)]),
+
+        // ── `work_native` counters of the ic_framework pipeline ───────
+        // (2026-10-16; `PhaseCost::work`).  Each prices work the list in
+        // `known_uncounted` named; the `counted:<item>` marker beside them
+        // takes the item off that list for the record that carries it.
+        c if c.starts_with("counted:") => Shape,
+        // Dense and sparse Gauss: one matrix entry read or compared (a
+        // pivot-column read, a zero skipped in a pivot row, the leftmost
+        // search, the non-zero collection, `pinned`'s scan; for the sparse
+        // matrix a merge step, a copied word, a binary-search probe, a
+        // column-weight update).  Entries are words: one word operation.
+        "gauss_entries_scanned" => Prims(&[(WordOp, 1)]),
+        // A pivot inversion modulo `r` is `2w` of these (the code counts
+        // `2w` per inversion, `ic_boundary::pivot_inversion_steps`): the
+        // binary extended Euclid of the `field_inv` convention, whose step
+        // is a subtraction, a comparison and a select, i.e. `field_add` at
+        // `r`'s width.  `2w · modr_add` is exactly `field_inv` at `w` bits,
+        // expressed without a new primitive.
+        "pivot_inversion_steps" => Prims(&[(ModrAdd, 1)]),
+        // The relation row: the zeroed `|F| + 1` words, the support count
+        // and the column-part key's scan, one word operation a column.
+        "row_build_words" => Prims(&[(WordOp, 1)]),
+        // Per non-zero of the column-part key: two `mix` calls (a XOR with
+        // a constant, two multiplies, two shift-XORs: five word operations
+        // each, a multiply counted as one word operation as rho's
+        // `partition_hashes_uncharged` counts it), the column-and-value
+        // packing (two) and the accumulator XOR (one).
+        "row_key_mixes" => Prims(&[(WordOp, 13)]),
+        // A summand's coefficient added into its column, and the target
+        // column's `0 − h·b`.
+        "row_build_modr_adds" => Prims(&[(ModrAdd, 1)]),
+        // `h·b` and `h·a` of every row.
+        "row_build_modr_muls" => Prims(&[(ModrMul, 1)]),
+        // The repeated-column-part guard: one insert into a table of
+        // 64-bit keys.
+        "column_part_inserts" => HASH,
+        // The walk's coefficient updates `a ← a + a_j`, `b ← b + b_j` (two
+        // a step, a restart, a stride step or a stride renewal).
+        "walk_modr_adds" => Prims(&[(ModrAdd, 1)]),
+        // A walk step's jump choice: the point key (one), `mix` (five, as
+        // above), the shift and the index reduction (one), the
+        // permutation read (one).
+        "walk_mix_hashes" => Prims(&[(WordOp, 8)]),
+        // One 64-bit draw of the target stream (`StdRng`, ChaCha12): a
+        // 64-byte block is 12 rounds of four quarter-rounds of four 32-bit
+        // additions (`5·32` gates) and four XORs (32), plus sixteen
+        // feed-forward additions — 39,424 gates, 4,928 a 64-bit word, 77
+        // word operations — and the range reduction and swap (three).
+        "target_rng_draws" => Prims(&[(WordOp, 80)]),
+        // A pair-table build's insert attempts (kept or not), and the
+        // Frobenius table's orbit-index inserts.
+        "table_insert_attempts" => HASH,
+        // The Frobenius table's orbit pass: one canonicalisation a point.
+        "orbit_canonicalisations" => Prims(&[(Canon, 1)]),
+        // `FrobeniusCanon::new` inside the solve: the normal-element
+        // search's squarings and its `F_2` Gauss–Jordan, the transpose and
+        // the byte tables, one word operation a bit test, XOR or swap.
+        "canon_build_word_ops" => Prims(&[(WordOp, 1)]),
+        "canon_build_field_sqrs" => Prims(&[(FieldSqr, 1)]),
+        // A conversion into Montgomery form is a Montgomery product.
+        "montgomery_conversions" => Prims(&[(FieldMul, 1)]),
+        // rootfind-subtract's sweep: the batched inversion's `3k` products
+        // and the target's two conversions; the `k` differences.
+        "sweep_field_muls" => Prims(&[(FieldMul, 1)]),
+        "sweep_field_adds" => Prims(&[(FieldAdd, 1)]),
+        // A base's `point_index` and `x_index`: inserts and the lookups
+        // that pair a point with its negative; the negatives formed; the
+        // abscissa sort's compares and copies.
+        "index_inserts" => HASH,
+        "index_point_negations" => Prims(&[(FieldAdd, 1)]),
+        "index_sort_word_ops" => Prims(&[(WordOp, 1)]),
         _ => return None,
     })
 }
@@ -328,16 +399,36 @@ fn is_ic(method: &str) -> bool {
 
 /// Work each family's code does with no counter (classification of
 /// 2026-10-15; see `docs/units/BITOPS.md`).
-fn known_uncounted(method: &str, solver: Option<&SolverStats>) -> Vec<String> {
+///
+/// An index-calculus item leaves the list only for a record that carries
+/// the marker `counted:<item>` in some phase's `work_native`: the code
+/// that does the work counts it and says so.  A record written before
+/// those counters existed carries no marker and keeps the item; so does a
+/// record whose matrix, target loop, oracle or base is one the counters
+/// do not reach (the residual collector, the large-prime tables, a
+/// builder that does not derive its indexes through `ic_boundary`).
+fn known_uncounted(
+    method: &str,
+    solver: Option<&SolverStats>,
+    phases: &[PhaseRecord],
+) -> Vec<String> {
     let mut out: Vec<&str> = Vec::new();
     if is_ic(method) {
-        out.extend([
-            "gauss_column_scans_and_pivot_inversions",
-            "relation_row_construction",
-            "walk_bookkeeping",
-            "table_insert_attempts",
-            "base_index_builds",
-        ]);
+        let counted = |item: &str| {
+            let marker = format!("counted:{item}");
+            phases.iter().any(|p| p.work_native.contains_key(&marker))
+        };
+        out.extend(
+            [
+                "gauss_column_scans_and_pivot_inversions",
+                "relation_row_construction",
+                "walk_bookkeeping",
+                "table_insert_attempts",
+                "base_index_builds",
+            ]
+            .into_iter()
+            .filter(|item| !counted(item)),
+        );
         if method == "ic.k4_gaudry" {
             out.extend(["c4_modelled_algebraic_solve", "oracle_hash_and_sort_work"]);
         }
@@ -642,7 +733,7 @@ pub fn price(x: &Priceable) -> Result<WorkBlock, String> {
     let add = widths.gates(GroupAdd).map_err(|e| e.to_string())? as f64;
     let floor =
         (std::f64::consts::PI * r / (2.0 * x.curve.automorphisms_available as f64)).sqrt() * add;
-    let known = known_uncounted(method, x.solver);
+    let known = known_uncounted(method, x.solver, x.phases);
     unpriced.sort();
     Ok(WorkBlock {
         schema: WORK_SCHEMA.into(),
@@ -866,6 +957,70 @@ mod tests {
         assert_eq!(w.unpriced, vec!["mystery".to_string()]);
         assert!(!w.complete);
         assert_eq!(w.phases[0].prims["hash_probe"], 2);
+    }
+
+    #[test]
+    fn work_native_is_priced_and_its_markers_clear_only_their_items() {
+        let c = curve("prime", 24, (1 << 23) + 15, 2);
+        let params = BTreeMap::new();
+        let counters = BTreeMap::new();
+        let plain = vec![PhaseRecord {
+            name: "linear_algebra".into(),
+            native: [("row_ops".to_string(), 50u64)].into_iter().collect(),
+            ..Default::default()
+        }];
+        let price_of = |phases: &[PhaseRecord]| {
+            price(&Priceable {
+                method_id: "ic.pipeline",
+                method_params: &params,
+                curve: &c,
+                phases,
+                counters: &counters,
+                solver: None,
+            })
+            .unwrap()
+        };
+        let before = price_of(&plain);
+        assert_eq!(before.known_uncounted.len(), 5);
+        let mut counted = plain.clone();
+        counted[0].work_native = [
+            ("gauss_entries_scanned".to_string(), 10u64),
+            ("pivot_inversion_steps".into(), 48),
+            ("counted:gauss_column_scans_and_pivot_inversions".into(), 1),
+        ]
+        .into_iter()
+        .collect();
+        let after = price_of(&counted);
+        assert!(after.unpriced.is_empty());
+        assert_eq!(after.phases[0].prims["word_op"], 10);
+        assert_eq!(after.phases[0].prims["modr_add"], 50 + 48);
+        assert_eq!(
+            after.known_uncounted,
+            vec![
+                "relation_row_construction".to_string(),
+                "walk_bookkeeping".into(),
+                "table_insert_attempts".into(),
+                "base_index_builds".into(),
+            ]
+        );
+        let ws = widths_of(&c).unwrap();
+        let extra = 10 * ws.gates(WordOp).unwrap() + 48 * ws.gates(ModrAdd).unwrap();
+        let (b, a): (u128, u128) = (
+            before.bitops.parse().unwrap(),
+            after.bitops.parse().unwrap(),
+        );
+        assert_eq!(a - b, extra);
+        // 2w steps of `modr_add` are exactly one `field_inv` at r's width.
+        let w = ws.r_bits;
+        assert_eq!(
+            u128::from(2 * w) * ws.gates(ModrAdd).unwrap(),
+            crate::cryptanalysis::bitops::Widths {
+                field: Field::Prime { bits: w },
+                r_bits: w,
+            }
+            .gates(FieldInv)
+            .unwrap()
+        );
     }
 
     #[test]

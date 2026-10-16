@@ -33,7 +33,9 @@
 //! implementation must answer incrementally; a batch method would have
 //! to re-solve on every call and is not what this trait is for.
 
-use crate::cryptanalysis::ic_boundary::{IncrementalGauss, RelationSolver, RowStatus};
+use crate::cryptanalysis::ic_boundary::{
+    pivot_inversion_steps, IncrementalGauss, RelationSolver, RowStatus,
+};
 
 #[cfg(test)]
 fn addmod(a: u64, b: u64, m: u64) -> u64 {
@@ -64,11 +66,20 @@ fn invmod(a: u64, m: u64) -> Option<u64> {
 type Sparse = Vec<(usize, u64)>;
 
 /// `a − f·b`, both sparse and sorted, counting one `row_op` per
-/// non-zero touched.
-fn sparse_sub_scaled(a: &Sparse, f: u64, b: &Sparse, m: u64, ops: &mut u64) -> Sparse {
+/// non-zero touched and, in `steps`, one merge step (a column compare
+/// and a push) per entry of either input.
+fn sparse_sub_scaled(
+    a: &Sparse,
+    f: u64,
+    b: &Sparse,
+    m: u64,
+    ops: &mut u64,
+    steps: &mut u64,
+) -> Sparse {
     let mut out = Vec::with_capacity(a.len() + b.len());
     let (mut i, mut j) = (0, 0);
     while i < a.len() || j < b.len() {
+        *steps += 1;
         match (a.get(i), b.get(j)) {
             (Some(&(ca, va)), Some(&(cb, vb))) if ca == cb => {
                 let v = submod(va, mulmod(f, vb, m), m);
@@ -127,6 +138,14 @@ pub struct StructuredGauss {
     /// method cannot report because it has none to speak of.
     pub nonzeros: u64,
     pub peak_nonzeros: u64,
+    /// Word steps beside `row_ops`, for `bitop/v1` only: the dense
+    /// row's scan into sparse form, the pivot-hit searches, the merge
+    /// steps, the row clones (two words an entry), the lightest-column
+    /// choice, the binary searches for the pivot column in every stored
+    /// row, and the column-weight bookkeeping.
+    pub entries_scanned: u64,
+    /// Pivot normalisations, one modular inversion each.
+    pub pivot_inversions: u64,
 }
 
 impl StructuredGauss {
@@ -144,10 +163,13 @@ impl StructuredGauss {
             inconsistent: 0,
             nonzeros: 0,
             peak_nonzeros: 0,
+            entries_scanned: 0,
+            pivot_inversions: 0,
         }
     }
 
     fn note_weight(&mut self, row: &Sparse, delta: i32) {
+        self.entries_scanned += row.len() as u64;
         for &(c, _) in row {
             let w = &mut self.weight[c];
             *w = (*w as i32 + delta).max(0) as u32;
@@ -165,16 +187,28 @@ impl RelationSolver for StructuredGauss {
             .filter(|(_, &v)| v != 0)
             .map(|(c, &v)| (c, v % m))
             .collect();
+        self.entries_scanned += self.cols as u64;
         // Reduce against every pivot the new row touches.  A sparse row
         // touches few, and the reduction adds only the pivot row's
         // non-zeros, so this is the step the structure pays for.
         loop {
-            let hit = row
-                .iter()
-                .find_map(|&(c, f)| self.row_of_pivot[c].map(|i| (i, f)));
+            let mut looked = 0u64;
+            let hit = row.iter().find_map(|&(c, f)| {
+                looked += 1;
+                self.row_of_pivot[c].map(|i| (i, f))
+            });
+            self.entries_scanned += looked;
             let Some((i, f)) = hit else { break };
             let pivot_row = self.rows[i].clone();
-            row = sparse_sub_scaled(&row, f, &pivot_row, m, &mut self.row_ops);
+            self.entries_scanned += 2 * pivot_row.len() as u64;
+            row = sparse_sub_scaled(
+                &row,
+                f,
+                &pivot_row,
+                m,
+                &mut self.row_ops,
+                &mut self.entries_scanned,
+            );
             rhs = submod(rhs, mulmod(f, self.rhs[i], m), m);
             self.row_ops += 1;
         }
@@ -192,6 +226,8 @@ impl RelationSolver for StructuredGauss {
             .copied()
             .min_by_key(|&(c, _)| (self.weight[c], c))
             .expect("non-empty row");
+        self.entries_scanned += row.len() as u64;
+        self.pivot_inversions += 1;
         let inv = invmod(pv, m).expect("prime modulus");
         for (_, v) in row.iter_mut() {
             *v = mulmod(*v, inv, m);
@@ -202,12 +238,22 @@ impl RelationSolver for StructuredGauss {
         // Eliminate the new pivot column from every stored row that
         // holds it; only those rows are touched.
         for i in 0..self.rows.len() {
+            // A binary search reads about `⌊log₂ len⌋ + 1` entries.
+            self.entries_scanned += u64::from(usize::BITS - self.rows[i].len().leading_zeros());
             let f = match self.rows[i].binary_search_by_key(&pc, |&(c, _)| c) {
                 Ok(k) => self.rows[i][k].1,
                 Err(_) => continue,
             };
             let before = self.rows[i].clone();
-            let after = sparse_sub_scaled(&before, f, &row, m, &mut self.row_ops);
+            self.entries_scanned += 2 * before.len() as u64;
+            let after = sparse_sub_scaled(
+                &before,
+                f,
+                &row,
+                m,
+                &mut self.row_ops,
+                &mut self.entries_scanned,
+            );
             self.rhs[i] = submod(self.rhs[i], mulmod(f, rhs, m), m);
             self.row_ops += 1;
             self.nonzeros = self.nonzeros - before.len() as u64 + after.len() as u64;
@@ -241,6 +287,27 @@ impl RelationSolver for StructuredGauss {
 
     fn work(&self) -> (u64, &'static str) {
         (self.row_ops, "row_ops")
+    }
+
+    /// `gauss_entries_scanned` and `pivot_inversion_steps`, as the dense
+    /// matrix reports them.  `pinned` here reads a row length and one
+    /// entry, which is not counted.
+    fn work_counters(&self) -> std::collections::BTreeMap<String, u64> {
+        let mut out = std::collections::BTreeMap::new();
+        out.insert(
+            "counted:gauss_column_scans_and_pivot_inversions".to_string(),
+            1,
+        );
+        if self.entries_scanned > 0 {
+            out.insert("gauss_entries_scanned".to_string(), self.entries_scanned);
+        }
+        if self.pivot_inversions > 0 {
+            out.insert(
+                "pivot_inversion_steps".to_string(),
+                self.pivot_inversions * pivot_inversion_steps(self.modulus),
+            );
+        }
+        out
     }
 }
 
