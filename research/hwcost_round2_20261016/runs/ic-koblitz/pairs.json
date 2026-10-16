@@ -92,6 +92,7 @@
     ],
     "wall_ratio_in_band": false,
     "w_star": -0.2541570106910829,
+    "rank": "unranked",
     "usd_per_solve_ic": 1.842850966796875e-9,
     "usd_per_solve_rho": 3.744443076171875e-8
   },
@@ -188,6 +189,7 @@
     ],
     "wall_ratio_in_band": false,
     "w_star": -0.2803682399838786,
+    "rank": "unranked",
     "usd_per_solve_ic": 3.091883411458333e-9,
     "usd_per_solve_rho": 3.8023353365885416e-8
   },
@@ -284,6 +286,7 @@
     ],
     "wall_ratio_in_band": false,
     "w_star": -0.16461633840358825,
+    "rank": "unranked",
     "usd_per_solve_ic": 3.9628433268229156e-9,
     "usd_per_solve_rho": 4.0236730123697904e-8
   },
@@ -380,6 +383,7 @@
     ],
     "wall_ratio_in_band": false,
     "w_star": -0.22636975823043448,
+    "rank": "unranked",
     "usd_per_solve_ic": 1.3110471331380206e-8,
     "usd_per_solve_rho": 4.4263715302734363e-8
   },
@@ -476,6 +480,7 @@
     ],
     "wall_ratio_in_band": false,
     "w_star": -0.11111906244666771,
+    "rank": "IC > rho",
     "usd_per_solve_ic": 5.396048530924479e-8,
     "usd_per_solve_rho": 5.143677847656251e-8
   },
@@ -572,6 +577,7 @@
     ],
     "wall_ratio_in_band": true,
     "w_star": 0.0049770848931065875,
+    "rank": "IC > rho",
     "usd_per_solve_ic": 2.821990501139323e-7,
     "usd_per_solve_rho": 3.7606021682942717e-8
   },
@@ -668,6 +674,7 @@
     ],
     "wall_ratio_in_band": true,
     "w_star": 0.020031147800768093,
+    "rank": "IC > rho",
     "usd_per_solve_ic": 1.752593175087891e-6,
     "usd_per_solve_rho": 1.6659539843424479e-7
   },
@@ -764,6 +771,7 @@
     ],
     "wall_ratio_in_band": true,
     "w_star": 0.16858370110971035,
+    "rank": "IC > rho",
     "usd_per_solve_ic": 6.18427916827474e-6,
     "usd_per_solve_rho": 3.1839207462890623e-7
   }

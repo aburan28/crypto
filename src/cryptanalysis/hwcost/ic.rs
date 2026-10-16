@@ -80,8 +80,23 @@ pub struct Pair {
     /// Inside the band's ratio range.
     pub wall_ratio_in_band: bool,
     pub w_star: f64,
+    /// `IC > rho`, `IC < rho`, or `unranked` (§5a: wall ratio and all three
+    /// band ratios on the same side of 1).
+    pub rank: String,
     pub usd_per_solve_ic: f64,
     pub usd_per_solve_rho: f64,
+}
+
+/// The §5a order of IC against rho: only where every ratio (IC / rho) is on
+/// the same side of 1.
+fn rank(ratios: &[f64]) -> &'static str {
+    if ratios.iter().all(|&r| r > 1.0) {
+        "IC > rho"
+    } else if ratios.iter().all(|&r| r < 1.0) {
+        "IC < rho"
+    } else {
+        "unranked"
+    }
 }
 
 fn mean(v: &[f64]) -> f64 {
@@ -235,6 +250,7 @@ pub fn pairs(
             band_ratio,
             wall_ratio_in_band: wall_ratio >= lo && wall_ratio <= hi,
             w_star,
+            rank: rank(&[wall_ratio, band_ratio[0], band_ratio[1], band_ratio[2]]).into(),
             usd_per_solve_ic: usd(ic.wall_ms_mean),
             usd_per_solve_rho: usd(rho.wall_ms_mean),
             ic,
@@ -330,14 +346,7 @@ pub fn project(fits: &[Fit], targets: &[f64], usd_per_core_hour: f64) -> Vec<Pro
                 let q = format!("P(w={})", WEIGHTS[i]);
                 at(&q, "ic", x) / at(&q, "rho", x)
             });
-            let all = [ic_ms / rho_ms, band[0], band[1], band[2]];
-            let rank = if all.iter().all(|&r| r > 1.0) {
-                "IC > rho"
-            } else if all.iter().all(|&r| r < 1.0) {
-                "IC < rho"
-            } else {
-                "unranked"
-            };
+            let rank = rank(&[ic_ms / rho_ms, band[0], band[1], band[2]]);
             let years = |ms: f64| ms / 1e3 / (365.25 * 86400.0);
             Projection {
                 log2_r: x,
@@ -367,6 +376,17 @@ pub fn summary(pairs: &[Pair]) -> Vec<super::fit::Claim> {
         Claim::report("D1.in_band", &format!("curves (of {}) whose measured IC/rho wall ratio lies inside the band's ratio range", pairs.len()), inside),
         Claim::report("D1.w_star_median", "median implied weight w* (GAE per unpriced native operation)", w_med),
     ]
+    .into_iter()
+    .chain(["IC > rho", "IC < rho", "unranked"].map(|r| {
+        let n = pairs.iter().filter(|p| p.rank == r).count() as f64;
+        let id = format!("D1.rank.{}", r.replace(' ', ""));
+        let what = match r {
+            "unranked" => "left unranked (wall ratio and band ratios disagree on the order)".to_string(),
+            _ => format!("ranked {r} (§5a: wall ratio and all three band ratios agree)"),
+        };
+        Claim::report(&id, &format!("curves (of {}) {what}", pairs.len()), n)
+    }))
+    .collect()
 }
 
 /// Projection in GAE (the fitted `P(w)` exponents) converted to time at
@@ -420,15 +440,15 @@ pub fn project_gae(
 }
 
 pub fn pairs_csv(pairs: &[Pair]) -> String {
-    let mut s = String::from("session,curve,log2_r,ic_arm,rho_arm,ic_runs,rho_runs,ic_wall_ms,rho_wall_ms,ic_p_w0,ic_p_w01,ic_p_w1,rho_p_w0,rho_p_w01,rho_p_w1,ns_per_gae_w0,ns_per_gae_w01,ns_per_gae_w1,ic_pred_ms_w0,ic_pred_ms_w01,ic_pred_ms_w1,err_w0,err_w01,err_w1,wall_ratio,band_ratio_w0,band_ratio_w01,band_ratio_w1,in_band,w_star,usd_ic,usd_rho\n");
+    let mut s = String::from("session,curve,log2_r,ic_arm,rho_arm,ic_runs,rho_runs,ic_wall_ms,rho_wall_ms,ic_p_w0,ic_p_w01,ic_p_w1,rho_p_w0,rho_p_w01,rho_p_w1,ns_per_gae_w0,ns_per_gae_w01,ns_per_gae_w1,ic_pred_ms_w0,ic_pred_ms_w01,ic_pred_ms_w1,err_w0,err_w01,err_w1,wall_ratio,band_ratio_w0,band_ratio_w01,band_ratio_w1,in_band,w_star,rank,usd_ic,usd_rho\n");
     for p in pairs {
         s.push_str(&format!(
-            "{},{},{:.4},{},{},{},{},{:.4},{:.4},{:.1},{:.1},{:.1},{:.1},{:.1},{:.1},{:.3},{:.3},{:.3},{:.4},{:.4},{:.4},{:.4},{:.4},{:.4},{:.4},{:.4},{:.4},{:.4},{},{:.4},{:.3e},{:.3e}\n",
+            "{},{},{:.4},{},{},{},{},{:.4},{:.4},{:.1},{:.1},{:.1},{:.1},{:.1},{:.1},{:.3},{:.3},{:.3},{:.4},{:.4},{:.4},{:.4},{:.4},{:.4},{:.4},{:.4},{:.4},{:.4},{},{:.4},{},{:.3e},{:.3e}\n",
             p.session, p.curve, p.log2_r, p.ic.arm, p.rho.arm, p.ic.runs, p.rho.runs, p.ic.wall_ms_mean, p.rho.wall_ms_mean,
             p.ic.p[0], p.ic.p[1], p.ic.p[2], p.rho.p[0], p.rho.p[1], p.rho.p[2],
             p.ns_per_gae[0], p.ns_per_gae[1], p.ns_per_gae[2], p.ic_wall_pred_ms[0], p.ic_wall_pred_ms[1], p.ic_wall_pred_ms[2],
             p.err_pred[0], p.err_pred[1], p.err_pred[2], p.wall_ratio, p.band_ratio[0], p.band_ratio[1], p.band_ratio[2],
-            p.wall_ratio_in_band, p.w_star, p.usd_per_solve_ic, p.usd_per_solve_rho
+            p.wall_ratio_in_band, p.w_star, p.rank, p.usd_per_solve_ic, p.usd_per_solve_rho
         ));
     }
     s
@@ -457,5 +477,13 @@ mod tests {
         assert!((p[0].wall_ratio - 4.0f64.exp2()).abs() < 1e-9);
         fits[0].log2_c = -10.0;
         assert_eq!(project(&fits, &[40.0], 1.0)[0].rank, "unranked");
+    }
+
+    #[test]
+    fn rank_needs_every_ratio_on_one_side() {
+        assert_eq!(rank(&[0.5, 0.9, 0.99, 0.2]), "IC < rho");
+        assert_eq!(rank(&[2.0, 1.5, 1.01, 9.0]), "IC > rho");
+        assert_eq!(rank(&[0.05, 6.9, 9.3, 27.1]), "unranked");
+        assert_eq!(rank(&[1.0, 2.0, 2.0, 2.0]), "unranked");
     }
 }

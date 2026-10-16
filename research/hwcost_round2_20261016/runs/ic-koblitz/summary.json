@@ -12,5 +12,26 @@
     "value": -0.13786770042512797,
     "threshold": null,
     "verdict": "REPORT"
+  },
+  {
+    "id": "D1.rank.IC>rho",
+    "statement": "curves (of 8) ranked IC > rho (§5a: wall ratio and all three band ratios agree)",
+    "value": 4.0,
+    "threshold": null,
+    "verdict": "REPORT"
+  },
+  {
+    "id": "D1.rank.IC<rho",
+    "statement": "curves (of 8) ranked IC < rho (§5a: wall ratio and all three band ratios agree)",
+    "value": 0.0,
+    "threshold": null,
+    "verdict": "REPORT"
+  },
+  {
+    "id": "D1.rank.unranked",
+    "statement": "curves (of 8) ranked unranked (§5a: wall ratio and all three band ratios agree)",
+    "value": 4.0,
+    "threshold": null,
+    "verdict": "REPORT"
   }
 ]

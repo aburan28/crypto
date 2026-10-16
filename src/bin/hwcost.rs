@@ -545,13 +545,13 @@ fn run() -> Result<(), String> {
             write(&out.join("projections.json"), &json(&proj))?;
             let largest = pairs.last().ok_or("no paired curve")?;
             let gp = ic::project_gae(&fits, largest.ns_per_gae, &targets, usd_per_core_hour);
-            let mut gcsv = format!(
-                "# post hoc: P(w) fits x ns per GAE of {} at log2 r {:.2}\nlog2_r,w,ns_per_gae,ic_core_years,rho_core_years,ic_usd,rho_usd,ratio\n",
-                largest.rho.arm, largest.log2_r
-            );
+            // Post hoc (protocol addendum 1): P(w) fits × ns per GAE of the
+            // matched rho at its largest measured size, named in the last two
+            // columns.
+            let mut gcsv = String::from("log2_r,w,ns_per_gae,ic_core_years,rho_core_years,ic_usd,rho_usd,ratio,ns_per_gae_arm,ns_per_gae_log2_r\n");
             for g in &gp {
                 gcsv.push_str(&format!(
-                    "{},{},{:.3},{:.6e},{:.6e},{:.6e},{:.6e},{:.4}\n",
+                    "{},{},{:.3},{:.6e},{:.6e},{:.6e},{:.6e},{:.4},{},{:.2}\n",
                     g.log2_r,
                     g.w,
                     g.ns_per_gae,
@@ -559,7 +559,9 @@ fn run() -> Result<(), String> {
                     g.rho_core_years,
                     g.ic_usd,
                     g.rho_usd,
-                    g.ratio
+                    g.ratio,
+                    largest.rho.arm,
+                    largest.log2_r
                 ));
             }
             write(&out.join("projections_gae.csv"), &gcsv)?;
