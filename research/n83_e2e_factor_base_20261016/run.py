@@ -20,13 +20,14 @@ dynamic.parent.EXPECTED[SOURCE] = SOURCE_SHA256
 parent = dynamic.parent
 cold = dynamic.cold
 
-K_GRID = tuple(range(896, 1313, 32))
+K_GRID = tuple(sorted(set(range(896, 1313, 32)) |
+                      {1096, 1100, 1101, 1102, 1104, 1108}))
 CONTROL_K = 1152
 ARMS = (("k1152_a", CONTROL_K),
         *((f"k{k}", k) for k in K_GRID if k != CONTROL_K),
         ("k1152_b", CONTROL_K))
 RHO_SEED = "2026101601"
-IC_CAP_SECONDS = 480
+IC_CAP_SECONDS = 360
 RHO_CAP_SECONDS = 120
 
 
