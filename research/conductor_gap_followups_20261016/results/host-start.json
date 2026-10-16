@@ -1,0 +1,13 @@
+{
+  "local_observations": {
+    "/proc/self/status": "Name:\tcm-followups-v1\nUmask:\t0077\nState:\tR (running)\nTgid:\t17400\nNgid:\t0\nPid:\t17400\nPPid:\t1\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t256\nGroups:\t \nNStgid:\t17400\nNSpid:\t17400\nNSpgid:\t17309\nNSsid:\t17309\nKthread:\t0\nVmPeak:\t   13820 kB\nVmSize:\t    6364 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t    7984 kB\nVmRSS:\t    2680 kB\nRssAnon:\t     960 kB\nRssFile:\t    1720 kB\nRssShmem:\t       0 kB\nVmData:\t    1828 kB\nVmStk:\t     132 kB\nVmExe:\t     848 kB\nVmLib:\t    1728 kB\nVmPTE:\t      56 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t0/71955\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000000001007\nSigCgt:\t0000000000000440\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t0000000000000000\nCapAmb:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t1\nSpeculation_Store_Bypass:\tvulnerable\nSpeculationIndirectBranch:\talways enabled\nCpus_allowed:\t01\nCpus_allowed_list:\t0\nMems_allowed:\t00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t3\nnonvoluntary_ctxt_switches:\t4\n",
+    "/sys/fs/cgroup/cpu.max": "400000 100000\n",
+    "/sys/fs/cgroup/cpu.stat": "usage_usec 2827350142\nuser_usec 2769655110\nsystem_usec 57695031\nnice_usec 0\nnr_periods 11748\nnr_throttled 4241\nthrottled_usec 153670421\nnr_bursts 0\nburst_usec 0\n",
+    "/sys/fs/cgroup/cpuset.cpus.effective": "0-4\n",
+    "/sys/fs/cgroup/memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+    "/sys/fs/cgroup/memory.max": "17179869184\n"
+  },
+  "pid": 17400,
+  "scope": "Container-visible local launch guard; no physical-host or frequency isolation attestation.",
+  "unix_seconds": 1792117729
+}

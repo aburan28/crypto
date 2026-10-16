@@ -2,7 +2,53 @@
   "additional_coordinates_expected": 16,
   "additional_overlap_expected": 40,
   "complete_primary_expected": 2160,
-  "groups": {},
+  "groups": {
+    "crossover/crater-cm": {
+      "attempts": 6,
+      "completed": 6,
+      "mean_group_ops_per_sqrt_r": null,
+      "mean_native_cpu_seconds": 86.997726829,
+      "mean_observed_queries": 186028274.5,
+      "mean_process_cpu_per_group_op": null,
+      "mean_process_cpu_seconds": 87.185,
+      "restricted_mean_query_lower": 186028274.5,
+      "restricted_mean_query_upper": 186028274.5,
+      "statuses": {
+        "PASS": 6
+      },
+      "verified": 6
+    },
+    "crossover/crater-recurrence": {
+      "attempts": 6,
+      "completed": 6,
+      "mean_group_ops_per_sqrt_r": null,
+      "mean_native_cpu_seconds": 88.29746921166667,
+      "mean_observed_queries": 186028274.5,
+      "mean_process_cpu_per_group_op": null,
+      "mean_process_cpu_seconds": 88.48833333333333,
+      "restricted_mean_query_lower": 186028274.5,
+      "restricted_mean_query_upper": 186028274.5,
+      "statuses": {
+        "PASS": 6
+      },
+      "verified": 6
+    },
+    "crossover/floor-recurrence": {
+      "attempts": 5,
+      "completed": 5,
+      "mean_group_ops_per_sqrt_r": null,
+      "mean_native_cpu_seconds": 89.646870015,
+      "mean_observed_queries": 199536800.8,
+      "mean_process_cpu_per_group_op": null,
+      "mean_process_cpu_seconds": 89.85199999999999,
+      "restricted_mean_query_lower": 199536800.8,
+      "restricted_mean_query_upper": 199536800.8,
+      "statuses": {
+        "PASS": 5
+      },
+      "verified": 5
+    }
+  },
   "schema": "conductor-followup.progress/v1",
-  "sealed_attempts": 0
+  "sealed_attempts": 17
 }

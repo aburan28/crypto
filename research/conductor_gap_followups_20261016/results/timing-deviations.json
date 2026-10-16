@@ -1,0 +1,20 @@
+{
+  "schema": "conductor-followup.timing-deviations/v1",
+  "deviations": [
+    {
+      "cohort": "crossover",
+      "index": 3,
+      "phase": "Rust wrapper verification/archive tail",
+      "classification": "potential overlap with baseline calibration startup",
+      "baseline_timer_file_created": "2026-10-16T02:34:15.886Z",
+      "primary_timer_file_modified": "2026-10-16T02:34:15.978Z",
+      "scope": "Primary native setup/collection already finished. Full-process CPU remains descriptive L0. Retain this observation and report CPU sensitivity to the affected whole-gap cluster at final analysis."
+    }
+  ],
+  "posthoc_build": {
+    "primary_index": 12,
+    "primary_timer_modified": "2026-10-16T02:52:07.576Z",
+    "build_log_created": "2026-10-16T02:52:07.944Z",
+    "scope": "Scheduler-only pause; primary wrapper completed before compilation began."
+  }
+}

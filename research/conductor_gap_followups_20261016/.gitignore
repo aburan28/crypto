@@ -1,0 +1,15 @@
+# Mutable scheduler state is snapshotted explicitly; never stage an active attempt.
+results/campaign.lock
+results/campaign.pid
+results/campaign-console.log
+results/execution.jsonl
+results/processes/
+results/receipts/
+runs/crossover-*/
+runs/yield-*/
+runs/rho-*/
+runs/rho-coordinate-*/
+runs/orbit-*/
+runs/dose-*/
+runs/overlap-*/
+bases/

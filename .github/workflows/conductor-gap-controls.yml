@@ -85,6 +85,7 @@ jobs:
           set -euo pipefail
           study=research/conductor_gap_followups_20261016
           cargo test --release --example conductor_gap_followups
+          cargo test --release --example conductor_gap_followup_posthoc
           gp -q -f "$study/native/certify_dose.gp" > /tmp/followup-dose.jsonl 2> /tmp/followup-dose.stderr
           test "$(wc -l < /tmp/followup-dose.jsonl)" -eq 32
           ! grep -E 'user error|at top-level|syntax error|incorrect type' /tmp/followup-dose.stderr
