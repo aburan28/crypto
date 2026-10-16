@@ -1,0 +1,19 @@
+NAVIGATION_DIAGNOSTIC {"url":"chrome-error://chromewebdata/","title":"file:///workspace/repos/crypto-n83-basis/docs/index-calculus-scoreboard.html","ready":"complete","body":"This page is blocked\n\nYour organization doesn’t allow you to view this site"}
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+0 !== 2
+
+    at file:///workspace/n83_basis_setup/pr1899-browser-diagnostic.mjs:82:10 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 0,
+  expected: 2,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

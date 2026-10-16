@@ -1,0 +1,56 @@
+node:internal/child_process:1160
+    result.error = new ErrnoException(result.error, 'spawnSync ' + options.file);
+                   ^
+
+<ref *1> Error: spawnSync git EPERM
+    at Object.spawnSync (node:internal/child_process:1160:20)
+    at spawnSync (node:child_process:928:24)
+    at execFileSync (node:child_process:971:15)
+    at file:///workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/checks/pr-followup-20261016T0253Z/test-dashboard-composition.mjs:7:19
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loader:643:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  errno: -1,
+  code: 'EPERM',
+  syscall: 'spawnSync git',
+  path: 'git',
+  spawnargs: [
+    'show',
+    '14e56ddb0902161eaa289425c5131a58fefd5243:docs/index-calculus-scoreboard.html'
+  ],
+  error: [Circular *1],
+  status: 0,
+  signal: null,
+  output: [
+    null,
+    Buffer(1793487) [Uint8Array] [
+       60,  33, 100, 111,  99, 116, 121, 112, 101,  32, 104, 116,
+      109, 108,  62,  10,  60, 104, 116, 109, 108,  32, 108,  97,
+      110, 103,  61,  34, 101, 110,  34,  62,  10,  60, 104, 101,
+       97, 100,  62,  10,  60, 109, 101, 116,  97,  32,  99, 104,
+       97, 114, 115, 101, 116,  61,  34, 117, 116, 102,  45,  56,
+       34,  62,  10,  60, 109, 101, 116,  97,  32, 110,  97, 109,
+      101,  61,  34, 118, 105, 101, 119, 112, 111, 114, 116,  34,
+       32,  99, 111, 110, 116, 101, 110, 116,  61,  34, 119, 105,
+      100, 116, 104,  61,
+      ... 1793387 more items
+    ],
+    Buffer(0) [Uint8Array] []
+  ],
+  pid: 52821,
+  stdout: Buffer(1793487) [Uint8Array] [
+     60,  33, 100, 111,  99, 116, 121, 112, 101,  32, 104, 116,
+    109, 108,  62,  10,  60, 104, 116, 109, 108,  32, 108,  97,
+    110, 103,  61,  34, 101, 110,  34,  62,  10,  60, 104, 101,
+     97, 100,  62,  10,  60, 109, 101, 116,  97,  32,  99, 104,
+     97, 114, 115, 101, 116,  61,  34, 117, 116, 102,  45,  56,
+     34,  62,  10,  60, 109, 101, 116,  97,  32, 110,  97, 109,
+    101,  61,  34, 118, 105, 101, 119, 112, 111, 114, 116,  34,
+     32,  99, 111, 110, 116, 101, 110, 116,  61,  34, 119, 105,
+    100, 116, 104,  61,
+    ... 1793387 more items
+  ],
+  stderr: Buffer(0) [Uint8Array] []
+}
+
+Node.js v24.19.0
