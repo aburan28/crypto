@@ -118,7 +118,7 @@ would pay only where the linear algebra dominates, past about $2^(120)$.
 
 = Predictions
 
-P1 verified 288/288 (replays: §Audit). P2 held (1.00 ∈ [0.9, 1.3]). P3 held (2.04).
+P1 held: 288/288 verified, 268/268 replays reproduced. P2 held (1.00 ∈ [0.9, 1.3]). P3 held (2.04).
 *P4 not held* (dense elimination 2.34 < 2.4). P5 held (1.93; $S_"rho"$ slope
 −0.15). P6: crossover $2^(100.4) in [2^(88), 2^(115)]$ held; *"no dense crossover
 below $2^(200)$" not held* ($2^(101.8)$, recrossing at $2^(126)$). P7 held (1.57;
@@ -126,7 +126,13 @@ below $2^(200)$" not held* ($2^(101.8)$, recrossing at $2^(126)$). P7 held (1.57
 
 = Audit
 
-In progress at the time of this commit (amendment 2 scope): 15 of 60 sessions audited, all OK; the replays continue and this section is replaced with the receipts when they finish.
+`ecbench verify` on all 60 sessions (receipts `audits/<job>.audit.json`; scope
+fixed by amendment 2): *audit OK on all 60, 288 records, 0 problems.* Full replay
+(`--replay-all`) on 50 sessions, every session with $p <= 197$, every rho-only
+session and the spot checks `main-p293-t0` and `main-p401-t0`: *268 replays
+reproduced exactly*. Integrity only (stored $[d]G = Q$ checks, every planned run
+recorded, hashes) on the other 10: `main-p1009-t0/t1`, `main-p701-t0/t1`,
+`main-p509-t0/t1`, `main-p401-t1`, `main-p293-t1/t2`, `lp2-p293-t0`.
 
 = Limits
 

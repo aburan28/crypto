@@ -169,8 +169,8 @@ intervals are wide.
 
 ## Predictions (PROTOCOL.md)
 
-- **P1 (verified, replays): held for verification**; 288/288 verified.
-  Replays: see "Audit".
+- **P1 (verified, replays): held.** 288/288 verified; 268 of 268 replays
+  reproduced, 60/60 audits OK (see "Audit" for the scope).
 - **P2 (relations `β ∈ [0.9, 1.3]`): held.** 1.00.
 - **P3 (Wiedemann `β ∈ [1.6, 2.4]`): held.** 2.04.
 - **P4 (dense elimination `β ∈ [2.4, 3.3]`): not held.** 2.34 (2.11–2.57).
@@ -186,7 +186,23 @@ intervals are wide.
 
 ## Audit
 
-In progress at the time of this commit (amendment 2 scope): 15 of 60 sessions audited, all OK; the replays continue and this section is replaced with the receipts when they finish.
+`ecbench verify` on all 60 sessions (receipts `audits/<job>.audit.json`, list
+`audits/AUDITS.txt`; scope fixed by amendment 2): **audit OK on all 60, 288
+records, 0 problems.**
+
+- **Full replay (`--replay-all`), 50 sessions:** every session with
+  `p ≤ 197` (all three arms), every rho-only session, and the two upper-rung
+  spot checks `main-p293-t0` and `main-p401-t0`. **268 replays reproduced
+  exactly**: 76 in the IC specs (IC and paired rho) and 192 rho-only.
+- **Integrity only, 10 sessions** (the stored `[d]G = Q` checks, every
+  planned run recorded, hashes; not re-executed): `main-p1009-t0/t1`,
+  `main-p701-t0/t1`, `main-p509-t0/t1`, `main-p401-t1`, `main-p293-t1/t2`,
+  `lp2-p293-t0`.
+
+The audit was stopped twice by infrastructure (once deliberately while
+amendment 3's relaunch ran, once by a container restart) and resumed;
+`audits/AUDITS.aborted-1.txt` lists the lines from the stopped first run.
+Every session in it was audited again and passed.
 
 ## What did not run, and what was not tried
 
