@@ -14,6 +14,10 @@ SOURCE_SHA256 = "3ee6bc11399b382e72789b152043e5a67abc5b783c4e998ad8c534d60baebc0
 ARMS = (
     ("k2543root22_a", 2543, "root22_dynamic", 900),
     ("k1024root22", 1024, "root22_dynamic", 900),
+    ("k1152root22", 1152, "root22_dynamic", 900),
+    ("k1152root11", 1152, "root11_dynamic", 900),
+    ("k1536root22", 1536, "root22_dynamic", 900),
+    ("k1536root11", 1536, "root11_dynamic", 900),
     ("k2048root22", 2048, "root22_dynamic", 900),
     ("k2543root11", 2543, "root11_dynamic", 900),
     ("k3072root11", 3072, "root11_dynamic", 900),

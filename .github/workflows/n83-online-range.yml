@@ -18,14 +18,14 @@ permissions:
   contents: read
 
 concurrency:
-  group: n83-online-range-${{ github.ref }}
+  group: n83-online-range-expanded-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   one-point-online-screen:
     if: github.repository == 'aburan28/crypto'
     runs-on: ubuntu-24.04
-    timeout-minutes: 240
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
 

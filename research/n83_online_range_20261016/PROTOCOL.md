@@ -1,7 +1,9 @@
 # N83 exact-root factor-base online range screen
 
-This screen expands the exact root-index factor-base range on the previously
-exposed public point from the cold screen. The point file SHA-256 is
+This expanded screen measures the exact root-index factor-base range and the
+K1152/K1536 cold-shortlisted pipelines on the previously exposed public
+point. The original eight-arm run remains a separately archived screen.
+The point file SHA-256 is
 `2c068d2f659588edcdbaa685fc73bb146e2bfee3be123d377d537658f8021c6d`;
 the answer sidecar SHA-256 is
 `b71c5a8bfdae603931fa6c03fc6f6faa3b261288cf787ac682bf8a3e3afe262d`.
@@ -27,12 +29,16 @@ visible CPUs, 15.5 GiB RAM and 2 GiB free disk:
 | ---: | --- | ---: | ---: | --- |
 | 1 | K2543/root22 A | 2,543 | 422,138 | root22 dynamic |
 | 2 | K1024/root22 | 1,024 | 169,984 | root22 dynamic |
-| 3 | K2048/root22 | 2,048 | 339,968 | root22 dynamic |
-| 4 | K2543/root11 | 2,543 | 422,138 | root11 dynamic |
-| 5 | K3072/root11 | 3,072 | 509,952 | root11 dynamic |
-| 6 | K3450/root11 | 3,450 | 572,700 | root11 fixed |
-| 7 | K3584/root11 | 3,584 | 594,944 | root11 fixed |
-| 8 | K2543/root22 B | 2,543 | 422,138 | root22 dynamic |
+| 3 | K1152/root22 | 1,152 | 191,232 | root22 dynamic |
+| 4 | K1152/root11 | 1,152 | 191,232 | root11 dynamic |
+| 5 | K1536/root22 | 1,536 | 254,976 | root22 dynamic |
+| 6 | K1536/root11 | 1,536 | 254,976 | root11 dynamic |
+| 7 | K2048/root22 | 2,048 | 339,968 | root22 dynamic |
+| 8 | K2543/root11 | 2,543 | 422,138 | root11 dynamic |
+| 9 | K3072/root11 | 3,072 | 509,952 | root11 dynamic |
+| 10 | K3450/root11 | 3,450 | 572,700 | root11 fixed |
+| 11 | K3584/root11 | 3,584 | 594,944 | root11 fixed |
+| 12 | K2543/root22 B | 2,543 | 422,138 | root22 dynamic |
 
 Run strong rho once afterward on that same point with the pinned
 `n83_dense_root_20261013/rho_config.json` and seed `2026101601`. The IC
