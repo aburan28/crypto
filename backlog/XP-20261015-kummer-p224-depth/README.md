@@ -1,7 +1,10 @@
 # XP-20261015-kummer-p224-depth: does the Kummer solving degree transfer to the real field?
 
-**Status: blocked** on the generic-field F4 lane (`claude/f4-generic-field`,
-in progress, not pushed). Funding 400,000, second of the four seed cards.
+**Status: draft** (unblocked: the generic-field engine exists on
+`claude/f4-generic-field`, `pkm_tower_pilot --engine generic`; its study
+[`research/f4_generic_field_20261015`](../../research/f4_generic_field_20261015/README.md)
+already measured most of this card's cells, see the card's `status_note`).
+Funding 400,000, second of the four seed cards.
 
 ## Question
 
