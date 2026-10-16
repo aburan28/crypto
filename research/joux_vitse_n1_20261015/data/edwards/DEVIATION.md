@@ -50,3 +50,9 @@
      run report).
    - The arm running at the time (`dlp_p31_s2`) continues on the old binary;
      later arms run the new one.
+
+5. **Second container restart (before 11:52Z, 2026-10-16).** It killed
+   `dlp_p71_s1` at its last checkpoint (967,360 trials, 5 relations, 4.92 h
+   of its 10-hour budget). `run_edwards_resume.sh` resumed it from that
+   checkpoint at 11:52Z. The record's `resume` row marks the join, and the
+   wall cap counts the time before the restart.
