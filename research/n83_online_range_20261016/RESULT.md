@@ -17,6 +17,17 @@ in the [expanded analysis](analysis_38896107047.json).
 | K3450/root11 fixed | 78.146 | 79.161 | Independently replayed in both |
 | K3584/root11 fixed | — | — | 900-second timeout in both |
 
+The expanded screen's [IC1 rows](ic1_rows_38896107047.json) bind its 11
+completed arms to 10 exact candidate manifests and retain the K3584 timeout
+as a separate row with a null candidate identity. Both K2543/root22 A/B
+controls resolve to the same candidate ID,
+`IC1N83Ckb1a1fb422138PDP4rootRCguidedLAgaussTDdirectISO0hcec5838fbe33`.
+K3072/root11 resolves to
+`IC1N83Ckb1a1fb509952PDP4rootRCguidedLAgaussTDdirectISO0hd45656791e9f`.
+The materializer checked the exact raw ZIP and replay hashes, executed source,
+base dumps, usable-point counts and arm order; it ran twice without changing
+any versioned record. The selected candidate remains null under the A/A gate.
+
 The predeclared K2543/root22 A/B control was noisy in both runs:
 18.570 versus 14.487 ms (24.70%) in the eight-arm screen and 18.327 versus
 14.120 ms (25.93%) in the expanded screen. Both exceed the 10% gate, so
