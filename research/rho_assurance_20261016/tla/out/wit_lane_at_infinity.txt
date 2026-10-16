@@ -1,3 +1,343 @@
 TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
-Error: Error: unrecognized option: -noGenerateSpecTE
-Usage: java tlc2.TLC [-option] inputfile
+Running breadth-first search Model-Checking with fp 37 and seed 4480083527989083045 with 4 workers on 4 cores with 3040MB heap and 64MB offheap memory [pid: 20812] (Linux 6.18.44-fc-v139 amd64, Ubuntu 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file /home/user/crypto/research/rho_assurance_20261016/tla/StrongRho.tla
+Parsing file /tmp/Integers.tla
+Parsing file /tmp/Sequences.tla
+Parsing file /tmp/FiniteSets.tla
+Parsing file /tmp/TLC.tla
+Parsing file /tmp/Naturals.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module StrongRho
+Starting... (2026-10-16 18:03:55)
+Computing initial states...
+Computed 2 initial states...
+Computed 4 initial states...
+Computed 8 initial states...
+Computed 16 initial states...
+Computed 32 initial states...
+Computed 64 initial states...
+Computed 128 initial states...
+Computed 256 initial states...
+Computed 512 initial states...
+Computed 1024 initial states...
+Computed 2048 initial states...
+Computed 4096 initial states...
+Computed 8192 initial states...
+Computed 16384 initial states...
+Finished computing initial states: 28830 distinct states generated at 2026-10-16 18:03:56.
+Error: Invariant W_LaneAtInfinity is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ phase = "begin"
+/\ capped = 0
+/\ escapes = 0
+/\ steps = 0
+/\ lane = << [ b |-> 0,
+     a |-> 0,
+     pt |-> 0,
+     prev |-> <<0, 0, 0, 0>>,
+     nprev |-> 0,
+     len |-> 0,
+     live |-> FALSE ],
+   [ b |-> 0,
+     a |-> 0,
+     pt |-> 0,
+     prev |-> <<0, 0, 0, 0>>,
+     nprev |-> 0,
+     len |-> 0,
+     live |-> FALSE ] >>
+/\ cursorA = 6
+/\ wasted = 0
+/\ d = 0
+/\ strideA = 1
+/\ fruitless = 0
+/\ pending = {}
+/\ walks = 0
+/\ table = <<>>
+/\ longest = 0
+/\ cursor = 6
+/\ failed = 0
+/\ sentinel = 0
+/\ result = 0
+/\ status = "running"
+
+State 2: <Begin line 118, col 5 to line 125, col 79 of module StrongRho>
+/\ phase = "start"
+/\ capped = 0
+/\ escapes = 0
+/\ steps = 0
+/\ lane = << [ b |-> 0,
+     a |-> 0,
+     pt |-> 0,
+     prev |-> <<0, 0, 0, 0>>,
+     nprev |-> 0,
+     len |-> 0,
+     live |-> FALSE ],
+   [ b |-> 0,
+     a |-> 0,
+     pt |-> 0,
+     prev |-> <<0, 0, 0, 0>>,
+     nprev |-> 0,
+     len |-> 0,
+     live |-> FALSE ] >>
+/\ cursorA = 6
+/\ wasted = 0
+/\ d = 0
+/\ strideA = 1
+/\ fruitless = 0
+/\ pending = {1, 2}
+/\ walks = 0
+/\ table = <<>>
+/\ longest = 0
+/\ cursor = 6
+/\ failed = 0
+/\ sentinel = 0
+/\ result = 0
+/\ status = "running"
+
+State 3: <StartLane line 129, col 5 to line 142, col 70 of module StrongRho>
+/\ phase = "start"
+/\ capped = 0
+/\ escapes = 0
+/\ steps = 0
+/\ lane = << [ b |-> 16,
+     a |-> 3,
+     pt |-> 3,
+     prev |-> <<0, 0, 0, 0>>,
+     nprev |-> 0,
+     len |-> 0,
+     live |-> TRUE ],
+   [ b |-> 0,
+     a |-> 0,
+     pt |-> 0,
+     prev |-> <<0, 0, 0, 0>>,
+     nprev |-> 0,
+     len |-> 0,
+     live |-> FALSE ] >>
+/\ cursorA = 7
+/\ wasted = 0
+/\ d = 0
+/\ strideA = 1
+/\ fruitless = 0
+/\ pending = {2}
+/\ walks = 1
+/\ table = <<>>
+/\ longest = 0
+/\ cursor = 7
+/\ failed = 0
+/\ sentinel = 0
+/\ result = 0
+/\ status = "running"
+
+State 4: <StartLane line 129, col 5 to line 142, col 70 of module StrongRho>
+/\ phase = "start"
+/\ capped = 0
+/\ escapes = 0
+/\ steps = 0
+/\ lane = << [ b |-> 16,
+     a |-> 3,
+     pt |-> 3,
+     prev |-> <<0, 0, 0, 0>>,
+     nprev |-> 0,
+     len |-> 0,
+     live |-> TRUE ],
+   [ b |-> 27,
+     a |-> 3,
+     pt |-> 3,
+     prev |-> <<0, 0, 0, 0>>,
+     nprev |-> 0,
+     len |-> 0,
+     live |-> TRUE ] >>
+/\ cursorA = 8
+/\ wasted = 0
+/\ d = 0
+/\ strideA = 1
+/\ fruitless = 0
+/\ pending = {}
+/\ walks = 2
+/\ table = <<>>
+/\ longest = 0
+/\ cursor = 8
+/\ failed = 0
+/\ sentinel = 0
+/\ result = 0
+/\ status = "running"
+
+State 5: <EndStart line 145, col 5 to line 147, col 87 of module StrongRho>
+/\ phase = "dp"
+/\ capped = 0
+/\ escapes = 0
+/\ steps = 0
+/\ lane = << [ b |-> 16,
+     a |-> 3,
+     pt |-> 3,
+     prev |-> <<0, 0, 0, 0>>,
+     nprev |-> 0,
+     len |-> 0,
+     live |-> TRUE ],
+   [ b |-> 27,
+     a |-> 3,
+     pt |-> 3,
+     prev |-> <<0, 0, 0, 0>>,
+     nprev |-> 0,
+     len |-> 0,
+     live |-> TRUE ] >>
+/\ cursorA = 8
+/\ wasted = 0
+/\ d = 0
+/\ strideA = 1
+/\ fruitless = 0
+/\ pending = 1..2
+/\ walks = 2
+/\ table = <<>>
+/\ longest = 0
+/\ cursor = 8
+/\ failed = 0
+/\ sentinel = 0
+/\ result = 0
+/\ status = "running"
+
+State 6: <DpLane line 151, col 5 to line 179, col 116 of module StrongRho>
+/\ phase = "dp"
+/\ capped = 0
+/\ escapes = 0
+/\ steps = 0
+/\ lane = << [ b |-> 16,
+     a |-> 3,
+     pt |-> 3,
+     prev |-> <<0, 0, 0, 0>>,
+     nprev |-> 0,
+     len |-> 0,
+     live |-> TRUE ],
+   [ b |-> 27,
+     a |-> 3,
+     pt |-> 3,
+     prev |-> <<0, 0, 0, 0>>,
+     nprev |-> 0,
+     len |-> 0,
+     live |-> TRUE ] >>
+/\ cursorA = 8
+/\ wasted = 0
+/\ d = 0
+/\ strideA = 1
+/\ fruitless = 0
+/\ pending = {2}
+/\ walks = 2
+/\ table = <<>>
+/\ longest = 0
+/\ cursor = 8
+/\ failed = 0
+/\ sentinel = 0
+/\ result = 0
+/\ status = "running"
+
+State 7: <DpLane line 151, col 5 to line 179, col 116 of module StrongRho>
+/\ phase = "dp"
+/\ capped = 0
+/\ escapes = 0
+/\ steps = 0
+/\ lane = << [ b |-> 16,
+     a |-> 3,
+     pt |-> 3,
+     prev |-> <<0, 0, 0, 0>>,
+     nprev |-> 0,
+     len |-> 0,
+     live |-> TRUE ],
+   [ b |-> 27,
+     a |-> 3,
+     pt |-> 3,
+     prev |-> <<0, 0, 0, 0>>,
+     nprev |-> 0,
+     len |-> 0,
+     live |-> TRUE ] >>
+/\ cursorA = 8
+/\ wasted = 0
+/\ d = 0
+/\ strideA = 1
+/\ fruitless = 0
+/\ pending = {}
+/\ walks = 2
+/\ table = <<>>
+/\ longest = 0
+/\ cursor = 8
+/\ failed = 0
+/\ sentinel = 0
+/\ result = 0
+/\ status = "running"
+
+State 8: <EndDp line 182, col 5 to line 184, col 87 of module StrongRho>
+/\ phase = "step"
+/\ capped = 0
+/\ escapes = 0
+/\ steps = 0
+/\ lane = << [ b |-> 16,
+     a |-> 3,
+     pt |-> 3,
+     prev |-> <<0, 0, 0, 0>>,
+     nprev |-> 0,
+     len |-> 0,
+     live |-> TRUE ],
+   [ b |-> 27,
+     a |-> 3,
+     pt |-> 3,
+     prev |-> <<0, 0, 0, 0>>,
+     nprev |-> 0,
+     len |-> 0,
+     live |-> TRUE ] >>
+/\ cursorA = 8
+/\ wasted = 0
+/\ d = 0
+/\ strideA = 1
+/\ fruitless = 0
+/\ pending = {1, 2}
+/\ walks = 2
+/\ table = <<>>
+/\ longest = 0
+/\ cursor = 8
+/\ failed = 0
+/\ sentinel = 0
+/\ result = 0
+/\ status = "running"
+
+State 9: <StepLane line 188, col 5 to line 228, col 101 of module StrongRho>
+/\ phase = "step"
+/\ capped = 0
+/\ escapes = 1
+/\ steps = 1
+/\ lane = << [ b |-> 1,
+     a |-> 0,
+     pt |-> 0,
+     prev |-> <<0, 0, 0, 0>>,
+     nprev |-> 0,
+     len |-> 1,
+     live |-> TRUE ],
+   [ b |-> 27,
+     a |-> 3,
+     pt |-> 3,
+     prev |-> <<0, 0, 0, 0>>,
+     nprev |-> 0,
+     len |-> 0,
+     live |-> TRUE ] >>
+/\ cursorA = 8
+/\ wasted = 0
+/\ d = 0
+/\ strideA = 1
+/\ fruitless = 0
+/\ pending = {2}
+/\ walks = 2
+/\ table = <<>>
+/\ longest = 0
+/\ cursor = 8
+/\ failed = 0
+/\ sentinel = 1
+/\ result = 0
+/\ status = "running"
+
+230643 states generated, 227852 distinct states found, 26035 states left on queue.
+The depth of the complete state graph search is 9.
+The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 1 and the 95th percentile is 1).
+Finished in 03s at (2026-10-16 18:03:59)
