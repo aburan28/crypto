@@ -72,7 +72,9 @@ for v in xpos:
     if v in arms:
         m = arms[v]["summary"]["iters"]["mean"]
         ax.scatter(xpos[v], -d["level"], s=70, color=cmap((m - lo) / (hi - lo or 1)), edgecolor="k", zorder=3)
-        ax.annotate(f"v{v}", (xpos[v], -d["level"]), textcoords="offset points", xytext=(0, 7), ha="center", fontsize=6)
+        floor = d["level"] == depth
+        ax.annotate(f"v{v}", (xpos[v], -d["level"]), textcoords="offset points", xytext=(0, -9 if floor else 7),
+                    ha="center", va="top" if floor else "bottom", fontsize=6, rotation=90 if floor else 0)
     else:
         ax.scatter(xpos[v], -d["level"], s=12, color="#dddddd", edgecolor="#999999", zorder=2)
     if v == 0:
