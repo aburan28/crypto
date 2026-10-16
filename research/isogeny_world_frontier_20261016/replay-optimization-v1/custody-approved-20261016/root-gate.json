@@ -1,0 +1,227 @@
+{
+  "schema": "isogeny-merged-source-root-gate/v1",
+  "status": "FAIL",
+  "source_commit": "3ce9694072773badcedc815ddbb953339888e433",
+  "command": "cargo test --release --locked --offline --lib -- --test-threads=1",
+  "exit_code": 101,
+  "passed": 4161,
+  "failed": 1,
+  "ignored": 117,
+  "filtered": 0,
+  "body_seconds_operational_only": 5314.88,
+  "started_utc": "2026-10-16T19:07:12Z",
+  "ended_utc": "2026-10-16T21:07:28Z",
+  "test_executable": {
+    "path": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/root-target/release/deps/crypto_lib-e89b2f0dbc9b5389",
+    "bytes": 62103520,
+    "sha256": "d0df72f83a47794a2099b873ea1a047c46b7fe08762bb26200b4d3e82a1d3535"
+  },
+  "archive": {
+    "path": "root-gate-3ce9694.tar.gz",
+    "bytes": 76106,
+    "sha256": "dd94aa850851429469c8d8bc98d519c3b0e1098cba72281e0ccadca933bba8ab",
+    "all_member_hashes_replayed": true
+  },
+  "raw_files": [
+    {
+      "path": "administrative/goal-lanes-tests.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "administrative/goal-lanes-tests.stderr",
+      "bytes": 124,
+      "sha256": "6b7195ce94ecdcf469f918795ca263e2367395d52552c70afe2fceceed7c8bfa"
+    },
+    {
+      "path": "administrative/goal-lanes-tests.stdout",
+      "bytes": 768,
+      "sha256": "7c4b2b3f0afaaf6bf12cde3c261b463b4219c46a0b4a8414898078e4dc7f9b43"
+    },
+    {
+      "path": "administrative/provenance.txt",
+      "bytes": 463,
+      "sha256": "24d58e36c646098bc9df57e2ed2f1ead3337e55c48efa46534986e02661b3aec"
+    },
+    {
+      "path": "bounded-module-retake/command.json",
+      "bytes": 190,
+      "sha256": "4a67a2f313367e17d4e9a468d6476572201f732a8e7d54d38dea39ee2867df22"
+    },
+    {
+      "path": "bounded-module-retake/ended-utc.txt",
+      "bytes": 33,
+      "sha256": "a559e3493fdabbee7dbc1a0e612b8511054f14be4f07b8c435e8fcb5567fb2aa"
+    },
+    {
+      "path": "bounded-module-retake/executable.json",
+      "bytes": 233,
+      "sha256": "ad69738a1664c995603db74206d0ae536c409f14f6b38d45e589a8bc7e461e28"
+    },
+    {
+      "path": "bounded-module-retake/prospective-note.txt",
+      "bytes": 196,
+      "sha256": "a7f1bdc44a2dd2a7bb9d56e62cc1023954bff9cbacf4b8e8b422a32cd2651a05"
+    },
+    {
+      "path": "bounded-module-retake/source-commit.txt",
+      "bytes": 41,
+      "sha256": "1fc00a75e419e85d8b13d168627c3606307db391af328c9fd7b6c6d0d9d406a9"
+    },
+    {
+      "path": "bounded-module-retake/started-utc.txt",
+      "bytes": 33,
+      "sha256": "8493a1a72e252cf2f4ced996bba7530e7d0fd1755e8d463635eb2c1da7ce05fe"
+    },
+    {
+      "path": "bounded-module-retake/test-os-time.txt",
+      "bytes": 777,
+      "sha256": "adf45a161e32625de529a63999bdd8ca452ab1ccc51a87094ce80eee32b209c1"
+    },
+    {
+      "path": "bounded-module-retake/test.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "bounded-module-retake/test.log",
+      "bytes": 1014,
+      "sha256": "11364fa0ba337cfff08a89fef5f03ee3d6c3af695f57e540ef9d698c341a6abd"
+    },
+    {
+      "path": "command.txt",
+      "bytes": 66,
+      "sha256": "a82930d97270d50d614e22f6c8aa6c8cfc423bcafe27e7693b448abfaf68d4a8"
+    },
+    {
+      "path": "compiler.txt",
+      "bytes": 203,
+      "sha256": "dbd639801eacf9d8900b64719640b726c1ad6b3e8fc216b7f0b2eae7c256a602"
+    },
+    {
+      "path": "diagnostic.json",
+      "bytes": 1350,
+      "sha256": "ceadc8ccd5fa5990021e3c7f4424de28f999e243e0d3747950c7c2a8fadd6ecc"
+    },
+    {
+      "path": "ended-utc.txt",
+      "bytes": 21,
+      "sha256": "9e9129eaad8fcc1308d9acc898aadfb1e9666dbaa7564e3f9788301421f0f624"
+    },
+    {
+      "path": "host.txt",
+      "bytes": 234,
+      "sha256": "13a1ef230d34d059d4866f8758ce35c1e5fce18ef080eed56722c8dd76f25949"
+    },
+    {
+      "path": "merge-changed-paths.txt",
+      "bytes": 27056,
+      "sha256": "f340c89479130ffff41e44e5fe01a2abaeeb795a0e39727e0d23d07d78575e38"
+    },
+    {
+      "path": "package-root-gate-command.py",
+      "bytes": 5122,
+      "sha256": "2f4d7d9200278c68a3fdd10c1bfa955192b3b41e78ae36eafe99719560a24d0a"
+    },
+    {
+      "path": "root-code-diff.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "root-code-diff.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "run-command.sh",
+      "bytes": 885,
+      "sha256": "04adab1ae1a2cbce03fc5e14306be857c52e210b9682a6beb362dac725f59c15"
+    },
+    {
+      "path": "source-commit.txt",
+      "bytes": 41,
+      "sha256": "1fc00a75e419e85d8b13d168627c3606307db391af328c9fd7b6c6d0d9d406a9"
+    },
+    {
+      "path": "source-tree.txt",
+      "bytes": 41,
+      "sha256": "e388dc57b518a3acbedd945d5312e0fabba5082b700fe72921756e334151e2f1"
+    },
+    {
+      "path": "started-utc.txt",
+      "bytes": 21,
+      "sha256": "87fc08c2f3f7e466f1d7c4431eaa1854ad8e3351e5018d8cf326fdd8e06130f4"
+    },
+    {
+      "path": "test-os-time.txt",
+      "bytes": 1123,
+      "sha256": "4aff4f68f771b86ce836d57ba53c4eda67823517dcca5ba424f262889b44c442"
+    },
+    {
+      "path": "test.exit",
+      "bytes": 4,
+      "sha256": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c"
+    },
+    {
+      "path": "test.log",
+      "bytes": 356419,
+      "sha256": "f42429048eccca8a982b4b9148c6de8f9dcc1e099ed30f646368335cfc26fff4"
+    }
+  ],
+  "isolation": "shared host",
+  "performance_claim": false,
+  "scientific_runs": 0,
+  "earlier_root_parallel_failure": "preserved; cause and parallel stability unestablished",
+  "diagnostic": {
+    "schema": "isogeny-unrelated-root-validation-diagnostic/v1",
+    "full_suite": "FAIL:4161/1/117 ignored;exit101",
+    "assertion_observation": {
+      "accepted": 27,
+      "trials": 4000,
+      "rate": 0.00675,
+      "strict_lower_threshold": "1/(37*4)"
+    },
+    "bounded_module_retake": {
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 4265,
+      "exit_code": 0,
+      "replaces_full_failure": false
+    },
+    "same_current_executable_sha256": "d0df72f83a47794a2099b873ea1a047c46b7fe08762bb26200b4d3e82a1d3535",
+    "sqisign_module_sha256": "7caef45c3cff41e67f431da9179fb189c9a143e86f37c7c6ef253b6a1428be6f",
+    "source_comparisons": {
+      "frozen_native_source": {
+        "base": "015fa7bb504ef63953e0e04e464bb266f4f207bf",
+        "paths": [
+          "src/pqc/sqisign.rs",
+          "src/hash/sha3.rs",
+          "Cargo.lock"
+        ],
+        "exit_code": 0,
+        "diff": ""
+      },
+      "main_parent": {
+        "base": "d22253655de460de5fbf4774959c97d8a03de682",
+        "paths": [
+          "src/pqc/sqisign.rs",
+          "src/hash/sha3.rs",
+          "Cargo.lock"
+        ],
+        "exit_code": 0,
+        "diff": ""
+      }
+    },
+    "imports": [
+      "crate::hash::sha3::shake256",
+      "rand::{rngs::OsRng,Rng}",
+      "std collections and OnceLock"
+    ],
+    "cause": "UNESTABLISHED",
+    "full_gate_passed": false,
+    "source_gate_complete": false,
+    "scientific_runs": 0
+  }
+}

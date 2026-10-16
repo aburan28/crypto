@@ -1,0 +1,5 @@
+# These public fixture bytes are bound by SHA-256 in native replay controls.
+# Preserve them verbatim on every checkout, including core.autocrlf=true.
+search.json -text
+p224/ell-1471.json -text
+p224/ell-1471.stderr.txt -text

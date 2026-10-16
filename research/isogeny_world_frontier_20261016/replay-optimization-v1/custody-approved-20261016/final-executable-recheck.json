@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "scientific_runs": 0,
+  "executables": [
+    {
+      "arm": "reference",
+      "binary": "isogeny",
+      "sha256": "2ff7d57174cda2d0e90088eb6ce217cbd1826e7697ed12ec7770d3d8f395d379",
+      "bytes": 32176704,
+      "compiled_equal_installed": true
+    },
+    {
+      "arm": "reference",
+      "binary": "fixed-modulus-bench",
+      "sha256": "b42863e83b7667ba2b69f1fd77bb15f045cd1af11a325a5abddd35e228b55274",
+      "bytes": 1164224,
+      "compiled_equal_installed": true
+    },
+    {
+      "arm": "candidate",
+      "binary": "isogeny",
+      "sha256": "305bdff7db7bc25a2ccdce3f44e71c3d47269e76afa0ecd1703803365ab9b207",
+      "bytes": 32193216,
+      "compiled_equal_installed": true
+    },
+    {
+      "arm": "candidate",
+      "binary": "fixed-modulus-bench",
+      "sha256": "3a983cffd7465ad2ae2a8fcc7b21dfce257c21b9caad98bacfd95400084553be",
+      "bytes": 1164512,
+      "compiled_equal_installed": true
+    }
+  ],
+  "pdf_visual_inspection": "final two pages rendered and inspected; no clipping or missing content"
+}

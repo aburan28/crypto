@@ -1,0 +1,1377 @@
+﻿2026-10-16T16:37:06.7854606Z Current runner version: '2.337.0'
+2026-10-16T16:37:06.7885711Z ##[group]Runner Image Provisioner
+2026-10-16T16:37:06.7886548Z Hosted Compute Agent
+2026-10-16T16:37:06.7887100Z Version: 20261002.596
+2026-10-16T16:37:06.7887724Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+2026-10-16T16:37:06.7888615Z Build Date: 2026-10-02T22:28:27Z
+2026-10-16T16:37:06.7889278Z Worker ID: {bb184ff8-c4c7-4b0e-90aa-705e31356342}
+2026-10-16T16:37:06.7890084Z Region: northcentralus
+2026-10-16T16:37:06.7890664Z Cloud: Azure
+2026-10-16T16:37:06.7891230Z ##[endgroup]
+2026-10-16T16:37:06.7892524Z ##[group]Operating System
+2026-10-16T16:37:06.7893147Z Microsoft Windows Server 2025
+2026-10-16T16:37:06.7893758Z 10.0.26100
+2026-10-16T16:37:06.7894252Z Datacenter
+2026-10-16T16:37:06.7894737Z ##[endgroup]
+2026-10-16T16:37:06.7895372Z ##[group]Runner Image
+2026-10-16T16:37:06.7895948Z Image: windows-2025-vs2026
+2026-10-16T16:37:06.7896541Z Version: 20261007.264.1
+2026-10-16T16:37:06.7898091Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20261007.264/images/windows/Windows2025-VS2026-Readme.md
+2026-10-16T16:37:06.7899753Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20261007.264
+2026-10-16T16:37:06.7900695Z ##[endgroup]
+2026-10-16T16:37:06.7901782Z ##[group]GITHUB_TOKEN Permissions
+2026-10-16T16:37:06.7904129Z Contents: read
+2026-10-16T16:37:06.7904753Z Metadata: read
+2026-10-16T16:37:06.7905275Z ##[endgroup]
+2026-10-16T16:37:06.7907290Z Secret source: Actions
+2026-10-16T16:37:06.7908207Z Cache mode: write
+2026-10-16T16:37:06.7908922Z Prepare workflow directory
+2026-10-16T16:37:06.8384914Z Prepare all required actions
+2026-10-16T16:37:06.8433022Z Getting action download info
+2026-10-16T16:37:07.0455522Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-16T16:37:07.1865699Z Download action repository 'dtolnay/rust-toolchain@1.93.1' (SHA:633c1125191e55c620c8ae7d364073c0ead621c1)
+2026-10-16T16:37:07.3142532Z Download action repository 'Swatinem/rust-cache@v2' (SHA:6323deb102c322ba6fcbdcafc7e3dddab59af2b6)
+2026-10-16T16:37:07.6534461Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-16T16:37:08.0190946Z Complete job name: isogeny (x86_64-pc-windows-msvc, windows-latest)
+2026-10-16T16:37:08.1757760Z ##[group]Run git config --global core.longpaths true
+2026-10-16T16:37:08.1758793Z [36;1mgit config --global core.longpaths true[0m
+2026-10-16T16:37:08.2705257Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-16T16:37:08.2706338Z env:
+2026-10-16T16:37:08.2706801Z   CARGO_TERM_COLOR: always
+2026-10-16T16:37:08.2707371Z   ECC_MARCH: x86-64-v3
+2026-10-16T16:37:08.2707874Z   CUDA_PKG_VERSION: 12-8
+2026-10-16T16:37:08.2708411Z   CUDA_DIR_VERSION: 12.8
+2026-10-16T16:37:08.2708939Z ##[endgroup]
+2026-10-16T16:37:09.1946953Z ##[group]Run actions/checkout@v4
+2026-10-16T16:37:09.1947713Z with:
+2026-10-16T16:37:09.1948190Z   repository: aburan28/crypto
+2026-10-16T16:37:09.1952471Z   token: ***
+2026-10-16T16:37:09.1952913Z   ssh-strict: true
+2026-10-16T16:37:09.1953348Z   ssh-user: git
+2026-10-16T16:37:09.1954078Z   persist-credentials: true
+2026-10-16T16:37:09.1954583Z   clean: true
+2026-10-16T16:37:09.1955022Z   sparse-checkout-cone-mode: true
+2026-10-16T16:37:09.1955549Z   fetch-depth: 1
+2026-10-16T16:37:09.1955979Z   fetch-tags: false
+2026-10-16T16:37:09.1956421Z   show-progress: true
+2026-10-16T16:37:09.1956856Z   lfs: false
+2026-10-16T16:37:09.1957257Z   submodules: false
+2026-10-16T16:37:09.1957718Z   set-safe-directory: true
+2026-10-16T16:37:09.1958441Z   allow-unsafe-pr-checkout: false
+2026-10-16T16:37:09.1958977Z env:
+2026-10-16T16:37:09.1959383Z   CARGO_TERM_COLOR: always
+2026-10-16T16:37:09.1959857Z   ECC_MARCH: x86-64-v3
+2026-10-16T16:37:09.1960363Z   CUDA_PKG_VERSION: 12-8
+2026-10-16T16:37:09.1960842Z   CUDA_DIR_VERSION: 12.8
+2026-10-16T16:37:09.1961294Z ##[endgroup]
+2026-10-16T16:37:09.3395220Z Syncing repository: aburan28/crypto
+2026-10-16T16:37:09.3397002Z ##[group]Getting Git version info
+2026-10-16T16:37:09.3397639Z Working directory is 'D:\a\crypto\crypto'
+2026-10-16T16:37:09.4083538Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-16T16:37:09.4451403Z git version 2.56.0.windows.2
+2026-10-16T16:37:09.4501453Z ##[endgroup]
+2026-10-16T16:37:09.4516106Z Copying 'C:\Users\runneradmin\.gitconfig' to 'D:\a\_temp\2b2a6fc2-3367-423a-8a6e-da5316c21690\.gitconfig'
+2026-10-16T16:37:09.4535146Z Temporarily overriding HOME='D:\a\_temp\2b2a6fc2-3367-423a-8a6e-da5316c21690' before making global git config changes
+2026-10-16T16:37:09.4536575Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-16T16:37:09.4545263Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\crypto\crypto
+2026-10-16T16:37:09.4978024Z Deleting the contents of 'D:\a\crypto\crypto'
+2026-10-16T16:37:09.4986767Z ##[group]Initializing the repository
+2026-10-16T16:37:09.4995195Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\crypto\crypto
+2026-10-16T16:37:09.6231425Z Initialized empty Git repository in D:/a/crypto/crypto/.git/
+2026-10-16T16:37:09.6286373Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/aburan28/crypto
+2026-10-16T16:37:09.7058068Z ##[endgroup]
+2026-10-16T16:37:09.7059230Z ##[group]Disabling automatic garbage collection
+2026-10-16T16:37:09.7070641Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-10-16T16:37:09.7495523Z ##[endgroup]
+2026-10-16T16:37:09.7496598Z ##[group]Setting up auth
+2026-10-16T16:37:09.7508835Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-16T16:37:09.8036652Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-16T16:37:11.2956093Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-16T16:37:11.3338371Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-16T16:37:11.8850684Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-16T16:37:11.9238021Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-16T16:37:12.5027199Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-10-16T16:37:12.5416627Z ##[endgroup]
+2026-10-16T16:37:12.5417696Z ##[group]Fetching the repository
+2026-10-16T16:37:12.5428035Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +87399c4f398ffc16b11779c6ff15541a32211cb8:refs/remotes/pull/1991/merge
+2026-10-16T16:37:54.4056822Z From https://github.com/aburan28/crypto
+2026-10-16T16:37:54.4058082Z  * [new ref]             87399c4f398ffc16b11779c6ff15541a32211cb8 -> pull/1991/merge
+2026-10-16T16:37:54.4108858Z ##[endgroup]
+2026-10-16T16:37:54.4109424Z ##[group]Determining the checkout info
+2026-10-16T16:37:54.4112264Z ##[endgroup]
+2026-10-16T16:37:54.4123330Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+2026-10-16T16:37:54.4650063Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+2026-10-16T16:37:54.5068000Z ##[group]Checking out the ref
+2026-10-16T16:37:54.5081541Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force refs/remotes/pull/1991/merge
+2026-10-16T16:37:56.0353734Z Updating files:   1% (1502/99908)
+2026-10-16T16:37:56.4510594Z Updating files:   2% (1999/99908)
+2026-10-16T16:37:56.7050028Z Updating files:   3% (2998/99908)
+2026-10-16T16:37:56.8431749Z Updating files:   3% (3471/99908)
+2026-10-16T16:37:57.0499162Z Updating files:   4% (3997/99908)
+2026-10-16T16:37:57.3185199Z Updating files:   5% (4996/99908)
+2026-10-16T16:37:57.6905107Z Updating files:   6% (5995/99908)
+2026-10-16T16:37:57.6946079Z Updating files:   6% (6984/99908)
+2026-10-16T16:37:58.1161058Z Updating files:   7% (6994/99908)
+2026-10-16T16:37:58.6544450Z Updating files:   8% (7993/99908)
+2026-10-16T16:37:58.6935546Z Updating files:   9% (8992/99908)
+2026-10-16T16:37:59.3768687Z Updating files:   9% (9122/99908)
+2026-10-16T16:37:59.7394357Z Updating files:  10% (9991/99908)
+2026-10-16T16:38:00.7083214Z Updating files:  10% (10098/99908)
+2026-10-16T16:38:01.1004010Z Updating files:  10% (10549/99908)
+2026-10-16T16:38:01.7127761Z Updating files:  11% (10990/99908)
+2026-10-16T16:38:02.0962482Z Updating files:  11% (11605/99908)
+2026-10-16T16:38:02.7389571Z Updating files:  12% (11989/99908)
+2026-10-16T16:38:02.8824918Z Updating files:  12% (12953/99908)
+2026-10-16T16:38:03.7736112Z Updating files:  13% (12989/99908)
+2026-10-16T16:38:04.7408995Z Updating files:  13% (13332/99908)
+2026-10-16T16:38:04.8600672Z Updating files:  13% (13835/99908)
+2026-10-16T16:38:05.5310431Z Updating files:  14% (13988/99908)
+2026-10-16T16:38:05.7417138Z Updating files:  15% (14987/99908)
+2026-10-16T16:38:05.9937729Z Updating files:  15% (15350/99908)
+2026-10-16T16:38:06.6617644Z Updating files:  16% (15986/99908)
+2026-10-16T16:38:06.7434818Z Updating files:  17% (16985/99908)
+2026-10-16T16:38:07.1166090Z Updating files:  17% (17140/99908)
+2026-10-16T16:38:07.3932350Z Updating files:  18% (17984/99908)
+2026-10-16T16:38:07.6836935Z Updating files:  19% (18983/99908)
+2026-10-16T16:38:07.7433713Z Updating files:  20% (19982/99908)
+2026-10-16T16:38:07.9466997Z Updating files:  20% (20180/99908)
+2026-10-16T16:38:08.2035805Z Updating files:  21% (20981/99908)
+2026-10-16T16:38:08.4941233Z Updating files:  22% (21980/99908)
+2026-10-16T16:38:08.7542311Z Updating files:  23% (22979/99908)
+2026-10-16T16:38:08.7714010Z Updating files:  23% (23928/99908)
+2026-10-16T16:38:08.9535241Z Updating files:  24% (23978/99908)
+2026-10-16T16:38:09.1937729Z Updating files:  25% (24977/99908)
+2026-10-16T16:38:09.4048897Z Updating files:  26% (25977/99908)
+2026-10-16T16:38:09.7567476Z Updating files:  27% (26976/99908)
+2026-10-16T16:38:10.1590097Z Updating files:  28% (27975/99908)
+2026-10-16T16:38:10.4041204Z Updating files:  29% (28974/99908)
+2026-10-16T16:38:10.7902471Z Updating files:  30% (29973/99908)
+2026-10-16T16:38:11.1940220Z Updating files:  30% (30532/99908)
+2026-10-16T16:38:11.9774795Z Updating files:  31% (30972/99908)
+2026-10-16T16:38:12.8247684Z Updating files:  31% (31088/99908)
+2026-10-16T16:38:13.8700340Z Updating files:  31% (31094/99908)
+2026-10-16T16:38:14.8297673Z Updating files:  31% (31108/99908)
+2026-10-16T16:38:15.8648504Z Updating files:  31% (31123/99908)
+2026-10-16T16:38:16.7602957Z Updating files:  31% (31292/99908)
+2026-10-16T16:38:16.9302246Z Updating files:  32% (31971/99908)
+2026-10-16T16:38:17.8813680Z Updating files:  32% (31999/99908)
+2026-10-16T16:38:18.2237410Z Updating files:  32% (32211/99908)
+2026-10-16T16:38:18.4348715Z Updating files:  33% (32970/99908)
+2026-10-16T16:38:18.6450908Z Updating files:  34% (33969/99908)
+2026-10-16T16:38:18.8028959Z Updating files:  35% (34968/99908)
+2026-10-16T16:38:18.8631792Z Updating files:  35% (35699/99908)
+2026-10-16T16:38:19.2036340Z Updating files:  36% (35967/99908)
+2026-10-16T16:38:19.6132917Z Updating files:  37% (36966/99908)
+2026-10-16T16:38:19.8086507Z Updating files:  38% (37966/99908)
+2026-10-16T16:38:19.8098431Z Updating files:  39% (38965/99908)
+2026-10-16T16:38:20.0330195Z Updating files:  39% (38971/99908)
+2026-10-16T16:38:20.2803200Z Updating files:  40% (39964/99908)
+2026-10-16T16:38:20.4563765Z Updating files:  41% (40963/99908)
+2026-10-16T16:38:20.6301610Z Updating files:  42% (41962/99908)
+2026-10-16T16:38:20.8228473Z Updating files:  43% (42961/99908)
+2026-10-16T16:38:21.0171192Z Updating files:  43% (43690/99908)
+2026-10-16T16:38:21.2966253Z Updating files:  44% (43960/99908)
+2026-10-16T16:38:21.4803527Z Updating files:  45% (44959/99908)
+2026-10-16T16:38:21.6828539Z Updating files:  46% (45958/99908)
+2026-10-16T16:38:21.8361519Z Updating files:  47% (46957/99908)
+2026-10-16T16:38:21.9121559Z Updating files:  47% (47630/99908)
+2026-10-16T16:38:22.1878545Z Updating files:  48% (47956/99908)
+2026-10-16T16:38:22.5559357Z Updating files:  49% (48955/99908)
+2026-10-16T16:38:22.7539834Z Updating files:  50% (49954/99908)
+2026-10-16T16:38:22.8380858Z Updating files:  51% (50954/99908)
+2026-10-16T16:38:22.9902115Z Updating files:  51% (51294/99908)
+2026-10-16T16:38:23.2888764Z Updating files:  52% (51953/99908)
+2026-10-16T16:38:23.4780477Z Updating files:  53% (52952/99908)
+2026-10-16T16:38:23.8559878Z Updating files:  54% (53951/99908)
+2026-10-16T16:38:24.0158672Z Updating files:  54% (54158/99908)
+2026-10-16T16:38:24.2022072Z Updating files:  55% (54950/99908)
+2026-10-16T16:38:24.3863348Z Updating files:  56% (55949/99908)
+2026-10-16T16:38:24.6056084Z Updating files:  57% (56948/99908)
+2026-10-16T16:38:24.8471021Z Updating files:  58% (57947/99908)
+2026-10-16T16:38:24.8483857Z Updating files:  59% (58946/99908)
+2026-10-16T16:38:25.8089624Z Updating files:  59% (58954/99908)
+2026-10-16T16:38:25.8572518Z Updating files:  60% (59945/99908)
+2026-10-16T16:38:26.3349602Z Updating files:  60% (59965/99908)
+2026-10-16T16:38:26.6250228Z Updating files:  61% (60944/99908)
+2026-10-16T16:38:26.8449997Z Updating files:  62% (61943/99908)
+2026-10-16T16:38:26.8705992Z Updating files:  63% (62943/99908)
+2026-10-16T16:38:27.1536209Z Updating files:  63% (63023/99908)
+2026-10-16T16:38:27.5143214Z Updating files:  64% (63942/99908)
+2026-10-16T16:38:27.8909354Z Updating files:  65% (64941/99908)
+2026-10-16T16:38:28.0366417Z Updating files:  65% (65725/99908)
+2026-10-16T16:38:28.2784580Z Updating files:  66% (65940/99908)
+2026-10-16T16:38:28.7729398Z Updating files:  67% (66939/99908)
+2026-10-16T16:38:28.9184761Z Updating files:  68% (67938/99908)
+2026-10-16T16:38:29.8975512Z Updating files:  68% (68086/99908)
+2026-10-16T16:38:30.0267248Z Updating files:  68% (68855/99908)
+2026-10-16T16:38:30.8977245Z Updating files:  69% (68937/99908)
+2026-10-16T16:38:31.8619634Z Updating files:  69% (69102/99908)
+2026-10-16T16:38:31.8940341Z Updating files:  70% (69936/99908)
+2026-10-16T16:38:32.3460490Z Updating files:  70% (69995/99908)
+2026-10-16T16:38:32.8958567Z Updating files:  71% (70935/99908)
+2026-10-16T16:38:33.2953427Z Updating files:  71% (71747/99908)
+2026-10-16T16:38:33.8541616Z Updating files:  72% (71934/99908)
+2026-10-16T16:38:33.9045834Z Updating files:  73% (72933/99908)
+2026-10-16T16:38:34.4558488Z Updating files:  73% (73036/99908)
+2026-10-16T16:38:34.7688596Z Updating files:  74% (73932/99908)
+2026-10-16T16:38:34.9963359Z Updating files:  75% (74931/99908)
+2026-10-16T16:38:35.6012909Z Updating files:  75% (74946/99908)
+2026-10-16T16:38:35.9096159Z Updating files:  76% (75931/99908)
+2026-10-16T16:38:35.9277603Z Updating files:  77% (76930/99908)
+2026-10-16T16:38:36.0838797Z Updating files:  77% (77048/99908)
+2026-10-16T16:38:36.3926422Z Updating files:  78% (77929/99908)
+2026-10-16T16:38:36.5801663Z Updating files:  79% (78928/99908)
+2026-10-16T16:38:36.9211451Z Updating files:  80% (79927/99908)
+2026-10-16T16:38:36.9297799Z Updating files:  81% (80926/99908)
+2026-10-16T16:38:37.1765727Z Updating files:  81% (80931/99908)
+2026-10-16T16:38:37.3942591Z Updating files:  82% (81925/99908)
+2026-10-16T16:38:37.6231579Z Updating files:  83% (82924/99908)
+2026-10-16T16:38:37.8261110Z Updating files:  84% (83923/99908)
+2026-10-16T16:38:37.9376167Z Updating files:  85% (84922/99908)
+2026-10-16T16:38:38.0088687Z Updating files:  85% (85516/99908)
+2026-10-16T16:38:38.1892254Z Updating files:  86% (85921/99908)
+2026-10-16T16:38:38.5115452Z Updating files:  87% (86920/99908)
+2026-10-16T16:38:38.9516513Z Updating files:  88% (87920/99908)
+2026-10-16T16:38:38.9805511Z Updating files:  88% (88818/99908)
+2026-10-16T16:38:39.9562506Z Updating files:  89% (88919/99908)
+2026-10-16T16:38:40.1551990Z Updating files:  89% (89518/99908)
+2026-10-16T16:38:40.9529486Z Updating files:  90% (89918/99908)
+2026-10-16T16:38:41.2115310Z Updating files:  90% (90349/99908)
+2026-10-16T16:38:41.5030755Z Updating files:  91% (90917/99908)
+2026-10-16T16:38:41.9592467Z Updating files:  92% (91916/99908)
+2026-10-16T16:38:42.0191562Z Updating files:  92% (92679/99908)
+2026-10-16T16:38:42.2760833Z Updating files:  93% (92915/99908)
+2026-10-16T16:38:42.5056195Z Updating files:  94% (93914/99908)
+2026-10-16T16:38:42.8866917Z Updating files:  95% (94913/99908)
+2026-10-16T16:38:42.9739481Z Updating files:  96% (95912/99908)
+2026-10-16T16:38:43.4875551Z Updating files:  96% (96050/99908)
+2026-10-16T16:38:43.9052954Z Updating files:  97% (96911/99908)
+2026-10-16T16:38:44.2020575Z Updating files:  98% (97910/99908)
+2026-10-16T16:38:44.7025461Z Updating files:  98% (98082/99908)
+2026-10-16T16:38:44.9876048Z Updating files:  99% (98909/99908)
+2026-10-16T16:38:45.0629653Z Updating files:  99% (99629/99908)
+2026-10-16T16:38:45.0630083Z Updating files: 100% (99908/99908)
+2026-10-16T16:38:45.0630438Z Updating files: 100% (99908/99908), done.
+2026-10-16T16:38:45.2075107Z Note: switching to 'refs/remotes/pull/1991/merge'.
+2026-10-16T16:38:45.2075568Z 
+2026-10-16T16:38:45.2075953Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-16T16:38:45.2076833Z changes and commit them, and you can discard any commits you make in this
+2026-10-16T16:38:45.2077675Z state without impacting any branches by switching back to a branch.
+2026-10-16T16:38:45.2078181Z 
+2026-10-16T16:38:45.2078578Z If you want to create a new branch to retain commits you create, you may
+2026-10-16T16:38:45.2079360Z do so (now or later) by using -c with the switch command. Example:
+2026-10-16T16:38:45.2079816Z 
+2026-10-16T16:38:45.2080121Z   git switch -c <new-branch-name>
+2026-10-16T16:38:45.2080389Z 
+2026-10-16T16:38:45.2080597Z Or undo this operation with:
+2026-10-16T16:38:45.2080910Z 
+2026-10-16T16:38:45.2081055Z   git switch -
+2026-10-16T16:38:45.2081305Z 
+2026-10-16T16:38:45.2081659Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-16T16:38:45.2082226Z 
+2026-10-16T16:38:45.2082826Z HEAD is now at 87399c4f3 Merge 3ce9694072773badcedc815ddbb953339888e433 into d22253655de460de5fbf4774959c97d8a03de682
+2026-10-16T16:38:45.4805729Z ##[endgroup]
+2026-10-16T16:38:45.5220687Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-10-16T16:38:45.5565618Z 87399c4f398ffc16b11779c6ff15541a32211cb8
+2026-10-16T16:38:45.6202031Z ##[group]Run dtolnay/rust-toolchain@1.93.1
+2026-10-16T16:38:45.6202425Z with:
+2026-10-16T16:38:45.6202693Z   targets: x86_64-pc-windows-msvc
+2026-10-16T16:38:45.6202989Z env:
+2026-10-16T16:38:45.6203437Z   CARGO_TERM_COLOR: always
+2026-10-16T16:38:45.6203727Z   ECC_MARCH: x86-64-v3
+2026-10-16T16:38:45.6204003Z   CUDA_PKG_VERSION: 12-8
+2026-10-16T16:38:45.6204278Z   CUDA_DIR_VERSION: 12.8
+2026-10-16T16:38:45.6204723Z ##[endgroup]
+2026-10-16T16:38:45.6277922Z ##[start-action display=Parse toolchain version;id=__dtolnay_rust-toolchain.parse]
+2026-10-16T16:38:45.6446859Z ##[group]Run if [[ -z $toolchain ]]; then
+2026-10-16T16:38:45.6447300Z [36;1mif [[ -z $toolchain ]]; then[0m
+2026-10-16T16:38:45.6447907Z [36;1m  # GitHub does not enforce `required: true` inputs itself. https://github.com/actions/runner/issues/1070[0m
+2026-10-16T16:38:45.6448509Z [36;1m  echo "'toolchain' is a required input" >&2[0m
+2026-10-16T16:38:45.6448863Z [36;1m  exit 1[0m
+2026-10-16T16:38:45.6449355Z [36;1melif [[ $toolchain =~ ^stable' '[0-9]+' '(year|month|week|day)s?' 'ago$ ]]; then[0m
+2026-10-16T16:38:45.6449803Z [36;1m  if [[ Windows == macOS ]]; then[0m
+2026-10-16T16:38:45.6451204Z [36;1m    echo "toolchain=1.$((($(date -v-$(sed 's/stable \([0-9]*\) \(.\).*/\1\2/' <<< $toolchain) +%s)/60/60/24-16569)/7/6))" >> $GITHUB_OUTPUT[0m
+2026-10-16T16:38:45.6451715Z [36;1m  else[0m
+2026-10-16T16:38:45.6452148Z [36;1m    echo "toolchain=1.$((($(date --date "${toolchain#stable }" +%s)/60/60/24-16569)/7/6))" >> $GITHUB_OUTPUT[0m
+2026-10-16T16:38:45.6452634Z [36;1m  fi[0m
+2026-10-16T16:38:45.6452994Z [36;1melif [[ $toolchain =~ ^stable' 'minus' '[0-9]+' 'releases?$ ]]; then[0m
+2026-10-16T16:38:45.6453551Z [36;1m  echo "toolchain=1.$((($(date +%s)/60/60/24-16569)/7/6-${toolchain//[^0-9]/}))" >> $GITHUB_OUTPUT[0m
+2026-10-16T16:38:45.6454050Z [36;1melif [[ $toolchain =~ ^1\.[0-9]+$ ]]; then[0m
+2026-10-16T16:38:45.6454598Z [36;1m  echo "toolchain=1.$((i=${toolchain#1.}, c=($(date +%s)/60/60/24-16569)/7/6, i+9*i*(10*i<=c)+90*i*(100*i<=c)))" >> $GITHUB_OUTPUT[0m
+2026-10-16T16:38:45.6455108Z [36;1melse[0m
+2026-10-16T16:38:45.6455358Z [36;1m  delimiter=EOF[0m
+2026-10-16T16:38:45.6455692Z [36;1m  while [[ $toolchain == *$delimiter* ]]; do delimiter+=_; done[0m
+2026-10-16T16:38:45.6456282Z [36;1m  printf 'toolchain<<%s\n%s\n%s\n' "$delimiter" "$toolchain" "$delimiter" >> $GITHUB_OUTPUT[0m
+2026-10-16T16:38:45.6456746Z [36;1mfi[0m
+2026-10-16T16:38:45.6472226Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-10-16T16:38:45.6472715Z env:
+2026-10-16T16:38:45.6472973Z   CARGO_TERM_COLOR: always
+2026-10-16T16:38:45.6473269Z   ECC_MARCH: x86-64-v3
+2026-10-16T16:38:45.6473549Z   CUDA_PKG_VERSION: 12-8
+2026-10-16T16:38:45.6473821Z   CUDA_DIR_VERSION: 12.8
+2026-10-16T16:38:45.6474028Z   toolchain: 1.93.1
+2026-10-16T16:38:45.6474230Z ##[endgroup]
+2026-10-16T16:38:45.8082373Z ##[end-action id=__dtolnay_rust-toolchain.parse;outcome=success;conclusion=success;duration_ms=180]
+2026-10-16T16:38:45.8087570Z ##[start-action display=Set $CARGO_HOME;id=__dtolnay_rust-toolchain.__run]
+2026-10-16T16:38:45.8224617Z ##[group]Run echo CARGO_HOME=${CARGO_HOME:-"$USERPROFILE\.cargo"} >> $GITHUB_ENV
+2026-10-16T16:38:45.8225147Z [36;1mecho CARGO_HOME=${CARGO_HOME:-"$USERPROFILE\.cargo"} >> $GITHUB_ENV[0m
+2026-10-16T16:38:45.8238269Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-10-16T16:38:45.8238649Z env:
+2026-10-16T16:38:45.8238837Z   CARGO_TERM_COLOR: always
+2026-10-16T16:38:45.8239066Z   ECC_MARCH: x86-64-v3
+2026-10-16T16:38:45.8239271Z   CUDA_PKG_VERSION: 12-8
+2026-10-16T16:38:45.8239478Z   CUDA_DIR_VERSION: 12.8
+2026-10-16T16:38:45.8239668Z ##[endgroup]
+2026-10-16T16:38:45.9283120Z ##[end-action id=__dtolnay_rust-toolchain.__run;outcome=success;conclusion=success;duration_ms=119]
+2026-10-16T16:38:45.9285798Z ##[start-action display=Install rustup if needed;id=__dtolnay_rust-toolchain.__run_2]
+2026-10-16T16:38:45.9293090Z ##[end-action id=__dtolnay_rust-toolchain.__run_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-16T16:38:45.9295319Z ##[start-action display=Install rustup if needed on windows;id=__dtolnay_rust-toolchain.__run_3]
+2026-10-16T16:38:45.9429767Z ##[group]Run if ! command -v rustup &>/dev/null; then
+2026-10-16T16:38:45.9430128Z [36;1mif ! command -v rustup &>/dev/null; then[0m
+2026-10-16T16:38:45.9430891Z [36;1m  curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused --location --silent --show-error --fail https://win.rustup.rs/x86_64 --output 'D:\a\_temp\rustup-init.exe'[0m
+2026-10-16T16:38:45.9431743Z [36;1m  'D:\a\_temp\rustup-init.exe' --default-toolchain none --no-modify-path -y[0m
+2026-10-16T16:38:45.9432155Z [36;1m  echo "$CARGO_HOME\bin" >> $GITHUB_PATH[0m
+2026-10-16T16:38:45.9432420Z [36;1mfi[0m
+2026-10-16T16:38:45.9445476Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-10-16T16:38:45.9445856Z env:
+2026-10-16T16:38:45.9446059Z   CARGO_TERM_COLOR: always
+2026-10-16T16:38:45.9446273Z   ECC_MARCH: x86-64-v3
+2026-10-16T16:38:45.9446473Z   CUDA_PKG_VERSION: 12-8
+2026-10-16T16:38:45.9446683Z   CUDA_DIR_VERSION: 12.8
+2026-10-16T16:38:45.9447077Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+2026-10-16T16:38:45.9447335Z ##[endgroup]
+2026-10-16T16:38:45.9958646Z ##[end-action id=__dtolnay_rust-toolchain.__run_3;outcome=success;conclusion=success;duration_ms=66]
+2026-10-16T16:38:45.9975192Z ##[start-action display=rustup toolchain install 1.93.1;id=__dtolnay_rust-toolchain.__run_4]
+2026-10-16T16:38:46.0112029Z ##[group]Run set -f  # split targets and components on commas and whitespace, without glob expansion
+2026-10-16T16:38:46.0112712Z [36;1mset -f  # split targets and components on commas and whitespace, without glob expansion[0m
+2026-10-16T16:38:46.0113139Z [36;1mflags=()[0m
+2026-10-16T16:38:46.0113414Z [36;1mfor t in ${targets//,/ }; do flags+=(--target "$t"); done[0m
+2026-10-16T16:38:46.0114160Z [36;1mfor c in ${components//,/ }; do flags+=(--component "$c"); done[0m
+2026-10-16T16:38:46.0114649Z [36;1mif [[ $toolchain == nightly && -n $components ]]; then flags+=(--allow-downgrade); fi[0m
+2026-10-16T16:38:46.0115094Z [36;1mlog=$(mktemp)[0m
+2026-10-16T16:38:46.0115337Z [36;1mtrap 'rm -f "$log"' EXIT[0m
+2026-10-16T16:38:46.0115587Z [36;1mfor attempt in 1 2 3 4 5; do[0m
+2026-10-16T16:38:46.0116151Z [36;1m  if rustup toolchain install "$toolchain" "${flags[@]}" --profile minimal --no-self-update --force-non-host 2>&1 | tee "$log"; then[0m
+2026-10-16T16:38:46.0116685Z [36;1m    break[0m
+2026-10-16T16:38:46.0116879Z [36;1m  else[0m
+2026-10-16T16:38:46.0117068Z [36;1m    status=$?[0m
+2026-10-16T16:38:46.0117268Z [36;1m  fi[0m
+2026-10-16T16:38:46.0117548Z [36;1m  if [[ $attempt == 5 ]] || ! grep -Fq 'checksum failed for ' "$log" \[0m
+2026-10-16T16:38:46.0118084Z [36;1m      || ! grep -Fq 'this is likely due to an ongoing update of the official release server' "$log"; then[0m
+2026-10-16T16:38:46.0118540Z [36;1m    exit "$status"[0m
+2026-10-16T16:38:46.0118922Z [36;1m  fi[0m
+2026-10-16T16:38:46.0119283Z [36;1m  echo "Retrying rustup toolchain install in 30 seconds (retry $attempt of 4)" >&2[0m
+2026-10-16T16:38:46.0119686Z [36;1m  sleep 30[0m
+2026-10-16T16:38:46.0119877Z [36;1mdone[0m
+2026-10-16T16:38:46.0132141Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-10-16T16:38:46.0132533Z env:
+2026-10-16T16:38:46.0132728Z   CARGO_TERM_COLOR: always
+2026-10-16T16:38:46.0132954Z   ECC_MARCH: x86-64-v3
+2026-10-16T16:38:46.0133165Z   CUDA_PKG_VERSION: 12-8
+2026-10-16T16:38:46.0133394Z   CUDA_DIR_VERSION: 12.8
+2026-10-16T16:38:46.0133626Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+2026-10-16T16:38:46.0134239Z   toolchain: 1.93.1
+2026-10-16T16:38:46.0134450Z   targets: x86_64-pc-windows-msvc
+2026-10-16T16:38:46.0134694Z   components: 
+2026-10-16T16:38:46.0134897Z   RUSTUP_PERMIT_COPY_RENAME: 1
+2026-10-16T16:38:46.0135126Z ##[endgroup]
+2026-10-16T16:38:46.7769860Z info: syncing channel updates for 1.93.1-x86_64-pc-windows-msvc
+2026-10-16T16:38:47.3158914Z info: latest update on 2026-02-12 for version 1.93.1 (01f6ddf75 2026-02-11)
+2026-10-16T16:38:47.3473446Z info: downloading 3 components
+2026-10-16T16:38:55.8604691Z 
+2026-10-16T16:38:55.8922063Z   1.93.1-x86_64-pc-windows-msvc installed - rustc 1.93.1 (01f6ddf75 2026-02-11)
+2026-10-16T16:38:55.8922604Z 
+2026-10-16T16:38:55.9225113Z ##[end-action id=__dtolnay_rust-toolchain.__run_4;outcome=success;conclusion=success;duration_ms=9924]
+2026-10-16T16:38:55.9232446Z ##[start-action display=rustup default 1.93.1;id=__dtolnay_rust-toolchain.__run_5]
+2026-10-16T16:38:55.9385800Z ##[group]Run rustup default "$toolchain" --force-non-host
+2026-10-16T16:38:55.9386193Z [36;1mrustup default "$toolchain" --force-non-host[0m
+2026-10-16T16:38:55.9399268Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-10-16T16:38:55.9399645Z env:
+2026-10-16T16:38:55.9399838Z   CARGO_TERM_COLOR: always
+2026-10-16T16:38:55.9400060Z   ECC_MARCH: x86-64-v3
+2026-10-16T16:38:55.9400256Z   CUDA_PKG_VERSION: 12-8
+2026-10-16T16:38:55.9400465Z   CUDA_DIR_VERSION: 12.8
+2026-10-16T16:38:55.9400939Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+2026-10-16T16:38:55.9401199Z   toolchain: 1.93.1
+2026-10-16T16:38:55.9401388Z ##[endgroup]
+2026-10-16T16:38:56.0120210Z info: using existing install for 1.93.1-x86_64-pc-windows-msvc
+2026-10-16T16:38:56.0176013Z info: default toolchain set to 1.93.1-x86_64-pc-windows-msvc
+2026-10-16T16:38:56.0176371Z 
+2026-10-16T16:38:56.0389253Z   1.93.1-x86_64-pc-windows-msvc unchanged - rustc 1.93.1 (01f6ddf75 2026-02-11)
+2026-10-16T16:38:56.0389611Z 
+2026-10-16T16:38:56.0475862Z ##[end-action id=__dtolnay_rust-toolchain.__run_5;outcome=success;conclusion=success;duration_ms=124]
+2026-10-16T16:38:56.0479759Z ##[start-action display=Create cachekey;id=__dtolnay_rust-toolchain.rustc-version]
+2026-10-16T16:38:56.0610271Z ##[group]Run DATE=$(rustc +"$toolchain" --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')
+2026-10-16T16:38:56.0611080Z [36;1mDATE=$(rustc +"$toolchain" --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')[0m
+2026-10-16T16:38:56.0611712Z [36;1mHASH=$(rustc +"$toolchain" --version --verbose | sed -ne 's/^commit-hash: //p')[0m
+2026-10-16T16:38:56.0612194Z [36;1mecho "cachekey=$(echo $DATE$HASH | head -c12)" >> $GITHUB_OUTPUT[0m
+2026-10-16T16:38:56.0625615Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-10-16T16:38:56.0625999Z env:
+2026-10-16T16:38:56.0626184Z   CARGO_TERM_COLOR: always
+2026-10-16T16:38:56.0626399Z   ECC_MARCH: x86-64-v3
+2026-10-16T16:38:56.0626600Z   CUDA_PKG_VERSION: 12-8
+2026-10-16T16:38:56.0626811Z   CUDA_DIR_VERSION: 12.8
+2026-10-16T16:38:56.0627027Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+2026-10-16T16:38:56.0627273Z   toolchain: 1.93.1
+2026-10-16T16:38:56.0627469Z ##[endgroup]
+2026-10-16T16:38:56.8999019Z ##[end-action id=__dtolnay_rust-toolchain.rustc-version;outcome=success;conclusion=success;duration_ms=851]
+2026-10-16T16:38:56.9001642Z ##[start-action display=Disable incremental compilation;id=__dtolnay_rust-toolchain.__run_6]
+2026-10-16T16:38:56.9126128Z ##[group]Run if [ -z "${CARGO_INCREMENTAL+set}" ]; then
+2026-10-16T16:38:56.9126507Z [36;1mif [ -z "${CARGO_INCREMENTAL+set}" ]; then[0m
+2026-10-16T16:38:56.9126818Z [36;1m  echo CARGO_INCREMENTAL=0 >> $GITHUB_ENV[0m
+2026-10-16T16:38:56.9127086Z [36;1mfi[0m
+2026-10-16T16:38:56.9138918Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-10-16T16:38:56.9139304Z env:
+2026-10-16T16:38:56.9139489Z   CARGO_TERM_COLOR: always
+2026-10-16T16:38:56.9139707Z   ECC_MARCH: x86-64-v3
+2026-10-16T16:38:56.9139920Z   CUDA_PKG_VERSION: 12-8
+2026-10-16T16:38:56.9140149Z   CUDA_DIR_VERSION: 12.8
+2026-10-16T16:38:56.9140376Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+2026-10-16T16:38:56.9140816Z ##[endgroup]
+2026-10-16T16:38:56.9535528Z ##[end-action id=__dtolnay_rust-toolchain.__run_6;outcome=success;conclusion=success;duration_ms=53]
+2026-10-16T16:38:56.9537991Z ##[start-action display=Enable colors in Cargo output;id=__dtolnay_rust-toolchain.__run_7]
+2026-10-16T16:38:56.9660264Z ##[group]Run if [ -z "${CARGO_TERM_COLOR+set}" ]; then
+2026-10-16T16:38:56.9660632Z [36;1mif [ -z "${CARGO_TERM_COLOR+set}" ]; then[0m
+2026-10-16T16:38:56.9660957Z [36;1m  echo CARGO_TERM_COLOR=always >> $GITHUB_ENV[0m
+2026-10-16T16:38:56.9661234Z [36;1mfi[0m
+2026-10-16T16:38:56.9673247Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-10-16T16:38:56.9673665Z env:
+2026-10-16T16:38:56.9673868Z   CARGO_TERM_COLOR: always
+2026-10-16T16:38:56.9674091Z   ECC_MARCH: x86-64-v3
+2026-10-16T16:38:56.9674297Z   CUDA_PKG_VERSION: 12-8
+2026-10-16T16:38:56.9674516Z   CUDA_DIR_VERSION: 12.8
+2026-10-16T16:38:56.9674739Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+2026-10-16T16:38:56.9675009Z   CARGO_INCREMENTAL: 0
+2026-10-16T16:38:56.9675211Z ##[endgroup]
+2026-10-16T16:38:57.0062270Z ##[end-action id=__dtolnay_rust-toolchain.__run_7;outcome=success;conclusion=success;duration_ms=52]
+2026-10-16T16:38:57.0065994Z ##[start-action display=Enable Cargo sparse registry;id=__dtolnay_rust-toolchain.__run_8]
+2026-10-16T16:38:57.0196146Z ##[group]Run # implemented in 1.66, stabilized in 1.68, made default in 1.70
+2026-10-16T16:38:57.0196674Z [36;1m# implemented in 1.66, stabilized in 1.68, made default in 1.70[0m
+2026-10-16T16:38:57.0197319Z [36;1mif [ -z "${CARGO_REGISTRIES_CRATES_IO_PROTOCOL+set}" -o -f "D:\a\_temp"/.implicit_cargo_registries_crates_io_protocol ]; then[0m
+2026-10-16T16:38:57.0197976Z [36;1m  if rustc +"$toolchain" --version --verbose | grep -q '^release: 1\.6[89]\.'; then[0m
+2026-10-16T16:38:57.0198478Z [36;1m    touch "D:\a\_temp"/.implicit_cargo_registries_crates_io_protocol || true[0m
+2026-10-16T16:38:57.0198952Z [36;1m    echo CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse >> $GITHUB_ENV[0m
+2026-10-16T16:38:57.0199431Z [36;1m  elif rustc +"$toolchain" --version --verbose | grep -q '^release: 1\.6[67]\.'; then[0m
+2026-10-16T16:38:57.0199917Z [36;1m    touch "D:\a\_temp"/.implicit_cargo_registries_crates_io_protocol || true[0m
+2026-10-16T16:38:57.0200362Z [36;1m    echo CARGO_REGISTRIES_CRATES_IO_PROTOCOL=git >> $GITHUB_ENV[0m
+2026-10-16T16:38:57.0200685Z [36;1m  fi[0m
+2026-10-16T16:38:57.0200861Z [36;1mfi[0m
+2026-10-16T16:38:57.0212257Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-10-16T16:38:57.0212647Z env:
+2026-10-16T16:38:57.0212832Z   CARGO_TERM_COLOR: always
+2026-10-16T16:38:57.0213049Z   ECC_MARCH: x86-64-v3
+2026-10-16T16:38:57.0213256Z   CUDA_PKG_VERSION: 12-8
+2026-10-16T16:38:57.0213465Z   CUDA_DIR_VERSION: 12.8
+2026-10-16T16:38:57.0213685Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+2026-10-16T16:38:57.0213941Z   CARGO_INCREMENTAL: 0
+2026-10-16T16:38:57.0214133Z   toolchain: 1.93.1
+2026-10-16T16:38:57.0214334Z ##[endgroup]
+2026-10-16T16:38:57.1983723Z ##[end-action id=__dtolnay_rust-toolchain.__run_8;outcome=success;conclusion=success;duration_ms=191]
+2026-10-16T16:38:57.1988938Z ##[start-action display=Work around spurious network errors in curl 8.0;id=__dtolnay_rust-toolchain.__run_9]
+2026-10-16T16:38:57.2127376Z ##[group]Run # https://rust-lang.zulipchat.com/#narrow/stream/246057-t-cargo/topic/timeout.20investigation
+2026-10-16T16:38:57.2128111Z [36;1m# https://rust-lang.zulipchat.com/#narrow/stream/246057-t-cargo/topic/timeout.20investigation[0m
+2026-10-16T16:38:57.2128758Z [36;1mif rustc +"$toolchain" --version --verbose | grep -q '^release: 1\.7[01]\.'; then[0m
+2026-10-16T16:38:57.2129208Z [36;1m  echo CARGO_HTTP_MULTIPLEXING=false >> $GITHUB_ENV[0m
+2026-10-16T16:38:57.2129496Z [36;1mfi[0m
+2026-10-16T16:38:57.2141239Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-10-16T16:38:57.2141620Z env:
+2026-10-16T16:38:57.2141993Z   CARGO_TERM_COLOR: always
+2026-10-16T16:38:57.2142217Z   ECC_MARCH: x86-64-v3
+2026-10-16T16:38:57.2142421Z   CUDA_PKG_VERSION: 12-8
+2026-10-16T16:38:57.2142632Z   CUDA_DIR_VERSION: 12.8
+2026-10-16T16:38:57.2142869Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+2026-10-16T16:38:57.2143123Z   CARGO_INCREMENTAL: 0
+2026-10-16T16:38:57.2143315Z   toolchain: 1.93.1
+2026-10-16T16:38:57.2143509Z ##[endgroup]
+2026-10-16T16:38:57.3251574Z ##[end-action id=__dtolnay_rust-toolchain.__run_9;outcome=success;conclusion=success;duration_ms=126]
+2026-10-16T16:38:57.3257394Z ##[start-action display=rustc +1.93.1 --version --verbose;id=__dtolnay_rust-toolchain.__run_10]
+2026-10-16T16:38:57.3384965Z ##[group]Run rustc +"$toolchain" --version --verbose
+2026-10-16T16:38:57.3385324Z [36;1mrustc +"$toolchain" --version --verbose[0m
+2026-10-16T16:38:57.3398231Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-10-16T16:38:57.3398716Z env:
+2026-10-16T16:38:57.3398994Z   CARGO_TERM_COLOR: always
+2026-10-16T16:38:57.3399339Z   ECC_MARCH: x86-64-v3
+2026-10-16T16:38:57.3399645Z   CUDA_PKG_VERSION: 12-8
+2026-10-16T16:38:57.3399942Z   CUDA_DIR_VERSION: 12.8
+2026-10-16T16:38:57.3400274Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+2026-10-16T16:38:57.3401418Z   CARGO_INCREMENTAL: 0
+2026-10-16T16:38:57.3401725Z   toolchain: 1.93.1
+2026-10-16T16:38:57.3402045Z ##[endgroup]
+2026-10-16T16:38:57.4242266Z rustc 1.93.1 (01f6ddf75 2026-02-11)
+2026-10-16T16:38:57.4242586Z binary: rustc
+2026-10-16T16:38:57.4242851Z commit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf
+2026-10-16T16:38:57.4243147Z commit-date: 2026-02-11
+2026-10-16T16:38:57.4243377Z host: x86_64-pc-windows-msvc
+2026-10-16T16:38:57.4243597Z release: 1.93.1
+2026-10-16T16:38:57.4244646Z LLVM version: 21.1.8
+2026-10-16T16:38:57.4364843Z ##[end-action id=__dtolnay_rust-toolchain.__run_10;outcome=success;conclusion=success;duration_ms=110]
+2026-10-16T16:38:57.4591503Z ##[group]Run Swatinem/rust-cache@v2
+2026-10-16T16:38:57.4591833Z with:
+2026-10-16T16:38:57.4592033Z   workspaces: tools/isogeny-cli
+2026-10-16T16:38:57.4592277Z   prefix-key: v0-rust
+2026-10-16T16:38:57.4592481Z   add-job-id-key: true
+2026-10-16T16:38:57.4592704Z   add-rust-environment-hash-key: true
+2026-10-16T16:38:57.4592997Z   cache-targets: true
+2026-10-16T16:38:57.4593196Z   cache-all-crates: false
+2026-10-16T16:38:57.4593418Z   cache-workspace-crates: false
+2026-10-16T16:38:57.4593632Z   save-if: true
+2026-10-16T16:38:57.4593815Z   cache-provider: github
+2026-10-16T16:38:57.4594010Z   cache-bin: true
+2026-10-16T16:38:57.4594186Z   lookup-only: false
+2026-10-16T16:38:57.4594368Z   cmd-format: {0}
+2026-10-16T16:38:57.4594538Z env:
+2026-10-16T16:38:57.4594707Z   CARGO_TERM_COLOR: always
+2026-10-16T16:38:57.4594916Z   ECC_MARCH: x86-64-v3
+2026-10-16T16:38:57.4595103Z   CUDA_PKG_VERSION: 12-8
+2026-10-16T16:38:57.4595307Z   CUDA_DIR_VERSION: 12.8
+2026-10-16T16:38:57.4595560Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+2026-10-16T16:38:57.4595824Z   CARGO_INCREMENTAL: 0
+2026-10-16T16:38:57.4596013Z ##[endgroup]
+2026-10-16T16:39:02.0331449Z ##[group]Cache Configuration
+2026-10-16T16:39:02.0331875Z Cache Provider:
+2026-10-16T16:39:02.0332145Z     github
+2026-10-16T16:39:02.0332457Z Workspaces:
+2026-10-16T16:39:02.0332751Z     D:\a\crypto\crypto\tools\isogeny-cli
+2026-10-16T16:39:02.0333152Z Cache Paths:
+2026-10-16T16:39:02.0333435Z     C:\Users\runneradmin\.cargo\bin
+2026-10-16T16:39:02.0333824Z     C:\Users\runneradmin\.cargo\.crates.toml
+2026-10-16T16:39:02.0334624Z     C:\Users\runneradmin\.cargo\.crates2.json
+2026-10-16T16:39:02.0335053Z     C:\Users\runneradmin\.cargo\registry
+2026-10-16T16:39:02.0335459Z     C:\Users\runneradmin\.cargo\git
+2026-10-16T16:39:02.0335807Z     D:\a\crypto\crypto\tools\isogeny-cli\target
+2026-10-16T16:39:02.0336181Z Restore Key:
+2026-10-16T16:39:02.0336450Z     v0-rust-isogeny-Windows_NT-x64-c577465d
+2026-10-16T16:39:02.0336834Z Cache Key:
+2026-10-16T16:39:02.0337169Z     v0-rust-isogeny-Windows_NT-x64-c577465d-8a8c2ddf
+2026-10-16T16:39:02.0337575Z .. Prefix:
+2026-10-16T16:39:02.0337842Z   - v0-rust-isogeny-Windows_NT-x64
+2026-10-16T16:39:02.0338216Z .. Environment considered:
+2026-10-16T16:39:02.0338527Z   - Rust Versions:
+2026-10-16T16:39:02.0338984Z     - 1.93.1 x86_64-pc-windows-msvc 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf
+2026-10-16T16:39:02.0339692Z     - 1.99.0 x86_64-pc-windows-msvc b940084d7eb6a299eb4bfeb8e34901bc051e7ac4
+2026-10-16T16:39:02.0340010Z   - CARGO_HOME
+2026-10-16T16:39:02.0340190Z   - CARGO_INCREMENTAL
+2026-10-16T16:39:02.0340387Z   - CARGO_TERM_COLOR
+2026-10-16T16:39:02.0340584Z .. Lockfiles considered:
+2026-10-16T16:39:02.0340832Z   - D:\a\crypto\crypto\tools\isogeny-cli\Cargo.lock
+2026-10-16T16:39:02.0341240Z   - D:\a\crypto\crypto\tools\isogeny-cli\Cargo.toml
+2026-10-16T16:39:02.0341890Z ##[endgroup]
+2026-10-16T16:39:02.0341991Z 
+2026-10-16T16:39:02.0342088Z ... Restoring cache ...
+2026-10-16T16:39:02.2773321Z Cache hit for restore-key: v0-rust-isogeny-Windows_NT-x64-c577465d-8327835f
+2026-10-16T16:39:03.0135047Z Received 51048669 of 51048669 (100.0%), 80.9 MBs/sec
+2026-10-16T16:39:03.0138519Z Cache Size: ~49 MB (51048669 B)
+2026-10-16T16:39:03.0173474Z [command]"C:\Program Files\Git\usr\bin\tar.exe" -xf D:/a/_temp/6e3bbf2c-4e40-462f-ad34-f221ef026cb5/cache.tzst -P -C D:/a/crypto/crypto --force-local --use-compress-program "zstd -d"
+2026-10-16T16:39:03.7782451Z Cache restored successfully
+2026-10-16T16:39:03.7835824Z Restored from cache key "v0-rust-isogeny-Windows_NT-x64-c577465d-8327835f" full match: false.
+2026-10-16T16:39:03.8211727Z ##[group]Run cargo build --locked --release --manifest-path tools/isogeny-cli/Cargo.toml --target x86_64-pc-windows-msvc
+2026-10-16T16:39:03.8212687Z [36;1mcargo build --locked --release --manifest-path tools/isogeny-cli/Cargo.toml --target x86_64-pc-windows-msvc[0m
+2026-10-16T16:39:03.8213432Z [36;1mcargo test --locked --release --manifest-path tools/isogeny-cli/Cargo.toml --target x86_64-pc-windows-msvc[0m
+2026-10-16T16:39:03.8285062Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-16T16:39:03.8285412Z env:
+2026-10-16T16:39:03.8285597Z   CARGO_TERM_COLOR: always
+2026-10-16T16:39:03.8285824Z   ECC_MARCH: x86-64-v3
+2026-10-16T16:39:03.8286057Z   CUDA_PKG_VERSION: 12-8
+2026-10-16T16:39:03.8286265Z   CUDA_DIR_VERSION: 12.8
+2026-10-16T16:39:03.8286486Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+2026-10-16T16:39:03.8286743Z   CARGO_INCREMENTAL: 0
+2026-10-16T16:39:03.8286946Z   CACHE_ON_FAILURE: false
+2026-10-16T16:39:03.8287268Z   CRYPTO_BUILD_GIT_COMMIT: 87399c4f398ffc16b11779c6ff15541a32211cb8
+2026-10-16T16:39:03.8287608Z   CRYPTO_BUILD_GIT_DIRTY: false
+2026-10-16T16:39:03.8287847Z ##[endgroup]
+2026-10-16T16:39:04.3122780Z [1m[92m    Updating[0m crates.io index
+2026-10-16T16:39:07.4028992Z [1m[92m   Compiling[0m isogeny-cli v0.1.0 (D:\a\crypto\crypto\tools\isogeny-cli)
+2026-10-16T16:39:07.4045859Z [1m[92m   Compiling[0m isogeny_algos v0.1.0 (D:\a\crypto\crypto\isogeny_algos)
+2026-10-16T16:42:35.1058247Z [1m[93mwarning[0m[1m[97m: unused import: `num_bigint::BigUint`[0m
+2026-10-16T16:42:35.1425731Z  [1m[96m--> [0msrc\bin\field_checks.rs:5:5
+2026-10-16T16:42:35.1630400Z   [1m[96m|[0m
+2026-10-16T16:42:35.1825330Z [1m[96m5[0m [1m[96m|[0m use num_bigint::BigUint;
+2026-10-16T16:42:35.2093973Z   [1m[96m|[0m     [1m[93m^^^^^^^^^^^^^^^^^^^[0m
+2026-10-16T16:42:35.2196650Z   [1m[96m|[0m
+2026-10-16T16:42:35.2452268Z   [1m[96m= [0m[1m[97mnote[0m: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+2026-10-16T16:42:35.2675066Z 
+2026-10-16T16:42:35.2857359Z [1m[93mwarning[0m[1m[97m: unused imports: `One` and `Zero`[0m
+2026-10-16T16:42:35.2871803Z  [1m[96m--> [0msrc\bin\field_checks.rs:6:18
+2026-10-16T16:42:35.3013654Z   [1m[96m|[0m
+2026-10-16T16:42:35.3224887Z [1m[96m6[0m [1m[96m|[0m use num_traits::{One, Zero};
+2026-10-16T16:42:35.3435877Z   [1m[96m|[0m                  [1m[93m^^^[0m  [1m[93m^^^^[0m
+2026-10-16T16:42:35.3560932Z 
+2026-10-16T16:42:35.3642782Z [1m[93mwarning[0m[1m[97m: struct `Element` is never constructed[0m
+2026-10-16T16:42:35.3833423Z  [1m[96m--> [0msrc\bin\..\verification_field.rs:8:12
+2026-10-16T16:42:35.4008877Z   [1m[96m|[0m
+2026-10-16T16:42:35.4250761Z [1m[96m8[0m [1m[96m|[0m pub struct Element<const N: usize>(pub [u64; N]);
+2026-10-16T16:42:35.4251586Z   [1m[96m|[0m            [1m[93m^^^^^^^[0m
+2026-10-16T16:42:35.4252052Z   [1m[96m|[0m
+2026-10-16T16:42:35.4252704Z   [1m[96m= [0m[1m[97mnote[0m: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+2026-10-16T16:42:35.4253234Z 
+2026-10-16T16:42:35.4253633Z [1m[93mwarning[0m[1m[97m: struct `PrimeField` is never constructed[0m
+2026-10-16T16:42:35.4633377Z   [1m[96m--> [0msrc\bin\..\verification_field.rs:12:12
+2026-10-16T16:42:35.4723336Z    [1m[96m|[0m
+2026-10-16T16:42:35.4734601Z [1m[96m12[0m [1m[96m|[0m pub struct PrimeField<const N: usize> {
+2026-10-16T16:42:35.4828967Z    [1m[96m|[0m            [1m[93m^^^^^^^^^^[0m
+2026-10-16T16:42:35.5148360Z 
+2026-10-16T16:42:35.5200990Z [1m[93mwarning[0m[1m[97m: function `to_limbs` is never used[0m
+2026-10-16T16:42:35.5218159Z   [1m[96m--> [0msrc\bin\..\verification_field.rs:31:4
+2026-10-16T16:42:35.5668931Z    [1m[96m|[0m
+2026-10-16T16:42:35.5848210Z [1m[96m31[0m [1m[96m|[0m fn to_limbs<const N: usize>(v: &BigUint) -> [u64; N] {
+2026-10-16T16:42:35.6088494Z    [1m[96m|[0m    [1m[93m^^^^^^^^[0m
+2026-10-16T16:42:35.6194120Z 
+2026-10-16T16:42:35.6213317Z [1m[93mwarning[0m[1m[97m: function `from_limbs` is never used[0m
+2026-10-16T16:42:35.6454278Z   [1m[96m--> [0msrc\bin\..\verification_field.rs:39:4
+2026-10-16T16:42:35.6545336Z    [1m[96m|[0m
+2026-10-16T16:42:35.6605479Z [1m[96m39[0m [1m[96m|[0m fn from_limbs<const N: usize>(v: &[u64; N]) -> BigUint {
+2026-10-16T16:42:35.6898314Z    [1m[96m|[0m    [1m[93m^^^^^^^^^^[0m
+2026-10-16T16:42:35.6903584Z 
+2026-10-16T16:42:35.6924373Z [1m[93mwarning[0m[1m[97m: function `geq` is never used[0m
+2026-10-16T16:42:35.7224195Z   [1m[96m--> [0msrc\bin\..\verification_field.rs:47:4
+2026-10-16T16:42:35.7243587Z    [1m[96m|[0m
+2026-10-16T16:42:35.7381131Z [1m[96m47[0m [1m[96m|[0m fn geq<const N: usize>(a: &[u64; N], b: &[u64; N]) -> bool {
+2026-10-16T16:42:35.7558652Z    [1m[96m|[0m    [1m[93m^^^[0m
+2026-10-16T16:42:35.7724227Z 
+2026-10-16T16:42:35.7919319Z [1m[93mwarning[0m[1m[97m: function `sub_limbs` is never used[0m
+2026-10-16T16:42:35.8122004Z   [1m[96m--> [0msrc\bin\..\verification_field.rs:56:4
+2026-10-16T16:42:35.8189652Z    [1m[96m|[0m
+2026-10-16T16:42:35.8258453Z [1m[96m56[0m [1m[96m|[0m fn sub_limbs<const N: usize>(a: &[u64; N], b: &[u64; N]) -> ([u64; N], bool) {
+2026-10-16T16:42:35.8466571Z    [1m[96m|[0m    [1m[93m^^^^^^^^^[0m
+2026-10-16T16:42:35.8550907Z 
+2026-10-16T16:42:35.8664371Z [1m[93mwarning[0m[1m[97m: function `add_limbs` is never used[0m
+2026-10-16T16:42:35.8823949Z   [1m[96m--> [0msrc\bin\..\verification_field.rs:68:4
+2026-10-16T16:42:35.8983216Z    [1m[96m|[0m
+2026-10-16T16:42:35.9025749Z [1m[96m68[0m [1m[96m|[0m fn add_limbs<const N: usize>(a: &[u64; N], b: &[u64; N]) -> ([u64; N], bool) {
+2026-10-16T16:42:35.9221358Z    [1m[96m|[0m    [1m[93m^^^^^^^^^[0m
+2026-10-16T16:42:35.9319718Z 
+2026-10-16T16:42:35.9399528Z [1m[93mwarning[0m[1m[97m: function `shr1` is never used[0m
+2026-10-16T16:42:35.9797159Z   [1m[96m--> [0msrc\bin\..\verification_field.rs:80:4
+2026-10-16T16:42:35.9897661Z    [1m[96m|[0m
+2026-10-16T16:42:36.0019457Z [1m[96m80[0m [1m[96m|[0m fn shr1<const N: usize>(a: &mut [u64; N], carry: bool) {
+2026-10-16T16:42:36.0168615Z    [1m[96m|[0m    [1m[93m^^^^[0m
+2026-10-16T16:42:36.0438910Z 
+2026-10-16T16:42:36.0593297Z [1m[93mwarning[0m[1m[97m: multiple associated items are never used[0m
+2026-10-16T16:42:36.0842313Z    [1m[96m--> [0msrc\bin\..\verification_field.rs:93:12
+2026-10-16T16:42:36.1144304Z     [1m[96m|[0m
+2026-10-16T16:42:36.1446121Z  [1m[96m89[0m [1m[96m|[0m impl<const N: usize> PrimeField<N> {
+2026-10-16T16:42:36.1523685Z     [1m[96m|[0m [1m[96m----------------------------------[0m [1m[96massociated items in this implementation[0m
+2026-10-16T16:42:36.1821450Z [1m[96m...[0m
+2026-10-16T16:42:36.1842036Z  [1m[96m93[0m [1m[96m|[0m     pub fn new(p: &BigUint) -> Option<Self> {
+2026-10-16T16:42:36.1843947Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:36.1859135Z [1m[96m...[0m
+2026-10-16T16:42:36.1880132Z [1m[96m135[0m [1m[96m|[0m     pub fn modulus(&self) -> &BigUint {
+2026-10-16T16:42:36.2191049Z     [1m[96m|[0m            [1m[93m^^^^^^^[0m
+2026-10-16T16:42:36.2232505Z [1m[96m...[0m
+2026-10-16T16:42:36.2416556Z [1m[96m140[0m [1m[96m|[0m     pub fn least_nonresidue(&self) -> u64 {
+2026-10-16T16:42:36.2527267Z     [1m[96m|[0m            [1m[93m^^^^^^^^^^^^^^^^[0m
+2026-10-16T16:42:36.2756550Z [1m[96m...[0m
+2026-10-16T16:42:36.2785271Z [1m[96m145[0m [1m[96m|[0m     pub fn zero(&self) -> Element<N> {
+2026-10-16T16:42:36.2786909Z     [1m[96m|[0m            [1m[93m^^^^[0m
+2026-10-16T16:42:36.2787806Z [1m[96m...[0m
+2026-10-16T16:42:36.2804677Z [1m[96m150[0m [1m[96m|[0m     pub fn one(&self) -> Element<N> {
+2026-10-16T16:42:36.2845745Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:36.3168070Z [1m[96m...[0m
+2026-10-16T16:42:36.3253510Z [1m[96m155[0m [1m[96m|[0m     pub fn is_zero(&self, a: &Element<N>) -> bool {
+2026-10-16T16:42:36.3317816Z     [1m[96m|[0m            [1m[93m^^^^^^^[0m
+2026-10-16T16:42:36.3804778Z [1m[96m...[0m
+2026-10-16T16:42:36.4154888Z [1m[96m160[0m [1m[96m|[0m     pub fn mul(&self, a: &Element<N>, b: &Element<N>) -> Element<N> {
+2026-10-16T16:42:36.4580688Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:36.4739704Z [1m[96m...[0m
+2026-10-16T16:42:36.4993691Z [1m[96m198[0m [1m[96m|[0m     pub fn sqr(&self, a: &Element<N>) -> Element<N> {
+2026-10-16T16:42:36.5014109Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:36.5074624Z [1m[96m...[0m
+2026-10-16T16:42:36.5339733Z [1m[96m203[0m [1m[96m|[0m     pub fn add(&self, a: &Element<N>, b: &Element<N>) -> Element<N> {
+2026-10-16T16:42:36.5386497Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:36.5414056Z [1m[96m...[0m
+2026-10-16T16:42:36.5726467Z [1m[96m213[0m [1m[96m|[0m     pub fn sub(&self, a: &Element<N>, b: &Element<N>) -> Element<N> {
+2026-10-16T16:42:36.5823384Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:36.6057740Z [1m[96m...[0m
+2026-10-16T16:42:36.6087129Z [1m[96m222[0m [1m[96m|[0m     pub fn neg(&self, a: &Element<N>) -> Element<N> {
+2026-10-16T16:42:36.6457125Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:36.6656491Z [1m[96m...[0m
+2026-10-16T16:42:36.6886672Z [1m[96m226[0m [1m[96m|[0m     pub fn from_u64(&self, v: u64) -> Element<N> {
+2026-10-16T16:42:36.7062850Z     [1m[96m|[0m            [1m[93m^^^^^^^^[0m
+2026-10-16T16:42:36.7223475Z [1m[96m...[0m
+2026-10-16T16:42:36.7243478Z [1m[96m236[0m [1m[96m|[0m     pub fn from_i64(&self, v: i64) -> Element<N> {
+2026-10-16T16:42:36.7561494Z     [1m[96m|[0m            [1m[93m^^^^^^^^[0m
+2026-10-16T16:42:36.7590556Z [1m[96m...[0m
+2026-10-16T16:42:36.7704526Z [1m[96m245[0m [1m[96m|[0m     pub fn from_u128(&self, v: u128) -> Element<N> {
+2026-10-16T16:42:36.7706167Z     [1m[96m|[0m            [1m[93m^^^^^^^^^[0m
+2026-10-16T16:42:36.7707125Z [1m[96m...[0m
+2026-10-16T16:42:36.7984219Z [1m[96m249[0m [1m[96m|[0m     pub fn from_big(&self, v: &BigUint) -> Element<N> {
+2026-10-16T16:42:36.8045428Z     [1m[96m|[0m            [1m[93m^^^^^^^^[0m
+2026-10-16T16:42:36.8047215Z [1m[96m...[0m
+2026-10-16T16:42:36.8048320Z [1m[96m254[0m [1m[96m|[0m     pub fn to_big(&self, a: &Element<N>) -> BigUint {
+2026-10-16T16:42:36.8050050Z     [1m[96m|[0m            [1m[93m^^^^^^[0m
+2026-10-16T16:42:36.8081370Z [1m[96m...[0m
+2026-10-16T16:42:36.8357740Z [1m[96m262[0m [1m[96m|[0m     pub fn pow(&self, a: &Element<N>, e: &BigUint) -> Element<N> {
+2026-10-16T16:42:36.8408123Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:36.8420329Z [1m[96m...[0m
+2026-10-16T16:42:36.8545515Z [1m[96m274[0m [1m[96m|[0m     pub fn inv(&self, a: &Element<N>) -> Option<Element<N>> {
+2026-10-16T16:42:36.8547048Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:36.8547943Z [1m[96m...[0m
+2026-10-16T16:42:36.8784274Z [1m[96m310[0m [1m[96m|[0m     fn half_coefficient(&self, mut a: Element<N>) -> Element<N> {
+2026-10-16T16:42:36.8817463Z     [1m[96m|[0m        [1m[93m^^^^^^^^^^^^^^^^[0m
+2026-10-16T16:42:36.8869609Z [1m[96m...[0m
+2026-10-16T16:42:36.9162637Z [1m[96m321[0m [1m[96m|[0m     pub fn div(&self, a: &Element<N>, b: &Element<N>) -> Option<Element<N>> {
+2026-10-16T16:42:36.9252787Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:36.9352674Z [1m[96m...[0m
+2026-10-16T16:42:36.9588737Z [1m[96m326[0m [1m[96m|[0m     pub fn legendre(&self, a: &Element<N>) -> i32 {
+2026-10-16T16:42:36.9607144Z     [1m[96m|[0m            [1m[93m^^^^^^^^[0m
+2026-10-16T16:42:36.9669168Z [1m[96m...[0m
+2026-10-16T16:42:36.9989386Z [1m[96m338[0m [1m[96m|[0m     pub fn sqrt(&self, a: &Element<N>) -> Option<Element<N>> {
+2026-10-16T16:42:37.0130912Z     [1m[96m|[0m            [1m[93m^^^^[0m
+2026-10-16T16:42:37.0339249Z [1m[96m...[0m
+2026-10-16T16:42:37.0419826Z [1m[96m368[0m [1m[96m|[0m     pub fn hex(&self, a: &Element<N>) -> String {
+2026-10-16T16:42:37.0534158Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:37.0706106Z 
+2026-10-16T16:42:37.0739321Z [1m[93mwarning[0m[1m[97m: function `is_probable_prime` is never used[0m
+2026-10-16T16:42:37.0742324Z    [1m[96m--> [0msrc\bin\..\verification_field.rs:375:8
+2026-10-16T16:42:37.0743556Z     [1m[96m|[0m
+2026-10-16T16:42:37.0744912Z [1m[96m375[0m [1m[96m|[0m pub fn is_probable_prime(n: &BigUint) -> bool {
+2026-10-16T16:42:37.1053617Z     [1m[96m|[0m        [1m[93m^^^^^^^^^^^^^^^^^[0m
+2026-10-16T16:42:37.1093661Z 
+2026-10-16T16:42:37.1114260Z [1m[93mwarning[0m[1m[97m: struct `Fe` is never constructed[0m
+2026-10-16T16:42:37.1413321Z   [1m[96m--> [0msrc\bin\..\..\..\..\src\cryptanalysis\isogeny_walk\field.rs:13:12
+2026-10-16T16:42:37.1440010Z    [1m[96m|[0m
+2026-10-16T16:42:37.1452118Z [1m[96m13[0m [1m[96m|[0m pub struct Fe(pub [u64; 4]);
+2026-10-16T16:42:37.1596474Z    [1m[96m|[0m            [1m[93m^^[0m
+2026-10-16T16:42:37.1598146Z 
+2026-10-16T16:42:37.1599040Z [1m[93mwarning[0m[1m[97m: struct `Field` is never constructed[0m
+2026-10-16T16:42:37.1870712Z   [1m[96m--> [0msrc\bin\..\..\..\..\src\cryptanalysis\isogeny_walk\field.rs:17:12
+2026-10-16T16:42:37.2214915Z    [1m[96m|[0m
+2026-10-16T16:42:37.2336500Z [1m[96m17[0m [1m[96m|[0m pub struct Field {
+2026-10-16T16:42:37.2547049Z    [1m[96m|[0m            [1m[93m^^^^^[0m
+2026-10-16T16:42:37.2565576Z 
+2026-10-16T16:42:37.2673948Z [1m[93mwarning[0m[1m[97m: function `to_limbs` is never used[0m
+2026-10-16T16:42:37.2864216Z   [1m[96m--> [0msrc\bin\..\..\..\..\src\cryptanalysis\isogeny_walk\field.rs:36:4
+2026-10-16T16:42:37.2882859Z    [1m[96m|[0m
+2026-10-16T16:42:37.3003764Z [1m[96m36[0m [1m[96m|[0m fn to_limbs(v: &BigUint) -> [u64; 4] {
+2026-10-16T16:42:37.3201127Z    [1m[96m|[0m    [1m[93m^^^^^^^^[0m
+2026-10-16T16:42:37.3255650Z 
+2026-10-16T16:42:37.3257152Z [1m[93mwarning[0m[1m[97m: function `from_limbs` is never used[0m
+2026-10-16T16:42:37.3258576Z   [1m[96m--> [0msrc\bin\..\..\..\..\src\cryptanalysis\isogeny_walk\field.rs:44:4
+2026-10-16T16:42:37.3322176Z    [1m[96m|[0m
+2026-10-16T16:42:37.3536339Z [1m[96m44[0m [1m[96m|[0m fn from_limbs(v: &[u64; 4]) -> BigUint {
+2026-10-16T16:42:37.3575821Z    [1m[96m|[0m    [1m[93m^^^^^^^^^^[0m
+2026-10-16T16:42:37.3657312Z 
+2026-10-16T16:42:37.3855691Z [1m[93mwarning[0m[1m[97m: function `geq` is never used[0m
+2026-10-16T16:42:37.3961743Z   [1m[96m--> [0msrc\bin\..\..\..\..\src\cryptanalysis\isogeny_walk\field.rs:52:4
+2026-10-16T16:42:37.3963406Z    [1m[96m|[0m
+2026-10-16T16:42:37.3964434Z [1m[96m52[0m [1m[96m|[0m fn geq(a: &[u64; 4], b: &[u64; 4]) -> bool {
+2026-10-16T16:42:37.4055668Z    [1m[96m|[0m    [1m[93m^^^[0m
+2026-10-16T16:42:37.4172045Z 
+2026-10-16T16:42:37.4372023Z [1m[93mwarning[0m[1m[97m: function `sub_limbs` is never used[0m
+2026-10-16T16:42:37.4373022Z   [1m[96m--> [0msrc\bin\..\..\..\..\src\cryptanalysis\isogeny_walk\field.rs:61:4
+2026-10-16T16:42:37.5088533Z    [1m[96m|[0m
+2026-10-16T16:42:37.5229576Z [1m[96m61[0m [1m[96m|[0m fn sub_limbs(a: &[u64; 4], b: &[u64; 4]) -> ([u64; 4], bool) {
+2026-10-16T16:42:37.5389202Z    [1m[96m|[0m    [1m[93m^^^^^^^^^[0m
+2026-10-16T16:42:37.5523145Z 
+2026-10-16T16:42:37.5841272Z [1m[93mwarning[0m[1m[97m: function `add_limbs` is never used[0m
+2026-10-16T16:42:37.6137066Z   [1m[96m--> [0msrc\bin\..\..\..\..\src\cryptanalysis\isogeny_walk\field.rs:73:4
+2026-10-16T16:42:37.6216044Z    [1m[96m|[0m
+2026-10-16T16:42:37.6520208Z [1m[96m73[0m [1m[96m|[0m fn add_limbs(a: &[u64; 4], b: &[u64; 4]) -> ([u64; 4], bool) {
+2026-10-16T16:42:37.6849739Z    [1m[96m|[0m    [1m[93m^^^^^^^^^[0m
+2026-10-16T16:42:37.7188318Z 
+2026-10-16T16:42:37.7210273Z [1m[93mwarning[0m[1m[97m: multiple associated items are never used[0m
+2026-10-16T16:42:37.7550742Z    [1m[96m--> [0msrc\bin\..\..\..\..\src\cryptanalysis\isogeny_walk\field.rs:89:12
+2026-10-16T16:42:37.7785793Z     [1m[96m|[0m
+2026-10-16T16:42:37.8082916Z  [1m[96m85[0m [1m[96m|[0m impl Field {
+2026-10-16T16:42:37.8108909Z     [1m[96m|[0m [1m[96m----------[0m [1m[96massociated items in this implementation[0m
+2026-10-16T16:42:37.8423284Z [1m[96m...[0m
+2026-10-16T16:42:37.8429767Z  [1m[96m89[0m [1m[96m|[0m     pub fn new(p: &BigUint) -> Option<Self> {
+2026-10-16T16:42:37.8752110Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:37.9093686Z [1m[96m...[0m
+2026-10-16T16:42:37.9372084Z [1m[96m125[0m [1m[96m|[0m     pub fn modulus(&self) -> &BigUint {
+2026-10-16T16:42:37.9638666Z     [1m[96m|[0m            [1m[93m^^^^^^^[0m
+2026-10-16T16:42:37.9829718Z [1m[96m...[0m
+2026-10-16T16:42:38.0217173Z [1m[96m130[0m [1m[96m|[0m     pub fn least_nonresidue(&self) -> u64 {
+2026-10-16T16:42:38.0385085Z     [1m[96m|[0m            [1m[93m^^^^^^^^^^^^^^^^[0m
+2026-10-16T16:42:38.0707122Z [1m[96m...[0m
+2026-10-16T16:42:38.0879648Z [1m[96m134[0m [1m[96m|[0m     pub fn zero(&self) -> Fe {
+2026-10-16T16:42:38.1132263Z     [1m[96m|[0m            [1m[93m^^^^[0m
+2026-10-16T16:42:38.1399090Z [1m[96m...[0m
+2026-10-16T16:42:38.1547394Z [1m[96m138[0m [1m[96m|[0m     pub fn one(&self) -> Fe {
+2026-10-16T16:42:38.1634275Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:38.1981378Z [1m[96m...[0m
+2026-10-16T16:42:38.2070915Z [1m[96m142[0m [1m[96m|[0m     pub fn is_zero(&self, a: &Fe) -> bool {
+2026-10-16T16:42:38.2400377Z     [1m[96m|[0m            [1m[93m^^^^^^^[0m
+2026-10-16T16:42:38.2768196Z [1m[96m...[0m
+2026-10-16T16:42:38.3289609Z [1m[96m146[0m [1m[96m|[0m     pub fn mul(&self, a: &Fe, b: &Fe) -> Fe {
+2026-10-16T16:42:38.3684090Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:38.3817028Z [1m[96m...[0m
+2026-10-16T16:42:38.4112710Z [1m[96m182[0m [1m[96m|[0m     pub fn sqr(&self, a: &Fe) -> Fe {
+2026-10-16T16:42:38.4352200Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:38.4557495Z [1m[96m...[0m
+2026-10-16T16:42:38.4770914Z [1m[96m186[0m [1m[96m|[0m     pub fn add(&self, a: &Fe, b: &Fe) -> Fe {
+2026-10-16T16:42:38.5090525Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:38.5253797Z [1m[96m...[0m
+2026-10-16T16:42:38.5588331Z [1m[96m195[0m [1m[96m|[0m     pub fn sub(&self, a: &Fe, b: &Fe) -> Fe {
+2026-10-16T16:42:38.5914102Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:38.6084747Z [1m[96m...[0m
+2026-10-16T16:42:38.6464890Z [1m[96m204[0m [1m[96m|[0m     pub fn neg(&self, a: &Fe) -> Fe {
+2026-10-16T16:42:38.6663198Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:38.6822443Z [1m[96m...[0m
+2026-10-16T16:42:38.7002833Z [1m[96m208[0m [1m[96m|[0m     pub fn from_u64(&self, v: u64) -> Fe {
+2026-10-16T16:42:38.7019196Z     [1m[96m|[0m            [1m[93m^^^^^^^^[0m
+2026-10-16T16:42:38.7141864Z [1m[96m...[0m
+2026-10-16T16:42:38.7459751Z [1m[96m212[0m [1m[96m|[0m     pub fn from_i64(&self, v: i64) -> Fe {
+2026-10-16T16:42:38.7647381Z     [1m[96m|[0m            [1m[93m^^^^^^^^[0m
+2026-10-16T16:42:38.7973583Z [1m[96m...[0m
+2026-10-16T16:42:38.8197826Z [1m[96m221[0m [1m[96m|[0m     pub fn from_u128(&self, v: u128) -> Fe {
+2026-10-16T16:42:38.8605870Z     [1m[96m|[0m            [1m[93m^^^^^^^^^[0m
+2026-10-16T16:42:38.8956143Z [1m[96m...[0m
+2026-10-16T16:42:38.9135616Z [1m[96m225[0m [1m[96m|[0m     pub fn from_big(&self, v: &BigUint) -> Fe {
+2026-10-16T16:42:38.9439102Z     [1m[96m|[0m            [1m[93m^^^^^^^^[0m
+2026-10-16T16:42:38.9629990Z [1m[96m...[0m
+2026-10-16T16:42:38.9839646Z [1m[96m230[0m [1m[96m|[0m     pub fn to_big(&self, a: &Fe) -> BigUint {
+2026-10-16T16:42:38.9976252Z     [1m[96m|[0m            [1m[93m^^^^^^[0m
+2026-10-16T16:42:39.0227871Z [1m[96m...[0m
+2026-10-16T16:42:39.0447816Z [1m[96m234[0m [1m[96m|[0m     pub fn pow(&self, a: &Fe, e: &BigUint) -> Fe {
+2026-10-16T16:42:39.0655685Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:39.0979622Z [1m[96m...[0m
+2026-10-16T16:42:39.1101459Z [1m[96m246[0m [1m[96m|[0m     pub fn inv(&self, a: &Fe) -> Option<Fe> {
+2026-10-16T16:42:39.1435575Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:39.1613812Z [1m[96m...[0m
+2026-10-16T16:42:39.1816065Z [1m[96m253[0m [1m[96m|[0m     pub fn div(&self, a: &Fe, b: &Fe) -> Option<Fe> {
+2026-10-16T16:42:39.2054229Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:39.2262411Z [1m[96m...[0m
+2026-10-16T16:42:39.2542029Z [1m[96m258[0m [1m[96m|[0m     pub fn legendre(&self, a: &Fe) -> i32 {
+2026-10-16T16:42:39.2662348Z     [1m[96m|[0m            [1m[93m^^^^^^^^[0m
+2026-10-16T16:42:39.2757670Z [1m[96m...[0m
+2026-10-16T16:42:39.3084063Z [1m[96m270[0m [1m[96m|[0m     pub fn sqrt(&self, a: &Fe) -> Option<Fe> {
+2026-10-16T16:42:39.3181429Z     [1m[96m|[0m            [1m[93m^^^^[0m
+2026-10-16T16:42:39.3500545Z [1m[96m...[0m
+2026-10-16T16:42:39.3933647Z [1m[96m300[0m [1m[96m|[0m     pub fn hex(&self, a: &Fe) -> String {
+2026-10-16T16:42:39.4350762Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:42:39.4627669Z 
+2026-10-16T16:42:39.4835682Z [1m[93mwarning[0m[1m[97m: function `is_probable_prime` is never used[0m
+2026-10-16T16:42:39.5183356Z    [1m[96m--> [0msrc\bin\..\..\..\..\src\cryptanalysis\isogeny_walk\field.rs:307:8
+2026-10-16T16:42:39.5417047Z     [1m[96m|[0m
+2026-10-16T16:42:39.5679943Z [1m[96m307[0m [1m[96m|[0m pub fn is_probable_prime(n: &BigUint) -> bool {
+2026-10-16T16:42:39.5976688Z     [1m[96m|[0m        [1m[93m^^^^^^^^^^^^^^^^^[0m
+2026-10-16T16:42:39.6110800Z 
+2026-10-16T16:42:39.6321210Z [1m[93mwarning[0m: `isogeny-cli` (bin "field_checks") generated 21 warnings (run `cargo fix --bin "field_checks" -p isogeny-cli` to apply 2 suggestions)
+2026-10-16T16:43:59.2733203Z [1m[92m    Finished[0m `release` profile [optimized] target(s) in 4m 55s
+2026-10-16T16:43:59.4186399Z [1m[92m   Compiling[0m isogeny-cli v0.1.0 (D:\a\crypto\crypto\tools\isogeny-cli)
+2026-10-16T16:44:23.6866568Z [1m[93mwarning[0m[1m[97m: unused import: `num_bigint::BigUint`[0m
+2026-10-16T16:44:23.6957258Z  [1m[96m--> [0msrc\bin\field_checks.rs:5:5
+2026-10-16T16:44:23.7155118Z   [1m[96m|[0m
+2026-10-16T16:44:23.7195382Z [1m[96m5[0m [1m[96m|[0m use num_bigint::BigUint;
+2026-10-16T16:44:23.7215177Z   [1m[96m|[0m     [1m[93m^^^^^^^^^^^^^^^^^^^[0m
+2026-10-16T16:44:23.7291660Z   [1m[96m|[0m
+2026-10-16T16:44:23.7493069Z   [1m[96m= [0m[1m[97mnote[0m: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+2026-10-16T16:44:23.7529822Z 
+2026-10-16T16:44:23.7548548Z [1m[93mwarning[0m[1m[97m: unused imports: `One` and `Zero`[0m
+2026-10-16T16:44:23.7611379Z  [1m[96m--> [0msrc\bin\field_checks.rs:6:18
+2026-10-16T16:44:23.7832391Z   [1m[96m|[0m
+2026-10-16T16:44:23.7859559Z [1m[96m6[0m [1m[96m|[0m use num_traits::{One, Zero};
+2026-10-16T16:44:23.7867717Z   [1m[96m|[0m                  [1m[93m^^^[0m  [1m[93m^^^^[0m
+2026-10-16T16:44:23.7930209Z 
+2026-10-16T16:44:23.7934555Z [1m[93mwarning[0m[1m[97m: struct `Element` is never constructed[0m
+2026-10-16T16:44:23.7936411Z  [1m[96m--> [0msrc\bin\..\verification_field.rs:8:12
+2026-10-16T16:44:23.7937384Z   [1m[96m|[0m
+2026-10-16T16:44:23.7938778Z [1m[96m8[0m [1m[96m|[0m pub struct Element<const N: usize>(pub [u64; N]);
+2026-10-16T16:44:23.7998118Z   [1m[96m|[0m            [1m[93m^^^^^^^[0m
+2026-10-16T16:44:23.7999804Z   [1m[96m|[0m
+2026-10-16T16:44:23.8000944Z   [1m[96m= [0m[1m[97mnote[0m: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+2026-10-16T16:44:23.8141343Z 
+2026-10-16T16:44:23.8143629Z [1m[93mwarning[0m[1m[97m: struct `PrimeField` is never constructed[0m
+2026-10-16T16:44:23.8144939Z   [1m[96m--> [0msrc\bin\..\verification_field.rs:12:12
+2026-10-16T16:44:23.8146678Z    [1m[96m|[0m
+2026-10-16T16:44:23.8154024Z [1m[96m12[0m [1m[96m|[0m pub struct PrimeField<const N: usize> {
+2026-10-16T16:44:23.8182950Z    [1m[96m|[0m            [1m[93m^^^^^^^^^^[0m
+2026-10-16T16:44:23.8264781Z 
+2026-10-16T16:44:23.8445763Z [1m[93mwarning[0m[1m[97m: function `to_limbs` is never used[0m
+2026-10-16T16:44:23.8465063Z   [1m[96m--> [0msrc\bin\..\verification_field.rs:31:4
+2026-10-16T16:44:23.8466435Z    [1m[96m|[0m
+2026-10-16T16:44:23.8470805Z [1m[96m31[0m [1m[96m|[0m fn to_limbs<const N: usize>(v: &BigUint) -> [u64; N] {
+2026-10-16T16:44:23.8472127Z    [1m[96m|[0m    [1m[93m^^^^^^^^[0m
+2026-10-16T16:44:23.8483262Z 
+2026-10-16T16:44:23.8580458Z [1m[93mwarning[0m[1m[97m: function `from_limbs` is never used[0m
+2026-10-16T16:44:23.8620291Z   [1m[96m--> [0msrc\bin\..\verification_field.rs:39:4
+2026-10-16T16:44:23.8871659Z    [1m[96m|[0m
+2026-10-16T16:44:23.8932462Z [1m[96m39[0m [1m[96m|[0m fn from_limbs<const N: usize>(v: &[u64; N]) -> BigUint {
+2026-10-16T16:44:23.8952715Z    [1m[96m|[0m    [1m[93m^^^^^^^^^^[0m
+2026-10-16T16:44:23.8971601Z 
+2026-10-16T16:44:23.9087014Z [1m[93mwarning[0m[1m[97m: function `geq` is never used[0m
+2026-10-16T16:44:23.9089422Z   [1m[96m--> [0msrc\bin\..\verification_field.rs:47:4
+2026-10-16T16:44:23.9190769Z    [1m[96m|[0m
+2026-10-16T16:44:23.9251872Z [1m[96m47[0m [1m[96m|[0m fn geq<const N: usize>(a: &[u64; N], b: &[u64; N]) -> bool {
+2026-10-16T16:44:23.9319710Z    [1m[96m|[0m    [1m[93m^^^[0m
+2026-10-16T16:44:23.9347100Z 
+2026-10-16T16:44:23.9349126Z [1m[93mwarning[0m[1m[97m: function `sub_limbs` is never used[0m
+2026-10-16T16:44:23.9410019Z   [1m[96m--> [0msrc\bin\..\verification_field.rs:56:4
+2026-10-16T16:44:23.9412025Z    [1m[96m|[0m
+2026-10-16T16:44:23.9415970Z [1m[96m56[0m [1m[96m|[0m fn sub_limbs<const N: usize>(a: &[u64; N], b: &[u64; N]) -> ([u64; N], bool) {
+2026-10-16T16:44:23.9480211Z    [1m[96m|[0m    [1m[93m^^^^^^^^^[0m
+2026-10-16T16:44:23.9483026Z 
+2026-10-16T16:44:23.9485341Z [1m[93mwarning[0m[1m[97m: function `add_limbs` is never used[0m
+2026-10-16T16:44:23.9501689Z   [1m[96m--> [0msrc\bin\..\verification_field.rs:68:4
+2026-10-16T16:44:23.9502996Z    [1m[96m|[0m
+2026-10-16T16:44:23.9504058Z [1m[96m68[0m [1m[96m|[0m fn add_limbs<const N: usize>(a: &[u64; N], b: &[u64; N]) -> ([u64; N], bool) {
+2026-10-16T16:44:23.9505752Z    [1m[96m|[0m    [1m[93m^^^^^^^^^[0m
+2026-10-16T16:44:23.9506173Z 
+2026-10-16T16:44:23.9506651Z [1m[93mwarning[0m[1m[97m: function `shr1` is never used[0m
+2026-10-16T16:44:23.9507544Z   [1m[96m--> [0msrc\bin\..\verification_field.rs:80:4
+2026-10-16T16:44:23.9508257Z    [1m[96m|[0m
+2026-10-16T16:44:23.9509011Z [1m[96m80[0m [1m[96m|[0m fn shr1<const N: usize>(a: &mut [u64; N], carry: bool) {
+2026-10-16T16:44:23.9509859Z    [1m[96m|[0m    [1m[93m^^^^[0m
+2026-10-16T16:44:23.9510274Z 
+2026-10-16T16:44:23.9510803Z [1m[93mwarning[0m[1m[97m: multiple associated items are never used[0m
+2026-10-16T16:44:23.9511713Z    [1m[96m--> [0msrc\bin\..\verification_field.rs:93:12
+2026-10-16T16:44:23.9512393Z     [1m[96m|[0m
+2026-10-16T16:44:23.9513087Z  [1m[96m89[0m [1m[96m|[0m impl<const N: usize> PrimeField<N> {
+2026-10-16T16:44:23.9514241Z     [1m[96m|[0m [1m[96m----------------------------------[0m [1m[96massociated items in this implementation[0m
+2026-10-16T16:44:23.9515158Z [1m[96m...[0m
+2026-10-16T16:44:23.9515862Z  [1m[96m93[0m [1m[96m|[0m     pub fn new(p: &BigUint) -> Option<Self> {
+2026-10-16T16:44:23.9517955Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:23.9518582Z [1m[96m...[0m
+2026-10-16T16:44:23.9519250Z [1m[96m135[0m [1m[96m|[0m     pub fn modulus(&self) -> &BigUint {
+2026-10-16T16:44:23.9520077Z     [1m[96m|[0m            [1m[93m^^^^^^^[0m
+2026-10-16T16:44:23.9520967Z [1m[96m...[0m
+2026-10-16T16:44:23.9521697Z [1m[96m140[0m [1m[96m|[0m     pub fn least_nonresidue(&self) -> u64 {
+2026-10-16T16:44:23.9522934Z     [1m[96m|[0m            [1m[93m^^^^^^^^^^^^^^^^[0m
+2026-10-16T16:44:23.9523619Z [1m[96m...[0m
+2026-10-16T16:44:23.9524308Z [1m[96m145[0m [1m[96m|[0m     pub fn zero(&self) -> Element<N> {
+2026-10-16T16:44:23.9525345Z     [1m[96m|[0m            [1m[93m^^^^[0m
+2026-10-16T16:44:23.9526006Z [1m[96m...[0m
+2026-10-16T16:44:23.9526643Z [1m[96m150[0m [1m[96m|[0m     pub fn one(&self) -> Element<N> {
+2026-10-16T16:44:23.9527518Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:23.9528744Z [1m[96m...[0m
+2026-10-16T16:44:23.9529460Z [1m[96m155[0m [1m[96m|[0m     pub fn is_zero(&self, a: &Element<N>) -> bool {
+2026-10-16T16:44:23.9530292Z     [1m[96m|[0m            [1m[93m^^^^^^^[0m
+2026-10-16T16:44:23.9530943Z [1m[96m...[0m
+2026-10-16T16:44:23.9531801Z [1m[96m160[0m [1m[96m|[0m     pub fn mul(&self, a: &Element<N>, b: &Element<N>) -> Element<N> {
+2026-10-16T16:44:23.9532692Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:23.9533297Z [1m[96m...[0m
+2026-10-16T16:44:23.9534039Z [1m[96m198[0m [1m[96m|[0m     pub fn sqr(&self, a: &Element<N>) -> Element<N> {
+2026-10-16T16:44:23.9534862Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:23.9535483Z [1m[96m...[0m
+2026-10-16T16:44:23.9536274Z [1m[96m203[0m [1m[96m|[0m     pub fn add(&self, a: &Element<N>, b: &Element<N>) -> Element<N> {
+2026-10-16T16:44:23.9537203Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:23.9537793Z [1m[96m...[0m
+2026-10-16T16:44:23.9539850Z [1m[96m213[0m [1m[96m|[0m     pub fn sub(&self, a: &Element<N>, b: &Element<N>) -> Element<N> {
+2026-10-16T16:44:23.9540764Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:23.9541292Z [1m[96m...[0m
+2026-10-16T16:44:23.9542012Z [1m[96m222[0m [1m[96m|[0m     pub fn neg(&self, a: &Element<N>) -> Element<N> {
+2026-10-16T16:44:23.9543213Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:23.9544779Z [1m[96m...[0m
+2026-10-16T16:44:23.9545441Z [1m[96m226[0m [1m[96m|[0m     pub fn from_u64(&self, v: u64) -> Element<N> {
+2026-10-16T16:44:23.9546273Z     [1m[96m|[0m            [1m[93m^^^^^^^^[0m
+2026-10-16T16:44:23.9546928Z [1m[96m...[0m
+2026-10-16T16:44:23.9547627Z [1m[96m236[0m [1m[96m|[0m     pub fn from_i64(&self, v: i64) -> Element<N> {
+2026-10-16T16:44:23.9548446Z     [1m[96m|[0m            [1m[93m^^^^^^^^[0m
+2026-10-16T16:44:23.9549060Z [1m[96m...[0m
+2026-10-16T16:44:23.9549823Z [1m[96m245[0m [1m[96m|[0m     pub fn from_u128(&self, v: u128) -> Element<N> {
+2026-10-16T16:44:23.9550649Z     [1m[96m|[0m            [1m[93m^^^^^^^^^[0m
+2026-10-16T16:44:23.9551361Z [1m[96m...[0m
+2026-10-16T16:44:23.9552160Z [1m[96m249[0m [1m[96m|[0m     pub fn from_big(&self, v: &BigUint) -> Element<N> {
+2026-10-16T16:44:23.9552999Z     [1m[96m|[0m            [1m[93m^^^^^^^^[0m
+2026-10-16T16:44:23.9553607Z [1m[96m...[0m
+2026-10-16T16:44:23.9554325Z [1m[96m254[0m [1m[96m|[0m     pub fn to_big(&self, a: &Element<N>) -> BigUint {
+2026-10-16T16:44:23.9555178Z     [1m[96m|[0m            [1m[93m^^^^^^[0m
+2026-10-16T16:44:23.9555728Z [1m[96m...[0m
+2026-10-16T16:44:23.9556500Z [1m[96m262[0m [1m[96m|[0m     pub fn pow(&self, a: &Element<N>, e: &BigUint) -> Element<N> {
+2026-10-16T16:44:23.9557418Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:23.9558022Z [1m[96m...[0m
+2026-10-16T16:44:23.9558795Z [1m[96m274[0m [1m[96m|[0m     pub fn inv(&self, a: &Element<N>) -> Option<Element<N>> {
+2026-10-16T16:44:23.9560002Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:23.9560652Z [1m[96m...[0m
+2026-10-16T16:44:23.9561463Z [1m[96m310[0m [1m[96m|[0m     fn half_coefficient(&self, mut a: Element<N>) -> Element<N> {
+2026-10-16T16:44:23.9562629Z     [1m[96m|[0m        [1m[93m^^^^^^^^^^^^^^^^[0m
+2026-10-16T16:44:23.9563753Z [1m[96m...[0m
+2026-10-16T16:44:23.9564643Z [1m[96m321[0m [1m[96m|[0m     pub fn div(&self, a: &Element<N>, b: &Element<N>) -> Option<Element<N>> {
+2026-10-16T16:44:23.9565578Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:23.9566198Z [1m[96m...[0m
+2026-10-16T16:44:23.9566960Z [1m[96m326[0m [1m[96m|[0m     pub fn legendre(&self, a: &Element<N>) -> i32 {
+2026-10-16T16:44:23.9567826Z     [1m[96m|[0m            [1m[93m^^^^^^^^[0m
+2026-10-16T16:44:23.9568451Z [1m[96m...[0m
+2026-10-16T16:44:23.9569259Z [1m[96m338[0m [1m[96m|[0m     pub fn sqrt(&self, a: &Element<N>) -> Option<Element<N>> {
+2026-10-16T16:44:23.9570142Z     [1m[96m|[0m            [1m[93m^^^^[0m
+2026-10-16T16:44:23.9570749Z [1m[96m...[0m
+2026-10-16T16:44:23.9571417Z [1m[96m368[0m [1m[96m|[0m     pub fn hex(&self, a: &Element<N>) -> String {
+2026-10-16T16:44:23.9572284Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:23.9572679Z 
+2026-10-16T16:44:23.9574445Z [1m[93mwarning[0m[1m[97m: function `is_probable_prime` is never used[0m
+2026-10-16T16:44:23.9575527Z    [1m[96m--> [0msrc\bin\..\verification_field.rs:375:8
+2026-10-16T16:44:23.9576251Z     [1m[96m|[0m
+2026-10-16T16:44:23.9576973Z [1m[96m375[0m [1m[96m|[0m pub fn is_probable_prime(n: &BigUint) -> bool {
+2026-10-16T16:44:23.9577839Z     [1m[96m|[0m        [1m[93m^^^^^^^^^^^^^^^^^[0m
+2026-10-16T16:44:23.9578306Z 
+2026-10-16T16:44:23.9578772Z [1m[93mwarning[0m[1m[97m: struct `Fe` is never constructed[0m
+2026-10-16T16:44:23.9579753Z   [1m[96m--> [0msrc\bin\..\..\..\..\src\cryptanalysis\isogeny_walk\field.rs:13:12
+2026-10-16T16:44:23.9580537Z    [1m[96m|[0m
+2026-10-16T16:44:23.9581166Z [1m[96m13[0m [1m[96m|[0m pub struct Fe(pub [u64; 4]);
+2026-10-16T16:44:23.9581928Z    [1m[96m|[0m            [1m[93m^^[0m
+2026-10-16T16:44:23.9582320Z 
+2026-10-16T16:44:23.9582812Z [1m[93mwarning[0m[1m[97m: struct `Field` is never constructed[0m
+2026-10-16T16:44:23.9584269Z   [1m[96m--> [0msrc\bin\..\..\..\..\src\cryptanalysis\isogeny_walk\field.rs:17:12
+2026-10-16T16:44:23.9585084Z    [1m[96m|[0m
+2026-10-16T16:44:23.9585873Z [1m[96m17[0m [1m[96m|[0m pub struct Field {
+2026-10-16T16:44:23.9587316Z    [1m[96m|[0m            [1m[93m^^^^^[0m
+2026-10-16T16:44:23.9587863Z 
+2026-10-16T16:44:23.9588658Z [1m[93mwarning[0m[1m[97m: function `to_limbs` is never used[0m
+2026-10-16T16:44:23.9589711Z   [1m[96m--> [0msrc\bin\..\..\..\..\src\cryptanalysis\isogeny_walk\field.rs:36:4
+2026-10-16T16:44:23.9590531Z    [1m[96m|[0m
+2026-10-16T16:44:23.9716759Z [1m[96m36[0m [1m[96m|[0m fn to_limbs(v: &BigUint) -> [u64; 4] {
+2026-10-16T16:44:23.9763866Z    [1m[96m|[0m    [1m[93m^^^^^^^^[0m
+2026-10-16T16:44:23.9787015Z 
+2026-10-16T16:44:23.9787741Z [1m[93mwarning[0m[1m[97m: function `from_limbs` is never used[0m
+2026-10-16T16:44:23.9846313Z   [1m[96m--> [0msrc\bin\..\..\..\..\src\cryptanalysis\isogeny_walk\field.rs:44:4
+2026-10-16T16:44:23.9877188Z    [1m[96m|[0m
+2026-10-16T16:44:23.9881532Z [1m[96m44[0m [1m[96m|[0m fn from_limbs(v: &[u64; 4]) -> BigUint {
+2026-10-16T16:44:23.9944094Z    [1m[96m|[0m    [1m[93m^^^^^^^^^^[0m
+2026-10-16T16:44:23.9970118Z 
+2026-10-16T16:44:23.9970828Z [1m[93mwarning[0m[1m[97m: function `geq` is never used[0m
+2026-10-16T16:44:23.9971856Z   [1m[96m--> [0msrc\bin\..\..\..\..\src\cryptanalysis\isogeny_walk\field.rs:52:4
+2026-10-16T16:44:23.9972715Z    [1m[96m|[0m
+2026-10-16T16:44:23.9973384Z [1m[96m52[0m [1m[96m|[0m fn geq(a: &[u64; 4], b: &[u64; 4]) -> bool {
+2026-10-16T16:44:23.9974480Z    [1m[96m|[0m    [1m[93m^^^[0m
+2026-10-16T16:44:23.9974833Z 
+2026-10-16T16:44:23.9975254Z [1m[93mwarning[0m[1m[97m: function `sub_limbs` is never used[0m
+2026-10-16T16:44:23.9976158Z   [1m[96m--> [0msrc\bin\..\..\..\..\src\cryptanalysis\isogeny_walk\field.rs:61:4
+2026-10-16T16:44:23.9977891Z    [1m[96m|[0m
+2026-10-16T16:44:23.9980355Z [1m[96m61[0m [1m[96m|[0m fn sub_limbs(a: &[u64; 4], b: &[u64; 4]) -> ([u64; 4], bool) {
+2026-10-16T16:44:23.9982120Z    [1m[96m|[0m    [1m[93m^^^^^^^^^[0m
+2026-10-16T16:44:23.9982779Z 
+2026-10-16T16:44:24.0003300Z [1m[93mwarning[0m[1m[97m: function `add_limbs` is never used[0m
+2026-10-16T16:44:24.0036178Z   [1m[96m--> [0msrc\bin\..\..\..\..\src\cryptanalysis\isogeny_walk\field.rs:73:4
+2026-10-16T16:44:24.0083373Z    [1m[96m|[0m
+2026-10-16T16:44:24.0205543Z [1m[96m73[0m [1m[96m|[0m fn add_limbs(a: &[u64; 4], b: &[u64; 4]) -> ([u64; 4], bool) {
+2026-10-16T16:44:24.0261776Z    [1m[96m|[0m    [1m[93m^^^^^^^^^[0m
+2026-10-16T16:44:24.0263374Z 
+2026-10-16T16:44:24.0264105Z [1m[93mwarning[0m[1m[97m: multiple associated items are never used[0m
+2026-10-16T16:44:24.0265826Z    [1m[96m--> [0msrc\bin\..\..\..\..\src\cryptanalysis\isogeny_walk\field.rs:89:12
+2026-10-16T16:44:24.0266882Z     [1m[96m|[0m
+2026-10-16T16:44:24.0281148Z  [1m[96m85[0m [1m[96m|[0m impl Field {
+2026-10-16T16:44:24.0289858Z     [1m[96m|[0m [1m[96m----------[0m [1m[96massociated items in this implementation[0m
+2026-10-16T16:44:24.0418043Z [1m[96m...[0m
+2026-10-16T16:44:24.0538250Z  [1m[96m89[0m [1m[96m|[0m     pub fn new(p: &BigUint) -> Option<Self> {
+2026-10-16T16:44:24.0593698Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:24.0615080Z [1m[96m...[0m
+2026-10-16T16:44:24.0759119Z [1m[96m125[0m [1m[96m|[0m     pub fn modulus(&self) -> &BigUint {
+2026-10-16T16:44:24.0868951Z     [1m[96m|[0m            [1m[93m^^^^^^^[0m
+2026-10-16T16:44:24.0928830Z [1m[96m...[0m
+2026-10-16T16:44:24.0949880Z [1m[96m130[0m [1m[96m|[0m     pub fn least_nonresidue(&self) -> u64 {
+2026-10-16T16:44:24.1088985Z     [1m[96m|[0m            [1m[93m^^^^^^^^^^^^^^^^[0m
+2026-10-16T16:44:24.1202184Z [1m[96m...[0m
+2026-10-16T16:44:24.1264202Z [1m[96m134[0m [1m[96m|[0m     pub fn zero(&self) -> Fe {
+2026-10-16T16:44:24.1271097Z     [1m[96m|[0m            [1m[93m^^^^[0m
+2026-10-16T16:44:24.1423920Z [1m[96m...[0m
+2026-10-16T16:44:24.1521749Z [1m[96m138[0m [1m[96m|[0m     pub fn one(&self) -> Fe {
+2026-10-16T16:44:24.1583582Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:24.1602506Z [1m[96m...[0m
+2026-10-16T16:44:24.1743607Z [1m[96m142[0m [1m[96m|[0m     pub fn is_zero(&self, a: &Fe) -> bool {
+2026-10-16T16:44:24.1922342Z     [1m[96m|[0m            [1m[93m^^^^^^^[0m
+2026-10-16T16:44:24.2080197Z [1m[96m...[0m
+2026-10-16T16:44:24.2254020Z [1m[96m146[0m [1m[96m|[0m     pub fn mul(&self, a: &Fe, b: &Fe) -> Fe {
+2026-10-16T16:44:24.2324593Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:24.2416676Z [1m[96m...[0m
+2026-10-16T16:44:24.2574476Z [1m[96m182[0m [1m[96m|[0m     pub fn sqr(&self, a: &Fe) -> Fe {
+2026-10-16T16:44:24.2576082Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:24.2652323Z [1m[96m...[0m
+2026-10-16T16:44:24.2733717Z [1m[96m186[0m [1m[96m|[0m     pub fn add(&self, a: &Fe, b: &Fe) -> Fe {
+2026-10-16T16:44:24.2894580Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:24.2898382Z [1m[96m...[0m
+2026-10-16T16:44:24.2975222Z [1m[96m195[0m [1m[96m|[0m     pub fn sub(&self, a: &Fe, b: &Fe) -> Fe {
+2026-10-16T16:44:24.3053269Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:24.3231041Z [1m[96m...[0m
+2026-10-16T16:44:24.3233872Z [1m[96m204[0m [1m[96m|[0m     pub fn neg(&self, a: &Fe) -> Fe {
+2026-10-16T16:44:24.3273247Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:24.3275351Z [1m[96m...[0m
+2026-10-16T16:44:24.3276284Z [1m[96m208[0m [1m[96m|[0m     pub fn from_u64(&self, v: u64) -> Fe {
+2026-10-16T16:44:24.3278268Z     [1m[96m|[0m            [1m[93m^^^^^^^^[0m
+2026-10-16T16:44:24.3352573Z [1m[96m...[0m
+2026-10-16T16:44:24.3388530Z [1m[96m212[0m [1m[96m|[0m     pub fn from_i64(&self, v: i64) -> Fe {
+2026-10-16T16:44:24.3507442Z     [1m[96m|[0m            [1m[93m^^^^^^^^[0m
+2026-10-16T16:44:24.3508832Z [1m[96m...[0m
+2026-10-16T16:44:24.3509763Z [1m[96m221[0m [1m[96m|[0m     pub fn from_u128(&self, v: u128) -> Fe {
+2026-10-16T16:44:24.3548507Z     [1m[96m|[0m            [1m[93m^^^^^^^^^[0m
+2026-10-16T16:44:24.3558620Z [1m[96m...[0m
+2026-10-16T16:44:24.3719677Z [1m[96m225[0m [1m[96m|[0m     pub fn from_big(&self, v: &BigUint) -> Fe {
+2026-10-16T16:44:24.3839683Z     [1m[96m|[0m            [1m[93m^^^^^^^^[0m
+2026-10-16T16:44:24.3864878Z [1m[96m...[0m
+2026-10-16T16:44:24.3879452Z [1m[96m230[0m [1m[96m|[0m     pub fn to_big(&self, a: &Fe) -> BigUint {
+2026-10-16T16:44:24.4037847Z     [1m[96m|[0m            [1m[93m^^^^^^[0m
+2026-10-16T16:44:24.4160392Z [1m[96m...[0m
+2026-10-16T16:44:24.4197142Z [1m[96m234[0m [1m[96m|[0m     pub fn pow(&self, a: &Fe, e: &BigUint) -> Fe {
+2026-10-16T16:44:24.4356553Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:24.4479682Z [1m[96m...[0m
+2026-10-16T16:44:24.4513296Z [1m[96m246[0m [1m[96m|[0m     pub fn inv(&self, a: &Fe) -> Option<Fe> {
+2026-10-16T16:44:24.4517638Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:24.4687759Z [1m[96m...[0m
+2026-10-16T16:44:24.4797050Z [1m[96m253[0m [1m[96m|[0m     pub fn div(&self, a: &Fe, b: &Fe) -> Option<Fe> {
+2026-10-16T16:44:24.4847629Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:24.5007558Z [1m[96m...[0m
+2026-10-16T16:44:24.5130847Z [1m[96m258[0m [1m[96m|[0m     pub fn legendre(&self, a: &Fe) -> i32 {
+2026-10-16T16:44:24.5195371Z     [1m[96m|[0m            [1m[93m^^^^^^^^[0m
+2026-10-16T16:44:24.5344703Z [1m[96m...[0m
+2026-10-16T16:44:24.5426018Z [1m[96m270[0m [1m[96m|[0m     pub fn sqrt(&self, a: &Fe) -> Option<Fe> {
+2026-10-16T16:44:24.5461424Z     [1m[96m|[0m            [1m[93m^^^^[0m
+2026-10-16T16:44:24.5530081Z [1m[96m...[0m
+2026-10-16T16:44:24.5782299Z [1m[96m300[0m [1m[96m|[0m     pub fn hex(&self, a: &Fe) -> String {
+2026-10-16T16:44:24.5899193Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:24.6179667Z 
+2026-10-16T16:44:24.6449550Z [1m[93mwarning[0m[1m[97m: function `is_probable_prime` is never used[0m
+2026-10-16T16:44:24.6550617Z    [1m[96m--> [0msrc\bin\..\..\..\..\src\cryptanalysis\isogeny_walk\field.rs:307:8
+2026-10-16T16:44:24.6830245Z     [1m[96m|[0m
+2026-10-16T16:44:24.7096605Z [1m[96m307[0m [1m[96m|[0m pub fn is_probable_prime(n: &BigUint) -> bool {
+2026-10-16T16:44:24.7147509Z     [1m[96m|[0m        [1m[93m^^^^^^^^^^^^^^^^^[0m
+2026-10-16T16:44:24.7205551Z 
+2026-10-16T16:44:24.7680577Z [1m[93mwarning[0m: `isogeny-cli` (bin "field_checks") generated 21 warnings (run `cargo fix --bin "field_checks" -p isogeny-cli` to apply 2 suggestions)
+2026-10-16T16:44:33.8716464Z [1m[93mwarning[0m[1m[97m: multiple methods are never used[0m
+2026-10-16T16:44:33.8793617Z    [1m[96m--> [0msrc\bin\..\verification_field.rs:135:12
+2026-10-16T16:44:33.8813133Z     [1m[96m|[0m
+2026-10-16T16:44:33.8921847Z  [1m[96m89[0m [1m[96m|[0m impl<const N: usize> PrimeField<N> {
+2026-10-16T16:44:33.9051076Z     [1m[96m|[0m [1m[96m----------------------------------[0m [1m[96mmethods in this implementation[0m
+2026-10-16T16:44:33.9128092Z [1m[96m...[0m
+2026-10-16T16:44:33.9148170Z [1m[96m135[0m [1m[96m|[0m     pub fn modulus(&self) -> &BigUint {
+2026-10-16T16:44:33.9256491Z     [1m[96m|[0m            [1m[93m^^^^^^^[0m
+2026-10-16T16:44:33.9385482Z [1m[96m...[0m
+2026-10-16T16:44:33.9447730Z [1m[96m140[0m [1m[96m|[0m     pub fn least_nonresidue(&self) -> u64 {
+2026-10-16T16:44:33.9450253Z     [1m[96m|[0m            [1m[93m^^^^^^^^^^^^^^^^[0m
+2026-10-16T16:44:33.9451311Z [1m[96m...[0m
+2026-10-16T16:44:33.9453500Z [1m[96m222[0m [1m[96m|[0m     pub fn neg(&self, a: &Element<N>) -> Element<N> {
+2026-10-16T16:44:33.9525887Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:33.9575179Z [1m[96m...[0m
+2026-10-16T16:44:33.9721506Z [1m[96m236[0m [1m[96m|[0m     pub fn from_i64(&self, v: i64) -> Element<N> {
+2026-10-16T16:44:33.9743464Z     [1m[96m|[0m            [1m[93m^^^^^^^^[0m
+2026-10-16T16:44:33.9744915Z [1m[96m...[0m
+2026-10-16T16:44:33.9746071Z [1m[96m245[0m [1m[96m|[0m     pub fn from_u128(&self, v: u128) -> Element<N> {
+2026-10-16T16:44:33.9779453Z     [1m[96m|[0m            [1m[93m^^^^^^^^^[0m
+2026-10-16T16:44:33.9897874Z [1m[96m...[0m
+2026-10-16T16:44:34.0041202Z [1m[96m321[0m [1m[96m|[0m     pub fn div(&self, a: &Element<N>, b: &Element<N>) -> Option<Element<N>> {
+2026-10-16T16:44:34.0077824Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:34.0098813Z [1m[96m...[0m
+2026-10-16T16:44:34.0218299Z [1m[96m338[0m [1m[96m|[0m     pub fn sqrt(&self, a: &Element<N>) -> Option<Element<N>> {
+2026-10-16T16:44:34.0357969Z     [1m[96m|[0m            [1m[93m^^^^[0m
+2026-10-16T16:44:34.0406344Z [1m[96m...[0m
+2026-10-16T16:44:34.0434066Z [1m[96m368[0m [1m[96m|[0m     pub fn hex(&self, a: &Element<N>) -> String {
+2026-10-16T16:44:34.0547379Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:34.0683160Z     [1m[96m|[0m
+2026-10-16T16:44:34.0792255Z     [1m[96m= [0m[1m[97mnote[0m: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+2026-10-16T16:44:34.1022042Z 
+2026-10-16T16:44:34.1141521Z [1m[93mwarning[0m[1m[97m: methods `modulus`, `neg`, `from_i64`, `from_u128`, `div`, and `hex` are never used[0m
+2026-10-16T16:44:34.1187497Z    [1m[96m--> [0msrc\bin\..\..\..\..\src\cryptanalysis\isogeny_walk\field.rs:125:12
+2026-10-16T16:44:34.1362283Z     [1m[96m|[0m
+2026-10-16T16:44:34.1451201Z  [1m[96m85[0m [1m[96m|[0m impl Field {
+2026-10-16T16:44:34.1468891Z     [1m[96m|[0m [1m[96m----------[0m [1m[96mmethods in this implementation[0m
+2026-10-16T16:44:34.1526998Z [1m[96m...[0m
+2026-10-16T16:44:34.1700212Z [1m[96m125[0m [1m[96m|[0m     pub fn modulus(&self) -> &BigUint {
+2026-10-16T16:44:34.1781423Z     [1m[96m|[0m            [1m[93m^^^^^^^[0m
+2026-10-16T16:44:34.1792681Z [1m[96m...[0m
+2026-10-16T16:44:34.1857232Z [1m[96m204[0m [1m[96m|[0m     pub fn neg(&self, a: &Fe) -> Fe {
+2026-10-16T16:44:34.2035150Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:34.2112632Z [1m[96m...[0m
+2026-10-16T16:44:34.2113412Z [1m[96m212[0m [1m[96m|[0m     pub fn from_i64(&self, v: i64) -> Fe {
+2026-10-16T16:44:34.2174681Z     [1m[96m|[0m            [1m[93m^^^^^^^^[0m
+2026-10-16T16:44:34.2354802Z [1m[96m...[0m
+2026-10-16T16:44:34.2432061Z [1m[96m221[0m [1m[96m|[0m     pub fn from_u128(&self, v: u128) -> Fe {
+2026-10-16T16:44:34.2452024Z     [1m[96m|[0m            [1m[93m^^^^^^^^^[0m
+2026-10-16T16:44:34.2464790Z [1m[96m...[0m
+2026-10-16T16:44:34.2466466Z [1m[96m253[0m [1m[96m|[0m     pub fn div(&self, a: &Fe, b: &Fe) -> Option<Fe> {
+2026-10-16T16:44:34.2467691Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:34.2493924Z [1m[96m...[0m
+2026-10-16T16:44:34.2753784Z [1m[96m300[0m [1m[96m|[0m     pub fn hex(&self, a: &Fe) -> String {
+2026-10-16T16:44:34.2772538Z     [1m[96m|[0m            [1m[93m^^^[0m
+2026-10-16T16:44:34.2793407Z 
+2026-10-16T16:44:43.0960835Z [1m[93mwarning[0m: `isogeny-cli` (bin "field_checks" test) generated 2 warnings
+2026-10-16T16:46:56.5989380Z [1m[92m    Finished[0m `release` profile [optimized] target(s) in 2m 57s
+2026-10-16T16:46:56.6080780Z [1m[92m     Running[0m unittests src\bin\field_checks.rs (tools\isogeny-cli\target\x86_64-pc-windows-msvc\release\deps\field_checks-ac639fcefcd709ab.exe)
+2026-10-16T16:46:56.6191101Z 
+2026-10-16T16:46:56.6191549Z running 3 tests
+2026-10-16T16:46:56.6690386Z test original::tests::arithmetic_matches_biguint_on_p224_and_small_primes ... ok
+2026-10-16T16:46:56.7092799Z test tests::small_and_full_width_fields ... ok
+2026-10-16T16:46:56.8159597Z test tests::wider_standard_fields ... ok
+2026-10-16T16:46:56.8160023Z 
+2026-10-16T16:46:56.8160485Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+2026-10-16T16:46:56.8161105Z 
+2026-10-16T16:46:56.8182669Z [1m[92m     Running[0m unittests src\bin\fixed_modulus_bench.rs (tools\isogeny-cli\target\x86_64-pc-windows-msvc\release\deps\fixed_modulus_bench-1eb3d2b37c195507.exe)
+2026-10-16T16:46:56.8297965Z 
+2026-10-16T16:46:56.8298789Z running 11 tests
+2026-10-16T16:46:56.8323649Z test modpoly::tests::j_series_matches_the_integer_expansion ... ok
+2026-10-16T16:46:56.8325275Z test modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+2026-10-16T16:46:56.8331038Z test modular_polynomial::tests::modular_polynomial_storage_scaling_barrier ... ok
+2026-10-16T16:46:56.8332577Z test modular_polynomial::tests::phi_2_basic_properties ... ok
+2026-10-16T16:46:56.8338474Z test receipt_tests::os_cpu_is_actual_user_plus_system_not_stage_estimates ... ok
+2026-10-16T16:46:56.8339941Z test modular_polynomial::tests::phi_3_basic_properties ... ok
+2026-10-16T16:46:56.8441286Z test tests::deterministic_dataset_controls_are_bounded_and_match_both_reducers ... ok
+2026-10-16T16:46:56.8442905Z test tests::native_percentile_uses_maximum_of_eight_and_refuses_missing_samples ... ok
+2026-10-16T16:46:56.8713705Z test catalog::tests::common_standard_names_resolve_without_merging_different_models ... ok
+2026-10-16T16:46:57.0442983Z test catalog::tests::all_models_are_accounted_for_with_operation_capabilities ... ok
+2026-10-16T16:46:57.7167388Z test tests::p192_and_small_prime_reduction_controls ... ok
+2026-10-16T16:46:57.7167951Z 
+2026-10-16T16:46:57.7168393Z test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.89s
+2026-10-16T16:46:57.7168770Z 
+2026-10-16T16:46:57.7216117Z [1m[92m     Running[0m unittests src\main.rs (tools\isogeny-cli\target\x86_64-pc-windows-msvc\release\deps\isogeny-1c4b143cea52b52f.exe)
+2026-10-16T16:46:57.7326298Z 
+2026-10-16T16:46:57.7326724Z running 85 tests
+2026-10-16T16:46:57.7558084Z test challenge::tests::plan_rejects_unbounded_ranges_and_nonprime_models ... ok
+2026-10-16T16:46:57.7605850Z test challenge::tests::policy_identifies_rules_and_catalogue ... ok
+2026-10-16T16:46:57.7672744Z test catalog::tests::common_standard_names_resolve_without_merging_different_models ... ok
+2026-10-16T16:46:57.7696267Z test cli_tests::degree_three_screening_uses_the_characteristic_three_residue_field ... ok
+2026-10-16T16:46:57.7735736Z test cli_tests::known_small_extension_candidates_have_exact_eigenvalue_orders ... ok
+2026-10-16T16:46:57.7891846Z test cli_tests::receipt_hashes_match_the_independent_reference_at_padding_boundaries ... ok
+2026-10-16T16:46:57.7950119Z test cli_tests::usage_failures_precede_output_creation ... ok
+2026-10-16T16:46:57.8211121Z test challenge::tests::catalogue_has_every_standard_prime_model_and_no_research_descendants ... ok
+2026-10-16T16:46:57.8846720Z test compact_cm_verify::tests::adding_subgroup_order_preserves_points_and_changes_geometric_degree ... ok
+2026-10-16T16:46:57.8858270Z test compact_cm_verify::tests::exact_integer_checker_catches_modulus_sized_error_that_evaluated_idc_accepts ... ok
+2026-10-16T16:46:57.8880607Z test compact_cm_verify::tests::exact_source_tuple_matches_the_registered_standard ... ok
+2026-10-16T16:46:57.9134475Z test compact_cm_verify::tests::signed_zero_and_negative_geometric_expressions_replay_independently ... ok
+2026-10-16T16:46:57.9359983Z test compact_cm_verify::tests::complete_control_and_other_primitive_root_are_accepted_but_wrong_pairing_is_rejected ... ok
+2026-10-16T16:46:57.9716181Z test constructor::extension::tests::extension_point_count_matches_the_known_base_trace ... ok
+2026-10-16T16:46:58.0370712Z test catalog::tests::all_models_are_accounted_for_with_operation_capabilities ... ok
+2026-10-16T16:46:58.0374873Z test constructor::extension::tests::rejects_a_reducible_modulus ... ok
+2026-10-16T16:46:58.0390786Z test constructor::extension::tests::small_extension_arithmetic ... ok
+2026-10-16T16:46:58.0558471Z test cli_tests::execution_index_preserves_each_canonical_curve_and_its_subgroup ... ok
+2026-10-16T16:46:58.0579251Z test constructor::extension::tests::large_prime_extension_arithmetic ... ok
+2026-10-16T16:46:58.0659981Z test constructor::tests::selections_keep_old_routes_and_enable_new_degree_nine_routes ... ok
+2026-10-16T16:46:58.0663559Z test hash_sha256::tests::sha224_abc ... ok
+2026-10-16T16:46:58.0666388Z test hash_sha256::tests::sha224_empty ... ok
+2026-10-16T16:46:58.0669559Z test hash_sha256::tests::sha256_abc ... ok
+2026-10-16T16:46:58.0672583Z test hash_sha256::tests::sha256_block_boundary_55 ... ok
+2026-10-16T16:46:58.0675536Z test hash_sha256::tests::sha256_empty ... ok
+2026-10-16T16:46:58.0678487Z test hash_sha256::tests::sha256_fips180_112byte ... ok
+2026-10-16T16:46:58.0681350Z test hash_sha256::tests::sha256_fips180_56byte ... ok
+2026-10-16T16:46:58.0684280Z test hash_sha256::tests::sha256_hello_world ... ok
+2026-10-16T16:46:58.0740876Z test constructor::tests::every_enabled_extension_passes_field_laws ... ok
+2026-10-16T16:46:58.0744146Z test hash_sha256::tests::sha256_two_blocks_64 ... ok
+2026-10-16T16:46:58.0748522Z test hash_sha256::tests::sha_extensions_agree_with_the_portable_rounds ... ok
+2026-10-16T16:46:58.0773759Z test hash_sha256::tests::streaming_matches_one_shot_at_every_split ... ok
+2026-10-16T16:46:58.0786178Z test hash_sha256::tests::streaming_million_a ... ok
+2026-10-16T16:46:58.0787157Z test hash_sha256::tests::sha256_million_a ... ok
+2026-10-16T16:46:58.0800647Z test identity_certificate::tests::committed_schoenhage_certificate_still_checks ... ok
+2026-10-16T16:46:58.0804268Z test identity_certificate::tests::canonical_bytes_are_sorted_and_round_trip ... ok
+2026-10-16T16:46:58.0807755Z test identity_certificate::tests::degree_bound_is_checked_syntactically_not_trusted ... ok
+2026-10-16T16:46:58.0809522Z test identity_certificate::tests::field_arithmetic_agrees_with_u128_reference ... ok
+2026-10-16T16:46:58.0824250Z test identity_certificate::tests::points_depend_on_the_id_so_the_author_cannot_pre_pick_them ... ok
+2026-10-16T16:46:58.0833302Z test identity_certificate::tests::schoenhage_identity_certifies_and_checks ... ok
+2026-10-16T16:46:58.0836449Z test identity_certificate::tests::swapping_the_statement_under_a_sealed_id_is_malformed ... ok
+2026-10-16T16:46:58.0846779Z test identity_certificate::tests::tampering_with_the_digest_is_detected ... ok
+2026-10-16T16:46:58.0848859Z test identity_certificate::tests::the_identity_without_its_error_term_is_false_and_cannot_be_issued ... ok
+2026-10-16T16:46:58.0857013Z test map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+2026-10-16T16:46:58.0888807Z test modpoly::tests::j_series_matches_the_integer_expansion ... ok
+2026-10-16T16:46:58.0889776Z test modular_polynomial::tests::modular_polynomial_storage_scaling_barrier ... ok
+2026-10-16T16:46:58.0891164Z test modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+2026-10-16T16:46:58.0897428Z test modular_polynomial::tests::phi_2_basic_properties ... ok
+2026-10-16T16:46:58.0898567Z test modular_polynomial::tests::phi_3_basic_properties ... ok
+2026-10-16T16:46:58.0903292Z test replay::n10::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+2026-10-16T16:46:58.0905228Z test replay::n10::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+2026-10-16T16:46:58.0912162Z test replay::n1::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+2026-10-16T16:46:58.0918029Z test replay::n1::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+2026-10-16T16:46:58.0924856Z test replay::n1::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+2026-10-16T16:46:58.0932202Z test replay::n2::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+2026-10-16T16:46:58.0938375Z test replay::n2::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+2026-10-16T16:46:58.0950643Z test replay::n2::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+2026-10-16T16:46:58.0957544Z test replay::n3::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+2026-10-16T16:46:58.0963311Z test replay::n3::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+2026-10-16T16:46:58.0975491Z test compact_cm_verify::tests::small_positive_rungs_and_distinct_composite_controls ... ok
+2026-10-16T16:46:58.0983399Z test replay::n3::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+2026-10-16T16:46:58.0987803Z test replay::n4::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+2026-10-16T16:46:58.0991759Z test replay::n4::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+2026-10-16T16:46:58.0999093Z test replay::n5::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+2026-10-16T16:46:58.1005837Z test replay::n5::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+2026-10-16T16:46:58.1075019Z test field::tests::arithmetic_matches_biguint_on_p224_and_small_primes ... ok
+2026-10-16T16:46:58.1082448Z test replay::n6::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+2026-10-16T16:46:58.1088998Z test replay::n6::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+2026-10-16T16:46:58.1175809Z test replay::n4::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+2026-10-16T16:46:58.1183573Z test replay::n7::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+2026-10-16T16:46:58.1190258Z test replay::n7::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+2026-10-16T16:46:58.1205075Z test replay::n5::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+2026-10-16T16:46:58.1210017Z test replay::n10::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+2026-10-16T16:46:58.1213661Z test replay::n8::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+2026-10-16T16:46:58.1216892Z test replay::n8::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+2026-10-16T16:46:58.1224812Z test replay::n9::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+2026-10-16T16:46:58.1231696Z test replay::n9::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+2026-10-16T16:46:58.1299531Z test replay::n6::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+2026-10-16T16:46:58.1429436Z test replay::n7::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+2026-10-16T16:46:58.1430612Z test replay_trace::tests::interruption_worker ... ignored, child fixture selected by the interruption control
+2026-10-16T16:46:58.1441644Z test replay::n8::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+2026-10-16T16:46:58.1461743Z test walk::tests::large_walk_requests_have_matching_construction_and_replay_bounds ... ok
+2026-10-16T16:46:58.1480296Z test replay::n9::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+2026-10-16T16:46:58.1485619Z test replay_trace::write_failure_tests::requested_trace_write_failure_propagates_without_double_panic ... ok
+2026-10-16T16:46:58.1519558Z test replay_trace::tests::flushed_begin_survives_bounded_child_interruption ... ok
+2026-10-16T16:46:58.1520185Z 
+2026-10-16T16:46:58.1520636Z test result: ok. 84 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.42s
+2026-10-16T16:46:58.1521038Z 
+2026-10-16T16:46:58.1575709Z [1m[92m     Running[0m unittests src\bin\registry_models.rs (tools\isogeny-cli\target\x86_64-pc-windows-msvc\release\deps\registry_models-3c3639b56862f8fc.exe)
+2026-10-16T16:46:58.1676880Z 
+2026-10-16T16:46:58.1677166Z running 4 tests
+2026-10-16T16:46:58.1683692Z test tests::composite_fields_and_singular_models_are_rejected ... ok
+2026-10-16T16:46:58.1685435Z test tests::a_conflicting_historical_identity_is_rejected ... ok
+2026-10-16T16:46:58.2788659Z test tests::both_frozen_agm_identities_and_orders_match_the_native_adapter ... ok
+2026-10-16T16:46:58.3549204Z test tests::translated_coordinates_are_a_bijection_on_small_fields ... ok
+2026-10-16T16:46:58.3549767Z 
+2026-10-16T16:46:58.3550082Z test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+2026-10-16T16:46:58.3550476Z 
+2026-10-16T16:46:58.3572448Z [1m[92m     Running[0m tests\challenge_cli.rs (tools\isogeny-cli\target\x86_64-pc-windows-msvc\release\deps\challenge_cli-afbc051954f83cb3.exe)
+2026-10-16T16:46:58.3674017Z 
+2026-10-16T16:46:58.3674320Z running 1 test
+2026-10-16T16:47:00.0688491Z test native_challenge_replays_maps_rejects_forgery_and_ranks_curves_separately ... ok
+2026-10-16T16:47:00.0688920Z 
+2026-10-16T16:47:00.0689238Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.70s
+2026-10-16T16:47:00.0689673Z 
+2026-10-16T16:47:00.0708737Z [1m[92m     Running[0m tests\compact_cm_cli.rs (tools\isogeny-cli\target\x86_64-pc-windows-msvc\release\deps\compact_cm_cli-2894d44b0890895e.exe)
+2026-10-16T16:47:00.0813224Z 
+2026-10-16T16:47:00.0813682Z running 1 test
+2026-10-16T16:47:00.8396922Z test installed_compact_command_retains_controls_and_rejects_forged_certificates ... ok
+2026-10-16T16:47:00.8397376Z 
+2026-10-16T16:47:00.8397721Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.76s
+2026-10-16T16:47:00.8398124Z 
+2026-10-16T16:47:00.8417343Z [1m[92m     Running[0m tests\fixed_modulus_replay.rs (tools\isogeny-cli\target\x86_64-pc-windows-msvc\release\deps\fixed_modulus_replay-e52f58ac24c121e7.exe)
+2026-10-16T16:47:00.8520067Z 
+2026-10-16T16:47:00.8520422Z running 20 tests
+2026-10-16T16:47:00.8540891Z test accepted_p224_1471_cache_control_and_rehashed_negatives ... FAILED
+2026-10-16T16:47:00.8565636Z test identity_certificate::tests::canonical_bytes_are_sorted_and_round_trip ... ok
+2026-10-16T16:47:00.8583317Z test identity_certificate::tests::committed_schoenhage_certificate_still_checks ... ok
+2026-10-16T16:47:00.8589753Z test identity_certificate::tests::degree_bound_is_checked_syntactically_not_trusted ... ok
+2026-10-16T16:47:00.8594264Z test identity_certificate::tests::field_arithmetic_agrees_with_u128_reference ... ok
+2026-10-16T16:47:00.8613170Z test identity_certificate::tests::points_depend_on_the_id_so_the_author_cannot_pre_pick_them ... ok
+2026-10-16T16:47:00.8644620Z test identity_certificate::tests::schoenhage_identity_certifies_and_checks ... ok
+2026-10-16T16:47:00.8661023Z test identity_certificate::tests::swapping_the_statement_under_a_sealed_id_is_malformed ... ok
+2026-10-16T16:47:00.8673116Z test identity_certificate::tests::tampering_with_the_digest_is_detected ... ok
+2026-10-16T16:47:00.8681721Z test identity_certificate::tests::the_identity_without_its_error_term_is_false_and_cannot_be_issued ... ok
+2026-10-16T16:47:00.8689478Z test modpoly::tests::j_series_matches_the_integer_expansion ... ok
+2026-10-16T16:47:00.8926461Z test catalog::tests::common_standard_names_resolve_without_merging_different_models ... ok
+2026-10-16T16:47:00.8929536Z test modular_polynomial::tests::modular_polynomial_storage_scaling_barrier ... ok
+2026-10-16T16:47:00.8931669Z test modular_polynomial::tests::phi_2_basic_properties ... ok
+2026-10-16T16:47:00.8933726Z test modular_polynomial::tests::phi_3_basic_properties ... ok
+2026-10-16T16:47:00.8937258Z test newton_identity_native_issue_recheck_and_optional_export ... ok
+2026-10-16T16:47:00.9048299Z test modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+2026-10-16T16:47:01.0375121Z test companion_waits_for_ack_and_marks_done_even_on_parse_failure ... ok
+2026-10-16T16:47:01.0987075Z test catalog::tests::all_models_are_accounted_for_with_operation_capabilities ... ok
+2026-10-16T16:47:03.6132153Z test p521_arithmetic_and_kernel_reference_controls ... ok
+2026-10-16T16:47:03.6132785Z 
+2026-10-16T16:47:03.6133471Z failures:
+2026-10-16T16:47:03.6133616Z 
+2026-10-16T16:47:03.6133888Z ---- accepted_p224_1471_cache_control_and_rehashed_negatives stdout ----
+2026-10-16T16:47:03.6134245Z 
+2026-10-16T16:47:03.6134656Z thread 'accepted_p224_1471_cache_control_and_rehashed_negatives' (7400) panicked at tests\fixed_modulus_replay.rs:120:5:
+2026-10-16T16:47:03.6135298Z assertion `left == right` failed
+2026-10-16T16:47:03.6135797Z   left: "854333812fd0dffb0bb3479d545d36f7805ee39c85314da57d6db59607f7fb5c"
+2026-10-16T16:47:03.6136354Z  right: "ecf1109dbff2a72000fd84d9939127db68e2287e55e4ec10d143229874c230c8"
+2026-10-16T16:47:03.6136920Z note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+2026-10-16T16:47:03.6137283Z 
+2026-10-16T16:47:03.6137287Z 
+2026-10-16T16:47:03.6137423Z failures:
+2026-10-16T16:47:03.6137753Z     accepted_p224_1471_cache_control_and_rehashed_negatives
+2026-10-16T16:47:03.6138040Z 
+2026-10-16T16:47:03.6138730Z test result: FAILED. 19 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.76s
+2026-10-16T16:47:03.6139319Z 
+2026-10-16T16:47:03.6172900Z [1m[91merror[0m: test failed, to rerun pass `--test fixed_modulus_replay`
+2026-10-16T16:47:03.9292896Z ##[error]Process completed with exit code 1.
+2026-10-16T16:47:03.9584069Z Post job cleanup.
+2026-10-16T16:47:04.1704712Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-16T16:47:04.2090661Z git version 2.56.0.windows.2
+2026-10-16T16:47:04.2151770Z Copying 'C:\Users\runneradmin\.gitconfig' to 'D:\a\_temp\d016126a-9156-4405-b303-1dbadf9a4eb9\.gitconfig'
+2026-10-16T16:47:04.2173414Z Temporarily overriding HOME='D:\a\_temp\d016126a-9156-4405-b303-1dbadf9a4eb9' before making global git config changes
+2026-10-16T16:47:04.2174465Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-16T16:47:04.2185388Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\crypto\crypto
+2026-10-16T16:47:04.2586624Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-16T16:47:04.2967859Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-16T16:47:04.9471216Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-16T16:47:04.9813589Z http.https://github.com/.extraheader
+2026-10-16T16:47:04.9858130Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+2026-10-16T16:47:05.0237784Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-16T16:47:05.5821618Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-16T16:47:05.6214289Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-16T16:47:06.2227387Z Cleaning up orphan processes
+2026-10-16T16:47:06.2393664Z Terminate orphan process: pid (3420) (vctip)
+2026-10-16T16:47:06.3298250Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

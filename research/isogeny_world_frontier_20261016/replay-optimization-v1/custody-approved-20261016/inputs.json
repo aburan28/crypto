@@ -1,0 +1,82 @@
+{
+  "schema": "isogeny-approved-custody-inputs/v1",
+  "task_id": "TASK-20261016-de577e",
+  "authorization": {
+    "kind": "explicit-user-approval",
+    "date_utc": "2026-10-16",
+    "scope": "Four frozen reference/candidate executables and build/control evidence to the named custody destination. No chat transcript retained."
+  },
+  "remote": "s3://crypto-autoresearcher/store",
+  "logical_prefix": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/",
+  "physical_key_convention": "store/sha256/<first-two-hex>/<sha256>",
+  "native_source_commit": "015fa7bb504ef63953e0e04e464bb266f4f207bf",
+  "frozen_evidence_commit": "37d1d9c2c1d1a5a16cbb663ca0ddfaa030e57d33",
+  "bundle_regular_files": 61,
+  "inputs": [
+    {
+      "id": "reference-isogeny",
+      "path": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/clean-retake-v1/reference/install/isogeny",
+      "sha256": "2ff7d57174cda2d0e90088eb6ce217cbd1826e7697ed12ec7770d3d8f395d379",
+      "bytes": 32176704,
+      "store_name": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/reference/isogeny",
+      "role": "frozen-matched-executable"
+    },
+    {
+      "id": "reference-fixed-modulus-bench",
+      "path": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/clean-retake-v1/reference/install/fixed-modulus-bench",
+      "sha256": "b42863e83b7667ba2b69f1fd77bb15f045cd1af11a325a5abddd35e228b55274",
+      "bytes": 1164224,
+      "store_name": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/reference/fixed-modulus-bench",
+      "role": "frozen-matched-executable"
+    },
+    {
+      "id": "candidate-isogeny",
+      "path": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/clean-retake-v1/candidate/install/isogeny",
+      "sha256": "305bdff7db7bc25a2ccdce3f44e71c3d47269e76afa0ecd1703803365ab9b207",
+      "bytes": 32193216,
+      "store_name": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/candidate/isogeny",
+      "role": "frozen-matched-executable"
+    },
+    {
+      "id": "candidate-fixed-modulus-bench",
+      "path": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/clean-retake-v1/candidate/install/fixed-modulus-bench",
+      "sha256": "3a983cffd7465ad2ae2a8fcc7b21dfce257c21b9caad98bacfd95400084553be",
+      "bytes": 1164512,
+      "store_name": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/candidate/fixed-modulus-bench",
+      "role": "frozen-matched-executable"
+    },
+    {
+      "id": "frozen-build-control-evidence",
+      "path": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/custody-approved-20261016/frozen-build-control-evidence.tar.gz",
+      "sha256": "18b8c2aa9da6be25cf7a602903dd798cab10a1b8028b09544cdb7aea5bedbbc4",
+      "bytes": 2308854,
+      "store_name": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/frozen-build-control-evidence.tar.gz",
+      "role": "frozen-build-control-evidence"
+    },
+    {
+      "id": "native-manifest",
+      "path": "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-optimization-v1/clean-retake-015fa7bb504e/native-manifest.json",
+      "sha256": "2c8e0ada290d932fbf8348d2daea7220f3ae93e671d4d68ceecbc7be9a1a0632",
+      "bytes": 239967,
+      "store_name": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/native-manifest.json",
+      "role": "frozen-build-control-evidence"
+    },
+    {
+      "id": "generation-reference",
+      "path": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/generation-controls-p192-13/reference/dataset.json",
+      "sha256": "2b5bb3f2cdd04ddb3ab068e99c7a81e22e3801bcfd0471759ca993ec9e5fd871",
+      "bytes": 10233255,
+      "store_name": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/generation/reference/dataset.json",
+      "role": "frozen-build-control-evidence"
+    },
+    {
+      "id": "generation-candidate",
+      "path": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/generation-controls-p192-13/candidate/dataset.json",
+      "sha256": "2b5bb3f2cdd04ddb3ab068e99c7a81e22e3801bcfd0471759ca993ec9e5fd871",
+      "bytes": 10233255,
+      "store_name": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/generation/candidate/dataset.json",
+      "role": "frozen-build-control-evidence"
+    }
+  ],
+  "scientific_runs": 0
+}

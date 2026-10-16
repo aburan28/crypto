@@ -1,5 +1,8 @@
 # Fixed-modulus replay optimization v1
 
+**2026-10-16 custody/checkout update:** the approved four-executable upload and complete fresh readbacks are verified in [the current custody checkpoint](custody-approved-20261016/README.md). The exact Windows fixture checkout repair and fresh native cache/adversarial controls are in [the fixture receipt](windows-fixture-20261016/README.md). Frozen comparison source remains015fa7b; the current merged dependency/source differences are explicit. Independent source/resource review and the source-gate decision remain pending. No new scientific trial or degree is established. The development checkpoints below are historical; their locally pending custody statements describe their publication time.
+
+
 Primary source-only TASK-20261016-de577e, base1180f89d568c52ac60a022358b6fd70fa9e3bd30,
 branch codex/isogeny-fixed-modulus-20261016. PLAN.md is the unchanged published
 contract. No scientific trials are authorized by this implementation receipt.
