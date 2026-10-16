@@ -1,0 +1,32 @@
+{
+  "schema": "native-padding-control-build/v1",
+  "native_source_commit": "015fa7bb504ef63953e0e04e464bb266f4f207bf",
+  "source": "research/isogeny_world_frontier_20261016/replay-optimization-v1/reciprocal-padding-control.rs",
+  "source_sha256": "059153b7e751dee2b82ce59c889923cd5ca8d6fc4beaee8b7117c983f7114ac8",
+  "arithmetic_source": "research/p192_p224_large_degree_isogenies_20261009/verification_poly.rs",
+  "arithmetic_sha256": "474cdc811c6151d67df66753bc5e3396d605648d2fdc37e62286ab94b27c73eb",
+  "command": [
+    "rustc",
+    "--edition",
+    "2021",
+    "-C",
+    "opt-level=3",
+    "-L",
+    "dependency=/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/clean-retake-v1/reference/target/release/deps",
+    "--extern",
+    "num_bigint=/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/clean-retake-v1/reference/target/release/deps/libnum_bigint-9f9ebdee9ce2c59c.rlib",
+    "--extern",
+    "num_traits=/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/clean-retake-v1/reference/target/release/deps/libnum_traits-1118944c7e05d8dd.rlib",
+    "--extern",
+    "rand=/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/clean-retake-v1/reference/target/release/deps/librand-342cd54ec23029ea.rlib",
+    "research/isogeny_world_frontier_20261016/replay-optimization-v1/reciprocal-padding-control.rs",
+    "-o",
+    "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/padding-control/reciprocal-padding-control"
+  ],
+  "control_executable_local_path": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/padding-control/reciprocal-padding-control",
+  "control_executable_sha256": "05014ecf27ec7f579ebd0870bfc92261048c7b88867e2d2831d4b634e4f6f2e3",
+  "status": "PASS",
+  "known_answer_reductions": 32,
+  "scientific_runs": 0,
+  "frozen_production_binaries_changed": false
+}

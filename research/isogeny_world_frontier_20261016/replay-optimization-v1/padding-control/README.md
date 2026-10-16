@@ -1,0 +1,5 @@
+# Independent reciprocal zero-tail control
+
+The frozen production modules are unchanged. A separate native Rust known-answer control uses the P192 field and m=X^(L-1), whose formal reciprocal is1 followed by zeroes. L=127 exercises unchanged fallback; L=128,129,130 exercise cached reduction, including dividend length2L-1 requiring the complete length-L prefix. Eight lengths per modulus give32 reductions. Each result equals the independently known truncated coefficient prefix, unchanged rem, and schoolbook divrem. PASS; no timing or larger-degree claim.
+
+Source: ../reciprocal-padding-control.rs. Exact compilation is recorded in build-binding.json against the clean reference target's existing dependency rlibs. The actual source arithmetic SHA256 is pinned there, and the frozen four executables were not rebuilt or changed. This supplements the control/proof map in ../clean-retake-015fa7bb504e/report.pdf. OS timing is operational engineering cost only. No scientific trial, isogeny construction or target replay occurred. The pure-power modulus is a generic reduction control; actual isogeny admission still requires the unchanged squarefree-kernel guard.
