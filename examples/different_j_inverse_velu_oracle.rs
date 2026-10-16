@@ -323,7 +323,7 @@ fn inverse_velu_root(f: &Fp2, u: [u64; 2], split_attempts: &mut u64) -> Option<[
         let mut factor = None;
         for shift in 0..32u64 {
             *split_attempts += 1;
-            let shifted_x = vec![f.from_fp(shift), f.one()];
+            let shifted_x = vec![[shift, 1], f.one()];
             let character = pow_mod_poly(f, &shifted_x, (f.order() - 1) / 2, &rational);
             for test in [sub_poly(f, &character, &vec![f.one()]), character] {
                 let divisor = gcd_poly(f, rational.clone(), test);
@@ -415,7 +415,9 @@ fn inverse_velu_base(
             let plus = src.add(ops, point, t);
             let minus = src.add(ops, point, src.neg(t));
             let mut preimages = [point, plus, minus];
-            assert!(preimages.iter().all(|&q| !q.infinity && velu(src, t, q, ops) == mapped));
+            assert!(preimages
+                .iter()
+                .all(|&q| !q.infinity && velu(src, t, q, ops) == mapped));
             preimages.sort_by_key(|q| (q.x[0], q.x[1], q.y[0], q.y[1]));
             let q = dst.mul(ops, mapped, h());
             if q.infinity {
@@ -924,7 +926,13 @@ fn peak_rss_bytes() -> u64 {
 fn run(path: &str, round: u64, arm: &str, prefix_length: usize) {
     assert!(round < 3 && ARMS.contains(&arm));
     assert!([1, 4, 16, 64].contains(&prefix_length));
-    let transfer = ["isogeny-image", "destination-direct", "full-image", "inverse-velu"].contains(&arm);
+    let transfer = [
+        "isogeny-image",
+        "destination-direct",
+        "full-image",
+        "inverse-velu",
+    ]
+    .contains(&arm);
     let wall = Instant::now();
     let cpu = thread_cpu_ns();
     take_field_counters();
@@ -1051,21 +1059,21 @@ fn run(path: &str, round: u64, arm: &str, prefix_length: usize) {
     let peak_rss = peak_rss_bytes();
     let relation_meta = relation.as_ref().map(|setup| {
         json!({
-            "pair_entries":setup.pair_entries,"pair_keys":setup.table.len(),
-            "support_keys":setup.table.keys().copied().collect::<Vec<_>>(),
-            "scan_count":setup.scan_count,"image_points":setup.image_points,
-            "candidate_count":setup.candidate_count,
-            "oracle":setup.oracle.as_ref().map(|stats| json!({
-                "destination_points":stats.destination_points,
-                "polynomial_calls":stats.polynomial_calls,
-                "split_attempts":stats.split_attempts,
-                "rational_x_roots":stats.rational_x_roots,
-                "rejected_no_root":stats.rejected_no_root,
-                "rejected_no_lift":stats.rejected_no_lift,
-                "exact_map_checks":stats.exact_map_checks,
-                "rejected_map_mismatch":stats.rejected_map_mismatch,
-                "accepted_image_points":stats.accepted_image_points,
-            }))})
+        "pair_entries":setup.pair_entries,"pair_keys":setup.table.len(),
+        "support_keys":setup.table.keys().copied().collect::<Vec<_>>(),
+        "scan_count":setup.scan_count,"image_points":setup.image_points,
+        "candidate_count":setup.candidate_count,
+        "oracle":setup.oracle.as_ref().map(|stats| json!({
+            "destination_points":stats.destination_points,
+            "polynomial_calls":stats.polynomial_calls,
+            "split_attempts":stats.split_attempts,
+            "rational_x_roots":stats.rational_x_roots,
+            "rejected_no_root":stats.rejected_no_root,
+            "rejected_no_lift":stats.rejected_no_lift,
+            "exact_map_checks":stats.exact_map_checks,
+            "rejected_map_mismatch":stats.rejected_map_mismatch,
+            "accepted_image_points":stats.accepted_image_points,
+        }))})
     });
     println!(
         "{}",
@@ -1076,7 +1084,7 @@ fn run(path: &str, round: u64, arm: &str, prefix_length: usize) {
         "common_group_ops":common_ops,"setup_cpu_ns":setup_cpu_ns,"setup_fp_muls":setup_fp.0,
         "setup_fp_invs":setup_fp.1,"setup_group_ops":setup_ops,"relation_setup":relation_meta,
         "baby_entries":baby.len(),"prefixes":prefixes,"target_records":target_records,
-        "construction":"inverse-velu-v1",
+        "construction":"inverse-velu-v2",
         "total_cpu_ns":total_cpu_ns,"total_wall_ns":total_wall_ns,
         "total_fp_muls":total_fp_muls,"total_fp_invs":total_fp_invs,
         "peak_rss_bytes":peak_rss,"all_verified":all_verified})
