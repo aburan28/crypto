@@ -178,6 +178,31 @@ pub const V3: Constants = Constants {
     frozen: false,
 };
 
+/// The rule's comparison at baseline v6 (`research/ic_tool_program/rule/v6`):
+/// rule v3's protocol on v6's binary, v4 (main's `92246530`, R10) with R06's
+/// scan key and R08's folding subtraction.  The arms' sources are still
+/// §23's list; main's drift and the two rounds changed seven of its nine.
+pub const V6: Constants = Constants {
+    ic_sources: S23_IC_SOURCES,
+    rho_sources: S23_RHO_SOURCES,
+    input_law: S23_INPUT_LAW,
+    non_claims: S23_NON_CLAIMS,
+    isolation: "isolated_bench (src/bin/isolated_bench.rs) run --wait --cpus 2, uncontended",
+    process: S23_PROCESS,
+    what_this_is: "The rule's comparison at baseline v6: §23's figures, from the checked rows.",
+    curve_ids: S23_CURVE_IDS,
+    against: Against::Earlier {
+        analysis: "research/ic_single_target_20260930/analysis.json",
+        key: "s23_then_v6",
+    },
+    earlier: Some((
+        "research/ic_single_target_20260930/claims",
+        "research/ic_single_target_20260930/runs",
+    )),
+    reference_check: true,
+    frozen: false,
+};
+
 /// Where a comparison lives and what it writes.
 pub struct Comparison {
     /// The repository: the ledger, and what record paths are relative to.
