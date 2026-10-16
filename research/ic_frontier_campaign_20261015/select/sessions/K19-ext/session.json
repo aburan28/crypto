@@ -1,0 +1,52 @@
+{
+  "schema": "ecbench.session/v1",
+  "session_id": "ECBS1h93fd5a919c8b",
+  "label": "IC frontier campaign Phase 0 step 3: parameter selection, Koblitz a=1 n=19 (grid extension)",
+  "spec_id": "ECS1he52514f278dd",
+  "spec_sha256": "e52514f278dd1b81510cc240a74deba58c7e9c86ec817d92bcc41d5c4d5ad0ec",
+  "env_class_id": "ECBENV2h929840e8d538",
+  "host_sha256": "2b313def7380d3606b392922fde77ca4e30431035b7600a667888bd23586325a",
+  "plan_sha256": "c8bc675ce7245d6ba48eaa51307d86c72d6e4caad75eb3e5cd32f54250d82282",
+  "binary_sha256": "7662d1529a9a85ac8f4d6b3e8e5815e6fb9ad5736c941072a74eccb91ee7f598",
+  "git_commit": "b41afe34a3cab2988ffec944a70eb23813444423",
+  "git_dirty": false,
+  "options": {
+    "cpus": "none",
+    "lock_path": "/tmp/ic-frontier-ext.lock",
+    "wait_for_lock": false,
+    "allow_busy": true,
+    "thresholds": {
+      "settle_seconds": 2.0,
+      "max_other_cpu": 0.1,
+      "max_psi": 5.0,
+      "max_preemptions_per_second": 50.0
+    },
+    "exe": "/proc/self/exe"
+  },
+  "cpu_plan": null,
+  "preflight": null,
+  "eviction": null,
+  "runner_on_run_cpu": false,
+  "runner_cpus": null,
+  "ticks_per_second": 100,
+  "grading_version": 2,
+  "child_env_sha256": "db1325aca1b2e904875cd5890b474cc8090bafbf32b676ceb75a94f11fadbc5d",
+  "child_env": {
+    "HOME": "/root",
+    "LC_ALL": "C",
+    "OMP_NUM_THREADS": "1",
+    "PATH": "/nix/var/nix/profiles/default/bin:/root/.local/bin:/root/.cargo/bin:/usr/local/go/bin:/opt/node22/bin:/opt/maven/bin:/opt/gradle/bin:/opt/rbenv/bin:/root/.bun/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "RAYON_NUM_THREADS": "1",
+    "RUST_BACKTRACE": "0",
+    "RUST_MIN_STACK": "8388608"
+  },
+  "started_unix_ms": 1792044194137,
+  "finished_unix_ms": 1792044194815,
+  "status": "complete",
+  "executions_planned": 20,
+  "records_written": 20,
+  "records_sha256": "3981401714a826914a5b29f1039f6b3d8aa3398c0f23b17b99a23e83033922a7",
+  "status_counts": {
+    "verified": 20
+  }
+}

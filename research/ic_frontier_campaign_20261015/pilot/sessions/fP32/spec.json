@@ -1,0 +1,79 @@
+{
+ "schema": "ecbench.spec/v1",
+ "label": "IC frontier campaign Phase 0: feasibility, 32-bit a=-3 prime-order curve",
+ "description": "Phase 0 feasibility probe (PROTOCOL.md): one public train target per arm. Curve from ../prime_curves.jsonl (prime_fast::find_a3_curve). Not a measurement.",
+ "workloads": {
+  "curves": [
+   {
+    "kind": "prime_explicit",
+    "p": 4294967291,
+    "a": 4294967288,
+    "b": 31,
+    "group_order": 4294959973,
+    "r": 4294959973,
+    "gx": 2,
+    "gy": 2120051858
+   }
+  ],
+  "targets_per_curve": 1,
+  "target_seed": 20261015100,
+  "target_kind": "public"
+ },
+ "arms": [
+  {
+   "name": "rho-neg",
+   "role": "reference",
+   "method": {
+    "id": "rho.negation"
+   }
+  },
+  {
+   "name": "bsgs-neg",
+   "role": "baseline",
+   "method": {
+    "id": "bsgs.negation"
+   }
+  },
+  {
+   "name": "kangaroo",
+   "role": "baseline",
+   "method": {
+    "id": "kangaroo.vow"
+   }
+  },
+  {
+   "name": "ic-pair",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "prime-abscissa:size=64",
+     "oracle": "mitm:negation_folded=1",
+     "linalg": "incremental-gauss",
+     "max_trials": "2000000"
+    }
+   }
+  },
+  {
+   "name": "ic-rootfind",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "prime-abscissa:size=64",
+     "oracle": "rootfind-subtract:m=2",
+     "linalg": "incremental-gauss",
+     "max_trials": "2000000"
+    }
+   }
+  }
+ ],
+ "measurement": {
+  "rounds": 1,
+  "warmup": 0,
+  "order": "alternate",
+  "seed": 20261015102,
+  "isolation_required": "L0",
+  "timeout_seconds": 1200
+ }
+}
