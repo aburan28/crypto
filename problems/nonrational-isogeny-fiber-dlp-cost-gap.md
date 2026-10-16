@@ -652,3 +652,8 @@ step, with three-round range 1,266.482–1,575.602, **if all omitted
 full-image work costs zero**. This is a threshold, not a measured price
 or complete portable `S`; the disjoint native-instrumentation and
 cross-host conversion exit criterion remains unchanged.
+
+The [2026-10-16 isolation access follow-up](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/ISOLATION_ACCESS_V2.md)
+also found zero Spot vCPU quota in the five screened EC2 regions; no
+instance was launched. An authorized reserved-core host or changed
+quota is required before the L2 wall gate can be executed.
