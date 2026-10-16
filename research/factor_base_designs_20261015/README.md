@@ -115,6 +115,7 @@ Every `decide` runs in the kernel (`decide +kernel`).
 | #1 presentation correct | `exp_interval_identity`, `bitsVal_lt`, `iterate_sq` | `Encodings.lean` | proved |
 | #2 ladder steps | `lucas_double`, `lucas_double_succ` | `Encodings.lean` | proved |
 | #11 soundness, `m = 2` factorization, counting | `chain_sound`, `pencil_norm_factor`, `norm_chain_excess` | `Encodings.lean` | proved; completeness checked per instance by the harness |
+| #11 at `m = 4`: `Q²(X³+AX+B) − P² = (X − x_R)·G`, `G` a monic quartic (Amendment 3) | `quartic_norm_factor`, `quarticG` | `Encodings.lean` | proved (any commutative ring) |
 | break-even instances of the cost model | `BreakEven.slope_*`, `binom_sanity` | `BreakEven.lean` | proved (instances of the model) |
 
 ## 4. Toolchain and reproduction
