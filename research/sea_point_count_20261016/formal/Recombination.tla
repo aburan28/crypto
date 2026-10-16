@@ -1,10 +1,10 @@
 ------------------------- MODULE Recombination -------------------------
-EXTENDS Naturals, Integers, FiniteSets, TLC
+EXTENDS Naturals, Integers, FiniteSets, Sequences, TLC
 
 CONSTANTS MaxGroup, MaxCount, MaxRounds, Legacy
 VARIABLES n, count, truth, point, stride, allowed, phase, j, baby, giant,
-          hits, survivors, round, result
-vars == <<n,count,truth,point,stride,allowed,phase,j,baby,giant,hits,
+          hits, orderedHits, survivors, round, result
+vars == <<n,count,truth,point,stride,allowed,phase,j,baby,giant,hits,orderedHits,
           survivors,round,result>>
 
 Indices == 0..(count-1)
@@ -28,9 +28,10 @@ Init ==
                   {k \in 0..(count-1) : k % 2 = truth % 2}}
   /\ phase = "Baby"
   /\ j = 0
-  /\ baby = [r \in 0..(n-1) |-> {}]
+  /\ baby = [r \in 0..(n-1) |-> <<>>]
   /\ giant = 0
   /\ hits = {}
+  /\ orderedHits = <<>>
   /\ survivors = 0..(count-1)
   /\ round = 0
   /\ result = -1
@@ -38,19 +39,21 @@ Init ==
 BabyStep ==
   /\ phase = "Baby" /\ j < B
   /\ baby' = [baby EXCEPT ![Key(j)] =
-        IF Legacy /\ @ # {} THEN @ ELSE @ \cup {j}]
+        IF Legacy /\ Len(@) # 0 THEN @ ELSE Append(@,j)]
   /\ j' = j+1
-  /\ UNCHANGED <<n,count,truth,point,stride,allowed,phase,giant,hits,
+  /\ UNCHANGED <<n,count,truth,point,stride,allowed,phase,giant,hits,orderedHits,
                   survivors,round,result>>
 BeginGiants ==
   /\ phase = "Baby" /\ j = B
   /\ phase' = "Giant"
-  /\ UNCHANGED <<n,count,truth,point,stride,allowed,j,baby,giant,hits,
+  /\ UNCHANGED <<n,count,truth,point,stride,allowed,j,baby,giant,hits,orderedHits,
                   survivors,round,result>>
 GiantStep ==
   /\ phase = "Giant" /\ giant*B < count
-  /\ hits' = hits \cup {giant*B+b : b \in
-                   {v \in baby[GiantKey(giant)] : giant*B+v < count}}
+  /\ LET candidates == SelectSeq(baby[GiantKey(giant)], LAMBDA v : giant*B+v < count)
+         block == [i \in 1..Len(candidates) |-> giant*B+candidates[i]]
+     IN /\ hits' = hits \cup {block[i] : i \in 1..Len(block)}
+        /\ orderedHits' = orderedHits \o block
   /\ giant' = giant+1
   /\ UNCHANGED <<n,count,truth,point,stride,allowed,phase,j,baby,
                   survivors,round,result>>
@@ -58,26 +61,26 @@ FinishSearch ==
   /\ phase = "Giant" /\ giant*B >= count
   /\ survivors' = survivors \cap hits \cap allowed
   /\ phase' = "Choose"
-  /\ UNCHANGED <<n,count,truth,point,stride,allowed,j,baby,giant,hits,round,result>>
+  /\ UNCHANGED <<n,count,truth,point,stride,allowed,j,baby,giant,hits,orderedHits,round,result>>
 ReturnUnique ==
   /\ phase = "Choose" /\ Cardinality(survivors) = 1
   /\ result' = CHOOSE k \in survivors : TRUE
   /\ phase' = "Done"
-  /\ UNCHANGED <<n,count,truth,point,stride,allowed,j,baby,giant,hits,survivors,round>>
+  /\ UNCHANGED <<n,count,truth,point,stride,allowed,j,baby,giant,hits,orderedHits,survivors,round>>
 ReturnAmbiguous ==
   /\ phase = "Choose" /\ Cardinality(survivors) # 1 /\ round = MaxRounds
   /\ phase' = "Ambiguous"
-  /\ UNCHANGED <<n,count,truth,point,stride,allowed,j,baby,giant,hits,survivors,round,result>>
+  /\ UNCHANGED <<n,count,truth,point,stride,allowed,j,baby,giant,hits,orderedHits,survivors,round,result>>
 NextSample ==
   /\ phase = "Choose" /\ Cardinality(survivors) # 1 /\ round < MaxRounds
   /\ \E p \in 0..(n-1) :
        \/ /\ survivors' = survivors \cap Kernel(p)
           /\ phase' = "Choose"
-          /\ UNCHANGED <<point,j,baby,giant,hits>>
+          /\ UNCHANGED <<point,j,baby,giant,hits,orderedHits>>
        \/ /\ point' = p
           /\ phase' = "Baby"
-          /\ j' = 0 /\ giant' = 0 /\ hits' = {}
-          /\ baby' = [r \in 0..(n-1) |-> {}]
+          /\ j' = 0 /\ giant' = 0 /\ hits' = {} /\ orderedHits' = <<>>
+          /\ baby' = [r \in 0..(n-1) |-> <<>>]
           /\ UNCHANGED survivors
   /\ round' = round+1
   /\ UNCHANGED <<n,count,truth,stride,allowed,result>>
@@ -92,7 +95,12 @@ TrueSurvives == truth \in survivors
 NontrivialTrueSurvives == (n >= 2 /\ point > 0) => truth \in survivors
 UniqueSound == phase = "Done" => result = truth
 BabyComplete == phase = "Giant" =>
-                  \A r \in 0..(n-1) : baby[r] = {v \in 0..(B-1) : Key(v)=r}
+                  \A r \in 0..(n-1) :
+                    {baby[r][i] : i \in 1..Len(baby[r])} = {v \in 0..(B-1) : Key(v)=r}
+BabyOrdered == \A r \in 0..(n-1) :
+                 \A a,b \in 1..Len(baby[r]) : a < b => baby[r][a] < baby[r][b]
+HitsOrdered == /\ {orderedHits[i] : i \in 1..Len(orderedHits)} = hits
+               /\ \A a,b \in 1..Len(orderedHits) : a < b => orderedHits[a] < orderedHits[b]
 SearchPrefix == phase = "Giant" =>
                 hits = {k \in Expected : k < giant*B}
 Terminates == <>Terminal

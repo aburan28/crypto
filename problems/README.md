@@ -11,6 +11,7 @@ Keep resolved and superseded records in the index.
 
 | Problem | Status | What it blocks | What would unblock it |
 | --- | --- | --- | --- |
+| [SEA Rust-to-group refinement proof](sea-rust-group-refinement-proof.md) | open | complete formal verification of the Rust SEA/counting implementation | connect concrete field/point operations and congruences to the checked abstract search and uniqueness proofs |
 | [cairn certificate checkers are Python-only](cairn-certificate-checker-python-only.md) | open | objective mode for backlog cards with native checkers (the upgrade path of `XP-20261015-p192-isogeny-aux-search-t48`, which runs as lab tasks meanwhile) | cairn accepting a pinned native checker, or the `workspace` verifier running a zero-dependency Rust checker under its jail |
 | [Root-finding pipeline complete-cost calibration](rootfinding-complete-cost-calibration.md) | open | qualified full-cost or wall-time comparison for the assessed root-finding IC pipeline; 4/8/16-lane, B train/holdout and coverage panels are verified and replayed; a fresh-target equal-prefix component control exists, while native field counts are absent from sealed records and wall data are L0 | serialize and price native work; repeat matched public targets under L2 isolation and on an independent host |
 | [EC Bench GPU matched workload and validation](ecbench-gpu-matched-workload-contract.md) | open | admitted CPU/GPU comparison of the same ECDLP workload | frozen CUDA input/output, exact costs, independent answer replay and GPU contention controls |

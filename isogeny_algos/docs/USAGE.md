@@ -133,8 +133,8 @@ commits, so pin a commit.
 
 CM generation already exists in `gls_loop`, alongside the standalone
 `cm::hilbert_class_poly` implementation. The constructor reduces the Hilbert class
-polynomial modulo p, finds its j-invariants, builds a curve and tests the curve or
-its quadratic twist against the requested trace. For example:
+polynomial modulo p, finds its j-invariants, builds a curve and verifies the
+curve or its quadratic twist against the requested trace. For example:
 
 ```rust
 use isogeny_algos::{api, gls_loop, int::Int};
@@ -152,10 +152,15 @@ assert!(checked.certificate.certified || checked.twist_certificate.certified);
 
 `build_curve` expects `H_D mod p` to split completely and rejects j = 0 and
 1728; it is a specialized research constructor, not a `generate-cm` CLI command.
-Its eight sampled annihilation checks do not certify an exact order or a full
-endomorphism ring. Use `api::check_order` and inspect the returned statuses when
-an order certificate is required. Hilbert coefficients come from fixed-point
-complex evaluation with a rounding check, not certified interval arithmetic.
+The constructor validates the ordinary CM norm data and returns
+`order_verification`: exhaustive counting below 2^22, or curve/twist order
+certificates from `api::check_order` above that threshold. It returns an error
+when neither twist can be verified, including when factorisation is insufficient
+to complete a certificate. Sampled annihilation alone cannot select the correct
+twist: a wrong multiple can annihilate every point. The certificates retain the
+API's probable-prime assumptions. They do not certify the full endomorphism
+ring. Hilbert coefficients come from fixed-point complex evaluation with a
+rounding check, not certified interval arithmetic.
 
 ### Point-count recombination
 

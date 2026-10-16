@@ -1,5 +1,10 @@
 //! Validate paired outputs before computing timing ratios. Never admit contention.
-use isogeny_algos::json::Json;
+use isogeny_algos::{
+    api::{self, PrimeCurve},
+    bigint::Big,
+    int::Int,
+    json::Json,
+};
 use std::{collections::BTreeMap, fs, path::Path};
 
 fn key<'a>(j: &'a Json, k: &str) -> &'a Json {
@@ -26,6 +31,12 @@ fn valid_pair(a: &Json, b: &Json) -> Result<(), String> {
         }
         if key(key(row, "result"), "verified") != &Json::Bool(true) {
             return Err("unverified result".into());
+        }
+        for field in ["calls", "elapsed_ns"] {
+            let value = number(key(key(row, "result"), field));
+            if !value.is_finite() || value <= 0. {
+                return Err(format!("invalid positive measurement: {field}"));
+            }
         }
     }
     for name in ["curve", "order", "calls", "seed_schedule"] {
@@ -63,6 +74,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         groups.entry(group).or_default().push(row);
     }
     let mut summaries = vec![];
+    let mut certificates = vec![];
     let mut md=String::from("| Workload | A median us/call | B median us/call | A/B median paired ratio | Paired range | A/A max deviation | Admitted A/B pairs |\n| --- | ---: | ---: | ---: | --- | ---: | ---: |\n");
     for case in [
         "bsgs24",
@@ -81,6 +93,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut assetups = vec![];
         let mut bsetups = vec![];
         let mut curve = Json::Null;
+        let mut signature: Option<Vec<Json>> = None;
         for kind in ["aa", "ab"] {
             for round in 0..5 {
                 let rows = groups
@@ -91,6 +104,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     return Err("pair must have two rows".into());
                 }
                 valid_pair(&rows[0], &rows[1])?;
+                for row in rows.iter() {
+                    let result = key(row, "result");
+                    if key(result, "case").as_str() != Some(case) {
+                        return Err("result workload differs from requested workload".into());
+                    }
+                    let current: Vec<Json> = ["curve", "order", "calls", "seed_schedule"]
+                        .into_iter()
+                        .map(|name| key(result, name).clone())
+                        .collect();
+                    if signature.as_ref().is_some_and(|s| s != &current) {
+                        return Err("workload changed between rounds".into());
+                    }
+                    signature = Some(current);
+                }
                 curve = key(key(&rows[0], "result"), "curve").clone();
                 if rows
                     .iter()
@@ -120,6 +147,49 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let ma = median(&av);
         let mb = median(&bv);
         let ratio = median(&ratios);
+        // Independent from SEA congruence recombination and the BSGS search:
+        // prove the registered reference via point-order divisors and Hasse.
+        // This runs after timing, so validation cost is not silently charged
+        // to one arm or used to disturb a timed sample.
+        let entry = curves
+            .iter()
+            .find(|c| c.get("slug") == Some(&curve))
+            .unwrap();
+        if key(entry, "order") != &signature.as_ref().unwrap()[1] {
+            return Err("measured answer differs from registered reference order".into());
+        }
+        let model = Json::parse(key(entry, "model_json").as_str().unwrap())?;
+        let integer = |v: &Json| Int::from_big(&Big::from_dec(v.as_str().unwrap()));
+        let c = PrimeCurve::new(
+            integer(key(&model, "p")),
+            integer(key(&model, "a")),
+            integer(key(&model, "b")),
+        )?;
+        let order = integer(key(entry, "order"));
+        let checked = api::check_order(&c, &order, 1);
+        if !checked.certificate.certified || !checked.twist_certificate.certified {
+            return Err(format!("reference order could not be certified for {case}").into());
+        }
+        certificates.push(Json::obj(vec![
+            ("case", Json::str(case)),
+            ("curve", curve.clone()),
+            ("order", Json::str(&order)),
+            ("curve_certified", Json::Bool(checked.certificate.certified)),
+            (
+                "twist_certified",
+                Json::Bool(checked.twist_certificate.certified),
+            ),
+            ("curve_divisor", Json::str(checked.certificate.divisor)),
+            (
+                "twist_divisor",
+                Json::str(checked.twist_certificate.divisor),
+            ),
+            ("via_twist", Json::Bool(checked.certificate.via_twist)),
+            (
+                "assumption",
+                Json::str("factor primality is checked by probable-prime tests"),
+            ),
+        ]));
         md.push_str(&format!(
             "| {case} | {ma:.3} | {mb:.3} | {ratio:.5} | {low:.5}..{high:.5} | {:.3}% | {} / 5 |\n",
             100. * noise,
@@ -154,6 +224,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ]));
     }
     fs::write(dir.join("summary.json"), Json::Arr(summaries).dump())?;
+    fs::write(
+        dir.join("reference-certificates.json"),
+        Json::Arr(certificates).dump(),
+    )?;
     fs::write(dir.join("summary.md"), &md)?;
     print!("{md}");
     Ok(())
@@ -172,6 +246,7 @@ mod tests {
                     ("order", Json::str(order)),
                     ("calls", Json::Num(calls)),
                     ("seed_schedule", Json::str("1 + i % 4")),
+                    ("elapsed_ns", Json::str("1000")),
                     ("verified", Json::Bool(verified)),
                 ]),
             ),
@@ -189,5 +264,7 @@ mod tests {
         ] {
             assert!(valid_pair(&a, &b).is_err());
         }
+        let zero_calls = row("101", 0, true, 0);
+        assert!(valid_pair(&zero_calls, &zero_calls).is_err());
     }
 }

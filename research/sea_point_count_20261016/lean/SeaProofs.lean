@@ -67,6 +67,31 @@ def refine (candidates test : Nat → Prop) (k : Nat) : Prop := candidates k ∧
 theorem refinement_preserves (candidates test : Nat → Prop) (truth : Nat)
     (hc : candidates truth) (ht : test truth) : refine candidates test truth := ⟨hc,ht⟩
 
+def refineMany (initial : Nat → Prop) (tests : Nat → Nat → Prop) : Nat → Nat → Prop
+  | 0 => initial
+  | r+1 => refine (refineMany initial tests r) (tests r)
+
+theorem refinements_preserve (initial : Nat → Prop) (tests : Nat → Nat → Prop)
+    (truth : Nat) (hi : initial truth) (ht : ∀ r, tests r truth) :
+    ∀ r, refineMany initial tests r truth := by
+  intro r
+  induction r with
+  | zero => exact hi
+  | succ r ih => exact ⟨ih, ht r⟩
+
+theorem giant_blocks_ordered (i i' j j' width : Nat)
+    (hi : i < i') (hj : j < width) : i*width+j < i'*width+j' := by
+  have hm := Nat.mul_le_mul_right width (Nat.succ_le_of_lt hi)
+  rw [Nat.succ_mul] at hm
+  omega
+
+theorem signed_progression_ordered (offset stride : Int) (a b : Nat)
+    (hs : 0 < stride) (hab : a < b) :
+    offset + (a : Int)*stride < offset + (b : Int)*stride := by
+  have hi : (a : Int) < (b : Int) := by omega
+  have hp := Int.mul_lt_mul_of_pos_right hi hs
+  omega
+
 theorem direct_equals_full_intersection (candidates test : Nat → Prop) :
     refine candidates test = fun k => test k ∧ candidates k := by
   funext k
@@ -101,6 +126,9 @@ end SeaProofs
 #print axioms SeaProofs.subtract_left
 #print axioms SeaProofs.bsgs_complete
 #print axioms SeaProofs.refinement_preserves
+#print axioms SeaProofs.refinements_preserve
+#print axioms SeaProofs.giant_blocks_ordered
+#print axioms SeaProofs.signed_progression_ordered
 #print axioms SeaProofs.direct_equals_full_intersection
 #print axioms SeaProofs.unique_sound
 #print axioms SeaProofs.interval_unique

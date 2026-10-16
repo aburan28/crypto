@@ -1,3 +1,5 @@
 # Deterministically regenerated canonical Phi matrices; hashes and preparation
 # command are retained. These are setup products, not timing observations.
 /evidence/*/phi-cache/
+# Transient TLC fingerprint databases; textual traces and exit/log records remain.
+/formal/logs/**/states-*/

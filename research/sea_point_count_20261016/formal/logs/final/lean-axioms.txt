@@ -1,0 +1,10 @@
+'SeaProofs.smul_add' depends on axioms: [propext]
+'SeaProofs.subtract_left' does not depend on any axioms
+'SeaProofs.bsgs_complete' depends on axioms: [propext]
+'SeaProofs.refinement_preserves' does not depend on any axioms
+'SeaProofs.refinements_preserve' does not depend on any axioms
+'SeaProofs.giant_blocks_ordered' depends on axioms: [propext, Quot.sound]
+'SeaProofs.signed_progression_ordered' depends on axioms: [propext, Quot.sound]
+'SeaProofs.direct_equals_full_intersection' depends on axioms: [propext, Quot.sound]
+'SeaProofs.unique_sound' does not depend on any axioms
+'SeaProofs.interval_unique' depends on axioms: [propext, Quot.sound]
