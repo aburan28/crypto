@@ -48,8 +48,9 @@ and independent audit outcomes even when a stage fails.
 The per-arm conservative budget is 600 seconds build, 360 import, 1,200 search
 and 240 cleanup/audit, totaling 2,400 seconds; two arms use the previously
 approved 4,800-second stage envelope. Fresh regeneration has its own 1,800
-second cap and observed wall receipt; the revised 110-minute hosted timeout
-allows both the preparation and stage envelopes. Any total-runtime model must
+second cap and observed wall receipt; the revised 125-minute hosted timeout
+allows both envelopes plus 15 minutes for setup and artifact upload. Any
+total-runtime model must
 charge input construction or explain how reusable setup is amortized.
 The worker's search timer is 1,100 seconds, and its outer Docker wall is 1,150
 seconds. An incomplete job, cap, missing receipt or failed replay remains
