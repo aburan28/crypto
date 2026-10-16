@@ -108,7 +108,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "22b2ffef99720f2b2c7396a267412d2241a868e038a835c4fb1fd12209b102bf"
+   "sha256": "3b4e274181d338338341bb272826bd8a88ffe5aa5ac6bbc1570969dc572baab4"
   },
   "curves_schema": {
    "path": "docs/curves/ic/curves.schema.json",
@@ -9756,6 +9756,38 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp4-tm5-90163552",
+   "family": "prime",
+   "field": "GF(p), p = 13",
+   "coefficients": "a = 0, b = 11",
+   "order_bits": 5,
+   "standard": [],
+   "ec1": [
+    "EC1P4Cfph47e4fecd7461"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp4-tm5-c277dce2",
+   "family": "prime",
+   "field": "GF(p), p = 13",
+   "coefficients": "a = 0, b = 2",
+   "order_bits": 5,
+   "standard": [],
+   "ec1": [
+    "EC1P4Cfph7c32fa042bde"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp6-tm7-fc20da94",
    "family": "prime",
    "field": "GF(p), p = 59",
@@ -9767,6 +9799,38 @@
    "legacy": [
     "bench-8bit"
    ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp8-tm11-7caf6b43",
+   "family": "prime",
+   "field": "GF(p), p = 199",
+   "coefficients": "a = 0, b = 3",
+   "order_bits": 8,
+   "standard": [],
+   "ec1": [
+    "EC1P8Cfphdcceff26a483"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp8-tm11-c0dfd129",
+   "family": "prime",
+   "field": "GF(p), p = 199",
+   "coefficients": "a = 0, b = 118",
+   "order_bits": 8,
+   "standard": [],
+   "ec1": [
+    "EC1P8Cfphb11d1e6192b3"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"

@@ -112,7 +112,7 @@ fn affine_points(curve: &PrimeCurve) -> Vec<PrimePoint> {
 }
 
 fn prime(n: u64) -> bool {
-    n >= 2 && (2..).take_while(|d| d * d <= n).all(|d| n % d != 0)
+    n >= 2 && (2..).take_while(|d| d * d <= n).all(|d| !n.is_multiple_of(d))
 }
 
 fn check_map(source: &PrimeCurve, target: &PrimeCurve) -> (PrimePoint, u64) {
