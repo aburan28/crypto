@@ -1,0 +1,2025 @@
+{
+  "correctness_failures": [],
+  "counted_unit": "index_pair_candidates + rank_root_calls_total + mean target root_calls + harvest point additions",
+  "frozen": {
+    "n41": {
+      "C_free_train": 1349869.0,
+      "C_inc_train": 1297993.375,
+      "K_def": 255,
+      "K_free": 125,
+      "K_inc": 100
+    },
+    "n53": {
+      "C_free_train": 10968684.25,
+      "C_inc_train": 11379351.625,
+      "K_def": 220,
+      "K_free": 280,
+      "K_inc": 240
+    },
+    "n61": {
+      "C_free_train": 35982295.75,
+      "C_inc_train": 37217020.0,
+      "K_def": 500,
+      "K_free": 500,
+      "K_inc": 500
+    }
+  },
+  "kind": "ic_improve2_02_results",
+  "pooled": {
+    "a_same_K_K_def": {
+      "counted_index": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "pairs": 44,
+        "ratio": 1.0
+      },
+      "counted_rank": {
+        "ci95": [
+          0.9106643987449536,
+          0.9594604414748925
+        ],
+        "pairs": 44,
+        "ratio": 0.9338022003563188
+      },
+      "counted_target": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "pairs": 44,
+        "ratio": 1.0
+      },
+      "counted_total": {
+        "ci95": [
+          0.9481537156383523,
+          0.9786610151805757
+        ],
+        "pairs": 44,
+        "ratio": 0.9626959606543302
+      },
+      "verdict": "ADVANCES",
+      "wall_rank": {
+        "ci95": [
+          0.8911253427325397,
+          0.9420244671273029
+        ],
+        "pairs": 44,
+        "ratio": 0.9153773831643582
+      },
+      "wall_total": {
+        "ci95": [
+          0.9223627025913976,
+          0.960051513931783
+        ],
+        "pairs": 44,
+        "ratio": 0.940707934381366
+      }
+    },
+    "a_same_K_K_free": {
+      "counted_index": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "pairs": 44,
+        "ratio": 1.0
+      },
+      "counted_rank": {
+        "ci95": [
+          0.917704334593532,
+          0.9649739405677261
+        ],
+        "pairs": 44,
+        "ratio": 0.9398127333143943
+      },
+      "counted_target": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "pairs": 44,
+        "ratio": 1.0
+      },
+      "counted_total": {
+        "ci95": [
+          0.9532161243635612,
+          0.982173057057363
+        ],
+        "pairs": 44,
+        "ratio": 0.9668782031992387
+      },
+      "verdict": "ADVANCES",
+      "wall_rank": {
+        "ci95": [
+          0.8906492334366802,
+          0.9410341138794617
+        ],
+        "pairs": 44,
+        "ratio": 0.9143118347157696
+      },
+      "wall_total": {
+        "ci95": [
+          0.9215885090018202,
+          0.9587426769253466
+        ],
+        "pairs": 44,
+        "ratio": 0.9398375011149558
+      }
+    },
+    "a_same_K_K_inc": {
+      "counted_index": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "pairs": 44,
+        "ratio": 1.0
+      },
+      "counted_rank": {
+        "ci95": [
+          0.9257444432042926,
+          0.9735171524324968
+        ],
+        "pairs": 44,
+        "ratio": 0.9479441172237707
+      },
+      "counted_target": {
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "pairs": 44,
+        "ratio": 1.0
+      },
+      "counted_total": {
+        "ci95": [
+          0.95564196563729,
+          0.9862903306574219
+        ],
+        "pairs": 44,
+        "ratio": 0.9700045056142027
+      },
+      "verdict": "ADVANCES",
+      "wall_rank": {
+        "ci95": [
+          0.9073353120318562,
+          0.9587424879870242
+        ],
+        "pairs": 44,
+        "ratio": 0.9309519075007016
+      },
+      "wall_total": {
+        "ci95": [
+          0.931165505226961,
+          0.9692492013978838
+        ],
+        "pairs": 44,
+        "ratio": 0.9494292380611763
+      }
+    },
+    "b_tuned_vs_tuned": {
+      "counted_index": {
+        "ci95": [
+          1.0712359988884614,
+          1.0712359988884614
+        ],
+        "pairs": 44,
+        "ratio": 1.0712359988884614
+      },
+      "counted_rank": {
+        "ci95": [
+          0.8692404749532934,
+          0.9142646580980437
+        ],
+        "pairs": 44,
+        "ratio": 0.8897390710165639
+      },
+      "counted_target": {
+        "ci95": [
+          0.9683812390200972,
+          0.9683812390200972
+        ],
+        "pairs": 44,
+        "ratio": 0.9683812390200972
+      },
+      "counted_total": {
+        "ci95": [
+          0.9460503881150025,
+          0.9759923639259224
+        ],
+        "pairs": 44,
+        "ratio": 0.9597434236054408
+      },
+      "verdict": "ADVANCES",
+      "wall_rank": {
+        "ci95": [
+          0.8600503369526821,
+          0.9087362385989465
+        ],
+        "pairs": 44,
+        "ratio": 0.8828587552301929
+      },
+      "wall_total": {
+        "ci95": [
+          0.9218812593678419,
+          0.9610038053114206
+        ],
+        "pairs": 44,
+        "ratio": 0.940763893116567
+      }
+    },
+    "c_tuned_free_vs_inc_K_def": {
+      "counted_index": {
+        "ci95": [
+          0.9787415059401965,
+          0.9787415059401965
+        ],
+        "pairs": 44,
+        "ratio": 0.9787415059401965
+      },
+      "counted_rank": {
+        "ci95": [
+          0.8549068315307736,
+          0.9000088962832433
+        ],
+        "pairs": 44,
+        "ratio": 0.8755146964920416
+      },
+      "counted_target": {
+        "ci95": [
+          1.1531530810815136,
+          1.1531530810815136
+        ],
+        "pairs": 44,
+        "ratio": 1.1531530810815136
+      },
+      "counted_total": {
+        "ci95": [
+          0.9053771345173164,
+          0.934042237406077
+        ],
+        "pairs": 44,
+        "ratio": 0.918575988661552
+      },
+      "verdict": "ADVANCES",
+      "wall_rank": {
+        "ci95": [
+          0.8444153582657228,
+          0.8889669033704477
+        ],
+        "pairs": 44,
+        "ratio": 0.8651878840502373
+      },
+      "wall_total": {
+        "ci95": [
+          0.8839195990078815,
+          0.9188266055377764
+        ],
+        "pairs": 44,
+        "ratio": 0.9010450600565565
+      }
+    }
+  },
+  "sizes": {
+    "n41": {
+      "K": {
+        "K_def": 255,
+        "K_free": 125,
+        "K_inc": 100
+      },
+      "a_same_K": {
+        "K_def=255": {
+          "base": {
+            "K": 255,
+            "arm": "inc",
+            "means": {
+              "c_harvest_mean": 0.0,
+              "c_index": 2666025.0,
+              "c_rank_mean": 327383.3125,
+              "c_target_mean": 1969.5,
+              "c_total_mean": 2995377.8125,
+              "c_total_sd": 19891.005081757434,
+              "free_rank_mean": 0.0,
+              "peak_rss_max_bytes": 338341888.0,
+              "rank_attempts_mean": 255.0,
+              "seeds": 16,
+              "w_harvest_mean_ms": 0.0,
+              "w_index_mean_ms": 3407.846898375,
+              "w_rank_mean_ms": 463.64326781249997,
+              "w_target_mean_ms": 2.201117640625,
+              "w_total_mean_ms": 3892.496097140625,
+              "w_total_sd_ms": 708.491585897611
+            }
+          },
+          "candidate": {
+            "K": 255,
+            "arm": "free",
+            "means": {
+              "c_harvest_mean": 51172.0,
+              "c_index": 2666025.0,
+              "c_rank_mean": 117776.25,
+              "c_target_mean": 1969.5,
+              "c_total_mean": 2836942.75,
+              "c_total_sd": 9736.922556263178,
+              "free_rank_mean": 161.0,
+              "peak_rss_max_bytes": 338571264.0,
+              "rank_attempts_mean": 94.0,
+              "seeds": 16,
+              "w_harvest_mean_ms": 35.9489105,
+              "w_index_mean_ms": 3252.120248500001,
+              "w_rank_mean_ms": 173.6882661875,
+              "w_target_mean_ms": 2.1832723515625,
+              "w_total_mean_ms": 3477.849553414063,
+              "w_total_sd_ms": 603.7713984749839
+            }
+          },
+          "counted_index": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "pairs": 16,
+            "ratio": 1.0
+          },
+          "counted_rank": {
+            "ci95": [
+              0.3419107490330795,
+              0.3794685993131058
+            ],
+            "pairs": 16,
+            "ratio": 0.3597503156181792
+          },
+          "counted_target": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "pairs": 16,
+            "ratio": 1.0
+          },
+          "counted_total": {
+            "ci95": [
+              0.943710045075136,
+              0.9507489156107185
+            ],
+            "pairs": 16,
+            "ratio": 0.947106818432441
+          },
+          "verdict": "ADVANCES",
+          "wall_rank": {
+            "ci95": [
+              0.32887394013244453,
+              0.43844629976641997
+            ],
+            "pairs": 16,
+            "ratio": 0.37461617205610015
+          },
+          "wall_total": {
+            "ci95": [
+              0.8508981033974662,
+              0.9430655685783033
+            ],
+            "pairs": 16,
+            "ratio": 0.893475411823494
+          }
+        },
+        "K_free=125": {
+          "base": {
+            "K": 125,
+            "arm": "inc",
+            "means": {
+              "c_harvest_mean": 0.0,
+              "c_index": 640625.0,
+              "c_rank_mean": 700231.0,
+              "c_target_mean": 3446.25,
+              "c_total_mean": 1344302.25,
+              "c_total_sd": 64183.217482454085,
+              "free_rank_mean": 0.0,
+              "peak_rss_max_bytes": 87023616.0,
+              "rank_attempts_mean": 125.0,
+              "seeds": 16,
+              "w_harvest_mean_ms": 0.0,
+              "w_index_mean_ms": 720.6650597500001,
+              "w_rank_mean_ms": 758.68960225,
+              "w_target_mean_ms": 3.9747249765624995,
+              "w_total_mean_ms": 1490.7172970390627,
+              "w_total_sd_ms": 331.5064592413215
+            }
+          },
+          "candidate": {
+            "K": 125,
+            "arm": "free",
+            "means": {
+              "c_harvest_mean": 21222.0,
+              "c_index": 640625.0,
+              "c_rank_mean": 641038.125,
+              "c_target_mean": 3446.25,
+              "c_total_mean": 1306331.375,
+              "c_total_sd": 57400.72517645865,
+              "free_rank_mean": 5.0,
+              "peak_rss_max_bytes": 87097344.0,
+              "rank_attempts_mean": 120.0,
+              "seeds": 16,
+              "w_harvest_mean_ms": 6.620800624999999,
+              "w_index_mean_ms": 715.23527325,
+              "w_rank_mean_ms": 700.73881625,
+              "w_target_mean_ms": 3.5215141328125004,
+              "w_total_mean_ms": 1434.9176616953127,
+              "w_total_sd_ms": 254.3703431013712
+            }
+          },
+          "counted_index": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "pairs": 16,
+            "ratio": 1.0
+          },
+          "counted_rank": {
+            "ci95": [
+              0.8575679857359765,
+              0.9739311017265723
+            ],
+            "pairs": 16,
+            "ratio": 0.9154666460068177
+          },
+          "counted_target": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "pairs": 16,
+            "ratio": 1.0
+          },
+          "counted_total": {
+            "ci95": [
+              0.9401386143454606,
+              1.0027159300259108
+            ],
+            "pairs": 16,
+            "ratio": 0.9717542130127358
+          },
+          "verdict": "MATCHES",
+          "wall_rank": {
+            "ci95": [
+              0.8269149361332448,
+              1.0174779526786297
+            ],
+            "pairs": 16,
+            "ratio": 0.9236172661017907
+          },
+          "wall_total": {
+            "ci95": [
+              0.8830910153888767,
+              1.035230103727482
+            ],
+            "pairs": 16,
+            "ratio": 0.96256860005946
+          }
+        },
+        "K_inc=100": {
+          "base": {
+            "K": 100,
+            "arm": "inc",
+            "means": {
+              "c_harvest_mean": 0.0,
+              "c_index": 410000.0,
+              "c_rank_mean": 955174.5625,
+              "c_target_mean": 11362.875,
+              "c_total_mean": 1376537.4375,
+              "c_total_sd": 109096.28846969313,
+              "free_rank_mean": 0.0,
+              "peak_rss_max_bytes": 47812608.0,
+              "rank_attempts_mean": 100.0,
+              "seeds": 16,
+              "w_harvest_mean_ms": 0.0,
+              "w_index_mean_ms": 439.29081268749997,
+              "w_rank_mean_ms": 968.311049125,
+              "w_target_mean_ms": 10.632771867187499,
+              "w_total_mean_ms": 1422.9040390546872,
+              "w_total_sd_ms": 289.8034195652133
+            }
+          },
+          "candidate": {
+            "K": 100,
+            "arm": "free",
+            "means": {
+              "c_harvest_mean": 16840.0,
+              "c_index": 410000.0,
+              "c_rank_mean": 919608.8125,
+              "c_target_mean": 11362.875,
+              "c_total_mean": 1357811.6875,
+              "c_total_sd": 98240.87247116565,
+              "free_rank_mean": 1.0,
+              "peak_rss_max_bytes": 47910912.0,
+              "rank_attempts_mean": 99.0,
+              "seeds": 16,
+              "w_harvest_mean_ms": 4.402032625,
+              "w_index_mean_ms": 400.0392761874999,
+              "w_rank_mean_ms": 954.1588254999999,
+              "w_target_mean_ms": 10.823278171875,
+              "w_total_mean_ms": 1376.3020991718754,
+              "w_total_sd_ms": 370.86846438231777
+            }
+          },
+          "counted_index": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "pairs": 16,
+            "ratio": 1.0
+          },
+          "counted_rank": {
+            "ci95": [
+              0.9046200974617928,
+              1.024442580367301
+            ],
+            "pairs": 16,
+            "ratio": 0.9627651830395137
+          },
+          "counted_target": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "pairs": 16,
+            "ratio": 1.0
+          },
+          "counted_total": {
+            "ci95": [
+              0.9450110805352229,
+              1.0293184197112888
+            ],
+            "pairs": 16,
+            "ratio": 0.9863964833139527
+          },
+          "verdict": "MATCHES",
+          "wall_rank": {
+            "ci95": [
+              0.873468997733957,
+              1.1056086054414098
+            ],
+            "pairs": 16,
+            "ratio": 0.9853846306537672
+          },
+          "wall_total": {
+            "ci95": [
+              0.8761585538567784,
+              1.0661246393544732
+            ],
+            "pairs": 16,
+            "ratio": 0.9672487120679114
+          }
+        }
+      },
+      "b_tuned_vs_tuned": {
+        "base": {
+          "K": 100,
+          "arm": "inc",
+          "means": {
+            "c_harvest_mean": 0.0,
+            "c_index": 410000.0,
+            "c_rank_mean": 955174.5625,
+            "c_target_mean": 11362.875,
+            "c_total_mean": 1376537.4375,
+            "c_total_sd": 109096.28846969313,
+            "free_rank_mean": 0.0,
+            "peak_rss_max_bytes": 47812608.0,
+            "rank_attempts_mean": 100.0,
+            "seeds": 16,
+            "w_harvest_mean_ms": 0.0,
+            "w_index_mean_ms": 439.29081268749997,
+            "w_rank_mean_ms": 968.311049125,
+            "w_target_mean_ms": 10.632771867187499,
+            "w_total_mean_ms": 1422.9040390546872,
+            "w_total_sd_ms": 289.8034195652133
+          }
+        },
+        "candidate": {
+          "K": 125,
+          "arm": "free",
+          "means": {
+            "c_harvest_mean": 21222.0,
+            "c_index": 640625.0,
+            "c_rank_mean": 641038.125,
+            "c_target_mean": 3446.25,
+            "c_total_mean": 1306331.375,
+            "c_total_sd": 57400.72517645865,
+            "free_rank_mean": 5.0,
+            "peak_rss_max_bytes": 87097344.0,
+            "rank_attempts_mean": 120.0,
+            "seeds": 16,
+            "w_harvest_mean_ms": 6.620800624999999,
+            "w_index_mean_ms": 715.23527325,
+            "w_rank_mean_ms": 700.73881625,
+            "w_target_mean_ms": 3.5215141328125004,
+            "w_total_mean_ms": 1434.9176616953127,
+            "w_total_sd_ms": 254.3703431013712
+          }
+        },
+        "counted_index": {
+          "ci95": [
+            1.5625,
+            1.5625
+          ],
+          "pairs": 16,
+          "ratio": 1.5625
+        },
+        "counted_rank": {
+          "ci95": [
+            0.6278155600147861,
+            0.7179317377465451
+          ],
+          "pairs": 16,
+          "ratio": 0.6711214370305219
+        },
+        "counted_target": {
+          "ci95": [
+            0.30329032045147025,
+            0.30329032045147025
+          ],
+          "pairs": 16,
+          "ratio": 0.30329032045147025
+        },
+        "counted_total": {
+          "ci95": [
+            0.9105958513110222,
+            0.9900994690872112
+          ],
+          "pairs": 16,
+          "ratio": 0.948998072564227
+        },
+        "verdict": "ADVANCES",
+        "wall_rank": {
+          "ci95": [
+            0.6762633029195635,
+            0.7775536557036401
+          ],
+          "pairs": 16,
+          "ratio": 0.7236711972699396
+        },
+        "wall_total": {
+          "ci95": [
+            0.9563949579371903,
+            1.0565799745778375
+          ],
+          "pairs": 16,
+          "ratio": 1.0084430308094472
+        }
+      },
+      "c_tuned_free_vs_inc_K_def": {
+        "base": {
+          "K": 255,
+          "arm": "inc",
+          "means": {
+            "c_harvest_mean": 0.0,
+            "c_index": 2666025.0,
+            "c_rank_mean": 327383.3125,
+            "c_target_mean": 1969.5,
+            "c_total_mean": 2995377.8125,
+            "c_total_sd": 19891.005081757434,
+            "free_rank_mean": 0.0,
+            "peak_rss_max_bytes": 338341888.0,
+            "rank_attempts_mean": 255.0,
+            "seeds": 16,
+            "w_harvest_mean_ms": 0.0,
+            "w_index_mean_ms": 3407.846898375,
+            "w_rank_mean_ms": 463.64326781249997,
+            "w_target_mean_ms": 2.201117640625,
+            "w_total_mean_ms": 3892.496097140625,
+            "w_total_sd_ms": 708.491585897611
+          }
+        },
+        "candidate": {
+          "K": 125,
+          "arm": "free",
+          "means": {
+            "c_harvest_mean": 21222.0,
+            "c_index": 640625.0,
+            "c_rank_mean": 641038.125,
+            "c_target_mean": 3446.25,
+            "c_total_mean": 1306331.375,
+            "c_total_sd": 57400.72517645865,
+            "free_rank_mean": 5.0,
+            "peak_rss_max_bytes": 87097344.0,
+            "rank_attempts_mean": 120.0,
+            "seeds": 16,
+            "w_harvest_mean_ms": 6.620800624999999,
+            "w_index_mean_ms": 715.23527325,
+            "w_rank_mean_ms": 700.73881625,
+            "w_target_mean_ms": 3.5215141328125004,
+            "w_total_mean_ms": 1434.9176616953127,
+            "w_total_sd_ms": 254.3703431013712
+          }
+        },
+        "counted_index": {
+          "ci95": [
+            0.24029219530949636,
+            0.24029219530949636
+          ],
+          "pairs": 16,
+          "ratio": 0.24029219530949636
+        },
+        "counted_rank": {
+          "ci95": [
+            1.8710184880552307,
+            2.05554749424296
+          ],
+          "pairs": 16,
+          "ratio": 1.9580659750334708
+        },
+        "counted_target": {
+          "ci95": [
+            1.7498095963442497,
+            1.7498095963442497
+          ],
+          "pairs": 16,
+          "ratio": 1.7498095963442497
+        },
+        "counted_total": {
+          "ci95": [
+            0.42725983497998127,
+            0.4447538944752914
+          ],
+          "pairs": 16,
+          "ratio": 0.4361157278886668
+        },
+        "verdict": "ADVANCES",
+        "wall_rank": {
+          "ci95": [
+            1.3790363988891237,
+            1.6711272951941378
+          ],
+          "pairs": 16,
+          "ratio": 1.5113749403849488
+        },
+        "wall_total": {
+          "ci95": [
+            0.3452119543054132,
+            0.3899481397406168
+          ],
+          "pairs": 16,
+          "ratio": 0.3686368915692385
+        }
+      },
+      "inc_tuned_vs_inc_K_def": {
+        "base": {
+          "K": 255,
+          "arm": "inc",
+          "means": {
+            "c_harvest_mean": 0.0,
+            "c_index": 2666025.0,
+            "c_rank_mean": 327383.3125,
+            "c_target_mean": 1969.5,
+            "c_total_mean": 2995377.8125,
+            "c_total_sd": 19891.005081757434,
+            "free_rank_mean": 0.0,
+            "peak_rss_max_bytes": 338341888.0,
+            "rank_attempts_mean": 255.0,
+            "seeds": 16,
+            "w_harvest_mean_ms": 0.0,
+            "w_index_mean_ms": 3407.846898375,
+            "w_rank_mean_ms": 463.64326781249997,
+            "w_target_mean_ms": 2.201117640625,
+            "w_total_mean_ms": 3892.496097140625,
+            "w_total_sd_ms": 708.491585897611
+          }
+        },
+        "candidate": {
+          "K": 100,
+          "arm": "inc",
+          "means": {
+            "c_harvest_mean": 0.0,
+            "c_index": 410000.0,
+            "c_rank_mean": 955174.5625,
+            "c_target_mean": 11362.875,
+            "c_total_mean": 1376537.4375,
+            "c_total_sd": 109096.28846969313,
+            "free_rank_mean": 0.0,
+            "peak_rss_max_bytes": 47812608.0,
+            "rank_attempts_mean": 100.0,
+            "seeds": 16,
+            "w_harvest_mean_ms": 0.0,
+            "w_index_mean_ms": 439.29081268749997,
+            "w_rank_mean_ms": 968.311049125,
+            "w_target_mean_ms": 10.632771867187499,
+            "w_total_mean_ms": 1422.9040390546872,
+            "w_total_sd_ms": 289.8034195652133
+          }
+        },
+        "counted_index": {
+          "ci95": [
+            0.15378700499807765,
+            0.15378700499807765
+          ],
+          "pairs": 16,
+          "ratio": 0.15378700499807765
+        },
+        "counted_rank": {
+          "ci95": [
+            2.7326604412129827,
+            3.090506460406333
+          ],
+          "pairs": 16,
+          "ratio": 2.9176030849159424
+        },
+        "counted_target": {
+          "ci95": [
+            5.76942117288652,
+            5.76942117288652
+          ],
+          "pairs": 16,
+          "ratio": 5.76942117288652
+        },
+        "counted_total": {
+          "ci95": [
+            0.4417698649198881,
+            0.4766187044721456
+          ],
+          "pairs": 16,
+          "ratio": 0.459553860536583
+        },
+        "verdict": "ADVANCES",
+        "wall_rank": {
+          "ci95": [
+            1.9111265098685593,
+            2.2880154853793333
+          ],
+          "pairs": 16,
+          "ratio": 2.088482927172773
+        },
+        "wall_total": {
+          "ci95": [
+            0.34931088021203,
+            0.3824923883233788
+          ],
+          "pairs": 16,
+          "ratio": 0.3655505371219083
+        }
+      }
+    },
+    "n53": {
+      "K": {
+        "K_def": 220,
+        "K_free": 280,
+        "K_inc": 240
+      },
+      "a_same_K": {
+        "K_def=220": {
+          "base": {
+            "K": 220,
+            "arm": "inc",
+            "means": {
+              "c_harvest_mean": 0.0,
+              "c_index": 2565200.0,
+              "c_rank_mean": 9365999.3125,
+              "c_target_mean": 22139.125,
+              "c_total_mean": 11953338.4375,
+              "c_total_sd": 592982.6532838566,
+              "free_rank_mean": 0.0,
+              "peak_rss_max_bytes": 335958016.0,
+              "rank_attempts_mean": 220.0,
+              "seeds": 16,
+              "w_harvest_mean_ms": 0.0,
+              "w_index_mean_ms": 3375.4456133749995,
+              "w_rank_mean_ms": 12654.345737499998,
+              "w_target_mean_ms": 28.276768656250002,
+              "w_total_mean_ms": 16072.976986656251,
+              "w_total_sd_ms": 2854.302262663037
+            }
+          },
+          "candidate": {
+            "K": 220,
+            "arm": "free",
+            "means": {
+              "c_harvest_mean": 37186.0,
+              "c_index": 2565200.0,
+              "c_rank_mean": 8965933.3125,
+              "c_target_mean": 22139.125,
+              "c_total_mean": 11590458.4375,
+              "c_total_sd": 682193.4015442365,
+              "free_rank_mean": 4.0,
+              "peak_rss_max_bytes": 336031744.0,
+              "rank_attempts_mean": 216.0,
+              "seeds": 16,
+              "w_harvest_mean_ms": 13.838060125,
+              "w_index_mean_ms": 3363.364329375,
+              "w_rank_mean_ms": 11940.4042174375,
+              "w_target_mean_ms": 28.613557148437504,
+              "w_total_mean_ms": 15365.728871273439,
+              "w_total_sd_ms": 3058.526030414359
+            }
+          },
+          "counted_index": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "pairs": 16,
+            "ratio": 1.0
+          },
+          "counted_rank": {
+            "ci95": [
+              0.9138777314978839,
+              1.0028298859719356
+            ],
+            "pairs": 16,
+            "ratio": 0.9572852840736316
+          },
+          "counted_target": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "pairs": 16,
+            "ratio": 1.0
+          },
+          "counted_total": {
+            "ci95": [
+              0.9353406813355606,
+              1.0053535383261298
+            ],
+            "pairs": 16,
+            "ratio": 0.9696419538443274
+          },
+          "verdict": "MATCHES",
+          "wall_rank": {
+            "ci95": [
+              0.8943875137479252,
+              0.9949658403400045
+            ],
+            "pairs": 16,
+            "ratio": 0.9435813170532558
+          },
+          "wall_total": {
+            "ci95": [
+              0.9153341091294749,
+              0.9980099427805355
+            ],
+            "pairs": 16,
+            "ratio": 0.9559976900377591
+          }
+        },
+        "K_free=280": {
+          "base": {
+            "K": 280,
+            "arm": "inc",
+            "means": {
+              "c_harvest_mean": 0.0,
+              "c_index": 4155200.0,
+              "c_rank_mean": 6767571.75,
+              "c_target_mean": 30234.5,
+              "c_total_mean": 10953006.25,
+              "c_total_sd": 374437.3976205724,
+              "free_rank_mean": 0.0,
+              "peak_rss_max_bytes": 375418880.0,
+              "rank_attempts_mean": 280.0,
+              "seeds": 16,
+              "w_harvest_mean_ms": 0.0,
+              "w_index_mean_ms": 5412.396636,
+              "w_rank_mean_ms": 9576.808292500002,
+              "w_target_mean_ms": 43.9524906171875,
+              "w_total_mean_ms": 15063.62509649219,
+              "w_total_sd_ms": 2492.0669174119976
+            }
+          },
+          "candidate": {
+            "K": 280,
+            "arm": "free",
+            "means": {
+              "c_harvest_mean": 47448.0,
+              "c_index": 4155200.0,
+              "c_rank_mean": 6546567.0,
+              "c_target_mean": 30234.5,
+              "c_total_mean": 10779449.5,
+              "c_total_sd": 386036.4124784086,
+              "free_rank_mean": 8.0,
+              "peak_rss_max_bytes": 375459840.0,
+              "rank_attempts_mean": 272.0,
+              "seeds": 16,
+              "w_harvest_mean_ms": 17.520216812500003,
+              "w_index_mean_ms": 5227.6916868125,
+              "w_rank_mean_ms": 8814.1057675625,
+              "w_target_mean_ms": 39.31359260937501,
+              "w_total_mean_ms": 14130.817342859373,
+              "w_total_sd_ms": 2489.4399662326905
+            }
+          },
+          "counted_index": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "pairs": 16,
+            "ratio": 1.0
+          },
+          "counted_rank": {
+            "ci95": [
+              0.9328366820202666,
+              1.0055385465591509
+            ],
+            "pairs": 16,
+            "ratio": 0.9673435675063216
+          },
+          "counted_target": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "pairs": 16,
+            "ratio": 1.0
+          },
+          "counted_total": {
+            "ci95": [
+              0.962513554802,
+              1.0077720682805449
+            ],
+            "pairs": 16,
+            "ratio": 0.9841544187925575
+          },
+          "verdict": "MATCHES",
+          "wall_rank": {
+            "ci95": [
+              0.8764682689496648,
+              0.9664018845874983
+            ],
+            "pairs": 16,
+            "ratio": 0.9203594243883104
+          },
+          "wall_total": {
+            "ci95": [
+              0.9065778955843158,
+              0.9716466076436975
+            ],
+            "pairs": 16,
+            "ratio": 0.9380754799951815
+          }
+        },
+        "K_inc=240": {
+          "base": {
+            "K": 240,
+            "arm": "inc",
+            "means": {
+              "c_harvest_mean": 0.0,
+              "c_index": 3052800.0,
+              "c_rank_mean": 8218143.4375,
+              "c_target_mean": 24671.125,
+              "c_total_mean": 11295614.5625,
+              "c_total_sd": 466462.0207522393,
+              "free_rank_mean": 0.0,
+              "peak_rss_max_bytes": 347975680.0,
+              "rank_attempts_mean": 240.0,
+              "seeds": 16,
+              "w_harvest_mean_ms": 0.0,
+              "w_index_mean_ms": 3889.5459540625006,
+              "w_rank_mean_ms": 11113.100945187502,
+              "w_target_mean_ms": 32.3606511015625,
+              "w_total_mean_ms": 15053.417281976564,
+              "w_total_sd_ms": 2775.1610387383143
+            }
+          },
+          "candidate": {
+            "K": 240,
+            "arm": "free",
+            "means": {
+              "c_harvest_mean": 40586.0,
+              "c_index": 3052800.0,
+              "c_rank_mean": 8131148.0,
+              "c_target_mean": 24671.125,
+              "c_total_mean": 11249205.125,
+              "c_total_sd": 544167.2702925084,
+              "free_rank_mean": 5.0,
+              "peak_rss_max_bytes": 348045312.0,
+              "rank_attempts_mean": 235.0,
+              "seeds": 16,
+              "w_harvest_mean_ms": 15.228820187499998,
+              "w_index_mean_ms": 3805.1827704374996,
+              "w_rank_mean_ms": 11001.514366624999,
+              "w_target_mean_ms": 33.6784772265625,
+              "w_total_mean_ms": 14875.324917101561,
+              "w_total_sd_ms": 2782.2175378852503
+            }
+          },
+          "counted_index": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "pairs": 16,
+            "ratio": 1.0
+          },
+          "counted_rank": {
+            "ci95": [
+              0.9484226079453772,
+              1.0323676164028912
+            ],
+            "pairs": 16,
+            "ratio": 0.9894142225477554
+          },
+          "counted_target": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "pairs": 16,
+            "ratio": 1.0
+          },
+          "counted_total": {
+            "ci95": [
+              0.9658898367289649,
+              1.0270757688050773
+            ],
+            "pairs": 16,
+            "ratio": 0.9958913756092499
+          },
+          "verdict": "MATCHES",
+          "wall_rank": {
+            "ci95": [
+              0.9466312552231022,
+              1.0348294839138446
+            ],
+            "pairs": 16,
+            "ratio": 0.989959006121435
+          },
+          "wall_total": {
+            "ci95": [
+              0.9532706194648249,
+              1.0240112340569498
+            ],
+            "pairs": 16,
+            "ratio": 0.9881693065741137
+          }
+        }
+      },
+      "b_tuned_vs_tuned": {
+        "base": {
+          "K": 240,
+          "arm": "inc",
+          "means": {
+            "c_harvest_mean": 0.0,
+            "c_index": 3052800.0,
+            "c_rank_mean": 8218143.4375,
+            "c_target_mean": 24671.125,
+            "c_total_mean": 11295614.5625,
+            "c_total_sd": 466462.0207522393,
+            "free_rank_mean": 0.0,
+            "peak_rss_max_bytes": 347975680.0,
+            "rank_attempts_mean": 240.0,
+            "seeds": 16,
+            "w_harvest_mean_ms": 0.0,
+            "w_index_mean_ms": 3889.5459540625006,
+            "w_rank_mean_ms": 11113.100945187502,
+            "w_target_mean_ms": 32.3606511015625,
+            "w_total_mean_ms": 15053.417281976564,
+            "w_total_sd_ms": 2775.1610387383143
+          }
+        },
+        "candidate": {
+          "K": 280,
+          "arm": "free",
+          "means": {
+            "c_harvest_mean": 47448.0,
+            "c_index": 4155200.0,
+            "c_rank_mean": 6546567.0,
+            "c_target_mean": 30234.5,
+            "c_total_mean": 10779449.5,
+            "c_total_sd": 386036.4124784086,
+            "free_rank_mean": 8.0,
+            "peak_rss_max_bytes": 375459840.0,
+            "rank_attempts_mean": 272.0,
+            "seeds": 16,
+            "w_harvest_mean_ms": 17.520216812500003,
+            "w_index_mean_ms": 5227.6916868125,
+            "w_rank_mean_ms": 8814.1057675625,
+            "w_target_mean_ms": 39.31359260937501,
+            "w_total_mean_ms": 14130.817342859373,
+            "w_total_sd_ms": 2489.4399662326905
+          }
+        },
+        "counted_index": {
+          "ci95": [
+            1.3611111111111112,
+            1.3611111111111112
+          ],
+          "pairs": 16,
+          "ratio": 1.3611111111111112
+        },
+        "counted_rank": {
+          "ci95": [
+            0.7652299197971751,
+            0.8297201380301542
+          ],
+          "pairs": 16,
+          "ratio": 0.7965992623257862
+        },
+        "counted_target": {
+          "ci95": [
+            1.2255014718623491,
+            1.2255014718623491
+          ],
+          "pairs": 16,
+          "ratio": 1.2255014718623491
+        },
+        "counted_total": {
+          "ci95": [
+            0.9292981126001518,
+            0.9807773469580657
+          ],
+          "pairs": 16,
+          "ratio": 0.9543039416187586
+        },
+        "verdict": "ADVANCES",
+        "wall_rank": {
+          "ci95": [
+            0.7468091899259397,
+            0.8428529959458484
+          ],
+          "pairs": 16,
+          "ratio": 0.7931274817925077
+        },
+        "wall_total": {
+          "ci95": [
+            0.894293920145046,
+            0.9861794163919938
+          ],
+          "pairs": 16,
+          "ratio": 0.938711594727277
+        }
+      },
+      "c_tuned_free_vs_inc_K_def": {
+        "base": {
+          "K": 220,
+          "arm": "inc",
+          "means": {
+            "c_harvest_mean": 0.0,
+            "c_index": 2565200.0,
+            "c_rank_mean": 9365999.3125,
+            "c_target_mean": 22139.125,
+            "c_total_mean": 11953338.4375,
+            "c_total_sd": 592982.6532838566,
+            "free_rank_mean": 0.0,
+            "peak_rss_max_bytes": 335958016.0,
+            "rank_attempts_mean": 220.0,
+            "seeds": 16,
+            "w_harvest_mean_ms": 0.0,
+            "w_index_mean_ms": 3375.4456133749995,
+            "w_rank_mean_ms": 12654.345737499998,
+            "w_target_mean_ms": 28.276768656250002,
+            "w_total_mean_ms": 16072.976986656251,
+            "w_total_sd_ms": 2854.302262663037
+          }
+        },
+        "candidate": {
+          "K": 280,
+          "arm": "free",
+          "means": {
+            "c_harvest_mean": 47448.0,
+            "c_index": 4155200.0,
+            "c_rank_mean": 6546567.0,
+            "c_target_mean": 30234.5,
+            "c_total_mean": 10779449.5,
+            "c_total_sd": 386036.4124784086,
+            "free_rank_mean": 8.0,
+            "peak_rss_max_bytes": 375459840.0,
+            "rank_attempts_mean": 272.0,
+            "seeds": 16,
+            "w_harvest_mean_ms": 17.520216812500003,
+            "w_index_mean_ms": 5227.6916868125,
+            "w_rank_mean_ms": 8814.1057675625,
+            "w_target_mean_ms": 39.31359260937501,
+            "w_total_mean_ms": 14130.817342859373,
+            "w_total_sd_ms": 2489.4399662326905
+          }
+        },
+        "counted_index": {
+          "ci95": [
+            1.6198347107438016,
+            1.6198347107438016
+          ],
+          "pairs": 16,
+          "ratio": 1.6198347107438016
+        },
+        "counted_rank": {
+          "ci95": [
+            0.6713333991201216,
+            0.7280042686768068
+          ],
+          "pairs": 16,
+          "ratio": 0.6989715439400958
+        },
+        "counted_target": {
+          "ci95": [
+            1.3656592119155568,
+            1.3656592119155568
+          ],
+          "pairs": 16,
+          "ratio": 1.3656592119155568
+        },
+        "counted_total": {
+          "ci95": [
+            0.8765263400256273,
+            0.9283559291687304
+          ],
+          "pairs": 16,
+          "ratio": 0.9017940516251697
+        },
+        "verdict": "ADVANCES",
+        "wall_rank": {
+          "ci95": [
+            0.6661847356947279,
+            0.7275829840617881
+          ],
+          "pairs": 16,
+          "ratio": 0.6965279715286032
+        },
+        "wall_total": {
+          "ci95": [
+            0.8491114357306728,
+            0.9098650372044936
+          ],
+          "pairs": 16,
+          "ratio": 0.8791661528907025
+        }
+      },
+      "inc_tuned_vs_inc_K_def": {
+        "base": {
+          "K": 220,
+          "arm": "inc",
+          "means": {
+            "c_harvest_mean": 0.0,
+            "c_index": 2565200.0,
+            "c_rank_mean": 9365999.3125,
+            "c_target_mean": 22139.125,
+            "c_total_mean": 11953338.4375,
+            "c_total_sd": 592982.6532838566,
+            "free_rank_mean": 0.0,
+            "peak_rss_max_bytes": 335958016.0,
+            "rank_attempts_mean": 220.0,
+            "seeds": 16,
+            "w_harvest_mean_ms": 0.0,
+            "w_index_mean_ms": 3375.4456133749995,
+            "w_rank_mean_ms": 12654.345737499998,
+            "w_target_mean_ms": 28.276768656250002,
+            "w_total_mean_ms": 16072.976986656251,
+            "w_total_sd_ms": 2854.302262663037
+          }
+        },
+        "candidate": {
+          "K": 240,
+          "arm": "inc",
+          "means": {
+            "c_harvest_mean": 0.0,
+            "c_index": 3052800.0,
+            "c_rank_mean": 8218143.4375,
+            "c_target_mean": 24671.125,
+            "c_total_mean": 11295614.5625,
+            "c_total_sd": 466462.0207522393,
+            "free_rank_mean": 0.0,
+            "peak_rss_max_bytes": 347975680.0,
+            "rank_attempts_mean": 240.0,
+            "seeds": 16,
+            "w_harvest_mean_ms": 0.0,
+            "w_index_mean_ms": 3889.5459540625006,
+            "w_rank_mean_ms": 11113.100945187502,
+            "w_target_mean_ms": 32.3606511015625,
+            "w_total_mean_ms": 15053.417281976564,
+            "w_total_sd_ms": 2775.1610387383143
+          }
+        },
+        "counted_index": {
+          "ci95": [
+            1.1900826446280992,
+            1.1900826446280992
+          ],
+          "pairs": 16,
+          "ratio": 1.1900826446280992
+        },
+        "counted_rank": {
+          "ci95": [
+            0.8425988657088977,
+            0.9152737595787506
+          ],
+          "pairs": 16,
+          "ratio": 0.8774443776150982
+        },
+        "counted_target": {
+          "ci95": [
+            1.114367663582007,
+            1.114367663582007
+          ],
+          "pairs": 16,
+          "ratio": 1.114367663582007
+        },
+        "counted_total": {
+          "ci95": [
+            0.9162744460108238,
+            0.9754704445634471
+          ],
+          "pairs": 16,
+          "ratio": 0.9449757171656256
+        },
+        "verdict": "ADVANCES",
+        "wall_rank": {
+          "ci95": [
+            0.8396674788989478,
+            0.9196385663527105
+          ],
+          "pairs": 16,
+          "ratio": 0.8782043082839788
+        },
+        "wall_total": {
+          "ci95": [
+            0.8970220602052622,
+            0.9774503187579654
+          ],
+          "pairs": 16,
+          "ratio": 0.9365668410073552
+        }
+      }
+    },
+    "n61": {
+      "K": {
+        "K_def": 500,
+        "K_free": 500,
+        "K_inc": 500
+      },
+      "a_same_K": {
+        "K_def=500": {
+          "base": {
+            "K": 500,
+            "arm": "inc",
+            "means": {
+              "c_harvest_mean": 0.0,
+              "c_index": 15250000.0,
+              "c_rank_mean": 22836822.166666668,
+              "c_target_mean": 38391.75,
+              "c_total_mean": 38125213.916666664,
+              "c_total_sd": 1138678.6429168945,
+              "free_rank_mean": 0.0,
+              "peak_rss_max_bytes": 1451585536.0,
+              "rank_attempts_mean": 500.0,
+              "seeds": 12,
+              "w_harvest_mean_ms": 0.0,
+              "w_index_mean_ms": 23905.882970666662,
+              "w_rank_mean_ms": 38670.690812,
+              "w_target_mean_ms": 66.25448657291668,
+              "w_total_mean_ms": 62677.13605465624,
+              "w_total_sd_ms": 12275.527633529193
+            }
+          },
+          "candidate": {
+            "K": 500,
+            "arm": "free",
+            "means": {
+              "c_harvest_mean": 85198.0,
+              "c_index": 15250000.0,
+              "c_rank_mean": 21293067.25,
+              "c_target_mean": 38391.75,
+              "c_total_mean": 36666657.0,
+              "c_total_sd": 493630.0500165032,
+              "free_rank_mean": 25.0,
+              "peak_rss_max_bytes": 1451708416.0,
+              "rank_attempts_mean": 475.0,
+              "seeds": 12,
+              "w_harvest_mean_ms": 40.463663749999995,
+              "w_index_mean_ms": 23445.484557,
+              "w_rank_mean_ms": 35292.09372508333,
+              "w_target_mean_ms": 65.81134141666666,
+              "w_total_mean_ms": 58898.97970983333,
+              "w_total_sd_ms": 11251.323345174615
+            }
+          },
+          "counted_index": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "pairs": 12,
+            "ratio": 1.0
+          },
+          "counted_rank": {
+            "ci95": [
+              0.9058762874100805,
+              0.9661076371348178
+            ],
+            "pairs": 12,
+            "ratio": 0.9324006245089573
+          },
+          "counted_target": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "pairs": 12,
+            "ratio": 1.0
+          },
+          "counted_total": {
+            "ci95": [
+              0.9453262681865119,
+              0.9821995459194209
+            ],
+            "pairs": 12,
+            "ratio": 0.9617429840563059
+          },
+          "verdict": "ADVANCES",
+          "wall_rank": {
+            "ci95": [
+              0.885647559400352,
+              0.9462453131566934
+            ],
+            "pairs": 12,
+            "ratio": 0.912631581800751
+          },
+          "wall_total": {
+            "ci95": [
+              0.9185397857237712,
+              0.9632375600634078
+            ],
+            "pairs": 12,
+            "ratio": 0.9397203416964002
+          }
+        },
+        "K_free=500": {
+          "base": {
+            "K": 500,
+            "arm": "inc",
+            "means": {
+              "c_harvest_mean": 0.0,
+              "c_index": 15250000.0,
+              "c_rank_mean": 22836822.166666668,
+              "c_target_mean": 38391.75,
+              "c_total_mean": 38125213.916666664,
+              "c_total_sd": 1138678.6429168945,
+              "free_rank_mean": 0.0,
+              "peak_rss_max_bytes": 1451585536.0,
+              "rank_attempts_mean": 500.0,
+              "seeds": 12,
+              "w_harvest_mean_ms": 0.0,
+              "w_index_mean_ms": 23905.882970666662,
+              "w_rank_mean_ms": 38670.690812,
+              "w_target_mean_ms": 66.25448657291668,
+              "w_total_mean_ms": 62677.13605465624,
+              "w_total_sd_ms": 12275.527633529193
+            }
+          },
+          "candidate": {
+            "K": 500,
+            "arm": "free",
+            "means": {
+              "c_harvest_mean": 85198.0,
+              "c_index": 15250000.0,
+              "c_rank_mean": 21293067.25,
+              "c_target_mean": 38391.75,
+              "c_total_mean": 36666657.0,
+              "c_total_sd": 493630.0500165032,
+              "free_rank_mean": 25.0,
+              "peak_rss_max_bytes": 1451708416.0,
+              "rank_attempts_mean": 475.0,
+              "seeds": 12,
+              "w_harvest_mean_ms": 40.463663749999995,
+              "w_index_mean_ms": 23445.484557,
+              "w_rank_mean_ms": 35292.09372508333,
+              "w_target_mean_ms": 65.81134141666666,
+              "w_total_mean_ms": 58898.97970983333,
+              "w_total_sd_ms": 11251.323345174615
+            }
+          },
+          "counted_index": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "pairs": 12,
+            "ratio": 1.0
+          },
+          "counted_rank": {
+            "ci95": [
+              0.9058762874100805,
+              0.9661076371348178
+            ],
+            "pairs": 12,
+            "ratio": 0.9324006245089573
+          },
+          "counted_target": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "pairs": 12,
+            "ratio": 1.0
+          },
+          "counted_total": {
+            "ci95": [
+              0.9453262681865119,
+              0.9821995459194209
+            ],
+            "pairs": 12,
+            "ratio": 0.9617429840563059
+          },
+          "verdict": "ADVANCES",
+          "wall_rank": {
+            "ci95": [
+              0.885647559400352,
+              0.9462453131566934
+            ],
+            "pairs": 12,
+            "ratio": 0.912631581800751
+          },
+          "wall_total": {
+            "ci95": [
+              0.9185397857237712,
+              0.9632375600634078
+            ],
+            "pairs": 12,
+            "ratio": 0.9397203416964002
+          }
+        },
+        "K_inc=500": {
+          "base": {
+            "K": 500,
+            "arm": "inc",
+            "means": {
+              "c_harvest_mean": 0.0,
+              "c_index": 15250000.0,
+              "c_rank_mean": 22836822.166666668,
+              "c_target_mean": 38391.75,
+              "c_total_mean": 38125213.916666664,
+              "c_total_sd": 1138678.6429168945,
+              "free_rank_mean": 0.0,
+              "peak_rss_max_bytes": 1451585536.0,
+              "rank_attempts_mean": 500.0,
+              "seeds": 12,
+              "w_harvest_mean_ms": 0.0,
+              "w_index_mean_ms": 23905.882970666662,
+              "w_rank_mean_ms": 38670.690812,
+              "w_target_mean_ms": 66.25448657291668,
+              "w_total_mean_ms": 62677.13605465624,
+              "w_total_sd_ms": 12275.527633529193
+            }
+          },
+          "candidate": {
+            "K": 500,
+            "arm": "free",
+            "means": {
+              "c_harvest_mean": 85198.0,
+              "c_index": 15250000.0,
+              "c_rank_mean": 21293067.25,
+              "c_target_mean": 38391.75,
+              "c_total_mean": 36666657.0,
+              "c_total_sd": 493630.0500165032,
+              "free_rank_mean": 25.0,
+              "peak_rss_max_bytes": 1451708416.0,
+              "rank_attempts_mean": 475.0,
+              "seeds": 12,
+              "w_harvest_mean_ms": 40.463663749999995,
+              "w_index_mean_ms": 23445.484557,
+              "w_rank_mean_ms": 35292.09372508333,
+              "w_target_mean_ms": 65.81134141666666,
+              "w_total_mean_ms": 58898.97970983333,
+              "w_total_sd_ms": 11251.323345174615
+            }
+          },
+          "counted_index": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "pairs": 12,
+            "ratio": 1.0
+          },
+          "counted_rank": {
+            "ci95": [
+              0.9058762874100805,
+              0.9661076371348178
+            ],
+            "pairs": 12,
+            "ratio": 0.9324006245089573
+          },
+          "counted_target": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "pairs": 12,
+            "ratio": 1.0
+          },
+          "counted_total": {
+            "ci95": [
+              0.9453262681865119,
+              0.9821995459194209
+            ],
+            "pairs": 12,
+            "ratio": 0.9617429840563059
+          },
+          "verdict": "ADVANCES",
+          "wall_rank": {
+            "ci95": [
+              0.885647559400352,
+              0.9462453131566934
+            ],
+            "pairs": 12,
+            "ratio": 0.912631581800751
+          },
+          "wall_total": {
+            "ci95": [
+              0.9185397857237712,
+              0.9632375600634078
+            ],
+            "pairs": 12,
+            "ratio": 0.9397203416964002
+          }
+        }
+      },
+      "b_tuned_vs_tuned": {
+        "base": {
+          "K": 500,
+          "arm": "inc",
+          "means": {
+            "c_harvest_mean": 0.0,
+            "c_index": 15250000.0,
+            "c_rank_mean": 22836822.166666668,
+            "c_target_mean": 38391.75,
+            "c_total_mean": 38125213.916666664,
+            "c_total_sd": 1138678.6429168945,
+            "free_rank_mean": 0.0,
+            "peak_rss_max_bytes": 1451585536.0,
+            "rank_attempts_mean": 500.0,
+            "seeds": 12,
+            "w_harvest_mean_ms": 0.0,
+            "w_index_mean_ms": 23905.882970666662,
+            "w_rank_mean_ms": 38670.690812,
+            "w_target_mean_ms": 66.25448657291668,
+            "w_total_mean_ms": 62677.13605465624,
+            "w_total_sd_ms": 12275.527633529193
+          }
+        },
+        "candidate": {
+          "K": 500,
+          "arm": "free",
+          "means": {
+            "c_harvest_mean": 85198.0,
+            "c_index": 15250000.0,
+            "c_rank_mean": 21293067.25,
+            "c_target_mean": 38391.75,
+            "c_total_mean": 36666657.0,
+            "c_total_sd": 493630.0500165032,
+            "free_rank_mean": 25.0,
+            "peak_rss_max_bytes": 1451708416.0,
+            "rank_attempts_mean": 475.0,
+            "seeds": 12,
+            "w_harvest_mean_ms": 40.463663749999995,
+            "w_index_mean_ms": 23445.484557,
+            "w_rank_mean_ms": 35292.09372508333,
+            "w_target_mean_ms": 65.81134141666666,
+            "w_total_mean_ms": 58898.97970983333,
+            "w_total_sd_ms": 11251.323345174615
+          }
+        },
+        "counted_index": {
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "pairs": 12,
+          "ratio": 1.0
+        },
+        "counted_rank": {
+          "ci95": [
+            0.905116988426911,
+            0.9656605131349365
+          ],
+          "pairs": 12,
+          "ratio": 0.9324006245089573
+        },
+        "counted_target": {
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "pairs": 12,
+          "ratio": 1.0
+        },
+        "counted_total": {
+          "ci95": [
+            0.9448960682362514,
+            0.9819199747857538
+          ],
+          "pairs": 12,
+          "ratio": 0.9617429840563059
+        },
+        "verdict": "ADVANCES",
+        "wall_rank": {
+          "ci95": [
+            0.8858146681045997,
+            0.9443743221736222
+          ],
+          "pairs": 12,
+          "ratio": 0.912631581800751
+        },
+        "wall_total": {
+          "ci95": [
+            0.9190406246758848,
+            0.9620031116577681
+          ],
+          "pairs": 12,
+          "ratio": 0.9397203416964002
+        }
+      },
+      "c_tuned_free_vs_inc_K_def": {
+        "base": {
+          "K": 500,
+          "arm": "inc",
+          "means": {
+            "c_harvest_mean": 0.0,
+            "c_index": 15250000.0,
+            "c_rank_mean": 22836822.166666668,
+            "c_target_mean": 38391.75,
+            "c_total_mean": 38125213.916666664,
+            "c_total_sd": 1138678.6429168945,
+            "free_rank_mean": 0.0,
+            "peak_rss_max_bytes": 1451585536.0,
+            "rank_attempts_mean": 500.0,
+            "seeds": 12,
+            "w_harvest_mean_ms": 0.0,
+            "w_index_mean_ms": 23905.882970666662,
+            "w_rank_mean_ms": 38670.690812,
+            "w_target_mean_ms": 66.25448657291668,
+            "w_total_mean_ms": 62677.13605465624,
+            "w_total_sd_ms": 12275.527633529193
+          }
+        },
+        "candidate": {
+          "K": 500,
+          "arm": "free",
+          "means": {
+            "c_harvest_mean": 85198.0,
+            "c_index": 15250000.0,
+            "c_rank_mean": 21293067.25,
+            "c_target_mean": 38391.75,
+            "c_total_mean": 36666657.0,
+            "c_total_sd": 493630.0500165032,
+            "free_rank_mean": 25.0,
+            "peak_rss_max_bytes": 1451708416.0,
+            "rank_attempts_mean": 475.0,
+            "seeds": 12,
+            "w_harvest_mean_ms": 40.463663749999995,
+            "w_index_mean_ms": 23445.484557,
+            "w_rank_mean_ms": 35292.09372508333,
+            "w_target_mean_ms": 65.81134141666666,
+            "w_total_mean_ms": 58898.97970983333,
+            "w_total_sd_ms": 11251.323345174615
+          }
+        },
+        "counted_index": {
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "pairs": 12,
+          "ratio": 1.0
+        },
+        "counted_rank": {
+          "ci95": [
+            0.9049719808789473,
+            0.966125650891569
+          ],
+          "pairs": 12,
+          "ratio": 0.9324006245089573
+        },
+        "counted_target": {
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "pairs": 12,
+          "ratio": 1.0
+        },
+        "counted_total": {
+          "ci95": [
+            0.9447528393101398,
+            0.9821682278725243
+          ],
+          "pairs": 12,
+          "ratio": 0.9617429840563059
+        },
+        "verdict": "ADVANCES",
+        "wall_rank": {
+          "ci95": [
+            0.8850627116542004,
+            0.946508431152017
+          ],
+          "pairs": 12,
+          "ratio": 0.912631581800751
+        },
+        "wall_total": {
+          "ci95": [
+            0.9183203368768603,
+            0.9632898767039613
+          ],
+          "pairs": 12,
+          "ratio": 0.9397203416964002
+        }
+      },
+      "inc_tuned_vs_inc_K_def": {
+        "base": {
+          "K": 500,
+          "arm": "inc",
+          "means": {
+            "c_harvest_mean": 0.0,
+            "c_index": 15250000.0,
+            "c_rank_mean": 22836822.166666668,
+            "c_target_mean": 38391.75,
+            "c_total_mean": 38125213.916666664,
+            "c_total_sd": 1138678.6429168945,
+            "free_rank_mean": 0.0,
+            "peak_rss_max_bytes": 1451585536.0,
+            "rank_attempts_mean": 500.0,
+            "seeds": 12,
+            "w_harvest_mean_ms": 0.0,
+            "w_index_mean_ms": 23905.882970666662,
+            "w_rank_mean_ms": 38670.690812,
+            "w_target_mean_ms": 66.25448657291668,
+            "w_total_mean_ms": 62677.13605465624,
+            "w_total_sd_ms": 12275.527633529193
+          }
+        },
+        "candidate": {
+          "K": 500,
+          "arm": "inc",
+          "means": {
+            "c_harvest_mean": 0.0,
+            "c_index": 15250000.0,
+            "c_rank_mean": 22836822.166666668,
+            "c_target_mean": 38391.75,
+            "c_total_mean": 38125213.916666664,
+            "c_total_sd": 1138678.6429168945,
+            "free_rank_mean": 0.0,
+            "peak_rss_max_bytes": 1451585536.0,
+            "rank_attempts_mean": 500.0,
+            "seeds": 12,
+            "w_harvest_mean_ms": 0.0,
+            "w_index_mean_ms": 23905.882970666662,
+            "w_rank_mean_ms": 38670.690812,
+            "w_target_mean_ms": 66.25448657291668,
+            "w_total_mean_ms": 62677.13605465624,
+            "w_total_sd_ms": 12275.527633529193
+          }
+        },
+        "counted_index": {
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "pairs": 12,
+          "ratio": 1.0
+        },
+        "counted_rank": {
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "pairs": 12,
+          "ratio": 1.0
+        },
+        "counted_target": {
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "pairs": 12,
+          "ratio": 1.0
+        },
+        "counted_total": {
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "pairs": 12,
+          "ratio": 1.0
+        },
+        "verdict": "MATCHES",
+        "wall_rank": {
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "pairs": 12,
+          "ratio": 1.0
+        },
+        "wall_total": {
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "pairs": 12,
+          "ratio": 1.0
+        }
+      }
+    }
+  },
+  "statistic": "ratio of means over held-out seeds (pooled: ratio of summed per-size means), 95% percentile bootstrap over seeds within size, 10,000 resamples"
+}

@@ -1,0 +1,25 @@
+curve	B	A	ratio_w0	ratio_w0.1	ratio_w1	band_verdict
+s20	ic-ss-rootfind	ic-plain-ss	1.0217194021316547	1.0153283345294055	0.9808600330702079	unresolved inside the band
+s20	ic-ord-rootfind	ic-plain-ord	1.1154146346573917	1.1105643432458872	1.0849062848785747	ic-plain-ord < ic-ord-rootfind
+s20	ic-ss-rootfind	ic-ord-rootfind	1.107691982567532	1.102207434101379	1.0723782792793815	ic-ord-rootfind < ic-ss-rootfind
+s20	ic-plain-ss	ic-plain-ord	1.2092712005573514	1.2055925492721302	1.1861324712311898	ic-plain-ord < ic-plain-ss
+s20	ic-ss-rootfind	ic-ss-mitm	1.2559337602002103	1.2518675951681941	1.2295051296151083	ic-ss-mitm < ic-ss-rootfind
+s20	ic-ss-rootfind	rho-neg	48.146050214329456	47.52373169642432	44.306443102538545	rho-neg < ic-ss-rootfind
+s20	ic-ord-rootfind	rho-neg	43.46519697897531	43.11686732105018	41.3160579234332	rho-neg < ic-ord-rootfind
+s20	rho-neg-aa	rho-neg	1	1	1	unresolved inside the band
+s22	ic-ss-rootfind	ic-plain-ss	1.0129352676825758	1.0228768324788597	1.0739097363083163	ic-plain-ss < ic-ss-rootfind
+s22	ic-ord-rootfind	ic-plain-ord	1.3223539053421494	1.3007026568508555	1.1953026826562985	ic-plain-ord < ic-ord-rootfind
+s22	ic-ss-rootfind	ic-ord-rootfind	0.8235259472241016	0.8380077035522856	0.9159994425113901	ic-ss-rootfind < ic-ord-rootfind
+s22	ic-plain-ss	ic-plain-ord	1.0750862243683295	1.0656208175430246	1.019542475431284	ic-plain-ord < ic-plain-ss
+s22	ic-ss-rootfind	ic-ss-mitm	1.137809036973472	1.155871587125493	1.25211316028047	ic-ss-mitm < ic-ss-rootfind
+s22	ic-ss-rootfind	rho-neg	77.31896443383184	77.47497086263984	78.23931857831901	rho-neg < ic-ss-rootfind
+s22	ic-ord-rootfind	rho-neg	93.88770893552848	92.45138264746986	85.41415523552149	rho-neg < ic-ord-rootfind
+s22	rho-neg-aa	rho-neg	1	1	1	unresolved inside the band
+s24	ic-ss-rootfind	ic-plain-ss	1.0199255450379796	1.0155544244666088	0.9992885851980163	unresolved inside the band
+s24	ic-ord-rootfind	ic-plain-ord	1.3884455941109513	1.3346115786715644	1.1344375076084572	ic-plain-ord < ic-ord-rootfind
+s24	ic-ss-rootfind	ic-ord-rootfind	0.7356930697397526	0.7619647809737456	0.8815252743763673	ic-ss-rootfind < ic-ord-rootfind
+s24	ic-plain-ss	ic-plain-ord	1.0015140872465185	1.0013515718388164	1.000747281586553	ic-plain-ord < ic-plain-ss
+s24	ic-ss-rootfind	ic-ss-mitm	1.0736445348158783	1.0692877764521582	1.0530578548901048	ic-ss-mitm < ic-ss-rootfind
+s24	ic-ss-rootfind	rho-neg	31.611874797219993	32.977660511216754	39.45141330839173	rho-neg < ic-ss-rootfind
+s24	ic-ord-rootfind	rho-neg	42.968835914687254	43.27977005587223	44.75358161035318	rho-neg < ic-ord-rootfind
+s24	rho-neg-aa	rho-neg	1	1	1	unresolved inside the band

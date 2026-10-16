@@ -1,0 +1,102 @@
+{
+  "schema": "backlog.card/v1",
+  "id": "XP-20261016-prime-base-oracle-tuning",
+  "title": "Native prime-field factor-base size and decomposition-oracle tuning",
+  "created": "2026-10-16",
+  "authors": [
+    "factor-base follow-up"
+  ],
+  "status": "draft",
+  "status_note": "Recommendation only; no experiment run or scheduled. Freeze the native baseline, executable protocol, costs and checker before dispatch.",
+  "blocked_on": [],
+  "links": {
+    "lead": "research/factor_base_evaluation_20261015/followup_20261016/README.md",
+    "notes": [
+      "research/factor_base_evaluation_20261015/README.md",
+      "docs/ic/factor-base-encyclopedia/README.md",
+      "research/f4_generic_field_20261015/README.md",
+      "research/ic_next10_20261014/03-pkm-degree/README.md"
+    ],
+    "prs": [
+      1898
+    ]
+  },
+  "question": "Can joint selection of factor-base size and exact native decomposition oracle reduce complete one-target IC cost against the current verified prime-field incumbent on fresh matched workloads?",
+  "decision_value": "A verified holdout reduction robust to the common native-operation pricing band promotes the selected recipe to the next IC baseline, even if rho is still cheaper. A null, failed or price-sensitive result retains the incumbent and narrows the tuning question; no coverage-only result is promoted to a pipeline improvement.",
+  "protocol": {
+    "path": null,
+    "blob": null
+  },
+  "code": {
+    "repo": "crypto",
+    "commit": "f334da9fea56bcd1480cd198d238a5e36de36108",
+    "branch": null,
+    "build": [
+      [
+        "cargo",
+        "build",
+        "--release",
+        "--bin",
+        "ecbench"
+      ]
+    ]
+  },
+  "resources": {
+    "cpus": 1,
+    "ram_gb": 16,
+    "disk_gb": 10,
+    "gpu": null,
+    "est_core_hours": null,
+    "est_wall_hours": null,
+    "notes": "Proposed screening ceilings only; not estimates. Exact grid, cost derivation and caps must be frozen before ready. Existing native components are reused."
+  },
+  "run": {
+    "argv": [
+      "TODO-freeze-native-ecbench-spec-and-command"
+    ],
+    "env": {
+      "RAYON_NUM_THREADS": "1"
+    },
+    "timeout_per_shard_s": 7200
+  },
+  "shards": {
+    "count": 1,
+    "scheme": "single",
+    "params": {},
+    "stop": "all"
+  },
+  "checkpoint": {
+    "file": null,
+    "resume_flag": null
+  },
+  "outputs": {
+    "result_schema": "Draft: sealed ecbench records, exclusive phase costs, complete native-counter inventory and independent replay receipts",
+    "verify": [],
+    "land": "research/prime_base_oracle_tuning_20261016"
+  },
+  "cairn": {
+    "mode": "lab-task",
+    "notes": "Not published or leased; draft only. No execution until the card is ready and a lab space is selected.",
+    "space": "TBD",
+    "tasks": [
+      "XP-20261016-prime-base-oracle-tuning"
+    ],
+    "ttl_s": 86400,
+    "env": {
+      "name": "crypto-prime-base-tuning-draft",
+      "recipe": "TODO-freeze-environment-and-runnable-protocol"
+    },
+    "exec": {
+      "cpus": 1,
+      "memory_mb": 16384,
+      "timeout_s": 7200,
+      "sandbox": "auto",
+      "publish": "runs/XP-20261016-prime-base-oracle-tuning"
+    },
+    "funding": {
+      "units": 0,
+      "rationale": "Draft has no costed runnable protocol, so no queue priority or posted reward yet. A reviewer sets funding against the existing 131072-1000000 seed-card range when ready."
+    }
+  },
+  "owner_hint": "Native ecbench prime-field lane"
+}

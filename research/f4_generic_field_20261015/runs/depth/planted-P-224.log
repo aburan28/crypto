@@ -1,0 +1,7 @@
+kummer        P-224 m=2 tower t= 1 N= 2 planted D= 3 cols=      4 steps=  1 muladds=             15       0.5 ms  verify ok
+kummer        P-224 m=2 tower t= 2 N= 4 planted D= 4 cols=     16 steps=  3 muladds=           1428       0.9 ms  verify ok
+kummer        P-224 m=2 tower t= 3 N= 6 planted D= 4 cols=     56 steps=  5 muladds=          31911       3.6 ms  verify ok
+kummer        P-224 m=2 tower t= 4 N= 8 planted D= 4 cols=    152 steps=  7 muladds=         522733      18.2 ms  verify ok
+kummer        P-224 m=3 tower t= 2 N= 6 planted D= 5 cols=    164 steps= 10 muladds=         477624      21.2 ms  verify ok
+kummer        P-224 m=3 tower t= 3 N= 9 planted D= 6 cols=   1186 steps= 16 muladds=      161992458    1689.0 ms  verify ok
+{"budget_seconds":5400,"p":"P-224","planted_per_cell":1,"planted_violations":0,"random_per_cell":0,"rows":6,"seed":1347112276,"wall_seconds":1.780056436}

@@ -97,6 +97,13 @@ Read it honestly:
   `S` on these curves. `incomplete` (a measured run did not verify) is not
   admissible. `partial` (runs without a partner) needs explaining. `bounded` means
   unpriced work: say so.
+- **Pricing band (AGENTS.md §5a).** Every arm, the rho reference included,
+  usually leaves native work unpriced. List each arm's `*_uncharged` counters
+  with their counts, price them at 0, 0.1 and 1 GAE per operation on every
+  arm alike, and rank two arms only if the order holds across the band. An
+  arm that names a counter without emitting its count is a lower bound and
+  cannot be ranked. Never set a calibrated IC cost against an uncalibrated
+  rho cost.
 - For a baseline binary against a candidate binary, run the same spec into two
   sessions and pass `--b-dir`. Pairs then share seeds (`same_seeds: true`), and
   wall time is refused across sessions by design.

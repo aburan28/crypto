@@ -1,0 +1,96 @@
+name: N83 selected K3300 refinement reserve-point Tier 1 paired IC versus rho
+
+on:
+  push:
+    branches: [codex/n83-tier1-refine-reserve-20261015]
+    paths:
+      - .github/workflows/n83-tier1-refine-reserve.yml
+      - research/n83_tier1_refine_reserve_20261015/**
+      - research/n83_tier1_refine_reserve_results_20261015/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: n83-tier1-refine-reserve-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  five-fresh-pairs:
+    if: github.repository == 'aburan28/crypto'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch the executed source snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          frozen=d0e4aa13074c9fea910592c6e26b60b5e97fc439
+          git fetch --no-tags --depth=1 origin "$frozen"
+          test "$(git rev-parse FETCH_HEAD)" = "$frozen"
+          mkdir -p "$RUNNER_TEMP/n83-frozen-source"
+          git archive "$frozen" Cargo.lock \
+            examples/koblitz_orbit_dlp_fast.rs \
+            examples/n83_rho_optimization_eval.rs \
+            research/n83_dense_root_20261013 \
+            research/n83_indexed5_20261013 \
+            research/n83_root4_20261014 \
+            research/n83_factor_base_refine_20261014 \
+            research/n83_factor_base_refine_results_20261014 \
+            research/n83_tier1_refine_reserve_20261015 \
+            | tar -xf - -C "$RUNNER_TEMP/n83-frozen-source"
+          test "$(sha256sum "$RUNNER_TEMP/n83-frozen-source/examples/koblitz_orbit_dlp_fast.rs" | cut -d' ' -f1)" = \
+            5e9fd826d22816b429a82e658c517d9387916aabe7660f708e4c29901cce647e
+
+      - name: Download the exact completed raw artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/n83-tier1-sealed"
+          gh api repos/aburan28/crypto/actions/artifacts/11942380164/zip > \
+            "$RUNNER_TEMP/n83-tier1-sealed/raw.zip"
+          test "$(sha256sum "$RUNNER_TEMP/n83-tier1-sealed/raw.zip" | cut -d' ' -f1)" = \
+            536ed537b302bc16efca9f8b86ae26195d955bd22346da67f6ae316a150ab5c5
+          unzip -q "$RUNNER_TEMP/n83-tier1-sealed/raw.zip" -d \
+            "$RUNNER_TEMP/n83-tier1-sealed/raw"
+          test "$(sha256sum "$RUNNER_TEMP/n83-tier1-sealed/raw/results/analysis.json" | cut -d' ' -f1)" = \
+            a44849bef5f772cfb96b0a31f5227ba872a649b33f9351a33276d203ecd590a6
+
+      - name: Independently replay all five frozen same-point pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 "$RUNNER_TEMP/n83-frozen-source/research/n83_tier1_refine_reserve_20261015/verify.py" \
+            "$RUNNER_TEMP/n83-tier1-sealed/raw/results" > \
+            "$RUNNER_TEMP/n83-tier1-sealed/local-replay.log"
+          test "$(sha256sum "$RUNNER_TEMP/n83-tier1-sealed/raw/results/analysis.json" | cut -d' ' -f1)" = \
+            a44849bef5f772cfb96b0a31f5227ba872a649b33f9351a33276d203ecd590a6
+
+      - name: Reproduce the canonical current-head result rows
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 research/n83_tier1_refine_reserve_results_20261015/materialize.py \
+            --artifact-zip "$RUNNER_TEMP/n83-tier1-sealed/raw.zip" \
+            --artifact-sha256 536ed537b302bc16efca9f8b86ae26195d955bd22346da67f6ae316a150ab5c5 \
+            --analysis-sha256 a44849bef5f772cfb96b0a31f5227ba872a649b33f9351a33276d203ecd590a6 \
+            "$RUNNER_TEMP/n83-tier1-sealed/raw/results"
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+
+      - name: Preserve current-head replay receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-tier1-refine-sealed-replay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-tier1-sealed/local-replay.log
+          if-no-files-found: ignore
+          retention-days: 14

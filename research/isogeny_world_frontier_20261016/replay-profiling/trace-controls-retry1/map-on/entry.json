@@ -1,0 +1,30 @@
+{
+  "reason": "FAIL",
+  "schema": "isogeny-challenge-entry/v1",
+  "score": null,
+  "season": "ff4f7c405146fbd26faa63cb6fb9d1513eada31d15f3998368005fd5f05db3e0",
+  "status": "REJECTED",
+  "verification": {
+    "command": [
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/compact-implementation/release/isogeny",
+      "challenge",
+      "__judge",
+      "--input",
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/trace-controls-retry1/map-on/artifact",
+      "--rss-ready",
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/trace-controls-retry1/map-on/resources-ready"
+    ],
+    "elapsed_ms_operational_only": 115,
+    "exit_code": 2,
+    "map_count": null,
+    "memory_monitor_grace_ms": 100,
+    "memory_sampling_interval_ms": 25,
+    "resident_memory_limit_bytes": "8589934592",
+    "sampled_peak_resident_bytes": "33832960",
+    "status": "FAIL",
+    "stderr_sha256": "08ddaccbd0bb5e7177058338791a5c5a4a0663538118dcc6903120c8b65a8630",
+    "stdout": "verification.json",
+    "stdout_sha256": "fd244532de587f9c4f2d4b304148550d9c10b67fed6a894571e43d8440d518a9",
+    "unavailable_memory_samples": 0
+  }
+}
