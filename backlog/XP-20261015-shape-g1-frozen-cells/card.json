@@ -1,0 +1,106 @@
+{
+  "schema": "backlog.card/v1",
+  "id": "XP-20261015-shape-g1-frozen-cells",
+  "title": "Shape search G1 on its frozen cells (n, l) = (13, 5), (17, 6), (19, 7)",
+  "created": "2026-10-15",
+  "authors": ["backlog lane", "coordinator"],
+  "status": "blocked",
+  "status_note": "Blocked on PR #1892 (the ladder binary is on an unmerged branch; the card becomes ready only on a merged commit) and on memory: the frozen cells did not fit the 2.5 GB cap of the run that killed G1 on its scaled cells.",
+  "blocked_on": [
+    "pr:1892 factor_base_shape_ladder and the G1-G6 study (claude/leads-shape-search, open, unmerged); pin its merge commit",
+    "hw:degree-7 matrices need 47-50 GB at (13, 5) and more at (17, 6) and (19, 7) (PROTOCOL.md §3 of research/shape_search_g1_g6_20261015); size a host per cell in this card's PROTOCOL.md"
+  ],
+  "links": {
+    "lead": "research/notes/index-calculus/RESEARCH_FACTOR_BASE_SHAPE_SEARCH.md (G1: shape at m = 3)",
+    "notes": [
+      "research/shape_search_g1_g6_20261015/README.md on branch claude/leads-shape-search (G1 killed on the scaled cells; 'not testable on the frozen cells (resource)')",
+      "research/shape_search_g1_g6_20261015/PROTOCOL.md §3 (frozen cells, budget derivation)",
+      "research/notes/index-calculus/RESEARCH_DREG_MEASUREMENT.md Results 7-9 (earlier (13, 5) draws read >= 7 for random)"
+    ],
+    "prs": [1892]
+  },
+  "question": "On class-0 targets at m = 3, do the gp and fp factor-base shapes have a mean refutation degree at least 0.5 below random at two of the frozen cells (13, 5), (17, 6), (19, 7), as goal G1 was frozen to ask?",
+  "decision_value": "G1 is already killed on the scaled cells (gap 0.000 at n = 5, 7, 11), so the prior is a null here too; this card exists because the frozen goal named these cells and they were not testable for resources, which leaves G1's verdict on its own terms open. A gap of >= 0.5 at two frozen cells revives the shape line and gates G6 (n = 31 with the real F4 engine, then the m = 83 gate); no gap closes G1 on its frozen cells and retires the shape builders; a censored result (both arms at the degree bound) closes nothing and says so.",
+  "protocol": {"path": null, "blob": null},
+  "code": {
+    "repo": "crypto",
+    "commit": "f12cb92c7f703487e98f482540b88e380591ee04",
+    "branch": "claude/leads-shape-search",
+    "build": [["cargo", "build", "--release", "--example", "factor_base_shape_ladder"]]
+  },
+  "resources": {
+    "cpus": 1,
+    "ram_gb": 64,
+    "disk_gb": 10,
+    "gpu": null,
+    "est_core_hours": null,
+    "est_wall_hours": null,
+    "notes": "Not estimable from committed data: one random draw at (13, 5), d_max = 6 did not finish in 60 min under a 2.5 GB cap; degree 7 needs 47-50 GB at (13, 5); (17, 6) and (19, 7) have 35 and 40 unknowns, C(35, 6) ~ 1.6e6 and C(40, 6) ~ 3.8e6 degree-6 columns. 64 GB is a floor for (13, 5) only. PROTOCOL.md must size each cell from a timed probe before the card is ready."
+  },
+  "run": {
+    "argv": [
+      "target/release/examples/factor_base_shape_ladder",
+      "g1",
+      "--cell", "{cell}",
+      "--shapes", "random,random2,gp,fp,coord",
+      "--instances", "{instances}",
+      "--targets", "{targets}",
+      "--seed", "20261015"
+    ],
+    "env": {
+      "RAYON_NUM_THREADS": "1",
+      "F4_F2_MAX_ROWS": "50000000",
+      "F4_F2_MAX_COLS": "50000000",
+      "KIC_SPARSE_DENSE_FINISH": "1",
+      "KIC_SPARSE_F5": "1",
+      "KIC_SPARSE_DENSE_BUDGET_MB": "1200"
+    },
+    "timeout_per_shard_s": 1209600
+  },
+  "shards": {
+    "count": 3,
+    "scheme": "list",
+    "params": {
+      "items": [
+        {"name": "n13-l5", "vars": {"cell": "13:5:7", "instances": "2", "targets": "2"}},
+        {"name": "n17-l6", "vars": {"cell": "17:6:7", "instances": "2", "targets": "2"}},
+        {"name": "n19-l7", "vars": {"cell": "19:7:7", "instances": "2", "targets": "2"}}
+      ],
+      "argv_note": "Cell syntax n:l:d_max as in runs/*.meta of the study; output is JSONL on stdout, which cairn lab exec records as the run's stdout blob. Instance and target counts and the dense budget are set in PROTOCOL.md from the probe."
+    },
+    "stop": "all"
+  },
+  "checkpoint": {"file": null, "resume_flag": null},
+  "outputs": {
+    "result_schema": "factor_base_shape_ladder g1 JSONL (one line per measured target), scored by `factor_base_shape_ladder score`",
+    "verify": ["target/release/examples/factor_base_shape_ladder", "selftest"],
+    "land": "research/shape_search_g1_frozen_cells"
+  },
+  "cairn": {
+    "mode": "lab-task",
+    "notes": "Three single heavy runs, one lab task per cell. Not preemptible (no checkpoint).",
+    "space": "TBD",
+    "tasks": [
+      "XP-20261015-shape-g1-frozen-cells/shard-0",
+      "XP-20261015-shape-g1-frozen-cells/shard-1",
+      "XP-20261015-shape-g1-frozen-cells/shard-2"
+    ],
+    "ttl_s": 86400,
+    "env": {
+      "name": "crypto-shape-f12cb92",
+      "recipe": "A rust:1.98 image built at the merge commit of PR #1892 (f12cb92 until then) with `cargo build --release --example factor_base_shape_ladder`, imported with `cairn lab env import crypto-shape-<sha> --docker <image>`"
+    },
+    "exec": {
+      "cpus": 1,
+      "memory_mb": 65536,
+      "timeout_s": 1209600,
+      "sandbox": "auto",
+      "publish": "runs/XP-20261015-shape-g1-frozen-cells"
+    },
+    "funding": {
+      "units": 250000,
+      "rationale": "Below lead 1 and the P-224 depth check: G1 is already killed on its scaled cells, so this mostly closes a frozen goal on its own terms; still cheaper and more decisive than the P-192 search."
+    }
+  },
+  "owner_hint": null
+}

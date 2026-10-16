@@ -1,0 +1,25 @@
+ops (ok): ic-orbit-c2-renew / ic-orbit-c2-walk = 0.6683 [0.607, 0.733] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 0.7357 [0.665, 0.808]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 37.87%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-orbit-c2-renew / ic-orbit-c2-walk | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m31-tm90707-c95f16f5 | 20.46 | 16 | 0.6683 | [0.6066, 0.7333] | cluster |
+
+| workload | curve | log2 r | ic-orbit-c2-walk mean S | ic-orbit-c2-renew mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W19adcb2e4609 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.9922 | 1.5452 | 0.7756 |
+| W1c7b6f101460 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 2.0915 | 1.4181 | 0.6780 |
+| W2528df09abe7 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 2.3702 | 1.5092 | 0.6367 |
+| W2f63a6523c06 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.9998 | 1.3526 | 0.6763 |
+| W34fb71c29b0d | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 2.1450 | 1.4245 | 0.6641 |
+| W398d9675a96f | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 2.0114 | 1.6700 | 0.8303 |
+| W790cc8c1a87b | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 2.2773 | 1.5458 | 0.6788 |
+| W809ea26e5219 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 2.2265 | 1.1738 | 0.5272 |
+| W8646f72e5ea4 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 2.0416 | 1.2296 | 0.6023 |
+| Wa94ef5af8a3c | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.8716 | 1.3997 | 0.7479 |
+| Wad7d4cc5c37d | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 2.1225 | 1.8573 | 0.8750 |
+| Wae2a4bb7b221 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 2.3802 | 1.4214 | 0.5972 |
+| Wd6e0e88c542c | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 2.4561 | 1.3871 | 0.5648 |
+| We425437057cc | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 2.2730 | 1.3199 | 0.5807 |
+| We52edfe2425f | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 2.0081 | 1.5166 | 0.7553 |
+| Wfd99a000a544 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 2.3382 | 1.3551 | 0.5795 |

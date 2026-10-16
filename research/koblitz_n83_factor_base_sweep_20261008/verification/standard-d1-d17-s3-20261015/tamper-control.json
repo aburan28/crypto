@@ -1,0 +1,12 @@
+{
+  "changed_object_sha256": "4213bfca4eecde85fd5534915da867b958d003c53860e14a0273e4a2ffcec46c",
+  "dimension": 17,
+  "independent_reason": "dimension 17: compressed bytes mismatch",
+  "native_exit_code": 1,
+  "native_stderr_sha256": "5093102ac978284cb0d69e26f12daca926bb979921087159aca08acad3ad3ab6",
+  "native_stderr_text": "Error: \"compressed object mismatch\"\n",
+  "offset": 1817817,
+  "original_object_sha256": "a733708db913cd7e22b6afa8668cc2b618e9ba0c3d56566dd3349f8b4cb647e7",
+  "schema": "n83.standard-subspace-frontier-tamper-control/v1",
+  "status": "PASS_BOTH_REJECTED_ONE_BYTE_CORRUPTION"
+}

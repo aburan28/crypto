@@ -1,0 +1,139 @@
+{
+  "analysis_sha256": "f5547c4516c9ea29965fe624d677f8677222b0d02918684691dcf92746360fec",
+  "artifact_sha256": "dce8c2bf021d3058bc9b5fc61a4be6cbac4fdaa06b40ab9b178924ccca853ad8",
+  "balanced_comparison": {
+    "contiguous_block_size": 25,
+    "pairwise": {
+      "root11k3300wide3_minus_root11k3350wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -6.759954954,
+          0.7115554835
+        ],
+        "mean_ms": -2.918931587
+      },
+      "root11k3300wide3_minus_root11k3400wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -3.1942186920000006,
+          4.4750612325
+        ],
+        "mean_ms": 0.6782374424999996
+      },
+      "root11k3300wide3_minus_root11k3450wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -1.5245480789999997,
+          5.336790505500001
+        ],
+        "mean_ms": 1.865931164
+      },
+      "root11k3350wide3_minus_root11k3300wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.7896969764999999,
+          6.8534376895
+        ],
+        "mean_ms": 2.918931587
+      },
+      "root11k3350wide3_minus_root11k3400wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.7400493429999999,
+          8.1201264165
+        ],
+        "mean_ms": 3.5971690295
+      },
+      "root11k3350wide3_minus_root11k3450wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          0.40626288900000007,
+          8.925045608
+        ],
+        "mean_ms": 4.784862751
+      },
+      "root11k3400wide3_minus_root11k3300wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -4.502321274,
+          3.1346570010000008
+        ],
+        "mean_ms": -0.6782374424999996
+      },
+      "root11k3400wide3_minus_root11k3350wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -8.1890785045,
+          0.8914717050000004
+        ],
+        "mean_ms": -3.5971690295
+      },
+      "root11k3400wide3_minus_root11k3450wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -3.1420866279999995,
+          5.250750611
+        ],
+        "mean_ms": 1.1876937215000003
+      },
+      "root11k3450wide3_minus_root11k3300wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -5.3205328925,
+          1.4716379964999997
+        ],
+        "mean_ms": -1.865931164
+      },
+      "root11k3450wide3_minus_root11k3350wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -9.0559209095,
+          -0.5135164920000003
+        ],
+        "mean_ms": -4.784862751
+      },
+      "root11k3450wide3_minus_root11k3400wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -5.403967429000001,
+          3.1251901865
+        ],
+        "mean_ms": -1.1876937215000003
+      }
+    },
+    "pipeline_mean_ms": {
+      "root11k3300wide3": 35.170854395,
+      "root11k3350wide3": 38.089785982,
+      "root11k3400wide3": 34.4926169525,
+      "root11k3450wide3": 33.304923231
+    },
+    "repeatability": {
+      "root11k3300wide3_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.3633966900000001,
+          -0.1059446270000001
+        ],
+        "mean_ms": -0.237837774
+      },
+      "root11k3350wide3_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.3568128059999997,
+          0.07617656700000024
+        ],
+        "mean_ms": -0.12844287799999984
+      },
+      "root11k3400wide3_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.2279565139999998,
+          -0.04838208400000011
+        ],
+        "mean_ms": -0.1440684489999999
+      },
+      "root11k3450wide3_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          0.05676308500000011,
+          0.26228372700000013
+        ],
+        "mean_ms": 0.1589061640000002
+      }
+    },
+    "selected_pipeline": null
+  },
+  "candidate_id": null,
+  "candidate_manifest_sha256": null,
+  "schema": "n83.root11-highk-selection/v1",
+  "selected_pipeline": null,
+  "source_base_hash_blake3": null,
+  "source_commit": "e66475a416dead205ec797ca16f025abcea34d16",
+  "source_sha256": "f2745227d95e36ef45c73c5104a23ada6cebb0794405368581d2be17044845dc",
+  "status": "BOUNDED_UNKNOWN",
+  "workload_id": "ae0e70499b29"
+}

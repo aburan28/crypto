@@ -1,0 +1,88 @@
+{
+  "envelope_manifest_sha256": "68b43524198394a2f0d112f86df0d1c1f69ea1ff817695cf21efe2767b7d17b8",
+  "envelope_object_sha256": "aacb62784dee0c9f5e06328dbb85a4b6a1c7243e778328da82900e7284f3a74a",
+  "envelope_s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v2-size-frontier/a0/objects/82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851.jsonl.gz",
+  "ordered_header_and_all_point_rows_prefix": true,
+  "pilot_manifest_sha256": "5bd862987844f709e03beeab9fd265e3d2024011bcadcb82f5af9c72018df6a6",
+  "pilot_upload_receipt_sha256": "0eae40ffa0e938470671cf796633c1e47b61ff676df0807e7a7e8592e56bb828",
+  "prior_search_audit_sha256": "32420a62bb6ccf8f9df7f03dea9040e518606740968110dc8c0ac47cb50cafd5",
+  "residual_columns": 1448,
+  "residual_points": 240368,
+  "s3_head_receipt_sha256": "cf9ba9c11c4ef058409b3111f1d5e7a06964c66e194c620f3488a887fcbfb657",
+  "schema": "n83.k600-k2048-exact-prefix-screen/v1",
+  "scope": "source_only_nested_pair_and_support",
+  "selected_best_total_runtime": null,
+  "small_columns": 600,
+  "small_object_sha256": "3e85c9e419fcddd3c9faed3c84470bf96fcad9178e48e1d73629369335841ecf",
+  "small_points": 99600,
+  "small_s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e.jsonl.gz",
+  "solver_search_executed": false,
+  "support": [
+    {
+      "count_divided_by_nonidentity_subgroup_points": "3.378542609E-2",
+      "residual_summands": 0,
+      "small_summands": 5,
+      "summands": 5,
+      "uniform_nonidentity_hit_probability_ceiling": {
+        "denominator": "2417851639230796216685688",
+        "numerator": "81688147859301581419920"
+      },
+      "unordered_point_multisets_with_repetition": "81688147859301581419920"
+    },
+    {
+      "count_divided_by_nonidentity_subgroup_points": "4.076611029E-1",
+      "residual_summands": 1,
+      "small_summands": 4,
+      "summands": 5,
+      "uniform_nonidentity_hit_probability_ceiling": {
+        "denominator": "2417851639230796216685688",
+        "numerator": "985664065933326097483200"
+      },
+      "unordered_point_multisets_with_repetition": "985664065933326097483200"
+    },
+    {
+      "count_divided_by_nonidentity_subgroup_points": "1.967593178E+0",
+      "residual_summands": 2,
+      "small_summands": 3,
+      "summands": 5,
+      "uniform_nonidentity_hit_probability_ceiling": {
+        "denominator": "2417851639230796216685688",
+        "numerator": "2417851639230796216685688"
+      },
+      "unordered_point_multisets_with_repetition": "4757348390396427029827200"
+    },
+    {
+      "count_divided_by_nonidentity_subgroup_points": "5.608662277E+2",
+      "residual_summands": 0,
+      "small_summands": 6,
+      "summands": 6,
+      "uniform_nonidentity_hit_probability_ceiling": {
+        "denominator": "2417851639230796216685688",
+        "numerator": "2417851639230796216685688"
+      },
+      "unordered_point_multisets_with_repetition": "1356091327920955669555188600"
+    },
+    {
+      "count_divided_by_nonidentity_subgroup_points": "8.120935299E+3",
+      "residual_summands": 1,
+      "small_summands": 5,
+      "summands": 6,
+      "uniform_nonidentity_hit_probability_ceiling": {
+        "denominator": "2417851639230796216685688",
+        "numerator": "2417851639230796216685688"
+      },
+      "unordered_point_multisets_with_repetition": "19635216724644602522743330560"
+    },
+    {
+      "count_divided_by_nonidentity_subgroup_points": "4.899454582E+4",
+      "residual_summands": 2,
+      "small_summands": 4,
+      "summands": 6,
+      "uniform_nonidentity_hit_probability_ceiling": {
+        "denominator": "2417851639230796216685688",
+        "numerator": "2417851639230796216685688"
+      },
+      "unordered_point_multisets_with_repetition": "118461542932163830362969650400"
+    }
+  ]
+}

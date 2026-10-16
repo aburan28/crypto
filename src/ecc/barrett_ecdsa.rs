@@ -293,16 +293,28 @@ fn next_prime(alpha: &BigUint) -> BigUint {
 /// (~20 bits or less).
 fn find_curve_with_prime_order(p: &BigUint) -> Option<(BigUint, BigUint, BigUint)> {
     let p_u64: u64 = p.try_into().ok()?;
+    let candidate = |a: u64, b: u64| {
+        // Skip singular curves (4a³ + 27b² ≡ 0 mod p).
+        let disc = (4u128 * (a as u128).pow(3) + 27 * (b as u128).pow(2)) % p_u64 as u128;
+        if disc == 0 {
+            return None;
+        }
+        let n = count_points_brute(a, b, p_u64);
+        crate::asymmetric::rsa::is_prime(&BigUint::from(n))
+            .then(|| (BigUint::from(a), BigUint::from(b), BigUint::from(n)))
+    };
+    // At fixed a = 0, varying b explores only a handful of isomorphism
+    // classes. Probe distinct (a, b) pairs first so an unlucky prime does not
+    // force a full sweep of that first row before trying another class.
+    for value in 1..p_u64.min(65) {
+        if let Some(curve) = candidate(value, value) {
+            return Some(curve);
+        }
+    }
     for a in 0..p_u64 {
         for b in 0..p_u64 {
-            // Skip singular curves (4a³ + 27b² ≡ 0 mod p)
-            let disc = (4u128 * (a as u128).pow(3) + 27 * (b as u128).pow(2)) % p_u64 as u128;
-            if disc == 0 {
-                continue;
-            }
-            let n = count_points_brute(a, b, p_u64);
-            if crate::asymmetric::rsa::is_prime(&BigUint::from(n)) {
-                return Some((BigUint::from(a), BigUint::from(b), BigUint::from(n)));
+            if let Some(curve) = candidate(a, b) {
+                return Some(curve);
             }
         }
     }
