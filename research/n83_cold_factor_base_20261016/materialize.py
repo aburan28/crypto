@@ -96,13 +96,21 @@ def main():
     if panel.read(root / "analysis.json") != analysis:
         raise ValueError("raw artifact analysis differs from checked replay")
     point = json.loads((HERE / "targets.jsonl").read_text())
+    answer = json.loads((HERE / "answers.jsonl").read_text())
+    if answer["fixture_index"] != 0 or answer["point"] != point:
+        raise ValueError("primary target and answer sidecar differ")
     workload = {
         "schema_version": 1,
         "curve_id": panel.CURVE_ID,
         "target_count": 1,
         "public_targets": [point],
         "input_law": {
-            "domain": "n83-cold-factor-base-fresh-primary-20261016-v1",
+            "domain": "n83-cold-factor-base-one-plus-four-20261016-v1",
+            "fixture_index": 0,
+            "scalar_rule": "1+(little_endian(SHA256(domain||u32_le(index))) mod (r-1))",
+            "seed_sha256": answer["seed_sha256"],
+            "generator_sha256": source["hashes"][
+                "research/n83_cold_factor_base_20261016/generate.py"],
             "answer_sidecar_sha256": panel.file_sha(HERE / "answers.jsonl")},
         "target_sha256": panel.file_sha(HERE / "targets.jsonl"),
         "cold_or_warm": "one_public_point_per_fresh_process_empty_base_index_and_logs",
