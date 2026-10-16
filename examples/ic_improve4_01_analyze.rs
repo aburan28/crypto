@@ -1,21 +1,19 @@
-//! Analysis for IC improvement round 3, item 01 (the relation phase of genus-3 IC after the cubic
-//! GHS transfer), adapted from `ic_improve2_06_analyze.rs`.
+//! Analysis for IC improvement round 4, item 01 (the genus-3 relation phase, second pass), adapted
+//! from `ic_improve3_01_analyze.rs`.
 //!
-//! - `gate <run_dir> <item06_run_dir>`: every `sched:lpsgebw2` record (b <= 21) must equal item 06's.
-//! - `gatetrain <train_dir> <item06_train_dir>`: relation-only incumbent reruns must equal item 06's
-//!   training relation costs on the same (b, curve, kappa).
-//! - `diag <train_dir> <out.json>`: step-1 decomposition of the relation phase (trials x cost per
-//!   trial; primitives; smoothness and 2LP yield; q^a (log q)^beta against q^c fits).
-//! - `r2rule <train_dir> <item06_train_dir> <out.json>`: the frozen R2 kappa rule (PROTOCOL.md).
-//! - `acct <run_dir>`: `+R1s` (R1 driving the walk) against the shadow-accounted `+R1` arm.
-//! - `logfit <run_dir> <arm> <metric> <lo> <hi>`: q^a (log q)^beta against q^c on test records.
+//! - `gate <run_dir> <round3_run_dir>`: every R1-driven `r2:lpsgebw2` record must equal round 3's
+//!   shadow-accounted `r2:lpsgebw2+R1` record (k, cost, relation cost, LA counters, steps).
+//! - `pertrial <dir> <base_arm> <out.json>`: cost per trial by primitive for R1, C1, C2 and C1+C2,
+//!   with A + B log2 q fits.
+//! - `wtune <train_dir>`: relation cost per W of the lockstep collections (C2's W rule).
+//! - `tune <train_dir> <out.json>`: the frozen C3 and C4 rules (PROTOCOL.md).
 //! - `analyze <run_dir> <lo> <hi> <upper_lo> <out.json> <arm>...`: exponents (whole, relation, LA)
 //!   with paired Deltas against the first arm (the incumbent), local exponents, their trend and the
 //!   paired trend difference, paired ratios per size. 2000 bootstrap resamples of curves within each
 //!   size, paired across arms; a size uses the curves on which every listed arm is correct.
 //!
 //! ```sh
-//! cargo run --release --example ic_improve3_01_analyze -- diag research/ic_improve3_20261015/01-genus3-relations/results/train d.json
+//! cargo run --release --example ic_improve4_01_analyze -- tune research/ic_improve4_20261015/01-genus3-relations/results/train t.json
 //! ```
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, BTreeSet};
@@ -223,10 +221,12 @@ fn pertrial(dir: &str, prefix: &str, out: &str) {
             t(3) / t(0),
             bpb
         );
-        rows.push(json!({"bits": b, "n": rs.len(), "R1": t(0), "C1": t(1), "C2": t(2), "C1C2": t(3),
+        rows.push(
+            json!({"bits": b, "n": rs.len(), "R1": t(0), "C1": t(1), "C2": t(2), "C1C2": t(3),
             "r1_walk": mean(&|r| pr(r, "walk_add_r1")), "r1_split": mean(&|r| pr(r, "split_r1")),
             "r1_roots": mean(&|r| pr(r, "roots_r1")), "c1_split": mean(&|r| pr(r, "split_c1")),
-            "c1_roots": mean(&|r| pr(r, "roots_c1")), "c2_walk": mean(&|r| pr(r, "walk_add_c2"))}));
+            "c1_roots": mean(&|r| pr(r, "roots_c1")), "c2_walk": mean(&|r| pr(r, "walk_add_c2"))}),
+        );
     }
     println!("\nPer-trial cost fitted as A + B log2 q (OLS, every record a point), and the share B / ((A + B b) ln 2) it adds to a local exponent at b = 21:\n");
     println!("| variant | A | B per bit | log share at 2^21 |");
@@ -237,7 +237,8 @@ fn pertrial(dir: &str, prefix: &str, out: &str) {
         let x: Vec<f64> = p.iter().map(|t| t.0).collect();
         let y: Vec<f64> = p.iter().map(|t| t.1).collect();
         let bb = ols(&x, &y);
-        let a = y.iter().sum::<f64>() / y.len() as f64 - bb * x.iter().sum::<f64>() / x.len() as f64;
+        let a =
+            y.iter().sum::<f64>() / y.len() as f64 - bb * x.iter().sum::<f64>() / x.len() as f64;
         let share = bb / ((a + 21.0 * bb) * std::f64::consts::LN_2);
         println!("| {} | {:.1} | {:.2} | {:.4} |", v.0, a, bb, share);
         fits[v.0] = json!({"A": a, "B": bb, "share21": share});
@@ -369,7 +370,8 @@ fn tune(dir: &str, out: &str) {
     }
     let (bx, ly): (Vec<f64>, Vec<f64>) = best4.2.iter().map(|&(b, x)| (b as f64 - 20.0, x)).unzip();
     let beta = ols(&bx, &ly);
-    let alpha = ly.iter().sum::<f64>() / ly.len() as f64 - beta * bx.iter().sum::<f64>() / bx.len() as f64;
+    let alpha =
+        ly.iter().sum::<f64>() / ly.len() as f64 - beta * bx.iter().sum::<f64>() / bx.len() as f64;
     println!(
         "\nC4 rule: arm `{}`; ln kappa_C4(b) = {:.4} + ({:.4}) (b - 20)\n",
         best4.1, alpha, beta
@@ -398,7 +400,11 @@ fn wtune(dir: &str) {
     let mut m: BTreeMap<(u64, u64), BTreeMap<u64, (f64, f64, f64)>> = BTreeMap::new();
     for ((arm, b, c), r) in &d {
         let w = f(r, "walks") as u64;
-        let e = m.entry((*b, w)).or_default().entry(*c).or_insert((0.0, 0.0, 0.0));
+        let e = m
+            .entry((*b, w))
+            .or_default()
+            .entry(*c)
+            .or_insert((0.0, 0.0, 0.0));
         if arm.ends_with(":none") {
             e.0 = f(r, "steps");
             e.1 = f(r, "rel_cost");

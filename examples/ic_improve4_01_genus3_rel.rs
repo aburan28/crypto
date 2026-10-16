@@ -1,4 +1,27 @@
-//! IC improvement round 3, item 01 (`research/ic_improve3_20261015/01-genus3-relations/`):
+//! IC improvement round 4, item 01 (`research/ic_improve4_20261015/01-genus3-relations/`):
+//! a copy of round 3 item 01's `ic_improve3_01_genus3_rel.rs` (whose header follows) with
+//!
+//! - **R1 driving the walk** (round 3's candidate, this round's incumbent): `cadd_fast`,
+//!   `split_fast` and `roots_fast` are charged directly; round 3's `roots_split` still runs
+//!   on every new split with its counters restored, so the root order and the walk stream are
+//!   round 3's and the arm `r2:lpsgebw2` equals round 3's `r2:lpsgebw2+R1` bit for bit.
+//! - **C1**: a field-level splitting test (`split_c1`: Legendre symbol of the discriminant,
+//!   then the Lucas test V_{n/3}(y + 1/y) = 2 with n = q - (-3|q)) and root finding
+//!   (`roots_c1`: a cube root of y by one Lucas exponent, one square root, the quotient
+//!   quadratic), run beside R1 under saved counters with decisions and root sets asserted
+//!   equal on every trial (arms `+C1`).
+//! - **C2**: `--walks W` lockstep walks whose generic Cantor additions share one inversion
+//!   (`cadd_fast_pre` / `cadd_batch` / `cadd_fast_fin`, Montgomery's trick); arms `+C2` and
+//!   `+C1C2`, the base arm charging R1's unbatched additions.
+//! - **C3**: LA arms `lpsgebw2o<pct>[c]@<cx>` that check first at (1 + pct/100) nfb + 10 rows
+//!   (oversampling) and optionally remove cliques before SGE (`clique_filter`).
+//!
+//! ```sh
+//! cargo run --release --example ic_improve4_01_genus3_rel -- --bits 16 --curve 0 \
+//!     --kappa 1.9027 --cx 16 --streams r2 --las lpsgebw2@16,lpsgebw2o70c@16 --out out.jsonl
+//! ```
+//!
+//! Round 3's header follows. IC improvement round 3, item 01 (`research/ic_improve3_20261015/01-genus3-relations/`):
 //! a copy of round 2 item 06's `ic_improve2_06_genus3_kappa_bw.rs` with
 //!
 //! - the group order `N = #E(F_{q^3})` widened to `u128` (instances at q >= 2^22; for
@@ -1794,11 +1817,7 @@ impl C1 {
     fn new(p: u64) -> Self {
         let n = if p % 3 == 1 { p - 1 } else { p + 1 };
         let m = n / 3;
-        let e = if m % 3 == 0 {
-            None
-        } else {
-            inv_mod_int(3, m)
-        };
+        let e = if m % 3 == 0 { None } else { inv_mod_int(3, m) };
         cnt(1, 1);
         let inv3 = powmod(3, p - 2, p);
         let ts = if p % 4 == 1 {
@@ -1964,9 +1983,9 @@ fn split_c1(u: &P, p: u64, k: &C1) -> (bool, Option<C1Info>) {
 }
 
 /// C1 roots of a split u. Cubic, 9 not dividing n: gamma = y^e is a cube root of y, and a
-/// root of the depressed cubic is t1 = +-sqrt(-P' (V_e(y + 1/y) + 2)) / 3 (t1^2 = (-P/3)(gamma
-/// + 1/gamma + 2)); the sign by evaluating u; the other two roots from the quotient quadratic
-/// (the incumbent's quadratic formula, same charge). When 9 divides n (no single-exponent
+/// root of the depressed cubic is t1 = +-sqrt(-P' (V_e(y + 1/y) + 2)) / 3, since
+/// t1^2 = (-P/3)(gamma + 1/gamma + 2); the sign by evaluating u; the other two roots from the
+/// quotient quadratic (the incumbent's quadratic formula, same charge). When 9 divides n (no single-exponent
 /// cube root) or P' = 0: R1's polynomial route (w = x^((q-1)/2) mod u, counted, then R1's
 /// `roots_fast`). Other degrees: R1 (= incumbent) routines.
 fn roots_c1(u: &P, p: u64, info: Option<C1Info>, k: &C1, f: &mut Fast) -> Vec<u64> {
@@ -2017,7 +2036,10 @@ fn roots_c1(u: &P, p: u64, info: Option<C1Info>, k: &C1, f: &mut Fast) -> Vec<u6
 /// and one inversion for W values). Returns the sums; counts go to the global counters.
 fn cadd_batch(pairs: &[(&Div, &Div)], h: &P, f: &Fast) -> (Vec<Div>, usize) {
     let p = f.p;
-    let pres: Vec<Pre> = pairs.iter().map(|(a, b)| cadd_fast_pre(a, b, h, f)).collect();
+    let pres: Vec<Pre> = pairs
+        .iter()
+        .map(|(a, b)| cadd_fast_pre(a, b, h, f))
+        .collect();
     let xs: Vec<(usize, u64)> = pres
         .iter()
         .enumerate()
@@ -2401,7 +2423,10 @@ impl La {
         };
         // round 4: `<base>o<pct>[c]` oversamples the collection by pct percent (c: cliques)
         let (base, clique) = match base.strip_suffix('c') {
-            Some(b) if b.rfind('o').is_some_and(|i| b[i + 1..].parse::<u32>().is_ok()) => {
+            Some(b)
+                if b.rfind('o')
+                    .is_some_and(|i| b[i + 1..].parse::<u32>().is_ok()) =>
+            {
                 (b, true)
             }
             _ => (base, false),
@@ -3340,7 +3365,9 @@ fn clique_filter(rows: &[Row], rhs: &[u64], ncols: usize, kc: usize) -> (Vec<Row
                 continue;
             }
             if let Some(&i) = col_rows[j as usize].iter().find(|&&i| alive[i as usize]) {
-                kill(i as usize, rows, &mut alive, &mut w, &mut nr, &mut nc, &mut stack);
+                kill(
+                    i as usize, rows, &mut alive, &mut w, &mut nr, &mut nc, &mut stack,
+                );
             }
         }
         if w[kc] == 0 {
@@ -3790,8 +3817,7 @@ fn ic_solve(
                         }
                     }
                     for (i, (rw, _)) in full_rows.iter().enumerate() {
-                        if alive[i] && rw.iter().any(|&(j, _)| cntc[j as usize] == 1 && j != kcol)
-                        {
+                        if alive[i] && rw.iter().any(|&(j, _)| cntc[j as usize] == 1 && j != kcol) {
                             alive[i] = false;
                             changed = true;
                         }
