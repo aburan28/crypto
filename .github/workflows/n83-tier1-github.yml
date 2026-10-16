@@ -39,7 +39,8 @@ jobs:
           mkdir -p "$RUNNER_TEMP/n83-tier1-github/bin" \
             "$RUNNER_TEMP/n83-tier1-github/selector/bin"
           python3 research/n83_tier1_online_20261016/selector_run.py \
-            --preflight > "$RUNNER_TEMP/n83-tier1-github/selector-preflight.json"
+            --preflight --github-two-core > \
+            "$RUNNER_TEMP/n83-tier1-github/selector-preflight.json"
           rustc --version > "$RUNNER_TEMP/n83-tier1-github/rustc-version.txt"
           cargo --version > "$RUNNER_TEMP/n83-tier1-github/cargo-version.txt"
 
@@ -73,6 +74,7 @@ jobs:
           set -euo pipefail
           export PYTHONDONTWRITEBYTECODE=1
           python3 research/n83_tier1_online_20261016/selector_run.py \
+            --github-two-core \
             --binary "$RUNNER_TEMP/n83-tier1-github/selector/bin/koblitz_orbit_dlp_fast" \
             --rho-binary "$RUNNER_TEMP/n83-tier1-github/selector/bin/n83_rho_optimization_eval" \
             --output "$RUNNER_TEMP/n83-tier1-github/selector/results" \

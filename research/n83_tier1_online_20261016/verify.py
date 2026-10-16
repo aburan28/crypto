@@ -167,7 +167,8 @@ def main():
                  ["rho", "ic"]} for i in range(1, 6)]
     if (host["schema"] != "n83.tier1-online-host/v1"
             or not (aws_host or github_host)
-            or len(cpus) != 4 or len(set(cpus)) != 4
+            or len(cpus) != (2 if github_host else 4)
+            or len(set(cpus)) != len(cpus)
             or source["schema"] != "n83.tier1-online-source/v1"
             or source["hashes"] != hashes
             or source["source_sha256"] != runner.SOURCE_SHA256

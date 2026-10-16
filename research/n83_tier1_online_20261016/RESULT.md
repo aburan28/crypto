@@ -27,3 +27,18 @@ pod also refused its SSH connection during this attempt, so it supplied no
 replacement Tier 1 measurement. The candidate selection and five-point
 online speedup fields remain unknown until a suitable authorized host runs
 the frozen protocol and its archive passes independent replay.
+
+The first GitHub-hosted Tier 1 route ran on source commit
+`e0a1c7bc5987a126865ba5f0399084c2940fd288` as
+[run 38917594127](https://github.com/aburan28/crypto/actions/runs/38917594127).
+Its full release library suite passed 4,154 tests with 117 ignored and no
+failures; the IC example passed 20 tests and rho example four. The selector
+stopped before constructing any base because the hosted runner did not expose
+four distinct physical cores on one visible NUMA node. The seal and five
+fresh-point stages were skipped. Exact artifact `12054875724` is archived at
+`/Volumes/SSD990-2/n83-archive-20261016/raw/n83-tier1-github-38917594127.zip`,
+SHA-256 `8a043d3065af58c94866918b47da43f870026a03e2082ae6bef7a220009127d5`;
+ZIP integrity passed. This is a host-capacity failure, with selector choice
+and panel result unknown. The separately frozen
+[two-core hosted route](GITHUB_PROTOCOL.md) retains the same A/A and replay
+gates on a feasible cloud-runner resource envelope.
