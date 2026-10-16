@@ -1,0 +1,64 @@
+# model_v2.py output, 2026-10-16T02:37:17Z
+## Test A (exactness of N_8)
+p=7: 147 ordinary rows, 0 mismatches, 0 unexpected traces, nonordinary traces with 8th-power lambda [(686, 3)] -> PASS
+p=11: 605 ordinary rows, 0 mismatches, 0 unexpected traces, nonordinary traces with 8th-power lambda [] -> PASS
+p=13: 1014 ordinary rows, 0 mismatches, 0 unexpected traces, nonordinary traces with 8th-power lambda [] -> PASS
+p=17: 2312 ordinary rows, 0 mismatches, 0 unexpected traces, nonordinary traces with 8th-power lambda [(9826, 8)] -> PASS
+p=19: 3249 ordinary rows, 0 mismatches, 0 unexpected traces, nonordinary traces with 8th-power lambda [] -> PASS
+## Test B pristine holdouts
+p=53 rows=36517 zeros obs=247 exp=240.4 [213.8,266.9] PASS dispersion=1.005 (n=33243) auc=0.9818 weak_total obs=7893290 pred=7893291
+   P(zero) in [1e-06,1.4e-05]: exp=0.0 obs=0
+   P(zero) in [1.4e-05,0.00011]: exp=0.2 obs=1
+   P(zero) in [0.00011,0.00061]: exp=1.1 obs=0
+   P(zero) in [0.00061,0.0044]: exp=7.2 obs=6
+   P(zero) in [0.0044,0.91]: exp=231.8 obs=240
+   P(zero) <= 1e-6: obs=0
+p=59 rows=50474 zeros obs=270 exp=265.9 [238.0,293.8] PASS dispersion=1.001 (n=46972) auc=0.9861 weak_total obs=12120842 pred=12120843
+   P(zero) in [1e-06,1e-05]: exp=0.0 obs=0
+   P(zero) in [1e-05,6.9e-05]: exp=0.2 obs=0
+   P(zero) in [6.9e-05,0.00041]: exp=0.9 obs=1
+   P(zero) in [0.00041,0.003]: exp=6.1 obs=7
+   P(zero) in [0.003,0.92]: exp=258.6 obs=262
+   P(zero) <= 1e-6: obs=0
+## Test B forward
+p=61 rows=55815 zeros obs=273 exp=275.3 [247.0,303.6] PASS dispersion=0.992 (n=52180) auc=0.9841 weak_total obs=13849562 pred=13849563
+   P(zero) in [1e-06,9.4e-06]: exp=0.0 obs=0
+   P(zero) in [9.4e-06,6e-05]: exp=0.1 obs=0
+   P(zero) in [6e-05,0.00035]: exp=0.9 obs=0
+   P(zero) in [0.00035,0.0027]: exp=5.8 obs=11
+   P(zero) in [0.0027,0.9]: exp=268.4 obs=262
+   P(zero) <= 1e-6: obs=0
+## Non-pristine (seen during V1 diagnosis)
+p=37 rows=12321 zeros obs=145 exp=168.8 [146.5,191.1] FAIL dispersion=0.981 (n=9870) auc=0.9590 weak_total obs=1875530 pred=1875531
+   P(zero) in [1e-06,4.8e-05]: exp=0.0 obs=0
+   P(zero) in [4.8e-05,0.0005]: exp=0.3 obs=0
+   P(zero) in [0.0005,0.0027]: exp=2.3 obs=4
+   P(zero) in [0.0027,0.014]: exp=11.6 obs=9
+   P(zero) in [0.014,0.91]: exp=154.6 obs=132
+   P(zero) <= 1e-6: obs=0
+p=41 rows=16810 zeros obs=198 exp=186.2 [162.8,209.6] PASS dispersion=0.998 (n=14125) auc=0.9686 weak_total obs=2827442 pred=2827443
+   P(zero) in [1e-06,3.3e-05]: exp=0.0 obs=0
+   P(zero) in [3.3e-05,0.00033]: exp=0.3 obs=0
+   P(zero) in [0.00033,0.0018]: exp=1.9 obs=1
+   P(zero) in [0.0018,0.01]: exp=10.5 obs=10
+   P(zero) in [0.01,0.91]: exp=173.4 obs=187
+   P(zero) <= 1e-6: obs=0
+p=43 rows=19414 zeros obs=188 exp=195.9 [171.9,219.9] PASS dispersion=1.003 (n=16574) auc=0.9718 weak_total obs=3420650 pred=3420651
+   P(zero) in [1e-06,2.6e-05]: exp=0.0 obs=0
+   P(zero) in [2.6e-05,0.00024]: exp=0.3 obs=0
+   P(zero) in [0.00024,0.0015]: exp=1.8 obs=3
+   P(zero) in [0.0015,0.0085]: exp=9.6 obs=6
+   P(zero) in [0.0085,0.9]: exp=184.3 obs=179
+   P(zero) <= 1e-6: obs=0
+p=47 rows=25403 zeros obs=212 exp=212.6 [187.6,237.6] PASS dispersion=0.997 (n=22413) auc=0.9783 weak_total obs=4881888 pred=4881891
+   P(zero) in [1e-06,2.2e-05]: exp=0.0 obs=0
+   P(zero) in [2.2e-05,0.00018]: exp=0.2 obs=1
+   P(zero) in [0.00018,0.001]: exp=1.5 obs=0
+   P(zero) in [0.001,0.0067]: exp=8.7 obs=7
+   P(zero) in [0.0067,0.92]: exp=202.1 obs=204
+   P(zero) <= 1e-6: obs=0
+## V1 (failed) for reference
+p=37 rows=12321 zero_obs=145 | H_sixteenth: exp=85.6 [69.8,101.4] FAIL disp=4.681 auc=0.8991 | H_quarter: exp=71.0 [56.6,85.4] FAIL disp=5.479 auc=0.9199 | h_K: exp=980.1 [938.9,1021.3] FAIL disp=14.022 auc=0.7359
+p=41 rows=16810 zero_obs=198 | H_sixteenth: exp=95.3 [78.6,112.0] FAIL disp=5.034 auc=0.9300 | H_quarter: exp=79.0 [63.8,94.2] FAIL disp=5.718 auc=0.9433 | h_K: exp=1236.7 [1190.3,1283.2] FAIL disp=17.336 auc=0.7091
+p=43 rows=19414 zero_obs=188 | H_sixteenth: exp=99.6 [82.6,116.7] FAIL disp=5.194 auc=0.9395 | H_quarter: exp=82.8 [67.3,98.3] FAIL disp=6.156 auc=0.9509 | h_K: exp=1332.9 [1283.8,1381.9] FAIL disp=16.008 auc=0.7746
+p=47 rows=25403 zero_obs=212 | H_sixteenth: exp=109.1 [91.2,126.9] FAIL disp=5.543 auc=0.9508 | H_quarter: exp=90.6 [74.4,106.9] FAIL disp=6.349 auc=0.9624 | h_K: exp=1638.8 [1584.5,1693.1] FAIL disp=22.164 auc=0.7685

@@ -102,3 +102,15 @@ positives, and 540/100,948 higher-depth zero rows. The compressed CSV
 and full receipt are retained in larger_fields_20261009/p59_completed.
 The persistent worker has advanced to p61; later requested primes remain
 pending.
+
+## 2026-10-16 certified continuation
+
+A certifying counter (`--certified`: unique Hasse candidate across curve and
+twist points) reran p = 7, 13, 37, 41, 43, 47, 53 and 59 in a 4-core
+container, with byte-identical output in every case. It completed p = 61 and
+runs the remaining primes through 199 sequentially. The live queue is outside
+the repository; completed primes are added under `certified_20261016/` with
+stderr receipts and CSV hashes. The queue's GP controls are replaced by the
+certificate itself. The original p = 61 worker on the separate launchd host
+reported no result to this repository. The residual-zero model and its
+registered forward predictions are in `residual_model_20261016/`.
