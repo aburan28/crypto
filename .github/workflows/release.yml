@@ -549,7 +549,7 @@ jobs:
         with:
           token: ${{ github.token }}
           prefix: v
-          version: ${{ needs.meta.outputs.release_version }}
+          version: ${{ needs.meta.outputs.tag }}
           draft: false
           release-notes: /tmp/notes.md
           files: ${{ steps.assets.outputs.files }}
