@@ -1,0 +1,12 @@
+G1                 PASS   0.1792 a priori, all 46 builds, median |error|
+G1.eta>1           REPORT 0.0000 builds measured above the a priori ceiling (η > 1)
+G2                 PASS   0.0145 η from each GPU's base build, 44 other builds, median |error|
+G2.10              PASS   0.0145 the same, against 10%
+G3                 PASS   0.1950 η from the RTX PRO 6000 base build carried to 25 B200 builds, median |error|
+G1.shared          REPORT 0.1237 shared-int pipes: a priori, median |error|
+G1.shared.eta>1    REPORT 0.0000 shared-int pipes: builds with η > 1
+G2.shared          REPORT 0.0192 shared-int pipes: η per GPU, median |error|
+G3.shared          REPORT 0.1072 shared-int pipes: η carried across GPUs, median |error|
+142 rows checked against 46 builds
+expected ECC2K-130 work 2^60.9 at 14.63753 B/s on rtx-pro-6000 ($3.031/h): 40827.8 h, $123749
+expected ECC2K-130 work 2^60.9 at 15.115792 B/s on rtx-pro-6000 ($3.031/h): 39536.1 h, $119834
