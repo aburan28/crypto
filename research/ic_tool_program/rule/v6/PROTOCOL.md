@@ -98,9 +98,11 @@ take under an hour, and the reference check's 48 walks take minutes.
     icprog rule claims --comparison v6
     icprog rule analyse --comparison v6 > research/ic_tool_program/rule/v6/analysis.json
 
-## Amendment 1 (2026-10-16, after the rows, before any figure was read): the claims and the reference walk
+## Amendment 1 (2026-10-16, after the rows): the claims and the reference walk
 
-The 408 rows ran as declared, 15:40–16:56 UTC. Two tools then failed for
+The 408 rows ran as declared, 15:40–16:56 UTC. While diagnosing what
+follows, one figure was seen: the cold ratio at `2^36.6`, 3.78. Two tools
+then failed for
 reasons that lie outside the measurement. Both are fixed without
 re-timing any row.
 
