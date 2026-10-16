@@ -1,0 +1,58 @@
+{
+ "schema": "ecbench.spec/v1",
+ "label": "IC frontier campaign Phase 0 step 3: parameter selection, Koblitz a=0 n=41 (compact grid extension)",
+ "description": "Grid extension: compact-orbit optimum at the top tested column count (64); columns 128 and 256 on the same train targets. Not a measurement.",
+ "workloads": {
+  "curves": [
+   {
+    "kind": "koblitz",
+    "a": 0,
+    "n": 41
+   }
+  ],
+  "targets_per_curve": 4,
+  "target_seed": 20261015100,
+  "target_kind": "public"
+ },
+ "arms": [
+  {
+   "name": "rho-strong",
+   "role": "reference",
+   "method": {
+    "id": "rho.signed_frobenius_strong"
+   }
+  },
+  {
+   "name": "compact-c128",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "compact-orbit-scan:columns=128,raw_x_cap=1000000",
+     "oracle": "mitm-frobenius-counted:m=2",
+     "max_trials": "50000000"
+    }
+   }
+  },
+  {
+   "name": "compact-c256",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "compact-orbit-scan:columns=256,raw_x_cap=1000000",
+     "oracle": "mitm-frobenius-counted:m=2",
+     "max_trials": "50000000"
+    }
+   }
+  }
+ ],
+ "measurement": {
+  "rounds": 1,
+  "warmup": 0,
+  "order": "alternate",
+  "seed": 20261015103,
+  "isolation_required": "L0",
+  "timeout_seconds": 900
+ }
+}
