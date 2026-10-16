@@ -17,6 +17,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /Cargo.toml
+            /tools/volcano-cli/
+            /isogeny_algos/
             /src/*
             /examples/koblitz_orbit_dlp_s3_batch.rs
             /docs/ic/calibration.json

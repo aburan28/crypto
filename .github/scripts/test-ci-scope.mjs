@@ -80,6 +80,20 @@ test('isogeny release inputs select the Rust package lane', () => {
   assert.equal(classify(['research/p192_p224_large_degree_isogenies_20261008/PROTOCOL.md']).release_rust, false);
 });
 
+test('volcano-cli, a path dependency of the root crate, selects the root lanes', () => {
+  for (const file of ['tools/volcano-cli/Cargo.toml', 'tools/volcano-cli/Cargo.lock', 'tools/volcano-cli/src/main.rs']) {
+    const result = classify([file]);
+    assert.equal(result.rust_root, true, file);
+    assert.equal(result.release_rust, true, file);
+    assert.equal(result.ecbench_replay, true, file);
+    assert.equal(result.release_native, false, file);
+    assert.equal(result.release_cuda, false, file);
+  }
+  assert.equal(classify(['isogeny_algos/src/lib.rs']).rust_root, true);
+  assert.equal(classify(['tools/volcano-cli/README.md']).rust_root, false);
+  assert.equal(classify(['tools/volcano-cli/README.md']).release_rust, true);
+});
+
 test('real git diffs include renames, deletes, unusual names and over 300 files', () => {
   const cwd = mkdtempSync(path.join(os.tmpdir(), 'crypto-ci-scope-'));
   const git = (...args) => execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
