@@ -1,0 +1,30 @@
+{
+  "schema": "isogeny-docs-validation/v1",
+  "date_utc": "2026-10-16",
+  "status": "PASS",
+  "json_parse": "PASS",
+  "raw_archive_member_hashes": "PASS",
+  "local_markdown_links_checked": 36,
+  "shell_code_fences_bash_n": "PASS",
+  "release_filenames_against_recorded_sha256sums": "PASS",
+  "native_closure_unchanged_from": "015fa7bb504ef63953e0e04e464bb266f4f207bf",
+  "root_code_unchanged_from": "1180f89d568c52ac60a022358b6fd70fa9e3bd30",
+  "new_library_test_execution": false,
+  "reason_prior_gates_reused": "Documentation-only change since the recorded native/root gates; no changed arithmetic, examples, root code or test source.",
+  "canonical_graph_blob_ids_unchanged": {
+    "docs/challenges/isogeny-prime-degree/leaderboard.json": "5e1ebf75a09f2399874405e555b986ea383e30ba",
+    "tools/isogeny-cli/challenge.json": "2d460f29770398125106b5618ab80b78c7968e0e",
+    "docs/curves/registry.json": "c461054163b96d8c799e8c2dfacaec1085c0184e",
+    "docs/ic/progress-timeline.json": "c045203ca7f0384139c8ada272c44914b643a4a5",
+    "docs/index-calculus-scoreboard.html": "f66b6c11fd61d8e28e82fafe46069d1fa110b520",
+    "docs/performance-gains": "ad6349e889a893485914d8f6c34eee3b347b8444"
+  },
+  "pdf": {
+    "pages": 3,
+    "all_pages_visually_inspected": true,
+    "bytes": 98666,
+    "sha256": "6b68bdc75b32e15bb92b9174bc20a67fcc92c52661d84f8e89f386e2f758b77f"
+  },
+  "scientific_runs": 0,
+  "executable_upload_operations": 0
+}

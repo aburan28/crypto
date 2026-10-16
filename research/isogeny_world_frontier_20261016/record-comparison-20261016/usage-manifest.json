@@ -1,0 +1,129 @@
+{
+  "schema": "isogeny-release-usage-check/v1",
+  "date_utc": "2026-10-16",
+  "conductor_task": "T-3286",
+  "executable": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/official-release-v0.1.2390/unpacked/isogeny-v0.1.2390-aarch64-apple-darwin/isogeny",
+  "executable_sha256": "1514b1a7d7248f716e810169218dfdbdda941d454934c93e81714d68b8e66d9e",
+  "cwd": "/private/tmp/isogeny-publication-docs-20261016/runtime-cwd",
+  "commands": [
+    {
+      "argv": [
+        "--version"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "curves"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "challenge",
+        "policy"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "--help"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "version": {
+    "schema": "isogeny-tool/v1",
+    "tool": {
+      "git_commit": "bd7eb117f094a336d3e3e8f31facb0c6b86f95bc",
+      "git_dirty": "false",
+      "name": "isogeny",
+      "standards_sha256": "22b2ffef99720f2b2c7396a267412d2241a868e038a835c4fb1fd12209b102bf",
+      "version": "0.1.0"
+    }
+  },
+  "observed_catalogue_count": 2112,
+  "observed_challenge_count": 54,
+  "policy_season": "ff4f7c405146fbd26faa63cb6fb9d1513eada31d15f3998368005fd5f05db3e0",
+  "policy_rules_sha256": "2b80d3dd4e6d2b8fab8b2351346809b5ad6e4ef79a873033011a71db7c5de8e7",
+  "policy_catalogue_sha256": "22b2ffef99720f2b2c7396a267412d2241a868e038a835c4fb1fd12209b102bf",
+  "archive": {
+    "path": "usage-check.tar.gz",
+    "bytes": 295831,
+    "sha256": "7856a9d95346a3528c97eebf5b0d4eb4708a0b65042ef09f6b6a98c83685f16f",
+    "regular_members": 13
+  },
+  "raw_files": [
+    {
+      "path": "binary.sha256",
+      "bytes": 212,
+      "sha256": "8b60b3152461b527174aa5899d0381aa3f0048583947cb2a843a7a4435f233c3"
+    },
+    {
+      "path": "curves.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "curves.json",
+      "bytes": 2663629,
+      "sha256": "0cd94312bfa6166ff9d32913168f4f38515a31f63269d8c99b59c0a8a1142865"
+    },
+    {
+      "path": "curves.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "help.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "help.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "help.txt",
+      "bytes": 2054,
+      "sha256": "f0ad95d6131cad07fc6a4580767840a54c806491fe39db788d1a66b53314b08c"
+    },
+    {
+      "path": "policy.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "policy.json",
+      "bytes": 34456,
+      "sha256": "9a97806369ab0d029b357a06fd0b4dc744bb04ee0062b195b8ca4b0405e1ea83"
+    },
+    {
+      "path": "policy.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "version.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "version.json",
+      "bytes": 277,
+      "sha256": "c0fa4716e108275cba644c13d8a35abae246c17d4784c6e7f09211bb80f8f5b5"
+    },
+    {
+      "path": "version.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "archive_hash_replay": "PASS",
+  "scientific_runs": 0,
+  "binary_upload_operations": 0,
+  "builds_or_new_tests_run": false,
+  "policy_or_season_changed": false,
+  "timing_claim": null
+}
