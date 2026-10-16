@@ -10,9 +10,9 @@ Research evidence report. Study: `research/iso1_weak_classes_20261007`. Markdown
 
 == Summary
 
-+ *Certified census labels through p = 79.* A new counter returns a group order only when it is the unique Hasse-interval candidate compatible with the tested points on the curve and its quadratic twist. Reruns at p = 7, 13, 37, 41, 43, 47, 53, 59 are byte-identical to the retained CSVs, so their zero labels are exact. p = 61, 67, 71, 73 and 79 are new.
++ *Certified census labels through p = 83.* A new counter returns a group order only when it is the unique Hasse-interval candidate compatible with the tested points on the curve and its quadratic twist. Reruns at p = 7, 13, 37, 41, 43, 47, 53, 59 are byte-identical to the retained CSVs, so their zero labels are exact. p = 61, 67, 71, 73, 79 and 83 are new.
 + *Exact 8th-power mass (conjecture).* The number $N_8(t)$ of 8th-power Legendre parameters in a class is a closed 2-adic factor times an odd-conductor Hurwitz number. It matches exhaustive censuses at p = 7, 11, 13, 17 and the registered holdouts p = 19 and p = 23 with 0 mismatches.
-+ *Random thinning.* Beyond that structure, the norm-one torus samples each class at random. The parameter-free model predicts the residual zero count at the pristine holdouts p = 53, 59 and at the forward predictions p = 61, 67, 71, 73, 79, with binomial dispersion $1.00 plus.minus 0.01$.
++ *Random thinning.* Beyond that structure, the norm-one torus samples each class at random. The parameter-free model predicts the residual zero count at the pristine holdouts p = 53, 59 and at the forward predictions p = 61, 67, 71, 73, 79, 83, with binomial dispersion $1.00 plus.minus 0.01$.
 
 Beyond the proved obstruction $v_2(f_pi) >= 2$, whether a class is weak is a draw with probability $1 - (1 - 8/(p^2-1))^(N_8(t)/12)$. The evidence does not support any compact deterministic criterion beyond that.
 
@@ -37,6 +37,7 @@ $Q = p^6$, so the Hasse interval is exactly $[Q+1-2p^3, Q+1+2p^3]$. Every curve 
   [71], [2,118,901], [34], [resumed], [new: 0 / 176,436 depth-1 weak; 634 / 176,434 high-depth zero],
   [73], [2,367,853], [27], [resumed], [new: 0 / 191,844 depth-1 weak; 622 / 191,844 high-depth zero],
   [79], [3,247,401], [35], [resumed], [new: 0 / 243,400 depth-1 weak; 746 / 243,398 high-depth zero],
+  [83], [3,956,583], [33], [resumed], [new: 0 / 282,450 depth-1 weak; 798 / 282,448 high-depth zero],
 )
 
 Receipts: `certified_20261016/` (comparison receipt, stderr receipts, CSV hashes, queue script and status).
@@ -89,15 +90,16 @@ V1, which used class size only, was registered and failed on its training primes
   [71], [forward, e = 4], [88,217], [317], [317.9 [287.5, 348.3]], [1.000], [0.989],
   [73], [forward, e = 4], [95,922], [311], [327.1 [296.3, 357.9]], [1.011], [0.989],
   [79], [forward, e = 5], [121,699], [373], [353.5 [321.5, 385.5]], [0.998], [0.993],
+  [83], [forward, e = 3], [141,224], [399], [372.6 [339.7, 405.4]], [1.001], [0.993],
 )
 
-p = 37 lies 1.5 below its interval; every other prime is inside. $h_K$ alone ranks zero rows with AUC 0.71–0.78.
+p = 37 lies 1.5 below its interval; every other prime is inside. Pooled over the eight scored primes 53–83, observed minus predicted is +56.2 with standard deviation 43.1 (z = 1.30, not significant); this is a watch item for the next forward predictions. $h_K$ alone ranks zero rows with AUC 0.71–0.78.
 
 == 4. Scope and limits
 
 - *Proved* (`THEOREM.pdf`): no ordinary class with $v_2(f_pi) = 1$ is weak, for every odd $p$.
-- *Exact* for $p <= 79$: the certified class labels.
+- *Exact* for $p <= 83$: the certified class labels.
 - *Conjecture*, exact on six primes: the $N_8$ formula.
-- *Measured*: the binomial thinning model, at two pristine holdouts and five forward predictions. It describes the data statistically and decides no individual class. It does not show that no exotic arithmetic criterion exists.
+- *Measured*: the binomial thinning model, at two pristine holdouts and six forward predictions. It describes the data statistically and decides no individual class. It does not show that no exotic arithmetic criterion exists.
 - Class numbers come from PARI/GP 2.15.4 `quadclassunit`, which is GRH-conditional for large $|D_K|$. This affects the predictions, not the census labels.
-- Pending: the censuses for p = 83–199. p = 71, 73 and 79 ran across several container sessions with checkpointing, so it has no single wall time. p = 199 alone needs about 4 days on 4 threads.
+- Pending: the censuses for p = 89–199. p = 71, 73, 79 and 83 ran across several container sessions with checkpointing, so it has no single wall time. p = 199 alone needs about 4 days on 4 threads.
