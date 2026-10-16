@@ -1,0 +1,140 @@
+{
+  "all_valid": true,
+  "assessments_checked": 6,
+  "format": "transfer-assessment-validation-summary-v1",
+  "results": [
+    {
+      "advantage_measurement": {
+        "basis": "unmeasured",
+        "claim_scope": "unmeasured",
+        "net_speedup": null
+      },
+      "assessment_format": "correspondence-assessment-v3",
+      "case_id": "known-binary-n83-genus3-cover-construction",
+      "errors": [],
+      "solver": {
+        "family": "none",
+        "name": null
+      },
+      "valid": true,
+      "verdicts": {
+        "algorithmically_relevant": "unknown",
+        "measured_advantage": "unknown",
+        "modeled_advantage": "unknown",
+        "novel_reduction_within_boundary": "not_applicable",
+        "valid_transfer": "unknown"
+      }
+    },
+    {
+      "advantage_measurement": {
+        "basis": "unmeasured",
+        "claim_scope": "unmeasured",
+        "net_speedup": null
+      },
+      "assessment_format": "correspondence-assessment-v3",
+      "case_id": "known-binary-n83-mixed-product-transfer",
+      "errors": [],
+      "solver": {
+        "family": "generic_group",
+        "name": "Pollard rho on the transported product subgroup"
+      },
+      "valid": true,
+      "verdicts": {
+        "algorithmically_relevant": "supported",
+        "measured_advantage": "unknown",
+        "modeled_advantage": "unknown",
+        "novel_reduction_within_boundary": "not_applicable",
+        "valid_transfer": "supported"
+      }
+    },
+    {
+      "advantage_measurement": {
+        "basis": "unmeasured",
+        "claim_scope": "unmeasured",
+        "net_speedup": null
+      },
+      "assessment_format": "correspondence-assessment-v3",
+      "case_id": "known-binary-n83-opposite-product-rejection",
+      "errors": [],
+      "solver": {
+        "family": "none",
+        "name": null
+      },
+      "valid": true,
+      "verdicts": {
+        "algorithmically_relevant": "refuted",
+        "measured_advantage": "not_applicable",
+        "modeled_advantage": "not_applicable",
+        "novel_reduction_within_boundary": "not_applicable",
+        "valid_transfer": "refuted"
+      }
+    },
+    {
+      "advantage_measurement": {
+        "basis": "unmeasured",
+        "claim_scope": "unmeasured",
+        "net_speedup": null
+      },
+      "assessment_format": "correspondence-assessment-v3",
+      "case_id": "known-frobenius-compatible-surface-filter",
+      "errors": [],
+      "solver": {
+        "family": "none",
+        "name": null
+      },
+      "valid": true,
+      "verdicts": {
+        "algorithmically_relevant": "unknown",
+        "measured_advantage": "unknown",
+        "modeled_advantage": "unknown",
+        "novel_reduction_within_boundary": "not_applicable",
+        "valid_transfer": "unknown"
+      }
+    },
+    {
+      "advantage_measurement": {
+        "basis": "unmeasured",
+        "claim_scope": "unmeasured",
+        "net_speedup": null
+      },
+      "assessment_format": "correspondence-assessment-v3",
+      "case_id": "known-small-prime-quartic-transfer",
+      "errors": [],
+      "solver": {
+        "family": "generic_group",
+        "name": "Pollard rho on the transported elliptic-curve image"
+      },
+      "valid": true,
+      "verdicts": {
+        "algorithmically_relevant": "supported",
+        "measured_advantage": "unknown",
+        "modeled_advantage": "unknown",
+        "novel_reduction_within_boundary": "not_applicable",
+        "valid_transfer": "supported"
+      }
+    },
+    {
+      "advantage_measurement": {
+        "basis": "unmeasured",
+        "claim_scope": "unmeasured",
+        "net_speedup": null
+      },
+      "assessment_format": "correspondence-assessment-v3",
+      "case_id": "known-false-torsion-free-lattice-transfer",
+      "errors": [],
+      "solver": {
+        "family": "none",
+        "name": null
+      },
+      "valid": true,
+      "verdicts": {
+        "algorithmically_relevant": "refuted",
+        "measured_advantage": "not_applicable",
+        "modeled_advantage": "not_applicable",
+        "novel_reduction_within_boundary": "not_applicable",
+        "valid_transfer": "refuted"
+      }
+    }
+  ],
+  "validator": "0.2.0"
+}

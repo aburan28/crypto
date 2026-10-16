@@ -1,0 +1,24 @@
+    Blocking waiting for file lock on build directory
+   Compiling isogeny_algos v0.1.0 (/workspace/scratch/599516f9ea0d/crypto/isogeny_algos)
+    Finished `release` profile [optimized] target(s) in 6m 11s
+     Running tests/api.rs (isogeny_algos/target/release/deps/api-278311100f5e86fa)
+
+running 8 tests
+test field_dispatch_handles_every_limb_boundary ... ok
+test isogenies_match_modular_roots_and_velu ... ok
+test p224_small_low_limb_does_not_reject_modular_construction ... ok
+test cli_records_and_exit_codes ... ok
+test counts_match_bsgs ... ok
+test p192_order_and_split_degree_maps_are_supported ... ok
+test standard_curves_certified_and_named_as_in_the_registry ... ok
+test cm_modular_polynomial_api_and_cli_are_end_to_end ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.36s
+
+     Running tests/sutherland.rs (isogeny_algos/target/release/deps/sutherland-a87dad87666025c8)
+
+running 2 tests
+test sutherland_phi_crt_matches_integer_phi ... ok
+test sutherland_phi_mod_p_matches_qexpansion ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s

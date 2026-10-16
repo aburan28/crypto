@@ -1,0 +1,11 @@
+{
+  "args": [
+    "verify",
+    "--input",
+    "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/trace-controls-retry1/malformed"
+  ],
+  "exit_code": 1,
+  "stderr": "\nthread 'main' (482818) panicked at /Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/compact-implementation/release/build/isogeny-cli-b2c294de52a3a50f/out/verification_engines.rs:124:104:\ncalled `Result::unwrap()` on an `Err` value: Error(\"EOF while parsing an object\", line: 1, column: 1)\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n",
+  "stdout": "{\n  \"error\": \"construction or independent verification failed; inspect retained run records\",\n  \"status\": \"FAIL\"\n}\n",
+  "trace": null
+}

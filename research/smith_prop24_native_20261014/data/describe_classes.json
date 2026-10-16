@@ -1,0 +1,98 @@
+[
+  {
+    "bins": [
+      "0",
+      "(0,0.1]",
+      "(0.1,0.2]",
+      "(0.2,0.3]",
+      "(0.3,0.4]",
+      "(0.4,0.5]",
+      "(0.5,0.6]",
+      "(0.6,0.7]",
+      "(0.7,0.8]",
+      "(0.8,0.9]",
+      "(0.9,1]"
+    ],
+    "classes_by_bin": [
+      560,
+      47,
+      196,
+      204,
+      216,
+      220,
+      128,
+      98,
+      65,
+      28,
+      93
+    ],
+    "curves_by_bin": [
+      83610,
+      25716,
+      78888,
+      109128,
+      106962,
+      102174,
+      76470,
+      52920,
+      30894,
+      14688,
+      9858
+    ],
+    "curves_in_them": 83610,
+    "median_class_size_with_full_success": 348,
+    "median_class_size_without_full_success": 108,
+    "p": 7,
+    "pooled_share_full_over_tractable": 0.3591192348417782,
+    "tractable_classes": 1855,
+    "tractable_classes_without_full_success": 560
+  },
+  {
+    "bins": [
+      "0",
+      "(0,0.1]",
+      "(0.1,0.2]",
+      "(0.2,0.3]",
+      "(0.3,0.4]",
+      "(0.4,0.5]",
+      "(0.5,0.6]",
+      "(0.6,0.7]",
+      "(0.7,0.8]",
+      "(0.8,0.9]",
+      "(0.9,1]"
+    ],
+    "classes_by_bin": [
+      1210,
+      329,
+      1112,
+      1219,
+      1173,
+      1006,
+      554,
+      407,
+      198,
+      68,
+      155
+    ],
+    "curves_by_bin": [
+      684915,
+      664540,
+      2341020,
+      3161580,
+      3228160,
+      3263160,
+      2072590,
+      1441320,
+      491560,
+      107365,
+      57330
+    ],
+    "curves_in_them": 684915,
+    "median_class_size_with_full_success": 1860,
+    "median_class_size_without_full_success": 420,
+    "p": 11,
+    "pooled_share_full_over_tractable": 0.3651643242885219,
+    "tractable_classes": 7431,
+    "tractable_classes_without_full_success": 1210
+  }
+]

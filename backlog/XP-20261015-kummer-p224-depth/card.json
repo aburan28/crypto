@@ -1,0 +1,97 @@
+{
+  "schema": "backlog.card/v1",
+  "id": "XP-20261015-kummer-p224-depth",
+  "title": "Kummer tower solving degree at a prime with v2(p - 1) = 40 and at the NIST P-224 prime",
+  "created": "2026-10-15",
+  "authors": ["backlog lane", "coordinator"],
+  "status": "draft",
+  "status_note": "Unblocked: the generic-field F4 engine exists on branch claude/f4-generic-field (f4_tower_generic over fp_backend; pkm_tower_pilot --engine generic picks Fp52 at 45 bits and Fp224 at P-224; above 2^63 the wide builder builds the system and --verify checks it exhaustively with BigUint re-checks). research/f4_generic_field_20261015 already measured, at 27*2^40 + 1 and at P-224, m = 2 N <= 18 (N = 20 one target), m = 3 N <= 12 (N = 15 at 27*2^40 + 1), m = 4 N = 8 and 12, all with the recorded p1/p2 D; what this card adds is the second target in those one-target cells and m = 3, N = 15 at P-224 (3.2e12 multiply-adds, about 13 h of one core at the measured 14.5 ns each). Measured cost multiple F (ns per multiply-add against Fp32 at p1, one core): 1.5 at 45 bits (Fp52, AVX-512 IFMA), 30 at P-224. Draft until a PROTOCOL.md is frozen and the engine is merged; the P-224 shard's rows carry p as a string and are verified in-row (--verify), not by pkm_tower_check verify.",
+  "blocked_on": [],
+  "links": {
+    "lead": "docs/ic/factor-base-encyclopedia/README.md §0.1 (Kummer tower, the P-224 shape: v2(p - 1) = 96)",
+    "notes": [
+      "research/notes/index-calculus/RESEARCH_PKM_TOWER_ORACLE.md §10.10 (2-adic table) and §11.7",
+      "research/pkm_dickson_torus_20261015/README.md on branch claude/leads-dickson-torus (recorded Kummer D at p1: m = 2, N = 2..20; m = 3, N <= 15; m = 4, N <= 12)"
+    ],
+    "prs": []
+  },
+  "question": "Is the Kummer tower's F4 solving degree D at fixed (m, N) the same at a 45-bit prime with v2(p - 1) = 40 and at the P-224 prime as at the 31-bit p1 where every recorded value was measured?",
+  "decision_value": "Every PKM solving-degree number in the repository is measured over a prime below 2^32; whether it transfers to the field of the curve it is about has never been checked. If D at p = 27*2^40 + 1 and at the P-224 prime equals the p1 value in every cell, lead 1's answer (from the cheaper p1 runs) speaks for P-224 and the small-prime ladder stays the instrument; if D differs in any cell, every p1 extrapolation in the encyclopedia is suspect and lead 1 has to be rerun at the real field. Depths beyond 27 tower levels exist only at these primes, so this card is also the first place a deeper Kummer tower can be built at all.",
+  "protocol": {"path": null, "blob": null},
+  "code": {
+    "repo": "crypto",
+    "commit": null,
+    "branch": "claude/f4-generic-field",
+    "build": [["cargo", "build", "--release", "--example", "pkm_tower_pilot"]]
+  },
+  "resources": {
+    "cpus": 1,
+    "ram_gb": 16,
+    "disk_gb": 5,
+    "gpu": null,
+    "est_core_hours": null,
+    "est_wall_hours": null,
+    "notes": "Cost = (recorded p1 cost of the same cell) x F, F the multi-limb slowdown of the generic-field engine at 45 and 224 bits, which the generic-field lane measures. The p1 cells this card repeats are small (m = 3, N = 15: 1.1 GB, 6.0 min; m = 2, N <= 20 and m = 4, N <= 12 below that), so with F in the tens the whole card is hours to a few days of one core; memory grows with the limb count (x2 at 45 bits, x7 at 224 bits for 32-bit limbs)."
+  },
+  "run": {
+    "argv": [
+      "target/release/examples/pkm_tower_pilot",
+      "--engine", "generic",
+      "--p", "{p}",
+      "--kinds", "kummer",
+      "--m", "2,3,4",
+      "--t-min", "1",
+      "--max-t", "10",
+      "--max-t-m3", "5",
+      "--max-t-m4", "3",
+      "--controls", "tower",
+      "--ladder-t", "none",
+      "--planted", "0",
+      "--random", "2",
+      "--verify",
+      "--out", "{out}/rows.jsonl"
+    ],
+    "env": {"RAYON_NUM_THREADS": "1"},
+    "timeout_per_shard_s": 604800
+  },
+  "shards": {
+    "count": 2,
+    "scheme": "list",
+    "params": {
+      "items": [
+        {"name": "v2-40", "vars": {"p": "29686813949953"}, "note": "27*2^40 + 1, prime (GNU factor), v2(p - 1) = 40, 45 bits"},
+        {"name": "p224", "vars": {"p": "26959946667150639794667015087019630673557916260026308143510066298881"}, "note": "NIST P-224 prime 2^224 - 2^96 + 1, v2(p - 1) = 96"}
+      ]
+    },
+    "stop": "all"
+  },
+  "checkpoint": {"file": null, "resume_flag": null},
+  "outputs": {
+    "result_schema": "pkm_tower_pilot JSONL rows, compared cell by cell with the recorded p1 rows",
+    "verify": ["target/release/examples/pkm_tower_check", "verify", "{out}/rows.jsonl"],
+    "land": "research/pkm_kummer_wide_field_depth"
+  },
+  "cairn": {
+    "mode": "lab-task",
+    "notes": "Two single runs, one per prime. Not preemptible until the engine checkpoints.",
+    "space": "TBD",
+    "tasks": ["XP-20261015-kummer-p224-depth/shard-0", "XP-20261015-kummer-p224-depth/shard-1"],
+    "ttl_s": 86400,
+    "env": {
+      "name": "crypto-f4-generic",
+      "recipe": "A rust:1.98 image built at the generic-field lane's merge commit with `cargo build --release --example pkm_tower_pilot --example pkm_tower_check`, imported with `cairn lab env import crypto-f4-generic-<sha> --docker <image>`"
+    },
+    "exec": {
+      "cpus": 1,
+      "memory_mb": 16384,
+      "timeout_s": 604800,
+      "sandbox": "auto",
+      "publish": "runs/XP-20261015-kummer-p224-depth"
+    },
+    "funding": {
+      "units": 400000,
+      "rationale": "Second: cheap once the engine exists, and it decides whether every small-prime solving degree (lead 1 included) speaks for the P-224 field at all."
+    }
+  },
+  "owner_hint": "the generic-field F4 lane"
+}

@@ -5,7 +5,9 @@
 # MCP server in .mcp.json work in every cloud session. docs/CONDUCTOR.md
 # explains each step.
 #
-# It starts no autonomous agent: no `conductor worker`, no `cairn agent run`.
+# It starts one cairn node (scripts/cairn-node.sh: `cairn run --no-mcp`, which
+# syncs the log with the seed nodes and verifies claims) and no autonomous agent:
+# no `conductor worker`, no `cairn agent run`.
 #
 # Idempotent: binaries are installed only when missing, so a container restored
 # from the cached image goes straight to starting the control plane.
@@ -43,12 +45,12 @@ if ! command -v conductor >/dev/null || ! command -v conductor-mcp >/dev/null; t
     go install "github.com/aburan28/conductor/cmd/...@${CONDUCTOR_VERSION:-main}"
 fi
 
-# cairn, built from its public repository for the same reason. The `ui` feature
-# stays off: `cairn mcp` does not need it.
-if ! command -v cairn >/dev/null; then
-  cargo install --locked --root /usr/local \
-    --git https://github.com/aburan28/cairn ${CAIRN_REV:+--rev "$CAIRN_REV"} cairn
-fi
+# cairn, built from its public repository for the same reason, with the `ui`
+# feature that `cairn run` needs, and a node started that joins the published
+# seed nodes and stays up for the session. scripts/cairn-node.sh does both, is
+# shared with the sibling repositories, and never fails the hook; `cairn mcp`
+# (.mcp.json) runs from the same binary.
+"$repo/scripts/cairn-node.sh" ensure || true
 
 # A shared control plane when the environment names one; otherwise one in this
 # container on the image's Postgres 16, which coordinates only this container.
@@ -87,5 +89,6 @@ fi
 
 conductor_version="$(conductor version 2>/dev/null | head -n 1)"
 cairn_version="$(cairn --version 2>/dev/null | head -n 1)"
-echo "ready: $conductor_version; $cairn_version; $plane"
-echo "Workspace tools: $conductor_version and $cairn_version are installed; Conductor is using $plane. Log: $state/session-start.log" >&3
+cairn_node="$("$repo/scripts/cairn-node.sh" status 2>&1 | head -n 1)"
+echo "ready: $conductor_version; $cairn_version; $plane; $cairn_node"
+echo "Workspace tools: $conductor_version and $cairn_version are installed; Conductor is using $plane. $cairn_node. Log: $state/session-start.log" >&3
