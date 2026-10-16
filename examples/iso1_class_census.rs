@@ -10,12 +10,14 @@ use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::time::Instant;
 
 use crypto_lib::cryptanalysis::jv_cover::{Fld, Fq3, E2, E6};
-use crypto_lib::cryptanalysis::jv_isogeny_walk::{
-    certified_order, curve_order, random_curve, Curve2,
-};
+use crypto_lib::cryptanalysis::jv_isogeny_walk::{curve_order, random_curve, Curve2};
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 use rayon::prelude::*;
+
+#[path = "../research/iso1_weak_classes_20261007/census_runtime/src/certified.rs"]
+mod certified;
+use certified::certified_order;
 
 fn factors(mut n: u128) -> Vec<(u128, u32)> {
     let mut out = Vec::new();

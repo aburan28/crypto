@@ -5,8 +5,8 @@
 //! with a <= b, whether lambda lies in Omega = (F_Q^*)^(2^e) with
 //! e = v2(Q-1), and whether it lies in the norm-one torus T of order q^2+q+1.
 //! Output rows aggregate counts by (trace, a, b, in_omega, in_t).
+use crypto_lib::certified::certified_order;
 use crypto_lib::field_kernel::{EllE, Fld, Fq3, PtE6, E2, E6};
-use crypto_lib::point_count_kernel::certified_order;
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 use rayon::prelude::*;
