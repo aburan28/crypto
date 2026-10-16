@@ -23,7 +23,11 @@ theorem smul_add (p : G) (a b : Nat) :
     smul g p (a+b) = g.add (smul g p a) (smul g p b) := by
   induction b with
   | zero => simp [smul, g.add_zero]
-  | succ b ih => simp only [Nat.add_succ, smul, ih, g.assoc]
+  | succ b ih =>
+    calc
+      smul g p (a+(b+1)) = g.add (smul g p (a+b)) p := rfl
+      _ = g.add (g.add (smul g p a) (smul g p b)) p := congrArg (fun x => g.add x p) ih
+      _ = g.add (smul g p a) (g.add (smul g p b) p) := g.assoc _ _ _
 
 theorem subtract_left (a b q : G) :
     g.add a b = q ↔ b = g.add q (g.neg a) := by
@@ -74,6 +78,23 @@ theorem unique_sound (candidates : Nat → Prop) (truth result : Nat)
     (hu : ∀ a b, candidates a → candidates b → a = b) : result = truth :=
   hu result truth hr ht
 
+/- Core of Hasse uniqueness: a genuine common divisor exceeding the interval
+   width admits at most one multiple there. Exact group-order divisibility is
+   an explicit premise; probable-prime factor discovery is not proved here. -/
+theorem interval_unique (lower upper a b d : Nat)
+    (ha : lower ≤ a ∧ a ≤ upper) (hb : lower ≤ b ∧ b ≤ upper)
+    (hwidth : upper-lower < d) (hda : d ∣ a) (hdb : d ∣ b) : a = b := by
+  obtain ⟨x, rfl⟩ := hda
+  obtain ⟨y, rfl⟩ := hdb
+  rcases Nat.lt_trichotomy x y with h | h | h
+  · have hm := Nat.mul_le_mul_left d (Nat.succ_le_of_lt h)
+    rw [Nat.mul_succ] at hm
+    omega
+  · rw [h]
+  · have hm := Nat.mul_le_mul_left d (Nat.succ_le_of_lt h)
+    rw [Nat.mul_succ] at hm
+    omega
+
 end SeaProofs
 
 #print axioms SeaProofs.smul_add
@@ -82,3 +103,4 @@ end SeaProofs
 #print axioms SeaProofs.refinement_preserves
 #print axioms SeaProofs.direct_equals_full_intersection
 #print axioms SeaProofs.unique_sound
+#print axioms SeaProofs.interval_unique

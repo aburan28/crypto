@@ -89,6 +89,7 @@ Spec == Init /\ [][Next]_vars /\ WF_vars(Next)
 TypeOK == /\ survivors \subseteq Indices /\ hits \subseteq Indices
           /\ phase \in {"Baby","Giant","Choose","Done","Ambiguous"}
 TrueSurvives == truth \in survivors
+NontrivialTrueSurvives == (n >= 2 /\ point > 0) => truth \in survivors
 UniqueSound == phase = "Done" => result = truth
 BabyComplete == phase = "Giant" =>
                   \A r \in 0..(n-1) : baby[r] = {v \in 0..(B-1) : Key(v)=r}
