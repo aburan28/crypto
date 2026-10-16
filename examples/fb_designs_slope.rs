@@ -1729,7 +1729,14 @@ fn analyze(dir: &str, pilot: Option<&str>) {
         } else {
             "inconclusive"
         };
-        println!("  m={m}: {} shared completed cells → {v}", shared.len());
+        if m == 3 {
+            println!("  m={m}: {} shared completed cells → {v}", shared.len());
+        } else {
+            println!(
+                "  m={m}: {} shared completed cells (descriptive: the rule is registered for m = 3)",
+                shared.len()
+            );
+        }
     }
 
     // The preregistered predictions, as differences at equal b.
