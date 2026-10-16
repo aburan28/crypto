@@ -1,0 +1,75 @@
+{
+ "schema": "ecbench.spec/v1",
+ "label": "IC frontier campaign Phase 0 step 3: prime base-size grid extension, 28-bit a=-3 curve",
+ "description": "Grid extension after the first prime pass put the optimum at N/2 of ceil((2r)^(1/3)) (lower edge): factors 1/8, 1/4, 1/2 (and 1/16 at 40 bits) on the same train targets and seed. Not a measurement.",
+ "workloads": {
+  "curves": [
+   {
+    "kind": "prime_explicit",
+    "p": 268435399,
+    "a": 268435396,
+    "b": 3,
+    "group_order": 268407199,
+    "r": 268407199,
+    "gx": 1,
+    "gy": 1
+   }
+  ],
+  "targets_per_curve": 4,
+  "target_seed": 20261015100,
+  "target_kind": "public"
+ },
+ "arms": [
+  {
+   "name": "rho-neg",
+   "role": "reference",
+   "method": {
+    "id": "rho.negation"
+   }
+  },
+  {
+   "name": "pair-N102",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "prime-abscissa:size=102",
+     "oracle": "mitm:negation_folded=1",
+     "max_trials": "105357725"
+    }
+   }
+  },
+  {
+   "name": "pair-N204",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "prime-abscissa:size=204",
+     "oracle": "mitm:negation_folded=1",
+     "max_trials": "52728862"
+    }
+   }
+  },
+  {
+   "name": "pair-N407",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "prime-abscissa:size=407",
+     "oracle": "mitm:negation_folded=1",
+     "max_trials": "26479085"
+    }
+   }
+  }
+ ],
+ "measurement": {
+  "rounds": 1,
+  "warmup": 0,
+  "order": "alternate",
+  "seed": 20261015104,
+  "isolation_required": "L0",
+  "timeout_seconds": 1800
+ }
+}

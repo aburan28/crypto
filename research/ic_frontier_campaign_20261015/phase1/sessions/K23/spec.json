@@ -1,0 +1,92 @@
+{
+ "schema": "ecbench.spec/v1",
+ "label": "IC frontier campaign Phase 1: Koblitz a=1 n=23",
+ "description": "Phase 1 counted frontier (research/ic_frontier_campaign_20261015/PROTOCOL.md, frozen): every Koblitz arm on hold-out public targets, parameters from params.json chosen on the train panel. Counts only; ranking by the AGENTS.md 5a band. Public synthetic; no security claim.",
+ "workloads": {
+  "targets_per_curve": 16,
+  "target_seed": 20261015200,
+  "target_kind": "public",
+  "curves": [
+   {
+    "kind": "koblitz",
+    "a": 1,
+    "n": 23
+   }
+  ]
+ },
+ "arms": [
+  {
+   "name": "rho-strong",
+   "role": "reference",
+   "method": {
+    "id": "rho.signed_frobenius_strong"
+   }
+  },
+  {
+   "name": "rho-frob",
+   "role": "baseline",
+   "method": {
+    "id": "rho.signed_frobenius"
+   }
+  },
+  {
+   "name": "bsgs-neg",
+   "role": "baseline",
+   "method": {
+    "id": "bsgs.negation"
+   }
+  },
+  {
+   "name": "ic-compact",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "compact-orbit-scan:columns=2,raw_x_cap=1000000",
+     "oracle": "mitm-frobenius-counted:m=2",
+     "max_trials": "50000000"
+    }
+   }
+  },
+  {
+   "name": "ic-negfold",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "koblitz-standard-subspace:dimension=8",
+     "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+     "max_trials": "50000000"
+    }
+   }
+  },
+  {
+   "name": "ic-shared",
+   "role": "candidate",
+   "method": {
+    "id": "ic.shared_rank",
+    "params": {
+     "factor_base": "compact-orbit-scan:columns=8,raw_x_cap=1000000",
+     "rank_seed": "20261015202",
+     "rank_max_trials": "1000000",
+     "target_max_attempts": "512"
+    }
+   }
+  },
+  {
+   "name": "rho-strong-aa",
+   "role": "control",
+   "method": {
+    "id": "rho.signed_frobenius_strong"
+   }
+  }
+ ],
+ "measurement": {
+  "rounds": 2,
+  "warmup": 1,
+  "order": "alternate",
+  "seed": 20261015201,
+  "isolation_required": "L0",
+  "timeout_seconds": 3600
+ }
+}
