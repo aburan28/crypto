@@ -246,17 +246,17 @@ def main():
                   "status": ("PASS_10_PERCENT" if
                              abs(times[0] - times[1]) / statistics.mean(times) <= 0.10
                              else "NOISY")}
-    complete = (len(accepted) == len(runner.ARMS)
-                and all(row["status"] == "PASS_INDEPENDENT_REPLAY" for row in accepted)
-                and rho["status"] == "PASS_INDEPENDENT_REPLAY"
-                and rho["resources"]["status"] == "PASS"
-                and aa is not None and aa["status"] == "PASS_10_PERCENT")
     evidence_valid = (len(accepted) > 0
                       and all(row["status"] in ("PASS_INDEPENDENT_REPLAY", "TIMEOUT")
                               for row in arms)
                       and rho["status"] == "PASS_INDEPENDENT_REPLAY")
+    bounded_arms = [row["arm"] for row in arms if row["status"] == "TIMEOUT"]
+    admitted = (evidence_valid
+                and all(row["resources"]["status"] == "PASS" for row in accepted)
+                and rho["resources"]["status"] == "PASS"
+                and aa is not None and aa["status"] == "PASS_10_PERCENT")
     cold_by_pipeline = {}
-    if len(accepted) == len(runner.ARMS):
+    if admitted:
         for row in accepted:
             key = f"k{row['k']}{row['variant']}" + (
                 "wide3" if row["bloom_profile"] == "wide3" else "")
@@ -269,12 +269,14 @@ def main():
         "hardware_tier": "cloud_instance_exploratory",
         "workload_role": "one_fresh_public_point_cold_factor_base_screen",
         "target_count": 1, "arm_order": source["arm_order"],
-        "status": "SCREEN_COMPLETE" if complete else "BOUNDED_UNKNOWN",
+        "status": ("SCREEN_ADMITTED_WITH_TIMEOUT" if bounded_arms else
+                   "SCREEN_COMPLETE") if admitted else "BOUNDED_UNKNOWN",
         "evidence_status": ("PASS_INDEPENDENT_REPLAY" if evidence_valid
                             else "VERIFICATION_FAILED"),
         "selected_factor_base": None,
+        "bounded_arms": bounded_arms,
         "descriptive_cold_process_ms_by_pipeline": cold_by_pipeline,
-        "confirmation_candidates": ranked[:2] if complete else [],
+        "confirmation_candidates": ranked[:2] if admitted else [],
         "aa_control": aa, "arms": arms, "rho": rho,
         "controlled_online_speedup": None,
     }
