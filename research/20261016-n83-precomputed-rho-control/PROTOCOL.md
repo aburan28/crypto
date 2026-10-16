@@ -125,3 +125,34 @@ cgroup CPU limit. Both jobs run the plain-rho control so each job's ratios
 are internal to one runner. Precomputation is target independent and reused
 across all 16 targets in both IC and rho; this compares online cost at
 matched reusable cost, not cold cost.
+
+## Amendment 1 (2026-10-16, after run 1, before run 2)
+
+Run 1 (`38855595549`) executed the arms above unchanged. Two problems found,
+both recorded as they are:
+
+1. **Runner class.** The k3300 job ran on an AMD EPYC 9V45 (the k600 job on
+   the EPYC 7763 of the original claims). On the 9V45, IC K3300's
+   target-independent wall (`process_total − targets_total`) was 497.6 s
+   (603.7 s user CPU with the 4 rank threads), so the fixed 650 s budget of
+   arm (a) exceeded the IC's setup wall there (and its CPU by 8%). Arm (a) of
+   run 1's k3300 job is therefore **not** time-matched; it is reported, but
+   not used for the verdict on K3300.
+2. **Analyzer.** Both frozen IC producers print their setup summary on stdout,
+   not into the records file, so run 1's in-job analysis stopped with
+   `IC summary missing`. The analyzer now also reads `ic/stdout.log`; run 2's
+   workflow re-analyzes run 1's raw artifact with it. No record changes.
+
+Added for run 2 (same targets, all arms re-run as a replicate on fresh
+runners):
+
+- **`bl_a2_wall_equal`** (`configs/bl_a2_wall_equal.template.json`): as arm
+  (a) (one thread, CPU 3, dp_bits 7, 32 online lanes) but its table walks stop
+  at **this job's measured IC target-independent wall minus 2 s** (curve setup
+  and sort come out of the IC's budget), read from the IC summary in the same
+  job. New table and online seeds (`2026101605`/`2026101606`). This arm decides
+  the time-matched verdict; where IC's setup used 4 rank threads it is
+  conservative for rho (one thread against IC's CPU time).
+
+The decision rule is unchanged, applied to `bl_a2_wall_equal` for (a). Run 1's
+arms stay in the report as recorded.

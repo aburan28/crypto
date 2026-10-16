@@ -68,6 +68,20 @@ cp "$here/configs/bl_a_time_matched.json" "$out/bl_a/config.json"
   > "$out/bl_a/stdout.log" 2> "$out/bl_a/stderr.log" || true
 echo "bl_a end $(stamp)" >> "$out/host/timeline.txt"
 
+# 3b. Amendment 1 (run 2 onward): time-matched to this job's measured IC
+# target-independent wall (process_total - targets_total from the IC summary),
+# minus 2 s for the precomputed arm's sort and curve setup.
+if [ -f "$here/configs/bl_a2_wall_equal.template.json" ]; then
+  mkdir -p "$out/bl_a2"
+  ic_setup_s=$(jq -r 'select(.kind=="compact_orbit_dlp_summary") | ((.timing_ms.process_total - .timing_ms.targets_total) / 1000 - 2)' "$out/ic/stdout.log")
+  sed "s/IC_TARGET_INDEPENDENT_SECONDS/$ic_setup_s/" "$here/configs/bl_a2_wall_equal.template.json" > "$out/bl_a2/config.json"
+  echo "bl_a2 start $(stamp) wall_budget_s=$ic_setup_s" >> "$out/host/timeline.txt"
+  /usr/bin/time -v -o "$out/bl_a2/time.txt" taskset -c 3 \
+    "$bl_bin" "$out/bl_a2/config.json" "$out/targets.jsonl" "$out/bl_a2/records.jsonl" \
+    > "$out/bl_a2/stdout.log" 2> "$out/bl_a2/stderr.log" || true
+  echo "bl_a2 end $(stamp)" >> "$out/host/timeline.txt"
+fi
+
 # 4. Precomputed rho, memory-matched: table bytes = this job's IC max RSS.
 ic_rss_kib=$(awk -F': ' '/Maximum resident set size/ {print $2}' "$out/ic/time.txt")
 ic_rss=$((ic_rss_kib * 1024))

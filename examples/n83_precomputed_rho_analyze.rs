@@ -2,8 +2,8 @@
 //!
 //! Usage: n83_precomputed_rho_analyze <job-dir> <ic-label> <analysis.json>
 //!
-//! `<job-dir>` holds `targets.jsonl`, `ic/records.jsonl` and `ic/time.txt`
-//! (GNU time -v), `rho_plain/w<NN>.json` (one strong-rho receipt per target),
+//! `<job-dir>` holds `targets.jsonl`, `ic/records.jsonl`, `ic/stdout.log`
+//! (the IC setup summary) and `ic/time.txt` (GNU time -v), `rho_plain/w<NN>.json` (one strong-rho receipt per target),
 //! and `bl_a/records.jsonl`, `bl_b/records.jsonl` (precomputed-rho records).
 //! Every recovered scalar of every arm is replayed here with the generic
 //! library curve (`[d]G == Q`), independently of the producers, and the arms
@@ -202,8 +202,11 @@ fn load_ic(dir: &str, targets: &[[u128; 2]]) -> Result<(Arm, Value), String> {
         .iter()
         .filter(|r| r["kind"] == "compact_orbit_dlp_target")
         .collect();
+    // Both frozen producers print their setup summary on stdout.
+    let stdout = read_jsonl(&format!("{dir}/stdout.log")).unwrap_or_default();
     let summary = records
         .iter()
+        .chain(stdout.iter())
         .find(|r| r["kind"] == "compact_orbit_dlp_summary")
         .ok_or("IC summary missing")?;
     if rows.len() != targets.len() {
@@ -359,7 +362,16 @@ fn run(job: &str, ic_label: &str, out: &str) -> Result<bool, String> {
     let rho = load_rho_plain(&format!("{job}/rho_plain"), &targets)?;
     let (bl_a, a_info) = load_bl(&format!("{job}/bl_a"), "bl_a_time_matched", &targets)?;
     let (bl_b, b_info) = load_bl(&format!("{job}/bl_b"), "bl_b_memory_matched", &targets)?;
-    let arms = [&ic, &rho, &bl_a, &bl_b];
+    // Amendment 1 (run 2 onward): time-matched to the measured IC setup wall.
+    let a2 = if fs::metadata(format!("{job}/bl_a2/records.jsonl")).is_ok() {
+        Some(load_bl(&format!("{job}/bl_a2"), "bl_a2_wall_equal", &targets)?)
+    } else {
+        None
+    };
+    let mut arms = vec![&ic, &rho, &bl_a, &bl_b];
+    if let Some((a2_arm, _)) = &a2 {
+        arms.push(a2_arm);
+    }
     // Optional sidecar: the scalars the hosted single-target run recovered
     // for these public points (read only after every arm has finished).
     let reference: Option<Vec<u64>> = fs::read_to_string(format!("{job}/reference_scalars.txt"))
@@ -372,7 +384,7 @@ fn run(job: &str, ic_label: &str, out: &str) -> Result<bool, String> {
         let mut row = json!({"target_index": i});
         let mut agreed: Option<u64> = None;
         let mut agree = true;
-        for arm in arms {
+        for arm in &arms {
             let d = arm.scalars[i];
             let ok = d.is_some_and(|d| curve.verify(d, *t));
             all_ok &= ok;
@@ -391,7 +403,7 @@ fn run(job: &str, ic_label: &str, out: &str) -> Result<bool, String> {
         }
         verification.push(row);
     }
-    let analysis = json!({
+    let mut analysis = json!({
         "schema": "n83-precomputed-rho-analysis/v1",
         "job": job,
         "ic_label": ic_label,
@@ -414,6 +426,11 @@ fn run(job: &str, ic_label: &str, out: &str) -> Result<bool, String> {
             "rho_plain_over_bl_a": paired(&rho, &bl_a, 24),
         },
     });
+    if let Some((a2_arm, a2_info)) = &a2 {
+        analysis["arms"]["bl_a2_wall_equal"] = arm_stats(a2_arm, 15);
+        analysis["setup"]["bl_a2_wall_equal"] = a2_info.clone();
+        analysis["paired"]["ic_over_bl_a2"] = paired(&ic, a2_arm, 25);
+    }
     fs::write(out, format!("{}\n", serde_json::to_string_pretty(&analysis).unwrap()))
         .map_err(|e| e.to_string())?;
     Ok(all_ok)

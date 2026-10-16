@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: n83-precomputed-rho-control-${{ github.ref }}
@@ -110,6 +111,21 @@ jobs:
             "$RUNNER_TEMP/t-hosted/release/deps" "$RUNNER_TEMP/t-branch/release/build" \
             "$RUNNER_TEMP/t-tier1/release/build" "$RUNNER_TEMP/t-hosted/release/build" || true
           df -h "$RUNNER_TEMP" | tail -1
+
+      - name: Re-analyze run 1 (38855595549) with the fixed analyzer
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/out/run1-reanalysis"
+          gh run download 38855595549 -R aburan28/crypto \
+            -n "n83-precomputed-rho-${{ matrix.ic }}-38855595549-1" -D "$RUNNER_TEMP/run1"
+          set +e
+          "$AN_BIN" "$RUNNER_TEMP/run1/${{ matrix.ic }}" ${{ matrix.ic }} \
+            "$RUNNER_TEMP/out/run1-reanalysis/analysis.json" > "$RUNNER_TEMP/out/run1-reanalysis/analysis.log" 2>&1
+          echo "$?" > "$RUNNER_TEMP/out/run1-reanalysis/analysis_exit.txt"
+          cat "$RUNNER_TEMP/out/run1-reanalysis/analysis.log"
 
       - name: Run IC, plain rho and both precomputed arms on this runner
         shell: bash
