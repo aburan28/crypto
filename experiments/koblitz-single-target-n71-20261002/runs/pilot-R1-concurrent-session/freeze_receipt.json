@@ -1,0 +1,44 @@
+{
+  "candidate_id": null,
+  "claim_boundary": "One public synthetic n=71 toy target only. This is a boundary rung, not ECC2K-130 and not a production/key-recovery claim.",
+  "created_at_utc": "2026-10-03T00:59:19.888167+00:00",
+  "fixture_point_receipt_sha256": "78346844395d14174c396340e005720b8b6ed06f14d47bec31b9d06da093e37a",
+  "fixture_scalar_validation_only_sha256": "423292a28f67480c7ce68becad61775d303c787ffafb6245de1583a9ef1e2fc3",
+  "kind": "koblitz_n71_one_target_public_point_freeze",
+  "measurement_started": false,
+  "proposal_id": "N71_U128_COMPACT_ORBIT_SINGLE_TARGET",
+  "public_target": [
+    "1850589826078099102726",
+    "2157895285144092536687"
+  ],
+  "run_id": null,
+  "target_count": 1,
+  "workload_id": "cd9b5b764d88",
+  "workload_record": {
+    "curve": {
+      "a": 0,
+      "cofactor": 428276,
+      "defining_polynomial": "x^71 + x^5 + x^3 + x + 1",
+      "field_characteristic": 2,
+      "field_degree": 71,
+      "field_representation": "polynomial basis over F2",
+      "model": "y^2 + x*y = x^3 + 1",
+      "subgroup_order": "5513228015079457"
+    },
+    "input_law": "one precomputed public synthetic point; fixture scalar is validation-only and absent from the IC online input",
+    "resource_envelope": {
+      "common_peak_rss_cap_bytes": 17179869184,
+      "one_process_per_arm": true,
+      "workers_per_arm": 1
+    },
+    "target_count": 1,
+    "target_generation_fixture": {
+      "kind": "known-answer synthetic fixture",
+      "scalar_validation_only": "314159265358979"
+    },
+    "target_point": [
+      "1850589826078099102726",
+      "2157895285144092536687"
+    ]
+  }
+}

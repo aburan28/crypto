@@ -10,6 +10,10 @@ name: ic programme harness
 on:
   pull_request:
     paths:
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - 'src/bin/icprog.rs'
       - 'src/bin/icprog/**'
       - 'src/bin/prepared_sat_worker.rs'
@@ -27,6 +31,7 @@ on:
       - 'research/ic_single_target_20260930/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-preparation-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-preparation-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-target-replay-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-custody-v1/**'
@@ -48,6 +53,7 @@ on:
       - 'src/bin/isolated_bench/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-preparation-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-preparation-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-target-replay-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-custody-v1/**'
@@ -59,13 +65,20 @@ on:
 permissions:
   contents: read
 
+# A newer push to the same pull request cancels this workflow's run for the older commit.
+# Every other event (push, schedule, dispatch) gets a group of its own and is never cancelled.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && github.workflow_ref || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   harness:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - name: Install valgrind, for callgrind_annotate
         run: sudo apt-get update && sudo apt-get install -y valgrind
       - name: Fetch ledger §23's build commit, whose sources its claims hash
@@ -86,10 +99,11 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - name: Bootstrap native build serialization
         run: rustc --edition 2021 src/bin/isolated_bench/busy_unix.rs -o "$RUNNER_TEMP/native-busy"
       - name: Resolve and retain the ignored development lockfile before replay builds
@@ -102,6 +116,7 @@ jobs:
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_source -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog prepared_sat -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog prepared_f5 -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog ordinary_preparation -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog f5_target -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog f5_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_sat_control -- --test-threads=1

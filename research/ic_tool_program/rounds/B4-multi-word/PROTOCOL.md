@@ -139,3 +139,33 @@ Nothing about the cost of ECC2K-130's subgroup, which is B7b's.
   needs (B7b).
 - Prime fields beyond one word for `kic` (B5).
 - Any method using a proper intermediate subfield.
+
+## Amendment 1 (2026-10-05, before any measurement)
+
+**B4 is measured on main's head, with native tools.**
+- **Why.** R07 re-bases the programme on main's head, `995ea207`.
+  AGENTS.md also excludes Python from the programme's tooling
+  (plan §10a).
+- **B4's arm** is `tbarm-B4` (`d5761c13`). Each step's arm is one merge of
+  that step's tip into the arm before it, starting from main's head.
+  The arms are on record in
+  [`../../track-b/stack-20261005-main.bundle`](../../track-b/stack-20261005-main.bundle),
+  and [`../../track-b/README.md`](../../track-b/README.md) states the rules
+  that resolve their conflicts.
+- **The base** is main's head, `995ea207`: v3, if R07 accepts it. No
+  Track B run starts before R07's decision. If R07 is not accepted, this
+  amendment is revisited first.
+- **The runners.** `icprog conformance` replaces `conformance/run.py`,
+  and `icprog bround` replaces `harness/bround.py`. Each keeps the
+  script's steps and rules.
+- **The A/A bands.** This host is not R01's, so the bands are the run's
+  own, as the acceptance rule already allows. `icprog bround aa` runs
+  the base against a byte-identical copy, on `M1`'s 22 rows, five
+  rounds, in the chain's run tree.
+- **The chain** gains B4 after B3b, as B4's protocol declares.
+- **The arm carries one port commit:** the W-word pair table takes
+  R05's presence filter, as the two-word table does.
+- **Measurement 5, F0 at three words,** runs on `icprog f0 --set b4`,
+  `run.py` and `analyse.py` ported: the same twelve runs, each under its
+  hour. Both arms' certificates are replayed in arithmetic of its own.
+- **Nothing else changes:** the cases, the pins, the acceptance rules.

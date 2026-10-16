@@ -1,9 +1,17 @@
 name: Workflow syntax
+# YAML structure plus GitHub Actions expressions, triggers and job semantics.
 on:
   workflow_dispatch:
   pull_request:
     paths:
       - '.github/workflows/**'
+      - '.github/scripts/run-actionlint.sh'
+# A newer push to the same pull request cancels this workflow's run for the older commit.
+# Every other event (push, schedule, dispatch) gets a group of its own and is never cancelled.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && github.workflow_ref || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   parse:
     runs-on: ubuntu-latest
@@ -12,6 +20,16 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/
+            /.github/scripts/run-actionlint.sh
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --quiet pyyaml==6.0.3
       - name: Every workflow parses and declares triggers
         run: |
           python3 - <<'PY'
@@ -37,3 +55,5 @@ jobs:
           print('checked %d workflows, %d problems' % (len(files), len(bad)))
           sys.exit(1 if bad else 0)
           PY
+      - name: GitHub Actions workflow semantics (actionlint 1.7.12)
+        run: bash .github/scripts/run-actionlint.sh

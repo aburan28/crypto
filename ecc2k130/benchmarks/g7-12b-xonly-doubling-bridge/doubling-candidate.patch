@@ -1,0 +1,119 @@
+diff -ruN ecc2k130/build/g7-xonly-23-src/include/packedkernels.cuh ecc2k130/build/g7-xonly-doubling-src/include/packedkernels.cuh
+--- ecc2k130/build/g7-xonly-23-src/include/packedkernels.cuh	2026-09-17 16:04:10.716266976 +0000
++++ ecc2k130/build/g7-xonly-doubling-src/include/packedkernels.cuh	2026-09-17 21:11:48.364572391 +0000
+@@ -88,8 +88,8 @@
+ #if ECC_PACKED_BATCH_SPLIT != 1 && ECC_PACKED_BATCH_SPLIT != 2
+ #error "ECC_PACKED_BATCH_SPLIT must be 1 or 2"
+ #endif
+-#if ECC_PACKED_BATCH_SPLIT == 2 && (ECC_BATCH != 16 || ECC_THREADS != 256 || !ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+-#error "Split batches require batch16, threads256, block inversion and weighted-prefix mode2"
++#if ECC_PACKED_BATCH_SPLIT == 2 && ((ECC_BATCH < 16 || ECC_BATCH > 32 || (ECC_BATCH & 1)) || ECC_THREADS != 256 || !ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_WEIGHTED_PREFIX != 2)
++#error "Split batches require an even batch16..32, threads256, block inversion and weighted-prefix mode2"
+ #endif
+ #ifndef ECC_PACKED_LAST_SLOT_CACHE
+ #define ECC_PACKED_LAST_SLOT_CACHE 0
+@@ -97,8 +97,8 @@
+ #if ECC_PACKED_LAST_SLOT_CACHE < 0 || ECC_PACKED_LAST_SLOT_CACHE > 2
+ #error "ECC_PACKED_LAST_SLOT_CACHE must be 0, 1 or 2"
+ #endif
+-#if ECC_PACKED_LAST_SLOT_CACHE && (ECC_BATCH != 16 || ECC_PACKED_BATCH_SPLIT != 2 || !ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+-#error "Last-slot cache requires batch16, split2, block inversion and weighted-prefix mode2"
++#if ECC_PACKED_LAST_SLOT_CACHE && ((ECC_BATCH < 16 || ECC_BATCH > 32 || (ECC_BATCH & 1)) || ECC_PACKED_BATCH_SPLIT != 2 || !ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_WEIGHTED_PREFIX != 2)
++#error "Last-slot cache requires an even batch16..32, split2, block inversion and weighted-prefix mode2"
+ #endif
+ #if ECC_PACKED_LAST_SLOT_CACHE
+ static constexpr int lastLocalSlot131 = ECC_BATCH / ECC_PACKED_BATCH_SPLIT - 1;
+@@ -109,8 +109,8 @@
+ #if ECC_PACKED_SHARED_X_SLOTS != 0 && ECC_PACKED_SHARED_X_SLOTS != 2 && ECC_PACKED_SHARED_X_SLOTS != 4
+ #error "SHARED_X_SLOTS must be 0, 2 or 4"
+ #endif
+-#if ECC_PACKED_SHARED_X_SLOTS && (ECC_BATCH != 16 || ECC_THREADS != 256 || ECC_PACKED_BATCH_SPLIT != 2 || !ECC_PACKED_BLOCK_INVERSE || !ECC_PACKED_COMPACT_STATE || !ECC_PACKED_POLY_STATE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+-#error "SHARED_X_SLOTS requires the selected B16 split2 compact polynomial block-inverse layout"
++#if ECC_PACKED_SHARED_X_SLOTS && ((ECC_BATCH < 16 || ECC_BATCH > 32 || (ECC_BATCH & 1)) || ECC_THREADS != 256 || ECC_PACKED_BATCH_SPLIT != 2 || !ECC_PACKED_BLOCK_INVERSE || !ECC_PACKED_COMPACT_STATE || !ECC_PACKED_POLY_STATE || ECC_PACKED_WEIGHTED_PREFIX != 2)
++#error "SHARED_X_SLOTS requires an even B16..32 split2 compact polynomial block-inverse layout"
+ #endif
+ #if ECC_PACKED_SHARED_X_SLOTS
+ static constexpr int firstSharedXLocalSlot131=ECC_BATCH/ECC_PACKED_BATCH_SPLIT-ECC_PACKED_SHARED_X_SLOTS;
+diff -ruN ecc2k130/build/g7-xonly-23-src/include/packedxonly23.cuh ecc2k130/build/g7-xonly-doubling-src/include/packedxonly23.cuh
+--- ecc2k130/build/g7-xonly-23-src/include/packedxonly23.cuh	2026-09-17 16:04:01.049674260 +0000
++++ ecc2k130/build/g7-xonly-doubling-src/include/packedxonly23.cuh	2026-09-17 21:04:24.229562987 +0000
+@@ -2,6 +2,13 @@
+ // Included inside namespace eccPacked131 by packedkernels.cuh.
+ #pragma once
+
++#ifndef ECC_PACKED_XONLY_DOUBLE_ONLY
++#define ECC_PACKED_XONLY_DOUBLE_ONLY 0
++#endif
++#if ECC_PACKED_XONLY_DOUBLE_ONLY != 0 && ECC_PACKED_XONLY_DOUBLE_ONLY != 1
++#error "ECC_PACKED_XONLY_DOUBLE_ONLY must be 0 or 1"
++#endif
++
+ #if !ECC_PACKED_BLOCK_INVERSE || !ECC_PACKED_POLY_STATE || \
+     ECC_PACKED_WEIGHTED_PREFIX != 2 || !ECC_PACKED_CACHE_DENOM
+ #error "The x-only 2/3 walk requires polynomial state, cached denominators, weighted prefixes, and block inversion"
+@@ -76,6 +83,22 @@
+                     }
+                 }
+
++#if ECC_PACKED_XONLY_DOUBLE_ONLY
++                // [2]P: x'=(x+1/x)^2. Store each denominator and the
++                // product before it; backward recovery needs no numerator.
++                const P131 denominator = x;
++                if (localSlot) {
++                    store(p.pchain, slot, tid, p.threads, prod);
++                    prod = mulPolynomial131(prod, denominator);
++                } else {
++                    prod = denominator;
++                }
++#if ECC_PACKED_LAST_SLOT_CACHE
++                if (localSlot == lastLocalSlot131) lastDenominator = denominator;
++                else
++#endif
++                store(denominators, slot, tid, p.threads, denominator);
++#else
+                 // Polynomial-basis forms of:
+                 // [2]: (x^4 + 1) / x^2
+                 // [3]: x (x^4 + x + 1)^2 / (x^4 + x^3 + 1)^2
+@@ -112,6 +135,7 @@
+                 else
+ #endif
+                 store(denominators, slot, tid, p.threads, denominator);
++#endif
+             }
+         }
+
+@@ -128,6 +152,26 @@
+ #else
+                 const P131 denominator = load(denominators, slot, tid, p.threads);
+ #endif
++#if ECC_PACKED_XONLY_DOUBLE_ONLY
++#if ECC_PACKED_SHARED_X_SLOTS
++                const P131 x = localSlot >= firstSharedXLocalSlot131
++                    ? loadSharedX131(sharedXLow, sharedXTail,
++                        (localSlot - firstSharedXLocalSlot131) * ECC_THREADS + threadIdx.x)
++                    : load(p.x, slot, tid, p.threads);
++#else
++                const P131 x = load(p.x, slot, tid, p.threads);
++#endif
++                P131 inverseX;
++                if (localSlot) {
++                    const PolynomialPair pair = mulPolynomialPair131(inv,
++                        load(p.pchain, slot, tid, p.threads), denominator);
++                    inverseX = pair.first;
++                    inv = pair.second;
++                } else {
++                    inverseX = inv;
++                }
++                const P131 nx = squarePolynomial131(add131(x, inverseX));
++#else
+                 P131 nx;
+                 if (localSlot) {
+                     const PolynomialPair pair = mulPolynomialPair131(inv,
+@@ -144,6 +188,7 @@
+                     nx = mulPolynomial131(
+                         inv, load(p.pchain, firstSlot, tid, p.threads));
+                 }
++#endif
+ #if ECC_PACKED_SHARED_X_SLOTS
+                 if (localSlot >= firstSharedXLocalSlot131)
+                     storeSharedX131(sharedXLow, sharedXTail,

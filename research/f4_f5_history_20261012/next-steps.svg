@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="520" viewBox="0 0 1000 520" role="img" aria-labelledby="title desc">
+  <title id="title">Proposed F4/F5 follow-up workflow</title>
+  <desc id="desc">Original proposed sequence: freeze a native matched protocol, measure eligible runtime and peak memory, profile complete calls, test held-out scaling and publish evidence. Independently fix the unfinished isogeny test. Current execution status is in NEXT_STEPS.md.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#5a7184"/></marker>
+  </defs>
+  <rect width="1000" height="520" fill="#ffffff"/>
+  <g font-family="DejaVu Sans, sans-serif">
+    <text x="40" y="44" font-size="25" font-weight="bold" fill="#17364b">F4/F5: proposed next steps</text>
+    <text x="40" y="74" font-size="17" fill="#79542b">PLANNING SNAPSHOT · Current execution status: NEXT_STEPS.md</text>
+    <g fill="#f2f6fa" stroke="#326eab" stroke-width="2" stroke-dasharray="7 4">
+      <rect x="40" y="110" width="280" height="130" rx="10"/>
+      <rect x="360" y="110" width="280" height="130" rx="10"/>
+      <rect x="680" y="110" width="280" height="130" rx="10"/>
+      <rect x="680" y="285" width="280" height="130" rx="10"/>
+      <rect x="360" y="285" width="280" height="130" rx="10"/>
+    </g>
+    <g stroke="#5a7184" stroke-width="2.5" fill="none" marker-end="url(#arrow)">
+      <path d="M 325 175 H 354"/>
+      <path d="M 645 175 H 674"/>
+      <path d="M 820 245 V 279"/>
+      <path d="M 675 350 H 647"/>
+    </g>
+    <g font-size="18" font-weight="bold" fill="#17364b">
+      <text x="58" y="141">1. Freeze native protocol</text>
+      <text x="378" y="141">2. Time + peak memory</text>
+      <text x="698" y="141">3. Profile complete calls</text>
+      <text x="698" y="316">4. Test held-out scaling</text>
+      <text x="378" y="316">5. Publish accepted data</text>
+    </g>
+    <g font-size="15" fill="#29485d">
+      <text x="58" y="171">e957e48c → 2e3dffda</text>
+      <text x="58" y="198">Same inputs, builds, resources</text>
+      <text x="58" y="225">Verify results; reserve the core</text>
+      <text x="378" y="171">Paired A / B / A′ + noise gate</text>
+      <text x="378" y="198">Time without allocation hooks</text>
+      <text x="378" y="225">Separate live heap / RSS runs</text>
+      <text x="698" y="171">Include worker-thread work</text>
+      <text x="698" y="198">Rows, columns, fill-in, pruning</text>
+      <text x="698" y="225">Choose one measured hotspot</text>
+      <text x="698" y="346">Freeze seeds and run budgets</text>
+      <text x="698" y="373">Check F4/F5 math equivalence</text>
+      <text x="698" y="400">Find crossover; retain failures</text>
+      <text x="378" y="346">Linked follow-on PRs + records</text>
+      <text x="378" y="373">Separate native / CI series</text>
+      <text x="378" y="400">Regenerate graphs and PDFs</text>
+    </g>
+    <rect x="40" y="285" width="280" height="130" rx="10" fill="#fff8ec" stroke="#b17a35" stroke-width="2" stroke-dasharray="7 4"/>
+    <text x="58" y="316" font-size="18" font-weight="bold" fill="#715027">Independent validation</text>
+    <g font-size="15" fill="#715027">
+      <text x="58" y="346">Reproduce stalled isogeny test</text>
+      <text x="58" y="373">Reproduce, diagnose, verify</text>
+      <text x="58" y="400">Keep timing reservations clear</text>
+    </g>
+    <text x="40" y="461" font-size="16" fill="#29485d">Scope: Boolean F4/F5; complete calls and criterion phase remain separate.</text>
+    <text x="40" y="489" font-size="15" fill="#5a7184">Sources: NEXT_STEPS.md · allocation study 20261011 · history/validation study 20261012</text>
+  </g>
+</svg>

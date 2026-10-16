@@ -36,6 +36,7 @@ for extra in (REPO / "research/ic_candidate_tournament_20260915", REPO / "tools"
         sys.path.insert(0, str(extra))
 import identity  # noqa: E402
 import oracle  # noqa: E402
+import oracle_u128  # noqa: E402  (same checker, degree bound widened to the u128 rungs n = 71, 83)
 from curve_identity import candidate_identity  # noqa: E402
 
 PHASE_FIELDS = {
@@ -49,7 +50,9 @@ CURVE_FIELDS = ("degree", "curve_a", "subgroup_order", "irreducible", "group_ord
                 "generator", "lambda")
 
 _curves: dict[str, oracle.Curve] = {}
-_OracleCurve = oracle.Curve
+# oracle.py is pinned by sha256 in frozen records and stays untouched; the
+# widened checker is a separate module with identical arithmetic.
+_OracleCurve = oracle_u128.Curve
 
 
 def cached_curve(fixture: dict[str, Any]) -> oracle.Curve:
@@ -100,6 +103,86 @@ def input_law(beat: dict[str, Any]) -> str:
     return (f"public hash-to-curve: x = SHA-256('{law['domain']}|<role>|<seed>|<counter>')[0:8] "
             "little-endian mod 2^n for the first counter whose x lifts; y by half-trace, sign by bit 0 "
             "of digest byte 8; Q = [h]P. No scalar is known to either arm.")
+
+
+def same_point(a, b) -> bool:
+    """Compare public points numerically: wide producers emit u128 coordinates
+    as decimal strings while the panel stores Python ints."""
+    def norm(p):
+        return [int(v) for v in p]
+    try:
+        return norm(a) == norm(b)
+    except (TypeError, ValueError):
+        return a == b
+
+
+def primary_claim_fields(ic_record: dict[str, Any], rho_record: dict[str, Any],
+                         interval: dict[str, Any]) -> dict[str, Any]:
+    """Build the paired one-target fields from the two verified producer rows."""
+    ic_ms, rho_ms = float(ic_record["online_ms"]), float(rho_record["online_ms"])
+    probes, steps = int(ic_record["probes"]), int(rho_record["walk_steps"])
+    if min(ic_ms, rho_ms) <= 0 or min(probes, steps) < 0:
+        raise ValueError("a verified one-target claim needs positive online costs and nonnegative counters")
+    ic_hw = ic_record.get("online_hw_counts")
+    rho_hw = rho_record.get("online_hw_counts")
+    ic_hw = ic_hw if isinstance(ic_hw, dict) else {}
+    rho_hw = rho_hw if isinstance(rho_hw, dict) else {}
+    ic_instructions = ic_hw.get("instructions")
+    rho_instructions = rho_hw.get("instructions")
+    def complete_counter(hw: dict[str, Any]) -> bool:
+        enabled = hw.get("instructions_time_enabled_ns")
+        running = hw.get("instructions_time_running_ns")
+        return (type(hw.get("instructions")) is int and hw["instructions"] > 0 and
+                type(enabled) is int and enabled > 0 and
+                type(running) is int and running == enabled and not hw.get("error"))
+
+    complete_instructions = complete_counter(ic_hw) and complete_counter(rho_hw)
+    return {
+        "timing_class": "single_target_online",
+        "record_class": "verified_answer_exploratory_wall",
+        "ic_cost": ic_ms, "rho_cost": rho_ms,
+        "ic_online_ms": ic_ms, "rho_online_ms": rho_ms,
+        "ic_online_wall_ms": ic_ms, "rho_online_wall_ms": rho_ms,
+        "online_speedup": rho_ms / ic_ms,
+        "controlled_online_speedup": None,
+        "automorphism_discount": {
+            "A": int(rho_record["automorphism_size"]),
+            "formula": "sqrt(A) for signed Frobenius classes",
+        },
+        "all_stages_charged_same_series": True,
+        "paired_target": {
+            "ic_public_q": ic_record["target"],
+            "rho_public_q": rho_record["published_q"],
+            "same_public_point": same_point(ic_record["target"], rho_record["published_q"]),
+        },
+        "ic_verified": ic_record["group_verified"] is True,
+        "rho_verified": rho_record["verified"] is True,
+        "ic_online_interval": f"{interval['ic_start_event']} -> {interval['ic_stop_event']}",
+        "rho_online_interval": f"{interval['rho_start_event']} -> {interval['rho_stop_event']}",
+        "operation_accounting": {
+            "unit_assumption": "IC root-index probes and rho walk steps are distinct native counters",
+            "comparison_status": "native_counters_only",
+            "operation_units": {"ic": "root-index probes", "rho": "walk steps"},
+            "ic_online_operations": probes,
+            "rho_online_operations": steps,
+            "rho_per_ic_native_counter": steps / probes if probes else None,
+            "ops_speedup_online": None,
+        },
+        "hardware_accounting": {
+            "status": "measured_common_counter" if complete_instructions else "counter_unavailable",
+            "unit": "calling-thread user instructions retired",
+            "method": "Linux perf_event_open around each producer's target online interval",
+            "ic_online_instructions": ic_instructions,
+            "rho_online_instructions": rho_instructions,
+            "rho_per_ic_instructions": rho_instructions / ic_instructions if complete_instructions else None,
+            "ic_time_enabled_ns": ic_hw.get("instructions_time_enabled_ns"),
+            "ic_time_running_ns": ic_hw.get("instructions_time_running_ns"),
+            "rho_time_enabled_ns": rho_hw.get("instructions_time_enabled_ns"),
+            "rho_time_running_ns": rho_hw.get("instructions_time_running_ns"),
+            "ic_counter_error": ic_hw.get("error"),
+            "rho_counter_error": rho_hw.get("error"),
+        },
+    }
 
 
 def untimed(record: dict[str, Any], extra_skip: tuple[str, ...] = ()) -> dict[str, Any]:
@@ -203,9 +286,9 @@ def replay_certificate(path: Path, digest: str, fixture: dict[str, Any],
     scalar = int(cert["scalar"])
     checks = {
         "digest_matches": recomputed == digest,
-        "target_is_workload_target": cert["target"] == [int(v) for v in fixture["targets"][0]],
+        "target_is_workload_target": same_point(cert["target"], [int(v) for v in fixture["targets"][0]]),
         "target_in_subgroup": target is not None and curve.mul(target, curve.r) is None,
-        "generator_matches_fixture": cert["generator"] == [int(v) for v in fixture["generator"]],
+        "generator_matches_fixture": same_point(cert["generator"], [int(v) for v in fixture["generator"]]),
         "scalar_in_range": 0 <= scalar < curve.r,
         "scalar_times_g_is_target": curve.mul(curve.g, scalar) == target,
     }
@@ -217,7 +300,8 @@ def replay_certificate(path: Path, digest: str, fixture: dict[str, Any],
             total = curve.add(total, point)
         checks["relation_points_on_curve"] = all(
             p is not None and curve.decode([p[0], p[1]]) == p for p in points)
-        checks["relation_x_codes_match_points"] = [p[0] if p else None for p in points] == cert["relation"]["x_codes"]
+        checks["relation_x_codes_match_points"] = [str(p[0]) if p else None for p in points] == [
+            str(x) for x in cert["relation"]["x_codes"]]
         checks["relation_sums_to_target"] = total == target
     return {"arm": cert["arm"], "digest_recomputed": recomputed, "checks": checks,
             "statement_holds": all(checks.values()), "checker": "oracle.py (pure-Python field arithmetic)"}
@@ -387,7 +471,7 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                 summary_rows = lab.read_jsonl(run / f"logs/tune_K{k}_w{seed:03d}.summary.json")
                 summary = summary_rows[-1] if summary_rows else {}
                 ok = (measured["exit_code"] == 0 and len(records) == 1
-                      and records[0].get("group_verified") is True and records[0]["target"] == entry["point"])
+                      and records[0].get("group_verified") is True and same_point(records[0]["target"], entry["point"]))
                 tune["rows"].append({
                     "K": k, "workload": seed, "state": "ok" if ok else "failed",
                     "estimated_ic_rss_bytes": need, "available_memory_bytes": available,
@@ -448,12 +532,15 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                     env=dict(rho_env, KIC_RHO_EXPLICIT_SCALAR=str(scalar)), stdout_path=out,
                     stderr_path=run / f"logs/identity_{arm}.stderr.txt", cpu=arguments.cpu)
                 outputs[arm] = (measured, lab.read_jsonl(out), [])
-            ic_new = [untimed(x, ("relation_checks",)) for x in outputs["ic"][1]]
+            ic_new = [untimed(x, ("relation_checks", "online_hw_counts", "online_hw_scope",
+                                   "root_calls", "skipped_symmetric_states"))
+                      for x in outputs["ic"][1]]
             ic_old = [untimed(x) for x in outputs["frozen_ic"][1]]
             summary_keys = ("base_hash", "rank", "rank_attempts", "rank_relations", "rank_failures",
                             "regular_states", "root_table_entries", "targets_solved")
             ic_summaries = [o[2][-1] if o[2] else {} for o in (outputs["ic"], outputs["frozen_ic"])]
-            rho_new = [untimed(x, ("producer_version",)) for x in outputs["rho"][1]]
+            rho_new = [untimed(x, ("producer_version", "online_hw_counts", "online_hw_scope"))
+                       for x in outputs["rho"][1]]
             rho_old = [untimed(x, ("producer_version",)) for x in outputs["frozen_rho"][1]]
             report = {
                 "known_scalar": scalar, "K": k_choice, "rho_seed": beat["rho_seed_base"],
@@ -463,7 +550,8 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                     ic_summaries[0].get(k) == ic_summaries[1].get(k) for k in summary_keys),
                 "rho_untimed_records_identical": bool(rho_new) and rho_new == rho_old,
                 "compared": "every record field except timers (*_ms, *_ns, *_event), the IC's new "
-                            "relation_checks counter and rho's producer_version",
+                            "relation_checks/root_calls/skipped_symmetric_states counters, rho's "
+                            "producer_version and online hardware counters",
             }
             report["identical"] = all(code == 0 for code in report["exit_codes"].values()) and all(
                 report[k] for k in ("ic_untimed_records_identical", "ic_setup_summary_identical",
@@ -519,7 +607,8 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
         base_rows = lab.read_jsonl(base_path)[:1]
         lab.require(bool(base_rows), f"base dump missing: {base_path}")
         base = base_rows[0]
-        base_points = [tuple(p) if p else None for p in base["factor_base_point_coordinates"]]
+        base_points = [tuple(int(c) for c in p) if p else None
+                      for p in base["factor_base_point_coordinates"]]
         representatives = [list(p) for p in base["factor_base_representatives"]]
         curve_ids = lab.read_json(REPO / beat["curve_ids"])
         curve_rec = next(c for c in curve_ids["curves"] if (c["a"], c["n"]) == (a, n))
@@ -588,8 +677,8 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
             fixture = fixture_base | {"targets": [[str(v) for v in row["target"]]], "target_seeds": [seed],
                                       "target_scalar_constructed": False}
             producers_ok = row["ic"]["exit_code"] == 0 and row["rho"]["exit_code"] == 0
-            ic_ok = bool(ic_record) and ic_record.get("group_verified") is True and ic_record["target"] == row["target"]
-            rho_ok = bool(rho_record) and rho_record.get("verified") is True and rho_record["published_q"] == row["target"]
+            ic_ok = bool(ic_record) and ic_record.get("group_verified") is True and same_point(ic_record["target"], row["target"])
+            rho_ok = bool(rho_record) and rho_record.get("verified") is True and same_point(rho_record["published_q"], row["target"])
             verify: dict[str, Any] = {"workload": seed, "producers_ok": producers_ok, "ic_ok": ic_ok, "rho_ok": rho_ok,
                                       "base_hash": (row["ic_summary"] or {}).get("base_hash")}
             if not (producers_ok and ic_ok and rho_ok):
@@ -641,6 +730,7 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
             ic_cold_ms = ic_record["online_stop_ns"] / 1e6
             rho_cold_ms = rho_record["online_stop_ns"] / 1e6
             claim = {
+                **primary_claim_fields(ic_record, rho_record, online_interval),
                 "schema_version": 2, "task_id": lab.TASK_ID, "beat_id": beat_id, "autolab_run_id": run.name,
                 "stage": "vs_rho", "status": "PENDING_INDEPENDENT_VALIDATION",
                 "regime": beat["regime"], "result_class": beat["result_class"],
@@ -650,8 +740,6 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                 "workload_id": work["workload_id"], "workload_manifest_sha256": work["record_sha256"],
                 "run_id": run_key, "rho_reference_uid": rho_uid["candidate_uid"],
                 "target_count": 1, "ic_target_hash": target_hash, "rho_target_hash": target_hash,
-                "timing_class": "single_target_online_wall",
-                "ic_online_wall_ms": ic_ms, "rho_online_wall_ms": rho_ms, "online_speedup": speedup,
                 "ic_online_phase_ms": {schema: float(ic_record[field]) for schema, field in PHASE_FIELDS.items()},
                 "rho_online_phase_ms": {"walk_and_collision_ms": rho_record["walk_and_collision_ms"],
                                         "recovery_check_ms": rho_record["recovery_check_ms"]},

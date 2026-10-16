@@ -30,6 +30,12 @@ on:
 permissions:
   contents: read
 
+# A newer push to the same pull request cancels this workflow's run for the older commit.
+# Every other event (push, schedule, dispatch) gets a group of its own and is never cancelled.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && github.workflow_ref || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   names:
     runs-on: ubuntu-latest
@@ -48,5 +54,9 @@ jobs:
       - name: The pull request adds no retired curve name
         if: github.event_name == 'pull_request'
         env:
-          BASE: ${{ github.event.pull_request.base.sha }}
-        run: python3 scripts/check_curve_names.py --diff "$BASE"
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # Checkout uses the synthetic PR merge commit. Its first parent is
+          # the exact base used to build it, even if main advanced after the event.
+          test "$(git rev-parse HEAD^2)" = "$PR_HEAD"
+          python3 scripts/check_curve_names.py --diff "$(git rev-parse HEAD^1)"

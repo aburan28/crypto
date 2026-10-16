@@ -1,0 +1,11 @@
+% AUTHORS file template — copy to `AUTHORS` and fill in real names.
+%
+% After editing, run `make deanonymize` to restore the author block
+% in ecc2k130.tex before camera-ready / preprint.  The %pdfauthor= line
+% (plain text, no TeX) fills hyperref's PDF metadata; % lines are dropped.
+%pdfauthor=Author Name 1, Author Name 2
+
+\author{Author Name 1 \and Author Name 2 \\
+        Affiliation, Country \\
+        \texttt{email@example.org}}
+\date{\today}

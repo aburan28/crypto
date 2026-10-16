@@ -1,0 +1,91 @@
+{
+  "schema": "factor-base-delta-sweep-v1",
+  "field_degree": 19,
+  "structure": "standard",
+  "summands": 2,
+  "dmax": 6,
+  "targets": 16,
+  "rows": [
+    {
+      "delta": -1,
+      "dim": 10,
+      "nvars": 20,
+      "decomposable_fraction": 0.6875,
+      "unsat_measured": 5,
+      "censored_above_dmax": 0,
+      "d_star_mean": 5.0,
+      "d_star_max": 5,
+      "macaulay_rows_mean": 25669.0,
+      "macaulay_cols_mean": 21700.0,
+      "work_proxy": 557017300.0,
+      "work_per_relation_proxy": 810206981.8181819
+    },
+    {
+      "delta": 1,
+      "dim": 9,
+      "nvars": 18,
+      "decomposable_fraction": 0.1875,
+      "unsat_measured": 13,
+      "censored_above_dmax": 0,
+      "d_star_mean": 4.0,
+      "d_star_max": 4,
+      "macaulay_rows_mean": 3268.0,
+      "macaulay_cols_mean": 4048.0,
+      "work_proxy": 13228864.0,
+      "work_per_relation_proxy": 70553941.33333333
+    },
+    {
+      "delta": 3,
+      "dim": 8,
+      "nvars": 16,
+      "decomposable_fraction": 0.125,
+      "unsat_measured": 14,
+      "censored_above_dmax": 0,
+      "d_star_mean": 3.857142857142857,
+      "d_star_max": 4,
+      "macaulay_rows_mean": 2277.285714285714,
+      "macaulay_cols_mean": 2257.0,
+      "work_proxy": 5139833.857142857,
+      "work_per_relation_proxy": 41118670.85714286
+    },
+    {
+      "delta": 5,
+      "dim": 7,
+      "nvars": 14,
+      "decomposable_fraction": 0.0,
+      "unsat_measured": 16,
+      "censored_above_dmax": 0,
+      "d_star_mean": 2.875,
+      "d_star_max": 3,
+      "macaulay_rows_mean": 251.75,
+      "macaulay_cols_mean": 424.5,
+      "work_proxy": 106867.875
+    },
+    {
+      "delta": 7,
+      "dim": 6,
+      "nvars": 12,
+      "decomposable_fraction": 0.0,
+      "unsat_measured": 16,
+      "censored_above_dmax": 0,
+      "d_star_mean": 2.0,
+      "d_star_max": 2,
+      "macaulay_rows_mean": 19.0,
+      "macaulay_cols_mean": 79.0,
+      "work_proxy": 1501.0
+    },
+    {
+      "delta": 9,
+      "dim": 5,
+      "nvars": 10,
+      "decomposable_fraction": 0.0,
+      "unsat_measured": 16,
+      "censored_above_dmax": 0,
+      "d_star_mean": 2.0,
+      "d_star_max": 2,
+      "macaulay_rows_mean": 19.0,
+      "macaulay_cols_mean": 56.0,
+      "work_proxy": 1064.0
+    }
+  ]
+}

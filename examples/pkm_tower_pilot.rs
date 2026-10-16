@@ -30,12 +30,29 @@
 //! rewriting rules, the other equations its input in normal form (the
 //! `reduced` presentation), and the naive control, which has no tower, is
 //! skipped. `--max-nnz` stops a system whose matrices grow past a size, and
-//! `--trace` prints its step trace.
+//! `--trace` prints its step trace, with the step a stop cut off as a
+//! `tower stop in step` line. `--targets 1` measures target 1 alone: every
+//! target is still drawn, so it is the system a full run gives it.
+//!
+//! `--kinds dickson-torus` builds the Dickson tower in its torus case
+//! (`2^t | p + 1`, `u` and `μ_{2^t}` in the norm-1 torus of `F_{p²}`; note
+//! §2.1), checked by `check_torus` before anything is measured.
+//! `--null-chain` runs the null control at `m ≥ 3` as well, with every `S₃`
+//! link of the chain given random coefficients on its own support
+//! (`research/pkm_dickson_torus_20261015/`).
 //!
 //! The committed runs, their exact flags and the scripts that tabulate and
 //! cross-check them are in `research/pkm_tower_pilot_20260924/` (the pilot,
 //! `f4_fp`) and `research/pkm_tower_round2_20260925/` (round 2,
 //! `f4_fp_tower`).
+//!
+//! `--export-magma-rows ROWS.jsonl[,…] --export-dir DIR` measures nothing: it
+//! rebuilds the Kummer `tower` system of every committed row (from the row's
+//! `p`, curve, `g`, `m`, `t` and `x_r`, through the same `system` the row
+//! was measured on) and writes it as a Magma script that times
+//! `GroebnerBasis` (F4, Magma's default over a prime field) and reports
+//! whether the ideal is the unit ideal, which the row's `inconsistent` must
+//! match (`research/magma_f4_comparison_20261013/`).
 //!
 //! ```bash
 //! cargo run --release --example pkm_tower_pilot -- --out pilot.jsonl
@@ -219,6 +236,9 @@ enum Kind {
     Kummer,
     Dickson,
     Isogeny,
+    /// The Dickson tower in its torus case (`2^t | p + 1`). Last, so the
+    /// cell seeds of the other kinds (`kind as u64`) are unchanged.
+    DicksonTorus,
 }
 
 impl Kind {
@@ -227,6 +247,7 @@ impl Kind {
             Kind::Kummer => "kummer",
             Kind::Dickson => "dickson",
             Kind::Isogeny => "isogeny",
+            Kind::DicksonTorus => "dickson-torus",
         }
     }
 }
@@ -450,6 +471,152 @@ fn dickson(p: u64, t: usize, rng: &mut StdRng) -> Tower {
     }
 }
 
+// ── The Dickson torus case (note §2.1, `2^t | p + 1`) ───────────────
+//
+// `F_{p²} = F_p(i)` with `i² = −1`, which is a field because `p ≡ 3 mod 4`
+// whenever `4 | p + 1`. An element is `(re, im)`. The norm-1 torus
+// `T = {w : w·w̄ = 1}` is cyclic of order `p + 1`; on it `w̄ = w^p = w^{−1}`,
+// so `w + w^{−1} = 2·re(w)` lies in `F_p`.
+
+type Fp2 = (u64, u64);
+
+fn fp2_mul(x: Fp2, y: Fp2, p: u64) -> Fp2 {
+    (
+        subm(mulm(x.0, y.0, p), mulm(x.1, y.1, p), p),
+        addm(mulm(x.0, y.1, p), mulm(x.1, y.0, p), p),
+    )
+}
+
+fn fp2_pow(mut x: Fp2, mut e: u64, p: u64) -> Fp2 {
+    let mut r = (1u64, 0u64);
+    while e > 0 {
+        if e & 1 == 1 {
+            r = fp2_mul(r, x, p);
+        }
+        x = fp2_mul(x, x, p);
+        e >>= 1;
+    }
+    r
+}
+
+/// `x^{−1} = x̄ / N(x)`, for any non-zero `x` (not only torus elements).
+fn fp2_inv(x: Fp2, p: u64) -> Fp2 {
+    let n = addm(mulm(x.0, x.0, p), mulm(x.1, x.1, p), p);
+    let ni = invm(n, p);
+    (mulm(x.0, ni, p), mulm(subm(0, x.1, p), ni, p))
+}
+
+/// A random element of the torus `T`: `z^{p−1} = z̄/z` for a random
+/// `z ∈ F_{p²}^*`.
+fn torus_element(p: u64, rng: &mut StdRng) -> Fp2 {
+    loop {
+        let z = (rng.gen_range(0..p), rng.gen_range(0..p));
+        if z == (0, 0) {
+            continue;
+        }
+        let w = fp2_pow(z, p - 1, p);
+        debug_assert_eq!(fp2_mul(w, fp2_pow(w, p, p), p), (1, 0));
+        return w;
+    }
+}
+
+/// The checks of note §2.1 for a torus tower, beyond [`Tower::check`]
+/// (which checks `|V| = 2^t`, distinctness and every level equation):
+/// - `V ⊂ F_p`: `w + w^{−1}` has no `i`-part for every `w ∈ u·μ_{2^t}`;
+/// - the case is the torus one: `y² − 4` is a non-residue for every
+///   `y ∈ V` (so `X² − yX + 1` has its roots in `T \ F_p`);
+/// - the tower is unramified: `y_j ≠ 0` at every level on `V` (`c` avoids
+///   the critical value `−2` along the chain), and `c ≠ ±2`.
+///
+/// Panics otherwise.
+fn check_torus(tower: &Tower, u: Fp2, zeta: Fp2, p: u64) {
+    let t = tower.t;
+    assert_eq!(p % 4, 3, "the torus case needs p ≡ 3 mod 4");
+    assert!(
+        (p + 1).is_multiple_of(1u64 << t),
+        "2^{t} does not divide p + 1"
+    );
+    // ζ has exact order 2^t in T; u is in T and u² ∉ μ_{2^t}.
+    assert_eq!(fp2_pow(zeta, 1u64 << t, p), (1, 0), "ζ^(2^t) ≠ 1");
+    assert_eq!(
+        fp2_pow(zeta, 1u64 << (t - 1), p),
+        (p - 1, 0),
+        "ζ does not have exact order 2^t"
+    );
+    assert_eq!(fp2_pow(u, p + 1, p), (1, 0), "u is not in the torus");
+    assert_ne!(u.1, 0, "u lies in F_p: the split case, not the torus");
+    assert_ne!(fp2_pow(u, 1u64 << (t + 1), p), (1, 0), "u² ∈ μ_{{2^t}}");
+    let mut w = u;
+    for (k, &x) in tower.v.iter().enumerate() {
+        // By the general inverse, not by the conjugate the builder used.
+        let wi = fp2_inv(w, p);
+        let sum = (addm(w.0, wi.0, p), addm(w.1, wi.1, p));
+        assert_eq!(sum.1, 0, "w + 1/w ∉ F_p at k = {k}");
+        assert_eq!(sum.0, x, "V[{k}] is not w + 1/w");
+        let disc = subm(mulm(x, x, p), 4, p);
+        assert_eq!(
+            powm(disc, (p - 1) / 2, p),
+            p - 1,
+            "y² − 4 is not a non-residue at V[{k}]: not the torus case"
+        );
+        let y = tower.values(x, p);
+        assert!(y.iter().all(|&yj| yj != 0), "a level is ramified at V[{k}]");
+        w = fp2_mul(w, zeta, p);
+    }
+    assert!(tower.c != 2 && tower.c != p - 2, "c = ±2");
+}
+
+/// The Dickson tower in its torus case: `V = {w + w^{−1} : w ∈ u·μ_{2^t}}`
+/// with `u` and `μ_{2^t}` in the norm-1 torus `T ⊂ F_{p²}^*`, which needs
+/// `2^t | p + 1`. The step is `y ↦ y² − 2` and `c = u^{2^t} + u^{−2^t}`,
+/// as in the split case: only the numbers change, never the equations.
+fn dickson_torus(p: u64, t: usize, rng: &mut StdRng) -> Tower {
+    assert!(
+        p % 4 == 3 && (p + 1).is_multiple_of(1u64 << t),
+        "the torus case needs 2^{t} | p + 1 (and p ≡ 3 mod 4)"
+    );
+    // A primitive 2^t-th root of unity in T: h^{(p+1)/2^t} for an h ∈ T
+    // that is not a square in T.
+    let zeta = loop {
+        let h = torus_element(p, rng);
+        if fp2_pow(h, p.div_ceil(2), p) == (p - 1, 0) {
+            break fp2_pow(h, (p + 1) >> t, p);
+        }
+    };
+    loop {
+        let u = torus_element(p, rng);
+        if u.1 == 0 || fp2_pow(u, 1u64 << (t + 1), p) == (1, 0) {
+            continue;
+        }
+        let mut v = Vec::with_capacity(1 << t);
+        let mut w = u;
+        for _ in 0..1u64 << t {
+            // On T, w^{−1} = w̄, so w + w^{−1} = 2·re(w).
+            v.push(addm(w.0, w.0, p));
+            w = fp2_mul(w, zeta, p);
+        }
+        let mut s = v.clone();
+        s.sort_unstable();
+        s.dedup();
+        if s.len() != 1 << t {
+            continue;
+        }
+        let ut = fp2_pow(u, 1u64 << t, p);
+        let c = addm(ut.0, ut.0, p);
+        let tower = Tower {
+            kind: Kind::DicksonTorus,
+            t,
+            v,
+            scale: 1,
+            steps: vec![Step::Dickson; t],
+            c,
+            info: json!({"case": "torus", "u": [u.0, u.1], "zeta": [zeta.0, zeta.1], "c": c}),
+        };
+        check_torus(&tower, u, zeta, p);
+        return tower;
+    }
+}
+
 fn random_point(curve: &PrimeCurve, rng: &mut StdRng) -> PrimePoint {
     loop {
         let x = rng.gen_range(0..curve.p);
@@ -584,6 +751,7 @@ fn build_tower(kind: Kind, p: u64, t: usize, rng: &mut StdRng) -> Tower {
         Kind::Kummer => kummer(p, t, rng),
         Kind::Dickson => dickson(p, t, rng),
         Kind::Isogeny => isogeny(p, t, rng),
+        Kind::DicksonTorus => dickson_torus(p, t, rng),
     };
     tower.check(p);
     tower
@@ -764,17 +932,20 @@ fn system(
     let n = m * t + (m - 2);
     let mut eqs = summation(tower, curve, m, n, target.x_r);
     if control == Control::Null {
-        // S₃'s support, random coefficients, planted zero.
-        assert_eq!(m, 2);
-        let mut f = Pol::zero(n);
-        for e in eqs[0].terms.keys() {
-            f.terms.insert(e.clone(), rng.gen_range(1..p));
+        // S₃'s support, random coefficients, planted zero: at m = 2 the one
+        // S₃, and at m ≥ 3 (`--null-chain`) every S₃ link of the chain, in
+        // order. At m = 2 the draws are those of the pilot's null.
+        for eq in eqs.iter_mut() {
+            let mut f = Pol::zero(n);
+            for e in eq.terms.keys() {
+                f.terms.insert(e.clone(), rng.gen_range(1..p));
+            }
+            if let Some(sol) = &target.solution {
+                let c = f.eval(sol, p);
+                f = f.sub(&Pol::constant(n, c, p), p);
+            }
+            *eq = f;
         }
-        if let Some(sol) = &target.solution {
-            let c = f.eval(sol, p);
-            f = f.sub(&Pol::constant(n, c, p), p);
-        }
-        eqs[0] = f;
     }
     let towers_from = eqs.len();
     for i in 0..m {
@@ -940,12 +1111,60 @@ fn memory_mb() -> Option<(u64, u64)> {
 /// One line of a tower run's step trace, with the process's memory when the
 /// step ended.
 fn print_tower_step(k: usize, st: &f4_fp_tower::StepTrace) {
+    eprintln!("tower step {k}: {}", tower_step_fields(st));
+}
+
+/// The step a stop cut off (`TowerF4Report::stopped_step`), as far as it
+/// got, at the moment of the stop: with the process's memory and its
+/// address space, which `ulimit -v` caps. Its prefix differs from a
+/// step's, so that no reader of traces takes it for a finished step.
+fn print_stopped_step(k: usize, oversize: bool, st: &f4_fp_tower::StepTrace) {
+    let why = if oversize {
+        "oversize: --max-nnz"
+    } else {
+        "budget"
+    };
+    let space = address_space_mb().map_or(String::new(), |(size, peak)| {
+        format!(", address space {size} MB (peak {peak} MB)")
+    });
+    let live = live_heap_mb().map_or(String::new(), |mb| format!(", live heap {mb} MB"));
+    eprintln!(
+        "tower stop in step {k} ({why}): {}{space}{live}",
+        tower_step_fields(st)
+    );
+}
+
+/// The bytes the allocator holds for live allocations, in MB: what the run
+/// still uses, without the freed memory the allocator keeps mapped for
+/// reuse, which the address space counts. glibc only.
+#[cfg(all(target_os = "linux", target_env = "gnu"))]
+fn live_heap_mb() -> Option<u64> {
+    // SAFETY: mallinfo2 only reads the allocator's counters.
+    let m = unsafe { libc::mallinfo2() };
+    Some(((m.uordblks + m.hblkhd) >> 20) as u64)
+}
+
+#[cfg(not(all(target_os = "linux", target_env = "gnu")))]
+fn live_heap_mb() -> Option<u64> {
+    None
+}
+
+/// The process's address space and its peak, in MB (`VmSize`, `VmPeak`).
+fn address_space_mb() -> Option<(u64, u64)> {
+    let status = std::fs::read_to_string("/proc/self/status").ok()?;
+    let field = |key: &str| -> Option<u64> {
+        let line = status.lines().find(|l| l.starts_with(key))?;
+        Some(line.split_whitespace().nth(1)?.parse::<u64>().ok()? / 1024)
+    };
+    Some((field("VmSize:")?, field("VmPeak:")?))
+}
+
+fn tower_step_fields(st: &f4_fp_tower::StepTrace) -> String {
     let memory = memory_mb().map_or(String::new(), |(rss, peak)| {
         format!(", memory {rss} MB (peak {peak} MB)")
     });
-    eprintln!(
-        "tower step {}: degree {}, {} critical + {} tower pairs, {} S-rows + {} reducers + {} promoted x {} cols, nnz {}, residue {} x {}, fresh {} (lowest degree {}), basis {}, pairs left {}, {:.1} ms (rows {:.0}, A {:.0}, B {:.0}, update {:.0}), B' {} entries, kept {} elements with {} entries, muladds {}{}{}",
-        k,
+    format!(
+        "degree {}, {} critical + {} tower pairs, {} S-rows + {} reducers + {} promoted x {} cols, nnz {}, residue {} x {}, fresh {} (lowest degree {}), basis {}, pairs left {}, {:.1} ms (rows {:.0}, A {:.0}, B {:.0}, update {:.0}), B' {} entries, kept {} elements with {} entries, muladds {}{}{}",
         st.degree,
         st.critical_pairs,
         st.tower_pairs,
@@ -974,7 +1193,7 @@ fn print_tower_step(k: usize, st: &f4_fp_tower::StepTrace) {
             st.s_rows, st.skipped_rows
         )),
         memory
-    );
+    )
 }
 
 /// One line of a signature-engine run's step trace, with the process's
@@ -1031,6 +1250,7 @@ fn measure_tower(
     budget: Duration,
     stop_below: Option<usize>,
     max_nnz: Option<u64>,
+    max_dense: Option<u64>,
     trace: bool,
     full_rank_exit: bool,
     sig: Option<sig_fp_tower::SigOptions>,
@@ -1066,10 +1286,15 @@ fn measure_tower(
     if let Some(c) = max_nnz {
         opts = opts.with_max_nnz(c);
     }
+    if let Some(c) = max_dense {
+        opts = opts.with_max_dense(c);
+    }
     opts.full_rank_exit = full_rank_exit;
     if trace {
-        // Each step as it ends, so that a run that dies leaves its trace.
+        // Each step as it ends, so that a run that dies leaves its trace,
+        // and a step a stop cuts off when it does.
         opts = opts.on_step(print_tower_step);
+        opts.on_stop = Some(print_stopped_step);
         opts.on_sig_step = Some(print_sig_step);
     }
     let (r, sig_stats) = if let Some(so) = sig {
@@ -1124,6 +1349,10 @@ fn measure_tower(
             "max_residual_rows": r.max_residual_rows,
             "full_rank_exit": sig.is_none().then_some(full_rank_exit),
             "rows_skipped_full_rank": sig.is_none().then_some(r.rows_skipped),
+            // The largest `B'`, counting a step stopped for it, and that
+            // step as far as it got (both added in round 7).
+            "max_dense_entries": sig.is_none().then_some(r.max_dense_entries),
+            "stopped_step": r.stopped_step,
             "oversize": r.oversize,
             "critical_pairs_reduced": r.critical_pairs_reduced,
             "tower_pairs_reduced": r.tower_pairs_reduced,
@@ -1152,6 +1381,10 @@ struct Args {
     /// large `N` that tail, not the solve, exhausts memory.
     planted_max_t: usize,
     random: usize,
+    /// `--null-chain`: run the null control at `m ≥ 3` too, with every `S₃`
+    /// link of the chain given random coefficients on its own support (off
+    /// by default, so every committed command line runs what it ran).
+    null_chain: bool,
     budget: u64,
     seed: u64,
     ladder_ts: Vec<usize>,
@@ -1170,8 +1403,12 @@ struct Args {
     /// committed pilot row), `f4_fp_tower` on the tower quotient ring, or
     /// the signature-based `sig_fp_tower` on the same ring.
     engine: Engine,
-    /// `f4_fp_tower` only: stop before a matrix with more non-zeros.
+    /// `f4_fp_tower` only: stop before a matrix with more non-zeros, or a
+    /// `B'` with more entries.
     max_nnz: Option<u64>,
+    /// `f4_fp_tower` only: the bound on `B'` alone, in place of `--max-nnz`
+    /// (round 7).
+    max_dense: Option<u64>,
     /// `f4_fp_tower` only: print one line per F4 step.
     trace: bool,
     /// `f4_fp_tower` only: skip a step's remaining S-rows once their
@@ -1179,6 +1416,10 @@ struct Args {
     full_rank_exit: bool,
     /// `sig_fp_tower` only: the module and rewrite orders.
     sig: sig_fp_tower::SigOptions,
+    /// Measure only the targets with these indices (`target_index`). Every
+    /// target and system is still drawn, in order, so each one measured is
+    /// the system a run without the flag gives it.
+    targets: Option<Vec<usize>>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -1219,6 +1460,7 @@ fn parse_args() -> Args {
         planted: 3,
         planted_max_t: usize::MAX,
         random: 3,
+        null_chain: false,
         budget: 60,
         seed: 0x504B_4D54,
         ladder_ts: vec![4, 6],
@@ -1229,9 +1471,11 @@ fn parse_args() -> Args {
         dump: None,
         engine: Engine::F4,
         max_nnz: None,
+        max_dense: None,
         trace: false,
         full_rank_exit: true,
         sig: sig_fp_tower::SigOptions::default(),
+        targets: None,
     };
     let args: Vec<String> = std::env::args().skip(1).collect();
     let list = |s: &str| -> Vec<usize> {
@@ -1244,6 +1488,11 @@ fn parse_args() -> Args {
     while i < args.len() {
         if args[i] == "--trace" {
             a.trace = true;
+            i += 1;
+            continue;
+        }
+        if args[i] == "--null-chain" {
+            a.null_chain = true;
             i += 1;
             continue;
         }
@@ -1262,6 +1511,7 @@ fn parse_args() -> Args {
                         "kummer" => Kind::Kummer,
                         "dickson" => Kind::Dickson,
                         "isogeny" => Kind::Isogeny,
+                        "dickson-torus" => Kind::DicksonTorus,
                         other => panic!("unknown kind `{other}`"),
                     })
                     .collect()
@@ -1301,6 +1551,7 @@ fn parse_args() -> Args {
                 }
             }
             "--max-nnz" => a.max_nnz = Some(v.parse().expect("--max-nnz")),
+            "--max-dense" => a.max_dense = Some(v.parse().expect("--max-dense")),
             "--sig-order" => {
                 a.sig.order = match v.as_str() {
                     "pot" => sig_fp_tower::ModuleOrder::PositionFirst,
@@ -1324,6 +1575,7 @@ fn parse_args() -> Args {
                 }
             }
             "--dump" => a.dump = Some(v.parse().expect("--dump")),
+            "--targets" => a.targets = Some(list(&v)),
             other => panic!("unknown flag `{other}`"),
         }
         i += 2;
@@ -1402,6 +1654,9 @@ fn run_cell(cell: &Cell, a: &Args, sink: &mut Sink) -> bool {
             // The naive control has no tower to rewrite by.
             continue;
         }
+        if a.targets.as_ref().is_some_and(|ts| !ts.contains(&k)) {
+            continue;
+        }
         let d_in: Vec<u32> = eqs.iter().map(Pol::degree).collect();
         let d_max = d_in.iter().copied().max().unwrap_or(1);
         let max_degree = match (a.cap, cell.control) {
@@ -1435,6 +1690,7 @@ fn run_cell(cell: &Cell, a: &Args, sink: &mut Sink) -> bool {
                     Duration::from_secs(a.budget),
                     a.stop_below,
                     a.max_nnz,
+                    a.max_dense,
                     a.trace,
                     a.full_rank_exit,
                     (a.engine == Engine::Sig).then_some(a.sig),
@@ -1601,7 +1857,126 @@ fn dump_basis(basis: &[Poly], cell: &Cell, k: u32) {
     }
 }
 
+/// `--export-magma-rows`: one Magma script per distinct committed Kummer
+/// `tower` row, and one JSON line per script with the row's own F4 result.
+fn export_magma_rows(files: &[String], dir: &str) {
+    std::fs::create_dir_all(dir).expect("create --export-dir");
+    let mut seen = std::collections::BTreeSet::new();
+    for path in files {
+        let text = std::fs::read_to_string(path).expect("read a rows file");
+        for line in text.lines().filter(|l| !l.trim().is_empty()) {
+            let r: Value = serde_json::from_str(line).expect("a JSON row");
+            if r["kind"] != "kummer" || r["control"] != "tower" {
+                continue;
+            }
+            let u = |k: &str| r[k].as_u64().unwrap_or_else(|| panic!("{path}: no {k}"));
+            let (p, m, t, x_r) = (u("p"), u("m") as usize, u("t") as usize, u("x_r"));
+            let (ca, cb) = (
+                r["curve"]["a"].as_u64().unwrap(),
+                r["curve"]["b"].as_u64().unwrap(),
+            );
+            let g = r["tower"]["g"].as_u64().expect("tower.g");
+            if !seen.insert((p, m, t, x_r, g, ca, cb)) {
+                continue;
+            }
+            let tower = Tower {
+                kind: Kind::Kummer,
+                t,
+                v: Vec::new(),
+                scale: g,
+                steps: vec![Step::Square; t],
+                c: 1,
+                info: r["tower"].clone(),
+            };
+            let curve = PrimeCurve { p, a: ca, b: cb };
+            let target = Target {
+                planted: false,
+                x_r,
+                solution: None,
+                xs: Vec::new(),
+            };
+            let mut rng = StdRng::seed_from_u64(0);
+            let (eqs, n, _, _) = system(Control::Tower, &tower, &curve, m, &target, 1, &mut rng);
+            let name = format!("pkm_kummer_p{p}_m{m}_t{t}_x{x_r}");
+            let mut names: Vec<String> = Vec::new();
+            for i in 0..m {
+                for j in 0..t {
+                    names.push(format!("y{i}_{j}"));
+                }
+            }
+            for k in 0..m.saturating_sub(2) {
+                names.push(format!("u{k}"));
+            }
+            assert_eq!(names.len(), n);
+            let mut out = format!(
+                "// {name}: PKM's Kummer tower system (m = {m}, t = {t}, N = {}, {n} unknowns, {} equations)\n\
+                 // from {path}; written by examples/pkm_tower_pilot.rs --export-magma-rows.\n\
+                 // Ours (that row): engine {}, {} ms, inconsistent = {}, timed out = {}.\n\
+                 K := GF({p});\nP := PolynomialRing(K, {n}, \"grevlex\");\nAssignNames(~P, [{}]);\nF := [P |\n",
+                m * t,
+                eqs.len(),
+                r["engine"].as_str().unwrap_or("f4_fp"),
+                r["ms"],
+                r["inconsistent"],
+                r["timed_out"],
+                names.iter().map(|s| format!("\"{s}\"")).collect::<Vec<_>>().join(", ")
+            );
+            let polys: Vec<String> = eqs
+                .iter()
+                .map(|f| {
+                    let ts: Vec<String> = f
+                        .terms
+                        .iter()
+                        .map(|(e, c)| {
+                            let mut t = c.to_string();
+                            for (i, &k) in e.iter().enumerate() {
+                                if k == 1 {
+                                    t.push_str(&format!("*P.{}", i + 1));
+                                } else if k > 1 {
+                                    t.push_str(&format!("*P.{}^{k}", i + 1));
+                                }
+                            }
+                            t
+                        })
+                        .collect();
+                    format!("  {}", ts.join(" + "))
+                })
+                .collect();
+            out.push_str(&polys.join(",\n"));
+            out.push_str(&format!(
+                "\n];\nI := ideal<P | F>;\n\
+                 t0 := Cputime(); G := GroebnerBasis(I); tg := Cputime(t0);\n\
+                 unit := G eq [P | 1];\n\
+                 printf \"RESULT-GB name={name} p={p} magma_gb_s=%o basis_len=%o unit=%o ours_inconsistent={}\\n\", tg, #G, unit;\n\
+                 if not unit and Dimension(I) eq 0 then\n\
+                 \x20 t1 := Cputime(); V := Variety(I); printf \"RESULT-VAR name={name} magma_variety_s=%o magma_solutions=%o\\n\", Cputime(t1), #V;\n\
+                 end if;\n",
+                r["inconsistent"]
+            ));
+            let file = format!("{dir}/{name}.magma");
+            std::fs::write(&file, &out).expect("write a Magma script");
+            println!(
+                "{}",
+                json!({"name": name, "row_file": path, "p": p, "m": m, "t": t, "N": m * t, "x_r": x_r,
+                       "ours_engine": r["engine"], "ours_ms": r["ms"], "ours_muladds": r["muladds"],
+                       "ours_inconsistent": r["inconsistent"], "ours_timed_out": r["timed_out"],
+                       "script_bytes": out.len()})
+            );
+        }
+    }
+}
+
 fn main() {
+    let argv: Vec<String> = std::env::args().collect();
+    if let Some(i) = argv.iter().position(|x| x == "--export-magma-rows") {
+        let files: Vec<String> = argv[i + 1].split(',').map(String::from).collect();
+        let j = argv
+            .iter()
+            .position(|x| x == "--export-dir")
+            .expect("--export-dir");
+        export_magma_rows(&files, &argv[j + 1]);
+        return;
+    }
     let a = parse_args();
     let started = Instant::now();
     let mut sink = Sink {
@@ -1620,15 +1995,15 @@ fn main() {
                 3 => a.max_t_m3,
                 _ => a.max_t_m4,
             };
-            // The null and naive controls are written for m = 2, and the
-            // naive membership for the Kummer coset only.
+            // The naive control is written for m = 2 and the Kummer coset
+            // only; the null for m = 2, and for every m with `--null-chain`.
             let controls: Vec<Control> = a
                 .controls
                 .iter()
                 .copied()
                 .filter(|c| match c {
                     Control::Tower => true,
-                    Control::Null => m == 2,
+                    Control::Null => m == 2 || a.null_chain,
                     Control::Naive => m == 2 && kind == Kind::Kummer,
                     Control::Ladder => false,
                 })
@@ -1685,5 +2060,105 @@ fn main() {
     eprintln!("{summary}");
     if let Some(f) = sink.file.as_mut() {
         writeln!(f, "{}", json!({ "summary": summary })).expect("write --out");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// `7·2^21 − 1` and `61·2^25 − 1`, the torus primes of
+    /// `research/pkm_dickson_torus_20261015/`.
+    const TORUS_PRIMES: [u64; 2] = [14_680_063, 2_046_820_351];
+
+    #[test]
+    fn torus_tower_has_2t_distinct_values_in_fp() {
+        for &p in &TORUS_PRIMES {
+            for t in 1..=12 {
+                let mut rng = StdRng::seed_from_u64(0x7031 ^ t as u64);
+                // `build_tower` runs `Tower::check`, and `dickson_torus`
+                // runs `check_torus`: both panic on a wrong tower.
+                let tower = build_tower(Kind::DicksonTorus, p, t, &mut rng);
+                assert_eq!(tower.v.len(), 1 << t);
+                let mut s = tower.v.clone();
+                s.sort_unstable();
+                s.dedup();
+                assert_eq!(s.len(), 1 << t, "|V| = 2^t, p = {p}, t = {t}");
+                assert!(s.iter().all(|&x| x < p), "V ⊂ F_p");
+                // Every value climbs the chain to c.
+                for &x in &tower.v {
+                    let y = tower.values(x, p);
+                    assert_eq!(tower.apply(t - 1, y[t - 1], p), tower.c);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn torus_values_are_traces_of_torus_elements() {
+        // Independent of the builder: y ∈ V iff the roots of X² − yX + 1
+        // are a coset element and its inverse in T \ F_p, so y² − 4 is a
+        // non-residue, and D_{2^t}(y) = c.
+        let p = TORUS_PRIMES[0];
+        let t = 8;
+        let mut rng = StdRng::seed_from_u64(5);
+        let tower = build_tower(Kind::DicksonTorus, p, t, &mut rng);
+        for &y in &tower.v {
+            let d = subm(mulm(y, y, p), 4, p);
+            assert_eq!(powm(d, (p - 1) / 2, p), p - 1);
+            let mut z = y;
+            for _ in 0..t {
+                z = subm(mulm(z, z, p), 2, p);
+            }
+            assert_eq!(z, tower.c);
+        }
+        // c itself is not ±2 and D_{2^t} has exactly 2^t roots over c in V.
+        assert!(tower.c != 2 && tower.c != p - 2);
+    }
+
+    #[test]
+    #[should_panic(expected = "the torus case needs")]
+    fn torus_refuses_a_split_prime() {
+        let mut rng = StdRng::seed_from_u64(1);
+        // p₀ = 3·2^18 + 1: p + 1 = 2·393217, so 2^2 ∤ p + 1.
+        dickson_torus(786_433, 2, &mut rng);
+    }
+
+    #[test]
+    fn torus_tower_square_rules_vanish_on_v() {
+        // The f4_fp_tower rewriting rules are the Dickson ones: every tower
+        // equation reduces to zero in the ring, and every element of V^2
+        // satisfies the raw equations.
+        let p = TORUS_PRIMES[1];
+        let t = 6;
+        let mut rng = StdRng::seed_from_u64(9);
+        let tower = build_tower(Kind::DicksonTorus, p, t, &mut rng);
+        let ring = tower_ring(&tower, 2, p);
+        let n = 2 * t;
+        for i in 0..2 {
+            for e in tower.equations(n, i * t, p) {
+                assert!(ring.from_raw(&raw_terms(&e)).is_empty());
+            }
+        }
+    }
+
+    #[test]
+    fn chain_null_keeps_planted_zero() {
+        let p = TORUS_PRIMES[1];
+        let mut rng = StdRng::seed_from_u64(11);
+        let tower = build_tower(Kind::DicksonTorus, p, 3, &mut rng);
+        let (curve, on) = target_curve(p, &tower, 3, &mut rng);
+        let target = loop {
+            if let Some(tg) = plant(&curve, &tower, 3, &on, &mut rng) {
+                break tg;
+            }
+        };
+        let (eqs, _, sol, _) = system(Control::Null, &tower, &curve, 3, &target, 1, &mut rng);
+        let sol = sol.expect("planted");
+        assert!(eqs.iter().all(|e| e.eval(&sol, p) == 0));
+        // The null changed every chain link's coefficients.
+        let (tw, _, _, _) = system(Control::Tower, &tower, &curve, 3, &target, 1, &mut rng);
+        assert_ne!(eqs[0].terms, tw[0].terms);
+        assert_ne!(eqs[1].terms, tw[1].terms);
     }
 }

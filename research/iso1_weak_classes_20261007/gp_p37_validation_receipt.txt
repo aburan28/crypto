@@ -1,0 +1,11 @@
+PARI/GP 2.17.3, arm64 macOS, setrand(1501), p=37, 100 random norm-one Legendre parameters lambda=beta^(p^2-1) in F_(p^6).
+command: gp -q -f research/iso1_weak_classes_20261007/gp_p37_validation.gp > research/iso1_weak_classes_20261007/gp_p37_weak_traces.txt 2> research/iso1_weak_classes_20261007/gp_p37_validation_stderr.txt
+exit_code: 0
+stderr_bytes: 0
+traces: 100
+distinct_traces: 100
+traces_with_positive_weak_representative_in_p37_csv: 100
+traces_missing_from_positive_weak_set: 0
+script_sha256: 432e112c435db56679303a8651e071f882457a8003c050e38a2dd35664d800c3
+trace_output_sha256: 426d670112e0973962503af22dc1b7dad1e0e9852c39ee285e60c52a930bb599
+The first GP script attempt had a multiline for-loop syntax error and produced no trace rows; the corrected script and successful rerun are the evidence above.

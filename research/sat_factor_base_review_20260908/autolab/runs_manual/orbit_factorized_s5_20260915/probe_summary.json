@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "kind": "orbit_factorized_s5_probe_summary",
+  "task_id": "TASK-KIC-S5-THREE-PAIRINGS-XOR-20260910",
+  "claim_boundary": "Public-synthetic orbit-factorized S5 formula/accounting probe only. UNKNOWN at fixed conflict budget is not a relation-extraction win, SAT advantage, or vs_rho claim.",
+  "observations": [
+    {
+      "n": 13,
+      "eta": [1, 2],
+      "target_class": "planted",
+      "algebra_encoding": "factorized_s5_over_frobenius_orbit_factor_base",
+      "pair_table_entries": 0,
+      "pair_selector_variables": 0,
+      "variables": 2114,
+      "ordinary_clauses": 2440,
+      "native_xor_rows": 1367,
+      "conflict_budget": 100000,
+      "decomposition_verdict": "UNKNOWN",
+      "models_examined": 0,
+      "artifact": "n13_orbit_internal.json"
+    },
+    {
+      "n": 13,
+      "eta": [1, 2],
+      "target_class": "planted",
+      "algebra_encoding": "lazy_pair_roots_plus_factorized_final_s3_over_frobenius_orbits",
+      "pair_table_entries": 0,
+      "pair_selector_variables": 0,
+      "s3_root_theory_clauses": 339140,
+      "variables": 830,
+      "models_examined": 0,
+      "valid_x_tuples": 0,
+      "note": "stats backend rejects lazy roots; internal arm builds but finds no models in this smoke",
+      "artifact": "n13_planted_internal.json"
+    }
+  ],
+  "next": "Need reusable pair-level constraints that prune before four factors are fixed, or a different planted unit/helper path; relative_pair_stats panel already shows n-fold support compression through n=53."
+}

@@ -1,8 +1,19 @@
 name: ecbench n37 target-only instruction profile
 
+# PRs audit all sealed records and replay the archived profile/decision.
+# A zero-solver-replay PR receipt is record integrity, never a new independent
+# measurement certificate. Manual runs retain all 320 solver replays and the
+# original 64-job profiling protocol when a fresh archive is needed.
+
 on:
+  merge_group:
   pull_request:
     paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - 'research/ecbench_n37_online_ir_20261004/**'
       - '.github/workflows/ecbench-n37-online-ir.yml'
       - 'src/bin/ecbench.rs'
@@ -14,15 +25,22 @@ on:
 permissions:
   contents: read
 
+# A newer push to the same pull request cancels this workflow's run for the older commit.
+# Every other event (push, schedule, dispatch) gets a group of its own and is never cancelled.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && github.workflow_ref || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   profile:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && 25 || 60 }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Install frozen profiler
+        if: github.event_name != 'pull_request' && github.event_name != 'merge_group'
         run: |
           sudo apt-get update
           sudo apt-get install -y valgrind
@@ -39,28 +57,40 @@ jobs:
         run: |
           unzip -p research/ecbench_n37_online_ir_20261004/RAW-CALLGRIND.zip Cargo.lock > Cargo.lock
           sha256sum Cargo.lock
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ecbench
       - name: Build frozen ecbench and check the independent analyzer
         run: |
           cargo test --release --lib cryptanalysis::ecbench::callgrind
           cargo build --release --bin ecbench
           cargo check --release --example ecbench_n37_online_ir_analyze
-      - name: Independently replay all measured native executions
+      - name: Audit all sealed records (solver replay on manual runs)
         run: |
+          replay_args=(--replay-all)
+          expected_replays=320
+          audit_receipt=INDEPENDENT-AUDIT.json
+          if [[ "$GITHUB_EVENT_NAME" == pull_request || "$GITHUB_EVENT_NAME" == merge_group ]]; then
+            replay_args=(--replay 0)
+            expected_replays=0
+            audit_receipt=RECORD-INTEGRITY.json
+          fi
           out="$RUNNER_TEMP/ecbench-n37-online-ir"
           mkdir -p "$out"
           ./target/release/ecbench verify \
             --dir research/ecbench_n37_online_ir_20261004/sessions/mac_arm64_l0_01 \
-            --replay-all --exit-code --out "$out/INDEPENDENT-AUDIT.json" \
-            > "$out/independent-audit.log"
-          jq -e --arg original 'ECBENV2hd82681268e96' \
+            "${replay_args[@]}" --exit-code --out "$out/$audit_receipt" \
+            > "$out/record-audit.log"
+          jq -e --arg original 'ECBENV2hd82681268e96' --argjson expected_replays "$expected_replays" \
             '.ok == true and .session_id == "ECBS1he4e70185e6e2"
              and .records == 384 and .verified_records == 384
-             and (.replays | length) == 320
+             and (.replays | length) == $expected_replays
              and all(.replays[]; .reproduced and .detail == "identical")
              and .auditor_env_class_id != $original' \
-            "$out/INDEPENDENT-AUDIT.json" > /dev/null
+            "$out/$audit_receipt" > /dev/null
       - name: Profile all 64 frozen first-round one-target solves
-        if: ${{ hashFiles('research/ecbench_n37_online_ir_20261004/RAW-CALLGRIND.zip') == '' }}
+        if: ${{ github.event_name != 'pull_request' && github.event_name != 'merge_group' && (hashFiles('research/ecbench_n37_online_ir_20261004/RAW-CALLGRIND.zip') == '') }}
         env:
           RAYON_NUM_THREADS: '1'
         run: |
@@ -184,10 +214,16 @@ jobs:
           cmp "$RUNNER_TEMP/ecbench-n37-online-ir-decision.json" "$dir/DECISION.json"
           test "$(find "$dir/candidate_claims" -name '*.json' -type f | wc -l)" -eq 32
           for claim in "$dir"/candidate_claims/*.json; do
-            target/release/ecbench claim check --report "$claim"
+            # Frozen L0 diagnostics: the current checker must keep rejecting them
+            # (L2 floor, ecbench PR #1605; record_class/accounting, 2bcca4148).
+            jq -e '.verdict | startswith("descriptive only, not admissible")' "$claim" > /dev/null
+            target/release/ecbench claim check --report "$claim" > "$RUNNER_TEMP/frozen-claim-check.json" 2>/dev/null && exit 1 || true
+            jq -e '.status == "FAIL"
+              and (.validation_errors | index("isolation_levels.ic L0 is below required L2") != null)
+              and (.validation_errors | index("isolation_levels.rho L0 is below required L2") != null)' "$RUNNER_TEMP/frozen-claim-check.json" > /dev/null
           done
       - uses: actions/upload-artifact@v4
-        if: ${{ always() && hashFiles('research/ecbench_n37_online_ir_20261004/RAW-CALLGRIND.zip') == '' }}
+        if: ${{ !cancelled() && github.event_name != 'pull_request' && github.event_name != 'merge_group' && hashFiles('research/ecbench_n37_online_ir_20261004/RAW-CALLGRIND.zip') == '' }}
         with:
           name: ecbench-n37-online-ir-profiles
           path: ${{ runner.temp }}/ecbench-n37-online-ir

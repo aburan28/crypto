@@ -342,6 +342,22 @@ pub struct FitOptions {
     pub curves: Vec<String>,
     pub resamples: usize,
     pub seed: u64,
+    /// Fit the band-priced cost at this weight (GAE per native operation,
+    /// AGENTS.md §5a, [`super::band`]) instead of the charged cost.  The
+    /// domain's unit then names the weight, so the bound never shares an
+    /// id with a charged-cost bound.  Omitted from the record when unset, so
+    /// a bound fitted without it keeps the id it had before the field existed.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weight: Option<f64>,
+    /// Accept an arm whose parameters change from size to size under a
+    /// declared rule (for example a factor-base size chosen per size on a
+    /// train panel).  Every session must run the same method id with the
+    /// same parameter names; parameters whose values differ are recorded
+    /// as `per size` and the rule text becomes part of the bound's method
+    /// identity, so the bound never shares an id with a fixed-parameter one.
+    /// Omitted from the record when unset (see `weight`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub param_rule: Option<String>,
 }
 
 impl Default for FitOptions {
@@ -351,6 +367,8 @@ impl Default for FitOptions {
             curves: vec![],
             resamples: RESAMPLES,
             seed: SEED,
+            weight: None,
+            param_rule: None,
         }
     }
 }
@@ -539,6 +557,11 @@ pub fn memory_entries(r: &Record) -> Option<f64> {
 
 /// Every counter the unit does not charge, summed, per `√r`.
 pub fn uncharged_work(r: &Record) -> f64 {
+    // Top-level `*_uncharged` counters only.  An index-calculus record keeps
+    // most of its unpriced counts in its phases' native maps, so this axis
+    // undercounts IC unpriced work; it is kept as it is because committed
+    // bound ids depend on it.  Use `ecbench band` / `bound fit --weight`
+    // (super::band, AGENTS.md §5a) for a complete count.
     let total: u64 = r
         .counters
         .iter()
@@ -546,6 +569,38 @@ pub fn uncharged_work(r: &Record) -> f64 {
         .map(|(_, v)| *v)
         .sum();
     total as f64 / (r.workload.curve.r as f64).sqrt()
+}
+
+/// The primitive-level axes: modular multiplications, squarings and
+/// inversions behind the group operations, per `√r`, read from a record's
+/// `field_ops` block.  A bound carries them only when every verified run
+/// of the arm reports the block (prime-field curves through the generic
+/// walks and tables); a verdict reports them always and lets them decide
+/// only when the challenge names them.
+pub const FIELD_AXES: &[&str] = &["field_muls", "field_sqrs", "field_invs"];
+
+/// What a field axis counts, for the record's `statistic` and `source`.
+pub fn field_axis_describes(axis: &str) -> Option<(&'static str, &'static str)> {
+    match axis {
+        "field_muls" => Some(("field multiplications", "field_ops.muls")),
+        "field_sqrs" => Some(("field squarings", "field_ops.sqrs")),
+        "field_invs" => Some(("field inversions", "field_ops.invs")),
+        _ => None,
+    }
+}
+
+/// One field axis of a run as a multiple of `√r`, or `None` when the
+/// record carries no field-operation block (unknown, not zero) or `axis`
+/// is not one of [`FIELD_AXES`].
+pub fn field_axis(r: &Record, axis: &str) -> Option<f64> {
+    let f = r.field_ops.as_ref()?;
+    let count = match axis {
+        "field_muls" => f.muls,
+        "field_sqrs" => f.sqrs,
+        "field_invs" => f.invs,
+        _ => return None,
+    };
+    Some(count as f64 / (r.workload.curve.r as f64).sqrt())
 }
 
 /// What `bound fit` reads besides the sessions.
@@ -612,11 +667,28 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
             family: arm.method.family.clone(),
             entry: arm.method.entry.clone(),
         };
-        match &method {
-            None => method = Some(m),
-            Some(prev) if prev.method_id != m.method_id => {
+        match (&mut method, &inputs.options.param_rule) {
+            (None, _) => method = Some(m),
+            (Some(prev), Some(rule)) if prev.method_id != m.method_id => {
+                let same_keys = prev.params.keys().eq(m.params.keys());
+                if prev.id != m.id || !same_keys {
+                    return Err(format!(
+                        "arm `{}` runs {} in one session and {} in another; a parameter rule \
+                         covers one method id with one set of parameter names",
+                        inputs.arm, prev.id, m.id
+                    ));
+                }
+                for (k, v) in m.params.iter() {
+                    if prev.params.get(k) != Some(v) {
+                        prev.params.insert(k.clone(), "per size".into());
+                    }
+                }
+                prev.method_id = format!("{} under rule: {rule}", prev.id);
+            }
+            (Some(prev), None) if prev.method_id != m.method_id => {
                 return Err(format!(
-                    "arm `{}` is {} in one session and {} in another; a bound is about one method",
+                    "arm `{}` is {} in one session and {} in another; a bound is about one method \
+                     (pass --param-rule to fit a size-dependent parameter rule)",
                     inputs.arm, prev.method_id, m.method_id
                 ))
             }
@@ -657,6 +729,18 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
         ));
     }
 
+    // Band-priced or charged cost per record (AGENTS.md §5a).
+    let mut priced: BTreeMap<String, (Option<f64>, Option<f64>)> = BTreeMap::new();
+    for r in &recs {
+        let v = match opts.weight {
+            None => (r.cost.total_gae, r.cost.s),
+            Some(w) => (super::band::priced_gae(r, w)?, super::band::priced_s(r, w)?),
+        };
+        priced.insert(r.record_id.clone(), v);
+    }
+    let gae_of = |r: &Record| priced[&r.record_id].0;
+    let s_of = |r: &Record| priced[&r.record_id].1;
+
     // One domain.
     let families: BTreeSet<&str> = recs
         .iter()
@@ -678,7 +762,13 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
             "the arm ran on planted and public targets; a bound is about one target kind".into(),
         );
     }
-    let units: BTreeSet<&str> = recs.iter().map(|r| r.cost.unit.as_str()).collect();
+    let units: BTreeSet<String> = recs
+        .iter()
+        .map(|r| match opts.weight {
+            None => r.cost.unit.clone(),
+            Some(w) => format!("{}+band(w={w})", r.cost.unit),
+        })
+        .collect();
     if units.len() != 1 {
         return Err("the runs report different units".into());
     }
@@ -698,7 +788,7 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
         problem: PROBLEM.into(),
         family: families.into_iter().next().unwrap().to_string(),
         target_kind: kinds.into_iter().next().unwrap(),
-        unit: units.into_iter().next().unwrap().to_string(),
+        unit: units.into_iter().next().unwrap(),
         tier: tiers.into_iter().next().unwrap().to_string(),
         envelope: Envelope::default(),
     };
@@ -720,7 +810,7 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
         let floor = floor_s(a);
         let mut by_w: BTreeMap<&str, Vec<f64>> = BTreeMap::new();
         for r in &ok {
-            if let Some(s) = r.cost.s {
+            if let Some(s) = s_of(r) {
                 by_w.entry(r.workload.workload_id.as_str())
                     .or_default()
                     .push(s);
@@ -734,7 +824,7 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
                 .entry(r.isolation.level.name().to_string())
                 .or_insert(0) += 1;
         }
-        let gaes: Vec<f64> = ok.iter().filter_map(|r| r.cost.total_gae).collect();
+        let gaes: Vec<f64> = ok.iter().filter_map(|r| gae_of(r)).collect();
         let mems: Vec<f64> = ok.iter().filter_map(|r| memory_entries(r)).collect();
         let unch: Vec<f64> = ok.iter().map(|r| uncharged_work(r)).collect();
         let declared = expected_s(&method.id, a);
@@ -785,15 +875,15 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
         let ln_r = (row.r as f64).ln();
         strata.push(
             mine.iter()
-                .filter_map(|r| r.cost.total_gae)
+                .filter_map(|r| gae_of(r))
                 .filter(|g| *g > 0.0)
                 .map(|g| (ln_r, g.ln()))
                 .collect(),
         );
-        s_strata.push(mine.iter().filter_map(|r| r.cost.s).collect());
+        s_strata.push(mine.iter().filter_map(|r| s_of(r)).collect());
         f_strata.push(
             mine.iter()
-                .filter_map(|r| r.cost.s)
+                .filter_map(|r| s_of(r))
                 .map(|s| s / row.floor_s)
                 .collect(),
         );
@@ -891,6 +981,42 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
             ci95: u_est.as_ref().and_then(|e| e.ci95),
         },
     );
+    // The field-operation axes, with the same two-stage interval, only
+    // when there are verified runs and every one of them carries the
+    // block.  Otherwise nothing is added — not an unknown axis — so a
+    // bound fitted from records written before the block existed is
+    // byte for byte the bound it was.
+    for (i, axis) in FIELD_AXES.iter().enumerate() {
+        let mut strata: Vec<Vec<f64>> = Vec::new();
+        let mut known = !verified.is_empty();
+        for row in &sizes {
+            let mine: Vec<&&Record> = verified
+                .iter()
+                .filter(|r| r.workload.curve.slug == row.slug)
+                .collect();
+            let vals: Vec<f64> = mine.iter().filter_map(|r| field_axis(r, axis)).collect();
+            if vals.len() != mine.len() {
+                known = false;
+            }
+            strata.push(vals);
+        }
+        if !known {
+            continue;
+        }
+        let (what, source) = field_axis_describes(axis).expect("a field axis");
+        let est = estimate(&strata, opts.resamples, opts.seed ^ (0x11 + 2 * i as u64));
+        dimensions.insert(
+            axis.to_string(),
+            Dimension {
+                statistic: format!("mean {what} / sqrt(r) over verified runs"),
+                source: format!("{source}, workload.curve.r"),
+                lower_is_better: true,
+                known: est.is_some(),
+                value: est.as_ref().map(|e| e.value),
+                ci95: est.as_ref().and_then(|e| e.ci95),
+            },
+        );
+    }
 
     // Stages.
     let mut names: Vec<String> = Vec::new();
@@ -1090,24 +1216,33 @@ pub fn check(path: &Path, root: &Path) -> Result<Bound, String> {
     fresh.verdict_id = recorded.verdict_id.clone();
     fresh.seal()?;
     if fresh.bound_id != recorded.bound_id {
+        // Compare each section as the JSON the seal hashes, not as parsed
+        // structs: a float read back from a record need not equal the one
+        // that was written bit for bit, so struct equality can name sections
+        // that did not change and miss the one that did.
+        fn json<T: Serialize>(v: &T) -> String {
+            serde_json::to_string(v).unwrap_or_default()
+        }
+        let raw: serde_json::Value = serde_json::from_str(
+            &std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()))?,
+        )
+        .map_err(|e| format!("{}: {e}", path.display()))?;
+        let fresh_v: serde_json::Value = serde_json::from_str(&json(&fresh)).unwrap_or_default();
         let mut diffs = Vec::new();
-        if fresh.sizes != recorded.sizes {
-            diffs.push("sizes");
-        }
-        if fresh.fit != recorded.fit {
-            diffs.push("fit");
-        }
-        if fresh.constant != recorded.constant {
-            diffs.push("constant");
-        }
-        if fresh.dimensions != recorded.dimensions {
-            diffs.push("dimensions");
-        }
-        if fresh.provenance != recorded.provenance {
-            diffs.push("provenance");
-        }
-        if fresh.admissibility != recorded.admissibility {
-            diffs.push("admissibility");
+        for key in [
+            "sizes",
+            "fit",
+            "constant",
+            "dimensions",
+            "provenance",
+            "admissibility",
+            "fit_options",
+            "method",
+            "domain",
+        ] {
+            if raw.get(key) != fresh_v.get(key) {
+                diffs.push(key);
+            }
         }
         return Err(format!(
             "{}: re-derived bound is {}, recorded {}; differs in: {}",

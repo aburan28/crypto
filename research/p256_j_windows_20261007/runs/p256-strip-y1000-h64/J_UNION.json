@@ -1,0 +1,41 @@
+{
+  "schema": "p256.isogeny-grid-j-union/v1",
+  "status": "pass",
+  "elapsed_ms": 19514,
+  "resources": {
+    "status": "measured_getrusage_self",
+    "user_cpu_micros": 19588493,
+    "system_cpu_micros": 415647,
+    "peak_rss_bytes": 183721984
+  },
+  "inputs": [
+    {
+      "input": "/tmp/p256-isogeny-million-20261006/p256-grid-1m.jsonl.gz",
+      "schema": "p256.isogeny-grid-certificate/v1",
+      "source_commit": "316f546373db8f42ac894ef7d8b4232e57d87f8e",
+      "target_curves": 1000000,
+      "curve_records": 1000000,
+      "bound_records": 1000001,
+      "record_chain_sha256": "4de6e93e0d7a90ff53a26f8f1fd1cbd03ab55f701a25f8e49874cb8bead40302",
+      "stored_sha256": "87522b6de08e64804dcee17bba058eb91922d6b8dd9853cd32523f67a3d0cbdc",
+      "stored_bytes": 527157501,
+      "content_sha256": "2a1a27d06f48b22b85ce3c96ac4017f5af6a0256e9d1ad277e3fb1f516475454",
+      "content_bytes": 1773118481
+    },
+    {
+      "input": "/tmp/p256-j-strip-20261007/runs/p256-strip-y1000-h64/p256-strip-y1000-h64.jsonl.gz",
+      "schema": "p256.isogeny-grid-strip-certificate/v1",
+      "source_commit": "581aeff3d89b412e718207e05f4002808271f1ef",
+      "target_curves": 64000,
+      "curve_records": 64000,
+      "bound_records": 64002,
+      "record_chain_sha256": "7d542b93aec2f21d9237e86f9d079cee4f858b5650bc0995c2f85ca0857cf87d",
+      "stored_sha256": "90f22f7aadaef78cff5a72889e5539b2ae81459d57d7a84b37a9009e96a3f701",
+      "stored_bytes": 33739337,
+      "content_sha256": "a24593f9d1d1c880b63f1da86d10e375981f72aaa358e1eae428e63b3d4714b1",
+      "content_bytes": 114464825
+    }
+  ],
+  "input_curves": 1064000,
+  "unique_j_invariants": 1064000
+}

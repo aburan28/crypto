@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "objective": "paired online solve for exactly one previously unseen public target point with compact-orbit IC vs one rho solve",
+  "candidate_id": "IC1N61Ckb1fb73200PDP4rootRCguidedLAgaussTDdirectISO0h9885b61504c4",
+  "curve_id": "EC1N61Ckb1hd0e02e3be112",
+  "workload_id": "2c0fdc4f8660",
+  "target_count_per_invocation": 1,
+  "target_Q": [
+    1191898001997870864,
+    2105024931777585135
+  ],
+  "arms": {
+    "ic": {
+      "executable": "target/release/examples/koblitz_orbit_dlp_fast",
+      "input": "one public point JSON line; answer scalar absent",
+      "source_sha256": "bb69bd4409fcb5898558533393dce02200e14571ded033b966cf2dcd9b3e9687",
+      "binary_sha256": "edf9ed313009a56e5d00acabefe92add93272761bbb8e264c9cc20dcc6fc243e",
+      "rank_seed": 7,
+      "retained_factor_base_sha256": "97c76a732ec92871d75839153d98793b2fbbb6c01506f82cd6af09780f5009ab"
+    },
+    "rho": {
+      "executable": "target/release/examples/koblitz_rho_fixture",
+      "args": "61 0 signed_frobenius 1 packed",
+      "source_sha256": "f1d4d8eeb428fe0c70f69057b61fdaa5fb2a0e5944a764a48be1cb9c634f82a1",
+      "binary_sha256": "dd5e052d0c2cfb67de71eddd146d2333a8a7804535dbf7271a31cdcd547a87ac",
+      "fixed_target_scalar_external_sidecar": 77777777777777,
+      "walk_seeds": [
+        20260925,
+        20260926,
+        20260927
+      ],
+      "fixtures_per_invocation": 1
+    }
+  },
+  "timing": {
+    "IC_start": "after reusable target-independent base/index/log preparation; one public Q already supplied",
+    "IC_stop": "after target relation extraction, group-lift check, log recovery, and [d]G=Q check",
+    "rho_start": "after Q construction; includes per-target jump setup and walk through in-process verification",
+    "rho_stop": "after verified scalar returned",
+    "excluded": [
+      "process launch",
+      "input loading",
+      "Q construction from known scalar",
+      "IC target-independent preparation"
+    ]
+  },
+  "verification_source_sha256": "2e3856f243ef1829acc47bee60ed668e31c0a0b4124a042d8aeb7b2bc4798fe5",
+  "claim_boundary": "one fresh public synthetic n=61 target, 48-bit subgroup; toy-curve evidence only, not ECC2K-130 or production-key evidence"
+}

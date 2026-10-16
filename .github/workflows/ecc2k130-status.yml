@@ -5,10 +5,9 @@ name: ECC2K-130 status pages
 
 on:
   schedule:
-    # Every 3 minutes. scripts/rho_status/render.py sizes history.json from
-    # this interval, and test_rho_status.py pins the two together, so changing
-    # it here without changing that constant shortens the published series.
-    - cron: "*/3 * * * *"
+    # Every 10 minutes. scripts/rho_status/render.py sizes history.json from
+    # this interval, and test_rho_status.py pins the two together.
+    - cron: "*/10 * * * *"
   workflow_dispatch:
   pull_request:
     paths:
@@ -70,19 +69,33 @@ permissions:
   id-token: write
 
 concurrency:
-  # Scheduled publications must not replace pending PR validation runs.
-  # Keep all publishing events in the original serialized deployment group.
+  # PRs get their own group so they never cancel each other. Scheduled,
+  # push and manual publishers share one group and admitted runs finish even
+  # when the hosted runner queue is under pressure.
   group: ${{ github.event_name == 'pull_request' && format('ecc2k130-status-pages-pr-{0}', github.event.pull_request.number) || 'ecc2k130-status-pages' }}
   cancel-in-progress: false
 
 jobs:
+  # Pull requests only. A publishing run runs these same steps inside the
+  # publish job, before anything is deployed, so it waits for one runner
+  # rather than two. Every job here queues for the same GitHub-hosted runners
+  # as the repository's PR checks, and on 2026-10-07 run 3682 held the
+  # serialized group from 14:08Z to 22:33Z: its test job waited 3h23m for a
+  # runner and its publish job 5h00m, for about two minutes of work, while
+  # every scheduled run behind it was superseded unrun. test_rho_status.py
+  # pins the two step lists to each other.
   test:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - name: Offline snapshot tests
         run: python3 scripts/rho_status/test_rho_status.py
+      - name: DP34 telemetry snapshot tests
+        run: python3 scripts/rho_status/test_weight_status.py
+      - name: Mac control snapshot tests
+        run: python3 scripts/rho_status/test_mac_control.py
       - name: Site build tests
         run: python3 scripts/site/test_build.py
       - name: Browser rho engine tests
@@ -96,7 +109,6 @@ jobs:
         run: node scripts/site/test_algorithm_lab.js
 
   publish:
-    needs: test
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     # 35 min so the index-only fallback plus a stretch of hour-chunk
@@ -113,6 +125,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # The test job's steps, in the same order: a failure here stops the
+      # run before anything is deployed, as `needs: test` used to.
+      - name: Offline snapshot tests
+        run: python3 scripts/rho_status/test_rho_status.py
+      - name: DP34 telemetry snapshot tests
+        run: python3 scripts/rho_status/test_weight_status.py
+      - name: Mac control snapshot tests
+        run: python3 scripts/rho_status/test_mac_control.py
+      - name: Site build tests
+        run: python3 scripts/site/test_build.py
+      - name: Browser rho engine tests
+        run: node scripts/rho_gpu_emulate.mjs
+      - name: Check performance dashboard interactions
+        run: node scripts/site/test_performance_ui.js
+      - name: Check algorithm demonstrations
+        run: node scripts/site/test_algorithm_lab.js
+
       - name: Configure AWS
         # Not fatal. AWS credentials are needed to find the walker and to
         # derive the status-bucket URL from the account; with the
@@ -124,6 +153,25 @@ jobs:
           aws-region: us-west-2
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: DP34 telemetry snapshot
+        # This is a counts-only view of the separate table-walk namespace.
+        # It is deliberately fail-soft: the DP32 page must continue to publish
+        # if this research bucket or boto3 is temporarily unavailable.
+        continue-on-error: true
+        run: |
+          python3 -m pip install --quiet --disable-pip-version-check boto3
+          python3 scripts/rho_status/weight_status.py \
+            --bucket ecc2k130-590183823895 \
+            --prefix campaigns/ecc2k130-table8-22b-v1 \
+            --out docs/ecc2k130-status/status34.json
+
+      - name: Read Mac control workers
+        # The source manifests are private and can contain storage keys or
+        # future walk fields. This script publishes an allowlist of counters
+        # for the separate synthetic campaign. AWS failures publish an
+        # explicit unavailable state and do not freeze the main status page.
+        run: python3 scripts/rho_status/mac_control.py --out docs/ecc2k130-status/mac-control.json
 
       - name: Snapshot (ingest feed first, walker SSH hop when it answers)
         # fetch_via_walker.sh writes the ingest host's public status.json
@@ -186,6 +234,28 @@ jobs:
             --history-in /tmp/history-prev.json \
             --history-out docs/ecc2k130-status/history.json \
             --status-out docs/ecc2k130-status/status.json
+
+      - name: Merge previous DP34 Pages history
+        env:
+          PAGES_HISTORY34_URL: https://aburan28.github.io/crypto/history34.json
+        run: |
+          set -euo pipefail
+          set +e
+          http_code=$(curl -sS -L --retry 5 --retry-all-errors --retry-delay 3 --max-time 60 \
+            -o /tmp/history34-prev.json -w "%{http_code}" "$PAGES_HISTORY34_URL")
+          curl_exit=$?
+          set -e
+          if [ "$http_code" = "404" ]; then
+            echo '{"points":[]}' > /tmp/history34-prev.json
+          elif [ "$curl_exit" -ne 0 ] || [ "$http_code" != "200" ]; then
+            echo "Could not fetch live history34.json (curl=$curl_exit HTTP=$http_code); retaining the checked-in DP34 history." >&2
+            cp docs/ecc2k130-status/history34.json /tmp/history34-prev.json
+          fi
+          python3 scripts/rho_status/render.py \
+            --status docs/ecc2k130-status/status34.json \
+            --history-in /tmp/history34-prev.json \
+            --history-out docs/ecc2k130-status/history34.json \
+            --status-out docs/ecc2k130-status/status34.json
 
       - uses: actions/configure-pages@v5
       - name: Assemble site

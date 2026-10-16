@@ -1,0 +1,190 @@
+#!/usr/bin/env python3
+"""Forward correctness checks on the supplied public CryptoPro-B CM map.
+
+Uses known generated scalars only. No discrete-log search or relation solver.
+Run: python check_cm.py
+"""
+import hashlib
+import json
+import math
+import os
+import platform
+import random
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+MAP_BYTES = (ROOT / 'endomorphism155.json').read_bytes()
+DATA = json.loads(MAP_BYTES)
+P = 2**255 + 3225
+N = int('800000000000000000000000000000015f700cfff1a624e5e497161bcc8a198f', 16)
+A = P - 3
+B = int('3e1af419a269a5f866a7d3c25c3df80ae979259373ff2b182f49d4ce7e1bbc8b', 16)
+G = (1, int('3fa8124359f96680b83d1c3eb2c070e5c545c9858d03ecfb744bf8d717717efc', 16))
+
+
+def require(condition, description):
+    if not condition:
+        raise RuntimeError(description)
+
+
+def trim(f):
+    f = [v % P for v in f]
+    while len(f) > 1 and f[-1] == 0:
+        f.pop()
+    return f or [0]
+
+
+def plus(f, g):
+    r = [0] * max(len(f), len(g))
+    for i, v in enumerate(f): r[i] += v
+    for i, v in enumerate(g): r[i] += v
+    return trim(r)
+
+
+def scale(f, c):
+    return trim([c*v for v in f])
+
+
+def times(f, g):
+    r = [0] * (len(f) + len(g) - 1)
+    for i, a in enumerate(f):
+        for j, b in enumerate(g): r[i+j] += a*b
+    return trim(r)
+
+
+def derivative(f):
+    return trim([i*f[i] for i in range(1, len(f))])
+
+
+def evaluate(f, x):
+    r = 0
+    for v in reversed(f): r = (r*x+v) % P
+    return r
+
+
+def negate(q):
+    return None if q is None else (q[0], -q[1] % P)
+
+
+def add(q, r):
+    if q is None: return r
+    if r is None: return q
+    x, y = q
+    u, v = r
+    if x == u:
+        if (y+v) % P == 0: return None
+        slope = (3*x*x+A) * pow(2*y, -1, P) % P
+    else:
+        slope = (v-y) * pow(u-x, -1, P) % P
+    z = (slope*slope-x-u) % P
+    return z, (slope*(x-z)-y) % P
+
+
+def multiply(k, q):
+    if k < 0: return multiply(-k, negate(q))
+    result = None
+    while k:
+        if k & 1: result = add(result, q)
+        k >>= 1
+        if k: q = add(q, q)
+    return result
+
+
+def on_curve(q, a=A, b=B):
+    return q is None or (q[1]**2-q[0]**3-a*q[0]-b) % P == 0
+
+
+def cm_map(q):
+    for m in DATA['maps']:
+        if q is None: continue
+        require(on_curve(q, m['source_A'], m['source_B']), 'Map source point invalid')
+        x, y = q
+        num, den = m['x_numerator'], m['x_denominator']
+        nv, dv = evaluate(num, x), evaluate(den, x)
+        if dv == 0:
+            q = None
+            continue
+        di = pow(dv, -1, P)
+        tangent = (evaluate(derivative(num), x)*dv-nv*evaluate(derivative(den), x)) % P
+        q = (nv*di % P, y*tangent*di*di % P)
+        require(on_curve(q, m['target_A'], m['target_B']), 'Map target point invalid')
+    if q is not None:
+        u = DATA['final_isomorphism_u']
+        q = (q[0]*pow(pow(u, 2, P), -1, P) % P,
+             q[1]*pow(pow(u, 3, P), -1, P) % P)
+    require(on_curve(q), 'Final map point invalid')
+    return q
+
+
+def main():
+    affinity = None
+    if hasattr(os, 'sched_getaffinity'):
+        os.sched_setaffinity(0, {min(os.sched_getaffinity(0))})
+        affinity = sorted(os.sched_getaffinity(0))
+    require(DATA['p'] == P and DATA['n'] == N, 'Parameter mismatch')
+    require(on_curve(G) and multiply(N, G) is None, 'Generator/order check failed')
+    t, v = P+1-N, 4646402506017662432554672533504826433
+    require(t*t-4*P == -619*v*v, 'CM discriminant identity failed')
+    require(math.prod([103, 6217, 17233477, 3989640269, 105533924655391]) == v,
+            'Frobenius conductor factor product failed')
+    lam = (1-(t-v)//2) * pow(v, -1, N) % N
+    require(lam == DATA['endomorphism_scalar'], 'Subgroup scalar mismatch')
+    require((lam*lam-lam+155) % N == 0, 'Scalar CM polynomial failed')
+    require((12*13-lam*(1-lam)) % N == 1, 'Polarization subgroup determinant failed')
+    previous = (A, B)
+    identities = []
+    for m in DATA['maps']:
+        require((m['source_A'], m['source_B']) == previous, 'Map chain mismatch')
+        num, den, k = m['x_numerator'], m['x_denominator'], m['kernel']
+        require(times(k, k) == trim(den), 'Denominator is not kernel square')
+        require(len(trim(num))-1 == m['degree'] and len(trim(den))-1 == m['degree']-1,
+                'Map polynomial degrees invalid')
+        tangent = plus(times(derivative(num), den), scale(times(num, derivative(den)), -1))
+        source_cubic = [m['source_B'], m['source_A'], 0, 1]
+        lhs = times(source_cubic, times(tangent, tangent))
+        rhs_inner = plus(times(times(num, num), num),
+                         scale(times(num, times(den, den)), m['target_A']))
+        rhs_inner = plus(rhs_inner, scale(times(times(den, den), den), m['target_B']))
+        require(lhs == times(den, rhs_inner), 'Exact curve polynomial identity failed')
+        identities.append({'degree': m['degree'], 'exact_polynomial_identity': 'passed'})
+        previous = (m['target_A'], m['target_B'])
+    u = DATA['final_isomorphism_u']
+    require(previous == (A*pow(u, 4, P) % P, B*pow(u, 6, P) % P), 'Final isomorphism failed')
+    rng = random.Random(202610059)
+    scalars = [0, 1, -1, N-1, N, N+1, 155] + [rng.randrange(1, N) for _ in range(32)]
+    points = [multiply(k, G) for k in scalars]
+    records = []
+    for scalar, q in zip(scalars, points):
+        image = cm_map(q)
+        require(image == multiply(lam, q), 'Map/scalar action differs')
+        require(add(add(cm_map(image), negate(image)), multiply(155, q)) is None,
+                'CM map polynomial identity failed on a point')
+        require(cm_map(negate(q)) == negate(image), 'Negation compatibility failed')
+        records.append({'known_scalar': str(scalar), 'map_equals_scalar_action': True,
+                        'cm_map_polynomial': True, 'negation_compatibility': True})
+    pair_checks = 0
+    for q, r in zip(points[:16], points[-16:]):
+        require(cm_map(add(q, r)) == add(cm_map(q), cm_map(r)), 'Additivity failed')
+        pair_checks += 1
+    output = {'curve': 'id-GostR3410-2001-CryptoPro-B-ParamSet',
+              'map': 'degree-155 CM endomorphism omega',
+              'source_map_sha256': hashlib.sha256(MAP_BYTES).hexdigest(),
+              'scope': 'forward-map correctness on known public inputs',
+              'genus_two_transfer_tested': False, 'relation_solver_benchmarked': False,
+              'exact_component_map_identities': identities,
+              'generator_order': 'passed', 'cm_discriminant_identity': 'passed',
+              'frobenius_conductor_factor_product': 'passed',
+              'scalar_cm_polynomial': 'passed', 'polarization_subgroup_determinant': 'passed',
+              'known_input_cases': len(records), 'additivity_pairs': pair_checks,
+              'failed_checks': 0, 'records': records,
+              'metadata': {'python': sys.version, 'platform': platform.platform(),
+                           'cpu_affinity': affinity},
+              'limitation': 'No explicit genus-two equation or transfer map is present; '
+                            'these checks do not measure relation-solving cost.'}
+    (ROOT / 'results.json').write_text(json.dumps(output, indent=2))
+    print(json.dumps({k: value for k, value in output.items() if k not in ('records', 'metadata')}, indent=2))
+
+
+if __name__ == '__main__':
+    main()

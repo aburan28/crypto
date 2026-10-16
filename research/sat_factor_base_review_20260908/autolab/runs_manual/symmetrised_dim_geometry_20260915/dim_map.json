@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "kind": "symmetrised_quadratic_cell_dim_geometry",
+  "updated_at": "2026-09-15T16:10:59Z",
+  "claim_boundary": "F2 cyclotomic geometry for divisor_for_dimension only. Approximate for prime n via Phi_n splitting. Not a decomposition win; not ledger promotion.",
+  "method": "For prime n, x^n-1=(x-1)Phi_n; Phi_n splits into phi(n)/ord_n(2) irreducibles of degree ord_n(2). Available dims = 1+k*ord.",
+  "rows": [
+    {
+      "n": 13,
+      "ord2": 12,
+      "phi_n_irreducible_count": 1,
+      "available_dims_approx": [
+        1
+      ],
+      "target_dim_m2": 7,
+      "closest_dim": 1,
+      "quadratic_cell_usable": false,
+      "note": "only dim=1 proper subspace; blocked like n=37"
+    },
+    {
+      "n": 17,
+      "ord2": 8,
+      "phi_n_irreducible_count": 2,
+      "available_dims_approx": [
+        1,
+        9
+      ],
+      "target_dim_m2": 9,
+      "closest_dim": 9,
+      "quadratic_cell_usable": true,
+      "note": null
+    },
+    {
+      "n": 19,
+      "ord2": 18,
+      "phi_n_irreducible_count": 1,
+      "available_dims_approx": [
+        1
+      ],
+      "target_dim_m2": 10,
+      "closest_dim": 1,
+      "quadratic_cell_usable": false,
+      "note": "only dim=1 proper subspace; blocked like n=37"
+    },
+    {
+      "n": 23,
+      "ord2": 11,
+      "phi_n_irreducible_count": 2,
+      "available_dims_approx": [
+        1,
+        12
+      ],
+      "target_dim_m2": 12,
+      "closest_dim": 12,
+      "quadratic_cell_usable": true,
+      "note": null
+    },
+    {
+      "n": 29,
+      "ord2": 28,
+      "phi_n_irreducible_count": 1,
+      "available_dims_approx": [
+        1
+      ],
+      "target_dim_m2": 15,
+      "closest_dim": 1,
+      "quadratic_cell_usable": false,
+      "note": "only dim=1 proper subspace; blocked like n=37"
+    },
+    {
+      "n": 31,
+      "ord2": 5,
+      "phi_n_irreducible_count": 6,
+      "available_dims_approx": [
+        1,
+        6,
+        11,
+        16,
+        21,
+        26
+      ],
+      "target_dim_m2": 16,
+      "closest_dim": 16,
+      "quadratic_cell_usable": true,
+      "note": null
+    },
+    {
+      "n": 37,
+      "ord2": 36,
+      "phi_n_irreducible_count": 1,
+      "available_dims_approx": [
+        1
+      ],
+      "target_dim_m2": 19,
+      "closest_dim": 1,
+      "quadratic_cell_usable": false,
+      "note": "only dim=1 proper subspace; blocked like n=37"
+    },
+    {
+      "n": 41,
+      "ord2": 20,
+      "phi_n_irreducible_count": 2,
+      "available_dims_approx": [
+        1,
+        21
+      ],
+      "target_dim_m2": 21,
+      "closest_dim": 21,
+      "quadratic_cell_usable": true,
+      "note": null
+    },
+    {
+      "n": 43,
+      "ord2": 14,
+      "phi_n_irreducible_count": 3,
+      "available_dims_approx": [
+        1,
+        15,
+        29
+      ],
+      "target_dim_m2": 22,
+      "closest_dim": 15,
+      "quadratic_cell_usable": false,
+      "note": null
+    },
+    {
+      "n": 47,
+      "ord2": 23,
+      "phi_n_irreducible_count": 2,
+      "available_dims_approx": [
+        1,
+        24
+      ],
+      "target_dim_m2": 24,
+      "closest_dim": 24,
+      "quadratic_cell_usable": true,
+      "note": null
+    },
+    {
+      "n": 53,
+      "ord2": 52,
+      "phi_n_irreducible_count": 1,
+      "available_dims_approx": [
+        1
+      ],
+      "target_dim_m2": 27,
+      "closest_dim": 1,
+      "quadratic_cell_usable": false,
+      "note": "only dim=1 proper subspace; blocked like n=37"
+    }
+  ],
+  "implications": [
+    "n=37 and n=53 are geometrically blocked for mid-dim quadratic cells (only dim=1).",
+    "n=31 remains the working mid-dim cell (dim 16 exact).",
+    "n=41 admits dim 21 (=target); n=47 admits dim 24 (=target) \u2014 candidates to advance the cell, but factor-base size is ~2^dim and may be resource-heavy.",
+    "n=43 closest mid-dim is 15 (target 22) \u2014 usable smaller cell, not the m=2 balance point."
+  ]
+}

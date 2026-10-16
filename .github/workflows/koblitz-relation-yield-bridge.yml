@@ -23,6 +23,12 @@ on:
 permissions:
   contents: read
 
+# A newer push to the same pull request cancels this workflow's run for the older commit.
+# Every other event (push, schedule, dispatch) gets a group of its own and is never cancelled.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && github.workflow_ref || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   smoke-and-custody:
     runs-on: ubuntu-latest
@@ -30,8 +36,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - name: Install frozen dependency lock
-        run: cp research/weil_factor_composition_20260914/validation/dependencies.lock.txt Cargo.lock
       - name: Validate Python custody rules
         run: python3 scripts/test_koblitz_relation_yield_bridge.py
       - name: Validate Rust producer

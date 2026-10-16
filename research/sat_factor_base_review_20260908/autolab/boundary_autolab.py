@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import hashlib
+import shlex
 import json
 import math
 import os
@@ -122,6 +123,7 @@ FIELD_ALIASES: dict[str, tuple[str, ...]] = {
         "non_claims",
         "claim_boundary",
     ),
+    "operation_accounting": ("operation_accounting",),
 }
 
 ONLINE_REQUIRED_STAGES: dict[str, tuple[str, ...]] = {
@@ -142,6 +144,15 @@ class AutolabError(RuntimeError):
 
 def now() -> str:
     return dt.datetime.now(dt.timezone.utc).isoformat()
+
+
+def independent_replay_pointer(run: Path) -> str:
+    """Return the reserved path for this run's independent replay receipt."""
+    replay_path = run / "validation" / "independent_replay.json"
+    try:
+        return replay_path.relative_to(REPO).as_posix()
+    except ValueError:
+        return str(replay_path)
 
 
 def sha256(path: Path | str) -> str:
@@ -212,6 +223,105 @@ def missing_fields(report: dict[str, Any], keys: list[str]) -> list[str]:
     return [key for key in keys if not field_present(report, key)]
 
 
+def operation_accounting_errors(accounting: Any) -> list[str]:
+    """Check the operation-count block that sits next to the wall ratio.
+
+    Native IC probes and rho steps have different costs.  Keep both counts
+    and their units, while requiring a calibration receipt before reporting
+    an operation speedup.
+    """
+    if not isinstance(accounting, dict):
+        return ["operation_accounting must be an object"]
+    errors = []
+    ic_ops = accounting.get("ic_online_operations")
+    rho_ops = accounting.get("rho_online_operations")
+    for name, value in (("ic_online_operations", ic_ops), ("rho_online_operations", rho_ops)):
+        if type(value) not in (int, float) or not math.isfinite(value) or value < 0:
+            errors.append(f"operation_accounting.{name} must be nonnegative and finite")
+    units = accounting.get("operation_units")
+    if not isinstance(units, dict) or not all(
+        isinstance(units.get(arm), str) and units[arm].strip() for arm in ("ic", "rho")
+    ):
+        errors.append("operation_accounting.operation_units must name the ic and rho units")
+    assumption = accounting.get("unit_assumption")
+    if not isinstance(assumption, str) or not assumption.strip():
+        errors.append("operation_accounting.unit_assumption must state how the units compare")
+    status = accounting.get("comparison_status")
+    if status not in ("native_counters_only", "calibrated_common_unit"):
+        errors.append("operation_accounting.comparison_status must name the calibration state")
+    raw_quotient = accounting.get("rho_per_ic_native_counter")
+    if not errors:
+        if ic_ops == 0:
+            if raw_quotient is not None:
+                errors.append("operation_accounting.rho_per_ic_native_counter must be null for zero IC probes")
+        elif raw_quotient is not None:
+            expected = float(rho_ops) / float(ic_ops)
+            if type(raw_quotient) not in (int, float) or not math.isfinite(raw_quotient) or raw_quotient < 0 or not math.isclose(
+                float(raw_quotient), expected, rel_tol=1e-8, abs_tol=1e-12
+            ):
+                errors.append("operation_accounting.rho_per_ic_native_counter does not match the raw counts")
+    ratio = accounting.get("ops_speedup_online")
+    if ratio is not None:
+        calibrated = (
+            status == "calibrated_common_unit"
+            and isinstance(units, dict)
+            and units.get("ic") == units.get("rho")
+            and isinstance(accounting.get("calibration_receipt"), str)
+            and bool(accounting["calibration_receipt"].strip())
+        )
+        if not calibrated:
+            errors.append("operation_accounting.ops_speedup_online requires a calibrated common unit and receipt")
+        elif positive_cost(ic_ops) is None or positive_cost(rho_ops) is None:
+            errors.append("operation_accounting calibrated counts must be positive")
+        elif positive_cost(ratio) is None:
+            errors.append("operation_accounting.ops_speedup_online must be positive and finite")
+        elif not errors:
+            expected = float(rho_ops) / float(ic_ops)
+            if not math.isclose(float(ratio), expected, rel_tol=1e-8, abs_tol=1e-12):
+                errors.append("operation_accounting.ops_speedup_online does not match calibrated counts")
+    elif status == "calibrated_common_unit":
+        errors.append("operation_accounting.ops_speedup_online is required for calibrated counts")
+    return errors
+
+
+def hardware_accounting_errors(accounting: Any) -> list[str]:
+    """Check the optional common retired-instruction counter for a paired target."""
+    if not isinstance(accounting, dict):
+        return ["hardware_accounting must be an object"]
+    errors = []
+    status = accounting.get("status")
+    if status not in ("measured_common_counter", "counter_unavailable"):
+        errors.append("hardware_accounting.status is invalid")
+    if accounting.get("unit") != "calling-thread user instructions retired":
+        errors.append("hardware_accounting.unit must name the measured unit")
+    if not isinstance(accounting.get("method"), str) or not accounting["method"].strip():
+        errors.append("hardware_accounting.method must describe the counter boundary")
+    ic_count = accounting.get("ic_online_instructions")
+    rho_count = accounting.get("rho_online_instructions")
+    for arm, count in (("ic", ic_count), ("rho", rho_count)):
+        if count is not None and (type(count) is not int or count <= 0):
+            errors.append(f"hardware_accounting.{arm}_online_instructions must be positive when present")
+    ratio = accounting.get("rho_per_ic_instructions")
+    if status == "measured_common_counter":
+        for arm in ("ic", "rho"):
+            enabled = accounting.get(f"{arm}_time_enabled_ns")
+            running = accounting.get(f"{arm}_time_running_ns")
+            if (type(enabled) is not int or enabled <= 0 or
+                    type(running) is not int or running != enabled):
+                errors.append(f"hardware_accounting.{arm} counter must run throughout its enabled interval")
+            if accounting.get(f"{arm}_counter_error"):
+                errors.append(f"hardware_accounting.{arm} counter error must be null")
+        if type(ic_count) is not int or ic_count <= 0 or type(rho_count) is not int or rho_count <= 0:
+            errors.append("hardware_accounting measured status requires both online instruction counts")
+        elif positive_cost(ratio) is None or not math.isclose(
+            float(ratio), rho_count / ic_count, rel_tol=1e-9, abs_tol=1e-12
+        ):
+            errors.append("hardware_accounting.rho_per_ic_instructions must match the counts")
+    elif status == "counter_unavailable" and ratio is not None:
+        errors.append("hardware_accounting.rho_per_ic_instructions must be null when unavailable")
+    return errors
+
+
 def validate_claim(
     report: dict[str, Any],
     *,
@@ -225,9 +335,69 @@ def validate_claim(
     global_required = list(schema.get("global_provenance_required", []))
     missing_stage = missing_fields(report, required)
     missing_global = missing_fields(report, global_required)
+    pairing_errors: list[str] = []
+    if stage == "vs_rho":
+        paired = report.get("paired_target")
+        if report.get("target_count") != 1:
+            pairing_errors.append("target_count must be exactly one")
+        if not isinstance(paired, dict):
+            pairing_errors.append("paired_target must be an object")
+        else:
+            ic_q = paired.get("ic_public_q")
+            rho_q = paired.get("rho_public_q")
+            if not isinstance(ic_q, list) or not isinstance(rho_q, list):
+                pairing_errors.append("both arms must record public target coordinates")
+            elif ic_q != rho_q:
+                pairing_errors.append("IC and rho public targets differ")
+            if paired.get("same_public_point") is not True:
+                pairing_errors.append("same_public_point is not verified")
+        if report.get("ic_verified") is not True:
+            pairing_errors.append("IC target recovery is not verified")
+        if report.get("rho_verified") is not True:
+            pairing_errors.append("rho target recovery is not verified")
+        if positive_cost(report.get("ic_online_ms")) is None:
+            pairing_errors.append("positive ic_online_ms is required")
+        if positive_cost(report.get("rho_online_ms")) is None:
+            pairing_errors.append("positive rho_online_ms is required")
+        if positive_cost(report.get("online_speedup")) is None:
+            pairing_errors.append("positive same-target online_speedup is required")
+        elif positive_cost(report.get("ic_online_ms")) is not None and positive_cost(report.get("rho_online_ms")) is not None:
+            expected = float(report["rho_online_ms"]) / float(report["ic_online_ms"])
+            if not math.isclose(float(report["online_speedup"]), expected, rel_tol=1e-8, abs_tol=1e-9):
+                pairing_errors.append("online_speedup does not equal rho_online_ms / ic_online_ms")
+        for arm in ("ic", "rho"):
+            phases = report.get(f"{arm}_online_phase_ms")
+            total = report.get(f"{arm}_online_ms")
+            if not isinstance(phases, dict) or not phases:
+                pairing_errors.append(f"{arm}_online_phase_ms must record exclusive phases")
+            elif any(type(value) not in (int, float) or not math.isfinite(value) or value < 0 for value in phases.values()):
+                pairing_errors.append(f"{arm}_online_phase_ms must contain finite nonnegative costs")
+            elif positive_cost(total) is not None:
+                phase_sum = math.fsum(float(value) for value in phases.values())
+                if not math.isclose(phase_sum, float(total), rel_tol=1e-8, abs_tol=0.02):
+                    pairing_errors.append(f"{arm} online phase costs do not sum to online time")
+            else:
+                pairing_errors.append(f"{arm}_online_ms is missing")
+        if report.get("all_stages_charged_same_series") is not True:
+            pairing_errors.append("same-target charged intervals are not confirmed")
+        if field_present(report, "operation_accounting"):
+            pairing_errors.extend(operation_accounting_errors(report["operation_accounting"]))
     validation_errors: list[str] = []
 
     if stage == "vs_rho":
+        paired = report.get("paired_target")
+        if paired is not None:
+            if not isinstance(paired, dict):
+                validation_errors.append("paired_target must be an object")
+            elif (
+                paired.get("same_public_point") is not True
+                or paired.get("ic_public_q") != paired.get("rho_public_q")
+            ):
+                validation_errors.append("paired_target must contain the same public point in both arms")
+        if "all_stages_charged_same_series" in report and report["all_stages_charged_same_series"] is not True:
+            validation_errors.append("all_stages_charged_same_series must be true when present")
+        if field_present(report, "operation_accounting"):
+            validation_errors.extend(operation_accounting_errors(report["operation_accounting"]))
         for key in ("candidate_id", "workload_id", "run_id"):
             value = report.get(key)
             if not isinstance(value, str) or not value.strip():
@@ -268,8 +438,34 @@ def validate_claim(
             validation_errors.append("IC and rho target hashes must be nonempty strings")
         elif target_hashes[0] != target_hashes[1]:
             validation_errors.append("IC and rho target hashes must match")
-        if report.get("timing_class") not in stage_schema.get("timing_class_enum", []):
-            validation_errors.append("timing_class must be single_target_online_wall")
+        timing_classes = stage_schema.get("timing_class_enum", [])
+        if "primary_ic_online_phase_keys" in stage_schema:
+            if report.get("timing_class") != "single_target_online":
+                validation_errors.append("timing_class must be single_target_online for a primary vs_rho claim")
+        elif report.get("timing_class") not in timing_classes:
+            validation_errors.append(f"timing_class must be one of {timing_classes}")
+        record_class = report.get("record_class")
+        if record_class not in stage_schema.get("record_class_enum", []):
+            validation_errors.append("record_class must identify exploratory or controlled wall evidence")
+        if "hardware_accounting" in report:
+            validation_errors.extend(hardware_accounting_errors(report["hardware_accounting"]))
+        controlled_speedup = report.get("controlled_online_speedup")
+        if controlled_speedup is None:
+            if record_class == "verified_answer_controlled_wall":
+                validation_errors.append("controlled wall record requires controlled_online_speedup")
+        else:
+            if record_class != "verified_answer_controlled_wall":
+                validation_errors.append("controlled_online_speedup requires a controlled wall record")
+            measured_speedup = positive_cost(report.get("online_speedup"))
+            if positive_cost(controlled_speedup) is None or measured_speedup is None or not math.isclose(
+                float(controlled_speedup), measured_speedup, rel_tol=1e-9, abs_tol=1e-12
+            ):
+                validation_errors.append("controlled_online_speedup must equal the paired online ratio")
+            receipt = report.get("host_isolation_receipt")
+            if not isinstance(receipt, dict) or receipt.get("status") != "PASS" or not isinstance(
+                receipt.get("path"), str
+            ) or not receipt["path"].strip():
+                validation_errors.append("controlled_online_speedup requires a host-isolation receipt")
         if report.get("same_resource_envelope") is not True:
             validation_errors.append("same_resource_envelope must be true")
         for key in ("ic_scalar_verified", "rho_scalar_verified"):
@@ -300,12 +496,36 @@ def validate_claim(
             validation_errors.append("online times and speedup must be positive finite numbers")
         elif not math.isclose(speedup, rho_ms / ic_ms, rel_tol=1e-9, abs_tol=1e-12):
             validation_errors.append("online_speedup must equal rho_online_wall_ms / ic_online_wall_ms")
+        for arm, wall_ms in (("ic", ic_ms), ("rho", rho_ms)):
+            for alias in (f"{arm}_cost", f"{arm}_online_ms"):
+                alias_ms = positive_cost(report.get(alias))
+                if alias_ms is None or wall_ms is None or not math.isclose(
+                    alias_ms, wall_ms, rel_tol=1e-9, abs_tol=1e-12
+                ):
+                    validation_errors.append(f"{alias} must equal {arm}_online_wall_ms")
+
+        discount = report.get("automorphism_discount")
+        policy = report.get("rho_policy")
+        if not isinstance(discount, dict) or type(discount.get("A")) is not int or discount["A"] < 1:
+            validation_errors.append("automorphism_discount.A must be a positive integer")
+        elif isinstance(policy, dict) and discount["A"] != policy.get("automorphism_size"):
+            validation_errors.append("automorphism_discount.A must match rho_policy.automorphism_size")
 
         phase_costs = report.get("ic_online_phase_ms")
-        phase_fields = stage_schema.get("ic_online_phase_fields", [])
+        phase_fields = stage_schema.get("ic_online_phase_fields")
+        if phase_fields is None:
+            primary_keys = stage_schema.get("primary_ic_online_phase_keys", [])
+            phase_fields = [f"T_{key}_ms" for key in primary_keys]
+        if not phase_fields:
+            validation_errors.append("ledger must specify IC online phase fields")
         if not isinstance(phase_costs, dict):
             validation_errors.append("ic_online_phase_ms must be an object")
         else:
+            unexpected = set(phase_costs) - set(phase_fields)
+            if unexpected:
+                validation_errors.append(
+                    f"ic_online_phase_ms has unexpected fields: {sorted(unexpected)}"
+                )
             phase_values = []
             for key in phase_fields:
                 value = phase_costs.get(key)
@@ -316,6 +536,21 @@ def validate_claim(
             if len(phase_values) == len(phase_fields) and ic_ms is not None:
                 if not math.isclose(math.fsum(phase_values), ic_ms, rel_tol=1e-6, abs_tol=1e-3):
                     validation_errors.append("IC exclusive phase costs must sum to ic_online_wall_ms")
+
+        rho_phases = report.get("rho_online_phase_ms")
+        rho_phase_fields = stage_schema.get("rho_online_phase_fields", [])
+        if not isinstance(rho_phases, dict):
+            validation_errors.append("rho_online_phase_ms must be an object")
+        elif rho_phase_fields:
+            if set(rho_phases) != set(rho_phase_fields):
+                validation_errors.append("rho_online_phase_ms must contain exactly the declared phases")
+            elif all(type(rho_phases[key]) in (int, float) and math.isfinite(rho_phases[key])
+                     and rho_phases[key] >= 0 for key in rho_phase_fields) and rho_ms is not None:
+                if not math.isclose(math.fsum(float(rho_phases[key]) for key in rho_phase_fields),
+                                    rho_ms, rel_tol=1e-6, abs_tol=1e-3):
+                    validation_errors.append("rho exclusive phase costs must sum to rho_online_wall_ms")
+            else:
+                validation_errors.append("rho_online_phase_ms must contain finite nonnegative costs")
 
         interval = report.get("online_interval")
         interval_fields = (
@@ -358,7 +593,7 @@ def validate_claim(
                 if not isinstance(value, str) or not value.strip():
                     validation_errors.append(f"rho_policy.{key} must be a nonempty string")
 
-    ok = not missing_stage and not missing_global and not validation_errors
+    ok = not missing_stage and not missing_global and not pairing_errors and not validation_errors
     return {
         "schema_version": ledger.get("schema_version"),
         "stage": stage,
@@ -366,6 +601,7 @@ def validate_claim(
         "status": "PASS" if ok else "FAIL",
         "missing_stage_fields": missing_stage,
         "missing_global_provenance": missing_global,
+        "pairing_errors": pairing_errors,
         "validation_errors": validation_errors,
         "required_stage_fields": required,
         "required_global_provenance": global_required,
@@ -550,6 +786,11 @@ def plan(protocol: dict[str, Any], ledger: dict[str, Any]) -> dict[str, Any]:
         "how_to_beat": ledger.get("how_to_beat", []),
         "commands": {
             "preflight": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py preflight",
+            "smoke": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat smoke.koblitz.vs_rho.n13",
+            "n37_wall": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat koblitz.vs_rho.n37_wall",
+            "n41_charged": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat koblitz.vs_rho.n41_charged",
+            "n53_factor_base": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat koblitz.factor_base.n53",
+            "n37_single_target": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat koblitz.vs_rho.n37_wall --fixtures 1",
             "claim_check": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py claim-check --report PATH --stage vs_rho",
         },
     }
@@ -583,6 +824,24 @@ def build_producers() -> dict[str, str]:
     return binaries
 
 
+def build_example(example: str) -> str:
+    source = REPO / "examples" / f"{example}.rs"
+    require(source.is_file(), f"missing producer source: {source}")
+    completed = subprocess.run(
+        ["cargo", "build", "--release", "--example", example],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+    )
+    require(
+        completed.returncode == 0,
+        f"cargo build --example {example} failed:\n" + completed.stderr[-4000:],
+    )
+    binary = (REPO / "target/release/examples" / example).resolve()
+    require(binary.is_file(), f"built binary missing: {binary}")
+    return str(binary)
+
+
 RESOURCE_RECEIPT_FIELDS = (
     "exit_code",
     "whole_process_wall_ms",
@@ -592,6 +851,7 @@ RESOURCE_RECEIPT_FIELDS = (
     "stdout_stable",
     "children_cpu_user_ms",
     "children_cpu_system_ms",
+    "children_peak_rss_bytes",
     "command",
     "seed",
 )
@@ -619,6 +879,9 @@ def _run_once(
     # Children CPU deltas (seconds -> ms). Wall is the outer process wait.
     cpu_user_ms = (usage_after.ru_utime - usage_before.ru_utime) * 1000.0
     cpu_system_ms = (usage_after.ru_stime - usage_before.ru_stime) * 1000.0
+    # Peak RSS after wait is cumulative for this process's children; treat as
+    # an observed upper bound for single-producer launches.
+    peak_rss = children_rss_bytes(int(usage_after.ru_maxrss))
     return completed, elapsed_ms, cpu_user_ms, cpu_system_ms
 
 
@@ -692,6 +955,9 @@ def run_timed(
         "stdout_stable": len(set(outputs)) <= 1,
         "children_cpu_user_ms": statistics.median(users),
         "children_cpu_system_ms": statistics.median(systems),
+        "children_peak_rss_bytes": children_rss_bytes(
+            int(resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss)
+        ),
         "stdout": completed.stdout,
         "stderr": completed.stderr,
     }
@@ -712,13 +978,108 @@ def parse_json_lines(text: str) -> list[dict[str, Any]]:
     return rows
 
 
+def parse_json_objects(text: str) -> list[dict[str, Any]]:
+    """Parse concatenated / pretty-printed JSON objects from producer stdout."""
+    rows = parse_json_lines(text)
+    if rows:
+        return rows
+    rows = []
+    decoder = json.JSONDecoder()
+    index = 0
+    while index < len(text):
+        while index < len(text) and text[index].isspace():
+            index += 1
+        if index >= len(text):
+            break
+        try:
+            value, end = decoder.raw_decode(text, index)
+        except json.JSONDecodeError:
+            break
+        if isinstance(value, dict):
+            rows.append(value)
+        index = end
+    return rows
+
+
+def children_rss_bytes(ru_maxrss: int) -> int:
+    # Darwin reports bytes; Linux reports kilobytes.
+    if sys.platform == "darwin":
+        return int(ru_maxrss)
+    return int(ru_maxrss) * 1024
+
+
 def seed_for(beat_id: str, arm: str, repetition: int) -> int:
     material = f"{TASK_ID}|{beat_id}|arm={arm}|repetition={repetition}".encode()
     return int.from_bytes(hashlib.sha256(material).digest()[:8], "big")
 
 
+def exclusive_online_timing_ok(row: dict[str, Any] | None) -> bool:
+    """Reject a phase sum that re-adds nested LA/replay to collection_ms."""
+    if not isinstance(row, dict):
+        return False
+    phases = row.get("target_online_phase_ms")
+    if not isinstance(phases, dict):
+        return False
+    keys = ("fixture_setup_ms", "collection_ms", "linear_solve_ms",
+            "solution_validation_ms", "reference_validation_ms", "target_online_wall_ms")
+    values = {key: row.get(key) for key in keys}
+    if any(isinstance(value, bool) or not isinstance(value, (int, float))
+           or not math.isfinite(value) or value < 0 for value in values.values()):
+        return False
+    breakdown = row.get("timing_breakdown_ms")
+    if not isinstance(breakdown, dict):
+        return False
+    target_generation_ms = breakdown.get("target_generation")
+    packed_verification_ms = breakdown.get("packed_verification")
+    if any(isinstance(value, bool) or not isinstance(value, (int, float))
+           or not math.isfinite(value) or value < 0
+           for value in (target_generation_ms, packed_verification_ms)):
+        return False
+    expected_pdp = (values["collection_ms"] - values["linear_solve_ms"]
+                    - values["solution_validation_ms"] - target_generation_ms
+                    - packed_verification_ms)
+    tolerance = max(1e-6, values["target_online_wall_ms"] * 1e-8)
+    if expected_pdp < -tolerance:
+        return False
+    expected = {
+        "target_query": values["fixture_setup_ms"] + target_generation_ms,
+        "target_pdp": expected_pdp,
+        "target_relation_check": values["reference_validation_ms"]
+                                 + packed_verification_ms,
+        "target_descent": 0.0,
+        "target_recovery_check": values["linear_solve_ms"] + values["solution_validation_ms"],
+    }
+    if set(phases) != set(expected):
+        return False
+    if any(isinstance(phases[key], bool) or not isinstance(phases[key], (int, float))
+           or not math.isfinite(phases[key]) or phases[key] < 0
+           or abs(phases[key] - value) > tolerance for key, value in expected.items()):
+        return False
+    charged = (values["fixture_setup_ms"] + values["collection_ms"]
+               + values["reference_validation_ms"])
+    return abs(charged - values["target_online_wall_ms"]) <= tolerance
+
+
+def exclusive_precomputation_ms(row: dict[str, Any] | None) -> float | None:
+    """Collection already contains final LA and solution validation."""
+    if not isinstance(row, dict):
+        return None
+    keys = ("setup_ms", "fixture_setup_ms", "collection_ms", "reference_validation_ms")
+    values = [row.get(key) for key in keys]
+    if any(isinstance(value, bool) or not isinstance(value, (int, float))
+           or not math.isfinite(value) or value < 0 for value in values):
+        return None
+    return sum(values)
+
+
 def positive_cost(value):
-    return float(value) if type(value) in (int, float) and math.isfinite(value) and value > 0 else None
+    if type(value) not in (int, float) or value <= 0:
+        return None
+    try:
+        result = float(value)
+    except (OverflowError, ValueError):
+        return None
+    return result if math.isfinite(result) else None
 
 
 def extract_ic_cost(rows: list[dict[str, Any]], timing_class: str) -> float | None:
@@ -805,6 +1166,26 @@ def automorphism_discount(n: int) -> dict[str, Any]:
     }
 
 
+def public_target_hash(beat: dict[str, Any], point: Any) -> str | None:
+    """Bind a producer's public point to the beat's field and curve parameters."""
+    if not isinstance(point, list) or len(point) != 2:
+        return None
+    try:
+        coordinates = []
+        for value in point:
+            if type(value) is int and value >= 0:
+                coordinates.append(str(value))
+            elif isinstance(value, str) and value.isascii() and value.isdecimal():
+                coordinates.append(str(int(value)))
+            else:
+                return None
+        payload = {"n": int(beat["n"]), "a": int(beat["a"]), "q": coordinates}
+    except (KeyError, TypeError, ValueError):
+        return None
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(canonical).hexdigest()
+
+
 def draft_vs_rho_claim(
     *,
     beat: dict[str, Any],
@@ -815,6 +1196,71 @@ def draft_vs_rho_claim(
     binaries: dict[str, str],
 ) -> dict[str, Any]:
     timing_class = beat["timing_class_goal"]
+    direct_rows = parse_json_objects(direct_obs["stdout"])
+    rho_rows = parse_json_objects(rho_obs["stdout"])
+    direct_summaries = [
+        row for row in direct_rows if row.get("kind") == "relation_rank_summary"
+    ]
+    precompute_row = next(
+        (row for row in direct_summaries if row.get("precomputation_fixture")), None
+    )
+    online_row = next(
+        (row for row in reversed(direct_summaries)
+         if row.get("online_target_count") == 1), None
+    )
+    rho_row = next(
+        (row for row in reversed(rho_rows) if row.get("kind") == "rho_public_fixture"),
+        None,
+    )
+    ic_q = online_row.get("published_q") if online_row else None
+    rho_q = rho_row.get("published_q") if rho_row else None
+    ic_target_hash = public_target_hash(beat, ic_q)
+    rho_target_hash = public_target_hash(beat, rho_q)
+    same_public_point = ic_target_hash is not None and ic_target_hash == rho_target_hash
+    ic_scalar = online_row.get("published_fixture_scalar") if online_row else None
+    rho_scalar = rho_row.get("published_fixture_scalar") if rho_row else None
+    same_fixture_scalar = ic_scalar is not None and ic_scalar == rho_scalar
+
+    ic_phases = online_row.get("target_online_phase_ms") if online_row else None
+    ic_online = online_row.get("target_online_wall_ms") if online_row else None
+    ic_phase_exclusive_ok = exclusive_online_timing_ok(online_row)
+    ic_phase_sum_ok = False
+    if ic_phase_exclusive_ok:
+        phase_sum = math.fsum(float(value) for value in ic_phases.values())
+        ic_phase_sum_ok = math.isclose(
+            phase_sum, float(ic_online), rel_tol=1e-8, abs_tol=0.02
+        )
+    rho_phases = None
+    rho_online = None
+    if rho_row is not None:
+        walk_ms = rho_row.get("walk_ms")
+        validation_ms = rho_row.get("validation_ms")
+        if all(
+            type(value) in (int, float) and math.isfinite(value) and value >= 0
+            for value in (walk_ms, validation_ms)
+        ):
+            rho_phases = {
+                "target_walk": float(walk_ms),
+                "scalar_recovery_check": float(validation_ms),
+            }
+            rho_online = sum(rho_phases.values())
+
+    ic_verified = bool(
+        online_row
+        and online_row.get("status") == "SHARED_FACTOR_LOG_ONE_RELATION"
+        and online_row.get("uses_retained_factor_logs") is True
+        and online_row.get("online_target_count") == 1
+        and online_row.get("linear_solution_verified") is True
+        and online_row.get("recovered_fixture_scalar") == ic_scalar
+        and ic_phase_sum_ok
+        and ic_phase_exclusive_ok
+    )
+    rho_verified = bool(
+        rho_row
+        and rho_row.get("verified") is True
+        and rho_row.get("recovered_fixture_scalar") == rho_scalar
+        and rho_online is not None
+    )
     direct_rows = parse_json_lines(direct_obs["stdout"])
     rho_rows = parse_json_lines(rho_obs["stdout"])
     producers_ok = direct_obs["exit_code"] == 0 and rho_obs["exit_code"] == 0
@@ -823,12 +1269,59 @@ def draft_vs_rho_claim(
         float(direct_obs["whole_process_wall_ms"])
         if timing_class == "whole_process_wall"
         else extract_ic_cost(direct_rows, timing_class)
+        and positive_cost(rho_online) is not None
     )
-    rho_cost = (
-        float(rho_obs["whole_process_wall_ms"])
-        if timing_class == "whole_process_wall"
-        else extract_rho_cost(rho_rows)
+    target_count = int(online_row.get("online_target_count", 0)) if online_row else 0
+    pairing_ok = same_public_point and same_fixture_scalar and target_count == 1
+    stable_outputs = all(
+        observation.get("stdout_stable", True) is True
+        for observation in (direct_obs, rho_obs)
     )
+    online_speedup = (
+        float(rho_online) / float(ic_online)
+        if pairing_ok and ic_verified and rho_verified and stable_outputs
+        and positive_cost(ic_online) is not None
+        and positive_cost(rho_online) is not None
+        else None
+    )
+    producers_ok = (
+        direct_obs["exit_code"] == 0 and rho_obs["exit_code"] == 0
+        and pairing_ok and ic_verified and rho_verified and stable_outputs
+    )
+    precompute_ms = exclusive_precomputation_ms(precompute_row)
+    if timing_class in ("single_target_online", "single_target_online_wall"):
+        ic_cost = positive_cost(ic_online)
+        rho_cost = positive_cost(rho_online)
+    else:
+        ic_cost = (
+            float(direct_obs["whole_process_wall_ms"])
+            if timing_class == "whole_process_wall"
+            else extract_ic_cost(direct_rows, timing_class)
+        )
+        rho_cost = (
+            float(rho_obs["whole_process_wall_ms"])
+            if timing_class == "whole_process_wall"
+            else extract_rho_cost(rho_rows)
+        )
+    ic_operations = online_row.get("target_trials") if online_row else None
+    rho_operations = rho_row.get("walk_steps") if rho_row else None
+    operation_accounting = None
+    if all(
+        isinstance(value, (int, float)) and not isinstance(value, bool) and value > 0
+        for value in (ic_operations, rho_operations)
+    ):
+        operation_accounting = {
+            "schema_version": "1.0",
+            "unit_assumption": "IC target trials and rho walk steps are distinct uncalibrated counters",
+            "comparison_status": "native_counters_only",
+            "operation_units": {"ic": "target relation trials", "rho": "walk steps"},
+            "ic_online_operations": ic_operations,
+            "ic_online_operations_basis": "target_trials of the one online target",
+            "rho_online_operations": rho_operations,
+            "rho_online_operations_basis": "measured walk steps of this run",
+            "rho_per_ic_native_counter": float(rho_operations) / float(ic_operations),
+            "ops_speedup_online": None,
+        }
     claim = {
         "schema_version": 2,
         "task_id": TASK_ID,
@@ -844,50 +1337,79 @@ def draft_vs_rho_claim(
         "workload_manifest_sha256": None,
         "run_id": None,
         "autolab_run_id": run.name,
-        "target_count": integrity.get("fixtures"),
-        "ic_target_hash": integrity.get("fixture_hash") if integrity["status"] == "MATCHED" else None,
-        "rho_target_hash": integrity.get("fixture_hash") if integrity["status"] == "MATCHED" else None,
-        "ic_online_wall_ms": None,
-        "rho_online_wall_ms": None,
-        "ic_online_phase_ms": None,
-        "online_speedup": None,
+        "target_count": target_count,
+        "ic_target_hash": ic_target_hash,
+        "rho_target_hash": rho_target_hash,
+        "ic_online_wall_ms": positive_cost(ic_online),
+        "rho_online_wall_ms": positive_cost(rho_online),
         "online_interval": None,
         "same_resource_envelope": None,
-        "ic_scalar_verified": integrity["status"] == "MATCHED" and producers_ok,
-        "rho_scalar_verified": integrity["status"] == "MATCHED" and producers_ok,
         "independent_validation": False,
         "ic_replay_certificate_sha256": None,
         "rho_replay_certificate_sha256": None,
         "ic_resource_envelope": None,
         "rho_resource_envelope": None,
+        "ic_scalar_verified": ic_verified,
+        "rho_scalar_verified": rho_verified,
         "rho_policy": None,
         "ic_cost": ic_cost,
         "rho_cost": rho_cost,
         "automorphism_discount": automorphism_discount(int(beat["n"])),
-        "all_stages_charged_same_series": bool(producers_ok and integrity['status'] == 'MATCHED'
-            and timing_class == 'whole_process_wall'
-            and all(isinstance(x, (int, float)) and math.isfinite(x) and x > 0 for x in (ic_cost, rho_cost))),
-        "comparison_integrity": integrity,
+        "all_stages_charged_same_series": bool(
+            pairing_ok and ic_verified and rho_verified and ic_phase_sum_ok
+            and ic_phase_exclusive_ok and stable_outputs
+        ),
         "verdict": (
-            ("DRAFT_PENDING_INDEPENDENT_VALIDATION" if integrity['status'] == 'MATCHED' else 'INVALID_COMPARISON')
+            "DRAFT_PENDING_INDEPENDENT_VALIDATION"
             if producers_ok
             else "PRODUCER_FAILURE"
         ),
         "claim_boundary": (
-            "Legacy single-fixture producer diagnostic only. Current producers "
-            "report whole-process or operation-counted costs, not target-online "
-            "wall intervals; this row is not a primary single-target speedup."
+            "Public synthetic Koblitz, one-target online comparison after reusable "
+            "IC setup. No batch throughput, key recovery, asymptotic sub-rho claim, "
+            "or ledger promotion before independent validation."
         ),
         "claim_boundary_non_claims": [
             "not key recovery",
             "not asymptotic sub-sqrt",
             "not imported/external points",
+            "not a multi-target batch",
             "not ledger promotion until independent validation",
+            "not compared against Pollard rho with precomputation at equal "
+            "precompute and memory",
         ],
-        "independent_replay_pointer": str(
-            (run / "artifacts/claim_draft.json").relative_to(REPO)
+        "paired_target": {
+            "ic_public_q": ic_q,
+            "rho_public_q": rho_q,
+            "same_public_point": same_public_point,
+            "ic_fixture_scalar": ic_scalar,
+            "rho_fixture_scalar": rho_scalar,
+            "same_fixture_scalar": same_fixture_scalar,
+            "point_generation_excluded_from_online": bool(
+                online_row and rho_row
+                and "fixture_generation_ms" in online_row
+                and "target_generation_ms_excluded" in rho_row
+            ),
+        },
+        "ic_verified": ic_verified,
+        "ic_exclusive_timing_verified": ic_phase_exclusive_ok,
+        "rho_verified": rho_verified,
+        "ic_online_ms": float(ic_online) if isinstance(ic_online, (int, float)) else None,
+        "rho_online_ms": float(rho_online) if isinstance(rho_online, (int, float)) else None,
+        "online_speedup": online_speedup,
+        "operation_accounting": operation_accounting,
+        "ic_online_phase_ms": ic_phases,
+        "rho_online_phase_ms": rho_phases,
+        "ic_online_interval": online_row.get("target_online_interval") if online_row else None,
+        "rho_online_interval": (
+            "first target-dependent walk step through recovered scalar and verification; "
+            "excludes launch, walk setup, and fixture point generation"
+            if rho_row else None
         ),
-        "fixture_hash": integrity['fixture_hash'],
+        "ic_precomputation_fixture_ms": precompute_ms,
+        "ic_target_relation_attempts": online_row.get("target_trials") if online_row else None,
+        "independent_replay_pointer": independent_replay_pointer(run),
+        "fixture_hash": ic_target_hash if same_public_point else None,
         "executable_or_source_hash": {
             "direct": sha256(binaries["direct"]),
             "rho": sha256(binaries["rho"]),
@@ -909,10 +1431,7 @@ def draft_vs_rho_claim(
             "rho": rho_obs["whole_process_wall_ms"],
         },
         "whole_process_wall_method": {
-            "description": (
-                "median of timed executions after one discarded warmup; "
-                "first-execution cost is reported separately and not charged"
-            ),
+            "description": "median of timed executions after one discarded warmup; first-execution cost is reported separately",
             "cold_start_wall_ms": {
                 "direct": direct_obs.get("cold_start_wall_ms"),
                 "rho": rho_obs.get("cold_start_wall_ms"),
@@ -932,6 +1451,647 @@ def draft_vs_rho_claim(
         },
         "direct_rows": len(direct_rows),
         "rho_rows": len(rho_rows),
+        "direct_target_summary_rows": len(direct_summaries),
+    }
+    return claim
+
+
+def select_factor_base_row(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
+    for row in rows:
+        if row.get("kind") == "point_defined_factor_base":
+            return row
+        if row.get("evidence_class") == "measured_factor_base_construction":
+            return row
+    for row in rows:
+        if "factor_base_points" in row or "orbit_columns" in row:
+            return row
+    return rows[0] if rows else None
+
+
+def parse_paired_oracle_stdout(stdout: str) -> dict[str, Any]:
+    """Parse symmetrised_oracle_bench / format_paired text into structured fields."""
+    import re
+
+    header = None
+    for line in stdout.splitlines():
+        m = re.match(
+            r"== K_(\d+)/F_2\^(\d+)\s+m = (\d+)\s+dim V = (\d+)\s+"
+            r"\|F_x\| = (\d+)\s+\|F_u\| = (\d+)\s+targets = (\d+)",
+            line.strip(),
+        )
+        if m:
+            header = {
+                "a": int(m.group(1)),
+                "n": int(m.group(2)),
+                "m": int(m.group(3)),
+                "dim": int(m.group(4)),
+                "F_x": int(m.group(5)),
+                "F_u": int(m.group(6)),
+                "targets": int(m.group(7)),
+            }
+            break
+    require(header is not None, "paired oracle stdout missing K_/F_2 header")
+
+    arms: dict[str, Any] = {}
+    divisor_indices: list[int] | None = None
+    wall_s: float | None = None
+    arm_map = {
+        "x-chained F4": "x_chained_f4",
+        "sym F4": "sym_f4",
+        "x-direct F4": "x_direct_f4",
+    }
+    for line in stdout.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("divisor indices"):
+            dm = re.search(r"divisor indices\s+(\[.*?\])\s+\(([0-9.]+)\s*s\)", stripped)
+            if dm:
+                divisor_indices = json.loads(dm.group(1).replace("'", '"'))
+                wall_s = float(dm.group(2))
+            continue
+        for label, key in arm_map.items():
+            if not stripped.startswith(label):
+                continue
+            rest = stripped[len(label) :].split()
+            # vars eqs deg found refuted inconc viaT found_ms refuted_ms effort [built] ffd gate...
+            require(len(rest) >= 12, f"paired oracle arm row too short: {stripped}")
+            # Current format_paired inserts a 'built' column before ffd.
+            if len(rest) >= 13:
+                vars_n, eqs, deg, found, refuted, inconc, via_t = map(int, rest[0:7])
+                found_ms = float(rest[7]) if rest[7] != "-" else float("nan")
+                refuted_ms = float(rest[8]) if rest[8] != "-" else float("nan")
+                effort = float(rest[9]) if rest[9] != "-" else float("nan")
+                ffd_tok = rest[11]
+                gate = rest[12]
+            else:
+                vars_n, eqs, deg, found, refuted, inconc, via_t = map(int, rest[0:7])
+                found_ms = float(rest[7]) if rest[7] != "-" else float("nan")
+                refuted_ms = float(rest[8]) if rest[8] != "-" else float("nan")
+                effort = float(rest[9]) if rest[9] != "-" else float("nan")
+                ffd_tok = rest[10]
+                gate = rest[11]
+            ffd = None if ffd_tok == "-" else int(ffd_tok)
+            arms[key] = {
+                "vars": vars_n,
+                "eqs": eqs,
+                "deg": deg,
+                "found": found,
+                "refuted": refuted,
+                "inconclusive": inconc,
+                "via_t": via_t,
+                "found_ms_median": found_ms,
+                "refuted_ms_median": refuted_ms,
+                "effort_splits": effort,
+                "ffd": ffd,
+                "gate": gate,
+            }
+            break
+
+    require(arms, "paired oracle stdout missing arm rows")
+    ffds = [arm["ffd"] for arm in arms.values() if isinstance(arm.get("ffd"), int)]
+    # Honesty gate: max of class medians (found/refuted) across arms.
+    class_medians = []
+    for arm in arms.values():
+        for key in ("found_ms_median", "refuted_ms_median"):
+            val = arm.get(key)
+            if isinstance(val, (int, float)) and val == val:  # not NaN
+                class_medians.append(float(val))
+    median_ms = max(class_medians) if class_medians else None
+    disagreements = 0
+    for arm in arms.values():
+        gate = str(arm.get("gate") or "")
+        if gate != "ok":
+            # FAIL N
+            parts = gate.split()
+            if len(parts) == 2 and parts[0] == "FAIL" and parts[1].isdigit():
+                disagreements += int(parts[1])
+            else:
+                disagreements += 1
+    return {
+        "header": header,
+        "arms": arms,
+        "divisor_indices": divisor_indices,
+        "wall_s": wall_s,
+        "ffds": ffds,
+        "median_ms_per_target": median_ms,
+        "disagreements": disagreements,
+    }
+
+
+def parse_semaev_decomp_bench_stdout(stdout: str) -> dict[str, Any]:
+    """Parse examples/semaev_decomp_bench text ladder into structured fields."""
+    import re
+
+    ladder: list[dict[str, Any]] = []
+    for line in stdout.splitlines():
+        m = re.match(
+            r"^\s*(\d+)\s+(\d+)\s+(\d+)\s+([0-9.]+)s\s+([0-9.]+)s\s+([0-9.]+)s\s+([0-9.]+)x\s*$",
+            line,
+        )
+        if not m:
+            continue
+        ladder.append(
+            {
+                "l": int(m.group(1)),
+                "n": int(m.group(2)),
+                "triples": int(m.group(3)),
+                "triples_gen_s": float(m.group(4)),
+                "triples_1wd_s": float(m.group(5)),
+                "pairs_s": float(m.group(6)),
+                "speedup_vs_triples": float(m.group(7)),
+            }
+        )
+    require(ladder, "semaev_decomp_bench stdout missing pairs ladder rows")
+    return {"ladder": ladder}
+
+
+def parse_j0_known_answer_stdout(stdout: str) -> dict[str, Any]:
+    """Parse examples/j0_known_answer_bits JSON result object from stdout."""
+    rows = parse_json_objects(stdout)
+    row = next(
+        (
+            item
+            for item in reversed(rows)
+            if isinstance(item.get("bits"), int)
+            and "ic_ok" in item
+            and "rho_ok" in item
+        ),
+        None,
+    )
+    require(row is not None, "j0_known_answer_bits stdout missing known-answer JSON row")
+    return row
+
+
+def draft_j0_end_to_end_dlp_claim(
+    *,
+    beat: dict[str, Any],
+    beat_id: str,
+    run: Path,
+    direct_obs: dict[str, Any],
+    binaries: dict[str, str],
+) -> dict[str, Any]:
+    parsed = parse_j0_known_answer_stdout(direct_obs.get("stdout") or "")
+    bits = int(beat.get("bits") or parsed["bits"])
+    require(int(parsed["bits"]) == bits, f"producer bits {parsed['bits']} != beat bits {bits}")
+    producers_ok = (
+        direct_obs["exit_code"] == 0
+        and parsed.get("ic_ok") is True
+        and parsed.get("rho_ok") is True
+        and parsed.get("ic_agrees_rho") is True
+    )
+    peak_rss = direct_obs.get("children_peak_rss_bytes")
+    cap = beat.get("resource_cap_bytes")
+    under_cap = (
+        peak_rss is not None and cap is not None and int(peak_rss) <= int(cap)
+        if cap is not None
+        else None
+    )
+    ic_ms = float(parsed["ic_ms"])
+    rho_ms = float(parsed["rho_ms"])
+    source = REPO / "examples" / f"{beat['producer']['example']}.rs"
+    binary_path = binaries.get("custom") or binaries.get("direct")
+    claim = {
+        "schema_version": 2,
+        "task_id": TASK_ID,
+        "beat_id": beat_id,
+        "regime": beat["regime"],
+        "stage": "end_to_end_dlp",
+        "n": bits,
+        "n_or_bits": bits,
+        "curve": parsed.get("curve"),
+        "recovered_d_verified": bool(parsed.get("ic_ok")),
+        "ic_ok": parsed.get("ic_ok"),
+        "rho_ok": parsed.get("rho_ok"),
+        "ic_matches_truth": parsed.get("ic_matches_truth"),
+        "ic_agrees_rho": parsed.get("ic_agrees_rho"),
+        "ic_ms": ic_ms,
+        "rho_ms": rho_ms,
+        "stage_timers": {
+            "ic_ms": ic_ms,
+            "rho_ms": rho_ms,
+            "note": (
+                "producer does not yet split FB/relations/LA; "
+                "wall is full j0_index_calculus_dlp vs pollard_rho"
+            ),
+        },
+        "target_orbits": parsed.get("target_orbits"),
+        "max_trials": parsed.get("max_trials"),
+        "rho_steps": parsed.get("rho_steps"),
+        "wall_s": float(direct_obs.get("whole_process_wall_ms") or 0.0) / 1000.0,
+        "peak_rss_bytes": peak_rss,
+        "verdict": (
+            "J0_16BIT_KA_IC_AGREES_RHO_PENDING_INDEPENDENT_VALIDATION"
+            if producers_ok
+            else "PRODUCER_FAILURE"
+        ),
+        "claim_boundary": (
+            "Public synthetic known-answer j=0 IC vs rho only. "
+            "Not key recovery, not asymptotic sub-rho, not ledger promotion."
+        ),
+        "claim_boundary_non_claims": [
+            "not key recovery on deployed curves",
+            "not asymptotic sub-rho",
+            "not ledger promotion until independent validation",
+            "IC slower than rho on this instance (expected; not a vs_rho crossover)",
+        ],
+        "independent_replay_pointer": independent_replay_pointer(run),
+        "fixture_hash": sha256(source),
+        "executable_or_source_hash": {
+            "executable": sha256(binary_path) if binary_path else None,
+            "source": sha256(source),
+        },
+        "host_id": host_record(),
+        "resource_caps": {
+            "common_cap_bytes": cap,
+            "observed_peak_rss_bytes": peak_rss,
+            "under_cap": under_cap,
+        },
+        "seeds": {"random_scalar": "runtime"},
+        "evidence_paths": [
+            str((run / "logs/direct.stdout.jsonl").resolve()),
+            str((run / "receipts/direct.resource.json").resolve()),
+        ],
+        "created_at": now(),
+        "autolab_run_id": run.name,
+        "producer_exit_codes": {"direct": direct_obs["exit_code"]},
+    }
+    return claim
+
+
+def draft_binary_pairs_decomposition_claim(
+    *,
+    beat: dict[str, Any],
+    beat_id: str,
+    run: Path,
+    direct_obs: dict[str, Any],
+    binaries: dict[str, str],
+) -> dict[str, Any]:
+    parsed = parse_semaev_decomp_bench_stdout(direct_obs.get("stdout") or "")
+    ladder = parsed["ladder"]
+    l_goal = int(beat.get("l") or 8)
+    row = next((item for item in ladder if item["l"] == l_goal), None)
+    require(row is not None, f"semaev_decomp_bench stdout missing l={l_goal} ladder row")
+    producers_ok = direct_obs["exit_code"] == 0
+    peak_rss = direct_obs.get("children_peak_rss_bytes")
+    cap = beat.get("resource_cap_bytes")
+    under_cap = (
+        peak_rss is not None and cap is not None and int(peak_rss) <= int(cap)
+        if cap is not None
+        else None
+    )
+    pairs_s = float(row["pairs_s"])
+    median_ms = pairs_s * 1000.0
+    source = REPO / "examples" / f"{beat['producer']['example']}.rs"
+    binary_path = binaries.get("custom") or binaries.get("direct")
+    claim = {
+        "schema_version": 2,
+        "task_id": TASK_ID,
+        "beat_id": beat_id,
+        "regime": beat["regime"],
+        "stage": "decomposition",
+        "n": beat.get("n", row["n"]),
+        "n_or_bits": beat.get("n", row["n"]),
+        "m_summands": beat.get("m", 3),
+        "dimension_l_or_dim": l_goal,
+        "unknowns": "2*l_bit_pair_space",
+        "system_degree": "quartic_s4_symmetrised",
+        "eq_var_ratio": "inapplicable_pairs_and_solve_no_boolean_system",
+        "ffd_or_degree_of_regularity": {
+            "status": "inapplicable",
+            "reason": (
+                "oracle_class=pairs_and_solve enumerates pair space; "
+                "no Boolean Macaulay/GB system in this arm"
+            ),
+            "note": (
+                "Ledger sub-2^(2l) beat still wants subspace/oracle FFD at l=8; "
+                "see runs_manual/binary_s4_ffd_l8_20260920 for related S4 subspace FFD."
+            ),
+        },
+        "oracle_class": "pairs_and_solve",
+        "median_ms_per_target": median_ms,
+        "largest_solvable": {
+            "budget": "pairs_baseline",
+            "l": l_goal,
+            "n": row["n"],
+            "pairs_solve_s": pairs_s,
+        },
+        "ladder": [
+            {
+                "l": item["l"],
+                "pairs_s": item["pairs_s"],
+                "speedup_vs_triples": item["speedup_vs_triples"],
+                "triples_gen_s": item["triples_gen_s"],
+            }
+            for item in ladder
+        ],
+        "ledger_gate_assessment": {
+            "ffd_logged": False,
+            "median_le_half_pairs": "n/a_until_faster_oracle_measured",
+            "note": (
+                "pairs-and-solve IS Theta(2^(2l)); this measures the baseline, "
+                "not a sub-2^(2l) win"
+            ),
+            "sub_2_to_2l_oracle": False,
+            "targets_le_64": True,
+        },
+        "wall_s": float(direct_obs.get("whole_process_wall_ms") or 0.0) / 1000.0,
+        "peak_rss_bytes": peak_rss,
+        "verdict": (
+            "L8_PAIRS_BASELINE_MEASURED_NO_SUB_2_2L_PENDING_INDEPENDENT_VALIDATION"
+            if producers_ok
+            else "PRODUCER_FAILURE"
+        ),
+        "claim_boundary": (
+            "Public synthetic binary Semaev pairs-and-solve baseline only. "
+            "Not key recovery, not a sub-2^(2l) oracle claim, not ledger promotion."
+        ),
+        "claim_boundary_non_claims": [
+            "not key recovery",
+            "not sub-2^(2l) oracle claim",
+            "not ledger promotion",
+            "FFD unmeasured on pairs arm",
+        ],
+        "independent_replay_pointer": independent_replay_pointer(run),
+        "fixture_hash": sha256(source),
+        "executable_or_source_hash": {
+            "executable": sha256(binary_path) if binary_path else None,
+            "source": sha256(source),
+        },
+        "host_id": host_record(),
+        "resource_caps": {
+            "common_cap_bytes": cap,
+            "observed_peak_rss_bytes": peak_rss,
+            "under_cap": under_cap,
+        },
+        "seeds": {"decomp_bench_internal": "0x9E3779B9"},
+        "evidence_paths": [
+            str((run / "logs/direct.stdout.jsonl").resolve()),
+            str((run / "receipts/direct.resource.json").resolve()),
+        ],
+        "created_at": now(),
+        "autolab_run_id": run.name,
+        "producer_exit_codes": {"direct": direct_obs["exit_code"]},
+    }
+    return claim
+
+
+def draft_decomposition_claim(
+    *,
+    beat: dict[str, Any],
+    beat_id: str,
+    run: Path,
+    direct_obs: dict[str, Any],
+    binaries: dict[str, str],
+    fixtures: int,
+) -> dict[str, Any]:
+    producer = beat.get("producer") or {}
+    if str(producer.get("example") or "") == "semaev_decomp_bench":
+        return draft_binary_pairs_decomposition_claim(
+            beat=beat,
+            beat_id=beat_id,
+            run=run,
+            direct_obs=direct_obs,
+            binaries=binaries,
+        )
+    parsed = parse_paired_oracle_stdout(direct_obs.get("stdout") or "")
+    header = parsed["header"]
+    arms = parsed["arms"]
+    producers_ok = direct_obs["exit_code"] == 0
+    peak_rss = direct_obs.get("children_peak_rss_bytes")
+    cap = beat.get("resource_cap_bytes")
+    under_cap = peak_rss is not None and cap is not None and int(peak_rss) <= int(cap)
+    ffds = parsed["ffds"]
+    ffd_block = {
+        "draws": 1,
+        "min": min(ffds) if ffds else None,
+        "max": max(ffds) if ffds else None,
+        "mean": (sum(ffds) / len(ffds)) if ffds else None,
+        "note": "FFD from first target draw in paired_bench; control-plane decomposition launch",
+    }
+    for key, arm in arms.items():
+        if isinstance(arm.get("ffd"), int):
+            ffd_block[key] = arm["ffd"]
+    x_arm = arms.get("x_chained_f4") or next(iter(arms.values()))
+    unknowns = int(beat.get("unknowns_goal") or x_arm.get("vars") or 0)
+    dim = int(beat.get("dim_goal") or header["dim"])
+    median_ms = parsed["median_ms_per_target"]
+    under_1h = isinstance(median_ms, (int, float)) and median_ms <= 3_600_000.0
+    source = REPO / "examples" / f"{beat['producer']['example']}.rs"
+    binary_path = binaries.get("custom") or binaries.get("direct")
+    claim = {
+        "schema_version": 2,
+        "task_id": TASK_ID,
+        "beat_id": beat_id,
+        "regime": beat["regime"],
+        "stage": "decomposition",
+        "n": beat["n"],
+        "a": beat.get("a", header["a"]),
+        "n_or_bits": beat["n"],
+        "m_summands": beat.get("m", header["m"]),
+        "dimension_l_or_dim": dim,
+        "unknowns": unknowns,
+        "system_degree": beat.get("system_degree", "quadratic"),
+        "eq_var_ratio": (x_arm["eqs"] / x_arm["vars"]) if x_arm.get("vars") else None,
+        "ffd_or_degree_of_regularity": ffd_block,
+        "oracle_class": "groebner",
+        "median_ms_per_target": median_ms,
+        "median_ms_per_target_detail": {
+            "reported_as": "max(found, refuted) class medians for 1h gate honesty",
+            **{
+                f"{key}_found_median_ms": arm.get("found_ms_median")
+                for key, arm in arms.items()
+            },
+            **{
+                f"{key}_refuted_median_ms": arm.get("refuted_ms_median")
+                for key, arm in arms.items()
+            },
+        },
+        "largest_solvable": {
+            "budget": "1h",
+            "dim": dim,
+            "m": beat.get("m", header["m"]),
+            "n": beat["n"],
+            "observed_median_ms": median_ms,
+            "under_budget": under_1h,
+            "unknowns": unknowns,
+            "verdict_mix": {
+                "found": x_arm.get("found"),
+                "inconclusive": x_arm.get("inconclusive"),
+                "refuted": x_arm.get("refuted"),
+            },
+        },
+        "arms": arms,
+        "disagreements": parsed["disagreements"],
+        "divisor_indices": parsed["divisor_indices"],
+        "fb_sizes": {"F_x": header["F_x"], "F_u": header["F_u"]},
+        "targets": header["targets"],
+        "node_budget": 50000,
+        "sat": False,
+        "wall_s": parsed["wall_s"]
+        if parsed["wall_s"] is not None
+        else (float(direct_obs.get("whole_process_wall_ms") or 0.0) / 1000.0),
+        "peak_rss_bytes": peak_rss,
+        "acceptance_vs_ledger": {
+            "dim_16_m_2_quadratic": dim == 16 and int(beat.get("m", 2)) == 2,
+            "disagreements_zero": parsed["disagreements"] == 0,
+            "ffd_logged": bool(ffds),
+            "median_under_1h": under_1h,
+        },
+        "verdict": (
+            "N31_M2_DIM16_PANEL_PASS_UNDER_1H_PENDING_INDEPENDENT_VALIDATION"
+            if producers_ok
+            and parsed["disagreements"] == 0
+            and under_1h
+            and ffds
+            else (
+                "PRODUCER_FAILURE"
+                if not producers_ok
+                else "DRAFT_INCOMPLETE_OR_GATE_FAIL"
+            )
+        ),
+        "claim_boundary": (
+            "Public synthetic Koblitz Semaev decomposition oracle measure only. "
+            "Not key recovery, not asymptotic sub-rho, not imported points, not "
+            "ledger promotion until independent validation."
+        ),
+        "claim_boundary_non_claims": [
+            "not key recovery",
+            "not asymptotic sub-sqrt",
+            "not imported/external points",
+            "not ledger promotion until independent validation",
+        ],
+        "independent_replay_pointer": independent_replay_pointer(run),
+        "fixture_hash": sha256(source),
+        "executable_or_source_hash": {
+            "executable": sha256(binary_path) if binary_path else None,
+            "source": sha256(source),
+        },
+        "host_id": host_record(),
+        "resource_caps": {
+            "common_cap_bytes": cap,
+            "node_budget": 50000,
+            "observed_peak_rss_bytes": peak_rss,
+            "under_cap": under_cap,
+        },
+        "seeds": {"paired_bench_default": hex(int((beat.get("env") or {}).get("seed", 0x5EED)))},
+        "evidence_paths": [
+            str((run / "logs/direct.stdout.jsonl").resolve()),
+            str((run / "receipts/direct.resource.json").resolve()),
+        ],
+        "created_at": now(),
+        "autolab_run_id": run.name,
+        "producer_exit_codes": {"direct": direct_obs["exit_code"]},
+    }
+    return claim
+
+
+def draft_factor_base_claim(
+    *,
+    beat: dict[str, Any],
+    beat_id: str,
+    run: Path,
+    direct_obs: dict[str, Any],
+    binaries: dict[str, str],
+) -> dict[str, Any]:
+    rows = parse_json_objects(direct_obs["stdout"])
+    base = select_factor_base_row(rows) or {}
+    producers_ok = direct_obs["exit_code"] == 0
+    factor_base_size = base.get("factor_base_points")
+    if isinstance(factor_base_size, list):
+        factor_base_size = len(factor_base_size)
+    orbit_count = base.get("orbit_columns")
+    retained = base.get("support_payload_lower_bound_bytes")
+    construction_wall = base.get("total_setup_ms")
+    if construction_wall is None:
+        construction_wall = direct_obs.get("whole_process_wall_ms")
+    peak_rss = direct_obs.get("children_peak_rss_bytes")
+    cap = beat.get("resource_cap_bytes")
+    under_cap = (
+        peak_rss is not None and cap is not None and int(peak_rss) <= int(cap)
+    )
+    pair_mode = beat.get("direct", {}).get("pair_mode", "unknown")
+    eta = beat.get("eta")
+    eta_label = (
+        f"eta_{eta[0]}_{eta[1]}"
+        if isinstance(eta, list) and len(eta) == 2
+        else "eta_unknown"
+    )
+    claim = {
+        "schema_version": 2,
+        "task_id": TASK_ID,
+        "beat_id": beat_id,
+        "regime": beat["regime"],
+        "stage": "factor_base",
+        "n": beat["n"],
+        "n_or_bits": beat["n"],
+        "factor_base_size_F": factor_base_size,
+        "orbit_count_K": orbit_count,
+        "dimension_l_or_dim": orbit_count,
+        "construction_method": (
+            f"point_defined_{pair_mode}_{eta_label}"
+            + ("_summary_only" if (beat.get("env") or {}).get("KIC_SUMMARY_ONLY") == "1" else "")
+        ),
+        "materialized": True,
+        "construction_wall_ms": construction_wall,
+        "retained_bytes": retained,
+        "frobenius_closed": base.get("frobenius_closed"),
+        "negation_closed": base.get("negation_closed"),
+        "subgroup_membership_verified": base.get("subgroup_membership_verified"),
+        "pair_index_mode": base.get("pair_index_mode", pair_mode),
+        "eta": base.get("eta")
+        or (
+            {"numerator": eta[0], "denominator": eta[1]}
+            if isinstance(eta, list) and len(eta) == 2
+            else eta
+        ),
+        "base_hash": base.get("base_hash"),
+        "support_table_allocated_bytes": base.get("support_table_allocated_bytes"),
+        "producer_timings_ms": {
+            "curve_setup_ms": base.get("curve_setup_ms"),
+            "base_construction_ms": base.get("base_construction_ms"),
+            "support_index_ms": base.get("support_index_ms"),
+            "independent_base_validation_ms": base.get(
+                "independent_base_validation_ms"
+            ),
+            "total_setup_ms": base.get("total_setup_ms"),
+            "whole_process_wall_ms": direct_obs.get("whole_process_wall_ms"),
+        },
+        "verdict": (
+            "DRAFT_PENDING_INDEPENDENT_VALIDATION"
+            if producers_ok and under_cap
+            else (
+                "PRODUCER_FAILURE"
+                if not producers_ok
+                else "DRAFT_RESOURCE_CAP_EXCEEDED_OR_INCOMPLETE"
+            )
+        ),
+        "claim_boundary": (
+            "Public synthetic Koblitz factor-base construction measure only. "
+            "Not key recovery, not asymptotic sub-rho, not an imported-point "
+            "attack, and not a ledger promotion until independent validation "
+            "and schema PASS."
+        ),
+        "claim_boundary_non_claims": [
+            "not key recovery",
+            "not asymptotic sub-sqrt",
+            "not imported/external points",
+            "not ledger promotion until independent validation",
+        ],
+        "independent_replay_pointer": independent_replay_pointer(run),
+        "fixture_hash": sha256(REPO / "examples/koblitz_rank_fixture.rs"),
+        "executable_or_source_hash": {
+            "direct": sha256(binaries["direct"]),
+            "rank_fixture_source": sha256(REPO / "examples/koblitz_rank_fixture.rs"),
+        },
+        "host_id": host_record(),
+        "resource_caps": {
+            "common_cap_bytes": cap,
+            "observed_peak_rss_bytes": peak_rss,
+            "under_cap": under_cap,
+        },
+        "seeds": {"direct": direct_obs.get("seed")},
+        "producer_exit_codes": {"direct": direct_obs["exit_code"]},
+        "whole_process_wall_ms": direct_obs["whole_process_wall_ms"],
+        "direct_rows": len(rows),
     }
     return claim
 
@@ -953,9 +2113,12 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
     fixtures = arguments.fixtures
     if fixtures is None:
         fixtures = int(beat.get("fixtures", beat.get("fixtures_default", 1)))
-    require(fixtures == 1, "run exactly one target per workload; batch fixtures are disabled")
-    repeats = getattr(arguments, "repeats", None) or DEFAULT_TIMED_REPEATS
-    require(repeats > 0, "repeats must be positive")
+    require(fixtures > 0, "fixtures must be positive")
+    if beat.get("stage") == "vs_rho":
+        require(
+            fixtures == 1,
+            "vs_rho primary launches require exactly one target; define a separate secondary workload before using multiple targets",
+        )
 
     with RunnerLock():
         preflight_receipt = preflight(protocol, ledger)
@@ -986,6 +2149,8 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
             "status": "ACTIVE",
             "phase": "build",
             "fixtures": fixtures,
+            "online_target_count": fixtures,
+            "precompute_fixture_count": int(beat.get("precompute_fixtures", 0)),
             "created_at": now(),
             "updated_at": now(),
         }
@@ -998,7 +2163,22 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
             write_json(run / "artifacts/prepared_commands.json", commands)
             return state
 
-        binaries = build_producers()
+        stage = str(beat.get("stage") or "vs_rho")
+        if stage in ("decomposition", "end_to_end_dlp") and isinstance(
+            beat.get("producer"), dict
+        ) and beat["producer"].get("example"):
+            require(
+                beat["producer"].get("example"),
+                f"beat {beat_id} stage {stage} requires producer.example",
+            )
+            custom = build_example(str(beat["producer"]["example"]))
+            binaries = {"custom": custom, "direct": custom}
+        elif stage == "decomposition":
+            raise AutolabError(
+                f"beat {beat_id} stage decomposition requires producer.example"
+            )
+        else:
+            binaries = build_producers()
         write_json(
             run / "artifacts/binaries.json",
             {key: {"path": path, "sha256": sha256(path)} for key, path in binaries.items()},
@@ -1012,81 +2192,196 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
         env.setdefault("KIC_INCREMENTAL_RANK_CROSSCHECK", "1")
         for key, value in (beat.get("env") or {}).items():
             env[str(key)] = str(value)
-        direct_seed = seed_for(beat_id, "direct", 0)
-        rho_seed = seed_for(beat_id, "rho", 0)
-        direct_cmd = [
-            binaries["direct"],
-            str(beat["n"]),
-            str(beat["a"]),
-            str(beat["eta"][0]),
-            str(beat["eta"][1]),
-            str(direct_seed),
-            beat["direct"]["pair_mode"],
-            beat["direct"]["target_mode"],
-            beat["direct"]["query_mode"],
-            str(fixtures),
-        ]
-        rho_cmd = [
-            binaries["rho"],
-            str(beat["n"]),
-            str(beat["a"]),
-            beat["rho"]["quotient_mode"],
-            str(fixtures),
-            beat["rho"]["backend"],
-            str(rho_seed),
-        ]
-        write_json(
-            run / "artifacts/commands.json",
-            {"direct": direct_cmd, "rho": rho_cmd, "fixtures": fixtures},
-        )
 
-        direct_obs = run_timed(direct_cmd, env=env, cwd=REPO, repeats=repeats)
+        commands = producer_commands(beat, beat_id, fixtures, binaries=binaries)
+        write_json(run / "artifacts/commands.json", commands)
+
+        direct_seed = seed_for(beat_id, "direct", 0)
+        direct_cmd = commands["direct_argv"]
+        direct_obs = run_timed(direct_cmd, env=env, cwd=REPO)
         direct_obs["seed"] = direct_seed
-        direct_obs["fixtures"] = fixtures
         (run / "logs/direct.stdout.jsonl").write_text(direct_obs["stdout"])
         (run / "logs/direct.stderr.txt").write_text(direct_obs["stderr"])
         write_json(
             run / "receipts/direct.resource.json",
-            {k: direct_obs[k] for k in RESOURCE_RECEIPT_FIELDS},
+            {key: direct_obs.get(key) for key in RESOURCE_RECEIPT_FIELDS},
         )
 
-        rho_obs = run_timed(rho_cmd, env=env, cwd=REPO, repeats=repeats)
-        rho_obs["seed"] = rho_seed
-        (run / "logs/rho.stdout.jsonl").write_text(rho_obs["stdout"])
-        (run / "logs/rho.stderr.txt").write_text(rho_obs["stderr"])
-        write_json(
-            run / "receipts/rho.resource.json",
-            {k: rho_obs[k] for k in RESOURCE_RECEIPT_FIELDS},
-        )
+        if stage == "factor_base":
+            claim = draft_factor_base_claim(
+                beat=beat,
+                beat_id=beat_id,
+                run=run,
+                direct_obs=direct_obs,
+                binaries=binaries,
+            )
+            write_json(run / "artifacts/claim_draft.json", claim)
+            validation = validate_claim(claim, stage="factor_base", ledger=ledger)
+            write_json(run / "artifacts/claim_check.json", validation)
+            producers_ok = direct_obs["exit_code"] == 0
+            status = (
+                "PENDING_INDEPENDENT_VALIDATION" if producers_ok else "PRODUCER_FAILURE"
+            )
+            if producers_ok and validation["status"] != "PASS":
+                status = "SCHEMA_INCOMPLETE"
+            state.update(
+                status=status,
+                phase="analysis",
+                updated_at=now(),
+                direct_exit_code=direct_obs["exit_code"],
+                claim_check=validation["status"],
+            )
+        elif stage == "vs_rho":
+            require(
+                isinstance(beat.get("rho"), dict),
+                f"beat {beat_id} stage vs_rho requires a rho config object",
+            )
+            rho_seed = seed_for(beat_id, "rho", 0)
+            rho_cmd = commands["rho_argv"]
+            rho_env = env.copy()
+            rho_fixed_target_scalar = None
+            if beat.get("pair_rho_to_direct_target", True):
+                direct_rows = parse_json_objects(direct_obs["stdout"])
+                direct_online = next(
+                    (row for row in reversed(direct_rows)
+                     if row.get("kind") == "relation_rank_summary"
+                     and row.get("online_target_count") == 1),
+                    None,
+                )
+                if direct_online is not None:
+                    rho_fixed_target_scalar = direct_online.get("published_fixture_scalar")
+                if isinstance(rho_fixed_target_scalar, int):
+                    rho_env["KIC_RHO_FIXED_TARGET_SCALAR"] = str(rho_fixed_target_scalar)
+                    commands["rho_environment_overrides"] = {
+                        "KIC_RHO_FIXED_TARGET_SCALAR": str(rho_fixed_target_scalar),
+                        "source": "the one IC online target's published synthetic fixture scalar; target generation excluded from both online intervals",
+                    }
+                else:
+                    commands["rho_environment_overrides"] = None
+            write_json(run / "artifacts/commands.json", commands)
+            if rho_fixed_target_scalar is None and beat.get("pair_rho_to_direct_target", True):
+                rho_obs = {
+                    "exit_code": 1,
+                    "whole_process_wall_ms": 0.0,
+                    "children_cpu_user_ms": 0.0,
+                    "children_cpu_system_ms": 0.0,
+                    "children_peak_rss_bytes": 0,
+                    "command": rho_cmd,
+                    "stdout": "",
+                    "stderr": "IC producer did not emit the single online target fixture scalar; rho was not launched",
+                }
+            else:
+                rho_obs = run_timed(rho_cmd, env=rho_env, cwd=REPO)
+            rho_obs["seed"] = rho_seed
+            rho_obs["fixed_target_scalar"] = rho_fixed_target_scalar
+            (run / "logs/rho.stdout.jsonl").write_text(rho_obs["stdout"])
+            (run / "logs/rho.stderr.txt").write_text(rho_obs["stderr"])
+            write_json(
+                run / "receipts/rho.resource.json",
+                {
+                    **{key: rho_obs.get(key) for key in RESOURCE_RECEIPT_FIELDS},
+                    "fixed_target_scalar": rho_obs.get("fixed_target_scalar"),
+                },
+            )
 
-        claim = draft_vs_rho_claim(
-            beat=beat,
-            beat_id=beat_id,
-            run=run,
-            direct_obs=direct_obs,
-            rho_obs=rho_obs,
-            binaries=binaries,
-        )
-        write_json(run / "artifacts/claim_draft.json", claim)
-        validation = validate_claim(claim, stage="vs_rho", ledger=ledger)
-        write_json(run / "artifacts/claim_check.json", validation)
+            claim = draft_vs_rho_claim(
+                beat=beat,
+                beat_id=beat_id,
+                run=run,
+                direct_obs=direct_obs,
+                rho_obs=rho_obs,
+                binaries=binaries,
+            )
+            write_json(run / "artifacts/claim_draft.json", claim)
+            validation = validate_claim(claim, stage="vs_rho", ledger=ledger)
+            write_json(run / "artifacts/claim_check.json", validation)
 
-        producers_ok = direct_obs["exit_code"] == 0 and rho_obs["exit_code"] == 0
-        status = "PENDING_INDEPENDENT_VALIDATION" if producers_ok else "PRODUCER_FAILURE"
-        if validation["status"] != "PASS":
-            status = "SCHEMA_INCOMPLETE"
-        if producers_ok and claim['comparison_integrity']['status'] != 'MATCHED':
-            status = 'INVALID_COMPARISON'
-        elif producers_ok and not claim['all_stages_charged_same_series']:
-            status = 'ACCOUNTING_INCOMPLETE'
-        state.update(
-            status=status,
-            phase="analysis",
-            updated_at=now(),
-            direct_exit_code=direct_obs["exit_code"],
-            rho_exit_code=rho_obs["exit_code"],
-            claim_check=validation["status"],
-        )
+            producers_ok = direct_obs["exit_code"] == 0 and rho_obs["exit_code"] == 0
+            status = (
+                "PENDING_INDEPENDENT_VALIDATION" if producers_ok else "PRODUCER_FAILURE"
+            )
+            pairing_errors = []
+            if producers_ok and claim["paired_target"]["same_public_point"] is not True:
+                pairing_errors.append("IC and rho public targets differ or are missing")
+            if producers_ok and claim["paired_target"]["same_fixture_scalar"] is not True:
+                pairing_errors.append("IC and rho fixture scalars differ or are missing")
+            if producers_ok and pairing_errors:
+                status = "PAIRING_FAILURE"
+            elif producers_ok and not claim["all_stages_charged_same_series"]:
+                status = "ACCOUNTING_INCOMPLETE"
+            elif producers_ok and validation["status"] != "PASS":
+                status = "SCHEMA_INCOMPLETE"
+            state.update(
+                status=status,
+                phase="analysis",
+                updated_at=now(),
+                direct_exit_code=direct_obs["exit_code"],
+                rho_exit_code=rho_obs["exit_code"],
+                claim_check=validation["status"],
+                pairing_errors=pairing_errors,
+            )
+        elif stage == "decomposition":
+            claim = draft_decomposition_claim(
+                beat=beat,
+                beat_id=beat_id,
+                run=run,
+                direct_obs=direct_obs,
+                binaries=binaries,
+                fixtures=fixtures,
+            )
+            write_json(run / "artifacts/claim_draft.json", claim)
+            validation = validate_claim(claim, stage="decomposition", ledger=ledger)
+            write_json(run / "artifacts/claim_check.json", validation)
+            producers_ok = direct_obs["exit_code"] == 0
+            status = (
+                "PENDING_INDEPENDENT_VALIDATION" if producers_ok else "PRODUCER_FAILURE"
+            )
+            if producers_ok and validation["status"] != "PASS":
+                status = "SCHEMA_INCOMPLETE"
+            state.update(
+                status=status,
+                phase="analysis",
+                updated_at=now(),
+                direct_exit_code=direct_obs["exit_code"],
+                claim_check=validation["status"],
+            )
+        elif stage == "end_to_end_dlp":
+            producer = beat.get("producer") or {}
+            require(
+                str(producer.get("example") or "") == "j0_known_answer_bits",
+                f"beat {beat_id} end_to_end_dlp launch supports j0_known_answer_bits only",
+            )
+            claim = draft_j0_end_to_end_dlp_claim(
+                beat=beat,
+                beat_id=beat_id,
+                run=run,
+                direct_obs=direct_obs,
+                binaries=binaries,
+            )
+            write_json(run / "artifacts/claim_draft.json", claim)
+            validation = validate_claim(claim, stage="end_to_end_dlp", ledger=ledger)
+            write_json(run / "artifacts/claim_check.json", validation)
+            producers_ok = (
+                direct_obs["exit_code"] == 0
+                and claim.get("ic_ok") is True
+                and claim.get("rho_ok") is True
+                and claim.get("ic_agrees_rho") is True
+            )
+            status = (
+                "PENDING_INDEPENDENT_VALIDATION" if producers_ok else "PRODUCER_FAILURE"
+            )
+            if producers_ok and validation["status"] != "PASS":
+                status = "SCHEMA_INCOMPLETE"
+            state.update(
+                status=status,
+                phase="analysis",
+                updated_at=now(),
+                direct_exit_code=direct_obs["exit_code"],
+                claim_check=validation["status"],
+            )
+        else:
+            raise AutolabError(f"unsupported launch stage: {stage}")
+
         write_json(run / "state.json", state)
         write_json(
             run / "artifacts/candidate.json",
@@ -1124,6 +2419,39 @@ def producer_commands(
     fixtures: int,
     binaries: dict[str, str] | None,
 ) -> dict[str, Any]:
+    producer = beat.get("producer")
+    if isinstance(producer, dict) and producer.get("args_template"):
+        example = str(producer["example"])
+        direct_bin = (
+            binaries.get("custom")
+            if binaries and binaries.get("custom")
+            else f"target/release/examples/{example}"
+        )
+        rendered = str(producer["args_template"]).format(
+            a=beat.get("a", 0),
+            n=beat.get("n"),
+            m=beat.get("m"),
+            l=beat.get("l"),
+            bits=beat.get("bits"),
+            fixtures=fixtures,
+        )
+        direct_argv = [direct_bin, *shlex.split(rendered)]
+        return {
+            "build": f"cargo build --release --example {example}",
+            "stage": beat.get("stage"),
+            "direct": " ".join(direct_argv),
+            "direct_argv": direct_argv,
+            "fixtures": fixtures,
+            "online_target_count": fixtures,
+            "precompute_fixtures": 0,
+            "direct_producer_fixture_count": fixtures,
+            "rho_producer_fixture_count": 0,
+            "env": beat.get("env") or {},
+            "rho": None,
+            "rho_argv": None,
+            "custom_example": example,
+        }
+
     direct_bin = (
         binaries["direct"]
         if binaries
@@ -1133,38 +2461,53 @@ def producer_commands(
         binaries["rho"] if binaries else "target/release/examples/koblitz_rho_fixture"
     )
     direct_seed = seed_for(beat_id, "direct", 0)
-    rho_seed = seed_for(beat_id, "rho", 0)
-    return {
+    precompute_fixtures = int(beat.get("precompute_fixtures", 0))
+    direct_fixtures = fixtures + precompute_fixtures
+    direct_argv = [
+        direct_bin,
+        str(beat["n"]),
+        str(beat["a"]),
+        str(beat["eta"][0]),
+        str(beat["eta"][1]),
+        str(direct_seed),
+        beat["direct"]["pair_mode"],
+        beat["direct"]["target_mode"],
+        beat["direct"]["query_mode"],
+        str(direct_fixtures),
+    ]
+    result: dict[str, Any] = {
         "build": (
             "cargo build --release --example koblitz_rank_fixture "
             "--example koblitz_rho_fixture"
         ),
-        "direct": " ".join(
-            [
-                direct_bin,
-                str(beat["n"]),
-                str(beat["a"]),
-                str(beat["eta"][0]),
-                str(beat["eta"][1]),
-                str(direct_seed),
-                beat["direct"]["pair_mode"],
-                beat["direct"]["target_mode"],
-                beat["direct"]["query_mode"],
-                str(fixtures),
-            ]
-        ),
-        "rho": " ".join(
-            [
-                rho_bin,
-                str(beat["n"]),
-                str(beat["a"]),
-                beat["rho"]["quotient_mode"],
-                str(fixtures),
-                beat["rho"]["backend"],
-                str(rho_seed),
-            ]
-        ),
+        "stage": beat.get("stage"),
+        "direct": " ".join(direct_argv),
+        "direct_argv": direct_argv,
+        "fixtures": fixtures,
+        "online_target_count": fixtures,
+        "precompute_fixtures": precompute_fixtures,
+        "direct_producer_fixture_count": direct_fixtures,
+        "rho_producer_fixture_count": fixtures,
+        "env": beat.get("env") or {},
     }
+    rho_cfg = beat.get("rho")
+    if isinstance(rho_cfg, dict):
+        rho_seed = seed_for(beat_id, "rho", 0)
+        rho_argv = [
+            rho_bin,
+            str(beat["n"]),
+            str(beat["a"]),
+            rho_cfg["quotient_mode"],
+            str(fixtures),
+            rho_cfg["backend"],
+            str(rho_seed),
+        ]
+        result["rho"] = " ".join(rho_argv)
+        result["rho_argv"] = rho_argv
+    else:
+        result["rho"] = None
+        result["rho_argv"] = None
+    return result
 
 
 TIME_L_FIELDS = {
@@ -1852,7 +3195,22 @@ def write_panel_manifest(run: Path) -> None:
 
 def status(arguments: argparse.Namespace) -> None:
     run = resolve_run(arguments.run_id)
-    print((run / "state.json").read_text(), end="")
+    state = read_json(run / "state.json")
+    pairing_audit_path = run / "artifacts/paired_target_audit.json"
+    if pairing_audit_path.is_file():
+        audit = read_json(pairing_audit_path)
+        if audit.get("status") == "PAIRING_REJECTED" or audit.get("speedup_claim_valid") is False:
+            state["recorded_status"] = state.get("status")
+            state["recorded_claim_check"] = state.get("claim_check")
+            state["status"] = "PAIRING_FAILURE"
+            state["claim_check"] = "FAIL"
+            state["pairing_audit_status"] = audit.get("status")
+            state["pairing_errors"] = [audit.get("reason") or "paired-target audit rejected the run"]
+            state["status_note"] = (
+                "Effective status includes the post-run pairing audit; "
+                "the original state.json remains unchanged."
+            )
+    print(json.dumps(state, indent=2, sort_keys=True) + "\n", end="")
 
 
 def verify(arguments: argparse.Namespace) -> dict[str, Any]:

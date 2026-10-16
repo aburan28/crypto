@@ -1,0 +1,55 @@
+{
+  "basis_sha256": "146935a8159a097150c950ba15890c6f1f4f920dbf24a1a9a99f1018f14ced2c",
+  "chunk_count": 8,
+  "chunks_sha256": "f3d5f5cce5a6b9ffa83da08cb313d120e0b8949840b34b0914a984da3071debf",
+  "column_set_sha256": "34898b98703a3d8a991b92346e0767d582c3ebb23c6724fefaa138a6fcd97a91",
+  "column_x_multiplicity_histogram": {
+    "1": 4148,
+    "2": 0,
+    "3": 0,
+    "4": 0
+  },
+  "cpu_seconds": 1.2028785079999977,
+  "curve": "leaf_1_4",
+  "dimension": 13,
+  "field_operations": {
+    "field_inverse": 12339,
+    "field_mul": 12339,
+    "field_square": 20635
+  },
+  "liftable_nonzero_x": 4148,
+  "nonliftable_nonzero_x": 4043,
+  "peak_rss_bytes": 40976384,
+  "physical_points": 8297,
+  "projected_infinity_nonzero_x": 0,
+  "projected_sign_classes": 4148,
+  "rows_gzip_sha256": "0d854ffb250c89e6439994b5c915964276a213812060cb542e62196604f5b275",
+  "rows_sha256": "7e7b188ee71d59dcefc00573ef20c80bc9449743c4ffa666b61b3a4739a8422b",
+  "sample_lifts": [
+    {
+      "mask": 3,
+      "projected_x": 941592258517063826986549501002725132963,
+      "x": 1400731755896558778132245161358026420150
+    },
+    {
+      "mask": 5,
+      "projected_x": 1538728916019505651736427506162101788034,
+      "x": 980606922575443125430699100152527944053
+    },
+    {
+      "mask": 4099,
+      "projected_x": 367839175603279568888454768264891666174,
+      "x": 1319416073276936924647492158364181273638
+    },
+    {
+      "mask": 4096,
+      "projected_x": 2400689302052177312404031262646250540365,
+      "x": 2718714326956225103168859205060425298832
+    }
+  ],
+  "schema": "ecc2k130-leaf-m10-slot-v1",
+  "slot": "low_7",
+  "total_masks": 8192,
+  "wall_seconds": 1.2036722359999885,
+  "zero_x_count": 1
+}

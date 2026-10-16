@@ -1,0 +1,39 @@
+{
+  "beat_id": "koblitz.factor_base.n53",
+  "claim_check": {
+    "fail_closed": true,
+    "missing_global_provenance": [],
+    "missing_stage_fields": [],
+    "pairing_errors": [],
+    "required_global_provenance": [
+      "fixture_hash",
+      "executable_or_source_hash",
+      "host_id",
+      "resource_caps",
+      "seeds",
+      "claim_boundary_non_claims"
+    ],
+    "required_stage_fields": [
+      "n_or_bits",
+      "factor_base_size_F",
+      "orbit_count_K",
+      "dimension_l_or_dim",
+      "construction_method",
+      "materialized",
+      "construction_wall_ms",
+      "retained_bytes"
+    ],
+    "schema_version": 2,
+    "stage": "factor_base",
+    "status": "PASS",
+    "validation_errors": []
+  },
+  "claim_draft_sha256": "3b0e370d9e8f960c574f9c7dfb5c4491ec19d4b357b180af95b1cf7c17d0c1f2",
+  "created_at": "2026-10-12T16:29:12.025297+00:00",
+  "ledger_sha256": "3577441f36cff5901288b5201c56c792cc53d7029681dcaac3fc55a7fb9e06fa",
+  "note": "Draft only. Promote the ledger only after independent validation and a claim-check PASS with every required measurement field.",
+  "run_id": "20261012T161605Z-ac2e7ab560",
+  "schema_version": "1.0",
+  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910"
+}

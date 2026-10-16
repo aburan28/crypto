@@ -1,0 +1,211 @@
+{
+  "schema": "p256.isogeny-grid-strip-receipt/v1",
+  "status": "pass",
+  "source_commit": "581aeff3d89b412e718207e05f4002808271f1ef",
+  "audit_points": 2,
+  "audit_seed_x": 7,
+  "elapsed_ms": 411530,
+  "resources": {
+    "status": "measured_getrusage_self",
+    "user_cpu_micros": 1409073127,
+    "system_cpu_micros": 145185,
+    "peak_rss_bytes": 88707072
+  },
+  "uncompressed_bytes": 114464825,
+  "summary": {
+    "record": "summary",
+    "schema": "p256.isogeny-grid-strip-summary/v1",
+    "bound_records": 64002,
+    "record_chain_sha256": "7d542b93aec2f21d9237e86f9d079cee4f858b5650bc0995c2f85ca0857cf87d",
+    "unique_curves": 64000,
+    "parent_edges": 64000,
+    "kernel_certificates": 64000,
+    "order_proved_prime": 64000,
+    "non_singular": 64000,
+    "generator_valid": 64000,
+    "unique_j_invariants": 64000,
+    "unique_canonical_models": 64000,
+    "unique_icv1_identities": 64000,
+    "unique_ec1_aliases": 64000,
+    "unique_curve_uids": 64000,
+    "unique_icv1_slugs": 63999,
+    "icv1_slug_collisions": [
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-fbb22aa2",
+        "first_index": 4337916969052,
+        "repeated_index": 4514010628692
+      }
+    ],
+    "a_minus_3_models": 32145,
+    "qr_prefix_64_min": 13,
+    "qr_prefix_64_max": 48,
+    "qr_prefix_64_histogram": [
+      {
+        "value": 13,
+        "count": 1
+      },
+      {
+        "value": 14,
+        "count": 1
+      },
+      {
+        "value": 17,
+        "count": 6
+      },
+      {
+        "value": 18,
+        "count": 17
+      },
+      {
+        "value": 19,
+        "count": 36
+      },
+      {
+        "value": 20,
+        "count": 81
+      },
+      {
+        "value": 21,
+        "count": 161
+      },
+      {
+        "value": 22,
+        "count": 265
+      },
+      {
+        "value": 23,
+        "count": 514
+      },
+      {
+        "value": 24,
+        "count": 900
+      },
+      {
+        "value": 25,
+        "count": 1424
+      },
+      {
+        "value": 26,
+        "count": 2139
+      },
+      {
+        "value": 27,
+        "count": 3022
+      },
+      {
+        "value": 28,
+        "count": 3905
+      },
+      {
+        "value": 29,
+        "count": 4852
+      },
+      {
+        "value": 30,
+        "count": 5464
+      },
+      {
+        "value": 31,
+        "count": 6286
+      },
+      {
+        "value": 32,
+        "count": 6322
+      },
+      {
+        "value": 33,
+        "count": 5961
+      },
+      {
+        "value": 34,
+        "count": 5444
+      },
+      {
+        "value": 35,
+        "count": 4813
+      },
+      {
+        "value": 36,
+        "count": 3876
+      },
+      {
+        "value": 37,
+        "count": 2990
+      },
+      {
+        "value": 38,
+        "count": 2115
+      },
+      {
+        "value": 39,
+        "count": 1409
+      },
+      {
+        "value": 40,
+        "count": 869
+      },
+      {
+        "value": 41,
+        "count": 549
+      },
+      {
+        "value": 42,
+        "count": 262
+      },
+      {
+        "value": 43,
+        "count": 167
+      },
+      {
+        "value": 44,
+        "count": 93
+      },
+      {
+        "value": 45,
+        "count": 30
+      },
+      {
+        "value": 46,
+        "count": 17
+      },
+      {
+        "value": 47,
+        "count": 6
+      },
+      {
+        "value": 48,
+        "count": 3
+      }
+    ],
+    "primary_screen_hits": [],
+    "qr_52_comparability_hits": [],
+    "minimum_b_signed_bits": {
+      "value": 240,
+      "curve": {
+        "index": 4325032067281,
+        "coordinate": {
+          "x": 209,
+          "y": 1007
+        },
+        "icv1_slug": "icv1-fp256-t89188191154553853111372247798585809583-5b9cff0a",
+        "icv1_identity": "ICV1:fp-115792089210356248762697446949407573530086143415290314195533631308867097853951:89188191154553853111372247798585809583:115792089210356248762697446949407573529996955224135760342422259061068512044369:34461495289144999540777451575865560585009370714271238796811083708671151797959:unk:unk:r:5b9cff0a589b",
+        "ec1_alias": "EC1P256Cfph4f91f55440f6",
+        "curve_uid": "urn:ec-record:1:sha256:4f91f55440f6dcfb63e7fe2c809d765239d9cd53adfb9805b597a86276958a35"
+      }
+    },
+    "minimum_a_signed_bits_without_a_minus_3": {
+      "value": 239,
+      "curve": {
+        "index": 4496830759443,
+        "coordinate": {
+          "x": 531,
+          "y": 1047
+        },
+        "icv1_slug": "icv1-fp256-t89188191154553853111372247798585809583-606eaa6a",
+        "icv1_identity": "ICV1:fp-115792089210356248762697446949407573530086143415290314195533631308867097853951:89188191154553853111372247798585809583:115792089210356248762697446949407573529996955224135760342422259061068512044369:114591619308943029863013023101580401203495656146378024809149177485446767624776:unk:unk:r:606eaa6a9991",
+        "ec1_alias": "EC1P256Cfph8dca5902475d",
+        "curve_uid": "urn:ec-record:1:sha256:8dca5902475df822f986a721a0f8e16d079dca2f9cea4c662584a38cf02cc975"
+      }
+    }
+  }
+}

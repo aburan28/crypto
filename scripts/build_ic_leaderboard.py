@@ -56,6 +56,7 @@ SOURCES = {
     "koblitz_s21": "research/ic_constructions_20260926/analysis.json",
     "koblitz_s22": "research/ic_descent_20260930/analysis-isolated.json",
     "koblitz_s23": "research/ic_single_target_20260930/analysis.json",
+    "koblitz_rule_v3": "research/ic_tool_program/rule/v3/analysis.json",
     "oracles": "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json",
     "n37_rank_columns": "research/ecbench_n37_rank_columns_20261004/RESULT.json",
     "n37_k8_k16": "research/ecbench_n37_k8_k16_20261004/DECISION.json",
@@ -67,10 +68,18 @@ SOURCES = {
     "f6_small_cold_rows": "research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl",
     "f6_small_cold_replay": "research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json",
     "f6_ecbench_ladder": "research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json",
+    "f4_f5_f6_cross_family": "research/f4_f5_f6_cross_family_20261011/ANALYSIS.json",
+    "n41_n53_counted": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
+    "conductor_gap_counts": "research/ecbench_conductor_gap_20261012/analysis.json",
+    "frontier_audit": "research/ecbench_frontier_20261013/frontier-data.json",
     "registry": "docs/curves/registry.json",
+    "curves_schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
 }
+GITHUB = "https://github.com/aburan28/crypto/blob/main/"
 S22_RUNS = "research/ic_descent_20260930/runs-isolated/main"
 S23_RUNS = "research/ic_single_target_20260930/runs"
+RULE_V3_RUNS = "research/ic_tool_program/rule/v3/runs"
 
 # Phases, in pipeline order, as the page groups them.
 PHASES = [
@@ -114,14 +123,16 @@ REGIME_NAME = {"prime": "Prime field", "char2": "Random binary", "koblitz": "Kob
 FAMILY_OF = {"koblitz": "A", "prime": "B", "char2": "B", "koblitz_batch": "C"}
 FAMILIES = {
     "A": {
-        "title": "Koblitz, one target", "regimes": ["koblitz"], "section": "§23",
+        "title": "Koblitz, one target", "regimes": ["koblitz"], "section": "§23, re-run at baseline v3",
         "status": "primary comparison: one target, as AGENTS.md's one-target rule requires",
-        "targets": "one unseen public point per process, 64 per size",
+        "targets": "one unseen public point per process, 64 per size; §23's figures on the same curve are the before marks",
         "unit": "one batched affine addition (`add_many` over 1,024 subgroup points), per √r",
         "unit_how": "A clock reading, not a count: `ic price` times each phase exclusively, on one thread, "
-                    "and divides by this unit, measured around each repetition (§20, §23).",
+                    "and divides by this unit, measured around each repetition (§20, §23). Each process measures its own "
+                    "unit, which is 2.3–3.2 times cheaper at baseline v3 than in §23's processes, so S here is not "
+                    "compared with §23's; the ratios carry no unit (research/ic_tool_program/rule/v3/README.md).",
         "reference": "One-target rho on the same point, measured as built (its set-up plus its walk), "
-                     "in the same unit and the same process; its answer replayed and verified (§23).",
+                     "in the same unit and the same process; its answer replayed and verified (§23; rule v3 at baseline v3).",
         "floor": "√(π/4n) rho steps per √r: generic, one target, no precomputation, A = 2n by signed "
                  "Frobenius and negation, n the extension degree. Stated in steps and not rescaled to "
                  "units, so × floor here divides units by steps.",
@@ -197,6 +208,62 @@ class Names:
         if c is None:
             raise SystemExit(f"{legacy!r} is not in docs/curves/registry.json")
         return c
+
+
+def curve_records() -> dict:
+    """The IC curve records in docs/curves/ic/curves.yaml, keyed by ICV1 slug.
+
+    The CI interpreter has no YAML parser, so this reads only the fields the
+    page cites (record key, ICV1 slug, factor-base references and their link
+    status) from the file's fixed two-space layout, and refuses to build if
+    the layout is not the one it expects.
+    """
+    lines = (REPO / SOURCES["curves_yaml"]).read_text().splitlines()
+    if "schema_version: 1" not in lines or "curves:" not in lines:
+        raise SystemExit(f"{SOURCES['curves_yaml']}: expected schema_version 1 with a top-level curves map")
+    recs, cur, in_icv1, in_refs = [], None, False, False
+    for line in lines[lines.index("curves:") + 1:]:
+        if line and not line.startswith(" "):
+            break
+        m = re.fullmatch(r"  ([A-Za-z0-9_]+):", line)
+        if m:
+            cur = {"key": m.group(1), "slug": None, "factor_base_refs": None, "factor_base_link_status": None}
+            recs.append(cur)
+            in_icv1 = in_refs = False
+            continue
+        if cur is None:
+            continue
+        if re.fullmatch(r"    [A-Za-z_]+:.*", line):
+            in_icv1 = line == "    icv1_identity:"
+            in_refs = False
+            m = re.fullmatch(r"    factor_base_refs:(.*)", line)
+            if m:
+                v = m.group(1).strip()
+                if v == "[]":
+                    cur["factor_base_refs"] = []
+                elif v == "":
+                    cur["factor_base_refs"], in_refs = [], True
+                else:
+                    raise SystemExit(f"{SOURCES['curves_yaml']}: unreadable factor_base_refs for {cur['key']}")
+            m = re.fullmatch(r"    factor_base_link_status: (\S+)", line)
+            if m:
+                cur["factor_base_link_status"] = m.group(1)
+        elif in_icv1 and (m := re.fullmatch(r"      slug: (\S+)", line)):
+            cur["slug"] = None if m.group(1) == "null" else m.group(1)
+        elif in_refs and (m := re.fullmatch(r"    - (.+)", line)):
+            cur["factor_base_refs"].append(m.group(1).strip().strip("'\""))
+    if not recs or any(r["factor_base_refs"] is None or r["factor_base_link_status"] is None for r in recs):
+        raise SystemExit(f"{SOURCES['curves_yaml']}: every record needs factor_base_refs and factor_base_link_status")
+    return {r["slug"]: r for r in recs if r["slug"]}, len(recs)
+
+
+def curve_record(records: dict, slug: str) -> dict:
+    """Where a curve's identity and factor base are recorded."""
+    rec = records.get(slug)
+    return {"registry": SOURCES["registry"], "schema": SOURCES["curves_schema"],
+            "curves_yaml": SOURCES["curves_yaml"], "curves_yaml_key": rec["key"] if rec else None,
+            "factor_base_refs": rec["factor_base_refs"] if rec else [],
+            "factor_base_link_status": rec["factor_base_link_status"] if rec else "no_curves_yaml_record"}
 
 
 def ec1_of(c: dict) -> str | None:
@@ -357,16 +424,24 @@ def koblitz_rows(names: Names) -> list[dict]:
 
 
 def koblitz_one_target_rows(names: Names) -> list[dict]:
-    """Ledger §23: one unseen public point per process, 64 per size.  The
+    """Ledger §23's comparison: one unseen public point per process, 64 per
+    size, re-run at the IC tool programme's baseline v3 as rule v3.  The
     primary comparison under AGENTS.md's one-target rule.  S here is cold,
     the reusable set-up plus the online interval, against one-target rho's
     set-up plus its walk; the online speedup, the canonical-step reading and
-    the Bernstein–Lange precomputation model ride beside it, never alone."""
+    the Bernstein–Lange precomputation model ride beside it, never alone.
+    §23's figures on the same curve are the row's before marks.  Each
+    process prices S in its own batched addition, so a row's S is not
+    compared with §23's; the ratios carry no unit."""
     rows = []
-    for x in load(SOURCES["koblitz_s23"])["sizes"]:
-        c = names(x["curve"])
+    s23 = {(x["a"], x["n"]): x for x in load(SOURCES["koblitz_s23"])["sizes"]}
+    for x in load(SOURCES["koblitz_rule_v3"])["sizes"]:
         a, n = x["a"], x["n"]
-        par = json.loads((REPO / S23_RUNS / f"k{a}n{n}" / "T01.params.json").read_text())
+        before = s23[(a, n)]
+        c = names(before["curve"])
+        if c["slug"] != x["curve"]:
+            raise SystemExit(f"rule v3's {x['curve']} is not §23's {before['curve']}")
+        par = json.loads((REPO / RULE_V3_RUNS / f"k{a}n{n}" / "T01.params.json").read_text())
         columns = int(re.search(r"-c(\d+)-", par["name"]).group(1))
         d = x["diagnostics"]
         sh = d["online_phase_shares"]
@@ -387,6 +462,8 @@ def koblitz_one_target_rows(names: Names) -> list[dict]:
                          "verify": online * sh["recovery_check"]},
             "ratio_rho": x["cold_ratio_ic_over_rho"]["value"],
             "ratio_rho_ci": list(x["cold_ratio_ic_over_rho"]["ci95"]),
+            "ratio_rho_section23": before["cold_ratio_ic_over_rho"]["value"],
+            "online_speedup_section23": before["online_speedup"]["mean_ratio"],
             "online_speedup": x["online_speedup"]["mean_ratio"],
             "online_speedup_ci": list(x["online_speedup"]["ci95"]),
             "online_speedup_canonical_step": x["online_speedup_rho_model"]["mean_ratio"],
@@ -401,11 +478,13 @@ def koblitz_one_target_rows(names: Names) -> list[dict]:
         }
         rows.append({
             "regime": "koblitz", "slug": c["slug"], "ec1": x.get("curve_id") or ec1_of(c),
-            "legacy": x["curve"], "log2_r": x["log2_r"], "cofactor": None,
-            "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+            "legacy": before["curve"], "log2_r": x["log2_r"], "cofactor": None,
+            "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
             "reference_s": x["s_rho_online_mean"] + x["s_rho_setup"], "floor_s": floor_s,
-            "targets": 1, "recipes": [recipe], "best": recipe, "source": SOURCES["koblitz_s23"],
-            "round": "§23 one unseen point, online and cold (2026-09-30)", "class": "accounting",
+            "targets": 1, "recipes": [recipe], "best": recipe, "source": SOURCES["koblitz_rule_v3"],
+            "before_source": SOURCES["koblitz_s23"],
+            "round": "rule v3: §23's comparison at baseline v3 (2026-10-06); before marks §23 (2026-09-30)",
+            "class": "accounting",
         })
     return rows
 
@@ -501,8 +580,69 @@ def families(board: list[dict]) -> dict:
     return out
 
 
+def latest_frontier_audit() -> dict:
+    """Copy the accounting-only frontier synthesis into the generated board.
+
+    This record is deliberately separate from the ranked curve rows: its source
+    says that no admitted whole-pipeline measurement, reference, or curve moved.
+    """
+    audit = load(SOURCES["frontier_audit"])
+    effect = audit.get("leaderboard_effect", {})
+    cold = audit.get("canonical_koblitz_medium", {}).get("ops_leader", {})
+    online = {row.get("label"): row for row in audit.get("online_boundary", [])}
+    n61 = online.get("n61 compact orbit", {})
+    n83 = online.get("n83 dense K1798", {})
+    failed = next((r for r in audit.get("current_replay_audit", {}).get("receipts", [])
+                   if r.get("file") == "audits/rootfind-n13-replay-all-failed.json"), {})
+    if (audit.get("schema") != "crypto.ecbench_frontier_synthesis/v1"
+            or audit.get("classification") != "evidence synthesis; no new bound or challenge verdict"
+            or effect.get("ranked_rows_changed") is not False
+            or effect.get("generated_audit_record_required") is not True
+            or cold.get("method") != "rho.signed_frobenius_strong"
+            or cold.get("bound_id") != "ECBND1h05a2ea918f3c"
+            or n61.get("status") != "admitted online"
+            or n61.get("targets") != 64
+            or n83.get("status") != "exploratory one point"
+            or n83.get("targets") != 1
+            or "not a matched cold ratio" not in n83.get("setup_inclusive_class", "")
+            or failed.get("ok") is not False
+            or failed.get("replays_identical") != 120
+            or failed.get("replays_total") != 168
+            or failed.get("failures") != 48):
+        raise SystemExit("review the ECBench frontier audit before updating the leaderboard")
+    return {
+        "date": audit["date"],
+        "source": SOURCES["frontier_audit"],
+        "classification": audit["classification"],
+        "ranked_rows_changed": effect["ranked_rows_changed"],
+        "reason": effect["reason"],
+        "cold": {
+            "method": cold["method"], "bound_id": cold["bound_id"],
+            "ops_over_floor": cold["ops_over_floor"], "ops_ci95": cold["ops_ci95"],
+            "runs": cold["runs"], "sizes": cold["sizes"],
+        },
+        "admitted_online": {
+            "label": n61["label"], "rho_over_ic": n61["online_rho_over_ic"],
+            "ci95": n61["online_ci95"], "targets": n61["targets"],
+            "setup_seconds_approx": n61["setup_seconds_approx"], "status": n61["status"],
+        },
+        "exploratory_online": {
+            "label": n83["label"], "rho_over_ic": n83["online_rho_over_ic"],
+            "targets": n83["targets"], "complete_process_seconds": n83["complete_process_seconds"],
+            "setup_inclusive_class": n83["setup_inclusive_class"],
+            "first_integer_break_even_under_model": n83["first_integer_break_even_under_model"],
+            "status": n83["status"],
+        },
+        "replay_block": {
+            "identical": failed["replays_identical"], "total": failed["replays_total"],
+            "failures": failed["failures"], "scope": failed["failure_scope"],
+        },
+    }
+
+
 def build() -> dict:
     names = Names()
+    frontier_audit = latest_frontier_audit()
     small_rows = [json.loads(line) for line in (REPO / SOURCES["f6_small_cold_rows"]).read_text().splitlines() if line]
     small_replay = load(SOURCES["f6_small_cold_replay"])
     small_by_arm = {row["arm"]: row for row in small_rows}
@@ -568,6 +708,40 @@ def build() -> dict:
             }
             for z in ladder["per_size"] if z["targets_completed_both_ic_arms"] > 0
         ],
+        "online_speedup": None,
+        "fully_priced_cold_speedup": None,
+    }
+    cross = load(SOURCES["f4_f5_f6_cross_family"])
+    if cross["schema"] != "f4f5f6-cross-family-analysis/v1":
+        raise SystemExit("review the F4/F5/F6 cross-family analysis before updating the leaderboard")
+
+    def med(arms: dict, arm: str, field: str):
+        v = (arms.get(arm) or {}).get(field)
+        return v["median"] if v else None
+
+    cross_rows = []
+    for key in ("K13", "R13", "K19", "R19"):
+        for c in cross["sessions"][key]["cells"]:
+            q = c["questions"]
+            cross_rows.append({
+                "session": key,
+                "family": c["family"],
+                "m": c["m"],
+                "curve": names(c["slug"])["slug"],
+                "base_points": (c["arms"].get("f6-ic") or {}).get("base_points"),
+                "rho_negation_s": med(c["arms"], "rho-negation", "s"),
+                "rho_strong_s": med(c["arms"], "rho-strong", "s"),
+                "inherited_s": med(c["arms"], "inherited-f4", "s"),
+                "f6_s": med(c["arms"], "f6-ic", "s"),
+                "f5_over_f4_w": (q.get("q1_f5_over_f4_word_xors") or {}).get("ratio", {}).get("median"),
+                "matrix_f4_over_inherited_w": (q.get("q2_matrix_f4_over_inherited_word_xors") or {}).get("ratio", {}).get("median"),
+                "log2_inherited_over_f6_w": q["q3_log2_inherited_over_f6_word_xors"]["log2_ratio"]["median"],
+                "f6_verdict": q["q3_log2_inherited_over_f6_word_xors"]["verdict"],
+            })
+    cross_diagnostic = {
+        "source": SOURCES["f4_f5_f6_cross_family"],
+        "class": "relabelling; stage diagnostic with solver word XORs unpriced (S is a lower bound)",
+        "rows": cross_rows,
         "online_speedup": None,
         "fully_priced_cold_speedup": None,
     }
@@ -692,11 +866,54 @@ def build() -> dict:
         "panel_k8_over_k16_online_wall_ci95": native_wall_decision["panel_descriptive_ratios"]["k8_over_k16"]["target_block_bootstrap_95"],
         "admitted_online_speedup": None,
     }
+    n4153 = load(SOURCES["n41_n53_counted"])
+    if (n4153["schema"] != "ecbench.n41_n53_shared_rank_decision/v1"
+            or n4153["status"] != "complete_l0_counted_diagnostic"
+            or n4153["online_speedup"] is not None
+            or n4153["fully_priced_cold_speedup"] is not None
+            or n4153["all_measured_L2"]
+            or n4153["measured_runs"] != 640):
+        raise SystemExit("review the n41/n53 counted decision before updating the leaderboard")
+
+    def quotient(c: dict, key: str) -> dict:
+        q = c["secondary_counted"][key]
+        return {"ratio_of_sums": q["ratio_of_sums"], "ci95": q["ci95"], "pairs": q["pairs"]}
+    n41_n53_diagnostic = {
+        "source": SOURCES["n41_n53_counted"],
+        "decision": n4153["decision"],
+        "class": "accounting; counted lower bounds with native work unpriced, L0 wall exploratory, "
+                 "L2 host run pending",
+        "measured_runs": n4153["measured_runs"],
+        "measured_verified_runs": n4153["measured_verified_runs"],
+        "isolation_levels": n4153["isolation_levels"],
+        "curves": [
+            {"curve": names(c["curve"])["slug"], "log2_r": c["log2_r"],
+             "primary_workload_id": c["primary_workload_id"],
+             "arms": [{"arm": a["arm"], "measured": a["measured"], "verified": a["verified"],
+                       "timeouts": a["timeouts"], "errors": a["errors"],
+                       "usable_points": a.get("usable_points"), "folded_columns": a.get("folded_columns"),
+                       "mean_cold_s_lower_bound": a["mean_cold_s_lower_bound"]} for a in c["arms"]],
+             "k8_over_rho": quotient(c, "ic-k8_over_rho-strong"),
+             "k16_over_rho": quotient(c, "ic-k16_over_rho-strong"),
+             "k16_over_k8": quotient(c, "ic-k16_over_ic-k8"),
+             "h1": c["h1_counted_ic_over_rho_above_one"],
+             "h2_verdict": c["h2_target_only_counted_k16_over_k8"]["verdict"]}
+            for c in n4153["curves"]],
+        "online_speedup": None,
+        "fully_priced_cold_speedup": None,
+    }
     ladder, kob, kob1 = ladder_rows(names), koblitz_rows(names), koblitz_one_target_rows(names)
     board = ladder + kob1 + kob
     for r in board:
         r["family"] = FAMILY_OF[r["regime"]]
     measured = {r["slug"] for r in board}
+    records, n_records = curve_records()
+    for r in board:
+        r["curve_record"] = curve_record(records, r["slug"])
+        r["factor_base"] = {"points": r["best"]["base_points"], "recipe": r["best"]["label"],
+                            "variant": r["best"].get("variant"), "source": r["source"],
+                            "refs": r["curve_record"]["factor_base_refs"],
+                            "link_status": r["curve_record"]["factor_base_link_status"]}
     leaders = {}
     for regime in ("prime", "char2", "koblitz", "koblitz_batch"):
         rows = [r for r in board if r["regime"] == regime]
@@ -730,7 +947,25 @@ def build() -> dict:
         "n37_native_wall_diagnostic": native_wall_diagnostic,
         "f6_small_cold_diagnostic": small_cold_diagnostic,
         "f6_ecbench_ladder_diagnostic": ladder_diagnostic,
-        "exponents": exponents(), "roster": roster(names, measured),
+        "f4_f5_f6_cross_family_diagnostic": cross_diagnostic,
+        "latest_frontier_audit": frontier_audit,
+        "curve_records": {
+            "registry": SOURCES["registry"], "schema": SOURCES["curves_schema"], "yaml": SOURCES["curves_yaml"],
+            "yaml_records": n_records,
+            "board_curves": len(measured),
+            "board_curves_in_yaml": sum(s in records for s in measured),
+            "board_curves_factor_base_reconciled": sum(
+                1 for s in measured if s in records and records[s]["factor_base_refs"]),
+        },
+        "exponents": exponents(), "roster": [
+            {**c, "curves_yaml_key": (records.get(c["slug"]) or {}).get("key"),
+             "factor_base_link_status": (records.get(c["slug"]) or {}).get(
+                 "factor_base_link_status", "no_curves_yaml_record")}
+            for c in roster(names, measured)],
+        "n41_n53_counted_diagnostic": n41_n53_diagnostic,
+        # Native analysis computes these observations; this view only copies
+        # and renders them, outside the fully priced rankings.
+        "conductor_gap_count_diagnostic": load(SOURCES["conductor_gap_counts"]),
         "phases": [{"id": i, "name": n, "what": w} for i, n, w in PHASES],
     }
 
@@ -758,6 +993,23 @@ def esc(s) -> str:
     return html.escape(str(s))
 
 
+def gh(path: str, text: str | None = None) -> str:
+    return f'<a href="{esc(GITHUB + path)}"><code>{esc(text or path)}</code></a>'
+
+
+def record_cell(r: dict) -> str:
+    """The curve's registry, curves.yaml and factor-base references under its slug."""
+    cr, fb = r["curve_record"], r["factor_base"]
+    yml = (gh(cr["curves_yaml"], f'curves.yaml#{cr["curves_yaml_key"]}') if cr["curves_yaml_key"]
+           else f'{gh(cr["curves_yaml"], "curves.yaml")}: no record')
+    refs = (", ".join(f"<code>{esc(x)}</code>" for x in fb["refs"]) if fb["refs"]
+            else "none" if not cr["curves_yaml_key"] else f'none ({esc(fb["link_status"])})')
+    # |F| and the recipe have their own columns; this names where the base was defined.
+    return (f'<br><span class="muted">{gh(cr["registry"], "registry")} · {yml}</span>'
+            f'<br><span class="muted" title="{fb["points"]:,} points, {esc(fb["variant"] or fb["recipe"])}">'
+            f'factor base: {gh(fb["source"], fb["source"].rsplit("/", 1)[-1])} · refs {refs}</span>')
+
+
 def rich(s) -> str:
     """Escaped text with `code` spans, for the family definitions shared with the Markdown."""
     return re.sub(r"`([^`]+)`", r"<code>\1</code>", esc(s))
@@ -774,6 +1026,33 @@ def markdown(doc: dict) -> str:
          "`× reference` and `× floor` are comparable within a table and nowhere else.  The same slug "
          "can appear in two tables with different `S`, because the unit, the reference and the number "
          "of targets differ.", ""]
+    audit = doc["latest_frontier_audit"]
+    cold = audit["cold"]
+    admitted = audit["admitted_online"]
+    exploratory = audit["exploratory_online"]
+    replay = audit["replay_block"]
+    L += [f"## Latest frontier audit ({audit['date']})", "",
+          "This accounting synthesis is published on every performance handoff. It does not replace the "
+          "curve-by-curve tables: the frozen source records that no ranked row changed.", "",
+          "| boundary | observed result | leaderboard treatment |",
+          "|:--|:--|:--|",
+          f"| Canonical medium-tier Koblitz cold operations | `{cold['method']}` / "
+          f"`{cold['bound_id']}`: {cold['ops_over_floor']:.3f}× floor "
+          f"[{cold['ops_ci95'][0]:.3f}, {cold['ops_ci95'][1]:.3f}], "
+          f"{cold['runs']} runs at {cold['sizes']} sizes | Standing rho boundary; not an IC row |",
+          f"| Retained-setup online, `{admitted['label']}` | rho/IC "
+          f"{admitted['rho_over_ic']:.1f}× [{admitted['ci95'][0]:.1f}, "
+          f"{admitted['ci95'][1]:.1f}], {admitted['targets']} unseen targets; about "
+          f"{admitted['setup_seconds_approx']:.0f} s setup excluded | Admitted online result; "
+          "kept separate from cold ranked rows |",
+          f"| Retained-setup online, `{exploratory['label']}` | rho/IC "
+          f"{exploratory['rho_over_ic']:.6f}× on {exploratory['targets']} public point; complete IC "
+          f"process {exploratory['complete_process_seconds']:.3f} s | Exploratory shared-host result; "
+          "no matched cold ratio and no rank promotion |",
+          f"| Current-binary root-finder replay-all | {replay['identical']}/{replay['total']} identical; "
+          f"{replay['failures']} inherited-F4 counter mismatches | Failed replay retained; affected "
+          "stage counters blocked from promotion |", "",
+          f"[Frozen synthesis data](../../{audit['source']}). {audit['reason']}", ""]
     for code in ("A", "B", "C"):
         f = fams[code]
         rows = [r for r in doc["board"] if r["family"] == code]
@@ -795,7 +1074,9 @@ def markdown(doc: dict) -> str:
             b = r["best"]
             cells = ([REGIME_NAME[r["regime"]]] if multi else []) + [
                 f"`{r['slug']}`", f"{r['log2_r']:.1f}", b["label"], g3(b["s"]), g3(r["reference_s"]),
-                f"**{times(b['ratio_rho'])}**", g3(r["floor_s"]), times(b["ratio_floor"]),
+                f"**{times(b['ratio_rho'])}**" + (f" (was {times(b['ratio_rho_section23'])}, §23)"
+                                                   if "ratio_rho_section23" in b else ""),
+                g3(r["floor_s"]), times(b["ratio_floor"]),
                 "✓" if b["verified"] else "✗"]
             L.append("| " + " | ".join(cells) + " |")
         L.append("")
@@ -809,6 +1090,20 @@ def markdown(doc: dict) -> str:
             ph, s = r["best"]["phases_s"], r["best"]["s"]
             L.append(f"| {code} | `{r['slug']}` | " + " | ".join(
                 (f"{100 * ph[i] / s:.1f}%" if i in ph else "—") for i, _, _ in PHASES) + " |")
+    cr = doc["curve_records"]
+    L += ["", "## Curve records and factor bases", "",
+          f"Identity: [`{cr['registry']}`](../../{cr['registry']}). IC curve records: schema "
+          f"[`{cr['schema']}`](../../{cr['schema']}), records [`{cr['yaml']}`](../../{cr['yaml']}) "
+          f"({cr['yaml_records']} records). {cr['board_curves_in_yaml']} of the {cr['board_curves']} board curves "
+          f"have a record there; {cr['board_curves_factor_base_reconciled']} have a reconciled factor base.", "",
+          "| table | curve | curves.yaml record | factor base (points, recipe) | factor-base source | refs |",
+          "|:--|:--|:--|:--|:--|:--|"]
+    for code in ("A", "B", "C"):
+        for r in (r for r in doc["board"] if r["family"] == code):
+            fb, key = r["factor_base"], r["curve_record"]["curves_yaml_key"]
+            L.append(f"| {code} | `{r['slug']}` | {('`' + key + '`') if key else 'none'} | "
+                     f"{fb['points']:,}, {fb['variant'] or fb['recipe']} | `{fb['source']}` | "
+                     + (", ".join(f"`{x}`" for x in fb["refs"]) or f"none ({fb['link_status']})") + " |")
     d = doc["bounded_diagnostics"][0]
     L += ["", "## Bounded n37 diagnostic outside tables A–C", "",
           f"The separately calibrated `{d['curve']}` shared-rank K16 candidate "
@@ -908,6 +1203,63 @@ def markdown(doc: dict) -> str:
                  f"{z['f4_s_lower_over_rho']:.3f} | {z['f6_s_lower_over_rho']:.3f} | "
                  f"{z['median_log2_w4_over_w6']:.3f} |")
     L.append("")
+    y = doc["f4_f5_f6_cross_family_diagnostic"]
+
+    def f3(v):
+        return "—" if v is None else f"{v:.3f}"
+    L += ["## F4, F5 and F6-IC on Koblitz and generic binary curves, outside tables A–C", "",
+          "Matrix F4, matrix F5, inherited F4 and F6-IC through `pdp3-binary` on eight public "
+          "one-target workloads per cell, beside same-target rho. IC `S` is a lower bound "
+          "(solver word XORs unpriced; F6-IC's geometric additions charged). `W` is counted "
+          "solver word XORs. Prime curves have no algebraic oracle in `ecbench`. "
+          f"Read the [analysis](../../{y['source']}).", "",
+          "| family | m | curve | base points | rho-negation S | strong rho S | inherited F4 S | F6-IC S "
+          "| W F5/F4 | W F4 matrix/inherited | median log2(W inh/W F6) |",
+          "|:--|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|"]
+    for z in y["rows"]:
+        L.append(f"| {z['family']} | {z['m']} | `{z['curve']}` | {z['base_points']} | "
+                 f"{f3(z['rho_negation_s'])} | {f3(z['rho_strong_s'])} | {f3(z['inherited_s'])} | "
+                 f"{f3(z['f6_s'])} | {f3(z['f5_over_f4_w'])} | {f3(z['matrix_f4_over_inherited_w'])} | "
+                 f"{f3(z['log2_inherited_over_f6_w'])} |")
+    L.append("")
+    v = doc["n41_n53_counted_diagnostic"]
+
+    def qmd(q: dict) -> str:
+        if q["ratio_of_sums"] is None:
+            return f"unknown ({q['pairs']} verified pairs)"
+        ci = q["ci95"]
+        return (f"{q['ratio_of_sums']:.3f} [{ci[0]:.3f}, {ci[1]:.3f}]" if ci
+                else f"{q['ratio_of_sums']:.3f} (no interval)")
+    L += ["## n41/n53 shared-rank counted panel, outside tables A–C", "",
+          "The four n37 arms (strong signed-Frobenius rho, K8, K16 and an identical K16 control, "
+          "method parameters unchanged) ran on 16 new public one-target workloads on each of the next "
+          "two registered sizes, five paired rounds each, on macOS at L0. Counted cold IC/rho is a "
+          "quotient of two lower bounds (native work unpriced); a cell whose arm never verifies under "
+          "the frozen parameters is unknown, not a cost. "
+          f"{v['measured_verified_runs']} of {v['measured_runs']} measured runs verified; "
+          f"decision `{v['decision']}`; the L2 host run is pending. "
+          f"Read the [frozen decision](../../{v['source']}).", "",
+          "| curve | log2 r | arm | verified / measured | usable points | columns | mean cold S (lower bound) | counted IC/rho [95%] |",
+          "|:--|--:|:--|--:|--:|--:|--:|:--|"]
+    for c in v["curves"]:
+        for a in c["arms"]:
+            q = {"ic-k8": c["k8_over_rho"], "ic-k16": c["k16_over_rho"]}.get(a["arm"])
+            s_txt = f"{a['mean_cold_s_lower_bound']:.3f}" if a["mean_cold_s_lower_bound"] is not None else "—"
+            L.append(f"| `{c['curve']}` | {c['log2_r']:.2f} | {a['arm']} | {a['verified']}/{a['measured']} | "
+                     f"{a['usable_points'] if a['usable_points'] is not None else '—'} | "
+                     f"{a['folded_columns'] if a['folded_columns'] is not None else '—'} | {s_txt} | "
+                     f"{qmd(q) if q else ('reference' if a['arm'] == 'rho-strong' else 'A/A control')} |")
+        L.append(f"| `{c['curve']}` | {c['log2_r']:.2f} | K16 / K8 | — | — | — | — | {qmd(c['k16_over_k8'])} |")
+    L.append("")
+    L += ["## Large-prime conductor-gap counted diagnostics", "",
+          "Copied from native analysis: eight independent one-target workloads per fixed curve; "
+          "no transported targets. Counted S has unpriced native work. These observations do "
+          "not enter tables A–C or change a full-cost ranking.", "",
+          "| ell | IC floor/crater | 99% interval |", "|---:|---:|---|"]
+    for session in doc["conductor_gap_count_diagnostic"]["sessions"]:
+        observed = session["arms"]["ic-mitm"]["cross_curve"]
+        L.append(f"| {session['ell']} | {observed['ratio_floor_over_crater']:.6f} | "
+                 f"{observed['ci99'][0]:.6f} to {observed['ci99'][1]:.6f} |")
     L += ["", "## Sources", ""]
     for k, v in doc["sources"].items():
         L.append(f"- `{v['path']}` — sha256 `{v['sha256'][:16]}…`")
@@ -1089,6 +1441,36 @@ def page(doc: dict, standalone: bool) -> str:
                  f'{unit_ref("B")}</p></div>')
     P.append(f'<div class="fact"><dt>Curves</dt><dd>{len({r["slug"] for r in board})} priced</dd>'
              f'<p>of {len(doc["roster"])} named in the repository; every one by its ICV1 slug</p></div></dl></header>')
+    audit = doc["latest_frontier_audit"]
+    acold = audit["cold"]
+    admitted = audit["admitted_online"]
+    exploratory = audit["exploratory_online"]
+    replay = audit["replay_block"]
+    P.append(f'<section class="panel" id="frontier-audit"><h2>Latest frontier audit · '
+             f'{esc(audit["date"])} <span class="chip">accounting</span></h2>'
+             '<p>This synthesis is carried on the leaderboard even though it changes no ranked curve row. '
+             'Cold, retained-setup online, exploratory and failed-replay evidence remain separate.</p>'
+             '<div class="scroll"><table><thead><tr><th>Boundary</th><th>Observed result</th>'
+             '<th>Leaderboard treatment</th></tr></thead><tbody>'
+             '<tr><td>Canonical medium-tier Koblitz cold operations</td>'
+             f'<td><code>{esc(acold["method"])}</code> / <code>{esc(acold["bound_id"])}</code>: '
+             f'{acold["ops_over_floor"]:.3f}× floor [{acold["ops_ci95"][0]:.3f}, '
+             f'{acold["ops_ci95"][1]:.3f}], {acold["runs"]} runs at {acold["sizes"]} sizes</td>'
+             '<td>Standing rho boundary; not an IC row</td></tr>'
+             f'<tr><td>Retained-setup online · <code>{esc(admitted["label"])}</code></td>'
+             f'<td>rho/IC {admitted["rho_over_ic"]:.1f}× [{admitted["ci95"][0]:.1f}, '
+             f'{admitted["ci95"][1]:.1f}], {admitted["targets"]} unseen targets; about '
+             f'{admitted["setup_seconds_approx"]:.0f} s setup excluded</td>'
+             '<td>Admitted online result; separate from cold ranked rows</td></tr>'
+             f'<tr><td>Retained-setup online · <code>{esc(exploratory["label"])}</code></td>'
+             f'<td>rho/IC {exploratory["rho_over_ic"]:.6f}× on {exploratory["targets"]} public point; '
+             f'complete IC process {exploratory["complete_process_seconds"]:.3f} s</td>'
+             '<td>Exploratory shared-host result; no matched cold ratio and no rank promotion</td></tr>'
+             f'<tr><td>Current-binary root-finder replay-all</td><td>{replay["identical"]}/'
+             f'{replay["total"]} identical; {replay["failures"]} inherited-F4 counter mismatches</td>'
+             '<td>Failed replay retained; affected stage counters blocked from promotion</td></tr>'
+             '</tbody></table></div>'
+             f'<p>{esc(audit["reason"])} {gh(audit["source"], "Frozen synthesis data")}.</p></section>')
     d = doc["bounded_diagnostics"][0]
     P.append(f'<section class="card" id="bounded-n37-diagnostic"><h2>New n37 counted diagnostic, outside the priced tables</h2>'
              f'<p>On <code>{esc(d["curve"])}</code>, shared-rank K16 has {d["usable_points"]:,} actual usable '
@@ -1182,6 +1564,57 @@ def page(doc: dict, standalone: bool) -> str:
                  f'<td>{z["rho_s"]:.3f}</td><td>{z["f4_s_lower_over_rho"]:.3f}</td>'
                  f'<td>{z["f6_s_lower_over_rho"]:.3f}</td><td>{z["median_log2_w4_over_w6"]:.3f}</td></tr>')
     P.append('</tbody></table></section>')
+    y = doc["f4_f5_f6_cross_family_diagnostic"]
+
+    def h3(v):
+        return "—" if v is None else f"{v:.3f}"
+    P.append(f'<section class="card" id="bounded-f4-f5-f6-cross-family"><h2>F4, F5 and F6-IC on Koblitz and generic binary curves, outside the priced tables</h2>'
+             '<p>Matrix F4, matrix F5, inherited F4 and F6-IC through <code>pdp3-binary</code> on eight public '
+             'one-target workloads per cell, beside same-target rho. IC S is a lower bound: solver word XORs '
+             'are unpriced and F6-IC\'s geometric additions are charged. W is counted solver word XORs. '
+             'Prime curves have no algebraic oracle in <code>ecbench</code>. '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(y["source"])}">Analysis</a>.</p>')
+    P.append('<table><thead><tr><th>Family</th><th>m</th><th>Curve</th><th>Base points</th><th>Rho-negation S</th>'
+             '<th>Strong rho S</th><th>Inherited F4 S</th><th>F6-IC S</th><th>W F5/F4</th>'
+             '<th>W matrix F4/inherited</th><th>Median log₂(W inh/W F6)</th></tr></thead><tbody>')
+    for z in y["rows"]:
+        P.append(f'<tr><td>{esc(z["family"])}</td><td>{z["m"]}</td><td><code>{esc(z["curve"])}</code></td>'
+                 f'<td>{z["base_points"]}</td><td>{h3(z["rho_negation_s"])}</td><td>{h3(z["rho_strong_s"])}</td>'
+                 f'<td>{h3(z["inherited_s"])}</td><td>{h3(z["f6_s"])}</td><td>{h3(z["f5_over_f4_w"])}</td>'
+                 f'<td>{h3(z["matrix_f4_over_inherited_w"])}</td><td>{h3(z["log2_inherited_over_f6_w"])}</td></tr>')
+    P.append('</tbody></table></section>')
+    v = doc["n41_n53_counted_diagnostic"]
+
+    def qhtml(q: dict) -> str:
+        if q["ratio_of_sums"] is None:
+            return f'unknown ({q["pairs"]} verified pairs)'
+        ci = q["ci95"]
+        return (f'{q["ratio_of_sums"]:.3f} <span class="muted">[{ci[0]:.3f}, {ci[1]:.3f}]</span>' if ci
+                else f'{q["ratio_of_sums"]:.3f} <span class="muted">(no interval)</span>')
+    P.append(f'<section class="card" id="bounded-n41-n53-counted"><h2>n41/n53 shared-rank counted panel, outside the priced tables</h2>'
+             '<p>The four n37 arms, method parameters unchanged, on 16 new public one-target workloads '
+             'on each of the next two registered sizes, five paired rounds each, on macOS at L0. '
+             'Counted cold IC/rho is a quotient of two lower bounds with native work unpriced; a cell '
+             'whose arm never verifies under the frozen parameters is unknown, not a cost. '
+             f'{v["measured_verified_runs"]} of {v["measured_runs"]} measured runs verified; decision '
+             f'<code>{esc(v["decision"])}</code>; the L2 host run is pending. '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(v["source"])}">Frozen decision</a>.</p>')
+    P.append('<table><thead><tr><th>Curve</th><th class="n">log₂ r</th><th>Arm</th><th class="n">Verified / measured</th>'
+             '<th class="n">Usable points</th><th class="n">Columns</th><th class="n">Mean cold S (lower bound)</th>'
+             '<th>Counted IC/rho [95%]</th></tr></thead><tbody>')
+    for c in v["curves"]:
+        for a in c["arms"]:
+            q = {"ic-k8": c["k8_over_rho"], "ic-k16": c["k16_over_rho"]}.get(a["arm"])
+            s_txt = f'{a["mean_cold_s_lower_bound"]:.3f}' if a["mean_cold_s_lower_bound"] is not None else "—"
+            P.append(f'<tr><td><code>{esc(c["curve"])}</code></td><td class="n">{c["log2_r"]:.2f}</td><td>{esc(a["arm"])}</td>'
+                     f'<td class="n">{a["verified"]}/{a["measured"]}</td>'
+                     f'<td class="n">{a["usable_points"] if a["usable_points"] is not None else "—"}</td>'
+                     f'<td class="n">{a["folded_columns"] if a["folded_columns"] is not None else "—"}</td>'
+                     f'<td class="n">{s_txt}</td>'
+                     f'<td>{qhtml(q) if q else ("reference" if a["arm"] == "rho-strong" else "A/A control")}</td></tr>')
+        P.append(f'<tr><td><code>{esc(c["curve"])}</code></td><td class="n">{c["log2_r"]:.2f}</td><td>K16 / K8</td>'
+                 f'<td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td>{qhtml(c["k16_over_k8"])}</td></tr>')
+    P.append('</tbody></table></section>')
 
     head_cells = ('<th class="n">#</th><th>curve</th><th class="n">log₂ r</th><th>recipe</th>'
                   '<th class="n">m</th><th class="n">|F|</th><th class="n">K</th><th class="n">S, IC</th>'
@@ -1203,13 +1636,16 @@ def page(doc: dict, standalone: bool) -> str:
                 if b["construction_artefact"]:
                     ci += (f'<br><span class="muted">curve construction exceeds rho\'s walk here (§23.9); '
                            f'without it {times(b["cold_ratio_without_curve_construction"])}</span>')
+            if "ratio_rho_section23" in b:
+                ci += (f'<br><span class="muted">was {times(b["ratio_rho_section23"])} cold, '
+                       f'{g3(b["online_speedup_section23"])}× faster online (§23, at v0)</span>')
             if "ratio_rho_section21" in b:
                 ci += (f'<br><span class="muted">was {times(b["ratio_rho_section21"])} (§21)</span>'
                        f'<br><span class="muted">derived one-target cold estimate: {times(b["one_target_cold_ratio_section20"])} '
                      f'(§20; not table A\'s measurement)</span>')
             rank = "—" if b.get("construction_artefact") else i
             P.append(f'<tr class="{"lead" if r["slug"] == L[g]["slug"] else ""}"><td class="n">{rank}</td>'
-                     f'<td><span class="slug">{esc(r["slug"])}</span></td><td class="n">{r["log2_r"]:.1f}</td>'
+                     f'<td><span class="slug">{esc(r["slug"])}</span>{record_cell(r)}</td><td class="n">{r["log2_r"]:.1f}</td>'
                      f'<td class="recipe">{esc(b["label"])}</td><td class="n">{b["m"]}</td><td class="n">{b["base_points"]:,}</td>'
                      f'<td class="n">{b["columns"]:,}</td><td class="n">{g3(b["s"])}</td>'
                      f'<td class="n">{g3(r["reference_s"])}</td><td class="n"><span class="ratio">{times(b["ratio_rho"])}</span>{ci}</td>'
@@ -1245,8 +1681,9 @@ def page(doc: dict, standalone: bool) -> str:
              'here.</strong> Tables A, B and C below are priced in different units against different references '
              'and floors, stated at the head of each; S, × ref and × floor are comparable inside a table and '
              'nowhere else. Tables A and B solve one target per row, as AGENTS.md\'s one-target rule requires: '
-             'A on one unseen public point per process against one-target rho on the same point (§23, 64 points '
-             'per size), B against the matched negation-map rho (ledger §18). Table C is a historical 32-target '
+             'A on one unseen public point per process against one-target rho on the same point (§23\'s comparison, '
+             're-run at the ic tool programme\'s baseline v3, 64 points per size, §23\'s figures kept as the '
+             'before marks), B against the matched negation-map rho (ledger §18). Table C is a historical 32-target '
              'diagnostic. For the Koblitz rows of A the online interval, the reading with rho at the canonical '
              'step and the generic-precomputation model sit beside the cold ratio, as §23 requires. The bar '
              'splits S into phases. A walked-target row on the ladder is resolved to about a factor 1.8 either '
@@ -1299,7 +1736,7 @@ def page(doc: dict, standalone: bool) -> str:
         P.append(f'<tr><td>{esc(VARIANTS.get(vname, vname))}</td>')
         for r in ladder:
             v = next((x for x in r["recipes"] if x["variant"] == vname), None)
-            best = v is r["best"]
+            best = v == r["best"]
             cell = times(v["ratio_rho"]) if v else "—"
             P.append(f'<td class="n">{"<strong>" + cell + "</strong>" if best else cell}</td>')
         P.append('</tr>')
@@ -1392,6 +1829,13 @@ def page(doc: dict, standalone: bool) -> str:
              '<p>From the curve registry. The slug is the curve\'s name in text; the EC1 alias identifies the exact '
              'representation measured (subgroup and generator included) for comparisons across repositories. '
              'Legacy spellings are what older notes and frozen reports called the curve.</p>')
+    cr = doc["curve_records"]
+    P.append(f'<p id="curve-records"><strong>Curve records.</strong> Identity comes from {gh(cr["registry"])}. '
+             f'IC curve records follow the schema {gh(cr["schema"])} and live in {gh(cr["yaml"])} '
+             f'({cr["yaml_records"]} records), which carries each curve\'s <code>factor_base_refs</code> and '
+             f'<code>factor_base_link_status</code>. {cr["board_curves_in_yaml"]} of the {cr["board_curves"]} curves '
+             f'on the board have a record there, and {cr["board_curves_factor_base_reconciled"]} have a reconciled '
+             'factor base; each board row shows its own record and the factor base its source file used.</p>')
     for fam in fam_order:
         rows = [c for c in doc["roster"] if c["family"] == fam]
         if not rows:
@@ -1399,16 +1843,29 @@ def page(doc: dict, standalone: bool) -> str:
         P.append(f'<details {"open" if fam == "koblitz" else ""}><summary>{esc(fam)} · {len(rows)} curves · '
                  f'{sum(c["on_board"] for c in rows)} on the board</summary><div class="scroll"><table><thead><tr>'
                  '<th>slug</th><th>field</th><th>coefficients</th><th class="n">#E bits</th><th>EC1</th>'
-                 '<th>also called</th><th>board</th></tr></thead><tbody>')
+                 '<th>also called</th><th>curves.yaml</th><th>board</th></tr></thead><tbody>')
         for c in rows:
             ec1 = ", ".join(c["ec1"]) if c["ec1"] else f'<span class="muted">{esc(c["ec1_unresolved"])}</span>'
             also = ", ".join(c["standard"] + c["legacy"])
             P.append(f'<tr><td><span class="slug">{esc(c["slug"])}</span></td><td>{esc(c["field"])}</td>'
                      f'<td>{esc(c["coefficients"])}</td><td class="n">{c["order_bits"]}</td>'
                      f'<td><code>{ec1 if c["ec1"] else ""}</code>{"" if c["ec1"] else ec1}</td>'
-                     f'<td>{esc(also)}</td><td>{"✓" if c["on_board"] else ""}</td></tr>')
+                     f'<td>{esc(also)}</td><td>{esc(c["curves_yaml_key"] or "—")}</td>'
+                     f'<td>{"✓" if c["on_board"] else ""}</td></tr>')
         P.append('</tbody></table></div></details>')
     P.append('</section>')
+
+    # Native observations are rendered without recomputing a comparison.
+    P.append('<section id="conductor-gap-counts"><h2>Large-prime conductor-gap counted diagnostics</h2>'
+             '<p>Eight independent one-target workloads per fixed curve, no transported targets. '
+             'Counted S leaves native work unpriced. These observations remain outside tables A–C '
+             'and the full-cost rankings.</p><table><thead><tr><th>ell</th><th>IC floor/crater</th>'
+             '<th>99% interval</th></tr></thead><tbody>')
+    for session in doc["conductor_gap_count_diagnostic"]["sessions"]:
+        observed = session["arms"]["ic-mitm"]["cross_curve"]
+        P.append(f'<tr><td>{session["ell"]}</td><td>{observed["ratio_floor_over_crater"]:.6f}</td>'
+                 f'<td>{observed["ci99"][0]:.6f} to {observed["ci99"][1]:.6f}</td></tr>')
+    P.append('</tbody></table>' + gh(SOURCES["conductor_gap_counts"], 'Native analysis and source records') + '</section>')
 
     # Footer.
     P.append('<footer><p><strong>What this is not.</strong> A view of frozen measurements, class accounting: no row '
@@ -1417,10 +1874,13 @@ def page(doc: dict, standalone: bool) -> str:
              '<a href="https://github.com/aburan28/crypto/blob/main/docs/ic/BOUNDARY_TARGETS.md">docs/ic/BOUNDARY_TARGETS.md</a>; the canonical page is the '
              '<a href="https://aburan28.github.io/crypto/scoreboard/">index-calculus scoreboard</a>. No IC pipeline has been priced '
              'end to end on ECC2K-130 or on the m = 83 confidence gate (AGENTS.md §8a).</p>'
-             f'<p>Current through ledger §{LEDGER_COVERED_THROUGH}. Built by '
+             f'<p>Current through ledger §{LEDGER_COVERED_THROUGH}; latest frontier audit '
+             f'{esc(doc["latest_frontier_audit"]["date"])}. Built by '
              '<code>scripts/build_ic_leaderboard.py</code> from: '
              + ", ".join(f'<code>{esc(v["path"])}</code> ({v["sha256"][:12]})' for v in doc["sources"].values())
-             + '. Curves are named by ICV1 slug (<a href="https://github.com/aburan28/crypto/blob/main/docs/curves/ICV1.md">docs/curves/ICV1.md</a>).</p></footer></div>')
+             + '. Curves are named by ICV1 slug (<a href="https://github.com/aburan28/crypto/blob/main/docs/curves/ICV1.md">docs/curves/ICV1.md</a>); '
+             f'curve records: {gh(SOURCES["curves_schema"])} and {gh(SOURCES["curves_yaml"])} '
+             '(<a href="#curve-records">coverage</a>).</p></footer></div>')
     body = "\n".join(P)
     if standalone:
         return ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
@@ -1431,13 +1891,32 @@ def page(doc: dict, standalone: bool) -> str:
     return head + body + "\n"
 
 
+def stable(o):
+    """Round every float to 12 significant figures.
+
+    Phase totals are sums and means of many frozen readings, and their last
+    one or two digits differ between Python builds (summation and mean
+    rounding), which made `--check` call the committed file stale on a
+    runner whose interpreter differed from the author's.  Twelve figures is
+    far below anything the page or a ratio reads, and identical everywhere.
+    """
+    if isinstance(o, float):
+        return float(f"{o:.12g}") if math.isfinite(o) else o
+    if isinstance(o, dict):
+        return {k: stable(v) for k, v in o.items()}
+    if isinstance(o, (list, tuple)):
+        return [stable(v) for v in o]
+    return o
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--artifact", type=Path)
     args = ap.parse_args()
     doc = build()
-    outs = {OUT_JSON: json.dumps(doc, indent=1, ensure_ascii=False) + "\n",
+    # Round only the JSON: rendering compares recipe rows by identity.
+    outs = {OUT_JSON: json.dumps(stable(doc), indent=1, ensure_ascii=False) + "\n",
             OUT_MD: markdown(doc), OUT_HTML: page(doc, standalone=True)}
     if args.check:
         sections = [int(m) for m in re.findall(r"^## (\d+)\.", (REPO / LEDGER).read_text(), re.M)]

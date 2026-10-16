@@ -1,0 +1,25 @@
+cell m=3 K_0/GF(2^13) l=5: r=2003 fb=17
+  t=0 unsplit        g=0: vars=15 sd_max=7 wall=16.238s xors=20102406940 verified=1/1 exact=Some(true) timeouts=0
+  t=0 split-2+1      g=0: vars=28 sd_max=4 wall=7.171s xors=1054935107 verified=0/1 exact=Some(false) timeouts=0
+  t=0 unsplit        g=2: vars=15 sd_max=7 wall=2.223s xors=1393252727 verified=1/1 exact=Some(true) timeouts=0
+  t=0 split-2+1      g=2: vars=28 sd_max=4 wall=87.350s xors=3702155728 verified=1/1 exact=Some(true) timeouts=0
+  t=0 unsplit        g=4: vars=15 sd_max=6 wall=0.317s xors=63792773 verified=1/1 exact=Some(true) timeouts=0
+  t=0 split-2+1      g=4: vars=28 sd_max=4 wall=12.312s xors=1686578515 verified=1/1 exact=Some(true) timeouts=0
+  t=1 unsplit        g=0: vars=15 sd_max=7 wall=17.193s xors=22782743701 verified=3/3 exact=Some(true) timeouts=0
+  t=1 split-2+1      g=0: vars=28 sd_max=4 wall=8.055s xors=1072863581 verified=0/3 exact=Some(false) timeouts=0
+  t=1 unsplit        g=2: vars=15 sd_max=7 wall=3.600s xors=1830457683 verified=3/3 exact=Some(true) timeouts=0
+  t=1 split-2+1      g=2: vars=28 sd_max=4 wall=162.953s xors=5259768876 verified=3/3 exact=Some(true) timeouts=0
+  t=1 unsplit        g=4: vars=15 sd_max=6 wall=0.415s xors=72232798 verified=3/3 exact=Some(true) timeouts=0
+  t=1 split-2+1      g=4: vars=28 sd_max=4 wall=23.607s xors=1784672149 verified=3/3 exact=Some(true) timeouts=0
+  t=2 unsplit        g=0: vars=15 sd_max=7 wall=6.249s xors=15611205315 verified=0/0 exact=Some(true) timeouts=0
+  t=2 split-2+1      g=0: vars=28 sd_max=4 wall=4.531s xors=644174379 verified=0/0 exact=Some(true) timeouts=0
+  t=2 unsplit        g=2: vars=15 sd_max=7 wall=1.135s xors=1178719072 verified=0/0 exact=Some(true) timeouts=0
+  t=2 split-2+1      g=2: vars=28 sd_max=4 wall=8.235s xors=1944057366 verified=0/0 exact=Some(true) timeouts=0
+  t=2 unsplit        g=4: vars=15 sd_max=6 wall=0.268s xors=59586942 verified=0/0 exact=Some(true) timeouts=0
+  t=2 split-2+1      g=4: vars=28 sd_max=4 wall=5.399s xors=1502016689 verified=0/0 exact=Some(true) timeouts=0
+  t=3 unsplit        g=0: vars=15 sd_max=7 wall=15.764s xors=18754178128 verified=1/1 exact=Some(true) timeouts=0
+  t=3 split-2+1      g=0: vars=28 sd_max=4 wall=6.809s xors=941234614 verified=0/1 exact=Some(false) timeouts=0
+  t=3 unsplit        g=2: vars=15 sd_max=7 wall=2.221s xors=1383362312 verified=1/1 exact=Some(true) timeouts=0
+  t=3 split-2+1      g=2: vars=28 sd_max=4 wall=87.015s xors=3734021428 verified=1/1 exact=Some(true) timeouts=0
+  t=3 unsplit        g=4: vars=15 sd_max=6 wall=0.495s xors=63702740 verified=1/1 exact=Some(true) timeouts=0
+  t=3 split-2+1      g=4: vars=28 sd_max=4 wall=13.474s xors=1657761603 verified=1/1 exact=Some(true) timeouts=0

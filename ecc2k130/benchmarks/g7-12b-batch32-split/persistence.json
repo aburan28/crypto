@@ -1,0 +1,26 @@
+[
+  {
+    "batch": 24,
+    "passed": true,
+    "final_checkpoint_sha256": "8cf5a28c292693d3a200c84ce6558a0e42359fff4e7b6f7104a420553a26fc4c",
+    "final_iteration": 256
+  },
+  {
+    "batch": 32,
+    "passed": true,
+    "final_checkpoint_sha256": "78ac56882d292200b06ccadd15399760c4c84b74da442d936df08310d0839cc9",
+    "final_iteration": 256
+  },
+  {
+    "batch": 24,
+    "rejects_batch16_checkpoint": true,
+    "returncode": 6,
+    "log_sha256": "230e0006ac0b50d09b95c92292ba8657fb33f6f4dc9a5eff68927a39244e7392"
+  },
+  {
+    "batch": 32,
+    "rejects_batch16_checkpoint": true,
+    "returncode": 6,
+    "log_sha256": "f27c3f44959ad75f818aa41475a8468f9032816c4005e7f9458d228e4aac058e"
+  }
+]

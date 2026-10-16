@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="290" viewBox="0 0 760 290">
+  <rect width="760" height="290" fill="white"/>
+  <text x="30" y="30" font-family="sans-serif" font-size="17" font-weight="bold">L1 round trip: measured wall time (n=1 per operation)</text>
+  <text x="30" y="53" font-family="sans-serif" font-size="12">run-20261011T1944Z-l1-fix · shared VM · log seconds · no interval recorded</text>
+  <g stroke="#b8c3d0" stroke-width="1">
+    <line x1="230" y1="82" x2="230" y2="226"/><line x1="365" y1="82" x2="365" y2="226"/>
+    <line x1="500" y1="82" x2="500" y2="226"/><line x1="635" y1="82" x2="635" y2="226"/>
+  </g>
+  <g fill="#354356" font-family="sans-serif" font-size="12">
+    <text x="215" y="247">0.1</text><text x="360" y="247">1</text><text x="493" y="247">10</text><text x="626" y="247">100</text>
+    <text x="68" y="109">KeyGen</text><text x="68" y="156">Encaps</text><text x="68" y="203">Decaps</text>
+    <text x="318" y="156">0.2242 s</text><text x="659" y="203">11.406 s</text><text x="659" y="109">25.788 s</text>
+  </g>
+  <g stroke="#263e66" stroke-width="2" fill="#2678b8">
+    <line x1="230" y1="105" x2="555" y2="105"/><circle cx="555" cy="105" r="6"/>
+    <line x1="230" y1="152" x2="277" y2="152"/><circle cx="277" cy="152" r="6"/>
+    <line x1="230" y1="199" x2="508" y2="199"/><circle cx="508" cy="199" r="6"/>
+  </g>
+  <text x="325" y="278" font-family="sans-serif" font-size="12">Wall time (seconds, logarithmic axis)</text>
+</svg>

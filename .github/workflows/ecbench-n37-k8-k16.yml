@@ -1,49 +1,71 @@
 name: ecbench n37 K8 K16 frozen profile
 
+# PRs audit all sealed records and replay the archived profile/decision.
+# A zero-solver-replay PR receipt is record integrity, never a new independent
+# measurement certificate. Manual runs retain all 320 solver replays and the
+# original 64 fresh Callgrind solves.
+
 on:
-  pull_request:
-    paths:
-      - 'research/ecbench_n37_k8_k16_20261004/**'
-      - '.github/workflows/ecbench-n37-k8-k16.yml'
-      - 'src/bin/ecbench.rs'
-      - 'src/cryptanalysis/ecbench/**'
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
 
 permissions:
   contents: read
 
+# A newer push to the same pull request cancels this workflow's run for the older commit.
+# Every other event (push, schedule, dispatch) gets a group of its own and is never cancelled.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && github.workflow_ref || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   profile:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && 25 || 60 }}
     steps:
       - uses: actions/checkout@v4
       - name: Install frozen profiler
+        if: github.event_name != 'pull_request' && github.event_name != 'merge_group'
         run: |
           sudo apt-get update
           sudo apt-get install -y valgrind
           test "$(valgrind --version)" = valgrind-3.22.0
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ecbench
       - name: Build the frozen native ecbench path
         run: |
           cargo test --release --lib cryptanalysis::ecbench::callgrind
           cargo build --release --bin ecbench
           cargo check --release --example ecbench_k8_k16_analyze
-      - name: Independently replay the sealed Mac session
+      - name: Audit the sealed Mac session (solver replay on manual runs)
         run: |
+          replay_args=(--replay-all)
+          expected_replays=320
+          audit_receipt=INDEPENDENT-AUDIT.json
+          if [[ "$GITHUB_EVENT_NAME" == pull_request || "$GITHUB_EVENT_NAME" == merge_group ]]; then
+            replay_args=(--replay 0)
+            expected_replays=0
+            audit_receipt=RECORD-INTEGRITY.json
+          fi
           out="$RUNNER_TEMP/ecbench-n37-k8-k16"
           mkdir -p "$out"
           ./target/release/ecbench verify \
             --dir research/ecbench_n37_k8_k16_20261004/sessions/mac_arm64_l0_01 \
-            --replay-all --exit-code --out "$out/INDEPENDENT-AUDIT.json" \
-            > "$out/independent-audit.log"
-          jq -e --arg original 'ECBENV2hd82681268e96' \
+            "${replay_args[@]}" --exit-code --out "$out/$audit_receipt" \
+            > "$out/record-audit.log"
+          jq -e --arg original 'ECBENV2hd82681268e96' --argjson expected_replays "$expected_replays" \
             '.ok == true and .session_id == "ECBS1hdebde0f96835"
              and .records == 384 and .verified_records == 384
-             and (.replays | length) == 320
+             and (.replays | length) == $expected_replays
              and all(.replays[]; .reproduced and .detail == "identical")
              and .auditor_env_class_id != $original' \
-            "$out/INDEPENDENT-AUDIT.json" > /dev/null
+            "$out/$audit_receipt" > /dev/null
       - name: Profile all 64 frozen first-round one-target solves
+        if: github.event_name != 'pull_request' && github.event_name != 'merge_group'
         env:
           RAYON_NUM_THREADS: '1'
         run: |
@@ -139,7 +161,7 @@ jobs:
             "$RUNNER_TEMP/ecbench-k8-k16-decision.json"
           cmp "$RUNNER_TEMP/ecbench-k8-k16-decision.json" "$dir/DECISION.json"
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ !cancelled() }}
         with:
           name: ecbench-n37-k8-k16-profiles
           path: ${{ runner.temp }}/ecbench-n37-k8-k16

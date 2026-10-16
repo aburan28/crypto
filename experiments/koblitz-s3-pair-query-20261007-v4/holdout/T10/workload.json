@@ -1,0 +1,34 @@
+{
+  "identity_sha256": "2803f7b2d83ae1541f78aa74be15d689f840c4de3db2bcd35ee1f0fd8433a71e",
+  "record": {
+    "cache_policy": "one fresh process per run; factor base and S3 index are prepared before the online clock, but relation collection, matrix rank, target span, and scalar recovery occur inside the online interval; no cross-run shared cache",
+    "cold_or_warm_target_count": {
+      "rho_queries": 0,
+      "targets_per_invocation": 1,
+      "warm_queries_after_candidate_preparation": 1
+    },
+    "comparison_question": "fresh-target one-target correctness and latency variability for paired baseline versus shared-inversion S3 solver",
+    "curve_id": "EC1N53Ckb1h888961ed110e",
+    "input_law": "one deterministic pseudorandom public subgroup point supplied as coordinates; generation scalar is outside both timed intervals and is absent from the solver input",
+    "relation_collection_seed": 20260928,
+    "resource_envelope": {
+      "candidate_processes": 1,
+      "maximum_process_threads_including_main": 15,
+      "memory_limit_bytes": null,
+      "relation_and_index_workers": 14,
+      "rho_workers_if_paired": 14
+    },
+    "rho_fixture_or_walk_seeds": [],
+    "rho_reference_id": null,
+    "subgroup_order": 21044858204113,
+    "target_count": 1,
+    "target_generation_seed": "s3-paired-inversion-holdout-20261007-v1:T10",
+    "targets": [
+      [
+        2932660181133343,
+        4910561265866411
+      ]
+    ]
+  },
+  "workload_id": "2803f7b2d83a"
+}

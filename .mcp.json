@@ -7,6 +7,17 @@
       ],
       "command": "conductor-mcp",
       "type": "stdio"
+    },
+    "cairn": {
+      "args": [
+        "--log",
+        "${HOME}/.cairn/cairn.jsonl",
+        "--root",
+        "${HOME}/.cairn",
+        "mcp"
+      ],
+      "command": "cairn",
+      "type": "stdio"
     }
   }
 }

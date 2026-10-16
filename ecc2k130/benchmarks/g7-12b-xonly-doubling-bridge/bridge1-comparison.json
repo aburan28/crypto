@@ -1,0 +1,37 @@
+{
+  "status": "non-promotable-sigma-bridge-1-common-path-diagnostic",
+  "checkpoint_mismatches": {
+    "bridge1": 0
+  },
+  "rows": [
+    {
+      "variant": "doubling",
+      "rates_billion_per_second": [
+        11.67584,
+        11.629054,
+        11.508403
+      ],
+      "median_billion_per_second": 11.629054,
+      "paired_geomean_vs_doubling": 1.0,
+      "paired_95_ci": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "variant": "bridge1",
+      "rates_billion_per_second": [
+        13.282202,
+        13.089917,
+        13.050816999999999
+      ],
+      "median_billion_per_second": 13.089917,
+      "paired_geomean_vs_doubling": 1.132397833914814,
+      "paired_95_ci": [
+        1.1172307646705542,
+        1.1477708051058644
+      ]
+    }
+  ],
+  "decision": "bridge-1 provides enough headroom to study a complete bridge-1/bridge-3 map"
+}

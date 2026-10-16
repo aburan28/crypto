@@ -1,0 +1,72 @@
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index 348b60eee..c24b0b1fe 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -4348,6 +4348,8 @@ impl PairSumTable {
+             /// Entries row `rows.start + i` put in partition `p`, at
+             /// `i * parts + p`.
+             counts: Vec<u32>,
++            /// The presence filter's bits for this run's pairs.
++            present: Vec<u64>,
+         }
+         assert!(bucket_bits <= Self::TAGGED_STREAM_BUCKET_BITS);
+         let rows = row_lens.len();
+@@ -4360,10 +4362,11 @@ impl PairSumTable {
+         let per_part = buckets / parts;
+         let filter_bits = filter_bits_for(total);
+         let present_mask = (1u64 << filter_bits) - 1;
+-        let present_atomic: Vec<AtomicU64> = (0..(1usize << filter_bits) / 64)
+-            .map(|_| AtomicU64::new(0))
+-            .collect();
+-        // 1. Every row keyed once, straight into its run's streams.
++        let filter_words = (1usize << filter_bits) / 64;
++        // 1. Every row keyed once, straight into its run's streams, its
++        // bits set in the run's own filter with plain ORs: a locked OR
++        // between the streams' stores would wait for every store before
++        // it.  The runs' filters are ORed together afterwards.
+         let runs = rayon::current_num_threads().clamp(1, rows.max(1));
+         let per_run = rows.div_ceil(runs);
+         let streams: Vec<Run> = (0..runs)
+@@ -4377,6 +4380,7 @@ impl PairSumTable {
+                 let mut spill: Vec<Vec<u32>> = vec![Vec::new(); parts];
+                 let mut counts = Vec::with_capacity(here.len() * parts);
+                 let mut row_counts = vec![0u32; parts];
++                let mut present = vec![0u64; filter_words];
+                 for r in here.clone() {
+                     row_counts.fill(0);
+                     each_row(r, &mut |keys, _| {
+@@ -4394,7 +4398,7 @@ impl PairSumTable {
+                             }
+                             row_counts[p] += 1;
+                             let (word, bits) = filter_slot(h, present_mask, FILTER_EXTRA);
+-                            present_atomic[word].fetch_or(bits, Ordering::Relaxed);
++                            present[word] |= bits;
+                         }
+                     });
+                     counts.extend_from_slice(&row_counts);
+@@ -4406,6 +4410,7 @@ impl PairSumTable {
+                     lens,
+                     spill,
+                     counts,
++                    present,
+                 }
+             })
+             .collect();
+@@ -4461,10 +4466,13 @@ impl PairSumTable {
+                 }
+             });
+         bucket_start[buckets] = total as u32;
+-        let present = present_atomic
+-            .iter()
+-            .map(|w| w.load(Ordering::Relaxed))
+-            .collect();
++        let mut filters = streams.into_iter().map(|s| s.present);
++        let mut present = filters.next().unwrap_or_else(|| vec![0u64; filter_words]);
++        for other in filters {
++            for (w, o) in present.iter_mut().zip(other) {
++                *w |= o;
++            }
++        }
+         (bucket_start, rests, present, present_mask)
+     }
+ 

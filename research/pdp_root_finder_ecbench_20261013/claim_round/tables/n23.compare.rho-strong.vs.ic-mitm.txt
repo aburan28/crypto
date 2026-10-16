@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pdp_root_finder_ecbench_20261013/claim_round/sessions/n23/comparisons/rho-strong__ic-mitm.json
+ops (ok): ic-mitm / rho-strong = 641.9365 [611.870, 672.109] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 50.5660 [49.109, 52.254]
+| curve | log2 r | workloads | ic-mitm / rho-strong | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m23-t5197-69e76b73 | 21.00 | 8 | 641.9365 | [611.8703, 672.1094] | cluster |
+
+| workload | curve | log2 r | rho-strong mean S | ic-mitm mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W357f81962d5e | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1456 | 710.5546 | 620.2613 |
+| W419251f265ab | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1239 | 710.5545 | 632.2055 |
+| W79741821eb0e | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1601 | 710.5580 | 612.5085 |
+| W940c68db171b | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.0279 | 710.5430 | 691.2464 |
+| W9bcd1bbb011c | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.0496 | 710.5396 | 676.9887 |
+| Wb67fa475db27 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1384 | 710.5413 | 624.1385 |
+| Wdbe43b509726 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.0569 | 710.5700 | 672.2981 |
+| Web4713354444 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1527 | 710.5690 | 616.4331 |

@@ -1,0 +1,8 @@
+wrote raw/sym4_n15_l3.json
+  subfield   mean D*=3.000  [3..3]  decomposable 0.000  over 6 unsat targets
+  geometric  mean D*=5.000  [5..5]  decomposable 0.062  over 5 unsat targets
+  standard   mean D*=5.000  [5..5]  decomposable 0.000  over 5 unsat targets
+  geometric  W dims [3, 5, 7] vars=15 (chain 24) point-decomp 0.062 bool-unsat 0.312 spurious 10
+  standard   W dims [3, 5, 7] vars=15 (chain 24) point-decomp 0.000 bool-unsat 0.312 spurious 11
+  subfield   W dims [3, 3, 3] vars=9 (chain 24) point-decomp 0.000 bool-unsat 1.000 spurious 0
+  random     W dims [3, 6, 10] vars=19 (chain 24) point-decomp 0.188 bool-unsat 0.000 spurious 13

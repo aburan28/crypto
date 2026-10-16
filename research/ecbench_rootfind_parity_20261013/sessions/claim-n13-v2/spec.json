@@ -1,0 +1,44 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "rootfind parity claim v2: compact-orbit counted frob m=2 vs F4 and negfold on public E_0 n=13",
+  "description": "Head-to-head after parity cycles 4–5. Cold candidate is compact-orbit-scan:columns=2 + mitm-frobenius-counted:m=2 (cycle-5; koblitz-orbit:divisor=0;1 unavailable on E0; subtract dead). Inherited-F4 m=3 d=5 is the IC row to match. Negfold m=2 d=5 kept as best complete-S rootfind on standard-subspace. Uncounted mitm-frobenius:m=2 kept for setup delta. Public synthetic; classification engineering; no security claim; multi-target amortization secondary only.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 13}],
+    "targets_per_curve": 8,
+    "target_seed": 202610131901,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+    {"name": "rho-frob", "role": "baseline", "method": {"id": "rho.signed_frobenius"}},
+    {"name": "ic-f4-m3-d5", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=3,engine=inherited-f4,degree=3,node_budget=8192",
+      "max_trials": "200000"}}},
+    {"name": "ic-negfold-m2-d5", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+      "max_trials": "200000"}}},
+    {"name": "ic-c2-frob-m2", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "compact-orbit-scan:columns=2,raw_x_cap=10000",
+      "oracle": "mitm-frobenius:m=2",
+      "max_trials": "200000"}}},
+    {"name": "ic-c2-frob-counted-m2", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "compact-orbit-scan:columns=2,raw_x_cap=10000",
+      "oracle": "mitm-frobenius-counted:m=2",
+      "max_trials": "200000"}}},
+    {"name": "ic-c3-frob-counted-m2", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "compact-orbit-scan:columns=3,raw_x_cap=10000",
+      "oracle": "mitm-frobenius-counted:m=2",
+      "max_trials": "200000"}}},
+    {"name": "rho-strong-aa", "role": "control", "method": {"id": "rho.signed_frobenius_strong"}}
+  ],
+  "measurement": {
+    "rounds": 3,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 202610131902,
+    "isolation_required": "L2",
+    "timeout_seconds": 1800
+  }
+}

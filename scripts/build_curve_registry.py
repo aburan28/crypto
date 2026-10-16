@@ -93,6 +93,36 @@ PRIME_STANDARDS = {
         (0x188DA80EB03090F67CBF20EB43A18800F4FF0AFD82FF1012,
          0x07192B95FFC8DA78631011ED6B24CDD573F977A11E794811)),
 }
+# Standard random binary curves carried by the source tree.  Keep these
+# separate from KOBLITZ_STANDARDS: sect113r1 is a general binary Weierstrass
+# curve, not a Koblitz curve.  The identity pins make a basis, encoding or
+# subgroup change fail the registry build instead of silently renaming it.
+BINARY_STANDARDS = {
+    "sect113r1": {
+        "m": 113,
+        "modulus": (1 << 113) | (1 << 9) | 1,
+        "a": 0x003088250CA6E7C7FE649CE85820F7,
+        "b": 0x00E8BEE4D3E2260744188BE0E9C723,
+        "subgroup_order": 0x0100000000000000D9CCEC8A39E56F,
+        "cofactor": 2,
+        "generator": (
+            0x009D73616F35F4AB1407D73562C10F,
+            0x00A52830277958EE84D1315ED31886,
+        ),
+        "source": "src/binary_ecc/curve.rs",
+        "icv1": (
+            "ICV1:f2m-113-99967757:-122610772499221213:"
+            "10384593717069655379671765157661406:"
+            "0x6942e38fc45c62366c09aa8204cd:unk:unk:r:97df4ac684cb"
+        ),
+        "ec1": "EC1N113Csect113r1hf529f17bd191",
+        "curve_uid": (
+            "urn:ec-record:1:sha256:"
+            "f529f17bd1913792333a661e3557ad6b8e0ca2d4d02b939bc069d17d9fd94d97"
+        ),
+        "field_sha256": "da55718b2ae51e38fc5d836fcf62bbca5907b877c61b29d5e3c30a5e94b60ee3",
+    },
+}
 # Where the source tree constructs each prime standard, when not curve.rs.
 PRIME_STANDARD_SOURCES = {"P-224": "src/ecc/curve_zoo.rs", "P-192": "src/ecc/curve_zoo.rs"}
 # Binary standards whose generator the source tree carries, in the basis of
@@ -219,6 +249,24 @@ def prime_record(p: int, a: int, b: int, order: int, r: int, h: int,
     return field, curve
 
 
+EXTENSION_ELEMENT_ENCODING = ("decimal coefficient list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ... "
+                              "+ e_{k-1} t^{k-1} modulo the monic modulus")
+
+
+def extension_record(p: int, mod: list[int], a: list[int], b: list[int], r: int, h: int,
+                     g: tuple[list[int], list[int]]) -> tuple[dict, dict]:
+    """An extension-field EC1 record in the same style (no earlier producer):
+    the modulus is listed from c_0 up to its leading 1."""
+    k = len(mod)
+    field = {"characteristic": p, "degree": k, "representation": "polynomial",
+             "modulus": [c % p for c in mod] + [1], "element_encoding": EXTENSION_ELEMENT_ENCODING}
+    zero = [0] * k
+    curve = {"model": "short Weierstrass", "coefficients": [zero, zero, zero, a, b],
+             "subgroup_order": str(r), "cofactor": h, "generator": [g[0], g[1]],
+             "target_group": TARGET_GROUP}
+    return field, curve
+
+
 def generator_of(o: dict) -> tuple[int, int] | None:
     g = o.get("generator")
     if isinstance(g, dict):
@@ -262,7 +310,18 @@ def add_koblitz(reg: Registry, a: int, n: int, source: str, standard: str | None
 
 
 def harvest_json(reg: Registry, problems: list[str], fatal: list[str]) -> None:
+    # Explicit coordinate forms are normalized by the native registry_models
+    # tool. This harvester consumes its field results and checks source bytes;
+    # it must never reinterpret quadratic coefficients as a short model.
+    native_path = REPO / "docs/curves/sources/prime-models.json"
+    try:
+        native_doc = json.loads(native_path.read_text())
+        native_rows = native_doc["records"] if native_doc.get("schema") == "prime-models-normalization/v1" else []
+    except (OSError, ValueError, KeyError):
+        native_rows = []
     for path in tracked("*.json"):
+        if path == native_path:
+            continue
         try:
             if path.stat().st_size > MAX_JSON_BYTES:
                 continue
@@ -270,15 +329,17 @@ def harvest_json(reg: Registry, problems: list[str], fatal: list[str]) -> None:
         except (OSError, ValueError, UnicodeDecodeError):
             continue
         rel = str(path.relative_to(REPO))
-        stack = [doc]
+        stack = [(doc, "")]
         while stack:
-            o = stack.pop()
+            o, pointer = stack.pop()
             if isinstance(o, list):
-                stack.extend(x for x in o if isinstance(x, (dict, list)))
+                stack.extend((x, f"{pointer}/{index}") for index, x in enumerate(o)
+                             if isinstance(x, (dict, list)))
                 continue
             if not isinstance(o, dict):
                 continue
-            stack.extend(v for v in o.values() if isinstance(v, (dict, list)))
+            stack.extend((v, pointer + "/" + str(k).replace("~", "~0").replace("/", "~1"))
+                         for k, v in o.items() if isinstance(v, (dict, list)))
             order = _int(o.get("group_order", o.get("order")))
             name = o.get("name") if isinstance(o.get("name"), str) else None
             field = o.get("field")
@@ -315,6 +376,29 @@ def harvest_json(reg: Registry, problems: list[str], fatal: list[str]) -> None:
                     if g and rh:
                         reg.represent(ident, *binary_record(m, f, a, b, order, *rh, g), rel)
                 elif "p" in o and "a" in o and "b" in o and order:
+                    form = o.get("model", o.get("form"))
+                    form = "".join(form.split()) if isinstance(form, str) else None
+                    if form == "y^2=x^3+ax^2+bx":
+                        rows = [row for row in native_rows
+                                if row.get("source") == rel and row.get("pointer") == pointer
+                                and row.get("original") == o]
+                        if len(rows) != 1 or rows[0].get("source_sha256") != hashlib.sha256(path.read_bytes()).hexdigest():
+                            fatal.append(f"{rel}: native prime-model normalization is missing or stale; "
+                                         "run registry_models from tools/isogeny-cli")
+                            continue
+                        row = rows[0]
+                        ident, params = row["identity"], row["params"]
+                        check_rust(o, ident, rel, fatal)
+                        reg.add(ident, "prime", params, rel, [name] if name else [])
+                        # A future record with a generator must carry its
+                        # native coordinate conversion before an EC1 is added.
+                        if generator_of(o):
+                            fatal.append(f"{rel}: native normalization does not yet export generator coordinates")
+                        continue
+                    if form is not None and form not in {
+                            "shortWeierstrass", "y^2=x^3+ax+b", "y^2=x^3+a*x+b"}:
+                        fatal.append(f"{rel}: unsupported explicit prime model {form!r}")
+                        continue
                     p, a, b = _int(o["p"]), _int(o["a"]), _int(o["b"])
                     if p is None or a is None or b is None or p < 5:
                         continue
@@ -366,7 +450,7 @@ def tag_of(e: dict) -> str:
         return re.sub(r"[^a-z0-9]", "", e["standard_names"][0].lower())
     if e["family"] == "koblitz":
         return f"e{e['params']['a']}"  # E_0 / E_1, as AGENTS.md §8b names the families
-    return {"subfield": "sf", "binary": "rb", "prime": "fp"}[e["family"]]
+    return {"subfield": "sf", "binary": "rb", "prime": "fp", "extension": "fpk"}[e["family"]]
 
 
 def check_rust(o: dict, ident: dict, rel: str, fatal: list[str]) -> None:
@@ -474,6 +558,43 @@ PROGRAMME_KOBLITZ = {(0, 67): B3B, (1, 67): B3B, (0, 79): B3B,
                      (0, 577): B4}
 
 
+# Extension-field curves the ic tool programme names (B5a): its instances,
+# each found and checked by its generator (`icprog b5a instances`), with the
+# generator the frozen case documents carry; and B2's C050, whose order B2's
+# generator found.
+B5A = "research/ic_tool_program/rounds/B5a-extension-fields/instances.json"
+B5A_DOCS = "research/ic_tool_program/conformance/v2-b5a/params"
+B2_C050 = "research/ic_tool_program/conformance/v2-b2/params/C050-cubic-extension.json"
+
+
+def add_extension_doc(reg: Registry, rel: str, order: int | None = None) -> None:
+    """A schema v2 `prime_extension` document's curve, its order `r h` unless given."""
+    doc = json.loads((REPO / rel).read_text())
+    f, c, sub = doc["field"], doc["curve"], doc["subgroup"]
+    p, mod = int(f["p"]), [int(x) for x in f["modulus"]]
+    a, b = [int(x) for x in c["a"]], [int(x) for x in c["b"]]
+    r, h = int(sub["order"]), int(sub["cofactor"])
+    ident = cid.extension_id(p, len(mod), mod, a, b, r * h if order is None else order)
+    reg.add(ident, "extension", {"p": str(p), "k": len(mod), "modulus": [str(x) for x in mod],
+                                 "a": [str(x) for x in a], "b": [str(x) for x in b]}, rel)
+    g = sub["generator"]
+    reg.represent(ident, *extension_record(p, mod, a, b, r, h, ([int(x) for x in g["x"]], [int(x) for x in g["y"]])),
+                  rel)
+
+
+def harvest_programme_extensions(reg: Registry) -> None:
+    path = REPO / B5A
+    if not path.exists():
+        return
+    for rec in json.loads(path.read_text())["instances"]:
+        rel = f"{B5A_DOCS}/{rec['id']}-known.json"
+        add_extension_doc(reg, rel, int(rec["order"]))
+        assert reg.curves[cid.extension_id(int(rec["p"]), rec["k"], [int(x) for x in rec["modulus"]],
+                                           [int(x) for x in rec["a"]], [int(x) for x in rec["b"]],
+                                           int(rec["order"]))["model_sha256"]]["slug"] == rec["slug"]
+    add_extension_doc(reg, B2_C050)
+
+
 def harvest_standards(reg: Registry) -> None:
     for a, n in DESIGNATED_KOBLITZ:
         add_koblitz(reg, a, n, STANDARD_MODULI[n][1])
@@ -494,6 +615,26 @@ def harvest_standards(reg: Registry) -> None:
         reg.add(ident, "prime", {"p": str(p), "a": str(a), "b": str(b)},
                 src, [], standard=name)
         reg.represent(ident, *prime_record(p, a, b, n * h, n, h, g), src)
+    for name, spec in BINARY_STANDARDS.items():
+        m, f, a, b = (spec[k] for k in ("m", "modulus", "a", "b"))
+        r, h, g = (spec[k] for k in ("subgroup_order", "cofactor", "generator"))
+        order = r * h
+        ident = cid.binary_id(m, f, a, b, order)
+        field, curve = binary_record(m, f, a, b, order, r, h, g)
+        representation = ec1.curve_identity(field, curve, name)
+        assert ident["icv1"] == spec["icv1"], name
+        assert representation["curve_id"] == spec["ec1"], name
+        assert representation["curve_uid"] == spec["curve_uid"], name
+        assert representation["field_sha256"] == spec["field_sha256"], name
+        reg.add(
+            ident,
+            "binary",
+            {"m": m, "modulus": cid._hex(f), "a": cid._hex(a), "b": cid._hex(b)},
+            spec["source"],
+            [],
+            standard=name,
+        )
+        reg.represent(ident, field, curve, spec["source"])
 
 
 def unresolved_text(reg: Registry) -> list[str]:
@@ -508,6 +649,24 @@ def unresolved_text(reg: Registry) -> list[str]:
     return sorted(missing)
 
 
+def harvest_native_standards(reg: Registry) -> None:
+    """Consume native identities; do not derive model arithmetic here."""
+    path = REPO / "docs/curves/standards/registry.json"
+    if not path.exists():
+        return
+    for row in json.loads(path.read_text())["curves"]:
+        ident = dict(row, model_sha256=hashlib.sha256(row["model_json"].encode()).hexdigest())
+        entry = reg.add(ident, row["family"], row["params"], str(path.relative_to(REPO)), row["aliases"])
+        if entry["order"] != row["order"]:
+            raise ValueError("native standards order conflicts with existing identity")
+        entry["standards_provenance"] = row["standards_provenance"]
+        for name in row["standard_names"]:
+            if name not in entry["standard_names"]:
+                entry["standard_names"].append(name)
+        for rep in row["representations"]:
+            reg.represent(ident, rep["field"], rep["curve"], str(path.relative_to(REPO)))
+
+
 def carry_forward(reg: Registry) -> None:
     """The registry is append-only.  A curve registered once stays, with its
     names and representations, even when no source re-derives it: after
@@ -515,7 +674,19 @@ def carry_forward(reg: Registry) -> None:
     curve is gone, and the slug that replaced it must still resolve."""
     if not OUT.exists():
         return
+    # Deprecated erroneous extraction labels (prime-model-corrections.json)
+    # are retained as provenance in that file only; carrying them forward
+    # would resurrect the wrong models, e.g. after a merge of a stale
+    # registry.json.
+    try:
+        corrections = json.loads(
+            (REPO / "docs/curves/sources/prime-model-corrections.json").read_text())["corrections"]
+        deprecated = {c["deprecated_extraction_slug"] for c in corrections}
+    except (OSError, ValueError, KeyError):
+        deprecated = set()
     for e in json.loads(OUT.read_text())["curves"]:
+        if e["slug"] in deprecated:
+            continue
         key = hashlib.sha256(e["model_json"].encode("ascii")).hexdigest()
         if key in reg.curves:
             for a in e["aliases"]:
@@ -537,6 +708,8 @@ def build() -> tuple[dict, list[str], list[str]]:
     harvest_json(reg, problems, fatal)
     harvest_curve_records(reg)
     harvest_text_koblitz(reg)
+    harvest_native_standards(reg)
+    harvest_programme_extensions(reg)
     carry_forward(reg)
     ambiguous = sorted(f"{reg.alias_text[k]!r} -> {len(v)} models"
                        for k, v in reg.alias_models.items() if len(v) > 1)
@@ -557,7 +730,7 @@ def build() -> tuple[dict, list[str], list[str]]:
         if not e["representations"]:
             e["ec1_unresolved"] = unresolved_reason(e)
     check_calibration(Registry._rebuilt(list(reg.curves.values())), fatal)
-    fam_rank = {"koblitz": 0, "subfield": 1, "binary": 2, "prime": 3}
+    fam_rank = {"koblitz": 0, "subfield": 1, "binary": 2, "prime": 3, "extension": 4}
     curves = sorted(reg.curves.values(), key=lambda e: (
         fam_rank[e["family"]], int(e["params"].get("n", e["params"].get("m", 0)) or 0),
         int(e["params"].get("p", 0)), e["params"].get("a", 0) if e["family"] == "koblitz" else 0,

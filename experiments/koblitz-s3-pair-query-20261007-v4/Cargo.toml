@@ -1,0 +1,19 @@
+[package]
+name = "koblitz-s3-pair-query-v4"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "s3-baseline-v4"
+path = "baseline.rs"
+
+[[bin]]
+name = "s3-candidate-v4"
+path = "candidate.rs"
+
+[dependencies]
+crypto_lib = { package = "crypto", path = "../.." }
+blake3 = "1.5"
+num-bigint = "0.4"
+num-traits = "0.2"
+serde_json = "1.0"

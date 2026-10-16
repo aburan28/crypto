@@ -102,6 +102,33 @@ def plan_cpus(topology: dict[str, Any], pool: list[int], want: int,
                      cores=cores, smt=smt, reason=reason)
 
 
+def split_slots(topology: dict[str, Any], pool: list[int], n: int) -> list[list[int]]:
+    """Cut a lab pool into ``n`` slots of whole cores, as even as the cores allow.
+
+    Cores are taken in (node, core) order, so a slot spans two NUMA nodes
+    only when a node's cores do not divide evenly among the slots on it.
+    Each slot keeps every SMT sibling of its cores: a sibling in another
+    slot would share the core with that slot's job.
+    """
+    if n < 1:
+        raise PlanError("slots must be at least 1")
+    online = set(topology.get("online") or topology["cpus"].keys())
+    available = set(pool) & online
+    cores = sorted(cores_of(topology, available).items(), key=lambda kv: (node_of(topology, kv[1][0]), kv[1][0]))
+    if len(cores) < n:
+        raise PlanError(f"{len(cores)} core(s) in the lab pool cannot make {n} slots")
+    slots: list[list[int]] = []
+    start = 0
+    for i in range(n):
+        size = len(cores) // n + (1 if i < len(cores) % n else 0)
+        cpus: list[int] = []
+        for _, cs in cores[start:start + size]:
+            cpus += sorted(set(topology["cpus"][cs[0]]["siblings"]) & available or set(cs))
+        slots.append(sorted(cpus))
+        start += size
+    return slots
+
+
 def capacity(topology: dict[str, Any], pool: list[int]) -> dict[str, Any]:
     """How big a job this pool can take, per SMT mode, on one node and overall."""
     out: dict[str, Any] = {}

@@ -1,0 +1,22 @@
+{
+ "claim_boundary": "precompute-path wall-time improvement only; online target stage unchanged; probes per relation statistically equivalent to the sequential guided policy",
+ "host": "Apple M4 Pro, 14 cores, uncontended",
+ "kind": "parallel_guided_rank_benchmark_n71",
+ "process_total_ms": 161526.907375,
+ "rank": 600,
+ "rank_failures": 0,
+ "rank_probes_mean": 2043477.1,
+ "rank_rows_without_gain": 0,
+ "rank_stage_ms_parallel": 128886.841583,
+ "rank_stage_ms_sequential_reference": 1485679.143,
+ "sequential_reference_source": "experiments/koblitz-single-target-n71-20261002/README.md (pilot R1 guided rank acquisition, single-threaded, 2026-10-02)",
+ "speedup": 11.527004035111363,
+ "target_row": {
+  "group_verified": true,
+  "note": "reproduces the frozen n=71 ledger target relation exactly (deterministic 14,554-probe relation, fixture scalar 2718281828459045)",
+  "probes": 14554,
+  "recovered_scalar": 2718281828459045
+ },
+ "threads": 12,
+ "verdict": "PARALLEL_GUIDED_RANK_11_5X_AT_N71_UNCONTENDED"
+}

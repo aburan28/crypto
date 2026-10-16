@@ -1,4 +1,12 @@
 {
+  "actions_run": 36694337420,
+  "machine": "x86_64",
+  "platform": "Linux-6.12.94+-x86_64-with-glibc2.39",
+  "producers_rerun": false,
+  "python": "3.12.8 (main, Sep 29 2026, 17:00:15) [GCC 13.3.0]",
+  "role": "second_host_replay",
+  "verifier": "research/notes/ecc2k130/compact_ir_cold_gap_20260930/verify_cold.py --relocated",
+  "verifier_sha256": "02ddbe38534c1edd1d2d1e6f3887aa94f74c01a2f58fe691f6701fd72249a8d5"
   "cold_verifier_sha256": "2c74ab8a515d46d515c5ddd9d530733ae510ea7b3e7ff0ce4be5680923106619",
   "ir_verifier_sha256": "0131c39fb9379a6595683465d8655d310187533af83e5f26d19ab11a72bf8b5e",
   "machine": "arm64",

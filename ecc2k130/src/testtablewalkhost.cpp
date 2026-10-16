@@ -85,7 +85,7 @@ int main() {
         unsigned long long h3 = eccHistPush(hist, rawTag);
         unsigned stagedTag = rawTag;
         if (eccTagFruitless(rawTag, hist, 131)) {
-            stagedTag = twCycleTag(xn, yp, rawTag, shared.data(), shared.data(), 34);
+            stagedTag = twCycleTag(xp, yp, rawTag, shared.data(), shared.data(), 34);
             h3 = (h3 & ~0xffffull) | stagedTag;
         }
         P131 d, e;

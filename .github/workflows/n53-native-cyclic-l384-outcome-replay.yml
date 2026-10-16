@@ -1,12 +1,10 @@
 name: n53 native-cyclic L384 first outcome archive replay
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-    paths:
-      - 'research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_first_outcome_20260929/**'
-      - 'research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_20260929/RESULT.md'
-      - '.github/workflows/n53-native-cyclic-l384-outcome-replay.yml'
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
 
 permissions:
   contents: read

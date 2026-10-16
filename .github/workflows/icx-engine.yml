@@ -16,6 +16,7 @@ on:
       - "src/cryptanalysis/ec_index_calculus.rs"
       - "src/cryptanalysis/curve_catalog.rs"
       - "src/cryptanalysis/ic_engine.rs"
+      - "src/cryptanalysis/matmul_exponent.rs"
       - "src/cryptanalysis/ic_progress.rs"
       - "src/cryptanalysis/ic_run.rs"
       - "src/cryptanalysis/semaev_decomp.rs"
@@ -27,6 +28,9 @@ on:
       - "docs/ic/NIST_PARAMETER_COVERAGE.md"
       - "tools/ic_nist_parameter_reference.py"
       - "Cargo.toml"
+      - "Cargo.lock"
+      - "rust-toolchain.toml"
+      - ".cargo/**"
       - "docs/ic/ENGINE_AUDIT_AND_DESIGN.md"
       - "gpu/fes/**"
       - ".github/workflows/icx-engine.yml"
@@ -34,6 +38,12 @@ on:
 
 permissions:
   contents: read
+
+# A newer push to the same pull request cancels this workflow's run for the older commit.
+# Every other event (push, schedule, dispatch) gets a group of its own and is never cancelled.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && github.workflow_ref || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build-and-run:
@@ -49,14 +59,36 @@ jobs:
           - runner: macos-14
             arch: macos-arm64
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/scripts/
+            /Cargo.toml
+            /Cargo.lock
+            /build.rs
+            /.cargo/
+            /rust-toolchain*
+            /rustfmt.toml
+            /clippy.toml
+            /src/
+            /tests/
+            /examples/
+            /benches/
+            /experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs
+            /experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs
+            /gpu/fes/
+            /docs/ic/nist-parameter-reference.json
+      - name: Materialize compile-time fixture inputs
+        run: node .github/scripts/ci-scope.mjs --materialize
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - name: Build icx
         run: cargo build --release --bin icx
       - name: Unit tests (catalog, engine, progress, run, field backend, fes-gpu)
-        run: cargo test --release --lib -- cryptanalysis::curve_catalog cryptanalysis::ic_engine cryptanalysis::ic_progress cryptanalysis::ic_run cryptanalysis::fes_gpu cryptanalysis::semaev_decomp::tests::clmul_path_matches_independent_reference
+        run: cargo test --release --lib -- cryptanalysis::curve_catalog cryptanalysis::ic_engine cryptanalysis::matmul_exponent cryptanalysis::ic_progress cryptanalysis::ic_run cryptanalysis::fes_gpu cryptanalysis::semaev_decomp::tests::clmul_path_matches_independent_reference
       - name: Build the host-emulation FES worker (drives the GPU offload path)
         run: make -C gpu/fes host-worker
       - name: Integration tests (catalog + FES worker subprocess path)
@@ -114,12 +146,16 @@ jobs:
   gpu-fes-cuda:
     name: GPU FES CUDA compile-check
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     env:
       CUDA_PKG_VERSION: 12-8
       CUDA_DIR_VERSION: "12.8"
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /gpu/fes/
       - name: Install nvcc (compiler + CUDA headers only)
         run: |
           distro="ubuntu$(lsb_release -rs | tr -d .)"

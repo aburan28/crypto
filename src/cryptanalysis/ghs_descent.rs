@@ -17,9 +17,9 @@
 //!
 //! The descent depends on the magic-number case:
 //!
-//! ## Case `m = 1` (curve already over `k`)
+//! ## Case `m = 1` with a curve defined over `k`
 //!
-//! `√b ∈ k`, so `b ∈ k` and `E` is *itself* defined over `k`.  The
+//! When both `a` and `b` lie in `k`, `E` is itself defined over `k`.  The
 //! "descent" is trivial: view `E` as a curve over the larger field
 //! and use the **trace homomorphism**
 //! ```text
@@ -29,7 +29,7 @@
 //! and the original DLP transports: if `Q = d·P`, then
 //! `Tr(Q) = d·Tr(P)`.
 //!
-//! This case is fully implemented and tested end-to-end:
+//! This subfield-defined case is implemented and tested end-to-end:
 //! [`descend_m1`] and [`solve_via_descent_m1`].
 //!
 //! ## Case `m ≥ 2`
@@ -199,10 +199,10 @@ pub fn sigma_point(p: &Pt, tower: &FieldTower) -> Pt {
 
 // ── m = 1 descent: trace map ────────────────────────────────────────
 
-/// Trace homomorphism `E(K) → E(k)` for the case `m = 1` (where `b ∈ k`).
+/// Trace homomorphism `E(K) → E(k)` when **both** curve coefficients lie in `k`.
 ///
 /// Returns `Tr(P) = P ⊕ σ(P) ⊕ σ²(P) ⊕ … ⊕ σ^{n-1}(P)`.  Because
-/// `E` is `σ`-stable (its defining `b` is `σ`-fixed), each `σ^i(P)`
+/// `E` is `σ`-stable (both `a` and `b` are `σ`-fixed), each `σ^i(P)`
 /// is again a point on `E`, and the sum is `σ`-fixed, hence in
 /// `E(k)`.
 pub fn trace_map(curve: &ECurve, tower: &FieldTower, p: &Pt) -> Pt {
@@ -215,16 +215,16 @@ pub fn trace_map(curve: &ECurve, tower: &FieldTower, p: &Pt) -> Pt {
     acc
 }
 
-/// **`m = 1` descent**: take a curve over `K` whose `b` already lies
-/// in the subfield `k = F_{2^l}` and (a) verify that the magic
-/// number is `1`, and (b) return the same curve, viewed as its own
+/// **`m = 1` trace descent**: take a curve over `K` whose `a` and `b` lie
+/// in the subfield `k = F_{2^l}` and return the same curve, viewed as its own
 /// "descended" version.  The descent map is then [`trace_map`].
 ///
-/// Returns `None` if `b ∉ k` (i.e., the trapdoor magic number for
-/// this factorisation is `> 1`, so `m = 1` descent doesn't apply).
+/// Returns `None` if either coefficient is outside `k`. A GHS magic
+/// number of one alone does not license this trace map for an arbitrary
+/// `a`: Frobenius conjugation must preserve the exact curve model.
 pub fn descend_m1(tc: &TrapdoorCurve) -> Option<DescentM1> {
     let tower = FieldTower::new(tc.big_n, tc.n, tc.l, tc.big_irr.clone());
-    if !tower.is_in_subfield(&tc.b, tc.l) {
+    if !tower.is_in_subfield(&tc.a, tc.l) || !tower.is_in_subfield(&tc.b, tc.l) {
         return None;
     }
     let curve = ECurve::new(tc.big_n, tc.big_irr.clone(), tc.a.clone(), tc.b.clone());
@@ -336,6 +336,11 @@ pub struct DescentM2Affine {
 /// see [`DescentM2Affine`] for the smooth-model caveat.
 pub fn descend_m2_affine(tc: &TrapdoorCurve) -> Option<DescentM2Affine> {
     let tower = FieldTower::new(tc.big_n, tc.n, tc.l, tc.big_irr.clone());
+    // The polynomial below was derived for a = 1. Other a-coefficients
+    // require a separate change of variables and cannot use this model.
+    if tc.a != F2mElement::one(tc.big_n) {
+        return None;
+    }
     // β = √b, β' = σ(β).
     let beta = tc.sqrt_b.clone();
     let beta_p = tower.frobenius(&beta);
@@ -394,7 +399,14 @@ pub fn descend_m2_affine(tc: &TrapdoorCurve) -> Option<DescentM2Affine> {
 // compositum, intersected with the algebraic-function-field of F_q(x),
 // is the function field of the descended hyperelliptic curve C/F_q.
 //
-// In the type-II case where σ acts on V_E(σ) by the 3-cycle
+// Note (2026-10-13): "magic 2" here means the plain orbit dimension
+// dim span{β_i} = 2.  The GHS magic number of Maurer–Menezes–Teske,
+// dim span{(1, β_i)}, is 3 in the 3-cycle case below (the relation
+// β_0 + β_1 + β_2 = 0 has odd weight), which is type I with genus
+// 2^2 − 1 = 3; the 2-cycle case β_2 = β_0 has magic number 2, type II,
+// genus 2.  See `ec_trapdoor::ghs_type_i`.
+//
+// In the case where σ acts on V_E(σ) by the 3-cycle
 //     β_0 -> β_1 -> β_2 = β_0 + β_1 -> β_0,
 // the σ-orbit of t_0 in the compositum is {t_0, t_1, t_0 + t_1}, and
 // the σ-symmetric elements
@@ -409,24 +421,31 @@ pub fn descend_m2_affine(tc: &TrapdoorCurve) -> Option<DescentM2Affine> {
 // = (x+a) in char 2).
 //
 // This module exposes those generators *symbolically*.  Converting
-// (w_0, e_2, e_3) into a single canonical genus-2 equation
+// (w_0, e_2, e_3) into a single canonical genus-3 equation
 // w² + h(x)·w = f(x) requires further algebraic-geometry work that is
 // not implemented here — see [`DescentM2Abstract::smooth_model_status`]
 // for the precise gap.
 
-/// σ-orbit information for a magic-2 trapdoor curve.
+/// σ-orbit information for a trapdoor curve whose plain `√b` orbit spans
+/// two dimensions (GHS magic number 2 or 3).
 #[derive(Clone, Debug)]
 pub struct DescentM2Abstract {
     /// β_0 = √b.
     pub beta_0: F2mElement,
     /// β_1 = σ(β_0).
     pub beta_1: F2mElement,
-    /// β_2 = σ²(β_0).  In the type-II / genus-2 case this equals
-    /// β_0 + β_1; we store it explicitly for verification.
+    /// β_2 = σ²(β_0).  In the 3-cycle case this equals β_0 + β_1; we
+    /// store it explicitly for verification.
     pub beta_2: F2mElement,
-    /// `true` iff β_2 = β_0 + β_1 (type II, descended genus = 2).
-    /// `false` iff β_2 = β_0 (type I, descended genus = 1).
-    pub is_type_ii: bool,
+    /// `true` iff β_2 = β_0 + β_1: MMT magic number 3, type I, genus 3.
+    /// `false` iff β_2 = β_0: magic number 2, type II, genus 2.  (Before
+    /// 2026-10-13 this field was `is_type_ii` and the two cases were
+    /// labelled genus 2 and genus 1.)
+    pub three_cycle: bool,
+    /// MMT magic number: 3 for the 3-cycle, 2 for the 2-cycle.
+    pub magic: u32,
+    /// GHS genus: 3 for the 3-cycle, 2 for the 2-cycle.
+    pub genus: u32,
     /// k(x)-side of the w_0 = t_0 + t_1 + t_2 Artin-Schreier equation,
     /// i.e. the polynomial w_0² + w_0 - rhs = 0 where rhs ∈ k(x).
     /// For magic 2 in any sub-type this is simply `x + a` (a degree-1
@@ -434,11 +453,13 @@ pub struct DescentM2Abstract {
     pub w0_rhs: F2mPoly,
 }
 
-/// Construct the abstract m=2 descent data.  Returns `None` if the
-/// curve's magic number is not 2 with respect to the trapdoor
-/// factorisation.
+/// Construct the abstract descent data for a plain `√b` orbit of
+/// dimension 2.  Returns `None` otherwise (and when `a ∉ k`).
 pub fn descend_m2_abstract(tc: &TrapdoorCurve) -> Option<DescentM2Abstract> {
     let tower = FieldTower::new(tc.big_n, tc.n, tc.l, tc.big_irr.clone());
+    if !tower.is_in_subfield(&tc.a, tc.l) {
+        return None;
+    }
     let beta_0 = tc.sqrt_b.clone();
     let beta_1 = tower.frobenius(&beta_0);
     let beta_2 = tower.frobenius(&beta_1);
@@ -446,11 +467,10 @@ pub fn descend_m2_abstract(tc: &TrapdoorCurve) -> Option<DescentM2Abstract> {
     if beta_0 == beta_1 {
         return None;
     }
-    // For the descent to give genus ≥ 1, β_2 must be either β_0 (type I)
-    // or β_0 + β_1 (type II).
-    let is_type_ii = beta_2 == beta_0.add(&beta_1);
-    let is_type_i = beta_2 == beta_0;
-    if !(is_type_ii || is_type_i) {
+    // Plain orbit dimension 2: β_2 = β_0 (2-cycle) or β_0 + β_1 (3-cycle).
+    let three_cycle = beta_2 == beta_0.add(&beta_1);
+    let two_cycle = beta_2 == beta_0;
+    if !(three_cycle || two_cycle) {
         // Higher-magic case; this routine is m=2-only.
         return None;
     }
@@ -463,7 +483,9 @@ pub fn descend_m2_abstract(tc: &TrapdoorCurve) -> Option<DescentM2Abstract> {
         beta_0,
         beta_1,
         beta_2,
-        is_type_ii,
+        three_cycle,
+        magic: if three_cycle { 3 } else { 2 },
+        genus: if three_cycle { 3 } else { 2 },
         w0_rhs,
     })
 }
@@ -471,15 +493,14 @@ pub fn descend_m2_abstract(tc: &TrapdoorCurve) -> Option<DescentM2Abstract> {
 impl DescentM2Abstract {
     /// Describe what step of the construction is implemented vs not.
     pub fn smooth_model_status(&self) -> &'static str {
-        if self.is_type_ii {
-            "type II (genus 2): σ-fixed AS generators w_0, e_2, e_3 are produced \
-             symbolically; conversion to canonical w² + h(x)·w = f(x) form \
-             requires explicit elimination and is not implemented. The HCDLP \
-             plumbing in binary_ecc::hyperelliptic is ready to consume the \
-             smooth model once produced."
+        if self.three_cycle {
+            "3-cycle, MMT magic number 3, type I (genus 3): σ-fixed AS generators \
+             w_0, e_2, e_3 are produced symbolically; conversion to a canonical \
+             w² + h(x)·w = f(x) model requires explicit elimination and is not \
+             implemented."
         } else {
-            "type I (genus 1): descended curve is the AS-elliptic w_0² + w_0 = x + a. \
-             Genus-1 descent yields no attack advantage over direct ECDLP on E."
+            "2-cycle, MMT magic number 2, type II (genus 2): the descended curve \
+             is not constructed here."
         }
     }
 }
@@ -561,6 +582,30 @@ mod tests {
         assert_eq!(recomputed_tq, tq, "trace descent commutes with scalar mul");
     }
 
+    #[test]
+    fn m1_trace_requires_both_coefficients_in_the_subfield() {
+        let irr = f64_irr();
+        let tower = FieldTower::new(6, 3, 2, irr.clone());
+        let a = F2mElement::from_biguint(&BigUint::from(2u8), 6);
+        let b = F2mElement::one(6);
+        assert!(!tower.is_in_subfield(&a, 2));
+        assert!(tower.is_in_subfield(&b, 2));
+        let tc = TrapdoorCurve {
+            big_n: 6,
+            n: 3,
+            l: 2,
+            big_irr: irr,
+            a,
+            b,
+            sqrt_b: F2mElement::one(6),
+            row: Default::default(),
+            full_audit: None,
+        };
+        assert!(descend_m1(&tc).is_none());
+        assert!(descend_m2_abstract(&tc).is_none());
+        assert!(descend_m2_affine(&tc).is_none());
+    }
+
     /// **Full end-to-end pipeline** for an `m = 1` trapdoor on the
     /// `(N=6, n=2, l=3)` tower:
     ///
@@ -618,9 +663,10 @@ mod tests {
             .find(|r| r.n == 2 && r.l == 3)
             .expect("(n=2,l=3) row present");
         assert_eq!(trap_row.magic_m, 1, "trapdoor factorisation gives m = 1");
-        // Genus = 2^{m-1} − 1 in type-I (orbit closed) = 0 for m=1.
-        // That's the "trivial" descent: E itself already over k.
-        assert_eq!(trap_row.genus, num_bigint::BigUint::from(0u32));
+        // m = 1 is type II (Ord_b = x − 1), genus 2^0 = 1: the
+        // "trivial" descent, E itself already over k.  (Before 2026-10-13
+        // the orbit-length type rule reported genus 0 here.)
+        assert_eq!(trap_row.genus, num_bigint::BigUint::from(1u32));
 
         // ── (3) Pick P, d ──
         let curve = ECurve::new(big_n, irr.clone(), a.clone(), b.clone());

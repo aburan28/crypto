@@ -1,0 +1,37 @@
+{
+  "status": "complete-map-split-kernel-diagnostic",
+  "checkpoint_mismatches": {
+    "split": 0
+  },
+  "rows": [
+    {
+      "variant": "base",
+      "rates_billion_per_second": [
+        11.770282,
+        11.490686,
+        11.438104
+      ],
+      "median_billion_per_second": 11.490686,
+      "paired_geomean_vs_base": 1.0,
+      "paired_95_ci": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "variant": "split",
+      "rates_billion_per_second": [
+        3.696868,
+        3.691592,
+        3.682704
+      ],
+      "median_billion_per_second": 3.691592,
+      "paired_geomean_vs_base": 0.319087062433236,
+      "paired_95_ci": [
+        0.30838975705829763,
+        0.3301554318259169
+      ]
+    }
+  ],
+  "decision": "reject split global scan: per-step full-state traffic dominates"
+}

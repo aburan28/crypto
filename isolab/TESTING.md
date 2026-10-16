@@ -113,11 +113,52 @@ A `standard` job never starts on a busy host; that is the contract.
 * `smt: off` keyed on the `smt/control` string, which an Arm VM reports as
   `notimplemented` while still exposing two threads per core.
 
+## Slots and the Sage image, 2026-10-08
+
+Run in a cloud container: x86-64 Xeon @ 2.30 GHz, 4 vCPUs on one NUMA node,
+kernel 6.18, **cgroup v1** (so no cpuset partitions: tier C at best), root,
+docker 29.6 with runc, nats-server 2.10.22, no podman.
+
+| what | result |
+|:--|:--|
+| full suite (`pytest` in `isolab/`) | 64 passed, 3 skipped (privileged and podman suites, which need cgroup v2 root and podman) |
+| `tests/test_slots.py` | slot splitting on the synthetic two-node host, the host-settings refcount and its crash path, IRQ undo from two slots in both orders, shared / exclusive / drain locking, the grade cap, and two in-process slots running overlapping jobs against a real hub |
+| CLI: `isolab worker --cpus 1-3 --slots 2 --backend direct`, then two `isolab run` jobs | ran at the same time on cpus `[1]` (slot s0) and `[3]` (s1); each result lists the other job in `co_tenant_jobs`, `co_tenant_cpu_s` 1.0 and 1.87 against a 2.0 s wall, `other_cpu_s` 0.02, `shared_host: true` |
+| `isolab images build sage --tool docker --ca-bundle …` | built on SageMath 10.10; `sage -c 'factor(2^64+1)'`, `import pandas, gmpy2` pass with every capability dropped, a read-only root and no network |
+| a Sage job through the docker backend (`isolab run --backend docker --image localhost/isolab-sage:latest --repeats 2 -- sage f.sage`) | succeeded, both repeats timed by the in-container launcher (3.44 s, 2.98 s), image digest pinned, tier C |
+
+Found and fixed on the way:
+
+* The docker backend could not resolve any image: its `image inspect`
+  template named `.Digest`, which only podman has, so docker failed the
+  template and the worker tried to pull `localhost/…` from a registry.
+* The Sage image could not run a job. `/home/sage` is mode 0750, and a job
+  runs as root with every capability dropped, so `sage` was "not found".
+  The upstream entrypoint also re-joins its arguments into one shell
+  string. The recipe now opens the home directory to any uid and clears
+  the entrypoint.
+* The Sage recipe swallowed its own failures (`|| true`), so a build behind
+  a TLS-intercepting proxy "succeeded" without pandas. Failures are now
+  fatal, and `--ca-bundle` passes a proxy CA as a build secret.
+* A relative `--state-dir` broke the launcher path.
+* Without a job cgroup, a job's "own" processes were every descendant of
+  the worker, which in a slotted worker includes the other slots' jobs.
+
+The CUDA image (`nvidia/cuda:12.6.3-devel-ubuntu24.04`, 12 GB) also built
+cleanly here; `nvcc` 12.6.85, NumPy 1.26.4 and numactl 2.0.18 answer inside
+it with no capabilities and a read-only root. There is no GPU here, so this
+proves the recipe and not the CUDA runtime. Behind this container's proxy,
+apt could not verify NVIDIA's own package repository and fell back to the
+Ubuntu archive, which carries everything the recipe installs.
+
+CI now builds and smokes both images (`image-sage`, `image-cuda` in
+`.github/workflows/isolab.yml`).
+
 ## Not shown here
 
 Hardware counters, `cpu-migrations` from perf, cpufreq and turbo control,
 thermal throttle counters and tier A as a whole were exercised only as
 `unavailable`. They need a bare-metal Linux host and remain to be
-confirmed there with `isolab doctor` and a `strict` calibration. The Sage
-image was not built: the upstream `sagemath/sagemath` image is x86-64 only
-and the lab host was Arm. The CUDA image was not built: no GPU.
+confirmed there with `isolab doctor` and a `strict` calibration. Slots with
+real cgroup v2 partitions side by side are covered by the privileged CI
+step, not by a lab host yet. The CUDA image has never run on a GPU.

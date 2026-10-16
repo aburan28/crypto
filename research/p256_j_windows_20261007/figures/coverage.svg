@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="610" viewBox="0 0 1100 610" role="img" aria-labelledby="title desc">
+  <title id="title">Verified P-256 screening coverage against 2^32</title>
+  <desc id="desc">Horizontal logarithmic bars compare the verified reference, million prefix, new strip, cumulative union, and the requested 2^32 boundary.</desc>
+  <rect width="1100" height="610" fill="#ffffff"/>
+  <style>
+    text { font-family: Helvetica, Arial, sans-serif; fill: #243447; }
+    .title { font-size: 24px; font-weight: 700; }
+    .subtitle { font-size: 14px; fill: #52616f; }
+    .label { font-size: 14px; font-weight: 600; }
+    .value { font-size: 13px; }
+    .tick { font-size: 12px; fill: #657786; }
+    .grid { stroke: #d9e1e8; stroke-width: 1; }
+    .axis { stroke: #657786; stroke-width: 1.5; }
+  </style>
+
+  <text x="48" y="42" class="title">Verified P-256 screening coverage against 2³²</text>
+  <text x="48" y="68" class="subtitle">Log₁₀ x-axis; counts are exact within replayed certificates, with no sampling error bar.</text>
+
+  <line x1="320" y1="105" x2="320" y2="500" class="axis"/>
+  <line x1="320" y1="500" x2="920" y2="500" class="axis"/>
+  <g>
+    <line x1="320" y1="105" x2="320" y2="500" class="grid"/><text x="320" y="522" text-anchor="middle" class="tick">10⁴</text>
+    <line x1="420" y1="105" x2="420" y2="500" class="grid"/><text x="420" y="522" text-anchor="middle" class="tick">10⁵</text>
+    <line x1="520" y1="105" x2="520" y2="500" class="grid"/><text x="520" y="522" text-anchor="middle" class="tick">10⁶</text>
+    <line x1="620" y1="105" x2="620" y2="500" class="grid"/><text x="620" y="522" text-anchor="middle" class="tick">10⁷</text>
+    <line x1="720" y1="105" x2="720" y2="500" class="grid"/><text x="720" y="522" text-anchor="middle" class="tick">10⁸</text>
+    <line x1="820" y1="105" x2="820" y2="500" class="grid"/><text x="820" y="522" text-anchor="middle" class="tick">10⁹</text>
+    <line x1="920" y1="105" x2="920" y2="500" class="grid"/><text x="920" y="522" text-anchor="middle" class="tick">10¹⁰</text>
+  </g>
+
+  <text x="48" y="145" class="label">multi-prime reference</text>
+  <rect x="320" y="122" width="81.65" height="34" rx="5" fill="#9fbad0"/>
+  <text x="415" y="144" class="value">65,536 · 0.001525879%</text>
+
+  <text x="48" y="225" class="label">verified million prefix</text>
+  <rect x="320" y="202" width="200" height="34" rx="5" fill="#4c78a8"/>
+  <text x="534" y="224" class="value">1,000,000 · 0.023283064%</text>
+
+  <text x="48" y="305" class="label">new strip increment</text>
+  <rect x="320" y="282" width="80.62" height="34" rx="5" fill="#72b7b2"/>
+  <text x="414" y="304" class="value">64,000 · 0.001490116%</text>
+
+  <text x="48" y="385" class="label">exact cumulative union</text>
+  <rect x="320" y="362" width="202.69" height="34" rx="5" fill="#2a9d8f"/>
+  <text x="537" y="384" class="value">1,064,000 · 0.024773180%</text>
+
+  <text x="48" y="465" class="label">requested boundary</text>
+  <rect x="320" y="442" width="563.30" height="34" rx="5" fill="#e76f51"/>
+  <text x="895" y="464" class="value">2³² = 4,294,967,296 · 100%</text>
+
+  <text x="620" y="565" text-anchor="middle" class="subtitle">The cumulative audit covers 1 / 4,036.623398 of the requested boundary; it is not an exhaustive class search.</text>
+</svg>

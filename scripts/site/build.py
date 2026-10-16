@@ -23,6 +23,8 @@ Layout, and why each path is where it is:
     /status/walk-forest*.json, walk-forest.js  the same forests as an explorable graph
     /status/status.json   snapshot, next to the page that reads it
     /status/history.json  published history, likewise
+    /status/status34.json DP34 table-walk snapshot, kept separate from DP32
+    /status/history34.json DP34 table-walk history, likewise
     /status.json          same bytes at the root
     /history.json         same bytes at the root
 
@@ -75,6 +77,26 @@ PAGES = (
     ("docs/site/assets/rho-gpu-host.js", "assets/rho-gpu-host.js"),
     ("docs/site/assets/rho-gpu.wgsl", "assets/rho-gpu.wgsl"),
     ("docs/index-calculus-scoreboard.html", "scoreboard/index.html"),
+    # Evidence linked from the scoreboard with ../ecc2k130/benchmarks/...
+    # must be copied at that same site-relative path or the published links 404.
+    ("ecc2k130/benchmarks/g7-12b-batch32-split/RESULTS.md", "ecc2k130/benchmarks/g7-12b-batch32-split/RESULTS.md"),
+    ("ecc2k130/benchmarks/g7-12b-batch32-split/comparison.json", "ecc2k130/benchmarks/g7-12b-batch32-split/comparison.json"),
+    ("ecc2k130/benchmarks/g7-12b-batch32-split/validation-audit.json", "ecc2k130/benchmarks/g7-12b-batch32-split/validation-audit.json"),
+    ("ecc2k130/benchmarks/g7-12b-direct-delta34/RESULTS.md", "ecc2k130/benchmarks/g7-12b-direct-delta34/RESULTS.md"),
+    ("ecc2k130/benchmarks/g7-12b-direct-delta34/comparison.json", "ecc2k130/benchmarks/g7-12b-direct-delta34/comparison.json"),
+    ("ecc2k130/benchmarks/g7-12b-direct-delta34/validation-audit.json", "ecc2k130/benchmarks/g7-12b-direct-delta34/validation-audit.json"),
+    ("ecc2k130/benchmarks/g7-12b-larger-batch-xcache/RESULTS.md", "ecc2k130/benchmarks/g7-12b-larger-batch-xcache/RESULTS.md"),
+    ("ecc2k130/benchmarks/g7-12b-larger-batch-xcache/comparison-followup.json", "ecc2k130/benchmarks/g7-12b-larger-batch-xcache/comparison-followup.json"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-23-bridge/RESULTS.md", "ecc2k130/benchmarks/g7-12b-xonly-23-bridge/RESULTS.md"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-23-bridge/comparison-recompute.json", "ecc2k130/benchmarks/g7-12b-xonly-23-bridge/comparison-recompute.json"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-23-bridge/comparison.json", "ecc2k130/benchmarks/g7-12b-xonly-23-bridge/comparison.json"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/README.md", "ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/README.md"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/bridge13-pipeline-mod72-comparison.json", "ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/bridge13-pipeline-mod72-comparison.json"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/bridge13-pipeline-mod72-confirmation.json", "ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/bridge13-pipeline-mod72-confirmation.json"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/poly15-arith4-build.json", "ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/poly15-arith4-build.json"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/poly15-comparison.json", "ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/poly15-comparison.json"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/poly15-validation.json", "ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/poly15-validation.json"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/production-mod72-final.json", "ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/production-mod72-final.json"),
     # Beside the scoreboard, whose relative link to it then resolves both in
     # the working tree (docs/) and when published (/scoreboard/).
     ("docs/ic-leaderboard.html", "scoreboard/ic-leaderboard.html"),
@@ -108,6 +130,9 @@ PAGES = (
 DATA = (
     ("docs/ecc2k130-status/status.json", ("status/status.json", "status.json")),
     ("docs/ecc2k130-status/history.json", ("status/history.json", "history.json")),
+    ("docs/ecc2k130-status/status34.json", ("status/status34.json", "status34.json")),
+    ("docs/ecc2k130-status/history34.json", ("status/history34.json", "history34.json")),
+    ("docs/ecc2k130-status/mac-control.json", ("status/mac-control.json",)),
 )
 
 # Pages worth listing for crawlers. Data files and the 404 stay out.

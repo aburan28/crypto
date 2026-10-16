@@ -1,0 +1,47 @@
+{
+  "analysis_sha256": "a8f7ec556a66212400b629ff9ce85980735b609f0802b9c6e8e3cf2ec811152e",
+  "arm_order": [
+    "k3550_a",
+    "k3596_a",
+    "k3596_b",
+    "k3550_b"
+  ],
+  "artifact_sha256": "1927c1dcbbdc2ccabaa708896624e5e8735359462fc2edfec12464442cbc158b",
+  "balanced_comparison": {
+    "contiguous_block_bootstrap_95pct_ms": [
+      -2.080616355375,
+      0.10455237812499994
+    ],
+    "contiguous_block_size": 50,
+    "contrast": "mean_k3596_a_b_minus_mean_k3550_a_b",
+    "mean_ms": -0.988685524375,
+    "repeatability": {
+      "k3550_a_minus_b": {
+        "contiguous_block_bootstrap_95pct_ms": [
+          3.0178547745,
+          3.52150596325
+        ],
+        "mean_ms": 3.27093915725
+      },
+      "k3596_a_minus_b": {
+        "contiguous_block_bootstrap_95pct_ms": [
+          0.38250845450000004,
+          0.5290264434999999
+        ],
+        "mean_ms": 0.45430907000000004
+      }
+    },
+    "selected_k": null
+  },
+  "candidate_id": null,
+  "candidate_manifest_sha256": null,
+  "mean_online_ms_exploratory": null,
+  "schema": "n83.root4-highk-selection/v1",
+  "selected_arm": null,
+  "selected_k": null,
+  "source_base_hash_blake3": null,
+  "source_commit": "8a37349f3d3cc2bc2960b03167adcf57da83ba77",
+  "source_sha256": "c9824acebda0360416c3c507594bb07c17ca798c32cbf8f84bba95ca2c44d5b1",
+  "status": "BOUNDED_UNKNOWN",
+  "workload_id": "56376712e771"
+}

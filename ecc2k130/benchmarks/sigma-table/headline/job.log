@@ -1,0 +1,97 @@
+NVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-d0d6311b-74da-213d-36ff-462e0b4e66d2, 610.57.04, 2430 MHz, 600.00 W, 97887 MiB, 12.0
+Cuda compilation tools, release 13.3, V13.3.73
+Build cuda_13.3.r13.3/compiler.38244171_0
+source: origin/main 18ca29769 + claude/ecc2k130-sigma-table da381fe08
+verify threads: 96256; benchmark threads: 385024
+=== build control THREADS=256 MINBLOCKS=2 PACKED_SIGMA_TABLE=0
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+=== arithmetic control
+packed arithmetic sigma table: 0
+PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases
+PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 18194 GPU polynomial products, including all 17161 basis pairs
+PASS: 18194 GPU paired polynomial products against independent multiplication
+PASS: 1157 GPU polynomial squares against independent multiplication and long division
+PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing
+=== integration control
+PASS: DP replay across launch boundaries, restart and checkpoint resume
+PASS: byte-identical resume, scalar iteration count, incompatible checkpoint preserved
+PASS: overdue walks restart without false distinguished-point reports
+=== build candidate THREADS=512 MINBLOCKS=1 PACKED_SIGMA_TABLE=1
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+=== arithmetic candidate
+packed arithmetic sigma table: 1
+PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases
+PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 18194 GPU polynomial products, including all 17161 basis pairs
+PASS: 18194 GPU paired polynomial products against independent multiplication
+PASS: 1157 GPU polynomial squares against independent multiplication and long division
+PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing
+PASS: 3112 GPU Frobenius table lookups through shared memory against the network path
+=== integration candidate
+PASS: DP replay across launch boundaries, restart and checkpoint resume
+PASS: byte-identical resume, scalar iteration count, incompatible checkpoint preserved
+PASS: overdue walks restart without false distinguished-point reports
+packed kernel: 126 registers/thread, 0 local bytes/thread, 1792 shared bytes/block, single-product multiplier
+packed sigma table: 0 (0 dynamic shared bytes)
+packed sigma fused: 1
+packed sigma fused late y: 0
+  finished: 3.617 M it/s, 1709477 distinguished points (300 verified against the reference, 0 dropped)
+packed kernel: 128 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed sigma table: 1 (68352 dynamic shared bytes)
+packed sigma fused: 1
+packed sigma fused late y: 0
+  finished: 3.639 M it/s, 1709477 distinguished points (300 verified against the reference, 0 dropped)
+/results/dp-control.bin: detected v1 framing
+/results/dp-control.bin: 1709477 sorted records (reference)
+/results/dp-candidate.bin: detected v1 framing
+/results/dp-candidate.bin: 1709477 sorted records (IDENTICAL)
+PASS: replay and sorted corpus identity
+warmup	0	1	control	15666.759	9d248a990c4fb2c2a1db9bf7d34aede26ce7393cb61960fe63200762c9561cda	2385, 522.16, 47
+warmup	0	2	candidate	16013.284	df8664b385bc20c215d62300c86793e7513a70aff0acfda984f6c6368c28cc81	2295, 519.53, 52
+warmup	0	3	candidate	15923.816	7c72f2bd595c787c1e9c30d6927d00f73ac6a7155a59de434a976b09e7c25f82	2272, 529.34, 55
+warmup	0	4	control	15529.296	19b7e7e07475b892d4f3a1ddaf092184b92636540dcf787f57df82e7b6056278	2385, 510.35, 56
+aa	1	1	control_a	15498.753	3639884e9be337fcad98775dcb7f7cb6ce2492a84db0bf1d03283ea1da3fa424	2400, 516.50, 57
+aa	1	2	control_b	15509.355	407d61ee43ed33925189cbfff0890456a4e259c2eb6365c7d0279cb17fa046ec	2362, 494.53, 56
+aa	2	1	control_b	15518.575	3f3bbc61547eae59d1c2c6755d1f3baaa2bfa96ebbace9f7d715a9322cbb1847	2355, 528.27, 56
+aa	2	2	control_a	15503.252	25dbf7927ed72c774c0cd18b832c5102d74282bba6737bf2c272b20ff798f76d	2370, 461.90, 55
+aa	3	1	control_a	15507.054	c95ed7819882c48302125f014943a368baa2555ec04648e60fc83f0c3bb94f28	2407, 522.12, 57
+aa	3	2	control_b	15515.976	e60acf28a4113cf21056ea74cec99dc8ca036fdfb65beccf4d28148155baaf65	2370, 506.44, 56
+aa	4	1	control_b	15512.937	1861f24e4f2237a749b0db26cf12d84e52ad41ce0ac11a26ccf51212e6e25215	2355, 518.51, 57
+aa	4	2	control_a	15513.678	4eae2d9d374ebfc9da6e8ad10cff6f450ba412916fc7b9f3a9384dd5e87e8e33	2385, 506.17, 57
+aa	5	1	control_a	15516.455	770c1234b22feab1f07880281b4730979f0bc79c26ced51d6462ecaa229d8004	2377, 517.09, 56
+aa	5	2	control_b	15514.619	b1abdd816e2f328c68ce0300853c9aa11f9395074304651e56955459f93a247e	2400, 519.58, 57
+ab	1	1	control	15511.745	241f90dffbf7833a1c5148b9464459f13185ac0b04085fd51012433d0d21f36a	2385, 530.78, 58
+ab	1	2	candidate	15883.911	ca8668b42ec1be9f7634fab5b4411d18355b2be4c67215857b27e7e90729ded9	2310, 509.58, 57
+ab	2	1	candidate	15884.515	0ff20a8289001e550c610a1fcc35b91de32fe09cdf3f087a380ea33357f7023b	2280, 516.25, 57
+ab	2	2	control	15514.757	ef707f4d96861a126396857585d73df716115962792395e2216efe80ec89b9b6	2377, 522.90, 58
+ab	3	1	control	15513.653	0569e367cfb884d39806b1cfc54741ba794b67fc12449fdc7f2ebfd1f55cfa49	2377, 556.98, 56
+ab	3	2	candidate	15884.899	b7af0ea1c9df3dba8b243c8e8ef3e52a3bffd1d8bd5e900c845fb8e1c3b284c9	2287, 552.02, 58
+ab	4	1	candidate	15883.553	80fdff61d1712edc4e7d6e0e4a7c3c792183ab94f84a2c62fc897acc24ea81ad	2362, 525.12, 57
+ab	4	2	control	15514.261	37180abb29cf13094438de8d555831c11c9ba9c474caf33f2b62c776c7d1a896	2347, 538.02, 59
+ab	5	1	control	15510.774	2470d2e82a946175825aa7b0561e1c52ec5f0a4142062a911be46e2f7ab862d4	2392, 514.45, 57
+ab	5	2	candidate	15884.369	0575d622eedbce82587bccddb470bf15e3aa7368bdaf088290688a5e3ce75690	2362, 528.47, 58
+A/A max drift 0.000988; A/B median 1.023930 min 1.023803; control 15513.653 M/s; candidate 15884.369 M/s; PROMOTE_ENGINEERING
+=== done

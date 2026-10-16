@@ -1,0 +1,18 @@
+{
+  "build": "cargo build --release --example semaev_decomp_bench",
+  "custom_example": "semaev_decomp_bench",
+  "direct": "/Volumes/SSD990/ic-auto6/target/release/examples/semaev_decomp_bench 8",
+  "direct_argv": [
+    "/Volumes/SSD990/ic-auto6/target/release/examples/semaev_decomp_bench",
+    "8"
+  ],
+  "direct_producer_fixture_count": 1,
+  "env": {},
+  "fixtures": 1,
+  "online_target_count": 1,
+  "precompute_fixtures": 0,
+  "rho": null,
+  "rho_argv": null,
+  "rho_producer_fixture_count": 0,
+  "stage": "decomposition"
+}

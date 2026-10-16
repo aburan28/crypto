@@ -230,6 +230,11 @@ def instanceId():
         return socket.gethostname()
 
 
+def gpuName(gpu):
+    # Non-GPU clients (the FPGA host program) have no nvidia-smi; the
+    # bootstrap tells us what the device is instead.
+    if os.environ.get("ECC_DEVICE_NAME"):
+        return os.environ["ECC_DEVICE_NAME"]
 def isCpuDevice():
     return os.environ.get("ECC_DEVICE", "").lower() == "cpu"
 
@@ -1396,6 +1401,7 @@ class Worker:
             self.store.put(src, entry["key"])
             if metaSrc:
                 self.store.put(metaSrc, entry["key"] + ".json")
+        self.reportRds(src, slot)
         self.removeSpoolEntry(entry)
         self.creditSpoolEntry(entry, slot)
         return True
@@ -1555,6 +1561,24 @@ class Worker:
                 self.state["ckptIter"] = it
                 self.saveState()
             os.remove(snap)
+
+    def reportRds(self, deltaPath, slot):
+        """Copy new GPU records into rho-dp, including each walk's starting seed.
+
+        No-op unless DATABASE_URL / RHO_DP_DSN is set.  Failures are logged;
+        S3 already has the durable copy."""
+        if not (os.environ.get("DATABASE_URL") or os.environ.get("RHO_DP_DSN")):
+            return
+        try:
+            from rds_gpu import reportGpuDelta
+            stats = reportGpuDelta(deltaPath, worker_id=self.owner,
+                                   campaign=os.environ.get("RHO_CAMPAIGN", "ecc2k-130"))
+            log("rds: reported %d dp (%d new, %d collisions) including starting seeds"
+                % (stats["reported"], stats["new"], stats["collisions"]))
+            if stats.get("last_collision"):
+                log("rds collision: %s" % stats["last_collision"])
+        except Exception as e:
+            log("rds report failed (points remain in S3): %s" % e)
 
     # ---- one client run ---------------------------------------------------
     def runClient(self, slot):

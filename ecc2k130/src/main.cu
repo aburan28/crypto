@@ -980,7 +980,12 @@ static void testOrbit(Rng &rng, const Solver<Cfg> &sol) {
         if (R::trace(p.x) != 0) okTrace = false;
     }
 #endif
+#if ECC_PACKED_XONLY_POLY_SELECT
+    (void)okFrob;
+    report("polynomial-bit selector is not Frobenius-invariant", true);
+#else
     report("iteration commutes with Frobenius", okFrob);
+#endif
     report("iteration commutes with negation", okNeg);
     report("weight is constant on an orbit", okWeight);
     report("subgroup x-coordinates have even weight", okTrace);
@@ -1011,12 +1016,12 @@ static void testWitness(Rng &rng, Solver<Cfg> &sol) {
             R::startPoint(seed, sol.basis, sol.target, &alpha0, sol.ell, sol.spow, &degenerate);
         if (degenerate) continue;     // toy fields only; see testStartPoint
         typename R::Point p = start;
-        unsigned long long counts[ECC_JCOUNT] = {0};
+        unsigned long long counts[ECC_STEP_KINDS] = {0};
         unsigned long long taken = 0;
         bool ran = true;
         for (int i = 0; i < STEPS; ++i) {
             const int hw = R::weight(p.x);
-            counts[R::jOf(hw) - 3]++;
+            counts[R::stepIndex(p.x, hw)]++;
             p = R::step(p, hw);
             ++taken;
             if (p.inf) { ran = false; break; }
@@ -1024,7 +1029,7 @@ static void testWitness(Rng &rng, Solver<Cfg> &sol) {
         if (!ran) continue;
         ++walked;
         unsigned long long total = 0;
-        for (int k = 0; k < ECC_JCOUNT; ++k) total += counts[k];
+        for (int k = 0; k < ECC_STEP_KINDS; ++k) total += counts[k];
         if (total != taken) okSum = false;
         // The endpoint identity costs one scalar multiplication, and the
         // reference's is O(m^3) -- at m = 131 it is seconds, so one trail is
@@ -1409,8 +1414,11 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
                 --verifyBudget;
                 const typename Solver<Cfg>::WalkResult w = sol.rewalk(rec.seed);
                 const bool same = w.ok && w.iters == rec.iters &&
-                                  w.endPoint.x == R::fromLimbs(rec.x) &&
-                                  w.endPoint.y == R::fromLimbs(rec.y);
+                                  w.endPoint.x == R::fromLimbs(rec.x)
+#if !ECC_PACKED_XONLY_23
+                                  && w.endPoint.y == R::fromLimbs(rec.y)
+#endif
+                                  ;
                 if (!same) {
                     printf("MISMATCH: seed %016llx was not reproduced by the reference walk\n",
                            (unsigned long long)rec.seed);

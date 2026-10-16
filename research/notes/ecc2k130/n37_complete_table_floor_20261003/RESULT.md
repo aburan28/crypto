@@ -50,7 +50,14 @@ The [audit receipt](AUDIT.json) has SHA-256
 and zero problems. The two count receipts each have SHA-256
 `f895700386ef5280fba175699c0f257a0702f377a779bdc00b4ad6b39c67a3c8`;
 the [decision receipt](DECISION.json) has SHA-256
-`448be4d380abfd8387f60e80fa0edf1183fe3b07bf46a64da3352542bf7e992a`.
+`1521ba98667186096cf3846f504a46edab4bd8e0db3752e4984e7f06d5b03598`.
+This supersedes the original receipt SHA-256
+`448be4d380abfd8387f60e80fa0edf1183fe3b07bf46a64da3352542bf7e992a`
+after commit `f11fe93ee75a8901873108025eaf79875bd215a9` enabled
+`serde_json/float_roundtrip`: one `rho_s` field now preserves the exact value
+`0.37222665730402227` already present in the sealed source record rather than
+the prior one-ULP-lower parse. No count, charge, ratio at reported precision,
+or decision changed.
 The producer and analyzer source SHA-256 digests are respectively
 `9021b123eaccfd20272d29842a946fbbf8e0a880cbb4d3cad8ff931ff548ba7c`
 and `163165c09619035d90c884b12c47a832784cf9eec6d915303d285b3a5023918b`.

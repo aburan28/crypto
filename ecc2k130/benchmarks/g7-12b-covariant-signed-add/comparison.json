@@ -1,0 +1,19 @@
+{
+  "status": "single-orbit-closed-at-pilot",
+  "selected": {
+    "trials": 100,
+    "solved": 100,
+    "overdue": 0,
+    "mean_complete_iterations": 157.5
+  },
+  "signed_covariant_single_orbit": {
+    "trials": 100,
+    "solved": 100,
+    "overdue": 171,
+    "mean_complete_iterations": 1891.72
+  },
+  "candidate_over_selected_work_ratio": 12.010920634920636,
+  "continue_threshold": 1.1,
+  "decision": "close before CUDA; structured transition creates excessive DP-free cycles",
+  "full_dlp_S": null
+}

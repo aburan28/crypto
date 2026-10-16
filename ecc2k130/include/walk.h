@@ -27,17 +27,37 @@
 // per-branch step counter is.  ECC_WITNESS=0 compiles the counting out, which
 // is the control the paired comparison in CAIRN-WITNESS.md asks for.
 #define ECC_JCOUNT 8
+// ECC_SIGMA_SIGN=1/2: the step is R + sigma^j(R) or R - sigma^j(R), the sign
+// being bit ECC_SIGMA_SIGN_BIT of the normal-basis weight (1) or the parity of
+// popcount(x AND sigma^j(x)) in normal coordinates (2); both class-invariant.  The rewalk then counts sixteen step kinds, (1 + s^j) and (1 - s^j).
+#ifndef ECC_SIGMA_SIGN
+#define ECC_SIGMA_SIGN 0
+#endif
+#ifndef ECC_SIGMA_SIGN_BIT
+#define ECC_SIGMA_SIGN_BIT 4
+#endif
+#ifndef ECC_STEP_KINDS
+#define ECC_STEP_KINDS (ECC_SIGMA_SIGN ? 16 : 8)
+#endif
 // Default to carrying the witness -- except on the table walk, which cannot
 // produce one (see below).  Defaulting rather than erroring matters because
 // several build recipes select the table walk and say nothing about the
 // witness; they want a table-walk binary, not a diagnostic.  An explicit
 // ECC_WITNESS=1 alongside the table walk is a different thing and still fails.
 #ifndef ECC_WITNESS
-#if defined(ECC_WALK_TABLE) && ECC_WALK_TABLE
+#if (defined(ECC_WALK_TABLE) && ECC_WALK_TABLE) || (defined(ECC_PACKED_XONLY_23) && ECC_PACKED_XONLY_23)
 #define ECC_WITNESS 0
 #else
 #define ECC_WITNESS 1
 #endif
+#endif
+#if ECC_SIGMA_SIGN && ECC_WITNESS
+#error "ECC_SIGMA_SIGN has no device witness yet (eight counters); build with WITNESS=0"
+#endif
+// The sign changes Ref::step, the sigma walk; a table-walk build carries it
+// unused (walkconstant.cpp compiles both walks), the x-only walk cannot.
+#if ECC_SIGMA_SIGN && defined(ECC_PACKED_XONLY_23) && ECC_PACKED_XONLY_23
+#error "ECC_SIGMA_SIGN modifies the sigma walk only"
 #endif
 #ifndef ECC_COUNT_BITS
 #define ECC_COUNT_BITS 32
@@ -50,6 +70,10 @@
 // that path's report sites never fill them.
 #if ECC_WITNESS && defined(ECC_WALK_TABLE) && ECC_WALK_TABLE
 #error "WITNESS=1 needs the sigma^j + 1 iteration: the table walk has no (1 + s^j)^{n_j} factorisation. Build with WITNESS=0 or WALK_TABLE=0."
+#endif
+// The x-only walk's kernel never fills the eight counters either.
+#if ECC_WITNESS && defined(ECC_PACKED_XONLY_23) && ECC_PACKED_XONLY_23
+#error "WITNESS=1 needs the sigma^j + 1 iteration: the x-only walk does not carry the eight counters. Build with WITNESS=0 or PACKED_XONLY_23=0."
 #endif
 
 // Counters are walk state, so a checkpoint written with them cannot be read by

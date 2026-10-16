@@ -1,0 +1,13 @@
+   Compiling isogeny_algos v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-p192-p224-large-degree-isogenies-20261008/isogeny_algos)
+warning: field `hw` is never read
+  --> src/gf2n.rs:17:5
+   |
+12 | pub struct GF2n {
+   |            ---- field in this struct
+...
+17 |     hw: bool,
+   |     ^^
+   |
+   = note: `GF2n` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+

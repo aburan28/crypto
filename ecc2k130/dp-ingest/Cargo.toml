@@ -1,0 +1,30 @@
+[package]
+name = "ecc2k130-dp-ingest"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "ECC2K-130 distinguished-point ingest (pure core; Python still runs live)"
+
+# Outside the study library's build graph. The IC autolab jobs freeze
+# research/ic_candidate_tournament_20260915/ci/Cargo.lock onto the root
+# package; nothing here may become a root dependency.
+[workspace]
+
+[[bin]]
+name = "ecc2k-dp-ingest"
+path = "src/bin/ecc2k_dp_ingest.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive", "env"] }
+hex = "0.4"
+regex = "1"
+sha2 = "0.10"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+too_many_arguments = "allow"
+type_complexity = "allow"
+needless_range_loop = "allow"
+chunks_exact_to_as_chunks = "allow"

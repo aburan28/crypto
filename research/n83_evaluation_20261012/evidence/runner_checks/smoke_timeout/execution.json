@@ -1,0 +1,68 @@
+{
+  "accounting": "Whole-process wall/CPU include launch, load, preparation, online, replay. Producer online interval is separate.",
+  "argv": [
+    "/usr/bin/sleep",
+    "5"
+  ],
+  "argv_existing_file_sha256": {},
+  "arm": "rho",
+  "binary_sha256": "0637e6d47579929cb72efa46f361861b319d62c62fe8a9d10731fd7655eb5936",
+  "cpu_system_s": 0.0,
+  "cpu_total_s": 0.000793,
+  "cpu_user_s": 0.000793,
+  "cwd": "/workspace",
+  "elapsed_process_wall_s": 0.305179865,
+  "environment": {
+    "KIC_RANK_THREADS": "1",
+    "KIC_RHO_THREADS": "1",
+    "KIC_TARGET_THREADS": "1",
+    "KIC_THREADS": "1",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "finished_epoch_ms": 1791771109424,
+  "interrupted_signal": 0,
+  "known_answer_environment_present": false,
+  "memory_limit_hit": null,
+  "memory_limit_note": "RLIMIT_AS allocation refusal may appear as nonzero/abort; no inference from exit code alone",
+  "peak_rss_bytes": 524288,
+  "peak_rss_native_kib": 512,
+  "peak_rss_source": "Linux wait4(2) ru_maxrss KiB multiplied by 1024; exact child process",
+  "pid": 9109,
+  "raw_wait_status": 15,
+  "resource_envelope": {
+    "address_space_limit_bytes": 12884901888,
+    "address_space_limit_mechanism": "RLIMIT_AS soft=hard",
+    "cpu_affinity": [
+      3
+    ],
+    "cpu_count": 1,
+    "online_target_threads": 1,
+    "rank_threads": 1,
+    "threads": 1,
+    "timeout_s": 0.2
+  },
+  "return_code": null,
+  "schema": "n83.process-receipt/v1",
+  "semantic": {
+    "jsonl_rows": 0,
+    "reason": "expected exactly one scalar-bearing target row",
+    "target_rows": 0,
+    "valid": false
+  },
+  "semantic_path": "/workspace/n83_evaluation/runner/smoke/timeout_process/stdout.jsonl",
+  "semantic_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "started_epoch_ms": 1791771109118,
+  "status": "TIMEOUT",
+  "stderr_path": "/workspace/n83_evaluation/runner/smoke/timeout_process/stderr.txt",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_path": "/workspace/n83_evaluation/runner/smoke/timeout_process/stdout.jsonl",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "target_sha256": "d4f9872d9d4e22d26770ecb749b29f1da944d701fb85c8bbc8f20489cd0345c5",
+  "termination_signal": 15,
+  "timeout": true
+}

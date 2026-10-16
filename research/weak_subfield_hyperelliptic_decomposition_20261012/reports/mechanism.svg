@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 330" font-family="Helvetica, Arial, sans-serif" font-size="12">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#6b6a63"/></marker>
+  </defs>
+  <rect width="760" height="330" fill="#fcfcfb"/>
+  <text x="20" y="24" font-size="13" fill="#1a1a19" font-weight="bold">Where the weak-curve factor base lives (measured: E1, E4, E5; proved: Lemma 1-2, Lean steps 1-3)</text>
+
+  <rect x="20" y="50" width="250" height="74" rx="6" fill="#ffffff" stroke="#6b6a63"/>
+  <text x="32" y="72" fill="#1a1a19" font-weight="bold">Weak curve C over K = F_q^n</text>
+  <text x="32" y="92" fill="#1a1a19">y^2 = f(x),  f(x) = beta^5 g(x/beta)</text>
+  <text x="32" y="110" fill="#6b6a63">paper: psi = mu^2 f(alpha^a x) in F_q[x]</text>
+
+  <rect x="520" y="50" width="220" height="74" rx="6" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
+  <text x="532" y="72" fill="#1a1a19" font-weight="bold">Subfield curve C0 over F_q</text>
+  <text x="532" y="92" fill="#1a1a19">y'^2 = psi(t),  psi in F_q[t]</text>
+  <text x="532" y="110" fill="#6b6a63">#J_C0(F_q) at most (1+sqrt q)^4</text>
+
+  <line x1="270" y1="87" x2="516" y2="87" stroke="#6b6a63" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="393" y="78" text-anchor="middle" fill="#1a1a19">x = beta t,  y' = mu y</text>
+  <text x="393" y="104" text-anchor="middle" fill="#6b6a63">isomorphism over K (Lemma 1)</text>
+
+  <rect x="20" y="170" width="720" height="140" rx="6" fill="#ffffff" stroke="#6b6a63"/>
+  <text x="32" y="190" fill="#1a1a19" font-weight="bold">J_C(K), about q^(2n) elements</text>
+
+  <rect x="40" y="204" width="290" height="92" rx="6" fill="#eaf2fc" stroke="#2a78d6" stroke-width="2"/>
+  <text x="52" y="224" fill="#1a1a19" font-weight="bold">image of J_C0(F_q^gcd(2,n))</text>
+  <text x="52" y="244" fill="#1a1a19">factor base: points with x in beta F_q</text>
+  <text x="52" y="262" fill="#1a1a19">every relation lambda^2 - psi, lambda in F_q[t]</text>
+  <text x="52" y="282" fill="#6b6a63">span H: 14 to 1920 elements (E1)</text>
+
+  <rect x="440" y="204" width="290" height="92" rx="6" fill="#fdefe8" stroke="#eb6834" stroke-width="2"/>
+  <text x="452" y="224" fill="#1a1a19" font-weight="bold">prime-order subgroup, order ell</text>
+  <text x="452" y="244" fill="#1a1a19">DLP target D1, D2</text>
+  <text x="452" y="262" fill="#1a1a19">Kani pullback of E1(K)[ell] (E4)</text>
+  <text x="452" y="282" fill="#6b6a63">ell does not divide |H|: 0 of ell-1 multiples in H</text>
+
+  <text x="385" y="246" text-anchor="middle" fill="#1a1a19">meet in {0}</text>
+  <text x="385" y="264" text-anchor="middle" fill="#6b6a63">no relation</text>
+  <text x="385" y="280" text-anchor="middle" fill="#6b6a63">reaches it</text>
+
+  <line x1="630" y1="124" x2="200" y2="200" stroke="#2a78d6" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="520" y="150" fill="#2a78d6">base change</text>
+</svg>

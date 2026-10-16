@@ -86,7 +86,7 @@ struct Solver {
         // for 196 point operations instead of 392.
         Point startPt;
         unsigned long long iters;
-        unsigned long long counts[8];
+        unsigned long long counts[ECC_STEP_KINDS];
         U192 alpha0;
         U192 a, b;
         u64 seed;
@@ -98,7 +98,7 @@ struct Solver {
         out.ok = false;
         out.seed = seed;
         out.iters = 0;
-        for (int i = 0; i < 8; ++i) out.counts[i] = 0;
+        for (int i = 0; i < ECC_STEP_KINDS; ++i) out.counts[i] = 0;
         Point p = R::startPoint(seed, basis, target, &out.alpha0, ell, spow);
         out.startPt = p;
         out.a = out.alpha0;
@@ -122,7 +122,31 @@ struct Solver {
 #if ECC_WALK_TABLE
             p = walk.step(p, hw, &hist, &out.a, &out.b, ell, spow);
 #else
-            out.counts[R::jOf(hw) - 3]++;
+#if ECC_PACKED_XONLY_23
+#if ECC_PACKED_XONLY_ARITHMETIC_ONLY
+            out.counts[0]++;
+#elif ECC_PACKED_XONLY_BRIDGE3
+            if (
+#if ECC_PACKED_XONLY_POLY_SELECT
+                R::polySelectBridge3(p.x)
+#else
+                ECC_PACKED_XONLY_IS_BRIDGE3(hw)
+#endif
+            ) out.counts[2]++;
+            else
+#if ECC_PACKED_XONLY_DOUBLE_ONLY
+            out.counts[0]++;
+#else
+            out.counts[(hw >> 1) & 1]++;
+#endif
+#elif ECC_PACKED_XONLY_DOUBLE_ONLY
+            out.counts[0]++;
+#else
+            out.counts[(hw >> 1) & 1]++;
+#endif
+#else
+            out.counts[R::stepIndex(p.x, hw)]++;
+#endif
             p = R::step(p, hw);
 #endif
         }
@@ -147,6 +171,7 @@ struct Solver {
         out.seed = seed;
         out.iters = iters;
         unsigned long long total = 0;
+        for (int i = 0; i < ECC_STEP_KINDS; ++i) out.counts[i] = 0;
         for (int i = 0; i < 8; ++i) { out.counts[i] = counts[i]; total += counts[i]; }
 #if ECC_WALK_TABLE
         (void)total;
@@ -169,13 +194,41 @@ struct Solver {
     // mu = prod_j (1 + s^j)^{n_j}
     U192 multiplier(const unsigned long long *counts) const {
         U192 mu = u192_from(1);
-        for (int j = 0; j < 8; ++j) {
+#if ECC_PACKED_XONLY_23
+#if ECC_PACKED_XONLY_BRIDGE1_COMMON
+        if (counts[0]) {
+            U192 e = u192_zero();
+            e.v[0] = counts[0];
+            const U192 bridge1 = mod_add(u192_from(1), spow[1], ell);
+            mu = mod_mul(mu, mod_pow(bridge1, e, ell), ell);
+        }
+#else
+        for (int j = 0; j < 2; ++j) {
             if (!counts[j]) continue;
-            const U192 f = mod_add(u192_from(1), spow[j + 3], ell);
+            U192 e = u192_zero();
+            e.v[0] = counts[j];
+            mu = mod_mul(mu, mod_pow(u192_from(j + 2), e, ell), ell);
+        }
+#endif
+#if ECC_PACKED_XONLY_BRIDGE3
+        if (counts[2]) {
+            U192 e = u192_zero();
+            e.v[0] = counts[2];
+            const U192 bridge = mod_add(u192_from(1), spow[3], ell);
+            mu = mod_mul(mu, mod_pow(bridge, e, ell), ell);
+        }
+#endif
+#else
+        for (int j = 0; j < ECC_STEP_KINDS; ++j) {
+            if (!counts[j]) continue;
+            // (1 + s^j) for kinds [0, 8), (1 - s^j) for [8, 16)
+            const U192 f = j < 8 ? mod_add(u192_from(1), spow[j + 3], ell)
+                                 : mod_sub(u192_from(1), spow[j - 8 + 3], ell);
             U192 e = u192_zero();
             e.v[0] = counts[j];
             mu = mod_mul(mu, mod_pow(f, e, ell), ell);
         }
+#endif
         return mu;
     }
 

@@ -74,10 +74,12 @@ fn main() {
         sat_macaulay_degree: None,
         sat_options: SatDecompositionOptions {
             encoding: XorEncoding::Native,
+            factored_s4: false,
             branch_on_summands: true,
             restrict_to_factor_base: true,
             trace_constraint: true,
             conflict_budget,
+            wall_budget: None,
             symmetry_breaking: false,
         },
         collapse_negation,

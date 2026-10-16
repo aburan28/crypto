@@ -1,0 +1,26 @@
+{
+  "command": [
+    "/home/ubuntu/crypto/ecc2k130/build/g7-split-batch24",
+    "--packed",
+    "--threads",
+    "336",
+    "--steps",
+    "64",
+    "--launches",
+    "2",
+    "--run-id",
+    "58255",
+    "--checkpoint",
+    "/home/ubuntu/crypto/ecc2k130/build/batch24-resumed.ckpt",
+    "--bench",
+    "--verify",
+    "0"
+  ],
+  "returncode": 0,
+  "timed_out": false,
+  "timeout_seconds": 300,
+  "elapsed_seconds": 0.5199701509991428,
+  "log": "batch24-resume-end.log",
+  "log_sha256": "c184fb334ef3872a70c8bcead3dd5248b884295ebf17e80cc8d55242554f7721",
+  "binary_sha256": "ea262776683d3014876ab70d09d800b334529cd366760ad67d3099eb82b04f6a"
+}

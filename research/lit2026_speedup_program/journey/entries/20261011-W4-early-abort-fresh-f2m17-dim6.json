@@ -1,0 +1,28 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W4",
+  "slug": "early-abort-fresh",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1687",
+  "papers": ["arXiv 2603.24890"],
+  "kind": "no-change",
+  "workload": {
+    "id": "f6-ic-probe-k1-f2m17-dim6-f4",
+    "description": "f6_ic_probe inherited-F4 arm, Koblitz icv1-f2m17-tm101-00378d4e, prime-order subgroup of KoblitzCurve::new, standard subspace dim 6 (63 points), m = 3, targets [k]G k = 1..8 (1 relation), budget 20000, reps 3",
+    "curve_ids": ["icv1-f2m17-tm101-00378d4e"]
+  },
+  "metric": "stage-unit word XORs (word_xors), summed over the 8 targets",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 5,
+  "arms": [
+    {"role": "original", "label": "program baseline", "commit": "4b6e09b78", "value": 15015618},
+    {"role": "previous", "label": "KIC_F4_EARLY_ABORT=0", "commit": "acd95f18f", "value": 15015618},
+    {"role": "candidate", "label": "KIC_F4_EARLY_ABORT=1 (degree-2 probe before fresh degree-3 builds)", "commit": "acd95f18f", "value": 14959088}
+  ],
+  "ratio_original_over_candidate": {"value": 1.0037789736914442, "interval": [1.0037789736914442, 1.0037789736914442], "interval_kind": "none (deterministic; identical in all 5 rounds)"},
+  "ratio_previous_over_candidate": {"value": 1.0037789736914442, "interval": [1.0037789736914442, 1.0037789736914442], "interval_kind": "none (deterministic; identical in all 5 rounds)"},
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w4_early_abort_20261011/reports/run-20261011T2025Z/report.pdf",
+  "note": "254 degree-2 probes refuted 10 fresh nodes; the one relation (target 3) is identical across arms. Wall at L0 not admissible (null control 0.61-2.11 per round)."
+}

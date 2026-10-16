@@ -1,0 +1,26 @@
+{
+ "_comment": "L5 algebraic form at n=23 (K_0): the Frobenius closure of a prefix subspace of dimension 7 (not Frobenius-stable) with the descended S3 solved exhaustively (fes-f2, exact, solver-independent yield): plain descent (both summands over V) against ordered tau-slots (summand 2 over every Frobenius image of V, one system per rotation, first lifted hit wins). Prediction: hits per solved system x 2 (= 2!) with slots; the Frobenius-folded pair table on the same base is the reference arm.",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 17
+ },
+ "repeats": 8,
+ "seed": 20261010,
+ "max_trials": 400000,
+ "matrix": {
+  "factor_base": [
+   "koblitz-closure:dimension=7"
+  ],
+  "oracle": [
+   "descent-algebraic",
+   "descent-algebraic:slots=all",
+   "mitm-frobenius"
+  ],
+  "solver": [
+   "fes-f2"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "kind": "claim_check_receipt",
+  "beat_id": "manual.binary.decomposition.l8_pairs_baseline",
+  "checked_at": "2026-09-15T14:12:46Z",
+  "status": "PASS",
+  "note": "Schema claim-check only on prior draft; not a new measurement and not ledger promotion.",
+  "claim_boundary_non_claims": [
+    "not key recovery",
+    "not sub-2^(2l) oracle claim",
+    "not ledger promotion",
+    "FFD unmeasured"
+  ]
+}

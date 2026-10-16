@@ -1,0 +1,25 @@
+ops (ok): rho-frob-aa / rho-frob = 1.0000 [1.000, 1.000] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 0.9926 [0.948, 1.021]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 0.00%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | rho-frob-aa / rho-frob | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m17-tm101-00378d4e | 16.00 | 16 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-frob mean S | rho-frob-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W00cea0167a03 | icv1-f2m17-tm101-00378d4e | 16.00 | 1.1534 | 1.1534 | 1.0000 |
+| W02c8f6044adb | icv1-f2m17-tm101-00378d4e | 16.00 | 0.9373 | 0.9373 | 1.0000 |
+| W0e5cd594b7e8 | icv1-f2m17-tm101-00378d4e | 16.00 | 1.0590 | 1.0590 | 1.0000 |
+| W22f4e3f37be7 | icv1-f2m17-tm101-00378d4e | 16.00 | 0.9245 | 0.9245 | 1.0000 |
+| W33a23d35d53c | icv1-f2m17-tm101-00378d4e | 16.00 | 0.9151 | 0.9151 | 1.0000 |
+| W401368f39862 | icv1-f2m17-tm101-00378d4e | 16.00 | 0.9836 | 0.9836 | 1.0000 |
+| W4a1147cacd58 | icv1-f2m17-tm101-00378d4e | 16.00 | 9.9160 | 9.9160 | 1.0000 |
+| W6c2e632db8ff | icv1-f2m17-tm101-00378d4e | 16.00 | 0.8453 | 0.8453 | 1.0000 |
+| W6d93ce543ab7 | icv1-f2m17-tm101-00378d4e | 16.00 | 1.0013 | 1.0013 | 1.0000 |
+| W73f2f403ab7a | icv1-f2m17-tm101-00378d4e | 16.00 | 0.8930 | 0.8930 | 1.0000 |
+| W87e0f8f15da6 | icv1-f2m17-tm101-00378d4e | 16.00 | 0.9193 | 0.9193 | 1.0000 |
+| W8f4b05efef4e | icv1-f2m17-tm101-00378d4e | 16.00 | 0.9746 | 0.9746 | 1.0000 |
+| W8fce223f47aa | icv1-f2m17-tm101-00378d4e | 16.00 | 1.1560 | 1.1560 | 1.0000 |
+| Waf40807c76a4 | icv1-f2m17-tm101-00378d4e | 16.00 | 0.9767 | 0.9767 | 1.0000 |
+| Wd7ac0fa1971c | icv1-f2m17-tm101-00378d4e | 16.00 | 0.8667 | 0.8667 | 1.0000 |
+| Wff6eb135a8e0 | icv1-f2m17-tm101-00378d4e | 16.00 | 0.8591 | 0.8591 | 1.0000 |

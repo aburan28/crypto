@@ -1,0 +1,14 @@
+   Compiling p192-p224-large-degree-replay v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-p192-p224-large-degree-isogenies-20261008/research/p192_p224_large_degree_isogenies_20261008)
+warning: method `set` is never used
+  --> catalogue_views.rs:75:8
+   |
+62 | impl Object {
+   | ----------- method in this implementation
+...
+75 |     fn set(&mut self, key: &str, v: &Value) {
+   |        ^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `p192-p224-large-degree-replay` (bin "catalogue-views") generated 1 warning
+    Finished `release` profile [optimized] target(s) in 5.96s

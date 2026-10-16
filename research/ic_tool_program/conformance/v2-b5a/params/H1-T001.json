@@ -1,0 +1,64 @@
+{
+ "schema_version": 2,
+ "name": "B5a H1-T001: icv1-fp9k3-t1227-55c8d640, a public point for measurement 5",
+ "field": {
+  "kind": "prime_extension",
+  "p": "271",
+  "degree": 3,
+  "modulus": [
+   "269",
+   "0",
+   "0"
+  ]
+ },
+ "curve": {
+  "form": "short_weierstrass",
+  "a": [
+   "88",
+   "60",
+   "158"
+  ],
+  "b": [
+   "233",
+   "70",
+   "211"
+  ]
+ },
+ "subgroup": {
+  "order": "50383",
+  "cofactor": "395",
+  "generator": {
+   "x": [
+    "88",
+    "252",
+    "245"
+   ],
+   "y": [
+    "255",
+    "69",
+    "184"
+   ]
+  }
+ },
+ "target": {
+  "point": {
+   "x": [
+    "30",
+    "84",
+    "223"
+   ],
+   "y": [
+    "35",
+    "179",
+    "159"
+   ]
+  }
+ },
+ "method": {
+  "solve": "rho",
+  "rho": {
+   "pipeline": "auto",
+   "seed": 2293761
+  }
+ }
+}

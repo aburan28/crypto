@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 190" role="img" aria-label="Published-cover construction and verification gates">
+  <rect width="1000" height="190" fill="#fbfcff"/>
+  <text x="500" y="27" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="bold" fill="#15243b">From a published pattern to a usable curve witness</text>
+  <g font-family="sans-serif" text-anchor="middle" fill="#15243b">
+    <rect x="15" y="58" width="170" height="80" rx="9" fill="#dceef2" stroke="#267c92"/>
+    <text x="100" y="88" font-size="13">Choose d, n, F</text><text x="100" y="108" font-size="12">binary mask orbit</text>
+    <rect x="215" y="58" width="170" height="80" rx="9" fill="#e4edfc" stroke="#527caf"/>
+    <text x="300" y="88" font-size="13">Choose root orbits</text><text x="300" y="108" font-size="12">squarefree f over k_d</text>
+    <rect x="415" y="58" width="170" height="80" rx="9" fill="#fcecd7" stroke="#b87937"/>
+    <text x="500" y="88" font-size="13">Descend covering C/k</text><text x="500" y="108" font-size="12">map, genus, isogeny</text>
+    <rect x="615" y="58" width="170" height="80" rx="9" fill="#f5e5ed" stroke="#a75f85"/>
+    <text x="700" y="88" font-size="13">Map exact E/k_d</text><text x="700" y="108" font-size="12">twist and subgroup</text>
+    <rect x="815" y="58" width="170" height="80" rx="9" fill="#e4f2e7" stroke="#558d62"/>
+    <text x="900" y="88" font-size="13">Measure transport</text><text x="900" y="108" font-size="12">and destination cost</text>
+  </g>
+  <g stroke="#5b687b" stroke-width="2" fill="none"><path d="M185 98h28"/><path d="M385 98h28"/><path d="M585 98h28"/><path d="M785 98h28"/></g>
+  <g fill="#5b687b"><path d="M213 98l-7-5v10z"/><path d="M413 98l-7-5v10z"/><path d="M613 98l-7-5v10z"/><path d="M813 98l-7-5v10z"/></g>
+  <text x="500" y="169" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#59697e">Current Rust and Lean checks cover the first box; later boxes require exact field and map certificates.</text>
+</svg>

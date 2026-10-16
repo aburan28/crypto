@@ -42,7 +42,7 @@ use std::time::Duration;
 use serde::Serialize;
 
 use crate::cryptanalysis::ic_boundary::{
-    CountedGroup, FactorBase, GroupOps, OracleCounters, RowStatus,
+    CountedGroup, FactorBase, GroupOps, OracleCounters, Relation, RowStatus,
 };
 use crate::cryptanalysis::pq_groebner_f2::F2BoolPoly;
 
@@ -239,6 +239,41 @@ pub trait DecompositionOracle<G: CountedGroup> {
         counters: &mut OracleCounters,
         point: G::Elt,
     ) -> Option<Vec<usize>>;
+
+    /// **The large-prime seam.**  Decompose `point = [a]G + [b]Q`, or
+    /// store what partially decomposed and hand back whatever complete
+    /// relations the stored partials now merge into.  The default is
+    /// [`decompose`] wrapped as one [`Relation::Summands`], so an
+    /// oracle without large primes behaves exactly as before; the
+    /// Frobenius pair-table oracle overrides it when `large_primes` is
+    /// set (`ic_framework::large_prime`).  Every merged row returned
+    /// here must already hold as a group equation.
+    ///
+    /// [`decompose`]: DecompositionOracle::decompose
+    #[allow(clippy::too_many_arguments)]
+    fn decompose_relations(
+        &mut self,
+        ctx: &InstanceCtx<G>,
+        fb: &FactorBase<G::Elt>,
+        ops: &mut GroupOps,
+        counters: &mut OracleCounters,
+        point: G::Elt,
+        _a: u64,
+        _b: u64,
+    ) -> Vec<Relation> {
+        match self.decompose(ctx, fb, ops, counters, point) {
+            Some(summands) => vec![Relation::Summands(summands)],
+            None => Vec::new(),
+        }
+    }
+
+    /// Native counters the oracle accumulated over the relation phase
+    /// beyond [`OracleCounters`], folded into the relation phase's
+    /// counters by name.  The large-prime collector reports its partials,
+    /// merges and verification work here.
+    fn relation_counters(&self) -> BTreeMap<String, u64> {
+        BTreeMap::new()
+    }
 
     /// The algebraic system the last [`decompose`] built, when it built
     /// one.  Table oracles return `None` and their degree columns stay
@@ -491,6 +526,28 @@ pub enum Targets {
     /// An r-adding walk: one group addition per trial, with the guard
     /// that no target is presented twice.
     Walk,
+    /// The same guarded walk with native Montgomery additions on supported
+    /// single-word prime curves.
+    WalkPrimeFast,
+    /// Synchronized independent prime walks, with ordinary additions done
+    /// separately.  The paired reference for the batch variants.
+    WalkPrimeSerial4,
+    WalkPrimeSerial8,
+    WalkPrimeSerial16,
+    /// The same lane schedule with Montgomery batch inversion.
+    WalkPrimeBatch4,
+    WalkPrimeBatch8,
+    WalkPrimeBatch16,
+    /// Residual matching (lead L3): the walk subtracts a base point at
+    /// every step and relations come from collisions of the residuals;
+    /// the oracle is not consulted.  See `ic_framework::residual`.
+    Residual,
+    /// `R ← R + S` for one drawn `S = [s]G + [t]Q`: one addition per
+    /// target, with no jump table to set up.  See `TargetSource::Stride`.
+    Stride,
+    /// `Stride` with a new stride after every relation.  See
+    /// `TargetSource::StrideRenew`.
+    StrideRenew,
 }
 
 impl Targets {
@@ -498,6 +555,16 @@ impl Targets {
         match self {
             Targets::Random => "random",
             Targets::Walk => "walk",
+            Targets::WalkPrimeFast => "walk-prime-fast",
+            Targets::WalkPrimeSerial4 => "walk-prime-serial-4",
+            Targets::WalkPrimeSerial8 => "walk-prime-serial-8",
+            Targets::WalkPrimeSerial16 => "walk-prime-serial-16",
+            Targets::WalkPrimeBatch4 => "walk-prime-batch-4",
+            Targets::WalkPrimeBatch8 => "walk-prime-batch-8",
+            Targets::WalkPrimeBatch16 => "walk-prime-batch-16",
+            Targets::Residual => "residual",
+            Targets::Stride => "stride",
+            Targets::StrideRenew => "stride-renew",
         }
     }
 
@@ -505,8 +572,18 @@ impl Targets {
         match s {
             "random" => Ok(Targets::Random),
             "walk" => Ok(Targets::Walk),
+            "walk-prime-fast" => Ok(Targets::WalkPrimeFast),
+            "walk-prime-serial-4" => Ok(Targets::WalkPrimeSerial4),
+            "walk-prime-serial-8" => Ok(Targets::WalkPrimeSerial8),
+            "walk-prime-serial-16" => Ok(Targets::WalkPrimeSerial16),
+            "walk-prime-batch-4" => Ok(Targets::WalkPrimeBatch4),
+            "walk-prime-batch-8" => Ok(Targets::WalkPrimeBatch8),
+            "walk-prime-batch-16" => Ok(Targets::WalkPrimeBatch16),
+            "residual" => Ok(Targets::Residual),
+            "stride" => Ok(Targets::Stride),
+            "stride-renew" => Ok(Targets::StrideRenew),
             other => Err(format!(
-                "unknown target source `{other}`; try random or walk"
+                "unknown target source `{other}`; try random, walk, walk-prime-fast, walk-prime-serial-4/8/16, walk-prime-batch-4/8/16, residual, stride or stride-renew"
             )),
         }
     }

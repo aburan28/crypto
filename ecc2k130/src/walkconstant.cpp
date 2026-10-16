@@ -372,7 +372,9 @@ static int run(bool table, Dist dist, int walks, unsigned long long trials,
                     } else {
                         const int b = hashedBranch(key[w], salt);
                         t.branchCounts[b]++;
-                        q = R::addPt(p[w], R::frob(p[w], 3 + b));
+                        // Hashed j; the sign rule of the build (ECC_SIGMA_SIGN) as Ref::step applies it.
+                        const auto fq = R::frob(p[w], 3 + b);
+                        q = R::addPt(p[w], R::minusOfJ(p[w].x, hw, 3 + b) ? R::neg(fq) : fq);
                     }
                     t.steps++;
                     if (q.inf || !R::onCurve(q)) { restart = true; break; }

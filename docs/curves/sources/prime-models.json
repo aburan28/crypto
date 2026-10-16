@@ -1,0 +1,77 @@
+{
+  "generated_by": "registry_models (native Rust)",
+  "records": [
+    {
+      "coordinate_map": {
+        "u": "x+a/3",
+        "v": "y",
+        "x_shift": "699056"
+      },
+      "identity": {
+        "end": "unk",
+        "icv1": "ICV1:fp-1048583:-700:1049284:128:unk:unk:r:d62ba3a6bad8",
+        "j": "128",
+        "model_json": "{\"a\":\"699056\",\"b\":\"737891\",\"field\":\"fp-1048583\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1048583\",\"v\":\"1\"}",
+        "model_sha256": "d62ba3a6bad8667c2cf734c3b54a0805a90bf15a67dcd8074ca675763192f59f",
+        "order": "1049284",
+        "slug": "icv1-fp21-tm700-d62ba3a6",
+        "trace": -700
+      },
+      "original": {
+        "a": 2,
+        "b": 2,
+        "h": 4,
+        "icv1": "ICV1:fp-1048583:-700:1049284:128:unk:unk:r:d62ba3a6bad8",
+        "model": "y^2 = x^3 + a x^2 + b x",
+        "order": 1049284,
+        "p": 1048583,
+        "r": 262321,
+        "slug": "icv1-fp21-tm700-d62ba3a6"
+      },
+      "params": {
+        "a": "699056",
+        "b": "737891",
+        "p": "1048583"
+      },
+      "pointer": "/curve_E",
+      "source": "research/isogeny_fibers_20261010/round4/16_7_agm_isogeny_oracles/out_seed7.json",
+      "source_sha256": "c994098262295909d653bc3897dcaa17c8984f93689d84c15bc6c39e8667aab6"
+    },
+    {
+      "coordinate_map": {
+        "u": "x+a/3",
+        "v": "y",
+        "x_shift": "699054"
+      },
+      "identity": {
+        "end": "unk",
+        "icv1": "ICV1:fp-1048583:-700:1049284:10976:unk:unk:r:07d957b2581c",
+        "j": "10976",
+        "model_json": "{\"a\":\"699046\",\"b\":\"388354\",\"field\":\"fp-1048583\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1048583\",\"v\":\"1\"}",
+        "model_sha256": "07d957b2581ca589c53bd348469374711223edc928f3338595bbba3fc1cac971",
+        "order": "1049284",
+        "slug": "icv1-fp21-tm700-07d957b2",
+        "trace": -700
+      },
+      "original": {
+        "a": 1048579,
+        "b": 1048579,
+        "icv1": "ICV1:fp-1048583:-700:1049284:10976:unk:unk:r:07d957b2581c",
+        "model": "y^2 = x^3 + a x^2 + b x",
+        "order": 1049284,
+        "p": 1048583,
+        "slug": "icv1-fp21-tm700-07d957b2"
+      },
+      "params": {
+        "a": "699046",
+        "b": "388354",
+        "p": "1048583"
+      },
+      "pointer": "/curve_E2",
+      "source": "research/isogeny_fibers_20261010/round4/16_7_agm_isogeny_oracles/out_seed7.json",
+      "source_sha256": "c994098262295909d653bc3897dcaa17c8984f93689d84c15bc6c39e8667aab6"
+    }
+  ],
+  "schema": "prime-models-normalization/v1",
+  "what_this_is": "Exact short-Weierstrass metadata derived from explicitly declared source models; historical source bytes are unchanged."
+}

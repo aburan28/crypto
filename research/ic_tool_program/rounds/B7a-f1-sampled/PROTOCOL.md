@@ -379,3 +379,32 @@ revision and the abandonment.
   declaration named the B7a arm's runs of measurement 4.
 - **Nothing else changes:** the acceptance rule, the A/A bands and the
   other measurements.
+
+## Amendment 3 (2026-10-05, before any measurement)
+
+**B7a is measured on main's head, with native tools.**
+- **Why.** R07 re-bases the programme on main's head, `995ea207`.
+  AGENTS.md also excludes Python from the programme's tooling
+  (plan §10a).
+- **B7a's arm** is `tbarm-B7a` (`570d4e9a`). Each step's arm is one merge of
+  that step's tip into the arm before it, starting from main's head.
+  The arms are on record in
+  [`../../track-b/stack-20261005-main.bundle`](../../track-b/stack-20261005-main.bundle),
+  and [`../../track-b/README.md`](../../track-b/README.md) states the rules
+  that resolve their conflicts.
+- **The base** is main's head, `995ea207`: v3, if R07 accepts it. No
+  Track B run starts before R07's decision. If R07 is not accepted, this
+  amendment is revisited first.
+- **The runners.** `icprog conformance` replaces `conformance/run.py`,
+  and `icprog bround` replaces `harness/bround.py`. Each keeps the
+  script's steps and rules.
+- **The A/A bands.** This host is not R01's, so the bands are the run's
+  own, as the acceptance rule already allows. `icprog bround aa` runs
+  the base against a byte-identical copy, on `M1`'s 22 rows, five
+  rounds, in the chain's run tree.
+- **The chain** gains B4 after B3b, as B4's protocol declares.
+- **Measurements 5–7** (F1 against F0, the count's check, partial
+  tables) run on `icprog b7a` (`f1`, `partial`, `analyse`), `run.py` and
+  `analyse.py` ported. Measurement 5's F0 figures are the chain's B7a
+  arm, since under the chain those are measurement 4's B7a processes.
+- **Nothing else changes:** the cases, the pins, the acceptance rules.

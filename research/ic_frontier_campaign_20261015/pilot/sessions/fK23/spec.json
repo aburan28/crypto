@@ -1,0 +1,100 @@
+{
+ "schema": "ecbench.spec/v1",
+ "label": "IC frontier campaign Phase 0: feasibility, Koblitz n=23",
+ "description": "Phase 0 feasibility probe (PROTOCOL.md): one public train target per arm at this size to see which arms finish under the cap. Not a measurement.",
+ "workloads": {
+  "curves": [
+   {
+    "kind": "koblitz",
+    "a": 0,
+    "n": 23
+   }
+  ],
+  "targets_per_curve": 1,
+  "target_seed": 20261015100,
+  "target_kind": "public"
+ },
+ "arms": [
+  {
+   "name": "rho-strong",
+   "role": "reference",
+   "method": {
+    "id": "rho.signed_frobenius_strong"
+   }
+  },
+  {
+   "name": "rho-frob",
+   "role": "baseline",
+   "method": {
+    "id": "rho.signed_frobenius"
+   }
+  },
+  {
+   "name": "bsgs-neg",
+   "role": "baseline",
+   "method": {
+    "id": "bsgs.negation"
+   }
+  },
+  {
+   "name": "ic-compact",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "compact-orbit-scan:columns=2,raw_x_cap=10000",
+     "oracle": "mitm-frobenius-counted:m=2",
+     "linalg": "incremental-gauss",
+     "max_trials": "200000"
+    }
+   }
+  },
+  {
+   "name": "ic-negfold",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "koblitz-standard-subspace:dimension=5",
+     "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+     "linalg": "incremental-gauss",
+     "max_trials": "200000"
+    }
+   }
+  },
+  {
+   "name": "ic-f4",
+   "role": "baseline",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "koblitz-standard-subspace:dimension=5",
+     "oracle": "pdp3-koblitz:m=3,engine=inherited-f4,degree=3,node_budget=8192",
+     "linalg": "incremental-gauss",
+     "max_trials": "200000"
+    }
+   }
+  },
+  {
+   "name": "ic-shared",
+   "role": "candidate",
+   "method": {
+    "id": "ic.shared_rank",
+    "params": {
+     "factor_base": "compact-orbit-scan:columns=8,raw_x_cap=1000000",
+     "rank_seed": "20261015101",
+     "rank_max_trials": "100000",
+     "target_max_attempts": "512"
+    }
+   }
+  }
+ ],
+ "measurement": {
+  "rounds": 1,
+  "warmup": 0,
+  "order": "alternate",
+  "seed": 20261015102,
+  "isolation_required": "L0",
+  "timeout_seconds": 600
+ }
+}

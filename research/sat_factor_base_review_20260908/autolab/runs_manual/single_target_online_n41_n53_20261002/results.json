@@ -1,0 +1,127 @@
+{
+  "censored": "run 20261002T213515Z-14ab45f3ac failed closed (precompute rank starved at 188/221 with eta 1/16 pointwise knobs); retained under gitignored autolab/runs/ on the measurement host",
+  "claim_boundary": "Public synthetic Koblitz curves only; exactly one previously unseen target per run, IC and rho on the identical frozen public point under the same 16 GiB cap; online clocks exclude process launch, input loading, fixture generation, and reusable IC preparation. Constant-factor wins only; no asymptotic sub-rho claim, no key recovery, no external/private targets, no deployed-curve security impact. Multi-target amortized results remain secondary.",
+  "kind": "single_target_online_vs_rho_records_20261002",
+  "n41": {
+    "automorphism_discount": "sqrt(2n), A=82 signed Frobenius",
+    "curve": {
+      "a": 0,
+      "b": 1,
+      "field": "GF(2^41)",
+      "modulus": "x^41 + x^3 + 1",
+      "weierstrass": "y^2 + x*y = x^3 + 1"
+    },
+    "ic_verified_all_runs": true,
+    "independent_scalar_replay": {
+      "method": "standalone Python polynomial-basis GF(2^41); separate from Rust producers",
+      "status": "PASS",
+      "validated_runs": [
+        "20261001T151557Z-d271c124eb",
+        "20261002T213001Z-3e68b28a95"
+      ]
+    },
+    "n": 41,
+    "paired_runs": {
+      "ic_online_ms": [
+        8.997,
+        8.719,
+        8.429
+      ],
+      "online_speedup": [
+        17.68,
+        17.93,
+        18.83
+      ],
+      "rho_online_ms": [
+        159.107,
+        156.326,
+        158.75
+      ],
+      "run_ids": [
+        "koblitz.vs_rho.n41_charged",
+        "koblitz.vs_rho.n41_charged",
+        "koblitz.vs_rho.n41_charged"
+      ]
+    },
+    "public_generator": [
+      2056947637384,
+      1635505394702
+    ],
+    "public_target_q": [
+      32261361846,
+      1686243023477
+    ],
+    "regime": "koblitz",
+    "rejected_prior_run": "20261001T020900Z-d7138bdf44 (PAIRING_REJECTED: arms used different public points)",
+    "rho_verified_all_runs": true,
+    "subgroup_order": 549756390943,
+    "timing_class": "single_target_online",
+    "verdict": "N41_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER"
+  },
+  "n53": {
+    "automorphism_discount": "sqrt(2n), A=106 signed Frobenius",
+    "base_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+    "curve": {
+      "a": 0,
+      "b": 1,
+      "field": "GF(2^53)",
+      "modulus": "x^53 + x^6 + x^2 + x + 1",
+      "weierstrass": "y^2 + x*y = x^3 + 1"
+    },
+    "ic_verified_all_runs": true,
+    "independent_scalar_replay": {
+      "method": "standalone Python polynomial-basis GF(2^53); separate from Rust producers",
+      "status": "PASS",
+      "validated_runs": [
+        "20261002T214339Z-56e7fbb9d7",
+        "20261002T214636Z-0fbed42339"
+      ]
+    },
+    "n": 53,
+    "paired_runs": {
+      "ic_online_ms": [
+        18.006,
+        15.531
+      ],
+      "online_speedup": [
+        51.03,
+        55.71
+      ],
+      "rho_online_ms": [
+        918.836,
+        865.179
+      ],
+      "run_ids": [
+        "koblitz.vs_rho.n53_charged",
+        "koblitz.vs_rho.n53_charged"
+      ]
+    },
+    "precompute": {
+      "eta": "1/10",
+      "excluded_from_online_ms": [
+        61839.6,
+        104606.4
+      ],
+      "matrix_columns": 221,
+      "note": "explicit pair table this rung; under the 16 GiB common cap; compact-orbit replacement is the next rung",
+      "pair_mode": "signed_expanded",
+      "peak_child_rss_bytes": 9338765312,
+      "query_mode": "pair_pair_guided_256"
+    },
+    "public_generator": [
+      198217578752339,
+      7929897206038174
+    ],
+    "public_target_q": [
+      4910906853150104,
+      968484661590993
+    ],
+    "regime": "koblitz",
+    "rho_verified_all_runs": true,
+    "subgroup_order": 21044858204113,
+    "timing_class": "single_target_online",
+    "verdict": "N53_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER"
+  },
+  "schema_version": "1.0",
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910"
+}

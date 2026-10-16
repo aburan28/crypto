@@ -1,0 +1,22 @@
+{
+  "fail_closed": true,
+  "missing_global_provenance": [],
+  "missing_stage_fields": [],
+  "required_global_provenance": [
+    "fixture_hash",
+    "executable_or_source_hash",
+    "host_id",
+    "resource_caps",
+    "seeds",
+    "claim_boundary_non_claims"
+  ],
+  "required_stage_fields": [
+    "n_or_bits",
+    "recovered_d_verified",
+    "stage_timers",
+    "claim_boundary"
+  ],
+  "schema_version": 2,
+  "stage": "end_to_end_dlp",
+  "status": "PASS"
+}

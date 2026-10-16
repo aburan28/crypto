@@ -1,0 +1,14 @@
+%% Editable source for figure.svg (dependency graph).
+%% Rendered by hand into figure.svg (SVG is the committed rendering).
+flowchart TB
+    REF["REFUTED by arXiv:2610.06783v1:\ninteger + real 3SUM, APSP/(min,+) product,\nExact Triangle, zero-weight k-Clique,\nthin-hint OMv"]
+    OK["INTACT: SETH, OV, k-SUM/XOR k>=4,\nunhinted OMv, generic-group/Shoup bounds"]
+    REF --> EXT["External claims that cited them:\n3SUM/APSP-hardness verdicts,\nsparse-triangle lower bounds,\ndynamic-problem bounds"]
+    OK --> CORE["Our core: generic-group floor S=sqrt(pi/2A)\n+ measured rho -- unconditional"]
+    EXT -. "no citation in our tree" .-> CORE
+    CORE --> V["Scoreboard verdict, ledger floors,\nFRAMEWORK.md: UNAFFECTED"]
+    REF --> R1["RR panel sentence naming the conjecture:\n1 precision fix (this PR)"]
+    REF --> R2["Nagao contract generic-3SUM:\nalready correct (demands structure)"]
+    REF --> R3["dense_3sum metric:\nhistorical measurement, stands"]
+    REF --> FP["False positives: b3sum, getRandomValues,\nSethi-Ullman, token/timing scopes,\nmatvec substrings, relation-weight zero-weight"]
+    CORE --> M["Method proposals: identity certificates;\nscreen transfers on arrival;\ngeneral-regime watch"]

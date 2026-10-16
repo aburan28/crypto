@@ -1,0 +1,11 @@
+In file included from /home/ubuntu/crypto/ecc2k130/build/g7-xonly-doubling-src/src/../include/packedengine.cuh:3,
+                 from /home/ubuntu/crypto/ecc2k130/build/g7-xonly-doubling-src/src/main.cu:518:
+/home/ubuntu/crypto/ecc2k130/build/g7-xonly-doubling-src/src/../include/packedkernels.cuh:92:2: error: #error "Split batches require batch16, threads256, block inversion and weighted-prefix mode2"
+   92 | #error "Split batches require batch16, threads256, block inversion and weighted-prefix mode2"
+      |  ^~~~~
+/home/ubuntu/crypto/ecc2k130/build/g7-xonly-doubling-src/src/../include/packedkernels.cuh:101:2: error: #error "Last-slot cache requires batch16, split2, block inversion and weighted-prefix mode2"
+  101 | #error "Last-slot cache requires batch16, split2, block inversion and weighted-prefix mode2"
+      |  ^~~~~
+/home/ubuntu/crypto/ecc2k130/build/g7-xonly-doubling-src/src/../include/packedkernels.cuh:113:2: error: #error "SHARED_X_SLOTS requires the selected B16 split2 compact polynomial block-inverse layout"
+  113 | #error "SHARED_X_SLOTS requires the selected B16 split2 compact polynomial block-inverse layout"
+      |  ^~~~~

@@ -1,0 +1,8 @@
+q = 343073 (19 bits)  t = 241  ell = 263  N = #E = 342833 (prime)   t^2-4q = -19*ell^2: true
+crater E0: a = 36086 b = 72172 j = 144483 (= -884736 mod q)  [N]P = O on 8 random P: true   f_E = 1 (h(-19)=1)
+floor E1: a = 43182 b = 57354 j = 186499  #E = N confirmed by 8 random [N]P = O (via twist)   f_E = ell = 263   (1120 samples, 0.0 s)
+floor E2: a = 248905 b = 168314 j = 177916  #E = N confirmed by 8 random [N]P = O   f_E = ell = 263   (2546 samples, 0.1 s)
+floor E3: a = 4202 b = 45429 j = 134867  #E = N confirmed by 8 random [N]P = O (via twist)   f_E = ell = 263   (2813 samples, 0.1 s)
+floor E4: a = 145160 b = 299911 j = 86743  #E = N confirmed by 8 random [N]P = O   f_E = ell = 263   (3216 samples, 0.1 s)
+samples/hit observed 804, predicted |D|*ell/4 (both twists) = 1249
+Order certification note: [N]P=O for 8 random P is a probabilistic certificate; confirm with ellcard/Sage before use.

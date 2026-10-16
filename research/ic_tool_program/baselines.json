@@ -594,6 +594,230 @@
      }
     }
    ]
+  },
+  {
+   "baseline": "v3",
+   "round": "R07",
+   "class": "engineering",
+   "commit": "995ea207",
+   "built_from": "995ea2071cc7453877a503d30eb561ae82cddab9",
+   "base": "v2 edcb0bec",
+   "src_tree": "8d256c652fe1f95d685c8ec4443f2c9252a3c6c5",
+   "binary_sha256": "9c3320390d74ae48b74382d2ec3f8b4b5b1585e5e8aa2448c0d78369807a26b4",
+   "host": {
+    "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "logical_cores": 4,
+    "memory": "MemTotal:       16480968 kB",
+    "os": "Linux-6.18.44-fc-v70-x86_64-with-glibc2.39",
+    "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+    "transparent_hugepage": {
+     "enabled": "always [madvise] never",
+     "defrag": "always defer defer+madvise [madvise] never"
+    }
+   },
+   "host_resumed": {
+    "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "logical_cores": 4,
+    "memory": "MemTotal:       16480968 kB",
+    "os": "Linux-6.18.44-fc-v70-x86_64-with-glibc2.39",
+    "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+    "transparent_hugepage": {
+     "enabled": "always [madvise] never",
+     "defrag": "always defer defer+madvise [madvise] never"
+    }
+   },
+   "source": "research/ic_tool_program/rounds/R07-main-head/analysis.json",
+   "what_changed": "main's head, about 700 commits past v2's lineage, chiefly #1242 (every Gf2 product reduced by two carry-less folds with the modulus's sparse tail); the programme's own levers v1 and v2 reached it through #1166 and #1187; every pinned output is v0's",
+   "measured": "R07's comparison: M1's two rows at the eight smaller sizes and all eight at the three target sizes, five rounds each, paired with v2 in the same runs; s_cold is the candidate's median in v0's unit",
+   "sizes": [
+    {
+     "curve_alias": "icv1-f2m19-tm797-9c54981b",
+     "ec1": "EC1N19Ce1h7e63aa468dcc",
+     "curve_uid": "urn:ec-record:1:sha256:7e63aa468dcc9ee8813f014acabe3395ac3e3d9f533d00361a821770038f4d23",
+     "log2_r": 18.002,
+     "unit_ns": 21.993,
+     "rows_measured": 2,
+     "rounds": 5,
+     "s_cold": 112.532,
+     "s_cold_base_same_runs": 133.555,
+     "cold_ratio_over_base": {
+      "geomean": 1.1566,
+      "lo": 1.0737,
+      "hi": 1.2459,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m23-tm5197-1f85e9e1",
+     "ec1": "EC1N23Ce1heec6a3619e3f",
+     "curve_uid": "urn:ec-record:1:sha256:eec6a3619e3fdf05035e0ef5d3ec8cf3af507268cf760c77d47518d62141b00f",
+     "log2_r": 22.001,
+     "unit_ns": 22.281,
+     "rows_measured": 2,
+     "rounds": 5,
+     "s_cold": 29.999,
+     "s_cold_base_same_runs": 35.285,
+     "cold_ratio_over_base": {
+      "geomean": 1.2098,
+      "lo": 1.1476,
+      "hi": 1.2753,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m45-tm6236725-40939294",
+     "ec1": "EC1N45Ce1h97bc367649de",
+     "curve_uid": "urn:ec-record:1:sha256:97bc367649ded9e1309ece1e66c630f558ee953b017378c53b2c3cf2896747df",
+     "log2_r": 24.803,
+     "unit_ns": 26.903,
+     "rows_measured": 2,
+     "rounds": 5,
+     "s_cold": 17.906,
+     "s_cold_base_same_runs": 21.592,
+     "cold_ratio_over_base": {
+      "geomean": 1.2086,
+      "lo": 1.1697,
+      "hi": 1.2488,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m37-tm534059-32aad96b",
+     "ec1": "EC1N37Ce0h0c51aa4aa7c3",
+     "curve_uid": "urn:ec-record:1:sha256:0c51aa4aa7c3c76c45885e230d717aedcbefad98e2604d1664ac38b57299f180",
+     "log2_r": 27.781,
+     "unit_ns": 24.29,
+     "rows_measured": 2,
+     "rounds": 5,
+     "s_cold": 8.251,
+     "s_cold_base_same_runs": 10.291,
+     "cold_ratio_over_base": {
+      "geomean": 1.2866,
+      "lo": 1.2324,
+      "hi": 1.3432,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m43-tm998717-e2e742b0",
+     "ec1": "EC1N43Ce1h7d34f0f22c70",
+     "curve_uid": "urn:ec-record:1:sha256:7d34f0f22c707e3756957364281079ea2835960013fd13a1e648b7ff5e5fea8c",
+     "log2_r": 32.113,
+     "unit_ns": 26.96,
+     "rows_measured": 2,
+     "rounds": 5,
+     "s_cold": 4.79,
+     "s_cold_base_same_runs": 6.003,
+     "cold_ratio_over_base": {
+      "geomean": 1.2506,
+      "lo": 1.1977,
+      "hi": 1.3059,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m47-t22705043-f4e44623",
+     "ec1": "EC1N47Ce1h9669b6d5105b",
+     "curve_uid": "urn:ec-record:1:sha256:9669b6d5105b035b2ff286a4e32c52725841e8546ab03de8a8077c5114e98b0c",
+     "log2_r": 36.636,
+     "unit_ns": 27.702,
+     "rows_measured": 2,
+     "rounds": 5,
+     "s_cold": 3.12,
+     "s_cold_base_same_runs": 4.115,
+     "cold_ratio_over_base": {
+      "geomean": 1.2482,
+      "lo": 1.0704,
+      "hi": 1.4555,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m57-tm747311035-c1f545af",
+     "ec1": "EC1N57Ce0hb5884395c7f2",
+     "curve_uid": "urn:ec-record:1:sha256:b5884395c7f28d0d22eb1acc451c34ff979b0a40f93629e44b30107592b76695",
+     "log2_r": 38.002,
+     "unit_ns": 29.418,
+     "rows_measured": 2,
+     "rounds": 5,
+     "s_cold": 3.673,
+     "s_cold_base_same_runs": 4.373,
+     "cold_ratio_over_base": {
+      "geomean": 1.2307,
+      "lo": 1.1657,
+      "hi": 1.2993,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m41-tm2308219-7f48b14a",
+     "ec1": "EC1N41Ce0he09550ab560a",
+     "curve_uid": "urn:ec-record:1:sha256:e09550ab560a9bb6de7981f4b47c48235d8553626dc43dbe92bf73262a95a8e1",
+     "log2_r": 39.0,
+     "unit_ns": 24.447,
+     "rows_measured": 2,
+     "rounds": 5,
+     "s_cold": 4.382,
+     "s_cold_base_same_runs": 5.108,
+     "cold_ratio_over_base": {
+      "geomean": 1.1099,
+      "lo": 1.0217,
+      "hi": 1.2057,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m53-tm56619371-dac20a85",
+     "ec1": "EC1N53Ce0hb097de99be9a",
+     "curve_uid": "urn:ec-record:1:sha256:b097de99be9a3af970966707e65d24bf63302ba5324f05b714f916a680651ae6",
+     "log2_r": 44.259,
+     "unit_ns": 29.911,
+     "rows_measured": 8,
+     "rounds": 5,
+     "s_cold": 5.818,
+     "s_cold_base_same_runs": 6.656,
+     "cold_ratio_over_base": {
+      "geomean": 1.1349,
+      "lo": 1.1037,
+      "hi": 1.167,
+      "n": 39
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m59-tm943548413-98844ecc",
+     "ec1": "EC1N59Ce1h20858f64459b",
+     "curve_uid": "urn:ec-record:1:sha256:20858f64459bbef8a18a8b75dbe579ce4cb0901d5c1b70d236ac154427d86980",
+     "log2_r": 44.517,
+     "unit_ns": 30.682,
+     "rows_measured": 8,
+     "rounds": 5,
+     "s_cold": 5.479,
+     "s_cold_base_same_runs": 8.11,
+     "cold_ratio_over_base": {
+      "geomean": 1.4829,
+      "lo": 1.452,
+      "hi": 1.5144,
+      "n": 40
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m61-t158598901-ab42b6c5",
+     "ec1": "EC1N61Ce0hd8c15448081e",
+     "curve_uid": "urn:ec-record:1:sha256:d8c15448081eb349784c3d5d9d3144eaa4a5252d115f9049e10bbadf373db689",
+     "log2_r": 47.211,
+     "unit_ns": 30.922,
+     "rows_measured": 8,
+     "rounds": 5,
+     "s_cold": 8.086,
+     "s_cold_base_same_runs": 12.258,
+     "cold_ratio_over_base": {
+      "geomean": 1.5261,
+      "lo": 1.5067,
+      "hi": 1.5459,
+      "n": 40
+     }
+    }
+   ]
   }
  ]
 }

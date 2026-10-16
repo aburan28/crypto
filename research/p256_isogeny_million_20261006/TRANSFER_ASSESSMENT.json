@@ -1,0 +1,120 @@
+{
+  "schema": "crypto-transfer-assessment/draft-v1",
+  "status": "evidence_snapshot_not_a_ledger_certificate",
+  "subject": "P-256 degree-13/degree-11 isogeny grid",
+  "source": {
+    "curve": "P-256",
+    "field": "F_p",
+    "subgroup_order": "P-256 prime group order",
+    "canonical_id": "icv1-fp256-t89188191154553853111372247798585809583-f188c491"
+  },
+  "destination": {
+    "family": "1000-by-1000 canonical curve grid over F_p",
+    "unique_curves": 1000000,
+    "group_order": "same P-256 prime group order"
+  },
+  "typed_correspondence": [
+    {
+      "from": "E_(0,0)/F_p",
+      "to": "E_(0,y)/F_p",
+      "map": "composition of y separable cyclic degree-13 isogenies",
+      "certificate": "one replayed kernel polynomial and Velu codomain isomorphism per edge"
+    },
+    {
+      "from": "E_(0,y)/F_p",
+      "to": "E_(x,y)/F_p",
+      "map": "composition of x separable cyclic degree-11 isogenies",
+      "certificate": "one replayed kernel polynomial and Velu codomain isomorphism per edge"
+    },
+    {
+      "from": "E_(0,0)(F_p)",
+      "to": "E_(x,y)(F_p)",
+      "map": "induced rational-point group homomorphism",
+      "classification": "group isomorphism on the prime-order rational subgroup because 11 and 13 are coprime to its order"
+    }
+  ],
+  "obligations": [
+    {
+      "name": "map_existence",
+      "status": "supported",
+      "evidence": "999999 parent edges regenerated from the frozen modular-polynomial root rule"
+    },
+    {
+      "name": "executable_construction",
+      "status": "supported",
+      "evidence": "999999 kernel polynomials, Velu codomains and target isomorphisms generated and independently replayed"
+    },
+    {
+      "name": "map_correctness",
+      "status": "supported",
+      "evidence": "generation and replay agree on every edge, target model, identity and rolling-chain value"
+    },
+    {
+      "name": "subgroup_preservation",
+      "status": "supported",
+      "evidence": "all 1000000 curves passed prime-order audits; the edge degrees 11 and 13 do not divide that order"
+    },
+    {
+      "name": "exceptional_points_and_kernel_intersection",
+      "status": "supported",
+      "evidence": "the rational prime-order subgroup intersects each degree-11 or degree-13 kernel trivially"
+    },
+    {
+      "name": "point_transport_and_recovery_cost",
+      "status": "unknown",
+      "evidence": "the certificate verifies curve maps, but no ECDLP payload transport or dual-map recovery benchmark was run"
+    },
+    {
+      "name": "measured_index_calculus_advantage",
+      "status": "unknown",
+      "evidence": "no preregistered structural screen selected a curve, so no full solver comparison was run"
+    },
+    {
+      "name": "scaling_beyond_the_fixed_grid",
+      "status": "unknown",
+      "evidence": "the verified boundary is exactly 1000000 unique curves, not the full P-256 isogeny class"
+    }
+  ],
+  "costs": {
+    "generation": {
+      "status": "measured",
+      "wall_seconds": 5816.209,
+      "user_cpu_seconds": 22687.881,
+      "peak_rss_bytes": 1010831360
+    },
+    "independent_replay": {
+      "status": "measured",
+      "wall_seconds": 6601.237,
+      "user_cpu_seconds": 23164.372,
+      "peak_rss_bytes": 1011425280
+    },
+    "point_conversion": {
+      "status": "not_measured"
+    },
+    "relation_generation": {
+      "status": "not_attempted"
+    },
+    "linear_algebra": {
+      "status": "not_attempted"
+    },
+    "target_log_recovery": {
+      "status": "not_attempted"
+    },
+    "matched_pollard_rho": {
+      "status": "not_attempted"
+    }
+  },
+  "controls": [
+    "registered P-256 root and deterministic canonical-model identity",
+    "independent replay with two fresh order-audit points per curve",
+    "full-identity uniqueness distinct from expected 32-bit display-slug collisions",
+    "future transported-data and coordinate-isomorphism controls before any solver claim",
+    "future cold one-target index-calculus versus matched Pollard-rho comparison including all setup and recovery costs"
+  ],
+  "exploration_boundary": {
+    "unique_curves": 1000000,
+    "fraction_of_2_pow_32": 0.00023283064365386963,
+    "finding": "no preregistered structural candidate within this family and boundary",
+    "universal_nonexistence_claim": false
+  }
+}

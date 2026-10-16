@@ -1,0 +1,429 @@
+{
+  "big_n": 12,
+  "modulus_hex": "0x1009",
+  "curves_total": 8190,
+  "classes_total": 128,
+  "walk3_built": true,
+  "walk3_edges": 8188,
+  "factorisations": [
+    {
+      "big_n": 12,
+      "n": 2,
+      "l": 6,
+      "magic_histogram_a0": [
+        0,
+        63,
+        4032
+      ],
+      "plain_undercount_b": 0,
+      "subfield_curves": 126,
+      "twist_failing_condition8": 63,
+      "thresholds": [
+        {
+          "max_m": 2,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 8064,
+          "classes_with_weak_member": 126,
+          "class_covered_curves": 8166,
+          "walk3_covered_curves": 8096,
+          "walk3_distance_histogram": [
+            8064,
+            32
+          ],
+          "median_log2_sqrt_weak_class_size": 2.850219859070546
+        }
+      ]
+    },
+    {
+      "big_n": 12,
+      "n": 3,
+      "l": 4,
+      "magic_histogram_a0": [
+        0,
+        15,
+        0,
+        4080
+      ],
+      "plain_undercount_b": 255,
+      "subfield_curves": 30,
+      "twist_failing_condition8": 0,
+      "thresholds": [
+        {
+          "max_m": 2,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 0,
+          "classes_with_weak_member": 0,
+          "class_covered_curves": 0,
+          "walk3_covered_curves": 0,
+          "walk3_distance_histogram": [],
+          "median_log2_sqrt_weak_class_size": null
+        },
+        {
+          "max_m": 3,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 8160,
+          "classes_with_weak_member": 128,
+          "class_covered_curves": 8190,
+          "walk3_covered_curves": 8182,
+          "walk3_distance_histogram": [
+            8160,
+            20,
+            2
+          ],
+          "median_log2_sqrt_weak_class_size": 2.850219859070546
+        }
+      ]
+    },
+    {
+      "big_n": 12,
+      "n": 4,
+      "l": 3,
+      "magic_histogram_a0": [
+        0,
+        7,
+        56,
+        448,
+        3584
+      ],
+      "plain_undercount_b": 0,
+      "subfield_curves": 14,
+      "twist_failing_condition8": 511,
+      "thresholds": [
+        {
+          "max_m": 2,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 56,
+          "classes_with_weak_member": 7,
+          "class_covered_curves": 484,
+          "walk3_covered_curves": 179,
+          "walk3_distance_histogram": [
+            56,
+            51,
+            72
+          ],
+          "median_log2_sqrt_weak_class_size": 3.1427011094311244
+        },
+        {
+          "max_m": 3,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 504,
+          "classes_with_weak_member": 26,
+          "class_covered_curves": 1831,
+          "walk3_covered_curves": 1087,
+          "walk3_distance_histogram": [
+            504,
+            343,
+            180,
+            60
+          ],
+          "median_log2_sqrt_weak_class_size": 3.084962500721156
+        },
+        {
+          "max_m": 4,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 7672,
+          "classes_with_weak_member": 127,
+          "class_covered_curves": 8178,
+          "walk3_covered_curves": 8008,
+          "walk3_distance_histogram": [
+            7672,
+            323,
+            13
+          ],
+          "median_log2_sqrt_weak_class_size": 2.850219859070546
+        }
+      ]
+    },
+    {
+      "big_n": 12,
+      "n": 6,
+      "l": 2,
+      "magic_histogram_a0": [
+        0,
+        3,
+        12,
+        60,
+        180,
+        960,
+        2880
+      ],
+      "plain_undercount_b": 255,
+      "subfield_curves": 6,
+      "twist_failing_condition8": 1023,
+      "thresholds": [
+        {
+          "max_m": 2,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 24,
+          "classes_with_weak_member": 6,
+          "class_covered_curves": 398,
+          "walk3_covered_curves": 146,
+          "walk3_distance_histogram": [
+            24,
+            50,
+            72
+          ],
+          "median_log2_sqrt_weak_class_size": 2.850219859070546
+        },
+        {
+          "max_m": 3,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 84,
+          "classes_with_weak_member": 13,
+          "class_covered_curves": 838,
+          "walk3_covered_curves": 340,
+          "walk3_distance_histogram": [
+            84,
+            112,
+            144
+          ],
+          "median_log2_sqrt_weak_class_size": 2.9534452978042594
+        },
+        {
+          "max_m": 4,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 444,
+          "classes_with_weak_member": 41,
+          "class_covered_curves": 2758,
+          "walk3_covered_curves": 988,
+          "walk3_distance_histogram": [
+            444,
+            400,
+            144
+          ],
+          "median_log2_sqrt_weak_class_size": 3.084962500721156
+        },
+        {
+          "max_m": 5,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 1404,
+          "classes_with_weak_member": 60,
+          "class_covered_curves": 3910,
+          "walk3_covered_curves": 2140,
+          "walk3_distance_histogram": [
+            1404,
+            664,
+            72
+          ],
+          "median_log2_sqrt_weak_class_size": 2.850219859070546
+        },
+        {
+          "max_m": 6,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 7164,
+          "classes_with_weak_member": 125,
+          "class_covered_curves": 8040,
+          "walk3_covered_curves": 7555,
+          "walk3_distance_histogram": [
+            7164,
+            391
+          ],
+          "median_log2_sqrt_weak_class_size": 2.792481250360578
+        }
+      ]
+    },
+    {
+      "big_n": 12,
+      "n": 12,
+      "l": 1,
+      "magic_histogram_a0": [
+        0,
+        1,
+        2,
+        10,
+        14,
+        36,
+        48,
+        144,
+        192,
+        576,
+        768,
+        768,
+        1536
+      ],
+      "plain_undercount_b": 255,
+      "subfield_curves": 2,
+      "twist_failing_condition8": 2047,
+      "thresholds": [
+        {
+          "max_m": 2,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 2,
+          "classes_with_weak_member": 1,
+          "class_covered_curves": 104,
+          "walk3_covered_curves": 8,
+          "walk3_distance_histogram": [
+            2,
+            6
+          ],
+          "median_log2_sqrt_weak_class_size": 3.350219859070546
+        },
+        {
+          "max_m": 3,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 12,
+          "classes_with_weak_member": 4,
+          "class_covered_curves": 379,
+          "walk3_covered_curves": 49,
+          "walk3_distance_histogram": [
+            12,
+            37
+          ],
+          "median_log2_sqrt_weak_class_size": 3.350219859070546
+        },
+        {
+          "max_m": 4,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 34,
+          "classes_with_weak_member": 9,
+          "class_covered_curves": 599,
+          "walk3_covered_curves": 173,
+          "walk3_distance_histogram": [
+            34,
+            67,
+            72
+          ],
+          "median_log2_sqrt_weak_class_size": 2.9534452978042594
+        },
+        {
+          "max_m": 5,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 70,
+          "classes_with_weak_member": 11,
+          "class_covered_curves": 683,
+          "walk3_covered_curves": 311,
+          "walk3_distance_histogram": [
+            70,
+            97,
+            144
+          ],
+          "median_log2_sqrt_weak_class_size": 2.9534452978042594
+        },
+        {
+          "max_m": 6,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 142,
+          "classes_with_weak_member": 17,
+          "class_covered_curves": 1151,
+          "walk3_covered_curves": 443,
+          "walk3_distance_histogram": [
+            142,
+            157,
+            144
+          ],
+          "median_log2_sqrt_weak_class_size": 3.11440934524794
+        },
+        {
+          "max_m": 7,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 286,
+          "classes_with_weak_member": 26,
+          "class_covered_curves": 1703,
+          "walk3_covered_curves": 671,
+          "walk3_distance_histogram": [
+            286,
+            253,
+            132
+          ],
+          "median_log2_sqrt_weak_class_size": 3.084962500721156
+        },
+        {
+          "max_m": 8,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 574,
+          "classes_with_weak_member": 46,
+          "class_covered_curves": 3071,
+          "walk3_covered_curves": 1271,
+          "walk3_distance_histogram": [
+            574,
+            457,
+            156,
+            60,
+            24
+          ],
+          "median_log2_sqrt_weak_class_size": 3.084962500721156
+        },
+        {
+          "max_m": 9,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 1150,
+          "classes_with_weak_member": 53,
+          "class_covered_curves": 3431,
+          "walk3_covered_curves": 2051,
+          "walk3_distance_histogram": [
+            1150,
+            637,
+            228,
+            36
+          ],
+          "median_log2_sqrt_weak_class_size": 2.850219859070546
+        },
+        {
+          "max_m": 10,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 2302,
+          "classes_with_weak_member": 86,
+          "class_covered_curves": 5687,
+          "walk3_covered_curves": 3863,
+          "walk3_distance_histogram": [
+            2302,
+            901,
+            408,
+            252
+          ],
+          "median_log2_sqrt_weak_class_size": 2.9534452978042594
+        },
+        {
+          "max_m": 11,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 3070,
+          "classes_with_weak_member": 86,
+          "class_covered_curves": 5687,
+          "walk3_covered_curves": 4127,
+          "walk3_distance_histogram": [
+            3070,
+            529,
+            312,
+            216
+          ],
+          "median_log2_sqrt_weak_class_size": 2.9534452978042594
+        },
+        {
+          "max_m": 12,
+          "curves_total": 8190,
+          "classes_total": 128,
+          "direct_weak_curves": 6142,
+          "classes_with_weak_member": 96,
+          "class_covered_curves": 6143,
+          "walk3_covered_curves": 6143,
+          "walk3_distance_histogram": [
+            6142,
+            1
+          ],
+          "median_log2_sqrt_weak_class_size": 2.850219859070546
+        }
+      ]
+    }
+  ]
+}

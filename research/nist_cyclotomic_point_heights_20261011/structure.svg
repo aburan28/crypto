@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" font-family="Helvetica, Arial, sans-serif" font-size="12">
+  <!-- Hand-authored; editable source is this file. Values from RESULTS.md (verified natively). -->
+  <rect width="100%" height="100%" fill="white"/>
+  <text x="480" y="26" text-anchor="middle" font-size="15" font-weight="bold">Where the cyclotomic structure of the NIST primes acts — and where it does not</text>
+  <!-- column headers -->
+  <g font-weight="bold" font-size="13" text-anchor="middle">
+    <text x="170" y="56">P-192: p = t⁶ − t² − 1</text>
+    <text x="480" y="56">P-224: p = t⁷ − t³ + 1</text>
+    <text x="790" y="56">P-256: p = t⁸ − t⁷ + t⁶ + t³ − 1</text>
+  </g>
+  <text x="480" y="74" text-anchor="middle" fill="#555">t = 2³²; Φ₁Φ₂Φ₄(t) = 2¹²⁸ − 1 = 3·5·17·257·641·65537·274177·6700417·67280421310721 (largest prime 46 bits)</text>
+  <!-- row label: multiplicative side -->
+  <rect x="20" y="92" width="920" height="150" fill="#eef4fb" stroke="#9db7d5"/>
+  <text x="30" y="110" font-weight="bold" fill="#1b4f7a">Multiplicative groups F_p*, F_{p²}* — algebraic, forced by f ± 1 in Z[t]</text>
+  <!-- P-192 boxes -->
+  <g font-size="11">
+    <rect x="40" y="122" width="260" height="50" fill="white" stroke="#1b6ca8"/>
+    <text x="48" y="138">p + 1 = t²·Φ₁Φ₂Φ₄ = 2⁶⁴(2¹²⁸ − 1)</text>
+    <text x="48" y="153">largest prime 46 bits — forced</text>
+    <text x="48" y="167" fill="#555">p − 1: t⁶ − t² − 2 irreducible, largest 88 bits</text>
+    <rect x="350" y="122" width="260" height="50" fill="white" stroke="#c0392b"/>
+    <text x="358" y="138">p − 1 = t³·Φ₁Φ₂Φ₄ = 2⁹⁶(2¹²⁸ − 1)</text>
+    <text x="358" y="153">largest prime 46 bits — forced</text>
+    <text x="358" y="167" fill="#555">p + 1: t⁷ − t³ + 2 irreducible, largest 157 bits</text>
+    <rect x="660" y="122" width="270" height="50" fill="white" stroke="#2e8b57"/>
+    <text x="668" y="138">p + 1 = t³·Φ₄·(t³ − t² + 1), largest 94 bits — forced</text>
+    <text x="668" y="153">p − 1 = Φ₁Φ₂·(sextic): 2⁶⁴ − 1 forced, largest 160 bits</text>
+    <text x="668" y="167" fill="#b22">corrects “no clean factorisation” in two earlier docs</text>
+    <text x="40" y="196" fill="#333">Pohlig–Hellman in F_p*: ≈ 2⁴⁴ (P-192, via p − 1), 2²³ (P-224), 2⁸⁰ (P-256). Finite-field DLP only.</text>
+    <text x="40" y="214" fill="#333">In F_{p²}* the order is (p − 1)(p + 1): largest factors 88 / 157 / 160 bits.</text>
+    <text x="40" y="232" fill="#333">Deployment rule it proves: never reuse these primes as DSA / Schnorr / pairing moduli.</text>
+  </g>
+  <!-- the bridge -->
+  <g>
+    <line x1="480" y1="242" x2="480" y2="300" stroke="#999" stroke-width="2" stroke-dasharray="7 5"/>
+    <rect x="300" y="256" width="360" height="34" fill="#fff6e5" stroke="#d9a441"/>
+    <text x="480" y="270" text-anchor="middle" font-weight="bold">only bridge: embedding degree ord_n(p)</text>
+    <text x="480" y="284" text-anchor="middle">= (n − 1)/10, (n − 1)/3, (n − 1)/3  →  189 / 223 / 255 bits: closed</text>
+    <text x="700" y="282" fill="#b22" font-size="20">✕</text>
+  </g>
+  <!-- additive side -->
+  <rect x="20" y="304" width="920" height="236" fill="#f3f9f1" stroke="#9fc69a"/>
+  <text x="30" y="322" font-weight="bold" fill="#2e6b2e">Point group E(F_p) — what it actually feels (not forced by the Solinas form)</text>
+  <g font-size="11">
+    <text x="40" y="344" font-weight="bold">n ∓ 1 (Cheon / Brown–Gallant, needs published [αⁱ]G)</text>
+    <text x="40" y="360">P-192: n − 1 = 2⁴·5·2389·P83·P92 — smooth part 2¹⁷·⁵ usable</text>
+    <text x="40" y="375">P-224: n − 1 = 2²·3⁶·5·17·2153·P196 — smooth part 2²⁹</text>
+    <text x="40" y="390">P-256: n − 1 = 2⁴·3·71·131·373·3407·17449·38189·187019741·622491383·1002328039319·P92</text>
+    <text x="40" y="405" fill="#b22">P-256: every power of two up to 2⁹⁶ has a divisor of n − 1 within 5 % — cost √(n/Q) (see cheon_cost.svg)</text>
+    <text x="40" y="432" font-weight="bold">Frobenius cyclotomic factorisation of the points: #E(F_{p^k}) = ∏_{d|k} N(Φ_d(π))</text>
+    <text x="40" y="448">N₂ = twist order: 23·P95·P95 / 3²·11·47·3015283·40375823·267983539294927·P118 / 3·5·13·179·P241</text>
+    <text x="40" y="463">N_d, d ≥ 3: every one keeps an unsplit cofactor of ≥ 330 bits — no small extension subgroup to address</text>
+    <text x="40" y="490" font-weight="bold">Heights of lifts to Q (the “smaller point heights” question)</text>
+    <text x="40" y="506">canonical lift y² = x³ − 3x + b: 0 points in 9.8·10⁶ small candidates per curve (expected 10⁻²²…10⁻³²)</text>
+    <text x="40" y="521">lifted generator: ĥ(G̃) = 0.99·log p, ĥ/log|Δ| ≈ 1/6; two-point lift: pairing cos &lt; 0.002, regulator ≈ ĥ(G̃)·ĥ(R̃)</text>
+    <text x="40" y="536">a point has a lift of height ≤ H only if |x| ≤ e^H: fraction 2e^H/p of the group = the small-x factor base, nothing else</text>
+  </g>
+  <text x="940" y="552" text-anchor="end" font-size="10" fill="#666">research/nist_cyclotomic_point_heights_20261011 — derived + natively verified; PARI used for discovery only</text>
+</svg>

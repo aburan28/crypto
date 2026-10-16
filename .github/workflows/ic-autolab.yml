@@ -2,6 +2,10 @@ name: IC autolab integration
 on:
   pull_request:
     paths:
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - 'src/**'
       - 'examples/ic_tournament_worker.rs'
       - 'examples/ic_query_law_vectors.rs'
@@ -14,11 +18,11 @@ permissions:
   contents: read
 concurrency:
   group: ic-autolab-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
-  linux-integration:
+  linux-integration-controls:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -35,7 +39,8 @@ jobs:
           test "$(valgrind --version)" = valgrind-3.22.0
       - name: Freeze dependency resolution
         run: |
-          cp research/ic_candidate_tournament_20260915/ci/Cargo.lock Cargo.lock
+          # The committed root lock matches the current manifest. Keep the
+          # tournament's older lock intact for its retained source replays.
           cargo fetch --locked
       - name: Harness and accounting regression tests
         run: |
@@ -46,6 +51,28 @@ jobs:
           cargo run --locked --release --example ic_query_law_vectors > "$RUNNER_TEMP/ic-query-law-rust-vectors.json"
           python research/ic_candidate_tournament_20260915/generic_query_law.py \
             --rust-vectors "$RUNNER_TEMP/ic-query-law-rust-vectors.json"
+      - name: Preserve controls and replay evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ic-autolab-controls-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/ic-query-law-rust-vectors.json
+            Cargo.lock
+          retention-days: 30
+          if-no-files-found: warn
+
+  linux-integration-release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.94.1
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ic-autolab-integration
+      - name: Freeze dependency resolution
+        run: cargo fetch --locked
       - name: Release arithmetic and descent regressions
         run: |
           cargo test --locked --release --lib pdp_admission_ -- --test-threads=1
@@ -63,6 +90,34 @@ jobs:
           cargo test --locked --release --example ic_tournament_worker public_input_ -- --test-threads=1
           RAYON_NUM_THREADS=1 cargo test --locked --release --example ic_tournament_worker exclusive_worker_ -- --include-ignored --test-threads=1
           RAYON_NUM_THREADS=1 cargo test --locked --release --example ic_tournament_worker prepared_target_tests -- --ignored --test-threads=1
+      - name: Preserve release regression evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ic-autolab-release-${{ github.run_id }}-${{ github.run_attempt }}
+          path: Cargo.lock
+          retention-days: 30
+
+  linux-integration:
+    needs: [linux-integration-controls, linux-integration-release]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: dtolnay/rust-toolchain@1.94.1
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ic-autolab-integration
+      - name: Install calibrated profiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          test "$(valgrind --version)" = valgrind-3.22.0
+      - name: Freeze dependency resolution
+        run: cargo fetch --locked
       - name: Build source-bound generic worker and audit scientific controls
         run: |
           run_start=$(python research/ic_candidate_tournament_20260915/execution_ids.py \

@@ -1,0 +1,26 @@
+{
+  "command": [
+    "/home/ubuntu/crypto/ecc2k130/build/ecc2k130-local-packed",
+    "--packed",
+    "--threads",
+    "512",
+    "--steps",
+    "64",
+    "--launches",
+    "2",
+    "--run-id",
+    "142",
+    "--checkpoint",
+    "/home/ubuntu/crypto/ecc2k130/build/xcache-five-resume-reference.ckpt",
+    "--bench",
+    "--verify",
+    "0"
+  ],
+  "returncode": 0,
+  "timed_out": false,
+  "timeout_seconds": 300,
+  "elapsed_seconds": 0.5302242910001951,
+  "log": "xcache-five-resume-reference-start.log",
+  "log_sha256": "763470dde75793a4e2d8bb5c39319ca2f7a1b2d38ec21a89fd7f26b71dfca905",
+  "binary_sha256": "8c4ed76a152cc135280a68fd3559c3bf71bef726ab73eae0e04014c2e27c6d02"
+}

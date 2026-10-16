@@ -1,0 +1,129 @@
+{
+  "a": 0,
+  "acceptance_vs_ledger": {
+    "dim_16_m_2_quadratic": true,
+    "disagreements_zero": true,
+    "ffd_logged": true,
+    "median_under_1h": true
+  },
+  "arms": {
+    "sym_f4": {
+      "deg": 2,
+      "effort_splits": 4095,
+      "eqs": 31,
+      "ffd": 4,
+      "found": 4,
+      "found_ms_median": 7011.0,
+      "gate": "ok",
+      "inconclusive": 0,
+      "refuted": 4,
+      "refuted_ms_median": 38153.0,
+      "vars": 31
+    },
+    "x_chained_f4": {
+      "deg": 2,
+      "effort_splits": 7056,
+      "eqs": 31,
+      "ffd": 3,
+      "found": 5,
+      "found_ms_median": 20850.0,
+      "gate": "ok",
+      "inconclusive": 0,
+      "refuted": 3,
+      "refuted_ms_median": 75871.0,
+      "vars": 32
+    }
+  },
+  "beat_id": "koblitz.decomposition.n31_m2_dim16",
+  "claim_boundary": "Public synthetic Koblitz Semaev decomposition oracle measure only. Not key recovery, not asymptotic sub-rho, not imported points, not ledger promotion until independent validation.",
+  "claim_boundary_non_claims": [
+    "not key recovery",
+    "not asymptotic sub-sqrt",
+    "not imported/external points",
+    "not ledger promotion until independent validation"
+  ],
+  "created_at": "2026-09-11T06:10:51.703410+00:00",
+  "dimension_l_or_dim": 16,
+  "disagreements": 0,
+  "divisor_indices": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "eq_var_ratio": 0.96875,
+  "evidence_paths": [
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/n31_decomp_m2_dim16_20260911/panel_targets8.stdout.txt",
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/n31_decomp_m2_dim16_20260911/panel_targets8.time.stderr"
+  ],
+  "executable_or_source_hash": {
+    "executable": "77722a67fd889babd33e14e6525517afe1dcbd0f261f2215f3c80db7c31484cf",
+    "source": "d0698ec223a9a0b75b6bab3875eaa752b7bf3be76bcf1d3f94f8fbf821d6297e"
+  },
+  "fb_sizes": {
+    "F_u": 69441,
+    "F_x": 68327
+  },
+  "ffd_or_degree_of_regularity": {
+    "draws": 1,
+    "max": 4,
+    "mean": 3.5,
+    "min": 3,
+    "note": "FFD from first target draw in paired_bench (ffd_max_degree=4); 8-target panel",
+    "sym_f4": 4,
+    "x_chained_f4": 3
+  },
+  "fixture_hash": "d0698ec223a9a0b75b6bab3875eaa752b7bf3be76bcf1d3f94f8fbf821d6297e",
+  "host_id": {
+    "machine": "arm64",
+    "node": "Adams-MacBook-Pro.local",
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "python": "3.9.10"
+  },
+  "independent_replay_pointer": "research/sat_factor_base_review_20260908/autolab/runs_manual/n31_decomp_m2_dim16_20260911/claim_draft_panel8.json",
+  "largest_solvable": {
+    "budget": "1h",
+    "dim": 16,
+    "m": 2,
+    "n": 31,
+    "observed_median_ms": 75871.0,
+    "under_budget": true,
+    "unknowns": 32,
+    "verdict_mix": {
+      "found": 5,
+      "inconclusive": 0,
+      "refuted": 3
+    }
+  },
+  "m_summands": 2,
+  "median_ms_per_target": 75871.0,
+  "median_ms_per_target_detail": {
+    "reported_as": "max(found, refuted) class medians for 1h gate honesty",
+    "x_chained_found_median_ms": 20850.0,
+    "x_chained_refuted_median_ms": 75871.0
+  },
+  "n": 31,
+  "n_or_bits": 31,
+  "node_budget": 50000,
+  "oracle_class": "groebner",
+  "peak_rss_bytes": 207110144,
+  "regime": "koblitz",
+  "resource_caps": {
+    "common_cap_bytes": 17179869184,
+    "node_budget": 50000,
+    "observed_peak_rss_bytes": 207110144,
+    "under_cap": true
+  },
+  "sat": false,
+  "schema_version": 2,
+  "seeds": {
+    "paired_bench_default": "0x5EED"
+  },
+  "stage": "decomposition",
+  "system_degree": "quadratic",
+  "targets": 8,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "unknowns": 32,
+  "verdict": "N31_M2_DIM16_PANEL8_PASS_UNDER_1H_PENDING_INDEPENDENT_VALIDATION",
+  "wall_s": 612.06
+}

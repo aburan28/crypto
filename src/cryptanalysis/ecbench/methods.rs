@@ -22,6 +22,8 @@ use serde_json::{json, Value};
 
 use crate::cryptanalysis::ecbench::canonical::{derive_u64, sha256_hex, short_id};
 use crate::cryptanalysis::ecbench::claw::{pair_claw, pair_claw_wide, ClawOutcome, ClawShape};
+use crate::cryptanalysis::ecbench::fp4::{self as fp4, Fp4Group, Fp4Instance, K4Base, K4Params};
+use crate::cryptanalysis::ecbench::full_price;
 use crate::cryptanalysis::ecbench::generic::{
     bsgs_interleaved, bsgs_negation, bsgs_textbook, kangaroo, GenericOutcome,
 };
@@ -30,14 +32,20 @@ use crate::cryptanalysis::ecbench_large_prime::{
     self as large_prime, SolveConfig as LargePrimeConfig,
 };
 use crate::cryptanalysis::ic_boundary::{
-    rho_cap, rho_reference, rho_walk_with, signed_frobenius_rho_tuned, BinaryGroup, BinaryInstance,
-    Calibration, CountedGroup, GroupOps, NegationClasses, PhaseCost, PointClasses, PrimeInstance,
-    PrimePoint, RhoResult, RhoWalk,
+    price_phase, rho_cap, rho_reference, rho_walk_with, signed_frobenius_rho_tuned, BinaryGroup,
+    BinaryInstance, Calibration, CountedGroup, CubicClasses, FieldOps, GroupOps, NegationClasses,
+    PhaseCost, PointClasses, PrimeInstance, PrimePoint, QuarticClasses, RhoResult, RhoWalk,
+};
+use crate::cryptanalysis::ic_framework::fiber::{
+    FiberDescentOracle, FiberFrobeniusMitmOracle, FiberMitmOracle,
 };
 use crate::cryptanalysis::ic_framework::plugins::{
-    BinarySubspaceBase, CompactOrbitScanBase, DescentAlgebraicOracle, FrobeniusMitmOracle,
-    GlvOrbitBase, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase, SubtractOracle,
+    BinarySubspaceBase, CompactOrbitScanBase, CyclotomicBase, DescentAlgebraicOracle,
+    FrobeniusMitmOracle, GlvOrbitBase, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase,
+    PrimeBatchMitmOracle, RootfindSubtractOracle, SubtractOracle,
 };
+use crate::cryptanalysis::ic_framework::prime_tower::{PrimeIsogenyBase, PrimeKummerBase};
+use crate::cryptanalysis::ic_framework::rootfind::{RootfindMitmOracle, RootfindPairsOracle};
 use crate::cryptanalysis::ic_framework::shared_rank::{
     run_shared_rank_targets, SharedRankSpec, SharedTargetSpec,
 };
@@ -85,11 +93,135 @@ pub struct MethodDecl {
     pub params: &'static [ParamDecl],
 }
 
+const K4_PARAMS: &[ParamDecl] = &[
+    ParamDecl {
+        name: "base",
+        default: None,
+        help: "`xline` ({P : x(P) ∈ F_p}) or `yline-d4` ({P : Y(P) ∈ F_p}, columns {±P, ±(P+T)})",
+    },
+    ParamDecl {
+        name: "large_primes",
+        default: None,
+        help: "0 (full relations) or 2 (double large primes)",
+    },
+    ParamDecl {
+        name: "c4",
+        default: None,
+        help: "F_p multiplications charged per trial: the algebraic solve's measured cost (§11.17 S₄: 1.213e12; D₄: 2.54e10)",
+    },
+    ParamDecl {
+        name: "lp_exponent",
+        default: Some("0.75"),
+        help: "|F'| = ⌈|F|^lp_exponent⌉ when large_primes > 0 (Gaudry's |F|^{1−1/k})",
+    },
+    ParamDecl {
+        name: "trial_cap",
+        default: Some("2000"),
+        help: "trials per column before the run counts as exhausted",
+    },
+];
+
+const IC_PIPELINE_PARAMS: &[ParamDecl] = &[
+        ParamDecl {
+            name: "factor_base",
+            default: None,
+            help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, prime-kummer:t=T[,g=G], prime-isogeny:t=T[,seed=S] (auxiliary-curve search charged to the factor-base phase), binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M, cyclotomic:w=W[,columns=N], koblitz-standard-subspace:dimension=D",
+        },
+        ParamDecl {
+            name: "oracle",
+            default: None,
+            help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; mitm-prime-batch:m=2 (prime folded table with batched inversions); rootfind-subtract:m=2|3 (prime curves: prime_fast's direct-subtraction root finding, one batched inversion a target); the cofactor-fiber-aware mitm-fiber:fiber=closed|lifts|blind, mitm-frobenius-fiber:fiber=closed|lifts|blind and descent-algebraic-fiber:fiber=combined|lifts|blind (ic_framework::fiber); or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N, pdp3-koblitz:m=2|3,engine=rootfind (PairSumTable), pdp3-koblitz:m=3,engine=rootfind-window (cyclic ⌈|F|/3⌉ window), pdp3-koblitz:m=2|3,engine=rootfind-negfold (PairTable negation fold, ~half set-up), and pdp3-koblitz:m=3,engine=rootfind-window-negfold on koblitz-standard-subspace",
+        },
+        ParamDecl {
+            name: "solver",
+            default: Some(""),
+            help: "descent-algebraic and descent-algebraic-fiber only: f4-f2, buchberger-f2, sat-cdcl, exhaustive (with :k=v options)",
+        },
+        ParamDecl {
+            name: "linalg",
+            default: Some("incremental-gauss"),
+            help: "incremental-gauss (stop at target pin), incremental-gauss-full-rank (all columns independent), incremental-gauss-full-rank-checked (also point-check each base column), or structured-gauss",
+        },
+        ParamDecl {
+            name: "targets",
+            default: Some("walk"),
+            help: "random ([a]G+[b]Q per trial), walk, or walk-prime-fast (same guarded stream using native Montgomery additions on prime curves)",
+        },
+        ParamDecl {
+            name: "max_trials",
+            default: Some("100000000"),
+            help: "relation trials before the run counts as exhausted",
+        },
+        ParamDecl {
+            name: "solver_budget_seconds",
+            default: Some("0"),
+            help: "per-call wall budget for an algebraic solver; nonzero makes the run nondeterministic",
+        },
+];
+
+const STRONG_PARAMS: &[ParamDecl] = &[
+    ParamDecl {
+        name: "lanes",
+        default: Some("32"),
+        help: "walks advanced in lockstep (batch-inversion width); the reference measured 32",
+    },
+    ParamDecl {
+        name: "dp_bits",
+        default: Some("4"),
+        help: "distinguished-point bits; the reference measured 4",
+    },
+    ParamDecl {
+        name: "step_cap_factor",
+        default: Some("2000"),
+        help: "give up after this multiple of the ideal step count",
+    },
+];
+
 const RHO_PARAMS: &[ParamDecl] = &[ParamDecl {
     name: "cap_multiple",
     default: Some("64"),
     help: "step budget as a multiple of √r before the run counts as exhausted",
 }];
+
+// Keep the defaults of the frozen `ic.pipeline_counted` sessions. The
+// existing `ic.pipeline` declaration below retains main's newer options.
+const IC_COUNTED_PARAMS: &[ParamDecl] = &[
+    ParamDecl {
+        name: "factor_base",
+        default: None,
+        help: "factor-base plug-in spec",
+    },
+    ParamDecl {
+        name: "oracle",
+        default: None,
+        help: "decomposition oracle plug-in spec",
+    },
+    ParamDecl {
+        name: "solver",
+        default: Some(""),
+        help: "algebraic solver plug-in spec",
+    },
+    ParamDecl {
+        name: "linalg",
+        default: Some("incremental-gauss"),
+        help: "linear algebra plug-in",
+    },
+    ParamDecl {
+        name: "targets",
+        default: Some("walk"),
+        help: "random, walk, or walk-prime-fast on single-word prime curves",
+    },
+    ParamDecl {
+        name: "max_trials",
+        default: Some("100000000"),
+        help: "relation trial cap",
+    },
+    ParamDecl {
+        name: "solver_budget_seconds",
+        default: Some("0"),
+        help: "per-call solver wall budget",
+    },
+];
 
 /// Every method `ecbench` knows.  Adding one is an entry here and an arm
 /// in [`solve`]; nothing else changes.
@@ -120,6 +252,30 @@ pub fn registry() -> &'static [MethodDecl] {
             params: RHO_PARAMS,
         },
         MethodDecl {
+            id: "ic.k4_gaudry",
+            family: "ic",
+            summary: "Gaudry's k = 4 index calculus on E(F_{p⁴}) (fp4_translation curves only): x-line or D₄ Y-line base, optional double large primes (|F'| = ⌈|F|^lp_exponent⌉), filtering + Wiedemann; each trial charged the algebraic solve's measured cost c4 (F_p mults ÷ 97), its relations from an exact enumeration oracle whose own work is counted uncharged, so S is a lower bound; expected S ∝ r^{-1/2}·p·c4 until the linear algebra (∝ p², or p^{3/2} with large primes) dominates",
+            entry: "ecbench::fp4::solve_k4",
+            applies: Applies::Any,
+            params: K4_PARAMS,
+        },
+        MethodDecl {
+            id: "rho.cubic",
+            family: "rho",
+            summary: "tuned walk on {±ζ₃^i(P)} (A = 6), the rational order-3 automorphism of a j = 0 curve with p ≡ 1 (mod 3) and 3 | r − 1; Wiener–Zuccherato look-ahead and cycle escape; refuses any curve without the structure",
+            entry: "ic_boundary::CubicClasses with RhoWalk::negation()",
+            applies: Applies::Any,
+            params: RHO_PARAMS,
+        },
+        MethodDecl {
+            id: "rho.quartic",
+            family: "rho",
+            summary: "tuned walk on {±ι^i(P)} (A = 4), the rational order-4 automorphism of a j = 1728 curve with p ≡ 1 (mod 4) and 4 | r − 1; Wiener–Zuccherato look-ahead and cycle escape; refuses any curve without the structure",
+            entry: "ic_boundary::QuarticClasses with RhoWalk::negation()",
+            applies: Applies::Any,
+            params: RHO_PARAMS,
+        },
+        MethodDecl {
             id: "rho.signed_frobenius",
             family: "rho",
             summary: "tuned walk on signed Frobenius orbits {±φ^t P} (A = 2n), Koblitz curves only",
@@ -133,23 +289,7 @@ pub fn registry() -> &'static [MethodDecl] {
             summary: "the strong single-target reference of the IC measurement rules (docs/ic/boundary_targets.json, since 2026-10-01): lockstep walks with batched inversion on signed Frobenius orbits (A = 2n), Koblitz curves only",
             entry: "koblitz_strong_rho::StrongRho::solve",
             applies: Applies::KoblitzOnly,
-            params: &[
-                ParamDecl {
-                    name: "lanes",
-                    default: Some("32"),
-                    help: "walks advanced in lockstep (batch-inversion width); the reference measured 32",
-                },
-                ParamDecl {
-                    name: "dp_bits",
-                    default: Some("4"),
-                    help: "distinguished-point bits; the reference measured 4",
-                },
-                ParamDecl {
-                    name: "step_cap_factor",
-                    default: Some("2000"),
-                    help: "give up after this multiple of the ideal step count",
-                },
-            ],
+            params: STRONG_PARAMS,
         },
         MethodDecl {
             id: "rho.signed_frobenius_strong_escape",
@@ -237,43 +377,39 @@ pub fn registry() -> &'static [MethodDecl] {
             summary: "index calculus through ic_framework::run_pipeline: factor base, oracle set-up, relations, linear algebra, verification, all charged",
             entry: "ic_framework::run_pipeline",
             applies: Applies::Any,
-            params: &[
-                ParamDecl {
-                    name: "factor_base",
-                    default: None,
-                    help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M, koblitz-standard-subspace:dimension=D",
-                },
-                ParamDecl {
-                    name: "oracle",
-                    default: None,
-                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N on koblitz-standard-subspace",
-                },
-                ParamDecl {
-                    name: "solver",
-                    default: Some(""),
-                    help: "descent-algebraic only: buchberger-f2, sat-cdcl, exhaustive (with :k=v options)",
-                },
-                ParamDecl {
-                    name: "linalg",
-                    default: Some("incremental-gauss"),
-                    help: "incremental-gauss (stop at target pin), incremental-gauss-full-rank (all columns independent), incremental-gauss-full-rank-checked (also point-check each base column), or structured-gauss",
-                },
-                ParamDecl {
-                    name: "targets",
-                    default: Some("walk"),
-                    help: "random ([a]G+[b]Q per trial) or walk (one addition per trial)",
-                },
-                ParamDecl {
-                    name: "max_trials",
-                    default: Some("100000000"),
-                    help: "relation trials before the run counts as exhausted",
-                },
-                ParamDecl {
-                    name: "solver_budget_seconds",
-                    default: Some("0"),
-                    help: "per-call wall budget for an algebraic solver; nonzero makes the run nondeterministic",
-                },
-            ],
+            params: IC_PIPELINE_PARAMS,
+        },
+        MethodDecl {
+            id: "ic.pipeline_full",
+            family: "ic",
+            summary: "ic.pipeline unchanged, then every native counter priced from src/cryptanalysis/ecbench/full_prices.json (field multiplications, squarings, inversions, Artin-Schreier solves, hash probes, canonicalisations, row operations), so the factor base's construction is charged; unknown counters stay unpriced",
+            entry: "ic_framework::run_pipeline + ecbench::full_price::reprice",
+            applies: Applies::BinaryOnly,
+            params: IC_PIPELINE_PARAMS,
+        },
+        MethodDecl {
+            id: "rho.signed_frobenius_full",
+            family: "rho",
+            summary: "rho.signed_frobenius unchanged, with its canonicalisations and distinguished-point probes priced from src/cryptanalysis/ecbench/full_prices.json",
+            entry: "ic_boundary::signed_frobenius_rho_tuned + ecbench::full_price::reprice",
+            applies: Applies::KoblitzOnly,
+            params: RHO_PARAMS,
+        },
+        MethodDecl {
+            id: "rho.signed_frobenius_strong_full",
+            family: "rho",
+            summary: "rho.signed_frobenius_strong unchanged, with its canonicalisations, partition hashes and table probes priced from src/cryptanalysis/ecbench/full_prices.json",
+            entry: "koblitz_strong_rho::StrongRho::solve + ecbench::full_price::reprice",
+            applies: Applies::KoblitzOnly,
+            params: STRONG_PARAMS,
+        },
+        MethodDecl {
+            id: "ic.pipeline_counted",
+            family: "ic",
+            summary: "index calculus with solver wall pricing excluded by deterministic phase recomputation; unpriced solver work remains explicit",
+            entry: "ic_framework::run_pipeline + ecbench::ic_report(counted)",
+            applies: Applies::Any,
+            params: IC_COUNTED_PARAMS,
         },
         MethodDecl {
             id: "ic.large_prime",
@@ -368,8 +504,12 @@ pub fn expected_s(id: &str, a_available: u32) -> Option<f64> {
     match id {
         "rho.frozen_reference" | "rho.plain" => Some((PI / 2.0).sqrt()),
         "rho.negation" => Some((PI / 4.0).sqrt()),
+        "rho.cubic" => Some((PI / 12.0).sqrt()),
+        "rho.quartic" => Some((PI / 8.0).sqrt()),
         "rho.signed_frobenius"
+        | "rho.signed_frobenius_full"
         | "rho.signed_frobenius_strong"
+        | "rho.signed_frobenius_strong_full"
         | "rho.signed_frobenius_strong_escape" => {
             Some((PI / (2.0 * a_available.max(1) as f64)).sqrt())
         }
@@ -639,6 +779,20 @@ pub struct SolveReport {
     /// oracles; `None` for table oracles and generic methods.
     #[serde(default)]
     pub solver: Option<SolverStats>,
+    /// The field operations behind the group operations — modular
+    /// multiplications, squarings and inversions — summed over every
+    /// phase of the solve, when the group counted them
+    /// ([`CountedGroup::counts_field_ops`]: the prime-field curve
+    /// arithmetic the generic walks and tables run on).  `None` is
+    /// unknown, never zero: binary and Koblitz curves do not count, and
+    /// the index-calculus pipeline does field arithmetic outside the
+    /// group law (square roots, Legendre symbols, the oracles, the
+    /// elimination) that this tally would not see, so it reports none.
+    /// Kept out of `counters` and `phases`, so what a committed record's
+    /// replay compares is unchanged; the audit compares the block only
+    /// when both the record and the replay carry it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_ops: Option<FieldOps>,
 }
 
 fn ops_phase(name: &str, ops: GroupOps) -> PhaseRecord {
@@ -667,7 +821,18 @@ fn param_u64(m: &ResolvedMethod, name: &str) -> Result<u64, String> {
         .map_err(|_| format!("parameter `{name}` is not an integer: `{}`", m.params[name]))
 }
 
-fn generic_report(out: GenericOutcome, wall: u64, a: u32) -> SolveReport {
+/// The field operations of a solve from its ledgers, when the group
+/// counts them; `None` (unknown) when it does not.
+fn field_ops_of<G: CountedGroup>(g: &G, ledgers: &[GroupOps]) -> Option<FieldOps> {
+    g.counts_field_ops().then(|| FieldOps::total(ledgers))
+}
+
+fn generic_report(
+    out: GenericOutcome,
+    wall: u64,
+    a: u32,
+    field_ops: Option<FieldOps>,
+) -> SolveReport {
     let total = out.setup.gae() + out.search.gae();
     SolveReport {
         recovered: out.recovered.map(u128::from),
@@ -688,12 +853,13 @@ fn generic_report(out: GenericOutcome, wall: u64, a: u32) -> SolveReport {
         online: None,
         online_error: None,
         solver: None,
+        field_ops,
     }
 }
 
 /// Split a tuned rho run into set-up, walk and verification from its own
 /// counters; the frozen walk has none and stays one phase.
-fn rho_report(res: RhoResult, wall: u64) -> SolveReport {
+fn rho_report(res: RhoResult, wall: u64, field_ops: Option<FieldOps>) -> SolveReport {
     let c = &res.counters;
     let get = |k: &str| c.get(k).copied().unwrap_or(0);
     let phases = if c.is_empty() {
@@ -735,6 +901,7 @@ fn rho_report(res: RhoResult, wall: u64) -> SolveReport {
         online: None,
         online_error: None,
         solver: None,
+        field_ops,
     }
 }
 
@@ -752,10 +919,22 @@ fn solve_generic<G: CountedGroup>(
     // Everything these methods do depends on the target (rho's jump table
     // is [a]G + [b]Q), so the whole solve is the online window.
     measurement::begin_online(Phase::RhoSolve);
+    // The rho walks keep one ledger for the whole solve; the tables and
+    // the kangaroo keep set-up and search apart.  Either way the field
+    // operations reported are the solve's total, known only when the
+    // group counts them.
+    let rho = |res: RhoResult, wall: u64| {
+        let f = field_ops_of(g, &[res.group_ops]);
+        rho_report(res, wall, f)
+    };
+    let generic = |o: GenericOutcome, wall: u64, a: u32| {
+        let f = field_ops_of(g, &[o.setup, o.search]);
+        generic_report(o, wall, a, f)
+    };
     let rep = match m.id.as_str() {
         "rho.frozen_reference" => {
             let res = rho_reference(g, gen, target, r, seed, cap()?);
-            rho_report(res, t.elapsed().as_nanos() as u64)
+            rho(res, t.elapsed().as_nanos() as u64)
         }
         "rho.plain" => {
             let res = rho_walk_with(
@@ -768,7 +947,7 @@ fn solve_generic<G: CountedGroup>(
                 cap()?,
                 RhoWalk::plain(),
             );
-            rho_report(res, t.elapsed().as_nanos() as u64)
+            rho(res, t.elapsed().as_nanos() as u64)
         }
         "rho.negation" => {
             let res = rho_walk_with(
@@ -781,23 +960,23 @@ fn solve_generic<G: CountedGroup>(
                 cap()?,
                 RhoWalk::negation(),
             );
-            rho_report(res, t.elapsed().as_nanos() as u64)
+            rho(res, t.elapsed().as_nanos() as u64)
         }
         "bsgs.textbook" => {
             let o = bsgs_textbook(g, gen, target, r);
-            generic_report(o, t.elapsed().as_nanos() as u64, 1)
+            generic(o, t.elapsed().as_nanos() as u64, 1)
         }
         "bsgs.interleaved" => {
             let o = bsgs_interleaved(g, gen, target, r);
-            generic_report(o, t.elapsed().as_nanos() as u64, 1)
+            generic(o, t.elapsed().as_nanos() as u64, 1)
         }
         "bsgs.negation" => {
             let o = bsgs_negation(g, gen, target, r);
-            generic_report(o, t.elapsed().as_nanos() as u64, 2)
+            generic(o, t.elapsed().as_nanos() as u64, 2)
         }
         "kangaroo.vow" => {
             let o = kangaroo(g, gen, target, r, seed, cap()?);
-            generic_report(o, t.elapsed().as_nanos() as u64, 1)
+            generic(o, t.elapsed().as_nanos() as u64, 1)
         }
         other => return Err(format!("`{other}` is not a generic method")),
     };
@@ -844,6 +1023,19 @@ pub fn solve(
     seed: u64,
 ) -> Result<SolveReport, String> {
     let d = decl(&m.id).ok_or("unregistered method")?;
+    // A `*_full` method runs its base unchanged and is repriced after.
+    let full = full_price::base_of(&m.id);
+    let base_m;
+    let (m, run_d) = match full {
+        Some(base) => {
+            base_m = ResolvedMethod {
+                id: base.to_string(),
+                ..m.clone()
+            };
+            (&base_m, decl(base).ok_or("unregistered base method")?)
+        }
+        None => (m, d),
+    };
     if d.applies == Applies::KoblitzOnly && curve.family != "koblitz" {
         return Err(format!(
             "`{}` runs on Koblitz curves only; {} is {}",
@@ -864,8 +1056,11 @@ pub fn solve(
         solve_wide(m, wi, tx, ty, seed)?
     } else {
         let (tx, ty) = (parse_hex(&target[0])?, parse_hex(&target[1])?);
-        solve_inner(m, inst, curve, d, tx, ty, seed)?
+        solve_inner(m, inst, curve, run_d, tx, ty, seed)?
     };
+    if full.is_some() {
+        full_price::reprice(&mut rep, d.family, &curve.slug)?;
+    }
     match session.map(|s| s.finish()) {
         Some(Ok(snap)) if rep.online.is_none() => {
             rep.online = online_window(d.family, &m.id, &snap)
@@ -888,6 +1083,15 @@ fn solve_inner(
 ) -> Result<SolveReport, String> {
     if let Instance::Wide(_) = inst {
         return Err("a wide instance goes through solve_wide".into());
+    }
+    if let Instance::Fp4(i) = inst {
+        return solve_fp4(m, i, tx, ty, seed);
+    }
+    if m.id == "ic.k4_gaudry" {
+        return Err(format!(
+            "`ic.k4_gaudry` runs on fp4_translation curves only; {} is {}",
+            curve.slug, curve.family
+        ));
     }
     match (inst, d.family) {
         (Instance::Binary(i), _) if m.id == "ic.large_prime" => {
@@ -918,7 +1122,59 @@ fn solve_inner(
             )
             .ok_or("not a Koblitz instance")?;
             measurement::end_online();
-            Ok(rho_report(res, t.elapsed().as_nanos() as u64))
+            // A Koblitz walk does not count its field operations: unknown.
+            Ok(rho_report(res, t.elapsed().as_nanos() as u64, None))
+        }
+        (Instance::Prime(i), _) if m.id == "rho.quartic" => {
+            let t = Instant::now();
+            measurement::begin_online(Phase::RhoSolve);
+            let mut setup = GroupOps::default();
+            let classes =
+                QuarticClasses::new(&i.curve, i.generator_point(), i.r, &mut setup).ok_or(
+                    format!(
+                        "`rho.quartic` needs a j = 1728 curve over p ≡ 1 (mod 4) with 4 | r − 1 and a nontrivial ι on the subgroup; {} lacks the structure",
+                        curve.slug
+                    ),
+                )?;
+            let mut res = rho_walk_with(
+                &i.curve,
+                &classes,
+                i.generator_point(),
+                PrimePoint::affine(tx, ty),
+                i.r,
+                seed,
+                rho_cap(i.r, param_u64(m, "cap_multiple")? as f64),
+                RhoWalk::negation(),
+            );
+            res.group_ops.merge(setup);
+            measurement::end_online();
+            let f = FieldOps::total(&[res.group_ops]);
+            Ok(rho_report(res, t.elapsed().as_nanos() as u64, Some(f)))
+        }
+        (Instance::Prime(i), _) if m.id == "rho.cubic" => {
+            let t = Instant::now();
+            measurement::begin_online(Phase::RhoSolve);
+            let mut setup = GroupOps::default();
+            let classes = CubicClasses::new(&i.curve, i.generator_point(), i.r, &mut setup).ok_or(
+                format!(
+                    "`rho.cubic` needs a j = 0 curve over p ≡ 1 (mod 3) with 3 | r − 1 and a nontrivial ζ₃ on the subgroup; {} lacks the structure",
+                    curve.slug
+                ),
+            )?;
+            let mut res = rho_walk_with(
+                &i.curve,
+                &classes,
+                i.generator_point(),
+                PrimePoint::affine(tx, ty),
+                i.r,
+                seed,
+                rho_cap(i.r, param_u64(m, "cap_multiple")? as f64),
+                RhoWalk::negation(),
+            );
+            res.group_ops.merge(setup);
+            measurement::end_online();
+            let f = FieldOps::total(&[res.group_ops]);
+            Ok(rho_report(res, t.elapsed().as_nanos() as u64, Some(f)))
         }
         (Instance::Prime(i), _) => solve_generic(
             m,
@@ -932,8 +1188,93 @@ fn solve_inner(
             let g = BinaryGroup(&i.fast);
             solve_generic(m, &g, i.generator, FastPoint::affine(tx, ty), i.r, seed)
         }
-        (Instance::Wide(_), _) => unreachable!("returned above"),
+        (Instance::Wide(_), _) | (Instance::Fp4(_), _) => unreachable!("returned above"),
     }
+}
+
+/// `E(F_{p⁴})`: `ic.k4_gaudry`, or a generic method on [`Fp4Group`].
+fn solve_fp4(
+    m: &ResolvedMethod,
+    i: &Fp4Instance,
+    tx: u64,
+    ty: u64,
+    seed: u64,
+) -> Result<SolveReport, String> {
+    let target = i.decode(tx, ty)?;
+    if m.id != "ic.k4_gaudry" {
+        if !(m.id.starts_with("rho.plain")
+            || m.id == "rho.negation"
+            || m.id.starts_with("bsgs.")
+            || m.id == "kangaroo.vow")
+        {
+            return Err(format!("`{}` has no E(F_p⁴) implementation", m.id));
+        }
+        let g = Fp4Group(i.curve());
+        return solve_generic(m, &g, i.g, target, i.r, seed);
+    }
+    let base = match m.params["base"].as_str() {
+        "xline" => K4Base::XLine,
+        "yline-d4" => K4Base::YLineD4,
+        // Item ic_improve_20261014/01: the D₄ Y-line stacked with double
+        // large primes (|F'| = ⌈columns^lp_exponent⌉ of the folded columns).
+        "yline-d4-lp" => K4Base::YLineD4,
+        // Item ic_improve_20261015/04: the D₄ Y-line with the eager
+        // first-dependency stop (filter after every relation).
+        "yline-d4-ed" => K4Base::YLineD4,
+        other => {
+            return Err(format!(
+                "base `{other}`: xline, yline-d4, yline-d4-lp or yline-d4-ed"
+            ))
+        }
+    };
+    let large_primes = param_u64(m, "large_primes")? as usize;
+    if large_primes != 0 && large_primes != 2 {
+        return Err("large_primes is 0 or 2".into());
+    }
+    if (m.params["base"] == "yline-d4" || m.params["base"] == "yline-d4-ed") && large_primes != 0 {
+        return Err("yline-d4 and yline-d4-ed run without large primes".into());
+    }
+    let prm = K4Params {
+        base,
+        large_primes,
+        lp_exponent: param_f64(m, "lp_exponent")?,
+        c4: param_f64(m, "c4")?,
+        trial_cap_per_column: param_u64(m, "trial_cap")?,
+        eager_la: m.params["base"] == "yline-d4-ed",
+    };
+    let t = Instant::now();
+    measurement::begin_online(Phase::RhoSolve);
+    let out = fp4::solve_k4(i, target, seed, &prm);
+    measurement::end_online();
+    let phases: Vec<PhaseRecord> = out
+        .phases
+        .iter()
+        .map(|&(name, adds, gae)| PhaseRecord {
+            name: name.into(),
+            adds,
+            gae,
+            ..Default::default()
+        })
+        .collect();
+    let total = phases.iter().map(|p| p.gae).sum();
+    Ok(SolveReport {
+        recovered: out.recovered.map(u128::from),
+        exhausted: out.exhausted,
+        phases,
+        total_gae: total,
+        automorphisms_used: if base == K4Base::YLineD4 { 4 } else { 2 },
+        unpriced: unpriced_of(&out.counters),
+        counters: out.counters,
+        deterministic: true,
+        nondeterminism: vec![],
+        solve_wall_ns: t.elapsed().as_nanos() as u64,
+        factor_base: None,
+        detail: out.detail,
+        online: None,
+        online_error: None,
+        solver: None,
+        field_ops: None,
+    })
 }
 
 fn solve_large_prime(
@@ -1084,6 +1425,9 @@ fn solve_large_prime(
         online: None,
         online_error: None,
         solver: None,
+        // Binary-field index calculus: the field work is outside the group law
+        // this tally sees, so it stays unknown rather than understated.
+        field_ops: None,
     })
 }
 
@@ -1236,6 +1580,7 @@ fn claw_report(o: ClawOutcome, shape: ClawShape, r: u128, n: u32, wall: u64) -> 
         online: None,
         online_error: None,
         solver: None,
+        field_ops: None,
     }
 }
 
@@ -1333,6 +1678,7 @@ fn strong_run<F: RhoField, S: RhoScalar>(
             online: None,
             online_error: None,
             solver: None,
+            field_ops: None,
         });
     };
     let c = o.charges;
@@ -1388,6 +1734,7 @@ fn strong_run<F: RhoField, S: RhoScalar>(
         online: None,
         online_error: None,
         solver: None,
+        field_ops: None,
     })
 }
 
@@ -1409,7 +1756,7 @@ fn pinned_only_calibration(regime: &str, slug: &str) -> Calibration {
 
 /// Native counters the calibration prices, with the unit field that
 /// prices each (`price_phase`'s table).
-const PRICED_NATIVE: &[(&str, &str)] = &[
+pub const PRICED_NATIVE: &[(&str, &str)] = &[
     ("sqrt_solves", "ns_per_sqrt"),
     ("as_solves", "ns_per_as_solve"),
     ("s4_pairs", "ns_per_s4_pair"),
@@ -1459,7 +1806,9 @@ fn ic_report(
     // (`audit::legacy_solver_rounding` reproduces those records).
     let mut total = rep.total_gae;
     if let Some(s) = &rep.decomposition.solver {
-        if s.gae > 0.0 && s.priced_by != "pinned" {
+        if (s.gae > 0.0 || (m.id == "ic.pipeline_counted" && s.calls > 0))
+            && s.priced_by != "pinned"
+        {
             phases[2].gae = rep.decomposition.gae_before_solver;
             total = phases.iter().fold(0.0, |acc, p| acc + p.gae);
             unpriced.push(format!("solver_{}_uncharged", s.op_unit.replace(' ', "_")));
@@ -1467,6 +1816,20 @@ fn ic_report(
         if param_u64(m, "solver_budget_seconds").unwrap_or(0) > 0 {
             nondeterminism.push("solver ran under a wall-clock budget".into());
         }
+    }
+    if m.id == "ic.pipeline_counted" {
+        // The frozen counted method reconstructs its relation charge from
+        // integer group/native work, independent of solver wall time.
+        let mut counted = rep.decomposition.cost.clone();
+        price_phase(&mut counted, calib);
+        phases[2].gae = counted.gae
+            + rep
+                .decomposition
+                .solver
+                .as_ref()
+                .filter(|s| s.priced_by == "pinned")
+                .map_or(0.0, |s| s.gae);
+        total = phases.iter().map(|p| p.gae).sum();
     }
     // Native counters with no pinned ratio for this curve.
     for (counter, unit) in PRICED_NATIVE {
@@ -1528,6 +1891,11 @@ fn ic_report(
         online: None,
         online_error: None,
         solver,
+        // The pipeline's field arithmetic outside the group law (square
+        // roots, Legendre symbols, oracle inversions, the elimination) is
+        // counted natively and priced apart; the group-law tally alone
+        // would understate it, so the figure stays unknown.
+        field_ops: None,
     }
 }
 
@@ -1608,9 +1976,13 @@ fn solve_ic_prime(
     let (spec, fb_name, or_name) = pipeline_spec(m, seed)?;
     let abscissa = PrimeAbscissaBase { instance: inst };
     let orbit = GlvOrbitBase { instance: inst };
+    let kummer = PrimeKummerBase { instance: inst };
+    let isogeny = PrimeIsogenyBase { instance: inst };
     let base: &dyn FactorBaseBuilder<_> = match fb_name.as_str() {
         "prime-abscissa" => &abscissa,
         "glv-orbit" => &orbit,
+        "prime-kummer" => &kummer,
+        "prime-isogeny" => &isogeny,
         other => {
             return Err(format!(
                 "factor base `{other}` does not run on a prime curve"
@@ -1620,9 +1992,19 @@ fn solve_ic_prime(
     let ms = spec.oracle_params.u64_or("m", 2)? as u32;
     let mut subtract = SubtractOracle;
     let mut mitm = MitmOracle::new(ms);
+    let mut prime_batch = PrimeBatchMitmOracle::new();
+    let mut mitm_fiber = FiberMitmOracle::new(ms);
+    let mut rootfind_mitm = RootfindMitmOracle::new(ms);
+    let mut rootfind_pairs = RootfindPairsOracle::new(ms);
+    let mut rootfind = RootfindSubtractOracle::new(ms, inst);
     let oracle: &mut dyn DecompositionOracle<_> = match or_name.as_str() {
         "subtract" => &mut subtract,
         "mitm" => &mut mitm,
+        "mitm-prime-batch" => &mut prime_batch,
+        "mitm-fiber" => &mut mitm_fiber,
+        "rootfind-mitm" => &mut rootfind_mitm,
+        "rootfind-pairs" => &mut rootfind_pairs,
+        "rootfind-subtract" => &mut rootfind,
         other => return Err(format!("oracle `{other}` does not run on a prime curve")),
     };
     let ctx = InstanceCtx {
@@ -1707,11 +2089,13 @@ fn solve_ic_binary(
     let subspace = BinarySubspaceBase { instance: inst };
     let orbit = KoblitzOrbitBase { instance: inst };
     let compact = CompactOrbitScanBase { instance: inst };
+    let cyclotomic = CyclotomicBase { instance: inst };
     let plugin_base = binary_plugins().and_then(|p| (p.base)(fb_name.as_str(), inst));
     let base: &dyn FactorBaseBuilder<BinaryGroup> = match fb_name.as_str() {
         "binary-subspace" => &subspace,
         "koblitz-orbit" => &orbit,
         "compact-orbit-scan" => &compact,
+        "cyclotomic" => &cyclotomic,
         other => match plugin_base.as_deref() {
             Some(b) => b,
             None => {
@@ -1726,6 +2110,28 @@ fn solve_ic_binary(
     let mut mitm = MitmOracle::new(ms);
     let mut frob = FrobeniusMitmOracle::new(ms, inst);
     let mut frob_counted = FrobeniusMitmOracle::new_counted(ms, inst);
+    let mut mitm_fiber = FiberMitmOracle::new(ms);
+    let mut frob_fiber = FiberFrobeniusMitmOracle::new(ms, inst);
+    let mut rootfind_mitm = RootfindMitmOracle::new(ms);
+    let mut rootfind_pairs = RootfindPairsOracle::new(ms);
+    let mut descent_fiber = match or_name.as_str() {
+        "descent-algebraic-fiber" => {
+            let name = spec
+                .solver
+                .as_deref()
+                .ok_or("descent-algebraic-fiber needs `solver`")?;
+            let budget = (spec.solver_budget_seconds > 0)
+                .then(|| std::time::Duration::from_secs(spec.solver_budget_seconds));
+            Some(FiberDescentOracle::new(
+                ms,
+                inst,
+                solver_by_name(name)?,
+                spec.solver_params.clone(),
+                budget,
+            ))
+        }
+        _ => None,
+    };
     let mut plugin_oracle = binary_plugins().and_then(|p| (p.oracle)(or_name.as_str(), ms, inst));
     let mut algebraic = match or_name.as_str() {
         "descent-algebraic" => {
@@ -1750,7 +2156,12 @@ fn solve_ic_binary(
         "mitm" => &mut mitm,
         "mitm-frobenius" => &mut frob,
         "mitm-frobenius-counted" => &mut frob_counted,
+        "mitm-fiber" => &mut mitm_fiber,
+        "mitm-frobenius-fiber" => &mut frob_fiber,
+        "rootfind-mitm" => &mut rootfind_mitm,
+        "rootfind-pairs" => &mut rootfind_pairs,
         "descent-algebraic" => algebraic.as_mut().expect("built above"),
+        "descent-algebraic-fiber" => descent_fiber.as_mut().expect("built above"),
         other => match plugin_oracle.as_deref_mut() {
             Some(o) => o,
             None => return Err(format!("oracle `{other}` does not run on a binary curve")),
@@ -1955,6 +2366,7 @@ fn solve_shared_rank(
         online: Some(online),
         online_error: None,
         solver: None,
+        field_ops: None,
     })
 }
 
@@ -2069,13 +2481,20 @@ pub fn dump_factor_base(
     if let Instance::Wide(_) = &inst {
         return Err("no factor-base plug-in runs on a wide (n > 62) curve yet".into());
     }
+    if let Instance::Fp4(_) = &inst {
+        return Err("no factor-base plug-in runs on E(F_p⁴); ic.k4_gaudry builds its own".into());
+    }
     match &inst {
         Instance::Prime(i) => {
             let abscissa = PrimeAbscissaBase { instance: i };
             let orbit = GlvOrbitBase { instance: i };
+            let kummer = PrimeKummerBase { instance: i };
+            let isogeny = PrimeIsogenyBase { instance: i };
             let base: &dyn FactorBaseBuilder<_> = match name.as_str() {
                 "prime-abscissa" => &abscissa,
                 "glv-orbit" => &orbit,
+                "prime-kummer" => &kummer,
+                "prime-isogeny" => &isogeny,
                 other => {
                     return Err(format!(
                         "factor base `{other}` does not run on a prime curve"
@@ -2114,11 +2533,13 @@ pub fn dump_factor_base(
             let subspace = BinarySubspaceBase { instance: i };
             let orbit = KoblitzOrbitBase { instance: i };
             let compact = CompactOrbitScanBase { instance: i };
+            let cyclotomic = CyclotomicBase { instance: i };
             let plugin_base = binary_plugins().and_then(|p| (p.base)(name.as_str(), i));
             let base: &dyn FactorBaseBuilder<BinaryGroup> = match name.as_str() {
                 "binary-subspace" => &subspace,
                 "koblitz-orbit" => &orbit,
                 "compact-orbit-scan" => &compact,
+                "cyclotomic" => &cyclotomic,
                 other => match plugin_base.as_deref() {
                     Some(b) => b,
                     None => {
@@ -2155,7 +2576,7 @@ pub fn dump_factor_base(
                 build_doubles: total.doubles,
             })
         }
-        Instance::Wide(_) => unreachable!("returned above"),
+        Instance::Wide(_) | Instance::Fp4(_) => unreachable!("returned above"),
     }
 }
 
@@ -2238,6 +2659,235 @@ mod tests {
         );
         assert_eq!(s.sat_conflicts, None);
         assert_eq!(s.n_vars, None);
+    }
+
+    /// A prime-curve solve reports the field operations behind its group
+    /// operations; a Koblitz solve, whose arithmetic does not count them,
+    /// reports none — and never a zero.
+    #[test]
+    fn field_operations_are_reported_on_prime_curves_and_unknown_elsewhere() {
+        use crate::cryptanalysis::ecbench::workload::CurveSpec;
+        let m = resolve(&MethodSpec {
+            id: "bsgs.negation".into(),
+            params: BTreeMap::new(),
+        })
+        .unwrap();
+        let spec = CurveSpec::PrimeSearch {
+            bits: 12,
+            seed: 59297,
+        };
+        let inst = spec.build().unwrap();
+        let facts = inst.facts(&spec);
+        let Instance::Prime(prime) = &inst else {
+            unreachable!()
+        };
+        let mut scratch = GroupOps::default();
+        let target = prime.curve.mul(&mut scratch, prime.generator_point(), 97);
+        let rep = solve(
+            &m,
+            &inst,
+            &facts,
+            &[format!("0x{:x}", target.x), format!("0x{:x}", target.y)],
+            5,
+        )
+        .unwrap();
+        assert_eq!(rep.recovered, Some(97));
+        let f = rep
+            .field_ops
+            .expect("a prime curve counts its field operations");
+        let group_ops = rep.total_gae;
+        // Every addition or doubling that did field work did exactly one
+        // inversion, at least two multiplications and at least one
+        // squaring; the special cases (∞ + P, P + (−P)) did none.
+        assert!(
+            f.invs > 0 && f.invs as f64 <= group_ops,
+            "{f:?} over {group_ops} group operations"
+        );
+        assert!(f.muls >= 2 * f.invs && f.sqrs >= f.invs, "{f:?}");
+        // The block is its own: counters and phases, which committed
+        // replays compare, do not carry it.
+        assert!(rep.counters.keys().all(|k| !k.contains("field")));
+        let v = serde_json::to_value(&rep).unwrap();
+        assert_eq!(v["field_ops"]["invs"], f.invs);
+
+        let spec = CurveSpec::Koblitz { a: 1, n: 17 };
+        let inst = spec.build().unwrap();
+        let facts = inst.facts(&spec);
+        let Instance::Binary(binary) = &inst else {
+            unreachable!()
+        };
+        let target = binary.fast.mul_u64(binary.generator, 113);
+        let rep = solve(
+            &m,
+            &inst,
+            &facts,
+            &[format!("0x{:x}", target.x), format!("0x{:x}", target.y)],
+            5,
+        )
+        .unwrap();
+        assert_eq!(rep.recovered, Some(u128::from(113 % binary.r)));
+        assert!(rep.field_ops.is_none(), "unknown is not zero");
+        let v = serde_json::to_value(&rep).unwrap();
+        assert!(v.get("field_ops").is_none(), "absent, not null");
+    }
+
+    /// `rootfind-subtract` is `subtract`'s search on `prime_fast`'s
+    /// arithmetic: the same candidates in the same order, so the two arms
+    /// issue the same queries and find the same relations on one seed,
+    /// with one batched inversion a target instead of one per candidate.
+    /// Its hits are re-added on the ledger (one addition each), which is
+    /// the only charge the two differ by.
+    #[test]
+    fn rootfind_subtract_follows_subtract_query_stream_on_a_prime_curve() {
+        use crate::cryptanalysis::ecbench::workload::CurveSpec;
+        let spec = CurveSpec::PrimeSearch {
+            bits: 20,
+            seed: 59297,
+        };
+        let inst = spec.build().unwrap();
+        let facts = inst.facts(&spec);
+        let Instance::Prime(prime) = &inst else {
+            unreachable!()
+        };
+        let mut scratch = GroupOps::default();
+        let target = prime.curve.mul(&mut scratch, prime.generator_point(), 4099);
+        let coords = [format!("0x{:x}", target.x), format!("0x{:x}", target.y)];
+        let run = |oracle: &str| {
+            let m = resolve(&MethodSpec {
+                id: "ic.pipeline".into(),
+                params: [
+                    (
+                        "factor_base".to_string(),
+                        "prime-abscissa:size=32".to_string(),
+                    ),
+                    ("oracle".to_string(), oracle.to_string()),
+                ]
+                .into_iter()
+                .collect(),
+            })
+            .unwrap();
+            solve(&m, &inst, &facts, &coords, 11).unwrap()
+        };
+        let sub = run("subtract");
+        let root = run("rootfind-subtract:m=2");
+        assert_eq!(sub.recovered, Some(4099 % u128::from(prime.r)));
+        assert_eq!(root.recovered, sub.recovered);
+        for key in ["targets_tried", "relations_found", "matrix_rank"] {
+            assert_eq!(sub.counters[key], root.counters[key], "{key}");
+        }
+        let relations = |r: &SolveReport| {
+            r.phases
+                .iter()
+                .find(|p| p.name == "relations")
+                .cloned()
+                .expect("a relations phase")
+        };
+        let (s, r) = (relations(&sub), relations(&root));
+        // The same candidate points, each one addition; the root finder
+        // adds one re-addition per relation and nothing else.
+        assert_eq!(
+            r.adds,
+            s.adds + root.counters["relations_found"],
+            "{s:?} {r:?}"
+        );
+        assert_eq!(r.native["lookups"], s.native["lookups"]);
+        // One batched inversion per oracle call; the relation loop's
+        // target guard skips a few trials before the oracle sees them.
+        let inversions = r.native["inversions"];
+        assert!(inversions > 0 && inversions <= root.counters["targets_tried"]);
+        assert_eq!(s.native.get("inversions").copied().unwrap_or(0), 0);
+        assert_eq!(r.native.get("frobfold_mismatches").copied().unwrap_or(0), 0);
+        assert!(root.solver.is_none(), "a table oracle solves no system");
+        assert!(root.deterministic);
+
+        // A knob the engine does not read is refused, as is a summand
+        // count it does not take.
+        for bad in [
+            "rootfind-subtract:m=2,negation_folded=1",
+            "rootfind-subtract:m=4",
+        ] {
+            let m = resolve(&MethodSpec {
+                id: "ic.pipeline".into(),
+                params: [
+                    (
+                        "factor_base".to_string(),
+                        "prime-abscissa:size=32".to_string(),
+                    ),
+                    ("oracle".to_string(), bad.to_string()),
+                ]
+                .into_iter()
+                .collect(),
+            })
+            .unwrap();
+            assert!(solve(&m, &inst, &facts, &coords, 11).is_err(), "{bad}");
+        }
+        let m = resolve(&MethodSpec {
+            id: "ic.pipeline".into(),
+            params: [
+                (
+                    "factor_base".to_string(),
+                    "prime-abscissa:size=32".to_string(),
+                ),
+                ("oracle".to_string(), "rootfind-subtract:m=3".to_string()),
+            ]
+            .into_iter()
+            .collect(),
+        })
+        .unwrap();
+        let three = solve(&m, &inst, &facts, &coords, 11).unwrap();
+        assert_eq!(three.recovered, sub.recovered);
+        assert!(three
+            .phases
+            .iter()
+            .any(|p| p.name == "oracle_setup" && p.adds > 0));
+    }
+
+    /// `prime-isogeny` runs end to end: the answer is right, the
+    /// auxiliary-curve search is charged in the factor-base phase and
+    /// recorded apart, and the dump's id is the run's.
+    #[test]
+    fn prime_isogeny_base_charges_its_search_and_keeps_its_id() {
+        use crate::cryptanalysis::ecbench::workload::CurveSpec;
+        let spec = CurveSpec::PrimeSearch {
+            bits: 20,
+            seed: 59297,
+        };
+        let inst = spec.build().unwrap();
+        let facts = inst.facts(&spec);
+        let Instance::Prime(prime) = &inst else {
+            unreachable!()
+        };
+        let mut scratch = GroupOps::default();
+        let target = prime
+            .curve
+            .mul(&mut scratch, prime.generator_point(), 77_777);
+        let coords = [format!("0x{:x}", target.x), format!("0x{:x}", target.y)];
+        let fb_spec = "prime-isogeny:t=7,seed=1";
+        let m = resolve(&MethodSpec {
+            id: "ic.pipeline".into(),
+            params: [
+                ("factor_base".to_string(), fb_spec.to_string()),
+                ("oracle".to_string(), "rootfind-mitm:m=3".to_string()),
+            ]
+            .into_iter()
+            .collect(),
+        })
+        .unwrap();
+        let rep = solve(&m, &inst, &facts, &coords, 5).unwrap();
+        assert_eq!(rep.recovered, Some(77_777 % u128::from(prime.r)));
+        let fbp = rep.phases.iter().find(|p| p.name == "factor_base").unwrap();
+        let charged = fbp.native["aux_search_gae"] + fbp.native["aux_tower_build_gae"];
+        assert!(charged > 0 && fbp.native["aux_curves_tried"] >= 1);
+        assert_eq!((fbp.adds + fbp.doubles) as u64, charged);
+        assert_eq!(fbp.gae, charged as f64);
+        let fb = rep.factor_base.as_ref().unwrap();
+        assert_eq!(fb.family, "prime-isogeny");
+        let dump = dump_factor_base(&spec, fb_spec).unwrap();
+        assert_eq!(dump.factor_base.fb_id, fb.fb_id);
+        assert_eq!(dump.build_adds + dump.build_doubles, charged);
+        let again = solve(&m, &inst, &facts, &coords, 5).unwrap();
+        assert_eq!(again.total_gae, rep.total_gae);
+        assert_eq!(again.factor_base.unwrap().fb_id, fb.fb_id);
     }
 
     #[test]

@@ -1,0 +1,41 @@
+### n = 13
+
+| arm | cells | found | refuted | exhausted | disagree | spurious | common refuted | native conflicts (common) | own conflicts (common) | own decisions (common) | median wall refuting, ms | native median wall (common), ms | wall ratio | median wall found, ms |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| native-cdcl-xor | 20 | 13 | 7 | 0 | 0 | 0 | 7 | 1151371 | 1151371 | n/a | 5589 | 5589 | 1.00 | 266 |
+| cvc5-bool | 20 | 13 | 7 | 0 | 0 | 0 | 7 | 1151371 | n/a | 223431 | 2445 | 5589 | 0.44 | 967 |
+| cvc5-bv1 | 20 | 13 | 7 | 0 | 0 | 0 | 7 | 1151371 | n/a | n/a | 7482 | 5589 | 1.34 | 500 |
+| z3-bool | 20 | 13 | 7 | 0 | 0 | 0 | 7 | 1151371 | 878802 | 936412 | 12333 | 5589 | 2.21 | 3694 |
+| z3-bv1 | 20 | 13 | 7 | 0 | 0 | 0 | 7 | 1151371 | 2098876 | 2188226 | 14679 | 5589 | 2.63 | 4184 |
+
+### n = 19
+
+| arm | cells | found | refuted | exhausted | disagree | spurious | common refuted | native conflicts (common) | own conflicts (common) | own decisions (common) | median wall refuting, ms | native median wall (common), ms | wall ratio | median wall found, ms |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| native-cdcl-xor | 12 | 4 | 0 | 8 | 0 | 0 | 0 | 0 | n/a | n/a | n/a | n/a | n/a | 17541 |
+| cvc5-bool | 12 | 0 | 0 | 12 | 0 | 0 | 0 | 0 | n/a | n/a | n/a | n/a | n/a | n/a |
+| cvc5-bv1 | 12 | 5 | 0 | 7 | 0 | 0 | 0 | 0 | n/a | n/a | n/a | n/a | n/a | 60452 |
+| z3-bool | 12 | 1 | 0 | 11 | 0 | 0 | 0 | 0 | n/a | n/a | n/a | n/a | n/a | 25536 |
+| z3-bv1 | 12 | 0 | 0 | 12 | 0 | 0 | 0 | 0 | n/a | n/a | n/a | n/a | n/a | n/a |
+
+### n = 23
+
+| arm | cells | found | refuted | exhausted | disagree | spurious | common refuted | native conflicts (common) | own conflicts (common) | own decisions (common) | median wall refuting, ms | native median wall (common), ms | wall ratio | median wall found, ms |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| native-cdcl-xor | 8 | 0 | 0 | 8 | 0 | 0 | 0 | 0 | n/a | n/a | n/a | n/a | n/a | n/a |
+| cvc5-bool | 8 | 0 | 0 | 8 | 0 | 0 | 0 | 0 | n/a | n/a | n/a | n/a | n/a | n/a |
+| cvc5-bv1 | 8 | 0 | 0 | 8 | 0 | 0 | 0 | 0 | n/a | n/a | n/a | n/a | n/a | n/a |
+| z3-bool | 8 | 0 | 0 | 8 | 0 | 0 | 0 | 0 | n/a | n/a | n/a | n/a | n/a | n/a |
+| z3-bv1 | 8 | 0 | 0 | 8 | 0 | 0 | 0 | 0 | n/a | n/a | n/a | n/a | n/a | n/a |
+
+### wall ratio to native on common refuted cells, by n
+
+- cvc5-bool: n=13: 0.44
+- cvc5-bv1: n=13: 1.34
+- z3-bool: n=13: 2.21
+- z3-bv1: n=13: 2.63
+
+P1 (correctness): PASS
+P2 (Z3 parity cost ≥ 5× native conflicts on common refuted cells): FAIL
+P3 (no SMT arm decides more cells than native): FAIL
+P4 (wall ratio to native at n=23 ≥ ratio at n=13): not scored (no qualifying cells)

@@ -254,6 +254,7 @@ pub fn binary_explicit_instance(
             subgroup_order: order,
             cofactor: BigUint::from(group_order / r),
             lambda,
+            frobenius_is_endomorphism: true,
             k: 1,
             q: 2,
             a_index: a,

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="420" viewBox="0 0 1000 420">
+<style>text{font-family:Arial,sans-serif;fill:#15344b}.title{font-size:23px;font-weight:bold}.body{font-size:18px}.small{font-size:16px}rect{fill:#edf5f8;stroke:#315c73;stroke-width:2}.edge{fill:none;stroke:#315c73;stroke-width:3}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#315c73"/></marker></defs>
+<text x="30" y="32" class="title">Native freeze: 3 training + 5 holdout public points</text>
+<rect x="30" y="70" width="290" height="120" rx="12"/><text x="50" y="101" class="body">SplitMix64 seed 202610128301</text><text x="50" y="130" class="small">Uniform nonzero scalar proposals</text><text x="50" y="158" class="small">Unbiased 64-bit range rejection</text>
+<path d="M320 130H370" class="edge" marker-end="url(#arrow)"/>
+<rect x="380" y="70" width="280" height="120" rx="12"/><text x="400" y="101" class="body">Native Q = [d]G and exclusions</text><text x="400" y="130" class="small">Exclude prior Q and K600 base</text><text x="400" y="158" class="small">Exclude earlier accepted orbits</text>
+<path d="M660 130H710" class="edge" marker-end="url(#arrow)"/>
+<rect x="720" y="70" width="250" height="120" rx="12"/><text x="740" y="101" class="body">8 point-only fixtures</text><text x="740" y="130" class="small">3 training; 5 held out</text><text x="740" y="158" class="small">8/8 native fixture checks pass</text>
+<rect x="180" y="245" width="650" height="105" rx="12"/><text x="202" y="276" class="body">Separate validation-only scalar sidecar</text><text x="202" y="306" class="small">Independent validator replays dG and the deterministic stream.</text><text x="202" y="333" class="small">Measured children receive only public point JSONL files.</text>
+<text x="30" y="397" class="small">Accepted law is conditioned on signed-orbit exclusions. No benchmark or performance claim.</text>
+</svg>

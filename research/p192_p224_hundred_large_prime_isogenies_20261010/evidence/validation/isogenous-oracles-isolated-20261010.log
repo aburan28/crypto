@@ -1,0 +1,15 @@
+
+running 1 test
+
+thread 'cryptanalysis::koblitz_index_calculus::isogenous_model_tests::isogenous_model_solves_the_dlp_with_every_oracle' (100152) panicked at src/cryptanalysis/koblitz_index_calculus.rs:18370:54:
+factor base on the model
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test cryptanalysis::koblitz_index_calculus::isogenous_model_tests::isogenous_model_solves_the_dlp_with_every_oracle ... FAILED
+
+failures:
+
+failures:
+    cryptanalysis::koblitz_index_calculus::isogenous_model_tests::isogenous_model_solves_the_dlp_with_every_oracle
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3916 filtered out; finished in 0.02s
+

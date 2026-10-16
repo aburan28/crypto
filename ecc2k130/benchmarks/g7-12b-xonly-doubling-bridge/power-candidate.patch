@@ -1,0 +1,12 @@
+diff -ruN /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-block-src/include/packedxonly23.cuh /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-power-src/include/packedxonly23.cuh
+--- /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-block-src/include/packedxonly23.cuh	2026-09-17 21:48:34.741913357 +0000
++++ /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-power-src/include/packedxonly23.cuh	2026-09-17 21:55:43.772867564 +0000
+@@ -19,7 +19,7 @@
+     const P131 x4 = squarePolynomial131(x2);
+     const P131 x3 = mulPolynomial131(x, x2);
+     const P131 x5 = mulPolynomial131(x, x4);
+-    const P131 x6 = mulPolynomial131(x2, x4);
++    const P131 x6 = squarePolynomial131(x3);
+     const P131 x7 = mulPolynomial131(x, x6);
+     const P131 one{{1, 0, 0, 0, 0}};
+     const P131 a = add131(add131(add131(add131(add131(x7, x6), x4), x3), x), one);

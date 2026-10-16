@@ -1,0 +1,1115 @@
+{
+  "schema": "p256.dickson_balanced_s5_degree/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "prime": 1151,
+  "a": 1148,
+  "b": 241,
+  "depth": 5,
+  "terminals": [
+    0,
+    369
+  ],
+  "cells_per_class": 4,
+  "max_degree": 8,
+  "budget_seconds_per_arm_cell": 20,
+  "terminal_results": [
+    {
+      "terminal": 0,
+      "boundaries": [
+        {
+          "boundary": 25,
+          "liftable_x": [
+            519
+          ],
+          "signed_points": 2
+        },
+        {
+          "boundary": 41,
+          "liftable_x": [
+            1061
+          ],
+          "signed_points": 2
+        },
+        {
+          "boundary": 257,
+          "liftable_x": [],
+          "signed_points": 0
+        },
+        {
+          "boundary": 262,
+          "liftable_x": [
+            372
+          ],
+          "signed_points": 2
+        },
+        {
+          "boundary": 342,
+          "liftable_x": [
+            583
+          ],
+          "signed_points": 2
+        },
+        {
+          "boundary": 384,
+          "liftable_x": [
+            409
+          ],
+          "signed_points": 2
+        },
+        {
+          "boundary": 433,
+          "liftable_x": [
+            678
+          ],
+          "signed_points": 2
+        },
+        {
+          "boundary": 564,
+          "liftable_x": [],
+          "signed_points": 0
+        },
+        {
+          "boundary": 587,
+          "liftable_x": [],
+          "signed_points": 0
+        },
+        {
+          "boundary": 718,
+          "liftable_x": [
+            408,
+            743
+          ],
+          "signed_points": 4
+        },
+        {
+          "boundary": 767,
+          "liftable_x": [
+            725
+          ],
+          "signed_points": 2
+        },
+        {
+          "boundary": 809,
+          "liftable_x": [
+            1040
+          ],
+          "signed_points": 2
+        },
+        {
+          "boundary": 889,
+          "liftable_x": [],
+          "signed_points": 0
+        },
+        {
+          "boundary": 894,
+          "liftable_x": [
+            969
+          ],
+          "signed_points": 2
+        },
+        {
+          "boundary": 1110,
+          "liftable_x": [
+            320
+          ],
+          "signed_points": 2
+        },
+        {
+          "boundary": 1126,
+          "liftable_x": [
+            235
+          ],
+          "signed_points": 2
+        }
+      ],
+      "planted_source_boundaries": [
+        25,
+        41,
+        262,
+        342
+      ],
+      "target": [
+        441,
+        24
+      ],
+      "selected_positive_cells": 4,
+      "selected_negative_cells": 4,
+      "cells": [
+        {
+          "boundaries": [
+            25,
+            25,
+            384,
+            1110
+          ],
+          "expected_positive": true,
+          "exhaustive_signed_tuples": 16,
+          "baseline": {
+            "arm": "curve-lift-baseline",
+            "variables": 23,
+            "equations": 24,
+            "input_max_degree": 2,
+            "inconsistent": false,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 453,
+            "field_ops": 854546
+          },
+          "specialised": {
+            "arm": "liftability-specialised",
+            "variables": 15,
+            "equations": 16,
+            "input_max_degree": 2,
+            "inconsistent": false,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 2,
+            "max_cols_to_solution": 32,
+            "field_ops": 1323
+          },
+          "staged": {
+            "positive": true,
+            "correct": true,
+            "pair_image_solves": 2,
+            "join_solves": 1,
+            "roots_returned": 5,
+            "index_lookups": 2,
+            "field_multiplications": 120,
+            "maximum_local_degree": 2,
+            "left_image_size": 1,
+            "right_image_size": 2,
+            "witness": [
+              443,
+              196
+            ],
+            "image_sha256": "5f8ad6f62f2585f6581f7a117b678f6fd570411741a9398a3da0b2091e024370"
+          }
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            767,
+            1110
+          ],
+          "expected_positive": true,
+          "exhaustive_signed_tuples": 16,
+          "baseline": {
+            "arm": "curve-lift-baseline",
+            "variables": 23,
+            "equations": 24,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": false,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 453,
+            "field_ops": 424948
+          },
+          "specialised": {
+            "arm": "liftability-specialised",
+            "variables": 15,
+            "equations": 16,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": false,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 2,
+            "max_cols_to_solution": 32,
+            "field_ops": 857
+          },
+          "staged": {
+            "positive": false,
+            "correct": false,
+            "pair_image_solves": 2,
+            "join_solves": 1,
+            "roots_returned": 5,
+            "index_lookups": 2,
+            "field_multiplications": 120,
+            "maximum_local_degree": 2,
+            "left_image_size": 1,
+            "right_image_size": 2,
+            "witness": null,
+            "image_sha256": "e05657ddc1149f79dc8dad2ef54e329ef5aa1442ba455ae9fd638a177d2b2929"
+          }
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            1110,
+            384
+          ],
+          "expected_positive": true,
+          "exhaustive_signed_tuples": 16,
+          "baseline": {
+            "arm": "curve-lift-baseline",
+            "variables": 23,
+            "equations": 24,
+            "input_max_degree": 2,
+            "inconsistent": false,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 453,
+            "field_ops": 854550
+          },
+          "specialised": {
+            "arm": "liftability-specialised",
+            "variables": 15,
+            "equations": 16,
+            "input_max_degree": 2,
+            "inconsistent": false,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 2,
+            "max_cols_to_solution": 32,
+            "field_ops": 1323
+          },
+          "staged": {
+            "positive": true,
+            "correct": true,
+            "pair_image_solves": 2,
+            "join_solves": 1,
+            "roots_returned": 5,
+            "index_lookups": 2,
+            "field_multiplications": 120,
+            "maximum_local_degree": 2,
+            "left_image_size": 1,
+            "right_image_size": 2,
+            "witness": [
+              443,
+              196
+            ],
+            "image_sha256": "5f8ad6f62f2585f6581f7a117b678f6fd570411741a9398a3da0b2091e024370"
+          }
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            1110,
+            767
+          ],
+          "expected_positive": true,
+          "exhaustive_signed_tuples": 16,
+          "baseline": {
+            "arm": "curve-lift-baseline",
+            "variables": 23,
+            "equations": 24,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": false,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 453,
+            "field_ops": 424882
+          },
+          "specialised": {
+            "arm": "liftability-specialised",
+            "variables": 15,
+            "equations": 16,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": false,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 2,
+            "max_cols_to_solution": 32,
+            "field_ops": 857
+          },
+          "staged": {
+            "positive": false,
+            "correct": false,
+            "pair_image_solves": 2,
+            "join_solves": 1,
+            "roots_returned": 5,
+            "index_lookups": 2,
+            "field_multiplications": 120,
+            "maximum_local_degree": 2,
+            "left_image_size": 1,
+            "right_image_size": 2,
+            "witness": null,
+            "image_sha256": "e05657ddc1149f79dc8dad2ef54e329ef5aa1442ba455ae9fd638a177d2b2929"
+          }
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            25,
+            25
+          ],
+          "expected_positive": false,
+          "exhaustive_signed_tuples": 16,
+          "baseline": {
+            "arm": "curve-lift-baseline",
+            "variables": 23,
+            "equations": 24,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 375,
+            "field_ops": 281668
+          },
+          "specialised": {
+            "arm": "liftability-specialised",
+            "variables": 15,
+            "equations": 16,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 2,
+            "max_cols_to_solution": 32,
+            "field_ops": 837
+          },
+          "staged": {
+            "positive": false,
+            "correct": true,
+            "pair_image_solves": 2,
+            "join_solves": 1,
+            "roots_returned": 4,
+            "index_lookups": 2,
+            "field_multiplications": 105,
+            "maximum_local_degree": 2,
+            "left_image_size": 1,
+            "right_image_size": 1,
+            "witness": null,
+            "image_sha256": "13583aa333cea68d839a5daa48310050f768e20fd0d5d228c5c85be5ed891138"
+          }
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            25,
+            41
+          ],
+          "expected_positive": false,
+          "exhaustive_signed_tuples": 16,
+          "baseline": {
+            "arm": "curve-lift-baseline",
+            "variables": 23,
+            "equations": 24,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 453,
+            "field_ops": 424815
+          },
+          "specialised": {
+            "arm": "liftability-specialised",
+            "variables": 15,
+            "equations": 16,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 2,
+            "max_cols_to_solution": 32,
+            "field_ops": 857
+          },
+          "staged": {
+            "positive": false,
+            "correct": true,
+            "pair_image_solves": 2,
+            "join_solves": 1,
+            "roots_returned": 5,
+            "index_lookups": 2,
+            "field_multiplications": 120,
+            "maximum_local_degree": 2,
+            "left_image_size": 1,
+            "right_image_size": 2,
+            "witness": null,
+            "image_sha256": "fab49fef7e040e46c68320866ddc28972581c113ae444d3338b4cf9ca0b837df"
+          }
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            25,
+            262
+          ],
+          "expected_positive": false,
+          "exhaustive_signed_tuples": 16,
+          "baseline": {
+            "arm": "curve-lift-baseline",
+            "variables": 23,
+            "equations": 24,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 453,
+            "field_ops": 425031
+          },
+          "specialised": {
+            "arm": "liftability-specialised",
+            "variables": 15,
+            "equations": 16,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 2,
+            "max_cols_to_solution": 32,
+            "field_ops": 857
+          },
+          "staged": {
+            "positive": false,
+            "correct": true,
+            "pair_image_solves": 2,
+            "join_solves": 1,
+            "roots_returned": 5,
+            "index_lookups": 2,
+            "field_multiplications": 120,
+            "maximum_local_degree": 2,
+            "left_image_size": 1,
+            "right_image_size": 2,
+            "witness": null,
+            "image_sha256": "c726ae304111d7047724662c2424c3e9ca56c6f68e1d9a3273c89f3d50697dbf"
+          }
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            25,
+            342
+          ],
+          "expected_positive": false,
+          "exhaustive_signed_tuples": 16,
+          "baseline": {
+            "arm": "curve-lift-baseline",
+            "variables": 23,
+            "equations": 24,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 453,
+            "field_ops": 423882
+          },
+          "specialised": {
+            "arm": "liftability-specialised",
+            "variables": 15,
+            "equations": 16,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 2,
+            "max_cols_to_solution": 32,
+            "field_ops": 857
+          },
+          "staged": {
+            "positive": false,
+            "correct": true,
+            "pair_image_solves": 2,
+            "join_solves": 1,
+            "roots_returned": 5,
+            "index_lookups": 2,
+            "field_multiplications": 120,
+            "maximum_local_degree": 2,
+            "left_image_size": 1,
+            "right_image_size": 2,
+            "witness": null,
+            "image_sha256": "d5ad109e56cfbd8b6eb7ab5cadf92c8c0f37c6eb318a5337c5803cebe9c680a5"
+          }
+        }
+      ]
+    },
+    {
+      "terminal": 369,
+      "boundaries": [
+        {
+          "boundary": 94,
+          "liftable_x": [
+            163,
+            988
+          ],
+          "signed_points": 4
+        },
+        {
+          "boundary": 166,
+          "liftable_x": [
+            390
+          ],
+          "signed_points": 2
+        },
+        {
+          "boundary": 288,
+          "liftable_x": [
+            574,
+            577
+          ],
+          "signed_points": 4
+        },
+        {
+          "boundary": 447,
+          "liftable_x": [],
+          "signed_points": 0
+        },
+        {
+          "boundary": 507,
+          "liftable_x": [
+            462
+          ],
+          "signed_points": 2
+        },
+        {
+          "boundary": 525,
+          "liftable_x": [],
+          "signed_points": 0
+        },
+        {
+          "boundary": 537,
+          "liftable_x": [],
+          "signed_points": 0
+        },
+        {
+          "boundary": 539,
+          "liftable_x": [
+            328
+          ],
+          "signed_points": 2
+        },
+        {
+          "boundary": 612,
+          "liftable_x": [],
+          "signed_points": 0
+        },
+        {
+          "boundary": 614,
+          "liftable_x": [
+            935
+          ],
+          "signed_points": 2
+        },
+        {
+          "boundary": 626,
+          "liftable_x": [
+            138
+          ],
+          "signed_points": 2
+        },
+        {
+          "boundary": 644,
+          "liftable_x": [
+            229
+          ],
+          "signed_points": 2
+        },
+        {
+          "boundary": 704,
+          "liftable_x": [
+            330
+          ],
+          "signed_points": 2
+        },
+        {
+          "boundary": 863,
+          "liftable_x": [
+            273,
+            878
+          ],
+          "signed_points": 4
+        },
+        {
+          "boundary": 985,
+          "liftable_x": [
+            318
+          ],
+          "signed_points": 2
+        },
+        {
+          "boundary": 1057,
+          "liftable_x": [
+            470,
+            681
+          ],
+          "signed_points": 4
+        }
+      ],
+      "planted_source_boundaries": [
+        94,
+        166,
+        288,
+        507
+      ],
+      "target": [
+        722,
+        28
+      ],
+      "selected_positive_cells": 4,
+      "selected_negative_cells": 4,
+      "cells": [
+        {
+          "boundaries": [
+            94,
+            94,
+            288,
+            614
+          ],
+          "expected_positive": true,
+          "exhaustive_signed_tuples": 128,
+          "baseline": {
+            "arm": "curve-lift-baseline",
+            "variables": 23,
+            "equations": 24,
+            "input_max_degree": 2,
+            "inconsistent": false,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 453,
+            "field_ops": 854694
+          },
+          "specialised": {
+            "arm": "liftability-specialised",
+            "variables": 15,
+            "equations": 16,
+            "input_max_degree": 2,
+            "inconsistent": false,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 267,
+            "field_ops": 339588
+          },
+          "staged": {
+            "positive": true,
+            "correct": true,
+            "pair_image_solves": 6,
+            "join_solves": 4,
+            "roots_returned": 18,
+            "index_lookups": 8,
+            "field_multiplications": 420,
+            "maximum_local_degree": 2,
+            "left_image_size": 4,
+            "right_image_size": 4,
+            "witness": [
+              1065,
+              359
+            ],
+            "image_sha256": "21bcf3fd759fd8a8c3cc4e2a902d4e5da036a2fa042b36b32bd3c4ad1816aa54"
+          }
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            288,
+            1057
+          ],
+          "expected_positive": true,
+          "exhaustive_signed_tuples": 256,
+          "baseline": {
+            "arm": "curve-lift-baseline",
+            "variables": 23,
+            "equations": 24,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": false,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 453,
+            "field_ops": 425088
+          },
+          "specialised": {
+            "arm": "liftability-specialised",
+            "variables": 15,
+            "equations": 16,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": false,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 447,
+            "field_ops": 424683
+          },
+          "staged": {
+            "positive": false,
+            "correct": false,
+            "pair_image_solves": 8,
+            "join_solves": 4,
+            "roots_returned": 22,
+            "index_lookups": 8,
+            "field_multiplications": 510,
+            "maximum_local_degree": 2,
+            "left_image_size": 4,
+            "right_image_size": 8,
+            "witness": null,
+            "image_sha256": "ab273bead9647323583866e0c8d65a9f8fc0fc748904a773fb01b6a3db7b52bc"
+          }
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            614,
+            288
+          ],
+          "expected_positive": true,
+          "exhaustive_signed_tuples": 128,
+          "baseline": {
+            "arm": "curve-lift-baseline",
+            "variables": 23,
+            "equations": 24,
+            "input_max_degree": 2,
+            "inconsistent": false,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 453,
+            "field_ops": 854638
+          },
+          "specialised": {
+            "arm": "liftability-specialised",
+            "variables": 15,
+            "equations": 16,
+            "input_max_degree": 2,
+            "inconsistent": false,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 267,
+            "field_ops": 339794
+          },
+          "staged": {
+            "positive": true,
+            "correct": true,
+            "pair_image_solves": 6,
+            "join_solves": 4,
+            "roots_returned": 18,
+            "index_lookups": 8,
+            "field_multiplications": 420,
+            "maximum_local_degree": 2,
+            "left_image_size": 4,
+            "right_image_size": 4,
+            "witness": [
+              1065,
+              359
+            ],
+            "image_sha256": "21bcf3fd759fd8a8c3cc4e2a902d4e5da036a2fa042b36b32bd3c4ad1816aa54"
+          }
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            863,
+            1057
+          ],
+          "expected_positive": true,
+          "exhaustive_signed_tuples": 256,
+          "baseline": {
+            "arm": "curve-lift-baseline",
+            "variables": 23,
+            "equations": 24,
+            "input_max_degree": 2,
+            "inconsistent": false,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 453,
+            "field_ops": 845919
+          },
+          "specialised": {
+            "arm": "liftability-specialised",
+            "variables": 15,
+            "equations": 16,
+            "input_max_degree": 2,
+            "inconsistent": false,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 447,
+            "field_ops": 845497
+          },
+          "staged": {
+            "positive": true,
+            "correct": true,
+            "pair_image_solves": 8,
+            "join_solves": 4,
+            "roots_returned": 22,
+            "index_lookups": 8,
+            "field_multiplications": 510,
+            "maximum_local_degree": 2,
+            "left_image_size": 4,
+            "right_image_size": 8,
+            "witness": [
+              1065,
+              0
+            ],
+            "image_sha256": "b2897bf223871991859f3884acb0f90455a843258a7ea8dfbb855dd5a3a9dad3"
+          }
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            94,
+            94
+          ],
+          "expected_positive": false,
+          "exhaustive_signed_tuples": 256,
+          "baseline": {
+            "arm": "curve-lift-baseline",
+            "variables": 23,
+            "equations": 24,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 375,
+            "field_ops": 281633
+          },
+          "specialised": {
+            "arm": "liftability-specialised",
+            "variables": 15,
+            "equations": 16,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 375,
+            "field_ops": 281270
+          },
+          "staged": {
+            "positive": false,
+            "correct": true,
+            "pair_image_solves": 8,
+            "join_solves": 4,
+            "roots_returned": 20,
+            "index_lookups": 8,
+            "field_multiplications": 480,
+            "maximum_local_degree": 2,
+            "left_image_size": 4,
+            "right_image_size": 4,
+            "witness": null,
+            "image_sha256": "bbd3a539df44250f135b59672f50c0d3fc9268a37be06eb9dd20376884eda9cc"
+          }
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            94,
+            166
+          ],
+          "expected_positive": false,
+          "exhaustive_signed_tuples": 128,
+          "baseline": {
+            "arm": "curve-lift-baseline",
+            "variables": 23,
+            "equations": 24,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 453,
+            "field_ops": 425111
+          },
+          "specialised": {
+            "arm": "liftability-specialised",
+            "variables": 15,
+            "equations": 16,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 267,
+            "field_ops": 178322
+          },
+          "staged": {
+            "positive": false,
+            "correct": true,
+            "pair_image_solves": 6,
+            "join_solves": 4,
+            "roots_returned": 18,
+            "index_lookups": 8,
+            "field_multiplications": 420,
+            "maximum_local_degree": 2,
+            "left_image_size": 4,
+            "right_image_size": 4,
+            "witness": null,
+            "image_sha256": "3b1ea0500c8b57fa3101feebc1c9457d011b5e06db0908505c889d350b720c2d"
+          }
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            94,
+            288
+          ],
+          "expected_positive": false,
+          "exhaustive_signed_tuples": 256,
+          "baseline": {
+            "arm": "curve-lift-baseline",
+            "variables": 23,
+            "equations": 24,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 453,
+            "field_ops": 424592
+          },
+          "specialised": {
+            "arm": "liftability-specialised",
+            "variables": 15,
+            "equations": 16,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 447,
+            "field_ops": 424187
+          },
+          "staged": {
+            "positive": false,
+            "correct": true,
+            "pair_image_solves": 8,
+            "join_solves": 4,
+            "roots_returned": 22,
+            "index_lookups": 8,
+            "field_multiplications": 510,
+            "maximum_local_degree": 2,
+            "left_image_size": 4,
+            "right_image_size": 8,
+            "witness": null,
+            "image_sha256": "554952d53e7f2e00f40b6eb3e433eac26ff6ef4f204f6937895d914fc2c8d06d"
+          }
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            94,
+            507
+          ],
+          "expected_positive": false,
+          "exhaustive_signed_tuples": 128,
+          "baseline": {
+            "arm": "curve-lift-baseline",
+            "variables": 23,
+            "equations": 24,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 453,
+            "field_ops": 425078
+          },
+          "specialised": {
+            "arm": "liftability-specialised",
+            "variables": 15,
+            "equations": 16,
+            "input_max_degree": 2,
+            "inconsistent": true,
+            "complete": true,
+            "correct": true,
+            "timed_out": false,
+            "pairs_above_bound": 0,
+            "solving_degree_max": 3,
+            "max_cols_to_solution": 267,
+            "field_ops": 178334
+          },
+          "staged": {
+            "positive": false,
+            "correct": true,
+            "pair_image_solves": 6,
+            "join_solves": 4,
+            "roots_returned": 18,
+            "index_lookups": 8,
+            "field_multiplications": 420,
+            "maximum_local_degree": 2,
+            "left_image_size": 4,
+            "right_image_size": 4,
+            "witness": null,
+            "image_sha256": "f2922565d2a005f3819712b8753ff12c4e7828ddc7b82d927177633a0ab8483a"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Install an isolab hub and/or worker on a Linux host. Run as root.
 #
-#   sudo deploy/install.sh --hub --worker --cpus 4-15 [--pool P]... [--label K=V]... [--gvisor]
+#   sudo deploy/install.sh --hub --worker --cpus 4-15 [--slots N] [--pool P]... [--label K=V]... [--gvisor]
 #   sudo deploy/install.sh --worker --cpus 2-7 --hub-url nats://TOKEN@first-host:4222
 #   sudo deploy/install.sh --hub --cluster-routes nats://first-host:6222
 set -euo pipefail
@@ -12,6 +12,7 @@ while [ $# -gt 0 ]; do
     --hub) HUB=1;;
     --worker) WORKER=1;;
     --cpus) CPUS="$2"; shift;;
+    --slots) SLOTS="$2"; shift;;
     --pool) POOLS+=("$2"); shift;;
     --label) LABELS+=("$2"); shift;;
     --hub-url) HUB_URL="$2"; shift;;
@@ -94,6 +95,7 @@ if [ $WORKER = 1 ]; then
   EXTRA=""; for p in "${POOLS[@]:-}"; do [ -n "$p" ] && EXTRA="$EXTRA --pool $p"; done
   for l in "${LABELS[@]:-}"; do [ -n "$l" ] && EXTRA="$EXTRA --label $l"; done
   EXTRA="$EXTRA --default-image $DEFAULT_IMAGE"
+  [ -n "${SLOTS:-}" ] && EXTRA="$EXTRA --slots $SLOTS"
   cat > /etc/isolab/worker.env <<ENV
 ISOLAB_URL=$HUB_URL
 ISOLAB_CPUS=$CPUS

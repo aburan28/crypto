@@ -1,0 +1,105 @@
+{
+  "schema": "crypto.store-index/v1",
+  "entries": {
+    "factor-bases/icv1-f2m11-t67-05f5aa36/FB1h5862f57f8b31.json": {
+      "sha256": "861f6cc20ba939db435cd220411cfe86eb1722d12e04456494130745340c7d80",
+      "bytes": 3051,
+      "description": "ecbench dump cyclotomic:w=1 on icv1-f2m11-t67-05f5aa36 (k11-cyc-w1)",
+      "tags": [
+        "ecbench-fb-protocol-20261013",
+        "k11-cyc-w1"
+      ],
+      "provenance": "ecbench fb --curve '{\"kind\":\"koblitz\",\"a\":1,\"n\":11}' --factor-base 'cyclotomic:w=1' (commit 0f0db951ad)"
+    },
+    "factor-bases/icv1-f2m17-tm101-00378d4e/FB1h554bcb8d6c56.json": {
+      "sha256": "c71a2041e4960616d250649c6496381c3f485ade9adb280a8fbce19ab33c5f66",
+      "bytes": 2094,
+      "description": "ecbench dump koblitz-standard-subspace:dimension=4 on icv1-f2m17-tm101-00378d4e (k17-std)",
+      "tags": [
+        "ecbench-fb-protocol-20261013",
+        "k17-std"
+      ],
+      "provenance": "ecbench fb --curve '{\"kind\":\"koblitz\",\"a\":1,\"n\":17}' --factor-base 'koblitz-standard-subspace:dimension=4' (commit 0f0db951ad)"
+    },
+    "factor-bases/icv1-f2m17-tm101-00378d4e/FB1h585d0da5e4b8.json": {
+      "sha256": "6080a07364dde77f7546308df7ed0f5a0c0f009005a1d03476791de71eb917bc",
+      "bytes": 26124,
+      "description": "ecbench dump compact-orbit-scan:columns=8,raw_x_cap=5000 on icv1-f2m17-tm101-00378d4e (k17-compact)",
+      "tags": [
+        "ecbench-fb-protocol-20261013",
+        "k17-compact"
+      ],
+      "provenance": "ecbench fb --curve '{\"kind\":\"koblitz\",\"a\":1,\"n\":17}' --factor-base 'compact-orbit-scan:columns=8,raw_x_cap=5000' (commit 0f0db951ad)"
+    },
+    "factor-bases/icv1-f2m17-tm101-00378d4e/FB1h70021407fcc7.json": {
+      "sha256": "2cc9856310098b518b61d0c92f1124a451068704c5a030bcc820e3d74d65a42c",
+      "bytes": 1985,
+      "description": "ecbench dump binary-subspace:dimension=4 on icv1-f2m17-tm101-00378d4e (k17-subspace)",
+      "tags": [
+        "ecbench-fb-protocol-20261013",
+        "k17-subspace"
+      ],
+      "provenance": "ecbench fb --curve '{\"kind\":\"koblitz\",\"a\":1,\"n\":17}' --factor-base 'binary-subspace:dimension=4' (commit 0f0db951ad)"
+    },
+    "factor-bases/icv1-f2m17-tm101-00378d4e/FB1hdd4118e0e739.json": {
+      "sha256": "955c430ae5585c3adb9fb090afb308b838d6782ac5c155e5ace277ff95810e51",
+      "bytes": 41914,
+      "description": "ecbench dump koblitz-orbit:divisor=0;1 on icv1-f2m17-tm101-00378d4e (k17-orbit)",
+      "tags": [
+        "ecbench-fb-protocol-20261013",
+        "k17-orbit"
+      ],
+      "provenance": "ecbench fb --curve '{\"kind\":\"koblitz\",\"a\":1,\"n\":17}' --factor-base 'koblitz-orbit:divisor=0;1' (commit 0f0db951ad)"
+    },
+    "factor-bases/icv1-f2m23-t5197-69e76b73/FB1h852163645cdd.json": {
+      "sha256": "49da6de1db12fcc1b0e79b239a8ed1b1418270f975b24d7ae3ff36902868020a",
+      "bytes": 411349,
+      "description": "ecbench dump koblitz-orbit:divisor=0;1 on icv1-f2m23-t5197-69e76b73 (k23-orbit)",
+      "tags": [
+        "ecbench-fb-protocol-20261013",
+        "k23-orbit"
+      ],
+      "provenance": "ecbench fb --curve '{\"kind\":\"koblitz\",\"a\":0,\"n\":23}' --factor-base 'koblitz-orbit:divisor=0;1' (commit 0f0db951ad)"
+    },
+    "factor-bases/icv1-f2m23-t5197-69e76b73/FB1hd02c2c67699c.json": {
+      "sha256": "a0e95d52e08a483569b2cac1784ebc11a7aeb19ab2e56e22cf8b614bbb8c8301",
+      "bytes": 45321,
+      "description": "ecbench dump compact-orbit-scan:columns=10,raw_x_cap=10000 on icv1-f2m23-t5197-69e76b73 (k23-compact)",
+      "tags": [
+        "ecbench-fb-protocol-20261013",
+        "k23-compact"
+      ],
+      "provenance": "ecbench fb --curve '{\"kind\":\"koblitz\",\"a\":0,\"n\":23}' --factor-base 'compact-orbit-scan:columns=10,raw_x_cap=10000' (commit 0f0db951ad)"
+    },
+    "factor-bases/icv1-f2m23-tm5197-1f85e9e1/FB1h089756e11c3b.json": {
+      "sha256": "ac35f10a1b7d875dc452671fd81aaa544dbcb7f92be82abfa61639a56780f88f",
+      "bytes": 5587,
+      "description": "ecbench dump cyclotomic:w=1 on icv1-f2m23-tm5197-1f85e9e1 (k23-cyc-w1)",
+      "tags": [
+        "ecbench-fb-protocol-20261013",
+        "k23-cyc-w1"
+      ],
+      "provenance": "ecbench fb --curve '{\"kind\":\"koblitz\",\"a\":1,\"n\":23}' --factor-base 'cyclotomic:w=1' (commit 0f0db951ad)"
+    },
+    "factor-bases/icv1-fp20-t727-cd198a38/FB1h4b3725c0aa92.json": {
+      "sha256": "4e3787c54b9eed6a7c13b9aa4e97b7a4b91073bb1e21599f1619dc7332b838c0",
+      "bytes": 6804,
+      "description": "ecbench dump prime-abscissa:size=32 on icv1-fp20-t727-cd198a38 (p20-abscissa)",
+      "tags": [
+        "ecbench-fb-protocol-20261013",
+        "p20-abscissa"
+      ],
+      "provenance": "ecbench fb --curve '{\"kind\":\"prime_search\",\"bits\":20,\"seed\":59297}' --factor-base 'prime-abscissa:size=32' (commit 0f0db951ad)"
+    },
+    "factor-bases/icv1-fp20-t727-cd198a38/FB1h81b0d90efecd.json": {
+      "sha256": "3feee5be8acc1ae44792a1bdfa8eb29c85075f7e5810c9557dbbb76a7bb85463",
+      "bytes": 3992,
+      "description": "ecbench dump glv-orbit:size=16 on icv1-fp20-t727-cd198a38 (p20-glv)",
+      "tags": [
+        "ecbench-fb-protocol-20261013",
+        "p20-glv"
+      ],
+      "provenance": "ecbench fb --curve '{\"kind\":\"prime_search\",\"bits\":20,\"seed\":59297}' --factor-base 'glv-orbit:size=16' (commit 0f0db951ad)"
+    }
+  }
+}

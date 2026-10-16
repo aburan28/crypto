@@ -67,7 +67,11 @@ fn main() {
             x ^= x << 13;
             x ^= x >> 7;
             x ^= x << 17;
-            let i = if usable { x as usize & mask } else { x as usize % n };
+            let i = if usable {
+                x as usize & mask
+            } else {
+                x as usize % n
+            };
             acc = acc.wrapping_add(chase[i]);
         }
         std::hint::black_box(acc);

@@ -7,6 +7,10 @@ accepts explicit K_0 curve parameters and points through degree 131, with durabl
 pair tables, relations and precomputation. See [Fixed parameters](FIXED_PARAMETERS.md).
 The older inspection command uses imported points for mathematical validation.
 
+**Factor-base encyclopedia:** [factor-base-encyclopedia/README.md](factor-base-encyclopedia/README.md) describes every factor base tried here and in crypto-autoresearcher (definition, existence, build cost, oracle, measured results, verdict), starting with the PKM Kummer-coset (P-224 shape) and isogeny-chain (P-192 shape) towers; PDF in the same directory.
+
+**Technique inventory:** [ECDLP_RESEARCH_TECHNIQUES.md](ECDLP_RESEARCH_TECHNIQUES.md) maps factor-base, relation, filtering, sparse-linear-algebra, and individual-logarithm research techniques to their native modules and labels each as integrated, experimental, component, or backlog.
+
 **Agent scoreboard:** per-stage records and next targets to beat live in
 [`BOUNDARY_TARGETS.md`](BOUNDARY_TARGETS.md) and
 [`boundary_targets.json`](boundary_targets.json) (binary, Koblitz, prime;
@@ -299,9 +303,26 @@ target then needs one or two relations. The `logs` trial budget
 relation set; a base whose coverage cannot determine every column
 reports `incomplete` rather than emitting an unverified database.
 
-### Linear algebra: relation filtering and block Wiedemann
+## Primary one-target comparison
+
+For an IC-versus-rho speedup claim, the measured workload is one previously
+unseen public target point, and both algorithms solve that exact point. The IC
+clock starts at the first target-dependent step after reusable curve, base,
+index, and factor-log preparation is ready. The rho clock starts at its first
+target-dependent walk step. Both clocks stop after scalar recovery and
+independent verification. Exclude process launch, input loading, target
+fixture generation, and target-independent preparation from these online
+times; report setup separately when useful. Do not replace this result with
+batch throughput, a multi-target average, or shared-table amortization. Those
+are secondary measurements for a separately stated question.
+
+The `--batch` execution knob in the option list describes internal target scheduling. It
+does not change the primary workload definition: submit exactly one target
+when measuring the one-target online comparison.
+### Linear algebra: filtering, block Wiedemann, and block Lanczos
 
     ./target/release/ic logs --degree 31 --curve-a 0 --summands 3 --factor-base fb31.json --database logs31.json --linear-algebra sparse --block-size 4
+    ./target/release/ic logs --degree 31 --curve-a 0 --summands 3 --factor-base fb31.json --database logs31-lanczos.json --linear-algebra sparse --sparse-solver block-lanczos --block-size 4 --spmv sharded --spmv-shards 8
     ./target/release/ic logs --degree 31 --curve-a 0 --summands 3 --factor-base fb31.json --database logs31.json --linear-algebra dense
 
 Each relation has at most `m` nonzero entries, so the relation matrix is
@@ -317,12 +338,30 @@ sparse in exactly the way a number-field-sieve matrix is. By default
    recorded, so the eliminated logarithms are reconstructed exactly from
    the core solution (back-substitution, then propagation through the
    original rows, then a small dense residual if anything is left).
-2. **Block Wiedemann** — the reduced core is made square by folding its
+2. **Black-box core solve** — block Wiedemann (the default) makes the
+   reduced core square by folding its
    excess rows into random earlier rows, homogenised to `M (x, 1)ᵀ = 0`,
    and a kernel vector is read off the Krylov sequence `X Mⁱ Y` of
    `block_size × block_size` blocks through a matrix Berlekamp–Massey
    step (a shifted minimal approximant basis). Only sparse
-   matrix-times-block products touch the matrix, in parallel over rows.
+   matrix-times-block products touch the matrix. `--sparse-solver
+   block-lanczos` instead runs finite-field block Lanczos on the symmetric
+   congruence `A^T D A`; it retries on breakdown and still verifies `A x = b`.
+   Products select `auto`, `serial`, `rayon`, deterministic `sharded`, or
+   `worker` execution with `--spmv`. A worker speaks the CPU-verified `SPMV1`
+   contract in `gpu/spmv`; set `IC_SPMV_WORKER` to the host, CUDA, or cluster
+   launcher executable. Worker failure emits a warning and falls back to the
+   serial CPU product.
+
+The filter before the Krylov solve is selected with `--filter-strategy`:
+`cado` (the default) runs CADO-NFS's filter as ported into
+`koblitz_sparse_la` (`FilterOptions::cado()`: whole-clique purge under
+Bouvier's Ω₃₁ weight over up to 50 steps, then Markowitz-ordered merges along
+minimum spanning trees up to an average row weight of 100); `legacy` runs the
+historical filter described above. On synthetic m = 3 systems of 262,144
+columns the `cado` filter's whole solve is about 10× faster than `legacy` and
+about 1.9× faster than CADO-NFS's own pipeline; below about 4,096 columns it is
+slower by milliseconds (`research/la_engines_20261014`).
 
 The sparse path never attempts a solve before every column occurs in
 some row, and the solution is checked against every relation before
@@ -331,7 +370,8 @@ keeps the reference behaviour: full big-integer elimination after every
 new relation. Both paths certify the same database (the `ic` tests
 compare them); the report's `linear_algebra` object records the mode,
 the attempts, the time, and for the sparse path the filtering counts
-and the Wiedemann run (`core_dimension`, `sequence_length`, products).
+and the configured solver/SpMV backend plus the selected Wiedemann or Lanczos
+run (`core_dimension`, iterations or sequence length, and products).
 
 ## Running the pipeline as a resumable workflow
 
@@ -430,7 +470,10 @@ A parameter file (schema_version 1):
     {"schema_version":1,"name":"icv1-f2m31-tm90707-c95f16f5","curve":{"degree":31,"curve_a":0},
      "summands":3,"solver":"pair_table","seed":1,"max_trials":200000,
      "linear_algebra":{"mode":"sparse",
-                       "sparse":{"wiedemann":{"block_m":4,"block_n":4},
+                       "sparse":{"solver":"block-wiedemann",
+                                 "spmv":{"backend":"auto","shards":0},
+                                 "wiedemann":{"block_m":4,"block_n":4},
+                                 "lanczos":{"block_size":4,"margin":8},
                                  "filter":{"target_excess":32,"merge_max_weight":8}}},
      "collection":{"unit_trials":4096,"units":4,"max_units":64},
      "factor_base":{"mode":"search","family":"divisor","min_dimension":5,
@@ -450,8 +493,8 @@ without child validation). Each target is a synthetic known-answer
 instance: `known_log` names the scalar, `random_seed` draws one
 reproducibly. Solver is `pair_table` (default), `enumerate`, `groebner`
 or `sat`. `linear_algebra` is optional: `mode` is `sparse` (default;
-filtering + block Wiedemann, with every knob of the sparse solver under
-`sparse`) or `dense`. `collection` sizes the work units (above). The
+filtering plus block Wiedemann or block Lanczos, with every solver and SpMV
+knob under `sparse`) or `dense`. `collection` sizes the work units (above). The
 report lists every stage with whether it ran or was reused — the collect
 stage with its units, the logs stage with its verification counts and
 linear-algebra statistics — and every solution with its expected and
@@ -1113,11 +1156,12 @@ to child runs launched by compare.
 
 Selection time includes process startup, curve and factor-base
 construction, relation collection, matrix solving, verification, and
-report emission. Child completion is polled every 10 ms; very small
-timing differences should not be interpreted as meaningful. The report
-also includes the total comparison time, so selection and unsuccessful
-candidate costs remain visible. A selected candidate is a bounded
-observation, not a global optimum, scaling claim, or challenge result.
+report emission. This is an engineering-selection diagnostic and is not the
+primary one-target online metric above. Child completion is polled every 10
+ms; very small timing differences should not be interpreted as meaningful.
+The report also includes the total comparison time, so selection and
+unsuccessful candidate costs remain visible. A selected candidate is a
+bounded observation, not a global optimum, scaling claim, or challenge result.
 
 ## Reports and resource accounting
 

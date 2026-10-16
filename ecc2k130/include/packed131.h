@@ -109,7 +109,54 @@
 #if ECC_PACKED_KARAT3 && !ECC_PACKED_CLMAD
 #error "ECC_PACKED_KARAT3 requires ECC_PACKED_CLMAD"
 #endif
+#ifndef ECC_PACKED_NATIVE_PRODUCT
+#define ECC_PACKED_NATIVE_PRODUCT 0
+#endif
+#ifndef ECC_PACKED_NATIVE_REDUCE
+#define ECC_PACKED_NATIVE_REDUCE 0
+#endif
+#if (ECC_PACKED_NATIVE_PRODUCT < 0 || ECC_PACKED_NATIVE_PRODUCT > 2) || (ECC_PACKED_NATIVE_REDUCE < 0 || ECC_PACKED_NATIVE_REDUCE > 1)
+#error "Native product must be 0, 1 (full native), or 2 (balanced); reduction must be 0 or 1"
+#endif
+#if (ECC_PACKED_NATIVE_PRODUCT || ECC_PACKED_NATIVE_REDUCE) && !ECC_PACKED_CLMAD
+#error "Native product/reduction require ECC_PACKED_CLMAD"
+#endif
+#ifndef ECC_PACKED_TAIL_LAYOUT
+#define ECC_PACKED_TAIL_LAYOUT 0
+#endif
+#if ECC_PACKED_TAIL_LAYOUT < 0 || ECC_PACKED_TAIL_LAYOUT > 2
+#error "ECC_PACKED_TAIL_LAYOUT must be 0, 1 or 2"
+#endif
+#if ECC_PACKED_TAIL_LAYOUT && (!ECC_PACKED_CLMAD || ECC_PACKED_NATIVE_PRODUCT)
+#error "Tail layout requires CLMAD and the original low128 product"
+#endif
+#ifndef ECC_PACKED_FUSED_SIGMA
+#define ECC_PACKED_FUSED_SIGMA 0
+#endif
+#if ECC_PACKED_FUSED_SIGMA < 0 || ECC_PACKED_FUSED_SIGMA > 3
+#error "ECC_PACKED_FUSED_SIGMA must be 0, 1 (nibbles), 2 (bytes), or 3 (shared three-bit groups)"
+#endif
+#ifndef ECC_PACKED_INLINE
+#define ECC_PACKED_INLINE 0
+#endif
+#if ECC_PACKED_INLINE < 0 || ECC_PACKED_INLINE > 7
+#error "ECC_PACKED_INLINE must be a bit mask from 0 to 7"
+#endif
+#ifndef ECC_PACKED_FAST_CONVERT
+#define ECC_PACKED_FAST_CONVERT 0
+#endif
+#if ECC_PACKED_FAST_CONVERT != 0 && ECC_PACKED_FAST_CONVERT != 1
+#error "ECC_PACKED_FAST_CONVERT must be 0 or 1"
+#endif
 #include "bitslice.h"
+// The native carryless core is small enough to test selected call boundaries.
+// Bits select polynomial single (1), polynomial pair (2), and normal (4);
+// the first two combine with ECC_PACKED_INLINE_POLY below.
+#if ECC_PACKED_INLINE & 4
+#define ECC_PACKED_NORMAL_ATTR ECC_HD
+#else
+#define ECC_PACKED_NORMAL_ATTR ECC_BIG
+#endif
 namespace eccPacked131 {
 #ifndef ECC_PACKED_ADD_COMBINE
 #define ECC_PACKED_ADD_COMBINE 0
@@ -248,6 +295,7 @@ ECC_HD void clmul128(uint32_t r[8], const uint32_t a[4], const uint32_t b[4]) {
 }
 
 struct P131 { uint32_t v[5]; };
+#include "packednative131.h"
 
 #if ECC_PACKED_TOP_CLMAD
 /* The low 64 bits of x*y, plus an addend.  On the device this is one clmad
@@ -390,7 +438,9 @@ ECC_HD void topCrossHoist131(const P131 &a, const P131 &b, uint32_t *c) {
     for (int i = 0; i < 5; ++i) c[4 + i] ^= extra[i];
 }
 ECC_HD void product131(const P131 &a,const P131 &b,uint32_t *c) {
-#if ECC_PACKED_KARAT3
+#if ECC_PACKED_NATIVE_PRODUCT && defined(__CUDA_ARCH__)
+    nativeProduct131(a,b,c);
+#elif ECC_PACKED_KARAT3
     product131Karat3(a, b, c);
 #else
 #if ECC_PACKED_TOP_HOIST
@@ -406,6 +456,28 @@ ECC_HD void product131(const P131 &a,const P131 &b,uint32_t *c) {
     topCrossClmad131(a,b,c);
 #else
     clmul128(c,a.v,b.v); c[8]=0;
+#if ECC_PACKED_TAIL_LAYOUT && defined(__CUDA_ARCH__)
+    const uint32_t ma0=0u-(a.v[4]&1u), mb0=0u-(b.v[4]&1u);
+    const uint32_t ma1=0u-((a.v[4]>>1)&1u), mb1=0u-((b.v[4]>>1)&1u);
+    const uint32_t ma2=0u-((a.v[4]>>2)&1u), mb2=0u-((b.v[4]>>2)&1u);
+    uint32_t previous1=0,previous2=0;
+#pragma unroll
+    for(int i=0;i<4;i++) {
+        const uint32_t t0=(a.v[i]&mb0)^(b.v[i]&ma0);
+        const uint32_t t1=(a.v[i]&mb1)^(b.v[i]&ma1);
+        const uint32_t t2=(a.v[i]&mb2)^(b.v[i]&ma2);
+#if ECC_PACKED_TAIL_LAYOUT == 1
+        const uint32_t shifted1=__funnelshift_l(previous1,t1,1);
+        const uint32_t shifted2=__funnelshift_l(previous2,t2,2);
+#else
+        const uint32_t shifted1=(t1<<1)|(previous1>>31);
+        const uint32_t shifted2=(t2<<2)|(previous2>>30);
+#endif
+        c[4+i]^=t0^shifted1^shifted2;
+        previous1=t1;previous2=t2;
+    }
+    c[8]^=(previous1>>31)^(previous2>>30)^(b.v[4]&ma0)^((b.v[4]&ma1)<<1)^((b.v[4]&ma2)<<2);
+#else
 #pragma unroll
     for(int k=0;k<3;k++) {
         uint32_t ma=0u-((a.v[4]>>k)&1u), mb=0u-((b.v[4]>>k)&1u);
@@ -417,6 +489,7 @@ ECC_HD void product131(const P131 &a,const P131 &b,uint32_t *c) {
         }
         c[8]^=(b.v[4]&ma)<<k;
     }
+#endif
 #endif
 #endif
 }
@@ -496,7 +569,9 @@ ECC_HD P131 add131(const P131 &a,const P131 &b) {
 #if ECC_PACKED_DIRECT_REDUCE != 0 && ECC_PACKED_DIRECT_REDUCE != 1
 #error "ECC_PACKED_DIRECT_REDUCE must be 0 or 1"
 #endif
-#if ECC_PACKED_DIRECT_REDUCE
+#if ECC_PACKED_NATIVE_REDUCE && defined(__CUDA_ARCH__)
+ECC_HD P131 reducePolynomial131(const uint32_t *h) { return nativeReduce131(h); }
+#elif ECC_PACKED_DIRECT_REDUCE
 #include "packeddirectreduce131.h"
 #else
 #include "packedpolyreduce131.h"
@@ -579,12 +654,12 @@ ECC_HD P131 fromPolynomial131(const P131 &a) {
 #if ECC_PACKED_INLINE_POLY < 0 || ECC_PACKED_INLINE_POLY > 3
 #error "ECC_PACKED_INLINE_POLY must be in [0, 3]"
 #endif
-#if ECC_PACKED_INLINE_POLY & 1
+#if (ECC_PACKED_INLINE_POLY & 1) || (ECC_PACKED_INLINE & 1)
 #define ECC_POLY_SINGLE ECC_HD
 #else
 #define ECC_POLY_SINGLE ECC_BIG
 #endif
-#if ECC_PACKED_INLINE_POLY & 2
+#if (ECC_PACKED_INLINE_POLY & 2) || (ECC_PACKED_INLINE & 2)
 #define ECC_POLY_PAIR ECC_HD
 #else
 #define ECC_POLY_PAIR ECC_BIG
@@ -669,7 +744,7 @@ static ECC_BIG P131 mulOnb131(MulArg a, MulArg b) {
     r.v[4]&=7;
     return r;
 }
-static ECC_BIG P131 mul131(MulArg a, MulArg b) {
+static ECC_PACKED_NORMAL_ATTR P131 mul131(MulArg a, MulArg b) {
 #if ECC_PACKED_SINGLE_PRODUCT
     const P131 pa = toPolynomial131(a), pb = toPolynomial131(b);
     uint32_t h[9];
@@ -807,6 +882,24 @@ ECC_HD P131 squarePolynomialTable131(P131 a, const uint32_t *tab) {
     }
     return P131{{r[0], r[1], r[2], r[3], r[4]}};
 }
+#ifndef ECC_SIGMA_SQUARE_TABLE
+#define ECC_SIGMA_SQUARE_TABLE 0
+#endif
+#if ECC_SIGMA_SQUARE_TABLE != 0 && ECC_SIGMA_SQUARE_TABLE != 1
+#error "ECC_SIGMA_SQUARE_TABLE must be 0 or 1"
+#endif
+// The sigma-fused kernel's one lambda square per completed update.  Keeping
+// this compile-time wrapper beside the two exact implementations lets the
+// native replay compile both arms from the same call site as the CUDA kernel.
+// The kernel header owns the flag-combination guards and table residency.
+ECC_HD P131 sigmaLambdaSquare131(P131 a, const uint32_t *tab) {
+#if ECC_SIGMA_SQUARE_TABLE
+    return squarePolynomialTable131(a, tab);
+#else
+    (void)tab;
+    return squarePolynomial131(a);
+#endif
+}
 ECC_HD P131 sqr131(const P131 &a){
  P131 rev=reverse131(a),r;
 #if ECC_PACKED_ALU_SQR
@@ -829,6 +922,33 @@ ECC_HD P131 sqr131(const P131 &a){
 #endif
 #if ECC_PACKED_SHARED_SIGMA && !(ECC_PACKED_PERM_SIGMA & 1)
 #error "ECC_PACKED_SHARED_SIGMA requires the walk permutation network"
+#endif
+#ifndef ECC_PACKED_PARTIAL_SIGMA
+#define ECC_PACKED_PARTIAL_SIGMA 0
+#endif
+#if ECC_PACKED_PARTIAL_SIGMA < 0 || ECC_PACKED_PARTIAL_SIGMA > 3
+#error "ECC_PACKED_PARTIAL_SIGMA must be a mask from 0 to 3"
+#endif
+#if ((ECC_PACKED_PARTIAL_SIGMA & 1) && !(ECC_PACKED_PERM_SIGMA & 1)) || ((ECC_PACKED_PARTIAL_SIGMA & 2) && !(ECC_PACKED_PERM_SIGMA & 2))
+#error "Partial routing requires the corresponding Frobenius network"
+#endif
+#ifndef ECC_PACKED_BYTE_SIGMA
+#define ECC_PACKED_BYTE_SIGMA 0
+#endif
+#if ECC_PACKED_BYTE_SIGMA < 0 || ECC_PACKED_BYTE_SIGMA > 1
+#error "ECC_PACKED_BYTE_SIGMA must be 0 or 1"
+#endif
+#if ECC_PACKED_BYTE_SIGMA && !(ECC_PACKED_PERM_SIGMA & 1)
+#error "Byte-select Frobenius requires the walk permutation network"
+#endif
+#ifndef ECC_PACKED_SIGMA_ORDER
+#define ECC_PACKED_SIGMA_ORDER 0
+#endif
+#if ECC_PACKED_SIGMA_ORDER < 0 || ECC_PACKED_SIGMA_ORDER > 1
+#error "ECC_PACKED_SIGMA_ORDER must be 0 or 1"
+#endif
+#if ECC_PACKED_SIGMA_ORDER && !(ECC_PACKED_PARTIAL_SIGMA & 1)
+#error "Reordered Frobenius routing requires the partial walk network"
 #endif
 #if ECC_PACKED_PERM_SIGMA
 #include "packedsigma131.h"
@@ -867,6 +987,149 @@ static ECC_BIG void mul131x2(MulArg a1, MulArg b1, MulArg a2, MulArg b2, P131 *r
     *r1 = mulOnb131(a1, b1);
     *r2 = mulOnb131(a2, b2);
 #endif
+}
+#ifndef ECC_PACKED_SIGMA_TABLE
+#define ECC_PACKED_SIGMA_TABLE 0
+#endif
+#if ECC_PACKED_SIGMA_TABLE != 0 && ECC_PACKED_SIGMA_TABLE != 1
+#error "ECC_PACKED_SIGMA_TABLE must be 0 or 1"
+#endif
+// Walk Frobenius steps as one linear map on polynomial coordinates.
+//
+// The walk needs d = x + sigma^j(x) with j in 3..10, and with polynomial
+// coordinate storage it previously converted to the normal basis, ran a
+// 56-stage masked swap network, and converted back. L_j = T (I + sigma^j) T^-1
+// is a fixed GF(2)-linear map on the 131 polynomial coordinates, so its
+// action is the XOR of 33 nibble lookups: 8 maps x 33 nibble positions x 16
+// entries, each the low 128 bits of the image as one 16-byte row, 67,584
+// bytes. The three top output bits are parities of the input against three
+// 131-bit masks per map. The table lives in shared memory on the device.
+static const int SIGMA_TABLE_NIBBLES = 33;
+static const int SIGMA_TABLE_GROUP_WORDS = SIGMA_TABLE_NIBBLES * 16 * 4;  // one map
+static const int SIGMA_TABLE_LO_WORDS = 8 * SIGMA_TABLE_GROUP_WORDS;
+static const int SIGMA_TABLE_TOP_STRIDE = 16;                              // 15 mask words, padded
+static const int SIGMA_TABLE_WORDS = SIGMA_TABLE_LO_WORDS + 8 * SIGMA_TABLE_TOP_STRIDE;
+static const int SIGMA_TABLE_BYTES = SIGMA_TABLE_WORDS * 4;
+// Host construction from the verified normal-basis arithmetic: every entry is
+// the XOR of basis-vector images computed by fromPolynomial131, sigma131 and
+// toPolynomial131, so the table agrees with them by construction.
+inline void buildSigmaTable(uint32_t *table) {
+    for (int w = 0; w < SIGMA_TABLE_WORDS; ++w) table[w] = 0;
+    for (int q = 0; q < 8; ++q) {
+        P131 image[131];
+        for (int i = 0; i < 131; ++i) {
+            P131 e{}; e.v[i / 32] = 1u << (i % 32);
+            const P131 a = fromPolynomial131(e);
+            image[i] = toPolynomial131(add131(a, sigma131(a, q + 3)));
+        }
+        uint32_t *lo = table + q * SIGMA_TABLE_GROUP_WORDS;
+        for (int k = 0; k < SIGMA_TABLE_NIBBLES; ++k)
+            for (int n = 0; n < 16; ++n) {
+                uint32_t *row = lo + (k * 16 + n) * 4;
+                for (int b = 0; b < 4; ++b) {
+                    const int i = 4 * k + b;
+                    if (i < 131 && ((n >> b) & 1))
+                        for (int w = 0; w < 4; ++w) row[w] ^= image[i].v[w];
+                }
+            }
+        uint32_t *top = table + SIGMA_TABLE_LO_WORDS + q * SIGMA_TABLE_TOP_STRIDE;
+        for (int b = 0; b < 3; ++b)
+            for (int i = 0; i < 131; ++i)
+                if ((image[i].v[4] >> b) & 1u) top[b * 5 + i / 32] |= 1u << (i % 32);
+    }
+}
+ECC_HD uint32_t parity131(const P131 &a, const uint32_t *m) {
+    const uint32_t t = (a.v[0] & m[0]) ^ (a.v[1] & m[1]) ^ (a.v[2] & m[2]) ^ (a.v[3] & m[3]) ^ (a.v[4] & m[4]);
+#ifdef __CUDA_ARCH__
+    return __popc(t) & 1u;
+#else
+    return __builtin_popcount(t) & 1u;
+#endif
+}
+#ifdef __CUDACC__
+// Device lookup against the block's shared-memory copy. `base` is the 32-bit
+// shared address of the 256-byte-aligned table; each nibble then costs one
+// funnel shift, one LOP3 (mask and OR with the map's base) and one 128-bit
+// load, and the 33 rows XOR into four accumulators.
+__device__ __forceinline__ P131 sigmaPlusTable131(const P131 &a, int q, uint32_t base) {
+    base += uint32_t(q) * (SIGMA_TABLE_GROUP_WORDS * 4);
+    uint32_t r0 = 0, r1 = 0, r2 = 0, r3 = 0;
+#define ECC_SIGMA_ROW(K, OFF) do { \
+        uint32_t e0, e1, e2, e3; \
+        asm volatile("ld.shared.v4.u32 {%0,%1,%2,%3}, [%4+%5];" \
+            : "=r"(e0), "=r"(e1), "=r"(e2), "=r"(e3) : "r"(base | (OFF)), "n"((K) * 256)); \
+        r0 ^= e0; r1 ^= e1; r2 ^= e2; r3 ^= e3; } while (0)
+    // Row offsets are immediates, so every nibble is spelled out.
+    ECC_SIGMA_ROW(0, (a.v[0] << 4) & 0xf0u);
+    ECC_SIGMA_ROW(1, a.v[0] & 0xf0u);
+    ECC_SIGMA_ROW(2, (a.v[0] >> 4) & 0xf0u);
+    ECC_SIGMA_ROW(3, (a.v[0] >> 8) & 0xf0u);
+    ECC_SIGMA_ROW(4, (a.v[0] >> 12) & 0xf0u);
+    ECC_SIGMA_ROW(5, (a.v[0] >> 16) & 0xf0u);
+    ECC_SIGMA_ROW(6, (a.v[0] >> 20) & 0xf0u);
+    ECC_SIGMA_ROW(7, (a.v[0] >> 24) & 0xf0u);
+    ECC_SIGMA_ROW(8, (a.v[1] << 4) & 0xf0u);
+    ECC_SIGMA_ROW(9, a.v[1] & 0xf0u);
+    ECC_SIGMA_ROW(10, (a.v[1] >> 4) & 0xf0u);
+    ECC_SIGMA_ROW(11, (a.v[1] >> 8) & 0xf0u);
+    ECC_SIGMA_ROW(12, (a.v[1] >> 12) & 0xf0u);
+    ECC_SIGMA_ROW(13, (a.v[1] >> 16) & 0xf0u);
+    ECC_SIGMA_ROW(14, (a.v[1] >> 20) & 0xf0u);
+    ECC_SIGMA_ROW(15, (a.v[1] >> 24) & 0xf0u);
+    ECC_SIGMA_ROW(16, (a.v[2] << 4) & 0xf0u);
+    ECC_SIGMA_ROW(17, a.v[2] & 0xf0u);
+    ECC_SIGMA_ROW(18, (a.v[2] >> 4) & 0xf0u);
+    ECC_SIGMA_ROW(19, (a.v[2] >> 8) & 0xf0u);
+    ECC_SIGMA_ROW(20, (a.v[2] >> 12) & 0xf0u);
+    ECC_SIGMA_ROW(21, (a.v[2] >> 16) & 0xf0u);
+    ECC_SIGMA_ROW(22, (a.v[2] >> 20) & 0xf0u);
+    ECC_SIGMA_ROW(23, (a.v[2] >> 24) & 0xf0u);
+    ECC_SIGMA_ROW(24, (a.v[3] << 4) & 0xf0u);
+    ECC_SIGMA_ROW(25, a.v[3] & 0xf0u);
+    ECC_SIGMA_ROW(26, (a.v[3] >> 4) & 0xf0u);
+    ECC_SIGMA_ROW(27, (a.v[3] >> 8) & 0xf0u);
+    ECC_SIGMA_ROW(28, (a.v[3] >> 12) & 0xf0u);
+    ECC_SIGMA_ROW(29, (a.v[3] >> 16) & 0xf0u);
+    ECC_SIGMA_ROW(30, (a.v[3] >> 20) & 0xf0u);
+    ECC_SIGMA_ROW(31, (a.v[3] >> 24) & 0xf0u);
+    ECC_SIGMA_ROW(32, (a.v[4] << 4) & 0x70u);
+#undef ECC_SIGMA_ROW
+    const uint32_t top = base - uint32_t(q) * (SIGMA_TABLE_GROUP_WORDS * 4) + SIGMA_TABLE_LO_WORDS * 4
+                       + uint32_t(q) * (SIGMA_TABLE_TOP_STRIDE * 4);
+    uint32_t m[16];
+#define ECC_SIGMA_MASKS(I) \
+    asm volatile("ld.shared.v4.u32 {%0,%1,%2,%3}, [%4+%5];" \
+        : "=r"(m[4 * (I)]), "=r"(m[4 * (I) + 1]), "=r"(m[4 * (I) + 2]), "=r"(m[4 * (I) + 3]) : "r"(top), "n"((I) * 16))
+    ECC_SIGMA_MASKS(0); ECC_SIGMA_MASKS(1); ECC_SIGMA_MASKS(2); ECC_SIGMA_MASKS(3);
+#undef ECC_SIGMA_MASKS
+    const uint32_t w4 = parity131(a, m) | (parity131(a, m + 5) << 1) | (parity131(a, m + 10) << 2);
+    return P131{{r0, r1, r2, r3, w4}};
+}
+// Copy the table from global memory into shared memory and return its
+// 256-byte-aligned shared address. Every thread of the block must call it
+// before any lookup; the extern array needs SIGMA_TABLE_BYTES + 256 bytes.
+__device__ __forceinline__ uint32_t stageSigmaTable(const uint32_t *__restrict__ global, uint32_t *shared) {
+    const uint32_t raw = uint32_t(__cvta_generic_to_shared(shared));
+    const uint32_t aligned = (raw + 255u) & ~255u;
+    uint4 *dst = reinterpret_cast<uint4 *>(shared + (aligned - raw) / 4);
+    const uint4 *src = reinterpret_cast<const uint4 *>(global);
+    for (int i = threadIdx.x; i < SIGMA_TABLE_WORDS / 4; i += blockDim.x) dst[i] = src[i];
+    __syncthreads();
+    return aligned;
+}
+#endif
+// Host reference with the same nibble decomposition, for tests and tools.
+inline P131 sigmaPlusTable131(const uint32_t *table, const P131 &a, int q) {
+    const uint32_t *lo = table + q * SIGMA_TABLE_GROUP_WORDS;
+    uint32_t r[4] = {0, 0, 0, 0};
+    for (int k = 0; k < SIGMA_TABLE_NIBBLES; ++k) {
+        const uint32_t n = (k < 32 ? a.v[k / 8] >> (4 * (k % 8)) : a.v[4]) & 15u;
+        const uint32_t *row = lo + (k * 16 + int(n)) * 4;
+        for (int w = 0; w < 4; ++w) r[w] ^= row[w];
+    }
+    const uint32_t *m = table + SIGMA_TABLE_LO_WORDS + q * SIGMA_TABLE_TOP_STRIDE;
+    const uint32_t w4 = parity131(a, m) | (parity131(a, m + 5) << 1) | (parity131(a, m + 10) << 2);
+    return P131{{r[0], r[1], r[2], r[3], w4}};
 }
 ECC_HD P131 inv131(P131 a){
 #if ECC_PACKED_ONB_INV
@@ -997,4 +1260,7 @@ ECC_HD void inv131x2(P131 a, P131 b, P131 *ra, P131 *rb) {
  *ra = sqr131(xa); *rb = sqr131(xb);
 }
 
+#include "packedfusedsigma131.h"
+
 } // namespace eccPacked131
+#undef ECC_PACKED_NORMAL_ATTR

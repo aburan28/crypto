@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="660" viewBox="0 0 1200 660" font-family="sans-serif">
+<title>General-regime envelope and where the sixteen targets stop</title>
+<rect x="0" y="0" width="1200" height="660" fill="#ffffff"/>
+<text x="20" y="28" font-size="17" font-weight="bold">The general envelope widens size -- and size never binds</text>
+<text x="20" y="48" font-size="12" fill="#444">Proven gamma(eps) from paper Table 2 (Thm 25), plotted from table2.json. All 16 repo targets stop at shape/ring/scope.</text>
+<rect x="1048" y="70" width="92" height="260" fill="#f5f5f5"/>
+<text x="1056" y="90" font-size="11" fill="#666">past eps*: no theorem --</text>
+<text x="1056" y="106" font-size="11" fill="#666">new base identity needed (Sec 6, open)</text>
+<line x1="90" y1="330" x2="1140" y2="330" stroke="#333"/>
+<line x1="90" y1="70" x2="90" y2="330" stroke="#333"/>
+<line x1="90" y1="330" x2="90" y2="336" stroke="#333"/>
+<text x="76" y="350" font-size="11">eps 0.02</text>
+<line x1="281" y1="330" x2="281" y2="336" stroke="#333"/>
+<text x="267" y="350" font-size="11">eps 0.04</text>
+<line x1="472" y1="330" x2="472" y2="336" stroke="#333"/>
+<text x="458" y="350" font-size="11">eps 0.06</text>
+<line x1="663" y1="330" x2="663" y2="336" stroke="#333"/>
+<text x="649" y="350" font-size="11">eps 0.08</text>
+<line x1="854" y1="330" x2="854" y2="336" stroke="#333"/>
+<text x="840" y="350" font-size="11">eps 0.10</text>
+<line x1="1045" y1="330" x2="1045" y2="336" stroke="#333"/>
+<text x="1031" y="350" font-size="11">eps 0.12</text>
+<line x1="84" y1="330" x2="90" y2="330" stroke="#333"/>
+<text x="46" y="334" font-size="11">0.00</text>
+<line x1="84" y1="280" x2="90" y2="280" stroke="#333"/>
+<text x="46" y="284" font-size="11">0.05</text>
+<line x1="84" y1="230" x2="90" y2="230" stroke="#333"/>
+<text x="46" y="234" font-size="11">0.10</text>
+<line x1="84" y1="180" x2="90" y2="180" stroke="#333"/>
+<text x="46" y="184" font-size="11">0.15</text>
+<line x1="84" y1="130" x2="90" y2="130" stroke="#333"/>
+<text x="46" y="134" font-size="11">0.20</text>
+<line x1="84" y1="80" x2="90" y2="80" stroke="#333"/>
+<text x="46" y="84" font-size="11">0.25</text>
+<text x="46" y="58" font-size="11">gamma</text>
+<line x1="429" y1="70" x2="429" y2="330" stroke="#2e7d32" stroke-dasharray="6,4" stroke-width="1.5"/>
+<text x="435" y="122" font-size="11" fill="#2e7d32">concrete gate 1/18 (Cor 26)</text>
+<line x1="1048" y1="70" x2="1048" y2="330" stroke="#c62828" stroke-dasharray="6,4" stroke-width="1.5"/>
+<text x="930" y="138" font-size="11" fill="#c62828">ceiling eps* 0.1204</text>
+<polyline points="176,89 434,175 491,192 653,236 844,284 987,317" fill="none" stroke="#1565c0" stroke-width="2.5"/>
+<polyline points="176,224 434,265 491,272 653,291 844,311 987,325" fill="none" stroke="#7b1fa2" stroke-width="2.5"/>
+<circle cx="176" cy="89" r="4" fill="#1565c0"/>
+<circle cx="434" cy="175" r="4" fill="#1565c0"/>
+<circle cx="491" cy="192" r="4" fill="#1565c0"/>
+<circle cx="653" cy="236" r="4" fill="#1565c0"/>
+<circle cx="844" cy="284" r="4" fill="#1565c0"/>
+<circle cx="987" cy="317" r="4" fill="#1565c0"/>
+<circle cx="176" cy="224" r="4" fill="#7b1fa2"/>
+<circle cx="434" cy="265" r="4" fill="#7b1fa2"/>
+<circle cx="491" cy="272" r="4" fill="#7b1fa2"/>
+<circle cx="653" cy="291" r="4" fill="#7b1fa2"/>
+<circle cx="844" cy="311" r="4" fill="#7b1fa2"/>
+<circle cx="987" cy="325" r="4" fill="#7b1fa2"/>
+<text x="46" y="79" font-size="11" fill="#1565c0">kappa=1: 0.2412 at eps 0.029</text>
+<text x="653" y="315" font-size="11" fill="#7b1fa2">kappa=1/2 (lower curve)</text>
+<text x="844" y="272" font-size="11" fill="#1565c0">kappa=1 (upper curve)</text>
+<text x="90" y="368" font-size="11" fill="#333">MSM operating point eps~1 and hash-probe targets have no coordinates in this plane (blocked before size).</text>
+<rect x="20" y="400" width="360" height="130" rx="8" fill="#ffebee" stroke="#c62828"/>
+<text x="30" y="424" font-size="12" font-weight="bold">SHAPE: shared thin integer middle?</text>
+<text x="30" y="446" font-size="11">hash probes (#1-3, #6): no middle</text>
+<text x="30" y="466" font-size="11">polynomial systems: not inner products</text>
+<text x="30" y="486" font-size="11">per-target recursion: no batch W</text>
+<rect x="420" y="400" width="360" height="130" rx="8" fill="#fff8e1" stroke="#f9a825"/>
+<text x="430" y="424" font-size="12" font-weight="bold">RING: small-integer products over Z?</text>
+<text x="430" y="446" font-size="11">MSM checks: group ops, eps~1 scale-free</text>
+<text x="430" y="466" font-size="11">sparse LA: matvecs over Z/rZ</text>
+<text x="430" y="486" font-size="11">paper: no new sparse-MM either (Sec 6)</text>
+<rect x="820" y="400" width="360" height="130" rx="8" fill="#e8f5e9" stroke="#2e7d32"/>
+<text x="830" y="424" font-size="12" font-weight="bold">SIZE: inside the envelope?</text>
+<text x="830" y="446" font-size="11">nothing arrives here</text>
+<text x="830" y="466" font-size="11">widest row (eps 0.114) moves zero verdicts</text>
+<text x="830" y="486" font-size="11">size never binds</text>
+<line x1="380" y1="465" x2="420" y2="465" stroke="#333" stroke-width="1.5"/>
+<polygon points="420,459 420,471 432,465" fill="#333"/>
+<line x1="780" y1="465" x2="820" y2="465" stroke="#333" stroke-width="1.5"/>
+<polygon points="820,459 820,471 832,465" fill="#333"/>
+<text x="20" y="560" font-size="11" fill="#333">Watch condition (conjunction): a new base identity past eps* = 0.1204 AND a reduction reshaping an algebraic workload into thin products. Either alone changes nothing.</text>
+<text x="20" y="582" font-size="11" fill="#333">Gate-parameterization next action: extend screen_workload with the six table2.json rows after PR #1493 merges (acceptance: existing tests unchanged).</text>
+<text x="20" y="620" font-size="11" fill="#666">Editable source: figure.mmd. Envelope data: table2.json (paper Table 2, p.40, cells verified against rendered page).</text>
+</svg>

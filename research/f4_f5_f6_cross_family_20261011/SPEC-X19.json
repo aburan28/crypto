@@ -1,0 +1,13 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "F4/F5/F6 cross-family: matrix F4 and F5 at m=19, first target of each family, capped at 1800 s",
+  "description": "Preregistered cross-family Groebner-solver comparison (PROTOCOL.md). Public one-target workloads; IC S is a counted lower bound (solver word XORs unpriced; F6-IC geometric additions charged).",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 19}, {"kind": "binary_random", "n": 19, "seed": 59297, "max_cofactor": 8}],
+    "targets_per_curve": 1,
+    "target_seed": 202610111901,
+    "target_kind": "public"
+  },
+  "arms": [{"name": "matrix-f4", "role": "baseline", "method": {"id": "ic.pipeline", "params": {"factor_base": "binary-standard-subspace:dimension=7", "oracle": "pdp3-binary:m=3,engine=matrix-f4,degree=3,node_budget=8192", "max_trials": "200000"}}}, {"name": "matrix-f5", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "binary-standard-subspace:dimension=7", "oracle": "pdp3-binary:m=3,engine=matrix-f5,degree=3,node_budget=8192", "max_trials": "200000"}}}],
+  "measurement": {"rounds": 1, "warmup": 0, "order": "alternate", "seed": 202610111902, "isolation_required": "L1", "timeout_seconds": 1800}
+}

@@ -1,0 +1,16 @@
+n=131 a=0: f = 38531015900842053623 = {263: 1, 146505763881528721: 1}
+ell_big prime: True
+  ell=263 depth=1 chi=+1 horiz_at_surface=2 curves_level1=262 pi_mod_ell=262 kernel_field_degree=ord(a)=2
+  ell=146505763881528721 depth=1 chi=-1 horiz_at_surface=0 curves_level1=146505763881528722 pi_mod_ell=65861677189822723 kernel_field_degree=ord(a)=12208813656794060
+  total curves in class (incl. K_0): 38531015900842054149  ~2^65.0
+  fraction with End=O_K: 1/38531015900842054149
+
+Toy ladder (a=0 unless noted): n | f | factorization | per-prime (depth, chi, kernel-degree)
+n=23: f=967 fac={967: 1} rows=[(967, 1, 1, 21)] total_curves~2^9
+n=41: f=703889 fac={409: 1, 1721: 1} rows=[(409, 1, -1, 408), (1721, 1, -1, 215)] total_curves~2^19
+n=53: f=68476319 fac={68476319: 1} rows=[(68476319, 1, 1, 646003)] total_curves~2^26
+n=61: f=1146312001 fac={1951: 1, 587551: 1} rows=[(1951, 1, -1, 975), (587551, 1, -1, 117510)] total_curves~2^30
+n=71: f=31797598073 fac={31797598073: 1} rows=[(31797598073, 1, -1, 31797598072)] total_curves~2^34
+n=73: f=23369856751 fac={23369856751: 1} rows=[(23369856751, 1, -1, 11684928375)] total_curves~2^34
+n=83: f=347450761417 fac={6473: 1, 53676929: 1} rows=[(6473, 1, -1, 6472), (53676929, 1, -1, 13419232)] total_curves~2^38
+n=97: f=264777735625649 fac={751943: 1, 352124743: 1} rows=[(751943, 1, -1, 375971), (352124743, 1, -1, 58687457)] total_curves~2^47

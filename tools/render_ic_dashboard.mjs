@@ -143,7 +143,7 @@ assert.equal(sharedIndependentCheck.status, 'PASS');
 const sharedIndependentCheckPin = {path:sharedIndependentCheckPath, sha256:sharedIndependentCheckSha};
 const rankColumnsPath = 'research/ecbench_n37_rank_columns_20261004/RESULT.json';
 const rankColumnsBytes = readFileSync(resolve(ROOT, rankColumnsPath));
-const rankColumnsSha = '9d3ba4708f70e2796bbdb8a541a85b794972563d6ecfe70bde160a698da49fbb';
+const rankColumnsSha = 'f7b950edc74978cbdf2dbc3da54c73bde6c05c0827fbe29ff8bd33659168afa1';
 assert.equal(sha(rankColumnsBytes), rankColumnsSha, 'n37 column decision changed; review its evidence before refreshing the dashboard.');
 const rankColumns = JSON.parse(rankColumnsBytes);
 assert.equal(rankColumns.status, 'independently_replayed_l0_bounded_diagnostic');
@@ -291,6 +291,13 @@ const retainedPanels = [
   ['cold-compact-orbit-20261003','Historical compact-orbit cold-cost panel'],
   ['full-rank-compact-orbit-20261003','Historical compact-orbit full-rank panel'],
   ['n61-compact-orbit-hosted-20261003','n61 compact-orbit autolab panels · hosted isolated reruns'],
+  ['isogeny-conductor-gap-20261011','Isogeny conductor gap and fiber-aware relations · 11 October 2026'],
+  ['isogeny-conductor-gap-round2-20261011','Conductor gap round 2: partial fibers and crater automorphisms · 11 October 2026'],
+  ['isogeny-conductor-gap-round3-20261011','Conductor gap round 3: two-torsion summation polynomials and the combined descent audited · 11 October 2026'],
+  ['conductor-gap-ic37-20261012','Large-prime conductor gap: IC measured at ell = 131101 · 12 October 2026'],
+  ['drastic-conductor-gap-20261012','Drastic prime conductor gaps: ECDLP on both ends · 12 October 2026'],
+  ['drastic-conductor-gap-round2-20261012','Drastic prime conductor gap round 2: the j = 0 crater · 12 October 2026'],
+  ['drastic-conductor-gap-round3-20261012','Drastic prime conductor gap round 3: paired targets · 12 October 2026'],
   ['lab-ecbench-all','Cross-method evidence · every measured candidate'],
   ['lab-pair-claw','Pair claw of cryptanalysis#175 · same-target strong rho'],
   ['lab-progress','Research progress over time · separate regimes and references'],
@@ -300,7 +307,7 @@ const retainedPanels = [
   if (id === 'lab-progress') {
     const marker = /(<script type="application\/json" id="progress-data">)[\s\S]*?(<\/script>)/;
     assert.ok(marker.test(html), 'Progress panel has no canonical data embed');
-    html = html.replace(marker, (_, start, end) => start + progressRaw.toString('utf8').trim() + end);
+    html = html.replace(marker, (_, start, end) => start + progressRaw.toString('utf8') + end);
   }
   return {id,label,html};
 });
