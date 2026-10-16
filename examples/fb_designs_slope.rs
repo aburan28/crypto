@@ -1211,8 +1211,16 @@ fn target_seed(cell: u64, k: usize) -> u64 {
 
 /// Build and measure one system; prints a description line (`"phase":
 /// "built"`) before F4 runs, and the row after.
-fn one(prime: usize, arm: Arm, m: usize, t: usize, k: usize, budget: Duration) -> Value {
-    let (mut row, eqs, n, sol) = build_system(prime, arm, m, t, k);
+fn one(
+    prime: usize,
+    arm: Arm,
+    m: usize,
+    t: usize,
+    k: usize,
+    budget: Duration,
+    distinct: bool,
+) -> Value {
+    let (mut row, eqs, n, sol) = build_system(prime, arm, m, t, k, distinct);
     let mut built = row.clone();
     merge(&mut built, &json!({"phase": "built"}));
     println!("{built}");
@@ -1222,32 +1230,34 @@ fn one(prime: usize, arm: Arm, m: usize, t: usize, k: usize, budget: Duration) -
     row
 }
 
-/// One system with every check before measuring: its row so far (no F4
-/// fields), equations, unknown count and planted solution.
-fn build_system(
-    prime: usize,
+/// Two systems are the same when every equation has the same terms.
+fn same_system(a: &[Pol], b: &[Pol]) -> bool {
+    a.len() == b.len() && a.iter().zip(b).all(|(x, y)| x.terms == y.terms)
+}
+
+/// One planted target and its system, drawn from `trng` (replanting until a
+/// draw is valid): equations, unknown count, planted solution, target, and
+/// the presentation's info.
+#[allow(clippy::too_many_arguments)]
+fn draw_target(
     arm: Arm,
     m: usize,
     t: usize,
-    k: usize,
-) -> (Value, Vec<Pol>, usize, Vec<u64>) {
-    let p = prime_of(prime);
-    let cs = cell_seed(prime, arm, m, t);
-    let mut rng = StdRng::seed_from_u64(cs);
-    let d = build_design(arm, p, t, &mut rng);
-    let (curve, on) = target_curve(p, &d.v, m.max(2), &mut rng);
-    let ts = target_seed(cs, k);
-    let mut trng = StdRng::seed_from_u64(ts);
-    let mut extra = Value::Null;
-    let (eqs, n, sol, target) = loop {
-        let Some(tg) = plant(&curve, m, &on, &mut trng) else {
+    p: u64,
+    d: &Design,
+    curve: &PrimeCurve,
+    on: &[u64],
+    trng: &mut StdRng,
+) -> (Vec<Pol>, usize, Vec<u64>, Target, Value) {
+    loop {
+        let Some(tg) = plant(curve, m, on, trng) else {
             continue;
         };
         if arm == Arm::A11 || arm == Arm::N11 {
             let Shape::Kummer { g } = d.shape else {
                 unreachable!()
             };
-            let Some((mut eqs, n, sol, mut info)) = norm_chain_system(g, t, &curve, m, &tg) else {
+            let Some((mut eqs, n, sol, mut info)) = norm_chain_system(g, t, curve, m, &tg) else {
                 continue;
             };
             if arm == Arm::N11 {
@@ -1267,13 +1277,55 @@ fn build_system(
                     &json!({"null": "s-defining equations randomised", "null_eqs": m}),
                 );
             }
-            extra = info;
-            break (eqs, n, sol, tg);
+            return (eqs, n, sol, tg, info);
         }
-        let null = (arm == Arm::N).then_some(&mut trng);
-        let (eqs, n, sol) = tower_system(&d, &curve, m, &tg, null);
-        break (eqs, n, sol, tg);
-    };
+        let null = (arm == Arm::N).then_some(&mut *trng);
+        let (eqs, n, sol) = tower_system(d, curve, m, &tg, null);
+        return (eqs, n, sol, tg, Value::Null);
+    }
+}
+
+/// One system with every check before measuring: its row so far (no F4
+/// fields), equations, unknown count and planted solution.
+fn build_system(
+    prime: usize,
+    arm: Arm,
+    m: usize,
+    t: usize,
+    k: usize,
+    distinct: bool,
+) -> (Value, Vec<Pol>, usize, Vec<u64>) {
+    let p = prime_of(prime);
+    let cs = cell_seed(prime, arm, m, t);
+    let mut rng = StdRng::seed_from_u64(cs);
+    let d = build_design(arm, p, t, &mut rng);
+    let (curve, on) = target_curve(p, &d.v, m.max(2), &mut rng);
+    let ts = target_seed(cs, k);
+    // Targets 0 … k in order, each from its own stream. With `distinct`
+    // (Amendment 4, G2) a target whose system equals an earlier target's is
+    // redrawn from the same stream; without a collision every draw is the
+    // first one, so the rule changes no collision-free row.
+    let mut accepted: Vec<Vec<Pol>> = Vec::new();
+    let mut redraws = 0usize;
+    let mut chosen = None;
+    for j in if distinct { 0..=k } else { k..=k } {
+        let mut trng = StdRng::seed_from_u64(target_seed(cs, j));
+        loop {
+            let r = draw_target(arm, m, t, p, &d, &curve, &on, &mut trng);
+            if distinct && accepted.iter().any(|e| same_system(e, &r.0)) {
+                if j == k {
+                    redraws += 1;
+                }
+                continue;
+            }
+            accepted.push(r.0.clone());
+            if j == k {
+                chosen = Some(r);
+            }
+            break;
+        }
+    }
+    let (eqs, n, sol, target, extra) = chosen.expect("target k drawn");
     if arm == Arm::A11 || arm == Arm::N11 {
         check_norm_chain(&d, m, p, &mut StdRng::seed_from_u64(ts ^ 0xC4EC));
     }
@@ -1297,6 +1349,8 @@ fn build_system(
         "planted_x": target.pts.iter().map(|pt| pt.x).collect::<Vec<_>>(),
         "set": d.info,
         "presentation": extra,
+        "distinct_targets": distinct,
+        "target_redraws": redraws,
         "engine": "f4_fp",
         "order": "grevlex",
     });
@@ -1366,6 +1420,8 @@ struct RunArgs {
     prime: usize,
     /// Row file name without extension; `{arm}` and `{m}` are substituted.
     file: String,
+    /// Amendment 4, G2: redraw a target whose system repeats an earlier one.
+    distinct: bool,
 }
 
 /// Run one system in a child under `ulimit -v` and a hard wall limit of
@@ -1391,6 +1447,7 @@ fn run_child(a: &RunArgs, arm: Arm, m: usize, t: usize, k: usize, log: &mut File
             "--budget",
             &a.budget.to_string(),
         ])
+        .args(a.distinct.then_some("--distinct-targets"))
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
@@ -1979,7 +2036,7 @@ fn check_p2(budget: Duration) -> bool {
     );
     println!("planted systems at t = 2 (the p2 seeds of F1, target 0)");
     for (arm, m) in [(Arm::A0, 2), (Arm::A11, 2), (Arm::A0, 3), (Arm::A11, 3)] {
-        let (row, eqs, n, sol) = build_system(1, arm, m, 2, 0);
+        let (row, eqs, n, sol) = build_system(1, arm, m, 2, 0, false);
         let r = measure(&eqs, n, p, &sol, budget);
         let input: Vec<Poly> = eqs
             .iter()
@@ -2085,7 +2142,7 @@ fn regress(file: &str, arm: Arm, m: usize, t: usize, budget: Duration) -> bool {
     let mut all = !committed.is_empty();
     for c in &committed {
         let k = c["target"].as_u64().expect("a target") as usize;
-        let (mut row, eqs, n, sol) = build_system(0, arm, m, t, k);
+        let (mut row, eqs, n, sol) = build_system(0, arm, m, t, k, false);
         merge(&mut row, &measure(&eqs, n, P1, &sol, budget));
         let differ: Vec<&str> = REGRESS_FIELDS
             .iter()
@@ -2630,7 +2687,8 @@ fn main() {
             let k: usize = flag(&args, "--target").map_or(0, |s| s.parse().unwrap());
             let budget = flag(&args, "--budget").map_or(300, |s| s.parse().unwrap());
             let prime = flag(&args, "--prime").map_or(0, |s| parse_prime(&s));
-            let row = one(prime, arm, m, t, k, Duration::from_secs(budget));
+            let distinct = args.iter().any(|a| a == "--distinct-targets");
+            let row = one(prime, arm, m, t, k, Duration::from_secs(budget), distinct);
             println!("{row}");
         }
         "run" => {
@@ -2654,6 +2712,7 @@ fn main() {
                 out_dir: flag(&args, "--out-dir").expect("--out-dir"),
                 prime: flag(&args, "--prime").map_or(0, |s| parse_prime(&s)),
                 file: flag(&args, "--file").unwrap_or_else(|| "{arm}-m{m}".into()),
+                distinct: args.iter().any(|a| a == "--distinct-targets"),
             };
             assert!(a.t_min >= 2, "t starts at 2");
             let two = (prime_of(a.prime) - 1).trailing_zeros() as usize;

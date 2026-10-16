@@ -263,3 +263,69 @@ corrects a statement in it that cannot hold.
    coefficients are ordered `q₀, c₁, c₂`, with
    `P(X) = Q(x_R)·y(−R) + c₁(X − x_R) + c₂(X² − x_R²)`. The excess
    (`norm_chain_excess`) is asserted to be 1 at every `m`.
+
+### Amendment 4, 2026-10-16: the `m = 4` series to three cells; distinct targets
+
+Registered by the experiment lane before any G1 row exists. It finalises the
+draft committed as `AMENDMENT-4-DRAFT.md` (`1b44b48cc`). The draft's three
+open questions were settled with the study's owner, as items 1–3 below. It
+adds one experiment (G1) and one construction rule (G2). It changes no
+committed row, verdict, threshold or decision rule.
+
+**Why.** F4 left both `m = 4` series inconclusive with 2 completed cells each.
+Every `t = 4` system stopped at the 300 s budget, A0 at partial D = 7 and
+A11 at partial D = 6. §1's threshold was derived at `m = 4`. F3 showed that a
+3600 s budget completes cells 300 s cannot, and that 13 GB is the limit that
+binds next (A0, `m = 3`, `t = 5`).
+
+**G1. `m = 4` from `t = 4`, p₁, arms A0 and A11.**
+- F4 budget 3600 s, hard kill 3900 s (as F3).
+- **Memory limit `ulimit -v 15000000`** (item 1; raised from 13 GB). That is
+  the physical memory of the host that runs G1 (15 GB, no swap, no cgroup
+  limit). A system that outgrows it is killed, by the allocator's abort or
+  by the kernel's OOM killer, and recorded as aborted with its reason. A
+  larger limit needs a larger host and a new amendment.
+- Seeds as in Amendment 2. With G2 the `t = 4` systems are the F4 systems
+  that timed out, unless G2 redraws one; the rows record `target_redraws`.
+- `t` rises from 4 until the stop rule, per arm. Files are
+  `runs/G1-{arm}-m4.jsonl`.
+- An arm's `m = 4` series is its F4 rows at `t = 2, 3` plus its G1 rows. A
+  cell enters the σ fit only if both of its systems complete. F4's `t = 4`
+  timeout rows stay committed, and G1 supersedes them in the fit.
+
+**G2. Distinct targets (construction; harness flag `--distinct-targets`).**
+- *Rule:* a planted target whose **system** (every equation, term for term)
+  equals an earlier target's system in the same cell is redrawn from its own
+  stream (item 2). Targets are built in index order, so the rule gives the
+  same result in every process.
+- *Why the system and not `x_R`:* N's and N11's systems take random
+  coefficients from the target stream, and A11's depends on `y(−R)`. So equal
+  `x_R` does not mean equal systems for every arm, but equal systems is what
+  makes a cell hold one system twice.
+- *Scope:* without a collision every draw is the first one. Committed rows
+  are therefore reproduced unchanged: checked before registration with
+  `regress` (flag off: A0 `m = 3` `t = 3`, A11 `m = 3` `t = 3`, N `m = 2`
+  `t = 4`), and with the flag on for A11 `m = 3` `t = 3` and A0 `m = 3`
+  `t = 4` (target 1, equal to the committed `x_R`, abscissae and D). The
+  flag changes the collided cells, for example A0 `m = 2` `t = 2` target 1:
+  one redraw, a new `x_R`.
+- G2 applies to G1 and later runs. Committed collided cells are not re-run.
+
+**More targets per cell: not added.** All 97 completed cells so far have
+equal D across their two systems, 76 of them with distinct `x_R`. 96 have
+equal `max_cols`; the exception is A1g at `m = 3`, `t = 3`.
+
+**Decision rules.**
+- *G1:* §1's σ verdict per arm at `m = 4`, over the arm's completed `m = 4`
+  cells. With fewer than 3 the verdict stays inconclusive, its reason is
+  recorded, and no further budget or memory change is made without a new
+  amendment.
+- *G1, secondary (descriptive):* Δlog₂ `max_cols`/Δb per arm, and A11's cell
+  `max_cols` over A0's at each shared completed `t`.
+
+**Predictions.**
+- G1: A0's σ ≥ 0.5 at `m = 4`. This is F4's registered prediction, still
+  undecided.
+- No prediction for A11's σ or width (item 3). The draft's width prediction
+  rested on widths of systems the budget cut off, so it is dropped.
+- A0's `t = 4` systems may hit the memory limit (F3).
