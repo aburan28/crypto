@@ -353,6 +353,18 @@ pub fn project(fits: &[Fit], targets: &[f64], usd_per_core_hour: f64) -> Vec<Pro
         .collect()
 }
 
+/// The protocol's D1 quantities over the paired curves.
+pub fn summary(pairs: &[Pair]) -> Vec<super::fit::Claim> {
+    use super::fit::Claim;
+    let inside = pairs.iter().filter(|p| p.wall_ratio_in_band).count() as f64;
+    let mut ws: Vec<f64> = pairs.iter().map(|p| p.w_star).filter(|w| w.is_finite()).collect();
+    let w_med = super::measure::median(&mut ws).unwrap_or(f64::NAN);
+    vec![
+        Claim::report("D1.in_band", &format!("curves (of {}) whose measured IC/rho wall ratio lies inside the band's ratio range", pairs.len()), inside),
+        Claim::report("D1.w_star_median", "median implied weight w* (GAE per unpriced native operation)", w_med),
+    ]
+}
+
 pub fn pairs_csv(pairs: &[Pair]) -> String {
     let mut s = String::from("session,curve,log2_r,ic_arm,rho_arm,ic_runs,rho_runs,ic_wall_ms,rho_wall_ms,ic_p_w0,ic_p_w01,ic_p_w1,rho_p_w0,rho_p_w01,rho_p_w1,ns_per_gae_w0,ns_per_gae_w01,ns_per_gae_w1,ic_pred_ms_w0,ic_pred_ms_w01,ic_pred_ms_w1,err_w0,err_w01,err_w1,wall_ratio,band_ratio_w0,band_ratio_w01,band_ratio_w1,in_band,w_star,usd_ic,usd_rho\n");
     for p in pairs {

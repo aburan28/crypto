@@ -385,12 +385,18 @@ fn run() -> Result<(), String> {
                 .filter(|p| p.batch >= 4096 && base_names.contains(&p.run))
                 .collect();
             let worst = f1.iter().map(|p| p.ratio).fold(f64::MIN, f64::max);
-            println!(
-                "F1 {}: worst fp64bf/fp64 kernel ratio at B >= 4096 in the baseline runs {:.4} (threshold 0.85, {} cells)",
-                if !f1.is_empty() && worst <= 0.85 { "PASS" } else { "FAIL" },
-                worst,
-                f1.len()
+            let f1c = fit::Claim::at_most(
+                "F1",
+                &format!("worst fp64bf/fp64 kernel ratio at B ≥ 4096 in the baseline runs ({} cells)", f1.len()),
+                if f1.is_empty() { f64::NAN } else { worst },
+                0.85,
             );
+            println!("{} {}: {:.4} (threshold 0.85)", f1c.id, f1c.verdict, f1c.value);
+            let classes: Vec<serde_json::Value> = counts
+                .iter()
+                .map(|((g, c), n)| serde_json::json!({"group": g, "class": c, "arms": n}))
+                .collect();
+            write(&out.join("summary.json"), &json(&serde_json::json!({"classes": classes, "claims": [f1c]})))?;
         }
         Cmd::GpuCheck {
             calibration,
@@ -404,6 +410,11 @@ fn run() -> Result<(), String> {
             std::fs::create_dir_all(&out).map_err(|e| e.to_string())?;
             write(&out.join("gpu_check.csv"), &gpu::rows_csv(&check))?;
             write(&out.join("gpu_check.json"), &json(&check))?;
+            let claims = gpu::claims(&check);
+            write(&out.join("claims.json"), &json(&claims))?;
+            for c in &claims {
+                println!("{:<18} {:<6} {:.4} {}", c.id, c.verdict, c.value, c.statement);
+            }
             for id in gpu::gpu_ids() {
                 for m in [gpu::PipeModel::Separate, gpu::PipeModel::SharedInt] {
                     write(
@@ -446,6 +457,11 @@ fn run() -> Result<(), String> {
             write(&out.join("pairs.json"), &json(&pairs))?;
             write(&out.join("fits.json"), &json(&fits))?;
             write(&out.join("projections.json"), &json(&proj))?;
+            let summary = ic::summary(&pairs);
+            write(&out.join("summary.json"), &json(&summary))?;
+            for c in &summary {
+                println!("{:<18} {:.4} {}", c.id, c.value, c.statement);
+            }
             let mut csv = String::from("log2_r,ic_core_years,rho_core_years,ic_usd,rho_usd,wall_ratio,band_ratio_w0,band_ratio_w01,band_ratio_w1,rank\n");
             for p in &proj {
                 csv.push_str(&format!(

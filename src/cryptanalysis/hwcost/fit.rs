@@ -86,6 +86,29 @@ pub struct Claim {
     pub verdict: String,
 }
 
+impl Claim {
+    /// `PASS` when `value ≤ threshold`, else `FAIL`.
+    pub fn at_most(id: &str, statement: &str, value: f64, threshold: f64) -> Claim {
+        Claim {
+            id: id.into(),
+            statement: statement.into(),
+            value,
+            threshold,
+            verdict: if value.is_finite() && value <= threshold { "PASS" } else { "FAIL" }.into(),
+        }
+    }
+    /// A pre-registered quantity reported without a threshold.
+    pub fn report(id: &str, statement: &str, value: f64) -> Claim {
+        Claim {
+            id: id.into(),
+            statement: statement.into(),
+            value,
+            threshold: f64::NAN,
+            verdict: "REPORT".into(),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SizeFit {
     pub op: String,
@@ -576,7 +599,7 @@ pub fn validate_with(
     ))
 }
 
-fn median_abs(v: impl Iterator<Item = f64>) -> f64 {
+pub fn median_abs(v: impl Iterator<Item = f64>) -> f64 {
     let mut v: Vec<f64> = v.map(f64::abs).collect();
     super::measure::median(&mut v).unwrap_or(f64::NAN)
 }
