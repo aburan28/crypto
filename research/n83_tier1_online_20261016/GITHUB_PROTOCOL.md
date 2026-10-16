@@ -51,3 +51,16 @@ two distinct cores or adequate memory, the job records a host-capacity
 failure and the online speedup remains unknown. K3114's separate
 exposed-point capacity-frontier screen does not change this already frozen
 K3072/K2543 selector.
+
+The executed source commit is retained as Git tag
+`n83-tier1-source-20261016`. After this result is merged, rerun the frozen
+workflow by manual dispatch on that tag:
+
+```sh
+gh workflow run n83-tier1-github.yml --ref n83-tier1-source-20261016
+```
+
+The versioned workflow admits only SHA
+`4238a20bacba174b634cd9efdf88d048e61a77ff`; dispatch on a later
+default-branch commit skips the job. This preserves the source, run identity
+and artifact seal checks used by the original panel.

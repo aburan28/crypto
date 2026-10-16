@@ -1,18 +1,6 @@
 name: N83 same-instance Tier 1 selector and five-point panel
 
 on:
-  push:
-    branches: [codex/n83-tier1-online-20261016]
-    paths:
-      - .github/workflows/n83-tier1-github.yml
-      - research/n83_tier1_online_20261016/PROTOCOL.md
-      - research/n83_tier1_online_20261016/GITHUB_PROTOCOL.md
-      - research/n83_tier1_online_20261016/run.py
-      - research/n83_tier1_online_20261016/verify.py
-      - research/n83_tier1_online_20261016/selector_run.py
-      - research/n83_tier1_online_20261016/selector_verify.py
-      - research/n83_tier1_online_20261016/selector_select.py
-      - research/n83_tier1_online_20261016/github_seal.py
   workflow_dispatch:
 
 permissions:
@@ -25,7 +13,7 @@ concurrency:
 
 jobs:
   same-instance-panel:
-    if: github.repository == 'aburan28/crypto'
+    if: github.repository == 'aburan28/crypto' && github.sha == '4238a20bacba174b634cd9efdf88d048e61a77ff'
     runs-on: ubuntu-24.04
     timeout-minutes: 170
     steps:
