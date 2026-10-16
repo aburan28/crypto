@@ -41,7 +41,9 @@ pub struct PhaseWork {
     pub prims: BTreeMap<String, u128>,
     /// Gates of the phase, as a decimal integer (exact past `2^53`).
     pub bitops: String,
-    pub log2_bitops: f64,
+    /// `None` for zero gates, whose logarithm JSON cannot carry (it reads
+    /// back as `null`).
+    pub log2_bitops: Option<f64>,
 }
 
 /// A record's work in `bitop/v1`.
@@ -53,7 +55,9 @@ pub struct WorkBlock {
     pub phases: Vec<PhaseWork>,
     /// Total gates, as a decimal integer.
     pub bitops: String,
-    pub log2_bitops: f64,
+    /// `None` for zero gates, whose logarithm JSON cannot carry (it reads
+    /// back as `null`).
+    pub log2_bitops: Option<f64>,
     /// `bitops / √r`.
     pub bitops_per_sqrt_r: f64,
     /// The generic floor `√(πr/2A)` additions, in gates, with `A` the
@@ -841,7 +845,7 @@ pub fn price(x: &Priceable) -> Result<WorkBlock, String> {
                 .map(|(p, c)| (p.name().to_string(), *c))
                 .collect(),
             bitops: gates.to_string(),
-            log2_bitops: bitops::log2(gates),
+            log2_bitops: (gates > 0).then(|| bitops::log2(gates)),
         });
     }
     let r = x.curve.r as f64;
@@ -856,7 +860,7 @@ pub fn price(x: &Priceable) -> Result<WorkBlock, String> {
         widths,
         phases: out_phases,
         bitops: total.to_string(),
-        log2_bitops: bitops::log2(total),
+        log2_bitops: (total > 0).then(|| bitops::log2(total)),
         bitops_per_sqrt_r: total as f64 / r.sqrt(),
         floor_bitops: floor,
         ratio_to_floor: total as f64 / floor,
