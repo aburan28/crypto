@@ -135,3 +135,15 @@ or a verification fails.
   session-tracked task.
 - **After a container restart,** a resume runs
   `icprog run r12 manifest-resumed` first.
+
+## Amendment 1 (2026-10-16, before any R12 run): the candidate's binary, tests and holdouts
+
+- **The candidate's binary:** v7 plus `candidate-v7.patch`, built from
+  local commit `23138d20b1d64cbb7f54a27e41cd08e1d1a38b0c` with
+  `rustc 1.97.0` and main's lock. SHA-256
+  `3ba2f76565c3f9ae54aa63d8f24a26d18cc26f18a2d68de9fd4496280e48e3db`.
+- **The tests passed on its tree:** 207 of 207 `koblitz_fast` and
+  `koblitz_index_calculus` tests ([`tests.log`](tests.log)).
+- **The holdouts** are committed in [`holdouts/`](holdouts/SHA256SUMS),
+  drawn by `icprog holdouts` (seeds 238–241, `T167`–`T174`).
+- **`icprog host-class r12`** finds nothing missing on this host.
