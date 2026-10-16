@@ -1,0 +1,15 @@
+release	Pin the release tag to the built source commit	﻿2026-10-16T06:13:29.4436363Z ##[group]Run git tag "v0.1.2356" "$GITHUB_SHA"
+release	Pin the release tag to the built source commit	2026-10-16T06:13:29.4436717Z ^[[36;1mgit tag "v0.1.2356" "$GITHUB_SHA"^[[0m
+release	Pin the release tag to the built source commit	2026-10-16T06:13:29.4437012Z ^[[36;1mgit push origin "refs/tags/v0.1.2356"^[[0m
+release	Pin the release tag to the built source commit	2026-10-16T06:13:29.4485656Z shell: /usr/bin/bash -e {0}
+release	Pin the release tag to the built source commit	2026-10-16T06:13:29.4485908Z env:
+release	Pin the release tag to the built source commit	2026-10-16T06:13:29.4486113Z   CARGO_TERM_COLOR: always
+release	Pin the release tag to the built source commit	2026-10-16T06:13:29.4486348Z   ECC_MARCH: x86-64-v3
+release	Pin the release tag to the built source commit	2026-10-16T06:13:29.4486570Z   CUDA_PKG_VERSION: 12-8
+release	Pin the release tag to the built source commit	2026-10-16T06:13:29.4486795Z   CUDA_DIR_VERSION: 12.8
+release	Pin the release tag to the built source commit	2026-10-16T06:13:29.4487021Z ##[endgroup]
+release	Pin the release tag to the built source commit	2026-10-16T06:14:18.1398909Z error: RPC failed; HTTP 500 curl 22 The requested URL returned error: 500
+release	Pin the release tag to the built source commit	2026-10-16T06:14:18.1399718Z send-pack: unexpected disconnect while reading sideband packet
+release	Pin the release tag to the built source commit	2026-10-16T06:14:18.7360072Z fatal: the remote end hung up unexpectedly
+release	Pin the release tag to the built source commit	2026-10-16T06:14:18.7379862Z Everything up-to-date
+release	Pin the release tag to the built source commit	2026-10-16T06:14:18.7395037Z ##[error]Process completed with exit code 1.
