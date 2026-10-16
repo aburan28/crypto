@@ -3108,6 +3108,7 @@ mod wide {
         indexed4_table: bool,
         indexed5_load75: bool,
         indexed5_fixed30: bool,
+        indexed5_compact27: bool,
         indexed4_fixed30: bool,
         indexed4_fixed31: bool,
         root_table_request_entries: usize,
@@ -3351,6 +3352,7 @@ mod wide {
         let root_only21 = std::env::var("KIC_ROOT_ONLY21").as_deref() == Ok("1");
         let root_only11 = std::env::var("KIC_ROOT_ONLY11").as_deref() == Ok("1");
         let indexed5_id30 = std::env::var("KIC_INDEXED5_ID30").as_deref() == Ok("1");
+        let indexed5_compact27 = std::env::var("KIC_INDEXED5_COMPACT27").as_deref() == Ok("1");
         let indexed4_table = std::env::var("KIC_INDEXED_ROOT4").as_deref() == Ok("1");
         let indexed4_fixed30 = std::env::var("KIC_INDEXED4_FIXED30").as_deref() == Ok("1");
         let indexed4_fixed31 = std::env::var("KIC_INDEXED4_FIXED31").as_deref() == Ok("1");
@@ -3397,6 +3399,25 @@ mod wide {
                 .and_then(|pairs| pairs.checked_mul(n))
                 .expect("state capacity exceeds usize")
         };
+        if indexed5_compact27 {
+            assert!(
+                gf.n == 83
+                    && root_only11
+                    && indexed5_load75
+                    && !indexed5_id30
+                    && !indexed4_table
+                    && std::env::var("KIC_INDEXED_ROOT5").as_deref() == Ok("1")
+                    && std::env::var("KIC_PACKED_ROOT_TABLE").as_deref() == Ok("1")
+                    && !root_bloom_enabled(),
+                "compact27 requires one-root N83 exact five-byte load75 slots without Bloom",
+            );
+            assert!(
+                max_states
+                    .checked_mul(40)
+                    .is_some_and(|bound| bound <= 17usize * (1usize << 27)),
+                "compact27 complete two-root bound exceeds 85% of 2^27 slots",
+            );
+        }
         if root_only11 {
             assert!(
                 ((std::env::var("KIC_INDEXED_ROOT5").as_deref() == Ok("1")
@@ -3435,6 +3456,8 @@ mod wide {
         let root11_request_entries = root_only11.then(|| {
             if indexed4_table {
                 1usize << 30
+            } else if indexed5_compact27 {
+                1usize << 26
             } else if indexed5_load75 {
                 max_states
                     .checked_mul(4)
@@ -3713,6 +3736,7 @@ mod wide {
             indexed4_table,
             indexed5_load75,
             indexed5_fixed30,
+            indexed5_compact27,
             indexed4_fixed30,
             indexed4_fixed31,
             root_table_request_entries,
@@ -4435,6 +4459,7 @@ mod wide {
         summary["root_table_indexed5_id30_enabled"] = json!(index.indexed5_id30);
         summary["indexed5_load75_enabled"] = json!(index.indexed5_load75);
         summary["indexed5_fixed30_enabled"] = json!(index.indexed5_fixed30);
+        summary["indexed5_compact27_enabled"] = json!(index.indexed5_compact27);
         summary["indexed4_fixed31_enabled"] = json!(index.indexed4_fixed31);
         summary["indexed4_fixed30_enabled"] = json!(index.indexed4_fixed30);
         summary["root_only11_enabled"] =
