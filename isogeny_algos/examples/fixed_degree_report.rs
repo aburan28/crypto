@@ -17,9 +17,11 @@
 use isogeny_algos::curve::from_j;
 use isogeny_algos::field::{is_prime, Rng, Zp};
 use isogeny_algos::find::modpoly::Phi;
-use isogeny_algos::fixed_degree::baselines::{mitm_smooth, vow_claw, vow_expected_evals, VowParams};
+use isogeny_algos::fixed_degree::baselines::{
+    mitm_smooth, vow_claw, vow_expected_evals, VowParams,
+};
 use isogeny_algos::fixed_degree::connecting::{connecting_ideal, connects};
-use isogeny_algos::fixed_degree::endring::{end_ring, reduce_ideal, random_ss_j, JGraph, J};
+use isogeny_algos::fixed_degree::endring::{end_ring, random_ss_j, reduce_ideal, JGraph, J};
 use isogeny_algos::fixed_degree::pipeline::{
     find_isogeny_of_degree, plant_ideal, random_prime_norm_ideal, solve_degree, Instance, Solver,
 };
@@ -86,7 +88,14 @@ fn pipeline_records() {
             d: Int::from(d),
         };
         let t = Instant::now();
-        let res = find_isogeny_of_degree(&dg, &mut g, &inst, solver, &ReprOptions::default(), &mut rng);
+        let res = find_isogeny_of_degree(
+            &dg,
+            &mut g,
+            &inst,
+            solver,
+            &ReprOptions::default(),
+            &mut rng,
+        );
         let total = ms(t);
         match res {
             Ok(sol) => {
@@ -119,10 +128,27 @@ fn pipeline_records() {
                     sol.isogeny.j_ok
                 );
             }
-            Err(e) => println!(
-                "{{\"kind\":\"pipeline\",\"case\":{idx},\"p\":{P},\"solver\":\"{solver:?}\",\"planted\":{planted},\"d\":{d},\"log_p_d\":{:.4},\"ok\":false,\"error\":\"{e}\",\"total_ms\":{total:.1}}}",
-                (d as f64).ln() / lp
-            ),
+            Err(e) => {
+                // diagnostic: does Cornacchia find a solution on the same instance?
+                let alt = if solver != Solver::Cornacchia {
+                    find_isogeny_of_degree(
+                        &dg,
+                        &mut g,
+                        &inst,
+                        Solver::Cornacchia,
+                        &ReprOptions::default(),
+                        &mut rng,
+                    )
+                    .map(|s| format!("{:?}", s.degree.x))
+                    .unwrap_or_else(|e| e.to_string())
+                } else {
+                    "n/a".to_string()
+                };
+                println!(
+                    "{{\"kind\":\"pipeline\",\"case\":{idx},\"p\":{P},\"solver\":\"{solver:?}\",\"planted\":{planted},\"d\":{d},\"log_p_d\":{:.4},\"ok\":false,\"error\":\"{e}\",\"total_ms\":{total:.1},\"cornacchia_same_instance\":\"{alt}\"}}",
+                    (d as f64).ln() / lp
+                )
+            }
         }
     }
 }
@@ -153,7 +179,12 @@ fn steps25_records() {
         let o0 = alg.o0();
         for rep in 0..2 {
             let q1 = next_prime(&p.isqrt() * &Int::from(3i64));
-            let i1 = reduce_ideal(&alg, &o0, &random_prime_norm_ideal(&alg, &o0, &q1, &mut rng)).0;
+            let i1 = reduce_ideal(
+                &alg,
+                &o0,
+                &random_prime_norm_ideal(&alg, &o0, &q1, &mut rng),
+            )
+            .0;
             let o1 = i1.right_order(&alg, &o0);
             let d = next_prime(&p.isqrt() * &Int::from((mult + rng.below(mult)) as i64));
             let j0 = random_prime_norm_ideal(&alg, &o1, &d, &mut rng);
@@ -181,7 +212,9 @@ fn steps25_records() {
 
 fn baseline_records() {
     // p = 2^22-ish, p = 3 mod 4: planted 2^e walks
-    let p = (4_000_000u64..).find(|&q| q % 4 == 3 && is_prime(q)).unwrap();
+    let p = (4_000_000u64..)
+        .find(|&q| q % 4 == 3 && is_prime(q))
+        .unwrap();
     let fp = Zp::new(p);
     let phi = Phi::compute(&fp, 2).lift(|x| (x, 0u64));
     let mut g = JGraph::new(p, 2);
@@ -193,7 +226,11 @@ fn baseline_records() {
             let mut prev = None;
             let mut cur = j1;
             for _ in 0..e {
-                let nb: Vec<J> = g.neighbours(cur).into_iter().filter(|&v| Some(v) != prev).collect();
+                let nb: Vec<J> = g
+                    .neighbours(cur)
+                    .into_iter()
+                    .filter(|&v| Some(v) != prev)
+                    .collect();
                 let nx = nb[rng.below(nb.len() as u64) as usize];
                 prev = Some(cur);
                 cur = nx;

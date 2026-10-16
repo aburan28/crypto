@@ -244,6 +244,9 @@ pub fn random_prime_norm_ideal(alg: &Alg, o: &Lattice, q: &Int, rng: &mut Rng) -
             (&(&(-&bb) + &sq) * &inv2a).modulo(q)
         };
         c[k] = t;
+        if c.iter().all(|v| v.is_zero()) {
+            continue;
+        }
         let mut beta = Quat::zero();
         for (idx, cv) in c.iter().enumerate() {
             beta = beta.add(&b[idx].scale(cv, &Int::one()));
