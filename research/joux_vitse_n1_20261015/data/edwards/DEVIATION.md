@@ -19,3 +19,15 @@
      the same 10-hour cap.
    - Every requested arm still runs; only their order and concurrency
      changed. Counts are unaffected; wall times overlap.
+
+3. **Container restart (about 02:05Z, 2026-10-16).** The restart killed
+   `dlp_p41_s1` (started 18:15Z, about 7.8 h, 1 relation by trial 165,664)
+   and `dlp_p71_s1` (started 00:02Z, about 2 h, 2 relations by trial
+   155,645).
+   - Their partial records are kept in `killed_20261016T0205Z/` and are not
+     used in any result.
+   - The arms still owed by the protocol were relaunched at 02:14Z in one
+     sequence, each with its 10-hour cap: `p = 31` seed 2, `p = 41` seed 2,
+     `p = 71` seed 1, `p = 41` seed 1.
+   - The two seed-1 arms restart from trial 0 and are deterministic, so they
+     replay the killed runs' relations first.
