@@ -6160,13 +6160,7 @@ impl PairSumTable {
 
     /// [`Self::pairs_for_key`] when the caller already holds
     /// `pair_filter_hash(key)`.
-    fn pairs_for_key_hash(
-        &self,
-        target: FastPoint,
-        key: u64,
-        h: u64,
-        out: &mut Vec<(u32, u32)>,
-    ) {
+    fn pairs_for_key_hash(&self, target: FastPoint, key: u64, h: u64, out: &mut Vec<(u32, u32)>) {
         out.clear();
         if !self.admitted_hash(h) {
             return;
