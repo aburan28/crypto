@@ -477,7 +477,10 @@ fn mix_root_bloom(mut value: u64) -> u64 {
 }
 
 fn root_bloom_enabled() -> bool {
-    std::env::var("KIC_ROOT_BLOOM").as_deref() == Ok("1")
+    // Enabled by default (opt out with KIC_ROOT_BLOOM=0): most root-table
+    // probe keys miss, and the Bloom prefilter avoids a random DRAM walk per
+    // miss. Exactness is unchanged; a Bloom pass still probes the table.
+    std::env::var("KIC_ROOT_BLOOM").as_deref() != Ok("0")
 }
 
 /// Open-addressing u64 -> u64 table; keys are < 2^63 so u64::MAX marks empty.
@@ -3552,7 +3555,6 @@ mod wide {
         base: &Base128,
         codes: &[u128; 4],
         target: FastPoint128,
-        relation_check_ns: &mut u128,
     ) -> Option<[usize; 4]> {
         let choices: Vec<&Vec<usize>> = codes
             .iter()
@@ -3564,10 +3566,7 @@ mod wide {
                 for &c in choices[2] {
                     let abc = fast.add(ab, base.points[c]);
                     for &d in choices[3] {
-                        let check_started = Instant::now();
-                        let matches = fast.add(abc, base.points[d]) == target;
-                        *relation_check_ns += check_started.elapsed().as_nanos();
-                        if matches {
+                        if fast.add(abc, base.points[d]) == target {
                             return Some([a, b, c, d]);
                         }
                     }
@@ -3638,7 +3637,7 @@ mod wide {
                 for partner in partners {
                     *probes += 1;
                     let (canonical, partner_shift) =
-                        basis.canonical(basis.to_normal.apply(partner));
+                        basis.canonical_selected(basis.to_normal.apply(partner));
                     let Some(value) = index
                         .table
                         .get_with_context(canonical, &index.states, basis)
@@ -3654,9 +3653,12 @@ mod wide {
                         index.shifted[left2][left_shift2],
                         index.shifted[right2][right_shift2],
                     ];
-                    if let Some(point_indices) =
-                        lift128(fast, base, &codes, target, relation_check_ns)
-                    {
+                    // Time the whole lift once per candidate instead of one
+                    // Instant::now() per innermost add.
+                    let lift_started = Instant::now();
+                    let lifted = lift128(fast, base, &codes, target);
+                    *relation_check_ns += lift_started.elapsed().as_nanos();
+                    if let Some(point_indices) = lifted {
                         return Some(Relation128 {
                             point_indices,
                             x_codes: codes,
