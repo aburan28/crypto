@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="640" viewBox="0 0 980 640" font-family="Helvetica, Arial, sans-serif" font-size="13">
+  <!-- Hand-written SVG: this file is its own source. Edit it here; nothing generates it. -->
+  <title>Experiment backlog: card lifecycle, lab leases and objectives</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#444"/>
+    </marker>
+    <style>
+      .box { fill: #ffffff; stroke: #444; stroke-width: 1.2; rx: 6; }
+      .git { fill: #eef3fb; stroke: #3b6db3; }
+      .lab { fill: #eef8f0; stroke: #2f8a4a; }
+      .obj { fill: #fdf3e7; stroke: #b9741a; }
+      .bad { fill: #fbeeee; stroke: #b33b3b; }
+      .lane { font-weight: bold; font-size: 14px; }
+      .small { font-size: 11px; fill: #333; }
+      .edge { stroke: #444; stroke-width: 1.2; fill: none; marker-end: url(#arrow); }
+      .dash { stroke-dasharray: 5 4; }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="980" height="640" fill="#ffffff"/>
+
+  <!-- Lane 1: the card in git -->
+  <text x="20" y="28" class="lane" fill="#3b6db3">1. The card (crypto repo, git, reviewed in a PR, CI: backlog validate --all)</text>
+  <rect x="20" y="44" width="110" height="40" class="box git"/><text x="75" y="69" text-anchor="middle">draft</text>
+  <rect x="190" y="44" width="110" height="40" class="box bad"/><text x="245" y="64" text-anchor="middle">blocked</text><text x="245" y="78" text-anchor="middle" class="small">blocked_on: typed links</text>
+  <rect x="360" y="44" width="130" height="40" class="box git"/><text x="425" y="64" text-anchor="middle">ready</text><text x="425" y="78" text-anchor="middle" class="small">PROTOCOL blob + commit</text>
+  <rect x="550" y="44" width="110" height="40" class="box git"/><text x="605" y="69" text-anchor="middle">running</text>
+  <rect x="720" y="30" width="110" height="30" class="box git"/><text x="775" y="50" text-anchor="middle">done</text>
+  <rect x="720" y="68" width="110" height="30" class="box bad"/><text x="775" y="88" text-anchor="middle">failed</text>
+  <rect x="860" y="44" width="100" height="40" class="box bad"/><text x="910" y="69" text-anchor="middle">abandoned</text>
+  <path d="M130,64 L188,64" class="edge"/>
+  <path d="M300,64 L358,64" class="edge"/>
+  <path d="M130,56 C230,10 330,10 360,52" class="edge"/>
+  <path d="M490,64 L548,64" class="edge"/>
+  <path d="M660,58 L718,46" class="edge"/>
+  <path d="M660,70 L718,82" class="edge"/>
+  <text x="20" y="112" class="small">Every status change is a commit to backlog/&lt;ID&gt;/card.json in a PR. Funding (cairn.funding.units) is priority: proposed by the author, approved by the reviewer who merges.</text>
+
+  <!-- Lane 2: lab tasks -->
+  <text x="20" y="150" class="lane" fill="#2f8a4a">2. Single heavy runs: cairn lab tasks (mode "lab-task"; signed CRDT ops, offline, sync by dir / bundle / peer)</text>
+  <rect x="20" y="166" width="150" height="54" class="box lab"/><text x="95" y="188" text-anchor="middle">backlog cairn-publish</text><text x="95" y="205" text-anchor="middle" class="small">doc backlog/&lt;ID&gt; (card, funding)</text>
+  <rect x="200" y="166" width="140" height="54" class="box lab"/><text x="270" y="188" text-anchor="middle">sync / clone / bundle</text><text x="270" y="205" text-anchor="middle" class="small">space onto the runner</text>
+  <rect x="370" y="166" width="150" height="54" class="box lab"/><text x="445" y="188" text-anchor="middle">claim TASK --ttl</text><text x="445" y="205" text-anchor="middle" class="small">highest funding first</text>
+  <rect x="550" y="166" width="150" height="54" class="box lab"/><text x="625" y="188" text-anchor="middle">lab exec --task</text><text x="625" y="205" text-anchor="middle" class="small">receipt + /out in one op</text>
+  <rect x="730" y="166" width="230" height="54" class="box lab"/><text x="845" y="188" text-anchor="middle">release --outcome completed|failed</text><text x="845" y="205" text-anchor="middle" class="small">then sync back</text>
+  <path d="M170,193 L198,193" class="edge"/>
+  <path d="M340,193 L368,193" class="edge"/>
+  <path d="M520,193 L548,193" class="edge"/>
+  <path d="M700,193 L728,193" class="edge"/>
+  <path d="M625,220 C625,262 445,262 445,222" class="edge dash"/>
+  <text x="535" y="270" text-anchor="middle" class="small">re-claim before expiry = heartbeat</text>
+  <path d="M520,214 C600,300 760,300 845,222" class="edge dash"/>
+  <text x="700" y="304" text-anchor="middle" class="small">preempted by higher funding: checkpoint published, release --outcome abandoned (resumable runs only)</text>
+
+  <rect x="20" y="320" width="460" height="108" class="box"/>
+  <text x="32" y="340" font-weight="bold">Leases (cairn lab claim): what holds</text>
+  <text x="32" y="358" class="small">Among live claims on a task, the first in (lamport, id) order holds it; every replica that</text>
+  <text x="32" y="373" class="small">has synced computes the same holder; the others read "contended". Advisory: two offline</text>
+  <text x="32" y="388" class="small">runners can both run until they sync. Avoid it: sync, claim, sync again before starting;</text>
+  <text x="32" y="403" class="small">keep ttl short and re-claim. A lease is never evidence and never a permission.</text>
+  <text x="32" y="420" class="small">first_success: check doc backlog/&lt;ID&gt; "found" before each claim; set only on checker accept.</text>
+
+  <!-- Lane 3: objectives -->
+  <text x="20" y="446" class="lane" fill="#b9741a">3. Checkable searches: cairn objectives (mode "objective"; any solver, a pinned verifier decides)</text>
+  <rect x="20" y="462" width="160" height="54" class="box obj"/><text x="100" y="484" text-anchor="middle">backlog cairn-post</text><text x="100" y="501" text-anchor="middle" class="small">--confirm; reward = funding</text>
+  <rect x="210" y="462" width="170" height="54" class="box obj"/><text x="295" y="484" text-anchor="middle">cairn work --objective</text><text x="295" y="501" text-anchor="middle" class="small">work_assignment: unit range</text>
+  <rect x="410" y="462" width="150" height="54" class="box obj"/><text x="485" y="484" text-anchor="middle">commit, then reveal</text><text x="485" y="501" text-anchor="middle" class="small">next epoch</text>
+  <rect x="590" y="462" width="170" height="54" class="box obj"/><text x="675" y="484" text-anchor="middle">pinned verifier</text><text x="675" y="501" text-anchor="middle" class="small">accept / reject / unavailable</text>
+  <rect x="790" y="462" width="170" height="54" class="box obj"/><text x="875" y="484" text-anchor="middle">settle</text><text x="875" y="501" text-anchor="middle" class="small">first_success ends it</text>
+  <path d="M180,489 L208,489" class="edge"/>
+  <path d="M380,489 L408,489" class="edge"/>
+  <path d="M560,489 L588,489" class="edge"/>
+  <path d="M760,489 L788,489" class="edge"/>
+
+  <!-- Results -->
+  <rect x="300" y="560" width="380" height="54" class="box git"/>
+  <text x="490" y="582" text-anchor="middle">a reasoning session lands the result: PR into research/&lt;dir&gt;</text>
+  <text x="490" y="599" text-anchor="middle" class="small">report + graph + PDF, receipts, store: names for large files; card -> done / failed</text>
+  <path d="M845,220 C960,330 900,560 682,585" class="edge dash"/>
+  <path d="M875,516 C875,560 760,580 682,587" class="edge dash"/>
+</svg>

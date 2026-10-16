@@ -1,0 +1,18 @@
+saved /home/user/wt/lane-h/research/pkm_supersingular_aux_20261015/q3/sessions/s20/comparisons/ic-ord-rootfind__ic-ss-rootfind.json
+ops (ok): ic-ss-rootfind / ic-ord-rootfind = 1.1077 [1.092, 1.122] (cluster) over 16 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.0711 [1.053, 1.089]
+measurement quality: 0 / 100; paired attempts 16, verified 16, admitted 0; levels {"L0": 16}; p95 foreign busy unknown%, p95 run queue 9.32%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-ss-rootfind / ic-ord-rootfind | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp20-t1143-5bef62bd | 17.45 | 8 | 1.1077 | [1.0918, 1.1218] | cluster |
+
+| workload | curve | log2 r | ic-ord-rootfind mean S | ic-ss-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W1c6ea9f93ded | icv1-fp20-t1143-5bef62bd | 17.45 | 60.5706 | 68.4596 | 1.1302 |
+| W3a523e159296 | icv1-fp20-t1143-5bef62bd | 17.45 | 62.0392 | 70.1492 | 1.1307 |
+| W54e78eadb6f6 | icv1-fp20-t1143-5bef62bd | 17.45 | 64.3283 | 70.3656 | 1.0939 |
+| W7673cd42109e | icv1-fp20-t1143-5bef62bd | 17.45 | 64.0055 | 69.3807 | 1.0840 |
+| W812ea13fe327 | icv1-fp20-t1143-5bef62bd | 17.45 | 62.8633 | 69.5249 | 1.1060 |
+| Wcbbd5fc33da4 | icv1-fp20-t1143-5bef62bd | 17.45 | 63.4048 | 71.0017 | 1.1198 |
+| We420bb72eb7e | icv1-fp20-t1143-5bef62bd | 17.45 | 63.7371 | 69.1631 | 1.0851 |
+| Wf2b5d6985b81 | icv1-fp20-t1143-5bef62bd | 17.45 | 62.6008 | 69.7330 | 1.1139 |

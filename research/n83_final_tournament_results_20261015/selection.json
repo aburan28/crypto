@@ -1,0 +1,142 @@
+{
+  "admission_sha256": "91ef9ffbb4515576bae01b08177a7ce0bd2fc58e08a745990668e9163c74964d",
+  "analysis_sha256": "3a474962a4c8e58d7db416ca90b9746c4f3d05a047647308ab2937d46cfc147f",
+  "artifact_id": 12006958284,
+  "artifact_run_id": 38793258972,
+  "artifact_sha256": "a0762097a9f0ac62adda606ff9d4d8cbd94e585c1b4e5bb7dbc37f04e4ed80f6",
+  "balanced_comparison": {
+    "bootstrap_resamples": 10000,
+    "contiguous_block_size": 50,
+    "descriptive_lowest_pipeline": "root4k3425std",
+    "pairwise": {
+      "root11k3450wide3_minus_root4k3425std": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -1.54513059775,
+          1.8040146864999997
+        ],
+        "mean_ms": 0.11988286399999996
+      },
+      "root11k3450wide3_minus_root4k3596": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -8.1289423875,
+          -5.049404925125
+        ],
+        "mean_ms": -6.5758489385
+      },
+      "root11k3450wide3_minus_wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -3.7559733554999997,
+          0.01667391412500005
+        ],
+        "mean_ms": -1.865058388375
+      },
+      "root4k3425std_minus_root11k3450wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -1.8258869658749999,
+          1.6011441936250002
+        ],
+        "mean_ms": -0.11988286399999996
+      },
+      "root4k3425std_minus_root4k3596": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -8.254681447375,
+          -5.095101028625
+        ],
+        "mean_ms": -6.6957318025
+      },
+      "root4k3425std_minus_wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -3.72219634675,
+          -0.28666299699999986
+        ],
+        "mean_ms": -1.9849412523749999
+      },
+      "root4k3596_minus_root11k3450wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          4.981970469875,
+          8.147583433625
+        ],
+        "mean_ms": 6.5758489385
+      },
+      "root4k3596_minus_root4k3425std": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          5.103874532875,
+          8.19594347375
+        ],
+        "mean_ms": 6.6957318025
+      },
+      "root4k3596_minus_wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          3.00247050825,
+          6.464446045375
+        ],
+        "mean_ms": 4.710790550125
+      },
+      "wide3_minus_root11k3450wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          0.04532663674999998,
+          3.75584101775
+        ],
+        "mean_ms": 1.865058388375
+      },
+      "wide3_minus_root4k3425std": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          0.22717906174999988,
+          3.7309350062499997
+        ],
+        "mean_ms": 1.9849412523749999
+      },
+      "wide3_minus_root4k3596": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -6.443372634125,
+          -2.9818479943750003
+        ],
+        "mean_ms": -4.710790550125
+      }
+    },
+    "pipeline_mean_ms": {
+      "root11k3450wide3": 28.80836220775,
+      "root4k3425std": 28.68847934375,
+      "root4k3596": 35.38421114625,
+      "wide3": 30.673420596125
+    },
+    "repeatability": {
+      "root11k3450wide3_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.09113254924999997,
+          0.592867657
+        ],
+        "mean_ms": 0.2658484005
+      },
+      "root4k3425std_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.18790142549999994,
+          0.43834651325000007
+        ],
+        "mean_ms": 0.1173364495
+      },
+      "root4k3596_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          0.6244311660000003,
+          1.18244657425
+        ],
+        "mean_ms": 0.8973862715
+      },
+      "wide3_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.07494957625000011,
+          0.56403039275
+        ],
+        "mean_ms": 0.23803296124999998
+      }
+    },
+    "selected_candidate_id": null,
+    "selected_pipeline": null
+  },
+  "schema": "n83.final-tournament-selection/v1",
+  "selected_candidate_id": null,
+  "selected_pipeline": null,
+  "source_commit": "d72ee1c00da72361c81060a15f1f25fc828a9d0f",
+  "status": "BOUNDED_UNKNOWN",
+  "workload_id": "902e0212cfbe"
+}

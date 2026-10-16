@@ -1,0 +1,40 @@
+Index calculus is the method that should exploit the most structure in an
+elliptic-curve discrete-logarithm instance, and in practice it has never
+beaten Pollard rho on a prime-order curve of cryptographic shape. This
+paper surveys where that question stands and measures it. We review the
+literature by field type---extension fields (Gaudry, Diem, FGHR), prime-degree
+binary fields and the contested first-fall-degree heuristics behind the
+subexponential claims (Petit--Quisquater, Semaev, and the evidence of Huang,
+Kosters and Yeo, Shantz--Teske and Galbraith--Gebregiyorgis), subfield curves
+(Galbraith--Granger--Merz--Petit) and prime fields (Petit--Kosters--Messeng,
+Amadori--Pintore--Sala, McGuire--Mueller)---and the generic lower bounds that
+frame them.
+
+We then measure the frontier with one native harness that charges rho,
+baby-step giant-step, the kangaroo and several index-calculus pipelines in a
+single counted unit on one-target workloads with sealed, replayable records.
+Almost no cost in such records is complete, the rho baselines included, so we
+price every arm's unpriced native work alike across a band of weights and rank
+two methods only where the order holds across the band. On fixed ladders of
+eight Koblitz curves ($\log_2 r$ from 11 to 39), six NIST-shaped prime curves
+(20--40 bits) and five Kummer-tower curves---4{,}848 executions on public
+targets, parameters chosen on separate training targets, every session
+replay-audited---no index-calculus arm beats generic rho on any curve at any
+weight. The closest, a compact Frobenius-orbit factor base, is $3.8$--$15\times$
+signed-Frobenius rho with native work free; two-summand prime-field index
+calculus goes from $10.5\times$ to $102\times$ rho between 20 and 40 bits; no
+fitted cost exponent of a campaign index-calculus arm lies below rho's.
+
+The measurements come from a fourteen-week engineering programme that we also
+document: root-finding decomposition oracles (a known mechanism, here proved in
+Lean and engineered to $383$--$1{,}535\times$ over matrix F4 per decomposition),
+an $\FF_p$ F4 brought to msolve parity on square systems, FGHR's $D_4$ symmetry cutting the
+$k=4$ solve over $\FF_{p^4}$ by $48\times$, genus-three index calculus after the cubic GHS transfer at
+about $q^{1.4}$ against rho's $q^{3/2}$ (the only exponent below rho's; its
+distance to a measured negation-map rho at $q=2^{20}$ fell from $2.6\times$
+to $1.15\times$ in three improvement rounds), and the negative results, including a
+conservation lemma for isogeny transfers and an equal-advice audit that
+retires the programme's online win over rho: Bernstein--Lange
+preprocessing rho with the same table is $53$--$317\times$ faster. We close with open problems, each
+stated as the experiment or proof that would settle it. Nothing here concerns a
+deployed curve or key recovery.

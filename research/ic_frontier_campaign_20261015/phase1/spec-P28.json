@@ -1,0 +1,72 @@
+{
+ "schema": "ecbench.spec/v1",
+ "label": "IC frontier campaign Phase 1: 28-bit a=-3 prime-order curve",
+ "description": "Phase 1 counted frontier (PROTOCOL.md, frozen): generic arms and the two-summand pair-table IC with the train-panel base size. Counts only; AGENTS.md 5a band. Public synthetic; no security claim.",
+ "workloads": {
+  "targets_per_curve": 16,
+  "target_seed": 20261015200,
+  "target_kind": "public",
+  "curves": [
+   {
+    "kind": "prime_explicit",
+    "p": 268435399,
+    "a": 268435396,
+    "b": 3,
+    "group_order": 268407199,
+    "r": 268407199,
+    "gx": 1,
+    "gy": 1
+   }
+  ]
+ },
+ "arms": [
+  {
+   "name": "rho-neg",
+   "role": "reference",
+   "method": {
+    "id": "rho.negation"
+   }
+  },
+  {
+   "name": "bsgs-neg",
+   "role": "baseline",
+   "method": {
+    "id": "bsgs.negation"
+   }
+  },
+  {
+   "name": "kangaroo",
+   "role": "baseline",
+   "method": {
+    "id": "kangaroo.vow"
+   }
+  },
+  {
+   "name": "ic-pair",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "prime-abscissa:size=407",
+     "oracle": "mitm:negation_folded=1",
+     "max_trials": "26479085"
+    }
+   }
+  },
+  {
+   "name": "rho-neg-aa",
+   "role": "control",
+   "method": {
+    "id": "rho.negation"
+   }
+  }
+ ],
+ "measurement": {
+  "rounds": 2,
+  "warmup": 1,
+  "order": "alternate",
+  "seed": 20261015201,
+  "isolation_required": "L0",
+  "timeout_seconds": 3600
+ }
+}
