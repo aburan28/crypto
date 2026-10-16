@@ -1,6 +1,12 @@
 name: N83 precision-source cold root11 root22 screen
 
 on:
+  push:
+    branches: [codex/n83-e2e-crosslayout-20261016]
+    paths:
+      - .github/workflows/n83-e2e-crosslayout.yml
+      - research/n83_e2e_crosslayout_20261016/run.py
+      - research/n83_e2e_crosslayout_20261016/verify.py
   workflow_dispatch:
 
 permissions:
