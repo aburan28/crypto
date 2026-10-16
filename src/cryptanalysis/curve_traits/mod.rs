@@ -40,19 +40,23 @@
 
 pub mod arith;
 pub mod certify;
+pub mod dissect;
 pub mod query;
+pub mod sources;
 pub mod subfield;
+pub mod torsion;
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
+use std::sync::Mutex;
 
 use num_bigint::{BigInt, BigUint};
 use num_integer::Integer;
-use num_traits::{One, Signed, Zero};
+use num_traits::{One, Signed, ToPrimitive, Zero};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
-use arith::{factor, Factored};
+use arith::Factored;
 
 /// How well a value is established.  Ordered from strongest to weakest,
 /// so the weaker of two is their maximum.
@@ -159,7 +163,8 @@ pub struct Representation {
     pub cofactor: BigUint,
 }
 
-/// A registry entry, parsed losslessly.
+/// A registry entry, parsed losslessly, or a curve from another source
+/// (see [`sources`]) in the same shape.
 #[derive(Clone, Debug)]
 pub struct RegistryCurve {
     pub slug: String,
@@ -167,9 +172,102 @@ pub struct RegistryCurve {
     pub model: Model,
     pub trace: BigInt,
     pub order: BigUint,
-    /// The registry's certified `End(E)` discriminant, when it has one.
+    /// The certified `End(E)` discriminant, when the source has one.
     pub end: Option<BigInt>,
     pub representations: Vec<Representation>,
+    /// Volcano levels `v_ℓ([O_K : End(E)])` the source proves, by `ℓ`.
+    pub levels: BTreeMap<u64, u32>,
+    pub source: Source,
+}
+
+/// Where a record's curve came from.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Source {
+    /// `registry`, `isogeny-walk` or `ic-crosswalk`.
+    pub kind: String,
+    /// The file it was read from, when not the registry.
+    pub path: Option<String>,
+    /// The source's representation identifier, when it records one.
+    pub curve_uid: Option<String>,
+    /// Whether the slug is a registered ICV1 identity (`AGENTS.md` §11);
+    /// a walked or crosswalk curve's slug is computed, not registered.
+    pub registered: bool,
+}
+
+impl Source {
+    fn registry() -> Self {
+        Source {
+            kind: "registry".into(),
+            path: None,
+            curve_uid: None,
+            registered: true,
+        }
+    }
+}
+
+/// Factoring shared by every record of one build: the rho budget, the
+/// committed factor hints, and a memo, since isogenous curves share
+/// `t² − 4q`, twist orders and `r − 1`.
+pub struct Factoring {
+    pub budget: u64,
+    pub hints: Vec<BigUint>,
+    memo: Mutex<HashMap<BigUint, Factored>>,
+}
+
+impl Factoring {
+    pub fn new(budget: u64, hints: Vec<BigUint>) -> Self {
+        Factoring {
+            budget,
+            hints,
+            memo: Mutex::new(HashMap::new()),
+        }
+    }
+
+    pub fn factor(&self, n: &BigUint) -> Factored {
+        if let Some(f) = self.memo.lock().expect("memo").get(n) {
+            return f.clone();
+        }
+        let f = arith::factor_hinted(n, self.budget, &self.hints);
+        self.memo.lock().expect("memo").insert(n.clone(), f.clone());
+        f
+    }
+
+    /// Every composite left unsplit so far, ascending.
+    pub fn leftovers(&self) -> Vec<BigUint> {
+        let memo = self.memo.lock().expect("memo");
+        let mut out: Vec<BigUint> = memo
+            .values()
+            .flat_map(|f| f.composites.iter().map(|(c, _)| c.clone()))
+            .collect();
+        out.sort();
+        out.dedup();
+        out
+    }
+}
+
+/// Parse `docs/curves/factor-hints.txt`: one prime per line, each above
+/// the trial-division bound and passing [`arith::is_prime`].
+pub fn read_hints(text: &str) -> Result<Vec<BigUint>, String> {
+    let mut out = Vec::new();
+    for (i, line) in text.lines().enumerate() {
+        let line = line.trim();
+        if line.is_empty() {
+            continue;
+        }
+        let p: BigUint = line
+            .parse()
+            .map_err(|_| format!("factor hints line {}: not an integer", i + 1))?;
+        if p.bits() <= 16 || !arith::is_prime(&p) {
+            return Err(format!(
+                "factor hints line {}: {p} is not a prime above 2^16",
+                i + 1
+            ));
+        }
+        out.push(p);
+    }
+    out.sort();
+    out.dedup();
+    Ok(out)
 }
 
 fn parse_uint(s: &str) -> Option<BigUint> {
@@ -556,6 +654,8 @@ pub fn read_registry(text: &str) -> Result<Vec<RegistryCurve>, String> {
             order,
             end,
             representations,
+            levels: BTreeMap::new(),
+            source: Source::registry(),
         });
     }
     Ok(out)
@@ -636,6 +736,19 @@ pub struct SubfieldRecord {
     pub method: String,
 }
 
+/// The volcano level of `End(E)` at one prime `ℓ | v`.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct LevelRecord {
+    pub ell: String,
+    /// `v_ℓ(v)`: the depth of the `ℓ`-volcano.
+    pub depth: u32,
+    /// `v_ℓ([O_K : End(E)])`: 0 on the crater, `depth` on the floor.
+    pub level: Option<u32>,
+    /// The level is at most this.
+    pub level_at_most: u32,
+    pub method: String,
+}
+
 /// What is known of `End(E)`, an order of `Q(π)` between `Z[π]` and
 /// `O_K`.  For an ordinary curve every geometric endomorphism is defined
 /// over the working field, so this is also the ring over that field.
@@ -643,8 +756,12 @@ pub struct SubfieldRecord {
 pub struct EndomorphismRecord {
     /// `f₀` with the conductor `[O_K : End(E)]` dividing it: the conductor
     /// `v` of `Z[π]`, sharpened by every other order known to lie in
-    /// `End(E)`.
+    /// `End(E)` and by the volcano levels below.
     pub conductor_divides: Option<String>,
+    /// `[O_K : End(E)]`, when every level is resolved.
+    pub conductor: Option<String>,
+    /// One entry per prime of `v`.
+    pub levels: Vec<LevelRecord>,
     /// `true` when `End(E) = O_K` is established; `false` when a
     /// certificate fixes a smaller order; absent when unresolved.
     pub maximal: Option<bool>,
@@ -683,11 +800,12 @@ pub struct Twist {
     pub status: Status,
 }
 
-/// Everything derived about one registered curve.
+/// Everything derived about one curve.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct CurveTraits {
     pub slug: String,
     pub family: String,
+    pub source: Source,
     pub field: FieldInfo,
     pub trace: String,
     pub order: String,
@@ -704,16 +822,19 @@ pub struct CurveTraits {
     pub subgroup: Subgroup,
     pub embedding: Embedding,
     pub twist: Twist,
+    /// The DiSSECT families ([`dissect`]); absent for models whose
+    /// arithmetic this module does not have.
+    pub dissect: Option<dissect::DissectRecord>,
     /// The grouping keys of [`KEYS`], precomputed.
     pub keys: BTreeMap<String, String>,
 }
 
 // ── Computing it ──────────────────────────────────────────────────────
 
-fn frobenius(c: &RegistryCurve, budget: u64) -> Result<(Frobenius, BigInt), String> {
+fn frobenius(c: &RegistryCurve, fx: &Factoring) -> Result<(Frobenius, BigInt), String> {
     let q = BigInt::from(c.model.q());
     let delta: BigInt = &c.trace * &c.trace - BigInt::from(4u8) * &q;
-    let fac = factor(delta.magnitude(), budget);
+    let fac = fx.factor(delta.magnitude());
     let split = arith::split_discriminant(&delta, &fac);
     if let (Some(end), Some(dk)) = (&c.end, &split.cm_disc) {
         // A certified End(E) discriminant is d_K·f² for some f | v.
@@ -813,7 +934,7 @@ fn subfield_record(c: &RegistryCurve) -> Result<SubfieldRecord, String> {
     })
 }
 
-fn subgroup(c: &RegistryCurve, budget: u64) -> Result<(Subgroup, Option<BigUint>), String> {
+fn subgroup(c: &RegistryCurve, fx: &Factoring) -> Result<(Subgroup, Option<BigUint>), String> {
     if let Some(rep) = c.representations.first() {
         let r = rep.subgroup_order.clone();
         if &rep.cofactor * &r != c.order || !arith::is_prime(&r) {
@@ -834,7 +955,7 @@ fn subgroup(c: &RegistryCurve, budget: u64) -> Result<(Subgroup, Option<BigUint>
             Some(r),
         ));
     }
-    let fac = factor(&c.order, budget);
+    let fac = fx.factor(&c.order);
     Ok(match fac.largest_prime() {
         Some(r) => {
             let r = r.clone();
@@ -862,7 +983,7 @@ fn subgroup(c: &RegistryCurve, budget: u64) -> Result<(Subgroup, Option<BigUint>
     })
 }
 
-fn embedding(q: &BigUint, r: Option<&BigUint>, budget: u64) -> Embedding {
+fn embedding(q: &BigUint, r: Option<&BigUint>, fx: &Factoring) -> Embedding {
     let unknown = |status| Embedding {
         degree: None,
         lower_bound: None,
@@ -876,7 +997,7 @@ fn embedding(q: &BigUint, r: Option<&BigUint>, budget: u64) -> Embedding {
         return unknown(Status::NotApplicable);
     }
     let rm1 = r - 1u8;
-    let fac: Factored = factor(&rm1, budget);
+    let fac: Factored = fx.factor(&rm1);
     let r_status = arith::prime_status(r);
     let exact = |k: BigUint, status| Embedding {
         complement_bits: Some((&rm1 / &k).bits()),
@@ -899,11 +1020,11 @@ fn embedding(q: &BigUint, r: Option<&BigUint>, budget: u64) -> Embedding {
     }
 }
 
-fn twist(q: &BigUint, trace: &BigInt, budget: u64) -> Twist {
+fn twist(q: &BigUint, trace: &BigInt, fx: &Factoring) -> Twist {
     let order = (BigInt::from(q.clone()) + BigInt::one() + trace)
         .to_biguint()
         .expect("Hasse: q + 1 + t > 0");
-    let fac = factor(&order, budget);
+    let fac = fx.factor(&order);
     let (bits, cofactor) = match fac.largest_prime() {
         Some(p) => (Some(p.bits()), Some((&order / p).to_string())),
         None => (None, None),
@@ -935,6 +1056,8 @@ fn endomorphism(
 ) -> Result<EndomorphismRecord, String> {
     let record = |f0: Option<String>, maximal, status, contains: Vec<String>| EndomorphismRecord {
         conductor_divides: f0,
+        conductor: None,
+        levels: Vec::new(),
         maximal,
         status,
         contains,
@@ -978,34 +1101,174 @@ fn endomorphism(
         }
     }
     let status = frob.status;
+    let v_primes: Vec<(BigUint, u32)> = frob
+        .conductor_primes
+        .iter()
+        .map(|(p, e)| (p.parse().expect("written by frobenius()"), *e))
+        .collect();
+    let val = |n: &BigUint, ell: &BigUint| {
+        let (mut n, mut e) = (n.clone(), 0u32);
+        while !n.is_zero() && (&n % ell).is_zero() {
+            n /= ell;
+            e += 1;
+        }
+        e
+    };
+    for (&ell, &level) in &c.levels {
+        if level > 0 && !v_primes.iter().any(|(p, _)| *p == BigUint::from(ell)) {
+            return Err(format!(
+                "the source certifies level {level} at ℓ = {ell}, which does not divide v"
+            ));
+        }
+    }
     if let Some(end) = &c.end {
         let f = (end / &dk).sqrt();
         if !(&f0 % f.magnitude()).is_zero() {
             return Err(format!(
-                "registry certifies End(E) of conductor {f}, which does not divide {f0}"
+                "certified End(E) of conductor {f}, which does not divide {f0}"
             ));
         }
-        contains.push(format!(
-            "End(E) of discriminant {end} (registry certificate)"
-        ));
-        return Ok(record(
-            Some(f.to_string()),
-            Some(f.is_one()),
+        contains.push(format!("End(E) of discriminant {end} (source certificate)"));
+        let f = f.magnitude().clone();
+        let mut levels = Vec::new();
+        for (ell, depth) in &v_primes {
+            let level = val(&f, ell);
+            if let Some(&l) = ell.to_u64().and_then(|e| c.levels.get(&e)) {
+                if l != level {
+                    return Err(format!(
+                        "level {l} at ℓ = {ell} contradicts End(E) of conductor {f}"
+                    ));
+                }
+            }
+            levels.push(LevelRecord {
+                ell: ell.to_string(),
+                depth: *depth,
+                level: Some(level),
+                level_at_most: level,
+                method: "certified End(E)".into(),
+            });
+        }
+        return Ok(EndomorphismRecord {
+            conductor_divides: Some(f.to_string()),
+            conductor: Some(f.to_string()),
+            levels,
+            maximal: Some(f.is_one()),
             status,
             contains,
-        ));
+        });
     }
-    Ok(if f0.is_one() {
-        record(Some("1".into()), Some(true), status, contains)
+    // Resolve each prime of v: a certified level, else the scalar test
+    // (torsion.rs): Frobenius scalar on E[ℓ] iff ℓ | [End(E) : Z[π]].
+    let mut levels = Vec::new();
+    let mut bound = BigUint::one();
+    let mut exact = BigUint::one();
+    let mut resolved = true;
+    for (ell, depth) in &v_primes {
+        let e = val(&f0, ell);
+        let small = ell.to_u64();
+        let (level, at_most, method): (Option<u32>, u32, String) = if e == 0 {
+            (Some(0), 0, "f₀ is prime to ℓ".into())
+        } else if let Some(&l) = small.and_then(|s| c.levels.get(&s)) {
+            if l > e {
+                return Err(format!(
+                    "the source certifies level {l} at ℓ = {ell}, above v_ℓ(f₀) = {e}"
+                ));
+            }
+            // Where the scalar test runs, it must agree.
+            let tested = small.and_then(|s| torsion::frobenius_is_scalar(&c.model, &c.trace, s));
+            if tested.is_some_and(|scalar| scalar != (l < *depth)) {
+                return Err(format!(
+                    "the source certifies level {l} of {depth} at ℓ = {ell}; the scalar test on \
+                     E[ℓ] says otherwise"
+                ));
+            }
+            let how = if tested.is_some() {
+                ", agreeing with the scalar test"
+            } else {
+                ""
+            };
+            (Some(l), l, format!("certified by {}{how}", c.source.kind))
+        } else {
+            match small.and_then(|l| torsion::frobenius_is_scalar(&c.model, &c.trace, l)) {
+                Some(true) => {
+                    let m = e.min(depth - 1);
+                    (
+                        (m == 0).then_some(0),
+                        m,
+                        "Frobenius is a scalar on E[ℓ]: above the floor".into(),
+                    )
+                }
+                Some(false) => {
+                    if *depth > e {
+                        return Err(format!(
+                            "Frobenius is not a scalar on E[{ell}], so End(E) is on the floor, \
+                             but v_ℓ(f₀) = {e} < depth {depth}"
+                        ));
+                    }
+                    (
+                        Some(*depth),
+                        *depth,
+                        "Frobenius is not a scalar on E[ℓ]: the floor".into(),
+                    )
+                }
+                None => {
+                    let why = match (&c.model, small) {
+                        (Model::Other { .. } | Model::Extension { .. }, _) => {
+                            "not tested: no field arithmetic for this model"
+                        }
+                        (_, Some(l)) if l <= torsion::SCALAR_TEST_MAX_ELL => {
+                            "not tested: beyond the scalar test's cost limit"
+                        }
+                        _ => "not tested: ℓ above the scalar test's range",
+                    };
+                    (None, e, why.into())
+                }
+            }
+        };
+        bound *= ell.pow(at_most);
+        match level {
+            Some(l) => exact *= ell.pow(l),
+            None => resolved = false,
+        }
+        levels.push(LevelRecord {
+            ell: ell.to_string(),
+            depth: *depth,
+            level,
+            level_at_most: at_most,
+            method,
+        });
+    }
+    if levels
+        .iter()
+        .any(|l| l.level.is_some() && l.method.starts_with("Frobenius"))
+    {
+        contains.push("the levels the scalar test on E[ℓ] resolves".into());
+    }
+    Ok(if resolved {
+        EndomorphismRecord {
+            conductor_divides: Some(exact.to_string()),
+            conductor: Some(exact.to_string()),
+            maximal: Some(exact.is_one()),
+            levels,
+            status,
+            contains,
+        }
     } else {
-        record(Some(f0.to_string()), None, Status::Bounded, contains)
+        EndomorphismRecord {
+            conductor_divides: Some(bound.to_string()),
+            conductor: None,
+            maximal: None,
+            levels,
+            status: Status::Bounded,
+            contains,
+        }
     })
 }
 
 /// Derive every trait of one curve.  `Err` when the registry entry
 /// contradicts itself (an order the model refutes, a certified `End(E)`
 /// outside `Q(π)`).
-pub fn compute(c: &RegistryCurve, budget: u64) -> Result<CurveTraits, String> {
+pub fn compute(c: &RegistryCurve, fx: &Factoring) -> Result<CurveTraits, String> {
     let ctx = |e: String| format!("{}: {e}", c.slug);
     let q = c.model.q();
     let characteristic = match &c.model {
@@ -1014,19 +1277,48 @@ pub fn compute(c: &RegistryCurve, budget: u64) -> Result<CurveTraits, String> {
     };
     let (status, method) =
         certify::check_order(&c.model, &c.order, &c.representations).map_err(ctx)?;
-    let (frob, delta) = frobenius(c, budget).map_err(ctx)?;
+    let (frob, delta) = frobenius(c, fx).map_err(ctx)?;
     let ordinary = !(&c.trace % BigInt::from(characteristic.clone())).is_zero();
     let trace_ratio = {
         let r = arith::log2_abs(&c.trace) - 1.0 - arith::log2_abs(&BigInt::from(q.clone())) / 2.0;
         let mag = if c.trace.is_zero() { 0.0 } else { r.exp2() };
         arith::round_to(if c.trace.is_negative() { -mag } else { mag }, 6)
     };
-    let (subgroup, r) = subgroup(c, budget).map_err(ctx)?;
+    let (subgroup, r) = subgroup(c, fx).map_err(ctx)?;
     let sub = subfield_record(c).map_err(ctx)?;
     let endo = endomorphism(c, &frob, &sub, ordinary).map_err(ctx)?;
+    let small = small_primes(&delta, &characteristic);
+    let dissect = match &c.model {
+        Model::Prime { .. } | Model::Binary { .. } if ordinary => {
+            let scalar = |ell: u64| -> Option<bool> {
+                let depth = small.iter().find(|s| s.ell == ell).map(|s| s.depth)?;
+                if depth == 0 {
+                    return Some(false);
+                }
+                let lv = endo.levels.iter().find(|l| l.ell == ell.to_string())?;
+                match lv.level {
+                    Some(l) => Some(l < depth),
+                    None if lv.level_at_most < depth => Some(true),
+                    None => None,
+                }
+            };
+            Some(dissect::compute(
+                fx,
+                &c.model,
+                &characteristic,
+                &c.trace,
+                &c.order,
+                r.as_ref(),
+                status,
+                &scalar,
+            ))
+        }
+        _ => None,
+    };
     let mut out = CurveTraits {
         slug: c.slug.clone(),
         family: c.family.clone(),
+        source: c.source.clone(),
         field: FieldInfo {
             kind: match c.model {
                 Model::Binary { .. } => "binary",
@@ -1051,13 +1343,14 @@ pub fn compute(c: &RegistryCurve, budget: u64) -> Result<CurveTraits, String> {
         ordinary,
         anomalous: c.trace.is_one(),
         trace_ratio,
-        small_primes: small_primes(&delta, &characteristic),
+        small_primes: small,
         frobenius: frob,
         endomorphism: endo,
         subfield: sub,
-        embedding: embedding(&q, r.as_ref(), budget),
-        twist: twist(&q, &c.trace, budget),
+        embedding: embedding(&q, r.as_ref(), fx),
+        twist: twist(&q, &c.trace, fx),
         subgroup,
+        dissect,
         keys: BTreeMap::new(),
     };
     out.keys = keys(&out);
@@ -1099,8 +1392,13 @@ pub const KEYS: &[(&str, &str)] = &[
     ("depth", "v_ℓ(v) for ℓ = 2, 3, 5, 7: the ℓ-volcano depths"),
     (
         "end_order",
-        "'maximal' when End(E) = O_K is established; 'non-maximal' when certified smaller; 'unresolved'; 'unknown'",
+        "'maximal' when End(E) = O_K is established; 'non-maximal' when a smaller order is established; 'unresolved'; 'unknown'",
     ),
+    (
+        "isogenies",
+        "rational ℓ-isogenies over GF(q) for ℓ = 2, 3, 5, 7 ('?' unknown, '-' the characteristic)",
+    ),
+    ("source", "registry, isogeny-walk or ic-crosswalk"),
 ];
 
 /// The keys a curve's default signature is made of.
@@ -1116,6 +1414,26 @@ fn keys(t: &CurveTraits) -> BTreeMap<String, String> {
         if t.field.kind == "binary" { "2" } else { "p" }.into(),
     );
     put("family", t.family.clone());
+    put("source", t.source.kind.clone());
+    put(
+        "isogenies",
+        [2u64, 3, 5, 7]
+            .iter()
+            .map(|&l| {
+                let n = match &t.dissect {
+                    Some(d) => match d.torsion.iter().find(|r| r.ell == l) {
+                        Some(r) => r
+                            .rational_isogenies
+                            .map_or_else(|| "?".to_string(), |n| n.to_string()),
+                        None => "-".into(),
+                    },
+                    None => "?".into(),
+                };
+                format!("{l}:{n}")
+            })
+            .collect::<Vec<_>>()
+            .join(","),
+    );
     put("ordinary", if t.ordinary { "yes" } else { "no" }.into());
     put(
         "end_order",
@@ -1235,7 +1553,58 @@ pub fn signature(t: &CurveTraits, keys: &[&str]) -> String {
 
 // ── The trait file ────────────────────────────────────────────────────
 
-pub const SCHEMA: &str = "curve-traits/1";
+pub const SCHEMA: &str = "curve-traits/2";
+
+/// One file a build read, by path and SHA-256.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct InputDigest {
+    pub path: String,
+    pub sha256: String,
+}
+
+/// A file handed to [`TraitFile::build_from`].
+pub struct Input {
+    pub path: String,
+    pub text: String,
+}
+
+impl Input {
+    fn digest(&self) -> InputDigest {
+        let d = crate::hash::sha256::sha256(self.text.as_bytes());
+        InputDigest {
+            path: self.path.clone(),
+            sha256: d.iter().map(|b| format!("{b:02x}")).collect(),
+        }
+    }
+}
+
+/// The DiSSECT families no record carries, and why.
+pub const NOT_EVALUATED_FAMILIES: &[(&str, &str)] = &[
+    (
+        "brainpool_overlap",
+        "defined on Brainpool's seed-derived bit strings; the registry records no seeds",
+    ),
+    (
+        "multiples_x",
+        "DiSSECT's definition depends on a choice of base point this module does not reproduce",
+    ),
+    (
+        "q_torsion",
+        "torsion of a lift to Q: the lift is a choice DiSSECT makes and this module does not",
+    ),
+    (
+        "square_4p1",
+        "the square part of 4q − 1 needs factoring numbers of the size of q; not attempted",
+    ),
+    (
+        "class_number",
+        "only exact h(d_K) for |d_K| ≤ 10^7 (frobenius.class_number); no analytic bounds",
+    ),
+    (
+        "weierstrass",
+        "the coefficients are in the registry's model_json; not copied",
+    ),
+];
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TraitFile {
@@ -1244,30 +1613,84 @@ pub struct TraitFile {
     pub what_this_is: String,
     /// SHA-256 of the registry bytes the records were derived from.
     pub registry_sha256: String,
+    /// Every file read: registry, factor hints, source manifest, sources.
+    pub inputs: Vec<InputDigest>,
     /// Rho iterations per composite.
     pub factor_budget: u64,
     pub default_signature: Vec<String>,
+    pub not_evaluated_families: BTreeMap<String, String>,
     pub curves: Vec<CurveTraits>,
 }
 
 impl TraitFile {
+    /// The registry alone: no hints, no other sources.
     pub fn build(registry_text: &str, budget: u64) -> Result<Self, String> {
+        let registry = Input {
+            path: "docs/curves/registry.json".into(),
+            text: registry_text.to_string(),
+        };
+        Ok(Self::build_from(&registry, None, None, &[], budget)?.0)
+    }
+
+    /// The registry, the factor hints, and the curves of every source the
+    /// manifest names (`sources[i]` is the file at the manifest's `i`-th
+    /// path).  Returns the [`Factoring`] too, for its leftovers.
+    pub fn build_from(
+        registry: &Input,
+        hints: Option<&Input>,
+        manifest: Option<&Input>,
+        sources: &[Input],
+        budget: u64,
+    ) -> Result<(Self, Factoring), String> {
         use rayon::prelude::*;
-        let curves = read_registry(registry_text)?;
-        let records: Result<Vec<_>, String> =
-            curves.par_iter().map(|c| compute(c, budget)).collect();
-        let digest = crate::hash::sha256::sha256(registry_text.as_bytes());
-        Ok(TraitFile {
+        let mut curves = read_registry(&registry.text)?;
+        let mut inputs = vec![registry.digest()];
+        let hint_primes = match hints {
+            Some(h) => {
+                inputs.push(h.digest());
+                read_hints(&h.text)?
+            }
+            None => Vec::new(),
+        };
+        if let Some(m) = manifest {
+            inputs.push(m.digest());
+            let specs = sources::read_manifest(&m.text)?;
+            if specs.len() != sources.len()
+                || specs.iter().zip(sources).any(|(s, i)| s.path != i.path)
+            {
+                return Err("the source files do not match the manifest".into());
+            }
+            let mut seen: std::collections::BTreeSet<String> =
+                curves.iter().map(|c| c.slug.clone()).collect();
+            for (spec, input) in specs.iter().zip(sources) {
+                inputs.push(input.digest());
+                let read = match spec.kind.as_str() {
+                    "isogeny-walk" => sources::read_walk(spec, &input.text)?,
+                    _ => sources::read_crosswalk(spec, &input.text)?,
+                };
+                curves.extend(read.into_iter().filter(|c| seen.insert(c.slug.clone())));
+            }
+        }
+        let fx = Factoring::new(budget, hint_primes);
+        let records: Result<Vec<_>, String> = curves.par_iter().map(|c| compute(c, &fx)).collect();
+        let file = TraitFile {
             schema: SCHEMA.into(),
             generated_by: "cargo run --release --bin curve_traits -- build".into(),
-            what_this_is: "Traits derived from each registered curve's model and order, with the \
-                           status of each value; see docs/curves/TRAITS.md."
+            what_this_is: "Traits derived from each curve's model and order (the registry, then \
+                           the sources in docs/curves/trait-sources.json), with the status of \
+                           each value; see docs/curves/TRAITS.md."
                 .into(),
-            registry_sha256: digest.iter().map(|b| format!("{b:02x}")).collect(),
+            registry_sha256: inputs[0].sha256.clone(),
+            inputs,
             factor_budget: budget,
             default_signature: DEFAULT_SIGNATURE.iter().map(|s| s.to_string()).collect(),
+            not_evaluated_families: NOT_EVALUATED_FAMILIES
+                .iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
             curves: records?,
-        })
+        };
+        Ok((file, fx))
     }
 
     /// Pretty JSON with a trailing newline, as committed.
@@ -1316,6 +1739,10 @@ mod tests {
     use super::*;
 
     const REGISTRY: &str = include_str!("../../../docs/curves/registry.json");
+
+    fn fx() -> Factoring {
+        Factoring::new(DEFAULT_BUDGET, Vec::new())
+    }
 
     fn curve(slug: &str) -> RegistryCurve {
         read_registry(REGISTRY)
@@ -1410,7 +1837,7 @@ mod tests {
 
     #[test]
     fn a_small_koblitz_curve() {
-        let t = compute(&curve("icv1-f2m7-t13-616700dd"), DEFAULT_BUDGET).unwrap();
+        let t = compute(&curve("icv1-f2m7-t13-616700dd"), &fx()).unwrap();
         assert_eq!(t.order_check.status, Status::Proved);
         assert_eq!(t.frobenius.cm_disc.as_deref(), Some("-7"));
         // 13² − 4·128 = −343 = −7·7²: v = 7.
@@ -1426,11 +1853,7 @@ mod tests {
 
     #[test]
     fn ecc2k_130_conductor_is_exact() {
-        let t = compute(
-            &curve("icv1-f2m131-tm22283658519494248867-115e0dc5"),
-            DEFAULT_BUDGET,
-        )
-        .unwrap();
+        let t = compute(&curve("icv1-f2m131-tm22283658519494248867-115e0dc5"), &fx()).unwrap();
         assert_eq!(t.frobenius.cm_disc.as_deref(), Some("-7"));
         assert_eq!(
             t.frobenius.conductor_primes,
@@ -1446,7 +1869,7 @@ mod tests {
 
     #[test]
     fn endomorphism_rings_from_contained_orders() {
-        let get = |slug: &str| compute(&curve(slug), DEFAULT_BUDGET).unwrap();
+        let get = |slug: &str| compute(&curve(slug), &fx()).unwrap();
         // K_0 over GF(2^7): Z[π] has conductor 7, but Z[τ] is maximal.
         let t = get("icv1-f2m7-t13-616700dd");
         assert_eq!(t.frobenius.conductor, "7");
@@ -1464,9 +1887,15 @@ mod tests {
         // secp256k1: j = 0 puts Z[ζ₃] in End(E) though v has 128 bits.
         let t = get("icv1-fp256-t432420386565659656852420866390673177327-76dadd18");
         assert_eq!(t.endomorphism.maximal, Some(true));
-        // A generic prime curve with v = 7: End(E) is Z[π] or O_K, unresolved.
+        // A generic prime curve with v = 7 at depth 1: Frobenius is a
+        // scalar on E[7], so End(E) is above the floor: O_K.
         let t = get("icv1-fp10-t5-192cb216");
-        assert_eq!(t.endomorphism.conductor_divides.as_deref(), Some("7"));
+        assert_eq!(t.endomorphism.conductor.as_deref(), Some("1"));
+        assert_eq!(t.endomorphism.maximal, Some(true));
+        assert_eq!(t.keys["end_order"], "maximal");
+        // v = 271 is beyond the scalar test: End(E) is Z[π] or O_K, unresolved.
+        let t = get("icv1-f2m17-tm101-8da609f8");
+        assert_eq!(t.endomorphism.conductor_divides.as_deref(), Some("271"));
         assert_eq!(t.endomorphism.maximal, None);
         assert_eq!(t.endomorphism.status, Status::Bounded);
         assert_eq!(t.keys["end_order"], "unresolved");
@@ -1474,7 +1903,7 @@ mod tests {
 
     #[test]
     fn the_gf2_18_twist_groups_with_koblitz_by_cm_not_by_descent() {
-        let t = compute(&curve("icv1-f2m18-t999-40751283"), DEFAULT_BUDGET).unwrap();
+        let t = compute(&curve("icv1-f2m18-t999-40751283"), &fx()).unwrap();
         assert_eq!(t.keys["cm"], "-7");
         assert_eq!(t.keys["jfield"], "k1");
         assert_eq!(t.keys["descent"], "k2|t|=3");

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420">
+<defs><marker id="a" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0,0 L9,3.5 L0,7" fill="#275b78"/></marker></defs>
+<rect width="1200" height="420" fill="white"/><g font-family="Arial,sans-serif" fill="#183044" text-anchor="middle">
+<text x="600" y="28" font-size="24" font-weight="bold">Native replay tracing: fixed P-192/13 controls</text>
+<text x="600" y="57" font-size="18">source icv1-fp192-t31607402316713927207482677199-52e4af59</text>
+<g fill="#edf5fa" stroke="#275b78" stroke-width="2"><rect x="25" y="87" width="260" height="100" rx="12"/><rect x="320" y="87" width="260" height="100" rx="12"/><rect x="615" y="87" width="260" height="100" rx="12"/><rect x="910" y="87" width="260" height="100" rx="12"/></g>
+<g font-size="20"><text x="155" y="117">Fresh native trace</text><text x="450" y="117">Kernel validation</text><text x="745" y="117">Exact map checks</text><text x="1040" y="117">Point transports</text></g>
+<g font-size="18"><text x="155" y="147">parse + source order</text><text x="155" y="173">begin flushed first</text><text x="450" y="147">GCD + torsion</text><text x="450" y="173">inverse + composition</text><text x="745" y="147">denominator + GCD</text><text x="745" y="173">curve substitution</text><text x="1040" y="147">target order</text><text x="1040" y="173">20 checks per map</text></g>
+<path d="M285,137 H312 M580,137 H607 M875,137 H902" stroke="#275b78" stroke-width="2" marker-end="url(#a)"/>
+<text x="600" y="216" font-size="17">target icv1-fp192-t31607402316713927207482677199-cca00332</text>
+<text x="600" y="239" font-size="17">target icv1-fp192-t31607402316713927207482677199-e157377d</text>
+<rect x="55" y="257" width="1090" height="95" rx="12" fill="#f0f8ed" stroke="#477b36" stroke-width="2"/>
+<text x="600" y="287" font-size="21">94 native tests pass; verification bytes and nine adversarial verdicts agree</text>
+<text x="600" y="315" font-size="18">Interrupted fixture: durable begin, no false end. Trace/write errors and four RSS-loss cases reject unmonitored work.</text>
+<text x="600" y="339" font-size="18">Fixture RSS is synthetic. Core COMPLETED is separate from challenge admission.</text>
+<text x="600" y="381" font-size="19">Degree 50,341 is sealed and was not rerun here. No timing or speedup comparison.</text>
+<text x="600" y="407" font-size="18">Later profile: same artifact, exact binary, concurrency 1, native watchdog and independent controls.</text>
+</g></svg>

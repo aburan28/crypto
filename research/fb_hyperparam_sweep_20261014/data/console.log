@@ -1,0 +1,294 @@
+binary generic_b coordinate n=8 n'=2: yield=0.0322 D*=2.125 (0.0s)
+binary generic_b coordinate n=8 n'=3: yield=0.1250 D*=2.3125 (0.1s)
+binary generic_b coordinate n=8 n'=4: yield=0.3325 D*=2.375 (0.1s)
+binary generic_b coordinate n=8 n'=5: yield=0.4812 D*=2.125 (0.2s)
+binary generic_b coordinate n=8 n'=6: yield=1.0000 D*=null (0.5s)
+binary generic_b random n=8 n'=2: yield=0.0371 D*=2.0 (0.0s)
+binary generic_b random n=8 n'=3: yield=0.1338 D*=2.9375 (0.1s)
+binary generic_b random n=8 n'=4: yield=0.4207 D*=3.8125 (0.1s)
+binary generic_b random n=8 n'=5: yield=0.8977 D*=4.0 (0.2s)
+binary generic_b random n=8 n'=6: yield=1.0000 D*=null (0.5s)
+binary generic_b subfield n=8 n'=2: yield=0.0349 D*=2.0 (0.0s)
+binary generic_b subfield n=8 n'=4: yield=0.3713 D*=2.125 (0.1s)
+binary koblitz_b1 coordinate n=8 n'=2: yield=0.0303 D*=2.0625 (0.0s)
+binary koblitz_b1 coordinate n=8 n'=3: yield=0.1123 D*=2.4375 (0.1s)
+binary koblitz_b1 coordinate n=8 n'=4: yield=0.3694 D*=2.375 (0.1s)
+binary koblitz_b1 coordinate n=8 n'=5: yield=0.5002 D*=2.0 (0.2s)
+binary koblitz_b1 coordinate n=8 n'=6: yield=1.0000 D*=null (0.5s)
+binary koblitz_b1 random n=8 n'=2: yield=0.0303 D*=2.125 (0.0s)
+binary koblitz_b1 random n=8 n'=3: yield=0.1199 D*=2.75 (0.1s)
+binary koblitz_b1 random n=8 n'=4: yield=0.4602 D*=3.8125 (0.1s)
+binary koblitz_b1 random n=8 n'=5: yield=0.9348 D*=4.0 (0.2s)
+binary koblitz_b1 random n=8 n'=6: yield=1.0000 D*=null (0.5s)
+binary koblitz_b1 subfield n=8 n'=2: yield=0.0122 D*=2.0 (0.0s)
+binary koblitz_b1 subfield n=8 n'=4: yield=0.2861 D*=2.375 (0.1s)
+binary generic_b coordinate n=9 n'=2: yield=0.0176 D*=2.0625 (0.0s)
+binary generic_b coordinate n=9 n'=3: yield=0.0566 D*=2.375 (0.0s)
+binary generic_b coordinate n=9 n'=4: yield=0.2361 D*=2.9375 (0.1s)
+binary generic_b coordinate n=9 n'=5: yield=0.6519 D*=3.9375 (0.2s)
+binary generic_b coordinate n=9 n'=6: yield=0.9839 D*=5.0 (1.1s)
+binary generic_b random n=9 n'=2: yield=0.0159 D*=2.0625 (0.0s)
+binary generic_b random n=9 n'=3: yield=0.0571 D*=2.5 (0.0s)
+binary generic_b random n=9 n'=4: yield=0.2256 D*=3.0625 (0.1s)
+binary generic_b random n=9 n'=5: yield=0.6807 D*=4.0 (0.2s)
+binary generic_b random n=9 n'=6: yield=0.9766 D*=5.0 (1.1s)
+binary generic_b subfield n=9 n'=3: yield=0.0654 D*=2.25 (0.1s)
+binary koblitz_b1 coordinate n=9 n'=2: yield=0.0098 D*=2.0 (0.0s)
+binary koblitz_b1 coordinate n=9 n'=3: yield=0.0852 D*=2.125 (0.0s)
+binary koblitz_b1 coordinate n=9 n'=4: yield=0.2654 D*=3.0 (0.1s)
+binary koblitz_b1 coordinate n=9 n'=5: yield=0.6685 D*=3.9375 (0.2s)
+binary koblitz_b1 coordinate n=9 n'=6: yield=0.9800 D*=5.0 (1.0s)
+binary koblitz_b1 random n=9 n'=2: yield=0.0125 D*=2.0 (0.0s)
+binary koblitz_b1 random n=9 n'=3: yield=0.0657 D*=2.4375 (0.0s)
+binary koblitz_b1 random n=9 n'=4: yield=0.1992 D*=3.0 (0.1s)
+binary koblitz_b1 random n=9 n'=5: yield=0.6719 D*=4.0 (0.3s)
+binary koblitz_b1 random n=9 n'=6: yield=0.9941 D*=5.0 (1.0s)
+binary koblitz_b1 subfield n=9 n'=3: yield=0.0134 D*=2.0 (0.0s)
+binary generic_b coordinate n=10 n'=2: yield=0.0083 D*=2.0 (0.0s)
+binary generic_b coordinate n=10 n'=3: yield=0.0347 D*=2.125 (0.1s)
+binary generic_b coordinate n=10 n'=4: yield=0.1123 D*=2.625 (0.1s)
+binary generic_b coordinate n=10 n'=5: yield=0.3140 D*=2.625 (0.3s)
+binary generic_b coordinate n=10 n'=6: yield=0.5034 D*=2.0 (1.1s)
+binary generic_b random n=10 n'=2: yield=0.0073 D*=2.0625 (0.0s)
+binary generic_b random n=10 n'=3: yield=0.0344 D*=2.125 (0.1s)
+binary generic_b random n=10 n'=4: yield=0.1248 D*=2.5625 (0.1s)
+binary generic_b random n=10 n'=5: yield=0.4031 D*=4.0 (0.3s)
+binary generic_b random n=10 n'=6: yield=0.8694 D*=4.0 (0.8s)
+binary generic_b subfield n=10 n'=2: yield=0.0063 D*=2.0 (0.0s)
+binary generic_b subfield n=10 n'=5: yield=0.3777 D*=2.1875 (0.3s)
+binary koblitz_b1 coordinate n=10 n'=2: yield=0.0063 D*=2.0 (0.0s)
+binary koblitz_b1 coordinate n=10 n'=3: yield=0.0276 D*=2.25 (0.1s)
+binary koblitz_b1 coordinate n=10 n'=4: yield=0.1150 D*=2.4375 (0.1s)
+binary koblitz_b1 coordinate n=10 n'=5: yield=0.3452 D*=2.5 (0.3s)
+binary koblitz_b1 coordinate n=10 n'=6: yield=0.4995 D*=2.0 (1.0s)
+binary koblitz_b1 random n=10 n'=2: yield=0.0088 D*=2.125 (0.0s)
+binary koblitz_b1 random n=10 n'=3: yield=0.0295 D*=2.375 (0.1s)
+binary koblitz_b1 random n=10 n'=4: yield=0.1069 D*=2.25 (0.1s)
+binary koblitz_b1 random n=10 n'=5: yield=0.3887 D*=4.0 (0.4s)
+binary koblitz_b1 random n=10 n'=6: yield=0.8923 D*=4.0 (0.9s)
+binary koblitz_b1 subfield n=10 n'=2: yield=0.0032 D*=2.0 (0.0s)
+binary koblitz_b1 subfield n=10 n'=5: yield=0.2263 D*=2.3125 (0.4s)
+binary generic_b coordinate n=11 n'=2: yield=0.0027 D*=2.0 (0.0s)
+binary generic_b coordinate n=11 n'=3: yield=0.0198 D*=2.0625 (0.1s)
+binary generic_b coordinate n=11 n'=4: yield=0.0684 D*=2.375 (0.2s)
+binary generic_b coordinate n=11 n'=5: yield=0.2290 D*=3.125 (0.4s)
+binary generic_b coordinate n=11 n'=6: yield=0.6445 D*=4.0 (1.3s)
+binary generic_b random n=11 n'=2: yield=0.0059 D*=2.0 (0.0s)
+binary generic_b random n=11 n'=3: yield=0.0181 D*=2.25 (0.1s)
+binary generic_b random n=11 n'=4: yield=0.0632 D*=3.0 (0.2s)
+binary generic_b random n=11 n'=5: yield=0.2178 D*=4.0 (0.4s)
+binary generic_b random n=11 n'=6: yield=0.6472 D*=4.0 (1.1s)
+binary koblitz_b1 coordinate n=11 n'=2: yield=0.0059 D*=2.0 (0.0s)
+binary koblitz_b1 coordinate n=11 n'=3: yield=0.0217 D*=2.0 (0.1s)
+binary koblitz_b1 coordinate n=11 n'=4: yield=0.0715 D*=2.625 (0.1s)
+binary koblitz_b1 coordinate n=11 n'=5: yield=0.2329 D*=3.0625 (0.3s)
+binary koblitz_b1 coordinate n=11 n'=6: yield=0.6343 D*=3.9375 (1.0s)
+binary koblitz_b1 random n=11 n'=2: yield=0.0034 D*=2.0 (0.0s)
+binary koblitz_b1 random n=11 n'=3: yield=0.0176 D*=2.3125 (0.1s)
+binary koblitz_b1 random n=11 n'=4: yield=0.0586 D*=3.0 (0.1s)
+binary koblitz_b1 random n=11 n'=5: yield=0.2395 D*=4.0 (0.4s)
+binary koblitz_b1 random n=11 n'=6: yield=0.6477 D*=4.0 (1.0s)
+binary generic_b coordinate n=12 n'=2: yield=0.0012 D*=2.0 (0.0s)
+binary generic_b coordinate n=12 n'=3: yield=0.0103 D*=2.0625 (0.1s)
+binary generic_b coordinate n=12 n'=4: yield=0.0378 D*=2.3125 (0.1s)
+binary generic_b coordinate n=12 n'=5: yield=0.1145 D*=2.5625 (0.4s)
+binary generic_b coordinate n=12 n'=6: yield=0.3110 D*=2.5 (1.2s)
+binary generic_b random n=12 n'=2: yield=0.0007 D*=2.0625 (0.0s)
+binary generic_b random n=12 n'=3: yield=0.0066 D*=2.0625 (0.1s)
+binary generic_b random n=12 n'=4: yield=0.0312 D*=2.875 (0.2s)
+binary generic_b random n=12 n'=5: yield=0.1143 D*=3.4375 (0.5s)
+binary generic_b random n=12 n'=6: yield=0.4141 D*=4.0 (1.3s)
+binary generic_b subfield n=12 n'=2: yield=0.0015 D*=2.0 (0.0s)
+binary generic_b subfield n=12 n'=3: yield=0.0071 D*=2.0 (0.1s)
+binary generic_b subfield n=12 n'=4: yield=0.0317 D*=2.0 (0.2s)
+binary generic_b subfield n=12 n'=6: yield=0.3630 D*=2.1875 (1.3s)
+binary koblitz_b1 coordinate n=12 n'=2: yield=0.0012 D*=2.0 (0.0s)
+binary koblitz_b1 coordinate n=12 n'=3: yield=0.0078 D*=2.0625 (0.1s)
+binary koblitz_b1 coordinate n=12 n'=4: yield=0.0342 D*=2.3125 (0.1s)
+binary koblitz_b1 coordinate n=12 n'=5: yield=0.1189 D*=2.6875 (0.4s)
+binary koblitz_b1 coordinate n=12 n'=6: yield=0.3125 D*=2.625 (1.3s)
+binary koblitz_b1 random n=12 n'=2: yield=0.0024 D*=2.0 (0.0s)
+binary koblitz_b1 random n=12 n'=3: yield=0.0083 D*=2.1875 (0.1s)
+binary koblitz_b1 random n=12 n'=4: yield=0.0315 D*=2.9375 (0.1s)
+binary koblitz_b1 random n=12 n'=5: yield=0.1208 D*=3.375 (0.4s)
+binary koblitz_b1 random n=12 n'=6: yield=0.3950 D*=4.0 (1.3s)
+binary koblitz_b1 subfield n=12 n'=2: yield=0.0007 D*=2.0 (0.0s)
+binary koblitz_b1 subfield n=12 n'=3: yield=0.0027 D*=2.0625 (0.1s)
+binary koblitz_b1 subfield n=12 n'=4: yield=0.0061 D*=2.0 (0.1s)
+binary koblitz_b1 subfield n=12 n'=6: yield=0.2432 D*=2.25 (1.2s)
+binary generic_b coordinate n=13 n'=2: yield=0.0002 D*=2.0625 (0.1s)
+binary generic_b coordinate n=13 n'=3: yield=0.0049 D*=2.0 (0.1s)
+binary generic_b coordinate n=13 n'=4: yield=0.0144 D*=2.25 (0.2s)
+binary generic_b coordinate n=13 n'=5: yield=0.0608 D*=3.0 (0.5s)
+binary generic_b coordinate n=13 n'=6: yield=0.2207 D*=3.8125 (1.7s)
+binary generic_b random n=13 n'=2: yield=0.0007 D*=2.0 (0.0s)
+binary generic_b random n=13 n'=3: yield=0.0046 D*=2.0 (0.1s)
+binary generic_b random n=13 n'=4: yield=0.0186 D*=2.75 (0.2s)
+binary generic_b random n=13 n'=5: yield=0.0662 D*=3.0 (0.5s)
+binary generic_b random n=13 n'=6: yield=0.2314 D*=4.0 (1.7s)
+binary koblitz_b1 coordinate n=13 n'=2: yield=0.0015 D*=2.0 (0.0s)
+binary koblitz_b1 coordinate n=13 n'=3: yield=0.0051 D*=2.125 (0.1s)
+binary koblitz_b1 coordinate n=13 n'=4: yield=0.0164 D*=2.25 (0.2s)
+binary koblitz_b1 coordinate n=13 n'=5: yield=0.0564 D*=2.6875 (0.4s)
+binary koblitz_b1 coordinate n=13 n'=6: yield=0.2117 D*=3.9375 (1.6s)
+binary koblitz_b1 random n=13 n'=2: yield=0.0010 D*=2.0 (0.0s)
+binary koblitz_b1 random n=13 n'=3: yield=0.0029 D*=2.0625 (0.1s)
+binary koblitz_b1 random n=13 n'=4: yield=0.0198 D*=2.875 (0.2s)
+binary koblitz_b1 random n=13 n'=5: yield=0.0718 D*=3.0 (0.5s)
+binary koblitz_b1 random n=13 n'=6: yield=0.2214 D*=4.0 (1.6s)
+binary generic_b coordinate n=14 n'=2: yield=0.0005 D*=2.0 (0.0s)
+binary generic_b coordinate n=14 n'=3: yield=0.0020 D*=2.0 (0.1s)
+binary generic_b coordinate n=14 n'=4: yield=0.0068 D*=2.125 (0.2s)
+binary generic_b coordinate n=14 n'=5: yield=0.0320 D*=2.625 (0.5s)
+binary generic_b coordinate n=14 n'=6: yield=0.1199 D*=3.0 (1.8s)
+binary generic_b random n=14 n'=2: yield=0.0005 D*=2.0 (0.0s)
+binary generic_b random n=14 n'=3: yield=0.0037 D*=2.0 (0.1s)
+binary generic_b random n=14 n'=4: yield=0.0066 D*=2.5625 (0.2s)
+binary generic_b random n=14 n'=5: yield=0.0312 D*=3.0 (0.5s)
+binary generic_b random n=14 n'=6: yield=0.1101 D*=4.0 (1.6s)
+binary generic_b subfield n=14 n'=2: yield=0.0002 D*=2.0 (0.0s)
+binary koblitz_b1 coordinate n=14 n'=2: yield=0.0002 D*=2.0 (0.0s)
+binary koblitz_b1 coordinate n=14 n'=3: yield=0.0029 D*=2.0 (0.1s)
+binary koblitz_b1 coordinate n=14 n'=4: yield=0.0059 D*=2.0625 (0.2s)
+binary koblitz_b1 coordinate n=14 n'=5: yield=0.0327 D*=2.3125 (0.5s)
+binary koblitz_b1 coordinate n=14 n'=6: yield=0.1182 D*=2.9375 (1.5s)
+binary koblitz_b1 random n=14 n'=2: yield=0.0005 D*=2.0 (0.0s)
+binary koblitz_b1 random n=14 n'=3: yield=0.0010 D*=2.0 (0.1s)
+binary koblitz_b1 random n=14 n'=4: yield=0.0081 D*=2.8125 (0.2s)
+binary koblitz_b1 random n=14 n'=5: yield=0.0295 D*=3.0 (0.4s)
+binary koblitz_b1 random n=14 n'=6: yield=0.1143 D*=4.0 (1.5s)
+binary koblitz_b1 subfield n=14 n'=2: yield=0.0005 D*=2.0 (0.0s)
+binary generic_b coordinate n=15 n'=2: yield=0.0002 D*=2.0 (0.0s)
+binary generic_b coordinate n=15 n'=3: yield=0.0005 D*=2.0 (0.1s)
+binary generic_b coordinate n=15 n'=4: yield=0.0039 D*=2.0 (0.1s)
+binary generic_b coordinate n=15 n'=5: yield=0.0139 D*=2.5 (0.4s)
+binary generic_b coordinate n=15 n'=6: yield=0.0630 D*=2.9375 (1.6s)
+binary generic_b random n=15 n'=2: yield=0.0000 D*=2.0 (0.0s)
+binary generic_b random n=15 n'=3: yield=0.0002 D*=2.0 (0.1s)
+binary generic_b random n=15 n'=4: yield=0.0046 D*=2.5625 (0.2s)
+binary generic_b random n=15 n'=5: yield=0.0156 D*=2.9375 (0.4s)
+binary generic_b random n=15 n'=6: yield=0.0627 D*=4.0 (1.7s)
+binary generic_b subfield n=15 n'=3: yield=0.0020 D*=2.0 (0.1s)
+binary generic_b subfield n=15 n'=5: yield=0.0159 D*=2.0 (0.5s)
+binary koblitz_b1 coordinate n=15 n'=2: yield=0.0000 D*=2.0 (0.0s)
+binary koblitz_b1 coordinate n=15 n'=3: yield=0.0015 D*=2.0 (0.1s)
+binary koblitz_b1 coordinate n=15 n'=4: yield=0.0054 D*=2.0 (0.2s)
+binary koblitz_b1 coordinate n=15 n'=5: yield=0.0164 D*=2.25 (0.4s)
+binary koblitz_b1 coordinate n=15 n'=6: yield=0.0664 D*=2.875 (1.4s)
+binary koblitz_b1 random n=15 n'=2: yield=0.0007 D*=2.0 (0.0s)
+binary koblitz_b1 random n=15 n'=3: yield=0.0002 D*=2.0 (0.1s)
+binary koblitz_b1 random n=15 n'=4: yield=0.0044 D*=2.4375 (0.2s)
+binary koblitz_b1 random n=15 n'=5: yield=0.0171 D*=3.0 (0.5s)
+binary koblitz_b1 random n=15 n'=6: yield=0.0640 D*=4.0 (1.6s)
+binary koblitz_b1 subfield n=15 n'=3: yield=0.0005 D*=2.0 (0.1s)
+binary koblitz_b1 subfield n=15 n'=5: yield=0.0000 D*=2.0 (0.2s)
+binary generic_b coordinate n=16 n'=2: yield=0.0002 D*=2.0 (0.0s)
+binary generic_b coordinate n=16 n'=3: yield=0.0000 D*=2.0 (0.1s)
+binary generic_b coordinate n=16 n'=4: yield=0.0010 D*=2.0 (0.2s)
+binary generic_b coordinate n=16 n'=5: yield=0.0088 D*=2.3125 (0.5s)
+binary generic_b coordinate n=16 n'=6: yield=0.0337 D*=2.1875 (1.8s)
+binary generic_b random n=16 n'=2: yield=0.0000 D*=2.0 (0.0s)
+binary generic_b random n=16 n'=3: yield=0.0007 D*=2.0 (0.1s)
+binary generic_b random n=16 n'=4: yield=0.0017 D*=2.4375 (0.2s)
+binary generic_b random n=16 n'=5: yield=0.0088 D*=3.0 (0.6s)
+binary generic_b random n=16 n'=6: yield=0.0342 D*=3.8125 (2.0s)
+binary generic_b subfield n=16 n'=2: yield=0.0000 D*=2.0 (0.0s)
+binary generic_b subfield n=16 n'=4: yield=0.0024 D*=2.0 (0.2s)
+binary koblitz_b1 coordinate n=16 n'=2: yield=0.0000 D*=2.0 (0.0s)
+binary koblitz_b1 coordinate n=16 n'=3: yield=0.0005 D*=2.0 (0.1s)
+binary koblitz_b1 coordinate n=16 n'=4: yield=0.0015 D*=2.0 (0.2s)
+binary koblitz_b1 coordinate n=16 n'=5: yield=0.0098 D*=2.4375 (0.6s)
+binary koblitz_b1 coordinate n=16 n'=6: yield=0.0281 D*=2.3125 (2.0s)
+binary koblitz_b1 random n=16 n'=2: yield=0.0002 D*=2.0 (0.0s)
+binary koblitz_b1 random n=16 n'=3: yield=0.0000 D*=2.0 (0.1s)
+binary koblitz_b1 random n=16 n'=4: yield=0.0020 D*=2.1875 (0.2s)
+binary koblitz_b1 random n=16 n'=5: yield=0.0076 D*=2.9375 (0.6s)
+binary koblitz_b1 random n=16 n'=6: yield=0.0269 D*=3.625 (2.1s)
+binary koblitz_b1 subfield n=16 n'=2: yield=0.0000 D*=2.0 (0.0s)
+binary koblitz_b1 subfield n=16 n'=4: yield=0.0007 D*=2.0 (0.2s)
+prime bits=20 rep=0 m=2 fb=64: 0.023s
+prime bits=20 rep=0 m=2 fb=256: 0.021s
+prime bits=20 rep=0 m=2 fb=1024: 0.030s
+prime bits=20 rep=0 m=2 fb=4096: 0.320s
+prime bits=20 rep=0 m=2 fb=16384: 7.727s
+prime bits=20 rep=0 m=3 fb=64: 0.002s
+prime bits=20 rep=0 m=3 fb=256: 0.006s
+prime bits=20 rep=0 m=3 fb=1024: 0.187s
+prime bits=20 rep=0 m=3 fb=4096: 2.610s
+prime bits=20 rep=1 m=2 fb=64: 0.028s
+prime bits=20 rep=1 m=2 fb=256: 0.017s
+prime bits=20 rep=1 m=2 fb=1024: 0.025s
+prime bits=20 rep=1 m=2 fb=4096: 0.302s
+prime bits=20 rep=1 m=2 fb=16384: 7.578s
+prime bits=20 rep=1 m=3 fb=64: 0.002s
+prime bits=20 rep=1 m=3 fb=256: 0.006s
+prime bits=20 rep=1 m=3 fb=1024: 0.228s
+prime bits=20 rep=1 m=3 fb=4096: 2.706s
+prime bits=20 rep=2 m=2 fb=64: 0.020s
+prime bits=20 rep=2 m=2 fb=256: 0.018s
+prime bits=20 rep=2 m=2 fb=1024: 0.028s
+prime bits=20 rep=2 m=2 fb=4096: 0.292s
+prime bits=20 rep=2 m=2 fb=16384: 7.638s
+prime bits=20 rep=2 m=3 fb=64: 0.002s
+prime bits=20 rep=2 m=3 fb=256: 0.008s
+prime bits=20 rep=2 m=3 fb=1024: 0.244s
+prime bits=20 rep=2 m=3 fb=4096: 2.890s
+prime bits=24 rep=0 m=2 fb=64: 0.307s
+prime bits=24 rep=0 m=2 fb=256: 0.264s
+prime bits=24 rep=0 m=2 fb=1024: 0.258s
+prime bits=24 rep=0 m=2 fb=4096: 0.590s
+prime bits=24 rep=0 m=2 fb=16384: 8.050s
+prime bits=24 rep=0 m=3 fb=64: 0.022s
+prime bits=24 rep=0 m=3 fb=256: 0.014s
+prime bits=24 rep=0 m=3 fb=1024: 0.196s
+prime bits=24 rep=0 m=3 fb=4096: 11.071s
+prime bits=24 rep=1 m=2 fb=64: 0.380s
+prime bits=24 rep=1 m=2 fb=256: 0.245s
+prime bits=24 rep=1 m=2 fb=1024: 0.270s
+prime bits=24 rep=1 m=2 fb=4096: 0.615s
+prime bits=24 rep=1 m=2 fb=16384: 8.023s
+prime bits=24 rep=1 m=3 fb=64: 0.022s
+prime bits=24 rep=1 m=3 fb=256: 0.014s
+prime bits=24 rep=1 m=3 fb=1024: 0.201s
+prime bits=24 rep=1 m=3 fb=4096: 12.423s
+prime bits=24 rep=2 m=2 fb=64: 0.267s
+prime bits=24 rep=2 m=2 fb=256: 0.266s
+prime bits=24 rep=2 m=2 fb=1024: 0.315s
+prime bits=24 rep=2 m=2 fb=4096: 0.566s
+prime bits=24 rep=2 m=2 fb=16384: 8.026s
+prime bits=24 rep=2 m=3 fb=64: 0.023s
+prime bits=24 rep=2 m=3 fb=256: 0.016s
+prime bits=24 rep=2 m=3 fb=1024: 0.208s
+prime bits=24 rep=2 m=3 fb=4096: 12.757s
+prime bits=28 rep=0 m=2 fb=64: 4.995s
+prime bits=28 rep=0 m=2 fb=256: 3.926s
+prime bits=28 rep=0 m=2 fb=1024: 3.588s
+prime bits=28 rep=0 m=2 fb=4096: 3.744s
+prime bits=28 rep=0 m=2 fb=16384: 11.590s
+prime bits=28 rep=0 m=3 fb=64: 0.294s
+prime bits=28 rep=0 m=3 fb=256: 0.123s
+prime bits=28 rep=0 m=3 fb=1024: 0.285s
+prime bits=28 rep=0 m=3 fb=4096: 10.475s
+prime bits=28 rep=1 m=2 fb=64: 4.935s
+prime bits=28 rep=1 m=2 fb=256: 4.131s
+prime bits=28 rep=1 m=2 fb=1024: 3.850s
+prime bits=28 rep=1 m=2 fb=4096: 4.066s
+prime bits=28 rep=1 m=2 fb=16384: 11.120s
+prime bits=28 rep=1 m=3 fb=64: 0.300s
+prime bits=28 rep=1 m=3 fb=256: 0.127s
+prime bits=28 rep=1 m=3 fb=1024: 0.293s
+prime bits=28 rep=1 m=3 fb=4096: 10.036s
+prime bits=28 rep=2 m=2 fb=64: 4.217s
+prime bits=28 rep=2 m=2 fb=256: 3.792s
+prime bits=28 rep=2 m=2 fb=1024: 3.673s
+prime bits=28 rep=2 m=2 fb=4096: 3.695s
+prime bits=28 rep=2 m=2 fb=16384: 10.903s
+prime bits=28 rep=2 m=3 fb=64: 0.423s
+prime bits=28 rep=2 m=3 fb=256: 0.138s
+prime bits=28 rep=2 m=3 fb=1024: 0.328s
+prime bits=28 rep=2 m=3 fb=4096: 9.644s
+wrote research/fb_hyperparam_sweep_20261014/data/sweep.json in 290.9s
+
+real	4m50.861s
+user	4m32.488s
+sys	0m14.525s

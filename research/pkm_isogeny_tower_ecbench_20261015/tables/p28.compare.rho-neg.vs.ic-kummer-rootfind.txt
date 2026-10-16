@@ -1,0 +1,18 @@
+saved /home/user/wt/isogeny-tower/research/pkm_isogeny_tower_ecbench_20261015/sessions/p28/comparisons/rho-neg__ic-kummer-rootfind.json
+ops (ok): ic-kummer-rootfind / rho-neg = 129.9544 [103.886, 172.710] (cluster) over 16 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 31.6516 [30.439, 34.984]
+measurement quality: 0 / 100; paired attempts 16, verified 16, admitted 0; levels {"L0": 16}; p95 foreign busy unknown%, p95 run queue 4.29%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-kummer-rootfind / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp28-t4155-50f492b1 | 26.20 | 8 | 129.9544 | [103.8859, 172.7097] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-kummer-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W2ccd8c58d746 | icv1-fp28-t4155-50f492b1 | 26.20 | 1.3791 | 131.3315 | 95.2311 |
+| W312e2a60696a | icv1-fp28-t4155-50f492b1 | 26.20 | 0.6936 | 131.1054 | 189.0190 |
+| W3a315d086353 | icv1-fp28-t4155-50f492b1 | 26.20 | 0.6609 | 131.3149 | 198.6934 |
+| W4f89d827f0f8 | icv1-fp28-t4155-50f492b1 | 26.20 | 1.5289 | 132.4856 | 86.6542 |
+| W6cf3601f38d4 | icv1-fp28-t4155-50f492b1 | 26.20 | 0.9568 | 132.1870 | 138.1594 |
+| W7ae405a02d41 | icv1-fp28-t4155-50f492b1 | 26.20 | 0.8878 | 131.6086 | 148.2493 |
+| Waae34cb814ba | icv1-fp28-t4155-50f492b1 | 26.20 | 1.1559 | 131.7215 | 113.9537 |
+| Wdea0d01c7e18 | icv1-fp28-t4155-50f492b1 | 26.20 | 0.8392 | 131.1477 | 156.2846 |

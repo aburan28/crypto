@@ -156,3 +156,38 @@ fn ddf_matches_exponentiation_ddf() {
         82,
     );
 }
+
+/// The scaled remainder tree gives the Horner values for every point count (odd counts carry a
+/// node up a level), every polynomial length (below, at and above the root degree, and beyond
+/// the precomputed inverse, which falls back to one division), and over u64 and multi-limb fields.
+#[test]
+fn eval_tree_matches_horner() {
+    fn go<F: Field>(f: &F, rng: &mut Rng) {
+        for &npts in &[1usize, 2, 3, 5, 8, 13, 50, 64, 101] {
+            let pts: Vec<F::E> = (0..npts).map(|_| f.random(rng)).collect();
+            let t = poly::EvalTree::new(f, &pts);
+            for &len in &[
+                0usize,
+                1,
+                2,
+                npts,
+                npts + 1,
+                2 * npts + 1,
+                2 * npts + 3,
+                5 * npts + 7,
+            ] {
+                let a: Vec<F::E> = (0..len).map(|_| f.random(rng)).collect();
+                let want: Vec<F::E> = pts.iter().map(|&x| poly::eval(f, &a, x)).collect();
+                assert_eq!(t.eval(f, &a), want, "{npts} points, length {len}");
+                let prod = want.iter().fold(f.one(), |acc, &v| f.mul(acc, v));
+                assert_eq!(t.prod(f, &a), prod);
+            }
+        }
+    }
+    let mut rng = Rng::new(31);
+    go(&Zp::new(2305843009213693951), &mut rng);
+    let p256 = isogeny_algos::bigint::Big::from_dec(
+        "115792089210356248762697446949407573530086143415290314195533631308867097853951",
+    );
+    go(&FpM::<4>::new(&p256), &mut rng);
+}

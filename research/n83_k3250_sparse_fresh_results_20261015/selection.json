@@ -1,0 +1,27 @@
+{
+  "analysis_sha256": "dd66bf98224b22058f55fe1273e16566aec34ecef2da958259cf0376bee9354f",
+  "artifact_sha256": "9de603c3e7c40b88bee0705bc548de3d2f4e52cd78552a80aaa1d7757758dfec",
+  "baseline_base_hash_matches": true,
+  "candidate_id": "IC1N83Ckb1a1fb547800PDP4rootRCguidedLAgaussTDdirectISO0h3f5f3cd1266e",
+  "candidate_manifest_sha256": "a658e0e493710707df5ca242f3811b3d52571ee567c0282c9553100bcf74cf03",
+  "mean_online_ms_exploratory": 35.0963944146,
+  "paired_comparisons": {
+    "k3250_root11": {
+      "confirmed_faster_than_k3300": false,
+      "contiguous_block_bootstrap_95pct_ms": [
+        1.79632645275,
+        3.26346149425
+      ],
+      "contiguous_block_size": 50,
+      "contrast": "k3250_root11_minus_k3300_root11",
+      "mean_ms": 2.53423542145
+    }
+  },
+  "schema": "n83.k3250-sparse-fresh-selection/v1",
+  "selected_arm": "k3300_root11",
+  "source_base_hash_blake3": "a4ba33098d2776520b98a326585a2301f8ccd5bc005df7c1a70fbe8496c61d8b",
+  "source_commit": "402c3142fb3f1cfe70b9de58d54e51e50b2a40c5",
+  "source_sha256": "c9824acebda0360416c3c507594bb07c17ca798c32cbf8f84bba95ca2c44d5b1",
+  "status": "FRESH_FACTOR_BASE_SELECTED",
+  "workload_id": "cac72d73693e"
+}

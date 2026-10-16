@@ -1,0 +1,25 @@
+ops (ok): ic-negfold-m2-d6-renew / rho-strong = 4.6813 [4.191, 5.202] (cluster) over 48 pairs on 16 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 0.4750 [0.404, 0.486]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 1.12%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-negfold-m2-d6-renew / rho-strong | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m19-t797-b6cf2467 | 17.00 | 16 | 4.6813 | [4.1906, 5.2023] | cluster |
+
+| workload | curve | log2 r | rho-strong mean S | ic-negfold-m2-d6-renew mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W0923719d9d8f | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.0602 | 11.7913 | 3.8532 |
+| W17d36a54392a | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.1486 | 15.8538 | 5.0352 |
+| W2db40eab3e1e | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.3854 | 15.9542 | 4.7126 |
+| W33527f428771 | icv1-f2m19-t797-b6cf2467 | 17.00 | 2.9136 | 17.4829 | 6.0003 |
+| W417cf4917395 | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.0307 | 15.7589 | 5.1998 |
+| W55ce49ff9c6c | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.2656 | 14.3593 | 4.3971 |
+| W68c1a004b90d | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.1495 | 14.2413 | 4.5217 |
+| W69efefb86dbc | icv1-f2m19-t797-b6cf2467 | 17.00 | 2.9717 | 14.2432 | 4.7929 |
+| W774265ef6ac4 | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.3274 | 14.2036 | 4.2687 |
+| W8934c6d643ae | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.4794 | 10.7953 | 3.1026 |
+| W9e4377a16b90 | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.1182 | 14.3888 | 4.6144 |
+| Wa10f3062002b | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.0325 | 11.4568 | 3.7780 |
+| Wc00a6b407523 | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.0611 | 15.8022 | 5.1623 |
+| Wc4e427fbb636 | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.0297 | 15.3682 | 5.0724 |
+| Wc9ec5feeb46b | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.0915 | 19.2317 | 6.2209 |
+| Wd0ff80f9704d | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.0307 | 13.5816 | 4.4814 |
