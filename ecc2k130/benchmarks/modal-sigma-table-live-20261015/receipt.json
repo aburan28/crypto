@@ -1,0 +1,80 @@
+{
+  "kind": "ecc2k130_modal_campaign_operational_receipt",
+  "recorded_at": "2026-10-16T00:38:39Z",
+  "source_commit": "0e62889d7b4d56daeb7aaf0ee57bb8293513788f",
+  "launcher_environment": {
+    "macos": "26.6",
+    "python": "3.12.8",
+    "modal_cli": "1.2.4"
+  },
+  "campaign": {
+    "curve": 131,
+    "dp_weight": 32,
+    "walk": "sigma",
+    "record_bytes": 32,
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "batch": 16,
+    "block_threads": 512,
+    "min_blocks": 1,
+    "worker_threads": 385024,
+    "witness": 0,
+    "packed_inline_poly": 3,
+    "sigma_fused": 1,
+    "packed_sigma_table": 1
+  },
+  "validation": {
+    "command": "CURVE=131 ./run.sh validate",
+    "first_success_app_id": "ap-Wy8WgzfwdoGA7egD5l87KX",
+    "result": "passed",
+    "gpu_compute_capability": "sm_120",
+    "nvcc_version": "13.3.73",
+    "binary_sha256": "fcd09f71ef330b4b450e5ff437c2be563fb06f00af829793381550fe190d7405",
+    "source_sha256": "bab69e2c0281dcd593deb8100dab97046822d24b3f8119421dc80f043f8cbcf5",
+    "repeat": {
+      "app_id": "ap-H7n0QUIUhHERcq2Iu1Ov4J",
+      "result": "passed",
+      "source_sha256": "bab69e2c0281dcd593deb8100dab97046822d24b3f8119421dc80f043f8cbcf5",
+      "binary_sha256": "fd211cdee272a65f535a298b7d3a821f1a9fb20053f7209aaa4c11d6457ac1a1",
+      "raw_output": "modal-validate.log"
+    },
+    "binary_hash_discrepancy": "The two validation builds report different executable hashes despite the same source hash and selected flags; the cause was not established. The live call's executable hash was not emitted.",
+    "first_attempt": {
+      "app_id": "ap-nXd0dTEaYoCjvzoaWYccQe",
+      "result": "interrupted_before_validation",
+      "exit_code": 130,
+      "reason": "launcher passed minBlocks2 before the one-block correction"
+    }
+  },
+  "deployment": {
+    "app": "ecc2k130",
+    "url": "https://modal.com/apps/a-buran28/main/deployed/ecc2k130",
+    "new_run_id": 8011,
+    "new_call_id": "fc-01M511XE04ND5GK8CBY6HGYGHR",
+    "new_slot": 98011,
+    "existing_calls_reattached": [8009, 8010],
+    "existing_calls_new_image_resume_observed": false
+  },
+  "new_worker_sample": {
+    "timestamp": "2026-10-16T00:36:35Z",
+    "elapsed": "5m15s",
+    "rate_million_iterations_per_second": 15893.1,
+    "client_reported_dp": "13.58k",
+    "boundary": "live client progress, not paired throughput"
+  },
+  "first_upload": {
+    "timestamp": "2026-10-16T00:33:00Z",
+    "records": 3343,
+    "slot": 98011,
+    "checkpoint_timestamp": "2026-10-16T00:33:01Z",
+    "checkpoint_bytes": 40
+  },
+  "public_snapshot": {
+    "generated_at": "2026-10-16T00:36:01Z",
+    "state": "COLLECTING",
+    "walking_slots": 4,
+    "dps": 532964467,
+    "outstanding_objects": 0
+  },
+  "comparative_evidence": "../sigma-table/headline/result.json",
+  "claim_boundary": "same-walk engineering benchmark plus live collection; no end-to-end attack-cost inference"
+}
