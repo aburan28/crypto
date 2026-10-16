@@ -1,0 +1,41 @@
+{
+  "kind": "equal_advice_bl_reference_archive",
+  "beat_id": "koblitz.compact_orbit.n61_bl_reference",
+  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "claim_check": "FAIL",
+  "claim_draft_status": "SCHEMA_INCOMPLETE",
+  "run_id": "20261016T063525Z-842e1c174e",
+  "targets": 1024,
+  "table_bytes": 5711008,
+  "table_bytes_levels": [
+    356928,
+    1427744,
+    5711008
+  ],
+  "bl_online_rows": 3072,
+  "bl_solved_or_verified_rows": 3072,
+  "scalar_verify_primary": {
+    "matched": 1024,
+    "mismatched": 0,
+    "missing": 0,
+    "table_bytes": 5711008,
+    "targets": 1024
+  },
+  "precompute_ms": 167647.978875,
+  "process_ms": 207209.530584,
+  "existing_study": "research/ic_next10_20261014/09-equal-advice/",
+  "vs_rho_schema_gap": [
+    "no paired IC arm / ic_* fields",
+    "no rho_policy / resource envelopes",
+    "target_count=1024 not 1 (panel not single_target_online primary schema)",
+    "missing candidate/workload manifests and replay certificates",
+    "missing online_interval / automorphism_discount / speedup pairing"
+  ],
+  "api_mismatch": {
+    "ks_batch": "<n> <a> signed_frobenius <L> <batch_seed> + KIC_RHO_GENERATE_ONLY",
+    "equal_advice": "ic_next10_09_equal_advice targets|bl with point files + table_bytes",
+    "launcher": "use launch-equal-advice; launch-panel rejects this beat"
+  },
+  "next_command": "Paired IC landed in evidence/20261016-n61-bl-ic-pair-l1024 (hash-verified reuse of this BL corpus). Next: co-measure + IC1 manifests/replay for claim-check PASS; do not promote ledger",
+  "claim_boundary": "diagnostic/reference-arm; fail-closed vs_rho; no ledger promotion; public synthetic only; PENDING_INDEPENDENT_VALIDATION"
+}

@@ -1,6 +1,36 @@
 {
   "schema": "crypto.store-index/v1",
   "entries": {
+    "evidence/isogeny-degree-challenge-20261015/isogeny-66b5b7ce0-macos-arm64": {
+      "sha256": "9755969d8a3217d7b317d9eb47d643ca07d038519a03ed349a19ae52476c9854",
+      "bytes": 31422176,
+      "description": "Frozen native judge from retained admission and resource-control evidence",
+      "provenance": "Dedicated release build from clean source 66b5b7ce0; constructor, replay and resource-control packet retained in research/isogeny_degree_challenge_20261015; experimental judge, not a release publication"
+    },
+    "evidence/isogeny-degree-challenge-20261015/isogeny-7e96187d3-macos-arm64": {
+      "sha256": "dc1c9fde4cc45d80631e01ec14b211b58db2206aa4def8ac3f727463df899638",
+      "bytes": 31421328,
+      "description": "Frozen native judge from the initial admission control packet",
+      "provenance": "cargo test --release --locked --offline --manifest-path tools/isogeny-cli/Cargo.toml; clean source 7e96187d3b819ecb6b5554d2024260bfe9eb0cba; experimental judge, not a release publication"
+    },
+    "evidence/isogeny-degree-challenge-20261015/isogeny-9bb7cbce2-macos-arm64": {
+      "sha256": "dd84d9213c76eb65aba1cb564769dcb0b06509dba751c8daaf1ad58edcd656f1",
+      "bytes": 31423504,
+      "description": "Frozen native challenge judge with distinct-kernel completeness checks",
+      "provenance": "Clean source 9bb7cbce2b84151eff6846b02da842a8ef019343; full release suite plus nine adversarial cases and twenty resource controls; experimental artifact, official publication remains through ReleaseMe"
+    },
+    "evidence/isogeny-degree-challenge-20261015/isogeny-d72229b34-macos-arm64": {
+      "sha256": "7fae8cf48c9ded1b1c03bc5a75de783bd67301d60e47e3a63831e9c74a931231",
+      "bytes": 31405808,
+      "description": "Frozen native judge from retained admission and resource-control evidence",
+      "provenance": "Dedicated release build from clean source d72229b34; constructor, replay and resource-control packet retained in research/isogeny_degree_challenge_20261015; experimental judge, not a release publication"
+    },
+    "evidence/isogeny-degree-challenge-20261015/isogeny-ff71f5772-macos-arm64": {
+      "sha256": "b8ce9c6f2adca6bec7c1623ee3fdd18c0756fc197f86a178feaf2c4e56bfcf7e",
+      "bytes": 31422816,
+      "description": "Frozen final native challenge judge with passing admission and twenty resource stress controls",
+      "provenance": "cargo test --release --locked --offline --manifest-path tools/isogeny-cli/Cargo.toml from clean source ff71f577203179760211cdc1dc3da7a33fc77ec1; installed native controls and bounded historical-map replay; experimental binary, not a ReleaseMe publication"
+    },
     "factor-base-traces/historical-20261015/all-384.zip": {
       "sha256": "531fd60acf09a591c097608f5496b8b5dc4551621b1a2d462a4dcffc6fdc1b85",
       "bytes": 2462002,

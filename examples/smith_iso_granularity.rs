@@ -3,8 +3,14 @@
 //!
 //! ```text
 //! cargo run --release --example smith_iso_granularity -- --p 7 --out DIR
+//! cargo run --release --example smith_iso_granularity -- --p 7 --out DIR --subgroups
 //! cargo run --release --example smith_iso_granularity -- summarize --dir DIR 7 11
+//! cargo run --release --example smith_iso_granularity -- summarize-serre --dir DIR 7 11
 //! ```
+//!
+//! `--subgroups` also writes per-isomorphism-class Prop. 2 / Prop. 4 subgroup
+//! counts (`iso_sub_p<p>.csv.gz`) for `summarize-serre`, which runs H1 and H2
+//! of `research/smith_serre_sign_20261016/PROTOCOL.md`.
 //!
 //! `summarize` reads `iso_p<p>.csv.gz` and `controls_p<p>.json`, runs the
 //! protocol's nulls (999 within-stratum permutations of the `full_success`
@@ -44,6 +50,10 @@ struct Rec {
     key: [i16; 3],
     stratum: u8,
     full: [bool; 2],
+    /// Rational tractable subgroups passing Prop. 2 (twist-invariant).
+    n_trig: u8,
+    /// Of those, passing Prop. 4 on the curve and on its twist.
+    n_iso: [u8; 2],
 }
 
 fn twisted_key(k: [i16; 3], tw: bool) -> [i16; 3] {
@@ -123,6 +133,10 @@ fn main() {
         summarize_cmd(&args);
         return;
     }
+    if args.get(1).map(String::as_str) == Some("summarize-serre") {
+        serre_cmd(&args);
+        return;
+    }
     let p: u64 = arg(&args, "--p").expect("--p").parse().unwrap();
     let out = PathBuf::from(arg(&args, "--out").expect("--out DIR"));
     fs::create_dir_all(&out).unwrap();
@@ -156,6 +170,8 @@ fn main() {
                 key: [(-e1) as i16, e2 as i16, (-e3) as i16],
                 stratum: sp::STRATA.iter().position(|&x| x == ns).unwrap() as u8,
                 full: [o.full_success(false), o.full_success(true)],
+                n_trig: o.n_trig() as u8,
+                n_iso: [o.n_iso(false) as u8, o.n_iso(true) as u8],
             }
         })
         .collect();
@@ -167,6 +183,11 @@ fn main() {
     let mut rows = String::from("rep_code,rep_twist,a1,a2,a3,stratum,full,size\n");
     let (mut n_iso, mut n_models, mut c2_fail) = (0u64, 0u64, 0u64);
     let mut c2_nonsqfree = 0u64;
+    // `--subgroups`: per-iso-class Prop. 2 / Prop. 4 subgroup counts, with
+    // their orbit constancy (c4) and twist complementarity (c5).
+    let want_sub = args.iter().any(|a| a == "--subgroups");
+    let mut sub = String::from("rep_code,rep_twist,n_trig,n_iso\n");
+    let (mut c4_fail, mut c5_fail) = (0u64, 0u64);
     // per L-key: models, tractable, full (control C1)
     let mut agg: HashMap<[i16; 3], [u64; 3]> = HashMap::new();
     for code in 0..total {
@@ -195,6 +216,16 @@ fn main() {
                 {
                     c2_fail += 1;
                 }
+                if r2.n_trig != r.n_trig || r2.n_iso[t2 as usize] != r.n_iso[tw as usize] {
+                    c4_fail += 1;
+                }
+            }
+            c5_fail += (r.n_iso[0] + r.n_iso[1] != r.n_trig) as u64;
+            if want_sub {
+                sub.push_str(&format!(
+                    "{code},{},{},{}\n",
+                    tw as u8, r.n_trig, r.n_iso[tw as usize]
+                ));
             }
             let size = orb.len() as u64;
             n_iso += 1;
@@ -238,7 +269,16 @@ fn main() {
         .output()
         .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
         .unwrap_or_default();
-    let ctl = json!({
+    if want_sub {
+        let mut gz = GzEncoder::new(Vec::new(), Compression::best());
+        gz.write_all(sub.as_bytes()).unwrap();
+        fs::write(
+            out.join(format!("iso_sub_p{p}.csv.gz")),
+            gz.finish().unwrap(),
+        )
+        .unwrap();
+    }
+    let mut ctl = json!({
         "p": p,
         "git_head": git,
         "octics": total,
@@ -257,6 +297,12 @@ fn main() {
         "seconds_total": secs,
         "threads": rayon::current_num_threads(),
     });
+    if want_sub {
+        ctl["c4_subgroup_counts_inconsistent"] = json!(c4_fail);
+        ctl["c4_pass"] = json!(c4_fail == 0);
+        ctl["c5_twist_complementarity_violations"] = json!(c5_fail);
+        ctl["c5_pass"] = json!(c5_fail == 0);
+    }
     fs::write(
         out.join(format!("controls_p{p}.json")),
         serde_json::to_string_pretty(&ctl).unwrap() + "\n",
@@ -523,6 +569,176 @@ fn summarize_cmd(args: &[String]) {
     fs::write(
         dir.join("verdict.json"),
         serde_json::to_string_pretty(&json!({"per_prime": verdicts, "overall": overall})).unwrap()
+            + "\n",
+    )
+    .unwrap();
+}
+
+const SEED_SERRE: u64 = 20261016;
+
+/// H1 and H2 of `research/smith_serre_sign_20261016/PROTOCOL.md`.
+fn serre(dir: &std::path::Path, p: u64) -> Value {
+    let ctl: Value =
+        serde_json::from_str(&fs::read_to_string(dir.join(format!("controls_p{p}.json"))).unwrap())
+            .unwrap();
+    let valid = ["c1_pass", "c2_pass", "c3_pass", "c4_pass"]
+        .iter()
+        .all(|k| ctl[k].as_bool() == Some(true));
+    let iso = load(dir, p);
+    let mut text = String::new();
+    flate2::read::GzDecoder::new(fs::File::open(dir.join(format!("iso_sub_p{p}.csv.gz"))).unwrap())
+        .read_to_string(&mut text)
+        .unwrap();
+    let sub: Vec<[u64; 2]> = text
+        .lines()
+        .skip(1)
+        .map(|l| {
+            let v: Vec<u64> = l.split(',').map(|x| x.parse().unwrap()).collect();
+            [v[2], v[3]]
+        })
+        .collect();
+    let n = iso.size.len();
+    assert_eq!(sub.len(), n, "iso and iso_sub rows align");
+    let total: u64 = iso.size.iter().sum();
+    let n1: Vec<u64> = iso
+        .key
+        .iter()
+        .map(|k| (p as i64 + 1 + k[0]) as u64)
+        .collect();
+    let nb = 2 * p as usize + 3;
+
+    // C5': curve-side + twist-side Prop. 4 passes <= Prop. 2 passes, per N1
+    // pair (models weighted; the twist of a curve with N1 has 2p+2-N1).
+    let (mut t, mut ip) = (vec![0u64; nb], vec![0u64; nb]);
+    for i in 0..n {
+        t[n1[i] as usize] += iso.size[i] * sub[i][0];
+        ip[n1[i] as usize] += iso.size[i] * sub[i][1];
+    }
+    let mut c5p = true;
+    let all_trig: u64 = t.iter().sum();
+    let mut bins = vec![];
+    let (mut mono, mut maxdev, mut prev) = (true, 0f64, -1f64);
+    for b in 0..nb {
+        let tw = 2 * p as usize + 2 - b.min(2 * p as usize + 2);
+        if b > 2 * p as usize + 2 || t[b] == 0 {
+            continue;
+        }
+        c5p &= ip[b] + ip[tw] <= t[b];
+        let nondeg = ip[b] + ip[tw];
+        let r = ip[b] as f64 / nondeg as f64;
+        let model = b as f64 / (2 * p + 2) as f64;
+        let big = t[b] as f64 >= 0.01 * all_trig as f64;
+        if big {
+            mono &= r >= prev;
+            prev = r;
+            maxdev = maxdev.max((r - model).abs());
+        }
+        bins.push(json!({
+            "N1": b, "prop2_passes": t[b], "prop4_passes": ip[b],
+            "degenerate_share": 1.0 - nondeg as f64 / t[b] as f64,
+            "r": r, "model_N1_over_2p2": model, "in_test": big,
+        }));
+    }
+    let h1 = if mono && maxdev <= 0.10 {
+        "sign law holds"
+    } else {
+        "sign law fails"
+    };
+
+    // H2: nulls conditioned on (stratum, N1, any Prop. 2 pass).
+    let mut tract_l = vec![false; iso.n_l];
+    for i in 0..n {
+        if iso.stratum[i] != 0 {
+            tract_l[iso.lid[i]] = true;
+        }
+    }
+    let u = (0..n)
+        .filter(|&i| tract_l[iso.lid[i]])
+        .map(|i| iso.size[i])
+        .sum::<u64>() as f64
+        / total as f64;
+    let c = class_share(&iso, &iso.full, total);
+    let mut rng = sp::SplitMix64(SEED_SERRE);
+    let g0: Vec<u64> = iso.stratum.iter().map(|&s| s as u64).collect();
+    let null0 = null(&iso, &g0, total, &mut rng);
+    let cell = |lab: &[u64]| -> Vec<u64> {
+        (0..n)
+            .map(|i| (iso.stratum[i] as u64 * 1000 + lab[i]) * 2 + (sub[i][0] > 0) as u64)
+            .collect()
+    };
+    let null_n1 = null(&iso, &cell(&n1), total, &mut rng);
+    let n_vals = n1.iter().collect::<std::collections::BTreeSet<_>>().len() as u64;
+    let mut lrng = sp::SplitMix64(SEED_SERRE ^ 0x5eed);
+    let lab_l: Vec<u64> = (0..iso.n_l).map(|_| lrng.below(n_vals)).collect();
+    let rand_lab: Vec<u64> = (0..n).map(|i| lab_l[iso.lid[i]]).collect();
+    let null_rand = null(&iso, &cell(&rand_lab), total, &mut rng);
+    let closed = |ns: &[f64]| (u - quant(ns, 0.5)) / (u - c);
+    let (cl0, cl1, clr) = (closed(&null0), closed(&null_n1), closed(&null_rand));
+    let gain_n1 = cl1 - cl0;
+    let gain_rand = clr - cl0;
+    let h2 = if !valid {
+        "control failed - invalid"
+    } else if gain_rand >= 0.75 * gain_n1 {
+        "inconclusive: coarse conditioning alone"
+    } else if c < quant(&null_n1, 0.025) {
+        "partial: residual clustering remains"
+    } else if c > quant(&null_n1, 0.975) {
+        "excess over the N1 null"
+    } else {
+        "N1 and Prop. 2 explain the clustering"
+    };
+    let nj = |ns: &[f64]| {
+        let mut v = null_json(ns, c);
+        v["seed"] = json!(SEED_SERRE);
+        v
+    };
+    json!({
+        "p": p, "controls": ctl, "instrument_valid": valid,
+        "c5prime_pass": c5p,
+        "h1": {"bins": bins, "monotone": mono, "max_abs_dev": maxdev, "verdict": h1},
+        "h2": {
+            "U": u, "C": c,
+            "null_stratum": nj(&null0), "null_stratum_n1_trig": nj(&null_n1),
+            "null_stratum_random_label_trig": nj(&null_rand),
+            "random_label_values": n_vals,
+            "gap_closed_stratum": cl0, "gap_closed_n1": cl1, "gap_closed_random": clr,
+            "verdict": h2,
+        },
+    })
+}
+
+fn serre_cmd(args: &[String]) {
+    let dir = PathBuf::from(arg(args, "--dir").expect("--dir DIR"));
+    let mut verdict = BTreeMap::new();
+    for p in args[4..].iter().map(|s| s.parse::<u64>().unwrap()) {
+        let s = serre(&dir, p);
+        fs::write(
+            dir.join(format!("serre_p{p}.json")),
+            serde_json::to_string_pretty(&s).unwrap() + "\n",
+        )
+        .unwrap();
+        eprintln!(
+            "p={p}: H1 {} (max dev {:.3}); H2 {} (closed {:.2} / {:.2}, random {:.2})",
+            s["h1"]["verdict"],
+            s["h1"]["max_abs_dev"].as_f64().unwrap(),
+            s["h2"]["verdict"],
+            s["h2"]["gap_closed_stratum"].as_f64().unwrap(),
+            s["h2"]["gap_closed_n1"].as_f64().unwrap(),
+            s["h2"]["gap_closed_random"].as_f64().unwrap()
+        );
+        verdict.insert(
+            p.to_string(),
+            json!({"h1": s["h1"]["verdict"], "h2": s["h2"]["verdict"]}),
+        );
+    }
+    fs::write(
+        dir.join("serre_verdict.json"),
+        serde_json::to_string_pretty(&json!({
+            "per_prime": verdict,
+            "confirmatory_prime": 11,
+            "note": "p = 7 was used to find the law (exploratory)",
+        }))
+        .unwrap()
             + "\n",
     )
     .unwrap();
