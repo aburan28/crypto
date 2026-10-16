@@ -1,0 +1,18 @@
+saved /home/user/wt/lane-h/research/pkm_supersingular_aux_20261015/q3/sessions/s22/comparisons/rho-neg__ic-ord-rootfind.json
+ops (ok): ic-ord-rootfind / rho-neg = 93.8877 [77.411, 120.387] (cluster) over 16 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 3.3376 [3.035, 3.656]
+measurement quality: 0 / 100; paired attempts 16, verified 16, admitted 0; levels {"L0": 16}; p95 foreign busy unknown%, p95 run queue 4.35%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-ord-rootfind / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp22-tm1105-62a9d176 | 19.68 | 8 | 93.8877 | [77.4105, 120.3871] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-ord-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W1b918280984e | icv1-fp22-tm1105-62a9d176 | 19.68 | 0.8752 | 102.5680 | 117.1960 |
+| W58b48b9f86c3 | icv1-fp22-tm1105-62a9d176 | 19.68 | 1.5695 | 100.8138 | 64.2315 |
+| W5d1379225c75 | icv1-fp22-tm1105-62a9d176 | 19.68 | 0.6441 | 102.2833 | 158.8015 |
+| W5ee6787b4d93 | icv1-fp22-tm1105-62a9d176 | 19.68 | 1.1319 | 102.5619 | 90.6067 |
+| W6caa17112f61 | icv1-fp22-tm1105-62a9d176 | 19.68 | 1.2325 | 101.7572 | 82.5638 |
+| W9042e4742e96 | icv1-fp22-tm1105-62a9d176 | 19.68 | 1.3581 | 102.3369 | 75.3520 |
+| Wc0fdb6611628 | icv1-fp22-tm1105-62a9d176 | 19.68 | 0.6364 | 102.2533 | 160.6627 |
+| Wc2567b03a681 | icv1-fp22-tm1105-62a9d176 | 19.68 | 1.2461 | 101.6780 | 81.5954 |

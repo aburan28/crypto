@@ -7,6 +7,8 @@ accepts explicit K_0 curve parameters and points through degree 131, with durabl
 pair tables, relations and precomputation. See [Fixed parameters](FIXED_PARAMETERS.md).
 The older inspection command uses imported points for mathematical validation.
 
+**Factor-base encyclopedia:** [factor-base-encyclopedia/README.md](factor-base-encyclopedia/README.md) describes every factor base tried here and in crypto-autoresearcher (definition, existence, build cost, oracle, measured results, verdict), starting with the PKM Kummer-coset (P-224 shape) and isogeny-chain (P-192 shape) towers; PDF in the same directory.
+
 **Technique inventory:** [ECDLP_RESEARCH_TECHNIQUES.md](ECDLP_RESEARCH_TECHNIQUES.md) maps factor-base, relation, filtering, sparse-linear-algebra, and individual-logarithm research techniques to their native modules and labels each as integrated, experimental, component, or backlog.
 
 **Agent scoreboard:** per-stage records and next targets to beat live in

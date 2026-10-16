@@ -3,8 +3,9 @@ NVCC ?= nvcc
 ARCH ?= sm_120
 NIST_PTX ?= 1
 MAXREG ?= 0
+TABLE_SHARED ?= 0
 CXXFLAGS ?= -O3 -std=c++17 -Wall -Wextra -Wno-unknown-pragmas
-NVCCFLAGS ?= -O3 -std=c++17 -arch=$(ARCH) -lineinfo -Xptxas=-v
+NVCCFLAGS ?= -O3 -std=c++17 -arch=$(ARCH) -lineinfo -Xptxas=-v -DRHO_TABLE_SHARED=$(TABLE_SHARED)
 ifneq ($(MAXREG),0)
 NVCCFLAGS += -maxrregcount=$(MAXREG)
 endif

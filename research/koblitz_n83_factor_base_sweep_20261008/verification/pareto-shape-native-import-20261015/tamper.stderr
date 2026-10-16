@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/Volumes/SSD990/crypto/worktrees/codex-n83-mixed-orbit-worker-20261012/research/koblitz_n83_factor_base_sweep_20261008/verification/pareto-shape-native-import-20261015/audit.py", line 179, in <module>
+    value = replay(args.run_dir, args.binary)
+  File "/Volumes/SSD990/crypto/worktrees/codex-n83-mixed-orbit-worker-20261012/research/koblitz_n83_factor_base_sweep_20261008/verification/pareto-shape-native-import-20261015/audit.py", line 109, in replay
+    require(sha256(path) == stage[f"{stream}_sha256"],
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            f"raw stage stream changed: {path.name}")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/crypto/worktrees/codex-n83-mixed-orbit-worker-20261012/research/koblitz_n83_factor_base_sweep_20261008/verification/pareto-shape-native-import-20261015/audit.py", line 25, in require
+    raise ValueError(reason)
+ValueError: raw stage stream changed: arm-00.stdout
