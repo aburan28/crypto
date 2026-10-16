@@ -172,19 +172,40 @@ pub fn velu_codomain(f: &Field, e: &Model, h: &Poly) -> Model {
 /// Certify that `h` is the kernel polynomial of an `F_p`-rational
 /// `ℓ`-isogeny from `e`, and return Vélu's codomain.  Independent of `Φ_ℓ`.
 pub fn verify_kernel(f: &Field, e: &Model, ell: u64, h: &Poly) -> Result<Model, EdgeError> {
+    verify_kernel_with_observer(f, e, ell, h, |_, _| {})
+}
+
+/// The same arithmetic and acceptance with optional stage observations.
+pub fn verify_kernel_with_observer(
+    f: &Field,
+    e: &Model,
+    ell: u64,
+    h: &Poly,
+    mut observe: impl FnMut(&'static str, &'static str),
+) -> Result<Model, EdgeError> {
+    observe("kernel_degree", "begin");
     let d = ((ell - 1) / 2) as usize;
     if ell < 3 || ell.is_multiple_of(2) || poly::degree(h) != Some(d) || h[d] != f.one() {
+        observe("kernel_degree", "error");
         return Err(EdgeError::WrongDegree);
     }
+    observe("kernel_degree", "end");
+    observe("squarefree_kernel_gcd", "begin");
     if poly::degree(&poly::gcd(f, h, &poly::derivative(f, h))) != Some(0) {
+        observe("squarefree_kernel_gcd", "error");
         return Err(EdgeError::NotSquarefree);
     }
+    observe("squarefree_kernel_gcd", "end");
+    observe("selected_division_polynomial_torsion", "begin");
     let g = half_generator(ell) as usize;
     let fs = division_polys_selected(f, e, &[ell as usize, g - 1, g, g + 1], h);
     if !fs[&(ell as usize)].is_empty() {
+        observe("selected_division_polynomial_torsion", "error");
         return Err(EdgeError::NotTorsion);
     }
+    observe("selected_division_polynomial_torsion", "end");
     if d > 1 {
+        observe("subgroup_inverse", "begin");
         // x([g]P) = x − F f_{g−1} f_{g+1} / f_g²  (g odd)
         //         = x − f_{g−1} f_{g+1} / (F f_g²) (g even), F = 4(x³+ax+b).
         let big_f = poly::trim(
@@ -204,14 +225,27 @@ pub fn verify_kernel(f: &Field, e: &Model, ell: u64, h: &Poly) -> Result<Model, 
         } else {
             den = mm(&den, &big_f);
         }
-        let den_inv = poly::invmod(f, &den, h).ok_or(EdgeError::NotSubgroup)?;
+        let den_inv = match poly::invmod(f, &den, h) {
+            Some(inverse) => inverse,
+            None => {
+                observe("subgroup_inverse", "error");
+                return Err(EdgeError::NotSubgroup);
+            }
+        };
         let xg = poly::sub(f, &poly::x(f), &mm(&num, &den_inv));
+        observe("subgroup_inverse", "end");
+        observe("subgroup_modular_composition", "begin");
         let image = compose_mod(f, h, &poly::rem(f, &xg, h), h);
         if !image.is_empty() {
+            observe("subgroup_modular_composition", "error");
             return Err(EdgeError::NotSubgroup);
         }
+        observe("subgroup_modular_composition", "end");
     }
-    Ok(velu_codomain(f, e, h))
+    observe("velu_codomain", "begin");
+    let codomain = velu_codomain(f, e, h);
+    observe("velu_codomain", "end");
+    Ok(codomain)
 }
 
 pub fn division_polys_selected(

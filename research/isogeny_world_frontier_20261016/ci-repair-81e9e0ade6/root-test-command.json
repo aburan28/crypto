@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "cargo",
+    "test",
+    "--release",
+    "--lib",
+    "--locked",
+    "--offline",
+    "--target-dir",
+    "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/root-main-sync-target"
+  ],
+  "source_commit": "81e9e0ade64ecff163ab835468eb5f58d52bf96d",
+  "root_library_source_diff": "empty",
+  "purpose": "required correctness gate for documentation/CI-only repair; not a performance measurement"
+}

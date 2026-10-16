@@ -1,0 +1,10 @@
+{
+  "sha256": "b8ce9c6f2adca6bec7c1623ee3fdd18c0756fc197f86a178feaf2c4e56bfcf7e",
+  "bytes": 31422816,
+  "description": "Frozen final native challenge judge with passing admission and twenty resource stress controls",
+  "provenance": "cargo test --release --locked --offline --manifest-path tools/isogeny-cli/Cargo.toml from clean source ff71f577203179760211cdc1dc3da7a33fc77ec1; installed native controls and bounded historical-map replay; experimental binary, not a ReleaseMe publication",
+  "name": "evidence/isogeny-degree-challenge-20261015/isogeny-ff71f5772-macos-arm64",
+  "reference": "store:evidence/isogeny-degree-challenge-20261015/isogeny-ff71f5772-macos-arm64",
+  "source_commit": "ff71f577203179760211cdc1dc3da7a33fc77ec1",
+  "freeze_local_only_note": "Freeze records describe initial local custody; this index reference records subsequent immutable archival."
+}
