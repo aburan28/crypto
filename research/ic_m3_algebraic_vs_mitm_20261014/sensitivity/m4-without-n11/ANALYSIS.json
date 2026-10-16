@@ -1,0 +1,664 @@
+{
+  "boot": 2000,
+  "by_m": {
+    "4": {
+      "arms": {
+        "f4-chain": {
+          "cells": [
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 68790377.82057971,
+              "counted_per_relation": 3845696.392463769,
+              "counted_unit": "word_xors",
+              "d": 4,
+              "disagreements": 0,
+              "log2_ci": [
+                25.817683350841417,
+                26.225202102699544
+              ],
+              "n": 13,
+              "ratio_to_floor": 2166.0863386554624,
+              "status": "measured",
+              "stopped": false,
+              "targets": 12,
+              "yes_targets": 6
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 1395822901.3,
+              "counted_per_relation": 151874586.2207207,
+              "counted_unit": "word_xors",
+              "d": 5,
+              "disagreements": 0,
+              "log2_ci": [
+                30.155717715263236,
+                30.62284083364069
+              ],
+              "n": 17,
+              "ratio_to_floor": 10357.394571801602,
+              "status": "measured",
+              "stopped": false,
+              "targets": 12,
+              "yes_targets": 6
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 4683322150.659649,
+              "counted_per_relation": 666540278.2333333,
+              "counted_unit": "word_xors",
+              "d": 5,
+              "disagreements": 0,
+              "log2_ci": [
+                31.83332481095636,
+                32.44268881823286
+              ],
+              "n": 19,
+              "ratio_to_floor": 12520.298010206516,
+              "status": "measured",
+              "stopped": false,
+              "targets": 12,
+              "yes_targets": 6
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 17065.0,
+              "counted_per_relation": 0.0,
+              "counted_unit": "word_xors",
+              "d": 6,
+              "disagreements": 0,
+              "log2_ci": [
+                14.058752793986228,
+                14.058752793986228
+              ],
+              "n": 23,
+              "ratio_to_floor": 0.00676958697578217,
+              "status": "unsupported",
+              "stopped": false,
+              "targets": 1,
+              "yes_targets": 1
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 17515.0,
+              "counted_per_relation": 0.0,
+              "counted_unit": "word_xors",
+              "d": 8,
+              "disagreements": 0,
+              "log2_ci": [
+                14.096303367689424,
+                14.096303367689424
+              ],
+              "n": 29,
+              "ratio_to_floor": 0.0048648593795358646,
+              "status": "unsupported",
+              "stopped": false,
+              "targets": 1,
+              "yes_targets": 1
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 18197.0,
+              "counted_per_relation": 0.0,
+              "counted_unit": "word_xors",
+              "d": 8,
+              "disagreements": 0,
+              "log2_ci": [
+                14.151413003496927,
+                14.151413003496927
+              ],
+              "n": 31,
+              "ratio_to_floor": 0.0012748308587021018,
+              "status": "unsupported",
+              "stopped": false,
+              "targets": 1,
+              "yes_targets": 1
+            }
+          ],
+          "delta_ci": [
+            0.41193137195828444,
+            0.47805729081043613
+          ],
+          "delta_lower_bound_ci": [
+            0.41193137195828444,
+            0.47805729081043613
+          ],
+          "floor_slope_same_cells": 0.5827703073338621,
+          "lower_bound_cells": [],
+          "lower_bound_fit_valid": false,
+          "measured_cells": [
+            13,
+            17,
+            19
+          ],
+          "slope_lower_bound_fit": 1.0249818599390086,
+          "slope_measured": 1.0249818599390086,
+          "slope_measured_ci": [
+            0.9709686870439437,
+            1.0832269311336122
+          ],
+          "verdict": "grows faster than the floor"
+        },
+        "f6-ic": {
+          "cells": [
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 61867391.002028994,
+              "counted_per_relation": 3845696.392463769,
+              "counted_unit": "word_xors",
+              "d": 4,
+              "disagreements": 0,
+              "log2_ci": [
+                25.659802925021474,
+                26.113641055463003
+              ],
+              "n": 13,
+              "ratio_to_floor": 1948.0938279955149,
+              "status": "measured",
+              "stopped": false,
+              "targets": 12,
+              "yes_targets": 6
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 1287152078.4252253,
+              "counted_per_relation": 150410867.1351351,
+              "counted_unit": "word_xors",
+              "d": 5,
+              "disagreements": 0,
+              "log2_ci": [
+                30.036810894196318,
+                30.505012410842703
+              ],
+              "n": 17,
+              "ratio_to_floor": 9551.026808449871,
+              "status": "measured",
+              "stopped": false,
+              "targets": 12,
+              "yes_targets": 6
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 4622887542.831579,
+              "counted_per_relation": 663000927.531579,
+              "counted_unit": "word_xors",
+              "d": 5,
+              "disagreements": 0,
+              "log2_ci": [
+                31.81630682766756,
+                32.41879955230857
+              ],
+              "n": 19,
+              "ratio_to_floor": 12358.733361054457,
+              "status": "measured",
+              "stopped": false,
+              "targets": 12,
+              "yes_targets": 6
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 26788.0,
+              "counted_per_relation": 0.0,
+              "counted_unit": "word_xors",
+              "d": 6,
+              "disagreements": 0,
+              "log2_ci": [
+                14.709299252712155,
+                14.709299252712155
+              ],
+              "n": 23,
+              "ratio_to_floor": 0.01062664494036055,
+              "status": "unsupported",
+              "stopped": false,
+              "targets": 1,
+              "yes_targets": 1
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 16529.0,
+              "counted_per_relation": 0.0,
+              "counted_unit": "word_xors",
+              "d": 8,
+              "disagreements": 0,
+              "log2_ci": [
+                14.012711824162656,
+                14.012711824162656
+              ],
+              "n": 29,
+              "ratio_to_floor": 0.00459099404421058,
+              "status": "unsupported",
+              "stopped": false,
+              "targets": 1,
+              "yes_targets": 1
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 15754.0,
+              "counted_per_relation": 0.0,
+              "counted_unit": "word_xors",
+              "d": 8,
+              "disagreements": 0,
+              "log2_ci": [
+                13.943430560383598,
+                13.943430560383598
+              ],
+              "n": 31,
+              "ratio_to_floor": 0.0011036811204040728,
+              "status": "unsupported",
+              "stopped": false,
+              "targets": 1,
+              "yes_targets": 1
+            }
+          ],
+          "delta_ci": [
+            0.4235418764664459,
+            0.4994853877994795
+          ],
+          "delta_lower_bound_ci": [
+            0.4235418764664459,
+            0.4994853877994795
+          ],
+          "floor_slope_same_cells": 0.5827703073338621,
+          "lower_bound_cells": [],
+          "lower_bound_fit_valid": false,
+          "measured_cells": [
+            13,
+            17,
+            19
+          ],
+          "slope_lower_bound_fit": 1.045455162907704,
+          "slope_measured": 1.045455162907704,
+          "slope_measured_ci": [
+            0.985850506725938,
+            1.1096378366719293
+          ],
+          "verdict": "grows faster than the floor"
+        },
+        "s22-hybrid-g8": {
+          "cells": [
+            {
+              "bad_witness": 0,
+              "censored": 6,
+              "cost_per_relation_ns": 135387272761.43274,
+              "counted_per_relation": 2666839846.2405796,
+              "counted_unit": "word_xors",
+              "d": 4,
+              "disagreements": 0,
+              "log2_ci": [
+                36.742691012231504,
+                37.213206223291465
+              ],
+              "n": 13,
+              "ratio_to_floor": 4263103.812589132,
+              "status": "lower_bound",
+              "stopped": false,
+              "targets": 12,
+              "yes_targets": 6
+            },
+            {
+              "bad_witness": 0,
+              "censored": 4,
+              "cost_per_relation_ns": 664281481246.4432,
+              "counted_per_relation": 16494859638.016216,
+              "counted_unit": "word_xors",
+              "d": 5,
+              "disagreements": 0,
+              "log2_ci": [
+                39.09015055017253,
+                39.473469365830454
+              ],
+              "n": 17,
+              "ratio_to_floor": 4929153.549209101,
+              "status": "lower_bound",
+              "stopped": true,
+              "targets": 4,
+              "yes_targets": 2
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 0.0,
+              "counted_per_relation": 0.0,
+              "counted_unit": "word_xors",
+              "d": 5,
+              "disagreements": 0,
+              "log2_ci": null,
+              "n": 19,
+              "ratio_to_floor": 0.0,
+              "status": "not_run",
+              "stopped": false,
+              "targets": 0,
+              "yes_targets": 0
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 0.0,
+              "counted_per_relation": 0.0,
+              "counted_unit": "word_xors",
+              "d": 6,
+              "disagreements": 0,
+              "log2_ci": null,
+              "n": 23,
+              "ratio_to_floor": 0.0,
+              "status": "not_run",
+              "stopped": false,
+              "targets": 0,
+              "yes_targets": 0
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 0.0,
+              "counted_per_relation": 0.0,
+              "counted_unit": "word_xors",
+              "d": 8,
+              "disagreements": 0,
+              "log2_ci": null,
+              "n": 29,
+              "ratio_to_floor": 0.0,
+              "status": "not_run",
+              "stopped": false,
+              "targets": 0,
+              "yes_targets": 0
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 0.0,
+              "counted_per_relation": 0.0,
+              "counted_unit": "word_xors",
+              "d": 8,
+              "disagreements": 0,
+              "log2_ci": null,
+              "n": 31,
+              "ratio_to_floor": 0.0,
+              "status": "not_run",
+              "stopped": false,
+              "targets": 0,
+              "yes_targets": 0
+            }
+          ],
+          "delta_ci": null,
+          "delta_lower_bound_ci": [
+            -0.004911683043876902,
+            0.10674739609030492
+          ],
+          "floor_slope_same_cells": null,
+          "lower_bound_cells": [
+            13,
+            17
+          ],
+          "lower_bound_fit_valid": false,
+          "measured_cells": [],
+          "slope_lower_bound_fit": 0.5736756431636127,
+          "slope_measured": null,
+          "slope_measured_ci": null,
+          "verdict": "undetermined (fewer than 3 usable cells)"
+        },
+        "sat": {
+          "cells": [
+            {
+              "bad_witness": 0,
+              "censored": 1,
+              "cost_per_relation_ns": 45238102597.472466,
+              "counted_per_relation": 610371.2313043479,
+              "counted_unit": "conflicts",
+              "d": 4,
+              "disagreements": 0,
+              "log2_ci": [
+                34.78048435536717,
+                36.02170898607327
+              ],
+              "n": 13,
+              "ratio_to_floor": 1424467.1875281397,
+              "status": "lower_bound",
+              "stopped": false,
+              "targets": 12,
+              "yes_targets": 6
+            },
+            {
+              "bad_witness": 0,
+              "censored": 9,
+              "cost_per_relation_ns": 621789323066.0153,
+              "counted_per_relation": 7156307.40900901,
+              "counted_unit": "conflicts",
+              "d": 5,
+              "disagreements": 0,
+              "log2_ci": [
+                38.96160686464779,
+                39.40428333777993
+              ],
+              "n": 17,
+              "ratio_to_floor": 4613849.904260874,
+              "status": "lower_bound",
+              "stopped": false,
+              "targets": 12,
+              "yes_targets": 6
+            },
+            {
+              "bad_witness": 0,
+              "censored": 4,
+              "cost_per_relation_ns": 1294349254293.2896,
+              "counted_per_relation": 9936672.331578948,
+              "counted_unit": "conflicts",
+              "d": 5,
+              "disagreements": 0,
+              "log2_ci": [
+                39.97233543882783,
+                40.51978999488076
+              ],
+              "n": 19,
+              "ratio_to_floor": 3460286.922768699,
+              "status": "lower_bound",
+              "stopped": true,
+              "targets": 4,
+              "yes_targets": 2
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 0.0,
+              "counted_per_relation": 0.0,
+              "counted_unit": "conflicts",
+              "d": 6,
+              "disagreements": 0,
+              "log2_ci": null,
+              "n": 23,
+              "ratio_to_floor": 0.0,
+              "status": "not_run",
+              "stopped": false,
+              "targets": 0,
+              "yes_targets": 0
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 0.0,
+              "counted_per_relation": 0.0,
+              "counted_unit": "conflicts",
+              "d": 8,
+              "disagreements": 0,
+              "log2_ci": null,
+              "n": 29,
+              "ratio_to_floor": 0.0,
+              "status": "not_run",
+              "stopped": false,
+              "targets": 0,
+              "yes_targets": 0
+            },
+            {
+              "bad_witness": 0,
+              "censored": 0,
+              "cost_per_relation_ns": 0.0,
+              "counted_per_relation": 0.0,
+              "counted_unit": "conflicts",
+              "d": 8,
+              "disagreements": 0,
+              "log2_ci": null,
+              "n": 31,
+              "ratio_to_floor": 0.0,
+              "status": "not_run",
+              "stopped": false,
+              "targets": 0,
+              "yes_targets": 0
+            }
+          ],
+          "delta_ci": null,
+          "delta_lower_bound_ci": [
+            0.13486983985170498,
+            0.3495986075572869
+          ],
+          "floor_slope_same_cells": null,
+          "lower_bound_cells": [
+            13,
+            17,
+            19
+          ],
+          "lower_bound_fit_valid": false,
+          "measured_cells": [],
+          "slope_lower_bound_fit": 0.826249800209588,
+          "slope_measured": null,
+          "slope_measured_ci": null,
+          "verdict": "undetermined (fewer than 3 usable cells)"
+        }
+      },
+      "cells": [
+        {
+          "columns": 10.0,
+          "d": 4,
+          "decomps_per_target": 1.0078125,
+          "exhaustive_checked": 12,
+          "exhaustive_equal": 12,
+          "fb_points": 19,
+          "floor_amortized_adds": 571.1356521739131,
+          "floor_amortized_ns": 31757.91130434783,
+          "floor_log2_ci": [
+            14.89994064878343,
+            15.015830584882831
+          ],
+          "floor_online_ns": 18501.511304347827,
+          "n": 13,
+          "p_decomposable": 0.5615234375,
+          "pool": 1024,
+          "table_build_ns": 132564.0
+        },
+        {
+          "columns": 15.0,
+          "d": 5,
+          "decomps_per_target": 0.22265625,
+          "exhaustive_checked": 12,
+          "exhaustive_equal": 12,
+          "fb_points": 29,
+          "floor_amortized_adds": 4596.816216216216,
+          "floor_amortized_ns": 134765.83243243242,
+          "floor_log2_ci": [
+            16.87179196517042,
+            17.233750310980454
+          ],
+          "floor_online_ns": 121521.03243243243,
+          "n": 17,
+          "p_decomposable": 0.1806640625,
+          "pool": 1024,
+          "table_build_ns": 198672.0
+        },
+        {
+          "columns": 18.0,
+          "d": 5,
+          "decomps_per_target": 0.1025390625,
+          "exhaustive_checked": 12,
+          "exhaustive_equal": 12,
+          "fb_points": 35,
+          "floor_amortized_adds": 13282.810526315789,
+          "floor_amortized_ns": 374058.36081871344,
+          "floor_log2_ci": [
+            18.257457960342585,
+            18.792513062929487
+          ],
+          "floor_online_ns": 356852.3052631579,
+          "n": 19,
+          "p_decomposable": 0.0927734375,
+          "pool": 1024,
+          "table_build_ns": 309709.0
+        },
+        {
+          "columns": 27.0,
+          "d": 6,
+          "decomps_per_target": 0.0263671875,
+          "exhaustive_checked": 12,
+          "exhaustive_equal": 12,
+          "fb_points": 53,
+          "floor_amortized_adds": 107577.22222222222,
+          "floor_amortized_ns": 2520833.2592592593,
+          "floor_log2_ci": [
+            20.802973543982343,
+            21.870182688500318
+          ],
+          "floor_online_ns": 2511063.074074074,
+          "n": 23,
+          "p_decomposable": 0.0263671875,
+          "pool": 1024,
+          "table_build_ns": 263795.0
+        },
+        {
+          "columns": 127.0,
+          "d": 8,
+          "decomps_per_target": 0.3330078125,
+          "exhaustive_checked": 0,
+          "exhaustive_equal": 0,
+          "fb_points": 253,
+          "floor_amortized_adds": 206856.75,
+          "floor_amortized_ns": 3600309.615048119,
+          "floor_log2_ci": [
+            21.624110718123944,
+            21.939511063492557
+          ],
+          "floor_online_ns": 3589354.111111111,
+          "n": 29,
+          "p_decomposable": 0.28125,
+          "pool": 1024,
+          "table_build_ns": 1391349.0
+        },
+        {
+          "columns": 131.0,
+          "d": 8,
+          "decomps_per_target": 0.0849609375,
+          "exhaustive_checked": 0,
+          "exhaustive_equal": 0,
+          "fb_points": 261,
+          "floor_amortized_adds": 812735.5476190476,
+          "floor_amortized_ns": 14274050.456015995,
+          "floor_log2_ci": [
+            23.475885936658326,
+            24.08293926479931
+          ],
+          "floor_online_ns": 14245502.547619049,
+          "n": 31,
+          "p_decomposable": 0.08203125,
+          "pool": 1024,
+          "table_build_ns": 3739776.0
+        }
+      ],
+      "floor_slope_amortized": 0.4564742910315061,
+      "floor_slope_amortized_ci": [
+        0.4433826295768727,
+        0.4701015371077584
+      ],
+      "floor_slope_counted_adds": 0.539315599141113,
+      "floor_slope_online": 0.4886000427956408
+    }
+  },
+  "protocol": "research/ic_m3_algebraic_vs_mitm_20261014/PROTOCOL.md",
+  "seed": 20261014
+}
