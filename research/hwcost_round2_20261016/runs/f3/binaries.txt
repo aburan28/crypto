@@ -1,0 +1,3 @@
+baseline: target/release/hwcost, cargo build --release --bin hwcost at 220214176e267f997c75c67461fbe1cdc866673c (src/cryptanalysis/hwcost/kernel.rs identical to 4e5994fc9, the addendum commit cm-1 and cm-2 ran at)
+native:   target-native/release/hwcost, RUSTFLAGS="-C target-cpu=native" at 597502b4d (the protocol commit isa-native-1 and isa-native-2 ran at; Fp64Cm did not exist yet)
+command:  research/hwcost_round2_20261016/f3_disasm.sh BINARY LABEL runs/f3   (GNU objdump (GNU Binutils for Ubuntu) 2.42)
