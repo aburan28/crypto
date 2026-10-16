@@ -1,0 +1,349 @@
+{
+  "admissibility": {
+    "bounded": true,
+    "deterministic": true,
+    "reasons": [],
+    "status": "admissible",
+    "unpriced": [
+      "inserts_uncharged",
+      "lookups_uncharged"
+    ]
+  },
+  "bound_id": "ECBND1h23cc5c8ea7c0",
+  "constant": {
+    "declared_ratio_to_floor": null,
+    "ratio_to_floor": {
+      "ci95": [
+        6.6296623258507905,
+        7.925618567769682
+      ],
+      "ci_method": "cluster",
+      "value": 7.255336825607554
+    },
+    "s": {
+      "ci95": [
+        0.9256247748175332,
+        1.0523249317328331
+      ],
+      "ci_method": "cluster",
+      "value": 0.9922846416559943
+    }
+  },
+  "dimensions": {
+    "memory": {
+      "ci95": [
+        0.500002536547889,
+        0.5000654918610029
+      ],
+      "known": true,
+      "lower_is_better": true,
+      "source": "first of counters.inserts_uncharged, counters.table_inserts_uncharged, counters.table_entries, counters.distinguished_points",
+      "statistic": "mean table entries / sqrt(r) over verified runs",
+      "value": 0.5000276391668192
+    },
+    "ops": {
+      "ci95": [
+        6.6296623258507905,
+        7.925618567769682
+      ],
+      "known": true,
+      "lower_is_better": true,
+      "source": "cost.total_gae, workload.curve.r, automorphisms_available",
+      "statistic": "mean S / sqrt(pi / 2A) over verified runs",
+      "value": 7.255336825607554
+    },
+    "uncharged": {
+      "ci95": [
+        0.9260832938455283,
+        1.0558581151556792
+      ],
+      "known": true,
+      "lower_is_better": true,
+      "source": "counters.*_uncharged",
+      "statistic": "mean sum of *_uncharged counters / sqrt(r) over verified runs",
+      "value": 0.9918652941840653
+    }
+  },
+  "domain": {
+    "envelope": {
+      "precomputation": "none",
+      "targets": 1,
+      "threads": 1
+    },
+    "family": "koblitz",
+    "problem": "ecdlp.single_target",
+    "target_kind": "public",
+    "tier": "medium",
+    "unit": "ecbench.gae+band(w=0)"
+  },
+  "domain_id": "ECDOM1h49d80ea7fd98",
+  "fit": {
+    "alpha": 0.491283122139418,
+    "alpha_agrees_with_declared": true,
+    "alpha_ci95": [
+      0.4102233414699761,
+      0.5237832136020829
+    ],
+    "ci_method": "cluster",
+    "declared_alpha": 0.5,
+    "log2_c": 0.22957698028686505,
+    "model": "gae = C * r^alpha",
+    "points": 128,
+    "r_squared": 0.964435161845958,
+    "scaling_claim": true,
+    "size_parameter": "r",
+    "sizes": 4
+  },
+  "fit_options": {
+    "curves": [],
+    "resamples": 2000,
+    "seed": 20261005,
+    "tier": "medium",
+    "weight": 0.0
+  },
+  "improves_on": [],
+  "label": "ic-frontier bsgs-neg medium w=0",
+  "level": "exponent",
+  "method": {
+    "entry": "ecbench::generic::bsgs_negation",
+    "family": "bsgs",
+    "id": "bsgs.negation",
+    "method_id": "ECM1h87f6341629c3",
+    "params": {}
+  },
+  "notes": "",
+  "provenance": {
+    "audits": [],
+    "records": 128,
+    "sessions": [
+      {
+        "arm": "bsgs-neg",
+        "binary_sha256": "7a8f0a63dd91e4f6bed408b57acc90c02f178d368191f14c8dfbaafb03184cf6",
+        "dir": "research/ic_frontier_campaign_20261015/phase1/sessions/K13",
+        "env_class_id": "ECBENV2hdc4243564840",
+        "git_commit": "215e6e5a6e9c908abe80b23d0ff89d82ae890fb8",
+        "records_sha256": "3e85fec4d3fbd2730cd73a5264823b9997d78eb23370b54dc0071ee7ace5320b",
+        "role": "baseline",
+        "session_id": "ECBS1hbfd8fb2d966d",
+        "spec_id": "ECS1hfda9e6ca03ae",
+        "status": "complete"
+      },
+      {
+        "arm": "bsgs-neg",
+        "binary_sha256": "7a8f0a63dd91e4f6bed408b57acc90c02f178d368191f14c8dfbaafb03184cf6",
+        "dir": "research/ic_frontier_campaign_20261015/phase1/sessions/K17",
+        "env_class_id": "ECBENV2hdc4243564840",
+        "git_commit": "215e6e5a6e9c908abe80b23d0ff89d82ae890fb8",
+        "records_sha256": "bf935190a370afa5f13ccabe6f7f5664822dad4b5e30ab2aa6380415884386d4",
+        "role": "baseline",
+        "session_id": "ECBS1hb9677faec03f",
+        "spec_id": "ECS1hdc50ad017f36",
+        "status": "complete"
+      },
+      {
+        "arm": "bsgs-neg",
+        "binary_sha256": "7a8f0a63dd91e4f6bed408b57acc90c02f178d368191f14c8dfbaafb03184cf6",
+        "dir": "research/ic_frontier_campaign_20261015/phase1/sessions/K19",
+        "env_class_id": "ECBENV2hdc4243564840",
+        "git_commit": "215e6e5a6e9c908abe80b23d0ff89d82ae890fb8",
+        "records_sha256": "1af7fb2a6b575454a19e1d5b8d7a4bba4a8473d0bcf243b8d336713fd9d24e39",
+        "role": "baseline",
+        "session_id": "ECBS1hce49b18f393e",
+        "spec_id": "ECS1h7905a959ebbd",
+        "status": "complete"
+      },
+      {
+        "arm": "bsgs-neg",
+        "binary_sha256": "7a8f0a63dd91e4f6bed408b57acc90c02f178d368191f14c8dfbaafb03184cf6",
+        "dir": "research/ic_frontier_campaign_20261015/phase1/sessions/K23",
+        "env_class_id": "ECBENV2hdc4243564840",
+        "git_commit": "215e6e5a6e9c908abe80b23d0ff89d82ae890fb8",
+        "records_sha256": "827d23e83544165d54104f917eb607359b7de8ce06cc4ba07aaf6c0c1ac4ef15",
+        "role": "baseline",
+        "session_id": "ECBS1hc12e48be2952",
+        "spec_id": "ECS1h00407182702b",
+        "status": "complete"
+      },
+      {
+        "arm": "bsgs-neg",
+        "binary_sha256": "7a8f0a63dd91e4f6bed408b57acc90c02f178d368191f14c8dfbaafb03184cf6",
+        "dir": "research/ic_frontier_campaign_20261015/phase1/sessions/K37",
+        "env_class_id": "ECBENV2hdc4243564840",
+        "git_commit": "215e6e5a6e9c908abe80b23d0ff89d82ae890fb8",
+        "records_sha256": "81b1b715564e6d58541feb9ddb9ed49a933c7a1a1337226f3ef09ba0181d932e",
+        "role": "baseline",
+        "session_id": "ECBS1h5dbe3414ae38",
+        "spec_id": "ECS1h5be38c4bdc85",
+        "status": "complete"
+      },
+      {
+        "arm": "bsgs-neg",
+        "binary_sha256": "7a8f0a63dd91e4f6bed408b57acc90c02f178d368191f14c8dfbaafb03184cf6",
+        "dir": "research/ic_frontier_campaign_20261015/phase1/sessions/K41",
+        "env_class_id": "ECBENV2hdc4243564840",
+        "git_commit": "215e6e5a6e9c908abe80b23d0ff89d82ae890fb8",
+        "records_sha256": "14eb08e4a73743d1599b6ed18a8fc8d1004f93102bcb8113f2c1f86e14f2cf3f",
+        "role": "baseline",
+        "session_id": "ECBS1h8b4d697db152",
+        "spec_id": "ECS1h1e72afd1a6dc",
+        "status": "complete"
+      },
+      {
+        "arm": "bsgs-neg",
+        "binary_sha256": "7a8f0a63dd91e4f6bed408b57acc90c02f178d368191f14c8dfbaafb03184cf6",
+        "dir": "research/ic_frontier_campaign_20261015/phase1/sessions/K43",
+        "env_class_id": "ECBENV2hdc4243564840",
+        "git_commit": "215e6e5a6e9c908abe80b23d0ff89d82ae890fb8",
+        "records_sha256": "52fde34be423da92766fa816ab50d30cba5898ca5db0fa5cd0f4b9a0720c8679",
+        "role": "baseline",
+        "session_id": "ECBS1hb24ef3a2e4f7",
+        "spec_id": "ECS1ha6ba47e7e5db",
+        "status": "complete"
+      },
+      {
+        "arm": "bsgs-neg",
+        "binary_sha256": "7a8f0a63dd91e4f6bed408b57acc90c02f178d368191f14c8dfbaafb03184cf6",
+        "dir": "research/ic_frontier_campaign_20261015/phase1/sessions/K47",
+        "env_class_id": "ECBENV2hdc4243564840",
+        "git_commit": "215e6e5a6e9c908abe80b23d0ff89d82ae890fb8",
+        "records_sha256": "4fc7fc94711b64b1d1e03b6e33faa73b53eca3c2c452c00900549e5af300d64a",
+        "role": "baseline",
+        "session_id": "ECBS1h122912d07fa5",
+        "spec_id": "ECS1h650d51eb69c7",
+        "status": "complete"
+      }
+    ],
+    "statuses": {
+      "verified": 128
+    },
+    "verified": 128
+  },
+  "schema": "ecbench.bound/v1",
+  "sizes": [
+    {
+      "automorphisms_available": 74,
+      "declared_ratio_to_floor": 6.863662517577698,
+      "declared_s": 1.0,
+      "field_bits": 37,
+      "floor_s": 0.14569480906717377,
+      "levels": {
+        "L0": 32
+      },
+      "log2_r": 27.78083708554834,
+      "mean_gae": 15253.0,
+      "mean_s": 1.0044368480713393,
+      "memory_entries_per_sqrt_r": 0.500078241936258,
+      "r": 230603167,
+      "ratio_to_floor": 6.894115545381136,
+      "runs": 32,
+      "s_ci95": [
+        0.8778123567994568,
+        1.137092125555274
+      ],
+      "slug": "icv1-f2m37-tm534059-32aad96b",
+      "uncharged_per_sqrt_r": 1.0031856646901447,
+      "verified": 32,
+      "workloads": 16
+    },
+    {
+      "automorphisms_available": 86,
+      "declared_ratio_to_floor": 7.399277020331919,
+      "declared_s": 1.0,
+      "field_bits": 43,
+      "floor_s": 0.1351483391218054,
+      "levels": {
+        "L0": 32
+      },
+      "log2_r": 32.112779548336775,
+      "mean_gae": 68964.875,
+      "mean_s": 1.0119825160221023,
+      "memory_entries_per_sqrt_r": 0.5000272416352408,
+      "r": 4644189029,
+      "ratio_to_floor": 7.487938975780019,
+      "runs": 32,
+      "s_ci95": [
+        0.9036211625127031,
+        1.124719690265547
+      ],
+      "slug": "icv1-f2m43-tm998717-e2e742b0",
+      "uncharged_per_sqrt_r": 1.0116743644763126,
+      "verified": 32,
+      "workloads": 16
+    },
+    {
+      "automorphisms_available": 94,
+      "declared_ratio_to_floor": 7.735777827895049,
+      "declared_s": 1.0,
+      "field_bits": 47,
+      "floor_s": 0.12926948294637178,
+      "levels": {
+        "L0": 32
+      },
+      "log2_r": 36.635865112243344,
+      "mean_gae": 339556.0,
+      "mean_s": 1.039116523891853,
+      "memory_entries_per_sqrt_r": 0.5000034474597475,
+      "r": 106781081677,
+      "ratio_to_floor": 8.038374566121972,
+      "runs": 32,
+      "s_ci95": [
+        0.8938861739261125,
+        1.1776170884687165
+      ],
+      "slug": "icv1-f2m47-t22705043-f4e44623",
+      "uncharged_per_sqrt_r": 1.0390308376937918,
+      "verified": 32,
+      "workloads": 16
+    },
+    {
+      "automorphisms_available": 82,
+      "declared_ratio_to_floor": 7.225151993843567,
+      "declared_s": 1.0,
+      "field_bits": 41,
+      "floor_s": 0.13840539283493047,
+      "levels": {
+        "L0": 32
+      },
+      "log2_r": 39.00000151433405,
+      "mean_gae": 677395.8125,
+      "mean_s": 0.9136026786386814,
+      "memory_entries_per_sqrt_r": 0.5000016256360308,
+      "r": 549756390943,
+      "ratio_to_floor": 6.600918215147092,
+      "runs": 32,
+      "s_ci95": [
+        0.7844921621888696,
+        1.0346123664293438
+      ],
+      "slug": "icv1-f2m41-tm2308219-7f48b14a",
+      "uncharged_per_sqrt_r": 0.9135703098760133,
+      "verified": 32,
+      "workloads": 16
+    }
+  ],
+  "stages": [
+    {
+      "alpha": 0.49966191951378985,
+      "alpha_ci95": [
+        0.4993050265067865,
+        0.4999306233912828
+      ],
+      "mean_gae": 143970.75,
+      "name": "setup",
+      "share_of_gae": 0.5229738945206844,
+      "sizes_with_work": 4
+    },
+    {
+      "alpha": 0.4494791081359551,
+      "alpha_ci95": [
+        0.07035703002563035,
+        0.5769349282484453
+      ],
+      "mean_gae": 131321.671875,
+      "name": "search",
+      "share_of_gae": 0.4770261054793156,
+      "sizes_with_work": 4
+    }
+  ],
+  "verdict_id": null
+}

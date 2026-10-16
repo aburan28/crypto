@@ -19,7 +19,7 @@
 //! | `GF(p)` | same-field genus-2 cover (`COVERS.md`) | genus, degree | solver cost |
 //! | `GF(p)` | base change to `GF(p^k)` then a genus-`k` descent | nothing (existence open) | solver cost at the most favourable genus |
 //! | `GF(p^k)` | Gaudry–Diem decomposition on `E(F_{p^k})` | — | relation and decomposition cost |
-//! | `GF(p^k)` | descent to a genus-`k` cover over `GF(p)` | nothing (existence open) | solver cost at the most favourable genus |
+//! | `GF(p^k)` | descent to a cover over `GF(p)` | nothing (existence open) | solver cost at the most favourable genus: `k`, or the GHS floor ([`ghs_genus_floor`]) where that is higher |
 //!
 //! Every row is a formula.  A `formula_advantage` row says the literature's
 //! complexity formulas, with the stated constants, put the route below rho on
@@ -46,6 +46,27 @@ use crate::cryptanalysis::ec_trapdoor::DescentRow;
 use cost::{CostModel, DestinationCost, DestinationSolver};
 
 pub const SCHEMA: &str = "jacobian-transfers/2";
+
+/// Least genus of a GHS compositum cover in odd characteristic, by the
+/// Frobenius period `n` of the branch set (that is, for `E/F_{q^n}` with
+/// `F_q(j(E)) = F_{q^n}`), for `n = 1..=14`.  It depends only on the orbit
+/// type of the branch locus, never on `q`.  Every degree-2 function on such
+/// an `E` has a branch set of period exactly `n`, so this is a lower bound on
+/// every GHS cover; whether a particular curve attains it is a separate
+/// question (Joux–Vitse, Eurocrypt 2012, App. C, attain 9 at `n = 6`).
+/// Source: `research/odd_char_descent_genus3_20261014/` (Theorem 3 and the
+/// exact enumeration in `results/run-20261014T1800Z/min_genus.csv`).
+const GHS_GENUS_FLOOR: [u32; 14] = [1, 2, 3, 5, 5, 9, 7, 33, 81, 49, 1793, 25, 9217, 41];
+
+/// The least genus of any GHS cover of `E/F_{p^k}` when `F_p(j(E)) = F_{p^k}`,
+/// or `None` for `k` outside the enumerated range `1..=14`.  A curve whose
+/// `j` lies in a proper subfield can have a smaller cover, and a non-GHS
+/// construction is not covered by this bound.
+pub fn ghs_genus_floor(k: u32) -> Option<u32> {
+    k.checked_sub(1)
+        .and_then(|i| GHS_GENUS_FLOOR.get(i as usize))
+        .copied()
+}
 
 /// Pollard-rho iterations spent factoring an order whose subgroup the
 /// registry does not record.
@@ -98,8 +119,7 @@ fn str_field<'a>(v: &'a Value, key: &str) -> Result<&'a str, String> {
 
 fn parse_field(model: &Value, label: &str) -> Result<Field, String> {
     let num = |key: &str| {
-        str_field(model, key)
-            .and_then(|s| parse_uint(s).ok_or_else(|| format!("bad {key}: {s}")))
+        str_field(model, key).and_then(|s| parse_uint(s).ok_or_else(|| format!("bad {key}: {s}")))
     };
     if label.starts_with("f2m-") {
         let modulus = num("modulus")?;
@@ -142,7 +162,9 @@ pub fn read_registry(text: &str) -> Result<Vec<RegistryCurve>, String> {
         let ctx = |e: String| format!("{slug}: {e}");
         let icv1 = str_field(c, "icv1")?.to_string();
         let parts: Vec<&str> = icv1.split(':').collect();
-        let label = parts.get(1).ok_or_else(|| ctx("ICV1 has no field".into()))?;
+        let label = parts
+            .get(1)
+            .ok_or_else(|| ctx("ICV1 has no field".into()))?;
         let model: Value = serde_json::from_str(str_field(c, "model_json")?)
             .map_err(|e| ctx(format!("model JSON: {e}")))?;
         let field = parse_field(&model, label).map_err(ctx)?;
@@ -469,9 +491,9 @@ impl RouteBuilder<'_> {
     ) -> TransferRoute {
         let log2_genus = log2_biguint(genus).max(0.0);
         let log2_order = log2_genus.exp2() * field_bits;
-        let destination_cost = self
-            .model
-            .jacobian_destination(self.subgroup_bits, log2_genus, field_bits);
+        let destination_cost =
+            self.model
+                .jacobian_destination(self.subgroup_bits, log2_genus, field_bits);
         // One evaluation of the transfer map: at least `g` operations over the
         // source field (the GHS conorm–norm map writes a genus-`g` divisor).
         let log2_transfer = log2_genus + self.model.log2_elliptic_op(self.source_field_bits);
@@ -509,7 +531,8 @@ impl RouteBuilder<'_> {
         destination_cost: DestinationCost,
         notes: Vec<String>,
     ) -> TransferRoute {
-        let log2_total = binary::log2_total(&[log2_search, log2_transfer, destination_cost.log2_cost]);
+        let log2_total =
+            binary::log2_total(&[log2_search, log2_transfer, destination_cost.log2_cost]);
         let ratio_log2 = self.reference_log2 - log2_total;
         let exponent_ratio_log2 = 0.5 * self.subgroup_bits - destination_cost.log2_leading;
         let carried = matches!(
@@ -545,7 +568,9 @@ impl RouteBuilder<'_> {
             transport,
             cost: RouteCost {
                 log2_search: log2_search.is_finite().then(|| round_to(log2_search, 3)),
-                log2_transfer: log2_transfer.is_finite().then(|| round_to(log2_transfer, 3)),
+                log2_transfer: log2_transfer
+                    .is_finite()
+                    .then(|| round_to(log2_transfer, 3)),
                 destination: destination_cost,
                 log2_total: round_to(log2_total, 3),
                 ratio_log2: round_to(ratio_log2, 3),
@@ -566,10 +591,20 @@ impl RouteBuilder<'_> {
 }
 
 fn inv<K: Into<String>, V: Into<Value>>(pairs: Vec<(K, V)>) -> BTreeMap<String, Value> {
-    pairs.into_iter().map(|(k, v)| (k.into(), v.into())).collect()
+    pairs
+        .into_iter()
+        .map(|(k, v)| (k.into(), v.into()))
+        .collect()
 }
 
-fn binary_routes(rb: &RouteBuilder, c: &RegistryCurve, n_total: u32, irr: &IrreduciblePoly, a: &F2mElement, b: &F2mElement) -> Vec<TransferRoute> {
+fn binary_routes(
+    rb: &RouteBuilder,
+    c: &RegistryCurve,
+    n_total: u32,
+    irr: &IrreduciblePoly,
+    a: &F2mElement,
+    b: &F2mElement,
+) -> Vec<TransferRoute> {
     let mut routes = Vec::new();
     let disc = &c.trace * &c.trace - BigInt::from(BigUint::from(1u32) << n_total) * 4;
     let log2_abs_disc = log2_abs(&disc);
@@ -668,7 +703,10 @@ fn binary_routes(rb: &RouteBuilder, c: &RegistryCurve, n_total: u32, irr: &Irred
                 cx.partial_cmp(&cy).unwrap_or(std::cmp::Ordering::Equal)
             });
         if let Some(bp) = best_plausible {
-            if !chosen.iter().any(|e| e.annihilator_degree == bp.annihilator_degree) {
+            if !chosen
+                .iter()
+                .any(|e| e.annihilator_degree == bp.annihilator_degree)
+            {
                 chosen.push(bp);
             }
         }
@@ -729,10 +767,16 @@ fn binary_routes(rb: &RouteBuilder, c: &RegistryCurve, n_total: u32, irr: &Irred
     routes
 }
 
-fn route_cost_preview(rb: &RouteBuilder, e: &binary::IsogenyExtensionEstimate, field_bits: f64) -> f64 {
+fn route_cost_preview(
+    rb: &RouteBuilder,
+    e: &binary::IsogenyExtensionEstimate,
+    field_bits: f64,
+) -> f64 {
     let genus = binary::generic_genus(e.magic_bound);
     let log2_genus = log2_biguint(&genus).max(0.0);
-    let dest = rb.model.jacobian_destination(rb.subgroup_bits, log2_genus, field_bits);
+    let dest = rb
+        .model
+        .jacobian_destination(rb.subgroup_bits, log2_genus, field_bits);
     binary::log2_total(&[e.log2_search_cost, dest.log2_cost])
 }
 
@@ -771,7 +815,12 @@ fn prime_routes(rb: &RouteBuilder, p: &BigUint) -> Vec<TransferRoute> {
     routes
 }
 
-fn extension_routes(rb: &RouteBuilder, c: &RegistryCurve, p: &BigUint, k: u32) -> Vec<TransferRoute> {
+fn extension_routes(
+    rb: &RouteBuilder,
+    c: &RegistryCurve,
+    p: &BigUint,
+    k: u32,
+) -> Vec<TransferRoute> {
     let p_bits = log2_biguint(p);
     let two_torsion = (&c.order % 2u32).is_zero();
     let mut routes = Vec::new();
@@ -809,27 +858,76 @@ fn extension_routes(rb: &RouteBuilder, c: &RegistryCurve, p: &BigUint, k: u32) -
             "the repository's gaudry_cubic measurements at k = 3 found the solve constant far above this formula; a formula advantage here is a lead, not a measurement".into(),
         ],
     ));
-    // Descent to a genus-k cover over GF(p).
-    let genus = BigUint::from(k);
-    let log2_genus = log2_biguint(&genus);
-    let transport = rb.transport_by_size(log2_genus, p_bits);
+    // Descent to a cover over GF(p).  The cheapest genus the literature
+    // allows is k for the Weil restriction in general, but no GHS cover has
+    // genus below `ghs_genus_floor(k)`; where that is above k the row is priced
+    // at the floor, and keeps what it said at genus k for the record.
+    let floor = ghs_genus_floor(k).filter(|&f| f > k);
+    let genus_of = |g: u32| {
+        let g = BigUint::from(g);
+        let transport = rb.transport_by_size(log2_biguint(&g), p_bits);
+        (g, transport)
+    };
+    let priced_genus = floor.unwrap_or(k);
+    let (genus, transport) = genus_of(priced_genus);
+    let mut invariants = inv(vec![
+        ("extension_degree", Value::from(k)),
+        ("genus_lower_bound", Value::from(priced_genus)),
+        ("rational_two_torsion_point", Value::from(two_torsion)),
+    ]);
+    let mut notes = vec![
+        "existence of a cover over GF(p) of the priced genus is not established for this curve; odd-characteristic GHS and Diem's genus-3 covers need extra structure (for k = 3, rational 2-torsion is the usual precondition, recorded as an exact invariant)".into(),
+    ];
+    if let Some(f) = floor {
+        // What the row said before 2026-10-15, when it was priced at g = k.
+        let (gk, tk) = genus_of(k);
+        let at_k = rb.jacobian_route(
+            "cover_descent",
+            String::new(),
+            Evidence::Proposed,
+            BTreeMap::new(),
+            &gk,
+            p_bits,
+            tk,
+            f64::NEG_INFINITY,
+            Vec::new(),
+        );
+        invariants.insert("genus_basis".into(), Value::from("ghs_genus_floor"));
+        invariants.insert(
+            "class_at_genus_k".into(),
+            Value::from(class_name(at_k.class)),
+        );
+        invariants.insert(
+            "ratio_log2_at_genus_k".into(),
+            Value::from(at_k.cost.ratio_log2),
+        );
+        let attained = if k == 6 {
+            "a GHS cover of genus 9 exists when j(E) is outside GF(p^3) and GF(p^2) (Joux–Vitse, Eurocrypt 2012, App. C)"
+        } else {
+            "whether this curve attains that genus is not verified"
+        };
+        notes.push(format!(
+            "priced at g = {f}, the least genus of any GHS cover of E/GF(p^{k}) when F_p(j(E)) = GF(p^{k}) (research/odd_char_descent_genus3_20261014/); {attained}.  Until 2026-10-15 the row was priced at g = {k}, which no GHS cover has, and was {} ({:+.1} bits against rho).  A curve whose j lies in a proper subfield, or a non-GHS cover, could have a smaller genus, so the row is a lower bound on the GHS route only",
+            class_name(at_k.class),
+            at_k.cost.ratio_log2
+        ));
+    } else {
+        invariants.insert("genus_basis".into(), Value::from("weil_restriction"));
+        notes.push(
+            "priced at the most favourable genus, g = k, so the row is a lower bound on the route"
+                .into(),
+        );
+    }
     routes.push(rb.jacobian_route(
         "cover_descent",
-        format!("descent to a genus-{k} cover C/GF(p) of E/GF(p^{k})"),
+        format!("descent to a genus-{priced_genus} cover C/GF(p) of E/GF(p^{k})"),
         Evidence::Proposed,
-        inv(vec![
-            ("extension_degree", Value::from(k)),
-            ("genus_lower_bound", Value::from(k)),
-            ("rational_two_torsion_point", Value::from(two_torsion)),
-        ]),
+        invariants,
         &genus,
         p_bits,
         transport,
         f64::NEG_INFINITY,
-        vec![
-            "existence of a genus-k cover over GF(p) is not established for this curve; odd-characteristic GHS and Diem's genus-3 covers need extra structure (for k = 3, rational 2-torsion is the usual precondition, recorded as an exact invariant)".into(),
-            "priced at the most favourable genus, g = k, so the row is a lower bound on the route".into(),
-        ],
+        notes,
     ));
     routes
 }
@@ -885,7 +983,10 @@ impl TransferFile {
     pub fn build(registry_text: &str, model: CostModel, budget: u64) -> Result<Self, String> {
         use rayon::prelude::*;
         let curves = read_registry(registry_text)?;
-        let records: Vec<CurveTransfers> = curves.par_iter().map(|c| screen(c, &model, budget)).collect();
+        let records: Vec<CurveTransfers> = curves
+            .par_iter()
+            .map(|c| screen(c, &model, budget))
+            .collect();
         let digest = crate::hash::sha256::sha256(registry_text.as_bytes());
         let mut by_class = BTreeMap::new();
         let mut by_route_kind = BTreeMap::new();
@@ -895,8 +996,14 @@ impl TransferFile {
             for route in &r.routes {
                 *by_route_kind.entry(route.kind.clone()).or_insert(0) += 1;
             }
-            if matches!(r.verdict, RouteClass::FormulaAdvantage | RouteClass::FormulaMarginal) {
-                let best = r.best_route.map(|i| r.routes[i].label.clone()).unwrap_or_default();
+            if matches!(
+                r.verdict,
+                RouteClass::FormulaAdvantage | RouteClass::FormulaMarginal
+            ) {
+                let best = r
+                    .best_route
+                    .map(|i| r.routes[i].label.clone())
+                    .unwrap_or_default();
                 formula_advantage.push((r.slug.clone(), best));
             }
         }
@@ -966,9 +1073,15 @@ mod tests {
     fn every_registry_entry_parses() {
         let curves = registry();
         assert!(curves.len() >= 300);
-        assert!(curves.iter().any(|c| matches!(c.field, Field::Extension { .. })));
-        assert!(curves.iter().any(|c| matches!(c.field, Field::Binary { .. })));
-        assert!(curves.iter().any(|c| matches!(c.field, Field::Prime { .. })));
+        assert!(curves
+            .iter()
+            .any(|c| matches!(c.field, Field::Extension { .. })));
+        assert!(curves
+            .iter()
+            .any(|c| matches!(c.field, Field::Binary { .. })));
+        assert!(curves
+            .iter()
+            .any(|c| matches!(c.field, Field::Prime { .. })));
     }
 
     #[test]
@@ -1075,7 +1188,11 @@ mod tests {
                     && x.invariants["mmt_condition_8"] == false)
         );
         // c2pnb368w1 has Tr(a) = 0: one exact row per tower.
-        let r = screen(&by_name("c2pnb368w1"), &CostModel::default(), DEFAULT_FACTOR_BUDGET);
+        let r = screen(
+            &by_name("c2pnb368w1"),
+            &CostModel::default(),
+            DEFAULT_FACTOR_BUDGET,
+        );
         let g7 = r
             .routes
             .iter()
@@ -1090,18 +1207,36 @@ mod tests {
 
     #[test]
     fn koblitz_curves_degenerate_and_random_b_sits_at_the_maximum() {
-        let k = screen(&by_name("sect163k1"), &CostModel::default(), DEFAULT_FACTOR_BUDGET);
-        let ghs: Vec<_> = k.routes.iter().filter(|x| x.kind == "ghs_weil_descent").collect();
+        let k = screen(
+            &by_name("sect163k1"),
+            &CostModel::default(),
+            DEFAULT_FACTOR_BUDGET,
+        );
+        let ghs: Vec<_> = k
+            .routes
+            .iter()
+            .filter(|x| x.kind == "ghs_weil_descent")
+            .collect();
         assert_eq!(ghs.len(), 1);
         assert_eq!(ghs[0].invariants["magic_number"], 1);
         assert_eq!(ghs[0].transport, Transport::Degenerate);
         assert_eq!(k.verdict, RouteClass::Boundary);
-        let b = screen(&by_name("sect113r1"), &CostModel::default(), DEFAULT_FACTOR_BUDGET);
-        let ghs = b.routes.iter().find(|x| x.kind == "ghs_weil_descent").unwrap();
+        let b = screen(
+            &by_name("sect113r1"),
+            &CostModel::default(),
+            DEFAULT_FACTOR_BUDGET,
+        );
+        let ghs = b
+            .routes
+            .iter()
+            .find(|x| x.kind == "ghs_weil_descent")
+            .unwrap();
         assert_eq!(ghs.invariants["magic_number"], 113);
         let two_112 = BigUint::from(1u32) << 112u32;
-        assert!(ghs.destination.genus == two_112.to_string()
-            || ghs.destination.genus == (&two_112 - BigUint::from(1u32)).to_string());
+        assert!(
+            ghs.destination.genus == two_112.to_string()
+                || ghs.destination.genus == (&two_112 - BigUint::from(1u32)).to_string()
+        );
         assert_eq!(b.verdict, RouteClass::Boundary);
     }
 
@@ -1112,7 +1247,13 @@ mod tests {
             assert_eq!(r.verdict, RouteClass::Boundary, "{name}");
             assert!(r.routes.iter().all(|x| x.cost.ratio_log2 < 0.0), "{name}");
             assert!(r.routes.iter().any(|x| x.kind == "same_field_cover"));
-            assert_eq!(r.routes.iter().filter(|x| x.kind == "base_change_descent").count(), 2);
+            assert_eq!(
+                r.routes
+                    .iter()
+                    .filter(|x| x.kind == "base_change_descent")
+                    .count(),
+                2
+            );
         }
     }
 
@@ -1124,8 +1265,71 @@ mod tests {
             .unwrap();
         let r = screen(&c, &CostModel::default(), DEFAULT_FACTOR_BUDGET);
         assert_eq!(r.field.kind, "extension");
-        assert!(r.routes.iter().any(|x| x.kind == "extension_index_calculus"));
+        assert!(r
+            .routes
+            .iter()
+            .any(|x| x.kind == "extension_index_calculus"));
         assert!(r.routes.iter().any(|x| x.kind == "cover_descent"));
+    }
+
+    #[test]
+    fn ghs_genus_floor_matches_the_odd_characteristic_study() {
+        // research/odd_char_descent_genus3_20261014/results/run-20261014T1800Z/
+        // min_genus.csv, column min_genus_period_n, n = 1..=14.  Joux–Vitse
+        // App. C gives 9 at n = 6.  Genus n is attained at n = 1, 2, 3, 5, 7
+        // only; at n = 4 the least genus is 5 and at n = 9 it is 81.
+        let csv = [1, 2, 3, 5, 5, 9, 7, 33, 81, 49, 1793, 25, 9217, 41];
+        for (i, g) in csv.into_iter().enumerate() {
+            assert_eq!(ghs_genus_floor(i as u32 + 1), Some(g), "n = {}", i + 1);
+        }
+        assert_eq!(ghs_genus_floor(6), Some(9));
+        assert_eq!(ghs_genus_floor(10), Some(49));
+        assert_eq!(ghs_genus_floor(14), Some(41));
+        assert_eq!(ghs_genus_floor(0), None);
+        assert_eq!(ghs_genus_floor(15), None);
+    }
+
+    #[test]
+    fn cover_descent_is_priced_at_the_ghs_floor_where_it_exceeds_k() {
+        let file =
+            TransferFile::build(REGISTRY, CostModel::default(), DEFAULT_FACTOR_BUDGET).unwrap();
+        let (mut raised, mut unchanged) = (0, 0);
+        for c in file.curves.iter().filter(|c| c.field.kind == "extension") {
+            let k = c.field.degree;
+            let r = c.routes.iter().find(|r| r.kind == "cover_descent").unwrap();
+            match ghs_genus_floor(k).filter(|&f| f > k) {
+                Some(f) => {
+                    assert_eq!(r.destination.genus, f.to_string(), "{}", c.slug);
+                    assert_eq!(r.invariants["genus_lower_bound"], f);
+                    assert_eq!(r.invariants["genus_basis"], "ghs_genus_floor");
+                    assert_eq!(
+                        r.label,
+                        format!("descent to a genus-{f} cover C/GF(p) of E/GF(p^{k})")
+                    );
+                    // Pricing at a larger genus never improves the class.
+                    let before: RouteClass =
+                        serde_json::from_value(r.invariants["class_at_genus_k"].clone()).unwrap();
+                    assert!(before <= r.class, "{} k = {k}", c.slug);
+                    assert!(
+                        r.invariants["ratio_log2_at_genus_k"].as_f64().unwrap()
+                            >= r.cost.ratio_log2,
+                        "{}",
+                        c.slug
+                    );
+                    assert!(r.notes.last().unwrap().contains("Until 2026-10-15"));
+                    raised += 1;
+                }
+                None => {
+                    assert_eq!(r.destination.genus, k.to_string(), "{}", c.slug);
+                    assert_eq!(r.invariants["genus_basis"], "weil_restriction");
+                    assert!(!r.invariants.contains_key("class_at_genus_k"));
+                    unchanged += 1;
+                }
+            }
+            // The verdict is still the best class over the routes.
+            assert_eq!(c.verdict, c.routes.iter().map(|r| r.class).min().unwrap());
+        }
+        assert!(raised > 0 && unchanged > 0);
     }
 
     #[test]
@@ -1141,10 +1345,14 @@ mod tests {
 
     #[test]
     fn the_whole_registry_builds_and_round_trips() {
-        let file = TransferFile::build(REGISTRY, CostModel::default(), DEFAULT_FACTOR_BUDGET).unwrap();
+        let file =
+            TransferFile::build(REGISTRY, CostModel::default(), DEFAULT_FACTOR_BUDGET).unwrap();
         assert_eq!(file.curves.len(), registry().len());
         let json = file.to_json();
-        assert!(!json.contains("null,") || !json.contains("\"log2_cost\": null"), "non-finite cost");
+        assert!(
+            !json.contains("null,") || !json.contains("\"log2_cost\": null"),
+            "non-finite cost"
+        );
         let back: TransferFile = serde_json::from_str(&json).unwrap();
         // The file parses back; values agree to 12 significant digits (the
         // JSON parser is not correctly rounded above 2^53, and `check` rebuilds
@@ -1157,11 +1365,16 @@ mod tests {
             assert_eq!(x.best_route, y.best_route);
             for (rx, ry) in x.routes.iter().zip(&y.routes) {
                 let (a, b) = (rx.cost.log2_total, ry.cost.log2_total);
-                assert!((a - b).abs() <= 1e-11 * a.abs().max(1.0), "{} {a} {b}", x.slug);
+                assert!(
+                    (a - b).abs() <= 1e-11 * a.abs().max(1.0),
+                    "{} {a} {b}",
+                    x.slug
+                );
             }
         }
         // Rebuilding is deterministic.
-        let again = TransferFile::build(REGISTRY, CostModel::default(), DEFAULT_FACTOR_BUDGET).unwrap();
+        let again =
+            TransferFile::build(REGISTRY, CostModel::default(), DEFAULT_FACTOR_BUDGET).unwrap();
         assert_eq!(again.to_json(), json);
         assert_eq!(file.summary.curves, file.curves.len());
         assert!(file.find("Oakley Group 3").is_some());

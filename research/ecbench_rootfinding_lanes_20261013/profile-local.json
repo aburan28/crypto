@@ -1,0 +1,15 @@
+{
+  "samples": 200000,
+  "inversion_ns": 15902250,
+  "coordinate_roundtrip_ns": 843500,
+  "jump_select_ns": 256041,
+  "table_lookup_ns": 739917,
+  "guard_insert_ns": 759834,
+  "pool_samples": 256,
+  "pool_ns": 1316834,
+  "pool_group_ops": 14187,
+  "classification": "L0 local microloop diagnostic; shared host and no isolation gate",
+  "source_commit": "9036e0654613eb48296005b244f4790d7e3027da",
+  "test_command": "cargo test --offline --locked --release --lib prime_lane_probe_component_profile -- --ignored --nocapture",
+  "raw_log": "prime-lane-profile.log.gz"
+}

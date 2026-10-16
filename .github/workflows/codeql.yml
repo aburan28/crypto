@@ -68,16 +68,21 @@ jobs:
         run: node .github/scripts/ci-scope.mjs
 
   analyze:
-    if: always() && !cancelled()
-    needs: scope
-    timeout-minutes: 25
+    if: always() && !cancelled() && github.event_name != 'workflow_dispatch'
+    needs: [scope, build-rust-database]
+    # Routine Rust scans consume the finalized database from the first job;
+    # queries retain this existing job identity and /language:rust category.
+    # Both routine phases keep a 25-minute cap. Other events keep their envelope.
+    timeout-minutes: ${{ (github.event_name != 'pull_request' && github.event_name != 'merge_group') && 60 || 25 }}
     name: Analyze (${{ matrix.language }})
     # Runner size impacts CodeQL analysis time. To learn more, please see:
     #   - https://gh.io/recommended-hardware-resources-for-running-codeql
     #   - https://gh.io/supported-runners-and-hardware-resources
     #   - https://gh.io/using-larger-runners (GitHub.com only)
     # Consider using larger runners or machines with greater resources for possible analysis time improvements.
-    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    # Rust uses the standard public-repository ARM runner with the same four
+    # CPUs and 16 GiB envelope; CodeQL provides a Linux arm64 bundle.
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || (matrix.language == 'rust' && 'ubuntu-24.04-arm') || 'ubuntu-latest' }}
     permissions:
       # required for all workflows
       security-events: write
@@ -122,9 +127,58 @@ jobs:
       run: |
         echo '::error::CI scope or release metadata failed; refusing to skip validation.'
         exit 1
+    - name: Require the complete Rust database handoff
+      if: needs.scope.outputs[matrix.scope] != 'false' && matrix.language == 'rust' && (github.event_name == 'pull_request' || github.event_name == 'merge_group') && needs.build-rust-database.result != 'success'
+      run: |
+        echo '::error::Complete Rust database creation failed; refusing incomplete analysis.'
+        exit 1
     - name: Checkout repository
-      if: needs.scope.outputs[matrix.scope] != 'false'
+      if: needs.scope.outputs[matrix.scope] != 'false' && matrix.language != 'rust'
       uses: actions/checkout@v7
+
+    # The repository contains many research receipts that CodeQL does not
+    # parse as Rust. Keep every tracked Rust source and Cargo manifest while
+    # avoiding those unrelated blobs in the time-limited PR scan.
+    - name: Checkout complete Rust source
+      if: needs.scope.outputs[matrix.scope] != 'false' && matrix.language == 'rust'
+      uses: actions/checkout@v7
+      with:
+        filter: blob:none
+        sparse-checkout-cone-mode: false
+        sparse-checkout: |
+          /*.rs
+          /**/*.rs
+          /Cargo.toml
+          /Cargo.lock
+          /**/Cargo.toml
+          /**/Cargo.lock
+          /rust-toolchain*
+          /.cargo/**
+
+    - name: Prove complete Rust source coverage
+      if: needs.scope.outputs[matrix.scope] != 'false' && matrix.language == 'rust'
+      shell: bash
+      run: |
+        python3 - <<'PY'
+        import os
+        import subprocess
+
+        paths = subprocess.check_output(
+            ["git", "ls-tree", "-r", "-z", "--name-only", "HEAD"]
+        ).decode().split("\0")
+        required = [
+            path for path in paths
+            if path.endswith(".rs")
+            or path == "Cargo.toml" or path.endswith("/Cargo.toml")
+            or path == "Cargo.lock" or path.endswith("/Cargo.lock")
+        ]
+        missing = [path for path in required if not os.path.lexists(path)]
+        if missing:
+            raise SystemExit("Rust CodeQL checkout omitted source: " +
+                             ", ".join(missing[:20]))
+        print(f"Rust CodeQL checkout includes all {len(required)} "
+              "tracked Rust sources and Cargo manifests")
+        PY
 
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
@@ -134,7 +188,8 @@ jobs:
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      if: needs.scope.outputs[matrix.scope] != 'false'
+      id: init
+      if: needs.scope.outputs[matrix.scope] != 'false' && !(matrix.language == 'rust' && (github.event_name == 'pull_request' || github.event_name == 'merge_group'))
       uses: github/codeql-action/init@v4
       with:
         languages: ${{ matrix.language }}
@@ -164,7 +219,160 @@ jobs:
         exit 1
 
     - name: Perform CodeQL Analysis
-      if: needs.scope.outputs[matrix.scope] != 'false'
+      if: needs.scope.outputs[matrix.scope] != 'false' && !(matrix.language == 'rust' && (github.event_name == 'pull_request' || github.event_name == 'merge_group'))
       uses: github/codeql-action/analyze@v4
       with:
         category: "/language:${{matrix.language}}"
+
+    - name: Set up CodeQL for the finalized Rust database
+      id: rust-tools
+      if: needs.scope.outputs[matrix.scope] != 'false' && matrix.language == 'rust' && (github.event_name == 'pull_request' || github.event_name == 'merge_group')
+      uses: github/codeql-action/setup-codeql@v4
+      with:
+        languages: rust
+    - name: Download this workflow attempt's finalized database
+      if: needs.scope.outputs[matrix.scope] != 'false' && matrix.language == 'rust' && (github.event_name == 'pull_request' || github.event_name == 'merge_group')
+      uses: actions/download-artifact@v4
+      with:
+        name: rust-codeql-db-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/rust-codeql-handoff/
+    - name: Verify handoff and run its complete query configuration
+      if: needs.scope.outputs[matrix.scope] != 'false' && matrix.language == 'rust' && (github.event_name == 'pull_request' || github.event_name == 'merge_group')
+      shell: bash
+      env:
+        CODEQL_CLI: ${{ steps.rust-tools.outputs.codeql-path }}
+        CODEQL_VERSION: ${{ steps.rust-tools.outputs.codeql-version }}
+      run: |
+        set -euo pipefail
+        handoff_dir="$RUNNER_TEMP/rust-codeql-handoff"
+        cd "$handoff_dir"
+        sha256sum --check rust-db.zip.sha256
+        test "$(cat source-sha.txt)" = "$GITHUB_SHA"
+        test "$(cat codeql-version.txt)" = "$CODEQL_VERSION"
+        "$CODEQL_CLI" database unbundle --target="$RUNNER_TEMP/rust-query-db" rust-db.zip
+        # With no query override, CodeQL uses the configuration retained at
+        # database creation. The relocatable bundle includes generated suites.
+        "$CODEQL_CLI" database analyze "$RUNNER_TEMP/rust-query-db/rust" \
+          --format=sarifv2.1.0 --output="$RUNNER_TEMP/rust.sarif" \
+          --sarif-category=/language:rust --threads=4 --ram=14000 \
+          --expect-discarded-cache --min-disk-free=1024
+    - name: Upload complete Rust analysis
+      if: needs.scope.outputs[matrix.scope] != 'false' && matrix.language == 'rust' && (github.event_name == 'pull_request' || github.event_name == 'merge_group')
+      uses: github/codeql-action/upload-sarif@v4
+      with:
+        sarif_file: ${{ runner.temp }}/rust.sarif
+        category: /language:rust
+        wait-for-processing: true
+
+  build-rust-database:
+    name: Build database (rust)
+    if: needs.scope.outputs.rust != 'false' && (github.event_name == 'pull_request' || github.event_name == 'merge_group')
+    needs: scope
+    timeout-minutes: 25
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout complete Rust source
+        uses: actions/checkout@v7
+        with:
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*.rs
+            /**/*.rs
+            /Cargo.toml
+            /Cargo.lock
+            /**/Cargo.toml
+            /**/Cargo.lock
+            /rust-toolchain*
+            /.cargo/**
+
+      - name: Prove complete Rust source coverage
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          import subprocess
+
+          paths = subprocess.check_output(
+              ["git", "ls-tree", "-r", "-z", "--name-only", "HEAD"]
+          ).decode().split("\0")
+          required = [
+              path for path in paths
+              if path.endswith(".rs")
+              or path == "Cargo.toml" or path.endswith("/Cargo.toml")
+              or path == "Cargo.lock" or path.endswith("/Cargo.lock")
+          ]
+          missing = [path for path in required if not os.path.lexists(path)]
+          if missing:
+              raise SystemExit("Rust CodeQL checkout omitted source: " +
+                               ", ".join(missing[:20]))
+          print(f"Rust CodeQL checkout includes all {len(required)} "
+                "tracked Rust sources and Cargo manifests")
+          PY
+      - name: Initialize CodeQL
+        id: init
+        uses: github/codeql-action/init@v4
+        with:
+          languages: rust
+          build-mode: none
+      - name: Finalize the complete Rust database
+        id: analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          skip-queries: true
+          category: /language:rust
+      - name: Bundle complete Rust database for the query job
+        shell: bash
+        env:
+          CODEQL_CLI: ${{ steps.init.outputs.codeql-path }}
+          CODEQL_VERSION: ${{ steps.init.outputs.codeql-version }}
+          RUST_DATABASE: ${{ fromJSON(steps.analysis.outputs.db-locations).rust }}
+        run: |
+          set -euo pipefail
+          handoff_dir="$RUNNER_TEMP/rust-codeql-handoff"
+          mkdir "$handoff_dir"
+          test -n "$CODEQL_VERSION"
+          test -n "$RUST_DATABASE"
+          "$CODEQL_CLI" database bundle --include-temp --include-diagnostics \
+            --output="$handoff_dir/rust-db.zip" --name=rust "$RUST_DATABASE"
+          printf '%s\n' "$GITHUB_SHA" > "$handoff_dir/source-sha.txt"
+          printf '%s\n' "$CODEQL_VERSION" > "$handoff_dir/codeql-version.txt"
+          cd "$handoff_dir"
+          sha256sum rust-db.zip > rust-db.zip.sha256
+
+      - name: Retain immutable Rust database handoff
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-codeql-db-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/rust-codeql-handoff/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 1
+
+  analyze-rust-long:
+    if: github.event_name == 'workflow_dispatch'
+    needs: scope
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+    steps:
+      - name: Require successful scope classification
+        if: needs.scope.result != 'success'
+        run: exit 1
+      - uses: actions/checkout@v7
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: rust
+          build-mode: none
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:rust-long"

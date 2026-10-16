@@ -1,0 +1,96 @@
+{
+  "p": 37,
+  "f": [
+    2,
+    29,
+    12,
+    33,
+    20,
+    15,
+    28,
+    1
+  ],
+  "cycle_type": [
+    1,
+    1,
+    6
+  ],
+  "tractable_subgroups": 1,
+  "trig_rational": true,
+  "maps": [
+    {
+      "map": {
+        "n": [
+          1,
+          0,
+          21,
+          34
+        ],
+        "d": [
+          0,
+          1,
+          16,
+          31
+        ],
+        "normal_form": true
+      },
+      "degree3": true,
+      "pairs_ok": true,
+      "alpha": 10,
+      "alpha_chi": 1,
+      "eval_chi": 1,
+      "lemma4_ok": true
+    },
+    {
+      "map": {
+        "n": [
+          1,
+          0,
+          16,
+          22
+        ],
+        "d": [
+          0,
+          1,
+          32,
+          18
+        ],
+        "normal_form": true
+      },
+      "degree3": true,
+      "pairs_ok": true,
+      "alpha": 7,
+      "alpha_chi": 1,
+      "eval_chi": 1,
+      "lemma4_ok": true
+    }
+  ],
+  "smith_map_found": true,
+  "iso_rational": true,
+  "h_points": 42,
+  "h_points_expected": 42,
+  "delta1_squared_matches_64s": true,
+  "delta0_matches": true,
+  "delta2_matches": true,
+  "delta4_matches": true,
+  "f_coeffs_match": true,
+  "reversed_model_iso_rational": true,
+  "reversed_model_x_check": {
+    "maps": 0,
+    "m_rank_deficient": 0,
+    "disc_zero": 0,
+    "pencil_in_grassmannian": 0,
+    "non_normal_form": 0,
+    "degree_drop": 0,
+    "pair_condition_fail": 0,
+    "eval_mismatch": 0,
+    "lemma4_fail": 0,
+    "lambda_disagree": 0,
+    "construction_failed": 0,
+    "x_agree": 1,
+    "x_disagree": 0,
+    "x_not_applicable": 1,
+    "x_count_error": 0
+  },
+  "passed": true
+}

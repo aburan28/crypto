@@ -900,7 +900,11 @@ mod tests {
             let fails = (1u64..4096)
                 .filter(|&v| !mmt_condition_8(&tower, &a1, &el(v)))
                 .count();
-            let expect = if n % 2 == 1 { 0 } else { (1usize << (12 - l)) - 1 };
+            let expect = if n % 2 == 1 {
+                0
+            } else {
+                (1usize << (12 - l)) - 1
+            };
             assert_eq!(fails, expect, "n = {n}");
             assert!((1u64..4096).all(|v| mmt_condition_8(&tower, &a0, &el(v))));
         }
@@ -950,5 +954,4 @@ mod tests {
             assert_eq!(tc.row.magic_m, m);
         }
     }
-
 }

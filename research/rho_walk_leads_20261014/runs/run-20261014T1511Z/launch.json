@@ -1,0 +1,1358 @@
+{
+ "plan": "full",
+ "started_utc": "2026-10-14T15:12:04Z",
+ "finished_utc": "2026-10-14T15:13:00Z",
+ "commit": "e531dbc19ab04d679a5374852d9ef0517edd7b70",
+ "image": "rust:1.88-slim-bookworm",
+ "cpu_per_container": 16,
+ "jobs": [
+  {
+   "file": "e1-32",
+   "argv": [
+    "e1",
+    "--bits",
+    "32",
+    "--t0",
+    "0",
+    "--trials",
+    "250"
+   ],
+   "wall_s": 1.8,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-32",
+   "argv": [
+    "e1",
+    "--bits",
+    "32",
+    "--t0",
+    "250",
+    "--trials",
+    "250"
+   ],
+   "wall_s": 1.8,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-32",
+   "argv": [
+    "e1",
+    "--bits",
+    "32",
+    "--t0",
+    "500",
+    "--trials",
+    "250"
+   ],
+   "wall_s": 2.0,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-32",
+   "argv": [
+    "e1",
+    "--bits",
+    "32",
+    "--t0",
+    "750",
+    "--trials",
+    "250"
+   ],
+   "wall_s": 1.8,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-32",
+   "argv": [
+    "e1",
+    "--bits",
+    "32",
+    "--t0",
+    "1000",
+    "--trials",
+    "250"
+   ],
+   "wall_s": 1.6,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-32",
+   "argv": [
+    "e1",
+    "--bits",
+    "32",
+    "--t0",
+    "1250",
+    "--trials",
+    "250"
+   ],
+   "wall_s": 1.8,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-32",
+   "argv": [
+    "e1",
+    "--bits",
+    "32",
+    "--t0",
+    "1500",
+    "--trials",
+    "250"
+   ],
+   "wall_s": 1.8,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-32",
+   "argv": [
+    "e1",
+    "--bits",
+    "32",
+    "--t0",
+    "1750",
+    "--trials",
+    "250"
+   ],
+   "wall_s": 2.0,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "0",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 3.1,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "125",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 3.1,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "250",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 2.9,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "375",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 3.2,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "500",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 2.8,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "625",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 2.9,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "750",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 3.0,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "875",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 2.7,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1000",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 3.2,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1125",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 2.6,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1250",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 3.2,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1375",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 3.4,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1500",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 2.9,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1625",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 2.6,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1750",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 2.9,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1875",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 2.9,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-40",
+   "argv": [
+    "e1",
+    "--bits",
+    "40",
+    "--t0",
+    "0",
+    "--trials",
+    "32"
+   ],
+   "wall_s": 3.5,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-40",
+   "argv": [
+    "e1",
+    "--bits",
+    "40",
+    "--t0",
+    "32",
+    "--trials",
+    "32"
+   ],
+   "wall_s": 3.1,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-40",
+   "argv": [
+    "e1",
+    "--bits",
+    "40",
+    "--t0",
+    "64",
+    "--trials",
+    "32"
+   ],
+   "wall_s": 4.4,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-40",
+   "argv": [
+    "e1",
+    "--bits",
+    "40",
+    "--t0",
+    "96",
+    "--trials",
+    "32"
+   ],
+   "wall_s": 4.0,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-40",
+   "argv": [
+    "e1",
+    "--bits",
+    "40",
+    "--t0",
+    "128",
+    "--trials",
+    "32"
+   ],
+   "wall_s": 4.6,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-40",
+   "argv": [
+    "e1",
+    "--bits",
+    "40",
+    "--t0",
+    "160",
+    "--trials",
+    "32"
+   ],
+   "wall_s": 3.5,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-40",
+   "argv": [
+    "e1",
+    "--bits",
+    "40",
+    "--t0",
+    "192",
+    "--trials",
+    "32"
+   ],
+   "wall_s": 2.8,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-40",
+   "argv": [
+    "e1",
+    "--bits",
+    "40",
+    "--t0",
+    "224",
+    "--trials",
+    "32"
+   ],
+   "wall_s": 4.0,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-40",
+   "argv": [
+    "e1",
+    "--bits",
+    "40",
+    "--t0",
+    "256",
+    "--trials",
+    "32"
+   ],
+   "wall_s": 4.5,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-40",
+   "argv": [
+    "e1",
+    "--bits",
+    "40",
+    "--t0",
+    "288",
+    "--trials",
+    "32"
+   ],
+   "wall_s": 3.5,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-40",
+   "argv": [
+    "e1",
+    "--bits",
+    "40",
+    "--t0",
+    "320",
+    "--trials",
+    "32"
+   ],
+   "wall_s": 4.1,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-40",
+   "argv": [
+    "e1",
+    "--bits",
+    "40",
+    "--t0",
+    "352",
+    "--trials",
+    "32"
+   ],
+   "wall_s": 3.1,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-40",
+   "argv": [
+    "e1",
+    "--bits",
+    "40",
+    "--t0",
+    "384",
+    "--trials",
+    "32"
+   ],
+   "wall_s": 5.6,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-40",
+   "argv": [
+    "e1",
+    "--bits",
+    "40",
+    "--t0",
+    "416",
+    "--trials",
+    "32"
+   ],
+   "wall_s": 3.2,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-40",
+   "argv": [
+    "e1",
+    "--bits",
+    "40",
+    "--t0",
+    "448",
+    "--trials",
+    "32"
+   ],
+   "wall_s": 3.7,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-40",
+   "argv": [
+    "e1",
+    "--bits",
+    "40",
+    "--t0",
+    "480",
+    "--trials",
+    "20"
+   ],
+   "wall_s": 2.0,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1shift-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "0",
+    "--trials",
+    "125",
+    "--escape",
+    "shift"
+   ],
+   "wall_s": 2.7,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1shift-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "125",
+    "--trials",
+    "125",
+    "--escape",
+    "shift"
+   ],
+   "wall_s": 3.2,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1shift-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "250",
+    "--trials",
+    "125",
+    "--escape",
+    "shift"
+   ],
+   "wall_s": 2.9,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1shift-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "375",
+    "--trials",
+    "125",
+    "--escape",
+    "shift"
+   ],
+   "wall_s": 3.0,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1shift-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "500",
+    "--trials",
+    "125",
+    "--escape",
+    "shift"
+   ],
+   "wall_s": 2.8,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1shift-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "625",
+    "--trials",
+    "125",
+    "--escape",
+    "shift"
+   ],
+   "wall_s": 3.1,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1shift-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "750",
+    "--trials",
+    "125",
+    "--escape",
+    "shift"
+   ],
+   "wall_s": 3.4,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1shift-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "875",
+    "--trials",
+    "125",
+    "--escape",
+    "shift"
+   ],
+   "wall_s": 3.1,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1shift-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1000",
+    "--trials",
+    "125",
+    "--escape",
+    "shift"
+   ],
+   "wall_s": 3.0,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1shift-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1125",
+    "--trials",
+    "125",
+    "--escape",
+    "shift"
+   ],
+   "wall_s": 3.6,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1shift-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1250",
+    "--trials",
+    "125",
+    "--escape",
+    "shift"
+   ],
+   "wall_s": 2.9,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1shift-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1375",
+    "--trials",
+    "125",
+    "--escape",
+    "shift"
+   ],
+   "wall_s": 2.7,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1shift-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1500",
+    "--trials",
+    "125",
+    "--escape",
+    "shift"
+   ],
+   "wall_s": 3.5,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1shift-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1625",
+    "--trials",
+    "125",
+    "--escape",
+    "shift"
+   ],
+   "wall_s": 2.7,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1shift-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1750",
+    "--trials",
+    "125",
+    "--escape",
+    "shift"
+   ],
+   "wall_s": 3.0,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1shift-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1875",
+    "--trials",
+    "125",
+    "--escape",
+    "shift"
+   ],
+   "wall_s": 3.0,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1noesc-32",
+   "argv": [
+    "e1",
+    "--bits",
+    "32",
+    "--trials",
+    "200",
+    "--escape",
+    "off"
+   ],
+   "wall_s": 0.9,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1dp-36",
+   "argv": [
+    "e1dp",
+    "--bits",
+    "36",
+    "--t0",
+    "0",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 2.5,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1dp-36",
+   "argv": [
+    "e1dp",
+    "--bits",
+    "36",
+    "--t0",
+    "125",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 2.7,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1dp-36",
+   "argv": [
+    "e1dp",
+    "--bits",
+    "36",
+    "--t0",
+    "250",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 2.4,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1dp-36",
+   "argv": [
+    "e1dp",
+    "--bits",
+    "36",
+    "--t0",
+    "375",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 3.0,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1dp-36",
+   "argv": [
+    "e1dp",
+    "--bits",
+    "36",
+    "--t0",
+    "500",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 2.9,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1dp-36",
+   "argv": [
+    "e1dp",
+    "--bits",
+    "36",
+    "--t0",
+    "625",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 2.6,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1dp-36",
+   "argv": [
+    "e1dp",
+    "--bits",
+    "36",
+    "--t0",
+    "750",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 2.9,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1dp-36",
+   "argv": [
+    "e1dp",
+    "--bits",
+    "36",
+    "--t0",
+    "875",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 2.8,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "rf-32",
+   "argv": [
+    "rf",
+    "--bits",
+    "32",
+    "--t0",
+    "0",
+    "--trials",
+    "1000"
+   ],
+   "wall_s": 0.3,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "rf-32",
+   "argv": [
+    "rf",
+    "--bits",
+    "32",
+    "--t0",
+    "1000",
+    "--trials",
+    "1000"
+   ],
+   "wall_s": 0.3,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "rf-32",
+   "argv": [
+    "rf",
+    "--bits",
+    "32",
+    "--t0",
+    "2000",
+    "--trials",
+    "1000"
+   ],
+   "wall_s": 0.3,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "rf-32",
+   "argv": [
+    "rf",
+    "--bits",
+    "32",
+    "--t0",
+    "3000",
+    "--trials",
+    "1000"
+   ],
+   "wall_s": 0.3,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "rf-36",
+   "argv": [
+    "rf",
+    "--bits",
+    "36",
+    "--t0",
+    "0",
+    "--trials",
+    "250"
+   ],
+   "wall_s": 0.4,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "rf-36",
+   "argv": [
+    "rf",
+    "--bits",
+    "36",
+    "--t0",
+    "250",
+    "--trials",
+    "250"
+   ],
+   "wall_s": 0.3,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "rf-36",
+   "argv": [
+    "rf",
+    "--bits",
+    "36",
+    "--t0",
+    "500",
+    "--trials",
+    "250"
+   ],
+   "wall_s": 0.3,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "rf-36",
+   "argv": [
+    "rf",
+    "--bits",
+    "36",
+    "--t0",
+    "750",
+    "--trials",
+    "250"
+   ],
+   "wall_s": 0.4,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "rf-36",
+   "argv": [
+    "rf",
+    "--bits",
+    "36",
+    "--t0",
+    "1000",
+    "--trials",
+    "250"
+   ],
+   "wall_s": 0.4,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "rf-36",
+   "argv": [
+    "rf",
+    "--bits",
+    "36",
+    "--t0",
+    "1250",
+    "--trials",
+    "250"
+   ],
+   "wall_s": 0.3,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "rf-36",
+   "argv": [
+    "rf",
+    "--bits",
+    "36",
+    "--t0",
+    "1500",
+    "--trials",
+    "250"
+   ],
+   "wall_s": 0.4,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "rf-36",
+   "argv": [
+    "rf",
+    "--bits",
+    "36",
+    "--t0",
+    "1750",
+    "--trials",
+    "250"
+   ],
+   "wall_s": 0.3,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e2-36",
+   "argv": [
+    "e2",
+    "--bits",
+    "36",
+    "--t0",
+    "0",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 5.1,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e2-36",
+   "argv": [
+    "e2",
+    "--bits",
+    "36",
+    "--t0",
+    "125",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 6.6,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e2-36",
+   "argv": [
+    "e2",
+    "--bits",
+    "36",
+    "--t0",
+    "250",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 5.9,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e2-36",
+   "argv": [
+    "e2",
+    "--bits",
+    "36",
+    "--t0",
+    "375",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 6.2,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e2-36",
+   "argv": [
+    "e2",
+    "--bits",
+    "36",
+    "--t0",
+    "500",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 5.0,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e2-36",
+   "argv": [
+    "e2",
+    "--bits",
+    "36",
+    "--t0",
+    "625",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 6.5,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e2-36",
+   "argv": [
+    "e2",
+    "--bits",
+    "36",
+    "--t0",
+    "750",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 5.6,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e2-36",
+   "argv": [
+    "e2",
+    "--bits",
+    "36",
+    "--t0",
+    "875",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 5.3,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e4-36",
+   "argv": [
+    "e4",
+    "--bits",
+    "36",
+    "--t0",
+    "0",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 1.6,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e4-36",
+   "argv": [
+    "e4",
+    "--bits",
+    "36",
+    "--t0",
+    "125",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 1.5,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e4-36",
+   "argv": [
+    "e4",
+    "--bits",
+    "36",
+    "--t0",
+    "250",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 1.3,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e4-36",
+   "argv": [
+    "e4",
+    "--bits",
+    "36",
+    "--t0",
+    "375",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 1.4,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e4-36",
+   "argv": [
+    "e4",
+    "--bits",
+    "36",
+    "--t0",
+    "500",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 1.3,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e4-36",
+   "argv": [
+    "e4",
+    "--bits",
+    "36",
+    "--t0",
+    "625",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 1.4,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e4-36",
+   "argv": [
+    "e4",
+    "--bits",
+    "36",
+    "--t0",
+    "750",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 1.3,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e4-36",
+   "argv": [
+    "e4",
+    "--bits",
+    "36",
+    "--t0",
+    "875",
+    "--trials",
+    "125"
+   ],
+   "wall_s": 1.5,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "bench",
+   "argv": [
+    "bench",
+    "--walks",
+    "1024",
+    "--steps",
+    "4000",
+    "--reps",
+    "21"
+   ],
+   "wall_s": 33.1,
+   "host": "16\nmodel name\t: unknown"
+  }
+ ]
+}

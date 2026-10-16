@@ -83,9 +83,9 @@ use rand::{rngs::StdRng, Rng, SeedableRng};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::cmp::Reverse;
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::collections::{BinaryHeap, HashMap};
 use std::fmt::Debug;
-use std::hash::Hash;
+use std::hash::{Hash, Hasher};
 use std::io::Write;
 use std::process::Command;
 
@@ -183,8 +183,8 @@ impl WordWidth {
         }
         match bits {
             ..=127 => Some(Self::U128),
-            ..=191 => Some(Self::U192),
-            ..=MAX_MODULUS_BITS => Some(Self::U256),
+            128..=191 => Some(Self::U192),
+            192..=MAX_MODULUS_BITS => Some(Self::U256),
             _ => None,
         }
     }
@@ -1161,9 +1161,9 @@ impl<W: ModWord> SparseRow<W> {
     /// `Σ c · x_col mod r` for a full assignment `x`.
     fn evaluate(&self, x: &[W], modulus: W::Modulus) -> W {
         let m = &modulus;
-        self.entries
-            .iter()
-            .fold(W::zero(), |acc, &(c, v)| acc.add(v.mul(x[c as usize], m), m))
+        self.entries.iter().fold(W::zero(), |acc, &(c, v)| {
+            acc.add(v.mul(x[c as usize], m), m)
+        })
     }
 
     /// `self − factor · other`, entries merged by column (`factor < r`).
@@ -1222,6 +1222,56 @@ pub struct FilterOptions {
     pub merge_max_weight: usize,
     /// A merge is skipped when it would leave a row heavier than this.
     pub max_row_weight: usize,
+    /// Which filter runs.  Omitted from JSON at its historical default so
+    /// frozen job configurations keep their digest.
+    #[serde(skip_serializing_if = "is_default")]
+    pub strategy: FilterStrategy,
+    /// [`FilterStrategy::Cado`] only: stop merging once the average row
+    /// weight exceeds this; `0` stops instead when a merge would raise the
+    /// Krylov cost `columns × nonzeros` of the core.
+    #[serde(skip_serializing_if = "is_default")]
+    pub target_density: usize,
+}
+
+/// Which filter [`filter_relations`] runs after duplicate removal.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum FilterStrategy {
+    /// The historical filter: singleton cascade; excess removal taking the
+    /// heaviest row of each of the largest weight-2 components; then the
+    /// lightest column first, pivoting on its lightest row (a star), a merge
+    /// skipped when it would push any row past `max_row_weight`.
+    #[default]
+    Legacy,
+    /// The filter of CADO-NFS (`purge` then `merge`; Bouvier 2013).
+    /// **Purge:** the excess is spent over up to 50 steps; each step deletes
+    /// whole connected components of rows joined by weight-2 columns,
+    /// heaviest first under the weight Ω₃₁ (a column of weight `w ≥ 3`
+    /// contributes `0.8^(w−2)`, of weight 2 contributes `1/8`), then
+    /// cascades singletons.  **Merge:** columns in order of the Markowitz
+    /// fill estimate `(w − 1)(r_min − 2) − r_min` (`r_min` the column's
+    /// lightest row), each eliminated along a minimum spanning tree of its
+    /// rows weighted by the exact size of each pairwise combination, until
+    /// the average row weight passes `target_density` (or, at 0, until a
+    /// merge would raise `columns × nonzeros`).
+    Cado,
+}
+
+impl FilterOptions {
+    /// The CADO-NFS-style filter at the settings this crate's benchmark
+    /// selected (`research/la_engines_20261014`): [`FilterStrategy::Cado`],
+    /// columns merged up to weight 32 (CADO's `MERGE_LEVEL_MAX`), no per-row
+    /// cap, merging until the average row weight passes 100 (`merge-dl`'s
+    /// default `target_density`).
+    pub fn cado() -> Self {
+        Self {
+            merge_max_weight: 32,
+            max_row_weight: usize::MAX,
+            strategy: FilterStrategy::Cado,
+            target_density: 100,
+            ..Self::default()
+        }
+    }
 }
 
 impl Default for FilterOptions {
@@ -1232,6 +1282,8 @@ impl Default for FilterOptions {
             target_excess: 32,
             merge_max_weight: 8,
             max_row_weight: 32,
+            strategy: FilterStrategy::Legacy,
+            target_density: 0,
         }
     }
 }
@@ -1282,6 +1334,8 @@ struct Workspace<W: ModWord> {
     col_rows: Vec<Vec<usize>>,
     col_eliminated: Vec<bool>,
     active_rows: usize,
+    /// Columns, not eliminated, that occur in some active row.
+    live_columns: usize,
     eliminated: Vec<(SparseRow<W>, u32)>,
     report: FilterReport,
 }
@@ -1303,6 +1357,9 @@ impl<W: ModWord> Workspace<W> {
             let list = &mut self.col_rows[c as usize];
             if let Some(pos) = list.iter().position(|&r| r == row_id) {
                 list.swap_remove(pos);
+                if list.is_empty() {
+                    self.live_columns -= 1;
+                }
             }
         }
         self.active_rows -= 1;
@@ -1311,6 +1368,9 @@ impl<W: ModWord> Workspace<W> {
 
     fn attach(&mut self, row_id: usize, row: SparseRow<W>) {
         for &(c, _) in &row.entries {
+            if self.col_rows[c as usize].is_empty() {
+                self.live_columns += 1;
+            }
             self.col_rows[c as usize].push(row_id);
         }
         self.rows[row_id] = Some(row);
@@ -1381,6 +1441,139 @@ impl<W: ModWord> Workspace<W> {
         Ok(Some(touched))
     }
 
+    /// Markowitz fill estimate of eliminating `c`: the change in nonzeros if
+    /// every other row were combined with the lightest one, assuming no
+    /// overlap beyond `c`.  `None` for an empty column.
+    fn markowitz_cost(&self, c: u32) -> Option<i64> {
+        let members = &self.col_rows[c as usize];
+        let w = members.len() as i64;
+        let r_min = members
+            .iter()
+            .map(|&r| self.rows[r].as_ref().expect("active").weight())
+            .min()? as i64;
+        Some((w - 1) * (r_min - 2) - r_min)
+    }
+
+    /// Eliminate column `c` along a minimum spanning tree of its rows: the
+    /// edge between rows `a` and `b` weighs the exact number of distinct
+    /// columns of `a − λ b` other than `c`, every row but the root is
+    /// replaced by its combination with its tree parent (computed from the
+    /// original rows, so the transform is triangular), and the root is kept
+    /// on the elimination stack to recover `x_c`.  Returns the columns whose
+    /// rows changed and the change in nonzeros, or `None` when a combined
+    /// row would exceed `max_row_weight`.
+    fn eliminate_mst(
+        &mut self,
+        c: u32,
+        max_row_weight: usize,
+    ) -> Result<Option<(Vec<u32>, i64)>, Inconsistent> {
+        let m = self.modulus;
+        let members = self.col_rows[c as usize].clone();
+        let w = members.len();
+        if w == 0 {
+            return Ok(None);
+        }
+        let union_less_c = |a: &SparseRow<W>, b: &SparseRow<W>| -> usize {
+            let (mut i, mut j, mut n) = (0, 0, 0);
+            while i < a.entries.len() || j < b.entries.len() {
+                match (a.entries.get(i), b.entries.get(j)) {
+                    (Some(&(ca, _)), Some(&(cb, _))) if ca == cb => {
+                        i += 1;
+                        j += 1;
+                        n += 1;
+                    }
+                    (Some(&(ca, _)), Some(&(cb, _))) if ca < cb => {
+                        i += 1;
+                        n += 1;
+                    }
+                    (Some(_), None) => {
+                        i += 1;
+                        n += 1;
+                    }
+                    _ => {
+                        j += 1;
+                        n += 1;
+                    }
+                }
+            }
+            n - 1
+        };
+        // Prim's algorithm from the lightest row.
+        let rows: Vec<&SparseRow<W>> = members
+            .iter()
+            .map(|&r| self.rows[r].as_ref().expect("active"))
+            .collect();
+        let root = (0..w)
+            .min_by_key(|&k| (rows[k].weight(), members[k]))
+            .expect("nonempty");
+        let mut in_tree = vec![false; w];
+        let mut best = vec![(usize::MAX, root); w];
+        in_tree[root] = true;
+        for k in 0..w {
+            if k != root {
+                best[k] = (union_less_c(rows[k], rows[root]), root);
+            }
+        }
+        let mut parent = vec![root; w];
+        for _ in 1..w {
+            let k = (0..w)
+                .filter(|&k| !in_tree[k])
+                .min_by_key(|&k| (best[k].0, members[k]))
+                .expect("a row outside the tree");
+            if best[k].0 > max_row_weight {
+                return Ok(None);
+            }
+            in_tree[k] = true;
+            parent[k] = best[k].1;
+            for j in 0..w {
+                if !in_tree[j] {
+                    let e = union_less_c(rows[j], rows[k]);
+                    if e < best[j].0 {
+                        best[j] = (e, k);
+                    }
+                }
+            }
+        }
+        // Combine every non-root row with its parent's original row.
+        let originals: Vec<SparseRow<W>> = rows.iter().map(|&r| r.clone()).collect();
+        let before: i64 = originals.iter().map(|r| r.weight() as i64).sum();
+        let mut after = 0i64;
+        let mut touched: Vec<u32> = Vec::new();
+        for &r in &members {
+            let row = self.detach(r).expect("active");
+            touched.extend(row.entries.iter().map(|&(t, _)| t));
+        }
+        for k in 0..w {
+            if k == root {
+                continue;
+            }
+            let p = &originals[parent[k]];
+            let inv = p
+                .coefficient(c)
+                .expect("member")
+                .inv(&m)
+                .ok_or(Inconsistent)?;
+            let factor = originals[k].coefficient(c).expect("member").mul(inv, &m);
+            let reduced = originals[k].axpy(factor, p, m);
+            debug_assert!(reduced.coefficient(c).is_none());
+            if reduced.entries.is_empty() {
+                if !reduced.rhs.is_zero() {
+                    return Err(Inconsistent);
+                }
+                self.report.dependent_rows_dropped += 1;
+                continue;
+            }
+            after += reduced.weight() as i64;
+            self.attach(members[k], reduced);
+        }
+        self.col_eliminated[c as usize] = true;
+        self.eliminated.push((originals[root].clone(), c));
+        touched.sort_unstable();
+        touched.dedup();
+        touched.retain(|&t| t != c);
+        Ok(Some((touched, after - before)))
+    }
+
     /// Eliminate every singleton column, cascading.
     fn cascade_singletons(&mut self, seeds: Vec<u32>) -> Result<(), Inconsistent> {
         let mut stack = seeds;
@@ -1402,6 +1595,191 @@ impl<W: ModWord> Workspace<W> {
         let seeds = row.entries.iter().map(|&(c, _)| c).collect();
         self.cascade_singletons(seeds)
     }
+}
+
+/// [`FilterStrategy::Cado`] excess removal (CADO-NFS `purge`): spend the
+/// excess over up to 50 steps, each deleting whole weight-2-connected
+/// components of rows, heaviest first under Ω₃₁, then cascading singletons.
+/// A component is deleted only if the excess stays at or above the target.
+fn purge_cado<W: ModWord>(ws: &mut Workspace<W>, target_excess: usize) -> Result<(), Inconsistent> {
+    let excess = |ws: &Workspace<W>| ws.active_rows as i64 - ws.live_columns as i64;
+    let target = target_excess as i64;
+    let start = excess(ws);
+    if start <= target {
+        return Ok(());
+    }
+    // CADO picks the step count so that each step removes about 1% of the
+    // columns, at most 50.
+    let per_step = (ws.live_columns as i64 / 100).max(1);
+    let steps = ((start - target) / per_step).clamp(1, 50);
+    // Ω₃₁ by column weight; columns heavier than the table contribute
+    // below 0.8^62 and are taken as 0.
+    let omega: Vec<f64> = (0..64usize)
+        .map(|w| match w {
+            0 | 1 => 0.0,
+            2 => 0.125,
+            w => 0.8f64.powi(w as i32 - 2),
+        })
+        .collect();
+    let n = ws.rows.len();
+    let mut weight = vec![0.0f64; n];
+    let mut head = vec![usize::MAX; n];
+    let mut next = vec![usize::MAX; n];
+    for step in 1..=steps {
+        let step_target = start - (start - target) * step / steps;
+        // Components of active rows joined by weight-2 columns.
+        let mut parent: Vec<usize> = (0..n).collect();
+        for c in 0..ws.col_rows.len() {
+            if !ws.col_eliminated[c] && ws.col_rows[c].len() == 2 {
+                let (a, b) = (ws.col_rows[c][0], ws.col_rows[c][1]);
+                let (ra, rb) = (find_root(&mut parent, a), find_root(&mut parent, b));
+                if ra != rb {
+                    parent[ra] = rb;
+                }
+            }
+        }
+        // Per-row Ω₃₁ weights in parallel, then per-root sums and an
+        // intrusive member list in row order (the same summation order as a
+        // serial pass, so the ranking is deterministic).
+        let row_weight: Vec<f64> = ws
+            .rows
+            .par_iter()
+            .map(|row| {
+                row.as_ref().map_or(0.0, |row| {
+                    row.entries
+                        .iter()
+                        .map(|&(c, _)| {
+                            let w = ws.col_rows[c as usize].len();
+                            if w < omega.len() {
+                                omega[w]
+                            } else {
+                                0.0
+                            }
+                        })
+                        .sum::<f64>()
+                })
+            })
+            .collect();
+        weight.iter_mut().for_each(|w| *w = 0.0);
+        head.iter_mut().for_each(|h| *h = usize::MAX);
+        let mut roots: Vec<usize> = Vec::new();
+        for id in 0..n {
+            if ws.rows[id].is_none() {
+                continue;
+            }
+            let root = find_root(&mut parent, id);
+            if head[root] == usize::MAX {
+                roots.push(root);
+            }
+            next[id] = head[root];
+            head[root] = id;
+            weight[root] += row_weight[id];
+        }
+        // Heaviest first; ties by root for determinism.  Only the heaviest
+        // few are needed per step: select them, sort that prefix, and sort
+        // the rest only if the prefix runs out.
+        let heavier = |a: &(f64, usize), b: &(f64, usize)| b.0.total_cmp(&a.0).then(a.1.cmp(&b.1));
+        let mut order: Vec<(f64, usize)> = roots.iter().map(|&r| (weight[r], r)).collect();
+        let need = (excess(ws) - step_target).max(0) as usize;
+        let prefix = (2 * need + 1024).min(order.len());
+        if prefix < order.len() {
+            order.select_nth_unstable_by(prefix, heavier);
+        }
+        order[..prefix].sort_unstable_by(heavier);
+        let mut seeds: Vec<u32> = Vec::new();
+        let mut k = 0;
+        while k < order.len() {
+            if k == prefix && prefix < order.len() {
+                order[prefix..].sort_unstable_by(heavier);
+            }
+            let root = order[k].1;
+            k += 1;
+            if excess(ws) <= step_target {
+                break;
+            }
+            let mut rows = Vec::new();
+            let mut id = head[root];
+            while id != usize::MAX {
+                rows.push(id);
+                id = next[id];
+            }
+            if excess(ws) - (rows.len() as i64) < target {
+                continue;
+            }
+            for id in rows {
+                if let Some(row) = ws.detach(id) {
+                    ws.report.excess_rows_removed += 1;
+                    seeds.extend(row.entries.iter().map(|&(c, _)| c));
+                }
+            }
+        }
+        ws.cascade_singletons(seeds)?;
+    }
+    Ok(())
+}
+
+/// [`FilterStrategy::Cado`] merge: repeatedly eliminate the column of least
+/// Markowitz cost along a minimum spanning tree of its rows, until the
+/// density target or the Krylov-cost criterion stops it.
+fn merge_markowitz<W: ModWord>(
+    ws: &mut Workspace<W>,
+    opts: &FilterOptions,
+) -> Result<(), Inconsistent> {
+    let columns = ws.col_rows.len();
+    let mut nonzeros: i64 = ws.rows.iter().flatten().map(|r| r.weight() as i64).sum();
+    let mut active_cols = ws.active_columns() as i64;
+    let mut stamp = vec![0u32; columns];
+    let mut heap: BinaryHeap<Reverse<(i64, u32, u32)>> = BinaryHeap::new();
+    let eligible = |ws: &Workspace<W>, c: usize| {
+        !ws.col_eliminated[c] && (1..=opts.merge_max_weight).contains(&ws.col_rows[c].len())
+    };
+    for c in 0..columns {
+        if eligible(ws, c) {
+            if let Some(cost) = ws.markowitz_cost(c as u32) {
+                heap.push(Reverse((cost, c as u32, 0)));
+            }
+        }
+    }
+    while let Some(Reverse((cost, c, s))) = heap.pop() {
+        let ci = c as usize;
+        if s != stamp[ci] || !eligible(ws, ci) {
+            continue; // stale
+        }
+        let rows = ws.active_rows as i64;
+        if opts.target_density > 0 {
+            if rows > 0 && nonzeros > opts.target_density as i64 * rows {
+                break;
+            }
+        } else if active_cols > 1 && cost > 0 && (active_cols - 1) * cost >= nonzeros {
+            // (N − 1)(nnz + Δ) ≥ N·nnz: this and every costlier merge would
+            // raise the Krylov cost.
+            break;
+        }
+        let w = ws.col_rows[ci].len();
+        let Some((touched, delta)) = ws.eliminate_mst(c, opts.max_row_weight)? else {
+            continue; // fill-in bound; retried if a row of it changes
+        };
+        if w == 1 {
+            ws.report.singletons_removed += 1;
+        } else {
+            ws.report.merged_columns += 1;
+        }
+        nonzeros += delta;
+        active_cols -= 1;
+        for t in touched {
+            let ti = t as usize;
+            stamp[ti] = stamp[ti].wrapping_add(1);
+            if ws.col_rows[ti].is_empty() && !ws.col_eliminated[ti] {
+                active_cols -= 1;
+            }
+            if eligible(ws, ti) {
+                if let Some(cost) = ws.markowitz_cost(t) {
+                    heap.push(Reverse((cost, t, stamp[ti])));
+                }
+            }
+        }
+    }
+    Ok(())
 }
 
 fn find_root(parent: &mut [usize], mut x: usize) -> usize {
@@ -1426,10 +1804,47 @@ pub fn filter_relations<W: ModWord>(
         nonzeros_in: rows.iter().map(SparseRow::weight).sum(),
         ..FilterReport::default()
     };
-    // Duplicates and trivial rows.
+    // Duplicates and trivial rows.  A later row equal to an earlier one is
+    // dropped; rows are hashed in parallel and compared only within a hash
+    // collision, which keeps exactly the rows a set of seen rows would.
+    let duplicate: Vec<bool> = if opts.remove_duplicates {
+        let hashes: Vec<u64> = rows
+            .par_iter()
+            .map(|row| {
+                let mut h = std::collections::hash_map::DefaultHasher::new();
+                row.hash(&mut h);
+                h.finish()
+            })
+            .collect();
+        let mut order: Vec<u32> = (0..rows.len() as u32)
+            .filter(|&i| !rows[i as usize].entries.is_empty())
+            .collect();
+        order.par_sort_unstable_by_key(|&i| (hashes[i as usize], i));
+        let mut duplicate = vec![false; rows.len()];
+        let mut start = 0;
+        while start < order.len() {
+            let h = hashes[order[start] as usize];
+            let mut end = start + 1;
+            while end < order.len() && hashes[order[end] as usize] == h {
+                end += 1;
+            }
+            for j in start + 1..end {
+                let row = &rows[order[j] as usize];
+                if order[start..j]
+                    .iter()
+                    .any(|&i| !duplicate[i as usize] && rows[i as usize] == *row)
+                {
+                    duplicate[order[j] as usize] = true;
+                }
+            }
+            start = end;
+        }
+        duplicate
+    } else {
+        vec![false; rows.len()]
+    };
     let mut kept: Vec<SparseRow<W>> = Vec::with_capacity(rows.len());
-    let mut seen: HashSet<SparseRow<W>> = HashSet::new();
-    for row in rows {
+    for (row, dup) in rows.into_iter().zip(duplicate) {
         if row.entries.is_empty() {
             if !row.rhs.is_zero() {
                 return Err(Inconsistent);
@@ -1437,16 +1852,12 @@ pub fn filter_relations<W: ModWord>(
             report.dependent_rows_dropped += 1;
             continue;
         }
-        if opts.remove_duplicates {
-            if seen.contains(&row) {
-                report.duplicates_removed += 1;
-                continue;
-            }
-            seen.insert(row.clone());
+        if dup {
+            report.duplicates_removed += 1;
+            continue;
         }
         kept.push(row);
     }
-    drop(seen);
 
     let mut ws = Workspace {
         modulus,
@@ -1454,9 +1865,17 @@ pub fn filter_relations<W: ModWord>(
         col_rows: vec![Vec::new(); columns],
         col_eliminated: vec![false; columns],
         active_rows: 0,
+        live_columns: 0,
         eliminated: Vec::new(),
         report,
     };
+    let mut counts = vec![0u32; columns];
+    kept.iter()
+        .flat_map(|r| &r.entries)
+        .for_each(|&(c, _)| counts[c as usize] += 1);
+    for (list, &n) in ws.col_rows.iter_mut().zip(&counts) {
+        list.reserve_exact(n as usize);
+    }
     for (id, row) in kept.into_iter().enumerate() {
         ws.rows.push(None);
         ws.attach(id, row);
@@ -1473,7 +1892,12 @@ pub fn filter_relations<W: ModWord>(
     // Excess: remove rows, preferring those whose removal cascades
     // through the largest connected component of weight-2 columns
     // (the clique rule), heaviest row first.
-    if opts.target_excess != usize::MAX && opts.remove_singletons {
+    if opts.target_excess != usize::MAX
+        && opts.remove_singletons
+        && opts.strategy == FilterStrategy::Cado
+    {
+        purge_cado(&mut ws, opts.target_excess)?;
+    } else if opts.target_excess != usize::MAX && opts.remove_singletons {
         loop {
             let active_cols = ws.active_columns();
             if ws.active_rows <= active_cols.saturating_add(opts.target_excess) {
@@ -1523,8 +1947,11 @@ pub fn filter_relations<W: ModWord>(
         }
     }
 
-    // Merge light columns, lightest first, under the fill-in bound.
-    if opts.merge_max_weight >= 2 {
+    // Merge light columns.
+    if opts.merge_max_weight >= 2 && opts.strategy == FilterStrategy::Cado {
+        merge_markowitz(&mut ws, opts)?;
+    } else if opts.merge_max_weight >= 2 {
+        // Lightest first, under the fill-in bound.
         let mut heap: BinaryHeap<Reverse<(usize, u32)>> = BinaryHeap::new();
         for c in 0..columns {
             let w = ws.col_rows[c].len();
@@ -1976,13 +2403,22 @@ impl<W: ModWord> CsrMatrix<W> {
             }
             target.push('\n');
         };
-        append(&mut contract, &mut self.row_ptr.iter().map(|v| v.to_string()));
-        append(&mut contract, &mut self.col_idx.iter().map(|v| v.to_string()));
+        append(
+            &mut contract,
+            &mut self.row_ptr.iter().map(|v| v.to_string()),
+        );
+        append(
+            &mut contract,
+            &mut self.col_idx.iter().map(|v| v.to_string()),
+        );
         append(
             &mut contract,
             &mut (0..self.vals.len()).map(|k| self.coefficient(k).to_biguint().to_string()),
         );
-        append(&mut contract, &mut x.iter().map(|v| v.to_biguint().to_string()));
+        append(
+            &mut contract,
+            &mut x.iter().map(|v| v.to_biguint().to_string()),
+        );
         contract
     }
 
@@ -2657,7 +3093,8 @@ fn block_gram<W: ModWord>(
         for i in 0..lanes {
             let a = left[row * lanes + i];
             for j in 0..lanes {
-                out[i * lanes + j] = out[i * lanes + j].add(a.mul(right[row * lanes + j], modulus), modulus);
+                out[i * lanes + j] =
+                    out[i * lanes + j].add(a.mul(right[row * lanes + j], modulus), modulus);
             }
         }
     }
@@ -2672,7 +3109,8 @@ fn small_product<W: ModWord>(a: &[W], b: &[W], n: usize, modulus: &W::Modulus) -
                 continue;
             }
             for j in 0..n {
-                out[i * n + j] = out[i * n + j].add(a[i * n + k].mul(b[k * n + j], modulus), modulus);
+                out[i * n + j] =
+                    out[i * n + j].add(a[i * n + k].mul(b[k * n + j], modulus), modulus);
             }
         }
     }
@@ -2797,11 +3235,7 @@ pub fn block_lanczos_solve<W: ModWord>(
             let answer: Vec<W> = solution.chunks(lanes).map(|block| block[0]).collect();
             let mut check = vec![W::zero(); dimension];
             a.mul_block(&answer, 1, &mut check);
-            if check
-                .iter()
-                .zip(b)
-                .all(|(&x, &y)| x == y.reduce(modulus))
-            {
+            if check.iter().zip(b).all(|(&x, &y)| x == y.reduce(modulus)) {
                 return Some((answer, report));
             }
             return None;
@@ -3081,10 +3515,22 @@ pub enum SparseRows {
 macro_rules! with_rows {
     ($self:expr, |$modulus:ident, $rows:ident| $body:expr) => {
         match $self {
-            SparseRows::U64 { modulus: $modulus, rows: $rows } => $body,
-            SparseRows::U128 { modulus: $modulus, rows: $rows } => $body,
-            SparseRows::U192 { modulus: $modulus, rows: $rows } => $body,
-            SparseRows::U256 { modulus: $modulus, rows: $rows } => $body,
+            SparseRows::U64 {
+                modulus: $modulus,
+                rows: $rows,
+            } => $body,
+            SparseRows::U128 {
+                modulus: $modulus,
+                rows: $rows,
+            } => $body,
+            SparseRows::U192 {
+                modulus: $modulus,
+                rows: $rows,
+            } => $body,
+            SparseRows::U256 {
+                modulus: $modulus,
+                rows: $rows,
+            } => $body,
         }
     };
 }
@@ -3145,9 +3591,8 @@ impl SparseRows {
 
     /// Append a row given densely over the columns.
     pub fn push_dense(&mut self, row: &[BigUint], rhs: &BigUint) {
-        with_rows!(self, |modulus, rows| rows.push(SparseRow::from_dense(
-            row, rhs, *modulus
-        )))
+        with_rows!(self, |modulus, rows| rows
+            .push(SparseRow::from_dense(row, rhs, *modulus)))
     }
 
     /// Append a row from `(column, coefficient)` pairs (unsorted,
@@ -3691,6 +4136,105 @@ mod tests {
             merged_any && purged_any,
             "the random trials exercised merge and purge"
         );
+    }
+
+    #[test]
+    fn cado_filter_preserves_the_solution_and_shrinks_the_core() {
+        let mut rng = StdRng::seed_from_u64(11);
+        let mut smaller = 0;
+        for trial in 0..60 {
+            let columns = rng.gen_range(5..120);
+            let rows_n = columns + rng.gen_range(0..2 * columns);
+            let weight = rng.gen_range(2..=4);
+            let (rows, x) = planted_system(&mut rng, rows_n, columns, weight, P);
+            let opts = FilterOptions {
+                target_excess: rng.gen_range(0..8),
+                merge_max_weight: rng.gen_range(0..40),
+                max_row_weight: if rng.gen() {
+                    usize::MAX
+                } else {
+                    rng.gen_range(4..60)
+                },
+                strategy: FilterStrategy::Cado,
+                target_density: [0, 0, 5, 20][rng.gen_range(0..4)],
+                ..FilterOptions::default()
+            };
+            let filtered = filter_relations(rows.clone(), columns, P, &opts).expect("consistent");
+            for row in &filtered.core_rows {
+                assert_eq!(
+                    row.evaluate(&x, P),
+                    row.rhs,
+                    "trial {trial}: core row broken"
+                );
+                for &(c, _) in &row.entries {
+                    assert!(filtered.core_columns.contains(&c));
+                }
+            }
+            let core: Vec<u64> = filtered
+                .core_columns
+                .iter()
+                .map(|&c| x[c as usize])
+                .collect();
+            let full = filtered.reconstruct(&core, &rows);
+            assert_eq!(
+                full.is_some(),
+                dense_reference(&rows, columns, P).is_some(),
+                "trial {trial}"
+            );
+            if let Some(full) = full {
+                assert_eq!(full, x, "trial {trial}");
+            }
+            let legacy = filter_relations(
+                rows.clone(),
+                columns,
+                P,
+                &FilterOptions {
+                    strategy: FilterStrategy::Legacy,
+                    ..opts
+                },
+            )
+            .expect("consistent");
+            smaller += usize::from(filtered.core_columns.len() < legacy.core_columns.len());
+        }
+        assert!(smaller > 0, "the CADO filter never beat the legacy filter");
+        // The solve end to end, in both word widths.
+        let (rows, x) = planted_system(&mut rng, 8000, 1000, 3, P);
+        let mut covered = vec![false; 1000];
+        rows.iter()
+            .flat_map(|r| &r.entries)
+            .for_each(|&(c, _)| covered[c as usize] = true);
+        assert!(
+            covered.iter().all(|&c| c),
+            "the fixture covers every column"
+        );
+        let opts = SparseSolveOptions {
+            filter: FilterOptions::cado(),
+            ..SparseSolveOptions::default()
+        };
+        let (outcome, report) = solve_sparse_system(&rows, 1000, P, &opts);
+        assert_eq!(outcome, SparseSolveOutcome::Solved(x), "{report:#?}");
+        assert!(report.filter.merged_columns > 0);
+    }
+
+    #[test]
+    fn filter_strategy_defaults_keep_the_serialized_options() {
+        let json = serde_json::to_string(&SparseSolveOptions::default()).unwrap();
+        assert!(
+            !json.contains("strategy") && !json.contains("target_density"),
+            "{json}"
+        );
+        let back: FilterOptions = serde_json::from_str(
+            r#"{"remove_duplicates":true,"remove_singletons":true,"target_excess":32,"merge_max_weight":8,"max_row_weight":32}"#,
+        )
+        .unwrap();
+        assert_eq!(back, FilterOptions::default());
+        let m = FilterOptions {
+            strategy: FilterStrategy::Cado,
+            ..FilterOptions::default()
+        };
+        assert!(serde_json::to_string(&m)
+            .unwrap()
+            .contains(r#""strategy":"cado""#));
     }
 
     #[test]
@@ -4309,7 +4853,8 @@ mod wide_tests {
     /// `2¹⁹¹ − 19`: the top of `U192`, where an accumulator absorbs two products.
     const P191: &str = "3138550867693340381917894711603833208051177722232017256429";
     /// `2²⁵⁰ − 207`.
-    const P250: &str = "1809251394333065553493296640760748560207343510400633813116524750123642650417";
+    const P250: &str =
+        "1809251394333065553493296640760748560207343510400633813116524750123642650417";
 
     fn big(s: &str) -> BigUint {
         BigUint::from_str(s).unwrap()
@@ -4391,7 +4936,9 @@ mod wide_tests {
             let expect = coeffs
                 .iter()
                 .zip(&data)
-                .fold(BigUint::zero(), |acc, (c, d)| acc + c.to_biguint() * d.to_biguint())
+                .fold(BigUint::zero(), |acc, (c, d)| {
+                    acc + c.to_biguint() * d.to_biguint()
+                })
                 % &mb;
             let lazy_coeffs: Vec<W> = coeffs.iter().map(|&c| W::lazy_form(c, &m)).collect();
             let mut acc = LazyLanes::<W, 1>::new(&lazy);
@@ -4493,7 +5040,10 @@ mod wide_tests {
         let rows_n = columns + columns / 10 + 64;
         let (rows, x) = planted::<W>(&mut rng, rows_n, columns, 5, &m);
         let mut last = None;
-        for solver in [SparseCoreSolver::BlockWiedemann, SparseCoreSolver::BlockLanczos] {
+        for solver in [
+            SparseCoreSolver::BlockWiedemann,
+            SparseCoreSolver::BlockLanczos,
+        ] {
             let opts = SparseSolveOptions {
                 solver,
                 seed,
@@ -4504,7 +5054,10 @@ mod wide_tests {
                 SparseSolveOutcome::Solved(sol) => assert_eq!(sol, x, "{s} {solver:?}"),
                 other => panic!("{s} {solver:?}: {other:?} ({report:?})"),
             }
-            assert_eq!(report.core_dimension + report.reconstructed_columns, columns);
+            assert_eq!(
+                report.core_dimension + report.reconstructed_columns,
+                columns
+            );
             match solver {
                 SparseCoreSolver::BlockWiedemann => assert!(report.wiedemann.is_some()),
                 SparseCoreSolver::BlockLanczos => assert!(report.lanczos.is_some()),
@@ -4525,14 +5078,23 @@ mod wide_tests {
             })
             .collect();
         let rhs: Vec<W> = rows_s.iter().map(|r| r.rhs).collect();
-        assert_eq!(dense_solve_unique(dense, rhs, m), Some(x_s.clone()), "{s} dense");
+        assert_eq!(
+            dense_solve_unique(dense, rhs, m),
+            Some(x_s.clone()),
+            "{s} dense"
+        );
         // The pipeline on the small instance agrees with the dense solve.
         let (outcome, _) = solve_sparse_system(&rows_s, small, m, &SparseSolveOptions::default());
-        assert_eq!(outcome, SparseSolveOutcome::Solved(x_s), "{s} small pipeline");
+        assert_eq!(
+            outcome,
+            SparseSolveOutcome::Solved(x_s),
+            "{s} small pipeline"
+        );
         // Singular: a column no row covers, and a rank-deficient system.
         let (mut rows_u, _) = planted::<W>(&mut rng, small + 8, small, 5, &m);
         rows_u.retain(|r| r.entries.iter().all(|&(c, _)| c != 3));
-        let (outcome, report) = solve_sparse_system(&rows_u, small, m, &SparseSolveOptions::default());
+        let (outcome, report) =
+            solve_sparse_system(&rows_u, small, m, &SparseSolveOptions::default());
         assert_eq!(outcome, SparseSolveOutcome::Undetermined, "{s} uncovered");
         assert_eq!(report.filter.uncovered_columns, 1);
         // Rank-deficient, consistent, every column covered: a square
@@ -4558,8 +5120,15 @@ mod wide_tests {
             })
             .collect();
         let rhs_d: Vec<W> = rows_d.iter().map(|r| r.rhs).collect();
-        assert_eq!(dense_solve_unique(dense_d, rhs_d, m), None, "{s} dense rank-deficient");
-        for solver in [SparseCoreSolver::BlockWiedemann, SparseCoreSolver::BlockLanczos] {
+        assert_eq!(
+            dense_solve_unique(dense_d, rhs_d, m),
+            None,
+            "{s} dense rank-deficient"
+        );
+        for solver in [
+            SparseCoreSolver::BlockWiedemann,
+            SparseCoreSolver::BlockLanczos,
+        ] {
             let opts = SparseSolveOptions {
                 solver,
                 ..SparseSolveOptions::default()
@@ -4580,8 +5149,13 @@ mod wide_tests {
             }
         }
         rows_d[2] = rows_d[1].clone(); // an exact duplicate: removed, rows < columns
-        let (outcome, report) = solve_sparse_system(&rows_d, small, m, &SparseSolveOptions::default());
-        assert_eq!(outcome, SparseSolveOutcome::Undetermined, "{s} duplicate row");
+        let (outcome, report) =
+            solve_sparse_system(&rows_d, small, m, &SparseSolveOptions::default());
+        assert_eq!(
+            outcome,
+            SparseSolveOutcome::Undetermined,
+            "{s} duplicate row"
+        );
         assert!(
             report.filter.duplicates_removed == 1 || report.filter.uncovered_columns == 1,
             "{s} duplicate row: {report:?}"
@@ -4618,6 +5192,33 @@ mod wide_tests {
         check_pipeline::<U192>(R130, 1500, 2);
     }
 
+    /// The CADO-style filter in the wide width: the ECC2K-130 order, both
+    /// Krylov solvers, same planted solution as the legacy filter.
+    #[test]
+    fn cado_filter_solves_modulo_the_ecc2k130_order() {
+        let m = modulus::<U192>(R130);
+        let mut rng = StdRng::seed_from_u64(130);
+        let (rows, x) = planted::<U192>(&mut rng, 2000, 1500, 3, &m);
+        for solver in [
+            SparseCoreSolver::BlockWiedemann,
+            SparseCoreSolver::BlockLanczos,
+        ] {
+            for filter in [FilterOptions::cado(), FilterOptions::default()] {
+                let opts = SparseSolveOptions {
+                    solver,
+                    filter,
+                    ..SparseSolveOptions::default()
+                };
+                let (outcome, report) = solve_sparse_system(&rows, 1500, m, &opts);
+                assert_eq!(
+                    outcome,
+                    SparseSolveOutcome::Solved(x.clone()),
+                    "{solver:?} {filter:?} {report:?}"
+                );
+            }
+        }
+    }
+
     #[test]
     fn wide_pipeline_solves_planted_systems_modulo_190_and_191_bit_primes() {
         check_pipeline::<U192>(P190, 1000, 3);
@@ -4651,14 +5252,21 @@ mod wide_tests {
                 rhs: U128::from_u64(r.rhs, &m128),
             })
             .collect();
-        for solver in [SparseCoreSolver::BlockWiedemann, SparseCoreSolver::BlockLanczos] {
+        for solver in [
+            SparseCoreSolver::BlockWiedemann,
+            SparseCoreSolver::BlockLanczos,
+        ] {
             let opts = SparseSolveOptions {
                 solver,
                 ..SparseSolveOptions::default()
             };
             let (o64, r64) = solve_sparse_system(&rows64, columns, m64, &opts);
             let (o128, r128) = solve_sparse_system(&rows128, columns, m128, &opts);
-            assert_eq!(o64, SparseSolveOutcome::Solved(x64.clone()), "{solver:?} u64");
+            assert_eq!(
+                o64,
+                SparseSolveOutcome::Solved(x64.clone()),
+                "{solver:?} u64"
+            );
             let SparseSolveOutcome::Solved(s128) = o128 else {
                 panic!("{solver:?} U128: {o128:?}");
             };
@@ -4768,7 +5376,8 @@ mod wide_tests {
             .and_then(|v| v.parse().ok())
             .unwrap_or(10_000);
         let width = std::env::var("KOBLITZ_SPARSE_LA_WIDTH").unwrap_or_else(|_| "u64".into());
-        let solvers = std::env::var("KOBLITZ_SPARSE_LA_SOLVERS").unwrap_or_else(|_| "wiedemann,lanczos".into());
+        let solvers = std::env::var("KOBLITZ_SPARSE_LA_SOLVERS")
+            .unwrap_or_else(|_| "wiedemann,lanczos".into());
         match width.as_str() {
             "u64" => bench::<u64>(P61, "u64", columns, &solvers),
             "u128" => bench::<U128>(P127, "u128", columns, &solvers),
@@ -4818,7 +5427,9 @@ mod wide_tests {
         // SpMV: block of 4 lanes (the default Krylov block) and 1 lane,
         // serial and with the default (parallel over rows) backend.
         for lanes in [4usize, 1] {
-            let v: Vec<W> = (0..columns * lanes).map(|_| W::random(&mut rng, &m)).collect();
+            let v: Vec<W> = (0..columns * lanes)
+                .map(|_| W::random(&mut rng, &m))
+                .collect();
             let mut y = vec![W::zero(); rows_n * lanes];
             for backend in [SpmvBackend::Serial, SpmvBackend::Auto] {
                 let a = a.clone().with_spmv(SpmvOptions { backend, shards: 0 });
@@ -4866,7 +5477,12 @@ mod wide_tests {
                 .wiedemann
                 .as_ref()
                 .map(|w| w.products * w.block_n)
-                .or_else(|| report.lanczos.as_ref().map(|l| l.sparse_products * l.block_size))
+                .or_else(|| {
+                    report
+                        .lanczos
+                        .as_ref()
+                        .map(|l| l.sparse_products * l.block_size)
+                })
                 .unwrap_or(0);
             println!(
                 "BENCH_JSON {{\"kind\":\"solve\",\"width\":\"{width}\",\"modulus_bits\":{bits},\"columns\":{columns},\"rows\":{rows_n},\"nnz\":{nnz},\"solver\":\"{solver:?}\",\"threads\":{threads},\"seconds\":{secs:.3},\"cpu_seconds\":{cpu:.3},\"load_average\":{load:.1},\"verified\":{verified},\"core_dimension\":{},\"core_nonzeros\":{},\"attempts\":{},\"core_lane_products\":{core_products},\"report\":{}}}",

@@ -1,0 +1,10 @@
+# ecbench fb --curve <curve> --factor-base prime-isogeny:t=T (seed 0), read before the measured runs to size the plain-base control.
+# name t | slug | registered | fb_id | abscissae (= S_plain) | signed points | charged adds | charged doubles | description
+p20 t=8 icv1-fp20-tm728-d215a2a1	true	FB1h6fc61bfeb2a5	122	244	926	503	isogeny tower t = 8, seed = 0, E' = (a' 518994, b' 603100), #E' = 944896, 23 auxiliary curves tried, 122 of 2^8 abscissae on the curve
+p22 t=9 icv1-fp22-tm2947-e15fed69	true	FB1h319acee697a2	258	516	4523	7071	isogeny tower t = 9, seed = 0, E' = (a' 1325225, b' 486902), #E' = 2386944, 333 auxiliary curves tried, 258 of 2^9 abscissae on the curve
+p24 t=9 icv1-fp24-t2705-27cbb01b	true	FB1h63160e7d2f87	241	482	1317	151	isogeny tower t = 9, seed = 0, E' = (a' 2404959, b' 9995400), #E' = 10935296, 3 auxiliary curves tried, 241 of 2^9 abscissae on the curve
+p26 t=10 icv1-fp26-t2838-8e779ca8	true	FB1he0e38863269a	506	1012	10995	14467	isogeny tower t = 10, seed = 0, E' = (a' 17681987, b' 38873060), #E' = 40857600, 572 auxiliary curves tried, 506 of 2^10 abscissae on the curve
+p28 t=11 icv1-fp28-t4155-50f492b1	true	FB1h1b92e1d1bc87	1032	2064	6446	2863	isogeny tower t = 11, seed = 0, E' = (a' 199569339, b' 40175098), #E' = 231677952, 102 auxiliary curves tried, 1032 of 2^11 abscissae on the curve
+q20 t=8 icv1-fp20-t199-d1684bf5	true	FB1h81dfc9ab0c7f	145	290	3144	3541	isogeny tower t = 8, seed = 0, E' = (a' 304763, b' 813933), #E' = 970240, 161 auxiliary curves tried, 145 of 2^8 abscissae on the curve
+q22 t=9 icv1-fp22-t285-9fc7e3e5	true	FB1h5a7ac58298f0	257	514	11625	16325	isogeny tower t = 9, seed = 0, E' = (a' 2877778, b' 2622244), #E' = 3596800, 744 auxiliary curves tried, 257 of 2^9 abscissae on the curve
+q24 t=9 icv1-fp24-t4451-d5368b2d	true	FB1h18a55c2597e2	254	508	7952	11053	isogeny tower t = 9, seed = 0, E' = (a' 3137689, b' 584770), #E' = 13131776, 477 auxiliary curves tried, 254 of 2^9 abscissae on the curve

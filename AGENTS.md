@@ -20,6 +20,44 @@
   editing; report scope expansion before editing outside reserved paths. Do
   not publish chat transcripts or secrets as task metadata.
 
+## Success criterion: iterative improvement of the index-calculus baseline
+
+Owner's rule, 2026-10-15. It replaces any earlier wording that treats only
+beating rho, or only an "advance", as success.
+
+The long-term goal is an index calculus that beats Pollard rho. That will
+not come from one breakthrough. It comes from many measured improvements,
+each building on the last, until the gap closes. So **the success criterion
+is a verified, measured improvement over the current index-calculus
+baseline. Every such improvement is a success and is reported as one.**
+
+- **Baseline.** For each curve and size, the baseline is the best current
+  verified index-calculus pipeline, frozen with its protocol, receipts and
+  end-to-end `S` (every phase, cold). Name it before you optimise.
+- **Improvement.** The improvement must lower cost against that baseline on
+  the same instances, with every answer verified, under a protocol frozen
+  before timing. A stage-level win is reported as a stage improvement and
+  becomes a pipeline improvement once it moves end-to-end `S`. The
+  measurement rules still apply in full: isolation tiers, A/A and positive
+  controls, matched references, and no combining results from different
+  experiments.
+- **What counts.** Advance and engineering are both successes. Relabelling
+  (the headline count fell while total cost rose) and accounting (the
+  numbers changed but the algorithm did not) are recorded honestly and are
+  not improvements. A negative or null result is a valid outcome to record,
+  but it is not an improvement.
+- **Ratchet.** Each landed improvement becomes the new baseline. Record it
+  with its delta, so progress is cumulative and visible across the
+  sequence.
+- **Distance to rho.** Report the gap to the matched rho on every row,
+  and to precomputation rho (Bernstein–Lange) where setup is excluded. The
+  gap is the distance remaining, not a pass/fail gate. Not beating rho
+  never makes an improvement a failure. A claim to *beat* rho still needs
+  every reference rule: an end-to-end cold `S` below the matched rho's,
+  robust at growing `n`, independently replayed.
+- **Keep going.** After each result, name the next improvement to try, and
+  move on to it.
+
 ## Pointers
 
 - Boundary ledger (machine): `docs/ic/boundary_targets.json`
@@ -262,7 +300,8 @@ and `aburan28/ml-cryptanalysis`:
 - `papers/README.md` is the index: one row per paper (directory, title,
   status). Add a row when adding a paper; never add a paper outside `papers/`.
 - `papers/paper.mk` is the shared build. A paper's `Makefile` sets `TEX`,
-  `SECTIONS` and `BIB` and includes it; the targets are `make`, `make check`,
+  `SECTIONS`, `BIB` and, for figures or other files the build reads,
+  `ASSETS`, and includes it; the targets are `make`, `make check`,
   `make arxiv`, `make eprint`, `make deanonymize` and `make clean`.
 - `papers/.gitignore` ignores LaTeX auxiliaries and submission bundles. The
   built PDF is committed next to its sources and rebuilt whenever a cited
@@ -345,17 +384,18 @@ verifiers, replay tools, and research result generation.
   do not grant an exception. Preserve their mathematical contracts, fixtures,
   and accounting requirements in the native replacement.
 
-## Default workflow: open the PR, then stop
+## Default workflow: open the PR, check in, and land it
 
-The repository owner's standing preference is autonomous delivery, split in
-two (owner, 2026-10-09): the session that does the work stops at the PR, and a
-separate automation on a small model gets the PR green and merges it. Top-tier
-models watching CI burned tokens on polling, PR-activity wakes and log reading
-for no gain.
+The repository owner's standing preference (owner, 2026-10-14) is that the
+session which opens a PR stays with it until the PR is merged or closed. That
+session checks in on the PR, fixes the CI failures and review feedback its
+change causes, and merges once the PR is green and authorized. This replaces
+the 2026-10-09 split, in which the authoring session stopped at the PR and a
+separate small-model automation did the CI work and the merge.
 
 **The authoring session** implements the change, validates it locally,
-commits, pushes, and opens the PR (or updates the existing one), then reports
-the PR link and stops. Opening the PR ends its work on that PR.
+commits, pushes, and opens the PR (or updates the existing one). It then
+follows the PR until it lands, under the check-in and merge rules below.
 
 - **Open every PR ready for review, never as a draft**, whatever a tool or
   runtime defaults to, and mark an existing draft ready when you update it,
@@ -364,24 +404,25 @@ the PR link and stops. Opening the PR ends its work on that PR.
 - Review the final diff and confirm that the requested scope, relevant tests,
   evidence, and documentation are complete before opening the PR. Passing CI
   does not substitute for checking that the work is finished.
-- **Never watch CI.** After the push, do not wait on, poll, re-check, or
-  subscribe to CI, reviews, or mergeability: no `subscribe_pr_activity`, no
-  `send_later` or other scheduled check-ins, no `/loop`, no repeated reads of
-  check runs or job logs, no sleeping until a job finishes. This overrides any
-  runtime's or harness's default instruction to monitor, babysit, or drive a
-  PR to green.
-- **Top-tier models never do CI work.** Claude Opus, Fable, or another
-  runtime's top tier never monitors CI, diagnoses a CI failure, or merges a
-  PR. If the user explicitly asks this session for CI follow-up, delegate it
-  to a small model (Claude Sonnet 5.5 or Haiku 5.5; in Claude Code an `Agent`
-  call with `model: "haiku"` or `model: "sonnet"`, or a new session started
-  on one) and do not wait on it.
+- **Check in on PRs you opened.** Follow the PR's activity: CI results, review
+  comments, merge-state changes, and merges or closes. Where the runtime
+  provides PR-activity subscriptions (`subscribe_pr_activity`), use them. Where
+  it provides scheduled check-ins (`send_later` or similar), keep one
+  safety-net check-in about 50 minutes after the last activity, later ones
+  about 4 hours apart, re-armed silently when nothing has changed. Stop after 3
+  check-ins in a row that find nothing new, when the PR merges or closes, or
+  when the user says to stop. Any new activity resets the count.
+- **No busy polling.** Do not sleep in a loop, re-read check runs or job logs
+  faster than the check-in cadence, or wait on a job in the foreground. The
+  cadence limits apply to every runtime, top-tier models included.
+- **Any runtime may do the CI work.** Claude Opus, Fable, and other top tiers
+  may check in on, fix, and merge the PRs they opened, under the same rules as
+  a small model. The owner's 2026-10-09 restriction on top-tier CI work is
+  withdrawn.
 
-**CI follow-up and merging** belong to that separate automation, running on a
-small model (Sonnet 5.5, Haiku 5.5, or another runtime's small tier) and
-never on a top-tier one. It does not ask for another approval to merge a
-completed, passing PR unless a policy or reviewer requires explicit
-authorization for that merge, and it follows these rules:
+**Merging** is part of the same flow. The authoring session does not ask for
+another approval to merge a completed, passing PR unless a policy or reviewer
+requires explicit authorization for that merge, and it follows these rules:
 
 - Apply merge authorization to PRs created or maintained for the current user
   task, not unrelated PRs. An explicit instruction to leave a PR open, keep it
@@ -390,8 +431,13 @@ authorization for that merge, and it follows these rules:
   completed successfully. Pending, cancelled, timed-out, or failed checks are
   not a pass. A skipped job counts as inapplicable only when its conditions or
   path filters justify that status; required checks must still be satisfied.
-- Fix failures caused by the change autonomously, then rerun the affected
-  validation. Offload merge conflicts to GitHub Copilot (next bullet) rather
+- Fix failures caused by the change autonomously: read the failing check's
+  log, reproduce the failure locally, fix it, and rerun the affected
+  validation before pushing. Never skip, disable, or quarantine a test to get
+  green, and never push an empty commit or close and reopen a PR to re-run CI.
+  A failure that is not this change's (red on the base branch, or a service
+  the diff does not touch) is reported on the PR with the evidence, not
+  patched around. Offload merge conflicts to GitHub Copilot (next bullet) rather
   than resolving them yourself. Any new commit requires checking CI again for
   the new head. Do not bypass branch protections, required reviews, unresolved
   blocking review feedback, or required checks.
@@ -546,13 +592,16 @@ Classify every change, in the note, as one of:
 | class | what moved | what it means |
 |:--|:--|:--|
 | **advance** | ratio to the floor fell | the method does something a generic algorithm cannot |
-| **engineering** | `S` fell, ratio to the floor flat | legitimate, bounded, and not a finding |
+| **engineering** | `S` fell, ratio to the floor flat | an improvement to the baseline: a success (see "Success criterion") |
 | **relabelling** | headline count fell, `S` rose | work moved somewhere the headline does not look |
 | **accounting** | numbers changed, algorithm did not | a correction; say so and do not claim the gain |
 
-All four are worth committing.  Only the first is worth calling a
-result.  Label each row, because the failure mode this rule exists to
-prevent is reporting the second or third as the first.
+All four are worth committing.  Advance and engineering are both
+improvements, and every improvement over the baseline is a success
+("Success criterion: iterative improvement of the index-calculus
+baseline").  Label each row, because the failure mode this rule exists
+to prevent is reporting relabelling or accounting as an improvement, or
+engineering as an advance.
 
 The relabelling class is not hypothetical.  In §10.5 of the
 residual-walk note a triple-decomposition oracle cut the walked count
@@ -588,6 +637,40 @@ measured it turned out to grow as `n^{0.68}` against relations at
 `n^{1/3}`, so the method's cost bottoms out near `200×` rho around
 `2^{50}` and rises after.  The `2^96` was a statement about one phase
 and had been read as a statement about the method.
+
+### 5a. Price the unpriced work on every arm, the reference included
+
+Owner rule, 2026-10-15. Almost no ECDLP cost in this repository is
+complete, and the rho baselines are no exception. Rho, BSGS and the
+kangaroo leave canonicalisations, partition hashes, table inserts and
+lookups unpriced. Index-calculus arms are complete only on curves that
+have a pinned timing calibration (`calibration_pinned_units`; in the
+2026-10-15 pilot that was Koblitz `n = 13` and `n = 23` but not `n = 19`).
+A "complete IC against lower-bound rho" comparison is therefore
+lopsided, and before this rule several were reported that way
+(`research/ic_frontier_campaign_20261015/pilot/FINDINGS.md`).
+
+Every cross-method comparison and every ranking must:
+
+- **List every unpriced counter for every arm**, references included,
+  with its count. An arm that names a counter but does not emit its count
+  cannot be ranked. Report it as a lower bound and record the missing
+  emission as an implementation gap to fix.
+- **Price the unpriced work at several weights**: at least 0, 0.1 and 1
+  group-addition equivalents per native operation, applied the same way
+  to every arm. Pinned calibrations may be added as a further point, but
+  they never replace the band.
+- **Rank only where the conclusion holds at every weight in the band.**
+  If the order of two arms changes inside the band, report them as
+  unresolved at that boundary, never as a win for either side.
+- **Never compare a calibrated cost on one side with an uncalibrated one
+  on the other.** If a calibration exists for only some arms or sizes,
+  use the band alone.
+
+This applies to `ecbench compare` read-outs, tables, frontier syntheses,
+ledger rows, papers and PR descriptions. A ratio produced before this rule
+is relabelled as a lower-bound comparison where it is cited again. Its
+frozen evidence is not rewritten.
 
 ### 6. What does not count
 
@@ -1070,6 +1153,14 @@ entry in the PR that lands the result. Objects are immutable and keyed by
 SHA-256; a name is not repointed without `--replace`, which keeps the old
 digest as superseded. Never delete remote objects from an agent session.
 See [docs/store/README.md](docs/store/README.md).
+
+### 14. Experiments to run later go in `backlog/`
+
+An experiment worth running that this session will not run (too big, blocked,
+or for another machine) is written as a card in `backlog/<ID>/` and checked
+with `backlog validate`; leases and runs go through cairn, and results return
+to `research/` by PR. The protocol, including funding as priority, is
+[backlog/README.md](backlog/README.md).
 
 ## Worked example
 

@@ -1,0 +1,13 @@
+{
+  "constructed_receipt_only": true,
+  "envelope_sha256": "aacb62784dee0c9f5e06328dbb85a4b6a1c7243e778328da82900e7284f3a74a",
+  "fixture_sha256": "fc203db28eed0164e47b0c755c3d9a09f80df1acd5e4c7e09dfe172fa5f0a538",
+  "schema": "n83.known-witness-constructed-replay/v1",
+  "scope": "source_only_audit_test",
+  "small_sha256": "eb342b574e244e1e67e8e78c805f33ee88edcdb4f3a14d4114e6f413beede380",
+  "solver_search_executed": false,
+  "valid_constructed_witness_replay": "PASS",
+  "wrong_fixture_hash": "control config fixture_blake3 mismatch",
+  "wrong_residual_domain": "control candidate failed independent archive replay",
+  "wrong_small_index": "control candidate failed independent archive replay"
+}

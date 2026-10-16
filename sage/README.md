@@ -154,6 +154,49 @@ What it does not cover:
   `V` lowers `D*` by overdetermining the system and also lowers the chance
   a target decomposes. Compare structures at equal `n` and `n'`.
 
+## Campaign 2026-10-13: factor base → D* yield and correlations
+
+`research/factor_base_dor_campaign_20261013/` runs this engine over the
+full structure × dimension grid (n = 9, 11, 13, 15; 3 seeds), the
+Shantz–Teske δ sweep at n = 11 and 13, the symmetric-S4 cells at
+(n = 9, l = 2) and (n = 15, l = 3), and the n = 131 applicability checks;
+its `REPORT.typ`/`REPORT.pdf` carry the measured tables and figures.
+Findings (all toy-scale stage diagnostics):
+
+- **Only multiplicative closure lowers `D*`.** The subfield base refutes
+  at `D* = 2` exactly at every matched cell (vs 2.35–3.00 standard/random),
+  and at `D* = 3` with 9 unknowns in the symmetric-S4 encoding at
+  n = 15, l = 3 against `D* = 5` with 15 unknowns for standard *and* the
+  geometric special subspace. `nb_window`/`nb_break` never beat random on
+  `D*`; the Frobenius-window fold and the weight-class stacking (10–38×
+  trial reductions at n = 11/13) are unknowns levers, not degree levers.
+- **`D*` tracks the base dimension, not the field degree**
+  (Pearson r = 0.87 with `n'`, −0.04 with `n`), rising ≈ one degree per
+  +2 of `n'`; the standard base is measurably below random (partial
+  closure), e.g. 2.23 vs 2.79 at n = 13, `n' = 4`, all seeds.
+- **Work per relation has an interior optimum in `n'`** (≈ `n/3..n/4` at
+  toy scale): the largest measured cells are 20–300× worse per relation
+  than the optimum (n = 13 standard: 1.6·10⁴ at `n' = 3` against
+  4.5·10⁶ at `n' = 6`). The δ sweep improves per-relation work 6.5×
+  (n = 11) and 11× (n = 13) from δ = −1 to δ = +3.
+- **At n = 131 the closure lever is absent** (`x^131 − 1` has no proper
+  factor), so the challenge curve only gets the size (δ) and arity levers;
+  the Frobenius-window fold itself is verified at 131
+  (`raw/frobwin_n131.log`). The m=83 confidence gate of AGENTS.md §8a
+  is not yet run for any of these levers.
+
+**Round 2 (scaling, same study directory):** the grid extended to n = 17,
+19, 23 and the δ sweeps to n = 15, 17, 19 (n = 19 shares 131's full-length
+cyclotomic order, ord = n − 1). The size laws scale: D* still tracks n′
+(r = 0.82 over 133 aggregates), the interior work-per-relation optimum sits
+at n′ ≈ n/2.7 with 100–875× spreads at n = 19, and the per-relation δ gain
+*grows* with n (6.5× at n = 11 → 19.7× at n = 19, 246× at n = 15 δ = +5),
+until the counting floor 2^−δ empties the yield (visible at n ≥ 17, δ ≥ 5).
+The new arity+size result: on the symmetric-S4 m = 3 encoding, a heavy δ
+drops D* by whole degrees — 5 → 3 from (n = 15, l = 3) to (n = 15, l = 2),
+and D* = 4 at (n = 19, l = 3, δ = +10) with yield still 0.0625 — the one
+whole-degree lever that exists at n = 131.
+
 ## `sm2.sage` — SM2 (sm2p256v1, GB/T 32918)
 
 Mirrors `../src/ecc/sm2.rs` and `../src/hash/sm3.rs`. Run:

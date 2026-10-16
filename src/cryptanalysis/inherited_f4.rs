@@ -510,6 +510,7 @@ struct LayoutStep {
     to_here: RefCell<HashMap<u32, Rc<Vec<u32>>>>,
     /// The word-wise rewrite plans of those composed maps (and of this
     /// step's own map, under key `to − 1`), built on demand from the map.
+    #[allow(dead_code)] // rewrite-plan cache reserved for a later path
     plans: RefCell<HashMap<u32, Rc<RewritePlan>>>,
 }
 
@@ -547,6 +548,7 @@ struct RewritePlan {
 
 impl RewritePlan {
     /// The plan of `map`, with nothing built yet.
+    #[allow(dead_code)]
     fn new(map: Rc<Vec<u32>>) -> Self {
         let n_src_words = map.len().div_ceil(64);
         Self {
@@ -1016,6 +1018,7 @@ impl From<Vec<u64>> for RowWords {
 
 /// A zeroed shared buffer of `n` words, allocated once (an `Rc<[u64]>`
 /// made from a `Vec` would copy it).
+#[allow(dead_code)]
 fn zeroed_words(n: usize) -> Rc<[u64]> {
     std::iter::repeat_n(0u64, n).collect()
 }
@@ -1314,6 +1317,10 @@ pub struct ReducedBasis {
     /// Rounds of degree-fall closure run per node; `0` keeps the plain
     /// Macaulay row space (see [`ReducedBasis::from_system_closed`]).
     closure_rounds: u32,
+    /// Least leading degree of a row the closure multiplies out: `2` for
+    /// the splitting solver, which eliminates linear rows in its tail; `1`
+    /// for full MutantXL ([`ReducedBasis::from_system_closed_full`]).
+    min_fall_degree: u32,
     /// Degree falls not yet multiplied by the variables, as row indices.
     pending: Vec<u32>,
     /// The row space contains the constant `1`.  The basis is then kept as
@@ -1436,6 +1443,7 @@ impl ReducedBasis {
             rows: Vec::new(),
             pivot_col: Vec::new(),
             closure_rounds: 0,
+            min_fall_degree: 2,
             pending: Vec::new(),
             refuted: false,
             support_local,
@@ -1689,24 +1697,59 @@ impl ReducedBasis {
         rounds: u32,
         support_local: bool,
     ) -> Option<(Self, InheritCost)> {
+        Self::from_system_closed_impl(system, n_vars, degree, rounds, support_local, 2)
+    }
+
+    /// Full MutantXL at fixed degree: [`ReducedBasis::from_system_closed`]
+    /// with linear falls multiplied out as well (the splitting solver leaves
+    /// those to its linear tail).  The saturated row space is the degree-
+    /// `degree` part of the closure of the Macaulay row space under
+    /// multiplying any element of degree `< degree` by a variable; it
+    /// contains `1` from a degree on that is never above XL's.  Degrees
+    /// below 2 build no closure.
+    pub fn from_system_closed_full(
+        system: &[F2BoolPoly],
+        n_vars: usize,
+        degree: u32,
+        rounds: u32,
+    ) -> Option<(Self, InheritCost)> {
+        Self::from_system_closed_impl(system, n_vars, degree, rounds, false, 1)
+    }
+
+    fn from_system_closed_impl(
+        system: &[F2BoolPoly],
+        n_vars: usize,
+        degree: u32,
+        rounds: u32,
+        support_local: bool,
+        min_fall_degree: u32,
+    ) -> Option<(Self, InheritCost)> {
         let (mut basis, mut cost) = Self::from_system_with(system, n_vars, degree, support_local)?;
-        if rounds == 0 || degree < 3 || basis.rows.is_empty() || basis.refuted {
+        if rounds == 0 || degree < min_fall_degree + 1 || basis.rows.is_empty() || basis.refuted {
             return Some((basis, cost));
         }
         basis.closure_rounds = rounds;
+        basis.min_fall_degree = min_fall_degree;
         let occurring = basis
             .system
             .iter()
             .flat_map(|p| p.terms.iter())
             .fold(0u64, |acc, t| acc | t.mask)
             & all_variable_mask(n_vars);
-        let lower = macaulay_rows_monos_with_mask(
-            basis.system.as_slice(),
-            n_vars,
-            degree - 1,
-            occurring,
-            None,
-        )?;
+        // Full MutantXL seeds every fall: a fall of the degree-`degree−1`
+        // space times a monomial of degree two or more is not in general a
+        // row of this matrix.
+        let lower = if min_fall_degree >= 2 {
+            macaulay_rows_monos_with_mask(
+                basis.system.as_slice(),
+                n_vars,
+                degree - 1,
+                occurring,
+                None,
+            )?
+        } else {
+            Vec::new()
+        };
         let mut lower_leading: std::collections::HashSet<u64> = std::collections::HashSet::new();
         if !lower.is_empty() {
             let columns = macaulay_columns(&lower)?;
@@ -1747,6 +1790,17 @@ impl ReducedBasis {
     /// Number of columns.
     pub fn columns(&self) -> usize {
         self.columns.len()
+    }
+
+    /// Whether the row space contains the constant `1`.
+    pub fn is_refuted(&self) -> bool {
+        self.refuted
+    }
+
+    /// Degree falls queued for closure and not yet multiplied out: `0`
+    /// after [`ReducedBasis::close`] has saturated the basis.
+    pub fn pending_falls(&self) -> usize {
+        self.pending.len()
     }
 
     /// Depth of this basis below its root: the number of variables
@@ -1805,6 +1859,7 @@ impl ReducedBasis {
 
     /// The word-wise plan of [`ReducedBasis::composite`], memoised on the
     /// step that maps into the current layout like the map itself.
+    #[allow(dead_code)]
     fn rewrite_plan(&self, from: u32) -> Rc<RewritePlan> {
         let to = self.epoch();
         let step = &self.history[(to - 1) as usize];
@@ -2307,6 +2362,7 @@ impl ReducedBasis {
             pivot_col: Vec::with_capacity(self.rows.len()),
             pivot_of: Vec::new(),
             closure_rounds: self.closure_rounds,
+            min_fall_degree: self.min_fall_degree,
             pending: Vec::new(),
             refuted: false,
             support_local: self.support_local,
@@ -2446,7 +2502,7 @@ impl ReducedBasis {
             return false;
         }
         let d = self.columns[self.pivot_col[r] as usize].count_ones();
-        d >= 2 && d < self.degree
+        d >= self.min_fall_degree && d < self.degree
     }
 
     /// Queue a freshly inserted row for closure if it is a degree fall.

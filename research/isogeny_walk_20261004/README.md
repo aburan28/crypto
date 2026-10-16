@@ -144,6 +144,12 @@ From `walk.json#class`; they hold for every curve in each class.
 | `ℓ \| t² − 4p` | 3, 5 (depth 0, one horizontal edge) | 3 (depth **1**), 29 (depth 0) |
 | Atkin `ℓ ≤ 61` | 7 19 31 53 61 | 5 7 13 17 19 23 31 37 41 43 53 |
 
+Later evidence (2026-10-08, [`../p224_hypothesis_ranking_20261008/`](../p224_hypothesis_ranking_20261008/README.md)):
+P-224's `C₁₈₂ = 11549194661 · L₁₄₈` factors completely, so `[O_K : Z[π]] = 3`
+and the surface curves, P-224 among them, have `End(E) = O_K`.  The P-224 twist
+cofactor is `3015283 · 40375823 · 267983539294927 · ℓ′` with `ℓ′ ≈ 2^117.1`.
+The table above is left as recorded.
+
 **P-224 sits on the surface of a depth-1 3-volcano.**  `v_3(t² − 4p) = 3`
 forces `3 | [O_K : Z[π]]` exactly once.  P-224 has four rational
 3-isogenies:
