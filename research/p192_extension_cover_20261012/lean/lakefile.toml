@@ -1,6 +1,6 @@
 name = "p192_extension_cover"
 version = "0.1.0"
-defaultTargets = ["CrossRatio", "SignedBase", "ScalarAnchor", "AdaptiveBase", "ShortSums", "DivisorSupport", "NonspecialSupport", "LinePointInverse", "LineSupport", "LineFiberDescent", "ThreeSumCapacity", "LineLeafRank", "LineClosure", "LineCenter", "FullCollinearity"]
+defaultTargets = ["CrossRatio", "SignedBase", "ScalarAnchor", "AdaptiveBase", "ShortSums", "DivisorSupport", "NonspecialSupport", "LinePointInverse", "LineSupport", "LineFiberDescent", "ThreeSumCapacity", "LineLeafRank", "LineClosure", "LineCenter", "FullCollinearity", "ResidualDiscriminant", "PencilThreeSum", "FourCellDensity", "TraceProjection", "TraceThree", "FullLineCapacity"]
 
 [[require]]
 name = "mathlib"
@@ -51,3 +51,21 @@ name = "LineCenter"
 
 [[lean_lib]]
 name = "FullCollinearity"
+
+[[lean_lib]]
+name = "ResidualDiscriminant"
+
+[[lean_lib]]
+name = "PencilThreeSum"
+
+[[lean_lib]]
+name = "FourCellDensity"
+
+[[lean_lib]]
+name = "TraceProjection"
+
+[[lean_lib]]
+name = "TraceThree"
+
+[[lean_lib]]
+name = "FullLineCapacity"

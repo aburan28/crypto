@@ -1,0 +1,40 @@
+name: P-192 geometry collector Lean proofs
+
+on:
+  push:
+    paths:
+      - .github/workflows/p192-geometry-collector-lean.yml
+      - research/p192_extension_cover_20261012/lean/**
+  pull_request:
+    paths:
+      - .github/workflows/p192-geometry-collector-lean.yml
+      - research/p192_extension_cover_20261012/lean/**
+  workflow_dispatch:
+
+jobs:
+  pencil-and-four-cell:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: research/p192_extension_cover_20261012/lean
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the pencil and four-cell theorems
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/p192_extension_cover_20261012/lean
+          auto-config: false
+          use-mathlib-cache: true
+          build: true
+          build-args: 'PencilThreeSum FourCellDensity TraceThree'
+          test: false
+          lint: false
+          leanchecker: true
+          leanchecker-args: '--fresh --verbose PencilThreeSum'
+      - name: Audit pencil theorem axioms
+        run: lake env lean PencilThreeSum.lean
+      - name: Fresh-check four-cell theorem and audit axioms
+        run: lake env leanchecker --fresh --verbose FourCellDensity && lake env lean FourCellDensity.lean
+      - name: Fresh-check three-step trace theorem and audit axioms
+        run: lake env leanchecker --fresh --verbose TraceThree && lake env lean TraceThree.lean

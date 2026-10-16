@@ -73,6 +73,7 @@ jobs:
           python3 -B research/p192_extension_cover_20261012/verify_line_full_constant.py
           python3 -B research/p192_extension_cover_20261012/verify_line_full_collinearity.py
           python3 -B research/p192_extension_cover_20261012/verify_line_full_selected_tangencies.py
+          python3 -B research/p192_extension_cover_20261012/verify_line_full_residual_discriminant.py
           cd research/p192_extension_cover_20261012
           sha256sum -c ARTIFACTS.sha256
   lean-proof:
@@ -227,6 +228,28 @@ jobs:
           leanchecker-args: '--fresh --verbose FullCollinearity'
       - name: Audit full-line incidence theorem axioms
         run: lake env lean FullCollinearity.lean
+  p192-residual-discriminant-lean-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: research/p192_extension_cover_20261012/lean
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and fresh-check residual-discriminant theorems
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/p192_extension_cover_20261012/lean
+          auto-config: false
+          use-mathlib-cache: true
+          build: true
+          build-args: 'ResidualDiscriminant'
+          test: false
+          lint: false
+          leanchecker: true
+          leanchecker-args: '--fresh --verbose ResidualDiscriminant'
+      - name: Audit residual-discriminant theorem axioms
+        run: lake env lean ResidualDiscriminant.lean
   leaderboard-lean-proof:
     runs-on: ubuntu-latest
     timeout-minutes: 25
