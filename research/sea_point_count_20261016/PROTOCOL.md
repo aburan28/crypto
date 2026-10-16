@@ -1,0 +1,65 @@
+# Matched point-count measurements and formal verification
+
+Frozen before execution on 2026-10-16. User request: measure the speedup of
+PR #1923 and model its correctness in TLA+, with formal verification.
+
+Reference algorithm: cf2745214d83e7bbf737f07d758e486d6af8fa7f.
+Candidate algorithm: 44f8d17f1c5b8988a57a16e9dddc8e5ce099d325.
+The same native harness and compiler options will build against each source.
+No algorithm tuning will be mixed into this comparison. Subsequent code changes
+require a distinct arm and new measurements. Setup, outputs and source hashes
+will be recorded. All curve fixtures use already registered models.
+
+Hypothesis: the candidate reduces follow-up search and small-field BSGS work;
+complete baby-table storage can add overhead to ordinary SEA. Neither an
+improvement nor a regression is presumed. Report every workload separately.
+
+Workloads: registered 24-, 32-, and 40-bit prime-field curves through
+curve::order; SEA on the 40-bit curve and P-192 with a prewarmed Phi cache;
+P-192 api::count_points including polynomial setup and certification; and
+secp256k1 CM counting as an unchanged-path control. Each invocation has fixed
+repetition counts and a fixed seed schedule. Every order must match its frozen
+registered reference; API counts must carry successful certificates. Hashes,
+orders, and call counts must match before a pair is eligible for a speed ratio.
+No DLP is solved or timed. No deployed-curve security claim is made.
+
+Measurement: five paired A/A rounds, followed by at least five alternating A/B
+rounds per workload. Native code records internal algorithm elapsed time;
+launch and input construction are excluded. Cold counting includes field
+dispatch, Phi construction, counting, and certification; cached SEA excludes
+initial cache construction, which is recorded separately. Use one reserved
+CPU, the repository bench lock, eviction/restoration of other movable threads,
+quiet-machine checks, and per-child process CPU accounting. Implement these
+mechanics in Rust because AGENTS.md prohibits Python performance drivers.
+Keep the policy of tools/isolated_bench.py and document unavailable PSI and
+unmovable-thread observations. No build, TLC/Lean run, or other heavy task may
+overlap timing. Keep contention and failures in the evidence; do not pool
+contended rows with admitted rows. A/A spread accompanies median and minimum
+times and paired baseline/candidate ratios. An effect within the A/A noise
+range is inconclusive. Cloud-neighbor and frequency control remain unavailable.
+
+Execution limits: 30 minutes for the complete timed suite, 120 seconds per
+count invocation, 2 GiB TLC heap and five minutes per model configuration.
+If a limit is reached, retain the failure and report that workload unresolved;
+do not replace it with a smaller one. No paid resource provisioning.
+
+Formal scope: model the actual baby-table/giant-step enumeration, Atkin
+filtering as a truth-preserving predicate, successive samples, both full-search
+and direct-refinement transitions, early unique return, and bounded ambiguous
+return. TLC will check candidate completeness, preservation of the true
+candidate, unique-return soundness, and progress over explicitly recorded
+finite cyclic-group/interval bounds. A legacy single-index table configuration
+must fail with a counterexample; accepting that configuration is a test failure.
+
+Add Lean proofs of the unbounded combinatorial/group-search argument and
+candidate preservation where feasible, with pinned tools and inspected axioms.
+Map statements to actual Rust code and model actions. Distinguish a proof of
+the model from a refinement proof of compiled Rust. Neither TLC nor these
+proofs certify bigint/field arithmetic, SEA prime congruences, primality tests,
+the analytic Hilbert polynomial implementation, timing resistance, or a full
+cryptographic implementation. Record remaining obligations explicitly.
+
+Deliverables: native harness and replay commands; raw A/A and A/B records and
+host/source/binary manifest; TLA+/TLC configs and counterexample; Lean source,
+build and axiom logs; a coverage/proof map; source-linked reports with plots,
+SVG/PNG and inspected PDFs; benchmark index entry; and an update to PR #1923.
