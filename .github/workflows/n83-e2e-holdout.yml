@@ -1,6 +1,11 @@
 name: N83 five-point cold factor-base holdout
 
 on:
+  push:
+    branches: [codex/n83-e2e-holdout-freeze-20261016]
+    paths:
+      - research/n83_e2e_holdout_20261016/selection.json
+      - research/n83_e2e_holdout_20261016/screen_analysis.json
   workflow_dispatch:
 
 permissions:
