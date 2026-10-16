@@ -188,9 +188,16 @@ the per-op cost is 622–635 ns on every curve. Per-curve rows are in
 ## Run it on your own curve
 
 ```sh
-scripts/volcano_ecdlp.sh --curve P,A,B [--order N] [--ell 3] [--seed S] [--trials 100]
-scripts/volcano_ecdlp.sh --ca /path/to/ca --curve P,A,B ...   # cryptanalysis's C rho
+cargo build --release --bin volcano-rho
+target/release/volcano-rho --curve P,A,B [--order N] [--ell 3] [--seed S] [--trials 100] --out OUT
+target/release/volcano-rho --curve P,A,B --engine ca --ca /path/to/ca ...   # cryptanalysis's C rho
+python research/isogeny-volcano-rho/plot.py OUT    # optional: the standard graphs
 ```
+
+The cryptanalysis repository has the same measurement built into its own
+binary, with no Rust involved: `ca volcano --p P --a A --b B [--trials T]
+[--diagram FILE]` (`ca_volcano.h`). It reproduces this study's curve A
+volcano exactly (80 curves, 2 / 6 / 18 / 54).
 
 `y² = x³ + Ax + B` over `F_P`, any prime `P < 2^62`. Without `--order` the
 tool counts points (baby-step giant-step). It checks the order against
@@ -199,7 +206,7 @@ random points, takes `n` the largest prime factor, draws a generator
 reads the volcano depth `v_ℓ(f)` and the crater shape from `D = t² − 4p`.
 Then it walks, carries `(P, kP)` to every curve and measures. A curve whose
 conductor ℓ does not divide has depth 0, so the walk covers crater curves
-only. Outputs go to `--out` (default `volcano-ecdlp-<UTC>/`):
+only. Outputs go to `--out`:
 `results.json`, `trials.csv`, `instances.jsonl` (every curve's instance in
 `ca` format, ready for `ca solve`) and the standard graphs.
 
@@ -207,7 +214,7 @@ only. Outputs go to `--out` (default `volcano-ecdlp-<UTC>/`):
   distinguished points. The DP rate defaults to `min(8, log₂n/2 − 6)` bits,
   so small groups keep every point. With every point distinguished, the
   x-keyed table also catches `±X` matches, so expect about √(πn/4).
-  `--engine ca` (or `--ca` on the script) runs `ca solve --alg rho` from
+  `--engine ca` runs `ca solve --alg rho` from
   aburan28/cryptanalysis on each curve, with its defaults (negation map
   on) plus any `--ca-arg`. Iterations are then `ca`'s reported `ops` and
   times its reported `seconds`.
