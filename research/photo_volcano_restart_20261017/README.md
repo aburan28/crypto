@@ -139,3 +139,39 @@ Full 4600-case rho/BSGS completion, full random-corpus IC recovery, rho/BSGS
 field-level counters and complete per-step event streams remain unresolved.
 Raw records, failed attempts and private randomness remain preserved locally.
 The new sources do not modify the already frozen running workers or fixtures.
+
+## 2026-10-17 14:50 UTC measured snapshot
+
+**All 4600 rho cases are now independently verified, with zero failed cases.**
+BSGS has 3297 verified cases at this snapshot; the interrupted execution
+session was no longer connected, so remaining jobs were resumed with the
+same frozen identity and fresh per-launch logs. All interrupted attempts are
+retained and rebuilt table setup is recorded again. No completed job was
+replaced. Check LIVE_STATUS.json locally for later actual progress.
+
+The [quantitative report](reports/quantitative_1452/REPORT.md) includes an
+[inspected 13-page run PDF](reports/quantitative_1452/RUN_REPORT.pdf),
+[inspected eight-page results PDF](reports/quantitative_1452/RESULTS_REPORT.pdf),
+seven full-graph heatmaps and per-curve/per-generator/per-problem min/mean/max
+summaries. Every one of the 100 rho problems now has all 46 curve results.
+Curve-average rho counts range from 107895789.39 to 134494184.67 group
+operations, ratio 1.246519; individual cases range from 3759524 to 429007765.
+These descriptive spreads do not establish an intrinsic hardness difference.
+BSGS's paired online operation counts agree across every observed curve and
+generator. All 4600 IC target GB stages count exactly 217410 field
+multiplications, despite wall times from 11.519667 to 266.013969 ms under L0.
+
+The [public IC metrics/replay archive](artifacts/public_ic_metrics_and_replay.tar.xz)
+contains all 14720 polynomial-system/ideal replays, public factor-base point
+coordinates and aggregate metrics. It excludes scalar witnesses, known random
+setup coefficients, raw getrandom journals and raw native case records.
+Its checksum is beside it. Source data and generated visuals remain separate
+from the full private checkpoint, which has not been externally exported.
+
+The [benchmark mirror](../../benchmarks/20261017-photo-volcano-restart/) copies
+the same PDF/SVG/150 dpi PNG bytes. Missing field counters, successful full IC
+recovery and full BSGS completion are still open; no fastest-tool or complete
+cold-cost claim is made. `source/monitor.mjs` observes the real native workers,
+appends local status, and generates a new local report on native completion.
+It sends no data externally; that final report still requires PDF inspection
+and a later PR update. It never restarts a solver or declares full IC complete.

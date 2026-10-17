@@ -1,0 +1,4648 @@
+[
+  {
+    "curve": 0,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 13928373,
+        "mean": 19641781.49,
+        "max": 42562475
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 13927027,
+        "mean": 15513424.4,
+        "max": 16373737
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15932,
+        "mean": 23213.31,
+        "max": 93501
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 152,
+        "mean": 262.16,
+        "max": 568
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 14074856,
+        "mean": 19873295.05,
+        "max": 42809207
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 1,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 14317595,
+        "mean": 19468722.51,
+        "max": 47232859
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 13324835,
+        "mean": 15522881.8,
+        "max": 17449414
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 16129,
+        "mean": 22486.02,
+        "max": 65534
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 78,
+        "mean": 271.98,
+        "max": 438
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 14462209,
+        "mean": 19699932.47,
+        "max": 47667958
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 2,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 14931584,
+        "mean": 19475348.2,
+        "max": 40102246
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 13187349,
+        "mean": 15490516.93,
+        "max": 16752431
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15817,
+        "mean": 22234.61,
+        "max": 57393
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 99,
+        "mean": 279.2,
+        "max": 471
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 15149397,
+        "mean": 19702603.1,
+        "max": 40326208
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 3,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 13451933,
+        "mean": 19585527.41,
+        "max": 43393100
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 12952349,
+        "mean": 15391781.9,
+        "max": 16714492
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15675,
+        "mean": 21897.11,
+        "max": 52810
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 55,
+        "mean": 266.17,
+        "max": 455
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 13597749,
+        "mean": 19811194.22,
+        "max": 43616032
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 4,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 14500196,
+        "mean": 19224861.84,
+        "max": 42780264
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 13117675,
+        "mean": 15437847.16,
+        "max": 16744896
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 16815,
+        "mean": 24035.08,
+        "max": 142618
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 83,
+        "mean": 273.19,
+        "max": 528
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 14646324,
+        "mean": 19456315.33,
+        "max": 43128162
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 5,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 13226616,
+        "mean": 19768260.79,
+        "max": 42516171
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 13225249,
+        "mean": 15485525.53,
+        "max": 18793613
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 16046,
+        "mean": 23970.47,
+        "max": 133544
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 75,
+        "mean": 273.55,
+        "max": 404
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 14632278,
+        "mean": 20187976.18,
+        "max": 42739449
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 6,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 14374759,
+        "mean": 19545563.45,
+        "max": 42490469
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 13339469,
+        "mean": 15581671.47,
+        "max": 17876231
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 16510,
+        "mean": 23614.73,
+        "max": 57683
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 160,
+        "mean": 275.25,
+        "max": 475
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 14521846,
+        "mean": 20009130.08,
+        "max": 42747720
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 7,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 14510340,
+        "mean": 19535332.05,
+        "max": 43342618
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 13698689,
+        "mean": 15504231.46,
+        "max": 18107478
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 16100,
+        "mean": 21694.27,
+        "max": 25070
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 76,
+        "mean": 528.34,
+        "max": 25198
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 14660143,
+        "mean": 19991081.06,
+        "max": 43576836
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 8,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 13408899,
+        "mean": 19289329.39,
+        "max": 42895199
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 13407772,
+        "mean": 15489444.88,
+        "max": 16749667
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15980,
+        "mean": 24032.89,
+        "max": 126394
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 93,
+        "mean": 277.02,
+        "max": 566
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 13556143,
+        "mean": 19520330.34,
+        "max": 43119081
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 9,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 14730867,
+        "mean": 19720662.17,
+        "max": 42366466
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 13816976,
+        "mean": 15500403.14,
+        "max": 16837147
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15917,
+        "mean": 22924.71,
+        "max": 96514
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 95,
+        "mean": 277.11,
+        "max": 853
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 14879604,
+        "mean": 19953962.91,
+        "max": 42627266
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 10,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 13756483,
+        "mean": 19963390.36,
+        "max": 42817756
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 13755274,
+        "mean": 15668433.94,
+        "max": 17993331
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 16515,
+        "mean": 24215.67,
+        "max": 126083
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 116,
+        "mean": 277.04,
+        "max": 418
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 13904970,
+        "mean": 20425882.42,
+        "max": 43040131
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 11,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 14563250,
+        "mean": 19994739.13,
+        "max": 42360023
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 14100512,
+        "mean": 15596440.03,
+        "max": 16850071
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15972,
+        "mean": 22499.03,
+        "max": 55410
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 87,
+        "mean": 500.3,
+        "max": 23180
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 14705316,
+        "mean": 20224218.17,
+        "max": 42582285
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 12,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 14071692,
+        "mean": 19791569.72,
+        "max": 42688556
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 13850076,
+        "mean": 15523665.79,
+        "max": 16567476
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15951,
+        "mean": 22679.42,
+        "max": 59417
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 105,
+        "mean": 276.35,
+        "max": 396
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 14218118,
+        "mean": 20022542.6,
+        "max": 42920104
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 13,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 15066006,
+        "mean": 20249994.81,
+        "max": 49093201
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 14341489,
+        "mean": 15497934.95,
+        "max": 16616251
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 16043,
+        "mean": 24017.11,
+        "max": 136731
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 93,
+        "mean": 275.85,
+        "max": 428
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 15282005,
+        "mean": 20482463.37,
+        "max": 49315325
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 14,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 15192772,
+        "mean": 19871742.46,
+        "max": 42597240
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 14299008,
+        "mean": 15684482.8,
+        "max": 17035815
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 19056,
+        "mean": 22964.72,
+        "max": 116787
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 127,
+        "mean": 288.28,
+        "max": 499
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 15389299,
+        "mean": 20102867.01,
+        "max": 42816484
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 15,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 14201659,
+        "mean": 19565564.72,
+        "max": 41863348
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 13674804,
+        "mean": 15248482.57,
+        "max": 16941194
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 16169,
+        "mean": 28699.84,
+        "max": 750091
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 91,
+        "mean": 315.49,
+        "max": 1242
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 14417216,
+        "mean": 19779343.73,
+        "max": 42058123
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 16,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 13568771,
+        "mean": 17876892.4,
+        "max": 40495555
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 12632094,
+        "mean": 13907869.92,
+        "max": 15149306
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15763,
+        "mean": 20682.86,
+        "max": 134396
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 71,
+        "mean": 332.86,
+        "max": 5985
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 13751084,
+        "mean": 18071069.07,
+        "max": 40692537
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 17,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 13486730,
+        "mean": 19667691.26,
+        "max": 71610080
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 13222473,
+        "mean": 15181932.52,
+        "max": 52494844
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15185,
+        "mean": 19730.94,
+        "max": 50779
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 105,
+        "mean": 356.87,
+        "max": 2818
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 13662440,
+        "mean": 19872462.18,
+        "max": 71799459
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 18,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 13889990,
+        "mean": 23100863.03,
+        "max": 86646268
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 13244507,
+        "mean": 17805083.53,
+        "max": 79923216
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15971,
+        "mean": 21542.41,
+        "max": 84388
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 179,
+        "mean": 296.53,
+        "max": 605
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 14099186,
+        "mean": 23309842.66,
+        "max": 86866661
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 19,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 15195424,
+        "mean": 22909388.28,
+        "max": 136225811
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 13248160,
+        "mean": 18083780.29,
+        "max": 103974245
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 17411,
+        "mean": 26921.36,
+        "max": 364052
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 106,
+        "mean": 305.03,
+        "max": 530
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 15418337,
+        "mean": 23172833.94,
+        "max": 136508999
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 20,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11941536,
+        "mean": 16086474.87,
+        "max": 44876928
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11941387,
+        "mean": 15618680.97,
+        "max": 44876813
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 14800,
+        "mean": 20549.88,
+        "max": 169389
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 70,
+        "mean": 227.29,
+        "max": 483
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 12077744,
+        "mean": 16279000.67,
+        "max": 45050257
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 21,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11911544,
+        "mean": 16170716.22,
+        "max": 60997656
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11911385,
+        "mean": 16170008.05,
+        "max": 60998658
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15223,
+        "mean": 17331.27,
+        "max": 91991
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 41,
+        "mean": 178.44,
+        "max": 365
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 12044726,
+        "mean": 16463822.87,
+        "max": 66391762
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 22,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11832539,
+        "mean": 18337704.64,
+        "max": 165926703
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11832385,
+        "mean": 13622407.37,
+        "max": 62214973
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15224,
+        "mean": 17290.95,
+        "max": 128317
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 38,
+        "mean": 324.77,
+        "max": 15388
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 11965051,
+        "mean": 18497983.42,
+        "max": 166253388
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 23,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11839242,
+        "mean": 21845704.54,
+        "max": 162590175
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11839267,
+        "mean": 17092210.82,
+        "max": 135494590
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15304,
+        "mean": 16762.08,
+        "max": 46566
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 40,
+        "mean": 212.21,
+        "max": 2050
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 11969543,
+        "mean": 21992894.28,
+        "max": 162760513
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 24,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11957349,
+        "mean": 15430730.13,
+        "max": 42168511
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11957415,
+        "mean": 12571188.66,
+        "max": 15828830
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15245,
+        "mean": 16398.35,
+        "max": 37382
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 43,
+        "mean": 175.64,
+        "max": 1928
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 12092284,
+        "mean": 15576888.19,
+        "max": 42329979
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 25,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11798671,
+        "mean": 19531164.38,
+        "max": 116586171
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11772055,
+        "mean": 15352093.85,
+        "max": 90312304
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15112,
+        "mean": 16676.11,
+        "max": 34844
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 41,
+        "mean": 173.32,
+        "max": 353
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 11930766,
+        "mean": 19681100.96,
+        "max": 116745939
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 26,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11851430,
+        "mean": 16450633.57,
+        "max": 64682278
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11851457,
+        "mean": 12806077.81,
+        "max": 20767809
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15142,
+        "mean": 17872.92,
+        "max": 113325
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 60,
+        "mean": 188.44,
+        "max": 2237
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 11985473,
+        "mean": 16598948.61,
+        "max": 64818393
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 27,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11885146,
+        "mean": 15432558.88,
+        "max": 34986121
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11770966,
+        "mean": 12921667.73,
+        "max": 15674810
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 14967,
+        "mean": 16838.69,
+        "max": 39489
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 62,
+        "mean": 238.33,
+        "max": 5779
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 12034193,
+        "mean": 15794536.1,
+        "max": 35130018
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 28,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11899900,
+        "mean": 15987799.88,
+        "max": 36811452
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11899854,
+        "mean": 13179623.54,
+        "max": 33741703
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 14833,
+        "mean": 17421.32,
+        "max": 81835
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 48,
+        "mean": 176.36,
+        "max": 427
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 12030839,
+        "mean": 16136248.76,
+        "max": 36954347
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 29,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11824045,
+        "mean": 23280019.95,
+        "max": 106585030
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11823878,
+        "mean": 18925049.04,
+        "max": 88171645
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 14644,
+        "mean": 223602.52,
+        "max": 19487715
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 48,
+        "mean": 195.04,
+        "max": 497
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 11957247,
+        "mean": 23676032.56,
+        "max": 106776278
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 30,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11978381,
+        "mean": 19359501.02,
+        "max": 121276286
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11977958,
+        "mean": 15855816.04,
+        "max": 107828110
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 14918,
+        "mean": 16622.85,
+        "max": 42436
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 58,
+        "mean": 201.45,
+        "max": 702
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 12113631,
+        "mean": 19513513.34,
+        "max": 121478459
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 31,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11822796,
+        "mean": 15494818.41,
+        "max": 32023285
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11822365,
+        "mean": 12676229.3,
+        "max": 15568831
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15004,
+        "mean": 18363.75,
+        "max": 92599
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 68,
+        "mean": 173.34,
+        "max": 330
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 11975749,
+        "mean": 15833645.51,
+        "max": 33440631
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 32,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11925854,
+        "mean": 16441950.81,
+        "max": 46250955
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11925636,
+        "mean": 13223964.69,
+        "max": 26919612
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 14829,
+        "mean": 16575.37,
+        "max": 41106
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 53,
+        "mean": 359.28,
+        "max": 16910
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 12056716,
+        "mean": 16778283.63,
+        "max": 46394156
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 33,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11751545,
+        "mean": 22324704.2,
+        "max": 97368472
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11751164,
+        "mean": 16232699.83,
+        "max": 92975030
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15086,
+        "mean": 59514.37,
+        "max": 4097262
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 79,
+        "mean": 231.71,
+        "max": 2241
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 11904988,
+        "mean": 22522992.68,
+        "max": 97548717
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 34,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11896142,
+        "mean": 15951713.97,
+        "max": 35092912
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11895852,
+        "mean": 12681536.15,
+        "max": 17236196
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15064,
+        "mean": 16408.55,
+        "max": 36423
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 51,
+        "mean": 173.65,
+        "max": 411
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 12027383,
+        "mean": 16100309.01,
+        "max": 35231316
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 35,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11944459,
+        "mean": 15682832.59,
+        "max": 35184504
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11944340,
+        "mean": 12608029,
+        "max": 15907773
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15054,
+        "mean": 17661.7,
+        "max": 45867
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 64,
+        "mean": 170.52,
+        "max": 384
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 12078262,
+        "mean": 15826679.73,
+        "max": 35341030
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 36,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11587314,
+        "mean": 16491149.4,
+        "max": 84221300
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11587331,
+        "mean": 13226104.13,
+        "max": 64809142
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15024,
+        "mean": 16520.93,
+        "max": 37823
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 42,
+        "mean": 174.28,
+        "max": 403
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 11721446,
+        "mean": 16638290.91,
+        "max": 84448680
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 37,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11519667,
+        "mean": 15134178.11,
+        "max": 32925403
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11519587,
+        "mean": 12512079.17,
+        "max": 15089313
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 14735,
+        "mean": 17137.64,
+        "max": 37164
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 61,
+        "mean": 185.6,
+        "max": 385
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 11654483,
+        "mean": 15468098.71,
+        "max": 33110698
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 38,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11899710,
+        "mean": 16471732.18,
+        "max": 42270252
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11899700,
+        "mean": 13579814.59,
+        "max": 35901051
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 14759,
+        "mean": 17049.81,
+        "max": 65513
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 42,
+        "mean": 187.68,
+        "max": 290
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 12032488,
+        "mean": 16622518.61,
+        "max": 42448137
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 39,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11923815,
+        "mean": 16527322.98,
+        "max": 105244971
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11923796,
+        "mean": 13356760.64,
+        "max": 35361035
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15360,
+        "mean": 16611.17,
+        "max": 39009
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 59,
+        "mean": 173.77,
+        "max": 418
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 12056441,
+        "mean": 16674679.47,
+        "max": 105402060
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 40,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11613154,
+        "mean": 15428392.47,
+        "max": 36205693
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11613115,
+        "mean": 12670612.68,
+        "max": 17222630
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15041,
+        "mean": 17198.13,
+        "max": 84301
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 58,
+        "mean": 167.55,
+        "max": 290
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 11745900,
+        "mean": 15575090.48,
+        "max": 36344118
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 41,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11706503,
+        "mean": 16241578.08,
+        "max": 79654770
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11705912,
+        "mean": 13350822.44,
+        "max": 57659794
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 14597,
+        "mean": 21984.81,
+        "max": 511649
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 58,
+        "mean": 176.15,
+        "max": 293
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 11830081,
+        "mean": 16576712.97,
+        "max": 79797829
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 42,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11908533,
+        "mean": 22995455.16,
+        "max": 266013969
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11908313,
+        "mean": 17299967.73,
+        "max": 148705618
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 14586,
+        "mean": 16636.94,
+        "max": 41728
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 46,
+        "mean": 183.5,
+        "max": 416
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 12041126,
+        "mean": 23255318.66,
+        "max": 270254726
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 43,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11735173,
+        "mean": 15446439.55,
+        "max": 39944905
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11492659,
+        "mean": 12696742.7,
+        "max": 17765273
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 14917,
+        "mean": 19369.23,
+        "max": 240883
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 41,
+        "mean": 175.42,
+        "max": 313
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 11892297,
+        "mean": 15974661.44,
+        "max": 40088881
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 44,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11776467,
+        "mean": 16104610.83,
+        "max": 61968138
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11776447,
+        "mean": 13153366.12,
+        "max": 25482384
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 15202,
+        "mean": 16821.18,
+        "max": 84609
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 40,
+        "mean": 179.54,
+        "max": 347
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 11909810,
+        "mean": 16279180.69,
+        "max": 62107565
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  },
+  {
+    "curve": 45,
+    "metrics": {
+      "gb_wall_ns": {
+        "n": 100,
+        "min": 11713543,
+        "mean": 17600289.89,
+        "max": 91606667
+      },
+      "gb_process_cpu_ns": {
+        "n": 100,
+        "min": 11713295,
+        "mean": 14177398.39,
+        "max": 91601285
+      },
+      "construction_ns": {
+        "n": 100,
+        "min": 14767,
+        "mean": 21205.44,
+        "max": 374052
+      },
+      "root_and_relation_ns": {
+        "n": 100,
+        "min": 72,
+        "mean": 179.51,
+        "max": 495
+      },
+      "whole_probe_wall_ns": {
+        "n": 100,
+        "min": 11881002,
+        "mean": 17747797.31,
+        "max": 91756925
+      },
+      "dreg": {
+        "n": 100,
+        "min": 13,
+        "mean": 13,
+        "max": 13
+      },
+      "gb.basis_insertions": {
+        "n": 100,
+        "min": 46,
+        "mean": 46,
+        "max": 46
+      },
+      "gb.field_add_sub": {
+        "n": 100,
+        "min": 296654,
+        "mean": 296654,
+        "max": 296654
+      },
+      "gb.field_inverse": {
+        "n": 100,
+        "min": 725,
+        "mean": 725,
+        "max": 725
+      },
+      "gb.field_multiply_including_inverse_power": {
+        "n": 100,
+        "min": 217410,
+        "mean": 217410,
+        "max": 217410
+      },
+      "gb.leading_reductions": {
+        "n": 100,
+        "min": 10564,
+        "mean": 10564,
+        "max": 10564
+      },
+      "gb.max_actual_polynomial_degree": {
+        "n": 100,
+        "min": 23,
+        "mean": 23,
+        "max": 23
+      },
+      "gb.max_sugar_degree": {
+        "n": 100,
+        "min": 26,
+        "mean": 26,
+        "max": 26
+      },
+      "gb.pairs_created": {
+        "n": 100,
+        "min": 1035,
+        "mean": 1035,
+        "max": 1035
+      },
+      "gb.pairs_processed": {
+        "n": 100,
+        "min": 342,
+        "mean": 342,
+        "max": 342
+      },
+      "gb.product_criterion_skips": {
+        "n": 100,
+        "min": 1,
+        "mean": 1,
+        "max": 1
+      }
+    }
+  }
+]

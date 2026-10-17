@@ -8,8 +8,8 @@ if pgrep -f "^$root/worker $root " >/dev/null; then echo "Existing campaign work
 sha256sum -c FROZEN.sha256 --quiet
 if [[ -e STOP ]]; then echo 'STOP exists; remove only when intentionally resuming'; exit 1; fi
 if [[ "${1:-}" == --check ]]; then echo "Frozen inputs verified; no workers active"; exit 0; fi
-logroot="$root/logs/launch_$(date -u +%Y%m%dT%H%M%SZ)_$"
-mkdir -p "$logroot"
+mkdir -p "$root/logs"
+logroot=$(mktemp -d "$root/logs/launch_$(date -u +%Y%m%dT%H%M%SZ)_XXXXXX")
 rho_family() {
   "$root/worker" "$root" rho 0 100 > "$logroot/rho_coverage_0.log" 2>&1 &
   first=$!

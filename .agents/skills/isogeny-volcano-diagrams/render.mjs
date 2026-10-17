@@ -29,7 +29,7 @@ export function render(data){
     const score=id=>{const ns=neighbors.get(id).filter(x=>direction*(byId.get(x).level-l)<0);return ns.length?ns.reduce((s,x)=>s+rank.get(x),0)/ns.length:rank.get(id);};
     layers.get(l).sort((a,b)=>score(a)-score(b)||a.localeCompare(b));update();
   }
-  const width=Math.max(1100,Math.max(...[...layers.values()].map(x=>x.length))*96+120),height=245+levels.length*180;
+  const width=Math.max(1100,Math.max(...[...layers.values()].map(x=>x.length))*75+120),height=245+levels.length*180;
   const pos=new Map();levels.forEach((l,j)=>layers.get(l).forEach(id=>pos.set(id,{x:60+rank.get(id)*(width-120),y:190+j*180})));
   let range=null;
   if(data.metric){need(typeof data.metric.unit==='string'&&typeof data.metric.boundary==='string'&&typeof data.metric.statistic==='string','metric units, statistic and boundary required');const vs=nodes.map(n=>n.value).filter(x=>x!==null);range=data.range??(vs.length?[Math.min(...vs),Math.max(...vs)]:null);if(range){need(range.length===2&&range.every(Number.isFinite)&&range[0]<=range[1],'invalid color range');need(vs.every(x=>x>=range[0]&&x<=range[1]),'measurement outside shared color range');}}
@@ -46,7 +46,7 @@ export function render(data){
     else{const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len,bend=8+Math.floor(index/2)*12;const cx=(a.x+b.x)/2-uy*bend,cy=(a.y+b.y)/2+ux*bend;d=`M${a.x+ux*15} ${a.y+uy*15}Q${cx} ${cy},${b.x-ux*17} ${b.y-uy*17}`;lx=cx+4;ly=cy-4;}
     svg+=`<g class="edge" data-edge="${esc(e.id??String(i))}"><path d="${d}" fill="none" stroke="#8ca4b5" stroke-width="1.1"${e.verified?'':' stroke-dasharray="4 3"'} marker-end="url(#arrow)"/><text x="${lx}" y="${ly}" font-size="10">${e.degree}</text><title>${esc(JSON.stringify(e))}</title></g>`;
   }
-  for(const n of nodes){const p=pos.get(n.id);svg+=`<g class="node" data-node="${esc(n.id)}" data-level="${n.level}" data-curve-id="${esc(n.curve_id)}" tabindex="0"><circle cx="${p.x}" cy="${p.y}" r="14" fill="${fill(n)}" stroke="#254f66"/><text x="${p.x}" y="${p.y+32}" text-anchor="middle" font-size="14">${esc(n.id)}</text><text x="${p.x}" y="${p.y+47}" text-anchor="middle" font-family="monospace" font-size="8">${esc(n.curve_id.slice(0,12))}</text>${data.metric?`<text x="${p.x}" y="${p.y+64}" text-anchor="middle" font-size="10">${n.value===null?'missing':esc(fmt(n.value))} · n=${n.n}</text>`:''}<title>${esc(JSON.stringify(n))}</title></g>`;}
+  for(const n of nodes){const p=pos.get(n.id);svg+=`<g class="node" data-node="${esc(n.id)}" data-level="${n.level}" data-curve-id="${esc(n.curve_id)}" tabindex="0"><circle cx="${p.x}" cy="${p.y}" r="14" fill="${fill(n)}" stroke="#254f66"/><text x="${p.x}" y="${p.y+32}" text-anchor="middle" font-size="20">${esc(n.id)}</text><text x="${p.x}" y="${p.y+47}" text-anchor="middle" font-family="monospace" font-size="9">${esc(n.curve_id.slice(0,12))}</text>${data.metric?`<text x="${p.x}" y="${p.y+64}" text-anchor="middle" font-size="13">${n.value===null?'missing':'n='+n.n}</text>`:''}<title>${esc(JSON.stringify(n))}</title></g>`;}
   svg+=`<text x="25" y="${height-22}" font-size="12">Full exact identities, map evidence and measurements: graph_data.json / interactive inspector.</text></g></svg>`;
   return {svg,range,width,height,nodes:nodes.length,edges:data.edges.length,levels};
 }

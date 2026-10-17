@@ -1,0 +1,191 @@
+[
+  {
+    "name": "rho_operations",
+    "label": "Rho: counted group operations",
+    "unit": "upstream group operations",
+    "boundary": "Native solve; upstream counter boundary; not field-operation equivalents",
+    "manifest": {
+      "schema": "isogeny-volcano-diagram/v1",
+      "run_id": "photo-volcano-fresh/quantitative_1452",
+      "node_count": 46,
+      "directed_edge_count": 90,
+      "recorded_levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "color_range": [
+        107895789.39,
+        134494184.67
+      ],
+      "source_sha256": "b5def0a10d7d6df9411649cd3355fe775b30329a3ff157d0c0d138aca04a233e",
+      "missing_nodes": 0,
+      "all_vertices_and_maps_retained": true,
+      "pdf_inspection_required": true
+    }
+  },
+  {
+    "name": "rho_wall",
+    "label": "Rho: native elapsed time",
+    "unit": "seconds",
+    "boundary": "One native solve per case; L0 concurrent work; setup handled by upstream solve",
+    "manifest": {
+      "schema": "isogeny-volcano-diagram/v1",
+      "run_id": "photo-volcano-fresh/quantitative_1452",
+      "node_count": 46,
+      "directed_edge_count": 90,
+      "recorded_levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "color_range": [
+        6.6735518339399995,
+        10.24742088433
+      ],
+      "source_sha256": "edba70feac9ea5c97711dcc2328326870fe00b4f4581893804510ac0fe098202",
+      "missing_nodes": 0,
+      "all_vertices_and_maps_retained": true,
+      "pdf_inspection_required": true
+    }
+  },
+  {
+    "name": "bsgs_operations",
+    "label": "BSGS: counted online group operations",
+    "unit": "upstream group operations",
+    "boundary": "Query only; excludes reused m=2^27 table setup and destruction",
+    "manifest": {
+      "schema": "isogeny-volcano-diagram/v1",
+      "run_id": "photo-volcano-fresh/quantitative_1452",
+      "node_count": 46,
+      "directed_edge_count": 90,
+      "recorded_levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "color_range": [
+        71307530.65671642,
+        71837588.1
+      ],
+      "source_sha256": "19cf1c2555debc9fcfb633f54d3137c69b27d14ad97ae11b2ec972cf7400e75f",
+      "missing_nodes": 0,
+      "all_vertices_and_maps_retained": true,
+      "pdf_inspection_required": true
+    }
+  },
+  {
+    "name": "bsgs_wall",
+    "label": "BSGS: online elapsed time",
+    "unit": "seconds",
+    "boundary": "Query only; excludes reused table setup; L0 concurrent work",
+    "manifest": {
+      "schema": "isogeny-volcano-diagram/v1",
+      "run_id": "photo-volcano-fresh/quantitative_1452",
+      "node_count": 46,
+      "directed_edge_count": 90,
+      "recorded_levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "color_range": [
+        10.7693988587,
+        17.4887327624
+      ],
+      "source_sha256": "9862924f06f5ea519c495cb54dddf8080493486928aed1aaf5cff7440765b37d",
+      "missing_nodes": 0,
+      "all_vertices_and_maps_retained": true,
+      "pdf_inspection_required": true
+    }
+  },
+  {
+    "name": "ic_operations",
+    "label": "IC target GB stage: counted field multiplications",
+    "unit": "F_p multiplications including inverse exponentiation",
+    "boundary": "Actual GB stage only; not full cold IC recovery",
+    "manifest": {
+      "schema": "isogeny-volcano-diagram/v1",
+      "run_id": "photo-volcano-fresh/quantitative_1452",
+      "node_count": 46,
+      "directed_edge_count": 90,
+      "recorded_levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "color_range": [
+        217410,
+        217410
+      ],
+      "source_sha256": "2552bfb969e2132689e999100ccd9a4a4f54fbab905f40de2fe50430c1c086cb",
+      "missing_nodes": 0,
+      "all_vertices_and_maps_retained": true,
+      "pdf_inspection_required": true
+    }
+  },
+  {
+    "name": "ic_wall",
+    "label": "IC target GB stage: elapsed time",
+    "unit": "milliseconds",
+    "boundary": "Actual GB stage only; L0 concurrent work; zero full recoveries",
+    "manifest": {
+      "schema": "isogeny-volcano-diagram/v1",
+      "run_id": "photo-volcano-fresh/quantitative_1452",
+      "node_count": 46,
+      "directed_edge_count": 90,
+      "recorded_levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "color_range": [
+        15.134178109999999,
+        23.28001995
+      ],
+      "source_sha256": "5184dff0afa747c17eec1b11b6e9d68a59ec2f430c7fa07647f43264d52a2728",
+      "missing_nodes": 0,
+      "all_vertices_and_maps_retained": true,
+      "pdf_inspection_required": true
+    }
+  },
+  {
+    "name": "ic_hilbert_cutoff",
+    "label": "IC target top-forms Hilbert cutoff",
+    "unit": "polynomial degree",
+    "boundary": "First zero Hilbert-function degree of (X^12,Y^12,X^2Y^2); not CM regularity",
+    "manifest": {
+      "schema": "isogeny-volcano-diagram/v1",
+      "run_id": "photo-volcano-fresh/quantitative_1452",
+      "node_count": 46,
+      "directed_edge_count": 90,
+      "recorded_levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "color_range": [
+        13,
+        13
+      ],
+      "source_sha256": "a5831a7a792e2c89cb0f81fe1c639c800c8eea032c3268f4a0c7803f7bbb2baf",
+      "missing_nodes": 0,
+      "all_vertices_and_maps_retained": true,
+      "pdf_inspection_required": true
+    }
+  }
+]

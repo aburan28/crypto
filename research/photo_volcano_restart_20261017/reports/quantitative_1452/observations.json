@@ -1,0 +1,20 @@
+{
+  "verified_rho": 4600,
+  "verified_bsgs": 3297,
+  "rho_fully_paired_instances": 100,
+  "bsgs_counted_query_operations_equal_for_each_observed_paired_key": true,
+  "ic_target_multiply_min": 217410,
+  "ic_target_multiply_max": 217410,
+  "ic_gb_wall_ms_min": 11.519667,
+  "ic_gb_wall_ms_max": 266.013969,
+  "ic_dreg_min": 13,
+  "ic_dreg_max": 13,
+  "map_multiply_per_pair": [
+    174
+  ],
+  "all_subgroup_orders": "18014494963342201",
+  "full_IC_recoveries": 0,
+  "timing_isolation": "L0 concurrent",
+  "intrinsic_hardness_difference_established": false,
+  "all_native_cases_complete": false
+}
