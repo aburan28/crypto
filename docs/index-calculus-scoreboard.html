@@ -875,6 +875,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 <tr><td>2026-10-03</td><td>Elliptic curve, n61 batch of L &ge; 1,024 targets vs frozen KS v2 rho (historical diagnostic)</td><td>n61 L = 16,384, K = 700, hosted isolated</td><td class="n">0.323&times; <small>isolated wall time</small></td><td>unmatched</td><td><span class="chip">accounting</span></td><td><a href="#n61-compact-orbit-hosted-20261003">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab/evidence/20261003-koblitz-n61-hosted-isolated/README.md">source</a></td></tr>
 <tr><td>2026-09-19</td><td>Not an elliptic curve: hyperelliptic Jacobian, genus 4, toy size</td><td>Genus-4 crossover exponent</td><td class="n">0.21&times;</td><td>matched</td><td><span class="chip">advance, exponent</span></td><td><a href="#genus-crossover">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#genus-crossover">source</a></td></tr>
 <tr><td>2026-09-30</td><td>Not an elliptic curve: hyperelliptic Jacobian, genus 4, toy size</td><td>Round seven: sparse solve priced, genus-3 claim withdrawn</td><td class="n">0.24&times;</td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#genus-crossover">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#genus-crossover">source</a></td></tr>
+<tr><td>2026-10-15</td><td>Not an elliptic curve: genus-3 Jacobian of a GHS cubic cover, double large primes</td><td>Genus-3 GHS IC-2LP rebuilt baseline at q = 2^14 (04b)</td><td class="n">0.252&times; <small>rho renormalised to &radic;(&pi;/2); 0.162&times; raw; rho n = 4, on Jac(C), not E0</small></td><td>matched</td><td><span class="chip">engineering</span></td><td><a href="#genus-crossover">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_improve_20261014/04b-genus3-2lp-rebalance/README.md">source</a></td></tr>
 <tr><td>2026-10-03</td><td>Weak elliptic class: cover and decomposition on E(F_p^6)</td><td>Cover and decomposition, p = 1009 (subgroup 2^57.9), best of two seeds</td><td class="n">8.1&times;</td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md">source</a></td></tr>
 <tr><td>2026-10-03</td><td>Weak elliptic class: cover and decomposition on E(F_p^6)</td><td>Cover and decomposition, F4 stopped at the B&eacute;zout staircase, p = 1009 (subgroup 2^57.9), best of two seeds</td><td class="n">5.1&times;</td><td>matched</td><td><span class="chip">engineering</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md">source</a> (&sect;10)</td></tr>
 <tr><td>2026-10-04</td><td>Weak elliptic class: cover and decomposition on E(F_p^6)</td><td>Sieving variant of the cover route (Joux&ndash;Vitse &sect;3.2), p = 1511 (subgroup 2^61.4), best of two seeds</td><td class="n">0.012&times;</td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md">source</a> (&sect;11)</td></tr>
@@ -1617,6 +1618,24 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
       ]
     },
     {
+      "id": "genus3-ghs-2lp",
+      "label": "Not an elliptic curve: genus-3 Jacobian of a GHS cubic cover, double large primes",
+      "role": "context",
+      "note": "Index calculus with double large primes on Jac(C) of hyperelliptic GHS cubic covers (m = 3, r = 5) over prime F_q, q = 2^10-2^20, counted F_q plus mod-ell multiplications, one target cold, 12 paired instances per size. Rho is measured on the same Jac(C)[ell] in the same unit at q <= 2^14 only (4 single walks per size, renormalised to sqrt(pi/2)); it is not rho on the elliptic curve E0(F_q^3). The exponent result (total q^1.383 against GTTD's 4/3) is in the genus-crossover panel.",
+      "points": [
+        {
+          "date": "2026-10-15",
+          "value": 0.252,
+          "reference": "matched",
+          "label": "Genus-3 GHS IC-2LP rebuilt baseline at q = 2^14 (04b)",
+          "detail": "Rebuilt IC-2LP baseline (kappa = 2, tree-cycle elimination + Lanczos) against rho on the same Jac(C)[ell] at q = 2^14: 0.252x with rho renormalised to sqrt(pi/2) (0.162x raw; rho walks 0.49-3.48 steps per sqrt(ell), n = 4). Cost exponent over 2^14-2^20: 1.383 (99% [1.382, 1.384]) against rho's 3/2 and GTTD's 4/3; relation phase 1.332, linear algebra 1.447. Retuning the factor base gives 1.373; structured Gaussian elimination before Lanczos gives 1.419 while cheaper by 9-22%. The original study this follows up is not in the repository; this is a rebuild. Toy sizes; not an ECDLP crossover, since rho on E0(F_q^3) is not measured.",
+          "class": "engineering",
+          "anchor": "#genus-crossover",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ic_improve_20261014/04b-genus3-2lp-rebalance/README.md"
+        }
+      ]
+    },
+    {
       "id": "cover-fp6",
       "label": "Weak elliptic class: cover and decomposition on E(F_p^6)",
       "role": "context",
@@ -1821,7 +1840,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
     var last = pts[pts.length - 1];
     var lx = X(day(last.date)), flip = lx > W - R - 110;
     var lab = mk('text', { x: flip ? lx - 10 : lx + 9, y: Y(last.value) + 4, 'class': 'dlabel ' + cls, 'text-anchor': flip ? 'end' : 'start' }, svg);
-    lab.textContent = ser.role === 'emphasis' ? 'whole method, cold' : ser.id === 'ec-cold-unisolated' ? 'unisolated cold' : ser.id === 'ec-batch' ? '32 targets together' : ser.id === 'ec-batch-n61' ? 'n61 batch vs KS v2' : ser.id === 'ec-online' ? 'online only' : ser.id === 'genus4' ? 'genus-4 Jacobian' : 'E(F_p^6) cover';
+    lab.textContent = ser.role === 'emphasis' ? 'whole method, cold' : ser.id === 'ec-cold-unisolated' ? 'unisolated cold' : ser.id === 'ec-batch' ? '32 targets together' : ser.id === 'ec-batch-n61' ? 'n61 batch vs KS v2' : ser.id === 'ec-online' ? 'online only' : ser.id === 'genus4' ? 'genus-4 Jacobian' : ser.id === 'genus3-ghs-2lp' ? 'genus-3 GHS cover, 2LP' : 'E(F_p^6) cover';
     var li = document.createElement('span'); li.className = 'lg ' + cls; var sw = document.createElement('i'); li.appendChild(sw); li.appendChild(document.createTextNode(ser.label)); legend.appendChild(li);
   });
   var hol = document.createElement('span'); hol.className = 'lg emph hollow'; var sw2 = document.createElement('i'); hol.appendChild(sw2); hol.appendChild(document.createTextNode('hollow: later shown measured against an unmatched rho')); legend.appendChild(hol);
@@ -5660,7 +5679,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 
   <section aria-labelledby="genus-crossover" style="margin:3rem 0;overflow-x:auto">
     <h2 id="genus-crossover">Hyperelliptic: one exponent survives the priced linear algebra</h2>
-  <p class="panel-summary">Genus 4 retains an exponent advance, the genus 3 claim is withdrawn as accounting once the solve was priced, and the reduced factor base remedy does not pay.</p>
+  <p class="panel-summary">Genus 4 retains an exponent advance, the genus 3 claim is withdrawn as accounting once the solve was priced, and the reduced factor base remedy does not pay. Genus-3 double large primes on GHS covers (04b, 2026-10-15) grow as q<sup>1.383</sup>, above GTTD&rsquo;s 4/3, and neither retuning the factor base nor structured elimination removes it.</p>
     <p>The one family in this ledger that measures below a real rho. With <code>N</code> the
     subgroup order and <code>m &asymp; p/2</code> the full degree-1 factor base, rho costs
     <code>&radic;N</code> at any genus. The relation stage alone gives
@@ -5703,6 +5722,20 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     <code>N</code> = 3.2&middot;10<sup>7</sup> reads 0.23 raw, 0.46 renormalised &mdash; a single row,
     not a refit. Frozen source:
     <a href="https://github.com/aburan28/crypto/blob/main/experiments/hyperelliptic_large_prime_r8/manifest.json">round eight</a>.</p>
+    <p><strong>04b, 2026-10-15: genus-3 double large primes on GHS cubic covers depart from 4/3 through the linear algebra.</strong>
+    Index calculus with double large primes (Gaudry&ndash;Thom&eacute;&ndash;Th&eacute;riault&ndash;Diem), reduced factor base
+    <code>F = &lceil;2q<sup>2/3</sup>&rceil;</code>, on <code>Jac(C)</code> of hyperelliptic GHS cubic covers (<code>m = 3, r = 5</code>)
+    over prime <code>F<sub>q</sub></code>, <code>q &asymp; 2<sup>10</sup>&ndash;2<sup>20</sup></code>; counted <code>F<sub>q</sub></code>
+    plus mod-&ell; multiplications over the whole method, 12 paired one-target instances per size, all 360 logarithms verified,
+    protocol frozen before data. The rebuilt baseline fits <code>q<sup>1.383</sup></code> over 2<sup>14</sup>&ndash;2<sup>20</sup>
+    (99% [1.382, 1.384]) against GTTD&rsquo;s <code>q<sup>4/3</sup></code>: the relation phase sits at <code>q<sup>1.332</sup></code> and the
+    linear algebra at <code>q<sup>1.447</sup></code>, because the Lanczos row weight grows 7.8 &rarr; 14.4. Retuning the factor base per size
+    gives <code>q<sup>1.373</sup></code> (paired ratio 0.961 at 2<sup>20</sup>); structured Gaussian elimination before Lanczos is 9&ndash;22%
+    cheaper at every size but fits <code>q<sup>1.419</sup></code>, since its saving shrinks as the baseline&rsquo;s weight catches up.
+    <span class="chip">engineering</span> Against rho on the same <code>Jac(C)[&ell;]</code> at <code>q = 2<sup>14</sup></code>: 0.25&times;
+    renormalised (0.16&times; raw, 4 walks); rho on <code>E0(F<sub>q&sup3;</sub>)</code> is not measured, so this is no ECDLP crossover.
+    The study it follows up is not in the repository; this is a rebuild. Frozen source:
+    <a href="https://github.com/aburan28/crypto/blob/main/research/ic_improve_20261014/04b-genus3-2lp-rebalance/README.md">04b study</a>.</p>
     <p><strong>Superseded corrections, kept.</strong> Round five fitted against
     <code>log&#8322; p</code> and genus 4 missed at &minus;1.611 against &minus;1.0; restated against
     <code>N</code>, which the harness measures as <code>p<sup>1.91</sup></code>,

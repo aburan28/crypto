@@ -1,0 +1,55 @@
+{
+  "artifact_sha256": {
+    ".github/workflows/weak-curve-database.yml": "c9809b23e083fc6e3ae1524fbc468e525313fee66566d207150977bd86567849",
+    "research/p192_extension_cover_20261012/REPORT.md": "b536987dade1270e050d9dca43a16bcb2212ffbd8d859aa2ac9038a2eb5b3375",
+    "research/p192_extension_cover_20261012/lean/AdaptiveBase.lean": "602d2100002ba15d2671293ee8d91232c419e9c30d14edaf96e3f2da82beb4b8",
+    "research/p192_extension_cover_20261012/lean/ShortSums.lean": "9244c00a90c56454a0b7628bb1be7a59ed68c8ddeb369937a3a30f2c172abd18",
+    "research/p192_extension_cover_20261012/lean/lake-manifest.json": "fc1b089030173d9aad95d8dafe3e47168f93fccc14274413e9645acadabbf1b9",
+    "research/p192_extension_cover_20261012/lean/lakefile.toml": "03cff09527f4e5fdc3651af70fa6e492ccd899b5e4736a5c719068b7f34208a5",
+    "research/p192_extension_cover_20261012/lean/lean-toolchain": "d5edba4e4b8faad9c1baeadb265716d20d03be4d1a2647dc5e35b0c0325bea7b",
+    "research/p192_extension_cover_20261012/lean/short-sums-axioms-20261015.log": "9c84e6abfec37be06adc7a4f2600e0a71c9f5946124a8ede7c47e18751060684",
+    "research/p192_extension_cover_20261012/lean/short-sums-build-20261015.log": "d1af0635a44c63969da4ea95e1d2b04d3d4509495a527960327a03b2106225c2",
+    "research/p192_extension_cover_20261012/lean/short-sums-fresh-20261015.log": "3eb83905b2716a13b8c66f9ef0474d86341b87983d24c92aed0abfdcb587a81a",
+    "research/p192_extension_cover_20261012/native_support/src/bin/adaptive_short_sums.rs": "3b9ef20eb593808ac922dac84682750342076507418abdb981082e476c3ca19e",
+    "research/p192_extension_cover_20261012/native_support/src/ec.rs": "776d74d3f5ef53f8427d29e519237a692136322259c23b8ba90b078df93fa382",
+    "research/p192_extension_cover_20261012/reports/run-20261015T1955Z/REPORT.md": "c1928b5c47cbde751394dd4e0d6c38334227085a0a8d425282e55284f32e0957",
+    "research/p192_extension_cover_20261012/type_i_adaptive_private_columns.json": "c3b83c7b55872e112cab0cb90b409abea6cafe62af2a7882feef45ddd728e4e9",
+    "research/p192_extension_cover_20261012/type_i_adaptive_short_sums.json": "7d24c306fd42f98b67aa3c587bd90b2f665214e0980162c08330e6c77c4ad0b6",
+    "research/p192_extension_cover_20261012/type_i_adaptive_short_sums.log": "70959a555518e0e1a52dfb27634f5d58fda0a886b0e47b15b8ff9e6ae5539aa8",
+    "research/p192_extension_cover_20261012/type_i_adaptive_short_sums_independent.log": "72fad558cf8fd740f9296c07ef319c499a350d60da00efede875caaaccebf978",
+    "research/p192_extension_cover_20261012/type_i_base_points_legacy_fixture.json": "3984b55b793305b30beaf18918209282bce80d444c96217cd6143c7d9470d409",
+    "research/p192_extension_cover_20261012/type_i_fixed_origin_reduction.json": "83bc6ab920b65482ab37a0d224f06b8c61e21ef184c960aa24b236f0602a1e42",
+    "research/p192_extension_cover_20261012/type_i_geom_character_collector.json": "961a9995114189ed1ee86febde46979900317417a2744f34274833390fb5ff49",
+    "research/p192_extension_cover_20261012/type_i_guided_negative_fixed_origin_reduction.json": "4781fa4ac8593195919f7b51831c907f8b9ff65bfbdab848fabcc34ed919b95a",
+    "research/p192_extension_cover_20261012/type_i_negative_fixed_origin_reduction.json": "d524d64dbef9b6532a215e11750e9ce14c32a400492bb817fece7922afe0234e",
+    "research/p192_extension_cover_20261012/verify_adaptive_private_columns.py": "5007c57dc99a9f50e168f21cbb449d842d1c2167ddfcecfe9c228dac9c942a9e",
+    "research/p192_extension_cover_20261012/verify_adaptive_short_sums.py": "cc1fc49cd7f253d694a5d2e5562217374718975784ba9c19e8d5dd3851437068"
+  },
+  "checks": {
+    "independent_exit": 0,
+    "lean_axioms_exit": 0,
+    "lean_build_exit": 0,
+    "lean_fresh_exit": 0,
+    "native_exit": 0
+  },
+  "counts": {
+    "distinct_denominator_cubic_vectors": 160,
+    "distinct_numerator_cubic_vectors": 160,
+    "distinct_pair_sums": 12801,
+    "four_sum_hits": 0,
+    "four_sum_pair_complement_tests": 824320,
+    "minimum_old_base_sum_length": 5,
+    "old_unordered_pairs": 12880,
+    "reduced_signed_degree_three_classes": 160,
+    "selected_adaptive_points": 64,
+    "two_sum_hits": 0
+  },
+  "native_binary_sha256": "5077dd54660feea1ede37a9759ed004f08b7979af2a3d3b728294053fb6788b6",
+  "parent_commit": "6f82b7d38f39c5d99727ade827c85ec43d6c74ba",
+  "scope": "standard P-192 Type I quotient; fixed 160 signed old classes; 64 selected accepted known-scalar adaptive points",
+  "status": "verified_short_sum_absence_and_structural_lean",
+  "toolchain": {
+    "lean": "leanprover/lean4:v4.34.1",
+    "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)"
+  }
+}

@@ -1,0 +1,8 @@
+ShortSums.lean:19:28: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+ShortSums.lean:28:28: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+'P192ExtensionCover.two_sum_collision_eliminates_fresh' depends on axioms: [propext]
+'P192ExtensionCover.four_sum_collision_eliminates_fresh' depends on axioms: [propext]

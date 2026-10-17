@@ -1,0 +1,35 @@
+{
+  "additional_private_pair_rows": 5035,
+  "artifact_sha256": {
+    "research/p192_extension_cover_20261012/lean/LineSupport.lean": "30470e9af174cbf205d89ad2359b19a9893773e9a6cecd537afcd43238c51996",
+    "research/p192_extension_cover_20261012/lean/TraceThree.lean": "311d143bac7dee89174e464c12ed3effde44c76fd8f8d652c3e17d7700fef5f0",
+    "research/p192_extension_cover_20261012/line_residual_pivot_three.py": "505d5e66117a7b1c7f90c777fde419e5af0cf7ebca83e5bbb8596bc744b2291f",
+    "research/p192_extension_cover_20261012/line_residual_pivot_three_fast.py": "99919b8b0727973d548dfdaa687b72d12eeae1eab14c2026954c5fcb197fd535",
+    "research/p192_extension_cover_20261012/reports/run-20261016T1850Z/RUN.json": "7704fd9b7e1c7f2bc1a39bc414030729accb0287298b93b518f3dc9b60d93a45",
+    "research/p192_extension_cover_20261012/reports/run-20261016T2031Z/REPORT.md": "633d4ab7dfb8a8b369f375e3f6e4261692a976f160dd27a7903641743049282e",
+    "research/p192_extension_cover_20261012/type_i_line_trace_full_chunks/pivot-000.json": "d197c50d979c2ffda34d8cf8e16280740288be2eefbf8715d36fb3fe09e77ed7",
+    "research/p192_extension_cover_20261012/type_i_line_trace_full_verified_20261016T1849Z.json": "e800401cf3d451d37daa3191e7c7dd22791e25eb5c5b0e29dfcbc76f956c88fa",
+    "research/p192_extension_cover_20261012/type_i_residual_pivot000_three.json": "998911e3bafdb522ccefea7394047f1bbea8600f8aa5923e73a3bfa287644621",
+    "research/p192_extension_cover_20261012/type_i_residual_pivot000_three_fast.json": "da5f61f7b243122eb73ab49502f0ad9e090fbf110db352662a931e136138d541",
+    "research/p192_extension_cover_20261012/type_i_residual_pivot000_three_replay.json": "0492d87c08fbb24c5d49ff4ad7c951bb83cdbe55e2122e15db73233cbac8fe6f",
+    "research/p192_extension_cover_20261012/type_i_residual_pivot000_three_runtime_info.json": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+    "research/p192_extension_cover_20261012/verify_line_residual_pivot_three.py": "bf206da72f115c4b5c0c54c60ff55f23b7de1b4dc8e22a4c7fc897b7786ae05e"
+  },
+  "boundary": "One source-residual pivot through all 9925 selected quartic points. All first residual images checked in the fully checked producer; 20 direct six-step controls for both images, full independent prime-field line replay, and exact equality of all rows in the sampled-closure producer. Timings are unisolated.",
+  "distinct_signed_residual_columns": 10073,
+  "nonsplit_cuts": 4888,
+  "old_family_signed_column_overlaps": 1,
+  "parent_commit": "52b5ff0caa2eba058b8971f9e444ea1394dae805",
+  "proof_status": "existing_lean_private_pair_and_conditional_trace_theorems_plus_point_replay",
+  "publication_state_at_freeze": "local_uncommitted_pending_review",
+  "replay_commands": [
+    "/Volumes/SSD990/cryptanalysis/sage --runtime-info",
+    "/Volumes/SSD990/cryptanalysis/sage -python research/p192_extension_cover_20261012/line_residual_pivot_three.py",
+    "python3 -B research/p192_extension_cover_20261012/verify_line_residual_pivot_three.py",
+    "/Volumes/SSD990/cryptanalysis/sage -python research/p192_extension_cover_20261012/line_residual_pivot_three_fast.py"
+  ],
+  "schema_version": 1,
+  "selected_classes": 9925,
+  "split_cuts": 5037,
+  "status": "verified_p192_residual_pivot000_full_projected_fan"
+}

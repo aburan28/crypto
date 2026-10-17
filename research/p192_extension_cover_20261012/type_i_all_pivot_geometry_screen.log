@@ -1,0 +1,6 @@
+ALL_PIVOT_GEOMETRY_PROGRESS 10 141 cross 7
+Traceback (most recent call last):
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/line_all_pivot_geometry_screen.py", line 79, in <module>
+    if pow(disc, (p-1)//2, p) == p-1:
+       ~~~^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
