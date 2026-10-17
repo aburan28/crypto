@@ -1278,10 +1278,7 @@ mod tests {
             let s = f.sq(&a);
             let r = f.sqrt(&s).unwrap();
             assert_eq!(f.sq(&r), s);
-            assert_eq!(
-                f.is_square(&a),
-                f.pow(&a, (f.order() / 2) as u128) == E5::ONE
-            );
+            assert_eq!(f.is_square(&a), f.pow(&a, f.order() / 2) == E5::ONE);
         }
     }
 
