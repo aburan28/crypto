@@ -1,0 +1,73 @@
+"""Replay the support partition with the original F_(p^3) fiber character."""
+import hashlib
+import itertools
+import json
+from pathlib import Path
+
+from sage.all import prod
+import type_i_divisor_transfer as dt
+import verify_type_i_quotient_base as vb
+
+HERE = Path(__file__).resolve().parent
+path = HERE / "type_i_conditioned_support.json"
+receipt = json.loads(path.read_text())
+assert receipt["source_sha256"] == hashlib.sha256(
+    (HERE / "type_i_conditioned_support.py").read_bytes()
+).hexdigest()
+assert receipt["base_receipt_sha256"] == hashlib.sha256(
+    (HERE / "type_i_quotient_base_probe.json").read_bytes()
+).hexdigest()
+for key, name in (("density_receipt_sha256", "type_i_character_density.json"),
+                  ("collector_receipt_sha256", "type_i_geom_character_collector.json"),
+                  ("reduced_query_receipt_sha256", "type_i_guided_reduced_queries.json")):
+    assert receipt[key] == hashlib.sha256((HERE / name).read_bytes()).hexdigest()
+
+p, r, O = dt.p, dt.r, vb.O
+half = pow(2, -1, int(r))
+
+def character(P):
+    assert P != O and P[0] != dt.c0
+    X = dt.inf + dt.d0 / (P[0] - dt.c0)
+    rhs = prod(X - z**p for z in dt.quartic_roots)
+    assert rhs != 0 and rhs**(p**3) == rhs
+    value = rhs**((p**3-1)//2)
+    assert value in (1, -1)
+    return "+" if value == 1 else "-"
+
+cells = {}
+seen = set()
+target_cells = {}
+for triple in itertools.combinations_with_replacement(vb.base, 3):
+    point = sum((v[0] for v in triple), O)
+    key = str(point)
+    assert key not in seen
+    seen.add(key)
+    P = -half * point
+    cell = character(P) + character(P + P)
+    cells[cell] = cells.get(cell, 0) + 1
+    target_cells[key] = cell
+assert len(seen) == 816
+digest = hashlib.sha256("\n".join(
+    f"{key}|{target_cells[key]}" for key in sorted(target_cells)
+).encode()).hexdigest()
+assert digest == receipt["target_cell_sha256"]
+assert cells == receipt["distinct_targets_by_character_pair"]
+assert cells == receipt["triple_counts_by_character_pair"]
+assert cells["++"] == receipt["accepted_support_targets"] == 224
+assert receipt["frozen_accepted_queries"] == 64
+assert receipt["frozen_three_sum_matches"] == 0
+assert str(receipt["conditioned_hit_probability_upper_bound"]) == (
+    f"224/{receipt['accepted_nonzero_scalar_lower_bound']}"
+)
+out = {
+    "status": "verified_type_i_conditioned_support_direct_fiber_character",
+    "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+    "producer_sha256": receipt["source_sha256"],
+    "distinct_targets_replayed": len(seen),
+    "cells_replayed": cells,
+    "direct_f3_character_test": True,
+}
+(HERE / "type_i_conditioned_support_verification.json").write_text(
+    json.dumps(out, indent=2, sort_keys=True) + "\n"
+)
+print(json.dumps(out, indent=2, sort_keys=True))

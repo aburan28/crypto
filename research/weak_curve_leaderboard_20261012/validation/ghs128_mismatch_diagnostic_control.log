@@ -1,0 +1,17 @@
+   Compiling weak-curve-leaderboard v0.1.0 (/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/weak_curve_leaderboard_20261012)
+    Finished `release` profile [optimized] target(s) in 3.02s
+     Running `target/release/weak-curve-leaderboard check /private/tmp/ghs128_snapshot_mismatch.json`
+snapshot first differs at byte 4 (frozen 912533 bytes, rebuilt 912533 bytes)
+frozen context: {
+  Xcounts": {
+    "exact_covering_models": 24,
+    "exact_models": 814,
+    "findings": 29,
+    "l
+rebuilt context: {
+  "counts": {
+    "exact_covering_models": 24,
+    "exact_models": 814,
+    "findings": 29,
+    "l
+Error: "snapshot differs from frozen source databases"

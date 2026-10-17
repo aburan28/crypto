@@ -3589,6 +3589,25 @@ impl<'a> FastEnumeration<'a> {
     }
 }
 
+/// Project a general point to single-word coordinates for the fast field.
+pub(crate) fn to_fast_point(fast: &FastBinaryCurve, p: &BinaryPoint) -> ArithFastPoint {
+    match p {
+        BinaryPoint::Infinity => None,
+        BinaryPoint::Affine { x, y } => Some((fast.word(x), fast.word(y))),
+    }
+}
+
+/// Lift single-word coordinates back to a general point.
+pub(crate) fn from_fast_point(fast: &FastBinaryCurve, p: ArithFastPoint) -> BinaryPoint {
+    match p {
+        None => BinaryPoint::Infinity,
+        Some((x, y)) => BinaryPoint::Affine {
+            x: fast.element(x),
+            y: fast.element(y),
+        },
+    }
+}
+
 fn to_fast_point_128(fc: &FastBinaryCurve128, p: &BinaryPoint) -> FastPoint128 {
     match p {
         BinaryPoint::Infinity => None,
@@ -5969,25 +5988,6 @@ impl PairSumTable {
     }
 }
 
-/// Project a general point to single-word coordinates for the fast field.
-pub(crate) fn to_fast_point(fast: &FastBinaryCurve, p: &BinaryPoint) -> ArithFastPoint {
-    match p {
-        BinaryPoint::Infinity => None,
-        BinaryPoint::Affine { x, y } => Some((fast.word(x), fast.word(y))),
-    }
-}
-
-/// Lift single-word coordinates back to a general point.
-pub(crate) fn from_fast_point(fast: &FastBinaryCurve, p: ArithFastPoint) -> BinaryPoint {
-    match p {
-        None => BinaryPoint::Infinity,
-        Some((x, y)) => BinaryPoint::Affine {
-            x: fast.element(x),
-            y: fast.element(y),
-        },
-    }
-}
-
 impl PairSumTable {
     /// The single-word curve the table was built on.
     pub fn curve(&self) -> &FastCurve {
@@ -6007,8 +6007,14 @@ impl PairSumTable {
     /// already made of is flat, so a folded table buckets on that.
     #[inline]
     fn bucket_of(&self, key: u64) -> usize {
+        self.bucket_of_hash(key, pair_filter_hash(key))
+    }
+
+    /// [`Self::bucket_of`] when the caller already holds `pair_filter_hash(key)`.
+    #[inline]
+    fn bucket_of_hash(&self, key: u64, h: u64) -> usize {
         if self.fold {
-            (pair_filter_hash(key) >> self.bucket_shift) as usize
+            (h >> self.bucket_shift) as usize
         } else {
             (key >> self.bucket_shift) as usize
         }
@@ -6016,8 +6022,15 @@ impl PairSumTable {
 
     /// Index of the filter word holding this key's bits.
     #[inline]
+    #[allow(dead_code)]
     fn filter_word(&self, key: u64) -> usize {
-        ((pair_filter_hash(key) & self.present_mask) as usize) >> 6
+        self.filter_word_hash(pair_filter_hash(key))
+    }
+
+    /// [`Self::filter_word`] for a precomputed `pair_filter_hash(key)`.
+    #[inline]
+    fn filter_word_hash(&self, h: u64) -> usize {
+        ((h & self.present_mask) as usize) >> 6
     }
 
     /// Whether the filter admits this key: every bit it would have set is
@@ -6025,7 +6038,13 @@ impl PairSumTable {
     /// against the entries.
     #[inline]
     fn admitted(&self, key: u64) -> bool {
-        let (word, bits) = filter_slot(pair_filter_hash(key), self.present_mask, self.filter_extra);
+        self.admitted_hash(pair_filter_hash(key))
+    }
+
+    /// [`Self::admitted`] for a precomputed `pair_filter_hash(key)`.
+    #[inline]
+    fn admitted_hash(&self, h: u64) -> bool {
+        let (word, bits) = filter_slot(h, self.present_mask, self.filter_extra);
         self.present[word] & bits == bits
     }
 
@@ -6047,8 +6066,17 @@ impl PairSumTable {
     /// Whether the compact table may hold this key: never a false
     /// negative, and a false positive about one time in `2²⁸`, which
     /// costs a recovery scan that comes back empty.
+    #[allow(dead_code)]
     fn compact_contains(&self, key: u64) -> bool {
-        let bucket = self.bucket_of(key);
+        self.compact_contains_hash(key, pair_filter_hash(key))
+    }
+
+    /// [`Self::compact_contains`] when the caller already holds
+    /// `pair_filter_hash(key)` — the walk and the blocked `m = 3` scan
+    /// each already paid for that hash once for the presence filter.
+    #[inline]
+    fn compact_contains_hash(&self, key: u64, h: u64) -> bool {
+        let bucket = self.bucket_of_hash(key, h);
         let Some(&lo) = self.bucket_start.get(bucket) else {
             return false;
         };
@@ -6057,10 +6085,10 @@ impl PairSumTable {
         // A run holds about sixteen rests, which is one cache line: a
         // scan beats a search and spares the build any ordering.
         if self.tagged {
-            let rest = (pair_filter_hash(key) as u32) & 0xffff;
+            let rest = (h as u32) & 0xffff;
             return run.iter().any(|&w| w & 0xffff == rest);
         }
-        run.contains(&Self::compact_rest(key))
+        run.contains(&(h as u32))
     }
 
     /// The orbits a tagged table offers for this key, as the high halves
@@ -6151,14 +6179,28 @@ impl PairSumTable {
     /// exposed so a benchmark can model that loop exactly.
     #[doc(hidden)]
     pub fn prefetch_key(&self, key: u64) {
-        prefetch(&self.present[self.filter_word(key)]);
+        self.prefetch_key_hash(pair_filter_hash(key));
+    }
+
+    /// [`Self::prefetch_key`] for a precomputed `pair_filter_hash(key)`.
+    #[doc(hidden)]
+    #[inline]
+    pub fn prefetch_key_hash(&self, h: u64) {
+        prefetch(&self.present[self.filter_word_hash(h)]);
     }
 
     /// Prefetch the bucket-index entry for a key that passed the presence
     /// filter. The following entry normally shares its cache line.
     #[inline]
+    #[allow(dead_code)]
     fn prefetch_bucket(&self, key: u64) {
-        let bucket = self.bucket_of(key);
+        self.prefetch_bucket_hash(key, pair_filter_hash(key));
+    }
+
+    /// [`Self::prefetch_bucket`] for a precomputed `pair_filter_hash(key)`.
+    #[inline]
+    fn prefetch_bucket_hash(&self, key: u64, h: u64) {
+        let bucket = self.bucket_of_hash(key, h);
         if let Some(start) = self.bucket_start.get(bucket) {
             prefetch((start as *const u32).cast::<u64>());
         }
@@ -6199,11 +6241,21 @@ impl PairSumTable {
     /// The lookup half of [`Self::contains_pair`].
     #[doc(hidden)]
     pub fn contains_key(&self, key: u64) -> bool {
-        if !self.admitted(key) {
+        self.contains_key_hash(key, pair_filter_hash(key))
+    }
+
+    /// [`Self::contains_key`] when the caller already holds
+    /// `pair_filter_hash(key)`.  The walking `m = 2` descent and the
+    /// blocked `m = 3` scan each hash once for prefetch and reuse it
+    /// here, so a miss is one multiply-mix instead of two or three.
+    #[doc(hidden)]
+    #[inline]
+    pub fn contains_key_hash(&self, key: u64, h: u64) -> bool {
+        if !self.admitted_hash(h) {
             return false;
         }
         if self.is_compact() {
-            return self.compact_contains(key);
+            return self.compact_contains_hash(key, h);
         }
         !self.lookup_admitted(key).is_empty()
     }
@@ -6265,18 +6317,24 @@ impl PairSumTable {
     /// [`Self::pairs_for`] for a target whose key is already in hand, so
     /// that a scan canonicalising a row at a time does not do it twice.
     fn pairs_for_key(&self, target: FastPoint, key: u64, out: &mut Vec<(u32, u32)>) {
+        self.pairs_for_key_hash(target, key, pair_filter_hash(key), out)
+    }
+
+    /// [`Self::pairs_for_key`] when the caller already holds
+    /// `pair_filter_hash(key)`.
+    fn pairs_for_key_hash(&self, target: FastPoint, key: u64, h: u64, out: &mut Vec<(u32, u32)>) {
         out.clear();
-        if !self.admitted(key) {
+        if !self.admitted_hash(h) {
             return;
         }
         if self.is_compact() {
             if self.is_witnessed_compact() {
-                let bucket = self.bucket_of(key);
+                let bucket = self.bucket_of_hash(key, h);
                 let Some(&lo) = self.bucket_start.get(bucket) else {
                     return;
                 };
                 let hi = self.bucket_start[bucket + 1];
-                let rest = Self::compact_rest(key);
+                let rest = h as u32;
                 for slot in lo as usize..hi as usize {
                     if self.rests[slot] != rest {
                         continue;
@@ -6298,7 +6356,7 @@ impl PairSumTable {
                 }
                 return;
             }
-            if self.compact_contains(key) {
+            if self.compact_contains_hash(key, h) {
                 self.recover_pair(target, out);
             }
             return;
@@ -6359,6 +6417,30 @@ impl PairSumTable {
         let sum = idxs.iter().fold(FastPoint::INFINITY, |s, &i| {
             self.curve.add(s, self.points[i])
         });
+        (sum == target).then_some(idxs)
+    }
+
+    /// [`Self::decompose_fast`] for `m = 2` when the probe key and its
+    /// filter hash are already in hand (the walking descent's reject
+    /// path).  Skips a second `key_of` / `pair_filter_hash` / admit on
+    /// the rare hit; answers are unchanged because recovery still checks
+    /// the group.
+    pub fn decompose_fast_m2_known(
+        &self,
+        target: FastPoint,
+        key: u64,
+        h: u64,
+        pairs: &mut Vec<(u32, u32)>,
+    ) -> Option<Vec<usize>> {
+        self.pairs_for_key_hash(target, key, h, pairs);
+        let &(i, j) = pairs.first()?;
+        let idxs = if i <= j {
+            vec![i as usize, j as usize]
+        } else {
+            vec![j as usize, i as usize]
+        };
+        let _check = measurement::relation_check_scope();
+        let sum = self.curve.add(self.points[idxs[0]], self.points[idxs[1]]);
         (sum == target).then_some(idxs)
     }
 
@@ -6581,6 +6663,7 @@ impl PairSumTable {
         const BLOCK: usize = 1024;
         const LOOKAHEAD: usize = 32;
         let mut admitted_offsets = Vec::with_capacity(BLOCK / 8);
+        let mut hashes = Vec::with_capacity(BLOCK);
         let count = if fused { x3s.len() } else { rests.len() };
         for lo in (0..count).step_by(BLOCK) {
             let hi = (lo + BLOCK).min(count);
@@ -6588,18 +6671,21 @@ impl PairSumTable {
                 Some(canon) if fused => canon.x_keys(&x3s[lo..hi], keys),
                 _ => self.keys_of(&rests[lo..hi], keys),
             }
+            hashes.clear();
+            hashes.extend(keys.iter().copied().map(pair_filter_hash));
             admitted_offsets.clear();
-            for &key in keys.iter().take(LOOKAHEAD) {
-                prefetch(&self.present[self.filter_word(key)]);
+            for &h in hashes.iter().take(LOOKAHEAD) {
+                prefetch(&self.present[self.filter_word_hash(h)]);
             }
             for within in 0..hi - lo {
-                if let Some(&ahead) = keys.get(within + LOOKAHEAD) {
-                    prefetch(&self.present[self.filter_word(ahead)]);
+                if let Some(&ahead) = hashes.get(within + LOOKAHEAD) {
+                    prefetch(&self.present[self.filter_word_hash(ahead)]);
                 }
-                if !self.admitted(keys[within]) {
+                let h = hashes[within];
+                if !self.admitted_hash(h) {
                     continue;
                 }
-                self.prefetch_bucket(keys[within]);
+                self.prefetch_bucket_hash(keys[within], h);
                 admitted_offsets.push(within);
             }
             // The bucket entries arrived during the filter pass: read them
@@ -6629,7 +6715,7 @@ impl PairSumTable {
                     Some(&lambda) => self.curve.finish_lazy(target, rest, lambda),
                     None => rest,
                 };
-                self.pairs_for_key(rest, keys[within], pairs);
+                self.pairs_for_key_hash(rest, keys[within], hashes[within], pairs);
                 for &(i, j) in pairs.iter() {
                     if !sink(&[i as usize, j as usize, k]) {
                         return;
@@ -6742,6 +6828,7 @@ impl PairSumTable {
                 let mut lambdas: Vec<u64> = Vec::with_capacity(BLOCK);
                 let mut scratch = BatchScratch::default();
                 let mut keys = Vec::with_capacity(BLOCK);
+                let mut hashes = Vec::with_capacity(BLOCK);
                 let mut pairs = Vec::new();
                 // The folding kernel's path, as in
                 // [`Self::witnesses_fast_scan`]: the block's rests as
@@ -6786,14 +6873,17 @@ impl PairSumTable {
                         Some(canon) if fused => canon.x_keys(&x3s, &mut keys),
                         _ => self.keys_of(&rests, &mut keys),
                     }
-                    for &key in keys.iter().take(LOOKAHEAD) {
-                        prefetch(&self.present[self.filter_word(key)]);
+                    hashes.clear();
+                    hashes.extend(keys.iter().copied().map(pair_filter_hash));
+                    for &h in hashes.iter().take(LOOKAHEAD) {
+                        prefetch(&self.present[self.filter_word_hash(h)]);
                     }
                     for offset in 0..count {
-                        if let Some(&ahead) = keys.get(offset + LOOKAHEAD) {
-                            prefetch(&self.present[self.filter_word(ahead)]);
+                        if let Some(&ahead) = hashes.get(offset + LOOKAHEAD) {
+                            prefetch(&self.present[self.filter_word_hash(ahead)]);
                         }
-                        if !self.admitted(keys[offset]) {
+                        let h = hashes[offset];
+                        if !self.admitted_hash(h) {
                             continue;
                         }
                         let k = lo + offset;
@@ -6806,7 +6896,7 @@ impl PairSumTable {
                             Some(&lambda) => self.curve.finish_lazy(target, rest, lambda),
                             None => rest,
                         };
-                        self.pairs_for_key(rest, keys[offset], &mut pairs);
+                        self.pairs_for_key_hash(rest, keys[offset], h, &mut pairs);
                         for &(i, j) in &pairs {
                             if (!sorted || j as usize <= k) && !sink(&[i as usize, j as usize, k]) {
                                 return;
@@ -6847,6 +6937,7 @@ impl PairSumTable {
                 let mut negs = Vec::new();
                 let mut rests = Vec::new();
                 let mut keys = Vec::new();
+                let mut hashes = Vec::new();
                 let mut scratch = BatchScratch::default();
                 let mut pairs = Vec::new();
                 for l in 0..self.points.len() {
@@ -6863,17 +6954,20 @@ impl PairSumTable {
                     rests.clear();
                     self.curve.add_many(target, &negs, &mut rests, &mut scratch);
                     self.keys_of(&rests, &mut keys);
-                    for &key in keys.iter().take(LOOKAHEAD) {
-                        prefetch(&self.present[self.filter_word(key)]);
+                    hashes.clear();
+                    hashes.extend(keys.iter().copied().map(pair_filter_hash));
+                    for &h in hashes.iter().take(LOOKAHEAD) {
+                        prefetch(&self.present[self.filter_word_hash(h)]);
                     }
                     for (k, rest) in rests.iter().enumerate() {
-                        if let Some(&ahead) = keys.get(k + LOOKAHEAD) {
-                            prefetch(&self.present[self.filter_word(ahead)]);
+                        if let Some(&ahead) = hashes.get(k + LOOKAHEAD) {
+                            prefetch(&self.present[self.filter_word_hash(ahead)]);
                         }
-                        if !self.admitted(keys[k]) {
+                        let h = hashes[k];
+                        if !self.admitted_hash(h) {
                             continue;
                         }
-                        self.pairs_for_key(*rest, keys[k], &mut pairs);
+                        self.pairs_for_key_hash(*rest, keys[k], h, &mut pairs);
                         for &(i, j) in &pairs {
                             if (!sorted || j as usize <= k)
                                 && !sink(&[i as usize, j as usize, k, l])
@@ -14024,6 +14118,8 @@ impl<'a> IndividualLogSolver<'a> {
         let mut advanced = Vec::with_capacity(DESCENT_WALKS);
         let mut lambdas: Vec<u64> = Vec::with_capacity(DESCENT_WALKS);
         let mut keys: Vec<u64> = Vec::with_capacity(DESCENT_WALKS);
+        let mut hashes: Vec<u64> = Vec::with_capacity(DESCENT_WALKS);
+        let mut hit_pairs: Vec<(u32, u32)> = Vec::new();
         while report.trials < self.opts.max_trials {
             // Key every state of the round first and prefetch its filter
             // word, so the 64 probes' cache misses overlap instead of
@@ -14032,12 +14128,26 @@ impl<'a> IndividualLogSolver<'a> {
             // not hold yields no witness, so the reject changes nothing
             // but the time — the trials, their order and the first
             // decomposition found are the same.
+            //
+            // The filter hash is computed once per key and shared by the
+            // prefetch and the reject: previously each side mixed the key
+            // independently, so a miss paid two multiply-mixes for one
+            // answer.
             measurement::mark(Phase::TargetPdp);
             pair.keys_of(&states, &mut keys);
+            hashes.clear();
+            hashes.reserve(keys.len());
             for &key in &keys {
-                pair.prefetch_key(key);
+                let h = pair_filter_hash(key);
+                hashes.push(h);
+                pair.prefetch_key_hash(h);
             }
-            for ((state, (a, b)), &key) in states.iter().zip(coefficients.iter()).zip(&keys) {
+            for (((state, (a, b)), &key), &h) in states
+                .iter()
+                .zip(coefficients.iter())
+                .zip(&keys)
+                .zip(&hashes)
+            {
                 if report.trials >= self.opts.max_trials {
                     break;
                 }
@@ -14065,8 +14175,29 @@ impl<'a> IndividualLogSolver<'a> {
                     }
                     continue;
                 }
-                if m == 2 && !pair.contains_key(key) {
-                    report.record(*a, *b, || PdpAttempt::bare(None, PdpOutcome::Unresolved));
+                if m == 2 {
+                    if !pair.contains_key_hash(key, h) {
+                        report.record(*a, *b, || PdpAttempt::bare(None, PdpOutcome::Unresolved));
+                        continue;
+                    }
+                    // Hit: recover from the known key/hash instead of
+                    // re-canonicalising inside decompose_fast.
+                    let pdp = PdpAttempt::bare(
+                        pair.decompose_fast_m2_known(*state, key, h, &mut hit_pairs),
+                        PdpOutcome::Unresolved,
+                    );
+                    report.record(*a, *b, || pdp.clone());
+                    let Some(idxs) = pdp.points else {
+                        continue;
+                    };
+                    if let Some(d) = self.logarithm_from(fc, *g, q_fast, &idxs, *a, *b) {
+                        report.relation = Some(DescentRelation {
+                            a: *a,
+                            b: *b,
+                            points: idxs,
+                        });
+                        return Some(Some(d));
+                    }
                     continue;
                 }
                 let pdp = PdpAttempt::bare(
@@ -16522,6 +16653,58 @@ mod tests {
                 (sparse.degree, sparse.low_terms),
                 "n = {n}"
             );
+        }
+    }
+
+    #[test]
+    fn decompose_fast_m2_known_matches_decompose_fast() {
+        for (a, n) in [(0u8, 9u32), (0, 13)] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+            let pair = PairSumTable::build(&kc, &fb).unwrap();
+            let fc = pair.curve().clone();
+            let g = fc.lift(kc.generator());
+            let mut pairs = Vec::new();
+            for k in 0..128u64 {
+                let t = fc.mul_u64(g, k.wrapping_mul(4243) + 3);
+                let key = pair.probe_key(t);
+                let h = pair_filter_hash(key);
+                let slow = pair.decompose_fast(t, 2);
+                let fast = if pair.contains_key_hash(key, h) {
+                    pair.decompose_fast_m2_known(t, key, h, &mut pairs)
+                } else {
+                    None
+                };
+                assert_eq!(slow, fast, "a={a} n={n} k={k}");
+            }
+        }
+    }
+
+    #[test]
+    fn contains_key_hash_matches_contains_key() {
+        // The walking probe path hashes once and reuses the mix; the public
+        // contains_key entry must agree bit-for-bit on every key.
+        for (a, n) in [(0u8, 9u32), (0, 13)] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+            let pair = PairSumTable::build(&kc, &fb).unwrap();
+            let fc = pair.curve().clone();
+            let g = fc.lift(kc.generator());
+            for k in 0..256u64 {
+                let t = fc.mul_u64(g, k.wrapping_mul(7919) + 1);
+                let key = pair.probe_key(t);
+                let h = pair_filter_hash(key);
+                assert_eq!(
+                    pair.contains_key(key),
+                    pair.contains_key_hash(key, h),
+                    "a={a} n={n} k={k}"
+                );
+                assert_eq!(
+                    pair.contains_pair(t),
+                    pair.contains_key_hash(key, h),
+                    "contains_pair a={a} n={n} k={k}"
+                );
+            }
         }
     }
 

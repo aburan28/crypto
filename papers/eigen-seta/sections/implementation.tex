@@ -1,8 +1,11 @@
 \section{Implementation and side channels}\label{sec:impl}
 
-The implementation is the Rust crate \art{crypto:eigen_seta/} (about 4,300 lines
-plus tests). It is generic over the limb count, so one code base serves all
-parameter sets. Variable-time big integers (\texttt{num-bigint}) appear only
+Revision~1 described the Rust crate \art{crypto:eigen_seta/} (about 4,300
+lines plus tests), and \S\ref{sec:impl}--\S\ref{sec:results} still describe
+and measure that historical build unless they say otherwise. The maintained
+implementation is now the sibling repository \art{eigenx:}~\cite{EigenX}.
+\S\ref{sec:impl-v2} lists what changed. The crate is generic over the limb
+count, so one code base serves all parameter sets. Variable-time big integers (\texttt{num-bigint}) appear only
 in key generation and in public constants.
 
 \subsection{Arithmetic}
@@ -87,3 +90,36 @@ robustness tests feed decapsulation 48 adversarial ciphertexts
 terminates without a panic. A
 regression test covers a key-generation hang that we fixed: Tonelli--Shanks
 accepted $z=0$ as a non-residue.
+
+\subsection{The maintained implementation (revision 2)}\label{sec:impl-v2}
+The following changes in \art{eigenx:} matter for this paper.
+\begin{itemize}
+\item \emph{Theta-coordinate decapsulation.} The $(2^E,2^E)$-chain of
+  decapsulation is a level-2 theta chain ported from Theta-Rust
+  (Dartois--Maino--Pope--Robert~\cite{DMPR23};
+  \art{eigenx:src/theta.rs}, \art{eigenx:src/chain.rs}). The Mumford chain of
+  \S\ref{sec:impl} is kept for variable-time chain inspection only. The
+  identification of $\gamma$ on $\EC[d]$ now matches $x$-coordinates per image
+  and selects in constant time among the $y$-sign patterns.
+\item \emph{Parameters.} The Q3 and Q5 sets, the NUMS prime search of (P4),
+  and parallel key-generation attempts. The toy sets are no longer shipped.
+\item \emph{Cryptanalysis code.} A cost model (\art{eigenx:src/security.rs})
+  and runnable attacks (\art{eigenx:src/cryptanalysis/}): key derivation from
+  $f$, the near-miss experiment, meet in the middle on $\varphi$,
+  mask-guess/Kani scaffolding, and the public-key degree test of
+  Lemma~\ref{lem:pktest} (new in this revision).
+\item \emph{A field-arithmetic defect, fixed in this revision.} The
+  interleaved products \texttt{Fp::mul2} and \texttt{Fp::mul3}, which
+  $\F_{p^2}$ multiplication and squaring use, always took the
+  Montgomery-friendly reduction. For a modulus with $p+1\not\equiv0\bmod2^{64}$
+  they returned wrong products. The test \texttt{f1} of
+  \art{eigenx:tests/field.rs}, on the field of $2^{61}-1$, failed on every run
+  on the main branch and passes after the fix
+  (\art{crypto:research/eigen_seta_assessment_20261017/records/}). Every Eigen-S\'eta prime
+  is Montgomery-friendly, so no parameter set was affected. The fix routes
+  other moduli to the generic product, as single multiplication already did.
+\end{itemize}
+Constant-time evidence (\S\ref{sec:results}) was produced on the historical
+Mumford build and has not been repeated on the theta build;
+\art{eigenx:SIDE_CHANNELS.md} is the author's assessment of the current code.
+

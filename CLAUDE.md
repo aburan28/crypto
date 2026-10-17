@@ -42,6 +42,11 @@ check-ins), and never busy-poll, sleep in a loop, or re-read job logs faster
 than that cadence. AGENTS.md, "Default workflow: open the PR, check in, and
 land it".
 
+Model tiers (owner, 2026-10-17): frontier/core models reason and decide;
+`experiment-director` (Sonnet) writes a frozen command card, the main session
+relays it verbatim to `executor-mechanical` (Haiku), and the director assesses
+the run. AGENTS.md, "Model tiers".
+
 Every cross-method ECDLP comparison prices the unpriced native work of
 every arm, rho references included, at 0, 0.1 and 1 GAE per operation and
 ranks two arms only where the order holds across that band (AGENTS.md §5a).

@@ -16,7 +16,7 @@ On top of the field layer this directory now carries a full Pollard-rho engine f
 
 | File | What it is |
 |---|---|
-| `nist_curve.cuh` | Affine points and the small curve arithmetic the walk needs, generic over the field with a pluggable coefficient `a` (`AMinus3` for P-256/P-384). No Jacobian and no a=-3 assumption in the walk layer: the hot step never inverts. |
+| `nist_curve.cuh` | Affine points and the small curve arithmetic the walk needs, generic over the field with a pluggable coefficient `a` (`AMinus3` for P-256/P-384). The hot step never inverts. Walk seeding and the jump-table build (`scalar_mul`/`double_scalar_mul`) take the inversion-free a=-3 Jacobian ladder (`n_double`/`n_madd`, `jmadd` dispatching the equal/inverse cases) with one final `to_affine` — one field inversion per seed instead of ~750; a general-`a` curve keeps the affine ladder. See `benchmarks/20261017-gpu-nist-jac-seed`. |
 | `nist_rho.cuh` | The r-adding walk: negation-map fold (fold 2, `sqrt(2)` fewer steps; j != 0 so `+-1` is all of Aut), distinguished points, fruitless-cycle detection and escape, splitmix64 seeds, SoA batched state, and `rho_batch_step` batching the one inversion across a thread's walks. Generic over `F::N`, so one body serves both curves. |
 | `nist_rho_host.hpp` | Host driver: jump-table build, the walk carrying each walk's `(a,b)` with `P=a*G+b*Q` in lockstep with `phase_b`, and collision -> logarithm. |
 | `test_rho.cpp` | CPU verification (below). |
