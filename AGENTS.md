@@ -1006,6 +1006,37 @@ existing EC2 key-pair name **`meow34`** when launching the instance.
   accessible, report that access blocker and continue with non-SSH work where
   possible.
 
+### 9a. Experiments that do not run locally go through `ephemeral`
+
+When an experiment, benchmark or build is to run in the cloud rather than on
+the local machine, run it with the ephemeral runner
+([`taskq/deploy/ephemeral/`](taskq/deploy/ephemeral/README.md)). Do not
+launch EC2 instances by hand for it. `conductor/deploy/aws/launch.py`, in the
+Conductor repository, starts the Conductor control plane, not experiments.
+
+```sh
+cargo build --release --manifest-path taskq/deploy/ephemeral/cli/Cargo.toml   # once
+E=taskq/deploy/ephemeral/cli/target/release/ephemeral   # or the bash CLI: taskq/deploy/ephemeral/ephemeral
+$E run --detach --type c7i.4xlarge --ttl 4h -- 'cargo run --release -- ... --out "$EPHEMERAL_OUT"'
+$E status last; $E logs -f last; $E fetch last
+```
+
+- The two CLIs are interchangeable: same flags, S3 layout and runner, and
+  either one can follow, fetch or kill the other's jobs.
+- Agents use `--detach` and check back with `status` or `logs -f` at the
+  check-in cadence of the default workflow, rather than holding a foreground
+  session open on a long job.
+- Each job is a paid instance. Start the jobs the request asks for and no
+  more. Pick the smallest instance type and `--ttl` that fit, and `kill` any
+  `--keep` instance once you are done with it. The runner, the deadline timer
+  and the reaper terminate everything else.
+- Runners use Session Manager (`ephemeral shell`), not SSH. Section 9 applies
+  to hosts launched by hand.
+- A result that lands in the repository still follows section 10, the
+  `benchmarks/` rule and the research-visuals rule. Its provenance is the
+  fetched `job.json`, `host.txt` and `rusage.txt` in
+  `~/.cache/ephemeral/runs/<id>/`.
+
 ### 10. Performance work starts from a clean, recorded baseline
 
 A speedup is a comparison, so it is only as good as the baseline and the
