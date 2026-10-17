@@ -4948,6 +4948,43 @@ pub fn split_rule_default() -> SplitRule {
     }
 }
 
+/// Gate threshold of [`fall_row_gate_augment`]: generators per occurring
+/// variable, trained and frozen in
+/// `research/ic_improve_20261015/03-fallrow-gate/runs/gate.json`.
+pub const FALL_ROW_GATE_THETA: f64 = 2.1583;
+
+/// Is the gated fall-row augmentation on (`KIC_FALLROW_GATE=1`)?  Off by
+/// default; read once per process.
+pub fn fall_row_gate_enabled() -> bool {
+    static ON: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ON.get_or_init(|| std::env::var("KIC_FALLROW_GATE").as_deref() == Ok("1"))
+}
+
+/// **Gated fall-row augmentation** (round 2, item 03).  When the system is
+/// overdetermined — non-zero generators per occurring variable at least
+/// [`FALL_ROW_GATE_THETA`], found by counting alone — run one degree-3
+/// Macaulay pass and return the generators with every reduced row of
+/// degree `< 3` appended.  Otherwise `None`: solve the system as given.
+/// The appended rows lie in the ideal, so the roots are unchanged.
+pub fn fall_row_gate_augment(system: &[F2BoolPoly], n_vars: usize) -> Option<Vec<F2BoolPoly>> {
+    let gens = system.iter().filter(|p| !p.is_zero()).count();
+    let occurring = system
+        .iter()
+        .flat_map(|p| p.terms.iter())
+        .fold(0u64, |acc, t| acc | t.mask)
+        .count_ones();
+    if occurring == 0 || (gens as f64) < FALL_ROW_GATE_THETA * occurring as f64 {
+        return None;
+    }
+    let (rows, _) = matrix_f4_f2_counted_with(system, n_vars, 3, RowCriterion::None)?;
+    let mut out = system.to_vec();
+    out.extend(
+        rows.into_iter()
+            .filter(|p| p.terms.iter().all(|t| t.mask.count_ones() < 3)),
+    );
+    Some(out)
+}
+
 /// Pick the variable to split on among those still unassigned.
 ///
 /// Returns `None` only when every variable is assigned.  A free
@@ -5568,21 +5605,27 @@ pub fn prebuild_inherited_roots_lanes(
     (total, placed)
 }
 
-/// `KIC_F6_GATE_FIRST=1`: when a node's reduction forces variables, assign
+/// Gate-first order: when a node's reduction forces variables, assign
 /// them and ask the node oracle (the F6-IC geometry gate) **before**
 /// specialising the node's bases by them, instead of after.  The oracle
 /// reads only the assignment and the defined variables, so it decides the
 /// same way either way; a refuted node then never pays for the
 /// specialisations, and a continuing one specialises exactly as before
 /// and is not asked again.  Every verdict, root, counter of the solve and
-/// call of the oracle is unchanged; only the stage unit drops.  Off by
-/// default; [`set_gate_first`] overrides it on the calling thread.
+/// call of the oracle is unchanged; only the stage unit drops.
+///
+/// On by default (`research/f6_gate_first_x86_20261016`: F6-IC with the
+/// pair index 1.34–1.73× fewer word XORs and 1.56–2.12× less CPU on nine
+/// cells, x86 with the eager rewrite; 1.57–1.78× on aarch64 in
+/// `research/lit2026_w5_lane_batched_f4_20261011`).  `KIC_F6_GATE_FIRST=0`
+/// restores the specialise-then-ask order as a same-binary control;
+/// [`set_gate_first`] overrides it on the calling thread.
 fn gate_first() -> bool {
     static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     if let Some(v) = GATE_FIRST_OVERRIDE.with(|c| c.get()) {
         return v;
     }
-    *ENABLED.get_or_init(|| std::env::var("KIC_F6_GATE_FIRST").as_deref() == Ok("1"))
+    *ENABLED.get_or_init(|| std::env::var("KIC_F6_GATE_FIRST").as_deref() != Ok("0"))
 }
 
 thread_local! {
@@ -5603,6 +5646,244 @@ pub fn set_gate_first(enabled: Option<bool>) {
 /// `(nodes, specialisations)` the gate-first order skipped on this thread.
 pub fn gate_first_skips_thread() -> (u64, u64) {
     GATE_FIRST_SKIPS.with(|c| c.get())
+}
+
+/// **In-engine linear harvest** (round 2, item 05).  Every inherited-F4
+/// reduction reads the node basis's whole linear tail
+/// ([`ReducedBasis::linear_tail`]) and keeps only the decisive rows — `1`,
+/// `v`, `v + 1`.  With a harvest configured, a node whose reduction forces
+/// nothing (the solver would split next) instead appends the tail's
+/// multi-variable rows with at most `max_vars` variables to its system as
+/// generators, and the node's linear elimination
+/// ([`eliminate_linear_generators`]) substitutes them away and rebuilds the
+/// node's bases.  Each row is in the ideal of the node system, so the
+/// roots are unchanged; every root is still verified against the original
+/// equations.
+///
+/// **On by default** since round 2 item 05
+/// (`research/ic_improve_20261015/05-linear-harvest/`), with the gate
+/// widened in round 3 item 02
+/// (`research/ic_improve3_20261015/02-harvest-gate/`): the default is
+/// [`LINEAR_HARVEST_DEFAULT`] — root only, in solves with fewer than
+/// 0.961 non-zero generators per occurring variable (item 05's gate) **or**
+/// whose root basis has rank ≥ 331 (item 02's frozen size gate, which adds
+/// the large cells where the rebuild is amortised and leaves out the small
+/// over-determined (13,4) m3 system, where it is not).
+/// **Opt out with `KIC_LINEAR_HARVEST=0`**, which restores the
+/// pre-harvest engine exactly (identical counters); `KIC_LINEAR_HARVEST=gpv`
+/// restores item 05's gpv-only gate ([`LINEAR_HARVEST_GPV`]); `every`
+/// harvests at every node (measured: regresses), and other specifications
+/// are parsed by [`parse_linear_harvest`].
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct LinearHarvest {
+    /// Harvest rows with at most this many variables (`2..`).
+    pub max_vars: u32,
+    /// Harvest only at the root (before the first split).
+    pub root_only: bool,
+    /// Harvest only at a node with at least this many unassigned variables.
+    pub min_free: u32,
+    /// Harvest only in a solve whose input has fewer than
+    /// `gpv_below_milli / 1000` non-zero generators per occurring variable
+    /// (`u32::MAX`: no gate).  Counted on the original equations.
+    pub gpv_below_milli: u32,
+    /// Also harvest (OR with the gpv gate) in a solve whose input has at
+    /// least this many occurring variables (`u32::MAX`: never by this
+    /// route).  Round 3 item 02.
+    pub or_occ_at_least: u32,
+    /// Also harvest (OR with the gpv gate) where the basis the rows were
+    /// read from has at least this rank (`u32::MAX`: never by this route).
+    /// Round 3 item 02.
+    pub or_rank_at_least: u32,
+}
+
+/// The default harvest (also `KIC_LINEAR_HARVEST=1`): root only, gated on
+/// generators per occurring variable `< 0.961` (item 05's frozen θ =
+/// 0.9607) **or** root basis rank `≥ 331` (round 3 item 02's frozen θ), as
+/// `parse_linear_harvest("root,gpv=0.9607,rank=331")` stores it.
+pub const LINEAR_HARVEST_DEFAULT: LinearHarvest = LinearHarvest {
+    max_vars: u32::MAX,
+    root_only: true,
+    min_free: 0,
+    gpv_below_milli: 961,
+    or_occ_at_least: u32::MAX,
+    or_rank_at_least: 331,
+};
+
+/// Item 05's default before round 3 item 02 (`KIC_LINEAR_HARVEST=gpv`):
+/// root only, gated on generators per occurring variable `< 0.961` alone,
+/// as `parse_linear_harvest("root,gpv=0.9607")` stores it.
+pub const LINEAR_HARVEST_GPV: LinearHarvest = LinearHarvest {
+    or_rank_at_least: u32::MAX,
+    ..LINEAR_HARVEST_DEFAULT
+};
+
+/// Every node, every multi-variable row, no gate (`KIC_LINEAR_HARVEST=every`);
+/// also the base that [`parse_linear_harvest`]'s modifiers start from.
+pub const LINEAR_HARVEST_EVERY_NODE: LinearHarvest = LinearHarvest {
+    max_vars: u32::MAX,
+    root_only: false,
+    min_free: 0,
+    gpv_below_milli: u32::MAX,
+    or_occ_at_least: u32::MAX,
+    or_rank_at_least: u32::MAX,
+};
+
+thread_local! {
+    static LINEAR_HARVEST_OVERRIDE: std::cell::Cell<Option<Option<LinearHarvest>>> =
+        const { std::cell::Cell::new(None) };
+    /// `(harvest events, rows harvested)` on this thread.
+    static LINEAR_HARVEST_COUNTS: std::cell::Cell<(u64, u64)> = const { std::cell::Cell::new((0, 0)) };
+}
+
+/// Parse a harvest specification: `1` for [`LINEAR_HARVEST_DEFAULT`],
+/// `gpv` for [`LINEAR_HARVEST_GPV`], `every` for
+/// [`LINEAR_HARVEST_EVERY_NODE`], or modifiers of the latter,
+/// comma-separated `k=<max vars>`, `root`, `free=<min free>`,
+/// `gpv=<generators per variable bound>`, and the OR-ed size gates
+/// `rank=<root basis rank>` and `occ=<occurring variables>`; `0` or empty
+/// is off.
+pub fn parse_linear_harvest(spec: &str) -> Option<LinearHarvest> {
+    let spec = spec.trim();
+    if spec.is_empty() || spec == "0" {
+        return None;
+    }
+    if spec == "1" {
+        return Some(LINEAR_HARVEST_DEFAULT);
+    }
+    if spec == "gpv" {
+        return Some(LINEAR_HARVEST_GPV);
+    }
+    let mut h = LINEAR_HARVEST_EVERY_NODE;
+    if spec == "every" {
+        return Some(h);
+    }
+    for part in spec.split(',') {
+        let part = part.trim();
+        if part == "root" {
+            h.root_only = true;
+        } else if let Some(k) = part.strip_prefix("k=") {
+            h.max_vars = k.parse().ok()?;
+        } else if let Some(f) = part.strip_prefix("free=") {
+            h.min_free = f.parse().ok()?;
+        } else if let Some(g) = part.strip_prefix("gpv=") {
+            let g: f64 = g.parse().ok()?;
+            h.gpv_below_milli = (g * 1000.0).round() as u32;
+        } else if let Some(o) = part.strip_prefix("occ=") {
+            h.or_occ_at_least = o.parse().ok()?;
+        } else if let Some(r) = part.strip_prefix("rank=") {
+            h.or_rank_at_least = r.parse().ok()?;
+        } else if part != "1" {
+            return None;
+        }
+    }
+    Some(h)
+}
+
+/// The harvest in force on this thread: [`set_linear_harvest`]'s override,
+/// else `KIC_LINEAR_HARVEST` (read once): unset means
+/// [`LINEAR_HARVEST_DEFAULT`], `0` turns the harvest off (the engine before
+/// item 05, counter for counter), `gpv` is item 05's gate
+/// ([`LINEAR_HARVEST_GPV`]), anything else is [`parse_linear_harvest`]d.
+pub fn linear_harvest() -> Option<LinearHarvest> {
+    static ENV: std::sync::OnceLock<Option<LinearHarvest>> = std::sync::OnceLock::new();
+    if let Some(v) = LINEAR_HARVEST_OVERRIDE.with(|c| c.get()) {
+        return v;
+    }
+    *ENV.get_or_init(|| match std::env::var("KIC_LINEAR_HARVEST") {
+        Err(_) => Some(LINEAR_HARVEST_DEFAULT),
+        Ok(s) => parse_linear_harvest(&s),
+    })
+}
+
+/// Override `KIC_LINEAR_HARVEST` on this thread (`None` restores it;
+/// `Some(None)` forces it off).
+pub fn set_linear_harvest(cfg: Option<Option<LinearHarvest>>) {
+    LINEAR_HARVEST_OVERRIDE.with(|c| c.set(cfg));
+}
+
+/// `(harvest events, rows harvested)` on this thread so far.
+pub fn linear_harvest_counts_thread() -> (u64, u64) {
+    LINEAR_HARVEST_COUNTS.with(|c| c.get())
+}
+
+/// Reset [`linear_harvest_counts_thread`].
+pub fn linear_harvest_counts_reset() {
+    LINEAR_HARVEST_COUNTS.with(|c| c.set((0, 0)));
+}
+
+/// The harvest's per-solve gate: non-zero generators per occurring
+/// variable of `system` below `gpv_below_milli / 1000`.
+fn linear_harvest_gate(system: &[F2BoolPoly], gpv_below_milli: u32) -> bool {
+    if gpv_below_milli == u32::MAX {
+        return true;
+    }
+    let gens = system.iter().filter(|p| !p.is_zero()).count() as u64;
+    let occurring = system
+        .iter()
+        .flat_map(|p| p.terms.iter())
+        .fold(0u64, |acc, t| acc | t.mask)
+        .count_ones() as u64;
+    gens * 1000 < gpv_below_milli as u64 * occurring
+}
+
+/// The harvest's size gate (round 3 item 02), OR-ed with the gpv gate:
+/// the input has at least `or_occ_at_least` occurring variables, or the
+/// node's largest basis has rank at least `or_rank_at_least`.
+fn linear_harvest_size_gate(
+    system: &[F2BoolPoly],
+    bases: &InheritedBases,
+    h: &LinearHarvest,
+) -> bool {
+    if h.or_rank_at_least != u32::MAX
+        && bases
+            .bases
+            .iter()
+            .map(ReducedBasis::rank)
+            .max()
+            .unwrap_or(0) as u64
+            >= h.or_rank_at_least as u64
+    {
+        return true;
+    }
+    h.or_occ_at_least != u32::MAX
+        && system
+            .iter()
+            .flat_map(|p| p.terms.iter())
+            .fold(0u64, |acc, t| acc | t.mask)
+            .count_ones()
+            >= h.or_occ_at_least
+}
+
+/// The decisive-row test of [`ReducedBasis::decisive_rows`]: `1`, or one
+/// variable with an optional constant.
+fn is_decisive_tail_row(p: &F2BoolPoly) -> bool {
+    (p.terms.len() == 1 && p.terms[0].mask == 0)
+        || (p.terms.len() <= 2
+            && p.terms.iter().filter(|t| t.mask.count_ones() == 1).count() == 1
+            && p.terms.iter().all(|t| t.mask.count_ones() <= 1))
+}
+
+/// Split a linear tail into its decisive rows (in order, as
+/// [`ReducedBasis::decisive_rows`] returns them) and, into `harvest`, the
+/// multi-variable rows with at most `max_vars` variables.
+fn split_linear_tail(
+    tail: Vec<F2BoolPoly>,
+    max_vars: u32,
+    harvest: &mut Vec<F2BoolPoly>,
+) -> Vec<F2BoolPoly> {
+    harvest.clear();
+    let mut decisive = Vec::new();
+    for p in tail {
+        if is_decisive_tail_row(&p) {
+            decisive.push(p);
+        } else {
+            let vars = p.terms.iter().filter(|t| t.mask != 0).count() as u32;
+            if vars <= max_vars {
+                harvest.push(p);
+            }
+        }
+    }
+    decisive
 }
 
 /// One reduction of the splitting tree, as the lane lockstep diagnostic
@@ -5661,8 +5942,12 @@ fn reduce_inherited(
     support_local: bool,
     bases: &mut InheritedBases,
     stats: &mut SolveStats,
+    mut harvest: Option<(u32, &mut Vec<F2BoolPoly>)>,
 ) -> Option<Vec<F2BoolPoly>> {
     stats.reductions += 1;
+    if let Some((_, buf)) = harvest.as_mut() {
+        buf.clear();
+    }
     dump_node_system(system, n_vars, engine);
     // A canonical polynomial lists its terms highest degree first, so its
     // degree is its first term's; otherwise scan every term.
@@ -5744,7 +6029,12 @@ fn reduce_inherited(
         );
         let started = std::time::Instant::now();
         let mut cost = InheritCost::default();
-        let rows = basis.decisive_rows(&mut cost);
+        let rows = match harvest.as_mut() {
+            None => basis.decisive_rows(&mut cost),
+            Some((max_vars, buf)) => {
+                split_linear_tail(basis.linear_tail(&mut cost), *max_vars, buf)
+            }
+        };
         let word_ops = cost.word_ops();
         charge_word_ops(word_ops);
         let (rank, columns) = (basis.rank() as u64, basis.columns() as u64);
@@ -6127,6 +6417,12 @@ fn solve_rec(
         _ => (InheritedBases::default(), std::rc::Rc::new(system)),
     };
     let inherit = matches!(opts.engine, SolverEngine::InheritedF4 { .. });
+    let harvest_cfg = if inherit && policy.linear_elimination {
+        linear_harvest()
+    } else {
+        None
+    };
+    let mut harvested: Vec<F2BoolPoly> = Vec::new();
 
     // Reduce, propagate, repeat until the algebra stops learning.
     loop {
@@ -6220,6 +6516,10 @@ fn solve_rec(
                 policy.support_local,
                 &mut bases,
                 stats,
+                match harvest_cfg {
+                    Some(h) => Some((h.max_vars, &mut harvested)),
+                    None => None,
+                },
             )
         } else {
             reduce_system(&system, n_vars, opts.engine, stats)
@@ -6234,6 +6534,24 @@ fn solve_rec(
         }
         let forced: Vec<(u32, bool)> = reduced.iter().filter_map(forced_assignment).collect();
         if forced.is_empty() {
+            if let Some(h) = harvest_cfg {
+                if !harvested.is_empty()
+                    && (!h.root_only || parent.is_none())
+                    && assignment.iter().filter(|a| a.is_none()).count() as u32 >= h.min_free
+                    && (linear_harvest_gate(original, h.gpv_below_milli)
+                        || linear_harvest_size_gate(original, &bases, &h))
+                {
+                    // Hand the tail's multi-variable rows to the linear
+                    // elimination at the top of the loop.
+                    let rows = harvested.len() as u64;
+                    LINEAR_HARVEST_COUNTS.with(|c| {
+                        let (e, r) = c.get();
+                        c.set((e + 1, r + rows));
+                    });
+                    std::rc::Rc::make_mut(&mut system).append(&mut harvested);
+                    continue;
+                }
+            }
             break;
         }
         if inherit && gate_first() {
@@ -7782,6 +8100,82 @@ mod tests {
     /// Linear elimination changes the tree, never the roots: on random
     /// systems with linear generators mixed in, every engine and split
     /// rule, with either degree-drop rule, returns exactly the variety.
+    #[test]
+    fn linear_harvest_keeps_every_root() {
+        // Underdetermined quadratic and cubic systems (gpv < 1, so the
+        // default's gate fires): every harvest configuration must find
+        // exactly the brute-force roots.
+        let mut seed = 0x0a5e_57ed_11ea_7a11u64;
+        let mut next = || {
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
+            seed
+        };
+        let mut harvested = 0u64;
+        for trial in 0..60 {
+            let n_vars = 7 + (trial % 6);
+            let m = n_vars - 1 - (trial % 3);
+            let system: Vec<F2BoolPoly> = (0..m)
+                .map(|k| {
+                    let deg = 2 + (k % 2) as u64;
+                    let terms = 4 + (next() % 8) as usize;
+                    let monos = (0..terms)
+                        .map(|_| {
+                            let d = (next() % (deg + 1)) as u32;
+                            let mut mask = 0u64;
+                            for _ in 0..d {
+                                mask |= 1u64 << (next() % n_vars as u64);
+                            }
+                            F2BoolMono::from_mask(mask)
+                        })
+                        .collect();
+                    F2BoolPoly::from_monos(monos, n_vars)
+                })
+                .filter(|p| !p.is_zero())
+                .collect();
+            let brute: Vec<u64> = (0..(1u64 << n_vars))
+                .filter(|pt| system.iter().all(|e| e.eval(*pt) == 0))
+                .collect();
+            for cfg in [
+                None,
+                Some(LINEAR_HARVEST_DEFAULT),
+                Some(LINEAR_HARVEST_GPV),
+                Some(LINEAR_HARVEST_EVERY_NODE),
+                parse_linear_harvest("root"),
+                parse_linear_harvest("k=2"),
+                // The size gates alone (gpv gate closed).
+                parse_linear_harvest("root,gpv=0,rank=1"),
+                parse_linear_harvest("root,gpv=0,occ=1"),
+            ] {
+                set_linear_harvest(Some(cfg));
+                linear_harvest_counts_reset();
+                let opts = SolveOptions {
+                    max_solutions: 1 << 13,
+                    ..SolveOptions::default()
+                };
+                let (mut got, _) = solve_boolean_system(&system, n_vars, &opts);
+                harvested += linear_harvest_counts_thread().0;
+                set_linear_harvest(None);
+                got.sort_unstable();
+                got.dedup();
+                assert_eq!(got, brute, "trial {trial} {cfg:?}: roots differ");
+            }
+        }
+        assert!(harvested > 0, "no harvest fired");
+        assert_eq!(parse_linear_harvest("0"), None);
+        assert_eq!(parse_linear_harvest("1"), Some(LINEAR_HARVEST_DEFAULT));
+        assert_eq!(
+            parse_linear_harvest("root,gpv=0.9607,rank=331"),
+            Some(LINEAR_HARVEST_DEFAULT)
+        );
+        assert_eq!(parse_linear_harvest("gpv"), Some(LINEAR_HARVEST_GPV));
+        assert_eq!(
+            parse_linear_harvest("root,gpv=0.9607"),
+            Some(LINEAR_HARVEST_GPV)
+        );
+    }
+
     #[test]
     fn linear_elimination_keeps_every_root() {
         let mut seed = 0x51ce_d00d_0bad_f00du64;

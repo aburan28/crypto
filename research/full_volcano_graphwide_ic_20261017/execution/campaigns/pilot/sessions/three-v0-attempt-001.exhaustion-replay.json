@@ -1,0 +1,80 @@
+{
+  "ok": true,
+  "records_sha256": "8d9c2d1c436ebc3e53528443cbb031251c9cd3fc35742defe060e97e81bae6d6",
+  "replayer_binary_sha256": "8ec9d8a87d7926fcb3fd1e301540508ba2585505456ca438659f58ea86cad3ae",
+  "replays": [
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1hd4abf9384293",
+      "reproduced": true,
+      "seq": 3
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1hf9305926a37d",
+      "reproduced": true,
+      "seq": 4
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1hc9ab0f408bf0",
+      "reproduced": true,
+      "seq": 5
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1h8ce69a6392c9",
+      "reproduced": true,
+      "seq": 6
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1hc5ab49ae6dd3",
+      "reproduced": true,
+      "seq": 7
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1h040a3341b1bb",
+      "reproduced": true,
+      "seq": 11
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1hb87fab1af9a6",
+      "reproduced": true,
+      "seq": 12
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1h008ac1c8b1b2",
+      "reproduced": true,
+      "seq": 13
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1h7e23195a16bd",
+      "reproduced": true,
+      "seq": 14
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1hd8bddc3db69e",
+      "reproduced": true,
+      "seq": 15
+    }
+  ],
+  "schema": "volcano-exhaustion-replay/v1",
+  "scope": "Measured deterministic exhausted records; successful records replayed by ecbench verify; timeouts have no deterministic final report.",
+  "session": "/workspace/volcano_ic_pilot_20261017/sessions/three-v0-attempt-001"
+}

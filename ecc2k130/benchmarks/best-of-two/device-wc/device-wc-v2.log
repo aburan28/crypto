@@ -1,0 +1,18 @@
+sign 0 --n 23 --walk sigma --dist ecc2k130 --walks 8 --trials 200000 --seed 20261014  (36.3 s)
+n = 23, device sigma walk, H = 8, ecc2k130 branches, W = 8: 200000 trials, mean 293.7 classes visited (random mapping 267.2), c = 1.0992 +- 0.0013; sum p^2 = 0.12655, model 1.0700, c / model = 1.0273; cycle rule 0 times in 57339022 steps; fruitless: pairwise 0.000e+00/step (predicted 8.329e-08) by length {}, tau-relation 0.000e+00/step (predicted 5.176e-07) by length {}; short returns 0; restarts 0
+
+sign 1 --n 23 --walk sigma --dist ecc2k130 --walks 8 --trials 200000 --seed 20261014  (32.9 s)
+n = 23, device sigma walk, H = 8, ecc2k130 branches, W = 8: 200000 trials, mean 285.4 classes visited (random mapping 267.2), c = 1.0680 +- 0.0012; sum p^2 = 0.12655, model 1.0700, c / model = 0.9982; cycle rule 0 times in 55674672 steps; fruitless: pairwise 0.000e+00/step (predicted 8.329e-08) by length {}, tau-relation 0.000e+00/step (predicted 5.176e-07) by length {}; short returns 0; restarts 0
+
+sign 2 --n 23 --walk sigma --dist ecc2k130 --walks 8 --trials 200000 --seed 20261014  (34.8 s)
+n = 23, device sigma walk, H = 8, ecc2k130 branches, W = 8: 200000 trials, mean 284.0 classes visited (random mapping 267.2), c = 1.0628 +- 0.0012; sum p^2 = 0.12655, model 1.0700, c / model = 0.9932; cycle rule 0 times in 55392448 steps; fruitless: pairwise 0.000e+00/step (predicted 8.329e-08) by length {}, tau-relation 0.000e+00/step (predicted 5.175e-07) by length {}; short returns 0; restarts 0
+
+sign 0 --n 41 --walk sigma --dist ecc2k130 --walks 16 --trials 4000 --seed 20261014  (561.3 s)
+n = 41, device sigma walk, H = 8, ecc2k130 branches, W = 16: 4000 trials, mean 111492.5 classes visited (random mapping 102621.1), c = 1.0864 +- 0.0091; sum p^2 = 0.12655, model 1.0700, c / model = 1.0154; cycle rule 0 times in 445910193 steps; fruitless: pairwise 0.000e+00/step (predicted 1.470e-08) by length {}, tau-relation 0.000e+00/step (predicted 9.137e-08) by length {}; short returns 0; restarts 0
+
+sign 1 --n 41 --walk sigma --dist ecc2k130 --walks 16 --trials 4000 --seed 20261014  (612.7 s)
+n = 41, device sigma walk, H = 8, ecc2k130 branches, W = 16: 4000 trials, mean 110179.5 classes visited (random mapping 102621.1), c = 1.0737 +- 0.0088; sum p^2 = 0.12655, model 1.0700, c / model = 1.0034; cycle rule 0 times in 440657913 steps; fruitless: pairwise 0.000e+00/step (predicted 1.470e-08) by length {}, tau-relation 0.000e+00/step (predicted 9.136e-08) by length {}; short returns 0; restarts 0
+
+sign 2 --n 41 --walk sigma --dist ecc2k130 --walks 16 --trials 4000 --seed 20261014  (593.4 s)
+n = 41, device sigma walk, H = 8, ecc2k130 branches, W = 16: 4000 trials, mean 107761.6 classes visited (random mapping 102621.1), c = 1.0501 +- 0.0086; sum p^2 = 0.12655, model 1.0700, c / model = 0.9814; cycle rule 0 times in 430986324 steps; fruitless: pairwise 0.000e+00/step (predicted 1.470e-08) by length {}, tau-relation 0.000e+00/step (predicted 9.136e-08) by length {}; short returns 0; restarts 0
+

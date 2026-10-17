@@ -1,0 +1,25 @@
+ops (ok): ic-orbit-c3-renew / rho-strong = 1.3786 [1.249, 1.521] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 0.0978 [0.095, 0.110]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 0.00%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-orbit-c3-renew / rho-strong | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m23-t5197-69e76b73 | 21.00 | 16 | 1.3786 | [1.2492, 1.5211] | cluster |
+
+| workload | curve | log2 r | rho-strong mean S | ic-orbit-c3-renew mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W08eca30d808d | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1921 | 1.5988 | 1.3411 |
+| W43c1403e6523 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.2005 | 1.4686 | 1.2233 |
+| W4abd725f7509 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1762 | 1.4923 | 1.2688 |
+| W5a2b6332e5b7 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1848 | 1.8216 | 1.5375 |
+| W5af51add3ac1 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.2016 | 1.4788 | 1.2307 |
+| W66787602faec | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.0708 | 1.8649 | 1.7416 |
+| W74adbac221d7 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.0629 | 1.2423 | 1.1687 |
+| W7a8b9f9cdfa9 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1933 | 1.4749 | 1.2360 |
+| W83078eff0203 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.0869 | 1.6101 | 1.4814 |
+| W8de5d6956c91 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.2081 | 1.7558 | 1.4533 |
+| Wb9e3667b1aad | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.2739 | 1.3735 | 1.0782 |
+| Wc1a32e051d3c | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.0703 | 1.7961 | 1.6781 |
+| We9366425a469 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1116 | 1.6563 | 1.4900 |
+| Wf658af88683f | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1027 | 1.2302 | 1.1156 |
+| Wf9f61f36a136 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1197 | 1.9420 | 1.7344 |
+| Wfd71e38f7111 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.3226 | 1.8052 | 1.3649 |

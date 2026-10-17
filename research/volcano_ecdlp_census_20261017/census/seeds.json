@@ -1,0 +1,11 @@
+{
+  "schema": "volcano-census.seeds/v1",
+  "recorded_before": "the census walks and any Phase B spec",
+  "ca_seed": 20261017,
+  "source_choice": "crater root = level-0 vertex of least j; crater-b = level-0 vertex farthest (BFS) from it, ties least j; floor-a = floor vertex (sorted by j) at index H('floor-a:'+V) mod #floor; floor-b = scanning on from H('floor-b:'+V) mod #floor, the first floor vertex whose ancestor at the first level with >= 2 vertices differs from floor-a's; H = first 8 hex digits of SHA-256, as an integer",
+  "target_seed_paired": 20261111,
+  "target_seed_native": 20261115,
+  "targets_per_curve": 8,
+  "pairing_note": "PLAN 3 says 'a different target_seed per family' and also that D and U share k_i; they conflict. Resolved for the pairing statement: families D, U-a, U-b and S share target_seed 20261111 (same k_i, different source generators); family N uses 20261115 (fresh generators, independent scalars).",
+  "ecbench_measurement_seed": 20261017
+}

@@ -1,0 +1,149 @@
+{
+  "c5prime_pass": true,
+  "controls": {
+    "c1_census_rows": 5231,
+    "c1_mismatched_rows": 0,
+    "c1_pass": true,
+    "c2_inconsistent_models": 0,
+    "c2_orbit_hits_nonsquarefree": 0,
+    "c2_pass": true,
+    "c3_pass": true,
+    "c3_unvisited_models": 0,
+    "c4_pass": true,
+    "c4_subgroup_counts_inconsistent": 0,
+    "c5_pass": false,
+    "c5_twist_complementarity_violations": 1488,
+    "git_head": "3be2421417df81fbc64a77014ece60f7d7c3aaf9",
+    "iso_classes": 34227,
+    "l_classes": 5231,
+    "models": 1411788,
+    "octics": 823543,
+    "p": 7,
+    "seconds_analysis": 17.124148456,
+    "seconds_total": 17.298460026,
+    "threads": 2
+  },
+  "h1": {
+    "bins": [
+      {
+        "N1": 0,
+        "degenerate_share": 0.0,
+        "in_test": false,
+        "model_N1_over_2p2": 0.0,
+        "prop2_passes": 2292,
+        "prop4_passes": 36,
+        "r": 0.015706806282722512
+      },
+      {
+        "N1": 2,
+        "degenerate_share": 0.02811523776466507,
+        "in_test": true,
+        "model_N1_over_2p2": 0.125,
+        "prop2_passes": 17286,
+        "prop4_passes": 1092,
+        "r": 0.065
+      },
+      {
+        "N1": 4,
+        "degenerate_share": 0.06191369606003749,
+        "in_test": true,
+        "model_N1_over_2p2": 0.25,
+        "prop2_passes": 67158,
+        "prop4_passes": 14196,
+        "r": 0.22533333333333333
+      },
+      {
+        "N1": 6,
+        "degenerate_share": 0.08729938577372698,
+        "in_test": true,
+        "model_N1_over_2p2": 0.375,
+        "prop2_passes": 151410,
+        "prop4_passes": 53316,
+        "r": 0.38581104550191037
+      },
+      {
+        "N1": 8,
+        "degenerate_share": 0.09326469326469322,
+        "in_test": true,
+        "model_N1_over_2p2": 0.5,
+        "prop2_passes": 209790,
+        "prop4_passes": 95112,
+        "r": 0.5
+      },
+      {
+        "N1": 10,
+        "degenerate_share": 0.08729938577372698,
+        "in_test": true,
+        "model_N1_over_2p2": 0.625,
+        "prop2_passes": 151410,
+        "prop4_passes": 84876,
+        "r": 0.6141889544980896
+      },
+      {
+        "N1": 12,
+        "degenerate_share": 0.06191369606003749,
+        "in_test": true,
+        "model_N1_over_2p2": 0.75,
+        "prop2_passes": 67158,
+        "prop4_passes": 48804,
+        "r": 0.7746666666666666
+      },
+      {
+        "N1": 14,
+        "degenerate_share": 0.02811523776466507,
+        "in_test": true,
+        "model_N1_over_2p2": 0.875,
+        "prop2_passes": 17286,
+        "prop4_passes": 15708,
+        "r": 0.935
+      },
+      {
+        "N1": 16,
+        "degenerate_share": 0.0,
+        "in_test": false,
+        "model_N1_over_2p2": 1.0,
+        "prop2_passes": 2292,
+        "prop4_passes": 2256,
+        "r": 0.9842931937172775
+      }
+    ],
+    "max_abs_dev": 0.06000000000000005,
+    "monotone": true,
+    "verdict": "sign law holds"
+  },
+  "h2": {
+    "C": 0.4304456476468138,
+    "U": 0.48966842047106224,
+    "gap_closed_n1": 0.7985647649802656,
+    "gap_closed_random": 0.6346609257265875,
+    "gap_closed_stratum": 0.5385001794043774,
+    "null_stratum": {
+      "frac_le_observed": 0.0,
+      "hi": 0.4607610349429234,
+      "lo": 0.4546900101148331,
+      "median": 0.45777694668037977,
+      "perms": 999,
+      "seed": 20261016
+    },
+    "null_stratum_n1_trig": {
+      "frac_le_observed": 0.0,
+      "hi": 0.44608538959107175,
+      "lo": 0.4389996940050489,
+      "median": 0.44237520080918663,
+      "perms": 999,
+      "seed": 20261016
+    },
+    "null_stratum_random_label_trig": {
+      "frac_le_observed": 0.0,
+      "hi": 0.4554029358515585,
+      "lo": 0.44850147472566704,
+      "median": 0.45208204064632934,
+      "perms": 999,
+      "seed": 20261016
+    },
+    "random_label_values": 17,
+    "verdict": "partial: residual clustering remains"
+  },
+  "instrument_valid": true,
+  "p": 7
+}

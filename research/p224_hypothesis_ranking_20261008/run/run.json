@@ -1,0 +1,58 @@
+{
+  "args": {
+    "out": "research/p224_hypothesis_ranking_20261008/run",
+    "trial_bound": 1048576,
+    "rho_budget": 67108864,
+    "bounds": [
+      100000,
+      1000000,
+      10000000,
+      100000000
+    ],
+    "null_bound": 1000000,
+    "null_draws": 1000,
+    "null_label": "p224-b-null/v1"
+  },
+  "git_revision": "aa57a6fdd20cfa36f199e5cdb48d28558efc7bb4",
+  "git_dirty": false,
+  "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+  "threads": 4,
+  "seconds": [
+    [
+      "seeds",
+      0.000167949
+    ],
+    [
+      "prime_sides",
+      44.927191386
+    ],
+    [
+      "cm_discriminant",
+      49.828146514
+    ],
+    [
+      "twist",
+      20.69883644
+    ],
+    [
+      "embedding_degree",
+      1.058962273
+    ],
+    [
+      "published_factorizations",
+      0.002967185
+    ],
+    [
+      "b_null_panel",
+      1.279066753
+    ],
+    [
+      "b_residues",
+      4.426286021
+    ],
+    [
+      "total",
+      122.221641007
+    ]
+  ]
+}

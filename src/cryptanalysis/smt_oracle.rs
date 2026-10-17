@@ -48,7 +48,10 @@ use std::fmt::Write as _;
 use std::fs;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant};
+
+static NEXT_SCRIPT_ID: AtomicU64 = AtomicU64::new(0);
 
 /// How the Boolean system is written in SMT-LIB 2.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -406,7 +409,11 @@ pub fn run_smt(script: &str, round: usize, options: &SmtSolveOptions) -> Result<
         None => {
             let dir = options.work_dir.clone().unwrap_or_else(std::env::temp_dir);
             fs::create_dir_all(&dir).map_err(|e| format!("create work dir: {e}"))?;
-            dir.join(format!("smt-pdp-{}-{round}.smt2", std::process::id()))
+            let script_id = NEXT_SCRIPT_ID.fetch_add(1, Ordering::Relaxed);
+            dir.join(format!(
+                "smt-pdp-{}-{script_id}-{round}.smt2",
+                std::process::id()
+            ))
         }
     };
     fs::write(&path, script).map_err(|e| format!("write script {}: {e}", path.display()))?;

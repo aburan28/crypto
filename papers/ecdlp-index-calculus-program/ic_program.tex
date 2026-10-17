@@ -1,0 +1,79 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{xcolor}
+\usepackage{xurl}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{caption}
+
+\hypersetup{colorlinks=true, linkcolor=blue!50!black, citecolor=blue!50!black,
+            urlcolor=blue!50!black}
+\captionsetup{font=small, labelfont=bf}
+\setlist{nosep, leftmargin=1.4em}
+\sloppy
+\emergencystretch=3em
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\newcommand{\FF}{\mathbb{F}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\Fb}{\mathcal{F}}
+\newcommand{\Sem}[1]{S_{#1}}
+\newcommand{\abs}[1]{\lvert #1 \rvert}
+% A committed artefact in this repository; breakable anywhere.
+\newcommand{\art}[1]{\path{#1}}
+\newcommand{\cls}[1]{\textsc{#1}}
+
+\title{Elliptic-Curve Index Calculus Against Pollard Rho:\\[4pt]
+       {\large A Survey of Results, a Measured Frontier with Every Cost Priced,\\
+       and Open Problems}}
+\author{Anonymous}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+
+\tableofcontents
+\bigskip
+
+\input{sections/intro}
+\input{sections/background}
+\input{sections/theory}
+\input{sections/method}
+\input{sections/chronology}
+\input{sections/rootfinding}
+\input{sections/groebner}
+\input{sections/koblitz}
+\input{sections/prime}
+\input{sections/transfer}
+\input{sections/frontier}
+\input{sections/openproblems}
+\input{sections/conclusion}
+
+\appendix
+\input{sections/artefacts}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\end{document}

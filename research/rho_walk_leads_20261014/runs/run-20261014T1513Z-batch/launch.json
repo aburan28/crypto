@@ -1,0 +1,106 @@
+{
+ "plan": "batch",
+ "started_utc": "2026-10-14T15:13:55Z",
+ "finished_utc": "2026-10-14T15:15:22Z",
+ "commit": "be3610fa17f6c0ce3802010f73d652a655c6fe70",
+ "image": "rust:1.88-slim-bookworm",
+ "cpu_per_container": 16,
+ "jobs": [
+  {
+   "file": "bench-m8",
+   "argv": [
+    "bench",
+    "--walks",
+    "8",
+    "--steps",
+    "512000",
+    "--reps",
+    "21",
+    "--arms",
+    "base,pm_score"
+   ],
+   "wall_s": 84.1,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "bench-m16",
+   "argv": [
+    "bench",
+    "--walks",
+    "16",
+    "--steps",
+    "256000",
+    "--reps",
+    "21",
+    "--arms",
+    "base,pm_score"
+   ],
+   "wall_s": 52.3,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "bench-m32",
+   "argv": [
+    "bench",
+    "--walks",
+    "32",
+    "--steps",
+    "128000",
+    "--reps",
+    "21",
+    "--arms",
+    "base,pm_score"
+   ],
+   "wall_s": 29.6,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "bench-m64",
+   "argv": [
+    "bench",
+    "--walks",
+    "64",
+    "--steps",
+    "64000",
+    "--reps",
+    "21",
+    "--arms",
+    "base,pm_score"
+   ],
+   "wall_s": 24.5,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "bench-m128",
+   "argv": [
+    "bench",
+    "--walks",
+    "128",
+    "--steps",
+    "32000",
+    "--reps",
+    "21",
+    "--arms",
+    "base,pm_score"
+   ],
+   "wall_s": 19.6,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "bench-m1024",
+   "argv": [
+    "bench",
+    "--walks",
+    "1024",
+    "--steps",
+    "4000",
+    "--reps",
+    "21",
+    "--arms",
+    "base,pm_score"
+   ],
+   "wall_s": 13.3,
+   "host": "16\nmodel name\t: unknown"
+  }
+ ]
+}

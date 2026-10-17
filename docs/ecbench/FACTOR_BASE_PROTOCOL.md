@@ -62,6 +62,8 @@ Supported plug-in families (binary / Koblitz unless noted):
 | `koblitz-standard-subspace` | `koblitz-standard-subspace:dimension=4` | PDP / standard basis (binary plug-in) |
 | `prime-abscissa` | `prime-abscissa:size=32` | prime curves |
 | `glv-orbit` | `glv-orbit:size=16` | prime curves with automorphism fold |
+| `prime-kummer` | `prime-kummer:t=9` | prime curves, `2^t \| p − 1`; PKM's Kummer tower |
+| `prime-isogeny` | `prime-isogeny:t=9,seed=0` | prime curves, any `p`; PKM's isogeny tower, auxiliary-curve search charged to the factor-base phase |
 
 ## Publish (Git + S3)
 

@@ -1,0 +1,40 @@
+--------------------------------------------------------------------------------
+Profile data file 'q4-candidate.cg' (creator: callgrind-3.22.0)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 0 - 370937117
+Trigger: Program termination
+Profiled target:  koblitz_rho_fixture-candidate 53 0 signed_frobenius 4 strong (PID 29621, part 1)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       99.5
+Include dirs:     
+User annotated:   
+Auto-annotation:  on
+
+--------------------------------------------------------------------------------
+Ir                     
+--------------------------------------------------------------------------------
+3,077,470,177 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                      file:function
+--------------------------------------------------------------------------------
+1,387,005,149 (45.07%)  ???:<crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::canonicalize 
+  806,466,333 (26.21%)  ???:<crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::solve 
+  202,328,052 ( 6.57%)  ???:<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::batch_inv_clmul 
+  178,012,155 ( 5.78%)  ???:<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::mul_fold 
+  132,154,498 ( 4.29%)  ???:<crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::inv 
+   82,888,470 ( 2.69%)  ???:<std::hash::random::DefaultHasher as core::hash::Hasher>::write 
+   70,301,335 ( 2.28%)  ???:<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::inv_clmul 
+   65,904,176 ( 2.14%)  ???:<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&(u8, u64, u64)> 
+   47,018,800 ( 1.53%)  ???:<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::write 
+   45,342,192 ( 1.47%)  ???:__umodti3 
+   18,139,157 ( 0.59%)  ???:<hashbrown::map::HashMap<(u8, u64, u64), (u64, u64), std::hash::random::RandomState>>::insert 
+   13,816,019 ( 0.45%)  ???:<crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::add 
+   10,916,228 ( 0.35%)  ???:<hashbrown::raw::RawTable<((u8, u64, u64), (u64, u64))>>::reserve_rehash::<hashbrown::map::make_hasher<(u8, u64, u64), (u64, u64), std::hash::random::RandomState>::{closure#0}> 
+    3,529,085 ( 0.11%)  ???:crypto_lib::binary_ecc::f2m::reduce_words 
+

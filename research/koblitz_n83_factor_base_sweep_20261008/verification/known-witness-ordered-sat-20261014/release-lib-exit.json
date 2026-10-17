@@ -1,0 +1,18 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "--release",
+    "--lib",
+    "--offline",
+    "--",
+    "--test-threads=1"
+  ],
+  "cwd": "/Volumes/SSD990/crypto/worktrees/codex-n83-mixed-orbit-worker-20261012",
+  "exit_code": 101,
+  "finished_utc": "2026-10-14T06:48:33.289429+00:00",
+  "log_bytes": 174648,
+  "runner_pid": 16602,
+  "schema": "n83.release-library-validation/v1",
+  "started_utc": "2026-10-14T06:03:48.598514+00:00"
+}

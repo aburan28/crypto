@@ -137,6 +137,13 @@ enum Cmd {
 
 #[derive(Subcommand)]
 enum IsogenyOp {
+    /// Plan, enumerate, resume, verify or solve on an ordinary isogeny class.
+    /// Example: crypto isogeny class build --curve curve.json --out graph.sqlite --steps all
+    #[command(disable_help_flag = true)]
+    Class {
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
+    },
     /// Map the ℓ-volcano of a small curve.
     /// `<curve>` is a built-in name: `toy-a`, `toy-b`, `toy-j0`.
     Volcano {
@@ -1122,6 +1129,14 @@ fn cmd_isogeny(op: IsogenyOp) {
     use num_bigint::BigInt;
 
     match op {
+        IsogenyOp::Class { args } => {
+            let (value, code) = match volcano_cli::run(&args) {
+                Ok(result) => result,
+                Err(error) => (serde_json::json!({"status":"ERROR","error":error}), 2),
+            };
+            println!("{}", serde_json::to_string_pretty(&value).unwrap());
+            std::process::exit(code);
+        }
         IsogenyOp::Volcano { curve, ell, depth } => {
             let c = parse_isogeny_curve(&curve);
             let m = map_volcano(&c, ell, depth, 256);

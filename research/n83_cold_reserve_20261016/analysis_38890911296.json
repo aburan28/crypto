@@ -1,0 +1,1150 @@
+{
+  "arm_count": 20,
+  "cold_process_ms_by_point": [
+    {
+      "cold_process_ms": {
+        "k1024root22": 167319.25759649999,
+        "k1152root11": 164285.747526,
+        "k1152root22": 164446.670871,
+        "k1536root22": 185999.382214
+      },
+      "point_index": 1
+    },
+    {
+      "cold_process_ms": {
+        "k1024root22": 167811.17999049998,
+        "k1152root11": 164831.57165700002,
+        "k1152root22": 165296.686701,
+        "k1536root22": 186222.327627
+      },
+      "point_index": 2
+    },
+    {
+      "cold_process_ms": {
+        "k1024root22": 166869.640995,
+        "k1152root11": 164186.280662,
+        "k1152root22": 164887.077095,
+        "k1536root22": 184649.895993
+      },
+      "point_index": 3
+    },
+    {
+      "cold_process_ms": {
+        "k1024root22": 165981.3378495,
+        "k1152root11": 164421.246228,
+        "k1152root22": 165014.57549,
+        "k1536root22": 187177.853973
+      },
+      "point_index": 4
+    }
+  ],
+  "controlled_online_speedup": null,
+  "cross_point_base_identity": {
+    "k1024root22": {
+      "identities": [
+        [
+          "f3bb5adfd099df1be8e90edf56c9a764028e060d7e0c3a97759e9b699c423629",
+          87028652
+        ]
+      ],
+      "status": "PASS"
+    },
+    "k1152root11": {
+      "identities": [
+        [
+          "42b700925cd82a171d99904cb83d6552e8b7b3a9988d0bdc1a3d1ea9d3119d01",
+          110146029
+        ]
+      ],
+      "status": "PASS"
+    },
+    "k1152root22": {
+      "identities": [
+        [
+          "42b700925cd82a171d99904cb83d6552e8b7b3a9988d0bdc1a3d1ea9d3119d01",
+          110146029
+        ]
+      ],
+      "status": "PASS"
+    },
+    "k1536root22": {
+      "identities": [
+        [
+          "c7c782d5759187b8d4fe71751579def0757d8c912bdefcd5ef6de908c72a7b4b",
+          195816567
+        ]
+      ],
+      "status": "PASS"
+    }
+  },
+  "evidence_status": "PASS_INDEPENDENT_REPLAY",
+  "execution_order_status": "PASS",
+  "hardware_tier": "cloud_instance_exploratory",
+  "mean_cold_process_ms_by_pipeline": {
+    "k1024root22": 166995.354107875,
+    "k1152root11": 164431.21151825,
+    "k1152root22": 164911.25253925,
+    "k1536root22": 186012.36495175
+  },
+  "ordered_events": [
+    "p1_k1024root22_a",
+    "p1_k1152root22",
+    "p1_k1152root11",
+    "p1_k1536root22",
+    "p1_k1024root22_b",
+    "p1_rho",
+    "p2_rho",
+    "p2_k1024root22_a",
+    "p2_k1152root11",
+    "p2_k1536root22",
+    "p2_k1152root22",
+    "p2_k1024root22_b",
+    "p3_k1024root22_a",
+    "p3_k1536root22",
+    "p3_k1152root22",
+    "p3_k1152root11",
+    "p3_k1024root22_b",
+    "p3_rho",
+    "p4_rho",
+    "p4_k1024root22_a",
+    "p4_k1152root22",
+    "p4_k1536root22",
+    "p4_k1152root11",
+    "p4_k1024root22_b"
+  ],
+  "paired_intervals": {
+    "k1024root22|k1152root11": {
+      "differences_ms": [
+        -3033.510070499993,
+        -2979.6083334999566,
+        -2683.3603329999896,
+        -1560.0916215000034
+      ],
+      "lower_95_ms": -3657.0587926949756,
+      "mean_ms": -2564.1425896249857,
+      "sample_sd_ms": 686.8403097675315,
+      "upper_95_ms": -1471.226386554996
+    },
+    "k1024root22|k1152root22": {
+      "differences_ms": [
+        -2872.5867254999757,
+        -2514.49328949998,
+        -1982.5639000000083,
+        -966.7623595000186
+      ],
+      "lower_95_ms": -3404.498081233247,
+      "mean_ms": -2084.1015686249957,
+      "sample_sd_ms": 829.7997112572244,
+      "upper_95_ms": -763.7050560167447
+    },
+    "k1024root22|k1536root22": {
+      "differences_ms": [
+        18680.124617500027,
+        18411.147636500013,
+        17780.25499800002,
+        21196.516123499983
+      ],
+      "lower_95_ms": 16628.343227155612,
+      "mean_ms": 19017.01084387501,
+      "sample_sd_ms": 1501.151873483714,
+      "upper_95_ms": 21405.67846059441
+    },
+    "k1152root11|k1024root22": {
+      "differences_ms": [
+        3033.510070499993,
+        2979.6083334999566,
+        2683.3603329999896,
+        1560.0916215000034
+      ],
+      "lower_95_ms": 1471.226386554996,
+      "mean_ms": 2564.1425896249857,
+      "sample_sd_ms": 686.8403097675315,
+      "upper_95_ms": 3657.0587926949756
+    },
+    "k1152root11|k1152root22": {
+      "differences_ms": [
+        160.92334500001743,
+        465.1150439999765,
+        700.7964329999813,
+        593.3292619999847
+      ],
+      "lower_95_ms": 108.42306554097968,
+      "mean_ms": 480.04102099999,
+      "sample_sd_ms": 233.54232550095867,
+      "upper_95_ms": 851.6589764590003
+    },
+    "k1152root11|k1536root22": {
+      "differences_ms": [
+        21713.63468800002,
+        21390.75596999997,
+        20463.615331000008,
+        22756.607744999987
+      ],
+      "lower_95_ms": 20075.957614946514,
+      "mean_ms": 21581.153433499996,
+      "sample_sd_ms": 945.9363484337155,
+      "upper_95_ms": 23086.34925205348
+    },
+    "k1152root22|k1024root22": {
+      "differences_ms": [
+        2872.5867254999757,
+        2514.49328949998,
+        1982.5639000000083,
+        966.7623595000186
+      ],
+      "lower_95_ms": 763.7050560167447,
+      "mean_ms": 2084.1015686249957,
+      "sample_sd_ms": 829.7997112572244,
+      "upper_95_ms": 3404.498081233247
+    },
+    "k1152root22|k1152root11": {
+      "differences_ms": [
+        -160.92334500001743,
+        -465.1150439999765,
+        -700.7964329999813,
+        -593.3292619999847
+      ],
+      "lower_95_ms": -851.6589764590003,
+      "mean_ms": -480.04102099999,
+      "sample_sd_ms": 233.54232550095867,
+      "upper_95_ms": -108.42306554097968
+    },
+    "k1152root22|k1536root22": {
+      "differences_ms": [
+        21552.711343000003,
+        20925.640925999993,
+        19762.818898000027,
+        22163.278483000002
+      ],
+      "lower_95_ms": 19469.56979073433,
+      "mean_ms": 21101.112412500006,
+      "sample_sd_ms": 1025.3386641946445,
+      "upper_95_ms": 22732.65503426568
+    },
+    "k1536root22|k1024root22": {
+      "differences_ms": [
+        -18680.124617500027,
+        -18411.147636500013,
+        -17780.25499800002,
+        -21196.516123499983
+      ],
+      "lower_95_ms": -21405.67846059441,
+      "mean_ms": -19017.01084387501,
+      "sample_sd_ms": 1501.151873483714,
+      "upper_95_ms": -16628.343227155612
+    },
+    "k1536root22|k1152root11": {
+      "differences_ms": [
+        -21713.63468800002,
+        -21390.75596999997,
+        -20463.615331000008,
+        -22756.607744999987
+      ],
+      "lower_95_ms": -23086.34925205348,
+      "mean_ms": -21581.153433499996,
+      "sample_sd_ms": 945.9363484337155,
+      "upper_95_ms": -20075.957614946514
+    },
+    "k1536root22|k1152root22": {
+      "differences_ms": [
+        -21552.711343000003,
+        -20925.640925999993,
+        -19762.818898000027,
+        -22163.278483000002
+      ],
+      "lower_95_ms": -22732.65503426568,
+      "mean_ms": -21101.112412500006,
+      "sample_sd_ms": 1025.3386641946445,
+      "upper_95_ms": -19469.56979073433
+    }
+  },
+  "point_count": 4,
+  "point_rows": [
+    {
+      "aa_control": {
+        "cold_process_ms": [
+          166798.58568,
+          167839.92951299998
+        ],
+        "relative_difference": 0.0062236938410954006,
+        "status": "PASS_10_PERCENT"
+      },
+      "arms": [
+        {
+          "actual_factor_base_points": 169984,
+          "arm": "p1_k1024root22_a",
+          "base_hash": "f3bb5adfd099df1be8e90edf56c9a764028e060d7e0c3a97759e9b699c423629",
+          "cold_process_ms_exploratory": 166798.58568,
+          "cold_unattributed_ms": 2.9367519999888714,
+          "effective_columns": 1024,
+          "full_child_wall_seconds": 167.1749294880001,
+          "k": 1024,
+          "layout": "root22_dynamic",
+          "one_target_online_ms": 399.417483,
+          "online_phases_ms": {
+            "target_descent_ms": 0.000571,
+            "target_pdp_ms": 399.276961,
+            "target_query_ms": 2.9999999999999997e-05,
+            "target_recovery_check_ms": 0.12913,
+            "target_relation_check_ms": 0.010078
+          },
+          "pipeline": "k1024root22",
+          "rank_attempts": 1024,
+          "rank_relations": 1024,
+          "rank_stage_ms": 122930.21386799999,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 2,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 1750331392,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 957361152,
+          "root_table_allocated_bytes": 671088640,
+          "root_table_entries": 87028652,
+          "setup_ms": 43465.757634,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 744013,
+          "targets_total_ms": 399.677426
+        },
+        {
+          "actual_factor_base_points": 191232,
+          "arm": "p1_k1152root22",
+          "base_hash": "42b700925cd82a171d99904cb83d6552e8b7b3a9988d0bdc1a3d1ea9d3119d01",
+          "cold_process_ms_exploratory": 164446.670871,
+          "cold_unattributed_ms": 3.5764620000216496,
+          "effective_columns": 1152,
+          "full_child_wall_seconds": 164.650129805,
+          "k": 1152,
+          "layout": "root22_dynamic",
+          "one_target_online_ms": 318.522541,
+          "online_phases_ms": {
+            "target_descent_ms": 0.000772,
+            "target_pdp_ms": 318.38024599999994,
+            "target_query_ms": 4e-05,
+            "target_recovery_check_ms": 0.12914099999999998,
+            "target_relation_check_ms": 0.011702
+          },
+          "pipeline": "k1152root22",
+          "rank_attempts": 1152,
+          "rank_relations": 1152,
+          "rank_stage_ms": 109049.48731,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 2690433024,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 1211658624,
+          "root_table_allocated_bytes": 1342177280,
+          "root_table_entries": 110146029,
+          "setup_ms": 55074.794527,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 609915,
+          "targets_total_ms": 318.812572
+        },
+        {
+          "actual_factor_base_points": 191232,
+          "arm": "p1_k1152root11",
+          "base_hash": "42b700925cd82a171d99904cb83d6552e8b7b3a9988d0bdc1a3d1ea9d3119d01",
+          "cold_process_ms_exploratory": 164285.747526,
+          "cold_unattributed_ms": 3.6291969999713274,
+          "effective_columns": 1152,
+          "full_child_wall_seconds": 164.6593130430001,
+          "k": 1152,
+          "layout": "root11_dynamic",
+          "one_target_online_ms": 317.693584,
+          "online_phases_ms": {
+            "target_descent_ms": 0.000571,
+            "target_pdp_ms": 317.541691,
+            "target_query_ms": 4e-05,
+            "target_recovery_check_ms": 0.13897900000000002,
+            "target_relation_check_ms": 0.011672
+          },
+          "pipeline": "k1152root11",
+          "rank_attempts": 1152,
+          "rank_relations": 1152,
+          "rank_stage_ms": 109152.06774000001,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 2087485440,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 605829312,
+          "root_table_allocated_bytes": 1342177280,
+          "root_table_entries": 110146029,
+          "setup_ms": 54812.100757,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 609915,
+          "targets_total_ms": 317.949832
+        },
+        {
+          "actual_factor_base_points": 254976,
+          "arm": "p1_k1536root22",
+          "base_hash": "c7c782d5759187b8d4fe71751579def0757d8c912bdefcd5ef6de908c72a7b4b",
+          "cold_process_ms_exploratory": 185999.382214,
+          "cold_unattributed_ms": 6.247714000026697,
+          "effective_columns": 1536,
+          "full_child_wall_seconds": 186.67427405299986,
+          "k": 1536,
+          "layout": "root22_dynamic",
+          "one_target_online_ms": 62.249129,
+          "online_phases_ms": {
+            "target_descent_ms": 0.000541,
+            "target_pdp_ms": 62.096455,
+            "target_query_ms": 2.9999999999999997e-05,
+            "target_recovery_check_ms": 0.139841,
+            "target_relation_check_ms": 0.011592
+          },
+          "pipeline": "k1536root22",
+          "rank_attempts": 1536,
+          "rank_relations": 1536,
+          "rank_stage_ms": 86819.14472699999,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 3688071168,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 2154054144,
+          "root_table_allocated_bytes": 1342177280,
+          "root_table_entries": 195816567,
+          "setup_ms": 99111.482121,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 112608,
+          "targets_total_ms": 62.507652
+        },
+        {
+          "actual_factor_base_points": 169984,
+          "arm": "p1_k1024root22_b",
+          "base_hash": "f3bb5adfd099df1be8e90edf56c9a764028e060d7e0c3a97759e9b699c423629",
+          "cold_process_ms_exploratory": 167839.92951299998,
+          "cold_unattributed_ms": 3.1368949999857136,
+          "effective_columns": 1024,
+          "full_child_wall_seconds": 168.16304374699985,
+          "k": 1024,
+          "layout": "root22_dynamic",
+          "one_target_online_ms": 406.309366,
+          "online_phases_ms": {
+            "target_descent_ms": 0.0005819999999999999,
+            "target_pdp_ms": 406.168916,
+            "target_query_ms": 3.1e-05,
+            "target_recovery_check_ms": 0.12914,
+            "target_relation_check_ms": 0.010058
+          },
+          "pipeline": "k1024root22",
+          "rank_attempts": 1024,
+          "rank_relations": 1024,
+          "rank_stage_ms": 123508.172955,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 1750261760,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 957361152,
+          "root_table_allocated_bytes": 671088640,
+          "root_table_entries": 87028652,
+          "setup_ms": 43922.021258,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 744013,
+          "targets_total_ms": 406.598405
+        }
+      ],
+      "point_index": 1,
+      "public_point": [
+        "3277169389397587422174579",
+        "1280099399834549186083033"
+      ],
+      "rho": {
+        "full_child_wall_seconds": 1.0006557919998613,
+        "online_ms": 357.409097,
+        "resources": {
+          "cpu_throttled_periods_delta": 0,
+          "major_faults": 0,
+          "oom_events_delta": 0,
+          "oom_kills_delta": 0,
+          "peak_rss_bytes": 21164032,
+          "status": "PASS"
+        },
+        "status": "PASS_INDEPENDENT_REPLAY"
+      }
+    },
+    {
+      "aa_control": {
+        "cold_process_ms": [
+          167490.853354,
+          168131.506627
+        ],
+        "relative_difference": 0.0038177031651661815,
+        "status": "PASS_10_PERCENT"
+      },
+      "arms": [
+        {
+          "actual_factor_base_points": 169984,
+          "arm": "p2_k1024root22_a",
+          "base_hash": "f3bb5adfd099df1be8e90edf56c9a764028e060d7e0c3a97759e9b699c423629",
+          "cold_process_ms_exploratory": 167490.853354,
+          "cold_unattributed_ms": 2.8267490000018825,
+          "effective_columns": 1024,
+          "full_child_wall_seconds": 167.674464296,
+          "k": 1024,
+          "layout": "root22_dynamic",
+          "one_target_online_ms": 1509.388018,
+          "online_phases_ms": {
+            "target_descent_ms": 0.000411,
+            "target_pdp_ms": 1509.2592089999998,
+            "target_query_ms": 4.1e-05,
+            "target_recovery_check_ms": 0.120906,
+            "target_relation_check_ms": 0.006802
+          },
+          "pipeline": "k1024root22",
+          "rank_attempts": 1024,
+          "rank_relations": 1024,
+          "rank_stage_ms": 122139.489257,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 1750814720,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 957361152,
+          "root_table_allocated_bytes": 671088640,
+          "root_table_entries": 87028652,
+          "setup_ms": 43838.890526999996,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 2825159,
+          "targets_total_ms": 1509.646821
+        },
+        {
+          "actual_factor_base_points": 191232,
+          "arm": "p2_k1152root11",
+          "base_hash": "42b700925cd82a171d99904cb83d6552e8b7b3a9988d0bdc1a3d1ea9d3119d01",
+          "cold_process_ms_exploratory": 164831.57165700002,
+          "cold_unattributed_ms": 3.5644040000285315,
+          "effective_columns": 1152,
+          "full_child_wall_seconds": 165.15739823900003,
+          "k": 1152,
+          "layout": "root11_dynamic",
+          "one_target_online_ms": 140.708843,
+          "online_phases_ms": {
+            "target_descent_ms": 0.000531,
+            "target_pdp_ms": 140.57811900000002,
+            "target_query_ms": 2.9999999999999997e-05,
+            "target_recovery_check_ms": 0.120926,
+            "target_relation_check_ms": 0.008375
+          },
+          "pipeline": "k1152root11",
+          "rank_attempts": 1152,
+          "rank_relations": 1152,
+          "rank_stage_ms": 109814.317744,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 2084737024,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 605829312,
+          "root_table_allocated_bytes": 1342177280,
+          "root_table_entries": 110146029,
+          "setup_ms": 54872.707577,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 268027,
+          "targets_total_ms": 140.981932
+        },
+        {
+          "actual_factor_base_points": 254976,
+          "arm": "p2_k1536root22",
+          "base_hash": "c7c782d5759187b8d4fe71751579def0757d8c912bdefcd5ef6de908c72a7b4b",
+          "cold_process_ms_exploratory": 186222.327627,
+          "cold_unattributed_ms": 6.327837999977394,
+          "effective_columns": 1536,
+          "full_child_wall_seconds": 186.6586597019998,
+          "k": 1536,
+          "layout": "root22_dynamic",
+          "one_target_online_ms": 10.685924,
+          "online_phases_ms": {
+            "target_descent_ms": 0.00048100000000000004,
+            "target_pdp_ms": 10.5372,
+            "target_query_ms": 2.9999999999999997e-05,
+            "target_recovery_check_ms": 0.121226,
+            "target_relation_check_ms": 0.026316
+          },
+          "pipeline": "k1536root22",
+          "rank_attempts": 1536,
+          "rank_relations": 1536,
+          "rank_stage_ms": 86930.464376,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 3687034880,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 2154054144,
+          "root_table_allocated_bytes": 1342177280,
+          "root_table_entries": 195816567,
+          "setup_ms": 99274.59704800001,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 19084,
+          "targets_total_ms": 10.938365000000001
+        },
+        {
+          "actual_factor_base_points": 191232,
+          "arm": "p2_k1152root22",
+          "base_hash": "42b700925cd82a171d99904cb83d6552e8b7b3a9988d0bdc1a3d1ea9d3119d01",
+          "cold_process_ms_exploratory": 165296.686701,
+          "cold_unattributed_ms": 3.5271749999998008,
+          "effective_columns": 1152,
+          "full_child_wall_seconds": 165.65617796099968,
+          "k": 1152,
+          "layout": "root22_dynamic",
+          "one_target_online_ms": 139.588729,
+          "online_phases_ms": {
+            "target_descent_ms": 0.0006519999999999999,
+            "target_pdp_ms": 139.458125,
+            "target_query_ms": 4e-05,
+            "target_recovery_check_ms": 0.120945,
+            "target_relation_check_ms": 0.008337
+          },
+          "pipeline": "k1152root22",
+          "rank_attempts": 1152,
+          "rank_relations": 1152,
+          "rank_stage_ms": 109990.671181,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 2690322432,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 1211658624,
+          "root_table_allocated_bytes": 1342177280,
+          "root_table_entries": 110146029,
+          "setup_ms": 55162.622338,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 268027,
+          "targets_total_ms": 139.866007
+        },
+        {
+          "actual_factor_base_points": 169984,
+          "arm": "p2_k1024root22_b",
+          "base_hash": "f3bb5adfd099df1be8e90edf56c9a764028e060d7e0c3a97759e9b699c423629",
+          "cold_process_ms_exploratory": 168131.506627,
+          "cold_unattributed_ms": 2.8314159999983985,
+          "effective_columns": 1024,
+          "full_child_wall_seconds": 168.66467394300025,
+          "k": 1024,
+          "layout": "root22_dynamic",
+          "one_target_online_ms": 1513.298646,
+          "online_phases_ms": {
+            "target_descent_ms": 0.00046100000000000004,
+            "target_pdp_ms": 1513.169464,
+            "target_query_ms": 4e-05,
+            "target_recovery_check_ms": 0.120875,
+            "target_relation_check_ms": 0.006784
+          },
+          "pipeline": "k1024root22",
+          "rank_attempts": 1024,
+          "rank_relations": 1024,
+          "rank_stage_ms": 121965.304672,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 1748508672,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 957361152,
+          "root_table_allocated_bytes": 671088640,
+          "root_table_entries": 87028652,
+          "setup_ms": 44649.83446,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 2825159,
+          "targets_total_ms": 1513.5360790000002
+        }
+      ],
+      "point_index": 2,
+      "public_point": [
+        "9271598421722686282481455",
+        "6207226871974079714209121"
+      ],
+      "rho": {
+        "full_child_wall_seconds": 1.000647193000077,
+        "online_ms": 561.533042,
+        "resources": {
+          "cpu_throttled_periods_delta": 0,
+          "major_faults": 0,
+          "oom_events_delta": 0,
+          "oom_kills_delta": 0,
+          "peak_rss_bytes": 21164032,
+          "status": "PASS"
+        },
+        "status": "PASS_INDEPENDENT_REPLAY"
+      }
+    },
+    {
+      "aa_control": {
+        "cold_process_ms": [
+          166851.57056599998,
+          166887.711424
+        ],
+        "relative_difference": 0.00021658138523298468,
+        "status": "PASS_10_PERCENT"
+      },
+      "arms": [
+        {
+          "actual_factor_base_points": 169984,
+          "arm": "p3_k1024root22_a",
+          "base_hash": "f3bb5adfd099df1be8e90edf56c9a764028e060d7e0c3a97759e9b699c423629",
+          "cold_process_ms_exploratory": 166851.57056599998,
+          "cold_unattributed_ms": 2.9943489999851636,
+          "effective_columns": 1024,
+          "full_child_wall_seconds": 167.16094076299987,
+          "k": 1024,
+          "layout": "root22_dynamic",
+          "one_target_online_ms": 415.480556,
+          "online_phases_ms": {
+            "target_descent_ms": 0.000411,
+            "target_pdp_ms": 415.332282,
+            "target_query_ms": 2.9999999999999997e-05,
+            "target_recovery_check_ms": 0.13064399999999998,
+            "target_relation_check_ms": 0.016489
+          },
+          "pipeline": "k1024root22",
+          "rank_attempts": 1024,
+          "rank_relations": 1024,
+          "rank_stage_ms": 122995.482293,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 1748504576,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 957361152,
+          "root_table_allocated_bytes": 671088640,
+          "root_table_entries": 87028652,
+          "setup_ms": 43437.350717999994,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 774127,
+          "targets_total_ms": 415.743206
+        },
+        {
+          "actual_factor_base_points": 254976,
+          "arm": "p3_k1536root22",
+          "base_hash": "c7c782d5759187b8d4fe71751579def0757d8c912bdefcd5ef6de908c72a7b4b",
+          "cold_process_ms_exploratory": 184649.895993,
+          "cold_unattributed_ms": 6.131563000033424,
+          "effective_columns": 1536,
+          "full_child_wall_seconds": 185.1692550759999,
+          "k": 1536,
+          "layout": "root22_dynamic",
+          "one_target_online_ms": 134.62602800000002,
+          "online_phases_ms": {
+            "target_descent_ms": 0.000361,
+            "target_pdp_ms": 134.479165,
+            "target_query_ms": 7.000000000000001e-05,
+            "target_recovery_check_ms": 0.13068300000000002,
+            "target_relation_check_ms": 0.014918
+          },
+          "pipeline": "k1536root22",
+          "rank_attempts": 1536,
+          "rank_relations": 1536,
+          "rank_stage_ms": 86361.32710299999,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 3686199296,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 2154054144,
+          "root_table_allocated_bytes": 1342177280,
+          "root_table_entries": 195816567,
+          "setup_ms": 98147.54237699999,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 246274,
+          "targets_total_ms": 134.89495000000002
+        },
+        {
+          "actual_factor_base_points": 191232,
+          "arm": "p3_k1152root22",
+          "base_hash": "42b700925cd82a171d99904cb83d6552e8b7b3a9988d0bdc1a3d1ea9d3119d01",
+          "cold_process_ms_exploratory": 164887.077095,
+          "cold_unattributed_ms": 3.5258339999702457,
+          "effective_columns": 1152,
+          "full_child_wall_seconds": 165.15566244399997,
+          "k": 1152,
+          "layout": "root22_dynamic",
+          "one_target_online_ms": 687.684369,
+          "online_phases_ms": {
+            "target_descent_ms": 0.000501,
+            "target_pdp_ms": 687.526152,
+            "target_query_ms": 4.1e-05,
+            "target_recovery_check_ms": 0.130775,
+            "target_relation_check_ms": 0.026341
+          },
+          "pipeline": "k1152root22",
+          "rank_attempts": 1152,
+          "rank_relations": 1152,
+          "rank_stage_ms": 109653.94204400001,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 2689650688,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 1211658624,
+          "root_table_allocated_bytes": 1342177280,
+          "root_table_entries": 110146029,
+          "setup_ms": 54541.672407,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 1327516,
+          "targets_total_ms": 687.9368099999999
+        },
+        {
+          "actual_factor_base_points": 191232,
+          "arm": "p3_k1152root11",
+          "base_hash": "42b700925cd82a171d99904cb83d6552e8b7b3a9988d0bdc1a3d1ea9d3119d01",
+          "cold_process_ms_exploratory": 164186.280662,
+          "cold_unattributed_ms": 3.5307469999995647,
+          "effective_columns": 1152,
+          "full_child_wall_seconds": 164.6604014059999,
+          "k": 1152,
+          "layout": "root11_dynamic",
+          "one_target_online_ms": 695.037319,
+          "online_phases_ms": {
+            "target_descent_ms": 0.000561,
+            "target_pdp_ms": 694.878856,
+            "target_query_ms": 4e-05,
+            "target_recovery_check_ms": 0.130824,
+            "target_relation_check_ms": 0.026407
+          },
+          "pipeline": "k1152root11",
+          "rank_attempts": 1152,
+          "rank_relations": 1152,
+          "rank_stage_ms": 108950.383883,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 2086842368,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 605829312,
+          "root_table_allocated_bytes": 1342177280,
+          "root_table_entries": 110146029,
+          "setup_ms": 54537.066162,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 1327516,
+          "targets_total_ms": 695.29987
+        },
+        {
+          "actual_factor_base_points": 169984,
+          "arm": "p3_k1024root22_b",
+          "base_hash": "f3bb5adfd099df1be8e90edf56c9a764028e060d7e0c3a97759e9b699c423629",
+          "cold_process_ms_exploratory": 166887.711424,
+          "cold_unattributed_ms": 2.9988619999901402,
+          "effective_columns": 1024,
+          "full_child_wall_seconds": 167.17166860199995,
+          "k": 1024,
+          "layout": "root22_dynamic",
+          "one_target_online_ms": 413.849543,
+          "online_phases_ms": {
+            "target_descent_ms": 0.00043099999999999996,
+            "target_pdp_ms": 413.70104499999997,
+            "target_query_ms": 2.9999999999999997e-05,
+            "target_recovery_check_ms": 0.130634,
+            "target_relation_check_ms": 0.016482
+          },
+          "pipeline": "k1024root22",
+          "rank_attempts": 1024,
+          "rank_relations": 1024,
+          "rank_stage_ms": 122772.337601,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 1751592960,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 957361152,
+          "root_table_allocated_bytes": 671088640,
+          "root_table_entries": 87028652,
+          "setup_ms": 43698.252119000004,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 774127,
+          "targets_total_ms": 414.122842
+        }
+      ],
+      "point_index": 3,
+      "public_point": [
+        "2375271256637458238349330",
+        "3298886101946937162750817"
+      ],
+      "rho": {
+        "full_child_wall_seconds": 2.501544253999782,
+        "online_ms": 2193.924088,
+        "resources": {
+          "cpu_throttled_periods_delta": 0,
+          "major_faults": 0,
+          "oom_events_delta": 0,
+          "oom_kills_delta": 0,
+          "peak_rss_bytes": 30941184,
+          "status": "PASS"
+        },
+        "status": "PASS_INDEPENDENT_REPLAY"
+      }
+    },
+    {
+      "aa_control": {
+        "cold_process_ms": [
+          165803.076531,
+          166159.599168
+        ],
+        "relative_difference": 0.002147968209072134,
+        "status": "PASS_10_PERCENT"
+      },
+      "arms": [
+        {
+          "actual_factor_base_points": 169984,
+          "arm": "p4_k1024root22_a",
+          "base_hash": "f3bb5adfd099df1be8e90edf56c9a764028e060d7e0c3a97759e9b699c423629",
+          "cold_process_ms_exploratory": 165803.076531,
+          "cold_unattributed_ms": 2.798355000000754,
+          "effective_columns": 1024,
+          "full_child_wall_seconds": 166.17237646900003,
+          "k": 1024,
+          "layout": "root22_dynamic",
+          "one_target_online_ms": 95.47011699999999,
+          "online_phases_ms": {
+            "target_descent_ms": 0.000361,
+            "target_pdp_ms": 95.326679,
+            "target_query_ms": 4.9999999999999996e-05,
+            "target_recovery_check_ms": 0.124322,
+            "target_relation_check_ms": 0.018074
+          },
+          "pipeline": "k1024root22",
+          "rank_attempts": 1024,
+          "rank_relations": 1024,
+          "rank_stage_ms": 122092.614983,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 1750089728,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 957361152,
+          "root_table_allocated_bytes": 671088640,
+          "root_table_entries": 87028652,
+          "setup_ms": 43611.92114,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 177608,
+          "targets_total_ms": 95.742053
+        },
+        {
+          "actual_factor_base_points": 191232,
+          "arm": "p4_k1152root22",
+          "base_hash": "42b700925cd82a171d99904cb83d6552e8b7b3a9988d0bdc1a3d1ea9d3119d01",
+          "cold_process_ms_exploratory": 165014.57549,
+          "cold_unattributed_ms": 3.537971999998259,
+          "effective_columns": 1152,
+          "full_child_wall_seconds": 165.65136998499975,
+          "k": 1152,
+          "layout": "root22_dynamic",
+          "one_target_online_ms": 23.254321,
+          "online_phases_ms": {
+            "target_descent_ms": 0.00033,
+            "target_pdp_ms": 23.124167999999997,
+            "target_query_ms": 2.9999999999999997e-05,
+            "target_recovery_check_ms": 0.12420199999999999,
+            "target_relation_check_ms": 0.00503
+          },
+          "pipeline": "k1152root22",
+          "rank_attempts": 1152,
+          "rank_relations": 1152,
+          "rank_stage_ms": 109854.888702,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 2688118784,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 1211658624,
+          "root_table_allocated_bytes": 1342177280,
+          "root_table_entries": 110146029,
+          "setup_ms": 55132.634631,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 44570,
+          "targets_total_ms": 23.514185
+        },
+        {
+          "actual_factor_base_points": 254976,
+          "arm": "p4_k1536root22",
+          "base_hash": "c7c782d5759187b8d4fe71751579def0757d8c912bdefcd5ef6de908c72a7b4b",
+          "cold_process_ms_exploratory": 187177.853973,
+          "cold_unattributed_ms": 6.127228999988503,
+          "effective_columns": 1536,
+          "full_child_wall_seconds": 187.67742088999967,
+          "k": 1536,
+          "layout": "root22_dynamic",
+          "one_target_online_ms": 57.003286,
+          "online_phases_ms": {
+            "target_descent_ms": 0.000541,
+            "target_pdp_ms": 56.862841,
+            "target_query_ms": 4e-05,
+            "target_recovery_check_ms": 0.124332,
+            "target_relation_check_ms": 0.0149
+          },
+          "pipeline": "k1536root22",
+          "rank_attempts": 1536,
+          "rank_relations": 1536,
+          "rank_stage_ms": 86889.155912,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 3688050688,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 2154054144,
+          "root_table_allocated_bytes": 1342177280,
+          "root_table_entries": 195816567,
+          "setup_ms": 100225.314455,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 103384,
+          "targets_total_ms": 57.256377
+        },
+        {
+          "actual_factor_base_points": 191232,
+          "arm": "p4_k1152root11",
+          "base_hash": "42b700925cd82a171d99904cb83d6552e8b7b3a9988d0bdc1a3d1ea9d3119d01",
+          "cold_process_ms_exploratory": 164421.246228,
+          "cold_unattributed_ms": 3.6568659999951514,
+          "effective_columns": 1152,
+          "full_child_wall_seconds": 164.65388022399975,
+          "k": 1152,
+          "layout": "root11_dynamic",
+          "one_target_online_ms": 23.795033,
+          "online_phases_ms": {
+            "target_descent_ms": 0.00033999999999999997,
+            "target_pdp_ms": 23.664779,
+            "target_query_ms": 8e-05,
+            "target_recovery_check_ms": 0.12419100000000001,
+            "target_relation_check_ms": 0.00509
+          },
+          "pipeline": "k1152root11",
+          "rank_attempts": 1152,
+          "rank_relations": 1152,
+          "rank_stage_ms": 109348.607799,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 2084200448,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 605829312,
+          "root_table_allocated_bytes": 1342177280,
+          "root_table_entries": 110146029,
+          "setup_ms": 55044.913481999996,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 44570,
+          "targets_total_ms": 24.068081000000003
+        },
+        {
+          "actual_factor_base_points": 169984,
+          "arm": "p4_k1024root22_b",
+          "base_hash": "f3bb5adfd099df1be8e90edf56c9a764028e060d7e0c3a97759e9b699c423629",
+          "cold_process_ms_exploratory": 166159.599168,
+          "cold_unattributed_ms": 2.75471999998814,
+          "effective_columns": 1024,
+          "full_child_wall_seconds": 166.67373560099986,
+          "k": 1024,
+          "layout": "root22_dynamic",
+          "one_target_online_ms": 94.78447700000001,
+          "online_phases_ms": {
+            "target_descent_ms": 0.000301,
+            "target_pdp_ms": 94.64118,
+            "target_query_ms": 2.9999999999999997e-05,
+            "target_recovery_check_ms": 0.124192,
+            "target_relation_check_ms": 0.018153
+          },
+          "pipeline": "k1024root22",
+          "rank_attempts": 1024,
+          "rank_relations": 1024,
+          "rank_stage_ms": 122547.509915,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 1752027136,
+            "status": "PASS"
+          },
+          "root_state_allocated_bytes": 957361152,
+          "root_table_allocated_bytes": 671088640,
+          "root_table_entries": 87028652,
+          "setup_ms": 43514.292456,
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "target_probes": 177608,
+          "targets_total_ms": 95.042077
+        }
+      ],
+      "point_index": 4,
+      "public_point": [
+        "1634752198389439227682951",
+        "330540721449110754028976"
+      ],
+      "rho": {
+        "full_child_wall_seconds": 1.0006760719998056,
+        "online_ms": 306.229123,
+        "resources": {
+          "cpu_throttled_periods_delta": 0,
+          "major_faults": 0,
+          "oom_events_delta": 0,
+          "oom_kills_delta": 0,
+          "peak_rss_bytes": 21164032,
+          "status": "PASS"
+        },
+        "status": "PASS_INDEPENDENT_REPLAY"
+      }
+    }
+  ],
+  "schema": "n83.cold-reserve-analysis/v1",
+  "selected_candidate_id": null,
+  "selected_pipeline": null,
+  "selection_admitted": true,
+  "status": "BOUNDED_UNKNOWN",
+  "workload_role": "four_frozen_one_point_cold_confirmations"
+}

@@ -26,6 +26,8 @@ pub mod kernel;
 pub mod million;
 pub mod million_store;
 pub mod modpoly;
+pub mod p61_adjacency;
+pub mod p61_class;
 pub mod poly;
 pub mod queue;
 pub mod record;

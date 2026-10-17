@@ -1,0 +1,445 @@
+warning: multiple methods are never used
+   --> src/bin/../verification_field.rs:135:12
+    |
+ 89 | impl<const N: usize> PrimeField<N> {
+    | ---------------------------------- methods in this implementation
+...
+135 |     pub fn modulus(&self) -> &BigUint {
+    |            ^^^^^^^
+...
+140 |     pub fn least_nonresidue(&self) -> u64 {
+    |            ^^^^^^^^^^^^^^^^
+...
+222 |     pub fn neg(&self, a: &Element<N>) -> Element<N> {
+    |            ^^^
+...
+236 |     pub fn from_i64(&self, v: i64) -> Element<N> {
+    |            ^^^^^^^^
+...
+245 |     pub fn from_u128(&self, v: u128) -> Element<N> {
+    |            ^^^^^^^^^
+...
+321 |     pub fn div(&self, a: &Element<N>, b: &Element<N>) -> Option<Element<N>> {
+    |            ^^^
+...
+338 |     pub fn sqrt(&self, a: &Element<N>) -> Option<Element<N>> {
+    |            ^^^^
+...
+368 |     pub fn hex(&self, a: &Element<N>) -> String {
+    |            ^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: methods `modulus`, `neg`, `from_i64`, `from_u128`, `div`, and `hex` are never used
+   --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:125:12
+    |
+ 85 | impl Field {
+    | ---------- methods in this implementation
+...
+125 |     pub fn modulus(&self) -> &BigUint {
+    |            ^^^^^^^
+...
+204 |     pub fn neg(&self, a: &Fe) -> Fe {
+    |            ^^^
+...
+212 |     pub fn from_i64(&self, v: i64) -> Fe {
+    |            ^^^^^^^^
+...
+221 |     pub fn from_u128(&self, v: u128) -> Fe {
+    |            ^^^^^^^^^
+...
+253 |     pub fn div(&self, a: &Fe, b: &Fe) -> Option<Fe> {
+    |            ^^^
+...
+300 |     pub fn hex(&self, a: &Fe) -> String {
+    |            ^^^
+
+warning: unused import: `num_bigint::BigUint`
+ --> src/bin/field_checks.rs:5:5
+  |
+5 | use num_bigint::BigUint;
+  |     ^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused imports: `One` and `Zero`
+ --> src/bin/field_checks.rs:6:18
+  |
+6 | use num_traits::{One, Zero};
+  |                  ^^^  ^^^^
+
+warning: struct `Element` is never constructed
+ --> src/bin/../verification_field.rs:8:12
+  |
+8 | pub struct Element<const N: usize>(pub [u64; N]);
+  |            ^^^^^^^
+  |
+  = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: struct `PrimeField` is never constructed
+  --> src/bin/../verification_field.rs:12:12
+   |
+12 | pub struct PrimeField<const N: usize> {
+   |            ^^^^^^^^^^
+
+warning: function `to_limbs` is never used
+  --> src/bin/../verification_field.rs:31:4
+   |
+31 | fn to_limbs<const N: usize>(v: &BigUint) -> [u64; N] {
+   |    ^^^^^^^^
+
+warning: function `from_limbs` is never used
+  --> src/bin/../verification_field.rs:39:4
+   |
+39 | fn from_limbs<const N: usize>(v: &[u64; N]) -> BigUint {
+   |    ^^^^^^^^^^
+
+warning: function `geq` is never used
+  --> src/bin/../verification_field.rs:47:4
+   |
+47 | fn geq<const N: usize>(a: &[u64; N], b: &[u64; N]) -> bool {
+   |    ^^^
+
+warning: function `sub_limbs` is never used
+  --> src/bin/../verification_field.rs:56:4
+   |
+56 | fn sub_limbs<const N: usize>(a: &[u64; N], b: &[u64; N]) -> ([u64; N], bool) {
+   |    ^^^^^^^^^
+
+warning: function `add_limbs` is never used
+  --> src/bin/../verification_field.rs:68:4
+   |
+68 | fn add_limbs<const N: usize>(a: &[u64; N], b: &[u64; N]) -> ([u64; N], bool) {
+   |    ^^^^^^^^^
+
+warning: function `shr1` is never used
+  --> src/bin/../verification_field.rs:80:4
+   |
+80 | fn shr1<const N: usize>(a: &mut [u64; N], carry: bool) {
+   |    ^^^^
+
+warning: multiple associated items are never used
+   --> src/bin/../verification_field.rs:93:12
+    |
+ 89 | impl<const N: usize> PrimeField<N> {
+    | ---------------------------------- associated items in this implementation
+...
+ 93 |     pub fn new(p: &BigUint) -> Option<Self> {
+    |            ^^^
+...
+135 |     pub fn modulus(&self) -> &BigUint {
+    |            ^^^^^^^
+...
+140 |     pub fn least_nonresidue(&self) -> u64 {
+    |            ^^^^^^^^^^^^^^^^
+...
+145 |     pub fn zero(&self) -> Element<N> {
+    |            ^^^^
+...
+150 |     pub fn one(&self) -> Element<N> {
+    |            ^^^
+...
+155 |     pub fn is_zero(&self, a: &Element<N>) -> bool {
+    |            ^^^^^^^
+...
+160 |     pub fn mul(&self, a: &Element<N>, b: &Element<N>) -> Element<N> {
+    |            ^^^
+...
+198 |     pub fn sqr(&self, a: &Element<N>) -> Element<N> {
+    |            ^^^
+...
+203 |     pub fn add(&self, a: &Element<N>, b: &Element<N>) -> Element<N> {
+    |            ^^^
+...
+213 |     pub fn sub(&self, a: &Element<N>, b: &Element<N>) -> Element<N> {
+    |            ^^^
+...
+222 |     pub fn neg(&self, a: &Element<N>) -> Element<N> {
+    |            ^^^
+...
+226 |     pub fn from_u64(&self, v: u64) -> Element<N> {
+    |            ^^^^^^^^
+...
+236 |     pub fn from_i64(&self, v: i64) -> Element<N> {
+    |            ^^^^^^^^
+...
+245 |     pub fn from_u128(&self, v: u128) -> Element<N> {
+    |            ^^^^^^^^^
+...
+249 |     pub fn from_big(&self, v: &BigUint) -> Element<N> {
+    |            ^^^^^^^^
+...
+254 |     pub fn to_big(&self, a: &Element<N>) -> BigUint {
+    |            ^^^^^^
+...
+262 |     pub fn pow(&self, a: &Element<N>, e: &BigUint) -> Element<N> {
+    |            ^^^
+...
+274 |     pub fn inv(&self, a: &Element<N>) -> Option<Element<N>> {
+    |            ^^^
+...
+310 |     fn half_coefficient(&self, mut a: Element<N>) -> Element<N> {
+    |        ^^^^^^^^^^^^^^^^
+...
+321 |     pub fn div(&self, a: &Element<N>, b: &Element<N>) -> Option<Element<N>> {
+    |            ^^^
+...
+326 |     pub fn legendre(&self, a: &Element<N>) -> i32 {
+    |            ^^^^^^^^
+...
+338 |     pub fn sqrt(&self, a: &Element<N>) -> Option<Element<N>> {
+    |            ^^^^
+...
+368 |     pub fn hex(&self, a: &Element<N>) -> String {
+    |            ^^^
+
+warning: function `is_probable_prime` is never used
+   --> src/bin/../verification_field.rs:375:8
+    |
+375 | pub fn is_probable_prime(n: &BigUint) -> bool {
+    |        ^^^^^^^^^^^^^^^^^
+
+warning: struct `Fe` is never constructed
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:13:12
+   |
+13 | pub struct Fe(pub [u64; 4]);
+   |            ^^
+
+warning: struct `Field` is never constructed
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:17:12
+   |
+17 | pub struct Field {
+   |            ^^^^^
+
+warning: function `to_limbs` is never used
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:36:4
+   |
+36 | fn to_limbs(v: &BigUint) -> [u64; 4] {
+   |    ^^^^^^^^
+
+warning: function `from_limbs` is never used
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:44:4
+   |
+44 | fn from_limbs(v: &[u64; 4]) -> BigUint {
+   |    ^^^^^^^^^^
+
+warning: function `geq` is never used
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:52:4
+   |
+52 | fn geq(a: &[u64; 4], b: &[u64; 4]) -> bool {
+   |    ^^^
+
+warning: function `sub_limbs` is never used
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:61:4
+   |
+61 | fn sub_limbs(a: &[u64; 4], b: &[u64; 4]) -> ([u64; 4], bool) {
+   |    ^^^^^^^^^
+
+warning: function `add_limbs` is never used
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:73:4
+   |
+73 | fn add_limbs(a: &[u64; 4], b: &[u64; 4]) -> ([u64; 4], bool) {
+   |    ^^^^^^^^^
+
+warning: multiple associated items are never used
+   --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:89:12
+    |
+ 85 | impl Field {
+    | ---------- associated items in this implementation
+...
+ 89 |     pub fn new(p: &BigUint) -> Option<Self> {
+    |            ^^^
+...
+125 |     pub fn modulus(&self) -> &BigUint {
+    |            ^^^^^^^
+...
+130 |     pub fn least_nonresidue(&self) -> u64 {
+    |            ^^^^^^^^^^^^^^^^
+...
+134 |     pub fn zero(&self) -> Fe {
+    |            ^^^^
+...
+138 |     pub fn one(&self) -> Fe {
+    |            ^^^
+...
+142 |     pub fn is_zero(&self, a: &Fe) -> bool {
+    |            ^^^^^^^
+...
+146 |     pub fn mul(&self, a: &Fe, b: &Fe) -> Fe {
+    |            ^^^
+...
+182 |     pub fn sqr(&self, a: &Fe) -> Fe {
+    |            ^^^
+...
+186 |     pub fn add(&self, a: &Fe, b: &Fe) -> Fe {
+    |            ^^^
+...
+195 |     pub fn sub(&self, a: &Fe, b: &Fe) -> Fe {
+    |            ^^^
+...
+204 |     pub fn neg(&self, a: &Fe) -> Fe {
+    |            ^^^
+...
+208 |     pub fn from_u64(&self, v: u64) -> Fe {
+    |            ^^^^^^^^
+...
+212 |     pub fn from_i64(&self, v: i64) -> Fe {
+    |            ^^^^^^^^
+...
+221 |     pub fn from_u128(&self, v: u128) -> Fe {
+    |            ^^^^^^^^^
+...
+225 |     pub fn from_big(&self, v: &BigUint) -> Fe {
+    |            ^^^^^^^^
+...
+230 |     pub fn to_big(&self, a: &Fe) -> BigUint {
+    |            ^^^^^^
+...
+234 |     pub fn pow(&self, a: &Fe, e: &BigUint) -> Fe {
+    |            ^^^
+...
+246 |     pub fn inv(&self, a: &Fe) -> Option<Fe> {
+    |            ^^^
+...
+253 |     pub fn div(&self, a: &Fe, b: &Fe) -> Option<Fe> {
+    |            ^^^
+...
+258 |     pub fn legendre(&self, a: &Fe) -> i32 {
+    |            ^^^^^^^^
+...
+270 |     pub fn sqrt(&self, a: &Fe) -> Option<Fe> {
+    |            ^^^^
+...
+300 |     pub fn hex(&self, a: &Fe) -> String {
+    |            ^^^
+
+warning: function `is_probable_prime` is never used
+   --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:307:8
+    |
+307 | pub fn is_probable_prime(n: &BigUint) -> bool {
+    |        ^^^^^^^^^^^^^^^^^
+
+   Compiling isogeny-cli v0.1.0 (/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/tools/isogeny-cli)
+warning: `isogeny-cli` (bin "field_checks" test) generated 2 warnings
+warning: `isogeny-cli` (bin "field_checks") generated 21 warnings (run `cargo fix --bin "field_checks" -p isogeny-cli` to apply 2 suggestions)
+    Finished `release` profile [optimized] target(s) in 1m 32s
+     Running unittests src/bin/field_checks.rs (/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/compact-implementation/release/deps/field_checks-7bcfafe5b5b34c9d)
+
+running 3 tests
+test original::tests::arithmetic_matches_biguint_on_p224_and_small_primes ... ok
+test tests::small_and_full_width_fields ... ok
+test tests::wider_standard_fields ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+     Running unittests src/main.rs (/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/compact-implementation/release/deps/isogeny-8734bd11e3dad22d)
+
+running 81 tests
+test compact_cm_verify::tests::exact_integer_checker_catches_modulus_sized_error_that_evaluated_idc_accepts ... ok
+test cli_tests::receipt_hashes_match_the_independent_reference_at_padding_boundaries ... ok
+test compact_cm_verify::tests::exact_source_tuple_matches_the_registered_standard ... ok
+test challenge::tests::policy_identifies_rules_and_catalogue ... ok
+test catalog::tests::common_standard_names_resolve_without_merging_different_models ... ok
+test constructor::extension::tests::extension_point_count_matches_the_known_base_trace ... ok
+test cli_tests::degree_three_screening_uses_the_characteristic_three_residue_field ... ok
+test challenge::tests::plan_rejects_unbounded_ranges_and_nonprime_models ... ok
+test cli_tests::known_small_extension_candidates_have_exact_eigenvalue_orders ... ok
+test cli_tests::usage_failures_precede_output_creation ... ok
+test constructor::extension::tests::rejects_a_reducible_modulus ... ok
+test compact_cm_verify::tests::signed_zero_and_negative_geometric_expressions_replay_independently ... ok
+test compact_cm_verify::tests::adding_subgroup_order_preserves_points_and_changes_geometric_degree ... ok
+test constructor::extension::tests::small_extension_arithmetic ... ok
+test hash_sha256::tests::sha224_abc ... ok
+test hash_sha256::tests::sha224_empty ... ok
+test constructor::tests::selections_keep_old_routes_and_enable_new_degree_nine_routes ... ok
+test hash_sha256::tests::sha256_empty ... ok
+test hash_sha256::tests::sha256_hello_world ... ok
+test hash_sha256::tests::sha256_fips180_112byte ... ok
+test hash_sha256::tests::sha256_two_blocks_64 ... ok
+test hash_sha256::tests::streaming_matches_one_shot_at_every_split ... ok
+test hash_sha256::tests::sha256_abc ... ok
+test hash_sha256::tests::sha256_block_boundary_55 ... ok
+test hash_sha256::tests::sha256_fips180_56byte ... ok
+test identity_certificate::tests::field_arithmetic_agrees_with_u128_reference ... ok
+test challenge::tests::catalogue_has_every_standard_prime_model_and_no_research_descendants ... ok
+test field::tests::arithmetic_matches_biguint_on_p224_and_small_primes ... ok
+test hash_sha256::tests::sha256_million_a ... ok
+test identity_certificate::tests::canonical_bytes_are_sorted_and_round_trip ... ok
+test identity_certificate::tests::committed_schoenhage_certificate_still_checks ... ok
+test identity_certificate::tests::degree_bound_is_checked_syntactically_not_trusted ... ok
+test constructor::tests::every_enabled_extension_passes_field_laws ... ok
+test hash_sha256::tests::streaming_million_a ... ok
+test identity_certificate::tests::points_depend_on_the_id_so_the_author_cannot_pre_pick_them ... ok
+test map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test identity_certificate::tests::the_identity_without_its_error_term_is_false_and_cannot_be_issued ... ok
+test identity_certificate::tests::swapping_the_statement_under_a_sealed_id_is_malformed ... ok
+test identity_certificate::tests::tampering_with_the_digest_is_detected ... ok
+test identity_certificate::tests::schoenhage_identity_certifies_and_checks ... ok
+test constructor::extension::tests::large_prime_extension_arithmetic ... ok
+test modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test modular_polynomial::tests::phi_2_basic_properties ... ok
+test modular_polynomial::tests::phi_3_basic_properties ... ok
+test replay::n2::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n10::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test modular_polynomial::tests::modular_polynomial_storage_scaling_barrier ... ok
+test replay::n1::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n10::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n1::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n1::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n2::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n3::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n3::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n2::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n4::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n4::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n5::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n5::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n3::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n6::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n6::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n7::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n7::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n8::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n8::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n9::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n9::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test walk::tests::large_walk_requests_have_matching_construction_and_replay_bounds ... ok
+test replay::n4::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n5::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n7::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n6::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n9::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test compact_cm_verify::tests::complete_control_and_other_primitive_root_are_accepted_but_wrong_pairing_is_rejected ... ok
+test replay::n10::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n8::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test compact_cm_verify::tests::small_positive_rungs_and_distinct_composite_controls ... ok
+test cli_tests::execution_index_preserves_each_canonical_curve_and_its_subgroup ... ok
+test catalog::tests::all_models_are_accounted_for_with_operation_capabilities ... ok
+
+test result: ok. 81 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+
+     Running unittests src/bin/registry_models.rs (/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/compact-implementation/release/deps/registry_models-14786ddc59768d85)
+
+running 4 tests
+test tests::composite_fields_and_singular_models_are_rejected ... ok
+test tests::a_conflicting_historical_identity_is_rejected ... ok
+test tests::both_frozen_agm_identities_and_orders_match_the_native_adapter ... ok
+test tests::translated_coordinates_are_a_bijection_on_small_fields ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/challenge_cli.rs (/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/compact-implementation/release/deps/challenge_cli-5eec4db822083ae4)
+
+running 1 test
+test native_challenge_replays_maps_rejects_forgery_and_ranks_curves_separately ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.30s
+
+     Running tests/compact_cm_cli.rs (/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/compact-implementation/release/deps/compact_cm_cli-c7979f46c8bb8402)
+
+running 1 test
+test installed_compact_command_retains_controls_and_rejects_forged_certificates ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.89s
+

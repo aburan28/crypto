@@ -1,0 +1,39 @@
+{
+  "status": "passed",
+  "complete": true,
+  "vertices": 129140163,
+  "directed_kernel_maps": 258280326,
+  "exhaustive_checks": {
+    "status": "passed",
+    "enumeration_complete": true,
+    "unique_vertices": 129140163,
+    "downward_maps_checked": 129140162,
+    "strict_duals_checked": 129140162,
+    "scalar_checks": 31528,
+    "sorting_ns": 15728139651,
+    "levels": [
+      1,
+      2,
+      6,
+      18,
+      54,
+      162,
+      486,
+      1458,
+      4374,
+      13122,
+      39366,
+      118098,
+      354294,
+      1062882,
+      3188646,
+      9565938,
+      28697814,
+      86093442
+    ]
+  },
+  "independent_sympy_vertices": 475,
+  "independent_map_witnesses": 1804,
+  "floor_completeness": "The ordinary volcano theorem and nonbacktracking descent establish the floor. Rational kernel sets are independently factored on samples at every stratum; map/dual and j-uniqueness audits are exhaustive.",
+  "vertex_sha256": "cc97902e8a62dd04969ad2bcab9802631ddc35fdc55e3e51d5dd49bbec3c799b"
+}

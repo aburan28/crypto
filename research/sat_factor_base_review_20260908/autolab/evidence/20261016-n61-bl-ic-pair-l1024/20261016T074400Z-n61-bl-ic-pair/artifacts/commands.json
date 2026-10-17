@@ -1,0 +1,38 @@
+{
+  "bl": [
+    "/Volumes/SSD990/tmp/cargo-bl-n61/release/examples/ic_next10_09_equal_advice",
+    "bl",
+    "61",
+    "0",
+    "5711008",
+    "/Volumes/SSD990/tmp/wt-n61-bl-ic-pair/research/sat_factor_base_review_20260908/autolab/runs/20261016T074400Z-n61-bl-ic-pair/inputs/points.txt",
+    "/Volumes/SSD990/tmp/wt-n61-bl-ic-pair/research/sat_factor_base_review_20260908/autolab/runs/20261016T074400Z-n61-bl-ic-pair/logs/bl.jsonl"
+  ],
+  "build": [
+    "cargo",
+    "build",
+    "--release",
+    "--example",
+    "ic_next10_09_equal_advice",
+    "--example",
+    "koblitz_orbit_dlp_fast_online"
+  ],
+  "ic": [
+    "/Volumes/SSD990/tmp/cargo-bl-n61/release/examples/koblitz_orbit_dlp_fast_online",
+    "construct:61:0:256",
+    "/Volumes/SSD990/tmp/wt-n61-bl-ic-pair/research/sat_factor_base_review_20260908/autolab/runs/20261016T074400Z-n61-bl-ic-pair/inputs/ic_points.txt",
+    "7",
+    "/Volumes/SSD990/tmp/wt-n61-bl-ic-pair/research/sat_factor_base_review_20260908/autolab/runs/20261016T074400Z-n61-bl-ic-pair/logs/ic.jsonl"
+  ],
+  "reuse_bl_archive": "/Volumes/SSD990/tmp/wt-n61-bl-ic-pair/research/sat_factor_base_review_20260908/autolab/evidence/20261016-n61-bl-reference-l1024/20261016T063525Z-842e1c174e",
+  "targets": [
+    "/Volumes/SSD990/tmp/cargo-bl-n61/release/examples/ic_next10_09_equal_advice",
+    "targets",
+    "61",
+    "0",
+    "1024",
+    "autolab-n61-bl-ref-eval-v1",
+    "/Volumes/SSD990/tmp/wt-n61-bl-ic-pair/research/sat_factor_base_review_20260908/autolab/runs/20261016T074400Z-n61-bl-ic-pair/inputs/points.txt",
+    "/Volumes/SSD990/tmp/wt-n61-bl-ic-pair/research/sat_factor_base_review_20260908/autolab/runs/20261016T074400Z-n61-bl-ic-pair/inputs/scalars.txt"
+  ]
+}

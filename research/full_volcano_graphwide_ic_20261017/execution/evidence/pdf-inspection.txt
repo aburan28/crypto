@@ -1,0 +1,7 @@
+Inspected all rendered pages at 1500-pixel preview scale:
+- run-20261017T0240Z-control-pilot/report.pdf: pages 1 and 2.
+- run-20261017T0245Z-survey-prefix-12/report.pdf: page 1.
+Both yield graphs have explicit target counts, observed min/max and conductor
+labels. Tables, hashes and scope limits are legible without clipped content.
+Graph PNGs rendered at 150 dpi from the same SVG via a zero-margin Typst PDF.
+Copies of PDFs, SVGs and PNGs are retained in benchmarks/20261017-volcano-ic-campaign.

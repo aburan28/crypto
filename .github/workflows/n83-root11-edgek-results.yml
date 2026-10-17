@@ -1,0 +1,99 @@
+name: N83 root11 capacity-edge sealed result replay
+
+on:
+  push:
+    branches: [codex/n83-final-tournament-20261015]
+    paths:
+      - .github/workflows/n83-root11-edgek-results.yml
+      - research/n83_root11_edgek_results_20261015/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: n83-root11-edgek-results-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  six-arm-sealed-replay:
+    if: github.repository == 'aburan28/crypto'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore the exact source and public fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          frozen=10c7c80d9489ef4fd1f302c9063c7452444aeaee
+          git fetch --no-tags --depth=1 origin "$frozen"
+          test "$(git rev-parse FETCH_HEAD)" = "$frozen"
+          git worktree add --detach "$RUNNER_TEMP/n83-edge-frozen-source" "$frozen"
+          cd "$RUNNER_TEMP/n83-edge-frozen-source"
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 research/n83_k3250_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k3350_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k_abba_20261015/generate.py > /dev/null
+          python3 research/n83_root4_highk_20261015/generate.py > /dev/null
+          python3 research/n83_best_e2e_20261015/generate.py > /dev/null
+          python3 research/n83_legacy_challenger_20261015/generate.py > /dev/null
+          python3 research/n83_root4_bloom_20261015/generate.py > /dev/null
+          python3 research/n83_root11_highk_20261015/generate.py > /dev/null
+          python3 research/n83_final_tournament_20261015/generate.py > /dev/null
+          python3 research/n83_final_tier1_20261015/generate.py > /dev/null
+          python3 research/n83_root11_edgek_20261015/generate.py > \
+            "$RUNNER_TEMP/n83-edge-fixture.json"
+          test "$(sha256sum research/n83_root11_edgek_20261015/targets.jsonl | cut -d' ' -f1)" = \
+            c75cbb92ef1a23057272cf3481cc649b12495135c75affd1c2610205a42b7aef
+          test "$(sha256sum research/n83_root11_edgek_20261015/answers.jsonl | cut -d' ' -f1)" = \
+            ca95d57ff091b8fc7de8aa2fd22120cadac94a7c7a697e3c757aebc53115a159
+
+      - name: Download and hash the exact completed artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/n83-edge-sealed"
+          gh api repos/aburan28/crypto/actions/artifacts/12005586706/zip > \
+            "$RUNNER_TEMP/n83-edge-sealed/raw.zip"
+          test "$(sha256sum "$RUNNER_TEMP/n83-edge-sealed/raw.zip" | cut -d' ' -f1)" = \
+            a7bbcefaff56322e234db96ea799771941dab020252e0adc89a6c66190ba62e3
+          unzip -q "$RUNNER_TEMP/n83-edge-sealed/raw.zip" -d \
+            "$RUNNER_TEMP/n83-edge-sealed/raw"
+          test "$(sha256sum "$RUNNER_TEMP/n83-edge-sealed/raw/results/analysis.json" | cut -d' ' -f1)" = \
+            f50192442355a64fd1c4cfd07147f5b35f8aef4ae77d783f1c7614035992c3eb
+
+      - name: Independently replay six bases and all 6000 target records
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 "$RUNNER_TEMP/n83-edge-frozen-source/research/n83_root11_edgek_20261015/verify.py" \
+            "$RUNNER_TEMP/n83-edge-sealed/raw/results" > \
+            "$RUNNER_TEMP/n83-edge-sealed/local-replay.json"
+          test "$(sha256sum "$RUNNER_TEMP/n83-edge-sealed/raw/results/analysis.json" | cut -d' ' -f1)" = \
+            f50192442355a64fd1c4cfd07147f5b35f8aef4ae77d783f1c7614035992c3eb
+
+      - name: Reproduce current-head candidate and measurement records
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 research/n83_root11_edgek_results_20261015/materialize.py \
+            --artifact-zip "$RUNNER_TEMP/n83-edge-sealed/raw.zip" \
+            "$RUNNER_TEMP/n83-edge-sealed/raw/results"
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+
+      - name: Preserve replay output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-root11-edgek-sealed-replay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-edge-sealed/local-replay.json
+          if-no-files-found: ignore
+          retention-days: 14

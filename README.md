@@ -45,6 +45,7 @@ companion as much as a working library.
 | `sage/`, `scripts/`, `secp256k1_cm_audit/`, `cd_attack/`, `quantum_circuit_secp256k1/` | Sage/PARI/Python companions to specific notes |
 | `papers/` | manuscript sources, one directory per paper (`papers/README.md` is the index) |
 | [`problems/`](problems/README.md) | named research and audit blockers, supporting evidence, and concrete conditions for moving past them |
+| [`backlog/`](backlog/README.md) | experiments we would like to run: one validated card each (`backlog validate`), leased and run through cairn, results landed in `research/` by PR |
 | `AGENTS.md` | the reporting convention (boundary, table, ratio) every research thread follows |
 
 ## Quick tour
@@ -480,7 +481,7 @@ another's success condition. The doc explains both.
 | `zk::bulletproofs`    | Bulletproofs range proofs                       |
 | `zk::groth16`         | Groth16 zk-SNARK skeleton                       |
 | `zk::plonk`           | PLONK zk-SNARK skeleton                         |
-| `zk::stark` / `stark_v2` | STARK proof system skeleton                   |
+| `zk::stark` / `stark_v2` | STARK-style proof skeletons: **educational, unaudited, not zero-knowledge, no DEEP/out-of-domain sample, no stated security level; must not back a research claim** (`stark` is a spot-check argument, not a STARK; see the module docs) |
 
 ---
 

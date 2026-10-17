@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "updated": "2026-10-16",
+  "claim": "A roster of public elliptic-curve challenges and where a distinguished-point walk for each one would go. A row is not a discrete-log recovery and is not a statement about the security of any deployed curve.",
+  "groups": [
+    {
+      "id": "certicom-koblitz",
+      "title": "Certicom Koblitz challenges",
+      "summary": "Binary Koblitz curves from the Certicom ECC Challenge. Only ECC2K-130 has a distinguished-point store on this site.",
+      "challenges": [
+        {"id": "ecc2k-95", "name": "ECC2K-95", "field": "GF(2^97)", "kind": "binary Koblitz", "collection": "none", "join": "A walk has to use this curve's field and generator. The ECC2K-130 client does not produce points for it, and this site has no store for them."},
+        {"id": "ecc2k-108", "name": "ECC2K-108", "field": "GF(2^109)", "kind": "binary Koblitz", "collection": "none", "join": "A walk has to use this curve's field and generator. The ECC2K-130 client does not produce points for it, and this site has no store for them."},
+        {"id": "ecc2k-130", "name": "ECC2K-130", "field": "GF(2^131)", "kind": "binary Koblitz", "collection": "live", "status_href": "./", "join": "This is the production walk. Use the ECC2K-130 GPU client, pick a run id in 10000–65534 that nobody else is walking, and keep the points until a public upload exists. The fleet's own store is the only corpus the status page counts."},
+        {"id": "ecc2k-163", "name": "ECC2K-163", "field": "GF(2^163)", "kind": "binary Koblitz", "collection": "none", "join": "No distinguished-point store on this site. Points from an ECC2K-130 walk do not belong to this curve."},
+        {"id": "ecc2k-238", "name": "ECC2K-238", "field": "GF(2^239)", "kind": "binary Koblitz", "collection": "none", "join": "No distinguished-point store on this site. Points from an ECC2K-130 walk do not belong to this curve."}
+      ]
+    },
+    {
+      "id": "certicom-binary",
+      "title": "Certicom random binary challenges",
+      "summary": "Binary curves that are not Koblitz, from the same published list. None of them share the ECC2K-130 walk.",
+      "challenges": [
+        {"id": "ecc2-79", "name": "ECC2-79", "field": "GF(2^79)", "kind": "binary", "collection": "none", "join": "No store on this site. The field and the curve equation are this challenge's, not ECC2K-130's."},
+        {"id": "ecc2-89", "name": "ECC2-89", "field": "GF(2^89)", "kind": "binary", "collection": "none", "join": "No store on this site. The field and the curve equation are this challenge's, not ECC2K-130's."},
+        {"id": "ecc2-97", "name": "ECC2-97", "field": "GF(2^97)", "kind": "binary", "collection": "none", "join": "No store on this site. The field and the curve equation are this challenge's, not ECC2K-130's."},
+        {"id": "ecc2-109", "name": "ECC2-109", "field": "GF(2^109)", "kind": "binary", "collection": "none", "join": "No store on this site. The field and the curve equation are this challenge's, not ECC2K-130's."},
+        {"id": "ecc2-131", "name": "ECC2-131", "field": "GF(2^131)", "kind": "binary", "collection": "none", "join": "Same field size as ECC2K-130 and a different curve. Points from the Koblitz walk are not points of this challenge."},
+        {"id": "ecc2-163", "name": "ECC2-163", "field": "GF(2^163)", "kind": "binary", "collection": "none", "join": "No store on this site."},
+        {"id": "ecc2-191", "name": "ECC2-191", "field": "GF(2^191)", "kind": "binary", "collection": "none", "join": "No store on this site."},
+        {"id": "ecc2-238", "name": "ECC2-238", "field": "GF(2^239)", "kind": "binary", "collection": "none", "join": "No store on this site."}
+      ]
+    },
+    {
+      "id": "certicom-prime",
+      "title": "Certicom prime-field challenges",
+      "summary": "Prime-field curves from the Certicom ECC Challenge. The binary GPU client does not walk them.",
+      "challenges": [
+        {"id": "eccp-79", "name": "ECCp-79", "field": "79-bit prime", "kind": "prime field", "collection": "none", "join": "No store on this site. A prime-field walk is a different group from ECC2K-130."},
+        {"id": "eccp-89", "name": "ECCp-89", "field": "89-bit prime", "kind": "prime field", "collection": "none", "join": "No store on this site. A prime-field walk is a different group from ECC2K-130."},
+        {"id": "eccp-97", "name": "ECCp-97", "field": "97-bit prime", "kind": "prime field", "collection": "none", "join": "No store on this site. A prime-field walk is a different group from ECC2K-130."},
+        {"id": "eccp-109", "name": "ECCp-109", "field": "109-bit prime", "kind": "prime field", "collection": "none", "join": "No store on this site. A prime-field walk is a different group from ECC2K-130."},
+        {"id": "eccp-131", "name": "ECCp-131", "field": "131-bit prime", "kind": "prime field", "collection": "none", "join": "No store on this site. A prime-field walk is a different group from ECC2K-130."},
+        {"id": "eccp-163", "name": "ECCp-163", "field": "163-bit prime", "kind": "prime field", "collection": "none", "join": "No store on this site."},
+        {"id": "eccp-191", "name": "ECCp-191", "field": "192-bit prime", "kind": "prime field", "collection": "none", "join": "No store on this site. The challenge name is the subgroup size; the field in the Certicom list is 192 bits."},
+        {"id": "eccp-239", "name": "ECCp-239", "field": "239-bit prime", "kind": "prime field", "collection": "none", "join": "No store on this site."},
+        {"id": "eccp-359", "name": "ECCp-359", "field": "359-bit prime", "kind": "prime field", "collection": "none", "join": "No store on this site."}
+      ]
+    },
+    {
+      "id": "research-ecc",
+      "title": "Research curve catalog",
+      "summary": "263 research instances in aburan28/cryptanalysis, challenges/ecc. They are not the Certicom parameter sets. Prime-field short-Weierstrass records can start a local rho job; the points stay on that machine.",
+      "challenges": [
+        {"id": "family-binary-koblitz", "name": "Binary Koblitz", "field": "GF(2^m)", "kind": "66 curves", "collection": "catalog", "join": "Includes f2-koblitz-a0-m131, the same equation family as ECC2K-130. A catalog record is not a second copy of the live store. ca-curves show <id> prints the record."},
+        {"id": "family-binary-random", "name": "Binary, not Koblitz", "field": "GF(2^m)", "kind": "4 curves", "collection": "catalog", "join": "Index-calculus inputs in the catalog. No distinguished-point store on this site."},
+        {"id": "family-binary-subfield", "name": "Binary, defined over a subfield", "field": "GF(2^m)", "kind": "7 curves", "collection": "catalog", "join": "No distinguished-point store on this site."},
+        {"id": "family-binary-supersingular", "name": "Binary supersingular", "field": "GF(2^m)", "kind": "9 curves", "collection": "catalog", "join": "No distinguished-point store on this site."},
+        {"id": "family-prime-cm", "name": "Prime field, complex multiplication", "field": "prime", "kind": "31 curves", "collection": "local", "join": "ca-curves rho-job <id> --seed 1 writes a job with the curve, generator, and target, and without a known logarithm. ca-suite rho-collab work --job <file> --node local walks it on that machine."},
+        {"id": "family-prime-j0", "name": "Prime field, j = 0", "field": "prime", "kind": "22 curves", "collection": "local", "join": "Same local rho-job path as the other prime-field short-Weierstrass records. Points are not uploaded to the ECC2K-130 store."},
+        {"id": "family-prime-j1728", "name": "Prime field, j = 1728", "field": "prime", "kind": "11 curves", "collection": "local", "join": "Same local rho-job path. Points are not uploaded to the ECC2K-130 store."},
+        {"id": "family-prime-random-j", "name": "Prime field, random j", "field": "prime", "kind": "8 curves", "collection": "local", "join": "Same local rho-job path. Points are not uploaded to the ECC2K-130 store."},
+        {"id": "family-prime-anomalous", "name": "Prime field, anomalous", "field": "prime", "kind": "8 curves", "collection": "local", "join": "Trace 1. Same local rho-job path. An anomalous curve is not a license to treat the walk as a Smart attack; the job is ordinary rho."},
+        {"id": "family-prime-supersingular", "name": "Prime field, supersingular", "field": "prime", "kind": "8 curves", "collection": "local", "join": "Same local rho-job path. Points are not uploaded to the ECC2K-130 store."},
+        {"id": "family-prime-j0-twist", "name": "Prime field, j = 0 twists", "field": "prime", "kind": "3 curves", "collection": "local", "join": "Same local rho-job path. Points are not uploaded to the ECC2K-130 store."},
+        {"id": "family-prime-smooth-order", "name": "Prime field, smooth order", "field": "prime", "kind": "3 curves", "collection": "local", "join": "Same local rho-job path. Points are not uploaded to the ECC2K-130 store."},
+        {"id": "family-prime-bn-pairing", "name": "Barreto–Naehrig sample", "field": "prime", "kind": "1 curve", "collection": "local", "join": "Same local rho-job path. Points are not uploaded to the ECC2K-130 store."},
+        {"id": "family-odd-extension", "name": "Odd-characteristic extensions", "field": "F_p^k", "kind": "42 curves", "collection": "catalog", "join": "Index-calculus inputs. rho-job does not cover extension records."},
+        {"id": "family-char3", "name": "Characteristic 3", "field": "F_3^m", "kind": "39 curves", "collection": "catalog", "join": "Ordinary and supersingular. No distinguished-point store on this site."},
+        {"id": "family-isogeny-volcano", "name": "Isogeny volcano exhibit", "field": "prime", "kind": "1 curve", "collection": "catalog", "join": "fp-volcano-d7-l3-exhibit records a rational 3-volcano. It is not a rho campaign."}
+      ]
+    }
+  ]
+}
