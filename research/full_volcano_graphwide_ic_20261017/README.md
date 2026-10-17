@@ -6,6 +6,8 @@ reductions, factor-base grids, matched generic references, complete setup and
 online accounting, raw yields, failures and min/max/mean coverage statistics.
 The original A--E requirements remain open; the three additional complete
 graphs provide an immediately available corpus.
+The [complete graph explorer](graph-viewer/README.md) embeds every vertex and
+recorded selected-degree map, with conductor filters and exact kernel inspection.
 
 Native input certification has completed over **every one of the 24,823
 vertices and 51 strata**. This is workload preparation, not a solver benchmark.

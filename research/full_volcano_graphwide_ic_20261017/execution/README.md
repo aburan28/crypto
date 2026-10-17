@@ -10,7 +10,9 @@ The stopped dev-build checkpoint now covers **99 vertices and all 51 strata**:
 min/max/mean with explicit sample counts. The
 [three-page inspected report](../reports/run-20261017T0337Z-all-strata/report.pdf)
 plots every stratum. [Download the self-contained checkpoint](https://drive.google.com/file/d/1hLVWVad2SrgHaBn6U5iSyqnKbx5cAkeY/view)
-or inspect its [delivery receipt](delivery-99.json). This covers every stratum,
+or inspect its [delivery receipt](delivery-99.json). The supplemental
+[graph explorer](../graph-viewer/README.md) shows every graph vertex/map while
+marking the measured subset. This checkpoint covers every stratum,
 not every vertex. The original dev campaign is paused, not running.
 
 An optimized build passed the same control and three-root pilot. All **56

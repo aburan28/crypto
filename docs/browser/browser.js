@@ -151,7 +151,7 @@
   function curvesView(q) {
     var head = el("div", null, [
       el("h1", { text: "Curves" }),
-      el("p", { class: "lede", text: "Every curve in the ICV1 registry: " + DATA.counts.curves + " models. Search by name or identity, filter by family, field, trace, order, subgroup and what has been measured on it. Click a slug for its full record and everything that cites it. A conductor is not an invariant of a curve over a finite field; the endomorphism discriminant (−7 for every Koblitz curve) is the nearest thing recorded." })
+      el("p", { class: "lede", text: "Every curve in the ICV1 registry: " + DATA.counts.curves + " models. Search by name or identity, filter by family, field, trace, order, subgroup and what has been measured on it. Click a slug for its full record and everything that cites it. This catalog filters the recorded endomorphism discriminant. Volcano conductors require a certified endomorphism order; missing order data is not a conductor assignment." })
     ]);
     var f = el("form", { class: "filters" });
     function input(name, label, type, extra) {
