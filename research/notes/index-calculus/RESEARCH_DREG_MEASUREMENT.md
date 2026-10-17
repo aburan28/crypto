@@ -858,6 +858,25 @@ closure measurement on its cells. It has 16 unsatisfiable draws at degree 4.
   survivors put the m = 4 rise at ℓ ≤ 7, so the m = 4 degree-4 row is
   contradicted.
 
+## Result 14: one fixed variable usually brings the ℓ = 7 draws back to degree 4
+
+`research/dreg_closure_specialise_20261017/` was pre-registered. It
+specialises the 8 m = 3, ℓ = 7 draws whose degree-4 closure does not refute
+(Result 12), one fixed variable or three, and reruns the closure.
+
+- **Registered verdict: uninformative for "max ℓ" vs "Σℓ".**
+  - The positive control is valid: fixing one coordinate per summand
+    refutes on 8 of 8.
+  - The null control is not: fixing one intermediate-point coordinate also
+    refutes, on 6 of 8.
+- **Descriptive.** Any single fixed variable lets degree 4 refute on 6 of 8
+  draws. The ℓ = 7 degree-4 failure is marginal.
+- **Both branches of one guess.** Both values of one guessed summand
+  coordinate refute on 5 of 8 draws. That is a one-guess, degree-4 hybrid
+  refutation: about 100k columns per branch, against about 760k–1M at
+  degree 5.
+- **The open question.** It is how many guesses degree 4 needs as ℓ grows.
+
 ## Reproducing
 
 ```sh
