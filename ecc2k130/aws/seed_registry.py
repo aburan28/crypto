@@ -93,6 +93,25 @@ class S3Json:
             raise SeedConflict("cannot update shared seed registry; launch refused")
 
 
+class ApiJson:
+    """Seed-registry compare-and-set through a worker's narrow broker token."""
+
+    def __init__(self, store):
+        self.store = store
+
+    def read(self, key):
+        try:
+            return self.store.seedRead(key)
+        except Exception as error:
+            raise SeedConflict("cannot read shared seed registry; launch refused") from error
+
+    def cas(self, key, value, etag=None):
+        try:
+            return self.store.seedCas(key, value, etag)
+        except Exception as error:
+            raise SeedConflict("cannot update shared seed registry; launch refused") from error
+
+
 class SeedRegistry:
     def __init__(self, store, clock=time.time):
         self.store = store
@@ -159,19 +178,27 @@ class SeedRegistry:
 @contextlib.contextmanager
 def worker_guard(worker, slot, run_id):
     """All cloud slot backends share one seed registry at the bucket root."""
-    if int(worker.cfg.get("curve", 0)) != 131 or not hasattr(worker.store, "bucket"):
+    if int(worker.cfg.get("curve", 0)) != 131:
         yield
         return
     name = type(worker.slots).__name__
     if name == "S3Slots":
         backend = "s3"
+        registryStore = S3Json(worker.store.bucket)
+    elif name == "ApiSlots":
+        # The broker operates on the same S3 slot records, so a transition to
+        # token auth does not create a second permanent seed namespace.
+        backend = "s3"
+        registryStore = ApiJson(worker.store)
     elif name == "DynamoSlots":
         backend = "dynamodb:" + worker.slots.table
+        registryStore = S3Json(worker.store.bucket)
     elif name == "PostgresSlots":
         backend = "rds:" + worker.slots.campaign
+        registryStore = S3Json(worker.store.bucket)
     else:
         raise SeedConflict("unknown production slot authority")
-    registry = SeedRegistry(S3Json(worker.store.bucket))
+    registry = SeedRegistry(registryStore)
     stream = slot_stream(getattr(worker.store, "prefix", ""), slot, backend)
     token = registry.acquire(run_id, stream, worker.ckptPath)
     try:

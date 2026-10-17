@@ -50,3 +50,27 @@ Walking the ℓ-isogeny between the levels. For `ℓ ≥ 263` the degree-ℓ
 modular polynomial is out of reach, which is why the pairs are built by
 CM, not by walking. A method that *needs* the isogeny to exploit the
 conductor is outside this protocol's scope.
+
+## Correction (2026-10-16, after the sessions; the frozen text above is unchanged)
+
+Sheriff case SHF-20261016-3caa6f, finding L5. Line 5 says "the Lean-provable
+theorem states" the null for generic methods. "Pre-registered predictions"
+says `S = 1` for `rho.*`, `bsgs.*` and `kangaroo.*` "is a theorem". Both
+overstate the theorem's scope. `lean/GenericInvariance.lean` covers
+algorithms whose control flow depends only on group-operation outcomes
+(equality answers) and a random tape, which is BSGS-type algorithms. The rho
+and kangaroo that ecbench runs choose each step by hashing the point
+representation (`mix(g.key(&pos))`, `src/cryptanalysis/ecbench/generic.rs:275`;
+`TunedWalker::index` in `src/cryptanalysis/ic_boundary.rs`), so the theorem
+does not cover them. The sheriff case gives a toy illustration, not run on
+ecbench: on `Z_1019` against its isomorphic image in `F_2039^*`, a
+representation-hashing r-adding walk had a different cost on 197 of 200
+transported instances, and BSGS had a different transcript on 0 of 200.
+
+Read the prediction as follows. For `bsgs.*`, `S = 1` is a theorem, and a
+deviation is a harness fault. For `rho.*` and `kangaroo.*`, `S = 1` is the
+expected null hypothesis but not a theorem. A deviation in either is
+unexplained until it is re-tested. It is not automatically a harness fault,
+and it is not noise. The decision rule and the specs are unchanged. The
+ℓ = 8209 rho interval [1.005, 1.46] stays unexplained, and a re-test under
+a fresh measurement seed is the open follow-up (README §5).
