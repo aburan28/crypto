@@ -1,4 +1,5 @@
-//! Squaring against the general product of two equal vectors (FpM2, FpM4): ns per call.
+//! Squaring against the general product of two equal vectors (FpM1, FpM2, FpM4, FpM8): us per
+//! call.
 use isogeny_algos::field::*;
 use isogeny_algos::fpm::FpM;
 use isogeny_algos::poly;
@@ -8,7 +9,7 @@ use std::time::Instant;
 fn run<const N: usize>(name: &str, f: &FpM<N>) {
     let mut rng = Rng::new(1);
     println!("# {name}: n  mul_us  sqr_us  conv_us  conv_sq_us");
-    for n in [8usize, 16, 24, 32, 48, 64, 90, 128, 160, 192] {
+    for n in [8usize, 16, 24, 32, 48, 64, 90, 128, 160, 192, 256, 320] {
         let a: Vec<[u64; N]> = (0..n).map(|_| f.random(&mut rng)).collect();
         let b = a.clone();
         let reps = 300;
@@ -32,6 +33,7 @@ fn run<const N: usize>(name: &str, f: &FpM<N>) {
 }
 
 fn main() {
+    run("FpM1", &FpM::<1>::from_dec("2305843009213693951"));
     run(
         "FpM2",
         &FpM::<2>::from_dec("170141183460469231731687303715884105727"),

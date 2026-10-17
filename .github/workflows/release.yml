@@ -361,6 +361,113 @@ jobs:
           path: dist/*
           if-no-files-found: error
 
+  isogeny-algos:
+    if: always() && !cancelled()
+    needs: [meta, scope]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {target: x86_64-unknown-linux-gnu,  os: ubuntu-latest}
+          - {target: x86_64-unknown-linux-musl, os: ubuntu-latest}
+          - {target: aarch64-apple-darwin,      os: macos-latest}
+          - {target: x86_64-pc-windows-msvc,    os: windows-latest}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && 25 || 30 }}
+    steps:
+      - name: Keep Cargo output outside the package tree
+        shell: bash
+        run: echo "CARGO_TARGET_DIR=$RUNNER_TEMP/isogeny-algos-target" >> "$GITHUB_ENV"
+      - name: Require successful scope classification
+        if: needs.scope.result != 'success' || needs.meta.result != 'success'
+        run: |
+          echo '::error::CI scope or release metadata failed; refusing to skip validation.'
+          exit 1
+      - if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.scope.outputs.release_rust != 'false'
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /isogeny_algos/
+            /LICENSE
+            /LICENSE.md
+      # the crate's own CI toolchain (isogeny-algos.yml); it uses slice APIs newer than 1.93
+      - uses: dtolnay/rust-toolchain@1.98
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.scope.outputs.release_rust != 'false'
+        with:
+          targets: ${{ matrix.target }}
+      - name: Install the musl linker
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.scope.outputs.release_rust != 'false') && matrix.target == 'x86_64-unknown-linux-musl'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq musl-tools
+      - uses: Swatinem/rust-cache@v2
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.scope.outputs.release_rust != 'false'
+        with:
+          workspaces: isogeny_algos
+          cache-targets: false
+      # x86-64 builds stay portable: the AVX-512 IFMA and ADX paths are chosen at run time
+      - name: Build the command line
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.scope.outputs.release_rust != 'false'
+        run: cargo build --locked --release --manifest-path isogeny_algos/Cargo.toml --target ${{ matrix.target }} --bin isogeny-algos
+      - name: Test the installed executable without a checkout
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.scope.outputs.release_rust != 'false'
+        shell: bash
+        run: |
+          set -euo pipefail
+          ext=""
+          [ "${{ runner.os }}" = "Windows" ] && ext=".exe"
+          mkdir -p "$RUNNER_TEMP/isogeny-algos-installed"
+          cp "$CARGO_TARGET_DIR/${{ matrix.target }}/release/isogeny-algos$ext" "$RUNNER_TEMP/isogeny-algos-installed/"
+          cd "$RUNNER_TEMP/isogeny-algos-installed"
+          B="./isogeny-algos$ext"
+          "$B" version > BUILD.json
+          grep -Fq '"name":"isogeny-algos"' BUILD.json
+          "$B" count --curve p256 --order 115792089210356248762697446949407573529996955224135760342422259061068512044369 > p256.json
+          grep -Fq '"status":"PASS"' p256.json
+          set +e; "$B" count --curve p256 --order 1 > /dev/null; code=$?; set -e
+          test "$code" -eq 1
+          P=2305843009213693951
+          for args in \
+            "count --p 170141183460469231731687303715884105727 --a 3 --b 1234567" \
+            "isogenies --p $P --a 7 --b 7 --ell 73" \
+            "chain --p $P --a 4 --b 7 --ell 3 --n 3" \
+            "velu --p $P --a 7 --b 7 --ell 73 --kernel-x 2302858932999476951 --method sqrtvelu" \
+            "dual --p $P --a 7 --b 7 --ell 73" \
+            "csidh --primes 3,5,7,11,13,17,19,23,29,31,37,59 --exps 1,-1,2,0,0,1,-3,0,1,0,0,2" \
+            "path --p 1000003 --j1 499965 --j2 620467 --method ghs" \
+            "klpt --p 1152921504606847067 --norm 1000003" \
+            "richelot --p 211 --roots 1,2,3,4,5,6 --lc 3" \
+            "modpoly --ell 5 --p 10007 --j 1234"; do
+            "$B" $args > family.json
+            grep -Fq '"status":"PASS"' family.json || { echo "FAILED: $args"; cat family.json; exit 1; }
+          done
+      - name: Stage the archive
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.scope.outputs.release_rust != 'false'
+        shell: bash
+        run: |
+          name="isogeny-algos-${{ needs.meta.outputs.tag }}-${{ matrix.target }}"
+          ext=""
+          [ "${{ runner.os }}" = "Windows" ] && ext=".exe"
+          mkdir -p "dist/$name"
+          cp "$CARGO_TARGET_DIR/${{ matrix.target }}/release/isogeny-algos$ext" "dist/$name/"
+          cp isogeny_algos/docs/USAGE.md "dist/$name/USAGE.md"
+          cp "$RUNNER_TEMP/isogeny-algos-installed/BUILD.json" "dist/$name/BUILD.json"
+          for license in LICENSE LICENSE.md; do
+            [ -f "$license" ] && cp "$license" "dist/$name/" || true
+          done
+          cd dist
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            7z a -tzip "$name.zip" "$name" > /dev/null
+          else
+            tar czf "$name.tar.gz" "$name"
+          fi
+          rm -rf "$name"
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.scope.outputs.release_rust != 'false'
+        with:
+          name: isogeny-algos-${{ matrix.target }}
+          path: dist/*
+          if-no-files-found: error
+
   native:
     if: always() && !cancelled()
     needs: [meta, scope]
@@ -495,7 +602,7 @@ jobs:
           bash .github/scripts/test_publish_release_assets.sh
 
   release:
-    needs: [meta, rust, native, cuda, isogeny, release-assets]
+    needs: [meta, rust, native, cuda, isogeny, isogeny-algos, release-assets]
     # Dry runs build and stage everything, then stop short of publishing.
     # The ref test is not redundant with the event test: workflow_dispatch
     # can be started from any branch, and a release tagged `-main.` that
@@ -541,6 +648,10 @@ jobs:
           | `isogeny-*-x86_64-unknown-linux-musl.tar.gz` | dedicated tool — static |
           | `isogeny-*-aarch64-apple-darwin.tar.gz` | dedicated tool — Apple silicon |
           | `isogeny-*-x86_64-pc-windows-msvc.zip` | dedicated `isogeny.exe` tool |
+          | `isogeny-algos-*-x86_64-unknown-linux-gnu.tar.gz` | `isogeny-algos` (point counting, isogenies, Vélu/√élu, chains, BMSS, duals, CSIDH, paths, KLPT, Richelot, Φ_ℓ), USAGE.md, BUILD.json — glibc |
+          | `isogeny-algos-*-x86_64-unknown-linux-musl.tar.gz` | `isogeny-algos` — static |
+          | `isogeny-algos-*-aarch64-apple-darwin.tar.gz` | `isogeny-algos` — Apple silicon |
+          | `isogeny-algos-*-x86_64-pc-windows-msvc.zip` | `isogeny-algos.exe` |
           | `ecc2k130-cpu-*.tar.gz` | ECC2K-130 client, CPU (`-march=x86-64-v3`) |
           | `ecc2k130-cuda-*.tar.gz` | ECC2K-130 client, CUDA fatbinary (sm_80–sm_120) |
 
@@ -549,6 +660,9 @@ jobs:
           Run `isogeny --help` after extracting the dedicated tool archive.
           `isogeny search --curve p224 --ell 1471 --out p224-1471` constructs
           and independently verifies the recorded one-eigenline map.
+
+          Run `isogeny-algos help` for the algorithm toolkit; every command prints one
+          JSON record with its checks (USAGE.md in the archive).
 
           The CUDA binary is compiled, not GPU-tested: GitHub runners have no GPU.
           NOTES

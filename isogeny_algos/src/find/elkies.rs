@@ -187,6 +187,18 @@ pub fn bmss_isogeny<F: Field>(
     })
 }
 
+/// The normalised isogeny e -> ep: BMSS by Newton iteration on the Padé system
+/// (`bmss::Method::FastElkiesPrime`), with [`bmss_isogeny`] where it does not apply (l = 2).
+pub fn normalised_isogeny<F: Field>(
+    f: &F,
+    e: &Curve<F::E>,
+    ep: &Curve<F::E>,
+    ell: usize,
+) -> Option<RatIsogeny<F>> {
+    super::bmss::isogeny(f, super::bmss::Method::FastElkiesPrime, e, ep, ell, None)
+        .or_else(|| bmss_isogeny(f, e, ep, ell))
+}
+
 /// All F-rational normalised l-isogenies out of `e` found through Phi_l roots.
 pub fn elkies_isogenies<F: Field>(
     f: &F,
@@ -198,7 +210,7 @@ pub fn elkies_isogenies<F: Field>(
     let mut out = vec![];
     for jt in phi.neighbors(f, j, rng) {
         if let Some(ep) = elkies_codomain(f, phi, e, jt) {
-            if let Some(iso) = bmss_isogeny(f, e, &ep, phi.ell) {
+            if let Some(iso) = normalised_isogeny(f, e, &ep, phi.ell) {
                 out.push(iso);
             }
         }

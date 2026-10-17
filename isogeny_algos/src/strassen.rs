@@ -23,7 +23,7 @@
 //! O(l^0.79 log l), not the paper's O~(l^{1/2}) (which assumes quasi-linear multiplication). At
 //! opt-level 1 on 61-bit n it was slower than the l - 1 naive multiplications at l = 10^4 and
 //! faster from l = 10^5 on (2.5x at 10^6; `strassen_factorial_timing` prints the table).
-use crate::field::{lazy_conv, lazy_dot_rev, Field, Rng};
+use crate::field::{lazy_conv, lazy_dot_rev, Field, Red128, Rng};
 use crate::poly::{self, Poly};
 use crate::series;
 
@@ -33,12 +33,17 @@ use crate::series;
 #[derive(Clone, Copy, Debug)]
 pub struct ZnRing {
     pub n: u64,
+    /// division-free reduction for the lazy kernels; Montgomery needs n odd
+    red: Option<Red128>,
 }
 
 impl ZnRing {
     pub fn new(n: u64) -> Self {
         assert!((2..1u64 << 62).contains(&n), "ZnRing: need 2 <= n < 2^62");
-        ZnRing { n }
+        ZnRing {
+            n,
+            red: (n % 2 == 1).then(|| Red128::new(n)),
+        }
     }
     /// Inverse of a unit, None if gcd(a, n) > 1.
     pub fn try_inv(&self, a: u64) -> Option<u64> {
@@ -111,15 +116,32 @@ impl Field for ZnRing {
     fn sqrt(&self, _a: u64) -> Option<u64> {
         None
     }
-    // lazy accumulation is plain modular arithmetic: valid for any modulus below 2^62
+    // lazy accumulation is plain modular arithmetic: valid for any odd modulus below 2^62
+    // (the kernels reduce by Montgomery steps); even n accumulates in u128 directly
     fn conv(&self, a: &[u64], b: &[u64]) -> Vec<u64> {
-        lazy_conv(a, b, self.n, a.len() + b.len() - 1, |acc| acc as u64)
+        self.conv_trunc(a, b, (a.len() + b.len()).saturating_sub(1))
     }
     fn conv_trunc(&self, a: &[u64], b: &[u64], k: usize) -> Vec<u64> {
-        lazy_conv(a, b, self.n, k, |acc| acc as u64)
+        match &self.red {
+            Some(red) => lazy_conv(a, b, red, k, |x| red.reduce(x)),
+            None if a.is_empty() || b.is_empty() => vec![0; k],
+            None => (0..k)
+                .map(|t| {
+                    let lo = (t + 1).saturating_sub(b.len());
+                    let hi = t.min(a.len().saturating_sub(1));
+                    (lo..=hi).fold(0u64, |acc, i| self.add(acc, self.mul(a[i], b[t - i])))
+                })
+                .collect(),
+        }
     }
     fn dot_rev(&self, a: &[u64], b: &[u64]) -> u64 {
-        lazy_dot_rev(a, b, self.n) as u64
+        match &self.red {
+            Some(red) => lazy_dot_rev(a, b, red, |x| red.reduce(x)),
+            None => {
+                let (n, bl) = (a.len().min(b.len()), b.len());
+                (0..n).fold(0, |acc, i| self.add(acc, self.mul(a[i], b[bl - 1 - i])))
+            }
+        }
     }
 }
 

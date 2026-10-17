@@ -6,6 +6,15 @@ use isogeny_algos::fpm::{FpM, NTT_N};
 use isogeny_algos::poly;
 
 fn check<const N: usize>(f: &FpM<N>, seed: u64) {
+    // both transform families: AVX-512 IFMA where the CPU has it, and the portable one
+    for simd in [true, false] {
+        isogeny_algos::ntt::SIMD.with(|s| s.set(simd));
+        check_mode(f, seed);
+    }
+    isogeny_algos::ntt::SIMD.with(|s| s.set(true));
+}
+
+fn check_mode<const N: usize>(f: &FpM<N>, seed: u64) {
     let mut rng = Rng::new(seed);
     let mut pm1 = f.p;
     pm1[0] -= 1;
@@ -62,4 +71,32 @@ fn squaring_four_and_eight_limbs() {
     );
     let csidh = "5326738796327623094747867617954605554069371494832722337612446642054009560026576537626892113026381253624626941643949444792662881241621373288942880288065659";
     check(&FpM::<8>::from_dec(csidh), 6);
+}
+
+#[test]
+fn squaring_word_prime_field() {
+    // Zp: the u64 path (small p), the u128 path with frequent folds (p near 2^62), and p - 1
+    for p in [
+        1_000_003u64,
+        1_099_511_627_791,
+        2_305_843_009_213_693_951,
+        4_611_686_018_427_387_847,
+    ] {
+        let f = Zp::new(p);
+        let mut rng = Rng::new(p);
+        for n in [1usize, 2, 7, 31, 32, 33, 64, 100, 257] {
+            for top in [false, true] {
+                let a: Vec<u64> = (0..n)
+                    .map(|_| if top { p - 1 } else { f.random(&mut rng) })
+                    .collect();
+                let b = a.clone();
+                assert_eq!(f.conv_sq(&a), f.conv(&a, &b), "p={p} n={n} top={top}");
+                assert_eq!(
+                    poly::sqr_raw(&f, &a),
+                    poly::mul_raw(&f, &a, &b),
+                    "p={p} n={n} top={top}"
+                );
+            }
+        }
+    }
 }

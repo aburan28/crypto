@@ -117,7 +117,7 @@ pub fn explicit_chain<F: Field>(
     for (i, &l) in path.ells.iter().enumerate() {
         let phi = cache.get(l);
         let ep = elkies::elkies_codomain(f, phi, &cur, path.js[i + 1])?;
-        let iso = elkies::bmss_isogeny(f, &cur, &ep, l)?;
+        let iso = elkies::normalised_isogeny(f, &cur, &ep, l)?;
         cur = iso.cod;
         out.push(iso);
     }

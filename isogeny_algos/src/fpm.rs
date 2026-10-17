@@ -13,6 +13,10 @@ thread_local! {
     /// Override of the shorter-operand length from which products go through the multi-prime
     /// NTT (`crate::ntt`; for tuning runs and tests; None = built-in default, usize::MAX = never).
     pub static NTT_N: std::cell::Cell<Option<usize>> = const { std::cell::Cell::new(None) };
+    /// Explicit-CRT fold constants of `conv_long` per (p, prime family, number of primes):
+    /// (M / m_i) 2^64 mod p for each prime, then -M 2^64 mod p, N limbs each.
+    static CRT_FOLD: std::cell::RefCell<Vec<(Vec<u64>, usize, std::rc::Rc<Vec<u64>>)>> =
+        const { std::cell::RefCell::new(Vec::new()) };
 }
 
 #[derive(Clone, Debug)]
@@ -31,6 +35,16 @@ pub struct FpM<const N: usize> {
     s64: [u64; N],
     /// BMI2 + ADX available and N = 8 (N = 4 on request): use the assembly multiplication
     adx: bool,
+    /// N = 1 and p < 2^62: division-free reduction of the lazily accumulated u128 sums
+    red1: Option<crate::field::Red128>,
+}
+
+/// The single limbs of N = 1 residues, read in place ([u64; 1] has the layout of u64).
+#[inline(always)]
+fn limbs1<const N: usize>(a: &[[u64; N]]) -> &[u64] {
+    assert!(N == 1);
+    // SAFETY: N == 1, so [u64; N] has the size and alignment of u64 and the slice is contiguous
+    unsafe { std::slice::from_raw_parts(a.as_ptr() as *const u64, a.len()) }
 }
 
 #[inline(always)]
@@ -830,6 +844,7 @@ impl<const N: usize> FpM<N> {
             nocarry: N > 1 && pl[N - 1] < (1u64 << 63) - 2,
             s64: [0; N],
             adx: false,
+            red1: (N == 1 && p.bits() <= 62).then(|| crate::field::Red128::new(pl[0])),
         };
         // R mod p, R^2 mod p, R^3 mod p by repeated doubling of 1
         let mut x = [0u64; N];
@@ -984,6 +999,13 @@ impl<const N: usize> FpM<N> {
     /// multiplication by the Montgomery form of 2^64 restore T R^{-1} mod p.
     #[inline(always)]
     fn redc_wide(&self, acc: &mut [u64; 2 * MAXN + 2]) -> [u64; N] {
+        let r = self.redc_raw(acc);
+        self.mont_mul(&r, &self.s64)
+    }
+    /// T / (2^64 R) mod p for T < 2^64 p R: the N + 1 word-by-word Montgomery steps of
+    /// `redc_wide` without its correcting product.
+    #[inline(always)]
+    fn redc_raw(&self, acc: &mut [u64; 2 * MAXN + 2]) -> [u64; N] {
         for i in 0..=N {
             let m = acc[i].wrapping_mul(self.pinv) as u128;
             let mut c = 0u64;
@@ -1005,7 +1027,25 @@ impl<const N: usize> FpM<N> {
         if acc[2 * N + 1] != 0 || geq(&r, &self.p) {
             r = sub_raw(&r, &self.p).0;
         }
-        self.mont_mul(&r, &self.s64)
+        r
+    }
+    /// acc += w b for one word w.
+    #[inline(always)]
+    fn mul_acc_word(acc: &mut [u64; 2 * MAXN + 2], w: u64, b: &[u64; N]) {
+        let w = w as u128;
+        let mut c = 0u64;
+        for j in 0..N {
+            let s = acc[j] as u128 + w * b[j] as u128 + c as u128;
+            acc[j] = s as u64;
+            c = (s >> 64) as u64;
+        }
+        let mut t = N;
+        while c != 0 {
+            let (s, o) = acc[t].overflowing_add(c);
+            acc[t] = s;
+            c = o as u64;
+            t += 1;
+        }
     }
     #[cfg(target_arch = "x86_64")]
     #[inline(always)]
@@ -1055,14 +1095,24 @@ impl<const N: usize> FpM<N> {
     pub fn uses_adx(&self) -> bool {
         self.adx
     }
-    /// Shorter-operand length from which `conv_long` uses the multi-prime NTT: about 1.2-1.5x
-    /// past the measured crossover with Karatsuba (`examples/profile_ntt.rs`).
+    /// Shorter-operand length from which `conv_long` uses the multi-prime NTT: the measured
+    /// crossover with Karatsuba for balanced operands (`examples/profile_ntt.rs`), lower when
+    /// the AVX-512 IFMA transforms are in use.
     pub fn ntt_threshold(&self) -> usize {
-        match N {
-            1 => 1024,
-            2 => 192,
-            3 | 4 => 128,
-            _ => 256,
+        if crate::ntt::simd_active() {
+            match N {
+                1 => 72,
+                2 => 56,
+                3 | 4 => 32,
+                _ => 24,
+            }
+        } else {
+            match N {
+                1 => 384,
+                2 => 112,
+                3 | 4 => 64,
+                _ => 40,
+            }
         }
     }
     /// Canonical residue (out of Montgomery form).
@@ -1304,16 +1354,26 @@ impl<const N: usize> Field for FpM<N> {
     fn conv(&self, a: &[Self::E], b: &[Self::E]) -> Vec<Self::E> {
         self.conv_trunc(a, b, a.len() + b.len() - 1)
     }
+    fn dot_rev_rows(&self, a: &[Self::E], rows: &[&[Self::E]]) -> Vec<Self::E> {
+        let Some(red) = &self.red1 else {
+            return rows.iter().map(|b| self.dot_rev(a, b)).collect();
+        };
+        let rows1: Vec<&[u64]> = rows.iter().map(|b| limbs1(b)).collect();
+        crate::field::lazy_dot_rev_rows(limbs1(a), &rows1, red, |x| red.redc(x))
+            .into_iter()
+            .map(|x| {
+                let mut t = [0u64; N];
+                t[0] = x;
+                t
+            })
+            .collect()
+    }
     fn dot_rev(&self, a: &[Self::E], b: &[Self::E]) -> Self::E {
-        if N == 1 && self.pbits <= 62 {
-            let a1: Vec<u64> = a.iter().map(|x| x[0]).collect();
-            let b1: Vec<u64> = b.iter().map(|x| x[0]).collect();
-            let v = crate::field::lazy_dot_rev(&a1, &b1, self.p[0]) as u64;
+        if let Some(red) = &self.red1 {
+            // sum of (aR)(bR), one Montgomery reduction: (sum ab) R
             let mut t = [0u64; N];
-            t[0] = v;
-            let mut one = [0u64; N];
-            one[0] = 1;
-            return self.mont_mul(&t, &one);
+            t[0] = crate::field::lazy_dot_rev(limbs1(a), limbs1(b), red, |x| red.redc(x));
+            return t;
         }
         let n = a.len().min(b.len());
         let mut acc = [0u64; 2 * MAXN + 2];
@@ -1323,20 +1383,15 @@ impl<const N: usize> Field for FpM<N> {
         self.redc_wide(&mut acc)
     }
     fn conv_trunc(&self, a: &[Self::E], b: &[Self::E], nout: usize) -> Vec<Self::E> {
-        if N == 1 && self.pbits <= 62 {
-            // sum of (aR)(bR) reduced mod p, then one REDC: (sum ab) R
-            let a1: Vec<u64> = a.iter().map(|x| x[0]).collect();
-            let b1: Vec<u64> = b.iter().map(|x| x[0]).collect();
-            let p0 = self.p[0];
-            let v = crate::field::lazy_conv(&a1, &b1, p0, nout, |acc| acc as u64);
+        if let Some(red) = &self.red1 {
+            // sum of (aR)(bR), one Montgomery reduction per coefficient: (sum ab) R
+            let v = crate::field::lazy_conv(limbs1(a), limbs1(b), red, nout, |x| red.redc(x));
             return v
                 .into_iter()
                 .map(|x| {
                     let mut t = [0u64; N];
                     t[0] = x;
-                    let mut one = [0u64; N];
-                    one[0] = 1;
-                    self.mont_mul(&t, &one)
+                    t
                 })
                 .collect();
         }
@@ -1358,8 +1413,17 @@ impl<const N: usize> Field for FpM<N> {
         r
     }
     fn conv_sq(&self, a: &[Self::E]) -> Vec<Self::E> {
-        if N == 1 && self.pbits <= 62 {
-            return self.conv(a, a);
+        if let Some(red) = &self.red1 {
+            // sum of (aR)(aR), one Montgomery reduction per coefficient: (sum a a) R
+            let v = crate::field::lazy_sq(limbs1(a), red, |x| red.redc(x));
+            return v
+                .into_iter()
+                .map(|x| {
+                    let mut t = [0u64; N];
+                    t[0] = x;
+                    t
+                })
+                .collect();
         }
         // coefficient k: 2 sum_{i < k - i} a_i a_{k-i} (+ a_{k/2}^2), lazily accumulated
         let n = a.len();
@@ -1385,59 +1449,103 @@ impl<const N: usize> Field for FpM<N> {
         }
         r
     }
+    fn prepare(&self, b: &[Self::E], max_len: usize, cyc: usize) -> Option<crate::field::Prepared> {
+        let thr = NTT_N.with(|k| k.get()).unwrap_or(self.ntt_threshold());
+        if b.is_empty() || b.len().min(max_len) < thr {
+            return None;
+        }
+        Some(std::rc::Rc::new(crate::ntt::prepare(
+            b, self.pbits, max_len, cyc,
+        )))
+    }
+    fn conv_prepared(&self, a: &[Self::E], b: &crate::field::Prepared) -> Option<Vec<Self::E>> {
+        let (u, t, set) = crate::ntt::conv_crt_prepared(a, b.downcast_ref()?)?;
+        Some(self.fold(&u, t, set))
+    }
+    fn conv_cyclic(&self, a: &[Self::E], b: &[Self::E], len: usize) -> Option<Vec<Self::E>> {
+        let thr = NTT_N.with(|k| k.get()).unwrap_or(self.ntt_threshold());
+        if a.len().min(b.len()) < thr || a.len() + b.len() - 1 <= len {
+            return None;
+        }
+        assert!(len.is_power_of_two() && a.len().max(b.len()) <= len + 1);
+        Some(self.fold_crt(a, b, len))
+    }
     fn conv_long(&self, a: &[Self::E], b: &[Self::E]) -> Option<Vec<Self::E>> {
         let thr = NTT_N.with(|k| k.get()).unwrap_or(self.ntt_threshold());
         if a.len().min(b.len()) < thr {
             return None;
         }
-        // the Montgomery residues aR, bR as integers: exact convolution T = sum (aR)(bR) as
-        // mixed-radix digits, T = sum_i d_i M_i with M_i = m_0 .. m_{i-1}; then
-        // redc_wide(sum_i d_i (M_i mod p)) = T R^{-1} = (sum ab) R, as `conv_trunc` returns
-        let (d, t) = crate::ntt::conv_digits(a, b, self.pbits);
-        let ps = crate::ntt::primes();
-        let mut cm: Vec<[u64; N]> = Vec::with_capacity(t);
-        let mut m = Big::from_u64(1);
-        for pr in &ps[..t] {
-            cm.push(big_mod(&m, &self.pbig).limbs(N).try_into().unwrap());
-            m = m.mul(&Big::from_u64(pr.p));
-        }
+        // the Montgomery residues aR, bR as integers: exact convolution T = sum (aR)(bR) in
+        // explicit-CRT form, T = sum_i u_i C_i - q M with C_i = M / m_i; folded mod p as
+        // sum_i u_i (C_i mod p) + q (-M mod p), all terms non-negative, then one
+        // Montgomery reduction gives T R^{-1} = (sum ab) R, as `conv_trunc` returns
         let nout = a.len() + b.len() - 1;
-        let mut out = Vec::with_capacity(nout);
-        for k in 0..nout {
-            let mut acc = [0u64; 2 * MAXN + 2];
-            for (i, c) in cm.iter().enumerate() {
-                let di = d[k * t + i] as u128;
-                let mut carry = 0u64;
-                for j in 0..N {
-                    let s = acc[j] as u128 + di * c[j] as u128 + carry as u128;
-                    acc[j] = s as u64;
-                    carry = (s >> 64) as u64;
-                }
-                let mut j = N;
-                while carry != 0 {
-                    let (s, o) = acc[j].overflowing_add(carry);
-                    acc[j] = s;
-                    carry = o as u64;
-                    j += 1;
-                }
+        // a product just past a power of two L (at most 3L/8 beyond, both operands at most
+        // L + 1 long): transform at L, mod x^L - 1, and take the wrapped top coefficients
+        // V_k (k >= L) from the product of the operands' high ends instead of doubling the
+        // transform. V_k for k >= L only involves a_i with i >= L + 1 - len(b) and b_j with
+        // j >= L + 1 - len(a): it is coefficient k - (2L + 1 - nout) of that short product.
+        let half = nout.next_power_of_two() / 2;
+        if half >= 64 && nout - half <= 3 * half / 8 && a.len().max(b.len()) <= half + 1 {
+            let ah = &a[half + 1 - b.len()..];
+            let bh = &b[half + 1 - a.len()..];
+            let top = if std::ptr::eq(a, b) {
+                crate::poly::sqr_raw(self, ah)
+            } else {
+                crate::poly::mul_raw(self, ah, bh)
+            };
+            let mut r = self.fold_crt(a, b, half);
+            let off = 2 * half + 1 - nout;
+            for k in half..nout {
+                let v = top[k - off];
+                r[k - half] = self.sub(r[k - half], v);
+                r.push(v);
             }
-            out.push(self.redc_wide(&mut acc));
+            return Some(r);
         }
-        Some(out)
+        Some(self.fold_crt(a, b, usize::MAX))
+    }
+    fn powmod_table_max(&self) -> usize {
+        // measured crossovers (examples/profile_powmod.rs); Barrett's two products win from a
+        // shorter modulus with the IFMA transforms
+        if crate::ntt::simd_active() {
+            match N {
+                1 => 44,
+                2 => 60,
+                3 | 4 => 52,
+                _ => 40,
+            }
+        } else {
+            match N {
+                1 => 160,
+                2 => 140,
+                3 | 4 => 110,
+                _ => 85,
+            }
+        }
     }
     fn sqr_threshold(&self) -> usize {
         // schoolbook squares form each cross product once, so they stay ahead of Karatsuba
-        // much longer than general products (examples/profile_sqr.rs)
-        match N {
-            1 if self.pbits <= 62 => self.karatsuba_threshold(),
+        // much longer than general products (examples/profile_sqr.rs); with the IFMA
+        // transforms a multi-limb square goes to the NTT (one transform) from its threshold
+        let school = match N {
+            1 if self.pbits <= 62 => 72,
             2..=4 => 96,
             _ => 64,
+        };
+        if N > 1 && crate::ntt::simd_active() {
+            school.min(self.ntt_threshold())
+        } else {
+            school
         }
     }
     fn karatsuba_threshold(&self) -> usize {
-        KARATSUBA_N
-            .with(|k| k.get())
-            .unwrap_or(if N == 1 { 32 } else { 16 })
+        // one limb below 2^62: the four-output lazy kernel stays ahead of Karatsuba to ~72
+        KARATSUBA_N.with(|k| k.get()).unwrap_or(match N {
+            1 if self.red1.is_some() => 72,
+            1 => 32,
+            _ => 16,
+        })
     }
     fn size(&self) -> u128 {
         self.pbig
@@ -1461,5 +1569,80 @@ impl<const N: usize> Field for FpM<N> {
                 return r;
             }
         }
+    }
+}
+
+impl<const N: usize> FpM<N> {
+    /// The convolution of `conv_long` from `ntt::conv_crt` (mod x^cyc - 1 when `cyc` is below
+    /// the product length), folded mod p.
+    fn fold_crt(&self, a: &[[u64; N]], b: &[[u64; N]], cyc: usize) -> Vec<[u64; N]> {
+        let (u, t, set) = crate::ntt::conv_crt(a, b, self.pbits, cyc);
+        self.fold(&u, t, set)
+    }
+    /// Explicit-CRT residues from `ntt` (t per coefficient over `set`) folded mod p.
+    fn fold(&self, u: &[u64], t: usize, set: &crate::ntt::PrimeSet) -> Vec<[u64; N]> {
+        let ps = &set.primes[..t];
+        if let Some(red) = &self.red1 {
+            // one limb: t + 1 <= 9 products below 2^124 each (u_i, p < 2^62) fit a u128
+            assert!(t <= 8);
+            let mut cm = [0u64; 8];
+            for (i, c) in cm[..t].iter_mut().enumerate() {
+                *c = ps
+                    .iter()
+                    .enumerate()
+                    .filter(|&(j, _)| j != i)
+                    .fold(1u64, |c, (_, pj)| red.reduce(c as u128 * pj.p as u128));
+            }
+            let mneg = (self.p[0] - red.reduce(cm[0] as u128 * ps[0].p as u128)) % self.p[0];
+            return u
+                .chunks_exact(t)
+                .map(|ui| {
+                    let mut s = set.quotient(ui) as u128 * mneg as u128;
+                    for (x, c) in ui.iter().zip(&cm) {
+                        s += *x as u128 * *c as u128;
+                    }
+                    let mut r = [0u64; N];
+                    r[0] = red.redc(s);
+                    r
+                })
+                .collect();
+        }
+        // the constants carry an extra 2^64, so the N + 1 word reductions of `redc_raw` leave
+        // T 2^64 2^(-64 (N + 1)) = T R^{-1} with no correcting product
+        let consts = CRT_FOLD.with(|c| {
+            let mut c = c.borrow_mut();
+            // keyed by p, the prime family (its first prime) and the number of primes
+            let key = |p: &[u64], tt: usize| {
+                p.len() == N + 1 && p[..N] == self.p[..] && p[N] == ps[0].p && tt == t
+            };
+            if let Some((_, _, v)) = c.iter().find(|(p, tt, _)| key(p, *tt)) {
+                return v.clone();
+            }
+            let mbig = ps.iter().fold(Big::from_u64(1), |m, pr| m.mul_small(pr.p));
+            let shift = |x: &Big| big_mod(&x.shl(64), &self.pbig).limbs(N);
+            let mut v: Vec<u64> = ps
+                .iter()
+                .flat_map(|pr| shift(&mbig.divrem_small(pr.p).0))
+                .collect();
+            v.extend(shift(&self.pbig.sub(&big_mod(&mbig, &self.pbig))));
+            let v = std::rc::Rc::new(v);
+            let mut k = self.p.to_vec();
+            k.push(ps[0].p);
+            c.push((k, t, v.clone()));
+            v
+        });
+        let limb = |i: usize| -> &[u64; N] { consts[i * N..(i + 1) * N].try_into().unwrap() };
+        let mneg = limb(t);
+        let mut out = Vec::with_capacity(u.len() / t);
+        for ui in u.chunks_exact(t) {
+            let mut acc = [0u64; 2 * MAXN + 2];
+            let q = set.quotient(ui);
+            Self::mul_acc_word(&mut acc, q, mneg);
+            for (i, x) in ui.iter().enumerate() {
+                Self::mul_acc_word(&mut acc, *x, limb(i));
+            }
+            out.push(self.redc_raw(&mut acc));
+        }
+        out
     }
 }

@@ -6,17 +6,19 @@
 # isolation records to results/p15-external/isolation.jsonl.
 #
 #   external/run.sh            (from isogeny_algos/; needs gp, libflint-dev, a C compiler)
+#   OUT=results/p16-external external/run.sh   (another output directory)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 CPU=${CPU:-3}
 # other processes may use up to this many CPUs while a run settles and runs (the agent driving
 # the run polls a little); each record still says how much they used and whether it was contended
 MAX_OTHER=${MAX_OTHER:-0.5}
-# OPS=poly reruns only the polynomial workloads (products, squares, x^p mod g)
+# OPS=poly reruns only the polynomial workloads (products, squares, x^p mod g), OPS=sea only
+# Phi_l and SEA
 OPS=${OPS:-all}
 # appended to every isolation-record label (to tell reruns apart in isolation.jsonl)
 TAGSFX=${TAGSFX:-}
-OUT=results/p15-external
+OUT=${OUT:-results/p15-external}
 ISO="python3 ../tools/isolated_bench.py"
 mkdir -p "$OUT"
 cargo build --release -q --example ext_compare
@@ -47,6 +49,7 @@ for round in 1 2; do
   R="$OUT/round$round"; mkdir -p "$R"
   if [ $round = 1 ]; then order="ours flint pari"; else order="pari flint ours"; fi
   for p in p61 p127 p255 p511; do
+    [ "$OPS" = sea ] && break
     for op in poly powx; do
       for tool in $order; do
         case $tool in
@@ -57,7 +60,7 @@ for round in 1 2; do
       done
     done
   done
-  [ "$OPS" = all ] || continue
+  [ "$OPS" = poly ] && continue
   for tool in $order; do
     case $tool in
       ours) timed "ours phi p127 r$round" "$R/ours.phi.p127.jsonl" $OURS phi p127 89

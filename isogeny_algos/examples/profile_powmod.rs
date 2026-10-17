@@ -1,4 +1,5 @@
-//! x^q mod g for a random monic g of degree d over 127- and 255-bit prime fields: the table
+//! x^q mod g for a random monic g of degree d over word-size and 127-, 255- and 511-bit prime
+//! fields: the table
 //! reducer against Newton/Barrett (`poly::POWMOD_TABLE_N` forces the choice), results checked
 //! equal. `cargo run --release --example profile_powmod`
 use isogeny_algos::field::*;
@@ -9,7 +10,7 @@ use std::time::Instant;
 fn run<F: Field>(name: &str, f: &F) {
     let mut rng = Rng::new(3);
     println!("# {name}: deg  table_ms  barrett_ms  barrett/table");
-    for d in [48, 56, 63, 72, 80, 90, 100, 120, 140, 160, 200, 256] {
+    for d in [16, 24, 32, 40, 48, 56, 63, 72, 80, 90, 100, 120, 140, 160] {
         let mut g: Vec<F::E> = (0..d).map(|_| f.random(&mut rng)).collect();
         g.push(f.one());
         let x = poly::x_poly(f);
@@ -38,6 +39,7 @@ fn run<F: Field>(name: &str, f: &F) {
 }
 
 fn main() {
+    run("FpM1 (2^61-1)", &FpM::<1>::from_dec("2305843009213693951"));
     run("Zp (40-bit)", &Zp::new(next_prime((1u64 << 39) + 12345)));
     run("Zp (61-bit)", &Zp::new(next_prime((1u64 << 60) + 12345)));
     run(
@@ -50,4 +52,6 @@ fn main() {
             "57896044618658097711785492504343953926634992332820282019728792003956564819949",
         ),
     );
+    let csidh = "5326738796327623094747867617954605554069371494832722337612446642054009560026576537626892113026381253624626941643949444792662881241621373288942880288065659";
+    run("FpM8 (CSIDH-512)", &FpM::<8>::from_dec(csidh));
 }

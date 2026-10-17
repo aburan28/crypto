@@ -30,6 +30,9 @@ use crate::kernel::kohel::kohel;
 use crate::poly;
 use std::collections::HashMap;
 
+mod families;
+pub use families::*;
+
 /// y^2 = x^3 + a x + b over GF(p), p an odd prime above 3, coefficients reduced mod p.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PrimeCurve {

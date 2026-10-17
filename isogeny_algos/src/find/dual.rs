@@ -3,7 +3,7 @@
 //! codomain E~ over it, Padé/BMSS gives psi: E' -> E~, and E~ is E rescaled by u = l:
 //! E~ = (l^4 A, l^6 B), because psi o phi pulls omega back to omega while [l] pulls it back to l omega.
 //! The dual is then  (x, y) -> (x_psi / u^2, y_psi / u^3)  (not normalised: c = 1/l).
-use super::elkies::{bmss_isogeny, elkies_codomain};
+use super::elkies::{elkies_codomain, normalised_isogeny};
 use super::modpoly::Phi;
 use crate::curve::*;
 use crate::field::Field;
@@ -44,7 +44,7 @@ impl<F: Field> Isogeny<F> for ScaledIso<F> {
 pub fn dual_isogeny<F: Field>(f: &F, phi: &Phi<F>, iso: &RatIsogeny<F>) -> Option<ScaledIso<F>> {
     let ell = phi.ell;
     let et = elkies_codomain(f, phi, &iso.cod, jinv(f, &iso.dom))?;
-    let psi = bmss_isogeny(f, &iso.cod, &et, ell)?;
+    let psi = normalised_isogeny(f, &iso.cod, &et, ell)?;
     let l = f.from_u64(ell as u64);
     let l2 = f.mul(l, l);
     let l4 = f.mul(l2, l2);
