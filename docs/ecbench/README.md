@@ -919,6 +919,14 @@ Stated so that nothing here is read as more than it is:
   dispatch, input, child output, and raw parts together. The
   [n37 protocol](../../research/ecbench_callgrind_solve_20261004/PROTOCOL.md)
   freezes a same-target IC/rho census using this path.
+  For a whole-solve census with frequent relation-loop phase transitions, also
+  set `ECBENCH_CALLGRIND_PHASE_DUMPS=0`. This retains exclusive phase clocks
+  and the external solve markers while suppressing internal dump/reset
+  requests. Collection stays enabled and the parser sums the complete solve;
+  the instruction count includes the profiling-control branch overhead.
+  The default keeps historical phase-dump behavior. Pin the newly built
+  executable and this setting, as in the
+  [conductor-gap v2 protocol](../../research/ecbench_conductor_gap_ir_20261014/PROTOCOL-v2.md).
 - **A target-only Callgrind interval is opt-in for the shared-rank IC and
   strong signed-Frobenius rho.** Set `ECBENCH_CALLGRIND_TARGET=1` alongside
   `ECBENCH_CALLGRIND_SOLVE=1`, then run `ecbench callgrind-online-ir

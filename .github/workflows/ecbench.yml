@@ -194,6 +194,15 @@ jobs:
           python3 research/ecbench_factor_bases_20261013/check_fb_ids.py
           python3 research/ecbench_factor_bases_20261013/check_fbm_ids.py
           python3 -m py_compile research/ecbench_factor_bases_20261013/join_sage_dor.py
+      - name: Re-derive the conductor-gap instruction census from archived profiles
+        run: |
+          study=research/ecbench_conductor_gap_ir_20261014
+          archive=research/ecbench_conductor_gap_20261012
+          cargo test --release --example conductor_gap_ir
+          (cd "$study" && sha256sum -c raw-callgrind.tar.xz.sha256)
+          tar -xJf "$study/raw-callgrind.tar.xz" -C "$study"
+          cargo run --release --example conductor_gap_ir -- analyze "$study" "$archive"
+          git diff --exit-code -- "$study/analysis.json" "$study/analysis.md"
       - name: Host
         run: ./target/release/ecbench host | tee -a "$GITHUB_STEP_SUMMARY"
       # Bounds are re-derivable from the sessions they name, challenges must

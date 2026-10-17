@@ -89,6 +89,7 @@ impl Phase {
 
 struct Trace {
     generation: u64,
+    profiler_dumps: bool,
     phase: Phase,
     started: Instant,
     last: Instant,
@@ -103,7 +104,9 @@ struct Trace {
 
 impl Trace {
     fn boundary(&mut self, next: Phase) {
-        dump(self.phase.label());
+        if self.profiler_dumps {
+            dump(self.phase.label());
+        }
         let now = Instant::now();
         let ns = u64::try_from(now.duration_since(self.last).as_nanos()).expect("bounded interval");
         self.elapsed[self.phase as usize] += ns;
@@ -162,6 +165,13 @@ pub struct Session {
 
 impl Session {
     pub fn begin() -> Result<Self, &'static str> {
+        // Whole-solve instruction censuses need only the external markers.
+        // Fine-grained relation callbacks can otherwise create millions of
+        // profile files. Keep their exclusive clocks, and keep collection on.
+        Self::begin_profiled(std::env::var("ECBENCH_CALLGRIND_PHASE_DUMPS").as_deref() != Ok("0"))
+    }
+
+    fn begin_profiled(profiler_dumps: bool) -> Result<Self, &'static str> {
         CURRENT.with(|slot| {
             let mut state = slot.borrow_mut();
             if state.trace.is_some() {
@@ -180,6 +190,7 @@ impl Session {
             entered[Phase::Setup as usize] = true;
             state.trace = Some(Trace {
                 generation,
+                profiler_dumps,
                 phase: Phase::Setup,
                 started: now,
                 last: now,
@@ -424,6 +435,30 @@ thread_local! { static DUMPS: std::cell::Cell<usize> = const { std::cell::Cell::
 mod tests {
     use super::*;
     use std::time::Duration;
+
+    #[test]
+    fn whole_solve_mode_keeps_clocks_and_external_profiler_markers() {
+        let before = DUMPS.with(|count| count.get());
+        let session = Session::begin_profiled(false).unwrap();
+        mark(Phase::Precompute);
+        begin_online(Phase::TargetQuery);
+        {
+            let _scope = scope(Phase::TargetPdp);
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        end_online();
+        let snapshot = session.finish().unwrap();
+        assert!(snapshot.online_wall_ns.unwrap() > 0);
+        assert!(snapshot.online_phases_ns["target_pdp"].unwrap() > 0);
+        assert_eq!(DUMPS.with(|count| count.get()), before);
+        callgrind_dump(b"ecbench_before_solve\0");
+        callgrind_dump(b"ecbench_solve\0");
+        assert_eq!(DUMPS.with(|count| count.get()), before + 2);
+        let session = Session::begin_profiled(true).unwrap();
+        mark(Phase::Precompute);
+        session.finish().unwrap();
+        assert!(DUMPS.with(|count| count.get()) > before + 2);
+    }
 
     #[test]
     fn exclusive_measurement_closes_online_and_observed_intervals() {

@@ -1,0 +1,10 @@
+   Compiling crypto v0.1.0 (/workspace/crypto)
+    Finished `release` profile [optimized] target(s) in 1.31s
+     Running unittests examples/conductor_gap_ir.rs (/workspace/toolchains/volcano-ir/test-target/release/examples/conductor_gap_ir-c6db77fca237634d)
+
+running 2 tests
+test tests::paired_resampling_preserves_target_dependence ... ok
+test tests::independent_null_and_separated_controls ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

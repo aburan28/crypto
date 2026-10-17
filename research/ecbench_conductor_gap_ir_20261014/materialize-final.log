@@ -1,0 +1,30 @@
+node:internal/errors:985
+  const err = new Error(message);
+              ^
+
+Error: Command failed: git sparse-checkout add /benches/pqc_speed.rs /benches/pqc_split.rs /experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs /experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs /experiments/koblitz-n53-compact-cold-20261009/native_replay.rs /experiments/koblitz-n53-compact-cold-20261009/native_run.rs /experiments/koblitz-n53-compact-cold-20261009/reference.rs /research/prime_fourier_flatness_exp7_20261007/render.rs /research/prime_fourier_flatness_exp7_20261007/render_all_patterns.rs /research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs /research/koblitz_n83_factor_base_sweep_20261008/primary_adapter.rs
+fatal: specify directories rather than patterns (no leading slash)
+
+    at genericNodeError (node:internal/errors:985:15)
+    at wrappedFn (node:internal/errors:539:14)
+    at checkExecSyncError (node:child_process:942:11)
+    at execFileSync (node:child_process:978:15)
+    at git (file:///workspace/crypto/.github/scripts/ci-scope.mjs:82:10)
+    at materializeSources (file:///workspace/crypto/.github/scripts/ci-scope.mjs:127:23)
+    at materializeInputs (file:///workspace/crypto/.github/scripts/ci-scope.mjs:193:3)
+    at file:///workspace/crypto/.github/scripts/ci-scope.mjs:224:5
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loader:643:26 {
+  status: 128,
+  signal: null,
+  output: [
+    null,
+    '',
+    'fatal: specify directories rather than patterns (no leading slash)\n'
+  ],
+  pid: 4149,
+  stdout: '',
+  stderr: 'fatal: specify directories rather than patterns (no leading slash)\n'
+}
+
+Node.js v24.19.0

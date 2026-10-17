@@ -1,0 +1,24 @@
+{
+  "algorithm_seed": 11064510734406129259,
+  "curve": {
+    "a": 6064550680,
+    "b": 68678790390,
+    "group_order": 81640511861,
+    "gx": 2,
+    "gy": 25752399999,
+    "kind": "prime_explicit",
+    "p": 81640512137,
+    "r": 81640511861
+  },
+  "expected_method_id": "ECM1hefea4e0ebe79",
+  "expected_workload_id": "W66be038fe1c0",
+  "method": {
+    "id": "rho.negation",
+    "params": {
+      "cap_multiple": "64"
+    }
+  },
+  "schema": "ecbench.child_input/v1",
+  "target_index": 6,
+  "target_seed": 2026101201
+}

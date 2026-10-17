@@ -146,17 +146,6 @@
      "class": "engineering",
      "anchor": "#n83-tier1-cold-20261016",
      "source": "https://github.com/aburan28/crypto/blob/main/research/n83_e2e_holdout_20261016/RESULT.md"
-    },
-    {
-     "date": "2026-10-15",
-     "value": 68183174.19,
-     "reference": "matched",
-     "unit": "F_p multiplications",
-     "label": "Joux-Vitse (n - 1)-decomposition at n = 5, E(F_{p^5}), complete DLP at p = 31 (ell = 2^24.8), F4 trace replay",
-     "detail": "Native complete DLPs paired with rho on the same target in F_p multiplications: 6.8e7x at p = 31 (6,688 trials, 19 relations), 4.5e7x and 1.8e8x at p = 11; one trial 5.9-9.2e9 flat in p over a 12-rung ladder (p = 11-241), about 25p trials per relation; every trial agrees with a meet-in-the-middle oracle and every answer verified; parity extrapolated at q = 2^58.2 (group 2^291). A reproduction of a published route; no ecbench session (no F_{p^k} instance on main).",
-     "class": "accounting",
-     "anchor": "#rho-parity-ledger",
-     "source": "https://github.com/aburan28/crypto/blob/main/research/joux_vitse_n1_20261015/README.md"
     }
    ]
   },
@@ -404,6 +393,50 @@
      "class": "accounting",
      "anchor": "#n37-online-ir-20261004",
      "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_online_ir_20261004/RESULT.md"
+    },
+    {
+     "date": "2026-10-15",
+     "value": 28.152537256177837,
+     "reference": "matched",
+     "unit": "Callgrind Ir diagnostic",
+     "label": "Conductor gap ell8209-q29, icv1-fp29-t47-14392892, archived eight-target IC/rho census",
+     "detail": "Complete user-space implementation Ir; paired 95% interval 16.31850–56.63575. 100/100 profiles verified. Comparison status: admissible_implementation_diagnostic. Method resolution, target preparation, kernel work and external audit excluded; no native wall-time or intrinsic-hardness conclusion.",
+     "class": "accounting",
+     "anchor": "#conductor-gap-ir-20261014",
+     "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md"
+    },
+    {
+     "date": "2026-10-15",
+     "value": 25.276325882164183,
+     "reference": "matched",
+     "unit": "Callgrind Ir diagnostic",
+     "label": "Conductor gap ell8209-q29, icv1-fp29-t47-1f934956, archived eight-target IC/rho census",
+     "detail": "Complete user-space implementation Ir; paired 95% interval 15.89281–40.76003. 100/100 profiles verified. Comparison status: admissible_implementation_diagnostic. Method resolution, target preparation, kernel work and external audit excluded; no native wall-time or intrinsic-hardness conclusion.",
+     "class": "accounting",
+     "anchor": "#conductor-gap-ir-20261014",
+     "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md"
+    },
+    {
+     "date": "2026-10-15",
+     "value": 47.771484263859804,
+     "reference": "matched",
+     "unit": "Callgrind Ir diagnostic",
+     "label": "Conductor gap ell131101-q37, icv1-fp37-t277-91fd6e29, archived eight-target IC/rho census",
+     "detail": "Complete user-space implementation Ir; paired 95% interval 36.85623–68.60869. 100/100 profiles verified. Comparison status: admissible_implementation_diagnostic. Method resolution, target preparation, kernel work and external audit excluded; no native wall-time or intrinsic-hardness conclusion.",
+     "class": "accounting",
+     "anchor": "#conductor-gap-ir-20261014",
+     "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md"
+    },
+    {
+     "date": "2026-10-15",
+     "value": 47.078295091523685,
+     "reference": "matched",
+     "unit": "Callgrind Ir diagnostic",
+     "label": "Conductor gap ell131101-q37, icv1-fp37-t277-090dc414, archived eight-target IC/rho census",
+     "detail": "Complete user-space implementation Ir; paired 95% interval 32.20587–83.65539. 100/100 profiles verified. Comparison status: admissible_implementation_diagnostic. Method resolution, target preparation, kernel work and external audit excluded; no native wall-time or intrinsic-hardness conclusion.",
+     "class": "accounting",
+     "anchor": "#conductor-gap-ir-20261014",
+     "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md"
     }
    ]
   },

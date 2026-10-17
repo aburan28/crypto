@@ -748,6 +748,25 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 <div class="scroll"><table><caption>Controls and within-curve quotients.</caption><thead><tr><th>family</th><th>ell</th><th>comparison</th><th>quotient</th><th>99% interval</th><th>pairs</th></tr></thead><tbody><tr><td>d3</td><td>1016839</td><td>same method, paired (theorem: one)</td><td>1.0814</td><td>0.7829 to 1.4719</td><td>64</td></tr><tr><td>d3</td><td>1016839</td><td>within crater, paired</td><td>1.7191</td><td>1.3391 to 2.2374</td><td>64</td></tr><tr><td>d3</td><td>2033609</td><td>same method, paired (theorem: one)</td><td>0.9315</td><td>0.6963 to 1.2410</td><td>64</td></tr><tr><td>d3</td><td>2033609</td><td>within crater, paired</td><td>2.0573</td><td>1.5392 to 2.7057</td><td>64</td></tr><tr><td>d4</td><td>1016839</td><td>same method, paired (theorem: one)</td><td>0.9425</td><td>0.6585 to 1.4088</td><td>32</td></tr><tr><td>d4</td><td>1016839</td><td>within crater, paired</td><td>1.2058</td><td>0.7151 to 2.0371</td><td>32</td></tr><tr><td>d19</td><td>4067213</td><td>same method, paired (theorem: one)</td><td>1.0155</td><td>0.6461 to 1.6385</td><td>32</td></tr></tbody></table></div>
 <p class="dash-footnote">Tier-1 Linux wall times and external-host replay are blocked on a Linux isolate host (tools/isolated_bench.py needs PSI and taskset); the root-finding PDP of #1729 is not yet an ecbench arm; the cubic-fold MITM table is frozen as the round-4 lead. <a href="https://github.com/aburan28/crypto/blob/main/research/drastic_prime_conductor_gap_round3_20261012/README.md">Note, sessions and tables</a></p>
 </section></div></details>
+<details class="dash-details"><summary>Conductor gap: complete implementation instruction census · 15 October 2026</summary><div class="dash-detail-body"><section class="panel" id="conductor-gap-ir-20261014">
+<h2>Conductor gap: complete implementation instruction census <span class="chip">accounting</span></h2>
+<p class="panel-summary">The archived prime-field IC and matched rho solves are counted in Callgrind user-space instructions. 100/100 profiles passed native point/scalar and exact deterministic-counter replay.</p>
+<p>IC floor/crater ratios and independent 99% intervals: ell8209-q29: 0.9688066 [0.5735211–1.492155]; ell131101-q37: 1.162501 [0.9016566–1.462762]. Frozen repeated instruction lead: false. A/A within 2%: true. Comparison status: admissible_implementation_diagnostic.</p>
+<div class="scroll"><table><caption>Cold methods::solve instruction census; eight archived one-target workloads per fixed curve and primary arm. Setup and all user-space work inside the adapter are included. Method resolution, target construction, kernel work and the external independent verification are excluded and remain unmeasured. Ir is a separate unit from the GAE generic floor.</caption><thead><tr><th>gap cell</th><th>ICV1 model</th><th>arm</th><th>n</th><th>mean Ir</th><th>mean Ir/sqrt(r)</th></tr></thead><tbody><tr><td>ell8209-q29</td><td><code>icv1-fp29-t47-14392892</code></td><td>rho-neg</td><td>8</td><td>1.465622e+7</td><td>819.1898</td></tr>
+<tr><td>ell8209-q29</td><td><code>icv1-fp29-t47-14392892</code></td><td>rho-neg-aa</td><td>8</td><td>1.465622e+7</td><td>819.1898</td></tr>
+<tr><td>ell8209-q29</td><td><code>icv1-fp29-t47-14392892</code></td><td>ic-mitm</td><td>8</td><td>4.126097e+8</td><td>23062.27</td></tr>
+<tr><td>ell8209-q29</td><td><code>icv1-fp29-t47-1f934956</code></td><td>rho-neg</td><td>8</td><td>1.581476e+7</td><td>883.9450</td></tr>
+<tr><td>ell8209-q29</td><td><code>icv1-fp29-t47-1f934956</code></td><td>rho-neg-aa</td><td>8</td><td>1.581475e+7</td><td>883.9443</td></tr>
+<tr><td>ell8209-q29</td><td><code>icv1-fp29-t47-1f934956</code></td><td>ic-mitm</td><td>8</td><td>3.997390e+8</td><td>22342.88</td></tr>
+<tr><td>ell131101-q37</td><td><code>icv1-fp37-t277-91fd6e29</code></td><td>rho-neg</td><td>8</td><td>2.741009e+8</td><td>959.3068</td></tr>
+<tr><td>ell131101-q37</td><td><code>icv1-fp37-t277-91fd6e29</code></td><td>rho-neg-aa</td><td>8</td><td>2.741009e+8</td><td>959.3069</td></tr>
+<tr><td>ell131101-q37</td><td><code>icv1-fp37-t277-91fd6e29</code></td><td>ic-mitm</td><td>8</td><td>1.309420e+10</td><td>45827.51</td></tr>
+<tr><td>ell131101-q37</td><td><code>icv1-fp37-t277-090dc414</code></td><td>rho-neg</td><td>8</td><td>3.233343e+8</td><td>1131.616</td></tr>
+<tr><td>ell131101-q37</td><td><code>icv1-fp37-t277-090dc414</code></td><td>rho-neg-aa</td><td>8</td><td>3.233343e+8</td><td>1131.615</td></tr>
+<tr><td>ell131101-q37</td><td><code>icv1-fp37-t277-090dc414</code></td><td>ic-mitm</td><td>8</td><td>1.522203e+10</td><td>53274.53</td></tr>
+</tbody></table></div>
+<p>The same archived targets are reused for accounting; no new map or target transport is constructed. These two fixed pairs cannot establish intrinsic hardness. Prime-field F4/SAT, representation controls and another-host validation remain open. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md">Reports, PDFs, frozen jobs and lossless evidence</a>.</p>
+</section></div></details>
 <details class="dash-details"><summary>N83 Tier 1 cold factor-base holdout · 16 October 2026</summary><div class="dash-detail-body"><section class="dash-section" id="n83-tier1-cold-20261016" aria-labelledby="n83-tier1-cold-title" data-collapse="open">
 <div class="dash-section-head"><div><p class="dash-kicker">Degree-83 Koblitz a=1 / five sealed one-target points / Tier 1 cloud instance</p><h2 id="n83-tier1-cold-title">K1120 and K1104 reduce full cold process time against K1152.</h2><p class="panel-summary">K1120 saves 2.645 s [2.085, 3.205] and K1104 saves 2.244 s [1.980, 2.508] against the mirrored K1152 control. The 0.401 s K1120 lead over K1104 spans zero, so the frozen selector is <code>BOUNDED_UNKNOWN</code> with a null selected candidate.</p></div><span class="status neutral">Engineering · Tier 1</span></div>
 <p class="dash-section-intro">All 25 IC arms and five same-point rho solves on the five preregistered public points passed independent base, relation, scalar, resource, topology, and execution-order replay. K1152 ran twice per point as a local A/A bracket; every bracket passed its 10% gate. Each IC child began with an empty base, index, and log cache. The curve is <code>icv1-f2m83-t6151469093347-9eba6cd5</code>, model <code>y²+xy=x³+x²+1</code>, subgroup order 8,569,786,107,849,059.</p>
@@ -889,6 +908,10 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 <tr><td>2026-10-07</td><td>Weak elliptic class: cover and decomposition on E(F_p^6)</td><td>Isogeny walk stage from a non-weak start eight moves from a weak curve, p = 1,009 (subgroup 2^57.9)</td><td class="n">0.0002&times;</td><td>stage</td><td><span class="chip">accounting</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md">source</a> (&sect;17)</td></tr>
 <tr><td>2026-10-12</td><td>Elliptic curve, cold counted-work diagnostics with unpriced native work</td><td>Large-prime conductor-gap IC, ell = 8209, fixed floor, eight one-target workloads</td><td class="n">19.7311&times; <small>bounded count diagnostic</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#conductor-gap-ic37-20261012">panel</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_20261012/README.md">source</a></td></tr>
 <tr><td>2026-10-12</td><td>Elliptic curve, cold counted-work diagnostics with unpriced native work</td><td>Large-prime conductor-gap IC, ell = 131101, fixed floor, eight one-target workloads</td><td class="n">45.0827&times; <small>bounded count diagnostic</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#conductor-gap-ic37-20261012">panel</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_20261012/README.md">source</a></td></tr>
+<tr><td>2026-10-15</td><td>Elliptic curve, complete method-solve simulated instructions</td><td>Conductor gap ell8209-q29, icv1-fp29-t47-14392892, archived eight-target IC/rho census</td><td class="n">28.15254&times; <small>simulated instruction diagnostic</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#conductor-gap-ir-20261014">panel</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md">source</a></td></tr>
+<tr><td>2026-10-15</td><td>Elliptic curve, complete method-solve simulated instructions</td><td>Conductor gap ell8209-q29, icv1-fp29-t47-1f934956, archived eight-target IC/rho census</td><td class="n">25.27633&times; <small>simulated instruction diagnostic</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#conductor-gap-ir-20261014">panel</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md">source</a></td></tr>
+<tr><td>2026-10-15</td><td>Elliptic curve, complete method-solve simulated instructions</td><td>Conductor gap ell131101-q37, icv1-fp37-t277-91fd6e29, archived eight-target IC/rho census</td><td class="n">47.77148&times; <small>simulated instruction diagnostic</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#conductor-gap-ir-20261014">panel</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md">source</a></td></tr>
+<tr><td>2026-10-15</td><td>Elliptic curve, complete method-solve simulated instructions</td><td>Conductor gap ell131101-q37, icv1-fp37-t277-090dc414, archived eight-target IC/rho census</td><td class="n">47.07830&times; <small>simulated instruction diagnostic</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#conductor-gap-ir-20261014">panel</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md">source</a></td></tr>
 <tr><td>2026-10-14</td><td>Elliptic curve, whole method, cold, one target</td><td>Frobenius-orbit IC, fully priced, stride-renew, vs rho-frob: best cell <code>icv1-f2m29-tm40309-30c52b96</code> (r = 2<sup>15.4</sup>)</td><td class="n">1.566&times; <small>S; [0.992, 2.347]; 18.2&times; at r = 2<sup>39</sup></small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#lab-ecbench-all">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_frobenius_orbit_vs_rho_20261014/README.md">source</a></td></tr>
 <tr><td>2026-10-14</td><td>Elliptic curve, cold counted-work diagnostics with unpriced native work</td><td>Prime rootfinding B48 batch-8 buffer reuse, registered 20-bit subgroup</td><td class="n">6.8747&times; <small>counted GAE lower-bound diagnostic; not a speed bound</small></td><td>matched</td><td><span class="chip">engineering</span></td><td><a href="#rootfinding-buffers-20261014">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_rootfinding_alloc_20261014/REPORT.md">source</a></td></tr>
 <tr><td>2026-10-17</td><td>Elliptic curve, whole method, cold, one target</td><td>Volcano projected size-16 MITM, two targets; <code>icv1-fp57-t536870914-6cabb0c9</code></td><td class="n">19.215&times; <small>quotient of incomplete GAE lower bounds; diagnostic, no cost-direction claim</small></td><td>matched; L0/debug</td><td><span class="chip">accounting</span></td><td><a href="#lab-volcano-ic">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/full_volcano_graphwide_ic_20261017/execution/pilot-summary/two-comparison.json">native comparison</a></td></tr>
@@ -1322,6 +1345,50 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           "class": "accounting",
           "anchor": "#n37-online-ir-20261004",
           "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_online_ir_20261004/RESULT.md"
+        },
+        {
+          "date": "2026-10-15",
+          "value": 28.152537256177837,
+          "reference": "matched",
+          "unit": "Callgrind Ir diagnostic",
+          "label": "Conductor gap ell8209-q29, icv1-fp29-t47-14392892, archived eight-target IC/rho census",
+          "detail": "Complete user-space implementation Ir; paired 95% interval 16.31850–56.63575. 100/100 profiles verified. Comparison status: admissible_implementation_diagnostic. Method resolution, target preparation, kernel work and external audit excluded; no native wall-time or intrinsic-hardness conclusion.",
+          "class": "accounting",
+          "anchor": "#conductor-gap-ir-20261014",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md"
+        },
+        {
+          "date": "2026-10-15",
+          "value": 25.276325882164183,
+          "reference": "matched",
+          "unit": "Callgrind Ir diagnostic",
+          "label": "Conductor gap ell8209-q29, icv1-fp29-t47-1f934956, archived eight-target IC/rho census",
+          "detail": "Complete user-space implementation Ir; paired 95% interval 15.89281–40.76003. 100/100 profiles verified. Comparison status: admissible_implementation_diagnostic. Method resolution, target preparation, kernel work and external audit excluded; no native wall-time or intrinsic-hardness conclusion.",
+          "class": "accounting",
+          "anchor": "#conductor-gap-ir-20261014",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md"
+        },
+        {
+          "date": "2026-10-15",
+          "value": 47.771484263859804,
+          "reference": "matched",
+          "unit": "Callgrind Ir diagnostic",
+          "label": "Conductor gap ell131101-q37, icv1-fp37-t277-91fd6e29, archived eight-target IC/rho census",
+          "detail": "Complete user-space implementation Ir; paired 95% interval 36.85623–68.60869. 100/100 profiles verified. Comparison status: admissible_implementation_diagnostic. Method resolution, target preparation, kernel work and external audit excluded; no native wall-time or intrinsic-hardness conclusion.",
+          "class": "accounting",
+          "anchor": "#conductor-gap-ir-20261014",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md"
+        },
+        {
+          "date": "2026-10-15",
+          "value": 47.078295091523685,
+          "reference": "matched",
+          "unit": "Callgrind Ir diagnostic",
+          "label": "Conductor gap ell131101-q37, icv1-fp37-t277-090dc414, archived eight-target IC/rho census",
+          "detail": "Complete user-space implementation Ir; paired 95% interval 32.20587–83.65539. 100/100 profiles verified. Comparison status: admissible_implementation_diagnostic. Method resolution, target preparation, kernel work and external audit excluded; no native wall-time or intrinsic-hardness conclusion.",
+          "class": "accounting",
+          "anchor": "#conductor-gap-ir-20261014",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md"
         }
       ]
     },

@@ -1,0 +1,18 @@
+
+running 7 tests
+test tests::exclusive_measurement_closes_online_and_observed_intervals ... ok
+test tests::exclusive_measurement_disabled_is_noop_and_errors_drop_the_session ... ok
+test tests::exclusive_measurement_guard_is_thread_local_and_survives_unwind ... ok
+test tests::exclusive_measurement_relation_check_uses_the_correct_interval ... ok
+test tests::exclusive_measurement_strict_session_rejects_foreign_boundaries ... ignored, process-exclusive strict session; CI runs this isolated with --include-ignored
+test tests::exclusive_measurement_unstarted_and_repeated_online_are_distinct ... ok
+test tests::whole_solve_mode_keeps_clocks_and_external_profiler_markers ... ok
+
+test result: ok. 6 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+running 1 test
+test tests::exclusive_measurement_strict_session_rejects_foreign_boundaries ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
