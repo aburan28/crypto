@@ -1,0 +1,13 @@
+# Changed limit2 norm-primary enumeration
+
+This new search driver uses the frozen exact bounded-support compiler with limit2, chosen on the opened actual count-profile fixture. It is not a holdout winner or a new mathematical priority claim. The norm-primary contract has174 free input bits; original339-variable S3 roots, ghosts, exceptional maps and auxiliary fibers remain distinct.
+
+The compiler proof gives a unique functional extension of every primary assignment, preserving every zero/repeated-source norm witness. For each SAT leaf the driver checks every declared native coordinate against that unique extension, every CNF/XOR constraint, the original arithmetic DAG, and an independently evaluated literal polynomial norm divided by X+z. The recovered sources,r,s,h,k and kernel bit are retained. A duplicate primary assignment is an error.
+
+The blocking clause negates the entire ordered primary assignment. By induction, enumerated models are distinct, valid norm witnesses. Exhaustion requires native UNSAT or a contradictory complete-primary blocking clause. Native UNKNOWN, model cap4096, inner60-second expiration or late70-second serialization boundary clears the norm exact count and completeness flag; verified witnesses survive only as a lower bound. The90-second outer supervisor charges all startup/setup/search/replay/serialization and can demote late completion. Original-root count is always null. No independently checked large UNSAT proof is produced, so native exhaustion is not promoted as a certified generalized-rootfinding result.
+
+Independent small oracles enumerate2048 primary assignments using literal polynomial norms across GF4/GF8, a0/a1 and both target signs. All six complete native sets contain28 models and agree exactly. A model cap1 and an already-expired inner budget return inconclusive exact-count-null results. The integration test explicitly uses the pinned shared library and is ignored by default.
+
+Falsifiable training prediction: the changed representation produces at least one independently replayed actual norm witness, or complete native norm exhaustion, within the60-second inner budget. The old formulation found none in60seconds. Failure refutes this bounded prediction; no speed ratio is formed from the old timeout. Native matrix initialization, peak sizes, cap rejections, decision/propagation counters and startup counts are retained. The true8x matching full all-roots F4/F5/F6 gate remains unchanged.
+
+If the prediction fails, next test a sorted-source representative search with complete unique permutation restoration for each norm parameter witness, or the bijective source-sum primary coordinates. Both require new exact model-set controls. Do not retry this same failed execution unchanged.
