@@ -22,6 +22,7 @@ use serde::{Deserialize, Serialize};
 use super::kernel::{self, Arith, Counted, LowWord, OpTally, Walks};
 use crate::cryptanalysis::ecc2k130_guard::is_probable_prime;
 use crate::cryptanalysis::fp_backend::PrimeField;
+use crate::cryptanalysis::two_sylow_search;
 
 pub const MEASUREMENTS_SCHEMA: &str = "hwcost.measurements.v1";
 
@@ -34,7 +35,8 @@ pub const DP_MASK: u64 = (1 << 16) - 1;
 /// can be fitted against the limb count; `fp64` is the dedicated one-word
 /// backend and `fp64bf` the same field and representation through
 /// [`kernel::Fp64Bf`] (no data-dependent branch in subtraction or
-/// reduction).
+/// reduction); `pf64` is the production prime-field rho engine's
+/// arithmetic ([`kernel::PrimeFast`], `p < 2⁶²`).
 #[derive(Clone, Copy, Debug)]
 pub struct FieldSpec {
     pub name: &'static str,
@@ -44,7 +46,7 @@ pub struct FieldSpec {
     pub prime_label: &'static str,
 }
 
-pub const FIELDS: [FieldSpec; 7] = [
+pub const FIELDS: [FieldSpec; 8] = [
     FieldSpec {
         name: "fp64",
         backend: "Fp64",
@@ -65,6 +67,13 @@ pub const FIELDS: [FieldSpec; 7] = [
         limbs: 1,
         prime_hex: "7fffffffffffffe7",
         prime_label: "2^63-25",
+    },
+    FieldSpec {
+        name: "pf64",
+        backend: "prime_fast::Fp64",
+        limbs: 1,
+        prime_hex: "3fffffffffffffc7",
+        prime_label: "2^62-57",
     },
     FieldSpec {
         name: "w1",
@@ -102,7 +111,7 @@ pub fn field_spec(name: &str) -> Result<FieldSpec, String> {
         .copied()
         .find(|f| f.name == name)
         .ok_or_else(|| {
-            format!("unknown field `{name}` (have fp64, fp64bf, fp64cm, w1, w2, w3, w4)")
+            format!("unknown field `{name}` (have fp64, fp64bf, fp64cm, pf64, w1, w2, w3, w4)")
         })
 }
 
@@ -146,6 +155,14 @@ macro_rules! hwcost_with_field {
             "fp64cm" => {
                 let $f = Fp64::new(num_traits::ToPrimitive::to_u64(&p).unwrap());
                 let $a = $crate::cryptanalysis::hwcost::kernel::Fp64Cm::new(&$f);
+                $body
+            }
+            "pf64" => {
+                let p = num_traits::ToPrimitive::to_u64(&p).unwrap();
+                let $f = Fp64::new(p);
+                let $a = $crate::cryptanalysis::hwcost::kernel::PrimeFast(
+                    $crate::cryptanalysis::prime_fast::Fp64::new(p),
+                );
                 $body
             }
             "w1" => {
@@ -217,6 +234,14 @@ pub struct Params {
     pub scaling_batch: usize,
     pub fields: Vec<String>,
     pub seed: u64,
+    /// When set, also time `prime_fast::rho_parallel` end to end on a
+    /// prime-order `a = −3` curve of this many bits (arm `pfrho.<bits>`).
+    #[serde(default)]
+    pub prime_fast_rho_bits: Option<u32>,
+    /// When set, also time `two_sylow_search`'s halving search on
+    /// `fp_backend::Fp64` (arms `tsy.<family>.<arm>`, ns per draw).
+    #[serde(default)]
+    pub two_sylow: bool,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -554,6 +579,154 @@ where
     arms
 }
 
+/// The production prime-field rho, `prime_fast::rho_parallel`, end to end:
+/// one known-answer solve per call on the prime-order `a = −3` curve of
+/// `bits` bits that [`prime_fast::find_a3_curve`] returns, one thread with
+/// 1024 lock-step walkers, the negation map, a 2¹⁰-entry r-adding table and
+/// 6 distinguished bits; wall time (table set-up included) per walk step.
+///
+/// [`prime_fast::find_a3_curve`]: crate::cryptanalysis::prime_fast::find_a3_curve
+fn prime_fast_rho_arm(bits: u32, seed: u64) -> Result<Arm, String> {
+    use crate::cryptanalysis::prime_fast::{find_a3_curve, rho_parallel, RhoConfig};
+    use rand::Rng;
+    let (curve, g) =
+        find_a3_curve(bits, 3).ok_or_else(|| format!("no {bits}-bit a = -3 prime-order curve"))?;
+    let cfg = RhoConfig {
+        threads: 1,
+        walkers: 1024,
+        table_bits: 10,
+        dp_bits: 6,
+        negation: true,
+        seed,
+        max_steps: 0,
+    };
+    let mut rng = StdRng::seed_from_u64(seed ^ u64::from(bits));
+    Ok(Arm {
+        group: "pfrho",
+        name: format!("pfrho.{bits}"),
+        unit: "ns_per_step",
+        run: Box::new(move |n: u64| {
+            let (mut ns, mut steps) = (0.0, 0.0);
+            for _ in 0..n {
+                let x = rng.gen_range(1..curve.n);
+                let q = curve.mul(Some(g), x).expect("x < n gives a finite point");
+                let cfg = RhoConfig {
+                    seed: rng.gen(),
+                    ..cfg.clone()
+                };
+                let t = Instant::now();
+                let r = rho_parallel(&curve, g, q, &cfg).expect("unlimited rho solves");
+                ns += t.elapsed().as_nanos() as f64;
+                assert_eq!(r.log, x, "pfrho: wrong logarithm");
+                steps += r.total_steps as f64;
+            }
+            (ns, steps)
+        }),
+        value: ns_per_unit,
+        n: 0,
+    })
+}
+
+/// Depth at which a draw records its point (`two_sylow_search`'s own tests
+/// use 6; production `pkm_aux_search` passes its target depth).
+const TWO_SYLOW_RECORD_T: u32 = 6;
+const TWO_SYLOW_GATE_DRAWS: u64 = 2000;
+const TWO_SYLOW_FAMILIES: [two_sylow_search::Family; 2] = [
+    two_sylow_search::Family::Z2xZ2,
+    two_sylow_search::Family::Z2xZ8,
+];
+const TWO_SYLOW_ARMS: [(two_sylow_search::Arm, &str); 3] = [
+    (two_sylow_search::Arm::Baseline, "baseline"),
+    (two_sylow_search::Arm::FastChi, "fast-chi"),
+    (two_sylow_search::Arm::Fast, "fast"),
+];
+
+/// The largest prime `p ≡ 3 (mod 4)` below 2⁶³ (the halving search needs
+/// `p ≡ 3 mod 4`; `fp_backend::Fp64` takes `p < 2⁶³`).
+pub fn two_sylow_prime() -> u64 {
+    let mut p = (1u64 << 63) - 1; // ≡ 3 (mod 4)
+    while !crate::cryptanalysis::residual_walk::is_prime_u64(p) {
+        p -= 4;
+    }
+    p
+}
+
+/// Before timing: the three arms agree on every draw's depth (the point
+/// each records may differ; any point of order `2^t` serves), and a
+/// checksum of each arm's draws is logged, so two binaries can be shown to
+/// compute the same search.
+fn two_sylow_gate(p: u64, draws: u64, log: &mut dyn FnMut(String)) -> Result<(), String> {
+    use crate::cryptanalysis::fp_backend::Fp64;
+    use two_sylow_search::Halver;
+    for family in TWO_SYLOW_FAMILIES {
+        let mut hs: Vec<Halver<Fp64>> = TWO_SYLOW_ARMS
+            .iter()
+            .map(|&(a, _)| Halver::new(Fp64::new(p), a))
+            .collect();
+        let (mut depth_sum, mut points) = (0u64, 0u64);
+        let mut x_xor = [0u64; 3];
+        for seed in 0..draws {
+            let r: Vec<_> = hs
+                .iter_mut()
+                .map(|h| h.run_draw(family, seed, TWO_SYLOW_RECORD_T))
+                .collect();
+            if r.iter().any(|d| d.depth != r[0].depth) {
+                return Err(format!(
+                    "two_sylow {}: arms disagree on the depth at seed {seed}",
+                    family.name()
+                ));
+            }
+            depth_sum += u64::from(r[0].depth);
+            points += u64::from(r[0].point.is_some());
+            for (i, d) in r.iter().enumerate() {
+                if let Some(pt) = &d.point {
+                    x_xor[i] ^= hs[i].f.to_u64(pt.x).unwrap_or(0);
+                }
+            }
+        }
+        log(format!(
+            "two_sylow {} p={p}: {draws} draws, three arms agree on every depth; depth sum {depth_sum}, points (depth >= {TWO_SYLOW_RECORD_T}) {points}, x xor per arm {}",
+            family.name(),
+            TWO_SYLOW_ARMS
+                .iter()
+                .zip(x_xor)
+                .map(|((_, n), x)| format!("{n} {x:#018x}"))
+                .collect::<Vec<_>>()
+                .join(", ")
+        ));
+    }
+    Ok(())
+}
+
+/// One arm per family × search arm: consecutive draws from seed 0,
+/// continuing across calls, ns per draw.
+fn two_sylow_arms(p: u64) -> Vec<Arm> {
+    use crate::cryptanalysis::fp_backend::Fp64;
+    let mut arms = Vec::new();
+    for family in TWO_SYLOW_FAMILIES {
+        for &(arm, arm_name) in &TWO_SYLOW_ARMS {
+            let mut h = two_sylow_search::Halver::new(Fp64::new(p), arm);
+            let mut seed = 0u64;
+            arms.push(Arm {
+                group: "tsy",
+                name: format!("tsy.{}.{arm_name}", family.name()),
+                unit: "ns_per_draw",
+                run: Box::new(move |n: u64| {
+                    let t = Instant::now();
+                    for _ in 0..n {
+                        black_box(h.run_draw(family, seed, TWO_SYLOW_RECORD_T));
+                        seed += 1;
+                    }
+                    (t.elapsed().as_nanos() as f64, n as f64)
+                }),
+                value: ns_per_unit,
+                n: 0,
+            });
+        }
+    }
+    arms
+}
+
 fn read_sum(buf: &[u64]) -> u64 {
     buf.iter().fold(0u64, |a, &x| a.wrapping_add(x))
 }
@@ -775,6 +948,8 @@ pub fn default_params(quick: bool) -> Params {
             scaling_batch: 256,
             fields: vec!["fp64".into(), "w2".into()],
             seed: 20261016,
+            prime_fast_rho_bits: None,
+            two_sylow: false,
         }
     } else {
         Params {
@@ -808,6 +983,8 @@ pub fn default_params(quick: bool) -> Params {
             scaling_batch: 1024,
             fields: FIELDS.iter().map(|f| f.name.to_string()).collect(),
             seed: 20261016,
+            prime_fast_rho_bits: None,
+            two_sylow: false,
         }
     }
 }
@@ -892,6 +1069,25 @@ pub fn run(params: Params, log: &mut dyn FnMut(String)) -> Result<Measurements, 
         }
     }
     run_group(&mut arms, reps, target, &mut samples, log);
+    drop(arms);
+
+    if params.two_sylow {
+        let p = two_sylow_prime();
+        two_sylow_gate(p, TWO_SYLOW_GATE_DRAWS, log)?;
+        log(format!(
+            "two_sylow_search halving draws on fp_backend::Fp64, p = {p}"
+        ));
+        let mut arms = two_sylow_arms(p);
+        run_group(&mut arms, reps, target, &mut samples, log);
+    }
+
+    if let Some(bits) = params.prime_fast_rho_bits {
+        log(format!(
+            "prime_fast::rho_parallel, {bits}-bit curve, one thread"
+        ));
+        let mut arms = vec![prime_fast_rho_arm(bits, params.seed)?];
+        run_group(&mut arms, reps, target, &mut samples, log);
+    }
 
     Ok(Measurements {
         schema: MEASUREMENTS_SCHEMA.into(),
@@ -935,4 +1131,30 @@ pub fn medians(m: &Measurements) -> BTreeMap<String, f64> {
     arms.into_iter()
         .filter_map(|a| m.median(a).map(|v| (a.to_string(), v)))
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::cryptanalysis::residual_walk::is_prime_u64;
+
+    #[test]
+    fn two_sylow_prime_is_the_largest_3_mod_4_prime_below_2_63() {
+        let p = two_sylow_prime();
+        assert_eq!(p, 9_223_372_036_854_775_783);
+        assert!(is_prime_u64(p) && p % 4 == 3);
+        let mut q = p + 4;
+        while q < 1 << 63 {
+            assert!(!is_prime_u64(q), "{q}");
+            q += 4;
+        }
+    }
+
+    #[test]
+    fn two_sylow_gate_passes_on_a_small_run() {
+        let mut lines = Vec::new();
+        two_sylow_gate(two_sylow_prime(), 50, &mut |s| lines.push(s)).unwrap();
+        assert_eq!(lines.len(), 2);
+        assert!(lines.iter().all(|l| l.contains("three arms agree")));
+    }
 }
