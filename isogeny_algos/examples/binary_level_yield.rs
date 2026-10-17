@@ -120,7 +120,10 @@ fn main() {
         let e = BinCurve::new(a2, 0, a6);
         let order = e.order(&f, &mut rng);
         let disc = frobenius_disc(q, order);
-        let hit = disc.odd_heights(args.ell_max).into_iter().find(|&(_, h)| h >= 2);
+        let hit = disc
+            .odd_heights(args.ell_max)
+            .into_iter()
+            .find(|&(_, h)| h >= 2);
         if samples % 100 == 0 {
             eprintln!(
                 "  sample {samples}: t = {}, f_pi = {} ({:?}) [{:.1}s]",
@@ -150,7 +153,8 @@ fn main() {
         "sample {samples}: a2 = {:#x}, a6 = {:#x}, j = {j0:#x}, #E = {order}, t = {}, D = {}, D_K = {}, f_pi = {} = {:?}, ell = {ell}, height = {height} [{:.1}s]",
         e0.a2, e0.a6, disc.trace, disc.d, disc.d_k, disc.f_pi, disc.f_pi_factors, t_sample.as_secs_f64()
     );
-    let (r, cofactor) = largest_prime_factor(order).map_or((None, None), |(r, c)| (Some(r), Some(c)));
+    let (r, cofactor) =
+        largest_prime_factor(order).map_or((None, None), |(r, c)| (Some(r), Some(c)));
     let order_factors: Vec<(u64, u32)> = if order <= u64::MAX as u128 {
         isogeny_algos::field::factor_u64(order as u64)
     } else {
@@ -166,16 +170,33 @@ fn main() {
         .filter(|&(l, _)| l != ell)
         .map(|(l, h)| EllGraph::new(&f, l, h))
         .collect();
-    eprintln!("Phi_ell mod 2 built for ell in {:?} [{:.2}s]",
-        std::iter::once(ell).chain(others.iter().map(|g| g.ell)).collect::<Vec<_>>(), t1.elapsed().as_secs_f64());
+    eprintln!(
+        "Phi_ell mod 2 built for ell in {:?} [{:.2}s]",
+        std::iter::once(ell)
+            .chain(others.iter().map(|g| g.ell))
+            .collect::<Vec<_>>(),
+        t1.elapsed().as_secs_f64()
+    );
 
     // 3. the component
     let t2 = Instant::now();
-    let comp = enumerate_component(&g, j0, e0.a2, order, a2_pair, args.max_vertices, &mut rng, |done, total| {
-        if done % 200 == 0 {
-            eprintln!("  component: {done} expanded / {total} discovered [{:.1}s]", t2.elapsed().as_secs_f64());
-        }
-    });
+    let comp = enumerate_component(
+        &g,
+        j0,
+        e0.a2,
+        order,
+        a2_pair,
+        args.max_vertices,
+        &mut rng,
+        |done, total| {
+            if done % 200 == 0 {
+                eprintln!(
+                    "  component: {done} expanded / {total} discovered [{:.1}s]",
+                    t2.elapsed().as_secs_f64()
+                );
+            }
+        },
+    );
     let t_component = t2.elapsed();
     let mut level_counts: Vec<usize> = vec![0; height as usize + 1];
     let mut level_unknown = 0;
@@ -222,8 +243,15 @@ fn main() {
     let threads = args.threads.clamp(1, nv.max(1));
     std::thread::scope(|s| {
         for tid in 0..threads {
-            let (f, comp, other_positions, disc, order_factors, admissible, args) =
-                (&f, &comp, &other_positions, &disc, &order_factors, &admissible, &args);
+            let (f, comp, other_positions, disc, order_factors, admissible, args) = (
+                &f,
+                &comp,
+                &other_positions,
+                &disc,
+                &order_factors,
+                &admissible,
+                &args,
+            );
             let (out, next, done, class_id) = (&out, &next, &done, &class_id);
             s.spawn(move || {
                 let mut rng = Rng::new(args.seed ^ (0x5eed << 8) ^ tid as u64);
@@ -249,17 +277,30 @@ fn main() {
                         ("order_factored", Json::Bool(r.is_some())),
                         (
                             "order_factors",
-                            Json::Arr(order_factors.iter().map(|&(p, e)| Json::Arr(vec![num(p), num(e)])).collect()),
+                            Json::Arr(
+                                order_factors
+                                    .iter()
+                                    .map(|&(p, e)| Json::Arr(vec![num(p), num(e)]))
+                                    .collect(),
+                            ),
                         ),
                         ("D", num(disc.d)),
                         ("D_K", num(disc.d_k)),
                         ("f_pi", num(disc.f_pi)),
                         (
                             "f_pi_factored",
-                            Json::Arr(disc.f_pi_factors.iter().map(|&(p, e)| Json::Arr(vec![num(p), num(e)])).collect()),
+                            Json::Arr(
+                                disc.f_pi_factors
+                                    .iter()
+                                    .map(|&(p, e)| Json::Arr(vec![num(p), num(e)]))
+                                    .collect(),
+                            ),
                         ),
                         ("f_pi_unfactored", disc.unfactored.map_or(Json::Null, num)),
-                        ("admissible_ells", Json::Arr(admissible.iter().map(|&l| num(l)).collect())),
+                        (
+                            "admissible_ells",
+                            Json::Arr(admissible.iter().map(|&l| num(l)).collect()),
+                        ),
                         ("ell", num(ell)),
                         ("height_ell", num(height)),
                         ("v_ell_f_E", v.level.map_or(Json::Null, num)),
@@ -296,7 +337,13 @@ fn main() {
                             v.rational == ell as usize + 1
                         }
                     }) && other_positions[i].iter().all(|p| {
-                        p.level.is_some_and(|l| if l == p.height { p.rational == 1 } else { p.rational == p.ell as usize + 1 })
+                        p.level.is_some_and(|l| {
+                            if l == p.height {
+                                p.rational == 1
+                            } else {
+                                p.rational == p.ell as usize + 1
+                            }
+                        })
                     });
                     row.push(("level_consistent", Json::Bool(level_consistent)));
                     match a2 {
@@ -307,7 +354,8 @@ fn main() {
                         Some(a2) => {
                             let e = BinCurve::new(a2, 0, a6);
                             // the order once more, on two fresh random points
-                            let ok = (0..2).all(|_| e.mul(f, &e.random_point(f, &mut rng), order) == Pt::Inf)
+                            let ok = (0..2)
+                                .all(|_| e.mul(f, &e.random_point(f, &mut rng), order) == Pt::Inf)
                                 && e.j(f) == v.j;
                             row.push(("order_check", Json::Bool(ok)));
                             let fb = factor_base(f, &e, args.l);
@@ -320,13 +368,20 @@ fn main() {
                                 ("fb_pairs", num(y.pairs)),
                                 ("yield2_count", num(y.count)),
                                 ("yield2_exact", Json::Float(y.count as f64 / qf)),
-                                ("yield2_subgroup_count", y.subgroup_count.map_or(Json::Null, num)),
+                                (
+                                    "yield2_subgroup_count",
+                                    y.subgroup_count.map_or(Json::Null, num),
+                                ),
                                 (
                                     "yield2_subgroup_exact",
-                                    y.subgroup_count.map_or(Json::Null, |c| Json::Float(c as f64 / qf)),
+                                    y.subgroup_count
+                                        .map_or(Json::Null, |c| Json::Float(c as f64 / qf)),
                                 ),
                                 ("subgroup_combos", y.subgroup_combos.map_or(Json::Null, num)),
-                                ("cofactor_balance_C", y.cofactor_balance_c.map_or(Json::Null, num)),
+                                (
+                                    "cofactor_balance_C",
+                                    y.cofactor_balance_c.map_or(Json::Null, num),
+                                ),
                             ]);
                             if r.is_none() {
                                 row.push(("subgroup_note", Json::str("order not factored: no r")));
@@ -351,7 +406,10 @@ fn main() {
                     }
                     let d = done.fetch_add(1, Ordering::SeqCst) + 1;
                     if d % 50 == 0 || d == nv {
-                        eprintln!("  yields: {d}/{nv} rows [{:.1}s]", t3.elapsed().as_secs_f64());
+                        eprintln!(
+                            "  yields: {d}/{nv} rows [{:.1}s]",
+                            t3.elapsed().as_secs_f64()
+                        );
                     }
                 }
             });

@@ -26,7 +26,9 @@ use rayon::prelude::*;
 fn main() {
     let a: Vec<String> = std::env::args().skip(1).collect();
     if a.len() < 7 {
-        eprintln!("usage: koblitz_level_panel <n> <a2> <l> <m> <probes> <seeds,..|mono> <a6,..|all>");
+        eprintln!(
+            "usage: koblitz_level_panel <n> <a2> <l> <m> <probes> <seeds,..|mono> <a6,..|all>"
+        );
         std::process::exit(2);
     }
     let n: u32 = a[0].parse().unwrap();
@@ -70,7 +72,10 @@ fn main() {
         a[6].split(',').map(|s| s.parse().unwrap()).collect()
     };
     for &x in &members {
-        assert!(depth.contains_key(&x), "a6 = {x} is not a walked member of the class");
+        assert!(
+            depth.contains_key(&x),
+            "a6 = {x} is not a walked member of the class"
+        );
     }
 
     let dir = std::env::var("KOBLITZ_PRES_CHECKPOINT").unwrap_or_else(|_| "experiments".into());
@@ -79,7 +84,12 @@ fn main() {
         .unwrap_or_default()
         .lines()
         .filter_map(|line| serde_json::from_str::<serde_json::Value>(line).ok())
-        .map(|r| (r["a6"].as_u64().unwrap(), r["basis_seed"].as_i64().unwrap_or(-1)))
+        .map(|r| {
+            (
+                r["a6"].as_u64().unwrap(),
+                r["basis_seed"].as_i64().unwrap_or(-1),
+            )
+        })
         .collect();
     let mut cells: Vec<(u64, Option<u64>)> = members
         .iter()
@@ -89,16 +99,38 @@ fn main() {
     {
         use rand::seq::SliceRandom;
         use rand::SeedableRng;
-        cells.shuffle(&mut rand::rngs::StdRng::seed_from_u64(DEFAULT_SEED ^ n as u64 ^ (m as u64) << 8));
+        cells.shuffle(&mut rand::rngs::StdRng::seed_from_u64(
+            DEFAULT_SEED ^ n as u64 ^ (m as u64) << 8,
+        ));
     }
-    eprintln!("n={n} a2={a2} l={l} m={m}: {} members x {} V, {} cells left", members.len(), seeds.len(), cells.len());
+    eprintln!(
+        "n={n} a2={a2} l={l} m={m}: {} members x {} V, {} cells left",
+        members.len(),
+        seeds.len(),
+        cells.len()
+    );
 
-    let ffd_targets: u32 = std::env::var("KOBLITZ_PRES_FFD_TARGETS").ok().and_then(|v| v.parse().ok()).unwrap_or(0);
-    let threads: usize = std::env::var("KOBLITZ_PANEL_THREADS").ok().and_then(|v| v.parse().ok()).unwrap_or(3);
-    rayon::ThreadPoolBuilder::new().num_threads(threads).build_global().ok();
+    let ffd_targets: u32 = std::env::var("KOBLITZ_PRES_FFD_TARGETS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(0);
+    let threads: usize = std::env::var("KOBLITZ_PANEL_THREADS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(3);
+    rayon::ThreadPoolBuilder::new()
+        .num_threads(threads)
+        .build_global()
+        .ok();
     let irr = field_for(n).unwrap();
     let order = koblitz_family_order(n, a2) as u64;
-    let file = std::sync::Mutex::new(std::fs::OpenOptions::new().create(true).append(true).open(&path).unwrap());
+    let file = std::sync::Mutex::new(
+        std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&path)
+            .unwrap(),
+    );
     let finished = std::sync::atomic::AtomicUsize::new(0);
     let total = cells.len();
     let t0 = std::time::Instant::now();

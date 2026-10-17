@@ -4,7 +4,7 @@
 //! levels by non-backtracking walks, the connected component of a curve in the ell-graph with a
 //! vertex bound, and the exact 2-sum relation yield of the factor base
 //! V = span_F2{1, z, ..., z^(l-1)} = {x < 2^l} in the polynomial basis.
-use crate::binary::{BinCurve, BPt};
+use crate::binary::{BPt, BinCurve};
 use crate::curve::Pt;
 use crate::field::{factor_u64, is_prime, Field, Rng};
 use crate::find::modpoly::Phi;
@@ -499,8 +499,7 @@ pub fn two_sum_yield(f: &GF2n, e: &BinCurve, fb: &FactorBase, r: Option<u128>) -
                     continue;
                 }
                 let inv = f.inv(fb.xs[i] ^ fb.xs[k]);
-                let (xp, xm) =
-                    pair_abscissae(f, e.a2, fb.xs[i], fb.ys[i], fb.xs[k], fb.ys[k], inv);
+                let (xp, xm) = pair_abscissae(f, e.a2, fb.xs[i], fb.ys[i], fb.xs[k], fb.ys[k], inv);
                 let m = u64::from(plus) + u64::from(minus);
                 if plus {
                     sub_xs.push(xp);
@@ -559,7 +558,13 @@ mod tests {
         // q = 7, t = 2: D = -24, D_K = -24, f = 1
         let d = frobenius_disc(7, 6);
         assert_eq!((d.d, d.d_k, d.f_pi), (-24, -24, 1));
-        for &(dd, l, s) in &[(-7i128, 3u64, -1i32), (-39, 3, 0), (-7, 7, 0), (-3, 7, 1), (-39, 5, 1)] {
+        for &(dd, l, s) in &[
+            (-7i128, 3u64, -1i32),
+            (-39, 3, 0),
+            (-7, 7, 0),
+            (-3, 7, 1),
+            (-39, 5, 1),
+        ] {
             assert_eq!(kronecker_odd(dd, l), s, "({dd}/{l})");
         }
         // D = f^2 D_K with D_K fundamental and f = f_pi, for many orders
@@ -580,7 +585,10 @@ mod tests {
         let (a, b, c) = (5u64, 77u64, 1234u64);
         let p = poly::from_roots(&f, &[a, a, b, c, a]);
         let p = poly::scale(&f, &p, 99);
-        assert_eq!(roots_with_multiplicity(&f, &p, &mut rng), vec![a, a, a, b, c]);
+        assert_eq!(
+            roots_with_multiplicity(&f, &p, &mut rng),
+            vec![a, a, a, b, c]
+        );
         // an irreducible quadratic factor contributes nothing
         let irr = vec![1u64, 1, 1]; // Y^2 + Y + 1 has no root when Tr(1) = 1 (n odd)
         let p = poly::mul(&f, &poly::from_roots(&f, &[b, b]), &irr);
@@ -709,7 +717,11 @@ mod tests {
             let f = GF2n::new(n);
             let tau = trace_one_element(&f);
             for trial in 0..4 {
-                let e = BinCurve::new(if trial % 2 == 0 { 0 } else { tau }, 0, f.random(&mut rng) | 1);
+                let e = BinCurve::new(
+                    if trial % 2 == 0 { 0 } else { tau },
+                    0,
+                    f.random(&mut rng) | 1,
+                );
                 let order = e.order_naive(&f);
                 let (r, _) = largest_prime_factor(order).unwrap();
                 let fb = factor_base(&f, &e, 5);
@@ -726,7 +738,10 @@ mod tests {
                 assert_eq!(plain.subgroup_count, None);
             }
         }
-        assert!(nontrivial > 0, "no curve with subgroup relations: test too weak");
+        assert!(
+            nontrivial > 0,
+            "no curve with subgroup relations: test too weak"
+        );
     }
 
     /// Every ordinary j over GF(2^12) with its two twists' orders; the full ell-graph of each
@@ -791,7 +806,11 @@ mod tests {
                     let d = dist[&j];
                     assert!(d <= h);
                     let level_bf = h - d;
-                    assert_eq!(g.level(j, &mut rng), Some(level_bf), "ell = {ell}, j = {j:#x}");
+                    assert_eq!(
+                        g.level(j, &mut rng),
+                        Some(level_bf),
+                        "ell = {ell}, j = {j:#x}"
+                    );
                     let cnt = nbrs[&j].len() as u64;
                     if level_bf == h {
                         assert_eq!(cnt, 1);
@@ -809,7 +828,11 @@ mod tests {
                 for &j in js.iter().take(6) {
                     let e = BinCurve::new(0, 0, f.inv(j));
                     let ks = crate::binary::kernel_polys(&f, &e, ell, &mut rng);
-                    assert_eq!(ks.len(), nbrs[&j].len(), "kernel count, ell = {ell}, j = {j:#x}");
+                    assert_eq!(
+                        ks.len(),
+                        nbrs[&j].len(),
+                        "kernel count, ell = {ell}, j = {j:#x}"
+                    );
                     let mut targets: Vec<u64> = ks
                         .iter()
                         .map(|k| crate::binary::kohel_codomain(&f, &e, k).j(&f))
@@ -819,7 +842,16 @@ mod tests {
                 }
                 // the bounded component enumeration finds the whole volcano when not bounded
                 let j0 = js[0];
-                let comp = enumerate_component(&g, j0, 0, order0[&j0], (0, tau), 100_000, &mut rng, |_, _| {});
+                let comp = enumerate_component(
+                    &g,
+                    j0,
+                    0,
+                    order0[&j0],
+                    (0, tau),
+                    100_000,
+                    &mut rng,
+                    |_, _| {},
+                );
                 assert!(!comp.truncated);
                 let mut seen: HashSet<u64> = HashSet::new();
                 for v in &comp.vertices {
@@ -828,7 +860,10 @@ mod tests {
                     assert_eq!(v.level, Some(h - dist[&v.j]));
                     assert_eq!(v.rational, nbrs[&v.j].len());
                     let a2 = v.a2.expect("twist found");
-                    assert_eq!(BinCurve::new(a2, 0, f.inv(v.j)).order_naive(&f), order0[&j0]);
+                    assert_eq!(
+                        BinCurve::new(a2, 0, f.inv(v.j)).order_naive(&f),
+                        order0[&j0]
+                    );
                 }
                 // a connected component: everything reachable from j0 was found
                 let mut reach = HashSet::from([j0]);
@@ -842,13 +877,17 @@ mod tests {
                 }
                 assert_eq!(reach, seen);
                 // and the bound is honoured
-                let small = enumerate_component(&g, j0, 0, order0[&j0], (0, tau), 3, &mut rng, |_, _| {});
+                let small =
+                    enumerate_component(&g, j0, 0, order0[&j0], (0, tau), 3, &mut rng, |_, _| {});
                 assert_eq!(small.vertices.len(), 3.min(reach.len()));
                 assert_eq!(small.truncated, reach.len() > 3);
                 classes_checked += 1;
             }
         }
-        assert!(classes_checked >= 2, "classes with height >= 2: {classes_checked}");
+        assert!(
+            classes_checked >= 2,
+            "classes with height >= 2: {classes_checked}"
+        );
         assert!(vertices_checked >= 30, "vertices: {vertices_checked}");
         assert!(!craters.is_empty());
     }
