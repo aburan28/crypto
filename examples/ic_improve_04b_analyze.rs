@@ -633,6 +633,23 @@ fn cmd_report(dir: &str, rho_dir: &str, choice_path: &str, out: &str, md_path: &
             }
         }
     }
+    // IC / rho in S (descriptive, PROTOCOL §8): raw, and with rho's measured walk renormalised to the ideal sqrt(pi/2)
+    let mut icrho = serde_json::Map::new();
+    for (k, r) in &rho_tab {
+        for arm in ["BL", "A2"] {
+            if let Some(sv) = s_tab.get(&format!("{}/{}", arm, k)) {
+                let (srho, steps) = (
+                    r["mean_S"].as_f64().unwrap(),
+                    r["mean_steps_per_sqrt_ell"].as_f64().unwrap(),
+                );
+                let ideal = (std::f64::consts::PI / 2.0).sqrt();
+                icrho.insert(
+                    format!("{}/{}", arm, k),
+                    json!({"raw": sv.as_f64().unwrap() / srho, "rho_renormalised": sv.as_f64().unwrap() / (srho * ideal / steps), "rho_steps_per_sqrt_ell": steps, "rho_n": r["n"]}),
+                );
+            }
+        }
+    }
     let mut wt = serde_json::Map::new();
     for ((arm, k), w) in &weights {
         let n = w.len() as f64;
@@ -643,7 +660,7 @@ fn cmd_report(dir: &str, rho_dir: &str, choice_path: &str, out: &str, md_path: &
         "protocol": "research/ic_improve_20261014/04b-genus3-2lp-rebalance/PROTOCOL.md", "bootstrap": {"B": BOOT_B, "seed": BOOT_SEED, "unit": "12 test instances resampled within each size, shared by all arms"},
         "q": qs.iter().map(|(k, v)| (k.to_string(), json!(v))).collect::<serde_json::Map<_, _>>(),
         "kappa_used": kappas_used.iter().map(|((a, k), v)| (format!("{}/{}", a, k), json!(v))).collect::<serde_json::Map<_, _>>(),
-        "point": point, "ci": ci, "ratios": ratios, "S": s_tab, "weights": wt, "rho": rho_tab,
+        "point": point, "ci": ci, "ratios": ratios, "S": s_tab, "weights": wt, "rho": rho_tab, "ic_over_rho": icrho,
         "controls": {"pairing_rel_identical": pairing_ok, "aa_fit_diff_point": aa_point, "aa_fit_diff_95": [aa_ci.0, aa_ci.1], "lanczos_accounting_checked": acct_checked, "lanczos_accounting_mismatches": acct_bad,
                      "power_half_width_95_E_BL": half95, "power_ok": half95 <= 0.03},
         "decision": {"D0_baseline_departs": d0, "E_BL": bl_fit, "E_BL_99": [g("BL/total/fit", "lo99"), g("BL/total/fit", "hi99")], "T_BL_99": [g("BL/total/trend", "lo99"), g("BL/total/trend", "hi99")], "arms": verdicts},
