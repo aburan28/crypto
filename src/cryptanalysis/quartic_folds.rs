@@ -37,8 +37,10 @@ use rand::{Rng, SeedableRng};
 use rayon::prelude::*;
 use serde::Serialize;
 
+use super::d4_weighted_s5::{lift_back, solve_weighted, weighted_system, MACAULAY_BOUND};
 use super::gaudry_cubic::{square_core, wiedemann_u64, SparseRel};
-use super::gaudry_quartic::{mitm_signed, pair_table, Curve4, Pt4, E4};
+use super::gaudry_quartic::{mitm_signed, pair_table, Curve4, Pt4, QuarticSolve, E4};
+use super::gaudry_quartic_d4::{D4Instance, SymmetrisedD4};
 use super::glv_invariant_base::factor_u64;
 use super::residual_walk::{inv_mod, is_prime_u64, mix64, pow_mod, sqrt_mod};
 
@@ -331,6 +333,9 @@ pub struct FoldedBase4 {
     pub columns: usize,
     /// Points per column, mean.
     pub points_per_column: f64,
+    /// `F_p` multiplications spent building it (the lifts and the orbit
+    /// checks).
+    pub build_muls: u64,
 }
 
 /// Build the base and check every column coefficient on points.
@@ -428,6 +433,7 @@ pub fn folded_base(inst: &FoldInstance4, rng: &mut StdRng) -> Result<FoldedBase4
         coef,
         columns,
         points_per_column: ppc,
+        build_muls: curve.f.muls(),
     })
 }
 
@@ -839,6 +845,449 @@ pub fn run_k4_folds(
     })
 }
 
+/// Per-call solve cost `C` (Weil restriction and solve, the reruns
+/// included), summarised over every call of one E19 run.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct CallStats {
+    pub calls: u64,
+    pub mean: f64,
+    pub median: f64,
+    pub p10: f64,
+    pub p90: f64,
+    pub min: u64,
+    pub max: u64,
+}
+
+impl CallStats {
+    fn of(mut v: Vec<u64>) -> Self {
+        if v.is_empty() {
+            return Self::default();
+        }
+        v.sort_unstable();
+        let q = |f: f64| v[((v.len() - 1) as f64 * f).round() as usize] as f64;
+        CallStats {
+            calls: v.len() as u64,
+            mean: v.iter().map(|&c| c as f64).sum::<f64>() / v.len() as f64,
+            median: q(0.5),
+            p10: q(0.1),
+            p90: q(0.9),
+            min: v[0],
+            max: v[v.len() - 1],
+        }
+    }
+}
+
+/// One E19 run (§9.5): relations collected by the weighted `D₄` solve on
+/// E18's `τ_T`-folded base, the folded matrix solved, every phase charged
+/// in `F_p` multiplications, and the matched walks.
+#[derive(Clone, Debug, Serialize)]
+pub struct K4PipelineReport {
+    pub p: u64,
+    pub seed: u64,
+    pub n: u64,
+    pub bits: f64,
+    pub group_order: u64,
+    pub cofactor: u64,
+    pub base_points: usize,
+    pub points_per_column: f64,
+    /// Targets `R = aG + bQ` drawn, each given to the solve once.
+    pub residuals: u64,
+    /// Calls where the solve returned no answer (a degenerate or
+    /// unresolved eigenspace past `d + 2`); charged, never dropped.
+    pub unsolved: u64,
+    pub unsolved_outcomes: std::collections::BTreeMap<String, u64>,
+    /// Calls that needed a weighted degree above 26.
+    pub reruns: u64,
+    /// Rational invariant solutions, summed over calls.
+    pub rational_solutions: u64,
+    /// Verified `Y`-quadruples from the lift-back, summed over calls.
+    pub lifted: u64,
+    /// ... of which use `Y = 0` (`u = c`), a point outside E18's base.
+    pub off_base: u64,
+    /// Quadruples on the base whose exact signed sum is `R`.
+    pub decompositions: u64,
+    /// Quadruples on the base with no sign vector summing to `R` exactly
+    /// (G2.9: must be zero).
+    pub check_failures: u64,
+    pub targets_decomposed: u64,
+    pub decompositions_per_target: [u64; 10],
+    /// The folded rows re-added in the group before the solve (G2.9).
+    pub rows_readded: u64,
+    pub rows_readd_failures: u64,
+    /// `C` per call: `QuarticSolve::total_muls`.
+    pub call: CallStats,
+    pub precompute_muls: u64,
+    pub base_muls: u64,
+    pub generation_muls: u64,
+    pub weil_muls: u64,
+    /// Every solve, the Weil restriction excluded (it is `weil_muls`).
+    pub solve_muls: u64,
+    pub lift_muls: u64,
+    pub check_muls: u64,
+    /// `16 ·` the matrix's mod-`n` multiplications, every attempt.
+    pub la_fp_muls: u64,
+    /// Everything above.
+    pub total_muls: u64,
+    /// Macaulay-matrix entries (`rows · cols`, last degree of each call):
+    /// the native work the multiplication count does not price.
+    pub macaulay_entries: u64,
+    /// `F_p` multiplications of one affine addition in `E(F_{p⁴})`: the
+    /// group-addition equivalent (GAE) that prices unpriced native work.
+    pub fp_muls_per_add: f64,
+    pub solve_ms: f64,
+    pub folded: ArmReport,
+    pub rho: Vec<RhoRun4F>,
+    /// Mean `F_p` multiplications of the negation-folded walks (matched).
+    pub rho_matched_muls: f64,
+    pub rho_matched_steps: f64,
+    pub rho_unfolded_muls: f64,
+    /// `total_muls / rho_matched_muls`.
+    pub ratio: f64,
+    pub wall_ms: f64,
+}
+
+/// One target's trip through the solve, priced by its own counters.
+struct TargetOut {
+    a: u64,
+    b: u64,
+    r: Pt4,
+    solved: bool,
+    outcome: String,
+    degree: u16,
+    rational: usize,
+    call_muls: u64,
+    gen_muls: u64,
+    weil_muls: u64,
+    lift_muls: u64,
+    check_muls: u64,
+    entries: u64,
+    ms: f64,
+    lifted: usize,
+    off_base: usize,
+    failures: usize,
+    /// Verified decompositions: base indices with signs (`+1` or `-1`).
+    decs: Vec<[(usize, i64); 4]>,
+}
+
+/// Decompose `r` over the base by the weighted `D₄` solve at degree 26:
+/// Weil restriction, solve, lift-back, then the map of each `Y`-quadruple
+/// to base points (`by_y`) and its signs by a group check against `r`
+/// itself (the lift-back matches `±r` on `x` only).  Every phase on its own
+/// counters; generation is the caller's.
+fn d4_decompose(
+    inst: &FoldInstance4,
+    pre: &SymmetrisedD4,
+    base: &[Pt4],
+    by_y: &HashMap<u64, usize>,
+    r: &Pt4,
+    tseed: u64,
+) -> TargetOut {
+    let mut trng = StdRng::seed_from_u64(tseed);
+    let di = D4Instance {
+        curve: inst.curve(),
+        x0: inst.x0,
+        c: inst.c,
+    };
+    let c = &di.curve;
+    let before = c.f.muls();
+    let y_r = di.y_of_x(&r.x);
+    let comps = weighted_system(pre, &c.f, &y_r);
+    let mut st = QuarticSolve {
+        weil_muls: c.f.muls() - before,
+        ..Default::default()
+    };
+    let (sols, degree) = solve_weighted(
+        &comps,
+        MACAULAY_BOUND,
+        inst.p,
+        &mut trng,
+        &mut st,
+        true,
+        false,
+    );
+    let solved = sols.is_some();
+    let sols = sols.unwrap_or_default();
+    let lb = lift_back(&di, &sols, r, &mut trng);
+    let before = c.f.muls();
+    let (mut off, mut failures) = (0usize, 0usize);
+    let mut decs = Vec::new();
+    for ys in &lb.decompositions {
+        let idx: Option<Vec<usize>> = ys.iter().map(|y| by_y.get(y).copied()).collect();
+        let Some(idx) = idx else {
+            off += 1;
+            continue;
+        };
+        let pts: [Pt4; 4] = core::array::from_fn(|i| base[idx[i]]);
+        let mut hit = None;
+        for s in 0..8u32 {
+            let sign = |i: usize| -> i64 {
+                if i > 0 && s >> (i - 1) & 1 == 1 {
+                    -1
+                } else {
+                    1
+                }
+            };
+            let mut acc = pts[0];
+            for (i, q) in pts.iter().enumerate().skip(1) {
+                acc = if sign(i) == 1 {
+                    c.add(&acc, q)
+                } else {
+                    c.sub(&acc, q)
+                };
+            }
+            if !acc.inf && acc.x == r.x {
+                // `−r` is the all-flipped pattern.
+                let flip = if acc.y == r.y { 1 } else { -1 };
+                hit = Some(core::array::from_fn(|i| (idx[i], flip * sign(i))));
+                break;
+            }
+        }
+        match hit {
+            Some(d) => decs.push(d),
+            None => failures += 1,
+        }
+    }
+    TargetOut {
+        a: 0,
+        b: 0,
+        r: *r,
+        solved,
+        outcome: st.outcome.clone(),
+        degree,
+        rational: sols.len(),
+        call_muls: st.total_muls,
+        gen_muls: 0,
+        weil_muls: st.weil_muls,
+        lift_muls: lb.muls,
+        check_muls: c.f.muls() - before,
+        entries: st.rows as u64 * st.cols as u64,
+        ms: st.total_ms,
+        lifted: lb.decompositions.len(),
+        off_base: off,
+        failures,
+        decs,
+    }
+}
+
+/// E19: the first end-to-end `k = 4` index calculus with the weighted `D₄`
+/// solve.  Targets are decomposed by `weighted_system`, `solve_weighted`
+/// at weighted degree 26 and `lift_back`; each lifted `Y`-quadruple is
+/// mapped to base points and its signs fixed by a group check; one verified
+/// decomposition per target, drawn uniformly, becomes a `τ_T`-folded row;
+/// Wiedemann runs until `[d]G = Q` verifies.  Then `rho_runs` walks of each
+/// of the unfolded and negation-folded kinds.
+pub fn run_k4_d4_pipeline(
+    p: u64,
+    seed: u64,
+    rho_runs: usize,
+    max_residuals: u64,
+) -> Result<K4PipelineReport, String> {
+    let start = Instant::now();
+    let inst = generate_translation_instance(p, seed, 4)?;
+    let n = inst.n;
+    let curve = inst.curve();
+    let mut rng = StdRng::seed_from_u64(seed ^ 0xE19D_4A11);
+    let fb = folded_base(&inst, &mut rng)?;
+    let base = &fb.points;
+    let d4 = D4Instance {
+        curve: inst.curve(),
+        x0: inst.x0,
+        c: inst.c,
+    };
+    let pre = SymmetrisedD4::precompute(&d4, &mut rng, 8)?;
+    // Y of every base point, for the map back from the lift; charged.
+    let before = d4.curve.f.muls();
+    let mut by_y: HashMap<u64, usize> = HashMap::new();
+    for (i, pt) in base.iter().enumerate() {
+        let y = d4.y_of_x(&pt.x);
+        if !y.in_fp() {
+            return Err("a base point's Y is not in F_p".into());
+        }
+        by_y.insert(y.0[0], i);
+    }
+    let base_muls = fb.build_muls + d4.curve.f.muls() - before;
+    let fp_muls_per_add = {
+        let c = inst.curve();
+        let mut acc = base[0];
+        for _ in 0..64 {
+            acc = c.add(&acc, &base[1]);
+        }
+        c.f.muls() as f64 / 64.0
+    };
+
+    let mut folded = Arm::new("d4-folded", fb.columns);
+    let mut unsolved_outcomes = std::collections::BTreeMap::new();
+    let mut per_target = [0u64; 10];
+    let mut calls: Vec<u64> = Vec::new();
+    let (mut residuals, mut unsolved, mut reruns, mut rational) = (0u64, 0u64, 0u64, 0u64);
+    let (mut lifted, mut off_base, mut decompositions, mut check_failures) = (0u64, 0, 0, 0);
+    let (mut targets_decomposed, mut rows_readded, mut rows_readd_failures) = (0u64, 0u64, 0u64);
+    let (mut gen_muls, mut weil_muls, mut solve_muls) = (0u64, 0u64, 0u64);
+    let (mut lift_muls, mut check_muls, mut entries) = (0u64, 0u64, 0u64);
+    let mut solve_ms = 0.0;
+    let threads = rayon::current_num_threads().max(1);
+    while residuals < max_residuals && !folded.rep.solved {
+        let batch: Vec<(u64, u64, u64)> = (0..threads as u64 * 2)
+            .map(|k| {
+                (
+                    rng.gen_range(0..n),
+                    rng.gen_range(1..n),
+                    mix64(seed ^ (residuals + k).wrapping_mul(0x9E37_79B9_7F4A_7C15)),
+                )
+            })
+            .collect();
+        let outs: Vec<TargetOut> = batch
+            .par_iter()
+            .map(|&(a, b, tseed)| {
+                let c = inst.curve();
+                let r = c.add(&c.mul(&inst.g, a), &c.mul(&inst.q, b));
+                let mut o = d4_decompose(&inst, &pre, base, &by_y, &r, tseed);
+                o.a = a;
+                o.b = b;
+                o.gen_muls = c.f.muls();
+                o
+            })
+            .collect();
+        for mut o in outs {
+            // A sequential run stops at the solve: the rest of the batch is
+            // an artefact of the parallel draw and is not counted.
+            if folded.rep.solved {
+                break;
+            }
+            residuals += 1;
+            calls.push(o.call_muls);
+            gen_muls += o.gen_muls;
+            weil_muls += o.weil_muls;
+            solve_muls += o.call_muls - o.weil_muls;
+            lift_muls += o.lift_muls;
+            check_muls += o.check_muls;
+            entries += o.entries;
+            solve_ms += o.ms;
+            rational += o.rational as u64;
+            lifted += o.lifted as u64;
+            off_base += o.off_base as u64;
+            check_failures += o.failures as u64;
+            decompositions += o.decs.len() as u64;
+            if !o.solved {
+                unsolved += 1;
+                *unsolved_outcomes.entry(o.outcome.clone()).or_insert(0u64) += 1;
+            }
+            if o.degree > MACAULAY_BOUND {
+                reruns += 1;
+            }
+            per_target[o.decs.len().min(9)] += 1;
+            if o.decs.is_empty() {
+                continue;
+            }
+            targets_decomposed += 1;
+            // E18's rule 2: one decomposition per target, drawn uniformly.
+            let terms = o.decs.swap_remove(rng.gen_range(0..o.decs.len()));
+            // G2.9: the row re-added in the group, aG + bQ − Σ sP = O.
+            let mut acc = o.r;
+            for &(i, s) in &terms {
+                acc = if s == 1 {
+                    curve.sub(&acc, &base[i])
+                } else {
+                    curve.add(&acc, &base[i])
+                };
+            }
+            if !acc.inf || o.r != curve.add(&curve.mul(&inst.g, o.a), &curve.mul(&inst.q, o.b)) {
+                rows_readd_failures += 1;
+                continue;
+            }
+            rows_readded += 1;
+            let mut merged: HashMap<usize, u64> = HashMap::new();
+            for &(i, s) in &terms {
+                let v = if s == 1 {
+                    fb.coef[i]
+                } else {
+                    (n - fb.coef[i]) % n
+                };
+                let e = merged.entry(fb.col[i]).or_insert(0);
+                *e = (*e + v) % n;
+            }
+            let mut cols: Vec<(usize, u64)> = merged.into_iter().filter(|&(_, v)| v != 0).collect();
+            cols.push((folded.small, (n - o.b) % n));
+            cols.sort_unstable();
+            folded.push(SparseRel { cols, rhs: o.a });
+            folded.attempt(&inst, &curve, &mut rng, residuals);
+        }
+    }
+    if !folded.rep.solved {
+        return Err(format!(
+            "p = {p} seed {seed}: no solve within {max_residuals} residuals"
+        ));
+    }
+    let jobs: Vec<(RhoFold, u64)> = [RhoFold::None, RhoFold::Negation]
+        .iter()
+        .flat_map(|&f| (0..rho_runs as u64).map(move |k| (f, seed * 1000 + k)))
+        .collect();
+    let rho: Vec<RhoRun4F> = jobs
+        .par_iter()
+        .map(|&(f, s)| rho4_folded(&inst, f, s))
+        .collect();
+    let mean = |fold: RhoFold, steps: bool| -> f64 {
+        let w: Vec<&RhoRun4F> = rho.iter().filter(|w| w.fold == fold).collect();
+        w.iter()
+            .map(|w| if steps { w.steps } else { w.fp_muls } as f64)
+            .sum::<f64>()
+            / w.len().max(1) as f64
+    };
+    let rho_matched_muls = mean(RhoFold::Negation, false);
+    let la_fp_muls = 16 * folded.rep.la_ops;
+    let total_muls = pre.precompute_muls
+        + base_muls
+        + gen_muls
+        + weil_muls
+        + solve_muls
+        + lift_muls
+        + check_muls
+        + la_fp_muls;
+    Ok(K4PipelineReport {
+        p,
+        seed,
+        n,
+        bits: (n as f64).log2(),
+        group_order: inst.group_order,
+        cofactor: inst.cofactor,
+        base_points: base.len(),
+        points_per_column: fb.points_per_column,
+        residuals,
+        unsolved,
+        unsolved_outcomes,
+        reruns,
+        rational_solutions: rational,
+        lifted,
+        off_base,
+        decompositions,
+        check_failures,
+        targets_decomposed,
+        decompositions_per_target: per_target,
+        rows_readded,
+        rows_readd_failures,
+        call: CallStats::of(calls),
+        precompute_muls: pre.precompute_muls,
+        base_muls,
+        generation_muls: gen_muls,
+        weil_muls,
+        solve_muls,
+        lift_muls,
+        check_muls,
+        la_fp_muls,
+        total_muls,
+        macaulay_entries: entries,
+        fp_muls_per_add,
+        solve_ms,
+        folded: folded.rep,
+        rho_matched_muls,
+        rho_matched_steps: mean(RhoFold::Negation, true),
+        rho_unfolded_muls: mean(RhoFold::None, false),
+        ratio: total_muls as f64 / rho_matched_muls,
+        rho,
+        wall_ms: start.elapsed().as_secs_f64() * 1e3,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -966,5 +1415,80 @@ mod rho_tests {
         let psi = none / mean_steps(RhoFold::Psi);
         assert!((1.15..1.75).contains(&neg), "unfolded / negation = {neg}");
         assert!((1.9..3.1).contains(&psi), "unfolded / psi = {psi}");
+    }
+}
+
+#[cfg(test)]
+mod pipeline_tests {
+    use super::*;
+
+    /// A planted `R = P₀ + P₁ − P₂ + P₃` comes back from the weighted solve
+    /// as base points whose signed sum is `R` exactly, the planted one among
+    /// them.
+    #[test]
+    fn d4_decompose_recovers_a_planted_decomposition() {
+        let inst = generate_translation_instance(37, 2, 4).unwrap();
+        let curve = inst.curve();
+        let mut rng = StdRng::seed_from_u64(5);
+        let fb = folded_base(&inst, &mut rng).unwrap();
+        let d4 = D4Instance {
+            curve: inst.curve(),
+            x0: inst.x0,
+            c: inst.c,
+        };
+        let pre = SymmetrisedD4::precompute(&d4, &mut rng, 4).unwrap();
+        let by_y: HashMap<u64, usize> = fb
+            .points
+            .iter()
+            .enumerate()
+            .map(|(i, pt)| (d4.y_of_x(&pt.x).0[0], i))
+            .collect();
+        // Four points in four distinct columns.
+        let mut pick: Vec<usize> = Vec::new();
+        for i in 0..fb.points.len() {
+            if pick.iter().all(|&j| fb.col[j] != fb.col[i]) {
+                pick.push(i);
+            }
+            if pick.len() == 4 {
+                break;
+            }
+        }
+        let b = &fb.points;
+        let r = curve.add(
+            &curve.sub(&curve.add(&b[pick[0]], &b[pick[1]]), &b[pick[2]]),
+            &b[pick[3]],
+        );
+        let o = d4_decompose(&inst, &pre, b, &by_y, &r, 7);
+        assert!(o.solved, "{}", o.outcome);
+        assert_eq!(o.failures, 0);
+        assert!(o.call_muls > 0 && o.check_muls > 0);
+        let mut planted = pick.clone();
+        planted.sort_unstable();
+        let mut seen = false;
+        for d in &o.decs {
+            let mut acc = r;
+            for &(i, s) in d {
+                acc = if s == 1 {
+                    curve.sub(&acc, &b[i])
+                } else {
+                    curve.add(&acc, &b[i])
+                };
+            }
+            assert!(acc.inf, "a decomposition does not re-add to R");
+            let mut idx: Vec<usize> = d.iter().map(|&(i, _)| i).collect();
+            idx.sort_unstable();
+            seen |= idx == planted;
+        }
+        assert!(seen, "the planted decomposition is missing");
+    }
+
+    #[test]
+    #[ignore = "hundreds of solves: run with --ignored --release"]
+    fn the_pipeline_recovers_the_logarithm_at_p_37() {
+        let rep = run_k4_d4_pipeline(37, 2, 2, 20_000).unwrap();
+        assert!(rep.folded.solved && rep.folded.correct);
+        assert_eq!(rep.check_failures, 0);
+        assert_eq!(rep.rows_readd_failures, 0);
+        assert!(rep.rho.iter().all(|w| w.correct));
     }
 }

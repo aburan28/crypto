@@ -1984,6 +1984,127 @@ fn e18(o: &mut String, rows: &[&Value]) {
     }
 }
 
+/// E19 (goal G2, note §9.5): the `k = 4` index calculus end to end with the
+/// weighted `D₄` solve.  Every phase in `F_p` multiplications (the matrix
+/// at `16` per mod-`n` multiplication), against the mean of that curve's
+/// negation-folded walks; the handover re-derived from E19's own constants
+/// by §11.16's `p* = y·(cols/p)·C·√h / (S_rho·(1 − r))`, `n* = p*⁴/h`.
+fn e19(o: &mut String, rows: &[&Value]) {
+    let rows = sorted(rows, &["bits", "seed"]);
+    o.push_str("### E19 — the k = 4 index calculus end to end with the weighted D₄ solve\n\n");
+    o.push_str("| p | seed | log2 n | h | base | cols | targets | unsolved | reruns | decompositions (off base, check failures) | rows | y | core (φ) | C median | C mean | correct (log, walks) |\n");
+    o.push_str("|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|:--|--:|--:|:--|\n");
+    for r in &rows {
+        let y = fl(r, "residuals") / fl(r, "folded.relations");
+        let _ = writeln!(
+            o,
+            "| {} | {} | {:.1} | {} | {} | {} | {} | {} | {} | {} ({}, {}) | {} | {:.1} | {} ({:.3}) | {} | {} | {}, {} |",
+            py_str(at(r, "p")),
+            py_str(at(r, "seed")),
+            fl(r, "bits"),
+            py_str(at(r, "cofactor")),
+            py_str(at(r, "base_points")),
+            py_str(at(r, "folded.columns")),
+            py_str(at(r, "residuals")),
+            py_str(at(r, "unsolved")),
+            py_str(at(r, "reruns")),
+            py_str(at(r, "decompositions")),
+            py_str(at(r, "off_base")),
+            py_str(at(r, "check_failures")),
+            py_str(at(r, "folded.relations")),
+            y,
+            py_str(at(r, "folded.unknowns")),
+            fl(r, "folded.phi"),
+            g3(fl(r, "call.median")),
+            g3(fl(r, "call.mean")),
+            yes(bool_at(r, "folded.correct")),
+            yes(r["rho"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .all(|w| bool_at(w, "correct"))),
+        );
+    }
+    o.push_str("\n#### E19 — where the multiplications go, and the distance to rho\n\n");
+    o.push_str("| p | seed | precompute | base | generation | Weil | solves | lift-back | checks | LA ×16 | solves share | other than solves | S total | rho (negation) | S / rho | predicted 0.584·C/p | measured / predicted |\n");
+    o.push_str("|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|\n");
+    let mut fit: Vec<(f64, f64)> = Vec::new();
+    for r in &rows {
+        let tot = fl(r, "total_muls");
+        let solves = fl(r, "weil_muls") + fl(r, "solve_muls");
+        let pred = 0.584 * fl(r, "call.mean") / fl(r, "p");
+        fit.push((fl(r, "n"), fl(r, "ratio")));
+        let _ = writeln!(
+            o,
+            "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {:.2} % | {:.3} % | {} | {} | {} | {} | {:.2} |",
+            py_str(at(r, "p")),
+            py_str(at(r, "seed")),
+            g3(fl(r, "precompute_muls")),
+            g3(fl(r, "base_muls")),
+            g3(fl(r, "generation_muls")),
+            g3(fl(r, "weil_muls")),
+            g3(fl(r, "solve_muls")),
+            g3(fl(r, "lift_muls")),
+            g3(fl(r, "check_muls")),
+            g3(fl(r, "la_fp_muls")),
+            100.0 * solves / tot,
+            100.0 * (tot - solves) / tot,
+            g3(tot),
+            g3(fl(r, "rho_matched_muls")),
+            g3(fl(r, "ratio")),
+            g3(pred),
+            fl(r, "ratio") / pred,
+        );
+    }
+    let _ = writeln!(
+        o,
+        "\nFitted exponent of S / rho in n: {} over {} curves.\n",
+        fmt_f(fit_exponent(&fit)),
+        fit.len()
+    );
+    o.push_str("#### E19 — unpriced native work at 0, 0.1 and 1 GAE (AGENTS.md §5a)\n\n");
+    o.push_str("Native work: one operation per Macaulay-matrix entry (rows · cols of each call's last degree) for the index calculus, one per step for each walk; a GAE is one affine addition in E(F_{p⁴}) at the curve's measured F_p multiplications.\n\n");
+    o.push_str("| p | seed | GAE (F_p mults) | S / rho at 0 | at 0.1 | at 1 | order holds |\n|--:|--:|--:|--:|--:|--:|:--|\n");
+    for r in &rows {
+        let gae = fl(r, "fp_muls_per_add");
+        let at_g = |g: f64| {
+            (fl(r, "total_muls") + g * gae * fl(r, "macaulay_entries"))
+                / (fl(r, "rho_matched_muls") + g * gae * fl(r, "rho_matched_steps"))
+        };
+        let v = [at_g(0.0), at_g(0.1), at_g(1.0)];
+        let _ = writeln!(
+            o,
+            "| {} | {} | {:.1} | {} | {} | {} | {} |",
+            py_str(at(r, "p")),
+            py_str(at(r, "seed")),
+            gae,
+            g3(v[0]),
+            g3(v[1]),
+            g3(v[2]),
+            yes(v.iter().all(|&x| x > 1.0)),
+        );
+    }
+    // §11.16's handover from E19's own constants, pooled.
+    let pool =
+        |f: &dyn Fn(&Value) -> f64| -> f64 { mean(&rows.iter().map(|r| f(r)).collect::<Vec<_>>()) };
+    let y = rows.iter().map(|r| fl(r, "residuals")).sum::<f64>()
+        / rows.iter().map(|r| fl(r, "folded.relations")).sum::<f64>();
+    let cols_p = pool(&|r| fl(r, "folded.columns") / fl(r, "p"));
+    let c = pool(&|r| fl(r, "call.mean"));
+    let h = pool(&|r| fl(r, "cofactor"));
+    let s_rho = pool(&|r| fl(r, "rho_matched_muls") / fl(r, "n").sqrt());
+    let r_la = pool(&|r| fl(r, "la_fp_muls") / fl(r, "rho_matched_muls"));
+    let p_star = y * cols_p * c * h.sqrt() / (s_rho * (1.0 - r_la));
+    let n_star = p_star.powi(4) / h;
+    let _ = writeln!(
+        o,
+        "\n#### E19 — the handover from E19's own constants\n\n| y (pooled) | cols / p | C (mean of means) | h | S_rho (negation) | r = LA / rho | p* | log2 n* |\n|--:|--:|--:|--:|--:|--:|--:|--:|\n| {y:.1} | {cols_p:.3} | {} | {h:.2} | {s_rho:.1} | {r_la:.3} | {} | {:.1} |",
+        g3(c),
+        g3(p_star),
+        n_star.log2()
+    );
+}
+
 fn e13_ok(r: &Value) -> bool {
     ["d3_fold12", "d3_fold6", "s3_fold12", "s3_fold6"]
         .iter()
@@ -2423,7 +2544,7 @@ fn main() {
     }
     let mut o = String::new();
     type Printer = fn(&mut String, &[&Value]);
-    let printers: [(&str, Printer); 18] = [
+    let printers: [(&str, Printer); 19] = [
         ("e1", e1),
         ("e2", e2),
         ("e3", e3),
@@ -2440,6 +2561,7 @@ fn main() {
         ("e13", e16),
         ("e17", e17),
         ("e18", e18),
+        ("e19", e19),
         ("e14", e14),
         ("e15", e15),
     ];
