@@ -255,3 +255,5 @@ The [native local certificate summaries](original-local-strata-20261017T1500Z/RE
 retain every unknown vertex and historical global stratum status. The fifteen
 visibility-cut controls pass, and generic C reproduces its frozen certificate.
 These prefixes do not discharge full A/C/D/E generation or new DLP timings.
+
+Latest additions: [full selected-point-order C](full_point_order/README.md) and [clean 4,037-vertex checkpoint](checkpoint-4037/README.md). Neither completes original A/C/D/E or the full requested method matrix. See STATUS.md for exact scope.

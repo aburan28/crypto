@@ -1,5 +1,34 @@
 # Volcano experiment downloads, 17 October 2026
 
+Latest measured addition (17 October 2026): **full selected-point-order C**.
+Both EC PH/BSGS and k=1 Tate/Miller → multiplicative PH / projected-prime
+factor-base relations verify all 3,738 public one-target workloads over the
+1,869 retained models (7,476 primary method records); every non-clock record,
+fixture and truth field matches its separate replay. Selected exact orders
+range from 2,600,529,297,408 to 1,637,958,981,148,213,248, with largest prime 7.
+All 2/3/7 prime-power parts are included. This extends the earlier r=7-only
+cohort; the two cohorts are never pooled. It is not full C population, NFS,
+large-k support, a maximal-point-order certificate or a runtime improvement.
+[Protocol, implementation and archived evidence](execution/full_point_order/README.md).
+[Drive archive](https://drive.google.com/file/d/1HHlPDmGzwSopnwMGQ4vgvcGSH0WRa0BO/view),
+[report](https://drive.google.com/file/d/1Gdrpkb8n8XhBoO8Sdr3JKl_VIPMUgqdZ/view),
+[phase CSV](https://drive.google.com/file/d/1UHAE8NCShFWGQ1hHOR3U56KeNdW_MrQL/view),
+[aggregate CSV](https://drive.google.com/file/d/1OUbeh-phxP8vXXE_gzY6KoS6tFPapjIE/view).
+The cold solver intervals charge order certification, setup, projections,
+transfer, relations, matrix work, reconstruction and verification. Shared
+fixture generation is outside both intervals and reported separately. Raw
+clocks remain unqualified; a contended replay is retained separately.
+
+Latest frozen repaired survey: **4,037 / 24,823 vertices**, all 51 strata,
+64,592 records (41,573 verified / 20,132 exhausted / 2,887 timeout),
+2,098,636 relations / 98,188,909 actual calls. The worker was cleanly paused
+at 18:48:59 UTC for isolated C measurement and delivery validation.
+[Checkpoint and downloads](execution/checkpoint-4037/README.md).
+Older 2,935-vertex uploads and PID receipts below remain historical snapshots.
+The new fixed viewer covers every graph vertex/map but only marks 4,037
+measured vertices. A later execution receipt controls current worker status.
+
+
 [Open the Drive folder](https://drive.google.com/drive/folders/109DpcQpX7ATz6GeI8iSWAExGMWBoR-H_).
 These are frozen snapshots. Complete graph enumeration and completed ECDLP
 measurements have different coverage.

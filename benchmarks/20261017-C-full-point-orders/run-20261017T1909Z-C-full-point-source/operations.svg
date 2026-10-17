@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="760" viewBox="0 0 1100 760">
+<rect width="1100" height="760" fill="white"/><g font-family="sans-serif" fill="#17354a">
+<text x="24" y="28" font-size="22" font-weight="bold">Original C: full selected-point-order diagnostic — source</text>
+<text x="24" y="53" font-size="14">Native per-target means and observed min–max, not confidence intervals. Blue: EC control. Orange: finite-field route.</text>
+<text x="67" y="87" font-size="15" font-weight="bold">Curve additions and doublings: call counts, including scalar multiplication</text>
+<line x1="68" x2="1070" y1="227" y2="227" stroke="#dbe4eb"/>
+<text x="60" y="231" text-anchor="end" font-size="13">0</text>
+<line x1="68" x2="1070" y1="171.0" y2="171.0" stroke="#dbe4eb"/>
+<text x="60" y="175.0" text-anchor="end" font-size="13">812</text>
+<line x1="68" x2="1070" y1="115" y2="115" stroke="#dbe4eb"/>
+<text x="60" y="119" text-anchor="end" font-size="13">1,625</text>
+<line x1="547" x2="547" y1="115.0" y2="115.41353846153845" stroke="#24698a" stroke-width="2"/>
+<circle cx="547" cy="115.20676923076923" r="3.5" fill="#24698a"/>
+<line x1="553" x2="553" y1="158.00799999999998" y2="158.5593846153846" stroke="#c16b24" stroke-width="2"/>
+<circle cx="553" cy="158.28369230769232" r="3.5" fill="#c16b24"/>
+<text x="67" y="280" font-size="15" font-weight="bold">Explicit Fp multiplications and squarings: curve-field work remains separate</text>
+<line x1="68" x2="1070" y1="420" y2="420" stroke="#dbe4eb"/>
+<text x="60" y="424" text-anchor="end" font-size="13">0</text>
+<line x1="68" x2="1070" y1="364.0" y2="364.0" stroke="#dbe4eb"/>
+<text x="60" y="368.0" text-anchor="end" font-size="13">36,570</text>
+<line x1="68" x2="1070" y1="308" y2="308" stroke="#dbe4eb"/>
+<text x="60" y="312" text-anchor="end" font-size="13">73,140</text>
+<line x1="547" x2="547" y1="420.0" y2="420.0" stroke="#24698a" stroke-width="2"/>
+<circle cx="547" cy="420.0" r="3.5" fill="#24698a"/>
+<line x1="553" x2="553" y1="308.0" y2="308.7932184850971" stroke="#c16b24" stroke-width="2"/>
+<circle cx="553" cy="308.39660924254855" r="3.5" fill="#c16b24"/>
+<text x="67" y="473" font-size="15" font-weight="bold">Curve-field inversions: calls counted, internals unexpanded</text>
+<line x1="68" x2="1070" y1="613" y2="613" stroke="#dbe4eb"/>
+<text x="60" y="617" text-anchor="end" font-size="13">0</text>
+<line x1="68" x2="1070" y1="557.0" y2="557.0" stroke="#dbe4eb"/>
+<text x="60" y="561.0" text-anchor="end" font-size="13">788</text>
+<line x1="68" x2="1070" y1="501" y2="501" stroke="#dbe4eb"/>
+<text x="60" y="505" text-anchor="end" font-size="13">1,577</text>
+<line x1="547" x2="547" y1="501.0" y2="502.13633481293596" stroke="#24698a" stroke-width="2"/>
+<circle cx="547" cy="501.568167406468" r="3.5" fill="#24698a"/>
+<line x1="553" x2="553" y1="541.9790741915028" y2="542.5472415979708" stroke="#c16b24" stroke-width="2"/>
+<circle cx="553" cy="542.2631578947369" r="3.5" fill="#c16b24"/>
+<text transform="translate(550,633) rotate(55)" font-size="13">967.46</text>
+<text x="550" y="691" text-anchor="middle" font-size="12">2</text>
+<text x="24" y="731" font-size="14">Conductor f in millions, ordinal positions; ? keeps unknown labels. Bottom numbers: target observations per arm.</text>
+<text x="24" y="752" font-size="13">Point orders vary and are certified; these samples do not isolate a causal conductor effect or establish a priced total.</text>
+</g></svg>
