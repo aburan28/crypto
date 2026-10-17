@@ -5,6 +5,7 @@ use crypto_lib::cryptanalysis::{
     ecbench::canonical::sha256_hex,
     ic_boundary::{CountedGroup, GroupOps, IncrementalGauss, PrimeCurve, PrimePoint, RowStatus},
 };
+use rusqlite::{Connection, OpenFlags};
 use serde_json::{json, Value};
 use std::{env, fs, path::Path, time::Instant};
 
@@ -348,10 +349,48 @@ fn run(c: &PrimeCurve, n: u64, target_index: u64) -> Result<Value, String> {
 
 fn main() {
     let args: Vec<_> = env::args().collect();
-    assert_eq!(
-        args.len(),
-        3,
-        "finite-field-k1 ORIGINAL_C_JSON FRESH_OUTPUT"
+    if args.get(1).map(String::as_str) == Some("compare") {
+        assert_eq!(
+            args.len(),
+            5,
+            "finite-field-k1 compare BASE CANDIDATE FRESH_RECEIPT"
+        );
+        assert!(!Path::new(&args[4]).exists());
+        let raw_a = fs::read(&args[2]).unwrap();
+        let raw_b = fs::read(&args[3]).unwrap();
+        let mut a: Value = serde_json::from_slice(&raw_a).unwrap();
+        let mut b: Value = serde_json::from_slice(&raw_b).unwrap();
+        let records = a["rows"].as_array().unwrap().len();
+        fn omit_times(v: &mut Value) {
+            match v {
+                Value::Object(m) => {
+                    m.remove("end_to_end_ns");
+                    m.remove("elapsed_ns");
+                    for v in m.values_mut() {
+                        omit_times(v);
+                    }
+                }
+                Value::Array(a) => {
+                    for v in a {
+                        omit_times(v);
+                    }
+                }
+                _ => {}
+            }
+        }
+        omit_times(&mut a);
+        omit_times(&mut b);
+        let ok = a == b;
+        let receipt = json!({"schema":"volcano-ff-k1-replay-match/v1","ok":ok,
+            "base_sha256":sha256_hex(&raw_a),"candidate_sha256":sha256_hex(&raw_b),"records":records,
+            "scope":"Exact JSON equality after excluding elapsed_ns and end_to_end_ns at every level; includes identities, outcomes, relations and all operation counters. Same binary, not independent implementation."});
+        fs::write(&args[4], serde_json::to_vec_pretty(&receipt).unwrap()).unwrap();
+        assert!(ok, "re-execution differs; failed receipt preserved");
+        return;
+    }
+    assert!(
+        args.len() == 3 || args.len() == 4,
+        "finite-field-k1 ORIGINAL_C_JSON FRESH_OUTPUT [FROZEN_C_PREFIX_DB]"
     );
     let out = Path::new(&args[2]);
     assert!(!out.exists());
@@ -367,14 +406,81 @@ fn main() {
         (1637958981148213249, 571607911220311176, 29329524900995129)
     );
     let n = v["order"].as_u64().unwrap();
+    assert_eq!(n, 1637958981148213248);
+    let mut cases = vec![(None, c, false, None)];
+    let prefix = if args.len() == 4 {
+        let raw_db = fs::read(&args[3]).unwrap();
+        let digest = sha256_hex(&raw_db);
+        assert_eq!(
+            digest,
+            "468ce8320b6b7deae37198ca3afc07534fa4fe0e950f621e45ad322f23a2c881"
+        );
+        let uri = format!(
+            "file:{}?immutable=1",
+            Path::new(&args[3]).canonicalize().unwrap().display()
+        );
+        let db = Connection::open_with_flags(
+            uri,
+            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_URI,
+        )
+        .unwrap();
+        let meta = |key: &str| -> Value {
+            let s: String = db
+                .query_row("SELECT value FROM metadata WHERE key=?", [key], |r| {
+                    r.get(0)
+                })
+                .unwrap();
+            serde_json::from_str(&s).unwrap()
+        };
+        let plan = meta("plan");
+        let receipt = meta("verification");
+        assert_eq!(plan["input"], v);
+        assert_eq!(plan["order"], n);
+        assert_eq!(receipt["status"], "REPLAYED");
+        assert_eq!(receipt["vertex_class_complete"], false);
+        let mut stmt = db
+            .prepare("SELECT id,a,b,expanded,conductor FROM nodes ORDER BY id")
+            .unwrap();
+        cases = stmt
+            .query_map([], |r| {
+                Ok((
+                    Some(r.get::<_, u64>(0)?),
+                    PrimeCurve {
+                        p: 1637958981148213249,
+                        a: r.get(1)?,
+                        b: r.get(2)?,
+                    },
+                    r.get::<_, u64>(3)? == 1,
+                    r.get::<_, Option<u64>>(4)?,
+                ))
+            })
+            .unwrap()
+            .collect::<Result<Vec<_>, _>>()
+            .unwrap();
+        assert_eq!(cases.len(), 1869);
+        Some(
+            json!({"sha256":digest,"verification":receipt,"vertices":cases.len(),
+            "scope":"Every stored prefix vertex; original C frontier is NOT exhausted; conductor strata NOT_ESTABLISHED"}),
+        )
+    } else {
+        None
+    };
+    let requested = cases.len() * 2;
     let mut rows = vec![];
-    for i in 0..2 {
-        rows.push(match run(&c, n, i) {
-            Ok(v) => v,
-            Err(e) => json!({"target_index":i,"status":"failed","reason":e}),
-        });
+    for (vertex, c, expanded, conductor) in cases {
+        for i in 0..2 {
+            let mut result = match run(&c, n, i) {
+                Ok(v) => v,
+                Err(e) => json!({"curve":c,"target_index":i,"status":"failed","reason":e}),
+            };
+            result["graph_vertex"] = json!(vertex);
+            result["prefix_expanded"] = json!(expanded);
+            result["raw_prefix_conductor_uncertified"] = json!(conductor);
+            rows.push(result);
+        }
     }
-    let source = fs::read(file!()).expect("run from source checkout so source is bound");
+    // Bind the source compiled into this executable, not a mutable runtime file.
+    let source = include_bytes!("finite_field_k1.rs");
     let verified: Vec<_> = rows.iter().filter(|v| v["status"] == "verified").collect();
     let stats = |values: Vec<u64>| -> Value {
         if values.is_empty() {
@@ -408,11 +514,12 @@ fn main() {
             .collect(),
     );
     fs::write(out,serde_json::to_vec_pretty(&json!({"schema":"volcano-ff-k1-diagnostic/v1",
-        "input_sha256":sha256_hex(&raw),"source_sha256":sha256_hex(&source),
-        "scope":"Original C source model only; not its full graph or all conductor strata",
+        "input_sha256":sha256_hex(&raw),"source_sha256":sha256_hex(source),
+        "scope":if prefix.is_some(){"All 1869 known original C prefix vertices; not its full graph or all conductor strata"}else{"Original C source model only; not its full graph or all conductor strata"},
+        "prefix":prefix,
         "backend":"Reduced Tate/Miller then projected-prime-subgroup two-summand finite-field relations; no generic solver fallback",
-        "summary":{"requested":2,"verified":verified.len(),"failed":2-verified.len(),
-            "end_to_end_ns":times,"metrics":metrics,"scope":"Present verified observations only; raw failed rows preserved. Two public targets on one original model, not graph-wide or qualified timing."},
+        "summary":{"requested":requested,"verified":verified.len(),"failed":requested-verified.len(),
+            "end_to_end_ns":times,"metrics":metrics,"scope":"Present verified observations only; raw failed rows preserved. Two public target searches per model; not full-class or qualified timing."},
         "rows":rows})).unwrap()).unwrap();
 }
 
@@ -464,5 +571,37 @@ mod tests {
     #[test]
     fn rejects_degenerate_destination() {
         assert!(relation_solve(113, 7, 1, 1, &mut Work::default()).is_err());
+    }
+    #[test]
+    fn destination_relations_check_every_nontrivial_generator_and_target() {
+        for (c, n) in [
+            (
+                PrimeCurve {
+                    p: 113,
+                    a: 19,
+                    b: 2,
+                },
+                112,
+            ),
+            (
+                PrimeCurve {
+                    p: 1637958981148213249,
+                    a: 571607911220311176,
+                    b: 29329524900995129,
+                },
+                1637958981148213248,
+            ),
+        ] {
+            let mut w = Work::default();
+            let g = projected_point(&c, n / 7, 1, &mut w).unwrap();
+            let base = tate(&c, g, g, 7, &mut w).unwrap();
+            for generator_power in 1..7 {
+                let alpha = w.pow(base, generator_power, c.p);
+                for x in 1..7 {
+                    let beta = w.pow(alpha, x, c.p);
+                    assert_eq!(relation_solve(c.p, 7, alpha, beta, &mut w).unwrap().0, x);
+                }
+            }
+        }
     }
 }

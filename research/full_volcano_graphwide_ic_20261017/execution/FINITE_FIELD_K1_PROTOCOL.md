@@ -29,7 +29,18 @@ full multiplicative-group integer-smoothness index calculus. r=7 is an
 implementation diagnostic, with no scaling, sub-rho or security claim.
 
 Run two cold public targets, made by independently searching and cofactor
-projecting points, on original C. Include setup, projection, pairing, relation
+projecting points, on original C. Then run both public target searches on every
+one of the 1,869 models in its retained prefix, with no vertex sampling. The
+fixed prefix SHA-256 is
+`468ce8320b6b7deae37198ca3afc07534fa4fe0e950f621e45ad322f23a2c881`.
+Its existing replay receipt covers 4,903 maps and 1,024 expanded vertices;
+the remaining frontier is not exhausted and strata are NOT_ESTABLISHED.
+Keep the source-model run and prefix run separate. Preserve every prefix
+vertex id and expanded flag. Do not infer conductor strata from a partial DB.
+Read the fixed DB immutably and verify its input, order and replay metadata.
+Any unsuccessful target stays a failed row with its reason; do not omit it
+from requested/attempted denominators or silently call the prefix complete.
+Include setup, projection, pairing, relation
 collection, linear algebra and verification in end-to-end elapsed time.
 Record phase operation ledgers, actual query counts, candidate pair tests,
 relations, rank, missing/unpriced work and unqualified elapsed observations.
