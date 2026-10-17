@@ -28849,6 +28849,98 @@
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
+   "slug": "icv1-fp57-t536870914-6cabb0c9",
+   "icv1": "ICV1:fp-72057594692239361:536870914:72057594155368448:72057594692235986:unk:unk:r:6cabb0c957ab",
+   "family": "prime",
+   "params": {
+    "p": "72057594692239361",
+    "a": "72057594640571486",
+    "b": "72057418918128611"
+   },
+   "model_json": "{\"a\":\"72057594640571486\",\"b\":\"72057418918128611\",\"field\":\"fp-72057594692239361\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"72057594692239361\",\"v\":\"1\"}",
+   "trace": 536870914,
+   "order": "72057594155368448",
+   "j": "72057594692235986",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/full_volcano_classes_20261017/evidence/two-plan.json",
+    "research/full_volcano_classes_20261017/inputs/two.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp57-t536870914-f06621c1",
+   "icv1": "ICV1:fp-72057594692239361:536870914:72057594155368448:61246377931557386:unk:unk:r:f06621c18b5f",
+   "family": "prime",
+   "params": {
+    "p": "72057594692239361",
+    "a": "68729085115388107",
+    "b": "48675709858211155"
+   },
+   "model_json": "{\"a\":\"68729085115388107\",\"b\":\"48675709858211155\",\"field\":\"fp-72057594692239361\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"72057594692239361\",\"v\":\"1\"}",
+   "trace": 536870914,
+   "order": "72057594155368448",
+   "j": "61246377931557386",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/full_volcano_classes_20261017/evidence/two-floor-plan.json",
+    "research/full_volcano_classes_20261017/inputs/two-floor.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp57-tm536870941-8ba9239b",
+   "icv1": "ICV1:fp-72057601940934853:-536870941:72057602477805795:44919162374585067:unk:unk:r:8ba9239b1887",
+   "family": "prime",
+   "params": {
+    "p": "72057601940934853",
+    "a": "28655819626602497",
+    "b": "66385351484448529"
+   },
+   "model_json": "{\"a\":\"28655819626602497\",\"b\":\"66385351484448529\",\"field\":\"fp-72057601940934853\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"72057601940934853\",\"v\":\"1\"}",
+   "trace": -536870941,
+   "order": "72057602477805795",
+   "j": "44919162374585067",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/full_volcano_classes_20261017/evidence/three-floor-plan.json",
+    "research/full_volcano_classes_20261017/inputs/three-floor.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp57-tm536870941-e6d0c766",
+   "icv1": "ICV1:fp-72057601940934853:-536870941:72057602477805795:72057601940902085:unk:unk:r:e6d0c766a344",
+   "family": "prime",
+   "params": {
+    "p": "72057601940934853",
+    "a": "72057598549840069",
+    "b": "71979615803822277"
+   },
+   "model_json": "{\"a\":\"72057598549840069\",\"b\":\"71979615803822277\",\"field\":\"fp-72057601940934853\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"72057601940934853\",\"v\":\"1\"}",
+   "trace": -536870941,
+   "order": "72057602477805795",
+   "j": "72057601940902085",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/full_volcano_classes_20261017/evidence/three-plan.json",
+    "research/full_volcano_classes_20261017/inputs/three.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-fp57-t106-c1aa2a23",
    "icv1": "ICV1:fp-126100789566376697:106:126100789566376592:30289789144510153:unk:unk:r:c1aa2a2301d3",
    "family": "prime",
@@ -28871,6 +28963,52 @@
     "research/full_volcano_classes_20261016/evidence/validation/volcano-root-entry-plan.json",
     "research/full_volcano_classes_20261016/evidence/validation/volcano-root-layout-plan.json",
     "research/full_volcano_classes_20261016/inputs/A.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp59-t1073741954-4dd0b1ef",
+   "icv1": "ICV1:fp-288230445959117953:1073741954:288230444885376000:288230445958233217:unk:unk:r:4dd0b1ef0285",
+   "family": "prime",
+   "params": {
+    "p": "288230445959117953",
+    "a": "288228093099277441",
+    "b": "50668532689170053"
+   },
+   "model_json": "{\"a\":\"288228093099277441\",\"b\":\"50668532689170053\",\"field\":\"fp-288230445959117953\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"288230445959117953\",\"v\":\"1\"}",
+   "trace": 1073741954,
+   "order": "288230444885376000",
+   "j": "288230445958233217",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/full_volcano_classes_20261017/evidence/mixed-plan.json",
+    "research/full_volcano_classes_20261017/inputs/mixed.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp59-t1073741954-577193f8",
+   "icv1": "ICV1:fp-288230445959117953:1073741954:288230444885376000:51867586891726485:unk:unk:r:577193f8d326",
+   "family": "prime",
+   "params": {
+    "p": "288230445959117953",
+    "a": "48225064342821860",
+    "b": "185448819232354168"
+   },
+   "model_json": "{\"a\":\"48225064342821860\",\"b\":\"185448819232354168\",\"field\":\"fp-288230445959117953\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"288230445959117953\",\"v\":\"1\"}",
+   "trace": 1073741954,
+   "order": "288230444885376000",
+   "j": "51867586891726485",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/full_volcano_classes_20261017/evidence/mixed-floor-plan.json",
+    "research/full_volcano_classes_20261017/inputs/mixed-floor.json"
    ],
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"

@@ -11,6 +11,7 @@ Keep resolved and superseded records in the index.
 
 | Problem | Status | What it blocks | What would unblock it |
 | --- | --- | --- | --- |
+| [Full debug traits replay asserts in binary-subfield trace](curve-traits-debug-subfield-trace.md) | open | full debug catalogue generation/freshness replay after adding six prime models | isolate the unchanged binary-field input, explain/fix its trace assertion and complete full native replay |
 | [Generalized GPU rho workers for nine Certicom binary challenges](certicom-binary-gpu-rho-integration.md) | open | persistent, independently replayable GPU rho and qualified fastest-arithmetic choices for all nine exact challenges | exact CPU bindings, per-curve GPU replay and durable DP/collision path, then matched device performance gates |
 | [p61 selected-class census and adjacency completion](p61-full-isogeny-class-census.md) | investigating | complete selected-class graph and its use as an admitted large-field corpus | exact 358,094,304-vertex ledger, verified selected-degree adjacency, and adequate durable storage |
 | [Full large-volcano class storage and execution](full-volcano-class-storage-and-execution.md) | open | complete fixed five-class datasets and graph-wide multi-method ECDLP/IC measurements | durable full-run storage, complete generation/map replay, and matched ecbench workloads with all requested targets and statistics |

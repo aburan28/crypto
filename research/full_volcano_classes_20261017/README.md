@@ -17,6 +17,13 @@ graph rather than equating the source conductor with the Frobenius conductor.
 The archive contains SQLite databases, all-node CSVs, all-kernel JSONL,
 stratum adjacency counts and an explicit-map example for every stratum.
 
+[Download the complete archive](https://drive.google.com/file/d/1SSyQ5bY0RPTK_abRW6MCG78cdANonBVi/view?usp=drivesdk)
+or [open the PDF](https://drive.google.com/file/d/1E0QPO5jRkOJ9iFD4EQvWymeguxp_QVyI/view?usp=drivesdk).
+Drive metadata readback verified both uploads' names, sizes and parent folder.
+The local ZIP CRC and every delivered file's SHA-256 passed; a remote whole-file
+hash was not checked. The 10,066,274-byte archive SHA-256 is
+`17c2d5d3290925b5fe0d84534423dd6e85b1804d4382dad0c00955b47a76458e`.
+
 See [the report](reports/run-20261017/REPORT.md), [PDF](reports/run-20261017/report.pdf),
 [native counts](evidence/coverage.json), [protocol](PROTOCOL.md) and
 `delivery.json` for hashes and verified Drive links.
@@ -53,3 +60,13 @@ were retained; using a `.txt` stdout log fixed the orchestration. No graph
 data or cryptographic arithmetic changed. Conductor reservation was attempted
 but unavailable (127). Canonical IC/rho timing graphs are unchanged because
 this run supplies graph coverage, not solver performance measurements.
+
+The catalogue cover generator and full recheck verified all 2,126 registered
+models. Browser and leaderboard generation/freshness checks passed. The full
+debug traits rebuild asserted in existing binary-subfield code and was stopped;
+its queued full check was not run. A native incremental refresh computed the
+six new prime-model records, preserved all 2,296 baseline rows exactly, and
+verified unchanged hashes for all other inputs. This is explicitly not a full
+traits replay: see [the open validation problem](../../problems/curve-traits-debug-subfield-trace.md).
+Global naming lint still reports five legacy occurrences in two unchanged
+archive reports; frozen evidence was preserved.
