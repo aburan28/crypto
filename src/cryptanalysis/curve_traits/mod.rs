@@ -46,6 +46,7 @@ pub mod query;
 pub mod sources;
 pub mod subfield;
 pub mod torsion;
+pub mod walk;
 
 use std::collections::{BTreeMap, HashMap};
 use std::sync::Mutex;
@@ -1164,6 +1165,10 @@ fn endomorphism(
     let mut bound = BigUint::one();
     let mut exact = BigUint::one();
     let mut resolved = true;
+    let v_full: BigUint = frob.conductor.parse().expect("written by frobenius()");
+    // Cycles of horizontal isogenies (walk.rs), walked once, when first
+    // needed: before the point test, which costs far more.
+    let mut cycles: Option<Vec<walk::Cycle>> = None;
     for (ell, depth) in &v_primes {
         let e = val(&f0, ell);
         let small = ell.to_u64();
@@ -1198,9 +1203,13 @@ fn endomorphism(
                     let mut s = 1u32.max(depth.saturating_sub(e));
                     let mut stopped = false;
                     while s < *depth {
-                        match small
-                            .and_then(|l| torsion::scalar_on_power(&c.model, &c.trace, l, s + 1))
-                        {
+                        // The division polynomial f_{ℓ^{s+1}} where it is
+                        // small, else points over GF(q^m) (points.rs).
+                        match small.and_then(|l| {
+                            torsion::scalar_on_power(&c.model, &c.trace, l, s + 1).or_else(|| {
+                                points::scalar_on_power_by_points(&c.model, &c.trace, l, s + 1)
+                            })
+                        }) {
                             Some(true) => s += 1,
                             Some(false) => {
                                 stopped = true;
@@ -1244,14 +1253,28 @@ fn endomorphism(
                     )
                 }
                 None => {
-                    // Depth 1, beyond the division polynomial: decide it
-                    // from points over GF(q^k) (points.rs).
-                    let by_points = if *depth == 1 {
+                    // Beyond the division polynomial: a cycle that puts ℓ
+                    // outside the conductor, else (depth 1) points over
+                    // GF(q^k) (points.rs).
+                    let cycles = cycles
+                        .get_or_insert_with(|| walk::conductor_from_cycles(&c.model, &dk, &v_full));
+                    let by_cycle = !cycles.is_empty() && walk::cap(cycles, ell) == 0;
+                    let by_points = if by_cycle {
+                        None
+                    } else if *depth == 1 {
                         small.and_then(|l| points::scalar_by_points(&c.model, &c.trace, l))
                     } else {
                         None
                     };
                     match by_points {
+                        _ if by_cycle => (
+                            Some(0),
+                            0,
+                            format!(
+                                "{}: an endomorphism of conductor prime to ℓ, the crater",
+                                walk::describe(cycles)
+                            ),
+                        ),
                         Some(true) => (
                             Some(0),
                             0,
@@ -1309,6 +1332,59 @@ fn endomorphism(
         .any(|l| l.level.is_some() && l.method.starts_with("Frobenius"))
     {
         contains.push("the levels the scalar test on E[ℓ] resolves".into());
+    }
+    // Levels still open: a closed cycle of horizontal isogenies is an
+    // endomorphism whose conductor the conductor of End(E) divides
+    // (walk.rs).  It must also agree with every level already resolved.
+    if !resolved || cycles.as_ref().is_some_and(|c| !c.is_empty()) {
+        let cycles =
+            cycles.get_or_insert_with(|| walk::conductor_from_cycles(&c.model, &dk, &v_full));
+        if !cycles.is_empty() {
+            let how = walk::describe(cycles);
+            for lv in levels.iter_mut() {
+                let ell: BigUint = lv.ell.parse().expect("written above");
+                let cap = walk::cap(cycles, &ell);
+                match lv.level {
+                    Some(level) if level > cap => {
+                        return Err(format!(
+                            "level {level} at ℓ = {ell}, but {how} bounds it by {cap}"
+                        ));
+                    }
+                    Some(_) => {}
+                    None if cap == 0 => {
+                        lv.level = Some(0);
+                        lv.level_at_most = 0;
+                        lv.method =
+                            format!("{how}: an endomorphism of conductor prime to ℓ, the crater");
+                    }
+                    None if cap < lv.level_at_most => {
+                        lv.level_at_most = cap;
+                        lv.method = format!("{}; {how}: level at most {cap}", lv.method);
+                    }
+                    None => {}
+                }
+            }
+            for cy in cycles.iter() {
+                let shown: Vec<String> = cy.multiples.iter().map(BigUint::to_string).collect();
+                contains.push(format!(
+                    "Z[α], α the endomorphism of a cycle of {} {}-isogenies through E (f divides {})",
+                    cy.steps,
+                    cy.degree,
+                    shown.join(" or ")
+                ));
+            }
+            bound = BigUint::one();
+            exact = BigUint::one();
+            resolved = true;
+            for lv in &levels {
+                let ell: BigUint = lv.ell.parse().expect("written above");
+                bound *= ell.pow(lv.level_at_most);
+                match lv.level {
+                    Some(level) => exact *= ell.pow(level),
+                    None => resolved = false,
+                }
+            }
+        }
     }
     Ok(if resolved {
         EndomorphismRecord {
@@ -1746,7 +1822,17 @@ impl TraitFile {
             }
         }
         let fx = Factoring::new(budget, hint_primes);
-        let records: Result<Vec<_>, String> = curves.par_iter().map(|c| compute(c, &fx)).collect();
+        let records: Result<Vec<_>, String> = curves
+            .par_iter()
+            .map(|c| {
+                let t0 = std::time::Instant::now();
+                let r = compute(c, &fx);
+                if std::env::var_os("TRAITS_TIMING").is_some() {
+                    eprintln!("TIMING {} {:.3}", c.slug, t0.elapsed().as_secs_f64());
+                }
+                r
+            })
+            .collect();
         let file = TraitFile {
             schema: SCHEMA.into(),
             generated_by: "cargo run --release --bin curve_traits -- build".into(),
