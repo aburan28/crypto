@@ -1,0 +1,9 @@
+Command: LEAN_TOOLCHAIN=leanprover/lean4:v4.35.0 lean research/n83_indexed4_id30_20261017/FourByteId30.lean
+Exit: 0
+Output:
+'N83FourByteId30.encode_nonzero_and_fits' depends on axioms: [propext, Classical.choice, Quot.sound]
+'N83FourByteId30.decode_roundtrip' depends on axioms: [propext, Classical.choice, Quot.sound]
+'N83FourByteId30.load75_bound' depends on axioms: [propext, Quot.sound]
+
+The toolchain manager emitted a network-query warning before using the installed pinned v4.35.0 release. The Lean process exited 0 and printed all three #print axioms results above.
+lean4checker --fresh: unavailable on this host (command -v returned no path).

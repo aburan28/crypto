@@ -1,0 +1,25 @@
+{
+  "architecture": "arm64",
+  "binary_sha256": "b3fd21350dc988e3f8980fab870439a1169f2204a990200dba514503c6f69849",
+  "build_command": "env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/Volumes/SSD990/crypto/artifacts/n83_indexed4_id30_20261017/target cargo build --locked --release --example koblitz_orbit_dlp_fast",
+  "cargo": "cargo 1.93.1 (Homebrew)",
+  "log_sha256": {
+    "cargo_build.stderr": "c5a8ee23c67116df7ed31219901ee450e6672e00443594f7cfba7cea23d2d7f9",
+    "cargo_build.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cargo_test.stderr": "bef64d60ae9538e88f141cd5be1b2218404f19d00616ad61938b8c93ed8b8cb5",
+    "cargo_test.stdout": "74a14e6ec53c9d7c8275d7fe3b6629dc3f98fa08135a9b40588ffba8f20f5e75"
+  },
+  "os": "macOS 26.6",
+  "raw_test_stdout_sha256": "8fd2d0e5ba0d16f9c0faf6e29bac993f2697ead6716442e10daec9ace2d92163",
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "schema": "n83.indexed4-id30-build-test/v1",
+  "screen_plan_sha256": "14584ea80b9e1a93fc5d3ef0d9ce6de712ae1628b20e78819ecfbf310da1690b",
+  "selection_plan_sha256": "44a068cefe27ae4d9e51220f836bcdccf7d1d86bc480b8219abbc70f0101a275",
+  "source_sha256": "c73985a15892ea1674a3ffee8f3fdb00fdfd4728a41b3edda4645b054d573050",
+  "status": "PASS_RELEASE_UNIT_TEST_AND_BUILD",
+  "test_command": "env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/Volumes/SSD990/crypto/artifacts/n83_indexed4_id30_20261017/target cargo test --locked --release --example koblitz_orbit_dlp_fast indexed_four_byte_id30_preserves_large_ids_and_exact_keys",
+  "test_count_failed": 0,
+  "test_count_passed": 1,
+  "test_name": "indexed_four_byte_id30_preserves_large_ids_and_exact_keys",
+  "versioned_test_stdout_normalization": "trailing_blank_line_removed"
+}

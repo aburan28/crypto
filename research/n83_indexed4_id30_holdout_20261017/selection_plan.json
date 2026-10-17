@@ -1,0 +1,19 @@
+{
+  "arm_names": [
+    "indexed5_id30",
+    "indexed4_id30"
+  ],
+  "choice_rule": "dispatch_only_if_both_complete_and_four_byte_geometric_online_lower",
+  "k": 4096,
+  "schema": "n83.indexed4-id30-holdout-selection-plan/v1",
+  "screen_plan_sha256": "14584ea80b9e1a93fc5d3ef0d9ce6de712ae1628b20e78819ecfbf310da1690b",
+  "sha256": {
+    "research/n83_indexed4_id30_20261017/plan.json": "14584ea80b9e1a93fc5d3ef0d9ce6de712ae1628b20e78819ecfbf310da1690b",
+    "research/n83_indexed4_id30_holdout_20261017/PROTOCOL.md": "627071e3e9234b42899f9703c4857a29cb63793bd3e6c4e08477ca62cdcb1aba",
+    "research/n83_indexed4_id30_holdout_20261017/answers.jsonl": "05890e113df6df51d1f76b0d7b741b61d0e7e455e74cf386820c6da4871ccd78",
+    "research/n83_indexed4_id30_holdout_20261017/choose.py": "ae44ed95ae2c85bebcf4c74ffccbc60ce1a21b0c28e07281e3e307d8955b2732",
+    "research/n83_indexed4_id30_holdout_20261017/generate.py": "b4483a89f78308faad5ce3ca54d9adb7e6c5e4240c9c695adf7b034b98e87eac",
+    "research/n83_indexed4_id30_holdout_20261017/manifest.json": "713e2be4b9590566fe4cdd28f37a6346f6475d6ba4fd828086dc846450a1a102",
+    "research/n83_indexed4_id30_holdout_20261017/targets.jsonl": "9382792536e697b8e1799e2b8a9fc7c00f3912fc2d871b409aa93ebbf35d7307"
+  }
+}
