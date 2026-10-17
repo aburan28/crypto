@@ -63,3 +63,8 @@ unadmitted, the fixed fallback is K1120/root11
 chosen from the earlier exposed-point screen before the ten points above
 are used. The fallback does not turn a null finalist result into a selected
 winner. Use two dedicated Tier 1 host strata of five same-point IC/rho pairs.
+The versioned runner, independent verifier, two-metric paired selector,
+provider-archive binder, IC1 row materializer and cloud workflow implement
+that preregistered next step. The workflow waits for a later `dispatch.json`
+bound to the independently replayed finalist result; the ten-point fixture
+has not been dispatched.

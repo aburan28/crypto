@@ -13,6 +13,9 @@ fixed fallback K1120/root11,
 A fallback measurement preserves the finalist panel's null selection.
 Commit and independently replay the finalist selection and its provider
 artifact binding before dispatching this comparison.
+The branch workflow is armed only by a later committed `dispatch.json` with
+the SHA-256 digests of those two versioned finalist files. No dispatch file
+is present in the frozen fixture commit.
 
 The ten sealed public points are in `targets.jsonl`, SHA-256
 `9bf9bfca72d4e82a5780759d52ac000b812ca25e831af04238983c8b72d2d777`.

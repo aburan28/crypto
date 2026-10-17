@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+"""Seal the finalist result binding that arms the K3072 cloud workflow."""
+
+import argparse
+import json
+from pathlib import Path
+
+import importlib.util
+
+HERE = Path(__file__).resolve().parent
+spec = importlib.util.spec_from_file_location('n83_k3072_dispatch_run', HERE / 'run.py')
+runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('finalist_result_dir', type=Path)
+    args = parser.parse_args()
+    directory = args.finalist_result_dir.resolve()
+    validated = directory / 'validated_rows.json'
+    selection = directory / 'selection.json'
+    _, choice = runner.choose_second(validated, selection)
+    record = json.loads(validated.read_text())
+    if record.get('run_id') is None or record.get('head_sha') is None:
+        raise ValueError('finalist provider run or source head is absent')
+    dispatch = {
+        'schema': 'n83.k3072-current-source-dispatch/v1',
+        'finalist_run_id': record['run_id'],
+        'finalist_head_sha': record['head_sha'],
+        'finalist_validated_sha256': runner.parent.digest(validated),
+        'finalist_selection_sha256': runner.parent.digest(selection),
+        'comparison_candidate_id': choice['comparison_candidate_id'],
+        'fallback_used': choice['fallback_used'],
+    }
+    path = HERE / 'dispatch.json'
+    blob = json.dumps(dispatch, sort_keys=True, indent=2) + '\n'
+    if path.exists() and path.read_text() != blob:
+        raise ValueError('sealed dispatch differs')
+    path.write_text(blob)
+    print(json.dumps(dispatch, sort_keys=True))
+
+
+if __name__ == '__main__':
+    main()
