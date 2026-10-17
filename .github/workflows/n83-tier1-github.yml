@@ -1,0 +1,138 @@
+name: N83 same-instance Tier 1 selector and five-point panel
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: n83-tier1-github-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  same-instance-panel:
+    if: github.repository == 'aburan28/crypto' && github.sha == '4238a20bacba174b634cd9efdf88d048e61a77ff'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 170
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Freeze selector inputs and build environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          mkdir -p "$RUNNER_TEMP/n83-tier1-github/bin" \
+            "$RUNNER_TEMP/n83-tier1-github/selector/bin"
+          python3 research/n83_tier1_online_20261016/selector_run.py \
+            --preflight --github-two-core > \
+            "$RUNNER_TEMP/n83-tier1-github/selector-preflight.json"
+          rustc --version > "$RUNNER_TEMP/n83-tier1-github/rustc-version.txt"
+          cargo --version > "$RUNNER_TEMP/n83-tier1-github/cargo-version.txt"
+
+      - name: Test and build exact IC and same-point rho producers
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-tier1-github-target"
+          export CARGO_BUILD_JOBS=2
+          export RUST_TEST_THREADS=1
+          cargo test --release --locked --lib > \
+            "$RUNNER_TEMP/n83-tier1-github/libtest.log" 2>&1
+          cargo test --release --locked --example koblitz_orbit_dlp_fast > \
+            "$RUNNER_TEMP/n83-tier1-github/ic-example-tests.log" 2>&1
+          cargo test --release --locked --example n83_rho_optimization_eval > \
+            "$RUNNER_TEMP/n83-tier1-github/rho-example-tests.log" 2>&1
+          cargo build --release --locked --example koblitz_orbit_dlp_fast > \
+            "$RUNNER_TEMP/n83-tier1-github/ic-build.log" 2>&1
+          cargo build --release --locked --example n83_rho_optimization_eval > \
+            "$RUNNER_TEMP/n83-tier1-github/rho-build.log" 2>&1
+          cp "$CARGO_TARGET_DIR/release/examples/koblitz_orbit_dlp_fast" \
+            "$RUNNER_TEMP/n83-tier1-github/bin/koblitz_orbit_dlp_fast"
+          cp "$CARGO_TARGET_DIR/release/examples/n83_rho_optimization_eval" \
+            "$RUNNER_TEMP/n83-tier1-github/bin/n83_rho_optimization_eval"
+          cp "$RUNNER_TEMP/n83-tier1-github/bin/"* \
+            "$RUNNER_TEMP/n83-tier1-github/selector/bin/"
+
+      - name: Run and independently replay the exposed-point selector
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 research/n83_tier1_online_20261016/selector_run.py \
+            --github-two-core \
+            --binary "$RUNNER_TEMP/n83-tier1-github/selector/bin/koblitz_orbit_dlp_fast" \
+            --rho-binary "$RUNNER_TEMP/n83-tier1-github/selector/bin/n83_rho_optimization_eval" \
+            --output "$RUNNER_TEMP/n83-tier1-github/selector/results" \
+            2>&1 | tee "$RUNNER_TEMP/n83-tier1-github/selector/run.log"
+          python3 research/n83_tier1_online_20261016/selector_verify.py \
+            "$RUNNER_TEMP/n83-tier1-github/selector/results" \
+            2>&1 | tee "$RUNNER_TEMP/n83-tier1-github/selector/verify.log"
+          python3 research/n83_tier1_online_20261016/selector_select.py \
+            "$RUNNER_TEMP/n83-tier1-github/selector/results" \
+            --receipt "$RUNNER_TEMP/n83-tier1-github/selector/seal.json" \
+            2>&1 | tee "$RUNNER_TEMP/n83-tier1-github/selector/select.log"
+          cp research/n83_tier1_online_20261016/selection.json \
+            research/n83_tier1_online_20261016/candidate_*.json \
+            "$RUNNER_TEMP/n83-tier1-github/selector/"
+
+      - name: Seal selector before loading fresh points
+        id: seal_upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-tier1-selector-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-tier1-github/selector/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Confirm exact immutable selector artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_ID: ${{ steps.seal_upload.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.seal_upload.outputs.artifact-digest }}
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 research/n83_tier1_online_20261016/github_seal.py \
+            --artifact-id "$ARTIFACT_ID" \
+            --artifact-digest "$ARTIFACT_DIGEST" \
+            --selector-results "$RUNNER_TEMP/n83-tier1-github/selector/results" \
+            --output "$RUNNER_TEMP/n83-tier1-github/selector/github-artifact-seal.json" \
+            2>&1 | tee "$RUNNER_TEMP/n83-tier1-github/selector/github-seal.log"
+
+      - name: Run five fresh same-point IC/rho pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 research/n83_tier1_online_20261016/run.py \
+            --fixture-preflight > "$RUNNER_TEMP/n83-tier1-github/fixture-preflight.json"
+          python3 research/n83_tier1_online_20261016/run.py --github-host \
+            --binary "$RUNNER_TEMP/n83-tier1-github/bin/koblitz_orbit_dlp_fast" \
+            --rho-binary "$RUNNER_TEMP/n83-tier1-github/bin/n83_rho_optimization_eval" \
+            --output "$RUNNER_TEMP/n83-tier1-github/results" \
+            2>&1 | tee "$RUNNER_TEMP/n83-tier1-github/run.log"
+
+      - name: Independently replay all five points
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          if [ -d "$RUNNER_TEMP/n83-tier1-github/results" ]; then
+            python3 research/n83_tier1_online_20261016/verify.py \
+              "$RUNNER_TEMP/n83-tier1-github/results" \
+              2>&1 | tee "$RUNNER_TEMP/n83-tier1-github/verify.log"
+          fi
+
+      - name: Preserve all raw rows and bounded failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-tier1-full-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-tier1-github/
+          if-no-files-found: error
+          retention-days: 14

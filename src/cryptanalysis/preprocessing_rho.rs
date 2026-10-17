@@ -137,9 +137,13 @@ impl PreprocessingTable {
 // (which corresponds to some g^a), the discrete log of h is
 // recovered as `a_table - steps_online (mod n)`.
 
+#[inline]
+fn low_byte(x: &BigUint) -> u8 {
+    x.iter_u32_digits().next().unwrap_or(0) as u8
+}
+
 fn partition(x: &BigUint) -> u8 {
-    let bytes = x.to_bytes_be();
-    bytes.last().copied().unwrap_or(0) & 1
+    low_byte(x) & 1
 }
 
 fn step_g(x: &BigUint, a: &BigUint, g: &BigUint, p: &BigUint, n: &BigUint) -> (BigUint, BigUint) {
@@ -153,8 +157,7 @@ fn is_distinguished(x: &BigUint, dp_bits: u8) -> bool {
     if dp_bits == 0 {
         return true;
     }
-    let bytes = x.to_bytes_be();
-    let last = bytes.last().copied().unwrap_or(0);
+    let last = low_byte(x);
     if dp_bits >= 8 {
         last == 0
     } else {
@@ -337,6 +340,33 @@ fn _link() {
 mod tests {
     use super::*;
     use num_bigint::BigUint;
+
+    #[test]
+    fn low_byte_checks_match_serialized_walk_rule() {
+        let values = [
+            BigUint::zero(),
+            BigUint::one(),
+            BigUint::from(255u32),
+            BigUint::from(256u32),
+            (BigUint::one() << 64usize) + 256u32,
+            (BigUint::one() << 130usize) + 0x1200u32,
+        ];
+        for x in &values {
+            let last = x.to_bytes_be().last().copied().unwrap_or(0);
+            assert_eq!(low_byte(x), last);
+            assert_eq!(partition(x), last & 1);
+            for dp_bits in 0..=u8::MAX {
+                let expected = if dp_bits == 0 {
+                    true
+                } else if dp_bits >= 8 {
+                    last == 0
+                } else {
+                    last & ((1u8 << dp_bits) - 1) == 0
+                };
+                assert_eq!(is_distinguished(x, dp_bits), expected);
+            }
+        }
+    }
 
     /// Test build + online on a small Sophie-Germain group.
     /// p = 1019, q = 509 (Sophie Germain pair).  g = 2, plant

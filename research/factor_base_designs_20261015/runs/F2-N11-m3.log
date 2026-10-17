@@ -1,0 +1,11 @@
+== N11 m=3 p1: commit f287673fe73be1b340167d1436d389f259926889, budget 300 s, grace 120 s, ulimit -v 13000000, started 2026-10-15T21:55:47Z
+N11  m=3 t= 2 target=0 b=2.000 |V|=4 n_vars=15 n_eqs=16 D=4 reached=4 0.0 s ok
+N11  m=3 t= 2 target=1 b=2.000 |V|=4 n_vars=15 n_eqs=16 D=4 reached=4 0.0 s ok
+N11  m=3 t= 3 target=0 b=3.000 |V|=8 n_vars=20 n_eqs=21 D=4 reached=4 0.1 s ok
+N11  m=3 t= 3 target=1 b=3.000 |V|=8 n_vars=20 n_eqs=21 D=4 reached=4 0.1 s ok
+N11  m=3 t= 4 target=0 b=4.000 |V|=16 n_vars=25 n_eqs=26 D=4 reached=4 1.9 s ok
+N11  m=3 t= 4 target=1 b=4.000 |V|=16 n_vars=25 n_eqs=26 D=4 reached=4 1.9 s ok
+N11  m=3 t= 5 target=0 b=5.000 |V|=32 n_vars=30 n_eqs=31 D=5 reached=5 301.1 s timeout (F4 budget of 300 s)
+N11  m=3 t= 5 target=1 b=5.000 |V|=32 n_vars=30 n_eqs=31 D=5 reached=5 301.1 s timeout (F4 budget of 300 s)
+-- N11 m=3: a system at t = 5 hit a limit or failed; the series stops
+== N11 m=3: ended 2026-10-15T22:05:56Z

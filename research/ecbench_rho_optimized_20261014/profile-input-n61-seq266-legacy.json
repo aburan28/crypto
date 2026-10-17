@@ -1,0 +1,22 @@
+{
+  "schema": "ecbench.child_input/v1",
+  "curve": {
+    "kind": "koblitz",
+    "a": 0,
+    "n": 61
+  },
+  "target_seed": 2026101401,
+  "target_index": 0,
+  "target_kind": "public",
+  "expected_workload_id": "W3a517768b166",
+  "method": {
+    "id": "rho.signed_frobenius_strong_legacy",
+    "params": {
+      "dp_bits": "4",
+      "lanes": "32",
+      "step_cap_factor": "2000"
+    }
+  },
+  "expected_method_id": "ECM1hde93c20646a7",
+  "algorithm_seed": 5480128907060238240
+}

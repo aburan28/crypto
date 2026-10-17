@@ -1,0 +1,88 @@
+{
+  "schema": "ec-hardness/p61-adjacency-test-results/v1",
+  "rust": {
+    "producer_commit": "f9b48fcf916bfa2b0b6fbec06e8b7c4137ceef96",
+    "verifier_commit": "92a62be6471358edb3f9becaeb56c94c24a90b7e",
+    "checks": [
+      {
+        "command": "cargo check --release --bin p61_isogeny_adjacency",
+        "source_commit": "f9b48fcf916bfa2b0b6fbec06e8b7c4137ceef96",
+        "exit_code": 0,
+        "status": "pass"
+      },
+      {
+        "command": "cargo test --release --lib p61_adjacency",
+        "source_commit": "f9b48fcf916bfa2b0b6fbec06e8b7c4137ceef96",
+        "elapsed_seconds": 516,
+        "passed": 4,
+        "failed": 0,
+        "filtered_out": 4216,
+        "exit_code": 0,
+        "status": "pass"
+      },
+      {
+        "command": "cargo check --release --bin p61_isogeny_adjacency",
+        "source_commit": "92a62be6471358edb3f9becaeb56c94c24a90b7e",
+        "exit_code": 0,
+        "status": "pass"
+      },
+      {
+        "command": "cargo build --release --bin p61_isogeny_adjacency",
+        "source_commit": "92a62be6471358edb3f9becaeb56c94c24a90b7e",
+        "elapsed_seconds": 364,
+        "exit_code": 0,
+        "status": "pass"
+      }
+    ]
+  },
+  "supervisor": {
+    "preserved_failure": {
+      "command": "python3 research/p61_isogeny_class_20261014/test_run_adjacency_campaign.py",
+      "status": "test_infrastructure_failure",
+      "error": "the importlib-loaded module was not registered in sys.modules before dataclass evaluation",
+      "resolution": "register the module before executing it; no campaign output was produced by the failed test invocation"
+    },
+    "passing_runs": [
+      {
+        "command": "python3 research/p61_isogeny_class_20261014/test_run_adjacency_campaign.py",
+        "passed": 4,
+        "failed": 0,
+        "status": "pass"
+      },
+      {
+        "command": "python3 research/p61_isogeny_class_20261014/test_run_adjacency_campaign.py",
+        "passed": 5,
+        "failed": 0,
+        "status": "pass",
+        "added_gate": "--follow is incompatible with --max-windows"
+      },
+      {
+        "command": "python3 -m py_compile research/p61_isogeny_class_20261014/run_adjacency_campaign.py research/p61_isogeny_class_20261014/test_run_adjacency_campaign.py",
+        "exit_code": 0,
+        "status": "pass"
+      }
+    ]
+  },
+  "real_data_replay": [
+    {
+      "vertices": 1,
+      "directed_edges": 7,
+      "producer_status": "pass",
+      "verifier_status": "pass"
+    },
+    {
+      "vertices": 64,
+      "directed_edges": 448,
+      "producer_status": "pass",
+      "verifier_status": "pass",
+      "admission_status": "pass"
+    },
+    {
+      "vertices": 4096,
+      "directed_edges": 28672,
+      "producer_status": "pass",
+      "verifier_status": "pass",
+      "admission_status": "pass"
+    }
+  ]
+}
