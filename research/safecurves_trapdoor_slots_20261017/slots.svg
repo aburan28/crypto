@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="540" font-family="DejaVu Sans, sans-serif" font-size="13">
+  <rect width="980" height="540" fill="#ffffff"/>
+  <text x="20" y="28" font-size="17" font-weight="bold">SafeCurves / SECG trapdoor slots: what each criterion can and cannot see</text>
+
+  <text x="20" y="58" font-weight="bold">criteria levels</text>
+  <rect x="20" y="66" width="220" height="30" fill="#dff" stroke="#369"/>
+  <text x="30" y="86">SECG (sec2): order only</text>
+  <rect x="20" y="102" width="220" height="30" fill="#cfe" stroke="#369"/>
+  <text x="30" y="122">SafeCurves: + rho, transfer, |D|, twist, ladder, rigidity</text>
+
+  <text x="280" y="58" font-weight="bold">slots</text>
+  <!-- T5 -->
+  <rect x="280" y="66" width="330" height="56" fill="#fdd" stroke="#933"/>
+  <text x="290" y="86" font-weight="bold">T5 sextic/quartic twist weakness (j = 0 / j = 1728)</text>
+  <text x="290" y="104">twist criterion certifies 1 of 6 classes; round B: grind is free</text>
+  <text x="625" y="86">passes SECG</text>
+  <text x="625" y="102">passes SafeCurves only on non-Montgomery models</text>
+  <!-- T4 -->
+  <rect x="280" y="130" width="330" height="44" fill="#fdd" stroke="#933"/>
+  <text x="290" y="148">T4 quadratic-twist weakness (invalid curve)</text>
+  <text x="290" y="164">killed by SafeCurves twist check; SECG: open</text>
+  <!-- T3 -->
+  <rect x="280" y="182" width="330" height="44" fill="#ffd" stroke="#993"/>
+  <text x="290" y="200">T3 grind onto secret coefficient class (BADA55)</text>
+  <text x="290" y="216">rigidity is documented generation, not proof</text>
+  <!-- T2 -->
+  <rect x="280" y="234" width="330" height="44" fill="#dfd" stroke="#393"/>
+  <text x="290" y="252">T2 special prime / non-pairing transfer</text>
+  <text x="290" y="268">transfer check kills pairings only</text>
+  <!-- T1 -->
+  <rect x="280" y="286" width="330" height="44" fill="#fdd" stroke="#933"/>
+  <text x="290" y="304" font-weight="bold">T1 representation (hidden isogeny / model advantage)</text>
+  <text x="290" y="320">no public check at any criteria level</text>
+
+  <text x="20" y="360" font-weight="bold">round A: SECG j = 0 sextic orbits (measured, rho cost per class)</text>
+  <rect x="20" y="370" width="940" height="150" fill="#f8f8f8" stroke="#999"/>
+  <text x="35" y="392">curve       published   quadratic twist (certified)   weakest other sextic class</text>
+  <text x="35" y="416">secp192k1   2^96        2^68.5                       2^28.0   (d = 3)</text>
+  <text x="35" y="440">secp224k1   2^112.5     2^111.5                       2^55.5   (d = 8)</text>
+  <text x="35" y="464">secp256k1   2^128       2^110                        2^65.5   (d = 3, a cubic twist)</text>
+  <text x="35" y="498">six orders = {p+1 +/- t_i}, t1 = t2 + t3 (j = 0 CM relation) - the full orbit is</text>
+  <text x="35" y="514">derivable from the public (p, n), so a complete-orbit twist check is cheap.</text>
+  <text x="640" y="400" font-weight="bold">round B (toy grind)</text>
+  <text x="640" y="420">48 bits: found in 2 primes</text>
+  <text x="640" y="438">96 bits: found in 3 primes</text>
+  <text x="640" y="456">sibling rho 2^6.5 / 2^14</text>
+</svg>
