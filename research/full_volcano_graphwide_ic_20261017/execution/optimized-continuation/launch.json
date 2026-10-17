@@ -1,0 +1,69 @@
+{
+  "schema": "volcano-optimized-launch/v1",
+  "observed_at_utc": "2026-10-17T04:44:11.883442+00:00",
+  "campaign": "/workspace/volcano_ic_release_survey_20261017",
+  "source_cwd": "/workspace/scratch/volcano-release-source",
+  "source_head": "9bca26ae25f480f4b2162fc03f0d4d0ff20ed3cf",
+  "worker": {
+    "max_bytes": 2147483648,
+    "max_jobs": 24823,
+    "max_seconds": 86400,
+    "pid": 64909,
+    "started_ms": "1792212172262"
+  },
+  "command": [
+    "/workspace/volcano_ic_release_survey_20261017/volcano-ic-driver",
+    "run",
+    "/workspace/volcano_ic_release_survey_20261017",
+    "24823",
+    "86400",
+    "2147483648"
+  ],
+  "process_alive_at_observation": true,
+  "observed_argv_matches_frozen_driver": true,
+  "manifest_sha256": "8b1e834f21bd5ef9e6e9d1ceb52acf596d62726611463ca2b32f06ad87c8e56f",
+  "optimization_addendum_sha256": "9d7375aa90550fa9a14cc099caace54a22142b0d49ec36355daa838e13c325d9",
+  "frozen_driver_and_ecbench_hashes": "MATCH_MANIFEST",
+  "observed_status": {
+    "campaign": "/workspace/volcano_ic_release_survey_20261017",
+    "coverage": [
+      {
+        "graph": "mixed",
+        "state": "audited",
+        "vertices": 1
+      },
+      {
+        "graph": "mixed",
+        "state": "queued",
+        "vertices": 10068
+      },
+      {
+        "graph": "mixed",
+        "state": "running",
+        "vertices": 1
+      },
+      {
+        "graph": "three",
+        "state": "audited",
+        "vertices": 2
+      },
+      {
+        "graph": "three",
+        "state": "queued",
+        "vertices": 6559
+      },
+      {
+        "graph": "two",
+        "state": "audited",
+        "vertices": 2
+      },
+      {
+        "graph": "two",
+        "state": "queued",
+        "vertices": 8190
+      }
+    ]
+  },
+  "snapshot_scope": "Native status observed during execution; not a stopped checkpoint or a cloud upload of the live campaign. The 99-node delivered dev snapshot is separate.",
+  "timing": "UNQUALIFIED_DESCRIPTIVE; no build, test or replay job left active at launch; ordinary delivery/git activity may overlap counts-only sessions."
+}

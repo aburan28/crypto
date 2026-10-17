@@ -23,6 +23,10 @@ pairs** have no completed baseline report to compare. The
 [optimized continuation](optimized-continuation/optimization.json) retain that
 distinction. No optimized speedup is claimed. The new full-queue campaign uses
 a separate binary, ledger and output directory; planning alone is not execution.
+It has now [actually launched](optimized-continuation/launch.json), PID 64909,
+with a 24-hour/2-GiB guard and audited progress in all three classes. The
+source stays pinned to clean commit `9bca26ae2` in a separate worktree.
+The live local ledger is not the uploaded stopped dev snapshot.
 
 Observed pilot: **48 attempts, 30 verified, 14 exhausted, 4 timed out**.
 Small control: **12 attempts, 8 verified, 4 exhausted**. Both projected-base
@@ -164,3 +168,17 @@ remain in the shared problem files; checks cited here are the new focused
 tests, build, audits and replay receipts only. The benchmark build happened
 before the measured sessions; short driver rejection checks occurred during
 the counts-only survey, so its raw wall observations are not timing evidence.
+
+Validation follow-up: the restricted full release suite has 4,225 passes, ten
+failures and 117 existing ignored tests. All 37 networking tests pass with
+local networking permitted; the exact Joux–Vitse test passes alone in 2.55 s.
+Its parallel whole-suite timeout is a separate [open validation problem](../../../problems/release-suite-jv-nagao-wall-budget.md).
+The full suite is not reported green. Frozen campaign controls/audits are
+separate evidence; no solver assertion or sealed record was weakened.
+
+The permitted full parallel release rerun finished with **4,234 passed, one
+Joux–Vitse wall-budget failure and 117 existing ignored tests**; its full log
+is `evidence/merged-release-tests-permitted.log`. All networking failures
+were resolved by the appropriate permissions. The isolated exact Joux–Vitse
+test passes; the whole-suite failure remains open and prevents an all-green
+validation statement. No further heavy validation runs alongside the worker.
