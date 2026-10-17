@@ -11,6 +11,8 @@ Keep resolved and superseded records in the index.
 
 | Problem | Status | What it blocks | What would unblock it |
 | --- | --- | --- | --- |
+| [Prime61 exhaustive horizontal class memory](prime61-horizontal-class-memory.md) | open; disk-backed pilot verified | certified full-class coverage and all-class workload execution; retained-vector requirement removed on the new path | certified degree-set coverage, provisioned disk/compute envelope and replayed remaining workloads |
+| [Screenshot candidate driver is not located](screenshot-factor-base-driver-unlocated.md) | open | faithful 1,000/2,000-candidate isogeny benchmark at a requested large field | original file/branch/PR or source bundle, native fixture replay and validated larger-field map |
 | [Full debug traits replay asserts in binary-subfield trace](curve-traits-debug-subfield-trace.md) | open | full debug catalogue generation/freshness replay after adding six prime models | isolate the unchanged binary-field input, explain/fix its trace assertion and complete full native replay |
 | [Generalized GPU rho workers for nine Certicom binary challenges](certicom-binary-gpu-rho-integration.md) | open | persistent, independently replayable GPU rho and qualified fastest-arithmetic choices for all nine exact challenges | exact CPU bindings, per-curve GPU replay and durable DP/collision path, then matched device performance gates |
 | [p61 selected-class census and adjacency completion](p61-full-isogeny-class-census.md) | investigating | complete selected-class graph and its use as an admitted large-field corpus | exact 358,094,304-vertex ledger, verified selected-degree adjacency, and adequate durable storage |

@@ -1,0 +1,8 @@
+{
+  "purpose": "Quantify the full horizontal class before any full-class execution claim",
+  "native_tool": "PARI/GP 2.15.2, Debian binary packages extracted outside the repository",
+  "input": "Delta_pi=-6649310858224389603, verified factorization and conductor in the native driver",
+  "operation": "Run qfbclassno on the exact negative discriminant, record algorithm documentation and both available algorithms where feasible. Verify primality/factorization separately. Treat any conditional guarantee explicitly.",
+  "limits": "300 seconds per class-number command; retain timeout/stack failures; no full class walk is started merely by computing the class number.",
+  "interpretation": "For a certified fundamental discriminant, the ordinary isogeny class has one endomorphism order and its number of Fp-isomorphism classes is h(D). This is a finite-class size, not the number of all isogeny maps or degrees."
+}

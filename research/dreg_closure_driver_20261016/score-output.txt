@@ -1,0 +1,11 @@
+| m | (n, ℓ) | N | closure degree per draw | cell | XL refutes at 4 | log₂ ops ÷ log₂ cols | secs per draw |
+|--:|---|--:|---|---|--:|---|---|
+| 3 | (22, 6) | 40 | 4 4 4 4 | flat | 0 | 2.29 2.28 2.28 2.29 | 284 262 266 263 |
+| 3 | (24, 6) | 42 | 4 4 4 4 | flat | 0 | 2.29 2.29 2.29 2.29 | 395 377 388 374 |
+| 4 | (11, 5) | 42 | 4 4 4 4 | flat | 0 | 2.24 2.25 2.20 2.18 | 206 245 232 175 |
+| 4 | (12, 5) | 44 | 4 4 4 4 | flat | 0 | 2.28 2.22 2.31 2.33 | 552 327 603 730 |
+
+Study: flat to N = 44
+Q5: draws where XL refutes at degree 4: 0
+Q6: log₂ ops ÷ log₂ cols over 16 refuting draws: 2.18–2.33 (registered band 2.0–2.4)
+Soundness control: 4 satisfiable draws, 0 refuted, 0 unmeasured

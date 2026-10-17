@@ -1,0 +1,17 @@
+| cell | draw | A0 (6,7,7) | A1 (6c,7,7) | B (6,6,6) | C (null) |
+|---|--:|---|---|---|---|
+| m3-19-7 | 0 | refutes | does not | refutes | does not |
+| m3-19-7 | 3 | refutes | refutes | refutes | refutes |
+| m3-19-7 | 5 | does not | does not | refutes | does not |
+| m3-19-7 | 7 | refutes | refutes | refutes | refutes |
+| m3-21-7 | 0 | refutes | refutes | refutes | refutes |
+| m3-21-7 | 2 | refutes | refutes | refutes | refutes |
+| m3-21-7 | 3 | does not | refutes | refutes | refutes |
+| m3-21-7 | 6 | refutes | refutes | refutes | refutes |
+
+A0: 6 refute at 4, 2 do not, 0 unmeasured
+A1: 6 refute at 4, 2 do not, 0 unmeasured
+B: 8 refute at 4, 0 do not, 0 unmeasured
+C: 6 refute at 4, 2 do not, 0 unmeasured
+Controls: B refutes on 8 of 8 (need ≥ 7), C does not refute on 2 of 8 (need ≥ 7) → NOT valid
+Arm A: 12 of 16 refute at 4 → uninformative for H_sum vs H_max (controls not valid)
