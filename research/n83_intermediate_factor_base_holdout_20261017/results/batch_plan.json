@@ -1,0 +1,20 @@
+{
+  "files_sha256": {
+    "batch.py": "f462e0de3ec0f36897b43582e0882b9dab5958a11587ae7e37a3a48feb671653",
+    "batch_answers.jsonl": "1fb66a7bf9bc1fd6f75214d1a633711d64c44e289aeffb86e5b9fb44cf7e46a2",
+    "batch_targets.jsonl": "ac14c0326532b81041d357e921d99f86ef7ff4f6cf5e475b9c3a2bcc8997ac7c",
+    "target/release/examples/koblitz_orbit_dlp_fast": "faaac22aa6228c8d486875d6947fa654417d1122191fbe0eb9bde59bb45eb98f"
+  },
+  "hardware_tier": "ordinary_local_exploratory",
+  "k_values": [
+    2304,
+    2543,
+    2688,
+    2816,
+    3072
+  ],
+  "must_follow_single_target_screen": true,
+  "role": "secondary_shared_setup_query_distribution",
+  "schema": "n83.intermediate-k-batch-plan/v1",
+  "target_count": 128
+}

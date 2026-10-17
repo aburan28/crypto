@@ -1,0 +1,40 @@
+{
+  "batch_plan_sha256": "7dc0fab8574ec52c5dea60411ff4680cf3279d5808cd08bea0a9a480df050b9b",
+  "candidate_manifests": {
+    "2304": {
+      "candidate_id": "IC1N83Ckb1a1fb382464PDP4rootRCguidedLAgaussTDdirectISO0hf7c27ecf3b60",
+      "path": "research/n83_intermediate_factor_base_holdout_20261017/candidate_IC1N83Ckb1a1fb382464PDP4rootRCguidedLAgaussTDdirectISO0hf7c27ecf3b60.json",
+      "sha256": "08d8af6f2e40f4261512856738f62744592593ca6259b948e764c057e3448d8e"
+    },
+    "2543": {
+      "candidate_id": "IC1N83Ckb1a1fb422138PDP4rootRCguidedLAgaussTDdirectISO0h7a345a837c55",
+      "path": "research/n83_smallk_challenge_20261017/candidate_IC1N83Ckb1a1fb422138PDP4rootRCguidedLAgaussTDdirectISO0h7a345a837c55.json",
+      "sha256": "299494ca4a49e699903288c6fdf089149e1759f606b37f91f606757467fca6d1"
+    },
+    "2688": {
+      "candidate_id": "IC1N83Ckb1a1fb446208PDP4rootRCguidedLAgaussTDdirectISO0hc92369996197",
+      "path": "research/n83_intermediate_factor_base_holdout_20261017/candidate_IC1N83Ckb1a1fb446208PDP4rootRCguidedLAgaussTDdirectISO0hc92369996197.json",
+      "sha256": "c8d57ee17c1e1df8f9634d7f80fe75a2c86ad1ef816afd7f0f77af6e74094273"
+    },
+    "2816": {
+      "candidate_id": "IC1N83Ckb1a1fb467456PDP4rootRCguidedLAgaussTDdirectISO0hf693b1b33c8b",
+      "path": "research/n83_intermediate_factor_base_holdout_20261017/candidate_IC1N83Ckb1a1fb467456PDP4rootRCguidedLAgaussTDdirectISO0hf693b1b33c8b.json",
+      "sha256": "257bdf475bf2caf7abd488849f9948b0bae89762ff56a197afd0c9a0af709e0f"
+    },
+    "3072": {
+      "candidate_id": "IC1N83Ckb1a1fb509952PDP4rootRCguidedLAgaussTDdirectISO0hec7ae07d8b9a",
+      "path": "research/n83_smallk_challenge_20261017/candidate_IC1N83Ckb1a1fb509952PDP4rootRCguidedLAgaussTDdirectISO0hec7ae07d8b9a.json",
+      "sha256": "3259e58a238ca9e802d789ec840d0e2bf8c052271ae58b78384bec39b2216e1a"
+    }
+  },
+  "files_sha256": {
+    "PROTOCOL.md": "a4406a85ca9d187f52eddbac78e93fde7e3585320de49fc5e45db6a8762068ec",
+    "answers.jsonl": "4a71be5ba7a63432fe50a6f219d3f6c5d8d499034735617d49930b15d3cddf9a",
+    "generate.py": "0130f81b9fa4d7d9078fe06945d77132c50565007a0a92daaac8b9a084dd6515",
+    "manifest.json": "31e35ecea4e2948c0867989ecf15963dce693a8fa57f1b3575187e3789bd3675",
+    "targets.jsonl": "c548def473e11ef04e9350c89bad92540c3bfb215a1138847c7bc006078189de"
+  },
+  "prior_local_seal_sha256": "086496f2ba984d06fbf33ed3ab1683d3b2f75f4402dc6a76c1ebf76bab8785c8",
+  "schema": "n83.intermediate-holdout-repo-seal/v1",
+  "status": "SEALED_UNMEASURED_BEFORE_FULL_BATCH_OUTCOME"
+}
