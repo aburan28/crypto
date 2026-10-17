@@ -1,0 +1,583 @@
+{
+  "cells": {
+    "++": 30,
+    "+-": 26,
+    "-+": 40,
+    "--": 45,
+    "exceptional": 0
+  },
+  "fiber_rule": "Q and unique r-torsion half H=2^-1 Q; quartic RHS at inverse x is nonzero square in F_(p^3) iff character +",
+  "field_prime": "6277101735386680763835789423207666416083908700390324961279",
+  "input_classes": 141,
+  "input_receipt_sha256": "1650a868094bbcaa7885acc0aa59aa63b71c10398f5e0b3dc0e3f1656161690f",
+  "rows": [
+    {
+      "cell": "-+",
+      "index": 0
+    },
+    {
+      "cell": "++",
+      "index": 1
+    },
+    {
+      "cell": "--",
+      "index": 2
+    },
+    {
+      "cell": "--",
+      "index": 3
+    },
+    {
+      "cell": "-+",
+      "index": 4
+    },
+    {
+      "cell": "+-",
+      "index": 5
+    },
+    {
+      "cell": "++",
+      "index": 6
+    },
+    {
+      "cell": "+-",
+      "index": 7
+    },
+    {
+      "cell": "++",
+      "index": 8
+    },
+    {
+      "cell": "+-",
+      "index": 9
+    },
+    {
+      "cell": "-+",
+      "index": 10
+    },
+    {
+      "cell": "+-",
+      "index": 11
+    },
+    {
+      "cell": "+-",
+      "index": 12
+    },
+    {
+      "cell": "--",
+      "index": 13
+    },
+    {
+      "cell": "++",
+      "index": 14
+    },
+    {
+      "cell": "--",
+      "index": 15
+    },
+    {
+      "cell": "--",
+      "index": 16
+    },
+    {
+      "cell": "--",
+      "index": 17
+    },
+    {
+      "cell": "+-",
+      "index": 18
+    },
+    {
+      "cell": "-+",
+      "index": 19
+    },
+    {
+      "cell": "+-",
+      "index": 20
+    },
+    {
+      "cell": "+-",
+      "index": 21
+    },
+    {
+      "cell": "-+",
+      "index": 22
+    },
+    {
+      "cell": "--",
+      "index": 23
+    },
+    {
+      "cell": "--",
+      "index": 24
+    },
+    {
+      "cell": "-+",
+      "index": 25
+    },
+    {
+      "cell": "++",
+      "index": 26
+    },
+    {
+      "cell": "-+",
+      "index": 27
+    },
+    {
+      "cell": "--",
+      "index": 28
+    },
+    {
+      "cell": "++",
+      "index": 29
+    },
+    {
+      "cell": "+-",
+      "index": 30
+    },
+    {
+      "cell": "++",
+      "index": 31
+    },
+    {
+      "cell": "++",
+      "index": 32
+    },
+    {
+      "cell": "--",
+      "index": 33
+    },
+    {
+      "cell": "-+",
+      "index": 34
+    },
+    {
+      "cell": "-+",
+      "index": 35
+    },
+    {
+      "cell": "++",
+      "index": 36
+    },
+    {
+      "cell": "--",
+      "index": 37
+    },
+    {
+      "cell": "--",
+      "index": 38
+    },
+    {
+      "cell": "--",
+      "index": 39
+    },
+    {
+      "cell": "-+",
+      "index": 40
+    },
+    {
+      "cell": "-+",
+      "index": 41
+    },
+    {
+      "cell": "--",
+      "index": 42
+    },
+    {
+      "cell": "+-",
+      "index": 43
+    },
+    {
+      "cell": "--",
+      "index": 44
+    },
+    {
+      "cell": "-+",
+      "index": 45
+    },
+    {
+      "cell": "-+",
+      "index": 46
+    },
+    {
+      "cell": "+-",
+      "index": 47
+    },
+    {
+      "cell": "--",
+      "index": 48
+    },
+    {
+      "cell": "++",
+      "index": 49
+    },
+    {
+      "cell": "+-",
+      "index": 50
+    },
+    {
+      "cell": "-+",
+      "index": 51
+    },
+    {
+      "cell": "-+",
+      "index": 52
+    },
+    {
+      "cell": "--",
+      "index": 53
+    },
+    {
+      "cell": "--",
+      "index": 54
+    },
+    {
+      "cell": "-+",
+      "index": 55
+    },
+    {
+      "cell": "-+",
+      "index": 56
+    },
+    {
+      "cell": "-+",
+      "index": 57
+    },
+    {
+      "cell": "++",
+      "index": 58
+    },
+    {
+      "cell": "--",
+      "index": 59
+    },
+    {
+      "cell": "--",
+      "index": 60
+    },
+    {
+      "cell": "--",
+      "index": 61
+    },
+    {
+      "cell": "--",
+      "index": 62
+    },
+    {
+      "cell": "++",
+      "index": 63
+    },
+    {
+      "cell": "+-",
+      "index": 64
+    },
+    {
+      "cell": "+-",
+      "index": 65
+    },
+    {
+      "cell": "-+",
+      "index": 66
+    },
+    {
+      "cell": "--",
+      "index": 67
+    },
+    {
+      "cell": "--",
+      "index": 68
+    },
+    {
+      "cell": "-+",
+      "index": 69
+    },
+    {
+      "cell": "--",
+      "index": 70
+    },
+    {
+      "cell": "-+",
+      "index": 71
+    },
+    {
+      "cell": "-+",
+      "index": 72
+    },
+    {
+      "cell": "--",
+      "index": 73
+    },
+    {
+      "cell": "-+",
+      "index": 74
+    },
+    {
+      "cell": "--",
+      "index": 75
+    },
+    {
+      "cell": "++",
+      "index": 76
+    },
+    {
+      "cell": "++",
+      "index": 77
+    },
+    {
+      "cell": "++",
+      "index": 78
+    },
+    {
+      "cell": "--",
+      "index": 79
+    },
+    {
+      "cell": "+-",
+      "index": 80
+    },
+    {
+      "cell": "--",
+      "index": 81
+    },
+    {
+      "cell": "--",
+      "index": 82
+    },
+    {
+      "cell": "++",
+      "index": 83
+    },
+    {
+      "cell": "++",
+      "index": 84
+    },
+    {
+      "cell": "-+",
+      "index": 85
+    },
+    {
+      "cell": "+-",
+      "index": 86
+    },
+    {
+      "cell": "++",
+      "index": 87
+    },
+    {
+      "cell": "+-",
+      "index": 88
+    },
+    {
+      "cell": "+-",
+      "index": 89
+    },
+    {
+      "cell": "--",
+      "index": 90
+    },
+    {
+      "cell": "-+",
+      "index": 91
+    },
+    {
+      "cell": "++",
+      "index": 92
+    },
+    {
+      "cell": "++",
+      "index": 93
+    },
+    {
+      "cell": "--",
+      "index": 94
+    },
+    {
+      "cell": "++",
+      "index": 95
+    },
+    {
+      "cell": "--",
+      "index": 96
+    },
+    {
+      "cell": "+-",
+      "index": 97
+    },
+    {
+      "cell": "++",
+      "index": 98
+    },
+    {
+      "cell": "++",
+      "index": 99
+    },
+    {
+      "cell": "+-",
+      "index": 100
+    },
+    {
+      "cell": "-+",
+      "index": 101
+    },
+    {
+      "cell": "+-",
+      "index": 102
+    },
+    {
+      "cell": "-+",
+      "index": 103
+    },
+    {
+      "cell": "-+",
+      "index": 104
+    },
+    {
+      "cell": "-+",
+      "index": 105
+    },
+    {
+      "cell": "--",
+      "index": 106
+    },
+    {
+      "cell": "+-",
+      "index": 107
+    },
+    {
+      "cell": "-+",
+      "index": 108
+    },
+    {
+      "cell": "++",
+      "index": 109
+    },
+    {
+      "cell": "--",
+      "index": 110
+    },
+    {
+      "cell": "++",
+      "index": 111
+    },
+    {
+      "cell": "++",
+      "index": 112
+    },
+    {
+      "cell": "++",
+      "index": 113
+    },
+    {
+      "cell": "--",
+      "index": 114
+    },
+    {
+      "cell": "--",
+      "index": 115
+    },
+    {
+      "cell": "--",
+      "index": 116
+    },
+    {
+      "cell": "-+",
+      "index": 117
+    },
+    {
+      "cell": "-+",
+      "index": 118
+    },
+    {
+      "cell": "++",
+      "index": 119
+    },
+    {
+      "cell": "-+",
+      "index": 120
+    },
+    {
+      "cell": "-+",
+      "index": 121
+    },
+    {
+      "cell": "-+",
+      "index": 122
+    },
+    {
+      "cell": "++",
+      "index": 123
+    },
+    {
+      "cell": "--",
+      "index": 124
+    },
+    {
+      "cell": "-+",
+      "index": 125
+    },
+    {
+      "cell": "--",
+      "index": 126
+    },
+    {
+      "cell": "-+",
+      "index": 127
+    },
+    {
+      "cell": "--",
+      "index": 128
+    },
+    {
+      "cell": "--",
+      "index": 129
+    },
+    {
+      "cell": "++",
+      "index": 130
+    },
+    {
+      "cell": "+-",
+      "index": 131
+    },
+    {
+      "cell": "--",
+      "index": 132
+    },
+    {
+      "cell": "-+",
+      "index": 133
+    },
+    {
+      "cell": "-+",
+      "index": 134
+    },
+    {
+      "cell": "+-",
+      "index": 135
+    },
+    {
+      "cell": "+-",
+      "index": 136
+    },
+    {
+      "cell": "+-",
+      "index": 137
+    },
+    {
+      "cell": "-+",
+      "index": 138
+    },
+    {
+      "cell": "--",
+      "index": 139
+    },
+    {
+      "cell": "--",
+      "index": 140
+    }
+  ],
+  "runtime_sha256": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+  "source_sha256": "cafcbad97bda689ae7a6b1c16a90e0945ab04e9990f6afcb9c26796b9f2b9a4d",
+  "status": "verified_line_quotient_two_fiber_character_census",
+  "subgroup_order": "6277101735386680763835789423176059013767194773182842284081"
+}

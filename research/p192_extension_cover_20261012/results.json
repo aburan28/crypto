@@ -1,0 +1,67 @@
+{
+  "a_hex": "0xfffffffffffffffffffffffffffffffefffffffffffffffc",
+  "b_hex": "0x64210519e59c80e70fa7e9ab72243049feb8deecc146b9b1",
+  "curve": "NIST P-192 / secp192r1",
+  "curve_order_equals_r": true,
+  "elapsed_s_diagnostic": 14.297,
+  "extension_orders": {
+    "1": {
+      "field_bits": 192,
+      "order_v2": 0,
+      "r_divides_multiplicative_order": false,
+      "r_divides_order": true
+    },
+    "2": {
+      "field_bits": 384,
+      "order_v2": 0,
+      "r_divides_multiplicative_order": false,
+      "r_divides_order": true
+    },
+    "3": {
+      "field_bits": 576,
+      "order_v2": 2,
+      "r_divides_multiplicative_order": false,
+      "r_divides_order": true
+    },
+    "5": {
+      "field_bits": 960,
+      "order_v2": 0,
+      "r_divides_multiplicative_order": false,
+      "r_divides_order": true
+    },
+    "6": {
+      "field_bits": 1152,
+      "order_v2": 4,
+      "r_divides_multiplicative_order": false,
+      "r_divides_order": true
+    }
+  },
+  "generator_x_hex": "0x188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012",
+  "generator_y_hex": "0x7192b95ffc8da78631011ed6b24cdd573f977a11e794811",
+  "genus2_control": {
+    "degree": 2,
+    "equation": "v^2=(u^2)^3+a(u^2)+b",
+    "generator_pullback_mumford_u": "u^2-Gx",
+    "generator_pullback_mumford_v": "Gy",
+    "genus": 2,
+    "map": "(u,v)->(u^2,v)",
+    "pullback_nonzero": true,
+    "pushforward_of_Fp6_Fp3_norm_multiplier": 4,
+    "pushforward_of_pullback_multiplier": 2,
+    "r_times_pullback_zero": true,
+    "squarefree": true
+  },
+  "legendre_norms_Fp6_over_Fp2": [
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1
+  ],
+  "p_hex": "0xfffffffffffffffffffffffffffffffeffffffffffffffff",
+  "r_hex": "0xffffffffffffffffffffffff99def836146bc9b1b4d22831",
+  "r_prime": true,
+  "two_division_cubic_irreducible": true,
+  "two_division_roots_in_Fp3": true
+}

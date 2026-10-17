@@ -1,0 +1,89 @@
+"""Exact three-sum support partition under the frozen Type I character law.
+
+This finite support census uses quotient points only. The independent seeded
+collector supplies the known-scalar query law and its ordinary-query sample.
+"""
+import hashlib
+import itertools
+import json
+from pathlib import Path
+
+from sage.all import PolynomialRing
+import type_i_divisor_transfer as dt
+import verify_type_i_quotient_base as vb
+
+HERE = Path(__file__).resolve().parent
+density_path = HERE / "type_i_character_density.json"
+base_path = HERE / "type_i_quotient_base_probe.json"
+collector_path = HERE / "type_i_geom_character_collector.json"
+reduced_query_path = HERE / "type_i_guided_reduced_queries.json"
+density = json.loads(density_path.read_text())
+collector = json.loads(collector_path.read_text())
+reduced_queries = json.loads(reduced_query_path.read_text())
+assert collector["accepted_queries"] == reduced_queries["degree_three_Fp_pairs"] == 64
+assert collector["exact_three_sum_matches"] == reduced_queries["three_sum_matches"] == 0
+F, p, r = dt.gm.F, dt.p, dt.r
+R = PolynomialRing(F, "z")
+sextic = R([F(int(c)) for c in density["sextic_coefficients_decimal"]])
+assert sextic.degree() == 6 and len(vb.base) == 16
+assert all(x[0] == x[1] == x[2] for x in vb.base)
+O = vb.O
+half = pow(2, -1, int(r))
+
+def sign(P):
+    if P == O:
+        return "identity"
+    value = sextic(F(P[0]))
+    if value == 0:
+        return "zero"
+    return "+" if value ** ((p - 1) // 2) == 1 else "-"
+
+triples = list(itertools.combinations_with_replacement(range(16), 3))
+assert len(triples) == 816
+targets = {}
+cell_triples = {}
+for i, j, k in triples:
+    q = vb.base[i][0] + vb.base[j][0] + vb.base[k][0]
+    P = -half * q  # q = -2P in the exact quotient coordinate.
+    cell = sign(P) + sign(2 * P)
+    cell_triples[cell] = cell_triples.get(cell, 0) + 1
+    key = str(q)
+    if key in targets:
+        assert targets[key][0] == cell
+        targets[key][1] += 1
+    else:
+        targets[key] = [cell, 1]
+
+cell_targets = {}
+for cell, multiplicity in targets.values():
+    cell_targets[cell] = cell_targets.get(cell, 0) + 1
+assert sum(cell_triples.values()) == 816
+assert sum(cell_targets.values()) == len(targets)
+assert sum(m for _, m in targets.values()) == 816
+accepted = cell_targets.get("++", 0)
+target_cell_digest = hashlib.sha256("\n".join(
+    f"{key}|{targets[key][0]}" for key in sorted(targets)
+).encode()).hexdigest()
+out = {
+    "status": "exact_type_i_fixed_base_character_support_partition",
+    "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+    "base_receipt_sha256": hashlib.sha256(base_path.read_bytes()).hexdigest(),
+    "density_receipt_sha256": hashlib.sha256(density_path.read_bytes()).hexdigest(),
+    "collector_receipt_sha256": hashlib.sha256(collector_path.read_bytes()).hexdigest(),
+    "reduced_query_receipt_sha256": hashlib.sha256(reduced_query_path.read_bytes()).hexdigest(),
+    "base_classes": len(vb.base),
+    "unordered_triples": len(triples),
+    "distinct_three_sum_targets": len(targets),
+    "target_cell_sha256": target_cell_digest,
+    "triple_counts_by_character_pair": cell_triples,
+    "distinct_targets_by_character_pair": cell_targets,
+    "accepted_support_targets": accepted,
+    "frozen_accepted_queries": collector["accepted_queries"],
+    "frozen_three_sum_matches": collector["exact_three_sum_matches"],
+    "accepted_nonzero_scalar_lower_bound": density["accepted_nonzero_scalar_lower_bound"],
+    "conditioned_hit_probability_upper_bound": f"{accepted}/{density['accepted_nonzero_scalar_lower_bound']}",
+    "query_equation": "target quotient q=-2P; P=aG for the known-scalar collector, so q=a(-2G)",
+    "boundary": "Exact finite support partition; denominator is a proved lower bound on accepted scalars, and the seeded 64-query yield is a separate measurement.",
+}
+(HERE / "type_i_conditioned_support.json").write_text(json.dumps(out, indent=2, sort_keys=True) + "\n")
+print(json.dumps(out, indent=2, sort_keys=True))

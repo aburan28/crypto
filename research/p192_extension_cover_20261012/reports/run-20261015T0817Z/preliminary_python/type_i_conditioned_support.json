@@ -1,0 +1,31 @@
+{
+  "accepted_nonzero_scalar_lower_bound": "1569275433846670190958947353987675545133315652035359680560",
+  "accepted_support_targets": 224,
+  "base_classes": 16,
+  "base_receipt_sha256": "f7de9791a007214b8506bf054ed24d55a803c4d1c8da50815aee04c5410339c7",
+  "boundary": "Exact finite support partition; denominator is a proved lower bound on accepted scalars, and the seeded 64-query yield is a separate measurement.",
+  "collector_receipt_sha256": "961a9995114189ed1ee86febde46979900317417a2744f34274833390fb5ff49",
+  "conditioned_hit_probability_upper_bound": "224/1569275433846670190958947353987675545133315652035359680560",
+  "density_receipt_sha256": "fd0a47cf4aecf736b1852d133fd384e30d9584114761bac6495f803d4210ca29",
+  "distinct_targets_by_character_pair": {
+    "++": 224,
+    "+-": 211,
+    "-+": 203,
+    "--": 178
+  },
+  "distinct_three_sum_targets": 816,
+  "frozen_accepted_queries": 64,
+  "frozen_three_sum_matches": 0,
+  "query_equation": "target quotient q=-2P; P=aG for the known-scalar collector, so q=a(-2G)",
+  "reduced_query_receipt_sha256": "a5d6dc835f28282073fa2774079efa520831a5cc1758b979f1804d000f1d3c5c",
+  "source_sha256": "aa2ebbd72e78c631b5bb8b06137783536f38e66bfec2bbc4c4706fd907f959dc",
+  "status": "exact_type_i_fixed_base_character_support_partition",
+  "target_cell_sha256": "e35a1e8cf18ad6da28ace81804fda283f9a9a79055d7d8e8b4bfea200683f343",
+  "triple_counts_by_character_pair": {
+    "++": 224,
+    "+-": 211,
+    "-+": 203,
+    "--": 178
+  },
+  "unordered_triples": 816
+}

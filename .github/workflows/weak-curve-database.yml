@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'research/weak_curve_database_20261012/**'
+      - 'research/weak_curve_leaderboard_20261012/**'
+      - 'research/p192_extension_cover_20261012/**'
       - 'docs/curves/weak-families/catalog.json'
       - 'docs/curves/weak-families/models.json'
       - 'docs/curves/weak-families/properties.json'
@@ -35,6 +37,45 @@ jobs:
       - name: Replay algebraic identity certificate
         working-directory: .
         run: cargo run --release --example weak_curve_cubic_identity -- check research/weak_curve_database_20261012/cubic_identity.certificate.json
+      - name: Check WeakCurves catalog and genus-128 GHS model audit
+        working-directory: research/weak_curve_leaderboard_20261012
+        run: |
+          cargo test --release --locked
+          cargo run --release --locked -- check snapshot.json
+          cargo run --release --locked --bin ghs_genus128_cost_audit -- --check
+          python3 validate_attack_map.py
+          python3 validate_decomposition_properties.py
+      - name: Verify WeakCurves artifact hashes
+        working-directory: .
+        run: sha256sum -c research/weak_curve_leaderboard_20261012/ARTIFACTS.sha256
+      - name: Verify P-192 research artifact hashes
+        working-directory: research/p192_extension_cover_20261012
+        run: sha256sum -c ARTIFACTS.sha256
+      - name: Verify P-192 divisor-support custody and nonspeciality receipt
+        working-directory: .
+        run: |
+          python3 research/p192_extension_cover_20261012/verify_divisor_support_receipt.py research/p192_extension_cover_20261012/type_i_fixed_origin_reduction.json research/p192_extension_cover_20261012/type_i_negative_fixed_origin_reduction.json research/p192_extension_cover_20261012/type_i_guided_negative_fixed_origin_reduction.json research/p192_extension_cover_20261012/type_i_divisor_support.json research/p192_extension_cover_20261012/type_i_divisor_support_input.gp research/p192_extension_cover_20261012/type_i_divisor_support_gp.log research/p192_extension_cover_20261012/divisor_support_screen.py
+          python3 research/p192_extension_cover_20261012/verify_nonspecial_support_receipt.py research/p192_extension_cover_20261012/type_i_divisor_support.json research/p192_extension_cover_20261012/type_i_nonspecial_support.json research/p192_extension_cover_20261012/type_i_nonspecial_support_input.gp research/p192_extension_cover_20261012/type_i_nonspecial_support_gp.log research/p192_extension_cover_20261012/nonspecial_support_screen.py research/p192_extension_cover_20261012/verify_nonspecial_support.gp
+      - name: Replay P-192 line sections, projection custody, and guided collector
+        working-directory: .
+        run: |
+          python3 research/p192_extension_cover_20261012/verify_line_support_receipt.py
+          python3 research/p192_extension_cover_20261012/verify_line_reduced_source.py
+          python3 research/p192_extension_cover_20261012/verify_line_projection_receipt.py
+          python3 research/p192_extension_cover_20261012/verify_line_guided_collector.py
+          python3 research/p192_extension_cover_20261012/verify_line_fixed_origin_receipt.py
+          python3 -B research/p192_extension_cover_20261012/verify_line_sum_coverage.py
+          python3 -B research/p192_extension_cover_20261012/verify_line_cell_sample.py
+          python3 -B research/p192_extension_cover_20261012/verify_line_signed_short_receipt.py
+          python3 -B research/p192_extension_cover_20261012/verify_line_leaf_relation.py
+          python3 -B research/p192_extension_cover_20261012/prepare_line_second_gen_input.py
+          python3 -B research/p192_extension_cover_20261012/verify_line_second_gen_closure.py
+          python3 -B research/p192_extension_cover_20261012/verify_line_full_constant.py
+          python3 -B research/p192_extension_cover_20261012/verify_line_full_collinearity.py
+          python3 -B research/p192_extension_cover_20261012/verify_line_full_selected_tangencies.py
+          python3 -B research/p192_extension_cover_20261012/verify_line_full_residual_discriminant.py
+          cd research/p192_extension_cover_20261012
+          sha256sum -c ARTIFACTS.sha256
   lean-proof:
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ github.event_name == 'workflow_dispatch' && 90 || 25 }}
@@ -56,4 +97,180 @@ jobs:
           leanchecker: true
           leanchecker-args: '--fresh --verbose WeakCurveDatabase'
       - name: Audit transitive axioms
+        run: lake env lean AxiomAudit.lean
+  p192-lean-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ github.event_name == 'workflow_dispatch' && 35 || 25 }}
+    defaults:
+      run:
+        working-directory: research/p192_extension_cover_20261012/lean
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build P-192 norm theorem and replay in a fresh kernel
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/p192_extension_cover_20261012/lean
+          auto-config: false
+          use-mathlib-cache: true
+          build: true
+          build-args: 'CrossRatio SignedBase ScalarAnchor AdaptiveBase ShortSums DivisorSupport NonspecialSupport'
+          test: false
+          lint: false
+          leanchecker: true
+          leanchecker-args: '--fresh --verbose CrossRatio'
+      - name: Audit P-192 theorem axioms
+        run: lake env lean CrossRatio.lean
+      - name: Fresh-check signed-base theorem and audit axioms
+        run: lake env leanchecker --fresh --verbose SignedBase && lake env lean SignedBase.lean
+      - name: Fresh-check scalar-anchor theorem and audit axioms
+        run: lake env leanchecker --fresh --verbose ScalarAnchor && lake env lean ScalarAnchor.lean
+      - name: Fresh-check adaptive-base theorem and audit axioms
+        run: lake env leanchecker --fresh --verbose AdaptiveBase && lake env lean AdaptiveBase.lean
+      - name: Fresh-check short-sum collision theorems and audit axioms
+        run: lake env leanchecker --fresh --verbose ShortSums && lake env lean ShortSums.lean
+      - name: Fresh-check divisor-support theorems and audit axioms
+        run: lake env leanchecker --fresh --verbose DivisorSupport && lake env lean DivisorSupport.lean
+      - name: Fresh-check noncollinearity theorem and audit axioms
+        run: lake env leanchecker --fresh --verbose NonspecialSupport && lake env lean NonspecialSupport.lean
+  p192-line-lean-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: research/p192_extension_cover_20261012/lean
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build line inverse, support, and Frobenius fiber theorems
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/p192_extension_cover_20261012/lean
+          auto-config: false
+          use-mathlib-cache: true
+          build: true
+          build-args: 'LinePointInverse LineSupport LineFiberDescent ThreeSumCapacity LineLeafRank'
+          test: false
+          lint: false
+          leanchecker: true
+          leanchecker-args: '--fresh --verbose LinePointInverse'
+      - name: Audit line-point inverse theorem axioms
+        run: lake env lean LinePointInverse.lean
+      - name: Fresh-check line-support theorems and audit axioms
+        run: lake env leanchecker --fresh --verbose LineSupport && lake env lean LineSupport.lean
+      - name: Fresh-check six-fiber descent theorem and audit axioms
+        run: lake env leanchecker --fresh --verbose LineFiberDescent && lake env lean LineFiberDescent.lean
+      - name: Fresh-check three-sum capacity theorem and audit axioms
+        run: lake env leanchecker --fresh --verbose ThreeSumCapacity && lake env lean ThreeSumCapacity.lean
+      - name: Fresh-check private-column rank theorem and audit axioms
+        run: lake env leanchecker --fresh --verbose LineLeafRank && lake env lean LineLeafRank.lean
+  p192-line-closure-lean-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: research/p192_extension_cover_20261012/lean
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and fresh-check line-closure theorem
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/p192_extension_cover_20261012/lean
+          auto-config: false
+          use-mathlib-cache: true
+          build: true
+          build-args: 'LineClosure'
+          test: false
+          lint: false
+          leanchecker: true
+          leanchecker-args: '--fresh --verbose LineClosure'
+      - name: Audit line-closure theorem axioms
+        run: lake env lean LineClosure.lean
+  p192-line-center-lean-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: research/p192_extension_cover_20261012/lean
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and fresh-check line-centering theorems
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/p192_extension_cover_20261012/lean
+          auto-config: false
+          use-mathlib-cache: true
+          build: true
+          build-args: 'LineCenter'
+          test: false
+          lint: false
+          leanchecker: true
+          leanchecker-args: '--fresh --verbose LineCenter'
+      - name: Audit line-centering theorem axioms
+        run: lake env lean LineCenter.lean
+  p192-full-collinearity-lean-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: research/p192_extension_cover_20261012/lean
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and fresh-check full-line incidence implication
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/p192_extension_cover_20261012/lean
+          auto-config: false
+          use-mathlib-cache: true
+          build: true
+          build-args: 'FullCollinearity'
+          test: false
+          lint: false
+          leanchecker: true
+          leanchecker-args: '--fresh --verbose FullCollinearity'
+      - name: Audit full-line incidence theorem axioms
+        run: lake env lean FullCollinearity.lean
+  p192-residual-discriminant-lean-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: research/p192_extension_cover_20261012/lean
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and fresh-check residual-discriminant theorems
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/p192_extension_cover_20261012/lean
+          auto-config: false
+          use-mathlib-cache: true
+          build: true
+          build-args: 'ResidualDiscriminant'
+          test: false
+          lint: false
+          leanchecker: true
+          leanchecker-args: '--fresh --verbose ResidualDiscriminant'
+      - name: Audit residual-discriminant theorem axioms
+        run: lake env lean ResidualDiscriminant.lean
+  leaderboard-lean-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: research/weak_curve_leaderboard_20261012/lean
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build all leaderboard theorem modules
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/weak_curve_leaderboard_20261012/lean
+          auto-config: false
+          use-mathlib-cache: true
+          build: true
+          build-args: 'PrimeExamples OakleyOrders MinimalPairingField RelationSupport'
+          test: false
+          lint: false
+          leanchecker: true
+          leanchecker-args: '--fresh --verbose RelationSupport'
+      - name: Fresh-kernel replay of Oakley genus theorem
+        run: lake env leanchecker --fresh --verbose OakleyOrders
+      - name: Audit leaderboard theorem axioms
         run: lake env lean AxiomAudit.lean

@@ -1,0 +1,85 @@
+{
+  "base_prime_decimal": "6277101735386680763835789423207666416083908700390324961279",
+  "boundary": "r-primary isogeny-coordinate reduction and norm-order check; no generic plane-quartic divisor reduction or P-192 relation collector",
+  "divisor_fiber_sha256": "b6767c53b19a1300839aa21ba6a5cb881d7e7bec6c150c9fbf0ef0679247d9b5",
+  "divisor_transfer_source_sha256": "62f7025733aaeeee3467f466191aa32b172223a4d1af1df73453c41caff221d7",
+  "expected_nonzero_component": [
+    [
+      "5369744403678710563432458361254544170966096384586764429448"
+    ],
+    [
+      "847867355597609724085134516292412287829582146117606403156"
+    ]
+  ],
+  "norm_class_fixed_by_q_frobenius": true,
+  "norm_class_nonzero_and_exact_order_r": true,
+  "norm_pushforward_vector": [
+    [
+      [
+        "5369744403678710563432458361254544170966096384586764429448"
+      ],
+      [
+        "847867355597609724085134516292412287829582146117606403156"
+      ]
+    ],
+    [
+      [
+        "5369744403678710563432458361254544170966096384586764429448"
+      ],
+      [
+        "847867355597609724085134516292412287829582146117606403156"
+      ]
+    ],
+    [
+      [
+        "5369744403678710563432458361254544170966096384586764429448"
+      ],
+      [
+        "847867355597609724085134516292412287829582146117606403156"
+      ]
+    ]
+  ],
+  "norm_vector_equals_diagonal_minus_2G": true,
+  "reduction_model": "three elliptic quotient pushforwards; faithful on odd torsion by the Klein-four push-pull identity",
+  "source_sha256": "84039dbfc2a54ef0cbaf07856bcc63dc18f939ac20e61414c2294d83d0bc03bd",
+  "status": "verified_type_i_norm_nonzero_via_three_elliptic_quotients",
+  "subgroup_order_decimal": "6277101735386680763835789423176059013767194773182842284081",
+  "three_quotient_pushforward_vectors": [
+    [
+      [
+        [
+          "5369744403678710563432458361254544170966096384586764429448"
+        ],
+        [
+          "847867355597609724085134516292412287829582146117606403156"
+        ]
+      ],
+      null,
+      null
+    ],
+    [
+      null,
+      null,
+      [
+        [
+          "5369744403678710563432458361254544170966096384586764429448"
+        ],
+        [
+          "847867355597609724085134516292412287829582146117606403156"
+        ]
+      ]
+    ],
+    [
+      null,
+      [
+        [
+          "5369744403678710563432458361254544170966096384586764429448"
+        ],
+        [
+          "847867355597609724085134516292412287829582146117606403156"
+        ]
+      ],
+      null
+    ]
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "boundary": "All chunked fixed-origin reductions passed the checked Sage constructor; independent native cubic-cut replay is a separate gate.",
+  "chunk_size": 512,
+  "chunks": [
+    {
+      "count": 512,
+      "receipt_sha256": "61fb51f04d0f2e98d2afb35e94e4a5180e8ef367ea1ea4e080e12d82d8b30e6e",
+      "resumed": false,
+      "start": 0
+    },
+    {
+      "count": 512,
+      "receipt_sha256": "35b16ed6d99c1e465b55062cf6c9e64a1b49f978075a0f3a7e3984c975854325",
+      "resumed": false,
+      "start": 512
+    },
+    {
+      "count": 512,
+      "receipt_sha256": "0815d53900a39a2ba3d43aa69e1ec03018b5265755ac0c16952c3fdfc5740eb9",
+      "resumed": false,
+      "start": 1024
+    },
+    {
+      "count": 512,
+      "receipt_sha256": "091273d1394f27740f240948f3015b69266c91005fa2699daf5193b459bcbd83",
+      "resumed": false,
+      "start": 1536
+    },
+    {
+      "count": 512,
+      "receipt_sha256": "3e382d918ce6618c2af818135d80692e8d3b9dcc6dcc31341aaf15d12e08d795",
+      "resumed": false,
+      "start": 2048
+    },
+    {
+      "count": 512,
+      "receipt_sha256": "b9c793910d506ca433bd786768d0d1ed704e498247ed2d8627068c47e11360bd",
+      "resumed": false,
+      "start": 2560
+    },
+    {
+      "count": 512,
+      "receipt_sha256": "c03b44692e96e5f89e842a6c94a410359f3342c20242667bd013c9de2e14cb9c",
+      "resumed": false,
+      "start": 3072
+    },
+    {
+      "count": 512,
+      "receipt_sha256": "0df26646b53c8c1a7fd16a06cee3e1d07e07c41b9c7dad6dd1827177f6f3656f",
+      "resumed": false,
+      "start": 3584
+    },
+    {
+      "count": 512,
+      "receipt_sha256": "b40ba820d3f33afe26eb222c86d9927887e314c3625a39e60417a28dacec8b2c",
+      "resumed": false,
+      "start": 4096
+    },
+    {
+      "count": 512,
+      "receipt_sha256": "6d41c3e862b9400a8a1b36d0e9a0675b1785206a5c2cbb60166b5fe40189c7da",
+      "resumed": false,
+      "start": 4608
+    },
+    {
+      "count": 512,
+      "receipt_sha256": "70bc529725ea9bbd15154be88cc6a46c51fd24e9b9ca1ee3069f9bd0b7afb868",
+      "resumed": false,
+      "start": 5120
+    },
+    {
+      "count": 512,
+      "receipt_sha256": "46fff3716d5f8ea38983910243bca5feb4e6b759a27a226d114a9b09b53c1f38",
+      "resumed": false,
+      "start": 5632
+    },
+    {
+      "count": 512,
+      "receipt_sha256": "08cd1e5ee5b09d433215963b490cb340b4571173450cf9867c07b38957e24ffe",
+      "resumed": false,
+      "start": 6144
+    },
+    {
+      "count": 512,
+      "receipt_sha256": "30a52b8be1ba26eace16983e8ce711e2a80db242988c2d832afcf97ba6e986a4",
+      "resumed": false,
+      "start": 6656
+    },
+    {
+      "count": 512,
+      "receipt_sha256": "dec025faf13b13beba55df80eaa4999f636b8f8577f3c2f007a3b7789167cc1d",
+      "resumed": false,
+      "start": 7168
+    },
+    {
+      "count": 512,
+      "receipt_sha256": "64c17b4938241098b3d312ecac889ddfb8699984dc2fc9da3abadd6d34326c12",
+      "resumed": false,
+      "start": 7680
+    },
+    {
+      "count": 512,
+      "receipt_sha256": "f73e1787ab228b6c2201609dd359411a96792c3e916f2723f1df5f7bb2553972",
+      "resumed": false,
+      "start": 8192
+    },
+    {
+      "count": 512,
+      "receipt_sha256": "e79f3e4449d8e1f4fdddfed24c514f3b8a3d10d673ba699d5fe0ae75b9367003",
+      "resumed": false,
+      "start": 8704
+    },
+    {
+      "count": 512,
+      "receipt_sha256": "07e00f6c295ea430777d4192fabcaea6e63d3b22f9eebcb7a576c99ca580fa80",
+      "resumed": false,
+      "start": 9216
+    },
+    {
+      "count": 56,
+      "receipt_sha256": "cf48c2f944832de59fe75b4bd3546239a03f68b0be898cff874dfd3e1500841c",
+      "resumed": false,
+      "start": 9728
+    }
+  ],
+  "elapsed_ns_unisolated": 3860700612416,
+  "field_prime": "6277101735386680763835789423207666416083908700390324961279",
+  "input_classes": 9784,
+  "input_sha256": "718dd3d29fb16b9d7479c011baf548276389a81adcf8aa473cf64007de98e92a",
+  "reduced_classes": 9784,
+  "runtime_info_sha256": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+  "source_sha256": "c1aa0208bb7e3ee6fa3694f28492f8dae2c55c18343c71667e8d60d118214878",
+  "status": "all_9784_new_quotient_classes_reduced",
+  "worker_source_sha256": "7c5c92df287532a88c8448863c21ac4a76b92ce00ac416495f39923d743119f4",
+  "workers": 4
+}
