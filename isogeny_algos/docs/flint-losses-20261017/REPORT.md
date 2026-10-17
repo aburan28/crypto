@@ -1,5 +1,5 @@
 ---
-title: "isogeny_algos: closing the losses against FLINT (2026-10-17)"
+title: "isogeny_algos: closing the losses against FLINT and PARI (2026-10-17)"
 ---
 
 **Question.** The external comparison of 2026-10-16 (`docs/external-20261016/REPORT.md`)
@@ -11,7 +11,9 @@ found FLINT 3.0.1 faster than `isogeny_algos` in 49 cases:
 - x^p mod g over 2^61 − 1 and the CSIDH-512 prime at every degree, and at some degrees over
   2^127 − 1 and 2^255 − 19.
 
-AGENTS.md §15 makes each loss a target. This round removes all of them.
+It also found PARI/GP 2.15.4 with its precomputed `seadata` faster at SEA over 2^127 − 1.
+
+AGENTS.md §15 makes each loss a target. This round removes all of them (SEA: change 8).
 
 **Status of each statement.**
 
@@ -23,7 +25,7 @@ AGENTS.md §15 makes each loss a target. This round removes all of them.
 - *Verified*:
   - every tool gives the same output in every case: 114 polynomial cases, Φ_ℓ for 23
     levels, and 30 SEA group orders. Mismatches: 0;
-  - 153 tests pass, both with the AVX-512 IFMA path on and with it off
+  - 154 tests pass, both with the AVX-512 IFMA path on and with it off
     (`ISOGENY_NO_SIMD=1`).
 - *Host*: a 4-vCPU Xeon VM with AVX-512 IFMA, single-threaded. The first comparison ran on a
   2.80 GHz host and this one on a 2.10 GHz host, where FLINT itself was faster (by 12–27 %
@@ -57,15 +59,20 @@ of FLINT and PARI, every case is below 1 as well.
 | x^p mod g, 2^255 − 19, degree 90–256 | 1.03–1.17 | 0.31–0.46 |
 | x^p mod g, 2^127 − 1, degree 256 | 1.03 | 0.24 |
 
-**Unchanged comparisons with PARI** (every output agrees):
+**SEA and Φ_ℓ against PARI** (`results/p17-sea/`, head 1c823fd98, after change 8: 16
+isolated runs, none contended; every group order and Φ_ℓ value agrees):
 
-- Φ_ℓ mod 2^127 − 1 for all primes ℓ ≤ 89 takes 1.22 s. PARI takes 9.2 s for Φ_ℓ(j, Y) at a
-  single j, and 9.5 s for the full Φ_ℓ over Z.
-- SEA over 2^61 − 1, 20 curves: 28 ms, against 77 ms for PARI with `seadata`.
-- **SEA over 2^127 − 1, 10 curves, is still a loss: 878 ms against 708 ms for PARI with
-  its precomputed `seadata` polynomials** (1.24×). Without `seadata`, PARI takes 5070 ms.
-  Ours also computes Φ_ℓ itself (1.2 s for ℓ ≤ 89, done once per field and not included).
-  This is the next target; it is a PARI loss, not a FLINT one.
+| workload | ours | PARI with `seadata` | PARI without | ours / PARI |
+|:--|--:|--:|--:|--:|
+| SEA over 2^127 − 1, 10 curves | 545 ms | 647 ms | 5052 ms | 0.84 |
+| SEA over 2^61 − 1, 20 curves | 18 ms | 79 ms | 2242 ms | 0.23 |
+| Φ_ℓ mod 2^127 − 1, all primes ℓ ≤ 89 | 1.31 s | 9.1 s (one j) | 9.5 s (over Z) | 0.14 |
+
+- Before change 8, the run on head 04f75a816 (`results/p16-external/`) had SEA over 2^127 − 1
+  at 878 ms against 708 ms: 1.24× slower than PARI.
+- One curve of the ten (k = 7) is still slower than PARI on its own (82 ms against 63 ms).
+- PARI with `seadata` reads its modular polynomials from disk. Ours computes Φ_ℓ once per
+  field (1.3 s for ℓ ≤ 89), and that time is not included in the SEA totals.
 
 ## Changes
 
@@ -119,11 +126,26 @@ of FLINT and PARI, every case is below 1 as well.
    - the table-vs-Barrett limit is now a `Field` method: 44/60/52/40 with IFMA, and
      160/140/110/85 without.
 
+8. **SEA stops on the cost of an Atkin-aware search** (`find/sea.rs`, `search_plan`).
+   - The final search over t = t0 + k m now enumerates the residues of k modulo a product
+     M_A of Atkin primes that their candidate sets allow. It uses one shared baby-step table
+     and one giant-step walk per residue, so the Atkin primes cut the search instead of only
+     filtering its hits.
+   - `search_plan` picks the Atkin primes greedily and estimates the search in point
+     additions. SEA stops adding primes once that estimate is below the next prime's cost
+     (about 3 ℓ² additions) or 4096, whichever is larger.
+   - Over 2^127 − 1 this skips the last one or two primes (ℓ ≈ 61–71, 10–17 ms each). The
+     final search itself costs 1–5 ms.
+   - `tests/sea.rs` pins four group orders over 2^127 − 1 to PARI's `ellcard`, and checks
+     that the Atkin-residue search ran.
+
 ## Evidence
 
 - **Records:**
   - `results/p16-external/`: round1 and round2 per tool and case, `isolation.jsonl`,
     `host.txt` and `SUMMARY.md`;
+  - `results/p17-sea/`: the Φ_ℓ and SEA rerun after change 8
+    (`OUT=results/p17-sea OPS=sea external/run.sh`);
   - the first comparison is unchanged in `results/p15-external/`.
 - **Driver:** `OUT=results/p16-external external/run.sh`; summary and chart data from
   `examples/ext_summary.rs` (`--dat` → `ratios.dat`); charts from `chart.awk`.
