@@ -1,6 +1,6 @@
 # Separate F4/F5 performance history
 
-Frozen rendering of **69 recorded main revisions**, plus the native allocation baseline/candidate audit. No new performance run or speedup claim.
+Frozen rendering of **70 recorded main revisions**, plus the native allocation baseline/candidate audit. No new performance run or speedup claim.
 
 Plots retain each algorithm as its own series. CI runtime is diagnostic; incomplete historical profiler coverage is retained as recorded. Connecting lines stop when fingerprints or measurement conditions change. X spacing is revision order, not elapsed time.
 
@@ -87,6 +87,7 @@ One shared K_1 / 2^23 m=2 system, 22 Boolean variables, maximum degree 4. Matrix
 | 2026-10-17 / a90646f1 | 679,435,649 | 653,817,360 | 85.170 | 86.662 |
 | 2026-10-17 / b59187e5 | 679,340,625 | 654,418,146 | 86.682 | 91.890 |
 | 2026-10-17 / fd043d4f | 679,549,955 | 654,621,012 | 90.548 | 92.367 |
+| 2026-10-17 / 17c71374 | 679,449,939 | 653,830,397 | 86.043 | 89.344 |
 
 - Historical Python-orchestrated perf.history/v1 snapshots; no new performance run or speedup claim.
 - Runtime: one recorded median per kernel and revision; sample counts retained per point, no stored spread, no isolated timing eligibility. Runtime is diagnostic.
@@ -175,6 +176,7 @@ Shared K_1 / 2^17 m=2 workload, 16 Boolean variables, four planted and four rand
 | 2026-10-17 / a90646f1 | 1,787,695,280 | 1,807,903,799 | 173.534 | 175.412 |
 | 2026-10-17 / b59187e5 | 1,787,474,342 | 1,807,737,121 | 173.891 | 176.406 |
 | 2026-10-17 / fd043d4f | 1,790,182,702 | 1,809,892,450 | 175.761 | 178.537 |
+| 2026-10-17 / 17c71374 | 1,787,980,075 | 1,807,678,901 | 172.788 | 175.501 |
 
 - Historical Python-orchestrated perf.history/v1 snapshots; no new performance run or speedup claim.
 - Runtime: one recorded median per kernel and revision; sample counts retained per point, no stored spread, no isolated timing eligibility. Runtime is diagnostic.
@@ -299,6 +301,7 @@ Raw snapshots: `docs/perf/history/` on the `perf-history` branch; frozen copies:
 | `20261017T042023Z-a90646f15c7c.json` | `0184b0a915ac57eaf3097f9840c32e6adf6e3ee8204461f1d77c0d05cbc4e62e` | 5 |
 | `20261017T045602Z-b59187e5549a.json` | `c5372823129e751f22f658a4bd032baebdeee77e636e68ec1b74dbc9d40f0cb0` | 5 |
 | `20261017T053713Z-fd043d4f8161.json` | `4389bf4f83ac11220e07556ac3ce0fd5eedbe65f2a3cbfedfbb9cb0eba6e128e` | 5 |
+| `20261017T082351Z-17c713742f37.json` | `b58415b6e34cf090bcc3aed55750f07af725b2f12abef1306e1252cc9bc2490d` | 5 |
 
 Allocation provenance and hashes are in `plot-data.json`. Millisecond labels are the native conversion `wall_ns / 1,000,000`; no ratios, uncertainty estimates or fitted trends are calculated by the renderer.
 
