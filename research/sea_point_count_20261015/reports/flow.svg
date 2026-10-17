@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg
+  PUBLIC '-//W3C//DTD SVG 1.0//EN'
+  'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>
+<svg width="490" height="232" preserveAspectRatio="xMinYMin meet" viewBox="0 0 490 232" xmlns="http://www.w3.org/2000/svg" version="1.0" fill-rule="evenodd" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<title>...</title>
+	<desc>...</desc>
+	<clipPath id="clip">
+		<rect x="0" y="0" width="490" height="232"/>
+	</clipPath>
+	<g id="group" transform="scale(1,-1) translate(0,-232)" style="clip-path: url(#clip)">
+		<g transform="">
+			<text x="0" y="219" style="font-family: ReportSans-Bold; font-size: 11px;fill: rgb(8%,21%,30%); stroke:none;" transform="translate(0,438) scale(1,-1)">Implemented point-count changes</text>
+			<rect x="0" y="155" width="140" height="46" rx="5" ry="5" style="stroke: rgb(8%,21%,30%); stroke-linecap: butt; stroke-width: 1; fill: rgb(90%,94%,98%); fill-rule: evenodd;"/>
+			<text x="24.233154296874993" y="184.0" style="font-family: ReportSans; font-size: 9px;fill: rgb(8%,21%,30%); stroke:none;" transform="translate(0,368) scale(1,-1)">Complete walk / BSGS</text>
+			<text x="16.470214843749993" y="172.0" style="font-family: ReportSans; font-size: 9px;fill: rgb(8%,21%,30%); stroke:none;" transform="translate(0,344) scale(1,-1)">keep every matching index</text>
+			<rect x="174" y="155" width="138" height="46" rx="5" ry="5" style="stroke: rgb(8%,21%,30%); stroke-linecap: butt; stroke-width: 1; fill: rgb(90%,94%,98%); fill-rule: evenodd;"/>
+			<text x="201.47607421875" y="184.0" style="font-family: ReportSans; font-size: 9px;fill: rgb(8%,21%,30%); stroke:none;" transform="translate(0,368) scale(1,-1)">Surviving candidates</text>
+			<text x="206.23095703125" y="172.0" style="font-family: ReportSans; font-size: 9px;fill: rgb(8%,21%,30%); stroke:none;" transform="translate(0,344) scale(1,-1)">sorted intersection</text>
+			<rect x="346" y="155" width="144" height="46" rx="5" ry="5" style="stroke: rgb(8%,21%,30%); stroke-linecap: butt; stroke-width: 1; fill: rgb(89%,95%,92%); fill-rule: evenodd;"/>
+			<text x="388.72802734375" y="184.0" style="font-family: ReportSans; font-size: 9px;fill: rgb(8%,21%,30%); stroke:none;" transform="translate(0,368) scale(1,-1)">One candidate</text>
+			<text x="370.4775390625" y="172.0" style="font-family: ReportSans; font-size: 9px;fill: rgb(8%,21%,30%); stroke:none;" transform="translate(0,344) scale(1,-1)">public order certification</text>
+			<path d="M 140,178 L 174,178 Z" style="stroke: rgb(8%,21%,30%); stroke-linecap: butt; stroke-width: 1;"/>
+			<polygon points="174 178, 169 181, 169 175" style="stroke: rgb(8%,21%,30%); stroke-linecap: butt; stroke-width: 1; fill: rgb(8%,21%,30%); fill-rule: evenodd;"/>
+			<path d="M 312,178 L 346,178 Z" style="stroke: rgb(8%,21%,30%); stroke-linecap: butt; stroke-width: 1;"/>
+			<polygon points="346 178, 341 181, 341 175" style="stroke: rgb(8%,21%,30%); stroke-linecap: butt; stroke-width: 1; fill: rgb(8%,21%,30%); fill-rule: evenodd;"/>
+			<rect x="174" y="86" width="220" height="43" rx="5" ry="5" style="stroke: rgb(8%,21%,30%); stroke-linecap: butt; stroke-width: 1; fill: rgb(90%,94%,98%); fill-rule: evenodd;"/>
+			<text x="213.707275390625" y="113.5" style="font-family: ReportSans; font-size: 9px;fill: rgb(8%,21%,30%); stroke:none;" transform="translate(0,227) scale(1,-1)">If ambiguous: sample another point</text>
+			<text x="218.470947265625" y="101.5" style="font-family: ReportSans; font-size: 9px;fill: rgb(8%,21%,30%); stroke:none;" transform="translate(0,203) scale(1,-1)">choose scalar tests or full search</text>
+			<path d="M 243,155 L 243,129 Z" style="stroke: rgb(8%,21%,30%); stroke-linecap: butt; stroke-width: 1;"/>
+			<polygon points="243 129, 240 134, 246 134" style="stroke: rgb(8%,21%,30%); stroke-linecap: butt; stroke-width: 1; fill: rgb(8%,21%,30%); fill-rule: evenodd;"/>
+			<text x="0" y="60" style="font-family: ReportSans-Bold; font-size: 11px;fill: rgb(8%,21%,30%); stroke:none;" transform="translate(0,120) scale(1,-1)">Existing CM generation (specialized research constructor)</text>
+			<rect x="0" y="0" width="140" height="43" rx="5" ry="5" style="stroke: rgb(8%,21%,30%); stroke-linecap: butt; stroke-width: 1; fill: rgb(89%,95%,92%); fill-rule: evenodd;"/>
+			<text x="22.732421874999993" y="27.5" style="font-family: ReportSans; font-size: 9px;fill: rgb(8%,21%,30%); stroke:none;" transform="translate(0,55) scale(1,-1)">Hilbert class polynomial</text>
+			<text x="9.465332031249993" y="15.5" style="font-family: ReportSans; font-size: 9px;fill: rgb(8%,21%,30%); stroke:none;" transform="translate(0,31) scale(1,-1)">fixed-point complex evaluation</text>
+			<rect x="174" y="0" width="138" height="43" rx="5" ry="5" style="stroke: rgb(8%,21%,30%); stroke-linecap: butt; stroke-width: 1; fill: rgb(89%,95%,92%); fill-rule: evenodd;"/>
+			<text x="211.482421875" y="27.5" style="font-family: ReportSans; font-size: 9px;fill: rgb(8%,21%,30%); stroke:none;" transform="translate(0,55) scale(1,-1)">Roots modulo p</text>
+			<text x="188.725341796875" y="15.5" style="font-family: ReportSans; font-size: 9px;fill: rgb(8%,21%,30%); stroke:none;" transform="translate(0,31) scale(1,-1)">build curve / quadratic twist</text>
+			<rect x="346" y="0" width="144" height="43" rx="5" ry="5" style="stroke: rgb(8%,21%,30%); stroke-linecap: butt; stroke-width: 1; fill: rgb(89%,95%,92%); fill-rule: evenodd;"/>
+			<text x="373.228515625" y="27.5" style="font-family: ReportSans; font-size: 9px;fill: rgb(8%,21%,30%); stroke:none;" transform="translate(0,55) scale(1,-1)">Sampled order checks</text>
+			<text x="371.978271484375" y="15.5" style="font-family: ReportSans; font-size: 9px;fill: rgb(8%,21%,30%); stroke:none;" transform="translate(0,31) scale(1,-1)">certify separately in api</text>
+			<path d="M 140,21 L 174,21 Z" style="stroke: rgb(8%,21%,30%); stroke-linecap: butt; stroke-width: 1;"/>
+			<polygon points="174 21, 169 24, 169 18" style="stroke: rgb(8%,21%,30%); stroke-linecap: butt; stroke-width: 1; fill: rgb(8%,21%,30%); fill-rule: evenodd;"/>
+			<path d="M 312,21 L 346,21 Z" style="stroke: rgb(8%,21%,30%); stroke-linecap: butt; stroke-width: 1;"/>
+			<polygon points="346 21, 341 24, 341 18" style="stroke: rgb(8%,21%,30%); stroke-linecap: butt; stroke-width: 1; fill: rgb(8%,21%,30%); fill-rule: evenodd;"/>
+		</g>
+	</g>
+</svg>
