@@ -23,6 +23,8 @@ use rand::rngs::StdRng;
 use rand::SeedableRng;
 use serde_json::json;
 
+use crypto_lib::binary_ecc::curve::BinaryCurve;
+
 use crypto_lib::cryptanalysis::ecdlp_nist::{
     self as nist, anomalous, audit, curve_by_name, curve_names, nist_curves, solve, Audit, Curve,
     EcdlpGroup, Group, Method, SolveOptions,
@@ -32,8 +34,9 @@ use crypto_lib::cryptanalysis::ecdlp_nist::{
 #[command(
     name = "ecdlp-nist",
     version,
-    about = "ECDLP solvers and structural audit across the fifteen NIST curves",
-    long_about = "Solve Q = [k]G on P-192…P-521, K-163…K-571 and B-163…B-571 by the \
+    about = "ECDLP solvers and structural audit across NIST and Certicom curves",
+    long_about = "Solve Q = [k]G on the NIST P, K and B curves and nine Certicom binary \
+                  challenges by the \
                   branch the curve calls for (Smart on anomalous prime curves, \
                   Pohlig–Hellman on composite orders, BSGS/kangaroo on an interval, \
                   folded parallel rho otherwise), and audit each curve for the \
@@ -51,7 +54,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
-    /// List the NIST curves with their audit summary.
+    /// List the NIST and Certicom curves with their audit summary.
     List,
     /// Structural audit of one curve.
     Audit(CurveArg),
@@ -74,15 +77,18 @@ struct SolveArgs {
     /// Curve name (see `list`).
     curve: String,
     /// Plant Q = [k]G with this scalar (decimal or 0x-hex).
-    #[arg(long, conflicts_with_all = ["random_bits", "point"])]
+    #[arg(long, conflicts_with_all = ["random_bits", "point", "challenge"])]
     secret: Option<String>,
     /// Plant Q = [k]G with a random k of this many bits (seeded).
-    #[arg(long, conflicts_with = "point")]
+    #[arg(long, conflicts_with_all = ["point", "challenge"])]
     random_bits: Option<u32>,
     /// Solve an externally supplied point `x,y` (hex).  Needs an interval
     /// unless the curve is a toy.
-    #[arg(long, value_name = "X,Y")]
+    #[arg(long, value_name = "X,Y", conflicts_with = "challenge")]
     point: Option<String>,
+    /// Use the published Certicom challenge point Q for this curve.
+    #[arg(long)]
+    challenge: bool,
     /// Interval lower bound `lo` (decimal or 0x-hex); default 0.
     #[arg(long)]
     interval_lo: Option<String>,
@@ -183,7 +189,8 @@ fn audit_header() -> String {
 }
 
 fn cmd_list(json: bool) -> Result<(), String> {
-    let curves = nist_curves();
+    let mut curves = nist_curves();
+    curves.extend(nist::certicom_curves());
     let audits: Vec<Audit> = curves.iter().map(audit).collect();
     if json {
         let rows: Vec<serde_json::Value> = curves
@@ -282,7 +289,11 @@ fn cmd_solve(args: &SolveArgs, json: bool) -> Result<(), String> {
         (None, None) => None,
     };
     // Target: planted or supplied.
-    let (target, planted): (nist::AnyPoint, Option<BigUint>) = if let Some(pt) = &args.point {
+    let (target, planted): (nist::AnyPoint, Option<BigUint>) = if args.challenge {
+        let (_, target) = BinaryCurve::certicom_challenge(&curve.name)
+            .ok_or_else(|| format!("{} is not a Certicom binary challenge", curve.name))?;
+        (nist::AnyPoint::Binary(target), None)
+    } else if let Some(pt) = &args.point {
         let (x, y) = pt
             .split_once(',')
             .ok_or_else(|| "--point wants X,Y in hex".to_string())?;
@@ -297,7 +308,7 @@ fn cmd_solve(args: &SolveArgs, json: bool) -> Result<(), String> {
                 (&lo + rng.gen_biguint_below(&span)) % curve.order()
             }
             (None, None) => {
-                return Err("give --secret K, --random-bits B, or --point X,Y".into());
+                return Err("give --secret K, --random-bits B, --point X,Y, or --challenge".into());
             }
         };
         (curve.plant(&k), Some(k))
