@@ -93,6 +93,44 @@ running).
 `logs -f` at the check-in cadence in AGENTS.md, rather than holding a
 foreground session open on a long job.
 
+### Rust CLI: one binary, no aws CLI or jq
+
+[`cli/`](cli/) is a port of `ephemeral` to Rust on the AWS SDK. It has the
+same subcommands, flags, defaults, S3 files, tags, user data and exit
+statuses, and `runner.sh` is compiled into it. The two CLIs are
+interchangeable: either one can follow, fetch or kill a job the other
+launched. It needs only `git` (and, for `shell`, the aws CLI with
+session-manager-plugin).
+
+```sh
+cargo build --release --manifest-path taskq/deploy/ephemeral/cli/Cargo.toml
+E=taskq/deploy/ephemeral/cli/target/release/ephemeral
+$E run --type c7i.large --toolchain none --paths taskq -- 'echo hi > "$EPHEMERAL_OUT/x"'
+```
+
+It is a standalone crate (its own `[workspace]`), so the root `crypto` build
+does not compile the SDK. Credentials, region and profile come from the
+standard AWS chain. Like the aws CLI, it honours `HTTPS_PROXY`/`NO_PROXY` and
+`AWS_CA_BUNDLE`, which the SDK's default client does not. A binary carries the
+`runner.sh` it was built with. Rebuild after `runner.sh` changes, or set
+`EPHEMERAL_RUNNER=path/to/runner.sh`.
+
+Checked on the deployed stack (us-east-1, 2026-10-17), from a cloud sandbox
+behind an HTTPS proxy:
+
+| check | result |
+|---|---|
+| `config`, `ls`, `cache`, `status` on jobs the bash CLI launched | same data as the bash CLI |
+| `run --type c7i.large --toolchain none --paths taskq -- '…; exit 5'` with 1 unpushed commit | 66 KiB patch applied on the box, `$EPHEMERAL_OUT/arch.txt` fetched, CLI exit 5, instance `terminated` (job `20261017-043626-rs-smoke-29351c`) |
+| `run --detach -- sleep 600`, then `ls`, `kill last`, `status last`, `logs last` | listed as running, killed, status stays `killed`, instance shutting down (job `20261017-043746-sleep-76db6b`) |
+
+Not run against AWS yet: `bake`, `shell`, `--spot`, GPU types, and the
+capacity fallback across zones (they use the same calls as the bash CLI, but
+the Rust paths have not been exercised). `cargo test` covers the pure parts:
+id and slug rules, TTL spans, bash quoting of the command and `env` (checked
+by running bash), the user data (`bash -n`, deadline armed first) and the
+exit-status table.
+
 ### What ships from the working tree
 
 The patch contains tracked changes and untracked files that git does not
@@ -336,6 +374,7 @@ terraform fmt -check && terraform init -backend=false && terraform validate
 terraform test                                   # mocked AWS: safety properties of the stack
 python3 -m pytest tests/test_reaper.py           # reaper decisions
 tests/local_e2e.sh                               # full run with no AWS account (docker + network)
+(cd cli && cargo test && cargo clippy --all-targets && cargo fmt --check)   # Rust CLI
 ```
 
 `local_e2e.sh` replaces the `aws` CLI with [`tests/fake-aws`](tests/fake-aws),

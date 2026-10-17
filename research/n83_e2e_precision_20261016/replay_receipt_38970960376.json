@@ -1,0 +1,22 @@
+{
+  "schema": "n83.e2e-precision-local-replay/v1",
+  "run_id": 38970960376,
+  "run_attempt": 1,
+  "run_head_sha": "d13e28e76d3709c19f15cf2c352d4ab912812335",
+  "provider_artifact_id": 12083922301,
+  "provider_zip_sha256": "559578cd386693ce3681827ba3a9f192bd99be7ca72920fc35734cf515fd844d",
+  "cloud_analysis_sha256": "1d219b757c24dc38dd191041dd834d7dc0a4195ec83c99fbe6c17110a2a02225",
+  "local_replay_stdout_sha256": "4cbf30fc8b56c2bea74590e7107af2d4c181aefa5fa4aeced6a73e63bd51a39e",
+  "local_replay_exit_status": 0,
+  "local_replay_stderr_bytes": 0,
+  "local_replay_json_equal_cloud": true,
+  "verifier_sha256": "d21fa5775e0ae63a10dd70a3f387f245ce5e0711f8729ddc83f2f27b76fdcd84",
+  "materializer_sha256": "0ba904c048418d66fd8b515e6ffdf30668bfeefc7ce0dfe2d9033ce8603ec177",
+  "materializer_status": "PASS_EXACT_645_MEMBER_BINDING",
+  "candidate_count": 2,
+  "workload_count": 16,
+  "ic_run_count": 64,
+  "rho_run_count": 16,
+  "evidence_status": "PASS_INDEPENDENT_REPLAY",
+  "selection_status": "BOUNDED_UNKNOWN"
+}

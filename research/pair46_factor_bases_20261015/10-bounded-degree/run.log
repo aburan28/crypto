@@ -1,0 +1,39 @@
+field k=16 p=65539 a=62781 b=55396 #E=65736 hasse=true order=true
+k=16 d=2 done in 0.1s
+k=16 d=3 done in 0.0s
+k=16 d=4 done in 0.1s
+k=16 d=5 done in 0.1s
+k=16 d=6 done in 0.1s
+k=16 d=7 done in 0.1s
+k=16 d=8 done in 0.1s
+field k=20 p=1048583 a=289602 b=952262 #E=1048896 hasse=true order=true
+k=20 d=2 done in 0.7s
+k=20 d=3 done in 0.7s
+k=20 d=4 done in 0.9s
+k=20 d=5 done in 1.0s
+k=20 d=6 done in 1.1s
+k=20 d=7 done in 1.3s
+k=20 d=8 done in 1.5s
+field k=24 p=16777259 a=16575872 b=802967 #E=16776014 hasse=true order=true
+k=24 d=2 done in 11.1s
+k=24 d=3 done in 6.0s
+k=24 d=4 done in 6.8s
+k=24 d=5 done in 8.1s
+k=24 d=6 done in 9.9s
+k=24 d=7 done in 10.1s
+k=24 d=8 done in 12.1s
+ext k=8 q=263 F=278 e=0.5050 valid=true
+ext k=10 q=1031 F=1058 e=0.5019 valid=true
+ext k=12 q=4099 F=4006 e=0.4986 valid=true
+p46 d=2 rho_hat=0.5012 (1.2s)
+p46 d=3 rho_hat=0.6785 (1.3s)
+p46 d=4 rho_hat=0.6276 (1.4s)
+p46 d=5 rho_hat=0.6323 (1.8s)
+p46 d=6 rho_hat=0.6322 (2.0s)
+p46 d=7 rho_hat=0.6336 (2.3s)
+p46 d=8 rho_hat=0.6411 (2.5s)
+total 87.6s
+
+real	1m27.601s
+user	1m11.341s
+sys	0m3.702s
