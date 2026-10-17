@@ -1,0 +1,202 @@
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index d6f24649b..59bb1cf45 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -5184,7 +5184,12 @@ impl PairSumTable {
+         // 1. Every row keyed once, straight into its run's streams.
+         let runs = rayon::current_num_threads().clamp(1, rows.max(1));
+         let per_run = rows.div_ceil(runs);
+-        let streams: Vec<(Vec<Vec<u64>>, Vec<Vec<u32>>)> = (0..runs)
++        // Each stream is written a cache line at a time: its pending line
++        // sits in L1 and goes out whole by non-temporal stores, so the
++        // append neither reads the stream's lines before writing them nor
++        // keeps 128 of them in the cache ([`LineStream`]).
++        type Streams = (Vec<LineStream<u64, 8>>, Vec<LineStream<u32, 16>>);
++        let streams: Vec<Streams> = (0..runs)
+             .into_par_iter()
+             .map(|run| {
+                 let here = (run * per_run).min(rows)..((run + 1) * per_run).min(rows);
+@@ -5192,8 +5197,10 @@ impl PairSumTable {
+                 // deviations of it, so a stream is all but never regrown.
+                 let mean = row_lens[here.clone()].iter().sum::<usize>() / parts;
+                 let room = mean + 6 * (mean as f64).sqrt() as usize + 16;
+-                let mut hs: Vec<Vec<u64>> = (0..parts).map(|_| Vec::with_capacity(room)).collect();
+-                let mut ws: Vec<Vec<u32>> = (0..parts).map(|_| Vec::with_capacity(room)).collect();
++                let mut hs: Vec<LineStream<u64, 8>> =
++                    (0..parts).map(|_| LineStream::with_room(room)).collect();
++                let mut ws: Vec<LineStream<u32, 16>> =
++                    (0..parts).map(|_| LineStream::with_room(room)).collect();
+                 for r in here {
+                     each_row(r, &mut |keys, orbit| {
+                         for &key in keys {
+@@ -5208,12 +5215,19 @@ impl PairSumTable {
+                         }
+                     });
+                 }
++                for s in &mut hs {
++                    s.finish();
++                }
++                for s in &mut ws {
++                    s.finish();
++                }
++                LineStream::<u64, 8>::fence();
+                 (hs, ws)
+             })
+             .collect();
+         let mut part_start = vec![0usize; parts + 1];
+         for p in 0..parts {
+-            let len: usize = streams.iter().map(|(hs, _)| hs[p].len()).sum();
++            let len: usize = streams.iter().map(|(hs, _)| hs[p].as_slice().len()).sum();
+             part_start[p + 1] = part_start[p] + len;
+         }
+         let total = part_start[parts];
+@@ -5250,7 +5264,7 @@ impl PairSumTable {
+                     let first = p * per_part;
+                     let mut at = vec![0usize; per_part];
+                     for (hs, _) in &streams {
+-                        for &h in &hs[p] {
++                        for &h in hs[p].as_slice() {
+                             at[(h >> bucket_shift) as usize - first] += 1;
+                         }
+                     }
+@@ -5262,7 +5276,7 @@ impl PairSumTable {
+                         next += n;
+                     }
+                     for (hs, ws) in &streams {
+-                        let (hs, ws) = (&hs[p], &ws[p]);
++                        let (hs, ws) = (hs[p].as_slice(), ws[p].as_slice());
+                         for (i, (&h, &w)) in hs.iter().zip(ws).enumerate() {
+                             if let Some(&ahead) = hs.get(i + FILL_AHEAD) {
+                                 prefetch(&present[filter_slot(ahead, present_mask, 0).0]);
+@@ -21907,3 +21921,131 @@ impl std::fmt::Debug for FilterWords {
+         f.debug_struct("FilterWords").field("len", &self.len).finish()
+     }
+ }
++
++/// **A stream appended one 64-byte line at a time** (software
++/// write-combining), for the folded build's partition streams.
++///
++/// `N` elements of `T` make one cache line.  Pushes fill a pending line
++/// held in the struct (so in L1); a full line is written to the stream's
++/// storage with non-temporal stores, which neither read the line first nor
++/// leave it in the cache.  The stream's elements start on a 64-byte
++/// boundary inside an over-reserved `Vec`, so every flushed line is a whole
++/// aligned line.  If a stream outgrows its room it falls back to ordinary
++/// appends; its order, and so the table, is the same either way.
++pub(crate) struct LineStream<T: Copy + Default, const N: usize> {
++    buf: Vec<T>,
++    /// Elements before the first 64-byte boundary, unused.
++    off: usize,
++    /// Elements written after `off`, flushed lines only (`buf.len()` is
++    /// `off + len` once [`Self::finish`] has run, or while `plain`).
++    len: usize,
++    line: [T; N],
++    pending: usize,
++    /// Set once the reserved room ran out: lines go through `Vec` then.
++    plain: bool,
++}
++
++impl<T: Copy + Default, const N: usize> LineStream<T, N> {
++    const LINE: usize = 64;
++
++    fn with_room(room: usize) -> Self {
++        debug_assert_eq!(N * std::mem::size_of::<T>(), Self::LINE);
++        let mut buf: Vec<T> = Vec::with_capacity(room + 2 * N);
++        let addr = buf.as_mut_ptr() as usize;
++        let off = ((Self::LINE - addr % Self::LINE) % Self::LINE) / std::mem::size_of::<T>();
++        Self {
++            buf,
++            off,
++            len: 0,
++            line: [T::default(); N],
++            pending: 0,
++            plain: false,
++        }
++    }
++
++    #[inline(always)]
++    fn push(&mut self, v: T) {
++        self.line[self.pending] = v;
++        self.pending += 1;
++        if self.pending == N {
++            self.flush_line();
++        }
++    }
++
++    #[inline(always)]
++    fn flush_line(&mut self) {
++        self.pending = 0;
++        if !self.plain && self.off + self.len + N <= self.buf.capacity() {
++            // SAFETY: `off + len .. off + len + N` lies inside the
++            // reserved capacity, starts on a 64-byte boundary (`off` puts
++            // element 0 there and `len` is a whole number of lines), and
++            // nothing else refers to it.
++            unsafe {
++                let dst = self.buf.as_mut_ptr().add(self.off + self.len);
++                Self::stream_line(dst, &self.line);
++            }
++            self.len += N;
++        } else {
++            if !self.plain {
++                // SAFETY: the first `off + len` elements are initialised:
++                // `off` of them are never read (see `as_slice`), and the
++                // rest were written by whole lines.  Zero them first so
++                // `Vec` holds no uninitialised `T`.
++                unsafe {
++                    std::ptr::write_bytes(self.buf.as_mut_ptr(), 0, self.off);
++                    self.buf.set_len(self.off + self.len);
++                }
++                self.plain = true;
++            }
++            self.buf.extend_from_slice(&self.line);
++            self.len += N;
++        }
++    }
++
++    /// The last, partial line, and the `Vec`'s length.
++    fn finish(&mut self) {
++        if !self.plain {
++            // SAFETY: as in `flush_line`'s fallback.
++            unsafe {
++                std::ptr::write_bytes(self.buf.as_mut_ptr(), 0, self.off);
++                self.buf.set_len(self.off + self.len);
++            }
++            self.plain = true;
++        }
++        let pending = self.pending;
++        self.buf.extend_from_slice(&self.line[..pending]);
++        self.len += pending;
++        self.pending = 0;
++    }
++
++    /// The stream, in push order (after [`Self::finish`]).
++    fn as_slice(&self) -> &[T] {
++        &self.buf[self.off..]
++    }
++
++    /// Orders this thread's non-temporal stores before what follows.
++    fn fence() {
++        #[cfg(target_arch = "x86_64")]
++        // SAFETY: `sfence` has no operands and no preconditions.
++        unsafe {
++            std::arch::x86_64::_mm_sfence();
++        }
++    }
++
++    /// # Safety
++    /// `dst` must be 64-byte aligned and valid for writes of `N` `T`s.
++    #[inline(always)]
++    unsafe fn stream_line(dst: *mut T, line: &[T; N]) {
++        #[cfg(target_arch = "x86_64")]
++        {
++            use std::arch::x86_64::{__m128i, _mm_loadu_si128, _mm_stream_si128};
++            let s = line.as_ptr() as *const __m128i;
++            let d = dst as *mut __m128i;
++            for k in 0..4 {
++                _mm_stream_si128(d.add(k), _mm_loadu_si128(s.add(k)));
++            }
++        }
++        #[cfg(not(target_arch = "x86_64"))]
++        std::ptr::copy_nonoverlapping(line.as_ptr(), dst, N);
++    }
++}
