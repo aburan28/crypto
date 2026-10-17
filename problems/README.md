@@ -11,6 +11,7 @@ Keep resolved and superseded records in the index.
 
 | Problem | Status | What it blocks | What would unblock it |
 | --- | --- | --- | --- |
+| [Generalized rootfinding complete all-roots8x qualification](generalized-rootfinding-all-roots-8x.md) | open | novel qualified8x over matched genuine all-roots F4/F5/F6 across requested fields | native complete-output integration, independent replay, strongest external references and the unchanged hard gate |
 | [Prime61 exhaustive horizontal class memory](prime61-horizontal-class-memory.md) | open; disk-backed pilot verified | certified full-class coverage and all-class workload execution; retained-vector requirement removed on the new path | certified degree-set coverage, provisioned disk/compute envelope and replayed remaining workloads |
 | [Screenshot candidate driver is not located](screenshot-factor-base-driver-unlocated.md) | open | faithful 1,000/2,000-candidate isogeny benchmark at a requested large field | original file/branch/PR or source bundle, native fixture replay and validated larger-field map |
 | [Generalized GPU rho workers for nine Certicom binary challenges](certicom-binary-gpu-rho-integration.md) | open | persistent, independently replayable GPU rho and qualified fastest-arithmetic choices for all nine exact challenges | exact CPU bindings, per-curve GPU replay and durable DP/collision path, then matched device performance gates |
