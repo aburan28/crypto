@@ -2026,17 +2026,18 @@ fn e19(o: &mut String, rows: &[&Value]) {
         );
     }
     o.push_str("\n#### E19 — where the multiplications go, and the distance to rho\n\n");
-    o.push_str("| p | seed | precompute | base | generation | Weil | solves | lift-back | checks | LA ×16 | solves share | other than solves | S total | rho (negation) | S / rho | predicted 0.584·C/p | measured / predicted |\n");
-    o.push_str("|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|\n");
+    o.push_str("| p | seed | precompute | base | generation | Weil | solves | lift-back | checks | LA ×16 | solves share | other than solves | S total | rho (negation) | S / rho | registered 0.584·C/p, C = 1.3e9 | measured / registered | 0.584·C/p at this curve's mean C | measured / that |\n");
+    o.push_str("|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|\n");
     let mut fit: Vec<(f64, f64)> = Vec::new();
     for r in &rows {
         let tot = fl(r, "total_muls");
         let solves = fl(r, "weil_muls") + fl(r, "solve_muls");
+        let reg = 0.584 * 1.3e9 / fl(r, "p");
         let pred = 0.584 * fl(r, "call.mean") / fl(r, "p");
         fit.push((fl(r, "n"), fl(r, "ratio")));
         let _ = writeln!(
             o,
-            "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {:.2} % | {:.3} % | {} | {} | {} | {} | {:.2} |",
+            "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {:.2} % | {:.3} % | {} | {} | {} | {} | {:.2} | {} | {:.2} |",
             py_str(at(r, "p")),
             py_str(at(r, "seed")),
             g3(fl(r, "precompute_muls")),
@@ -2052,6 +2053,8 @@ fn e19(o: &mut String, rows: &[&Value]) {
             g3(tot),
             g3(fl(r, "rho_matched_muls")),
             g3(fl(r, "ratio")),
+            g3(reg),
+            fl(r, "ratio") / reg,
             g3(pred),
             fl(r, "ratio") / pred,
         );
@@ -2084,25 +2087,41 @@ fn e19(o: &mut String, rows: &[&Value]) {
             yes(v.iter().all(|&x| x > 1.0)),
         );
     }
-    // §11.16's handover from E19's own constants, pooled.
-    let pool =
-        |f: &dyn Fn(&Value) -> f64| -> f64 { mean(&rows.iter().map(|r| f(r)).collect::<Vec<_>>()) };
-    let y = rows.iter().map(|r| fl(r, "residuals")).sum::<f64>()
-        / rows.iter().map(|r| fl(r, "folded.relations")).sum::<f64>();
-    let cols_p = pool(&|r| fl(r, "folded.columns") / fl(r, "p"));
-    let c = pool(&|r| fl(r, "call.mean"));
-    let h = pool(&|r| fl(r, "cofactor"));
-    let s_rho = pool(&|r| fl(r, "rho_matched_muls") / fl(r, "n").sqrt());
-    let r_la = pool(&|r| fl(r, "la_fp_muls") / fl(r, "rho_matched_muls"));
-    let p_star = y * cols_p * c * h.sqrt() / (s_rho * (1.0 - r_la));
-    let n_star = p_star.powi(4) / h;
-    let _ = writeln!(
-        o,
-        "\n#### E19 — the handover from E19's own constants\n\n| y (pooled) | cols / p | C (mean of means) | h | S_rho (negation) | r = LA / rho | p* | log2 n* |\n|--:|--:|--:|--:|--:|--:|--:|--:|\n| {y:.1} | {cols_p:.3} | {} | {h:.2} | {s_rho:.1} | {r_la:.3} | {} | {:.1} |",
-        g3(c),
-        g3(p_star),
-        n_star.log2()
-    );
+    // §11.16's handover from E19's own constants: pooled over every curve
+    // (the registered G2.13), and over the largest p only, where rho's
+    // set-up is the smallest share of its cost.
+    o.push_str("\n#### E19 — the handover from E19's own constants\n\n| curves | y (pooled) | cols / p | C (mean of means) | h | S_rho (negation) | r = LA / rho | p* | log2 n* |\n|:--|--:|--:|--:|--:|--:|--:|--:|--:|\n");
+    let pmax = rows.iter().map(|r| fl(r, "p")).fold(0.0, f64::max);
+    let largest: Vec<&Value> = rows
+        .iter()
+        .copied()
+        .filter(|r| fl(r, "p") == pmax)
+        .collect();
+    for (label, set) in [
+        ("all (registered)", rows.clone()),
+        ("largest p only", largest),
+    ] {
+        let pool = |f: &dyn Fn(&Value) -> f64| -> f64 {
+            mean(&set.iter().map(|r| f(r)).collect::<Vec<_>>())
+        };
+        let y = set.iter().map(|r| fl(r, "residuals")).sum::<f64>()
+            / set.iter().map(|r| fl(r, "folded.relations")).sum::<f64>();
+        let cols_p = pool(&|r| fl(r, "folded.columns") / fl(r, "p"));
+        let c = pool(&|r| fl(r, "call.mean"));
+        let h = pool(&|r| fl(r, "cofactor"));
+        let s_rho = pool(&|r| fl(r, "rho_matched_muls") / fl(r, "n").sqrt());
+        let r_la = pool(&|r| fl(r, "la_fp_muls") / fl(r, "rho_matched_muls"));
+        let p_star = y * cols_p * c * h.sqrt() / (s_rho * (1.0 - r_la));
+        let n_star = p_star.powi(4) / h;
+        let _ = writeln!(
+            o,
+            "| {label} ({}) | {y:.1} | {cols_p:.3} | {} | {h:.2} | {s_rho:.1} | {r_la:.3} | {} | {:.1} |",
+            set.len(),
+            g3(c),
+            g3(p_star),
+            n_star.log2()
+        );
+    }
 }
 
 fn e13_ok(r: &Value) -> bool {
