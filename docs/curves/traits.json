@@ -28641,18 +28641,18 @@
       },
       "endomorphism": {
         "conductor_divides": "457",
-        "conductor": null,
+        "conductor": "457",
         "levels": [
           {
             "ell": "457",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]"
         ]
@@ -28879,7 +28879,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "binary",
         "isogenies": "2:-,3:0,5:0,7:1",
         "jfield": "full",
@@ -29521,18 +29521,18 @@
       },
       "endomorphism": {
         "conductor_divides": "41",
-        "conductor": null,
+        "conductor": "41",
         "levels": [
           {
             "ell": "41",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]"
         ]
@@ -29759,7 +29759,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "binary",
         "isogenies": "2:-,3:0,5:0,7:2",
         "jfield": "full",
@@ -29822,19 +29822,19 @@
         "class_number_status": "proved"
       },
       "endomorphism": {
-        "conductor_divides": "41",
-        "conductor": null,
+        "conductor_divides": "1",
+        "conductor": "1",
         "levels": [
           {
             "ell": "41",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": true,
+        "status": "proved",
         "contains": [
           "Z[π]"
         ]
@@ -30061,7 +30061,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "maximal",
         "family": "binary",
         "isogenies": "2:-,3:0,5:0,7:2",
         "jfield": "full",
@@ -30703,18 +30703,18 @@
       },
       "endomorphism": {
         "conductor_divides": "457",
-        "conductor": null,
+        "conductor": "457",
         "levels": [
           {
             "ell": "457",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]"
         ]
@@ -30941,7 +30941,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "binary",
         "isogenies": "2:-,3:0,5:0,7:1",
         "jfield": "full",
@@ -32783,18 +32783,18 @@
       },
       "endomorphism": {
         "conductor_divides": "967",
-        "conductor": null,
+        "conductor": "967",
         "levels": [
           {
             "ell": "967",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]"
         ]
@@ -33021,7 +33021,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "binary",
         "isogenies": "2:-,3:0,5:0,7:1",
         "jfield": "full",
@@ -33667,18 +33667,18 @@
       },
       "endomorphism": {
         "conductor_divides": "967",
-        "conductor": null,
+        "conductor": "967",
         "levels": [
           {
             "ell": "967",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]"
         ]
@@ -33905,7 +33905,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "binary",
         "isogenies": "2:-,3:0,5:0,7:1",
         "jfield": "full",
