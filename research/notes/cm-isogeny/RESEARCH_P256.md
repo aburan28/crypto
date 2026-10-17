@@ -655,6 +655,8 @@ the correlation tables.
 
 ### Step A: `b`-seed deep statistical profile
 
+*(Update 2026-10-16: the NIST seeds are now explained as `drand48` output seeded with 1997–98 timestamps; this null result stands and the seed-selection question it probed is closed beyond about 30 bits of selection. See `research/nist_seed_provenance_20261016/`.)*
+
 Module `cryptanalysis::b_seed_profile` (~190 LoC):
 - Sieve primes up to `Q = 100,000` (9,590 primes ≥ 5).
 - Compute `b mod q` ratio for each prime.
