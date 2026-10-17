@@ -29,8 +29,9 @@ The main result is a **structural-completeness theorem**:
 > with full automorphism folding), where `#E(F_p) = h·r`, `r` prime,
 > `h ∈ {1,2,4,8}`.
 
-The theorem is proven by case analysis over seven structural blocks
-(§4) under standing assumptions (Tate's isogeny theorem, Howe's gluing
+The theorem is argued by case analysis over seven structural blocks
+(§4; proof sketches in §8, not yet independently reviewed) under
+standing assumptions (Tate's isogeny theorem, Howe's gluing
 theorem, Gaudry's and Diem–Thomé's hyperelliptic index-calculus bounds,
 and no sub-exponential prime-field hyperelliptic DLP). The empirical
 checks are bounded: structural conditions are computed for the four
@@ -39,19 +40,17 @@ deployed curves only (§7); the twist ℓ-rank lemma is checked for
 covers p ≡ 1 (mod 6), p ≤ 1000, and the CM-73 sweep p ≤ 5000.
 (Corrected 2026-10-16, sheriff case SHF-20261016-3caa6f P5; the LaTeX
 paper `papers/structural-completeness/` is the reference version, and its
-instance and prime counts are recomputed in `recount/`.)
+instance and prime counts are recomputed in `recount/`. Corrected again
+2026-10-17, sheriff case SHF-20261017-e4d7f6 P-N6: "proven" became "argued
+(proof sketches in §8)", and a stale paragraph calling the proof
+"unconditional", conditional only on no sub-exponential algorithm being
+*known*, was deleted; it contradicted the standing assumptions above.)
 
 A surprising auxiliary finding: the **Howe-gluing genus-2 cover
 exists for every such curve** (we verify the three Howe (1996)
 conditions hold uniformly), but the cover does not yield a DLP
 speedup because genus-2 prime-field DLP costs `O(p)` while ECDLP
 costs `O(√p)`.
-
-The proof is *unconditional* in the sense that it depends only on
-established theorems (Tate, Howe, Gaudry, Diem-Thomé) plus
-mechanically verifiable arithmetic conditions; it is *conditional*
-only on the standing assumption that no sub-exponential DLP
-algorithm is known for prime-field hyperelliptic Jacobians.
 
 ## Section index
 
