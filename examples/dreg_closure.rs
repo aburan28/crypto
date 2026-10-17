@@ -29,6 +29,7 @@ use crypto_lib::cryptanalysis::koblitz_bench::{
 };
 use crypto_lib::cryptanalysis::koblitz_groebner::{build_decomposition_system, FieldStructure};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+use crypto_lib::cryptanalysis::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
 use num_bigint::BigUint;
 use serde_json::Value;
 
@@ -60,6 +61,37 @@ fn degree_json(d: &ClosureDegree) -> String {
     )
 }
 
+/// `p` with each `(v, b)` substituted: a term containing `v` vanishes when
+/// `b = 0` and loses `v` when `b = 1`; equal terms then cancel in pairs.
+fn specialise(p: &F2BoolPoly, fixes: &[(usize, bool)]) -> F2BoolPoly {
+    let mut masks: Vec<u64> = Vec::new();
+    'term: for t in &p.terms {
+        let mut m = t.mask;
+        for &(v, b) in fixes {
+            if m >> v & 1 == 1 {
+                if !b {
+                    continue 'term;
+                }
+                m &= !(1u64 << v);
+            }
+        }
+        masks.push(m);
+    }
+    masks.sort_unstable();
+    let mut kept: Vec<u64> = Vec::new();
+    for m in masks {
+        if kept.last() == Some(&m) {
+            kept.pop();
+        } else {
+            kept.push(m);
+        }
+    }
+    F2BoolPoly {
+        terms: kept.into_iter().map(|mask| F2BoolMono { mask }).collect(),
+        n_vars: p.n_vars,
+    }
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let flag = |name: &str| {
@@ -83,7 +115,27 @@ fn main() {
     let sparse: Option<u32> = flag("--sparse").map(|v| v.parse().expect("--sparse D"));
     let max_entries: usize =
         flag("--max-entries").map_or(1_500_000_000, |v| v.parse().expect("--max-entries"));
-    let valued = ["--max-cols", "--to", "--draw", "--sparse", "--max-entries"];
+    // `--fix v=b,…`: substitute the constant b into variable v before the
+    // scan (one branch of a guess).  Summand i's subspace coordinates are
+    // variables i·ℓ … i·ℓ+ℓ−1; the intermediate points follow from m·ℓ.
+    // A specialised system is a different system, so the committed XL
+    // outcome no longer applies and the XL identity check is skipped.
+    let fixes: Vec<(usize, bool)> = flag("--fix").map_or(Vec::new(), |v| {
+        v.split(',')
+            .map(|kv| {
+                let (k, b) = kv.split_once('=').expect("--fix v=b");
+                (k.parse().expect("variable"), b == "1")
+            })
+            .collect()
+    });
+    let valued = [
+        "--max-cols",
+        "--to",
+        "--draw",
+        "--sparse",
+        "--max-entries",
+        "--fix",
+    ];
     let files: Vec<&String> = args
         .iter()
         .enumerate()
@@ -119,11 +171,27 @@ fn main() {
                 .collect();
             let x_r = F2mElement::from_biguint(&BigUint::from(v["x_r"].as_u64().unwrap()), n);
             assert_eq!(basis.len(), ell);
-            let sys = build_decomposition_system(&basis, &x_r, &b, m, &st).expect("system");
+            let mut sys = build_decomposition_system(&basis, &x_r, &b, m, &st).expect("system");
             assert_eq!(
                 sys.n_vars as u64,
                 v["n_vars"].as_u64().unwrap(),
                 "{file}: rebuilt shape"
+            );
+            if !fixes.is_empty() {
+                sys.equations = sys
+                    .equations
+                    .iter()
+                    .map(|p| specialise(p, &fixes))
+                    .filter(|p| !p.terms.is_empty())
+                    .collect();
+            }
+            let fixed_json = format!(
+                "[{}]",
+                fixes
+                    .iter()
+                    .map(|(v, b)| format!("[{v},{}]", *b as u8))
+                    .collect::<Vec<_>>()
+                    .join(",")
             );
             if let Some(d) = sparse {
                 let started = std::time::Instant::now();
@@ -186,7 +254,7 @@ fn main() {
                 // XL identity: the plain basis refutes exactly at the
                 // committed degree, never below it.  Past a `≥D` bound the
                 // committed record says nothing, and XL is a new reading.
-                if d < committed || xl_known {
+                if fixes.is_empty() && (d < committed || xl_known) {
                     assert_eq!(
                         step.xl_refuted,
                         xl_known && d >= committed,
@@ -205,7 +273,7 @@ fn main() {
             let show = |x: Option<u32>| x.map_or("null".to_string(), |d| d.to_string());
             let measured_to = scan.last().map(|d| d.degree).unwrap_or(2);
             println!(
-                r#"{{"source":"{file}","cell":"{}","m":{m},"n":{n},"ell":{ell},"draw":{},"n_vars":{},"committed_outcome":{},"xl_degree":{},"closure_degree":{},"measured_to":{measured_to},"max_cols":{max_cols},"scan":[{}]}}"#,
+                r#"{{"source":"{file}","cell":"{}","m":{m},"n":{n},"ell":{ell},"draw":{},"n_vars":{},"committed_outcome":{},"fixed":{fixed_json},"xl_degree":{},"closure_degree":{},"measured_to":{measured_to},"max_cols":{max_cols},"scan":[{}]}}"#,
                 v["cell"].as_str().unwrap_or(""),
                 v["draw"],
                 sys.n_vars,
