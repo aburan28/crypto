@@ -1,0 +1,208 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Private ECC2K-130 quarantine for an external broker and validator
+
+Parameters:
+  CanonicalBucketName: {Type: String}
+  StatusBucketName: {Type: String}
+  IngressBucketName: {Type: String}
+  CodeBucketName: {Type: String}
+  CodeKey: {Type: String}
+  RdsSecurityGroupId: {Type: String}
+
+Resources:
+  WorkerTokens:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ecc2k130-worker-tokens
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions: [{AttributeName: tokenHash, AttributeType: S}]
+      KeySchema: [{AttributeName: tokenHash, KeyType: HASH}]
+      TimeToLiveSpecification: {AttributeName: expiresAt, Enabled: true}
+      SSESpecification: {SSEEnabled: true}
+      PointInTimeRecoverySpecification: {PointInTimeRecoveryEnabled: true}
+
+  UploadTickets:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ecc2k130-upload-tickets
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions: [{AttributeName: finalKey, AttributeType: S}]
+      KeySchema: [{AttributeName: finalKey, KeyType: HASH}]
+      TimeToLiveSpecification: {AttributeName: expiresAt, Enabled: true}
+      SSESpecification: {SSEEnabled: true}
+      PointInTimeRecoverySpecification: {PointInTimeRecoveryEnabled: true}
+
+  UploadStreams:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ecc2k130-upload-streams
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions: [{AttributeName: slotStream, AttributeType: S}]
+      KeySchema: [{AttributeName: slotStream, KeyType: HASH}]
+      SSESpecification: {SSEEnabled: true}
+      PointInTimeRecoverySpecification: {PointInTimeRecoveryEnabled: true}
+
+  ValidatorDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ecc2k130-upload-validator-dlq
+      MessageRetentionPeriod: 1209600
+      SqsManagedSseEnabled: true
+
+  ValidatorQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ecc2k130-upload-validator
+      VisibilityTimeout: 960
+      MessageRetentionPeriod: 345600
+      SqsManagedSseEnabled: true
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt ValidatorDeadLetterQueue.Arn
+        maxReceiveCount: 5
+
+  ValidatorQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues: [!Ref ValidatorQueue]
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: IngressBucketNotifications
+            Effect: Allow
+            Principal: {Service: s3.amazonaws.com}
+            Action: sqs:SendMessage
+            Resource: !GetAtt ValidatorQueue.Arn
+            Condition:
+              StringEquals: {aws:SourceAccount: !Ref AWS::AccountId}
+              ArnEquals:
+                aws:SourceArn: !Sub arn:${AWS::Partition}:s3:::${IngressBucketName}
+
+  IngressBucket:
+    Type: AWS::S3::Bucket
+    DependsOn: ValidatorQueuePolicy
+    Properties:
+      BucketName: !Ref IngressBucketName
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}
+      OwnershipControls: {Rules: [{ObjectOwnership: BucketOwnerEnforced}]}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireQuarantine
+            Status: Enabled
+            ExpirationInDays: 2
+            AbortIncompleteMultipartUpload: {DaysAfterInitiation: 1}
+      NotificationConfiguration:
+        QueueConfigurations:
+          - Event: s3:ObjectCreated:*
+            Queue: !GetAtt ValidatorQueue.Arn
+            Filter: {S3Key: {Rules: [{Name: prefix, Value: incoming/}]}}
+
+  IngressBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref IngressBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: s3:*
+            Resource:
+              - !Sub arn:${AWS::Partition}:s3:::${IngressBucketName}
+              - !Sub arn:${AWS::Partition}:s3:::${IngressBucketName}/*
+            Condition: {Bool: {aws:SecureTransport: 'false'}}
+
+  ExternalGatewayUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: ecc2k130-external-gateway
+      ManagedPolicyArns: [!Ref ExternalGatewayPolicy]
+
+  ExternalGatewayPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: ecc2k130-external-gateway
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem]
+            Resource: [!GetAtt WorkerTokens.Arn, !GetAtt UploadTickets.Arn, !GetAtt UploadStreams.Arn]
+          - Effect: Allow
+            Action: [sqs:SendMessage, sqs:ReceiveMessage, sqs:DeleteMessage, sqs:GetQueueAttributes]
+            Resource: !GetAtt ValidatorQueue.Arn
+          - Effect: Allow
+            Action: [s3:GetObject, s3:DeleteObject, s3:PutObject]
+            Resource: !Sub arn:${AWS::Partition}:s3:::${IngressBucketName}/incoming/*
+          - Effect: Allow
+            Action: s3:ListBucket
+            Resource: !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}
+          - Effect: Allow
+            Action: s3:GetObject
+            Resource:
+              - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/campaign.json
+              - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/bin/*
+              - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/aws/*
+              - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/infra/upload-gateway/*
+              - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/ckpt/*
+              - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/slots/*
+              - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/seed-registry/*
+              - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/dp/*
+              - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/solution.json
+              - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/solution/*
+          - Effect: Allow
+            Action: s3:PutObject
+            Resource:
+              - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/slots/*
+              - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/seed-registry/*
+              - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/dp/*
+              - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/ckpt/*
+              - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/solution/*
+              - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/logs/runpod-ingest-*/*
+          - Effect: Allow
+            Action: [s3:GetObject, s3:PutObject]
+            Resource: !Sub arn:${AWS::Partition}:s3:::${StatusBucketName}/*
+          - Effect: Allow
+            Action: secretsmanager:GetSecretValue
+            Resource: !Sub arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:rho/dp-rds-*
+          - Effect: Allow
+            Action: rds:DescribeDBInstances
+            Resource: '*'
+          - Effect: Allow
+            Action: ec2:AuthorizeSecurityGroupIngress
+            Resource: !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:security-group/${RdsSecurityGroupId}
+          - Effect: Allow
+            Action: cloudwatch:PutMetricData
+            Resource: '*'
+            Condition: {StringEquals: {cloudwatch:namespace: ECC2K130/Ingest}}
+
+  ValidatorDlqAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: ecc2k130-upload-validator-dlq
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions: [{Name: QueueName, Value: !GetAtt ValidatorDeadLetterQueue.QueueName}]
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+Outputs:
+  BrokerMode: {Value: external}
+  CodeKey: {Value: !Ref CodeKey}
+  ExternalGatewayUser: {Value: !Ref ExternalGatewayUser}
+  IngressBucket: {Value: !Ref IngressBucket}
+  WorkerTokensTable: {Value: !Ref WorkerTokens}
+  UploadTicketsTable: {Value: !Ref UploadTickets}
+  UploadStreamsTable: {Value: !Ref UploadStreams}
+  ValidatorQueueUrl: {Value: !Ref ValidatorQueue}

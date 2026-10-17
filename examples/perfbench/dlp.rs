@@ -2,7 +2,7 @@
 //! points, automorphism-folded), BSGS, Gaudry–Schost, Pohlig–Hellman, the
 //! collaborative rho walker and the ECC2K-130 cycle certificate.
 //!
-//! Every kernel is a full solve of a fixed planted instance through the
+//! Every kernel is a full solve of a fixed known-answer instance through the
 //! public entry point a research pipeline or CI job calls, with the walk's
 //! seed fixed, so the work is the same every run and the fingerprint covers
 //! the recovered logarithm and every operation counter the entry point
@@ -59,7 +59,7 @@ fn planted(i: u64, m: u64) -> u64 {
     1 + (z ^ (z >> 31)) % (m - 1)
 }
 
-// ── Pollard rho over Z_p^* (BigUint) ─────────────────────────────────
+// ── Pollard rho over Z_p^* ───────────────────────────────────────────
 
 /// `p = 2q + 1` with `q` prime (36-bit); `4` generates the order-`q`
 /// subgroup.
@@ -84,6 +84,51 @@ fn rho_floyd_zp_q36() -> Box<dyn Workload> {
         let sol = pollard_rho_dlp_zp(&g, &h, &p, &q, &opts).expect("rho solves");
         assert_eq!(g.modpow(&sol.x, &p), h);
         fp_big(Fp::new(), &sol.x).u64(sol.iterations).finish()
+    }))
+}
+
+/// A 66-bit prime modulus forces the multiprecision path.  The subgroup
+/// order is the 30-bit prime 1_073_741_827.
+fn wide_rho_instance() -> (BigUint, BigUint, BigUint, BigUint, BigUint) {
+    let p = BigUint::parse_bytes(b"36893488338545148151", 10).expect("prime modulus");
+    let q = BigUint::from(1_073_741_827u64);
+    let g = BigUint::parse_bytes(b"19778112498358488069", 10).expect("subgroup generator");
+    assert_eq!(g.modpow(&q, &p), BigUint::from(1u8));
+    let x = BigUint::from(planted(17, 1_073_741_827));
+    let h = g.modpow(&x, &p);
+    (p, q, g, x, h)
+}
+
+fn rho_floyd_zp_wide_q30() -> Box<dyn Workload> {
+    let (p, q, g, x, h) = wide_rho_instance();
+    let opts = RhoOptions {
+        max_iterations: 1 << 20,
+        max_restarts: 8,
+        seed: Some(0x0dd5_eed1),
+    };
+    Box::new(Closure(move || {
+        let sol = pollard_rho_dlp_zp(&g, &h, &p, &q, &opts).expect("wide rho solves");
+        assert_eq!(sol.x, x);
+        assert_eq!(g.modpow(&sol.x, &p), h);
+        fp_big(Fp::new(), &sol.x).u64(sol.iterations).finish()
+    }))
+}
+
+fn rho_dp_zp_wide_q30() -> Box<dyn Workload> {
+    let (p, q, g, x, h) = wide_rho_instance();
+    let opts = DpRhoOptions {
+        dp_bits: 6,
+        max_walkers: 1 << 18,
+        max_steps_per_walker: 1 << 12,
+        seed: Some(0x0dd5_eed2),
+    };
+    Box::new(Closure(move || {
+        let sol = pollard_rho_dp_dlp_zp_multi(&g, std::slice::from_ref(&h), &p, &q, &opts)
+            .expect("wide DP rho solves");
+        assert_eq!(sol.len(), 1);
+        assert_eq!(sol[0].x, x);
+        assert_eq!(g.modpow(&sol[0].x, &p), h);
+        fp_big(Fp::new(), &sol[0].x).u64(sol[0].iterations).finish()
     }))
 }
 
@@ -400,9 +445,21 @@ pub fn register(kernels: &mut Vec<Kernel>) {
         };
     add(
         "dlp/rho_floyd_zp_q36",
-        "pollard_rho_dlp_zp (Floyd, BigUint) on the 36-bit prime-order subgroup of a safe-prime Z_p^*",
+        "pollard_rho_dlp_zp (Floyd, word path) on the 36-bit prime-order subgroup of a safe-prime Z_p^*",
         Tier::Quick,
         rho_floyd_zp_q36,
+    );
+    add(
+        "dlp/rho_floyd_zp_wide_q30",
+        "pollard_rho_dlp_zp (Floyd, multiprecision path), 66-bit modulus and 30-bit prime-order subgroup, one target",
+        Tier::Quick,
+        rho_floyd_zp_wide_q30,
+    );
+    add(
+        "dlp/rho_dp_zp_wide_q30",
+        "pollard_rho_dp_dlp_zp_multi (multiprecision path), 66-bit modulus and 30-bit prime-order subgroup, one target",
+        Tier::Quick,
+        rho_dp_zp_wide_q30,
     );
     add(
         "dlp/rho_dp_zp_multi_q34_x3",

@@ -20,16 +20,26 @@ finding all directions structurally null at the prime-field level.
 
 The main result is a **structural-completeness theorem**:
 
-> For every prime-order ordinary elliptic curve `E` over a prime
+> For every ordinary elliptic curve `E` over a prime
 > field `F_p`, no algorithm in the family
 > `{F_p-isogeny transport, Cl(End)-orbit walking, (N, N)-cover
 > via Howe-gluing, higher-genus cover, supersingular-reduction
 > attack, volcano-floor ρ}`
-> reduces ECDLP cost below `√n / √|Aut(E)|` (plain Pollard ρ
-> with full automorphism folding).
+> reduces ECDLP cost below `√r / √|Aut(E)|` (plain Pollard ρ
+> with full automorphism folding), where `#E(F_p) = h·r`, `r` prime,
+> `h ∈ {1,2,4,8}`.
 
-The theorem is proven via seven independent structural blocks
-(§4) and empirically verified across all four deployed curves (§7).
+The theorem is proven by case analysis over seven structural blocks
+(§4) under standing assumptions (Tate's isogeny theorem, Howe's gluing
+theorem, Gaudry's and Diem–Thomé's hyperelliptic index-calculus bounds,
+and no sub-exponential prime-field hyperelliptic DLP). The empirical
+checks are bounded: structural conditions are computed for the four
+deployed curves only (§7); the twist ℓ-rank lemma is checked for
+ℓ ∈ {3,5,7,11,13} on j = 0 curves with p < 500; the split-Jacobian sweep
+covers p ≡ 1 (mod 6), p ≤ 1000, and the CM-73 sweep p ≤ 5000.
+(Corrected 2026-10-16, sheriff case SHF-20261016-3caa6f P5; the LaTeX
+paper `papers/structural-completeness/` is the reference version, and its
+instance and prime counts are recomputed in `recount/`.)
 
 A surprising auxiliary finding: the **Howe-gluing genus-2 cover
 exists for every such curve** (we verify the three Howe (1996)

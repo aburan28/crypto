@@ -17,6 +17,13 @@ Without them the hooks print one warning and let the edit through, the MCP
 server fails to start (`ENOENT: conductor-mcp`), and the `conductor check`
 that `CLAUDE.md` asks for cannot run. This page is how to install them.
 
+For an isolated enterprise installation, use the
+[private workspace path](PRIVATE_NETWORK.md): preinstalled compatible binaries,
+an internal Conductor endpoint, native Cairn private discovery, and optional
+WireGuard/internal DNS. `WORKSPACE_OFFLINE=1` makes the session hook and setup
+entrypoints validate local prerequisites and stop before online installers or
+public node startup. It does not run the online recipes below.
+
 ## On your own machine
 
 `scripts/setup-workstation.sh` does all of this and the rest of the stack in

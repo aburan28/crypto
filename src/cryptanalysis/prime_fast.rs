@@ -104,16 +104,22 @@ impl Fp64 {
         f
     }
 
+    /// `u mod p` for `u < 2p`.  A select, not a branch: on field data the
+    /// comparison is a coin flip a branch predictor cannot learn (see
+    /// [`crate::cryptanalysis::fp_backend::Fp64`] and
+    /// `research/hwcost_round2_20261016`, addendum 1).
+    #[inline(always)]
+    fn csub(&self, u: u64) -> u64 {
+        let (d, borrow) = u.overflowing_sub(self.p);
+        std::hint::select_unpredictable(borrow, u, d)
+    }
+
     /// Montgomery reduction of `t < p·2^64`: returns `t·R⁻¹ mod p`.
     #[inline(always)]
     pub fn reduce(&self, t: u128) -> u64 {
         let m = (t as u64).wrapping_mul(self.n_inv);
         let u = ((t + (m as u128) * (self.p as u128)) >> 64) as u64;
-        if u >= self.p {
-            u - self.p
-        } else {
-            u
-        }
+        self.csub(u)
     }
 
     #[inline(always)]
@@ -128,25 +134,18 @@ impl Fp64 {
 
     #[inline(always)]
     pub fn add(&self, a: u64, b: u64) -> u64 {
-        let s = a + b;
-        if s >= self.p {
-            s - self.p
-        } else {
-            s
-        }
+        self.csub(a + b)
     }
 
     #[inline(always)]
     pub fn sub(&self, a: u64, b: u64) -> u64 {
-        if a >= b {
-            a - b
-        } else {
-            a + self.p - b
-        }
+        let (d, borrow) = a.overflowing_sub(b);
+        std::hint::select_unpredictable(borrow, d.wrapping_add(self.p), d)
     }
 
     #[inline(always)]
     pub fn neg(&self, a: u64) -> u64 {
+        // a == 0 is rare on data, so this branch predicts: kept.
         if a == 0 {
             0
         } else {
@@ -1512,6 +1511,58 @@ pub fn find_a3_curve(bits: u32, residue_mod_4: u64) -> Option<(FastCurve, Pt)> {
 mod tests {
     use super::*;
     use crate::cryptanalysis::research_bench::bench_curves_a_minus_3;
+
+    /// The branch-free selections of [`Fp64`] (`reduce`, `add`, `sub`)
+    /// against the branchy formulas they replaced, bit for bit.
+    #[test]
+    fn fp64_selects_match_branchy_formulas() {
+        for p in [
+            5u64,
+            7,
+            13,
+            1_000_000_007,
+            2_147_483_647,
+            (1 << 61) - 1,
+            (1 << 62) - 57,
+        ] {
+            assert!(is_prime_u64(p), "{p}");
+            let f = Fp64::new(p);
+            let reduce = |t: u128| {
+                let m = (t as u64).wrapping_mul(f.n_inv);
+                let u = ((t + (m as u128) * (p as u128)) >> 64) as u64;
+                if u >= p {
+                    u - p
+                } else {
+                    u
+                }
+            };
+            let add = |a: u64, b: u64| if a + b >= p { a + b - p } else { a + b };
+            let sub = |a: u64, b: u64| if a >= b { a - b } else { a + p - b };
+            let check = |a: u64, b: u64| {
+                let t = a as u128 * b as u128;
+                assert_eq!(f.reduce(t), reduce(t), "reduce p={p} a={a} b={b}");
+                assert_eq!(f.mul(a, b), reduce(t), "mul p={p} a={a} b={b}");
+                assert_eq!(f.sqr(a), reduce(a as u128 * a as u128), "sqr p={p}");
+                assert_eq!(f.add(a, b), add(a, b), "add p={p} a={a} b={b}");
+                assert_eq!(f.sub(a, b), sub(a, b), "sub p={p} a={a} b={b}");
+            };
+            let edges = [0, 1, 2, p - 2, p - 1, p / 2, p / 2 + 1];
+            for &a in &edges {
+                for &b in &edges {
+                    check(a, b);
+                }
+            }
+            let mut rng = StdRng::seed_from_u64(p);
+            for _ in 0..20_000 {
+                check(rng.gen_range(0..p), rng.gen_range(0..p));
+            }
+            // reduce's whole input range, t < p·2^64, not only products.
+            for _ in 0..20_000 {
+                let t = rng.gen_range(0..(p as u128) << 64);
+                assert_eq!(f.reduce(t), reduce(t), "reduce p={p} t={t}");
+            }
+        }
+    }
 
     fn ladder(bits: u32) -> (FastCurve, Pt) {
         let (_, c) = bench_curves_a_minus_3()
