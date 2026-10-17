@@ -1,0 +1,30 @@
+{
+  "checked_utc": "2026-10-17T18:13:19.950219+00:00",
+  "objects": [
+    {
+      "bytes": 3020401,
+      "compressed_blake3": "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0",
+      "compressed_sha256": "8463aaf30365d6f6f5d6b189aff4e8afcb6c8305ec27c216700776cbdccba29d",
+      "etag": "\"0a92ba2876edcbb921bb1398eb2b2f42\"",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0.jsonl.gz"
+    },
+    {
+      "bytes": 3019769,
+      "compressed_blake3": "966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47",
+      "compressed_sha256": "df02963d1706fa7a64fd7558d88db79b23ea34801ac58062c4c500113e8c57fe",
+      "etag": "\"0eed85b1374c2697cd3e1a4755e33ddb\"",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47.jsonl.gz"
+    },
+    {
+      "bytes": 3025798,
+      "compressed_blake3": "b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e",
+      "compressed_sha256": "3e85c9e419fcddd3c9faed3c84470bf96fcad9178e48e1d73629369335841ecf",
+      "etag": "\"359c027f8c0be18a8e41696f6c5c7aed\"",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e.jsonl.gz"
+    }
+  ],
+  "schema": "n83.hosted-m6-s3-base-replay/v1",
+  "selected_best_total_runtime": null,
+  "source_plan_sha256": "7788514127328a78cf2b0f634003ddae3ff18a9ff0c0c8cd75b50fcc006152cd",
+  "status": "PASS_3_FROZEN_S3_OBJECTS"
+}
