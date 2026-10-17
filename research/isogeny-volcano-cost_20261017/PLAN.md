@@ -1,8 +1,17 @@
 # Do isogenous curves differ in ECDLP cost? Experiment plan
 
-Status: **draft plan (v0), not frozen.** `PROTOCOL.md` will freeze it after
-the tooling in §8 exists and the dry run in §9 has passed. No result below
-is a finding. The pre-flight numbers in §7 only size the design.
+Status: **superseded by [`PROTOCOL.md`](PROTOCOL.md) (v1, frozen
+2026-10-17)**, which adds the horizontal component (amendment below) and
+fixes N, the classes and the rules. No result below is a finding. The
+pre-flight numbers in §7 only size the design.
+
+**Amendment, 2026-10-17: horizontal isogenies.** Curves on one level of a
+volcano share an endomorphism ring, so the class group connects all of them
+by horizontal isogenies. The between-curve variation within a level is
+therefore exactly the horizontal effect, and the between-level contrast is
+the vertical one. The protocol tests both, plus the isomorphic-model
+(coordinate) null. It adds two split-crater classes (11 crater curves each)
+so the crater has many horizontally adjacent curves.
 
 ## 1. Question and the claims each outcome licenses
 
