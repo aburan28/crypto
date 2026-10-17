@@ -1,0 +1,11 @@
+{"a":[0,5,1,1,5],"b":[6,2,0,9,6],"base_muls":14124,"base_points":5,"c":2,"curve_muls_before_sym":0,"kind":"setup","p":11,"pair_table_muls":3660,"seed":2,"sym_ms":8099.043207999999,"sym_precompute_muls":1868144500,"trace_ms":71029.264224,"trace_record_muls":10075658590,"trace_record_tries":1,"trace_steps":28}
+{"P":{"inf":false,"x":[1,10,7,10,2],"y":[1,10,4,10,1]},"Q":{"inf":false,"x":[10,5,5,5,3],"y":[9,3,1,0,9]},"cofactor":"36","curve_tries":1,"ell":"4493","k_secret":"4377","kind":"instance","order":"161748","p":11,"seed":2}
+{"fp_muls":152460,"fp_muls_per_op":190.575,"group_ops":800,"k":"4377","kind":"rho","ms":1.567561,"p":11,"seed":2,"verified":true}
+{"a":"248","b":"2453","kind":"relation","p":11,"seed":2,"terms":[[0,1],[1,-1],[2,1],[4,-1]],"trial":2585,"verified":true}
+{"a":"250","b":"4092","kind":"relation","p":11,"seed":2,"terms":[[0,-1],[1,1],[3,1],[4,1]],"trial":2781,"verified":true}
+{"a":"4182","b":"3256","kind":"relation","p":11,"seed":2,"terms":[[2,-1],[2,-1],[2,1],[3,-1]],"trial":2917,"verified":true}
+{"a":"4182","b":"3256","kind":"relation","p":11,"seed":2,"terms":[[1,-1],[1,1],[2,-1],[3,-1]],"trial":2917,"verified":true}
+{"a":"4182","b":"3256","kind":"relation","p":11,"seed":2,"terms":[[2,-1],[3,-1],[3,-1],[3,1]],"trial":2917,"verified":true}
+{"a":"4182","b":"3256","kind":"relation","p":11,"seed":2,"terms":[[2,-1],[3,-1],[4,-1],[4,1]],"trial":2917,"verified":true}
+{"a":"4182","b":"3256","kind":"relation","p":11,"seed":2,"terms":[[0,-1],[0,1],[2,-1],[3,-1]],"trial":2917,"verified":true}
+{"agg":{"consistent":255,"muls_f4":26717721382647,"muls_system_split_readd":377957981,"not_split":289,"replay_mismatch":270,"solutions":302,"split_repeated":11,"undetermined":0},"k":"4377","kind":"ic","linear_algebra_mulmods":112,"mitm_disagree":0,"ms":12429149.500386,"online_muls":26718118966496,"p":11,"ratio_online_ic_over_rho":175246746.46789977,"relations":7,"seed":2,"setup_muls_target_independent":11943817214,"target_gen_muls":19625756,"trial_muls":26718099340628,"trials":2920,"unknowns":6,"verified":true}

@@ -210,6 +210,8 @@ pub mod isogeny_eval;
 pub mod isogeny_walk;
 pub mod j0_twists;
 pub mod jacobian_transfer;
+pub mod joux_vitse;
+pub mod joux_vitse_edwards;
 pub mod jv_cover;
 pub mod jv_isogeny_walk;
 pub mod jv_quartic;
