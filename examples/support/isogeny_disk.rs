@@ -135,11 +135,17 @@ impl Spec {
             d < 0 && d.rem_euclid(4) == 1,
             "ordinary maximal-order fixture required"
         );
+        let factors = factor_u64((-d).try_into().unwrap());
         assert!(
-            factor_u64((-d).try_into().unwrap())
-                .iter()
-                .all(|&(p, e)| is_prime_u64(p) && e == 1),
+            factors.iter().all(|&(p, e)| is_prime_u64(p) && e == 1),
             "fundamental Frobenius discriminant required"
+        );
+        assert_eq!(
+            factors
+                .iter()
+                .fold(1u128, |n, &(p, e)| n * (p as u128).pow(e)),
+            (-d) as u128,
+            "factorization must reconstruct the exact discriminant"
         );
         let f = Field::new(&self.p.into()).unwrap();
         let n = make_node(self, &f, self.a, self.b, self.g, self.q, 0, None);
@@ -441,7 +447,6 @@ impl<'a> Engine<'a> {
         while sources.step() {
             let id = sources.int(0);
             let n = read_node(db, id);
-            let m = model(&self.f, &n);
             let mut expected = Vec::new();
             for phi in &self.phis {
                 for j in poly::roots(
