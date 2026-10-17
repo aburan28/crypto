@@ -24,7 +24,7 @@
 #   --disk GB         root volume size (default 100)
 #   --toolchain P     none | build (gcc, cmake, gmp...) | rust (build + rustup; default).
 #                     build and rust boot the baked image when `bake` has made one.
-#   --no-cache        rust: do not restore or save the cargo cache
+#   --no-cache        do not restore or save the git object cache or (rust) the cargo cache
 #   --cargo-dir DIR   rust: the directory holding Cargo.lock (default: the repo root)
 #   --setup CMD       shell command run in the checkout before the job
 #   --env K=V         environment variable for the job (repeatable)
