@@ -31,6 +31,15 @@ target probe, rho and ratio columns. The full
 and [plot source](results/plot.py) retain all thirty pairs and the exact
 selector output.
 
+The [canonical IC1 row file](results/ic1_rows_39023971459.json) assigns
+every public point a workload ID and every candidate measurement its
+`<candidate-id>W<workload-id>R1` run ID. It binds each of the thirty rows to
+the exact candidate manifest, source and executed binaries, host and
+correctness receipts, provider ZIP hash, paired rho timing, exclusive online
+phases and the preserved cold cost. Its [materializer](results/materialize_ic1.py)
+checks the ten raw per-point files against the sealed fixture and the two
+host analyses before emitting any row.
+
 The three candidate IDs are, respectively:
 
 * `IC1N83Ckb1a1fb164672PDP4rootRCguidedLAgaussTDdirectISO0h829ed476f094`;
