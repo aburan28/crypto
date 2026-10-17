@@ -12,6 +12,17 @@ conservative charge, including preparation, is **5,014 seconds**, separate
 from the earlier local charge below. These are censored first trials, with
 no observed natural relation yield, useful rank, or complete-runtime winner.
 
+The [hosted ordered fixed-witness control](verification/hosted-fixed-witness-run-39051579293/RESULT.md)
+recovered and independently replayed a valid K1182/K2048 known-answer model
+at 787 conflicts after fixing eight x-coordinate blocks. Circuit and domain
+construction reached their final markers by 82.098 ms; the one-CPU worker
+finished in 214.870 seconds. The 22-file raw artifact was retained under a
+content-addressed S3 evidence key, freshly downloaded and replayed to the
+same audit. This separately confirms fixed-witness encoding access on Linux
+ARM; it does not convert either natural K600 Gray/hash trial into a measured
+partial-relation yield. The full hosted job envelope of 2,400 seconds is
+charged separately from the paired trial and local ledger.
+
 The [bounded native known-witness stage control](verification/known-witness-stage-native-900-20261014/RESULT.md)
 reached the SAT solver, emitted all nine ordered markers and returned a
 worker-verified model after 787 conflicts. Its copied raw receipts passed
@@ -38,6 +49,10 @@ of the 558 pairs admitted by the current residual-domain minimum has a
 nonvacuous five-summand single-query hit ceiling; the largest 3+2 ceiling is
 below 0.338. This bounds a fresh uniform nonidentity query, not the frozen
 public target or observed solver yield, and it adds no N83 search charge.
+The [later independently sourced whole-subgroup replication](verification/cross-stream-support-20261017/RESULT.md)
+recomputes all 648 pair recipes and four current-worker shapes from the
+second overlap audit. It corroborates the five-summand screening conclusion
+without adding a solver observation.
 
 A [conditional relation-query floor](verification/pilot-pair-rank-floor-20261014/RESULT.md)
 extends those exact counts to a stated goal of as many independent rows as
@@ -88,7 +103,7 @@ Started 2026-10-08. Public known-answer research. The requested minimum **comple
 | Primary cold runner | K=64, m=2 exact-enumeration preflight PASS; one trial returned `UNKNOWN_trial_cap` with zero relations. K=64 m=3 and K=256 m=2 attempts reached `UNKNOWN_budget` caps. All retain null total runtime and winner |
 | Existing four-summand source transfer | Balanced-S5 SAT is admitted only through n=53; the upstream wide compact-orbit n=83 runner uses a different polynomial basis/base schema and u64 rank. The study-local adapter pins the study field. A primary compact probe accepts a replayed base, checks a state/cgroup cap, verifies any witness in the generic group and converts a hit to a full-width signed-orbit row. A new outer supervisor freezes compiled sources from a clean commit and classifies bounded probe outcomes; synthetic process tests pass, but no retained primary four-summand probe, natural rank or cold run followed; see `S5_CAPACITY.md` |
 | Compact Linux worker startup | Static x86-64 Linux worker rebuilt from source commit `2742a0989`; two guarded empty/invalid public-panel Docker starts retained expected producer-failure receipts. The second reached panel validation after cgroup and compiled-source checks; no retained base was imported. See `verification/compact-probe-linux-startup/` |
-| Best total runtime | Unresolved: full relation collection, rank, linear algebra and individual-log phases have not completed the comparison gate; the [22,200-second cumulative local allowance](verification/known-witness-ordered-sat-20261014/audit.json) is fully charged |
+| Best total runtime | Unresolved: full relation collection, rank, linear algebra and individual-log phases have not completed the comparison gate; the later [23,100-second cumulative local allowance](verification/known-witness-stage-native-900-20261014/RESULT.md) is fully charged |
 
 ## Exact revisions and instances
 

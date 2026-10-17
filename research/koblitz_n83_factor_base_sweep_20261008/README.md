@@ -33,6 +33,17 @@ models. The retained archive and raw stage receipts passed independent replay
 and S3 byte checks. Source dominance and these censored first trials do not
 establish runtime dominance.
 
+The later [hosted fixed-witness control](verification/hosted-fixed-witness-run-39051579293/RESULT.md)
+reproduced an ordered K1182/K2048 known-answer SAT model on Linux ARM after
+fixing its five summand and three partial-sum x-coordinates. It passed original
+group/S3 replay at 787 conflicts; the 22-file artifact and a fresh S3 GET
+passed byte-identical independent audit. This confirms access to that fixed
+encoding on another host, while the natural Gray/hash searches above remain
+censored. A [separate whole-subgroup support replication](verification/cross-stream-support-20261017/RESULT.md)
+recounts all 648 primary pilot pairs from the later independent overlap
+receipt; its five-summand ceilings agree with the earlier nonidentity screen
+at the reported precision. Neither stage measures a complete IC runtime.
+
 ## Matched retained-base extension, 2026-10-11
 
 The [K=1,182 versus K=2,048 matched search gate](verification/matched-k1182-k2048-900s-20261011/RESULT.md) used the same public point, source-matched Linux worker, five-summand orbit-domain search and 5,000-conflict cap for each S3-backed factor base. Both runs returned `UNKNOWN_solver_cap` with zero models, zero relations and rank zero. The complete point-row prefix and compressed object hashes were rechecked. The full additional 900 seconds were charged, bringing the cumulative conservative local charge at that round to **11,700 of 11,700 seconds**. Neither one-trial wall time ranks the bases by complete cold runtime; no minimum-runtime base is selected. Earlier dated budget paragraphs below describe their frozen rounds.
