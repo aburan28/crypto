@@ -1,0 +1,80 @@
+{
+  "baseline": "research/ecbench_rootfinding_alloc_20261014/sessions/baseline-a0",
+  "candidate": "research/ecbench_rootfinding_alloc_20261014/sessions/baseline-a1",
+  "records_baseline": 128,
+  "records_candidate": 128,
+  "missing_baseline": [],
+  "missing_candidate": [],
+  "deterministic_mismatches": [],
+  "all_verified": true,
+  "l0_timing": {
+    "rho-neg": {
+      "candidate_over_baseline_solve_wall_geomean": 0.9536884539706854,
+      "target_cluster_bootstrap_95_percent": [
+        0.756011986698338,
+        1.2574109298444203
+      ],
+      "target_log_ratios": [
+        0.01571293562057051,
+        -0.009669528536467102,
+        -0.27331975145447096,
+        -0.2169377794198883,
+        -0.06166898281477324,
+        -0.00925293010089205,
+        -0.5908824438185412,
+        0.7666726482544963
+      ]
+    },
+    "b48-serial-8": {
+      "candidate_over_baseline_solve_wall_geomean": 1.02486441483964,
+      "target_cluster_bootstrap_95_percent": [
+        0.9025883094480097,
+        1.1859755612873675
+      ],
+      "target_log_ratios": [
+        0.13786623312917973,
+        -0.17232577512329061,
+        0.4121828615302125,
+        -0.20772151295420788,
+        -0.08602960270977524,
+        0.21726673742587324,
+        -0.10376009981861964,
+        -0.0009962363945018623
+      ]
+    },
+    "b48-batch-8": {
+      "candidate_over_baseline_solve_wall_geomean": 1.062638313525318,
+      "target_cluster_bootstrap_95_percent": [
+        0.8180028268156853,
+        1.3895953981147557
+      ],
+      "target_log_ratios": [
+        -0.17084148985273231,
+        0.2999339717862823,
+        -0.29891581899275904,
+        -0.11153631489824171,
+        -0.46048123594832124,
+        0.015952590472069015,
+        0.7243289604928013,
+        0.487597663178351
+      ]
+    },
+    "rho-neg-aa": {
+      "candidate_over_baseline_solve_wall_geomean": 0.7961311777454652,
+      "target_cluster_bootstrap_95_percent": [
+        0.5697852566057316,
+        1.0679035691142853
+      ],
+      "target_log_ratios": [
+        -0.005118094596594931,
+        -0.043966856412224635,
+        -0.04232042414052812,
+        -0.8382159894349733,
+        0.2404813850497111,
+        0.22395588083456605,
+        -1.1057990525914407,
+        -0.25294733312855805
+      ]
+    }
+  }
+}

@@ -92,15 +92,29 @@ p=103 rows=270529 zeros obs=442 exp=460.3 [423.8,496.8] PASS dispersion=1.004 (n
    P(zero) in [9.08e-5,1.10e-3]: exp=4.1 obs=3
    P(zero) in [1.10e-3,9.54e-1]: exp=455.6 obs=439
    P(zero) <= 1e-6: obs=0
+p=107 rows=303398 zeros obs=488 exp=480.2 [443.0,517.5] PASS dispersion=1.000 (n=297328) auc=0.9961 weak_total obs=131091050 pred=131091051
+   P(zero) in [1.00e-6,3.63e-6]: exp=0.0 obs=0
+   P(zero) in [3.63e-6,1.54e-5]: exp=0.1 obs=0
+   P(zero) in [1.54e-5,8.89e-5]: exp=0.5 obs=1
+   P(zero) in [8.89e-5,1.12e-3]: exp=4.2 obs=5
+   P(zero) in [1.12e-3,9.48e-1]: exp=475.4 obs=482
+   P(zero) <= 1e-6: obs=0
+p=109 rows=320787 zeros obs=516 exp=488.9 [451.3,526.5] PASS dispersion=1.001 (n=314584) auc=0.9952 weak_total obs=141170042 pred=141170043
+   P(zero) in [1.00e-6,3.56e-6]: exp=0.0 obs=0
+   P(zero) in [3.56e-6,1.50e-5]: exp=0.1 obs=0
+   P(zero) in [1.50e-5,9.03e-5]: exp=0.5 obs=1
+   P(zero) in [9.03e-5,1.12e-3]: exp=4.4 obs=3
+   P(zero) in [1.12e-3,9.48e-1]: exp=483.9 obs=512
+   P(zero) <= 1e-6: obs=0
 ## Pooled check (iso1_residual_model pool figures/zero_rows.csv), all scored primes, overall and by e = v2(p^2-1)
-## all: primes [53,59,61,67,83,101,71,73,89,103,79,97] obs-exp = +77.7, sd = 56.3, z = 1.38
-## e = 3: primes [53,59,61,67,83,101] obs-exp = +54.4, sd = 38.0, z = 1.43
+## all: primes [53,59,61,67,83,101,107,109,71,73,89,103,79,97] obs-exp = +112.6, sd = 62.5, z = 1.80
+## e = 3: primes [53,59,61,67,83,101,107,109] obs-exp = +89.3, sd = 46.6, z = 1.91
 ## e = 4: primes [71,73,89,103] obs-exp = -29.1, sd = 33.7, z = -0.86
 ## e = 5: primes [79] obs-exp = +19.5, sd = 16.3, z = 1.19
 ## e = 6: primes [97] obs-exp = +32.9, sd = 18.1, z = 1.82
 ## e >= 4: primes [71,73,89,103,79,97] obs-exp = +23.3, sd = 41.6, z = 0.56
-## Registered follow-up test (PROTOCOL_V2.md): pooled over the fresh primes scored so far (101, 103; 107, 109, 113 pending)
-## all: primes [101,103] obs-exp = -17.6, sd = 26.2, z = -0.67
+## Registered follow-up test (PROTOCOL_V2.md): pooled over the fresh primes scored so far (101, 103, 107, 109; 113 pending)
+## all: primes [101,107,109,103] obs-exp = +17.3, sd = 37.6, z = 0.46
 ## Non-pristine (seen during V1 diagnosis)
 p=37 rows=12321 zeros obs=145 exp=168.8 [146.5,191.1] FAIL dispersion=0.981 (n=9870) auc=0.9590 weak_total obs=1875530 pred=1875531
    P(zero) in [1.02e-6,4.79e-5]: exp=0.0 obs=0
