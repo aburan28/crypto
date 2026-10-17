@@ -23,10 +23,17 @@ pairs** have no completed baseline report to compare. The
 [optimized continuation](optimized-continuation/optimization.json) retain that
 distinction. No optimized speedup is claimed. The new full-queue campaign uses
 a separate binary, ledger and output directory; planning alone is not execution.
-It has now [actually launched](optimized-continuation/launch.json), PID 64909,
-with a 24-hour/2-GiB guard and audited progress in all three classes. The
-source stays pinned to clean commit `9bca26ae2` in a separate worktree.
-The live local ledger is not the uploaded stopped dev snapshot.
+Its [historical launch](optimized-continuation/launch.json), PID 64909,
+subsequently halted after 432 seconds on a failed standard audit. The stopped
+release checkpoint covers **70 audited vertices, all 51 strata, 1,120 accepted
+attempts: 810 verified, 280 exhausted, 30 timeouts**. The additional failed
+16-record capsule is retained but excluded from accepted summaries. Record 10
+combined timeout with a checked scalar; no historical record was relabeled.
+[Repair protocol](WATCHDOG_REPAIR_PROTOCOL.md) makes watchdog censoring
+consistent and requires fresh gates before a new campaign launches.
+[Download the stopped release checkpoint](https://drive.google.com/file/d/1vVW3fCYqdnl3Ue2ef1FckbSTODbg-MTs/view)
+and its [inspected report](../reports/run-20261017T0540Z-release-stopped/report.pdf).
+The release and dev datasets remain separate; neither snapshot is a live worker.
 
 Observed pilot: **48 attempts, 30 verified, 14 exhausted, 4 timed out**.
 Small control: **12 attempts, 8 verified, 4 exhausted**. Both projected-base

@@ -81,6 +81,35 @@ Those are separate acceptance conditions; merging tooling cannot discharge them.
   representations. A different external-memory backend could change storage
   needs. Current resource limits do not cancel the user's requested workload.
 
+## Drive/S3 clarification and exact field destinations
+
+The user selected Google Drive and S3 for durable storage. Drive deliveries
+are working. The existing repository target is `s3://crypto-autoresearcher/store`.
+A normal SDK `HeadBucket` attempt could not be signed: credential discovery
+returned no identity and raised `NoCredentialsError`; no S3 write was attempted.
+See [access receipt](../research/full_volcano_graphwide_ic_20261017/execution/watchdog-repair/s3-access-probe.json).
+The repository also has a reports-to-S3 workflow for reports merged to main; it does not provide this runtime an identity or a larger SQLite working volume. No credential material is needed in chat. An attached existing role/worker is
+needed to use that target. An object archive alone does not supply random-access
+storage for the current SQLite enumerator. A validated external-memory backend
+could change that requirement but is not implemented by an S3 upload command.
+Current free space is approximately 6.8 GiB on the workspace and 2.1 GiB on /tmp.
+
+The [native original-input inventory](../research/full_volcano_graphwide_ic_20261017/evidence/original-applicability.json)
+completely factors the five orders and computes exact largest-prime embedding
+degrees. For A/B/C/D/E those degrees are 238827252966622 / 341460 / 1 /
+101139959082 / 17426350368. These are model-specific, not the three additional
+classes' degrees. Original C has largest prime subgroup 7, not a 61-bit prime
+subgroup. A scoped k=1 diagnostic is implemented separately; its eventual
+execution would not establish all C vertices or the other prime-power parts.
+The byte counts in that inventory refer only to specified dense extension-field
+representations, not universal lower bounds or impossibility results.
+
+The first optimized survey stopped after 70 audited vertices because a late
+child report and watchdog status were combined inconsistently. Its failed audit
+is preserved; the runner repair does not weaken the auditor. A new campaign
+requires fresh control/pilot gates. This is a recording defect, separate from
+resource and finite-field implementation gaps.
+
 ## What would unblock it
 
 - [ ] Retain complete vertex/map outputs for each fixed case on durable

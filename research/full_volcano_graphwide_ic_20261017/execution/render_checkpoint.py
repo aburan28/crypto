@@ -8,6 +8,7 @@ import typst
 summary_dir, checkpoint, out = map(Path, sys.argv[1:4])
 doc = json.loads((summary_dir / "summary.json").read_text())
 inv = json.loads((checkpoint / "inventory.json").read_text())
+meta = json.loads(Path(sys.argv[4]).read_text()) if len(sys.argv) > 4 else None
 out.mkdir(exist_ok=False, parents=True)
 (out / "plot-data.json").write_text(json.dumps({"summary": doc, "inventory": inv}, indent=2) + "\n")
 classes = [("two", "icv1-fp57-t536870914-6cabb0c9"),
@@ -50,6 +51,10 @@ for ci, (graph, slug) in enumerate(classes):
         table.append(f'[{f}], [{row["status"]}], [{row["records"]}], [{cost["min"]:,.0f}], [{cost["mean"]:,.1f}], [{cost["max"]:,.0f}], [{trial["mean"]:.6f}], [{actual["mean"]:.6f}],')
     tables[graph] = "\n".join(table)
 svg += ['<text x="20" y="729" font-size="11">Run 20261017T0337Z: 99 audited vertices / 24,823 planned. All strata covered by samples; entire-graph distributions remain incomplete.</text>', '</g></svg>']
+if meta:
+    svg[-2] = (f'<text x="20" y="729" font-size="11">Run {html.escape(meta["run_id"])}: '
+               f'{inv["vertices_audited"]} audited vertices / {inv["vertices_planned"]:,} planned. '
+               'All strata sampled; entire-graph distributions incomplete. One failed capsule excluded.</text>')
 (out / "all-strata-yield.svg").write_text("\n".join(svg) + "\n")
 coverage = "\n".join(f'[{r["graph"]}], [{r["vertices_audited"]}], [{r["vertices_planned"]}], [{r["strata_audited"]}], [{r["strata_planned"]}], [{r["max_audited_conductor"]}],' for r in inv["graphs"])
 source = r'''#set page(paper: "a4", margin: 13mm)
@@ -131,6 +136,34 @@ This is an implementation gap, not proof that mathematical reductions do
 not exist. A separately named release-profile survey must pass matched count
 checks and audits before launch. Canonical fastest-method claims are unchanged.
 '''
+if meta:
+    # Presentation-only substitutions from the native inventory and summary.
+    # No result is recomputed here; old published report inputs remain usable.
+    source = source.replace("99-vertex checkpoint", f'{inv["vertices_audited"]}-vertex release checkpoint')
+    source = source.replace("20261017T0337Z", meta["run_id"])
+    source = source.replace("1,584", f'{doc["measured_records"]:,}').replace("1,065", f'{doc["outcome_totals"]["verified"]:,}')
+    source = source.replace("422 exhausted", f'{doc["outcome_totals"]["exhausted"]:,} exhausted')
+    source = source.replace("97 watchdog", f'{doc["outcome_totals"]["timeout"]:,} watchdog')
+    source = source.replace("99 of 24,823", f'{inv["vertices_audited"]} of {inv["vertices_planned"]:,}')
+    source = source.replace("every standard audit receipt passes", "every included standard audit receipt passes")
+    source = source.replace("Exact inventory and raw frozen files accompany this report.",
+        "The failed three-v10-attempt-001 capsule (16 raw records) and failed audit are retained separately in the archive; they are excluded from these accepted summaries. Its record 10 combines timeout status with a checked scalar. No old record was relabeled. A watchdog recording repair is tested separately.")
+    source = source.replace("2,223,204", f'{doc["relation_trials"]:,}').replace("2,075,145", f'{doc["decomposition_calls"]:,}')
+    source = source.replace("57,176", f'{doc["relations_found"]:,}').replace("990 IC reports", f'{doc["relation_observations"]} IC reports')
+    source = source.replace("All 594", f'All {doc["mitm_call_lookup_checks"]}')
+    source = source.replace("Source commits 4eecf6b53 and ee54ad603", f'Source commit {meta["source_commit"]}')
+    start = source.index("Dev-profile ecbench hash")
+    end = source.index("The full million-trial", start)
+    source = source[:start] + f'''Release-profile ecbench hash
+#text(size: 6.5pt)[{doc["binary_sha256"]}].
+All wall observations are unqualified. No optimized runtime comparison is
+admitted. This worker halted on its failed audit after 432 elapsed seconds;
+that invocation includes orchestration and replay, not only solver work.
+The historical dev checkpoint remains a separate dataset. Neither its repeated
+targets nor its timings are pooled here.
+
+''' + source[end:]
+    source = source.replace("A separately named release-profile survey must pass matched count\nchecks and audits before launch.", "A repaired runner must pass fresh controls and completed-report matching before a separate new campaign launches.")
 (out / "report.typ").write_text(source)
 typst.compile(str(out / "report.typ"), output=str(out / "report.pdf"))
 (out / "figure.typ").write_text('#set page(width: 1100pt, height: 740pt, margin: 0pt)\n#image("all-strata-yield.svg", width: 100%)\n')

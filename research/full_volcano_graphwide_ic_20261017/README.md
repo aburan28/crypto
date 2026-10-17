@@ -21,7 +21,12 @@ across all 51 strata**, with 1,584 attempts (1,065 verified, 422 exhausted,
 The separate optimized continuation has frozen the complete 24,823-vertex queue
 after 56 exact completed deterministic profile comparisons, with four censored
 pairs excluded. Consult its launch receipt and ledger for execution status;
-planning alone is not execution. The original full matrix and A--E remain open. The preparation
+planning alone is not execution. That worker subsequently halted on a failed
+audit after 70 accepted vertices, all 51 strata. Its failed capsule is retained
+separately; the [watchdog repair](execution/WATCHDOG_REPAIR_PROTOCOL.md) requires
+fresh gates and a new campaign. The [stopped release archive](https://drive.google.com/file/d/1vVW3fCYqdnl3Ue2ef1FckbSTODbg-MTs/view)
+contains 1,120 accepted attempts (810 verified, 280 exhausted, 30 timeouts).
+The original full matrix and A--E remain open. The preparation
 archive below is an unchanged historical NOT_RUN snapshot.
 
 [Download the certified inputs and preparation report](https://drive.google.com/file/d/1SPpdcNjm7q6ChcMkaty0NgED8lyHofHq/view?usp=drivesdk).
