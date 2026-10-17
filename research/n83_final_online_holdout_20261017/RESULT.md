@@ -35,3 +35,5 @@ python3 research/n83_final_online_holdout_20261017/materialize.py research/n83_f
 `aggregate.py --help` lists the required provider archive, upstream panel, run identity and output arguments for a full replay from raw ZIPs.
 
 The next factor-base comparison is the frozen K2543/K2816/K3072 fresh-point Tier 1 holdout, selected from the local fine-grid screen. Its independent points can test whether the larger base improves online time under the same one-target rho comparison. The K992 target-worker cancellation experiment separately tests whether stopping redundant workers improves the target phase without changing the factor base.
+
+An approved single `g5g.metal` Spot cross-hardware replication was prepared with a 150-minute automatic shutdown and a $0.45/hour maximum Spot bid. AWS returned an account-level `Blocked` error to `RunInstances`; the postcheck found no g5g instance or open Spot request, and the temporary security group was deleted. The [infrastructure receipt](results/aws_g5g_spot_attempt_20261017.json) records this attempt separately from the completed Tier 1 panel.
