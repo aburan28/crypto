@@ -1,0 +1,49 @@
+pair46 {'p': 5947698030651343, 'p_minus_1': {'2': 1, '3': 4, '7': 1, '241': 1, '631': 1, '34489703': 1}, 'p_plus_1': {'2': 4, '11': 1, '21061': 1, '1604564779': 1}}
+n1=2 p=17 A1_pkm_mult_chain: |V|=4 |F|=1 valid=1 nbsols=1 pred=1.26 T=0.0037s Dmax=10 Dcorr=[8, 8, 8, 9, 8, 8, 8, 8, 8, 8, 8, 8] Dlcorr=[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4] ok=True sympy=[True, True]
+n1=2 p=17 A2_subgroup_flat: |V|=4 |F|=1 valid=1 nbsols=1 pred=1.26 T=0.0017s Dmax=11 Dcorr=[10, 10, 10, 10, 9, 9, 10, 10, 9, 9, 10, 9] Dlcorr=[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6] ok=True sympy=[True, True]
+n1=2 p=17 A3_pkm_isogeny_chain: |V|=4 |F|=3 valid=11 nbsols=11 pred=11.37 T=0.0071s Dmax=9 Dcorr=[8, 8, 9, 9, 8, 8, 8, 9, 8, 8, 8, 8] Dlcorr=[5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5] ok=True sympy=[True, True]
+n1=2 p=19 A4_dickson_chain: |V|=4 |F|=1 valid=2 nbsols=2 pred=1.26 T=0.0035s Dmax=10 Dcorr=[8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 10] Dlcorr=[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4] ok=True sympy=[True, True]
+n1=2 p=19 A5_dickson_flat: |V|=4 |F|=1 valid=2 nbsols=2 pred=1.26 T=0.0016s Dmax=13 Dcorr=[10, 12, 10, 12, 10, 10, 10, 10, 10, 9, 12, 10] Dlcorr=[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6] ok=True sympy=[True, True]
+n1=2 p=17 A6_small_x: |V|=4 |F|=3 valid=12 nbsols=12 pred=11.37 T=0.0017s Dmax=11 Dcorr=[9, 9, 9, 9, 10, 10, 9, 9, 10, 10, 10, 9] Dlcorr=[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6] ok=True sympy=[True, True]
+n1=2 p=17 A7_random_x: |V|=4 |F|=1 valid=0 nbsols=0 pred=1.26 T=0.0020s Dmax=10 Dcorr=[10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 9, 10] Dlcorr=[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6] ok=True sympy=[True, True]
+n1=2 rho mean ops=12.8 time=0.00001s  elapsed=2s
+n1=3 p=73 A1_pkm_mult_chain: |V|=8 |F|=5 valid=12 nbsols=12 pred=8.22 T=0.0741s Dmax=10 Dcorr=[9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9] Dlcorr=[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4] ok=True sympy=[True, True]
+n1=3 p=73 A2_subgroup_flat: |V|=8 |F|=5 valid=12 nbsols=12 pred=8.22 T=0.0117s Dmax=18 Dcorr=[17, 17, 17, 17, 17, 17, 16, 17, 17, 17, 17, 17] Dlcorr=[10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10] ok=True sympy=[True, True]
+n1=3 p=73 A3_pkm_isogeny_chain: |V|=8 |F|=5 valid=9 nbsols=9 pred=8.22 T=0.0996s Dmax=10 Dcorr=[9, 9, 9, 9, 9, 9, 10, 10, 9, 9, 10, 10] Dlcorr=[5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5] ok=True sympy=[True, True]
+n1=3 p=71 A4_dickson_chain: |V|=8 |F|=6 valid=10 nbsols=10 pred=10.41 T=0.0724s Dmax=10 Dcorr=[9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9] Dlcorr=[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4] ok=True sympy=[True, True]
+n1=3 p=71 A5_dickson_flat: |V|=8 |F|=6 valid=10 nbsols=10 pred=10.41 T=0.0118s Dmax=18 Dcorr=[17, 16, 17, 17, 17, 17, 17, 17, 16, 17, 17, 17] Dlcorr=[10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10] ok=True sympy=[True, True]
+n1=3 p=73 A6_small_x: |V|=8 |F|=3 valid=2 nbsols=2 pred=2.96 T=0.0088s Dmax=18 Dcorr=[17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17] Dlcorr=[10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10] ok=True sympy=[True, True]
+n1=3 p=73 A7_random_x: |V|=8 |F|=4 valid=3 nbsols=3 pred=5.26 T=0.0105s Dmax=18 Dcorr=[17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17] Dlcorr=[10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10] ok=True sympy=[True, True]
+n1=3 rho mean ops=25.5 time=0.00003s  elapsed=17s
+n1=4 p=257 A1_pkm_mult_chain: |V|=16 |F|=9 valid=5 nbsols=5 pred=7.17 T=1.2027s Dmax=11 Dcorr=[10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10] Dlcorr=[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4] ok=True sympy=[None, None]
+n1=4 p=257 A2_subgroup_flat: |V|=16 |F|=9 valid=5 nbsols=5 pred=7.17 T=0.0452s Dmax=34 Dcorr=[33, 33, 33, 33, 29, 28, 33, 33, 33, 33, 33, 33] Dlcorr=[18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18] ok=True sympy=[None, None]
+n1=4 p=257 A3_pkm_isogeny_chain: |V|=16 |F|=12 valid=12 nbsols=12 pred=12.75 T=1.6178s Dmax=12 Dcorr=[11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11] Dlcorr=[5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5] ok=True sympy=[None, None]
+n1=4 p=271 A4_dickson_chain: |V|=16 |F|=10 valid=11 nbsols=11 pred=8.66 T=1.2335s Dmax=11 Dcorr=[10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10] Dlcorr=[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4] ok=True sympy=[None, None]
+n1=4 p=271 A5_dickson_flat: |V|=16 |F|=10 valid=11 nbsols=11 pred=8.66 T=0.0418s Dmax=34 Dcorr=[33, 33, 33, 33, 33, 33, 32, 30, 33, 33, 33, 33] Dlcorr=[18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18] ok=True sympy=[None, None]
+n1=4 p=257 A6_small_x: |V|=16 |F|=9 valid=5 nbsols=5 pred=7.17 T=0.0432s Dmax=34 Dcorr=[33, 33, 33, 33, 29, 28, 33, 33, 33, 33, 33, 33] Dlcorr=[18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18] ok=True sympy=[None, None]
+n1=4 p=257 A7_random_x: |V|=16 |F|=6 valid=5 nbsols=5 pred=3.19 T=0.0435s Dmax=34 Dcorr=[33, 33, 33, 33, 29, 28, 33, 33, 33, 33, 33, 33] Dlcorr=[18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18] ok=True sympy=[None, None]
+n1=4 rho mean ops=50.5 time=0.00004s  elapsed=69s
+n1=5 p=1153 A1_pkm_mult_chain: |V|=32 |F|=15 valid=6 nbsols=6 pred=4.78 T=17.4151s Dmax=13 Dcorr=[12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12] Dlcorr=[5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5] ok=True sympy=[None, None]
+n1=5 p=1153 A2_subgroup_flat: |V|=32 |F|=15 valid=6 nbsols=6 pred=4.78 T=0.2866s Dmax=66 Dcorr=[65, 65, 57, 65, 65, 65, 65, 65, 65, 65, 65, 65] Dlcorr=[34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34] ok=True sympy=[None, None]
+n1=5 p=1153 A3_pkm_isogeny_chain: |V|=32 |F|=18 valid=7 nbsols=7 pred=6.89 T=20.0995s Dmax=14 Dcorr=[13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13] Dlcorr=[5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5] ok=True sympy=[None, None]
+n1=5 p=1087 A4_dickson_chain: |V|=32 |F|=16 valid=11 nbsols=11 pred=5.86 T=17.5013s Dmax=13 Dcorr=[12, 12, 12, 12, 11, 12, 12, 12, 12, 12, 12, 12] Dlcorr=[5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5] ok=True sympy=[None, None]
+n1=5 p=1087 A5_dickson_flat: |V|=32 |F|=16 valid=11 nbsols=11 pred=5.86 T=0.2690s Dmax=66 Dcorr=[65, 65, 65, 65, 64, 65, 65, 65, 65, 65, 65, 65] Dlcorr=[34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34] ok=True sympy=[None, None]
+n1=5 p=1153 A6_small_x: |V|=32 |F|=15 valid=3 nbsols=3 pred=4.78 T=0.3087s Dmax=66 Dcorr=[65, 63, 57, 65, 65, 65, 65, 61, 65, 65, 65, 65] Dlcorr=[34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34] ok=True sympy=[None, None]
+n1=5 p=1153 A7_random_x: |V|=32 |F|=17 valid=12 nbsols=12 pred=6.14 T=0.3005s Dmax=66 Dcorr=[65, 64, 57, 65, 65, 65, 65, 65, 65, 65, 65, 65] Dlcorr=[34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34] ok=True sympy=[None, None]
+n1=5 rho mean ops=117.2 time=0.00012s  elapsed=762s
+n1=6 p=4289 A1_pkm_mult_chain: |V|=64 |F|=36 valid=12 nbsols=12 pred=7.33 no GB
+n1=6 p=4289 A2_subgroup_flat: |V|=64 |F|=36 valid=12 nbsols=12 pred=7.33 T=2.0821s Dmax=130 Dcorr=[129, 129, 129, 106, 129, 129, 129, 129, 129, 129, 129, 129] Dlcorr=[66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66] ok=True sympy=[None, None]
+n1=6 p=4289 A3_pkm_isogeny_chain: |V|=64 |F|=27 valid=5 nbsols=5 pred=4.12 no GB
+n1=6 p=4159 A4_dickson_chain: |V|=64 |F|=28 valid=4 nbsols=4 pred=4.58 no GB
+n1=6 p=4159 A5_dickson_flat: |V|=64 |F|=28 valid=4 nbsols=4 pred=4.58 T=1.8928s Dmax=130 Dcorr=[129, 129, 129, 129, 129, 129, 129, 129, 129, 129, 129, 129] Dlcorr=[66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66] ok=True sympy=[None, None]
+n1=6 p=4289 A6_small_x: |V|=64 |F|=25 valid=1 nbsols=1 pred=3.54 T=1.9579s Dmax=130 Dcorr=[129, 129, 129, 106, 129, 129, 129, 129, 129, 129, 129, 129] Dlcorr=[66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66] ok=True sympy=[None, None]
+n1=6 p=4289 A7_random_x: |V|=64 |F|=28 valid=8 nbsols=8 pred=4.43 T=1.9388s Dmax=130 Dcorr=[129, 129, 129, 106, 129, 129, 129, 129, 129, 128, 129, 129] Dlcorr=[66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66] ok=True sympy=[None, None]
+n1=6 rho mean ops=226.0 time=0.00039s  elapsed=858s
+n1=7 p=17921 A1_pkm_mult_chain: |V|=128 |F|=63 valid=2 nbsols=2 pred=5.26 no GB
+n1=7 p=17921 A2_subgroup_flat: |V|=128 |F|=63 valid=2 nbsols=2 pred=5.26 T=14.3249s Dmax=258 Dcorr=[257, 257, 257, 257, 257, 257, 257, 257, 257, 257, 257, 257] Dlcorr=[130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130] ok=True sympy=[None, None]
+n1=7 p=17921 A3_pkm_isogeny_chain: |V|=128 |F|=66 valid=9 nbsols=9 pred=5.77 no GB
+n1=7 p=17791 A4_dickson_chain: |V|=128 |F|=61 valid=4 nbsols=4 pred=5.07 no GB
+n1=7 p=17791 A5_dickson_flat: |V|=128 |F|=61 valid=4 nbsols=4 pred=5.07 T=13.5547s Dmax=258 Dcorr=[257, 257, 257, 257, 257, 257, 257, 257, 257, 257, 257, 257] Dlcorr=[130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130] ok=True sympy=[None, None]
+n1=7 p=17921 A6_small_x: |V|=128 |F|=62 valid=2 nbsols=2 pred=5.09 T=14.1400s Dmax=258 Dcorr=[257, 257, 257, 257, 257, 257, 257, 257, 257, 257, 257, 257] Dlcorr=[130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130] ok=True sympy=[None, None]
+n1=7 p=17921 A7_random_x: |V|=128 |F|=68 valid=5 nbsols=5 pred=6.12 T=14.6759s Dmax=258 Dcorr=[257, 257, 257, 257, 257, 257, 257, 257, 257, 257, 257, 257] Dlcorr=[130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130] ok=True sympy=[None, None]
+n1=7 rho mean ops=445.8 time=0.00047s  elapsed=1579s

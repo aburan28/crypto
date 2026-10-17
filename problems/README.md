@@ -11,6 +11,8 @@ Keep resolved and superseded records in the index.
 
 | Problem | Status | What it blocks | What would unblock it |
 | --- | --- | --- | --- |
+| [Prime61 exhaustive horizontal class memory](prime61-horizontal-class-memory.md) | open; disk-backed pilot verified | certified full-class coverage and all-class workload execution; retained-vector requirement removed on the new path | certified degree-set coverage, provisioned disk/compute envelope and replayed remaining workloads |
+| [Screenshot candidate driver is not located](screenshot-factor-base-driver-unlocated.md) | open | faithful 1,000/2,000-candidate isogeny benchmark at a requested large field | original file/branch/PR or source bundle, native fixture replay and validated larger-field map |
 | [Generalized GPU rho workers for nine Certicom binary challenges](certicom-binary-gpu-rho-integration.md) | open | persistent, independently replayable GPU rho and qualified fastest-arithmetic choices for all nine exact challenges | exact CPU bindings, per-curve GPU replay and durable DP/collision path, then matched device performance gates |
 | [Genus-3 IC-2LP study 04 missing](ic-improve-04-genus3-2lp-study-missing.md) | investigating (04 has since landed on `main`) | pairing 04b's arms against the original IC-2LP arm (same instances, seeds, unit); 04b pairs against a rebuilt baseline instead | the original 04 tool and records at a pinned revision, then a matched baseline comparison |
 | [p61 selected-class census and adjacency completion](p61-full-isogeny-class-census.md) | investigating | complete selected-class graph and its use as an admitted large-field corpus | exact 358,094,304-vertex ledger, verified selected-degree adjacency, and adequate durable storage |
