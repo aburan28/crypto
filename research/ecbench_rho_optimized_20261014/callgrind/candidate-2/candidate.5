@@ -1,0 +1,1075 @@
+# callgrind format
+version: 1
+creator: callgrind-3.19.0
+pid: 401
+cmd:  /candidate exec
+part: 5
+
+
+desc: I1 cache: 
+desc: D1 cache: 
+desc: LL cache: 
+
+desc: Timerange: Basic block 232011419 - 232014123
+desc: Trigger: Client Request: ecbench_solve
+
+positions: line
+events: Ir
+summary: 11836
+
+
+ob=(1) /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+fl=(1) ???
+fn=(0) 0x000000000001ab70
+cob=(7) /candidate
+cfi=(152) ???
+cfn=(846) (below main)
+calls=0 0 
+0 11836
+
+ob=(7)
+fl=(152)
+fn=(1100) __rustc::__rust_alloc
+0 15
+cfn=(1102) __rustc::__rdl_alloc
+calls=15 0 
+0 2081
+
+fn=(1102)
+0 135
+cob=(3) /usr/lib/x86_64-linux-gnu/libc.so.6
+cfi=(173) ./malloc/./malloc/malloc.c
+cfn=(920) malloc
+calls=15 3281 
+0 1946
+
+fn=(1108) std::sys::backtrace::__rust_begin_short_backtrace::<fn() -> std::process::ExitCode, std::process::ExitCode>
+cfn=(1110) ecbench::main
+calls=0 0 
+0 11836
+
+fn=(1126) <alloc::raw_vec::RawVecInner>::finish_grow
+0 27
+cfn=(1154) __rustc::__rust_realloc
+calls=1 0 
+0 255
+0 13
+
+fn=(1156) __rustc::__rdl_realloc
+0 22
+cob=(3)
+cfi=(173)
+cfn=(1030) realloc
+calls=1 3394 
+0 232
+
+fn=(1314) core::fmt::write
+0 41
+cfn=(1182) <alloc::string::String as core::fmt::Write>::write_str
+calls=1 0 
+0 39
+0 19
+cfn=(1324) <&str as core::fmt::Display>::fmt
+calls=1 0 
+0 80
+0 15
+
+fn=(1976) crypto_lib::cryptanalysis::ic_measurement::dump
+0 9
+
+fn=(846)
+cob=(3)
+cfi=(153) ./csu/../csu/libc-start.c
+cfn=(848) __libc_start_main@@GLIBC_2.34
+calls=0 242 
+0 11836
+
+fn=(1324)
+0 5
+cfn=(1318) <str as core::fmt::Display>::fmt
+calls=1 0 
+0 75
+
+fn=(1360) ecbench::run
+cfn=(1382) crypto_lib::cryptanalysis::ecbench::record::child_main
+calls=0 0 
+0 11836
+
+fn=(2090) <crypto_lib::cryptanalysis::ic_measurement::Session>::finish
+0 31
+cfn=(2030) <crypto_lib::cryptanalysis::ic_measurement::Trace>::boundary
+calls=0 0 
+0 129
+0 11
+cfn=(2092) <alloc::vec::Vec<(&str, core::option::Option<u64>)> as alloc::vec::spec_from_iter::SpecFromIter<(&str, core::option::Option<u64>), core::iter::adapters::map::Map<core::slice::iter::Iter<crypto_lib::cryptanalysis::ic_measurement::Phase>, <crypto_lib::cryptanalysis::ic_measurement::Session>::finish::{closure#0}::{closure#0}>>>::from_iter
+calls=1 0 
+0 2126
+0 11
+cfn=(2098) <alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Owned, [u64; 4], alloc::collections::btree::set_val::SetValZST, alloc::collections::btree::node::marker::Leaf>>::new_leaf::<alloc::alloc::Global>
+calls=1 0 
+0 64
+0 15
+cfn=(2100) <alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Owned, &str, core::option::Option<u64>, alloc::collections::btree::node::marker::LeafOrInternal>>::bulk_push::<alloc::collections::btree::dedup_sorted_iter::DedupSortedIter<&str, core::option::Option<u64>, alloc::vec::into_iter::IntoIter<(&str, core::option::Option<u64>)>>, alloc::alloc::Global>
+calls=1 0 
+0 1161
+0 11
+cfn=(2032) <std::time::Instant>::duration_since
+calls=1 0 
+0 55
+0 19
+cfn=(2102) <alloc::vec::Vec<(&str, core::option::Option<u64>)> as alloc::vec::spec_from_iter::SpecFromIter<(&str, core::option::Option<u64>), core::iter::adapters::map::Map<core::iter::adapters::filter::Filter<core::slice::iter::Iter<crypto_lib::cryptanalysis::ic_measurement::Phase>, <crypto_lib::cryptanalysis::ic_measurement::Session>::finish::{closure#0}::{closure#1}>, <crypto_lib::cryptanalysis::ic_measurement::Session>::finish::{closure#0}::{closure#2}>>>::from_iter
+calls=1 0 
+0 1532
+0 13
+cfn=(2098)
+calls=1 0 
+0 64
+0 17
+cfn=(2100)
+calls=1 0 
+0 486
+0 22
+cfn=(2096) core::slice::sort::shared::smallsort::insertion_sort_shift_left::<(&str, core::option::Option<u64>), <[(&str, core::option::Option<u64>)]>::sort_by<<alloc::collections::btree::map::BTreeMap<&str, core::option::Option<u64>> as core::iter::traits::collect::FromIterator<(&str, core::option::Option<u64>)>>::from_iter<core::iter::adapters::map::Map<core::slice::iter::Iter<crypto_lib::cryptanalysis::ic_measurement::Phase>, <crypto_lib::cryptanalysis::ic_measurement::Session>::finish::{closure#0}::{closure#0}>>::{closure#0}>::{closure#0}>
+calls=1 0 
+0 1808
+0 8
+cfn=(2096)
+calls=1 0 
+0 650
+0 1
+
+fn=(882) main
+cfn=(884) std::rt::lang_start_internal
+calls=0 0 
+0 11836
+
+fn=(1266) __rustc::__rdl_dealloc
+0 6
+cob=(3)
+cfi=(173)
+cfn=(1040) free
+calls=6 3350 
+0 571
+
+fn=(1382)
+cfn=(1978) crypto_lib::cryptanalysis::ecbench::methods::solve
+calls=0 0 
+0 11832
+0 4
+
+fn=(2034) <std::sys::pal::unix::time::Timespec>::sub_timespec
+0 74
+
+fn=(2102)
+0 79
+cfn=(1274) core::str::converts::from_utf8
+calls=1 0 
+0 117
+0 19
+cfn=(1098) __rustc::__rust_no_alloc_shim_is_unstable_v2
+calls=1 0 
+0 1
+0 3
+cfn=(1100)
+calls=1 0 
+0 51
+0 152
+cfn=(1274)
+calls=5 0 
+0 649
+0 114
+cfn=(1138) <alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global>
+calls=1 0 
+0 331
+0 16
+
+fn=(2104) crypto_lib::cryptanalysis::ecbench::methods::online_window
+0 53
+cfn=(2076) <alloc::collections::btree::map::BTreeMap<alloc::string::String, u64>>::insert
+calls=1 0 
+0 144
+0 144
+cfn=(1098)
+calls=1 0 
+0 1
+0 4
+cfn=(1100)
+calls=1 0 
+0 787
+0 7
+cob=(3)
+cfi=(193) ./string/../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S
+cfn=(1002) __memcpy_avx_unaligned_erms
+calls=1 264 
+0 12
+0 19
+cfn=(1098)
+calls=1 0 
+0 1
+0 5
+cfn=(1100)
+calls=1 0 
+0 51
+0 29
+cfn=(1098)
+calls=1 0 
+0 1
+0 3
+cfn=(1100)
+calls=1 0 
+0 51
+0 4
+cfn=(1098)
+calls=1 0 
+0 1
+0 3
+cfn=(1100)
+calls=1 0 
+0 240
+0 5
+cfn=(1098)
+calls=1 0 
+0 1
+0 3
+cfn=(1100)
+calls=1 0 
+0 235
+0 7
+cfn=(1098)
+calls=1 0 
+0 1
+0 4
+cfn=(1100)
+calls=1 0 
+0 273
+0 11
+cfn=(1098)
+calls=1 0 
+0 1
+0 5
+cfn=(1100)
+calls=1 0 
+0 51
+0 41
+cfn=(1312) alloc::fmt::format::format_inner
+calls=1 0 
+0 344
+0 12
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=1 264 
+0 29
+0 8
+
+fn=(1320) <core::fmt::Formatter>::pad
+0 25
+cfn=(1182)
+calls=1 0 
+0 45
+
+fn=(2100)
+0 810
+cob=(3)
+cfi=(216) ./string/../sysdeps/x86_64/multiarch/memcmp-avx2-movbe.S
+cfn=(1298) __memcmp_avx2_movbe
+calls=1 80 
+0 21
+0 271
+cfn=(1098)
+calls=1 0 
+0 1
+0 3
+cfn=(1100)
+calls=1 0 
+0 51
+0 16
+cfn=(1098)
+calls=1 0 
+0 1
+0 3
+cfn=(1100)
+calls=1 0 
+0 51
+0 60
+cfn=(1264) __rustc::__rust_dealloc
+calls=2 0 
+0 223
+0 40
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=1 264 
+0 11
+0 5
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=1 264 
+0 11
+0 11
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=1 264 
+0 11
+0 6
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=1 264 
+0 11
+0 30
+
+fn=(1098)
+0 15
+
+fn=(1182)
+0 38
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=2 264 
+0 28
+0 18
+
+fn=(1312)
+0 69
+cfn=(1098)
+calls=1 0 
+0 1
+0 4
+cfn=(1100)
+calls=1 0 
+0 51
+0 10
+cfn=(1314)
+calls=1 0 
+0 194
+0 15
+
+fn=(1978)
+0 9
+cfn=(2090)
+calls=0 0 
+0 8234
+0 21
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=1 264 
+0 124
+0 9
+cfn=(2104)
+calls=1 0 
+0 2591
+0 4
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=1 264 
+0 29
+0 2
+cfn=(2106) core::ptr::drop_glue::<crypto_lib::cryptanalysis::ic_measurement::Snapshot>
+calls=1 0 
+0 808
+0 1
+
+fn=(2030)
+cfn=(1976)
+calls=0 0 
+0 9
+0 1
+cfn=(1982) <std::time::Instant>::now
+calls=1 0 
+0 28
+0 8
+cfn=(2032)
+calls=1 0 
+0 55
+0 28
+
+fn=(2094) <core::iter::adapters::map::Map<core::slice::iter::Iter<crypto_lib::cryptanalysis::ic_measurement::Phase>, <crypto_lib::cryptanalysis::ic_measurement::Session>::finish::{closure#0}::{closure#0}> as core::iter::traits::iterator::Iterator>::fold::<(), core::iter::traits::iterator::Iterator::for_each::call<(&str, core::option::Option<u64>), <alloc::vec::Vec<(&str, core::option::Option<u64>)>>::extend_trusted<core::iter::adapters::map::Map<core::slice::iter::Iter<crypto_lib::cryptanalysis::ic_measurement::Phase>, <crypto_lib::cryptanalysis::ic_measurement::Session>::finish::{closure#0}::{closure#0}>>::{closure#0}>::{closure#0}>
+0 287
+cfn=(1274)
+calls=14 0 
+0 1627
+0 106
+
+fn=(1138)
+0 27
+cfn=(1126)
+calls=1 0 
+0 295
+0 9
+
+fn=(1154)
+0 1
+cfn=(1156)
+calls=1 0 
+0 254
+
+fn=(2106)
+0 6
+cfn=(2108) <alloc::collections::btree::map::BTreeMap<&str, core::option::Option<u64>> as core::ops::drop::Drop>::drop
+calls=1 0 
+0 577
+0 6
+cfn=(2108)
+calls=1 0 
+0 219
+
+fn=(1106) std::rt::lang_start::<std::process::ExitCode>::{closure#0}
+cfn=(1108)
+calls=0 0 
+0 11836
+
+fn=(1264)
+0 6
+cfn=(1266)
+calls=6 0 
+0 577
+
+fn=(1982)
+0 2
+cfn=(1984) <std::sys::pal::unix::time::Timespec>::now
+calls=1 0 
+0 26
+
+fn=(2096)
+0 405
+cob=(3)
+cfi=(216)
+cfn=(1298)
+calls=18 80 
+0 376
+0 655
+cob=(3)
+cfi=(216)
+cfn=(1298)
+calls=37 80 
+0 778
+0 244
+
+fn=(2098)
+0 4
+cfn=(1098)
+calls=2 0 
+0 2
+0 6
+cfn=(1100)
+calls=2 0 
+0 102
+0 14
+
+fn=(2108)
+0 325
+cfn=(1264)
+calls=1 0 
+0 90
+0 82
+cfn=(1264)
+calls=1 0 
+0 90
+0 19
+cfn=(1264)
+calls=1 0 
+0 90
+0 10
+cfn=(1264)
+calls=1 0 
+0 90
+
+fn=(1110)
+cfn=(1360)
+calls=0 0 
+0 11836
+
+fn=(1274)
+0 2393
+
+fn=(1318)
+0 5
+cfn=(1320)
+calls=1 0 
+0 70
+
+fn=(1984)
+0 6
+cob=(3)
+cfi=(266) ./time/../sysdeps/unix/sysv/linux/clock_gettime.c
+cfn=(1986) clock_gettime@@GLIBC_2.17
+calls=1 38 
+0 10
+0 10
+
+fn=(2032)
+0 20
+cfn=(2034)
+calls=2 0 
+0 74
+0 16
+
+fn=(2092)
+0 22
+cfn=(1098)
+calls=1 0 
+0 1
+0 4
+cfn=(1100)
+calls=1 0 
+0 51
+0 16
+cfn=(2094)
+calls=1 0 
+0 2020
+0 12
+
+fn=(884)
+cfn=(1106)
+calls=0 0 
+0 11836
+
+fn=(2076)
+0 28
+cfn=(2078) <alloc::collections::btree::map::entry::VacantEntry<alloc::string::String, u64>>::insert_entry
+calls=1 0 
+0 106
+0 10
+
+fn=(2078)
+0 15
+cfn=(1098)
+calls=1 0 
+0 1
+0 3
+cfn=(1100)
+calls=1 0 
+0 51
+0 36
+
+ob=(3)
+fl=(153)
+fn=(848)
+cfi=(155) ./csu/../sysdeps/nptl/libc_start_call_main.h
+cfn=(874) (below main)
+calls=0 29 
+360 11836
+
+fl=(266)
+fn=(1986)
+38 2
++2 2
++28 2
++1 2
+-25 1
++42 1
+
+fl=(193)
+fn=(1002)
+264 10
++6 10
++1 10
++2 8
++1 8
++1 8
++3 5
++1 5
++1 5
++3 10
++30 2
++1 2
++2 2
++1 2
++2 1
++4 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
++2 1
++2 1
++39 1
++1 1
++1 1
++1 1
++1 1
++18 3
++1 3
++5 3
++1 3
++2 2
++1 2
++1 2
++2 2
++1 2
++1 2
++1 2
++1 2
++1 2
++1 2
++1 2
++1 2
++1 2
++1 2
++1 2
++1 2
++1 2
++1 4
++4 1
++1 1
++4 1
++2 1
++4 1
++1 1
++11 1
++3 1
++2 1
++2 1
++4 1
++1 1
++9 1
++1 1
++2 1
++2 1
++1 1
++1 1
++3 1
++2 1
++2 1
++2 2
++6 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
+-11 6
++1 6
++1 6
++1 6
++1 6
++1 6
++1 6
++1 6
++1 6
++1 6
++1 6
++1 6
++2 1
++1 1
++1 1
++1 1
++2 1
++4 2
+
+fl=(173)
+fn=(920)
+3281 75
++7 30
+1338 30
++19 74
+3298 28
++2 60
++3 30
++10 8
++28 20
+-36 45
+3187 22
++1 22
++2 11
++1 11
+-1 33
++1 11
++1 11
+3341 55
+-26 16
+cfn=(932) _int_malloc
+calls=4 1338 
+* 1326
++1 20
+fi=(174) ./malloc/./malloc/arena.c
+162 8
+fe=(173)
+
+fn=(1030)
+3394 9
++6 2
++4 2
++7 2
++11 1
+-2 1
++5 1
+-3 2
++2 2
++4 3
+fi=(174)
+162 3
+fe=(173)
+3436 4
++1 2
+1338 2
++19 6
+3447 2
++31 2
++2 6
+cfn=(1034) _int_realloc
+calls=1 4814 
+* 159
+* 1
++1 5
+fi=(174)
+162 4
+fe=(173)
+3481 2
++29 9
+
+fn=(1034)
+4814 7
++11 4
++1 4
++6 2
++2 2
++1 4
++2 4
++3 2
++14 1
++53 2
+-53 2
++57 1
+-57 1
++57 2
+-2 2
++19 1
++1 9
+-79 2
++12 2
++58 1
+-4 1
++3 1
++5 1
+-4 1
+-1 1
++1 1
++4 1
+-1 1
++1 1
+cfn=(1036) _int_free
+calls=1 4417 
+* 64
+* 1
+-60 1
+-1 2
++5 3
+cfn=(1158) unlink_chunk.constprop.0
+calls=1 1620 
+* 20
++44 4
+
+fn=(1036)
+4417 56
++10 7
+-10 21
++10 14
++6 35
++1 14
++4 35
++8 35
+-1 14
++1 14
++9 7
++9 7
+-15 7
++6 14
++20 28
++14 2
+4698 77
+4565 2
++6 3
++7 1
+-4 1
++4 2
++3 2
++5 3
++3 2
++1 2
++1 2
+2006 3
+4597 2
++9 2
++5 2
++4 1
++9 1
+-1 1
++1 3
++1 2
++12 1
+-10 1
++11 1
+-1 1
+-8 2
+3177 6
++2 6
+-4 6
++2 18
++1 6
++1 6
+4478 6
+4634 1
++1 1
++2 1
++1 1
++50 3
+
+fn=(1158)
+1620 5
++2 25
++3 5
++1 10
++2 20
+-3 5
++6 5
++1 5
++1 10
++24 10
+
+fn=(1040)
+3350 12
+-4 6
++14 6
+-14 12
++12 6
++4 6
+-4 6
++4 12
++17 18
+fi=(174)
+162 18
+fe=(173)
+3385 12
+cfn=(1036)
+calls=6 4417 
+* 427
++3 6
++1 24
+
+fn=(932)
+1338 8
+3766 32
+1357 4
+3766 4
+1357 11
+3807 6
++27 6
++2 18
++3 3
++2 6
+3980 4
+-1 4
+-1 4
++1 8
++1 16
++4 4
++6 19
+-1 3
++1 3
++3 6
++1 3
++2 6
+-3 10
++1 5
++2 10
++1 24
++2 8
++1 32
++2 32
+-10 8
++12 16
++1 16
++2 16
++11 22
++31 6
++1 6
++4 12
++29 12
++8 72
++1 3
++1 1
+-1 1
++4 2
+-4 12
++1 4
+-1 4
++4 8
++5 4
+-2 4
++2 12
++1 8
++7 2
+-1 8
++2 6
+3807 2
++27 2
++66 4
++2 4
+-2 4
++2 8
+-68 3
+1357 1
+3839 2
++2 14
+4409 36
+4085 6
++1 9
++1 3
+-1 3
++57 6
++9 3
+-9 6
++9 3
+-9 6
++1 3
++1 3
++1 3
++1 3
++6 6
+-10 10
++9 5
+-9 10
++9 5
+-9 10
++1 5
++1 5
++1 5
++1 5
++6 10
+3990 27
+4168 6
++11 8
++73 4
++1 4
++1 4
+-1 4
++1 4
++1 8
++1 12
++5 28
++16 3
++2 6
+-4 20
++8 7
++3 14
++2 3
++1 3
++1 3
+-2 12
+-27 3
+-99 24
+4019 6
++2 2
+-1 4
++29 2
++1 2
++4 4
++29 4
++8 2
++49 5
+-26 10
++3 6
++1 18
+-3 16
++6 4
++7 2
+-1 8
++2 4
++2 2
++1 6
++2 2
++1 4
+4295 8
++3 8
++2 4
++3 4
+-3 8
++3 4
+cfn=(1158)
+calls=4 1620 
+* 80
++3 12
++15 6
+-5 3
++5 6
++1 6
++3 3
++1 3
++1 3
++3 6
++1 3
++1 6
++5 24
++2 9
++1 3
+1999 3
+4343 3
+1999 7
+4343 1
+1999 2
+4309 1
+-1 1
++1 2
+
+fl=(216)
+fn=(1298)
+80 56
++1 56
++75 51
++10 51
++1 51
++1 51
++3 102
+401 56
++1 56
++5 56
++1 56
++1 56
++1 56
++1 56
++3 51
++1 51
++1 51
++1 51
++3 51
++1 51
++8 5
++1 5
++2 5
++1 5
++30 5
++1 5
++2 5
++10 5
++1 5
++1 5
++1 5
++1 1
++1 1
++1 1
++2 1
+
+fl=(155)
+fn=(874)
+cob=(7)
+cfi=(152)
+cfn=(882)
+calls=0 0 
+58 11836
+
+totals: 11836
