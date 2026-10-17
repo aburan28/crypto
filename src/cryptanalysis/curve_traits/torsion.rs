@@ -32,12 +32,27 @@ pub trait Field {
     fn neg(&self, a: &Self::E) -> Self::E;
     fn mul(&self, a: &Self::E, b: &Self::E) -> Self::E;
     fn inv(&self, a: &Self::E) -> Self::E;
+    /// A pseudo-random element fixed by `i` (splitmix64), so every use
+    /// is deterministic.
+    fn sample(&self, i: u64) -> Self::E;
     fn is_zero(&self, a: &Self::E) -> bool {
         *a == self.zero()
     }
     fn sub(&self, a: &Self::E, b: &Self::E) -> Self::E {
         self.add(a, &self.neg(b))
     }
+}
+
+/// The splitmix64 sequence seeded by `i`.
+pub(crate) fn splitmix(i: u64) -> impl Iterator<Item = u64> {
+    let mut state = i.wrapping_mul(0x9e37_79b9_7f4a_7c15);
+    std::iter::repeat_with(move || {
+        state = state.wrapping_add(0x9e37_79b9_7f4a_7c15);
+        let mut z = state;
+        z = (z ^ (z >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
+        z = (z ^ (z >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
+        z ^ (z >> 31)
+    })
 }
 
 /// `GF(p)`, `p` odd.
@@ -75,6 +90,13 @@ impl Field for Fp {
     fn inv(&self, a: &BigUint) -> BigUint {
         a.modpow(&(&self.0 - 2u8), &self.0)
     }
+    fn sample(&self, i: u64) -> BigUint {
+        let words = (self.0.bits() / 64 + 2) as usize;
+        let v = splitmix(i)
+            .take(words)
+            .fold(BigUint::zero(), |acc, w| (acc << 64) + w);
+        v % &self.0
+    }
 }
 
 /// `GF(2^n)`, `n ≤ 63`, on the table-free kernel of `semaev_decomp`.
@@ -102,6 +124,10 @@ impl Field for Small2 {
     }
     fn inv(&self, a: &u64) -> u64 {
         self.0.inv(*a)
+    }
+    fn sample(&self, i: u64) -> u64 {
+        let n = self.0.n;
+        splitmix(i).next().expect("infinite") & ((1u64 << n) - 1)
     }
 }
 
@@ -137,6 +163,14 @@ impl Field for Big2 {
     }
     fn inv(&self, a: &F2mElement) -> F2mElement {
         a.flt_inverse(&self.irr).expect("non-zero")
+    }
+    fn sample(&self, i: u64) -> F2mElement {
+        let words: Vec<u64> = splitmix(i).take(self.n.div_ceil(64) as usize).collect();
+        let v = words
+            .iter()
+            .rev()
+            .fold(BigUint::zero(), |acc, w| (acc << 64) + w);
+        F2mElement::from_biguint(&(v % (BigUint::one() << self.n)), self.n)
     }
 }
 
@@ -277,6 +311,10 @@ impl Field for FpK {
         t.truncate(k);
         t
     }
+    fn sample(&self, i: u64) -> Vec<u64> {
+        // Every coefficient from the sequence, so samples leave every subfield.
+        splitmix(i).take(self.k()).map(|z| z % self.p).collect()
+    }
     fn inv(&self, a: &Vec<u64>) -> Vec<u64> {
         // a^(q − 2): one call per monic(), so speed is not a concern.
         let q = BigUint::from(self.p).pow(self.k() as u32);
@@ -285,16 +323,16 @@ impl Field for FpK {
 }
 
 /// A polynomial, coefficients low to high, no trailing zeros.
-type Poly<E> = Vec<E>;
+pub(crate) type Poly<E> = Vec<E>;
 
-fn trim<F: Field>(f: &F, mut p: Poly<F::E>) -> Poly<F::E> {
+pub(crate) fn trim<F: Field>(f: &F, mut p: Poly<F::E>) -> Poly<F::E> {
     while p.last().is_some_and(|c| f.is_zero(c)) {
         p.pop();
     }
     p
 }
 
-fn padd<F: Field>(f: &F, a: &Poly<F::E>, b: &Poly<F::E>) -> Poly<F::E> {
+pub(crate) fn padd<F: Field>(f: &F, a: &Poly<F::E>, b: &Poly<F::E>) -> Poly<F::E> {
     let n = a.len().max(b.len());
     let z = f.zero();
     let out = (0..n)
@@ -303,12 +341,12 @@ fn padd<F: Field>(f: &F, a: &Poly<F::E>, b: &Poly<F::E>) -> Poly<F::E> {
     trim(f, out)
 }
 
-fn psub<F: Field>(f: &F, a: &Poly<F::E>, b: &Poly<F::E>) -> Poly<F::E> {
+pub(crate) fn psub<F: Field>(f: &F, a: &Poly<F::E>, b: &Poly<F::E>) -> Poly<F::E> {
     let nb: Poly<F::E> = b.iter().map(|c| f.neg(c)).collect();
     padd(f, a, &nb)
 }
 
-fn pmul<F: Field>(f: &F, a: &Poly<F::E>, b: &Poly<F::E>) -> Poly<F::E> {
+pub(crate) fn pmul<F: Field>(f: &F, a: &Poly<F::E>, b: &Poly<F::E>) -> Poly<F::E> {
     if a.is_empty() || b.is_empty() {
         return Vec::new();
     }
@@ -324,12 +362,12 @@ fn pmul<F: Field>(f: &F, a: &Poly<F::E>, b: &Poly<F::E>) -> Poly<F::E> {
     trim(f, out)
 }
 
-fn pscale<F: Field>(f: &F, a: &Poly<F::E>, c: &F::E) -> Poly<F::E> {
+pub(crate) fn pscale<F: Field>(f: &F, a: &Poly<F::E>, c: &F::E) -> Poly<F::E> {
     trim(f, a.iter().map(|x| f.mul(x, c)).collect())
 }
 
 /// `a mod m` for monic `m`.
-fn prem<F: Field>(f: &F, a: &Poly<F::E>, m: &Poly<F::E>) -> Poly<F::E> {
+pub(crate) fn prem<F: Field>(f: &F, a: &Poly<F::E>, m: &Poly<F::E>) -> Poly<F::E> {
     let d = m.len() - 1;
     let mut r = a.clone();
     while r.len() > d {
@@ -351,13 +389,13 @@ fn div_x<F: Field>(f: &F, a: &Poly<F::E>) -> Poly<F::E> {
     a.iter().skip(1).cloned().collect()
 }
 
-fn monic<F: Field>(f: &F, a: &Poly<F::E>) -> Poly<F::E> {
+pub(crate) fn monic<F: Field>(f: &F, a: &Poly<F::E>) -> Poly<F::E> {
     let lead = f.inv(a.last().expect("non-zero polynomial"));
     pscale(f, a, &lead)
 }
 
 /// `base^e mod m`.
-fn ppow<F: Field>(f: &F, base: &Poly<F::E>, e: &BigUint, m: &Poly<F::E>) -> Poly<F::E> {
+pub(crate) fn ppow<F: Field>(f: &F, base: &Poly<F::E>, e: &BigUint, m: &Poly<F::E>) -> Poly<F::E> {
     let mut acc = vec![f.one()];
     for i in (0..e.bits()).rev() {
         acc = prem(f, &pmul(f, &acc, &acc), m);
@@ -369,7 +407,12 @@ fn ppow<F: Field>(f: &F, base: &Poly<F::E>, e: &BigUint, m: &Poly<F::E>) -> Poly
 }
 
 /// `g(h) mod m` by Horner.
-fn compose<F: Field>(f: &F, g: &Poly<F::E>, h: &Poly<F::E>, m: &Poly<F::E>) -> Poly<F::E> {
+pub(crate) fn compose<F: Field>(
+    f: &F,
+    g: &Poly<F::E>,
+    h: &Poly<F::E>,
+    m: &Poly<F::E>,
+) -> Poly<F::E> {
     let mut acc: Poly<F::E> = Vec::new();
     for c in g.iter().rev() {
         acc = padd(f, &prem(f, &pmul(f, &acc, h), m), &trim(f, vec![c.clone()]));
@@ -378,21 +421,6 @@ fn compose<F: Field>(f: &F, g: &Poly<F::E>, h: &Poly<F::E>, m: &Poly<F::E>) -> P
 }
 
 impl FpK {
-    /// A pseudo-random element: every coefficient from splitmix64 seeded
-    /// by `i`, so the sequence is fixed and leaves every subfield.
-    pub fn sample(&self, i: u64) -> Vec<u64> {
-        let mut state = i.wrapping_mul(0x9e37_79b9_7f4a_7c15);
-        (0..self.k())
-            .map(|_| {
-                state = state.wrapping_add(0x9e37_79b9_7f4a_7c15);
-                let mut z = state;
-                z = (z ^ (z >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
-                z = (z ^ (z >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
-                (z ^ (z >> 31)) % self.p
-            })
-            .collect()
-    }
-
     /// The `i`-th element in base-`p` digit order (`0, 1, …, p − 1, z, …`).
     pub fn nth(&self, mut i: u64) -> Vec<u64> {
         (0..self.k())
@@ -465,13 +493,13 @@ pub fn on_curve<F: Field>(f: &F, a: &F::E, b: &F::E, x: &F::E, y: &F::E) -> bool
 /// A point of `y² = x³ + ax + b` in Jacobian coordinates
 /// `(X : Y : Z) ↦ (X/Z², Y/Z³)`; `Z = 0` is the point at infinity.
 #[derive(Clone)]
-struct Jac<E> {
-    x: E,
-    y: E,
-    z: E,
+pub(crate) struct Jac<E> {
+    pub(crate) x: E,
+    pub(crate) y: E,
+    pub(crate) z: E,
 }
 
-fn jac_double<F: Field>(f: &F, a: &F::E, p: &Jac<F::E>) -> Jac<F::E> {
+pub(crate) fn jac_double<F: Field>(f: &F, a: &F::E, p: &Jac<F::E>) -> Jac<F::E> {
     if f.is_zero(&p.z) || f.is_zero(&p.y) {
         return Jac {
             x: f.one(),
@@ -497,7 +525,7 @@ fn jac_double<F: Field>(f: &F, a: &F::E, p: &Jac<F::E>) -> Jac<F::E> {
     }
 }
 
-fn jac_add<F: Field>(f: &F, a: &F::E, p: &Jac<F::E>, q: &Jac<F::E>) -> Jac<F::E> {
+pub(crate) fn jac_add<F: Field>(f: &F, a: &F::E, p: &Jac<F::E>, q: &Jac<F::E>) -> Jac<F::E> {
     if f.is_zero(&p.z) {
         return q.clone();
     }
@@ -684,7 +712,7 @@ fn frobenius_fixes<F: Field>(f: &F, q: &BigUint, k: u32, m: &Poly<F::E>) -> bool
 }
 
 /// `(a div b, a mod b)` for any non-zero `b`.
-fn pdivrem<F: Field>(f: &F, a: &Poly<F::E>, b: &Poly<F::E>) -> (Poly<F::E>, Poly<F::E>) {
+pub(crate) fn pdivrem<F: Field>(f: &F, a: &Poly<F::E>, b: &Poly<F::E>) -> (Poly<F::E>, Poly<F::E>) {
     let db = b.len() - 1;
     let lead_inv = f.inv(b.last().expect("non-zero divisor"));
     let mut r = a.clone();
@@ -703,7 +731,7 @@ fn pdivrem<F: Field>(f: &F, a: &Poly<F::E>, b: &Poly<F::E>) -> (Poly<F::E>, Poly
 
 /// `a⁻¹ mod m` by the extended Euclidean algorithm; `None` when
 /// `gcd(a, m) ≠ 1`.
-fn pinv_mod<F: Field>(f: &F, a: &Poly<F::E>, m: &Poly<F::E>) -> Option<Poly<F::E>> {
+pub(crate) fn pinv_mod<F: Field>(f: &F, a: &Poly<F::E>, m: &Poly<F::E>) -> Option<Poly<F::E>> {
     let (mut r0, mut r1) = (m.clone(), prem(f, a, m));
     let (mut s0, mut s1): (Poly<F::E>, Poly<F::E>) = (Vec::new(), vec![f.one()]);
     while !r1.is_empty() {
@@ -838,7 +866,7 @@ pub fn scalar_on_power(model: &Model, trace: &BigInt, ell: u64, j: u32) -> Optio
 
 /// The order `k` of the double eigenvalue `λ` of Frobenius mod `ℓ`; 0
 /// when `λ ≡ 0`, which only happens for `ℓ` the characteristic.
-fn eigen_order(ell: u64, trace: &BigInt) -> u32 {
+pub(crate) fn eigen_order(ell: u64, trace: &BigInt) -> u32 {
     let lambda = if ell == 2 {
         1
     } else {
