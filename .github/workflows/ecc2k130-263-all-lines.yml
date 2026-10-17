@@ -29,7 +29,7 @@ concurrency:
 
 jobs:
   all-line-replay:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 45 }}
     env:
       PR_DRAFT: ${{ github.event.pull_request.draft }}

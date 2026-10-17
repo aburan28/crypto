@@ -16,7 +16,7 @@ permissions:
   contents: read
 jobs:
   freeze:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4

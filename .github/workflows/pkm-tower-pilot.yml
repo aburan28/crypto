@@ -29,7 +29,7 @@ concurrency:
 
 jobs:
   cross-check:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 45 }}
     steps:
       - uses: actions/checkout@v4
@@ -99,7 +99,7 @@ jobs:
       - name: The full-rank exit reproduces rounds 2 and 3 (round 6, note section 15.2)
         run: python3 research/pkm_tower_round6_20260930/compare_exit.py
   engine-tests:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 45 }}
     steps:
       - uses: actions/checkout@v4

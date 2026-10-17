@@ -20,7 +20,7 @@ on:
       - '.github/workflows/polynomial-reuse.yml'
 jobs:
   correctness:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: read
