@@ -1,0 +1,114 @@
+[
+  {
+    "conductor": 1,
+    "level2": 0,
+    "level3": 0,
+    "representative": "two/stratum-1-representative.json",
+    "representative_vertex": 0,
+    "vertices": 1
+  },
+  {
+    "conductor": 2,
+    "level2": 1,
+    "level3": 0,
+    "representative": "two/stratum-2-representative.json",
+    "representative_vertex": 1,
+    "vertices": 1
+  },
+  {
+    "conductor": 4,
+    "level2": 2,
+    "level3": 0,
+    "representative": "two/stratum-4-representative.json",
+    "representative_vertex": 2,
+    "vertices": 2
+  },
+  {
+    "conductor": 8,
+    "level2": 3,
+    "level3": 0,
+    "representative": "two/stratum-8-representative.json",
+    "representative_vertex": 4,
+    "vertices": 4
+  },
+  {
+    "conductor": 16,
+    "level2": 4,
+    "level3": 0,
+    "representative": "two/stratum-16-representative.json",
+    "representative_vertex": 8,
+    "vertices": 8
+  },
+  {
+    "conductor": 32,
+    "level2": 5,
+    "level3": 0,
+    "representative": "two/stratum-32-representative.json",
+    "representative_vertex": 16,
+    "vertices": 16
+  },
+  {
+    "conductor": 64,
+    "level2": 6,
+    "level3": 0,
+    "representative": "two/stratum-64-representative.json",
+    "representative_vertex": 32,
+    "vertices": 32
+  },
+  {
+    "conductor": 128,
+    "level2": 7,
+    "level3": 0,
+    "representative": "two/stratum-128-representative.json",
+    "representative_vertex": 64,
+    "vertices": 64
+  },
+  {
+    "conductor": 256,
+    "level2": 8,
+    "level3": 0,
+    "representative": "two/stratum-256-representative.json",
+    "representative_vertex": 128,
+    "vertices": 128
+  },
+  {
+    "conductor": 512,
+    "level2": 9,
+    "level3": 0,
+    "representative": "two/stratum-512-representative.json",
+    "representative_vertex": 256,
+    "vertices": 256
+  },
+  {
+    "conductor": 1024,
+    "level2": 10,
+    "level3": 0,
+    "representative": "two/stratum-1024-representative.json",
+    "representative_vertex": 512,
+    "vertices": 512
+  },
+  {
+    "conductor": 2048,
+    "level2": 11,
+    "level3": 0,
+    "representative": "two/stratum-2048-representative.json",
+    "representative_vertex": 1024,
+    "vertices": 1024
+  },
+  {
+    "conductor": 4096,
+    "level2": 12,
+    "level3": 0,
+    "representative": "two/stratum-4096-representative.json",
+    "representative_vertex": 2048,
+    "vertices": 2048
+  },
+  {
+    "conductor": 8192,
+    "level2": 13,
+    "level3": 0,
+    "representative": "two/stratum-8192-representative.json",
+    "representative_vertex": 4096,
+    "vertices": 4096
+  }
+]

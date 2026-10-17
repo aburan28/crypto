@@ -1,0 +1,183 @@
+{
+  "cases": [
+    {
+      "case": "two",
+      "cofactor": 1166905704448,
+      "embedding_degree": 30875,
+      "finite_field_applicability": {
+        "destination_field": "F_(p^k)",
+        "embedding_degree": 30875,
+        "embedding_degree_status": "EXACT_NATIVE_MULTIPLICATIVE_ORDER",
+        "existing_backend": "mov_attack_supersingular_k2; BSGS/PH destination solver, not finite-field IC",
+        "finite_field_index_calculus": "UNIMPLEMENTED_FOR_THIS_FIELD_AND_DEGREE",
+        "mathematical_reduction": "NOT_EXCLUDED_BY_LARGE_K",
+        "pairing_execution": "NOT_RUN",
+        "r_minus_1_factorization": [
+          [
+            "2",
+            1
+          ],
+          [
+            "5",
+            3
+          ],
+          [
+            "13",
+            1
+          ],
+          [
+            "19",
+            1
+          ]
+        ]
+      },
+      "graph_sha256": "8ec54bf16456fd0cf6a62f8758a68425e0151157a44c11e6c2e00ddff67a8f64",
+      "largest_prime_subgroup": 61751,
+      "per_conductor_vertices": {
+        "1": 1,
+        "1024": 512,
+        "128": 64,
+        "16": 8,
+        "2": 1,
+        "2048": 1024,
+        "256": 128,
+        "32": 16,
+        "4": 2,
+        "4096": 2048,
+        "512": 256,
+        "64": 32,
+        "8": 4,
+        "8192": 4096
+      },
+      "solver_runs": 0,
+      "source_model": "icv1-fp57-t536870914-6cabb0c9",
+      "strata_certified": 14,
+      "vertices_certified": 8192,
+      "workload_bytes": 11739236,
+      "workload_file": "two-workloads.jsonl",
+      "workload_sha256": "37d9e0adf75fd429be52e3cfff00194a6f3c7bac362177dde272fbf938730e97"
+    },
+    {
+      "case": "three",
+      "cofactor": 3645,
+      "embedding_degree": 3953777913734,
+      "finite_field_applicability": {
+        "destination_field": "F_(p^k)",
+        "embedding_degree": 3953777913734,
+        "embedding_degree_status": "EXACT_NATIVE_MULTIPLICATIVE_ORDER",
+        "existing_backend": "mov_attack_supersingular_k2; BSGS/PH destination solver, not finite-field IC",
+        "finite_field_index_calculus": "UNIMPLEMENTED_FOR_THIS_FIELD_AND_DEGREE",
+        "mathematical_reduction": "NOT_EXCLUDED_BY_LARGE_K",
+        "pairing_execution": "NOT_RUN",
+        "r_minus_1_factorization": [
+          [
+            "2",
+            1
+          ],
+          [
+            "5",
+            1
+          ],
+          [
+            "11",
+            1
+          ],
+          [
+            "53",
+            1
+          ],
+          [
+            "3390890149",
+            1
+          ]
+        ]
+      },
+      "graph_sha256": "a72ec162a221914f12e9c8806652e865b99565b7ddbcba860af0bae923de76b2",
+      "largest_prime_subgroup": 19768889568671,
+      "per_conductor_vertices": {
+        "1": 1,
+        "2187": 1458,
+        "243": 162,
+        "27": 18,
+        "3": 2,
+        "6561": 4374,
+        "729": 486,
+        "81": 54,
+        "9": 6
+      },
+      "solver_runs": 0,
+      "source_model": "icv1-fp57-tm536870941-e6d0c766",
+      "strata_certified": 9,
+      "vertices_certified": 6561,
+      "workload_bytes": 9696850,
+      "workload_file": "three-workloads.jsonl",
+      "workload_sha256": "a6ac094f7aa3deea7d560cd108a5e198edfc98517c192eb9bfa051f6ca47f9a0"
+    },
+    {
+      "case": "mixed",
+      "cofactor": 67771089792000,
+      "embedding_degree": 2126,
+      "finite_field_applicability": {
+        "destination_field": "F_(p^k)",
+        "embedding_degree": 2126,
+        "embedding_degree_status": "EXACT_NATIVE_MULTIPLICATIVE_ORDER",
+        "existing_backend": "mov_attack_supersingular_k2; BSGS/PH destination solver, not finite-field IC",
+        "finite_field_index_calculus": "UNIMPLEMENTED_FOR_THIS_FIELD_AND_DEGREE",
+        "mathematical_reduction": "NOT_EXCLUDED_BY_LARGE_K",
+        "pairing_execution": "NOT_RUN",
+        "r_minus_1_factorization": [
+          [
+            "2",
+            2
+          ],
+          [
+            "1063",
+            1
+          ]
+        ]
+      },
+      "graph_sha256": "621d236a1a604ef391978aabb8b419f10db6daa54977831e37fb515d9bdc9d96",
+      "largest_prime_subgroup": 4253,
+      "per_conductor_vertices": {
+        "1": 1,
+        "108": 216,
+        "12": 24,
+        "144": 288,
+        "16": 24,
+        "1728": 3456,
+        "18": 36,
+        "192": 384,
+        "2": 3,
+        "216": 432,
+        "24": 48,
+        "27": 36,
+        "288": 576,
+        "3": 4,
+        "32": 48,
+        "36": 72,
+        "4": 6,
+        "432": 864,
+        "48": 96,
+        "54": 108,
+        "576": 1152,
+        "6": 12,
+        "64": 96,
+        "72": 144,
+        "8": 12,
+        "864": 1728,
+        "9": 12,
+        "96": 192
+      },
+      "solver_runs": 0,
+      "source_model": "icv1-fp59-t1073741954-4dd0b1ef",
+      "strata_certified": 28,
+      "vertices_certified": 10070,
+      "workload_bytes": 14341797,
+      "workload_file": "mixed-workloads.jsonl",
+      "workload_sha256": "d28679bb906a0e9dd3a4c92d5cacb02fcf843f14dd26967559714ad72899c279"
+    }
+  ],
+  "graph_vertex_coverage": "ALL_THREE_COMPLETE_CLASSES",
+  "schema": "volcano-graphwide-inventory/v1",
+  "solver_execution": "NOT_RUN"
+}

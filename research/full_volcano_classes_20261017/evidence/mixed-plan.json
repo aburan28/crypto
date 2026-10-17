@@ -1,0 +1,178 @@
+{
+  "schema": "ordinary-isogeny-class/v1",
+  "input": {
+    "p": 288230445959117953,
+    "a": 288228093099277441,
+    "b": 50668532689170053,
+    "order": 288230444885376000
+  },
+  "order": 288230444885376000,
+  "trace": 1073741954,
+  "discriminant": -56733696,
+  "fundamental_discriminant": -19,
+  "frobenius_conductor": 1728,
+  "conductor_factors": [
+    [
+      2,
+      6
+    ],
+    [
+      3,
+      3
+    ]
+  ],
+  "maximal_class_number": 1,
+  "strata": [
+    {
+      "conductor": 1,
+      "expected_vertices": 1
+    },
+    {
+      "conductor": 2,
+      "expected_vertices": 3
+    },
+    {
+      "conductor": 3,
+      "expected_vertices": 4
+    },
+    {
+      "conductor": 4,
+      "expected_vertices": 6
+    },
+    {
+      "conductor": 6,
+      "expected_vertices": 12
+    },
+    {
+      "conductor": 8,
+      "expected_vertices": 12
+    },
+    {
+      "conductor": 9,
+      "expected_vertices": 12
+    },
+    {
+      "conductor": 12,
+      "expected_vertices": 24
+    },
+    {
+      "conductor": 16,
+      "expected_vertices": 24
+    },
+    {
+      "conductor": 18,
+      "expected_vertices": 36
+    },
+    {
+      "conductor": 24,
+      "expected_vertices": 48
+    },
+    {
+      "conductor": 27,
+      "expected_vertices": 36
+    },
+    {
+      "conductor": 32,
+      "expected_vertices": 48
+    },
+    {
+      "conductor": 36,
+      "expected_vertices": 72
+    },
+    {
+      "conductor": 48,
+      "expected_vertices": 96
+    },
+    {
+      "conductor": 54,
+      "expected_vertices": 108
+    },
+    {
+      "conductor": 64,
+      "expected_vertices": 96
+    },
+    {
+      "conductor": 72,
+      "expected_vertices": 144
+    },
+    {
+      "conductor": 96,
+      "expected_vertices": 192
+    },
+    {
+      "conductor": 108,
+      "expected_vertices": 216
+    },
+    {
+      "conductor": 144,
+      "expected_vertices": 288
+    },
+    {
+      "conductor": 192,
+      "expected_vertices": 384
+    },
+    {
+      "conductor": 216,
+      "expected_vertices": 432
+    },
+    {
+      "conductor": 288,
+      "expected_vertices": 576
+    },
+    {
+      "conductor": 432,
+      "expected_vertices": 864
+    },
+    {
+      "conductor": 576,
+      "expected_vertices": 1152
+    },
+    {
+      "conductor": 864,
+      "expected_vertices": 1728
+    },
+    {
+      "conductor": 1728,
+      "expected_vertices": 3456
+    }
+  ],
+  "expected_vertices": 10070,
+  "degrees": [
+    2,
+    3
+  ],
+  "auto_degrees": [
+    2,
+    3
+  ],
+  "order_evidence": {
+    "certified": true,
+    "divisor": "35742862709000",
+    "exact_small_field_enumeration": null,
+    "factor_primality": "native deterministic u64 Miller-Rabin rechecked for discriminant; order certificate uses isogeny_algos certificate backend",
+    "order_method": "Given",
+    "point_samples": [
+      [
+        "16248414833205398",
+        "204870116670075744"
+      ]
+    ],
+    "twist_divisor": "4238683044600881",
+    "via_twist": false
+  },
+  "source_identity": {
+    "curve_uid": null,
+    "ec1": null,
+    "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+    "icv1": "ICV1:fp-288230445959117953:1073741954:288230444885376000:288230445958233217:unk:unk:r:4dd0b1ef0285",
+    "model_json": "{\"a\":\"288228093099277441\",\"b\":\"50668532689170053\",\"field\":\"fp-288230445959117953\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"288230445959117953\",\"v\":\"1\"}",
+    "slug": "icv1-fp59-t1073741954-4dd0b1ef"
+  },
+  "source_code_sha256": "d3c77f50dc2e737de38561203ce3693f7899fe3db502b8e863c7ac69e5818bed",
+  "storage": {
+    "bounded_ram": "SQLite pages and one vertex's outgoing kernels; no whole-class HashMap",
+    "fixed_u64_vertex_payload_bytes": 241680,
+    "layout_includes": "a,b,j only (3 u64); excludes indexes, maps, journals, free space and DLP evidence; compressed or generative encodings can be smaller",
+    "sqlite_bytes": "not predicted; depends on degree set and SQLite layout"
+  }
+}

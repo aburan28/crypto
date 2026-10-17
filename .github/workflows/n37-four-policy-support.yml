@@ -40,6 +40,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            tools/volcano-cli/
+            isogeny_algos/
             src
             examples/n37_four_policy_support.rs
             examples/n37_four_policy_support_replay.rs
