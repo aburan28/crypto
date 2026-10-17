@@ -5,22 +5,23 @@
   "created": "2026-10-15",
   "authors": ["backlog lane", "coordinator"],
   "status": "blocked",
-  "status_note": "Blocked on hardware: the projection needs 133-146 GB (m = 3) and 243-384 GB (m = 4) of RAM against about 14 GB here, or a disk-backed B' reducer that is not built. The engine is pinned at the head of the open PR #1893. The engine has no checkpoint, so a run cannot resume; that must change, or the protocol must accept unresumable runs, before the card is ready.",
+  "status_note": "Rescoped 2026-10-16 (claim audit): the m = 4, N = 20 cell is already answered, NEGATIVE: msolve 0.6.5 completed three productive degree-8 F4 rounds on both targets before its 5 GB cap, so D >= 8 at m = 4, N = 20 (research/ic_next10_20261014/03-pkm-degree/README.md; caveat: msolve on the raw presentation, f4_fp_tower not run there). The card's own rule reads that as strong evidence against boundedness at m = 4. Only the m = 3, N = 21 cell remains (inconclusive there: D >= 7, stopped by the wall before any degree-8 round). Blocked on hardware: the projection needs 133-146 GB (m = 3) of RAM against about 14 GB here, or a disk-backed B' reducer that is not built. The engine is pinned at the head of the open PR #1893. The engine has no checkpoint, so a run cannot resume; that must change, or the protocol must accept unresumable runs, before the card is ready.",
   "blocked_on": [
-    "hw:a host with 192-256 GB RAM for m = 3, N = 21 and about 512 GB for m = 4, N = 20 (research/pkm_dickson_torus_20261015/README.md §5)",
+    "hw:a host with 192-256 GB RAM for m = 3, N = 21 (research/pkm_dickson_torus_20261015/README.md §5)",
     "note:or a disk-backed B' (echelon) in the F4 tower engine, streamed from NVMe; not built, and its I/O cost is not measured",
     "pr:1893 the projection and the pinned engine (claude/leads-dickson-torus, open, unmerged)"
   ],
   "links": {
     "lead": "docs/ic/factor-base-encyclopedia/README.md §8 item 1 (is the tower's F4 solving degree bounded?)",
     "notes": [
+      "research/ic_next10_20261014/03-pkm-degree/README.md (m = 4, N = 20: D >= 8, NEGATIVE; m = 3, N = 18/21/24: D >= 7, inconclusive)",
       "research/pkm_dickson_torus_20261015/README.md §5 on branch claude/leads-dickson-torus (Task C: derived, not run)",
       "research/notes/index-calculus/RESEARCH_PKM_TOWER_ORACLE.md §11.7, §12.7, §16.8-16.9"
     ],
     "prs": [1893]
   },
-  "question": "Does the Kummer tower's F4 solving degree D stay at 7 at m = 3, N = 21 (extending the plateau from N = 15 to L = 6 levels) and at m = 4, N = 20, or does it rise?",
-  "decision_value": "This is the only open question in the PKM line that decides an exponent rather than a constant: a bounded solving degree is what would make a tower factor base sub-exponential to decompose against, and every other PKM card (the P-192 auxiliary-curve search, the P-224 depth checks) is worth running only if D is bounded. A rise to D = 8 at either cell is strong evidence against boundedness at that m and would deprioritise the tower constructions. A plateau at m = 3, N = 21 does not by itself establish H1a under rule A1 (that needs L > 10, i.e. N >= 27 at m = 3); it would justify the larger runs.",
+  "question": "Does the Kummer tower's F4 solving degree D stay at 7 at m = 3, N = 21 (extending the plateau from N = 15 to L = 6 levels), or does it rise? (The m = 4, N = 20 cell is answered: D >= 8.)",
+  "decision_value": "The m = 4 half of this question is answered negatively (D >= 8 at m = 4, N = 20, research/ic_next10_20261014/03-pkm-degree/README.md), and m >= 4 is the only regime where a tower base can beat rho's exponent (RESEARCH_PKM_TOWER_ORACLE.md §3.7: m = 3 at best ties it). A rise to D = 8 at m = 3, N = 21 would extend the negative to m = 3; a plateau there does not by itself establish H1a under rule A1 (that needs L > 10, i.e. N >= 27 at m = 3) and, since m = 3 cannot beat rho's exponent, would at most justify the larger runs as a mechanism study.",
   "protocol": {"path": null, "blob": null},
   "code": {
     "repo": "crypto",
@@ -30,40 +31,55 @@
   },
   "resources": {
     "cpus": 1,
-    "ram_gb": 384,
+    "ram_gb": 160,
     "disk_gb": 50,
     "gpu": null,
-    "est_core_hours": 465,
-    "est_wall_hours": 465,
-    "notes": "Derived (research/pkm_dickson_torus_20261015/README.md §5, not run): m = 3, N = 21: 133-146 GB, 2.5-7.4e15 multiply-adds, 86-138 h; m = 4, N = 20: 243-384 GB, 0.85-2.0e16 multiply-adds, 168-327 h; single-threaded at the round-7 rate, both cells 254-465 h. Too low if D rises 7 -> 8. The round-6 full-rank exit cuts time to about 0.61x and leaves memory unchanged. The kernel is rayon-parallel, so a many-core node shortens wall time roughly by core count."
+    "est_core_hours": 138,
+    "est_wall_hours": 138,
+    "notes": "Derived (research/pkm_dickson_torus_20261015/README.md §5, not run): m = 3, N = 21: 133-146 GB, 2.5-7.4e15 multiply-adds, 86-138 h single-threaded at the round-7 rate. Too low if D rises 7 -> 8. The m = 4, N = 20 cell (243-384 GB, 168-327 h) is dropped: answered by 03-pkm-degree. The round-6 full-rank exit cuts time to about 0.61x and leaves memory unchanged. The kernel is rayon-parallel, so a many-core node shortens wall time roughly by core count."
   },
   "run": {
     "argv": [
       "target/release/examples/pkm_tower_pilot",
-      "--engine", "tower",
-      "--p", "2013265921",
-      "--kinds", "kummer",
-      "--m", "{m}",
-      "--t-min", "{t}",
-      "{max_t_flag}", "{t}",
-      "--controls", "tower",
-      "--targets", "0",
-      "--ladder-t", "none",
-      "--planted", "0",
-      "--random", "2",
-      "--budget", "1500000",
-      "--out", "{out}/rows.jsonl"
+      "--engine",
+      "tower",
+      "--p",
+      "2013265921",
+      "--kinds",
+      "kummer",
+      "--m",
+      "{m}",
+      "--t-min",
+      "{t}",
+      "{max_t_flag}",
+      "{t}",
+      "--controls",
+      "tower",
+      "--targets",
+      "0",
+      "--ladder-t",
+      "none",
+      "--planted",
+      "0",
+      "--random",
+      "2",
+      "--budget",
+      "1500000",
+      "--out",
+      "{out}/rows.jsonl"
     ],
     "env": {"RAYON_NUM_THREADS": "1"},
     "timeout_per_shard_s": 1500000
   },
   "shards": {
-    "count": 2,
+    "count": 1,
     "scheme": "list",
     "params": {
       "items": [
-        {"name": "m3-n21", "vars": {"m": "3", "t": "7", "max_t_flag": "--max-t-m3"}},
-        {"name": "m4-n20", "vars": {"m": "4", "t": "5", "max_t_flag": "--max-t-m4"}}
+        {
+          "name": "m3-n21",
+          "vars": {"m": "3", "t": "7", "max_t_flag": "--max-t-m3"}
+        }
       ],
       "argv_note": "Flags follow research/pkm_dickson_torus_20261015/run.sh (p1 = 15*2^27 + 1, the prime of the recorded Kummer rows the projection extrapolates). The --budget and --max-nnz caps, and whether one or two targets per cell, are fixed in PROTOCOL.md."
     },
@@ -79,7 +95,7 @@
     "mode": "lab-task",
     "notes": "Two single heavy runs: claim one task per cell, run it with `cairn lab exec` (receipt + rows published together), re-claim before the TTL lapses as the heartbeat, release completed or failed. Not preemptible: the engine cannot checkpoint, so a preempted run loses its work.",
     "space": "TBD",
-    "tasks": ["XP-20261015-pkm-m3-n21-m4-n20/shard-0", "XP-20261015-pkm-m3-n21-m4-n20/shard-1"],
+    "tasks": ["XP-20261015-pkm-m3-n21-m4-n20/shard-0"],
     "ttl_s": 86400,
     "env": {
       "name": "crypto-pkm-17c5663",
@@ -87,7 +103,7 @@
     },
     "exec": {
       "cpus": 8,
-      "memory_mb": 409600,
+      "memory_mb": 204800,
       "timeout_s": 1500000,
       "sandbox": "none",
       "sandbox_reason": "a 133-384 GB working set: gVisor's cgroup limit and bubblewrap's resident-set watchdog are untested at that size, and an exhausted-host kill would read as an infrastructure error; the receipt records the run as unconfined",
@@ -95,8 +111,8 @@
     },
     "funding": {
       "units": 1000000,
-      "rationale": "Highest: the only exponent-level open question in the PKM line; every other PKM card is worth running only if its answer is 'bounded'."
+      "rationale": "Highest: the remaining exponent-level open cell in the PKM line (m = 4 answered negatively by 03-pkm-degree)."
     }
   },
-  "owner_hint": "whoever has a 256-512 GB host"
+  "owner_hint": "whoever has a 256 GB host"
 }

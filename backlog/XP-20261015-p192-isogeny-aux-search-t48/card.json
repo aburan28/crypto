@@ -7,8 +7,8 @@
     "backlog lane",
     "coordinator"
   ],
-  "status": "blocked",
-  "status_note": "Blocked on the wide-field tower builder and the 192-bit field backend (both in progress, not yet pushed) and on PR #1889. Runs as cairn lab tasks with the native checker deciding `found` (first_success); posting it as a cairn objective is the upgrade path once cairn can pin a native checker. Recommended gate: run only after lead 1 (XP-20261015-pkm-m3-n21-m4-n20) gives a bounded F4 solving degree, or run it explicitly as an infrastructure/feasibility measurement.",
+  "status": "abandoned",
+  "status_note": "Superseded 2026-10-16 (claim audit). Three independent reasons: (1) t = 48 is not attack-optimal: RESEARCH_PKM_TOWER_ORACLE.md §3.7 puts the optimal base at |V| ~ (m! r T)^(1/(m+1)), about 2^39 at m = 4 for a 192-bit r, so the cost-optimal tower has t ~ 39, not 48 (48 = 192/m is the size at which every point decomposes, not the cost optimum); (2) the run argv used --family z2xz2 while est_core_hours (98,352) is the z2xz8 estimate; z2xz2 at t = 48 is 362,005 core-hours (argv corrected to z2xz8 below for the record); (3) the search is unnecessary: the supersingular y^2 = x^3 + x over the P-192 prime gives a point of order 2^t for every t <= 64 in one draw (research/pkm_supersingular_aux_20261015, F4 degree and relation yield indistinguishable from the ordinary tower), and the Dickson torus tower exists on P-192 for t <= 64 (research/pkm_dickson_torus_20261015, A5c). Lead 1, the gate this card named, is NEGATIVE at m = 4: D >= 8 at m = 4, N = 20 (research/ic_next10_20261014/03-pkm-degree). Successors: none needed for construction; any P-192 tower work is gated on XP-20261015-pkm-m3-n21-m4-n20 (rescoped to m = 3).",
   "blocked_on": [
     "note:decision — the supersingular curve y^2 = x^3 + x over the P-192 prime (#E = p + 1, cyclic 2-Sylow of order 2^64) already gives a point of order exactly 2^48 in one draw, and backlog_check_aux2t accepts it; decide whether the PKM relation phase may use a supersingular E' (then this search is unnecessary) or the checker must require an ordinary curve (then this card runs as specified, ~98,000 core-hours measured)",
     "pr:1918 merged; the solver and 2-Sylow halving filter are on branch claude/isogeny-tower-p192 (PR pending merge)",
@@ -25,7 +25,7 @@
     ]
   },
   "question": "How many auxiliary curves over the NIST P-192 prime must be drawn, and at what wall cost per draw, before one has a rational point of order 2^48, using a curve family that forces k bits of 2-power torsion and a halving filter that rejects most draws after O(1) square roots?",
-  "decision_value": "This run prices the construction of a P-192-size isogeny-tower factor base; it does not by itself say anything about P-192 security. The base is useful only if the tower's F4 solving degree stays bounded as the tower grows (encyclopedia §8 lead 1), which is unresolved and trending negative (D rises at m = 2, N = 20). If lead 1 comes back bounded, a curve found here is the input the relation phase needs and the measured trials-per-success fixes the construction's share of the cost; if lead 1 stays unbounded, this run only measures a feasibility constant and should be scheduled as infrastructure work, not as attack evidence. A failure to find a curve within the seed space is a bounded negative result about this family and filter, not about the tower.",
+  "decision_value": "Superseded (see status_note). This run prices the construction of a P-192-size isogeny-tower factor base; it does not by itself say anything about P-192 security. The base is useful only if the tower's F4 solving degree stays bounded as the tower grows (encyclopedia §8 lead 1), which is unresolved and trending negative (D rises at m = 2, N = 20). If lead 1 comes back bounded, a curve found here is the input the relation phase needs and the measured trials-per-success fixes the construction's share of the cost; if lead 1 stays unbounded, this run only measures a feasibility constant and should be scheduled as infrastructure work, not as attack evidence. A failure to find a curve within the seed space is a bounded negative result about this family and filter, not about the tower.",
   "protocol": {
     "path": null,
     "blob": null
@@ -61,7 +61,7 @@
       "--t",
       "48",
       "--family",
-      "z2xz2",
+      "z2xz8",
       "--seed-lo",
       "{seed_lo}",
       "--seed-hi",

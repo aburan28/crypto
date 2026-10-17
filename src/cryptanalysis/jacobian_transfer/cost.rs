@@ -22,10 +22,19 @@ pub struct CostModel {
     /// Field multiplications per elliptic group operation (affine, inversion
     /// included; the cover-route protocol's "roughly ten").
     pub elliptic_group_op_mults: f64,
-    /// Field multiplications per genus-`g` Jacobian group operation are
-    /// `jacobian_group_op_mults_per_genus_squared * g^2` (Cantor's algorithm
-    /// is quadratic in the genus; `g = 1` recovers the elliptic constant).
-    pub jacobian_group_op_mults_per_genus_squared: f64,
+    /// Counted field multiplications per genus-`g` Jacobian group operation,
+    /// `(g, mults)`, inversions weighted as 8 multiplications: textbook Cantor
+    /// addition over `F_1009`, 200 pairs per genus
+    /// (`research/jacobian_op_count_20261014/summary.csv`, #1846).  These
+    /// replace the earlier `10 g^2`, which the count put 2.0 bits low at
+    /// genus 2 and 3.3 bits low at genus 32.  Between points the cost is
+    /// interpolated linearly in `log2 g`; `g = 1` is the elliptic constant.
+    pub jacobian_group_op_mults_measured: Vec<(u32, f64)>,
+    /// Past the last measured genus the count is extrapolated as `g^e` with
+    /// this exponent, the fitted 2.347 of the same run.  The local exponent
+    /// at genus 32 is about 2.75, so the extrapolation understates the cost
+    /// and favours large-genus routes.
+    pub jacobian_group_op_extrapolation_exponent: f64,
     /// Bits a route must save over the reference to be classed a formula
     /// advantage rather than a boundary row.
     pub advantage_margin_bits: f64,
@@ -36,9 +45,16 @@ pub struct CostModel {
     /// Enge–Gaudry's `L_N(1/2, c)` constant for a Jacobian of order `N`.
     pub enge_gaudry_c: f64,
     /// Decomposition of a point of `E(F_{p^k})` over a factor base from
-    /// `F_p` solves the Semaev system whose Bézout bound is `2^(k(k-1))`; the
-    /// solve is priced at that bound times this exponent.
-    pub extension_decomposition_bezout_exponent: f64,
+    /// `F_p` solves the Semaev system `S_(k+1)`, whose solution count is the
+    /// Bézout bound `D = 2^(k(k-1))`.  Where no measured cost is recorded the
+    /// solve is priced at `D^e` `F_p` multiplications with this exponent
+    /// (FGLM is cubic in `D`, so 3 is a floor for a generic system).
+    pub extension_decomposition_degree_exponent: f64,
+    /// Measured `F_p` multiplications per decomposition `C_k`, `(k, C_k)`:
+    /// `C_3 = 0.876e6` (`RESEARCH_RESIDUAL_WALKS.md` §11.8) and
+    /// `C_4 = 1.227e12` (§11.17, plain `S_5`; the `D_4`-symmetric form needs
+    /// rational 2-torsion and is not the generic price).  Both lie above `D^3`.
+    pub extension_measured_solve_mults: Vec<(u32, f64)>,
 }
 
 impl Default for CostModel {
@@ -46,11 +62,27 @@ impl Default for CostModel {
         Self {
             karatsuba_exponent: 1.585,
             elliptic_group_op_mults: 10.0,
-            jacobian_group_op_mults_per_genus_squared: 10.0,
+            jacobian_group_op_mults_measured: vec![
+                (2, 164.7),
+                (3, 338.7),
+                (4, 569.6),
+                (5, 937.1),
+                (6, 1354.9),
+                (8, 2620.9),
+                (10, 4585.6),
+                (12, 7236.2),
+                (14, 10843.5),
+                (16, 15343.5),
+                (20, 27984.7),
+                (24, 46335.5),
+                (32, 102282.5),
+            ],
+            jacobian_group_op_extrapolation_exponent: 2.347,
             advantage_margin_bits: 8.0,
             hyperelliptic_ic_genus_polynomial_exponent: 2.0,
             enge_gaudry_c: std::f64::consts::SQRT_2,
-            extension_decomposition_bezout_exponent: 1.0,
+            extension_decomposition_degree_exponent: 3.0,
+            extension_measured_solve_mults: vec![(3, 0.876e6), (4, 1.227e12)],
         }
     }
 }
@@ -171,12 +203,35 @@ impl CostModel {
         self.elliptic_group_op_mults.log2() + self.log2_field_mult(field_bits)
     }
 
+    /// `log2` of the field multiplications in one genus-`g` Jacobian group
+    /// operation, `log2_genus = log2 g`, from the measured counts.
+    pub fn log2_jacobian_op_mults(&self, log2_genus: f64) -> f64 {
+        let elliptic = (0.0, self.elliptic_group_op_mults.log2());
+        let points = std::iter::once(elliptic).chain(
+            self.jacobian_group_op_mults_measured
+                .iter()
+                .map(|&(g, m)| (f64::from(g).log2(), m.log2())),
+        );
+        let mut prev: Option<(f64, f64)> = None;
+        for (x, y) in points {
+            if log2_genus <= x + 1e-12 {
+                return match prev {
+                    Some((x0, y0)) if log2_genus > x0 => {
+                        y0 + (y - y0) * (log2_genus - x0) / (x - x0)
+                    }
+                    _ => y,
+                };
+            }
+            prev = Some((x, y));
+        }
+        let (x, y) = prev.expect("the elliptic point");
+        y + self.jacobian_group_op_extrapolation_exponent * (log2_genus - x)
+    }
+
     /// `log2` of one genus-`g` Jacobian group operation over a field of
     /// `field_bits` bits; `log2_genus = log2 g`.
     pub fn log2_jacobian_op(&self, log2_genus: f64, field_bits: f64) -> f64 {
-        self.jacobian_group_op_mults_per_genus_squared.log2()
-            + 2.0 * log2_genus
-            + self.log2_field_mult(field_bits)
+        self.log2_jacobian_op_mults(log2_genus) + self.log2_field_mult(field_bits)
     }
 
     /// Pollard rho on a subgroup of `subgroup_bits` bits of `E(F_Q)`,
@@ -275,15 +330,33 @@ impl CostModel {
         best
     }
 
-    /// Gaudry–Diem index calculus on `E(F_{p^k})` with a factor base from
-    /// `F_p`: `p^(2 - 2/k)` relations, each decomposition priced at the Bézout
-    /// bound `2^(k(k-1))` of the Semaev system, in elliptic operations over
-    /// `F_{p^k}`.
-    pub fn log2_extension_ic(&self, p_bits: f64, k: u32) -> f64 {
+    /// `log2` of the `F_p` multiplications in one `S_(k+1)` decomposition:
+    /// the measured `C_k` where recorded, never below `D^e` with
+    /// `D = 2^(k(k-1))`.
+    pub fn log2_extension_solve_mults(&self, k: u32) -> f64 {
         let k_f = f64::from(k);
-        (2.0 - 2.0 / k_f) * p_bits
-            + self.extension_decomposition_bezout_exponent * k_f * (k_f - 1.0)
-            + self.log2_elliptic_op(p_bits * k_f)
+        let floor = self.extension_decomposition_degree_exponent * k_f * (k_f - 1.0);
+        self.extension_measured_solve_mults
+            .iter()
+            .find(|&&(kk, _)| kk == k)
+            .map_or(floor, |&(_, c)| c.log2().max(floor))
+    }
+
+    /// `log2` of the decomposition attempts: `p^(2 - 2/k)` relations
+    /// (double large primes), each needing about `k!` trials because a random
+    /// point decomposes over the factor base with probability about `1/k!`.
+    pub fn log2_extension_trials(&self, p_bits: f64, k: u32) -> f64 {
+        let k_f = f64::from(k);
+        (2.0 - 2.0 / k_f) * p_bits + log2_factorial(k_f)
+    }
+
+    /// Gaudry–Diem index calculus on `E(F_{p^k})` with a factor base from
+    /// `F_p`: [`Self::log2_extension_trials`] decompositions, each priced at
+    /// [`Self::log2_extension_solve_mults`] multiplications in `F_p`.
+    pub fn log2_extension_ic(&self, p_bits: f64, k: u32) -> f64 {
+        self.log2_extension_trials(p_bits, k)
+            + self.log2_extension_solve_mults(k)
+            + self.log2_field_mult(p_bits)
     }
 }
 
@@ -501,6 +574,42 @@ mod tests {
         );
         assert!(leading < 128.0);
         assert!(total > leading);
+    }
+
+    #[test]
+    fn jacobian_op_is_the_measured_cantor_count() {
+        // research/jacobian_op_count_20261014/summary.csv (#1846): 2.041 bits
+        // above 10 g^2 at genus 2, 3.320 bits at genus 32.
+        let m = CostModel::default();
+        for (g, mults) in [(2.0f64, 164.7f64), (6.0, 1354.9), (32.0, 102282.5)] {
+            assert!((m.log2_jacobian_op_mults(g.log2()) - mults.log2()).abs() < 1e-9, "{g}");
+        }
+        let at = |g: f64| m.log2_jacobian_op_mults(g.log2()) - (10.0 * g * g).log2();
+        assert!((at(2.0) - 2.041).abs() < 0.01);
+        assert!((at(32.0) - 3.320).abs() < 0.01);
+        // Interpolated between points, monotone, extrapolated past 32.
+        let g7 = m.log2_jacobian_op_mults(7f64.log2());
+        assert!(g7 > 1354.9f64.log2() && g7 < 2620.9f64.log2());
+        let g64 = m.log2_jacobian_op_mults(6.0);
+        assert!((g64 - 102282.5f64.log2() - 2.347).abs() < 1e-9);
+    }
+
+    #[test]
+    fn extension_ic_charges_measured_solves_and_k_factorial_trials() {
+        let m = CostModel::default();
+        // Measured C_3, C_4 lie above D^3 = 2^(3k(k-1)).
+        assert!((m.log2_extension_solve_mults(3) - 0.876e6f64.log2()).abs() < 1e-9);
+        assert!((m.log2_extension_solve_mults(4) - 1.227e12f64.log2()).abs() < 1e-9);
+        assert!(m.log2_extension_solve_mults(3) > 18.0);
+        assert!(m.log2_extension_solve_mults(4) > 36.0);
+        // Unmeasured k: the D^3 floor.
+        assert!((m.log2_extension_solve_mults(6) - 90.0).abs() < 1e-9);
+        // k! trials per relation.
+        let t = m.log2_extension_trials(40.0, 5) - (2.0 - 2.0 / 5.0) * 40.0;
+        assert!((t - 120f64.log2()).abs() < 1e-9);
+        let total = m.log2_extension_ic(40.0, 4);
+        let expect = 1.5 * 40.0 + 24f64.log2() + 1.227e12f64.log2() + m.log2_field_mult(40.0);
+        assert!((total - expect).abs() < 1e-9);
     }
 
     #[test]

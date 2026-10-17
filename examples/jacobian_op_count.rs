@@ -1,7 +1,8 @@
 //! Counted Cantor addition and doubling on genus-`g` Jacobians over `F_p`, `p`
 //! odd, against the cost model's `10 · g²` field multiplications per group
-//! operation (`jacobian_group_op_mults_per_genus_squared` in
-//! `docs/curves/jacobian-transfers.json`).
+//! operation (the former `jacobian_group_op_mults_per_genus_squared` in
+//! `docs/curves/jacobian-transfers.json`, since replaced by this run's counts
+//! as `jacobian_group_op_mults_measured`).
 //!
 //! ```text
 //! cargo run --release --example jacobian_op_count -- run \

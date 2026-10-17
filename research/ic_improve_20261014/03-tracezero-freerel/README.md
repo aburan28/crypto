@@ -1,5 +1,19 @@
 # Item 03: trace-zero pre-filter and free relations on the compact-orbit IC
 
+> **Annotation (2026-10-16, claim audit; the frozen record below is
+> unchanged).** The 0.957× was measured at the repository's untuned K
+> (255 / 220 / 500), not at each arm's tuned K. At `n = 41`, `K = 255` is far
+> above the tuned `K* = 100`, which is why the root table held 161 free
+> relations and the gain looks largest there. Round 2 re-ran it with K tuned
+> per arm on held-out seeds
+> ([`../../ic_improve_20261015/02-freerel-production/README.md`](../../ic_improve_20261015/02-freerel-production/README.md)):
+> at matched tuned K the `n = 41` and `n = 53` ratios are **0.972 [0.940,
+> 1.003] and 0.984 [0.963, 1.008], not significant** (MATCHES), and the
+> `n = 41` wall ratio is 1.008 [0.956, 1.057]. Only `n = 61` (0.962, where
+> both arms tune to `K = 500`) is a clean same-K effect. Round 2's pooled
+> tuned-vs-tuned 0.960× [0.946, 0.976] is partly where the incumbent's tuned
+> K landed. Quote round 2, per size, not this 0.957×.
+
 **Verdict.**
 
 - **R (free relations): ADVANCES, at constant level.** The complete Koblitz DLP solve costs 0.957× the incumbent in the counted unit, 95% CI [0.944, 0.970], pooled over 44 paired replicates at three sizes.
