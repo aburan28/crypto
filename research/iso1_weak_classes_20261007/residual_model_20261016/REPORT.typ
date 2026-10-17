@@ -10,9 +10,9 @@ Research evidence report. Study: `research/iso1_weak_classes_20261007`. Markdown
 
 == Summary
 
-+ *Certified census labels through p = 103.* A new counter returns a group order only when it is the unique Hasse-interval candidate compatible with the tested points on the curve and its quadratic twist. Reruns at p = 7, 13, 37, 41, 43, 47, 53, 59 are byte-identical to the retained CSVs, so their zero labels are exact. p = 61, 67, 71, 73, 79, 83, 89, 97, 101 and 103 are new.
++ *Certified census labels through p = 107.* A new counter returns a group order only when it is the unique Hasse-interval candidate compatible with the tested points on the curve and its quadratic twist. Reruns at p = 7, 13, 37, 41, 43, 47, 53, 59 are byte-identical to the retained CSVs, so their zero labels are exact. p = 61, 67, 71, 73, 79, 83, 89, 97, 101, 103 and 107 are new.
 + *Exact 8th-power mass (conjecture).* The number $N_8(t)$ of 8th-power Legendre parameters in a class is a closed 2-adic factor times an odd-conductor Hurwitz number. It matches exhaustive censuses at p = 7, 11, 13, 17 and the registered holdouts p = 19 and p = 23 with 0 mismatches.
-+ *Random thinning.* Beyond that structure, the norm-one torus samples each class at random. The parameter-free model predicts the residual zero count at the pristine holdouts p = 53, 59 and at the forward predictions p = 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, with binomial dispersion $1.00 plus.minus 0.01$.
++ *Random thinning.* Beyond that structure, the norm-one torus samples each class at random. The parameter-free model predicts the residual zero count at the pristine holdouts p = 53, 59 and at the forward predictions p = 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, with binomial dispersion $1.00 plus.minus 0.01$.
 
 Beyond the proved obstruction $v_2(f_pi) >= 2$, whether a class is weak is a draw with probability $1 - (1 - 8/(p^2-1))^(N_8(t)/12)$. The evidence does not support any compact deterministic criterion beyond that.
 
@@ -42,6 +42,7 @@ $Q = p^6$, so the Hasse interval is exactly $[Q+1-2p^3, Q+1+2p^3]$. Every curve 
   [97], [7,379,793], [39], [resumed], [new: 0 / 451,632 depth-1 weak; 934 / 451,632 high-depth zero],
   [101], [8,674,251], [66], [resumed], [new: 0 / 510,050 depth-1 weak; 908 / 510,050 high-depth zero],
   [103], [9,381,893], [37], [resumed], [new: 0 / 541,060 depth-1 weak; 884 / 541,058 high-depth zero],
+  [107], [10,926,163], [55], [resumed], [new: 0 / 606,798 depth-1 weak; 976 / 606,796 high-depth zero],
 )
 
 Receipts: `certified_20261016/` (comparison receipt, stderr receipts, CSV hashes, queue script and status).
@@ -99,15 +100,16 @@ V1, which used class size only, was registered and failed on its training primes
   [97], [forward, e = 6], [225,816], [467], [434.1 [398.7, 469.6]], [1.001], [0.996],
   [101], [fresh, e = 3], [255,025], [454], [453.3 [417.1, 489.5]], [0.995], [0.996],
   [103], [fresh, e = 4], [270,529], [442], [460.3 [423.8, 496.8]], [1.004], [0.996],
+  [107], [fresh, e = 3], [303,398], [488], [480.2 [443.0, 517.5]], [1.000], [0.996],
 )
 
-p = 37 lies 1.5 below its interval; every other prime is inside. After p = 97 the pooled excess over the ten scored primes 53–97 was +95.3 zero rows (sd 49.8, z = 1.91). It was not localized in the tails and not isolated by e = v₂(p²−1), so it was registered as a follow-up test on fresh primes 101, 103, 107, 109 and 113 (PROTOCOL_V2.md, commit ff9e0a3f8, made before p = 101 completed): V2 is rejected as a parameter-free description if their pooled one-sided z exceeds 2.0. Two of the five are scored: p = 101 (454 against 453.3) and p = 103 (442 against 460.3) give a pooled excess of −17.6 with standard deviation 26.2 (z = −0.67), so no excess. Over all twelve scored primes the pooled excess is +77.7 (sd 56.3, z = 1.38), down from 1.91. The predictions for 107, 109 and 113 (480.2, 488.9, 505.8) were committed in fa2425d14 before the p = 107 census completed. $h_K$ alone ranks zero rows with AUC 0.71–0.78.
+p = 37 lies 1.5 below its interval; every other prime is inside. After p = 97 the pooled excess over the ten scored primes 53–97 was +95.3 zero rows (sd 49.8, z = 1.91). It was not localized in the tails and not isolated by e = v₂(p²−1), so it was registered as a follow-up test on fresh primes 101, 103, 107, 109 and 113 (PROTOCOL_V2.md, commit ff9e0a3f8, made before p = 101 completed): V2 is rejected as a parameter-free description if their pooled one-sided z exceeds 2.0. Three of the five are scored: p = 101 (454 against 453.3), p = 103 (442 against 460.3) and p = 107 (488 against 480.2) give a pooled excess of -9.8 with standard deviation 32.4 (z = -0.30), so no excess. Over all thirteen scored primes the pooled excess is +85.5 (sd 59.4, z = 1.44), down from 1.91 at p = 97. The predictions for the remaining fresh primes 109 and 113 (488.9 and 505.8) were committed in fa2425d14 before the p = 107 census completed. $h_K$ alone ranks zero rows with AUC 0.71–0.78.
 
 == 4. Scope and limits
 
 - *Proved* (`THEOREM.pdf`): no ordinary class with $v_2(f_pi) = 1$ is weak, for every odd $p$.
-- *Exact* for $p <= 103$: the certified class labels.
+- *Exact* for $p <= 107$: the certified class labels.
 - *Conjecture*, exact on six primes: the $N_8$ formula.
-- *Measured*: the binomial thinning model, at two pristine holdouts and ten forward predictions. It describes the data statistically and decides no individual class. It does not show that no exotic arithmetic criterion exists.
+- *Measured*: the binomial thinning model, at two pristine holdouts and eleven forward predictions. It describes the data statistically and decides no individual class. It does not show that no exotic arithmetic criterion exists.
 - Class numbers come from PARI/GP 2.15.4 `quadclassunit`, which is GRH-conditional for large $|D_K|$. This affects the predictions, not the census labels.
-- Pending: the registered follow-up test (fresh primes 107, 109, 113; predictions committed before p = 107 completed) and the censuses for p = 107–199. p = 71–103 ran across several container sessions with checkpointing, so it has no single wall time. p = 199 alone needs about 4 days on 4 threads.
+- Pending: the registered follow-up test (fresh primes 109 and 113; predictions committed before p = 107 completed) and the censuses for p = 109–199. p = 71–107 ran across several container sessions with checkpointing, so it has no single wall time. p = 199 alone needs about 4 days on 4 threads.

@@ -4,11 +4,11 @@ This round answers the two open items in the [main report](../REPORT.md):
 the zero labels were probabilistic, and the high-depth classes with no weak
 representative had no explanation beyond an association with class number.
 
-1. **Every census label through p = 103 is now certified.** A new counter
+1. **Every census label through p = 107 is now certified.** A new counter
    returns a group order only when it is the unique Hasse-interval candidate
    compatible with the tested points on the curve and its twist. Reruns at
    p = 7, 13, 37, 41, 43, 47, 53 and 59 reproduce every retained CSV byte for
-   byte. p = 61, 67, 71, 73, 79, 83, 89, 97, 101 and 103 are new. The queue continues through p = 199.
+   byte. p = 61, 67, 71, 73, 79, 83, 89, 97, 101, 103 and 107 are new. The queue continues through p = 199.
 2. **The number of 8th-power Legendre parameters in a class is an exact
    2-adic formula times a Hurwitz class number.** The formula reproduces
    exhaustive censuses at p = 7, 11, 13, 17 and the registered holdouts
@@ -16,7 +16,7 @@ representative had no explanation beyond an association with class number.
 3. **Beyond that 2-adic structure, the norm-one torus samples a class at
    random.** A parameter-free binomial thinning predicts the residual zero
    count. It passes at the pristine holdouts p = 53 and 59, and at p = 61,
-   67, 71, 73, 79, 83, 89, 97, 101 and 103, which were predicted before their censuses finished. The dispersion is
+   67, 71, 73, 79, 83, 89, 97, 101, 103 and 107, which were predicted before their censuses finished. The dispersion is
    1.00 ± 0.01 throughout.
 
 The consequence for the original request: past the proved obstruction
@@ -71,6 +71,7 @@ threads, against 1,107 s for the original direct run.
 | **97** | **7,379,793** | **39** | resumed\* | **new**: 450,698 / 903,264 ordinary rows weak; 0 / 451,632 depth-1 weak; 934 / 451,632 high-depth zero |
 | **101** | **8,674,251** | **66** | resumed\* | **new**: 509,142 / 1,020,100 ordinary rows weak; 0 / 510,050 depth-1 weak; 908 / 510,050 high-depth zero |
 | **103** | **9,381,893** | **37** | resumed\* | **new**: 540,174 / 1,082,118 ordinary rows weak; 0 / 541,060 depth-1 weak; 884 / 541,058 high-depth zero |
+| **107** | **10,926,163** | **55** | resumed\* | **new**: 605,820 / 1,213,594 ordinary rows weak; 0 / 606,798 depth-1 weak; 976 / 606,796 high-depth zero |
 
 "Extra isolation points" counts the points needed beyond the first, summed
 over all point counts. Almost every order is isolated by one scan.
@@ -81,7 +82,7 @@ per-prime stderr receipts and CSV hashes, the
 [status log](../certified_20261016/queue_status.tsv), and the
 [p = 61](../certified_20261016/p61_cert.csv.gz) and
 [p = 67](../certified_20261016/p67_cert.csv.gz) and
-[p = 71](../certified_20261016/p71_cert.csv.gz) CSVs. \*p = 71 through 103 ran in
+[p = 71](../certified_20261016/p71_cert.csv.gz) CSVs. \*p = 71 through 107 ran in
 several container sessions with `ISO1_CHECKPOINT`; its job log is
 [p71_cert.ckpt.gz](../certified_20261016/p71_cert.ckpt.gz), and its
 wall time is not a single measurement. The unit test
@@ -192,6 +193,7 @@ are reported but are not pristine.
 | **97** | forward prediction (e = 6) | 225,816 | **467** | 434.1 [398.7, 469.6] | **pass, near the upper edge** | 1.001 | 0.996 |
 | **101** | fresh prime, follow-up test (e = 3) | 255,025 | **454** | 453.3 [417.1, 489.5] | **pass** | 0.995 | 0.996 |
 | **103** | fresh prime, follow-up test (e = 4) | 270,529 | **442** | 460.3 [423.8, 496.8] | **pass** | 1.004 | 0.996 |
+| **107** | fresh prime, follow-up test (e = 3) | 303,398 | **488** | 480.2 [443.0, 517.5] | **pass** | 1.000 | 0.996 |
 
 **Pooled check, and a small excess that is not confirming.** After
 p = 97 the pooled excess over the ten scored primes 53–97 was +95.3 zero rows
@@ -205,13 +207,14 @@ registered as a **follow-up test on fresh primes** in
 completed): pool primes 101, 103, 107, 109 and 113, and reject V2 as a
 parameter-free description if the one-sided z exceeds 2.0.
 
-**Follow-up so far, two of five fresh primes.** p = 101 came in at 454
-against 453.3 (+0.7) and p = 103 at 442 against 460.3 (−18.3). The pooled
-statistic over those two is −17.6 with sd 26.2, z = −0.67: no excess. Over
-all twelve scored primes the pooled excess is now +77.7 (sd 56.3, z = 1.38),
-down from 1.91. Predictions for the remaining fresh primes 107, 109 and 113
-(480.2, 488.9 and 505.8) were committed in `fa2425d14` before the p = 107
-census completed, and the test is decided when they are scored.
+**Follow-up so far, three of five fresh primes.** p = 101 came in at 454
+against 453.3 (+0.7), p = 103 at 442 against 460.3 (−18.3) and p = 107 at 488
+against 480.2 (+7.8). The pooled statistic over those three is -9.8 with sd
+32.4, z = -0.30: no excess. Over all thirteen scored primes the pooled
+excess is +85.5 (sd 59.4, z = 1.44), down from 1.91 at p = 97. Predictions for
+the two remaining fresh primes, 109 and 113 (488.9 and 505.8), were committed
+in `fa2425d14` before the p = 107 census completed, and the test is decided
+when they are scored.
 
 The checkpoint logs and the class tables for p ≥ 101 are not committed (they
 are 30–40 MB each and grow with p); their SHA-256 and recovery commands are
@@ -258,7 +261,7 @@ rows.
 
 * Proved (THEOREM.pdf): no ordinary class with `v₂(f_π) = 1` is weak, at
   every odd `p`.
-* Exact for p ≤ 103: the class labels, certified.
+* Exact for p ≤ 107: the class labels, certified.
 * Conjectured, exact on six primes: the `N₈` formula.
 * Measured, three pristine or forward holdouts passed: inside high-depth
   classes, weakness is a binomial thinning of the 8th-power mass. No
@@ -267,7 +270,7 @@ rows.
   `h_K`) separates the residual zeros.
 * Not shown: that no exotic arithmetic criterion exists. A future failure of
   the forward predictions would be evidence for one.
-* Census status: p ≤ 103 complete and certified; the queue runs the remaining
+* Census status: p ≤ 107 complete and certified; the queue runs the remaining
   primes through 199 in order. At the measured rate, p = 199 alone needs
   about 4 days on 4 threads.
 
