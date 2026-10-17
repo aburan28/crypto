@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "/usr/bin/env",
+    "LD_LIBRARY_PATH=/workspace/photo_volcano_restart_20261017/runtime/singular_root/usr/lib/x86_64-linux-gnu:/workspace/photo_volcano_restart_20261017/runtime/root/usr/lib/x86_64-linux-gnu",
+    "SINGULARPATH=/workspace/photo_volcano_restart_20261017/runtime/singular_root/usr/share/singular/LIB",
+    "/workspace/photo_volcano_restart_20261017/runtime/singular_root/usr/bin/Singular",
+    "-q",
+    "--no-rc",
+    "--no-shell",
+    "--cpus=1",
+    "--threads=1",
+    "--flint-threads=1",
+    "--random=20261017",
+    "--ticks-per-sec=1000",
+    "/workspace/photo_volcano_restart_20261017/validation/regularity_capability_probe.sing"
+  ],
+  "child_system_us": 13723,
+  "child_user_us": 34395,
+  "exit_status": 0,
+  "involuntary_switches": 5,
+  "major_faults": 0,
+  "max_rss_kib": 9512,
+  "minor_faults": 1238,
+  "stderr": "/workspace/photo_volcano_restart_20261017/sessions/regularity_probe_1820/stderr.txt",
+  "stdout": "/workspace/photo_volcano_restart_20261017/sessions/regularity_probe_1820/stdout.txt",
+  "voluntary_switches": 2,
+  "wall_ns": 75696348
+}

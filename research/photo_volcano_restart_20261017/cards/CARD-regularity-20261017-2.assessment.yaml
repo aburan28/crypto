@@ -1,0 +1,48 @@
+{
+  "card_id": "CARD-regularity-20261017-2",
+  "relay_verbatim": true,
+  "outcome": "stopped",
+  "stopped_at_step": 1,
+  "recommendation": "proceed_to_analysis",
+  "reasons": [
+    "executor_relay.txt records the exact card argv once and exit 2; success_exit_codes is [0], so the executor stopped at step 1 without a recorded retry.",
+    "audit.json records passed=false and cases=[]; both required convention success lines and all four CASE records are absent from stdout.txt.",
+    "stdout.txt contains Singular error lines beginning with ?, including \"not implemented for rings with rings as coeffients\"; PROBE_COMPLETE 4 alone does not pass the audit.",
+    "resources.json preserves raw CAS exit_status=0; launcher.json preserves exit_status=0, signal=null, error=\"Error: spawnSync /workspace/photo_volcano_restart_20261017/measure_process EPERM\"; stderr.txt is empty. These observations do not override the top-level exit 2 or failed audit.",
+    "The relayed stdout tail is exactly the final 30 lines of stdout.txt; relayed audit.json and resources.json blocks match their on-disk contents byte for byte after removing relay indentation.",
+    "All expected output files exist inside the declared session write scope. executor_relay.txt is the sole additional observed session file and was explicitly authorized for archival after execution.",
+    "Card, invocation amendment, original protocol/binding, original bound files and amendment executable hashes match their frozen values.",
+    "The failed audit is retained for reasoning-tier analysis; no rerun, regularity interpretation or repair is recommended by this assessment."
+  ],
+  "interpretation": "not_assessed",
+  "evidence": {
+    "card": {
+      "path": "/workspace/photo_volcano_restart_20261017/cards/CARD-regularity-20261017-2.yaml",
+      "sha256": "6a6d03c437a5a8620684286e68e262680e62fae88511a7797e1f41818acf3384"
+    },
+    "executor_relay": {
+      "path": "/workspace/photo_volcano_restart_20261017/sessions/regularity_probe_1820/executor_relay.txt",
+      "sha256": "1f34b49aa65d3c41d2f03fb1d2f7351208df47a4d555171b9c16e4e606094acb"
+    },
+    "output_files": {
+      "/workspace/photo_volcano_restart_20261017/sessions/regularity_probe_1820/audit.json": "299e43677c7e6fb01ebbafb41ef875078caadb3794bfd18443224ca0ab1ee90d",
+      "/workspace/photo_volcano_restart_20261017/sessions/regularity_probe_1820/resources.json": "058ca4bc777294b9731beb51f7926ff1671db260c5755119066dfdb8e8ba5f8e",
+      "/workspace/photo_volcano_restart_20261017/sessions/regularity_probe_1820/stdout.txt": "2b786bc3128563469cb01c988c00512082d326e7b143cced3fb7ef5bab16c9e9",
+      "/workspace/photo_volcano_restart_20261017/sessions/regularity_probe_1820/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "/workspace/photo_volcano_restart_20261017/sessions/regularity_probe_1820/launcher.json": "d98d1365da05a72a5b4bd038aae0ddaf0b94d9fd0451f26206c5ecf49b415e94"
+    }
+  },
+  "scope_verification": {
+    "campaign_git_checkout": false,
+    "recorded_outputs_within_write_scope": true,
+    "observed_session_files": [
+      "audit.json",
+      "executor_relay.txt",
+      "launcher.json",
+      "resources.json",
+      "stderr.txt",
+      "stdout.txt"
+    ],
+    "limitation": "The flat campaign has no git status or pre-run filesystem snapshot. Assessment verifies declared argv, recorded output paths, observed session files and unchanged frozen hashes; it cannot independently prove absence of unrecorded commands or unrelated writes outside this evidence."
+  }
+}

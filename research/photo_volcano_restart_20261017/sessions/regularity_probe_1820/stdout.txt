@@ -1,0 +1,33 @@
+// ** Could not find dynamic library: p_Procs_FieldGeneral.so (path )
+// ** Singular will work properly, but much slower.
+// ** See the INSTALL section in the Singular manual for details.
+   ? not implemented for rings with rings as coeffients
+   ? error occurred in or before /workspace/photo_volcano_restart_20261017/validation/regularity_capability_probe.sing line 3: `ideal T=x^2,y^2,z^2; resolution M=mres(T,0);`
+   ? `M` is not defined
+   ? error occurred in or before /workspace/photo_volcano_restart_20261017/validation/regularity_capability_probe.sing line 4: `ON_RES "+string(regularity(M))); print("CONVENTION_LIB "+string(regIdeal(T)));`
+   ? wrong type declaration. type 'help string;'
+   ? not implemented for rings with rings as coeffients
+   ? error occurred in or before mregular.lib::regIdeal line 113: `     H=maxdeg1(minbase(quotient(I,maxideal(1))))+1;`
+   ? leaving mregular.lib::regIdeal (0)
+   skipping text from `)` error at token `)`
+   ? `M` is undefined
+   ? error occurred in or before /workspace/photo_volcano_restart_20261017/validation/regularity_capability_probe.sing line 6: `rint("CASE 0 REG_IDEAL "+string(regularity(M))+" CPU_TICKS "+string(timer-t));`
+   ? `M` is not defined
+   ? error occurred in or before /workspace/photo_volcano_restart_20261017/validation/regularity_capability_probe.sing line 6: `rint("CASE 0 REG_IDEAL "+string(regularity(M))+" CPU_TICKS "+string(timer-t));`
+   ? wrong type declaration. type 'help string;'
+   ? `M` is undefined
+   ? error occurred in or before /workspace/photo_volcano_restart_20261017/validation/regularity_capability_probe.sing line 7: `rint("CASE 1 REG_IDEAL "+string(regularity(M))+" CPU_TICKS "+string(timer-t));`
+   ? `M` is not defined
+   ? error occurred in or before /workspace/photo_volcano_restart_20261017/validation/regularity_capability_probe.sing line 7: `rint("CASE 1 REG_IDEAL "+string(regularity(M))+" CPU_TICKS "+string(timer-t));`
+   ? wrong type declaration. type 'help string;'
+   ? `M` is undefined
+   ? error occurred in or before /workspace/photo_volcano_restart_20261017/validation/regularity_capability_probe.sing line 8: `rint("CASE 2 REG_IDEAL "+string(regularity(M))+" CPU_TICKS "+string(timer-t));`
+   ? `M` is not defined
+   ? error occurred in or before /workspace/photo_volcano_restart_20261017/validation/regularity_capability_probe.sing line 8: `rint("CASE 2 REG_IDEAL "+string(regularity(M))+" CPU_TICKS "+string(timer-t));`
+   ? wrong type declaration. type 'help string;'
+   ? `M` is undefined
+   ? error occurred in or before /workspace/photo_volcano_restart_20261017/validation/regularity_capability_probe.sing line 9: `int("CASE 22 REG_IDEAL "+string(regularity(M))+" CPU_TICKS "+string(timer-t));`
+   ? `M` is not defined
+   ? error occurred in or before /workspace/photo_volcano_restart_20261017/validation/regularity_capability_probe.sing line 9: `int("CASE 22 REG_IDEAL "+string(regularity(M))+" CPU_TICKS "+string(timer-t));`
+   ? wrong type declaration. type 'help string;'
+PROBE_COMPLETE 4

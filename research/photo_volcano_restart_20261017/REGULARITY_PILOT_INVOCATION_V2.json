@@ -1,0 +1,27 @@
+{
+  "schema": "regularity-pilot-invocation-amendment/v2",
+  "frozen_utc": "2026-10-17T18:20:10.295Z",
+  "supersedes_invocation_only": "REGULARITY_PILOT_PROTOCOL.md sentence naming /usr/bin/node",
+  "reason": "Compile-only card 1 found /usr/bin/node absent; no measurement was executed.",
+  "original_protocol": "REGULARITY_PILOT_PROTOCOL.md",
+  "original_binding": "REGULARITY_PILOT_FROZEN.json",
+  "argv": [
+    "/usr/bin/timeout",
+    "--signal=TERM",
+    "600",
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "/workspace/photo_volcano_restart_20261017/source/run_regularity_probe.mjs",
+    "/workspace/photo_volcano_restart_20261017"
+  ],
+  "cwd": "/workspace/photo_volcano_restart_20261017",
+  "timeout_seconds": 600,
+  "success_exit_codes": [
+    0
+  ],
+  "retries": "none",
+  "preserved_scope_and_measurement": "All original polynomial inputs, metrics, controls, session path, output handling and frozen runner remain unchanged.",
+  "executable_sha256": {
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node": "bc17c508ffeed0ec622934f9b7fa72f8e78da65350e63c3eceb56fa688aa5e12",
+    "/usr/bin/timeout": "6ca1891dfc0b05d7680770c2884c0391b92467c7bb6500a5c84677e6481739f1"
+  }
+}
