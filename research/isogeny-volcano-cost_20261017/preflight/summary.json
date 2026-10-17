@@ -1,0 +1,45 @@
+{
+ "session": "ECBS1h003daf885073",
+ "host": "4-vCPU shared VM, L0",
+ "arms": {
+  "rho-neg": {
+   "runs": 64,
+   "S_mean": 1.1653543812887925,
+   "S_sd": 0.5410928615409345,
+   "wall_ms_mean": 10.834316625,
+   "wall_ms_max": 14.913732
+  },
+  "bsgs-neg": {
+   "runs": 64,
+   "S_mean": 0.6644802509750627,
+   "S_sd": 0.0969513728771744,
+   "wall_ms_mean": 9.301377203125,
+   "wall_ms_max": 14.5958
+  },
+  "ic-mitm": {
+   "runs": 64,
+   "S_mean": 61.24820882031151,
+   "S_sd": 22.22538769675284,
+   "wall_ms_mean": 52.112738453125,
+   "wall_ms_max": 109.078734
+  },
+  "ic-rootfind": {
+   "runs": 64,
+   "S_mean": 3823.071233103419,
+   "S_sd": 1403.7195688391669,
+   "wall_ms_mean": 454.62262818749997,
+   "wall_ms_max": 988.213143
+  }
+ },
+ "bsgs_distinct_S_per_target": {
+  "0": 1,
+  "1": 1
+ },
+ "ic_mitm_yield_per_curve": {
+  "curves": 32,
+  "relations_per_curve": 40,
+  "min": 9.475687893136536e-05,
+  "max": 0.0002393702510651976,
+  "mean": 0.00013937491244883147
+ }
+}

@@ -1,0 +1,2 @@
+search: target/release/volcano-rho --j1728 --ell 2 --bits 48 --depth 5 --max-cofactor 100000 --seed 20261025 --trials 1 --per-level 1 --controls 0
+measure: ca volcano --p 213656134960913 --a 122917133887808 --b 0 --ell 2 --seed 20261026 --trials 400 --per-level 16 --controls 3 --automorphisms --threads 1 --diagram volcano.diagram.json --trials-out trials.csv (ca at aburan28/cryptanalysis 5841fd7; ca's default build, j = 1728 uses the generic glv_rho_solve)
