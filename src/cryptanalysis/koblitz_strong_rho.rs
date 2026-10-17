@@ -50,7 +50,7 @@ use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use std::collections::{BTreeSet, HashMap};
 use std::fmt::Debug;
-use std::hash::Hash;
+use std::hash::{BuildHasherDefault, Hash, Hasher};
 use std::ops::{BitAnd, BitOr, BitXor, Shl, Shr, Sub};
 
 /// Number of precomputed jumps (`r`-adding walk).
@@ -190,6 +190,7 @@ pub trait RhoScalar:
     fn bit(self, i: u32) -> bool;
     fn mul_ctx(m: Self) -> Self::MulCtx;
     fn mul_in(ctx: &Self::MulCtx, a: Self, b: Self) -> Self;
+    fn mul_pair_in(ctx: &Self::MulCtx, a: Self, b: Self, multiplier: Self) -> (Self, Self);
     fn mul_mod(a: Self, b: Self, m: Self) -> Self;
     fn add_mod(a: Self, b: Self, m: Self) -> Self;
     fn sub_mod(a: Self, b: Self, m: Self) -> Self;
@@ -230,6 +231,10 @@ impl RhoScalar for u64 {
     #[inline(always)]
     fn mul_in(ctx: &MulMod, a: Self, b: Self) -> Self {
         ctx.mul(a, b)
+    }
+    #[inline(always)]
+    fn mul_pair_in(ctx: &MulMod, a: Self, b: Self, multiplier: Self) -> (Self, Self) {
+        ctx.mul_pair(a, b, multiplier)
     }
     fn mul_mod(a: Self, b: Self, m: Self) -> Self {
         mul_mod(a, b, m)
@@ -324,6 +329,13 @@ impl RhoScalar for u128 {
     #[inline(always)]
     fn mul_in(m: &u128, a: Self, b: Self) -> Self {
         mul_mod_u128(a, b, *m)
+    }
+    #[inline(always)]
+    fn mul_pair_in(m: &u128, a: Self, b: Self, multiplier: Self) -> (Self, Self) {
+        (
+            mul_mod_u128(a, multiplier, *m),
+            mul_mod_u128(b, multiplier, *m),
+        )
     }
     fn mul_mod(a: Self, b: Self, m: Self) -> Self {
         mul_mod_u128(a % m, b % m, m)
@@ -496,7 +508,8 @@ pub struct StrongRhoOutcomeG<S> {
     pub walk_steps: u64,
     /// Walks started.
     pub walks: u64,
-    /// Walks abandoned in a fruitless cycle (length ≤ 4).
+    /// Walks abandoned in a fruitless cycle: the next point equals the
+    /// current one or one of the four before it, so cycles of length 1–5.
     pub fruitless: u64,
     /// Fruitless cycles escaped by doubling (`escape_fruitless` only).
     pub escapes: u64,
@@ -553,13 +566,67 @@ impl<E: FieldWord> Linear<E> {
         Self { tables }
     }
 
+    /// The image of `v`: one table per byte, the word shifted down a byte
+    /// per table (a constant shift, not a variable one per byte).
     #[inline(always)]
     fn apply(&self, v: E) -> E {
         let mut acc = E::default();
-        for (chunk, table) in self.tables.iter().enumerate() {
-            acc = acc ^ table[v.byte(chunk as u32)];
+        let mut w = v;
+        for table in &self.tables {
+            acc = acc ^ table[w.byte(0)];
+            w = w >> 8;
         }
         acc
+    }
+
+    /// The images of two words in one pass over the tables, as
+    /// canonicalization needs for `x` and `y`: the loop and its table
+    /// walk are shared, and the two lookups per table are independent.
+    #[inline(always)]
+    fn apply2(&self, u: E, v: E) -> (E, E) {
+        let (mut au, mut av) = (E::default(), E::default());
+        let (mut wu, mut wv) = (u, v);
+        for table in &self.tables {
+            au = au ^ table[wu.byte(0)];
+            av = av ^ table[wv.byte(0)];
+            wu = wu >> 8;
+            wv = wv >> 8;
+        }
+        (au, av)
+    }
+
+    /// Apply one linear map to two independent words in a single table walk.
+    /// Canonicalization always transforms `(x, y)` together; sharing the loop
+    /// halves its bounds, pointer and chunk-index work without changing a
+    /// lookup, table byte or output bit.
+    #[inline(always)]
+    fn apply_pair(&self, a: E, b: E) -> (E, E) {
+        // Every one-word Koblitz frontier curve has six, seven or eight byte
+        // chunks.  Spell those fixed shapes out so the hot path has constant
+        // shifts and table offsets, with no loop counter, dynamic shift, or
+        // bounds branch.  Other field widths retain the compact generic path.
+        macro_rules! fixed {
+            ($($i:literal),+ $(,)?) => {{
+                (
+                    E::default() $(^ self.tables[$i][a.byte($i as u32)])+,
+                    E::default() $(^ self.tables[$i][b.byte($i as u32)])+,
+                )
+            }};
+        }
+        match self.tables.len() {
+            6 => fixed!(0, 1, 2, 3, 4, 5),
+            7 => fixed!(0, 1, 2, 3, 4, 5, 6),
+            8 => fixed!(0, 1, 2, 3, 4, 5, 6, 7),
+            _ => {
+                let mut aa = E::default();
+                let mut bb = E::default();
+                for (chunk, table) in self.tables.iter().enumerate() {
+                    aa = aa ^ table[a.byte(chunk as u32)];
+                    bb = bb ^ table[b.byte(chunk as u32)];
+                }
+                (aa, bb)
+            }
+        }
     }
 }
 
@@ -729,14 +796,58 @@ impl MulMod {
             r
         }) as u64
     }
+
+    /// Multiply two residues by the same residue.  Canonicalization applies
+    /// one orbit multiplier to both walk coefficients; one dispatch and one
+    /// floating conversion of that multiplier are enough for both exact
+    /// reductions.
+    #[inline(always)]
+    fn mul_pair(&self, a: u64, b: u64, multiplier: u64) -> (u64, u64) {
+        debug_assert!(a < self.m && b < self.m && multiplier < self.m);
+        if !self.fast {
+            return (
+                ((a as u128 * multiplier as u128) % self.m as u128) as u64,
+                ((b as u128 * multiplier as u128) % self.m as u128) as u64,
+            );
+        }
+        // `fast` proves every operand and the quotient are in `[0, 2^50)`.
+        // Going through `i64` therefore preserves the unsigned value exactly
+        // while compiling to the scalar signed conversion instructions; a
+        // general `u64 as f64` / `f64 as u64` must emit saturation branches
+        // for the half of u64 that this path can never receive.
+        let multiplier_f64 = multiplier as i64 as f64;
+        let reduce = |value: u64| {
+            let estimate = (value as i64 as f64) * multiplier_f64 * self.inv;
+            // SAFETY: the range proof above makes `estimate` finite,
+            // non-negative and smaller than 2^50, hence representable by i64.
+            let q = unsafe { estimate.to_int_unchecked::<i64>() as u64 };
+            let r = value
+                .wrapping_mul(multiplier)
+                .wrapping_sub(q.wrapping_mul(self.m)) as i64;
+            let m = self.m as i64;
+            (if r < 0 {
+                r + m
+            } else if r >= m {
+                r - m
+            } else {
+                r
+            }) as u64
+        };
+        (reduce(a), reduce(b))
+    }
 }
 
 fn mul_mod(left: u64, right: u64, modulus: u64) -> u64 {
     ((left as u128 * right as u128) % modulus as u128) as u64
 }
 
+/// `(left + right) mod modulus` for operands already below the modulus, as
+/// every caller passes them: one conditional subtraction, no division.
 fn add_mod(left: u64, right: u64, modulus: u64) -> u64 {
-    ((left as u128 + right as u128) % modulus as u128) as u64
+    debug_assert!(left < modulus && right < modulus);
+    let sum = left as u128 + right as u128;
+    let modulus = modulus as u128;
+    (if sum >= modulus { sum - modulus } else { sum }) as u64
 }
 
 fn sub_mod(left: u64, right: u64, modulus: u64) -> u64 {
@@ -772,6 +883,52 @@ fn partition<E: FieldWord>(point: RawPointG<E>) -> usize {
     value = value.wrapping_mul(0x94d0_49bb_1331_11eb);
     value ^= value >> 31;
     value as usize % JUMPS
+}
+
+/// The distinguished-point table's hasher: a fixed 64-bit mixer over the
+/// key's words instead of std's keyed SipHash.  The keys are curve points
+/// the walk itself produces, so there is nothing to defend against, and
+/// the map holds and finds the same entries whatever the hash.
+#[derive(Default)]
+struct KeyHasher(u64);
+
+impl KeyHasher {
+    #[inline(always)]
+    fn mix(&mut self, word: u64) {
+        self.0 = (self.0 ^ word)
+            .wrapping_mul(0x9e37_79b9_7f4a_7c15)
+            .rotate_left(29);
+    }
+}
+
+impl Hasher for KeyHasher {
+    fn write(&mut self, bytes: &[u8]) {
+        for chunk in bytes.chunks(8) {
+            let mut word = [0u8; 8];
+            word[..chunk.len()].copy_from_slice(chunk);
+            self.mix(u64::from_le_bytes(word));
+        }
+    }
+    #[inline(always)]
+    fn write_u8(&mut self, value: u8) {
+        self.mix(u64::from(value));
+    }
+    #[inline(always)]
+    fn write_u64(&mut self, value: u64) {
+        self.mix(value);
+    }
+    #[inline(always)]
+    fn write_u128(&mut self, value: u128) {
+        self.mix(value as u64);
+        self.mix((value >> 64) as u64);
+    }
+    #[inline(always)]
+    fn finish(&self) -> u64 {
+        let mut v = self.0;
+        v ^= v >> 33;
+        v = v.wrapping_mul(0xff51_afd7_ed55_8ccd);
+        v ^ (v >> 33)
+    }
 }
 
 /// Distinguished-point hash (independent of [`partition`]).
@@ -1057,15 +1214,28 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
         choice
     }
 
-    /// Canonical representative of the signed-Frobenius orbit of the state's
-    /// point, with `a, b` multiplied by the orbit multiplier `±λ^k`.
-    pub fn canonicalize(&self, state: WalkStateG<F::E, S>) -> WalkStateG<F::E, S> {
+    /// Whether `state.point = state.a·G + state.b·Q`: the representation
+    /// invariant every walk state keeps.
+    pub fn represents(&self, state: WalkStateG<F::E, S>, q: RawPointG<F::E>) -> bool {
+        let expected = self.add(
+            self.scalar_mul(self.generator, state.a),
+            self.scalar_mul(q, state.b),
+        );
+        expected == state.point
+    }
+
+    /// Pre-optimization canonicalization (one `apply2` table walk per map, as on
+    /// `main` before the paired fixed-shape `apply_pair` path) retained as the
+    /// within-binary performance control.  It is deliberately separate from
+    /// [`Self::canonicalize`]: committed benchmark evidence can compare the
+    /// optimized implementation with these exact operations while requiring
+    /// identical points, coefficients, walks and charges.
+    fn canonicalize_legacy(&self, state: WalkStateG<F::E, S>) -> WalkStateG<F::E, S> {
         let RawPointG::Affine { x, y } = state.point else {
             return state;
         };
         let nb = &self.nb;
-        let xc = nb.to_normal.apply(x);
-        let yc = nb.to_normal.apply(y);
+        let (xc, yc) = nb.to_normal.apply2(x, y);
         let (best, best_k, tie) = nb.least_rotation(xc);
         let (k, negated) = if tie {
             self.choice_exhaustive(xc, yc)
@@ -1082,13 +1252,56 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
         } else {
             lam
         };
+        let (x, y) = nb.to_poly.apply2(xk, yk);
         WalkStateG {
-            point: RawPointG::Affine {
-                x: nb.to_poly.apply(xk),
-                y: nb.to_poly.apply(yk),
-            },
+            point: RawPointG::Affine { x, y },
             a: S::mul_in(&self.mm, state.a, multiplier),
             b: S::mul_in(&self.mm, state.b, multiplier),
+        }
+    }
+
+    /// Canonical representative of the signed-Frobenius orbit of the state's
+    /// point, with `a, b` multiplied by the orbit multiplier `±λ^k`.
+    pub fn canonicalize(&self, state: WalkStateG<F::E, S>) -> WalkStateG<F::E, S> {
+        let RawPointG::Affine { x, y } = state.point else {
+            return state;
+        };
+        let nb = &self.nb;
+        let (xc, yc) = nb.to_normal.apply_pair(x, y);
+        let (best, best_k, tie) = nb.least_rotation(xc);
+        let (k, negated) = if tie {
+            self.choice_exhaustive(xc, yc)
+        } else {
+            let yk = nb.rotate(yc, best_k);
+            (best_k, (yk ^ best) < yk)
+        };
+        let xk = nb.rotate(xc, k);
+        let yk = nb.rotate(yc, k);
+        let yk = if negated { yk ^ xk } else { yk };
+        let lam = self.lam_pow[k as usize];
+        let multiplier = if negated {
+            S::sub_mod(S::zero(), lam, self.modulus)
+        } else {
+            lam
+        };
+        let (a, b) = S::mul_pair_in(&self.mm, state.a, state.b, multiplier);
+        let (x, y) = nb.to_poly.apply_pair(xk, yk);
+        WalkStateG {
+            point: RawPointG::Affine { x, y },
+            a,
+            b,
+        }
+    }
+
+    #[inline(always)]
+    fn canonicalize_walk<const LEGACY: bool>(
+        &self,
+        state: WalkStateG<F::E, S>,
+    ) -> WalkStateG<F::E, S> {
+        if LEGACY {
+            self.canonicalize_legacy(state)
+        } else {
+            self.canonicalize(state)
         }
     }
 
@@ -1118,6 +1331,31 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
         jumps: &[JumpG<F::E, S>],
         start_rng: &mut StdRng,
         params: &StrongRhoParams,
+        charges: StrongRhoCharges,
+    ) -> Option<StrongRhoOutcomeG<S>> {
+        self.solve_impl::<false>(q, jumps, start_rng, params, charges)
+    }
+
+    /// The same walk through the literal pre-optimization canonicalization.
+    /// This exists only as a reproducible performance baseline; it must remain
+    /// trajectory- and count-identical to [`Self::solve`].
+    pub fn solve_legacy(
+        &self,
+        q: RawPointG<F::E>,
+        jumps: &[JumpG<F::E, S>],
+        start_rng: &mut StdRng,
+        params: &StrongRhoParams,
+        charges: StrongRhoCharges,
+    ) -> Option<StrongRhoOutcomeG<S>> {
+        self.solve_impl::<true>(q, jumps, start_rng, params, charges)
+    }
+
+    fn solve_impl<const LEGACY: bool>(
+        &self,
+        q: RawPointG<F::E>,
+        jumps: &[JumpG<F::E, S>],
+        start_rng: &mut StdRng,
+        params: &StrongRhoParams,
         mut charges: StrongRhoCharges,
     ) -> Option<StrongRhoOutcomeG<S>> {
         assert_eq!(jumps.len(), JUMPS, "jump table must have JUMPS entries");
@@ -1137,7 +1375,8 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
             .saturating_mul(params.step_cap_factor)
             .max(1_000_000);
         let lanes_n = params.lanes.max(1);
-        let mut table: HashMap<(u8, F::E, F::E), (S, S)> = HashMap::new();
+        let mut table: HashMap<(u8, F::E, F::E), (S, S), BuildHasherDefault<KeyHasher>> =
+            HashMap::default();
         let mut lanes = vec![
             Lane {
                 state: WalkStateG {
@@ -1175,7 +1414,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
                         continue;
                     }
                     charges.canonicalizations += 1;
-                    lane.state = self.canonicalize(WalkStateG {
+                    lane.state = self.canonicalize_walk::<LEGACY>(WalkStateG {
                         point: start,
                         a: start_a,
                         b: S::one(),
@@ -1196,6 +1435,14 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
                 let key = lane.state.point.key();
                 charges.table_queries += 1;
                 let Some(&(hit_a, hit_b)) = table.get(&key) else {
+                    // The representation invariant P = a·G + b·Q that every
+                    // collision relies on (the TLA+ model's RepInv,
+                    // research/rho_assurance_20261016/), checked in debug builds
+                    // on the stored points at power-of-two table sizes.
+                    debug_assert!(
+                        !(table.len() + 1).is_power_of_two() || self.represents(lane.state, q),
+                        "a distinguished point breaks P = a·G + b·Q"
+                    );
                     table.insert(key, (lane.state.a, lane.state.b));
                     charges.table_inserts += 1;
                     continue;
@@ -1225,6 +1472,22 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
                         abandoned_trail_lengths,
                     });
                 }
+                // Two representations P = a·G + b·Q of one point with b ≠ b'
+                // determine d whenever Q is in ⟨G⟩, so a failed candidate
+                // means Q is outside ⟨G⟩, never a broken state: both states
+                // still represent the point (checked in debug builds).
+                debug_assert!(
+                    self.represents(lane.state, q)
+                        && self.represents(
+                            WalkStateG {
+                                point: lane.state.point,
+                                a: hit_a,
+                                b: hit_b,
+                            },
+                            q
+                        ),
+                    "a failed collision with a state that breaks P = a·G + b·Q"
+                );
                 charges.failed_collisions += 1;
             }
             // One step for every live lane, denominators inverted together.
@@ -1259,7 +1522,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
                 };
                 charges.group_additions += 1;
                 charges.canonicalizations += 1;
-                let next = self.canonicalize(WalkStateG {
+                let next = self.canonicalize_walk::<LEGACY>(WalkStateG {
                     point: sum,
                     a: S::add_mod(lane.state.a, jump.a, modulus),
                     b: lane.state.b,
@@ -1278,7 +1541,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
                     escapes += 1;
                     charges.group_additions += 1;
                     charges.canonicalizations += 1;
-                    lane.state = self.canonicalize(WalkStateG {
+                    lane.state = self.canonicalize_walk::<LEGACY>(WalkStateG {
                         point: self.add(next.point, next.point),
                         a: S::add_mod(next.a, next.a, modulus),
                         b: S::add_mod(next.b, next.b, modulus),
@@ -1501,34 +1764,38 @@ mod tests {
     /// whether another `k` does — at both widths, on random words and on
     /// the cases it could get wrong: constant words, single bits and
     /// periodic words, where several rotations tie.
+    /// `least_rotation` against a scan of all `n` rotations, on `words`.
+    fn check_least_rotation<E: FieldWord>(n: u32, words: &[E]) {
+        let mask = word_mask::<E>(n);
+        let nb = NormalBasis {
+            n,
+            mask,
+            to_normal: Linear { tables: Vec::new() },
+            to_poly: Linear { tables: Vec::new() },
+        };
+        for &c in words {
+            let c = c & mask;
+            let (mut best, mut best_k, mut tie) = (c, 0u32, false);
+            for k in 1..n {
+                let v = nb.rotate(c, k);
+                if v < best {
+                    (best, best_k, tie) = (v, k, false);
+                } else if v == best {
+                    tie = true;
+                }
+            }
+            assert_eq!(
+                nb.least_rotation(c),
+                (best, best_k, tie),
+                "n = {n}, c = {c:?}"
+            );
+        }
+    }
+
     #[test]
     fn least_rotation_matches_the_exhaustive_scan() {
-        fn check<E: FieldWord>(n: u32, words: &[E]) {
-            let mask = word_mask::<E>(n);
-            let nb = NormalBasis {
-                n,
-                mask,
-                to_normal: Linear { tables: Vec::new() },
-                to_poly: Linear { tables: Vec::new() },
-            };
-            for &c in words {
-                let c = c & mask;
-                let (mut best, mut best_k, mut tie) = (c, 0u32, false);
-                for k in 1..n {
-                    let v = nb.rotate(c, k);
-                    if v < best {
-                        (best, best_k, tie) = (v, k, false);
-                    } else if v == best {
-                        tie = true;
-                    }
-                }
-                assert_eq!(
-                    nb.least_rotation(c),
-                    (best, best_k, tie),
-                    "n = {n}, c = {c:?}"
-                );
-            }
-        }
+        let check = check_least_rotation::<u64>;
+        let check_wide = check_least_rotation::<u128>;
         let mut s = 0x2545_F491_4F6C_DD1Du64;
         let mut next = move || {
             s ^= s << 13;
@@ -1552,9 +1819,24 @@ mod tests {
                 words.extend([w, w & (w >> 3) & (w >> 7), w | (w >> 5) | (w >> 11)]);
             }
             if n <= 63 {
-                check::<u64>(n, &words.iter().map(|&w| w as u64).collect::<Vec<_>>());
+                check(n, &words.iter().map(|&w| w as u64).collect::<Vec<_>>());
             }
-            check::<u128>(n, &words);
+            check_wide(n, &words);
+        }
+    }
+
+    /// Every word of every width up to 16 bits, at both word types: the
+    /// run-based search is exact on the whole space there, not only on the
+    /// sampled and structured words above.
+    #[test]
+    fn least_rotation_is_exact_on_every_word_up_to_16_bits() {
+        for n in 1u32..=16 {
+            let words: Vec<u64> = (0..1u64 << n).collect();
+            check_least_rotation::<u64>(n, &words);
+            check_least_rotation::<u128>(
+                n,
+                &words.iter().map(|&w| u128::from(w)).collect::<Vec<_>>(),
+            );
         }
     }
 
@@ -1617,8 +1899,17 @@ mod tests {
         for m in [3u64, 1 << 20, (1 << 49) + 1, (1 << 50) - 3, (1 << 57) + 13] {
             let mm = MulMod::new(m);
             for _ in 0..20_000 {
-                let (a, b) = (rng.gen_range(0..m), rng.gen_range(0..m));
+                let (a, b, multiplier) = (
+                    rng.gen_range(0..m),
+                    rng.gen_range(0..m),
+                    rng.gen_range(0..m),
+                );
                 assert_eq!(mm.mul(a, b), mul_mod(a, b, m), "m={m}");
+                assert_eq!(
+                    mm.mul_pair(a, b, multiplier),
+                    (mm.mul(a, multiplier), mm.mul(b, multiplier)),
+                    "paired m={m}"
+                );
             }
             assert_eq!(mm.mul(m - 1, m - 1), mul_mod(m - 1, m - 1, m));
         }
@@ -1641,7 +1932,15 @@ mod tests {
                 if p == RawPoint::Infinity {
                     continue;
                 }
-                let canon = rho.canonicalize(WalkState { point: p, a, b });
+                let state = WalkState { point: p, a, b };
+                let canon = rho.canonicalize(state);
+                let legacy = rho.canonicalize_legacy(state);
+                assert_eq!(
+                    (canon.point, canon.a, canon.b),
+                    (legacy.point, legacy.a, legacy.b),
+                    "optimized and legacy canonicalization differ at n={}",
+                    curve.n
+                );
                 let expected = rho.add(
                     rho.scalar_mul(rho.generator(), canon.a),
                     rho.scalar_mul(q, canon.b),
@@ -1692,6 +1991,75 @@ mod tests {
                     assert_eq!(out.scalar, d, "n={} lanes={lanes} seed={seed}", curve.n);
                     assert!(out.walk_steps > 0 && out.table_entries > 0);
                 }
+            }
+        }
+    }
+
+    /// The retained legacy arm is a performance control, not a different
+    /// algorithm: it must visit the same trails and return the same accounting
+    /// as the optimized arm for an identical target, jump table and RNG.
+    #[test]
+    fn optimized_and_legacy_solvers_follow_the_same_trajectory() {
+        for curve in curves().into_iter().filter(|c| (13..=31).contains(&c.n)) {
+            let rho = StrongRho::new(&curve);
+            for seed in 0..3u64 {
+                let mut charges = StrongRhoCharges::default();
+                let jumps = rho.jumps(seed ^ 0x5eed, &mut charges);
+                let d = StdRng::seed_from_u64(seed ^ 0xcafe).gen_range(1..rho.modulus());
+                let q = rho.scalar_mul(rho.generator(), d);
+                let params = StrongRhoParams::default();
+                let optimized = rho
+                    .solve(
+                        q,
+                        &jumps,
+                        &mut StdRng::seed_from_u64(seed),
+                        &params,
+                        charges,
+                    )
+                    .expect("optimized solve");
+                let legacy = rho
+                    .solve_legacy(
+                        q,
+                        &jumps,
+                        &mut StdRng::seed_from_u64(seed),
+                        &params,
+                        charges,
+                    )
+                    .expect("legacy solve");
+                assert_eq!(optimized.scalar, d);
+                assert_eq!(legacy.scalar, d);
+                assert_eq!(
+                    (
+                        optimized.walk_steps,
+                        optimized.walks,
+                        optimized.fruitless,
+                        optimized.escapes,
+                        optimized.capped,
+                        optimized.wasted_merges,
+                        optimized.table_entries,
+                        optimized.ideal_steps.to_bits(),
+                        optimized.automorphisms,
+                        optimized.charges,
+                        &optimized.dp_trail_lengths,
+                        &optimized.abandoned_trail_lengths,
+                    ),
+                    (
+                        legacy.walk_steps,
+                        legacy.walks,
+                        legacy.fruitless,
+                        legacy.escapes,
+                        legacy.capped,
+                        legacy.wasted_merges,
+                        legacy.table_entries,
+                        legacy.ideal_steps.to_bits(),
+                        legacy.automorphisms,
+                        legacy.charges,
+                        &legacy.dp_trail_lengths,
+                        &legacy.abandoned_trail_lengths,
+                    ),
+                    "n={} seed={seed}",
+                    curve.n
+                );
             }
         }
     }

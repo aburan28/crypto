@@ -1,0 +1,26 @@
+{
+  "schema": "ec-hardness/p61-adjacency-campaign-launches/v1",
+  "attempts": [
+    {
+      "sequence": 1,
+      "method": "Terminal do-script with the complete inline supervisor command",
+      "terminal_window_id": 2407,
+      "status": "launch_infrastructure_failure",
+      "observation": "the Terminal automation interface truncated the long command before its storage guards and follow arguments",
+      "effect": "the shell returned immediately; no adjacency supervisor remained, no campaign log was created, and admitted NAS data were unchanged"
+    },
+    {
+      "sequence": 2,
+      "method": "Terminal do-script invoking a short committed launcher",
+      "terminal_window_id": 2408,
+      "launcher_source_commit": "01466723a7f81db72387bd5c110408a3f8d61f73",
+      "launcher_sha256": "e0bdd3d56e55b0d3f01e141dbb7b1e42a297186b7952f086af51060578361b1b",
+      "supervisor_source_commit": "bd5ee73323c1ec956084fb429606a077cdd10844",
+      "supervisor_sha256": "96582a616059bc59fe3060dfd99666f022748ec59b580aba66d9c512a3b2613a",
+      "observation_utc": "2026-10-15T05:34:53Z",
+      "status": "running",
+      "health_observation": "the supervisor, caffeinate guard, and producer child were alive; the child was generating source-record window 4096..8192",
+      "log": "/Users/adamburan/Library/Logs/CryptoP61Campaign/adjacency-v2-from-x000000016704.log"
+    }
+  ]
+}

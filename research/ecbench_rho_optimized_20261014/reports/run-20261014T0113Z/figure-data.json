@@ -1,0 +1,39 @@
+{
+  "schema": "crypto.ecbench_rho_optimization_figures/v1",
+  "session_id": "ECBS1hffaa276d8a5c",
+  "source": "../../RESULT.json",
+  "callgrind": {
+    "unit": "callgrind.Ir",
+    "acceptance_ratio": 0.85,
+    "baseline_ir": 1989285300,
+    "iterations": [
+      {"label": "Baseline", "solve_ir": 1989285300, "ratio": 1.0, "accepted": true},
+      {"label": "Paired maps", "solve_ir": 1867868681, "ratio": 0.938962, "accepted": false},
+      {"label": "+ signed convert", "solve_ir": 1777918951, "ratio": 0.893759, "accepted": false},
+      {"label": "+ fixed shapes", "solve_ir": 1600543701, "ratio": 0.804582279, "accepted": true}
+    ]
+  },
+  "session_controls": [
+    {
+      "label": "GAE optimized / legacy",
+      "ratio": 1.0,
+      "ci95": [1.0, 1.0],
+      "pairs": 240,
+      "status": "admissible deterministic count"
+    },
+    {
+      "label": "wall optimized / legacy",
+      "ratio": 0.9585836525559679,
+      "ci95": null,
+      "pairs": 240,
+      "status": "L0 descriptive; not a result"
+    },
+    {
+      "label": "wall optimized / optimized",
+      "ratio": 0.9996863141669985,
+      "ci95": null,
+      "pairs": 240,
+      "status": "L0 A/A descriptive; not a result"
+    }
+  ]
+}

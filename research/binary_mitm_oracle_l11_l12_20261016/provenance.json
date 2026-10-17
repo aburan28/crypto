@@ -1,0 +1,13 @@
+{
+  "study": "binary_mitm_oracle_l11_l12_20261016",
+  "git_head": "58da37f36ba650be83f8fbbeec34d9fddb0e1fcc (ladder through l=10 merged; rungs executed on this revision)",
+  "command": "cargo run --release --example binary_mitm_oracle_l8 33 11 48 16 research/binary_mitm_oracle_l11_l12_20261016 ; cargo run --release --example binary_mitm_oracle_l8 37 12 48 16 research/binary_mitm_oracle_l11_l12_20261016",
+  "test_command": "cargo test --release --example binary_mitm_oracle_l8 (n=15 l=5 exhaustive control, unchanged)",
+  "host": {
+    "machine": "Apple M4 Pro, arm64, 14 logical cores, macOS 26.6",
+    "isolation": "unpinned, shared host, contended by other sessions' cargo builds (L0); wall times are practicality notes",
+    "build": "cargo build --release, default toolchain"
+  },
+  "runs": "one full 64-target run per rung (l11n33, l12n37)",
+  "seed": "0x9E37779B97F4A7C15 (deterministic LCG, fixed in the example, same as the l=8/9/10 studies)"
+}

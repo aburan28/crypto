@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="dcterms.date" content="2026-10-08" />
+  <title>P-224 hypothesis ranking</title>
+  <style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">body{font-family:"DejaVu Sans",Helvetica,Arial,sans-serif;font-size:10pt;max-width:none;margin:0;color:#1a1a2e;background:#fff}
+table{border-collapse:collapse;font-size:8pt;width:100%}
+th,td{border:1px solid #bbb;padding:3px 5px;vertical-align:top}
+code{font-size:8.5pt}
+pre{font-size:7pt;white-space:pre-wrap;word-break:break-all}
+img{max-width:100%}
+h1{font-size:15pt;margin-top:18pt}
+@page{size:A4;margin:14mm}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">NIST P-224: a ranked hidden-weakness hypothesis list,
+checked against this repository</h1>
+<p class="date">2026-10-08</p>
+</header>
+<h1 id="status">Status</h1>
+<p><strong>Assessment plus one native run; no ECDLP cost
+measured.</strong> Protocol: <a href="PROTOCOL.md"><code>PROTOCOL.md</code></a>, frozen in commit
+<code>aa57a6fd</code> before the run. Run: <a href="run/"><code>run/</code></a>, produced by
+<code>target/release/p224_hypotheses</code> at that commit, with a clean
+tree, rustc 1.97.0 and 4 threads, in 122 s of wall time. Every check
+finished, no stop condition fired, and the b-residue test raised no
+flag.</p>
+<p>This is not an index-calculus measurement. It has no rho ratio, no
+phase is priced, and no scoreboard row is owed (<code>AGENTS.md</code>
+§7a). Under <code>AGENTS.md</code> “Intermediate-cost and
+asymmetric-access hypotheses”, a hypothesis about a designer’s
+capability is not evidence that a trapdoor exists. A bounded null is not
+nonexistence.</p>
+<figure>
+<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5NjAgNjIwIiB3aWR0aD0iOTYwIiBoZWlnaHQ9IjYyMCIgZm9udC1mYW1pbHk9IkRlamFWdSBTYW5zLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8IS0tIEVkaXRhYmxlIHNvdXJjZTogdGhpcyBmaWxlLiBFdmlkZW5jZTogcnVuLyouanNvbiBhdCBhYTU3YTZmZC4gLS0+CiAgPHRpdGxlPlAtMjI0OiByYW5rZWQgaHlwb3RoZXNlcyBhZ2FpbnN0IHRoZSBjaGVja3MgcnVuIGhlcmU8L3RpdGxlPgogIDxyZWN0IHdpZHRoPSI5NjAiIGhlaWdodD0iNjIwIiBmaWxsPSIjZmZmZmZmIi8+CiAgPHRleHQgeD0iMjQiIHk9IjM0IiBmb250LXNpemU9IjIwIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWExYTJlIj5OSVNUIFAtMjI0OiBlYWNoIGh5cG90aGVzaXMsIHdoYXQgdGhpcyBydW4gY2hlY2tlZCwgd2hhdCBzdGF5cyBvcGVuPC90ZXh0PgogIDx0ZXh0IHg9IjI0IiB5PSI1NiIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzU1NSI+R3JlZW4gPSBtZWFzdXJlZCBvciBkZXJpdmVkIGhlcmUgKHJ1bi8qLmpzb24sIHJldiBhYTU3YTZmZCkuIEFtYmVyID0gaG9sZHMgb25seSB3aXRoaW4gYSBzdGF0ZWQgYm91bmQuIEdyZXkgPSBub3QgcHVibGljbHkgdGVzdGFibGUuPC90ZXh0PgoKICA8ZyBmb250LXNpemU9IjEyIiBmaWxsPSIjMWExYTJlIj4KICAgIDx0ZXh0IHg9IjI0IiB5PSI4OCIgZm9udC13ZWlnaHQ9IjcwMCI+aHlwb3RoZXNpcyAoc3VwcGxpZWQgcmFuayk8L3RleHQ+CiAgICA8dGV4dCB4PSIzMDAiIHk9Ijg4IiBmb250LXdlaWdodD0iNzAwIj5jaGVja2VkIGluIHRoaXMgY2hhbmdlPC90ZXh0PgogICAgPHRleHQgeD0iNjQwIiB5PSI4OCIgZm9udC13ZWlnaHQ9IjcwMCI+b3BlbiBhZnRlciBpdDwvdGV4dD4KICA8L2c+CgogIDwhLS0gSDEgLS0+CiAgPHJlY3QgeD0iMjAiIHk9IjEwMCIgd2lkdGg9IjI2MCIgaGVpZ2h0PSIxMDQiIHJ4PSI4IiBmaWxsPSIjZWVmMWZiIiBzdHJva2U9IiM0YTViYjUiLz4KICA8dGV4dCB4PSIzMiIgeT0iMTI0IiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWExYTJlIj4xLiBXZWFrIGNsYXNzIHRlc3RhYmxlIG9uIGIsPC90ZXh0PgogIDx0ZXh0IHg9IjMyIiB5PSIxNDIiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxYTFhMmUiPmdyb3VuZCBvdmVyIFNIQS0xIHNlZWRzPC90ZXh0PgogIDx0ZXh0IHg9IjMyIiB5PSIxNjQiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMzMzMiPm5lZWRzIGRlbnNpdHkgzrUg4omlIDJeLWsgZmVhc2libGUgaW4gMTk5N+KAkzk5PC90ZXh0PgogIDx0ZXh0IHg9IjMyIiB5PSIxODAiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMzMzMiPmFuZCBhIGNsYXNzIG5vYm9keSBwdWJsaWMgaGFzIG5hbWVkPC90ZXh0PgogIDxyZWN0IHg9IjI5MiIgeT0iMTAwIiB3aWR0aD0iMzM2IiBoZWlnaHQ9IjEwNCIgcng9IjgiIGZpbGw9IiNlOGY1ZWMiIHN0cm9rZT0iIzJlOGI1NyIvPgogIDx0ZXh0IHg9IjMwNCIgeT0iMTIyIiBmb250LXNpemU9IjExIiBmaWxsPSIjMWExYTJlIj5DMTogU0VFRCDihpIgYyDihpIgYsKyYyDiiaEg4oiSMjcgaG9sZHMsIGFsbCA1IE5JU1QgY3VydmVzOzwvdGV4dD4KICA8dGV4dCB4PSIzMDQiIHk9IjEzOCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzFhMWEyZSI+ICAgZGVyaXZlZCBjID0gRklQUyAxODYtNCBwcmludGVkIGMgKHNvIGIgaXMgU0hBLTEtYm91bmQpPC90ZXh0PgogIDxyZWN0IHg9IjMwNCIgeT0iMTQ2IiB3aWR0aD0iMzEyIiBoZWlnaHQ9IjUwIiByeD0iNCIgZmlsbD0iI2ZmZjZlMCIgc3Ryb2tlPSIjYzk4YTAwIi8+CiAgPHRleHQgeD0iMzEyIiB5PSIxNjIiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMxYTFhMmUiPkM2OiBLUyBvbiAoYiBtb2QgcSkvcSwgcSDiiaQgMTDigbg6IHAgPSAwLjc1LCAwLjEyLDwvdGV4dD4KICA8dGV4dCB4PSIzMTIiIHk9IjE3NiIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzFhMWEyZSI+MC4yMiwgMC4zMjsgZW1waXJpY2FsIHAgPSAwLjEyOCB2cyAxLDAwMCBudWxscy48L3RleHQ+CiAgPHRleHQgeD0iMzEyIiB5PSIxOTAiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMxYTFhMmUiPlBvd2VyOiByZXNpZHVlLWJpYXNpbmcgY2xhc3NlcyBvbmx5LjwvdGV4dD4KICA8cmVjdCB4PSI2NDAiIHk9IjEwMCIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxMDQiIHJ4PSI4IiBmaWxsPSIjZjJmMmYyIiBzdHJva2U9IiM4ODgiLz4KICA8dGV4dCB4PSI2NTIiIHk9IjEyNCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzMzMyI+QW55IGNsYXNzIGRlZmluZWQgYnkgYSBwcm9wZXJ0eSBvdGhlciB0aGFuPC90ZXh0PgogIDx0ZXh0IHg9IjY1MiIgeT0iMTQwIiBmb250LXNpemU9IjExIiBmaWxsPSIjMzMzIj5iIG1vZCBzbWFsbCBxIChqLCB0cmFjZSwgaXNvZ2Vub3VzIGN1cnZlLDwvdGV4dD4KICA8dGV4dCB4PSI2NTIiIHk9IjE1NiIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzMzMyI+ZGVyaXZlZCBMZWdlbmRyZSBwYXR0ZXJucykuIFNlZWQgcHJlaW1hZ2U8L3RleHQ+CiAgPHRleHQgeD0iNjUyIiB5PSIxNzIiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMzMzMiPnVua25vd24gKDIwMjMgYm91bnR5LCBubyBwdWJsaWMgcmVjb3ZlcnkpLjwvdGV4dD4KCiAgPCEtLSBIMiAtLT4KICA8cmVjdCB4PSIyMCIgeT0iMjE2IiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjEwNCIgcng9IjgiIGZpbGw9IiNlZWYxZmIiIHN0cm9rZT0iIzRhNWJiNSIvPgogIDx0ZXh0IHg9IjMyIiB5PSIyNDAiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxYTFhMmUiPjIuIFRoZSBwcmltZSwgbm90IHRoZSBjdXJ2ZTwvdGV4dD4KICA8dGV4dCB4PSIzMiIgeT0iMjYyIiBmb250LXNpemU9IjExIiBmaWxsPSIjMzMzIj5wID0gMsKywrLigbQg4oiSIDLigbnigbYgKyAxLCBjaG9zZW4gb3Blbmx5OzwvdGV4dD4KICA8dGV4dCB4PSIzMiIgeT0iMjc4IiBmb250LXNpemU9IjExIiBmaWxsPSIjMzMzIj5ubyBncmluZGluZyBuZWVkZWQ8L3RleHQ+CiAgPHJlY3QgeD0iMjkyIiB5PSIyMTYiIHdpZHRoPSIzMzYiIGhlaWdodD0iMTA0IiByeD0iOCIgZmlsbD0iI2U4ZjVlYyIgc3Ryb2tlPSIjMmU4YjU3Ii8+CiAgPHRleHQgeD0iMzA0IiB5PSIyMzgiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMxYTFhMmUiPkMyOiBw4oiSMSA9IDLigbnigbbCtygywrnCsuKBuOKIkjEpLCBsYXJnZXN0IHByaW1lIDJeNDUuOSwgduKCgiA9IDk2PC90ZXh0PgogIDx0ZXh0IHg9IjMwNCIgeT0iMjU0IiBmb250LXNpemU9IjExIiBmaWxsPSIjMWExYTJlIj4gICBQLTE5MiBwKzE6IHNhbWUgNDYtYml0IHNtb290aG5lc3MgKHbigoIgPSA2NCk8L3RleHQ+CiAgPHRleHQgeD0iMzA0IiB5PSIyNzAiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMxYTFhMmUiPiAgIFAtNTIxIHArMSA9IDLigbXCssK5OyBQLTI1NiBwKzEgaGFzIHbigoIgPSA5NjwvdGV4dD4KICA8dGV4dCB4PSIzMDQiIHk9IjI4NiIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzFhMWEyZSI+ICAgY29udHJvbCBicmFpbnBvb2xQMjI0cjE6IHbigoIgPSAxIC8gOCwgcm91Z2g8L3RleHQ+CiAgPHRleHQgeD0iMzA0IiB5PSIzMDYiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiNiMDMwMzAiPiAgIOKGkiAic3Ryb25nZXN0IGluIHRoZSBOSVNUIHNldCIgaG9sZHMgZm9yIHDiiJIxIG9ubHk8L3RleHQ+CiAgPHJlY3QgeD0iNjQwIiB5PSIyMTYiIHdpZHRoPSIzMDAiIGhlaWdodD0iMTA0IiByeD0iOCIgZmlsbD0iI2ZmZjZlMCIgc3Ryb2tlPSIjYzk4YTAwIi8+CiAgPHRleHQgeD0iNjUyIiB5PSIyNDAiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMzMzMiPlBLTSAoMjAxNikgS3VtbWVyIHRvd2VycyBuZWVkIDJedCB8IHDiiJIxOjwvdGV4dD4KICA8dGV4dCB4PSI2NTIiIHk9IjI1NiIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzMzMyI+UC0yMjQgZ2l2ZXMgdCDiiaQgOTYuIFJlcG8gdG93ZXIgb3JhY2xlOiBzb2x2aW5nPC90ZXh0PgogIDx0ZXh0IHg9IjY1MiIgeT0iMjcyIiBmb250LXNpemU9IjExIiBmaWxsPSIjMzMzIj5kZWdyZWUgcmlzaW5nLCBzaGFwZS1tYXRjaGVkIG51bGwgbWF0Y2hlcyB0aGU8L3RleHQ+CiAgPHRleHQgeD0iNjUyIiB5PSIyODgiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMzMzMiPnRvd2VyOyBsaW5lYXIgZ3Jvd3RoIHVuZGVjaWRlZCAoaW5jb25jbHVzaXZlKS48L3RleHQ+CiAgPHRleHQgeD0iNjUyIiB5PSIzMDYiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiNiMDMwMzAiPuKGkiBub3QgIm9ubHkgRl9wXioiOiBQS00gdXNlcyBpdCBmb3IgRUNETFA8L3RleHQ+CgogIDwhLS0gSDMgLS0+CiAgPHJlY3QgeD0iMjAiIHk9IjMzMiIgd2lkdGg9IjI2MCIgaGVpZ2h0PSIxMDQiIHJ4PSI4IiBmaWxsPSIjZWVmMWZiIiBzdHJva2U9IiM0YTViYjUiLz4KICA8dGV4dCB4PSIzMiIgeT0iMzU2IiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWExYTJlIj4zLiBIaWRkZW4gZW5kb21vcnBoaXNtIC88L3RleHQ+CiAgPHRleHQgeD0iMzIiIHk9IjM3NCIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFhMWEyZSI+aXNvZ2VueSBzdHJ1Y3R1cmU8L3RleHQ+CiAgPHRleHQgeD0iMzIiIHk9IjM5NiIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzMzMyI+Y2xhc3MtZ3JvdXAgYWN0aW9uLCBzbWFsbC1ub3JtIG1hcHMsPC90ZXh0PgogIDx0ZXh0IHg9IjMyIiB5PSI0MTIiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMzMzMiPnRyYW5zZmVyIHZpYSB0aGUgZW1iZWRkaW5nIGRlZ3JlZTwvdGV4dD4KICA8cmVjdCB4PSIyOTIiIHk9IjMzMiIgd2lkdGg9IjMzNiIgaGVpZ2h0PSIxMDQiIHJ4PSI4IiBmaWxsPSIjZThmNWVjIiBzdHJva2U9IiMyZThiNTciLz4KICA8dGV4dCB4PSIzMDQiIHk9IjM1NCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzFhMWEyZSI+QzM6IHTCsuKIkjRwID0gM8KywrdEX0ssIERfSyDiiYgg4oiSMl4yMjIuNSBzcXVhcmVmcmVlLDwvdGV4dD4KICA8dGV4dCB4PSIzMDQiIHk9IjM3MCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzFhMWEyZSI+ICAgY29uZHVjdG9yIDMg4oaSIEVuZChQLTIyNCkgPSBPX0sgKHN1cmZhY2UgY3VydmUpPC90ZXh0PgogIDx0ZXh0IHg9IjMwNCIgeT0iMzg2IiBmb250LXNpemU9IjExIiBmaWxsPSIjMWExYTJlIj5DNTogZW1iZWRkaW5nIGRlZ3JlZSBrID0gKG7iiJIxKS8zIOKJiCAyXjIyMi40PC90ZXh0PgogIDx0ZXh0IHg9IjMwNCIgeT0iNDAyIiBmb250LXNpemU9IjExIiBmaWxsPSIjMWExYTJlIj5DNzogU2FmZUN1cnZlcyBEX0sgYW5kIHR3aXN0IGZhY3RvcmlzYXRpb25zIGNoZWNrPC90ZXh0PgogIDx0ZXh0IHg9IjMwNCIgeT0iNDIyIiBmb250LXNpemU9IjExIiBmaWxsPSIjMWExYTJlIj4gICAoUC0yNTY6IHB1Ymxpc2hlZCBEX0sgY2hlY2tzOyByaG8gYWxvbmUgZGlkIG5vdCBzcGxpdCBpdCk8L3RleHQ+CiAgPHJlY3QgeD0iNjQwIiB5PSIzMzIiIHdpZHRoPSIzMDAiIGhlaWdodD0iMTA0IiByeD0iOCIgZmlsbD0iI2ZmZjZlMCIgc3Ryb2tlPSIjYzk4YTAwIi8+CiAgPHRleHQgeD0iNjUyIiB5PSIzNTYiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMzMzMiPmgoRF9LKSBub3QgY29tcHV0ZWQgKGhldXJpc3RpYyDiiYggMl4xMDbigJMyXjExMSkuPC90ZXh0PgogIDx0ZXh0IHg9IjY1MiIgeT0iMzcyIiBmb250LXNpemU9IjExIiBmaWxsPSIjMzMzIj5Jc29nZW55IHdhbGs6IOKEkyDiiaQgNjEsIOKJpCAyMGsgY3VydmVzLCBubyBETFA8L3RleHQ+CiAgPHRleHQgeD0iNjUyIiB5PSIzODgiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMzMzMiPmNvc3QgbWVhc3VyZWQsIG5vIHRyYW5zcG9ydC4gUC0yMjQgaXMgb24gdGhlPC90ZXh0PgogIDx0ZXh0IHg9IjY1MiIgeT0iNDA0IiBmb250LXNpemU9IjExIiBmaWxsPSIjMzMzIj5zdXJmYWNlIG9mIGEgZGVwdGgtMSAzLXZvbGNhbm8gKFAtMjU2OiBkZXB0aCAwKS48L3RleHQ+CgogIDwhLS0gSDQgLS0+CiAgPHJlY3QgeD0iMjAiIHk9IjQ0OCIgd2lkdGg9IjI2MCIgaGVpZ2h0PSI4MCIgcng9IjgiIGZpbGw9IiNlZWYxZmIiIHN0cm9rZT0iIzRhNWJiNSIvPgogIDx0ZXh0IHg9IjMyIiB5PSI0NzIiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxYTFhMmUiPjQuIE5ldyBFQ0RMUCBhbGdvcml0aG08L3RleHQ+CiAgPHRleHQgeD0iMzIiIHk9IjQ5MCIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFhMWEyZSI+a25vd24gb25seSB0byB0aGUgZGVzaWduZXI8L3RleHQ+CiAgPHRleHQgeD0iMzIiIHk9IjUxMiIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzMzMyI+YXBwbGllcyB0byBob25lc3QgaW5zdGFuY2VzIHRvbzwvdGV4dD4KICA8cmVjdCB4PSIyOTIiIHk9IjQ0OCIgd2lkdGg9IjMzNiIgaGVpZ2h0PSI4MCIgcng9IjgiIGZpbGw9IiNmMmYyZjIiIHN0cm9rZT0iIzg4OCIvPgogIDx0ZXh0IHg9IjMwNCIgeT0iNDcyIiBmb250LXNpemU9IjExIiBmaWxsPSIjMzMzIj5Ob3RoaW5nIHRvIHJ1bi4gQSBmaW5pdGUgcHVibGljIGNoZWNrIGNhbm5vdDwvdGV4dD4KICA8dGV4dCB4PSIzMDQiIHk9IjQ4OCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzMzMyI+ZmFsc2lmeSBpdCAocDI1Nl9zcGVjdWxhdGlvbjogTm90UHVibGljbHlUZXN0YWJsZSkuPC90ZXh0PgogIDxyZWN0IHg9IjY0MCIgeT0iNDQ4IiB3aWR0aD0iMzAwIiBoZWlnaHQ9IjgwIiByeD0iOCIgZmlsbD0iI2YyZjJmMiIgc3Ryb2tlPSIjODg4Ii8+CiAgPHRleHQgeD0iNjUyIiB5PSI0NzIiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMzMzMiPlJlc2lkdWFsLiBUaGUgcmVwbydzIElDIGxhZGRlciBzdGF5cyBhYm92ZTwvdGV4dD4KICA8dGV4dCB4PSI2NTIiIHk9IjQ4OCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzMzMyI+cmhvIGZvciBwcmltZS1maWVsZCBjdXJ2ZXM7IHRoYXQgYm91bmRzIGtub3duPC90ZXh0PgogIDx0ZXh0IHg9IjY1MiIgeT0iNTA0IiBmb250LXNpemU9IjExIiBmaWxsPSIjMzMzIj5tZXRob2RzLCBub3QgdW5rbm93biBvbmVzLjwvdGV4dD4KCiAgPCEtLSBJbXBsZW1lbnRhdGlvbiB0cmFjayAtLT4KICA8cmVjdCB4PSIyMCIgeT0iNTQwIiB3aWR0aD0iOTIwIiBoZWlnaHQ9IjY0IiByeD0iOCIgZmlsbD0iI2ZiZWVlZSIgc3Ryb2tlPSIjYjAzMDMwIi8+CiAgPHRleHQgeD0iMzIiIHk9IjU2MCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFhMWEyZSI+U2VwYXJhdGUgdHJhY2sgKGltcGxlbWVudGF0aW9uLCBub3QgYW4gYWxnZWJyYWljIHRyYXBkb29yKTo8L3RleHQ+CiAgPHRleHQgeD0iMzIiIHk9IjU3OCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzFhMWEyZSI+QzQ6IFAtMjI0IHR3aXN0ID0gM8KywrcxMcK3NDfCtzMwMTUyODPCtzQwMzc1ODIzwrcyNjc5ODM1MzkyOTQ5MjfCt+KEk+KAsiwg4oST4oCyIOKJiCAyXjExNy4xIOKGkiB0d2lzdCByaG8g4omIIDJeNTguNCAoUC0yNTY6IDJeMTIwLjMpLjwvdGV4dD4KICA8dGV4dCB4PSIzMiIgeT0iNTk0IiBmb250LXNpemU9IjExIiBmaWxsPSIjMWExYTJlIj524oKCKHDiiJIxKSA9IDk2IG1ha2VzIHNxdWFyZSByb290cyBhIDk2LXN0ZXAgVG9uZWxsaeKAk1NoYW5rcy48L3RleHQ+Cjwvc3ZnPgo=" alt="Each hypothesis, what this run checked, what stays open." />
+<figcaption aria-hidden="true">Each hypothesis, what this run checked,
+what stays open.</figcaption>
+</figure>
+<p>Evidence labels used below:</p>
+<ul>
+<li><strong>MEASURED</strong>: computed by this run (file named).</li>
+<li><strong>DERIVED</strong>: algebra from stated inputs.</li>
+<li><strong>VERIFIED-PUBLISHED</strong>: a published factorisation
+re-checked here by product and primality, not found here.</li>
+<li><strong>PRIOR</strong>: an earlier committed result in this
+repository.</li>
+<li><strong>OPEN</strong>: not established.</li>
+</ul>
+<h1 id="the-supplied-claim">The supplied claim</h1>
+<p>The supplied text ranks four hypotheses “by how compatible each is
+with the public evidence and 1999-era compute”:</p>
+<ol type="1">
+<li>a weak class recognisable from <code>(p, a, b)</code> without point
+counting, found by grinding SHA-1 seeds. It cites
+<code>b_seed_profile</code> and the Solinas-correlation experiment as
+nulls;</li>
+<li>the prime, not the curve. It says hidden-SNFS primes
+(Fried–Gaudry–Heninger– Thomé) have no ECDLP analogue. It calls P-224’s
+46-bit-smooth <code>p − 1</code> “the strongest structure of this kind
+in the NIST set”, affecting “only DLP in F_p^*, not the curve
+group”;</li>
+<li>hidden endomorphism or isogeny structure. It says all public checks
+pass (embedding degree, anomaly, CM discriminant and class number
+“enormous”) and that the isogeny walk found no weak curve at small
+degree;</li>
+<li>an unpublished ECDLP algorithm: the unfalsifiable residual.</li>
+</ol>
+<p>The ranking itself is an interpretation. This report checks the
+factual claims it rests on, for P-224.</p>
+<h1 id="claim-by-claim">Claim-by-claim</h1>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">#</th>
+<th style="text-align: left;">claim in the supplied text</th>
+<th style="text-align: left;">status for P-224</th>
+<th style="text-align: left;">evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1a</td>
+<td style="text-align: left;"><code>b</code> is bound to a SHA-1 seed,
+so a grind is the only freedom</td>
+<td style="text-align: left;"><strong>holds.</strong>
+<code>SEED → c</code> (X9.62 A.3.3.1) gives FIPS 186-4’s printed
+<code>c</code> and <code>b²c ≡ −27</code> for all five NIST curves</td>
+<td style="text-align: left;">MEASURED <code>run/seeds.json</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1b</td>
+<td style="text-align: left;">the b-residue KS profile came back
+null</td>
+<td style="text-align: left;"><strong>was P-256 only, at
+<code>q ≤ 10⁵</code></strong>, not the <code>10⁶</code> its module doc
+describes. P-224 is now null at every bound (table below)</td>
+<td style="text-align: left;">MEASURED
+<code>run/b_residues.json</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1c</td>
+<td style="text-align: left;">statistical probes on <code>b</code> are
+the right kind of test</td>
+<td style="text-align: left;"><strong>partly.</strong> The KS test sees
+only classes that bias <code>b mod q</code>. A cheaply testable class
+defined any other way is invisible to it</td>
+<td style="text-align: left;">DERIVED, PROTOCOL §4</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1d</td>
+<td style="text-align: left;">the Solinas-correlation experiment came
+back null</td>
+<td style="text-align: left;"><strong>P-256 only; not a test on
+<code>b</code>; miscalibrated.</strong> It tests bit correlations of the
+P-256 reduction map. Its z uses <code>√(E(1−E)/n)</code> with
+<code>E = p_r p_c</code>, not the independence variance
+<code>√(p_r(1−p_r)p_c(1−p_c)/n)</code>. That deflates every
+<code>z</code> by ≈ √3: the recorded max 2.46 over 131,072 pairs sits
+far below the ≈ 4.5 a calibrated null gives. Rescaled (≈ 4.3) it is
+still below its 6.1 threshold, so the null probably survives with less
+power than claimed. Not rerun here</td>
+<td style="text-align: left;">code read
+<code>src/cryptanalysis/solinas_correlations.rs</code>, PRIOR
+<code>RESEARCH_P256.md</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2a</td>
+<td style="text-align: left;">hidden-SNFS trapdoor is real for F_p
+DLP</td>
+<td style="text-align: left;"><strong>holds</strong>, with a date fix:
+ePrint 2016/961, EUROCRYPT 2017. A Solinas prime is <em>openly</em>
+SNFS-friendly, so no hiding is involved; for P-224 the F_p^* DLP is also
+trivial by Pohlig–Hellman (largest prime 2^45.9)</td>
+<td style="text-align: left;">literature; MEASURED
+<code>run/prime_sides.json</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2b</td>
+<td style="text-align: left;">P-224’s <code>p − 1</code> is 46-bit
+smooth</td>
+<td style="text-align: left;"><strong>holds.</strong>
+<code>p − 1 = 2⁹⁶·3·5·17·257·641·65537·274177·6700417·67280421310721</code>,
+all proved prime, <code>v₂ = 96</code></td>
+<td style="text-align: left;">MEASURED
+<code>run/prime_sides.json</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2c</td>
+<td style="text-align: left;">“the strongest structure of this kind in
+the NIST set”</td>
+<td style="text-align: left;"><strong>true for <code>p − 1</code>
+only.</strong> P-192’s <code>p + 1 = 2⁶⁴(2¹²⁸ − 1)</code> has the same
+46-bit smoothness; P-521’s <code>p + 1 = 2⁵²¹</code> is 2-smooth;
+P-256’s <code>p + 1</code> has <code>v₂ = 96</code> and largest prime
+2^93.2</td>
+<td style="text-align: left;">MEASURED
+<code>run/prime_sides.json</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2d</td>
+<td style="text-align: left;">it “only affects DLP in F_p^*, not the
+curve group”</td>
+<td style="text-align: left;"><strong>too strong.</strong>
+Petit–Kosters–Messeng (PKC 2016), the one published algebraic ECDLP
+mechanism for prime fields, builds factor bases from towers whose Kummer
+form needs <code>2^t \| p − 1</code>. P-224 supports
+<code>t ≤ 96</code>; every other NIST prime gives 1. Its Dickson-torus
+form needs <code>2^t \| p + 1</code>: P-192 (64), P-256 (96), P-521
+(521). Nikolaev (CTCrypt 2024) flags P-224 under the PKM criterion. This
+repository’s tower-oracle rounds measured a rising solving degree, with
+a shape-matched null matching the tower and linear growth undecided.
+That is an open lead, not an attack</td>
+<td style="text-align: left;">PRIOR
+<code>research/notes/index-calculus/RESEARCH_PKM_TOWER_ORACLE.md</code>,
+<code>research/notes/cm-isogeny/RESEARCH_PKM_CRITERION.md</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3a</td>
+<td style="text-align: left;">huge embedding degree</td>
+<td style="text-align: left;"><strong>holds, exactly.</strong>
+<code>k = (n − 1)/3 ≈ 2^222.4</code>, from a complete factorisation of
+<code>n − 1</code>. P-256: <code>k = (n − 1)/3</code></td>
+<td style="text-align: left;">MEASURED
+<code>run/embedding_degree.json</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3b</td>
+<td style="text-align: left;">not anomalous</td>
+<td style="text-align: left;"><strong>holds</strong>
+(<code>n ≠ p</code>)</td>
+<td style="text-align: left;">DERIVED</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3c</td>
+<td style="text-align: left;">CM discriminant enormous</td>
+<td style="text-align: left;"><strong>holds, and is now resolved
+here.</strong>
+<code>t² − 4p = −3³·29·79·7523·40927·11549194661·L₁₄₈</code>, factored
+completely. So the conductor of <code>Z[π]</code> is 3 and
+<code>D_K = −3·29·79·7523·40927·11549194661·L₁₄₈ ≈ −2^222.5</code>,
+equal to SafeCurves’ value. The isogeny walk places P-224 on the
+3-volcano’s surface, so <code>End(P-224) = O_K</code>. That closes the
+walk README’s <code>End(E) = unk</code> for P-224. For P-256, rho alone
+did not split the cofactor; SafeCurves’ factorisation checks, giving
+conductor 1 and <code>End = O_K</code></td>
+<td style="text-align: left;">MEASURED
+<code>run/cm_discriminant.json</code>; VERIFIED-PUBLISHED
+<code>run/published_factorizations.json</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3d</td>
+<td style="text-align: left;">class number enormous</td>
+<td style="text-align: left;"><strong>heuristic, not computed.</strong>
+<code>h(D_K) = √\|D_K\|·L(1,χ)/π ≈ 2^109.6·L(1,χ)</code>; a
+GRH-conditional asymptotic lower bound gives about 2^106</td>
+<td style="text-align: left;">OPEN</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3e</td>
+<td style="text-align: left;">isogeny walk found no weak curve at small
+degree</td>
+<td style="text-align: left;"><strong>holds only within its
+bounds</strong>: <code>ℓ ≤ 61</code>, 20,000 curves, a fixed trait list,
+no DLP cost measured, no discrete-log transport. It omits that P-224,
+unlike P-256, sits on a depth-1 3-volcano</td>
+<td style="text-align: left;">PRIOR
+<code>research/isogeny_walk_20261004/README.md</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td style="text-align: left;">an unpublished algorithm is not publicly
+testable</td>
+<td style="text-align: left;"><strong>holds</strong>; nothing was
+run</td>
+<td style="text-align: left;">PRIOR
+<code>src/cryptanalysis/p256_speculation.rs</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="the-b-residue-profile-c6">The b-residue profile (C6)</h2>
+<p>KS statistic of <code>(b mod q)/q</code> against Uniform[0,1) over
+primes <code>5 ≤ q ≤ Q</code>. The empirical p-value comes from 1,000
+SHA-1-derived null coefficients mod the P-224 prime at
+<code>Q = 10⁶</code> (<code>run/b_null_panel.json</code>).</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">curve</th>
+<th style="text-align: right;">Q</th>
+<th style="text-align: right;">primes</th>
+<th style="text-align: right;">D</th>
+<th style="text-align: right;">asymptotic p</th>
+<th style="text-align: right;">empirical p</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">P-224</td>
+<td style="text-align: right;">10⁵</td>
+<td style="text-align: right;">9,590</td>
+<td style="text-align: right;">0.006894</td>
+<td style="text-align: right;">0.752</td>
+<td style="text-align: right;">—</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">P-224</td>
+<td style="text-align: right;">10⁶</td>
+<td style="text-align: right;">78,496</td>
+<td style="text-align: right;">0.004220</td>
+<td style="text-align: right;">0.122</td>
+<td style="text-align: right;">0.128</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">P-224</td>
+<td style="text-align: right;">10⁷</td>
+<td style="text-align: right;">664,577</td>
+<td style="text-align: right;">0.001295</td>
+<td style="text-align: right;">0.215</td>
+<td style="text-align: right;">—</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">P-224</td>
+<td style="text-align: right;">10⁸</td>
+<td style="text-align: right;">5,761,453</td>
+<td style="text-align: right;">0.000400</td>
+<td style="text-align: right;">0.315</td>
+<td style="text-align: right;">—</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">P-256</td>
+<td style="text-align: right;">10⁵</td>
+<td style="text-align: right;">9,590</td>
+<td style="text-align: right;">0.011490</td>
+<td style="text-align: right;">0.159</td>
+<td style="text-align: right;">—</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">P-256</td>
+<td style="text-align: right;">10⁶</td>
+<td style="text-align: right;">78,496</td>
+<td style="text-align: right;">0.002673</td>
+<td style="text-align: right;">0.629</td>
+<td style="text-align: right;">0.627</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">P-256</td>
+<td style="text-align: right;">10⁷</td>
+<td style="text-align: right;">664,577</td>
+<td style="text-align: right;">0.001058</td>
+<td style="text-align: right;">0.446</td>
+<td style="text-align: right;">—</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">P-256</td>
+<td style="text-align: right;">10⁸</td>
+<td style="text-align: right;">5,761,453</td>
+<td style="text-align: right;">0.000297</td>
+<td style="text-align: right;">0.691</td>
+<td style="text-align: right;">—</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Reproduction.</strong> The P-256 <code>Q = 10⁵</code> row
+reproduces the recorded <code>D = 0.011490</code>,
+<code>p = 0.1589</code>.</li>
+<li><strong>Calibration gate (PROTOCOL §4): passes.</strong> 48 of 1,000
+null p-values fall below 0.05, inside the 30–70 band. 12 fall below
+0.01, 2 below 0.001, and the mean is 0.498.</li>
+<li><strong>Flag: none.</strong> No asymptotic
+<code>p &lt; 0.001</code>, and P-224’s statistic sits inside the null
+panel.</li>
+<li><strong>Cost.</strong> <code>Q = 10⁸</code> took seconds, not the
+“hours” the <code>b_seed_profile</code> module doc predicts
+(<code>run/run.json</code>: 4.4 s for all eight rows).</li>
+</ul>
+<h2 id="separate-track-implementation-not-an-algebraic-trapdoor">Separate
+track: implementation, not an algebraic trapdoor</h2>
+<p>These do not bear on hypotheses 1–4 and do not refute them
+(<code>AGENTS.md</code>).</p>
+<ul>
+<li><strong>Twist (C4).</strong>
+<code>#E′ = 3²·11·47·3015283·40375823·267983539294927·ℓ′</code> with
+<code>ℓ′ ≈ 2^117.1</code> a probable prime. Expected rho in the largest
+twist subgroup is about 2^58.4, matching SafeCurves. P-256’s twist gives
+about 2^120.3. An x-only implementation that skips point validation
+therefore leaks P-224 keys at about 2^58 work. This repository’s
+<code>research/p224_attack/</code> demonstrates the related
+invalid-curve route. This closes the walk README’s “212-bit composite,
+unfactored” twist cofactor.</li>
+<li><strong>Square roots.</strong> <code>v₂(p − 1) = 96</code> forces a
+96-step Tonelli–Shanks (or equivalent) for point decompression. P-224 is
+the only NIST prime with <code>v₂(p − 1) &gt; 1</code>.</li>
+</ul>
+<h1 id="interpretation-labelled-not-a-finding">Interpretation (labelled,
+not a finding)</h1>
+<p>The run does not change the supplied ranking’s order. It changes two
+of its statements:</p>
+<ul>
+<li>hypothesis 2’s smooth-prime structure is not unique to P-224’s
+<code>p − 1</code>;</li>
+<li>that structure is the stated prerequisite of a published ECDLP
+approach, PKM, whose status in this repository is inconclusive rather
+than closed.</li>
+</ul>
+<p>Hypothesis 2 for P-224 is therefore an open, testable lead, not a
+dead end. Its next step is the tower-oracle programme at
+<code>2</code>-power Kummer depth matched to P-224, with the full-cost
+and matched-rho gates of <code>AGENTS.md</code> §§1–8.</p>
+<p>Hypothesis 1’s grind bound is a scenario, not evidence.
+Koblitz–Menezes (ePrint 2015/1018) argue that a seed-ground weak class
+large enough to find would be too large to have escaped public notice.
+Bernstein et al. (BADA55, ePrint 2014/571) show how much freedom a seed
+procedure leaves a designer. The seed preimages remain unpublished: the
+2023 Valsorda bounty reports no recovery in the sources checked.</p>
+<h1 id="requirement-status">Requirement status</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">item</th>
+<th style="text-align: left;">status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">check each factual claim of the supplied
+ranking for P-224</td>
+<td style="text-align: left;">verified complete (table above)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">run P-224 counterparts of the cited P-256
+probes</td>
+<td style="text-align: left;">b-residue: complete. Solinas correlation:
+<strong>not attempted for P-224</strong>; its calibration defect is
+reported and the module is unchanged</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">close <code>End(E)</code> and twist gaps
+of the isogeny-walk README</td>
+<td style="text-align: left;">complete for P-224; P-256 <code>End</code>
+resolved only via a verified published factorisation</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">class number of <code>D_K</code></td>
+<td style="text-align: left;">open</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PKM cost at P-224 tower depth</td>
+<td style="text-align: left;">open (not attempted; needs its own
+protocol)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">hypothesis 4</td>
+<td style="text-align: left;">not testable</td>
+</tr>
+</tbody>
+</table>
+<h1 id="reproduce">Reproduce</h1>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">cargo</span> test <span class="at">--release</span> <span class="at">--lib</span> cryptanalysis::p224_hypotheses</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">cargo</span> build <span class="at">--release</span> <span class="at">--bin</span> p224_hypotheses</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">target/release/p224_hypotheses</span> <span class="at">--out</span> /tmp/p224-check   <span class="co"># compare with run/</span></span></code></pre></div>
+<p>SHA-256 of the committed outputs:</p>
+<pre><code>0dfebc6b32941387b7978b8c7c11fe1b8f575630c22557e5fe9a928f5b51e712  seeds.json
+f9a6d3e006c699a38fcfe79018932b59cc9cf1bc16168eeea844596753444f6b  prime_sides.json
+c6d8efa5c9960122501dd38248c149b344d98ae21b1b9f80b13ef751e9147204  cm_discriminant.json
+4fa39800f2da9704af99aa2a24099c4344509c74dfe1473d1f72365793b09870  twist.json
+796b2251d31082e6f3aafeb136c6bfe6f063593d79921b45693db35b7088210c  embedding_degree.json
+bd6d2284fd5a05e4063c5ebf5bb17ed6202afb5ef9cb40b267e46b339542ee4b  published_factorizations.json
+d09798a42e36d7cca27cf5647c230920fce9d4032539af3aa18fda20ecd1117d  b_residues.json
+6e4dafc81ec747328a67d3ef82d34972e5835193f2b6dea18a8e8e44405b00f5  b_null_panel.json</code></pre>
+<p><code>run.json</code> holds wall times, so it differs between runs.
+The other files are deterministic.</p>
+<h1 id="sources">Sources</h1>
+<ul>
+<li>NIST, <a href="https://csrc.nist.gov/pubs/fips/186-4/final">FIPS
+186-4</a>, Appendix D: seeds, <code>c</code>, curve parameters.</li>
+<li>Bernstein and Lange, <a href="https://safecurves.cr.yp.to/">SafeCurves</a>:
+<code>disc.html</code> and <code>twist.html</code>, fetched
+2026-10-08.</li>
+<li>Fried, Gaudry, Heninger and Thomé, <a href="https://eprint.iacr.org/2016/961">A kilobit hidden SNFS discrete
+logarithm computation</a>, EUROCRYPT 2017.</li>
+<li>Koblitz and Menezes, <a href="https://eprint.iacr.org/2015/1018">A
+Riddle Wrapped in an Enigma</a>.</li>
+<li>Bernstein et al., <a href="https://eprint.iacr.org/2014/571">How to
+manipulate curve standards</a> (BADA55).</li>
+<li>Petit, Kosters and Messeng, <em>Algebraic approaches for the
+elliptic curve discrete logarithm problem over prime fields</em>, PKC
+2016.</li>
+<li>Nikolaev, <em>On the correctness of criterion for resistance to
+Petit–Kosters–Messeng method</em>, CTCrypt 2024.</li>
+<li>Valsorda, <a href="https://words.filippo.io/seeds-bounty/">NIST
+curve seeds bounty</a>,
+<ol start="2023" type="1">
+<li></li>
+</ol></li>
+</ul>
+</body>
+</html>
