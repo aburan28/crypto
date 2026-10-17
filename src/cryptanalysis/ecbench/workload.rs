@@ -21,6 +21,7 @@ use crate::cryptanalysis::ecbench::canonical::{bare_id, compat_u128, derive_u128
 use crate::cryptanalysis::ecbench::conductor_gap::{self, GapLevel};
 use crate::cryptanalysis::ecbench_large_prime::binary_explicit_instance;
 use crate::cryptanalysis::gaudry_quartic::Pt4;
+use crate::cryptanalysis::gaudry_quartic_bin::{find_bin_curve, BinCurve, PtB, TowerBasis};
 use crate::cryptanalysis::gaudry_quartic_d4::{find_d4_curve, pack_e4, unpack_e4, D4Curve};
 use crate::cryptanalysis::ic_boundary::{
     find_prime_order_curve, koblitz_instance, random_binary_instance, roster_prime_instance,
@@ -83,6 +84,17 @@ pub enum CurveSpec {
     /// written as two packed words `x₀ + p x₁ + p² x₂ + p³ x₃`.
     Fp4Torsion {
         p: u64,
+        seed: u64,
+        max_cofactor: u64,
+    },
+    /// `gaudry_quartic_bin::find_bin_curve(m, seed, max_cofactor)`: an
+    /// ordinary curve `y² + xy = x³ + ax² + b` over the tower
+    /// `F_{q⁴} = F_q[z]/(quartic)`, `q = 2^m`, `4 ≤ m ≤ 15`, `b ∉ F_{q²}`,
+    /// `#E = h·r`, `r` prime, `h ≤ max_cofactor` (even: `T = (0, √b)`).  A
+    /// point is written as two packed words (coefficient `i` of the tower
+    /// basis in bits `[im, (i + 1)m)`).
+    F2m4Torsion {
+        m: u32,
         seed: u64,
         max_cofactor: u64,
     },
@@ -212,6 +224,18 @@ impl CurveSpec {
                 }
                 find_d4_curve(p, seed, max_cofactor).map(|c| Instance::Fp4(Box::new(c)))
             }
+            CurveSpec::F2m4Torsion {
+                m,
+                seed,
+                max_cofactor,
+            } => {
+                // Points pack into 4m ≤ 60 bits; the order search takes
+                // ≈ 2q baby and giant steps per point.
+                if !(4..=15).contains(&m) {
+                    return Err(format!("f2m4_torsion takes m from 4 to 15, not {m}"));
+                }
+                find_bin_curve(m, seed, max_cofactor).map(|c| Instance::F2m4(Box::new(c)))
+            }
         }
     }
 
@@ -249,7 +273,7 @@ impl CurveSpec {
             // certified Frobenius action and endomorphism identity that a
             // generic explicit binary instance intentionally does not claim.
             // The search is the constructor (cheap and deterministic).
-            Instance::Binary(_) | Instance::Wide(_) | Instance::Fp4(_) => None,
+            Instance::Binary(_) | Instance::Wide(_) | Instance::Fp4(_) | Instance::F2m4(_) => None,
         }
     }
 
@@ -289,6 +313,11 @@ impl CurveSpec {
                 seed,
                 max_cofactor,
             } => format!("gaudry_quartic_d4::find_d4_curve({p}, {seed}, {max_cofactor})"),
+            CurveSpec::F2m4Torsion {
+                m,
+                seed,
+                max_cofactor,
+            } => format!("gaudry_quartic_bin::find_bin_curve({m}, {seed}, {max_cofactor})"),
         }
     }
 }
@@ -298,6 +327,8 @@ pub enum Instance {
     Prime(PrimeInstance),
     /// A curve over `F_{p⁴}` with rational 2-torsion (`fp4_torsion`).
     Fp4(Box<D4Curve>),
+    /// A curve over the tower `F_{(2^m)⁴}` (`f2m4_torsion`).
+    F2m4(Box<BinCurve>),
     Binary(Box<BinaryInstance>),
     /// A Koblitz curve past one word (`64 ≤ n ≤ 127`).
     Wide(Box<WideInstance>),
@@ -412,6 +443,7 @@ impl Instance {
             Instance::Binary(i) => u128::from(i.r),
             Instance::Wide(i) => i.kc.r,
             Instance::Fp4(i) => u128::from(i.r),
+            Instance::F2m4(i) => u128::from(i.r),
         }
     }
 
@@ -481,6 +513,35 @@ impl Instance {
                     2,
                 )
             }
+            Instance::F2m4(i) => {
+                // The identity of the curve over F_{2^{4m}} in the polynomial
+                // basis of the tower's canonical generator θ.
+                let c = &i.curve;
+                let f = &c.f;
+                let tb = TowerBasis::new(f);
+                let big = num_bigint::BigUint::from;
+                let id = crate::cryptanalysis::curve_id::binary(
+                    4 * f.f.m,
+                    &big(tb.modulus),
+                    &big(tb.coords(f, &c.a)),
+                    &big(tb.coords(f, &c.b)),
+                    &big(i.group_order),
+                    None,
+                )
+                .expect("a found curve is non-singular and inside the Hasse interval");
+                (
+                    id,
+                    "extension",
+                    None,
+                    Some(f.f.m),
+                    u128::from(i.group_order),
+                    u128::from(i.r),
+                    u128::from(i.cofactor),
+                    u128::from(f.pack(&i.generator.x)),
+                    u128::from(f.pack(&i.generator.y)),
+                    2,
+                )
+            }
         };
         let entry = registry_entry(&id.slug);
         let rep = entry
@@ -537,6 +598,16 @@ impl Instance {
                     [
                         format!("0x{:x}", pack_e4(p, &pt.x)),
                         format!("0x{:x}", pack_e4(p, &pt.y)),
+                    ]
+                })
+            }
+            Instance::F2m4(i) => {
+                let c = &i.curve;
+                let pt = CountedGroup::mul(c, &mut scratch, i.generator, k);
+                (!pt.inf).then(|| {
+                    [
+                        format!("0x{:x}", c.f.pack(&pt.x)),
+                        format!("0x{:x}", c.f.pack(&pt.y)),
                     ]
                 })
             }
@@ -623,6 +694,27 @@ impl Instance {
                             [
                                 format!("0x{:x}", pack_e4(p, &q.x)),
                                 format!("0x{:x}", pack_e4(p, &q.y)),
+                            ],
+                            counter,
+                        ));
+                    }
+                }
+                Instance::F2m4(i) => {
+                    let c = &i.curve;
+                    let bits = 4 * c.f.f.m;
+                    let x = c.f.unpack(h & ((1u64 << bits) - 1));
+                    let mut rng = <rand::rngs::StdRng as rand::SeedableRng>::seed_from_u64(h);
+                    let Some(pt) = c.lift_x(&x, &mut rng) else {
+                        continue;
+                    };
+                    let k = CountedGroup::key(c, &pt);
+                    let pt = if (k & 1 == 1) != flip { pt } else { c.neg(&pt) };
+                    let q: PtB = CountedGroup::mul(c, &mut scratch, pt, i.cofactor);
+                    if !q.inf {
+                        return Some((
+                            [
+                                format!("0x{:x}", c.f.pack(&q.x)),
+                                format!("0x{:x}", c.f.pack(&q.y)),
                             ],
                             counter,
                         ));

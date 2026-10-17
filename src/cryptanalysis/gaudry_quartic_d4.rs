@@ -37,7 +37,8 @@ use serde::Serialize;
 
 use super::gaudry_cubic::rref_mod_p;
 use super::gaudry_quartic::{
-    solve_system_n_inner, split_quartic, Curve4, Fp4, Pt4, QuarticSolve, E4,
+    solve_system_w_inner, split_quartic, Curve4, Fp4, Pt4, QuarticSolve, ReplayOutcome, ShapeTrace,
+    E4,
 };
 use super::ic_boundary::{CountedGroup, FactorBase, GroupOps, OracleCounters};
 use super::ic_framework::stages::{
@@ -323,6 +324,55 @@ impl SymmetrisedD4 {
     }
 }
 
+impl SymmetrisedD4 {
+    /// The four Weil components of `H(·; Y_R)` in `(σ₁, σ₂, σ₃, π)`, with
+    /// `σ₄ = π²` substituted: `σ₁^a σ₂^b σ₃^c π^d`, `2(a + b + c) + d ≤ 8`,
+    /// weighted homogeneous of degree 8 at most for the weights
+    /// [`WEIGHTS`] = `(2, 2, 2, 1)` (the degree in each `Y_i`).  The
+    /// same Weil restriction as [`Self::system`], one equation fewer.
+    pub fn system_weighted(&self, f: &Fp4, y_r: &E4) -> Vec<HashMap<[u8; 4], u64>> {
+        let mut pows = [E4::ONE; 9];
+        for k in 1..9 {
+            pows[k] = f.mul(&pows[k - 1], y_r);
+        }
+        let mut out: Vec<HashMap<[u8; 4], u64>> = vec![HashMap::new(); 4];
+        for (m, c) in self.monos.iter().zip(&self.coef) {
+            let v = (0..9).fold(E4::ZERO, |acc, j| f.add(&acc, &f.mul(&c[j], &pows[j])));
+            for (i, comp) in out.iter_mut().enumerate() {
+                if v.0[i] != 0 {
+                    comp.insert(*m, v.0[i]);
+                }
+            }
+        }
+        out
+    }
+}
+
+/// The weights of `(σ₁, σ₂, σ₃, π)`: each `σ_k` has degree 2 in every
+/// `Y_i` it involves, `π` degree 1.  With them the substituted system's
+/// Hilbert series (four equations of weighted degree 8, if regular) is
+/// `(1 + t² + t⁴ + t⁶)³ (1 + t + … + t⁷)`: degree 25, value 512 at
+/// `t = 1`, so weighted Macaulay degree 26, 4,200 columns against the
+/// unweighted five-unknown matrix's 11,628.
+pub const WEIGHTS: [u8; 4] = [2, 2, 2, 1];
+
+/// How a `D₄` solve runs.  All off is the committed sessions' oracle,
+/// operation for operation.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize)]
+pub struct D4Options {
+    /// Four unknowns `(σ₁, σ₂, σ₃, π)` with `σ₄ = π²` substituted, in the
+    /// weights [`WEIGHTS`] (weighted Macaulay degree 26), instead of five
+    /// unknowns and `π² − σ₄`, unweighted (degree 14).
+    pub weighted: bool,
+    /// The eigen step along the chains of the multiplication unknown
+    /// (`π` when weighted, `σ₁` otherwise): only the border normal forms,
+    /// the characteristic polynomial as `det A(λ)` of a matrix with one
+    /// row per chain, eigenvectors as its kernels.
+    pub chains: bool,
+    /// The elimination's pivot in each column is the sparsest candidate.
+    pub sparsest: bool,
+}
+
 /// What one `D₄` solve cost and found.
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct D4Solve {
@@ -392,6 +442,7 @@ pub fn solve_d4(
 /// [`solve_d4`], with a system the degree-`macaulay` matrix does not solve
 /// (a degenerate one) returned as `Err` carrying what the attempt cost,
 /// phases summed into `total_muls`: work done whether or not it solved.
+#[allow(clippy::result_large_err)]
 pub fn solve_d4_or_cost(
     inst: &D4Instance,
     pre: &SymmetrisedD4,
@@ -400,26 +451,158 @@ pub fn solve_d4_or_cost(
     rng: &mut StdRng,
     debug: bool,
 ) -> Result<D4Solve, QuarticSolve> {
+    solve_d4_form(inst, pre, r, D4Options::default(), macaulay, rng, debug)
+}
+
+/// The shape of a first solved system, replayed on the later ones
+/// (`gaudry_quartic`'s [`ShapeTrace`], F4Remake's idea for a Macaulay
+/// matrix): the rows that reduced to zero are not built.  A replay whose
+/// leads, row count, rank or dimension differ runs the full solve as well,
+/// both charged; one that matches spans the same row space (a subset of
+/// the rows of equal rank), so it is exact.
+#[derive(Clone, Debug, Default)]
+pub struct D4Trace {
+    pub shape: Option<ShapeTrace>,
+    pub replays: u64,
+    pub fallbacks: u64,
+    /// Why replays fell back, by the check that failed.
+    pub fallback_reasons: std::collections::BTreeMap<String, u64>,
+}
+
+#[allow(clippy::too_many_arguments)]
+fn solve_traced<const N: usize>(
+    comps: &[HashMap<[u8; N], u64>],
+    w: &[u8; N],
+    opts: D4Options,
+    macaulay: u8,
+    p: u64,
+    rng: &mut StdRng,
+    st: &mut QuarticSolve,
+    debug: bool,
+    trace: Option<&mut D4Trace>,
+) -> Option<Vec<[u64; N]>> {
+    let run = |rng: &mut StdRng,
+               st: &mut QuarticSolve,
+               replay: Option<&ShapeTrace>,
+               record: Option<&mut ShapeTrace>| {
+        solve_system_w_inner::<N>(
+            comps,
+            w,
+            opts.chains,
+            opts.sparsest,
+            true,
+            0,
+            macaulay,
+            p,
+            rng,
+            st,
+            debug,
+            replay,
+            record,
+        )
+    };
+    let Some(tr) = trace else {
+        return run(rng, st, None, None).ok().flatten();
+    };
+    if let Some(shape) = &tr.shape {
+        match run(rng, st, Some(shape), None) {
+            Ok(sols) => {
+                tr.replays += 1;
+                st.replay = ReplayOutcome::Replayed;
+                return sols;
+            }
+            Err(()) => {
+                tr.fallbacks += 1;
+                *tr.fallback_reasons.entry(st.outcome.clone()).or_insert(0) += 1;
+            }
+        }
+        let sols = run(rng, st, None, None).ok().flatten();
+        st.replay = ReplayOutcome::FellBack;
+        return sols;
+    }
+    let mut shape = ShapeTrace::default();
+    let sols = run(rng, st, None, Some(&mut shape)).ok().flatten();
+    if sols.is_some() {
+        tr.shape = Some(shape);
+    }
+    sols
+}
+
+/// [`solve_d4_or_cost`] with [`D4Options`]: all off is that function,
+/// operation for operation; `weighted` substitutes `σ₄ = π²` and solves the
+/// four equations in the weighted grading [`WEIGHTS`] at weighted Macaulay
+/// degree `macaulay` (26 for a regular system), the multiplication matrix
+/// being that of `π`.
+#[allow(clippy::result_large_err)]
+pub fn solve_d4_form(
+    inst: &D4Instance,
+    pre: &SymmetrisedD4,
+    r: &Pt4,
+    opts: D4Options,
+    macaulay: u8,
+    rng: &mut StdRng,
+    debug: bool,
+) -> Result<D4Solve, QuarticSolve> {
+    solve_d4_traced(inst, pre, r, opts, macaulay, rng, debug, None)
+}
+
+/// [`solve_d4_form`] with a [`D4Trace`] carried from solve to solve
+/// (`None`: no replay, the same arithmetic as [`solve_d4_form`]).
+#[allow(clippy::too_many_arguments)]
+#[allow(clippy::result_large_err)]
+pub fn solve_d4_traced(
+    inst: &D4Instance,
+    pre: &SymmetrisedD4,
+    r: &Pt4,
+    opts: D4Options,
+    macaulay: u8,
+    rng: &mut StdRng,
+    debug: bool,
+    trace: Option<&mut D4Trace>,
+) -> Result<D4Solve, QuarticSolve> {
     let f = &inst.curve.f;
     let p = f.p;
     let mut out = D4Solve::default();
     let before = f.muls();
     let y_r = inst.y_of_x(&r.x);
-    let comps = pre.system(f, &y_r);
-    out.solve.weil_muls = f.muls() - before;
-    let sols = solve_system_n_inner::<5>(
-        &comps,
-        0,
-        macaulay,
-        p,
-        rng,
-        &mut out.solve,
-        debug,
-        None,
-        None,
-    )
-    .ok()
-    .flatten();
+    let sols: Option<Vec<[u64; 5]>> = if opts.weighted {
+        let comps = pre.system_weighted(f, &y_r);
+        out.solve.weil_muls = f.muls() - before;
+        solve_traced::<4>(
+            &comps,
+            &WEIGHTS,
+            opts,
+            macaulay,
+            p,
+            rng,
+            &mut out.solve,
+            debug,
+            trace,
+        )
+        .map(|v| {
+            v.into_iter()
+                .map(|s| {
+                    // σ₄ = π², one multiplication.
+                    out.solve.split_muls += 1;
+                    [s[0], s[1], s[2], s[3] * s[3] % p, s[3]]
+                })
+                .collect()
+        })
+    } else {
+        let comps = pre.system(f, &y_r);
+        out.solve.weil_muls = f.muls() - before;
+        solve_traced::<5>(
+            &comps,
+            &[1; 5],
+            opts,
+            macaulay,
+            p,
+            rng,
+            &mut out.solve,
+            debug,
+            trace,
+        )
+    };
     let Some(sols) = sols else {
         if debug {
             eprintln!(
@@ -838,6 +1021,13 @@ pub struct D4Oracle<'a> {
     /// without it, and their replays must keep their counts; their `S`
     /// is understated by those attempts, which the study reports.
     pub charge_unsolved: bool,
+    /// `weighted=1`, `chains=1`, `sparsest=1` ([`D4Options`]); all off
+    /// by default, the committed sessions' oracle.
+    pub opts: D4Options,
+    /// `replay=1`: the first solved system's shape replayed on the rest
+    /// ([`D4Trace`]); off by default.
+    pub replay: bool,
+    trace: D4Trace,
     pre: Option<SymmetrisedD4>,
     totals: SolverTotals,
     per_add: u64,
@@ -850,6 +1040,9 @@ impl<'a> D4Oracle<'a> {
             macaulay,
             seed,
             charge_unsolved: false,
+            opts: D4Options::default(),
+            replay: false,
+            trace: D4Trace::default(),
             pre: None,
             totals: SolverTotals {
                 solver: "d4-macaulay".into(),
@@ -860,12 +1053,22 @@ impl<'a> D4Oracle<'a> {
         }
     }
 
-    fn shape() -> SystemShape {
-        SystemShape {
-            n_vars: 5,
-            n_equations: 5,
-            degrees: vec![4, 4, 4, 4, 2],
-            semi_regular_degree: Some(14),
+    fn shape(&self) -> SystemShape {
+        if !self.opts.weighted {
+            SystemShape {
+                n_vars: 5,
+                n_equations: 5,
+                degrees: vec![4, 4, 4, 4, 2],
+                semi_regular_degree: Some(14),
+            }
+        } else {
+            // Weighted degrees, weights (2, 2, 2, 1).
+            SystemShape {
+                n_vars: 4,
+                n_equations: 4,
+                degrees: vec![8, 8, 8, 8],
+                semi_regular_degree: Some(26),
+            }
         }
     }
 }
@@ -878,10 +1081,24 @@ impl DecompositionOracle<Curve4> for D4Oracle<'_> {
         4
     }
     fn describe(&self, _params: &Params) -> String {
-        format!(
-            "S₅ in FGHR's D₄ invariants (σ₁, σ₂, σ₃, σ₄, π): Bézout 512, Macaulay degree {}",
-            self.macaulay
-        )
+        let mut d = if self.opts.weighted {
+            format!(
+                "S₅ in FGHR's D₄ invariants (σ₁, σ₂, σ₃, π), σ₄ = π², weights (2, 2, 2, 1): 512 solutions, weighted Macaulay degree {}",
+                self.macaulay
+            )
+        } else {
+            format!(
+                "S₅ in FGHR's D₄ invariants (σ₁, σ₂, σ₃, σ₄, π): Bézout 512, Macaulay degree {}",
+                self.macaulay
+            )
+        };
+        if self.opts.chains {
+            d.push_str(", eigen step along the chains");
+        }
+        if self.opts.sparsest {
+            d.push_str(", sparsest pivots");
+        }
+        d
     }
     fn prepare(
         &mut self,
@@ -917,19 +1134,29 @@ impl DecompositionOracle<Curve4> for D4Oracle<'_> {
             StdRng::seed_from_u64(self.seed ^ self.totals.calls.wrapping_mul(0x9e37_79b9));
         let adds_before = c.ops();
         let t = std::time::Instant::now();
-        let sol = solve_d4_or_cost(
+        let sol = solve_d4_traced(
             &self.curve.inst,
             pre,
             &point,
+            self.opts,
             self.macaulay,
             &mut rng,
             false,
+            self.replay.then_some(&mut self.trace),
         );
+        if self.replay {
+            self.totals
+                .extra
+                .insert("shape_replays".into(), self.trace.replays);
+            self.totals
+                .extra
+                .insert("shape_fallbacks".into(), self.trace.fallbacks);
+        }
         self.totals.wall_ns += t.elapsed().as_nanos() as u64;
         // The additions that test a candidate's signs.
         ops.adds += c.ops() - adds_before;
         self.totals.calls += 1;
-        self.totals.shape = Some(Self::shape());
+        self.totals.shape = Some(self.shape());
         let sol = match sol {
             Ok(sol) => sol,
             Err(cost) => {
@@ -970,7 +1197,7 @@ impl DecompositionOracle<Curve4> for D4Oracle<'_> {
         idx
     }
     fn last_system(&self) -> Option<SystemShape> {
-        Some(Self::shape())
+        Some(self.shape())
     }
     fn solver_totals(&self) -> Option<SolverTotals> {
         Some(self.totals.clone())
@@ -1064,6 +1291,102 @@ mod tests {
 
     fn inst_y_is_zero(d: &D4Curve, q: &Pt4) -> bool {
         d.inst.y_of_x(&q.x).is_zero()
+    }
+
+    /// A target that decomposes: four base points with signs, summed.
+    fn planted(inst: &D4Instance, base: &[(u64, Pt4)], rng: &mut StdRng) -> Pt4 {
+        loop {
+            let mut idx: Vec<usize> = Vec::new();
+            while idx.len() < 4 {
+                let i = rng.gen_range(0..base.len());
+                if !idx.contains(&i) {
+                    idx.push(i);
+                }
+            }
+            let mut acc = Pt4::INF;
+            for &i in &idx {
+                let q = if rng.gen_bool(0.5) {
+                    inst.curve.neg(&base[i].1)
+                } else {
+                    base[i].1
+                };
+                acc = inst.curve.add(&acc, &q);
+            }
+            if !acc.inf {
+                return acc;
+            }
+        }
+    }
+
+    #[test]
+    fn every_option_finds_the_meet_in_the_middle_decompositions() {
+        // The ecbench curve (p = 29): F_p small, so `det A` is scanned on
+        // all of F_p, and π-collisions between solutions are likely.
+        let d = find_d4_curve(29, 1, 16).unwrap();
+        let inst = &d.inst;
+        let mut rng = StdRng::seed_from_u64(7);
+        let pre = SymmetrisedD4::precompute(inst, &mut rng, 8).unwrap();
+        let base = y_base(inst, &mut rng);
+        let all = D4Options {
+            weighted: true,
+            chains: true,
+            sparsest: true,
+        };
+        let mut trace = D4Trace::default();
+        let mut agree = 0;
+        for k in 0..3 {
+            let r = planted(inst, &base, &mut rng);
+            let mitm = mitm_y_decompositions(&inst.curve, &base, &r);
+            let mut s1 = StdRng::seed_from_u64(k);
+            let plain = solve_d4_form(inst, &pre, &r, D4Options::default(), 14, &mut s1, false);
+            let mut s2 = StdRng::seed_from_u64(k);
+            let new = solve_d4_traced(inst, &pre, &r, all, 26, &mut s2, false, Some(&mut trace));
+            if let (Ok(a), Ok(b)) = (plain, new) {
+                let a: BTreeSet<[u64; 4]> = a.decompositions.into_iter().collect();
+                let b: BTreeSet<[u64; 4]> = b.decompositions.into_iter().collect();
+                assert_eq!(a, mitm);
+                assert_eq!(b, mitm);
+                assert!(!b.is_empty());
+                agree += 1;
+            }
+        }
+        assert!(agree >= 2, "{agree} of 3 planted targets solved by both");
+        assert!(trace.replays + trace.fallbacks >= 1);
+    }
+
+    #[test]
+    fn the_chain_step_matches_the_dense_eigen_step_beyond_the_scan() {
+        // p = 613 > dim + 1: `det A` is interpolated and its roots found.
+        let inst = generate_d4_instance(613, 1);
+        let mut rng = StdRng::seed_from_u64(11);
+        let pre = SymmetrisedD4::precompute(&inst, &mut rng, 8).unwrap();
+        let base = y_base(&inst, &mut rng);
+        for k in 0..2 {
+            let r = planted(&inst, &base, &mut rng);
+            let run = |chains: bool| {
+                let opts = D4Options {
+                    weighted: true,
+                    chains,
+                    sparsest: true,
+                };
+                let mut s = StdRng::seed_from_u64(k);
+                solve_d4_form(&inst, &pre, &r, opts, 26, &mut s, false).unwrap()
+            };
+            let (dense, chain) = (run(false), run(true));
+            assert_eq!(dense.solve.dim, 512);
+            assert_eq!(dense.rational_solutions, chain.rational_solutions);
+            assert_eq!(dense.decompositions, chain.decompositions);
+            assert_eq!(
+                dense.solve.rational_eigenvalues,
+                chain.solve.rational_eigenvalues
+            );
+            assert!(chain.solve.total_muls * 3 < dense.solve.total_muls);
+            let mitm = mitm_y_decompositions(&inst.curve, &base, &r);
+            assert_eq!(
+                chain.decompositions.into_iter().collect::<BTreeSet<_>>(),
+                mitm
+            );
+        }
     }
 
     #[test]

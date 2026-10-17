@@ -25,7 +25,8 @@ use crypto_lib::cryptanalysis::gaudry_quartic::{
     factor_base, mitm_decompositions, Pt4, QuarticSolve,
 };
 use crypto_lib::cryptanalysis::gaudry_quartic_d4::{
-    find_d4_curve, generate_d4_instance, mitm_y_decompositions, solve_d4, y_base, SymmetrisedD4,
+    find_d4_curve, generate_d4_instance, mitm_y_decompositions, solve_d4_traced, y_base, D4Options,
+    D4Trace, SymmetrisedD4,
 };
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
@@ -38,6 +39,7 @@ struct Row {
     target: usize,
     planted: bool,
     macaulay_degree: u8,
+    form: D4Options,
     base_points: usize,
     solve: QuarticSolve,
     rational_solutions: usize,
@@ -57,7 +59,16 @@ fn main() {
     let p = get("--p", 269);
     let seed = get("--seed", 1);
     let targets = get("--targets", 3) as usize;
-    let macaulay = get("--macaulay", 14) as u8;
+    let flag = |k: &str| args.iter().any(|a| a == k);
+    let form = D4Options {
+        weighted: flag("--weighted"),
+        chains: flag("--chains"),
+        sparsest: flag("--sparsest"),
+    };
+    let weighted = form.weighted;
+    let replay = flag("--replay");
+    let mut trace = D4Trace::default();
+    let macaulay = get("--macaulay", if weighted { 26 } else { 14 }) as u8;
     let debug = args.iter().any(|a| a == "--debug");
     let planted = args.iter().any(|a| a == "--planted");
     let out = args
@@ -259,11 +270,24 @@ fn main() {
             }
         };
         let mut srng = StdRng::seed_from_u64(seed + k as u64);
-        let Some(sol) = solve_d4(&inst, &pre, &r, macaulay, &mut srng, debug) else {
-            eprintln!(
-                "target {k}: the Macaulay matrix at degree {macaulay} did not close the quotient"
-            );
-            continue;
+        let sol = match solve_d4_traced(
+            &inst,
+            &pre,
+            &r,
+            form,
+            macaulay,
+            &mut srng,
+            debug,
+            replay.then_some(&mut trace),
+        ) {
+            Ok(sol) => sol,
+            Err(cost) => {
+                eprintln!(
+                    "target {k}: the Macaulay matrix at degree {macaulay} did not close the quotient ({}, dim {}, {:.3e} muls)",
+                    cost.outcome, cost.dim, cost.total_muls as f64
+                );
+                continue;
+            }
         };
         let tm = Instant::now();
         let mitm = mitm_y_decompositions(&inst.curve, &base, &r);
@@ -276,6 +300,7 @@ fn main() {
             target: k,
             planted,
             macaulay_degree: macaulay,
+            form,
             base_points: base.len(),
             rational_solutions: sol.rational_solutions,
             solver_decompositions: mine.len(),
@@ -308,5 +333,11 @@ fn main() {
                 .expect("open --json");
             writeln!(f, "{}", serde_json::to_string(&row).expect("row")).expect("write");
         }
+    }
+    if replay {
+        eprintln!(
+            "shape replays: {} replayed, {} fell back {:?}",
+            trace.replays, trace.fallbacks, trace.fallback_reasons
+        );
     }
 }
