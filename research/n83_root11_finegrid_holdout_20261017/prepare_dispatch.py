@@ -25,7 +25,7 @@ FILES = (
     'single_target/screen_result_k2752.json',
     'single_target/screen_result_k2880.json',
     'single_target/screen_result_k2944.json',
-    'run.py', 'verify.py', 'select.py',
+    'run.py', 'verify.py', 'select.py', 'materialize.py',
     'test_select.py', 'provider_jobs.py', 'test_provider_jobs.py', 'aggregate.py',
     'prepare_dispatch.py', 'check_dispatch.py',
     'results/local_selection.json', 'results/batch_full_replay.json',
