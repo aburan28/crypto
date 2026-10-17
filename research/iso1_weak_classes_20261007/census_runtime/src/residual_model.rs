@@ -279,11 +279,12 @@ fn predict(p: i128, lev: &str) {
     );
 }
 
-/// Pooled observed-minus-predicted zero rows over scored primes, overall and
+/// Pooled observed-minus-predicted zero rows over scored primes (optionally only
+/// those listed after the path, e.g. the registered follow-up primes), overall and
 /// grouped by e = v2(p^2 - 1). Reads figures/zero_rows.csv; a row is scored
 /// when its observed column is non-empty and its role is pristine or forward.
 /// Each prime's variance is ((hi - lo) / 3.92)^2, its 95% interval half-width.
-fn pool(path: &str) {
+fn pool(path: &str, only: &[i128]) {
     let text = fs::read_to_string(path).expect("zero_rows csv");
     let mut groups: BTreeMap<u32, Vec<(i128, f64, f64)>> = BTreeMap::new();
     for l in text.lines().skip(1) {
@@ -292,6 +293,9 @@ fn pool(path: &str) {
             continue;
         }
         let p: i128 = c[0].parse().unwrap();
+        if !only.is_empty() && !only.contains(&p) {
+            continue;
+        }
         let (obs, exp): (f64, f64) = (c[2].parse().unwrap(), c[3].parse().unwrap());
         let (lo, hi): (f64, f64) = (c[4].parse().unwrap(), c[5].parse().unwrap());
         let sd = (hi - lo) / 3.92;
@@ -328,7 +332,10 @@ fn main() {
         Some("exact") if a.len() == 3 => exact(&a[1], &a[2]),
         Some("holdout") if a.len() == 4 => holdout(a[1].parse().unwrap(), &a[2], &a[3]),
         Some("predict") if a.len() == 3 => predict(a[1].parse().unwrap(), &a[2]),
-        Some("pool") if a.len() == 2 => pool(&a[1]),
+        Some("pool") if a.len() >= 2 => {
+            let only: Vec<i128> = a[2..].iter().map(|x| x.parse().unwrap()).collect();
+            pool(&a[1], &only)
+        }
         _ => panic!("usage: iso1_residual_model exact OMEGA8 LEVELS | holdout P CENSUS LEVELS | predict P LEVELS"),
     }
 }

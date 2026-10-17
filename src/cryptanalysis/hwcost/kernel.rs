@@ -330,6 +330,49 @@ impl Arith for Fp64Cm {
     }
 }
 
+/// [`crate::cryptanalysis::prime_fast::Fp64`] (`p < 2⁶²`), the arithmetic
+/// of the production prime-field rho engine.  Its Montgomery form
+/// (`R = 2⁶⁴`, values `< p`) is `fp_backend::Fp64`'s at the same prime, so a
+/// walk through it must equal that field's point for point.
+#[derive(Clone)]
+pub struct PrimeFast(pub crate::cryptanalysis::prime_fast::Fp64);
+
+impl Arith for PrimeFast {
+    type E = u64;
+    #[inline(always)]
+    fn one(&self) -> u64 {
+        self.0.one
+    }
+    #[inline(always)]
+    fn is_zero(&self, a: u64) -> bool {
+        a == 0
+    }
+    #[inline(always)]
+    fn add(&self, a: u64, b: u64) -> u64 {
+        self.0.add(a, b)
+    }
+    #[inline(always)]
+    fn sub(&self, a: u64, b: u64) -> u64 {
+        self.0.sub(a, b)
+    }
+    #[inline(always)]
+    fn mul(&self, a: u64, b: u64) -> u64 {
+        self.0.mul(a, b)
+    }
+    #[inline(always)]
+    fn sqr(&self, a: u64) -> u64 {
+        self.0.sqr(a)
+    }
+    #[inline(always)]
+    fn inv(&self, a: u64) -> Option<u64> {
+        (a != 0).then(|| self.0.inv(a))
+    }
+    #[inline(always)]
+    fn low(&self, a: u64) -> u64 {
+        a
+    }
+}
+
 /// Exact tally of the field operations of a run.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct OpTally {
