@@ -1,0 +1,32 @@
+{
+  "schema": "prime61.execution-receipt/v1",
+  "scope": "Same-host native diagnostic runs; not sealed ecbench measurements or independent-host audits",
+  "command_notes": "Display commands are normalized for readability; bracketed text abbreviates repeated arguments or the GP input stream. reproduce.sh contains full executable commands, and class_number.gp preserves the exact native arithmetic input. Paths without a repository prefix in this receipt are study-relative.",
+  "source_library": "de0c9391480155ebdd5a8495d2c79e4508d4795d",
+  "initial_driver_commit": "764d53c0",
+  "identified_driver_commit": "95ec4bec",
+  "commands_and_exits": [
+    {"command": "timeout 300 target/release/isogeny_walk walk --curve custom --name prime61-isogeny-source --p 2305843009213693951 --a 2305843009213693948 --b 111 --order 2305843010818082053 --gx 1 --gy 1796364306280342617 --max-ell 13 --include-atkin --max-curves 64 --max-depth 1 --audit-points 2 --threads 1 --no-class-audits --out research/prime61_isogeny_20261016/one-hop-l13", "exit": 0},
+    {"command": "timeout 300 target/release/isogeny_walk walk --curve custom --name prime61-isogeny-source --p 2305843009213693951 --a 2305843009213693948 --b 111 --order 2305843010818082053 --gx 1 --gy 1796364306280342617 --primes 3,7,11,13,19,23,53,61 --max-curves 64 --max-depth 1 --audit-points 2 --threads 1 --no-class-audits --out research/prime61_isogeny_20261016/one-hop-l61", "exit": 0},
+    {"command": "target/release/isogeny_walk verify [same custom source] --dir research/prime61_isogeny_20261016/one-hop-l13", "exit": 0, "receipt": "walk-l13-verify.json"},
+    {"command": "target/release/isogeny_walk verify [same custom source] --dir research/prime61_isogeny_20261016/one-hop-l61", "exit": 0, "receipt": "walk-l61-verify.json"},
+    {"command": "timeout 300 target/release/examples/prime61_isogeny_experiment research/prime61_isogeny_20261016/one-hop-l13/isogeny_routes.json 100000 12", "exit": 0, "stdout": "factor-base-l13.jsonl"},
+    {"command": "timeout 300 target/release/examples/prime61_isogeny_experiment research/prime61_isogeny_20261016/one-hop-l61/isogeny_routes.json 100000 12", "exit": 0, "stdout": "factor-base-l61.jsonl", "revision": "764d53c0"},
+    {"command": "timeout 300 target/release/examples/prime61_isogeny_experiment research/prime61_isogeny_20261016/one-hop-l61/isogeny_routes.json 100000 12", "exit": 0, "stdout": "factor-base-l61-identified.jsonl", "revision": "95ec4bec"},
+    {"command": "timeout 300 target/release/examples/prime61_isogeny_experiment research/prime61_isogeny_20261016/one-hop-l61/isogeny_routes.json 100000 12", "exit": 0, "stdout": "factor-base-l61-replay.jsonl", "revision": "95ec4bec"},
+    {"command": "cmp results/factor-base-l61-identified.jsonl results/factor-base-l61-replay.jsonl", "exit": 0},
+    {"command": "rg run rows from original and identified files; cmp exact extracted rows", "exit": 0},
+    {"command": "timeout 300 env LD_LIBRARY_PATH=/workspace/crypto-pari/usr/lib/x86_64-linux-gnu /workspace/crypto-pari/usr/bin/gp -fq [class_number.gp commands]", "exit": 124, "stdout": "class-number.txt", "status": "bnfcertify timeout; full count remains conditional"},
+    {"command": "initial interactive GP class-order attempt", "exit": 0, "stdout": "class-order-initial-invalid.txt", "stderr": "class-order-initial-invalid.stderr", "status": "INVALID: interpreter continued after reserved-variable assignment error; symbolic PASS rejected"},
+    {"command": "timeout 300 env LD_LIBRARY_PATH=/workspace/crypto-pari/usr/lib/x86_64-linux-gnu /workspace/crypto-pari/usr/bin/gp -fq research/prime61_isogeny_20261016/class_order_certificate.gp", "exit": 0, "stdout": "class-order-certificate.txt", "status": "all exact checks pass"},
+    {"command": "repeat corrected class_order_certificate.gp and cmp stdout", "exit": 0, "stdout": "class-order-replay.txt"},
+    {"command": "cargo test --release --no-default-features --example prime61_isogeny_experiment", "exit": 0, "log": "prime61-isogeny-identified-tests.log"},
+    {"command": "cargo clippy --release --no-default-features --example prime61_isogeny_experiment --no-deps -- -D warnings", "exit": 101, "log": "prime61-isogeny-clippy-retry.log", "status": "pre-existing library mismatched_bit_width_type"},
+    {"command": "cargo clippy --release --no-default-features --example prime61_isogeny_experiment --no-deps -- -D warnings -A clippy::mismatched_bit_width_type", "exit": 0, "log": "prime61-isogeny-clippy-scoped.log"},
+    {"command": "bash research/prime61_isogeny_20261016/reproduce.sh /tmp/prime61-isogeny-script-reproduction", "exit": 0, "log": "prime61-isogeny-script-reproduction.log", "status": "fresh construction, verification, test, two full panels, exact recorded-output comparisons and native summary all pass"},
+    {"command": "backlog validate XP-20261016-prime61-horizontal-class", "exit": 0, "log": "backlog-validation.log", "note": "native standalone build of repository validator"}
+  ],
+  "unexecuted": ["full horizontal class enumeration", "full-class factor-base panel", "vertical extension-field maps", "independent-host replay", "full class-group certification after timeout", "Lean proof", "exact screenshot candidate-pool reconstruction"],
+  "full_cost": null,
+  "speedup": null
+}

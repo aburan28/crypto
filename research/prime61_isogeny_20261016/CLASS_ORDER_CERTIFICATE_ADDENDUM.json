@@ -1,0 +1,9 @@
+{
+  "purpose": "Establish an unconditional class-size lower bound independently of the unfinished full class-group certification",
+  "input_form": ["7","5","237475387793728201"],
+  "discriminant": "-6649310858224389603",
+  "candidate_order": "68162026",
+  "method": "Exact reduced binary quadratic form composition: verify A^n is principal and A^(n/l) is nonprincipal for every prime factor l of n. Record all reduced forms, factorization and prime checks. This proves the order of this one class without asserting that it generates the full group.",
+  "inference": "The class number is at least this exact element order. Multiply that lower bound by the native sizeof(Node) to test the current all-in-memory walker's node-vector requirement against the 16-GiB container limit; omit every other allocation, so this is only a lower bound.",
+  "limits": "300 seconds; source form and candidate order fixed from the prior native class-group output. Retain a failed certificate and do not infer a lower bound if any check fails."
+}

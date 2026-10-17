@@ -1,0 +1,9 @@
+default(parisize,512000000);
+D=-6649310858224389603;
+print("discriminant=",D);
+print("factor=",factor(abs(D)));
+print("qfbclassno_shanks=",qfbclassno(D));
+print("quadclassunit=",quadclassunit(D));
+B=bnfinit(x^2-x+(1-D)/4,1);
+print("bnf_class_group=",B.clgp);
+print("bnfcertify=",bnfcertify(B));
