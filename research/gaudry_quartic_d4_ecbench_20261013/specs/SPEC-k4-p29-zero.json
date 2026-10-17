@@ -1,0 +1,46 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "Gaudry k = 4 IC with the D4 oracle vs rho, E(F_29^4), Y-line base with the Y = 0 point",
+  "description": "Amendment 1 (PROTOCOL.md): the same workload, target and algorithm seeds as SPEC-k4-p29, with the base fghr-y-line:zero=1, which adds the order-4 point with Y = 0 as its own column. The SPEC-k4-p29 session lost 3 of 11 decompositions to that point. Reference: rho with the negation map.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "fp4_torsion",
+        "p": 29,
+        "seed": 1,
+        "max_cofactor": 16
+      }
+    ],
+    "targets_per_curve": 1,
+    "target_seed": 202610134029
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "ic-k4-d4-zero",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "fghr-y-line:zero=1",
+          "oracle": "gaudry-d4:macaulay=14",
+          "max_trials": "20000"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 202610134030,
+    "isolation_required": "L2",
+    "timeout_seconds": 86400
+  }
+}

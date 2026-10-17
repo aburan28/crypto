@@ -170,6 +170,7 @@ pub mod fp_backend_ifma;
 pub(crate) mod fx_hash;
 pub mod gaudry_cubic;
 pub mod gaudry_quartic;
+pub mod gaudry_quartic_bin;
 pub mod gaudry_quartic_d4;
 pub mod genus2_fp;
 pub mod gf2_elim;

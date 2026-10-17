@@ -1,0 +1,119 @@
+{
+  "schema": "ecbench.plan/v1",
+  "spec_id": "ECS1h8be34a3d45a9",
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation",
+        "family": "rho",
+        "params": {
+          "cap_multiple": "64"
+        },
+        "method_id": "ECM1hefea4e0ebe79",
+        "method_sha256": "efea4e0ebe79dadfedeb75106dab92e25fc26bfe282155ee0326380d4184e995",
+        "entry": "ic_boundary::rho_walk_with(NegationClasses, RhoWalk::negation())"
+      }
+    },
+    {
+      "name": "ic-frobenius",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "family": "ic",
+        "params": {
+          "factor_base": "bin-t-line",
+          "linalg": "incremental-gauss",
+          "max_trials": "5000000",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1",
+          "solver": "",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        },
+        "method_id": "ECM1he2d2aef75c06",
+        "method_sha256": "e2d2aef75c06c98f550b31574ab95a3288d21bd044720fbdf175cda5a59ed11a",
+        "entry": "ic_framework::run_pipeline"
+      }
+    },
+    {
+      "name": "rho-neg-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.negation",
+        "family": "rho",
+        "params": {
+          "cap_multiple": "64"
+        },
+        "method_id": "ECM1hefea4e0ebe79",
+        "method_sha256": "efea4e0ebe79dadfedeb75106dab92e25fc26bfe282155ee0326380d4184e995",
+        "entry": "ic_boundary::rho_walk_with(NegationClasses, RhoWalk::negation())"
+      }
+    }
+  ],
+  "workloads": [
+    {
+      "workload_id": "Wc066172da07a",
+      "workload_sha256": "c066172da07af46b82be8f2bfaf53fe071db97f8cf10ce4e2f4a07c6a7bc0589",
+      "curve_spec": {
+        "kind": "f2m4_torsion",
+        "m": 14,
+        "seed": 1,
+        "max_cofactor": 16
+      },
+      "curve": {
+        "slug": "icv1-f2m56-tm338854401-5d597dcf",
+        "icv1": "ICV1:f2m-56-14e93580:-338854401:72057594376782338:0xb4a93ce3c2852f:unk:unk:r:5d597dcf8ce1",
+        "family": "extension",
+        "construction": "gaudry_quartic_bin::find_bin_curve(14, 1, 16)",
+        "field_degree": null,
+        "field_bits": 14,
+        "group_order": 72057594376782338,
+        "r": 36028797188391169,
+        "cofactor": 2,
+        "generator": [
+          "0xe0dd7d3c62c470",
+          "0x50a3c2d0bd813d"
+        ],
+        "automorphisms_available": 2,
+        "registered": false,
+        "ec1": null,
+        "curve_uid": null
+      },
+      "target_law": "uniform_scalar_sha256_v1",
+      "target_seed": 202610150001,
+      "target_index": 0,
+      "target": [
+        "0xdfac302bfbae1",
+        "0x6b640e0021cbf2"
+      ],
+      "planted": 11775753947457252
+    }
+  ],
+  "executions": [
+    {
+      "seq": 0,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 11463782557363202834
+    },
+    {
+      "seq": 1,
+      "round": 0,
+      "warmup": false,
+      "arm": 1,
+      "workload": 0,
+      "algorithm_seed": 11463782557363202834
+    },
+    {
+      "seq": 2,
+      "round": 0,
+      "warmup": false,
+      "arm": 2,
+      "workload": 0,
+      "algorithm_seed": 11463782557363202834
+    }
+  ]
+}
