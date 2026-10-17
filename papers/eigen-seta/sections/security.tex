@@ -71,6 +71,51 @@ pairing-consistent guesses, including guesses agreeing with the truth on
 3--13 low bits, ran the whole chain and failed only at the final split
 (\art{crypto:research/eigen_seta_prototype_20261011/results/}).
 
+\paragraph{Testing a candidate from the public key alone (new in revision~2).}
+The test above uses a decapsulation, a chain of length $E\approx 4\log_2 f$
+on $\EC\times\EC$. A cheaper test needs no ciphertext. Write
+$\psi_A=2\tau-tf\in\End(\EA)$. It has trace~0 and degree $7f^2$, and it acts on
+the public basis as $f s_D$ on $P_A$ and $-fs_D$ on $Q_A$. For a candidate $f$
+this action is known exactly. For an odd $u$ and an exponent $e\le E$ with
+$m=2^e-7u^2f^2=c^2+c'^2$ ($c$ even), the endomorphism $\gamma=u\psi_A+c$ has
+degree $7u^2f^2+c^2=2^e-c'^2$. Kani's lemma then gives a $(2^e,2^e)$-isogeny
+of $\EA\times\EA$ with kernel
+$\langle(c'P',-\lambda_SP'),(c'Q',-\lambda_TQ')\rangle$, where
+$P'=[2^{E-e}]P_A$, $Q'=[2^{E-e}]Q_A$, $\lambda_S=ufs_D+c$ and
+$\lambda_T=c-ufs_D$.
+
+\begin{lemma}[the public-key test]\label{lem:pktest}
+For every candidate $f'$ and every plan $(u,e,c,c')$ built from it, the
+kernel above is isotropic of order $2^{2e}$. The chain splits into a product
+isomorphic to $\EA\times\EA$ if $f'=f$.
+\end{lemma}
+
+\begin{proof}
+$e(c'P',c'Q')\,e(\lambda_SP',\lambda_TQ')=e(P',Q')^{c'^2+\lambda_S\lambda_T}$
+and $c'^2+\lambda_S\lambda_T=c'^2+c^2-u^2f'^2s_D^2\equiv c^2+c'^2+7u^2f'^2=2^e$
+modulo $2^e$. For $f'=f$ the two generators are $(c'R,-\gamma R)$ for $R=P',Q'$,
+and $\deg\gamma+c'^2=2^e$, so this is Kani's lemma with codomain $\EA^2$ as in
+Proposition~\ref{prop:kani}.
+\end{proof}
+
+The congruence and the norm identity behind the lemma are checked in Lean~4
+(\art{crypto:research/eigen_seta_assessment_20261017/lean/EigenSetaPkTest.lean}).
+The step from the norm in $\Z[f\sqrt{-7}]$ to the degree of an endomorphism of
+$\EA$ is not formalised. The chain needs only $e>\log_2(7u^2f^2)$, about
+$2\log_2f+3$, against $E\approx 4\log_2f$. We implemented the test
+(\art{eigenx:src/cryptanalysis/pk_test.rs}) and measured it
+(\S\ref{sec:pktest-results}). The true degree is accepted at $e=\PkEOne$,
+$\PkEThree$ and $\PkEFive$ at L1, L3 and L5. The kernel is isotropic for
+every candidate, so a wrong one is not rejected early: \PkWrongTested\
+wrong candidates, including some that agree with $f$ on 16, 64 or
+$\tfrac12\log_2 f$ low bits, ran to the end and were rejected
+(\PkWrongAccepted\ accepted). At L1 one test took \PkTimeOne\,s against
+\DecTimeOne\,s for a decapsulation on the same host (medians). The test therefore cuts the
+per-candidate cost of the degree search by a factor of about two in chain
+length, and by $\PkRatioOne$ to $2.0$ in measured time at L1 to L5. The cost model now charges
+this shorter chain (Table~\ref{tab:attacks}). The search space is unchanged,
+and the row stays far above the binding attack.
+
 \paragraph{Recovering $\varepsilon$ from a path.} Let $I$ be any left
 $\End(\ED)$-ideal connecting $\ED$ to $\EA$. The isogeny $\varepsilon$
 corresponds to an equivalent ideal of norm $f$. There are about
@@ -83,9 +128,10 @@ $\EA$, and a reduced basis of $I$ yields it, and $f$, in polynomial time.
 Key recovery therefore costs no more than finding \emph{some} isogeny from
 $\ED$ to $\EA$. That is the supersingular path or endomorphism-ring
 problem~\cite{EHLMP18,Wes22}: $\tilde O(p^{1/2})$ classically~\cite{DG16}
-and $\tilde O(p^{1/4})$ quantumly~\cite{BJS14}. We also list $p^{1/3}$ as a
-conservative classical figure in view of recent heuristic algorithms with
-large memory~\cite[\S1.1]{EigenSetaNote}. Because $p\approx d^5$, all three
+and $\tilde O(p^{1/4})$ quantumly~\cite{BJS14}. More recent classical
+algorithms run in $p^{1/3+o(1)}$ time and memory under a smoothness
+heuristic~\cite{Wes26} and in $p^{2/5+o(1)}$ time without it~\cite{Udo26}.
+The cost model uses $p^{1/3}$. Because $p\approx d^5$, all three
 are far beyond the target.
 
 \paragraph{Meet in the middle on $\varepsilon$.} If $f$ is smooth, $\varepsilon$
@@ -113,9 +159,46 @@ The eigenvalues of $\tau$ are $f\mu$ and $f\nu$, with $\mu,\nu$ public, so an
 attacker knows the action of $\tau$ on $\EA[2^E]$ up to the unknown scalar
 $f\bmod 2^E$. We do not know how to use this without $f$. The decryption
 identity $\deg\gamma+c'^2=2^E$ involves $f^2$ through $\deg\tau$, so there is
-no smaller Kani instance that tests $f$ modulo $2^j$. This is the main
-structural assumption of the scheme, and it is where we would look first for
-an attack.
+no smaller Kani instance that tests $f$ modulo $2^j$: the public-key test
+of Lemma~\ref{lem:pktest} needs $f$ modulo $2^e$ with $2^e>7f^2$, which is all
+of $f$. This is the main structural assumption of the scheme, and it is where
+we would look first for an attack.
+
+\paragraph{The hidden orientation.} $\EA$ carries the orientation by
+$\Z[f\omega]$, of discriminant $-7f^2$, pushed through $\varepsilon$. The
+prime $2$ splits in $\Q(\sqrt{-7})$ and does not divide the conductor
+$f$, so the public eigenlines $\langle P_A\rangle$ and $\langle Q_A\rangle$
+are kernels of the horizontal ideals $\mathfrak p^E$ and $\bar{\mathfrak p}^E$.
+An attacker can therefore walk a segment of length $2E$ of the
+$\mathfrak p$-cycle through $\EA$. Its length, about $4\log_2f$, is
+negligible against the order of $[\mathfrak p]$ in a class group of size
+about $f$. The walk does not reach other ideal classes, because evaluating
+$\mathfrak l\star\EA$ for an odd prime $\ell$ needs the action of $\tau$ on
+$\EA[\ell]$. Every curve $\mathfrak p^k\star\EA$ on the segment is again the
+codomain of a degree-$f$ isogeny from $\ED$, namely the push-forward of
+$\varepsilon$ through a generator of $\mathfrak p_K^k$, since $h(-7)=1$. Given
+one endomorphism of $\EA$ of discriminant $-7f^2$, $\End(\EA)$ follows in
+$|{-7f^2}|^{1/4}\approx2^{140}$ classical time at L1 and in subexponential
+quantum time~\cite{HLMW23}. An effective orientation would make the
+class-group action computable, and Kuperberg's algorithm would then recover
+the key in subexponential quantum time~\cite{Wes21orient}. This would hold at
+every parameter set, the quantum-hardened ones included. No algorithm we know
+turns the two public walks into an effective orientation. Without one the
+problem is Wesolowski's $\mathfrak O$-\textsc{Uber}, for which only
+exponential algorithms are known. The level-structure
+frameworks~\cite{DFP24,Arpin24} are the closest tools we know of, and neither
+has been instantiated against this public key. The cost model lists
+$f^{1/2}$ as a classical lower bound for this row (the cost of a generic
+search in a group of order $f$ if the action could be evaluated); this is in
+the attacker's favour and is not an attack.
+
+\paragraph{The form of $\alpha$.} Key generation builds
+$\alpha=x+y\pi$ with $x,y\in\Z[\omega]$ and $N(y)\le 2^\kappa$, so
+$y$ ranges over a few thousand values and $x$ is fixed by $(f,y)$ up to units
+and conjugation. The public curve is determined by $(f,y)$ and a handful of
+choices, so enumerating $y$ adds only $\kappa$ bits to a search over $f$. We
+found no use for this structure beyond that. Since it is the only place where
+the key generator's choices are far from uniform, we record it here.
 
 \subsection{Message recovery}\label{sec:msg}
 
@@ -149,19 +232,66 @@ small degree for which $(P_A,Q_A)$ is an eigenbasis. The only such
 endomorphisms we know are those in $\Z[\tau]$, of degree at least $2f^2$,
 and they are not available without $f$.
 
-\subsection{Quantum security and NIST categories}\label{sec:nist}
-NIST defines categories 1, 3 and 5 by the cost of key search on AES-128, -192
-and -256~\cite{NIST16}. Quantumly, that is Grover search over $2^{128}$,
-$2^{192}$ or $2^{256}$ keys with an AES circuit as the oracle. The binding
-attack above has the same shape: a Grover search over about $2^{\lambda}$
-candidates, but with an oracle (an isogeny chain in dimension~8 over a
-1341- to 2630-bit field) that is far more expensive than an AES evaluation.
-Classically it is about $2^\lambda$ such chains against $2^\lambda$ AES
-evaluations. We therefore \emph{conjecture} that L1, L3 and L5 meet
-categories 1, 3 and 5. Two caveats apply. The margin rests on the oracle
-cost alone: the search space matches the AES key space and is not larger.
-And any attack that guesses less than $\sqrt d$ of mask information would
-break the claim.
+\subsection{Quantum security: two claim tiers}\label{sec:nist}
+Revision~1 of this paper conjectured that L1, L3 and L5 meet NIST categories
+1, 3 and 5. That statement conflated two different bars, and we withdraw it
+in that form. NIST defines the categories by the cost of key search on
+AES-128, -192 and -256~\cite{NIST16}. Quantumly that cost is stated as a gate
+count under a depth limit $\mathrm{MAXDEPTH}\in\{2^{40},2^{64},2^{96}\}$:
+about $2^{170}$, $2^{233}$ and $2^{298}$ gates divided by MAXDEPTH. The binding
+attack on the L sets is a Grover search over about $2^{\lambda}$ mask ratios,
+so it needs only about $2^{\lambda/2}$ oracle queries, the same exposure as
+FESTA~\cite{BMP23}. Its oracle, an isogeny chain over a field of about
+$10\lambda$ bits, is expensive, and Grover parallelises badly under a depth
+limit. So the gate count can still exceed the AES reference.
+Table~\ref{tab:tiers} gives both bars, computed by the cost model of the
+maintained implementation~\cite{EigenX}
+(\art{eigenx:src/security.rs}, \art{eigenx:examples/security_estimate.rs}).
+The oracle is costed at $2^8$ $\F_{p^2}$ multiplications per $(2,2)$-step with
+Karatsuba multiplication. That is below any implementation we know, so the
+gate columns favour the attacker. No external review of that constant
+exists.
+
+\begin{itemize}
+\item \emph{Tier A (gate count under MAXDEPTH).} L1, L3 and L5 meet the AES
+  reference at all three depth limits. In this metric they are conjectured
+  to meet categories 1, 3 and 5.
+\item \emph{Tier B (at least $2^\lambda$ quantum queries against every known
+  attack).} Only L5, Q3 and Q5 meet it. The Q sets take $d\ge 2^{4\lambda}$, so
+  the square root of the mask space lands at $2^\lambda$. At $\lambda=128$ this
+  rule reproduces the L5 prime exactly, so L5 is also the quantum-hardened
+  level-1 set (``Q1''). L1 and L3 offer about $2^{64.5}$ and $2^{96.5}$
+  queries and must not be described as quantum-hardened.
+\end{itemize}
+
+Both tiers assume that the hidden orientation stays ineffective. An effective
+orientation would bring in Kuperberg's subexponential algorithm and break
+both tiers at every set.
+
+\begin{table}[t]
+\centering
+\caption[Two claim tiers]{Two claim tiers, as $\log_2$. ``Queries'' is the
+smallest number of quantum oracle queries over all attacks of
+Table~\ref{tab:attacks}. ``Gates'' is the smallest gate count under MAXDEPTH
+$2^{40}/2^{64}/2^{96}$, with the AES reference below it. Derived by
+\art{eigenx:examples/security_estimate.rs} at
+\art{eigenx} commit \art{94fe2d9}; record
+\art{crypto:research/eigen_seta_assessment_20261017/records/security_estimate.txt}.}
+\label{tab:tiers}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrll}
+\toprule
+set & $\lambda$ & classical floor & queries & gates (MD $2^{40}/2^{64}/2^{96}$) & tiers met\\
+\midrule
+L1 & 128 & 128.4 & 64.5 & 151 / 127 / 98 \;(AES 130 / 106 / 74) & A\\
+L3 & 192 & 192.6 & 96.5 & 218 / 194 / 162 \;(AES 193 / 169 / 137) & A\\
+L5 & 256 & 256.8 & 128.5 & 284 / 260 / 228 \;(AES 258 / 234 / 202) & A (Cat.~5); B at $\lambda=128$\\
+Q3 & 192 & 384.4 & 192.5 & 415 / 391 / 359 \;(AES 193 / 169 / 137) & A, B\\
+Q5 & 256 & 512.7 & 256.5 & 545 / 521 / 489 \;(AES 258 / 234 / 202) & A, B\\
+\bottomrule
+\end{tabular}}
+\end{table}
 
 \subsection{Chosen-ciphertext security and decryption failures}\label{sec:cca}
 The KEM is $U^{\not\perp}[\textsf{Enc},G]$~\cite{HHK17}. In the random-oracle
@@ -183,7 +313,12 @@ differs. Only the failure of an \emph{honest} ciphertext would be visible,
 as a mismatch with the encapsulated key. That has probability
 heuristically $O(E/p)$ (\S\ref{sec:correctness}), and it did not occur in
 \FailTotalTrials\ decapsulations. So decryption-failure attacks have nothing
-to work with.
+to work with. The adaptive attacks on FESTA~\cite{MO23} need a
+validation or timing oracle, which implicit rejection and constant-time
+decapsulation remove. Mask-leakage hints~\cite{DIKM25} and fault
+injection on torsion masking~\cite{GLM26} apply as they do to FESTA. Masks
+are derived per ciphertext and never reused, and fault resistance is out of
+scope.
 
 \subsection{Weak keys}\label{sec:weak}
 \begin{itemize}
@@ -194,6 +329,15 @@ to work with.
   factors apart, so key generation rejects these $f$ via $2f\not\equiv2^E$.
 \item Scalars $\equiv-1$ modulo the point order. These break $y$-recovery in
   the ladder; key generation rejects them.
+\item Composite or smooth $f$. $f$ is a uniform odd integer prime to 21, so
+  it has small factors with constant probability and is $2^{64}$-smooth with
+  probability about $2^{-9}$ at L1. Attacks that exploit a smooth conductor,
+  as in SCALLOP, walk the class group and so need an effective
+  orientation. Restricting $f$ to primes would cost about $200\times$ more
+  candidates in key generation; it is an optional hardening that we have not
+  applied.
+\item Self-pairings~\cite{CHMMvBV23} need $m^2\mid\operatorname{disc}$ for
+  an accessible $m$. Here the discriminant $-7f^2$ is odd and prime to 3.
 \item The schedule condition and the gluing test. These fix the 2-adic shape
   of $(c',\lambda_S,\lambda_T)$ for all keys. They are public by design, and
   their cost in key entropy is included in $\rho$.
@@ -203,27 +347,34 @@ to work with.
 \centering
 \caption[Estimated attack costs, as $\log_2$ of the number of basic
 operations]{Estimated attack costs, as $\log_2$ of the number of basic
-operations. ``chain'' means one isogeny-chain evaluation. All figures are
-derived from the parameters, except $\rho$, which is measured. Source of
-$\rho$:
-\art{crypto:research/eigen_seta_rust_20261011/reports/run-20261011T1955Z-verify/records/f_filter_rate.txt}.}
+operations (revision~2). ``Chain'' means one isogeny-chain evaluation. All
+figures are derived from the parameters by the cost model
+\art{eigenx:src/security.rs} at commit \art{94fe2d9}; record
+\art{crypto:research/eigen_seta_assessment_20261017/records/security_estimate.txt}.
+The degree-search rows use the heuristic filter rate $1/\ln 2^E$. The
+measured rate $\rho$ at L1--L5 (\S\ref{sec:key}) is $1.6$--$2.3$ bits larger,
+so these rows understate the search by that much. The hidden-orientation row is a
+lower bound under the false assumption that the class-group action can be
+evaluated. It is not an attack.}
 \label{tab:attacks}
 \small
-\begin{tabular}{llrrr}
+\setlength{\tabcolsep}{4pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrrr}
 \toprule
-target & attack & L1 & L3 & L5\\
+target & attack & L1 & L3 & L5 & Q3 & Q5\\
 \midrule
-key & search over admissible $f$, classical (chains) & \FspaceLOne & \FspaceLThree & \FspaceLFive\\
-key & same with Grover (chains) & \GroverFLOne & \GroverFLThree & \GroverFLFive\\
-key & path to $\EA$ then shortest ideal, classical $p^{1/2}$ / $p^{1/3}$ & 670 / 447 & 995 / 663 & 1315 / 876\\
-key & path to $\EA$ then shortest ideal, quantum $p^{1/4}$ & 335 & 498 & 657\\
-key & meet in the middle on $\varepsilon$ ($\sqrt f$) & 138.5 & 204.1 & 267.5\\
-message & mask guess $+$ dim-8 attack, classical (chains) & 128 & 192 & 256\\
-message & same with Grover (chains) & 64 & 96 & 128\\
-message & claw on $\varphi$, classical $\sqrt d$ & 128.4 & 192.6 & 256.8\\
-message & claw on $\varphi$, quantum $d^{1/3}$ (with $d^{1/3}$ qubits) & 85.6 & 128.4 & 171.2\\
+key & degree search, public-key test (chains) & 265.5 & 396.9 & 523.5 & 777.9 & 1035.5\\
+key & same with Grover (queries) & 132.7 & 198.4 & 261.7 & 389.0 & 517.8\\
+key & $\End(\EA)$, classical $p^{1/3}$ & 447.0 & 663.7 & 876.7 & 1301.3 & 1730.7\\
+key & $\End(\EA)$, quantum $p^{1/4}$ & 335.2 & 497.8 & 657.5 & 976.0 & 1298.0\\
+key & hidden orientation, $f^{1/2}$ (lower bound only) & 138.5 & 204.5 & 268.0 & 395.5 & 524.5\\
+message & mask guess $+$ Kani, classical (chains) & 129.0 & 193.0 & 257.0 & 385.0 & 513.0\\
+message & same with Grover (queries) & 64.5 & 96.5 & 128.5 & 192.5 & 256.5\\
+message & claw on $\varphi$, classical $\sqrt d$ & 128.4 & 192.6 & 256.8 & 384.4 & 512.7\\
+message & claw on $\varphi$, quantum $d^{1/3}$ & 85.6 & 128.4 & 171.2 & 256.2 & 341.8\\
 \midrule
-\multicolumn{2}{l}{target $\lambda$ (classical) / NIST category} & 128 / 1 & 192 / 3 & 256 / 5\\
+\multicolumn{2}{l}{target $\lambda$ / tiers met (Table~\ref{tab:tiers})} & 128 / A & 192 / A & 256 / A,B$_{128}$ & 192 / A,B & 256 / A,B\\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}

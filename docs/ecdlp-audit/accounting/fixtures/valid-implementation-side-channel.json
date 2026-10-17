@@ -1,0 +1,263 @@
+{
+  "$schema": "../cross-route-cost-receipt.schema.json",
+  "schema_version": "ecdlp-cross-route-cost-receipt/v0.1-draft",
+  "record_state": "mock_non_authoritative",
+  "receipt_uid": "urn:ecdlp-audit:cost-receipt:mock:implementation-side-channel-001",
+  "created_at": "2026-10-13T20:20:00Z",
+  "authoritative": false,
+  "promotion_allowed": false,
+  "claim_transition_allowed": false,
+  "route": {
+    "route_uid": "route.mock.implementation-observation",
+    "route_revision": "draft-1",
+    "route_class": "implementation_side_channel",
+    "family": "synthetic-observation-classification",
+    "description": "Synthetic accounting example for an implementation side-channel assessment.",
+    "adversary_model_uid": "adversary.mock.owned-test-harness",
+    "prerequisites": ["invented observations", "known-answer class labels"],
+    "composed_route_uids": [],
+    "weakest_open_obligation": "No implementation was instrumented and no leakage was measured."
+  },
+  "route_registry_binding": {
+    "registry_path": "docs/ecdlp-audit/routes/route-registry.seed.json",
+    "registry_schema_version": "ecdlp-ws5-routes/v0-draft",
+    "registry_as_of": "2026-10-14",
+    "registry_revision_sha256": "sha256:b19664ca7557a3bd943ad472f8ea645b114a058f1a1557b8822c8177e0140b1b",
+    "route_family_join": {
+      "status": "unresolved",
+      "id": null,
+      "reason": "The local mock route has not been reviewed as an exact WS5 route-family member."
+    },
+    "evidence_profile_join": {
+      "status": "unresolved",
+      "id": null,
+      "reason": "No exact WS5 evidence-profile join has been established for this mock receipt."
+    }
+  },
+  "identities": {
+    "audit_unit_uid": "unit.mock.implementation.001",
+    "subject_uid": "subject.mock.implementation.001",
+    "target_set_uid": "targets.mock.implementation.001",
+    "workload_uid": "workload.mock.implementation.001",
+    "evidence_revision": "mock-evidence-1",
+    "curve": {"status": "not_applicable", "uid": null, "revision": null, "reason": "The abstract implementation fixture is not curve-specific."},
+    "field_or_platform": {"status": "applicable", "uid": "platform:mock-device", "revision": "mock-1"},
+    "representation": {"status": "applicable", "uid": "representation:mock-observation-vector", "revision": "mock-1"},
+    "subgroup_or_secret_domain": {"status": "applicable", "uid": "secret-domain:mock-bit-class", "revision": "mock-1"},
+    "protocol": {"status": "not_applicable", "uid": null, "revision": null, "reason": "The fixture concerns a standalone implementation operation."},
+    "implementation": {"status": "applicable", "uid": "implementation:mock-instrumented-target", "revision": "0000000-mock"}
+  },
+  "authorization": {
+    "tier": "T1",
+    "status": "mock_only",
+    "authorization_ref": "docs/ecdlp-audit/ECDLP_AUDIT_PLAN.mock.json",
+    "scope": "Schema fixture using invented observations and an owned synthetic harness only.",
+    "valid_from": null,
+    "expires_at": null,
+    "fixture_classes": ["public_synthetic", "known_answer"],
+    "live_target_execution": false,
+    "secret_material": false,
+    "production_exploitation": false,
+    "transferable": false
+  },
+  "workload": {
+    "fixture_class": "known_answer",
+    "description": "One invented observation set with a synthetic class label.",
+    "target_count": 1,
+    "target_manifest_ref": "mock://targets/implementation-001",
+    "target_manifest_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+    "reuse_group_uid": null,
+    "public_data_only": true,
+    "synthetic_or_known_answer": true,
+    "selection_rule": "The invented observation identifier was fixed before this receipt was written.",
+    "selection_frozen_before_execution": true
+  },
+  "environment": {
+    "environment_uid": "environment.mock.device.001",
+    "host_class": "invented-owned-device",
+    "cpu": "mock-device-cpu",
+    "gpu": null,
+    "memory_bytes": 536870912,
+    "os": "mock-device-os",
+    "toolchain": "mock-toolchain",
+    "isolation": "unknown",
+    "resource_cap": "Invented one-process, 512-MiB cap.",
+    "captured_at": "2026-10-13T20:20:00Z"
+  },
+  "execution": {
+    "mode": "mock_fixture",
+    "attempt_uid": "attempt.mock.implementation.001",
+    "started_at": null,
+    "ended_at": null,
+    "outcome": "complete",
+    "exit_code": 0,
+    "command_argv": ["mock-observation-audit", "--fixture", "implementation-001"],
+    "seeds": [3],
+    "repetitions": 1,
+    "concurrency": 1,
+    "cold_cache": "unknown",
+    "notes": "The bounded mock-fixture lifecycle is recorded as complete, but no command was executed and the scientific requirement remains partial."
+  },
+  "phase_records": [
+    {
+      "phase_id": "instrument-mock-target",
+      "category": "setup",
+      "accounting_class": "cold_only",
+      "description": "Invented instrumentation and calibration setup.",
+      "target_dependent": false,
+      "reused": false,
+      "attempts": 1,
+      "successes": 1,
+      "costs": [{"metric": "wall_time", "value": 6, "unit": "milliseconds", "status": "modeled", "source": "invented fixture", "sample_count": 1, "uncertainty": "No measurement."}],
+      "included_in_boundaries": ["cold_start"],
+      "artifact_refs": ["artifact.mock.implementation.raw"]
+    },
+    {
+      "phase_id": "observe-and-classify",
+      "category": "core",
+      "accounting_class": "online_target_dependent",
+      "description": "Invented target observation and classification, including one failed attempt.",
+      "target_dependent": true,
+      "reused": false,
+      "attempts": 2,
+      "successes": 1,
+      "costs": [{"metric": "wall_time", "value": 11, "unit": "milliseconds", "status": "modeled", "source": "invented aggregate for both attempts", "sample_count": 2, "uncertainty": "No measurement."}],
+      "included_in_boundaries": ["cold_start", "online_single_target"],
+      "artifact_refs": ["artifact.mock.implementation.raw", "artifact.mock.implementation.failure"]
+    },
+    {
+      "phase_id": "verify-classification",
+      "category": "verification",
+      "accounting_class": "verification",
+      "description": "Invented known-answer comparison for the retained classification.",
+      "target_dependent": true,
+      "reused": false,
+      "attempts": 1,
+      "successes": 1,
+      "costs": [{"metric": "wall_time", "value": 2, "unit": "milliseconds", "status": "modeled", "source": "invented fixture", "sample_count": 1, "uncertainty": "No measurement."}],
+      "included_in_boundaries": ["cold_start", "online_single_target"],
+      "artifact_refs": ["artifact.mock.implementation.raw"]
+    }
+  ],
+  "accounting_boundaries": {
+    "cold_start": {
+      "status": "modeled",
+      "denominator_targets": 1,
+      "included_phase_ids": ["instrument-mock-target", "observe-and-classify", "verify-classification"],
+      "excluded_phase_ids": [],
+      "totals": [{"metric": "wall_time", "value": 19, "unit": "milliseconds", "status": "modeled", "source": "sum of invented phases including the failed attempt", "sample_count": 1, "uncertainty": "No measurement."}],
+      "formula": "instrument-mock-target + observe-and-classify + verify-classification",
+      "complete": true,
+      "exclusions": []
+    },
+    "online_single_target": {
+      "status": "modeled",
+      "denominator_targets": 1,
+      "included_phase_ids": ["observe-and-classify", "verify-classification"],
+      "excluded_phase_ids": ["instrument-mock-target"],
+      "totals": [{"metric": "wall_time", "value": 13, "unit": "milliseconds", "status": "modeled", "source": "sum of invented target phases including the failed attempt", "sample_count": 1, "uncertainty": "No measurement."}],
+      "formula": "observe-and-classify + verify-classification",
+      "complete": true,
+      "exclusions": ["Cold instrumentation is separately charged."]
+    },
+    "amortized": {
+      "enabled": false,
+      "target_count": null,
+      "reuse_group_uid": null,
+      "reusable_phase_ids": [],
+      "per_target_phase_ids": [],
+      "total_costs": [],
+      "per_target_costs": [],
+      "allocation_formula": "Amortization is disabled for the one-target mock receipt.",
+      "assumptions": [],
+      "secondary_only": true
+    }
+  },
+  "failure_accounting": {
+    "attempts_total": 4,
+    "successful_attempts": 3,
+    "unsuccessful_searches": 1,
+    "timeouts": 0,
+    "ooms": 0,
+    "errors": 0,
+    "invalid_results": 0,
+    "budget_exhaustions": 0,
+    "failed_costs_included_in": ["cold_start", "online_single_target"],
+    "failure_artifact_refs": ["artifact.mock.implementation.failure"],
+    "search_boundary": "Two invented classification attempts; no claim beyond this fixture.",
+    "universal_nonexistence_claim": false
+  },
+  "duplicate_accounting": {
+    "candidates_generated": 3,
+    "candidates_retained": 1,
+    "duplicates_detected": 1,
+    "invalid_candidates": 1,
+    "deduplication_key": "mock observation-vector digest",
+    "deduplication_stage": "after invented observation parsing",
+    "duplicate_cost_charged": true,
+    "artifact_refs": ["artifact.mock.implementation.raw"]
+  },
+  "memory_accounting": {
+    "measurements": [
+      {"metric": "peak_rss", "scope": "invented whole process", "status": "modeled", "value_bytes": 8192, "tool": "invented counter", "sample_count": 1, "unknown_reason": null},
+      {"metric": "temporary_storage", "scope": "invented trace buffer", "status": "unknown", "value_bytes": null, "tool": "not measured", "sample_count": null, "unknown_reason": "The mock record intentionally exercises an explicit unknown."}
+    ],
+    "aggregate_scope": "One invented process and its temporary buffer.",
+    "concurrent_processes": 1,
+    "resource_cap_enforced": false
+  },
+  "matched_control": {
+    "status": "unmatched",
+    "control_receipt_uid": null,
+    "same_subject": true,
+    "same_target_set": true,
+    "same_fixture_class": true,
+    "same_authorization_envelope": true,
+    "same_environment_class": true,
+    "same_resource_cap": true,
+    "same_operation_unit": true,
+    "separate_complete_runs": false,
+    "best_of_component_mixing": false,
+    "differences": ["No separate complete control run exists."],
+    "rationale": "The fixture must remain unmatched because the declared control run is absent."
+  },
+  "uncertainty": {
+    "method": "No statistical method; all quantities are invented.",
+    "sample_count": 1,
+    "statistic": "illustrative point value",
+    "interval": null,
+    "confidence_or_coverage": "not applicable to mock data",
+    "limitations": ["The receipt records no experiment and establishes no leakage."]
+  },
+  "evidence": {
+    "source_revision": "mock-source-revision",
+    "build_identity": "mock-build-identity",
+    "configuration_identity": "mock-configuration-identity",
+    "dependency_identity": "mock-dependency-identity",
+    "raw_output_ref": "mock://raw/implementation-001",
+    "replay_receipt_ref": null,
+    "artifacts": [
+      {"artifact_uid": "artifact.mock.implementation.raw", "path_or_uri": "mock://raw/implementation-001", "sha256": null, "role": "Invented placeholder, not raw evidence.", "immutable": false},
+      {"artifact_uid": "artifact.mock.implementation.failure", "path_or_uri": "mock://failures/implementation-001", "sha256": null, "role": "Invented failed-attempt placeholder.", "immutable": false}
+    ],
+    "independent_replay": false
+  },
+  "result": {
+    "execution_outcome": "complete",
+    "requirement_status": "partial",
+    "correctness_verification": "not_run",
+    "outcome_class": "accounting_fixture_only",
+    "observed_result": "The synthetic object exercises implementation-route and failure-cost fields.",
+    "claim_status": "unknown",
+    "evidence_maturity": "E0",
+    "interpretation_category": "descriptive_only",
+    "claim_boundary": "Schema fixture only; not leakage evidence, secret recovery, or a performance measurement.",
+    "not_established": ["side channel", "partial leakage", "secret recovery", "performance", "real-world applicability"],
+    "universal_nonexistence_claim": false,
+    "full_solver_claim": false
+  },
+  "open_obligations": [
+    "Implement semantic reconciliation of failed-attempt and phase costs.",
+    "Require an owned test target, immutable observations, and independent replay before any later claim."
+  ]
+}

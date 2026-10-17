@@ -1,0 +1,57 @@
+  ***   syntax error, unexpected end of file, expecting )-> or ',' or ')': 
+  ***   ...8,for(j=i,128,for(k=j,128,
+  ***                               ^-
+... skipping file 'research/p192_extension_cover_20261012/type_i_mixed_known_log_independent.gp'
+  ***   at top-level: listput(knownsums,(K[i]+K[j]+K[k])%r)
+  ***                                      ^----------------
+  ***   incorrect type in gtos [integer expected] (t_POL).
+  ***   syntax error, unexpected ')', expecting end of file: )));
+  ***                                                        ^----
+  ***   at top-level: if(#knownsums!=357760,error("known-only triple
+  ***                                       ^------------------------
+  ***   user error: known-only triple count
+  ***   at top-level: if(#knownset!=349696,error(Str("known-only tar
+  ***                                      ^-------------------------
+  ***   user error: known-only target count 0
+  ***   syntax error, unexpected end of file, expecting )-> or ',' or ')': 
+  ***   for(i=1,64,
+  ***             ^-
+  ***   at top-level: s=steered[i][1]
+  ***                           ^-----
+  ***   incorrect type in gtos [integer expected] (t_POL).
+  ***   at top-level: if(s<=0||s>=r||!setsearch(knownset,s),error(St
+  ***                     ^------------------------------------------
+  *** _<=_: forbidden comparison t_POL , t_INT.
+  ***   at top-level: P=ellmul(E,G,s);Q=ellmul(E,P,-2)
+  ***                   ^------------------------------
+  *** ellmul: incorrect type in ellmul (non integral, non CM exponent) (t_POL).
+  ***   at top-level: if(#Q!=2||lift(Q[1])!=steered[i][2]||lift(Q[2]
+  ***                                 ^------------------------------
+  ***   incorrect type in _[_] OCcompo1 [not a vector] (t_POL).
+  ***   at top-level: if(char(P)!=1||char(elladd(E,P,P))!=1,error(St
+  ***                    ^-------------------------------------------
+  ***   in function char: ...);if(#P==1,return(0));x=P[1];v=Mod(0,p);for(k=
+  ***                                                 ^---------------------
+  ***   incorrect type in _[_] OCcompo1 [not a vector] (t_POL).
+  ***   syntax error, unexpected ')', expecting end of file: );
+  ***                                                        ^--
+  ***   syntax error, unexpected end of file, expecting )-> or ',' or ')': 
+  ***   for(i=1,64,
+  ***             ^-
+  ***   at top-level: s=fresh[i]
+  ***                         ^--
+  ***   incorrect type in gtos [integer expected] (t_POL).
+  ***   at top-level: if(s<=0||s>=r||setsearch(Set(A),s),error(Str("
+  ***                     ^------------------------------------------
+  *** _<=_: forbidden comparison t_POL , t_INT.
+  ***   at top-level: P=ellmul(E,G,s)
+  ***                   ^-------------
+  *** ellmul: incorrect type in ellmul (non integral, non CM exponent) (t_POL).
+  ***   at top-level: if(char(P)!=1||char(elladd(E,P,P))!=1,error(St
+  ***                    ^-------------------------------------------
+  ***   in function char: ...);if(#P==1,return(0));x=P[1];v=Mod(0,p);for(k=
+  ***                                                 ^---------------------
+  ***   incorrect type in _[_] OCcompo1 [not a vector] (t_POL).
+  ***   syntax error, unexpected ')', expecting end of file: );
+  ***                                                        ^--
+MIXED_KNOWN_LOG_INDEPENDENT_PASS signed_known=128 known_triples=357760 known_targets=349696 steered=64 fresh=64 fresh_known_only_hits=0

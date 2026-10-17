@@ -1,0 +1,395 @@
+{
+  "$schema": "../cross-route-cost-receipt.schema.json",
+  "schema_version": "ecdlp-cross-route-cost-receipt/v0.1-draft",
+  "record_state": "mock_non_authoritative",
+  "receipt_uid": "urn:ecdlp-audit:cost-receipt:mock:invalid-amortized-without-denominator",
+  "created_at": "2026-10-13T20:30:00Z",
+  "authoritative": false,
+  "promotion_allowed": false,
+  "claim_transition_allowed": false,
+  "route": {
+    "route_uid": "route.mock.evidence-integrity",
+    "route_revision": "draft-1",
+    "route_class": "evidence_integrity",
+    "family": "synthetic-artifact-reconciliation",
+    "description": "Synthetic accounting example for an evidence-integrity assessment.",
+    "adversary_model_uid": "adversary.mock.repository-auditor",
+    "prerequisites": [
+      "invented artifact manifest",
+      "invented expected digests"
+    ],
+    "composed_route_uids": [],
+    "weakest_open_obligation": "No immutable artifact or independent replay exists for this invented fixture."
+  },
+  "route_registry_binding": {
+    "registry_path": "docs/ecdlp-audit/routes/route-registry.seed.json",
+    "registry_schema_version": "ecdlp-ws5-routes/v0-draft",
+    "registry_as_of": "2026-10-14",
+    "registry_revision_sha256": "sha256:b19664ca7557a3bd943ad472f8ea645b114a058f1a1557b8822c8177e0140b1b",
+    "route_family_join": {
+      "status": "unresolved",
+      "id": null,
+      "reason": "The local mock route has not been reviewed as an exact WS5 route-family member."
+    },
+    "evidence_profile_join": {
+      "status": "unresolved",
+      "id": null,
+      "reason": "No exact WS5 evidence-profile join has been established for this mock receipt."
+    }
+  },
+  "identities": {
+    "audit_unit_uid": "unit.mock.evidence.001",
+    "subject_uid": "subject.mock.evidence-bundle.001",
+    "target_set_uid": "targets.mock.evidence.001",
+    "workload_uid": "workload.mock.evidence.001",
+    "evidence_revision": "mock-evidence-1",
+    "curve": {
+      "status": "not_applicable",
+      "uid": null,
+      "revision": null,
+      "reason": "This fixture audits an abstract evidence bundle rather than a curve."
+    },
+    "field_or_platform": {
+      "status": "applicable",
+      "uid": "platform:mock-repository",
+      "revision": "mock-1"
+    },
+    "representation": {
+      "status": "applicable",
+      "uid": "representation:mock-artifact-manifest",
+      "revision": "mock-1"
+    },
+    "subgroup_or_secret_domain": {
+      "status": "not_applicable",
+      "uid": null,
+      "revision": null,
+      "reason": "No mathematical subgroup or secret domain is used."
+    },
+    "protocol": {
+      "status": "not_applicable",
+      "uid": null,
+      "revision": null,
+      "reason": "No cryptographic protocol is executed."
+    },
+    "implementation": {
+      "status": "applicable",
+      "uid": "implementation:mock-evidence-checker",
+      "revision": "0000000-mock"
+    }
+  },
+  "authorization": {
+    "tier": "T0",
+    "status": "mock_only",
+    "authorization_ref": "docs/ecdlp-audit/ECDLP_AUDIT_PLAN.mock.json",
+    "scope": "Schema fixture using invented public artifact metadata only.",
+    "valid_from": null,
+    "expires_at": null,
+    "fixture_classes": [
+      "public_synthetic"
+    ],
+    "live_target_execution": false,
+    "secret_material": false,
+    "production_exploitation": false,
+    "transferable": false
+  },
+  "workload": {
+    "fixture_class": "public_synthetic",
+    "description": "One invented artifact manifest and expected digest set.",
+    "target_count": 4,
+    "target_manifest_ref": "mock://targets/evidence-001",
+    "target_manifest_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+    "reuse_group_uid": "reuse.mock.invalid-amortized",
+    "public_data_only": true,
+    "synthetic_or_known_answer": true,
+    "selection_rule": "The invented artifact identifiers were fixed before this receipt was written.",
+    "selection_frozen_before_execution": true
+  },
+  "environment": {
+    "environment_uid": "environment.mock.cpu.003",
+    "host_class": "invented-single-cpu",
+    "cpu": "mock-cpu",
+    "gpu": null,
+    "memory_bytes": 1073741824,
+    "os": "mock-os",
+    "toolchain": "mock-toolchain",
+    "isolation": "unknown",
+    "resource_cap": "Invented one-core, one-GiB cap.",
+    "captured_at": "2026-10-13T20:30:00Z"
+  },
+  "execution": {
+    "mode": "mock_fixture",
+    "attempt_uid": "attempt.mock.evidence.001",
+    "started_at": null,
+    "ended_at": null,
+    "outcome": "complete",
+    "exit_code": 0,
+    "command_argv": [
+      "mock-evidence-audit",
+      "--fixture",
+      "evidence-001"
+    ],
+    "seeds": [],
+    "repetitions": 1,
+    "concurrency": 1,
+    "cold_cache": "not_applicable",
+    "notes": "No command was executed; all values are invented schema examples."
+  },
+  "phase_records": [
+    {
+      "phase_id": "ingest-artifact-manifest",
+      "category": "setup",
+      "accounting_class": "cold_only",
+      "description": "Invented manifest parsing and identity normalization.",
+      "target_dependent": false,
+      "reused": false,
+      "attempts": 1,
+      "successes": 1,
+      "costs": [
+        {
+          "metric": "wall_time",
+          "value": 2,
+          "unit": "milliseconds",
+          "status": "modeled",
+          "source": "invented fixture",
+          "sample_count": 1,
+          "uncertainty": "No measurement."
+        }
+      ],
+      "included_in_boundaries": [
+        "cold_start"
+      ],
+      "artifact_refs": [
+        "artifact.mock.evidence.manifest"
+      ]
+    },
+    {
+      "phase_id": "reconcile-evidence",
+      "category": "replay",
+      "accounting_class": "online_target_dependent",
+      "description": "Invented target-specific digest and identity reconciliation.",
+      "target_dependent": true,
+      "reused": false,
+      "attempts": 1,
+      "successes": 1,
+      "costs": [
+        {
+          "metric": "wall_time",
+          "value": 7,
+          "unit": "milliseconds",
+          "status": "modeled",
+          "source": "invented fixture",
+          "sample_count": 1,
+          "uncertainty": "No measurement."
+        }
+      ],
+      "included_in_boundaries": [
+        "cold_start",
+        "online_single_target"
+      ],
+      "artifact_refs": [
+        "artifact.mock.evidence.manifest"
+      ]
+    }
+  ],
+  "accounting_boundaries": {
+    "cold_start": {
+      "status": "modeled",
+      "denominator_targets": 1,
+      "included_phase_ids": [
+        "ingest-artifact-manifest",
+        "reconcile-evidence"
+      ],
+      "excluded_phase_ids": [],
+      "totals": [
+        {
+          "metric": "wall_time",
+          "value": 9,
+          "unit": "milliseconds",
+          "status": "modeled",
+          "source": "sum of invented phases",
+          "sample_count": 1,
+          "uncertainty": "No measurement."
+        }
+      ],
+      "formula": "ingest-artifact-manifest + reconcile-evidence",
+      "complete": true,
+      "exclusions": []
+    },
+    "online_single_target": {
+      "status": "modeled",
+      "denominator_targets": 1,
+      "included_phase_ids": [
+        "reconcile-evidence"
+      ],
+      "excluded_phase_ids": [
+        "ingest-artifact-manifest"
+      ],
+      "totals": [
+        {
+          "metric": "wall_time",
+          "value": 7,
+          "unit": "milliseconds",
+          "status": "modeled",
+          "source": "invented target phase",
+          "sample_count": 1,
+          "uncertainty": "No measurement."
+        }
+      ],
+      "formula": "reconcile-evidence",
+      "complete": true,
+      "exclusions": [
+        "Cold manifest ingestion is separately charged."
+      ]
+    },
+    "amortized": {
+      "enabled": true,
+      "target_count": null,
+      "reuse_group_uid": "reuse.mock.invalid-amortized",
+      "reusable_phase_ids": [
+        "ingest-artifact-manifest"
+      ],
+      "per_target_phase_ids": [
+        "reconcile-evidence"
+      ],
+      "total_costs": [
+        {
+          "metric": "wall_time",
+          "value": 30,
+          "unit": "milliseconds",
+          "status": "modeled",
+          "source": "invented invalid fixture",
+          "sample_count": 1,
+          "uncertainty": "No measurement."
+        }
+      ],
+      "per_target_costs": [
+        {
+          "metric": "wall_time",
+          "value": 7.5,
+          "unit": "milliseconds",
+          "status": "modeled",
+          "source": "invented invalid fixture",
+          "sample_count": 4,
+          "uncertainty": "No measurement."
+        }
+      ],
+      "allocation_formula": "(ingest-artifact-manifest + 4 * reconcile-evidence) / 4",
+      "assumptions": [
+        "Four invented targets would share ingestion."
+      ],
+      "secondary_only": true
+    }
+  },
+  "failure_accounting": {
+    "attempts_total": 2,
+    "successful_attempts": 2,
+    "unsuccessful_searches": 0,
+    "timeouts": 0,
+    "ooms": 0,
+    "errors": 0,
+    "invalid_results": 0,
+    "budget_exhaustions": 0,
+    "failed_costs_included_in": [
+      "separate_reported_cost"
+    ],
+    "failure_artifact_refs": [],
+    "search_boundary": "One invented artifact manifest; no conclusion beyond this fixture.",
+    "universal_nonexistence_claim": false
+  },
+  "duplicate_accounting": {
+    "candidates_generated": 2,
+    "candidates_retained": 2,
+    "duplicates_detected": 0,
+    "invalid_candidates": 0,
+    "deduplication_key": "mock artifact UID plus digest",
+    "deduplication_stage": "during invented manifest ingestion",
+    "duplicate_cost_charged": true,
+    "artifact_refs": [
+      "artifact.mock.evidence.manifest"
+    ]
+  },
+  "memory_accounting": {
+    "measurements": [
+      {
+        "metric": "peak_rss",
+        "scope": "invented whole process",
+        "status": "modeled",
+        "value_bytes": 4096,
+        "tool": "invented counter",
+        "sample_count": 1,
+        "unknown_reason": null
+      }
+    ],
+    "aggregate_scope": "One invented process.",
+    "concurrent_processes": 1,
+    "resource_cap_enforced": false
+  },
+  "matched_control": {
+    "status": "not_applicable",
+    "control_receipt_uid": null,
+    "same_subject": false,
+    "same_target_set": false,
+    "same_fixture_class": false,
+    "same_authorization_envelope": false,
+    "same_environment_class": false,
+    "same_resource_cap": false,
+    "same_operation_unit": false,
+    "separate_complete_runs": false,
+    "best_of_component_mixing": false,
+    "differences": [
+      "This fixture records a single integrity check, not a comparison."
+    ],
+    "rationale": "No control is meaningful for this shape-only record."
+  },
+  "uncertainty": {
+    "method": "No statistical method; all quantities are invented.",
+    "sample_count": 1,
+    "statistic": "illustrative point value",
+    "interval": null,
+    "confidence_or_coverage": "not applicable to mock data",
+    "limitations": [
+      "The receipt records no audit and establishes no evidence defect or integrity guarantee."
+    ]
+  },
+  "evidence": {
+    "source_revision": "mock-source-revision",
+    "build_identity": "mock-build-identity",
+    "configuration_identity": "mock-configuration-identity",
+    "dependency_identity": "mock-dependency-identity",
+    "raw_output_ref": "mock://raw/evidence-001",
+    "replay_receipt_ref": null,
+    "artifacts": [
+      {
+        "artifact_uid": "artifact.mock.evidence.manifest",
+        "path_or_uri": "mock://raw/evidence-001",
+        "sha256": null,
+        "role": "Invented placeholder, not an immutable manifest.",
+        "immutable": false
+      }
+    ],
+    "independent_replay": false
+  },
+  "result": {
+    "execution_outcome": "complete",
+    "requirement_status": "partial",
+    "correctness_verification": "not_run",
+    "outcome_class": "accounting_fixture_only",
+    "observed_result": "Intentional negative fixture: enabled amortization omits its denominator.",
+    "claim_status": "unknown",
+    "evidence_maturity": "E0",
+    "interpretation_category": "descriptive_only",
+    "claim_boundary": "Schema fixture only; not evidence of an integrity defect or a successful audit.",
+    "not_established": [
+      "artifact integrity",
+      "provenance finding",
+      "independent replay",
+      "historical completeness"
+    ],
+    "universal_nonexistence_claim": false,
+    "full_solver_claim": false
+  },
+  "open_obligations": [
+    "Implement digest, identity, and immutable-artifact semantic checks.",
+    "Require independent replay before any evidence-integrity conclusion."
+  ]
+}

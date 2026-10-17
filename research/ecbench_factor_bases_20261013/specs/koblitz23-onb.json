@@ -1,0 +1,81 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "factor-base panel: Koblitz n=23 a=1 onb-weight vs cyclotomic vs subspace (mitm yield)",
+  "description": "Low-HW ONB weight-class base beside cyclotomic and subspace controls on the same curve as k23-cyc. mitm-frobenius for folded bases; mitm for subspace. Not a performance claim.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "koblitz",
+        "a": 1,
+        "n": 23
+      }
+    ],
+    "targets_per_curve": 1,
+    "target_seed": 20261013
+  },
+  "arms": [
+    {
+      "name": "rho-frob",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius"
+      }
+    },
+    {
+      "name": "ic-onb-w1",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "onb-weight:w=1",
+          "oracle": "mitm-frobenius:m=2",
+          "max_trials": "100000"
+        }
+      }
+    },
+    {
+      "name": "ic-onb-w2",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "onb-weight:w=2,columns=8",
+          "oracle": "mitm-frobenius:m=2",
+          "max_trials": "100000"
+        }
+      }
+    },
+    {
+      "name": "ic-cyc-w1",
+      "role": "control",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "cyclotomic:w=1",
+          "oracle": "mitm-frobenius:m=2",
+          "max_trials": "100000"
+        }
+      }
+    },
+    {
+      "name": "ic-subspace",
+      "role": "control",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=4",
+          "oracle": "mitm:m=2",
+          "max_trials": "100000"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 23,
+    "isolation_required": "L0",
+    "timeout_seconds": 300
+  }
+}

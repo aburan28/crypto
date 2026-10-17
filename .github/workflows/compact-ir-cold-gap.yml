@@ -24,10 +24,13 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            tools/volcano-cli/
+            isogeny_algos/
             docs/ic/calibration.json
             docs/ic/boundary_targets.json
             docs/ecbench/schema.sql
             docs/curves/registry.json
+            docs/curves/standards/parameters.json
             src
             examples/koblitz_orbit_dlp_s3_batch.rs
             examples/koblitz_rho_batch_ks_v2_n61.rs
@@ -103,10 +106,13 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            tools/volcano-cli/
+            isogeny_algos/
             docs/ic/calibration.json
             docs/ic/boundary_targets.json
             docs/ecbench/schema.sql
             docs/curves/registry.json
+            docs/curves/standards/parameters.json
             src
             examples/koblitz_orbit_dlp_s3_batch.rs
             examples/koblitz_rho_batch_ks_v2_n61.rs

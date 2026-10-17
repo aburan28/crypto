@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 470" role="img" aria-label="X25519 correctness validation flow">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect width="960" height="470" fill="#f8fafc"/>
+  <text x="36" y="45" font-family="Helvetica,Arial,sans-serif" font-size="26" font-weight="700" fill="#0f172a">X25519 fixed-radix validation</text>
+  <text x="36" y="73" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="#475569">Correctness checks only · Apple ARM64 · Rust 1.93.1 · no timing result</text>
+  <rect x="38" y="112" width="260" height="105" rx="12" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <text x="58" y="143" font-family="Helvetica,Arial,sans-serif" font-size="18" font-weight="700" fill="#1e3a8a">Radix 2^51 field</text>
+  <text x="58" y="171" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="#1e3a8a">add · subtract · multiply</text>
+  <text x="58" y="194" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="#1e3a8a">square · inversion chain</text>
+  <rect x="355" y="112" width="255" height="105" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="375" y="143" font-family="Helvetica,Arial,sans-serif" font-size="18" font-weight="700" fill="#065f46">1,000 generated rows</text>
+  <text x="375" y="171" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="#065f46">raw values retained</text>
+  <text x="375" y="194" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="#065f46">deterministic seed</text>
+  <rect x="666" y="112" width="255" height="105" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="686" y="143" font-family="Helvetica,Arial,sans-serif" font-size="18" font-weight="700" fill="#065f46">Python GF(p) oracle</text>
+  <text x="686" y="171" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="#065f46">1,000 / 1,000 passed</text>
+  <text x="686" y="194" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="#065f46">p = 2^255 − 19</text>
+  <line x1="298" y1="164" x2="355" y2="164" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="610" y1="164" x2="666" y2="164" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="38" y="255" width="260" height="105" rx="12" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <text x="58" y="286" font-family="Helvetica,Arial,sans-serif" font-size="18" font-weight="700" fill="#1e3a8a">X25519 ladder</text>
+  <text x="58" y="314" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="#1e3a8a">branchless source swap</text>
+  <text x="58" y="337" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="#1e3a8a">RFC 7748 encoding</text>
+  <rect x="355" y="255" width="255" height="105" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="375" y="286" font-family="Helvetica,Arial,sans-serif" font-size="18" font-weight="700" fill="#065f46">100 generated outputs</text>
+  <text x="375" y="314" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="#065f46">2 RFC vectors passed</text>
+  <text x="375" y="337" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="#065f46">raw values retained</text>
+  <rect x="666" y="255" width="255" height="105" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="686" y="286" font-family="Helvetica,Arial,sans-serif" font-size="18" font-weight="700" fill="#065f46">Integer ladder oracle</text>
+  <text x="686" y="314" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="#065f46">100 / 100 passed</text>
+  <text x="686" y="337" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="#065f46">separate implementation</text>
+  <line x1="298" y1="307" x2="355" y2="307" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="610" y1="307" x2="666" y2="307" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="38" y="396" width="883" height="47" rx="10" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+  <text x="58" y="425" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="#9a3412">Open gates: release library test · compiled-code timing review · isolated ARM/x86 A/A and A/B panels</text>
+</svg>

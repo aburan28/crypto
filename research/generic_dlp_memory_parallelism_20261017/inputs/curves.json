@@ -1,0 +1,156 @@
+{
+  "schema": "generic-dlp-curves/v1",
+  "what_this_is": "Frozen inputs of research/generic_dlp_memory_parallelism_20261017 (PROTOCOL.md). bsgs: the W11 study curves y^2 = x^3 + 7 (research/lit2026_w11_generic_engineering_20261011/reports/run-20261011T2049Z/raw/bsgs_curves.jsonl, generator (Qx, Qy)). rho: prime_fast::find_a3_curve(bits, 3). For every curve PARI/GP 2.15.4 ellcard(E) == group_order, isprime(group_order), and [n]G = O were checked before freezing.",
+  "curves": [
+    {
+      "name": "generic-dlp-20261017-bsgs-40",
+      "role": "bsgs",
+      "bits": 40,
+      "p": 1099511624389,
+      "a": 0,
+      "b": 7,
+      "group_order": 1099510121431,
+      "subgroup_order": 1099510121431,
+      "cofactor": 1,
+      "generator": {
+        "x": 1094085883958,
+        "y": 322694972088
+      }
+    },
+    {
+      "name": "generic-dlp-20261017-bsgs-44",
+      "role": "bsgs",
+      "bits": 44,
+      "p": 17592186040927,
+      "a": 0,
+      "b": 7,
+      "group_order": 17592187310023,
+      "subgroup_order": 17592187310023,
+      "cofactor": 1,
+      "generator": {
+        "x": 15614917454847,
+        "y": 8008055241781
+      }
+    },
+    {
+      "name": "generic-dlp-20261017-bsgs-48",
+      "role": "bsgs",
+      "bits": 48,
+      "p": 281474976707983,
+      "a": 0,
+      "b": 7,
+      "group_order": 281474961723409,
+      "subgroup_order": 281474961723409,
+      "cofactor": 1,
+      "generator": {
+        "x": 36310810106433,
+        "y": 93720629148040
+      }
+    },
+    {
+      "name": "generic-dlp-20261017-bsgs-52",
+      "role": "bsgs",
+      "bits": 52,
+      "p": 4503599627369383,
+      "a": 0,
+      "b": 7,
+      "group_order": 4503599759134657,
+      "subgroup_order": 4503599759134657,
+      "cofactor": 1,
+      "generator": {
+        "x": 1523448970925605,
+        "y": 1124496103444641
+      }
+    },
+    {
+      "name": "generic-dlp-20261017-rho-32",
+      "role": "rho",
+      "bits": 32,
+      "p": 4294967291,
+      "a": 4294967288,
+      "b": 31,
+      "group_order": 4294959973,
+      "subgroup_order": 4294959973,
+      "cofactor": 1,
+      "generator": {
+        "x": 2,
+        "y": 2120051858
+      }
+    },
+    {
+      "name": "generic-dlp-20261017-rho-36",
+      "role": "rho",
+      "bits": 36,
+      "p": 68719476731,
+      "a": 68719476728,
+      "b": 33,
+      "group_order": 68719022539,
+      "subgroup_order": 68719022539,
+      "cofactor": 1,
+      "generator": {
+        "x": 2,
+        "y": 51741851039
+      }
+    },
+    {
+      "name": "generic-dlp-20261017-rho-40",
+      "role": "rho",
+      "bits": 40,
+      "p": 1099511627563,
+      "a": 1099511627560,
+      "b": 56,
+      "group_order": 1099512551701,
+      "subgroup_order": 1099512551701,
+      "cofactor": 1,
+      "generator": {
+        "x": 1,
+        "y": 15267301451
+      }
+    },
+    {
+      "name": "generic-dlp-20261017-rho-44",
+      "role": "rho",
+      "bits": 44,
+      "p": 17592186044399,
+      "a": 17592186044396,
+      "b": 95,
+      "group_order": 17592192476281,
+      "subgroup_order": 17592192476281,
+      "cofactor": 1,
+      "generator": {
+        "x": 1,
+        "y": 8379642404149
+      }
+    },
+    {
+      "name": "generic-dlp-20261017-rho-48",
+      "role": "rho",
+      "bits": 48,
+      "p": 281474976710591,
+      "a": 281474976710588,
+      "b": 9,
+      "group_order": 281474991897067,
+      "subgroup_order": 281474991897067,
+      "cofactor": 1,
+      "generator": {
+        "x": 1,
+        "y": 111984877719828
+      }
+    },
+    {
+      "name": "generic-dlp-20261017-rho-52",
+      "role": "rho",
+      "bits": 52,
+      "p": 4503599627370323,
+      "a": 4503599627370320,
+      "b": 124,
+      "group_order": 4503599513826641,
+      "subgroup_order": 4503599513826641,
+      "cofactor": 1,
+      "generator": {
+        "x": 2,
+        "y": 1220001265989541
+      }
+    }
+  ]
+}

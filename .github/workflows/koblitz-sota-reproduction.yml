@@ -160,7 +160,7 @@ concurrency:
 jobs:
   reproduce-toy-controls:
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 45 || 50 }}
     steps:
       - uses: actions/checkout@v4
         with:

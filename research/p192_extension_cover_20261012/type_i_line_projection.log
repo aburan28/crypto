@@ -1,0 +1,78 @@
+constructing native F_(p^6) and quartic generator point
+{
+  "boundary": "elliptic quotient coordinate map only; genus-three Jacobian conorm and norm remain unimplemented",
+  "cleared_quartic_identity_verified": true,
+  "conjugate_quartic_rhs_square_over_Fp6": [
+    true,
+    true
+  ],
+  "elliptic_root_assignment_Fp3": [
+    [
+      "0",
+      "1"
+    ],
+    [
+      "5379329309169822858095324704890017497689533679363080256926",
+      "61093507738149796090974284332527227239152174053195053925",
+      "3587437080801769334788127070762657667239141860708784832816"
+    ],
+    [
+      "897772426216857905740464718317648918394375021027244704353",
+      "6216008227648530967744815138875139188844756526337129907353",
+      "2689664654584911429047662352445008748844766839681540128463"
+    ]
+  ],
+  "generator_quartic_X_Fp6": "1466025388247399056090932428678278972211003425396634073847*k^5 + 6216812045859230809190733133499267190912282108086088262426*k^4 + 6216812045859230809190733133499267190912282108086088262426*k^3 + 1466025388247399056090932428678278972211003425396634073847*k^2 + 1798766687331237959365118667589426155896190438506569955535",
+  "generator_quartic_Y_Fp6": "2644747628054511612362662128877882627650744399345925779854*k^5 + 587083002427738878326310362827130078847561804764634441024*k^4 + 587083002427738878326310362827130078847561804764634441024*k^3 + 2644747628054511612362662128877882627650744399345925779854*k^2 + 1290720780097531465770401953704952889135639622968463636330",
+  "generator_quartic_equation_verified": true,
+  "infinity_root_Fp3": [
+    "0",
+    "1"
+  ],
+  "inverse_generator_replay_verified": true,
+  "kappa_Fp6": "5312104573522375744080597291703252532897525754385013773912*k^5 + 2656793945320609144122676352718541030844366227065374195529*k^4 + 2656793945320609144122676352718541030844366227065374195529*k^3 + 5312104573522375744080597291703252532897525754385013773912*k^2 + 1283030364104431776322456765213671003374502770597175369849",
+  "kappa_squared_Fp6": "105224761814413175140247364031573860684447601115370522505*k^5 + 1369893259101746801787911335610834687497627012800826044765*k^4 + 1369893259101746801787911335610834687497627012800826044765*k^3 + 105224761814413175140247364031573860684447601115370522505*k^2 + 5135429902842557095913795449466988138750736879814419018620",
+  "mobius_C_Fp3": [
+    "756428815275971909735165916674226904144662252814236341564",
+    "985232718155019496333530151346343215608312224435244292497",
+    "5556151663426207545460493145915776773182769476121402103469"
+  ],
+  "mobius_D_Fp3": [
+    "2589731280963160040528480293729015732725622623413752825099",
+    "5591630406741706236820362785298114034426292504666715587223",
+    "3929051235071475032126763220238849535316737884208314123006"
+  ],
+  "mobius_models_found": 4,
+  "source_sha256": "c0f68c219797fdc185286e9418b7961084d2b87cc261589696032416ffbb7a4b",
+  "status": "verified_type_i_quartic_generator_coordinates",
+  "type_i_source_sha256": "a0e4449cbc7db61dfd10c37801b23784b25bec992ec4dca88790bf8016d4529f"
+}
+building two rational fibers and six Frobenius pairs
+{
+  "all_fiber_points_on_descended_model": true,
+  "boundary": "exact point-level conorm and nonzero r-torsion deduction; genus-three Jacobian reduction and nonzero Frobenius-norm class still need separate checks",
+  "conorm_order_deduction": "pullback of -G is nonzero and r-torsion by push-pull=[2] and r odd prime; the genus-three class is not reduced",
+  "conorm_pushforward_equals_minus_2G": true,
+  "conorm_pushforward_nonzero_and_r_torsion": true,
+  "fiber_cardinality_each": 2,
+  "fiber_sha256": "b6767c53b19a1300839aa21ba6a5cb881d7e7bec6c150c9fbf0ef0679247d9b5",
+  "formal_conorm": "Pplus(G)+Pminus(G)-Pplus(2G)-Pminus(2G)",
+  "formal_norm_to_Fp2": "sum of q^i-Frobenius translates of the formal conorm for i=0,1,2; q=p^2",
+  "frobenius_q_orbits_return_after_three_steps": true,
+  "generator_map_source_sha256": "c0f68c219797fdc185286e9418b7961084d2b87cc261589696032416ffbb7a4b",
+  "group_relation": "G - 2G = -G, order r on P-192",
+  "quotient_image_of_each_fiber_checked": true,
+  "r_prime_and_odd_checked": true,
+  "source_sha256": "62f7025733aaeeee3467f466191aa32b172223a4d1af1df73453c41caff221d7",
+  "status": "verified_type_i_point_level_conorm_norm"
+}
+LINE_PROJECTION_PROGRESS 1000/9784
+LINE_PROJECTION_PROGRESS 2000/9784
+LINE_PROJECTION_PROGRESS 3000/9784
+LINE_PROJECTION_PROGRESS 4000/9784
+LINE_PROJECTION_PROGRESS 5000/9784
+LINE_PROJECTION_PROGRESS 6000/9784
+LINE_PROJECTION_PROGRESS 7000/9784
+LINE_PROJECTION_PROGRESS 8000/9784
+LINE_PROJECTION_PROGRESS 9000/9784
+{"base141_signed_matches": 0, "base_key_sha256": "ad54c31a8ea86fa9dd8cce14a6a0d7c35c9eeaa032e8521a3676a3083ed5280d", "base_projected_distinct": 141, "base_projection_ns_unisolated": 16103080750, "base_rational_points": 141, "boundary": "First quotient for every new point; all 141 old and 64 new points checked in all three quotient coordinates. Local elapsed diagnostics are not isolated performance results. A full relation collector and target cost remain separate gates.", "candidate_id": null, "distinct_base_pair_sums": 9870, "field_prime": "6277101735386680763835789423207666416083908700390324961279", "gp_log_sha256": "8abe1c71be73143e98eb64acd8609561cf2ded4da04ee566c25a8c0337b4d46f", "gp_source_sha256": "fe0530d3887adbcb2615e35caf2b7ff669e8396aacb9e5116f6469eb0868f8d0", "input_sha256": {"base_points": "eba1cafb724ce2eec84be550762fb10574980f77f4997143d5c58f0c9467d82c", "new_point_pairs": "dadf92a7d40b588ed12e68ca4fdc51588061fdf804e435787a91834c7f135098", "new_points": "2392f42f5fe8ac9d253c321c03312af4a3a287854b128d0019d7388acb5faad5"}, "inverse_source_sha256": "22df81d318798ed1385d8ea20e55e02ecf583109ccd9a66ad36bac2dd61c2e80", "new_exact_repeats": 0, "new_key_sha256": "c139b81dfc72e3d7a71b37d4512c2a1b22082fd4e1721b84e912576e5764005a", "new_line_rational_points": 9784, "new_projected_distinct": 9784, "new_projected_sign_distinct": 9784, "new_projection_ns_unisolated": 473173770708, "new_signed_repeats": 0, "new_three_component_controls": 64, "new_zero": 0, "old16_controls": 16, "old16_signed_matches": 0, "pair_lines": 9870, "pair_sum_ns_unisolated": 636232208, "runtime_sha256": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01", "source_sha256": "52ef5c1c6a4ad485b930752e54ca89313bcebd52e6dbd32a99016592c8cbf578", "status": "verified_line_support_first_quotient_projection_screen", "subgroup_order": "6277101735386680763835789423176059013767194773182842284081"}

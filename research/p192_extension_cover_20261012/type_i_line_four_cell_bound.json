@@ -1,0 +1,26 @@
+{
+  "accepted_nonzero_scalar_lower_bound_each_cell": "1569275433846670190958947353987675545133315652035359680560",
+  "all_cell_error_bound": "7225356833233932165041403561837",
+  "ceil_sqrt_prime": "79228162514264337593543950336",
+  "field_prime": "6277101735386680763835789423207666416083908700390324961279",
+  "first_character_sum_absolute_bound": "1140801677516414653517097981903",
+  "ideal_uniform_conditioned_64_query_union_bound_lt_two_pow_minus_165": true,
+  "ideal_uniform_conditioned_single_query_hit_lt_two_pow_minus_171": true,
+  "input_sha256": {
+    "density": "fd0a47cf4aecf736b1852d133fd384e30d9584114761bac6495f803d4210ca29",
+    "support": "5fe0bbac438419564d73165b8e0ad6b01db5c64d95fbd7c24ebacb0bc51e0a4e"
+  },
+  "max_cell_support": 364824,
+  "product_character_sum_absolute_bound": "4943753478201102858007207598031",
+  "proof_hypotheses": "The same Hasse-Weil bounds for the genus-7 and genus-31 character covers and the identity exception at most one apply to every sign pair; doubling permutes the odd-prime-order elliptic group.",
+  "source_sha256": "00f7d6d848d2acf88dc8cc830d2c7893c504ca70a2868b9922313615d72ac198",
+  "status": "p192_four_cell_character_bound_arithmetic_certificate",
+  "subgroup_order": "6277101735386680763835789423176059013767194773182842284081",
+  "support_by_cell": {
+    "++": 364036,
+    "+-": 364258,
+    "-+": 363786,
+    "--": 364824
+  },
+  "trace": "31607402316713927207482677199"
+}

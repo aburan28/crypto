@@ -1,0 +1,8 @@
+{
+  "base_sha256": "c2268c3e70dcf88c15e56f4ce399a7877fe6feed1d2a27468149579a013607ec",
+  "candidate_sha256": "6a574161802df0e73953cabf81d53ae3678a5762f49b663ef680f4a6827f1687",
+  "ok": true,
+  "records": 2,
+  "schema": "volcano-ff-k1-replay-match/v1",
+  "scope": "Exact JSON equality after excluding elapsed_ns and end_to_end_ns at every level; includes identities, outcomes, relations and all operation counters. Same binary, not independent implementation."
+}

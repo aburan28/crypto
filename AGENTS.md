@@ -24,6 +24,11 @@
   and host, with the outputs checked equal. A result that has not been
   compared is not yet a claim of being the fastest, and a loss is reported
   as a loss.
+- **Every big improvement updates the leaderboard** (owner, 2026-10-15).
+  A PR that lands a large measured gain, whether a whole pipeline, a phase
+  or a component (an engine, filter, oracle, solver or kernel), regenerates
+  `docs/ic-leaderboard.html` and its twins in the same PR (§7b), even when
+  no row of tables A–C moves; it is not a follow-up.
 - **Conductor:** run `conductor check --summary "…" --scope path:…` before
   editing; report scope expansion before editing outside reserved paths. Do
   not publish chat transcripts or secrets as task metadata.
@@ -399,6 +404,35 @@ verifiers, replay tools, and research result generation.
 - Older instructions that name Python scripts describe legacy tooling; they
   do not grant an exception. Preserve their mathematical contracts, fixtures,
   and accounting requirements in the native replacement.
+
+## Model tiers
+
+Owner rule, 2026-10-17: one model-tier topology across the owner's
+repositories. The reference design is
+[`docs/model-tiers.md`](https://github.com/aburan28/crypto-autoresearcher/blob/main/docs/model-tiers.md)
+in aburan28/crypto-autoresearcher.
+
+| tier | does here | Anthropic |
+| --- | --- | --- |
+| frontier | design, interpretation, claims, breakthrough review | Mythos (`claude-mythos-5`), Fable 5.1 (`claude-fable-5-1`) |
+| core | the same when frontier is not needed; coordination and review | Opus 5.5 (`claude-opus-5-5`); OpenAI, GLM 5.3 and Qwen equivalents |
+| director | compiles a decided experiment into a frozen command card, then assesses the run | Sonnet 5.5 (`claude-sonnet-5-5`), [`experiment-director`](.claude/agents/experiment-director.md) |
+| mechanical | runs the card, relays tool output verbatim, computes nothing, refuses anything underspecified | Haiku 5.5 (`claude-haiku-5-5`, effort low), [`executor-mechanical`](.claude/agents/executor-mechanical.md) |
+
+- **Frontier and core keep the reasoning**: the spec and preregistration,
+  analysis (`ecbench compare` and `table` read-outs), the §5a pricing band and
+  every cross-method ranking, success-criterion classification, claims, and
+  every PR decision (open, fix, merge).
+- **The relay.** Subagents do not nest in Claude Code, so the main session
+  does every dispatch: it dispatches `experiment-director` in compile mode,
+  relays the card it returns to `executor-mechanical` verbatim (adding
+  nothing), then dispatches `experiment-director` again in assess mode with
+  the executor's returned text. A card with a `specification_error` is not
+  relayed; the reasoning tier fixes the spec.
+- **The mechanical tier's output is an observation, never a result claim.**
+  The director's assessment says only whether the run executed as specified
+  and the relay was verbatim. What the numbers mean is decided by the
+  frontier or core tier under the measurement rules below.
 
 ## Default workflow: open the PR, check in, and land it
 
@@ -813,7 +847,13 @@ until the leaderboard shows it**, in the same pull request.
   - a reference re-matched;
   - a rule change that redefines the primary comparison, as the
     one-target rule did;
-  - a change to `docs/curves/registry.json`, which the page's roster reads.
+  - a change to `docs/curves/registry.json`, which the page's roster reads;
+  - a big improvement in a phase or component (an engine, filter, oracle,
+    solver or kernel) that moves no whole-pipeline row (owner, 2026-10-15):
+    it gets its own section outside tables A–C, generated from the study's
+    frozen summary with the before figure kept and its class (usually
+    engineering) named, as the linear-algebra engine section was added for
+    `research/la_engines_20261014`.
 - **How.** The page is generated, never edited by hand.
   - Point `SOURCES` in `scripts/build_ic_leaderboard.py` at the round's
     frozen files.

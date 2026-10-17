@@ -43,6 +43,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            tools/volcano-cli/
+            isogeny_algos/
             Cargo.lock
             docs/ic/calibration.json
             docs/ic/boundary_targets.json
@@ -52,6 +54,7 @@ jobs:
             experiments/koblitz-single-target-n83-20261006
             docs/ecbench/schema.sql
             docs/curves/registry.json
+            docs/curves/standards/parameters.json
             src
             examples/koblitz_orbit_dlp_fast.rs
             examples/koblitz_orbit_dlp_fast_online.rs
@@ -92,11 +95,14 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            tools/volcano-cli/
+            isogeny_algos/
             Cargo.lock
             docs/ic/calibration.json
             docs/ic/boundary_targets.json
             docs/ecbench/schema.sql
             docs/curves/registry.json
+            docs/curves/standards/parameters.json
             src
             examples/koblitz_orbit_dlp_fast.rs
             examples/koblitz_orbit_dlp_fast_online.rs

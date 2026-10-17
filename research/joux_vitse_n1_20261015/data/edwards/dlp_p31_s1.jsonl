@@ -1,0 +1,12 @@
+{"base_points":7,"d":[28,22,8,13,12],"fp_muls_per_add":452.0,"kind":"setup","log2_n":22.77131596832236,"ms":691.553787,"n":"7158947","p":31,"seed":1,"sym_precompute_muls":9950526,"trace_record_muls":56990361,"trace_record_tries":1,"trace_steps":13}
+{"k_secret":"1720253","kind":"instance","n":"7158947","p":31,"seed":1}
+{"expected_walk_ops":3353.3934531037876,"fp_muls":1748336,"fp_muls_per_op":452.0,"group_ops":3868,"k":"1720253","kind":"rho","p":31,"seed":1,"verified":true}
+{"a":"604425","b":"6969438","kind":"relation","p":31,"quad":{"eps":1,"terms":[[2,1],[4,1],[5,1],[6,-1]]},"seed":1,"trial":20862,"verified":true}
+{"a":"4915946","b":"665042","kind":"relation","p":31,"quad":{"eps":1,"terms":[[0,1],[3,1],[5,-1],[6,1]]},"seed":1,"trial":54279,"verified":true}
+{"a":"5610046","b":"2062091","kind":"relation","p":31,"quad":{"eps":1,"terms":[[2,1],[3,-1],[4,1],[5,-1]]},"seed":1,"trial":61691,"verified":true}
+{"a":"7052816","b":"796370","kind":"relation","p":31,"quad":{"eps":0,"terms":[[0,-1],[1,1],[2,-1],[5,1]]},"seed":1,"trial":61907,"verified":true}
+{"a":"5328722","b":"5191806","kind":"relation","p":31,"quad":{"eps":1,"terms":[[0,-1],[2,1],[3,-1],[4,-1]]},"seed":1,"trial":84254,"verified":true}
+{"a":"1589028","b":"1443694","kind":"relation","p":31,"quad":{"eps":0,"terms":[[1,-1],[4,-1],[5,1],[6,-1]]},"seed":1,"trial":86145,"verified":true}
+{"a":"3092977","b":"968157","kind":"relation","p":31,"quad":{"eps":0,"terms":[[0,-1],[2,1],[3,1],[6,-1]]},"seed":1,"trial":100855,"verified":true}
+{"a":"539489","b":"6822579","kind":"relation","p":31,"quad":{"eps":0,"terms":[[1,1],[2,1],[4,1],[6,1]]},"seed":1,"trial":105332,"verified":true}
+{"agg":{"consistent":3195,"e_solutions":3351,"f4_muls":5926174181373,"not_split":3254,"replay_mismatch":3197,"resolve_group_ops":236,"roots_muls":1032776,"target_gen_muls":3195427108,"undetermined":0,"weil_muls":1521378048},"k":"1720253","kind":"ic","linear_algebra_mulmods":405,"ms":2977891.4027279997,"online_muls":5930892126382,"oracle_disagree":0,"p":31,"ratio_online_ic_over_expected_rho_walk":3912884.9450509716,"ratio_online_ic_over_rho":3392306.814240512,"relations":8,"relations_unverified":0,"resolve_muls":106672,"seed":1,"trials":105344,"unknowns":8,"verified":true}

@@ -1,0 +1,67 @@
+   Compiling isogeny_algos v0.1.0 (/workspace/crypto/isogeny_algos)
+    Finished `release` profile [optimized] target(s) in 2m 00s
+     Running unittests src/lib.rs (isogeny_algos/target/release/deps/isogeny_algos-65b786a8bd7d996d)
+
+running 23 tests
+test cm::tests::class_numbers_from_forms ... ok
+test eigen_seta::tests::diagonal_masks_apply_coordinatewise ... ok
+test eigen_seta::tests::toy_parameter_checks_are_fail_closed ... ok
+test eigen_seta_toy::tests::invalid_parameters_rejected ... ok
+test cm::tests::small_hilbert_polys_match_known_values ... ok
+test eigen_seta_toy::tests::jacobian_start_dual_quotient_exposes_intermediate_product ... ok
+test eigen_seta_toy::tests::cm_key_and_all_sender_indices_round_trip ... ok
+test eigen_seta_toy::tests::two_adic_four_division_matches_basis_coordinates ... ok
+test eigen_seta_toy::tests::two_halves_middle_automorphism_oracle ... ignored, bounded exploratory two-halves odd-torsion oracle; not a scalable decoder
+test eigen_seta_toy::tests::single_chain_decoder_multiple_keys ... ok
+test eigen_seta_toy::tests::special_key_single_chain_splits_and_payload_factors ... ok
+test find::modpoly::e4_tests::normalized_j_series_has_the_known_initial_coefficients ... ok
+test find::modpoly::e4_tests::sieve_matches_independent_divisor_enumeration ... ok
+test find::sea::recombination_tests::progression_bsgs_matches_exhaustive_search_including_low_order_steps ... ok
+test gf3n::tests::bitsliced_digits ... ok
+test gf3n::tests::moduli_match_exhaustive_scan ... ok
+test gf3n::tests::mul_inv_match_digit_schoolbook ... ok
+test gls_loop::tests::cheapest_loops_reproduce_known_values ... ok
+test gls_loop::tests::cm_generated_curve_has_requested_order_by_exhaustive_count ... ok
+test gls_loop::tests::loop_closes_and_maps_points_on_a_small_instance ... ok
+test find::modpoly::e4_tests::large_index_avoids_u64_cube_and_sum_overflow ... ok
+test eigen_seta_toy::tests::two_halves_oracle_decoder_multiple_keys ... ok
+test eigen_seta_toy::tests::ciphertext_kani_first_half_reaches_jacobian ... ok
+
+test result: ok. 22 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 1.90s
+
+     Running tests/api.rs (isogeny_algos/target/release/deps/api-278311100f5e86fa)
+
+running 7 tests
+test field_dispatch_handles_every_limb_boundary ... ok
+test isogenies_match_modular_roots_and_velu ... ok
+test cli_records_and_exit_codes ... ok
+test p224_small_low_limb_does_not_reject_modular_construction ... ok
+test counts_match_bsgs ... ok
+test p192_order_and_split_degree_maps_are_supported ... ok
+test standard_curves_certified_and_named_as_in_the_registry ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
+
+     Running tests/kernel.rs (isogeny_algos/target/release/deps/kernel-e0f521831c1bac90)
+
+running 3 tests
+test order_matches_naive ... ok
+test bsgs_order_consistent ... ok
+test three_kernel_algorithms_agree ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/sea.rs (isogeny_algos/target/release/deps/sea-5233b067de6e5943)
+
+running 8 tests
+test atkin_candidate_sets_partition ... ok
+test isogeny_cycles_give_t_mod_l_power ... ok
+test atkin_tower_eigenvalue_matches_true_trace ... ok
+test recombination_without_elkies_primes_matches_exhaustive_point_counts ... ok
+test sea_with_atkin_towers_matches_bsgs ... ok
+test atkin_degree_matches_gcd_definition ... ok
+test sea_matches_bsgs_at_40_and_61_bits ... ok
+test sea_at_128_bits ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.63s
+

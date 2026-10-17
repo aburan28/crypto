@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="180" viewBox="0 0 1000 180">
+<rect width="1000" height="180" fill="white"/>
+<g font-family="sans-serif" fill="#18364c" font-size="15">
+<text x="20" y="25" font-size="20" font-weight="bold">Executed diagnostic route: original C, largest prime subgroup r=7</text>
+<path d="M220 90H270M490 90H540M760 90H810" stroke="#256f9a" stroke-width="3"/>
+<g fill="#edf4f8" stroke="#256f9a"><rect x="20" y="53" width="200" height="76" rx="5"/><rect x="270" y="53" width="220" height="76" rx="5"/><rect x="540" y="53" width="220" height="76" rx="5"/><rect x="810" y="53" width="170" height="76" rx="5"/></g>
+<text x="38" y="80">EC generator / target</text><text x="38" y="107">cofactor projection</text>
+<text x="288" y="80">Reduced Tate / Miller</text><text x="288" y="107">shifted divisor, Fp</text>
+<text x="558" y="80">Projected prime base</text><text x="558" y="107">two-summand relations</text>
+<text x="826" y="80">Gauss mod 7</text><text x="826" y="107">Fp + EC checks</text>
+<text x="20" y="162">Two factor-base logs and one target log are unknowns. No rho/BSGS fallback. This is not NFS or integer-smoothness IC.</text>
+</g></svg>

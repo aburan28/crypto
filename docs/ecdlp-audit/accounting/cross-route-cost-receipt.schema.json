@@ -1,0 +1,851 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/aburan28/crypto/blob/main/docs/ecdlp-audit/accounting/cross-route-cost-receipt.schema.json",
+  "title": "Draft cross-route ECDLP audit cost receipt",
+  "description": "Strict non-authoritative WS7 draft. Conformance cannot promote a scientific, performance, solver, safety, or historical-completeness claim.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "record_state",
+    "receipt_uid",
+    "created_at",
+    "authoritative",
+    "promotion_allowed",
+    "claim_transition_allowed",
+    "route",
+    "route_registry_binding",
+    "identities",
+    "authorization",
+    "workload",
+    "environment",
+    "execution",
+    "phase_records",
+    "accounting_boundaries",
+    "failure_accounting",
+    "duplicate_accounting",
+    "memory_accounting",
+    "matched_control",
+    "uncertainty",
+    "evidence",
+    "result",
+    "open_obligations"
+  ],
+  "properties": {
+    "$schema": {"type": "string", "minLength": 1},
+    "schema_version": {"const": "ecdlp-cross-route-cost-receipt/v0.1-draft"},
+    "record_state": {"const": "mock_non_authoritative"},
+    "receipt_uid": {
+      "type": "string",
+      "pattern": "^urn:ecdlp-audit:cost-receipt:mock:[a-z0-9][a-z0-9._-]+$"
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "authoritative": {"const": false},
+    "promotion_allowed": {"const": false},
+    "claim_transition_allowed": {"const": false},
+    "route": {"$ref": "#/$defs/route"},
+    "route_registry_binding": {"$ref": "#/$defs/routeRegistryBinding"},
+    "identities": {"$ref": "#/$defs/identities"},
+    "authorization": {"$ref": "#/$defs/authorization"},
+    "workload": {"$ref": "#/$defs/workload"},
+    "environment": {"$ref": "#/$defs/environment"},
+    "execution": {"$ref": "#/$defs/execution"},
+    "phase_records": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/phase"}
+    },
+    "accounting_boundaries": {"$ref": "#/$defs/accountingBoundaries"},
+    "failure_accounting": {"$ref": "#/$defs/failureAccounting"},
+    "duplicate_accounting": {"$ref": "#/$defs/duplicateAccounting"},
+    "memory_accounting": {"$ref": "#/$defs/memoryAccounting"},
+    "matched_control": {"$ref": "#/$defs/matchedControl"},
+    "uncertainty": {"$ref": "#/$defs/uncertainty"},
+    "evidence": {"$ref": "#/$defs/evidence"},
+    "result": {"$ref": "#/$defs/result"},
+    "open_obligations": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "nullableSha256": {
+      "oneOf": [
+        {"$ref": "#/$defs/sha256"},
+        {"type": "null"}
+      ]
+    },
+    "nonemptyString": {"type": "string", "minLength": 1},
+    "stringList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "typedIdentity": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "uid", "revision"],
+          "properties": {
+            "status": {"const": "applicable"},
+            "uid": {"type": "string", "minLength": 1},
+            "revision": {"type": "string", "minLength": 1}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "uid", "revision", "reason"],
+          "properties": {
+            "status": {"const": "not_applicable"},
+            "uid": {"type": "null"},
+            "revision": {"type": "null"},
+            "reason": {"type": "string", "minLength": 1}
+          }
+        }
+      ]
+    },
+    "route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "route_uid",
+        "route_revision",
+        "route_class",
+        "family",
+        "description",
+        "adversary_model_uid",
+        "prerequisites",
+        "composed_route_uids",
+        "weakest_open_obligation"
+      ],
+      "properties": {
+        "route_uid": {"type": "string", "minLength": 1},
+        "route_revision": {"type": "string", "minLength": 1},
+        "route_class": {
+          "enum": [
+            "mathematical_transfer",
+            "generic_group",
+            "protocol_misuse",
+            "implementation_side_channel",
+            "fault_or_physical",
+            "parameter_provenance",
+            "supply_chain",
+            "evidence_integrity",
+            "hybrid"
+          ]
+        },
+        "family": {"type": "string", "minLength": 1},
+        "description": {"type": "string", "minLength": 1},
+        "adversary_model_uid": {"type": "string", "minLength": 1},
+        "prerequisites": {"$ref": "#/$defs/stringList"},
+        "composed_route_uids": {"$ref": "#/$defs/stringList"},
+        "weakest_open_obligation": {"type": "string", "minLength": 1}
+      }
+    },
+    "registryJoin": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "id", "reason"],
+          "properties": {
+            "status": {"const": "resolved"},
+            "id": {"type": "string", "minLength": 1},
+            "reason": {"type": "string", "minLength": 1}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "id", "reason"],
+          "properties": {
+            "status": {"const": "unresolved"},
+            "id": {"type": "null"},
+            "reason": {"type": "string", "minLength": 1}
+          }
+        }
+      ]
+    },
+    "routeRegistryBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "registry_path",
+        "registry_schema_version",
+        "registry_as_of",
+        "registry_revision_sha256",
+        "route_family_join",
+        "evidence_profile_join"
+      ],
+      "properties": {
+        "registry_path": {
+          "const": "docs/ecdlp-audit/routes/route-registry.seed.json"
+        },
+        "registry_schema_version": {
+          "const": "ecdlp-ws5-routes/v0-draft"
+        },
+        "registry_as_of": {"type": "string", "format": "date"},
+        "registry_revision_sha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "route_family_join": {"$ref": "#/$defs/registryJoin"},
+        "evidence_profile_join": {"$ref": "#/$defs/registryJoin"}
+      }
+    },
+    "identities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "audit_unit_uid",
+        "subject_uid",
+        "target_set_uid",
+        "workload_uid",
+        "evidence_revision",
+        "curve",
+        "field_or_platform",
+        "representation",
+        "subgroup_or_secret_domain",
+        "protocol",
+        "implementation"
+      ],
+      "properties": {
+        "audit_unit_uid": {"type": "string", "minLength": 1},
+        "subject_uid": {"type": "string", "minLength": 1},
+        "target_set_uid": {"type": "string", "minLength": 1},
+        "workload_uid": {"type": "string", "minLength": 1},
+        "evidence_revision": {"type": "string", "minLength": 1},
+        "curve": {"$ref": "#/$defs/typedIdentity"},
+        "field_or_platform": {"$ref": "#/$defs/typedIdentity"},
+        "representation": {"$ref": "#/$defs/typedIdentity"},
+        "subgroup_or_secret_domain": {"$ref": "#/$defs/typedIdentity"},
+        "protocol": {"$ref": "#/$defs/typedIdentity"},
+        "implementation": {"$ref": "#/$defs/typedIdentity"}
+      }
+    },
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tier",
+        "status",
+        "authorization_ref",
+        "scope",
+        "valid_from",
+        "expires_at",
+        "fixture_classes",
+        "live_target_execution",
+        "secret_material",
+        "production_exploitation",
+        "transferable"
+      ],
+      "properties": {
+        "tier": {"enum": ["T0", "T1", "T2", "T3", "T4"]},
+        "status": {"enum": ["mock_only", "documented", "expired", "missing"]},
+        "authorization_ref": {"type": "string", "minLength": 1},
+        "scope": {"type": "string", "minLength": 1},
+        "valid_from": {"type": ["string", "null"], "format": "date-time"},
+        "expires_at": {"type": ["string", "null"], "format": "date-time"},
+        "fixture_classes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "passive_public",
+              "public_synthetic",
+              "known_answer",
+              "authorized_public_challenge",
+              "owned_authorized"
+            ]
+          }
+        },
+        "live_target_execution": {"const": false},
+        "secret_material": {"const": false},
+        "production_exploitation": {"const": false},
+        "transferable": {"const": false}
+      }
+    },
+    "workload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fixture_class",
+        "description",
+        "target_count",
+        "target_manifest_ref",
+        "target_manifest_sha256",
+        "reuse_group_uid",
+        "public_data_only",
+        "synthetic_or_known_answer",
+        "selection_rule",
+        "selection_frozen_before_execution"
+      ],
+      "properties": {
+        "fixture_class": {
+          "enum": [
+            "passive_public",
+            "public_synthetic",
+            "known_answer",
+            "authorized_public_challenge",
+            "owned_authorized"
+          ]
+        },
+        "description": {"type": "string", "minLength": 1},
+        "target_count": {"type": "integer", "minimum": 1},
+        "target_manifest_ref": {"type": "string", "minLength": 1},
+        "target_manifest_sha256": {"$ref": "#/$defs/sha256"},
+        "reuse_group_uid": {"type": ["string", "null"], "minLength": 1},
+        "public_data_only": {"const": true},
+        "synthetic_or_known_answer": {"const": true},
+        "selection_rule": {"type": "string", "minLength": 1},
+        "selection_frozen_before_execution": {"type": "boolean"}
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "environment_uid",
+        "host_class",
+        "cpu",
+        "gpu",
+        "memory_bytes",
+        "os",
+        "toolchain",
+        "isolation",
+        "resource_cap",
+        "captured_at"
+      ],
+      "properties": {
+        "environment_uid": {"type": "string", "minLength": 1},
+        "host_class": {"type": "string", "minLength": 1},
+        "cpu": {"type": "string", "minLength": 1},
+        "gpu": {"type": ["string", "null"]},
+        "memory_bytes": {"type": "integer", "minimum": 1},
+        "os": {"type": "string", "minLength": 1},
+        "toolchain": {"type": "string", "minLength": 1},
+        "isolation": {"enum": ["none", "process", "container", "dedicated_host", "unknown"]},
+        "resource_cap": {"type": "string", "minLength": 1},
+        "captured_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "attempt_uid",
+        "started_at",
+        "ended_at",
+        "outcome",
+        "exit_code",
+        "command_argv",
+        "seeds",
+        "repetitions",
+        "concurrency",
+        "cold_cache",
+        "notes"
+      ],
+      "properties": {
+        "mode": {"enum": ["mock_fixture", "recorded_execution", "modeled_only"]},
+        "attempt_uid": {"type": "string", "minLength": 1},
+        "started_at": {"type": ["string", "null"], "format": "date-time"},
+        "ended_at": {"type": ["string", "null"], "format": "date-time"},
+        "outcome": {"enum": ["complete", "insufficient_relations", "budget", "timeout", "oom", "error"]},
+        "exit_code": {"type": ["integer", "null"]},
+        "command_argv": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string"}
+        },
+        "seeds": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {"type": "integer"},
+              {"type": "string"}
+            ]
+          }
+        },
+        "repetitions": {"type": "integer", "minimum": 1},
+        "concurrency": {"type": "integer", "minimum": 1},
+        "cold_cache": {"enum": ["yes", "no", "mixed", "not_applicable", "unknown"]},
+        "notes": {"type": "string"}
+      }
+    },
+    "quantity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric", "value", "unit", "status", "source", "sample_count", "uncertainty"],
+      "properties": {
+        "metric": {"type": "string", "minLength": 1},
+        "value": {"type": ["number", "null"], "minimum": 0},
+        "unit": {
+          "enum": [
+            "milliseconds",
+            "seconds",
+            "core_seconds",
+            "operations",
+            "attempts",
+            "bytes",
+            "joules",
+            "usd",
+            "items"
+          ]
+        },
+        "status": {"enum": ["measured", "modeled", "extrapolated", "unknown", "not_applicable"]},
+        "source": {"type": "string", "minLength": 1},
+        "sample_count": {"type": ["integer", "null"], "minimum": 1},
+        "uncertainty": {"type": ["string", "null"]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"enum": ["measured", "modeled", "extrapolated"]}}},
+          "then": {"properties": {"value": {"type": "number", "minimum": 0}, "sample_count": {"type": "integer", "minimum": 1}}}
+        },
+        {
+          "if": {"properties": {"status": {"enum": ["unknown", "not_applicable"]}}},
+          "then": {"properties": {"value": {"type": "null"}, "sample_count": {"type": "null"}}}
+        }
+      ]
+    },
+    "phase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "phase_id",
+        "category",
+        "accounting_class",
+        "description",
+        "target_dependent",
+        "reused",
+        "attempts",
+        "successes",
+        "costs",
+        "included_in_boundaries",
+        "artifact_refs"
+      ],
+      "properties": {
+        "phase_id": {"type": "string", "pattern": "^[a-z][a-z0-9._-]+$"},
+        "category": {
+          "enum": [
+            "discovery",
+            "construction",
+            "preprocessing",
+            "setup",
+            "conversion",
+            "transfer",
+            "core",
+            "recovery",
+            "verification",
+            "reporting",
+            "replay",
+            "other"
+          ]
+        },
+        "accounting_class": {
+          "enum": ["cold_only", "reusable_preprocessing", "online_target_dependent", "postprocessing", "verification"]
+        },
+        "description": {"type": "string", "minLength": 1},
+        "target_dependent": {"type": "boolean"},
+        "reused": {"type": "boolean"},
+        "attempts": {"type": "integer", "minimum": 0},
+        "successes": {"type": "integer", "minimum": 0},
+        "costs": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/quantity"}},
+        "included_in_boundaries": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"enum": ["cold_start", "online_single_target", "amortized_total", "amortized_per_target"]}
+        },
+        "artifact_refs": {"$ref": "#/$defs/stringList"}
+      }
+    },
+    "boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "denominator_targets",
+        "included_phase_ids",
+        "excluded_phase_ids",
+        "totals",
+        "formula",
+        "complete",
+        "exclusions"
+      ],
+      "properties": {
+        "status": {"enum": ["measured", "modeled", "extrapolated", "unknown", "not_applicable"]},
+        "denominator_targets": {"type": "integer", "minimum": 1},
+        "included_phase_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "excluded_phase_ids": {"$ref": "#/$defs/stringList"},
+        "totals": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/quantity"}},
+        "formula": {"type": "string", "minLength": 1},
+        "complete": {"type": "boolean"},
+        "exclusions": {"$ref": "#/$defs/stringList"}
+      }
+    },
+    "amortizedBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "target_count",
+        "reuse_group_uid",
+        "reusable_phase_ids",
+        "per_target_phase_ids",
+        "total_costs",
+        "per_target_costs",
+        "allocation_formula",
+        "assumptions",
+        "secondary_only"
+      ],
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "target_count": {"type": ["integer", "null"], "minimum": 2},
+        "reuse_group_uid": {"type": ["string", "null"], "minLength": 1},
+        "reusable_phase_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "per_target_phase_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "total_costs": {"type": "array", "items": {"$ref": "#/$defs/quantity"}},
+        "per_target_costs": {"type": "array", "items": {"$ref": "#/$defs/quantity"}},
+        "allocation_formula": {"type": "string", "minLength": 1},
+        "assumptions": {"$ref": "#/$defs/stringList"},
+        "secondary_only": {"const": true}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"enabled": {"const": true}}},
+          "then": {
+            "properties": {
+              "target_count": {"type": "integer", "minimum": 2},
+              "reuse_group_uid": {"type": "string", "minLength": 1},
+              "reusable_phase_ids": {"type": "array", "minItems": 1},
+              "per_target_phase_ids": {"type": "array", "minItems": 1},
+              "total_costs": {"type": "array", "minItems": 1},
+              "per_target_costs": {"type": "array", "minItems": 1}
+            }
+          },
+          "else": {
+            "properties": {
+              "target_count": {"type": "null"},
+              "reuse_group_uid": {"type": "null"},
+              "reusable_phase_ids": {"type": "array", "maxItems": 0},
+              "per_target_phase_ids": {"type": "array", "maxItems": 0},
+              "total_costs": {"type": "array", "maxItems": 0},
+              "per_target_costs": {"type": "array", "maxItems": 0}
+            }
+          }
+        }
+      ]
+    },
+    "accountingBoundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cold_start", "online_single_target", "amortized"],
+      "properties": {
+        "cold_start": {"$ref": "#/$defs/boundary"},
+        "online_single_target": {
+          "allOf": [
+            {"$ref": "#/$defs/boundary"},
+            {
+              "type": "object",
+              "properties": {"denominator_targets": {"const": 1}}
+            }
+          ]
+        },
+        "amortized": {"$ref": "#/$defs/amortizedBoundary"}
+      }
+    },
+    "failureAccounting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attempts_total",
+        "successful_attempts",
+        "unsuccessful_searches",
+        "timeouts",
+        "ooms",
+        "errors",
+        "invalid_results",
+        "budget_exhaustions",
+        "failed_costs_included_in",
+        "failure_artifact_refs",
+        "search_boundary",
+        "universal_nonexistence_claim"
+      ],
+      "properties": {
+        "attempts_total": {"type": "integer", "minimum": 0},
+        "successful_attempts": {"type": "integer", "minimum": 0},
+        "unsuccessful_searches": {"type": "integer", "minimum": 0},
+        "timeouts": {"type": "integer", "minimum": 0},
+        "ooms": {"type": "integer", "minimum": 0},
+        "errors": {"type": "integer", "minimum": 0},
+        "invalid_results": {"type": "integer", "minimum": 0},
+        "budget_exhaustions": {"type": "integer", "minimum": 0},
+        "failed_costs_included_in": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["cold_start", "online_single_target", "amortized_total", "separate_reported_cost"]}
+        },
+        "failure_artifact_refs": {"$ref": "#/$defs/stringList"},
+        "search_boundary": {"type": "string", "minLength": 1},
+        "universal_nonexistence_claim": {"const": false}
+      }
+    },
+    "duplicateAccounting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidates_generated",
+        "candidates_retained",
+        "duplicates_detected",
+        "invalid_candidates",
+        "deduplication_key",
+        "deduplication_stage",
+        "duplicate_cost_charged",
+        "artifact_refs"
+      ],
+      "properties": {
+        "candidates_generated": {"type": "integer", "minimum": 0},
+        "candidates_retained": {"type": "integer", "minimum": 0},
+        "duplicates_detected": {"type": "integer", "minimum": 0},
+        "invalid_candidates": {"type": "integer", "minimum": 0},
+        "deduplication_key": {"type": "string", "minLength": 1},
+        "deduplication_stage": {"type": "string", "minLength": 1},
+        "duplicate_cost_charged": {"type": "boolean"},
+        "artifact_refs": {"$ref": "#/$defs/stringList"}
+      }
+    },
+    "memoryMeasurement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric", "scope", "status", "value_bytes", "tool", "sample_count", "unknown_reason"],
+      "properties": {
+        "metric": {"enum": ["peak_rss", "gpu_peak", "persistent_storage", "temporary_storage", "table_size"]},
+        "scope": {"type": "string", "minLength": 1},
+        "status": {"enum": ["measured", "modeled", "extrapolated", "unknown", "not_applicable"]},
+        "value_bytes": {"type": ["integer", "null"], "minimum": 0},
+        "tool": {"type": "string", "minLength": 1},
+        "sample_count": {"type": ["integer", "null"], "minimum": 1},
+        "unknown_reason": {"type": ["string", "null"]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"enum": ["measured", "modeled", "extrapolated"]}}},
+          "then": {"properties": {"value_bytes": {"type": "integer", "minimum": 0}, "sample_count": {"type": "integer", "minimum": 1}, "unknown_reason": {"type": "null"}}}
+        },
+        {
+          "if": {"properties": {"status": {"enum": ["unknown", "not_applicable"]}}},
+          "then": {"properties": {"value_bytes": {"type": "null"}, "sample_count": {"type": "null"}, "unknown_reason": {"type": "string", "minLength": 1}}}
+        }
+      ]
+    },
+    "memoryAccounting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["measurements", "aggregate_scope", "concurrent_processes", "resource_cap_enforced"],
+      "properties": {
+        "measurements": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/memoryMeasurement"}},
+        "aggregate_scope": {"type": "string", "minLength": 1},
+        "concurrent_processes": {"type": "integer", "minimum": 1},
+        "resource_cap_enforced": {"type": "boolean"}
+      }
+    },
+    "matchedControl": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "control_receipt_uid",
+        "same_subject",
+        "same_target_set",
+        "same_fixture_class",
+        "same_authorization_envelope",
+        "same_environment_class",
+        "same_resource_cap",
+        "same_operation_unit",
+        "separate_complete_runs",
+        "best_of_component_mixing",
+        "differences",
+        "rationale"
+      ],
+      "properties": {
+        "status": {"enum": ["matched", "unmatched", "not_applicable"]},
+        "control_receipt_uid": {"type": ["string", "null"], "minLength": 1},
+        "same_subject": {"type": "boolean"},
+        "same_target_set": {"type": "boolean"},
+        "same_fixture_class": {"type": "boolean"},
+        "same_authorization_envelope": {"type": "boolean"},
+        "same_environment_class": {"type": "boolean"},
+        "same_resource_cap": {"type": "boolean"},
+        "same_operation_unit": {"type": "boolean"},
+        "separate_complete_runs": {"type": "boolean"},
+        "best_of_component_mixing": {"const": false},
+        "differences": {"$ref": "#/$defs/stringList"},
+        "rationale": {"type": "string", "minLength": 1}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "matched"}}},
+          "then": {
+            "properties": {
+              "control_receipt_uid": {"type": "string", "minLength": 1},
+              "same_subject": {"const": true},
+              "same_target_set": {"const": true},
+              "same_fixture_class": {"const": true},
+              "same_authorization_envelope": {"const": true},
+              "same_environment_class": {"const": true},
+              "same_resource_cap": {"const": true},
+              "same_operation_unit": {"const": true},
+              "separate_complete_runs": {"const": true}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"status": {"const": "unmatched"}}},
+          "then": {
+            "properties": {
+              "control_receipt_uid": {"type": "null"},
+              "separate_complete_runs": {"const": false}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"status": {"const": "not_applicable"}}},
+          "then": {
+            "properties": {
+              "control_receipt_uid": {"type": "null"},
+              "same_subject": {"const": false},
+              "same_target_set": {"const": false},
+              "same_fixture_class": {"const": false},
+              "same_authorization_envelope": {"const": false},
+              "same_environment_class": {"const": false},
+              "same_resource_cap": {"const": false},
+              "same_operation_unit": {"const": false},
+              "separate_complete_runs": {"const": false}
+            }
+          }
+        }
+      ]
+    },
+    "uncertainty": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "sample_count", "statistic", "interval", "confidence_or_coverage", "limitations"],
+      "properties": {
+        "method": {"type": "string", "minLength": 1},
+        "sample_count": {"type": "integer", "minimum": 1},
+        "statistic": {"type": "string", "minLength": 1},
+        "interval": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["low", "high", "unit"],
+              "properties": {
+                "low": {"type": "number"},
+                "high": {"type": "number"},
+                "unit": {"type": "string", "minLength": 1}
+              }
+            },
+            {"type": "null"}
+          ]
+        },
+        "confidence_or_coverage": {"type": "string", "minLength": 1},
+        "limitations": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_uid", "path_or_uri", "sha256", "role", "immutable"],
+      "properties": {
+        "artifact_uid": {"type": "string", "minLength": 1},
+        "path_or_uri": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/nullableSha256"},
+        "role": {"type": "string", "minLength": 1},
+        "immutable": {"type": "boolean"}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_revision",
+        "build_identity",
+        "configuration_identity",
+        "dependency_identity",
+        "raw_output_ref",
+        "replay_receipt_ref",
+        "artifacts",
+        "independent_replay"
+      ],
+      "properties": {
+        "source_revision": {"type": "string", "minLength": 1},
+        "build_identity": {"type": "string", "minLength": 1},
+        "configuration_identity": {"type": "string", "minLength": 1},
+        "dependency_identity": {"type": "string", "minLength": 1},
+        "raw_output_ref": {"type": "string", "minLength": 1},
+        "replay_receipt_ref": {"type": ["string", "null"], "minLength": 1},
+        "artifacts": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/artifact"}},
+        "independent_replay": {"type": "boolean"}
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_outcome",
+        "requirement_status",
+        "correctness_verification",
+        "outcome_class",
+        "observed_result",
+        "claim_status",
+        "evidence_maturity",
+        "interpretation_category",
+        "claim_boundary",
+        "not_established",
+        "universal_nonexistence_claim",
+        "full_solver_claim"
+      ],
+      "properties": {
+        "execution_outcome": {"enum": ["complete", "insufficient_relations", "budget", "timeout", "oom", "error"]},
+        "requirement_status": {
+          "enum": [
+            "verified_complete",
+            "implemented_unverified",
+            "partial",
+            "blocked",
+            "not_attempted"
+          ]
+        },
+        "correctness_verification": {"enum": ["passed", "failed", "partial", "not_run"]},
+        "outcome_class": {
+          "enum": [
+            "exact_scalar_recovery",
+            "equivalent_capability",
+            "partial_secret_leakage",
+            "property_or_provenance_finding",
+            "no_recovery_within_boundary",
+            "accounting_fixture_only"
+          ]
+        },
+        "observed_result": {"type": "string", "minLength": 1},
+        "claim_status": {"const": "unknown"},
+        "evidence_maturity": {"const": "E0"},
+        "interpretation_category": {"const": "descriptive_only"},
+        "claim_boundary": {"type": "string", "minLength": 1},
+        "not_established": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "universal_nonexistence_claim": {"const": false},
+        "full_solver_claim": {"const": false}
+      }
+    }
+  }
+}

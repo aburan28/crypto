@@ -1,0 +1,318 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "volcano census V1 N level 0 chunk 0",
+  "description": "Volcano ECDLP census Phase B (research/volcano_ecdlp_census_20261017/PLAN.md). Known-answer synthetic curves, planted_shared targets; no security claim.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 27409387,
+        "b": 14835669,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 39200761,
+        "gy": 22129742
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 32175902,
+        "b": 13311646,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 31712540,
+        "gy": 40116132
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 4754064,
+        "b": 24662977,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 38646844,
+        "gy": 37027338
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 3394626,
+        "b": 8182481,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 41966231,
+        "gy": 3651936
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 1184854,
+        "b": 7328183,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 20281154,
+        "gy": 22937934
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 25210500,
+        "b": 22719972,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 3776929,
+        "gy": 9609408
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 37329791,
+        "b": 13373323,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 37165674,
+        "gy": 24162387
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 38187199,
+        "b": 37713767,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 24882947,
+        "gy": 15173761
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 21079394,
+        "b": 2767464,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 4870214,
+        "gy": 14860094
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 21486913,
+        "b": 9256530,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 17353944,
+        "gy": 33344416
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 41020243,
+        "b": 19458854,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 27319687,
+        "gy": 17593980
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 4359955,
+        "b": 21663597,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 15733929,
+        "gy": 27079432
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 22636069,
+        "b": 40999508,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 18226677,
+        "gy": 32173020
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 3899006,
+        "b": 33431166,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 6905592,
+        "gy": 33018676
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 2151012,
+        "b": 18236466,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 5780016,
+        "gy": 31653477
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 7214819,
+        "b": 33633691,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 378461,
+        "gy": 6407047
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 16011655,
+        "b": 29226849,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 41420979,
+        "gy": 5112047
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 36689637,
+        "b": 37449049,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 42930358,
+        "gy": 11053586
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 24808764,
+        "b": 38420911,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 17957258,
+        "gy": 33787739
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 26776292,
+        "b": 1123469,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 20756824,
+        "gy": 37702241
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 149047,
+        "b": 27393204,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 26975017,
+        "gy": 35258785
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 1695953,
+        "b": 32469580,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 30367950,
+        "gy": 23519862
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 36984442,
+        "b": 26090620,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 2508187,
+        "gy": 15785165
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 10989783,
+        "b": 19670220,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 19355434,
+        "gy": 27280531
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 43047617,
+        "a": 3923604,
+        "b": 18267629,
+        "group_order": 43037636,
+        "r": 10759409,
+        "gx": 31893278,
+        "gy": 7353192
+      }
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 20261115,
+    "target_kind": "planted_shared"
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "rho-plain",
+      "role": "baseline",
+      "method": {
+        "id": "rho.plain"
+      }
+    },
+    {
+      "name": "bsgs",
+      "role": "candidate",
+      "method": {
+        "id": "bsgs.textbook"
+      }
+    },
+    {
+      "name": "bsgs-neg",
+      "role": "candidate",
+      "method": {
+        "id": "bsgs.negation"
+      }
+    },
+    {
+      "name": "ic",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=64",
+          "oracle": "mitm:negation_folded=1"
+        }
+      }
+    },
+    {
+      "name": "rho-neg-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.negation"
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 2,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 20261017,
+    "isolation_required": "L2",
+    "timeout_seconds": 600
+  }
+}

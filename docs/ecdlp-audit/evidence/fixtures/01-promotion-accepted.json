@@ -1,0 +1,104 @@
+{
+  "$schema": "../ws4-evidence.schema.json",
+  "schema_version": "ecdlp-ws4-evidence/v0-draft",
+  "record_kind": "evidence_transition_fixture",
+  "record_state": "draft_non_authoritative",
+  "authoritative": false,
+  "promotion_allowed": false,
+  "registry_ref": "../evidence-profile-registry.draft.json",
+  "fixture_id": "fixture.promotion.adjacent_accepted",
+  "title": "Adjacent E1 to E2 promotion accepted by the draft semantics",
+  "scenario_kind": "promotion",
+  "profile_id": "profile.B.mathematical_transfer",
+  "claim_kind": "cost_advantage",
+  "purpose": "Golden positive case for an adjacent transition with a fresh applicability gate, exact revision binding, review receipt, and all required components present.",
+  "before": {
+    "assessment_id": "assessment.transfer.001.r1",
+    "revision": 1,
+    "supersedes": null,
+    "claim_status": "unknown",
+    "derived_maturity": "E1",
+    "evaluated_at": "2026-10-14T09:00:00Z",
+    "history_count": 1,
+    "identity_binding": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "blocking_gates": [
+      {
+        "gate_id": "G.B.E2.transfer_applicability",
+        "level": "E2",
+        "outcome": "unknown",
+        "freshness": "fresh",
+        "rationale": "The applicability and exact-invariant check had not yet been attached.",
+        "evidence_refs": []
+      }
+    ],
+    "component_maturities": [
+      {"component_id": "source_curve_identity", "required": true, "maturity": "E1", "status": "present"},
+      {"component_id": "transfer_construction", "required": true, "maturity": "E1", "status": "present"},
+      {"component_id": "destination_arithmetic", "required": true, "maturity": "E1", "status": "present"},
+      {"component_id": "transfer_maps", "required": true, "maturity": "E1", "status": "present"},
+      {"component_id": "destination_solver", "required": true, "maturity": "E1", "status": "present"}
+    ],
+    "evidence_revision_refs": ["fixture-evidence:transfer-001:r1"]
+  },
+  "event": {
+    "event_id": "event.promotion.transfer.001.r2",
+    "event_type": "promotion_request",
+    "occurred_at": "2026-10-14T10:00:00Z",
+    "requested_maturity": "E2",
+    "gate_changes": [
+      {
+        "gate_id": "G.B.E2.transfer_applicability",
+        "level": "E2",
+        "before_outcome": "unknown",
+        "before_freshness": "fresh",
+        "after_outcome": "supported",
+        "after_freshness": "fresh",
+        "evidence_refs": ["fixture-evidence:transfer-001:applicability-r2"]
+      }
+    ],
+    "component_maturities_after": [
+      {"component_id": "source_curve_identity", "required": true, "maturity": "E2", "status": "present"},
+      {"component_id": "transfer_construction", "required": true, "maturity": "E2", "status": "present"},
+      {"component_id": "destination_arithmetic", "required": true, "maturity": "E2", "status": "present"},
+      {"component_id": "transfer_maps", "required": true, "maturity": "E2", "status": "present"},
+      {"component_id": "destination_solver", "required": true, "maturity": "E2", "status": "present"}
+    ],
+    "correction": null,
+    "reviewer_decision": "approved",
+    "reviewer_role": "mathematical",
+    "independence_assessment": {
+      "asserted_level": "R3",
+      "method": "separate_reviewer_reconstruction",
+      "reviewed_event_id": "event.promotion.transfer.001.r2",
+      "subject_identity_binding": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "author_identity": "fixture-actor:author-transfer-001",
+      "reviewer_identity": "fixture-actor:math-reviewer-transfer-001",
+      "same_person": false,
+      "relationship_to_author": "different_team",
+      "reviewer_contributed_to_subject": false,
+      "conflict_status": "clear",
+      "conflict_description": null,
+      "identity_check_receipt_ref": "fixture-identity-check:transfer-001:r2",
+      "conflict_check_receipt_ref": "fixture-conflict-check:transfer-001:r2",
+      "evidence_refs": ["fixture-review:transfer-001:r2"],
+      "semantic_validation_required": true
+    },
+    "review_receipt_refs": ["fixture-review:transfer-001:r2"]
+  },
+  "expected": {
+    "decision": "accept",
+    "resulting_maturity": "E2",
+    "reason_codes": ["promotion_contiguous_gates_satisfied"],
+    "weakest_component_ids": ["source_curve_identity", "transfer_construction", "destination_arithmetic", "transfer_maps", "destination_solver"],
+    "history_count_after": 2,
+    "new_assessment_id": "assessment.transfer.001.r2",
+    "prior_assessment_preserved": true,
+    "claim_status_derived_from_maturity": false,
+    "required_actions": []
+  },
+  "notes": [
+    "Expected accept is a golden result for a future semantic engine, not an authoritative promotion.",
+    "The claim status remains unknown even though the evidence maturity would become E2.",
+    "The synthetic R3 assertion now exposes author, reviewer, contribution, conflict, and receipt fields; a semantic validator must still compare identities and resolve the receipts."
+  ]
+}

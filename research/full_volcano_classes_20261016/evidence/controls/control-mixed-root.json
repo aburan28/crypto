@@ -1,0 +1,289 @@
+{
+  "endomorphism_conductor": 1,
+  "identity": {
+    "curve_uid": null,
+    "ec1": null,
+    "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+    "icv1": "ICV1:fp-67:4:64:42:unk:unk:r:0c09e92f419f",
+    "model_json": "{\"a\":\"46\",\"b\":\"47\",\"field\":\"fp-67\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"67\",\"v\":\"1\"}",
+    "slug": "icv1-fp7-t4-0c09e92f"
+  },
+  "j": 42,
+  "model": {
+    "a": 46,
+    "b": 47,
+    "order": 64,
+    "p": 67
+  },
+  "outgoing_isogenies": [
+    {
+      "degree": 2,
+      "exceptional_inputs": "infinity and kernel map to infinity",
+      "field_p": 67,
+      "formula": "X=u^2*N(x)/D(x); Y=u^3*y*(N'(x)D(x)-N(x)D'(x))/D(x)^2",
+      "kernel_polynomial_ascending": [
+        1,
+        1
+      ],
+      "normalized_quotient": {
+        "a": 2,
+        "b": 55
+      },
+      "target_identity": {
+        "curve_uid": null,
+        "ec1": null,
+        "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+        "icv1": "ICV1:fp-67:4:64:42:unk:unk:r:0c09e92f419f",
+        "model_json": "{\"a\":\"46\",\"b\":\"47\",\"field\":\"fp-67\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"67\",\"v\":\"1\"}",
+        "slug": "icv1-fp7-t4-0c09e92f"
+      },
+      "target_isomorphism_u": 6,
+      "target_model": {
+        "a": 46,
+        "b": 47
+      },
+      "target_vertex": 0,
+      "x_denominator_ascending": [
+        1,
+        1
+      ],
+      "x_numerator_ascending": [
+        49,
+        1,
+        1
+      ]
+    },
+    {
+      "degree": 2,
+      "exceptional_inputs": "infinity and kernel map to infinity",
+      "field_p": 67,
+      "formula": "X=u^2*N(x)/D(x); Y=u^3*y*(N'(x)D(x)-N(x)D'(x))/D(x)^2",
+      "kernel_polynomial_ascending": [
+        4,
+        1
+      ],
+      "normalized_quotient": {
+        "a": 45,
+        "b": 66
+      },
+      "target_identity": {
+        "curve_uid": null,
+        "ec1": null,
+        "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+        "icv1": "ICV1:fp-67:4:64:14:unk:unk:r:fb578a6ff01c",
+        "model_json": "{\"a\":\"45\",\"b\":\"66\",\"field\":\"fp-67\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"67\",\"v\":\"1\"}",
+        "slug": "icv1-fp7-t4-fb578a6f"
+      },
+      "target_isomorphism_u": 1,
+      "target_model": {
+        "a": 45,
+        "b": 66
+      },
+      "target_vertex": 1,
+      "x_denominator_ascending": [
+        4,
+        1
+      ],
+      "x_numerator_ascending": [
+        27,
+        4,
+        1
+      ]
+    },
+    {
+      "degree": 2,
+      "exceptional_inputs": "infinity and kernel map to infinity",
+      "field_p": 67,
+      "formula": "X=u^2*N(x)/D(x); Y=u^3*y*(N'(x)D(x)-N(x)D'(x))/D(x)^2",
+      "kernel_polynomial_ascending": [
+        62,
+        1
+      ],
+      "normalized_quotient": {
+        "a": 44,
+        "b": 33
+      },
+      "target_identity": {
+        "curve_uid": null,
+        "ec1": null,
+        "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+        "icv1": "ICV1:fp-67:4:64:42:unk:unk:r:0c09e92f419f",
+        "model_json": "{\"a\":\"46\",\"b\":\"47\",\"field\":\"fp-67\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"67\",\"v\":\"1\"}",
+        "slug": "icv1-fp7-t4-0c09e92f"
+      },
+      "target_isomorphism_u": 28,
+      "target_model": {
+        "a": 46,
+        "b": 47
+      },
+      "target_vertex": 0,
+      "x_denominator_ascending": [
+        62,
+        1
+      ],
+      "x_numerator_ascending": [
+        54,
+        62,
+        1
+      ]
+    },
+    {
+      "degree": 3,
+      "exceptional_inputs": "infinity and kernel map to infinity",
+      "field_p": 67,
+      "formula": "X=u^2*N(x)/D(x); Y=u^3*y*(N'(x)D(x)-N(x)D'(x))/D(x)^2",
+      "kernel_polynomial_ascending": [
+        18,
+        1
+      ],
+      "normalized_quotient": {
+        "a": 50,
+        "b": 16
+      },
+      "target_identity": {
+        "curve_uid": null,
+        "ec1": null,
+        "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+        "icv1": "ICV1:fp-67:4:64:51:unk:unk:r:3c3f9468bf25",
+        "model_json": "{\"a\":\"50\",\"b\":\"16\",\"field\":\"fp-67\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"67\",\"v\":\"1\"}",
+        "slug": "icv1-fp7-t4-3c3f9468"
+      },
+      "target_isomorphism_u": 1,
+      "target_model": {
+        "a": 50,
+        "b": 16
+      },
+      "target_vertex": 2,
+      "x_denominator_ascending": [
+        56,
+        36,
+        1
+      ],
+      "x_numerator_ascending": [
+        12,
+        15,
+        36,
+        1
+      ]
+    },
+    {
+      "degree": 3,
+      "exceptional_inputs": "infinity and kernel map to infinity",
+      "field_p": 67,
+      "formula": "X=u^2*N(x)/D(x); Y=u^3*y*(N'(x)D(x)-N(x)D'(x))/D(x)^2",
+      "kernel_polynomial_ascending": [
+        20,
+        1
+      ],
+      "normalized_quotient": {
+        "a": 48,
+        "b": 66
+      },
+      "target_identity": {
+        "curve_uid": null,
+        "ec1": null,
+        "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+        "icv1": "ICV1:fp-67:4:64:57:unk:unk:r:2e40287be6a3",
+        "model_json": "{\"a\":\"48\",\"b\":\"66\",\"field\":\"fp-67\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"67\",\"v\":\"1\"}",
+        "slug": "icv1-fp7-t4-2e40287b"
+      },
+      "target_isomorphism_u": 1,
+      "target_model": {
+        "a": 48,
+        "b": 66
+      },
+      "target_vertex": 3,
+      "x_denominator_ascending": [
+        65,
+        40,
+        1
+      ],
+      "x_numerator_ascending": [
+        10,
+        11,
+        40,
+        1
+      ]
+    },
+    {
+      "degree": 3,
+      "exceptional_inputs": "infinity and kernel map to infinity",
+      "field_p": 67,
+      "formula": "X=u^2*N(x)/D(x); Y=u^3*y*(N'(x)D(x)-N(x)D'(x))/D(x)^2",
+      "kernel_polynomial_ascending": [
+        30,
+        1
+      ],
+      "normalized_quotient": {
+        "a": 56,
+        "b": 6
+      },
+      "target_identity": {
+        "curve_uid": null,
+        "ec1": null,
+        "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+        "icv1": "ICV1:fp-67:4:64:33:unk:unk:r:1ccf8023bd4f",
+        "model_json": "{\"a\":\"56\",\"b\":\"6\",\"field\":\"fp-67\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"67\",\"v\":\"1\"}",
+        "slug": "icv1-fp7-t4-1ccf8023"
+      },
+      "target_isomorphism_u": 1,
+      "target_model": {
+        "a": 56,
+        "b": 6
+      },
+      "target_vertex": 4,
+      "x_denominator_ascending": [
+        29,
+        60,
+        1
+      ],
+      "x_numerator_ascending": [
+        39,
+        27,
+        60,
+        1
+      ]
+    },
+    {
+      "degree": 3,
+      "exceptional_inputs": "infinity and kernel map to infinity",
+      "field_p": 67,
+      "formula": "X=u^2*N(x)/D(x); Y=u^3*y*(N'(x)D(x)-N(x)D'(x))/D(x)^2",
+      "kernel_polynomial_ascending": [
+        66,
+        1
+      ],
+      "normalized_quotient": {
+        "a": 25,
+        "b": 12
+      },
+      "target_identity": {
+        "curve_uid": null,
+        "ec1": null,
+        "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+        "icv1": "ICV1:fp-67:4:64:35:unk:unk:r:34f581177f9f",
+        "model_json": "{\"a\":\"25\",\"b\":\"12\",\"field\":\"fp-67\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"67\",\"v\":\"1\"}",
+        "slug": "icv1-fp7-t4-34f58117"
+      },
+      "target_isomorphism_u": 1,
+      "target_model": {
+        "a": 25,
+        "b": 12
+      },
+      "target_vertex": 5,
+      "x_denominator_ascending": [
+        1,
+        65,
+        1
+      ],
+      "x_numerator_ascending": [
+        10,
+        32,
+        65,
+        1
+      ]
+    }
+  ],
+  "status": "STORED_RECORD; use verify for whole-database replay",
+  "vertex": 0
+}

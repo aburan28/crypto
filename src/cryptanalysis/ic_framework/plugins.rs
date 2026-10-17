@@ -14,6 +14,7 @@
 //! | `koblitz-orbit` | Koblitz | the same, each signed Frobenius orbit folded onto one column |
 //! | `compact-orbit-scan` | Koblitz | deterministic raw-abscissa scan, subgroup projection and signed Frobenius closure |
 //! | `cyclotomic` | Koblitz, `2n+1` prime | the γ-weight-`w` abscissae `Σ_{k∈S} γ^k` (lead A2), projected and folded like `compact-orbit-scan` |
+//! | `onb-weight` | Koblitz, `2n+1` prime | ONB Hamming-weight-`w` abscissae, projected and folded like `cyclotomic` (low-HW D\* hypothesis) |
 //! | `glv-orbit` | prime | the closure of the smallest abscissae under the curve's automorphism group, each orbit folded onto one column (`j = 0`: 6 points a column, `j = 1728`: 4, generic: 2) |
 //! | `gls-line` | GLS over `F_{p²}` | the `ψ`-stable line `x ∈ u·s·F_p`, each `⟨−1, ψ⟩`-orbit folded onto one column (4 points a column) |
 //!
@@ -38,7 +39,7 @@
 //! The pair table is where memory buys time, and `mitm`'s
 //! `negation_folded` parameter halves the additions that build it.
 
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::time::{Duration, Instant};
 
 use num_traits::ToPrimitive;
@@ -129,6 +130,246 @@ impl FactorBaseBuilder<PrimeCurve> for PrimeAbscissaBase<'_> {
         } else {
             Ok(prime_factor_base_strided(self.instance, size, stride))
         }
+    }
+}
+
+/// Scan rational points, project by the cofactor, and retain distinct signed
+/// subgroup points. This is a different base from `prime-abscissa`: the
+/// abscissae after projection need not be small.
+pub struct PrimeProjectedAbscissaBase<'i> {
+    pub instance: &'i PrimeInstance,
+}
+
+#[cfg(test)]
+mod projected_prime_tests {
+    use super::*;
+    use crate::cryptanalysis::ic_boundary::Calibration;
+    use crate::cryptanalysis::ic_framework::stages::Targets;
+    use crate::cryptanalysis::ic_framework::{run_pipeline, PipelineSpec};
+
+    fn fixture() -> PrimeInstance {
+        let curve = PrimeCurve {
+            p: 113,
+            a: 19,
+            b: 2,
+        };
+        let mut ops = GroupOps::default();
+        for x in 1..113 {
+            if let Some(y) = curve.sqrt(curve.rhs(x)) {
+                let g = curve.mul(&mut ops, PrimePoint::affine(x, y), 16);
+                if !g.infinity && curve.mul(&mut ops, g, 7).infinity {
+                    return PrimeInstance {
+                        name: "projected-control".into(),
+                        curve,
+                        group_order: 112,
+                        r: 7,
+                        cofactor: 16,
+                        generator: (g.x, g.y),
+                    };
+                }
+            }
+        }
+        panic!("control generator missing")
+    }
+    #[test]
+    fn projected_base_checks_membership_and_counts_projection() {
+        let inst = fixture();
+        let ctx = InstanceCtx {
+            group: &inst.curve,
+            generator: inst.generator_point(),
+            target: inst.generator_point(),
+            r: 7,
+            cofactor: 16,
+            group_order: 112,
+            name: inst.name.clone(),
+            field_degree: None,
+        };
+        let (_, params) =
+            Params::parse_spec("prime-projected-abscissa:size=2,scan_cap=64").unwrap();
+        let mut ops = GroupOps::default();
+        let fb = PrimeProjectedAbscissaBase { instance: &inst }
+            .build(&ctx, &params, &mut ops)
+            .unwrap();
+        assert_eq!(fb.columns, 2);
+        assert_eq!(fb.points.len(), 4);
+        assert!(ops.scalar_mults >= 4);
+        assert!(fb.cost.get("projected_base_membership_checks_uncharged") >= 2);
+        for p in &fb.points {
+            assert!(inst.curve.is_on_curve(*p));
+            assert!(!p.infinity);
+            assert!(inst.curve.mul(&mut ops, *p, 7).infinity);
+        }
+        let (_, bad) = Params::parse_spec("prime-projected-abscissa:size=4,scan_cap=64").unwrap();
+        assert!(PrimeProjectedAbscissaBase { instance: &inst }
+            .build(&ctx, &bad, &mut ops)
+            .is_err());
+    }
+    #[test]
+    fn projected_relations_recover_every_nonzero_control_log() {
+        let inst = fixture();
+        for k in 1..7 {
+            let mut scratch = GroupOps::default();
+            let q = inst.curve.mul(&mut scratch, inst.generator_point(), k);
+            let ctx = InstanceCtx {
+                group: &inst.curve,
+                generator: inst.generator_point(),
+                target: q,
+                r: 7,
+                cofactor: 16,
+                group_order: 112,
+                name: inst.name.clone(),
+                field_degree: None,
+            };
+            let (_, params) =
+                Params::parse_spec("prime-projected-abscissa:size=2,scan_cap=64").unwrap();
+            let spec = PipelineSpec {
+                factor_base: "prime-projected-abscissa".into(),
+                factor_base_params: params,
+                oracle: "mitm".into(),
+                oracle_params: Params::default(),
+                targets: Targets::Random,
+                linalg: "incremental-gauss-full-rank-checked".into(),
+                max_trials: 1000,
+                seed: 21,
+                ..Default::default()
+            };
+            let rep = run_pipeline(
+                &ctx,
+                &spec,
+                &PrimeProjectedAbscissaBase { instance: &inst },
+                &mut MitmOracle::new(2),
+                u64::MAX,
+                &Calibration {
+                    ns_per_add: 1.0,
+                    ns_per_double: 1.0,
+                    ..Default::default()
+                },
+                None,
+            )
+            .unwrap();
+            assert_eq!(rep.recovered, Some(k));
+            assert!(
+                inst.curve
+                    .mul(&mut scratch, inst.generator_point(), rep.recovered.unwrap())
+                    == q
+            );
+        }
+    }
+}
+
+impl FactorBaseBuilder<PrimeCurve> for PrimeProjectedAbscissaBase<'_> {
+    fn name(&self) -> &str {
+        "prime-projected-abscissa"
+    }
+
+    fn describe(&self, params: &Params) -> String {
+        format!("{} distinct signed subgroup columns from cofactor-projected raw abscissae; scan cap {}",
+            params.get("size").unwrap_or("?"), params.get("scan_cap").unwrap_or("?"))
+    }
+
+    fn parameters(&self) -> &[(&str, &str)] {
+        &[
+            (
+                "size",
+                "distinct negation pairs in the selected prime subgroup",
+            ),
+            ("scan_cap", "maximum raw abscissae scanned; required"),
+        ]
+    }
+
+    fn build(
+        &self,
+        ctx: &InstanceCtx<PrimeCurve>,
+        params: &Params,
+        ops: &mut GroupOps,
+    ) -> Result<FactorBase<PrimePoint>, String> {
+        let inst = self.instance;
+        if ctx.r != inst.r || ctx.cofactor != inst.cofactor || ctx.group_order != inst.group_order {
+            return Err("projected base context does not match its instance".into());
+        }
+        let size = params.u64("size")?;
+        let cap = params.u64("scan_cap")?;
+        if inst.r < 5 || size == 0 || size > (inst.r - 1) / 2 || cap == 0 || cap >= inst.curve.p {
+            return Err("projected base needs 0<size<=(r-1)/2 and 0<scan_cap<p".into());
+        }
+        let start = Instant::now();
+        let curve = &inst.curve;
+        let mut seen = BTreeSet::new();
+        let mut points = Vec::new();
+        let mut columns = Vec::new();
+        let mut coefficients = Vec::new();
+        let mut scanned = 0;
+        let mut sqrts = 0;
+        let mut projected = 0;
+        let mut checked = 0;
+        let mut duplicates = 0;
+        for x in 1..=cap {
+            scanned += 1;
+            let rhs = curve.rhs(x);
+            if curve.legendre(rhs) < 0 {
+                continue;
+            }
+            sqrts += 1;
+            let Some(y) = curve.sqrt(rhs) else {
+                continue;
+            };
+            let point = curve.mul(ops, PrimePoint::affine(x, y), inst.cofactor);
+            projected += 1;
+            if point.infinity {
+                continue;
+            }
+            checked += 1;
+            if !curve.mul(ops, point, inst.r).infinity {
+                return Err(
+                    "cofactor projection produced a point outside the selected subgroup".into(),
+                );
+            }
+            if !seen.insert(point.x) {
+                duplicates += 1;
+                continue;
+            }
+            let point = if point.y <= curve.p - point.y {
+                point
+            } else {
+                curve.neg(point)
+            };
+            let col = seen.len() - 1;
+            points.extend([point, curve.neg(point)]);
+            columns.extend([col, col]);
+            coefficients.extend([1, inst.r - 1]);
+            if seen.len() as u64 == size {
+                break;
+            }
+        }
+        if seen.len() as u64 != size {
+            return Err(format!(
+                "projected base scan exhausted: {} of {size} columns after {scanned} abscissae",
+                seen.len()
+            ));
+        }
+        let mut fb = FactorBase::from_column_map(
+            self.describe(params),
+            points,
+            columns,
+            coefficients,
+            size as usize,
+            |p| curve.key(p),
+            |p| curve.key(&curve.neg(*p)),
+            |p| p.x,
+        )?;
+        fb.cost.wall_ns = start.elapsed().as_nanos() as u64;
+        fb.cost.count("abscissae_scanned", scanned);
+        fb.cost.count("legendre_symbols", scanned);
+        fb.cost.count("sqrt_solves", sqrts);
+        fb.cost.count("cofactor_projected_points", projected);
+        fb.cost
+            .count("projected_base_membership_checks_uncharged", checked);
+        fb.cost
+            .count("projected_base_dedup_probes_uncharged", checked);
+        fb.cost.count("projected_base_duplicate_points", duplicates);
+        fb.cost
+            .count("projected_base_column_map_entries_uncharged", 2 * size);
+        Ok(fb)
     }
 }
 
@@ -867,6 +1108,149 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for CyclotomicBase<'_> {
         let mut fb = FactorBase::from_column_map(
             format!(
                 "{columns} projected signed Frobenius orbits of the {} gamma-weight-{w} abscissae",
+                abscissae.len()
+            ),
+            points,
+            col_of,
+            coef_of,
+            columns,
+            |p| p.pack(),
+            |p| inst.fast.neg(*p).pack(),
+            |p| p.x,
+        )?;
+        fb.cost
+            .count("abscissae_enumerated_uncharged", abscissae.len() as u64);
+        fb.cost.count("point_lifts_uncharged", lifts);
+        fb.cost.count("cofactor_projected_points", projected);
+        fb.cost.count("frobenius_maps", frobenius_maps);
+        Ok(fb)
+    }
+}
+
+/// Projected signed Frobenius orbits of the ONB Hamming-weight-`w`
+/// abscissae. Same fold as [`CyclotomicBase`]; the generator set is the
+/// normal basis rather than powers of γ. Spec: `onb-weight:w=W[,columns=N]`.
+pub struct OnbWeightBase<'i> {
+    pub instance: &'i BinaryInstance,
+}
+
+impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for OnbWeightBase<'_> {
+    fn name(&self) -> &str {
+        "onb-weight"
+    }
+
+    fn describe(&self, params: &Params) -> String {
+        format!(
+            "projected signed Frobenius orbits of the ONB Hamming-weight-{} abscissae",
+            params.get("w").unwrap_or("?")
+        )
+    }
+
+    fn parameters(&self) -> &[(&str, &str)] {
+        &[
+            (
+                "w",
+                "ONB Hamming weight of the abscissae; the set has C(n, w) elements before curve filtering",
+            ),
+            (
+                "columns",
+                "optional cap on the number of distinct projected signed orbits, in canonical abscissa order; 0 or absent takes them all",
+            ),
+        ]
+    }
+
+    fn build(
+        &self,
+        ctx: &InstanceCtx<BinaryGroup<'a>>,
+        params: &Params,
+        ops: &mut GroupOps,
+    ) -> Result<FactorBase<FastPoint>, String> {
+        use crate::cryptanalysis::cyclotomic_factor_base::CyclotomicField;
+        let inst = self.instance;
+        let kc = inst
+            .koblitz
+            .as_ref()
+            .ok_or("onb-weight requires a Koblitz curve")?;
+        if ctx.r != inst.r || ctx.cofactor != inst.cofactor || ctx.field_degree != Some(inst.n) {
+            return Err("onb-weight context does not match its binary instance".into());
+        }
+        let w = usize::try_from(params.u64("w")?).map_err(|_| "w does not fit in usize")?;
+        let column_cap = match params.get("columns") {
+            None => 0usize,
+            Some(_) => usize::try_from(params.u64("columns")?)
+                .map_err(|_| "columns does not fit in usize")?,
+        };
+        if inst.n == 0 || inst.n >= 64 || inst.n.is_multiple_of(2) {
+            return Err("onb-weight requires an odd degree < 64".into());
+        }
+        let field = CyclotomicField::new(&inst.irreducible, inst.n)?;
+        let abscissae = field.onb_weight_set(w)?;
+        let lambda = kc
+            .lambda
+            .to_u64()
+            .ok_or("Frobenius eigenvalue does not fit in u64")?;
+        let g = ctx.group;
+        let mut seen = HashSet::new();
+        let mut points = Vec::new();
+        let mut col_of = Vec::new();
+        let mut coef_of = Vec::new();
+        let (mut lifts, mut projected, mut frobenius_maps) = (0u64, 0u64, 0u64);
+        'outer: for x in &abscissae {
+            let raw_x = x.raw_bits().first().copied().unwrap_or(0);
+            for point in inst.points_with_x(raw_x) {
+                lifts += 1;
+                let seed = g.mul(ops, point, ctx.cofactor);
+                if g.is_identity(&seed) {
+                    continue;
+                }
+                projected += 1;
+                let mut xk = seed.x;
+                let mut key = xk;
+                for _ in 1..inst.n {
+                    xk = inst.gf.sqr(xk);
+                    key = key.min(xk);
+                }
+                if !seen.insert(key) {
+                    continue;
+                }
+                if !g.is_identity(&g.mul(ops, seed, ctx.r)) {
+                    return Err(format!("projected point from x {raw_x} has wrong order"));
+                }
+                let column = seen.len() - 1;
+                let mut member = seed;
+                let mut coefficient = 1u64;
+                for _ in 0..inst.n {
+                    if !inst.fast.is_on_curve(member) {
+                        return Err(format!("Frobenius image from x {raw_x} is off curve"));
+                    }
+                    points.push(member);
+                    col_of.push(column);
+                    coef_of.push(coefficient);
+                    points.push(g.neg(member));
+                    col_of.push(column);
+                    coef_of.push((ctx.r - coefficient) % ctx.r);
+                    member = inst.fast.frobenius_k(member, 1);
+                    frobenius_maps += 1;
+                    coefficient = ((coefficient as u128 * lambda as u128) % ctx.r as u128) as u64;
+                }
+                if member != seed || coefficient != 1 {
+                    return Err(format!("Frobenius orbit from x {raw_x} is not closed"));
+                }
+                if column_cap > 0 && seen.len() == column_cap {
+                    break 'outer;
+                }
+            }
+        }
+        let columns = seen.len();
+        if columns == 0 {
+            return Err(format!(
+                "no ONB weight-{w} abscissa carries a subgroup point on {}",
+                inst.name
+            ));
+        }
+        let mut fb = FactorBase::from_column_map(
+            format!(
+                "{columns} projected signed Frobenius orbits of the {} ONB weight-{w} abscissae",
                 abscissae.len()
             ),
             points,

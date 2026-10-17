@@ -1,0 +1,39 @@
+{
+  "schema": "generic-dlp-run-manifest/v1",
+  "run": "run-20261017T0201Z",
+  "protocol": "research/generic_dlp_memory_parallelism_20261017/PROTOCOL.md",
+  "baseline_commit": "b1bf5b8935f68257dfdd3fc542cb2fef41db741c",
+  "candidate_commit": "c699775dde4641313c5d045d6075497604db9657",
+  "candidate_branch": "claude/generic-dlp-memory-parallelism",
+  "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+  "build": "cargo build --release (default profile, no target-cpu flags)",
+  "host": {
+    "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "flags": "adx avx2 avx512f avx512ifma bmi2 pclmulqdq popcnt ",
+    "logical_cpus": 4,
+    "memory_bytes": 16874930176,
+    "caches": "L1d cache: 192 KiB (4 instances);L2 cache: 8 MiB (4 instances);L3 cache: 260 MiB (1 instance);",
+    "os": "Linux",
+    "kernel": "6.18.44-fc-v139",
+    "arch": "x86_64",
+    "virtualization": "KVM guest",
+    "transparent_hugepage": "always [madvise] never"
+  },
+  "external_tool": "PARI/GP [2, 15, 4] (Ubuntu noble pari-gp), single-threaded, elllog timed by getabstime()",
+  "binaries_sha256": [
+    "a686d9f6a22cd19a7e6bcd56d2b02f6833994250a17a16260de26de8091549d0  baseline/lit2026_w11_bsgs_time",
+    "ae2b2840251c34ce37803ccf5f27e9d8a6414fe8a5decafa54a9b0f0bd216b69  baseline/lit2026_w11_bsgs_opcount",
+    "7ab89414cdb74ffa34c5c466cb81e2ea58fb640625d641fcb8b4a6b3c46c1a45  baseline/generic_dlp_rho_time",
+    "7e3c169dba99788fa9f24d785cced76ad7265de69d6629b38cecbff471e2fb72  candidate/lit2026_w11_bsgs_time",
+    "b782ac97a6571f194e726922265c4448ca349f991c78addd2a60fa7ca3b1f5d7  candidate/lit2026_w11_bsgs_opcount",
+    "41be83daa4ac654172699c223561bb3186f996a1cace4b713ac2fd096bbcdef0  candidate/generic_dlp_rho_time"
+  ],
+  "isolation": "tools/isolated_bench.py run --cpus 3 (1-thread arms) or --cpus 0-3 (4-thread arms); records in raw/isolation.jsonl",
+  "commands": [
+    "research/generic_dlp_memory_parallelism_20261017/scripts/run_arms.sh <raw> <baseline_bin_dir> <candidate_bin_dir> {bsgs1,bsgs4,rho1,rho4}",
+    "research/generic_dlp_memory_parallelism_20261017/scripts/pari_elllog.sh <raw> <role> <bits> <k> <label>"
+  ],
+  "amendments": [
+    "Amendment 1 (PROTOCOL.md, 2026-10-17, before any multi-thread arm ran): the isolation and commands fields above were written at run start; the multi-thread arms ran as parts bsgs3 and rho3 with 3 threads on --cpus 1-3, because tools/isolated_bench.py refuses to reserve every CPU of the 4-vCPU guest."
+  ]
+}

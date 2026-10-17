@@ -1,0 +1,102 @@
+{
+  "schema_version": "ecdlp-audit.governance/v1-draft",
+  "record_kind": "workflow_fixture",
+  "record_id": "gov.fixture.rejection.self-review",
+  "status": "draft",
+  "authoritative": false,
+  "promotion_allowed": false,
+  "self_promotion_allowed": false,
+  "synthetic_only": true,
+  "created_at": "2026-10-14T00:00:00Z",
+  "source_plan": "research/notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.md#workstream-8--add-independent-governance",
+  "draft_notice": "This negative workflow drill demonstrates that an author acting as a required reviewer is rejected and cannot promote any state.",
+  "fixture": {
+    "fixture_version": "ws8-workflow-fixture/v1-draft",
+    "scenario_kind": "rejection",
+    "synthetic_scope": {
+      "fixture_only": true,
+      "public_synthetic": true,
+      "contains_real_target": false,
+      "contains_secret": false,
+      "operational_execution": false,
+      "scientific_evidence": false
+    },
+    "subject": {
+      "subject_id": "synthetic.claim.self-review-attempt",
+      "description": "Synthetic promotion request with the author improperly assigned as mathematical reviewer.",
+      "claim_status_before": "unknown",
+      "maturity_before": "E4",
+      "authoritative_state_before": "unchanged_fixture_baseline"
+    },
+    "request": {
+      "transition_kind": "promotion",
+      "requested_by": "author",
+      "author_identity": "synthetic:actor:author-a",
+      "source_assessment_id": "synthetic.assessment.rejection.base",
+      "proposed_assessment_id": "synthetic.assessment.rejection.proposed",
+      "review_binding": {
+        "aggregate_revision_digest": "sha256:4545454545454545454545454545454545454545454545454545454545454545",
+        "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+      },
+      "exact_revisions": [
+        {"component": "source_assessment", "revision_digest": "sha256:1212121212121212121212121212121212121212121212121212121212121212"},
+        {"component": "evidence_bundle", "revision_digest": "sha256:2323232323232323232323232323232323232323232323232323232323232323"},
+        {"component": "evidence_profile", "revision_digest": "sha256:3434343434343434343434343434343434343434343434343434343434343434"},
+        {"component": "proposed_aggregate", "revision_digest": "sha256:4545454545454545454545454545454545454545454545454545454545454545"},
+        {"component": "governance_schema", "revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777"},
+        {"component": "dependency_lock", "revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}
+      ],
+      "conditional_roles_invoked": [],
+      "evidence_receipt_ids": ["synthetic.receipt.rejection.input"],
+      "requested_claim_status": "supported",
+      "requested_maturity": "E5",
+      "justification": "The synthetic author attempts to approve the mathematical review of their own revision."
+    },
+    "assignments": [
+      {"role": "author", "actor_id": "synthetic:actor:author-a", "relationship_to_author": "same_person", "contributed_to_subject": true, "conflict_disclosed": true, "conflict_description": "The author also claims the mathematical reviewer role.", "eligible": true},
+      {"role": "mathematical_reviewer", "actor_id": "synthetic:actor:author-a", "relationship_to_author": "same_person", "contributed_to_subject": true, "conflict_disclosed": true, "conflict_description": "Self-review violates required role separation.", "eligible": false},
+      {"role": "release_approver", "actor_id": "synthetic:actor:release-f", "relationship_to_author": "different_team", "contributed_to_subject": false, "conflict_disclosed": false, "conflict_description": null, "eligible": true}
+    ],
+    "decisions": [
+      {"role": "mathematical_reviewer", "actor_id": "synthetic:actor:author-a", "review_binding": {"aggregate_revision_digest": "sha256:4545454545454545454545454545454545454545454545454545454545454545", "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}, "decision": "recuse", "rationale": "The actor is the author and cannot supply the required independent mathematical review.", "evidence_receipt_ids": ["synthetic.receipt.rejection.conflict"], "decided_at": "2026-10-14T01:00:00Z"},
+      {"role": "release_approver", "actor_id": "synthetic:actor:release-f", "review_binding": {"aggregate_revision_digest": "sha256:4545454545454545454545454545454545454545454545454545454545454545", "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}, "decision": "reject", "rationale": "A required role is conflicted and the distinct implementation and replay decisions are absent.", "evidence_receipt_ids": ["synthetic.receipt.rejection.release"], "decided_at": "2026-10-14T01:01:00Z"}
+    ],
+    "preflight_checks": [
+      {"check": "schema", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.rejection.schema", "rationale": "The negative case is structurally well formed."},
+      {"check": "identity", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.rejection.identity", "rationale": "Record identifiers resolve within the fixture."},
+      {"check": "revision_binding", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.rejection.revisions", "rationale": "The attempted request is digest-bound."},
+      {"check": "conflicts", "checker": "reviewer", "result": "fail", "receipt_id": "synthetic.receipt.rejection.conflict", "rationale": "The author and mathematical reviewer are the same actor."},
+      {"check": "required_roles", "checker": "machine", "result": "fail", "receipt_id": "synthetic.receipt.rejection.roles", "rationale": "Required independent implementation and replay decisions are missing."},
+      {"check": "history", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.rejection.history", "rationale": "Rejection leaves the modeled assessment history unchanged."}
+    ],
+    "history_snapshot": {
+      "prior_record_ids": ["synthetic.assessment.rejection.base"],
+      "prior_record_digests": ["sha256:1212121212121212121212121212121212121212121212121212121212121212"],
+      "append_only": true,
+      "records_deleted": false,
+      "records_rewritten": false
+    },
+    "identity_checks": {
+      "author_not_reviewer": false,
+      "required_roles_distinct": false,
+      "release_approver_not_author": true,
+      "conflicts_clear": false,
+      "every_decision_matches_requested_aggregate": true,
+      "every_decision_matches_governance_schema": true,
+      "every_decision_matches_dependency_revision": true,
+      "no_self_promotion_effect": true,
+      "draft_cannot_promote": true
+    },
+    "expected_outcome": {
+      "workflow_disposition": "reject",
+      "state_effect": "none_draft_only",
+      "authoritative_status_after": "unchanged",
+      "simulated_claim_status_after": "unknown",
+      "simulated_maturity_after": "E4",
+      "history_effect": "none",
+      "reasons": ["Self-review violates role separation.", "Required specialist and replay decisions are incomplete.", "The rejected draft request cannot change any authoritative record."]
+    },
+    "semantic_validator_required": true
+  }
+}

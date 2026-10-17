@@ -7,7 +7,7 @@ import { test } from 'node:test';
 import { classify, embeddedInputs, materializeInputs, scopes, select } from './ci-scope.mjs';
 
 test('prose does not run compilers, profiling or CodeQL', () => {
-  for (const file of ['README.md', 'AGENTS.md', 'docs/ecbench/README.md',
+  for (const file of ['AGENTS.md', 'docs/ecbench/README.md',
     'examples/README.md', 'research/ecbench_example/REPORT.md']) {
     assert.ok(Object.values(classify([file])).every(value => !value), file);
   }
@@ -34,6 +34,8 @@ test('crates and languages select their own checks', () => {
     assert.equal(classify([file]).release_cuda, true, file);
   }
   assert.equal(classify(['ecc2k130/benchmarks/old/probe.cu']).release_cuda, false);
+  assert.equal(classify(['ecc2k130/README.md']).release_native, true);
+  assert.equal(classify(['ecc2k130/README.md']).release_cuda, false);
   assert.equal(classify(['ecc2k130/aws/README.md']).release_native, false);
 });
 
@@ -56,8 +58,11 @@ test('dependencies, workflow edits and frozen evidence remain applicable', () =>
   assert.equal(classify(['research/fixture.json'], new Set(['research/fixture.json'])).rust_root, true);
 });
 
-test('isogeny release inputs select the Rust package lane', () => {
+test('staged Rust release inputs select the Rust package lane', () => {
   const inputs = [
+    'README.md',
+    'LICENSE',
+    'LICENSE.md',
     'tools/isogeny-cli/Cargo.toml',
     'tools/isogeny-cli/Cargo.lock',
     'tools/isogeny-cli/build.rs',
@@ -68,6 +73,8 @@ test('isogeny release inputs select the Rust package lane', () => {
     'isogeny_algos/src/field.rs',
     'docs/curves/registry.json',
     'docs/curves/standards/coverage.json',
+    'docs/ecdlp-audit/ECDLP_AUDIT_PLAN.mock.json',
+    'docs/ecdlp-audit/execution-boundary.svg',
     'research/p192_p224_hundred_large_prime_isogenies_20261010/PROTOCOL.md',
     'research/p192_p224_large_degree_isogenies_20261009/PROTOCOL.md',
     'research/p192_p224_large_degree_isogenies_20261009/verification_poly.rs',
@@ -81,6 +88,24 @@ test('isogeny release inputs select the Rust package lane', () => {
   }
   // Unrelated isogeny research reports do not invoke the release builder.
   assert.equal(classify(['research/p192_p224_large_degree_isogenies_20261008/PROTOCOL.md']).release_rust, false);
+  const attributes = classify(['.gitattributes']);
+  assert.equal(attributes.release_rust, true);
+  assert.equal(attributes.release_native, true);
+  assert.equal(attributes.release_cuda, true);
+});
+
+test('volcano-cli, a path dependency of the root crate, selects the root lanes', () => {
+  for (const file of ['tools/volcano-cli/Cargo.toml', 'tools/volcano-cli/Cargo.lock', 'tools/volcano-cli/src/main.rs']) {
+    const result = classify([file]);
+    assert.equal(result.rust_root, true, file);
+    assert.equal(result.release_rust, true, file);
+    assert.equal(result.ecbench_replay, true, file);
+    assert.equal(result.release_native, false, file);
+    assert.equal(result.release_cuda, false, file);
+  }
+  assert.equal(classify(['isogeny_algos/src/lib.rs']).rust_root, true);
+  assert.equal(classify(['tools/volcano-cli/README.md']).rust_root, false);
+  assert.equal(classify(['tools/volcano-cli/README.md']).release_rust, true);
 });
 
 test('real git diffs include renames, deletes, unusual names and over 300 files', () => {

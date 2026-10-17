@@ -1,0 +1,11 @@
+curve: p=146833024135393 a=14391545271884 b=141956518099848 #E=146833030777920 n=152951073727 h=960 t=-6642526 D=-543208944880896 depth=3 crater: ramified (one horizontal edge per crater vertex) (0 curves tried, 0.0s)
+      walk: mean     487658 iters  (1000 solves, 1000 walk seeds, 1 k, 1 generators)
+         k: mean     480254 iters  (1000 solves, 1 walk seeds, 1000 k, 1 generators)
+ generator: mean     492522 iters  (1000 solves, 1 walk seeds, 1 k, 1000 generators)
+       all: mean     496427 iters  (1000 solves, 1000 walk seeds, 1000 k, 1000 generators)
+   small_k: mean     487206 iters  (1000 solves, 1 walk seeds, 992 k, 1 generators)
+wrote research/isogeny-volcano-rho/runs/run-20261017T0415Z-instance
+
+real	7m25.187s
+user	28m35.498s
+sys	0m0.613s

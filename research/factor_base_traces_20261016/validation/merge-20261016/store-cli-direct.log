@@ -1,0 +1,10 @@
+
+running 5 tests
+test a_missing_aws_cli_is_reported_not_hidden ... ok
+test a_name_is_not_repointed_without_replace_and_nothing_is_uploaded ... ok
+test a_store_reference_works_wherever_a_path_is_accepted ... ok
+test a_tampered_remote_object_is_rejected_and_never_cached ... ok
+test push_on_one_machine_pull_on_another_through_s3 ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.35s
+

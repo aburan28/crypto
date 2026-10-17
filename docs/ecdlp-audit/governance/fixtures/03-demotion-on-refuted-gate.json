@@ -1,0 +1,112 @@
+{
+  "schema_version": "ecdlp-audit.governance/v1-draft",
+  "record_kind": "workflow_fixture",
+  "record_id": "gov.fixture.demotion.refuted-gate",
+  "status": "draft",
+  "authoritative": false,
+  "promotion_allowed": false,
+  "self_promotion_allowed": false,
+  "synthetic_only": true,
+  "created_at": "2026-10-14T00:00:00Z",
+  "source_plan": "research/notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.md#workstream-8--add-independent-governance",
+  "draft_notice": "This drill models a demotion after a gate is refuted while preserving prior evidence; it performs no authoritative change.",
+  "fixture": {
+    "fixture_version": "ws8-workflow-fixture/v1-draft",
+    "scenario_kind": "demotion",
+    "synthetic_scope": {
+      "fixture_only": true,
+      "public_synthetic": true,
+      "contains_real_target": false,
+      "contains_secret": false,
+      "operational_execution": false,
+      "scientific_evidence": false
+    },
+    "subject": {
+      "subject_id": "synthetic.claim.refuted-gate",
+      "description": "Synthetic supported claim whose E4 gate is later refuted by a synthetic counterexample.",
+      "claim_status_before": "supported",
+      "maturity_before": "E6",
+      "authoritative_state_before": "unchanged_fixture_baseline"
+    },
+    "request": {
+      "transition_kind": "demotion",
+      "requested_by": "author",
+      "author_identity": "synthetic:actor:author-a",
+      "source_assessment_id": "synthetic.assessment.demotion.base",
+      "proposed_assessment_id": "synthetic.assessment.demotion.proposed",
+      "review_binding": {
+        "aggregate_revision_digest": "sha256:4646464646464646464646464646464646464646464646464646464646464646",
+        "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+      },
+      "exact_revisions": [
+        {"component": "source_assessment", "revision_digest": "sha256:1313131313131313131313131313131313131313131313131313131313131313"},
+        {"component": "evidence_bundle", "revision_digest": "sha256:2424242424242424242424242424242424242424242424242424242424242424"},
+        {"component": "evidence_profile", "revision_digest": "sha256:3535353535353535353535353535353535353535353535353535353535353535"},
+        {"component": "proposed_aggregate", "revision_digest": "sha256:4646464646464646464646464646464646464646464646464646464646464646"},
+        {"component": "governance_schema", "revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777"},
+        {"component": "dependency_lock", "revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}
+      ],
+      "conditional_roles_invoked": [],
+      "evidence_receipt_ids": ["synthetic.receipt.demotion.counterexample", "synthetic.receipt.demotion.recompute"],
+      "requested_claim_status": "unknown",
+      "requested_maturity": "E3",
+      "justification": "A synthetic counterexample refutes the E4 gate, so contiguous maturity is recomputed to E3 and support is withdrawn."
+    },
+    "assignments": [
+      {"role": "author", "actor_id": "synthetic:actor:author-a", "relationship_to_author": "same_person", "contributed_to_subject": true, "conflict_disclosed": false, "conflict_description": null, "eligible": true},
+      {"role": "mathematical_reviewer", "actor_id": "synthetic:actor:math-b", "relationship_to_author": "different_team", "contributed_to_subject": false, "conflict_disclosed": false, "conflict_description": null, "eligible": true},
+      {"role": "evidence_replay_reviewer", "actor_id": "synthetic:actor:replay-d", "relationship_to_author": "external", "contributed_to_subject": false, "conflict_disclosed": false, "conflict_description": null, "eligible": true},
+      {"role": "release_approver", "actor_id": "synthetic:actor:release-f", "relationship_to_author": "different_team", "contributed_to_subject": false, "conflict_disclosed": false, "conflict_description": null, "eligible": true}
+    ],
+    "decisions": [
+      {"role": "mathematical_reviewer", "actor_id": "synthetic:actor:math-b", "review_binding": {"aggregate_revision_digest": "sha256:4646464646464646464646464646464646464646464646464646464646464646", "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}, "decision": "approve", "rationale": "The synthetic counterexample invalidates the modeled E4 statement under its stated hypotheses.", "evidence_receipt_ids": ["synthetic.receipt.demotion.counterexample"], "decided_at": "2026-10-14T02:00:00Z"},
+      {"role": "evidence_replay_reviewer", "actor_id": "synthetic:actor:replay-d", "review_binding": {"aggregate_revision_digest": "sha256:4646464646464646464646464646464646464646464646464646464646464646", "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}, "decision": "approve", "rationale": "Fresh synthetic replay reproduces the counterexample and E3 recomputation.", "evidence_receipt_ids": ["synthetic.receipt.demotion.recompute"], "decided_at": "2026-10-14T02:01:00Z"},
+      {"role": "release_approver", "actor_id": "synthetic:actor:release-f", "review_binding": {"aggregate_revision_digest": "sha256:4646464646464646464646464646464646464646464646464646464646464646", "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}, "decision": "approve", "rationale": "An authoritative system would append the demoted assessment; this draft only records the expected workflow result.", "evidence_receipt_ids": ["synthetic.receipt.demotion.release"], "decided_at": "2026-10-14T02:02:00Z"}
+    ],
+    "preflight_checks": [
+      {"check": "schema", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.demotion.schema", "rationale": "The synthetic event and transition records are structurally valid."},
+      {"check": "identity", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.demotion.identity", "rationale": "The affected synthetic assessment resolves exactly."},
+      {"check": "revision_binding", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.demotion.revisions", "rationale": "The counterexample and proposed assessment are revision-bound."},
+      {"check": "evidence_profile", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.demotion.recompute", "rationale": "The first refuted gate is E4, leaving a contiguous E0-E3 prefix."},
+      {"check": "staleness", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.demotion.trigger", "rationale": "The refutation is treated as an immediate event-bound trigger."},
+      {"check": "conflicts", "checker": "reviewer", "result": "pass", "receipt_id": "synthetic.receipt.demotion.conflicts", "rationale": "The modeled reviewers are distinct and conflict-free."},
+      {"check": "history", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.demotion.history", "rationale": "The modeled demotion appends and retains the prior supported assessment."},
+      {"check": "required_roles", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.demotion.roles", "rationale": "Domain, replay, and release decisions are present."}
+    ],
+    "event": {
+      "event_kind": "gate_refuted",
+      "detected_at": "2026-10-14T01:55:00Z",
+      "evidence_receipt_id": "synthetic.receipt.demotion.counterexample",
+      "description": "A synthetic counterexample refutes the modeled E4 gate."
+    },
+    "history_snapshot": {
+      "prior_record_ids": ["synthetic.assessment.demotion.base"],
+      "prior_record_digests": ["sha256:1313131313131313131313131313131313131313131313131313131313131313"],
+      "append_only": true,
+      "records_deleted": false,
+      "records_rewritten": false
+    },
+    "identity_checks": {
+      "author_not_reviewer": true,
+      "required_roles_distinct": true,
+      "release_approver_not_author": true,
+      "conflicts_clear": true,
+      "every_decision_matches_requested_aggregate": true,
+      "every_decision_matches_governance_schema": true,
+      "every_decision_matches_dependency_revision": true,
+      "no_self_promotion_effect": true,
+      "draft_cannot_promote": true
+    },
+    "expected_outcome": {
+      "workflow_disposition": "would_append_demotion",
+      "state_effect": "none_draft_only",
+      "authoritative_status_after": "unchanged",
+      "simulated_claim_status_after": "unknown",
+      "simulated_maturity_after": "E3",
+      "history_effect": "would_append_assessment",
+      "reasons": ["The synthetic E4 gate is refuted.", "Maturity is recomputed from the contiguous prefix.", "Prior evidence and the superseded supported assessment remain preserved."]
+    },
+    "semantic_validator_required": true
+  }
+}

@@ -39,7 +39,7 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -61,7 +61,7 @@ jobs:
   publish:
     if: github.event_name == 'push'
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
@@ -95,7 +95,7 @@ jobs:
   deploy:
     if: github.event_name == 'workflow_dispatch' && inputs.deploy
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       id-token: write

@@ -1,0 +1,69 @@
+digraph typed_transfer_context {
+  graph [
+    rankdir=TB,
+    bgcolor="white",
+    pad="0.12",
+    nodesep="0.25",
+    ranksep="0.34",
+    fontname="Helvetica",
+    fontsize=15,
+    newrank=true,
+    labelloc="t",
+    label="Typed cover, Picard, and delivery boundaries"
+  ];
+  node [shape=box, style="rounded,filled", fillcolor="white", color="#34495e", fontname="Helvetica", fontsize=11];
+  edge [fontname="Helvetica", fontsize=11, color="#34495e", arrowsize=0.72];
+
+  subgraph cluster_context {
+    label="Typed mathematical context";
+    color="#85929e";
+    style="rounded,dashed";
+
+    source_h [label="source H\nexact HC1 model", fillcolor="#f8f9f9"];
+    target_e [label="target E\nexact ICV1 + model hash", fillcolor="#f8f9f9"];
+    pic_e [label="Pic^0(E)", fillcolor="#eaf2f8", color="#2471a3"];
+    jac_h [label="Jac(H) = Pic^0(H)\nfield + dimension + infinity model", fillcolor="#eaf2f8", color="#2471a3"];
+
+    binding_note [
+      label="typed_bindings\n318 fields / 2,098 Jacobian contexts / 2,100 maps\nfield identity has relative degree 1; GF(p^k) may still have k > 1\nan identity joins objects—it does not claim arithmetic",
+      shape=note,
+      fillcolor="#f8f9f9",
+      color="#566573"
+    ];
+    transfer_limits [
+      shape=plain,
+      label=<
+        <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#566573">
+          <TR><TD BGCOLOR="#eafaf1">binary rational point-class pullback and<BR/>typed-fiber/point-divisor pushforward: SUPPORTED</TD></TR>
+          <TR><TD BGCOLOR="#fef9e7">odd two-infinity induced maps: UNKNOWN</TD></TR>
+          <TR><TD BGCOLOR="#fdedec">catalog arbitrary Jac(H) norm: REFUTED as current API;<BR/>fixed GF(8) fixture is outside catalog;<BR/>not a mathematical nonexistence claim</TD></TR>
+        </TABLE>
+      >
+    ];
+
+    { rank=same; source_h; target_e; }
+    { rank=same; pic_e; jac_h; }
+    source_h -> target_e [label="phi: geometry\nSUPPORTED (2,100)", color="#229954", penwidth=2];
+    pic_e -> jac_h [label="phi*: bounded\nbinary domain", color="#229954", penwidth=1.5];
+    jac_h -> pic_e [label="phi_*: bounded\nbinary domain", color="#229954", penwidth=1.5, constraint=false];
+    source_h -> pic_e [style="invis", weight=50];
+    target_e -> jac_h [style="invis", weight=50];
+    pic_e -> binding_note [style="invis", weight=40];
+    jac_h -> binding_note [style="invis", weight=40];
+    binding_note -> transfer_limits [style="invis", weight=40];
+  }
+
+  package [
+    label="Standalone boundary (mixed status)\ncurrent-source test: 2,100 / 2,100\npublished direct replay: bundled 592 rows\n746 inside / 1,354 outside old allowlist is a STATIC inference\nnew catalog-wide packaged artifact: UNKNOWN",
+    fillcolor="#f8f9f9",
+    color="#566573"
+  ];
+  solver [
+    label="Catalog-cover solver deliverable: UNKNOWN / not run\nno solver relations or target decomposition for these cover sources\ntiny odd one-infinity library is outside this path\nno matched baseline, memory, runtime, or advantage evidence",
+    fillcolor="#f2f3f4",
+    color="#7f8c8d"
+  ];
+
+  transfer_limits -> package [style="invis", weight=80];
+  package -> solver [style="invis", weight=80];
+}

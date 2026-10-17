@@ -1,0 +1,81 @@
+\section{Assessment (revision 2)}\label{sec:assessment}
+
+This section records an assessment of the scheme made on 2026-10-17 against
+the maintained implementation~\cite{EigenX}. It is still the authors' own
+analysis, not an external review. Its method was as follows. We recomputed
+every derived number in Tables~\ref{tab:params}, \ref{tab:attacks} and
+\ref{tab:tiers} from the parameters and the cost model, and reread the
+proofs of \S\ref{sec:correctness}. We read the key-generation filter that
+defines the degree search space. We ran the maintained test suite. We
+implemented and measured one new attack component, the test of
+Lemma~\ref{lem:pktest}. Records:
+\art{crypto:research/eigen_seta_assessment_20261017/}.
+
+\paragraph{Verdict.} We found no attack below the costs of
+Table~\ref{tab:attacks}. The binding attack is still mask guessing, at about
+$2^\lambda$ classical chains and $2^{\lambda/2}$ Grover queries on the L sets
+and $2^\lambda$ queries on L5, Q3 and Q5. Security rests on two assumptions
+that have no reduction to a standard problem. Assumption~\ref{ass:key} is that
+the hidden-degree eigenbasis with its hidden orientation hides $f$.
+Assumption~\ref{ass:msg} is that the masked eigen-torsion problem is hard, and
+IND-CPA needs its decisional form. We rank the risks as follows.
+\begin{enumerate}
+\item \emph{An effective orientation of $\EA$.} The public key is a segment
+  of length $2E$ of a horizontal $2$-walk in the hidden
+  $\Z[f\omega]$-orientation. Any method that extends this to an evaluable
+  class-group action gives subexponential quantum key recovery through
+  Kuperberg's algorithm. It does so at every parameter set, because the Q sets
+  enlarge $d$ and not $f$. The level-structure
+  frameworks~\cite{DFP24,Arpin24} and sesquilinear pairings are the tools to
+  check first. Nobody has done that.
+\item \emph{A mask-free higher-dimensional embedding.} The subgroups
+  $\varphi\langle P_A\rangle$ and $\varphi\langle Q_A\rangle$ and the product
+  $ab$ are public and do not depend on the mask ratio. A Kani embedding of
+  dimension~4 or~8 built from them alone would remove the binding attack's
+  $\sqrt d$ search. This is open.
+\item \emph{The decisional assumption.} Every basis of $\EA[2^E]$ is an
+  eigenbasis of some endomorphism, so the assumption is about the size of the
+  smallest diagonal one. No distinguisher is known, and no argument for
+  hardness is known beyond the absence of one.
+\end{enumerate}
+
+\paragraph{Corrections to revision 1.}
+\begin{itemize}
+\item \emph{NIST categories} (relabelling, claim correction). Revision~1
+  conjectured categories 1, 3 and 5 for L1, L3 and L5 on the strength of
+  AES-like structure. That holds only in the gate-count metric (Tier A of
+  \S\ref{sec:nist}). Against $2^\lambda$ quantum queries (Tier B), L1 and L3
+  fall short at $2^{64.5}$ and $2^{96.5}$. Only L5, Q3 and Q5 meet that bar.
+\item \emph{The degree-search oracle} (advance in the attack's cost
+  accounting, small). A candidate degree can be tested on the public key
+  alone with a chain of about $2\log_2f$ steps instead of a decapsulation
+  of $E\approx4\log_2f$ steps (Lemma~\ref{lem:pktest},
+  \S\ref{sec:pktest-results}). This lowers the degree-search row by about
+  1.9 bits in the gate model. It changes no tier.
+\item \emph{Implementation and measurements} (engineering). The paper now
+  points to the maintained code, which decapsulates with a theta chain and
+  adds the Q sets. Revision~1's timings and constant-time evidence describe
+  the historical Mumford build only (\S\ref{sec:impl-v2}). A field-arithmetic
+  defect for non-friendly moduli was found and fixed. It affected no
+  parameter set.
+\item \emph{Two inconsistencies in the maintained security notes}
+  (documentation). \art{eigenx:docs/SECURITY.md} placed the public
+  $\omega$-eigenbasis on $\ED[3^F]$. That is impossible, because $3$ is inert
+  in $\Q(\sqrt{-7})$, and Proposition~\ref{prop:cyclic} rests on there being
+  no eigenline modulo~3. The note is corrected. Its cost model takes the
+  admissible fraction of degrees to be $1/\ln2^E$ and says this is the
+  density of sums of two squares. Key generation actually accepts $f$ when
+  $2^E-7d^2f^2$, after removing prime factors up to $2^{14}$, leaves 1 or a
+  prime $\equiv1\pmod4$, together with the divisibility and sign conditions of Algorithm~\ref{alg:keygen}. The measured rate $\rho$
+  (\S\ref{sec:key}) is the right quantity. It exceeds the model's fraction
+  by 1.6 to 2.3 bits, so the model understates the search, which is the
+  conservative direction.
+\end{itemize}
+
+\paragraph{Practicality.} Primes of about $10.5\lambda$ bits (1341 bits at
+L1, 3904 and 5192 bits for Q3 and Q5) make public keys and ciphertexts 1.3 to
+5.2\,kB. Key generation is a rejection search that takes hours at Q5 even
+with eight workers (\art{eigenx:research/q5_roundtrip.md}). The decryption
+chain is the cost driver. Shortening it with two half-chains (open
+problem~3) would bring $p$ from about $d^5$ to about $d^3$, and it is the
+most valuable engineering change.
