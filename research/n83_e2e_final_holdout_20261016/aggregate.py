@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
 """Bind two N83 finalist cloud artifacts and select from validated rows."""
 
-import argparse
-import hashlib
-import importlib.util
-import json
-import subprocess
 import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
+# Direct script execution otherwise makes this directory's select.py shadow
+# Python's standard select extension, which subprocess needs for replay.
+if sys.path and Path(sys.path[0]).resolve() == HERE:
+    sys.path[0] = str(ROOT)
+
+import argparse
+import hashlib
+import importlib.util
+import json
+import subprocess
 
 
 def module(name, path):
@@ -61,7 +66,8 @@ def bind_half(half, results, archive, provider_sha, run_id, attempt,
         stderr = stderr_path.read_text()
     else:
         process = subprocess.run(
-            [sys.executable, str(HERE / "verify.py"), str(results),
+            [sys.executable, "-m",
+             "research.n83_e2e_final_holdout_20261016.verify", str(results),
              "--half", str(half), "--fixture-dir", str(fixture_dir)],
             cwd=ROOT, capture_output=True, text=True, check=False)
         status, stdout, stderr = (process.returncode, process.stdout,

@@ -1,0 +1,23 @@
+{
+  "actual_usable_points": 212480,
+  "base_hash": "1d348fe3486147274bab0a15aae072d3ac2570a35883f356e5c802b29c58bf10",
+  "binary_sha256": "d71a9662c9d4e2dde58443bfc646a05737c6b9ca6b3d5e831b632ce09384c906",
+  "candidate_id": "IC1N83Ckb1a1fb212480PDP4rootRCguidedLAgaussTDdirectISO0h69261fd42dac",
+  "cold_process_seconds": 146.95961945800082,
+  "effective_columns": 1280,
+  "k": 1280,
+  "one_target_online_ms": 4.73325,
+  "online_phases_ms": {
+    "target_descent_ms": 0.000791,
+    "target_pdp_ms": 4.609583,
+    "target_query_ms": 4.2e-05,
+    "target_recovery_check_ms": 0.10500000000000001,
+    "target_relation_check_ms": 0.01775
+  },
+  "receipt_sha256": "f61c5e7edbb2a03d6bf093ee155137e8ae5589ea47de887f607f3e53e6c1fbf9",
+  "root_table_entries": 135983147,
+  "schema": "n83.smallk-current-source-replay/v1",
+  "source_commit": "416489e09c3d8885b6c12f262935e6ba29373460",
+  "source_sha256": "8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12",
+  "status": "PASS_INDEPENDENT_ARITHMETIC_REPLAY"
+}
