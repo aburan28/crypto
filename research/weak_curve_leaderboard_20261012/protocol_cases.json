@@ -1,0 +1,14 @@
+[
+  {
+    "id": "WCPROTO1:SIKEp434:CD2022",
+    "name": "SIKEp434 / SIDH auxiliary-torsion attack",
+    "field": "F_(p²), p=2^216·3^137−1",
+    "curve": "y²=x³+6x²+x",
+    "security_goal": "SIDH/SIKE secret-isogeny key recovery",
+    "mechanism": "Castryck–Decru Kani-reducibility attack",
+    "prerequisites": "SIDH-style public images of the other party's torsion basis; specified starting-curve endomorphism information",
+    "evidence": "published_key_recovery",
+    "result": "Published SIKEp434 key-recovery implementation, approximately ten minutes on one core in the paper's setting",
+    "source_urls": ["https://github.com/microsoft/PQCrypto-SIDH/blob/master/src/P434/P434.c", "https://eprint.iacr.org/2022/975"]
+  }
+]

@@ -1,0 +1,24 @@
+{
+  "baseline_source_sha256": "19c602ea584ea0a9f6ad1f2834b6cb464dac3c2acaeb8adf4019f8ea06b76813",
+  "boundary": "Exact same-input cubic coefficients and degree-three residuals. Sequential shared-host stage times include fiber lifts and are not isolated wall-time speedups.",
+  "classes": 1,
+  "fast_total_ns_unisolated": 1814084126,
+  "field_prime": "6277101735386680763835789423207666416083908700390324961279",
+  "frozen_sha256": "019f65f32c8fef6ca8daa2240f53ee19230a18cd97b312c721387bcd4744c7b7",
+  "original_total_ns_unisolated": 659226500,
+  "pairs": [
+    {
+      "index": 0,
+      "negative_input_residual_fast_ns": 504371167,
+      "negative_input_residual_original_ns": 368651000,
+      "positive_input_residual_fast_ns": 1309712959,
+      "positive_input_residual_original_ns": 290575500
+    }
+  ],
+  "plane_sha256": "b16122e364056b30e46971b18084f7bfa6c0f6de2fa63f0cae63a1229dd224b3",
+  "residual_cuts": 2,
+  "runtime_info_sha256": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+  "source_sha256": "ab9047eaf58e25ac2d486e8c57b0d0d150064e5497ea80ae36cefa88b5cae77e",
+  "status": "matched_prime_field_cubic_reduction_probe",
+  "subgroup_order": "6277101735386680763835789423176059013767194773182842284081"
+}

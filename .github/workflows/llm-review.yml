@@ -22,7 +22,7 @@ permissions:
 jobs:
   review:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       # pull_request_target has access to secrets. Deliberately check out only

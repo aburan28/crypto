@@ -1,0 +1,8 @@
+| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | med wall ms | levels |
+|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---:|---|
+| ECBS1h3b04d5f819cb | rho-neg | rho.negation | icv1-fp26-tm6998-ac08dcfd | 21.57 | 504/504 | 1.177 | [1.110, 1.245] | 0.886 | 1.328 | 1.328 | 1.000 | yes | 8.341 | L1×37 L2×467 |
+| ECBS1h3b04d5f819cb | rho-plain | rho.plain | icv1-fp26-tm6998-ac08dcfd | 21.57 | 504/504 | 1.516 | [1.422, 1.605] | 1.253 | 1.209 | 1.710 | 1.287 | no | 8.293 | L1×41 L2×463 |
+| ECBS1h3b04d5f819cb | bsgs | bsgs.textbook | icv1-fp26-tm6998-ac08dcfd | 21.57 | 504/504 | 1.403 | [1.245, 1.581] | 1.500 | 0.936 | 1.584 | 1.192 | yes | 7.284 | L1×46 L2×458 |
+| ECBS1h3b04d5f819cb | bsgs-neg | bsgs.negation | icv1-fp26-tm6998-ac08dcfd | 21.57 | 504/504 | 0.903 | [0.745, 1.080] | 1.000 | 0.903 | 1.019 | 0.767 | yes | 7.237 | L1×48 L2×456 |
+| ECBS1h3b04d5f819cb | ic | ic.pipeline | icv1-fp26-tm6998-ac08dcfd | 21.57 | 504/504 | 71.199 | [68.023, 74.121] | – | – | 80.339 | 60.476 | yes | 37.129 | L1×44 L2×460 |
+| ECBS1h3b04d5f819cb | rho-neg-aa | rho.negation | icv1-fp26-tm6998-ac08dcfd | 21.57 | 504/504 | 1.177 | [1.110, 1.245] | 0.886 | 1.328 | 1.328 | 1.000 | yes | 8.265 | L1×46 L2×458 |

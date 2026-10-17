@@ -1,0 +1,36 @@
+{
+  "base_classes": 141,
+  "boundary": "Exact 141-class group-equation screen. Zero short-support overlaps do not bound longer relations or geometry-conditioned known-scalar target yield.",
+  "candidate_id": null,
+  "collision_relation_rank": 0,
+  "elapsed_ns_unisolated": 89304015375,
+  "field_prime": "6277101735386680763835789423207666416083908700390324961279",
+  "input_sha256": "1650a868094bbcaa7885acc0aa59aa63b71c10398f5e0b3dc0e3f1656161690f",
+  "max_covered_terms": 6,
+  "overlap_counts": {
+    "1_term_zero": 0,
+    "1_vs_1_opposite_sign": 0,
+    "1_vs_2_opposite_sign": 0,
+    "1_vs_2_same_sign": 0,
+    "1_vs_3_opposite_sign": 0,
+    "1_vs_3_same_sign": 0,
+    "2_term_zero": 0,
+    "2_vs_2_opposite_sign": 0,
+    "2_vs_3_opposite_sign": 0,
+    "2_vs_3_same_sign": 0,
+    "3_term_zero": 0,
+    "3_vs_3_opposite_sign": 0
+  },
+  "prior_support_sha256": "5ccebe2d9bda3bb5310bdae53778fc096d59786d7d94c8a8d74cad72130cca5b",
+  "scope": "same- and opposite-sign overlaps of all 1-, 2-, and 3-term unordered supports, including cross-length equalities and identity targets; no longer support tested",
+  "source_sha256": "81f9ed8b3d21999a7ba48a3b4db7c123def5f43cbce67c8c1743eb72a2e08bad",
+  "status": "verified_p192_line_base_signed_short_relation_screen",
+  "subgroup_order": "6277101735386680763835789423176059013767194773182842284081",
+  "support_counts": {
+    "1": 141,
+    "2": 10011,
+    "3": 477191
+  },
+  "support_sha256_sorted_xy_be24": "95a111382b5b3088a11f438e564864a462e46fb83619ed9b170afda03e067fb0",
+  "witnesses": []
+}

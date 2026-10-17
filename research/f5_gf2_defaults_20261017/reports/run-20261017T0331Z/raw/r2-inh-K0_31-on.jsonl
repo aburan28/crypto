@@ -1,0 +1,4 @@
+{"uptime":"1.05, 1.58, 1.47","utc":"2026-10-17T03:37:46Z","tool":"inh","arm":"on","form":"K0_31","threads":1,"round":2}
+{"arm":"f4","target":1,"ms":804.655,"hit":false,"indices":[],"exhausted":false,"reductions":1411,"splits":602,"propagations":3913,"infeasible":603,"geo_refute":0,"geo_witness":0,"partial_refute":0,"geo_adds":0,"oracle_ms":0.000,"pair_builds":0,"pair_lookups":0,"word_xors":290412310}
+{"arm":"f4","total_ms":804.655,"cpu_ms":2483.257,"reps":3,"lanes":1,"lane_built":0,"hits":0,"reductions":1411,"splits":602,"geo_refute":0,"geo_witness":0,"geo_adds":0,"oracle_ms":0.000,"word_xors":290412310,"root_elim_xors":48980223,"rows_generated":64854,"row_words_generated":1610589,"gate_first_nodes":0,"gate_first_specialisations":0}
+{"arm":"f4","profile":{"calls":4233,"build_ms":2151.113,"reduce_ms":18.999,"readback_ms":0.000,"rows":1584825,"cols":8187627,"word_ops":871236930,"specialise_word_ops":202937409}}
