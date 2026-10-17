@@ -767,6 +767,29 @@ nothing missing. R09's class excludes it.
   ([record](../../ic_tool_program/explorations/A14-prefetch-size-gate-20261017/README.md)).
 - **Next:** R04's stage probes at v8.
 
+**The scan's stages at v8 (2026-10-17).** R04's probes, ported onto v8
+([record](../../ic_tool_program/explorations/scan-stages-v8-20261017/README.md)).
+- **The scan costs 16.2, 16.8 and 17.6 ns per scanned summand** at the three
+  target sizes, against 35–36 at v3.
+- **The stages are now about equal:**
+  - subtract, 4.4 ns;
+  - key, 4.7–5.1 ns;
+  - filter, 5.0–6.6 ns (the largest; it grows with the filter's 4–8 MiB);
+  - admitted keys, 1.6–2.5 ns, R12's pass included.
+- **The scan is 97–99% of collection.** Collection is 56% of cold time at
+  `2^44.3` and `2^44.5`, and 82% at `2^47.2`. The build is 30% and 13%.
+
+**A15: the filter's hash done once is slower (2026-10-17).** Each key's
+filter slot hashed once a block, instead of once to prefetch it and once to test it.
+- **Cold time is 2–4% slower** at the three target sizes: v8 over the
+  candidate reads 0.958, 0.964 and 0.983.
+- **Collection is 2–6.5% slower.**
+- **The cause:** the filter stage waits on memory, and in v8 the second hash
+  overlaps that wait. No round is declared
+  ([record](../../ic_tool_program/explorations/A15-filter-slots-20261017/README.md)).
+- **Next:** the filter's memory access itself, or the build's 30% at
+  `2^44.3`–`2^44.5`.
+
 ## 9. Track B: generality and robustness
 
 **Where the tool stands (at `0bf67f16`).**
