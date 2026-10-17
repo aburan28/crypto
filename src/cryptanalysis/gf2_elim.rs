@@ -44,20 +44,21 @@
 //! a 64-bit word XORed into a row.  A table entry built costs its suffix,
 //! and a row cleared against `t` tables costs `t` suffixes, however the
 //! hardware groups them.
-//! The table buffer is kept across pivot blocks and only each table's zero
-//! entry is cleared before it is rebuilt; every other addressable entry is
-//! overwritten, so the rows and word counts are those of a fresh buffer.
-//! Its complete-call comparison is recorded in
-//! `research/gf2_table_reuse_20260929`; `KIC_GF2_REUSE_TABLE=0` allocates
-//! fresh tables per block as a same-binary control.
+//! The opt-in `KIC_GF2_REUSE_TABLE=1` keeps the table buffer across pivot
+//! blocks and clears only each table's zero entry before rebuilding it;
+//! every other addressable entry is overwritten, so the rows and word counts
+//! are those of a fresh buffer. Its complete-call comparison is recorded in
+//! `research/gf2_table_reuse_20260929`; it stays off by default because on
+//! the 4-vCPU Xeon of `research/f5_gf2_defaults_20261017` it was not a gain
+//! on every matrix-F4 case (0.955× on n = 16, m = 24).
 
 use rayon::prelude::*;
 
 /// Whether table buffers are reused across pivot blocks (see the module
-/// documentation); on unless `KIC_GF2_REUSE_TABLE=0`.
+/// documentation); off unless `KIC_GF2_REUSE_TABLE=1`.
 fn reuse_table_enabled() -> bool {
     static REUSE_TABLE: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    *REUSE_TABLE.get_or_init(|| std::env::var("KIC_GF2_REUSE_TABLE").as_deref() != Ok("0"))
+    *REUSE_TABLE.get_or_init(|| std::env::var("KIC_GF2_REUSE_TABLE").as_deref() == Ok("1"))
 }
 
 /// Largest pattern width of one Gray-code table.
