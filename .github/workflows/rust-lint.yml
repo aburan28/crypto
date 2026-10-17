@@ -119,6 +119,16 @@ jobs:
         run: |
           test "$(git rev-parse HEAD^2)" = "$PR_HEAD"
           BASE="$(git rev-parse HEAD^1)"
+          # Checkout uses the PR merge commit. Its first parent is the base
+          # actually used to build this tree, which can be newer than the
+          # base SHA in the event payload when main moves before this job.
+          mapfile -t parents < <(git cat-file -p HEAD | sed -n 's/^parent //p')
+          if [ ${#parents[@]} -ne 2 ] || [ "${parents[1]}" != "$PR_HEAD" ]; then
+            echo '::error::Expected a PR merge commit with the event head as its second parent.'
+            exit 1
+          fi
+          BASE="${parents[0]}"
+          git fetch --no-tags --depth=1 origin "$BASE"
           git diff --name-only -z --diff-filter=AMR "$BASE" HEAD -- \
             'src/**.rs' 'tests/**.rs' 'examples/**.rs' 'benches/**.rs' 'cd_attack/**.rs' 'build.rs' \
             > "$RUNNER_TEMP/changed-rust-files"
