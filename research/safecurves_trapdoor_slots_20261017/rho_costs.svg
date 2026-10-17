@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="460" font-family="DejaVu Sans, sans-serif" font-size="12">
+  <rect width="880" height="460" fill="#ffffff"/>
+  <text x="20" y="24" font-size="15" font-weight="bold">Round A census: rho cost (bits) on each of the six sextic-twist classes</text>
+  <text x="20" y="40">rho cost = bitlen(largest prime factor of the class order) / 2; values from census.md (SageMath SEA + factor, 2026-10-17)</text>
+
+  <!-- x axis: 0..130 bits mapped to x=150..850 (5.38 px per bit) -->
+  <line x1="150" y1="60" x2="150" y2="400" stroke="#333"/>
+  <g stroke="#eee">
+    <line x1="257" y1="60" x2="257" y2="400"/><line x1="364" y1="60" x2="364" y2="400"/>
+    <line x1="472" y1="60" x2="472" y2="400"/><line x1="579" y1="60" x2="579" y2="400"/>
+    <line x1="686" y1="60" x2="686" y2="400"/><line x1="793" y1="60" x2="793" y2="400"/>
+  </g>
+  <g text-anchor="middle">
+    <text x="150" y="416">0</text><text x="257" y="416">20</text><text x="364" y="416">40</text>
+    <text x="472" y="416">60</text><text x="579" y="416">80</text><text x="686" y="416">100</text>
+    <text x="793" y="416">120</text>
+  </g>
+  <text x="500" y="440" text-anchor="middle">rho cost on that twist class (bits)</text>
+
+  <!-- secp192k1: classes rho 96, 28, 38.5, 66.5, 35, 68.5 (d = 1,3,7,2,4,5; twist = d5 68.5) -->
+  <text x="140" y="86" text-anchor="end" font-weight="bold">secp192k1</text>
+  <g>
+    <rect x="150" y="70" width="517" height="12" fill="#4a7"/><text x="672" y="80">d=1 published (96.0)</text>
+    <rect x="150" y="86" width="151" height="12" fill="#c33"/><text x="306" y="96">d=3 (28.0)</text>
+    <rect x="150" y="102" width="207" height="12" fill="#999"/><text x="362" y="112">d=7 (38.5)</text>
+    <rect x="150" y="118" width="358" height="12" fill="#999"/><text x="513" y="128">d=2 (66.5)</text>
+    <rect x="150" y="134" width="188" height="12" fill="#999"/><text x="343" y="144">d=4 (35.0)</text>
+    <rect x="150" y="150" width="369" height="12" fill="#47c"/><text x="524" y="160">d=5 quadratic twist (68.5)</text>
+  </g>
+
+  <!-- secp224k1: rho 55.5 (d8, twist), 100 (d4), 63 (d7), 111.5 (d2), 56.5 (d14), 112.5 (d1 published) -->
+  <text x="140" y="216" text-anchor="end" font-weight="bold">secp224k1</text>
+  <g>
+    <rect x="150" y="200" width="599" height="12" fill="#4a7"/><text x="754" y="210">d=1 published (112.5)</text>
+    <rect x="150" y="216" width="299" height="12" fill="#47c"/><text x="454" y="226">d=8 quadratic twist (55.5)</text>
+    <rect x="150" y="232" width="304" height="12" fill="#999"/><text x="459" y="242">d=14 (56.5)</text>
+    <rect x="150" y="248" width="339" height="12" fill="#999"/><text x="494" y="258">d=7 (63.0)</text>
+    <rect x="150" y="264" width="538" height="12" fill="#999"/><text x="693" y="274">d=4 (100.0)</text>
+    <rect x="150" y="280" width="600" height="12" fill="#999"/><text x="755" y="290">d=2 (111.5)</text>
+  </g>
+
+  <!-- secp256k1: rho 66.5(d3), 128(d1 pub), 94(d2), 80.5(d7), 110(d6 twist), 67.5(d4) -->
+  <text x="140" y="346" text-anchor="end" font-weight="bold">secp256k1</text>
+  <g>
+    <rect x="150" y="330" width="689" height="12" fill="#4a7"/><text x="735" y="312" text-anchor="start">d=1 published (128.0)</text>
+    <rect x="150" y="346" width="358" height="12" fill="#c33"/><text x="513" y="356">d=3 cubic twist (66.5)</text>
+    <rect x="150" y="362" width="363" height="12" fill="#999"/><text x="518" y="372">d=4 (67.5)</text>
+    <rect x="150" y="378" width="433" height="12" fill="#999"/><text x="588" y="388">d=7 (80.5)</text>
+    <rect x="150" y="394" width="506" height="12" fill="#999"/><text x="661" y="404">d=2 (94.0)</text>
+    <rect x="150" y="410" width="592" height="12" fill="#47c"/><text x="747" y="420" text-anchor="end">d=6 quadratic twist (110.0)</text>
+  </g>
+
+  <g font-size="11">
+    <rect x="560" y="50" width="10" height="10" fill="#4a7"/><text x="574" y="59">published</text>
+    <rect x="640" y="50" width="10" height="10" fill="#47c"/><text x="654" y="59">quadratic twist (what the criterion certifies)</text>
+    <rect x="560" y="66" width="10" height="10" fill="#c33"/><text x="574" y="75">weakest other class</text>
+    <rect x="640" y="66" width="10" height="10" fill="#999"/><text x="654" y="75">other sextic classes</text>
+  </g>
+</svg>
