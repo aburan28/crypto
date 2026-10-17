@@ -1,0 +1,149 @@
+{
+  "arm_order": [
+    "gray_pool",
+    "hash_pool"
+  ],
+  "arms": [
+    {
+      "base_compressed_sha256": "8463aaf30365d6f6f5d6b189aff4e8afcb6c8305ec27c216700776cbdccba29d",
+      "base_object_blake3": "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0",
+      "base_s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0.jsonl.gz",
+      "point_multisets_4_plus_2": "531629281771844600944019700",
+      "pool_compressed_sha256": "df02963d1706fa7a64fd7558d88db79b23ea34801ac58062c4c500113e8c57fe",
+      "pool_object_blake3": "966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47",
+      "pool_s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47.jsonl.gz",
+      "residual_signed_orbits": 97,
+      "role": "gray_pool",
+      "shared_signed_orbits": 503,
+      "source_capacity": {
+        "chain_variables": 105908,
+        "current_worker_cap_pass": true,
+        "domain_clause_cap_pass": true,
+        "domain_clauses": 237280,
+        "domain_variables": 12694,
+        "envelope_orbits": 697,
+        "first_pair_order_variables": 82,
+        "residual_summands": 2,
+        "small_orbits": 600,
+        "small_summands": 4,
+        "summands": 6,
+        "total_variables": 118684,
+        "variable_cap_pass": true,
+        "xor_rows": 6059
+      },
+      "worker_search_argv": [
+        "/worker",
+        "run-cross-pilot",
+        "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0",
+        "/pilot-manifest.json",
+        "/base.jsonl.gz",
+        "966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47",
+        "/pilot-manifest.json",
+        "/pool.jsonl.gz",
+        "/corpus.json",
+        "2300",
+        "20000",
+        "64",
+        "4",
+        "2",
+        "/out/search"
+      ],
+      "worker_verify_argv": [
+        "/worker",
+        "verify-cross-pilot",
+        "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0",
+        "/pilot-manifest.json",
+        "/base.jsonl.gz",
+        "966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47",
+        "/pilot-manifest.json",
+        "/pool.jsonl.gz"
+      ]
+    },
+    {
+      "base_compressed_sha256": "8463aaf30365d6f6f5d6b189aff4e8afcb6c8305ec27c216700776cbdccba29d",
+      "base_object_blake3": "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0",
+      "base_s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0.jsonl.gz",
+      "point_multisets_4_plus_2": "20339736180461024717284020000",
+      "pool_compressed_sha256": "3e85c9e419fcddd3c9faed3c84470bf96fcad9178e48e1d73629369335841ecf",
+      "pool_object_blake3": "b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e",
+      "pool_s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e.jsonl.gz",
+      "residual_signed_orbits": 600,
+      "role": "hash_pool",
+      "shared_signed_orbits": 0,
+      "source_capacity": {
+        "chain_variables": 105908,
+        "current_worker_cap_pass": true,
+        "domain_clause_cap_pass": true,
+        "domain_clauses": 323796,
+        "domain_variables": 14706,
+        "envelope_orbits": 1200,
+        "first_pair_order_variables": 82,
+        "residual_summands": 2,
+        "small_orbits": 600,
+        "small_summands": 4,
+        "summands": 6,
+        "total_variables": 120696,
+        "variable_cap_pass": true,
+        "xor_rows": 6059
+      },
+      "worker_search_argv": [
+        "/worker",
+        "run-cross-pilot",
+        "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0",
+        "/pilot-manifest.json",
+        "/base.jsonl.gz",
+        "b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e",
+        "/pilot-manifest.json",
+        "/pool.jsonl.gz",
+        "/corpus.json",
+        "2300",
+        "20000",
+        "64",
+        "4",
+        "2",
+        "/out/search"
+      ],
+      "worker_verify_argv": [
+        "/worker",
+        "verify-cross-pilot",
+        "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0",
+        "/pilot-manifest.json",
+        "/base.jsonl.gz",
+        "b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e",
+        "/pilot-manifest.json",
+        "/pool.jsonl.gz"
+      ]
+    }
+  ],
+  "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
+  "first_trial_a": "1833078656608906180176350",
+  "first_trial_b": "163089659398503559150141",
+  "limits": {
+    "base_summands": 4,
+    "conflicts_per_arm": 20000,
+    "conservative_full_charge_seconds": 7500,
+    "external_wall_seconds_per_arm": 2400,
+    "job_cap_seconds": 7500,
+    "max_domain_clauses": 12000000,
+    "max_models_per_arm": 64,
+    "max_variables": 150000,
+    "order_first_pair": true,
+    "residual_summands": 2,
+    "run_cpus": 1,
+    "run_memory_bytes": 4294967296,
+    "swap_bytes": 0,
+    "worker_wall_seconds_per_arm": 2300
+  },
+  "public_target": [
+    "1834913121178197242856238",
+    "8797964190732846213981377"
+  ],
+  "schema": "n83.hosted-m6-gray-hash-paired-protocol/v1",
+  "scope_limit": "paired one-query SAT access only; not relation yield, graph rank or total IC runtime",
+  "selected_best_total_runtime": null,
+  "source_receipt_sha256": {
+    "old_plan": "fbd3fb943bc0f181797d106c41ee9961b8d70768b5c65a5584002e3c1b5e488f",
+    "support": "82ff0dcbd4dbb9fd7ee4269cade509abd1f2d1eefc973dcc64900bea3af36e9e"
+  },
+  "status": "FROZEN_BOUNDED_NATURAL_SEARCH"
+}

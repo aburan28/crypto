@@ -1,0 +1,136 @@
+name: N83 hosted K600 Gray/hash six-summand pair
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/n83-hosted-regenerate-20261016
+    paths:
+      - .github/workflows/n83-hosted-m6-paired.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: n83-hosted-m6-paired
+  cancel-in-progress: false
+
+jobs:
+  six-summand-pair:
+    if: github.repository == 'aburan28/crypto' && github.ref == 'refs/heads/codex/n83-hosted-regenerate-20261016'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 125
+    env:
+      IMAGE_REF: rust:1.98.1-bookworm@sha256:93ce27a88655056a51dbdd8f5f2d7ddc071c7b0070fb288a37b5a285fc83971e
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Pin source, image and runner paths
+        run: |
+          set -euo pipefail
+          printf 'CARGO_HOME=%s/n83-cargo\nTARGET_DIR=%s/n83-target\nARCHIVE_DIR=%s/n83-archives\nOUT_DIR=%s/n83-m6-pair\nSETUP=%s/n83-m6-setup\n' \
+            "$RUNNER_TEMP" "$RUNNER_TEMP" "$RUNNER_TEMP" "$RUNNER_TEMP" "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/n83-m6-setup" "$RUNNER_TEMP/n83-cargo" "$RUNNER_TEMP/n83-target" "$RUNNER_TEMP/n83-pilot-parent"
+          git rev-parse HEAD > "$RUNNER_TEMP/n83-m6-setup/source-commit.txt"
+          git status --porcelain=v1 > "$RUNNER_TEMP/n83-m6-setup/source-status.txt"
+          test ! -s "$RUNNER_TEMP/n83-m6-setup/source-status.txt"
+          python3 research/koblitz_n83_factor_base_sweep_20261008/verification/hosted-m6-paired-protocol-20261017/plan.py --check \
+            > "$RUNNER_TEMP/n83-m6-setup/plan-check.json"
+          sha256sum \
+            .github/workflows/n83-hosted-m6-paired.yml \
+            examples/koblitz_n83_mixed_orbit_worker.rs \
+            research/koblitz_n83_factor_base_sweep_20261008/verification/hosted-m6-paired-protocol-20261017/plan.py \
+            research/koblitz_n83_factor_base_sweep_20261008/verification/hosted-m6-paired-protocol-20261017/plan.json \
+            research/koblitz_n83_factor_base_sweep_20261008/verification/hosted-m6-paired-protocol-20261017/run.py \
+            Cargo.lock > "$RUNNER_TEMP/n83-m6-setup/sources.sha256"
+          uname -a > "$RUNNER_TEMP/n83-m6-setup/runner.txt"
+          docker version >> "$RUNNER_TEMP/n83-m6-setup/runner.txt"
+          docker pull --platform linux/arm64 "$IMAGE_REF" \
+            > "$RUNNER_TEMP/n83-m6-setup/image-pull.stdout" \
+            2> "$RUNNER_TEMP/n83-m6-setup/image-pull.stderr"
+          docker image inspect "$IMAGE_REF" --format '{{.Id}} {{.Architecture}} {{.Os}} {{json .RepoDigests}}' \
+            > "$RUNNER_TEMP/n83-m6-setup/image-identity.txt"
+      - name: Fetch offline Cargo registry and Python hash dependency
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: \
+            --target "$RUNNER_TEMP/n83-pydeps" 'blake3==1.0.8' \
+            > "$SETUP/python.stdout" 2> "$SETUP/python.stderr"
+          docker run --rm --pull never --platform linux/arm64 \
+            --user "$(id -u):$(id -g)" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/src,readonly" \
+            --mount "type=bind,src=$CARGO_HOME,dst=/cargo" \
+            --env CARGO_HOME=/cargo --workdir /src "$IMAGE_REF" \
+            cargo fetch --locked --target aarch64-unknown-linux-gnu \
+            > "$SETUP/cargo-fetch.stdout" 2> "$SETUP/cargo-fetch.stderr"
+      - name: Regenerate the three exact public pilot archives
+        env:
+          PYTHONPATH: ${{ runner.temp }}/n83-pydeps
+        run: |
+          set -euo pipefail
+          started=$(date +%s)
+          timeout --signal=TERM --kill-after=5s 600s docker run --rm --pull never --platform linux/arm64 \
+            --network none --cpus 4 --memory 8192m --memory-swap 8192m \
+            --user "$(id -u):$(id -g)" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/src,readonly" \
+            --mount "type=bind,src=$CARGO_HOME,dst=/cargo" \
+            --mount "type=bind,src=$TARGET_DIR,dst=/target" \
+            --env CARGO_HOME=/cargo --env CARGO_TARGET_DIR=/target \
+            --workdir /src "$IMAGE_REF" \
+            cargo build --release --locked --offline --example koblitz_n83_factor_base_export \
+            > "$SETUP/exporter-build.stdout" 2> "$SETUP/exporter-build.stderr"
+          timeout --signal=TERM --kill-after=5s 1800s docker run --rm --pull never --platform linux/arm64 \
+            --network none --cpus 1 --memory 4096m --memory-swap 4096m \
+            --user "$(id -u):$(id -g)" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/src,readonly" \
+            --mount "type=bind,src=$TARGET_DIR,dst=/target,readonly" \
+            --mount "type=bind,src=$RUNNER_TEMP/n83-pilot-parent,dst=/pilot" \
+            --workdir /src "$IMAGE_REF" \
+            /target/release/examples/koblitz_n83_factor_base_export pilot /pilot/panel 1800 \
+            > "$SETUP/pilot.stdout" 2> "$SETUP/pilot.stderr"
+          python3 research/koblitz_n83_factor_base_sweep_20261008/verification/hosted-paired-gate-20261015/prepare_archives.py \
+            --panel "$RUNNER_TEMP/n83-pilot-parent/panel" \
+            --archives "$ARCHIVE_DIR" --receipt "$SETUP/regeneration.json" \
+            --source-commit "$(git rev-parse HEAD)" --workflow-commit "$GITHUB_SHA" \
+            --started-unix-seconds "$started" \
+            > "$SETUP/regeneration.stdout" 2> "$SETUP/regeneration.stderr"
+      - name: Build six-summand mixed-orbit worker once
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 600s docker run --rm --pull never --platform linux/arm64 \
+            --network none --cpus 4 --memory 8192m --memory-swap 8192m \
+            --user "$(id -u):$(id -g)" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/src,readonly" \
+            --mount "type=bind,src=$CARGO_HOME,dst=/cargo" \
+            --mount "type=bind,src=$TARGET_DIR,dst=/target" \
+            --env CARGO_HOME=/cargo --env CARGO_TARGET_DIR=/target \
+            --workdir /src "$IMAGE_REF" \
+            cargo build --release --locked --offline --no-default-features --example koblitz_n83_mixed_orbit_worker \
+            > "$SETUP/worker-build.stdout" 2> "$SETUP/worker-build.stderr"
+          cp "$TARGET_DIR/release/examples/koblitz_n83_mixed_orbit_worker" "$SETUP/worker"
+          chmod 755 "$SETUP/worker"
+          sha256sum "$SETUP/worker" > "$SETUP/worker.sha256"
+      - name: Run matched 4+2 Gray and hash arms
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$(cat "$SETUP/source-commit.txt")"
+          sha256sum -c "$SETUP/sources.sha256"
+          python3 research/koblitz_n83_factor_base_sweep_20261008/verification/hosted-m6-paired-protocol-20261017/run.py \
+            --archives "$ARCHIVE_DIR" --worker "$SETUP/worker" \
+            --output "$OUT_DIR" --image "$IMAGE_REF" --run-id "$GITHUB_RUN_ID" \
+            > "$SETUP/run.stdout" 2> "$SETUP/run.stderr"
+      - name: Preserve preparation, frozen bases and raw stage receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-hosted-m6-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/n83-m6-setup/
+            ${{ runner.temp }}/n83-archives/*.jsonl.gz
+            ${{ runner.temp }}/n83-pilot-parent/panel/manifest.json
+            ${{ runner.temp }}/n83-m6-pair/
+          if-no-files-found: warn
+          retention-days: 90
