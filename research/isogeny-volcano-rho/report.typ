@@ -616,6 +616,67 @@ width, not anything about a curve.
   takes roughly `(2 · 0.52 · 100/x)²` solves per arm, about 1,100 for 3
   %.
 
+== Same walk on every curve: the pull-back control
+(`run-20261017T0111Z`)
+<same-walk-on-every-curve-the-pull-back-control-run-20261017t0111z>
+The per-curve differences come from the walk, not the curve. Rho picks
+each step, decides distinguished points and keys its table by a hash of
+the current point’s x-coordinate. An isogeny or a rescaling changes
+those coordinates, so each curve runs a different pseudo-random walk on
+the same group.
+
+#strong[Prediction.] If every curve read the root curve’s coordinates
+instead, the walks would coincide and every curve would take exactly the
+same number of steps for each seed.
+
+#strong[How the walk reads the root’s coordinates (`--walk pullback`).]
+- #strong[The canonical point.] Each curve m isogeny steps from the root
+reads `[ℓ^(M−m)] · φ̂₁ ∘ … ∘ φ̂_m (R)` on the root curve, which equals
+`±ℓ^M φ⁻¹(R)`. Here M is the largest distance among the measured curves,
+7 for curve C. - #strong[The dual edge.] Each dual φ̂ is the rational
+kernel whose codomain has the parent’s j-invariant, composed with the
+isomorphism onto the parent’s model. It is accepted only if
+`φ̂(φ(P)) = ±[ℓ]P`. - #strong[Controls.] These pull back by undoing their
+rescaling.
+
+#strong[Result] on curve C: 30 curves + 3 controls × 20 seeds.
+
+#align(center)[#table(
+  columns: 2,
+  align: (col, row) => (left,left,).at(col),
+  inset: 6pt,
+  [], [result],
+  [seeds that took the same number of steps on all 33 arms],
+  [#strong[20 / 20]],
+  [all 660 solves],
+  [correct],
+  [steps per seed (sorted)],
+  [67,490 · 165,318 · 202,642 · 212,430 · 226,841 · 274,404 · 369,316 ·
+  497,854 · 524,385 · 593,906 · 621,975 · 624,229 · 722,575 · 737,697 ·
+  745,537 · 755,347 · 767,003 · 839,832 · 903,373 · 1,021,850],
+  [mean over seeds],
+  [543,700 (√(πn/2) \= 490,158; one draw per seed, sd of the mean ≈
+  57,000)],
+  [cost per step],
+  [6,425 ns (root, chain length 0, ℓ^7 lift) rising to 7,562 ns (chain
+  length 7); native walk 757 ns],
+)
+]
+
+The native walk on the same curves gives per-seed counts that are
+uncorrelated across curves (mean correlation +0.002 on A, −0.025 on C).
+The pulled-back walk gives the same count everywhere. The step count is
+a property of the walk and the instance; the curve only supplies the
+coordinates the walk hashes. Pulling back makes every step about 9×
+dearer and saves no steps: whichever walk a curve runs, its collision
+time follows the same birthday distribution.
+
+#figure([#image("runs/run-20261017T0111Z/per_curve.svg")],
+  caption: [
+    pull-back per curve
+  ]
+)
+
 == Reading it
 <reading-it>
 - #strong[Observed:] level means differ by at most 63,000 iterations (L0
@@ -715,6 +776,8 @@ cargo build --release --bin volcano-rho
     --trials 100 --per-level 10 --controls 3 --out OUT_B
 ./target/release/volcano-rho --bits 48 --ell 2 --depth 3 --max-cofactor 4096 --seed 20261018 \
     --trials 100 --per-level 16 --controls 3 --out OUT_C
+./target/release/volcano-rho --bits 48 --ell 2 --depth 3 --max-cofactor 4096 --seed 20261018 \
+    --trials 20 --per-level 16 --controls 3 --walk pullback --out OUT_PULLBACK
 python plot.py OUT     # matplotlib, plotting only
 ```
 

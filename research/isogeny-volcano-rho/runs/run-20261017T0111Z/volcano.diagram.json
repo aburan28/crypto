@@ -1,0 +1,338 @@
+{
+ "schema": "volcano-diagram/v1",
+ "ell": 2,
+ "depth": 3,
+ "title": "2-isogeny volcano, depth 3, p = 146833024135393",
+ "subtitle": "run-20261017T0111Z",
+ "value_label": "mean rho iterations (measured curves)",
+ "vertices": [
+  {
+   "id": 0,
+   "label": "v0",
+   "level": 3,
+   "nbrs": [
+    1
+   ],
+   "value": 543700.2,
+   "highlight": "root"
+  },
+  {
+   "id": 1,
+   "label": "v1",
+   "level": 2,
+   "nbrs": [
+    0,
+    2,
+    3
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 2,
+   "label": "v2",
+   "level": 1,
+   "nbrs": [
+    1,
+    4,
+    5
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 3,
+   "label": "v3",
+   "level": 3,
+   "nbrs": [
+    1
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 4,
+   "label": "v4",
+   "level": 2,
+   "nbrs": [
+    2,
+    6,
+    7
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 5,
+   "label": "v5",
+   "level": 0,
+   "nbrs": [
+    2,
+    8,
+    9
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 6,
+   "label": "v6",
+   "level": 3,
+   "nbrs": [
+    4
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 7,
+   "label": "v7",
+   "level": 3,
+   "nbrs": [
+    4
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 8,
+   "label": "v8",
+   "level": 0,
+   "nbrs": [
+    5,
+    10,
+    11
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 9,
+   "label": "v9",
+   "level": 1,
+   "nbrs": [
+    5,
+    12,
+    13
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 10,
+   "label": "v10",
+   "level": 1,
+   "nbrs": [
+    8,
+    14,
+    15
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 11,
+   "label": "v11",
+   "level": 1,
+   "nbrs": [
+    8,
+    16,
+    17
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 12,
+   "label": "v12",
+   "level": 2,
+   "nbrs": [
+    9,
+    18,
+    19
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 13,
+   "label": "v13",
+   "level": 2,
+   "nbrs": [
+    9,
+    20,
+    21
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 14,
+   "label": "v14",
+   "level": 2,
+   "nbrs": [
+    10,
+    22,
+    23
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 15,
+   "label": "v15",
+   "level": 2,
+   "nbrs": [
+    10,
+    24,
+    25
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 16,
+   "label": "v16",
+   "level": 2,
+   "nbrs": [
+    11,
+    26,
+    27
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 17,
+   "label": "v17",
+   "level": 2,
+   "nbrs": [
+    11,
+    28,
+    29
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 18,
+   "label": "v18",
+   "level": 3,
+   "nbrs": [
+    12
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 19,
+   "label": "v19",
+   "level": 3,
+   "nbrs": [
+    12
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 20,
+   "label": "v20",
+   "level": 3,
+   "nbrs": [
+    13
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 21,
+   "label": "v21",
+   "level": 3,
+   "nbrs": [
+    13
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 22,
+   "label": "v22",
+   "level": 3,
+   "nbrs": [
+    14
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 23,
+   "label": "v23",
+   "level": 3,
+   "nbrs": [
+    14
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 24,
+   "label": "v24",
+   "level": 3,
+   "nbrs": [
+    15
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 25,
+   "label": "v25",
+   "level": 3,
+   "nbrs": [
+    15
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 26,
+   "label": "v26",
+   "level": 3,
+   "nbrs": [
+    16
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 27,
+   "label": "v27",
+   "level": 3,
+   "nbrs": [
+    16
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 28,
+   "label": "v28",
+   "level": 3,
+   "nbrs": [
+    17
+   ],
+   "value": 543700.2,
+   "highlight": null
+  },
+  {
+   "id": 29,
+   "label": "v29",
+   "level": 3,
+   "nbrs": [
+    17
+   ],
+   "value": 543700.2,
+   "highlight": null
+  }
+ ]
+}
