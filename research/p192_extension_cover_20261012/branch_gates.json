@@ -1,0 +1,58 @@
+{
+  "curve": "NIST P-192 / secp192r1",
+  "elapsed_s_diagnostic": 4.487,
+  "factor_base_eligibility_pilot": {
+    "plane_quartic_eligibility_elapsed_s": 0.003,
+    "same_field_plane_quartic_abscissae_with_fourth_root_rhs": 115,
+    "samples": 256,
+    "scholten_base_field_abscissae_with_square_rhs": 139,
+    "scholten_eligibility_elapsed_s": 0.005,
+    "seed": 1727116218387,
+    "status": "bounded candidate-eligibility diagnostic; no factor-base enumeration or relation pipeline",
+    "x_law": "Python MT19937 randrange(p), 256 independent draws",
+    "x_sha256_decimal_csv": "92166e6477a7738fdae1381531c864499523d404f0ac6e3ba3cadb0cdc8cfaf8"
+  },
+  "j": "6234286251230310114240839169629130138801351179850969208331",
+  "nonhyperelliptic_genus3": {
+    "equation": "Z^4=X^3 W+a X W^3+b W^4",
+    "field_of_definition": "F_p",
+    "genus": 3,
+    "jv_descended_branch_status": "unassessed",
+    "map_affine": "(x,z)->(x,z^2)",
+    "map_degree": 2,
+    "map_identity_verified": true,
+    "r_subgroup_injection": "follows from push-pull=[2] and odd r; not a Sage Jacobian computation",
+    "smoothness_input_squarefree": true
+  },
+  "p": "6277101735386680763835789423207666416083908700390324961279",
+  "quadratic_root_genus3": {
+    "direct_model": "excluded_by_j_degree",
+    "family": "y^2=(x^2-d)(x-alpha)(x-alpha^q), q=p^2, d nonsquare in F_q",
+    "j_exceptional": false,
+    "j_in_Fp": true,
+    "torus_order": "1552518092300708935148979488462502555238636254646207830263498029997357369250642409065385235928795348697166565028091618918400746707576973035834699926098465791604281683653179708100378022443889644978682747316509021503037814208924221441"
+  },
+  "r": "6277101735386680763835789423176059013767194773182842284081",
+  "scholten_genus2": {
+    "A_coeffs_Fp3": [
+      "2769947165853035464232776988473519526887302748200461941093",
+      "132409989857589925163547844810222380570847371404722670205",
+      "3932520332906807199740928830300861726414293199046897714383"
+    ],
+    "B_coeffs_Fp3": [
+      "4921032529411909477084232759958322423615272092523986796513",
+      "397229969572769775490643534430667141712542114214168010618",
+      "4194906706707195989518069220984879030738741555948309952727"
+    ],
+    "cover_genus": 2,
+    "cover_squarefree": true,
+    "elliptic_form": "y^2=A*t^3+B*t^2+B*t+A",
+    "field_of_definition": "F_(p^3)",
+    "generator_pullback_nonzero": true,
+    "genuinely_descended_from_Fp6": false,
+    "map_to_original_E": "(u,v)->(zeta+s*(u^2+1),v)",
+    "model": "v^2=A*u^6+B*u^4+B*u^2+A",
+    "quadratic_extension_coefficients_fixed": true,
+    "r_times_pullback_zero": true
+  }
+}

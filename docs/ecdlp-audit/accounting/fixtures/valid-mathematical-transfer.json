@@ -1,0 +1,263 @@
+{
+  "$schema": "../cross-route-cost-receipt.schema.json",
+  "schema_version": "ecdlp-cross-route-cost-receipt/v0.1-draft",
+  "record_state": "mock_non_authoritative",
+  "receipt_uid": "urn:ecdlp-audit:cost-receipt:mock:mathematical-transfer-001",
+  "created_at": "2026-10-13T20:00:00Z",
+  "authoritative": false,
+  "promotion_allowed": false,
+  "claim_transition_allowed": false,
+  "route": {
+    "route_uid": "route.mock.cover-transfer",
+    "route_revision": "draft-1",
+    "route_class": "mathematical_transfer",
+    "family": "hyperelliptic-cover-transfer",
+    "description": "Synthetic accounting example for a cover-transfer route.",
+    "adversary_model_uid": "adversary.mock.public-researcher",
+    "prerequisites": ["explicit map", "verified subgroup correspondence"],
+    "composed_route_uids": [],
+    "weakest_open_obligation": "No independent transfer replay exists for this invented fixture."
+  },
+  "route_registry_binding": {
+    "registry_path": "docs/ecdlp-audit/routes/route-registry.seed.json",
+    "registry_schema_version": "ecdlp-ws5-routes/v0-draft",
+    "registry_as_of": "2026-10-14",
+    "registry_revision_sha256": "sha256:b19664ca7557a3bd943ad472f8ea645b114a058f1a1557b8822c8177e0140b1b",
+    "route_family_join": {
+      "status": "unresolved",
+      "id": null,
+      "reason": "The local mock route has not been reviewed as an exact WS5 route-family member."
+    },
+    "evidence_profile_join": {
+      "status": "unresolved",
+      "id": null,
+      "reason": "No exact WS5 evidence-profile join has been established for this mock receipt."
+    }
+  },
+  "identities": {
+    "audit_unit_uid": "unit.mock.math.001",
+    "subject_uid": "subject.mock.curve.001",
+    "target_set_uid": "targets.mock.math.001",
+    "workload_uid": "workload.mock.math.001",
+    "evidence_revision": "mock-evidence-1",
+    "curve": {"status": "applicable", "uid": "EC1:mock-curve-001", "revision": "mock-1"},
+    "field_or_platform": {"status": "applicable", "uid": "field:mock-prime-101", "revision": "mock-1"},
+    "representation": {"status": "applicable", "uid": "representation:mock-weierstrass", "revision": "mock-1"},
+    "subgroup_or_secret_domain": {"status": "applicable", "uid": "subgroup:mock-order-53", "revision": "mock-1"},
+    "protocol": {"status": "not_applicable", "uid": null, "revision": null, "reason": "The fixture measures an algebraic route, not a protocol."},
+    "implementation": {"status": "applicable", "uid": "implementation:mock-transfer", "revision": "0000000-mock"}
+  },
+  "authorization": {
+    "tier": "T1",
+    "status": "mock_only",
+    "authorization_ref": "docs/ecdlp-audit/ECDLP_AUDIT_PLAN.mock.json",
+    "scope": "Schema fixture using invented public synthetic values only.",
+    "valid_from": null,
+    "expires_at": null,
+    "fixture_classes": ["public_synthetic", "known_answer"],
+    "live_target_execution": false,
+    "secret_material": false,
+    "production_exploitation": false,
+    "transferable": false
+  },
+  "workload": {
+    "fixture_class": "known_answer",
+    "description": "Four invented tiny-field targets sharing one synthetic setup.",
+    "target_count": 4,
+    "target_manifest_ref": "mock://targets/math-001",
+    "target_manifest_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+    "reuse_group_uid": "reuse.mock.math.001",
+    "public_data_only": true,
+    "synthetic_or_known_answer": true,
+    "selection_rule": "Fixed invented identifiers before the mock receipt was written.",
+    "selection_frozen_before_execution": true
+  },
+  "environment": {
+    "environment_uid": "environment.mock.cpu.001",
+    "host_class": "invented-single-cpu",
+    "cpu": "mock-cpu",
+    "gpu": null,
+    "memory_bytes": 1073741824,
+    "os": "mock-os",
+    "toolchain": "mock-toolchain",
+    "isolation": "unknown",
+    "resource_cap": "Invented one-core, one-GiB cap.",
+    "captured_at": "2026-10-13T20:00:00Z"
+  },
+  "execution": {
+    "mode": "mock_fixture",
+    "attempt_uid": "attempt.mock.math.001",
+    "started_at": null,
+    "ended_at": null,
+    "outcome": "complete",
+    "exit_code": 0,
+    "command_argv": ["mock-transfer", "--fixture", "math-001"],
+    "seeds": [1],
+    "repetitions": 1,
+    "concurrency": 1,
+    "cold_cache": "unknown",
+    "notes": "No command was executed; all values are invented schema examples."
+  },
+  "phase_records": [
+    {
+      "phase_id": "construct",
+      "category": "construction",
+      "accounting_class": "reusable_preprocessing",
+      "description": "Invented cover construction and validation setup.",
+      "target_dependent": false,
+      "reused": true,
+      "attempts": 2,
+      "successes": 1,
+      "costs": [{"metric": "wall_time", "value": 20, "unit": "milliseconds", "status": "modeled", "source": "invented fixture", "sample_count": 1, "uncertainty": "No measurement."}],
+      "included_in_boundaries": ["cold_start", "amortized_total", "amortized_per_target"],
+      "artifact_refs": ["artifact.mock.math.raw"]
+    },
+    {
+      "phase_id": "online-transfer-core-recovery",
+      "category": "core",
+      "accounting_class": "online_target_dependent",
+      "description": "Invented per-target transfer, core, and recovery interval.",
+      "target_dependent": true,
+      "reused": false,
+      "attempts": 4,
+      "successes": 4,
+      "costs": [{"metric": "wall_time", "value": 8, "unit": "milliseconds", "status": "modeled", "source": "invented fixture", "sample_count": 4, "uncertainty": "No measurement."}],
+      "included_in_boundaries": ["cold_start", "online_single_target", "amortized_total", "amortized_per_target"],
+      "artifact_refs": ["artifact.mock.math.raw"]
+    },
+    {
+      "phase_id": "verify",
+      "category": "verification",
+      "accounting_class": "verification",
+      "description": "Invented independent result verification.",
+      "target_dependent": true,
+      "reused": false,
+      "attempts": 4,
+      "successes": 4,
+      "costs": [{"metric": "wall_time", "value": 4, "unit": "milliseconds", "status": "modeled", "source": "invented fixture", "sample_count": 4, "uncertainty": "No measurement."}],
+      "included_in_boundaries": ["cold_start", "online_single_target", "amortized_total", "amortized_per_target"],
+      "artifact_refs": ["artifact.mock.math.raw"]
+    }
+  ],
+  "accounting_boundaries": {
+    "cold_start": {
+      "status": "modeled",
+      "denominator_targets": 1,
+      "included_phase_ids": ["construct", "online-transfer-core-recovery", "verify"],
+      "excluded_phase_ids": [],
+      "totals": [{"metric": "wall_time", "value": 32, "unit": "milliseconds", "status": "modeled", "source": "sum of invented phases", "sample_count": 1, "uncertainty": "No measurement."}],
+      "formula": "construct + one online-transfer-core-recovery + one verify",
+      "complete": true,
+      "exclusions": []
+    },
+    "online_single_target": {
+      "status": "modeled",
+      "denominator_targets": 1,
+      "included_phase_ids": ["online-transfer-core-recovery", "verify"],
+      "excluded_phase_ids": ["construct"],
+      "totals": [{"metric": "wall_time", "value": 12, "unit": "milliseconds", "status": "modeled", "source": "sum of invented online phases", "sample_count": 1, "uncertainty": "No measurement."}],
+      "formula": "one online-transfer-core-recovery + one verify",
+      "complete": true,
+      "exclusions": ["Reusable construction is excluded and separately charged in cold-start and amortized totals."]
+    },
+    "amortized": {
+      "enabled": true,
+      "target_count": 4,
+      "reuse_group_uid": "reuse.mock.math.001",
+      "reusable_phase_ids": ["construct"],
+      "per_target_phase_ids": ["online-transfer-core-recovery", "verify"],
+      "total_costs": [{"metric": "wall_time", "value": 68, "unit": "milliseconds", "status": "modeled", "source": "invented allocation", "sample_count": 1, "uncertainty": "No measurement."}],
+      "per_target_costs": [{"metric": "wall_time", "value": 17, "unit": "milliseconds", "status": "modeled", "source": "invented total divided by four", "sample_count": 4, "uncertainty": "No measurement."}],
+      "allocation_formula": "(construct + 4 * (online-transfer-core-recovery + verify)) / 4",
+      "assumptions": ["Exactly four targets reuse the same construction without invalidation."],
+      "secondary_only": true
+    }
+  },
+  "failure_accounting": {
+    "attempts_total": 10,
+    "successful_attempts": 9,
+    "unsuccessful_searches": 1,
+    "timeouts": 0,
+    "ooms": 0,
+    "errors": 0,
+    "invalid_results": 0,
+    "budget_exhaustions": 0,
+    "failed_costs_included_in": ["cold_start", "amortized_total"],
+    "failure_artifact_refs": ["artifact.mock.math.raw"],
+    "search_boundary": "Two invented construction attempts; no claim beyond this fixture.",
+    "universal_nonexistence_claim": false
+  },
+  "duplicate_accounting": {
+    "candidates_generated": 6,
+    "candidates_retained": 4,
+    "duplicates_detected": 1,
+    "invalid_candidates": 1,
+    "deduplication_key": "mock canonical coefficient tuple",
+    "deduplication_stage": "after invented construction",
+    "duplicate_cost_charged": true,
+    "artifact_refs": ["artifact.mock.math.raw"]
+  },
+  "memory_accounting": {
+    "measurements": [
+      {"metric": "peak_rss", "scope": "invented whole process", "status": "modeled", "value_bytes": 4096, "tool": "invented counter", "sample_count": 1, "unknown_reason": null},
+      {"metric": "persistent_storage", "scope": "invented reusable table", "status": "modeled", "value_bytes": 1024, "tool": "invented counter", "sample_count": 1, "unknown_reason": null}
+    ],
+    "aggregate_scope": "One invented process.",
+    "concurrent_processes": 1,
+    "resource_cap_enforced": false
+  },
+  "matched_control": {
+    "status": "unmatched",
+    "control_receipt_uid": null,
+    "same_subject": true,
+    "same_target_set": true,
+    "same_fixture_class": true,
+    "same_authorization_envelope": true,
+    "same_environment_class": true,
+    "same_resource_cap": true,
+    "same_operation_unit": true,
+    "separate_complete_runs": false,
+    "best_of_component_mixing": false,
+    "differences": ["No companion control receipt exists; the otherwise matching fields are invented shape examples only."],
+    "rationale": "Unresolved shape-only control declaration. A matched comparison requires a separately present, schema-valid control receipt."
+  },
+  "uncertainty": {
+    "method": "No statistical method; all quantities are invented.",
+    "sample_count": 1,
+    "statistic": "illustrative point value",
+    "interval": null,
+    "confidence_or_coverage": "not applicable to mock data",
+    "limitations": ["The receipt records no experiment and supports no comparison."]
+  },
+  "evidence": {
+    "source_revision": "mock-source-revision",
+    "build_identity": "mock-build-identity",
+    "configuration_identity": "mock-configuration-identity",
+    "dependency_identity": "mock-dependency-identity",
+    "raw_output_ref": "mock://raw/math-001",
+    "replay_receipt_ref": null,
+    "artifacts": [
+      {"artifact_uid": "artifact.mock.math.raw", "path_or_uri": "mock://raw/math-001", "sha256": null, "role": "Invented placeholder, not raw evidence.", "immutable": false}
+    ],
+    "independent_replay": false
+  },
+  "result": {
+    "execution_outcome": "complete",
+    "requirement_status": "partial",
+    "correctness_verification": "not_run",
+    "outcome_class": "accounting_fixture_only",
+    "observed_result": "The synthetic object exercises the draft accounting fields.",
+    "claim_status": "unknown",
+    "evidence_maturity": "E0",
+    "interpretation_category": "descriptive_only",
+    "claim_boundary": "Schema fixture only; not an experiment, construction, transfer, solver, or comparison.",
+    "not_established": ["cover existence", "map correctness", "subgroup preservation", "solver advantage", "performance"],
+    "universal_nonexistence_claim": false,
+    "full_solver_claim": false
+  },
+  "open_obligations": [
+    "Implement the semantic checker.",
+    "Add and validate a separate synthetic control receipt before changing matched_control.status to matched.",
+    "Replace invented values with immutable receipts only after authorization and review."
+  ]
+}

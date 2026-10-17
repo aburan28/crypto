@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "records_sha256": "541e0e005d45b2879d2edb1607bc0d05da92dccc1803f36b13df9051b01f777d",
+  "replayer_binary_sha256": "8ec9d8a87d7926fcb3fd1e301540508ba2585505456ca438659f58ea86cad3ae",
+  "replays": [
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1had5553180579",
+      "reproduced": true,
+      "seq": 7
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1hba52ad1c51da",
+      "reproduced": true,
+      "seq": 15
+    }
+  ],
+  "schema": "volcano-exhaustion-replay/v1",
+  "scope": "Measured deterministic exhausted records; successful records replayed by ecbench verify; timeouts have no deterministic final report.",
+  "session": "/workspace/volcano_ic_survey_20261017/sessions/mixed-v446-attempt-001"
+}

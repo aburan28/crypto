@@ -1,0 +1,74 @@
+{
+  "schema": "volcano-repaired-survey-launch/v1",
+  "launched_utc": "2026-10-17T06:58:03Z",
+  "status_checked_utc": "2026-10-17T06:59:13Z",
+  "pid": 79776,
+  "process_verified": "live non-zombie, PPID 1, separate session 79776",
+  "campaign": "/workspace/volcano_ic_repaired_survey_20261017",
+  "command": [
+    "volcano-ic-driver",
+    "run",
+    "/workspace/volcano_ic_repaired_survey_20261017",
+    "24823",
+    "86400",
+    "2147483648"
+  ],
+  "limits": {
+    "maximum_additional_vertices": 24823,
+    "elapsed_seconds": 86400,
+    "spool_bytes": 2147483648,
+    "child_watchdog_seconds": 3
+  },
+  "binary_sha256": "35d89073f4d666b094c213a1d31b0c819b63600123e067c111af3c947d7609a9",
+  "driver_sha256": "b8b489c7225c64ed492ffce39286c995f5ca820960956cf706c0d3110f5bdd2d",
+  "source_head": "2bf7700b73b3a84810aa86cb29837d1359b28322",
+  "queue_sha256": "45e277bede6017c30a49405096afefab3d34a18553ecd6b1a79238f2b9559728",
+  "profile": "Cargo release; watchdog observation repair; solver parameters unchanged",
+  "gates": {
+    "control_completed_pairs_matched": 12,
+    "pilot_completed_pairs_matched": 46,
+    "censored_pairs_not_compared": 2,
+    "all_audits_pass": true
+  },
+  "native_status_snapshot": {
+    "campaign": "/workspace/volcano_ic_repaired_survey_20261017",
+    "coverage": [
+      {
+        "graph": "mixed",
+        "state": "audited",
+        "vertices": 3
+      },
+      {
+        "graph": "mixed",
+        "state": "queued",
+        "vertices": 10067
+      },
+      {
+        "graph": "three",
+        "state": "audited",
+        "vertices": 3
+      },
+      {
+        "graph": "three",
+        "state": "queued",
+        "vertices": 6557
+      },
+      {
+        "graph": "three",
+        "state": "running",
+        "vertices": 1
+      },
+      {
+        "graph": "two",
+        "state": "audited",
+        "vertices": 4
+      },
+      {
+        "graph": "two",
+        "state": "queued",
+        "vertices": 8188
+      }
+    ]
+  },
+  "scope": "Actual local bounded survey launched; snapshot is not all-vertex completion, a full matrix, or an unattended cloud/upload job. Stops on guard, audit failure, STOP or signal. Historical binary/session files untouched."
+}

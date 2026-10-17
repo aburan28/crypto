@@ -1,0 +1,62 @@
+[
+  {
+    "a": 1,
+    "n": 17,
+    "subgroup_bits": 16.001122266128682,
+    "columns": 16,
+    "pool": 64,
+    "points": 544,
+    "seeds": 6,
+    "greedy_mean_coverage": 0.942284430620356,
+    "random_mean_coverage": 0.8957145325730086,
+    "random_sd_coverage": 0.0086461012197283,
+    "ratio": 1.051991897366644,
+    "ratio_ci95": [
+      1.0449492045236721,
+      1.059887225354851
+    ],
+    "greedy_build_ms_mean": 259.46151933333334,
+    "random_build_ms_mean": 0.28262400000000004,
+    "all_models_match": true
+  },
+  {
+    "a": 0,
+    "n": 23,
+    "subgroup_bits": 20.999106101271966,
+    "columns": 16,
+    "pool": 64,
+    "points": 736,
+    "seeds": 6,
+    "greedy_mean_coverage": 0.12428485726409434,
+    "random_mean_coverage": 0.11983304800784278,
+    "random_sd_coverage": 0.0007685497278499911,
+    "ratio": 1.0371500961567814,
+    "ratio_ci95": [
+      1.0321943811693242,
+      1.041818795446875
+    ],
+    "greedy_build_ms_mean": 578.8333655,
+    "random_build_ms_mean": 0.42426783333333334,
+    "all_models_match": true
+  },
+  {
+    "a": 1,
+    "n": 23,
+    "subgroup_bits": 22.00089368896064,
+    "columns": 16,
+    "pool": 64,
+    "points": 736,
+    "seeds": 6,
+    "greedy_mean_coverage": 0.06341177373214814,
+    "random_mean_coverage": 0.06225361786702033,
+    "random_sd_coverage": 0.0002650000933964881,
+    "ratio": 1.0186038322720736,
+    "ratio_ci95": [
+      1.015637353948871,
+      1.0219573215599707
+    ],
+    "greedy_build_ms_mean": 559.1746413333334,
+    "random_build_ms_mean": 0.4071983333333334,
+    "all_models_match": true
+  }
+]

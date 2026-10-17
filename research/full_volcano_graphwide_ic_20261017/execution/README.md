@@ -1,0 +1,257 @@
+# Measured index-calculus execution
+
+The control and pilot have run. The frozen [execution addendum](PROTOCOL.md)
+defines a separate bounded survey over all 24,823 vertices of the three
+additional complete graphs. It preserves the original full matrix and A--E.
+
+The stopped dev-build checkpoint now covers **99 vertices and all 51 strata**:
+**1,584 attempts, 1,065 verified, 422 exhausted, 97 timed out**. The native
+[summary v2](survey-99-summary-v2/summary.json) contains per-stratum/arm/status
+min/max/mean with explicit sample counts. The
+[three-page inspected report](../reports/run-20261017T0337Z-all-strata/report.pdf)
+plots every stratum. [Download the self-contained checkpoint](https://drive.google.com/file/d/1hLVWVad2SrgHaBn6U5iSyqnKbx5cAkeY/view)
+or inspect its [delivery receipt](delivery-99.json). The supplemental
+[graph explorer](../graph-viewer/README.md) shows every graph vertex/map while
+marking the measured subset. This checkpoint covers every stratum,
+not every vertex. The original dev campaign is paused, not running.
+
+An optimized build passed the same control and three-root pilot. All **56
+completed deterministic pairs** match the dev build exactly; **four censored
+pairs** have no completed baseline report to compare. The
+[native receipts](evidence/release-pilot-match.json), separate
+[release QA summary](release-qa-summary-v2/summary.json) and frozen
+[optimized continuation](optimized-continuation/optimization.json) retain that
+distinction. No optimized speedup is claimed. The new full-queue campaign uses
+a separate binary, ledger and output directory; planning alone is not execution.
+Its [historical launch](optimized-continuation/launch.json), PID 64909,
+subsequently halted after 432 seconds on a failed standard audit. The stopped
+release checkpoint covers **70 audited vertices, all 51 strata, 1,120 accepted
+attempts: 810 verified, 280 exhausted, 30 timeouts**. The additional failed
+16-record capsule is retained but excluded from accepted summaries. Record 10
+combined timeout with a checked scalar; no historical record was relabeled.
+[Repair protocol](WATCHDOG_REPAIR_PROTOCOL.md) makes watchdog censoring
+consistent and requires fresh gates before a new campaign launches.
+[Download the stopped release checkpoint](https://drive.google.com/file/d/1vVW3fCYqdnl3Ue2ef1FckbSTODbg-MTs/view)
+and its [inspected report](../reports/run-20261017T0540Z-release-stopped/report.pdf).
+The release and dev datasets remain separate; neither snapshot is a live worker.
+
+Observed pilot: **48 attempts, 30 verified, 14 exhausted, 4 timed out**.
+Small control: **12 attempts, 8 verified, 4 exhausted**. Both projected-base
+oracles solve both control targets. All four sessions pass the standard audit,
+replaying all 38 successful deterministic records. Supplemental native replay
+also reproduces all 18 exhausted records. Timeouts have unknown final counters.
+These are same-implementation replays, not independent implementation validation.
+
+The pilot's source models are `icv1-fp57-t536870914-6cabb0c9`,
+`icv1-fp57-tm536870941-e6d0c766`, and `icv1-fp59-t1073741954-4dd0b1ef`;
+the control is `icv1-fp7-t2-4910f2d0`. Public targets, actual largest prime
+subgroups, charged cofactor projection, checked base membership and checked
+base logs are retained. No planted scalar reaches the solver. Completed A/A
+rho attempts have identical counted results on their matched seeds.
+
+The new base is `prime-projected-abscissa:size=N,scan_cap=M`, separately
+identified from the unchanged raw-abscissa control. It cofactor-projects
+rational points, discards infinity, checks [r]P=O, deduplicates negation pairs
+and keeps both signs with coefficients 1 and r-1. Native tests recover every
+nonzero control logarithm and reject an oversized base (2/2 pass).
+
+## Run and resume
+
+The tools have Cargo entry points:
+
+```sh
+cargo build --release --bin ecbench --bin volcano-ic-driver --bin volcano-ic-summarize
+```
+
+Alternatively link `driver.rs` and `summarize.rs` using [BUILD.sh](BUILD.sh)
+and the exact matching rlib paths. This was the observed experiment build:
+unoptimized dev code, debug symbols disabled, incremental off, two
+build jobs. Counts and correctness are primary; wall time is L0/unqualified.
+Exact build/test logs are in [evidence](evidence/).
+
+```sh
+volcano-ic-driver plan /fresh/campaign /certified/inputs /path/ecbench survey freeze
+volcano-ic-driver run /campaign 24823 86400 1073741824
+volcano-ic-driver status /campaign
+volcano-ic-summarize /fresh/summary /campaign
+```
+
+`run` takes maximum additional vertices, elapsed seconds and campaign spool
+bytes. Limits are checked between sessions/replays: a time limit can overshoot
+by one bounded attempt. The spool guard reserves 64 MiB for another attempt;
+it is not a quota. A 1 GiB spool pauses with all files retained. Resume with
+the identical driver and unchanged binary/queue. A `STOP` file or SIGTERM
+requests a graceful pause; remove only the stop marker before resuming.
+Sealed sessions are never edited/deleted; retries get new numbered directories.
+A failed audit or wrong answer halts execution. A second writer and a changed
+driver are rejected before work begins; retained rejection logs verify this.
+
+Execution uses Unix advisory locks/signals. Other platforms retain planning,
+status, replay and summaries; non-Unix execution reports its unsupported status.
+Only Linux execution was tested. Existing snapshots freeze the supplied driver
+binary: use that binary for resume, because a later Cargo build has a different
+binary hash even when its solver logic is unchanged.
+
+The queue visits one representative of all 51 strata first, then every other
+vertex, alternating graphs within each phase. Each vertex has its own sealed
+session, audit and SQLite checkpoint. The queue preserves certified inputs
+and exact finite-field applicability records. Their historical NOT_RUN fields
+describe input-preparation state; `ledger.sqlite` records current execution.
+
+The standard audit replays successful records only. Supplemental native replay
+uses the harness measured-child function for deterministic exhausted records,
+comparing outcome, exact phases, counters, field operations, base identity and
+accounting flags. Its receipts stay outside the sealed session. Historical
+diagnostic sessions can also be checked:
+
+```sh
+volcano-ic-driver replay-exhausted /sealed/session /fresh/receipt.json
+```
+
+The native summarizer emits linked observations and per-graph/stratum/arm
+min/max/arithmetic mean with explicit n and separate outcomes. Timeout
+counters stay missing. GAE totals are lower bounds wherever work is unpriced;
+native `ecbench band` retains common 0/0.1/1 GAE sensitivity for all arms.
+No speed ranking or admitted runtime claim follows from this diagnostic.
+The [99-node native pricing band](survey-99-summary-v2/pricing-band.json)
+contains all 792 curve/arm rows, using common weights 0/0.1/1 on every arm.
+The [release QA band](release-qa-summary-v2/pricing-band.json) stays separate.
+These are supplemental [uploads](delivery-pricing-bands.json) outside the frozen
+archives; unavailable counts and incomplete pairs remain unrankable.
+
+Yield accounting correction: `targets_tried` includes repeated source queries
+skipped before the oracle. The 99-vertex checkpoint has **2,223,204 source
+trials**, **2,075,145 actual decomposition calls** and **57,176 relations**.
+Summary v2 reports yields per trial and per actual call separately; it checks
+all 594 completed MITM call denominators against native lookup counts. Earlier
+reports' "decompositions" label refers to source trials, not actual calls.
+Those reports and sealed records remain unchanged. These pooled counts span
+different subgroups/arms and are not a common success probability. Cross-binary
+pooling and duplicate workload/arm/round/seed observations are refused.
+
+For the projected size-64 MITM arm, native graph-aggregate rows show:
+
+| Source model | Completed attempts / outcome | Actual-call yield min / mean / max |
+| --- | --- | --- |
+| `icv1-fp57-t536870914-6cabb0c9` | 60 verified | 0.101992 / 0.125942 / 0.156250 |
+| `icv1-fp57-tm536870941-e6d0c766` | 50 exhausted | 0 / 0 / 0 |
+| `icv1-fp59-t1073741954-4dd0b1ef` | 88 verified | 0.787709 / 0.860825 / 0.930380 |
+
+These are arithmetic means over completed recorded attempts, separated by
+outcome. The 45-bit prime subgroup has no relation in these 50 bounded attempts.
+Different subgroup sizes and source models prevent attributing the differences
+to conductor alone. See the native per-stratum rows for the actual populations;
+these graph aggregates do not stand in for unmeasured vertices.
+
+New sealed capsules and replay receipts stay loose where the verifier and
+browser name their paths. Auxiliary logs are a deterministic
+[archive](supplemental-run-logs/README.md), as required by AGENTS.md §13a.
+The original first 12 capsules are not duplicated in the new 87-node increment.
+
+## Open requirements
+
+The real all-vertex survey has 4,096-trial caps, two public targets and one
+round. It does not complete the original million-trial/eight-target/five-round
+protocol. Full planning is supported; launch remains gated on that protocol's
+exact registration and qualified resource pilot. Transported targets, composite
+PH, independent implementation replay and finite-field IC for the actual
+embedding degrees remain open. The supersingular degree-2 MOV teaching backend
+does not implement those destinations. No generic fallback is labeled IC.
+Original A/C/D/E full graphs remain storage-blocked.
+
+[Measured data and inspected reports on Drive](https://drive.google.com/drive/folders/109DpcQpX7ATz6GeI8iSWAExGMWBoR-H_).
+The measured archive is separate from the earlier inputs/NOT_RUN upload.
+The earlier frozen survey snapshot has 12 of 24,823 vertices audited, with 192
+attempts: 119 verified, 58 exhausted and 15 timed out. The full queue and
+per-stratum completion ledger are included; queued rows are not solved rows.
+The new 99-node archive preserves that earlier upload and includes the complete
+three graphs, frozen dev binaries, queue, ledger, raw sessions, receipt-binding
+inventory and corrected native statistics. Remote name, size and parent were
+read back; a remote whole-file hash was not checked.
+
+Conductor reservation was attempted for implementation/report scopes but the
+tool is unavailable (127). Full-root historical test/catalogue obstructions
+remain in the shared problem files; checks cited here are the new focused
+tests, build, audits and replay receipts only. The benchmark build happened
+before the measured sessions; short driver rejection checks occurred during
+the counts-only survey, so its raw wall observations are not timing evidence.
+
+Validation follow-up: the restricted full release suite has 4,225 passes, ten
+failures and 117 existing ignored tests. All 37 networking tests pass with
+local networking permitted; the exact Joux–Vitse test passes alone in 2.55 s.
+Its parallel whole-suite timeout is a separate [open validation problem](../../../problems/release-suite-jv-nagao-wall-budget.md).
+That historical parallel result was not green. Frozen campaign controls/audits are
+separate evidence; no solver assertion or sealed record was weakened.
+
+The permitted full parallel release rerun finished with **4,234 passed, one
+Joux–Vitse wall-budget failure and 117 existing ignored tests**; its full log
+is `evidence/merged-release-tests-permitted.log`. All networking failures
+were resolved by the appropriate permissions. The isolated exact Joux–Vitse
+test passes. The later full **serial** release suite passes **4,236 tests,
+zero failures and 117 existing ignored tests**; see
+[the full serial receipt](watchdog-repair/release-full-serial.log). The parallel
+cause remains open; no assertion or solver budget was changed. Heavy checks
+finished before the repaired campaign's measured runs.
+
+
+## Repaired runner and original C progress
+
+Fresh repaired control/pilot: **60 attempts, 40 verified, 18 exhausted,
+2 timeouts**. All four capsules pass audits and successful/exhausted replay.
+**58 completed baseline pairs match exactly; 2 censored pairs are not compared**.
+[QA archive](https://drive.google.com/file/d/12Q0z7VUCWJuCgY5ofbW5Dof3V15FZ4Th/view),
+[inspected report](../reports/run-20261017T0628Z-repaired-gates/report.pdf),
+[delivery receipt](delivery-repaired-qa.json). These gates permit the separately
+frozen repaired whole queue; actual launch and progress have their own receipt.
+
+Original C now has a genuine k=1 Tate/Miller plus finite-field projected-prime
+relation diagnostic at **all 1,869 known prefix vertices**: **3,738/3,738
+public targets verified**, **15,042 equations / 9,171 queries**. Re-execution
+matches every outcome, equation and operation counter after excluding elapsed
+fields. The largest prime subgroup is **7**, not 61 bits. This is not NFS or
+integer-smoothness IC and establishes no scaling or fastest-method claim.
+
+[Local floor-distance bounds](LOCAL_STRATA_PROTOCOL.md), calibrated against
+all three complete graphs at five visibility cuts, identify **517 vertices
+across 24 conductor strata**, **2,985,984–967,458,816**. Source conductor is
+**967,458,816**. The other **1,352 vertices** retain unknown conductor. Native
+per-stratum summaries preserve that null bucket, all statuses and present n.
+This is not C's full **1,934,901,248-vertex / 165-stratum** class.
+[Dataset and binaries](https://drive.google.com/file/d/1Xi7mjLCskYEauXlwzAfQQtOoHw6waop-/view),
+[report](../reports/run-20261017T0626Z-finite-field-C-prefix/report.pdf),
+[evidence and reproduction](finite-field-k1-evidence/README.md),
+[delivery receipt](delivery-finite-field-C.json).
+
+All C timing observations are unqualified. Per-target intervals include
+setup/projection/pairing/base/relations/matrix/verification; process startup,
+input loading and result serialization/I/O are outside that interval. Bash
+process time is separate; peak RSS was not measured. Native operation counts
+retain explicit unpriced work. The two source-model targets stay separate
+from the prefix population. Exact representation registration, independent
+implementation replay, transported targets and full composite-order work
+remain open. Canonical fastest-method claims are unchanged.
+
+
+[Repaired local survey actually launched](repaired-continuation/README.md): PID 79776, 2026-10-17 06:58:03 UTC, 24-hour/2-GiB guards. The native receipt has audited progress in all three classes; consult the ledger for current coverage. This does not imply all 24,823 vertices are finished.
+
+
+## Checkpoint after interruption, 17 October 2026
+
+The previous process was absent when the environment returned. The unchanged
+native recovery path retained one interrupted attempt and finalized a
+**2,935-audited-vertex / 46,960-record** checkpoint, sampling all 51 strata.
+Outcomes: **30,270 verified, 14,626 exhausted, 2,064 timed out**. Native seals,
+audit/replay receipt bindings and exact populations pass. No historical
+session or mathematical parameter was changed. Source trials **74,829,850**;
+actual oracle calls **71,296,000**; relations **1,530,557**.
+[Recovery and download](recovery-20261017T1450Z/README.md). This is a frozen
+snapshot, not full-vertex or full-matrix completion. New runtime observations
+must retain their epoch; no admitted time comparisons are made.
+
+The same local-bound labeler now exposes a generic certify command and
+certifies source conductors for all original A–E models: **268,435,456;
+129,140,163; 967,458,816; 544,195,584; 644,972,544** respectively.
+The [native local certificate summaries](original-local-strata-20261017T1500Z/README.md)
+retain every unknown vertex and historical global stratum status. The fifteen
+visibility-cut controls pass, and generic C reproduces its frozen certificate.
+These prefixes do not discharge full A/C/D/E generation or new DLP timings.

@@ -1,0 +1,38 @@
+EFF
+======================================================================
+ERROR: test_an_unknown_explicit_form_is_rejected_before_short_model_extraction (__main__.NativePrimeModelTests.test_an_unknown_explicit_form_is_rejected_before_short_model_extraction)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/crypto-factor-traces/scripts/test_prime_model_normalization.py", line 68, in test_an_unknown_explicit_form_is_rejected_before_short_model_extraction
+    document = json.loads(source.read_text())
+                          ^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/crypto-factor-traces/research/isogeny_fibers_20261010/round4/16_7_agm_isogeny_oracles/out_seed7.json'
+
+======================================================================
+FAIL: test_missing_stale_duplicate_or_wrong_pointer_native_records_are_rejected (__main__.NativePrimeModelTests.test_missing_stale_duplicate_or_wrong_pointer_native_records_are_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/crypto-factor-traces/scripts/test_prime_model_normalization.py", line 60, in test_missing_stale_duplicate_or_wrong_pointer_native_records_are_rejected
+    self.assertEqual(len(fatal), 2)
+AssertionError: 0 != 2
+
+======================================================================
+FAIL: test_quadratic_records_use_the_native_identity_and_short_coefficients (__main__.NativePrimeModelTests.test_quadratic_records_use_the_native_identity_and_short_coefficients)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/crypto-factor-traces/scripts/test_prime_model_normalization.py", line 22, in test_quadratic_records_use_the_native_identity_and_short_coefficients
+    self.assertEqual(set(rows), {
+AssertionError: Items in the second set but not the first:
+'icv1-fp21-tm700-07d957b2'
+'icv1-fp21-tm700-d62ba3a6'
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.008s
+
+FAILED (failures=2, errors=1)

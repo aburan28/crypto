@@ -1,0 +1,16 @@
+{
+  "schema": "volcano-ic-worker-launch/v1",
+  "pid": 41157,
+  "started_ms": "1792206302692",
+  "observed_state": "RUNNING_IN_WORKSPACE",
+  "command": ["/workspace/scratch/volcano-ic-driver", "run", "/workspace/volcano_ic_survey_20261017", "24823", "86400", "1073741824"],
+  "log": "/workspace/volcano_ic_survey_20261017/resumed-worker-20261017.log",
+  "checkpoint": "/workspace/volcano_ic_survey_20261017/ledger.sqlite",
+  "frozen_driver_sha256": "8ec9d8a87d7926fcb3fd1e301540508ba2585505456ca438659f58ea86cad3ae",
+  "frozen_ecbench_sha256": "1869ca2e7be271794df8128c08a6dca0201038e2c81a3e0ce6434f7ec0d8379d",
+  "guard": "Pause between vertices at 24 hours, 1 GiB spool with 64 MiB headroom, STOP marker, signal, failed audit or wrong answer; preserve all files.",
+  "durability": "LOCAL_WORKSPACE_PROCESS_ONLY; dependent on environment lifetime; not an external scheduled worker",
+  "automatic_drive_upload": false,
+  "uploaded_snapshot": "delivery.json: first 12 audited survey vertices only",
+  "original_full_matrix": "NOT_LAUNCHED"
+}

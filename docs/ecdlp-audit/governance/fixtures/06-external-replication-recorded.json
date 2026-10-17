@@ -1,0 +1,123 @@
+{
+  "schema_version": "ecdlp-audit.governance/v1-draft",
+  "record_kind": "workflow_fixture",
+  "record_id": "gov.fixture.replication.external-recorded",
+  "status": "draft",
+  "authoritative": false,
+  "promotion_allowed": false,
+  "self_promotion_allowed": false,
+  "synthetic_only": true,
+  "created_at": "2026-10-14T00:00:00Z",
+  "source_plan": "research/notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.md#workstream-8--add-independent-governance",
+  "draft_notice": "This drill records a synthetic external replication entry but neither the replicator nor this draft can promote a claim.",
+  "fixture": {
+    "fixture_version": "ws8-workflow-fixture/v1-draft",
+    "scenario_kind": "external_replication",
+    "synthetic_scope": {
+      "fixture_only": true,
+      "public_synthetic": true,
+      "contains_real_target": false,
+      "contains_secret": false,
+      "operational_execution": false,
+      "scientific_evidence": false
+    },
+    "subject": {
+      "subject_id": "synthetic.claim.external-replication",
+      "description": "Synthetic unknown claim accompanied by a scoped R5-style public replication record.",
+      "claim_status_before": "unknown",
+      "maturity_before": "E4",
+      "authoritative_state_before": "unchanged_fixture_baseline"
+    },
+    "request": {
+      "transition_kind": "external_replication_registration",
+      "requested_by": "author",
+      "author_identity": "synthetic:actor:registry-author",
+      "source_assessment_id": "synthetic.assessment.replication.base",
+      "proposed_assessment_id": "synthetic.assessment.replication.registry-entry",
+      "review_binding": {
+        "aggregate_revision_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+        "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+      },
+      "exact_revisions": [
+        {"component": "source_assessment", "revision_digest": "sha256:1616161616161616161616161616161616161616161616161616161616161616"},
+        {"component": "evidence_bundle", "revision_digest": "sha256:2727272727272727272727272727272727272727272727272727272727272727"},
+        {"component": "implementation", "revision_digest": "sha256:3838383838383838383838383838383838383838383838383838383838383838"},
+        {"component": "authorization_record", "revision_digest": "sha256:4949494949494949494949494949494949494949494949494949494949494949"},
+        {"component": "proposed_aggregate", "revision_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555"},
+        {"component": "governance_schema", "revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777"},
+        {"component": "dependency_lock", "revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}
+      ],
+      "conditional_roles_invoked": ["authorization_privacy_reviewer"],
+      "evidence_receipt_ids": ["synthetic.receipt.replication.external", "synthetic.receipt.replication.review"],
+      "requested_claim_status": "unknown",
+      "requested_maturity": "E4",
+      "justification": "Register a scoped synthetic external result as additional evidence without changing claim status or maturity."
+    },
+    "assignments": [
+      {"role": "author", "actor_id": "synthetic:actor:registry-author", "relationship_to_author": "same_person", "contributed_to_subject": true, "conflict_disclosed": false, "conflict_description": null, "eligible": true},
+      {"role": "evidence_replay_reviewer", "actor_id": "synthetic:actor:replay-d", "relationship_to_author": "different_team", "contributed_to_subject": false, "conflict_disclosed": false, "conflict_description": null, "eligible": true},
+      {"role": "authorization_privacy_reviewer", "actor_id": "synthetic:actor:authorization-e", "relationship_to_author": "different_team", "contributed_to_subject": false, "conflict_disclosed": false, "conflict_description": null, "eligible": true},
+      {"role": "release_approver", "actor_id": "synthetic:actor:release-f", "relationship_to_author": "different_team", "contributed_to_subject": false, "conflict_disclosed": false, "conflict_description": null, "eligible": true}
+    ],
+    "decisions": [
+      {"role": "evidence_replay_reviewer", "actor_id": "synthetic:actor:replay-d", "review_binding": {"aggregate_revision_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555", "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}, "decision": "approve", "rationale": "The synthetic external receipt, artifact digest, scope, and independence attestation are complete enough for registry inclusion.", "evidence_receipt_ids": ["synthetic.receipt.replication.review"], "decided_at": "2026-10-14T05:00:00Z"},
+      {"role": "authorization_privacy_reviewer", "actor_id": "synthetic:actor:authorization-e", "review_binding": {"aggregate_revision_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555", "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}, "decision": "approve", "rationale": "The registry record contains only synthetic public material and no sensitive identity.", "evidence_receipt_ids": ["synthetic.receipt.replication.authorization"], "decided_at": "2026-10-14T05:01:00Z"},
+      {"role": "release_approver", "actor_id": "synthetic:actor:release-f", "review_binding": {"aggregate_revision_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555", "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}, "decision": "approve", "rationale": "The synthetic replication entry would be appended, but it triggers no automatic promotion and supplies no missing profile gates.", "evidence_receipt_ids": ["synthetic.receipt.replication.release"], "decided_at": "2026-10-14T05:02:00Z"}
+    ],
+    "preflight_checks": [
+      {"check": "schema", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.replication.schema", "rationale": "The replication entry is structurally valid."},
+      {"check": "identity", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.replication.identity", "rationale": "Synthetic replicator and artifact identifiers are explicit."},
+      {"check": "revision_binding", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.replication.revisions", "rationale": "The external receipt binds its synthetic artifact and source assessment."},
+      {"check": "authorization", "checker": "reviewer", "result": "pass", "receipt_id": "synthetic.receipt.replication.authorization", "rationale": "Public synthetic publication is modeled as permitted."},
+      {"check": "conflicts", "checker": "reviewer", "result": "pass", "receipt_id": "synthetic.receipt.replication.conflicts", "rationale": "The synthetic external replicator is organizationally separate from the author."},
+      {"check": "history", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.replication.history", "rationale": "The registry entry would append without modifying the source assessment."},
+      {"check": "required_roles", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.replication.roles", "rationale": "Replay, authorization, and release decisions are present for registry inclusion."}
+    ],
+    "event": {
+      "event_kind": "external_replication_received",
+      "detected_at": "2026-10-14T04:50:00Z",
+      "evidence_receipt_id": "synthetic.receipt.replication.external",
+      "description": "A synthetic external organization publishes a scoped replication result and artifact digest."
+    },
+    "external_replication": {
+      "registry_entry_id": "synthetic.replication.external.entry-001",
+      "replicator_id": "synthetic:actor:external-replicator-r",
+      "organization_id": "synthetic:organization:replica-lab",
+      "independence_level": "R5_external_public_replication",
+      "artifact_digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+      "result": "replicated",
+      "scope": "The same synthetic fixture and artifact digest only; no broader curve, implementation, performance, or security claim.",
+      "failed_attempts_retained": true,
+      "auto_promotion": false
+    },
+    "history_snapshot": {
+      "prior_record_ids": ["synthetic.assessment.replication.base"],
+      "prior_record_digests": ["sha256:1616161616161616161616161616161616161616161616161616161616161616"],
+      "append_only": true,
+      "records_deleted": false,
+      "records_rewritten": false
+    },
+    "identity_checks": {
+      "author_not_reviewer": true,
+      "required_roles_distinct": true,
+      "release_approver_not_author": true,
+      "conflicts_clear": true,
+      "every_decision_matches_requested_aggregate": true,
+      "every_decision_matches_governance_schema": true,
+      "every_decision_matches_dependency_revision": true,
+      "no_self_promotion_effect": true,
+      "draft_cannot_promote": true
+    },
+    "expected_outcome": {
+      "workflow_disposition": "record_replication_only",
+      "state_effect": "none_draft_only",
+      "authoritative_status_after": "unchanged",
+      "simulated_claim_status_after": "unknown",
+      "simulated_maturity_after": "E4",
+      "history_effect": "would_append_replication_entry",
+      "reasons": ["The scoped synthetic external receipt is suitable for registry inclusion.", "External replication does not fill unrelated evidence or accounting gates.", "The replicator cannot act as release approver or promote the claim."]
+    },
+    "semantic_validator_required": true
+  }
+}

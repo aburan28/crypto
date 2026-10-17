@@ -111,6 +111,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /Cargo.toml
+            /tools/volcano-cli/
+            /isogeny_algos/
             /Cargo.lock
             /.cargo/
             /.github/scripts/
@@ -187,6 +189,11 @@ jobs:
         run: cargo test --release --test ecbench_large_prime
       - name: Build
         run: cargo build --release --bin ecbench
+      - name: Factor-base catalog fb_id / fbm_id checks
+        run: |
+          python3 research/ecbench_factor_bases_20261013/check_fb_ids.py
+          python3 research/ecbench_factor_bases_20261013/check_fbm_ids.py
+          python3 -m py_compile research/ecbench_factor_bases_20261013/join_sage_dor.py
       - name: Host
         run: ./target/release/ecbench host | tee -a "$GITHUB_STEP_SUMMARY"
       # Bounds are re-derivable from the sessions they name, challenges must

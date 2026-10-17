@@ -1,0 +1,7203 @@
+{
+  "base_classes": 141,
+  "base_receipt_sha256": "1650a868094bbcaa7885acc0aa59aa63b71c10398f5e0b3dc0e3f1656161690f",
+  "boundary": "Frozen exploratory 512+512 sample; support draw is uniform on all 477191 distinct unordered triples and ambient draw uses uniform nonzero scalars. Cell labels use exact F_(p^3) quadratic character. Ratios are descriptive with sampling uncertainty, not full-cell counts.",
+  "candidate_id": null,
+  "elapsed_ns_unisolated": 91210099541,
+  "field_prime": "6277101735386680763835789423207666416083908700390324961279",
+  "runtime_sha256": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+  "seed": 1727116218390,
+  "source_sha256": "869e8b20f69d136280caad343110ea25b6557b9c14975f0c6fc0c40a14e58e53",
+  "status": "bounded_p192_line_support_vs_uniform_character_cell_sample",
+  "subgroup_order": "6277101735386680763835789423176059013767194773182842284081",
+  "support_cells": {
+    "++": 131,
+    "+-": 103,
+    "-+": 140,
+    "--": 138,
+    "exceptional": 0
+  },
+  "support_population": 477191,
+  "support_receipt_sha256": "5ccebe2d9bda3bb5310bdae53778fc096d59786d7d94c8a8d74cad72130cca5b",
+  "support_rows": [
+    {
+      "cell": "+-",
+      "indices": [
+        0,
+        12,
+        41
+      ],
+      "triple_index": 1655
+    },
+    {
+      "cell": "--",
+      "indices": [
+        0,
+        25,
+        85
+      ],
+      "triple_index": 3285
+    },
+    {
+      "cell": "++",
+      "indices": [
+        0,
+        34,
+        90
+      ],
+      "triple_index": 4289
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        0,
+        39,
+        91
+      ],
+      "triple_index": 4810
+    },
+    {
+      "cell": "--",
+      "indices": [
+        0,
+        54,
+        64
+      ],
+      "triple_index": 6193
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        0,
+        63,
+        110
+      ],
+      "triple_index": 6977
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        0,
+        76,
+        112
+      ],
+      "triple_index": 7902
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        0,
+        85,
+        94
+      ],
+      "triple_index": 8424
+    },
+    {
+      "cell": "--",
+      "indices": [
+        1,
+        7,
+        120
+      ],
+      "triple_index": 10949
+    },
+    {
+      "cell": "--",
+      "indices": [
+        1,
+        18,
+        33
+      ],
+      "triple_index": 12270
+    },
+    {
+      "cell": "++",
+      "indices": [
+        1,
+        23,
+        69
+      ],
+      "triple_index": 12906
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        1,
+        34,
+        49
+      ],
+      "triple_index": 14118
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        1,
+        48,
+        130
+      ],
+      "triple_index": 15592
+    },
+    {
+      "cell": "++",
+      "indices": [
+        1,
+        57,
+        110
+      ],
+      "triple_index": 16364
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        1,
+        67,
+        134
+      ],
+      "triple_index": 17173
+    },
+    {
+      "cell": "--",
+      "indices": [
+        1,
+        74,
+        80
+      ],
+      "triple_index": 17609
+    },
+    {
+      "cell": "++",
+      "indices": [
+        1,
+        84,
+        119
+      ],
+      "triple_index": 18263
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        1,
+        88,
+        109
+      ],
+      "triple_index": 18471
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        1,
+        104,
+        136
+      ],
+      "triple_index": 19210
+    },
+    {
+      "cell": "++",
+      "indices": [
+        2,
+        8,
+        40
+      ],
+      "triple_index": 20732
+    },
+    {
+      "cell": "++",
+      "indices": [
+        2,
+        25,
+        33
+      ],
+      "triple_index": 22833
+    },
+    {
+      "cell": "++",
+      "indices": [
+        2,
+        29,
+        110
+      ],
+      "triple_index": 23364
+    },
+    {
+      "cell": "++",
+      "indices": [
+        2,
+        33,
+        52
+      ],
+      "triple_index": 23744
+    },
+    {
+      "cell": "--",
+      "indices": [
+        2,
+        55,
+        105
+      ],
+      "triple_index": 25920
+    },
+    {
+      "cell": "++",
+      "indices": [
+        2,
+        63,
+        97
+      ],
+      "triple_index": 26564
+    },
+    {
+      "cell": "--",
+      "indices": [
+        2,
+        72,
+        93
+      ],
+      "triple_index": 27217
+    },
+    {
+      "cell": "--",
+      "indices": [
+        3,
+        17,
+        112
+      ],
+      "triple_index": 31547
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        3,
+        19,
+        25
+      ],
+      "triple_index": 31705
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        3,
+        41,
+        106
+      ],
+      "triple_index": 34217
+    },
+    {
+      "cell": "--",
+      "indices": [
+        3,
+        46,
+        46
+      ],
+      "triple_index": 34642
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        3,
+        46,
+        49
+      ],
+      "triple_index": 34645
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        3,
+        94,
+        122
+      ],
+      "triple_index": 38102
+    },
+    {
+      "cell": "++",
+      "indices": [
+        4,
+        32,
+        55
+      ],
+      "triple_index": 42683
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        4,
+        32,
+        76
+      ],
+      "triple_index": 42704
+    },
+    {
+      "cell": "--",
+      "indices": [
+        4,
+        33,
+        67
+      ],
+      "triple_index": 42803
+    },
+    {
+      "cell": "++",
+      "indices": [
+        4,
+        33,
+        73
+      ],
+      "triple_index": 42809
+    },
+    {
+      "cell": "--",
+      "indices": [
+        4,
+        41,
+        62
+      ],
+      "triple_index": 43626
+    },
+    {
+      "cell": "--",
+      "indices": [
+        4,
+        56,
+        56
+      ],
+      "triple_index": 45000
+    },
+    {
+      "cell": "--",
+      "indices": [
+        4,
+        61,
+        84
+      ],
+      "triple_index": 45438
+    },
+    {
+      "cell": "--",
+      "indices": [
+        4,
+        68,
+        75
+      ],
+      "triple_index": 45961
+    },
+    {
+      "cell": "++",
+      "indices": [
+        4,
+        83,
+        139
+      ],
+      "triple_index": 47000
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        4,
+        91,
+        93
+      ],
+      "triple_index": 47382
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        4,
+        94,
+        98
+      ],
+      "triple_index": 47531
+    },
+    {
+      "cell": "--",
+      "indices": [
+        4,
+        115,
+        126
+      ],
+      "triple_index": 48315
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        5,
+        7,
+        37
+      ],
+      "triple_index": 48956
+    },
+    {
+      "cell": "--",
+      "indices": [
+        5,
+        15,
+        124
+      ],
+      "triple_index": 50079
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        5,
+        33,
+        42
+      ],
+      "triple_index": 52094
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        5,
+        43,
+        116
+      ],
+      "triple_index": 53193
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        5,
+        44,
+        92
+      ],
+      "triple_index": 53266
+    },
+    {
+      "cell": "--",
+      "indices": [
+        5,
+        71,
+        82
+      ],
+      "triple_index": 55497
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        5,
+        73,
+        85
+      ],
+      "triple_index": 55637
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        5,
+        84,
+        84
+      ],
+      "triple_index": 56318
+    },
+    {
+      "cell": "++",
+      "indices": [
+        5,
+        88,
+        138
+      ],
+      "triple_index": 56590
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        5,
+        106,
+        140
+      ],
+      "triple_index": 57375
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        6,
+        18,
+        45
+      ],
+      "triple_index": 59552
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        6,
+        18,
+        68
+      ],
+      "triple_index": 59575
+    },
+    {
+      "cell": "--",
+      "indices": [
+        6,
+        19,
+        32
+      ],
+      "triple_index": 59661
+    },
+    {
+      "cell": "--",
+      "indices": [
+        6,
+        21,
+        34
+      ],
+      "triple_index": 59904
+    },
+    {
+      "cell": "++",
+      "indices": [
+        6,
+        32,
+        38
+      ],
+      "triple_index": 61162
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        6,
+        37,
+        43
+      ],
+      "triple_index": 61697
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        6,
+        44,
+        46
+      ],
+      "triple_index": 62400
+    },
+    {
+      "cell": "++",
+      "indices": [
+        6,
+        62,
+        129
+      ],
+      "triple_index": 64058
+    },
+    {
+      "cell": "--",
+      "indices": [
+        6,
+        68,
+        135
+      ],
+      "triple_index": 64517
+    },
+    {
+      "cell": "++",
+      "indices": [
+        6,
+        94,
+        132
+      ],
+      "triple_index": 66061
+    },
+    {
+      "cell": "--",
+      "indices": [
+        6,
+        95,
+        112
+      ],
+      "triple_index": 66087
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        7,
+        7,
+        57
+      ],
+      "triple_index": 67201
+    },
+    {
+      "cell": "--",
+      "indices": [
+        7,
+        10,
+        71
+      ],
+      "triple_index": 67611
+    },
+    {
+      "cell": "++",
+      "indices": [
+        7,
+        15,
+        116
+      ],
+      "triple_index": 68296
+    },
+    {
+      "cell": "++",
+      "indices": [
+        7,
+        31,
+        94
+      ],
+      "triple_index": 70154
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        7,
+        41,
+        105
+      ],
+      "triple_index": 71210
+    },
+    {
+      "cell": "++",
+      "indices": [
+        7,
+        42,
+        62
+      ],
+      "triple_index": 71266
+    },
+    {
+      "cell": "--",
+      "indices": [
+        7,
+        65,
+        125
+      ],
+      "triple_index": 73330
+    },
+    {
+      "cell": "++",
+      "indices": [
+        7,
+        77,
+        80
+      ],
+      "triple_index": 74119
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        7,
+        80,
+        107
+      ],
+      "triple_index": 74332
+    },
+    {
+      "cell": "--",
+      "indices": [
+        7,
+        87,
+        137
+      ],
+      "triple_index": 74761
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        7,
+        93,
+        111
+      ],
+      "triple_index": 75038
+    },
+    {
+      "cell": "--",
+      "indices": [
+        7,
+        100,
+        140
+      ],
+      "triple_index": 75375
+    },
+    {
+      "cell": "++",
+      "indices": [
+        8,
+        15,
+        47
+      ],
+      "triple_index": 77138
+    },
+    {
+      "cell": "--",
+      "indices": [
+        8,
+        37,
+        67
+      ],
+      "triple_index": 79677
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        8,
+        46,
+        59
+      ],
+      "triple_index": 80560
+    },
+    {
+      "cell": "--",
+      "indices": [
+        8,
+        52,
+        126
+      ],
+      "triple_index": 81176
+    },
+    {
+      "cell": "--",
+      "indices": [
+        8,
+        76,
+        136
+      ],
+      "triple_index": 83022
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        8,
+        82,
+        89
+      ],
+      "triple_index": 83344
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        9,
+        19,
+        100
+      ],
+      "triple_index": 86463
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        9,
+        22,
+        81
+      ],
+      "triple_index": 86804
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        9,
+        28,
+        123
+      ],
+      "triple_index": 87539
+    },
+    {
+      "cell": "--",
+      "indices": [
+        9,
+        29,
+        48
+      ],
+      "triple_index": 87576
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        9,
+        42,
+        54
+      ],
+      "triple_index": 88947
+    },
+    {
+      "cell": "++",
+      "indices": [
+        9,
+        48,
+        86
+      ],
+      "triple_index": 89552
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        9,
+        49,
+        118
+      ],
+      "triple_index": 89676
+    },
+    {
+      "cell": "--",
+      "indices": [
+        9,
+        56,
+        68
+      ],
+      "triple_index": 90242
+    },
+    {
+      "cell": "++",
+      "indices": [
+        9,
+        57,
+        97
+      ],
+      "triple_index": 90355
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        9,
+        64,
+        134
+      ],
+      "triple_index": 90952
+    },
+    {
+      "cell": "++",
+      "indices": [
+        9,
+        65,
+        72
+      ],
+      "triple_index": 90966
+    },
+    {
+      "cell": "++",
+      "indices": [
+        10,
+        12,
+        93
+      ],
+      "triple_index": 94227
+    },
+    {
+      "cell": "++",
+      "indices": [
+        10,
+        26,
+        65
+      ],
+      "triple_index": 95900
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        10,
+        55,
+        137
+      ],
+      "triple_index": 98872
+    },
+    {
+      "cell": "--",
+      "indices": [
+        10,
+        62,
+        128
+      ],
+      "triple_index": 99437
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        10,
+        63,
+        98
+      ],
+      "triple_index": 99485
+    },
+    {
+      "cell": "--",
+      "indices": [
+        10,
+        100,
+        128
+      ],
+      "triple_index": 101698
+    },
+    {
+      "cell": "--",
+      "indices": [
+        11,
+        23,
+        31
+      ],
+      "triple_index": 104033
+    },
+    {
+      "cell": "++",
+      "indices": [
+        11,
+        45,
+        92
+      ],
+      "triple_index": 106437
+    },
+    {
+      "cell": "++",
+      "indices": [
+        11,
+        60,
+        96
+      ],
+      "triple_index": 107761
+    },
+    {
+      "cell": "++",
+      "indices": [
+        11,
+        63,
+        131
+      ],
+      "triple_index": 108033
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        11,
+        92,
+        131
+      ],
+      "triple_index": 109860
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        11,
+        127,
+        128
+      ],
+      "triple_index": 110942
+    },
+    {
+      "cell": "++",
+      "indices": [
+        12,
+        13,
+        78
+      ],
+      "triple_index": 111240
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        12,
+        24,
+        64
+      ],
+      "triple_index": 112568
+    },
+    {
+      "cell": "++",
+      "indices": [
+        12,
+        27,
+        121
+      ],
+      "triple_index": 112970
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        12,
+        29,
+        50
+      ],
+      "triple_index": 113124
+    },
+    {
+      "cell": "++",
+      "indices": [
+        12,
+        70,
+        108
+      ],
+      "triple_index": 116913
+    },
+    {
+      "cell": "--",
+      "indices": [
+        12,
+        83,
+        121
+      ],
+      "triple_index": 117758
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        13,
+        13,
+        60
+      ],
+      "triple_index": 119478
+    },
+    {
+      "cell": "--",
+      "indices": [
+        13,
+        14,
+        18
+      ],
+      "triple_index": 119563
+    },
+    {
+      "cell": "--",
+      "indices": [
+        13,
+        28,
+        77
+      ],
+      "triple_index": 121295
+    },
+    {
+      "cell": "++",
+      "indices": [
+        13,
+        29,
+        111
+      ],
+      "triple_index": 121441
+    },
+    {
+      "cell": "--",
+      "indices": [
+        13,
+        29,
+        114
+      ],
+      "triple_index": 121444
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        13,
+        36,
+        131
+      ],
+      "triple_index": 122217
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        13,
+        40,
+        130
+      ],
+      "triple_index": 122626
+    },
+    {
+      "cell": "--",
+      "indices": [
+        13,
+        62,
+        119
+      ],
+      "triple_index": 124584
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        13,
+        71,
+        91
+      ],
+      "triple_index": 125222
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        13,
+        74,
+        111
+      ],
+      "triple_index": 125446
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        14,
+        17,
+        33
+      ],
+      "triple_index": 128081
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        14,
+        21,
+        69
+      ],
+      "triple_index": 128603
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        14,
+        29,
+        82
+      ],
+      "triple_index": 129540
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        14,
+        40,
+        40
+      ],
+      "triple_index": 130664
+    },
+    {
+      "cell": "++",
+      "indices": [
+        14,
+        40,
+        124
+      ],
+      "triple_index": 130748
+    },
+    {
+      "cell": "++",
+      "indices": [
+        14,
+        43,
+        100
+      ],
+      "triple_index": 131021
+    },
+    {
+      "cell": "++",
+      "indices": [
+        14,
+        50,
+        54
+      ],
+      "triple_index": 131633
+    },
+    {
+      "cell": "--",
+      "indices": [
+        14,
+        101,
+        103
+      ],
+      "triple_index": 134997
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        14,
+        119,
+        123
+      ],
+      "triple_index": 135566
+    },
+    {
+      "cell": "--",
+      "indices": [
+        15,
+        19,
+        52
+      ],
+      "triple_index": 136346
+    },
+    {
+      "cell": "--",
+      "indices": [
+        15,
+        28,
+        60
+      ],
+      "triple_index": 137407
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        15,
+        31,
+        39
+      ],
+      "triple_index": 137719
+    },
+    {
+      "cell": "++",
+      "indices": [
+        15,
+        32,
+        115
+      ],
+      "triple_index": 137904
+    },
+    {
+      "cell": "--",
+      "indices": [
+        15,
+        47,
+        51
+      ],
+      "triple_index": 139355
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        15,
+        55,
+        110
+      ],
+      "triple_index": 140130
+    },
+    {
+      "cell": "--",
+      "indices": [
+        15,
+        56,
+        81
+      ],
+      "triple_index": 140186
+    },
+    {
+      "cell": "++",
+      "indices": [
+        15,
+        57,
+        97
+      ],
+      "triple_index": 140286
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        15,
+        58,
+        79
+      ],
+      "triple_index": 140351
+    },
+    {
+      "cell": "++",
+      "indices": [
+        15,
+        59,
+        106
+      ],
+      "triple_index": 140460
+    },
+    {
+      "cell": "--",
+      "indices": [
+        15,
+        65,
+        100
+      ],
+      "triple_index": 140925
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        15,
+        65,
+        121
+      ],
+      "triple_index": 140946
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        15,
+        65,
+        140
+      ],
+      "triple_index": 140965
+    },
+    {
+      "cell": "++",
+      "indices": [
+        15,
+        74,
+        130
+      ],
+      "triple_index": 141594
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        15,
+        79,
+        98
+      ],
+      "triple_index": 141882
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        16,
+        22,
+        107
+      ],
+      "triple_index": 144636
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        16,
+        23,
+        40
+      ],
+      "triple_index": 144687
+    },
+    {
+      "cell": "++",
+      "indices": [
+        16,
+        52,
+        91
+      ],
+      "triple_index": 147725
+    },
+    {
+      "cell": "++",
+      "indices": [
+        16,
+        61,
+        65
+      ],
+      "triple_index": 148455
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        16,
+        65,
+        114
+      ],
+      "triple_index": 148814
+    },
+    {
+      "cell": "++",
+      "indices": [
+        16,
+        77,
+        122
+      ],
+      "triple_index": 149656
+    },
+    {
+      "cell": "--",
+      "indices": [
+        16,
+        100,
+        129
+      ],
+      "triple_index": 150859
+    },
+    {
+      "cell": "--",
+      "indices": [
+        17,
+        28,
+        140
+      ],
+      "triple_index": 153112
+    },
+    {
+      "cell": "--",
+      "indices": [
+        17,
+        33,
+        92
+      ],
+      "triple_index": 153614
+    },
+    {
+      "cell": "--",
+      "indices": [
+        17,
+        38,
+        71
+      ],
+      "triple_index": 154118
+    },
+    {
+      "cell": "--",
+      "indices": [
+        17,
+        41,
+        77
+      ],
+      "triple_index": 154427
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        17,
+        59,
+        105
+      ],
+      "triple_index": 156084
+    },
+    {
+      "cell": "--",
+      "indices": [
+        17,
+        66,
+        132
+      ],
+      "triple_index": 156657
+    },
+    {
+      "cell": "++",
+      "indices": [
+        17,
+        89,
+        124
+      ],
+      "triple_index": 158098
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        18,
+        25,
+        109
+      ],
+      "triple_index": 160365
+    },
+    {
+      "cell": "++",
+      "indices": [
+        18,
+        36,
+        128
+      ],
+      "triple_index": 161594
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        18,
+        53,
+        101
+      ],
+      "triple_index": 163199
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        18,
+        56,
+        108
+      ],
+      "triple_index": 163464
+    },
+    {
+      "cell": "--",
+      "indices": [
+        18,
+        68,
+        78
+      ],
+      "triple_index": 164376
+    },
+    {
+      "cell": "--",
+      "indices": [
+        18,
+        72,
+        90
+      ],
+      "triple_index": 164670
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        18,
+        75,
+        130
+      ],
+      "triple_index": 164911
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        18,
+        105,
+        131
+      ],
+      "triple_index": 166427
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        18,
+        107,
+        138
+      ],
+      "triple_index": 166503
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        19,
+        32,
+        130
+      ],
+      "triple_index": 168673
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        19,
+        39,
+        105
+      ],
+      "triple_index": 169383
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        19,
+        40,
+        106
+      ],
+      "triple_index": 169485
+    },
+    {
+      "cell": "--",
+      "indices": [
+        19,
+        41,
+        63
+      ],
+      "triple_index": 169542
+    },
+    {
+      "cell": "--",
+      "indices": [
+        19,
+        42,
+        68
+      ],
+      "triple_index": 169646
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        19,
+        45,
+        77
+      ],
+      "triple_index": 169946
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        19,
+        46,
+        135
+      ],
+      "triple_index": 170099
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        19,
+        52,
+        111
+      ],
+      "triple_index": 170624
+    },
+    {
+      "cell": "--",
+      "indices": [
+        19,
+        55,
+        101
+      ],
+      "triple_index": 170875
+    },
+    {
+      "cell": "++",
+      "indices": [
+        19,
+        95,
+        125
+      ],
+      "triple_index": 173519
+    },
+    {
+      "cell": "++",
+      "indices": [
+        19,
+        106,
+        128
+      ],
+      "triple_index": 173962
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        19,
+        126,
+        140
+      ],
+      "triple_index": 174464
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        20,
+        47,
+        62
+      ],
+      "triple_index": 177501
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        20,
+        47,
+        110
+      ],
+      "triple_index": 177549
+    },
+    {
+      "cell": "--",
+      "indices": [
+        20,
+        48,
+        97
+      ],
+      "triple_index": 177629
+    },
+    {
+      "cell": "--",
+      "indices": [
+        20,
+        53,
+        90
+      ],
+      "triple_index": 178072
+    },
+    {
+      "cell": "++",
+      "indices": [
+        20,
+        54,
+        133
+      ],
+      "triple_index": 178202
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        20,
+        62,
+        80
+      ],
+      "triple_index": 178809
+    },
+    {
+      "cell": "--",
+      "indices": [
+        20,
+        71,
+        107
+      ],
+      "triple_index": 179502
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        21,
+        39,
+        124
+      ],
+      "triple_index": 184043
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        21,
+        55,
+        60
+      ],
+      "triple_index": 185475
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        21,
+        97,
+        102
+      ],
+      "triple_index": 188226
+    },
+    {
+      "cell": "++",
+      "indices": [
+        21,
+        119,
+        139
+      ],
+      "triple_index": 188978
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        22,
+        22,
+        98
+      ],
+      "triple_index": 189287
+    },
+    {
+      "cell": "--",
+      "indices": [
+        22,
+        25,
+        120
+      ],
+      "triple_index": 189660
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        22,
+        28,
+        87
+      ],
+      "triple_index": 189969
+    },
+    {
+      "cell": "--",
+      "indices": [
+        22,
+        36,
+        98
+      ],
+      "triple_index": 190848
+    },
+    {
+      "cell": "--",
+      "indices": [
+        22,
+        43,
+        69
+      ],
+      "triple_index": 191526
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        22,
+        44,
+        56
+      ],
+      "triple_index": 191610
+    },
+    {
+      "cell": "--",
+      "indices": [
+        22,
+        53,
+        86
+      ],
+      "triple_index": 192468
+    },
+    {
+      "cell": "--",
+      "indices": [
+        22,
+        72,
+        131
+      ],
+      "triple_index": 193995
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        22,
+        87,
+        94
+      ],
+      "triple_index": 194873
+    },
+    {
+      "cell": "++",
+      "indices": [
+        22,
+        104,
+        109
+      ],
+      "triple_index": 195653
+    },
+    {
+      "cell": "++",
+      "indices": [
+        22,
+        106,
+        139
+      ],
+      "triple_index": 195754
+    },
+    {
+      "cell": "++",
+      "indices": [
+        22,
+        109,
+        111
+      ],
+      "triple_index": 195825
+    },
+    {
+      "cell": "--",
+      "indices": [
+        22,
+        109,
+        126
+      ],
+      "triple_index": 195840
+    },
+    {
+      "cell": "--",
+      "indices": [
+        22,
+        113,
+        138
+      ],
+      "triple_index": 195970
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        23,
+        40,
+        128
+      ],
+      "triple_index": 198309
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        23,
+        56,
+        62
+      ],
+      "triple_index": 199723
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        23,
+        70,
+        128
+      ],
+      "triple_index": 200874
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        23,
+        73,
+        81
+      ],
+      "triple_index": 201034
+    },
+    {
+      "cell": "++",
+      "indices": [
+        23,
+        90,
+        131
+      ],
+      "triple_index": 202087
+    },
+    {
+      "cell": "--",
+      "indices": [
+        23,
+        106,
+        132
+      ],
+      "triple_index": 202768
+    },
+    {
+      "cell": "++",
+      "indices": [
+        23,
+        114,
+        136
+      ],
+      "triple_index": 203016
+    },
+    {
+      "cell": "--",
+      "indices": [
+        23,
+        118,
+        128
+      ],
+      "triple_index": 203106
+    },
+    {
+      "cell": "--",
+      "indices": [
+        24,
+        33,
+        62
+      ],
+      "triple_index": 204418
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        24,
+        40,
+        99
+      ],
+      "triple_index": 205183
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        24,
+        41,
+        110
+      ],
+      "triple_index": 205294
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        24,
+        45,
+        102
+      ],
+      "triple_index": 205676
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        24,
+        45,
+        132
+      ],
+      "triple_index": 205706
+    },
+    {
+      "cell": "--",
+      "indices": [
+        24,
+        50,
+        64
+      ],
+      "triple_index": 206103
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        24,
+        51,
+        72
+      ],
+      "triple_index": 206201
+    },
+    {
+      "cell": "--",
+      "indices": [
+        24,
+        63,
+        99
+      ],
+      "triple_index": 207230
+    },
+    {
+      "cell": "--",
+      "indices": [
+        24,
+        74,
+        127
+      ],
+      "triple_index": 208050
+    },
+    {
+      "cell": "++",
+      "indices": [
+        24,
+        86,
+        117
+      ],
+      "triple_index": 208766
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        24,
+        96,
+        135
+      ],
+      "triple_index": 209279
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        24,
+        112,
+        123
+      ],
+      "triple_index": 209851
+    },
+    {
+      "cell": "--",
+      "indices": [
+        25,
+        27,
+        121
+      ],
+      "triple_index": 210600
+    },
+    {
+      "cell": "--",
+      "indices": [
+        25,
+        37,
+        79
+      ],
+      "triple_index": 211643
+    },
+    {
+      "cell": "--",
+      "indices": [
+        25,
+        49,
+        118
+      ],
+      "triple_index": 212852
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        25,
+        52,
+        53
+      ],
+      "triple_index": 213057
+    },
+    {
+      "cell": "--",
+      "indices": [
+        25,
+        53,
+        53
+      ],
+      "triple_index": 213145
+    },
+    {
+      "cell": "--",
+      "indices": [
+        25,
+        60,
+        129
+      ],
+      "triple_index": 213809
+    },
+    {
+      "cell": "++",
+      "indices": [
+        25,
+        71,
+        74
+      ],
+      "triple_index": 214579
+    },
+    {
+      "cell": "--",
+      "indices": [
+        25,
+        85,
+        121
+      ],
+      "triple_index": 215501
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        25,
+        110,
+        115
+      ],
+      "triple_index": 216570
+    },
+    {
+      "cell": "--",
+      "indices": [
+        26,
+        26,
+        115
+      ],
+      "triple_index": 217150
+    },
+    {
+      "cell": "++",
+      "indices": [
+        26,
+        34,
+        133
+      ],
+      "triple_index": 218052
+    },
+    {
+      "cell": "++",
+      "indices": [
+        26,
+        50,
+        117
+      ],
+      "triple_index": 219612
+    },
+    {
+      "cell": "++",
+      "indices": [
+        26,
+        76,
+        88
+      ],
+      "triple_index": 221598
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        26,
+        81,
+        116
+      ],
+      "triple_index": 221936
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        26,
+        110,
+        133
+      ],
+      "triple_index": 223258
+    },
+    {
+      "cell": "--",
+      "indices": [
+        27,
+        32,
+        85
+      ],
+      "triple_index": 224344
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        27,
+        38,
+        70
+      ],
+      "triple_index": 224962
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        27,
+        42,
+        70
+      ],
+      "triple_index": 225364
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        27,
+        45,
+        136
+      ],
+      "triple_index": 225721
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        27,
+        50,
+        93
+      ],
+      "triple_index": 226143
+    },
+    {
+      "cell": "++",
+      "indices": [
+        27,
+        61,
+        111
+      ],
+      "triple_index": 227096
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        27,
+        65,
+        82
+      ],
+      "triple_index": 227377
+    },
+    {
+      "cell": "--",
+      "indices": [
+        27,
+        67,
+        97
+      ],
+      "triple_index": 227541
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        27,
+        99,
+        123
+      ],
+      "triple_index": 229407
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        27,
+        111,
+        131
+      ],
+      "triple_index": 229841
+    },
+    {
+      "cell": "++",
+      "indices": [
+        28,
+        28,
+        139
+      ],
+      "triple_index": 230397
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        28,
+        45,
+        129
+      ],
+      "triple_index": 232155
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        28,
+        46,
+        61
+      ],
+      "triple_index": 232182
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        28,
+        53,
+        75
+      ],
+      "triple_index": 232833
+    },
+    {
+      "cell": "--",
+      "indices": [
+        28,
+        63,
+        71
+      ],
+      "triple_index": 233654
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        28,
+        65,
+        122
+      ],
+      "triple_index": 233858
+    },
+    {
+      "cell": "++",
+      "indices": [
+        28,
+        70,
+        98
+      ],
+      "triple_index": 234199
+    },
+    {
+      "cell": "++",
+      "indices": [
+        28,
+        70,
+        103
+      ],
+      "triple_index": 234204
+    },
+    {
+      "cell": "++",
+      "indices": [
+        28,
+        71,
+        119
+      ],
+      "triple_index": 234290
+    },
+    {
+      "cell": "--",
+      "indices": [
+        28,
+        72,
+        111
+      ],
+      "triple_index": 234351
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        28,
+        87,
+        136
+      ],
+      "triple_index": 235291
+    },
+    {
+      "cell": "--",
+      "indices": [
+        28,
+        121,
+        126
+      ],
+      "triple_index": 236522
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        29,
+        30,
+        136
+      ],
+      "triple_index": 236945
+    },
+    {
+      "cell": "++",
+      "indices": [
+        29,
+        31,
+        90
+      ],
+      "triple_index": 237009
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        29,
+        34,
+        114
+      ],
+      "triple_index": 237357
+    },
+    {
+      "cell": "++",
+      "indices": [
+        29,
+        36,
+        125
+      ],
+      "triple_index": 237579
+    },
+    {
+      "cell": "--",
+      "indices": [
+        29,
+        39,
+        129
+      ],
+      "triple_index": 237892
+    },
+    {
+      "cell": "++",
+      "indices": [
+        29,
+        54,
+        100
+      ],
+      "triple_index": 239273
+    },
+    {
+      "cell": "--",
+      "indices": [
+        29,
+        58,
+        97
+      ],
+      "triple_index": 239608
+    },
+    {
+      "cell": "--",
+      "indices": [
+        29,
+        81,
+        140
+      ],
+      "triple_index": 241284
+    },
+    {
+      "cell": "++",
+      "indices": [
+        29,
+        107,
+        127
+      ],
+      "triple_index": 242480
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        29,
+        108,
+        114
+      ],
+      "triple_index": 242500
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        30,
+        35,
+        79
+      ],
+      "triple_index": 243644
+    },
+    {
+      "cell": "++",
+      "indices": [
+        30,
+        37,
+        39
+      ],
+      "triple_index": 243813
+    },
+    {
+      "cell": "++",
+      "indices": [
+        30,
+        47,
+        67
+      ],
+      "triple_index": 244826
+    },
+    {
+      "cell": "--",
+      "indices": [
+        30,
+        54,
+        133
+      ],
+      "triple_index": 245522
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        30,
+        55,
+        66
+      ],
+      "triple_index": 245541
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        30,
+        61,
+        116
+      ],
+      "triple_index": 246086
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        30,
+        70,
+        119
+      ],
+      "triple_index": 246764
+    },
+    {
+      "cell": "++",
+      "indices": [
+        30,
+        70,
+        129
+      ],
+      "triple_index": 246774
+    },
+    {
+      "cell": "++",
+      "indices": [
+        30,
+        75,
+        131
+      ],
+      "triple_index": 247116
+    },
+    {
+      "cell": "++",
+      "indices": [
+        30,
+        80,
+        87
+      ],
+      "triple_index": 247387
+    },
+    {
+      "cell": "++",
+      "indices": [
+        30,
+        87,
+        88
+      ],
+      "triple_index": 247787
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        31,
+        35,
+        93
+      ],
+      "triple_index": 249763
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        31,
+        37,
+        108
+      ],
+      "triple_index": 249987
+    },
+    {
+      "cell": "++",
+      "indices": [
+        31,
+        47,
+        74
+      ],
+      "triple_index": 250938
+    },
+    {
+      "cell": "++",
+      "indices": [
+        31,
+        60,
+        66
+      ],
+      "triple_index": 252061
+    },
+    {
+      "cell": "++",
+      "indices": [
+        31,
+        64,
+        69
+      ],
+      "triple_index": 252378
+    },
+    {
+      "cell": "--",
+      "indices": [
+        31,
+        103,
+        139
+      ],
+      "triple_index": 254671
+    },
+    {
+      "cell": "++",
+      "indices": [
+        32,
+        38,
+        42
+      ],
+      "triple_index": 256019
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        32,
+        57,
+        92
+      ],
+      "triple_index": 257836
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        32,
+        68,
+        80
+      ],
+      "triple_index": 258682
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        32,
+        70,
+        111
+      ],
+      "triple_index": 258856
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        32,
+        76,
+        96
+      ],
+      "triple_index": 259246
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        32,
+        82,
+        135
+      ],
+      "triple_index": 259654
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        32,
+        121,
+        134
+      ],
+      "triple_index": 261174
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        33,
+        40,
+        45
+      ],
+      "triple_index": 262111
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        33,
+        42,
+        65
+      ],
+      "triple_index": 262330
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        33,
+        67,
+        121
+      ],
+      "triple_index": 264536
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        33,
+        69,
+        122
+      ],
+      "triple_index": 264682
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        33,
+        77,
+        130
+      ],
+      "triple_index": 265230
+    },
+    {
+      "cell": "++",
+      "indices": [
+        33,
+        128,
+        140
+      ],
+      "triple_index": 267178
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        34,
+        35,
+        123
+      ],
+      "triple_index": 267452
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        34,
+        57,
+        86
+      ],
+      "triple_index": 269494
+    },
+    {
+      "cell": "--",
+      "indices": [
+        34,
+        58,
+        136
+      ],
+      "triple_index": 269627
+    },
+    {
+      "cell": "--",
+      "indices": [
+        34,
+        60,
+        68
+      ],
+      "triple_index": 269722
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        34,
+        71,
+        106
+      ],
+      "triple_index": 270585
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        34,
+        101,
+        112
+      ],
+      "triple_index": 272226
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        35,
+        47,
+        52
+      ],
+      "triple_index": 274246
+    },
+    {
+      "cell": "++",
+      "indices": [
+        35,
+        48,
+        59
+      ],
+      "triple_index": 274346
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        35,
+        51,
+        74
+      ],
+      "triple_index": 274634
+    },
+    {
+      "cell": "--",
+      "indices": [
+        35,
+        95,
+        137
+      ],
+      "triple_index": 277667
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        36,
+        51,
+        126
+      ],
+      "triple_index": 280251
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        36,
+        87,
+        113
+      ],
+      "triple_index": 282812
+    },
+    {
+      "cell": "--",
+      "indices": [
+        37,
+        39,
+        49
+      ],
+      "triple_index": 284488
+    },
+    {
+      "cell": "++",
+      "indices": [
+        37,
+        68,
+        126
+      ],
+      "triple_index": 287088
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        37,
+        74,
+        124
+      ],
+      "triple_index": 287503
+    },
+    {
+      "cell": "++",
+      "indices": [
+        38,
+        46,
+        108
+      ],
+      "triple_index": 290589
+    },
+    {
+      "cell": "--",
+      "indices": [
+        38,
+        47,
+        82
+      ],
+      "triple_index": 290657
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        38,
+        60,
+        121
+      ],
+      "triple_index": 291827
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        38,
+        69,
+        131
+      ],
+      "triple_index": 292521
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        39,
+        39,
+        114
+      ],
+      "triple_index": 295162
+    },
+    {
+      "cell": "++",
+      "indices": [
+        39,
+        42,
+        112
+      ],
+      "triple_index": 295460
+    },
+    {
+      "cell": "--",
+      "indices": [
+        39,
+        49,
+        85
+      ],
+      "triple_index": 296098
+    },
+    {
+      "cell": "++",
+      "indices": [
+        39,
+        61,
+        119
+      ],
+      "triple_index": 297158
+    },
+    {
+      "cell": "--",
+      "indices": [
+        39,
+        63,
+        109
+      ],
+      "triple_index": 297305
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        40,
+        49,
+        72
+      ],
+      "triple_index": 301236
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        40,
+        56,
+        82
+      ],
+      "triple_index": 301862
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        40,
+        63,
+        78
+      ],
+      "triple_index": 302425
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        40,
+        68,
+        127
+      ],
+      "triple_index": 302849
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        40,
+        114,
+        117
+      ],
+      "triple_index": 305116
+    },
+    {
+      "cell": "++",
+      "indices": [
+        41,
+        43,
+        116
+      ],
+      "triple_index": 305763
+    },
+    {
+      "cell": "++",
+      "indices": [
+        41,
+        56,
+        64
+      ],
+      "triple_index": 306894
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        41,
+        58,
+        135
+      ],
+      "triple_index": 307132
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        41,
+        69,
+        102
+      ],
+      "triple_index": 307946
+    },
+    {
+      "cell": "++",
+      "indices": [
+        41,
+        73,
+        92
+      ],
+      "triple_index": 308214
+    },
+    {
+      "cell": "++",
+      "indices": [
+        41,
+        97,
+        110
+      ],
+      "triple_index": 309564
+    },
+    {
+      "cell": "++",
+      "indices": [
+        42,
+        43,
+        100
+      ],
+      "triple_index": 310697
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        42,
+        66,
+        130
+      ],
+      "triple_index": 312705
+    },
+    {
+      "cell": "--",
+      "indices": [
+        42,
+        70,
+        111
+      ],
+      "triple_index": 312976
+    },
+    {
+      "cell": "--",
+      "indices": [
+        42,
+        82,
+        129
+      ],
+      "triple_index": 313768
+    },
+    {
+      "cell": "++",
+      "indices": [
+        42,
+        126,
+        138
+      ],
+      "triple_index": 315383
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        43,
+        43,
+        73
+      ],
+      "triple_index": 315521
+    },
+    {
+      "cell": "++",
+      "indices": [
+        43,
+        47,
+        130
+      ],
+      "triple_index": 315960
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        43,
+        50,
+        124
+      ],
+      "triple_index": 316230
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        43,
+        71,
+        85
+      ],
+      "triple_index": 317871
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        43,
+        79,
+        86
+      ],
+      "triple_index": 318396
+    },
+    {
+      "cell": "--",
+      "indices": [
+        43,
+        86,
+        138
+      ],
+      "triple_index": 318854
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        43,
+        99,
+        101
+      ],
+      "triple_index": 319441
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        43,
+        104,
+        128
+      ],
+      "triple_index": 319663
+    },
+    {
+      "cell": "++",
+      "indices": [
+        43,
+        117,
+        140
+      ],
+      "triple_index": 320065
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        44,
+        51,
+        51
+      ],
+      "triple_index": 321000
+    },
+    {
+      "cell": "--",
+      "indices": [
+        44,
+        55,
+        109
+      ],
+      "triple_index": 321408
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        44,
+        65,
+        115
+      ],
+      "triple_index": 322219
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        44,
+        69,
+        98
+      ],
+      "triple_index": 322496
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        44,
+        81,
+        117
+      ],
+      "triple_index": 323301
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        44,
+        92,
+        116
+      ],
+      "triple_index": 323894
+    },
+    {
+      "cell": "++",
+      "indices": [
+        44,
+        102,
+        112
+      ],
+      "triple_index": 324325
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        44,
+        105,
+        108
+      ],
+      "triple_index": 324432
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        44,
+        108,
+        113
+      ],
+      "triple_index": 324539
+    },
+    {
+      "cell": "++",
+      "indices": [
+        45,
+        47,
+        106
+      ],
+      "triple_index": 325345
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        45,
+        68,
+        101
+      ],
+      "triple_index": 327083
+    },
+    {
+      "cell": "++",
+      "indices": [
+        45,
+        88,
+        103
+      ],
+      "triple_index": 328335
+    },
+    {
+      "cell": "++",
+      "indices": [
+        45,
+        88,
+        131
+      ],
+      "triple_index": 328363
+    },
+    {
+      "cell": "++",
+      "indices": [
+        46,
+        51,
+        58
+      ],
+      "triple_index": 330223
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        46,
+        62,
+        83
+      ],
+      "triple_index": 331172
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        46,
+        63,
+        131
+      ],
+      "triple_index": 331298
+    },
+    {
+      "cell": "--",
+      "indices": [
+        46,
+        68,
+        118
+      ],
+      "triple_index": 331660
+    },
+    {
+      "cell": "--",
+      "indices": [
+        46,
+        75,
+        106
+      ],
+      "triple_index": 332131
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        46,
+        97,
+        117
+      ],
+      "triple_index": 333341
+    },
+    {
+      "cell": "--",
+      "indices": [
+        46,
+        106,
+        126
+      ],
+      "triple_index": 333701
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        46,
+        107,
+        140
+      ],
+      "triple_index": 333749
+    },
+    {
+      "cell": "++",
+      "indices": [
+        46,
+        128,
+        135
+      ],
+      "triple_index": 334227
+    },
+    {
+      "cell": "--",
+      "indices": [
+        47,
+        48,
+        57
+      ],
+      "triple_index": 334414
+    },
+    {
+      "cell": "++",
+      "indices": [
+        47,
+        53,
+        126
+      ],
+      "triple_index": 334933
+    },
+    {
+      "cell": "++",
+      "indices": [
+        47,
+        86,
+        126
+      ],
+      "triple_index": 337276
+    },
+    {
+      "cell": "++",
+      "indices": [
+        48,
+        63,
+        136
+      ],
+      "triple_index": 340139
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        48,
+        71,
+        117
+      ],
+      "triple_index": 340708
+    },
+    {
+      "cell": "++",
+      "indices": [
+        48,
+        86,
+        123
+      ],
+      "triple_index": 341644
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        48,
+        88,
+        101
+      ],
+      "triple_index": 341729
+    },
+    {
+      "cell": "++",
+      "indices": [
+        48,
+        101,
+        128
+      ],
+      "triple_index": 342354
+    },
+    {
+      "cell": "--",
+      "indices": [
+        48,
+        113,
+        131
+      ],
+      "triple_index": 342759
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        49,
+        57,
+        68
+      ],
+      "triple_index": 343866
+    },
+    {
+      "cell": "++",
+      "indices": [
+        49,
+        72,
+        133
+      ],
+      "triple_index": 345071
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        49,
+        73,
+        95
+      ],
+      "triple_index": 345101
+    },
+    {
+      "cell": "++",
+      "indices": [
+        49,
+        94,
+        104
+      ],
+      "triple_index": 346307
+    },
+    {
+      "cell": "++",
+      "indices": [
+        49,
+        94,
+        122
+      ],
+      "triple_index": 346325
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        49,
+        109,
+        112
+      ],
+      "triple_index": 346900
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        50,
+        59,
+        103
+      ],
+      "triple_index": 348252
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        50,
+        67,
+        84
+      ],
+      "triple_index": 348853
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        50,
+        68,
+        94
+      ],
+      "triple_index": 348936
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        50,
+        75,
+        140
+      ],
+      "triple_index": 349465
+    },
+    {
+      "cell": "++",
+      "indices": [
+        50,
+        76,
+        80
+      ],
+      "triple_index": 349470
+    },
+    {
+      "cell": "++",
+      "indices": [
+        50,
+        82,
+        138
+      ],
+      "triple_index": 349897
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        50,
+        102,
+        136
+      ],
+      "triple_index": 350865
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        51,
+        51,
+        135
+      ],
+      "triple_index": 351695
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        51,
+        58,
+        68
+      ],
+      "triple_index": 352230
+    },
+    {
+      "cell": "--",
+      "indices": [
+        51,
+        59,
+        109
+      ],
+      "triple_index": 352353
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        51,
+        60,
+        90
+      ],
+      "triple_index": 352415
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        51,
+        64,
+        110
+      ],
+      "triple_index": 352749
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        51,
+        79,
+        124
+      ],
+      "triple_index": 353798
+    },
+    {
+      "cell": "--",
+      "indices": [
+        51,
+        80,
+        105
+      ],
+      "triple_index": 353840
+    },
+    {
+      "cell": "++",
+      "indices": [
+        51,
+        102,
+        129
+      ],
+      "triple_index": 354953
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        52,
+        53,
+        111
+      ],
+      "triple_index": 355853
+    },
+    {
+      "cell": "--",
+      "indices": [
+        52,
+        60,
+        108
+      ],
+      "triple_index": 356438
+    },
+    {
+      "cell": "--",
+      "indices": [
+        52,
+        76,
+        105
+      ],
+      "triple_index": 357595
+    },
+    {
+      "cell": "++",
+      "indices": [
+        52,
+        79,
+        112
+      ],
+      "triple_index": 357791
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        52,
+        122,
+        138
+      ],
+      "triple_index": 359537
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        53,
+        55,
+        88
+      ],
+      "triple_index": 359919
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        53,
+        99,
+        119
+      ],
+      "triple_index": 362744
+    },
+    {
+      "cell": "--",
+      "indices": [
+        54,
+        63,
+        123
+      ],
+      "triple_index": 364434
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        54,
+        80,
+        127
+      ],
+      "triple_index": 365611
+    },
+    {
+      "cell": "--",
+      "indices": [
+        55,
+        56,
+        113
+      ],
+      "triple_index": 367598
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        55,
+        93,
+        94
+      ],
+      "triple_index": 370021
+    },
+    {
+      "cell": "--",
+      "indices": [
+        56,
+        74,
+        101
+      ],
+      "triple_index": 372600
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        57,
+        78,
+        91
+      ],
+      "triple_index": 376418
+    },
+    {
+      "cell": "++",
+      "indices": [
+        57,
+        90,
+        104
+      ],
+      "triple_index": 377109
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        57,
+        111,
+        124
+      ],
+      "triple_index": 377969
+    },
+    {
+      "cell": "--",
+      "indices": [
+        58,
+        76,
+        85
+      ],
+      "triple_index": 379771
+    },
+    {
+      "cell": "--",
+      "indices": [
+        58,
+        89,
+        128
+      ],
+      "triple_index": 380568
+    },
+    {
+      "cell": "--",
+      "indices": [
+        59,
+        62,
+        133
+      ],
+      "triple_index": 382221
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        59,
+        87,
+        124
+      ],
+      "triple_index": 383862
+    },
+    {
+      "cell": "--",
+      "indices": [
+        59,
+        92,
+        93
+      ],
+      "triple_index": 384086
+    },
+    {
+      "cell": "++",
+      "indices": [
+        60,
+        79,
+        108
+      ],
+      "triple_index": 386707
+    },
+    {
+      "cell": "++",
+      "indices": [
+        61,
+        107,
+        119
+      ],
+      "triple_index": 391288
+    },
+    {
+      "cell": "++",
+      "indices": [
+        62,
+        63,
+        120
+      ],
+      "triple_index": 392007
+    },
+    {
+      "cell": "--",
+      "indices": [
+        62,
+        64,
+        131
+      ],
+      "triple_index": 392095
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        62,
+        66,
+        99
+      ],
+      "triple_index": 392214
+    },
+    {
+      "cell": "--",
+      "indices": [
+        62,
+        81,
+        100
+      ],
+      "triple_index": 393220
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        62,
+        81,
+        105
+      ],
+      "triple_index": 393225
+    },
+    {
+      "cell": "++",
+      "indices": [
+        62,
+        84,
+        114
+      ],
+      "triple_index": 393408
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        63,
+        85,
+        90
+      ],
+      "triple_index": 396521
+    },
+    {
+      "cell": "++",
+      "indices": [
+        63,
+        98,
+        109
+      ],
+      "triple_index": 397177
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        63,
+        98,
+        110
+      ],
+      "triple_index": 397178
+    },
+    {
+      "cell": "++",
+      "indices": [
+        64,
+        64,
+        81
+      ],
+      "triple_index": 398129
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        64,
+        106,
+        131
+      ],
+      "triple_index": 400510
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        65,
+        103,
+        120
+      ],
+      "triple_index": 403317
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        66,
+        68,
+        88
+      ],
+      "triple_index": 404210
+    },
+    {
+      "cell": "++",
+      "indices": [
+        66,
+        81,
+        112
+      ],
+      "triple_index": 405092
+    },
+    {
+      "cell": "++",
+      "indices": [
+        66,
+        84,
+        138
+      ],
+      "triple_index": 405292
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        66,
+        99,
+        103
+      ],
+      "triple_index": 405992
+    },
+    {
+      "cell": "--",
+      "indices": [
+        66,
+        100,
+        133
+      ],
+      "triple_index": 406063
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        67,
+        76,
+        85
+      ],
+      "triple_index": 407530
+    },
+    {
+      "cell": "--",
+      "indices": [
+        68,
+        115,
+        137
+      ],
+      "triple_index": 412038
+    },
+    {
+      "cell": "--",
+      "indices": [
+        69,
+        70,
+        87
+      ],
+      "triple_index": 412456
+    },
+    {
+      "cell": "--",
+      "indices": [
+        69,
+        80,
+        89
+      ],
+      "triple_index": 413113
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        69,
+        87,
+        102
+      ],
+      "triple_index": 413525
+    },
+    {
+      "cell": "++",
+      "indices": [
+        69,
+        104,
+        122
+      ],
+      "triple_index": 414310
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        69,
+        120,
+        120
+      ],
+      "triple_index": 414764
+    },
+    {
+      "cell": "--",
+      "indices": [
+        69,
+        120,
+        123
+      ],
+      "triple_index": 414767
+    },
+    {
+      "cell": "--",
+      "indices": [
+        70,
+        103,
+        122
+      ],
+      "triple_index": 416829
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        70,
+        116,
+        125
+      ],
+      "triple_index": 417235
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        70,
+        117,
+        123
+      ],
+      "triple_index": 417257
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        71,
+        78,
+        97
+      ],
+      "triple_index": 418039
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        71,
+        79,
+        129
+      ],
+      "triple_index": 418133
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        71,
+        80,
+        125
+      ],
+      "triple_index": 418190
+    },
+    {
+      "cell": "--",
+      "indices": [
+        71,
+        92,
+        95
+      ],
+      "triple_index": 418814
+    },
+    {
+      "cell": "--",
+      "indices": [
+        72,
+        74,
+        134
+      ],
+      "triple_index": 420233
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        72,
+        79,
+        103
+      ],
+      "triple_index": 420522
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        72,
+        91,
+        128
+      ],
+      "triple_index": 421213
+    },
+    {
+      "cell": "--",
+      "indices": [
+        73,
+        90,
+        92
+      ],
+      "triple_index": 423473
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        74,
+        88,
+        94
+      ],
+      "triple_index": 425650
+    },
+    {
+      "cell": "++",
+      "indices": [
+        74,
+        111,
+        112
+      ],
+      "triple_index": 426611
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        75,
+        85,
+        116
+      ],
+      "triple_index": 427721
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        76,
+        77,
+        137
+      ],
+      "triple_index": 429411
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        76,
+        102,
+        103
+      ],
+      "triple_index": 430652
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        76,
+        119,
+        121
+      ],
+      "triple_index": 431180
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        77,
+        83,
+        128
+      ],
+      "triple_index": 431845
+    },
+    {
+      "cell": "++",
+      "indices": [
+        77,
+        134,
+        140
+      ],
+      "triple_index": 433489
+    },
+    {
+      "cell": "++",
+      "indices": [
+        77,
+        135,
+        138
+      ],
+      "triple_index": 433493
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        78,
+        82,
+        82
+      ],
+      "triple_index": 433757
+    },
+    {
+      "cell": "++",
+      "indices": [
+        78,
+        105,
+        116
+      ],
+      "triple_index": 434872
+    },
+    {
+      "cell": "--",
+      "indices": [
+        78,
+        125,
+        129
+      ],
+      "triple_index": 435395
+    },
+    {
+      "cell": "++",
+      "indices": [
+        78,
+        136,
+        138
+      ],
+      "triple_index": 435514
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        79,
+        93,
+        129
+      ],
+      "triple_index": 436340
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        80,
+        117,
+        118
+      ],
+      "triple_index": 439072
+    },
+    {
+      "cell": "++",
+      "indices": [
+        82,
+        102,
+        121
+      ],
+      "triple_index": 442210
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        83,
+        87,
+        129
+      ],
+      "triple_index": 443239
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        83,
+        92,
+        125
+      ],
+      "triple_index": 443490
+    },
+    {
+      "cell": "++",
+      "indices": [
+        83,
+        101,
+        130
+      ],
+      "triple_index": 443891
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        83,
+        123,
+        136
+      ],
+      "triple_index": 444524
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        84,
+        132,
+        134
+      ],
+      "triple_index": 446292
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        85,
+        105,
+        138
+      ],
+      "triple_index": 447298
+    },
+    {
+      "cell": "--",
+      "indices": [
+        86,
+        91,
+        93
+      ],
+      "triple_index": 448198
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        86,
+        97,
+        118
+      ],
+      "triple_index": 448502
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        86,
+        110,
+        136
+      ],
+      "triple_index": 449001
+    },
+    {
+      "cell": "--",
+      "indices": [
+        88,
+        100,
+        122
+      ],
+      "triple_index": 451548
+    },
+    {
+      "cell": "--",
+      "indices": [
+        89,
+        94,
+        122
+      ],
+      "triple_index": 452665
+    },
+    {
+      "cell": "--",
+      "indices": [
+        92,
+        109,
+        131
+      ],
+      "triple_index": 457085
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        92,
+        130,
+        138
+      ],
+      "triple_index": 457533
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        92,
+        138,
+        138
+      ],
+      "triple_index": 457585
+    },
+    {
+      "cell": "++",
+      "indices": [
+        93,
+        102,
+        117
+      ],
+      "triple_index": 458002
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        93,
+        111,
+        111
+      ],
+      "triple_index": 458302
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        94,
+        100,
+        139
+      ],
+      "triple_index": 459073
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        94,
+        105,
+        113
+      ],
+      "triple_index": 459237
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        94,
+        119,
+        140
+      ],
+      "triple_index": 459663
+    },
+    {
+      "cell": "--",
+      "indices": [
+        96,
+        103,
+        115
+      ],
+      "triple_index": 461282
+    },
+    {
+      "cell": "--",
+      "indices": [
+        98,
+        99,
+        108
+      ],
+      "triple_index": 463053
+    },
+    {
+      "cell": "++",
+      "indices": [
+        98,
+        107,
+        131
+      ],
+      "triple_index": 463376
+    },
+    {
+      "cell": "++",
+      "indices": [
+        100,
+        112,
+        135
+      ],
+      "triple_index": 465299
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        101,
+        105,
+        113
+      ],
+      "triple_index": 465873
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        102,
+        106,
+        110
+      ],
+      "triple_index": 466685
+    },
+    {
+      "cell": "--",
+      "indices": [
+        102,
+        117,
+        132
+      ],
+      "triple_index": 467026
+    },
+    {
+      "cell": "--",
+      "indices": [
+        103,
+        121,
+        127
+      ],
+      "triple_index": 467848
+    },
+    {
+      "cell": "++",
+      "indices": [
+        105,
+        125,
+        130
+      ],
+      "triple_index": 469290
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        108,
+        111,
+        121
+      ],
+      "triple_index": 470752
+    },
+    {
+      "cell": "--",
+      "indices": [
+        108,
+        113,
+        129
+      ],
+      "triple_index": 470817
+    },
+    {
+      "cell": "--",
+      "indices": [
+        110,
+        113,
+        129
+      ],
+      "triple_index": 471841
+    },
+    {
+      "cell": "-+",
+      "indices": [
+        113,
+        118,
+        139
+      ],
+      "triple_index": 473282
+    },
+    {
+      "cell": "--",
+      "indices": [
+        113,
+        121,
+        132
+      ],
+      "triple_index": 473338
+    },
+    {
+      "cell": "+-",
+      "indices": [
+        124,
+        124,
+        130
+      ],
+      "triple_index": 476228
+    }
+  ],
+  "support_sample_without_replacement": 512,
+  "uniform_cells": {
+    "++": 125,
+    "+-": 130,
+    "-+": 133,
+    "--": 124,
+    "exceptional": 0
+  },
+  "uniform_rows": [
+    {
+      "cell": "+-",
+      "scalar": "4713220149429020400128509358734746722535477582719769732674",
+      "trial_index": 0
+    },
+    {
+      "cell": "-+",
+      "scalar": "4699318156319393713737200605588164290780978611350894397702",
+      "trial_index": 1
+    },
+    {
+      "cell": "++",
+      "scalar": "3078922969960630573783001894395620363158250199644943818823",
+      "trial_index": 2
+    },
+    {
+      "cell": "+-",
+      "scalar": "431786514426162387693385290694265148139424797427342575205",
+      "trial_index": 3
+    },
+    {
+      "cell": "-+",
+      "scalar": "1817039399583518107008810196308083500547855697363595224673",
+      "trial_index": 4
+    },
+    {
+      "cell": "++",
+      "scalar": "1627393329544564223424351582425265035423222482168208029530",
+      "trial_index": 5
+    },
+    {
+      "cell": "--",
+      "scalar": "2299080418709619530202782837944420619384382746842802608635",
+      "trial_index": 6
+    },
+    {
+      "cell": "++",
+      "scalar": "1829532601171065546805866006392987953153672420669906306302",
+      "trial_index": 7
+    },
+    {
+      "cell": "--",
+      "scalar": "2300743399300709538750442506709856721334663789486425010698",
+      "trial_index": 8
+    },
+    {
+      "cell": "--",
+      "scalar": "439509420377496046892441927915337871486549352792830652253",
+      "trial_index": 9
+    },
+    {
+      "cell": "--",
+      "scalar": "3698221894468293671871099446857716891352179142791256081379",
+      "trial_index": 10
+    },
+    {
+      "cell": "+-",
+      "scalar": "4989823804102920888867105155826649513868521608780798361324",
+      "trial_index": 11
+    },
+    {
+      "cell": "--",
+      "scalar": "3393801220926592877741316572936778294778541888934544876202",
+      "trial_index": 12
+    },
+    {
+      "cell": "+-",
+      "scalar": "4241459532767738174881102102888116612353246406764251901594",
+      "trial_index": 13
+    },
+    {
+      "cell": "-+",
+      "scalar": "37510740805046718539712650282925906574195209751204677284",
+      "trial_index": 14
+    },
+    {
+      "cell": "+-",
+      "scalar": "5214475172624261341178934407642920293306444137254652824035",
+      "trial_index": 15
+    },
+    {
+      "cell": "--",
+      "scalar": "477467521443473651807355949897440225912306997393952190188",
+      "trial_index": 16
+    },
+    {
+      "cell": "+-",
+      "scalar": "5164636611324343534428605421208195259634855963998541750127",
+      "trial_index": 17
+    },
+    {
+      "cell": "-+",
+      "scalar": "5002767046429708398975417939871672209847106816491369794849",
+      "trial_index": 18
+    },
+    {
+      "cell": "+-",
+      "scalar": "818875870763705473682315380680396581824108253757107026749",
+      "trial_index": 19
+    },
+    {
+      "cell": "+-",
+      "scalar": "6016921911799842101751630937610773180239881860158574309905",
+      "trial_index": 20
+    },
+    {
+      "cell": "++",
+      "scalar": "2220811539421136653507462161990340491260478605861390342274",
+      "trial_index": 21
+    },
+    {
+      "cell": "++",
+      "scalar": "2813517152173328489636640123183607339451619651159154876708",
+      "trial_index": 22
+    },
+    {
+      "cell": "--",
+      "scalar": "4905494064408327034959974226663016192111840374566242927445",
+      "trial_index": 23
+    },
+    {
+      "cell": "--",
+      "scalar": "1812283620716204142138457740237761214625789433883762157471",
+      "trial_index": 24
+    },
+    {
+      "cell": "+-",
+      "scalar": "3214528864511960067492416483736965826556605955048448790665",
+      "trial_index": 25
+    },
+    {
+      "cell": "++",
+      "scalar": "2458864000402919779735536029997994142308084972961398987511",
+      "trial_index": 26
+    },
+    {
+      "cell": "++",
+      "scalar": "5957324838327991176113273594697679305817613298824119551537",
+      "trial_index": 27
+    },
+    {
+      "cell": "-+",
+      "scalar": "2053679419989805948392011746137606102936850461261787729641",
+      "trial_index": 28
+    },
+    {
+      "cell": "-+",
+      "scalar": "3276937286444120535868375824816047942341594615496355513536",
+      "trial_index": 29
+    },
+    {
+      "cell": "+-",
+      "scalar": "3952868879254864936135260520037709393730384300220327496044",
+      "trial_index": 30
+    },
+    {
+      "cell": "-+",
+      "scalar": "294923480074519798511259740295868900415750756921306280757",
+      "trial_index": 31
+    },
+    {
+      "cell": "-+",
+      "scalar": "1280797559806741114802176178582874039687305533651605949376",
+      "trial_index": 32
+    },
+    {
+      "cell": "-+",
+      "scalar": "4755154674803091174394255641907097851450039162401489679426",
+      "trial_index": 33
+    },
+    {
+      "cell": "-+",
+      "scalar": "1895038900795509649904310069492802422450364914684523170370",
+      "trial_index": 34
+    },
+    {
+      "cell": "--",
+      "scalar": "5788035118016612361278584576732010419743455189096846023051",
+      "trial_index": 35
+    },
+    {
+      "cell": "+-",
+      "scalar": "2250900647092792956113848919655015792230553644215708182931",
+      "trial_index": 36
+    },
+    {
+      "cell": "-+",
+      "scalar": "6235190214602942772784200903362888160068653854058368855469",
+      "trial_index": 37
+    },
+    {
+      "cell": "++",
+      "scalar": "4267087007069777416892690509213391384400892224085294824926",
+      "trial_index": 38
+    },
+    {
+      "cell": "-+",
+      "scalar": "1537708978244964245050107993207489846021037738634980219401",
+      "trial_index": 39
+    },
+    {
+      "cell": "--",
+      "scalar": "564443243116201681630901252496567180056039669902630245251",
+      "trial_index": 40
+    },
+    {
+      "cell": "--",
+      "scalar": "2494647092902267631029597895792342297528578803855247289371",
+      "trial_index": 41
+    },
+    {
+      "cell": "-+",
+      "scalar": "1203489893449437620420098073560468138980200625911719730711",
+      "trial_index": 42
+    },
+    {
+      "cell": "++",
+      "scalar": "5525454141836603475339738540740926684239389023961481696205",
+      "trial_index": 43
+    },
+    {
+      "cell": "++",
+      "scalar": "1993632566618100741152732543786177656522572457765487148996",
+      "trial_index": 44
+    },
+    {
+      "cell": "++",
+      "scalar": "5741515492325514831763947214704164067291636625982588455122",
+      "trial_index": 45
+    },
+    {
+      "cell": "++",
+      "scalar": "5034965527084785488043580649314764185262656086979735185191",
+      "trial_index": 46
+    },
+    {
+      "cell": "+-",
+      "scalar": "1819827374570991596702956455847119281810817311446677426863",
+      "trial_index": 47
+    },
+    {
+      "cell": "-+",
+      "scalar": "459922307660923560275711385299918923751438578769112374865",
+      "trial_index": 48
+    },
+    {
+      "cell": "++",
+      "scalar": "2036404367294387304084257297921933470720971764975746656282",
+      "trial_index": 49
+    },
+    {
+      "cell": "-+",
+      "scalar": "4713718734397023292344352713296674877352349226306687505525",
+      "trial_index": 50
+    },
+    {
+      "cell": "+-",
+      "scalar": "599755946765243159016701697543758544267296572047967263548",
+      "trial_index": 51
+    },
+    {
+      "cell": "+-",
+      "scalar": "4583105166553828736150947040215660419078599282158789479705",
+      "trial_index": 52
+    },
+    {
+      "cell": "+-",
+      "scalar": "668718175765193582071487375511738559537260903050622009423",
+      "trial_index": 53
+    },
+    {
+      "cell": "+-",
+      "scalar": "5495197923472209974521211338421340701631804537165425928726",
+      "trial_index": 54
+    },
+    {
+      "cell": "++",
+      "scalar": "2479077297354537936341880161043448164842792408163171846878",
+      "trial_index": 55
+    },
+    {
+      "cell": "--",
+      "scalar": "1492695542861934884403442153229334477034059174621696110005",
+      "trial_index": 56
+    },
+    {
+      "cell": "++",
+      "scalar": "3529386159534164625109933549085160826500112339664155626834",
+      "trial_index": 57
+    },
+    {
+      "cell": "--",
+      "scalar": "4413321925609549116648262494454570324193875871377664861377",
+      "trial_index": 58
+    },
+    {
+      "cell": "-+",
+      "scalar": "1644483816731866466264933655593528781361218087359144298252",
+      "trial_index": 59
+    },
+    {
+      "cell": "++",
+      "scalar": "1713614457996437679024143977775865696734365501764657971296",
+      "trial_index": 60
+    },
+    {
+      "cell": "--",
+      "scalar": "31992301365514669478584843188545806435400352898196129033",
+      "trial_index": 61
+    },
+    {
+      "cell": "-+",
+      "scalar": "2214065525180828579696830294906294999510613703198958821337",
+      "trial_index": 62
+    },
+    {
+      "cell": "-+",
+      "scalar": "3105142351473387679932180687286413617441435027371180461577",
+      "trial_index": 63
+    },
+    {
+      "cell": "++",
+      "scalar": "4732685109780633705411913409695426671507694716090461889190",
+      "trial_index": 64
+    },
+    {
+      "cell": "+-",
+      "scalar": "138635680672802115014220797581369516291763617229173075477",
+      "trial_index": 65
+    },
+    {
+      "cell": "++",
+      "scalar": "2230612704008313906641214684093719149759249634074468119330",
+      "trial_index": 66
+    },
+    {
+      "cell": "+-",
+      "scalar": "2127254467989356876156706811908063619386235373194890641875",
+      "trial_index": 67
+    },
+    {
+      "cell": "-+",
+      "scalar": "1530193835224189229185443395220326600382433174222414624276",
+      "trial_index": 68
+    },
+    {
+      "cell": "++",
+      "scalar": "1840265316583084329242528314361838518101349556172658219411",
+      "trial_index": 69
+    },
+    {
+      "cell": "--",
+      "scalar": "2978953023626459013228610135294726409128879354303152627208",
+      "trial_index": 70
+    },
+    {
+      "cell": "--",
+      "scalar": "5958222071191181674844116961401264796962483619820695979907",
+      "trial_index": 71
+    },
+    {
+      "cell": "+-",
+      "scalar": "3229196366972324097582067488516006497770329098242938996933",
+      "trial_index": 72
+    },
+    {
+      "cell": "++",
+      "scalar": "4171176900865582217396160613065558185586609469356093406775",
+      "trial_index": 73
+    },
+    {
+      "cell": "-+",
+      "scalar": "1421209578809985721367290571751304682786668898464770402608",
+      "trial_index": 74
+    },
+    {
+      "cell": "++",
+      "scalar": "448231708301534500845311537161320525311423753755489586888",
+      "trial_index": 75
+    },
+    {
+      "cell": "--",
+      "scalar": "469525855534616004676845228166327235716126004285728071769",
+      "trial_index": 76
+    },
+    {
+      "cell": "++",
+      "scalar": "4142769400107727419027655763017460573646485556910263637122",
+      "trial_index": 77
+    },
+    {
+      "cell": "+-",
+      "scalar": "2050903133326059297319233652917933575716389828056638869802",
+      "trial_index": 78
+    },
+    {
+      "cell": "-+",
+      "scalar": "2893938274048044009941313597014747670738357536928870126369",
+      "trial_index": 79
+    },
+    {
+      "cell": "+-",
+      "scalar": "4389395842297044458747182976984389290260173296204554200146",
+      "trial_index": 80
+    },
+    {
+      "cell": "++",
+      "scalar": "5400729513067542061664818446175562965461656745911392378140",
+      "trial_index": 81
+    },
+    {
+      "cell": "--",
+      "scalar": "171669215588027892520086635807683660391766704025351320674",
+      "trial_index": 82
+    },
+    {
+      "cell": "+-",
+      "scalar": "307221679067622532545871186521487833835798437012786283117",
+      "trial_index": 83
+    },
+    {
+      "cell": "-+",
+      "scalar": "2440256188995146724786580579663706369656531623286100186550",
+      "trial_index": 84
+    },
+    {
+      "cell": "++",
+      "scalar": "3327935508689957125964297362906472175505605566100457435132",
+      "trial_index": 85
+    },
+    {
+      "cell": "+-",
+      "scalar": "5401782178172567067912051536400566049663564299082075417521",
+      "trial_index": 86
+    },
+    {
+      "cell": "++",
+      "scalar": "3831043335513287767572074851561639629354362543834583904220",
+      "trial_index": 87
+    },
+    {
+      "cell": "-+",
+      "scalar": "135423911151065995921884701344109179513550302500551105320",
+      "trial_index": 88
+    },
+    {
+      "cell": "+-",
+      "scalar": "484179633266662718967347648183410973543667537659672999933",
+      "trial_index": 89
+    },
+    {
+      "cell": "-+",
+      "scalar": "426457182311830933214824160940066530158417015069697320788",
+      "trial_index": 90
+    },
+    {
+      "cell": "++",
+      "scalar": "3584930417464305542342116526406314612302507455506194207102",
+      "trial_index": 91
+    },
+    {
+      "cell": "++",
+      "scalar": "720140119066403369909962997980043453824428214965400537866",
+      "trial_index": 92
+    },
+    {
+      "cell": "++",
+      "scalar": "4335224113044392481510295507220012121847495134937317549989",
+      "trial_index": 93
+    },
+    {
+      "cell": "--",
+      "scalar": "1253220176050402327768655306648434530150284419968898795598",
+      "trial_index": 94
+    },
+    {
+      "cell": "--",
+      "scalar": "4482816962276826995233424478460369387792806668832935551259",
+      "trial_index": 95
+    },
+    {
+      "cell": "+-",
+      "scalar": "2829183453517555543053166382663419135278298169903660273033",
+      "trial_index": 96
+    },
+    {
+      "cell": "--",
+      "scalar": "4914304632956840292723359723249161799260983814134223818568",
+      "trial_index": 97
+    },
+    {
+      "cell": "+-",
+      "scalar": "1445288145487713442302063098959538366126752810980686665420",
+      "trial_index": 98
+    },
+    {
+      "cell": "++",
+      "scalar": "2786342070196415881187553001640343646451414347322109032766",
+      "trial_index": 99
+    },
+    {
+      "cell": "-+",
+      "scalar": "259574061601690261150625551925063202652692374935723708175",
+      "trial_index": 100
+    },
+    {
+      "cell": "-+",
+      "scalar": "49225357997830467416329694256432560862118929281472210673",
+      "trial_index": 101
+    },
+    {
+      "cell": "++",
+      "scalar": "2622030406375991797927363268393976191994045763569442652649",
+      "trial_index": 102
+    },
+    {
+      "cell": "-+",
+      "scalar": "2983435481982313186342888961968384416557505761837152716040",
+      "trial_index": 103
+    },
+    {
+      "cell": "++",
+      "scalar": "4576169610113375171414546999996704668170089001671489200437",
+      "trial_index": 104
+    },
+    {
+      "cell": "--",
+      "scalar": "3284810199000974246242762295549245648471425605366708475292",
+      "trial_index": 105
+    },
+    {
+      "cell": "++",
+      "scalar": "3981931963484066804735963219794092637597595014230284103123",
+      "trial_index": 106
+    },
+    {
+      "cell": "--",
+      "scalar": "3015732524276986847149134540030690493772448635799187548646",
+      "trial_index": 107
+    },
+    {
+      "cell": "--",
+      "scalar": "430537443432509413175512222768083811485524458669102186971",
+      "trial_index": 108
+    },
+    {
+      "cell": "++",
+      "scalar": "6119304085280788256879726823882475228123108957211121804087",
+      "trial_index": 109
+    },
+    {
+      "cell": "--",
+      "scalar": "5490288401624675209804729316348763550404315108890158936494",
+      "trial_index": 110
+    },
+    {
+      "cell": "++",
+      "scalar": "1679506601528914075234081315852941205861838681819999020191",
+      "trial_index": 111
+    },
+    {
+      "cell": "-+",
+      "scalar": "2451438905182815163977820267328493984530879221795076058476",
+      "trial_index": 112
+    },
+    {
+      "cell": "++",
+      "scalar": "5880782662740416048405967946521916411355245901442240515272",
+      "trial_index": 113
+    },
+    {
+      "cell": "-+",
+      "scalar": "3551864480539885050611755983511313799020777426975254204146",
+      "trial_index": 114
+    },
+    {
+      "cell": "--",
+      "scalar": "4907916507662394453666549601514397109617370345854788583089",
+      "trial_index": 115
+    },
+    {
+      "cell": "++",
+      "scalar": "3188462260465989916347753627960257813043692598571302574798",
+      "trial_index": 116
+    },
+    {
+      "cell": "-+",
+      "scalar": "1733496291205111547168353242665067615334528432404785011227",
+      "trial_index": 117
+    },
+    {
+      "cell": "+-",
+      "scalar": "2523566113859506194132068964814143514661713000098116767868",
+      "trial_index": 118
+    },
+    {
+      "cell": "+-",
+      "scalar": "296055078934893861133670140798563531534650293902746560632",
+      "trial_index": 119
+    },
+    {
+      "cell": "+-",
+      "scalar": "1181270837346569319598817563255406846343588178432409749537",
+      "trial_index": 120
+    },
+    {
+      "cell": "--",
+      "scalar": "3031585455729606626216453409748598012183845542595416467693",
+      "trial_index": 121
+    },
+    {
+      "cell": "-+",
+      "scalar": "3901209446797372163729189341218664398816475969750467303907",
+      "trial_index": 122
+    },
+    {
+      "cell": "-+",
+      "scalar": "2034859750091677251173376909845224929811534740576914247285",
+      "trial_index": 123
+    },
+    {
+      "cell": "++",
+      "scalar": "423700901607089076238105652145417452955850704650707254951",
+      "trial_index": 124
+    },
+    {
+      "cell": "++",
+      "scalar": "5086418082093668546777603011971116946657329701162967437593",
+      "trial_index": 125
+    },
+    {
+      "cell": "+-",
+      "scalar": "1168007615830529809372135444422731806128866323277180048997",
+      "trial_index": 126
+    },
+    {
+      "cell": "+-",
+      "scalar": "1755216347076539938891082437457952980843582010981707648193",
+      "trial_index": 127
+    },
+    {
+      "cell": "-+",
+      "scalar": "1002659991581892061868905618476482617282474599982697984193",
+      "trial_index": 128
+    },
+    {
+      "cell": "-+",
+      "scalar": "2221188040173957208074511780679022502429636256515385448099",
+      "trial_index": 129
+    },
+    {
+      "cell": "-+",
+      "scalar": "3467042543690997893657019283921073745806571422179655711226",
+      "trial_index": 130
+    },
+    {
+      "cell": "--",
+      "scalar": "4440001225551546793546610082612563378451936237855647169449",
+      "trial_index": 131
+    },
+    {
+      "cell": "+-",
+      "scalar": "5550957909757698572525504590164905111269638466348031099829",
+      "trial_index": 132
+    },
+    {
+      "cell": "--",
+      "scalar": "3109692617516302791802215535293139298578965937402127197225",
+      "trial_index": 133
+    },
+    {
+      "cell": "++",
+      "scalar": "742803995538727923346695400878661332497387136477657782659",
+      "trial_index": 134
+    },
+    {
+      "cell": "++",
+      "scalar": "939792378596457258589642701079104926176902988485292319417",
+      "trial_index": 135
+    },
+    {
+      "cell": "+-",
+      "scalar": "4778105172187326994522677984505390914961893821418614731894",
+      "trial_index": 136
+    },
+    {
+      "cell": "++",
+      "scalar": "3164693124176025990116610459703296105468383869550901805424",
+      "trial_index": 137
+    },
+    {
+      "cell": "--",
+      "scalar": "943287375221827262523111928421572606780380330892296822308",
+      "trial_index": 138
+    },
+    {
+      "cell": "--",
+      "scalar": "790563205808908244141751857261459106975045214117423694600",
+      "trial_index": 139
+    },
+    {
+      "cell": "-+",
+      "scalar": "6104600006332248577638135498623057436480117185822204523971",
+      "trial_index": 140
+    },
+    {
+      "cell": "+-",
+      "scalar": "1844664583039209708924650016285922459617966033490000497480",
+      "trial_index": 141
+    },
+    {
+      "cell": "+-",
+      "scalar": "3117860960116186257621397656118897767277097634830815987051",
+      "trial_index": 142
+    },
+    {
+      "cell": "--",
+      "scalar": "3112603938302675162011873371345584803843092829828060523281",
+      "trial_index": 143
+    },
+    {
+      "cell": "++",
+      "scalar": "1164244313696596510977209620184805467525164597312645128114",
+      "trial_index": 144
+    },
+    {
+      "cell": "++",
+      "scalar": "4926805622265900595188349781484884416829132612381070704795",
+      "trial_index": 145
+    },
+    {
+      "cell": "-+",
+      "scalar": "5996263349485051942560402098426352633155231870728207565133",
+      "trial_index": 146
+    },
+    {
+      "cell": "--",
+      "scalar": "4975760859688407763219380158100616447827126768991851452782",
+      "trial_index": 147
+    },
+    {
+      "cell": "+-",
+      "scalar": "4375587495353366836225528450017243283845233423986717968641",
+      "trial_index": 148
+    },
+    {
+      "cell": "++",
+      "scalar": "4891153935809169389779550113772271444051329027306351373952",
+      "trial_index": 149
+    },
+    {
+      "cell": "-+",
+      "scalar": "1216267026530603325787073361118499774634758844790911956829",
+      "trial_index": 150
+    },
+    {
+      "cell": "++",
+      "scalar": "1816211910980133831950912257837979410101295395525390884429",
+      "trial_index": 151
+    },
+    {
+      "cell": "+-",
+      "scalar": "1250150421353660765293705634938567740736401711842328107608",
+      "trial_index": 152
+    },
+    {
+      "cell": "+-",
+      "scalar": "2942899186126491206367837512585663781821720914722667061492",
+      "trial_index": 153
+    },
+    {
+      "cell": "++",
+      "scalar": "2190167049122296724983303622481473829387014701578203206929",
+      "trial_index": 154
+    },
+    {
+      "cell": "++",
+      "scalar": "2169888415795218557851438426550720311004831375856950734799",
+      "trial_index": 155
+    },
+    {
+      "cell": "++",
+      "scalar": "3512790766206542271099322119936835741761512990409295719819",
+      "trial_index": 156
+    },
+    {
+      "cell": "+-",
+      "scalar": "1404967691704611104443158362488329219768526205670593073628",
+      "trial_index": 157
+    },
+    {
+      "cell": "++",
+      "scalar": "4406370725078418797212305734068500045125881811398782910429",
+      "trial_index": 158
+    },
+    {
+      "cell": "++",
+      "scalar": "1332678648617526439021407511975443410071870376682189329605",
+      "trial_index": 159
+    },
+    {
+      "cell": "-+",
+      "scalar": "3528528896602433184073011821605685917571250065446651863227",
+      "trial_index": 160
+    },
+    {
+      "cell": "+-",
+      "scalar": "5250274955167826554482986132059240312120080149445275419613",
+      "trial_index": 161
+    },
+    {
+      "cell": "-+",
+      "scalar": "2121118219584029337757214630835886866027880483263631042688",
+      "trial_index": 162
+    },
+    {
+      "cell": "++",
+      "scalar": "1674553318740084468646330493885752964340580688406660015426",
+      "trial_index": 163
+    },
+    {
+      "cell": "--",
+      "scalar": "2352875136233053881168046405364968667905202549349471409739",
+      "trial_index": 164
+    },
+    {
+      "cell": "+-",
+      "scalar": "3508675472806593676579365596332585885458469357689216185223",
+      "trial_index": 165
+    },
+    {
+      "cell": "-+",
+      "scalar": "3039874655950142722439278286523733272177431214713763050617",
+      "trial_index": 166
+    },
+    {
+      "cell": "--",
+      "scalar": "5371588437069651885810862720589196132318561484975517694549",
+      "trial_index": 167
+    },
+    {
+      "cell": "--",
+      "scalar": "4554109444883112431299933866032385666789731210251862477836",
+      "trial_index": 168
+    },
+    {
+      "cell": "++",
+      "scalar": "214237503966762038179907136961716797971264290943389297589",
+      "trial_index": 169
+    },
+    {
+      "cell": "-+",
+      "scalar": "6184161715505234236597091476252845710872317997668832301088",
+      "trial_index": 170
+    },
+    {
+      "cell": "--",
+      "scalar": "3423291627852840250631799954527949686578122674194084745786",
+      "trial_index": 171
+    },
+    {
+      "cell": "-+",
+      "scalar": "5794229668112829595117439556618859699496134188471398928834",
+      "trial_index": 172
+    },
+    {
+      "cell": "--",
+      "scalar": "3522896872698630150813037257323542823979646748624161560020",
+      "trial_index": 173
+    },
+    {
+      "cell": "+-",
+      "scalar": "977325680743946075287602719050034724566599781866763483926",
+      "trial_index": 174
+    },
+    {
+      "cell": "+-",
+      "scalar": "3921938641480387721546718425154628349080143992774708687695",
+      "trial_index": 175
+    },
+    {
+      "cell": "-+",
+      "scalar": "1851047259066762300023193853119844713130813585516922869434",
+      "trial_index": 176
+    },
+    {
+      "cell": "-+",
+      "scalar": "5379306504977113611492270323351619214850762702493602414785",
+      "trial_index": 177
+    },
+    {
+      "cell": "+-",
+      "scalar": "1199559539811252385374072970177580589846271975854669548078",
+      "trial_index": 178
+    },
+    {
+      "cell": "+-",
+      "scalar": "921220714734686347065111576395639484676646169945507139515",
+      "trial_index": 179
+    },
+    {
+      "cell": "++",
+      "scalar": "4016038937953457979331792017587746643480191187035844639915",
+      "trial_index": 180
+    },
+    {
+      "cell": "-+",
+      "scalar": "4740153784296391222588842661553280436441937940285458121917",
+      "trial_index": 181
+    },
+    {
+      "cell": "-+",
+      "scalar": "3349415808312136838052132470741208691740654561536689570329",
+      "trial_index": 182
+    },
+    {
+      "cell": "+-",
+      "scalar": "180517257170263053819185057265429229374093448071527231170",
+      "trial_index": 183
+    },
+    {
+      "cell": "--",
+      "scalar": "243357757335412509594024772355844648631127774015300369663",
+      "trial_index": 184
+    },
+    {
+      "cell": "-+",
+      "scalar": "221809978812642717898779788996593402626434535429322532430",
+      "trial_index": 185
+    },
+    {
+      "cell": "--",
+      "scalar": "3368303695498001608923154740156267392403821221386745898151",
+      "trial_index": 186
+    },
+    {
+      "cell": "-+",
+      "scalar": "82370000936054774177586521213893253401476823876119334042",
+      "trial_index": 187
+    },
+    {
+      "cell": "--",
+      "scalar": "1555830915616761876881266060473277440709276156125005146731",
+      "trial_index": 188
+    },
+    {
+      "cell": "++",
+      "scalar": "1618365843765732338270149515170920900256735610011562701709",
+      "trial_index": 189
+    },
+    {
+      "cell": "-+",
+      "scalar": "1109336610210709466164821380594868333878982775002504046804",
+      "trial_index": 190
+    },
+    {
+      "cell": "++",
+      "scalar": "5110249172397038331335513195180297265507944361844870022698",
+      "trial_index": 191
+    },
+    {
+      "cell": "++",
+      "scalar": "4883386521921761086085641145491797269095311587164679008018",
+      "trial_index": 192
+    },
+    {
+      "cell": "--",
+      "scalar": "1980059996525481198256485671643937621183808205657185103358",
+      "trial_index": 193
+    },
+    {
+      "cell": "+-",
+      "scalar": "3326695607637414022224693925748512907969629900550704042176",
+      "trial_index": 194
+    },
+    {
+      "cell": "-+",
+      "scalar": "3820576461883530460217685866461939060108332785697276134440",
+      "trial_index": 195
+    },
+    {
+      "cell": "+-",
+      "scalar": "2940317851344378952107575442197080879640007622833603850373",
+      "trial_index": 196
+    },
+    {
+      "cell": "-+",
+      "scalar": "2032502836279774267548818443477834565750483446006926170686",
+      "trial_index": 197
+    },
+    {
+      "cell": "++",
+      "scalar": "5503588748697410419987884333452526270566512314617998107389",
+      "trial_index": 198
+    },
+    {
+      "cell": "+-",
+      "scalar": "4556263776822758700221859424472767914070444349476903763079",
+      "trial_index": 199
+    },
+    {
+      "cell": "+-",
+      "scalar": "868497250192643286800772444801971553676028296279644756386",
+      "trial_index": 200
+    },
+    {
+      "cell": "--",
+      "scalar": "2180493298669358575999779128426142087419852933567355248882",
+      "trial_index": 201
+    },
+    {
+      "cell": "+-",
+      "scalar": "31350561794348331857640098363983181806362964276233125754",
+      "trial_index": 202
+    },
+    {
+      "cell": "++",
+      "scalar": "4181701057193100063778024768613549896729284722403406587706",
+      "trial_index": 203
+    },
+    {
+      "cell": "+-",
+      "scalar": "347024068254365528568584351452990678086478894950579371609",
+      "trial_index": 204
+    },
+    {
+      "cell": "-+",
+      "scalar": "1853322171351469163475822711805949288710211613027736141759",
+      "trial_index": 205
+    },
+    {
+      "cell": "+-",
+      "scalar": "4966191034282498892144373579803748971131283603524994318348",
+      "trial_index": 206
+    },
+    {
+      "cell": "++",
+      "scalar": "3383197623840201093442027578595893392514252899603976798931",
+      "trial_index": 207
+    },
+    {
+      "cell": "--",
+      "scalar": "1394458063896345453642750811479086715488106280075681648990",
+      "trial_index": 208
+    },
+    {
+      "cell": "-+",
+      "scalar": "4432926261268425791847600952219342778115060740359867809409",
+      "trial_index": 209
+    },
+    {
+      "cell": "-+",
+      "scalar": "5843433076546080094795701902285541731777894472315604867218",
+      "trial_index": 210
+    },
+    {
+      "cell": "--",
+      "scalar": "986208852393635459365308524424899610090150789198999255308",
+      "trial_index": 211
+    },
+    {
+      "cell": "-+",
+      "scalar": "2932453813115804734399838521087972673999358968557154035075",
+      "trial_index": 212
+    },
+    {
+      "cell": "--",
+      "scalar": "1953414647410688317675458532428359744611317492991399615458",
+      "trial_index": 213
+    },
+    {
+      "cell": "++",
+      "scalar": "3990118101859002841933027160115714782119776470238867421867",
+      "trial_index": 214
+    },
+    {
+      "cell": "--",
+      "scalar": "3111900142538967894406994045538642039349471622198607469122",
+      "trial_index": 215
+    },
+    {
+      "cell": "--",
+      "scalar": "5703360572060805275684034446851151944099604437847736764706",
+      "trial_index": 216
+    },
+    {
+      "cell": "+-",
+      "scalar": "188972286014571577243876015405053700889399503215561624204",
+      "trial_index": 217
+    },
+    {
+      "cell": "-+",
+      "scalar": "419413030030680859290517779640117225439042232592054724082",
+      "trial_index": 218
+    },
+    {
+      "cell": "-+",
+      "scalar": "4627089404159636294715725178423439779760385578403841312924",
+      "trial_index": 219
+    },
+    {
+      "cell": "+-",
+      "scalar": "4093708470441542109690604899850944404318805668301214064904",
+      "trial_index": 220
+    },
+    {
+      "cell": "++",
+      "scalar": "2267102187591838258290060298596895855673517906343457919895",
+      "trial_index": 221
+    },
+    {
+      "cell": "--",
+      "scalar": "6044358792239452443657032257325283468122989608939609015997",
+      "trial_index": 222
+    },
+    {
+      "cell": "+-",
+      "scalar": "2572636412230521266119253735913916598284687004658641254944",
+      "trial_index": 223
+    },
+    {
+      "cell": "--",
+      "scalar": "2918835284566594027716189715009158393424289689445498811108",
+      "trial_index": 224
+    },
+    {
+      "cell": "-+",
+      "scalar": "640338811765104932613004837008276220669692384372424687318",
+      "trial_index": 225
+    },
+    {
+      "cell": "-+",
+      "scalar": "2794472116629040939088924696409816968568102082794282180379",
+      "trial_index": 226
+    },
+    {
+      "cell": "++",
+      "scalar": "5396900949541136178700203501404787779990735532451091055527",
+      "trial_index": 227
+    },
+    {
+      "cell": "-+",
+      "scalar": "5030314370485528511281752669883108708143321098952505756995",
+      "trial_index": 228
+    },
+    {
+      "cell": "+-",
+      "scalar": "3038470955136041982062674048135653744262524084741914494245",
+      "trial_index": 229
+    },
+    {
+      "cell": "--",
+      "scalar": "5813159999520378642260865604613267308211299986398507136127",
+      "trial_index": 230
+    },
+    {
+      "cell": "--",
+      "scalar": "3606054041612346214472273008939808860305820401745288430074",
+      "trial_index": 231
+    },
+    {
+      "cell": "--",
+      "scalar": "3130503446669963299387809219199885766266875590838637549829",
+      "trial_index": 232
+    },
+    {
+      "cell": "+-",
+      "scalar": "2586281755729987358011458316647197835713365396406860063380",
+      "trial_index": 233
+    },
+    {
+      "cell": "++",
+      "scalar": "2318133421676190009568828354881113895834983214254582421629",
+      "trial_index": 234
+    },
+    {
+      "cell": "-+",
+      "scalar": "5633340059317704364741646597874164808085081089023937868647",
+      "trial_index": 235
+    },
+    {
+      "cell": "+-",
+      "scalar": "4982964242512430246146688233099006283396717431542986201865",
+      "trial_index": 236
+    },
+    {
+      "cell": "--",
+      "scalar": "5763577462411807437152147381860008836036535496642570012366",
+      "trial_index": 237
+    },
+    {
+      "cell": "-+",
+      "scalar": "707297190578890773133523369607821221560384057925704151343",
+      "trial_index": 238
+    },
+    {
+      "cell": "-+",
+      "scalar": "4195354268718405632012706481508835016176444239233434959246",
+      "trial_index": 239
+    },
+    {
+      "cell": "++",
+      "scalar": "984446393013766066455309911258535668307139566359172955387",
+      "trial_index": 240
+    },
+    {
+      "cell": "++",
+      "scalar": "6055293161105542375449760434849365336875658551242658690836",
+      "trial_index": 241
+    },
+    {
+      "cell": "-+",
+      "scalar": "3473128325600520121932228541725989807458687416400011340866",
+      "trial_index": 242
+    },
+    {
+      "cell": "+-",
+      "scalar": "3044687372821235286584262266233379182410480482037902709437",
+      "trial_index": 243
+    },
+    {
+      "cell": "--",
+      "scalar": "2061863753821216468622949322981379526744477289495459989714",
+      "trial_index": 244
+    },
+    {
+      "cell": "-+",
+      "scalar": "5217240329645871869920368365652662669180439909990470456433",
+      "trial_index": 245
+    },
+    {
+      "cell": "-+",
+      "scalar": "4059695939284979156352925924606369785182041640146164494376",
+      "trial_index": 246
+    },
+    {
+      "cell": "-+",
+      "scalar": "514896401156661063962399598416495382201905735970104080366",
+      "trial_index": 247
+    },
+    {
+      "cell": "+-",
+      "scalar": "1373606043409302620862760594631543745499639927024371453493",
+      "trial_index": 248
+    },
+    {
+      "cell": "--",
+      "scalar": "2921158741934810722924096636052123111637178168090990830194",
+      "trial_index": 249
+    },
+    {
+      "cell": "+-",
+      "scalar": "1263927361028465230229504688147900010399049536227088847448",
+      "trial_index": 250
+    },
+    {
+      "cell": "+-",
+      "scalar": "2432965814094263664180086894111337700117902735890102556284",
+      "trial_index": 251
+    },
+    {
+      "cell": "--",
+      "scalar": "142897467439381929365751379999961564895895974316964878841",
+      "trial_index": 252
+    },
+    {
+      "cell": "+-",
+      "scalar": "2319661771517216288988991977183589867501092529486659867368",
+      "trial_index": 253
+    },
+    {
+      "cell": "+-",
+      "scalar": "1886859678851825963203045096676712943492300699100708603675",
+      "trial_index": 254
+    },
+    {
+      "cell": "++",
+      "scalar": "3072591076438015259008965265098190166075325859758188101704",
+      "trial_index": 255
+    },
+    {
+      "cell": "--",
+      "scalar": "4439334571290880523149701469631904731933274040174218710536",
+      "trial_index": 256
+    },
+    {
+      "cell": "-+",
+      "scalar": "5908068077054779682650456449824465684980773135324232052607",
+      "trial_index": 257
+    },
+    {
+      "cell": "++",
+      "scalar": "3423383241014148051184994263379754180777367931525271804147",
+      "trial_index": 258
+    },
+    {
+      "cell": "+-",
+      "scalar": "5262786351446762025923914881976269208209851992949352598931",
+      "trial_index": 259
+    },
+    {
+      "cell": "++",
+      "scalar": "6061854481287048623675540473989067513939780057506826602968",
+      "trial_index": 260
+    },
+    {
+      "cell": "++",
+      "scalar": "2567649723221217768603829461759537331296282969939441446038",
+      "trial_index": 261
+    },
+    {
+      "cell": "++",
+      "scalar": "583638209369997109229702155332176896180755759256252000",
+      "trial_index": 262
+    },
+    {
+      "cell": "--",
+      "scalar": "5589508235422970016672862836186814709673958929438774539681",
+      "trial_index": 263
+    },
+    {
+      "cell": "+-",
+      "scalar": "4027347445458394564118659721350417117483694150711410070138",
+      "trial_index": 264
+    },
+    {
+      "cell": "--",
+      "scalar": "1640012883148291962005101625470127162499024893863016687185",
+      "trial_index": 265
+    },
+    {
+      "cell": "++",
+      "scalar": "5836784063568582700606262272264674943750643019708784194393",
+      "trial_index": 266
+    },
+    {
+      "cell": "++",
+      "scalar": "375711285215928224492224054693670438196993583414351001666",
+      "trial_index": 267
+    },
+    {
+      "cell": "++",
+      "scalar": "1669780816384971814384009788815735583676558023026625876950",
+      "trial_index": 268
+    },
+    {
+      "cell": "--",
+      "scalar": "4122393053542354063072904892159554028912127870408589586857",
+      "trial_index": 269
+    },
+    {
+      "cell": "+-",
+      "scalar": "5728491673274578353627721818122334486297126943712472678770",
+      "trial_index": 270
+    },
+    {
+      "cell": "-+",
+      "scalar": "3252635700244587430321082286394181674525421910530093030711",
+      "trial_index": 271
+    },
+    {
+      "cell": "++",
+      "scalar": "827992938505079593701931248326933092924569315431881580908",
+      "trial_index": 272
+    },
+    {
+      "cell": "--",
+      "scalar": "1139790324070831424723008341996701600297375235176734685096",
+      "trial_index": 273
+    },
+    {
+      "cell": "--",
+      "scalar": "5963441004219355553404406621540747676242121393653364322765",
+      "trial_index": 274
+    },
+    {
+      "cell": "++",
+      "scalar": "476340455764459134833488887691138374347161932353746593372",
+      "trial_index": 275
+    },
+    {
+      "cell": "+-",
+      "scalar": "824021193958856205450283244967711053135041424501970199307",
+      "trial_index": 276
+    },
+    {
+      "cell": "+-",
+      "scalar": "6200875866815129509689237886976247199308699463697580495064",
+      "trial_index": 277
+    },
+    {
+      "cell": "++",
+      "scalar": "4985571692695555643320646448850669731477302817779514291499",
+      "trial_index": 278
+    },
+    {
+      "cell": "++",
+      "scalar": "4844725373121324268484592994807570307989537149006971189788",
+      "trial_index": 279
+    },
+    {
+      "cell": "+-",
+      "scalar": "1734702478679441592648864579682462845292488258407861869813",
+      "trial_index": 280
+    },
+    {
+      "cell": "-+",
+      "scalar": "614901637351259925076424139433028357549462178267789394130",
+      "trial_index": 281
+    },
+    {
+      "cell": "--",
+      "scalar": "3335153564980376315444921558206725988536417313444552444752",
+      "trial_index": 282
+    },
+    {
+      "cell": "--",
+      "scalar": "4936467628826453970854548443619489368793831815519812973623",
+      "trial_index": 283
+    },
+    {
+      "cell": "-+",
+      "scalar": "1070506171941843153508677495298983751884964086913981992901",
+      "trial_index": 284
+    },
+    {
+      "cell": "-+",
+      "scalar": "122794850418309037360715134418684306061407997365723073034",
+      "trial_index": 285
+    },
+    {
+      "cell": "-+",
+      "scalar": "1876047903081392492687311597214444912091378478173754226015",
+      "trial_index": 286
+    },
+    {
+      "cell": "-+",
+      "scalar": "212696958302968464487122132587287512028051657403711916867",
+      "trial_index": 287
+    },
+    {
+      "cell": "+-",
+      "scalar": "5590060023132397281416979360707861797001335953195020070695",
+      "trial_index": 288
+    },
+    {
+      "cell": "+-",
+      "scalar": "531199501371479466201703397543971019365528143430205247267",
+      "trial_index": 289
+    },
+    {
+      "cell": "-+",
+      "scalar": "143099383614360605460837821778736081492191324705368943130",
+      "trial_index": 290
+    },
+    {
+      "cell": "--",
+      "scalar": "3396694063693001346733716687729460787380336086405868362721",
+      "trial_index": 291
+    },
+    {
+      "cell": "--",
+      "scalar": "3282176290585999951805851459960555228004580562492709205353",
+      "trial_index": 292
+    },
+    {
+      "cell": "+-",
+      "scalar": "5512054229985700840445956945034245436718108932803540969260",
+      "trial_index": 293
+    },
+    {
+      "cell": "-+",
+      "scalar": "700760539848629709308494408964350641045523714257603608606",
+      "trial_index": 294
+    },
+    {
+      "cell": "++",
+      "scalar": "5183570029645063487695674717551364419247580340681680535870",
+      "trial_index": 295
+    },
+    {
+      "cell": "-+",
+      "scalar": "3768174204605720170098243044745575144668832565622363288884",
+      "trial_index": 296
+    },
+    {
+      "cell": "-+",
+      "scalar": "1015950824152183112984677077671785020399698397955927468989",
+      "trial_index": 297
+    },
+    {
+      "cell": "++",
+      "scalar": "4929756857587335370495278082737829166055145611390361374609",
+      "trial_index": 298
+    },
+    {
+      "cell": "+-",
+      "scalar": "6128260390789472832406108819030135096745695955777382967041",
+      "trial_index": 299
+    },
+    {
+      "cell": "--",
+      "scalar": "4607668987856058492509890329953590774672085423677648518965",
+      "trial_index": 300
+    },
+    {
+      "cell": "-+",
+      "scalar": "1653864704834949709669311530561299161574956426409275343981",
+      "trial_index": 301
+    },
+    {
+      "cell": "++",
+      "scalar": "2696348893628249415407745638468478986744996024258142668059",
+      "trial_index": 302
+    },
+    {
+      "cell": "-+",
+      "scalar": "1191940877162493097261849230349443191953947416094593316756",
+      "trial_index": 303
+    },
+    {
+      "cell": "--",
+      "scalar": "5231189601149191206147298535698121495539622269710515484611",
+      "trial_index": 304
+    },
+    {
+      "cell": "-+",
+      "scalar": "2693587601630061235115164293859197257346490222973085170824",
+      "trial_index": 305
+    },
+    {
+      "cell": "--",
+      "scalar": "4274049626264499345163481641911377540031615044394260150458",
+      "trial_index": 306
+    },
+    {
+      "cell": "++",
+      "scalar": "570767853393537566611188457836882140002979141974937654731",
+      "trial_index": 307
+    },
+    {
+      "cell": "--",
+      "scalar": "4694552255932824704815882030800258669804432286885007102610",
+      "trial_index": 308
+    },
+    {
+      "cell": "--",
+      "scalar": "4625286154311133658271517753435425293962807083792534090227",
+      "trial_index": 309
+    },
+    {
+      "cell": "+-",
+      "scalar": "1611579927282381481012303913249809169137107724676163708489",
+      "trial_index": 310
+    },
+    {
+      "cell": "-+",
+      "scalar": "3171537078283656689659154178691786863085944529197494932671",
+      "trial_index": 311
+    },
+    {
+      "cell": "-+",
+      "scalar": "5578320904975638671392433811872510170036717524358767814896",
+      "trial_index": 312
+    },
+    {
+      "cell": "+-",
+      "scalar": "4518127526220506651813607941484615407343689818267577460381",
+      "trial_index": 313
+    },
+    {
+      "cell": "-+",
+      "scalar": "993471878985056164238494474138255328645959807892132974689",
+      "trial_index": 314
+    },
+    {
+      "cell": "+-",
+      "scalar": "4196420933597326111026030923034041216639881568530777264640",
+      "trial_index": 315
+    },
+    {
+      "cell": "++",
+      "scalar": "1313172312316983738706099731305454264676484842774687943800",
+      "trial_index": 316
+    },
+    {
+      "cell": "++",
+      "scalar": "3590218936611584871237676512362483214440708296785164538914",
+      "trial_index": 317
+    },
+    {
+      "cell": "--",
+      "scalar": "5392123248249439879531776949293856335535634744641915178563",
+      "trial_index": 318
+    },
+    {
+      "cell": "--",
+      "scalar": "1900377657443457598131514990332411375831601597468991896656",
+      "trial_index": 319
+    },
+    {
+      "cell": "--",
+      "scalar": "1517364442294693973044195707272240824055963066546545515905",
+      "trial_index": 320
+    },
+    {
+      "cell": "-+",
+      "scalar": "4890930727251501512896395484807657119732058937246370282944",
+      "trial_index": 321
+    },
+    {
+      "cell": "--",
+      "scalar": "5000252980177825227621876974526241165573352205744556530704",
+      "trial_index": 322
+    },
+    {
+      "cell": "--",
+      "scalar": "3180012622919348379765105152305919209528924622118391764407",
+      "trial_index": 323
+    },
+    {
+      "cell": "--",
+      "scalar": "328091969955314308441621716644184836760912786811242922082",
+      "trial_index": 324
+    },
+    {
+      "cell": "--",
+      "scalar": "3156501479786815915480541459412708682025533816970802713156",
+      "trial_index": 325
+    },
+    {
+      "cell": "++",
+      "scalar": "5391254025993455737932876388699373968249415416455237549925",
+      "trial_index": 326
+    },
+    {
+      "cell": "--",
+      "scalar": "1885686073735892757226152703130562864222997461184455453066",
+      "trial_index": 327
+    },
+    {
+      "cell": "-+",
+      "scalar": "4958250976361770810215749026549293553635031351408050034376",
+      "trial_index": 328
+    },
+    {
+      "cell": "--",
+      "scalar": "3118350124585390254502725705679742941273163640689344300475",
+      "trial_index": 329
+    },
+    {
+      "cell": "-+",
+      "scalar": "535632260464817379632801400195444789482148175284117228139",
+      "trial_index": 330
+    },
+    {
+      "cell": "+-",
+      "scalar": "2492264701531333688998361890044499448143273112119047575757",
+      "trial_index": 331
+    },
+    {
+      "cell": "--",
+      "scalar": "4837080133894508672511177343733633380320359974923675029209",
+      "trial_index": 332
+    },
+    {
+      "cell": "+-",
+      "scalar": "5253671099903428711874971367137997144877527830568549351130",
+      "trial_index": 333
+    },
+    {
+      "cell": "-+",
+      "scalar": "6080140973350349632320080022403744634846803189245018117796",
+      "trial_index": 334
+    },
+    {
+      "cell": "+-",
+      "scalar": "4552876682847590329853723207600423738406471022743161741975",
+      "trial_index": 335
+    },
+    {
+      "cell": "+-",
+      "scalar": "1078414247553180476045072583959678732043327469347231191010",
+      "trial_index": 336
+    },
+    {
+      "cell": "+-",
+      "scalar": "728795086108407972698328888964818929086022642267656801268",
+      "trial_index": 337
+    },
+    {
+      "cell": "-+",
+      "scalar": "4595302232061976384819117742910812665469515619379498964100",
+      "trial_index": 338
+    },
+    {
+      "cell": "-+",
+      "scalar": "4207735806174610653128875583575470644458606512245477494746",
+      "trial_index": 339
+    },
+    {
+      "cell": "+-",
+      "scalar": "5701314484887865841927995062446284660427103257703740045662",
+      "trial_index": 340
+    },
+    {
+      "cell": "++",
+      "scalar": "2639503671037788590544503461075849718337010912080717520107",
+      "trial_index": 341
+    },
+    {
+      "cell": "++",
+      "scalar": "2436682577883482507276027198434290391917563178892837215616",
+      "trial_index": 342
+    },
+    {
+      "cell": "--",
+      "scalar": "4734445363157188097140599637091645811920522633614751786035",
+      "trial_index": 343
+    },
+    {
+      "cell": "--",
+      "scalar": "2669570802495844522150827675798692642785566899423580706019",
+      "trial_index": 344
+    },
+    {
+      "cell": "++",
+      "scalar": "5323910930271656285414723333710117250818779189528094652823",
+      "trial_index": 345
+    },
+    {
+      "cell": "+-",
+      "scalar": "5079800869097617544084940734031704951920112037046581095424",
+      "trial_index": 346
+    },
+    {
+      "cell": "-+",
+      "scalar": "1141866819536631956636992933154870210046678331575940672740",
+      "trial_index": 347
+    },
+    {
+      "cell": "-+",
+      "scalar": "594727966521619070683845787259790674295204115239589468841",
+      "trial_index": 348
+    },
+    {
+      "cell": "+-",
+      "scalar": "3441068927709509334830740478679479171920037156140070679196",
+      "trial_index": 349
+    },
+    {
+      "cell": "-+",
+      "scalar": "4780053227807034885465450052315959420759867559795187853286",
+      "trial_index": 350
+    },
+    {
+      "cell": "--",
+      "scalar": "1215433147112318139191824233567100523452627450231941098800",
+      "trial_index": 351
+    },
+    {
+      "cell": "-+",
+      "scalar": "4067106229056810046045857137230529925374497255722213643190",
+      "trial_index": 352
+    },
+    {
+      "cell": "--",
+      "scalar": "2016337528959778202216603781381126360796767481454837011755",
+      "trial_index": 353
+    },
+    {
+      "cell": "--",
+      "scalar": "5148298216131888517242269473368889458965453695701158297252",
+      "trial_index": 354
+    },
+    {
+      "cell": "--",
+      "scalar": "4190219153527270329668345315758928688348545981613396606630",
+      "trial_index": 355
+    },
+    {
+      "cell": "+-",
+      "scalar": "987975574984167548172735245421628657341678600208237788705",
+      "trial_index": 356
+    },
+    {
+      "cell": "--",
+      "scalar": "4546601000227021272186948235379349286793788281683834377303",
+      "trial_index": 357
+    },
+    {
+      "cell": "--",
+      "scalar": "3852073898417884930519352972607887329908474794809492612178",
+      "trial_index": 358
+    },
+    {
+      "cell": "-+",
+      "scalar": "4663394157423976432106608895293322876822833065538611300220",
+      "trial_index": 359
+    },
+    {
+      "cell": "-+",
+      "scalar": "4450530557616911742539488914145696272185707508005501556130",
+      "trial_index": 360
+    },
+    {
+      "cell": "++",
+      "scalar": "2137367155705045767130732756081122786255637583536749794278",
+      "trial_index": 361
+    },
+    {
+      "cell": "++",
+      "scalar": "11259856127621073309513775705921722782065218264771732553",
+      "trial_index": 362
+    },
+    {
+      "cell": "++",
+      "scalar": "5081796268012506165001174438120817964120660715008496997575",
+      "trial_index": 363
+    },
+    {
+      "cell": "--",
+      "scalar": "4591413803723729282819043037080007193803510405249983356607",
+      "trial_index": 364
+    },
+    {
+      "cell": "--",
+      "scalar": "3193138984269901042966784161731126500932766964297994610390",
+      "trial_index": 365
+    },
+    {
+      "cell": "--",
+      "scalar": "1730275880321364298486250239776208076759747999543589723968",
+      "trial_index": 366
+    },
+    {
+      "cell": "++",
+      "scalar": "4450646870795548034208873743484770136810258597969045738251",
+      "trial_index": 367
+    },
+    {
+      "cell": "+-",
+      "scalar": "4016190677988224654506529425220036015053743604985637095262",
+      "trial_index": 368
+    },
+    {
+      "cell": "++",
+      "scalar": "1852899477665960092970719058182161632834266303895744412813",
+      "trial_index": 369
+    },
+    {
+      "cell": "+-",
+      "scalar": "1489801848970699599328612138765064850953526851835104175927",
+      "trial_index": 370
+    },
+    {
+      "cell": "+-",
+      "scalar": "4869980500462888241233759089128520296354269626476132397738",
+      "trial_index": 371
+    },
+    {
+      "cell": "+-",
+      "scalar": "664979837084177218842892146321874297030125490662479756520",
+      "trial_index": 372
+    },
+    {
+      "cell": "+-",
+      "scalar": "5432388084797949377294530714230526023713714944556960388955",
+      "trial_index": 373
+    },
+    {
+      "cell": "-+",
+      "scalar": "2205804855236473941617212147601840477627545628433763335249",
+      "trial_index": 374
+    },
+    {
+      "cell": "-+",
+      "scalar": "5689242191148756888893447758550082393223602668999654173759",
+      "trial_index": 375
+    },
+    {
+      "cell": "--",
+      "scalar": "2648413614468297748623299004453036220385139448978317821693",
+      "trial_index": 376
+    },
+    {
+      "cell": "--",
+      "scalar": "2135731449627780611654053816561692299461690302826929006801",
+      "trial_index": 377
+    },
+    {
+      "cell": "--",
+      "scalar": "4061607373453526840723139771358465299623506503938546658417",
+      "trial_index": 378
+    },
+    {
+      "cell": "-+",
+      "scalar": "1992801099357705295947872583654287670538198300114290561498",
+      "trial_index": 379
+    },
+    {
+      "cell": "--",
+      "scalar": "2697063170875119509004391117410795768196660079427520412588",
+      "trial_index": 380
+    },
+    {
+      "cell": "+-",
+      "scalar": "4717418157323722528255495301455304473458961484120931674078",
+      "trial_index": 381
+    },
+    {
+      "cell": "-+",
+      "scalar": "2297837879089393742388268825755389409788397994068947424472",
+      "trial_index": 382
+    },
+    {
+      "cell": "++",
+      "scalar": "4988205469357414650853906427581518426325411391826185747417",
+      "trial_index": 383
+    },
+    {
+      "cell": "--",
+      "scalar": "78513411877994747655911803562602136015977893671870376944",
+      "trial_index": 384
+    },
+    {
+      "cell": "--",
+      "scalar": "526621939134952527156082089256919699817013633332171760391",
+      "trial_index": 385
+    },
+    {
+      "cell": "+-",
+      "scalar": "5228232011541075560676026012454180432053236808731793378868",
+      "trial_index": 386
+    },
+    {
+      "cell": "++",
+      "scalar": "1318926185708444840305491087672298046905027337928014300765",
+      "trial_index": 387
+    },
+    {
+      "cell": "+-",
+      "scalar": "3368379068109105934593940158130979457618188913939780192881",
+      "trial_index": 388
+    },
+    {
+      "cell": "--",
+      "scalar": "528882928366249308223493313496588793216309814797346714209",
+      "trial_index": 389
+    },
+    {
+      "cell": "-+",
+      "scalar": "1430189896964040072777637874920358232033474727516120109675",
+      "trial_index": 390
+    },
+    {
+      "cell": "-+",
+      "scalar": "1816063924374568329736613491112292748874735386940785170486",
+      "trial_index": 391
+    },
+    {
+      "cell": "--",
+      "scalar": "3575266492002342246659407447039058938620524468351152058513",
+      "trial_index": 392
+    },
+    {
+      "cell": "--",
+      "scalar": "5001208148632039631808260689164955698097637780713010278328",
+      "trial_index": 393
+    },
+    {
+      "cell": "++",
+      "scalar": "1065921782596445564480683964058345955132791079642212892817",
+      "trial_index": 394
+    },
+    {
+      "cell": "+-",
+      "scalar": "3957827609984893348710016899300315559919036952508316525264",
+      "trial_index": 395
+    },
+    {
+      "cell": "-+",
+      "scalar": "5535133291990268606425267277364893150709910223956740018902",
+      "trial_index": 396
+    },
+    {
+      "cell": "++",
+      "scalar": "591048843038709913039379385269693363269746922966074557861",
+      "trial_index": 397
+    },
+    {
+      "cell": "+-",
+      "scalar": "4771048475079582993742838260482501989095539498247979402443",
+      "trial_index": 398
+    },
+    {
+      "cell": "-+",
+      "scalar": "5872332003581494884095522941208158961717081298073507906043",
+      "trial_index": 399
+    },
+    {
+      "cell": "-+",
+      "scalar": "713216766901726586785588810892496795588437856709899758364",
+      "trial_index": 400
+    },
+    {
+      "cell": "++",
+      "scalar": "6074498622841352035213723503521474480944944563285302432698",
+      "trial_index": 401
+    },
+    {
+      "cell": "++",
+      "scalar": "1547490896056106383897514703424396642180595190931668177471",
+      "trial_index": 402
+    },
+    {
+      "cell": "-+",
+      "scalar": "4158031283850426949285028011839308015123861000549819983699",
+      "trial_index": 403
+    },
+    {
+      "cell": "--",
+      "scalar": "167549003871349511869847747528378154210747850308548372606",
+      "trial_index": 404
+    },
+    {
+      "cell": "++",
+      "scalar": "2987755434359543202922426207319299070878218582669299589182",
+      "trial_index": 405
+    },
+    {
+      "cell": "--",
+      "scalar": "2435851026495158579068666154850212185425201137459033181295",
+      "trial_index": 406
+    },
+    {
+      "cell": "++",
+      "scalar": "1802092491569509820822136376464483195810595790704951426545",
+      "trial_index": 407
+    },
+    {
+      "cell": "++",
+      "scalar": "3957171373834478660638828846216847710546815117991711666753",
+      "trial_index": 408
+    },
+    {
+      "cell": "++",
+      "scalar": "1233528331624561240756364341245032372933649301614082831377",
+      "trial_index": 409
+    },
+    {
+      "cell": "-+",
+      "scalar": "6050207414813007983699879451326180819046474717306390981187",
+      "trial_index": 410
+    },
+    {
+      "cell": "++",
+      "scalar": "6122299679280614307470448318356453739089004909957618613728",
+      "trial_index": 411
+    },
+    {
+      "cell": "-+",
+      "scalar": "32878957249306733387898846689323632728736645481630210683",
+      "trial_index": 412
+    },
+    {
+      "cell": "++",
+      "scalar": "4062594191780975160671304828289567364094765317923376082854",
+      "trial_index": 413
+    },
+    {
+      "cell": "+-",
+      "scalar": "2674451157285925858987800488690767282475544678973143373194",
+      "trial_index": 414
+    },
+    {
+      "cell": "++",
+      "scalar": "1754988669541421107990816130579079814389545887449877504604",
+      "trial_index": 415
+    },
+    {
+      "cell": "+-",
+      "scalar": "4657816734332108357531278791881889008618775832046355465181",
+      "trial_index": 416
+    },
+    {
+      "cell": "-+",
+      "scalar": "5649887272355899495771393347512239565620444380268963308117",
+      "trial_index": 417
+    },
+    {
+      "cell": "--",
+      "scalar": "2888428584166655448804151380610765758530791640648901930301",
+      "trial_index": 418
+    },
+    {
+      "cell": "--",
+      "scalar": "271082641584141310888751877469871526154727852741007368231",
+      "trial_index": 419
+    },
+    {
+      "cell": "++",
+      "scalar": "40550223815436071160625779012499095950509510933558323725",
+      "trial_index": 420
+    },
+    {
+      "cell": "-+",
+      "scalar": "3201387536786953899361559579269497105566408783462807850979",
+      "trial_index": 421
+    },
+    {
+      "cell": "++",
+      "scalar": "2973655690170025949782717702948088375471194640048565944742",
+      "trial_index": 422
+    },
+    {
+      "cell": "-+",
+      "scalar": "2213981900069865031367157795461286720964028071850976848694",
+      "trial_index": 423
+    },
+    {
+      "cell": "-+",
+      "scalar": "3433071741471147031429107315726394852542786727135719620913",
+      "trial_index": 424
+    },
+    {
+      "cell": "++",
+      "scalar": "4832896510858700971209547076115628290865127409067201867091",
+      "trial_index": 425
+    },
+    {
+      "cell": "++",
+      "scalar": "3122102048028364681273975480742875743286017211851139371629",
+      "trial_index": 426
+    },
+    {
+      "cell": "+-",
+      "scalar": "541789151664239086394003975557180338531813172750162888129",
+      "trial_index": 427
+    },
+    {
+      "cell": "-+",
+      "scalar": "3544348316791570276575277531604332476583250374773978329653",
+      "trial_index": 428
+    },
+    {
+      "cell": "-+",
+      "scalar": "5234266052488065271907322198974431537383238051819301773642",
+      "trial_index": 429
+    },
+    {
+      "cell": "++",
+      "scalar": "3341436996503986561900017154573932171977986032520451920699",
+      "trial_index": 430
+    },
+    {
+      "cell": "+-",
+      "scalar": "1373188742297028871656205228417619396547699572929268600808",
+      "trial_index": 431
+    },
+    {
+      "cell": "+-",
+      "scalar": "278228510790351806576625609572466092458146927037491889215",
+      "trial_index": 432
+    },
+    {
+      "cell": "--",
+      "scalar": "5569162444820729767166199551435167633861064348609671885492",
+      "trial_index": 433
+    },
+    {
+      "cell": "--",
+      "scalar": "855323173983578159166492385555113342081484005234950670471",
+      "trial_index": 434
+    },
+    {
+      "cell": "++",
+      "scalar": "5636556866143307540971158437238680065230785193203281249888",
+      "trial_index": 435
+    },
+    {
+      "cell": "--",
+      "scalar": "467438557110620656558214946354575751313165050951318997431",
+      "trial_index": 436
+    },
+    {
+      "cell": "--",
+      "scalar": "4950183866732372188591831556610951109848274213573460014045",
+      "trial_index": 437
+    },
+    {
+      "cell": "+-",
+      "scalar": "2277454031962227291814504669839842235620530219619353311668",
+      "trial_index": 438
+    },
+    {
+      "cell": "++",
+      "scalar": "2697067950549755753403298708153747770236176603625830835758",
+      "trial_index": 439
+    },
+    {
+      "cell": "+-",
+      "scalar": "1525239679021343823270463933718076716181708052524892002262",
+      "trial_index": 440
+    },
+    {
+      "cell": "+-",
+      "scalar": "155101747735857187672394624017065954066346021817215706256",
+      "trial_index": 441
+    },
+    {
+      "cell": "-+",
+      "scalar": "3710267936816994038826630725142356464240263412343417813415",
+      "trial_index": 442
+    },
+    {
+      "cell": "--",
+      "scalar": "2736666521106268916178873880052618811055739882166691262146",
+      "trial_index": 443
+    },
+    {
+      "cell": "--",
+      "scalar": "5301833766137164538241857607719188548015393642703681723298",
+      "trial_index": 444
+    },
+    {
+      "cell": "+-",
+      "scalar": "1566623498774370134386555398210112200134302583163256927968",
+      "trial_index": 445
+    },
+    {
+      "cell": "+-",
+      "scalar": "6269696000465641836378186768410209148043648437967730398731",
+      "trial_index": 446
+    },
+    {
+      "cell": "++",
+      "scalar": "2389792383133006230322322895691351299979668431936146683865",
+      "trial_index": 447
+    },
+    {
+      "cell": "+-",
+      "scalar": "4081742157812430337969126506572348823164939005912583773254",
+      "trial_index": 448
+    },
+    {
+      "cell": "+-",
+      "scalar": "294166260524692448073576667607772982884941903773521661485",
+      "trial_index": 449
+    },
+    {
+      "cell": "++",
+      "scalar": "2795548318912966945706406827007430839938253673021565576737",
+      "trial_index": 450
+    },
+    {
+      "cell": "--",
+      "scalar": "5963092892368205799896656308895224531497433457131269994709",
+      "trial_index": 451
+    },
+    {
+      "cell": "-+",
+      "scalar": "3216783343324757806809813975361811742284226572987571918879",
+      "trial_index": 452
+    },
+    {
+      "cell": "--",
+      "scalar": "2751271282702577378526997417649902276552133882622052785150",
+      "trial_index": 453
+    },
+    {
+      "cell": "++",
+      "scalar": "2955812276266442912124851894726296885381412830900386957412",
+      "trial_index": 454
+    },
+    {
+      "cell": "--",
+      "scalar": "5767377197677632409584961636247226776016023893500991700931",
+      "trial_index": 455
+    },
+    {
+      "cell": "++",
+      "scalar": "5973285300663742065233648582119278744925174410750027013240",
+      "trial_index": 456
+    },
+    {
+      "cell": "--",
+      "scalar": "2048168491237245417410086335097382977363157969623915663448",
+      "trial_index": 457
+    },
+    {
+      "cell": "+-",
+      "scalar": "1529383686811837150989731618701686043477482126500034731629",
+      "trial_index": 458
+    },
+    {
+      "cell": "+-",
+      "scalar": "3062861417331366311935801608328963533313092435766973425138",
+      "trial_index": 459
+    },
+    {
+      "cell": "+-",
+      "scalar": "430968796398342910646342972863964696513726014661612824585",
+      "trial_index": 460
+    },
+    {
+      "cell": "-+",
+      "scalar": "5940405885225868651972153439851261777880460757324064712892",
+      "trial_index": 461
+    },
+    {
+      "cell": "+-",
+      "scalar": "1278932756363630302399512548918895735425242098804835343579",
+      "trial_index": 462
+    },
+    {
+      "cell": "-+",
+      "scalar": "2921730683136183360137007317891515059343446561125368012592",
+      "trial_index": 463
+    },
+    {
+      "cell": "+-",
+      "scalar": "5026830156821364571704191438738156003709818116327950975614",
+      "trial_index": 464
+    },
+    {
+      "cell": "--",
+      "scalar": "307349271729634910198128747062575723283580527623509841438",
+      "trial_index": 465
+    },
+    {
+      "cell": "+-",
+      "scalar": "1473538752801371777785371442961359713105695978771479442209",
+      "trial_index": 466
+    },
+    {
+      "cell": "-+",
+      "scalar": "3837565130043252671888175579091570554102766781867531833419",
+      "trial_index": 467
+    },
+    {
+      "cell": "+-",
+      "scalar": "2902215262957882249120635213634383054984947687196016405059",
+      "trial_index": 468
+    },
+    {
+      "cell": "-+",
+      "scalar": "361911675513756056209941775603927253295051764918381271587",
+      "trial_index": 469
+    },
+    {
+      "cell": "+-",
+      "scalar": "3810778266156083949556630113111955027121578464167599762500",
+      "trial_index": 470
+    },
+    {
+      "cell": "-+",
+      "scalar": "2034495948759663379789003286091930938829364234462736042577",
+      "trial_index": 471
+    },
+    {
+      "cell": "-+",
+      "scalar": "5372881167077245806600531368454897535020612516532693370035",
+      "trial_index": 472
+    },
+    {
+      "cell": "+-",
+      "scalar": "4740216232941705487857330487763229220833145083992805292481",
+      "trial_index": 473
+    },
+    {
+      "cell": "++",
+      "scalar": "4467278905172090071968461061049935173829761170364090940439",
+      "trial_index": 474
+    },
+    {
+      "cell": "+-",
+      "scalar": "2953259895473760478089374262220383725892361173657751923831",
+      "trial_index": 475
+    },
+    {
+      "cell": "-+",
+      "scalar": "779536365805278463837086789768784691880946346116755352433",
+      "trial_index": 476
+    },
+    {
+      "cell": "-+",
+      "scalar": "4060103939945109909361636507525169896240082587450015782254",
+      "trial_index": 477
+    },
+    {
+      "cell": "++",
+      "scalar": "608924485751530265632086753077883897504155002456701321852",
+      "trial_index": 478
+    },
+    {
+      "cell": "--",
+      "scalar": "3256608199126671919679045851298522236123729690532536362362",
+      "trial_index": 479
+    },
+    {
+      "cell": "-+",
+      "scalar": "5504160530462150526840326116172495177716749960333987237327",
+      "trial_index": 480
+    },
+    {
+      "cell": "+-",
+      "scalar": "5241893916262886056252372224823908069782045099760341950113",
+      "trial_index": 481
+    },
+    {
+      "cell": "++",
+      "scalar": "3487673918443421857535564451537918145359132235119141748481",
+      "trial_index": 482
+    },
+    {
+      "cell": "+-",
+      "scalar": "791957718634918037508446218310647279976156723329123802747",
+      "trial_index": 483
+    },
+    {
+      "cell": "++",
+      "scalar": "834135881145443952002723400287389269823752496941429556892",
+      "trial_index": 484
+    },
+    {
+      "cell": "-+",
+      "scalar": "5929573840183466709160723662522299396901781771842850683549",
+      "trial_index": 485
+    },
+    {
+      "cell": "--",
+      "scalar": "2039777730744288431252263915132399846762241310306081439192",
+      "trial_index": 486
+    },
+    {
+      "cell": "--",
+      "scalar": "739309074545999970881848939573879154815817378770766676131",
+      "trial_index": 487
+    },
+    {
+      "cell": "++",
+      "scalar": "5182626327713165890722312250293205921016613462711500223731",
+      "trial_index": 488
+    },
+    {
+      "cell": "-+",
+      "scalar": "5444181475311632867852789278223906925520730721146284407791",
+      "trial_index": 489
+    },
+    {
+      "cell": "+-",
+      "scalar": "2725562666625459680205108441025565937566666577490037878225",
+      "trial_index": 490
+    },
+    {
+      "cell": "-+",
+      "scalar": "5782118649374425241751666430471051482914882553626421762995",
+      "trial_index": 491
+    },
+    {
+      "cell": "++",
+      "scalar": "562224893181116436199674716551143896801713160183292859720",
+      "trial_index": 492
+    },
+    {
+      "cell": "+-",
+      "scalar": "453109264434874504231642017061441537106980841550878070199",
+      "trial_index": 493
+    },
+    {
+      "cell": "++",
+      "scalar": "2711255116854658938596436541018575246585348844141291570280",
+      "trial_index": 494
+    },
+    {
+      "cell": "+-",
+      "scalar": "2612519976250269162805888849605041503438959903921540621444",
+      "trial_index": 495
+    },
+    {
+      "cell": "--",
+      "scalar": "3647629438865511275316728482212372444723380875660127321593",
+      "trial_index": 496
+    },
+    {
+      "cell": "+-",
+      "scalar": "623392187680581806752007406338653379113320192655497917027",
+      "trial_index": 497
+    },
+    {
+      "cell": "+-",
+      "scalar": "520280328468632619897092851568369269059984808819473498549",
+      "trial_index": 498
+    },
+    {
+      "cell": "++",
+      "scalar": "696064519817964291665454337066365871922145538941390660489",
+      "trial_index": 499
+    },
+    {
+      "cell": "--",
+      "scalar": "5261805677162959894322186223369355317451764313116639196658",
+      "trial_index": 500
+    },
+    {
+      "cell": "+-",
+      "scalar": "2678470554678848252906449605052210428674620274665242400625",
+      "trial_index": 501
+    },
+    {
+      "cell": "--",
+      "scalar": "4714728871379591582806479042921997679074214340431757279817",
+      "trial_index": 502
+    },
+    {
+      "cell": "--",
+      "scalar": "2185052629533229075384574958932205621806413053490644432816",
+      "trial_index": 503
+    },
+    {
+      "cell": "+-",
+      "scalar": "2358627866439534756100083519942318784153315020918473889657",
+      "trial_index": 504
+    },
+    {
+      "cell": "++",
+      "scalar": "3611874559394657888560066090934128999472189437317514917734",
+      "trial_index": 505
+    },
+    {
+      "cell": "-+",
+      "scalar": "1021830876985058197266212342011836676989296957530373609607",
+      "trial_index": 506
+    },
+    {
+      "cell": "+-",
+      "scalar": "5770207198972312507457908313373783519319475530031536881967",
+      "trial_index": 507
+    },
+    {
+      "cell": "-+",
+      "scalar": "3592060926876785307869575143611348567313455326427686952389",
+      "trial_index": 508
+    },
+    {
+      "cell": "-+",
+      "scalar": "5311527442112430973968681329884030738615133992551301083625",
+      "trial_index": 509
+    },
+    {
+      "cell": "+-",
+      "scalar": "2431180177130522689357801065631176678060407779852226730806",
+      "trial_index": 510
+    },
+    {
+      "cell": "-+",
+      "scalar": "3514183133608825850396375491225293084191566204316728944797",
+      "trial_index": 511
+    }
+  ],
+  "uniform_scalar_sample_with_replacement": 512
+}

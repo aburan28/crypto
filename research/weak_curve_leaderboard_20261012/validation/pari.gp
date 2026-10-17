@@ -1,0 +1,13 @@
+e1=ellinit([0,0,0,1,32],101);
+e2=ellinit([0,0,0,1,0],101);
+e3=ellinit([0,0,0,1,0],103);
+if(ellcard(e1)!=101,error("anomalous count"));
+if(ellorder(e1,[4,10])!=101,error("anomalous point order"));
+if(ellcard(e2)!=100,error("smooth count"));
+if(ellorder(e2,[3,38])!=10,error("smooth point order"));
+if(ellgroup(e2)!=[10,10],error("smooth group structure"));
+if(ellcard(e3)!=104,error("pairing count"));
+if(ellorder(e3,[18,44])!=13,error("pairing point order"));
+print("F101 anomalous: order 101, selected order 101");
+print("F101 smooth: order 100, structure [10,10], selected order 10");
+print("F103 pairing candidate: order 104, selected order 13");

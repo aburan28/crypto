@@ -1,0 +1,14 @@
+evalmachine.<anonymous>:15
+ctx.globalAlpha=1;ctx.strokeStyle='#ffffff';ctx.lineWidth=2/scale;ctx.beginPath();const p=positions[selected];outgoing[selected].forEach(e=>{const q=positions[e[2]];ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);});ctx.stroke();ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(p.x,p.y,4/scale,0,Math.PI*2);ctx.fill();ctx.font=(12/scale)+'px system-ui';ctx.fillStyle='#cbdff7';Object.keys(graph.strata).map(Number).sort((a,b)=>a-b).forEach((f,i)=>ctx.fillText('f='+f,58+i*170,55));ctx.restore();}
+                                                                                                                                 ^
+
+TypeError: Cannot read properties of undefined (reading 'forEach')
+    at draw (evalmachine.<anonymous>:15:130)
+    at resize (evalmachine.<anonymous>:9:229)
+    at Object.loadGraph [as change] (evalmachine.<anonymous>:11:1193)
+    at file:///workspace/repos/crypto/research/full_volcano_graphwide_ic_20261017/graph-viewer/test-ui.mjs:32:52
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loader:643:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.19.0

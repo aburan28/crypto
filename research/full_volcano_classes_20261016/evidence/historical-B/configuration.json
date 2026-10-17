@@ -1,0 +1,32 @@
+{
+  "label": "B",
+  "p": 45862249674083071,
+  "N": 45862249674083067,
+  "t": 5,
+  "D_K": -11,
+  "frobenius_conductor": 129140163,
+  "depth": 17,
+  "ell": 3,
+  "prime_subgroup_order": 15024241,
+  "fixture_secret": 5689009,
+  "expected_vertices": 129140163,
+  "expected_directed_kernels": 258280326,
+  "record_bytes": 72,
+  "byte_order": "little",
+  "record_format": "<8QIHH",
+  "record_fields": [
+    "A",
+    "B",
+    "j",
+    "kernel_x",
+    "Px",
+    "Py",
+    "Qx",
+    "Qy",
+    "parent",
+    "level",
+    "flags"
+  ],
+  "edge_encoding": "For each non-root vertex: parent->child uses kernel_x on parent; child->parent uses kernel=-3*kernel_x mod p and coordinate scales 3^-2,3^-3. Root horizontal kernels are in checkpoint.txt. Map coefficients are derived exactly from the source A,B and kernel.",
+  "validation_note": "Queue completion is distinct from the subsequent independent uniqueness and map audit."
+}

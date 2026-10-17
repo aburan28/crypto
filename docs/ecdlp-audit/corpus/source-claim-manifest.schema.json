@@ -1,0 +1,1699 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/aburan28/crypto/blob/main/docs/ecdlp-audit/corpus/source-claim-manifest.schema.json",
+  "title": "Draft WS6 ECDLP source and claim manifest",
+  "description": "Strict, fail-closed draft contract. Structural validity does not establish source authenticity, claim truth, route-registry resolution, review independence, or corpus completeness.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "manifest_id",
+    "title",
+    "created_at",
+    "repository_revision",
+    "protocol",
+    "route_registry_binding",
+    "authority",
+    "completeness",
+    "counts",
+    "sources",
+    "claims",
+    "source_claim_links",
+    "search_runs",
+    "review"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "ecdlp-source-claim-manifest/draft-2"
+    },
+    "manifest_id": {
+      "$ref": "#/$defs/manifestId"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "repository_revision": {
+      "$ref": "#/$defs/gitOid"
+    },
+    "protocol": {
+      "$ref": "#/$defs/protocolBinding"
+    },
+    "route_registry_binding": {
+      "$ref": "#/$defs/routeRegistryBinding"
+    },
+    "authority": {
+      "$ref": "#/$defs/authority"
+    },
+    "completeness": {
+      "$ref": "#/$defs/completeness"
+    },
+    "counts": {
+      "$ref": "#/$defs/counts"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/source"
+      },
+      "uniqueItems": true
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/claim"
+      },
+      "uniqueItems": true
+    },
+    "source_claim_links": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/sourceClaimLink"
+      },
+      "uniqueItems": true
+    },
+    "search_runs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/searchRun"
+      },
+      "uniqueItems": true
+    },
+    "review": {
+      "$ref": "#/$defs/manifestReview"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "anyOf": [
+          {
+            "properties": {
+              "sources": {
+              "type": "array",
+                "contains": {
+                  "type": "object",
+                  "properties": {
+                    "route_registry_join": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": ["candidate_unreviewed", "reviewed_non_authoritative"]
+                        }
+                      },
+                      "required": ["status"]
+                    }
+                  },
+                  "required": ["route_registry_join"]
+                }
+              }
+            },
+            "required": ["sources"]
+          },
+          {
+            "properties": {
+              "claims": {
+              "type": "array",
+                "contains": {
+                  "type": "object",
+                  "properties": {
+                    "route_registry_join": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": ["candidate_unreviewed", "reviewed_non_authoritative"]
+                        }
+                      },
+                      "required": ["status"]
+                    }
+                  },
+                  "required": ["route_registry_join"]
+                }
+              }
+            },
+            "required": ["claims"]
+          }
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "route_registry_binding": {
+            "type": "object",
+            "properties": {
+              "binding_status": {"const": "content_hash_verified"},
+              "digest_scope": {"const": "raw_file_bytes"}
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "manifestId": {
+      "type": "string",
+      "pattern": "^WS6-MANIFEST-[A-Z0-9][A-Z0-9._-]*$"
+    },
+    "sourceId": {
+      "type": "string",
+      "pattern": "^SRC-[A-Z0-9][A-Z0-9._-]*$"
+    },
+    "claimId": {
+      "type": "string",
+      "pattern": "^CLM-[A-Z0-9][A-Z0-9._-]*$"
+    },
+    "linkId": {
+      "type": "string",
+      "pattern": "^LNK-[A-Z0-9][A-Z0-9._-]*$"
+    },
+    "runId": {
+      "type": "string",
+      "pattern": "^RUN-[A-Z0-9][A-Z0-9._-]*$"
+    },
+    "gitOid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "nullableDateTime": {
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "nullableString": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "routeLane": {
+      "type": "string",
+      "enum": ["A", "B", "C", "D", "E"]
+    },
+    "routeId": {
+      "type": "string",
+      "pattern": "^route\\.[a-e]\\.[a-z0-9][a-z0-9._-]*$"
+    },
+    "claimStatus": {
+      "type": "string",
+      "enum": ["supported", "refuted", "unknown", "not_applicable"]
+    },
+    "evidenceLevel": {
+      "type": "string",
+      "enum": ["E0", "E1", "E2", "E3", "E4", "E5", "E6", "E7"]
+    },
+    "protocolBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol_id",
+        "path",
+        "revision_status",
+        "frozen",
+        "frozen_at",
+        "reviewer_ids"
+      ],
+      "properties": {
+        "protocol_id": {
+          "type": "string",
+          "pattern": "^ws6-corpus-protocol-[a-z0-9._-]+$"
+        },
+        "path": {
+          "const": "docs/ecdlp-audit/corpus/PROTOCOL.md"
+        },
+        "revision_status": {
+          "enum": ["draft", "frozen", "superseded"]
+        },
+        "frozen": {
+          "type": "boolean"
+        },
+        "frozen_at": {
+          "$ref": "#/$defs/nullableDateTime"
+        },
+        "reviewer_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "frozen": {
+                "const": false
+              }
+            },
+            "required": ["frozen"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "revision_status": {
+                "const": "draft"
+              },
+              "frozen_at": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "frozen": {
+                "const": true
+              }
+            },
+            "required": ["frozen"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "revision_status": {
+                "enum": ["frozen", "superseded"]
+              },
+              "frozen_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "routeRegistryBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "registry_path",
+        "schema_path",
+        "schema_version",
+        "record_state",
+        "binding_status",
+        "content_sha256",
+        "digest_scope",
+        "reviewer_ids",
+        "reviewed_at",
+        "semantic_join_required",
+        "authoritative_mapping",
+        "limitations"
+      ],
+      "properties": {
+        "registry_path": {
+          "const": "docs/ecdlp-audit/routes/route-registry.seed.json"
+        },
+        "schema_path": {
+          "const": "docs/ecdlp-audit/routes/ws5-routes.schema.json"
+        },
+        "schema_version": {
+          "const": "ecdlp-ws5-routes/v0-draft"
+        },
+        "record_state": {
+          "const": "draft_non_authoritative"
+        },
+        "binding_status": {
+          "enum": ["path_only_unverified", "content_hash_verified"]
+        },
+        "content_sha256": {
+          "oneOf": [
+            {"$ref": "#/$defs/sha256"},
+            {"type": "null"}
+          ]
+        },
+        "digest_scope": {
+          "enum": ["none", "raw_file_bytes"]
+        },
+        "reviewer_ids": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        },
+        "reviewed_at": {
+          "$ref": "#/$defs/nullableDateTime"
+        },
+        "semantic_join_required": {
+          "const": true
+        },
+        "authoritative_mapping": {
+          "const": false
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {"binding_status": {"const": "path_only_unverified"}},
+            "required": ["binding_status"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "content_sha256": {"type": "null"},
+              "digest_scope": {"const": "none"},
+              "reviewer_ids": {"type": "array", "maxItems": 0},
+              "reviewed_at": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {"binding_status": {"const": "content_hash_verified"}},
+            "required": ["binding_status"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "content_sha256": {"$ref": "#/$defs/sha256"},
+              "digest_scope": {"const": "raw_file_bytes"},
+              "reviewer_ids": {"type": "array", "minItems": 1},
+              "reviewed_at": {"type": "string", "format": "date-time"}
+            }
+          }
+        }
+      ]
+    },
+    "routeRegistryJoin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "route_ids",
+        "basis",
+        "reviewer_ids",
+        "reviewed_at",
+        "semantic_resolution_required",
+        "authoritative"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["unresolved", "candidate_unreviewed", "reviewed_non_authoritative"]
+        },
+        "route_ids": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/routeId"},
+          "uniqueItems": true
+        },
+        "basis": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewer_ids": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        },
+        "reviewed_at": {
+          "$ref": "#/$defs/nullableDateTime"
+        },
+        "semantic_resolution_required": {
+          "const": true
+        },
+        "authoritative": {
+          "const": false
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {"status": {"const": "unresolved"}},
+            "required": ["status"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "route_ids": {"type": "array", "maxItems": 0},
+              "reviewer_ids": {"type": "array", "maxItems": 0},
+              "reviewed_at": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {"status": {"const": "candidate_unreviewed"}},
+            "required": ["status"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "route_ids": {"type": "array", "minItems": 1},
+              "reviewer_ids": {"type": "array", "maxItems": 0},
+              "reviewed_at": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {"status": {"const": "reviewed_non_authoritative"}},
+            "required": ["status"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "route_ids": {"type": "array", "minItems": 1},
+              "reviewer_ids": {"type": "array", "minItems": 1},
+              "reviewed_at": {"type": "string", "format": "date-time"}
+            }
+          }
+        }
+      ]
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authoritative",
+        "promotion_allowed",
+        "status",
+        "non_claims"
+      ],
+      "properties": {
+        "authoritative": {
+          "const": false
+        },
+        "promotion_allowed": {
+          "const": false
+        },
+        "status": {
+          "const": "draft_non_authoritative"
+        },
+        "non_claims": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "completeness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claimed",
+        "denominator_status",
+        "evidence_cutoff",
+        "statement",
+        "known_gaps"
+      ],
+      "properties": {
+        "claimed": {
+          "const": false
+        },
+        "denominator_status": {
+          "enum": ["unfrozen", "partially_frozen"]
+        },
+        "evidence_cutoff": {
+          "$ref": "#/$defs/nullableDateTime"
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "known_gaps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sources", "claims", "source_claim_links", "search_runs"],
+      "properties": {
+        "sources": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "claims": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_claim_links": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "search_runs": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "repositoryPointer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "locator", "pointer_kind", "revision", "blob_oid"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pointer_kind": {
+          "enum": [
+            "bibliographic_entry",
+            "standards_entry",
+            "advisory_entry",
+            "code_reference",
+            "incident_entry"
+          ]
+        },
+        "revision": {
+          "$ref": "#/$defs/gitOid"
+        },
+        "blob_oid": {
+          "$ref": "#/$defs/gitOid"
+        }
+      }
+    },
+    "identifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scheme", "value", "version"],
+      "properties": {
+        "scheme": {
+          "enum": [
+            "doi",
+            "iacr_eprint",
+            "rfc",
+            "cve",
+            "nist_publication",
+            "standard",
+            "git_commit",
+            "release",
+            "isbn",
+            "url",
+            "bibliographic_citation",
+            "other"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "$ref": "#/$defs/nullableString"
+        }
+      }
+    },
+    "sourceRelation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["relation", "target_source_id", "note"],
+      "properties": {
+        "relation": {
+          "enum": [
+            "supersedes",
+            "superseded_by",
+            "corrects",
+            "corrected_by",
+            "retracts",
+            "retracted_by",
+            "is_version_of",
+            "has_version"
+          ]
+        },
+        "target_source_id": {
+          "$ref": "#/$defs/sourceId"
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "access": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "license", "archive_status", "archive_locator"],
+      "properties": {
+        "status": {
+          "enum": ["open", "restricted", "paywalled", "unavailable", "unknown"]
+        },
+        "license": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "archive_status": {
+          "enum": ["not_attempted", "archived", "prohibited", "failed", "unknown"]
+        },
+        "archive_locator": {
+          "$ref": "#/$defs/nullableString"
+        }
+      }
+    },
+    "acquisition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "retrieval_locator",
+        "retrieved_at",
+        "content_sha256",
+        "byte_count",
+        "media_type",
+        "lawful_basis",
+        "normalization"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "pointer_only",
+            "metadata_only",
+            "retrieved",
+            "hash_verified",
+            "unavailable",
+            "paywalled_unacquired"
+          ]
+        },
+        "retrieval_locator": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "retrieved_at": {
+          "$ref": "#/$defs/nullableDateTime"
+        },
+        "content_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "byte_count": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "media_type": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "lawful_basis": {
+          "enum": [
+            "public_access",
+            "repository_checkout",
+            "licensed_access",
+            "not_applicable",
+            "unknown"
+          ]
+        },
+        "normalization": {
+          "enum": ["none", "metadata_only", "derived_copy", "unknown"]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "enum": [
+                  "pointer_only",
+                  "metadata_only",
+                  "unavailable",
+                  "paywalled_unacquired"
+                ]
+              }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "retrieved_at": {
+                "type": "null"
+              },
+              "content_sha256": {
+                "type": "null"
+              },
+              "byte_count": {
+                "type": "null"
+              },
+              "media_type": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "enum": ["retrieved", "hash_verified"]
+              }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "retrieval_locator": {
+                "type": "string",
+                "minLength": 1
+              },
+              "retrieved_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "content_sha256": {
+                "$ref": "#/$defs/sha256"
+              },
+              "byte_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "media_type": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "const": "hash_verified"
+              }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "content_sha256": {
+                "$ref": "#/$defs/sha256"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "custodyEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "event_type",
+        "actor_id",
+        "at",
+        "method",
+        "locator",
+        "content_sha256",
+        "notes"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^CST-[A-Z0-9][A-Z0-9._-]*$"
+        },
+        "event_type": {
+          "enum": [
+            "discovery",
+            "retrieval",
+            "hash_verification",
+            "normalization",
+            "archive",
+            "correction"
+          ]
+        },
+        "actor_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "locator": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "content_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "event_type": {
+                "enum": [
+                  "retrieval",
+                  "hash_verification",
+                  "normalization",
+                  "archive"
+                ]
+              }
+            },
+            "required": ["event_type"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "content_sha256": {
+                "$ref": "#/$defs/sha256"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "source_type",
+        "source_role",
+        "title",
+        "creators",
+        "issuer",
+        "issued_date",
+        "version_label",
+        "publication_status",
+        "identifiers",
+        "canonical_url",
+        "repository_pointers",
+        "relations",
+        "access",
+        "acquisition",
+        "custody_events",
+        "route_lanes",
+        "route_registry_join",
+        "topics",
+        "record_limitations"
+      ],
+      "properties": {
+        "source_id": {
+          "$ref": "#/$defs/sourceId"
+        },
+        "source_type": {
+          "enum": [
+            "paper",
+            "erratum",
+            "retraction",
+            "standard",
+            "advisory",
+            "incident_statement",
+            "code_revision",
+            "release",
+            "comparator"
+          ]
+        },
+        "source_role": {
+          "enum": ["primary_candidate", "primary", "secondary", "comparator"]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "creators": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "issuer": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "issued_date": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "version_label": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "publication_status": {
+          "enum": ["current", "superseded", "withdrawn", "retracted", "unknown"]
+        },
+        "identifiers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          },
+          "uniqueItems": true
+        },
+        "canonical_url": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "repository_pointers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/repositoryPointer"
+          },
+          "uniqueItems": true
+        },
+        "relations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceRelation"
+          },
+          "uniqueItems": true
+        },
+        "access": {
+          "$ref": "#/$defs/access"
+        },
+        "acquisition": {
+          "$ref": "#/$defs/acquisition"
+        },
+        "custody_events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/custodyEvent"
+          },
+          "uniqueItems": true
+        },
+        "route_lanes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/routeLane"
+          },
+          "uniqueItems": true
+        },
+        "route_registry_join": {
+          "$ref": "#/$defs/routeRegistryJoin"
+        },
+        "topics": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "record_limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "affectedIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identity_id", "kind", "value", "precision", "repository_ref"],
+      "properties": {
+        "identity_id": {
+          "type": "string",
+          "pattern": "^ID-[A-Z0-9][A-Z0-9._-]*$"
+        },
+        "kind": {
+          "enum": [
+            "curve",
+            "subgroup",
+            "field",
+            "protocol",
+            "implementation",
+            "version",
+            "incident",
+            "standard",
+            "generic_scope"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        },
+        "precision": {
+          "enum": ["exact", "label_only", "family_only", "unknown"]
+        },
+        "repository_ref": {
+          "$ref": "#/$defs/nullableString"
+        }
+      }
+    },
+    "claimVerification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reviewer_ids", "reviewed_at", "notes"],
+      "properties": {
+        "status": {
+          "enum": ["not_started", "single_reviewer", "second_person_verified", "disputed", "blocked"]
+        },
+        "reviewer_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "reviewed_at": {
+          "$ref": "#/$defs/nullableDateTime"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "const": "not_started"
+              }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "reviewer_ids": {
+                "type": "array",
+                "maxItems": 0
+              },
+              "reviewed_at": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "const": "second_person_verified"
+              }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "reviewer_ids": {
+                "type": "array",
+                "minItems": 2
+              },
+              "reviewed_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_id",
+        "statement",
+        "claim_kind",
+        "classification",
+        "critical",
+        "route_lanes",
+        "route_registry_join",
+        "hypotheses",
+        "affected_identities",
+        "status",
+        "evidence_level",
+        "limitations",
+        "verification"
+      ],
+      "properties": {
+        "claim_id": {
+          "$ref": "#/$defs/claimId"
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "claim_kind": {
+          "enum": [
+            "theorem",
+            "algorithm",
+            "standard_requirement",
+            "vulnerability",
+            "incident_observation",
+            "implementation_behavior",
+            "performance",
+            "correction",
+            "provenance"
+          ]
+        },
+        "classification": {
+          "enum": [
+            "original_ecdlp",
+            "mathematical_transfer",
+            "structural_precondition",
+            "protocol_baseline",
+            "implementation_bypass",
+            "incident_effect",
+            "evidence_provenance",
+            "correction"
+          ]
+        },
+        "critical": {
+          "type": "boolean"
+        },
+        "route_lanes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/routeLane"
+          },
+          "uniqueItems": true
+        },
+        "route_registry_join": {
+          "$ref": "#/$defs/routeRegistryJoin"
+        },
+        "hypotheses": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "affected_identities": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/affectedIdentity"
+          },
+          "uniqueItems": true
+        },
+        "status": {
+          "$ref": "#/$defs/claimStatus"
+        },
+        "evidence_level": {
+          "$ref": "#/$defs/evidenceLevel"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "verification": {
+          "$ref": "#/$defs/claimVerification"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "enum": ["supported", "refuted"]
+              }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "verification": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "second_person_verified"
+                  }
+                }
+              },
+              "route_registry_join": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "reviewed_non_authoritative"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "sourceClaimLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "link_id",
+        "source_id",
+        "claim_id",
+        "relation",
+        "locator",
+        "evidence_form",
+        "excerpt",
+        "verification_status",
+        "reviewer_ids",
+        "notes"
+      ],
+      "properties": {
+        "link_id": {
+          "$ref": "#/$defs/linkId"
+        },
+        "source_id": {
+          "$ref": "#/$defs/sourceId"
+        },
+        "claim_id": {
+          "$ref": "#/$defs/claimId"
+        },
+        "relation": {
+          "enum": [
+            "asserts",
+            "supports",
+            "refutes",
+            "corrects",
+            "defines",
+            "reports",
+            "contextualizes",
+            "discovery_pointer"
+          ]
+        },
+        "locator": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "value"],
+          "properties": {
+            "kind": {
+              "enum": [
+                "page",
+                "section",
+                "theorem",
+                "equation",
+                "table",
+                "record_field",
+                "commit_symbol",
+                "file_line",
+                "bibliographic_pointer_only"
+              ]
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "evidence_form": {
+          "enum": ["metadata_only", "quotation", "paraphrase", "code_observation", "record_field"]
+        },
+        "excerpt": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "verification_status": {
+          "enum": ["not_started", "single_reviewer", "second_person_verified", "disputed", "blocked"]
+        },
+        "reviewer_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "evidence_form": {
+                "const": "metadata_only"
+              }
+            },
+            "required": ["evidence_form"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "excerpt": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "relation": {
+                "const": "discovery_pointer"
+              }
+            },
+            "required": ["relation"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "locator": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "bibliographic_pointer_only"
+                  }
+                }
+              },
+              "evidence_form": {
+                "const": "metadata_only"
+              },
+              "verification_status": {
+                "const": "not_started"
+              },
+              "reviewer_ids": {
+                "type": "array",
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "verification_status": {
+                "const": "second_person_verified"
+              }
+            },
+            "required": ["verification_status"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "reviewer_ids": {
+                "type": "array",
+                "minItems": 2
+              }
+            }
+          }
+        }
+      ]
+    },
+    "searchRun": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_id",
+        "run_kind",
+        "protocol_id",
+        "service",
+        "service_version",
+        "exact_query",
+        "filters",
+        "started_at",
+        "ended_at",
+        "status",
+        "result_count",
+        "included_count",
+        "excluded_count",
+        "deferred_count",
+        "duplicate_count",
+        "raw_receipt_sha256",
+        "errors",
+        "notes"
+      ],
+      "properties": {
+        "run_id": {
+          "$ref": "#/$defs/runId"
+        },
+        "run_kind": {
+          "enum": ["pilot", "frozen_search", "backward_citation", "forward_citation", "comparator_reconciliation"]
+        },
+        "protocol_id": {
+          "type": "string",
+          "pattern": "^ws6-corpus-protocol-[a-z0-9._-]+$"
+        },
+        "service": {
+          "type": "string",
+          "minLength": 1
+        },
+        "service_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "exact_query": {
+          "type": "string",
+          "minLength": 1
+        },
+        "filters": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "ended_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "enum": ["completed", "partial", "failed", "blocked"]
+        },
+        "result_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "included_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "excluded_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "deferred_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "duplicate_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "raw_receipt_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "enum": ["completed", "partial", "failed"]
+              }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "raw_receipt_sha256": {
+                "$ref": "#/$defs/sha256"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "manifestReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "reviewer_ids",
+        "reviewed_at",
+        "all_critical_claims_second_person_verified",
+        "notes"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["not_started", "in_progress", "second_person_complete", "blocked"]
+        },
+        "reviewer_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "reviewed_at": {
+          "$ref": "#/$defs/nullableDateTime"
+        },
+        "all_critical_claims_second_person_verified": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "const": "not_started"
+              }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "reviewer_ids": {
+                "type": "array",
+                "maxItems": 0
+              },
+              "reviewed_at": {
+                "type": "null"
+              },
+              "all_critical_claims_second_person_verified": {
+                "const": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "const": "second_person_complete"
+              }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "reviewer_ids": {
+                "type": "array",
+                "minItems": 2
+              },
+              "reviewed_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "all_critical_claims_second_person_verified": {
+                "const": true
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

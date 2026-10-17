@@ -1,0 +1,5 @@
+# Generated media and verbatim tool evidence.
+*.pdf binary
+*.svg -diff -whitespace
+*.txt whitespace=-blank-at-eof
+*_TTrace_*.tla -whitespace

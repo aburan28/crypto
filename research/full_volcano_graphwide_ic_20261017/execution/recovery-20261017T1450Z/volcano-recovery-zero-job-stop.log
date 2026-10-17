@@ -1,0 +1,40 @@
+{
+  "campaign": "/workspace/volcano_ic_repaired_survey_20261017",
+  "coverage": [
+    {
+      "graph": "mixed",
+      "state": "audited",
+      "vertices": 989
+    },
+    {
+      "graph": "mixed",
+      "state": "queued",
+      "vertices": 9081
+    },
+    {
+      "graph": "three",
+      "state": "audited",
+      "vertices": 970
+    },
+    {
+      "graph": "three",
+      "state": "interrupted",
+      "vertices": 1
+    },
+    {
+      "graph": "three",
+      "state": "queued",
+      "vertices": 5590
+    },
+    {
+      "graph": "two",
+      "state": "audited",
+      "vertices": 976
+    },
+    {
+      "graph": "two",
+      "state": "queued",
+      "vertices": 7216
+    }
+  ]
+}

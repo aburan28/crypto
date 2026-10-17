@@ -11,7 +11,7 @@ if [[ ! -x "$ECB" ]]; then
   exit 1
 fi
 
-for spec in koblitz17 koblitz23 koblitz23-cyc prime20; do
+for spec in koblitz17 koblitz23 koblitz23-cyc prime20 koblitz17-algebraic koblitz23-onb; do
   out="$ROOT/sessions/$spec"
   if [[ -e "$out" ]]; then
     echo "skip existing $out"
@@ -25,4 +25,5 @@ for spec in koblitz17 koblitz23 koblitz23-cyc prime20; do
 done
 
 python3 "$ROOT/check_fb_ids.py"
+python3 "$ROOT/check_fbm_ids.py"
 echo "all sessions complete"

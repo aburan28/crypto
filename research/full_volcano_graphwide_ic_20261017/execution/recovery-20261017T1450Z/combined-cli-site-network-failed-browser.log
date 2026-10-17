@@ -1,0 +1,108 @@
+    Finished `release` profile [optimized] target(s) in 0.18s
+     Running unittests src/lib.rs (/workspace/scratch/volcano-release-target/release/deps/crypto_lib-565bcb20cb4d5bb4)
+
+running 37 tests
+test cryptanalysis::pollard_collab::cairn::tests::a_claim_record_has_the_id_and_artifact_id_cairn_gives_it ... ok
+test cryptanalysis::pollard_collab::cairn::tests::a_commitment_record_has_the_id_cairn_gives_it ... ok
+test cryptanalysis::pollard_collab::cairn::tests::a_key_submitter_signs_what_cairn_verifies ... ok
+test cryptanalysis::pollard_collab::cairn::tests::an_artifact_is_canonical_whichever_record_produced_it ... ok
+test cryptanalysis::pollard_collab::cairn::tests::an_older_node_without_progress_turns_heartbeats_off_quietly ... ok
+test cryptanalysis::pollard_collab::cairn::tests::canonical_encoding_matches_cairns_frozen_vectors ... ok
+test cryptanalysis::pollard_collab::cairn::tests::commitment_hash_matches_cairns_frozen_vectors ... ok
+test cryptanalysis::pollard_collab::cairn::tests::generic_artifacts_use_the_persisted_commit_reveal_outbox ... ok
+test cryptanalysis::pollard_collab::cairn::tests::heartbeats_carry_the_sessions_own_counters_at_the_cadence ... ok
+test cryptanalysis::pollard_collab::cairn::tests::pending_commitments_survive_a_restart ... ok
+test cryptanalysis::pollard_collab::cairn::tests::points_travel_through_cairn_as_commit_reveal_claims_and_solve ... ok
+test cryptanalysis::pollard_collab::cairn::tests::the_client_speaks_enough_http ... ok
+test cryptanalysis::pollard_collab::cairn::tests::timestamps_and_epochs_match_cairn ... ok
+test cryptanalysis::pollard_collab::job::tests::composite_modulus_job_is_refused_as_before ... ok
+test cryptanalysis::pollard_collab::job::tests::context_validates_inputs ... ok
+test cryptanalysis::pollard_collab::job::tests::derivations_are_deterministic_and_on_curve ... ok
+test cryptanalysis::pollard_collab::job::tests::every_demo_curve_builds_a_job ... ok
+test cryptanalysis::pollard_collab::job::tests::expected_cost_matches_sqrt_scale ... ok
+test cryptanalysis::pollard_collab::job::tests::job_id_is_stable_and_field_sensitive ... ok
+test cryptanalysis::pollard_collab::job::tests::unit_ranges_partition_index_space ... ok
+test cryptanalysis::pollard_collab::mailbox::tests::two_peers_collaborate_through_a_directory ... ok
+test cryptanalysis::pollard_collab::net::tests::foreign_job_is_refused ... ok
+test cryptanalysis::pollard_collab::net::tests::message_round_trip ... ok
+test cryptanalysis::pollard_collab::net::tests::three_nodes_in_a_chain_converge ... ok
+test cryptanalysis::pollard_collab::state::tests::leases_expire_and_units_resume_from_cursor ... ok
+test cryptanalysis::pollard_collab::state::tests::merge_is_order_independent_and_idempotent ... ok
+test cryptanalysis::pollard_collab::state::tests::merging_checkins_solves_the_instance ... ok
+test cryptanalysis::pollard_collab::state::tests::rejects_foreign_job_and_bad_dps ... ok
+test cryptanalysis::pollard_collab::state::tests::seq_never_reused_after_reload ... ok
+test cryptanalysis::pollard_collab::walk::tests::same_walker_same_trail ... ok
+test cryptanalysis::pollard_collab::walk::tests::step_helpers_match_the_expressions_they_replace ... ok
+test cryptanalysis::pollard_collab::walk::tests::step_keeps_the_invariant ... ok
+test cryptanalysis::pollard_collab::walk::tests::tampered_records_are_rejected ... ok
+test cryptanalysis::pollard_collab::walk::tests::walker_records_verify_in_both_modes ... ok
+test cryptanalysis::pollard_collab::worker::tests::lanes_on_one_node_split_units_and_stop_together ... ok
+test cryptanalysis::pollard_collab::worker::tests::single_lane_solves ... ok
+test cryptanalysis::pollard_collab::worker::tests::walker_budget_and_stop_flag_are_honoured ... ok
+
+test result: ok. 37 passed; 0 failed; 0 ignored; 0 measured; 4349 filtered out; finished in 0.69s
+
+   Compiling zerocopy v0.8.63
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling cc v1.8.0
+   Compiling serde_json v1.0.154
+   Compiling smallvec v1.16.3
+   Compiling syn v3.0.9
+   Compiling libsqlite3-sys v0.30.1
+   Compiling serde_derive v1.0.229
+   Compiling ahash v0.8.12
+   Compiling hashbrown v0.14.5
+   Compiling isogeny_algos v0.1.0 (/workspace/repos/crypto/isogeny_algos)
+   Compiling hashlink v0.9.1
+   Compiling serde v1.0.229
+   Compiling rusqlite v0.32.1
+   Compiling volcano-cli v0.1.0 (/workspace/repos/crypto/tools/volcano-cli)
+    Finished `release` profile [optimized] target(s) in 2m 34s
+     Running unittests src/lib.rs (/workspace/scratch/volcano-release-target/release/deps/volcano_cli-83f4512f73817584)
+
+running 6 tests
+test tests::domain_and_budget_rejections ... ok
+test tests::finite_component_is_not_a_complete_class ... ok
+test tests::automatic_degrees_connect_a_nontrivial_surface_class_group ... ok
+test tests::solve_checks_the_exact_cyclic_subgroup_and_budget ... ok
+test tests::resume_equals_uninterrupted_and_tampering_fails ... ok
+test tests::complete_controls_match_independent_model_census_and_strata ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running unittests src/main.rs (/workspace/scratch/volcano-release-target/release/deps/isogeny_class-7f129e374d72c1ac)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/cli.rs (/workspace/scratch/volcano-release-target/release/deps/cli-5dbb5a6e3561edc2)
+
+running 2 tests
+test invalid_budget_and_existing_output_never_overwrite_files ... ok
+test killed_writer_recovers_and_resumes_to_the_uninterrupted_graph ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+   Doc-tests volcano_cli
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+..................F..............................
+======================================================================
+FAIL: test_lab_browser_index_is_current_and_self_consistent (__main__.BuildTests.test_lab_browser_index_is_current_and_self_consistent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/repos/crypto/scripts/site/test_build.py", line 871, in test_lab_browser_index_is_current_and_self_consistent
+    self.assertEqual(builder.comparable(json.loads(committed)), builder.comparable(fresh), "docs/browser/data.json is stale; run python3 scripts/build_lab_browser.py")
+AssertionError: {'sch[554 chars]ds': 199, 'factor_bases': 373, 'candidates': 2[24257411 chars]ne}]} != {'sch[554 chars]ds': 207, 'factor_bases': 672, 'candidates': 2[25858072 chars]ne}]}
+Diff is 45586577 characters long. Set self.maxDiff to None to see it. : docs/browser/data.json is stale; run python3 scripts/build_lab_browser.py
+
+----------------------------------------------------------------------
+Ran 49 tests in 274.212s
+
+FAILED (failures=1)

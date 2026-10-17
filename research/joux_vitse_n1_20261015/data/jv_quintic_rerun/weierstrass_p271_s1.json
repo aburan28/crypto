@@ -1,0 +1,177 @@
+[
+  {
+    "p": 271,
+    "seed": 1,
+    "n": 1461661263463,
+    "bits": 40.410746147514274,
+    "base": 140,
+    "fp_muls_per_add": 220.0,
+    "precompute_muls": 1872961524,
+    "precompute_ms": 18118.857852,
+    "max_degree": 24,
+    "budget_secs": 900.0,
+    "random_residuals": 3,
+    "constructed_residuals": 2,
+    "random_decomposable": 0,
+    "expected_rate": 0.00015375153751537516,
+    "planted_found": 2,
+    "unverified": 0,
+    "mismatches": 0,
+    "undetermined": 0,
+    "timed_out": 0,
+    "c_second": {
+      "mean": 11044998593.666666,
+      "min": 11044053508,
+      "max": 11045848654
+    },
+    "weil_muls": {
+      "mean": 129427.0,
+      "min": 129427,
+      "max": 129427
+    },
+    "f4_muls": {
+      "mean": 11044869166.666666,
+      "min": 11043924081,
+      "max": 11045719227
+    },
+    "roots_muls": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "sign_group_ops": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "f4_ms": {
+      "mean": 5094.0,
+      "min": 4826,
+      "max": 5348
+    },
+    "solving_degree": {
+      "mean": 2.0,
+      "min": 2,
+      "max": 2
+    },
+    "degree_reached": {
+      "mean": 19.0,
+      "min": 19,
+      "max": 19
+    },
+    "max_rows": {
+      "mean": 2019.0,
+      "min": 2019,
+      "max": 2019
+    },
+    "max_cols": {
+      "mean": 3678.6666666666665,
+      "min": 3678,
+      "max": 3679
+    },
+    "c_second_decomposable": {
+      "mean": 11044813809.0,
+      "min": 11044087940,
+      "max": 11045539678
+    },
+    "f4_ms_decomposable": {
+      "mean": 4375.0,
+      "min": 3825,
+      "max": 4925
+    },
+    "degree_reached_decomposable": {
+      "mean": 19.0,
+      "min": 19,
+      "max": 19
+    },
+    "max_cols_decomposable": {
+      "mean": 3679.0,
+      "min": 3679,
+      "max": 3679
+    },
+    "per_test": [
+      {
+        "weil_muls": 129427,
+        "f4_muls": 11045719227,
+        "roots_muls": 0,
+        "group_ops": 0,
+        "solving_degree": 2,
+        "degree_reached": 19,
+        "max_rows": 2019,
+        "max_cols": 3679,
+        "f4_ms": 5348.377207,
+        "inconsistent": true,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 0,
+        "decompositions": 0
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 11044964192,
+        "roots_muls": 0,
+        "group_ops": 0,
+        "solving_degree": 2,
+        "degree_reached": 19,
+        "max_rows": 2019,
+        "max_cols": 3679,
+        "f4_ms": 4826.938527,
+        "inconsistent": true,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 0,
+        "decompositions": 0
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 11043924081,
+        "roots_muls": 0,
+        "group_ops": 0,
+        "solving_degree": 2,
+        "degree_reached": 19,
+        "max_rows": 2019,
+        "max_cols": 3678,
+        "f4_ms": 5108.203214,
+        "inconsistent": true,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 0,
+        "decompositions": 0
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 11043955507,
+        "roots_muls": 1026,
+        "group_ops": 9,
+        "solving_degree": 3,
+        "degree_reached": 19,
+        "max_rows": 2019,
+        "max_cols": 3679,
+        "f4_ms": 3825.611558,
+        "inconsistent": false,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 1,
+        "decompositions": 1
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 11045408674,
+        "roots_muls": 917,
+        "group_ops": 3,
+        "solving_degree": 3,
+        "degree_reached": 19,
+        "max_rows": 2019,
+        "max_cols": 3679,
+        "f4_ms": 4925.410551,
+        "inconsistent": false,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 1,
+        "decompositions": 1
+      }
+    ],
+    "mitm4_group_ops": 39200.0,
+    "wall_ms": 44137.035909
+  }
+]
