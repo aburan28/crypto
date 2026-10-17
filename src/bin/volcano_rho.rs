@@ -674,6 +674,8 @@ fn write_ecbench(
 ) -> (usize, std::collections::BTreeMap<String, usize>) {
     fs::create_dir_all(dir).unwrap();
     let mut curves = Vec::new();
+    // (vertex, model, level) of each entry of `curves`.
+    let mut owners: Vec<(usize, usize, u32)> = Vec::new();
     let mut side = String::new();
     let mut structures = std::collections::BTreeMap::new();
     for &v in walked {
@@ -687,7 +689,13 @@ fn write_ecbench(
             .copied()
             .filter(|&w| levels[w] == Some(lv))
             .collect();
-        for m in 0..args.models.max(1) {
+        let models = if lv == 0 {
+            args.crater_models.unwrap_or(args.models)
+        } else {
+            args.models
+        }
+        .max(1);
+        for m in 0..models {
             // Model 0 is the walked model; others are (u⁴a, u⁶b) with the generator mapped.
             let u = if m == 0 { 1 } else { rng.gen_range(2..f.p) };
             let (u2, u3) = (f.mul(u, u), f.mul(f.mul(u, u), u));
@@ -701,6 +709,7 @@ fn write_ecbench(
                 "kind": "prime_explicit", "p": f.p, "a": cv.a, "b": cv.b,
                 "group_order": order, "r": n, "gx": g.0, "gy": g.1,
             }));
+            owners.push((v, m, lv));
             side += &json!({
                 "vertex": v, "model": m, "u": u, "level": lv, "j": vs[v].j,
                 "p": f.p, "a": cv.a, "b": cv.b, "gx": g.0, "gy": g.1,
@@ -732,7 +741,14 @@ fn write_ecbench(
                             "isolation_required": "L0", "timeout_seconds": 600},
         })
     };
-    let models = args.models.max(1);
+    let pick = |keep: &dyn Fn(&(usize, usize, u32)) -> bool| -> Vec<serde_json::Value> {
+        curves
+            .iter()
+            .zip(&owners)
+            .filter(|(_, o)| keep(o))
+            .map(|(c, _)| c.clone())
+            .collect()
+    };
     let main = spec(
         "isogeny volcano: rho and IC on every curve",
         json!([
@@ -755,13 +771,16 @@ fn write_ecbench(
         json!([{"name": "ic-mitm-plus1", "role": "control", "method": ic(args.ic_size + 1)}]),
         args.seed,
     );
-    icctl["workloads"]["curves"] =
-        json!(curves.iter().step_by(models).cloned().collect::<Vec<_>>());
+    icctl["workloads"]["curves"] = json!(pick(&|o| o.1 == 0));
     let aa = spec(
         "isogeny volcano: independent A/A rho",
         json!([{"name": "rho-neg-aa", "role": "control", "method": {"id": "rho.negation"}}]),
         args.seed ^ 0xA_A000_0000,
     );
+    let mut aa = aa;
+    if args.aa_model0 {
+        aa["workloads"]["curves"] = json!(pick(&|o| o.1 == 0));
+    }
     // Positive control on a j = 0 / j = 1728 crater: the automorphism-folded
     // walk (which refuses every other curve) beside rho.negation, crater only.
     let crater_j = walked
@@ -784,12 +803,7 @@ fn write_ecbench(
             ]),
             args.seed,
         );
-        let crater_curves: Vec<serde_json::Value> = curves
-            .iter()
-            .enumerate()
-            .filter(|(i, _)| levels[walked[i / models]] == Some(0))
-            .map(|(_, c)| c.clone())
-            .collect();
+        let crater_curves = pick(&|o| o.2 == 0);
         crater["workloads"]["curves"] = json!(crater_curves);
         fs::write(
             dir.join("spec-crater-aut.json"),
@@ -818,7 +832,7 @@ fn write_ecbench(
     )
     .unwrap();
     fs::write(dir.join("curves.jsonl"), side).unwrap();
-    (walked.len() * args.models.max(1), structures)
+    (curves.len(), structures)
 }
 
 // ---------------------------------------------------------------- instance study
@@ -1013,6 +1027,14 @@ struct Args {
     ecbench: Option<PathBuf>,
     /// Isomorphic models per curve in the ecbench export (1 = as walked).
     models: usize,
+    /// Models per crater curve, when crater curves need more replicates
+    /// than the rest (`--crater-models`; default `models`).
+    crater_models: Option<usize>,
+    /// Curves kept per level, crater first (`--level-caps 16,4,12`); a
+    /// level past the list uses `--per-level`.
+    level_caps: Vec<usize>,
+    /// Restrict the A/A spec to each curve's model 0.
+    aa_model0: bool,
     /// Paired `planted_shared` targets per curve in the ecbench export.
     targets: u64,
     /// `prime-abscissa` factor-base size of the IC arm (the planted
@@ -1044,6 +1066,9 @@ fn parse_args() -> Args {
         instance_study: false,
         ecbench: None,
         models: 1,
+        crater_models: None,
+        level_caps: Vec::new(),
+        aa_model0: false,
         targets: 64,
         ic_size: 32,
         out: PathBuf::from("volcano-rho-out"),
@@ -1077,6 +1102,27 @@ fn parse_args() -> Args {
                 a.models = val
                     .parse()
                     .unwrap_or_else(|_| die("--models takes an integer"))
+            }
+            "--crater-models" => {
+                a.crater_models = Some(
+                    val.parse()
+                        .unwrap_or_else(|_| die("--crater-models takes an integer")),
+                )
+            }
+            "--level-caps" => {
+                a.level_caps = val
+                    .split(',')
+                    .map(|x| {
+                        x.trim()
+                            .parse()
+                            .unwrap_or_else(|_| die("--level-caps takes N,N,..."))
+                    })
+                    .collect()
+            }
+            "--aa-model0" => {
+                a.aa_model0 = true;
+                i += 1; // a flag: no value
+                continue;
             }
             "--targets" => {
                 a.targets = val
@@ -1135,7 +1181,8 @@ Pollard rho measured on each curve.
 
 options: [--ell 3] [--seed 1] [--trials 100] [--per-level 10] [--controls 3]
          [--dp-bits auto] [--engine native|ca] [--walk native|pullback] [--ca PATH] [--ca-arg ARG]... [--out DIR]
-         [--instance-study] [--ecbench DIR [--models 1] [--targets 64] [--ic-size 32]]
+         [--instance-study] [--ecbench DIR [--models 1] [--crater-models M] [--level-caps C0,C1,..]
+                        [--aa-model0] [--targets 64] [--ic-size 32]]
 
 --curve takes y^2 = x^3 + Ax + B over F_P, P prime < 2^62, in decimal. The
 generator (cofactor times a seeded random point) and the secret k are drawn
@@ -1712,7 +1759,12 @@ fn main() {
         let walked: Vec<usize> = (0..vs.len())
             .filter(|&v| {
                 let Some(l) = levels[v] else { return false };
-                let keep = v == 0 || taken[l as usize] < args.per_level;
+                let cap = args
+                    .level_caps
+                    .get(l as usize)
+                    .copied()
+                    .unwrap_or(args.per_level);
+                let keep = v == 0 || taken[l as usize] < cap;
                 if keep {
                     taken[l as usize] += 1;
                 }
