@@ -1,0 +1,41 @@
+{
+  "curve": "E0 y^2+xy=x^3+1 over F_2^83, r=2417851639230796216685689",
+  "rows": [
+    {
+      "build_ms": 32,
+      "enum_triples": 64,
+      "enum_wall_ms": 0,
+      "eqs": 83,
+      "exact_yield": 8.271806125530277e-25,
+      "l": 2,
+      "ladder_probes_per_relation_ref": 8800000.0,
+      "n_vars": 9,
+      "ratio_to_ladder": 1.3737793404711694e+17,
+      "reachable_set_size": 8,
+      "roots_found": 1,
+      "roots_that_are_true_decompositions": 1,
+      "solve_ms": 0,
+      "systems_per_relation_single_v": 1.2089258196146292e+24,
+      "v_points": 4
+    },
+    {
+      "build_ms": 371,
+      "enum_triples": 512,
+      "enum_wall_ms": 7,
+      "eqs": 83,
+      "exact_yield": 4.963083675318166e-24,
+      "l": 3,
+      "ladder_probes_per_relation_ref": 8800000.0,
+      "n_vars": 15,
+      "ratio_to_ladder": 2.2896322341186156e+16,
+      "reachable_set_size": 48,
+      "roots_found": 1,
+      "roots_that_are_true_decompositions": 1,
+      "solve_ms": 229,
+      "systems_per_relation_single_v": 2.014876366024382e+23,
+      "v_points": 8
+    }
+  ],
+  "schema": "koblitz-sym-s4-gate-n83-v1",
+  "seed_structures": "0x5EED0083"
+}
