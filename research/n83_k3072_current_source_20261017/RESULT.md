@@ -69,6 +69,45 @@ and [replay summary](replay_K3450.json) are also versioned and checked against
 the archive. Both exposed-point local
 timings are feasibility diagnostics.
 
+Two more current-source high-K layouts completed on the same public point
+and passed full independent arithmetic replay. The K3450/root11 wide3 Bloom
+index uses the same **572,700** usable points and **3,450** effective columns
+as the dynamic layout. It stores **987,887,478** root entries in a 5-byte
+packed table with a 1 GiB Bloom filter. K3500/root4 uses **581,000** usable
+points and **3,500** effective columns; its 4-byte packed table stores
+**1,016,729,255** root entries with a 1 GiB Bloom filter. Both runs recovered
+the exposed scalar from a four-point relation. The independent checker
+recomputed every base point, the witness sum, scalar replay, candidate ID,
+source and binary hashes, and the five exclusive online phases.
+
+| Current-source layout | Exact candidate ID | Packed table allocation | Local cold process | One-target online | Replay |
+| --- | --- | ---: | ---: | ---: | --- |
+| K3450/root11 wide3 Bloom | `IC1N83Ckb1a1fb572700PDP4rootRCguidedLAgaussTDdirectISO0hbde4a785a36e` | 5,368,709,120 bytes | 854.241 s | 43.380 ms | `PASS_INDEPENDENT_ARITHMETIC_REPLAY` |
+| K3500/root4 standard Bloom | `IC1N83Ckb1a1fb581000PDP4rootRCguidedLAgaussTDdirectISO0hb3a616c4e22f` | 8,589,934,592 bytes | 924.785 s | 36.898 ms | `PASS_INDEPENDENT_ARITHMETIC_REPLAY` |
+
+The wide3 table allocation is half the dynamic K3450 allocation on this
+input. Its observed online interval is 24.3% shorter, while its cold process
+is 40.690 seconds longer. K3500/root4 has the shortest online interval of
+these three high-K local controls, with the longest cold process. The point
+was already exposed and the host was shared, so these measured differences
+prioritize fresh same-point Tier 1 comparisons without selecting a winner.
+
+The raw wide3 archive is
+`/Volumes/SSD990/crypto/artifacts/n83_k3450_wide3_current_source_20261017/raw.tar.gz`,
+SHA-256 `1495f924ed125d4ea7aef000f2265b60f750126053ebb537b73c0f90735aff19`.
+The raw K3500/root4 archive is
+`/Volumes/SSD990/crypto/artifacts/n83_k3500_root4_current_source_20261017/raw.tar.gz`,
+SHA-256 `1f278f491e20e0780be9d225a7ce62e4345e9777763a7f7bf73377ac100ac3f5`.
+The versioned [high-K archive verifier](verify_highk_archives.py), producer
+receipts, replay summaries, and exact candidate manifests bind both archives
+to the current source. With each archive already extracted to its sibling
+artifact directory, replay them with:
+
+```sh
+python3 research/n83_k3072_current_source_20261017/verify_highk_archives.py wide3 /Volumes/SSD990/crypto/artifacts/n83_k3450_wide3_current_source_20261017/raw.tar.gz /Volumes/SSD990/crypto/artifacts/n83_k3450_wide3_current_source_20261017
+python3 research/n83_k3072_current_source_20261017/verify_highk_archives.py root4 /Volumes/SSD990/crypto/artifacts/n83_k3500_root4_current_source_20261017/raw.tar.gz /Volumes/SSD990/crypto/artifacts/n83_k3500_root4_current_source_20261017
+```
+
 The next comparison pairs both current-source high-K candidates with the
 winner of the frozen K1104–K1120 finalist panel on fresh public points,
 with each IC arm paired to a same-point strong rho run and per-pair Tier 1
