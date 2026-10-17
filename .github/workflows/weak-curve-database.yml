@@ -67,6 +67,9 @@ jobs:
           python3 -B research/p192_extension_cover_20261012/verify_line_sum_coverage.py
           python3 -B research/p192_extension_cover_20261012/verify_line_cell_sample.py
           python3 -B research/p192_extension_cover_20261012/verify_line_signed_short_receipt.py
+          python3 -B research/p192_extension_cover_20261012/verify_line_leaf_relation.py
+          python3 -B research/p192_extension_cover_20261012/prepare_line_second_gen_input.py
+          python3 -B research/p192_extension_cover_20261012/verify_line_second_gen_closure.py
   lean-proof:
     runs-on: ubuntu-latest
     timeout-minutes: ${{ github.event_name == 'workflow_dispatch' && 90 || 25 }}
@@ -138,7 +141,7 @@ jobs:
           auto-config: false
           use-mathlib-cache: true
           build: true
-          build-args: 'LinePointInverse LineSupport LineFiberDescent ThreeSumCapacity'
+          build-args: 'LinePointInverse LineSupport LineFiberDescent ThreeSumCapacity LineLeafRank'
           test: false
           lint: false
           leanchecker: true
@@ -151,6 +154,30 @@ jobs:
         run: lake env leanchecker --fresh --verbose LineFiberDescent && lake env lean LineFiberDescent.lean
       - name: Fresh-check three-sum capacity theorem and audit axioms
         run: lake env leanchecker --fresh --verbose ThreeSumCapacity && lake env lean ThreeSumCapacity.lean
+      - name: Fresh-check private-column rank theorem and audit axioms
+        run: lake env leanchecker --fresh --verbose LineLeafRank && lake env lean LineLeafRank.lean
+  p192-line-closure-lean-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: research/p192_extension_cover_20261012/lean
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and fresh-check line-closure theorem
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/p192_extension_cover_20261012/lean
+          auto-config: false
+          use-mathlib-cache: true
+          build: true
+          build-args: 'LineClosure'
+          test: false
+          lint: false
+          leanchecker: true
+          leanchecker-args: '--fresh --verbose LineClosure'
+      - name: Audit line-closure theorem axioms
+        run: lake env lean LineClosure.lean
   leaderboard-lean-proof:
     runs-on: ubuntu-latest
     timeout-minutes: 25
