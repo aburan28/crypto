@@ -10,11 +10,28 @@ Both primes have low limb 0xffffffff, hence Montgomery n' = 1. More importantly,
 
 The CUDA path adds explicit mad.lo.cc / madc.hi.cc product-row carry chains and hand-written sparse Montgomery reduction carry chains. A direct generalized-Mersenne/Solinas field is retained as a matched competitor, so the RTX PRO measurement decides rather than assuming either representation wins.
 
+## Pollard-rho ECDLP walk
+
+On top of the field layer this directory now carries a full Pollard-rho engine for the NIST prime curves, so the arithmetic target is also an ECDLP solver that matches the CPU engine in `src/cryptanalysis/ecdlp_nist/`.
+
+| File | What it is |
+|---|---|
+| `nist_curve.cuh` | Affine points and the small curve arithmetic the walk needs, generic over the field with a pluggable coefficient `a` (`AMinus3` for P-256/P-384). No Jacobian and no a=-3 assumption in the walk layer: the hot step never inverts. |
+| `nist_rho.cuh` | The r-adding walk: negation-map fold (fold 2, `sqrt(2)` fewer steps; j != 0 so `+-1` is all of Aut), distinguished points, fruitless-cycle detection and escape, splitmix64 seeds, SoA batched state, and `rho_batch_step` batching the one inversion across a thread's walks. Generic over `F::N`, so one body serves both curves. |
+| `nist_rho_host.hpp` | Host driver: jump-table build, the walk carrying each walk's `(a,b)` with `P=a*G+b*Q` in lockstep with `phase_b`, and collision -> logarithm. |
+| `test_rho.cpp` | CPU verification (below). |
+
+The CUDA kernels (`k_rho_seed`, `k_rho<C,Wc>`) and their runner live in `bench.cu` and call the same `rho_batch_step_w<Wc>` the CPU test cross-checks bit-for-bit against `rho_batch_step` for W = 2, 4, 8, 16, 32; its reference-passed `F::batch_inv_w<Wc>` is checked against `F::batch_inv` on 2000 random inputs per W. `./bench <threads> rho <W> <iters>` times only the walk; `./bench <threads>` runs the field and walk benches together.
+
 ## Correctness
 
 Run: cd gpu/nist && make test
 
-The test checks 20,000 random field pairs on each curve against Boost.Multiprecision and checks Jacobian doubling and mixed addition against independent affine arithmetic. The host path always uses portable uint64_t, so it remains the reference for the device specialization.
+`test_cpu` checks 20,000 random field pairs on each curve against Boost.Multiprecision and checks Jacobian doubling and mixed addition against independent affine arithmetic (Boost is a CI dependency).
+
+`test_rho` verifies the curve/walk/solver headers with **no external dependency**, on group-law identities that need no big-integer library: `a*inv(a)=1` and `batch_inv==inv`; `P+O=P`, `P+(-P)=O`, `[2]P` via add, associativity, `[a]G+[b]G=[a+b]G`, and `affine_add_with_inv==add`; the negation-map fold is a class function with the right aut code; the single step is deterministic; `rho_batch_step` (the exact kernel body) runs on the toy and emits only valid on-curve distinguished points; and the decisive end-to-end DLP solve on a ~2^20 prime-order toy curve whose `(n,G,Q,k)` were checked independently at construction. The folded walk solves it in fewer steps than the unfolded one, the expected `sqrt(2)`.
+
+**First device run is done** (see [RESULTS.md](RESULTS.md)): on one RTX PRO 6000 Blackwell the walk reaches 1.883 Gstep/s (P-256, global table) and 0.639 Gstep/s (P-384, shared table) at 256 threads/block, W=64, unrestricted registers, with the compile-time-W stepper, reference-passed batched inversion and an optional shared-memory jump table (`TABLE_SHARED=1`). Two first-run bugs (a host-only `batch_inv` that nvcc silently dropped from device code, and an unguarded `atomicAdd` on the null cycle counter) are fixed and covered by tests. Register caps (maxrregcount 96/128/160) all measured slower than unrestricted. `make test` still verifies everything on the CPU with no GPU; `make bench` needs `nvcc`.
 
 ## RTX PRO 6000 benchmark
 

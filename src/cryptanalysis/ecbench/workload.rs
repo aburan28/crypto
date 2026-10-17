@@ -18,6 +18,8 @@ use serde_json::{json, Value};
 
 use crate::binary_ecc::IrreduciblePoly;
 use crate::cryptanalysis::ecbench::canonical::{bare_id, compat_u128, derive_u128, derive_u64};
+use crate::cryptanalysis::ecbench::conductor_gap::{self, GapLevel};
+use crate::cryptanalysis::ecbench::fp4::Fp4Instance;
 use crate::cryptanalysis::ecbench_large_prime::binary_explicit_instance;
 use crate::cryptanalysis::ic_boundary::{
     find_prime_order_curve, koblitz_instance, random_binary_instance, roster_prime_instance,
@@ -45,6 +47,17 @@ pub enum CurveSpec {
         n: u32,
         seed: u64,
         max_cofactor: u64,
+    },
+    /// `conductor_gap::{crater, floor}(params(ell, t), seed)`: a curve of
+    /// the CM pair over `GF((t² + 19ℓ²)/4)` with prime order `q + 1 − t`,
+    /// at the crater (endomorphism conductor 1) or the floor (conductor
+    /// `ℓ`), certified from the Frobenius discriminant `−19ℓ²` alone.
+    /// `seed` drives the floor search and is ignored at the crater.
+    ConductorGap {
+        ell: u64,
+        t: u64,
+        level: GapLevel,
+        seed: u64,
     },
     /// A prime curve given outright: `y² = x³ + ax + b` over `F_p`, the
     /// group order, the prime subgroup order `r` and a generator of it.
@@ -75,6 +88,12 @@ pub enum CurveSpec {
         gx: u64,
         gy: u64,
     },
+    /// `ecbench::fp4::Fp4Instance::build(p, seed)`: a curve over
+    /// `F_{p⁴}` with rational 2-torsion `T = (x₀, 0)`, `f'(x₀) = c²`
+    /// (`quartic_folds::generate_translation_instance(p, seed, 16)`),
+    /// `p ≡ 1 (mod 4)`, `p < 2^15`.  Unregistered: ICV1 has no
+    /// extension-field form.
+    Fp4Translation { p: u64, seed: u64 },
 }
 
 impl CurveSpec {
@@ -115,6 +134,19 @@ impl CurveSpec {
             } => random_binary_instance(n, seed, max_cofactor)
                 .map(|i| Instance::Binary(Box::new(i)))
                 .ok_or_else(|| format!("no binary curve found for n={n} seed={seed}")),
+            CurveSpec::ConductorGap {
+                ell,
+                t,
+                level,
+                seed,
+            } => {
+                let p = conductor_gap::params(ell, t)?;
+                match level {
+                    GapLevel::Crater => conductor_gap::crater(p),
+                    GapLevel::Floor => conductor_gap::floor(p, seed),
+                }
+                .map(Instance::Prime)
+            }
             CurveSpec::PrimeExplicit {
                 p,
                 a,
@@ -161,6 +193,9 @@ impl CurveSpec {
                 gy,
             } => binary_explicit_instance(n, modulus, a, b, group_order, r, gx, gy)
                 .map(|i| Instance::Binary(Box::new(i))),
+            CurveSpec::Fp4Translation { p, seed } => {
+                Fp4Instance::build(p, seed).map(|i| Instance::Fp4(Box::new(i)))
+            }
         }
     }
 
@@ -197,7 +232,7 @@ impl CurveSpec {
             // Preserve the original Koblitz constructor: it carries the
             // certified Frobenius action and endomorphism identity that a
             // generic explicit binary instance intentionally does not claim.
-            Instance::Binary(_) | Instance::Wide(_) => None,
+            Instance::Binary(_) | Instance::Wide(_) | Instance::Fp4(_) => None,
         }
     }
 
@@ -217,12 +252,24 @@ impl CurveSpec {
                 seed,
                 max_cofactor,
             } => format!("random_binary_instance({n}, {seed}, {max_cofactor})"),
+            CurveSpec::ConductorGap {
+                ell,
+                t,
+                level,
+                seed,
+            } => match level {
+                GapLevel::Crater => format!("conductor_gap::crater(params({ell}, {t}))"),
+                GapLevel::Floor => format!("conductor_gap::floor(params({ell}, {t}), {seed})"),
+            },
             CurveSpec::PrimeExplicit { p, a, b, .. } => {
                 format!("PrimeCurve {{ p: {p}, a: {a}, b: {b} }} (explicit)")
             }
             CurveSpec::BinaryExplicit {
                 n, modulus, a, b, ..
             } => format!("binary_explicit_instance({n}, 0x{modulus:x}, 0x{a:x}, 0x{b:x}, ...)"),
+            CurveSpec::Fp4Translation { p, seed } => {
+                format!("quartic_folds::generate_translation_instance({p}, {seed}, 16)")
+            }
         }
     }
 }
@@ -233,6 +280,9 @@ pub enum Instance {
     Binary(Box<BinaryInstance>),
     /// A Koblitz curve past one word (`64 ≤ n ≤ 127`).
     Wide(Box<WideInstance>),
+    /// A curve over `F_{p⁴}` (`ecbench::fp4`); a point is one 64-bit word
+    /// per coordinate, four 16-bit limbs.
+    Fp4(Box<Fp4Instance>),
 }
 
 /// A wide Koblitz curve and the strong reference's arithmetic on it, which
@@ -343,10 +393,31 @@ impl Instance {
             Instance::Prime(i) => u128::from(i.r),
             Instance::Binary(i) => u128::from(i.r),
             Instance::Wide(i) => i.kc.r,
+            Instance::Fp4(i) => u128::from(i.r),
         }
     }
 
     pub fn facts(&self, spec: &CurveSpec) -> CurveFacts {
+        if let Instance::Fp4(i) = self {
+            let (icv1, slug) = i.names();
+            let g = Fp4Instance::encode(&i.g).unwrap_or_default();
+            return CurveFacts {
+                slug,
+                icv1,
+                family: "fp4".into(),
+                construction: spec.call(),
+                field_degree: None,
+                field_bits: Some(64 - i.p.leading_zeros()),
+                group_order: u128::from(i.group_order),
+                r: u128::from(i.r),
+                cofactor: u128::from(i.cofactor),
+                generator: g,
+                automorphisms_available: 2,
+                registered: false,
+                ec1: None,
+                curve_uid: None,
+            };
+        }
         let (id, family, degree, bits, order, r, h, gx, gy, aut) = match self {
             Instance::Prime(i) => (
                 i.curve_id(),
@@ -376,6 +447,7 @@ impl Instance {
                 u128::from(i.generator.y),
                 if i.koblitz.is_some() { 2 * i.n } else { 2 },
             ),
+            Instance::Fp4(_) => unreachable!("returned above"),
             Instance::Wide(i) => (
                 i.kc.curve_id(),
                 "koblitz",
@@ -425,6 +497,9 @@ impl Instance {
         // A one-word instance's subgroup order fits a word, so a reduced
         // scalar does too.
         let k = u64::try_from(k % self.r()).ok()?;
+        if let Instance::Fp4(i) = self {
+            return i.mul_generator_hex(k);
+        }
         match self {
             Instance::Prime(i) => {
                 let p = i.curve.mul(&mut scratch, i.generator_point(), k);
@@ -435,7 +510,7 @@ impl Instance {
                 let p = g.mul(&mut scratch, i.generator, k);
                 (!p.infinity).then(|| [format!("0x{:x}", p.x), format!("0x{:x}", p.y)])
             }
-            Instance::Wide(_) => unreachable!("returned above"),
+            Instance::Wide(_) | Instance::Fp4(_) => unreachable!("returned above"),
         }
     }
 }
@@ -455,6 +530,10 @@ impl Instance {
     ) -> Option<([String; 2], u64)> {
         let model = model_hash(curve);
         let mut scratch = GroupOps::default();
+        if let Instance::Fp4(_) = self {
+            // Planted targets only on E(F_{p⁴}): no public-target law yet.
+            return None;
+        }
         if let Instance::Wide(i) = self {
             // PUBLIC_TARGET_LAW_WIDE: the same inputs as decimal strings, a
             // 128-bit draw, its top bit choosing the ordinate.
@@ -500,7 +579,7 @@ impl Instance {
                         return Some(([format!("0x{:x}", q.x), format!("0x{:x}", q.y)], counter));
                     }
                 }
-                Instance::Wide(_) => unreachable!("handled above"),
+                Instance::Wide(_) | Instance::Fp4(_) => unreachable!("handled above"),
                 Instance::Binary(i) => {
                     let mask = if i.n >= 64 {
                         u64::MAX
@@ -553,12 +632,23 @@ pub enum TargetKind {
     /// `Q = [k]G` for a derived `k`, kept to check the answer against.
     #[default]
     Planted,
+    /// The same `k` on every curve of one order: the derivation hashes
+    /// `[r, target_seed, index]` only, so a paired comparison can
+    /// divide the same planted scalar's cost on two isogenous curves
+    /// (their `r` is equal) and resample targets jointly.  A paired
+    /// quotient is a different statistic from the independent-target
+    /// law, not a replacement for it.
+    PlantedShared,
     /// `Q` hashed to the subgroup; the answer is checked by `[d]G = Q`.
     Public,
 }
 
 impl TargetKind {
     pub fn is_planted(&self) -> bool {
+        matches!(self, TargetKind::Planted | TargetKind::PlantedShared)
+    }
+    /// Only the default kind stays unserialised.
+    pub fn is_plain_planted(&self) -> bool {
         *self == TargetKind::Planted
     }
 }
@@ -567,6 +657,18 @@ impl TargetKind {
 /// inputs, hashed as decimal strings, with a 128-bit draw.  A one-word
 /// order keeps [`TARGET_LAW`], so every existing workload is unchanged.
 pub const TARGET_LAW_WIDE: &str = "uniform_scalar_sha256_v2";
+
+/// The paired planted-scalar law: `k` derives from `[r, target_seed,
+/// index]` alone — no curve model — so every curve of the same subgroup
+/// order draws the same scalar list.  One-word orders only (the paired
+/// comparisons this serves run on one-word instances).
+pub const SHARED_TARGET_LAW: &str = "uniform_scalar_sha256_shared_v1";
+
+/// `k ∈ [1, r−1]` for target `index` under `target_seed`, the same on
+/// every curve of subgroup order `r`.
+pub fn shared_planted_scalar(r: u64, target_seed: u64, index: u64) -> u128 {
+    u128::from(1 + derive_u64(SHARED_TARGET_LAW, &[r, target_seed, index]) % (r - 1))
+}
 
 /// `k ∈ [1, r−1]` for target `index` under `target_seed`.
 pub fn planted_scalar(curve: &CurveFacts, target_seed: u64, index: u64) -> u128 {
@@ -658,6 +760,15 @@ impl Workload {
                 };
                 (law, q, Some(k), None)
             }
+            TargetKind::PlantedShared => {
+                let r = u64::try_from(curve.r)
+                    .map_err(|_| "planted_shared targets need a one-word subgroup order")?;
+                let k = shared_planted_scalar(r, target_seed, index);
+                let q = inst
+                    .mul_generator_hex(k)
+                    .ok_or("the planted scalar gave the identity; the subgroup order is wrong")?;
+                (SHARED_TARGET_LAW, q, Some(k), None)
+            }
             TargetKind::Public => {
                 // With r | h the r-torsion can be Z/r × Z/r, and a cleared
                 // point need not lie in <G>.
@@ -700,6 +811,8 @@ impl Workload {
     pub fn kind(&self) -> TargetKind {
         if self.target_law == PUBLIC_TARGET_LAW || self.target_law == PUBLIC_TARGET_LAW_WIDE {
             TargetKind::Public
+        } else if self.target_law == SHARED_TARGET_LAW {
+            TargetKind::PlantedShared
         } else {
             TargetKind::Planted
         }
@@ -865,6 +978,61 @@ mod tests {
         assert!(d < 1.63 / (n as f64).sqrt(), "KS D = {d}");
         let gap = xs.iter().map(|x| (x - 0.5).abs()).sum::<f64>() / n as f64;
         assert!((gap - 0.25).abs() < 0.005, "mean gap {gap}");
+    }
+
+    #[test]
+    fn conductor_gap_pair_shares_order_and_differs_in_j() {
+        let crater = CurveSpec::ConductorGap {
+            ell: 263,
+            t: 241,
+            level: GapLevel::Crater,
+            seed: 0,
+        };
+        let floor = CurveSpec::ConductorGap {
+            ell: 263,
+            t: 241,
+            level: GapLevel::Floor,
+            seed: 3,
+        };
+        let (Instance::Prime(c), Instance::Prime(f)) =
+            (crater.build().unwrap(), floor.build().unwrap())
+        else {
+            panic!("conductor_gap builds prime instances");
+        };
+        assert_eq!(
+            (c.curve.p, c.group_order, c.cofactor),
+            (343_073, 342_833, 1)
+        );
+        assert_eq!(
+            (f.curve.p, f.group_order, f.cofactor),
+            (343_073, 342_833, 1)
+        );
+        assert_ne!(
+            conductor_gap::j_invariant(&c.curve),
+            conductor_gap::j_invariant(&f.curve)
+        );
+        assert_eq!(
+            conductor_gap::j_invariant(&c.curve),
+            343_073 - 884_736 % 343_073
+        );
+        // The explicit form a measured child receives rebuilds the same curve.
+        let ex = CurveSpec::explicit(&Instance::Prime(f.clone())).unwrap();
+        let Instance::Prime(f2) = ex.build().unwrap() else {
+            panic!()
+        };
+        assert_eq!(
+            (f2.curve.a, f2.curve.b, f2.generator),
+            (f.curve.a, f.curve.b, f.generator)
+        );
+        assert_eq!(crater.call(), "conductor_gap::crater(params(263, 241))");
+        assert!(CurveSpec::ConductorGap {
+            ell: 263,
+            t: 3,
+            level: GapLevel::Crater,
+            seed: 0
+        }
+        .build()
+        .is_err());
     }
 
     #[test]

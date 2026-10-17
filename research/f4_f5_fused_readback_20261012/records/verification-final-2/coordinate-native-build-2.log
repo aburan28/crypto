@@ -1,0 +1,10 @@
+warning: unused import: `ToPrimitive`
+  --> /workspace/crypto/src/cryptanalysis/curve_traits/mod.rs:50:31
+   |
+50 | use num_traits::{One, Signed, ToPrimitive, Zero};
+   |                               ^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: 1 warning emitted
+

@@ -281,8 +281,15 @@ fn run(
     let stderr = err_t.join().unwrap_or_default();
     Ok(status.map(|s| Ran {
         status: s.code().unwrap_or_else(|| {
-            use std::os::unix::process::ExitStatusExt;
-            -s.signal().unwrap_or(0)
+            #[cfg(unix)]
+            {
+                use std::os::unix::process::ExitStatusExt;
+                -s.signal().unwrap_or(0)
+            }
+            #[cfg(not(unix))]
+            {
+                -1
+            }
         }),
         stderr,
     }))

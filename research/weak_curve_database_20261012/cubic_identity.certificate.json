@@ -1,0 +1,54 @@
+{
+  "schema": "identity.certificate/v1",
+  "id": "IDC1h3561e7fee541a297",
+  "statement": {
+    "name": "Cubic cocycle denominator-cleared product",
+    "source": "research/weak_curve_database_20261012/lean/WeakCurveDatabase.lean; forward Hilbert-90 identity",
+    "variables": [
+      "a",
+      "b",
+      "c"
+    ],
+    "degree_bound": 3,
+    "lhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "var",
+          "args": "b"
+        },
+        {
+          "op": "var",
+          "args": "c"
+        },
+        {
+          "op": "var",
+          "args": "a"
+        }
+      ]
+    },
+    "rhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "var",
+          "args": "a"
+        },
+        {
+          "op": "var",
+          "args": "b"
+        },
+        {
+          "op": "var",
+          "args": "c"
+        }
+      ]
+    }
+  },
+  "modulus": 2305843009213693951,
+  "points": 32,
+  "seed": 35347850463489,
+  "value_digest": "e4eacf0e216de5f263e90bab543bcb1664c16328860652bc1a7aef87dc091802",
+  "independence": "issued by examples/weak_curve_cubic_identity.rs using the native certificate module; independently replayable from the sealed statement id and seed",
+  "proof": null
+}

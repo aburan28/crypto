@@ -39,13 +39,35 @@ companion as much as a working library.
 | `research/<topic>_<date>/` | frozen experiment directories (harness, contract, results) that the notes cite |
 | `experiments/`, `figures/` | older frozen run outputs and plots referenced by the notes |
 | `isolab/` | standalone experiment execution environment: NATS hub, Linux workers with enforced measurement fidelity, MCP server; see [`isolab/README.md`](isolab/README.md) |
+| `spotlab/` | resumable throughput jobs on the cheapest AWS/GCP spot capacity: checkpoints in S3/GCS, automatic resume after preemption, MCP server; not a measurement environment; see [`spotlab/README.md`](spotlab/README.md) |
 | `docs/` | published pages (`index-calculus-scoreboard.html`, `algorithm-lab.html`, the ECC2K-130 status site), guides and primers in `docs/guides/`, the roadmap in `docs/DEFERRED.md` |
 | `ecc2k130/`, `gpu/`, `hdl/` | the ECC2K-130 rho campaign: fleet tooling, GPU kernels, FPGA cost models |
 | `sage/`, `scripts/`, `secp256k1_cm_audit/`, `cd_attack/`, `quantum_circuit_secp256k1/` | Sage/PARI/Python companions to specific notes |
-| `paper/` | manuscript sources |
+| `papers/` | manuscript sources, one directory per paper (`papers/README.md` is the index) |
+| [`problems/`](problems/README.md) | named research and audit blockers, supporting evidence, and concrete conditions for moving past them |
+| [`backlog/`](backlog/README.md) | experiments we would like to run: one validated card each (`backlog validate`), leased and run through cairn, results landed in `research/` by PR |
 | `AGENTS.md` | the reporting convention (boundary, table, ratio) every research thread follows |
 
 ## Quick tour
+
+The dedicated [`isogeny` executable](tools/isogeny-cli/README.md) screens P192/P224
+prime degrees, constructs explicit isogenies, and verifies their certificates.
+Download its platform archive from [Releases](https://github.com/aburan28/crypto/releases)
+and run it directly:
+
+```sh
+isogeny search --curve p224 --ell 1471 --out ./p224-1471
+isogeny search --curve p192 --ell 10453 --out ./p192-10453
+isogeny verify --input ./p224-1471
+isogeny curves
+isogeny search --curve P-384 --ell 19 --out ./p384-19
+isogeny search --curve P-521 --ell 7 --out ./p521-7
+```
+
+The executable embeds its algorithms and standard curve data. The kernel route at
+these two degrees constructs one Frobenius eigenline of two and labels coverage
+`PARTIAL`. The repository's Release workflow builds the platform archives and
+publishes them through ReleaseMe; PR runs test the archives before publication.
 
 ```bash
 # Build
@@ -98,6 +120,24 @@ command remains the default for cargo run.
 The [EC index-calculus baseline](research/index_calculus_baseline_20260914/README.md)
 adds counting bounds, an operation-accounting contract, and a certified WDSat control
 with frozen measurements and reproducible commands.
+
+## Elliptic-curve surface tools
+
+[`tools/ecdlp-surfaces`](tools/ecdlp-surfaces/README.md) is a standalone Rust
+crate with three command-line tools: `surface_search` enumerates containing
+quadrics, `transfer_check` checks the transported group law and prime subgroup,
+and `frobenius_filter` applies necessary conditions to supplied abelian-surface
+polynomials. Point arithmetic uses small prime fields, up to 10,000. Equivalent
+embeddings preserve the ECDLP; no destination-solver speedup is established.
+The [report](docs/ecdlp-surfaces/REPORT.md) includes the diagram, PDF, fixtures,
+and native identity certificates. Run `tools/ecdlp-surfaces/check.sh` to validate
+the crate and replay its examples.
+
+For genus-2 and higher Jacobian transfers, use the
+[`ecdlp-surfaces` skill](.agents/skills/ecdlp-surfaces/SKILL.md) and its
+[higher-genus reference](.agents/skills/ecdlp-surfaces/references/higher-genus.md)
+for the existing cover/arithmetic tools, native pullback APIs, and construction
+and subgroup-validation requirements.
 
 ## Isogeny walks
 
@@ -1010,7 +1050,7 @@ makes every orbit claimable. For points already collected without counters,
 - [`research/nagao_relations/`](research/nagao_relations/README.md) — implemented Riemann–Roch incidence and norm alternatives to summation polynomials, plus function-coefficient search using exact subspace support divisibility; exhaustive toy correctness controls, with no ECDLP speedup claim.
 - [`research/notes/ecc2k130/RESEARCH_ISOGENY_CLASS_SEARCH.md`](research/notes/ecc2k130/RESEARCH_ISOGENY_CLASS_SEARCH.md) — exhaustive search of the ECC2K-130 isogeny class for a curve whose Gröbner solving degree is lower: the class structure derived exactly (`Σ_{f|c} h(O_f) = 2^65.06`, conductor `263 · 146505763881528721`), the 263 vertices a computable isogeny reaches, and the proof that the curve coefficient enters the descended Semaev system *below* the leading form — so the degree of regularity is constant on the whole class (`experiments/isogeny_class_search.json`).
 - [`research/notes/ecc2k130/RESEARCH_ECC2K130_EXTENSION.md`](research/notes/ecc2k130/RESEARCH_ECC2K130_EXTENSION.md) — whether base-changing ECC2K-130 to `F_2^(131e)` buys a cheaper attack: the target group and its automorphisms are invariant under base change, and because 131 is prime every subfield and every Frobenius-stable subspace of `F_2^(131e)` is either too large to enumerate (`2^131` factor base, `2^70.19×` rho) or too small to generate (contained in the subgroup `E(F_2^e)`, so no relation exists), with nothing in between at any `e` (`experiments/ecc2k130_extension_field_boundary.json`).
-- [`research/notes/ecc2k130/RESEARCH_ECC2K130_HYPERELLIPTIC.md`](research/notes/ecc2k130/RESEARCH_ECC2K130_HYPERELLIPTIC.md) — whether ECC2K-130 maps to a hyperelliptic curve of another genus: covers over `F_2^131` exist in every genus and all cost at least `2^131` (`2^70.19×` rho), while over `F_2` the GHS genus is `1`, `2^129` or `2^130` for *every* curve over `F_2^131` (2 is a primitive root mod 131), and at genus 1 the transfer is exactly the zero map on `⟨G⟩`. The genus that would pay sits in the window `[130, 290…300]`, `2^120.77` away from every GHS descent (corrected 2026-10-06: not from every construction); `⟨G⟩` is `A(F_2)` for a simple 130-dimensional `A` with `#A(F_2) = r` exactly, so any correspondence over `F_2` needs genus `≥ 130` (`experiments/ecc2k130_hyperelliptic_cover_boundary.json`).
+- [`research/notes/ecc2k130/RESEARCH_ECC2K130_HYPERELLIPTIC.md`](research/notes/ecc2k130/RESEARCH_ECC2K130_HYPERELLIPTIC.md) — whether ECC2K-130 maps to a hyperelliptic curve of another genus: covers over `F_2^131` exist in every genus and all cost at least `2^131` (`2^70.19×` rho), while over `F_2` the GHS genus is `1`, `2^130 − 1` or `2^130` for *every* curve over `F_2^131` (2 is a primitive root mod 131; corrected 2026-10-13 from `2^129`, see `docs/audits/GHS_MAGIC_NUMBER_MMT_CORRECTION_20261013.md`), and at genus 1 the transfer is exactly the zero map on `⟨G⟩`. The genus that would pay sits in the window `[130, 290…300]`, `2^121.77` away from every GHS descent (corrected 2026-10-06: not from every construction); `⟨G⟩` is `A(F_2)` for a simple 130-dimensional `A` with `#A(F_2) = r` exactly, so any correspondence over `F_2` needs genus `≥ 130` (`experiments/ecc2k130_hyperelliptic_cover_boundary.json`).
 - [`research/notes/ecc2k130/RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md`](research/notes/ecc2k130/RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md) — whether a curve carrying the ECC2K-130 subgroup can be produced, by four routes in native Rust (`cryptanalysis::curve_construction`): the reduction of the modular curve `X_H(3²·7²·263²)` carries `A` explicitly at genus `508,799,809 ≈ 2^28.92`, a hundred bits below GHS but `2^20.69` above the window; every geometrically cyclic degree-131 cover of a curve of genus ≤ 1 needs genus `≥ 1300`; exhaustive toys over `F_2` find `A_n` is never itself a Jacobian at `n = 3, 5`, while genus-3 curves carry it at `n = 3`; the Klein quartic is the `n = 3` instance and the non-GHS counterexample that corrects the hyperelliptic note (`research/notes/ecc2k130/curve_construction_20261006/`).
 - [`research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION.md`](research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION.md) — whether an ECC2K-130 point decomposes into a sum of factor-base points, answered in three parts: they **exist** (the yield law `C(|F|,m)/#E` confirmed to within `1.09×` over twelve toy cells, one small-base outlier at `0.57×` aside; `dim V ≥ 45` suffices at `m = 3`), they are **admissible** (the cofactor-4 class histogram measured on the challenge curve admits every `m ≥ 2`, with class parity `= Tr(x(P))` on every sample, and certified `m = 2, 3, 4` witnesses at full size with `S₄ = 0`; a base inside `ker Tr` sits in the index-2 subgroup `2E`, so its sums are spread over `#E/2` and yield **twice** what the law says — measured exhaustively as `0.50×#E` against `1.00×#E` at `n = 13, 17, 19`, worth exactly one bit; and a whole-base yes/no detector **localises its own witness** by swapping a candidate summand for a class-matched base point, measured over eight rungs with zero sub-base queries and both failure modes tracking the `Θ(m/|F|)` collision law, so deciding and localising are the same problem), and they cannot be **found** — `relations × targets × oracle = m·2^131` independently of `dim V`, so the best implicit-base variant is `2^132.58 = 2^71.77×` rho and the best Frobenius-stable one `2^124.99 = 2^64.18×` rho on a materialised base; no table budget from `2^30` to `2^70` entries beats plain BSGS on the same memory, and the oracle would have to beat exhaustive search over its own candidate set by `2^(70.19 + log₂ m)` (`experiments/ecc2k130_point_decomposition.json`).
 - [`research/notes/ecc2k130/RESEARCH_ECC2K130_RR_SOLVER_PANEL.md`](research/notes/ecc2k130/RESEARCH_ECC2K130_RR_SOLVER_PANEL.md) — the Riemann-Roch (Nagao) decomposition solvers run on the **real** ECC2K-130 curve against matched Semaev controls, one factor base, one arity, one budget: at `d = 6` the two RR solvers resolve **32/32** slots and both controls **0/32**; 128 trials, zero errors, **28 independently verified three-summand relations** on the challenge curve, every complete planted run recovering its planted triple; `quadratic-image` is the strongest at full size (`0.827x` the counted field operations of `quadratic-optimized` on the same candidate sequence). It prices an **oracle**, not an attack: at `d in {6,7}` a uniform target decomposes with probability at most `5.4e-36`, against `d = 45` for existence, so no yield, `S` or rho ratio is claimed. Then the null-object control lands: brute-force **pair enumeration** exhausts the same `d = 6` instances in **0.494x** the counted field operations and returns identical solution sets, and the method-ceiling measurement to `d = 8` shows the RR encoding visiting about `|F|^2` candidates where pair enumeration visits `|F|^2/2` — same `Theta(|F|^2)` order, constant near two, in the wrong direction. The correct reading is therefore *the better of two algebraic encodings under one SAT solver*, not a good oracle; and the one route that genuinely exploits the `F_2`-subspace structure rather than re-indexing a search — Weil descent of `S_4` in the V-basis, never run at `n = 131` before — yields a **linear NO-certificate** (poly(`d`), no search) that is available only for `d <= 6`, because the `S_4` value set saturates `F_2^131` at `d = 7` while decompositions start at `d = 45`, measured at `d = 45` itself; the falsification target needs a different exponent and nine rounds produced constants. Batching is priced too and cuts the same way

@@ -120,7 +120,11 @@ impl Field {
             }
         }
         let squares = (0..nn).map(|k| reduced[k][k]).collect();
-        Field { n: nn, reduced, squares }
+        Field {
+            n: nn,
+            reduced,
+            squares,
+        }
     }
 }
 
@@ -131,10 +135,22 @@ struct Sym {
 }
 impl Sym {
     fn zero(n: usize) -> Self {
-        Sym { coords: vec![Vec::new(); n] }
+        Sym {
+            coords: vec![Vec::new(); n],
+        }
     }
     fn constant(v: u64, n: usize) -> Self {
-        Sym { coords: (0..n).map(|k| if (v >> k) & 1 == 1 { vec![[0u64; WORDS]] } else { Vec::new() }).collect() }
+        Sym {
+            coords: (0..n)
+                .map(|k| {
+                    if (v >> k) & 1 == 1 {
+                        vec![[0u64; WORDS]]
+                    } else {
+                        Vec::new()
+                    }
+                })
+                .collect(),
+        }
     }
     fn from_subspace_vars(basis: &[u64], offset: usize, n: usize) -> Self {
         let mut coords: Vec<Vec<Mask>> = vec![Vec::new(); n];
@@ -145,10 +161,19 @@ impl Sym {
                 }
             }
         }
-        Sym { coords: coords.into_iter().map(normalize).collect() }
+        Sym {
+            coords: coords.into_iter().map(normalize).collect(),
+        }
     }
     fn add(&self, o: &Self) -> Self {
-        Sym { coords: self.coords.iter().zip(o.coords.iter()).map(|(a, b)| poly_add(a, b)).collect() }
+        Sym {
+            coords: self
+                .coords
+                .iter()
+                .zip(o.coords.iter())
+                .map(|(a, b)| poly_add(a, b))
+                .collect(),
+        }
     }
     fn mul(&self, o: &Self, f: &Field) -> Self {
         let n = f.n;
@@ -170,7 +195,9 @@ impl Sym {
                 }
             }
         }
-        Sym { coords: acc.into_iter().map(normalize).collect() }
+        Sym {
+            coords: acc.into_iter().map(normalize).collect(),
+        }
     }
     fn square(&self, f: &Field) -> Self {
         let n = f.n;
@@ -183,12 +210,16 @@ impl Sym {
                 }
             }
         }
-        Sym { coords: acc.into_iter().map(normalize).collect() }
+        Sym {
+            coords: acc.into_iter().map(normalize).collect(),
+        }
     }
     /// Multiply every coordinate by a Boolean variable.
     fn scale_var(&self, v: usize) -> Self {
         let m = mask_var(v);
-        Sym { coords: self.coords.iter().map(|p| poly_mul_mono(p, &m)).collect() }
+        Sym {
+            coords: self.coords.iter().map(|p| poly_mul_mono(p, &m)).collect(),
+        }
     }
 }
 
@@ -225,7 +256,9 @@ fn rank_u64(vectors: &[u64]) -> usize {
 fn normal_basis(n: u32, irr: &IrreduciblePoly, rng: &mut StdRng) -> (Vec<u64>, Vec<u64>) {
     loop {
         let alpha = elem_from_bits(rng.gen_range(1..(1u64 << n)), n);
-        let conj: Vec<u64> = (0..n).map(|j| bits_of(&alpha.square_k_times(j, irr))).collect();
+        let conj: Vec<u64> = (0..n)
+            .map(|j| bits_of(&alpha.square_k_times(j, irr)))
+            .collect();
         if rank_u64(&conj) as u32 != n {
             continue;
         }
@@ -285,7 +318,17 @@ impl Layout {
         let (s0, s1, s2) = (0, n, 2 * n);
         let (c1, c2) = (3 * n, 3 * n + l);
         let (u1, u2) = (3 * n + 2 * l, 4 * n + 2 * l);
-        Layout { n, s0, s1, s2, c1, c2, u1, u2, n_vars: 5 * n + 2 * l }
+        Layout {
+            n,
+            s0,
+            s1,
+            s2,
+            c1,
+            c2,
+            u1,
+            u2,
+            n_vars: 5 * n + 2 * l,
+        }
     }
     fn shift_mask(&self, m: &Mask) -> Mask {
         let mut out = *m;
@@ -317,31 +360,53 @@ enum Fam {
     OneQuad(u8, usize, usize),
 }
 
-fn build_symmetric(n: u32, l: u32, irr: &IrreduciblePoly, f: &Field, b: u64, r: &F2mElement, normal: &[u64], pinv: &[u64]) -> (Layout, Vec<Poly>, Vec<Fam>) {
+fn build_symmetric(
+    n: u32,
+    l: u32,
+    irr: &IrreduciblePoly,
+    f: &Field,
+    b: u64,
+    r: &F2mElement,
+    normal: &[u64],
+    pinv: &[u64],
+) -> (Layout, Vec<Poly>, Vec<Fam>) {
     let nn = n as usize;
     let lay = Layout::new(nn, l as usize);
-    let window: Vec<F2mElement> = (0..l).map(|k| F2mElement::from_bit_positions(&[k], n)).collect();
+    let window: Vec<F2mElement> = (0..l)
+        .map(|k| F2mElement::from_bit_positions(&[k], n))
+        .collect();
     let u1 = Sym::from_subspace_vars(normal, lay.u1, nn);
     let u2 = Sym::from_subspace_vars(normal, lay.u2, nn);
     let barrel = |s_off: usize, c_off: usize| -> Sym {
         let mut acc = Sym::zero(nn);
         for k in 0..nn {
-            let shifted: Vec<u64> = window.iter().map(|w| bits_of(&w.square_k_times(k as u32, irr))).collect();
+            let shifted: Vec<u64> = window
+                .iter()
+                .map(|w| bits_of(&w.square_k_times(k as u32, irr)))
+                .collect();
             acc = acc.add(&Sym::from_subspace_vars(&shifted, c_off, nn).scale_var(s_off + k));
         }
         acc
     };
     let mut xr = Sym::zero(nn);
     for k in 0..nn {
-        xr = xr.add(&Sym::constant(bits_of(&r.square_k_times(k as u32, irr)), nn).scale_var(lay.s0 + k));
+        xr = xr.add(
+            &Sym::constant(bits_of(&r.square_k_times(k as u32, irr)), nn).scale_var(lay.s0 + k),
+        );
     }
     let mut eqs = Vec::new();
     let mut fam = Vec::new();
-    for (j, e) in to_normal(&sym_s3(&u1, &u2, &xr, b, f), pinv).into_iter().enumerate() {
+    for (j, e) in to_normal(&sym_s3(&u1, &u2, &xr, b, f), pinv)
+        .into_iter()
+        .enumerate()
+    {
         eqs.push(e);
         fam.push(Fam::S3(j));
     }
-    for (i, (u, s_off, c_off)) in [(&u1, lay.s1, lay.c1), (&u2, lay.s2, lay.c2)].into_iter().enumerate() {
+    for (i, (u, s_off, c_off)) in [(&u1, lay.s1, lay.c1), (&u2, lay.s2, lay.c2)]
+        .into_iter()
+        .enumerate()
+    {
         let diff = u.add(&barrel(s_off, c_off));
         for (j, e) in to_normal(&diff.coords, pinv).into_iter().enumerate() {
             eqs.push(e);
@@ -406,7 +471,12 @@ impl Gf {
         for low in (1u64..(1u64 << d)).step_by(2) {
             let f = (1u64 << d) | low;
             if Self::is_irreducible(f, d) {
-                let mut g = Gf { d, poly: f, exp: Vec::new(), log: Vec::new() };
+                let mut g = Gf {
+                    d,
+                    poly: f,
+                    exp: Vec::new(),
+                    log: Vec::new(),
+                };
                 if d <= 16 {
                     g.build_tables();
                 }
@@ -416,7 +486,12 @@ impl Gf {
         panic!("no irreducible of degree {d}");
     }
     fn is_irreducible(f: u64, d: u32) -> bool {
-        let g = Gf { d, poly: f, exp: Vec::new(), log: Vec::new() };
+        let g = Gf {
+            d,
+            poly: f,
+            exp: Vec::new(),
+            log: Vec::new(),
+        };
         let mut x = 2u64;
         for _ in 1..=(d / 2) {
             x = g.mul_slow(x, x);
@@ -543,7 +618,9 @@ fn rank_gf(gf: &Gf, mut m: Vec<Vec<u64>>) -> usize {
     let cols = m[0].len();
     let mut rank = 0;
     for c in 0..cols {
-        let Some(p) = (rank..m.len()).find(|&r| m[r][c] != 0) else { continue };
+        let Some(p) = (rank..m.len()).find(|&r| m[r][c] != 0) else {
+            continue;
+        };
         m.swap(rank, p);
         let inv = gf.inv(m[rank][c]);
         for v in m[rank].iter_mut() {
@@ -571,7 +648,9 @@ fn rank_bits(mut m: Vec<Vec<u64>>, cols: usize) -> usize {
     let mut rank = 0;
     for c in 0..cols {
         let (w, bit) = (c / 64, 1u64 << (c % 64));
-        let Some(p) = (rank..m.len()).find(|&r| m[r][w] & bit != 0) else { continue };
+        let Some(p) = (rank..m.len()).find(|&r| m[r][w] & bit != 0) else {
+            continue;
+        };
         m.swap(rank, p);
         let pivot = m[rank].clone();
         for r in 0..m.len() {
@@ -653,10 +732,17 @@ fn main() {
         let r = elem_from_bits(rng.gen_range(1..(1u64 << n)), n);
         let (lay, eqs, fam) = build_symmetric(n, l, &irr, &f, 1, &r, &normal, &pinv);
         if lay.n_vars > 64 * WORDS {
-            println!("| {n} | {l} | {d} | {} | — | — | too many variables | | | | | | | | | | |", lay.n_vars);
+            println!(
+                "| {n} | {l} | {d} | {} | — | — | too many variables | | | | | | | | | | |",
+                lay.n_vars
+            );
             continue;
         }
-        let index: HashMap<(u8, usize, usize, u8), usize> = fam.iter().enumerate().map(|(i, &f)| (fam_key(f), i)).collect();
+        let index: HashMap<(u8, usize, usize, u8), usize> = fam
+            .iter()
+            .enumerate()
+            .map(|(i, &f)| (fam_key(f), i))
+            .collect();
         // σ-invariance check of the equation set
         let mut invariant = true;
         for (ei, p) in eqs.iter().enumerate() {
@@ -757,19 +843,25 @@ fn main() {
         let gf = Gf::new(d);
         let zeta_inv = gf.inv(gf.root_of_unity(n as u64, &mut rng));
         let free_cols: Vec<Mask> = {
-            let mut v: Vec<Mask> = col_info.values().filter(|(_, _, fx)| !fx).map(|(c, _, _)| *c).collect();
+            let mut v: Vec<Mask> = col_info
+                .values()
+                .filter(|(_, _, fx)| !fx)
+                .map(|(c, _, _)| *c)
+                .collect();
             v.sort_unstable();
             v.dedup();
             v
         };
-        let free_index: HashMap<Mask, usize> = free_cols.iter().enumerate().map(|(i, c)| (*c, i)).collect();
+        let free_index: HashMap<Mask, usize> =
+            free_cols.iter().enumerate().map(|(i, c)| (*c, i)).collect();
         let mut block_ranks = Vec::new();
         for (j, size) in character_orbits(nn) {
             let zj = gf.pow(zeta_inv, j as u64);
             let zpow: Vec<u64> = (0..nn).map(|t| gf.pow(zj, t as u64)).collect();
             let mut rows_k: Vec<Vec<u64>> = Vec::new();
             for (ri, &(m, ei)) in reps.iter().enumerate() {
-                let fixed_row = lay.shift_mask(&m) == m && index[&fam_key(shift_fam(fam[ei], nn))] == ei;
+                let fixed_row =
+                    lay.shift_mask(&m) == m && index[&fam_key(shift_fam(fam[ei], nn))] == ei;
                 if fixed_row {
                     continue;
                 }
@@ -799,10 +891,11 @@ fn main() {
                 v.sort_unstable();
                 v
             };
-            let cidx: HashMap<Mask, usize> = all_cols.iter().enumerate().map(|(i, c)| (*c, i)).collect();
+            let cidx: HashMap<Mask, usize> =
+                all_cols.iter().enumerate().map(|(i, c)| (*c, i)).collect();
             let w = all_cols.len().div_ceil(64);
             let mut rows: Vec<Vec<u64>> = Vec::with_capacity(total_rows);
-            for (ei, p) in eqs.iter().enumerate() {
+            for p in &eqs {
                 let pdeg = p.iter().map(mask_deg).max().unwrap_or(0);
                 if pdeg > degree {
                     continue;
@@ -827,7 +920,10 @@ fn main() {
         } else {
             (None, 0.0)
         };
-        let detail: Vec<String> = block_ranks.iter().map(|(j, s, r)| format!("χ{j}×{s}: {r}")).collect();
+        let detail: Vec<String> = block_ranks
+            .iter()
+            .map(|(j, s, r)| format!("χ{j}×{s}: {r}"))
+            .collect();
         println!(
             "| {n} | {l} | {d} | {} | {} | {degree} | {} | {} | {} | {} | {} | {} | {:.1} (+{:.1} build) | {} | {:.1} | {} | {} |",
             lay.n_vars,

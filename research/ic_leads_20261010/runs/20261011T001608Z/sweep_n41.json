@@ -1,0 +1,23 @@
+{
+ "_comment": "n=41 with three summands (the ledger's shape): orbit-union base at K=600 with the Frobenius-folded table, and a prefix subspace of 2^13 abscissae with the negation-folded table; the prefix row is the floor-twin baseline (rerun with MODEL_B=817567783691).",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 41
+ },
+ "repeats": 4,
+ "seed": 20261010,
+ "max_trials": 4000000,
+ "matrix": {
+  "factor_base": [
+   "compact-orbit-scan:columns=600,raw_x_cap=400000000",
+   "binary-subspace:dimension=13"
+  ],
+  "oracle": [
+   "mitm-frobenius:m=3",
+   "mitm:negation_folded=1,m=3"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}

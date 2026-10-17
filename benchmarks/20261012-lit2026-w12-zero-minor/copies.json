@@ -1,0 +1,45 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-12",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/lit2026_w12_flagged_claims_20261011",
+  "run": "run-20261012T0009Z",
+  "files": [
+    {
+      "source": "research/lit2026_w12_flagged_claims_20261011/reports/run-20261012T0009Z/report.pdf",
+      "copy": "run-report.pdf",
+      "sha256": "a962e5169c3b2a147447d3b0f7b4ad394ac21b5dc54ee16978792a6d1af942f2",
+      "bytes": 191919
+    },
+    {
+      "source": "research/lit2026_w12_flagged_claims_20261011/REPORT.pdf",
+      "copy": "results-report.pdf",
+      "sha256": "5888007c59a7edb68d4474faec4679f601606d23d3c6139d0adac7f49e5736a0",
+      "bytes": 163426
+    },
+    {
+      "source": "research/lit2026_w12_flagged_claims_20261011/reports/run-20261012T0009Z/dsweep.svg",
+      "copy": "dsweep.svg",
+      "sha256": "961154034de5e65f6486523be9905809ca0dfe06d0b54ec1cab1e5ccd0ba7ad3",
+      "bytes": 31104
+    },
+    {
+      "source": "research/lit2026_w12_flagged_claims_20261011/reports/run-20261012T0009Z/scaling.svg",
+      "copy": "scaling.svg",
+      "sha256": "3dfe65ca988f8fdf8b38cd56c566ccda970ef0b8acba83536ee77e3fabcd6f0a",
+      "bytes": 168513
+    }
+  ],
+  "pngs": [
+    {
+      "source": "dsweep.svg",
+      "copy": "dsweep.png",
+      "dpi": 150
+    },
+    {
+      "source": "scaling.svg",
+      "copy": "scaling.png",
+      "dpi": 150
+    }
+  ]
+}

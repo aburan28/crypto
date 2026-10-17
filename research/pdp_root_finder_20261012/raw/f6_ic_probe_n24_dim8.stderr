@@ -1,0 +1,10 @@
+
+thread 'main' (3838) panicked at examples/f6_ic_probe.rs:73:38:
+curve has a usable subgroup
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+   1: core::panicking::panic_fmt
+   2: core::option::expect_failed
+   3: f6_ic_probe::main
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+exit 101

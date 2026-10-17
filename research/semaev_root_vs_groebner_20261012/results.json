@@ -1,0 +1,12 @@
+[
+  {"kind":"binary","n":9,"fb":55,"targets":254,"decomposable":254,"root_find_s":0.000729,"matrix_f4_s":0.279157},
+  {"kind":"binary","n":13,"fb":4005,"targets":256,"decomposable":256,"root_find_s":0.002544,"matrix_f4_s":3.905017},
+  {"kind":"binary_e2e","strategy":"root-find","log":53,"wall_s":0.023298},
+  {"kind":"binary_e2e","strategy":"matrix-F4","log":53,"wall_s":0.004077},
+  {"kind":"prime","bits":16,"fb":6,"targets":40,"decomposable":1,"refuted":39,"root_find_s":0.000030,"groebner_f4_s":1.052932},
+  {"kind":"prime","bits":20,"fb":6,"targets":40,"decomposable":1,"refuted":39,"root_find_s":0.000033,"groebner_f4_s":1.149034},
+  {"kind":"prime","bits":24,"fb":6,"targets":40,"decomposable":1,"refuted":39,"root_find_s":0.000026,"groebner_f4_s":1.225599},
+  {"kind":"prime_scaling","bits":20,"fb":120,"log_ok":true,"targets":4438,"wall_s":0.009000},
+  {"kind":"prime_scaling","bits":24,"fb":120,"log_ok":true,"targets":78159,"wall_s":0.162870},
+  {"kind":"prime_scaling","bits":28,"fb":160,"log_ok":true,"targets":1040671,"wall_s":2.826997}
+]

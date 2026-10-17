@@ -1,0 +1,39 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-11",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/pdp_oracle_speedup_20261011",
+  "run": "run-20261011T2255Z",
+  "files": [
+    {
+      "source": "research/pdp_oracle_speedup_20261011/reports/run-20261011T2255Z/report.pdf",
+      "copy": "run-report.pdf",
+      "sha256": "5b08c87999505686f9d792871e44a87a3a7335cc373c03bc7ca623a7deab991a",
+      "bytes": 80516
+    },
+    {
+      "source": "research/pdp_oracle_speedup_20261011/reports/run-20261011T2255Z/ns_per_pair.svg",
+      "copy": "ns_per_pair.svg",
+      "sha256": "31bd688e77fa9b082acdb629ccaf48307c76b591dce01d21a588161d5499b8a2",
+      "bytes": 80520
+    },
+    {
+      "source": "research/pdp_oracle_speedup_20261011/reports/run-20261011T2255Z/ns_per_target.svg",
+      "copy": "ns_per_target.svg",
+      "sha256": "a934fd1b35bfbe0d65487fbd2238d8b7733e66dc8491566ea1bf6369b3a0a979",
+      "bytes": 88678
+    }
+  ],
+  "pngs": [
+    {
+      "source": "ns_per_pair.svg",
+      "copy": "ns_per_pair.png",
+      "dpi": 150
+    },
+    {
+      "source": "ns_per_target.svg",
+      "copy": "ns_per_target.png",
+      "dpi": 150
+    }
+  ]
+}

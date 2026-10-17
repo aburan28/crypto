@@ -1,0 +1,61 @@
+Title:
+  Structural Completeness of Prime-Field Elliptic Curves Against
+  Isogeny-Graph Cryptanalysis
+
+Keywords:
+  elliptic curve cryptography, ECDLP, isogeny graphs, complex
+  multiplication, Howe gluing, Jacobian covers, secp256k1, P-256,
+  structural-completeness theorem
+
+Abstract:
+
+We pursue a comprehensive cryptanalytic audit of the isogeny-graph
+structure of deployed prime-field elliptic curves --- specifically
+secp256k1, NIST P-256, brainpoolP256r1, and Curve25519's prime
+subgroup. For each curve we run a battery of structural tests and
+two novel attack proposals (Class-Group-Amortised Hidden-Number
+Cryptanalysis; Volcano-Floor Class-Group-Augmented Pollard rho),
+finding all directions structurally null at the prime-field level.
+
+The main result is a structural-completeness theorem: for every
+ordinary elliptic curve E over a prime field F_p with #E(F_p) = h*r,
+r prime and h in {1,2,4,8}, no algorithm in the family
+{F_p-isogeny transport, Cl(End)-orbit walking, (N,N)-cover via
+Howe-gluing, higher-genus cover, supersingular-reduction attack,
+volcano-floor rho} reduces ECDLP cost below sqrt(r / |Aut(E)|)
+(plain Pollard rho with full automorphism folding). The theorem
+says nothing about algorithms outside this family.
+
+The theorem is proven by case analysis over seven structural blocks
+under standing assumptions: Tate's isogeny theorem, Howe's gluing
+theorem, Gaudry's and Diem-Thome's complexity bounds for
+hyperelliptic index calculus, and the assumption that prime-field
+hyperelliptic DLP is not sub-exponentially solvable. The empirical
+checks are bounded: the structural conditions are computed for the
+four deployed curves only; the twist l-rank lemma is checked
+numerically for l in {3,5,7,11,13} on j = 0 curves over F_p with
+p < 500; the split-Jacobian toy sweep covers primes p = 1 (mod 6)
+with p <= 1000, and the CM-73 sweep those with p <= 5000. A
+surprising auxiliary finding: the Howe-gluing genus-2 cover exists
+for every such curve, but does not yield a DLP speedup because
+genus-2 prime-field DLP costs O(p) while ECDLP costs O(sqrt(p)).
+For secp256k1 specifically, x^3 + 7 is irreducible over F_p, so the
+cover's field of definition is F_{p^3} and the cover-based attack
+costs O(p^{3/2}), about 2^384.
+
+A companion documentation note covers Mestre's algorithm for the
+actual explicit construction of the Howe-glued cover (open
+implementation task) and a parallel research proposal launches the
+orthogonal GLV-aware Hidden-Number Problem direction for the
+scalar-side attack surface.
+
+Companion artefacts (all open source, in the same repository as
+this submission):
+
+  - 13 PARI/GP scripts (~3000 lines) with committed baseline
+    outputs for reproducibility
+  - 1 Rust integration test (~390 lines) running the full audit on
+    every CurveParams constant via cargo test, plus a
+    freshly-generated CM curve at test time
+  - 5 supporting research notes covering the individual proposals
+    and the GLV-HNP / Mestre directions

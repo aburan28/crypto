@@ -1,0 +1,345 @@
+{
+  "adaptive": {
+    "a0.75-c0-uniform-w1.0": {
+      "la": [
+        0.4550026120722054,
+        -3.0849997118705748
+      ],
+      "relation": [
+        0.2731041401765926,
+        33.114937006182956
+      ]
+    },
+    "a0.80-c0-uniform-w1.0": {
+      "la": [
+        0.49923249454848184,
+        -4.084050882067013
+      ],
+      "relation": [
+        0.2512481548948214,
+        33.44733512322337
+      ]
+    },
+    "a0.85-c0-uniform-w1.0": {
+      "la": [
+        0.5153340625129961,
+        -4.188234519760787
+      ],
+      "relation": [
+        0.22446003810573525,
+        33.97992812197213
+      ]
+    },
+    "a0.90-c0-uniform-w1.0": {
+      "la": [
+        0.5317460094229303,
+        -4.3681877930077935
+      ],
+      "relation": [
+        0.19995711011184433,
+        34.572579745325314
+      ]
+    },
+    "a0.95-c0-uniform-w1.0": {
+      "la": [
+        0.5449044845789833,
+        -4.542209593739166
+      ],
+      "relation": [
+        0.19109858801710572,
+        34.74962334044207
+      ]
+    },
+    "plain": {
+      "la": [
+        0.5351582035961302,
+        -3.897001126267959
+      ],
+      "relation": [
+        0.1871889877228469,
+        34.85193707969159
+      ]
+    }
+  },
+  "choice_at": [
+    {
+      "choice": null,
+      "log2_E": 26.0,
+      "modelled_best_ratio_vs_plain": 0.9995397647235822
+    },
+    {
+      "choice": null,
+      "log2_E": 30.0,
+      "modelled_best_ratio_vs_plain": 1.0
+    },
+    {
+      "choice": null,
+      "log2_E": 35.0,
+      "modelled_best_ratio_vs_plain": 1.0
+    },
+    {
+      "choice": null,
+      "log2_E": 40.0,
+      "modelled_best_ratio_vs_plain": 1.0
+    },
+    {
+      "choice": null,
+      "log2_E": 41.4,
+      "modelled_best_ratio_vs_plain": 1.0
+    },
+    {
+      "choice": null,
+      "log2_E": 42.6,
+      "modelled_best_ratio_vs_plain": 1.0
+    },
+    {
+      "choice": null,
+      "log2_E": 64.0,
+      "modelled_best_ratio_vs_plain": 1.0
+    },
+    {
+      "choice": 0.85,
+      "log2_E": 128.0,
+      "modelled_best_ratio_vs_plain": 0.4028338263261664
+    },
+    {
+      "choice": 0.75,
+      "log2_E": 256.0,
+      "modelled_best_ratio_vs_plain": 1.1686405706029296e-6
+    }
+  ],
+  "first_leaves_plain": [
+    {
+      "alpha": 0.85,
+      "log2_E": 20.0,
+      "modelled_ratio": 0.9159952675376827
+    },
+    {
+      "alpha": null,
+      "log2_E": 21.5,
+      "modelled_ratio": 0.9521881800700175
+    },
+    {
+      "alpha": 0.9,
+      "log2_E": 116.5,
+      "modelled_ratio": 0.9431463071570589
+    },
+    {
+      "alpha": 0.85,
+      "log2_E": 125.4,
+      "modelled_ratio": 0.597201267959866
+    },
+    {
+      "alpha": 0.8,
+      "log2_E": 143.3,
+      "modelled_ratio": 0.12347229794368411
+    },
+    {
+      "alpha": 0.75,
+      "log2_E": 163.9,
+      "modelled_ratio": 0.01649773103958343
+    }
+  ],
+  "margin": 0.95,
+  "reproduction": [
+    {
+      "arm": "d4",
+      "item01": 25376.0,
+      "p": 1033,
+      "seed": 5,
+      "this_run": 25376.0
+    },
+    {
+      "arm": "a0.95-c0-uniform-w1.0",
+      "item01": 25441.0,
+      "p": 1033,
+      "seed": 5,
+      "this_run": 25441.0
+    },
+    {
+      "arm": "d4",
+      "item01": 26670.0,
+      "p": 1033,
+      "seed": 4,
+      "this_run": 26670.0
+    },
+    {
+      "arm": "a0.95-c0-uniform-w1.0",
+      "item01": 27964.0,
+      "p": 1033,
+      "seed": 4,
+      "this_run": 27964.0
+    },
+    {
+      "arm": "d4",
+      "item01": 18672.0,
+      "p": 769,
+      "seed": 4,
+      "this_run": 18672.0
+    },
+    {
+      "arm": "a0.95-c0-uniform-w1.0",
+      "item01": 18967.0,
+      "p": 769,
+      "seed": 4,
+      "this_run": 18967.0
+    },
+    {
+      "arm": "d4",
+      "item01": 22740.0,
+      "p": 769,
+      "seed": 5,
+      "this_run": 22740.0
+    },
+    {
+      "arm": "a0.95-c0-uniform-w1.0",
+      "item01": 23151.0,
+      "p": 769,
+      "seed": 5,
+      "this_run": 23151.0
+    },
+    {
+      "arm": "d4",
+      "item01": 9777.0,
+      "p": 521,
+      "seed": 4,
+      "this_run": 9777.0
+    },
+    {
+      "arm": "a0.95-c0-uniform-w1.0",
+      "item01": 10198.0,
+      "p": 521,
+      "seed": 4,
+      "this_run": 10198.0
+    },
+    {
+      "arm": "d4",
+      "item01": 10477.0,
+      "p": 397,
+      "seed": 4,
+      "this_run": 10477.0
+    },
+    {
+      "arm": "a0.95-c0-uniform-w1.0",
+      "item01": 10477.0,
+      "p": 397,
+      "seed": 4,
+      "this_run": 10477.0
+    },
+    {
+      "arm": "d4",
+      "item01": 13012.0,
+      "p": 521,
+      "seed": 5,
+      "this_run": 13012.0
+    },
+    {
+      "arm": "a0.95-c0-uniform-w1.0",
+      "item01": 14188.0,
+      "p": 521,
+      "seed": 5,
+      "this_run": 14188.0
+    },
+    {
+      "arm": "d4",
+      "item01": 6510.0,
+      "p": 269,
+      "seed": 4,
+      "this_run": 6510.0
+    },
+    {
+      "arm": "a0.95-c0-uniform-w1.0",
+      "item01": 6510.0,
+      "p": 269,
+      "seed": 4,
+      "this_run": 6510.0
+    },
+    {
+      "arm": "d4",
+      "item01": 6601.0,
+      "p": 269,
+      "seed": 5,
+      "this_run": 6601.0
+    },
+    {
+      "arm": "a0.95-c0-uniform-w1.0",
+      "item01": 6627.0,
+      "p": 269,
+      "seed": 5,
+      "this_run": 6627.0
+    },
+    {
+      "arm": "d4",
+      "item01": 7596.0,
+      "p": 397,
+      "seed": 5,
+      "this_run": 7596.0
+    },
+    {
+      "arm": "a0.95-c0-uniform-w1.0",
+      "item01": 8173.0,
+      "p": 397,
+      "seed": 5,
+      "this_run": 8173.0
+    },
+    {
+      "arm": "d4",
+      "item01": 3693.0,
+      "p": 181,
+      "seed": 4,
+      "this_run": 3693.0
+    },
+    {
+      "arm": "a0.95-c0-uniform-w1.0",
+      "item01": 3693.0,
+      "p": 181,
+      "seed": 4,
+      "this_run": 3693.0
+    },
+    {
+      "arm": "d4",
+      "item01": 4154.0,
+      "p": 181,
+      "seed": 5,
+      "this_run": 4154.0
+    },
+    {
+      "arm": "a0.95-c0-uniform-w1.0",
+      "item01": 4185.0,
+      "p": 181,
+      "seed": 5,
+      "this_run": 4185.0
+    },
+    {
+      "arm": "d4",
+      "item01": 4602.0,
+      "p": 101,
+      "seed": 4,
+      "this_run": 4602.0
+    },
+    {
+      "arm": "a0.95-c0-uniform-w1.0",
+      "item01": 4602.0,
+      "p": 101,
+      "seed": 4,
+      "this_run": 4602.0
+    },
+    {
+      "arm": "d4",
+      "item01": 7918.0,
+      "p": 101,
+      "seed": 5,
+      "this_run": 7918.0
+    },
+    {
+      "arm": "a0.95-c0-uniform-w1.0",
+      "item01": 7918.0,
+      "p": 101,
+      "seed": 5,
+      "this_run": 7918.0
+    }
+  ],
+  "rule": "fit OLS of log2(relation GAE) and log2(LA GAE) on log2 #E per configuration over the 14 training curves; at a curve's log2 #E choose the alpha with the least modelled whole cost; leave plain D4 only if that is < 0.95 x plain",
+  "source": "item-01 raw/train.jsonl (reproduced exactly by this run)",
+  "training_reproduces_item01": true
+}

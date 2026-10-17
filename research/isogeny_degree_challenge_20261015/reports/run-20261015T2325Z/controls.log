@@ -1,0 +1,50 @@
+
+running 1 test
+
+thread 'native_challenge_replays_maps_rejects_forgery_and_ranks_curves_separately' (2707447) panicked at tests/challenge_cli.rs:35:5:
+assertion `left == right` failed: stderr: ell-13: PASS (360 ms)
+verification: RESOURCE_MONITOR_UNAVAILABLE (412 ms)
+
+stdout: {
+  "reason": "RESOURCE_MONITOR_UNAVAILABLE",
+  "schema": "isogeny-challenge-entry/v1",
+  "score": null,
+  "season": "a3c89b0d55e5dafa1efb7da649a515d3c593da303afa78c154b60a29757088c0",
+  "status": "CENSORED",
+  "verification": {
+    "command": [
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/installed-66b5b7ce0/isogeny",
+      "challenge",
+      "__judge",
+      "--input",
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/runs/20261015T2325Z/controls/p192/judgement/artifact",
+      "--rss-ready",
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/runs/20261015T2325Z/controls/p192/judgement/resources-ready"
+    ],
+    "elapsed_ms_operational_only": 412,
+    "exit_code": 0,
+    "map_count": null,
+    "memory_monitor_grace_ms": 100,
+    "memory_sampling_interval_ms": 25,
+    "resident_memory_limit_bytes": "8589934592",
+    "sampled_peak_resident_bytes": "32768",
+    "status": "RESOURCE_MONITOR_UNAVAILABLE",
+    "stderr_sha256": "9f78f671f2dba353a94e16d9bafb8ac60c2000819ce0f492aed378bde34c87ea",
+    "stdout": "verification.json",
+    "stdout_sha256": "64f304a5c26ef6df2e7b9e4ef41b0afbb5ca481eae342bcbd19889977ac4c60e",
+    "unavailable_memory_samples": 5
+  }
+}
+
+  left: Some(3)
+ right: Some(0)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native_challenge_replays_maps_rejects_forgery_and_ranks_curves_separately ... FAILED
+
+failures:
+
+failures:
+    native_challenge_replays_maps_rejects_forgery_and_ranks_curves_separately
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.97s
+

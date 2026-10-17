@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import hashlib
+import shlex
 import json
 import math
 import os
@@ -225,9 +226,9 @@ def missing_fields(report: dict[str, Any], keys: list[str]) -> list[str]:
 def operation_accounting_errors(accounting: Any) -> list[str]:
     """Check the operation-count block that sits next to the wall ratio.
 
-    A wall ratio mixes the algorithmic comparison with the speed of each
-    arm's implementation, so a vs_rho claim must also state both arms'
-    online operation counts, their units, and their ratio.
+    Native IC probes and rho steps have different costs.  Keep both counts
+    and their units, while requiring a calibration receipt before reporting
+    an operation speedup.
     """
     if not isinstance(accounting, dict):
         return ["operation_accounting must be an object"]
@@ -235,8 +236,8 @@ def operation_accounting_errors(accounting: Any) -> list[str]:
     ic_ops = accounting.get("ic_online_operations")
     rho_ops = accounting.get("rho_online_operations")
     for name, value in (("ic_online_operations", ic_ops), ("rho_online_operations", rho_ops)):
-        if type(value) not in (int, float) or not math.isfinite(value) or value <= 0:
-            errors.append(f"operation_accounting.{name} must be positive")
+        if type(value) not in (int, float) or not math.isfinite(value) or value < 0:
+            errors.append(f"operation_accounting.{name} must be nonnegative and finite")
     units = accounting.get("operation_units")
     if not isinstance(units, dict) or not all(
         isinstance(units.get(arm), str) and units[arm].strip() for arm in ("ic", "rho")
@@ -245,16 +246,79 @@ def operation_accounting_errors(accounting: Any) -> list[str]:
     assumption = accounting.get("unit_assumption")
     if not isinstance(assumption, str) or not assumption.strip():
         errors.append("operation_accounting.unit_assumption must state how the units compare")
+    status = accounting.get("comparison_status")
+    if status not in ("native_counters_only", "calibrated_common_unit"):
+        errors.append("operation_accounting.comparison_status must name the calibration state")
+    raw_quotient = accounting.get("rho_per_ic_native_counter")
+    if not errors:
+        if ic_ops == 0:
+            if raw_quotient is not None:
+                errors.append("operation_accounting.rho_per_ic_native_counter must be null for zero IC probes")
+        elif raw_quotient is not None:
+            expected = float(rho_ops) / float(ic_ops)
+            if type(raw_quotient) not in (int, float) or not math.isfinite(raw_quotient) or raw_quotient < 0 or not math.isclose(
+                float(raw_quotient), expected, rel_tol=1e-8, abs_tol=1e-12
+            ):
+                errors.append("operation_accounting.rho_per_ic_native_counter does not match the raw counts")
     ratio = accounting.get("ops_speedup_online")
-    if type(ratio) not in (int, float) or not math.isfinite(ratio) or ratio <= 0:
-        errors.append("operation_accounting.ops_speedup_online is required")
-    elif not errors:
-        expected = float(rho_ops) / float(ic_ops)
-        if abs(float(ratio) - expected) > max(1e-12, expected * 1e-8):
-            errors.append(
-                "operation_accounting.ops_speedup_online does not equal "
-                "rho_online_operations / ic_online_operations"
-            )
+    if ratio is not None:
+        calibrated = (
+            status == "calibrated_common_unit"
+            and isinstance(units, dict)
+            and units.get("ic") == units.get("rho")
+            and isinstance(accounting.get("calibration_receipt"), str)
+            and bool(accounting["calibration_receipt"].strip())
+        )
+        if not calibrated:
+            errors.append("operation_accounting.ops_speedup_online requires a calibrated common unit and receipt")
+        elif positive_cost(ic_ops) is None or positive_cost(rho_ops) is None:
+            errors.append("operation_accounting calibrated counts must be positive")
+        elif positive_cost(ratio) is None:
+            errors.append("operation_accounting.ops_speedup_online must be positive and finite")
+        elif not errors:
+            expected = float(rho_ops) / float(ic_ops)
+            if not math.isclose(float(ratio), expected, rel_tol=1e-8, abs_tol=1e-12):
+                errors.append("operation_accounting.ops_speedup_online does not match calibrated counts")
+    elif status == "calibrated_common_unit":
+        errors.append("operation_accounting.ops_speedup_online is required for calibrated counts")
+    return errors
+
+
+def hardware_accounting_errors(accounting: Any) -> list[str]:
+    """Check the optional common retired-instruction counter for a paired target."""
+    if not isinstance(accounting, dict):
+        return ["hardware_accounting must be an object"]
+    errors = []
+    status = accounting.get("status")
+    if status not in ("measured_common_counter", "counter_unavailable"):
+        errors.append("hardware_accounting.status is invalid")
+    if accounting.get("unit") != "calling-thread user instructions retired":
+        errors.append("hardware_accounting.unit must name the measured unit")
+    if not isinstance(accounting.get("method"), str) or not accounting["method"].strip():
+        errors.append("hardware_accounting.method must describe the counter boundary")
+    ic_count = accounting.get("ic_online_instructions")
+    rho_count = accounting.get("rho_online_instructions")
+    for arm, count in (("ic", ic_count), ("rho", rho_count)):
+        if count is not None and (type(count) is not int or count <= 0):
+            errors.append(f"hardware_accounting.{arm}_online_instructions must be positive when present")
+    ratio = accounting.get("rho_per_ic_instructions")
+    if status == "measured_common_counter":
+        for arm in ("ic", "rho"):
+            enabled = accounting.get(f"{arm}_time_enabled_ns")
+            running = accounting.get(f"{arm}_time_running_ns")
+            if (type(enabled) is not int or enabled <= 0 or
+                    type(running) is not int or running != enabled):
+                errors.append(f"hardware_accounting.{arm} counter must run throughout its enabled interval")
+            if accounting.get(f"{arm}_counter_error"):
+                errors.append(f"hardware_accounting.{arm} counter error must be null")
+        if type(ic_count) is not int or ic_count <= 0 or type(rho_count) is not int or rho_count <= 0:
+            errors.append("hardware_accounting measured status requires both online instruction counts")
+        elif positive_cost(ratio) is None or not math.isclose(
+            float(ratio), rho_count / ic_count, rel_tol=1e-9, abs_tol=1e-12
+        ):
+            errors.append("hardware_accounting.rho_per_ic_instructions must match the counts")
+    elif status == "counter_unavailable" and ratio is not None:
+        errors.append("hardware_accounting.rho_per_ic_instructions must be null when unavailable")
     return errors
 
 
@@ -271,6 +335,53 @@ def validate_claim(
     global_required = list(schema.get("global_provenance_required", []))
     missing_stage = missing_fields(report, required)
     missing_global = missing_fields(report, global_required)
+    pairing_errors: list[str] = []
+    if stage == "vs_rho":
+        paired = report.get("paired_target")
+        if report.get("target_count") != 1:
+            pairing_errors.append("target_count must be exactly one")
+        if not isinstance(paired, dict):
+            pairing_errors.append("paired_target must be an object")
+        else:
+            ic_q = paired.get("ic_public_q")
+            rho_q = paired.get("rho_public_q")
+            if not isinstance(ic_q, list) or not isinstance(rho_q, list):
+                pairing_errors.append("both arms must record public target coordinates")
+            elif ic_q != rho_q:
+                pairing_errors.append("IC and rho public targets differ")
+            if paired.get("same_public_point") is not True:
+                pairing_errors.append("same_public_point is not verified")
+        if report.get("ic_verified") is not True:
+            pairing_errors.append("IC target recovery is not verified")
+        if report.get("rho_verified") is not True:
+            pairing_errors.append("rho target recovery is not verified")
+        if positive_cost(report.get("ic_online_ms")) is None:
+            pairing_errors.append("positive ic_online_ms is required")
+        if positive_cost(report.get("rho_online_ms")) is None:
+            pairing_errors.append("positive rho_online_ms is required")
+        if positive_cost(report.get("online_speedup")) is None:
+            pairing_errors.append("positive same-target online_speedup is required")
+        elif positive_cost(report.get("ic_online_ms")) is not None and positive_cost(report.get("rho_online_ms")) is not None:
+            expected = float(report["rho_online_ms"]) / float(report["ic_online_ms"])
+            if not math.isclose(float(report["online_speedup"]), expected, rel_tol=1e-8, abs_tol=1e-9):
+                pairing_errors.append("online_speedup does not equal rho_online_ms / ic_online_ms")
+        for arm in ("ic", "rho"):
+            phases = report.get(f"{arm}_online_phase_ms")
+            total = report.get(f"{arm}_online_ms")
+            if not isinstance(phases, dict) or not phases:
+                pairing_errors.append(f"{arm}_online_phase_ms must record exclusive phases")
+            elif any(type(value) not in (int, float) or not math.isfinite(value) or value < 0 for value in phases.values()):
+                pairing_errors.append(f"{arm}_online_phase_ms must contain finite nonnegative costs")
+            elif positive_cost(total) is not None:
+                phase_sum = math.fsum(float(value) for value in phases.values())
+                if not math.isclose(phase_sum, float(total), rel_tol=1e-8, abs_tol=0.02):
+                    pairing_errors.append(f"{arm} online phase costs do not sum to online time")
+            else:
+                pairing_errors.append(f"{arm}_online_ms is missing")
+        if report.get("all_stages_charged_same_series") is not True:
+            pairing_errors.append("same-target charged intervals are not confirmed")
+        if field_present(report, "operation_accounting"):
+            pairing_errors.extend(operation_accounting_errors(report["operation_accounting"]))
     validation_errors: list[str] = []
 
     if stage == "vs_rho":
@@ -327,8 +438,34 @@ def validate_claim(
             validation_errors.append("IC and rho target hashes must be nonempty strings")
         elif target_hashes[0] != target_hashes[1]:
             validation_errors.append("IC and rho target hashes must match")
-        if report.get("timing_class") not in stage_schema.get("timing_class_enum", []):
-            validation_errors.append("timing_class must be single_target_online_wall")
+        timing_classes = stage_schema.get("timing_class_enum", [])
+        if "primary_ic_online_phase_keys" in stage_schema:
+            if report.get("timing_class") != "single_target_online":
+                validation_errors.append("timing_class must be single_target_online for a primary vs_rho claim")
+        elif report.get("timing_class") not in timing_classes:
+            validation_errors.append(f"timing_class must be one of {timing_classes}")
+        record_class = report.get("record_class")
+        if record_class not in stage_schema.get("record_class_enum", []):
+            validation_errors.append("record_class must identify exploratory or controlled wall evidence")
+        if "hardware_accounting" in report:
+            validation_errors.extend(hardware_accounting_errors(report["hardware_accounting"]))
+        controlled_speedup = report.get("controlled_online_speedup")
+        if controlled_speedup is None:
+            if record_class == "verified_answer_controlled_wall":
+                validation_errors.append("controlled wall record requires controlled_online_speedup")
+        else:
+            if record_class != "verified_answer_controlled_wall":
+                validation_errors.append("controlled_online_speedup requires a controlled wall record")
+            measured_speedup = positive_cost(report.get("online_speedup"))
+            if positive_cost(controlled_speedup) is None or measured_speedup is None or not math.isclose(
+                float(controlled_speedup), measured_speedup, rel_tol=1e-9, abs_tol=1e-12
+            ):
+                validation_errors.append("controlled_online_speedup must equal the paired online ratio")
+            receipt = report.get("host_isolation_receipt")
+            if not isinstance(receipt, dict) or receipt.get("status") != "PASS" or not isinstance(
+                receipt.get("path"), str
+            ) or not receipt["path"].strip():
+                validation_errors.append("controlled_online_speedup requires a host-isolation receipt")
         if report.get("same_resource_envelope") is not True:
             validation_errors.append("same_resource_envelope must be true")
         for key in ("ic_scalar_verified", "rho_scalar_verified"):
@@ -359,12 +496,36 @@ def validate_claim(
             validation_errors.append("online times and speedup must be positive finite numbers")
         elif not math.isclose(speedup, rho_ms / ic_ms, rel_tol=1e-9, abs_tol=1e-12):
             validation_errors.append("online_speedup must equal rho_online_wall_ms / ic_online_wall_ms")
+        for arm, wall_ms in (("ic", ic_ms), ("rho", rho_ms)):
+            for alias in (f"{arm}_cost", f"{arm}_online_ms"):
+                alias_ms = positive_cost(report.get(alias))
+                if alias_ms is None or wall_ms is None or not math.isclose(
+                    alias_ms, wall_ms, rel_tol=1e-9, abs_tol=1e-12
+                ):
+                    validation_errors.append(f"{alias} must equal {arm}_online_wall_ms")
+
+        discount = report.get("automorphism_discount")
+        policy = report.get("rho_policy")
+        if not isinstance(discount, dict) or type(discount.get("A")) is not int or discount["A"] < 1:
+            validation_errors.append("automorphism_discount.A must be a positive integer")
+        elif isinstance(policy, dict) and discount["A"] != policy.get("automorphism_size"):
+            validation_errors.append("automorphism_discount.A must match rho_policy.automorphism_size")
 
         phase_costs = report.get("ic_online_phase_ms")
-        phase_fields = stage_schema.get("ic_online_phase_fields", [])
+        phase_fields = stage_schema.get("ic_online_phase_fields")
+        if phase_fields is None:
+            primary_keys = stage_schema.get("primary_ic_online_phase_keys", [])
+            phase_fields = [f"T_{key}_ms" for key in primary_keys]
+        if not phase_fields:
+            validation_errors.append("ledger must specify IC online phase fields")
         if not isinstance(phase_costs, dict):
             validation_errors.append("ic_online_phase_ms must be an object")
         else:
+            unexpected = set(phase_costs) - set(phase_fields)
+            if unexpected:
+                validation_errors.append(
+                    f"ic_online_phase_ms has unexpected fields: {sorted(unexpected)}"
+                )
             phase_values = []
             for key in phase_fields:
                 value = phase_costs.get(key)
@@ -375,6 +536,21 @@ def validate_claim(
             if len(phase_values) == len(phase_fields) and ic_ms is not None:
                 if not math.isclose(math.fsum(phase_values), ic_ms, rel_tol=1e-6, abs_tol=1e-3):
                     validation_errors.append("IC exclusive phase costs must sum to ic_online_wall_ms")
+
+        rho_phases = report.get("rho_online_phase_ms")
+        rho_phase_fields = stage_schema.get("rho_online_phase_fields", [])
+        if not isinstance(rho_phases, dict):
+            validation_errors.append("rho_online_phase_ms must be an object")
+        elif rho_phase_fields:
+            if set(rho_phases) != set(rho_phase_fields):
+                validation_errors.append("rho_online_phase_ms must contain exactly the declared phases")
+            elif all(type(rho_phases[key]) in (int, float) and math.isfinite(rho_phases[key])
+                     and rho_phases[key] >= 0 for key in rho_phase_fields) and rho_ms is not None:
+                if not math.isclose(math.fsum(float(rho_phases[key]) for key in rho_phase_fields),
+                                    rho_ms, rel_tol=1e-6, abs_tol=1e-3):
+                    validation_errors.append("rho exclusive phase costs must sum to rho_online_wall_ms")
+            else:
+                validation_errors.append("rho_online_phase_ms must contain finite nonnegative costs")
 
         interval = report.get("online_interval")
         interval_fields = (
@@ -417,7 +593,7 @@ def validate_claim(
                 if not isinstance(value, str) or not value.strip():
                     validation_errors.append(f"rho_policy.{key} must be a nonempty string")
 
-    ok = not missing_stage and not missing_global and not validation_errors
+    ok = not missing_stage and not missing_global and not pairing_errors and not validation_errors
     return {
         "schema_version": ledger.get("schema_version"),
         "stage": stage,
@@ -425,6 +601,7 @@ def validate_claim(
         "status": "PASS" if ok else "FAIL",
         "missing_stage_fields": missing_stage,
         "missing_global_provenance": missing_global,
+        "pairing_errors": pairing_errors,
         "validation_errors": validation_errors,
         "required_stage_fields": required,
         "required_global_provenance": global_required,
@@ -614,6 +791,7 @@ def plan(protocol: dict[str, Any], ledger: dict[str, Any]) -> dict[str, Any]:
             "n41_charged": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat koblitz.vs_rho.n41_charged",
             "n53_factor_base": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat koblitz.factor_base.n53",
             "n37_single_target": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat koblitz.vs_rho.n37_wall --fixtures 1",
+            "n61_bl_reference": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch-equal-advice --beat koblitz.compact_orbit.n61_bl_reference --targets 1024",
             "claim_check": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py claim-check --report PATH --stage vs_rho",
         },
     }
@@ -645,6 +823,24 @@ def build_producers() -> dict[str, str]:
     for path in binaries.values():
         require(Path(path).is_file(), f"built binary missing: {path}")
     return binaries
+
+
+def build_example(example: str) -> str:
+    source = REPO / "examples" / f"{example}.rs"
+    require(source.is_file(), f"missing producer source: {source}")
+    completed = subprocess.run(
+        ["cargo", "build", "--release", "--example", example],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+    )
+    require(
+        completed.returncode == 0,
+        f"cargo build --example {example} failed:\n" + completed.stderr[-4000:],
+    )
+    binary = (REPO / "target/release/examples" / example).resolve()
+    require(binary.is_file(), f"built binary missing: {binary}")
+    return str(binary)
 
 
 RESOURCE_RECEIPT_FIELDS = (
@@ -684,6 +880,9 @@ def _run_once(
     # Children CPU deltas (seconds -> ms). Wall is the outer process wait.
     cpu_user_ms = (usage_after.ru_utime - usage_before.ru_utime) * 1000.0
     cpu_system_ms = (usage_after.ru_stime - usage_before.ru_stime) * 1000.0
+    # Peak RSS after wait is cumulative for this process's children; treat as
+    # an observed upper bound for single-producer launches.
+    peak_rss = children_rss_bytes(int(usage_after.ru_maxrss))
     return completed, elapsed_ms, cpu_user_ms, cpu_system_ms
 
 
@@ -875,7 +1074,13 @@ def exclusive_precomputation_ms(row: dict[str, Any] | None) -> float | None:
 
 
 def positive_cost(value):
-    return float(value) if type(value) in (int, float) and math.isfinite(value) and value > 0 else None
+    if type(value) not in (int, float) or value <= 0:
+        return None
+    try:
+        result = float(value)
+    except (OverflowError, ValueError):
+        return None
+    return result if math.isfinite(result) else None
 
 
 def extract_ic_cost(rows: list[dict[str, Any]], timing_class: str) -> float | None:
@@ -1055,6 +1260,16 @@ def draft_vs_rho_claim(
         rho_row
         and rho_row.get("verified") is True
         and rho_row.get("recovered_fixture_scalar") == rho_scalar
+        and rho_online is not None
+    )
+    direct_rows = parse_json_lines(direct_obs["stdout"])
+    rho_rows = parse_json_lines(rho_obs["stdout"])
+    producers_ok = direct_obs["exit_code"] == 0 and rho_obs["exit_code"] == 0
+    integrity = comparison_integrity(direct_rows, rho_rows, direct_obs.get('fixtures'))
+    ic_cost = (
+        float(direct_obs["whole_process_wall_ms"])
+        if timing_class == "whole_process_wall"
+        else extract_ic_cost(direct_rows, timing_class)
         and positive_cost(rho_online) is not None
     )
     target_count = int(online_row.get("online_target_count", 0)) if online_row else 0
@@ -1098,17 +1313,15 @@ def draft_vs_rho_claim(
     ):
         operation_accounting = {
             "schema_version": "1.0",
-            "unit_assumption": (
-                "one IC target relation trial and one rho walk step are each counted "
-                "as one operation; uncalibrated, so compare the ratio only together "
-                "with a measured per-operation cost"
-            ),
+            "unit_assumption": "IC target trials and rho walk steps are distinct uncalibrated counters",
+            "comparison_status": "native_counters_only",
             "operation_units": {"ic": "target relation trials", "rho": "walk steps"},
             "ic_online_operations": ic_operations,
             "ic_online_operations_basis": "target_trials of the one online target",
             "rho_online_operations": rho_operations,
             "rho_online_operations_basis": "measured walk steps of this run",
-            "ops_speedup_online": float(rho_operations) / float(ic_operations),
+            "rho_per_ic_native_counter": float(rho_operations) / float(ic_operations),
+            "ops_speedup_online": None,
         }
     claim = {
         "schema_version": 2,
@@ -1256,6 +1469,522 @@ def select_factor_base_row(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
     return rows[0] if rows else None
 
 
+def parse_paired_oracle_stdout(stdout: str) -> dict[str, Any]:
+    """Parse symmetrised_oracle_bench / format_paired text into structured fields."""
+    import re
+
+    header = None
+    for line in stdout.splitlines():
+        m = re.match(
+            r"== K_(\d+)/F_2\^(\d+)\s+m = (\d+)\s+dim V = (\d+)\s+"
+            r"\|F_x\| = (\d+)\s+\|F_u\| = (\d+)\s+targets = (\d+)",
+            line.strip(),
+        )
+        if m:
+            header = {
+                "a": int(m.group(1)),
+                "n": int(m.group(2)),
+                "m": int(m.group(3)),
+                "dim": int(m.group(4)),
+                "F_x": int(m.group(5)),
+                "F_u": int(m.group(6)),
+                "targets": int(m.group(7)),
+            }
+            break
+    require(header is not None, "paired oracle stdout missing K_/F_2 header")
+
+    arms: dict[str, Any] = {}
+    divisor_indices: list[int] | None = None
+    wall_s: float | None = None
+    arm_map = {
+        "x-chained F4": "x_chained_f4",
+        "sym F4": "sym_f4",
+        "x-direct F4": "x_direct_f4",
+    }
+    for line in stdout.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("divisor indices"):
+            dm = re.search(r"divisor indices\s+(\[.*?\])\s+\(([0-9.]+)\s*s\)", stripped)
+            if dm:
+                divisor_indices = json.loads(dm.group(1).replace("'", '"'))
+                wall_s = float(dm.group(2))
+            continue
+        for label, key in arm_map.items():
+            if not stripped.startswith(label):
+                continue
+            rest = stripped[len(label) :].split()
+            # vars eqs deg found refuted inconc viaT found_ms refuted_ms effort [built] ffd gate...
+            require(len(rest) >= 12, f"paired oracle arm row too short: {stripped}")
+            # Current format_paired inserts a 'built' column before ffd.
+            if len(rest) >= 13:
+                vars_n, eqs, deg, found, refuted, inconc, via_t = map(int, rest[0:7])
+                found_ms = float(rest[7]) if rest[7] != "-" else float("nan")
+                refuted_ms = float(rest[8]) if rest[8] != "-" else float("nan")
+                effort = float(rest[9]) if rest[9] != "-" else float("nan")
+                ffd_tok = rest[11]
+                gate = rest[12]
+            else:
+                vars_n, eqs, deg, found, refuted, inconc, via_t = map(int, rest[0:7])
+                found_ms = float(rest[7]) if rest[7] != "-" else float("nan")
+                refuted_ms = float(rest[8]) if rest[8] != "-" else float("nan")
+                effort = float(rest[9]) if rest[9] != "-" else float("nan")
+                ffd_tok = rest[10]
+                gate = rest[11]
+            ffd = None if ffd_tok == "-" else int(ffd_tok)
+            arms[key] = {
+                "vars": vars_n,
+                "eqs": eqs,
+                "deg": deg,
+                "found": found,
+                "refuted": refuted,
+                "inconclusive": inconc,
+                "via_t": via_t,
+                "found_ms_median": found_ms,
+                "refuted_ms_median": refuted_ms,
+                "effort_splits": effort,
+                "ffd": ffd,
+                "gate": gate,
+            }
+            break
+
+    require(arms, "paired oracle stdout missing arm rows")
+    ffds = [arm["ffd"] for arm in arms.values() if isinstance(arm.get("ffd"), int)]
+    # Honesty gate: max of class medians (found/refuted) across arms.
+    class_medians = []
+    for arm in arms.values():
+        for key in ("found_ms_median", "refuted_ms_median"):
+            val = arm.get(key)
+            if isinstance(val, (int, float)) and val == val:  # not NaN
+                class_medians.append(float(val))
+    median_ms = max(class_medians) if class_medians else None
+    disagreements = 0
+    for arm in arms.values():
+        gate = str(arm.get("gate") or "")
+        if gate != "ok":
+            # FAIL N
+            parts = gate.split()
+            if len(parts) == 2 and parts[0] == "FAIL" and parts[1].isdigit():
+                disagreements += int(parts[1])
+            else:
+                disagreements += 1
+    return {
+        "header": header,
+        "arms": arms,
+        "divisor_indices": divisor_indices,
+        "wall_s": wall_s,
+        "ffds": ffds,
+        "median_ms_per_target": median_ms,
+        "disagreements": disagreements,
+    }
+
+
+def parse_semaev_decomp_bench_stdout(stdout: str) -> dict[str, Any]:
+    """Parse examples/semaev_decomp_bench text ladder into structured fields."""
+    import re
+
+    ladder: list[dict[str, Any]] = []
+    for line in stdout.splitlines():
+        m = re.match(
+            r"^\s*(\d+)\s+(\d+)\s+(\d+)\s+([0-9.]+)s\s+([0-9.]+)s\s+([0-9.]+)s\s+([0-9.]+)x\s*$",
+            line,
+        )
+        if not m:
+            continue
+        ladder.append(
+            {
+                "l": int(m.group(1)),
+                "n": int(m.group(2)),
+                "triples": int(m.group(3)),
+                "triples_gen_s": float(m.group(4)),
+                "triples_1wd_s": float(m.group(5)),
+                "pairs_s": float(m.group(6)),
+                "speedup_vs_triples": float(m.group(7)),
+            }
+        )
+    require(ladder, "semaev_decomp_bench stdout missing pairs ladder rows")
+    return {"ladder": ladder}
+
+
+def parse_j0_known_answer_stdout(stdout: str) -> dict[str, Any]:
+    """Parse examples/j0_known_answer_bits JSON result object from stdout."""
+    rows = parse_json_objects(stdout)
+    row = next(
+        (
+            item
+            for item in reversed(rows)
+            if isinstance(item.get("bits"), int)
+            and "ic_ok" in item
+            and "rho_ok" in item
+        ),
+        None,
+    )
+    require(row is not None, "j0_known_answer_bits stdout missing known-answer JSON row")
+    return row
+
+
+def draft_j0_end_to_end_dlp_claim(
+    *,
+    beat: dict[str, Any],
+    beat_id: str,
+    run: Path,
+    direct_obs: dict[str, Any],
+    binaries: dict[str, str],
+) -> dict[str, Any]:
+    parsed = parse_j0_known_answer_stdout(direct_obs.get("stdout") or "")
+    bits = int(beat.get("bits") or parsed["bits"])
+    require(int(parsed["bits"]) == bits, f"producer bits {parsed['bits']} != beat bits {bits}")
+    producers_ok = (
+        direct_obs["exit_code"] == 0
+        and parsed.get("ic_ok") is True
+        and parsed.get("rho_ok") is True
+        and parsed.get("ic_agrees_rho") is True
+    )
+    peak_rss = direct_obs.get("children_peak_rss_bytes")
+    cap = beat.get("resource_cap_bytes")
+    under_cap = (
+        peak_rss is not None and cap is not None and int(peak_rss) <= int(cap)
+        if cap is not None
+        else None
+    )
+    ic_ms = float(parsed["ic_ms"])
+    rho_ms = float(parsed["rho_ms"])
+    source = REPO / "examples" / f"{beat['producer']['example']}.rs"
+    binary_path = binaries.get("custom") or binaries.get("direct")
+    claim = {
+        "schema_version": 2,
+        "task_id": TASK_ID,
+        "beat_id": beat_id,
+        "regime": beat["regime"],
+        "stage": "end_to_end_dlp",
+        "n": bits,
+        "n_or_bits": bits,
+        "curve": parsed.get("curve"),
+        "recovered_d_verified": bool(parsed.get("ic_ok")),
+        "ic_ok": parsed.get("ic_ok"),
+        "rho_ok": parsed.get("rho_ok"),
+        "ic_matches_truth": parsed.get("ic_matches_truth"),
+        "ic_agrees_rho": parsed.get("ic_agrees_rho"),
+        "ic_ms": ic_ms,
+        "rho_ms": rho_ms,
+        "stage_timers": {
+            "ic_ms": ic_ms,
+            "rho_ms": rho_ms,
+            "note": (
+                "producer does not yet split FB/relations/LA; "
+                "wall is full j0_index_calculus_dlp vs pollard_rho"
+            ),
+        },
+        "target_orbits": parsed.get("target_orbits"),
+        "max_trials": parsed.get("max_trials"),
+        "rho_steps": parsed.get("rho_steps"),
+        "wall_s": float(direct_obs.get("whole_process_wall_ms") or 0.0) / 1000.0,
+        "peak_rss_bytes": peak_rss,
+        "verdict": (
+            "J0_16BIT_KA_IC_AGREES_RHO_PENDING_INDEPENDENT_VALIDATION"
+            if producers_ok
+            else "PRODUCER_FAILURE"
+        ),
+        "claim_boundary": (
+            "Public synthetic known-answer j=0 IC vs rho only. "
+            "Not key recovery, not asymptotic sub-rho, not ledger promotion."
+        ),
+        "claim_boundary_non_claims": [
+            "not key recovery on deployed curves",
+            "not asymptotic sub-rho",
+            "not ledger promotion until independent validation",
+            "IC slower than rho on this instance (expected; not a vs_rho crossover)",
+        ],
+        "independent_replay_pointer": independent_replay_pointer(run),
+        "fixture_hash": sha256(source),
+        "executable_or_source_hash": {
+            "executable": sha256(binary_path) if binary_path else None,
+            "source": sha256(source),
+        },
+        "host_id": host_record(),
+        "resource_caps": {
+            "common_cap_bytes": cap,
+            "observed_peak_rss_bytes": peak_rss,
+            "under_cap": under_cap,
+        },
+        "seeds": {"random_scalar": "runtime"},
+        "evidence_paths": [
+            str((run / "logs/direct.stdout.jsonl").resolve()),
+            str((run / "receipts/direct.resource.json").resolve()),
+        ],
+        "created_at": now(),
+        "autolab_run_id": run.name,
+        "producer_exit_codes": {"direct": direct_obs["exit_code"]},
+    }
+    return claim
+
+
+def draft_binary_pairs_decomposition_claim(
+    *,
+    beat: dict[str, Any],
+    beat_id: str,
+    run: Path,
+    direct_obs: dict[str, Any],
+    binaries: dict[str, str],
+) -> dict[str, Any]:
+    parsed = parse_semaev_decomp_bench_stdout(direct_obs.get("stdout") or "")
+    ladder = parsed["ladder"]
+    l_goal = int(beat.get("l") or 8)
+    row = next((item for item in ladder if item["l"] == l_goal), None)
+    require(row is not None, f"semaev_decomp_bench stdout missing l={l_goal} ladder row")
+    producers_ok = direct_obs["exit_code"] == 0
+    peak_rss = direct_obs.get("children_peak_rss_bytes")
+    cap = beat.get("resource_cap_bytes")
+    under_cap = (
+        peak_rss is not None and cap is not None and int(peak_rss) <= int(cap)
+        if cap is not None
+        else None
+    )
+    pairs_s = float(row["pairs_s"])
+    median_ms = pairs_s * 1000.0
+    source = REPO / "examples" / f"{beat['producer']['example']}.rs"
+    binary_path = binaries.get("custom") or binaries.get("direct")
+    claim = {
+        "schema_version": 2,
+        "task_id": TASK_ID,
+        "beat_id": beat_id,
+        "regime": beat["regime"],
+        "stage": "decomposition",
+        "n": beat.get("n", row["n"]),
+        "n_or_bits": beat.get("n", row["n"]),
+        "m_summands": beat.get("m", 3),
+        "dimension_l_or_dim": l_goal,
+        "unknowns": "2*l_bit_pair_space",
+        "system_degree": "quartic_s4_symmetrised",
+        "eq_var_ratio": "inapplicable_pairs_and_solve_no_boolean_system",
+        "ffd_or_degree_of_regularity": {
+            "status": "inapplicable",
+            "reason": (
+                "oracle_class=pairs_and_solve enumerates pair space; "
+                "no Boolean Macaulay/GB system in this arm"
+            ),
+            "note": (
+                "Ledger sub-2^(2l) beat still wants subspace/oracle FFD at l=8; "
+                "see runs_manual/binary_s4_ffd_l8_20260920 for related S4 subspace FFD."
+            ),
+        },
+        "oracle_class": "pairs_and_solve",
+        "median_ms_per_target": median_ms,
+        "largest_solvable": {
+            "budget": "pairs_baseline",
+            "l": l_goal,
+            "n": row["n"],
+            "pairs_solve_s": pairs_s,
+        },
+        "ladder": [
+            {
+                "l": item["l"],
+                "pairs_s": item["pairs_s"],
+                "speedup_vs_triples": item["speedup_vs_triples"],
+                "triples_gen_s": item["triples_gen_s"],
+            }
+            for item in ladder
+        ],
+        "ledger_gate_assessment": {
+            "ffd_logged": False,
+            "median_le_half_pairs": "n/a_until_faster_oracle_measured",
+            "note": (
+                "pairs-and-solve IS Theta(2^(2l)); this measures the baseline, "
+                "not a sub-2^(2l) win"
+            ),
+            "sub_2_to_2l_oracle": False,
+            "targets_le_64": True,
+        },
+        "wall_s": float(direct_obs.get("whole_process_wall_ms") or 0.0) / 1000.0,
+        "peak_rss_bytes": peak_rss,
+        "verdict": (
+            "L8_PAIRS_BASELINE_MEASURED_NO_SUB_2_2L_PENDING_INDEPENDENT_VALIDATION"
+            if producers_ok
+            else "PRODUCER_FAILURE"
+        ),
+        "claim_boundary": (
+            "Public synthetic binary Semaev pairs-and-solve baseline only. "
+            "Not key recovery, not a sub-2^(2l) oracle claim, not ledger promotion."
+        ),
+        "claim_boundary_non_claims": [
+            "not key recovery",
+            "not sub-2^(2l) oracle claim",
+            "not ledger promotion",
+            "FFD unmeasured on pairs arm",
+        ],
+        "independent_replay_pointer": independent_replay_pointer(run),
+        "fixture_hash": sha256(source),
+        "executable_or_source_hash": {
+            "executable": sha256(binary_path) if binary_path else None,
+            "source": sha256(source),
+        },
+        "host_id": host_record(),
+        "resource_caps": {
+            "common_cap_bytes": cap,
+            "observed_peak_rss_bytes": peak_rss,
+            "under_cap": under_cap,
+        },
+        "seeds": {"decomp_bench_internal": "0x9E3779B9"},
+        "evidence_paths": [
+            str((run / "logs/direct.stdout.jsonl").resolve()),
+            str((run / "receipts/direct.resource.json").resolve()),
+        ],
+        "created_at": now(),
+        "autolab_run_id": run.name,
+        "producer_exit_codes": {"direct": direct_obs["exit_code"]},
+    }
+    return claim
+
+
+def draft_decomposition_claim(
+    *,
+    beat: dict[str, Any],
+    beat_id: str,
+    run: Path,
+    direct_obs: dict[str, Any],
+    binaries: dict[str, str],
+    fixtures: int,
+) -> dict[str, Any]:
+    producer = beat.get("producer") or {}
+    if str(producer.get("example") or "") == "semaev_decomp_bench":
+        return draft_binary_pairs_decomposition_claim(
+            beat=beat,
+            beat_id=beat_id,
+            run=run,
+            direct_obs=direct_obs,
+            binaries=binaries,
+        )
+    parsed = parse_paired_oracle_stdout(direct_obs.get("stdout") or "")
+    header = parsed["header"]
+    arms = parsed["arms"]
+    producers_ok = direct_obs["exit_code"] == 0
+    peak_rss = direct_obs.get("children_peak_rss_bytes")
+    cap = beat.get("resource_cap_bytes")
+    under_cap = peak_rss is not None and cap is not None and int(peak_rss) <= int(cap)
+    ffds = parsed["ffds"]
+    ffd_block = {
+        "draws": 1,
+        "min": min(ffds) if ffds else None,
+        "max": max(ffds) if ffds else None,
+        "mean": (sum(ffds) / len(ffds)) if ffds else None,
+        "note": "FFD from first target draw in paired_bench; control-plane decomposition launch",
+    }
+    for key, arm in arms.items():
+        if isinstance(arm.get("ffd"), int):
+            ffd_block[key] = arm["ffd"]
+    x_arm = arms.get("x_chained_f4") or next(iter(arms.values()))
+    unknowns = int(beat.get("unknowns_goal") or x_arm.get("vars") or 0)
+    dim = int(beat.get("dim_goal") or header["dim"])
+    median_ms = parsed["median_ms_per_target"]
+    under_1h = isinstance(median_ms, (int, float)) and median_ms <= 3_600_000.0
+    source = REPO / "examples" / f"{beat['producer']['example']}.rs"
+    binary_path = binaries.get("custom") or binaries.get("direct")
+    claim = {
+        "schema_version": 2,
+        "task_id": TASK_ID,
+        "beat_id": beat_id,
+        "regime": beat["regime"],
+        "stage": "decomposition",
+        "n": beat["n"],
+        "a": beat.get("a", header["a"]),
+        "n_or_bits": beat["n"],
+        "m_summands": beat.get("m", header["m"]),
+        "dimension_l_or_dim": dim,
+        "unknowns": unknowns,
+        "system_degree": beat.get("system_degree", "quadratic"),
+        "eq_var_ratio": (x_arm["eqs"] / x_arm["vars"]) if x_arm.get("vars") else None,
+        "ffd_or_degree_of_regularity": ffd_block,
+        "oracle_class": "groebner",
+        "median_ms_per_target": median_ms,
+        "median_ms_per_target_detail": {
+            "reported_as": "max(found, refuted) class medians for 1h gate honesty",
+            **{
+                f"{key}_found_median_ms": arm.get("found_ms_median")
+                for key, arm in arms.items()
+            },
+            **{
+                f"{key}_refuted_median_ms": arm.get("refuted_ms_median")
+                for key, arm in arms.items()
+            },
+        },
+        "largest_solvable": {
+            "budget": "1h",
+            "dim": dim,
+            "m": beat.get("m", header["m"]),
+            "n": beat["n"],
+            "observed_median_ms": median_ms,
+            "under_budget": under_1h,
+            "unknowns": unknowns,
+            "verdict_mix": {
+                "found": x_arm.get("found"),
+                "inconclusive": x_arm.get("inconclusive"),
+                "refuted": x_arm.get("refuted"),
+            },
+        },
+        "arms": arms,
+        "disagreements": parsed["disagreements"],
+        "divisor_indices": parsed["divisor_indices"],
+        "fb_sizes": {"F_x": header["F_x"], "F_u": header["F_u"]},
+        "targets": header["targets"],
+        "node_budget": 50000,
+        "sat": False,
+        "wall_s": parsed["wall_s"]
+        if parsed["wall_s"] is not None
+        else (float(direct_obs.get("whole_process_wall_ms") or 0.0) / 1000.0),
+        "peak_rss_bytes": peak_rss,
+        "acceptance_vs_ledger": {
+            "dim_16_m_2_quadratic": dim == 16 and int(beat.get("m", 2)) == 2,
+            "disagreements_zero": parsed["disagreements"] == 0,
+            "ffd_logged": bool(ffds),
+            "median_under_1h": under_1h,
+        },
+        "verdict": (
+            "N31_M2_DIM16_PANEL_PASS_UNDER_1H_PENDING_INDEPENDENT_VALIDATION"
+            if producers_ok
+            and parsed["disagreements"] == 0
+            and under_1h
+            and ffds
+            else (
+                "PRODUCER_FAILURE"
+                if not producers_ok
+                else "DRAFT_INCOMPLETE_OR_GATE_FAIL"
+            )
+        ),
+        "claim_boundary": (
+            "Public synthetic Koblitz Semaev decomposition oracle measure only. "
+            "Not key recovery, not asymptotic sub-rho, not imported points, not "
+            "ledger promotion until independent validation."
+        ),
+        "claim_boundary_non_claims": [
+            "not key recovery",
+            "not asymptotic sub-sqrt",
+            "not imported/external points",
+            "not ledger promotion until independent validation",
+        ],
+        "independent_replay_pointer": independent_replay_pointer(run),
+        "fixture_hash": sha256(source),
+        "executable_or_source_hash": {
+            "executable": sha256(binary_path) if binary_path else None,
+            "source": sha256(source),
+        },
+        "host_id": host_record(),
+        "resource_caps": {
+            "common_cap_bytes": cap,
+            "node_budget": 50000,
+            "observed_peak_rss_bytes": peak_rss,
+            "under_cap": under_cap,
+        },
+        "seeds": {"paired_bench_default": hex(int((beat.get("env") or {}).get("seed", 0x5EED)))},
+        "evidence_paths": [
+            str((run / "logs/direct.stdout.jsonl").resolve()),
+            str((run / "receipts/direct.resource.json").resolve()),
+        ],
+        "created_at": now(),
+        "autolab_run_id": run.name,
+        "producer_exit_codes": {"direct": direct_obs["exit_code"]},
+    }
+    return claim
+
+
 def draft_factor_base_claim(
     *,
     beat: dict[str, Any],
@@ -1379,6 +2108,10 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
         f"{beat_id} is a single-target panel; use launch-single",
     )
     require(
+        beat.get("launch_mode") != "equal_advice_bl",
+        f"{beat_id} is an equal-advice BL reference beat; use launch-equal-advice",
+    )
+    require(
         beat.get("launch_mode", "single_target") == "single_target",
         f"{beat_id} is a multi-target batch panel; use launch-panel",
     )
@@ -1435,7 +2168,22 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
             write_json(run / "artifacts/prepared_commands.json", commands)
             return state
 
-        binaries = build_producers()
+        stage = str(beat.get("stage") or "vs_rho")
+        if stage in ("decomposition", "end_to_end_dlp") and isinstance(
+            beat.get("producer"), dict
+        ) and beat["producer"].get("example"):
+            require(
+                beat["producer"].get("example"),
+                f"beat {beat_id} stage {stage} requires producer.example",
+            )
+            custom = build_example(str(beat["producer"]["example"]))
+            binaries = {"custom": custom, "direct": custom}
+        elif stage == "decomposition":
+            raise AutolabError(
+                f"beat {beat_id} stage decomposition requires producer.example"
+            )
+        else:
+            binaries = build_producers()
         write_json(
             run / "artifacts/binaries.json",
             {key: {"path": path, "sha256": sha256(path)} for key, path in binaries.items()},
@@ -1450,7 +2198,6 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
         for key, value in (beat.get("env") or {}).items():
             env[str(key)] = str(value)
 
-        stage = str(beat.get("stage") or "vs_rho")
         commands = producer_commands(beat, beat_id, fixtures, binaries=binaries)
         write_json(run / "artifacts/commands.json", commands)
 
@@ -1578,6 +2325,65 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
                 claim_check=validation["status"],
                 pairing_errors=pairing_errors,
             )
+        elif stage == "decomposition":
+            claim = draft_decomposition_claim(
+                beat=beat,
+                beat_id=beat_id,
+                run=run,
+                direct_obs=direct_obs,
+                binaries=binaries,
+                fixtures=fixtures,
+            )
+            write_json(run / "artifacts/claim_draft.json", claim)
+            validation = validate_claim(claim, stage="decomposition", ledger=ledger)
+            write_json(run / "artifacts/claim_check.json", validation)
+            producers_ok = direct_obs["exit_code"] == 0
+            status = (
+                "PENDING_INDEPENDENT_VALIDATION" if producers_ok else "PRODUCER_FAILURE"
+            )
+            if producers_ok and validation["status"] != "PASS":
+                status = "SCHEMA_INCOMPLETE"
+            state.update(
+                status=status,
+                phase="analysis",
+                updated_at=now(),
+                direct_exit_code=direct_obs["exit_code"],
+                claim_check=validation["status"],
+            )
+        elif stage == "end_to_end_dlp":
+            producer = beat.get("producer") or {}
+            require(
+                str(producer.get("example") or "") == "j0_known_answer_bits",
+                f"beat {beat_id} end_to_end_dlp launch supports j0_known_answer_bits only",
+            )
+            claim = draft_j0_end_to_end_dlp_claim(
+                beat=beat,
+                beat_id=beat_id,
+                run=run,
+                direct_obs=direct_obs,
+                binaries=binaries,
+            )
+            write_json(run / "artifacts/claim_draft.json", claim)
+            validation = validate_claim(claim, stage="end_to_end_dlp", ledger=ledger)
+            write_json(run / "artifacts/claim_check.json", validation)
+            producers_ok = (
+                direct_obs["exit_code"] == 0
+                and claim.get("ic_ok") is True
+                and claim.get("rho_ok") is True
+                and claim.get("ic_agrees_rho") is True
+            )
+            status = (
+                "PENDING_INDEPENDENT_VALIDATION" if producers_ok else "PRODUCER_FAILURE"
+            )
+            if producers_ok and validation["status"] != "PASS":
+                status = "SCHEMA_INCOMPLETE"
+            state.update(
+                status=status,
+                phase="analysis",
+                updated_at=now(),
+                direct_exit_code=direct_obs["exit_code"],
+                claim_check=validation["status"],
+            )
         else:
             raise AutolabError(f"unsupported launch stage: {stage}")
 
@@ -1618,6 +2424,39 @@ def producer_commands(
     fixtures: int,
     binaries: dict[str, str] | None,
 ) -> dict[str, Any]:
+    producer = beat.get("producer")
+    if isinstance(producer, dict) and producer.get("args_template"):
+        example = str(producer["example"])
+        direct_bin = (
+            binaries.get("custom")
+            if binaries and binaries.get("custom")
+            else f"target/release/examples/{example}"
+        )
+        rendered = str(producer["args_template"]).format(
+            a=beat.get("a", 0),
+            n=beat.get("n"),
+            m=beat.get("m"),
+            l=beat.get("l"),
+            bits=beat.get("bits"),
+            fixtures=fixtures,
+        )
+        direct_argv = [direct_bin, *shlex.split(rendered)]
+        return {
+            "build": f"cargo build --release --example {example}",
+            "stage": beat.get("stage"),
+            "direct": " ".join(direct_argv),
+            "direct_argv": direct_argv,
+            "fixtures": fixtures,
+            "online_target_count": fixtures,
+            "precompute_fixtures": 0,
+            "direct_producer_fixture_count": fixtures,
+            "rho_producer_fixture_count": 0,
+            "env": beat.get("env") or {},
+            "rho": None,
+            "rho_argv": None,
+            "custom_example": example,
+        }
+
     direct_bin = (
         binaries["direct"]
         if binaries
@@ -2413,6 +3252,463 @@ def claim_check(arguments: argparse.Namespace) -> dict[str, Any]:
     return result
 
 
+def launch_equal_advice(arguments: argparse.Namespace) -> dict[str, Any]:
+    """Diagnostic Bernstein–Lange equal-advice reference arm (not KS batch rho).
+
+    Drives ``ic_next10_09_equal_advice`` via its ``targets`` / ``bl`` subcommands.
+    Optional ``--reuse-bl-archive`` + ``--pair-ic`` reuses a hash-verified BL
+    corpus and measures compact-orbit IC online on the same public points.
+    Fail-closed for vs_rho ledger promotion: claim draft stays SCHEMA_INCOMPLETE
+    until a schema-complete equal-advice paired report exists.
+    """
+    import equal_advice_pair
+
+    protocol = load_protocol()
+    ledger = load_ledger(protocol)
+    beat_id = arguments.beat
+    require(beat_id in protocol["beats"], f"unknown beat id: {beat_id}")
+    beat = protocol["beats"][beat_id]
+    require(
+        beat.get("launch_mode") == "equal_advice_bl",
+        f"{beat_id} is not an equal_advice_bl beat",
+    )
+    targets = int(arguments.targets or beat.get("targets_default", 1024))
+    minimum = int(beat.get("targets_minimum", 1024))
+    require(targets >= minimum, f"equal-advice targets must be >= {minimum} (no small-L panels)")
+    table_bytes = int(arguments.table_bytes or beat.get("table_bytes_default", 5711008))
+    label = str(arguments.label or beat.get("target_label_default", "autolab-n61-bl-ref-eval-v1"))
+    pair_ic = bool(getattr(arguments, "pair_ic", False))
+    reuse_archive = getattr(arguments, "reuse_bl_archive", None)
+    ic_k = int(getattr(arguments, "ic_k", None) or beat.get("ic_k_default", 256))
+    ic_rank_seed = int(getattr(arguments, "ic_rank_seed", None) or beat.get("ic_rank_seed", 7))
+    ic_target_count = getattr(arguments, "ic_target_count", None)
+    n, a = int(beat["n"]), int(beat["a"])
+    producers = beat["panel_producers"]
+    bl_prod = producers["bl"]
+    ic_prod = producers["ic"]
+    if pair_ic:
+        require("ic" in producers, f"{beat_id} has no IC panel producer")
+    if reuse_archive:
+        require(pair_ic or arguments.prepare_only, "--reuse-bl-archive requires --pair-ic (or --prepare-only)")
+
+    with RunnerLock():
+        # prepare-only must work in the Python-only harness (no cargo/rustc).
+        # Full execution still requires a complete preflight.
+        if arguments.prepare_only:
+            checks: list[dict[str, Any]] = []
+            for arm, producer in producers.items():
+                source = REPO / producer["source"]
+                checks.append(
+                    {
+                        "name": f"equal_advice_producer_source_{arm}",
+                        "ok": source.is_file(),
+                        "detail": str(source),
+                    }
+                )
+            git_head_proc = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=REPO,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            checks.append(
+                {
+                    "name": "git_head",
+                    "ok": git_head_proc.returncode == 0,
+                    "detail": git_head_proc.stdout.strip(),
+                }
+            )
+            if reuse_archive:
+                try:
+                    archive = equal_advice_pair.resolve_bl_archive(Path(reuse_archive))
+                    checks.append(
+                        {
+                            "name": "reuse_bl_archive",
+                            "ok": True,
+                            "detail": str(archive),
+                        }
+                    )
+                except (OSError, ValueError) as exc:
+                    checks.append(
+                        {
+                            "name": "reuse_bl_archive",
+                            "ok": False,
+                            "detail": str(exc),
+                        }
+                    )
+            preflight_receipt = {
+                "schema_version": "1.0",
+                "task_id": TASK_ID,
+                "kind": "equal_advice_prepare_only_preflight",
+                "ok": all(c["ok"] for c in checks),
+                "checks": checks,
+                "claim_boundary": (
+                    "prepare-only scaffolding; cargo/rustc not required; "
+                    "not a fixed-arm measurement"
+                ),
+            }
+        else:
+            preflight_receipt = preflight(protocol, ledger)
+            for arm, producer in producers.items():
+                source = REPO / producer["source"]
+                preflight_receipt["checks"].append(
+                    {
+                        "name": f"equal_advice_producer_source_{arm}",
+                        "ok": source.is_file(),
+                        "detail": str(source),
+                    }
+                )
+            preflight_receipt["ok"] = all(
+                c["ok"]
+                for c in preflight_receipt["checks"]
+                if c["name"] != "cryptominisat5_optional"
+            )
+        if not preflight_receipt["ok"]:
+            failed = [c for c in preflight_receipt["checks"] if not c["ok"]]
+            require(False, "preflight failed: " + "; ".join(f"{c['name']}={c['detail']}" for c in failed))
+        git_head = next(c["detail"] for c in preflight_receipt["checks"] if c["name"] == "git_head")
+        run_id = arguments.run_id or make_run_id(beat_id)
+        run = RUNS_DIR / run_id
+        require(not run.exists(), f"run already exists: {run}")
+        for name in ("artifacts", "inputs", "logs", "receipts"):
+            (run / name).mkdir(parents=True, exist_ok=True)
+        write_json(CURRENT_PATH, {"run_id": run_id, "beat_id": beat_id, "updated_at": now()})
+        write_json(run / "artifacts/preflight.json", preflight_receipt)
+        write_json(run / "inputs/protocol.json", protocol)
+        write_json(run / "inputs/boundary_targets.json", ledger)
+        write_json(
+            run / "inputs/ledger_pin.json",
+            {
+                "path": protocol["ledger"]["path"],
+                "sha256": sha256(ledger_path(protocol)),
+                "schema_version": ledger["schema_version"],
+            },
+        )
+
+        points_path = run / "inputs/points.txt"
+        scalars_path = run / "inputs/scalars.txt"
+        bl_out = run / "logs/bl.jsonl"
+        # Prefer CARGO_TARGET_DIR when set (autolab worktrees often redirect builds).
+        cargo_target = Path(os.environ.get("CARGO_TARGET_DIR", str(REPO / "target")))
+        bl_bin = str((cargo_target / "release/examples" / bl_prod["example"]).resolve())
+        ic_bin = str((cargo_target / "release/examples" / ic_prod["example"]).resolve())
+        targets_cmd = [
+            bl_bin,
+            "targets",
+            str(n),
+            str(a),
+            str(targets),
+            label,
+            str(points_path),
+            str(scalars_path),
+        ]
+        bl_cmd = [
+            bl_bin,
+            "bl",
+            str(n),
+            str(a),
+            str(table_bytes),
+            str(points_path),
+            str(bl_out),
+        ]
+        build_examples = [bl_prod["example"]]
+        if pair_ic:
+            build_examples.append(ic_prod["example"])
+        commands: dict[str, Any] = {
+            "build": ["cargo", "build", "--release"]
+            + [item for example in build_examples for item in ("--example", example)],
+            "targets": targets_cmd,
+            "bl": bl_cmd,
+        }
+        if pair_ic:
+            commands["ic"] = [
+                ic_bin,
+                f"construct:{n}:{a}:{ic_k}",
+                str(run / "inputs/ic_points.txt"),
+                str(ic_rank_seed),
+                str(run / "logs/ic.jsonl"),
+            ]
+        if reuse_archive:
+            commands["reuse_bl_archive"] = str(Path(reuse_archive).resolve())
+        write_json(run / "artifacts/commands.json", commands)
+
+        state: dict[str, Any] = {
+            "schema_version": "1.0",
+            "task_id": TASK_ID,
+            "run_id": run_id,
+            "beat_id": beat_id,
+            "launch_mode": "equal_advice_bl",
+            "status": "PREPARE_ONLY" if arguments.prepare_only else "ACTIVE",
+            "phase": "prepare",
+            "n": n,
+            "a": a,
+            "targets": targets,
+            "table_bytes": table_bytes,
+            "target_label": label,
+            "pair_ic": pair_ic,
+            "reuse_bl_archive": bool(reuse_archive),
+            "ic_k": ic_k if pair_ic else None,
+            "ic_rank_seed": ic_rank_seed if pair_ic else None,
+            "diagnostic_only": True,
+            "reference_arm": "bernstein_lange_equal_advice",
+            "existing_study": beat.get("existing_study"),
+            "git_head": git_head,
+            "created_at": now(),
+            "updated_at": now(),
+            "claim_boundary": (
+                "Diagnostic Bernstein–Lange equal-advice reference arm; public synthetic "
+                "only; fail-closed for vs_rho ledger promotion; PENDING_INDEPENDENT_VALIDATION "
+                "at most; not a KS v2 batch comparator and not an asymptotic sub-rho claim."
+            ),
+        }
+        write_json(run / "state.json", state)
+        if arguments.prepare_only:
+            write_json(
+                run / "artifacts/claim_draft.json",
+                {
+                    "beat_id": beat_id,
+                    "stage": "vs_rho",
+                    "status": "SCHEMA_INCOMPLETE",
+                    "diagnostic_only": True,
+                    "reason": "prepare-only; producers not executed",
+                    "n": n,
+                    "targets": targets,
+                    "table_bytes": table_bytes,
+                    "pair_ic": pair_ic,
+                    "reuse_bl_archive": bool(reuse_archive),
+                    "claim_boundary": state["claim_boundary"],
+                },
+            )
+            write_json(
+                run / "artifacts/claim_check.json",
+                {
+                    "status": "FAIL",
+                    "stage": "vs_rho",
+                    "reason": "prepare-only scaffolding; vs_rho remains fail-closed",
+                },
+            )
+            return state
+
+        pin: dict[str, Any] | None = None
+        if reuse_archive:
+            state.update(phase="reuse_bl", updated_at=now())
+            write_json(run / "state.json", state)
+            try:
+                pin = equal_advice_pair.materialize_bl_archive(
+                    archive=Path(reuse_archive),
+                    run=run,
+                    lab=sys.modules[__name__],
+                    targets=targets,
+                    table_bytes=table_bytes,
+                )
+            except (OSError, ValueError, FileNotFoundError) as exc:
+                require(False, f"reuse-bl-archive failed: {exc}")
+        else:
+            state.update(phase="build", updated_at=now())
+            write_json(run / "state.json", state)
+            built = subprocess.run(commands["build"], cwd=REPO, capture_output=True, text=True)
+            require(built.returncode == 0, "cargo build failed:\n" + built.stderr[-4000:])
+            write_json(
+                run / "artifacts/binaries.json",
+                {
+                    "paths": {"bl": bl_bin, **({"ic": ic_bin} if pair_ic else {})},
+                    "hashes": {
+                        "bl_binary_sha256": sha256(bl_bin),
+                        "bl_source_sha256": sha256(REPO / bl_prod["source"]),
+                        **(
+                            {
+                                "ic_binary_sha256": sha256(ic_bin),
+                                "ic_source_sha256": sha256(REPO / ic_prod["source"]),
+                            }
+                            if pair_ic
+                            else {}
+                        ),
+                        "git_head": git_head,
+                    },
+                },
+            )
+
+            state.update(phase="targets", updated_at=now())
+            write_json(run / "state.json", state)
+            gen = subprocess.run(targets_cmd, cwd=REPO, capture_output=True, text=True)
+            (run / "logs/targets.stdout").write_text(gen.stdout)
+            (run / "logs/targets.stderr").write_text(gen.stderr)
+            require(gen.returncode == 0, "targets generation failed:\n" + gen.stderr[-2000:])
+            require(points_path.is_file() and scalars_path.is_file(), "targets mode did not write point/scalar files")
+            point_lines = [ln for ln in points_path.read_text().splitlines() if ln.strip()]
+            require(len(point_lines) == targets, f"expected {targets} points, got {len(point_lines)}")
+
+            state.update(phase="bl", updated_at=now())
+            write_json(run / "state.json", state)
+            bl_run = subprocess.run(bl_cmd, cwd=REPO, capture_output=True, text=True)
+            (run / "logs/bl.stdout").write_text(bl_run.stdout)
+            (run / "logs/bl.stderr").write_text(bl_run.stderr)
+            require(bl_run.returncode == 0, "BL producer failed:\n" + bl_run.stderr[-4000:])
+            require(bl_out.is_file(), "BL producer did not write jsonl")
+
+        records = parse_json_lines(bl_out.read_text())
+        summary = next((r for r in records if r.get("kind") == "bl_summary" or r.get("kind") == "bl_level_summary"), None)
+        precompute = next((r for r in records if r.get("kind") == "bl_precompute"), None)
+        online_rows = [
+            r
+            for r in records
+            if r.get("kind") in ("bl_online", "bl_online_target", "bl_target", "bl_level_target")
+        ]
+        solved = sum(
+            1
+            for r in online_rows
+            if r.get("solved") or r.get("verified") or r.get("verified_vs_truth")
+        )
+
+        claim_draft: dict[str, Any]
+        check: dict[str, Any]
+        if pair_ic:
+            state.update(phase="build_ic", updated_at=now())
+            write_json(run / "state.json", state)
+            built = subprocess.run(commands["build"], cwd=REPO, capture_output=True, text=True)
+            require(built.returncode == 0, "cargo build failed:\n" + built.stderr[-4000:])
+            binaries = {"bl": bl_bin, "ic": ic_bin}
+            write_json(
+                run / "artifacts/binaries.json",
+                {
+                    "paths": binaries,
+                    "hashes": {
+                        "bl_binary_sha256": sha256(bl_bin) if Path(bl_bin).is_file() else None,
+                        "ic_binary_sha256": sha256(ic_bin),
+                        "bl_source_sha256": sha256(REPO / bl_prod["source"]),
+                        "ic_source_sha256": sha256(REPO / ic_prod["source"]),
+                        "git_head": git_head,
+                    },
+                },
+            )
+            points = equal_advice_pair.parse_points_file(points_path)
+            scalars = equal_advice_pair.parse_scalars_file(scalars_path)
+            count = int(ic_target_count) if ic_target_count is not None else len(points)
+            require(1 <= count <= len(points), f"ic_target_count must be in 1..{len(points)}")
+            state.update(phase="ic", updated_at=now(), ic_target_count=count)
+            write_json(run / "state.json", state)
+            try:
+                ic_obs = equal_advice_pair.run_ic_arm(
+                    lab=sys.modules[__name__],
+                    run=run,
+                    binaries=binaries,
+                    n=n,
+                    a=a,
+                    k=ic_k,
+                    rank_seed=ic_rank_seed,
+                    points=points,
+                    ic_target_count=count,
+                )
+            except (OSError, RuntimeError, ValueError) as exc:
+                require(False, f"paired IC arm failed: {exc}")
+            write_json(
+                run / "artifacts/ic_arm.json",
+                {
+                    "exit_code": ic_obs["exit_code"],
+                    "ic_target_count": ic_obs["ic_target_count"],
+                    "k": ic_obs["k"],
+                    "rank_seed": ic_obs["rank_seed"],
+                    "points_sha256": ic_obs["points_sha256"],
+                    "ic_jsonl_sha256": ic_obs["ic_jsonl_sha256"],
+                    "summary": ic_obs["summary"],
+                },
+            )
+            if pin is None:
+                pin = {
+                    "kind": "fresh_bl_measurement",
+                    "archive_run_id": None,
+                    "points_sha256": sha256(points_path),
+                    "scalars_sha256": sha256(scalars_path),
+                    "bl_jsonl_sha256": sha256(bl_out),
+                    "remeasured": True,
+                }
+            claim_draft = equal_advice_pair.draft_paired_vs_rho_slice(
+                lab=sys.modules[__name__],
+                beat=beat,
+                beat_id=beat_id,
+                run=run,
+                pin=pin,
+                ic_obs=ic_obs,
+                bl_records=records,
+                points=points,
+                scalars=scalars,
+                table_bytes=table_bytes,
+                binaries=binaries,
+                git_head=git_head,
+            )
+            claim_draft["bl_records"] = len(records)
+            claim_draft["bl_online_rows"] = len(online_rows)
+            claim_draft["bl_solved_or_verified_rows"] = solved
+            claim_draft["bl_precompute"] = precompute
+            claim_draft["bl_summary"] = summary
+            claim_draft["target_label"] = label
+            panel = equal_advice_pair.panel_pairing_summary(
+                ic_obs=ic_obs,
+                bl_records=records,
+                points=points,
+                scalars=scalars,
+                table_bytes=table_bytes,
+            )
+            write_json(run / "artifacts/panel_pairing.json", panel)
+            claim_draft["panel_pairing"] = {
+                "paired_targets": panel["paired_targets"],
+                "verified_pairs": panel["verified_pairs"],
+                "online_speedup_bl_over_ic": panel["online_speedup_bl_over_ic"],
+            }
+            write_json(run / "artifacts/claim_draft.json", claim_draft)
+            check = validate_claim(claim_draft, stage="vs_rho", ledger=ledger)
+            write_json(run / "artifacts/claim_check.json", check)
+            write_json(run / "artifacts/claim_check_tool.json", check)
+        else:
+            claim_draft = {
+                "beat_id": beat_id,
+                "stage": "vs_rho",
+                "status": "SCHEMA_INCOMPLETE",
+                "diagnostic_only": True,
+                "reference_arm": "bernstein_lange_equal_advice",
+                "n": n,
+                "a": a,
+                "targets": targets,
+                "table_bytes": table_bytes,
+                "target_label": label,
+                "bl_records": len(records),
+                "bl_online_rows": len(online_rows),
+                "bl_solved_or_verified_rows": solved,
+                "bl_precompute": precompute,
+                "bl_summary": summary,
+                "existing_study": beat.get("existing_study"),
+                "timing_class": beat.get("timing_class_goal"),
+                "claim_boundary": state["claim_boundary"],
+                "missing_vs_rho_fields_note": (
+                    "Equal-advice BL reference smoke does not emit the full vs_rho "
+                    "paired IC/rho schema; fail-closed until a schema-complete report."
+                ),
+                "independent_replay_pointer": None,
+                "verdict": "DIAGNOSTIC_REFERENCE_ARM_ONLY",
+            }
+            write_json(run / "artifacts/claim_draft.json", claim_draft)
+            check = {
+                "status": "FAIL",
+                "stage": "vs_rho",
+                "reason": "diagnostic equal-advice BL reference; vs_rho schema incomplete by design",
+                "claim_draft_status": claim_draft["status"],
+            }
+            write_json(run / "artifacts/claim_check.json", check)
+
+        state.update(
+            status="PENDING_INDEPENDENT_VALIDATION",
+            phase="done",
+            updated_at=now(),
+            claim_check_status=check["status"],
+            claim_draft_status=claim_draft.get("status"),
+            remaining_schema_gaps=claim_draft.get("remaining_schema_gaps"),
+        )
+        write_json(run / "state.json", state)
+        write_json(CURRENT_PATH, {"run_id": run_id, "beat_id": beat_id, "updated_at": now()})
+        return state
+
+
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(description=__doc__)
     sub = result.add_subparsers(dest="command", required=True)
@@ -2430,7 +3726,16 @@ def parser() -> argparse.ArgumentParser:
     launch_parser.add_argument(
         "--fixtures",
         type=int,
-        help="Online target count (default from beat); vs_rho primary runs require exactly 1",
+        help="Compatibility option; the only accepted value is 1 target per workload",
+    )
+    launch_parser.add_argument(
+        "--repeats",
+        type=int,
+        help=(
+            "Timed executions per arm after a discarded warmup exec "
+            f"(default {DEFAULT_TIMED_REPEATS}; stops early once a run "
+            f"exceeds {int(REPEAT_BUDGET_MS / 1000)}s)"
+        ),
     )
     launch_parser.add_argument(
         "--prepare-only",
@@ -2468,6 +3773,52 @@ def parser() -> argparse.ArgumentParser:
     single.add_argument("--k-candidates", help="Comma-separated K tune candidates (default: beat list)")
     single.add_argument("--cpu", type=int, help="Pin every producer to this CPU with taskset (Linux)")
     single.add_argument("--resume", metavar="RUN_ID", help="Continue an interrupted single-target run")
+
+    equal = sub.add_parser(
+        "launch-equal-advice",
+        help=(
+            "Diagnostic Bernstein–Lange equal-advice reference arm "
+            "(ic_next10_09_equal_advice); not a KS batch panel; fail-closed vs_rho"
+        ),
+    )
+    equal.add_argument("--beat", required=True, help="equal_advice_bl beat id from protocol.json")
+    equal.add_argument("--run-id")
+    equal.add_argument("--targets", type=int, help="Public synthetic targets (default: beat targets_default, >=1024)")
+    equal.add_argument("--table-bytes", type=int, help="BL table budget bytes (default: beat table_bytes_default)")
+    equal.add_argument("--label", help="Target corpus label for targets mode")
+    equal.add_argument(
+        "--prepare-only",
+        action="store_true",
+        help="Scaffold run dir + commands.json without building or executing producers",
+    )
+    equal.add_argument(
+        "--reuse-bl-archive",
+        metavar="PATH",
+        help=(
+            "Hash-verify and reuse an archived BL run (inputs/points.txt + logs/bl.jsonl) "
+            "instead of remeasuring BL; requires --pair-ic"
+        ),
+    )
+    equal.add_argument(
+        "--pair-ic",
+        action="store_true",
+        help="Measure koblitz_orbit_dlp_fast_online on the same public points as the BL arm",
+    )
+    equal.add_argument(
+        "--ic-k",
+        type=int,
+        help="Orbit columns K for construct:n:a:K (default: beat ic_k_default / 256 for n61 equal-advice)",
+    )
+    equal.add_argument(
+        "--ic-rank-seed",
+        type=int,
+        help="Rank seed for the IC online producer (default: beat ic_rank_seed / 7)",
+    )
+    equal.add_argument(
+        "--ic-target-count",
+        type=int,
+        help="How many leading archived points to solve with IC (default: all)",
+    )
 
     for name in ("status", "verify"):
         command = sub.add_parser(name)
@@ -2511,6 +3862,13 @@ def main() -> int:
             state = single_target_panel.launch_single(arguments, sys.modules[__name__])
             print(json.dumps(state, indent=2, sort_keys=True))
             return 0 if state.get("status") == "PENDING_INDEPENDENT_VALIDATION" else 3
+        if arguments.command == "launch-equal-advice":
+            state = launch_equal_advice(arguments)
+            print(json.dumps(state, indent=2, sort_keys=True))
+            return 0 if state.get("status") in (
+                "PENDING_INDEPENDENT_VALIDATION",
+                "PREPARE_ONLY",
+            ) else 3
         if arguments.command == "status":
             status(arguments)
             return 0

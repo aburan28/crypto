@@ -1,0 +1,7 @@
+{
+  "reason": "The first structured-solver attempt showed deferred SIGPROF delivery inside Sage native routines; some requests exceeded their declared CPU caps.",
+  "change": "Run each search in a supervised fork worker. The parent monitors worker CPU externally, streams partial verified decompositions, kills workers at the unchanged budget, reaps every worker, and charges parent plus worker CPU.",
+  "validation": "Repeat complete tiny-group solution-set checks and test forced CPU termination inside a non-cooperative OpenSSL native routine at 0.05 and 0.10 CPU seconds.",
+  "rerun": "Repeat all structured-solver gates and fresh comparisons on the same frozen fields, bases, targets, solver rules and CPU caps. Keep the first attempt in discarded_soft_timer_* files, outside all final comparison summaries.",
+  "unchanged": "The algebraic norm method, target/base selection, gate thresholds, generic comparison results and primary endpoints."
+}

@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pdp_root_finder_ecbench_20261013/sessions/n19/comparisons/rho-strong__ic-rootfind.json
+ops (ok): ic-rootfind / rho-strong = 14.9984 [14.316, 15.699] (cluster) over 40 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 11.6234 [10.905, 12.293]
+| curve | log2 r | workloads | ic-rootfind / rho-strong | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m19-t797-b6cf2467 | 17.00 | 8 | 14.9984 | [14.3158, 15.6988] | cluster |
+
+| workload | curve | log2 r | rho-strong mean S | ic-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W00eb7693de5f | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.1258 | 47.8766 | 15.3168 |
+| W2646a04cba9f | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.2844 | 45.1847 | 13.7573 |
+| W4b22eefd1b6a | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.2313 | 47.7090 | 14.7644 |
+| W7066c0498278 | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.1423 | 48.4023 | 15.4033 |
+| W834c0c4e2d83 | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.1418 | 46.8847 | 14.9230 |
+| W8c731b99a5c1 | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.1611 | 46.0809 | 14.5773 |
+| Wed3081c51b8f | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.0014 | 44.6253 | 14.8683 |
+| Wf83108e5d557 | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.1423 | 51.6542 | 16.4381 |

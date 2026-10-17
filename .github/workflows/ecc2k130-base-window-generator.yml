@@ -16,6 +16,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   parity:
     runs-on: ubuntu-24.04
@@ -28,6 +32,9 @@ jobs:
           sparse-checkout: |
             /Cargo.toml
             /docs/ic/calibration.json
+            /docs/ic/boundary_targets.json
+            /docs/ecbench/schema.sql
+            /docs/curves/registry.json
             /src/*
             /examples/koblitz_base_window.rs
             /research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
@@ -47,7 +54,7 @@ jobs:
       - name: Build generator
         run: |
           printf '%s  %s\n' \
-            7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627 \
+            ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90 \
             research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock | sha256sum -c -
           cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
           cargo build --locked --example koblitz_base_window

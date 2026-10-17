@@ -15,7 +15,16 @@ on:
       - 'docs/curves/registry.json'
       - 'docs/curves/traits.json'
       - 'docs/curves/TRAITS.md'
+      - 'docs/curves/factor-hints.txt'
+      - 'docs/curves/factor-hints.gp'
+      - 'docs/curves/trait-sources.json'
+      - 'docs/curves/ic/curves.yaml'
+      - 'research/isogeny_walk_20261004/runs/*/isogeny_routes.json'
       - '.github/workflows/curve-traits.yml'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - '.cargo/**'
   push:
     branches: [main]
     paths:
@@ -32,31 +41,81 @@ on:
       - 'docs/curves/registry.json'
       - 'docs/curves/traits.json'
       - 'docs/curves/TRAITS.md'
+      - 'docs/curves/factor-hints.txt'
+      - 'docs/curves/factor-hints.gp'
+      - 'docs/curves/trait-sources.json'
+      - 'docs/curves/ic/curves.yaml'
+      - 'research/isogeny_walk_20261004/runs/*/isogeny_routes.json'
       - '.github/workflows/curve-traits.yml'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - '.cargo/**'
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
+  # The trait build takes several minutes, and both `check` and the
+  # altered-file rejection rebuild it, so each runs in its own job to stay
+  # within the 25-minute PR budget (.github/scripts/check-pr-budgets.py).
   traits:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 45 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        task: [tests, check, altered]
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/scripts/
+            /Cargo.toml
+            /Cargo.lock
+            /build.rs
+            /.cargo/
+            /rust-toolchain*
+            /rustfmt.toml
+            /clippy.toml
+            /src/
+            /tests/
+            /examples/
+            /benches/
+            /experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs
+            /experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs
+            /docs/curves/registry.json
+            /docs/curves/traits.json
+            /docs/curves/factor-hints.txt
+            /docs/curves/trait-sources.json
+            /docs/curves/ic/curves.yaml
+            /research/isogeny_walk_20261004/runs/p256-ell31-radius2/isogeny_routes.json
+            /research/isogeny_walk_20261004/runs/p224-ell61-radius2/isogeny_routes.json
+      - name: Materialize compile-time fixture inputs
+        run: node .github/scripts/ci-scope.mjs --materialize
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: '1.98'
       - uses: Swatinem/rust-cache@v2
       - name: Module tests
+        if: matrix.task == 'tests'
         run: cargo test --release --lib curve_traits
-      - run: cargo build --release --bin curve_traits
+      - if: matrix.task != 'tests'
+        run: cargo build --release --bin curve_traits
       - name: traits.json is current with registry.json
+        if: matrix.task == 'check'
         run: ./target/release/curve_traits check
       - name: Queries run on the committed file
+        if: matrix.task == 'check'
         run: |
           ./target/release/curve_traits show ECC2K-130
           ./target/release/curve_traits group --by cm,descent --min-sizes 2
           ./target/release/curve_traits similar ECC2K-130 --other-sizes --top 5
       - name: Reject an altered file
+        if: matrix.task == 'altered'
         run: |
           cp docs/curves/traits.json /tmp/altered.json
           sed -i '0,/"conductor": "7"/s//"conductor": "11"/' /tmp/altered.json

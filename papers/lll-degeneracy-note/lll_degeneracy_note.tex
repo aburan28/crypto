@@ -1,0 +1,219 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\hypersetup{colorlinks=true, linkcolor=blue!50!black, citecolor=blue!50!black, urlcolor=blue!50!black}
+
+\title{LLL Failures on the Boneh--Venkatesan Lattice Were\\
+       Floating-Point Artifacts: A Corrected Note}
+\author{Anonymous}
+\date{}
+
+\newcommand{\FF}{\mathbb{F}}
+\newcommand{\ZZ}{\mathbb{Z}}
+
+\begin{document}
+\maketitle
+\emergencystretch=2em
+
+\begin{abstract}
+An earlier version of this note (PDF of 2026-10-11) reported two LLL
+failure modes for the Boneh--Venkatesan Hidden-Number-Problem lattice
+on deployed ECDSA curves: a ``curve-specific'' failure for secp256k1
+at 256 bits and a uniform failure at $\geq 384$ bits attributed to an
+undersized iteration cap. \textbf{Both were bugs in our floating-point
+Gram--Schmidt orthogonalisation, not properties of the curves or of
+LLL.} For secp256k1, and for every 384-bit curve, the squared
+Gram--Schmidt norms overflow IEEE double precision ($n^4 >$
+\texttt{f64::MAX}); P-521 additionally suffers catastrophic
+cancellation. Both had been diagnosed and fixed in the companion code
+before that version was built. With the fixes, a re-run on 2026-10-16
+recovers the key in every probe at 256 and 384 bits, secp256k1
+included (6/6), and on P-521 with 2048-bit fixed-point Gram--Schmidt
+(3/3). We withdraw the curve-specificity claim and every conclusion
+drawn from it. What remains is a numerical lesson: an
+$\texttt{f64}$ Gram--Schmidt step silently fails once the group order
+passes about $2^{256}$ (basis entries about $2^{512}$).
+\end{abstract}
+
+\section*{Correction (2026-10-16)}
+
+This version replaces the note of 2026-10-11. An integrity audit of
+our results (the \texttt{sheriff} case \texttt{SHF-20261016-3caa6f},
+finding P1, in the companion research repository) found that the note
+reported as curve properties two failures that our own analysis
+(\nolinkurl{research/notes/lattice-hnp/RESEARCH_LLL_GS_ANALYSIS.md},
+\S10) had traced to numerical bugs and fixed in May 2026. The
+following claims of the earlier version are \textbf{withdrawn}:
+\begin{itemize}
+\item that secp256k1's LLL failure is ``a curve-specific arithmetic
+      phenomenon'', ``empirically robust'' and ``reproducible'';
+\item that the $\geq 384$-bit failures were caused by the LLL iteration
+      cap;
+\item that LLL-convergence benchmarks are curve-specific and that
+      reported HNP attack costs do not transfer between curves;
+\item the proposed curve-selection criterion against
+      near-power-of-two group orders, and the open questions built on
+      the curve-specificity claim.
+\end{itemize}
+The pre-fix measurements are kept below (Section~\ref{sec:prefix}) as
+the record of what the buggy code did.
+
+\section{Setting and notation}
+
+The Boneh--Venkatesan lattice attack on biased-nonce
+ECDSA~\cite{boneh1996,nguyen2002} recovers the secret key $d$ from
+$m$ signatures $(r_i, s_i, z_i)$ in which the nonce $k_i$ is known
+to satisfy $0 \leq k_i < 2^{k_{\text{bits}}}$ for some
+$k_{\text{bits}} < n_{\text{bits}}$. With $a_i = s_i^{-1} r_i \bmod n$
+and $t_i = s_i^{-1} z_i \bmod n$, each signature contributes the
+constraint
+\[
+   d \cdot a_i + t_i \equiv k_i \pmod{n}.
+\]
+
+The standard $(m+2)$-dimensional integer lattice basis (rows)
+\[
+   B \;=\;
+   \begin{pmatrix}
+     n^2 \cdot I_m   & 0_{m \times 2}  \\[2pt]
+     n \cdot \mathbf{a}^\top  & 2^{k_{\text{bits}}}  & 0 \\[2pt]
+     n \cdot \mathbf{t}^\top  & 0  & n \cdot 2^{k_{\text{bits}}}
+   \end{pmatrix}
+\]
+is fed to LLL with Lov\'asz parameter $\delta = 0.75$; the short
+vector after reduction contains $-d \cdot 2^{k_{\text{bits}}}$ in
+the $(m+1)$-st coordinate (modulo sign).
+
+\section{What the earlier version measured}
+\label{sec:prefix}
+
+These are the pre-fix measurements as the 2026-10-11 version reported
+them. They were produced by unscaled \texttt{f64} Gram--Schmidt and
+are \textbf{superseded} by Section~\ref{sec:rerun}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrrr}
+\toprule
+$(d_{\text{seed}}, k_{\text{seed}})$ & P-256 outcome & P-256 time & secp256k1 outcome \\
+\midrule
+\texttt{(0xC0FFEE, 0xC0FFEE)}           & recovered & 690~ms  & iteration cap @ 9993~ms \\
+\texttt{(0xDEADBEEF, 0xBADCAFE)}        & recovered & 697~ms  & iteration cap @ 9845~ms \\
+\texttt{(0x12345678, 0x9ABCDEF0)}       & recovered & 646~ms  & iteration cap @ 10119~ms \\
+\bottomrule
+\end{tabular}
+\caption{Pre-fix (superseded): $k_{\text{bits}} = 192$, $m = 8$,
+$\delta = 0.75$. Reported then as P-256 3/3, secp256k1 0/3.}
+\label{tab:prefix}
+\end{table}
+
+The pre-fix sweep at $k_{\text{bits}} = 3 n_{\text{bits}}/4$, $m = 8$,
+one seed, reported secp192k1, secp224k1, P-256 and brainpoolP256r1
+recovering, and secp256k1, P-384, brainpoolP384r1 and P-521 hitting
+the iteration cap.
+
+\section{The causes}
+
+The basis has rows of size about $n^2$, so the squared Gram--Schmidt
+norms the reduction compares are of size about $n^4$.
+
+\paragraph{Failure A: overflow.} IEEE double precision tops out just
+below $2^{1024}$. Among the three 256-bit curves, only secp256k1's
+order is close enough to $2^{256}$ that $n^4$ exceeds
+\texttt{f64::MAX}; P-256's and brainpoolP256r1's orders are smaller,
+and their $n^4$ stays below it (an exact rational comparison of the
+standard orders~\cite{fips186,sec2}, recorded in the audit as
+\texttt{checks/f64-overflow.txt}). The overflowed norms became
+infinite and then \texttt{NaN}, and LLL ran to its iteration cap. The
+``curve specificity'' was the position of one group order relative to
+a floating-point limit. secp192k1 and secp224k1 escaped because their
+$n^4$ is far below the limit, which is also why the earlier
+near-power-of-two hypothesis seemed refuted. Scaling the basis by
+$2^{-(\text{max\_bits} - 500)}$ before orthogonalising removes the
+overflow (\texttt{src/cryptanalysis/lattice.rs}).
+
+\paragraph{Failure B: overflow, then cancellation.} At 384 bits, $n^4$
+overflows for every curve, which explains the ``uniform'' failure
+there; the same scaling fixes P-384 and brainpoolP384r1, so the
+iteration cap was not the cause. P-521 still fails after scaling:
+orthogonalising a row against rows of size about $n^2$ subtracts
+nearly equal 53-bit quantities, and the residual swamps the true
+component by many orders of magnitude (\S10.2 of the analysis). A
+2048-bit fixed-point Gram--Schmidt (\texttt{lll\_reduce\_hp}) removes
+it.
+
+\section{Re-run with the fixes (2026-10-16)}
+\label{sec:rerun}
+
+We re-ran the committed probes (\nolinkurl{tests/lll_degeneracy_probe.rs})
+on the fixed code. Commands, logs, parsed results and the host are in
+\nolinkurl{research/lll_degeneracy_rerun_20261016/}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llr}
+\toprule
+Curve & Gram--Schmidt & Recovered / probes \\
+\midrule
+secp192k1        & scaled \texttt{f64} & 3 / 3 \\
+secp224k1        & scaled \texttt{f64} & 3 / 3 \\
+secp256k1        & scaled \texttt{f64} & 6 / 6 \\
+P-256            & scaled \texttt{f64} & 6 / 6 \\
+brainpoolP256r1  & scaled \texttt{f64} & 1 / 1 \\
+P-384            & scaled \texttt{f64} & 4 / 4 \\
+brainpoolP384r1  & scaled \texttt{f64} & 4 / 4 \\
+P-521            & scaled \texttt{f64} & 0 / 4 \\
+P-521            & 2048-bit fixed point & 3 / 3 \\
+\bottomrule
+\end{tabular}
+\caption{Re-run, $m = 8$, $k_{\text{bits}} = 3 n_{\text{bits}}/4$,
+$\delta = 0.75$; each recovered probe returned the planted key.
+Source: \texttt{results.json} in the re-run directory.}
+\label{tab:rerun}
+\end{table}
+
+Every probe at 256 and 384 bits finished in 13--27~ms on an
+unisolated 4-vCPU virtual machine, against the roughly 10~s and 20~s
+cap hits of the earlier version. These timings are single runs, not a
+benchmark.
+
+\section{What remains}
+
+No curve-specific LLL behaviour remains at these parameters. The
+lesson is about implementations: an \texttt{f64} Gram--Schmidt step
+fails silently, by overflow, once the squared norms pass $2^{1024}$,
+that is once $n$ passes about $2^{256}$ and the basis entries about
+$2^{512}$, and loses the
+small components to cancellation at larger dynamic ranges. An HNP
+experiment that reports an LLL failure should state its arithmetic
+and rule this out before attributing the failure to the curve.
+
+This note makes no security claim about any curve. It reports a small
+number of probes at one parameter set ($m = 8$, $k_{\text{bits}} = 3
+n_{\text{bits}}/4$).
+
+\begin{thebibliography}{99}
+
+\bibitem{boneh1996} D.~Boneh, R.~Venkatesan, ``Hardness of computing
+the most significant bits of secret keys in Diffie--Hellman and
+related schemes'', CRYPTO 1996.
+
+\bibitem{nguyen2002} P.~Nguyen, I.~Shparlinski, ``The insecurity of
+the digital signature algorithm with partially known nonces'',
+\emph{J. Cryptol.} 2002.
+
+\bibitem{fips186} NIST FIPS 186-4, ``Digital Signature Standard'',
+2013.
+
+\bibitem{sec2} Certicom Research, ``SEC 2: Recommended Elliptic Curve
+Domain Parameters'', 2010.
+
+\end{thebibliography}
+
+\end{document}

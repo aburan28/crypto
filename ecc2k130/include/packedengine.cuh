@@ -91,7 +91,8 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     }
     unsigned checkpointVersion() const override { return 2u + ECC_CKPT_BUMP; }
 #else
-    static size_t dynamicSharedBytes() { return 0; }
+    // Zero without a sigma table; otherwise reserve its Frobenius nibble table.
+    static size_t dynamicSharedBytes() { return eccPacked131::SIGMA_SMEM_BYTES; }
     unsigned checkpointVersion() const override {
         return (ECC_PACKED_XONLY_POLY_SELECT ? 8u :
             (ECC_PACKED_XONLY_ARITHMETIC_ONLY ? 7u :
@@ -99,9 +100,6 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
             (ECC_PACKED_XONLY_BRIDGE1_COMMON ? 5u :
             (ECC_PACKED_XONLY_BRIDGE3 ? 4u : (ECC_PACKED_XONLY_23 ? 3u : 2u)))))) + ECC_CKPT_BUMP;
     }
-    // The fused sigma walk's Frobenius nibble table, when compiled in.
-    static size_t dynamicSharedBytes() { return eccPacked131::SIGMA_SMEM_BYTES; }
-    unsigned checkpointVersion() const override { return 2u + ECC_CKPT_BUMP; }
 #endif
     size_t fieldCount() const override { return size_t(P.threads) * BATCH * 5; }
 #if ECC_PACKED_STATE_TILE
@@ -472,6 +470,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed sigma fused late y: %d\n", ECC_SIGMA_FUSED_LATE_Y);
         printf("packed sigma fused shared slots: %d\n", ECC_SIGMA_FUSED_SHARED_SLOTS);
         printf("packed witness: %d\n", ECC_WITNESS);
+        printf("packed sigma sign: %d\n", ECC_SIGMA_SIGN);
         printf("packed L2 persist: %d\n", ECC_PACKED_L2_PERSIST);
         printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);
         printf("packed add combine: %d\n", ECC_PACKED_ADD_COMBINE);
@@ -554,7 +553,6 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
 #if ECC_PROFILE_RANGE
         CUDA_CHECK(cudaProfilerStart());
 #endif
-        eccPacked131::walk<<<(P.threads + eccPacked131::walkWorkersPerBlock131 - 1) / eccPacked131::walkWorkersPerBlock131, ECC_THREADS,
 #if ECC_TABLE_GLOBAL_HINTS
         WalkParams<unsigned> one = P;
         one.steps = 1;

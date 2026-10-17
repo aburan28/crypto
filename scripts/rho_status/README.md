@@ -1,10 +1,41 @@
 # ECC2K-130 public status snapshot
 
-GitHub Action, run every 3 minutes, that reads the private Pollard-ρ distinguished-point
+GitHub Action, run every 10 minutes, that reads the private Pollard-ρ distinguished-point
 store and publishes **aggregates only** to GitHub Pages.
 
 The page never includes point keys, walk coefficients `(a, b)`, seeds, or
 the database URL.
+
+The status page has two explicit feed tabs. **DP32 · production** is the
+original `ecc2k-130` campaign and keeps its live feed, collision count, and
+collision model. **DP34 · table-walk** is the separate
+`ecc2k130-table8-22b-v1` research namespace currently used by the table-walk
+GPU fleet. `weight_status.py` publishes only S3 object-size counts, sanitized
+slot counters, and checkpoint totals for that feed. Its records and rate are
+never merged into the DP32 totals: the two walk namespaces cannot be treated
+as one collision corpus.
+
+## Live Mac control uploads
+
+The separate `ecc2k130-synthetic-metal-h128-v1` Mac run has its own panel.
+`mac_control.py` reads the private `latest.json` objects, validates their
+campaign and run identities, and emits only worker names, timestamps,
+sequences, DP record counts, and walk update counts. Its `--publish-live`
+option writes that document to the fixed `mac-control.json` key in the status
+bucket. The bucket policy grants public read to that key alone; the private
+worker manifests remain private. The dashboard reads this live object first
+and uses the Pages snapshot when the live object is unavailable. The original
+campaign totals and collision odds never include the Mac control run.
+
+On the local Mac, install the checked-in `mac-control-publisher.plist` as
+`~/Library/LaunchAgents/com.adamburan.ecc2k130-mac-control-status.plist` and
+copy `mac_control.py` to the script path in that plist. Its `RunAtLoad` and
+120-second interval keep the public document current independently of the
+GitHub Actions queue. The existing Pages workflow still publishes a fallback
+copy on each successful deployment. The public object must be readable at
+`https://ecc2k130-status-590183823895.s3.us-west-2.amazonaws.com/mac-control.json`
+from the Pages origin through the bucket's existing CORS rule.
+
 
 ## Where the snapshot comes from, and why there are two sources
 
@@ -74,7 +105,8 @@ Two more things stop one dependency from freezing the page:
   walker was indistinguishable from the fix for a dead cron.
 
 The dashboard's stale threshold is 90 minutes: many missed feed writes at
-the ingest host's 3-minute cadence, or thirty missed Action runs.
+the ingest host's 3-minute cadence, or nine missed Action runs at the
+10-minute publishing cadence.
 `test_rho_status.py` pins it to both cadences.
 
 `snapshot.py` on the walker does not scan `distinguished_points` on every

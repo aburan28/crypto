@@ -1,0 +1,49 @@
+\section{Preliminaries}\label{sec:prelim}
+
+\paragraph{Curves and isogenies.} Let $p$ be a prime and $\F_{p^2}=\F_p(i)$ with
+$i^2=-1$ ($p\equiv3\bmod4$). All curves are supersingular and defined over
+$\F_{p^2}$. Isogenies are separable. For an isogeny $\phi$ we write $\hat\phi$
+for its dual, so that $\hat\phi\phi=[\deg\phi]$. For $N$ coprime to $p$, the
+$N$-torsion $E[N]\cong(\Z/N)^2$ carries the Weil pairing $e_N$, and
+$e_N(\phi P,\phi Q)=e_N(P,Q)^{\deg\phi}$.
+
+\paragraph{The base curve.} Let $\ED$ be the curve with $j$-invariant $-3375$.
+It has complex multiplication by $\mathcal{O}_K=\Z[(1+\sqrt{-7})/2]$, and it is
+supersingular over $\F_p$ whenever $-7$ is not a square modulo $p$, i.e.\
+$p\equiv3,5,6\pmod 7$. Its endomorphism $\omega$ of degree~2 satisfies
+$\omega^2-t\omega+2=0$ with $t=\pm1$, so $(2\omega-t)^2=-7$. We use the short
+Weierstrass model $y^2=x^3-3jkx-2jk^2$ with $j=-3375$ and $k=j-1728$. Since
+$p+1=2^{E+1}3^Fc$, every curve in the isogeny class has
+$\#E(\F_{p^2})=(p+1)^2$ and full rational $2^E$- and $3^F$-torsion.
+
+\paragraph{Eigenbases.} Let $s_D$ be a square root of $-7$ modulo $2^{E+2}$
+(it exists because $-7\equiv1\bmod8$), and set
+$\mu=(t+s_D)/2$ and $\nu=(t-s_D)/2$ modulo $2^E$. These are the two roots of
+$x^2-tx+2$ modulo $2^E$, and $\mu-\nu=s_D$ is odd. Hence $\omega$ has
+eigenvectors $P_D,Q_D$ spanning $\ED[2^E]$ with $\omega P_D=\mu P_D$ and
+$\omega Q_D=\nu Q_D$.
+
+\paragraph{Kani's lemma in the form used here.} Let $E$ be a curve, $\gamma\in\End(E)$
+and $c'\in\Z$ with $\deg\gamma+c'^2=2^E$. Then
+\[
+\Phi=\begin{pmatrix} c' & -\hat\gamma\\ \gamma & c'\end{pmatrix}:E^2\to E^2
+\]
+satisfies $\hat\Phi\Phi=[2^E]$. It is therefore a $(2^E,2^E)$-isogeny between
+principally polarised abelian surfaces, and its kernel is
+$\{(c'R,-\gamma R):R\in E[2^E]\}$. Given $\gamma(R)$ for a basis of
+$E[2^E]$, the isogeny $\Phi$ can be computed as a chain of $E$
+$(2,2)$-isogenies~\cite{Kan97,CD23,Rob23}, and it can then be evaluated at
+points outside the $2^E$-torsion. In particular $\Phi(X,0)=(c'X,\gamma X)$
+reveals $\gamma$ on any subgroup.
+
+\paragraph{$(2,2)$-chains.} A chain from $E\times E$ can pass through
+products of elliptic curves (product steps), glue into the Jacobian of a
+genus-2 curve, continue with Richelot isogenies, and split back into a
+product. We use the gluing, Richelot and splitting formulas of Castryck and
+Decru~\cite{CD23} in Mumford coordinates. The order in which these step types
+occur is the \emph{schedule} of the chain.
+
+\paragraph{FESTA masking.} In FESTA~\cite{BMP23}, the images of a torsion
+basis under a secret isogeny are published multiplied by a secret matrix. We
+use diagonal masks: $(a\varphi P,b\varphi Q)$ with odd $a,b$ modulo $2^E$. The
+Weil pairing reveals $ab$. The ratio $b/a$ stays hidden.

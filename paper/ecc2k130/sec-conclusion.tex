@@ -1,0 +1,81 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We summarise the state of Pollard rho on current NVIDIA hardware as
+measured in this work.
+
+\paragraph{Per-card throughput.} In 2010 the
+best GTX~295 kernel ran ECC2K-130 at $0.064$ billion iterations per
+second. On one RTX~PRO~6000 Blackwell the same walk runs at $14.64$ in
+the audited campaign build and $15.88$ in the best later build, and the
+whole $2^{60.9}$ budget is about five GPU-years. Roughly a sixth of that
+factor is a bigger, faster chip; the rest is arithmetic. Sixteen paired
+steps took the client from a $0.85$ bitsliced control to $14.64$, and
+three representation changes did most of the work: Frobenius
+permutation networks, the native carry-less product, and the smaller
+batch that the native product made possible.
+
+\paragraph{Time to solution.} At $15.88$ billion
+iterations per second, five RTX~PRO~6000s expect to find the collision
+in about a year, 56 in a month, 290 in a week, and a thousand in about
+three days, half of them spent waiting for the last trail to reach a
+distinguished point at cutoff 32. The work costs about \$114k at list
+price and \$38k--\$56k on the spot quotes we saw, whatever the fleet
+size. The same rates leave P-256 about $6\cdot10^{21}$ card-years away
+(Section~\ref{sec:solvetime}).
+
+\paragraph{Carry-less multiplication across dies.}
+PTX~9.3 gives every part from \texttt{sm\_80} onward a carry-less
+multiply, but not at the same rate. On the RTX~PRO~6000 it issues at
+about $1.7$ lanes per SM-clock, the cost of $38$ logic instructions; on
+the B200 and H100 it is ten to eighteen times faster. The workstation
+part still wins on this walk, per card, per SM and per dollar, because
+the walk is bound by integer logic and the RTX~PRO~6000 has the most
+SMs at the highest clock for the money. On the data-centre parts the
+logic pipe binds instead, the right kernel moves work onto the
+carry-less unit, and kernel tuning does not travel between them. For
+any walk with one affine addition per step, $28$ billion iterations per
+second on one RTX~PRO~6000 is out of reach on both pipes.
+
+\paragraph{Choice of iteration function.} The table walk
+does the arithmetic of a step more cheaply, and reached $20.08$ under
+cycle rule v2. But v2's exits from fruitless cycles depended on how a
+trail arrived, and the exact v3 rule that fixes this runs at $8.24$
+today, about half the $\sigma$-walk's rate. Closing that gap, with a deferred or off-critical-path cycle
+check, is the largest open optimisation in this paper, and even then a
+table walk must win on cost per solve, which nobody has measured.
+
+\paragraph{Transfer to prime fields.} On NIST P-256 and P-384 on the same card, explicit carry
+chains, a wider shared inversion and the same refusal of register-cap
+trades gave $1.52\times$ and $2.61\times$, to $1.632$ and $0.548$ billion
+iterations per second. The batch width, a modest knob on the binary
+walk, was the biggest lever on the prime one, because a Fermat
+inversion costs some forty times as many multiplications as a
+normal-basis one. A P-256 step remains about nine times as expensive
+as an ECC2K-130 step on the same card, which is the carry-less unit's
+advantage in one number.
+
+\paragraph{Remaining headroom.} None of the speedup
+came from changing the algorithm: every step kept Bailey et al.'s walk
+and its distinguished points bit for bit, and the gains split into
+representation and arithmetic ($6.3\times$), batch and geometry
+($1.5\times$), memory layout ($1.3\times$) and the new instruction
+($1.2\times$). The same pipe measurements bound what is left. Any walk with
+one affine addition per step tops out at about $24$--$26$ billion
+iterations per second on one RTX~PRO~6000, so the best $\sigma$-walk has
+roughly $1.5\times$ to go, all of it in integer work; a B200 would need a
+$1.55\times$ cut in logic instructions to reach $30$; the F2 FPGA stops near
+$9.3$. On CPUs the instruction sets matter as much as on GPUs: three-input
+logic and wider words give $2.4$--$3\times$ to the bitsliced client, and a
+packed client on the CPU's own carry-less multiply runs $2.9\times$ faster
+than with a software product.
+
+\paragraph{Asymptotic cost and the campaign.} The campaign's walk needs $2^{60.91}$--$2^{60.92}$ iterations,
+which agrees with the 2009 estimate. Index calculus on the curve costs
+$10^7$ times as much as rho, and the best measured decomposition is
+$35$--$51$ bits short of its budget. The campaign stored $486$ million
+points and $2^{56.68}$ iterations, $5.4\%$ of the expected work, with no
+collision, every record re-walkable from its seed; its fleet was
+reclaimed on 2026-09-18 and collection is paused. Whether the remaining
+$94.6\%$ is walked is a question of money, not mathematics, and at five
+GPU-years it is a much smaller question than it was in 2009.

@@ -1,0 +1,125 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "Prime rootfinding B retune holdout with batch-8",
+  "description": "Identical lane schedules compare serial and batch field additions at widths 4, 8 and 16. L0 operation and field counters only.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "prime_search",
+        "bits": 20,
+        "seed": 59297
+      }
+    ],
+    "target_kind": "public",
+    "targets_per_curve": 8,
+    "target_seed": 20261022
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "b40-batch-8",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=40",
+          "oracle": "mitm-prime-batch:m=2",
+          "targets": "walk-prime-batch-8",
+          "linalg": "incremental-gauss",
+          "max_trials": "5000000"
+        }
+      }
+    },
+    {
+      "name": "b44-batch-8",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=44",
+          "oracle": "mitm-prime-batch:m=2",
+          "targets": "walk-prime-batch-8",
+          "linalg": "incremental-gauss",
+          "max_trials": "5000000"
+        }
+      }
+    },
+    {
+      "name": "b48-batch-8",
+      "role": "baseline",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=48",
+          "oracle": "mitm-prime-batch:m=2",
+          "targets": "walk-prime-batch-8",
+          "linalg": "incremental-gauss",
+          "max_trials": "5000000"
+        }
+      }
+    },
+    {
+      "name": "b52-batch-8",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=52",
+          "oracle": "mitm-prime-batch:m=2",
+          "targets": "walk-prime-batch-8",
+          "linalg": "incremental-gauss",
+          "max_trials": "5000000"
+        }
+      }
+    },
+    {
+      "name": "b56-batch-8",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=56",
+          "oracle": "mitm-prime-batch:m=2",
+          "targets": "walk-prime-batch-8",
+          "linalg": "incremental-gauss",
+          "max_trials": "5000000"
+        }
+      }
+    },
+    {
+      "name": "b64-batch-8",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=64",
+          "oracle": "mitm-prime-batch:m=2",
+          "targets": "walk-prime-batch-8",
+          "linalg": "incremental-gauss",
+          "max_trials": "5000000"
+        }
+      }
+    },
+    {
+      "name": "rho-neg-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.negation"
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 3,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 20261022,
+    "isolation_required": "L2",
+    "timeout_seconds": 120
+  }
+}

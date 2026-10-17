@@ -1,0 +1,10 @@
+   Compiling p192-p224-large-degree-replay v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-p192-p224-large-degree-isogenies-20261008/research/p192_p224_large_degree_isogenies_20261008)
+    Finished `release` profile [optimized] target(s) in 1.85s
+     Running unittests map_identity_checks.rs (research/p192_p224_large_degree_isogenies_20261008/target/release/deps/map_identity_checks-0d4b24c807703deb)
+
+running 2 tests
+test map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test field::tests::arithmetic_matches_biguint_on_p224_and_small_primes ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

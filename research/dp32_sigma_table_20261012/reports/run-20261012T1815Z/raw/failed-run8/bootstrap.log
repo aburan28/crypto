@@ -1,0 +1,215 @@
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package libpython3.12-minimal:amd64.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 17334 files and directories currently installed.)
+Preparing to unpack .../libpython3.12-minimal_3.12.3-1ubuntu0.17_amd64.deb ...
+Unpacking libpython3.12-minimal:amd64 (3.12.3-1ubuntu0.17) ...
+Selecting previously unselected package libexpat1:amd64.
+Preparing to unpack .../libexpat1_2.6.1-2ubuntu0.6_amd64.deb ...
+Unpacking libexpat1:amd64 (2.6.1-2ubuntu0.6) ...
+Selecting previously unselected package python3.12-minimal.
+Preparing to unpack .../python3.12-minimal_3.12.3-1ubuntu0.17_amd64.deb ...
+Unpacking python3.12-minimal (3.12.3-1ubuntu0.17) ...
+Setting up libpython3.12-minimal:amd64 (3.12.3-1ubuntu0.17) ...
+Setting up libexpat1:amd64 (2.6.1-2ubuntu0.6) ...
+Setting up python3.12-minimal (3.12.3-1ubuntu0.17) ...
+Selecting previously unselected package python3-minimal.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 17653 files and directories currently installed.)
+Preparing to unpack .../0-python3-minimal_3.12.3-0ubuntu2.1_amd64.deb ...
+Unpacking python3-minimal (3.12.3-0ubuntu2.1) ...
+Selecting previously unselected package media-types.
+Preparing to unpack .../1-media-types_10.1.0_all.deb ...
+Unpacking media-types (10.1.0) ...
+Selecting previously unselected package netbase.
+Preparing to unpack .../2-netbase_6.4_all.deb ...
+Unpacking netbase (6.4) ...
+Selecting previously unselected package tzdata.
+Preparing to unpack .../3-tzdata_2026c-0ubuntu0.24.04.1_all.deb ...
+Unpacking tzdata (2026c-0ubuntu0.24.04.1) ...
+Selecting previously unselected package libpython3.12-stdlib:amd64.
+Preparing to unpack .../4-libpython3.12-stdlib_3.12.3-1ubuntu0.17_amd64.deb ...
+Unpacking libpython3.12-stdlib:amd64 (3.12.3-1ubuntu0.17) ...
+Selecting previously unselected package python3.12.
+Preparing to unpack .../5-python3.12_3.12.3-1ubuntu0.17_amd64.deb ...
+Unpacking python3.12 (3.12.3-1ubuntu0.17) ...
+Selecting previously unselected package libpython3-stdlib:amd64.
+Preparing to unpack .../6-libpython3-stdlib_3.12.3-0ubuntu2.1_amd64.deb ...
+Unpacking libpython3-stdlib:amd64 (3.12.3-0ubuntu2.1) ...
+Setting up python3-minimal (3.12.3-0ubuntu2.1) ...
+Selecting previously unselected package python3.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 18622 files and directories currently installed.)
+Preparing to unpack .../00-python3_3.12.3-0ubuntu2.1_amd64.deb ...
+Unpacking python3 (3.12.3-0ubuntu2.1) ...
+Selecting previously unselected package krb5-locales.
+Preparing to unpack .../01-krb5-locales_1.20.1-6ubuntu2.10_all.deb ...
+Unpacking krb5-locales (1.20.1-6ubuntu2.10) ...
+Selecting previously unselected package libkrb5support0:amd64.
+Preparing to unpack .../02-libkrb5support0_1.20.1-6ubuntu2.10_amd64.deb ...
+Unpacking libkrb5support0:amd64 (1.20.1-6ubuntu2.10) ...
+Selecting previously unselected package libk5crypto3:amd64.
+Preparing to unpack .../03-libk5crypto3_1.20.1-6ubuntu2.10_amd64.deb ...
+Unpacking libk5crypto3:amd64 (1.20.1-6ubuntu2.10) ...
+Selecting previously unselected package libkeyutils1:amd64.
+Preparing to unpack .../04-libkeyutils1_1.6.3-3build1_amd64.deb ...
+Unpacking libkeyutils1:amd64 (1.6.3-3build1) ...
+Selecting previously unselected package libkrb5-3:amd64.
+Preparing to unpack .../05-libkrb5-3_1.20.1-6ubuntu2.10_amd64.deb ...
+Unpacking libkrb5-3:amd64 (1.20.1-6ubuntu2.10) ...
+Selecting previously unselected package libgssapi-krb5-2:amd64.
+Preparing to unpack .../06-libgssapi-krb5-2_1.20.1-6ubuntu2.10_amd64.deb ...
+Unpacking libgssapi-krb5-2:amd64 (1.20.1-6ubuntu2.10) ...
+Selecting previously unselected package libnghttp2-14:amd64.
+Preparing to unpack .../07-libnghttp2-14_1.59.0-1ubuntu0.4_amd64.deb ...
+Unpacking libnghttp2-14:amd64 (1.59.0-1ubuntu0.4) ...
+Selecting previously unselected package libpsl5t64:amd64.
+Preparing to unpack .../08-libpsl5t64_0.21.2-1.1build1_amd64.deb ...
+Unpacking libpsl5t64:amd64 (0.21.2-1.1build1) ...
+Selecting previously unselected package publicsuffix.
+Preparing to unpack .../09-publicsuffix_20231001.0357-0.1_all.deb ...
+Unpacking publicsuffix (20231001.0357-0.1) ...
+Selecting previously unselected package libbrotli1:amd64.
+Preparing to unpack .../10-libbrotli1_1.1.0-2build2_amd64.deb ...
+Unpacking libbrotli1:amd64 (1.1.0-2build2) ...
+Selecting previously unselected package librtmp1:amd64.
+Preparing to unpack .../11-librtmp1_2.4+20151223.gitfa8646d.1-2build7_amd64.deb ...
+Unpacking librtmp1:amd64 (2.4+20151223.gitfa8646d.1-2build7) ...
+Selecting previously unselected package libssh-4:amd64.
+Preparing to unpack .../12-libssh-4_0.10.6-2ubuntu0.5_amd64.deb ...
+Unpacking libssh-4:amd64 (0.10.6-2ubuntu0.5) ...
+Selecting previously unselected package libcurl4t64:amd64.
+Preparing to unpack .../13-libcurl4t64_8.5.0-2ubuntu10.15_amd64.deb ...
+Unpacking libcurl4t64:amd64 (8.5.0-2ubuntu10.15) ...
+Selecting previously unselected package curl.
+Preparing to unpack .../14-curl_8.5.0-2ubuntu10.15_amd64.deb ...
+Unpacking curl (8.5.0-2ubuntu10.15) ...
+Setting up media-types (10.1.0) ...
+Setting up libkeyutils1:amd64 (1.6.3-3build1) ...
+Setting up libbrotli1:amd64 (1.1.0-2build2) ...
+Setting up libpsl5t64:amd64 (0.21.2-1.1build1) ...
+Setting up libnghttp2-14:amd64 (1.59.0-1ubuntu0.4) ...
+Setting up krb5-locales (1.20.1-6ubuntu2.10) ...
+Setting up libkrb5support0:amd64 (1.20.1-6ubuntu2.10) ...
+Setting up tzdata (2026c-0ubuntu0.24.04.1) ...
+
+Current default time zone: 'Etc/UTC'
+Local time is now:      Mon Oct 12 17:11:25 UTC 2026.
+Universal Time is now:  Mon Oct 12 17:11:25 UTC 2026.
+Run 'dpkg-reconfigure tzdata' if you wish to change it.
+
+Setting up librtmp1:amd64 (2.4+20151223.gitfa8646d.1-2build7) ...
+Setting up libk5crypto3:amd64 (1.20.1-6ubuntu2.10) ...
+Setting up netbase (6.4) ...
+Setting up libkrb5-3:amd64 (1.20.1-6ubuntu2.10) ...
+Setting up publicsuffix (20231001.0357-0.1) ...
+Setting up libpython3.12-stdlib:amd64 (3.12.3-1ubuntu0.17) ...
+Setting up python3.12 (3.12.3-1ubuntu0.17) ...
+Setting up libgssapi-krb5-2:amd64 (1.20.1-6ubuntu2.10) ...
+Setting up libssh-4:amd64 (0.10.6-2ubuntu0.5) ...
+Setting up libpython3-stdlib:amd64 (3.12.3-0ubuntu2.1) ...
+Setting up libcurl4t64:amd64 (8.5.0-2ubuntu10.15) ...
+Setting up python3 (3.12.3-0ubuntu2.1) ...
+Setting up curl (8.5.0-2ubuntu10.15) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.7) ...
+/tmp/source.tgz: OK
+GPU 0: NVIDIA RTX PRO 6000 Blackwell Workstation Edition (UUID: GPU-be42160e-bb0a-6c58-ca81-65c038bec246)
+NVIDIA RTX PRO 6000 Blackwell Workstation Edition, GPU-be42160e-bb0a-6c58-ca81-65c038bec246, 610.57.04, 3090 MHz, 510.00 W, 97887 MiB, 12.0
+Cuda compilation tools, release 13.3, V13.3.73
+Build cuda_13.3.r13.3/compiler.38244171_0
+source: 615381ba5c5fa89236a228cd75338d636fa81903 (uncommitted changes)
+verify threads: 96256; benchmark threads: 385024; launches: 16; pairs: 3
+=== build live THREADS=256 MINBLOCKS=2 PACKED_SIGMA_TABLE=0
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+=== arithmetic live
+packed arithmetic sigma table: 0
+PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases
+PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 18194 GPU polynomial products, including all 17161 basis pairs
+PASS: 18194 GPU paired polynomial products against independent multiplication
+PASS: 18194 GPU normal products, including all 17161 basis pairs, against independent gamma products
+PASS: 1157 GPU polynomial squares against independent multiplication and long division
+PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing
+=== build geometry THREADS=512 MINBLOCKS=1 PACKED_SIGMA_TABLE=0
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+=== arithmetic geometry
+packed arithmetic sigma table: 0
+PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases
+PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 18194 GPU polynomial products, including all 17161 basis pairs
+PASS: 18194 GPU paired polynomial products against independent multiplication
+PASS: 18194 GPU normal products, including all 17161 basis pairs, against independent gamma products
+PASS: 1157 GPU polynomial squares against independent multiplication and long division
+PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing
+=== build candidate THREADS=512 MINBLOCKS=1 PACKED_SIGMA_TABLE=1
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+=== arithmetic candidate
+packed arithmetic sigma table: 1
+PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases
+PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 18194 GPU polynomial products, including all 17161 basis pairs
+PASS: 18194 GPU paired polynomial products against independent multiplication
+PASS: 18194 GPU normal products, including all 17161 basis pairs, against independent gamma products
+PASS: 1157 GPU polynomial squares against independent multiplication and long division
+PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing
+packed kernel: 91 registers/thread, 0 local bytes/thread, 1792 shared bytes/block, single-product multiplier
+packed sigma table: 0 (0 dynamic shared bytes)
+packed sigma fused: 0
+packed sigma fused late y: 0
+packed sigma fused shared slots: 0
+packed sigma^1 common path: 0
+packed sigma square table: 0, 0 shared bytes
+  finished: 863.130 M it/s, 5 distinguished points (5 verified against the reference, 0 dropped)
+packed kernel: 91 registers/thread, 0 local bytes/thread, 1792 shared bytes/block, single-product multiplier
+packed sigma table: 0 (0 dynamic shared bytes)
+packed sigma fused: 0
+packed sigma fused late y: 0
+packed sigma fused shared slots: 0
+packed sigma^1 common path: 0
+packed sigma square table: 0, 0 shared bytes
+  finished: 760.288 M it/s, 5 distinguished points (5 verified against the reference, 0 dropped)
+packed kernel: 126 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed sigma table: 1 (68352 dynamic shared bytes)
+packed sigma fused: 0
+packed sigma fused late y: 0
+packed sigma fused shared slots: 0
+packed sigma^1 common path: 0
+packed sigma square table: 0, 0 shared bytes
+  finished: 764.931 M it/s, 5 distinguished points (5 verified against the reference, 0 dropped)
+/results/dp-live.bin: detected v2 framing
+/results/dp-live.bin: 5 sorted records (reference)
+/results/dp-geometry.bin: detected v2 framing
+/results/dp-geometry.bin: 5 sorted records (IDENTICAL)
+/results/dp-candidate.bin: detected v2 framing
+/results/dp-candidate.bin: 5 sorted records (IDENTICAL)
+correctness preflight failed; timing suppressed

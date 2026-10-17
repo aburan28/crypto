@@ -1,0 +1,36 @@
+{
+  "arm": {
+    "actual_factor_base_points": 679936,
+    "arm": "opt_in_id30",
+    "base_hash": "7369ccfa86149ccf6eced4dc200ed92ed7f6a8e5188f9c686b2dd95bf02eb470",
+    "cold_wall_seconds_exploratory": 806.5731853750003,
+    "online_ms_exploratory": 49.886458000000005,
+    "online_phases_ms": {
+      "target_descent_ms": 0.0006670000000000001,
+      "target_pdp_ms": 49.676749,
+      "target_query_ms": 0.0,
+      "target_recovery_check_ms": 0.12725,
+      "target_relation_check_ms": 0.081417
+    },
+    "point_indices": [
+      212723,
+      543487,
+      465789,
+      600458
+    ],
+    "recovered_scalar": 3640978018804724,
+    "root_table_entries": 1392477548,
+    "status": "PASS_INDEPENDENT_REPLAY"
+  },
+  "cap_seconds": 900,
+  "hardware_tier": "local_correctness_diagnostic",
+  "k": 4096,
+  "min_sampled_free_percent": 59,
+  "peak_sampled_rss_bytes": 18615615488,
+  "performance_claim": null,
+  "producer_status": "PASS_PRODUCER",
+  "schema": "n83.id30-k4096-analysis/v1",
+  "selected_factor_base": null,
+  "source_sha256": "f14d9747cd24627d39d7cae4c9bef69ed2819544125ef15f31306ce5d75f3fc7",
+  "status": "PASS_EXACT_K4096"
+}

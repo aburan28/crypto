@@ -1,0 +1,17 @@
+Revision captured before Lean build: 82a70c81a3083d06adae24a9e2c002449fb99f61
+Proof working directory: /workspace/crypto-integration/research/weak_curve_properties_lean_20261011
+Setup ELAN_HOME=/workspace/lean-validation-tooling/elan
+Setup PATH=/workspace/lean-validation-tooling/elan/bin:$PATH
+Setup MATHLIB_CACHE_DIR=/workspace/lean-validation-tooling/cache
+Preserved inherited proxy variables and TLS verification.
+
+/workspace/crypto-rustup/toolchains/1.98.0-x86_64-unknown-linux-gnu/bin/rustc --edition=2021 proof_check.rs -o /tmp/crypto-lean-integration-validation/proof-check
+/tmp/crypto-lean-integration-validation/proof-check --check
+lake build
+lake env leanchecker --fresh --verbose WeakCurveProperties
+lake env lean AxiomAudit.lean
+
+Build completed before the kernel replay and axiom audit were started.
+Kernel replay and axiom audit ran concurrently. No timing claims are made.
+.lake is ignored and holds local tooling/build artifacts.
+Tracked proofs, frozen receipts, EVIDENCE_SHA256.tsv, and workflow were not edited.

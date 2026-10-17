@@ -96,7 +96,9 @@ fn normal_basis(n: u32, irr: &IrreduciblePoly, rng: &mut StdRng) -> (Vec<F2mElem
             })
             .collect();
         for col in 0..nn {
-            let piv = (col..nn).find(|&r| (rows[r].0 >> col) & 1 == 1).expect("invertible");
+            let piv = (col..nn)
+                .find(|&r| (rows[r].0 >> col) & 1 == 1)
+                .expect("invertible");
             rows.swap(col, piv);
             let pv = rows[col];
             for r in 0..nn {
@@ -130,7 +132,6 @@ fn to_normal_coords(coords: &[F2BoolPoly], pinv: &[u64], n_vars: usize) -> Vec<F
 /// Variable layout for one system.
 struct Layout {
     n: usize,
-    l: usize,
     with_target_selector: bool,
     s0: usize,
     s1: usize,
@@ -161,7 +162,18 @@ impl Layout {
         off += n;
         let u2 = off;
         off += n;
-        Layout { n, l, with_target_selector, s0, s1, s2, c1, c2, u1, u2, n_vars: off }
+        Layout {
+            n,
+            with_target_selector,
+            s0,
+            s1,
+            s2,
+            c1,
+            c2,
+            u1,
+            u2,
+            n_vars: off,
+        }
     }
 
     /// The cyclic shift σ on a monomial mask: selector blocks and u blocks rotate by one.
@@ -212,7 +224,9 @@ fn build_system(
     let lay = Layout::new(n as usize, l as usize, with_target_selector);
     let nv = lay.n_vars;
     let nn = n as usize;
-    let window: Vec<F2mElement> = (0..l).map(|k| F2mElement::from_bit_positions(&[k], n)).collect();
+    let window: Vec<F2mElement> = (0..l)
+        .map(|k| F2mElement::from_bit_positions(&[k], n))
+        .collect();
     let s_elem = |var: usize| SymElement::from_subspace_vars(&[F2mElement::one(n)], var, n, nv);
     // u_i as symbolic elements in the normal basis (coordinates are the u variables).
     let u1 = SymElement::from_subspace_vars(normal, lay.u1, n, nv);
@@ -221,7 +235,10 @@ fn build_system(
     let barrel = |s_off: usize, c_off: usize| -> SymElement {
         let mut acc = SymElement::zero(n, nv);
         for k in 0..nn {
-            let shifted: Vec<F2mElement> = window.iter().map(|w| w.square_k_times(k as u32, irr)).collect();
+            let shifted: Vec<F2mElement> = window
+                .iter()
+                .map(|w| w.square_k_times(k as u32, irr))
+                .collect();
             let y_k = SymElement::from_subspace_vars(&shifted, c_off, n, nv);
             acc = acc.add(&s_elem(s_off + k).mul(&y_k, st));
         }
@@ -240,14 +257,23 @@ fn build_system(
     let mut eqs = Vec::new();
     let mut fam = Vec::new();
     // S3 in normal coordinates
-    for (j, e) in to_normal_coords(&sym_semaev_s3(&u1, &u2, &x_r, b, st), pinv, nv).into_iter().enumerate() {
+    for (j, e) in to_normal_coords(&sym_semaev_s3(&u1, &u2, &x_r, b, st), pinv, nv)
+        .into_iter()
+        .enumerate()
+    {
         eqs.push(e);
         fam.push((Fam::S3Coord, j, 0));
     }
     // u-constraints in normal coordinates
-    for (i, (u, s_off, c_off)) in [(&u1, lay.s1, lay.c1), (&u2, lay.s2, lay.c2)].into_iter().enumerate() {
+    for (i, (u, s_off, c_off)) in [(&u1, lay.s1, lay.c1), (&u2, lay.s2, lay.c2)]
+        .into_iter()
+        .enumerate()
+    {
         let diff = u.add(&barrel(s_off, c_off));
-        for (j, e) in to_normal_coords(&diff.coords, pinv, nv).into_iter().enumerate() {
+        for (j, e) in to_normal_coords(&diff.coords, pinv, nv)
+            .into_iter()
+            .enumerate()
+        {
             eqs.push(e);
             fam.push((Fam::UConstraint(i as u8), j, 0));
         }
@@ -258,7 +284,8 @@ fn build_system(
         blocks.push((0u8, lay.s0));
     }
     for (blk, off) in blocks {
-        let mut monos: Vec<F2BoolMono> = (0..nn).map(|k| F2BoolMono::var((off + k) as u32)).collect();
+        let mut monos: Vec<F2BoolMono> =
+            (0..nn).map(|k| F2BoolMono::var((off + k) as u32)).collect();
         monos.push(F2BoolMono::one());
         eqs.push(F2BoolPoly::from_monos(monos, nv));
         fam.push((Fam::OneHotLinear(blk), 0, 0));
@@ -293,7 +320,12 @@ fn macaulay_shape(sys: &System, nv: usize, d: u32) -> (Vec<(u64, usize)>, HashSe
     let mut rows = Vec::new();
     let mut cols = HashSet::new();
     for (ei, p) in sys.eqs.iter().enumerate() {
-        let pdeg = p.terms.iter().map(|t| t.mask.count_ones()).max().unwrap_or(0);
+        let pdeg = p
+            .terms
+            .iter()
+            .map(|t| t.mask.count_ones())
+            .max()
+            .unwrap_or(0);
         if pdeg > d {
             continue;
         }
@@ -324,7 +356,12 @@ fn macaulay_shape(sys: &System, nv: usize, d: u32) -> (Vec<(u64, usize)>, HashSe
 }
 
 /// σ on an equation index.
-fn shift_eq(sys: &System, lay: &Layout, ei: usize, index: &HashMap<(u8, usize, usize, u8), usize>) -> usize {
+fn shift_eq(
+    sys: &System,
+    lay: &Layout,
+    ei: usize,
+    index: &HashMap<(u8, usize, usize, u8), usize>,
+) -> usize {
     let n = lay.n;
     let (f, a, b2) = sys.fam[ei];
     let key = match f {
@@ -348,7 +385,6 @@ fn fam_key(f: Fam, a: usize, b2: usize) -> (u8, usize, usize, u8) {
     }
 }
 
-
 // ── Block-rank milestone: F_{2^d} arithmetic and the character blocks ──
 
 /// Small binary field F_{2^d}, elements as u64 bit-polynomials, d ≤ 40.
@@ -371,7 +407,12 @@ impl Gf {
                 continue;
             }
             if Self::is_irreducible(f, d) {
-                let mut g = Gf { d, poly: f, exp: Vec::new(), log: Vec::new() };
+                let mut g = Gf {
+                    d,
+                    poly: f,
+                    exp: Vec::new(),
+                    log: Vec::new(),
+                };
                 if d <= 16 {
                     g.build_tables();
                 }
@@ -388,9 +429,9 @@ impl Gf {
         let mut m = order;
         let mut q = 2u64;
         while q * q <= m {
-            if m % q == 0 {
+            if m.is_multiple_of(q) {
                 fs.push(q);
-                while m % q == 0 {
+                while m.is_multiple_of(q) {
                     m /= q;
                 }
             }
@@ -434,7 +475,12 @@ impl Gf {
     }
     fn is_irreducible(f: u64, d: u32) -> bool {
         // gcd(x^{2^i} − x, f) = 1 for i = 1..d/2
-        let g = Gf { d, poly: f, exp: Vec::new(), log: Vec::new() };
+        let g = Gf {
+            d,
+            poly: f,
+            exp: Vec::new(),
+            log: Vec::new(),
+        };
         let mut x = 2u64; // x
         for _ in 1..=(d / 2) {
             x = g.mul_slow(x, x);
@@ -520,7 +566,9 @@ fn rank_gf(gf: &Gf, mut m: Vec<Vec<u64>>) -> usize {
     let cols = m[0].len();
     let mut rank = 0;
     for c in 0..cols {
-        let Some(p) = (rank..m.len()).find(|&r| m[r][c] != 0) else { continue };
+        let Some(p) = (rank..m.len()).find(|&r| m[r][c] != 0) else {
+            continue;
+        };
         m.swap(rank, p);
         let inv = gf.inv(m[rank][c]);
         for v in m[rank].iter_mut() {
@@ -548,7 +596,9 @@ fn rank_bits(mut m: Vec<Vec<u64>>, cols: usize) -> usize {
     let mut rank = 0;
     for c in 0..cols {
         let (w, bit) = (c / 64, 1u64 << (c % 64));
-        let Some(p) = (rank..m.len()).find(|&r| m[r][w] & bit != 0) else { continue };
+        let Some(p) = (rank..m.len()).find(|&r| m[r][w] & bit != 0) else {
+            continue;
+        };
         m.swap(rank, p);
         let pivot = m[rank].clone();
         for r in 0..m.len() {
@@ -607,7 +657,14 @@ fn character_orbits(n: usize) -> Vec<(usize, usize)> {
 
 /// Build the trivial block over F_2 and one character block per Galois orbit,
 /// and return (rank_full, rank_trivial, Vec<(j, orbit size, rank_j)>, wall seconds for blocks).
-fn block_ranks(sys: &System, lay: &Layout, d: u32, field_d: u32, index: &HashMap<(u8, usize, usize, u8), usize>, rng: &mut StdRng) -> (usize, usize, Vec<(usize, usize, usize)>, f64) {
+fn block_ranks(
+    sys: &System,
+    lay: &Layout,
+    d: u32,
+    field_d: u32,
+    index: &HashMap<(u8, usize, usize, u8), usize>,
+    rng: &mut StdRng,
+) -> (usize, usize, Vec<(usize, usize, usize)>, f64) {
     let n = lay.n;
     let nv = lay.n_vars;
     // Row representatives and their column sets.
@@ -628,7 +685,9 @@ fn block_ranks(sys: &System, lay: &Layout, d: u32, field_d: u32, index: &HashMap
     // Column orbit bookkeeping: canonical representative, shift t, fixed?
     let mut col_info: HashMap<u64, (u64, u32, bool)> = HashMap::new();
     let mut col_index: HashMap<u64, usize> = HashMap::new(); // canonical → block column index
-    let mut classify = |c: u64, col_info: &mut HashMap<u64, (u64, u32, bool)>, col_index: &mut HashMap<u64, usize>| {
+    let classify = |c: u64,
+                    col_info: &mut HashMap<u64, (u64, u32, bool)>,
+                    col_index: &mut HashMap<u64, usize>| {
         if col_info.contains_key(&c) {
             return;
         }
@@ -679,12 +738,17 @@ fn block_ranks(sys: &System, lay: &Layout, d: u32, field_d: u32, index: &HashMap
     let zeta_inv = gf.inv(zeta);
     // free column representatives
     let free_cols: Vec<u64> = {
-        let mut v: Vec<u64> = col_info.values().filter(|(_, _, fixed)| !fixed).map(|(canon, _, _)| *canon).collect();
+        let mut v: Vec<u64> = col_info
+            .values()
+            .filter(|(_, _, fixed)| !fixed)
+            .map(|(canon, _, _)| *canon)
+            .collect();
         v.sort_unstable();
         v.dedup();
         v
     };
-    let free_index: HashMap<u64, usize> = free_cols.iter().enumerate().map(|(i, &c)| (c, i)).collect();
+    let free_index: HashMap<u64, usize> =
+        free_cols.iter().enumerate().map(|(i, &c)| (c, i)).collect();
     let mut block_results = Vec::new();
     for (j, size) in character_orbits(n) {
         let zj = gf.pow(zeta_inv, j as u64);
@@ -713,9 +777,18 @@ fn block_ranks(sys: &System, lay: &Layout, d: u32, field_d: u32, index: &HashMap
     }
     let secs = t0.elapsed().as_secs_f64();
     let t1 = Instant::now();
-    let rank_full = macaulay_profile(&sys.eqs, nv, d).map(|p| p.rank).unwrap_or(0);
+    let rank_full = macaulay_profile(&sys.eqs, nv, d)
+        .map(|p| p.rank)
+        .unwrap_or(0);
     let full_secs = t1.elapsed().as_secs_f64();
-    eprintln!("timing n={} degree={}: full F_2 rank {:.3}s, equivariant blocks {:.3}s, ratio {:.1}x", n, d, full_secs, secs, full_secs / secs.max(1e-9));
+    eprintln!(
+        "timing n={} degree={}: full F_2 rank {:.3}s, equivariant blocks {:.3}s, ratio {:.1}x",
+        n,
+        d,
+        full_secs,
+        secs,
+        full_secs / secs.max(1e-9)
+    );
     (rank_full, rank_triv, block_results, secs)
 }
 
@@ -758,17 +831,26 @@ fn main() {
         for with_sel in [true, false] {
             let (lay, sys) = build_system(n, l, &irr, &st, &b, &r, &normal, &pinv, with_sel);
             if lay.n_vars > 64 {
-                println!("| {n} | {l} | {} | {} | — | — | too many variables | | | | | |", if with_sel { "symmetric" } else { "gauge-fixed" }, lay.n_vars);
+                println!(
+                    "| {n} | {l} | {} | {} | — | — | too many variables | | | | | |",
+                    if with_sel { "symmetric" } else { "gauge-fixed" },
+                    lay.n_vars
+                );
                 continue;
             }
             // Sanity: the symmetric system is σ-invariant as a set of equations.
-            let index: HashMap<(u8, usize, usize, u8), usize> =
-                sys.fam.iter().enumerate().map(|(i, &(f, a, b2))| (fam_key(f, a, b2), i)).collect();
+            let index: HashMap<(u8, usize, usize, u8), usize> = sys
+                .fam
+                .iter()
+                .enumerate()
+                .map(|(i, &(f, a, b2))| (fam_key(f, a, b2), i))
+                .collect();
             if with_sel {
                 let mut invariant = true;
                 for (ei, p) in sys.eqs.iter().enumerate() {
                     let target = &sys.eqs[shift_eq(&sys, &lay, ei, &index)];
-                    let mut shifted: Vec<u64> = p.terms.iter().map(|t| lay.shift_mask(t.mask)).collect();
+                    let mut shifted: Vec<u64> =
+                        p.terms.iter().map(|t| lay.shift_mask(t.mask)).collect();
                     shifted.sort_unstable();
                     let mut tgt: Vec<u64> = target.terms.iter().map(|t| t.mask).collect();
                     tgt.sort_unstable();
@@ -783,7 +865,14 @@ fn main() {
                 let t0 = Instant::now();
                 let (rows, cols) = macaulay_shape(&sys, lay.n_vars, d);
                 if cols.len() > 3_000_000 {
-                    println!("| {n} | {l} | {} | {} | {} | {d} | {} | {} | too large | | | |", if with_sel { "symmetric" } else { "gauge-fixed" }, lay.n_vars, sys.eqs.len(), rows.len(), cols.len());
+                    println!(
+                        "| {n} | {l} | {} | {} | {} | {d} | {} | {} | too large | | | |",
+                        if with_sel { "symmetric" } else { "gauge-fixed" },
+                        lay.n_vars,
+                        sys.eqs.len(),
+                        rows.len(),
+                        cols.len()
+                    );
                     break;
                 }
                 let (row_orbits, col_orbits) = if with_sel {
@@ -812,7 +901,9 @@ fn main() {
                 } else {
                     (rows.len(), cols.len())
                 };
-                let rank = macaulay_profile(&sys.eqs, lay.n_vars, d).map(|p| p.rank.to_string()).unwrap_or("—".into());
+                let rank = macaulay_profile(&sys.eqs, lay.n_vars, d)
+                    .map(|p| p.rank.to_string())
+                    .unwrap_or("—".into());
                 if blocks && with_sel && d <= 3 {
                     let dd = {
                         let mut k = 1u32;
@@ -825,7 +916,10 @@ fn main() {
                     };
                     let (rf, rt, bl, secs) = block_ranks(&sys, &lay, d, dd, &index, &mut rng);
                     let sum: usize = rt + bl.iter().map(|(_, size, r)| size * r).sum::<usize>();
-                    let detail: Vec<String> = bl.iter().map(|(j, size, r)| format!("χ_{j} (orbit {size}): rank {r}")).collect();
+                    let detail: Vec<String> = bl
+                        .iter()
+                        .map(|(j, size, r)| format!("χ_{j} (orbit {size}): rank {r}"))
+                        .collect();
                     println!(
                         "<!-- blocks n={n} d={d}: full rank {rf} | trivial rank {rt} | {} | Σ = {sum} | identity {} | field F_2^{dd} | {:.1}s -->",
                         detail.join(", "),

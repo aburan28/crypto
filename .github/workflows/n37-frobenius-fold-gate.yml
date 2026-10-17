@@ -3,6 +3,11 @@ name: n37 Frobenius-folded pair-table gate
 on:
   pull_request:
     paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - '.github/workflows/n37-frobenius-fold-gate.yml'
       - 'examples/n37_frobenius_fold_gate.rs'
       - 'examples/n37_frobenius_fold_replay.rs'
@@ -29,7 +34,7 @@ concurrency:
 jobs:
   replay:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -49,6 +54,7 @@ jobs:
             research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b03.points.jsonl
             research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b04.points.jsonl
             research/notes/ecc2k130/n37_frobenius_fold_gate_20261003
+      - uses: Swatinem/rust-cache@v2
       - name: Use frozen lockfile
         run: cp research/notes/ecc2k130/n37_native_m6_mitm_20261002/Cargo.lock Cargo.lock
       - name: Check frozen source hashes and formatting
@@ -56,7 +62,7 @@ jobs:
           printf '%s  %s\n' \
             'ed66c80bc96eb576e006fb220eb914b4aae73e56348fb9c13b2df2a8005bffd2' examples/n37_frobenius_fold_gate.rs \
             '792a118ae3fb5a86ea6c1657c50f59013679307bf65f96c75b72f0b24f3eec93' examples/n37_frobenius_fold_replay.rs \
-            'b28d3c2d81146a40d00df85f45c6460d9e2bc5c26875307a06cfd15efff99365' Cargo.lock \
+            'ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90' Cargo.lock \
             | sha256sum --check
           rustfmt --edition 2021 --check examples/n37_frobenius_fold_gate.rs examples/n37_frobenius_fold_replay.rs
       - name: Build native producer and independent replay

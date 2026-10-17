@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="440" viewBox="0 0 720 440" font-family="Helvetica, Arial, sans-serif" font-size="12">
+<rect width="100%" height="100%" fill="white"/>
+<text x="360" y="22" text-anchor="middle" font-size="14" font-weight="bold">Cheon / Brown–Gallant cost from the factorisation of n ∓ 1 (best of both sides)</text>
+<line x1="64" y1="364" x2="64" y2="40" stroke="#ddd"/><text x="64" y="380" text-anchor="middle">16</text>
+<line x1="190.4" y1="364" x2="190.4" y2="40" stroke="#ddd"/><text x="190.4" y="380" text-anchor="middle">32</text>
+<line x1="316.8" y1="364" x2="316.8" y2="40" stroke="#ddd"/><text x="316.8" y="380" text-anchor="middle">48</text>
+<line x1="443.2" y1="364" x2="443.2" y2="40" stroke="#ddd"/><text x="443.2" y="380" text-anchor="middle">64</text>
+<line x1="569.6" y1="364" x2="569.6" y2="40" stroke="#ddd"/><text x="569.6" y="380" text-anchor="middle">80</text>
+<line x1="696" y1="364" x2="696" y2="40" stroke="#ddd"/><text x="696" y="380" text-anchor="middle">96</text>
+<line x1="64" y1="364" x2="696" y2="364" stroke="#ddd"/><text x="58" y="368" text-anchor="end">40</text>
+<line x1="64" y1="307.6521739130435" x2="696" y2="307.6521739130435" stroke="#ddd"/><text x="58" y="311.6521739130435" text-anchor="end">56</text>
+<line x1="64" y1="251.30434782608697" x2="696" y2="251.30434782608697" stroke="#ddd"/><text x="58" y="255.30434782608697" text-anchor="end">72</text>
+<line x1="64" y1="194.95652173913044" x2="696" y2="194.95652173913044" stroke="#ddd"/><text x="58" y="198.95652173913044" text-anchor="end">88</text>
+<line x1="64" y1="138.60869565217394" x2="696" y2="138.60869565217394" stroke="#ddd"/><text x="58" y="142.60869565217394" text-anchor="end">104</text>
+<line x1="64" y1="82.26086956521739" x2="696" y2="82.26086956521739" stroke="#ddd"/><text x="58" y="86.26086956521739" text-anchor="end">120</text>
+<text x="380" y="406" text-anchor="middle">log2 Q — number of published powers [α^i]G</text>
+<text transform="translate(16,202) rotate(-90)" text-anchor="middle">cost, log2 group operations</text>
+<line x1="64" y1="166.7826086956522" x2="696" y2="166.7826086956522" stroke="#1b6ca8" stroke-dasharray="6 4" stroke-width="1.2"/>
+<path d="M64.0,194.2 L127.2,197.7 L190.4,197.7 L253.6,197.7 L316.8,197.7 L380.0,197.7 L443.2,197.7 L569.6,304.5 L696.0,332.3" fill="none" stroke="#1b6ca8" stroke-width="2.4"/>
+<circle cx="64.0" cy="194.2" r="3.2" fill="#1b6ca8"/>
+<circle cx="127.2" cy="197.7" r="3.2" fill="#1b6ca8"/>
+<circle cx="190.4" cy="197.7" r="3.2" fill="#1b6ca8"/>
+<circle cx="253.6" cy="197.7" r="3.2" fill="#1b6ca8"/>
+<circle cx="316.8" cy="197.7" r="3.2" fill="#1b6ca8"/>
+<circle cx="380.0" cy="197.7" r="3.2" fill="#1b6ca8"/>
+<circle cx="443.2" cy="197.7" r="3.2" fill="#1b6ca8"/>
+<circle cx="569.6" cy="304.5" r="3.2" fill="#1b6ca8"/>
+<circle cx="696.0" cy="332.3" r="3.2" fill="#1b6ca8"/>
+<line x1="76" y1="302" x2="104" y2="302" stroke="#1b6ca8" stroke-width="2.4"/><text x="112" y="306">P-192 (dashed: generic √n = 2^96)</text>
+<line x1="64" y1="110.43478260869566" x2="696" y2="110.43478260869566" stroke="#c0392b" stroke-dasharray="6 4" stroke-width="1.2"/>
+<path d="M64.0,138.6 L127.2,152.5 L190.4,161.5 L253.6,161.5 L316.8,191.9 L380.0,193.7 L443.2,193.7 L569.6,193.7 L696.0,193.7" fill="none" stroke="#c0392b" stroke-width="2.4"/>
+<circle cx="64.0" cy="138.6" r="3.2" fill="#c0392b"/>
+<circle cx="127.2" cy="152.5" r="3.2" fill="#c0392b"/>
+<circle cx="190.4" cy="161.5" r="3.2" fill="#c0392b"/>
+<circle cx="253.6" cy="161.5" r="3.2" fill="#c0392b"/>
+<circle cx="316.8" cy="191.9" r="3.2" fill="#c0392b"/>
+<circle cx="380.0" cy="193.7" r="3.2" fill="#c0392b"/>
+<circle cx="443.2" cy="193.7" r="3.2" fill="#c0392b"/>
+<circle cx="569.6" cy="193.7" r="3.2" fill="#c0392b"/>
+<circle cx="696.0" cy="193.7" r="3.2" fill="#c0392b"/>
+<line x1="76" y1="320" x2="104" y2="320" stroke="#c0392b" stroke-width="2.4"/><text x="112" y="324">P-224 (dashed: generic √n = 2^112)</text>
+<line x1="64" y1="54.08695652233064" x2="696" y2="54.08695652233064" stroke="#2e8b57" stroke-dasharray="6 4" stroke-width="1.2"/>
+<path d="M64.0,81.9 L127.2,96.3 L190.4,110.4 L253.6,124.4 L316.8,138.6 L380.0,152.7 L443.2,166.8 L569.6,194.9 L696.0,223.1" fill="none" stroke="#2e8b57" stroke-width="2.4"/>
+<circle cx="64.0" cy="81.9" r="3.2" fill="#2e8b57"/>
+<circle cx="127.2" cy="96.3" r="3.2" fill="#2e8b57"/>
+<circle cx="190.4" cy="110.4" r="3.2" fill="#2e8b57"/>
+<circle cx="253.6" cy="124.4" r="3.2" fill="#2e8b57"/>
+<circle cx="316.8" cy="138.6" r="3.2" fill="#2e8b57"/>
+<circle cx="380.0" cy="152.7" r="3.2" fill="#2e8b57"/>
+<circle cx="443.2" cy="166.8" r="3.2" fill="#2e8b57"/>
+<circle cx="569.6" cy="194.9" r="3.2" fill="#2e8b57"/>
+<circle cx="696.0" cy="223.1" r="3.2" fill="#2e8b57"/>
+<line x1="76" y1="338" x2="104" y2="338" stroke="#2e8b57" stroke-width="2.4"/><text x="112" y="342">P-256 (dashed: generic √n = 2^128)</text>
+<text x="64" y="428" font-size="10" fill="#444">Source: results.json here. Exact divisors of n − 1, n + 1; cost √(n/d) + √d, d ≤ Q (resp. 2d ≤ Q). Three curves, exact values, no uncertainty.</text>
+</svg>

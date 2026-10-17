@@ -53,7 +53,12 @@ pub struct GhsCoverTower {
     pub type_i: bool,
     /// Degree `2^magic_number` of the Artin--Schreier compositum cover.
     pub cover_degree: BigUint,
-    /// Whether this row satisfies the caller's structural genus bound.
+    /// MMT Lemma 6 condition (8): `n` odd, `Tr(a) = 0`, or
+    /// `Tr_{K/k}(b) != 0`.  When it fails the cover does not descend to
+    /// `F_(2^l)` and the row is no candidate, whatever its genus.
+    pub descends: bool,
+    /// Whether the cover descends and its genus satisfies the caller's
+    /// structural genus bound.
     pub within_genus_bound: bool,
 }
 
@@ -81,7 +86,8 @@ pub struct GhsScreenReport {
 }
 
 impl GhsScreenReport {
-    /// Lowest-genus factorisation, if the absolute degree has one.
+    /// Lowest-genus factorisation whose cover descends (MMT condition (8));
+    /// the lowest-genus row overall when none does.
     pub fn best(&self) -> Option<&GhsCoverTower> {
         self.rows.first()
     }
@@ -123,7 +129,7 @@ pub fn screen_curve(
         .into_iter()
         .map(|row| {
             let cover_degree = BigUint::one() << row.magic_m;
-            let within_genus_bound = &row.genus <= genus_bound;
+            let within_genus_bound = row.descends && &row.genus <= genus_bound;
             GhsCoverTower {
                 relative_degree: row.n,
                 base_degree: row.l,
@@ -131,6 +137,7 @@ pub fn screen_curve(
                 genus: row.genus,
                 type_i: row.type_i,
                 cover_degree,
+                descends: row.descends,
                 within_genus_bound,
             }
         })
@@ -142,7 +149,7 @@ pub fn screen_curve(
     })
 }
 
-fn validate_input(input: &GhsCurveInput) -> Result<IrreduciblePoly, GhsScreenError> {
+pub(crate) fn validate_input(input: &GhsCurveInput) -> Result<IrreduciblePoly, GhsScreenError> {
     let degree = input.absolute_degree;
     if !(2..=MAX_FIELD_DEGREE).contains(&degree) {
         return Err(GhsScreenError::new(format!(
@@ -265,7 +272,10 @@ mod tests {
     }
 
     #[test]
-    fn folds_a_contribution_into_each_rows_genus() {
+    fn a_does_not_change_the_magic_number() {
+        // MMT eq. (5): m depends on b only.  With b = 1 every tower has
+        // m = 1 and genus 1, whatever a is.  (Before 2026-10-13 the audit
+        // added (σ - 1)σ^i(a) as generators and reported m = 2, 3, 6 here.)
         let mut input = aes_curve(1);
         input.a = BigUint::from(2u32);
         let report = screen_curve(&input, &BigUint::from(4u32)).unwrap();
@@ -284,9 +294,9 @@ mod tests {
         assert_eq!(
             rows,
             vec![
-                (2, 2, BigUint::from(2u32), false),
-                (4, 3, BigUint::from(4u32), false),
-                (8, 6, BigUint::from(32u32), false),
+                (2, 1, BigUint::from(1u32), false),
+                (4, 1, BigUint::from(1u32), false),
+                (8, 1, BigUint::from(1u32), false),
             ]
         );
     }

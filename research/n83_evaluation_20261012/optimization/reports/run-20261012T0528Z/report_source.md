@@ -1,0 +1,193 @@
+# Fair rho tuning and the prepared IC tail
+
+New optimization addendum · exact retained degree-83 a=1 model · run-20261012T0528Z
+
+12 October 2026
+
+> Selected rho has lower held-out process cost than default rho: native default/selected geometric ratio 1.7567 [1.5402,2.0334]. Prepared IC has four shorter cases and one 13,034.488 ms tail. Its geometric IC/rho ratio 0.4310 [0.1380,1.7764] and arithmetic mean-time ratio 1.5426 point in opposite directions. There is no definitive overall online winner. The combined edition retains the prior 48 pages as a historically frozen appendix.
+
+## 1. What the fairer rho control changes
+
+> The registered search selected fold-L64-DP6-E0. On 5 held-out target blocks, default/selected rho process cost is 1.756671 [1.540157,2.033353]. Prepared IC’s geometric ratio is 0.431011 [0.137988,1.776388], including parity; its arithmetic mean-time ratio is 1.542600 in the opposite direction. No overall definitive IC/rho online winner is established.
+
+Rho was tuned over a frozen two-stage field-kernel and policy search, rather than left at its original default. The selected policy was fixed before disjoint-target holdout. Its held-out mean process costs are default 3.915205 s versus selected 2.152616 s. This improves the tested control within the registered scope; it is not a global optimum or a claim that the cold-selected policy is an online optimum.
+
+Prepared IC is shorter than the selected-rho three-seed mean on four target cases, but the first target takes 13,034.487993 ms. All five cases are retained. A geometric mean summarizes multiplicative target ratios; the arithmetic mean describes this panel’s average time and is sensitive to the tail. Their disagreement and the interval crossing 1 prevent a blanket online-winner conclusion.
+
+The old packed-reference 8.1813× observation used a weaker control and is inadmissible as evidence against strong rho. Its correction and the prior default-strong evaluation remain historical. The appended 48-page report is unchanged. New selected-rho times are never paired with old IC times, and the historical 218.034569 cold ratio is not revised.
+
+| Native target-block estimator | Geometric ratio | 95% interval | Arithmetic mean-time ratio |
+| --- | --- | --- | --- |
+| Default/selected rho process | 1.756671 | [1.540157, 2.033353] | 1.818813 |
+| Default/selected rho online | 1.836263 | [1.609766, 2.135352] | 1.904154 |
+| Prepared IC/selected rho online | 0.431011 | [0.137988, 1.776388] | 1.542600 |
+
+*Sources: [O01](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/PROTOCOL.md), [O04](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/records/panel/statistics.json), [O05](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/verification/final_receipt.json), [O06](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/MEASUREMENT_REVIEW.md).*
+
+## 2. Declared corpus, sampling law and evidence flow
+
+The exact model is `icv1-f2m83-t6151469093347-9eba6cd5`: y²+xy=x³+x²+1 over GF(2)[z]/(z^83+z^7+z^4+z²+1), subgroup r=8569786107849059, cofactor 1128547018, G=(6614244651398184860292015,8868260410029249391539529). Field degree 83 is distinct from the approximately 52.928-bit subgroup. No substitution of the [0,1,2,45] representation or a=0 case occurs.
+
+Native generation uses unbiased nonzero scalar proposals, rejecting signed-Frobenius-orbit overlap with the old exposed point, retained K600 base and other generated points. Three training and five held-out target blocks are sampled without replacement under these exclusions. They are not unconditional independent draws. The validation scalar sidecar is not solver input.
+
+Kernel and policy training use nine cases on three targets; holdout uses five new targets and three fresh rho seeds per target/arm. There is one prepared IC interval per target and one shared IC preparation. No fastest seed, per-target policy choice or post-holdout tuning is used.
+
+![Executed campaign flow: 126 training rho processes; one frozen policy; 30 held-out rho solves plus 5 prepared IC target intervals. Statistical units remain five target blocks. [O01–O05]](figures/train_select_heldout.png)
+
+Executed campaign flow: 126 training rho processes; one frozen policy; 30 held-out rho solves plus 5 prepared IC target intervals. Statistical units remain five target blocks. [O01–O05]
+
+*Sources: [O01](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/PROTOCOL.md), [O02](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/records/panel/kernel/selection.json), [O03](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/records/panel/policy/selection.json), [O05](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/verification/final_receipt.json), [O06](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/MEASUREMENT_REVIEW.md).*
+
+## 3. Native training grid and the frozen selection
+
+Kernel training compares Wide and Fold at 32 lanes/DP4/escape off on 3 targets × 3 seeds: 18 launches. All 18 verify. In nine matched cases, recovered answers, walk counters and reported charges agree. No full step-by-step trajectory transcript is exported. The native selector freezes Fold under the registered whole-process criterion.
+
+| Kernel / policy | Verified cases | Mean process s | Mean online ms |
+| --- | --- | --- | --- |
+| fold-L32-DP4-E0 | 9/9 | 3.800763 | 3594.509619 |
+| wide-L32-DP4-E0 | 9/9 | 4.905513 | 4700.309334 |
+
+Fold then receives all 12 policies: lanes 16/32/64 × DP4/6 × escape off/on, nine cases each. All 108 verify uncapped. Eligibility requires all nine verified uncapped cases; wrong answers reject. The selection score is native mean whole-process wall, with the default preferred within 2% of best. This preference is a selection rule, not a confidence test.
+
+| Fold policy | Verified cases | Mean process s | Mean online ms |
+| --- | --- | --- | --- |
+| fold-L16-DP4-E0 | 9/9 | 4.254725 | 4051.613049 |
+| fold-L16-DP4-E1 | 9/9 | 4.318931 | 4116.507651 |
+| fold-L16-DP6-E0 | 9/9 | 2.699743 | 2492.910388 |
+| fold-L16-DP6-E1 | 9/9 | 2.737213 | 2532.174321 |
+| fold-L32-DP4-E0 | 9/9 | 3.695433 | 3490.948152 |
+| fold-L32-DP4-E1 | 9/9 | 3.746029 | 3540.834438 |
+| fold-L32-DP6-E0 | 9/9 | 2.341132 | 2133.465168 |
+| fold-L32-DP6-E1 | 9/9 | 2.355200 | 2150.567076 |
+| fold-L64-DP4-E0 | 9/9 | 3.473313 | 3268.471999 |
+| fold-L64-DP4-E1 | 9/9 | 3.498884 | 3293.263616 |
+| fold-L64-DP6-E0 | 9/9 | 2.146530 | 1946.016033 |
+| fold-L64-DP6-E1 | 9/9 | 2.172581 | 1964.917797 |
+
+The native choice is Fold/64/DP6/off, step-cap factor 2000: training process mean 2.146530315777778 s and secondary online mean 1946.0160328888887 ms. It is the selected fastest eligible tested policy under the registered cold-training criterion. The staged search does not test all 24 backend-policy combinations; kernel-policy interactions, other lane/DP values, jump tables, normal-coordinate point storage and compiler exploration remain outside scope.
+
+*Sources: [O01](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/PROTOCOL.md), [O02](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/records/panel/kernel/selection.json), [O03](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/records/panel/policy/selection.json), [O07](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/OPTIMIZATION_SCOPE_AUDIT.md).*
+
+## 4. Field primitives shared fairly with the strong algorithm
+
+Wide and Fold run the same generic strong walk, canonicalization, collision recovery and scalar transport in one release executable. Fold delegates field arithmetic to the existing Gf2_128 primitives already available to IC: carryless tail-fold reduction and specialized squaring. This is field engineering on the same polynomial, subgroup and point law; it does not change the factor-base set or introduce a new vector-space basis.
+
+Both kernels use runtime hardware dispatch and the same default release/compiler profile, without asymmetric target-cpu/LTO/PGO flags. Strong canonicalization already uses its exact zero-run/least-rotation selector; an older full-rotation-scan profile is not current optimization evidence.
+
+Nine same-input kernel cases match verified outcomes, walk counters and reported charges. Field tests and the unchanged generic algorithm support the comparison, but neither a full step transcript nor identical primitive-field/instruction counts is established. Changing lane, DP and escape settings can change useful collision progress; ns/step alone did not select the policy.
+
+![Exact-instance and backend/policy fairness. The selected policy shares existing IC arithmetic opportunities while preserving the strong group algorithm. Rho 60 s and IC 1800 s process caps remain unequal. [O01,O07]](figures/backend_fairness.png)
+
+Exact-instance and backend/policy fairness. The selected policy shares existing IC arithmetic opportunities while preserving the strong group algorithm. Rho 60 s and IC 1800 s process caps remain unequal. [O01,O07]
+
+*Sources: [O01](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/PROTOCOL.md), [O02](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/records/panel/kernel/selection.json), [O07](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/OPTIMIZATION_SCOPE_AUDIT.md), [O08](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/records/panel/ic/stage_manifest.json).*
+
+## 5. Selected rho on held-out target blocks
+
+All 30 held-out rho processes complete and verify; no target or seed is dropped. The selected policy and original Wide/32/DP4/off default each receive three fresh seeds per target under the same rho 60 s process cap. Default/selected whole-process ratio 1.756671 has native 95% interval [1.540157,2.033353]; its arithmetic mean-time ratio 1.818813 is a separate descriptive value.
+
+The native primary averages three actual rho process times within each target/arm, then takes the geometric mean of five target ratios. It bootstraps complete target blocks 20,000 times with seed 202610128399. The interval is conditional on the frozen selection, orbit-exclusion target law, these five blocks and this host; resampling is an exchangeability approximation, not fifteen independent targets.
+
+| Target | Default process mean s | Selected process mean s | Native default/selected |
+| --- | --- | --- | --- |
+| holdout_1 | 5.470036 | 2.325667 | 2.352029 |
+| holdout_2 | 4.923624 | 2.850779 | 1.727116 |
+| holdout_3 | 2.361908 | 1.625409 | 1.453117 |
+| holdout_4 | 4.422436 | 2.405613 | 1.838382 |
+| holdout_5 | 2.398020 | 1.555612 | 1.541529 |
+
+![All 30 held-out rho seed process times (dots) and native three-seed target means (bars), run-20261012T0528Z. All answers independently replayed. [O04,O05]](figures/holdout_rho.png)
+
+All 30 held-out rho seed process times (dots) and native three-seed target means (bars), run-20261012T0528Z. All answers independently replayed. [O04,O05]
+
+*Sources: [O01](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/PROTOCOL.md), [O04](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/records/panel/statistics.json), [O05](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/verification/final_receipt.json).*
+
+## 6. Prepared IC: all five cases and opposite estimator directions
+
+> IC/selected-rho geometric mean 0.431011 [0.137988,1.776388] includes parity. IC arithmetic mean 3008.682028 ms versus rho 1950.396640 ms yields native ratio 1.542600 in the opposite direction. Keep both summaries and the 13,034.487993 ms case; neither establishes a definitive overall online winner.
+
+IC has one measured target interval per held-out point, versus three selected-rho seed draws averaged per point. It is lower on four of five target cases. Q1’s verified 13,034.487993 ms interval stays in every estimator and the displayed panel. It is not deleted or replaced as an inconvenient outlier.
+
+The native geometric target-ratio estimator uses 20,000 target-block bootstrap draws, seed 202610128400. The wide interval reflects a small five-target panel under the conditional generation law. It does not measure repeated IC setup, repeated IC timings on each point, host variation, or target populations beyond that law.
+
+| Target | Selected rho native mean ms | Prepared IC ms | Native IC/rho |
+| --- | --- | --- | --- |
+| holdout_1 | 2125.592165 | 13034.487993 | 6.132168 |
+| holdout_2 | 2650.855295 | 567.676432 | 0.214148 |
+| holdout_3 | 1421.803807 | 209.946099 | 0.147662 |
+| holdout_4 | 2199.462871 | 227.662621 | 0.103508 |
+| holdout_5 | 1354.269060 | 1003.636996 | 0.741091 |
+
+![All five complete prepared IC intervals against selected-rho native three-seed means. Four shorter cases and one long tail give opposite geometric/arithmetic summaries; geometric CI includes 1. [O04]](figures/ic_cases.png)
+
+All five complete prepared IC intervals against selected-rho native three-seed means. Four shorter cases and one long tail give opposite geometric/arithmetic summaries; geometric CI includes 1. [O04]
+
+*Sources: [O01](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/PROTOCOL.md), [O04](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/records/panel/statistics.json), [O05](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/verification/final_receipt.json), [O06](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/MEASUREMENT_REVIEW.md).*
+
+## 7. What is charged: warm queries and the single IC cohort
+
+The immutable original IC binary pays once for loading the retained base, root indexing and guided rank/log preparation, then solves five targets from shared immutable prepared state. Recorded preparation is 1149151.699878 ms. The entire five-target process wall is 1164.439319887 s, CPU 1164.339530 s and wait4 peak RSS 5811478528 bytes. These are one cohort receipt, not five cold single-target measurements.
+
+Original construction/selection of the 600 representatives and OS-cold page-cache flushing are unmeasured. Do not divide preparation by five and call the result a cold single-target cost. Do not pair new rho times with old IC times; the old 218.034569 five-pair retained-input cold ratio stays frozen.
+
+Rho’s process includes launch/load, curve/normal basis, G-only jumps, Q validation, walk/collision, generic replay and receipt output. Dataset generation and 126 training solves are explicit research costs, not charged anew to a selected production solve. Stock IC assumes prevalidated fixtures whereas rho charges Q validation online; this asymmetry remains visible.
+
+Rho process cap is 60 s; IC cohort cap is 1800 s. IC’s third CLI argument 29 is a rank seed, not a 20-million-probe cap; extraction traverses full index.states once. All selected-rho seeds and five IC targets completed uncensored, so the declared complete-online comparison is available, with the unequal caps still disclosed.
+
+The new outer monitor polls at 5 ms, with nominal 0–5 ms exit-observation delay plus scheduling/poll-body effects—not a strict bound. This differs from the old 100 ms observer. Native complete online clocks remain separate from outer wall and child CPU. Raw target rows preserve the phase sum; no phase sum is substituted for complete online.
+
+| Native receipt | Recorded quantity |
+| --- | --- |
+| IC reusable preparation (one seed 29) | 1149151.699878 ms |
+| IC whole 5-target cohort wall | 1164.439319887 s |
+| IC cohort child CPU | 1164.339530 s |
+| IC cohort peak RSS | 5811478528 bytes |
+| Observed process monitor | 5 ms polling; no strict scheduling bound |
+| Common calibrated work S | null; IC probes and rho steps remain different units |
+
+*Sources: [O01](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/PROTOCOL.md), [O04](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/records/panel/statistics.json), [O06](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/MEASUREMENT_REVIEW.md), [O08](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/records/panel/ic/stage_manifest.json).*
+
+## 8. Independent verification, limits and measurement decisions
+
+Standalone native C++ replay reports PASS: 156 rho answers plus 5 IC answers independently verified, all 5 actual IC four-point witnesses checked and 0 invalid rows. It reproduces fixture generation/orbit exclusions and verifies 99,600 retained base point/label records. No full 600-row rank/factor-log transcript or step-by-step rho walk transcript is supplied.
+
+Four native isolation records—kernel, policy, holdout and IC—report exit 0 and 0 contended samples. The host is Linux x86_64 with exposed AMD EPYC 9V74 model, one pinned CPU 3 and 12 GiB address-space limit. These guest observations do not certify physical-host exclusivity, second-host reproduction or sealed ecbench admission.
+
+Recorded pre-timing validation passes 4 worker tests, 20 native runner/statistics tests and the default release library suite 3947 passed / 0 failed / 112 ignored. Conductor was unavailable. The exact legacy case still lacks the applicable sealed wide IC adapter, calibrated common S, independent-host gates and complete rank/log evidence; no admitted ledger promotion or global optimum is claimed.
+
+Measured source commits 4c9da3bd/4ae7caa2 and immutable executable hashes remain the execution identity. The delivery tree later integrates main at 010e4f69; this does not retime or relabel measured binaries. Pre-measurement checks above belong to their captured stage. Separate post-merge delivery checks pass: release library 3992 passed / 0 failed / 112 ignored in 402.32 s, and the configured example 4 passed / 0 failed in 12.19 s. These checks do not replace the pre-measurement results or measured-source identities.
+
+For future measurement, freeze the objective before selection: cold process versus prepared-online are different policies. Report both geometric ratios and expected-time/descriptive arithmetic summaries, retain tail cases, and expand the target panel with explicit sampling law and repeated setup/host measurements. This panel changes the reference-fairness evidence while leaving the overall prepared-online ranking unresolved.
+
+| Native authoritative artifact | SHA-256 |
+| --- | --- |
+| Statistics | 6250c42f5a7f6644db5c7c39bd5c712155b2667d081309b5e99202f64f8918f7 |
+| Independent final replay | 6640a9f69e8ef66f3e31a3eab70c18925bdc8140a623aac3559c01fdeb57e294 |
+| Machine protocol | bdbed17abe2c9073089d52498d481e42fe67df6b6ae1953467b20125c1faa9db |
+| Executed runner | b1b94b24fea42a7ac02e2ce21dfd913e7ba4a2b66a536f48d65bb3cfe8044a27 |
+| Executed rho worker | 21827dcc645fd4591b39dd913619f047d267a98d541854bd7c83ee7143d8bbcb |
+| Immutable IC worker | 983f28400b7852fc6628ba97d3ea83b2ab9e32d9944658c7eea831ee89a4abf2 |
+
+*Sources: [O01](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/PROTOCOL.md), [O04](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/records/panel/statistics.json), [O05](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/verification/final_receipt.json), [O06](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/MEASUREMENT_REVIEW.md), [O07](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/OPTIMIZATION_SCOPE_AUDIT.md), [O08](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/records/panel/ic/stage_manifest.json), [O11](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/README.md).*
+
+## 9. Source register and frozen historical appendix
+
+This addendum is a source-bound optimization and accounting report from recorded native results. Python only formats those records and renders plots/pages; it estimates no ratio, mean, interval, selection score or arithmetic certificate. Every kernel/policy case and every held-out rho/IC row remains linked below in native records.
+
+The combined PDF places this addendum before the unchanged historical 48 pages. Their default-policy conclusions retain their original scope and dates. The historical packed-reference correction, exact-field identity erratum and old 218.034569 cold ratio remain provenance, not newly optimized measurements. Historical pages are preserved during merging.
+
+| ID | Durable native source |
+| --- | --- |
+| [O01](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/PROTOCOL.md) | Frozen human protocol: PROTOCOL.md |
+| [O02](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/records/panel/kernel/selection.json) | Kernel selection and all 18 native cases: records/panel/kernel/selection.json |
+| [O03](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/records/panel/policy/selection.json) | Policy selection and all 108 native cases: records/panel/policy/selection.json |
+| [O04](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/records/panel/statistics.json) | Authoritative native statistics: records/panel/statistics.json |
+| [O05](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/verification/final_receipt.json) | Independent final arithmetic replay: verification/final_receipt.json |
+| [O06](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/MEASUREMENT_REVIEW.md) | Measurement/estimand review: MEASUREMENT_REVIEW.md |
+| [O07](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/OPTIMIZATION_SCOPE_AUDIT.md) | Field/policy implementation scope audit: OPTIMIZATION_SCOPE_AUDIT.md |
+| [O08](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/records/panel/ic/stage_manifest.json) | Executed IC cohort provenance: records/panel/ic/stage_manifest.json |
+| [O09](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/records/panel/holdout/records.jsonl) | Raw held-out rho rows: records/panel/holdout/records.jsonl |
+| [O10](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/native_runner/src/statistics.rs) | Native runner/statistics source: native_runner/src/statistics.rs |
+| [O11](https://github.com/aburan28/crypto/blob/codex/n83-rho-optimization-20261012/research/n83_evaluation_20261012/optimization/README.md) | Campaign delivery, checks and graph disposition: README.md |
+
+*Figures: native recorded training scores, all 30 held-out rho seed values, all 5 IC intervals and native target-block estimates. Report identity: run-20261012T0528Z. Layout/merge QA sits beside this source.*

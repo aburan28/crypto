@@ -14,6 +14,14 @@ path = "experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs"
 name = "s3_pair_candidate_frozen"
 path = "experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs"
 
+[[example]]
+name = "koblitz_n53_compact_replay"
+path = "experiments/koblitz-n53-compact-cold-20261009/native_replay.rs"
+
+[[example]]
+name = "koblitz_n53_compact_protocol"
+path = "experiments/koblitz-n53-compact-cold-20261009/native_run.rs"
+
 [[bin]]
 name = "crypto"
 path = "src/main.rs"
@@ -21,6 +29,10 @@ path = "src/main.rs"
 [[bin]]
 name = "ic"
 path = "src/bin/ic.rs"
+
+[[bin]]
+name = "pkm-aux-search"
+path = "src/bin/pkm_aux_search.rs"
 
 [[bin]]
 name = "quartic-ic"
@@ -36,6 +48,13 @@ path = "src/bin/hyperelliptic_cover.rs"
 [[bin]]
 name = "icx"
 path = "src/bin/icx.rs"
+
+# `ecdlp-nist` — ECDLP across the fifteen NIST curves (prime, binary,
+# Koblitz) with the structural audit, interval solvers, folded rho and the
+# Smart attack on constructed anomalous curves.
+[[bin]]
+name = "ecdlp-nist"
+path = "src/bin/ecdlp_nist.rs"
 
 # `ecc2k-guard` — the ECC2K-130 rho campaign's no-fruitless-cycle
 # certificate and verifiable seed provenance.
@@ -60,6 +79,12 @@ path = "src/bin/ecc2k_status.rs"
 name = "jacobian-certificate"
 path = "src/bin/jacobian_certificate.rs"
 
+# `jacobian_transfers` — every route from a registered curve into a Jacobian,
+# priced against rho under one frozen formula cost model (docs/curves/JACOBIAN_TRANSFERS.md).
+[[bin]]
+name = "jacobian_transfers"
+path = "src/bin/jacobian_transfers.rs"
+
 # `cryptopro-b-glv-bench` — GLV-2 with the degree-175 isogeny-chain
 # endomorphism against width-w NAF on GOST CryptoPro-B, same Jacobian
 # arithmetic in both arms (research/cryptopro_b_glv_chain_20261005).
@@ -75,11 +100,25 @@ path = "src/bin/cryptopro_b_glv_bench.rs"
 name = "cryptopro-b-chain-sweep"
 path = "src/bin/cryptopro_b_chain_sweep.rs"
 
+# `endo-chain-bench` — the curve-generic form of `cryptopro-b-chain-sweep`:
+# GLV-2 via a frozen isogeny-chain endomorphism against width-w NAF on any
+# short Weierstrass curve (Bandersnatch, Tom-384, CP6-782; CryptoPro-B as the
+# positive control); counting run with --features endo-chain-opcount
+# (research/endo_native_bench_20261016).
+[[bin]]
+name = "endo-chain-bench"
+path = "src/bin/endo_chain_bench.rs"
+
 [lib]
 name = "crypto_lib"
 path = "src/lib.rs"
 
 [features]
+# Keep the existing Redis TLS behavior in normal builds. The isolated,
+# network-disabled N83 capacity worker can omit its unused native OpenSSL
+# dependency when cross-building a static Linux binary.
+default = ["redis-native-tls"]
+redis-native-tls = ["redis/tls-native-tls"]
 f4-four-tables = []
 f4-five-tables = []
 f4-wide-tables = []
@@ -89,6 +128,12 @@ rho_debug = []
 # Field-operation counters in the CryptoPro-B field (`cryptopro_b_field::opcount`),
 # for the counting run of `cryptopro-b-chain-sweep`; timing builds leave it off.
 cryptopro-b-opcount = []
+# Field-operation counters in the curve-generic field (`endo_generic_field::opcount`),
+# for the counting run of `endo-chain-bench`; timing builds leave it off.
+endo-chain-opcount = []
+# Field-operation counters in the one-word field of `semaev_decomp` (`semaev_decomp::opcount`),
+# for PS-0 of research/pdp_oracle_speedup_20261011; timing builds leave it off.
+pdp-opcount = []
 
 [lints.rust]
 # `hashclash_linked` is set by a downstream build script that links the
@@ -149,7 +194,7 @@ blake3 = "1.5"
 flate2 = "1.0"
 # Base64 codec for cryptopals fixtures (challenge 56 cookie).
 base64 = "0.21"
-redis = { version = "1.7.0", features = ["tls-native-tls"] }
+redis = "1.7.0"
 
 [[bench]]
 name = "pqc_speed"

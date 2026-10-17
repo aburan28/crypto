@@ -58,13 +58,13 @@ The matrix is calibrated to **what an attacker can actually do to a curve**
 
 | # | Attack | Class | Prime-order curve (P-256, SM2, secp256k1) | Twist (with bad twist-order) | Anomalous curve | Binary / extension-field curve | Pairing-friendly curve | Repo path |
 |---|--------|-------|:--:|:--:|:--:|:--:|:--:|---|
-| 1 | **Pollard rho** | generic | ◐ Partial *(this IS the security bound)* | ◐ Partial | ◐ Partial | ◐ Partial | ◐ Partial | 🛡 `cryptanalysis/pollard_rho.rs`<br>🛡 `cryptanalysis/ec_index_calculus.rs::pollard_rho_ecdlp` |
-| 2 | **Baby-step / giant-step** | generic | ◐ √n time, √n memory | ◐ Partial | ◐ Partial | ◐ Partial | ◐ Partial | (folded into `pollard_rho.rs`) |
-| 3 | **Pohlig-Hellman** | generic | ○ N/A *(prime order)* | ✗ Breaks *(if cofactor has small factors)* | ○ N/A | ◐ Partial | ◐ Partial | 🛡 logic re-used by IC linear-algebra step |
+| 1 | **Pollard rho** | generic | ◐ Partial *(this IS the security bound)* | ◐ Partial | ◐ Partial | ◐ Partial | ◐ Partial | 🛡 `cryptanalysis/pollard_rho.rs`<br>🛡 `cryptanalysis/ec_index_calculus.rs::pollard_rho_ecdlp`<br>🛡 `cryptanalysis/ecdlp_nist/rho.rs` (parallel, distinguished points, negation map, Frobenius folding on K-curves; runs on every NIST curve, see `docs/ECDLP_NIST.md`) |
+| 2 | **Baby-step / giant-step** (and kangaroo on an interval) | generic | ◐ √n time, √n memory | ◐ Partial | ◐ Partial | ◐ Partial | ◐ Partial | 🛡 `cryptanalysis/ecdlp_nist/interval.rs` (negation-map BSGS, parallel kangaroos; bounded instances on all 15 NIST curves) |
+| 3 | **Pohlig-Hellman** | generic | ○ N/A *(prime order)* | ✗ Breaks *(if cofactor has small factors)* | ○ N/A | ◐ Partial | ◐ Partial | 🛡 `cryptanalysis/pohlig_hellman.rs`; 🛡 `cryptanalysis/ecdlp_nist/pohlig.rs` (generic over prime/binary groups, rho factoring, CRT) |
 | 4 | **Preprocessed / table rho** | generic | ◐ Partial | ◐ Partial | ◐ Partial | ◐ Partial | ◐ Partial | 🛡 `cryptanalysis/preprocessing_rho.rs` |
 | 5 | **Automorphism-folded rho** (GLV/GLS speedup) | generic | ◐ Partial *(√2 speedup on secp256k1)* | ◐ Partial | ◐ Partial | ◐ Partial | ◐ Partial | 🛡 `cryptanalysis/aut_folded_rho.rs` |
 | 6 | **ML-augmented rho walks** | generic | ◐ Partial *(small constant gain)* | ◐ Partial | ◐ Partial | ◐ Partial | ◐ Partial | 🛡 `cryptanalysis/ml_rho_walks.rs` |
-| 7 | **Smart-Semaev-Satoh-Araki** *(anomalous curves)* | structural | ○ N/A *(curve order ≠ p)* | ○ N/A | ✗ Breaks *(polynomial time)* | ○ N/A | ○ N/A | 🛡 `cryptanalysis/canonical_lift.rs::smart_attack_anomalous` |
+| 7 | **Smart-Semaev-Satoh-Araki** *(anomalous curves)* | structural | ○ N/A *(curve order ≠ p)* | ○ N/A | ✗ Breaks *(polynomial time)* | ○ N/A | ○ N/A | 🛡 `cryptanalysis/ecdlp_nist/anomalous.rs` (end to end: Jacobian lift mod p², formal log, CM-constructed anomalous curves of any size; `canonical_lift.rs::smart_attack_anomalous` delegates to it) |
 | 8 | **MOV / Frey-Rück** *(low embedding degree)* | structural | ○ N/A *(P-256 embedding degree astronomical)* | ○ N/A | ○ N/A | ○ N/A | ✗ Breaks *(transfers to F_{p^k}\*)* | (target group attacks via `bls12_381/`) |
 | 9 | **Weil descent / Gaudry-Hess-Smart** | structural | ○ N/A *(no extension structure)* | ○ N/A | ○ N/A | ✗ Breaks *(on F_{2^n}, n composite)* | partially applicable | (binary_ecc — vulnerable curves not deployed) |
 | 10 | **Index calculus / Semaev summation polys** (Semaev 2004, FPPR 2012, PQ 2012, PKM 2016) | structural | ◐ Asymptotically O(p^{3/2}) for 2-decomp; worse than rho | ◐ Same | ◐ Same | ✗ Breaks *(via Weil descent)* | ◐ Same | 🛡 `cryptanalysis/ec_index_calculus.rs` (full pipeline: S₃, S₄, factor base, relations, GE, end-to-end solver) |
@@ -155,7 +155,7 @@ repository (`src/ecc/curve_zoo.rs`):
 | Curve | Country / Standard | Worst applicable row | Severity |
 |-------|--------------------|----------------------|----------|
 | secp256k1 | SECG / Bitcoin | #15 twist attack | ◌ Impl-dep, twist work factor 2¹⁰⁹·⁵ — passes SafeCurves |
-| P-256 (NIST) | NIST / NIST | #13 special-prime trapdoor *(speculative)*, #15 twist 2¹²⁰ | ◌ Impl-dep + speculative rigidity |
+| P-256 (NIST) | NIST / NIST | #13 special-prime trapdoor *(speculative)*, #15 twist 2¹²⁰ | ◌ Impl-dep + speculative rigidity (seed explained 2026-10-16; see note) |
 | P-224 (NIST) | NIST / NIST | #15 twist attack 2⁵⁸·⁴ | **✗ Breaks** if validation skipped |
 | P-384 / P-521 (NIST) | NIST | #15 twist 2¹⁹¹·⁸ / 2²²¹·⁸ | ◌ Impl-dep but high margin |
 | brainpoolP256r1 / t1 | BSI / RFC 5639 | #15 twist 2⁴⁴·⁵ on t1 | **✗ Breaks** on twisted variant if validation skipped |
@@ -167,6 +167,15 @@ repository (`src/ecc/curve_zoo.rs`):
 | Curve25519 / Curve448 | Bernstein / RFC 7748 | none (twist-secure by design) | passes every SafeCurves row |
 | BN254 / alt_bn128 | Brazilian / Ethereum | #8 MOV-style via Kim-Barbulescu 2016 → ~110 bit | **✗ Below 128-bit pairing security**; migration to BLS12-381 advised |
 | BLS12-381 | Swiss-academic / Ethereum-2 | #8 future Tower-NFS erosion | ◐ ~120-bit margin holding for now |
+
+*Note (2026-10-16).* The NIST P-curve seeds are now explained: they are
+`drand48` output seeded with UNIX times from 1997–98 (Anthropic Frontier Red
+Team and F. Valsorda, 2026-10-16; reproduced in
+`research/nist_seed_provenance_20261016/`). The rigidity concern on the NIST
+rows therefore no longer rests on the seed, whose remaining freedom is about
+30 bits per curve. It rests only on the unexplained base points (no ECDLP
+consequence in a prime-order group) and on an unexplained skip of about half
+the valid candidates in each generation run.
 
 ---
 

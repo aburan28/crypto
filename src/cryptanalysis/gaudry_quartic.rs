@@ -29,9 +29,7 @@ use rand::Rng;
 use rayon::prelude::*;
 use serde::Serialize;
 
-use super::gaudry_cubic::{
-    am, charpoly_mod_p, eigenvectors_mod_p, mm, sm, split_eigenspace, PolyRing, UPoly,
-};
+use super::gaudry_cubic::{am, mm, sm, split_eigenspace, PolyRing, UPoly};
 use super::residual_walk::{inv_mod, pow_mod};
 
 // ── F_{p⁴} = F_p[t] / (t⁴ − c) ───────────────────────────────────────────
@@ -664,16 +662,16 @@ impl SymmetrisedS5 {
 
 // ── Monomials in four variables ───────────────────────────────────────────
 
-fn deg4(m: &[u8; 4]) -> u16 {
+fn deg4<const N: usize>(m: &[u8; N]) -> u16 {
     m.iter().map(|&x| x as u16).sum()
 }
 
-fn grevlex_cmp4(a: &[u8; 4], b: &[u8; 4]) -> std::cmp::Ordering {
+fn grevlex_cmp4<const N: usize>(a: &[u8; N], b: &[u8; N]) -> std::cmp::Ordering {
     let (da, db) = (deg4(a), deg4(b));
     if da != db {
         return da.cmp(&db);
     }
-    for i in (0..4).rev() {
+    for i in (0..N).rev() {
         if a[i] != b[i] {
             return b[i].cmp(&a[i]);
         }
@@ -681,14 +679,33 @@ fn grevlex_cmp4(a: &[u8; 4], b: &[u8; 4]) -> std::cmp::Ordering {
     std::cmp::Ordering::Equal
 }
 
-/// Monomials of total degree `≤ d` in four variables, grevlex descending.
-fn monomials4_desc(d: u8) -> Vec<[u8; 4]> {
-    let mut v = exponents4(d);
+/// Monomials of total degree `≤ d` in `N` variables (any order).
+fn exponents_n<const N: usize>(d: u8) -> Vec<[u8; N]> {
+    let mut out = Vec::new();
+    let mut cur = [0u8; N];
+    fn rec<const N: usize>(i: usize, left: u8, cur: &mut [u8; N], out: &mut Vec<[u8; N]>) {
+        if i == N {
+            out.push(*cur);
+            return;
+        }
+        for k in 0..=left {
+            cur[i] = k;
+            rec(i + 1, left - k, cur, out);
+        }
+        cur[i] = 0;
+    }
+    rec(0, d, &mut cur, &mut out);
+    out
+}
+
+/// Monomials of total degree `≤ d` in `N` variables, grevlex descending.
+fn monomials4_desc<const N: usize>(d: u8) -> Vec<[u8; N]> {
+    let mut v = exponents_n::<N>(d);
     v.sort_by(|x, y| grevlex_cmp4(y, x));
     v
 }
 
-fn leading_monomial4(f: &HashMap<[u8; 4], u64>) -> Option<[u8; 4]> {
+fn leading_monomial4<const N: usize>(f: &HashMap<[u8; N], u64>) -> Option<[u8; N]> {
     f.iter()
         .filter(|(_, &c)| c != 0)
         .map(|(m, _)| *m)
@@ -696,12 +713,12 @@ fn leading_monomial4(f: &HashMap<[u8; 4], u64>) -> Option<[u8; 4]> {
 }
 
 /// As `gaudry_cubic`'s `triangularise_leads`, for four components.
-fn triangularise_leads4(
-    comps: &[HashMap<[u8; 4], u64>],
+fn triangularise_leads4<const N: usize>(
+    comps: &[HashMap<[u8; N], u64>],
     p: u64,
     muls: &mut u64,
-) -> (Vec<HashMap<[u8; 4], u64>>, Vec<Option<[u8; 4]>>) {
-    let mut fs: Vec<HashMap<[u8; 4], u64>> = comps.to_vec();
+) -> (Vec<HashMap<[u8; N], u64>>, Vec<Option<[u8; N]>>) {
+    let mut fs: Vec<HashMap<[u8; N], u64>> = comps.to_vec();
     for _round in 0..16 {
         fs.sort_by(|a, b| match (leading_monomial4(a), leading_monomial4(b)) {
             (Some(x), Some(y)) => grevlex_cmp4(&y, &x),
@@ -747,6 +764,7 @@ fn axpy_const<const P: u32>(row: &mut [u16], piv: &[u16], f: u32) {
     }
 }
 
+#[inline(always)]
 fn axpy_dyn(row: &mut [u16], piv: &[u16], f: u32, p: u32) {
     let nf = p - f;
     for (r, &v) in row.iter_mut().zip(piv) {
@@ -754,12 +772,201 @@ fn axpy_dyn(row: &mut [u16], piv: &[u16], f: u32, p: u32) {
     }
 }
 
-fn axpy(row: &mut [u16], piv: &[u16], f: u32, p: u32) {
+#[inline(always)]
+fn axpy_portable(row: &mut [u16], piv: &[u16], f: u32, p: u32) {
     match p {
         269 => axpy_const::<269>(row, piv, f),
         257 => axpy_const::<257>(row, piv, f),
         _ => axpy_dyn(row, piv, f, p),
     }
+}
+
+/// The same loop compiled for wider vectors, chosen at run time: the
+/// release build targets baseline x86-64, where the multiply and the
+/// constant remainder barely vectorise.  Integer arithmetic, so the result
+/// is the same whichever runs.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx512f,avx512bw,avx512vl,avx2")]
+unsafe fn axpy_avx512(row: &mut [u16], piv: &[u16], f: u32, p: u32) {
+    axpy_portable(row, piv, f, p)
+}
+
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx2")]
+unsafe fn axpy_avx2(row: &mut [u16], piv: &[u16], f: u32, p: u32) {
+    axpy_portable(row, piv, f, p)
+}
+
+#[inline]
+pub(crate) fn axpy(row: &mut [u16], piv: &[u16], f: u32, p: u32) {
+    #[cfg(target_arch = "x86_64")]
+    {
+        if is_x86_feature_detected!("avx512bw") && is_x86_feature_detected!("avx512vl") {
+            // SAFETY: the features were detected on this CPU.
+            return unsafe { axpy_avx512(row, piv, f, p) };
+        }
+        if is_x86_feature_detected!("avx2") {
+            // SAFETY: as above.
+            return unsafe { axpy_avx2(row, piv, f, p) };
+        }
+    }
+    axpy_portable(row, piv, f, p)
+}
+
+// ── Dense kernels on u16 rows ─────────────────────────────────────────────
+//
+// The quotient-side routines (characteristic polynomial, eigenvectors) do
+// exactly the operations of `gaudry_cubic`'s `charpoly_mod_p` and
+// `eigenvectors_mod_p`, charge the same count and return the same values;
+// they run on `u16` rows with the vectorised `axpy` and in parallel over
+// rows instead of through `u128` remainders one entry at a time.
+
+/// As `gaudry_cubic::rref_mod_p`, on `u16` rows, rows eliminated in parallel.
+fn rref_u16(m: &mut [Vec<u16>], p: u32, muls: &mut u64) -> Vec<usize> {
+    let rows = m.len();
+    let cols = if rows > 0 { m[0].len() } else { 0 };
+    let mut pivots = Vec::new();
+    let mut r = 0;
+    for c in 0..cols {
+        if r >= rows {
+            break;
+        }
+        let Some(pr) = (r..rows).find(|&i| m[i][c] != 0) else {
+            continue;
+        };
+        m.swap(r, pr);
+        let inv = inv_mod(m[r][c] as u64, p as u64) as u32;
+        for v in &mut m[r][c..] {
+            *v = ((*v as u32 * inv) % p) as u16;
+        }
+        *muls += (cols - c) as u64;
+        let pivot = m[r].clone();
+        let hit = m
+            .par_iter_mut()
+            .enumerate()
+            .filter(|(i, row)| *i != r && row[c] != 0)
+            .map(|(_, row)| {
+                let f = row[c] as u32;
+                axpy(&mut row[c..], &pivot[c..], f, p);
+            })
+            .count();
+        *muls += (hit * (cols - c)) as u64;
+        pivots.push(c);
+        r += 1;
+    }
+    pivots
+}
+
+/// As `gaudry_cubic::charpoly_mod_p`.  The Hessenberg step at column `j`
+/// is a similarity by `I + Σ fᵢ E_{i,j+1}`, whose elementary factors
+/// commute (their products vanish), so its row operations can all run
+/// before its column operations: the same matrix as the interleaved order.
+pub(crate) fn charpoly_u16(a: &[Vec<u64>], p: u32, muls: &mut u64) -> UPoly {
+    let n = a.len();
+    let mut h: Vec<Vec<u16>> = a
+        .iter()
+        .map(|r| r.iter().map(|&v| v as u16).collect())
+        .collect();
+    for j in 0..n.saturating_sub(2) {
+        let Some(piv) = ((j + 1)..n).find(|&i| h[i][j] != 0) else {
+            continue;
+        };
+        if piv != j + 1 {
+            h.swap(piv, j + 1);
+            for row in h.iter_mut() {
+                row.swap(piv, j + 1);
+            }
+        }
+        let inv = inv_mod(h[j + 1][j] as u64, p as u64) as u32;
+        let fs: Vec<(usize, u32)> = ((j + 2)..n)
+            .filter(|&i| h[i][j] != 0)
+            .map(|i| (i, (h[i][j] as u32 * inv) % p))
+            .collect();
+        if fs.is_empty() {
+            continue;
+        }
+        *muls += 2 * (n * fs.len()) as u64;
+        let mut fv = vec![0u32; n];
+        for &(i, f) in &fs {
+            fv[i] = f;
+        }
+        // row_i −= fᵢ · row_{j+1}
+        let pivot = h[j + 1].clone();
+        h.par_iter_mut().enumerate().for_each(|(i, row)| {
+            if fv[i] != 0 {
+                axpy(row, &pivot, fv[i], p);
+            }
+        });
+        // col_{j+1} += Σ fᵢ · col_i
+        h.par_iter_mut().for_each(|row| {
+            let s: u64 = fs.iter().map(|&(i, f)| f as u64 * row[i] as u64).sum();
+            row[j + 1] = ((row[j + 1] as u64 + s) % p as u64) as u16;
+        });
+    }
+    // p_0 = 1; p_k(x) = (x − h[k-1][k-1]) p_{k-1}
+    //                   − Σ_{i=1}^{k-1} h[i-1][k-1] (Π_{m=i}^{k-1} h[m][m-1]) p_{i-1},
+    // charged as `PolyRing` charges its product and scalings.
+    let pp = p as u64;
+    let mut polys: Vec<Vec<u32>> = vec![vec![1]];
+    let mut acc: Vec<u64> = Vec::with_capacity(n);
+    for k in 1..=n {
+        let prev = &polys[k - 1];
+        let hk = (pp - h[k - 1][k - 1] as u64) % pp;
+        let mut pk = vec![0u32; k + 1];
+        for t in 0..=k {
+            let hi = if t >= 1 { prev[t - 1] as u64 } else { 0 };
+            let lo = if t < k { hk * prev[t] as u64 } else { 0 };
+            pk[t] = ((hi + lo) % pp) as u32;
+        }
+        *muls += 2 * k as u64;
+        acc.clear();
+        acc.resize(k, 0);
+        let mut prod = 1u64;
+        for i in (1..k).rev() {
+            prod = prod * h[i][i - 1] as u64 % pp;
+            let coef = h[i - 1][k - 1] as u64 * prod % pp;
+            if coef != 0 {
+                for (s, &q) in acc.iter_mut().zip(&polys[i - 1]) {
+                    *s += coef * q as u64;
+                }
+                *muls += i as u64;
+            }
+        }
+        for (v, &s) in pk.iter_mut().zip(&acc) {
+            *v = ((*v as u64 + pp - s % pp) % pp) as u32;
+        }
+        polys.push(pk);
+    }
+    UPoly(polys.pop().unwrap().into_iter().map(u64::from).collect())
+}
+
+/// As `gaudry_cubic::eigenvectors_mod_p`: a kernel basis of `m − λI`.
+pub(crate) fn eigenvectors_u16(
+    m: &[Vec<u16>],
+    lambda: u64,
+    p: u32,
+    muls: &mut u64,
+) -> Vec<Vec<u64>> {
+    let n = m.len();
+    let mut a: Vec<Vec<u16>> = m.to_vec();
+    for (i, row) in a.iter_mut().enumerate() {
+        row[i] = ((row[i] as u64 + p as u64 - lambda) % p as u64) as u16;
+    }
+    let pivots = rref_u16(&mut a, p, muls);
+    let mut is_piv = vec![false; n];
+    for &c in &pivots {
+        is_piv[c] = true;
+    }
+    let mut basis = Vec::new();
+    for fc in (0..n).filter(|&c| !is_piv[c]) {
+        let mut v = vec![0u64; n];
+        v[fc] = 1;
+        for (r, &pc) in pivots.iter().enumerate() {
+            v[pc] = (p as u64 - a[r][fc] as u64) % p as u64;
+        }
+        basis.push(v);
+    }
+    basis
 }
 
 // ── The solve ─────────────────────────────────────────────────────────────
@@ -798,9 +1005,15 @@ pub struct QuarticSolve {
     pub eigen_ms: f64,
     pub total_ms: f64,
     pub outcome: String,
+    pub replay: ReplayOutcome,
 }
 
 impl QuarticSolve {
+    /// Sum the phases into `total_muls` (for solves built outside this
+    /// module).
+    pub fn close_public(&mut self) {
+        self.close();
+    }
     fn close(&mut self) {
         self.total_muls = self.weil_muls
             + self.triangularise_muls
@@ -814,10 +1027,12 @@ impl QuarticSolve {
     }
 }
 
-struct Echelon {
-    rows: Vec<Vec<u16>>,
-    pivot_row: Vec<u32>,
-    zero_rows: usize,
+pub(crate) struct Echelon {
+    pub(crate) rows: Vec<Vec<u16>>,
+    pub(crate) pivot_row: Vec<u32>,
+    pub(crate) zero_rows: usize,
+    /// Input rows that reduced to zero (or were zero), by index.
+    pub(crate) zero_ids: Vec<u32>,
 }
 
 /// Forward elimination by leading column.  Every unused row has zeros
@@ -828,14 +1043,23 @@ struct Echelon {
 /// elimination, without scanning rows that are already zero there;
 /// `muls` counts the nonzero entries of each pivot row once per row it is
 /// subtracted from, and once for its normalisation.
-fn echelon_by_lead(mut rows: Vec<Vec<u16>>, p: u32, muls: &mut u64, debug: bool) -> Echelon {
+pub(crate) fn echelon_by_lead(
+    mut rows: Vec<Vec<u16>>,
+    p: u32,
+    muls: &mut u64,
+    debug: bool,
+) -> Echelon {
     let ncols = rows.first().map_or(0, |r| r.len());
     let mut buckets: Vec<Vec<u32>> = vec![Vec::new(); ncols];
     let mut zero_rows = 0usize;
+    let mut zero_ids: Vec<u32> = Vec::new();
     for (r, row) in rows.iter().enumerate() {
         match row.iter().position(|&x| x != 0) {
             Some(c) => buckets[c].push(r as u32),
-            None => zero_rows += 1,
+            None => {
+                zero_rows += 1;
+                zero_ids.push(r as u32);
+            }
         }
     }
     let mut pivot_row = vec![u32::MAX; ncols];
@@ -881,7 +1105,10 @@ fn echelon_by_lead(mut rows: Vec<Vec<u16>>, p: u32, muls: &mut u64, debug: bool)
             rows[r as usize] = row;
             match lead {
                 Some(l) => buckets[l].push(r),
-                None => zero_rows += 1,
+                None => {
+                    zero_rows += 1;
+                    zero_ids.push(r);
+                }
             }
         }
         rows[pr] = piv;
@@ -895,10 +1122,12 @@ fn echelon_by_lead(mut rows: Vec<Vec<u16>>, p: u32, muls: &mut u64, debug: bool)
             );
         }
     }
+    zero_ids.sort_unstable();
     Echelon {
         rows,
         pivot_row,
         zero_rows,
+        zero_ids,
     }
 }
 
@@ -906,20 +1135,20 @@ fn echelon_by_lead(mut rows: Vec<Vec<u16>>, p: u32, muls: &mut u64, debug: bool)
 /// of target columns by one sweep from the right over the pivots they
 /// reach — iteratively, since a chain of pivots can be tens of thousands
 /// deep.
-struct NormalForms4<'a> {
-    ech: &'a Echelon,
-    is_std: Vec<bool>,
-    std_index: Vec<u32>,
-    dim: usize,
-    p: u32,
-    memo: Vec<Option<(Vec<u16>, u64)>>,
-    reached: usize,
+pub(crate) struct NormalForms4<'a> {
+    pub(crate) ech: &'a Echelon,
+    pub(crate) is_std: Vec<bool>,
+    pub(crate) std_index: Vec<u32>,
+    pub(crate) dim: usize,
+    pub(crate) p: u32,
+    pub(crate) memo: Vec<Option<(Vec<u16>, u64)>>,
+    pub(crate) reached: usize,
 }
 
 impl<'a> NormalForms4<'a> {
     /// Make every column in `targets` resolvable.  `Err(c)` names a column
     /// reached that is neither standard nor a pivot.
-    fn ensure(&mut self, targets: &[usize], muls: &mut u64) -> Result<(), usize> {
+    pub(crate) fn ensure(&mut self, targets: &[usize], muls: &mut u64) -> Result<(), usize> {
         let ncols = self.is_std.len();
         let mut need: Vec<usize> = Vec::new();
         let mut seen = vec![false; ncols];
@@ -945,32 +1174,64 @@ impl<'a> NormalForms4<'a> {
             }
         }
         need.sort_unstable_by(|a, b| b.cmp(a));
+        // Right to left in blocks: within a block, the terms on columns
+        // already resolved are summed in parallel; the terms on columns of
+        // the block itself are added afterwards, right to left.  The same
+        // products as one column at a time, so the same vectors and count.
+        const BLOCK: usize = 128;
         let p = self.p;
-        for c in need {
-            let row = &self.ech.rows[self.ech.pivot_row[c] as usize];
-            let mut v = vec![0u16; self.dim];
-            for j in (c + 1)..ncols {
-                let a = row[j] as u32;
-                if a == 0 {
-                    continue;
-                }
-                if self.is_std[j] {
-                    let i = self.std_index[j] as usize;
-                    v[i] = ((v[i] as u32 + p - a) % p) as u16;
-                } else {
-                    let (w, nnz) = self.memo[j].as_ref().expect("computed right to left");
+        let mut in_block = vec![false; ncols];
+        for block in need.chunks(BLOCK) {
+            for &c in block {
+                in_block[c] = true;
+            }
+            let this = &*self;
+            let in_block_ref = &in_block;
+            let partial: Vec<(Vec<u16>, u64, Vec<(usize, u32)>)> = block
+                .par_iter()
+                .map(|&c| {
+                    let row = &this.ech.rows[this.ech.pivot_row[c] as usize];
+                    let mut v = vec![0u16; this.dim];
+                    let mut m = 0u64;
+                    let mut later = Vec::new();
+                    for j in (c + 1)..ncols {
+                        let a = row[j] as u32;
+                        if a == 0 {
+                            continue;
+                        }
+                        if this.is_std[j] {
+                            let i = this.std_index[j] as usize;
+                            v[i] = ((v[i] as u32 + p - a) % p) as u16;
+                        } else if in_block_ref[j] {
+                            later.push((j, a));
+                        } else {
+                            let (w, nnz) = this.memo[j].as_ref().expect("computed right to left");
+                            axpy(&mut v, w, a, p);
+                            m += *nnz;
+                        }
+                    }
+                    (v, m, later)
+                })
+                .collect();
+            for (&c, (mut v, m, later)) in block.iter().zip(partial) {
+                *muls += m;
+                for (j, a) in later {
+                    let (w, nnz) = self.memo[j].as_ref().expect("earlier in the block");
                     axpy(&mut v, w, a, p);
                     *muls += *nnz;
                 }
+                let nnz = v.iter().filter(|&&x| x != 0).count() as u64;
+                self.memo[c] = Some((v, nnz));
+                self.reached += 1;
             }
-            let nnz = v.iter().filter(|&&x| x != 0).count() as u64;
-            self.memo[c] = Some((v, nnz));
-            self.reached += 1;
+            for &c in block {
+                in_block[c] = false;
+            }
         }
         Ok(())
     }
 
-    fn vector(&self, c: usize) -> Vec<u64> {
+    pub(crate) fn vector(&self, c: usize) -> Vec<u64> {
         if self.is_std[c] {
             let mut v = vec![0u64; self.dim];
             v[self.std_index[c] as usize] = 1;
@@ -982,11 +1243,16 @@ impl<'a> NormalForms4<'a> {
     }
 }
 
-fn eval4(comp: &HashMap<[u8; 4], u64>, e: &[u64; 4], p: u64, muls: &mut u64) -> u64 {
+fn eval4<const N: usize>(
+    comp: &HashMap<[u8; N], u64>,
+    e: &[u64; N],
+    p: u64,
+    muls: &mut u64,
+) -> u64 {
     let mut acc = 0u64;
     for (m, &c) in comp {
         let mut t = c;
-        for k in 0..4 {
+        for k in 0..N {
             for _ in 0..m[k] {
                 t = mm(t, e[k], p);
                 *muls += 1;
@@ -1012,21 +1278,184 @@ pub fn solve_system4(
     st: &mut QuarticSolve,
     debug: bool,
 ) -> Option<Vec<[u64; 4]>> {
+    solve_system4_traced(
+        comps,
+        equation_degree,
+        macaulay_degree,
+        p,
+        rng,
+        st,
+        debug,
+        None,
+        None,
+    )
+}
+
+/// The shape of one Macaulay solve, recorded on a first system and replayed
+/// on later systems with the same monomial support (F4Remake's idea, for a
+/// Macaulay matrix): the leading monomials after triangularisation, the
+/// number of rows built, the input rows that reduced to zero, and the number
+/// of pivots.  A replay builds only the rows that did not reduce to zero.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct ShapeTrace {
+    pub leads: Vec<Option<Vec<u8>>>,
+    pub rows_built: usize,
+    pub zero_ids: Vec<u32>,
+    pub pivots: usize,
+    pub dim: usize,
+}
+
+/// How a traced solve went.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize)]
+pub enum ReplayOutcome {
+    /// No trace was given: a full solve, recorded.
+    #[default]
+    Recorded,
+    /// The trace matched: zero rows were not built.
+    Replayed,
+    /// The trace did not match this system (leads, rows, pivots or
+    /// dimension differ): the full solve ran and its cost is in `st`.
+    FellBack,
+}
+
+/// [`solve_system4`] with a shape trace.  With `replay = Some(t)`, the rows
+/// `t` records as reducing to zero are not built; if the replayed echelon
+/// does not reach `t`'s pivots and dimension, or the leads or row count
+/// differ, the full solve runs instead (charged in `st` as well: a fallback
+/// is never free).  With `record = Some(out)`, the full solve's shape is
+/// written to `out`.
+#[allow(clippy::too_many_arguments)]
+pub fn solve_system4_traced(
+    comps: &[HashMap<[u8; 4], u64>],
+    equation_degree: u8,
+    macaulay_degree: u8,
+    p: u64,
+    rng: &mut StdRng,
+    st: &mut QuarticSolve,
+    debug: bool,
+    replay: Option<&ShapeTrace>,
+    record: Option<&mut ShapeTrace>,
+) -> Option<Vec<[u64; 4]>> {
+    let mut outcome = ReplayOutcome::Recorded;
+    if let Some(t) = replay {
+        match solve_system4_inner(
+            comps,
+            equation_degree,
+            macaulay_degree,
+            p,
+            rng,
+            st,
+            debug,
+            Some(t),
+            None,
+        ) {
+            Ok(sols) => {
+                st.replay = ReplayOutcome::Replayed;
+                return sols;
+            }
+            Err(()) => outcome = ReplayOutcome::FellBack,
+        }
+    }
+    let r = solve_system4_inner(
+        comps,
+        equation_degree,
+        macaulay_degree,
+        p,
+        rng,
+        st,
+        debug,
+        None,
+        record,
+    )
+    .unwrap_or(None);
+    st.replay = outcome;
+    r
+}
+
+/// The solve.  `Err(())` only from a replay whose shape did not match.
+#[allow(clippy::too_many_arguments)]
+fn solve_system4_inner(
+    comps: &[HashMap<[u8; 4], u64>],
+    equation_degree: u8,
+    macaulay_degree: u8,
+    p: u64,
+    rng: &mut StdRng,
+    st: &mut QuarticSolve,
+    debug: bool,
+    replay: Option<&ShapeTrace>,
+    record: Option<&mut ShapeTrace>,
+) -> Result<Option<Vec<[u64; 4]>>, ()> {
+    solve_system_n_inner::<4>(
+        comps,
+        equation_degree,
+        macaulay_degree,
+        p,
+        rng,
+        st,
+        debug,
+        replay,
+        record,
+    )
+}
+
+/// The solve in `N` unknowns.  `equation_degree > 0`: every equation is
+/// shifted as one of that degree (the `k = 4` systems); `0`: each equation
+/// by its own total degree after triangularisation.  `Err(())` only from a
+/// replay whose shape did not match.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn solve_system_n_inner<const N: usize>(
+    comps: &[HashMap<[u8; N], u64>],
+    equation_degree: u8,
+    macaulay_degree: u8,
+    p: u64,
+    rng: &mut StdRng,
+    st: &mut QuarticSolve,
+    debug: bool,
+    replay: Option<&ShapeTrace>,
+    record: Option<&mut ShapeTrace>,
+) -> Result<Option<Vec<[u64; N]>>, ()> {
     assert!(p < 1 << 15, "rows are u16 and products must fit u32");
     let t0 = Instant::now();
     st.equation_degree = equation_degree;
     st.macaulay_degree = macaulay_degree;
     let cols = monomials4_desc(macaulay_degree);
-    let col_index: HashMap<[u8; 4], usize> =
+    let col_index: HashMap<[u8; N], usize> =
         cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
-    let shifts = monomials4_desc(macaulay_degree - equation_degree);
     let mut tri = 0u64;
     let (comps, leads) = triangularise_leads4(comps, p, &mut tri);
     st.triangularise_muls += tri;
-    let divides = |lm: &[u8; 4], m: &[u8; 4]| (0..4).all(|k| lm[k] <= m[k]);
+    let leads_v: Vec<Option<Vec<u8>>> = leads.iter().map(|l| l.map(|m| m.to_vec())).collect();
+    if let Some(t) = replay {
+        if t.leads != leads_v {
+            return Err(());
+        }
+    }
+    let mut shifts_by: HashMap<u8, Vec<[u8; N]>> = HashMap::new();
+    let degree_of = |c: &HashMap<[u8; N], u64>| -> u8 {
+        if equation_degree > 0 {
+            equation_degree
+        } else {
+            c.iter()
+                .filter(|(_, &v)| v != 0)
+                .map(|(m, _)| deg4(m) as u8)
+                .max()
+                .unwrap_or(0)
+        }
+    };
+    let divides = |lm: &[u8; N], m: &[u8; N]| (0..N).all(|k| lm[k] <= m[k]);
     let mut rows: Vec<Vec<u16>> = Vec::new();
+    let mut built = 0usize;
+    let mut skip_at = 0usize;
     for (i, comp) in comps.iter().enumerate() {
-        for sh in &shifts {
+        let dg = degree_of(comp);
+        if dg > macaulay_degree {
+            st.outcome = "an equation above the Macaulay degree".into();
+            return Ok(None);
+        }
+        let shifts = shifts_by
+            .entry(dg)
+            .or_insert_with(|| monomials4_desc::<N>(macaulay_degree - dg));
+        for sh in shifts.iter() {
             if leads
                 .iter()
                 .take(i)
@@ -1034,13 +1463,26 @@ pub fn solve_system4(
             {
                 continue;
             }
+            let index = built;
+            built += 1;
+            if let Some(t) = replay {
+                if skip_at < t.zero_ids.len() && t.zero_ids[skip_at] as usize == index {
+                    skip_at += 1;
+                    continue;
+                }
+            }
             let mut row = vec![0u16; cols.len()];
             for (&e, &c) in comp {
-                let m = [e[0] + sh[0], e[1] + sh[1], e[2] + sh[2], e[3] + sh[3]];
+                let m: [u8; N] = core::array::from_fn(|k| e[k] + sh[k]);
                 let ci = col_index[&m];
                 row[ci] = am(row[ci] as u64, c, p) as u16;
             }
             rows.push(row);
+        }
+    }
+    if let Some(t) = replay {
+        if t.rows_built != built {
+            return Err(());
         }
     }
     st.rows = rows.len();
@@ -1067,6 +1509,20 @@ pub fn solve_system4(
     let standard: Vec<usize> = (0..cols.len()).filter(|&c| is_std[c]).collect();
     let dim = standard.len();
     st.dim = dim;
+    if let Some(t) = replay {
+        if t.pivots != st.pivots || t.dim != dim {
+            return Err(());
+        }
+    }
+    if let Some(out) = record {
+        *out = ShapeTrace {
+            leads: leads_v.clone(),
+            rows_built: built,
+            zero_ids: ech.zero_ids.clone(),
+            pivots: st.pivots,
+            dim,
+        };
+    }
     let mut std_index = vec![u32::MAX; cols.len()];
     for (i, &c) in standard.iter().enumerate() {
         std_index[c] = i as u32;
@@ -1080,22 +1536,23 @@ pub fn solve_system4(
             st.echelon_ms / 1e3
         );
     }
-    let find = |m: [u8; 4]| col_index.get(&m).copied();
-    let (Some(c0), Some(c1), Some(c2), Some(c3), Some(c4)) = (
-        find([0, 0, 0, 0]),
-        find([1, 0, 0, 0]),
-        find([0, 1, 0, 0]),
-        find([0, 0, 1, 0]),
-        find([0, 0, 0, 1]),
-    ) else {
-        st.outcome = "low-degree monomials missing".into();
-        return None;
-    };
-    if [c0, c1, c2, c3, c4].iter().any(|&c| !is_std[c]) {
-        st.outcome = "1 or a variable is not standard".into();
-        return None;
+    // Columns of 1 and of each unknown.
+    let mut low: Vec<usize> = Vec::with_capacity(N + 1);
+    for v in 0..=N {
+        let m: [u8; N] = core::array::from_fn(|k| u8::from(v > 0 && k == v - 1));
+        match col_index.get(&m) {
+            Some(&c) => low.push(c),
+            None => {
+                st.outcome = "low-degree monomials missing".into();
+                return Ok(None);
+            }
+        }
     }
-    let idx = [c0, c1, c2, c3, c4].map(|c| std_index[c] as usize);
+    if low.iter().any(|&c| !is_std[c]) {
+        st.outcome = "1 or a variable is not standard".into();
+        return Ok(None);
+    }
+    let idx: Vec<usize> = low.iter().map(|&c| std_index[c] as usize).collect();
     let t2 = Instant::now();
     let mut nfs = NormalForms4 {
         ech: &ech,
@@ -1131,7 +1588,7 @@ pub fn solve_system4(
     st.reached_pivots = nfs.reached;
     let Some(m_e1) = m_e1 else {
         st.outcome = "border unreachable at this degree".into();
-        return None;
+        return Ok(None);
     };
     if debug {
         eprintln!(
@@ -1143,7 +1600,7 @@ pub fn solve_system4(
     }
     let t3 = Instant::now();
     let mut cp_muls = 0u64;
-    let cp = charpoly_mod_p(&m_e1, p, &mut cp_muls);
+    let cp = charpoly_u16(&m_e1, p as u32, &mut cp_muls);
     st.charpoly_muls += cp_muls;
     st.charpoly_ms = t3.elapsed().as_secs_f64() * 1e3;
     let t4 = Instant::now();
@@ -1151,21 +1608,21 @@ pub fn solve_system4(
     let lambdas = ring.roots(&cp, rng);
     st.roots_muls += ring.muls.get();
     st.rational_eigenvalues = lambdas.len();
-    let mut mt = vec![vec![0u64; dim]; dim];
+    let mut mt = vec![vec![0u16; dim]; dim];
     for i in 0..dim {
         for j in 0..dim {
-            mt[j][i] = m_e1[i][j];
+            mt[j][i] = m_e1[i][j] as u16;
         }
     }
     drop(m_e1);
-    let mut others: [Option<Vec<Vec<u64>>>; 3] = [None, None, None];
+    let mut others: Vec<Option<Vec<Vec<u64>>>> = vec![None; N - 1];
     let mut out = Vec::new();
     for lam in lambdas {
         let mut ev = 0u64;
-        let mut ker = eigenvectors_mod_p(&mt, lam, p, &mut ev);
+        let mut ker = eigenvectors_u16(&mt, lam, p as u32, &mut ev);
         if ker.len() > 1 {
             st.degenerate_eigenspaces += 1;
-            for k in 0..3 {
+            for k in 0..N - 1 {
                 if ker.len() <= 1 {
                     break;
                 }
@@ -1186,7 +1643,7 @@ pub fn solve_system4(
                 continue;
             }
             let inv = inv_mod(w[idx[0]], p);
-            let e: [u64; 4] = core::array::from_fn(|k| mm(w[idx[k + 1]], inv, p));
+            let e: [u64; N] = core::array::from_fn(|k| mm(w[idx[k + 1]], inv, p));
             if e[0] != lam {
                 continue;
             }
@@ -1205,12 +1662,17 @@ pub fn solve_system4(
     st.outcome = "solved".into();
     st.total_ms = t0.elapsed().as_secs_f64() * 1e3;
     st.close();
-    Some(out)
+    Ok(Some(out))
 }
 
 /// The multisets `{x₁, …, x₄} ⊂ F_p` whose elementary symmetric functions
 /// are `e` — the roots of `T⁴ − e₁T³ + e₂T² − e₃T + e₄`, when it splits.
-fn split_quartic(e: &[u64; 4], p: u64, rng: &mut StdRng, muls: &mut u64) -> Option<[u64; 4]> {
+pub(crate) fn split_quartic(
+    e: &[u64; 4],
+    p: u64,
+    rng: &mut StdRng,
+    muls: &mut u64,
+) -> Option<[u64; 4]> {
     let ring = PolyRing::new(p);
     let f = UPoly(vec![e[3], (p - e[2]) % p, e[1], (p - e[0]) % p, 1]);
     let roots = ring.roots(&f, rng);
@@ -1762,6 +2224,55 @@ pub fn run_k4_la(p: u64, seed: u64, rho_runs: usize) -> K4LaReport {
 mod tests {
     use super::*;
     use rand::SeedableRng;
+
+    #[test]
+    fn u16_kernels_match_the_reference_routines() {
+        use super::super::gaudry_cubic::{charpoly_mod_p, eigenvectors_mod_p};
+        let mut rng = StdRng::seed_from_u64(7);
+        for (p, n, zeros) in [
+            (269u64, 40usize, 0.0),
+            (269, 33, 0.6),
+            (257, 25, 0.9),
+            (13, 30, 0.3),
+        ] {
+            let mut m: Vec<Vec<u64>> = (0..n)
+                .map(|_| {
+                    (0..n)
+                        .map(|_| {
+                            if rng.gen::<f64>() < zeros {
+                                0
+                            } else {
+                                rng.gen_range(0..p)
+                            }
+                        })
+                        .collect()
+                })
+                .collect();
+            // A planted eigenvalue with a two-dimensional eigenspace.
+            for row in m.iter_mut().take(2) {
+                row.iter_mut().for_each(|v| *v = 0);
+            }
+            m[0][0] = 5 % p;
+            m[1][1] = 5 % p;
+            let (mut c_ref, mut c_new) = (0u64, 0u64);
+            let cp_ref = charpoly_mod_p(&m, p, &mut c_ref);
+            let cp_new = charpoly_u16(&m, p as u32, &mut c_new);
+            assert_eq!(cp_ref.0, cp_new.0, "p {p} n {n}");
+            assert_eq!(c_ref, c_new, "charpoly count, p {p} n {n}");
+            let m16: Vec<Vec<u16>> = m
+                .iter()
+                .map(|r| r.iter().map(|&v| v as u16).collect())
+                .collect();
+            for lam in [5 % p, 0, 1] {
+                let (mut e_ref, mut e_new) = (0u64, 0u64);
+                assert_eq!(
+                    eigenvectors_mod_p(&m, lam, p, &mut e_ref),
+                    eigenvectors_u16(&m16, lam, p as u32, &mut e_new)
+                );
+                assert_eq!(e_ref, e_new, "eigenvector count, p {p} n {n} λ {lam}");
+            }
+        }
+    }
 
     #[test]
     fn fp4_is_a_field() {

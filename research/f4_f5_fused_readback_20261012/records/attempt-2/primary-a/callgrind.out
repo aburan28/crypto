@@ -1,0 +1,26 @@
+# callgrind format
+version: 1
+creator: callgrind-3.24.0
+pid: 29417
+cmd:  /workspace/scratch/f4-f5-fused-readback/a/bench profile 3
+part: 100
+
+
+desc: I1 cache: 
+desc: D1 cache: 
+desc: LL cache: 
+
+desc: Timerange: Basic block 116720785 - 116720787
+desc: Trigger: Program termination
+
+positions: line
+events: Ir
+summary: 18446744073709445651
+
+
+ob=(1) /workspace/scratch/f4-f5-fused-readback/a/bench
+fl=(1) ???
+fn=(1) f4_f5_row_build_bench::main'2
+0 9
+
+totals: 9

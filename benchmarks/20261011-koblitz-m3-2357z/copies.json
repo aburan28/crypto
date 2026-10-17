@@ -1,0 +1,37 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-11",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/koblitz-isogeny",
+  "run": "run-20261011T2357Z",
+  "files": [
+    {
+      "source": "research/koblitz-isogeny/reports/run-20261011T2357Z/icc_n31_m3.svg",
+      "copy": "visuals/research/koblitz-isogeny/reports/run-20261011T2357Z/icc_n31_m3.svg",
+      "sha256": "deae9b9791a3e616d1654e389e3b085ee790542baa84399c09aaf0fd987ce499",
+      "bytes": 60467
+    },
+    {
+      "source": "research/koblitz-isogeny/reports/run-20261011T2357Z/report.pdf",
+      "copy": "visuals/research/koblitz-isogeny/reports/run-20261011T2357Z/report.pdf",
+      "sha256": "971079b99ae16d44e1696ab79bc5bf448bdcc0b8cbe713a7f34704f823fe7c24",
+      "bytes": 56400
+    }
+  ],
+  "pngs": [
+    {
+      "source": "visuals/research/koblitz-isogeny/reports/run-20261011T2357Z/icc_n31_m3.svg",
+      "copy": "visuals/research/koblitz-isogeny/reports/run-20261011T2357Z/icc_n31_m3.png",
+      "dpi": 150,
+      "width": 1200,
+      "height": 570,
+      "sha256": "92d5cda640cd3f9df77f4c4dd17933c28d467f4972e1c867d690cbc0d47ba5c0",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    }
+  ],
+  "verbatim_source_report": {
+    "source": "research/koblitz-isogeny/reports/run-20261011T2357Z/README.md",
+    "copy": "SOURCE_REPORT.md",
+    "sha256": "1f2de7591a7df2f2a0bc9feeed9e961319b1cdb742aef1666ad323dd208c1ac3"
+  }
+}

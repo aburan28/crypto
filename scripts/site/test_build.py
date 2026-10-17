@@ -72,12 +72,19 @@ class BuildTests(unittest.TestCase):
             "status/walk-forest-gf2-23.json",
             "status/walk-forest.js",
             "status/how.html",
+            "status/challenges.html",
+            "status/challenges.js",
+            "status/challenges.json",
             "status/rho-toy.js",
             "status/status.json",
             "status/history.json",
+            "status/status34.json",
+            "status/history34.json",
             "status/mac-control.json",
             "status.json",
             "history.json",
+            "status34.json",
+            "history34.json",
             "robots.txt",
             "sitemap.xml",
             ".nojekyll",
@@ -92,10 +99,12 @@ class BuildTests(unittest.TestCase):
         # and in the workflow together.
         workflow = read(os.path.join(ROOT, ".github", "workflows", "ecc2k130-status.yml"))
         self.assertIn("PAGES_HISTORY_URL: %s/history.json" % BASE_URL, workflow)
+        self.assertIn("PAGES_HISTORY34_URL: %s/history34.json" % BASE_URL, workflow)
         self.assertTrue(os.path.exists(os.path.join(self.out, "history.json")))
+        self.assertTrue(os.path.exists(os.path.join(self.out, "history34.json")))
 
     def test_snapshot_data_is_byte_identical_in_both_locations(self):
-        for name in ("status.json", "history.json"):
+        for name in ("status.json", "history.json", "status34.json", "history34.json"):
             source = read(os.path.join(ROOT, "docs", "ecc2k130-status", name), "rb")
             self.assertEqual(read(os.path.join(self.out, name), "rb"), source, name)
             self.assertEqual(read(os.path.join(self.out, "status", name), "rb"), source, name)
@@ -812,10 +821,37 @@ class BuildTests(unittest.TestCase):
 
     def test_sitemap_and_robots_point_at_the_published_urls(self):
         sitemap = read(os.path.join(self.out, "sitemap.xml"))
-        for path in ("/", "/browser/", "/scoreboard/", "/status/", "/status/how.html"):
+        for path in ("/", "/browser/", "/scoreboard/", "/status/", "/status/how.html", "/status/challenges.html"):
             self.assertIn("<loc>%s%s</loc>" % (BASE_URL, path), sitemap)
         self.assertIn("<lastmod>2026-01-01</lastmod>", sitemap)
         self.assertIn("Sitemap: %s/sitemap.xml" % BASE_URL, read(os.path.join(self.out, "robots.txt")))
+
+    def test_challenge_roster_keeps_one_live_store(self):
+        import json
+
+        page = read(os.path.join(self.out, "status", "challenges.html"))
+        script = read(os.path.join(self.out, "status", "challenges.js"))
+        roster = json.loads(read(os.path.join(self.out, "status", "challenges.json")))
+        self.assertNotIn("innerHTML", page)
+        self.assertNotIn("innerHTML", script)
+        self.assertEqual(roster["schema_version"], 1)
+        ids = []
+        live = []
+        for group in roster["groups"]:
+            self.assertIn("id", group)
+            for challenge in group["challenges"]:
+                self.assertIn(challenge["collection"], ("live", "local", "catalog", "none"))
+                self.assertTrue(challenge["id"] and challenge["name"] and challenge["field"] and challenge["join"])
+                ids.append(challenge["id"])
+                if challenge["collection"] == "live":
+                    live.append(challenge["id"])
+                    self.assertEqual(challenge["status_href"], "./")
+        self.assertEqual(live, ["ecc2k-130"])
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertIn("ECC2K-130", page)
+        self.assertIn("./challenges.json", page)
+        dashboard = read(os.path.join(self.out, "status", "index.html"))
+        self.assertIn("./challenges.html", dashboard)
 
     def test_lab_browser_index_is_current_and_self_consistent(self):
         # AGENTS.md §7c: docs/browser/data.json is generated from the curve

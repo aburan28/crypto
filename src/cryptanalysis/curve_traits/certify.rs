@@ -12,7 +12,9 @@
 //!   `GF(2^n)` is the `n/k`-th power of the one over `GF(2^k)`).
 //!   Proved.  This is how every Koblitz order is certified.
 //! - **Generator certificate** from a recorded representation: `G` on
-//!   the curve, `G ≠ O`, `[r]G = O` with `r` prime, so `r | #E`.  When
+//!   the curve, `G ≠ O`, `[r]G = O` with `r` prime, so `r | #E`.  Over
+//!   `GF(p^k)`, `k > 1`, this is the only check (Jacobian arithmetic on
+//!   the registry's polynomial basis, `3 < p < 2^63`).  When
 //!   `r > 4√q` the Hasse interval holds one multiple of `r`, which is
 //!   then `#E`; the certificate is as strong as `r`'s primality.  When
 //!   `r ≤ 4√q` it only shows the order is consistent.
@@ -25,8 +27,9 @@ use num_traits::{One, ToPrimitive, Zero};
 
 use num_bigint::BigInt;
 
-use super::arith::{is_prime, lucas_v, prime_status};
-use super::{subfield, Model, Representation, Status};
+use super::arith::{self, is_prime, lucas_v, prime_status, Factored};
+use super::torsion::{kills, on_curve, Field, FpK};
+use super::{subfield, GeneratorCoords, Model, Representation, Status};
 use crate::binary_ecc::curve::{scalar_mul, BinaryCurve, BinaryPoint};
 use crate::binary_ecc::F2mElement;
 use crate::cryptanalysis::semaev_decomp::Gf2;
@@ -93,8 +96,16 @@ pub fn check_order(
     order: &BigUint,
     reps: &[Representation],
 ) -> Result<Outcome, String> {
+    if let Model::Other { .. } = model {
+        return Ok((
+            Status::NotEvaluated,
+            "coordinate/order certificate adapter unavailable for this catalogue model",
+        ));
+    }
     let q = model.q();
-    if model.size_bits() <= COUNT_MAX_BITS {
+    // Over GF(p^k), k > 1, only the generator certificate is implemented.
+    let extension = matches!(model, Model::Extension { .. });
+    if model.size_bits() <= COUNT_MAX_BITS && !extension {
         let counted = match model {
             Model::Binary { irr, a, b, .. } => {
                 let gf = Gf2::new(irr);
@@ -105,6 +116,8 @@ pub fn check_order(
                 a.to_u64().expect("reduced"),
                 b.to_u64().expect("reduced"),
             ),
+            Model::Other { .. } => unreachable!("unavailable models returned above"),
+            Model::Extension { .. } => unreachable!("extension models are not counted"),
         };
         if BigUint::from(counted) != *order {
             return Err(format!(
@@ -139,10 +152,97 @@ pub fn check_order(
             best = Some(outcome);
         }
     }
-    Ok(best.unwrap_or((
-        Status::Unknown,
-        "recorded order; no usable generator and the field is too large to count",
-    )))
+    Ok(best.unwrap_or(if extension {
+        (
+            Status::NotEvaluated,
+            "GF(p^k): no usable generator, and point counting over GF(p^k) is not implemented",
+        )
+    } else {
+        (
+            Status::Unknown,
+            "recorded order; no usable generator and the field is too large to count",
+        )
+    }))
+}
+
+/// Points tried by [`point_order_certificate`].
+pub const POINT_ORDER_TRIES: u64 = 16;
+
+/// For a GF(p^k) model with no usable generator: take points at fixed
+/// pseudo-random x-coordinates ([`Field::sample`]), check
+/// `[N]P = O`, and compute each point's exact order from the
+/// factorisation of `N`.  Once the lcm `L` of those orders exceeds
+/// `4√q`, `N` is the only multiple of `L` in the Hasse interval, so it is
+/// `#E`; the certificate is as strong as the factorisation of `N`.
+/// `Err` when some point is not killed by `N` (the recorded order is
+/// wrong); `None` when the model is not one this handles or `N` did not
+/// factor.
+pub fn point_order_certificate(
+    model: &Model,
+    order: &BigUint,
+    fac: &Factored,
+) -> Result<Option<Outcome>, String> {
+    let Model::Extension {
+        p,
+        modulus,
+        a,
+        b,
+        q,
+        ..
+    } = model
+    else {
+        return Ok(None);
+    };
+    let Some(f) = FpK::new(p, modulus) else {
+        return Ok(None);
+    };
+    if !fac.complete() {
+        return Ok(None);
+    }
+    let (Some(a), Some(b)) = (f.element(a), f.element(b)) else {
+        return Ok(None);
+    };
+    let bound = BigUint::from(16u8) * q;
+    let mut lcm = BigUint::one();
+    let mut tried = 0;
+    let mut i = 0u64;
+    while tried < POINT_ORDER_TRIES && i < 4 * POINT_ORDER_TRIES && &lcm * &lcm <= bound {
+        let x = f.sample(i);
+        i += 1;
+        let rhs = f.add(&f.mul(&f.add(&f.mul(&x, &x), &a), &x), &b);
+        let Some(y) = f.sqrt(&rhs) else {
+            continue;
+        };
+        tried += 1;
+        if !kills(&f, &a, &x, &y, order) {
+            return Err(format!(
+                "a point at x = {x:?} is not killed by the recorded order {order}"
+            ));
+        }
+        let mut ord = order.clone();
+        for (ell, e) in &fac.primes {
+            for _ in 0..*e {
+                let smaller = &ord / ell;
+                if kills(&f, &a, &x, &y, &smaller) {
+                    ord = smaller;
+                } else {
+                    break;
+                }
+            }
+        }
+        lcm = num_integer::Integer::lcm(&lcm, &ord);
+    }
+    Ok(Some(if &lcm * &lcm > bound {
+        (
+            arith::weaker(Status::Proved, fac.prime_status()),
+            "point-order certificate: lcm of exact point orders exceeds 4√q",
+        )
+    } else {
+        (
+            Status::Bounded,
+            "point orders consistent with the recorded order, but their lcm is at most 4√q",
+        )
+    }))
 }
 
 /// `None` when the representation's generator is not on this model (a
@@ -160,8 +260,48 @@ fn generator_certificate(
             rep.cofactor
         ));
     }
-    let (gx, gy) = &rep.generator;
-    let killed = match model {
+    let killed = match (model, &rep.generator) {
+        (
+            Model::Extension {
+                p, modulus, a, b, ..
+            },
+            GeneratorCoords::Extension(gx, gy),
+        ) => {
+            let Some(f) = FpK::new(p, modulus) else {
+                return Ok(Some((
+                    Status::NotEvaluated,
+                    "GF(p^k) arithmetic here needs 3 < p < 2^63",
+                )));
+            };
+            let (Some(a), Some(b), Some(x), Some(y)) =
+                (f.element(a), f.element(b), f.element(gx), f.element(gy))
+            else {
+                return Ok(None);
+            };
+            if !on_curve(&f, &a, &b, &x, &y) {
+                return Ok(None);
+            }
+            Some(kills(&f, &a, &x, &y, r))
+        }
+        (_, GeneratorCoords::Extension(_, _)) | (Model::Extension { .. }, _) => return Ok(None),
+        (model, GeneratorCoords::Affine(gx, gy)) => affine_kills(model, rep, r, gx, gy)?,
+    };
+    let Some(killed) = killed else {
+        return Ok(None);
+    };
+    finish(killed, r, q)
+}
+
+/// `Some([r]G = O)` for a generator on a binary or prime-field model;
+/// `None` when it is not on the model.
+fn affine_kills(
+    model: &Model,
+    rep: &Representation,
+    r: &BigUint,
+    gx: &BigUint,
+    gy: &BigUint,
+) -> Result<Option<bool>, String> {
+    Ok(Some(match model {
         Model::Binary { n, irr, a, b, .. } => {
             let g = BinaryPoint::Affine {
                 x: F2mElement::from_biguint(gx, *n),
@@ -196,7 +336,11 @@ fn generator_certificate(
             };
             g.scalar_mul_vartime(r, &FieldElement::new(a.clone(), p.clone())) == Point::Infinity
         }
-    };
+        Model::Other { .. } | Model::Extension { .. } => return Ok(None),
+    }))
+}
+
+fn finish(killed: bool, r: &BigUint, q: &BigUint) -> Result<Option<Outcome>, String> {
     if !killed {
         return Err(format!("[r]G ≠ O for the recorded generator and r = {r}"));
     }

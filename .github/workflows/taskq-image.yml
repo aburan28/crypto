@@ -8,6 +8,10 @@ on:
       - 'taskq/pyproject.toml'
       - 'taskq/deploy/Dockerfile'
       - '.github/workflows/taskq-image.yml'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   publish:
     runs-on: ubuntu-latest

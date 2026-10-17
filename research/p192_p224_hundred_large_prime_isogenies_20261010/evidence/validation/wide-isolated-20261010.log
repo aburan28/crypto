@@ -1,0 +1,22 @@
+
+running 4 tests
+test cryptanalysis::koblitz_fast_arith::wide_tests::wide_artin_schreier_matches_scalar_solver ... ok
+test cryptanalysis::koblitz_fast_arith::wide_tests::wide_group_law_matches_general_curve_at_71 ... 
+thread 'cryptanalysis::koblitz_fast_arith::wide_tests::wide_group_law_matches_general_curve_at_71' (94218) panicked at src/cryptanalysis/koblitz_fast_arith.rs:1207:46:
+K_0/F_2^71 must construct
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+test cryptanalysis::koblitz_fast_arith::wide_tests::wide_points_with_x_match_general_lift ... 
+thread 'cryptanalysis::koblitz_fast_arith::wide_tests::wide_points_with_x_match_general_lift' (94220) panicked at src/cryptanalysis/koblitz_fast_arith.rs:1207:46:
+K_0/F_2^71 must construct
+FAILED
+test cryptanalysis::koblitz_fast_arith::wide_tests::wide_s3_roots_zero_the_scalar_polynomial ... ok
+
+failures:
+
+failures:
+    cryptanalysis::koblitz_fast_arith::wide_tests::wide_group_law_matches_general_curve_at_71
+    cryptanalysis::koblitz_fast_arith::wide_tests::wide_points_with_x_match_general_lift
+
+test result: FAILED. 2 passed; 2 failed; 0 ignored; 0 measured; 3913 filtered out; finished in 0.01s
+

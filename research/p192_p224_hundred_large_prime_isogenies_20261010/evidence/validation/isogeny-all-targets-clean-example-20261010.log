@@ -1,0 +1,1351 @@
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/ec_index_calculus.rs:397:9
+    |
+397 |     let mut g = poly_gcd(&monic, &shifted, p);
+    |         ----^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/ec_index_calculus.rs:406:20
+    |
+406 |     while let Some(mut h) = queue.pop() {
+    |                    ----^
+    |                    |
+    |                    help: remove this `mut`
+
+warning: unused variable: `deg`
+   --> src/cryptanalysis/ec_index_calculus.rs:386:9
+    |
+386 |     let deg = monic.len() - 1;
+    |         ^^^ help: if this is intentional, prefix it with an underscore: `_deg`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/ec_index_calculus.rs:576:9
+    |
+576 |     let mut b = poly_rem(base, f, p);
+    |         ----^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:484:9
+    |
+484 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:459:5
+    |
+459 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+
+warning: variable does not need to be mutable
+   --> src/pqc/fast/ml_kem.rs:420:13
+    |
+420 |         let mut buf = buf;
+    |             ----^^^
+    |             |
+    |             help: remove this `mut`
+
+warning: variants `Avx2` and `Avx512` are never constructed
+    --> src/cryptanalysis/f4_fp_tower.rs:1063:5
+     |
+1061 | enum Lanes {
+     |      ----- variants in this enum
+1062 |     Scalar,
+1063 |     Avx2,
+     |     ^^^^
+1064 |     Avx512,
+     |     ^^^^^^
+     |
+     = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `stored_point` is never used
+  --> src/cryptanalysis/f6_wide_geometry.rs:46:4
+   |
+46 | fn stored_point(point: &BinaryPoint) -> Option<Option<(u128, u128)>> {
+   |    ^^^^^^^^^^^^
+
+warning: function `restore_point` is never used
+  --> src/cryptanalysis/f6_wide_geometry.rs:53:4
+   |
+53 | fn restore_point(point: Option<(u128, u128)>, m: u32) -> BinaryPoint {
+   |    ^^^^^^^^^^^^^
+
+warning: function `batch_x_keys_stored` is never used
+   --> src/cryptanalysis/f6_wide_geometry.rs:496:26
+    |
+496 |     pub(super) unsafe fn batch_x_keys_stored(
+    |                          ^^^^^^^^^^^^^^^^^^^
+
+warning: function `batch_add_fixed` is never used
+   --> src/cryptanalysis/f6_wide_geometry.rs:561:26
+    |
+561 |     pub(super) unsafe fn batch_add_fixed(
+    |                          ^^^^^^^^^^^^^^^
+
+warning: constant `CACHE_VERSION` is never used
+  --> src/cryptanalysis/groebner_cache.rs:14:7
+   |
+14 | const CACHE_VERSION: u8 = 1;
+   |       ^^^^^^^^^^^^^
+
+warning: constant `DEFAULT_TTL_SECS` is never used
+  --> src/cryptanalysis/groebner_cache.rs:15:7
+   |
+15 | const DEFAULT_TTL_SECS: u64 = 7 * 24 * 60 * 60;
+   |       ^^^^^^^^^^^^^^^^
+
+warning: constant `DEFAULT_MAX_BYTES` is never used
+  --> src/cryptanalysis/groebner_cache.rs:16:7
+   |
+16 | const DEFAULT_MAX_BYTES: usize = 16 * 1024 * 1024;
+   |       ^^^^^^^^^^^^^^^^^
+
+warning: struct `CachedRows` is never constructed
+  --> src/cryptanalysis/groebner_cache.rs:19:8
+   |
+19 | struct CachedRows {
+   |        ^^^^^^^^^^
+
+warning: struct `GroebnerCache` is never constructed
+  --> src/cryptanalysis/groebner_cache.rs:27:19
+   |
+27 | pub(crate) struct GroebnerCache {
+   |                   ^^^^^^^^^^^^^
+
+warning: static `CACHE` is never used
+  --> src/cryptanalysis/groebner_cache.rs:34:8
+   |
+34 | static CACHE: OnceLock<Option<GroebnerCache>> = OnceLock::new();
+   |        ^^^^^
+
+warning: static `CONFIG_WARNING_EMITTED` is never used
+  --> src/cryptanalysis/groebner_cache.rs:35:8
+   |
+35 | static CONFIG_WARNING_EMITTED: OnceLock<()> = OnceLock::new();
+   |        ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: associated items `from_env`, `key`, `get`, and `put` are never used
+   --> src/cryptanalysis/groebner_cache.rs:38:8
+    |
+ 37 | impl GroebnerCache {
+    | ------------------ associated items in this implementation
+ 38 |     fn from_env() -> Option<Self> {
+    |        ^^^^^^^^
+...
+ 65 |     fn key(&self, equations: &[F2BoolPoly], n_vars: usize, degree: u32) -> String {
+    |        ^^^
+...
+ 88 |     fn get(&self, equations: &[F2BoolPoly], n_vars: usize, degree: u32) -> Option<Vec<F2BoolPoly>> {
+    |        ^^^
+...
+134 |     fn put(&self, equations: &[F2BoolPoly], n_vars: usize, degree: u32, rows: &[F2BoolPoly]) {
+    |        ^^^
+
+warning: function `get_or_compute` is never used
+   --> src/cryptanalysis/groebner_cache.rs:162:15
+    |
+162 | pub(crate) fn get_or_compute(
+    |               ^^^^^^^^^^^^^^
+
+warning: function `parse_env_u64` is never used
+   --> src/cryptanalysis/groebner_cache.rs:180:4
+    |
+180 | fn parse_env_u64(name: &str, default: u64) -> u64 {
+    |    ^^^^^^^^^^^^^
+
+warning: function `parse_env_usize` is never used
+   --> src/cryptanalysis/groebner_cache.rs:187:4
+    |
+187 | fn parse_env_usize(name: &str, default: usize) -> usize {
+    |    ^^^^^^^^^^^^^^^
+
+warning: function `warn_once` is never used
+   --> src/cryptanalysis/groebner_cache.rs:194:4
+    |
+194 | fn warn_once(message: String) {
+    |    ^^^^^^^^^
+
+warning: fields `qx` and `qy` are never read
+    --> src/cryptanalysis/koblitz_fast.rs:1111:5
+     |
+1107 | pub struct BatchScratch {
+     |            ------------ fields in this struct
+...
+1111 |     qx: Vec<u64>,
+     |     ^^
+1112 |     qy: Vec<u64>,
+     |     ^^
+     |
+     = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `factorise_u64` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:713:4
+    |
+713 | fn factorise_u64(mut v: u64) -> Vec<(u64, u32)> {
+    |    ^^^^^^^^^^^^^
+
+warning: function `factorise_big` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:783:4
+    |
+783 | fn factorise_big(mut v: BigUint) -> Vec<(BigUint, u32)> {
+    |    ^^^^^^^^^^^^^
+
+warning: constant `RC` is never used
+  --> src/pqc/fast/keccak4.rs:27:7
+   |
+27 | const RC: [u64; 24] = [
+   |       ^^
+
+warning: function `use_avx2` is never used
+   --> src/pqc/fast/ml_kem.rs:343:4
+    |
+343 | fn use_avx2() -> bool {
+    |    ^^^^^^^^
+
+warning: unused import: `BinaryCurve`
+    --> src/cryptanalysis/koblitz_fast_arith.rs:1195:29
+     |
+1195 |     use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement};
+     |                             ^^^^^^^^^^^
+     |
+     = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `crate::binary_ecc::F2mElement`
+    --> src/cryptanalysis/semaev_decomp.rs:2166:13
+     |
+2166 |         use crate::binary_ecc::F2mElement;
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::binary_ecc::F2mElement`
+    --> src/cryptanalysis/semaev_decomp.rs:3803:9
+     |
+3803 |     use crate::binary_ecc::F2mElement;
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variable does not need to be mutable
+    --> src/cryptanalysis/f4_fp_tower.rs:2301:13
+     |
+2301 |         let mut lanes = vec![Lanes::Scalar];
+     |             ----^^^^^
+     |             |
+     |             help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src/pqc/fast/keccak4.rs:500:13
+    |
+500 |         let mut v = vec![Backend::Portable];
+    |             ----^
+    |             |
+    |             help: remove this `mut`
+
+warning: `crypto` (lib) generated 29 warnings (run `cargo fix --lib -p crypto` to apply 7 suggestions)
+warning: `crypto` (lib test) generated 26 warnings (21 duplicates) (run `cargo fix --lib -p crypto --tests` to apply 5 suggestions)
+    Checking crypto v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-p192-p224-large-degree-isogenies-20261008)
+error[E0252]: the name `BinaryPoint` is defined multiple times
+ --> src/bin/ic/experiment.rs:9:30
+  |
+4 | use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
+  |                              ----------- previous import of the type `BinaryPoint` here
+...
+9 | use crypto_lib::binary_ecc::{BinaryPoint, F2mElement, IrreduciblePoly};
+  |                              ^^^^^^^^^^^--
+  |                              |
+  |                              `BinaryPoint` reimported here
+  |                              help: remove unnecessary import
+  |
+  = note: `BinaryPoint` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `F2mElement` is defined multiple times
+ --> src/bin/ic/experiment.rs:9:43
+  |
+4 | use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
+  |                                           ---------- previous import of the type `F2mElement` here
+...
+9 | use crypto_lib::binary_ecc::{BinaryPoint, F2mElement, IrreduciblePoly};
+  |                                           ^^^^^^^^^^--
+  |                                           |
+  |                                           `F2mElement` reimported here
+  |                                           help: remove unnecessary import
+  |
+  = note: `F2mElement` must be defined only once in the type namespace of this module
+
+warning: variable does not need to be mutable
+   --> examples/g2_equivariant_orbit_probe.rs:631:9
+    |
+631 |     let mut classify = |c: u64, col_info: &mut HashMap<u64, (u64, u32, bool)>, col_index: &mut HashMap<u64, usize>| {
+    |         ----^^^^^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+error[E0063]: missing field `wall_budget` in initializer of `SatDecompositionOptions`
+   --> examples/koblitz_unknown_scalar_panel.rs:532:22
+    |
+532 |         sat_options: SatDecompositionOptions {
+    |                      ^^^^^^^^^^^^^^^^^^^^^^^ missing `wall_budget`
+
+error[E0428]: the name `Fixed` is defined multiple times
+  --> src/bin/ic.rs:82:5
+   |
+78 |     Fixed(fixed::FixedArgs),
+   |     ----------------------- previous definition of the type `Fixed` here
+...
+82 |     Fixed(fixed::FixedArgs),
+   |     ^^^^^^^^^^^^^^^^^^^^^^^ `Fixed` redefined here
+   |
+   = note: `Fixed` must be defined only once in the type namespace of this enum
+
+warning: field `l` is never read
+   --> examples/g2_equivariant_orbit_probe.rs:133:5
+    |
+131 | struct Layout {
+    |        ------ field in this struct
+132 |     n: usize,
+133 |     l: usize,
+    |     ^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `crypto` (example "g2_equivariant_orbit_probe") generated 2 warnings (run `cargo fix --example "g2_equivariant_orbit_probe" -p crypto` to apply 1 suggestion)
+For more information about this error, try `rustc --explain E0063`.
+error: could not compile `crypto` (example "koblitz_unknown_scalar_panel") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error[E0425]: cannot find value `cost` in this scope
+    --> src/bin/ic/experiment.rs:1889:46
+     |
+1889 |             if winner.is_none_or(|(_, best)| cost < best) {
+     |                                              ^^^^ help: a local variable with a similar name exists: `costs`
+
+error[E0425]: cannot find value `cost` in this scope
+    --> src/bin/ic/experiment.rs:1890:38
+     |
+1890 |                 winner = Some((rank, cost));
+     |                                      ^^^^ help: a local variable with a similar name exists: `costs`
+
+error[E0425]: cannot find value `rank` in this scope
+    --> src/bin/ic/experiment.rs:1894:27
+     |
+1894 |             json!({"rank":rank+1,"spec":candidate.spec,"eligible":eligible,
+     |                           ^^^^ not found in this scope
+
+error[E0425]: cannot find value `candidate` in this scope
+    --> src/bin/ic/experiment.rs:1894:41
+     |
+1894 |             json!({"rank":rank+1,"spec":candidate.spec,"eligible":eligible,
+     |                                         ^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `eligible` in this scope
+    --> src/bin/ic/experiment.rs:1894:67
+     |
+1894 |             json!({"rank":rank+1,"spec":candidate.spec,"eligible":eligible,
+     |                                                                   ^^^^^^^^
+     |
+help: the binding `eligible` is available in a different scope in the same function
+    --> src/bin/ic/experiment.rs:1880:13
+     |
+1880 |         let eligible = costs.len() == args.holdout as usize;
+     |             ^^^^^^^^
+
+error[E0425]: cannot find value `med` in this scope
+    --> src/bin/ic/experiment.rs:1895:38
+     |
+1895 |             "median_process_seconds":med,"holdout":runs}),
+     |                                      ^^^
+     |
+help: the binding `med` is available in a different scope in the same function
+    --> src/bin/ic/experiment.rs:1881:13
+     |
+1881 |         let med = eligible.then(|| median(&mut costs));
+     |             ^^^
+
+error[E0425]: cannot find value `runs` in this scope
+    --> src/bin/ic/experiment.rs:1895:52
+     |
+1895 |             "median_process_seconds":med,"holdout":runs}),
+     |                                                    ^^^^
+     |
+help: the binding `runs` is available in a different scope in the same function
+    --> src/bin/ic/experiment.rs:1870:17
+     |
+1870 |         let mut runs = Vec::new();
+     |                 ^^^^
+
+error[E0425]: cannot find value `winner` in this scope
+    --> src/bin/ic/experiment.rs:1898:20
+     |
+1898 |     let selected = winner.map(|(rank, _)| &report.candidates[rank]);
+     |                    ^^^^^^
+     |
+help: the binding `winner` is available in a different scope in the same function
+    --> src/bin/ic/experiment.rs:1868:13
+     |
+1868 |     let mut winner: Option<(usize, f64)> = None;
+     |             ^^^^^^
+
+error[E0425]: cannot find value `report` in this scope
+    --> src/bin/ic/experiment.rs:1898:44
+     |
+1898 |     let selected = winner.map(|(rank, _)| &report.candidates[rank]);
+     |                                            ^^^^^^
+     |
+help: the binding `report` is available in a different scope in the same function
+    --> src/bin/ic/experiment.rs:1782:9
+     |
+1782 |     let report: SearchReport = search_with_progress(&kc, &options, &mut |i, total, c| {
+     |         ^^^^^^
+help: consider importing this function
+     |
+   2 + use crypto_lib::cryptanalysis::ecc2k130_status::report;
+     |
+
+error[E0425]: cannot find value `kc` in this scope
+    --> src/bin/ic/experiment.rs:1901:17
+     |
+1901 |         degree: kc.n,
+     |                 ^^
+     |
+help: the binding `kc` is available in a different scope in the same function
+    --> src/bin/ic/experiment.rs:1742:9
+     |
+1742 |     let kc = curve(args.degree, args.curve_a, args.subfield, args.curve_b)?;
+     |         ^^
+
+error[E0425]: cannot find value `kc` in this scope
+    --> src/bin/ic/experiment.rs:1902:18
+     |
+1902 |         curve_a: kc.a,
+     |                  ^^
+     |
+help: the binding `kc` is available in a different scope in the same function
+    --> src/bin/ic/experiment.rs:1742:9
+     |
+1742 |     let kc = curve(args.degree, args.curve_a, args.subfield, args.curve_b)?;
+     |         ^^
+
+error[E0425]: cannot find value `kc` in this scope
+    --> src/bin/ic/experiment.rs:1903:19
+     |
+1903 |         subfield: kc.k,
+     |                   ^^
+     |
+help: the binding `kc` is available in a different scope in the same function
+    --> src/bin/ic/experiment.rs:1742:9
+     |
+1742 |     let kc = curve(args.degree, args.curve_a, args.subfield, args.curve_b)?;
+     |         ^^
+
+error[E0425]: cannot find value `kc` in this scope
+    --> src/bin/ic/experiment.rs:1904:18
+     |
+1904 |         curve_b: kc.b_index,
+     |                  ^^
+     |
+help: the binding `kc` is available in a different scope in the same function
+    --> src/bin/ic/experiment.rs:1742:9
+     |
+1742 |     let kc = curve(args.degree, args.curve_a, args.subfield, args.curve_b)?;
+     |         ^^
+
+error[E0425]: cannot find value `args` in this scope
+    --> src/bin/ic/experiment.rs:1907:40
+     |
+1907 |     if let (Some(path), Some(doc)) = (&args.spec_out, &selected_doc) {
+     |                                        ^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use std::env::args;
+     |
+
+error[E0425]: cannot find value `args` in this scope
+    --> src/bin/ic/experiment.rs:1912:15
+     |
+1912 |     } else if args.validate_top == 0 && report.best().is_some() {
+     |               ^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use std::env::args;
+     |
+
+error[E0425]: cannot find value `report` in this scope
+    --> src/bin/ic/experiment.rs:1912:41
+     |
+1912 |     } else if args.validate_top == 0 && report.best().is_some() {
+     |                                         ^^^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use crypto_lib::cryptanalysis::ecc2k130_status::report;
+     |
+
+error[E0425]: cannot find value `report` in this scope
+    --> src/bin/ic/experiment.rs:1918:24
+     |
+1918 |     let measured_any = report
+     |                        ^^^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use crypto_lib::cryptanalysis::ecc2k130_status::report;
+     |
+
+error[E0425]: cannot find value `args` in this scope
+    --> src/bin/ic/experiment.rs:1927:45
+     |
+1927 |     let scoring = if let (Some(t), true) = (args.solve_cost_targets, measured_any) {
+     |                                             ^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use std::env::args;
+     |
+
+error[E0425]: cannot find value `args` in this scope
+    --> src/bin/ic/experiment.rs:1941:12
+     |
+1941 |         if args.solve_cost_targets.is_some() {
+     |            ^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use std::env::args;
+     |
+
+error[E0425]: cannot find value `kc` in this scope
+    --> src/bin/ic/experiment.rs:1959:18
+     |
+1959 |         "degree":kc.n,"curve_a":kc.a,"subgroup_order":kc.subgroup_order.to_string(),"cofactor":kc.cofactor.to_string(),
+     |                  ^^ not found in this scope
+
+error[E0425]: cannot find value `kc` in this scope
+    --> src/bin/ic/experiment.rs:1959:33
+     |
+1959 |         "degree":kc.n,"curve_a":kc.a,"subgroup_order":kc.subgroup_order.to_string(),"cofactor":kc.cofactor.to_string(),
+     |                                 ^^ not found in this scope
+
+error[E0425]: cannot find value `kc` in this scope
+    --> src/bin/ic/experiment.rs:1959:55
+     |
+1959 |         "degree":kc.n,"curve_a":kc.a,"subgroup_order":kc.subgroup_order.to_string(),"cofactor":kc.cofactor.to_string(),
+     |                                                       ^^ not found in this scope
+
+error[E0425]: cannot find value `kc` in this scope
+    --> src/bin/ic/experiment.rs:1959:96
+     |
+1959 |         "degree":kc.n,"curve_a":kc.a,"subgroup_order":kc.subgroup_order.to_string(),"cofactor":kc.cofactor.to_string(),
+     |                                                                                                ^^ not found in this scope
+
+error[E0425]: cannot find value `args` in this scope
+    --> src/bin/ic/experiment.rs:1960:20
+     |
+1960 |         "summands":args.summands,"options":report.options,"targets":report.targets,"exhaustive_targets":report.exhaustive_targets,
+     |                    ^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use std::env::args;
+     |
+
+error[E0425]: cannot find value `report` in this scope
+    --> src/bin/ic/experiment.rs:1960:44
+     |
+1960 |         "summands":args.summands,"options":report.options,"targets":report.targets,"exhaustive_targets":report.exhaustive_targets,
+     |                                            ^^^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use crypto_lib::cryptanalysis::ecc2k130_status::report;
+     |
+
+error[E0425]: cannot find value `report` in this scope
+    --> src/bin/ic/experiment.rs:1960:69
+     |
+1960 |         "summands":args.summands,"options":report.options,"targets":report.targets,"exhaustive_targets":report.exhaustive_targets,
+     |                                                                     ^^^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use crypto_lib::cryptanalysis::ecc2k130_status::report;
+     |
+
+error[E0425]: cannot find value `report` in this scope
+    --> src/bin/ic/experiment.rs:1960:105
+     |
+1960 |         "summands":args.summands,"options":report.options,"targets":report.targets,"exhaustive_targets":report.exhaustive_targets,
+     |                                                                                                         ^^^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use crypto_lib::cryptanalysis::ecc2k130_status::report;
+     |
+
+error[E0425]: cannot find value `report` in this scope
+    --> src/bin/ic/experiment.rs:1961:27
+     |
+1961 |         "candidate_count":report.candidates.len(),
+     |                           ^^^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use crypto_lib::cryptanalysis::ecc2k130_status::report;
+     |
+
+error[E0425]: cannot find value `report` in this scope
+    --> src/bin/ic/experiment.rs:1962:22
+     |
+1962 |         "candidates":report.candidates.iter().map(candidate_summary).collect::<Vec<_>>(),
+     |                      ^^^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use crypto_lib::cryptanalysis::ecc2k130_status::report;
+     |
+
+error[E0425]: cannot find value `report` in this scope
+    --> src/bin/ic/experiment.rs:1965:23
+     |
+1965 |         "best_census":report.best().map(|c| c.spec.clone()),
+     |                       ^^^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use crypto_lib::cryptanalysis::ecc2k130_status::report;
+     |
+
+error[E0425]: cannot find value `report` in this scope
+    --> src/bin/ic/experiment.rs:1966:23
+     |
+1966 |         "best_scored":report.best().map(|c| c.spec.clone()),
+     |                       ^^^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use crypto_lib::cryptanalysis::ecc2k130_status::report;
+     |
+
+error[E0425]: cannot find value `args` in this scope
+    --> src/bin/ic/experiment.rs:1967:32
+     |
+1967 |         "validation":{"solver":args.solver,"holdout_samples":args.holdout,"max_trials":args.max_trials,
+     |                                ^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use std::env::args;
+     |
+
+error[E0425]: cannot find value `args` in this scope
+    --> src/bin/ic/experiment.rs:1967:62
+     |
+1967 |         "validation":{"solver":args.solver,"holdout_samples":args.holdout,"max_trials":args.max_trials,
+     |                                                              ^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use std::env::args;
+     |
+
+error[E0425]: cannot find value `args` in this scope
+    --> src/bin/ic/experiment.rs:1967:88
+     |
+1967 |         "validation":{"solver":args.solver,"holdout_samples":args.holdout,"max_trials":args.max_trials,
+     |                                                                                        ^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use std::env::args;
+     |
+
+error[E0425]: cannot find value `args` in this scope
+    --> src/bin/ic/experiment.rs:1968:31
+     |
+1968 |             "timeout_seconds":args.timeout_seconds,"validated_top":args.validate_top,"runs":validations},
+     |                               ^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use std::env::args;
+     |
+
+error[E0425]: cannot find value `args` in this scope
+    --> src/bin/ic/experiment.rs:1968:68
+     |
+1968 |             "timeout_seconds":args.timeout_seconds,"validated_top":args.validate_top,"runs":validations},
+     |                                                                    ^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use std::env::args;
+     |
+
+error[E0425]: cannot find value `validations` in this scope
+    --> src/bin/ic/experiment.rs:1968:93
+     |
+1968 |             "timeout_seconds":args.timeout_seconds,"validated_top":args.validate_top,"runs":validations},
+     |                                                                                             ^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `args` in this scope
+    --> src/bin/ic/experiment.rs:1970:20
+     |
+1970 |         "spec_out":args.spec_out.as_ref().filter(|_| selected.is_some()).map(|p| p.display().to_string()),
+     |                    ^^^^ not found in this scope
+     |
+help: consider importing this function
+     |
+   2 + use std::env::args;
+     |
+
+error[E0425]: cannot find value `census_ms` in this scope
+    --> src/bin/ic/experiment.rs:1971:21
+     |
+1971 |         "census_ms":census_ms,"elapsed_seconds":started.elapsed().as_secs_f64(),"resources":resources(),
+     |                     ^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `started` in this scope
+    --> src/bin/ic/experiment.rs:1971:49
+     |
+1971 |         "census_ms":census_ms,"elapsed_seconds":started.elapsed().as_secs_f64(),"resources":resources(),
+     |                                                 ^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `materialize_with_selection_cost` in module `experiment`
+   --> src/bin/ic/price.rs:339:44
+    |
+339 |     let (fb, selection_cost) = experiment::materialize_with_selection_cost(&c, spec)?;
+    |                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `resource_snapshot` in module `experiment`
+    --> src/bin/ic/workflow.rs:1184:45
+     |
+1184 |     let select_resource_start = experiment::resource_snapshot();
+     |                                             ^^^^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `materialize_with_selection_cost` in module `experiment`
+    --> src/bin/ic/workflow.rs:1205:38
+     |
+1205 |         let (fb, cost) = experiment::materialize_with_selection_cost(&c, &doc.spec)?;
+     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `materialize_with_selection_cost` in module `experiment`
+    --> src/bin/ic/workflow.rs:1233:38
+     |
+1233 |         let (fb, cost) = experiment::materialize_with_selection_cost(&c, &spec)?;
+     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `factor_base_json` in module `experiment`
+    --> src/bin/ic/workflow.rs:1281:47
+     |
+1281 |     let mut factor_base_summary = experiment::factor_base_json(&spec, &fb, columns);
+     |                                               ^^^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `resource_delta` in module `experiment`
+    --> src/bin/ic/workflow.rs:1306:43
+     |
+1306 |         report["resources"] = experiment::resource_delta(select_resource_start);
+     |                                           ^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `resource_snapshot` in module `experiment`
+    --> src/bin/ic/workflow.rs:1324:46
+     |
+1324 |     let collect_resource_start = experiment::resource_snapshot();
+     |                                              ^^^^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `resource_snapshot` in module `experiment`
+    --> src/bin/ic/workflow.rs:1401:51
+     |
+1401 |             let pair_resource_start = experiment::resource_snapshot();
+     |                                                   ^^^^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `resource_delta` in module `experiment`
+    --> src/bin/ic/workflow.rs:1404:59
+     |
+1404 |             pair_table_build_resources = Some(experiment::resource_delta(pair_resource_start));
+     |                                                           ^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `resource_snapshot` in module `experiment`
+    --> src/bin/ic/workflow.rs:1408:51
+     |
+1408 |         let relation_resource_start = experiment::resource_snapshot();
+     |                                                   ^^^^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `resource_delta` in module `experiment`
+    --> src/bin/ic/workflow.rs:1454:52
+     |
+1454 |         relation_unit_resources = Some(experiment::resource_delta(relation_resource_start));
+     |                                                    ^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `resource_delta` in module `experiment`
+    --> src/bin/ic/workflow.rs:1473:41
+     |
+1473 |     let collect_resources = experiment::resource_delta(collect_resource_start);
+     |                                         ^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `resource_snapshot` in module `experiment`
+    --> src/bin/ic/workflow.rs:1528:43
+     |
+1528 |     let logs_resource_start = experiment::resource_snapshot();
+     |                                           ^^^^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `resource_snapshot` in module `experiment`
+    --> src/bin/ic/workflow.rs:1621:46
+     |
+1621 |             let resource_start = experiment::resource_snapshot();
+     |                                              ^^^^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `resource_delta` in module `experiment`
+    --> src/bin/ic/workflow.rs:1689:46
+     |
+1689 |             targeted_resources = experiment::resource_delta(resource_start);
+     |                                              ^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `resource_delta` in module `experiment`
+    --> src/bin/ic/workflow.rs:1888:43
+     |
+1888 |         report["resources"] = experiment::resource_delta(logs_resource_start);
+     |                                           ^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `resource_snapshot` in module `experiment`
+    --> src/bin/ic/workflow.rs:1919:44
+     |
+1919 |     let solve_resource_start = experiment::resource_snapshot();
+     |                                            ^^^^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `resource_delta` in module `experiment`
+    --> src/bin/ic/workflow.rs:2067:39
+     |
+2067 |     let solve_resources = experiment::resource_delta(solve_resource_start);
+     |                                       ^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `resource_snapshot` in module `experiment`
+    --> src/bin/ic/workflow.rs:2076:51
+     |
+2076 |         let baseline_resource_start = experiment::resource_snapshot();
+     |                                                   ^^^^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `resource_delta` in module `experiment`
+    --> src/bin/ic/workflow.rs:2173:37
+     |
+2173 |             "resources":experiment::resource_delta(baseline_resource_start),"vs_rho":vs_rho}));
+     |                                     ^^^^^^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `resources` in module `experiment`
+    --> src/bin/ic/workflow.rs:2220:81
+     |
+2220 |         "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":experiment::resources(),
+     |                                                                                 ^^^^^^^^^ not found in `experiment`
+
+error[E0425]: cannot find function `generate` in module `experiment`
+   --> src/bin/ic.rs:138:53
+    |
+138 |         Some(Action::Generate(args)) => experiment::generate(args.clone()),
+    |                                                     ^^^^^^^^ not found in `experiment`
+    |
+help: consider importing one of these functions
+    |
+ 25 + use crypto_lib::cryptanalysis::ic_corpus::generate;
+    |
+ 25 + use crypto_lib::cryptanalysis::p256_isogeny_walk::generate;
+    |
+help: if you import `generate`, refer to it directly
+    |
+138 -         Some(Action::Generate(args)) => experiment::generate(args.clone()),
+138 +         Some(Action::Generate(args)) => generate(args.clone()),
+    |
+
+error[E0425]: cannot find function `compare` in module `experiment`
+   --> src/bin/ic.rs:139:52
+    |
+139 |         Some(Action::Compare(args)) => experiment::compare(args.clone(), cli.json),
+    |                                                    ^^^^^^^ not found in `experiment`
+    |
+help: consider importing this function
+    |
+ 25 + use crypto_lib::cryptanalysis::ecbench::compare::compare;
+    |
+help: if you import `compare`, refer to it directly
+    |
+139 -         Some(Action::Compare(args)) => experiment::compare(args.clone(), cli.json),
+139 +         Some(Action::Compare(args)) => compare(args.clone(), cli.json),
+    |
+
+error[E0425]: cannot find function `search` in module `experiment`
+   --> src/bin/ic.rs:140:51
+    |
+140 |         Some(Action::Search(args)) => experiment::search(args.clone(), cli.json),
+    |                                                   ^^^^^^ not found in `experiment`
+    |
+    = note: function `crate::workflow::tests::search` exists but is inaccessible
+help: consider importing one of these functions
+    |
+ 25 + use crypto_lib::cryptanalysis::coordinate_search::search;
+    |
+ 25 + use crypto_lib::cryptanalysis::koblitz_factor_base_search::search;
+    |
+help: if you import `search`, refer to it directly
+    |
+140 -         Some(Action::Search(args)) => experiment::search(args.clone(), cli.json),
+140 +         Some(Action::Search(args)) => search(args.clone(), cli.json),
+    |
+
+error[E0425]: cannot find function `run` in module `experiment`
+   --> src/bin/ic.rs:154:48
+    |
+154 |         Some(Action::Run(args)) => experiment::run(args.clone(), cli.json),
+    |                                                ^^^ not found in `experiment`
+    |
+help: consider importing one of these functions
+    |
+ 25 + use crate::bench::run;
+    |
+ 25 + use crate::boundary::run;
+    |
+ 25 + use crate::corpus::run;
+    |
+ 25 + use crate::descent::run;
+    |
+    = and 84 other candidates
+help: if you import `run`, refer to it directly
+    |
+154 -         Some(Action::Run(args)) => experiment::run(args.clone(), cli.json),
+154 +         Some(Action::Run(args)) => run(args.clone(), cli.json),
+    |
+
+error[E0425]: cannot find function `run` in module `experiment`
+   --> src/bin/ic.rs:162:29
+    |
+162 |                 experiment::run(cli.run.clone(), cli.json)
+    |                             ^^^ not found in `experiment`
+    |
+help: consider importing one of these functions
+    |
+ 25 + use crate::bench::run;
+    |
+ 25 + use crate::boundary::run;
+    |
+ 25 + use crate::corpus::run;
+    |
+ 25 + use crate::descent::run;
+    |
+    = and 84 other candidates
+help: if you import `run`, refer to it directly
+    |
+162 -                 experiment::run(cli.run.clone(), cli.json)
+162 +                 run(cli.run.clone(), cli.json)
+    |
+
+error[E0603]: function `curve` is private
+   --> src/bin/ic/price.rs:315:25
+    |
+315 |     let c = experiment::curve(
+    |                         ^^^^^ private function
+    |
+note: the function `curve` is defined here
+   --> src/bin/ic/experiment.rs:941:1
+    |
+941 | fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0603]: function `curve` is private
+    --> src/bin/ic/price.rs:1152:25
+     |
+1152 |     let c = experiment::curve(
+     |                         ^^^^^ private function
+     |
+note: the function `curve` is defined here
+    --> src/bin/ic/experiment.rs:941:1
+     |
+ 941 | fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0603]: function `curve` is private
+    --> src/bin/ic/price.rs:1415:29
+     |
+1415 |         let c = experiment::curve(17, 1, 1, 1).expect("curve");
+     |                             ^^^^^ private function
+     |
+note: the function `curve` is defined here
+    --> src/bin/ic/experiment.rs:941:1
+     |
+ 941 | fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0603]: function `curve` is private
+    --> src/bin/ic/price.rs:1433:29
+     |
+1433 |         let c = experiment::curve(17, 1, 1, 1).expect("curve");
+     |                             ^^^^^ private function
+     |
+note: the function `curve` is defined here
+    --> src/bin/ic/experiment.rs:941:1
+     |
+ 941 | fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0603]: function `curve` is private
+    --> src/bin/ic/price.rs:1448:29
+     |
+1448 |         let c = experiment::curve(17, 1, 1, 1).expect("curve");
+     |                             ^^^^^ private function
+     |
+note: the function `curve` is defined here
+    --> src/bin/ic/experiment.rs:941:1
+     |
+ 941 | fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0603]: function `curve` is private
+    --> src/bin/ic/price.rs:1524:29
+     |
+1524 |         let c = experiment::curve(17, 1, 1, 1).expect("curve");
+     |                             ^^^^^ private function
+     |
+note: the function `curve` is defined here
+    --> src/bin/ic/experiment.rs:941:1
+     |
+ 941 | fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0603]: function `curve` is private
+    --> src/bin/ic/workflow.rs:1185:25
+     |
+1185 |     let c = experiment::curve(
+     |                         ^^^^^ private function
+     |
+note: the function `curve` is defined here
+    --> src/bin/ic/experiment.rs:941:1
+     |
+ 941 | fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `BinaryPoint` and `F2mElement`
+ --> src/bin/ic/experiment.rs:9:30
+  |
+9 | use crypto_lib::binary_ecc::{BinaryPoint, F2mElement, IrreduciblePoly};
+  |                              ^^^^^^^^^^^  ^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+error[E0425]: cannot find function `validate_factor_size` in this scope
+   --> src/bin/ic/experiment.rs:760:13
+    |
+760 |             validate_factor_size(args.degree, args.subfield)?;
+    |             ^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0061]: this function takes 2 arguments but 4 arguments were supplied
+   --> src/bin/ic/experiment.rs:766:13
+    |
+766 |     let c = curve(args.degree, args.curve_a, args.subfield, args.curve_b)?;
+    |             ^^^^^                            -------------  ------------ unexpected argument #4 of type `u64`
+    |                                              |
+    |                                              unexpected argument #3 of type `u32`
+    |
+note: function defined here
+   --> src/bin/ic/experiment.rs:941:4
+    |
+941 | fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
+    |    ^^^^^
+help: remove the extra arguments
+    |
+766 -     let c = curve(args.degree, args.curve_a, args.subfield, args.curve_b)?;
+766 +     let c = curve(args.degree, args.curve_a)?;
+    |
+
+error[E0425]: cannot find function `materialize` in this scope
+   --> src/bin/ic/experiment.rs:767:14
+    |
+767 |     let fb = materialize(&c, &spec)?;
+    |              ^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `factor_base_json` in this scope
+   --> src/bin/ic/experiment.rs:794:54
+    |
+794 |             "degree":c.n,"curve_a":c.a,"factor_base":factor_base_json(&spec,&fb,report.columns),
+    |                                                      ^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `resources` in this scope
+   --> src/bin/ic/experiment.rs:797:73
+    |
+797 |             "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources()}),
+    |                                                                         ^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `write_new` in this scope
+   --> src/bin/ic/experiment.rs:801:5
+    |
+801 |     write_new(
+    |     ^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `factor_base_json` in this scope
+   --> src/bin/ic/experiment.rs:809:23
+    |
+809 |         "factor_base":factor_base_json(&spec,&fb,report.columns),
+    |                       ^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `resources` in this scope
+   --> src/bin/ic/experiment.rs:813:69
+    |
+813 |         "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources(),
+    |                                                                     ^^^^^^^^^ not found in this scope
+
+error[E0061]: this function takes 2 arguments but 4 arguments were supplied
+   --> src/bin/ic/experiment.rs:832:13
+    |
+832 |     let c = curve(args.degree, args.curve_a, args.subfield, args.curve_b)?;
+    |             ^^^^^                            -------------  ------------ unexpected argument #4 of type `u64`
+    |                                              |
+    |                                              unexpected argument #3 of type `u32`
+    |
+note: function defined here
+   --> src/bin/ic/experiment.rs:941:4
+    |
+941 | fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
+    |    ^^^^^
+help: remove the extra arguments
+    |
+832 -     let c = curve(args.degree, args.curve_a, args.subfield, args.curve_b)?;
+832 +     let c = curve(args.degree, args.curve_a)?;
+    |
+
+error[E0425]: cannot find function `materialize` in this scope
+   --> src/bin/ic/experiment.rs:838:14
+    |
+838 |     let fb = materialize(&c, &doc.spec)?;
+    |              ^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `resources` in this scope
+   --> src/bin/ic/experiment.rs:882:69
+    |
+882 |         "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources(),
+    |                                                                     ^^^^^^^^^ not found in this scope
+
+error[E0282]: type annotations needed
+    --> src/bin/ic/experiment.rs:1970:79
+     |
+1970 |         "spec_out":args.spec_out.as_ref().filter(|_| selected.is_some()).map(|p| p.display().to_string()),
+     |                                                                               ^  - type must be known at this point
+     |
+help: consider giving this closure parameter an explicit type
+     |
+1970 |         "spec_out":args.spec_out.as_ref().filter(|_| selected.is_some()).map(|p: /* Type */| p.display().to_string()),
+     |                                                                                ++++++++++++
+
+error[E0308]: mismatched types
+    --> src/bin/ic/experiment.rs:1957:9
+     |
+1956 |       Ok(
+     |       -- arguments to this enum variant are incorrect
+1957 | /         json!({"schema_version":1,"operation":"search","status":status,
+1958 | |         "evidence_scope":"exact_yield_census_with_synthetic_validation",
+1959 | |         "degree":kc.n,"curve_a":kc.a,"subgroup_order":kc.subgroup_order.to_string(),"cofactor":kc.cofactor.to_string(),
+1960 | |         "summands":args.summands,"options":report.options,"targets":report.targets,"exhaustive_targets":report.exhaustive_targets,
+...    |
+1972 | |         "scoring":scoring,"scoring_objective":if measured_any{"expected_stage_ops"}else{"expected_trials"},
+1973 | |         "limitations":limitations}),
+     | |___________________________________^ expected `KoblitzCurve`, found `Value`
+     |
+help: the type constructed contains `serde_json::Value` due to the type of the argument passed
+    --> src/bin/ic/experiment.rs:1956:5
+     |
+1956 | /      Ok(
+1957 | |/         json!({"schema_version":1,"operation":"search","status":status,
+1958 | ||         "evidence_scope":"exact_yield_census_with_synthetic_validation",
+1959 | ||         "degree":kc.n,"curve_a":kc.a,"subgroup_order":kc.subgroup_order.to_string(),"cofactor":kc.cofactor.to_string(),
+1960 | ||         "summands":args.summands,"options":report.options,"targets":report.targets,"exhaustive_targets":report.exhaustive_targets,
+...    ||
+1972 | ||         "scoring":scoring,"scoring_objective":if measured_any{"expected_stage_ops"}else{"expected_trials"},
+1973 | ||         "limitations":limitations}),
+     | ||___________________________________- this argument influences the type of `Ok`
+1974 | |      )
+     | |______^
+note: tuple variant defined here
+    --> /private/tmp/rust-20260226-8162-ogcg3q/rustc-1.93.1-src/library/core/src/result.rs:561:5
+
+error[E0308]: mismatched types
+    --> src/bin/ic/experiment.rs:1890:32
+     |
+1890 |                 winner = Some((rank, cost));
+     |                                ^^^^ expected `usize`, found `&usize`
+     |
+help: consider dereferencing the borrow
+     |
+1890 |                 winner = Some((*rank, cost));
+     |                                +
+
+error[E0308]: mismatched types
+    --> src/bin/ic/experiment.rs:1710:49
+     |
+1710 | pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
+     |        ------                                   ^^^^^^^^^^^^^^^^^^^^^ expected `Result<Value, String>`, found `()`
+     |        |
+     |        implicitly returns `()` as its body has no tail or `return` expression
+     |
+     = note:   expected enum `Result<serde_json::Value, std::string::String>`
+             found unit type `()`
+
+error[E0061]: this function takes 2 arguments but 4 arguments were supplied
+   --> src/bin/ic/price.rs:315:13
+    |
+315 |     let c = experiment::curve(
+    |             ^^^^^^^^^^^^^^^^^
+...
+318 |         p.curve.subfield,
+    |         ---------------- unexpected argument #3 of type `u32`
+319 |         p.curve.curve_b,
+    |         --------------- unexpected argument #4 of type `u64`
+    |
+note: function defined here
+   --> src/bin/ic/experiment.rs:941:4
+    |
+941 | fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
+    |    ^^^^^
+help: remove the extra arguments
+    |
+317 -         p.curve.curve_a,
+318 -         p.curve.subfield,
+317 +         p.curve.curve_a,
+    |
+
+error[E0061]: this function takes 2 arguments but 4 arguments were supplied
+    --> src/bin/ic/price.rs:1152:13
+     |
+1152 |     let c = experiment::curve(
+     |             ^^^^^^^^^^^^^^^^^
+...
+1155 |         p.curve.subfield,
+     |         ---------------- unexpected argument #3 of type `u32`
+1156 |         p.curve.curve_b,
+     |         --------------- unexpected argument #4 of type `u64`
+     |
+note: function defined here
+    --> src/bin/ic/experiment.rs:941:4
+     |
+ 941 | fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
+     |    ^^^^^
+help: remove the extra arguments
+     |
+1154 -         p.curve.curve_a,
+1155 -         p.curve.subfield,
+1154 +         p.curve.curve_a,
+     |
+
+error[E0061]: this function takes 2 arguments but 4 arguments were supplied
+    --> src/bin/ic/price.rs:1415:17
+     |
+1415 |         let c = experiment::curve(17, 1, 1, 1).expect("curve");
+     |                 ^^^^^^^^^^^^^^^^^        -  - unexpected argument #4 of type `{integer}`
+     |                                          |
+     |                                          unexpected argument #3 of type `{integer}`
+     |
+note: function defined here
+    --> src/bin/ic/experiment.rs:941:4
+     |
+ 941 | fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
+     |    ^^^^^
+help: remove the extra arguments
+     |
+1415 -         let c = experiment::curve(17, 1, 1, 1).expect("curve");
+1415 +         let c = experiment::curve(17, 1).expect("curve");
+     |
+
+error[E0061]: this function takes 2 arguments but 4 arguments were supplied
+    --> src/bin/ic/price.rs:1433:17
+     |
+1433 |         let c = experiment::curve(17, 1, 1, 1).expect("curve");
+     |                 ^^^^^^^^^^^^^^^^^        -  - unexpected argument #4 of type `{integer}`
+     |                                          |
+     |                                          unexpected argument #3 of type `{integer}`
+     |
+note: function defined here
+    --> src/bin/ic/experiment.rs:941:4
+     |
+ 941 | fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
+     |    ^^^^^
+help: remove the extra arguments
+     |
+1433 -         let c = experiment::curve(17, 1, 1, 1).expect("curve");
+1433 +         let c = experiment::curve(17, 1).expect("curve");
+     |
+
+error[E0061]: this function takes 2 arguments but 4 arguments were supplied
+    --> src/bin/ic/price.rs:1448:17
+     |
+1448 |         let c = experiment::curve(17, 1, 1, 1).expect("curve");
+     |                 ^^^^^^^^^^^^^^^^^        -  - unexpected argument #4 of type `{integer}`
+     |                                          |
+     |                                          unexpected argument #3 of type `{integer}`
+     |
+note: function defined here
+    --> src/bin/ic/experiment.rs:941:4
+     |
+ 941 | fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
+     |    ^^^^^
+help: remove the extra arguments
+     |
+1448 -         let c = experiment::curve(17, 1, 1, 1).expect("curve");
+1448 +         let c = experiment::curve(17, 1).expect("curve");
+     |
+
+error[E0061]: this function takes 2 arguments but 4 arguments were supplied
+    --> src/bin/ic/price.rs:1524:17
+     |
+1524 |         let c = experiment::curve(17, 1, 1, 1).expect("curve");
+     |                 ^^^^^^^^^^^^^^^^^        -  - unexpected argument #4 of type `{integer}`
+     |                                          |
+     |                                          unexpected argument #3 of type `{integer}`
+     |
+note: function defined here
+    --> src/bin/ic/experiment.rs:941:4
+     |
+ 941 | fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
+     |    ^^^^^
+help: remove the extra arguments
+     |
+1524 -         let c = experiment::curve(17, 1, 1, 1).expect("curve");
+1524 +         let c = experiment::curve(17, 1).expect("curve");
+     |
+
+error[E0061]: this function takes 2 arguments but 4 arguments were supplied
+    --> src/bin/ic/workflow.rs:1185:13
+     |
+1185 |     let c = experiment::curve(
+     |             ^^^^^^^^^^^^^^^^^
+...
+1188 |         p.curve.subfield,
+     |         ---------------- unexpected argument #3 of type `u32`
+1189 |         p.curve.curve_b,
+     |         --------------- unexpected argument #4 of type `u64`
+     |
+note: function defined here
+    --> src/bin/ic/experiment.rs:941:4
+     |
+ 941 | fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
+     |    ^^^^^
+help: remove the extra arguments
+     |
+1187 -         p.curve.curve_a,
+1188 -         p.curve.subfield,
+1187 +         p.curve.curve_a,
+     |
+
+warning: unused variable: `c`
+    --> src/bin/ic/experiment.rs:1174:9
+     |
+1174 |     let c = curve_for_run(&args)?;
+     |         ^ help: if this is intentional, prefix it with an underscore: `_c`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+Some errors have detailed explanations: E0061, E0252, E0282, E0308, E0425, E0428, E0603.
+For more information about an error, try `rustc --explain E0061`.
+warning: `crypto` (bin "ic" test) generated 2 warnings
+error: could not compile `crypto` (bin "ic" test) due to 98 previous errors; 2 warnings emitted

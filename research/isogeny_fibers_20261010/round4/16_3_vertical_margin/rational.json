@@ -1,0 +1,8229 @@
+{
+  "argv": [
+    "/tmp/claude-0/-home-user/717e4727-b5a7-5b25-924a-7b31edb43331/scratchpad/r4target/release/examples/r4_16_3_vertical_margin",
+    "rational",
+    "24",
+    "3",
+    "/tmp/claude-0/-home-user/717e4727-b5a7-5b25-924a-7b31edb43331/scratchpad/research-wt/research/isogeny_fibers_20261010/round4/16_3_vertical_margin/rational.json"
+  ],
+  "field_bits": 61,
+  "mode": "rational",
+  "rows": [
+    {
+      "N": "1361900606779769848",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 321175070046896592,
+      "crater_j": 1361900609009076832,
+      "ell": 11,
+      "find": {
+        "I": 1,
+        "M": 725,
+        "Meq": 816
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 811,
+        "Meq": 1175
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 321175070046896592,
+      "log2_ell": 3.4594316186372973,
+      "p": 1361900609009080207,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 181,
+        "Meq": 636
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 207,
+        "Meq": 753
+      },
+      "sqrtvelu_sets": {
+        "I": 2,
+        "J": 1,
+        "K": 1,
+        "b": 1,
+        "b_prime": 2
+      },
+      "sqrtvelu_wall_s_contended": 0.000027757,
+      "t": 2229310360,
+      "v": 261254598,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 81,
+        "Meq": 263
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 105,
+        "Meq": 378
+      },
+      "velu_wall_s_contended": 3.268e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2133193495838002928",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 631436570374624623,
+      "crater_j": 2133193496309495392,
+      "ell": 11,
+      "find": {
+        "I": 2,
+        "M": 1622,
+        "Meq": 1804
+      },
+      "find_plus_velu_total": {
+        "I": 8,
+        "M": 1794,
+        "Meq": 2522
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 1,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 631436570374624623,
+      "log2_ell": 3.4594316186372973,
+      "p": 2133193496309498767,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 181,
+        "Meq": 636
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 207,
+        "Meq": 753
+      },
+      "sqrtvelu_sets": {
+        "I": 2,
+        "J": 1,
+        "K": 1,
+        "b": 1,
+        "b_prime": 2
+      },
+      "sqrtvelu_wall_s_contended": 8.56e-6,
+      "t": 471495840,
+      "v": 1089591382,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 81,
+        "Meq": 263
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 105,
+        "Meq": 378
+      },
+      "velu_wall_s_contended": 1.242e-6,
+      "wasted_velu": {
+        "I": 2,
+        "M": 81,
+        "Meq": 263
+      }
+    },
+    {
+      "N": "1274063120999033024",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 242761103697810432,
+      "crater_j": 1274063123251333682,
+      "ell": 11,
+      "find": {
+        "I": 1,
+        "M": 805,
+        "Meq": 896
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 891,
+        "Meq": 1255
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 242761103697810432,
+      "log2_ell": 3.4594316186372973,
+      "p": 1274063123251337057,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 181,
+        "Meq": 636
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 207,
+        "Meq": 753
+      },
+      "sqrtvelu_sets": {
+        "I": 2,
+        "J": 1,
+        "K": 1,
+        "b": 1,
+        "b_prime": 2
+      },
+      "sqrtvelu_wall_s_contended": 9.972e-6,
+      "t": 2252304034,
+      "v": 57791536,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 81,
+        "Meq": 263
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 105,
+        "Meq": 378
+      },
+      "velu_wall_s_contended": 2.94e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2086652860056461468",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 513953679901898513,
+      "crater_j": 2086652862363443774,
+      "ell": 17,
+      "find": {
+        "I": 1,
+        "M": 1019,
+        "Meq": 1110
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1141,
+        "Meq": 1505
+      },
+      "find_point_tries": 4,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 513953679901898513,
+      "log2_ell": 4.087462841250339,
+      "p": 2086652862363447149,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 4,
+        "M": 233,
+        "Meq": 597
+      },
+      "sqrtvelu_2pt": {
+        "I": 5,
+        "M": 288,
+        "Meq": 743
+      },
+      "sqrtvelu_sets": {
+        "I": 2,
+        "J": 2,
+        "K": 0,
+        "b": 2,
+        "b_prime": 2
+      },
+      "sqrtvelu_wall_s_contended": 0.000012286,
+      "t": 2306985682,
+      "v": 657313636,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 117,
+        "Meq": 299
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 153,
+        "Meq": 426
+      },
+      "velu_wall_s_contended": 3.33e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1964670757110853304",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 295695171125951335,
+      "crater_j": 1964670757922356184,
+      "ell": 17,
+      "find": {
+        "I": 1,
+        "M": 900,
+        "Meq": 991
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1022,
+        "Meq": 1386
+      },
+      "find_point_tries": 3,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 295695171125951335,
+      "log2_ell": 4.087462841250339,
+      "p": 1964670757922359559,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 4,
+        "M": 233,
+        "Meq": 597
+      },
+      "sqrtvelu_2pt": {
+        "I": 5,
+        "M": 288,
+        "Meq": 743
+      },
+      "sqrtvelu_sets": {
+        "I": 2,
+        "J": 2,
+        "K": 0,
+        "b": 2,
+        "b_prime": 2
+      },
+      "sqrtvelu_wall_s_contended": 0.000010463,
+      "t": 811506256,
+      "v": 1014195010,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 117,
+        "Meq": 299
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 153,
+        "Meq": 426
+      },
+      "velu_wall_s_contended": 2.534e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1741338021202389164",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 632431068692102329,
+      "crater_j": 1741338023714398406,
+      "ell": 17,
+      "find": {
+        "I": 1,
+        "M": 813,
+        "Meq": 904
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 935,
+        "Meq": 1299
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 632431068692102329,
+      "log2_ell": 4.087462841250339,
+      "p": 1741338023714401781,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 4,
+        "M": 233,
+        "Meq": 597
+      },
+      "sqrtvelu_2pt": {
+        "I": 5,
+        "M": 288,
+        "Meq": 743
+      },
+      "sqrtvelu_sets": {
+        "I": 2,
+        "J": 2,
+        "K": 0,
+        "b": 2,
+        "b_prime": 2
+      },
+      "sqrtvelu_wall_s_contended": 0.000010066,
+      "t": 2512012618,
+      "v": 305928260,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 117,
+        "Meq": 299
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 153,
+        "Meq": 426
+      },
+      "velu_wall_s_contended": 2.634e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2284467071546363776",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 1505765952096709356,
+      "crater_j": 2284467071926002496,
+      "ell": 23,
+      "find": {
+        "I": 2,
+        "M": 1616,
+        "Meq": 1798
+      },
+      "find_plus_velu_total": {
+        "I": 8,
+        "M": 1940,
+        "Meq": 2668
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 1,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 1505765952096709356,
+      "log2_ell": 4.523561956057013,
+      "p": 2284467071926005871,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 373,
+        "Meq": 828
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 437,
+        "Meq": 983
+      },
+      "sqrtvelu_sets": {
+        "I": 2,
+        "J": 2,
+        "K": 3,
+        "b": 2,
+        "b_prime": 2
+      },
+      "sqrtvelu_wall_s_contended": 9.463e-6,
+      "t": 379642096,
+      "v": 1133499018,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 157,
+        "Meq": 339
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 205,
+        "Meq": 478
+      },
+      "velu_wall_s_contended": 1.858e-6,
+      "wasted_velu": {
+        "I": 2,
+        "M": 157,
+        "Meq": 339
+      }
+    },
+    {
+      "N": "2289717084676335104",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 1732477355289137591,
+      "crater_j": 2289717087619831618,
+      "ell": 23,
+      "find": {
+        "I": 2,
+        "M": 2008,
+        "Meq": 2190
+      },
+      "find_plus_velu_total": {
+        "I": 8,
+        "M": 2332,
+        "Meq": 3060
+      },
+      "find_point_tries": 4,
+      "horizontal_retries": 1,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 1732477355289137591,
+      "log2_ell": 4.523561956057013,
+      "p": 2289717087619834993,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 373,
+        "Meq": 828
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 437,
+        "Meq": 983
+      },
+      "sqrtvelu_sets": {
+        "I": 2,
+        "J": 2,
+        "K": 3,
+        "b": 2,
+        "b_prime": 2
+      },
+      "sqrtvelu_wall_s_contended": 0.000015464,
+      "t": 2943499890,
+      "v": 265834736,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 157,
+        "Meq": 339
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 205,
+        "Meq": 478
+      },
+      "velu_wall_s_contended": 2.584e-6,
+      "wasted_velu": {
+        "I": 2,
+        "M": 157,
+        "Meq": 339
+      }
+    },
+    {
+      "N": "1476227124655533856",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 1401089245400775024,
+      "crater_j": 1476227126156042708,
+      "ell": 23,
+      "find": {
+        "I": 1,
+        "M": 910,
+        "Meq": 1001
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1072,
+        "Meq": 1436
+      },
+      "find_point_tries": 3,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 1401089245400775024,
+      "log2_ell": 4.523561956057013,
+      "p": 1476227126156046083,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 373,
+        "Meq": 828
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 437,
+        "Meq": 983
+      },
+      "sqrtvelu_sets": {
+        "I": 2,
+        "J": 2,
+        "K": 3,
+        "b": 2,
+        "b_prime": 2
+      },
+      "sqrtvelu_wall_s_contended": 9.655e-6,
+      "t": 1500512228,
+      "v": 722433542,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 157,
+        "Meq": 339
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 205,
+        "Meq": 478
+      },
+      "velu_wall_s_contended": 2.569e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1617103761973042352",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 695642925904328341,
+      "crater_j": 1617103763909380328,
+      "ell": 37,
+      "find": {
+        "I": 1,
+        "M": 796,
+        "Meq": 887
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1042,
+        "Meq": 1406
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 695642925904328341,
+      "log2_ell": 5.20945336562895,
+      "p": 1617103763909383703,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 4,
+        "M": 388,
+        "Meq": 752
+      },
+      "sqrtvelu_2pt": {
+        "I": 5,
+        "M": 501,
+        "Meq": 956
+      },
+      "sqrtvelu_sets": {
+        "I": 3,
+        "J": 3,
+        "K": 0,
+        "b": 3,
+        "b_prime": 3
+      },
+      "sqrtvelu_wall_s_contended": 0.000012311,
+      "t": 1936341352,
+      "v": 623240062,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 241,
+        "Meq": 423
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 317,
+        "Meq": 590
+      },
+      "velu_wall_s_contended": 2.881e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2043167789100711704",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 1207214437251487565,
+      "crater_j": 2043167790391569584,
+      "ell": 37,
+      "find": {
+        "I": 1,
+        "M": 814,
+        "Meq": 905
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1060,
+        "Meq": 1424
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 1207214437251487565,
+      "log2_ell": 5.20945336562895,
+      "p": 2043167790391572959,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 4,
+        "M": 388,
+        "Meq": 752
+      },
+      "sqrtvelu_2pt": {
+        "I": 5,
+        "M": 501,
+        "Meq": 956
+      },
+      "sqrtvelu_sets": {
+        "I": 3,
+        "J": 3,
+        "K": 0,
+        "b": 3,
+        "b_prime": 3
+      },
+      "sqrtvelu_wall_s_contended": 0.000015344,
+      "t": 1290861256,
+      "v": 964094570,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 241,
+        "Meq": 423
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 317,
+        "Meq": 590
+      },
+      "velu_wall_s_contended": 3.806e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1538904581297003932",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 73886584146982745,
+      "crater_j": 1538904583773488702,
+      "ell": 37,
+      "find": {
+        "I": 1,
+        "M": 783,
+        "Meq": 874
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1029,
+        "Meq": 1393
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 73886584146982745,
+      "log2_ell": 5.20945336562895,
+      "p": 1538904583773492077,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 4,
+        "M": 388,
+        "Meq": 752
+      },
+      "sqrtvelu_2pt": {
+        "I": 5,
+        "M": 501,
+        "Meq": 956
+      },
+      "sqrtvelu_sets": {
+        "I": 3,
+        "J": 3,
+        "K": 0,
+        "b": 3,
+        "b_prime": 3
+      },
+      "sqrtvelu_wall_s_contended": 0.000014232,
+      "t": 2476488146,
+      "v": 56851684,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 241,
+        "Meq": 423
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 317,
+        "Meq": 590
+      },
+      "velu_wall_s_contended": 3.685e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2240268298646388896",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 1442219384475260147,
+      "crater_j": 2240268299475056998,
+      "ell": 47,
+      "find": {
+        "I": 1,
+        "M": 697,
+        "Meq": 788
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1007,
+        "Meq": 1371
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 1442219384475260147,
+      "log2_ell": 5.554588851677638,
+      "p": 2240268299475060373,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 580,
+        "Meq": 1035
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 708,
+        "Meq": 1254
+      },
+      "sqrtvelu_sets": {
+        "I": 3,
+        "J": 3,
+        "K": 5,
+        "b": 3,
+        "b_prime": 3
+      },
+      "sqrtvelu_wall_s_contended": 0.000015506,
+      "t": 828671478,
+      "v": 1087222988,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 305,
+        "Meq": 487
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 401,
+        "Meq": 674
+      },
+      "velu_wall_s_contended": 4.005e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1711884971436762816",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 107624036320550334,
+      "crater_j": 1711884973808858278,
+      "ell": 47,
+      "find": {
+        "I": 1,
+        "M": 694,
+        "Meq": 785
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1004,
+        "Meq": 1368
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 107624036320550334,
+      "log2_ell": 5.554588851677638,
+      "p": 1711884973808861653,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 580,
+        "Meq": 1035
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 708,
+        "Meq": 1254
+      },
+      "sqrtvelu_sets": {
+        "I": 3,
+        "J": 3,
+        "K": 5,
+        "b": 3,
+        "b_prime": 3
+      },
+      "sqrtvelu_wall_s_contended": 0.00001614,
+      "t": 2372098838,
+      "v": 417592932,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 305,
+        "Meq": 487
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 401,
+        "Meq": 674
+      },
+      "velu_wall_s_contended": 4.173e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1482224475931880256",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 1014935208447870285,
+      "crater_j": 1482224478324926626,
+      "ell": 47,
+      "find": {
+        "I": 1,
+        "M": 700,
+        "Meq": 791
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1010,
+        "Meq": 1374
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 1014935208447870285,
+      "log2_ell": 5.554588851677638,
+      "p": 1482224478324930001,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 580,
+        "Meq": 1035
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 708,
+        "Meq": 1254
+      },
+      "sqrtvelu_sets": {
+        "I": 3,
+        "J": 3,
+        "K": 5,
+        "b": 3,
+        "b_prime": 3
+      },
+      "sqrtvelu_wall_s_contended": 0.000016814,
+      "t": 2393049746,
+      "v": 169962528,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 305,
+        "Meq": 487
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 401,
+        "Meq": 674
+      },
+      "velu_wall_s_contended": 4.092e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1782790369759066028",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 315095336993204464,
+      "crater_j": 1782790372427905814,
+      "ell": 67,
+      "find": {
+        "I": 1,
+        "M": 793,
+        "Meq": 884
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1221,
+        "Meq": 1585
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 315095336993204464,
+      "log2_ell": 6.066089190457772,
+      "p": 1782790372427909189,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 670,
+        "Meq": 1125
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 860,
+        "Meq": 1406
+      },
+      "sqrtvelu_sets": {
+        "I": 4,
+        "J": 4,
+        "K": 1,
+        "b": 4,
+        "b_prime": 4
+      },
+      "sqrtvelu_wall_s_contended": 0.000017515,
+      "t": 2668843162,
+      "v": 34718596,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 423,
+        "Meq": 605
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 559,
+        "Meq": 832
+      },
+      "velu_wall_s_contended": 4.943e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1420715332372217828",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 302556385060346347,
+      "crater_j": 1420715334743443882,
+      "ell": 67,
+      "find": {
+        "I": 1,
+        "M": 700,
+        "Meq": 791
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1128,
+        "Meq": 1492
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 302556385060346347,
+      "log2_ell": 6.066089190457772,
+      "p": 1420715334743447257,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 670,
+        "Meq": 1125
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 860,
+        "Meq": 1406
+      },
+      "sqrtvelu_sets": {
+        "I": 4,
+        "J": 4,
+        "K": 1,
+        "b": 4,
+        "b_prime": 4
+      },
+      "sqrtvelu_wall_s_contended": 0.00002277,
+      "t": 2371229430,
+      "v": 92684048,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 423,
+        "Meq": 605
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 559,
+        "Meq": 832
+      },
+      "velu_wall_s_contended": 5.714e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1814336050114643108",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 1565148932911806488,
+      "crater_j": 1814336051739381962,
+      "ell": 67,
+      "find": {
+        "I": 1,
+        "M": 700,
+        "Meq": 791
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1128,
+        "Meq": 1492
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 1565148932911806488,
+      "log2_ell": 6.066089190457772,
+      "p": 1814336051739385337,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 670,
+        "Meq": 1125
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 860,
+        "Meq": 1406
+      },
+      "sqrtvelu_sets": {
+        "I": 4,
+        "J": 4,
+        "K": 1,
+        "b": 4,
+        "b_prime": 4
+      },
+      "sqrtvelu_wall_s_contended": 0.000022383,
+      "t": 1624742230,
+      "v": 812189008,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 423,
+        "Meq": 605
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 559,
+        "Meq": 832
+      },
+      "velu_wall_s_contended": 5.076e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1470940428258990532",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 1189193951154188557,
+      "crater_j": 1470940429915905074,
+      "ell": 97,
+      "find": {
+        "I": 1,
+        "M": 867,
+        "Meq": 958
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1475,
+        "Meq": 1839
+      },
+      "find_point_tries": 3,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 1189193951154188557,
+      "log2_ell": 6.599912842187128,
+      "p": 1470940429915908449,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 4,
+        "M": 696,
+        "Meq": 1060
+      },
+      "sqrtvelu_2pt": {
+        "I": 5,
+        "M": 919,
+        "Meq": 1374
+      },
+      "sqrtvelu_sets": {
+        "I": 6,
+        "J": 4,
+        "K": 0,
+        "b": 4,
+        "b_prime": 6
+      },
+      "sqrtvelu_wall_s_contended": 0.000030328,
+      "t": 1656917918,
+      "v": 669582464,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 603,
+        "Meq": 785
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 799,
+        "Meq": 1072
+      },
+      "velu_wall_s_contended": 7.023e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1765481652970126848",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 1586417934900537440,
+      "crater_j": 1765481655215676772,
+      "ell": 97,
+      "find": {
+        "I": 1,
+        "M": 678,
+        "Meq": 769
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1286,
+        "Meq": 1650
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 1586417934900537440,
+      "log2_ell": 6.599912842187128,
+      "p": 1765481655215680147,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 4,
+        "M": 696,
+        "Meq": 1060
+      },
+      "sqrtvelu_2pt": {
+        "I": 5,
+        "M": 919,
+        "Meq": 1374
+      },
+      "sqrtvelu_sets": {
+        "I": 6,
+        "J": 4,
+        "K": 0,
+        "b": 4,
+        "b_prime": 6
+      },
+      "sqrtvelu_wall_s_contended": 0.000020754,
+      "t": 2245553300,
+      "v": 537110922,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 603,
+        "Meq": 785
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 799,
+        "Meq": 1072
+      },
+      "velu_wall_s_contended": 5.814e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2127950725455838544",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 1001315332496176017,
+      "crater_j": 2127950725527037244,
+      "ell": 97,
+      "find": {
+        "I": 1,
+        "M": 891,
+        "Meq": 982
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1499,
+        "Meq": 1863
+      },
+      "find_point_tries": 3,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 1001315332496176017,
+      "log2_ell": 6.599912842187128,
+      "p": 2127950725527040619,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 4,
+        "M": 696,
+        "Meq": 1060
+      },
+      "sqrtvelu_2pt": {
+        "I": 5,
+        "M": 919,
+        "Meq": 1374
+      },
+      "sqrtvelu_sets": {
+        "I": 6,
+        "J": 4,
+        "K": 0,
+        "b": 4,
+        "b_prime": 6
+      },
+      "sqrtvelu_wall_s_contended": 0.000021085,
+      "t": 71202076,
+      "v": 1102382690,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 603,
+        "Meq": 785
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 799,
+        "Meq": 1072
+      },
+      "velu_wall_s_contended": 6.03e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1224289826995771368",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 405356179167553626,
+      "crater_j": 1224289829195253016,
+      "ell": 131,
+      "find": {
+        "I": 1,
+        "M": 688,
+        "Meq": 779
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1502,
+        "Meq": 1866
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 405356179167553626,
+      "log2_ell": 7.03342300153745,
+      "p": 1224289829195256391,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 1095,
+        "Meq": 1550
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 1417,
+        "Meq": 1963
+      },
+      "sqrtvelu_sets": {
+        "I": 6,
+        "J": 5,
+        "K": 5,
+        "b": 5,
+        "b_prime": 6
+      },
+      "sqrtvelu_wall_s_contended": 0.000027205,
+      "t": 2199485024,
+      "v": 92137278,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 809,
+        "Meq": 991
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 1073,
+        "Meq": 1346
+      },
+      "velu_wall_s_contended": 8.584e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2261686476560442008",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 952941926004843771,
+      "crater_j": 2261686477301801956,
+      "ell": 131,
+      "find": {
+        "I": 1,
+        "M": 688,
+        "Meq": 779
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1502,
+        "Meq": 1866
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 952941926004843771,
+      "log2_ell": 7.03342300153745,
+      "p": 2261686477301805331,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 1095,
+        "Meq": 1550
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 1417,
+        "Meq": 1963
+      },
+      "sqrtvelu_sets": {
+        "I": 6,
+        "J": 5,
+        "K": 5,
+        "b": 5,
+        "b_prime": 6
+      },
+      "sqrtvelu_wall_s_contended": 0.000027573,
+      "t": 741363324,
+      "v": 1101760042,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 809,
+        "Meq": 991
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 1073,
+        "Meq": 1346
+      },
+      "velu_wall_s_contended": 7.502e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1862340467124767072",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_j": 1451732433018648211,
+      "crater_j": 1862340469104767128,
+      "ell": 131,
+      "find": {
+        "I": 1,
+        "M": 790,
+        "Meq": 881
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1604,
+        "Meq": 1968
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": 1451732433018648211,
+      "log2_ell": 7.03342300153745,
+      "p": 1862340469104770503,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 1095,
+        "Meq": 1550
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 1417,
+        "Meq": 1963
+      },
+      "sqrtvelu_sets": {
+        "I": 6,
+        "J": 5,
+        "K": 5,
+        "b": 5,
+        "b_prime": 6
+      },
+      "sqrtvelu_wall_s_contended": 0.000025666,
+      "t": 1980003432,
+      "v": 710024978,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 809,
+        "Meq": 991
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 1073,
+        "Meq": 1346
+      },
+      "velu_wall_s_contended": 6.89e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2214219883546750408",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1847334776226726153,
+      "crater_j": 2214219885430084252,
+      "ell": 181,
+      "find": {
+        "I": 1,
+        "M": 779,
+        "Meq": 870
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1897,
+        "Meq": 2261
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 7.499845887083206,
+      "p": 2214219885430087627,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 1396,
+        "Meq": 1851
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 1831,
+        "Meq": 2377
+      },
+      "sqrtvelu_sets": {
+        "I": 7,
+        "J": 6,
+        "K": 6,
+        "b": 6,
+        "b_prime": 7
+      },
+      "sqrtvelu_wall_s_contended": 0.000035732,
+      "t": 1883337220,
+      "v": 870953538,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 1113,
+        "Meq": 1295
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 1477,
+        "Meq": 1750
+      },
+      "velu_wall_s_contended": 8.545e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2203375155643548532",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 868074096442889445,
+      "crater_j": 2203375158428255498,
+      "ell": 181,
+      "find": {
+        "I": 1,
+        "M": 673,
+        "Meq": 764
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1791,
+        "Meq": 2155
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 7.499845887083206,
+      "p": 2203375158428258873,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 1396,
+        "Meq": 1851
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 1831,
+        "Meq": 2377
+      },
+      "sqrtvelu_sets": {
+        "I": 7,
+        "J": 6,
+        "K": 6,
+        "b": 6,
+        "b_prime": 7
+      },
+      "sqrtvelu_wall_s_contended": 0.000019798,
+      "t": 2784710342,
+      "v": 388934248,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 1113,
+        "Meq": 1295
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 1477,
+        "Meq": 1750
+      },
+      "velu_wall_s_contended": 7.709e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1721209348897179724",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1493903582915881106,
+      "crater_j": 1721209350909275158,
+      "ell": 181,
+      "find": {
+        "I": 1,
+        "M": 675,
+        "Meq": 766
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1793,
+        "Meq": 2157
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 7.499845887083206,
+      "p": 1721209350909278533,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 1396,
+        "Meq": 1851
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 1831,
+        "Meq": 2377
+      },
+      "sqrtvelu_sets": {
+        "I": 7,
+        "J": 6,
+        "K": 6,
+        "b": 6,
+        "b_prime": 7
+      },
+      "sqrtvelu_wall_s_contended": 0.000025154,
+      "t": 2012098810,
+      "v": 636541524,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 1113,
+        "Meq": 1295
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 1477,
+        "Meq": 1750
+      },
+      "velu_wall_s_contended": 7.478e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1559736566202025304",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 114772922378402337,
+      "crater_j": 1559736567221287528,
+      "ell": 257,
+      "find": {
+        "I": 1,
+        "M": 943,
+        "Meq": 1034
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 2513,
+        "Meq": 2877
+      },
+      "find_point_tries": 4,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 8.005624549193879,
+      "p": 1559736567221290903,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 4,
+        "M": 1700,
+        "Meq": 2064
+      },
+      "sqrtvelu_2pt": {
+        "I": 5,
+        "M": 2359,
+        "Meq": 2814
+      },
+      "sqrtvelu_sets": {
+        "I": 8,
+        "J": 8,
+        "K": 0,
+        "b": 8,
+        "b_prime": 8
+      },
+      "sqrtvelu_wall_s_contended": 0.00002618,
+      "t": 1019265600,
+      "v": 861895246,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 1565,
+        "Meq": 1747
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 2081,
+        "Meq": 2354
+      },
+      "velu_wall_s_contended": 9.845e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2117254993280797316",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 495714018096381580,
+      "crater_j": 2117254994749223066,
+      "ell": 257,
+      "find": {
+        "I": 1,
+        "M": 675,
+        "Meq": 766
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 2245,
+        "Meq": 2609
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 8.005624549193879,
+      "p": 2117254994749226441,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 4,
+        "M": 1700,
+        "Meq": 2064
+      },
+      "sqrtvelu_2pt": {
+        "I": 5,
+        "M": 2359,
+        "Meq": 2814
+      },
+      "sqrtvelu_sets": {
+        "I": 8,
+        "J": 8,
+        "K": 0,
+        "b": 8,
+        "b_prime": 8
+      },
+      "sqrtvelu_wall_s_contended": 0.00002001,
+      "t": 1468429126,
+      "v": 949641728,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 1565,
+        "Meq": 1747
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 2081,
+        "Meq": 2354
+      },
+      "velu_wall_s_contended": 0.000012405,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1955380131197959904",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1629599431005503233,
+      "crater_j": 1955380133396878342,
+      "ell": 257,
+      "find": {
+        "I": 1,
+        "M": 679,
+        "Meq": 770
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 2249,
+        "Meq": 2613
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 8.005624549193879,
+      "p": 1955380133396881717,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 4,
+        "M": 1700,
+        "Meq": 2064
+      },
+      "sqrtvelu_2pt": {
+        "I": 5,
+        "M": 2359,
+        "Meq": 2814
+      },
+      "sqrtvelu_sets": {
+        "I": 8,
+        "J": 8,
+        "K": 0,
+        "b": 8,
+        "b_prime": 8
+      },
+      "sqrtvelu_wall_s_contended": 0.00002262,
+      "t": 2198921814,
+      "v": 653153164,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 1565,
+        "Meq": 1747
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 2081,
+        "Meq": 2354
+      },
+      "velu_wall_s_contended": 9.776e-6,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2016452802353449664",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1802976675440367849,
+      "crater_j": 2016452804864000072,
+      "ell": 367,
+      "find": {
+        "I": 1,
+        "M": 762,
+        "Meq": 853
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 3002,
+        "Meq": 3366
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 8.519636252843213,
+      "p": 2016452804864003447,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 2436,
+        "Meq": 2891
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 3320,
+        "Meq": 3866
+      },
+      "sqrtvelu_sets": {
+        "I": 10,
+        "J": 9,
+        "K": 3,
+        "b": 9,
+        "b_prime": 10
+      },
+      "sqrtvelu_wall_s_contended": 0.000031963,
+      "t": 2510553784,
+      "v": 501843874,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 2235,
+        "Meq": 2417
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 2971,
+        "Meq": 3244
+      },
+      "velu_wall_s_contended": 0.000012825,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2063882388503762092",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 979256487925118169,
+      "crater_j": 2063882391322938214,
+      "ell": 367,
+      "find": {
+        "I": 1,
+        "M": 754,
+        "Meq": 845
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 2994,
+        "Meq": 3358
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 8.519636252843213,
+      "p": 2063882391322941589,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 2436,
+        "Meq": 2891
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 3320,
+        "Meq": 3866
+      },
+      "sqrtvelu_sets": {
+        "I": 10,
+        "J": 9,
+        "K": 3,
+        "b": 9,
+        "b_prime": 10
+      },
+      "sqrtvelu_wall_s_contended": 0.000030517,
+      "t": 2819179498,
+      "v": 209678844,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 2235,
+        "Meq": 2417
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 2971,
+        "Meq": 3244
+      },
+      "velu_wall_s_contended": 0.000012465,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1586997369550263512",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 763800142203963920,
+      "crater_j": 1586997371882377052,
+      "ell": 367,
+      "find": {
+        "I": 1,
+        "M": 661,
+        "Meq": 752
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 2901,
+        "Meq": 3265
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 8.519636252843213,
+      "p": 1586997371882380427,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 2436,
+        "Meq": 2891
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 3320,
+        "Meq": 3866
+      },
+      "sqrtvelu_sets": {
+        "I": 10,
+        "J": 9,
+        "K": 3,
+        "b": 9,
+        "b_prime": 10
+      },
+      "sqrtvelu_wall_s_contended": 0.000024939,
+      "t": 2332116916,
+      "v": 360400606,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 2235,
+        "Meq": 2417
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 2971,
+        "Meq": 3244
+      },
+      "velu_wall_s_contended": 0.00001335,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1412091784283832904",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 758031137043521776,
+      "crater_j": 1412091784365354568,
+      "ell": 521,
+      "find": {
+        "I": 1,
+        "M": 1052,
+        "Meq": 1143
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 4210,
+        "Meq": 4574
+      },
+      "find_point_tries": 5,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 9.025139562278508,
+      "p": 1412091784365357943,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 3362,
+        "Meq": 3817
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 4613,
+        "Meq": 5159
+      },
+      "sqrtvelu_sets": {
+        "I": 11,
+        "J": 11,
+        "K": 18,
+        "b": 11,
+        "b_prime": 11
+      },
+      "sqrtvelu_wall_s_contended": 0.000038499,
+      "t": 81525040,
+      "v": 897752814,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 3153,
+        "Meq": 3335
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 4197,
+        "Meq": 4470
+      },
+      "velu_wall_s_contended": 0.000017253,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1599100801046776764",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1290516431997884089,
+      "crater_j": 1599100802859078142,
+      "ell": 521,
+      "find": {
+        "I": 1,
+        "M": 944,
+        "Meq": 1035
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 4102,
+        "Meq": 4466
+      },
+      "find_point_tries": 4,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 9.025139562278508,
+      "p": 1599100802859081517,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 3362,
+        "Meq": 3817
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 4613,
+        "Meq": 5159
+      },
+      "sqrtvelu_sets": {
+        "I": 11,
+        "J": 11,
+        "K": 18,
+        "b": 11,
+        "b_prime": 11
+      },
+      "sqrtvelu_wall_s_contended": 0.000028193,
+      "t": 1812304754,
+      "v": 666757044,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 3153,
+        "Meq": 3335
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 4197,
+        "Meq": 4470
+      },
+      "velu_wall_s_contended": 0.000017488,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1633834191137606964",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 464150339408571097,
+      "crater_j": 1633834192396875178,
+      "ell": 521,
+      "find": {
+        "I": 1,
+        "M": 842,
+        "Meq": 933
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 4000,
+        "Meq": 4364
+      },
+      "find_point_tries": 3,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 9.025139562278508,
+      "p": 1633834192396878553,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 3362,
+        "Meq": 3817
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 4613,
+        "Meq": 5159
+      },
+      "sqrtvelu_sets": {
+        "I": 11,
+        "J": 11,
+        "K": 18,
+        "b": 11,
+        "b_prime": 11
+      },
+      "sqrtvelu_wall_s_contended": 0.0000359,
+      "t": 1259271590,
+      "v": 840881496,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 3153,
+        "Meq": 3335
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 4197,
+        "Meq": 4470
+      },
+      "velu_wall_s_contended": 0.000038072,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1874437984958404748",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 575592040478143164,
+      "crater_j": 1874437985270691494,
+      "ell": 727,
+      "find": {
+        "I": 1,
+        "M": 653,
+        "Meq": 744
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 5055,
+        "Meq": 5419
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 9.505811553919594,
+      "p": 1874437985270694869,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 4462,
+        "Meq": 4917
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 6170,
+        "Meq": 6716
+      },
+      "sqrtvelu_sets": {
+        "I": 13,
+        "J": 13,
+        "K": 25,
+        "b": 13,
+        "b_prime": 13
+      },
+      "sqrtvelu_wall_s_contended": 0.000045858,
+      "t": 312290122,
+      "v": 1028190284,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 4397,
+        "Meq": 4579
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 5853,
+        "Meq": 6126
+      },
+      "velu_wall_s_contended": 0.000027819,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2160332467999525800",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1589373000686305490,
+      "crater_j": 2160332470172300056,
+      "ell": 727,
+      "find": {
+        "I": 1,
+        "M": 656,
+        "Meq": 747
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 5058,
+        "Meq": 5422
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 9.505811553919594,
+      "p": 2160332470172303431,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 4462,
+        "Meq": 4917
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 6170,
+        "Meq": 6716
+      },
+      "sqrtvelu_sets": {
+        "I": 13,
+        "J": 13,
+        "K": 25,
+        "b": 13,
+        "b_prime": 13
+      },
+      "sqrtvelu_wall_s_contended": 0.000038205,
+      "t": 2172777632,
+      "v": 748366530,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 4397,
+        "Meq": 4579
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 5853,
+        "Meq": 6126
+      },
+      "velu_wall_s_contended": 0.000031152,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1980710225988380128",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 789403091370858664,
+      "crater_j": 1980710226146254982,
+      "ell": 727,
+      "find": {
+        "I": 1,
+        "M": 1155,
+        "Meq": 1246
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 5557,
+        "Meq": 5921
+      },
+      "find_point_tries": 6,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 9.505811553919594,
+      "p": 1980710226146258357,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 4462,
+        "Meq": 4917
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 6170,
+        "Meq": 6716
+      },
+      "sqrtvelu_sets": {
+        "I": 13,
+        "J": 13,
+        "K": 25,
+        "b": 13,
+        "b_prime": 13
+      },
+      "sqrtvelu_wall_s_contended": 0.000041524,
+      "t": 157878230,
+      "v": 1062202252,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 4397,
+        "Meq": 4579
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 5853,
+        "Meq": 6126
+      },
+      "velu_wall_s_contended": 0.000026843,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1216036677493534064",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 356072318967195617,
+      "crater_j": 1216036679225509652,
+      "ell": 1031,
+      "find": {
+        "I": 1,
+        "M": 650,
+        "Meq": 741
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 6872,
+        "Meq": 7236
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 10.00982861736811,
+      "p": 1216036679225513027,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 5847,
+        "Meq": 6302
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 8259,
+        "Meq": 8805
+      },
+      "sqrtvelu_sets": {
+        "I": 16,
+        "J": 16,
+        "K": 3,
+        "b": 16,
+        "b_prime": 16
+      },
+      "sqrtvelu_wall_s_contended": 0.000051313,
+      "t": 1731978964,
+      "v": 516083546,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 6217,
+        "Meq": 6399
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 8281,
+        "Meq": 8554
+      },
+      "velu_wall_s_contended": 0.000038592,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1164228062353638304",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 682481426434118581,
+      "crater_j": 1164228063627039526,
+      "ell": 1031,
+      "find": {
+        "I": 1,
+        "M": 635,
+        "Meq": 726
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 6857,
+        "Meq": 7221
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 10.00982861736811,
+      "p": 1164228063627042901,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 5847,
+        "Meq": 6302
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 8259,
+        "Meq": 8805
+      },
+      "sqrtvelu_sets": {
+        "I": 16,
+        "J": 16,
+        "K": 3,
+        "b": 16,
+        "b_prime": 16
+      },
+      "sqrtvelu_wall_s_contended": 0.000040867,
+      "t": 1273404598,
+      "v": 658499700,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 6217,
+        "Meq": 6399
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 8281,
+        "Meq": 8554
+      },
+      "velu_wall_s_contended": 0.000036223,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1649907450690540904",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 496345189587577609,
+      "crater_j": 1649907453039602984,
+      "ell": 1031,
+      "find": {
+        "I": 1,
+        "M": 655,
+        "Meq": 746
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 6877,
+        "Meq": 7241
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 10.00982861736811,
+      "p": 1649907453039606359,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 5847,
+        "Meq": 6302
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 8259,
+        "Meq": 8805
+      },
+      "sqrtvelu_sets": {
+        "I": 16,
+        "J": 16,
+        "K": 3,
+        "b": 16,
+        "b_prime": 16
+      },
+      "sqrtvelu_wall_s_contended": 0.000041445,
+      "t": 2349065456,
+      "v": 393068750,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 6217,
+        "Meq": 6399
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 8281,
+        "Meq": 8554
+      },
+      "velu_wall_s_contended": 0.000037045,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1758918034889968304",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 305862689843140676,
+      "crater_j": 1758918037476947026,
+      "ell": 1451,
+      "find": {
+        "I": 1,
+        "M": 640,
+        "Meq": 731
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 9388,
+        "Meq": 9752
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 10.502831804066744,
+      "p": 1758918037476950401,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 7926,
+        "Meq": 8381
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 11292,
+        "Meq": 11838
+      },
+      "sqrtvelu_sets": {
+        "I": 19,
+        "J": 19,
+        "K": 3,
+        "b": 19,
+        "b_prime": 19
+      },
+      "sqrtvelu_wall_s_contended": 0.000056371,
+      "t": 2586982098,
+      "v": 221422600,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 8743,
+        "Meq": 8925
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 11647,
+        "Meq": 11920
+      },
+      "velu_wall_s_contended": 0.000054112,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1336592260398159956",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 782640957525275108,
+      "crater_j": 1336592260686214906,
+      "ell": 1451,
+      "find": {
+        "I": 1,
+        "M": 728,
+        "Meq": 819
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 9476,
+        "Meq": 9840
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 10.502831804066744,
+      "p": 1336592260686218281,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 7926,
+        "Meq": 8381
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 11292,
+        "Meq": 11838
+      },
+      "sqrtvelu_sets": {
+        "I": 19,
+        "J": 19,
+        "K": 3,
+        "b": 19,
+        "b_prime": 19
+      },
+      "sqrtvelu_wall_s_contended": 0.000058178,
+      "t": 288058326,
+      "v": 867129208,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 8743,
+        "Meq": 8925
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 11647,
+        "Meq": 11920
+      },
+      "velu_wall_s_contended": 0.000051243,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1260676421662467832",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 917579355671217999,
+      "crater_j": 1260676423713154052,
+      "ell": 1451,
+      "find": {
+        "I": 1,
+        "M": 642,
+        "Meq": 733
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 9390,
+        "Meq": 9754
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 10.502831804066744,
+      "p": 1260676423713157427,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 7926,
+        "Meq": 8381
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 11292,
+        "Meq": 11838
+      },
+      "sqrtvelu_sets": {
+        "I": 19,
+        "J": 19,
+        "K": 3,
+        "b": 19,
+        "b_prime": 19
+      },
+      "sqrtvelu_wall_s_contended": 0.000059659,
+      "t": 2050689596,
+      "v": 345869066,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 8743,
+        "Meq": 8925
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 11647,
+        "Meq": 11920
+      },
+      "velu_wall_s_contended": 0.000048729,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2043300621090185872",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 699568133361826014,
+      "crater_j": 2043300623548017674,
+      "ell": 2053,
+      "find": {
+        "I": 1,
+        "M": 647,
+        "Meq": 738
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 13001,
+        "Meq": 13365
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 11.003517912108602,
+      "p": 2043300623548021049,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 10583,
+        "Meq": 11038
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 15130,
+        "Meq": 15676
+      },
+      "sqrtvelu_sets": {
+        "I": 23,
+        "J": 22,
+        "K": 14,
+        "b": 22,
+        "b_prime": 23
+      },
+      "sqrtvelu_wall_s_contended": 0.00007581,
+      "t": 2457835178,
+      "v": 551912096,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 12349,
+        "Meq": 12531
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 16457,
+        "Meq": 16730
+      },
+      "velu_wall_s_contended": 0.000086808,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1797535401802625396",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1046742936535099572,
+      "crater_j": 1797535404258231746,
+      "ell": 2053,
+      "find": {
+        "I": 1,
+        "M": 636,
+        "Meq": 727
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 12990,
+        "Meq": 13354
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 11.003517912108602,
+      "p": 1797535404258235121,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 10583,
+        "Meq": 11038
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 15130,
+        "Meq": 15676
+      },
+      "sqrtvelu_sets": {
+        "I": 23,
+        "J": 22,
+        "K": 14,
+        "b": 22,
+        "b_prime": 23
+      },
+      "sqrtvelu_wall_s_contended": 0.000088516,
+      "t": 2455609726,
+      "v": 407101688,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 12349,
+        "Meq": 12531
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 16457,
+        "Meq": 16730
+      },
+      "velu_wall_s_contended": 0.000070704,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1699429614883932800",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 783397994494673192,
+      "crater_j": 1699429617448249606,
+      "ell": 2053,
+      "find": {
+        "I": 1,
+        "M": 746,
+        "Meq": 837
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 13100,
+        "Meq": 13464
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 11.003517912108602,
+      "p": 1699429617448252981,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 10583,
+        "Meq": 11038
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 15130,
+        "Meq": 15676
+      },
+      "sqrtvelu_sets": {
+        "I": 23,
+        "J": 22,
+        "K": 14,
+        "b": 22,
+        "b_prime": 23
+      },
+      "sqrtvelu_wall_s_contended": 0.000075733,
+      "t": 2564320182,
+      "v": 178077220,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 12349,
+        "Meq": 12531
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 16457,
+        "Meq": 16730
+      },
+      "velu_wall_s_contended": 0.000067646,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2099314053769143584",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1465318375915381434,
+      "crater_j": 2099314055422504462,
+      "ell": 2897,
+      "find": {
+        "I": 1,
+        "M": 629,
+        "Meq": 720
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 18053,
+        "Meq": 18417
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 11.500343969270403,
+      "p": 2099314055422507837,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 14647,
+        "Meq": 15102
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 20956,
+        "Meq": 21502
+      },
+      "sqrtvelu_sets": {
+        "I": 27,
+        "J": 26,
+        "K": 44,
+        "b": 26,
+        "b_prime": 27
+      },
+      "sqrtvelu_wall_s_contended": 0.000089171,
+      "t": 1653364254,
+      "v": 899495324,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 17419,
+        "Meq": 17601
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 23215,
+        "Meq": 23488
+      },
+      "velu_wall_s_contended": 0.000096302,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1856267076438197712",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1645375903460550529,
+      "crater_j": 1856267078832269344,
+      "ell": 2897,
+      "find": {
+        "I": 1,
+        "M": 628,
+        "Meq": 719
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 18052,
+        "Meq": 18416
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 11.500343969270403,
+      "p": 1856267078832272719,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 14647,
+        "Meq": 15102
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 20956,
+        "Meq": 21502
+      },
+      "sqrtvelu_sets": {
+        "I": 27,
+        "J": 26,
+        "K": 44,
+        "b": 26,
+        "b_prime": 27
+      },
+      "sqrtvelu_wall_s_contended": 0.000087492,
+      "t": 2394075008,
+      "v": 491858454,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 17419,
+        "Meq": 17601
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 23215,
+        "Meq": 23488
+      },
+      "velu_wall_s_contended": 0.000098593,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2117531210928382432",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 609483497708017720,
+      "crater_j": 2117531213834475638,
+      "ell": 2897,
+      "find": {
+        "I": 1,
+        "M": 639,
+        "Meq": 730
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 18063,
+        "Meq": 18427
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 11.500343969270403,
+      "p": 2117531213834479013,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 5,
+        "M": 14647,
+        "Meq": 15102
+      },
+      "sqrtvelu_2pt": {
+        "I": 6,
+        "M": 20956,
+        "Meq": 21502
+      },
+      "sqrtvelu_sets": {
+        "I": 27,
+        "J": 26,
+        "K": 44,
+        "b": 26,
+        "b_prime": 27
+      },
+      "sqrtvelu_wall_s_contended": 0.000102294,
+      "t": 2906096582,
+      "v": 59434852,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 17419,
+        "Meq": 17601
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 23215,
+        "Meq": 23488
+      },
+      "velu_wall_s_contended": 0.000099705,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2175304502630096336",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 2072038037569080151,
+      "crater_j": 2175304505252567578,
+      "ell": 4099,
+      "find": {
+        "I": 1,
+        "M": 633,
+        "Meq": 724
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 25265,
+        "Meq": 25629
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 12.001056274634779,
+      "p": 2175304505252570953,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 24335,
+        "Meq": 24881
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 34079,
+        "Meq": 34716
+      },
+      "sqrtvelu_sets": {
+        "I": 32,
+        "J": 32,
+        "K": 1,
+        "b": 32,
+        "b_prime": 32
+      },
+      "sqrtvelu_wall_s_contended": 0.000128072,
+      "t": 2622474618,
+      "v": 510440272,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 24627,
+        "Meq": 24809
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 32827,
+        "Meq": 33100
+      },
+      "velu_wall_s_contended": 0.000146885,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1885624971159351356",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1602207371808338763,
+      "crater_j": 1885624973589956606,
+      "ell": 4099,
+      "find": {
+        "I": 1,
+        "M": 727,
+        "Meq": 818
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 25359,
+        "Meq": 25723
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 12.001056274634779,
+      "p": 1885624973589959981,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 24335,
+        "Meq": 24881
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 34079,
+        "Meq": 34716
+      },
+      "sqrtvelu_sets": {
+        "I": 32,
+        "J": 32,
+        "K": 1,
+        "b": 32,
+        "b_prime": 32
+      },
+      "sqrtvelu_wall_s_contended": 0.00011989,
+      "t": 2430608626,
+      "v": 483239308,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 24627,
+        "Meq": 24809
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 32827,
+        "Meq": 33100
+      },
+      "velu_wall_s_contended": 0.000147585,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2204642128498718804",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 82659119722298002,
+      "crater_j": 2204642129967682258,
+      "ell": 4099,
+      "find": {
+        "I": 1,
+        "M": 627,
+        "Meq": 718
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 25259,
+        "Meq": 25623
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 12.001056274634779,
+      "p": 2204642129967685633,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 24335,
+        "Meq": 24881
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 34079,
+        "Meq": 34716
+      },
+      "sqrtvelu_sets": {
+        "I": 32,
+        "J": 32,
+        "K": 1,
+        "b": 32,
+        "b_prime": 32
+      },
+      "sqrtvelu_wall_s_contended": 0.000113134,
+      "t": 1468966830,
+      "v": 975463624,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 24627,
+        "Meq": 24809
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 32827,
+        "Meq": 33100
+      },
+      "velu_wall_s_contended": 0.000132526,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1951338068323242148",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1513436653146785726,
+      "crater_j": 1951338070981790666,
+      "ell": 5801,
+      "find": {
+        "I": 1,
+        "M": 892,
+        "Meq": 983
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 35744,
+        "Meq": 36108
+      },
+      "find_point_tries": 4,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 12.502085903985904,
+      "p": 1951338070981794041,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 33618,
+        "Meq": 34164
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 47463,
+        "Meq": 48100
+      },
+      "sqrtvelu_sets": {
+        "I": 38,
+        "J": 38,
+        "K": 12,
+        "b": 38,
+        "b_prime": 38
+      },
+      "sqrtvelu_wall_s_contended": 0.000157541,
+      "t": 2658551894,
+      "v": 324577552,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 34847,
+        "Meq": 35029
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 46451,
+        "Meq": 46724
+      },
+      "velu_wall_s_contended": 0.000202085,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1462734867272368792",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 933418557876582364,
+      "crater_j": 1462734869223787012,
+      "ell": 5801,
+      "find": {
+        "I": 1,
+        "M": 620,
+        "Meq": 711
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 35472,
+        "Meq": 35836
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 12.502085903985904,
+      "p": 1462734869223790387,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 33618,
+        "Meq": 34164
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 47463,
+        "Meq": 48100
+      },
+      "sqrtvelu_sets": {
+        "I": 38,
+        "J": 38,
+        "K": 12,
+        "b": 38,
+        "b_prime": 38
+      },
+      "sqrtvelu_wall_s_contended": 0.000155445,
+      "t": 1951421596,
+      "v": 540223926,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 34847,
+        "Meq": 35029
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 46451,
+        "Meq": 46724
+      },
+      "velu_wall_s_contended": 0.000198482,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1369793227922602112",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1305790031619394955,
+      "crater_j": 1369793229066416714,
+      "ell": 5801,
+      "find": {
+        "I": 1,
+        "M": 625,
+        "Meq": 716
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 35477,
+        "Meq": 35841
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 12.502085903985904,
+      "p": 1369793229066420089,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 33618,
+        "Meq": 34164
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 47463,
+        "Meq": 48100
+      },
+      "sqrtvelu_sets": {
+        "I": 38,
+        "J": 38,
+        "K": 12,
+        "b": 38,
+        "b_prime": 38
+      },
+      "sqrtvelu_wall_s_contended": 0.000143341,
+      "t": 1143817978,
+      "v": 771904264,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 34847,
+        "Meq": 35029
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 46451,
+        "Meq": 46724
+      },
+      "velu_wall_s_contended": 0.000187096,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2236195591302080368",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1744412400189961081,
+      "crater_j": 2236195594060448756,
+      "ell": 8209,
+      "find": {
+        "I": 1,
+        "M": 692,
+        "Meq": 783
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 49986,
+        "Meq": 50350
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 13.002990771840553,
+      "p": 2236195594060452131,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 44728,
+        "Meq": 45274
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 63409,
+        "Meq": 64046
+      },
+      "sqrtvelu_sets": {
+        "I": 45,
+        "J": 45,
+        "K": 54,
+        "b": 45,
+        "b_prime": 45
+      },
+      "sqrtvelu_wall_s_contended": 0.000237613,
+      "t": 2758371764,
+      "v": 436899398,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 49289,
+        "Meq": 49471
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 65709,
+        "Meq": 65982
+      },
+      "velu_wall_s_contended": 0.000309705,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2221649869789187104",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1959204967888039807,
+      "crater_j": 2221649870197105358,
+      "ell": 8209,
+      "find": {
+        "I": 1,
+        "M": 904,
+        "Meq": 995
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 50198,
+        "Meq": 50562
+      },
+      "find_point_tries": 4,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 13.002990771840553,
+      "p": 2221649870197108733,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 44728,
+        "Meq": 45274
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 63409,
+        "Meq": 64046
+      },
+      "sqrtvelu_sets": {
+        "I": 45,
+        "J": 45,
+        "K": 54,
+        "b": 45,
+        "b_prime": 45
+      },
+      "sqrtvelu_wall_s_contended": 0.000199428,
+      "t": 407921630,
+      "v": 1116128476,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 49289,
+        "Meq": 49471
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 65709,
+        "Meq": 65982
+      },
+      "velu_wall_s_contended": 0.000278791,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1901997189897395392",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1594905414367338440,
+      "crater_j": 1901997192430492402,
+      "ell": 8209,
+      "find": {
+        "I": 1,
+        "M": 872,
+        "Meq": 963
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 50166,
+        "Meq": 50530
+      },
+      "find_point_tries": 4,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 13.002990771840553,
+      "p": 1901997192430495777,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 44728,
+        "Meq": 45274
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 63409,
+        "Meq": 64046
+      },
+      "sqrtvelu_sets": {
+        "I": 45,
+        "J": 45,
+        "K": 54,
+        "b": 45,
+        "b_prime": 45
+      },
+      "sqrtvelu_wall_s_contended": 0.00022851,
+      "t": 2533100386,
+      "v": 412551504,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 49289,
+        "Meq": 49471
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 65709,
+        "Meq": 65982
+      },
+      "velu_wall_s_contended": 0.000312934,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1534996758337241796",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 153475229374767038,
+      "crater_j": 1534996760777599666,
+      "ell": 11587,
+      "find": {
+        "I": 1,
+        "M": 612,
+        "Meq": 703
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 70182,
+        "Meq": 70546
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 13.500219464843928,
+      "p": 1534996760777603041,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 54446,
+        "Meq": 54992
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 77590,
+        "Meq": 78227
+      },
+      "sqrtvelu_sets": {
+        "I": 54,
+        "J": 53,
+        "K": 69,
+        "b": 53,
+        "b_prime": 54
+      },
+      "sqrtvelu_wall_s_contended": 0.000255949,
+      "t": 2440361246,
+      "v": 162403392,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 69565,
+        "Meq": 69747
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 92741,
+        "Meq": 93014
+      },
+      "velu_wall_s_contended": 0.000372045,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2159540385631934456",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 12809123366420765,
+      "crater_j": 2159540385700039468,
+      "ell": 11587,
+      "find": {
+        "I": 1,
+        "M": 615,
+        "Meq": 706
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 70185,
+        "Meq": 70549
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 13.500219464843928,
+      "p": 2159540385700042843,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 54446,
+        "Meq": 54992
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 77590,
+        "Meq": 78227
+      },
+      "sqrtvelu_sets": {
+        "I": 54,
+        "J": 53,
+        "K": 69,
+        "b": 53,
+        "b_prime": 54
+      },
+      "sqrtvelu_wall_s_contended": 0.000273658,
+      "t": 68108388,
+      "v": 1110567602,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 69565,
+        "Meq": 69747
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 92741,
+        "Meq": 93014
+      },
+      "velu_wall_s_contended": 0.000382438,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2006894699609471800",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 516328808775342395,
+      "crater_j": 2006894702217817996,
+      "ell": 11587,
+      "find": {
+        "I": 1,
+        "M": 711,
+        "Meq": 802
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 70281,
+        "Meq": 70645
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 13.500219464843928,
+      "p": 2006894702217821371,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 54446,
+        "Meq": 54992
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 77590,
+        "Meq": 78227
+      },
+      "sqrtvelu_sets": {
+        "I": 54,
+        "J": 53,
+        "K": 69,
+        "b": 53,
+        "b_prime": 54
+      },
+      "sqrtvelu_wall_s_contended": 0.000249253,
+      "t": 2608349572,
+      "v": 418174830,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 69565,
+        "Meq": 69747
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 92741,
+        "Meq": 93014
+      },
+      "velu_wall_s_contended": 0.000391926,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1439156554208856352",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 109325711708848461,
+      "crater_j": 1439156556243751334,
+      "ell": 16411,
+      "find": {
+        "I": 1,
+        "M": 613,
+        "Meq": 704
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 99125,
+        "Meq": 99489
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 14.0023755313252,
+      "p": 1439156556243754709,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 76918,
+        "Meq": 77464
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 108474,
+        "Meq": 109111
+      },
+      "sqrtvelu_sets": {
+        "I": 64,
+        "J": 64,
+        "K": 13,
+        "b": 64,
+        "b_prime": 64
+      },
+      "sqrtvelu_wall_s_contended": 0.000321582,
+      "t": 2034898358,
+      "v": 480448436,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 98507,
+        "Meq": 98689
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 131331,
+        "Meq": 131604
+      },
+      "velu_wall_s_contended": 0.000532632,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1429418984834612984",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1322720207363211871,
+      "crater_j": 1429418986906564004,
+      "ell": 16411,
+      "find": {
+        "I": 1,
+        "M": 612,
+        "Meq": 703
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 99124,
+        "Meq": 99488
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 14.0023755313252,
+      "p": 1429418986906567379,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 76918,
+        "Meq": 77464
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 108474,
+        "Meq": 109111
+      },
+      "sqrtvelu_sets": {
+        "I": 64,
+        "J": 64,
+        "K": 13,
+        "b": 64,
+        "b_prime": 64
+      },
+      "sqrtvelu_wall_s_contended": 0.000342591,
+      "t": 2071954396,
+      "v": 451138390,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 98507,
+        "Meq": 98689
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 131331,
+        "Meq": 131604
+      },
+      "velu_wall_s_contended": 0.000529418,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1727236986256182412",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1479867905541466327,
+      "crater_j": 1727236987141979174,
+      "ell": 16411,
+      "find": {
+        "I": 1,
+        "M": 703,
+        "Meq": 794
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 99215,
+        "Meq": 99579
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 14.0023755313252,
+      "p": 1727236987141982549,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 76918,
+        "Meq": 77464
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 108474,
+        "Meq": 109111
+      },
+      "sqrtvelu_sets": {
+        "I": 64,
+        "J": 64,
+        "K": 13,
+        "b": 64,
+        "b_prime": 64
+      },
+      "sqrtvelu_wall_s_contended": 0.000332389,
+      "t": 885800138,
+      "v": 935361356,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 98507,
+        "Meq": 98689
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 131331,
+        "Meq": 131604
+      },
+      "velu_wall_s_contended": 0.000507465,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1746043384069576512",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 347917624811718600,
+      "crater_j": 1746043385953955152,
+      "ell": 23173,
+      "find": {
+        "I": 1,
+        "M": 696,
+        "Meq": 787
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 139784,
+        "Meq": 140148
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 14.50015720860119,
+      "p": 1746043385953958527,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 106093,
+        "Meq": 106639
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 150766,
+        "Meq": 151403
+      },
+      "sqrtvelu_sets": {
+        "I": 76,
+        "J": 76,
+        "K": 34,
+        "b": 76,
+        "b_prime": 76
+      },
+      "sqrtvelu_wall_s_contended": 0.000452255,
+      "t": 1884382016,
+      "v": 700334406,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 139083,
+        "Meq": 139265
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 185431,
+        "Meq": 185704
+      },
+      "velu_wall_s_contended": 0.000756517,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1298536129313444408",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 205404936680743572,
+      "crater_j": 1298536131546066892,
+      "ell": 23173,
+      "find": {
+        "I": 1,
+        "M": 782,
+        "Meq": 873
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 139870,
+        "Meq": 140234
+      },
+      "find_point_tries": 3,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 14.50015720860119,
+      "p": 1298536131546070267,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 106093,
+        "Meq": 106639
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 150766,
+        "Meq": 151403
+      },
+      "sqrtvelu_sets": {
+        "I": 76,
+        "J": 76,
+        "K": 34,
+        "b": 76,
+        "b_prime": 76
+      },
+      "sqrtvelu_wall_s_contended": 0.000458901,
+      "t": 2232625860,
+      "v": 173009618,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 139083,
+        "Meq": 139265
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 185431,
+        "Meq": 185704
+      },
+      "velu_wall_s_contended": 0.000680338,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1282780304198055644",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1207813193768567558,
+      "crater_j": 1282780304810190238,
+      "ell": 23173,
+      "find": {
+        "I": 1,
+        "M": 595,
+        "Meq": 686
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 139683,
+        "Meq": 140047
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 14.50015720860119,
+      "p": 1282780304810193613,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 106093,
+        "Meq": 106639
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 150766,
+        "Meq": 151403
+      },
+      "sqrtvelu_sets": {
+        "I": 76,
+        "J": 76,
+        "K": 34,
+        "b": 76,
+        "b_prime": 76
+      },
+      "sqrtvelu_wall_s_contended": 0.000426753,
+      "t": 612137970,
+      "v": 824309956,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 139083,
+        "Meq": 139265
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 185431,
+        "Meq": 185704
+      },
+      "velu_wall_s_contended": 0.000734116,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1232467150873090176",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 695918834316225087,
+      "crater_j": 1232467152713702788,
+      "ell": 32771,
+      "find": {
+        "I": 1,
+        "M": 1058,
+        "Meq": 1149
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 197728,
+        "Meq": 198092
+      },
+      "find_point_tries": 6,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 15.000132076629967,
+      "p": 1232467152713706163,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 141782,
+        "Meq": 142328
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 202886,
+        "Meq": 203523
+      },
+      "sqrtvelu_sets": {
+        "I": 91,
+        "J": 90,
+        "K": 5,
+        "b": 90,
+        "b_prime": 91
+      },
+      "sqrtvelu_wall_s_contended": 0.000629452,
+      "t": 1840615988,
+      "v": 469346262,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 196665,
+        "Meq": 196847
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 262209,
+        "Meq": 262482
+      },
+      "velu_wall_s_contended": 0.001145586,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1594102359185207228",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1031085289722125883,
+      "crater_j": 1594102359519205886,
+      "ell": 32771,
+      "find": {
+        "I": 1,
+        "M": 785,
+        "Meq": 876
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 197455,
+        "Meq": 197819
+      },
+      "find_point_tries": 3,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 15.000132076629967,
+      "p": 1594102359519209261,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 141782,
+        "Meq": 142328
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 202886,
+        "Meq": 203523
+      },
+      "sqrtvelu_sets": {
+        "I": 91,
+        "J": 90,
+        "K": 5,
+        "b": 90,
+        "b_prime": 91
+      },
+      "sqrtvelu_wall_s_contended": 0.00056943,
+      "t": 334002034,
+      "v": 946033228,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 196665,
+        "Meq": 196847
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 262209,
+        "Meq": 262482
+      },
+      "velu_wall_s_contended": 0.000999199,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1493501893115410816",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 61952149493468152,
+      "crater_j": 1493501893536711418,
+      "ell": 32771,
+      "find": {
+        "I": 1,
+        "M": 596,
+        "Meq": 687
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 197266,
+        "Meq": 197630
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 15.000132076629967,
+      "p": 1493501893536714793,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 6,
+        "M": 141782,
+        "Meq": 142328
+      },
+      "sqrtvelu_2pt": {
+        "I": 7,
+        "M": 202886,
+        "Meq": 203523
+      },
+      "sqrtvelu_sets": {
+        "I": 91,
+        "J": 90,
+        "K": 5,
+        "b": 90,
+        "b_prime": 91
+      },
+      "sqrtvelu_wall_s_contended": 0.000563088,
+      "t": 421303978,
+      "v": 909985128,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 196665,
+        "Meq": 196847
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 262209,
+        "Meq": 262482
+      },
+      "velu_wall_s_contended": 0.000980284,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1457534530036868864",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 86816141149692928,
+      "crater_j": 1457534531731755722,
+      "ell": 46349,
+      "find": {
+        "I": 1,
+        "M": 695,
+        "Meq": 786
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 278843,
+        "Meq": 279207
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 15.50025059195788,
+      "p": 1457534531731759097,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 8,
+        "M": 193050,
+        "Meq": 193778
+      },
+      "sqrtvelu_2pt": {
+        "I": 9,
+        "M": 274751,
+        "Meq": 275570
+      },
+      "sqrtvelu_sets": {
+        "I": 108,
+        "J": 107,
+        "K": 62,
+        "b": 107,
+        "b_prime": 108
+      },
+      "sqrtvelu_wall_s_contended": 0.00074764,
+      "t": 1694890234,
+      "v": 649998376,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 278143,
+        "Meq": 278325
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 370843,
+        "Meq": 371116
+      },
+      "velu_wall_s_contended": 0.001416045,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1543151515543429932",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 36878900461452108,
+      "crater_j": 1543151517856056262,
+      "ell": 46349,
+      "find": {
+        "I": 1,
+        "M": 582,
+        "Meq": 673
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 278730,
+        "Meq": 279094
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 15.50025059195788,
+      "p": 1543151517856059637,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 8,
+        "M": 193050,
+        "Meq": 193778
+      },
+      "sqrtvelu_2pt": {
+        "I": 9,
+        "M": 274751,
+        "Meq": 275570
+      },
+      "sqrtvelu_sets": {
+        "I": 108,
+        "J": 107,
+        "K": 62,
+        "b": 107,
+        "b_prime": 108
+      },
+      "sqrtvelu_wall_s_contended": 0.000746754,
+      "t": 2312629706,
+      "v": 343167996,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 278143,
+        "Meq": 278325
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 370843,
+        "Meq": 371116
+      },
+      "velu_wall_s_contended": 0.001416434,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2184803447733701816",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1958633454938833020,
+      "crater_j": 2184803450018426048,
+      "ell": 46349,
+      "find": {
+        "I": 1,
+        "M": 691,
+        "Meq": 782
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 278839,
+        "Meq": 279203
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 15.50025059195788,
+      "p": 2184803450018429423,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 8,
+        "M": 193050,
+        "Meq": 193778
+      },
+      "sqrtvelu_2pt": {
+        "I": 9,
+        "M": 274751,
+        "Meq": 275570
+      },
+      "sqrtvelu_sets": {
+        "I": 108,
+        "J": 107,
+        "K": 62,
+        "b": 107,
+        "b_prime": 108
+      },
+      "sqrtvelu_wall_s_contended": 0.000824307,
+      "t": 2284727608,
+      "v": 709047002,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 278143,
+        "Meq": 278325
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 370843,
+        "Meq": 371116
+      },
+      "velu_wall_s_contended": 0.00140387,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1891347924040234604",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 311937863979637529,
+      "crater_j": 1891347926789115158,
+      "ell": 65537,
+      "find": {
+        "I": 1,
+        "M": 594,
+        "Meq": 685
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 393860,
+        "Meq": 394224
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 16.00002201361136,
+      "p": 1891347926789118533,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 7,
+        "M": 257889,
+        "Meq": 258526
+      },
+      "sqrtvelu_2pt": {
+        "I": 8,
+        "M": 363174,
+        "Meq": 363902
+      },
+      "sqrtvelu_sets": {
+        "I": 128,
+        "J": 128,
+        "K": 0,
+        "b": 128,
+        "b_prime": 128
+      },
+      "sqrtvelu_wall_s_contended": 0.00102374,
+      "t": 2748883930,
+      "v": 35914276,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 393261,
+        "Meq": 393443
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 524337,
+        "Meq": 524610
+      },
+      "velu_wall_s_contended": 0.002058142,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2041508497330580608",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 633610589714028383,
+      "crater_j": 2041508499836974262,
+      "ell": 65537,
+      "find": {
+        "I": 1,
+        "M": 765,
+        "Meq": 856
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 394031,
+        "Meq": 394395
+      },
+      "find_point_tries": 3,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 16.00002201361136,
+      "p": 2041508499836977637,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 7,
+        "M": 257889,
+        "Meq": 258526
+      },
+      "sqrtvelu_2pt": {
+        "I": 8,
+        "M": 363174,
+        "Meq": 363902
+      },
+      "sqrtvelu_sets": {
+        "I": 128,
+        "J": 128,
+        "K": 0,
+        "b": 128,
+        "b_prime": 128
+      },
+      "sqrtvelu_wall_s_contended": 0.000987804,
+      "t": 2506397030,
+      "v": 518790892,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 393261,
+        "Meq": 393443
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 524337,
+        "Meq": 524610
+      },
+      "velu_wall_s_contended": 0.002295693,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2244134332872820224",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 87042639545090535,
+      "crater_j": 2244134333762285014,
+      "ell": 65537,
+      "find": {
+        "I": 1,
+        "M": 582,
+        "Meq": 673
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 393848,
+        "Meq": 394212
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 16.00002201361136,
+      "p": 2244134333762288389,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 7,
+        "M": 257889,
+        "Meq": 258526
+      },
+      "sqrtvelu_2pt": {
+        "I": 8,
+        "M": 363174,
+        "Meq": 363902
+      },
+      "sqrtvelu_sets": {
+        "I": 128,
+        "J": 128,
+        "K": 0,
+        "b": 128,
+        "b_prime": 128
+      },
+      "sqrtvelu_wall_s_contended": 0.001012353,
+      "t": 889468166,
+      "v": 1081360500,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 393261,
+        "Meq": 393443
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 524337,
+        "Meq": 524610
+      },
+      "velu_wall_s_contended": 0.004329472,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1740576192843653792",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 874501378017958143,
+      "crater_j": 1740576193613660782,
+      "ell": 92683,
+      "find": {
+        "I": 1,
+        "M": 578,
+        "Meq": 669
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 556732,
+        "Meq": 557096
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 16.500017122231633,
+      "p": 1740576193613664157,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 8,
+        "M": 357224,
+        "Meq": 357952
+      },
+      "sqrtvelu_2pt": {
+        "I": 9,
+        "M": 507302,
+        "Meq": 508121
+      },
+      "sqrtvelu_sets": {
+        "I": 152,
+        "J": 152,
+        "K": 133,
+        "b": 152,
+        "b_prime": 152
+      },
+      "sqrtvelu_wall_s_contended": 0.001343549,
+      "t": 770010366,
+      "v": 953893436,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 556149,
+        "Meq": 556331
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 741517,
+        "Meq": 741790
+      },
+      "velu_wall_s_contended": 0.003335692,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1432297460377450468",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1384277790787977947,
+      "crater_j": 1432297462761624586,
+      "ell": 92683,
+      "find": {
+        "I": 1,
+        "M": 1018,
+        "Meq": 1109
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 557172,
+        "Meq": 557536
+      },
+      "find_point_tries": 6,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 16.500017122231633,
+      "p": 1432297462761627961,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 8,
+        "M": 357224,
+        "Meq": 357952
+      },
+      "sqrtvelu_2pt": {
+        "I": 9,
+        "M": 507302,
+        "Meq": 508121
+      },
+      "sqrtvelu_sets": {
+        "I": 152,
+        "J": 152,
+        "K": 133,
+        "b": 152,
+        "b_prime": 152
+      },
+      "sqrtvelu_wall_s_contended": 0.001391444,
+      "t": 2384177494,
+      "v": 80078112,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 556149,
+        "Meq": 556331
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 741517,
+        "Meq": 741790
+      },
+      "velu_wall_s_contended": 0.002775077,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2286776334645229676",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 992391911271291662,
+      "crater_j": 2286776335009285126,
+      "ell": 92683,
+      "find": {
+        "I": 1,
+        "M": 584,
+        "Meq": 675
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 556738,
+        "Meq": 557102
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 16.500017122231633,
+      "p": 2286776335009288501,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 8,
+        "M": 357224,
+        "Meq": 357952
+      },
+      "sqrtvelu_2pt": {
+        "I": 9,
+        "M": 507302,
+        "Meq": 508121
+      },
+      "sqrtvelu_sets": {
+        "I": 152,
+        "J": 152,
+        "K": 133,
+        "b": 152,
+        "b_prime": 152
+      },
+      "sqrtvelu_wall_s_contended": 0.001543857,
+      "t": 364058826,
+      "v": 1134810652,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 556149,
+        "Meq": 556331
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 741517,
+        "Meq": 741790
+      },
+      "velu_wall_s_contended": 0.002709774,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1530984192537729188",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 349065498001249858,
+      "crater_j": 1530984195000851402,
+      "ell": 131101,
+      "find": {
+        "I": 1,
+        "M": 577,
+        "Meq": 668
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 787235,
+        "Meq": 787599
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 17.00031916449334,
+      "p": 1530984195000854777,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 10,
+        "M": 504065,
+        "Meq": 504975
+      },
+      "sqrtvelu_2pt": {
+        "I": 11,
+        "M": 715742,
+        "Meq": 716743
+      },
+      "sqrtvelu_sets": {
+        "I": 181,
+        "J": 181,
+        "K": 28,
+        "b": 181,
+        "b_prime": 181
+      },
+      "sqrtvelu_wall_s_contended": 0.00173489,
+      "t": 2463125590,
+      "v": 90197488,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 786653,
+        "Meq": 786835
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 1048857,
+        "Meq": 1049130
+      },
+      "velu_wall_s_contended": 0.004633608,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1825961571691617136",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 182756417786189122,
+      "crater_j": 1825961574275876674,
+      "ell": 131101,
+      "find": {
+        "I": 1,
+        "M": 660,
+        "Meq": 751
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 787318,
+        "Meq": 787682
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 17.00031916449334,
+      "p": 1825961574275880049,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 10,
+        "M": 504065,
+        "Meq": 504975
+      },
+      "sqrtvelu_2pt": {
+        "I": 11,
+        "M": 715742,
+        "Meq": 716743
+      },
+      "sqrtvelu_sets": {
+        "I": 181,
+        "J": 181,
+        "K": 28,
+        "b": 181,
+        "b_prime": 181
+      },
+      "sqrtvelu_wall_s_contended": 0.001742472,
+      "t": 2584262914,
+      "v": 298910280,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 786653,
+        "Meq": 786835
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 1048857,
+        "Meq": 1049130
+      },
+      "velu_wall_s_contended": 0.003817517,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1586935258292532528",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 412960474201145833,
+      "crater_j": 1586935260772697872,
+      "ell": 131101,
+      "find": {
+        "I": 1,
+        "M": 672,
+        "Meq": 763
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 787330,
+        "Meq": 787694
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 17.00031916449334,
+      "p": 1586935260772701247,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 10,
+        "M": 504065,
+        "Meq": 504975
+      },
+      "sqrtvelu_2pt": {
+        "I": 11,
+        "M": 715742,
+        "Meq": 716743
+      },
+      "sqrtvelu_sets": {
+        "I": 181,
+        "J": 181,
+        "K": 28,
+        "b": 181,
+        "b_prime": 181
+      },
+      "sqrtvelu_wall_s_contended": 0.001788963,
+      "t": 2480168720,
+      "v": 167547078,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 786653,
+        "Meq": 786835
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 1048857,
+        "Meq": 1049130
+      },
+      "velu_wall_s_contended": 0.003862439,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1845839020709945492",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 433475990616698536,
+      "crater_j": 1845839022552509978,
+      "ell": 185369,
+      "find": {
+        "I": 1,
+        "M": 776,
+        "Meq": 867
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1113048,
+        "Meq": 1113412
+      },
+      "find_point_tries": 3,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 17.500040470904526,
+      "p": 1845839022552513353,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 10,
+        "M": 624185,
+        "Meq": 625095
+      },
+      "sqrtvelu_2pt": {
+        "I": 11,
+        "M": 887304,
+        "Meq": 888305
+      },
+      "sqrtvelu_sets": {
+        "I": 215,
+        "J": 215,
+        "K": 234,
+        "b": 215,
+        "b_prime": 215
+      },
+      "sqrtvelu_wall_s_contended": 0.002310132,
+      "t": 1842567862,
+      "v": 754822568,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 1112267,
+        "Meq": 1112449
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 1483007,
+        "Meq": 1483280
+      },
+      "velu_wall_s_contended": 0.005649591,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1601538982378400944",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 925773027180617852,
+      "crater_j": 1601538983953292594,
+      "ell": 185369,
+      "find": {
+        "I": 1,
+        "M": 568,
+        "Meq": 659
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1112840,
+        "Meq": 1113204
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 17.500040470904526,
+      "p": 1601538983953295969,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 10,
+        "M": 624185,
+        "Meq": 625095
+      },
+      "sqrtvelu_2pt": {
+        "I": 11,
+        "M": 887304,
+        "Meq": 888305
+      },
+      "sqrtvelu_sets": {
+        "I": 215,
+        "J": 215,
+        "K": 234,
+        "b": 215,
+        "b_prime": 215
+      },
+      "sqrtvelu_wall_s_contended": 0.002253103,
+      "t": 1574895026,
+      "v": 748890760,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 1112267,
+        "Meq": 1112449
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 1483007,
+        "Meq": 1483280
+      },
+      "velu_wall_s_contended": 0.005832143,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1942836918755856664",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1058821682787055167,
+      "crater_j": 1942836919271549848,
+      "ell": 185369,
+      "find": {
+        "I": 1,
+        "M": 572,
+        "Meq": 663
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1112844,
+        "Meq": 1113208
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 17.500040470904526,
+      "p": 1942836919271553223,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 10,
+        "M": 624185,
+        "Meq": 625095
+      },
+      "sqrtvelu_2pt": {
+        "I": 11,
+        "M": 887304,
+        "Meq": 888305
+      },
+      "sqrtvelu_sets": {
+        "I": 215,
+        "J": 215,
+        "K": 234,
+        "b": 215,
+        "b_prime": 215
+      },
+      "sqrtvelu_wall_s_contended": 0.002343772,
+      "t": 515696560,
+      "v": 1035471234,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 1112267,
+        "Meq": 1112449
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 1483007,
+        "Meq": 1483280
+      },
+      "velu_wall_s_contended": 0.005935002,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1414583772645087088",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 187761085041293954,
+      "crater_j": 1414583775023805592,
+      "ell": 262147,
+      "find": {
+        "I": 1,
+        "M": 1310,
+        "Meq": 1401
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1574242,
+        "Meq": 1574606
+      },
+      "find_point_tries": 9,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 18.00001651024001,
+      "p": 1414583775023808967,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 12,
+        "M": 830119,
+        "Meq": 831211
+      },
+      "sqrtvelu_2pt": {
+        "I": 13,
+        "M": 1166671,
+        "Meq": 1167854
+      },
+      "sqrtvelu_sets": {
+        "I": 256,
+        "J": 256,
+        "K": 1,
+        "b": 256,
+        "b_prime": 256
+      },
+      "sqrtvelu_wall_s_contended": 0.007077269,
+      "t": 2378721880,
+      "v": 1572882,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 1572927,
+        "Meq": 1573109
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 2097223,
+        "Meq": 2097496
+      },
+      "velu_wall_s_contended": 0.009197322,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2039757303295256864",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1498486937914950325,
+      "crater_j": 2039757306082924688,
+      "ell": 262147,
+      "find": {
+        "I": 1,
+        "M": 569,
+        "Meq": 660
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1573501,
+        "Meq": 1573865
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 18.00001651024001,
+      "p": 2039757306082928063,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 12,
+        "M": 830119,
+        "Meq": 831211
+      },
+      "sqrtvelu_2pt": {
+        "I": 13,
+        "M": 1166671,
+        "Meq": 1167854
+      },
+      "sqrtvelu_sets": {
+        "I": 256,
+        "J": 256,
+        "K": 1,
+        "b": 256,
+        "b_prime": 256
+      },
+      "sqrtvelu_wall_s_contended": 0.00312919,
+      "t": 2787671200,
+      "v": 235408006,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 1572927,
+        "Meq": 1573109
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 2097223,
+        "Meq": 2097496
+      },
+      "velu_wall_s_contended": 0.015903923,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1241788266897836256",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1194986550273211558,
+      "crater_j": 1241788267523839918,
+      "ell": 262147,
+      "find": {
+        "I": 1,
+        "M": 567,
+        "Meq": 658
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 1573499,
+        "Meq": 1573863
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 18.00001651024001,
+      "p": 1241788267523843293,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 12,
+        "M": 830119,
+        "Meq": 831211
+      },
+      "sqrtvelu_2pt": {
+        "I": 13,
+        "M": 1166671,
+        "Meq": 1167854
+      },
+      "sqrtvelu_sets": {
+        "I": 256,
+        "J": 256,
+        "K": 1,
+        "b": 256,
+        "b_prime": 256
+      },
+      "sqrtvelu_wall_s_contended": 0.003122336,
+      "t": 626007038,
+      "v": 808461348,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 1572927,
+        "Meq": 1573109
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 2097223,
+        "Meq": 2097496
+      },
+      "velu_wall_s_contended": 0.007884005,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1430821321711467392",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1256778709592679209,
+      "crater_j": 1430821322157857854,
+      "ell": 370759,
+      "find": {
+        "I": 1,
+        "M": 554,
+        "Meq": 645
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 2225170,
+        "Meq": 2225534
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 18.50012218828401,
+      "p": 1430821322157861229,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 14,
+        "M": 1257999,
+        "Meq": 1259273
+      },
+      "sqrtvelu_2pt": {
+        "I": 15,
+        "M": 1776751,
+        "Meq": 1778116
+      },
+      "sqrtvelu_sets": {
+        "I": 304,
+        "J": 304,
+        "K": 547,
+        "b": 304,
+        "b_prime": 304
+      },
+      "sqrtvelu_wall_s_contended": 0.004324073,
+      "t": 446393838,
+      "v": 888338564,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 2224611,
+        "Meq": 2224793
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 2966131,
+        "Meq": 2966404
+      },
+      "velu_wall_s_contended": 0.011643124,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1424714149486860724",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 35221856341554590,
+      "crater_j": 1424714151858231914,
+      "ell": 370759,
+      "find": {
+        "I": 1,
+        "M": 666,
+        "Meq": 757
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 2225282,
+        "Meq": 2225646
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 18.50012218828401,
+      "p": 1424714151858235289,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 14,
+        "M": 1257999,
+        "Meq": 1259273
+      },
+      "sqrtvelu_2pt": {
+        "I": 15,
+        "M": 1776751,
+        "Meq": 1778116
+      },
+      "sqrtvelu_sets": {
+        "I": 304,
+        "J": 304,
+        "K": 547,
+        "b": 304,
+        "b_prime": 304
+      },
+      "sqrtvelu_wall_s_contended": 0.004373463,
+      "t": 2371374566,
+      "v": 103812520,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 2224611,
+        "Meq": 2224793
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 2966131,
+        "Meq": 2966404
+      },
+      "velu_wall_s_contended": 0.01280397,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1794935691434374784",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1697590520165946503,
+      "crater_j": 1794935694005214316,
+      "ell": 370759,
+      "find": {
+        "I": 1,
+        "M": 648,
+        "Meq": 739
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 2225264,
+        "Meq": 2225628
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 18.50012218828401,
+      "p": 1794935694005217691,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 14,
+        "M": 1257999,
+        "Meq": 1259273
+      },
+      "sqrtvelu_2pt": {
+        "I": 15,
+        "M": 1776751,
+        "Meq": 1778116
+      },
+      "sqrtvelu_sets": {
+        "I": 304,
+        "J": 304,
+        "K": 547,
+        "b": 304,
+        "b_prime": 304
+      },
+      "sqrtvelu_wall_s_contended": 0.008214982,
+      "t": 2570842908,
+      "v": 285484430,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 2224611,
+        "Meq": 2224793
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 2966131,
+        "Meq": 2966404
+      },
+      "velu_wall_s_contended": 0.011115038,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1392001965987860308",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 636871802310548081,
+      "crater_j": 1392001966421984786,
+      "ell": 524309,
+      "find": {
+        "I": 1,
+        "M": 1463,
+        "Meq": 1554
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 3147371,
+        "Meq": 3147735
+      },
+      "find_point_tries": 11,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 19.00005778501343,
+      "p": 1392001966421988161,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 16,
+        "M": 1601178,
+        "Meq": 1602634
+      },
+      "sqrtvelu_2pt": {
+        "I": 17,
+        "M": 2269857,
+        "Meq": 2271404
+      },
+      "sqrtvelu_sets": {
+        "I": 362,
+        "J": 362,
+        "K": 66,
+        "b": 362,
+        "b_prime": 362
+      },
+      "sqrtvelu_wall_s_contended": 0.016667587,
+      "t": 434127854,
+      "v": 876644648,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 3145903,
+        "Meq": 3146085
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 4194523,
+        "Meq": 4194796
+      },
+      "velu_wall_s_contended": 0.042842809,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1232815115181582676",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 83150310125721627,
+      "crater_j": 1232815115414372498,
+      "ell": 524309,
+      "find": {
+        "I": 1,
+        "M": 550,
+        "Meq": 641
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 3146458,
+        "Meq": 3146822
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 19.00005778501343,
+      "p": 1232815115414375873,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 16,
+        "M": 1601178,
+        "Meq": 1602634
+      },
+      "sqrtvelu_2pt": {
+        "I": 17,
+        "M": 2269857,
+        "Meq": 2271404
+      },
+      "sqrtvelu_sets": {
+        "I": 362,
+        "J": 362,
+        "K": 66,
+        "b": 362,
+        "b_prime": 362
+      },
+      "sqrtvelu_wall_s_contended": 0.013607139,
+      "t": 232793198,
+      "v": 834699928,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 3145903,
+        "Meq": 3146085
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 4194523,
+        "Meq": 4194796
+      },
+      "velu_wall_s_contended": 0.032614368,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1958594907719819636",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 971450112740237578,
+      "crater_j": 1958594908384640074,
+      "ell": 524309,
+      "find": {
+        "I": 1,
+        "M": 652,
+        "Meq": 743
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 3146560,
+        "Meq": 3146924
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 19.00005778501343,
+      "p": 1958594908384643449,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 16,
+        "M": 1601178,
+        "Meq": 1602634
+      },
+      "sqrtvelu_2pt": {
+        "I": 17,
+        "M": 2269857,
+        "Meq": 2271404
+      },
+      "sqrtvelu_sets": {
+        "I": 362,
+        "J": 362,
+        "K": 66,
+        "b": 362,
+        "b_prime": 362
+      },
+      "sqrtvelu_wall_s_contended": 0.005345306,
+      "t": 664823814,
+      "v": 1027645640,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 3145903,
+        "Meq": 3146085
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 4194523,
+        "Meq": 4194796
+      },
+      "velu_wall_s_contended": 0.032195401,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1761533931710834404",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1374290174854092336,
+      "crater_j": 1761533932360347362,
+      "ell": 741457,
+      "find": {
+        "I": 1,
+        "M": 540,
+        "Meq": 631
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 4449344,
+        "Meq": 4449708
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 19.500003501997938,
+      "p": 1761533932360350737,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 18,
+        "M": 2008524,
+        "Meq": 2010162
+      },
+      "sqrtvelu_2pt": {
+        "I": 19,
+        "M": 2849795,
+        "Meq": 2851524
+      },
+      "sqrtvelu_sets": {
+        "I": 431,
+        "J": 430,
+        "K": 68,
+        "b": 430,
+        "b_prime": 431
+      },
+      "sqrtvelu_wall_s_contended": 0.007514638,
+      "t": 649516334,
+      "v": 972791584,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 4448799,
+        "Meq": 4448981
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 5931715,
+        "Meq": 5931988
+      },
+      "velu_wall_s_contended": 0.023083724,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1654236469096229376",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1456492083032233820,
+      "crater_j": 1654236469487715298,
+      "ell": 741457,
+      "find": {
+        "I": 1,
+        "M": 1015,
+        "Meq": 1106
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 4449819,
+        "Meq": 4450183
+      },
+      "find_point_tries": 6,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 19.500003501997938,
+      "p": 1654236469487718673,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 18,
+        "M": 2008524,
+        "Meq": 2010162
+      },
+      "sqrtvelu_2pt": {
+        "I": 19,
+        "M": 2849795,
+        "Meq": 2851524
+      },
+      "sqrtvelu_sets": {
+        "I": 431,
+        "J": 430,
+        "K": 68,
+        "b": 430,
+        "b_prime": 431
+      },
+      "sqrtvelu_wall_s_contended": 0.010856598,
+      "t": 391489298,
+      "v": 960928272,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 4448799,
+        "Meq": 4448981
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 5931715,
+        "Meq": 5931988
+      },
+      "velu_wall_s_contended": 0.024147332,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2247636979347714392",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 23153769195952513,
+      "crater_j": 2247636979518246128,
+      "ell": 741457,
+      "find": {
+        "I": 1,
+        "M": 643,
+        "Meq": 734
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 4449447,
+        "Meq": 4449811
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 19.500003501997938,
+      "p": 2247636979518249503,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 18,
+        "M": 2008524,
+        "Meq": 2010162
+      },
+      "sqrtvelu_2pt": {
+        "I": 19,
+        "M": 2849795,
+        "Meq": 2851524
+      },
+      "sqrtvelu_sets": {
+        "I": 431,
+        "J": 430,
+        "K": 68,
+        "b": 430,
+        "b_prime": 431
+      },
+      "sqrtvelu_wall_s_contended": 0.006926269,
+      "t": 170535112,
+      "v": 1131463382,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 4448799,
+        "Meq": 4448981
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 5931715,
+        "Meq": 5931988
+      },
+      "velu_wall_s_contended": 0.024728233,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1287087903593937176",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1264545128491607818,
+      "crater_j": 1287087905231820448,
+      "ell": 1048583,
+      "find": {
+        "I": 1,
+        "M": 545,
+        "Meq": 636
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 6292099,
+        "Meq": 6292463
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 20.000009630996303,
+      "p": 1287087905231823823,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 20,
+        "M": 2599879,
+        "Meq": 2601699
+      },
+      "sqrtvelu_2pt": {
+        "I": 21,
+        "M": 3649365,
+        "Meq": 3651276
+      },
+      "sqrtvelu_sets": {
+        "I": 512,
+        "J": 512,
+        "K": 3,
+        "b": 512,
+        "b_prime": 512
+      },
+      "sqrtvelu_wall_s_contended": 0.008835356,
+      "t": 1637886648,
+      "v": 593497978,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 6291549,
+        "Meq": 6291731
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 8388717,
+        "Meq": 8388990
+      },
+      "velu_wall_s_contended": 0.038894657,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1574051075637271508",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1262423137135459801,
+      "crater_j": 1574051075716960442,
+      "ell": 1048583,
+      "find": {
+        "I": 1,
+        "M": 736,
+        "Meq": 827
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 6292290,
+        "Meq": 6292654
+      },
+      "find_point_tries": 3,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 20.000009630996303,
+      "p": 1574051075716963817,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 20,
+        "M": 2599879,
+        "Meq": 2601699
+      },
+      "sqrtvelu_2pt": {
+        "I": 21,
+        "M": 3649365,
+        "Meq": 3651276
+      },
+      "sqrtvelu_sets": {
+        "I": 512,
+        "J": 512,
+        "K": 3,
+        "b": 512,
+        "b_prime": 512
+      },
+      "sqrtvelu_wall_s_contended": 0.021137446,
+      "t": 79692310,
+      "v": 947919032,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 6291549,
+        "Meq": 6291731
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 8388717,
+        "Meq": 8388990
+      },
+      "velu_wall_s_contended": 0.05694249,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1836908232906447404",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1422940808174369915,
+      "crater_j": 1836908235615982502,
+      "ell": 1048583,
+      "find": {
+        "I": 1,
+        "M": 542,
+        "Meq": 633
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 6292096,
+        "Meq": 6292460
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 20.000009630996303,
+      "p": 1836908235615985877,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 20,
+        "M": 2599879,
+        "Meq": 2601699
+      },
+      "sqrtvelu_2pt": {
+        "I": 21,
+        "M": 3649365,
+        "Meq": 3651276
+      },
+      "sqrtvelu_sets": {
+        "I": 512,
+        "J": 512,
+        "K": 3,
+        "b": 512,
+        "b_prime": 512
+      },
+      "sqrtvelu_wall_s_contended": 0.009028786,
+      "t": 2709538474,
+      "v": 29360324,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 6291549,
+        "Meq": 6291731
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 8388717,
+        "Meq": 8388990
+      },
+      "velu_wall_s_contended": 0.052295776,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2273570124958891168",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 2080751267166709276,
+      "crater_j": 2273570125652893886,
+      "ell": 1482919,
+      "find": {
+        "I": 1,
+        "M": 546,
+        "Meq": 637
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 8898128,
+        "Meq": 8898492
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 20.500008366381877,
+      "p": 2273570125652897261,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 24,
+        "M": 3893717,
+        "Meq": 3895901
+      },
+      "sqrtvelu_2pt": {
+        "I": 25,
+        "M": 5495879,
+        "Meq": 5498154
+      },
+      "sqrtvelu_sets": {
+        "I": 609,
+        "J": 608,
+        "K": 915,
+        "b": 608,
+        "b_prime": 609
+      },
+      "sqrtvelu_wall_s_contended": 0.017746777,
+      "t": 694006094,
+      "v": 1109223412,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 8897577,
+        "Meq": 8897759
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 11863417,
+        "Meq": 11863690
+      },
+      "velu_wall_s_contended": 0.048094728,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1923745448128847288",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 927412540593322442,
+      "crater_j": 1923745449982492664,
+      "ell": 1482919,
+      "find": {
+        "I": 1,
+        "M": 531,
+        "Meq": 622
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 8898113,
+        "Meq": 8898477
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 20.500008366381877,
+      "p": 1923745449982496039,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 24,
+        "M": 3893717,
+        "Meq": 3895901
+      },
+      "sqrtvelu_2pt": {
+        "I": 25,
+        "M": 5495879,
+        "Meq": 5498154
+      },
+      "sqrtvelu_sets": {
+        "I": 609,
+        "J": 608,
+        "K": 915,
+        "b": 608,
+        "b_prime": 609
+      },
+      "sqrtvelu_wall_s_contended": 0.025674179,
+      "t": 1853648752,
+      "v": 780015394,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 8897577,
+        "Meq": 8897759
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 11863417,
+        "Meq": 11863690
+      },
+      "velu_wall_s_contended": 0.089514709,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1796526079232872316",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1643710934475393632,
+      "crater_j": 1796526081558085934,
+      "ell": 1482919,
+      "find": {
+        "I": 1,
+        "M": 539,
+        "Meq": 630
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 8898121,
+        "Meq": 8898485
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 20.500008366381877,
+      "p": 1796526081558089309,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 24,
+        "M": 3893717,
+        "Meq": 3895901
+      },
+      "sqrtvelu_2pt": {
+        "I": 25,
+        "M": 5495879,
+        "Meq": 5498154
+      },
+      "sqrtvelu_sets": {
+        "I": 609,
+        "J": 608,
+        "K": 915,
+        "b": 608,
+        "b_prime": 609
+      },
+      "sqrtvelu_wall_s_contended": 0.014059019,
+      "t": 2325216994,
+      "v": 504192460,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 8897577,
+        "Meq": 8897759
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 11863417,
+        "Meq": 11863690
+      },
+      "velu_wall_s_contended": 0.045851297,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1538356056705888336",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1060137794682563128,
+      "crater_j": 1538356058379425824,
+      "ell": 2097169,
+      "find": {
+        "I": 1,
+        "M": 537,
+        "Meq": 628
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 12583607,
+        "Meq": 12583971
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 21.00001169477286,
+      "p": 1538356058379429199,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 26,
+        "M": 4960180,
+        "Meq": 4962546
+      },
+      "sqrtvelu_2pt": {
+        "I": 27,
+        "M": 7023811,
+        "Meq": 7026268
+      },
+      "sqrtvelu_sets": {
+        "I": 724,
+        "J": 724,
+        "K": 232,
+        "b": 724,
+        "b_prime": 724
+      },
+      "sqrtvelu_wall_s_contended": 0.016550678,
+      "t": 1673540864,
+      "v": 692065770,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 12583065,
+        "Meq": 12583247
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 16777405,
+        "Meq": 16777678
+      },
+      "velu_wall_s_contended": 0.104638288,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2152931447641384232",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1165234345424374798,
+      "crater_j": 2152931450564834444,
+      "ell": 2097169,
+      "find": {
+        "I": 1,
+        "M": 538,
+        "Meq": 629
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 12583608,
+        "Meq": 12583972
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 21.00001169477286,
+      "p": 2152931450564837819,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 26,
+        "M": 4960180,
+        "Meq": 4962546
+      },
+      "sqrtvelu_2pt": {
+        "I": 27,
+        "M": 7023811,
+        "Meq": 7026268
+      },
+      "sqrtvelu_sets": {
+        "I": 724,
+        "J": 724,
+        "K": 232,
+        "b": 724,
+        "b_prime": 724
+      },
+      "sqrtvelu_wall_s_contended": 0.016405818,
+      "t": 2923453588,
+      "v": 96469774,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 12583065,
+        "Meq": 12583247
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 16777405,
+        "Meq": 16777678
+      },
+      "velu_wall_s_contended": 0.073696969,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1745736107898068608",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 925152906189739152,
+      "crater_j": 1745736110452417076,
+      "ell": 2097169,
+      "find": {
+        "I": 1,
+        "M": 920,
+        "Meq": 1011
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 12583990,
+        "Meq": 12584354
+      },
+      "find_point_tries": 5,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 21.00001169477286,
+      "p": 1745736110452420451,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 26,
+        "M": 4960180,
+        "Meq": 4962546
+      },
+      "sqrtvelu_2pt": {
+        "I": 27,
+        "M": 7023811,
+        "Meq": 7026268
+      },
+      "sqrtvelu_sets": {
+        "I": 724,
+        "J": 724,
+        "K": 232,
+        "b": 724,
+        "b_prime": 724
+      },
+      "sqrtvelu_wall_s_contended": 0.016585462,
+      "t": 2554351844,
+      "v": 255854618,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 12583065,
+        "Meq": 12583247
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 16777405,
+        "Meq": 16777678
+      },
+      "velu_wall_s_contended": 0.074358585,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1557076711626231544",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 473451797564464759,
+      "crater_j": 1557076712498187188,
+      "ell": 2965847,
+      "find": {
+        "I": 1,
+        "M": 615,
+        "Meq": 706
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 17795769,
+        "Meq": 17796133
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 21.5000127443134,
+      "p": 1557076712498190563,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 30,
+        "M": 6215061,
+        "Meq": 6217791
+      },
+      "sqrtvelu_2pt": {
+        "I": 31,
+        "M": 8810179,
+        "Meq": 8813000
+      },
+      "sqrtvelu_sets": {
+        "I": 861,
+        "J": 861,
+        "K": 281,
+        "b": 861,
+        "b_prime": 861
+      },
+      "sqrtvelu_wall_s_contended": 0.02122309,
+      "t": 871959020,
+      "v": 883822406,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 17795149,
+        "Meq": 17795331
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 23726845,
+        "Meq": 23727118
+      },
+      "velu_wall_s_contended": 0.139178602,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1438151432887661864",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1311424773882647175,
+      "crater_j": 1438151435159497292,
+      "ell": 2965847,
+      "find": {
+        "I": 1,
+        "M": 627,
+        "Meq": 718
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 17795781,
+        "Meq": 17796145
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 21.5000127443134,
+      "p": 1438151435159500667,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 30,
+        "M": 6215061,
+        "Meq": 6217791
+      },
+      "sqrtvelu_2pt": {
+        "I": 31,
+        "M": 8810179,
+        "Meq": 8813000
+      },
+      "sqrtvelu_sets": {
+        "I": 861,
+        "J": 861,
+        "K": 281,
+        "b": 861,
+        "b_prime": 861
+      },
+      "sqrtvelu_wall_s_contended": 0.038074768,
+      "t": 2271838804,
+      "v": 290653006,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 17795149,
+        "Meq": 17795331
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 23726845,
+        "Meq": 23727118
+      },
+      "velu_wall_s_contended": 0.105044548,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2189702898525486824",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 2081504691301475154,
+      "crater_j": 2189702900417693836,
+      "ell": 2965847,
+      "find": {
+        "I": 1,
+        "M": 525,
+        "Meq": 616
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 17795679,
+        "Meq": 17796043
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 21.5000127443134,
+      "p": 2189702900417697211,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 30,
+        "M": 6215061,
+        "Meq": 6217791
+      },
+      "sqrtvelu_2pt": {
+        "I": 31,
+        "M": 8810179,
+        "Meq": 8813000
+      },
+      "sqrtvelu_sets": {
+        "I": 861,
+        "J": 861,
+        "K": 281,
+        "b": 861,
+        "b_prime": 861
+      },
+      "sqrtvelu_wall_s_contended": 0.02117661,
+      "t": 1892210388,
+      "v": 860095630,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 17795149,
+        "Meq": 17795331
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 23726845,
+        "Meq": 23727118
+      },
+      "velu_wall_s_contended": 0.106097667,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2162728452512682296",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 700099971499001599,
+      "crater_j": 2162728452957276736,
+      "ell": 4194319,
+      "find": {
+        "I": 1,
+        "M": 518,
+        "Meq": 609
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 25166494,
+        "Meq": 25166858
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 22.0000051594703,
+      "p": 2162728452957280111,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 36,
+        "M": 8011984,
+        "Meq": 8015260
+      },
+      "sqrtvelu_2pt": {
+        "I": 37,
+        "M": 11236970,
+        "Meq": 11240337
+      },
+      "sqrtvelu_sets": {
+        "I": 1024,
+        "J": 1024,
+        "K": 7,
+        "b": 1024,
+        "b_prime": 1024
+      },
+      "sqrtvelu_wall_s_contended": 0.056665289,
+      "t": 444597816,
+      "v": 1098911578,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 25165971,
+        "Meq": 25166153
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 33554611,
+        "Meq": 33554884
+      },
+      "velu_wall_s_contended": 0.186820718,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1996234812939408192",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 660101612230202504,
+      "crater_j": 1996234814323530088,
+      "ell": 4194319,
+      "find": {
+        "I": 1,
+        "M": 522,
+        "Meq": 613
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 25166498,
+        "Meq": 25166862
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 22.0000051594703,
+      "p": 1996234814323533463,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 36,
+        "M": 8011984,
+        "Meq": 8015260
+      },
+      "sqrtvelu_2pt": {
+        "I": 37,
+        "M": 11236970,
+        "Meq": 11240337
+      },
+      "sqrtvelu_sets": {
+        "I": 1024,
+        "J": 1024,
+        "K": 7,
+        "b": 1024,
+        "b_prime": 1024
+      },
+      "sqrtvelu_wall_s_contended": 0.028376459,
+      "t": 1384125272,
+      "v": 931138818,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 25165971,
+        "Meq": 25166153
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 33554611,
+        "Meq": 33554884
+      },
+      "velu_wall_s_contended": 0.332514366,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1916295347785038208",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1400066561085597176,
+      "crater_j": 1916295350477787632,
+      "ell": 4194319,
+      "find": {
+        "I": 1,
+        "M": 525,
+        "Meq": 616
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 25166501,
+        "Meq": 25166865
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 22.0000051594703,
+      "p": 1916295350477791007,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 36,
+        "M": 8011984,
+        "Meq": 8015260
+      },
+      "sqrtvelu_2pt": {
+        "I": 37,
+        "M": 11236970,
+        "Meq": 11240337
+      },
+      "sqrtvelu_sets": {
+        "I": 1024,
+        "J": 1024,
+        "K": 7,
+        "b": 1024,
+        "b_prime": 1024
+      },
+      "sqrtvelu_wall_s_contended": 0.030003477,
+      "t": 2692752800,
+      "v": 243270502,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 25165971,
+        "Meq": 25166153
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 33554611,
+        "Meq": 33554884
+      },
+      "velu_wall_s_contended": 0.198556655,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1261292517032637448",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1178852614064549311,
+      "crater_j": 1261292518207100576,
+      "ell": 5931649,
+      "find": {
+        "I": 1,
+        "M": 510,
+        "Meq": 601
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 35590472,
+        "Meq": 35590836
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 22.500001799459685,
+      "p": 1261292518207103951,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 42,
+        "M": 11919387,
+        "Meq": 11923209
+      },
+      "sqrtvelu_2pt": {
+        "I": 43,
+        "M": 16816790,
+        "Meq": 16820703
+      },
+      "sqrtvelu_sets": {
+        "I": 1218,
+        "J": 1217,
+        "K": 1212,
+        "b": 1217,
+        "b_prime": 1218
+      },
+      "sqrtvelu_wall_s_contended": 0.056545957,
+      "t": 1174466504,
+      "v": 723661178,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 35589957,
+        "Meq": 35590139
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 47453257,
+        "Meq": 47453530
+      },
+      "velu_wall_s_contended": 0.296488662,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1945700630213815300",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 829248340557350170,
+      "crater_j": 1945700632705104506,
+      "ell": 5931649,
+      "find": {
+        "I": 1,
+        "M": 679,
+        "Meq": 770
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 35590641,
+        "Meq": 35591005
+      },
+      "find_point_tries": 3,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 22.500001799459685,
+      "p": 1945700632705107881,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 42,
+        "M": 11919387,
+        "Meq": 11923209
+      },
+      "sqrtvelu_2pt": {
+        "I": 43,
+        "M": 16816790,
+        "Meq": 16820703
+      },
+      "sqrtvelu_sets": {
+        "I": 1218,
+        "J": 1217,
+        "K": 1212,
+        "b": 1217,
+        "b_prime": 1218
+      },
+      "sqrtvelu_wall_s_contended": 0.042213692,
+      "t": 2491292582,
+      "v": 474531920,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 35589957,
+        "Meq": 35590139
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 47453257,
+        "Meq": 47453530
+      },
+      "velu_wall_s_contended": 0.387353901,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1247500208767830656",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1063813336303730743,
+      "crater_j": 1247500210998127306,
+      "ell": 5931649,
+      "find": {
+        "I": 1,
+        "M": 958,
+        "Meq": 1049
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 35590920,
+        "Meq": 35591284
+      },
+      "find_point_tries": 6,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 22.500001799459685,
+      "p": 1247500210998130681,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 42,
+        "M": 11919387,
+        "Meq": 11923209
+      },
+      "sqrtvelu_2pt": {
+        "I": 43,
+        "M": 16816790,
+        "Meq": 16820703
+      },
+      "sqrtvelu_sets": {
+        "I": 1218,
+        "J": 1217,
+        "K": 1212,
+        "b": 1217,
+        "b_prime": 1218
+      },
+      "sqrtvelu_wall_s_contended": 0.056427516,
+      "t": 2230300026,
+      "v": 47453192,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 35589957,
+        "Meq": 35590139
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 47453257,
+        "Meq": 47453530
+      },
+      "velu_wall_s_contended": 0.472758031,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2186220835225101852",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 772396322260750824,
+      "crater_j": 2186220835627752094,
+      "ell": 8388617,
+      "find": {
+        "I": 1,
+        "M": 598,
+        "Meq": 689
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 50332360,
+        "Meq": 50332724
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 23.000001547843027,
+      "p": 2186220835627755469,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 50,
+        "M": 15239565,
+        "Meq": 15244115
+      },
+      "sqrtvelu_2pt": {
+        "I": 51,
+        "M": 21561484,
+        "Meq": 21566125
+      },
+      "sqrtvelu_sets": {
+        "I": 1448,
+        "J": 1448,
+        "K": 900,
+        "b": 1448,
+        "b_prime": 1448
+      },
+      "sqrtvelu_wall_s_contended": 0.050360393,
+      "t": 402653618,
+      "v": 1107297444,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 50331757,
+        "Meq": 50331939
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 67108993,
+        "Meq": 67109266
+      },
+      "velu_wall_s_contended": 0.341432144,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1349956884992865776",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1205344375630853007,
+      "crater_j": 1349956886318263888,
+      "ell": 8388617,
+      "find": {
+        "I": 1,
+        "M": 612,
+        "Meq": 703
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 50332374,
+        "Meq": 50332738
+      },
+      "find_point_tries": 2,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 23.000001547843027,
+      "p": 1349956886318267263,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 50,
+        "M": 15239565,
+        "Meq": 15244115
+      },
+      "sqrtvelu_2pt": {
+        "I": 51,
+        "M": 21561484,
+        "Meq": 21566125
+      },
+      "sqrtvelu_sets": {
+        "I": 1448,
+        "J": 1448,
+        "K": 900,
+        "b": 1448,
+        "b_prime": 1448
+      },
+      "sqrtvelu_wall_s_contended": 0.109479534,
+      "t": 1325401488,
+      "v": 721421062,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 50331757,
+        "Meq": 50331939
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 67108993,
+        "Meq": 67109266
+      },
+      "velu_wall_s_contended": 0.494949928,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "2155539996929809448",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 233163640334031956,
+      "crater_j": 2155539999865822024,
+      "ell": 8388617,
+      "find": {
+        "I": 1,
+        "M": 700,
+        "Meq": 791
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 50332462,
+        "Meq": 50332826
+      },
+      "find_point_tries": 3,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 23.000001547843027,
+      "p": 2155539999865825399,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 50,
+        "M": 15239565,
+        "Meq": 15244115
+      },
+      "sqrtvelu_2pt": {
+        "I": 51,
+        "M": 21561484,
+        "Meq": 21566125
+      },
+      "sqrtvelu_sets": {
+        "I": 1448,
+        "J": 1448,
+        "K": 900,
+        "b": 1448,
+        "b_prime": 1448
+      },
+      "sqrtvelu_wall_s_contended": 0.051196248,
+      "t": 2936015952,
+      "v": 16777234,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 50331757,
+        "Meq": 50331939
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 67108993,
+        "Meq": 67109266
+      },
+      "velu_wall_s_contended": 0.454517549,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1585268618109676544",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1404311502466849197,
+      "crater_j": 1585268619628174162,
+      "ell": 11863289,
+      "find": {
+        "I": 1,
+        "M": 487,
+        "Meq": 578
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 71180299,
+        "Meq": 71180663
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 23.500000704969747,
+      "p": 1585268619628177537,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 58,
+        "M": 19069358,
+        "Meq": 19074636
+      },
+      "sqrtvelu_2pt": {
+        "I": 59,
+        "M": 27004941,
+        "Meq": 27010310
+      },
+      "sqrtvelu_sets": {
+        "I": 1722,
+        "J": 1722,
+        "K": 1076,
+        "b": 1722,
+        "b_prime": 1722
+      },
+      "sqrtvelu_wall_s_contended": 0.06471964,
+      "t": 1518500994,
+      "v": 759250496,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 71179807,
+        "Meq": 71179989
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 94906387,
+        "Meq": 94906660
+      },
+      "velu_wall_s_contended": 0.568088976,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1608912539260460072",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 51766730522344736,
+      "crater_j": 1608912540280699552,
+      "ell": 11863289,
+      "find": {
+        "I": 1,
+        "M": 680,
+        "Meq": 771
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 71180492,
+        "Meq": 71180856
+      },
+      "find_point_tries": 3,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 23.500000704969747,
+      "p": 1608912540280702927,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 58,
+        "M": 19069358,
+        "Meq": 19074636
+      },
+      "sqrtvelu_2pt": {
+        "I": 59,
+        "M": 27004941,
+        "Meq": 27010310
+      },
+      "sqrtvelu_sets": {
+        "I": 1722,
+        "J": 1722,
+        "K": 1076,
+        "b": 1722,
+        "b_prime": 1722
+      },
+      "sqrtvelu_wall_s_contended": 0.094554968,
+      "t": 1020242856,
+      "v": 877883386,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 71179807,
+        "Meq": 71179989
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 94906387,
+        "Meq": 94906660
+      },
+      "velu_wall_s_contended": 0.703406036,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1388235941853147144",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 661707567905515925,
+      "crater_j": 1388235943490277652,
+      "ell": 11863289,
+      "find": {
+        "I": 1,
+        "M": 751,
+        "Meq": 842
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 71180563,
+        "Meq": 71180927
+      },
+      "find_point_tries": 4,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 23.500000704969747,
+      "p": 1388235943490281027,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 58,
+        "M": 19069358,
+        "Meq": 19074636
+      },
+      "sqrtvelu_2pt": {
+        "I": 59,
+        "M": 27004941,
+        "Meq": 27010310
+      },
+      "sqrtvelu_sets": {
+        "I": 1722,
+        "J": 1722,
+        "K": 1076,
+        "b": 1722,
+        "b_prime": 1722
+      },
+      "sqrtvelu_wall_s_contended": 0.138905982,
+      "t": 1637133884,
+      "v": 640617606,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 71179807,
+        "Meq": 71179989
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 94906387,
+        "Meq": 94906660
+      },
+      "velu_wall_s_contended": 0.773610291,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1285784284518474008",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 767181924582635483,
+      "crater_j": 1285784286699514304,
+      "ell": 16777259,
+      "find": {
+        "I": 1,
+        "M": 501,
+        "Meq": 592
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 100664121,
+        "Meq": 100664485
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 24.000003697622255,
+      "p": 1285784286699517679,
+      "seed": 0,
+      "sqrtvelu_1pt": {
+        "I": 68,
+        "M": 24448541,
+        "Meq": 24454729
+      },
+      "sqrtvelu_2pt": {
+        "I": 69,
+        "M": 34270305,
+        "Meq": 34276584
+      },
+      "sqrtvelu_sets": {
+        "I": 2048,
+        "J": 2048,
+        "K": 21,
+        "b": 2048,
+        "b_prime": 2048
+      },
+      "sqrtvelu_wall_s_contended": 0.131444511,
+      "t": 2181043672,
+      "v": 234881626,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 100663615,
+        "Meq": 100663797
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 134218135,
+        "Meq": 134218408
+      },
+      "velu_wall_s_contended": 0.92687265,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1758664669367650088",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1486641386646289919,
+      "crater_j": 1758664671548690384,
+      "ell": 16777259,
+      "find": {
+        "I": 1,
+        "M": 498,
+        "Meq": 589
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 100664118,
+        "Meq": 100664482
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 24.000003697622255,
+      "p": 1758664671548693759,
+      "seed": 1,
+      "sqrtvelu_1pt": {
+        "I": 68,
+        "M": 24448541,
+        "Meq": 24454729
+      },
+      "sqrtvelu_2pt": {
+        "I": 69,
+        "M": 34270305,
+        "Meq": 34276584
+      },
+      "sqrtvelu_sets": {
+        "I": 2048,
+        "J": 2048,
+        "K": 21,
+        "b": 2048,
+        "b_prime": 2048
+      },
+      "sqrtvelu_wall_s_contended": 0.083824473,
+      "t": 2181043672,
+      "v": 570426806,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 100663615,
+        "Meq": 100663797
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 134218135,
+        "Meq": 134218408
+      },
+      "velu_wall_s_contended": 0.922959167,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "N": "1247503491459254992",
+      "checks": [
+        "sqrtvelu_eq_velu",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_j": 1205727099671254092,
+      "crater_j": 1247503492130341978,
+      "ell": 16777259,
+      "find": {
+        "I": 1,
+        "M": 491,
+        "Meq": 582
+      },
+      "find_plus_velu_total": {
+        "I": 4,
+        "M": 100664111,
+        "Meq": 100664475
+      },
+      "find_point_tries": 1,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "lambda": 1,
+      "lib_codomain_j": null,
+      "log2_ell": 24.000003697622255,
+      "p": 1247503492130345353,
+      "seed": 2,
+      "sqrtvelu_1pt": {
+        "I": 68,
+        "M": 24448541,
+        "Meq": 24454729
+      },
+      "sqrtvelu_2pt": {
+        "I": 69,
+        "M": 34270305,
+        "Meq": 34276584
+      },
+      "sqrtvelu_sets": {
+        "I": 2048,
+        "J": 2048,
+        "K": 21,
+        "b": 2048,
+        "b_prime": 2048
+      },
+      "sqrtvelu_wall_s_contended": 0.177024333,
+      "t": 671090362,
+      "v": 805308432,
+      "v_ell_N": 2,
+      "velu_1pt": {
+        "I": 2,
+        "M": 100663615,
+        "Meq": 100663797
+      },
+      "velu_2pt": {
+        "I": 3,
+        "M": 134218135,
+        "Meq": 134218408
+      },
+      "velu_wall_s_contended": 1.296776624,
+      "wasted_velu": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    }
+  ],
+  "total_wall_s_contended": 25.919111117,
+  "unit": "M = F_p multiplications+squarings (incl. inside polynomial/extension arithmetic); I = F_p inversions; Meq = M + 91 I"
+}

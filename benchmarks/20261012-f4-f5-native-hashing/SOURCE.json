@@ -1,0 +1,97 @@
+{
+  "schema": "benchmark-pinned-source/v1",
+  "source_repository": "https://github.com/aburan28/crypto",
+  "source_commit": "31088bfce9d9cc86fb55a655b064b5472db263ae",
+  "source_commit_tree": "04c552f88b8e9b4cd54b960737bb0c062506de9a",
+  "study": "research/f4_f5_hash_20261012",
+  "study_tree": "e00b12589743ceeb250255f81aa204027e738980",
+  "study_blob_count": 991,
+  "source_tree_manifest": "SOURCE_TREE.json",
+  "source_tree_manifest_sha256": "493f83225c68353ba37df218202aefa3c5dc08944c4767b2c4456160b04118ec",
+  "source_report": {
+    "source": "research/f4_f5_hash_20261012/REPORT.md",
+    "copy": "SOURCE_REPORT.md",
+    "git_blob_sha1": "f469257d73d977ce6445cf4febac92142f5aecb3",
+    "sha256": "3c44fbfabd45c834d5b97a9dd87875d63846676a117afdb038b1a9d20775fe48",
+    "bytes": 8052
+  },
+  "measurement_unit": "Callgrind instruction references (Ir); allocator-requested bytes",
+  "runtime_measured": false,
+  "process_rss_measured": false,
+  "timing_eligibility": "Not earned; no /proc/pressure/cpu",
+  "copied_during_integration": "2026-10-12",
+  "files": [
+    {
+      "source": "research/f4_f5_hash_20261012/reports/run-20261012T0215Z/complete-instructions.pdf",
+      "copy": "complete-instructions.pdf",
+      "git_blob_sha1": "66fd1072213f518b5cfef3689c29a05502db1145",
+      "sha256": "1965332b145ff9a0dbde384ba1094c8cfa6644d27be8f7c8328e2b1ff33baee6",
+      "bytes": 58938
+    },
+    {
+      "source": "research/f4_f5_hash_20261012/reports/run-20261012T0215Z/complete-instructions.svg",
+      "copy": "complete-instructions.svg",
+      "git_blob_sha1": "e33dcbb5858ab1c1646c9aed26975dfa1e0411f5",
+      "sha256": "3d8365ef78daf250226efd37c746f8f19617ed82021a8ef7f55591a97b754e14",
+      "bytes": 66604
+    },
+    {
+      "source": "research/f4_f5_hash_20261012/reports/run-20261012T0215Z/criterion-instructions.pdf",
+      "copy": "criterion-instructions.pdf",
+      "git_blob_sha1": "3aa3b9a509c8eb3fcb9762209c475869a42d9630",
+      "sha256": "06551f7d01e336f22be5548ebfa1adc6c0d220f2f79e491de48eefc28784f8ac",
+      "bytes": 56917
+    },
+    {
+      "source": "research/f4_f5_hash_20261012/reports/run-20261012T0215Z/criterion-instructions.svg",
+      "copy": "criterion-instructions.svg",
+      "git_blob_sha1": "f01bf57a93414eda9edf99eb240cb2a3b0ee98ca",
+      "sha256": "434ef1f7ee59017f97c5168bce0224936b1e619b0b642ddf9b5d2bc1e6fbc023",
+      "bytes": 61312
+    },
+    {
+      "source": "research/f4_f5_hash_20261012/reports/run-20261012T0215Z/peak-live.pdf",
+      "copy": "peak-live.pdf",
+      "git_blob_sha1": "3f0104780c1ae9ca4fce5cb055d0cab3d772eb16",
+      "sha256": "fb04c78eb727500b3f7c5a41992fb857516634021f7ea0d284300fce3837baf2",
+      "bytes": 67504
+    },
+    {
+      "source": "research/f4_f5_hash_20261012/reports/run-20261012T0215Z/peak-live.svg",
+      "copy": "peak-live.svg",
+      "git_blob_sha1": "b0118c7038ba4a1e2a6f86e64a316298659de7a8",
+      "sha256": "83542176785220a81740882824ca2ad61131b2b5fe3fda75476728fe4387f6cf",
+      "bytes": 96429
+    },
+    {
+      "source": "research/f4_f5_hash_20261012/reports/run-20261012T0215Z/report.pdf",
+      "copy": "report.pdf",
+      "git_blob_sha1": "76889c5017e5ef71d5fe7c90f23d878aba9953c2",
+      "sha256": "de988a413c6bb3dcbdef6aefa8b7d4df213a06c93a8918cde1bf634ced76360c",
+      "bytes": 131139
+    }
+  ],
+  "pngs": [
+    {
+      "source": "complete-instructions.svg",
+      "copy": "complete-instructions.png",
+      "dpi": 150,
+      "sha256": "93a60567cacc2d22397e1d3831337335c69ba7c584ca83b1d994d856c1596406",
+      "bytes": 84595
+    },
+    {
+      "source": "criterion-instructions.svg",
+      "copy": "criterion-instructions.png",
+      "dpi": 150,
+      "sha256": "7b893e170b0cd44933df37386c50c651ca73889a26fdae18f112d7751c6f97d9",
+      "bytes": 88781
+    },
+    {
+      "source": "peak-live.svg",
+      "copy": "peak-live.png",
+      "dpi": 150,
+      "sha256": "a44845a49b9d8d8d962e6e9c7beec540756830c538b5316f21d200fb99d84727",
+      "bytes": 166735
+    }
+  ]
+}

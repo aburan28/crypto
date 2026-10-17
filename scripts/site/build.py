@@ -19,10 +19,13 @@ Layout, and why each path is where it is:
     /scoreboard/ic-current-state.html  docs/ic-current-state.html, where things stand
     /scoreboard/ic-measurement.html  docs/ic-measurement.html, the IC measurement standard
     /status/              the ECC2K-130 distinguished-point dashboard
+    /status/challenges.html  other curves and where their points would go
     /status/walk-forest.svg  the walk-forest figure the dashboard shows
     /status/walk-forest*.json, walk-forest.js  the same forests as an explorable graph
     /status/status.json   snapshot, next to the page that reads it
     /status/history.json  published history, likewise
+    /status/status34.json DP34 table-walk snapshot, kept separate from DP32
+    /status/history34.json DP34 table-walk history, likewise
     /status.json          same bytes at the root
     /history.json         same bytes at the root
 
@@ -121,6 +124,9 @@ PAGES = (
     ("docs/ecc2k130-status/walk-forest-gf2-23.json", "status/walk-forest-gf2-23.json"),
     ("docs/ecc2k130-status/walk-forest.js", "status/walk-forest.js"),
     ("docs/ecc2k130-status/how.html", "status/how.html"),
+    ("docs/ecc2k130-status/challenges.html", "status/challenges.html"),
+    ("docs/ecc2k130-status/challenges.js", "status/challenges.js"),
+    ("docs/ecc2k130-status/challenges.json", "status/challenges.json"),
     ("docs/ecc2k130-status/rho-toy.js", "status/rho-toy.js"),
 )
 
@@ -128,11 +134,13 @@ PAGES = (
 DATA = (
     ("docs/ecc2k130-status/status.json", ("status/status.json", "status.json")),
     ("docs/ecc2k130-status/history.json", ("status/history.json", "history.json")),
+    ("docs/ecc2k130-status/status34.json", ("status/status34.json", "status34.json")),
+    ("docs/ecc2k130-status/history34.json", ("status/history34.json", "history34.json")),
     ("docs/ecc2k130-status/mac-control.json", ("status/mac-control.json",)),
 )
 
 # Pages worth listing for crawlers. Data files and the 404 stay out.
-SITEMAP = ("/", "/browser/", "/scoreboard/", "/scoreboard/ic-leaderboard.html", "/scoreboard/ic-measurement.html", "/scoreboard/ic-current-state.html", "/scoreboard/performance-gains.html", "/scoreboard/algorithm-lab.html", "/status/", "/status/how.html")
+SITEMAP = ("/", "/browser/", "/scoreboard/", "/scoreboard/ic-leaderboard.html", "/scoreboard/ic-measurement.html", "/scoreboard/ic-current-state.html", "/scoreboard/performance-gains.html", "/scoreboard/algorithm-lab.html", "/status/", "/status/how.html", "/status/challenges.html")
 
 
 def copy(src_rel: str, dest_rel: str, out_dir: str, root: str = ROOT) -> str:

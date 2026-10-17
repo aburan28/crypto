@@ -9,28 +9,35 @@ on:
     paths:
       - 'isogeny_algos/**'
       - '.github/workflows/isogeny-algos.yml'
+      - 'research/p192_p224_large_degree_isogenies_20261008/PROTOCOL.md'
   push:
     branches: [main]
     paths:
       - 'isogeny_algos/**'
       - '.github/workflows/isogeny-algos.yml'
+      - 'research/p192_p224_large_degree_isogenies_20261008/PROTOCOL.md'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   native:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     env:
       CARGO_TERM_COLOR: always
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /isogeny_algos/
+            /research/p192_p224_large_degree_isogenies_20261008/PROTOCOL.md
       - uses: dtolnay/rust-toolchain@1.98
         with:
           components: rustfmt, clippy

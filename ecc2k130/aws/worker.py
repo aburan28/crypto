@@ -33,6 +33,10 @@ flushes points and checkpoints before exiting.  Spot interruptions and
 
 Environment (written to /etc/ecc2k130.env by bootstrap.sh):
   ECC_BUCKET, AWS_DEFAULT_REGION   the campaign bucket (slots live in it too)
+  ECC_UPLOAD_API, ECC_UPLOAD_TOKEN, ECC_WORKER_ID
+                 authenticated broker mode: the worker receives no AWS
+                 credentials and all object, lease and seed-registry access
+                 goes through the campaign's narrow HTTPS API
   ECC_TABLE      optional DynamoDB table for slots instead of S3 objects
   ECC_SLOT_BACKEND  rds -> lease slots from the RDS control plane instead
                  (controlplane/, needs DATABASE_URL or RHO_DB_HOST); the
@@ -446,6 +450,118 @@ class S3Store:
         sh(["aws", "s3", "cp", src, "s3://%s/%s" % (self.bucket, key), "--only-show-errors"])
 
 
+class PermanentUploadRejection(RuntimeError):
+    pass
+
+
+class ApiStore:
+    """Credential-free worker store backed by the authenticated upload API."""
+
+    def __init__(self, endpoint, token, workerId):
+        if not endpoint or not token or not workerId:
+            raise RuntimeError("ECC_UPLOAD_API, ECC_UPLOAD_TOKEN and ECC_WORKER_ID are required together")
+        self.endpoint = endpoint.rstrip("/")
+        self.token = token
+        self.workerId = workerId
+        self.owner = None
+
+    def _request(self, path, body, timeout=30):
+        body = dict(body, workerId=self.workerId)
+        data = json.dumps(body, separators=(",", ":")).encode()
+        request = urllib.request.Request(
+            self.endpoint + path, data=data, method="POST",
+            headers={"authorization": "Bearer " + self.token,
+                     "content-type": "application/json", "accept": "application/json",
+                     "user-agent": "ecc2k130-worker/1"})
+        try:
+            with urllib.request.urlopen(request, timeout=timeout) as reply:
+                result = json.loads(reply.read())
+        except urllib.error.HTTPError as error:
+            try:
+                detail = json.loads(error.read()).get("error", "request refused")
+            except Exception:
+                detail = "request refused"
+            raise RuntimeError("upload API refused %s: %s" % (path, detail))
+        if not isinstance(result, dict):
+            raise RuntimeError("upload API returned an invalid response")
+        return result
+
+    def _context(self):
+        return {"owner": self.owner} if self.owner else {}
+
+    def exists(self, key):
+        result = self._request("/v1/objects/access",
+                               dict({"key": key, "download": False}, **self._context()))
+        return bool(result.get("exists"))
+
+    def get(self, key, dest):
+        result = self._request("/v1/objects/access",
+                               dict({"key": key, "download": True}, **self._context()))
+        if not result.get("exists"):
+            return False
+        url = result.get("downloadUrl")
+        if not url:
+            raise RuntimeError("upload API omitted an object download URL")
+        proc = subprocess.run(["curl", "--fail", "--silent", "--show-error", "--location",
+                               "--output", dest, url], capture_output=True, text=True)
+        if proc.returncode:
+            raise RuntimeError("brokered object download failed")
+        return True
+
+    def put(self, src, key):
+        self.putValidated(src, key)
+
+    def putValidated(self, src, key, manifestPath=None):
+        body = {"key": key, "bytes": os.path.getsize(src),
+                "sha256": sha256File(src), "owner": self.owner}
+        if manifestPath:
+            body["manifest"] = readJson(manifestPath)
+        ticket = self._request("/v1/uploads/ticket", body)
+        if ticket.get("status") == "ACCEPTED":
+            return
+        if ticket.get("status") == "REJECTED":
+            raise PermanentUploadRejection(
+                "upload validator rejected the object: %s"
+                % ticket.get("reason", "unspecified validation failure"))
+        if ticket.get("status") in ("READY", "VALIDATING"):
+            # Validation of a large DP delta can take longer than the slot's
+            # lease.  The worker owns heartbeat processing, so waiting here
+            # would silently let that lease expire.  Keep the durable spool
+            # entry and let the next upload cycle observe the terminal state.
+            raise RuntimeError("upload validation is still pending")
+        if ticket.get("status") != "UPLOADING" or not ticket.get("uploadUrl"):
+            raise RuntimeError("upload API did not issue an uploadable ticket")
+        command = ["curl", "--fail", "--silent", "--show-error", "--location",
+                   "--request", "PUT", "--upload-file", src,
+                   "--output", "/dev/null", "--write-out", "%{http_code}"]
+        for name, value in sorted((ticket.get("uploadHeaders") or {}).items()):
+            command += ["--header", "%s: %s" % (name, value)]
+        command.append(ticket["uploadUrl"])
+        proc = subprocess.run(command, capture_output=True, text=True)
+        status = proc.stdout.strip()
+        if proc.returncode or not status.startswith("2"):
+            detail = (proc.stderr or "HTTP " + status or "request failed").strip()
+            raise RuntimeError("brokered quarantine upload failed: " + detail[:200])
+        state = self._request("/v1/uploads/complete",
+                              {"key": key, "ticketId": ticket["ticketId"]})
+        if state.get("status") == "ACCEPTED":
+            return
+        if state.get("status") == "REJECTED":
+            raise PermanentUploadRejection(
+                "upload validator rejected the object: %s"
+                % state.get("reason", "unspecified validation failure"))
+        raise RuntimeError("upload validation is still pending")
+
+    def seedRead(self, key):
+        result = self._request("/v1/seeds/read", {"key": key})
+        return result.get("value"), result.get("etag")
+
+    def seedCas(self, key, value, etag=None):
+        result = self._request("/v1/seeds/cas",
+                               {"key": key, "value": value, "etag": etag})
+        return bool(result.get("ok"))
+
+
 class LocalStore:
     def __init__(self, root):
         self.root = root
@@ -688,6 +804,33 @@ class S3Slots:
         return self._modify(slot, owner, lambda it: it.update(extra or {}, leaseUntil=0, state=state))
 
 
+class ApiSlots:
+    """The slot contract through ApiStore, with no cloud credential on-host."""
+
+    def __init__(self, store):
+        self.store = store
+
+    def scan(self):
+        return self.store._request("/v1/slots/scan", {}, timeout=180).get("items", [])
+
+    def claim(self, owner, info, newOnly=False):
+        result = self.store._request("/v1/slots/claim",
+                                     {"owner": owner, "info": info,
+                                      "newOnly": bool(newOnly)}, timeout=180)
+        return int(result["slot"])
+
+    def heartbeat(self, slot, owner, fields):
+        result = self.store._request("/v1/slots/heartbeat",
+                                     {"slot": slot, "owner": owner, "fields": fields})
+        return bool(result.get("ok"))
+
+    def release(self, slot, owner, state="idle", extra=None):
+        result = self.store._request("/v1/slots/release",
+                                     {"slot": slot, "owner": owner, "state": state,
+                                      "extra": extra or {}})
+        return bool(result.get("ok"))
+
+
 def rdsSlots():
     """The control plane's registry, under the same four-method contract.
 
@@ -838,10 +981,15 @@ class Worker:
         defaultClient = "ecc2k130-cpu" if self.cpu else "ecc2k130"
         self.client = os.environ.get("ECC_CLIENT", os.path.join(self.root, defaultClient))
         local = os.environ.get("ECC_LOCAL_STORE")
+        uploadApi = os.environ.get("ECC_UPLOAD_API")
         if local:
             os.makedirs(local, exist_ok=True)
             self.store = LocalStore(local)
             self.slots = LocalSlots(os.path.join(local, "slots.json"))
+        elif uploadApi:
+            self.store = ApiStore(uploadApi, os.environ.get("ECC_UPLOAD_TOKEN"),
+                                  os.environ.get("ECC_WORKER_ID"))
+            self.slots = ApiSlots(self.store)
         else:
             self.store = S3Store(os.environ["ECC_BUCKET"])
             # The RDS control plane when asked for, DynamoDB when a table is
@@ -858,6 +1006,8 @@ class Worker:
         self.instance = instanceId()
         deviceTag = "cpu%d" % self.gpu if self.cpu else "gpu%d" % self.gpu
         self.owner = "%s:%s:%s" % (self.instance, deviceTag, uuid.uuid4().hex)
+        if isinstance(self.store, ApiStore):
+            self.store.owner = self.owner
         self.work = os.path.join(self.root, deviceTag)
         os.makedirs(self.work, exist_ok=True)
         self.statePath = os.path.join(self.work, "state.json")
@@ -1347,8 +1497,8 @@ class Worker:
                 % (name, os.path.getsize(path)))
             os.remove(path)
 
-    def creditSpoolEntry(self, entry, slot):
-        """Move dpOffset past a delta the store has, and only then.
+    def creditSpoolEntry(self, entry, slot, uploaded=True):
+        """Move dpOffset past a handled delta, and only then.
 
         The offset indexes one dp file, so only an entry for this slot whose
         offset is where this process is reading may move it.  streamId is not
@@ -1374,7 +1524,8 @@ class Worker:
         self.state["dpOffset"] = int(entry["offset"]) + entryRecordBytes(entry)
         # Cumulative across dp file rotations, so the dashboard's count
         # is this slot's whole contribution.
-        self.state["dpUploaded"] = int(self.state.get("dpUploaded", 0)) + entryRecords(entry)
+        if uploaded:
+            self.state["dpUploaded"] = int(self.state.get("dpUploaded", 0)) + entryRecords(entry)
         self.saveState()
 
     def uploadSpoolEntry(self, entry, slot=None, source=None, metaSource=None, check=True):
@@ -1395,12 +1546,16 @@ class Worker:
         metaSrc = meta if os.path.exists(meta) else (metaSource if entry.get("hasMeta") else None)
         if check and self.store.exists(entry["key"]):
             log("spool: %s is already in the store; dropping the local copy" % entry["name"])
-            if metaSrc and not self.store.exists(entry["key"] + ".json"):
+            if (metaSrc and not hasattr(self.store, "putValidated")
+                    and not self.store.exists(entry["key"] + ".json")):
                 self.store.put(metaSrc, entry["key"] + ".json")
+        elif metaSrc and hasattr(self.store, "putValidated"):
+            self.store.putValidated(src, entry["key"], metaSrc)
         else:
             self.store.put(src, entry["key"])
             if metaSrc:
                 self.store.put(metaSrc, entry["key"] + ".json")
+        self.reportRds(src, slot)
         self.removeSpoolEntry(entry)
         self.creditSpoolEntry(entry, slot)
         return True
@@ -1425,6 +1580,18 @@ class Worker:
             try:
                 if self.uploadSpoolEntry(entry, slot):
                     sent += 1
+            except PermanentUploadRejection as error:
+                count = entryRecords(entry)
+                # The bytes are immutable, so recutting them cannot turn a
+                # validator rejection into an acceptance.  Advance the live
+                # file offset when this entry is its next prefix, but do not
+                # count the discarded points as uploaded.
+                self.creditSpoolEntry(entry, slot, uploaded=False)
+                self.removeSpoolEntry(entry)
+                self.state["spoolDropped"] = int(self.state.get("spoolDropped", 0)) + count
+                self.saveState()
+                log("spool: permanently rejected %s; dropped %d records (%s)"
+                    % (entry["name"], count, error))
             except Exception as e:
                 log("spool: %s still unsent (will retry): %s" % (entry["name"], e))
                 break
@@ -1519,15 +1686,6 @@ class Worker:
                     out.write(src.read(base))
                 src.seek(offset)
                 out.write(src.read(whole - offset))
-            key = "dp/slot-%05d/%d-%016d.bin" % (slot, int(time.time()), offset)
-            self.store.put(delta, key)
-            self.reportRds(delta, slot)
-            os.remove(delta)
-            self.state["dpOffset"] = whole
-            # Cumulative across dp file rotations, so the dashboard's count
-            # is this slot's whole contribution.
-            self.state["dpUploaded"] = int(self.state.get("dpUploaded", 0)) + (whole - offset) // RECORD_BYTES
-            self.saveState()
             key = "dp/slot-%05d/%s-%016d-%s.bin" % (slot, self.streamId, offset, sha256File(delta))
             metaPath = None
             if self.contract:
@@ -1556,9 +1714,12 @@ class Worker:
             if it >= 0 and it != self.state.get("ckptIter", -1):
                 if self.contract:
                     key = "ckpt/slot-%05d/%s.ck" % (slot, sha256File(snap))
-                    self.store.put(snap, key)
                     writeJson(snap + ".json", envelope(snap, self.contract, "checkpoint", iteration=it))
-                    self.store.put(snap + ".json", key + ".json")
+                    if hasattr(self.store, "putValidated"):
+                        self.store.putValidated(snap, key, snap + ".json")
+                    else:
+                        self.store.put(snap, key)
+                        self.store.put(snap + ".json", key + ".json")
                     if not self.slots.heartbeat(slot, self.owner, {"checkpointKey": key, "ckptIter": it}):
                         self.leaseLost = True
                         self.stopping = True

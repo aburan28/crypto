@@ -26,10 +26,11 @@ use serde_json::{json, Map, Value};
 
 use crate::cryptanalysis::ecbench::audit::{audit, AuditReport};
 use crate::cryptanalysis::ecbench::canonical::sha256_hex;
+use crate::cryptanalysis::ecbench::host::{self, HostCapsule};
 use crate::cryptanalysis::ecbench::methods::{dump_factor_base, FactorBaseFacts, ResolvedMethod};
 use crate::cryptanalysis::ecbench::record::Record;
 use crate::cryptanalysis::ecbench::runner::{read_records, read_session, PlanDoc, Session};
-use crate::cryptanalysis::ecbench::spec::Spec;
+use crate::cryptanalysis::ecbench::spec::{Level, Spec};
 use crate::cryptanalysis::ecbench::workload::{Instance, PUBLIC_TARGET_LAW};
 use crate::cryptanalysis::ic_boundary::{BinaryGroup, BinaryInstance, CountedGroup, GroupOps};
 use crate::cryptanalysis::koblitz_fast::FastPoint;
@@ -643,10 +644,29 @@ pub struct Independent {
     pub pointer: String,
 }
 
+/// A changed toolchain can change `env_class_id` on one machine. The
+/// hardware class is a second, conservative gate against that false positive.
+fn hardware_independence_problem(
+    session_host: &HostCapsule,
+    auditor_class: Option<&str>,
+) -> Option<String> {
+    let measured = match host::hardware_class_id(session_host) {
+        Ok(c) => c,
+        Err(e) => return Some(format!("cannot derive the session hardware class: {e}")),
+    };
+    match auditor_class {
+        None => Some("it records no auditor hardware class".into()),
+        Some(c) if c == measured => Some(format!(
+            "it ran on the session's own hardware class {c}; a compiler or kernel change is not an independent host"
+        )),
+        Some(_) => None,
+    }
+}
+
 /// Why `i` is not an independent replay of `runs` in the session at
-/// `dir`: empty when it is one.  It must be a passing audit of this
-/// session's exact files, run on another host class, that reproduced
-/// every one of the runs.
+/// `dir`: empty when it is one. It must be a passing audit of this
+/// session's exact files, run on another environment and hardware class,
+/// that reproduced every one of the runs.
 fn independent_problems(
     i: &Independent,
     dir: &Path,
@@ -670,6 +690,19 @@ fn independent_problems(
             problems.push(format!("it ran on the session's own host class {c}"))
         }
         Some(_) => {}
+    }
+    match std::fs::read(dir.join("host.json"))
+        .map_err(|e| e.to_string())
+        .and_then(|bytes| serde_json::from_slice::<HostCapsule>(&bytes).map_err(|e| e.to_string()))
+    {
+        Ok(session_host) => {
+            if let Some(problem) =
+                hardware_independence_problem(&session_host, r.auditor_hardware_class_id.as_deref())
+            {
+                problems.push(problem);
+            }
+        }
+        Err(e) => problems.push(format!("cannot read the session host capsule: {e}")),
     }
     for name in [
         "session.json",
@@ -752,6 +785,44 @@ pub fn attach_independent(
         Some(independent),
         false,
     )
+}
+
+const EXPLORATORY_WALL_RECORD: &str = "verified_answer_exploratory_wall";
+const CONTROLLED_WALL_RECORD: &str = "verified_answer_controlled_wall";
+
+/// Classification of the sealed measurements, not a caller's relabeling of
+/// the report. Independent replay and the other claim gates remain separate.
+fn measured_wall_record_class(ic: &Record, rho: &Record, required: Level) -> &'static str {
+    let required = required.max(Level::L2);
+    if ic.isolation.level >= required && rho.isolation.level >= required {
+        CONTROLLED_WALL_RECORD
+    } else {
+        EXPLORATORY_WALL_RECORD
+    }
+}
+
+/// Native counters have method-specific units and cover the whole measured
+/// record, including reusable preparation. They cannot supply a calibrated
+/// online operation ratio or total-work S without an additional common ledger.
+fn native_operation_accounting(ic: &Record, rho: &Record) -> Value {
+    let arm = |record: &Record| {
+        json!({
+            "record_id": record.record_id,
+            "native_counters": record.counters,
+            "cost_is_lower_bound": record.cost.lower_bound,
+            "unpriced_work": record.cost.unpriced,
+        })
+    };
+    json!({
+        "counter_scope": "whole_measured_record",
+        "ic": arm(ic),
+        "rho": arm(rho),
+        "common_operation_unit": null,
+        "calibrated_operation_ratio": null,
+        "total_work_S": null,
+        "calibration_status": "unknown",
+        "boundary": "IC probes and rho walk steps retain their native units; these counter bags are not an online common-unit operation ledger",
+    })
 }
 
 fn build_from_session(
@@ -918,8 +989,19 @@ fn build_from_session(
     let phase = |k: &str| ms(icw.phases_ns.get(k).copied().unwrap_or(0));
     let ic_ms = ms(icw.wall_ns);
     let rho_ms = ms(rhow.wall_ns);
+    // The live vs_rho schema calls these one-target online costs.  They
+    // include native solver/table work in wall time; the cold GAE values
+    // remain separate lower bounds wherever a conversion is missing.
+    let online_complete = [icw, rhow]
+        .iter()
+        .all(|w| w.phases_ns.values().sum::<u64>() == w.wall_ns);
+    if !online_complete {
+        return Err("the one-target online phases do not cover the measured interval".into());
+    }
     let target_hash = id_sha256(&json!([target.0, target.1]))?;
-    let required = spec.measurement.isolation_required;
+    // The configurable session floor may admit diagnostic L0/L1 timings.
+    // A one-target wall comparison has a non-configurable L2 minimum.
+    let required = spec.measurement.isolation_required.max(Level::L2);
     let levels = (ic.isolation.level, rho.isolation.level);
     let admissible = levels.0 >= required && levels.1 >= required;
     let speedup = rho_ms / ic_ms;
@@ -975,6 +1057,31 @@ fn build_from_session(
     put("ic_target_hash", json!(target_hash));
     put("rho_target_hash", json!(target_hash));
     put("timing_class", json!("single_target_online_wall"));
+    put(
+        "record_class",
+        json!(measured_wall_record_class(ic, rho, required)),
+    );
+    put("operation_accounting", native_operation_accounting(ic, rho));
+    put("ic_cost", json!(ic_ms));
+    put("rho_cost", json!(rho_ms));
+    put("cost_unit", json!("ms per one public target, online wall"));
+    put(
+        "automorphism_discount",
+        json!(format!("sqrt(2n) with A=2*n={} signed Frobenius", 2 * kb.n)),
+    );
+    put("all_stages_charged_same_series", json!(online_complete));
+    put(
+        "paired_target",
+        json!({
+            "ic_public_q": w.target,
+            "rho_public_q": rho.workload.target,
+            "same_public_point": w.target == rho.workload.target,
+        }),
+    );
+    put("ic_verified", json!(true));
+    put("rho_verified", json!(true));
+    put("ic_online_ms", json!(ic_ms));
+    put("rho_online_ms", json!(rho_ms));
     put("ic_online_wall_ms", json!(ic_ms));
     put("rho_online_wall_ms", json!(rho_ms));
     put("online_speedup", json!(speedup));
@@ -986,6 +1093,29 @@ fn build_from_session(
             "T_target_relation_check_ms": phase("target_relation_check"),
             "T_target_descent_ms": phase("target_descent"),
             "T_target_recovery_check_ms": phase("target_recovery_check"),
+        }),
+    );
+    put(
+        "rho_online_phase_ms",
+        json!({
+            "T_rho_solve_ms": ms(rhow.phases_ns.values().sum()),
+        }),
+    );
+    put(
+        "ic_online_interval",
+        json!({
+            "start_event": icw.start_event,
+            "stop_event": icw.stop_event,
+            "included_stages": icw.included_stages,
+            "zero_phases": icw.zero_phases,
+        }),
+    );
+    put(
+        "rho_online_interval",
+        json!({
+            "start_event": rhow.start_event,
+            "stop_event": rhow.stop_event,
+            "included_stages": rhow.included_stages,
         }),
     );
     put(
@@ -1021,11 +1151,11 @@ fn build_from_session(
         "verdict",
         json!(match (admissible, independent.is_some()) {
             (true, true) => format!(
-                "online speedup {speedup:.4} (rho / IC) on one public target, both runs at {} or above, replayed independently",
+                "one-run online ratio {speedup:.4} (rho / IC) on one public target, both runs at {} or above, replayed independently; a runtime gain additionally requires paired rounds and an A/A noise interval",
                 required.name()
             ),
             (true, false) => format!(
-                "online speedup {speedup:.4} (rho / IC) on one public target, both runs at {} or above; not a claim until an independent replay is cited",
+                "one-run online ratio {speedup:.4} (rho / IC) on one public target, both runs at {} or above; an independent replay and paired A/A evidence are still required for a runtime claim",
                 required.name()
             ),
             (false, _) => format!(
@@ -1079,6 +1209,7 @@ fn build_from_session(
             json!({
                 "receipt_sha256": i.receipt_sha256,
                 "auditor_env_class_id": i.receipt.auditor_env_class_id,
+                "auditor_hardware_class_id": i.receipt.auditor_hardware_class_id,
                 "auditor_binary_sha256": i.receipt.auditor_binary_sha256,
                 "replays": i.receipt.replays.len(),
             })
@@ -1244,6 +1375,74 @@ pub fn check_vs_rho(report: &Value) -> Result<Value, String> {
     let mut err = |s: String| errors.push(s);
     let get = |k: &str| report.get(k);
 
+    // The live ledger's vs_rho pairing contract is separate from its
+    // historical claim-provenance checks below. Check both: a matching
+    // hash alone does not prove that both rows expose the same public Q.
+    let mut pairing_errors = Vec::new();
+    match get("paired_target").and_then(Value::as_object) {
+        None => pairing_errors.push("paired_target must be an object".to_string()),
+        Some(paired) => {
+            let ic_q = paired.get("ic_public_q").and_then(Value::as_array);
+            let rho_q = paired.get("rho_public_q").and_then(Value::as_array);
+            match (ic_q, rho_q) {
+                (Some(a), Some(b)) if a != b => {
+                    pairing_errors.push("IC and rho public targets differ".to_string());
+                }
+                (Some(_), Some(_)) => {}
+                _ => pairing_errors
+                    .push("both arms must record public target coordinates".to_string()),
+            }
+            if paired.get("same_public_point") != Some(&Value::Bool(true)) {
+                pairing_errors.push("same_public_point is not verified".to_string());
+            }
+        }
+    }
+    for (key, message) in [
+        ("ic_verified", "IC target recovery is not verified"),
+        ("rho_verified", "rho target recovery is not verified"),
+    ] {
+        if get(key) != Some(&Value::Bool(true)) {
+            pairing_errors.push(message.to_string());
+        }
+    }
+    for arm in ["ic", "rho"] {
+        let total = positive_cost(get(&format!("{arm}_online_ms")));
+        let phases = get(&format!("{arm}_online_phase_ms")).and_then(Value::as_object);
+        match (total, phases) {
+            (None, _) => pairing_errors.push(format!("positive {arm}_online_ms is required")),
+            (Some(_), None) => pairing_errors.push(format!(
+                "{arm}_online_phase_ms must record exclusive phases"
+            )),
+            (Some(_), Some(phases)) if phases.is_empty() => {
+                pairing_errors.push(format!(
+                    "{arm}_online_phase_ms must record exclusive phases"
+                ));
+            }
+            (Some(total), Some(phases)) => {
+                let parts: Option<Vec<f64>> = phases
+                    .values()
+                    .map(|v| v.as_f64().filter(|n| n.is_finite() && *n >= 0.0))
+                    .collect();
+                match parts {
+                    None => pairing_errors.push(format!(
+                        "{arm}_online_phase_ms must contain finite nonnegative numbers"
+                    )),
+                    Some(parts) => {
+                        let sum: f64 = parts.iter().sum();
+                        if !isclose(sum, total, 1e-8, 0.02) {
+                            pairing_errors.push(format!(
+                                "{arm} online phase costs do not sum to online time"
+                            ));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if get("all_stages_charged_same_series") != Some(&Value::Bool(true)) {
+        pairing_errors.push("same-target charged intervals are not confirmed".to_string());
+    }
+
     for key in ["candidate_id", "workload_id", "run_id"] {
         if text(get(key)).is_none() {
             err(format!("{key} must be a nonempty string"));
@@ -1318,7 +1517,8 @@ pub fn check_vs_rho(report: &Value) -> Result<Value, String> {
     }
     if !stage["timing_class_enum"]
         .as_array()
-        .is_some_and(|e| get("timing_class").is_some_and(|t| e.contains(t)))
+        .is_some_and(|e| e.contains(&Value::String("single_target_online_wall".into())))
+        || get("timing_class").and_then(Value::as_str) != Some("single_target_online_wall")
     {
         err("timing_class must be single_target_online_wall".into());
     }
@@ -1349,13 +1549,104 @@ pub fn check_vs_rho(report: &Value) -> Result<Value, String> {
         ("ic_resource_envelope", ic_env),
         ("rho_resource_envelope", rho_env),
     ] {
-        if !v.is_some_and(|o| !o.is_empty()) {
+        if v.is_none_or(|o| o.is_empty()) {
             err(format!("{key} must be a nonempty object"));
         }
     }
     if let (Some(a), Some(b)) = (ic_env, rho_env) {
         if a != b {
             err("IC and rho resource envelopes must match exactly".into());
+        }
+    }
+    match get("isolation_levels").and_then(Value::as_object) {
+        None => err("isolation_levels must be an object".into()),
+        Some(levels) => {
+            let required = levels
+                .get("required")
+                .and_then(Value::as_str)
+                .and_then(Level::parse);
+            if required.is_none_or(|r| r < Level::L2) {
+                err("isolation_levels.required must be L2 or L3".into());
+            }
+            let required = required.unwrap_or(Level::L2).max(Level::L2);
+            for arm in ["ic", "rho"] {
+                let level = levels
+                    .get(arm)
+                    .and_then(Value::as_str)
+                    .and_then(Level::parse);
+                match level {
+                    Some(level) if level >= required => {}
+                    Some(level) => err(format!(
+                        "isolation_levels.{arm} {} is below required {}",
+                        level.name(),
+                        required.name()
+                    )),
+                    None => err(format!("isolation_levels.{arm} must be L0, L1, L2 or L3")),
+                }
+            }
+        }
+    }
+    if get("record_class").and_then(Value::as_str) != Some(CONTROLLED_WALL_RECORD) {
+        err("record_class must be verified_answer_controlled_wall for a primary wall claim".into());
+    }
+    match get("operation_accounting").and_then(Value::as_object) {
+        None => err("operation_accounting must retain a native-counter ledger object".into()),
+        Some(accounting) => {
+            if accounting.get("counter_scope").and_then(Value::as_str)
+                != Some("whole_measured_record")
+            {
+                err("operation_accounting.counter_scope must be whole_measured_record".into());
+            }
+            for arm in ["ic", "rho"] {
+                let prefix = format!("operation_accounting.{arm}");
+                let Some(ledger) = accounting.get(arm).and_then(Value::as_object) else {
+                    err(format!(
+                        "{prefix} must retain a native-counter ledger object"
+                    ));
+                    continue;
+                };
+                if ledger
+                    .get("native_counters")
+                    .and_then(Value::as_object)
+                    .is_none_or(|counters| {
+                        counters.is_empty()
+                            || counters
+                                .iter()
+                                .any(|(key, value)| key.trim().is_empty() || !value.is_u64())
+                    })
+                {
+                    err(format!(
+                        "{prefix}.native_counters must be a nonempty object of native u64 counters"
+                    ));
+                }
+                let record_id = text(ledger.get("record_id"));
+                if record_id.is_none() {
+                    err(format!("{prefix}.record_id must be a nonempty string"));
+                }
+                if let Some(expected) = text(get("ecbench_records").and_then(|r| r.get(arm))) {
+                    if record_id != Some(expected) {
+                        err(format!(
+                            "{prefix}.record_id must match ecbench_records.{arm}"
+                        ));
+                    }
+                }
+                if ledger
+                    .get("cost_is_lower_bound")
+                    .and_then(Value::as_bool)
+                    .is_none()
+                {
+                    err(format!("{prefix}.cost_is_lower_bound must be a bool"));
+                }
+                if ledger
+                    .get("unpriced_work")
+                    .and_then(Value::as_array)
+                    .is_none_or(|work| work.iter().any(|item| text(Some(item)).is_none()))
+                {
+                    err(format!(
+                        "{prefix}.unpriced_work must be an array of nonempty strings"
+                    ));
+                }
+            }
         }
     }
     let ic_ms = positive_cost(get("ic_online_wall_ms"));
@@ -1369,10 +1660,30 @@ pub fn check_vs_rho(report: &Value) -> Result<Value, String> {
         }
         _ => err("online times and speedup must be positive finite numbers".into()),
     }
+    for (arm, wall) in [("ic", ic_ms), ("rho", rho_ms)] {
+        if let Some(wall) = wall {
+            for key in [format!("{arm}_online_ms"), format!("{arm}_cost")] {
+                if !positive_cost(get(&key)).is_some_and(|cost| isclose(cost, wall, 1e-9, 1e-9)) {
+                    err(format!("{key} must equal {arm}_online_wall_ms"));
+                }
+            }
+        }
+    }
     match get("ic_online_phase_ms").and_then(Value::as_object) {
         None => err("ic_online_phase_ms must be an object".into()),
         Some(phases) => {
-            let fields = strs(&stage["ic_online_phase_fields"]);
+            // Newer ledgers name the five phases under
+            // `primary_ic_online_phase_keys`; older ones used
+            // `ic_online_phase_fields`. An empty field list must never
+            // turn a real interval into a comparison against zero.
+            let fields = if stage["ic_online_phase_fields"].is_array() {
+                strs(&stage["ic_online_phase_fields"])
+            } else {
+                strs(&stage["primary_ic_online_phase_keys"])
+                    .into_iter()
+                    .map(|key| format!("T_{key}_ms"))
+                    .collect()
+            };
             let mut values = Vec::new();
             for key in &fields {
                 match phases
@@ -1399,9 +1710,28 @@ pub fn check_vs_rho(report: &Value) -> Result<Value, String> {
     match get("online_interval").and_then(Value::as_object) {
         None => err("online_interval must be an object".into()),
         Some(interval) => {
-            let keys = strs(&stage["online_interval_event_fields"])
+            let event_fields = if stage["online_interval_event_fields"].is_array() {
+                strs(&stage["online_interval_event_fields"])
+            } else {
+                [
+                    "ic_start_event",
+                    "ic_stop_event",
+                    "rho_start_event",
+                    "rho_stop_event",
+                ]
                 .into_iter()
-                .chain(strs(&stage["online_interval_stage_fields"]));
+                .map(str::to_string)
+                .collect()
+            };
+            let stage_fields = if stage["online_interval_stage_fields"].is_array() {
+                strs(&stage["online_interval_stage_fields"])
+            } else {
+                ["ic_included_stages", "rho_included_stages"]
+                    .into_iter()
+                    .map(str::to_string)
+                    .collect()
+            };
+            let keys = event_fields.into_iter().chain(stage_fields);
             for key in keys {
                 let v = interval.get(&key);
                 let valid = if key.ends_with("_event") {
@@ -1457,7 +1787,10 @@ pub fn check_vs_rho(report: &Value) -> Result<Value, String> {
             }
         }
     }
-    let ok = missing_stage.is_empty() && missing_global.is_empty() && errors.is_empty();
+    let ok = missing_stage.is_empty()
+        && missing_global.is_empty()
+        && pairing_errors.is_empty()
+        && errors.is_empty();
     Ok(json!({
         "schema_version": ledger.get("schema_version"),
         "stage": "vs_rho",
@@ -1465,6 +1798,7 @@ pub fn check_vs_rho(report: &Value) -> Result<Value, String> {
         "status": if ok { "PASS" } else { "FAIL" },
         "missing_stage_fields": missing_stage,
         "missing_global_provenance": missing_global,
+        "pairing_errors": pairing_errors,
         "validation_errors": errors,
         "required_stage_fields": required,
         "required_global_provenance": global,
@@ -1491,6 +1825,7 @@ pub fn check_problems(check: &Value) -> Vec<String> {
                 .into_iter()
                 .map(|k| format!("missing provenance field {k}")),
         )
+        .chain(list("pairing_errors"))
         .chain(list("validation_errors"))
         .collect()
 }
@@ -1499,6 +1834,108 @@ pub fn check_problems(check: &Value) -> Vec<String> {
 mod tests {
     use super::*;
     use crate::cryptanalysis::ic_boundary::koblitz_instance;
+
+    fn recorded_counter_pair() -> (Record, Record) {
+        let records: Vec<Record> = include_str!(
+            "../../../research/ecbench_n41_n53_shared_rank_20261005/sessions/mac-l0/records.jsonl"
+        )
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+        let ic = records.iter().find(|r| r.method.family == "ic").unwrap();
+        let rho = records
+            .iter()
+            .find(|r| r.method.id.starts_with("rho."))
+            .unwrap();
+        (ic.clone(), rho.clone())
+    }
+
+    #[test]
+    fn native_counter_ledgers_keep_recorded_units_and_unknown_calibration() {
+        let (ic, rho) = recorded_counter_pair();
+        let accounting = native_operation_accounting(&ic, &rho);
+        assert_eq!(accounting["counter_scope"], "whole_measured_record");
+        assert_eq!(accounting["ic"]["native_counters"], json!(ic.counters));
+        assert_eq!(accounting["rho"]["native_counters"], json!(rho.counters));
+        assert_ne!(
+            accounting["ic"]["native_counters"],
+            accounting["rho"]["native_counters"]
+        );
+        for (arm, record) in [("ic", &ic), ("rho", &rho)] {
+            assert_eq!(accounting[arm]["record_id"], record.record_id);
+            assert_eq!(
+                accounting[arm]["cost_is_lower_bound"],
+                record.cost.lower_bound
+            );
+            assert_eq!(
+                accounting[arm]["unpriced_work"],
+                json!(record.cost.unpriced)
+            );
+        }
+        assert_eq!(accounting["calibration_status"], "unknown");
+        for key in [
+            "common_operation_unit",
+            "calibrated_operation_ratio",
+            "total_work_S",
+        ] {
+            assert!(accounting[key].is_null(), "{key} must remain unknown");
+        }
+    }
+
+    #[test]
+    fn wall_record_class_requires_both_recorded_levels_and_the_l2_floor() {
+        let (mut ic, mut rho) = recorded_counter_pair();
+        assert_eq!(ic.isolation.level, Level::L0);
+        assert_eq!(rho.isolation.level, Level::L0);
+        assert_eq!(
+            measured_wall_record_class(&ic, &rho, Level::L0),
+            EXPLORATORY_WALL_RECORD
+        );
+
+        // Synthetic copies check the policy only. The exporter obtains
+        // its levels from the audited sealed records, never report labels.
+        ic.isolation.level = Level::L2;
+        rho.isolation.level = Level::L1;
+        assert_eq!(
+            measured_wall_record_class(&ic, &rho, Level::L0),
+            EXPLORATORY_WALL_RECORD
+        );
+        rho.isolation.level = Level::L2;
+        assert_eq!(
+            measured_wall_record_class(&ic, &rho, Level::L0),
+            CONTROLLED_WALL_RECORD
+        );
+        assert_eq!(
+            measured_wall_record_class(&ic, &rho, Level::L3),
+            EXPLORATORY_WALL_RECORD
+        );
+        ic.isolation.level = Level::L3;
+        rho.isolation.level = Level::L3;
+        assert_eq!(
+            measured_wall_record_class(&ic, &rho, Level::L3),
+            CONTROLLED_WALL_RECORD
+        );
+    }
+
+    #[test]
+    fn compiler_change_on_one_machine_cannot_supply_independence() {
+        let original = host::capture().unwrap();
+        let mut alternate = original.clone();
+        alternate.stable.rustc_vv = Some("other toolchain".into());
+        assert_ne!(
+            host::recompute_class(&original).unwrap(),
+            host::recompute_class(&alternate).unwrap()
+        );
+        let alternate_hardware = host::hardware_class_id(&alternate).unwrap();
+        assert!(
+            hardware_independence_problem(&original, Some(&alternate_hardware))
+                .unwrap()
+                .contains("own hardware class")
+        );
+        assert!(hardware_independence_problem(&original, None)
+            .unwrap()
+            .contains("no auditor hardware class"));
+    }
 
     #[test]
     fn canonical_utf8_writes_non_ascii_raw() {

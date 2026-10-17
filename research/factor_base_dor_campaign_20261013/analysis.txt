@@ -1,0 +1,356 @@
+== m=2 grid: D*, yield, work-per-relation (mean over seeds) ==
+n   st         dim nvars D*mean[min..max] cens frac     W(D*)     W/rel     floor|V|^2/2^n  ratio
+9   random       3     6  2.57 [2..3]    0 0.0694 1.63e+03  2.74e+04  0.125
+9   standard     3     6  2.35 [2..3]    0 0.0417 1.11e+03  2.15e+04  0.125
+9   subfield     3     6  2.00 [2..2]    0 0.0139 340       7.78e+03  0.125
+11  nb_break     2     4  2.08 [2..3]    0 0.0000 211       -         0.008
+11  nb_break     3     6  2.99 [2..3]    0 0.0278 3.19e+03  7.76e+04  0.031
+11  nb_break     4     8  3.00 [3..3]    0 0.0972 9.21e+03  1.29e+05  0.125
+11  nb_break     5    10  4.00 [4..4]    0 0.3472 2.38e+05  7e+05     0.500
+11  nb_window    2     4  2.01 [2..3]    0 0.0000 178       -         0.008
+11  nb_window    3     6  2.19 [2..3]    0 0.0000 846       -         0.031
+11  nb_window    4     8  2.94 [2..3]    0 0.0139 8.78e+03  2.12e+05  0.125
+11  nb_window    5    10  3.92 [3..4]    0 0.2500 2.21e+05  2.24e+06  0.500
+11  random       2     4  2.00 [2..2]    0 0.0000 163       -         0.008
+11  random       3     6  2.15 [2..3]    0 0.0000 748       -         0.031
+11  random       4     8  2.88 [2..3]    0 0.0417 8.22e+03  1.44e+05  0.125
+11  random       5    10  3.92 [3..4]    0 0.1667 2.21e+05  1.45e+06  0.500
+11  standard     2     4  2.01 [2..3]    0 0.0000 174       -         0.008
+11  standard     3     6  2.10 [2..3]    0 0.0000 569       -         0.031
+11  standard     4     8  2.57 [2..3]    0 0.0833 5.49e+03  1.03e+05  0.125
+11  standard     5    10  3.26 [2..4]    0 0.2361 8.73e+04  3.96e+05  0.500
+13  nb_break     2     4  2.01 [2..3]    0 0.0139 180       4.01e+03  0.002
+13  nb_break     3     6  2.82 [2..3]    0 0.0139 3.18e+03  7.41e+04  0.008
+13  nb_break     4     8  2.99 [2..3]    0 0.0278 1.07e+04  2.61e+05  0.031
+13  nb_break     5    10  4.00 [4..4]    0 0.1111 2.81e+05  3.56e+06  0.125
+13  nb_break     6    12  4.00 [4..4]    0 0.4167 8.15e+05  2.63e+06  0.500
+13  nb_window    2     4  2.00 [2..2]    0 0.0000 200       -         0.002
+13  nb_window    3     6  2.08 [2..3]    0 0.0000 624       -         0.008
+13  nb_window    4     8  2.81 [2..3]    0 0.0278 8.99e+03  2.19e+05  0.031
+13  nb_window    5    10  2.99 [2..3]    0 0.0833 2.48e+04  3.61e+05  0.125
+13  nb_window    6    12  4.00 [4..4]    0 0.1944 8.15e+05  4.74e+06  0.500
+13  random       2     4  2.00 [2..2]    0 0.0000 188       -         0.002
+13  random       3     6  2.04 [2..3]    0 0.0000 476       -         0.008
+13  random       4     8  2.79 [2..3]    0 0.0278 8.7e+03   2.19e+05  0.031
+13  random       5    10  3.00 [3..3]    0 0.0694 2.52e+04  4.03e+05  0.125
+13  random       6    12  4.00 [4..4]    0 0.2500 8.15e+05  3.49e+06  0.500
+13  standard     2     4  2.01 [2..3]    0 0.0000 210       -         0.002
+13  standard     3     6  2.04 [2..3]    0 0.0139 492       1.58e+04  0.008
+13  standard     4     8  2.23 [2..3]    0 0.0278 2.95e+03  6.22e+04  0.031
+13  standard     5    10  2.86 [2..3]    0 0.0417 2.19e+04  3.99e+05  0.125
+13  standard     6    12  3.80 [2..4]    0 0.1528 6.77e+05  4.51e+06  0.500
+15  random       3     6  2.01 [2..3]    0 0.0000 429       -         0.002
+15  random       5    10  2.99 [2..3]    0 0.0139 2.86e+04  6.97e+05  0.031
+15  standard     3     6  2.00 [2..2]    0 0.0000 387       -         0.002
+15  standard     5    10  2.36 [2..3]    0 0.0278 1.1e+04   1.64e+05  0.031
+15  subfield     3     6  2.00 [2..2]    0 0.0139 555       1.21e+04  0.002
+15  subfield     5    10  2.00 [2..2]    0 0.0000 1.21e+03  -         0.031
+17  nb_break     2     4  2.00 [2..2]    0 0.0000 227       -         0.000
+17  nb_break     3     6  2.25 [2..3]    0 0.0000 1.56e+03  -         0.000
+17  nb_break     4     8  3.00 [3..3]    0 0.0000 1.42e+04  -         0.002
+17  nb_break     5    10  3.00 [3..3]    0 0.0312 3.29e+04  5.27e+05  0.008
+17  nb_break     6    12  4.00 [4..4]    0 0.0625 1.07e+06  1.71e+07  0.031
+17  nb_break     7    14  4.00 [4..4]    0 0.1875 2.65e+06  1.59e+07  0.125
+17  nb_break     8    16  4.00 [4..4]    0 0.4062 5.86e+06  1.52e+07  0.500
+17  nb_window    2     4  2.00 [2..2]    0 0.0000 256       -         0.000
+17  nb_window    3     6  2.00 [2..2]    0 0.0000 419       -         0.000
+17  nb_window    4     8  2.09 [2..3]    0 0.0000 1.91e+03  -         0.002
+17  nb_window    5    10  2.97 [2..3]    0 0.0000 3.19e+04  -         0.008
+17  nb_window    6    12  3.06 [2..4]    0 0.0000 1.58e+05  -         0.031
+17  nb_window    7    14  4.00 [4..4]    0 0.0625 2.65e+06  2.12e+07  0.125
+17  nb_window    8    16  4.00 [4..4]    0 0.3438 5.86e+06  1.72e+07  0.500
+17  random       2     4  2.00 [2..2]    0 0.0000 261       -         0.000
+17  random       3     6  2.00 [2..2]    0 0.0000 419       -         0.000
+17  random       4     8  2.06 [2..3]    0 0.0000 1.49e+03  -         0.002
+17  random       5    10  2.94 [2..3]    0 0.0000 3.09e+04  -         0.008
+17  random       6    12  3.00 [3..3]    0 0.0000 6.61e+04  -         0.031
+17  random       7    14  4.00 [4..4]    0 0.0312 2.65e+06  4.24e+07  0.125
+17  random       8    16  4.00 [4..4]    0 0.1250 5.86e+06  4.69e+07  0.500
+17  standard     2     4  2.00 [2..2]    0 0.0000 251       -         0.000
+17  standard     3     6  2.00 [2..2]    0 0.0000 414       -         0.000
+17  standard     4     8  2.03 [2..3]    0 0.0000 1.08e+03  -         0.002
+17  standard     5    10  2.28 [2..3]    0 0.0000 9.94e+03  -         0.008
+17  standard     6    12  2.81 [2..3]    0 0.0000 5.39e+04  -         0.031
+17  standard     7    14  3.17 [2..4]    0 0.0938 6.22e+05  9.47e+06  0.125
+17  standard     8    16  4.00 [4..4]    0 0.3438 5.86e+06  1.72e+07  0.500
+19  nb_break     2     4  2.00 [2..2]    0 0.0000 258       -         0.000
+19  nb_break     3     6  2.06 [2..3]    0 0.0000 741       -         0.000
+19  nb_break     4     8  3.00 [3..3]    0 0.0000 1.59e+04  -         0.000
+19  nb_break     5    10  3.00 [3..3]    0 0.0000 3.68e+04  -         0.002
+19  nb_break     6    12  4.00 [4..4]    0 0.0000 1.19e+06  -         0.008
+19  nb_break     7    14  4.00 [4..4]    0 0.0312 2.96e+06  -         0.031
+19  nb_break     8    16  4.00 [4..4]    0 0.0625 6.55e+06  -         0.125
+19  nb_break     9    18  5.00 [5..5]    0 0.3125 2.37e+08  1.26e+09  0.500
+19  nb_window    2     4  2.00 [2..2]    0 0.0000 266       -         0.000
+19  nb_window    3     6  2.00 [2..2]    0 0.0000 418       -         0.000
+19  nb_window    4     8  2.00 [2..2]    0 0.0000 703       -         0.000
+19  nb_window    5    10  2.78 [2..3]    0 0.0000 2.79e+04  -         0.002
+19  nb_window    6    12  3.00 [3..3]    0 0.0000 7.39e+04  -         0.008
+19  nb_window    7    14  4.00 [4..4]    0 0.0000 2.96e+06  -         0.031
+19  nb_window    8    16  4.00 [4..4]    0 0.1250 6.55e+06  3.49e+07  0.125
+19  nb_window    9    18  5.00 [5..5]    0 0.4062 2.37e+08  5.41e+08  0.500
+19  random       2     4  2.00 [2..2]    0 0.0000 273       -         0.000
+19  random       3     6  2.00 [2..2]    0 0.0000 451       -         0.000
+19  random       4     8  2.06 [2..3]    0 0.0000 722       -         0.000
+19  random       5    10  2.78 [2..3]    0 0.0000 3.01e+04  -         0.002
+19  random       6    12  3.00 [3..3]    0 0.0000 7.39e+04  -         0.008
+19  random       7    14  4.00 [4..4]    0 0.0000 2.96e+06  -         0.031
+19  random       8    16  4.00 [4..4]    0 0.0938 6.55e+06  5.24e+07  0.125
+19  random       9    18  5.00 [5..5]    0 0.2188 2.37e+08  1.26e+09  0.500
+19  standard     2     4  2.00 [2..2]    0 0.0000 261       -         0.000
+19  standard     3     6  2.00 [2..2]    0 0.0000 473       -         0.000
+19  standard     4     8  2.00 [2..2]    0 0.0000 758       -         0.000
+19  standard     5    10  2.09 [2..3]    0 0.0000 7.76e+03  -         0.002
+19  standard     6    12  2.19 [2..3]    0 0.0000 2.86e+04  -         0.008
+19  standard     7    14  2.77 [2..3]    0 0.0312 9e+04     1.44e+06  0.031
+19  standard     8    16  3.89 [3..4]    0 0.1250 6.1e+06   4.88e+07  0.125
+19  standard     9    18  4.00 [4..4]    0 0.2812 1.32e+07  3.53e+07  0.500
+23  nb_break     2     4  2.00 [2..2]    0 0.0000 307       -         0.000
+23  nb_break     3     6  2.00 [2..2]    0 0.0000 510       -         0.000
+23  nb_break     4     8  2.91 [2..3]    0 0.0000 1.75e+04  -         0.000
+23  nb_break     5    10  3.00 [3..3]    0 0.0000 4.45e+04  -         0.000
+23  nb_break     6    12  3.00 [3..3]    0 0.0000 8.94e+04  -         0.000
+23  nb_break     7    14  4.00 [4..4]    0 0.0312 3.59e+06  5.74e+07  0.002
+23  nb_break     8    16  4.00 [4..4]    0 0.0312 7.93e+06  1.27e+08  0.008
+23  nb_window    2     4  2.00 [2..2]    0 0.0000 333       -         0.000
+23  nb_window    3     6  2.00 [2..2]    0 0.0000 556       -         0.000
+23  nb_window    4     8  2.00 [2..2]    0 0.0000 870       -         0.000
+23  nb_window    5    10  2.09 [2..3]    0 0.0000 5.34e+03  -         0.000
+23  nb_window    6    12  2.88 [2..3]    0 0.0000 7.85e+04  -         0.000
+23  nb_window    7    14  3.00 [3..3]    0 0.0000 1.62e+05  -         0.002
+23  nb_window    8    16  4.00 [4..4]    0 0.0000 7.93e+06  -         0.008
+23  random       2     4  2.00 [2..2]    0 0.0000 360       -         0.000
+23  random       3     6  2.00 [2..2]    0 0.0000 531       -         0.000
+23  random       4     8  2.00 [2..2]    0 0.0000 860       -         0.000
+23  random       5    10  2.16 [2..3]    0 0.0000 8.04e+03  -         0.000
+23  random       6    12  2.94 [2..3]    0 0.0000 8.39e+04  -         0.000
+23  random       7    14  3.00 [3..3]    0 0.0000 1.62e+05  -         0.002
+23  random       8    16  4.00 [4..4]    0 0.0000 7.93e+06  -         0.008
+23  standard     2     4  2.00 [2..2]    0 0.0000 341       -         0.000
+23  standard     3     6  2.00 [2..2]    0 0.0000 555       -         0.000
+23  standard     4     8  2.00 [2..2]    0 0.0000 859       -         0.000
+23  standard     5    10  2.00 [2..2]    0 0.0000 1.29e+03  -         0.000
+23  standard     6    12  2.03 [2..3]    0 0.0000 4.55e+03  -         0.000
+23  standard     7    14  2.19 [2..3]    0 0.0000 3.24e+04  -         0.002
+23  standard     8    16  2.47 [2..3]    0 0.0000 1.29e+05  -         0.008
+
+== correlations (m=2, non-subfield structures pooled) ==
+pearson(D*mean, dim)      = 0.8162854570065192
+pearson(D*mean, nvars)    = 0.8162854570065192
+pearson(D*mean, n)        = -0.013384889408566636
+pearson(log W/rel, dim)   = 0.9359059650596102
+pearson(log frac, dim)    = 0.4270521532129501
+pearson(log frac, log floor)= 0.6882205804055307
+
+== structure contrasts at matched (n, dim) ==
+n=9 dim=3: subfield D*=2.00 frac=0.0000  vs standard D*=2.45 frac=0.0833
+n=9 dim=3: subfield D*=2.00 frac=0.0000  vs random D*=2.45 frac=0.0833
+n=9 dim=3: subfield D*=2.00 frac=0.0417  vs standard D*=2.45 frac=0.0833
+n=9 dim=3: subfield D*=2.00 frac=0.0417  vs random D*=2.45 frac=0.0833
+n=9 dim=3: subfield D*=2.00 frac=0.0000  vs standard D*=2.45 frac=0.0833
+n=9 dim=3: subfield D*=2.00 frac=0.0000  vs random D*=2.45 frac=0.0833
+n=15 dim=3: subfield D*=2.00 frac=0.0000  vs standard D*=2.00 frac=0.0000
+n=15 dim=3: subfield D*=2.00 frac=0.0000  vs random D*=2.00 frac=0.0000
+n=15 dim=3: subfield D*=2.00 frac=0.0000  vs standard D*=2.00 frac=0.0000
+n=15 dim=3: subfield D*=2.00 frac=0.0000  vs random D*=2.00 frac=0.0000
+n=15 dim=3: subfield D*=2.00 frac=0.0417  vs standard D*=2.00 frac=0.0000
+n=15 dim=3: subfield D*=2.00 frac=0.0417  vs random D*=2.00 frac=0.0000
+n=15 dim=5: subfield D*=2.00 frac=0.0000  vs standard D*=2.45 frac=0.0833
+n=15 dim=5: subfield D*=2.00 frac=0.0000  vs random D*=3.00 frac=0.0417
+n=15 dim=5: subfield D*=2.00 frac=0.0000  vs standard D*=2.45 frac=0.0833
+n=15 dim=5: subfield D*=2.00 frac=0.0000  vs random D*=3.00 frac=0.0417
+n=15 dim=5: subfield D*=2.00 frac=0.0000  vs standard D*=2.45 frac=0.0833
+n=15 dim=5: subfield D*=2.00 frac=0.0000  vs random D*=3.00 frac=0.0417
+
+== work-per-relation optima (best dim per (n, structure)) ==
+n=9   random     best dim=3 (D*=2.57, frac=0.0694, W/rel=2.74e+04)
+n=9   standard   best dim=3 (D*=2.35, frac=0.0417, W/rel=2.15e+04)
+n=9   subfield   best dim=3 (D*=2.00, frac=0.0139, W/rel=7.78e+03)
+n=11  nb_break   best dim=3 (D*=2.99, frac=0.0278, W/rel=7.76e+04)
+n=11  nb_window  best dim=4 (D*=2.94, frac=0.0139, W/rel=2.12e+05)
+n=11  random     best dim=4 (D*=2.88, frac=0.0417, W/rel=1.44e+05)
+n=11  standard   best dim=4 (D*=2.57, frac=0.0833, W/rel=1.03e+05)
+n=13  nb_break   best dim=2 (D*=2.01, frac=0.0139, W/rel=4.01e+03)
+n=13  nb_window  best dim=4 (D*=2.81, frac=0.0278, W/rel=2.19e+05)
+n=13  random     best dim=4 (D*=2.79, frac=0.0278, W/rel=2.19e+05)
+n=13  standard   best dim=3 (D*=2.04, frac=0.0139, W/rel=1.58e+04)
+n=15  random     best dim=5 (D*=2.99, frac=0.0139, W/rel=6.97e+05)
+n=15  standard   best dim=5 (D*=2.36, frac=0.0278, W/rel=1.64e+05)
+n=15  subfield   best dim=3 (D*=2.00, frac=0.0139, W/rel=1.21e+04)
+n=17  nb_break   best dim=5 (D*=3.00, frac=0.0312, W/rel=5.27e+05)
+n=17  nb_window  best dim=8 (D*=4.00, frac=0.3438, W/rel=1.72e+07)
+n=17  random     best dim=7 (D*=4.00, frac=0.0312, W/rel=4.24e+07)
+n=17  standard   best dim=7 (D*=3.17, frac=0.0938, W/rel=9.47e+06)
+n=19  nb_break   best dim=9 (D*=5.00, frac=0.3125, W/rel=1.26e+09)
+n=19  nb_window  best dim=8 (D*=4.00, frac=0.1250, W/rel=3.49e+07)
+n=19  random     best dim=8 (D*=4.00, frac=0.0938, W/rel=5.24e+07)
+n=19  standard   best dim=7 (D*=2.77, frac=0.0312, W/rel=1.44e+06)
+n=23  nb_break   best dim=7 (D*=4.00, frac=0.0312, W/rel=5.74e+07)
+
+== delta_n11_m2.json:  ==
+delta=-1 dim=6 nvars=12 D*mean=4.00 frac=0.8750 W=6.9e+05 W/rel=7.89e+05
+delta=+0 skipped (m*dim = n - delta has no integer dim)
+delta=+1 dim=5 nvars=10 D*mean=3.20 frac=0.1667 W=5.32e+04 W/rel=3.19e+05
+delta=+2 skipped (m*dim = n - delta has no integer dim)
+delta=+3 dim=4 nvars=8 D*mean=2.65 frac=0.0417 W=5.03e+03 W/rel=1.21e+05
+delta=+4 skipped (m*dim = n - delta has no integer dim)
+
+== delta_n13_m2.json:  ==
+delta=-1 dim=7 nvars=14 D*mean=4.00 frac=0.3750 W=2.03e+06 W/rel=5.41e+06
+delta=+0 skipped (m*dim = n - delta has no integer dim)
+delta=+1 dim=6 nvars=12 D*mean=3.85 frac=0.1667 W=6.47e+05 W/rel=3.88e+06
+delta=+2 skipped (m*dim = n - delta has no integer dim)
+delta=+3 dim=5 nvars=10 D*mean=2.87 frac=0.0417 W=2.05e+04 W/rel=4.93e+05
+delta=+4 skipped (m*dim = n - delta has no integer dim)
+
+== delta_n15_m2.json:  ==
+delta=-1 dim=8 nvars=16 D*mean=4.00 frac=0.5000 W=5.17e+06 W/rel=1.03e+07
+delta=+1 dim=7 nvars=14 D*mean=4.00 frac=0.1875 W=2.34e+06 W/rel=1.25e+07
+delta=+3 dim=6 nvars=12 D*mean=3.07 frac=0.1250 W=8.88e+04 W/rel=7.11e+05
+delta=+5 dim=5 nvars=10 D*mean=2.29 frac=0.1250 W=5.22e+03 W/rel=4.18e+04
+
+== delta_n17_m2.json:  ==
+delta=-1 dim=9 nvars=18 D*mean=4.40 frac=0.6875 W=6.33e+07 W/rel=9.21e+07
+delta=+1 dim=8 nvars=16 D*mean=4.00 frac=0.3125 W=5.86e+06 W/rel=1.88e+07
+delta=+3 dim=7 nvars=14 D*mean=3.33 frac=0.0625 W=7.26e+05 W/rel=1.16e+07
+delta=+5 dim=6 nvars=12 D*mean=2.81 frac=0.0000 W=4.71e+04 W/rel=-
+delta=+7 dim=5 nvars=10 D*mean=2.25 frac=0.0000 W=5.12e+03 W/rel=-
+
+== delta_n19_m2.json:  ==
+delta=-1 dim=10 nvars=20 D*mean=5.00 frac=0.6875 W=5.57e+08 W/rel=8.1e+08
+delta=+1 dim=9 nvars=18 D*mean=4.00 frac=0.1875 W=1.32e+07 W/rel=7.06e+07
+delta=+3 dim=8 nvars=16 D*mean=3.86 frac=0.1250 W=5.14e+06 W/rel=4.11e+07
+delta=+5 dim=7 nvars=14 D*mean=2.88 frac=0.0000 W=1.07e+05 W/rel=-
+delta=+7 dim=6 nvars=12 D*mean=2.00 frac=0.0000 W=1.5e+03 W/rel=-
+delta=+9 dim=5 nvars=10 D*mean=2.00 frac=0.0000 W=1.06e+03 W/rel=-
+
+== sym4_n15_l2.json (symmetric S4) ==
+n=15 geometric dim=2 nvars=9 D*=3.00 [3..3] point-frac=0.0625 bool-unsat=0.8750 spurious=None eqdeg=2
+n=15 standard dim=2 nvars=9 D*=3.00 [3..3] point-frac=0.0000 bool-unsat=1.0000 spurious=None eqdeg=2
+n=15 random dim=2 nvars=9 D*=3.00 [3..3] point-frac=0.1250 bool-unsat=0.8750 spurious=None eqdeg=2
+
+== sym4_n15_l3.json (symmetric S4) ==
+n=15 geometric dim=3 nvars=15 D*=5.00 [5..5] point-frac=0.0625 bool-unsat=0.3125 spurious=None eqdeg=2
+n=15 standard dim=3 nvars=15 D*=5.00 [5..5] point-frac=0.0000 bool-unsat=0.3125 spurious=None eqdeg=2
+n=15 subfield dim=3 nvars=9 D*=3.00 [3..3] point-frac=0.0000 bool-unsat=1.0000 spurious=None eqdeg=2
+n=15 random dim=3 nvars=19 D*=- [-..-] point-frac=0.1875 bool-unsat=0.0000 spurious=None eqdeg=2
+
+== sym4_n19_l3.json (symmetric S4) ==
+n=19 geometric dim=3 nvars=15 D*=4.00 [4..4] point-frac=0.0625 bool-unsat=0.9375 spurious=None eqdeg=2
+n=19 standard dim=3 nvars=15 D*=4.00 [4..4] point-frac=0.0000 bool-unsat=0.8750 spurious=None eqdeg=2
+n=19 random dim=3 nvars=19 D*=5.00 [5..5] point-frac=0.1875 bool-unsat=0.1250 spurious=None eqdeg=2
+
+== sym4_n21_l3.json (symmetric S4) ==
+n=21 geometric dim=3 nvars=15 D*=4.00 [4..4] point-frac=0.0625 bool-unsat=0.9375 spurious=None eqdeg=2
+n=21 standard dim=3 nvars=15 D*=4.00 [4..4] point-frac=0.0000 bool-unsat=1.0000 spurious=None eqdeg=2
+n=21 subfield dim=3 nvars=9 D*=3.00 [3..3] point-frac=0.0000 bool-unsat=1.0000 spurious=None eqdeg=2
+n=21 random dim=3 nvars=19 D*=5.00 [5..5] point-frac=0.1875 bool-unsat=0.6250 spurious=None eqdeg=2
+
+== sym4_n9_l2.json (symmetric S4) ==
+n=9 geometric dim=2 nvars=9 D*=4.00 [4..4] point-frac=0.0625 bool-unsat=0.2500 spurious=None eqdeg=2
+n=9 standard dim=2 nvars=9 D*=4.00 [4..4] point-frac=0.0000 bool-unsat=0.5000 spurious=None eqdeg=2
+subfield subfield needs dim | n (2 does not divide 9)
+n=9 random dim=2 nvars=9 D*=4.00 [4..4] point-frac=0.2500 bool-unsat=0.1875 spurious=None eqdeg=2
+
+== frobwin_n131 (engine writes to stderr; log is the record) ==
+n=131 dim=4 m=3: normal element found; pi^dim(V_i) = V_(i+1): True; windows disjoint: True
+
+== stack_n11.json ==
+{
+ "schema": "factor-base-stacking-v1",
+ "field_degree": 11,
+ "window_dim": 4,
+ "weights": [
+  1,
+  2
+ ],
+ "seed": 1,
+ "rows": [
+  {
+   "scheme": "win_sym",
+   "base_abscissae": 10,
+   "unknowns": 10,
+   "pairs_per_target": 55,
+   "coverage": 0.04298974108451392,
+   "trials": 255.875,
+   "enumeration_work": 14073.125
+  },
+  {
+   "scheme": "win_break",
+   "base_abscissae": 10,
+   "unknowns": 10,
+   "pairs_per_target": 100,
+   "coverage": 0.09233023937469467,
+   "trials": 119.13756613756614,
+   "enumeration_work": 11913.756613756614
+  },
+  {
+   "scheme": "wt_sym",
+   "base_abscissae": 44,
+   "unknowns": 4,
+   "pairs_per_target": 990,
+   "coverage": 0.424523693209575,
+   "trials": 11.777905638665132,
+   "enumeration_work": 11660.12658227848
+  },
+  {
+   "scheme": "wt_break",
+   "base_abscissae": 44,
+   "unknowns": 4,
+   "pairs_per_target": 363,
+   "coverage": 0.19345383488031265,
+   "trials": 25.845959595959595,
+   "enumeration_work": 9382.083333333334
+  }
+ ]
+}
+
+== stack_n13.json ==
+{
+ "schema": "factor-base-stacking-v1",
+ "field_degree": 13,
+ "window_dim": 4,
+ "weights": [
+  1,
+  2
+ ],
+ "seed": 1,
+ "rows": [
+  {
+   "scheme": "win_sym",
+   "base_abscissae": 6,
+   "unknowns": 6,
+   "pairs_per_target": 21,
+   "coverage": 0.003784641679892565,
+   "trials": 1849.5806451612902,
+   "enumeration_work": 38841.1935483871
+  },
+  {
+   "scheme": "win_break",
+   "base_abscissae": 6,
+   "unknowns": 6,
+   "pairs_per_target": 36,
+   "coverage": 0.008545965083628372,
+   "trials": 819.1,
+   "enumeration_work": 29487.6
+  },
+  {
+   "scheme": "wt_sym",
+   "base_abscissae": 39,
+   "unknowns": 3,
+   "pairs_per_target": 780,
+   "coverage": 0.16188499572701745,
+   "trials": 24.708898944193063,
+   "enumeration_work": 19272.941176470587
+  },
+  {
+   "scheme": "wt_break",
+   "base_abscissae": 39,
+   "unknowns": 3,
+   "pairs_per_target": 338,
+   "coverage": 0.082529605664754,
+   "trials": 48.467455621301774,
+   "enumeration_work": 16382.0
+  }
+ ]
+}

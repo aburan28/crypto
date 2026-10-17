@@ -8,15 +8,9 @@
 # defaults, and a listing longer than one S3 page.
 name: ECC2K control-plane integration
 on:
-  pull_request:
-    paths:
-      - 'ecc2k130/aws/**'
-      - '.github/workflows/ecc2k130-controlplane-integration.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'ecc2k130/aws/**'
-      - '.github/workflows/ecc2k130-controlplane-integration.yml'
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
 permissions:
   contents: read

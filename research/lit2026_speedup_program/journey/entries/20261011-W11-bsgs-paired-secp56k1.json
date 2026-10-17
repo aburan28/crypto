@@ -1,0 +1,28 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W11",
+  "slug": "bsgs-paired-secp56k1",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1692",
+  "papers": ["ePrint 2026/2102"],
+  "kind": "speedup",
+  "workload": {
+    "id": "bsgs-fast-fullgroup-secp56k1",
+    "description": "bsgs_fast full-group solve with negation map, 4 targets, 14 rayon threads, on secp56k1 of the arXiv 2508.14011 ladder (y^2=x^3+7, p=72057594037927573, prime n=72057594108275767, generator = 'Challenge' NUMS point)",
+    "curve_ids": ["secp56k1 (arXiv 2508.14011 Algorithm 3)"]
+  },
+  "metric": "median wall time per solve batch (table build + 4 searches)",
+  "unit": "s",
+  "isolation": "L0",
+  "samples": 5,
+  "arms": [
+    {"role": "original", "label": "program baseline", "commit": "4b6e09b78", "value": 45.84},
+    {"role": "previous", "label": "this branch, BSGS_STEP=chain", "commit": "680f3cf9d", "value": 48.99},
+    {"role": "candidate", "label": "BSGS_STEP=paired, BSGS_PAIR_K=32", "commit": "680f3cf9d", "value": 27.44}
+  ],
+  "ratio_original_over_candidate": {"value": 1.670, "interval": [1.349, 1.670], "interval_kind": "min-max of rounds"},
+  "ratio_previous_over_candidate": {"value": 1.785, "interval": [1.190, 1.849], "interval_kind": "min-max of rounds"},
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w11_generic_engineering_20261011/reports/run-20261011T2049Z/report.pdf",
+  "note": "Ratio of medians over 5 interleaved rounds on a shared host (load 72-155). Counted cost per visited point 18.88 -> 3.74 M-equivalents (chain vs paired K=32). The coz arm measured 35.32 s."
+}

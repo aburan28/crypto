@@ -10,6 +10,83 @@ fn dec(s: &str) -> Int {
     Int::from_big(&Big::from_dec(s))
 }
 
+#[test]
+fn p192_order_and_split_degree_maps_are_supported() {
+    let c = PrimeCurve::preset("p192").unwrap();
+    let n = dec("6277101735386680763835789423176059013767194773182842284081");
+    let count = api::check_order(&c, &n, 1);
+    assert!(count.certificate.certified && count.twist_certificate.certified);
+    let maps = api::isogenies(&c, 13, 1).unwrap();
+    assert_eq!(maps.len(), 2);
+    assert!(maps.iter().all(|r| r.verified()));
+}
+
+#[test]
+fn p224_small_low_limb_does_not_reject_modular_construction() {
+    use isogeny_algos::{field::Field, find::modpoly::Phi, fpm::FpM};
+    let c = PrimeCurve::preset("p224").unwrap();
+    let f = FpM::<4>::new(c.p.mag());
+    assert_eq!(f.char(), 1);
+    assert!(f.characteristic_exceeds(u64::MAX));
+    // A second construction route certifies the small modular polynomial exactly.
+    assert_eq!(
+        Phi::compute_hecke(&f, 3).c,
+        Phi::compute_linear_algebra(&f, 3).c
+    );
+    let n = dec("26959946667150639794667015087019625940457807714424391721682722368061");
+    let t = &(&c.p + &Int::one()) - &n;
+    let ell = [3u64, 5, 7, 11, 13, 17, 19, 23, 29, 31]
+        .into_iter()
+        .find(|&l| {
+            let tm = t.mod_u64(l);
+            let pm = c.p.mod_u64(l);
+            (0..l)
+                .filter(|&x| (x * x + l - tm * x % l + pm).is_multiple_of(l))
+                .count()
+                == 2
+        })
+        .expect("a split small prime for the public standard model");
+    let maps = api::isogenies(&c, ell, 1).unwrap();
+    assert_eq!(maps.len(), 2);
+    assert!(maps.iter().all(|m| m.verified()));
+    let small = FpM::<1>::from_u64_modulus(101);
+    assert!(small.characteristic_exceeds(100));
+    assert!(!small.characteristic_exceeds(101));
+}
+
+#[test]
+fn field_dispatch_handles_every_limb_boundary() {
+    use isogeny_algos::{field::Field, fp2::Fp2, fpm::FpM};
+
+    // A quadratic wrapper must retain its multiword base characteristic.
+    let mersenne = FpM::<2>::new(&Big::from_dec("170141183460469231731687303715884105727"));
+    let extension = Fp2::new(mersenne);
+    assert_eq!(extension.char(), u64::MAX);
+    assert!(extension.characteristic_exceeds(u64::MAX));
+
+    struct Multiply(Int, Int);
+    impl api::FieldTask for Multiply {
+        type Out = Int;
+        fn run<F: api::PrimeFieldInt>(self, f: &F) -> Int {
+            f.int(f.mul(f.elem(&self.0), f.elem(&self.1)))
+        }
+    }
+    // Montgomery arithmetic also works over these odd composite moduli; this checks
+    // dispatch and reduction at both ends of every limb width, not primality.
+    for bits in [
+        63, 64, 65, 128, 129, 192, 193, 256, 257, 320, 321, 384, 385, 448, 449, 512,
+    ] {
+        let p = &Int::from_big(&Big::from_u64(1).shl(bits)) - &Int::one();
+        let a = &p - &Int::from(2i64);
+        let b = &p - &Int::from(3i64);
+        assert_eq!(
+            api::with_field(&p, Multiply(a, b)),
+            Int::from(6i64),
+            "bits={bits}"
+        );
+    }
+}
+
 /// Standard curves: the orders come out certified and the ICV1 slugs are the ones the crypto
 /// repository's curve registry (`docs/curves/registry.json`) lists for P-256 and secp256k1.
 #[test]
@@ -150,4 +227,67 @@ fn cli_records_and_exit_codes() {
             env!("CARGO_PKG_VERSION")
         )
     );
+}
+
+#[test]
+fn cm_modular_polynomial_api_and_cli_are_end_to_end() {
+    let exact = isogeny_algos::find::modpoly::integer_coeffs(3);
+    assert_eq!(api::modular_polynomial_integer_cm(3, 42).unwrap(), exact);
+    // Targets include characteristic two, a composite, and a 200-bit integer.
+    for m in [
+        Int::one(),
+        Int::from(2u64),
+        Int::from(120u64),
+        Int::one().shl(200) + Int::from(7u64),
+    ] {
+        let expected: Vec<Vec<_>> = exact
+            .iter()
+            .map(|r| r.iter().map(|c| c.modulo(&m)).collect())
+            .collect();
+        assert_eq!(api::modular_polynomial_cm(&m, 3, 42).unwrap(), expected);
+    }
+    let p = Int::from(10007u64);
+    assert_eq!(
+        api::modular_polynomial_cm_at(&p, 3, &Int::from(1234u64), 42).unwrap(),
+        api::modular_polynomial_at(&p, 3, &Int::from(1234u64), 42).unwrap()
+    );
+    assert!(api::modular_polynomial_cm(&Int::from(-1i64), 3, 1).is_err());
+    assert!(api::modular_polynomial_cm_at(&Int::from(120u64), 3, &Int::one(), 1).is_err());
+
+    let bin = env!("CARGO_BIN_EXE_isogeny-algos");
+    let run = |tail: &[&str]| {
+        let out = Command::new(bin)
+            .args(["modpoly", "--method", "cm", "--ell", "3"])
+            .args(tail)
+            .output()
+            .unwrap();
+        (
+            out.status.code().unwrap(),
+            String::from_utf8(out.stdout).unwrap(),
+        )
+    };
+    let (code, out) = run(&["--integer"]);
+    assert_eq!(code, 0, "{out}");
+    assert!(out.contains("\"1855425871872000000000\""));
+    assert!(out.contains("\"method\":\"cm\""));
+    for args in [
+        &["--modulus", "120"][..],
+        &["--p", "10007"][..],
+        &["--p", "10007", "--j", "1234"][..],
+    ] {
+        let (code, out) = run(args);
+        assert_eq!(code, 0, "{out}");
+        assert!(out.contains("\"status\":\"PASS\""));
+        assert_eq!(out.trim().lines().count(), 1);
+    }
+    for args in [
+        &[][..],
+        &["--modulus", "0"][..],
+        &["--p", "120"][..],
+        &["--integer", "--modulus", "12"][..],
+        &["--modulus", "12", "--j", "0"][..],
+    ] {
+        let (code, out) = run(args);
+        assert_eq!(code, 2, "{out}");
+    }
 }

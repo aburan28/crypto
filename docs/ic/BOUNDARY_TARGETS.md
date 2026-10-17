@@ -113,7 +113,7 @@ subspace factor bases (`semaev_decomp`, `semaev_sat`, `pq_descent`,
 | Stage | Current best (measured knobs) | Next target to beat | Acceptance gates | Evidence |
 |-------|-------------------------------|---------------------|------------------|----------|
 | `factor_base` | Linearized / subspace bases; `ic` dim ≤ 12; structure checks through `n = 36`; mostly **materialized** | Implicit (non-materialized) base at `n ≥ 41` with membership predicate only; log construction time + retained bytes | Predicate agrees with exhaustive membership on ≥ 2¹⁶ holdout; retained bytes logged | `docs/ic/README.md`; `RESEARCH_SEMAEV_DECOMPOSITION.md` |
-| `decomposition` | SAT decides `n = 19`, `ℓ = 6`; pairs-and-solve validated at `n = 21`, `ℓ = 7`; usable wall-clock to ~`ℓ = 12` still `O(2^{2ℓ})`. Full-field Weil `S₃` FFD harness: **FFD = 3** on `n ∈ {3..7}` (`RESEARCH_FFD_MEASUREMENT.md`). Subspace oracle FFD **not yet logged as a frontier metric** on the SAT / pairs ladder | Sub-`2^{2ℓ}` oracle at fixed `ℓ = 8` (≤ 64 targets), median ≤ half pairs-and-solve; **report FFD / DoR** (min/max/mean over ≥ 16 draws) + eq/var + unknowns | Zero disagreements vs exhaustive / group check; budget/host recorded; **FFD fields present** | `RESEARCH_SAT_SEMAEV.md`; `RESEARCH_SEMAEV_DECOMPOSITION.md`; `RESEARCH_FFD_MEASUREMENT.md` |
+| `decomposition` | **Sub-`2^{2ℓ}` MITM oracle ladder through `ℓ = 12` (2026-10-16):** group-law MITM pair table on the non-Koblitz binary curve `y² + xy = x³ + z·x² + 1`. `ℓ = 8` over `F_{2^25}` (256 points, 32,896 sums): 94×–277×, max 1,068 ops vs 32,896 quartic solves. `ℓ = 9` over `F_{2^27}` (519 points, 134,594 sums): 2,473.9×, 2,076 vs 134,912. `ℓ = 10` over `F_{2^31}` (1,053 points, 554,304 sums): 4,244.2×, 4,212 vs 525,312. `ℓ = 11` over `F_{2^33}` (2,017 points, 2,033,876 sums, 65 MB, 2.7 s): 928.0×, 8,068 vs 2,098,176. `ℓ = 12` over `F_{2^37}` (4,023 points, 8,092,016 sums, 259 MB, 14.6 s): 2,187.2×, 16,092 vs 8,390,656 — the largest rung pairs-and-solve was historically usable at. All rungs: 64 targets each, 0 disagreements with pairs-and-solve (320 targets total), all witnesses re-added in the group, ≤-half gate PASS everywhere. Exhaustive `n=15, ℓ=5` control agrees with complete triple enumeration and pairs-and-solve on 200 targets. FFD `unmeasured` with reason (group-law oracle; no polynomial system — gate-permitted). Prior states in history | FFD-logged algebraic control on the same systems (measured DoR for the SAT/GB frontier comparison), and a memory-gated `ℓ = 13` probe (table `2^{2·13} = 2^{26}` entries ≈ 4 GiB) | Zero disagreements vs exhaustive / group check; budget/host recorded; FFD fields present | `research/binary_mitm_oracle_l8_20261015/`; `research/binary_mitm_oracle_l9_l10_20261015/`; `research/binary_mitm_oracle_l11_l12_20261016/`; `examples/binary_mitm_oracle_l8.rs` |
 | `relation_yield` | Measured on small corpus instances; not yet a distributional frontier | Yield curve η ↦ hit-rate for one frozen base at `n = 21` with 256 natural targets; publish trials-per-relation | 95% CI width ≤ 0.05 on hit-rate; policy hash frozen | *(open — first publication beats the "absent" record)* |
 | `rank` | Toy matrices only; no published sparse dims / LA cost | Full orbit-reduced rank at `n = 21` with surplus ≤ 2K+64; report `{rows,cols}`, sparse/dense, LA wall | Rank recomputed after every relation; terminal rank = required | *(open)* |
 | `end_to_end_dlp` | Toy known-answer only (framework / small degrees); claim = synthetic | Known-answer DLP at `n = 19` with stage times | `[d]G = Q`; incomplete stages fail closed | `docs/ic/` synthetic runs |
@@ -131,7 +131,9 @@ subspace factor bases (`semaev_decomp`, `semaev_sat`, `pq_descent`,
 oracles (enumerate / Groebner / SAT) + exact-support collectors
 (`koblitz_index_calculus`, `koblitz_rank_fixture`, SAT factor-base review).
 
-Code guard: `MAX_N = 63` in `koblitz_index_calculus` (u64 field packing).
+Code guard: `MAX_N = 127` in `koblitz_index_calculus`; the single-word
+arithmetic path handles degrees up to 63 and the `u128` path handles wider
+admitted degrees.
 
 Unknowns formula (chained Semaev): `unknowns(n,ℓ,m) = m·ℓ + (m−2)·n`.
 
@@ -142,7 +144,7 @@ Unknowns formula (chained Semaev): `unknowns(n,ℓ,m) = m·ℓ + (m−2)·n`.
 | `relation_yield` | At n=53, rank-guided eta 1/10 produced one verified four-sum relation for every requested public target; 1,244 target trials yielded 1,244 relations in the 1,024-target batch. Post-precomputation cost: 7.49 ms median, 27.38 ms p95 | Freeze and measure the same policy at growing n with target/probe tails and support density | Public-natural fixture domain; exact group checks; trials, probes, timing distribution, and policy hash retained | `autolab_n53_eta_sweep_20260912/results.json` |
 | `rank` | **n=53 minimum-rank accumulation**: guided eta 1/10 reached rank 221 in exactly 221 rows on every measured selection/holdout fixture; one factor-log table then served 1,023 targets with one row each; full transcript independently replayed | Growing-n shared-log rank/yield panel with the same guidance policy | Preserved rows or independent replay; matrix dimensions and LA time explicit; relation LA kept distinct from FFD | `runs/shared_factor_logs_n53_eta_1_10_full_batch4/`; `runs/shared_factor_logs_independent_replay.json` |
 | `end_to_end_dlp` | **1,024 public-synthetic n=53 known-answer targets** recovered with one retained factor-log table; all `[d]G = Q`, relation equations, and factor logs verified with zero replay discrepancies | Repeat at a second n≥53 rung or independent host under the same staged accounting | Public synthetic only; every target group-verified; support → rank → recover → verify timers present | `runs/shared_factor_logs_n53_eta_1_10_batch1024/`; independent replay |
-| `vs_rho` | **n=83 a=1 retained observation:** IC and rho solved the same frozen public point in three paired runs; independent scalar replay passed. Recorded online walls were IC 5.6–7.9 s and rho 43–71 s, with a median ratio of 8.2. The host was shared with unrelated work, and no qualifying isolation receipt is attached. This is a verified-answer, exploratory-timing record, not a controlled speedup. Earlier n=41–73 observations remain in history. | Repair the n=73/n=83 claim schemas and measure a new verified one-target IC/rho pair on the same point with a qualifying isolation receipt. Higher-degree rho projections are separately labeled research estimates. | Exactly one unseen public target; identical point; five exclusive IC online phase costs and exact rho interval; matched resource envelope; independent replay; host-isolation receipt; claim-check PASS; preserve failed rows | `experiments/koblitz-single-target-n83-20261006/` (claim report, fixture, R1–R3 raw runs and replays); `experiments/koblitz-single-target-n73-20261003/` |
+| `vs_rho` | **n=61 a=0 isolated rung (2026-10-12):** compact-orbit IC (K=500, 61,000 base points, 500 orbit columns) beat strong rho rung 3 on the identical public point per workload, 64 one-target workloads per host, claim-check PASS 64/64 on both hosts: an unpinned arm64 macOS host (median 12.9×) and a taskset-pinned x86_64 gvisor host (median 13.9×, 95% CI 9.8–19.1) with the qualifying CPU-isolation receipt (`cpus_allowed_list: 2`). Identical candidate manifest on both hosts; five exclusive IC online phases and the exact rho interval recorded; IC setup (~28 s) excluded and reported via the cold ratio (median 83.4); certificates replayed out of process. Constant-factor win only. The prior n=83 a=1 shared-host observation (median 8.2, no isolation receipt) moves to history. | Extend the isolated-host protocol to n=71 and n=83 with the same five-phase interval and taskset receipt, then a Bernstein–Lange rho reference arm at n=61+. | Exactly one unseen public target; identical point; five exclusive IC online phase costs and exact rho interval; matched resource envelope; independent replay; host-isolation receipt; claim-check PASS; preserve failed rows | `research/sat_factor_base_review_20260908/autolab/runs/20261012T173628Z-3fd988ea23/`; modal volume `ic-autolab-runs` `20261012T210541Z-20261012T202048Z-5521627904.tar.gz` |
 
 **Complete cold compact-orbit panel (disjoint public points).** The
 [preregistered six-cell W64 result](../../research/notes/ecc2k130/disjoint_cold_v2_outcome_20261001/RESULT.md)
@@ -182,7 +184,7 @@ verdict strings are retained as provenance. Their paired public-point scalar
 checks establish answer correctness. The earlier CPU wall ratios are
 exploratory because the retained runs lack a qualifying host-isolation
 receipt; the n=73 R2/R3 and all n=83 runs also shared the host with unrelated
-work. The n=73/n=83 reports fail the current `vs_rho` claim check because
+work. The n=61/n=71/n=73/n=83 reports fail the current `vs_rho` claim check because
 required fields are missing or named incompatibly. Neither the historical
 labels nor replay checks promote a controlled speedup. The older n=41/n=53
 producer also overlapped its `collection_ms` interval with solve and validation
@@ -194,6 +196,13 @@ n=71 median 2,864.1, n=73 median 1,189.7, and n=83 median 8.2 for
 `rho_online_ms / IC_online_ms`. Repeated runs on one point show timing
 variation for that point; they do not estimate the distribution over fresh
 targets. These recorded ratios are not controlled CPU speedup claims.
+
+**2026-10-12 isolated n=61 distribution:** the fresh-target single-target
+panel landed the distribution measurement those one-point repeats lacked — 64
+unseen public points per host, identical candidate, five-phase online
+interval, taskset-pinned isolated host — with medians 12.9× (arm64, local)
+and 13.9× (x86_64 gvisor, `cpus_allowed_list: 2`) and claim-check PASS 64/64
+on both hosts.
 
 **Rejected pairing audit (2026-10-01):** autolab run `20261001T020900Z-d7138bdf44` originally had a schema-only PASS, but its IC arm published `Q=(1449233660742,1458580003288)` with fixture scalar `333438554656`, while rho published `Q=(231924015792,446643714743)` with scalar `301011581851`. The points and scalars differ, so this is not a paired comparison and has no valid speedup. The retained `paired_target_audit.json` marks `PAIRING_REJECTED`; revalidation under the single-target contract returns FAIL. The three promoted runs (20261001T055853Z, 20261001T151557Z, 20261002T213001Z) all pair the identical public point.
 
@@ -211,9 +220,8 @@ quotient. The complete `S = total_operations / sqrt(r)` cost remains unknown
 without a fixed, calibrated operation boundary and all charged phases.
 Guided-rank queries also use a different query policy from target extraction;
 their mean probe count does not measure how fortunate a frozen target was.
-These results make no asymptotic or deployed-curve claim. See the
-[accounting review](./PLAN_IC_ACCOUNTING_FIXES_20261007.md) for evidence and
-remaining checks.
+See the [accounting review](./PLAN_IC_ACCOUNTING_FIXES_20261007.md) for the
+claim-check audit, native-counter boundary, and next measurements.
 
 ---
 

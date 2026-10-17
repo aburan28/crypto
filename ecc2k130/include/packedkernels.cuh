@@ -147,6 +147,11 @@ namespace eccPacked131 {
 #ifndef ECC_SIGMA_FUSED
 #define ECC_SIGMA_FUSED 0
 #endif
+// ECC_SIGMA_SIGN is wired into one forward pass: the campaign's, weighted
+// prefixes (2) with the Frobenius network.  Every other path refuses it.
+#if ECC_SIGMA_SIGN && (ECC_SIGMA_FUSED || ECC_PACKED_SIGMA_TABLE || ECC_PACKED_WEIGHTED_PREFIX != 2 || ECC_TABLE_PIPE_SELECT)
+#error "ECC_SIGMA_SIGN needs SIGMA_FUSED=0 PACKED_SIGMA_TABLE=0 PACKED_WEIGHTED_PREFIX=2"
+#endif
 #if ECC_SIGMA_FUSED != 0 && ECC_SIGMA_FUSED != 1
 #error "ECC_SIGMA_FUSED must be 0 or 1"
 #endif
@@ -165,6 +170,7 @@ namespace eccPacked131 {
 #if ECC_SIGMA_FUSED_SHARED_SLOTS != 0 && ECC_SIGMA_FUSED_SHARED_SLOTS != 2 && \
     ECC_SIGMA_FUSED_SHARED_SLOTS != 3 && ECC_SIGMA_FUSED_SHARED_SLOTS != 4
 #error "ECC_SIGMA_FUSED_SHARED_SLOTS must be 0, 2, 3 or 4"
+#endif
 #if ECC_SIGMA_SQUARE_TABLE && (!ECC_SIGMA_FUSED || ECC_WALK_TABLE || !ECC_PACKED_POLY_STATE)
 #error "ECC_SIGMA_SQUARE_TABLE requires the polynomial-state sigma-fused walk"
 #endif
@@ -458,8 +464,8 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
 #if ECC_SIGMA_FUSED && ECC_PACKED_CHAINS != 1
 #error "ECC_SIGMA_FUSED requires one Montgomery chain"
 #endif
-#if ECC_PACKED_SIGMA_TABLE && !ECC_SIGMA_FUSED
-#error "ECC_PACKED_SIGMA_TABLE is implemented for the fused sigma walk only"
+#if ECC_PACKED_SIGMA_TABLE && (!ECC_PACKED_POLY_STATE || ECC_PACKED_WEIGHTED_PREFIX != 2 || ECC_WALK_TABLE)
+#error "ECC_PACKED_SIGMA_TABLE requires the polynomial-state ordinary or fused sigma walk"
 #endif
 #if ECC_PACKED_SIGMA_TABLE
 // Dynamic shared memory for the Frobenius nibble table (SIGMA_TABLE_BYTES
@@ -612,13 +618,13 @@ __device__ __forceinline__ void tableResolveHintSlot(const WalkParams<unsigned> 
     const size_t id = size_t(slot) * p.threads + tid;
     unsigned long long hist = p.hist[id];
     const unsigned raw = unsigned(hist & 0xffffull);
-    const P131 x = fromPolynomial131(load(p.x, slot, tid, p.threads));
+    const P131 xp = load(p.x, slot, tid, p.threads);
     const P131 yp = load(p.y, slot, tid, p.threads);
 #if ECC_CYCLE_PROFILE
-    const unsigned tag = twCycleTagProfile(x, yp, raw, twSel, twTab, p.dpWeight,
+    const unsigned tag = twCycleTagProfile(xp, yp, raw, twSel, twTab, p.dpWeight,
                                            p.cycleProfile);
 #else
-    const unsigned tag = twCycleTag(x, yp, raw, twSel, twTab, p.dpWeight);
+    const unsigned tag = twCycleTag(xp, yp, raw, twSel, twTab, p.dpWeight);
 #endif
     p.hist[id] = (hist & ~0xffffull) | tag;
 }
@@ -795,6 +801,7 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
     sigmaFusedScratchStoreOrGlobal131<SIGMA_FUSED_SCRATCH_DENOMINATOR>(
         denominators, slot, tid, p.threads, tagged);
 }
+#endif  // ECC_SIGMA_FUSED
 
 #if ECC_PACKED_XONLY_23 && ECC_WALK_TABLE
 #error "ECC_PACKED_XONLY_23 and ECC_WALK_TABLE select different walks"
@@ -803,7 +810,8 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
 #if ECC_PACKED_BATCH_SPLIT != 1 || ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_SHARED_X_SLOTS || ECC_PACKED_LAST_SLOT_CACHE || ECC_PACKED_FUSED_SIGMA
 #error "Split batches, block inversion, shared-X slots, the last-slot cache and fused sigma are implemented only by the x-only walk (ECC_PACKED_XONLY_23)"
 #endif
-#if ECC_TABLE_FUSED
+#if ECC_SIGMA_FUSED
+// Forward work and the reverse pass share the sigma fused walk below.
 static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denominators) {
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
 #if ECC_SIGMA_SQUARE_TABLE
@@ -1158,6 +1166,13 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #elif ECC_PACKED_SHARED_SIGMA
     initSigmaWalkShared131();
 #endif
+#if ECC_PACKED_SIGMA_TABLE
+    // The table is exact for both sigma schedules. Stage it before the
+    // inactive partial-block return, just as the fused path does.
+    const uint32_t sigmaBase = stageSigmaTable(eccSigmaTableDevice, eccSigmaSmem);
+#else
+    const uint32_t sigmaBase = 0;
+#endif
 #if ECC_TABLE_BLOCK_HINTS && defined(__CUDA_ARCH__)
     __shared__ unsigned tableHintCount;
     __shared__ unsigned short tableHintQueue[ECC_TABLE_HINT_QUEUE];
@@ -1324,7 +1339,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             }
 #else
             P131 x = load(p.x, slot, tid, p.threads);
-#if ECC_WALK_TABLE
+#if ECC_WALK_TABLE || ECC_PACKED_SIGMA_TABLE
             const P131 xp = x;
 #endif
 #endif
@@ -1400,20 +1415,46 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             js[slot] = j;
 #endif
 #if ECC_PACKED_WEIGHTED_PREFIX
-            const P131 normalY = fromPolynomial131(load(p.y, slot, tid, p.threads));
 #if ECC_PACKED_WEIGHTED_PREFIX == 2
+#if ECC_PACKED_SIGMA_TABLE
+            const P131 yp = load(p.y, slot, tid, p.threads);
+            P131 dp = sigmaPlusTable131(xp, j - 3, sigmaBase);
+            P131 ep = sigmaPlusTable131(yp, j - 3, sigmaBase);
+#else
+            const P131 normalY = fromPolynomial131(load(p.y, slot, tid, p.threads));
 #if ECC_PACKED_SHARED_SIGMA
             const SigmaWalkPair131 sigmas = sigmaWalkNetworkPairShared131(x, normalY, j - 3);
 #else
             const SigmaWalkPair131 sigmas = sigmaWalkNetworkPair131(x, normalY, j - 3);
 #endif
             P131 d = add131(x, sigmas.first);
-            P131 ep = toPolynomial131(add131(normalY, sigmas.second));
+#if ECC_SIGMA_SIGN
+            // R - sigma^j(R) = R + (x_Q, x_Q + y_Q): the slope's numerator
+            // gains x_Q, the denominator and the inversion are unchanged.
+#if ECC_SIGMA_SIGN == 2
+            // parity of popcount(x AND sigma^j(x)), both normal coordinates
+            int adjacent = 0;
+#pragma unroll
+            for (int k = 0; k < 5; ++k) adjacent += __popc(x.v[k] & sigmas.first.v[k]);
+            const unsigned minusMask = 0u - unsigned(adjacent & 1);
 #else
-            P131 d = add131(x, sigma131(x, j));
-            P131 ep = toPolynomial131(add131(normalY, sigma131(normalY, j)));
+            const unsigned minusMask = 0u - unsigned((hw >> ECC_SIGMA_SIGN_BIT) & 1);
+#endif
+            P131 en = add131(normalY, sigmas.second);
+#pragma unroll
+            for (int k = 0; k < 5; ++k) en.v[k] ^= sigmas.first.v[k] & minusMask;
+            P131 ep = toPolynomial131(en);
+#else
+            P131 ep = toPolynomial131(add131(normalY, sigmas.second));
 #endif
             P131 dp = toPolynomial131(d);
+#endif
+#else
+            const P131 normalY = fromPolynomial131(load(p.y, slot, tid, p.threads));
+            P131 d = add131(x, sigma131(x, j));
+            P131 ep = toPolynomial131(add131(normalY, sigma131(normalY, j)));
+            P131 dp = toPolynomial131(d);
+#endif
             // W_i = E_i * product_{k<i}(D_k). Every prefix slot is used.
             if (slot) {
                 PolynomialPair pair = mulPolynomialPair131(prod, ep, dp);
@@ -1539,8 +1580,12 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             P131 dp = load(denominators, slot, tid, p.threads), ii;
             const int j = 3 + ((dp.v[4] >> 3) & 7);
             dp.v[4] &= 7;
+#if ECC_PACKED_SIGMA_TABLE
+            P131 ep = sigmaPlusTable131(y, j - 3, sigmaBase);
+#else
             const P131 normalY = fromPolynomial131(y);
             P131 ep = toPolynomial131(add131(normalY, sigma131(normalY, j)));
+#endif
 #elif ECC_PACKED_CACHE_DENOM
             P131 d = load(denominators, slot, tid, p.threads), ii;
             const int j = 3 + ((d.v[4] >> 3) & 7);

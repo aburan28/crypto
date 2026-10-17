@@ -1,0 +1,7 @@
+name = "hyper_genus3"
+version = "0.1.0"
+defaultTargets = ["HyperGenus3"]
+
+[[lean_lib]]
+name = "HyperGenus3"
+roots = ["HyperGenus3"]

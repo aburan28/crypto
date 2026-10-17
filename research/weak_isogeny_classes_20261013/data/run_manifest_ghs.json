@@ -1,0 +1,63 @@
+{
+  "command": [
+    "./target/release/examples/weak_class_coverage",
+    "--out",
+    "research/weak_isogeny_classes_20261013/data",
+    "--ghs",
+    "8,9,10,12,14,15,16,18,20,21,22,24",
+    "--walk-max",
+    "22"
+  ],
+  "git_head": "ee7d9ce1e084d9b7d20a251a6f802348bc8570bc",
+  "threads": 4,
+  "timings": [
+    {
+      "run": "ghs_N8",
+      "seconds": 0.000716695
+    },
+    {
+      "run": "ghs_N9",
+      "seconds": 0.001950142
+    },
+    {
+      "run": "ghs_N10",
+      "seconds": 0.002712074
+    },
+    {
+      "run": "ghs_N12",
+      "seconds": 0.012977911
+    },
+    {
+      "run": "ghs_N14",
+      "seconds": 0.078551176
+    },
+    {
+      "run": "ghs_N15",
+      "seconds": 0.162309427
+    },
+    {
+      "run": "ghs_N16",
+      "seconds": 0.312580173
+    },
+    {
+      "run": "ghs_N18",
+      "seconds": 3.67709405
+    },
+    {
+      "run": "ghs_N20",
+      "seconds": 29.16752735
+    },
+    {
+      "run": "ghs_N21",
+      "seconds": 95.035097518
+    },
+    {
+      "run": "ghs_N22",
+      "seconds": 266.715296556
+    },
+    {
+      "run": "ghs_N24",
+      "seconds": 122.792835661
+    }
+  ]
+}

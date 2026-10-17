@@ -6,19 +6,43 @@ on:
       - 'tools/export_benchmark_snapshot.py'
       - 'tests/test_curve_identity.py'
       - 'tests/test_benchmark_export.py'
+      - 'scripts/build_curve_registry.py'
+      - 'scripts/test_prime_model_normalization.py'
+      - 'scripts/check_curve_names.py'
+      - 'scripts/test_curve_names_archived_labels.py'
+      - 'research/f4_f5_history_20261012/reports/run-20261012T0009Z/REPORT.md'
+      - 'tools/isogeny-cli/src/bin/registry_models.rs'
+      - 'isogeny_algos/src/field.rs'
+      - 'docs/curves/sources/prime-models.json'
+      - 'research/isogeny_fibers_20261010/round4/16_7_agm_isogeny_oracles/out_seed7.json'
       - '.github/workflows/curve-identities.yml'
   push:
+    branches: [main]
     paths:
       - 'tools/curve_identity.py'
       - 'tools/export_benchmark_snapshot.py'
       - 'tests/test_curve_identity.py'
       - 'tests/test_benchmark_export.py'
+      - 'scripts/build_curve_registry.py'
+      - 'scripts/test_prime_model_normalization.py'
+      - 'scripts/check_curve_names.py'
+      - 'scripts/test_curve_names_archived_labels.py'
+      - 'research/f4_f5_history_20261012/reports/run-20261012T0009Z/REPORT.md'
+      - 'tools/isogeny-cli/src/bin/registry_models.rs'
+      - 'isogeny_algos/src/field.rs'
+      - 'docs/curves/sources/prime-models.json'
+      - 'research/isogeny_fibers_20261010/round4/16_7_agm_isogeny_oracles/out_seed7.json'
       - '.github/workflows/curve-identities.yml'
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   metadata:
     runs-on: ubuntu-latest
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 360 }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -27,3 +51,5 @@ jobs:
       - name: Check metadata identities without running experiments
         run: |
           python tests/test_curve_identity.py
+          python scripts/test_prime_model_normalization.py
+          python scripts/test_curve_names_archived_labels.py

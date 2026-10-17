@@ -1,0 +1,26 @@
+
+running 21 tests
+test rank::packed_tests::dual_sign_batch_matches_separate_signed_inputs ... ok
+test rank::packed_tests::forward_and_reverse_incremental_ranks_match_dense_elimination ... ok
+test rank::packed_tests::full_rank_solver_recovers_unique_public_solution ... ok
+test rank::packed_tests::bloom_hash_strategies_retain_every_inserted_x ... ok
+test rank::packed_tests::packed_n37_field_group_and_point_defined_base_validate ... ok
+test rank::packed_tests::packed_n41_field_group_and_point_defined_base_validate ... ok
+test rank::packed_tests::sharded_support_table_matches_exact_unsharded_membership ... ok
+test rank::packed_tests::specialized_n53_pair_batch_matches_generic ... ok
+test rank::packed_tests::specialized_n53_pair_sums_match_generic ... ok
+test rank::packed_tests::specialized_n53_support_expansion_matches_generic ... ok
+test rank::packed_tests::x_filter_and_lazy_y_recovery_match_full_fiber_batch ... ok
+test shared::packed_tests::dual_sign_batch_matches_separate_signed_inputs ... ok
+test shared::packed_tests::forward_and_reverse_incremental_ranks_match_dense_elimination ... ok
+test shared::packed_tests::full_rank_solver_recovers_unique_public_solution ... ok
+test shared::packed_tests::online_timer_phases_exclude_nested_solve_and_validation ... ok
+test rank::packed_tests::packed_field_and_group_operations_match_reference ... ok
+test shared::packed_tests::packed_n37_field_group_and_point_defined_base_validate ... ok
+test shared::packed_tests::packed_n41_field_group_and_point_defined_base_validate ... ok
+test shared::packed_tests::quotient_pair_witness_packs_48_bit_coefficients_losslessly ... ok
+test shared::packed_tests::x_filter_and_lazy_y_recovery_match_full_fiber_batch ... ok
+test shared::packed_tests::packed_field_and_group_operations_match_reference ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+

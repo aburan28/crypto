@@ -43,6 +43,9 @@ fn key(point: &BinaryPoint) -> Option<PointKey> {
     }
 }
 
+#[cfg(test)]
+// Signed-index query path, kept for the upcoming batch kernels.
+#[allow(dead_code)]
 fn stored_point(point: &BinaryPoint) -> Option<Option<(u128, u128)>> {
     match point {
         BinaryPoint::Infinity => Some(None),
@@ -50,6 +53,9 @@ fn stored_point(point: &BinaryPoint) -> Option<Option<(u128, u128)>> {
     }
 }
 
+#[cfg(test)]
+// Signed-index query path, kept for the upcoming batch kernels.
+#[allow(dead_code)]
 fn restore_point(point: Option<(u128, u128)>, m: u32) -> BinaryPoint {
     let Some((x, y)) = point else {
         return BinaryPoint::Infinity;
@@ -492,7 +498,10 @@ mod packed83 {
     /// query path avoids rebuilding heap-backed points for every batch.
     /// # Safety
     /// The caller must check the pinned polynomial and ARM64 AES/PMULL.
+    // Kept for the upcoming batch kernels.
+    #[allow(dead_code)]
     #[target_feature(enable = "aes")]
+    #[cfg(test)]
     pub(super) unsafe fn batch_x_keys_stored(
         curve: &BinaryCurve,
         fixed: &BinaryPoint,
@@ -557,7 +566,11 @@ mod packed83 {
     /// # Safety
     /// The caller must have checked ARM64 AES/PMULL support and the pinned
     /// degree-83 irreducible polynomial.
+    // Kept for the upcoming batch kernels.
+    #[allow(dead_code)]
     #[target_feature(enable = "aes")]
+    #[cfg(all(test, target_arch = "aarch64"))]
+    #[cfg(test)]
     pub(super) unsafe fn batch_add_fixed(
         curve: &BinaryCurve,
         fixed: &BinaryPoint,
@@ -713,8 +726,8 @@ struct SignedPairSum {
     // No heap allocations per sum. `None` is the identity and is distinct
     // from every affine point even when the curve admits (0, 0).
     point: PackedPoint,
-    pair: (usize, usize),
-    neg_pair: (usize, usize),
+    pair: (u32, u32),
+    neg_pair: (u32, u32),
 }
 
 /// Exact sign-quotient pair index for a distinct, negation-closed base.
@@ -794,8 +807,8 @@ impl F6SignedPairIndex {
                         entry.insert(sums.len());
                         sums.push(SignedPairSum {
                             point: sum,
-                            pair: (i, j),
-                            neg_pair: (negatives[i], negatives[j]),
+                            pair: (i as u32, j as u32),
+                            neg_pair: (negatives[i] as u32, negatives[j] as u32),
                         });
                     }
                 }
@@ -830,9 +843,9 @@ impl F6SignedPairIndex {
         // -(x, y) = (x, x + y) on a binary curve; -O = O
         let negative = entry.point.map(|(x, y)| (x, x ^ y));
         if residual == entry.point {
-            Some(entry.pair)
+            Some((entry.pair.0 as usize, entry.pair.1 as usize))
         } else if residual == negative {
-            Some(entry.neg_pair)
+            Some((entry.neg_pair.0 as usize, entry.neg_pair.1 as usize))
         } else {
             None
         }
@@ -848,10 +861,10 @@ impl F6SignedPairIndex {
     fn verify(
         &self,
         target: &BinaryPoint,
-        first: (usize, usize),
+        first: (u32, u32),
         second: (usize, usize),
     ) -> Option<[usize; 4]> {
-        let indices = [first.0, first.1, second.0, second.1];
+        let indices = [first.0 as usize, first.1 as usize, second.0, second.1];
         let sum = indices.iter().fold(BinaryPoint::Infinity, |acc, &index| {
             point_add(&self.curve, &acc, &self.points[index])
         });

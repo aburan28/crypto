@@ -1,0 +1,133 @@
+\section{Correctness}\label{sec:correctness}
+
+Throughout, $(\mathit{pk},\mathit{sk})$ is honestly generated,
+$\mathit{ct}=\textsf{Enc}(\mathit{pk},s)$, and the notation of
+Algorithms~\ref{alg:keygen}--\ref{alg:decaps} is in force. Write
+$\theta=\varphi\tau\hat\varphi\in\End(\EC)$ and $\psi=2\theta-tdf$.
+
+\begin{lemma}[the lollipop endomorphism]\label{lem:psi}
+$\Tr\psi=0$ and $\deg\psi=7d^2f^2$. Moreover $\psi S=ds_0S$ and
+$\psi T=-ds_0T$, where $s_0=fs_D\bmod 2^E$.
+\end{lemma}
+
+\begin{proof}
+$\Tr\theta=\varphi(\tau+\hat\tau)\hat\varphi=\varphi[tf]\hat\varphi=tdf$, and
+$\deg\theta=d^2\deg\tau=2d^2f^2$. Hence $\Tr\psi=2\Tr\theta-2tdf=0$ and
+\[
+\deg\psi=(2\theta-tdf)(2\hat\theta-tdf)=4\deg\theta-2tdf\Tr\theta+t^2d^2f^2=8d^2f^2-2d^2f^2+d^2f^2=7d^2f^2 .
+\]
+For the eigenvalues, $\hat\varphi S=a\hat\varphi\varphi P_A=adP_A$, and
+$\tau P_A=f\mu P_A$, so $\theta S=adf\mu\,\varphi P_A=df\mu S$. Likewise
+$\theta T=df\nu T$. Then $\psi S=df(2\mu-t)S=dfs_DS$, and
+$\psi T=df(2\nu-t)T=-dfs_DT$.
+\end{proof}
+
+The masks $a,b$ drop out because $S$ and $T$ are multiples of eigenvectors.
+This is where the trapdoor is used: only $f$ (through $s_0$) and the Kani
+scalars are needed, never $\varphi$ or the masks.
+
+\begin{proposition}[the decryption isogeny]\label{prop:kani}
+Let $\gamma=\psi+c$. Then $\deg\gamma+c'^2=2^E$, and the subgroup
+$\langle(c'S,-\lambda_SS),(c'T,-\lambda_TT)\rangle$ of $\EC^2$ is the kernel of
+the $(2^E,2^E)$-isogeny $\Phi=\begin{psmallmatrix}c'&-\hat\gamma\\ \gamma&c'\end{psmallmatrix}$.
+\end{proposition}
+
+\begin{proof}
+$\deg\gamma=\deg\psi+c\Tr\psi+c^2=7d^2f^2+c^2=2^E-c'^2$ by the choice of
+$c,c'$. By Lemma~\ref{lem:psi}, $\gamma S=(ds_0+c)S=\lambda_SS$ and
+$\gamma T=(c-ds_0)T=\lambda_TT$. The points $S,T$ form a basis of $\EC[2^E]$,
+because $\varphi$ has odd degree and $a,b$ are odd. So the two generators
+are $(c'R,-\gamma R)$ for $R=S,T$, and the kernel statement is Kani's lemma
+(\S\ref{sec:prelim}).
+\end{proof}
+
+From $\Phi(X,0)=(c'X,\gamma X)$, decapsulation obtains $\gamma$, and hence
+$\psi=\gamma-c$, on $\EC[d]$. Restricted to $\EC[d]$ we have
+$\psi=2\varphi\tau\hat\varphi$, since $d\mid tdf$.
+
+\begin{proposition}[the recovered kernel is always cyclic]\label{prop:cyclic}
+$\psi(\EC[d])$ is cyclic of order $d$, and the kernel of $\psi$ restricted to
+$\EC[d]$ is exactly $\ker\hat\varphi$.
+\end{proposition}
+
+\begin{proof}
+We have $\hat\varphi(\EC[d])=\ker\varphi=\langle K\rangle$, which is cyclic of
+order $d$. The endomorphism $\tau$ has degree $2f^2$, which is prime to $3$,
+so $\tau\langle K\rangle$ is again cyclic of order $d$. The map $\varphi$ is
+injective on $\tau\langle K\rangle$ if and only if
+$\tau\langle K\rangle\cap\langle K\rangle=0$, i.e.\ if and only if the two
+subgroups have different subgroups of order~$3$. That fails only if the line
+$L=\langle 3^{F-1}K\rangle\subset\EA[3]$ is an eigenline of $\tau$ modulo~3.
+The characteristic polynomial of $\tau$ is $x^2-tfx+2f^2$, whose
+discriminant is $f^2(t^2-8)=-7f^2\equiv 2f^2\pmod 3$. Since $3\nmid f$, this is
+a non-square modulo~3. So $\tau$ has no eigenline in $\EA[3]$, and $\varphi$
+maps $\tau\langle K\rangle$ isomorphically onto a cyclic group of order $d$.
+Thus $\psi(\EC[d])=2\varphi\tau\langle K\rangle$ has order $d$, its kernel
+has order $d^2/d=d$, and that kernel contains $\ker\hat\varphi$, which also
+has order~$d$.
+\end{proof}
+
+\begin{remark}\label{rem:noncyclic}
+The design note~\cite{EigenSetaNote} reported a ``non-cyclic $\psi'$'' corner
+case in one of eight trials of its toy prototype, a variant with a different
+$\psi'$ and very small $d=3^5$. Proposition~\ref{prop:cyclic} shows that the
+case cannot occur in version~2. The argument needs only that $-7$ is a
+non-square modulo~3 and $3\nmid\deg\tau$. The cause of the toy observation
+was not isolated.
+\end{remark}
+
+\begin{proposition}[recovery of $s$]\label{prop:s}
+Let $G$ be a generator of $\psi(\EC[d])$ and $H=kG$ the image of the other
+basis point. Then $\ker\hat\varphi=\langle X_h-kX_g\rangle$. If $K_g$ is the image
+under $\hat\varphi$ of a basis point and has order $d$, then $K_g=u(P_3+sQ_3)$
+for a unit $u$, and
+$s=\log e(P_3,K_g)/\log e(K_g,Q_3)$ in $\mu_d$.
+\end{proposition}
+
+\begin{proof}
+$\psi(X_h-kX_g)=H-kG=0$, and $X_h-kX_g$ has order $d$, so by
+Proposition~\ref{prop:cyclic} it generates $\ker\hat\varphi$. The image of
+$\EC[d]$ under $\hat\varphi$ is $\ker\varphi=\langle P_3+sQ_3\rangle$. With
+$\zeta=e(P_3,Q_3)$, which has order $d$, we get $e(K_g,Q_3)=\zeta^u$ and
+$e(P_3,K_g)=\zeta^{us}$. The codomain of $\hat\varphi$ is $\EA$ up to
+isomorphism, and isomorphisms preserve these subgroups. The implementation
+maps the codomain to the model with coefficient $A$, using $x\mapsto-x$ when
+the computed coefficient is $-A$.
+\end{proof}
+
+\begin{proposition}[fixed schedule]\label{prop:schedule}
+In the basis $(S,0),(T,0),(0,S),(0,T)$ of $\EC^2[2^E]$, the coordinates of
+$\ker\Phi$ are the columns of
+$\begin{psmallmatrix}c'&0\\0&c'\\-\lambda_S&0\\0&-\lambda_T\end{psmallmatrix}$
+modulo $2^E$, which depend on $\mathit{sk}$ only. Whether each $(2,2)$-step of
+the chain is a product step, a gluing, a Richelot step or a splitting is
+decided by linear conditions on these coordinates modulo powers of~2. So the
+schedule is the same for every ciphertext under a given key.
+\end{proposition}
+
+\begin{proof}[Proof sketch]
+The kernel of the $j$-th step is $2^{E-j}$ times the image of $\ker\Phi$ under
+the first $j-1$ steps. On a product $E_1\times E_2$, the step is a product
+step exactly when its 2-torsion kernel is a direct product
+$\langle(P,0),(0,Q)\rangle$, and a graph step when it is the graph of the
+identity of $\EC[2]$ (on $\EC\times\EC$) or of an isomorphism (after the
+split). Both are statements about the coordinates. On a Jacobian, the step
+is a splitting exactly when the codomain is a product, which happens at a
+fixed index determined by the same 2-adic data. Key generation imposes
+$\max(v_2(c'\mp\lambda_S))=2$ and the gluing test of line~15, which fixes the
+schedule as graph, product, glue, Richelot${}^{E-6}$, split, product, graph.
+The self-test checks it once.
+\end{proof}
+
+\paragraph{Correctness error.} By the propositions above, decapsulation of an
+honest ciphertext returns $H_K(s,\mathit{ct})$ unless an intermediate formula
+meets a degenerate input. Examples are a Mumford divisor not in general
+position, a zero denominator in a Richelot or splitting formula, or a Miller
+line through the second argument. No branch handles these cases. The output
+is then wrong but computed in the same time, and the FO check rejects it.
+Heuristically each such event has probability $O(1/p)$ per step, giving
+$\delta=O(E/p)\approx2^{-1330}$ at level~1. Key generation excludes the one
+structured degenerate case, a scalar $\equiv-1$ modulo the point order, which
+the x-only ladder with $y$-recovery cannot handle. The measured rates are in
+Table~\ref{tab:failures}: no failure occurred in \FailTotalTrials\
+decapsulations.
