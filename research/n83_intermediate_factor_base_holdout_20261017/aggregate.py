@@ -7,6 +7,7 @@ import importlib.util
 import json
 import subprocess
 import sys
+import zipfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -49,10 +50,21 @@ def write_once(path, value):
 
 def bind_stratum(stratum, results, archive, provider_sha, run_id, attempt,
                  head_sha, reuse_local_replay):
-    cloud_analysis, archive_sha = prior.finegrid.archive_analysis(
-        archive, provider_sha)
-    if (results / 'analysis.json').read_bytes() != cloud_analysis:
-        raise ValueError(f'stratum {stratum}: extracted analysis differs from ZIP')
+    archive_sha = provider_sha.removeprefix('sha256:')
+    if (len(archive_sha) != 64 or
+            any(c not in '0123456789abcdef' for c in archive_sha) or
+            sha256(archive) != archive_sha):
+        raise ValueError(f'stratum {stratum}: ZIP differs from provider digest')
+    with zipfile.ZipFile(archive) as saved:
+        if saved.testzip() is not None:
+            raise ValueError(f'stratum {stratum}: ZIP integrity failed')
+        names = saved.namelist()
+        if (len(names) != len(set(names)) or
+                any(Path(name).is_absolute() or '..' in Path(name).parts
+                    for name in names) or
+                'results/analysis.json' in names or 'verify.log' not in names):
+            raise ValueError(f'stratum {stratum}: malformed producer archive')
+        original_verifier_log_bytes = saved.read('verify.log')
     member_count = prior.finegrid.bind_extraction(archive, results)
     log = results.parent
     stdout_path = log / 'local_replay.stdout.txt'
@@ -71,14 +83,16 @@ def bind_stratum(stratum, results, archive, provider_sha, run_id, attempt,
         stdout_path.write_text(stdout)
         stderr_path.write_text(stderr)
         status_path.write_text(f'{status}\n')
-    analysis = json.loads(cloud_analysis)
-    if (status not in (0, 2) or stderr or json.loads(stdout) != analysis or
-            (results / 'analysis.json').read_bytes() != cloud_analysis):
+    analysis_bytes = (results / 'analysis.json').read_bytes()
+    analysis = json.loads(analysis_bytes)
+    if (status not in (0, 2) or stderr or json.loads(stdout) != analysis):
         raise ValueError(f'stratum {stratum}: independent local replay differs')
     if (status == 0) != (analysis['status'] == 'HALF_ADMITTED'):
         raise ValueError(f'stratum {stratum}: replay exit and admission differ')
     original_verifier_log = log / 'verify.log'
     original_failure = (original_verifier_log.is_file() and
+                        original_verifier_log.read_bytes() ==
+                        original_verifier_log_bytes and
                         "AttributeError: module 'n83_intermediate_choice' has no attribute 'five_run'"
                         in original_verifier_log.read_text())
     host, source = read(results / 'host.json'), read(results / 'source.json')
@@ -102,7 +116,7 @@ def bind_stratum(stratum, results, archive, provider_sha, run_id, attempt,
             'results': str(results), 'raw_artifact_sha256': archive_sha,
             'raw_artifact_zip': str(archive),
             'bound_result_members': member_count,
-            'analysis_sha256': hashlib.sha256(cloud_analysis).hexdigest(),
+            'analysis_sha256': hashlib.sha256(analysis_bytes).hexdigest(),
             'local_replay_exit': status,
             'archived_verifier_failure': original_failure,
             'archived_verifier_log_sha256': sha256(original_verifier_log)
