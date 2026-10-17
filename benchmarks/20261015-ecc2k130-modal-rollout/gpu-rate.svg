@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600">
+<rect width="100%" height="100%" fill="white"/>
+<text x="65" y="79" font-family="Arial, sans-serif" font-size="37" font-weight="bold" fill="#172b40">Same-walk RTX PRO 6000 kernel rate</text>
+<text x="65" y="118" font-family="Arial, sans-serif" font-size="23" font-weight="normal" fill="#52677a">Five paired A/B sessions; 385,024 workers; B16/T512/minBlocks1</text>
+<line x1="305" y1="180" x2="305" y2="430" stroke="#e5ebef" stroke-width="2"/>
+<text x="281" y="467" font-family="Arial, sans-serif" font-size="19" font-weight="normal" fill="#52677a">15.4</text>
+<line x1="433" y1="180" x2="433" y2="430" stroke="#e5ebef" stroke-width="2"/>
+<text x="409" y="467" font-family="Arial, sans-serif" font-size="19" font-weight="normal" fill="#52677a">15.5</text>
+<line x1="562" y1="180" x2="562" y2="430" stroke="#e5ebef" stroke-width="2"/>
+<text x="538" y="467" font-family="Arial, sans-serif" font-size="19" font-weight="normal" fill="#52677a">15.6</text>
+<line x1="690" y1="180" x2="690" y2="430" stroke="#e5ebef" stroke-width="2"/>
+<text x="666" y="467" font-family="Arial, sans-serif" font-size="19" font-weight="normal" fill="#52677a">15.7</text>
+<line x1="818" y1="180" x2="818" y2="430" stroke="#e5ebef" stroke-width="2"/>
+<text x="794" y="467" font-family="Arial, sans-serif" font-size="19" font-weight="normal" fill="#52677a">15.8</text>
+<line x1="947" y1="180" x2="947" y2="430" stroke="#e5ebef" stroke-width="2"/>
+<text x="923" y="467" font-family="Arial, sans-serif" font-size="19" font-weight="normal" fill="#52677a">15.9</text>
+<line x1="1075" y1="180" x2="1075" y2="430" stroke="#e5ebef" stroke-width="2"/>
+<text x="1051" y="467" font-family="Arial, sans-serif" font-size="19" font-weight="normal" fill="#52677a">16.0</text>
+<text x="65" y="264" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#172b40">Fused control</text>
+<line x1="305" y1="260" x2="451" y2="260" stroke="#2277a7" stroke-width="11"/>
+<circle cx="451" cy="260" r="13" fill="#2277a7"/>
+<text x="474" y="264" font-family="Arial, sans-serif" font-size="23" font-weight="bold" fill="#2277a7">15.513653 B/s</text>
+<text x="65" y="359" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#172b40">Sigma-table</text>
+<line x1="305" y1="355" x2="927" y2="355" stroke="#d77939" stroke-width="11"/>
+<circle cx="927" cy="355" r="13" fill="#d77939"/>
+<text x="950" y="359" font-family="Arial, sans-serif" font-size="23" font-weight="bold" fill="#d77939">15.884369 B/s</text>
+<text x="390" y="517" font-family="Arial, sans-serif" font-size="22" font-weight="normal" fill="#172b40">Scalar updates per second (billions; zoomed axis)</text>
+<text x="65" y="564" font-family="Arial, sans-serif" font-size="19" font-weight="normal" fill="#52677a">Paired median ratio 1.023930; range 1.023803-1.024086; A/A max drift 0.099%</text>
+</svg>

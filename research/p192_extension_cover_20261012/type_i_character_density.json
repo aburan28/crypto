@@ -1,0 +1,57 @@
+{
+  "accepted_nonzero_scalar_lower_bound": "1569275433846670190958947353987675545133315652035359680560",
+  "algebra_ns": 223181208,
+  "ceil_sqrt_p": "79228162514264337593543950336",
+  "conditioned_hit_probability_lt_two_pow_minus_180": true,
+  "conditioned_hit_probability_upper_bound": "51/98079714615416886934934209624229721570832228252209980035",
+  "cover_genera_by_riemann_hurwitz": [
+    7,
+    31
+  ],
+  "doubling_pullback_coprime_to_sextic_and_elliptic_cubic": true,
+  "doubling_pullback_degree": 24,
+  "doubling_pullback_squarefree": true,
+  "fixed_base_three_sum_support_upper_bound": 816,
+  "frozen_accepted": 64,
+  "frozen_attempts_replayed": 259,
+  "frozen_first_rejects": 128,
+  "frozen_second_rejects": 67,
+  "identity_accepted": 1,
+  "leading_coefficient_character": 1,
+  "norm_denominator_cubic_fourth_power": true,
+  "norm_denominator_degree": 12,
+  "norm_numerator_degree": 9,
+  "norm_numerator_has_elliptic_cubic_once": true,
+  "p": "6277101735386680763835789423207666416083908700390324961279",
+  "proof_boundary": "exact finite-field checks; genus and character-sum bounds use written Riemann--Hurwitz and Hasse--Weil, not full Lean formalization",
+  "query_replay_ns": 6425929667,
+  "r": "6277101735386680763835789423176059013767194773182842284081",
+  "sextic_coefficients_decimal": [
+    "5759581869224474742229764325508068724284088014620168166319",
+    "2871507866798370794595461585902226484155448926020705430421",
+    "256565401476304118742737824442136385444068317885306012086",
+    "1055430485884764447436599993424162659556006590722422652501",
+    "2468530440878597515397279578084013697192422058596623026533",
+    "4513201920895332105856497304264752470007880157222753543591",
+    "5531775489468915558493366168973950290545935493089116251548"
+  ],
+  "sextic_factor_coefficients_decimal": [
+    [
+      "5298494932656939781814693725686616741226607543799153434326",
+      "2259141873061735789040940643678165008310562918006641067564",
+      "0",
+      "1"
+    ],
+    [
+      "5036630175031127366908141443749878795180369304940978233550",
+      "4785009627883881406086137965228285633990949530539391447258",
+      "2056413985934923581046279913728657144972848587170828122168",
+      "1"
+    ]
+  ],
+  "sextic_factors_irreducible": true,
+  "sextic_squarefree_and_coprime_to_elliptic_cubic": true,
+  "source_sha256": "df08dd143423d518938895646e2bf5ff48d5392e262d717b2deb2f1b89337ba9",
+  "status": "checked_type_i_character_density_inputs",
+  "trace": "31607402316713927207482677199"
+}

@@ -1,0 +1,58 @@
+{
+  "accepted_hit_upper_exponent": 147,
+  "artifacts_sha256": {
+    "research/p192_extension_cover_20261012/lean/CubicCoefficientRows.lean": "bb8e2ab66bc221e685fa732289cedfbe5440ba5549648c1612589b771c1bb07b",
+    "research/p192_extension_cover_20261012/lean/PivotGuided.lean": "db788357c3828c91277c2d705c2b5886c499ffd24a4fb4e0d2af389700d2c08f",
+    "research/p192_extension_cover_20261012/lean/cubic-coefficient-rows-build-20261016.log": "62b7a7343bc311092446bb46862a24d474252db2294eed2d51e268a494040c8a",
+    "research/p192_extension_cover_20261012/lean/lakefile.toml": "24419b141411cccac071c520ec17ef12f64b362105e7adccfbd9291e7989dfe8",
+    "research/p192_extension_cover_20261012/lean/pivot-guided-full-fan-build-20261016.log": "0b7756fd05c64ab5198c3b442c66aa8ca802a62cc761190951845dfa64e8df89",
+    "research/p192_extension_cover_20261012/lean/pivot-guided-full-fan-build-20261016.preintersection.log": "dfd04337c795a40065a006c248a8e1aa6b003502368ccc17cf01ddc3a873e155",
+    "research/p192_extension_cover_20261012/line_quotient_cubic_fast_probe.py": "473afe8af5cbcdc67f2c95f81e053e8cc3775b1c22ee26f2590da1e10c4ef454",
+    "research/p192_extension_cover_20261012/line_two_fan_capacity.py": "60eba42d6221871bd5e0bef8b7675ca40963dbcea76187a294a7e022bc7da977",
+    "research/p192_extension_cover_20261012/reports/run-20261016T2341Z/REPORT.md": "b56c422ce9afbaf4e21a9550d4713e69fc48bf6bf957b69f44b5964180230536",
+    "research/p192_extension_cover_20261012/type_i_fast_cubic_probe.json": "f9eef4ad5e6d2edbb0afa73c251804ef71e9c8e02bb7723546aac8287fe2f35f",
+    "research/p192_extension_cover_20261012/type_i_fast_cubic_probe.log": "0654da545fbaea62e09cde60ca89aa809a6d72254ad9ebd0f90f5c9783eaf472",
+    "research/p192_extension_cover_20261012/type_i_fast_cubic_probe_attempt1.json": "88b4240554044e0406dac3bc08b389bbca922c61fd98e609507b3d48113e96d2",
+    "research/p192_extension_cover_20261012/type_i_fast_cubic_probe_attempt2.json": "9cb732548d6df5eaad3d87fa4d86509cb4e828099ee2b6abe6fd0025b4f55e39",
+    "research/p192_extension_cover_20261012/type_i_fast_cubic_probe_one.log": "d668dd80e3b7676e0d9b0c2bbf2462de6dc26e0c55b483f02156df8876e5f9fa",
+    "research/p192_extension_cover_20261012/type_i_fast_cubic_probe_two.log": "960c705fc2e7a81912093d1522dd43969d7a79b18be8372da6ec17201132eb5f",
+    "research/p192_extension_cover_20261012/type_i_fast_cubic_probe_verification.json": "eaa0e8d35f260e409a5f9c0e2412d1acd4a084c8ffbe471760002016b4c87cbc",
+    "research/p192_extension_cover_20261012/type_i_fast_cubic_probe_verification.log": "b30d934bcbcde455ec68dbfb0a31879fab2f5d3b28b01200e4cb1add3b22d64d",
+    "research/p192_extension_cover_20261012/type_i_fast_cubic_runtime_info.json": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+    "research/p192_extension_cover_20261012/type_i_two_fan_capacity.json": "d44a9603076bab4ce9884cdcdeb8db43f552b7725e836a0b0da919b105367191",
+    "research/p192_extension_cover_20261012/type_i_two_fan_capacity.log": "bf978dc85b2056ffdd4e60be3ac9e24f8c4497eae7b997a70bdf8633b7f31c98",
+    "research/p192_extension_cover_20261012/type_i_two_fan_capacity_verification.json": "32489502deb3ae52feceaa37c40be0ca9554d72ddcb2eb4b8249404ed04f898e",
+    "research/p192_extension_cover_20261012/type_i_two_fan_capacity_verification.log": "8ef2c2839c5bdc611a127379067193e33368249e519da32afad4ff6a90c82b70",
+    "research/p192_extension_cover_20261012/verify_fast_cubic_probe.py": "f3e9c78932c3ad99972164be0692feeeb5e3b4773d2f3a30cba19f625205227e",
+    "research/p192_extension_cover_20261012/verify_two_fan_capacity.py": "753f8efc70132ab2d3bac7f6ae31028fc3dedce3a71c9e6e8c3c4e872e7c7475"
+  },
+  "cubic_exact_classes": 16,
+  "cubic_exact_cuts": 32,
+  "cubic_stage_ns_unisolated": {
+    "fast": 24466895955,
+    "hybrid": 26531561460,
+    "original": 24322213500
+  },
+  "full_base_distinct_classes": 29935,
+  "full_base_three_sum_capacity": 4471261391320,
+  "independent_receipt_verifiers": [
+    "type_i_fast_cubic_probe_verification.json",
+    "type_i_two_fan_capacity_verification.json"
+  ],
+  "input_sha256": {
+    "line_quotient_cubic_probe.py": "19c602ea584ea0a9f6ad1f2834b6cb464dac3c2acaeb8adf4019f8ea06b76813",
+    "type_i_character_density.json": "fd0a47cf4aecf736b1852d133fd384e30d9584114761bac6495f803d4210ca29",
+    "type_i_line_full_new_quotient_points.json": "718dd3d29fb16b9d7479c011baf548276389a81adcf8aa473cf64007de98e92a",
+    "type_i_line_guided_collector.json": "1650a868094bbcaa7885acc0aa59aa63b71c10398f5e0b3dc0e3f1656161690f",
+    "type_i_plane_quartic.json": "b16122e364056b30e46971b18084f7bfa6c0f6de2fa63f0cae63a1229dd224b3",
+    "type_i_residual_pivot000_three.json": "998911e3bafdb522ccefea7394047f1bbea8600f8aa5923e73a3bfa287644621",
+    "type_i_residual_pivot001_cross.json": "3c182b4bbd5d0b27e17d44fa394894658c8d293ce70d46002237438826aea0fd",
+    "type_i_two_pivot_reduced64.json": "019f65f32c8fef6ca8daa2240f53ee19230a18cd97b312c721387bcd4744c7b7"
+  },
+  "lean_builds": [
+    "lean/cubic-coefficient-rows-build-20261016.log",
+    "lean/pivot-guided-full-fan-build-20261016.log"
+  ],
+  "source_commit_before_run": "3d64cfe60b116a820c0a507d522897d75b42cb29",
+  "status": "verified_cubic_variants_and_full_two_fan_capacity"
+}

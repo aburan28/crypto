@@ -1,0 +1,48 @@
+{
+  "base_classes": 205,
+  "boundary": "Exact support and two frozen known-scalar query laws on 205 reduced quotient classes; collision rank concerns only equal three-sum targets, and one-target pipeline cost is separate.",
+  "collision_relation_rank": 31,
+  "distinct_three_sum_targets": 1456904,
+  "duplicate_decompositions": 31,
+  "elapsed_ns_unisolated": 497205499000,
+  "euler_character_controls": 727,
+  "field_prime": "6277101735386680763835789423207666416083908700390324961279",
+  "first16_by_Q_H_cell": {
+    "++": 206,
+    "+-": 218,
+    "-+": 199,
+    "--": 193
+  },
+  "four_cell_coverage": 1456904,
+  "input_sha256": {
+    "collector": "2e2d07dcdf431a659d668211852f848655f3a2cce5a044b4c1735eb005b9aebd",
+    "density": "fd0a47cf4aecf736b1852d133fd384e30d9584114761bac6495f803d4210ca29",
+    "new": "d9dbd7b405c82a13459c920e2cea86cae772ce70b3e81c59da332e80b44636da",
+    "old": "1650a868094bbcaa7885acc0aa59aa63b71c10398f5e0b3dc0e3f1656161690f"
+  },
+  "known_scalar_arms": {
+    "balanced": {
+      "hits": [],
+      "queries": 64,
+      "rank": 0
+    },
+    "control": {
+      "hits": [],
+      "queries": 64,
+      "rank": 0
+    }
+  },
+  "new_classes": 64,
+  "old_classes": 141,
+  "plus_plus_only_coverage": 364036,
+  "source_sha256": "5a8892b71bfa18b7e3f0de7514e5bbf270eb6f4ea1ccfc7061c3429373024526",
+  "status": "verified_205_class_character_three_sum_collector",
+  "subgroup_order": "6277101735386680763835789423176059013767194773182842284081",
+  "support_by_Q_H_cell": {
+    "++": 364036,
+    "+-": 364258,
+    "-+": 363786,
+    "--": 364824
+  },
+  "unordered_triples": 1456935
+}

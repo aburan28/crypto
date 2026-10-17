@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="350" viewBox="0 0 1000 350" role="img" aria-label="P-192 mixed known-log Type I support and query outcomes">
+  <rect width="1000" height="350" fill="#f7f8fa"/>
+  <style>text{font-family:Arial,Helvetica,sans-serif;fill:#182334}.title{font-size:22px;font-weight:700}.head{font-size:17px;font-weight:700}.body{font-size:15px}.small{font-size:13px}.box{fill:#fff;stroke:#8091aa;stroke-width:2}.blue{fill:#e5f1fc;stroke:#3877ad}.green{fill:#e6f5ec;stroke:#3b855a}.orange{fill:#fff2df;stroke:#be8330}.arrow{stroke:#6c7d92;stroke-width:2.5;fill:none;marker-end:url(#tip)}</style>
+  <defs><marker id="tip" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#6c7d92"/></marker></defs>
+  <text class="title" x="30" y="37">Geometry-guided three-sum support, P-192 Type I</text>
+  <rect class="box blue" x="30" y="65" width="285" height="90" rx="9"/>
+  <text class="head" x="48" y="93">160 reduced signed classes</text>
+  <text class="body" x="48" y="118">32 unknown + 128 known-log</text>
+  <text class="small" x="48" y="139">16 unknown logarithm columns</text>
+  <path class="arrow" d="M315 110 H385"/>
+  <rect class="box" x="385" y="65" width="280" height="90" rx="9"/>
+  <text class="head" x="403" y="93">695,520 unordered triples</text>
+  <text class="body" x="403" y="118">335,712 nonzero-row triples</text>
+  <text class="small" x="403" y="139">2,048 zero-row; 357,760 known-only</text>
+  <path class="arrow" d="M665 110 H735"/>
+  <rect class="box green" x="735" y="65" width="235" height="90" rx="9"/>
+  <text class="head" x="752" y="93">83,874 accepted targets</text>
+  <text class="body" x="752" y="118">with a nonzero row</text>
+  <text class="small" x="752" y="139">of 333,184 distinct targets</text>
+  <path class="arrow" d="M525 155 V215 H275 V225"/>
+  <path class="arrow" d="M525 215 H740 V225"/>
+  <rect class="box orange" x="30" y="225" width="465" height="95" rx="9"/>
+  <text class="head" x="48" y="253">Steered known-only query law</text>
+  <text class="body" x="48" y="278">64/64 accepted three-sum hits; 0 unknown-log rows</text>
+  <text class="small" x="48" y="301">Every target has a known scalar equation</text>
+  <rect class="box blue" x="525" y="225" width="445" height="95" rx="9"/>
+  <text class="head" x="543" y="253">Fresh accepted scalar law</text>
+  <text class="body" x="543" y="278">64 queries from 246 attempts; 0 rank-bearing hits</text>
+  <text class="small" x="543" y="301">SHA-256 counter sample, disjoint from guided base</text>
+</svg>
