@@ -18,12 +18,23 @@ name: ecbench
 # independent-receipt/claim reconstruction. PR correctness receipts
 # are CI diagnostics, never full independent-replay certificates for claims.
 #
-# Committed evidence sessions (research/ecbench_*/sessions, the binary-curve
-# comparison, and the n37 compact-orbit note sessions below) are re-audited
+# Every committed ecbench session is found by its schema, not by where it
+# lives: a directory whose session.json has schema `ecbench.session/v1`,
+# wherever it is in the tree (sheriff case SHF-20261016-3caa6f, E2: 167
+# sessions outside research/ecbench_*/sessions/ were never re-verified).
+# Each is integrity-audited (hashes, seals, plan, answers, derived figures,
+# grading; --replay 0) on ecbench pull requests and in the weekly/manual
+# lane, and is evidence that is never edited.  An interrupted session,
+# including one whose runner was killed before it could mark it (still
+# `running`), is accepted by --allow-interrupted as evidence of the
+# interruption: every per-record check still applies.
+#
+# The sessions under research/ecbench_*/sessions, the binary-curve
+# comparison, and the n37 compact-orbit note sessions are also re-audited
 # in the weekly/manual lane with every measured run replayed: their counts
 # were recorded on another host and architecture and must reproduce here
 # bit for bit, so a change that alters what a registered method counts
-# fails here.  They are evidence and are never edited.
+# fails here.
 on:
   pull_request:
   merge_group:
@@ -120,6 +131,25 @@ jobs:
             /research/ghs_curve_comparison_20261009/
             /research/notes/ecc2k130/cold_compact_orbit_ic_20261003/
             /research/notes/ecc2k130/full_rank_compact_orbit_ic_20261003/
+      # Sessions are found by schema, wherever they live: check out every
+      # directory holding a session.json (tree only, no blobs needed to
+      # list them), then keep those whose session.json is an ecbench
+      # session.  The list is written once and read by the audit steps.
+      - name: Check out and list every committed ecbench session
+        run: |
+          list="$RUNNER_TEMP/ecbench-sessions.txt"
+          mapfile -t candidates < <(git ls-tree -r --name-only HEAD | sed -n 's#/session\.json$##p')
+          test "${#candidates[@]}" -gt 0 || { echo '::error::no session.json in the tree'; exit 1; }
+          printf '/%s/\n' "${candidates[@]}" | git sparse-checkout add --stdin
+          : > "$list"
+          for d in "${candidates[@]}"; do
+            test -f "$d/session.json" || { echo "::error::$d/session.json was not checked out"; exit 1; }
+            if jq -e '.schema == "ecbench.session/v1"' "$d/session.json" > /dev/null; then
+              echo "$d" >> "$list"
+            fi
+          done
+          test -s "$list" || { echo '::error::no committed ecbench sessions found'; exit 1; }
+          echo "$(wc -l < "$list") committed ecbench sessions (by schema)" | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Materialize compile-time inputs without unrelated archives
         run: node .github/scripts/ci-scope.mjs --materialize
       - name: Committed sessions are evidence and are never edited
@@ -128,11 +158,20 @@ jobs:
           BASE: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
         run: |
           git fetch --no-tags --depth=1 origin "$BASE"
-          changed=$(git diff --name-only --no-renames --diff-filter=MDRT "$BASE" HEAD -- \
-            'research/ecbench_*/sessions' \
-            'research/ghs_curve_comparison_20261009/sessions' \
-            'research/notes/ecc2k130/cold_compact_orbit_ic_20261003/sessions' \
-            'research/notes/ecc2k130/full_rank_compact_orbit_ic_20261003/sessions')
+          mapfile -t sessions < "$RUNNER_TEMP/ecbench-sessions.txt"
+          # Every session directory by schema, plus any session.json or
+          # records.jsonl removed or renamed anywhere (a deleted session
+          # is no longer listed at HEAD).
+          changed=$( {
+            git diff --name-only --no-renames --diff-filter=MDRT "$BASE" HEAD -- \
+              'research/ecbench_*/sessions' \
+              'research/ghs_curve_comparison_20261009/sessions' \
+              'research/notes/ecc2k130/cold_compact_orbit_ic_20261003/sessions' \
+              'research/notes/ecc2k130/full_rank_compact_orbit_ic_20261003/sessions' \
+              "${sessions[@]}"
+            git diff --name-only --no-renames --diff-filter=DR "$BASE" HEAD -- \
+              '*/session.json' '*/records.jsonl'
+          } | sort -u)
           if [ -n "$changed" ]; then
             echo "these committed session files were modified, renamed or deleted; add a new session instead:" >&2
             echo "$changed" >&2
@@ -358,17 +397,11 @@ jobs:
         if: (github.event_name == 'pull_request' || github.event_name == 'merge_group') && needs.scope.outputs.ecbench_replay != 'false'
         timeout-minutes: 12
         run: |
-          shopt -s nullglob
-          sessions=(research/ecbench_*/sessions/*/
-            research/ghs_curve_comparison_20261009/sessions/*/
-            research/notes/ecc2k130/cold_compact_orbit_ic_20261003/sessions/*/
-            research/notes/ecc2k130/full_rank_compact_orbit_ic_20261003/sessions/*/)
-          test "${#sessions[@]}" -gt 0 || { echo '::error::no committed evidence sessions found'; exit 1; }
-          for d in "${sessions[@]}"; do
-            echo "auditing $d (all integrity checks; exhaustive replay in weekly/manual lane)"
-            ./target/release/ecbench verify --dir "$d" --replay 0 --allow-interrupted --exit-code > /dev/null
-          done
-          echo 'PR evidence validation: every session hash/seal/answer audited. Fresh smoke sessions exercise deterministic replay; exhaustive historical replay belongs to the weekly/manual lane.' >> "$GITHUB_STEP_SUMMARY"
+          bash .github/scripts/ecbench-audit-sessions.sh "$RUNNER_TEMP/ecbench-sessions.txt"
+          echo 'PR evidence validation: every committed ecbench session (by schema) hash/seal/answer audited. Fresh smoke sessions exercise deterministic replay; exhaustive historical replay belongs to the weekly/manual lane.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Every committed ecbench session passes integrity
+        if: (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule')
+        run: bash .github/scripts/ecbench-audit-sessions.sh "$RUNNER_TEMP/ecbench-sessions.txt"
       - name: Committed evidence reproduces exhaustively on this host
         if: (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule')
         run: |

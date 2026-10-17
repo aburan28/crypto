@@ -50,6 +50,9 @@ test('dependencies, workflow edits and frozen evidence remain applicable', () =>
   assert.equal(classify(['docs/bounds/records/record.json']).ecbench_replay, true);
   assert.equal(classify(['research/ecbench_example/sessions/one/records.jsonl']).ecbench_replay, true);
   assert.equal(classify(['research/ecbench_example/sessions/one/README.md']).ecbench_replay, true);
+  assert.equal(classify(['research/pkm_example_ecbench_20261016/sessions/one/session.json']).ecbench_replay, true);
+  assert.equal(classify(['research/isogeny_example/interrupted/run1/records.jsonl']).ecbench_replay, true);
+  assert.equal(classify(['research/isogeny_example/README.md']).ecbench_replay, false);
   assert.equal(classify(['research/fixture.json'], new Set(['research/fixture.json'])).rust_root, true);
 });
 

@@ -11,6 +11,7 @@ export const scopes = ['rust_root', 'rust_cd', 'rust_fmt', 'release_rust',
   'javascript', 'python', 'rust'];
 
 const maintained = /^(src|tests|examples|benches)\//;
+const sharedAnalysis = /^crates\/crypto-analysis-core\//;
 const frozenExamples = /^experiments\/koblitz-s3-pair-query-20261007-v4\/(baseline|candidate)\.rs$/;
 const rustConfig = /^(Cargo\.(toml|lock)|build\.rs|rust-toolchain(\.toml)?|rustfmt\.toml|clippy\.toml|\.cargo\/.*)$/;
 // The release packages this independent crate and its path dependency. These
@@ -39,7 +40,7 @@ export function classify(files, embedded = new Set(), cargoSources = new Set()) 
     if (control.test(file)) return Object.fromEntries(scopes.map(key => [key, true]));
     const root = /\.rs$/.test(file) && maintained.test(file) || frozenExamples.test(file) || cargoSources.has(file) || rustConfig.test(file) || embedded.has(file)
       || (volcanoCliRust.test(file) && !prose.test(file)) || isogenyAlgosInputs.test(file);
-    result.rust_root ||= root || file === 'scripts/clippy-maintained.sh';
+    result.rust_root ||= root || sharedAnalysis.test(file) || file === 'scripts/clippy-maintained.sh';
     result.rust_cd ||= /^cd_attack\/(src|tests|examples|benches)\//.test(file) && !prose.test(file)
       || /^cd_attack\/(Cargo\.(toml|lock)|build\.rs|rust-toolchain(\.toml)?|\.cargo\/.*)$/.test(file)
       || /^rust-toolchain(\.toml)?$|^\.cargo\//.test(file);
@@ -59,7 +60,10 @@ export function classify(files, embedded = new Set(), cargoSources = new Set()) 
     result.ecbench_replay ||= root
       || /^docs\/(ecbench|bounds)\//.test(file) && !prose.test(file)
       || /^research\/(ecbench_[^/]+|ghs_curve_comparison_20261009)\//.test(file) && (!prose.test(file) || file.includes('/sessions/'))
-      || /^research\/notes\/ecc2k130\/(cold_compact_orbit_ic_20261003|full_rank_compact_orbit_ic_20261003)\//.test(file) && (!prose.test(file) || file.includes('/sessions/'));
+      || /^research\/notes\/ecc2k130\/(cold_compact_orbit_ic_20261003|full_rank_compact_orbit_ic_20261003)\//.test(file) && (!prose.test(file) || file.includes('/sessions/'))
+      // ecbench.yml audits every committed session by schema, wherever it
+      // lives; a session directory always holds these two files.
+      || /(^|\/)(session\.json|records\.jsonl)$/.test(file) && /^research\//.test(file);
     result.actions ||= /^\.github\/(workflows|actions)\//.test(file);
     result.c_cpp ||= /\.(c|cc|cpp|cxx|h|hh|hpp|hxx|cu|cuh)$/.test(file)
       || /(^|\/)(Makefile|CMakeLists\.txt)$|\.cmake$/.test(file);
