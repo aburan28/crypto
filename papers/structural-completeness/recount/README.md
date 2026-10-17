@@ -1,8 +1,19 @@
 # Recount of the instance and prime counts (sheriff case SHF-20261016-3caa6f)
 
 Raw outputs behind three numbers in `../structural_completeness.tex`, re-run on
-2026-10-16 at commit `f25d5e520` (branch `claude/sheriff-major-findings`; the
-four scripts are unchanged since `8b6b8c8ba`).
+2026-10-16 at commit `f25d5e520` (branch `claude/sheriff-major-findings`).
+~~the four scripts are unchanged since `8b6b8c8ba`~~ Three of the four cited
+scripts (`exp_zprime_l_residue.py`, `exp_zprime2_generalized_lemma.py`,
+`thread12_cm73_sweep.gp`) are unchanged since `8b6b8c8ba`. The fourth,
+`exp_zdoubleprime_lemma_extended.py`, was edited in `11aa00591` (the commit
+that added this directory) to stop printing the stale `16562` total, after its
+2026-10-16 output had been captured; that output therefore came from the
+`8b6b8c8ba` version. It was regenerated on 2026-10-17 with the current script
+(Python 3.13.16, `python3 -I -B exp_zdoubleprime_lemma_extended.py`, exit 0,
+3.4 s, at `b59187e55`); the only change is line 63, which now reads
+`(Exp Z''): 1,802 instances.` instead of `Grand total: 16562 + 1,802 = 18,364
+instances.` (Correction 2026-10-17, sheriff case SHF-20261017-e4d7f6, finding
+P-N5.)
 
 | File | Command (from `secp256k1_cm_audit/` unless noted) | Exit | Wall time |
 |---|---|---|---|
@@ -44,9 +55,11 @@ Its totals agree with the per-class tables the cited scripts print.
   standing assumptions of Section 8, and the bounded ranges of every
   empirical check.
 
-The `exp_zdoubleprime_lemma_extended.py` output still prints the stale
+~~The `exp_zdoubleprime_lemma_extended.py` output still prints the stale
 literal (`16562 + 1,802 = 18,364`) in its coverage summary; the paper no
-longer uses it.
+longer uses it.~~ That was true of the output captured before the script was
+edited; the regenerated output (2026-10-17, above) no longer prints the
+literal. All counts are unaffected.
 
 ## Report
 

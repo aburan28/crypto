@@ -64,7 +64,12 @@ The audit log comes from CI job `lean-proof` in
 cache, replays `S3Roots` with `leanchecker --fresh`, and refuses `sorry`,
 `admit`, `native_decide` and custom axioms. Read the CI log for the actual
 axiom set. Earlier text here stated the result without any kept output
-(sheriff case SHF-20261016-3caa6f, finding L6). To check locally:
+(sheriff case SHF-20261016-3caa6f, finding L6). The output of a green run
+is now committed as [`lean/axiom-audit.log`](lean/axiom-audit.log)
+(run 38984047507, job 117251255336, PR #2026 head e5a884227,
+2026-10-17): all three theorems depend on exactly `propext`,
+`Classical.choice` and `Quot.sound`, and `leanchecker --fresh` passed
+(added 2026-10-17, sheriff case SHF-20261017-e4d7f6, L-N7). To check locally:
 
 ```
 cd lean && lake exe cache get && lake build && lake env lean AxiomAudit.lean
