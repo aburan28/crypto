@@ -44,7 +44,7 @@ const MODULAR_POLYNOMIALS: &str = include_str!("modular_polynomials.txt");
 pub const WALK_COST: u64 = 4_000_000_000;
 
 /// Steps allowed for one walk.
-pub const MAX_STEPS: u32 = 10_000;
+pub const MAX_STEPS: u32 = 20_000;
 
 /// A closed cycle of `l`-isogenies through `E`.
 #[derive(Clone, Debug)]
@@ -95,25 +95,44 @@ fn degrees(dk: &BigInt, v: &BigUint, q: &BigUint) -> Vec<u64> {
     .collect()
 }
 
-/// Cycles through the curve for up to [`DEGREES_TRIED`] usable degrees
-/// `l`, each bounding the conductor on its own; together, at every `ℓ`,
-/// by the smallest of their bounds.
-pub fn conductor_from_cycles(model: &Model, dk: &BigInt, v: &BigUint) -> Vec<Cycle> {
+/// The walks of up to [`DEGREES_TRIED`] usable degrees `l`, at their
+/// default budget; closed ones bound the conductor, open ones exclude every
+/// order whose class number they outlast.
+#[derive(Clone, Debug, Default)]
+pub struct Walks {
+    pub closed: Vec<Cycle>,
+    pub open: Vec<(u64, u32)>,
+}
+
+pub fn walks(model: &Model, dk: &BigInt, v: &BigUint) -> Walks {
+    let mut out = Walks::default();
     // A cycle's length is the order of a class in a group of order about
     // √|d_K| or more: past MAX_DISC_BITS it cannot close in MAX_STEPS.
     if dk.bits() > MAX_DISC_BITS {
-        return Vec::new();
+        return out;
     }
-    degrees(dk, v, &model.q())
-        .into_iter()
-        .filter_map(|l| conductor_from_cycle(model, dk, l))
-        .take(DEGREES_TRIED)
-        .collect()
+    for l in degrees(dk, v, &model.q()) {
+        if out.closed.len() + out.open.len() >= DEGREES_TRIED {
+            break;
+        }
+        let Some(steps) = affordable(model, l, 1) else {
+            break;
+        };
+        match walk_degree(model, dk, l, steps) {
+            Some(Walked::Closed(c)) => out.closed.push(c),
+            Some(Walked::Open { degree, steps }) => out.open.push((degree, steps)),
+            None => {}
+        }
+    }
+    out
 }
 
 /// The bound the cycles put on `v_ℓ(f)`: each caps it by the largest
 /// valuation among its multiples, together by the smallest such cap.
 pub fn cap(cycles: &[Cycle], ell: &BigUint) -> u32 {
+    if cycles.is_empty() {
+        return u32::MAX;
+    }
     let val = |n: &BigUint| {
         let (mut n, mut e) = (n.clone(), 0u32);
         while !n.is_zero() && (&n % ell).is_zero() {
@@ -142,11 +161,11 @@ pub fn describe(cycles: &[Cycle]) -> String {
     }
 }
 
-/// The largest `|d_K|`, in bits, for which [`conductor_from_cycles`]
+/// The largest `|d_K|`, in bits, for which [`walks`]
 /// walks.
 pub const MAX_DISC_BITS: u64 = 48;
 
-/// Degrees `l` whose cycles [`conductor_from_cycles`] combines.
+/// Degrees `l` that [`walks`] walks.
 pub const DEGREES_TRIED: usize = 3;
 
 /// The integer `c` in the field of characteristic `p`.
@@ -184,8 +203,9 @@ fn quadratic_root<F: Field>(f: &F, how: &Roots2<'_, F>, g1: &F::E, g0: &F::E) ->
     }
 }
 
-/// Walk the cycle of `l`-isogenies from `j0`; `Some(r)` when it closes
-/// after `r` steps.
+/// Walk the cycle of `l`-isogenies from `j0`: `Ok(r)` when it closes after
+/// `r` steps, `Err(n)` when it has not after `n = max_steps` clean steps;
+/// `None` at a step that is not a clean pair of simple roots.
 fn walk<F: Field>(
     f: &F,
     p: &BigUint,
@@ -194,7 +214,7 @@ fn walk<F: Field>(
     l: u64,
     how: &Roots2<'_, F>,
     max_steps: u32,
-) -> Option<u32> {
+) -> Option<Result<u32, u32>> {
     let phi: Vec<(usize, usize, F::E)> = modular_polynomial(l)
         .into_iter()
         .map(|(i, j, c)| (i, j, embed(f, &c, p)))
@@ -255,12 +275,177 @@ fn walk<F: Field>(
             None => quadratic_root(f, how, &g[1], &g[0])?,
         };
         if next == *j0 {
-            return Some(step);
+            return Some(Ok(step));
         }
         prev = Some(cur);
         cur = next;
     }
-    None
+    Some(Err(max_steps))
+}
+
+/// [`walk`] over `GF(p)`, `p < 2^63`, in plain word arithmetic: the same
+/// steps, without the allocation of the generic polynomials.
+fn walk_word(p: u64, j0: u64, l: u64, max_steps: u32) -> Option<Result<u32, u32>> {
+    let m = |a: u64, b: u64| (u128::from(a) * u128::from(b) % u128::from(p)) as u64;
+    let add = |a: u64, b: u64| ((u128::from(a) + u128::from(b)) % u128::from(p)) as u64;
+    let sub = |a: u64, b: u64| add(a, p - b % p);
+    let pow = |mut b: u64, mut e: u64| {
+        let mut acc = 1u64;
+        while e > 0 {
+            if e & 1 == 1 {
+                acc = m(acc, b);
+            }
+            b = m(b, b);
+            e >>= 1;
+        }
+        acc
+    };
+    let inv = |a: u64| pow(a, p - 2);
+    let strip = |mut v: Vec<u64>| {
+        while v.last() == Some(&0) {
+            v.pop();
+        }
+        v
+    };
+    // a mod b, b non-zero.
+    let rem = |a: &[u64], b: &[u64]| {
+        let mut r = a.to_vec();
+        let lead = inv(*b.last().expect("non-zero"));
+        while r.len() >= b.len() {
+            let c = m(*r.last().expect("non-empty"), lead);
+            let shift = r.len() - b.len();
+            for (i, &x) in b.iter().enumerate() {
+                r[shift + i] = sub(r[shift + i], m(c, x));
+            }
+            r = strip(r);
+            if r.is_empty() {
+                break;
+            }
+        }
+        r
+    };
+    let gcd = |a: &[u64], b: &[u64]| {
+        let (mut a, mut b) = (strip(a.to_vec()), strip(b.to_vec()));
+        while !b.is_empty() {
+            let r = rem(&a, &b);
+            a = b;
+            b = r;
+        }
+        let lead = inv(*a.last().expect("non-zero"));
+        a.iter().map(|&c| m(c, lead)).collect::<Vec<u64>>()
+    };
+    let mulmod = |a: &[u64], b: &[u64], f: &[u64]| {
+        if a.is_empty() || b.is_empty() {
+            return Vec::new();
+        }
+        let mut t = vec![0u64; a.len() + b.len() - 1];
+        for (i, &x) in a.iter().enumerate() {
+            for (j, &y) in b.iter().enumerate() {
+                t[i + j] = add(t[i + j], m(x, y));
+            }
+        }
+        rem(&strip(t), f)
+    };
+    let phi: Vec<(usize, usize, u64)> = modular_polynomial(l)
+        .into_iter()
+        .map(|(i, j, c)| {
+            let r = c.mod_floor(&BigInt::from(p)).to_u64().expect("reduced");
+            (i, j, r)
+        })
+        .collect();
+    let top = l as usize + 1;
+    let half = (p - 1) / 2;
+    let mut prev: Option<u64> = None;
+    let mut cur = j0;
+    for step in 1..=max_steps {
+        let mut powers = vec![1u64];
+        for _ in 0..top {
+            let last = *powers.last().expect("non-empty");
+            powers.push(m(last, cur));
+        }
+        let mut f = vec![0u64; top + 1];
+        for &(i, j, c) in &phi {
+            f[j] = add(f[j], m(c, powers[i]));
+        }
+        let f = strip(f);
+        if f.len() != top + 1 {
+            return None;
+        }
+        // Y^p mod f.
+        let mut acc = vec![1u64];
+        let base = vec![0u64, 1];
+        for i in (0..64 - p.leading_zeros()).rev() {
+            acc = mulmod(&acc, &acc, &f);
+            if (p >> i) & 1 == 1 {
+                acc = mulmod(&acc, &base, &f);
+            }
+        }
+        let mut d = acc;
+        d.resize(d.len().max(2), 0);
+        d[1] = sub(d[1], 1);
+        let g = gcd(&f, &strip(d));
+        if g.len() != 3 {
+            return None;
+        }
+        let derivative: Vec<u64> = f
+            .iter()
+            .enumerate()
+            .skip(1)
+            .map(|(i, &c)| m(c, i as u64 % p))
+            .collect();
+        if gcd(&g, &strip(derivative)).len() != 1 {
+            return None;
+        }
+        let next = match prev {
+            Some(back) => {
+                if add(add(m(back, back), m(g[1], back)), g[0]) != 0 {
+                    return None;
+                }
+                sub(sub(0, g[1]), back)
+            }
+            None => {
+                // (−g₁ + √(g₁² − 4g₀))/2 by Tonelli–Shanks.
+                let disc = sub(m(g[1], g[1]), m(4, g[0]));
+                if disc != 0 && pow(disc, half) != 1 {
+                    return None;
+                }
+                let root = {
+                    let (mut q, mut s) = (p - 1, 0u32);
+                    while q % 2 == 0 {
+                        q /= 2;
+                        s += 1;
+                    }
+                    let z = (2..p).find(|&z| pow(z, half) == p - 1)?;
+                    let (mut mm, mut c, mut t, mut r) =
+                        (s, pow(z, q), pow(disc, q), pow(disc, q.div_ceil(2)));
+                    while t > 1 {
+                        let mut i = 0;
+                        let mut tt = t;
+                        while tt != 1 {
+                            tt = m(tt, tt);
+                            i += 1;
+                        }
+                        let mut b = c;
+                        for _ in 0..(mm - i - 1) {
+                            b = m(b, b);
+                        }
+                        mm = i;
+                        c = m(b, b);
+                        t = m(t, c);
+                        r = m(r, b);
+                    }
+                    if disc == 0 { 0 } else { r }
+                };
+                m(sub(root, g[1]), inv(2))
+            }
+        };
+        if next == j0 {
+            return Some(Ok(step));
+        }
+        prev = Some(cur);
+        cur = next;
+    }
+    Some(Err(max_steps))
 }
 
 /// `α = (x + y√d)/2` as `(x, y)`.
@@ -323,30 +508,51 @@ fn primitive_solution(d: &BigInt, l: u64, r: u32) -> Option<Quad> {
     None
 }
 
-/// The cycle of `l`-isogenies through the curve (`l` from [`degrees`]),
-/// and the multiples of the conductor it gives.  `None` when the model has
-/// no arithmetic here, a step is not a clean pair of simple roots, or the
-/// walk does not close within budget.
-fn conductor_from_cycle(model: &Model, dk: &BigInt, l: u64) -> Option<Cycle> {
-    if dk.sign() != Sign::Minus {
+/// What a walk of `l`-isogenies found.
+#[derive(Clone, Debug)]
+pub enum Walked {
+    /// It closed: a cycle.
+    Closed(Cycle),
+    /// It took `steps` clean steps without coming back.
+    Open { degree: u64, steps: u32 },
+}
+
+/// The steps a walk of degree `l` may take within [`WALK_COST`] times
+/// `scale`, at most [`MAX_STEPS`] times `scale`.
+pub fn affordable(model: &Model, l: u64, scale: u64) -> Option<u32> {
+    let step_cost = multiplication_cost(model, 1, model.q().bits())?
+        .saturating_mul((l + 2) * (l + 2))
+        .div_ceil(3);
+    Some(
+        (WALK_COST.saturating_mul(scale) / step_cost.max(1))
+            .min(u64::from(MAX_STEPS) * scale)
+            .min(u64::from(u32::MAX)) as u32,
+    )
+}
+
+/// Walk `l`-isogenies from the curve (`l` from [`degrees`]) for at most
+/// `max_steps`.  `None` when the model has no arithmetic here or a step is
+/// not a clean pair of simple roots.
+pub fn walk_degree(model: &Model, dk: &BigInt, l: u64, max_steps: u32) -> Option<Walked> {
+    if dk.sign() != Sign::Minus || max_steps < 3 {
         return None;
     }
     let q = model.q();
-    let step_cost = multiplication_cost(model, 1, q.bits())?
-        .saturating_mul((l + 2) * (l + 2))
-        .div_ceil(3);
-    let max_steps = (WALK_COST / step_cost.max(1)).min(u64::from(MAX_STEPS)) as u32;
-    if max_steps < 3 {
-        return None;
-    }
-    let steps = match model {
+    let result = match model {
         Model::Prime { p, a, b } => {
             if p <= &BigUint::from(3u8) {
                 return None;
             }
-            let f = Fp(p.clone());
-            let j = short_j(&f, a, b)?;
-            walk(&f, p, &q, &j, l, &Roots2::Odd { order: &q }, max_steps)?
+            if let Some(f) = FpK::new(p, &[BigUint::zero()]) {
+                // GF(p) in one word.
+                let el = |c: &BigUint| f.int(c.to_u64().expect("below p < 2^63"));
+                let j = short_j(&f, &el(a), &el(b))?;
+                walk_word(f.p, j[0], l, max_steps)?
+            } else {
+                let f = Fp(p.clone());
+                let j = short_j(&f, a, b)?;
+                walk(&f, p, &q, &j, l, &Roots2::Odd { order: &q }, max_steps)?
+            }
         }
         Model::Extension {
             p, modulus, a, b, ..
@@ -393,6 +599,10 @@ fn conductor_from_cycle(model: &Model, dk: &BigInt, l: u64) -> Option<Cycle> {
         }
         Model::Other { .. } => return None,
     };
+    let steps = match result {
+        Ok(r) => r,
+        Err(n) => return Some(Walked::Open { degree: l, steps: n }),
+    };
     let alpha = primitive_solution(dk, l, steps)?;
     // Unit multiples for d_K = −4 (i) and −3 (a sixth root of unity).
     let unit = match dk.to_i64() {
@@ -412,11 +622,94 @@ fn conductor_from_cycle(model: &Model, dk: &BigInt, l: u64) -> Option<Cycle> {
         multiples.sort();
         multiples.dedup();
     }
-    Some(Cycle {
+    Some(Walked::Closed(Cycle {
         degree: l,
         steps,
         multiples,
-    })
+    }))
+}
+
+/// The class number of the fundamental discriminant `d < 0`, by counting
+/// reduced forms `(a, b, c)`, `|b| ≤ a ≤ c`, `b ≥ 0` when `|b| = a` or
+/// `a = c`; `None` past [`CLASS_NUMBER_BITS`].
+pub fn class_number(d: &BigInt) -> Option<u64> {
+    if d.sign() != Sign::Minus || d.bits() > CLASS_NUMBER_BITS {
+        return None;
+    }
+    let n = d.magnitude().to_u64()?;
+    let mut h = 0u64;
+    let mut a = 1u64;
+    while 3 * a * a <= n {
+        // b ≡ d (mod 2), −a < b ≤ a.
+        let start = if n % 2 == 1 { 1 } else { 0 };
+        let mut b = start;
+        while b <= a {
+            let num = b * b + n;
+            if num % (4 * a) == 0 {
+                let c = num / (4 * a);
+                if c >= a {
+                    // (a, b, c), and (a, −b, c) unless b = 0, b = a or a = c.
+                    h += if b == 0 || b == a || a == c { 1 } else { 2 };
+                }
+            }
+            b += 2;
+        }
+        a += 1;
+    }
+    Some(h)
+}
+
+/// The largest `|d_K|`, in bits, [`class_number`] counts for.
+pub const CLASS_NUMBER_BITS: u64 = 32;
+
+/// `h(O_f) = h_K·f·Π_{p|f}(1 − (d_K/p)/p) / [O_K^* : O_f^*]` for the order
+/// of conductor `f = Π p^e`.
+pub fn order_class_number(dk: &BigInt, hk: u64, f: &[(BigUint, u32)]) -> BigUint {
+    let mut h = BigUint::from(hk);
+    let mut nontrivial = false;
+    for (p, e) in f {
+        if *e == 0 {
+            continue;
+        }
+        nontrivial = true;
+        let chi = kronecker(dk, p);
+        h *= p.pow(e - 1);
+        h = match chi {
+            1 => h * (p - 1u8),
+            -1 => h * (p + 1u8),
+            _ => h * p,
+        };
+    }
+    if nontrivial {
+        match dk.to_i64() {
+            Some(-4) => h /= 2u8,
+            Some(-3) => h /= 3u8,
+            _ => {}
+        }
+    }
+    h
+}
+
+/// The Kronecker symbol `(d/p)` for a prime `p`.
+fn kronecker(d: &BigInt, p: &BigUint) -> i32 {
+    if p == &BigUint::from(2u8) {
+        return match d.mod_floor(&BigInt::from(8)).to_u8().expect("small") {
+            1 | 7 => 1,
+            3 | 5 => -1,
+            _ => 0,
+        };
+    }
+    let pi = BigInt::from(p.clone());
+    let r = d.mod_floor(&pi);
+    if r.is_zero() {
+        return 0;
+    }
+    let e = (&pi - 1u8) >> 1u8;
+    if r.modpow(&e, &pi).is_one() {
+        1
+    } else {
+        -1
+    }
 }
 
 /// `j = 1728·4a³/(4a³ + 27b²)` of `y² = x³ + ax + b`; `None` for `j = 0`
@@ -434,6 +727,46 @@ fn short_j<F: Field>(f: &F, a: &F::E, b: &F::E) -> Option<F::E> {
 mod tests {
     use super::*;
     use crate::cryptanalysis::curve_traits::torsion::{frobenius_is_scalar, scalar_on_power};
+
+    /// The word-arithmetic walk takes the generic walk's steps.
+    #[test]
+    fn the_word_walk_matches_the_generic_walk() {
+        let mut compared = 0;
+        for p in [1009u64, 2003, 10007, 65537] {
+            let f = Fp(BigUint::from(p));
+            let q = BigUint::from(p);
+            for a in 1..8u64 {
+                for b in 1..8u64 {
+                    let Some(j) = short_j(&f, &BigUint::from(a), &BigUint::from(b)) else {
+                        continue;
+                    };
+                    for l in [3u64, 5, 7] {
+                        let generic = walk(&f, &q, &q, &j, l, &Roots2::Odd { order: &q }, 200);
+                        let word = walk_word(p, j.to_u64().expect("small"), l, 200);
+                        assert_eq!(generic, word, "p={p} a={a} b={b} l={l}");
+                        compared += usize::from(generic.is_some());
+                    }
+                }
+            }
+        }
+        assert!(compared > 100, "{compared}");
+    }
+
+    #[test]
+    fn class_numbers_match_known_values() {
+        for (d, h) in [(-3i64, 1u64), (-4, 1), (-7, 1), (-8, 1), (-15, 2), (-20, 2), (-23, 3),
+            (-47, 5), (-71, 7), (-84, 4), (-163, 1), (-199, 9), (-260, 8), (-1999, 27)] {
+            assert_eq!(class_number(&BigInt::from(d)), Some(h), "h({d})");
+        }
+        // h(−3·3²) = 1, h(−4·5²) = 2, h(−7·2²) = 1, h(−23·3²) = 3·(3 − 1) = 6.
+        let o = |d: i64, p: u32, e: u32, hk: u64| {
+            order_class_number(&BigInt::from(d), hk, &[(BigUint::from(p), e)])
+        };
+        assert_eq!(o(-3, 3, 1, 1), BigUint::from(1u8));
+        assert_eq!(o(-4, 5, 1, 1), BigUint::from(2u8));
+        assert_eq!(o(-7, 2, 1, 1), BigUint::from(1u8));
+        assert_eq!(o(-23, 3, 1, 3), BigUint::from(6u8));
+    }
 
     /// Cornacchia's solutions have the norm and are primitive at `l`.
     #[test]
@@ -628,11 +961,37 @@ mod tests {
                         f *= ell.pow(depth - s);
                         ell += 1;
                     }
-                    let cycles = conductor_from_cycles(&model, &BigInt::from(dk), &BigUint::from(v as u64));
+                    let cycles = walks(&model, &BigInt::from(dk), &BigUint::from(v as u64)).closed;
                     if cycles.is_empty() {
                         continue;
                     }
                     closed += 1;
+                    // The cycle length is the order of a class of the
+                    // class group of End(E): it divides h(O_f).
+                    let mut ff = Vec::new();
+                    let mut rest = f;
+                    let mut d = 2u64;
+                    while rest > 1 {
+                        let mut e = 0;
+                        while rest % d == 0 {
+                            rest /= d;
+                            e += 1;
+                        }
+                        if e > 0 {
+                            ff.push((BigUint::from(d), e));
+                        }
+                        d += 1;
+                    }
+                    let hk = class_number(&BigInt::from(dk)).expect("small");
+                    let h = order_class_number(&BigInt::from(dk), hk, &ff);
+                    for cycle in &cycles {
+                        assert!(
+                            (&h % cycle.steps).is_zero(),
+                            "p={p} a={a} b={b}: cycle of {} {}-isogenies, h(O_{f}) = {h}",
+                            cycle.steps,
+                            cycle.degree
+                        );
+                    }
                     for cycle in &cycles {
                     assert!(
                         cycle.multiples.iter().any(|y| (y % f).is_zero()),

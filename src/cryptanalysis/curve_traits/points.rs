@@ -182,6 +182,32 @@ pub fn irreducible<F: Field>(f: &F, q: &BigUint, k: usize, seed: u64) -> Option<
 /// A square root of `a` in a field of odd order `order` (Tonelli–Shanks),
 /// or `None` for a non-square.
 pub fn sqrt<F: Field>(f: &F, a: &F::E, order: &BigUint) -> Option<F::E> {
+    sqrt_with(f, a, order, None)
+}
+
+/// A non-square of the field of odd order `order`, found from seeds.
+pub fn nonresidue<F: Field>(f: &F, order: &BigUint) -> Option<F::E> {
+    let half = (order - 1u8) >> 1;
+    let minus_one = f.neg(&f.one());
+    (0u64..)
+        .map(|i| f.sample(i ^ 0x5eed))
+        .take(1024)
+        .find(|z| !f.is_zero(z) && field_pow(f, z, &half) == minus_one)
+}
+
+fn field_pow<F: Field>(f: &F, b: &F::E, e: &BigUint) -> F::E {
+    let mut acc = f.one();
+    for i in (0..e.bits()).rev() {
+        acc = f.mul(&acc, &acc);
+        if e.bit(i) {
+            acc = f.mul(&acc, b);
+        }
+    }
+    acc
+}
+
+/// [`sqrt`] with the non-square `z` it needs supplied, when known.
+pub fn sqrt_with<F: Field>(f: &F, a: &F::E, order: &BigUint, z: Option<&F::E>) -> Option<F::E> {
     if f.is_zero(a) {
         return Some(a.clone());
     }
@@ -203,9 +229,12 @@ pub fn sqrt<F: Field>(f: &F, a: &F::E, order: &BigUint) -> Option<F::E> {
     }
     let s = qm1.trailing_zeros().expect("order > 1");
     let t = &qm1 >> s;
-    let z = (0u64..)
-        .map(|i| f.sample(i ^ 0x5eed))
-        .find(|z| !f.is_zero(z) && pow(z, &half) == minus_one)?;
+    let z = match z {
+        Some(z) => z.clone(),
+        None => (0u64..)
+            .map(|i| f.sample(i ^ 0x5eed))
+            .find(|z| !f.is_zero(z) && pow(z, &half) == minus_one)?,
+    };
     let mut m = s;
     let mut c = pow(&z, &t);
     let mut tt = pow(a, &t);
@@ -288,6 +317,8 @@ pub(crate) struct ShortW<'a, F: Field> {
     pub a: F::E,
     pub b: F::E,
     pub order: BigUint,
+    /// A non-square, found once for every square root.
+    pub nonresidue: Option<F::E>,
 }
 
 impl<F: Field> CurveGroup for ShortW<'_, F> {
@@ -297,7 +328,7 @@ impl<F: Field> CurveGroup for ShortW<'_, F> {
         let g = self.f;
         let x = g.sample(i);
         let rhs = g.add(&g.mul(&g.add(&g.mul(&x, &x), &self.a), &x), &self.b);
-        let y = sqrt(g, &rhs, &self.order)?;
+        let y = sqrt_with(g, &rhs, &self.order, self.nonresidue.as_ref())?;
         Some(Jac { x, y, z: g.one() })
     }
     fn mul(&self, p: &Jac<F::E>, n: &BigUint) -> Jac<F::E> {
@@ -710,16 +741,20 @@ fn short_curve<'a, F: Field>(
     order: BigUint,
     twist: bool,
 ) -> Option<ShortW<'a, F>> {
+    let z = nonresidue(f, &order)?;
     let (a, b) = if twist {
-        let d = (0u64..512)
-            .map(|i| f.sample(i ^ 0x7a157))
-            .find(|d| !f.is_zero(d) && sqrt(f, d, &order).is_none())?;
-        let d2 = f.mul(&d, &d);
-        (f.mul(&a, &d2), f.mul(&b, &f.mul(&d2, &d)))
+        let z2 = f.mul(&z, &z);
+        (f.mul(&a, &z2), f.mul(&b, &f.mul(&z2, &z)))
     } else {
         (a, b)
     };
-    Some(ShortW { f, a, b, order })
+    Some(ShortW {
+        f,
+        a,
+        b,
+        order,
+        nonresidue: Some(z),
+    })
 }
 
 /// `y² + xy = x³ + ax² + b` over the binary field `f` of degree `m`, or its
@@ -867,8 +902,8 @@ pub fn scalar_by_points(model: &Model, trace: &BigInt, ell: u64) -> Option<bool>
         return None;
     }
     let q = model.q();
-    let rank = |degree: u32, twist: bool, n: &BigUint, cost: u64| {
-        let budget = POINT_TEST_COST / cost;
+    let rank = |degree: u32, twist: bool, n: &BigUint, cost: u64, total: u64| {
+        let budget = total / cost;
         if budget < MIN_MULTIPLICATIONS {
             return None;
         }
@@ -878,7 +913,7 @@ pub fn scalar_by_points(model: &Model, trace: &BigInt, ell: u64) -> Option<bool>
     // [`EARLY_DEGREE`].
     if u64::from(k) <= EARLY_DEGREE {
         let n = extension_order(&q, trace, k)?;
-        if let Some(r) = rank(k, false, &n, multiplication_cost(model, k, n.bits())?) {
+        if let Some(r) = rank(k, false, &n, multiplication_cost(model, k, n.bits())?, POINT_TEST_COST) {
             return Some(r);
         }
     }
@@ -892,8 +927,15 @@ pub fn scalar_by_points(model: &Model, trace: &BigInt, ell: u64) -> Option<bool>
     let n = (qi.pow(degree) + 1u8 + lucas_v(trace, &qi, degree))
         .to_biguint()
         .filter(|n| !n.is_zero())?;
-    rank(degree, true, &n, weighted_cost(model, degree, n.bits())?)
+    // Each seeded point costs a square root, about three multiplications
+    // the rank test does not count.
+    let cost = weighted_cost(model, degree, n.bits())?.saturating_mul(4);
+    rank(degree, true, &n, cost, NEW_POINT_COST)
 }
+
+/// The work allowed for one test of the twist route of
+/// [`scalar_by_points`] and of [`scalar_on_power_by_points`].
+pub const NEW_POINT_COST: u64 = 5_000_000_000;
 
 /// The degree up to which [`scalar_by_points`] first tries `E(GF(q^k))`
 /// itself.
@@ -984,6 +1026,8 @@ impl GroupTest for Eigen<'_> {
                 return None;
             }
             spent += 1;
+            // A square root, about three multiplications.
+            spent += 2;
             let Some(p) = g.sample_point(i) else {
                 continue;
             };
@@ -1138,7 +1182,7 @@ pub fn scalar_on_power_by_points(
         let Some(cost) = weighted_cost(model, m, order.bits()) else {
             return None;
         };
-        let budget = POINT_TEST_COST / cost;
+        let budget = NEW_POINT_COST / cost;
         if budget < MIN_MULTIPLICATIONS {
             verdict = None;
             continue;

@@ -114,8 +114,19 @@ secp256k1.
   `2λ ≡ t (mod n)` (one candidate for odd `ℓ`, two for `ℓ = 2`), and the
   test is `x^q ≡ x([λ]P) (mod f_n)`: it says `πP = ±λP` for every `P` of
   `E[n]` outside `E[2]`, which on a basis and its sum forces `π = ±λ`.
-  It runs for `ℓ^j ≤ 64` within the same cost budget; where it stops
-  early the level keeps the bound it reached.
+  It runs for `ℓ^j ≤ 64` within the same cost budget. Beyond that the
+  **prime-power point test** (`scalar_on_power_by_points`) decides the
+  same question from points: a scalar `λ` on `E[ℓ^j]` has `π^m = 1`
+  there, `m = ord(λ mod ℓ^j)`, so `E[ℓ^j] ⊆ E(GF(q^m))`. With
+  `#E(GF(q^m)) = ℓ^v·c` exact from the trace, a candidate `λ` is refuted
+  by `v < 2j`, by a point whose `ℓ`-part has order above `ℓ^{v−j}`, or by
+  a point `T` of order `ℓ^j` with `πT ≠ [λ]T` (`π` applied to its
+  coordinates through the matrix of the `q`-power map), and confirmed by
+  two eigenvectors of order `ℓ^j` whose order-`ℓ` multiples are
+  independent (the second split off the cyclic factor by a
+  Pohlig–Hellman logarithm). Extensions of prime fields below `2^63` are
+  built directly as `GF(p^m)` in word arithmetic. Where both stop early
+  the level keeps the bound it reached.
 - at depth 1 with `ψ_ℓ` too large, the **point test**
   ([`points.rs`](../../src/cryptanalysis/curve_traits/points.rs)): the
   scalar case is exactly `E[ℓ] ⊆ E(GF(q^k))`, `k = ord(λ)`, i.e. an
@@ -124,7 +135,11 @@ secp256k1.
   as `F[w]/(m)` with `m` certified irreducible by Rabin's test) find a
   certificate either way: a point whose `ℓ`-part has order `ℓ^{v_ℓ(N)}`
   (cyclic, the floor) or two independent points of order `ℓ` (rank 2,
-  the crater). Binary curves use the char-2 group law in affine
+  the crater). For even `k` the test runs instead on the quadratic twist
+  over `GF(q^{k/2})`: there `λ^{k/2} = −1`, so a scalar puts all of
+  `E[ℓ]` in the twist's group (order `q^{k/2} + 1 + V_{k/2}(t, q)`) and a
+  Jordan block only a line. It is tried after `E(GF(q^k))` itself, so
+  every level the earlier test decided is decided the same way. Binary curves use the char-2 group law in affine
   coordinates, with points sampled by solving `z² + z = x + a + b/x²`
   (`y = xz`; the half-trace in odd degree, a trace-1 element otherwise). The search is bounded by `POINT_TEST_COST` scalar-
   multiplication work, `ℓ ≤ 1000` and `k ≤ 64`; a test agrees with the
@@ -133,6 +148,24 @@ secp256k1.
   within a fixed cost budget (`SCALAR_TEST_COST`), and is compared with a
   brute-force count of rational `ℓ`-torsion over small prime, binary and
   `GF(p^k)` fields in the tests.
+
+- where those tests stop and `|d_K| < 2^48`, **walks of horizontal
+  isogenies** ([`walk.rs`](../../src/cryptanalysis/curve_traits/walk.rs)):
+  for a small prime `l` split in `K` and prime to `v`, `E` has exactly two
+  rational `l`-isogenies and the `l`-isogeny graph through it is a cycle,
+  walked on `j`-invariants as the roots of `Φ_l(j, Y)` in `GF(q)`
+  (`Φ_l` for `l ≤ 19` from PARI/GP, checked against Vélu's formulas in
+  the tests; every step a simple root). A cycle that closes after `r`
+  steps is a cyclic endomorphism `α` of degree `l^r`, so `(α) = 𝔩^r` and
+  Cornacchia's `x² − d_K y² = 4l^r` gives `|y|`, the conductor of
+  `Z[α] ⊆ End(E)`: `f | y`. The cycle length is also the order of a
+  class in the class group of `End(E)`, so it divides `h(O_f)`; a walk of
+  `n` steps that has not closed rules out every order with
+  `h(O_f) ≤ n` (class numbers from counting reduced forms and the
+  conductor formula). Of the orders between `Z[π]` and `O_K` the levels
+  allow, the walks keep those consistent with all of this: a level they
+  all share is decided (a floor this way needs no point over an extension
+  at all), and a resolved level outside them stops the build.
 
 When every prime is resolved, `conductor` is exact and `end_order` is
 `maximal` or `non-maximal`; otherwise `End(E)` stays `bounded` between

@@ -1043,6 +1043,167 @@ fn twist(q: &BigUint, trace: &BigInt, fx: &Factoring) -> Twist {
     }
 }
 
+/// The orders `End(E)` can still be, given the levels so far, cut down by
+/// the walks (walk.rs): a closed cycle of `r` `l`-isogenies puts the
+/// conductor `f` among the divisors of its `y` and makes `r` the order of
+/// a prime above `l` in the class group of `End(E)`, so `r | h(O_f)`; a
+/// walk of `n` steps that has not closed rules out every order with
+/// `h(O_f) ≤ n`.  A level all surviving orders share is decided; the
+/// others keep the largest surviving level as their bound.  Open walks are
+/// lengthened (within [`WALK_EXTENSION`] times the budget) to the class
+/// number they must outlast.  `Err` when no order survives.
+fn settle_by_walks(
+    model: &Model,
+    dk: &BigInt,
+    walks: &mut walk::Walks,
+    levels: &mut [LevelRecord],
+    contains: &mut Vec<String>,
+) -> Result<(), String> {
+    if walks.closed.is_empty() && walks.open.is_empty() {
+        return Ok(());
+    }
+    let primes: Vec<BigUint> = levels
+        .iter()
+        .map(|lv| lv.ell.parse().expect("written above"))
+        .collect();
+    let ranges: Vec<Vec<u32>> = levels
+        .iter()
+        .map(|lv| match lv.level {
+            Some(l) => vec![l],
+            None => (0..=lv.level_at_most).collect(),
+        })
+        .collect();
+    let count: usize = ranges.iter().map(Vec::len).product();
+    if count > MAX_CANDIDATE_ORDERS {
+        return Ok(());
+    }
+    let hk = walk::class_number(dk);
+    let class = |levels: &[u32]| {
+        let f: Vec<(BigUint, u32)> =
+            primes.iter().cloned().zip(levels.iter().copied()).collect();
+        hk.map(|h| walk::order_class_number(dk, h, &f))
+    };
+    let mut candidates: Vec<Vec<u32>> = vec![Vec::new()];
+    for r in &ranges {
+        candidates = candidates
+            .into_iter()
+            .flat_map(|c| {
+                r.iter().map(move |&l| {
+                    let mut c = c.clone();
+                    c.push(l);
+                    c
+                })
+            })
+            .collect();
+    }
+    // Lengthen each open walk past the largest class number it can afford
+    // to outlast, so it rules those orders out.
+    let classes: Vec<BigUint> = candidates.iter().filter_map(|cand| class(cand)).collect();
+    for (l, steps) in walks.open.iter_mut() {
+        let Some(reach) = walk::affordable(model, *l, WALK_EXTENSION) else {
+            continue;
+        };
+        let Some(need) = classes
+            .iter()
+            .filter_map(|h| h.to_u32())
+            .filter(|&h| h >= *steps && h < reach)
+            .max()
+        else {
+            continue;
+        };
+        match walk::walk_degree(model, dk, *l, need + 1) {
+            Some(walk::Walked::Closed(cy)) => walks.closed.push(cy),
+            Some(walk::Walked::Open { steps: n, .. }) => *steps = n,
+            None => {}
+        }
+    }
+    let closed: Vec<u64> = walks.closed.iter().map(|c| c.degree).collect();
+    walks.open.retain(|(l, _)| !closed.contains(l));
+    let fits = |cand: &Vec<u32>| {
+        let f = primes
+            .iter()
+            .zip(cand)
+            .fold(BigUint::one(), |acc, (p, &e)| acc * p.pow(e));
+        let h = class(cand);
+        walks.closed.iter().all(|cy| {
+            cy.multiples.iter().any(|y| (y % &f).is_zero())
+                && h.as_ref().is_none_or(|h| (h % cy.steps).is_zero())
+        }) && walks
+            .open
+            .iter()
+            .all(|(_, n)| h.as_ref().is_none_or(|h| h > &BigUint::from(*n)))
+    };
+    let survivors: Vec<&Vec<u32>> = candidates.iter().filter(|c| fits(c)).collect();
+    if survivors.is_empty() {
+        return Err(format!(
+            "no order between Z[π] and O_K fits the isogeny walks ({} closed, {} open)",
+            walks.closed.len(),
+            walks.open.len()
+        ));
+    }
+    let mut how = Vec::new();
+    if !walks.closed.is_empty() {
+        how.push(walk::describe(&walks.closed));
+    }
+    for (l, n) in &walks.open {
+        how.push(format!("{n} {l}-isogeny steps without a return"));
+    }
+    let how = how.join(", ");
+    let mut used = false;
+    for (i, lv) in levels.iter_mut().enumerate() {
+        if lv.level.is_some() {
+            continue;
+        }
+        let low = survivors.iter().map(|c| c[i]).min().expect("non-empty");
+        let high = survivors.iter().map(|c| c[i]).max().expect("non-empty");
+        if low == high {
+            let place = if low == 0 {
+                "the crater".to_string()
+            } else if low == lv.depth {
+                "the floor".to_string()
+            } else {
+                format!("level {low}")
+            };
+            lv.level = Some(low);
+            lv.level_at_most = low;
+            lv.method = format!("{how}: only {place} fits the orders between Z[π] and O_K");
+            used = true;
+        } else if high < lv.level_at_most {
+            lv.level_at_most = high;
+            lv.method = format!("{}; {how}: level at most {high}", lv.method);
+            used = true;
+        }
+    }
+    if used || !walks.closed.is_empty() {
+        for cy in &walks.closed {
+            let shown: Vec<String> = cy.multiples.iter().map(BigUint::to_string).collect();
+            contains.push(format!(
+                "Z[α], α the endomorphism of a cycle of {} {}-isogenies through E (f divides {})",
+                cy.steps,
+                cy.degree,
+                shown.join(" or ")
+            ));
+        }
+    }
+    Ok(())
+}
+
+/// The most candidate orders [`settle_by_walks`] weighs.
+const MAX_CANDIDATE_ORDERS: usize = 4096;
+
+/// How far past its budget [`settle_by_walks`] may lengthen an open walk.
+const WALK_EXTENSION: u64 = 8;
+
+/// Stage timing for profiling (TRAITS_TIMING).
+fn timed<T>(what: &str, slug: &str, f: impl FnOnce() -> T) -> T {
+    let t0 = std::time::Instant::now();
+    let r = f();
+    if std::env::var_os("TRAITS_TIMING").is_some() && t0.elapsed().as_secs_f64() > 0.5 {
+        eprintln!("STAGE {slug} {what} {:.2}", t0.elapsed().as_secs_f64());
+    }
+    r
+}
+
 /// Bound the conductor of `End(E)` by every order known to lie in it.
 /// `Z[π] ⊂ End(E)` gives `f | v`.  A field of definition `GF(2^k)` puts
 /// its Frobenius `π_k` in `End(E)` (`π = π_k^{n/k}`, and `Q(π_k) = Q(π)`),
@@ -1168,7 +1329,7 @@ fn endomorphism(
     let v_full: BigUint = frob.conductor.parse().expect("written by frobenius()");
     // Cycles of horizontal isogenies (walk.rs), walked once, when first
     // needed: before the point test, which costs far more.
-    let mut cycles: Option<Vec<walk::Cycle>> = None;
+    let mut cycles: Option<walk::Walks> = None;
     for (ell, depth) in &v_primes {
         let e = val(&f0, ell);
         let small = ell.to_u64();
@@ -1195,7 +1356,7 @@ fn endomorphism(
             };
             (Some(l), l, format!("certified by {}{how}", c.source.kind))
         } else {
-            match small.and_then(|l| torsion::frobenius_is_scalar(&c.model, &c.trace, l)) {
+            match small.and_then(|l| timed(&format!("scalar {l}"), &c.slug, || torsion::frobenius_is_scalar(&c.model, &c.trace, l))) {
                 Some(true) => {
                     // Scalar on E[ℓ^s] for every s up to the largest j
                     // with j ≤ v_ℓ([End(E) : Z[π]]) = depth − level; the
@@ -1206,8 +1367,8 @@ fn endomorphism(
                         // The division polynomial f_{ℓ^{s+1}} where it is
                         // small, else points over GF(q^m) (points.rs).
                         match small.and_then(|l| {
-                            torsion::scalar_on_power(&c.model, &c.trace, l, s + 1).or_else(|| {
-                                points::scalar_on_power_by_points(&c.model, &c.trace, l, s + 1)
+                            timed(&format!("power-divpoly {l}^{}", s + 1), &c.slug, || torsion::scalar_on_power(&c.model, &c.trace, l, s + 1)).or_else(|| {
+                                timed(&format!("power-points {l}^{}", s + 1), &c.slug, || points::scalar_on_power_by_points(&c.model, &c.trace, l, s + 1))
                             })
                         }) {
                             Some(true) => s += 1,
@@ -1257,12 +1418,12 @@ fn endomorphism(
                     // outside the conductor, else (depth 1) points over
                     // GF(q^k) (points.rs).
                     let cycles = cycles
-                        .get_or_insert_with(|| walk::conductor_from_cycles(&c.model, &dk, &v_full));
-                    let by_cycle = !cycles.is_empty() && walk::cap(cycles, ell) == 0;
+                        .get_or_insert_with(|| timed("cycles", &c.slug, || walk::walks(&c.model, &dk, &v_full)));
+                    let by_cycle = walk::cap(&cycles.closed, ell) == 0;
                     let by_points = if by_cycle {
                         None
                     } else if *depth == 1 {
-                        small.and_then(|l| points::scalar_by_points(&c.model, &c.trace, l))
+                        small.and_then(|l| timed(&format!("depth1-points {l}"), &c.slug, || points::scalar_by_points(&c.model, &c.trace, l)))
                     } else {
                         None
                     };
@@ -1272,7 +1433,7 @@ fn endomorphism(
                             0,
                             format!(
                                 "{}: an endomorphism of conductor prime to ℓ, the crater",
-                                walk::describe(cycles)
+                                walk::describe(&cycles.closed)
                             ),
                         ),
                         Some(true) => (
@@ -1336,53 +1497,22 @@ fn endomorphism(
     // Levels still open: a closed cycle of horizontal isogenies is an
     // endomorphism whose conductor the conductor of End(E) divides
     // (walk.rs).  It must also agree with every level already resolved.
-    if !resolved || cycles.as_ref().is_some_and(|c| !c.is_empty()) {
-        let cycles =
-            cycles.get_or_insert_with(|| walk::conductor_from_cycles(&c.model, &dk, &v_full));
-        if !cycles.is_empty() {
-            let how = walk::describe(cycles);
-            for lv in levels.iter_mut() {
-                let ell: BigUint = lv.ell.parse().expect("written above");
-                let cap = walk::cap(cycles, &ell);
-                match lv.level {
-                    Some(level) if level > cap => {
-                        return Err(format!(
-                            "level {level} at ℓ = {ell}, but {how} bounds it by {cap}"
-                        ));
-                    }
-                    Some(_) => {}
-                    None if cap == 0 => {
-                        lv.level = Some(0);
-                        lv.level_at_most = 0;
-                        lv.method =
-                            format!("{how}: an endomorphism of conductor prime to ℓ, the crater");
-                    }
-                    None if cap < lv.level_at_most => {
-                        lv.level_at_most = cap;
-                        lv.method = format!("{}; {how}: level at most {cap}", lv.method);
-                    }
-                    None => {}
-                }
-            }
-            for cy in cycles.iter() {
-                let shown: Vec<String> = cy.multiples.iter().map(BigUint::to_string).collect();
-                contains.push(format!(
-                    "Z[α], α the endomorphism of a cycle of {} {}-isogenies through E (f divides {})",
-                    cy.steps,
-                    cy.degree,
-                    shown.join(" or ")
-                ));
-            }
-            bound = BigUint::one();
-            exact = BigUint::one();
-            resolved = true;
-            for lv in &levels {
-                let ell: BigUint = lv.ell.parse().expect("written above");
-                bound *= ell.pow(lv.level_at_most);
-                match lv.level {
-                    Some(level) => exact *= ell.pow(level),
-                    None => resolved = false,
-                }
+    if !resolved || cycles.as_ref().is_some_and(|w| !w.closed.is_empty()) {
+        let walks = cycles.get_or_insert_with(|| {
+            timed("cycles-late", &c.slug, || walk::walks(&c.model, &dk, &v_full))
+        });
+        timed("orders", &c.slug, || {
+            settle_by_walks(&c.model, &dk, walks, &mut levels, &mut contains)
+        })?;
+        bound = BigUint::one();
+        exact = BigUint::one();
+        resolved = true;
+        for lv in &levels {
+            let ell: BigUint = lv.ell.parse().expect("written above");
+            bound *= ell.pow(lv.level_at_most);
+            match lv.level {
+                Some(level) => exact *= ell.pow(level),
+                None => resolved = false,
             }
         }
     }
@@ -2055,12 +2185,13 @@ mod tests {
         assert_eq!(t.endomorphism.conductor.as_deref(), Some("1"));
         assert_eq!(t.endomorphism.maximal, Some(true));
         assert_eq!(t.keys["end_order"], "maximal");
-        // v = 271 is beyond the scalar test: End(E) is Z[π] or O_K, unresolved.
+        // v = 271 is beyond the scalar test, d_K = −7 has class number 1:
+        // O_K would close every walk of l-isogenies in one step, and the
+        // walk does not, so End(E) = Z[π], of conductor 271.
         let t = get("icv1-f2m17-tm101-8da609f8");
-        assert_eq!(t.endomorphism.conductor_divides.as_deref(), Some("271"));
-        assert_eq!(t.endomorphism.maximal, None);
-        assert_eq!(t.endomorphism.status, Status::Bounded);
-        assert_eq!(t.keys["end_order"], "unresolved");
+        assert_eq!(t.endomorphism.conductor.as_deref(), Some("271"));
+        assert_eq!(t.endomorphism.maximal, Some(false));
+        assert_eq!(t.keys["end_order"], "non-maximal");
     }
 
     #[test]
