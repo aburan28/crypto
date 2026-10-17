@@ -24,15 +24,34 @@ five-arm, K992 and earlier N83 fixtures represented by its parent chain.
 | [answer sidecar](answers.jsonl) | `f94a313ea6e7c414a4fc85c3ec55e384f6c6be14febbe3304d4b9dde1e54e484` |
 | parent K992 generator | `514329656510e88d3316b688eef4d15104c64a5be7edb42f56ace269461d1dec` |
 
-The later dispatch must choose and hash exact `IC1` manifests before any
-holdout measurement. Its admissible choices come only from the pending
-five-arm online panel and K992/K1024/K1107 panel, plus the fixed K992 and
-K1107 controls. It must freeze the source and executed binaries, arm order,
-caps, Tier 1 resource envelope, verifier, selection rule, and matched rho
-policy in a separate dispatch record. Candidate selection must use online
-time for one independently verified public point, paired with rho on that
-same point; cold process cost is a separate factor-base objective. Run
-points 0–5 and 6–11 on independent Tier 1 instances, retain every failed
-or noisy pair, and pool strata only after each passes its frozen tier gate.
-No point from this fixture is used to choose the candidate list or tune an
-implementation before dispatch.
+The final arm set is fixed by the following rule before any holdout timing:
+
+1. Always include K992/root11
+   `IC1N83Ckb1a1fb164672PDP4rootRCguidedLAgaussTDdirectISO0h829ed476f094`
+   and K1107/root11
+   `IC1N83Ckb1a1fb183762PDP4rootRCguidedLAgaussTDdirectISO0h82329aa062fa`.
+2. Add the five-arm panel's exact online `selected_candidate_id` only if
+   `online.status == SELECTED` and both host strata were admitted. Otherwise
+   add its predeclared K1280/root11 control
+   `IC1N83Ckb1a1fb212480PDP4rootRCguidedLAgaussTDdirectISO0h69261fd42dac`.
+3. Add the K992/K1024/K1107 panel's exact online `selected_candidate_id`
+   under the same admission rule. Otherwise add its K1024/root11 control
+   `IC1N83Ckb1a1fb169984PDP4rootRCguidedLAgaussTDdirectISO0h3eb055926289`.
+4. Deduplicate identical candidate IDs, preserving this order. All arms use
+   the same frozen IC source SHA-256
+   `8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12`.
+
+The later dispatch must bind those exact `IC1` manifests, the two panel
+selection records, executed binaries, arm order, caps, Tier 1 resource
+envelope, verifier and matched rho policy before any holdout measurement.
+Run points 0–5 and 6–11 on independent Tier 1 instances, retain every
+failed or noisy pair, and pool only independently admitted strata. The
+primary comparison is each one-target IC online interval against an
+independent rho solve of the same point. Select an exact online candidate
+only if it is faster than every other arm on paired mean log time and every
+corresponding exact two-sided `2^12` sign-flip test passes
+`0.05 / binomial(number_of_distinct_arms, 2)`. Apply the same fixed rule to
+paired cold-process millisecond differences as a separate supplementary
+factor-base objective. An incomplete or noisy stratum leaves the selection
+unknown. No point from this fixture is used to choose the candidate list or
+tune an implementation before dispatch.
