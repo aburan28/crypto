@@ -1,5 +1,17 @@
 # Degree-83 factor-base sweep: observed evidence
 
+The [credential-free hosted K600 Gray/hash first pair](verification/hosted-paired-run-38983406418/RESULT.md)
+ran both natural searches on Linux ARM after reproducing the frozen S3 base
+bytes. Independent retained replay passed for all 51 artifact files, three
+archive hashes and signed-orbit partitions, clean Docker stages, and both
+solver receipts; fresh S3 GETs were byte identical to the regenerated
+archives. Gray retained 97 residual signed orbits after 503 shared with the
+base; hash retained 600 after zero shared. Each arm made one solver call and
+reached `UNKNOWN_search_cap` at 5,000 conflicts with zero models. The hosted
+conservative charge, including preparation, is **5,014 seconds**, separate
+from the earlier local charge below. These are censored first trials, with
+no observed natural relation yield, useful rank, or complete-runtime winner.
+
 The [bounded native known-witness stage control](verification/known-witness-stage-native-900-20261014/RESULT.md)
 reached the SAT solver, emitted all nine ordered markers and returned a
 worker-verified model after 787 conflicts. Its copied raw receipts passed

@@ -25,9 +25,13 @@ replays all 648 ordered pilot pairs and retains 311 admitted configurations
 in 24 distinct shapes under the conditional rank-query floor, source domain
 clauses and source variable count. The selected sequential-K600/hash-K600
 arm is on this source frontier; the same-base Gray arm is a matched control
-with 114 strict source dominators. The [frozen paired gate](verification/k600-gray-hash-paired-protocol-20261014/RESULT.md)
-has not launched either arm, and its local Docker precheck failed at the VM
-disk layer. Source dominance does not establish runtime dominance.
+with 114 strict source dominators. The local [frozen paired gate](verification/k600-gray-hash-paired-protocol-20261014/RESULT.md)
+did not launch because its Docker precheck failed at the VM disk layer. A
+separate [hosted first pair](verification/hosted-paired-run-38983406418/RESULT.md)
+ran both arms on Linux ARM; each reached the 5,000-conflict cap with zero
+models. The retained archive and raw stage receipts passed independent replay
+and S3 byte checks. Source dominance and these censored first trials do not
+establish runtime dominance.
 
 ## Matched retained-base extension, 2026-10-11
 
