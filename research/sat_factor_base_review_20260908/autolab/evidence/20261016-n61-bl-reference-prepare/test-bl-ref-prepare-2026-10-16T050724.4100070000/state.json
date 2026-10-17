@@ -1,0 +1,21 @@
+{
+  "a": 0,
+  "beat_id": "koblitz.compact_orbit.n61_bl_reference",
+  "claim_boundary": "Diagnostic Bernstein\u2013Lange equal-advice reference arm; public synthetic only; fail-closed for vs_rho ledger promotion; PENDING_INDEPENDENT_VALIDATION at most; not a KS v2 batch comparator and not an asymptotic sub-rho claim.",
+  "created_at": "2026-10-16T05:07:24.768282+00:00",
+  "diagnostic_only": true,
+  "existing_study": "research/ic_next10_20261014/09-equal-advice/",
+  "git_head": "78723c49b8bc947a9cce9013eb03f3e51cee05ec",
+  "launch_mode": "equal_advice_bl",
+  "n": 61,
+  "phase": "prepare",
+  "reference_arm": "bernstein_lange_equal_advice",
+  "run_id": "test-bl-ref-prepare-2026-10-16T050724.4100070000",
+  "schema_version": "1.0",
+  "status": "PREPARE_ONLY",
+  "table_bytes": 5711008,
+  "target_label": "autolab-n61-bl-ref-eval-v1",
+  "targets": 1024,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "updated_at": "2026-10-16T05:07:24.768290+00:00"
+}

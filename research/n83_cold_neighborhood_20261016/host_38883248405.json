@@ -1,0 +1,42 @@
+{
+  "cgroup_before": {
+    "cpu.max": "max 100000\n",
+    "cpu.pressure": "some avg10=0.00 avg60=0.00 avg300=0.00 total=339214\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=182770\n",
+    "cpu.stat": "usage_usec 835043011\nuser_usec 811887534\nsystem_usec 23155476\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 0\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n",
+    "memory.current": "9901223936\n",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+    "memory.max": "max\n",
+    "memory.peak": "14292221952\n",
+    "memory.pressure": "some avg10=0.00 avg60=0.00 avg300=0.00 total=353\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=353\n"
+  },
+  "cgroup_path": "/sys/fs/cgroup/system.slice/hosted-compute-agent.service",
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "disk_free_bytes": 82318204928,
+  "git_sha": "08a9b2123fafb4f2e392a138a31f1279d5e881cc",
+  "image_version": "20261012.334.1",
+  "instance_id": "gh-38883248405-1-same-point-neighborhood",
+  "mem_total_kib": 16373452,
+  "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "provider": "github_actions",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "recorded_utc": "2026-10-16T10:01:56.600072+00:00",
+  "run_url": "https://github.com/aburan28/crypto/actions/runs/38883248405",
+  "runner_arch": "X64",
+  "runner_name": "GitHub Actions 1000317436",
+  "runner_os": "Linux",
+  "schema": "n83.cold-neighborhood-host/v1",
+  "uname": {
+    "machine": "x86_64",
+    "node": "runnervm8k3b6",
+    "processor": "x86_64",
+    "release": "6.17.0-1022-azure",
+    "system": "Linux",
+    "version": "#22-Ubuntu SMP Mon Jul 27 17:24:03 UTC 2026"
+  },
+  "visible_affinity": [
+    0,
+    1,
+    2,
+    3
+  ]
+}

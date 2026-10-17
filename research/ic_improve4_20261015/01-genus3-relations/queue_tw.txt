@@ -1,0 +1,12 @@
+results/train --bits 18 --curve 5 --kappa 1.5763 --cx 8 --streams w1 --walks 1 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c5_W1.jsonl
+results/train --bits 18 --curve 6 --kappa 1.5763 --cx 8 --streams w1 --walks 1 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c6_W1.jsonl
+results/train --bits 18 --curve 7 --kappa 1.5763 --cx 8 --streams w1 --walks 1 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c7_W1.jsonl
+results/train --bits 18 --curve 5 --kappa 1.5763 --cx 8 --streams w8 --walks 8 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c5_W8.jsonl
+results/train --bits 18 --curve 6 --kappa 1.5763 --cx 8 --streams w8 --walks 8 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c6_W8.jsonl
+results/train --bits 18 --curve 7 --kappa 1.5763 --cx 8 --streams w8 --walks 8 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c7_W8.jsonl
+results/train --bits 18 --curve 5 --kappa 1.5763 --cx 8 --streams w32 --walks 32 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c5_W32.jsonl
+results/train --bits 18 --curve 6 --kappa 1.5763 --cx 8 --streams w32 --walks 32 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c6_W32.jsonl
+results/train --bits 18 --curve 7 --kappa 1.5763 --cx 8 --streams w32 --walks 32 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c7_W32.jsonl
+results/train --bits 18 --curve 5 --kappa 1.5763 --cx 8 --streams w128 --walks 128 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c5_W128.jsonl
+results/train --bits 18 --curve 6 --kappa 1.5763 --cx 8 --streams w128 --walks 128 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c6_W128.jsonl
+results/train --bits 18 --curve 7 --kappa 1.5763 --cx 8 --streams w128 --walks 128 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c7_W128.jsonl

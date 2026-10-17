@@ -1,6 +1,6 @@
 {
   "schema_version": "ic-progress-timeline/1",
-  "updated": "2026-10-15",
+  "updated": "2026-10-16",
   "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
   "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Direction against 1 is meaningful only for fully priced ratios; a quotient of incomplete lower bounds is diagnostic even when paired. No value on this page is computed from another.",
   "series": [
@@ -135,6 +135,17 @@
           "class": "accounting",
           "anchor": "#lab-ecbench-all",
           "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_frobenius_orbit_vs_rho_20261014/README.md"
+        },
+        {
+          "date": "2026-10-16",
+          "value": 55.36777360324759,
+          "reference": "matched",
+          "unit": "Tier 1 cloud-instance cold IC / same-point rho online wall",
+          "label": "n83 K1120 five-point cold factor-base holdout, selected ID null",
+          "detail": "On five sealed public points, 25/25 IC and 5/5 same-point rho arms replayed. K1120 mean cold process 119.826 s divided by mean rho online 2.164 s gives 55.368. K1120 saves 2.645 s [2.085, 3.205] against K1152; its 0.401 s advantage over K1104 has interval [-0.236, 1.038], so the frozen selection remains BOUNDED_UNKNOWN. Tier 1 GitHub cloud instance, A/A and topology gates passed.",
+          "class": "engineering",
+          "anchor": "#n83-tier1-cold-20261016",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/n83_e2e_holdout_20261016/RESULT.md"
         }
       ]
     },
@@ -809,9 +820,9 @@
     },
     {
       "id": "binary-decomp-oracle",
-      "label": "Binary decomposition-oracle stage (non-Koblitz, l=8)",
+      "label": "Binary decomposition-oracle stage (non-Koblitz, l=8..12)",
       "role": "context",
-      "note": "Per-target oracle work of the first sub-2^(2l) decomposition oracle, in counted point-additions divided by the pairs-and-solve pair count on the same 64 targets (non-Koblitz curve y^2+xy=x^3+z*x^2+1 over F_(2^25), 256-point subspace base, 20 found / 44 refuted, 0 disagreements, all witnesses group-verified). The 2^(2l)-entry pair table is target-independent and charged to the factor-base stage; relation collection stays Theta(2^n) overall, so this is a stage diagnostic, not an attack or crossover. FFD unmeasured with reason (group-law oracle).",
+      "note": "Per-target oracle work of the sub-2^(2l) binary decomposition-oracle ladder, in counted point-additions divided by the pairs-and-solve pair count on the same 64 targets per rung (non-Koblitz curve y^2+xy=x^3+z*x^2+1 over F_(2^25)/F_(2^27)/F_(2^31)). The 2^(2l)-entry pair tables are target-independent and charged to the factor-base stage; relation collection stays Theta(2^n) overall, so these are stage diagnostics, not attacks or crossovers. FFD unmeasured with reason (group-law oracle).",
       "points": [
         {
           "date": "2026-10-15",
@@ -822,6 +833,26 @@
           "class": "engineering",
           "anchor": "#rho-parity-ledger",
           "source": "https://github.com/aburan28/crypto/blob/main/research/binary_mitm_oracle_l8_20261015/REPORT.typ"
+        },
+        {
+          "date": "2026-10-15",
+          "value": 0.008,
+          "reference": "stage",
+          "label": "MITM oracle ladder to l=10: 2,076 ops at l=9, 4,212 at l=10 against 134,912 / 525,312 quartic solves",
+          "detail": "The l=9 rung over F_(2^27) (519 points, 134,594-sum table) reads median 0.293 ms vs 724.9 ms (2,473.9x, gate passes 1,236x) and l=10 over F_(2^31) (1,053 points, 554,304-sum table) 0.735 ms vs 3,119.2 ms (4,244.2x, gate passes 2,122x); 0 disagreements with pairs-and-solve on all 128 targets, all witnesses group-verified. Counted ops 2,076 and 4,212 point-adds against 2^l(2^l+1)/2 quartic solves: the 2^l-fold gap holds and the wall ratio widens. Class: engineering; no exponent, no vs_rho, no key recovery. Value plotted: max counted MITM ops at l=10 divided by its pairs count (4,212 / 525,312 = 0.0080).",
+          "class": "engineering",
+          "anchor": "#rho-parity-ledger",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/binary_mitm_oracle_l9_l10_20261015/REPORT.typ"
+        },
+        {
+          "date": "2026-10-16",
+          "value": 0.0019,
+          "reference": "stage",
+          "label": "MITM oracle ladder to l=12: 8,068 ops at l=11, 16,092 at l=12 against 2,098,176 / 8,390,656 quartic solves",
+          "detail": "The l=11 rung over F_(2^33) (2,017 points, 2,033,876-sum table, 65 MB) reads median 1.746 ms vs 1.62 s (928.0x) and l=12 over F_(2^37) (4,023 points, 8,092,016-sum table, 259 MB) 8.566 ms vs 18.7 s (2,187.2x); 0 disagreements with pairs-and-solve on all 128 targets, all witnesses group-verified. l=12 is the largest rung at which pairs-and-solve was historically usable, decided by the MITM arm for at most 16,092 counted point additions. Class: engineering; no exponent, no vs_rho, no key recovery. Value plotted: max counted MITM ops at l=12 divided by its pairs count (16,092 / 8,390,656 = 0.0019).",
+          "class": "engineering",
+          "anchor": "#rho-parity-ledger",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/binary_mitm_oracle_l11_l12_20261016/REPORT.typ"
         }
       ]
     }

@@ -1,4 +1,26 @@
-# Dedicated executable validation, 2026-10-09
+# Dedicated executable validation
+
+## Prime Degree Frontier, 2026-10-15 local / 2026-10-16 UTC
+
+The [native challenge report](../../research/isogeny_degree_challenge_20261015/README.md)
+records clean source `9bb7cbce2b84151eff6846b02da842a8ef019343`: 74 dedicated
+package tests passed, the standalone algorithm suites passed 128 cases with one
+existing ignored case, and the unfiltered root release-library gate passed
+4121 cases with zero failures and 117 existing ignored cases. The report retains
+all earlier failed attempts. Ordinary Clippy completed with existing verifier
+diagnostics; strict warning-free Clippy remains unresolved in that layout.
+
+The installed executable lists all 54 registered standard prime models, with 47
+construction/replay adapters and seven explicit conversion gaps. Nine adversarial
+cases were rejected; twenty short-map resource controls passed. P192/10453,
+P224/1471 and P521/7 were freshly admitted under separate source-curve scores.
+The one-second high-degree control was censored without a score. Five frozen
+experimental judge binaries are indexed in the artifact store. Actual new
+ReleaseMe asset publication remains pending the PR and main release workflow.
+
+The dated sections below preserve their original build and measurement state.
+
+## Dedicated executable validation, 2026-10-09
 
 The latest native setup/hashing continuation is recorded in
 [`research/isogeny_catalogue_setup_20261009/RESULTS.md`](../../research/isogeny_catalogue_setup_20261009/RESULTS.md).

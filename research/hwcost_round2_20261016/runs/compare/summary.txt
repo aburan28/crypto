@@ -1,0 +1,23 @@
+clock    no detected effect   2
+fp64     candidate slower     3
+fp64     no detected effect   5
+fp64bf   candidate slower     1
+fp64bf   no detected effect   7
+kernel   candidate faster     22
+kernel   candidate slower     1
+kernel   no detected effect   37
+mem      candidate faster     9
+mem      candidate slower     1
+mem      no detected effect   10
+scaling  candidate faster     9
+scaling  no detected effect   9
+w1       candidate slower     3
+w1       no detected effect   5
+w2       candidate faster     1
+w2       no detected effect   7
+w3       candidate faster     1
+w3       no detected effect   7
+w4       candidate faster     1
+w4       candidate slower     3
+w4       no detected effect   4
+F1 FAIL: 1.0499 (threshold 0.85)

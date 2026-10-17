@@ -4,9 +4,10 @@ The candidate places a three-hash Bloom screen before each exact canonical
 normal-basis S3 root-table lookup. The filter is populated only by successful
 table insertions. Its result can reject a lookup; a positive result still uses
 the original open-addressing table and its original value. Set
-`KIC_ROOT_BLOOM=1` to enable the candidate. The default is the unscreened
-reference. The JSON summary records whether the filter was enabled and its
-allocated byte count.
+`KIC_ROOT_BLOOM=0` to disable the screen (since 2026-10-15 the default is
+enabled; before that commit the default was the unscreened reference and
+`KIC_ROOT_BLOOM=1` enabled it). The JSON summary records whether the filter
+was enabled and its allocated byte count.
 
 ## Frozen comparison
 

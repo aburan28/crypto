@@ -6,8 +6,8 @@
 pub mod adx_gen;
 pub mod api;
 pub mod bigint;
-pub mod cm;
 pub mod binary;
+pub mod cm;
 pub mod curve;
 /// Research-only Eigen-Séta design helpers.  This module is deliberately not
 /// a cryptographic encryption implementation; see its module documentation.
@@ -17,22 +17,30 @@ pub mod eigen_seta_toy;
 pub mod ext;
 pub mod field;
 pub mod find;
+/// Fixed-degree isogenies between supersingular curves (Benčina–Kutas–Merz–Petit–Stopar–Weitkämper).
+pub mod fixed_degree;
 pub mod fp2;
-pub mod gls_loop;
 pub mod fpm;
 pub mod fpr;
 pub mod genus2;
 pub mod gf2n;
 pub mod gf3n;
+pub mod gls_loop;
 pub mod icv1;
 pub mod int;
 pub mod json;
 pub mod kernel;
+/// Exact integer LLL in any dimension.
+pub mod lattice;
+/// Multivariate integer polynomials and resultants.
+pub mod mpoly;
 pub mod path;
 pub mod poly;
 pub mod quat;
 pub mod series;
 pub mod sha256;
+/// Strassen's modular factorial and deterministic factoring (BDFLS 2020, section 2).
+pub mod strassen;
 pub mod testdata;
 pub mod theta;
 pub mod theta_g;
