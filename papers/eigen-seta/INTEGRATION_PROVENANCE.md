@@ -7,3 +7,13 @@ The maintained implementation in [`eigen_seta/`](../../eigen_seta/) includes lat
 The second verification cohort binds source `d504af28e0a262cd97cdca0a58c8168e90ce6f60`, and its public-filter example binds `72051ac67`. The manuscript's cryptographic security categories remain conjectures; no independent cryptanalysis or new security certification follows from this integration. Its mathematical cyclic-kernel argument is preserved without promoting it into maintained claims during conflict resolution.
 
 See [integration reconciliation](../../research/eigen_seta_rust_20261011/INTEGRATION_RECONCILIATION.md) and the [byte-preserving archive manifest](../../research/eigen_seta_rust_20261011/archives/pr-1680-74bec88bd/MANIFEST.json). Updating the historical manuscript to specify and measure the active build is a separate substantive revision.
+
+## Revision 2 (2026-10-17)
+
+The manuscript was revised in place: it now specifies against and measures
+the maintained implementation in the sibling repository `eigenx` (commit
+`94fe2d9`), adds the assessment of §9 and withdraws the unqualified NIST
+category conjecture. The revision-1 measurements (§8.1–8.3) are kept and
+labelled as measurements of the historical `crypto:eigen_seta/` build. The
+revision-1 PDF remains in git history at the commit named above.
+
