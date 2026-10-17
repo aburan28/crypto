@@ -1,0 +1,372 @@
+[
+  {
+    "base_muls": 120500,
+    "base_points": 26,
+    "bits": 20.911660425821683,
+    "call": {
+      "calls": 1926,
+      "max": 3359839001,
+      "mean": 1557845888.0145378,
+      "median": 1371585124.0,
+      "min": 456008740,
+      "p10": 1320080691.0,
+      "p90": 3094693040.0
+    },
+    "check_failures": 0,
+    "check_muls": 85845,
+    "cofactor": 4,
+    "decompositions": 76,
+    "decompositions_per_target": [
+      1912,
+      0,
+      6,
+      0,
+      0,
+      0,
+      0,
+      0,
+      8,
+      0
+    ],
+    "experiment": "e19",
+    "folded": {
+      "arm": "d4-folded",
+      "columns": 13,
+      "correct": true,
+      "duplicate_rows": 0,
+      "filtered_out": 0,
+      "la_attempts": 1,
+      "la_ops": 3747,
+      "la_ops_last": 3747,
+      "phi": 1.0769230769230769,
+      "relations": 14,
+      "residuals_at_solve": 1926,
+      "row_weight": 4.571428571428571,
+      "solved": true,
+      "unknowns": 14,
+      "wiedemann_constant": 19.117346938775512
+    },
+    "fp_muls_per_add": 97.0,
+    "generation_muls": 12578572,
+    "group_order": 7890364,
+    "la_fp_muls": 59952,
+    "lift_muls": 2695622,
+    "lifted": 76,
+    "macaulay_entries": 33266375240,
+    "n": 1972591,
+    "off_base": 0,
+    "p": 53,
+    "points_per_column": 2.0,
+    "precompute_muls": 16950747,
+    "ratio": 8751567.300605245,
+    "rational_solutions": 4049,
+    "reruns": 203,
+    "residuals": 1926,
+    "rho": [
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 410931,
+        "group_ops": 4046,
+        "seed": 2000,
+        "steps": 2028
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 519362,
+        "group_ops": 5166,
+        "seed": 2001,
+        "steps": 3166
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 516851,
+        "group_ops": 5136,
+        "seed": 2002,
+        "steps": 3132
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 301795,
+        "group_ops": 2927,
+        "seed": 2003,
+        "steps": 920
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 301593,
+        "group_ops": 2919,
+        "seed": 2004,
+        "steps": 917
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 341942,
+        "group_ops": 3343,
+        "seed": 2005,
+        "steps": 1374
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 268392,
+        "group_ops": 2573,
+        "seed": 2006,
+        "steps": 499
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 471326,
+        "group_ops": 4670,
+        "seed": 2007,
+        "steps": 2651
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 343902,
+        "group_ops": 3354,
+        "seed": 2008,
+        "steps": 1284
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 336526,
+        "group_ops": 3276,
+        "seed": 2009,
+        "steps": 1268
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 358773,
+        "group_ops": 3503,
+        "seed": 2010,
+        "steps": 1440
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 525697,
+        "group_ops": 5227,
+        "seed": 2011,
+        "steps": 3199
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 501082,
+        "group_ops": 4975,
+        "seed": 2012,
+        "steps": 2951
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 352354,
+        "group_ops": 3438,
+        "seed": 2013,
+        "steps": 1366
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 386521,
+        "group_ops": 3792,
+        "seed": 2014,
+        "steps": 1768
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 307065,
+        "group_ops": 2976,
+        "seed": 2015,
+        "steps": 918
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "Negation",
+        "fp_muls": 439061,
+        "group_ops": 4336,
+        "seed": 2000,
+        "steps": 2247
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "Negation",
+        "fp_muls": 245725,
+        "group_ops": 2345,
+        "seed": 2001,
+        "steps": 334
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 2,
+        "fold": "Negation",
+        "fp_muls": 346945,
+        "group_ops": 3384,
+        "seed": 2002,
+        "steps": 1331
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "Negation",
+        "fp_muls": 283074,
+        "group_ops": 2732,
+        "seed": 2003,
+        "steps": 701
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "Negation",
+        "fp_muls": 257070,
+        "group_ops": 2460,
+        "seed": 2004,
+        "steps": 442
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 3,
+        "fold": "Negation",
+        "fp_muls": 393700,
+        "group_ops": 3876,
+        "seed": 2005,
+        "steps": 1841
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 1,
+        "fold": "Negation",
+        "fp_muls": 336311,
+        "group_ops": 3273,
+        "seed": 2006,
+        "steps": 1161
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "Negation",
+        "fp_muls": 275774,
+        "group_ops": 2654,
+        "seed": 2007,
+        "steps": 621
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 5,
+        "fold": "Negation",
+        "fp_muls": 366695,
+        "group_ops": 3588,
+        "seed": 2008,
+        "steps": 1465
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 2,
+        "fold": "Negation",
+        "fp_muls": 415910,
+        "group_ops": 4094,
+        "seed": 2009,
+        "steps": 2021
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 4,
+        "fold": "Negation",
+        "fp_muls": 470399,
+        "group_ops": 4653,
+        "seed": 2010,
+        "steps": 2513
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "Negation",
+        "fp_muls": 229168,
+        "group_ops": 2170,
+        "seed": 2011,
+        "steps": 137
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 2,
+        "fold": "Negation",
+        "fp_muls": 261142,
+        "group_ops": 2501,
+        "seed": 2012,
+        "steps": 463
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 3,
+        "fold": "Negation",
+        "fp_muls": 431272,
+        "group_ops": 4251,
+        "seed": 2013,
+        "steps": 2104
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 2,
+        "fold": "Negation",
+        "fp_muls": 261235,
+        "group_ops": 2500,
+        "seed": 2014,
+        "steps": 454
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "Negation",
+        "fp_muls": 472062,
+        "group_ops": 4677,
+        "seed": 2015,
+        "steps": 2550
+      }
+    ],
+    "rho_matched_muls": 342846.4375,
+    "rho_matched_steps": 1274.0625,
+    "rho_unfolded_muls": 390257.0,
+    "rows_readd_failures": 0,
+    "rows_readded": 14,
+    "seed": 2,
+    "solve_ms": 7682690.322409011,
+    "solve_muls": 3000376192600,
+    "targets_decomposed": 14,
+    "total_muls": 3000443671554,
+    "unsolved": 5,
+    "unsolved_outcomes": {
+      "border unreachable at this degree": 5
+    },
+    "wall_ms": 2111821.154364,
+    "weil_muls": 34987716
+  }
+]
