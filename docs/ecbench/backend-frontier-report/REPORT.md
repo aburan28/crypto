@@ -38,6 +38,48 @@ The [agent workflow](../BACKEND_FRONTIER.md) records how to freeze an incumbent,
 change one lever, retain failures, use holdouts, compare an external reference
 and promote only a verified full-operation improvement.
 
+## Reproduction contract added on 2026-10-17
+
+The [contract](../BACKEND_REPRODUCTION.md) separates R0 exact report reproduction,
+R1 fresh arithmetic/solver-ledger reproduction, physical runner independence,
+and R2 statistical timing replication. A committed lock pins every input,
+producer/template/build file, Cargo dependencies, Rust 1.99.1 and all five
+generated files. `reproduce` requires a trusted lock hash and recomputes output
+bytes; `--check` also checks files on disk. Intentional baseline changes use
+`--seal` and require a reviewed lock/output diff. CI never reseals.
+
+The generated `REPLAY_PLAN.json` contains exact per-session argv cards, expected
+replay IDs, input hashes, recorded source/binary identity and known blockers.
+`check-rerun` validates fresh full native audits of the original and new session,
+then compares the entire deterministic ledger and both solver blocks, including
+SAT conflicts and learned clauses. This catches differences the legacy native
+audit does not compare. Only named direct clock fields are excluded; nested
+counters remain exact. The checker binds the supplied executable and audits but
+does not authenticate an external execution or claim host independence.
+
+The strict gate rejects failed/nondeterministic measured attempts, missing or
+duplicate replays, changed spec/plan, wrong binary, unbound files, stale
+executables and changed counters even when new records and receipts are
+resealed. Tests use explicitly synthetic fresh-session/receipt fixtures; they
+are software checks, not new solver evidence. One development test initially
+rewrote a lock without its trailing newline and correctly failed the trusted
+hash check; preserving the fixture's exact bytes corrected that test setup.
+
+R2 preregisters at least 20 matched rounds and 20 A/A pairs per exact target at
+L2 or higher on the same environment class. Its paired median-ratio 95% interval
+(10,000 bootstrap resamples, seed 20261017) must fit entirely within [0.95, 1.05]
+for timing equivalence. This contract is explicit; the tool issues no R2
+verdict. Historical admission's five-pair minimum is unchanged.
+
+**Status:** R0 and the R1 checker are implemented and validated. Fresh algorithm
+and independent-host reproduction remain unexecuted: the root build is blocked,
+all 17 host capsules lack clean build-time provenance under the strict gate
+(`runtime_worktree` or absent); six historical ladder sessions name no source
+commit, and the n19 root session declares a dirty tree. The checker requires
+their exact original executables; a separately reviewed bound-source protocol
+would be needed for a different recovery route. No R2 campaign, external comparison or absent field-size
+measurement was substituted by these software checks.
+
 ## Validation and limits
 
 The standalone Rust producer deliberately avoids a root-library dependency.

@@ -47,9 +47,12 @@ These are recorded in the Markdown report and validation logs, not waived.
 The new report builds independently. No global-fastest, external-tool,
 asymptotic or ledger-promotion claim is made.
 
-\textbf{Reproduction and sources.} See \texttt{docs/ecbench/BACKEND\_FRONTIER.md},
-\texttt{docs/backend-leaderboard/manifest.json} and
-\texttt{tools/backend-leaderboard/}. The JSON records source and producer-input
-hashes. Diagram source: \texttt{flow.dot}. Full commands, requirement status,
-limits and validation receipts: \texttt{REPORT.md} and \texttt{validation/}.
+\textbf{Reproduction.} The pinned Rust 1.99.1 producer checks a reviewed
+input/output lock (R0). Per-session command cards and the fresh-ledger checker
+(R1) require full native audits and exact solver counters, including conflicts
+and learned clauses. These checks do not establish an independent execution
+or timing equivalence (R2). Fresh runs remain blocked by the root build and
+historical source gaps. Exact acceptance criteria:
+\texttt{BACKEND\_REPRODUCTION.md}. Commands, evidence and limits:
+\texttt{REPORT.md} and \texttt{validation/}. Diagram source: \texttt{flow.dot}.
 \end{document}

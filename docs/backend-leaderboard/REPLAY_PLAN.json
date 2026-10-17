@@ -1,0 +1,6845 @@
+{
+  "acceptance": "docs/ecbench/BACKEND_REPRODUCTION.md",
+  "gates": {
+    "R0": {
+      "agreement": "SHA-256 of every pinned input and generated output; exact summary and frontier memberships",
+      "checker": "reproduce",
+      "solver_execution": false,
+      "toolchain": "1.99.1"
+    },
+    "R1": {
+      "acceptance_unit": "entire session",
+      "audits": "original and fresh session: every deterministic verified measurement, no duplicates, all file bindings and checks pass",
+      "checker": "check-rerun",
+      "failed_or_nondeterministic_measured_attempts_allowed": 0,
+      "independent_host_automatically_established": false,
+      "input_agreement": "exact spec.json and plan.json bytes",
+      "ledger_agreement": "exact; includes both solver observations and native counters; only specified direct clock fields excluded"
+    },
+    "R2": {
+      "bootstrap_seed": 20261017,
+      "checker": "external preregistered statistical receipt; not implemented by this report tool",
+      "confidence": 0.95,
+      "equivalence_interval": [
+        0.95,
+        1.05
+      ],
+      "minimum_aa_pairs_per_target": 20,
+      "minimum_isolation": "L2",
+      "minimum_matched_rounds_per_target": 20,
+      "paired_ratio": "rerun/original",
+      "pass": "entire paired CI and A/A CIs contained in equivalence interval",
+      "performance_promotion": "also require full-cost gain beyond parity and A/A noise, fresh holdouts and matched external references",
+      "resamples": 10000,
+      "same_environment_class_required": true,
+      "statistic": "median paired ratio",
+      "window": "declare cold, process or online before running; no substitution"
+    }
+  },
+  "notice": "Commands are a protocol, not evidence they ran. Exact result/counter agreement is separate from independent-host evidence and statistical wall-time agreement. No session is freshly reproduced by generating this plan.",
+  "schema": "ecbench.backend_replay_plan/v1",
+  "sessions": [
+    {
+      "check_argv": [
+        "<BACKEND_LEADERBOARD>",
+        "check-rerun",
+        "--source",
+        "research/f4_f5_f6_cross_family_20261011/sessions/K13",
+        "--rerun",
+        "<NEW_EVIDENCE>/session",
+        "--original-audit",
+        "<NEW_EVIDENCE>/original.audit.json",
+        "--rerun-audit",
+        "<NEW_EVIDENCE>/rerun.audit.json",
+        "--binary",
+        "<PINNED_ECBENCH>",
+        "--expected-lock-sha256",
+        "<TRUSTED_LOCK_SHA256>"
+      ],
+      "execution_order": [
+        "fresh_run_argv",
+        "original_replay_argv",
+        "fresh_audit_argv",
+        "check_argv"
+      ],
+      "expected_verified_deterministic_replays": [
+        {
+          "record_id": "ECR1h4f60dcf0c87f",
+          "seq": 0
+        },
+        {
+          "record_id": "ECR1h4286350d5c88",
+          "seq": 1
+        },
+        {
+          "record_id": "ECR1h6debc4e0cf7b",
+          "seq": 2
+        },
+        {
+          "record_id": "ECR1h70969bc21b1a",
+          "seq": 3
+        },
+        {
+          "record_id": "ECR1hc15ae52d5ea6",
+          "seq": 4
+        },
+        {
+          "record_id": "ECR1hb53a80205aee",
+          "seq": 5
+        },
+        {
+          "record_id": "ECR1h9e0bcd739585",
+          "seq": 6
+        },
+        {
+          "record_id": "ECR1hfe368ca96212",
+          "seq": 7
+        },
+        {
+          "record_id": "ECR1h33e9121ee2c2",
+          "seq": 8
+        },
+        {
+          "record_id": "ECR1hc0e6339f2e31",
+          "seq": 9
+        },
+        {
+          "record_id": "ECR1h1595ee14a8e4",
+          "seq": 10
+        },
+        {
+          "record_id": "ECR1h345d1c516a09",
+          "seq": 11
+        },
+        {
+          "record_id": "ECR1h01bd19cba309",
+          "seq": 12
+        },
+        {
+          "record_id": "ECR1h85b90568b247",
+          "seq": 13
+        },
+        {
+          "record_id": "ECR1h7ea26264d7bb",
+          "seq": 14
+        },
+        {
+          "record_id": "ECR1h0ccda73c221e",
+          "seq": 15
+        },
+        {
+          "record_id": "ECR1hc72d0a60a97c",
+          "seq": 16
+        },
+        {
+          "record_id": "ECR1hb27f02c53fa4",
+          "seq": 17
+        },
+        {
+          "record_id": "ECR1hdded98e006dd",
+          "seq": 18
+        },
+        {
+          "record_id": "ECR1he530ddd675b5",
+          "seq": 19
+        },
+        {
+          "record_id": "ECR1hfc8aae0751dd",
+          "seq": 20
+        },
+        {
+          "record_id": "ECR1h60cc80b1c569",
+          "seq": 21
+        },
+        {
+          "record_id": "ECR1hb276bc036459",
+          "seq": 22
+        },
+        {
+          "record_id": "ECR1hdf7650671ac9",
+          "seq": 23
+        },
+        {
+          "record_id": "ECR1ha9d573e507cb",
+          "seq": 24
+        },
+        {
+          "record_id": "ECR1h46bef7790a47",
+          "seq": 25
+        },
+        {
+          "record_id": "ECR1hb8a2e8d46e0e",
+          "seq": 26
+        },
+        {
+          "record_id": "ECR1hc999595f30a4",
+          "seq": 27
+        },
+        {
+          "record_id": "ECR1h15dfbff7863d",
+          "seq": 28
+        },
+        {
+          "record_id": "ECR1h2bf94fbd2a92",
+          "seq": 29
+        },
+        {
+          "record_id": "ECR1h887a6fe0e25a",
+          "seq": 30
+        },
+        {
+          "record_id": "ECR1he89a4b6955ce",
+          "seq": 31
+        },
+        {
+          "record_id": "ECR1h6c6709373b05",
+          "seq": 32
+        },
+        {
+          "record_id": "ECR1hec4f23d64078",
+          "seq": 33
+        },
+        {
+          "record_id": "ECR1h7e7cf7b9d311",
+          "seq": 34
+        },
+        {
+          "record_id": "ECR1h0510fb8f4b33",
+          "seq": 35
+        },
+        {
+          "record_id": "ECR1h87d7cc3bc129",
+          "seq": 36
+        },
+        {
+          "record_id": "ECR1h442f6e65c852",
+          "seq": 37
+        },
+        {
+          "record_id": "ECR1h220a2f08faa6",
+          "seq": 38
+        },
+        {
+          "record_id": "ECR1h33f0aa4d08b4",
+          "seq": 39
+        },
+        {
+          "record_id": "ECR1ha9114eca0d72",
+          "seq": 40
+        },
+        {
+          "record_id": "ECR1h02e4b83950d7",
+          "seq": 41
+        },
+        {
+          "record_id": "ECR1h8dee96b53414",
+          "seq": 42
+        },
+        {
+          "record_id": "ECR1h42119183424a",
+          "seq": 43
+        },
+        {
+          "record_id": "ECR1h2441c835261c",
+          "seq": 44
+        },
+        {
+          "record_id": "ECR1h8baf8168e579",
+          "seq": 45
+        },
+        {
+          "record_id": "ECR1h95aba5c460da",
+          "seq": 46
+        },
+        {
+          "record_id": "ECR1hfed0c9392ac1",
+          "seq": 47
+        }
+      ],
+      "file_hashes": {
+        "host.json": "1571926ca154768015db445c883b116629969b4211ec8ffed20d65e7ce322bd5",
+        "plan.json": "cb834a816331aea08a3616501b8090691a78c5ee7d146bca2f6ebbcc5a9e662f",
+        "records.jsonl": "d36cf12c03f7c12d15c92d0dece1182df054ebb96ef541e23f354ac80c605988",
+        "session.json": "269f40158610433d7cec1fad0667d423441adfb0415d819c3a20b4c635bf671b",
+        "spec.json": "5580721ea80bbc4269574c6a3b00ffc18c529445f2a3a16d7b11e698ea0c6e68"
+      },
+      "fresh_audit_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "<NEW_EVIDENCE>/session",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/rerun.audit.json"
+      ],
+      "fresh_run_argv": [
+        "<PINNED_ECBENCH>",
+        "run",
+        "--spec",
+        "research/f4_f5_f6_cross_family_20261011/sessions/K13/spec.json",
+        "--out",
+        "<NEW_EVIDENCE>/session"
+      ],
+      "git_commit": "bdd3c46608eea3b5d33888ea47b10df24acee064",
+      "git_commit_source": "runtime_worktree",
+      "git_dirty": false,
+      "known_blockers": [
+        "clean build-time source is not bound; a runtime checkout is insufficient: obtain the exact original binary or a bound complete source snapshot"
+      ],
+      "original_binary_sha256": "780e1084b13a5da741f378f993150a379634d723a31d5e858f150e7c838e615d",
+      "original_environment": "ECBENV2ha95bed7071ef",
+      "original_replay_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "research/f4_f5_f6_cross_family_20261011/sessions/K13",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/original.audit.json"
+      ],
+      "required_measured_records": 48,
+      "session_id": "ECBS1h2b56c13eeaec",
+      "source": "research/f4_f5_f6_cross_family_20261011/sessions/K13"
+    },
+    {
+      "check_argv": [
+        "<BACKEND_LEADERBOARD>",
+        "check-rerun",
+        "--source",
+        "research/f4_f5_f6_cross_family_20261011/sessions/K19",
+        "--rerun",
+        "<NEW_EVIDENCE>/session",
+        "--original-audit",
+        "<NEW_EVIDENCE>/original.audit.json",
+        "--rerun-audit",
+        "<NEW_EVIDENCE>/rerun.audit.json",
+        "--binary",
+        "<PINNED_ECBENCH>",
+        "--expected-lock-sha256",
+        "<TRUSTED_LOCK_SHA256>"
+      ],
+      "execution_order": [
+        "fresh_run_argv",
+        "original_replay_argv",
+        "fresh_audit_argv",
+        "check_argv"
+      ],
+      "expected_verified_deterministic_replays": [
+        {
+          "record_id": "ECR1h07f1470f9f08",
+          "seq": 0
+        },
+        {
+          "record_id": "ECR1ha0673762d1aa",
+          "seq": 1
+        },
+        {
+          "record_id": "ECR1h429d741e2b33",
+          "seq": 2
+        },
+        {
+          "record_id": "ECR1hc5afcce673f9",
+          "seq": 3
+        },
+        {
+          "record_id": "ECR1h39539a83a186",
+          "seq": 4
+        },
+        {
+          "record_id": "ECR1h6eb4a741aecf",
+          "seq": 5
+        },
+        {
+          "record_id": "ECR1h55ccf7bc4724",
+          "seq": 6
+        },
+        {
+          "record_id": "ECR1hb0821db5d0e7",
+          "seq": 7
+        },
+        {
+          "record_id": "ECR1hb4fdc3eddf0a",
+          "seq": 8
+        },
+        {
+          "record_id": "ECR1h8054548d5e9f",
+          "seq": 9
+        },
+        {
+          "record_id": "ECR1h282362f2a962",
+          "seq": 10
+        },
+        {
+          "record_id": "ECR1hc08e5474ece4",
+          "seq": 11
+        },
+        {
+          "record_id": "ECR1h5cf99b945bd4",
+          "seq": 12
+        },
+        {
+          "record_id": "ECR1hb149e6f8d16c",
+          "seq": 13
+        },
+        {
+          "record_id": "ECR1hae5af6eb5ed2",
+          "seq": 14
+        },
+        {
+          "record_id": "ECR1h1383d29064ba",
+          "seq": 15
+        },
+        {
+          "record_id": "ECR1h3ed72ee7b6b0",
+          "seq": 16
+        },
+        {
+          "record_id": "ECR1h902f613eeb87",
+          "seq": 17
+        },
+        {
+          "record_id": "ECR1he1c2c6459dbd",
+          "seq": 18
+        },
+        {
+          "record_id": "ECR1h512b96b496e9",
+          "seq": 19
+        },
+        {
+          "record_id": "ECR1h1a1ed67ca47f",
+          "seq": 20
+        },
+        {
+          "record_id": "ECR1h699f86c3c009",
+          "seq": 21
+        },
+        {
+          "record_id": "ECR1hbda922df4486",
+          "seq": 22
+        },
+        {
+          "record_id": "ECR1hdec10619bfb4",
+          "seq": 23
+        },
+        {
+          "record_id": "ECR1h2b98e5f9df94",
+          "seq": 24
+        },
+        {
+          "record_id": "ECR1h79a528cc84df",
+          "seq": 25
+        },
+        {
+          "record_id": "ECR1h1d7d3a4b41c1",
+          "seq": 26
+        },
+        {
+          "record_id": "ECR1h79609c2ae1d4",
+          "seq": 27
+        },
+        {
+          "record_id": "ECR1h1f0e29021331",
+          "seq": 28
+        },
+        {
+          "record_id": "ECR1h0e91e463d989",
+          "seq": 29
+        },
+        {
+          "record_id": "ECR1ha956b67feb9e",
+          "seq": 30
+        },
+        {
+          "record_id": "ECR1hb2df5e762390",
+          "seq": 31
+        }
+      ],
+      "file_hashes": {
+        "host.json": "ca29d6a4dce8bb411e52051feea0e6f9a80fbd1c5751a29fab925e4bde1a32e6",
+        "plan.json": "2fcaa9d02d7b094c8494c751e2acbfe2942dbd63d3a553a48de0959299715608",
+        "records.jsonl": "049834bfbf244b021a45ae33a44ec174e01cf9d6608be831a6aae39b3204b508",
+        "session.json": "fadf4d486726dca27416a147627911dd31fbbd4aef691d36bb1ed7112e4de59b",
+        "spec.json": "dbdc7205f421ad7cf7e641d545ace6bf4413107c3a612ba277f09ccfc506909d"
+      },
+      "fresh_audit_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "<NEW_EVIDENCE>/session",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/rerun.audit.json"
+      ],
+      "fresh_run_argv": [
+        "<PINNED_ECBENCH>",
+        "run",
+        "--spec",
+        "research/f4_f5_f6_cross_family_20261011/sessions/K19/spec.json",
+        "--out",
+        "<NEW_EVIDENCE>/session"
+      ],
+      "git_commit": "bc2d92fcdc16629063522837bf7be9cf3a2fb0b5",
+      "git_commit_source": "runtime_worktree",
+      "git_dirty": false,
+      "known_blockers": [
+        "clean build-time source is not bound; a runtime checkout is insufficient: obtain the exact original binary or a bound complete source snapshot"
+      ],
+      "original_binary_sha256": "780e1084b13a5da741f378f993150a379634d723a31d5e858f150e7c838e615d",
+      "original_environment": "ECBENV2ha95bed7071ef",
+      "original_replay_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "research/f4_f5_f6_cross_family_20261011/sessions/K19",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/original.audit.json"
+      ],
+      "required_measured_records": 32,
+      "session_id": "ECBS1h4af82d2330b7",
+      "source": "research/f4_f5_f6_cross_family_20261011/sessions/K19"
+    },
+    {
+      "check_argv": [
+        "<BACKEND_LEADERBOARD>",
+        "check-rerun",
+        "--source",
+        "research/f4_f5_f6_cross_family_20261011/sessions/R13",
+        "--rerun",
+        "<NEW_EVIDENCE>/session",
+        "--original-audit",
+        "<NEW_EVIDENCE>/original.audit.json",
+        "--rerun-audit",
+        "<NEW_EVIDENCE>/rerun.audit.json",
+        "--binary",
+        "<PINNED_ECBENCH>",
+        "--expected-lock-sha256",
+        "<TRUSTED_LOCK_SHA256>"
+      ],
+      "execution_order": [
+        "fresh_run_argv",
+        "original_replay_argv",
+        "fresh_audit_argv",
+        "check_argv"
+      ],
+      "expected_verified_deterministic_replays": [
+        {
+          "record_id": "ECR1h5a9da046c99e",
+          "seq": 0
+        },
+        {
+          "record_id": "ECR1heb17ed7ce137",
+          "seq": 1
+        },
+        {
+          "record_id": "ECR1h6f473745a9a0",
+          "seq": 2
+        },
+        {
+          "record_id": "ECR1h1886e067055d",
+          "seq": 3
+        },
+        {
+          "record_id": "ECR1hb30daa2f0ebf",
+          "seq": 4
+        },
+        {
+          "record_id": "ECR1h0b058aab37b9",
+          "seq": 5
+        },
+        {
+          "record_id": "ECR1h1a7a581ad735",
+          "seq": 6
+        },
+        {
+          "record_id": "ECR1h6b952b723844",
+          "seq": 7
+        },
+        {
+          "record_id": "ECR1h6214b8907a1d",
+          "seq": 8
+        },
+        {
+          "record_id": "ECR1h15f9a18d5126",
+          "seq": 9
+        },
+        {
+          "record_id": "ECR1h4dbf5180459b",
+          "seq": 10
+        },
+        {
+          "record_id": "ECR1h9a1c7a019caa",
+          "seq": 11
+        },
+        {
+          "record_id": "ECR1hb3de1d5743ab",
+          "seq": 12
+        },
+        {
+          "record_id": "ECR1h90900b0cd70e",
+          "seq": 13
+        },
+        {
+          "record_id": "ECR1h7b2189b2e2f9",
+          "seq": 14
+        },
+        {
+          "record_id": "ECR1hc3769fcc58fb",
+          "seq": 15
+        },
+        {
+          "record_id": "ECR1h2c84e96b1a19",
+          "seq": 16
+        },
+        {
+          "record_id": "ECR1he6a1a925d3d2",
+          "seq": 17
+        },
+        {
+          "record_id": "ECR1h1397f7a13bf2",
+          "seq": 18
+        },
+        {
+          "record_id": "ECR1h7ac07bcbe012",
+          "seq": 19
+        },
+        {
+          "record_id": "ECR1h76662e9f71da",
+          "seq": 20
+        },
+        {
+          "record_id": "ECR1hac54174054c7",
+          "seq": 21
+        },
+        {
+          "record_id": "ECR1h54f421f45cb4",
+          "seq": 22
+        },
+        {
+          "record_id": "ECR1hc92d880ed063",
+          "seq": 23
+        },
+        {
+          "record_id": "ECR1h21b77bd73641",
+          "seq": 24
+        },
+        {
+          "record_id": "ECR1h940fa9afc39c",
+          "seq": 25
+        },
+        {
+          "record_id": "ECR1hf50fd24ade94",
+          "seq": 26
+        },
+        {
+          "record_id": "ECR1ha208237b8f96",
+          "seq": 27
+        },
+        {
+          "record_id": "ECR1hd9c0371e0fe4",
+          "seq": 28
+        },
+        {
+          "record_id": "ECR1h8f684f4cb463",
+          "seq": 29
+        },
+        {
+          "record_id": "ECR1ha026c774b152",
+          "seq": 30
+        },
+        {
+          "record_id": "ECR1h394a4f437f4b",
+          "seq": 31
+        },
+        {
+          "record_id": "ECR1hfebaeede9d1e",
+          "seq": 32
+        },
+        {
+          "record_id": "ECR1h4d009348e134",
+          "seq": 33
+        },
+        {
+          "record_id": "ECR1h1428a4defe17",
+          "seq": 34
+        },
+        {
+          "record_id": "ECR1h61bae28af724",
+          "seq": 35
+        },
+        {
+          "record_id": "ECR1h2a03c86f61d8",
+          "seq": 36
+        },
+        {
+          "record_id": "ECR1h6f64bd91359f",
+          "seq": 37
+        },
+        {
+          "record_id": "ECR1h2c2969d9fc51",
+          "seq": 38
+        },
+        {
+          "record_id": "ECR1h33b11fa4aefb",
+          "seq": 39
+        }
+      ],
+      "file_hashes": {
+        "host.json": "4c70f157d574c6867e9716d621318882b551afcaf76313096985a22c22d6cdd1",
+        "plan.json": "5d36dffe1ba636354c592cbb923a256b379c72dc6ac0d4584e45866a24964e46",
+        "records.jsonl": "fb435bfcb0290494c8af47f40977adffbe8f991ac789930ad6b7b9ba67eaf465",
+        "session.json": "531e5693d81f284f27af1354210d30b6050e81f3c73f845a4adcebe78ab8e816",
+        "spec.json": "3875cb2d2f13cd8a312b4d0b597a4193fefdec007c32605f4d4159c7b8120cb7"
+      },
+      "fresh_audit_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "<NEW_EVIDENCE>/session",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/rerun.audit.json"
+      ],
+      "fresh_run_argv": [
+        "<PINNED_ECBENCH>",
+        "run",
+        "--spec",
+        "research/f4_f5_f6_cross_family_20261011/sessions/R13/spec.json",
+        "--out",
+        "<NEW_EVIDENCE>/session"
+      ],
+      "git_commit": "bc2d92fcdc16629063522837bf7be9cf3a2fb0b5",
+      "git_commit_source": "runtime_worktree",
+      "git_dirty": false,
+      "known_blockers": [
+        "clean build-time source is not bound; a runtime checkout is insufficient: obtain the exact original binary or a bound complete source snapshot"
+      ],
+      "original_binary_sha256": "780e1084b13a5da741f378f993150a379634d723a31d5e858f150e7c838e615d",
+      "original_environment": "ECBENV2ha95bed7071ef",
+      "original_replay_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "research/f4_f5_f6_cross_family_20261011/sessions/R13",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/original.audit.json"
+      ],
+      "required_measured_records": 40,
+      "session_id": "ECBS1h78657ab42aba",
+      "source": "research/f4_f5_f6_cross_family_20261011/sessions/R13"
+    },
+    {
+      "check_argv": [
+        "<BACKEND_LEADERBOARD>",
+        "check-rerun",
+        "--source",
+        "research/f4_f5_f6_cross_family_20261011/sessions/R19",
+        "--rerun",
+        "<NEW_EVIDENCE>/session",
+        "--original-audit",
+        "<NEW_EVIDENCE>/original.audit.json",
+        "--rerun-audit",
+        "<NEW_EVIDENCE>/rerun.audit.json",
+        "--binary",
+        "<PINNED_ECBENCH>",
+        "--expected-lock-sha256",
+        "<TRUSTED_LOCK_SHA256>"
+      ],
+      "execution_order": [
+        "fresh_run_argv",
+        "original_replay_argv",
+        "fresh_audit_argv",
+        "check_argv"
+      ],
+      "expected_verified_deterministic_replays": [
+        {
+          "record_id": "ECR1hc4c9e41bc265",
+          "seq": 0
+        },
+        {
+          "record_id": "ECR1hf933221b0462",
+          "seq": 1
+        },
+        {
+          "record_id": "ECR1h2c64790ea266",
+          "seq": 2
+        },
+        {
+          "record_id": "ECR1h692215773660",
+          "seq": 3
+        },
+        {
+          "record_id": "ECR1hb1c19e72be25",
+          "seq": 4
+        },
+        {
+          "record_id": "ECR1hbaaa56f463ae",
+          "seq": 5
+        },
+        {
+          "record_id": "ECR1hc8e0674a98e4",
+          "seq": 6
+        },
+        {
+          "record_id": "ECR1h135e3ff5d897",
+          "seq": 7
+        },
+        {
+          "record_id": "ECR1h146e1c05e418",
+          "seq": 8
+        },
+        {
+          "record_id": "ECR1hb9b05ce85010",
+          "seq": 9
+        },
+        {
+          "record_id": "ECR1h29d0be066602",
+          "seq": 10
+        },
+        {
+          "record_id": "ECR1h2ed3372cfa09",
+          "seq": 11
+        },
+        {
+          "record_id": "ECR1h4b969bd00b72",
+          "seq": 12
+        },
+        {
+          "record_id": "ECR1hf4acb9641377",
+          "seq": 13
+        },
+        {
+          "record_id": "ECR1hbc00736c35a4",
+          "seq": 14
+        },
+        {
+          "record_id": "ECR1h212293c1d7cd",
+          "seq": 15
+        },
+        {
+          "record_id": "ECR1hb6d700dfa8cd",
+          "seq": 16
+        },
+        {
+          "record_id": "ECR1h815890e4159b",
+          "seq": 17
+        },
+        {
+          "record_id": "ECR1h094352e0af61",
+          "seq": 18
+        },
+        {
+          "record_id": "ECR1h7dd7aaf8d810",
+          "seq": 19
+        },
+        {
+          "record_id": "ECR1h986844ecb357",
+          "seq": 20
+        },
+        {
+          "record_id": "ECR1hb2e4faf1dc38",
+          "seq": 21
+        },
+        {
+          "record_id": "ECR1he9b9044bab56",
+          "seq": 22
+        },
+        {
+          "record_id": "ECR1hfa63b94779dd",
+          "seq": 23
+        }
+      ],
+      "file_hashes": {
+        "host.json": "b1833c558c9dc38ff607588e6a74b0deb2dc2f68fff9d3d314ff2b0bdf8a151a",
+        "plan.json": "6d6ec22d0c3c632f6b8e857d7de2e7982468a8372f5d65a4b12a74dea156b3ec",
+        "records.jsonl": "5725efbc553fd66c42cbc035cb960fe9c73b59a46f49db6090a65510b1736227",
+        "session.json": "c2f5349c7b5ec6629b742b1325e0506fe9643fee9b8daf01125c66d40654123f",
+        "spec.json": "bb44373a3fb85c0e0738beaa20f105beff7b00aa3deaf3382ee7afcf749dff00"
+      },
+      "fresh_audit_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "<NEW_EVIDENCE>/session",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/rerun.audit.json"
+      ],
+      "fresh_run_argv": [
+        "<PINNED_ECBENCH>",
+        "run",
+        "--spec",
+        "research/f4_f5_f6_cross_family_20261011/sessions/R19/spec.json",
+        "--out",
+        "<NEW_EVIDENCE>/session"
+      ],
+      "git_commit": "83c3a2c8e18a7273d32303fdb699ec22e7132f35",
+      "git_commit_source": "runtime_worktree",
+      "git_dirty": false,
+      "known_blockers": [
+        "clean build-time source is not bound; a runtime checkout is insufficient: obtain the exact original binary or a bound complete source snapshot"
+      ],
+      "original_binary_sha256": "780e1084b13a5da741f378f993150a379634d723a31d5e858f150e7c838e615d",
+      "original_environment": "ECBENV2ha95bed7071ef",
+      "original_replay_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "research/f4_f5_f6_cross_family_20261011/sessions/R19",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/original.audit.json"
+      ],
+      "required_measured_records": 24,
+      "session_id": "ECBS1hfff3e0643af0",
+      "source": "research/f4_f5_f6_cross_family_20261011/sessions/R19"
+    },
+    {
+      "check_argv": [
+        "<BACKEND_LEADERBOARD>",
+        "check-rerun",
+        "--source",
+        "research/f4_f5_f6_cross_family_20261011/sessions/X19",
+        "--rerun",
+        "<NEW_EVIDENCE>/session",
+        "--original-audit",
+        "<NEW_EVIDENCE>/original.audit.json",
+        "--rerun-audit",
+        "<NEW_EVIDENCE>/rerun.audit.json",
+        "--binary",
+        "<PINNED_ECBENCH>",
+        "--expected-lock-sha256",
+        "<TRUSTED_LOCK_SHA256>"
+      ],
+      "execution_order": [
+        "fresh_run_argv",
+        "original_replay_argv",
+        "fresh_audit_argv",
+        "check_argv"
+      ],
+      "expected_verified_deterministic_replays": [],
+      "file_hashes": {
+        "host.json": "19665073449c01791efd4e403963ea16ee4e22915e30d874f1b49de55a86365d",
+        "plan.json": "ca08a03ae34528191bdd9649c54187ef09095fcfffcef1955e8706efd2c6c513",
+        "records.jsonl": "d8ed4827910c4e3e05e269e99363ef12b25ac4c0f0a920973f0031f020beb795",
+        "session.json": "035b48dc8d6b95727754b776d28320c5324af5dfe43bec0d49b9f9617fa36408",
+        "spec.json": "320ce8249dd94b9ec6fe9bbb234a23cf97a518d8aecd9e655f896867d306ff60"
+      },
+      "fresh_audit_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "<NEW_EVIDENCE>/session",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/rerun.audit.json"
+      ],
+      "fresh_run_argv": [
+        "<PINNED_ECBENCH>",
+        "run",
+        "--spec",
+        "research/f4_f5_f6_cross_family_20261011/sessions/X19/spec.json",
+        "--out",
+        "<NEW_EVIDENCE>/session"
+      ],
+      "git_commit": "83c3a2c8e18a7273d32303fdb699ec22e7132f35",
+      "git_commit_source": "runtime_worktree",
+      "git_dirty": false,
+      "known_blockers": [
+        "clean build-time source is not bound; a runtime checkout is insufficient: obtain the exact original binary or a bound complete source snapshot",
+        "source contains failed or nondeterministic attempts; strict whole-session ledger reproduction cannot pass"
+      ],
+      "original_binary_sha256": "780e1084b13a5da741f378f993150a379634d723a31d5e858f150e7c838e615d",
+      "original_environment": "ECBENV2ha95bed7071ef",
+      "original_replay_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "research/f4_f5_f6_cross_family_20261011/sessions/X19",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/original.audit.json"
+      ],
+      "required_measured_records": 4,
+      "session_id": "ECBS1h9453f8e9b41e",
+      "source": "research/f4_f5_f6_cross_family_20261011/sessions/X19"
+    },
+    {
+      "check_argv": [
+        "<BACKEND_LEADERBOARD>",
+        "check-rerun",
+        "--source",
+        "research/f6_ic_ecbench_ladder_20261005/sessions/n7",
+        "--rerun",
+        "<NEW_EVIDENCE>/session",
+        "--original-audit",
+        "<NEW_EVIDENCE>/original.audit.json",
+        "--rerun-audit",
+        "<NEW_EVIDENCE>/rerun.audit.json",
+        "--binary",
+        "<PINNED_ECBENCH>",
+        "--expected-lock-sha256",
+        "<TRUSTED_LOCK_SHA256>"
+      ],
+      "execution_order": [
+        "fresh_run_argv",
+        "original_replay_argv",
+        "fresh_audit_argv",
+        "check_argv"
+      ],
+      "expected_verified_deterministic_replays": [],
+      "file_hashes": {
+        "host.json": "1c7f0072d0316cb06268f508818d937ce2e4ae4b52c2d4169f8b2e6e67eb659b",
+        "plan.json": "192cc790de7498736c15c1a810f6513458b3bfd53c73eb9618135e3de55d0966",
+        "records.jsonl": "09199b94cd84e0f3998fac744f50c83397cf493337dc8c2120d6159b2cb6e47a",
+        "session.json": "3b45eb0274b54e28ddcc1d1ef5f82ef5ce2f86766e25ac2ab271847c88d8c77f",
+        "spec.json": "ecc2e4e6142a4fb5d099ceeb83751bd303fae00e788d051f39a37310a1d889e8"
+      },
+      "fresh_audit_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "<NEW_EVIDENCE>/session",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/rerun.audit.json"
+      ],
+      "fresh_run_argv": [
+        "<PINNED_ECBENCH>",
+        "run",
+        "--spec",
+        "research/f6_ic_ecbench_ladder_20261005/sessions/n7/spec.json",
+        "--out",
+        "<NEW_EVIDENCE>/session"
+      ],
+      "git_commit": null,
+      "git_commit_source": null,
+      "git_dirty": null,
+      "known_blockers": [
+        "clean build-time source is not bound; a runtime checkout is insufficient: obtain the exact original binary or a bound complete source snapshot",
+        "source contains failed or nondeterministic attempts; strict whole-session ledger reproduction cannot pass"
+      ],
+      "original_binary_sha256": "712a58bb4ae2ba9da32ed4170d6b4c775453a3b0cdf46fd28760559a249cebad",
+      "original_environment": "ECBENV2h7ce745528743",
+      "original_replay_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "research/f6_ic_ecbench_ladder_20261005/sessions/n7",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/original.audit.json"
+      ],
+      "required_measured_records": 72,
+      "session_id": "ECBS1h302934ff99ed",
+      "source": "research/f6_ic_ecbench_ladder_20261005/sessions/n7"
+    },
+    {
+      "check_argv": [
+        "<BACKEND_LEADERBOARD>",
+        "check-rerun",
+        "--source",
+        "research/f6_ic_ecbench_ladder_20261005/sessions/n13",
+        "--rerun",
+        "<NEW_EVIDENCE>/session",
+        "--original-audit",
+        "<NEW_EVIDENCE>/original.audit.json",
+        "--rerun-audit",
+        "<NEW_EVIDENCE>/rerun.audit.json",
+        "--binary",
+        "<PINNED_ECBENCH>",
+        "--expected-lock-sha256",
+        "<TRUSTED_LOCK_SHA256>"
+      ],
+      "execution_order": [
+        "fresh_run_argv",
+        "original_replay_argv",
+        "fresh_audit_argv",
+        "check_argv"
+      ],
+      "expected_verified_deterministic_replays": [
+        {
+          "record_id": "ECR1h2a06df709a3a",
+          "seq": 24
+        },
+        {
+          "record_id": "ECR1h5561330229fc",
+          "seq": 25
+        },
+        {
+          "record_id": "ECR1ha36d0695e2f6",
+          "seq": 26
+        },
+        {
+          "record_id": "ECR1h9bca61876df6",
+          "seq": 27
+        },
+        {
+          "record_id": "ECR1h7036aa185470",
+          "seq": 28
+        },
+        {
+          "record_id": "ECR1h736225b34650",
+          "seq": 29
+        },
+        {
+          "record_id": "ECR1h08f41283911f",
+          "seq": 30
+        },
+        {
+          "record_id": "ECR1h770a9c65f596",
+          "seq": 31
+        },
+        {
+          "record_id": "ECR1h668df177e12b",
+          "seq": 32
+        },
+        {
+          "record_id": "ECR1h5b00639efc20",
+          "seq": 33
+        },
+        {
+          "record_id": "ECR1hf27fb8af5a81",
+          "seq": 34
+        },
+        {
+          "record_id": "ECR1h89b41c8e3c30",
+          "seq": 35
+        },
+        {
+          "record_id": "ECR1he510bebc823a",
+          "seq": 36
+        },
+        {
+          "record_id": "ECR1h28779a7167f3",
+          "seq": 37
+        },
+        {
+          "record_id": "ECR1hd7c3a3d2e116",
+          "seq": 38
+        },
+        {
+          "record_id": "ECR1h11bba48b747d",
+          "seq": 39
+        },
+        {
+          "record_id": "ECR1h3ea8150a9758",
+          "seq": 40
+        },
+        {
+          "record_id": "ECR1h00e5473af452",
+          "seq": 41
+        },
+        {
+          "record_id": "ECR1h2ffd462906aa",
+          "seq": 42
+        },
+        {
+          "record_id": "ECR1hdbbb190fb3bb",
+          "seq": 43
+        },
+        {
+          "record_id": "ECR1ha40b71a9dc78",
+          "seq": 44
+        },
+        {
+          "record_id": "ECR1he14dc0cdc568",
+          "seq": 45
+        },
+        {
+          "record_id": "ECR1h178e0e2d6f21",
+          "seq": 46
+        },
+        {
+          "record_id": "ECR1h90e0c115a81f",
+          "seq": 47
+        },
+        {
+          "record_id": "ECR1h2d32a813e8a0",
+          "seq": 48
+        },
+        {
+          "record_id": "ECR1h34f2faa3a528",
+          "seq": 49
+        },
+        {
+          "record_id": "ECR1h0ebf795ebd74",
+          "seq": 50
+        },
+        {
+          "record_id": "ECR1hd62477487464",
+          "seq": 51
+        },
+        {
+          "record_id": "ECR1h710b7ec90ec0",
+          "seq": 52
+        },
+        {
+          "record_id": "ECR1h3dd87ac0c8e0",
+          "seq": 53
+        },
+        {
+          "record_id": "ECR1hae6da7e2c5f9",
+          "seq": 54
+        },
+        {
+          "record_id": "ECR1h6b86cd608649",
+          "seq": 55
+        },
+        {
+          "record_id": "ECR1h5c3bea50bd09",
+          "seq": 56
+        },
+        {
+          "record_id": "ECR1h2e1ce2acdec3",
+          "seq": 57
+        },
+        {
+          "record_id": "ECR1hdc6602a5390f",
+          "seq": 58
+        },
+        {
+          "record_id": "ECR1hce93e473683c",
+          "seq": 59
+        },
+        {
+          "record_id": "ECR1h1d6402a89c53",
+          "seq": 60
+        },
+        {
+          "record_id": "ECR1h427f0fd42aa4",
+          "seq": 61
+        },
+        {
+          "record_id": "ECR1h409928a43f62",
+          "seq": 62
+        },
+        {
+          "record_id": "ECR1hc44cb0c8be06",
+          "seq": 63
+        },
+        {
+          "record_id": "ECR1h2698b98057e2",
+          "seq": 64
+        },
+        {
+          "record_id": "ECR1hdcfe99be687c",
+          "seq": 65
+        },
+        {
+          "record_id": "ECR1h325fdde9de4e",
+          "seq": 66
+        },
+        {
+          "record_id": "ECR1h6d3ae7152ab6",
+          "seq": 67
+        },
+        {
+          "record_id": "ECR1hc4a0da960318",
+          "seq": 68
+        },
+        {
+          "record_id": "ECR1hc2b8c8a817dc",
+          "seq": 69
+        },
+        {
+          "record_id": "ECR1h32742c34928e",
+          "seq": 70
+        },
+        {
+          "record_id": "ECR1hf54109067324",
+          "seq": 71
+        },
+        {
+          "record_id": "ECR1hce46a32432c9",
+          "seq": 72
+        },
+        {
+          "record_id": "ECR1hf95a67378c5f",
+          "seq": 73
+        },
+        {
+          "record_id": "ECR1h44b02321f243",
+          "seq": 74
+        },
+        {
+          "record_id": "ECR1h7815ece8ebe2",
+          "seq": 75
+        },
+        {
+          "record_id": "ECR1h5f7afc549559",
+          "seq": 76
+        },
+        {
+          "record_id": "ECR1h51b45c1be22f",
+          "seq": 77
+        },
+        {
+          "record_id": "ECR1h573b39be057d",
+          "seq": 78
+        },
+        {
+          "record_id": "ECR1h4847200826c2",
+          "seq": 79
+        },
+        {
+          "record_id": "ECR1h64354bcf2a2f",
+          "seq": 80
+        },
+        {
+          "record_id": "ECR1h6364ee2c4b04",
+          "seq": 81
+        },
+        {
+          "record_id": "ECR1he7db5822825a",
+          "seq": 82
+        },
+        {
+          "record_id": "ECR1h471feacd9442",
+          "seq": 83
+        },
+        {
+          "record_id": "ECR1h891200d103ff",
+          "seq": 84
+        },
+        {
+          "record_id": "ECR1hae538f0661a0",
+          "seq": 85
+        },
+        {
+          "record_id": "ECR1hc7b7dfa60d42",
+          "seq": 86
+        },
+        {
+          "record_id": "ECR1hf157b9360d9f",
+          "seq": 87
+        },
+        {
+          "record_id": "ECR1hc624308b6a28",
+          "seq": 88
+        },
+        {
+          "record_id": "ECR1h9c1603c54ab0",
+          "seq": 89
+        },
+        {
+          "record_id": "ECR1h0133aa7a0f14",
+          "seq": 90
+        },
+        {
+          "record_id": "ECR1hfeb63500c7de",
+          "seq": 91
+        },
+        {
+          "record_id": "ECR1h5cf8660e8bc3",
+          "seq": 92
+        },
+        {
+          "record_id": "ECR1ha709299568cc",
+          "seq": 93
+        },
+        {
+          "record_id": "ECR1he10248c972be",
+          "seq": 94
+        },
+        {
+          "record_id": "ECR1hda54858cf945",
+          "seq": 95
+        }
+      ],
+      "file_hashes": {
+        "host.json": "e3e99adce4ea820ec20f6e91b1c932e14acfe3d653c41b98ca2ebd9509c2ce2a",
+        "plan.json": "cf5f432d1988b050fb9980f1760ca027a44b7965a3400ae04be12dea978fdcdc",
+        "records.jsonl": "ff58a8b92aa534d42921697f25215e7ffd8bfd2aa7680a976206743e984a2965",
+        "session.json": "ab70f0e11423f923b92812254ef78804bab355e4542db8c7bfa8bdaccee7ef3f",
+        "spec.json": "9be8f9f4601dfe3ff2437d03b8b18b18f5dcb8949c00fa18710476b9e0124dfc"
+      },
+      "fresh_audit_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "<NEW_EVIDENCE>/session",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/rerun.audit.json"
+      ],
+      "fresh_run_argv": [
+        "<PINNED_ECBENCH>",
+        "run",
+        "--spec",
+        "research/f6_ic_ecbench_ladder_20261005/sessions/n13/spec.json",
+        "--out",
+        "<NEW_EVIDENCE>/session"
+      ],
+      "git_commit": null,
+      "git_commit_source": null,
+      "git_dirty": null,
+      "known_blockers": [
+        "clean build-time source is not bound; a runtime checkout is insufficient: obtain the exact original binary or a bound complete source snapshot"
+      ],
+      "original_binary_sha256": "712a58bb4ae2ba9da32ed4170d6b4c775453a3b0cdf46fd28760559a249cebad",
+      "original_environment": "ECBENV2h7ce745528743",
+      "original_replay_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "research/f6_ic_ecbench_ladder_20261005/sessions/n13",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/original.audit.json"
+      ],
+      "required_measured_records": 72,
+      "session_id": "ECBS1h1c3104cd2c1d",
+      "source": "research/f6_ic_ecbench_ladder_20261005/sessions/n13"
+    },
+    {
+      "check_argv": [
+        "<BACKEND_LEADERBOARD>",
+        "check-rerun",
+        "--source",
+        "research/f6_ic_ecbench_ladder_20261005/sessions/n19",
+        "--rerun",
+        "<NEW_EVIDENCE>/session",
+        "--original-audit",
+        "<NEW_EVIDENCE>/original.audit.json",
+        "--rerun-audit",
+        "<NEW_EVIDENCE>/rerun.audit.json",
+        "--binary",
+        "<PINNED_ECBENCH>",
+        "--expected-lock-sha256",
+        "<TRUSTED_LOCK_SHA256>"
+      ],
+      "execution_order": [
+        "fresh_run_argv",
+        "original_replay_argv",
+        "fresh_audit_argv",
+        "check_argv"
+      ],
+      "expected_verified_deterministic_replays": [
+        {
+          "record_id": "ECR1h6a48721e41e2",
+          "seq": 24
+        },
+        {
+          "record_id": "ECR1hacb418194525",
+          "seq": 25
+        },
+        {
+          "record_id": "ECR1haebc4961d4a4",
+          "seq": 26
+        },
+        {
+          "record_id": "ECR1ha4f820d35a2c",
+          "seq": 27
+        },
+        {
+          "record_id": "ECR1h934d79e1e467",
+          "seq": 28
+        },
+        {
+          "record_id": "ECR1h7239b98b16b6",
+          "seq": 29
+        },
+        {
+          "record_id": "ECR1h683cb25f7929",
+          "seq": 30
+        },
+        {
+          "record_id": "ECR1h7d93a9e530da",
+          "seq": 31
+        },
+        {
+          "record_id": "ECR1h83a080fb7430",
+          "seq": 32
+        },
+        {
+          "record_id": "ECR1h5ed15b68fea5",
+          "seq": 33
+        },
+        {
+          "record_id": "ECR1h5f9e8afa748c",
+          "seq": 34
+        },
+        {
+          "record_id": "ECR1h94065ca46c84",
+          "seq": 35
+        },
+        {
+          "record_id": "ECR1hefbece9de146",
+          "seq": 36
+        },
+        {
+          "record_id": "ECR1h78cdc8c66a2a",
+          "seq": 37
+        },
+        {
+          "record_id": "ECR1h8c9636e06a21",
+          "seq": 38
+        },
+        {
+          "record_id": "ECR1h77263df9e36f",
+          "seq": 39
+        },
+        {
+          "record_id": "ECR1hf3370e48cc28",
+          "seq": 40
+        },
+        {
+          "record_id": "ECR1h9301b731de4f",
+          "seq": 41
+        },
+        {
+          "record_id": "ECR1h91c34e9cc3f0",
+          "seq": 42
+        },
+        {
+          "record_id": "ECR1hf2242f1589d6",
+          "seq": 43
+        },
+        {
+          "record_id": "ECR1h446b9f17b07b",
+          "seq": 44
+        },
+        {
+          "record_id": "ECR1h4e9f39112b15",
+          "seq": 45
+        },
+        {
+          "record_id": "ECR1h310b203c3dc8",
+          "seq": 46
+        },
+        {
+          "record_id": "ECR1hd567636a8f64",
+          "seq": 47
+        },
+        {
+          "record_id": "ECR1h788630ea2fae",
+          "seq": 48
+        },
+        {
+          "record_id": "ECR1h116c2f7b85fa",
+          "seq": 49
+        },
+        {
+          "record_id": "ECR1hd7cfced5e449",
+          "seq": 50
+        },
+        {
+          "record_id": "ECR1h89b81566d43b",
+          "seq": 51
+        },
+        {
+          "record_id": "ECR1h025205f93a55",
+          "seq": 52
+        },
+        {
+          "record_id": "ECR1h562d90baef1a",
+          "seq": 53
+        },
+        {
+          "record_id": "ECR1hcd6fdac155d7",
+          "seq": 54
+        },
+        {
+          "record_id": "ECR1h20da4770480e",
+          "seq": 55
+        },
+        {
+          "record_id": "ECR1hc991bcf4082c",
+          "seq": 56
+        },
+        {
+          "record_id": "ECR1hac4df0f8b2b4",
+          "seq": 57
+        },
+        {
+          "record_id": "ECR1hb60917fa82e8",
+          "seq": 58
+        },
+        {
+          "record_id": "ECR1hea65cb92a8b6",
+          "seq": 59
+        },
+        {
+          "record_id": "ECR1h5a29cd27a4df",
+          "seq": 60
+        },
+        {
+          "record_id": "ECR1h1ef39cd59628",
+          "seq": 61
+        },
+        {
+          "record_id": "ECR1hc242aac78875",
+          "seq": 62
+        },
+        {
+          "record_id": "ECR1hf50c5a8632ba",
+          "seq": 63
+        },
+        {
+          "record_id": "ECR1h2ac6628e39f3",
+          "seq": 64
+        },
+        {
+          "record_id": "ECR1h819ade4ce63a",
+          "seq": 65
+        },
+        {
+          "record_id": "ECR1h460c0c2793ab",
+          "seq": 66
+        },
+        {
+          "record_id": "ECR1h233b7c7a348d",
+          "seq": 67
+        },
+        {
+          "record_id": "ECR1h629dc16bbb8c",
+          "seq": 68
+        },
+        {
+          "record_id": "ECR1h095cc442f659",
+          "seq": 69
+        },
+        {
+          "record_id": "ECR1h5e6b7d1189f0",
+          "seq": 70
+        },
+        {
+          "record_id": "ECR1h0baead8150a1",
+          "seq": 71
+        },
+        {
+          "record_id": "ECR1h35b7a8260ca7",
+          "seq": 72
+        },
+        {
+          "record_id": "ECR1h9bc0a070cb70",
+          "seq": 73
+        },
+        {
+          "record_id": "ECR1h4e6fe73fce48",
+          "seq": 74
+        },
+        {
+          "record_id": "ECR1h03189c3e7f6c",
+          "seq": 75
+        },
+        {
+          "record_id": "ECR1hd56c20aac0d1",
+          "seq": 76
+        },
+        {
+          "record_id": "ECR1h123d9b441771",
+          "seq": 77
+        },
+        {
+          "record_id": "ECR1h832f19860f0d",
+          "seq": 78
+        },
+        {
+          "record_id": "ECR1h31cb4ba774b1",
+          "seq": 79
+        },
+        {
+          "record_id": "ECR1h47465049e8a5",
+          "seq": 80
+        },
+        {
+          "record_id": "ECR1h5ebe0afbb89c",
+          "seq": 81
+        },
+        {
+          "record_id": "ECR1h1da47a914d41",
+          "seq": 82
+        },
+        {
+          "record_id": "ECR1h93d2cad57f27",
+          "seq": 83
+        },
+        {
+          "record_id": "ECR1hf90254442740",
+          "seq": 84
+        },
+        {
+          "record_id": "ECR1hfec2f9cba0e7",
+          "seq": 85
+        },
+        {
+          "record_id": "ECR1hbdafbd8ec78c",
+          "seq": 86
+        },
+        {
+          "record_id": "ECR1hbc641791b307",
+          "seq": 87
+        },
+        {
+          "record_id": "ECR1h4c8ee3ec1f9b",
+          "seq": 88
+        },
+        {
+          "record_id": "ECR1h4c8b23f9eaaf",
+          "seq": 89
+        },
+        {
+          "record_id": "ECR1hf2eb88f9cd9a",
+          "seq": 90
+        },
+        {
+          "record_id": "ECR1hff28ceb8f5e4",
+          "seq": 91
+        },
+        {
+          "record_id": "ECR1h47360082a561",
+          "seq": 92
+        },
+        {
+          "record_id": "ECR1h3488377f98d8",
+          "seq": 93
+        },
+        {
+          "record_id": "ECR1h27ce12cecf9a",
+          "seq": 94
+        },
+        {
+          "record_id": "ECR1hbb91408a08f6",
+          "seq": 95
+        }
+      ],
+      "file_hashes": {
+        "host.json": "376fa7dc75707a46dec0ef09d5fb7794beed67d437a4af0c795a4cda4960b0bb",
+        "plan.json": "3893cde8d98ca8ad0e34f9298f98a42e1fa195851059ce47af95bf6561f550f3",
+        "records.jsonl": "9e74851c788c1371c52d49229dcb73855b180a67882a8fd9f4886b2af312aa6d",
+        "session.json": "bf092ba68ca8b9022b630c78c31c182a16c25c9c3b0c23b22e129c90bee41b24",
+        "spec.json": "c2457f4a8dde40d29d79b7e6afb1ac50ceda98b820f9f23acb5194300a781b65"
+      },
+      "fresh_audit_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "<NEW_EVIDENCE>/session",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/rerun.audit.json"
+      ],
+      "fresh_run_argv": [
+        "<PINNED_ECBENCH>",
+        "run",
+        "--spec",
+        "research/f6_ic_ecbench_ladder_20261005/sessions/n19/spec.json",
+        "--out",
+        "<NEW_EVIDENCE>/session"
+      ],
+      "git_commit": null,
+      "git_commit_source": null,
+      "git_dirty": null,
+      "known_blockers": [
+        "clean build-time source is not bound; a runtime checkout is insufficient: obtain the exact original binary or a bound complete source snapshot"
+      ],
+      "original_binary_sha256": "712a58bb4ae2ba9da32ed4170d6b4c775453a3b0cdf46fd28760559a249cebad",
+      "original_environment": "ECBENV2h7ce745528743",
+      "original_replay_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "research/f6_ic_ecbench_ladder_20261005/sessions/n19",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/original.audit.json"
+      ],
+      "required_measured_records": 72,
+      "session_id": "ECBS1h6c72efcb063f",
+      "source": "research/f6_ic_ecbench_ladder_20261005/sessions/n19"
+    },
+    {
+      "check_argv": [
+        "<BACKEND_LEADERBOARD>",
+        "check-rerun",
+        "--source",
+        "research/f6_ic_ecbench_ladder_20261005/sessions/n23",
+        "--rerun",
+        "<NEW_EVIDENCE>/session",
+        "--original-audit",
+        "<NEW_EVIDENCE>/original.audit.json",
+        "--rerun-audit",
+        "<NEW_EVIDENCE>/rerun.audit.json",
+        "--binary",
+        "<PINNED_ECBENCH>",
+        "--expected-lock-sha256",
+        "<TRUSTED_LOCK_SHA256>"
+      ],
+      "execution_order": [
+        "fresh_run_argv",
+        "original_replay_argv",
+        "fresh_audit_argv",
+        "check_argv"
+      ],
+      "expected_verified_deterministic_replays": [
+        {
+          "record_id": "ECR1h594c966d0648",
+          "seq": 24
+        },
+        {
+          "record_id": "ECR1hd43c06c43e77",
+          "seq": 25
+        },
+        {
+          "record_id": "ECR1h816fc777096e",
+          "seq": 26
+        },
+        {
+          "record_id": "ECR1hfdf588292463",
+          "seq": 27
+        },
+        {
+          "record_id": "ECR1h94eebcb70d1e",
+          "seq": 28
+        },
+        {
+          "record_id": "ECR1h13b94c4ccaae",
+          "seq": 29
+        },
+        {
+          "record_id": "ECR1hab1882b9d0ee",
+          "seq": 30
+        },
+        {
+          "record_id": "ECR1ha18970ea187b",
+          "seq": 31
+        },
+        {
+          "record_id": "ECR1hd68422b6e0f9",
+          "seq": 32
+        },
+        {
+          "record_id": "ECR1he4d8a589d9eb",
+          "seq": 33
+        },
+        {
+          "record_id": "ECR1h2e2fb50b6b40",
+          "seq": 34
+        },
+        {
+          "record_id": "ECR1h43800ed6fedf",
+          "seq": 35
+        },
+        {
+          "record_id": "ECR1hcfe1a760e9ef",
+          "seq": 36
+        },
+        {
+          "record_id": "ECR1h472781a34af0",
+          "seq": 37
+        },
+        {
+          "record_id": "ECR1h881dda7ea184",
+          "seq": 38
+        },
+        {
+          "record_id": "ECR1hd050d0cfa743",
+          "seq": 39
+        },
+        {
+          "record_id": "ECR1hd85320da2fda",
+          "seq": 40
+        },
+        {
+          "record_id": "ECR1h89f7c7bec395",
+          "seq": 41
+        },
+        {
+          "record_id": "ECR1h5a4941e1448f",
+          "seq": 42
+        },
+        {
+          "record_id": "ECR1h83c3587b407d",
+          "seq": 43
+        },
+        {
+          "record_id": "ECR1hb882e17c6bb1",
+          "seq": 44
+        },
+        {
+          "record_id": "ECR1hf4b5d0ab5e6c",
+          "seq": 45
+        },
+        {
+          "record_id": "ECR1h36f0d54ec9d2",
+          "seq": 46
+        },
+        {
+          "record_id": "ECR1hc4627e71c271",
+          "seq": 47
+        },
+        {
+          "record_id": "ECR1h7bffc12ea0dd",
+          "seq": 48
+        },
+        {
+          "record_id": "ECR1hbde11db27ffc",
+          "seq": 49
+        },
+        {
+          "record_id": "ECR1h294598786fbc",
+          "seq": 50
+        },
+        {
+          "record_id": "ECR1hf644fc286006",
+          "seq": 51
+        },
+        {
+          "record_id": "ECR1h7f1085e30952",
+          "seq": 52
+        },
+        {
+          "record_id": "ECR1h3e333c7d5b61",
+          "seq": 53
+        },
+        {
+          "record_id": "ECR1h4004db2b7654",
+          "seq": 54
+        },
+        {
+          "record_id": "ECR1hebcbf621c09c",
+          "seq": 55
+        },
+        {
+          "record_id": "ECR1hc76ed82e608a",
+          "seq": 56
+        },
+        {
+          "record_id": "ECR1h4bbfdff996f5",
+          "seq": 57
+        },
+        {
+          "record_id": "ECR1ha013273bf068",
+          "seq": 58
+        },
+        {
+          "record_id": "ECR1h893b6b10ee28",
+          "seq": 59
+        },
+        {
+          "record_id": "ECR1h07000c741607",
+          "seq": 60
+        },
+        {
+          "record_id": "ECR1he0f3b0c7f2d3",
+          "seq": 61
+        },
+        {
+          "record_id": "ECR1h1807ced60f4d",
+          "seq": 62
+        },
+        {
+          "record_id": "ECR1h386d524a9cce",
+          "seq": 63
+        },
+        {
+          "record_id": "ECR1h8a8ff5875794",
+          "seq": 64
+        },
+        {
+          "record_id": "ECR1h0b0db4093a3f",
+          "seq": 65
+        },
+        {
+          "record_id": "ECR1hceb11024639e",
+          "seq": 66
+        },
+        {
+          "record_id": "ECR1hffb4fb0239de",
+          "seq": 67
+        },
+        {
+          "record_id": "ECR1h5ec0dc22d1c4",
+          "seq": 68
+        },
+        {
+          "record_id": "ECR1h447cbce4a5a8",
+          "seq": 69
+        },
+        {
+          "record_id": "ECR1hac20683e5e47",
+          "seq": 70
+        },
+        {
+          "record_id": "ECR1h314c23bc1fed",
+          "seq": 71
+        },
+        {
+          "record_id": "ECR1h0dfbf9230292",
+          "seq": 72
+        },
+        {
+          "record_id": "ECR1h43954bc271e0",
+          "seq": 73
+        },
+        {
+          "record_id": "ECR1h3b56146992f3",
+          "seq": 74
+        },
+        {
+          "record_id": "ECR1hef85a5b1f448",
+          "seq": 75
+        },
+        {
+          "record_id": "ECR1h6366a31da878",
+          "seq": 76
+        },
+        {
+          "record_id": "ECR1h92f9eb5097a1",
+          "seq": 77
+        },
+        {
+          "record_id": "ECR1h055bea5c542b",
+          "seq": 78
+        },
+        {
+          "record_id": "ECR1hf41917a372e0",
+          "seq": 79
+        },
+        {
+          "record_id": "ECR1h1dcbb76bfb60",
+          "seq": 80
+        },
+        {
+          "record_id": "ECR1h8476b3a8f81a",
+          "seq": 81
+        },
+        {
+          "record_id": "ECR1h1e619a7adb18",
+          "seq": 82
+        },
+        {
+          "record_id": "ECR1h1073e6599ce4",
+          "seq": 83
+        },
+        {
+          "record_id": "ECR1h1d02672c32db",
+          "seq": 84
+        },
+        {
+          "record_id": "ECR1hb2a7be105b38",
+          "seq": 85
+        },
+        {
+          "record_id": "ECR1h5d9d1f37b0d9",
+          "seq": 86
+        },
+        {
+          "record_id": "ECR1h46ad178d7464",
+          "seq": 87
+        },
+        {
+          "record_id": "ECR1he9efaa56a26a",
+          "seq": 88
+        },
+        {
+          "record_id": "ECR1hddceab3b2b03",
+          "seq": 89
+        },
+        {
+          "record_id": "ECR1hbfe23bd512f9",
+          "seq": 90
+        },
+        {
+          "record_id": "ECR1h5bef63aa1961",
+          "seq": 91
+        },
+        {
+          "record_id": "ECR1ha582c14dd781",
+          "seq": 92
+        },
+        {
+          "record_id": "ECR1hff4df551ad40",
+          "seq": 93
+        },
+        {
+          "record_id": "ECR1h5de2be5a2f10",
+          "seq": 94
+        },
+        {
+          "record_id": "ECR1h537e8dd57842",
+          "seq": 95
+        }
+      ],
+      "file_hashes": {
+        "host.json": "bca1cab8780289a58caf7f40185c293e0d391ea6deae3c05c3bfcd05e3df653c",
+        "plan.json": "2e176a71e968e48010891732e3896f977855168fa6bd97c20885a169e326e8f3",
+        "records.jsonl": "061c2eb4cd3e3bb67ade8a8bdb5891e9fa03e378dc3675794960a1295155addb",
+        "session.json": "e23bc3f9b8043d4f09fc9b23278a89dff1b76bfee3147de0e4fd11494e4d60eb",
+        "spec.json": "47f9ece6cdedd7cb44221186b36078a9b2625e8dbdf05e15d35273127af4ea50"
+      },
+      "fresh_audit_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "<NEW_EVIDENCE>/session",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/rerun.audit.json"
+      ],
+      "fresh_run_argv": [
+        "<PINNED_ECBENCH>",
+        "run",
+        "--spec",
+        "research/f6_ic_ecbench_ladder_20261005/sessions/n23/spec.json",
+        "--out",
+        "<NEW_EVIDENCE>/session"
+      ],
+      "git_commit": null,
+      "git_commit_source": null,
+      "git_dirty": null,
+      "known_blockers": [
+        "clean build-time source is not bound; a runtime checkout is insufficient: obtain the exact original binary or a bound complete source snapshot"
+      ],
+      "original_binary_sha256": "712a58bb4ae2ba9da32ed4170d6b4c775453a3b0cdf46fd28760559a249cebad",
+      "original_environment": "ECBENV2h7ce745528743",
+      "original_replay_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "research/f6_ic_ecbench_ladder_20261005/sessions/n23",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/original.audit.json"
+      ],
+      "required_measured_records": 72,
+      "session_id": "ECBS1hd8140f7200eb",
+      "source": "research/f6_ic_ecbench_ladder_20261005/sessions/n23"
+    },
+    {
+      "check_argv": [
+        "<BACKEND_LEADERBOARD>",
+        "check-rerun",
+        "--source",
+        "research/f6_ic_ecbench_ladder_20261005/sessions/n31-interrupted-01",
+        "--rerun",
+        "<NEW_EVIDENCE>/session",
+        "--original-audit",
+        "<NEW_EVIDENCE>/original.audit.json",
+        "--rerun-audit",
+        "<NEW_EVIDENCE>/rerun.audit.json",
+        "--binary",
+        "<PINNED_ECBENCH>",
+        "--expected-lock-sha256",
+        "<TRUSTED_LOCK_SHA256>"
+      ],
+      "execution_order": [
+        "fresh_run_argv",
+        "original_replay_argv",
+        "fresh_audit_argv",
+        "check_argv"
+      ],
+      "expected_verified_deterministic_replays": [
+        {
+          "record_id": "ECR1h601dad32f64e",
+          "seq": 0
+        }
+      ],
+      "file_hashes": {
+        "host.json": "26b2ede0155c65996f99331a9f3690f15bc13563deded0108945364bbb005d53",
+        "plan.json": "738e92edc4885776f114ba88dac114966f684024f670f74d0d80527a5153ea3c",
+        "records.jsonl": "fbacde86703d2269b182426791457f8a2ffc23518e483778c6541e61387a4323",
+        "session.json": "a13bf42a9d2adc4d1eae2d3e7649d0c0fd3937c330acb0e6496370e14f9b9799",
+        "spec.json": "575028e68a81a714c67744c0fd51fbcd84ca99e1f35bf12498f005204b840662"
+      },
+      "fresh_audit_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "<NEW_EVIDENCE>/session",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/rerun.audit.json"
+      ],
+      "fresh_run_argv": [
+        "<PINNED_ECBENCH>",
+        "run",
+        "--spec",
+        "research/f6_ic_ecbench_ladder_20261005/sessions/n31-interrupted-01/spec.json",
+        "--out",
+        "<NEW_EVIDENCE>/session"
+      ],
+      "git_commit": null,
+      "git_commit_source": null,
+      "git_dirty": null,
+      "known_blockers": [
+        "original session is incomplete",
+        "clean build-time source is not bound; a runtime checkout is insufficient: obtain the exact original binary or a bound complete source snapshot",
+        "source contains failed or nondeterministic attempts; strict whole-session ledger reproduction cannot pass"
+      ],
+      "original_binary_sha256": "712a58bb4ae2ba9da32ed4170d6b4c775453a3b0cdf46fd28760559a249cebad",
+      "original_environment": "ECBENV2h7ce745528743",
+      "original_replay_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "research/f6_ic_ecbench_ladder_20261005/sessions/n31-interrupted-01",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/original.audit.json"
+      ],
+      "required_measured_records": 2,
+      "session_id": "ECBS1h83ac48e3f4d3",
+      "source": "research/f6_ic_ecbench_ladder_20261005/sessions/n31-interrupted-01"
+    },
+    {
+      "check_argv": [
+        "<BACKEND_LEADERBOARD>",
+        "check-rerun",
+        "--source",
+        "research/f6_ic_ecbench_ladder_20261005/sessions/n31-killed-02",
+        "--rerun",
+        "<NEW_EVIDENCE>/session",
+        "--original-audit",
+        "<NEW_EVIDENCE>/original.audit.json",
+        "--rerun-audit",
+        "<NEW_EVIDENCE>/rerun.audit.json",
+        "--binary",
+        "<PINNED_ECBENCH>",
+        "--expected-lock-sha256",
+        "<TRUSTED_LOCK_SHA256>"
+      ],
+      "execution_order": [
+        "fresh_run_argv",
+        "original_replay_argv",
+        "fresh_audit_argv",
+        "check_argv"
+      ],
+      "expected_verified_deterministic_replays": [
+        {
+          "record_id": "ECR1hc95c35b700b9",
+          "seq": 0
+        },
+        {
+          "record_id": "ECR1hb18a4eec6a37",
+          "seq": 3
+        }
+      ],
+      "file_hashes": {
+        "host.json": "a584565459bda5950744ad22ca38df150de0641e05e7e2b1f787b6f98137f07f",
+        "plan.json": "738e92edc4885776f114ba88dac114966f684024f670f74d0d80527a5153ea3c",
+        "records.jsonl": "d4eea9cbdd10c69a3cf24e3706239bbe0e2b087e94b9291f48bbfe02652fcf70",
+        "session.json": "a2bb73941a6146b70abd23151ef8b02239f2062a7c3a3ddbfebdf81abe2ae510",
+        "spec.json": "575028e68a81a714c67744c0fd51fbcd84ca99e1f35bf12498f005204b840662"
+      },
+      "fresh_audit_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "<NEW_EVIDENCE>/session",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/rerun.audit.json"
+      ],
+      "fresh_run_argv": [
+        "<PINNED_ECBENCH>",
+        "run",
+        "--spec",
+        "research/f6_ic_ecbench_ladder_20261005/sessions/n31-killed-02/spec.json",
+        "--out",
+        "<NEW_EVIDENCE>/session"
+      ],
+      "git_commit": null,
+      "git_commit_source": null,
+      "git_dirty": null,
+      "known_blockers": [
+        "original session is incomplete",
+        "original integrity is not complete/bound",
+        "clean build-time source is not bound; a runtime checkout is insufficient: obtain the exact original binary or a bound complete source snapshot",
+        "source contains failed or nondeterministic attempts; strict whole-session ledger reproduction cannot pass"
+      ],
+      "original_binary_sha256": "712a58bb4ae2ba9da32ed4170d6b4c775453a3b0cdf46fd28760559a249cebad",
+      "original_environment": "ECBENV2h7ce745528743",
+      "original_replay_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "research/f6_ic_ecbench_ladder_20261005/sessions/n31-killed-02",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/original.audit.json"
+      ],
+      "required_measured_records": 4,
+      "session_id": "ECBS1haeebe969c2a3",
+      "source": "research/f6_ic_ecbench_ladder_20261005/sessions/n31-killed-02"
+    },
+    {
+      "check_argv": [
+        "<BACKEND_LEADERBOARD>",
+        "check-rerun",
+        "--source",
+        "research/ecbench_rootfind_engine_20261012/sessions/claim-n13",
+        "--rerun",
+        "<NEW_EVIDENCE>/session",
+        "--original-audit",
+        "<NEW_EVIDENCE>/original.audit.json",
+        "--rerun-audit",
+        "<NEW_EVIDENCE>/rerun.audit.json",
+        "--binary",
+        "<PINNED_ECBENCH>",
+        "--expected-lock-sha256",
+        "<TRUSTED_LOCK_SHA256>"
+      ],
+      "execution_order": [
+        "fresh_run_argv",
+        "original_replay_argv",
+        "fresh_audit_argv",
+        "check_argv"
+      ],
+      "expected_verified_deterministic_replays": [
+        {
+          "record_id": "ECR1h04092119f283",
+          "seq": 56
+        },
+        {
+          "record_id": "ECR1hb77d390c4bf4",
+          "seq": 57
+        },
+        {
+          "record_id": "ECR1h18efc545cdef",
+          "seq": 58
+        },
+        {
+          "record_id": "ECR1hc9c4ea0e824b",
+          "seq": 59
+        },
+        {
+          "record_id": "ECR1hae5c56144ed8",
+          "seq": 60
+        },
+        {
+          "record_id": "ECR1h6442c464c710",
+          "seq": 61
+        },
+        {
+          "record_id": "ECR1h2d04d2cb74cd",
+          "seq": 62
+        },
+        {
+          "record_id": "ECR1h8a99a7863b43",
+          "seq": 63
+        },
+        {
+          "record_id": "ECR1h08b544642afe",
+          "seq": 64
+        },
+        {
+          "record_id": "ECR1hb9b2d82e33b2",
+          "seq": 65
+        },
+        {
+          "record_id": "ECR1h6fe82650f636",
+          "seq": 66
+        },
+        {
+          "record_id": "ECR1hdf194394d9d2",
+          "seq": 67
+        },
+        {
+          "record_id": "ECR1h8abb3a647d85",
+          "seq": 68
+        },
+        {
+          "record_id": "ECR1h2053b8c3ae60",
+          "seq": 69
+        },
+        {
+          "record_id": "ECR1h281d073ac630",
+          "seq": 70
+        },
+        {
+          "record_id": "ECR1h2f68b9e9479d",
+          "seq": 71
+        },
+        {
+          "record_id": "ECR1hbcf6d2d8e0e6",
+          "seq": 72
+        },
+        {
+          "record_id": "ECR1h52e692e6e50a",
+          "seq": 73
+        },
+        {
+          "record_id": "ECR1h2c5b2b653519",
+          "seq": 74
+        },
+        {
+          "record_id": "ECR1h39b07cdfa010",
+          "seq": 75
+        },
+        {
+          "record_id": "ECR1hc85d376f3392",
+          "seq": 76
+        },
+        {
+          "record_id": "ECR1he36dfaa0f8c5",
+          "seq": 77
+        },
+        {
+          "record_id": "ECR1hfe1125e2a34d",
+          "seq": 78
+        },
+        {
+          "record_id": "ECR1hba54be48be04",
+          "seq": 79
+        },
+        {
+          "record_id": "ECR1hdefa7fcbc596",
+          "seq": 80
+        },
+        {
+          "record_id": "ECR1haadfe430894e",
+          "seq": 81
+        },
+        {
+          "record_id": "ECR1h00738e3bfad1",
+          "seq": 82
+        },
+        {
+          "record_id": "ECR1h26ccc8c09dec",
+          "seq": 83
+        },
+        {
+          "record_id": "ECR1h4375598cf89e",
+          "seq": 84
+        },
+        {
+          "record_id": "ECR1h70ee21748d2b",
+          "seq": 85
+        },
+        {
+          "record_id": "ECR1h1e6b4460d10d",
+          "seq": 86
+        },
+        {
+          "record_id": "ECR1h5f30cbd0d58d",
+          "seq": 87
+        },
+        {
+          "record_id": "ECR1h8a712bf4304a",
+          "seq": 88
+        },
+        {
+          "record_id": "ECR1h7ce62d73551d",
+          "seq": 89
+        },
+        {
+          "record_id": "ECR1h305a930440e7",
+          "seq": 90
+        },
+        {
+          "record_id": "ECR1h061157d7e06a",
+          "seq": 91
+        },
+        {
+          "record_id": "ECR1h9070bf9ffc33",
+          "seq": 92
+        },
+        {
+          "record_id": "ECR1h33f29507cc5f",
+          "seq": 93
+        },
+        {
+          "record_id": "ECR1h1d76c0c7b02e",
+          "seq": 94
+        },
+        {
+          "record_id": "ECR1h7496b61e5a27",
+          "seq": 95
+        },
+        {
+          "record_id": "ECR1h9b22a89df1f7",
+          "seq": 96
+        },
+        {
+          "record_id": "ECR1ha4e2573ac63b",
+          "seq": 97
+        },
+        {
+          "record_id": "ECR1h130976fbb9c7",
+          "seq": 98
+        },
+        {
+          "record_id": "ECR1h3a03e50814a6",
+          "seq": 99
+        },
+        {
+          "record_id": "ECR1hc12c21e89b0d",
+          "seq": 100
+        },
+        {
+          "record_id": "ECR1hda4ab1384870",
+          "seq": 101
+        },
+        {
+          "record_id": "ECR1h181a1abd5293",
+          "seq": 102
+        },
+        {
+          "record_id": "ECR1h21d17cfce585",
+          "seq": 103
+        },
+        {
+          "record_id": "ECR1h739d5e06035e",
+          "seq": 104
+        },
+        {
+          "record_id": "ECR1hf037e84b856c",
+          "seq": 105
+        },
+        {
+          "record_id": "ECR1hb48f4e3a1af6",
+          "seq": 106
+        },
+        {
+          "record_id": "ECR1ha55ef81340d4",
+          "seq": 107
+        },
+        {
+          "record_id": "ECR1h9ae70530deb1",
+          "seq": 108
+        },
+        {
+          "record_id": "ECR1h727c6ad241f9",
+          "seq": 109
+        },
+        {
+          "record_id": "ECR1h2c01239e27db",
+          "seq": 110
+        },
+        {
+          "record_id": "ECR1h979db8e2c50b",
+          "seq": 111
+        },
+        {
+          "record_id": "ECR1ha7fee233360c",
+          "seq": 112
+        },
+        {
+          "record_id": "ECR1h49ebc6a45b08",
+          "seq": 113
+        },
+        {
+          "record_id": "ECR1h64801fa47d43",
+          "seq": 114
+        },
+        {
+          "record_id": "ECR1h432030f34306",
+          "seq": 115
+        },
+        {
+          "record_id": "ECR1h9453f35273de",
+          "seq": 116
+        },
+        {
+          "record_id": "ECR1hf81f1d4100f4",
+          "seq": 117
+        },
+        {
+          "record_id": "ECR1hde132f4ec7ec",
+          "seq": 118
+        },
+        {
+          "record_id": "ECR1h6e41f2aef18b",
+          "seq": 119
+        },
+        {
+          "record_id": "ECR1h6d82214fa29e",
+          "seq": 120
+        },
+        {
+          "record_id": "ECR1hfd71ca325d0b",
+          "seq": 121
+        },
+        {
+          "record_id": "ECR1hd4c03b741311",
+          "seq": 122
+        },
+        {
+          "record_id": "ECR1h214971262575",
+          "seq": 123
+        },
+        {
+          "record_id": "ECR1h842a8d2e4577",
+          "seq": 124
+        },
+        {
+          "record_id": "ECR1h23ae32825154",
+          "seq": 125
+        },
+        {
+          "record_id": "ECR1h3cb5292cdf94",
+          "seq": 126
+        },
+        {
+          "record_id": "ECR1hdf580fc0439e",
+          "seq": 127
+        },
+        {
+          "record_id": "ECR1hf7efa17c05bc",
+          "seq": 128
+        },
+        {
+          "record_id": "ECR1h73f0e1e24412",
+          "seq": 129
+        },
+        {
+          "record_id": "ECR1hcc5ebeae627e",
+          "seq": 130
+        },
+        {
+          "record_id": "ECR1he71a02296c53",
+          "seq": 131
+        },
+        {
+          "record_id": "ECR1h522b35fa9101",
+          "seq": 132
+        },
+        {
+          "record_id": "ECR1h51f372093059",
+          "seq": 133
+        },
+        {
+          "record_id": "ECR1hb454fdafe641",
+          "seq": 134
+        },
+        {
+          "record_id": "ECR1h7197901bdc28",
+          "seq": 135
+        },
+        {
+          "record_id": "ECR1hcf30bbbed36d",
+          "seq": 136
+        },
+        {
+          "record_id": "ECR1hf26887295cba",
+          "seq": 137
+        },
+        {
+          "record_id": "ECR1h5ff8a995da8c",
+          "seq": 138
+        },
+        {
+          "record_id": "ECR1hb206ea6a994a",
+          "seq": 139
+        },
+        {
+          "record_id": "ECR1h8922020b6573",
+          "seq": 140
+        },
+        {
+          "record_id": "ECR1h7efcd3a5755a",
+          "seq": 141
+        },
+        {
+          "record_id": "ECR1h81331d52e25a",
+          "seq": 142
+        },
+        {
+          "record_id": "ECR1he3e28e4e0ef2",
+          "seq": 143
+        },
+        {
+          "record_id": "ECR1h71d1bf7af703",
+          "seq": 144
+        },
+        {
+          "record_id": "ECR1hb5b28bebd703",
+          "seq": 145
+        },
+        {
+          "record_id": "ECR1h22ad5b69a9e2",
+          "seq": 146
+        },
+        {
+          "record_id": "ECR1he210ed49f627",
+          "seq": 147
+        },
+        {
+          "record_id": "ECR1h7cb5d22dfc19",
+          "seq": 148
+        },
+        {
+          "record_id": "ECR1h23f83c7ff7b9",
+          "seq": 149
+        },
+        {
+          "record_id": "ECR1h3f6f3fcceb90",
+          "seq": 150
+        },
+        {
+          "record_id": "ECR1he72b114a9d4f",
+          "seq": 151
+        },
+        {
+          "record_id": "ECR1h7486d50de133",
+          "seq": 152
+        },
+        {
+          "record_id": "ECR1h8031638170a7",
+          "seq": 153
+        },
+        {
+          "record_id": "ECR1h6dfe922d914c",
+          "seq": 154
+        },
+        {
+          "record_id": "ECR1h05bca42946ce",
+          "seq": 155
+        },
+        {
+          "record_id": "ECR1h3d3fd7033245",
+          "seq": 156
+        },
+        {
+          "record_id": "ECR1hd2830e1caa68",
+          "seq": 157
+        },
+        {
+          "record_id": "ECR1h914309e94c4f",
+          "seq": 158
+        },
+        {
+          "record_id": "ECR1h7a67159f6c52",
+          "seq": 159
+        },
+        {
+          "record_id": "ECR1h9b7cab2960f3",
+          "seq": 160
+        },
+        {
+          "record_id": "ECR1hdc5b05dd43a3",
+          "seq": 161
+        },
+        {
+          "record_id": "ECR1h8ed3f124b59c",
+          "seq": 162
+        },
+        {
+          "record_id": "ECR1h6bafa4d616bd",
+          "seq": 163
+        },
+        {
+          "record_id": "ECR1hc25a2565793c",
+          "seq": 164
+        },
+        {
+          "record_id": "ECR1h6b1f4e0ca787",
+          "seq": 165
+        },
+        {
+          "record_id": "ECR1ha065ffa52743",
+          "seq": 166
+        },
+        {
+          "record_id": "ECR1hf3b9be335f9f",
+          "seq": 167
+        },
+        {
+          "record_id": "ECR1h99e8606e8f07",
+          "seq": 168
+        },
+        {
+          "record_id": "ECR1h24113dee10f6",
+          "seq": 169
+        },
+        {
+          "record_id": "ECR1h8b738f5c8c77",
+          "seq": 170
+        },
+        {
+          "record_id": "ECR1h9203dd6ead97",
+          "seq": 171
+        },
+        {
+          "record_id": "ECR1he58349e940ef",
+          "seq": 172
+        },
+        {
+          "record_id": "ECR1hb47b9a84c6e6",
+          "seq": 173
+        },
+        {
+          "record_id": "ECR1h07052b5d85cd",
+          "seq": 174
+        },
+        {
+          "record_id": "ECR1heebc5f946c27",
+          "seq": 175
+        },
+        {
+          "record_id": "ECR1hd7b06aa2d638",
+          "seq": 176
+        },
+        {
+          "record_id": "ECR1h41ce0fd442de",
+          "seq": 177
+        },
+        {
+          "record_id": "ECR1h57e961672ae2",
+          "seq": 178
+        },
+        {
+          "record_id": "ECR1hd77fce423912",
+          "seq": 179
+        },
+        {
+          "record_id": "ECR1h53f3efd106a5",
+          "seq": 180
+        },
+        {
+          "record_id": "ECR1h5185965f35f8",
+          "seq": 181
+        },
+        {
+          "record_id": "ECR1hde8687f70a3b",
+          "seq": 182
+        },
+        {
+          "record_id": "ECR1h2268458012ab",
+          "seq": 183
+        },
+        {
+          "record_id": "ECR1h563152ba31de",
+          "seq": 184
+        },
+        {
+          "record_id": "ECR1h9cfcc86f64ee",
+          "seq": 185
+        },
+        {
+          "record_id": "ECR1h2a006b6d15a8",
+          "seq": 186
+        },
+        {
+          "record_id": "ECR1hb8e7e38e2eeb",
+          "seq": 187
+        },
+        {
+          "record_id": "ECR1hce809609a62b",
+          "seq": 188
+        },
+        {
+          "record_id": "ECR1hb85f81623793",
+          "seq": 189
+        },
+        {
+          "record_id": "ECR1haecd03c7a955",
+          "seq": 190
+        },
+        {
+          "record_id": "ECR1h21892d10e915",
+          "seq": 191
+        },
+        {
+          "record_id": "ECR1hba1a3d0aca95",
+          "seq": 192
+        },
+        {
+          "record_id": "ECR1ha2b4038e96b9",
+          "seq": 193
+        },
+        {
+          "record_id": "ECR1h0151baba1250",
+          "seq": 194
+        },
+        {
+          "record_id": "ECR1h5f8df70ab5f4",
+          "seq": 195
+        },
+        {
+          "record_id": "ECR1h5ca9a0660dee",
+          "seq": 196
+        },
+        {
+          "record_id": "ECR1hdfb2f16c8810",
+          "seq": 197
+        },
+        {
+          "record_id": "ECR1h059d902b79a0",
+          "seq": 198
+        },
+        {
+          "record_id": "ECR1h362c8ab628b8",
+          "seq": 199
+        },
+        {
+          "record_id": "ECR1h1f3ed29e3a11",
+          "seq": 200
+        },
+        {
+          "record_id": "ECR1h0e4348a7505a",
+          "seq": 201
+        },
+        {
+          "record_id": "ECR1hc570cba84927",
+          "seq": 202
+        },
+        {
+          "record_id": "ECR1h14ed6d97fa58",
+          "seq": 203
+        },
+        {
+          "record_id": "ECR1h0136e288e267",
+          "seq": 204
+        },
+        {
+          "record_id": "ECR1hc0cb24f922d0",
+          "seq": 205
+        },
+        {
+          "record_id": "ECR1had8cc8a0cd7c",
+          "seq": 206
+        },
+        {
+          "record_id": "ECR1h7d125ff684cf",
+          "seq": 207
+        },
+        {
+          "record_id": "ECR1hd47c81de5be2",
+          "seq": 208
+        },
+        {
+          "record_id": "ECR1h45a58739e562",
+          "seq": 209
+        },
+        {
+          "record_id": "ECR1h120bac54e433",
+          "seq": 210
+        },
+        {
+          "record_id": "ECR1h8b3e2e06f2c1",
+          "seq": 211
+        },
+        {
+          "record_id": "ECR1hbb44aa6f8fa8",
+          "seq": 212
+        },
+        {
+          "record_id": "ECR1h385e93776984",
+          "seq": 213
+        },
+        {
+          "record_id": "ECR1h43df6d7b054c",
+          "seq": 214
+        },
+        {
+          "record_id": "ECR1h884c9ed5850e",
+          "seq": 215
+        },
+        {
+          "record_id": "ECR1h3d94874f2a57",
+          "seq": 216
+        },
+        {
+          "record_id": "ECR1h46113f1e38ee",
+          "seq": 217
+        },
+        {
+          "record_id": "ECR1h08bd067e63a4",
+          "seq": 218
+        },
+        {
+          "record_id": "ECR1h7b7dbe945f93",
+          "seq": 219
+        },
+        {
+          "record_id": "ECR1hc3b8fd3d5b7a",
+          "seq": 220
+        },
+        {
+          "record_id": "ECR1h60cc742bada1",
+          "seq": 221
+        },
+        {
+          "record_id": "ECR1h1229214d541a",
+          "seq": 222
+        },
+        {
+          "record_id": "ECR1h6ba9fbfe33ab",
+          "seq": 223
+        }
+      ],
+      "file_hashes": {
+        "host.json": "fd6abc81dfec67d62e986511d72eacc643af8aebd4bc9bc284b8a334cf579e51",
+        "plan.json": "0b109338077a2f52037731c4ffa5357b6814be7c3005b4dc46fb33c88c1c3cb3",
+        "records.jsonl": "1c1f08b3c0b761ddb06021393b687043431261a64fb622ba794f0e045d479f10",
+        "session.json": "1bf079e238853eaa27adca23a83bcc38abc520ad0a1e4c8c9b6f616a4c4138a2",
+        "spec.json": "62fdb5aec2f6313000bf1ba67d7ca9385f9385225aef1a631ca45d42cdfa1b4d"
+      },
+      "fresh_audit_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "<NEW_EVIDENCE>/session",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/rerun.audit.json"
+      ],
+      "fresh_run_argv": [
+        "<PINNED_ECBENCH>",
+        "run",
+        "--spec",
+        "research/ecbench_rootfind_engine_20261012/sessions/claim-n13/spec.json",
+        "--out",
+        "<NEW_EVIDENCE>/session"
+      ],
+      "git_commit": "2245b7596f3fe04586c33b53a7cac97185fadba2",
+      "git_commit_source": "runtime_worktree",
+      "git_dirty": false,
+      "known_blockers": [
+        "clean build-time source is not bound; a runtime checkout is insufficient: obtain the exact original binary or a bound complete source snapshot"
+      ],
+      "original_binary_sha256": "1e972df4d8e769629ad4fd4a023214b05ee513a2cfea6f3ef51f2ca9e61fe531",
+      "original_environment": "ECBENV2h59034d4cd61b",
+      "original_replay_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "research/ecbench_rootfind_engine_20261012/sessions/claim-n13",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/original.audit.json"
+      ],
+      "required_measured_records": 168,
+      "session_id": "ECBS1hfd5bf1885227",
+      "source": "research/ecbench_rootfind_engine_20261012/sessions/claim-n13"
+    },
+    {
+      "check_argv": [
+        "<BACKEND_LEADERBOARD>",
+        "check-rerun",
+        "--source",
+        "research/ecbench_rootfind_engine_20261012/sessions/claim-n19",
+        "--rerun",
+        "<NEW_EVIDENCE>/session",
+        "--original-audit",
+        "<NEW_EVIDENCE>/original.audit.json",
+        "--rerun-audit",
+        "<NEW_EVIDENCE>/rerun.audit.json",
+        "--binary",
+        "<PINNED_ECBENCH>",
+        "--expected-lock-sha256",
+        "<TRUSTED_LOCK_SHA256>"
+      ],
+      "execution_order": [
+        "fresh_run_argv",
+        "original_replay_argv",
+        "fresh_audit_argv",
+        "check_argv"
+      ],
+      "expected_verified_deterministic_replays": [
+        {
+          "record_id": "ECR1h57939b5d8c08",
+          "seq": 56
+        },
+        {
+          "record_id": "ECR1hf9b79a5b6549",
+          "seq": 57
+        },
+        {
+          "record_id": "ECR1h88f3cf09da3b",
+          "seq": 58
+        },
+        {
+          "record_id": "ECR1hf40641612a60",
+          "seq": 59
+        },
+        {
+          "record_id": "ECR1hb617b3769809",
+          "seq": 60
+        },
+        {
+          "record_id": "ECR1h9c5c52fdf21b",
+          "seq": 61
+        },
+        {
+          "record_id": "ECR1h2796cfbc4f9b",
+          "seq": 62
+        },
+        {
+          "record_id": "ECR1haa82de91a768",
+          "seq": 63
+        },
+        {
+          "record_id": "ECR1h8149ba1856ed",
+          "seq": 64
+        },
+        {
+          "record_id": "ECR1h0e854aaa2e35",
+          "seq": 65
+        },
+        {
+          "record_id": "ECR1h66531e7a1b20",
+          "seq": 66
+        },
+        {
+          "record_id": "ECR1h4a8a732764bb",
+          "seq": 67
+        },
+        {
+          "record_id": "ECR1h9f94ead89940",
+          "seq": 68
+        },
+        {
+          "record_id": "ECR1hf0ee5d51eae4",
+          "seq": 69
+        },
+        {
+          "record_id": "ECR1he702853e06e0",
+          "seq": 70
+        },
+        {
+          "record_id": "ECR1h1849840e759e",
+          "seq": 71
+        },
+        {
+          "record_id": "ECR1h06ac7d412704",
+          "seq": 72
+        },
+        {
+          "record_id": "ECR1h6bd2062e5a67",
+          "seq": 73
+        },
+        {
+          "record_id": "ECR1h8a9157a684da",
+          "seq": 74
+        },
+        {
+          "record_id": "ECR1hf2c5e17b1853",
+          "seq": 75
+        },
+        {
+          "record_id": "ECR1hf93cc307d942",
+          "seq": 76
+        },
+        {
+          "record_id": "ECR1h04c6f4668be2",
+          "seq": 77
+        },
+        {
+          "record_id": "ECR1h01773ffdc124",
+          "seq": 78
+        },
+        {
+          "record_id": "ECR1h4d34255aed09",
+          "seq": 79
+        },
+        {
+          "record_id": "ECR1he7309cdb210a",
+          "seq": 80
+        },
+        {
+          "record_id": "ECR1h2bbe4a26fc18",
+          "seq": 81
+        },
+        {
+          "record_id": "ECR1h619d217aa376",
+          "seq": 82
+        },
+        {
+          "record_id": "ECR1hb5e2f5551ac1",
+          "seq": 83
+        },
+        {
+          "record_id": "ECR1h6195f8687d7d",
+          "seq": 84
+        },
+        {
+          "record_id": "ECR1h8eabaf762a52",
+          "seq": 85
+        },
+        {
+          "record_id": "ECR1ha50eaae81f12",
+          "seq": 86
+        },
+        {
+          "record_id": "ECR1hade7cd51d2de",
+          "seq": 87
+        },
+        {
+          "record_id": "ECR1hfb31427cc830",
+          "seq": 88
+        },
+        {
+          "record_id": "ECR1h081d102310fe",
+          "seq": 89
+        },
+        {
+          "record_id": "ECR1ha8ebeda8c254",
+          "seq": 90
+        },
+        {
+          "record_id": "ECR1h3c90ca1f1e34",
+          "seq": 91
+        },
+        {
+          "record_id": "ECR1hf19c6d2da372",
+          "seq": 92
+        },
+        {
+          "record_id": "ECR1hfa9d3a961e3d",
+          "seq": 93
+        },
+        {
+          "record_id": "ECR1h43a37298fcae",
+          "seq": 94
+        },
+        {
+          "record_id": "ECR1h022699e5508d",
+          "seq": 95
+        },
+        {
+          "record_id": "ECR1hcc1229f90940",
+          "seq": 96
+        },
+        {
+          "record_id": "ECR1h4dbdd3cd9658",
+          "seq": 97
+        },
+        {
+          "record_id": "ECR1h4481ac8e5139",
+          "seq": 98
+        },
+        {
+          "record_id": "ECR1h59c8c309af9d",
+          "seq": 99
+        },
+        {
+          "record_id": "ECR1h5f51dc10db52",
+          "seq": 100
+        },
+        {
+          "record_id": "ECR1h10dbc708ccc4",
+          "seq": 101
+        },
+        {
+          "record_id": "ECR1h30036c7edfe8",
+          "seq": 102
+        },
+        {
+          "record_id": "ECR1ha635916df1bc",
+          "seq": 103
+        },
+        {
+          "record_id": "ECR1hafced56ab3f8",
+          "seq": 104
+        },
+        {
+          "record_id": "ECR1hc671f48f5af1",
+          "seq": 105
+        },
+        {
+          "record_id": "ECR1h014027ee64be",
+          "seq": 106
+        },
+        {
+          "record_id": "ECR1h0f6cf9817bf0",
+          "seq": 107
+        },
+        {
+          "record_id": "ECR1h16516375e8cf",
+          "seq": 108
+        },
+        {
+          "record_id": "ECR1h81c926a639ae",
+          "seq": 109
+        },
+        {
+          "record_id": "ECR1h6d57727649ad",
+          "seq": 110
+        },
+        {
+          "record_id": "ECR1h2bbf2d70eeda",
+          "seq": 111
+        },
+        {
+          "record_id": "ECR1h6d41cb5d8bde",
+          "seq": 112
+        },
+        {
+          "record_id": "ECR1hfcb089decb97",
+          "seq": 113
+        },
+        {
+          "record_id": "ECR1ha675e50d6769",
+          "seq": 114
+        },
+        {
+          "record_id": "ECR1h19ea5c5512eb",
+          "seq": 115
+        },
+        {
+          "record_id": "ECR1h5aee5eb60f4c",
+          "seq": 116
+        },
+        {
+          "record_id": "ECR1hc38361d28bc2",
+          "seq": 117
+        },
+        {
+          "record_id": "ECR1h382c8344a707",
+          "seq": 118
+        },
+        {
+          "record_id": "ECR1h76d0e9719c84",
+          "seq": 119
+        },
+        {
+          "record_id": "ECR1hdcc2e4a80d97",
+          "seq": 120
+        },
+        {
+          "record_id": "ECR1hdf8825315ae5",
+          "seq": 121
+        },
+        {
+          "record_id": "ECR1h064afb7227a5",
+          "seq": 122
+        },
+        {
+          "record_id": "ECR1h40d69dd84e4b",
+          "seq": 123
+        },
+        {
+          "record_id": "ECR1h536613c0f162",
+          "seq": 124
+        },
+        {
+          "record_id": "ECR1ha090517fce8a",
+          "seq": 125
+        },
+        {
+          "record_id": "ECR1h8a9577c99cf4",
+          "seq": 126
+        },
+        {
+          "record_id": "ECR1hebc625df9c0e",
+          "seq": 127
+        },
+        {
+          "record_id": "ECR1hf30b249d9093",
+          "seq": 128
+        },
+        {
+          "record_id": "ECR1hb9bc4dfe35ff",
+          "seq": 129
+        },
+        {
+          "record_id": "ECR1hbe917eb8b9a1",
+          "seq": 130
+        },
+        {
+          "record_id": "ECR1h31eebbdd0952",
+          "seq": 131
+        },
+        {
+          "record_id": "ECR1h4a552532dcbf",
+          "seq": 132
+        },
+        {
+          "record_id": "ECR1h23c0a6a00f50",
+          "seq": 133
+        },
+        {
+          "record_id": "ECR1hb10bca5c6a87",
+          "seq": 134
+        },
+        {
+          "record_id": "ECR1h05b6f4fe4d2a",
+          "seq": 135
+        },
+        {
+          "record_id": "ECR1h4527330576f9",
+          "seq": 136
+        },
+        {
+          "record_id": "ECR1h3e1d909df6ef",
+          "seq": 137
+        },
+        {
+          "record_id": "ECR1hc7c935a29239",
+          "seq": 138
+        },
+        {
+          "record_id": "ECR1he1f9ebc6cb37",
+          "seq": 139
+        },
+        {
+          "record_id": "ECR1h934b2675f8d4",
+          "seq": 140
+        },
+        {
+          "record_id": "ECR1hc6262e69358b",
+          "seq": 141
+        },
+        {
+          "record_id": "ECR1hc9dfa55b4aa9",
+          "seq": 142
+        },
+        {
+          "record_id": "ECR1h5e2f881b8586",
+          "seq": 143
+        },
+        {
+          "record_id": "ECR1hbdfde39701f3",
+          "seq": 144
+        },
+        {
+          "record_id": "ECR1h31635d494d83",
+          "seq": 145
+        },
+        {
+          "record_id": "ECR1hb45797898376",
+          "seq": 146
+        },
+        {
+          "record_id": "ECR1h16a8be543e63",
+          "seq": 147
+        },
+        {
+          "record_id": "ECR1hd9709c9eeaf1",
+          "seq": 148
+        },
+        {
+          "record_id": "ECR1h5271ce3db866",
+          "seq": 149
+        },
+        {
+          "record_id": "ECR1hcd1ce33bb15a",
+          "seq": 150
+        },
+        {
+          "record_id": "ECR1h74f188157a14",
+          "seq": 151
+        },
+        {
+          "record_id": "ECR1hf2cd71adf54c",
+          "seq": 152
+        },
+        {
+          "record_id": "ECR1h2d382fee5c91",
+          "seq": 153
+        },
+        {
+          "record_id": "ECR1hd793fc177352",
+          "seq": 154
+        },
+        {
+          "record_id": "ECR1h438afa11a2de",
+          "seq": 155
+        },
+        {
+          "record_id": "ECR1h272a082bec38",
+          "seq": 156
+        },
+        {
+          "record_id": "ECR1hfa99f89f3fdd",
+          "seq": 157
+        },
+        {
+          "record_id": "ECR1h1d661070d7c4",
+          "seq": 158
+        },
+        {
+          "record_id": "ECR1h73cf9279af71",
+          "seq": 159
+        },
+        {
+          "record_id": "ECR1h6b7bfb73dcd2",
+          "seq": 160
+        },
+        {
+          "record_id": "ECR1h4eee2d5b7da3",
+          "seq": 161
+        },
+        {
+          "record_id": "ECR1h1d55229cea85",
+          "seq": 162
+        },
+        {
+          "record_id": "ECR1h6d0efda0a612",
+          "seq": 163
+        },
+        {
+          "record_id": "ECR1h4cedf4d84302",
+          "seq": 164
+        },
+        {
+          "record_id": "ECR1h63c388a26b44",
+          "seq": 165
+        },
+        {
+          "record_id": "ECR1h272ad0d15186",
+          "seq": 166
+        },
+        {
+          "record_id": "ECR1h38a438ade6bb",
+          "seq": 167
+        },
+        {
+          "record_id": "ECR1hb423105395f0",
+          "seq": 168
+        },
+        {
+          "record_id": "ECR1h7228013a8e36",
+          "seq": 169
+        },
+        {
+          "record_id": "ECR1h711a202c381a",
+          "seq": 170
+        },
+        {
+          "record_id": "ECR1h509fd0e02cf6",
+          "seq": 171
+        },
+        {
+          "record_id": "ECR1hfae56e317942",
+          "seq": 172
+        },
+        {
+          "record_id": "ECR1hbfe9df2ea99c",
+          "seq": 173
+        },
+        {
+          "record_id": "ECR1h726cb34d6585",
+          "seq": 174
+        },
+        {
+          "record_id": "ECR1h0b86e2728cf1",
+          "seq": 175
+        },
+        {
+          "record_id": "ECR1hf4aa07ebb98d",
+          "seq": 176
+        },
+        {
+          "record_id": "ECR1h61cb0a2b42b0",
+          "seq": 177
+        },
+        {
+          "record_id": "ECR1h01aa03441859",
+          "seq": 178
+        },
+        {
+          "record_id": "ECR1h37a1e5a1b5b2",
+          "seq": 179
+        },
+        {
+          "record_id": "ECR1h2e98855c723d",
+          "seq": 180
+        },
+        {
+          "record_id": "ECR1h7ffbb3406fad",
+          "seq": 181
+        },
+        {
+          "record_id": "ECR1hd485f96118ea",
+          "seq": 182
+        },
+        {
+          "record_id": "ECR1h327f5abd37ae",
+          "seq": 183
+        },
+        {
+          "record_id": "ECR1hdfb3d0a0243c",
+          "seq": 184
+        },
+        {
+          "record_id": "ECR1hc0b7aaab3d92",
+          "seq": 185
+        },
+        {
+          "record_id": "ECR1ha5592352f7fb",
+          "seq": 186
+        },
+        {
+          "record_id": "ECR1ha90bcf1a6d8f",
+          "seq": 187
+        },
+        {
+          "record_id": "ECR1h49a4b677f274",
+          "seq": 188
+        },
+        {
+          "record_id": "ECR1hda2e57335ade",
+          "seq": 189
+        },
+        {
+          "record_id": "ECR1h58c6be7a5bb9",
+          "seq": 190
+        },
+        {
+          "record_id": "ECR1h38e5ce3c8755",
+          "seq": 191
+        },
+        {
+          "record_id": "ECR1h31eb35229a39",
+          "seq": 192
+        },
+        {
+          "record_id": "ECR1ha58ca9c780d0",
+          "seq": 193
+        },
+        {
+          "record_id": "ECR1h22917f3a0436",
+          "seq": 194
+        },
+        {
+          "record_id": "ECR1h07bec76fee13",
+          "seq": 195
+        },
+        {
+          "record_id": "ECR1h60983a9dc32d",
+          "seq": 196
+        },
+        {
+          "record_id": "ECR1h6554122515f0",
+          "seq": 197
+        },
+        {
+          "record_id": "ECR1h77994ccfd551",
+          "seq": 198
+        },
+        {
+          "record_id": "ECR1hea2f515cbdae",
+          "seq": 199
+        },
+        {
+          "record_id": "ECR1hc1abba414cca",
+          "seq": 200
+        },
+        {
+          "record_id": "ECR1hda47bc069972",
+          "seq": 201
+        },
+        {
+          "record_id": "ECR1h0e15b72778bb",
+          "seq": 202
+        },
+        {
+          "record_id": "ECR1hf68604acd4a1",
+          "seq": 203
+        },
+        {
+          "record_id": "ECR1hea01b9d4dfd0",
+          "seq": 204
+        },
+        {
+          "record_id": "ECR1h1bbc75bf31f5",
+          "seq": 205
+        },
+        {
+          "record_id": "ECR1h89c76be90185",
+          "seq": 206
+        },
+        {
+          "record_id": "ECR1ha3a5e3db2b63",
+          "seq": 207
+        },
+        {
+          "record_id": "ECR1h6b852976c2ea",
+          "seq": 208
+        },
+        {
+          "record_id": "ECR1h885acf49d4b7",
+          "seq": 209
+        },
+        {
+          "record_id": "ECR1hc5881c42dc03",
+          "seq": 210
+        },
+        {
+          "record_id": "ECR1h1bfa329010f7",
+          "seq": 211
+        },
+        {
+          "record_id": "ECR1h3e491483572b",
+          "seq": 212
+        },
+        {
+          "record_id": "ECR1h6cb6f00baf8a",
+          "seq": 213
+        },
+        {
+          "record_id": "ECR1hb66accd83b62",
+          "seq": 214
+        },
+        {
+          "record_id": "ECR1hf7bb891fbae6",
+          "seq": 215
+        },
+        {
+          "record_id": "ECR1h9a0203968c20",
+          "seq": 216
+        },
+        {
+          "record_id": "ECR1h7910d5e13e69",
+          "seq": 217
+        },
+        {
+          "record_id": "ECR1h89dc488f0581",
+          "seq": 218
+        },
+        {
+          "record_id": "ECR1hd98275bf2926",
+          "seq": 219
+        },
+        {
+          "record_id": "ECR1h2367fbc825cd",
+          "seq": 220
+        },
+        {
+          "record_id": "ECR1h1aabdc7d71c8",
+          "seq": 221
+        },
+        {
+          "record_id": "ECR1ha78295644f89",
+          "seq": 222
+        },
+        {
+          "record_id": "ECR1ha808482354da",
+          "seq": 223
+        }
+      ],
+      "file_hashes": {
+        "host.json": "43796c68851178381e5dcf500819c95a6230c3c21a183cc2b1438cd9fd2d82e3",
+        "plan.json": "a6f4c0e746a7ef95c21be07ed04a39e18284b095dfc1911bcd0c19a622481103",
+        "records.jsonl": "fc6af199f23ab407c5a86654712aa015c38f98b932c2b8fcae34f5b7e0d953ff",
+        "session.json": "89f1963cb7bc3af30e5dfcc8904c89c040a9656312ff14d47160ae2d1b2cd1a4",
+        "spec.json": "96090ef2b62a74b87ca320bd04f6855bf5e5b28abd9b138fdd6239522f9fc0c3"
+      },
+      "fresh_audit_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "<NEW_EVIDENCE>/session",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/rerun.audit.json"
+      ],
+      "fresh_run_argv": [
+        "<PINNED_ECBENCH>",
+        "run",
+        "--spec",
+        "research/ecbench_rootfind_engine_20261012/sessions/claim-n19/spec.json",
+        "--out",
+        "<NEW_EVIDENCE>/session"
+      ],
+      "git_commit": "2245b7596f3fe04586c33b53a7cac97185fadba2",
+      "git_commit_source": "runtime_worktree",
+      "git_dirty": true,
+      "known_blockers": [
+        "clean build-time source is not bound; a runtime checkout is insufficient: obtain the exact original binary or a bound complete source snapshot"
+      ],
+      "original_binary_sha256": "1e972df4d8e769629ad4fd4a023214b05ee513a2cfea6f3ef51f2ca9e61fe531",
+      "original_environment": "ECBENV2h59034d4cd61b",
+      "original_replay_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "research/ecbench_rootfind_engine_20261012/sessions/claim-n19",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/original.audit.json"
+      ],
+      "required_measured_records": 168,
+      "session_id": "ECBS1h52e3269d5dab",
+      "source": "research/ecbench_rootfind_engine_20261012/sessions/claim-n19"
+    },
+    {
+      "check_argv": [
+        "<BACKEND_LEADERBOARD>",
+        "check-rerun",
+        "--source",
+        "research/ecbench_sat_pdp_20261009/sessions/count-qualified-main",
+        "--rerun",
+        "<NEW_EVIDENCE>/session",
+        "--original-audit",
+        "<NEW_EVIDENCE>/original.audit.json",
+        "--rerun-audit",
+        "<NEW_EVIDENCE>/rerun.audit.json",
+        "--binary",
+        "<PINNED_ECBENCH>",
+        "--expected-lock-sha256",
+        "<TRUSTED_LOCK_SHA256>"
+      ],
+      "execution_order": [
+        "fresh_run_argv",
+        "original_replay_argv",
+        "fresh_audit_argv",
+        "check_argv"
+      ],
+      "expected_verified_deterministic_replays": [
+        {
+          "record_id": "ECR1h79a30f74d911",
+          "seq": 40
+        },
+        {
+          "record_id": "ECR1hdbec856eb3b7",
+          "seq": 41
+        },
+        {
+          "record_id": "ECR1h2b7d6ef0821b",
+          "seq": 42
+        },
+        {
+          "record_id": "ECR1h702bb1af6878",
+          "seq": 43
+        },
+        {
+          "record_id": "ECR1hd004086acd9d",
+          "seq": 44
+        },
+        {
+          "record_id": "ECR1h21c016bfff8d",
+          "seq": 45
+        },
+        {
+          "record_id": "ECR1h915c8c707ba2",
+          "seq": 46
+        },
+        {
+          "record_id": "ECR1h0aac19a5b9fb",
+          "seq": 47
+        },
+        {
+          "record_id": "ECR1h892706cfb337",
+          "seq": 48
+        },
+        {
+          "record_id": "ECR1h2e39509e7366",
+          "seq": 49
+        },
+        {
+          "record_id": "ECR1hb6f2ba506753",
+          "seq": 50
+        },
+        {
+          "record_id": "ECR1h1ad24d9be06a",
+          "seq": 51
+        },
+        {
+          "record_id": "ECR1hf332d64e73e6",
+          "seq": 52
+        },
+        {
+          "record_id": "ECR1h9067d4ca8a98",
+          "seq": 53
+        },
+        {
+          "record_id": "ECR1h9c61267fe370",
+          "seq": 54
+        },
+        {
+          "record_id": "ECR1hcb667f69ecb3",
+          "seq": 55
+        },
+        {
+          "record_id": "ECR1h132f3fdb0544",
+          "seq": 56
+        },
+        {
+          "record_id": "ECR1h57d20186fb86",
+          "seq": 57
+        },
+        {
+          "record_id": "ECR1h5ed32e5d02fa",
+          "seq": 58
+        },
+        {
+          "record_id": "ECR1heead1c0b0044",
+          "seq": 59
+        },
+        {
+          "record_id": "ECR1hbf6c5336e3c9",
+          "seq": 60
+        },
+        {
+          "record_id": "ECR1h73d92b981521",
+          "seq": 61
+        },
+        {
+          "record_id": "ECR1hb04e39bc776d",
+          "seq": 62
+        },
+        {
+          "record_id": "ECR1h03f190fff558",
+          "seq": 63
+        },
+        {
+          "record_id": "ECR1hd96e75ecccf5",
+          "seq": 64
+        },
+        {
+          "record_id": "ECR1h88602dc5c545",
+          "seq": 65
+        },
+        {
+          "record_id": "ECR1ha73f7b1ae2cf",
+          "seq": 66
+        },
+        {
+          "record_id": "ECR1h1c9551966185",
+          "seq": 67
+        },
+        {
+          "record_id": "ECR1ha36f2f33b927",
+          "seq": 68
+        },
+        {
+          "record_id": "ECR1hf2c52e0b1604",
+          "seq": 69
+        },
+        {
+          "record_id": "ECR1h10edc7b3eea0",
+          "seq": 70
+        },
+        {
+          "record_id": "ECR1hd5b60b417ce9",
+          "seq": 71
+        },
+        {
+          "record_id": "ECR1h02155db2b24b",
+          "seq": 72
+        },
+        {
+          "record_id": "ECR1h1aff126633f1",
+          "seq": 73
+        },
+        {
+          "record_id": "ECR1h8394dd9be98e",
+          "seq": 74
+        },
+        {
+          "record_id": "ECR1h9b00af52d86e",
+          "seq": 75
+        },
+        {
+          "record_id": "ECR1h459f1558ec46",
+          "seq": 76
+        },
+        {
+          "record_id": "ECR1hfc4dae7ce74f",
+          "seq": 77
+        },
+        {
+          "record_id": "ECR1hfcb2ad35d9cb",
+          "seq": 78
+        },
+        {
+          "record_id": "ECR1ha0d15b3e9ca3",
+          "seq": 79
+        },
+        {
+          "record_id": "ECR1hb6aad19e14b0",
+          "seq": 80
+        },
+        {
+          "record_id": "ECR1hd32d17c751e1",
+          "seq": 81
+        },
+        {
+          "record_id": "ECR1hf08a5594cb5b",
+          "seq": 82
+        },
+        {
+          "record_id": "ECR1h0e740d377371",
+          "seq": 83
+        },
+        {
+          "record_id": "ECR1h4255b3850b0e",
+          "seq": 84
+        },
+        {
+          "record_id": "ECR1h2fdd0642e098",
+          "seq": 85
+        },
+        {
+          "record_id": "ECR1hfd91c6ea7172",
+          "seq": 86
+        },
+        {
+          "record_id": "ECR1h2434ed915808",
+          "seq": 87
+        },
+        {
+          "record_id": "ECR1h7d70c5e36985",
+          "seq": 88
+        },
+        {
+          "record_id": "ECR1h1400ca50252e",
+          "seq": 89
+        },
+        {
+          "record_id": "ECR1hc175cc3e2c29",
+          "seq": 90
+        },
+        {
+          "record_id": "ECR1ha256732a43ec",
+          "seq": 91
+        },
+        {
+          "record_id": "ECR1h3762ce03b948",
+          "seq": 92
+        },
+        {
+          "record_id": "ECR1h0abcb4aecb07",
+          "seq": 93
+        },
+        {
+          "record_id": "ECR1h7ee1232cca77",
+          "seq": 94
+        },
+        {
+          "record_id": "ECR1h818d06bb3e66",
+          "seq": 95
+        },
+        {
+          "record_id": "ECR1h27e4c6d60890",
+          "seq": 96
+        },
+        {
+          "record_id": "ECR1h45a2f5dbe934",
+          "seq": 97
+        },
+        {
+          "record_id": "ECR1h5089758c3f02",
+          "seq": 98
+        },
+        {
+          "record_id": "ECR1h3101f5c0c2e3",
+          "seq": 99
+        },
+        {
+          "record_id": "ECR1h068279c8d850",
+          "seq": 100
+        },
+        {
+          "record_id": "ECR1h7f30a4f6991a",
+          "seq": 101
+        },
+        {
+          "record_id": "ECR1h66f844cd6cb1",
+          "seq": 102
+        },
+        {
+          "record_id": "ECR1hc5b2cd5fceda",
+          "seq": 103
+        },
+        {
+          "record_id": "ECR1h251f6de1d490",
+          "seq": 104
+        },
+        {
+          "record_id": "ECR1hf5ed285a768e",
+          "seq": 105
+        },
+        {
+          "record_id": "ECR1h7d02e5162b6d",
+          "seq": 106
+        },
+        {
+          "record_id": "ECR1h6c412d495b79",
+          "seq": 107
+        },
+        {
+          "record_id": "ECR1h600b84867c8b",
+          "seq": 108
+        },
+        {
+          "record_id": "ECR1h58e72d59f41f",
+          "seq": 109
+        },
+        {
+          "record_id": "ECR1hb57baea56830",
+          "seq": 110
+        },
+        {
+          "record_id": "ECR1h81459f51a24f",
+          "seq": 111
+        },
+        {
+          "record_id": "ECR1he564c358316b",
+          "seq": 112
+        },
+        {
+          "record_id": "ECR1h03675d1ac99c",
+          "seq": 113
+        },
+        {
+          "record_id": "ECR1hbcf6c2d64fdb",
+          "seq": 114
+        },
+        {
+          "record_id": "ECR1h0be29039dd0d",
+          "seq": 115
+        },
+        {
+          "record_id": "ECR1h7ad1533ee510",
+          "seq": 116
+        },
+        {
+          "record_id": "ECR1h90c8dbefee13",
+          "seq": 117
+        },
+        {
+          "record_id": "ECR1h96da90551398",
+          "seq": 118
+        },
+        {
+          "record_id": "ECR1hdd58a40fcfe2",
+          "seq": 119
+        },
+        {
+          "record_id": "ECR1h1fc6f23153aa",
+          "seq": 120
+        },
+        {
+          "record_id": "ECR1h6fb38c5bd016",
+          "seq": 121
+        },
+        {
+          "record_id": "ECR1h54689a4543cd",
+          "seq": 122
+        },
+        {
+          "record_id": "ECR1he6239f5d9990",
+          "seq": 123
+        },
+        {
+          "record_id": "ECR1haf8b3b7bb2f9",
+          "seq": 124
+        },
+        {
+          "record_id": "ECR1h57bad0b0d510",
+          "seq": 125
+        },
+        {
+          "record_id": "ECR1he93eaba46168",
+          "seq": 126
+        },
+        {
+          "record_id": "ECR1hd9a53a2a0cff",
+          "seq": 127
+        },
+        {
+          "record_id": "ECR1h02c818830a8d",
+          "seq": 128
+        },
+        {
+          "record_id": "ECR1h6b341ea015c9",
+          "seq": 129
+        },
+        {
+          "record_id": "ECR1hf75461b028ba",
+          "seq": 130
+        },
+        {
+          "record_id": "ECR1hd561fb2fb78c",
+          "seq": 131
+        },
+        {
+          "record_id": "ECR1h825a4e23f83c",
+          "seq": 132
+        },
+        {
+          "record_id": "ECR1h6b5e49e63cb3",
+          "seq": 133
+        },
+        {
+          "record_id": "ECR1h69968b701aa7",
+          "seq": 134
+        },
+        {
+          "record_id": "ECR1hcaaf21eeef88",
+          "seq": 135
+        },
+        {
+          "record_id": "ECR1hb75bc5d0fe01",
+          "seq": 136
+        },
+        {
+          "record_id": "ECR1hd22f17a30f8f",
+          "seq": 137
+        },
+        {
+          "record_id": "ECR1h5255a6392c66",
+          "seq": 138
+        },
+        {
+          "record_id": "ECR1hd2db1a6c1c30",
+          "seq": 139
+        },
+        {
+          "record_id": "ECR1hf1ead7125ec7",
+          "seq": 140
+        },
+        {
+          "record_id": "ECR1hf74994300a30",
+          "seq": 141
+        },
+        {
+          "record_id": "ECR1h0007465e6789",
+          "seq": 142
+        },
+        {
+          "record_id": "ECR1h86ef95cfaf59",
+          "seq": 143
+        },
+        {
+          "record_id": "ECR1h1153811185a0",
+          "seq": 144
+        },
+        {
+          "record_id": "ECR1h92f86f14482a",
+          "seq": 145
+        },
+        {
+          "record_id": "ECR1hef70af47dc5d",
+          "seq": 146
+        },
+        {
+          "record_id": "ECR1h56a3a0bf8418",
+          "seq": 147
+        },
+        {
+          "record_id": "ECR1he59aa0d7249d",
+          "seq": 148
+        },
+        {
+          "record_id": "ECR1h22b034091fdd",
+          "seq": 149
+        },
+        {
+          "record_id": "ECR1hd4ebc294a8f3",
+          "seq": 150
+        },
+        {
+          "record_id": "ECR1h11bbda7bc0fd",
+          "seq": 151
+        },
+        {
+          "record_id": "ECR1h86066eb6a859",
+          "seq": 152
+        },
+        {
+          "record_id": "ECR1h174f0c9a9998",
+          "seq": 153
+        },
+        {
+          "record_id": "ECR1h9651d6ad4702",
+          "seq": 154
+        },
+        {
+          "record_id": "ECR1he69f15186c68",
+          "seq": 155
+        },
+        {
+          "record_id": "ECR1hfc385d7b6391",
+          "seq": 156
+        },
+        {
+          "record_id": "ECR1h81db30835136",
+          "seq": 157
+        },
+        {
+          "record_id": "ECR1h361ded48f010",
+          "seq": 158
+        },
+        {
+          "record_id": "ECR1h743162db414c",
+          "seq": 159
+        },
+        {
+          "record_id": "ECR1h4a2b8cc59ead",
+          "seq": 160
+        },
+        {
+          "record_id": "ECR1h7fd23ffae59d",
+          "seq": 161
+        },
+        {
+          "record_id": "ECR1hf61c5de040dc",
+          "seq": 162
+        },
+        {
+          "record_id": "ECR1h9fabc5020981",
+          "seq": 163
+        },
+        {
+          "record_id": "ECR1h859c877131e8",
+          "seq": 164
+        },
+        {
+          "record_id": "ECR1h07fe088f1b79",
+          "seq": 165
+        },
+        {
+          "record_id": "ECR1he0e17cd330b0",
+          "seq": 166
+        },
+        {
+          "record_id": "ECR1hc1bd540369ef",
+          "seq": 167
+        },
+        {
+          "record_id": "ECR1he0d717043f05",
+          "seq": 168
+        },
+        {
+          "record_id": "ECR1hbf346ad63e1b",
+          "seq": 169
+        },
+        {
+          "record_id": "ECR1ha0514ee07a01",
+          "seq": 170
+        },
+        {
+          "record_id": "ECR1h7e04c945fdae",
+          "seq": 171
+        },
+        {
+          "record_id": "ECR1h851328460363",
+          "seq": 172
+        },
+        {
+          "record_id": "ECR1h7d42c750b966",
+          "seq": 173
+        },
+        {
+          "record_id": "ECR1h5ca7b9be6026",
+          "seq": 174
+        },
+        {
+          "record_id": "ECR1h55061f133733",
+          "seq": 175
+        },
+        {
+          "record_id": "ECR1hb58bc5cf44f0",
+          "seq": 176
+        },
+        {
+          "record_id": "ECR1h517319799e6f",
+          "seq": 177
+        },
+        {
+          "record_id": "ECR1h5ada2ffef3f0",
+          "seq": 178
+        },
+        {
+          "record_id": "ECR1h7570a59d5471",
+          "seq": 179
+        },
+        {
+          "record_id": "ECR1hb87b0c7ab95b",
+          "seq": 180
+        },
+        {
+          "record_id": "ECR1h5f6b23862223",
+          "seq": 181
+        },
+        {
+          "record_id": "ECR1he71a5ae1be12",
+          "seq": 182
+        },
+        {
+          "record_id": "ECR1hbc8111fb3df7",
+          "seq": 183
+        },
+        {
+          "record_id": "ECR1h43d2c53f3a58",
+          "seq": 184
+        },
+        {
+          "record_id": "ECR1h72d286617bdf",
+          "seq": 185
+        },
+        {
+          "record_id": "ECR1h939ec7d08f90",
+          "seq": 186
+        },
+        {
+          "record_id": "ECR1h65f40ea74e18",
+          "seq": 187
+        },
+        {
+          "record_id": "ECR1hf60431a904a3",
+          "seq": 188
+        },
+        {
+          "record_id": "ECR1he872878a1847",
+          "seq": 189
+        },
+        {
+          "record_id": "ECR1h562fb05ac852",
+          "seq": 190
+        },
+        {
+          "record_id": "ECR1h652ea5dc1a6f",
+          "seq": 191
+        },
+        {
+          "record_id": "ECR1hce8a0f0126e5",
+          "seq": 192
+        },
+        {
+          "record_id": "ECR1h9b459272d061",
+          "seq": 193
+        },
+        {
+          "record_id": "ECR1hb813e6b712fc",
+          "seq": 194
+        },
+        {
+          "record_id": "ECR1h724c7d22bcb8",
+          "seq": 195
+        },
+        {
+          "record_id": "ECR1hbe62db947fe5",
+          "seq": 196
+        },
+        {
+          "record_id": "ECR1h93b9dc5a96a7",
+          "seq": 197
+        },
+        {
+          "record_id": "ECR1he5476d851f66",
+          "seq": 198
+        },
+        {
+          "record_id": "ECR1h40b898bd36c1",
+          "seq": 199
+        },
+        {
+          "record_id": "ECR1h4b1bf4d41232",
+          "seq": 200
+        },
+        {
+          "record_id": "ECR1h16967c9f5a1b",
+          "seq": 201
+        },
+        {
+          "record_id": "ECR1hceed2828877b",
+          "seq": 202
+        },
+        {
+          "record_id": "ECR1h4c9ed6ced9eb",
+          "seq": 203
+        },
+        {
+          "record_id": "ECR1hbc8a4a0cd50a",
+          "seq": 204
+        },
+        {
+          "record_id": "ECR1h5d020cd5765e",
+          "seq": 205
+        },
+        {
+          "record_id": "ECR1h4cfc72062e1a",
+          "seq": 206
+        },
+        {
+          "record_id": "ECR1h30b7054b2df4",
+          "seq": 207
+        },
+        {
+          "record_id": "ECR1h8fad74c7f275",
+          "seq": 208
+        },
+        {
+          "record_id": "ECR1hdbe20bb323de",
+          "seq": 209
+        },
+        {
+          "record_id": "ECR1hf1f0a0fcd383",
+          "seq": 210
+        },
+        {
+          "record_id": "ECR1hbf83a5528b02",
+          "seq": 211
+        },
+        {
+          "record_id": "ECR1hd9e1fcded4e5",
+          "seq": 212
+        },
+        {
+          "record_id": "ECR1he11007422238",
+          "seq": 213
+        },
+        {
+          "record_id": "ECR1hbb8941a57865",
+          "seq": 214
+        },
+        {
+          "record_id": "ECR1h1a18653abca2",
+          "seq": 215
+        },
+        {
+          "record_id": "ECR1h54ef53459e34",
+          "seq": 216
+        },
+        {
+          "record_id": "ECR1ha00e7ffa8e25",
+          "seq": 217
+        },
+        {
+          "record_id": "ECR1hbdb803d899a0",
+          "seq": 218
+        },
+        {
+          "record_id": "ECR1hf82e9d23eddd",
+          "seq": 219
+        },
+        {
+          "record_id": "ECR1he0f027e9f42a",
+          "seq": 220
+        },
+        {
+          "record_id": "ECR1hdf000ba9ed5b",
+          "seq": 221
+        },
+        {
+          "record_id": "ECR1hb904b4de4512",
+          "seq": 222
+        },
+        {
+          "record_id": "ECR1h40c9dd68fdee",
+          "seq": 223
+        },
+        {
+          "record_id": "ECR1ha8aebe5ebade",
+          "seq": 224
+        },
+        {
+          "record_id": "ECR1hfaa71c5a437e",
+          "seq": 225
+        },
+        {
+          "record_id": "ECR1h0b00a4237f3e",
+          "seq": 226
+        },
+        {
+          "record_id": "ECR1h12cae6413dc8",
+          "seq": 227
+        },
+        {
+          "record_id": "ECR1h750271f34a60",
+          "seq": 228
+        },
+        {
+          "record_id": "ECR1hedadb63ace30",
+          "seq": 229
+        },
+        {
+          "record_id": "ECR1h11e6be887fdd",
+          "seq": 230
+        },
+        {
+          "record_id": "ECR1h14374a41c8ae",
+          "seq": 231
+        },
+        {
+          "record_id": "ECR1hb5227db26039",
+          "seq": 232
+        },
+        {
+          "record_id": "ECR1hf94554b0a299",
+          "seq": 233
+        },
+        {
+          "record_id": "ECR1hf3b15e047108",
+          "seq": 234
+        },
+        {
+          "record_id": "ECR1h9e6677f1b2a6",
+          "seq": 235
+        },
+        {
+          "record_id": "ECR1h8dfdc3d19ad2",
+          "seq": 236
+        },
+        {
+          "record_id": "ECR1h485466e3ab4c",
+          "seq": 237
+        },
+        {
+          "record_id": "ECR1hfc0923c129ef",
+          "seq": 238
+        },
+        {
+          "record_id": "ECR1he423266f69f6",
+          "seq": 239
+        }
+      ],
+      "file_hashes": {
+        "host.json": "b63ce664a9c6312c79430510d993ca9b47cb9208cba61610ae46f712e802aa3d",
+        "plan.json": "a8f93513af1382837b8709a423d1b155e27ffc0433518bec971a120c8117dbc6",
+        "records.jsonl": "8f499a1d6f98164425bdc90d1903d935ca36686f2a36caacf2180fcee45d2f59",
+        "session.json": "232e8faba1d2fb3af1d6972830dbc9f9bb44e7cf7e3a545603be73fb959c5610",
+        "spec.json": "c5f2bcf67257569daecea0dc96876a61caee2cefb5d2894a63d0d7928b78b891"
+      },
+      "fresh_audit_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "<NEW_EVIDENCE>/session",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/rerun.audit.json"
+      ],
+      "fresh_run_argv": [
+        "<PINNED_ECBENCH>",
+        "run",
+        "--spec",
+        "research/ecbench_sat_pdp_20261009/sessions/count-qualified-main/spec.json",
+        "--out",
+        "<NEW_EVIDENCE>/session"
+      ],
+      "git_commit": "b83ff0902ee0d7d1d7fbed07f92ce441ee974f92",
+      "git_commit_source": null,
+      "git_dirty": false,
+      "known_blockers": [
+        "clean build-time source is not bound; a runtime checkout is insufficient: obtain the exact original binary or a bound complete source snapshot"
+      ],
+      "original_binary_sha256": "4c6f3b6d45f988ad134c6055600014e236858fa674b03ce7785a8b320b325869",
+      "original_environment": "ECBENV2hd82681268e96",
+      "original_replay_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "research/ecbench_sat_pdp_20261009/sessions/count-qualified-main",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/original.audit.json"
+      ],
+      "required_measured_records": 200,
+      "session_id": "ECBS1hb55a1bdabf18",
+      "source": "research/ecbench_sat_pdp_20261009/sessions/count-qualified-main"
+    },
+    {
+      "check_argv": [
+        "<BACKEND_LEADERBOARD>",
+        "check-rerun",
+        "--source",
+        "research/ecbench_n41_n53_shared_rank_20261005/sessions/mac-l0",
+        "--rerun",
+        "<NEW_EVIDENCE>/session",
+        "--original-audit",
+        "<NEW_EVIDENCE>/original.audit.json",
+        "--rerun-audit",
+        "<NEW_EVIDENCE>/rerun.audit.json",
+        "--binary",
+        "<PINNED_ECBENCH>",
+        "--expected-lock-sha256",
+        "<TRUSTED_LOCK_SHA256>"
+      ],
+      "execution_order": [
+        "fresh_run_argv",
+        "original_replay_argv",
+        "fresh_audit_argv",
+        "check_argv"
+      ],
+      "expected_verified_deterministic_replays": [],
+      "file_hashes": {
+        "host.json": "acd34b7af0256d652e9091efa2adff083af60a9c7e74e51fdbaa2e67b1dafbbf",
+        "plan.json": "b25e5e7d32f44d9b018f953950fd9709b84736b9183480fc391df89bd3ba1c03",
+        "records.jsonl": "da674814594dd9f64d4e1b2d893e93e0102fe0ac42290ab44d0542c132345fe9",
+        "session.json": "44e0b8a280c3a02595733aa8cba9299547345fe9bb6ac7d2c2b81895437c64af",
+        "spec.json": "bc6d9bbfae1d4a19216268431f1bd5ec3acf668a9336260e37686525bb4d1288"
+      },
+      "fresh_audit_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "<NEW_EVIDENCE>/session",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/rerun.audit.json"
+      ],
+      "fresh_run_argv": [
+        "<PINNED_ECBENCH>",
+        "run",
+        "--spec",
+        "research/ecbench_n41_n53_shared_rank_20261005/sessions/mac-l0/spec.json",
+        "--out",
+        "<NEW_EVIDENCE>/session"
+      ],
+      "git_commit": "51ba7c3ecd5c9afae48668495e602b23e21add0d",
+      "git_commit_source": null,
+      "git_dirty": false,
+      "known_blockers": [
+        "original session is incomplete",
+        "clean build-time source is not bound; a runtime checkout is insufficient: obtain the exact original binary or a bound complete source snapshot"
+      ],
+      "original_binary_sha256": "c562ee1e0533d4a2db306b50c1fd743460b65ae750e2135ba5f4cbf60e0abd38",
+      "original_environment": "ECBENV2h59034d4cd61b",
+      "original_replay_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "research/ecbench_n41_n53_shared_rank_20261005/sessions/mac-l0",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/original.audit.json"
+      ],
+      "required_measured_records": 0,
+      "session_id": "ECBS1h49d054e2f51a",
+      "source": "research/ecbench_n41_n53_shared_rank_20261005/sessions/mac-l0"
+    },
+    {
+      "check_argv": [
+        "<BACKEND_LEADERBOARD>",
+        "check-rerun",
+        "--source",
+        "research/ecbench_n41_n53_shared_rank_20261005/sessions/mac-l0-02",
+        "--rerun",
+        "<NEW_EVIDENCE>/session",
+        "--original-audit",
+        "<NEW_EVIDENCE>/original.audit.json",
+        "--rerun-audit",
+        "<NEW_EVIDENCE>/rerun.audit.json",
+        "--binary",
+        "<PINNED_ECBENCH>",
+        "--expected-lock-sha256",
+        "<TRUSTED_LOCK_SHA256>"
+      ],
+      "execution_order": [
+        "fresh_run_argv",
+        "original_replay_argv",
+        "fresh_audit_argv",
+        "check_argv"
+      ],
+      "expected_verified_deterministic_replays": [
+        {
+          "record_id": "ECR1h932b7bfc1a5e",
+          "seq": 131
+        },
+        {
+          "record_id": "ECR1h6a5f32cbdf5a",
+          "seq": 135
+        },
+        {
+          "record_id": "ECR1hc963e51c8a24",
+          "seq": 139
+        },
+        {
+          "record_id": "ECR1h73e4c811655d",
+          "seq": 143
+        },
+        {
+          "record_id": "ECR1h527c33bdb1ed",
+          "seq": 144
+        },
+        {
+          "record_id": "ECR1hae54d89f3c41",
+          "seq": 145
+        },
+        {
+          "record_id": "ECR1h3517e6f1da4b",
+          "seq": 147
+        },
+        {
+          "record_id": "ECR1h862c362623e0",
+          "seq": 151
+        },
+        {
+          "record_id": "ECR1h935da083dcd8",
+          "seq": 155
+        },
+        {
+          "record_id": "ECR1h9d1178c8450d",
+          "seq": 159
+        },
+        {
+          "record_id": "ECR1h7af15d496173",
+          "seq": 163
+        },
+        {
+          "record_id": "ECR1hbe08ec0d00ee",
+          "seq": 164
+        },
+        {
+          "record_id": "ECR1h2130c2bc2a07",
+          "seq": 165
+        },
+        {
+          "record_id": "ECR1h96fd2840459e",
+          "seq": 167
+        },
+        {
+          "record_id": "ECR1h7cce904493c9",
+          "seq": 171
+        },
+        {
+          "record_id": "ECR1h5058ff162be8",
+          "seq": 175
+        },
+        {
+          "record_id": "ECR1h4b035ffabfcc",
+          "seq": 179
+        },
+        {
+          "record_id": "ECR1h3b4030ab22b1",
+          "seq": 183
+        },
+        {
+          "record_id": "ECR1h7aea6285d304",
+          "seq": 184
+        },
+        {
+          "record_id": "ECR1hce6a91709f3a",
+          "seq": 185
+        },
+        {
+          "record_id": "ECR1h1344875267de",
+          "seq": 187
+        },
+        {
+          "record_id": "ECR1h4f30900d168d",
+          "seq": 191
+        },
+        {
+          "record_id": "ECR1hea91ca5402aa",
+          "seq": 195
+        },
+        {
+          "record_id": "ECR1he5f7f0b9116d",
+          "seq": 199
+        },
+        {
+          "record_id": "ECR1h4a98dd20cc92",
+          "seq": 203
+        },
+        {
+          "record_id": "ECR1haa0e3451676d",
+          "seq": 207
+        },
+        {
+          "record_id": "ECR1hb8c227ffcd4b",
+          "seq": 211
+        },
+        {
+          "record_id": "ECR1h558c01208548",
+          "seq": 215
+        },
+        {
+          "record_id": "ECR1h878935b0cf92",
+          "seq": 219
+        },
+        {
+          "record_id": "ECR1h07d49531121c",
+          "seq": 223
+        },
+        {
+          "record_id": "ECR1he291713070d5",
+          "seq": 227
+        },
+        {
+          "record_id": "ECR1ha3528c902a2d",
+          "seq": 231
+        },
+        {
+          "record_id": "ECR1h437ebe814baa",
+          "seq": 235
+        },
+        {
+          "record_id": "ECR1h79599023d0ed",
+          "seq": 239
+        },
+        {
+          "record_id": "ECR1ha4a5b9482f24",
+          "seq": 243
+        },
+        {
+          "record_id": "ECR1h25362447854b",
+          "seq": 247
+        },
+        {
+          "record_id": "ECR1hc628f2da11a7",
+          "seq": 251
+        },
+        {
+          "record_id": "ECR1h17dd1f147794",
+          "seq": 255
+        },
+        {
+          "record_id": "ECR1h0eea17b1f848",
+          "seq": 256
+        },
+        {
+          "record_id": "ECR1h77cfdf1b1f2d",
+          "seq": 260
+        },
+        {
+          "record_id": "ECR1hfdbbf5cdc49c",
+          "seq": 264
+        },
+        {
+          "record_id": "ECR1hb94822fe3ef1",
+          "seq": 266
+        },
+        {
+          "record_id": "ECR1hddf78213832b",
+          "seq": 267
+        },
+        {
+          "record_id": "ECR1hc0d19b3987c6",
+          "seq": 268
+        },
+        {
+          "record_id": "ECR1h8bbcbed798d0",
+          "seq": 272
+        },
+        {
+          "record_id": "ECR1ha9bc8c9aef2f",
+          "seq": 276
+        },
+        {
+          "record_id": "ECR1hbdf868e25269",
+          "seq": 278
+        },
+        {
+          "record_id": "ECR1hb2b997429e82",
+          "seq": 279
+        },
+        {
+          "record_id": "ECR1h17fb938cc2a0",
+          "seq": 280
+        },
+        {
+          "record_id": "ECR1h5e013e2db996",
+          "seq": 284
+        },
+        {
+          "record_id": "ECR1h260d5439c182",
+          "seq": 286
+        },
+        {
+          "record_id": "ECR1h91787f92f133",
+          "seq": 287
+        },
+        {
+          "record_id": "ECR1h23c5c071d5f3",
+          "seq": 288
+        },
+        {
+          "record_id": "ECR1h9cc62cdccec3",
+          "seq": 292
+        },
+        {
+          "record_id": "ECR1h22095ee703db",
+          "seq": 296
+        },
+        {
+          "record_id": "ECR1h4de94dd45a80",
+          "seq": 300
+        },
+        {
+          "record_id": "ECR1h51de63abc756",
+          "seq": 304
+        },
+        {
+          "record_id": "ECR1ha2a8f1aebaee",
+          "seq": 308
+        },
+        {
+          "record_id": "ECR1he8893389e792",
+          "seq": 312
+        },
+        {
+          "record_id": "ECR1hbc23dc6e9626",
+          "seq": 314
+        },
+        {
+          "record_id": "ECR1h8dd2268df613",
+          "seq": 315
+        },
+        {
+          "record_id": "ECR1h8915920e7ec1",
+          "seq": 316
+        },
+        {
+          "record_id": "ECR1he49dbd8e2c62",
+          "seq": 318
+        },
+        {
+          "record_id": "ECR1ha6ac91e4b529",
+          "seq": 319
+        },
+        {
+          "record_id": "ECR1hd40ea45c3bb1",
+          "seq": 320
+        },
+        {
+          "record_id": "ECR1hcd1d7f1a225f",
+          "seq": 324
+        },
+        {
+          "record_id": "ECR1hec2f27698eda",
+          "seq": 328
+        },
+        {
+          "record_id": "ECR1ha69c5f4b48d8",
+          "seq": 332
+        },
+        {
+          "record_id": "ECR1h270d06e8f191",
+          "seq": 336
+        },
+        {
+          "record_id": "ECR1h605d3f6b89b6",
+          "seq": 340
+        },
+        {
+          "record_id": "ECR1h76b22048ed79",
+          "seq": 344
+        },
+        {
+          "record_id": "ECR1hf25a58196fbd",
+          "seq": 348
+        },
+        {
+          "record_id": "ECR1h76ba5c19c707",
+          "seq": 352
+        },
+        {
+          "record_id": "ECR1h802c366188e0",
+          "seq": 356
+        },
+        {
+          "record_id": "ECR1h820713ee7791",
+          "seq": 360
+        },
+        {
+          "record_id": "ECR1hb68afca00970",
+          "seq": 364
+        },
+        {
+          "record_id": "ECR1h8c94b7589734",
+          "seq": 368
+        },
+        {
+          "record_id": "ECR1h4ce6ed991aa0",
+          "seq": 372
+        },
+        {
+          "record_id": "ECR1h637d7d2baac2",
+          "seq": 376
+        },
+        {
+          "record_id": "ECR1hb05f832f8f21",
+          "seq": 380
+        },
+        {
+          "record_id": "ECR1h46913ec1f96a",
+          "seq": 387
+        },
+        {
+          "record_id": "ECR1h9f8111801b24",
+          "seq": 391
+        },
+        {
+          "record_id": "ECR1he1011efb175b",
+          "seq": 392
+        },
+        {
+          "record_id": "ECR1h062cad108672",
+          "seq": 393
+        },
+        {
+          "record_id": "ECR1h0c27cbe0507e",
+          "seq": 395
+        },
+        {
+          "record_id": "ECR1h46d3f34166cf",
+          "seq": 396
+        },
+        {
+          "record_id": "ECR1h76839c1370fa",
+          "seq": 397
+        },
+        {
+          "record_id": "ECR1h467726135067",
+          "seq": 399
+        },
+        {
+          "record_id": "ECR1heb96df99222e",
+          "seq": 400
+        },
+        {
+          "record_id": "ECR1h43d15a5805f8",
+          "seq": 401
+        },
+        {
+          "record_id": "ECR1hdc55c714a90b",
+          "seq": 403
+        },
+        {
+          "record_id": "ECR1h80e0141e8629",
+          "seq": 407
+        },
+        {
+          "record_id": "ECR1h3c37e405c6bb",
+          "seq": 411
+        },
+        {
+          "record_id": "ECR1ha7eb8ba13fb0",
+          "seq": 415
+        },
+        {
+          "record_id": "ECR1h34cd2c0e5b65",
+          "seq": 419
+        },
+        {
+          "record_id": "ECR1hea8d2d0055e6",
+          "seq": 423
+        },
+        {
+          "record_id": "ECR1h3e87de71dbf3",
+          "seq": 424
+        },
+        {
+          "record_id": "ECR1hb0477aeb8c4a",
+          "seq": 425
+        },
+        {
+          "record_id": "ECR1h7990bdb6d0bc",
+          "seq": 427
+        },
+        {
+          "record_id": "ECR1h8d3728f3039c",
+          "seq": 431
+        },
+        {
+          "record_id": "ECR1h39702addfbc8",
+          "seq": 435
+        },
+        {
+          "record_id": "ECR1h1d379da0c1ef",
+          "seq": 439
+        },
+        {
+          "record_id": "ECR1h889561dc2a71",
+          "seq": 440
+        },
+        {
+          "record_id": "ECR1h1b4c8f639467",
+          "seq": 441
+        },
+        {
+          "record_id": "ECR1h2b4bcce07647",
+          "seq": 443
+        },
+        {
+          "record_id": "ECR1ha0dbf548fe28",
+          "seq": 447
+        },
+        {
+          "record_id": "ECR1h540ebe12079b",
+          "seq": 451
+        },
+        {
+          "record_id": "ECR1h2b792ec64c35",
+          "seq": 455
+        },
+        {
+          "record_id": "ECR1h2e978b75578b",
+          "seq": 459
+        },
+        {
+          "record_id": "ECR1h99067a2f5016",
+          "seq": 463
+        },
+        {
+          "record_id": "ECR1h0b90ccb8d3b7",
+          "seq": 467
+        },
+        {
+          "record_id": "ECR1h9e79d230c97e",
+          "seq": 471
+        },
+        {
+          "record_id": "ECR1hc819bb610d4b",
+          "seq": 475
+        },
+        {
+          "record_id": "ECR1h1350cca7b4f6",
+          "seq": 479
+        },
+        {
+          "record_id": "ECR1h2ddbfdf86a47",
+          "seq": 483
+        },
+        {
+          "record_id": "ECR1h2b3ef87d2f1e",
+          "seq": 487
+        },
+        {
+          "record_id": "ECR1h7c95e7eabe64",
+          "seq": 491
+        },
+        {
+          "record_id": "ECR1hd4104039a677",
+          "seq": 495
+        },
+        {
+          "record_id": "ECR1h1b9ca06d1125",
+          "seq": 499
+        },
+        {
+          "record_id": "ECR1h5b2193fa332e",
+          "seq": 503
+        },
+        {
+          "record_id": "ECR1hdc5ba5a1143d",
+          "seq": 507
+        },
+        {
+          "record_id": "ECR1h623d2bfbc6b6",
+          "seq": 511
+        },
+        {
+          "record_id": "ECR1hf82368212757",
+          "seq": 512
+        },
+        {
+          "record_id": "ECR1h7ffd5941d5d3",
+          "seq": 516
+        },
+        {
+          "record_id": "ECR1h10063f335b83",
+          "seq": 520
+        },
+        {
+          "record_id": "ECR1hcc4b2791e5d2",
+          "seq": 522
+        },
+        {
+          "record_id": "ECR1ha439cf924346",
+          "seq": 523
+        },
+        {
+          "record_id": "ECR1h1308825a9e6c",
+          "seq": 524
+        },
+        {
+          "record_id": "ECR1h9b223e311563",
+          "seq": 528
+        },
+        {
+          "record_id": "ECR1h4073e2a6135b",
+          "seq": 530
+        },
+        {
+          "record_id": "ECR1hd247b6dc7768",
+          "seq": 531
+        },
+        {
+          "record_id": "ECR1h8aaf25dff174",
+          "seq": 532
+        },
+        {
+          "record_id": "ECR1h3a786173ec92",
+          "seq": 534
+        },
+        {
+          "record_id": "ECR1h2812ae714e46",
+          "seq": 535
+        },
+        {
+          "record_id": "ECR1hb372cce683b1",
+          "seq": 536
+        },
+        {
+          "record_id": "ECR1h382f317a4d3e",
+          "seq": 540
+        },
+        {
+          "record_id": "ECR1hcb3c5fb41496",
+          "seq": 544
+        },
+        {
+          "record_id": "ECR1h0cac3a277df9",
+          "seq": 548
+        },
+        {
+          "record_id": "ECR1he1dbc1e4b7a9",
+          "seq": 550
+        },
+        {
+          "record_id": "ECR1habfe0d80b73f",
+          "seq": 551
+        },
+        {
+          "record_id": "ECR1h14d4bcde33db",
+          "seq": 552
+        },
+        {
+          "record_id": "ECR1he0d41d42e6b7",
+          "seq": 556
+        },
+        {
+          "record_id": "ECR1h3d1d9f08ba31",
+          "seq": 558
+        },
+        {
+          "record_id": "ECR1h8a4387f069e5",
+          "seq": 559
+        },
+        {
+          "record_id": "ECR1h661ceee2c47d",
+          "seq": 560
+        },
+        {
+          "record_id": "ECR1h7d3d4f6b2e05",
+          "seq": 564
+        },
+        {
+          "record_id": "ECR1h5a024f51ef3c",
+          "seq": 568
+        },
+        {
+          "record_id": "ECR1h437e3e3575a7",
+          "seq": 572
+        },
+        {
+          "record_id": "ECR1hbc99c8bc1ce4",
+          "seq": 576
+        },
+        {
+          "record_id": "ECR1hd2d69a85b57f",
+          "seq": 580
+        },
+        {
+          "record_id": "ECR1had0b47d8d4ea",
+          "seq": 584
+        },
+        {
+          "record_id": "ECR1h168b39a81bde",
+          "seq": 588
+        },
+        {
+          "record_id": "ECR1h37b8fec0c21b",
+          "seq": 592
+        },
+        {
+          "record_id": "ECR1he95f97c18d30",
+          "seq": 596
+        },
+        {
+          "record_id": "ECR1hd79b439a9640",
+          "seq": 600
+        },
+        {
+          "record_id": "ECR1h1027fc99d6cb",
+          "seq": 604
+        },
+        {
+          "record_id": "ECR1hb5cc6121010f",
+          "seq": 608
+        },
+        {
+          "record_id": "ECR1h3c85daae181d",
+          "seq": 612
+        },
+        {
+          "record_id": "ECR1h67d7c955c37b",
+          "seq": 616
+        },
+        {
+          "record_id": "ECR1h8c85fb8652fe",
+          "seq": 620
+        },
+        {
+          "record_id": "ECR1hb74086be005a",
+          "seq": 624
+        },
+        {
+          "record_id": "ECR1h8f52e4769ec5",
+          "seq": 628
+        },
+        {
+          "record_id": "ECR1h48e597bd41d6",
+          "seq": 632
+        },
+        {
+          "record_id": "ECR1hb3deee924e3b",
+          "seq": 636
+        },
+        {
+          "record_id": "ECR1h906dda7d0c9b",
+          "seq": 643
+        },
+        {
+          "record_id": "ECR1h31fc96f4d3c8",
+          "seq": 647
+        },
+        {
+          "record_id": "ECR1hf71fb75ee2f2",
+          "seq": 651
+        },
+        {
+          "record_id": "ECR1h33fb9aa480f5",
+          "seq": 652
+        },
+        {
+          "record_id": "ECR1hba254479860b",
+          "seq": 653
+        },
+        {
+          "record_id": "ECR1h11a7a47d1620",
+          "seq": 655
+        },
+        {
+          "record_id": "ECR1h4437ba5e0269",
+          "seq": 656
+        },
+        {
+          "record_id": "ECR1h5f9b4dcddafa",
+          "seq": 657
+        },
+        {
+          "record_id": "ECR1h3968fe63ca06",
+          "seq": 659
+        },
+        {
+          "record_id": "ECR1hc4ae69718cbb",
+          "seq": 663
+        },
+        {
+          "record_id": "ECR1hfcbd0415f677",
+          "seq": 664
+        },
+        {
+          "record_id": "ECR1h3cc6a27e7534",
+          "seq": 665
+        },
+        {
+          "record_id": "ECR1heba6eba27b9b",
+          "seq": 667
+        },
+        {
+          "record_id": "ECR1hba5b378af834",
+          "seq": 671
+        },
+        {
+          "record_id": "ECR1h1c97706e7b5e",
+          "seq": 675
+        },
+        {
+          "record_id": "ECR1hc40fcb71f2e5",
+          "seq": 679
+        },
+        {
+          "record_id": "ECR1h0543bfb962fa",
+          "seq": 680
+        },
+        {
+          "record_id": "ECR1h37a75b73c191",
+          "seq": 681
+        },
+        {
+          "record_id": "ECR1hae66bee50020",
+          "seq": 683
+        },
+        {
+          "record_id": "ECR1hd3544727f583",
+          "seq": 684
+        },
+        {
+          "record_id": "ECR1hd16c4e28fbf5",
+          "seq": 685
+        },
+        {
+          "record_id": "ECR1h7747df8d161d",
+          "seq": 687
+        },
+        {
+          "record_id": "ECR1h1c0dedbe6399",
+          "seq": 691
+        },
+        {
+          "record_id": "ECR1h0418665b2bd0",
+          "seq": 695
+        },
+        {
+          "record_id": "ECR1hae670190159b",
+          "seq": 699
+        },
+        {
+          "record_id": "ECR1h2dfb08dcb65a",
+          "seq": 703
+        },
+        {
+          "record_id": "ECR1he3c7297a48ee",
+          "seq": 707
+        },
+        {
+          "record_id": "ECR1h999c403b03a9",
+          "seq": 711
+        },
+        {
+          "record_id": "ECR1h0705f49efb58",
+          "seq": 715
+        },
+        {
+          "record_id": "ECR1h7fdefdb3ede9",
+          "seq": 719
+        },
+        {
+          "record_id": "ECR1h3955bdb0ca1c",
+          "seq": 723
+        },
+        {
+          "record_id": "ECR1h38119376aa38",
+          "seq": 727
+        },
+        {
+          "record_id": "ECR1h5cf45c744019",
+          "seq": 731
+        },
+        {
+          "record_id": "ECR1h7e81d35ed26f",
+          "seq": 735
+        },
+        {
+          "record_id": "ECR1h523570f2af22",
+          "seq": 739
+        },
+        {
+          "record_id": "ECR1h43606400874e",
+          "seq": 743
+        },
+        {
+          "record_id": "ECR1h3f7c15089262",
+          "seq": 747
+        },
+        {
+          "record_id": "ECR1h985d4b806616",
+          "seq": 751
+        },
+        {
+          "record_id": "ECR1ha1f1bba7df33",
+          "seq": 755
+        },
+        {
+          "record_id": "ECR1he28b982aa11f",
+          "seq": 759
+        },
+        {
+          "record_id": "ECR1hb8eb61bfe591",
+          "seq": 763
+        },
+        {
+          "record_id": "ECR1he0fad584bd01",
+          "seq": 767
+        }
+      ],
+      "file_hashes": {
+        "host.json": "f2e15ac9deb0813ff036ec346bd2af62bb42a7ce163fbf30678b2940a3418c12",
+        "plan.json": "b25e5e7d32f44d9b018f953950fd9709b84736b9183480fc391df89bd3ba1c03",
+        "records.jsonl": "e2c4ddacdab2223d347bb403127ce827023a2b16a39ac08c46ded3607c7eea10",
+        "session.json": "d6dbd3392375e18de55cac3562e59f6a21cc6f04e337546afb3faf2017d66ccc",
+        "spec.json": "bc6d9bbfae1d4a19216268431f1bd5ec3acf668a9336260e37686525bb4d1288"
+      },
+      "fresh_audit_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "<NEW_EVIDENCE>/session",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/rerun.audit.json"
+      ],
+      "fresh_run_argv": [
+        "<PINNED_ECBENCH>",
+        "run",
+        "--spec",
+        "research/ecbench_n41_n53_shared_rank_20261005/sessions/mac-l0-02/spec.json",
+        "--out",
+        "<NEW_EVIDENCE>/session"
+      ],
+      "git_commit": "51ba7c3ecd5c9afae48668495e602b23e21add0d",
+      "git_commit_source": null,
+      "git_dirty": false,
+      "known_blockers": [
+        "clean build-time source is not bound; a runtime checkout is insufficient: obtain the exact original binary or a bound complete source snapshot",
+        "source contains failed or nondeterministic attempts; strict whole-session ledger reproduction cannot pass"
+      ],
+      "original_binary_sha256": "c562ee1e0533d4a2db306b50c1fd743460b65ae750e2135ba5f4cbf60e0abd38",
+      "original_environment": "ECBENV2h59034d4cd61b",
+      "original_replay_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "research/ecbench_n41_n53_shared_rank_20261005/sessions/mac-l0-02",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/original.audit.json"
+      ],
+      "required_measured_records": 640,
+      "session_id": "ECBS1he98c2d9648b6",
+      "source": "research/ecbench_n41_n53_shared_rank_20261005/sessions/mac-l0-02"
+    },
+    {
+      "check_argv": [
+        "<BACKEND_LEADERBOARD>",
+        "check-rerun",
+        "--source",
+        "research/ecbench_m83_rho_20261005/sessions/calibration",
+        "--rerun",
+        "<NEW_EVIDENCE>/session",
+        "--original-audit",
+        "<NEW_EVIDENCE>/original.audit.json",
+        "--rerun-audit",
+        "<NEW_EVIDENCE>/rerun.audit.json",
+        "--binary",
+        "<PINNED_ECBENCH>",
+        "--expected-lock-sha256",
+        "<TRUSTED_LOCK_SHA256>"
+      ],
+      "execution_order": [
+        "fresh_run_argv",
+        "original_replay_argv",
+        "fresh_audit_argv",
+        "check_argv"
+      ],
+      "expected_verified_deterministic_replays": [
+        {
+          "record_id": "ECR1h61d6b51dd6e6",
+          "seq": 0
+        },
+        {
+          "record_id": "ECR1h1ca2d6865c5a",
+          "seq": 1
+        },
+        {
+          "record_id": "ECR1h217bd0480a2f",
+          "seq": 2
+        },
+        {
+          "record_id": "ECR1h801c32623e16",
+          "seq": 3
+        },
+        {
+          "record_id": "ECR1hee51e97ebd5a",
+          "seq": 4
+        },
+        {
+          "record_id": "ECR1hea716e16d105",
+          "seq": 5
+        },
+        {
+          "record_id": "ECR1h54332ad3a813",
+          "seq": 6
+        },
+        {
+          "record_id": "ECR1h605d5af51af9",
+          "seq": 7
+        },
+        {
+          "record_id": "ECR1h799f43fa75f9",
+          "seq": 8
+        },
+        {
+          "record_id": "ECR1h3836622b0de3",
+          "seq": 9
+        },
+        {
+          "record_id": "ECR1h6dc07632973b",
+          "seq": 10
+        },
+        {
+          "record_id": "ECR1hcd57e7e60f40",
+          "seq": 11
+        },
+        {
+          "record_id": "ECR1he1ed31b3b5b8",
+          "seq": 12
+        },
+        {
+          "record_id": "ECR1heb0a77f91a6d",
+          "seq": 13
+        },
+        {
+          "record_id": "ECR1h604d6c5d8d89",
+          "seq": 14
+        },
+        {
+          "record_id": "ECR1h7a6278b3cb9e",
+          "seq": 15
+        },
+        {
+          "record_id": "ECR1h4a550fc85a8e",
+          "seq": 16
+        },
+        {
+          "record_id": "ECR1h429530057eac",
+          "seq": 17
+        },
+        {
+          "record_id": "ECR1h5566c0cf1f02",
+          "seq": 18
+        },
+        {
+          "record_id": "ECR1h9f8a4492840c",
+          "seq": 19
+        },
+        {
+          "record_id": "ECR1hfeaed4827632",
+          "seq": 20
+        },
+        {
+          "record_id": "ECR1h242980f304b3",
+          "seq": 21
+        },
+        {
+          "record_id": "ECR1h84d3639bb812",
+          "seq": 22
+        },
+        {
+          "record_id": "ECR1h926b44b76826",
+          "seq": 23
+        },
+        {
+          "record_id": "ECR1h159371f5209f",
+          "seq": 24
+        },
+        {
+          "record_id": "ECR1h688820ace47e",
+          "seq": 25
+        },
+        {
+          "record_id": "ECR1h6966961c6cad",
+          "seq": 26
+        },
+        {
+          "record_id": "ECR1h6bd0249be412",
+          "seq": 27
+        },
+        {
+          "record_id": "ECR1hc0c4b25b11ec",
+          "seq": 28
+        },
+        {
+          "record_id": "ECR1h7dc32a35aee2",
+          "seq": 29
+        },
+        {
+          "record_id": "ECR1h110c129c9964",
+          "seq": 30
+        },
+        {
+          "record_id": "ECR1h5f70967d99e0",
+          "seq": 31
+        },
+        {
+          "record_id": "ECR1h04c87a31098d",
+          "seq": 32
+        },
+        {
+          "record_id": "ECR1h4e8dcd0b9f8d",
+          "seq": 33
+        },
+        {
+          "record_id": "ECR1h60863b76d1f4",
+          "seq": 34
+        },
+        {
+          "record_id": "ECR1h6839ca73baab",
+          "seq": 35
+        },
+        {
+          "record_id": "ECR1hd461f1d837ff",
+          "seq": 36
+        },
+        {
+          "record_id": "ECR1h0a0e9cc591b2",
+          "seq": 37
+        },
+        {
+          "record_id": "ECR1h7a34bc6f7cc0",
+          "seq": 38
+        },
+        {
+          "record_id": "ECR1h26dd47e4c7fb",
+          "seq": 39
+        },
+        {
+          "record_id": "ECR1h084223d0df74",
+          "seq": 40
+        },
+        {
+          "record_id": "ECR1h6113da65568e",
+          "seq": 41
+        },
+        {
+          "record_id": "ECR1h55856f06a1a0",
+          "seq": 42
+        },
+        {
+          "record_id": "ECR1h74049cd3faef",
+          "seq": 43
+        },
+        {
+          "record_id": "ECR1had5abcdaaa55",
+          "seq": 44
+        },
+        {
+          "record_id": "ECR1h01ef68c504a3",
+          "seq": 45
+        },
+        {
+          "record_id": "ECR1h27c551fb36fe",
+          "seq": 46
+        },
+        {
+          "record_id": "ECR1h8794a99bd4f7",
+          "seq": 47
+        },
+        {
+          "record_id": "ECR1h0a3369c9e649",
+          "seq": 48
+        },
+        {
+          "record_id": "ECR1hf387d43aaa01",
+          "seq": 49
+        },
+        {
+          "record_id": "ECR1hf54d33021f19",
+          "seq": 50
+        },
+        {
+          "record_id": "ECR1hec547d84178f",
+          "seq": 51
+        },
+        {
+          "record_id": "ECR1h38e0e694acc4",
+          "seq": 52
+        },
+        {
+          "record_id": "ECR1h64a50cea48c3",
+          "seq": 53
+        },
+        {
+          "record_id": "ECR1hfc3dfbef4160",
+          "seq": 54
+        },
+        {
+          "record_id": "ECR1he4ec1b2deed6",
+          "seq": 55
+        },
+        {
+          "record_id": "ECR1h574032cabee1",
+          "seq": 56
+        },
+        {
+          "record_id": "ECR1h50bf0109050f",
+          "seq": 57
+        },
+        {
+          "record_id": "ECR1hd69cf38cb88f",
+          "seq": 58
+        },
+        {
+          "record_id": "ECR1hf1b9837845f4",
+          "seq": 59
+        },
+        {
+          "record_id": "ECR1h40383d3054bb",
+          "seq": 60
+        },
+        {
+          "record_id": "ECR1h8dba2378e35b",
+          "seq": 61
+        },
+        {
+          "record_id": "ECR1h4169de600d27",
+          "seq": 62
+        },
+        {
+          "record_id": "ECR1hcaa0d81032ad",
+          "seq": 63
+        },
+        {
+          "record_id": "ECR1h0c24bb1bd848",
+          "seq": 64
+        },
+        {
+          "record_id": "ECR1h1f09baa245c7",
+          "seq": 65
+        },
+        {
+          "record_id": "ECR1h5530ce382149",
+          "seq": 66
+        },
+        {
+          "record_id": "ECR1h65e61383a4b7",
+          "seq": 67
+        },
+        {
+          "record_id": "ECR1h32ace0173120",
+          "seq": 68
+        },
+        {
+          "record_id": "ECR1hd9a8ba812d65",
+          "seq": 69
+        },
+        {
+          "record_id": "ECR1habf1b237de27",
+          "seq": 70
+        },
+        {
+          "record_id": "ECR1he7f7938e0c9b",
+          "seq": 71
+        },
+        {
+          "record_id": "ECR1h2ff6ea8a04d5",
+          "seq": 72
+        },
+        {
+          "record_id": "ECR1h1a221f156f60",
+          "seq": 73
+        },
+        {
+          "record_id": "ECR1h72df64855959",
+          "seq": 74
+        },
+        {
+          "record_id": "ECR1h7df8d7450beb",
+          "seq": 75
+        },
+        {
+          "record_id": "ECR1h9f3f0044e468",
+          "seq": 76
+        },
+        {
+          "record_id": "ECR1h963f60d5d857",
+          "seq": 77
+        },
+        {
+          "record_id": "ECR1h9fff1a85891a",
+          "seq": 78
+        },
+        {
+          "record_id": "ECR1h6342162c9555",
+          "seq": 79
+        },
+        {
+          "record_id": "ECR1h6e88bba4b9fb",
+          "seq": 80
+        },
+        {
+          "record_id": "ECR1ha80e9eef5454",
+          "seq": 81
+        },
+        {
+          "record_id": "ECR1h942d18269d93",
+          "seq": 82
+        },
+        {
+          "record_id": "ECR1h0a671bf19cdc",
+          "seq": 83
+        },
+        {
+          "record_id": "ECR1h71544624cf70",
+          "seq": 84
+        },
+        {
+          "record_id": "ECR1hfbec21c9c028",
+          "seq": 85
+        },
+        {
+          "record_id": "ECR1h1388caffd263",
+          "seq": 86
+        },
+        {
+          "record_id": "ECR1hbd835211ac3e",
+          "seq": 87
+        },
+        {
+          "record_id": "ECR1hdb247427c2f4",
+          "seq": 88
+        },
+        {
+          "record_id": "ECR1hbb3a6de26771",
+          "seq": 89
+        },
+        {
+          "record_id": "ECR1hfbaad818b6ea",
+          "seq": 90
+        },
+        {
+          "record_id": "ECR1h20ecf93b03b9",
+          "seq": 91
+        },
+        {
+          "record_id": "ECR1hae7a384a0e8d",
+          "seq": 92
+        },
+        {
+          "record_id": "ECR1h4b2ecd7ea062",
+          "seq": 93
+        },
+        {
+          "record_id": "ECR1h3c07b02daf61",
+          "seq": 94
+        },
+        {
+          "record_id": "ECR1hcab55902fbbb",
+          "seq": 95
+        },
+        {
+          "record_id": "ECR1he06de84e3231",
+          "seq": 96
+        },
+        {
+          "record_id": "ECR1h4878503453ef",
+          "seq": 97
+        },
+        {
+          "record_id": "ECR1h28313ec4bc93",
+          "seq": 98
+        },
+        {
+          "record_id": "ECR1h238ccc49309e",
+          "seq": 99
+        },
+        {
+          "record_id": "ECR1ha3f76223cdb2",
+          "seq": 100
+        },
+        {
+          "record_id": "ECR1h1248474c1793",
+          "seq": 101
+        },
+        {
+          "record_id": "ECR1h865722fba1b4",
+          "seq": 102
+        },
+        {
+          "record_id": "ECR1hb88e591af7ca",
+          "seq": 103
+        },
+        {
+          "record_id": "ECR1h0750d0e52ab3",
+          "seq": 104
+        },
+        {
+          "record_id": "ECR1h39ab78b169c7",
+          "seq": 105
+        },
+        {
+          "record_id": "ECR1h7305383470f2",
+          "seq": 106
+        },
+        {
+          "record_id": "ECR1hce03c69ba57c",
+          "seq": 107
+        },
+        {
+          "record_id": "ECR1hda0f3931e0c2",
+          "seq": 108
+        },
+        {
+          "record_id": "ECR1hf043e42c5e02",
+          "seq": 109
+        },
+        {
+          "record_id": "ECR1h4ab31cc61392",
+          "seq": 110
+        },
+        {
+          "record_id": "ECR1hac352d9fe774",
+          "seq": 111
+        },
+        {
+          "record_id": "ECR1hfa7cd7640476",
+          "seq": 112
+        },
+        {
+          "record_id": "ECR1h9a86c4a99fca",
+          "seq": 113
+        },
+        {
+          "record_id": "ECR1h5ffe115bcacb",
+          "seq": 114
+        },
+        {
+          "record_id": "ECR1h6b63e69ce60d",
+          "seq": 115
+        },
+        {
+          "record_id": "ECR1h840927f1854d",
+          "seq": 116
+        },
+        {
+          "record_id": "ECR1h26bbec9ceba4",
+          "seq": 117
+        },
+        {
+          "record_id": "ECR1h884fca7d8d5a",
+          "seq": 118
+        },
+        {
+          "record_id": "ECR1h523f8b5cc7c5",
+          "seq": 119
+        },
+        {
+          "record_id": "ECR1hd8f89f28a96c",
+          "seq": 120
+        },
+        {
+          "record_id": "ECR1h88614a513945",
+          "seq": 121
+        },
+        {
+          "record_id": "ECR1h9f3f7e65e630",
+          "seq": 122
+        },
+        {
+          "record_id": "ECR1hfa80f37a9753",
+          "seq": 123
+        },
+        {
+          "record_id": "ECR1h864a4c66bfd3",
+          "seq": 124
+        },
+        {
+          "record_id": "ECR1hc6e850c5f6ed",
+          "seq": 125
+        },
+        {
+          "record_id": "ECR1hdd3d6b23f613",
+          "seq": 126
+        },
+        {
+          "record_id": "ECR1h9bd1e4f1a698",
+          "seq": 127
+        },
+        {
+          "record_id": "ECR1h9080c79ebdfa",
+          "seq": 128
+        },
+        {
+          "record_id": "ECR1hfaf6c6fbdbf8",
+          "seq": 129
+        },
+        {
+          "record_id": "ECR1hc03c3137c9bd",
+          "seq": 130
+        },
+        {
+          "record_id": "ECR1h36bd2417b73b",
+          "seq": 131
+        },
+        {
+          "record_id": "ECR1hcf5192eda7de",
+          "seq": 132
+        },
+        {
+          "record_id": "ECR1hf8ff2f81543f",
+          "seq": 133
+        },
+        {
+          "record_id": "ECR1h5fe5117a9ad9",
+          "seq": 134
+        },
+        {
+          "record_id": "ECR1h58aaf97e533c",
+          "seq": 135
+        },
+        {
+          "record_id": "ECR1h762b8f94823a",
+          "seq": 136
+        },
+        {
+          "record_id": "ECR1ha49ac993e81d",
+          "seq": 137
+        },
+        {
+          "record_id": "ECR1hf4dc7b038981",
+          "seq": 138
+        },
+        {
+          "record_id": "ECR1hc346057f2d09",
+          "seq": 139
+        },
+        {
+          "record_id": "ECR1h0145a640b23d",
+          "seq": 140
+        },
+        {
+          "record_id": "ECR1h0a1e5a22853b",
+          "seq": 141
+        },
+        {
+          "record_id": "ECR1h43ec2ca2cd27",
+          "seq": 142
+        },
+        {
+          "record_id": "ECR1h21744e12e24e",
+          "seq": 143
+        },
+        {
+          "record_id": "ECR1h95b4281aca07",
+          "seq": 144
+        },
+        {
+          "record_id": "ECR1h5f75ed220580",
+          "seq": 145
+        },
+        {
+          "record_id": "ECR1h8c0609a791ce",
+          "seq": 146
+        },
+        {
+          "record_id": "ECR1hc866c2bb0617",
+          "seq": 147
+        },
+        {
+          "record_id": "ECR1h331c8b44e810",
+          "seq": 148
+        },
+        {
+          "record_id": "ECR1h547d64d5b42e",
+          "seq": 149
+        },
+        {
+          "record_id": "ECR1hbc93e8111b50",
+          "seq": 150
+        },
+        {
+          "record_id": "ECR1hf048f58d1e18",
+          "seq": 151
+        },
+        {
+          "record_id": "ECR1h3e63378b4ad9",
+          "seq": 152
+        },
+        {
+          "record_id": "ECR1hc0500a103f56",
+          "seq": 153
+        },
+        {
+          "record_id": "ECR1h2c266d51bc33",
+          "seq": 154
+        },
+        {
+          "record_id": "ECR1h8d33ff55d915",
+          "seq": 155
+        },
+        {
+          "record_id": "ECR1h163a15a238a4",
+          "seq": 156
+        },
+        {
+          "record_id": "ECR1hcfe1381c1ad4",
+          "seq": 157
+        },
+        {
+          "record_id": "ECR1h2ef34c2e40c7",
+          "seq": 158
+        },
+        {
+          "record_id": "ECR1ha1477d3843ca",
+          "seq": 159
+        },
+        {
+          "record_id": "ECR1hf3aaf8e4a3d4",
+          "seq": 160
+        },
+        {
+          "record_id": "ECR1h285419d6c722",
+          "seq": 161
+        },
+        {
+          "record_id": "ECR1h3eb2ba809892",
+          "seq": 162
+        },
+        {
+          "record_id": "ECR1h57e59e3182d8",
+          "seq": 163
+        },
+        {
+          "record_id": "ECR1h25013e40943c",
+          "seq": 164
+        },
+        {
+          "record_id": "ECR1h2fc4898a941d",
+          "seq": 165
+        },
+        {
+          "record_id": "ECR1h2b1572a2a4eb",
+          "seq": 166
+        },
+        {
+          "record_id": "ECR1h8979ce2a532d",
+          "seq": 167
+        },
+        {
+          "record_id": "ECR1ha034ccdb1cde",
+          "seq": 168
+        },
+        {
+          "record_id": "ECR1hb8eb4f639035",
+          "seq": 169
+        },
+        {
+          "record_id": "ECR1h65b1c08a5d26",
+          "seq": 170
+        },
+        {
+          "record_id": "ECR1h43d81453a639",
+          "seq": 171
+        },
+        {
+          "record_id": "ECR1hbec976ee7bbc",
+          "seq": 172
+        },
+        {
+          "record_id": "ECR1had9786fba3f5",
+          "seq": 173
+        },
+        {
+          "record_id": "ECR1h65694964c0fb",
+          "seq": 174
+        },
+        {
+          "record_id": "ECR1h221daa127f7f",
+          "seq": 175
+        },
+        {
+          "record_id": "ECR1h54ef29019106",
+          "seq": 176
+        },
+        {
+          "record_id": "ECR1h7184cef50d80",
+          "seq": 177
+        },
+        {
+          "record_id": "ECR1hdb55bc36a91b",
+          "seq": 178
+        },
+        {
+          "record_id": "ECR1h971127245615",
+          "seq": 179
+        },
+        {
+          "record_id": "ECR1h49fc245ab058",
+          "seq": 180
+        },
+        {
+          "record_id": "ECR1hc87f4973d73d",
+          "seq": 181
+        },
+        {
+          "record_id": "ECR1he569f7f237d3",
+          "seq": 182
+        },
+        {
+          "record_id": "ECR1ha4564c947782",
+          "seq": 183
+        },
+        {
+          "record_id": "ECR1hc5acc25a1664",
+          "seq": 184
+        },
+        {
+          "record_id": "ECR1hf7cf68c3bdaa",
+          "seq": 185
+        },
+        {
+          "record_id": "ECR1h92970369960b",
+          "seq": 186
+        },
+        {
+          "record_id": "ECR1hfcfa0be4546e",
+          "seq": 187
+        },
+        {
+          "record_id": "ECR1h714a64dc21f2",
+          "seq": 188
+        },
+        {
+          "record_id": "ECR1h5f341a317000",
+          "seq": 189
+        },
+        {
+          "record_id": "ECR1h48454406e5c8",
+          "seq": 190
+        },
+        {
+          "record_id": "ECR1he1ce88e1aaae",
+          "seq": 191
+        },
+        {
+          "record_id": "ECR1hd22c385b9505",
+          "seq": 192
+        },
+        {
+          "record_id": "ECR1h2f854cd239ad",
+          "seq": 193
+        },
+        {
+          "record_id": "ECR1hfb7ff047490a",
+          "seq": 194
+        },
+        {
+          "record_id": "ECR1hc7e7057af3a3",
+          "seq": 195
+        },
+        {
+          "record_id": "ECR1he00cc733dc7f",
+          "seq": 196
+        },
+        {
+          "record_id": "ECR1h4f33d656872e",
+          "seq": 197
+        },
+        {
+          "record_id": "ECR1h679857766c7e",
+          "seq": 198
+        },
+        {
+          "record_id": "ECR1hb3b17d54ada4",
+          "seq": 199
+        },
+        {
+          "record_id": "ECR1h9ddbbfe5cf17",
+          "seq": 200
+        },
+        {
+          "record_id": "ECR1hda8887eb397c",
+          "seq": 201
+        },
+        {
+          "record_id": "ECR1h2abadf38bacd",
+          "seq": 202
+        },
+        {
+          "record_id": "ECR1h167195d59522",
+          "seq": 203
+        },
+        {
+          "record_id": "ECR1h2882793f0419",
+          "seq": 204
+        },
+        {
+          "record_id": "ECR1h64de3bb0d6ad",
+          "seq": 205
+        },
+        {
+          "record_id": "ECR1h6988f7195ca6",
+          "seq": 206
+        },
+        {
+          "record_id": "ECR1h98d9c96e73b1",
+          "seq": 207
+        },
+        {
+          "record_id": "ECR1hb53d15ed9138",
+          "seq": 208
+        },
+        {
+          "record_id": "ECR1h5389239f0a89",
+          "seq": 209
+        },
+        {
+          "record_id": "ECR1h336c7abe4a36",
+          "seq": 210
+        },
+        {
+          "record_id": "ECR1hce0c2a7813fa",
+          "seq": 211
+        },
+        {
+          "record_id": "ECR1hedb105317828",
+          "seq": 212
+        },
+        {
+          "record_id": "ECR1hc9b5575718ef",
+          "seq": 213
+        },
+        {
+          "record_id": "ECR1hb82e30252d02",
+          "seq": 214
+        },
+        {
+          "record_id": "ECR1h5cbc1e24225d",
+          "seq": 215
+        },
+        {
+          "record_id": "ECR1hb49a6d0fa0c7",
+          "seq": 216
+        },
+        {
+          "record_id": "ECR1h56cfbf900374",
+          "seq": 217
+        },
+        {
+          "record_id": "ECR1hc2fac69d452e",
+          "seq": 218
+        },
+        {
+          "record_id": "ECR1h0e118a9a58ce",
+          "seq": 219
+        },
+        {
+          "record_id": "ECR1h7cf64bcfcf47",
+          "seq": 220
+        },
+        {
+          "record_id": "ECR1h6e73c6aba9b2",
+          "seq": 221
+        },
+        {
+          "record_id": "ECR1h1b2df0d8ed11",
+          "seq": 222
+        },
+        {
+          "record_id": "ECR1h698c4bc732b4",
+          "seq": 223
+        },
+        {
+          "record_id": "ECR1he74cf3555569",
+          "seq": 224
+        },
+        {
+          "record_id": "ECR1h1bad3a8a24c4",
+          "seq": 225
+        },
+        {
+          "record_id": "ECR1h24b40c36ba4e",
+          "seq": 226
+        },
+        {
+          "record_id": "ECR1hf79e714f34f7",
+          "seq": 227
+        },
+        {
+          "record_id": "ECR1hd2835c725532",
+          "seq": 228
+        },
+        {
+          "record_id": "ECR1h9c12dac14caf",
+          "seq": 229
+        },
+        {
+          "record_id": "ECR1h43711afb4d44",
+          "seq": 230
+        },
+        {
+          "record_id": "ECR1h2ebc48aba4af",
+          "seq": 231
+        },
+        {
+          "record_id": "ECR1h74b768c397ac",
+          "seq": 232
+        },
+        {
+          "record_id": "ECR1ha88aa305838a",
+          "seq": 233
+        },
+        {
+          "record_id": "ECR1he47beedf48ab",
+          "seq": 234
+        },
+        {
+          "record_id": "ECR1h8af50d8570a6",
+          "seq": 235
+        },
+        {
+          "record_id": "ECR1h359a8f8f7eb7",
+          "seq": 236
+        },
+        {
+          "record_id": "ECR1hb063e6007214",
+          "seq": 237
+        },
+        {
+          "record_id": "ECR1h30bfd3097d60",
+          "seq": 238
+        },
+        {
+          "record_id": "ECR1hc3876be2ddc2",
+          "seq": 239
+        },
+        {
+          "record_id": "ECR1h9d7eea0a4b43",
+          "seq": 240
+        },
+        {
+          "record_id": "ECR1h893abdf02ab8",
+          "seq": 241
+        },
+        {
+          "record_id": "ECR1h38e725a3df98",
+          "seq": 242
+        },
+        {
+          "record_id": "ECR1ha8365102204e",
+          "seq": 243
+        },
+        {
+          "record_id": "ECR1h3f0a0ce99b60",
+          "seq": 244
+        },
+        {
+          "record_id": "ECR1hc75dcc35a54d",
+          "seq": 245
+        },
+        {
+          "record_id": "ECR1h111a36e70d12",
+          "seq": 246
+        },
+        {
+          "record_id": "ECR1h3deec31b26db",
+          "seq": 247
+        },
+        {
+          "record_id": "ECR1hf5bc2f72c501",
+          "seq": 248
+        },
+        {
+          "record_id": "ECR1h3fcb7753f343",
+          "seq": 249
+        },
+        {
+          "record_id": "ECR1hea3b48dc1ca2",
+          "seq": 250
+        },
+        {
+          "record_id": "ECR1h9c09587600b7",
+          "seq": 251
+        },
+        {
+          "record_id": "ECR1h340ea36cc4fb",
+          "seq": 252
+        },
+        {
+          "record_id": "ECR1h3db1efb1bb81",
+          "seq": 253
+        },
+        {
+          "record_id": "ECR1hf4eb90a39b6c",
+          "seq": 254
+        },
+        {
+          "record_id": "ECR1h4a03574b98ba",
+          "seq": 255
+        },
+        {
+          "record_id": "ECR1h5d8bc5774d75",
+          "seq": 256
+        },
+        {
+          "record_id": "ECR1heaeeedbafbe8",
+          "seq": 257
+        },
+        {
+          "record_id": "ECR1h53f88df04d63",
+          "seq": 258
+        },
+        {
+          "record_id": "ECR1h576ae2811bcc",
+          "seq": 259
+        },
+        {
+          "record_id": "ECR1h5cc0e6a28a59",
+          "seq": 260
+        },
+        {
+          "record_id": "ECR1h70ced2c5ff7e",
+          "seq": 261
+        },
+        {
+          "record_id": "ECR1hc790acb774a8",
+          "seq": 262
+        },
+        {
+          "record_id": "ECR1h50a5ad4aa98f",
+          "seq": 263
+        },
+        {
+          "record_id": "ECR1h581f9f5f12d3",
+          "seq": 264
+        },
+        {
+          "record_id": "ECR1hf8234f4d6ac3",
+          "seq": 265
+        },
+        {
+          "record_id": "ECR1h158bf9cb0594",
+          "seq": 266
+        },
+        {
+          "record_id": "ECR1hed4dd38d324e",
+          "seq": 267
+        },
+        {
+          "record_id": "ECR1hfebdd3ee7f76",
+          "seq": 268
+        },
+        {
+          "record_id": "ECR1h03c6d03703fc",
+          "seq": 269
+        },
+        {
+          "record_id": "ECR1h0685eb5cadd7",
+          "seq": 270
+        },
+        {
+          "record_id": "ECR1h17669d8e9079",
+          "seq": 271
+        },
+        {
+          "record_id": "ECR1h14b3bfd8e400",
+          "seq": 272
+        },
+        {
+          "record_id": "ECR1hfbe510844fab",
+          "seq": 273
+        },
+        {
+          "record_id": "ECR1habb5a43b8e0c",
+          "seq": 274
+        },
+        {
+          "record_id": "ECR1heb1ce68b9604",
+          "seq": 275
+        },
+        {
+          "record_id": "ECR1h48e9117355e4",
+          "seq": 276
+        },
+        {
+          "record_id": "ECR1h67b032afee92",
+          "seq": 277
+        },
+        {
+          "record_id": "ECR1h615e614d0b9f",
+          "seq": 278
+        },
+        {
+          "record_id": "ECR1he0573d3c5a89",
+          "seq": 279
+        },
+        {
+          "record_id": "ECR1h9adaa826af7a",
+          "seq": 280
+        },
+        {
+          "record_id": "ECR1h26359ea7a3e4",
+          "seq": 281
+        },
+        {
+          "record_id": "ECR1hb0d16d7b8a8b",
+          "seq": 282
+        },
+        {
+          "record_id": "ECR1h47daa96eec76",
+          "seq": 283
+        },
+        {
+          "record_id": "ECR1ha9dc8dafd117",
+          "seq": 284
+        },
+        {
+          "record_id": "ECR1h91b693988caa",
+          "seq": 285
+        },
+        {
+          "record_id": "ECR1h3efe561226a6",
+          "seq": 286
+        },
+        {
+          "record_id": "ECR1h175c78b2e917",
+          "seq": 287
+        }
+      ],
+      "file_hashes": {
+        "host.json": "ce58a467908ff5986ad77a53333fa646b1555ffd91cf078cfe32484057de8f7d",
+        "plan.json": "98bd9d7c796bfa9e4c89d2563cf1a15ee37c2f31114daefb5aff2e7a75b99c48",
+        "records.jsonl": "8977db2d19cb027baa4d0e2b704b2c7eed026eea0380bd5f3cb4fba3c727827d",
+        "session.json": "3997cde21398ee5ff50ff251b77a69ca9b3a9a846e4cdbe9e65b487313f875e5",
+        "spec.json": "01edc358434794d3c782ea1647c465de1c2390f425063b1681a72bf667a0a4ce"
+      },
+      "fresh_audit_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "<NEW_EVIDENCE>/session",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/rerun.audit.json"
+      ],
+      "fresh_run_argv": [
+        "<PINNED_ECBENCH>",
+        "run",
+        "--spec",
+        "research/ecbench_m83_rho_20261005/sessions/calibration/spec.json",
+        "--out",
+        "<NEW_EVIDENCE>/session"
+      ],
+      "git_commit": "1b518f86635bfd3ce6f35e916bbb4418690cb89b",
+      "git_commit_source": null,
+      "git_dirty": false,
+      "known_blockers": [
+        "clean build-time source is not bound; a runtime checkout is insufficient: obtain the exact original binary or a bound complete source snapshot"
+      ],
+      "original_binary_sha256": "1e6b5f877ffe41f16c2f84f71e7d6a53dbb1fbaceac9d5bc7ebdc56b2d3e27a8",
+      "original_environment": "ECBENV2h59034d4cd61b",
+      "original_replay_argv": [
+        "<PINNED_ECBENCH>",
+        "verify",
+        "--dir",
+        "research/ecbench_m83_rho_20261005/sessions/calibration",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "<NEW_EVIDENCE>/original.audit.json"
+      ],
+      "required_measured_records": 288,
+      "session_id": "ECBS1ha38a29e8e509",
+      "source": "research/ecbench_m83_rho_20261005/sessions/calibration"
+    }
+  ]
+}

@@ -89,10 +89,18 @@ are an implementation gap, not a mathematical obstruction; see the harness
 
 ## Rebuild and check
 
+Use the [reproduction contract](BACKEND_REPRODUCTION.md) for exact pass/fail
+criteria and executable checks. The committed
+[reproduction lock](../backend-leaderboard/reproduction.lock.json) pins every
+input and all five output hashes. [Command cards](../backend-leaderboard/REPLAY_PLAN.json)
+name each original source/binary, required replay IDs, commands and known gaps.
+Report reproduction, fresh arithmetic/solver-ledger reproduction, independent
+host evidence and timing replication are separate gates.
+
 From the repository root:
 
 ```sh
-cargo build --locked --release --manifest-path tools/backend-leaderboard/Cargo.toml
+cargo +1.99.1 build --locked --release --manifest-path tools/backend-leaderboard/Cargo.toml
 tools/backend-leaderboard/target/release/backend-leaderboard \
   --manifest docs/backend-leaderboard/manifest.json \
   --out docs/backend-leaderboard
@@ -104,8 +112,10 @@ tools/backend-leaderboard/target/release/backend-leaderboard \
 In a sparse checkout, materialize the session directories and receipt files
 named by the manifest with `scripts/sparse-checkout.sh add --path ...` first.
 The generator does not silently skip an unreadable input. `--check` never repairs
-an output. The JSON, HTML and Markdown come from one build and must be committed
-together. The tool directly shares the harness's native pricing-band, bootstrap
+an output. The JSON, HTML, Markdown, replay plan and reproduction lock come
+from one deliberately sealed build and must be committed together. Use
+`--seal` only for an intentional, reviewed baseline update; reproduction never
+updates the lock. The tool directly shares the harness's native pricing-band, bootstrap
 and identity-codec source, and extracts its native counter vocabulary at build
 time. Calibration and curve-alias inputs are compiled in and hashed in the
 report. The HTML is standalone and works offline; the published route is
@@ -168,6 +178,7 @@ backend view does not replace those protocols or promote a ledger row.
 | Field-size ladder, including small powers and 51/53/83 | Grid complete; measured coverage partial | Absent and unattempted cells remain visible; 3/4/5/51/83 have no imported measurements |
 | Establish an auditable frontier | Verified for the imported panel | IC and cross-method count-band frontiers, memory tradeoffs and timing gates; current/global fastest remains unestablished |
 | Guide agents toward improvements | Implemented and validated | Frozen incumbent/challenger loop, counters, failure records, replay, external-tool requirements and CI freshness checks |
+| Independent reproducibility criteria | Implemented; fresh campaign blocked | Pinned R0 report check, exact R1 fresh-ledger comparator, per-session command cards, R2 timing protocol; current root build and provenance gaps remain explicit |
 | End-to-end operation time | Historical coverage partial | Cold, online, process and exclusive phases retain their boundaries; no admitted timing winner or fresh campaign |
 
 This change reindexes historical observations. It does not run a fresh performance

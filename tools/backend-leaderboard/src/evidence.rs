@@ -193,6 +193,8 @@ pub struct Session {
 #[derive(Debug, Deserialize)]
 pub struct HostCapsule {
     pub stable: HostFacts,
+    #[serde(default)]
+    pub build: Value,
 }
 #[derive(Debug, Deserialize)]
 pub struct HostFacts {

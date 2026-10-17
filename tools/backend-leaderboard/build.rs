@@ -1,6 +1,15 @@
 use std::path::PathBuf;
 
 fn main() {
+    let compiler = std::process::Command::new(std::env::var_os("RUSTC").unwrap())
+        .arg("--version")
+        .output()
+        .expect("read compiler version");
+    assert!(compiler.status.success());
+    println!(
+        "cargo:rustc-env=BACKEND_RUSTC={}",
+        String::from_utf8(compiler.stdout).unwrap().trim()
+    );
     // One counter-to-unit vocabulary: compile the harness's literal declaration
     // without depending on its solver/curve implementation or root build.
     let root = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap()).join("../..");

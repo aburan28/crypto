@@ -30,8 +30,10 @@ jobs:
             /src/cryptanalysis/curve_aliases.json
             /docs/ic/calibration.json
             /docs/backend-leaderboard/
-      - uses: dtolnay/rust-toolchain@stable
+            /docs/ecbench/BACKEND_REPRODUCTION.md
+      - uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: '1.99.1'
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
         with:
@@ -42,8 +44,12 @@ jobs:
           git sparse-checkout add --no-cone --stdin < /tmp/backend-sources.txt
       - name: Format, admission tests and lint
         run: |
-          cargo fmt --manifest-path tools/backend-leaderboard/Cargo.toml --check
-          cargo test --locked --manifest-path tools/backend-leaderboard/Cargo.toml
-          cargo clippy --locked --manifest-path tools/backend-leaderboard/Cargo.toml --all-targets -- -D warnings
+          cargo +1.99.1 fmt --manifest-path tools/backend-leaderboard/Cargo.toml --check
+          cargo +1.99.1 test --locked --manifest-path tools/backend-leaderboard/Cargo.toml
+          cargo +1.99.1 clippy --locked --manifest-path tools/backend-leaderboard/Cargo.toml --all-targets -- -D warnings
       - name: All generated views match their sealed sources
-        run: cargo run --locked --manifest-path tools/backend-leaderboard/Cargo.toml -- --check
+        run: |
+          cargo +1.99.1 run --locked --manifest-path tools/backend-leaderboard/Cargo.toml -- --check
+          lock_sha=$(sha256sum docs/backend-leaderboard/reproduction.lock.json | cut -d ' ' -f 1)
+          cargo +1.99.1 run --locked --manifest-path tools/backend-leaderboard/Cargo.toml -- reproduce --expected-lock-sha256 "$lock_sha" > /tmp/backend-reproduction.json
+          cat /tmp/backend-reproduction.json
