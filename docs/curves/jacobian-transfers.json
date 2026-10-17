@@ -2,7 +2,7 @@
   "schema": "jacobian-transfers/2",
   "generated_by": "cargo run --release --bin jacobian_transfers -- build",
   "what_this_is": "Every known route from each registered curve's discrete logarithm into a Jacobian, priced by one frozen formula-level cost model against Pollard rho on the same subgroup; see docs/curves/JACOBIAN_TRANSFERS.md. Rows are formulas and leads, never measurements or security claims.",
-  "registry_sha256": "22b2ffef99720f2b2c7396a267412d2241a868e038a835c4fb1fd12209b102bf",
+  "registry_sha256": "1ed997792f6865d55316e777915a7615c287605523f8daedba1d5b44c091eae5",
   "factor_budget": 200000,
   "cost_model": {
     "karatsuba_exponent": 1.585,
@@ -14,20 +14,20 @@
     "extension_decomposition_bezout_exponent": 1.0
   },
   "summary": {
-    "curves": 2112,
-    "routes": 5185,
+    "curves": 2121,
+    "routes": 5212,
     "by_class": {
-      "boundary": 1444,
+      "boundary": 1453,
       "formula_advantage": 601,
       "formula_marginal": 67
     },
     "by_route_kind": {
-      "base_change_descent": 1254,
+      "base_change_descent": 1272,
       "cover_descent": 1324,
       "extension_index_calculus": 1324,
       "ghs_isogeny_extension": 195,
       "ghs_weil_descent": 300,
-      "same_field_cover": 788
+      "same_field_cover": 797
     },
     "formula_advantage": [
       [
@@ -95582,6 +95582,175 @@
       ]
     },
     {
+      "slug": "icv1-fp36-t276049-fe2b595b",
+      "icv1": "ICV1:fp-39615550291:276049:39615274243:0:unk:unk:r:fe2b595b2c60",
+      "standard_names": [],
+      "family": "prime",
+      "field": {
+        "kind": "prime",
+        "degree": 1,
+        "log2_size": 35.205,
+        "log2_base": 35.205
+      },
+      "trace": "276049",
+      "subgroup": {
+        "order": "39615274243",
+        "bits": 35.205,
+        "status": "largest_prime_of_order"
+      },
+      "reference_log2": 28.894,
+      "verdict": "boundary",
+      "best_route": 0,
+      "routes": [
+        {
+          "kind": "same_field_cover",
+          "label": "same-field genus-2 cover H -> E of degree 2 over GF(p) (prime_quadratic_pullback_v1)",
+          "evidence": "construction",
+          "invariants": {
+            "construction": "docs/curves/COVERS.md prime characteristic > 3",
+            "map_degree": 2
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "2",
+            "log2_genus": 1.0,
+            "field_bits": 35.205,
+            "log2_order": 70.411
+          },
+          "transport": "carried_if_coprime_to_degree",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 12.465,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 30.894,
+              "log2_leading": 17.603,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  30.894
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  51.256
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  77.554
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 30.894,
+            "ratio_log2": -2.0,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "the Jacobian over the same field is larger than E: its best solver is rho or q^(2-2/g) index calculus, both at or above rho on E"
+          ]
+        },
+        {
+          "kind": "base_change_descent",
+          "label": "base change to GF(p^2) then descent to a genus-2 cover over GF(p)",
+          "evidence": "proposed",
+          "invariants": {
+            "extension_degree": 2,
+            "genus_lower_bound": 2
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "2",
+            "log2_genus": 1.0,
+            "field_bits": 35.205,
+            "log2_order": 70.411
+          },
+          "transport": "same_group",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 12.465,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 30.894,
+              "log2_leading": 17.603,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  30.894
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  51.256
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  77.554
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 30.894,
+            "ratio_log2": -2.0,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "GF(p) has no proper subfield; any descent must first base-change, and a cover over GF(p) of the Weil restriction has genus >= k (existence for this curve not established)",
+            "priced at the most favourable genus the literature allows, g = k, so the row is a lower bound on the route"
+          ]
+        },
+        {
+          "kind": "base_change_descent",
+          "label": "base change to GF(p^3) then descent to a genus-3 cover over GF(p)",
+          "evidence": "proposed",
+          "invariants": {
+            "extension_degree": 3,
+            "genus_lower_bound": 3
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "3",
+            "log2_genus": 1.585,
+            "field_bits": 35.205,
+            "log2_order": 105.616
+          },
+          "transport": "same_group",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 13.05,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 32.064,
+              "log2_leading": 17.603,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  32.064
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  64.746
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  78.139
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 32.064,
+            "ratio_log2": -3.17,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "GF(p) has no proper subfield; any descent must first base-change, and a cover over GF(p) of the Weil restriction has genus >= k (existence for this curve not established)",
+            "priced at the most favourable genus the literature allows, g = k, so the row is a lower bound on the route"
+          ]
+        }
+      ]
+    },
+    {
       "slug": "icv1-fp36-tm47184-1daf0972",
       "icv1": "ICV1:fp-68190058247:-47184:68190105432:47521970854:unk:unk:r:1daf0972773a",
       "standard_names": [],
@@ -96427,6 +96596,175 @@
       ]
     },
     {
+      "slug": "icv1-fp40-tm506303-75549727",
+      "icv1": "ICV1:fp-649522587953:-506303:649523094257:420771848988:unk:unk:r:755497276237",
+      "standard_names": [],
+      "family": "prime",
+      "field": {
+        "kind": "prime",
+        "degree": 1,
+        "log2_size": 39.241,
+        "log2_base": 39.241
+      },
+      "trace": "-506303",
+      "subgroup": {
+        "order": "649523094257",
+        "bits": 39.241,
+        "status": "largest_prime_of_order"
+      },
+      "reference_log2": 31.16,
+      "verdict": "boundary",
+      "best_route": 0,
+      "routes": [
+        {
+          "kind": "same_field_cover",
+          "label": "same-field genus-2 cover H -> E of degree 2 over GF(p) (prime_quadratic_pullback_v1)",
+          "evidence": "construction",
+          "invariants": {
+            "construction": "docs/curves/COVERS.md prime characteristic > 3",
+            "map_degree": 2
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "2",
+            "log2_genus": 1.0,
+            "field_bits": 39.241,
+            "log2_order": 78.481
+          },
+          "transport": "carried_if_coprime_to_degree",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 12.713,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 33.16,
+              "log2_leading": 19.621,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  33.16
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  55.539
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  85.873
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 33.16,
+            "ratio_log2": -2.0,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "the Jacobian over the same field is larger than E: its best solver is rho or q^(2-2/g) index calculus, both at or above rho on E"
+          ]
+        },
+        {
+          "kind": "base_change_descent",
+          "label": "base change to GF(p^2) then descent to a genus-2 cover over GF(p)",
+          "evidence": "proposed",
+          "invariants": {
+            "extension_degree": 2,
+            "genus_lower_bound": 2
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "2",
+            "log2_genus": 1.0,
+            "field_bits": 39.241,
+            "log2_order": 78.481
+          },
+          "transport": "same_group",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 12.713,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 33.16,
+              "log2_leading": 19.621,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  33.16
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  55.539
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  85.873
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 33.16,
+            "ratio_log2": -2.0,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "GF(p) has no proper subfield; any descent must first base-change, and a cover over GF(p) of the Weil restriction has genus >= k (existence for this curve not established)",
+            "priced at the most favourable genus the literature allows, g = k, so the row is a lower bound on the route"
+          ]
+        },
+        {
+          "kind": "base_change_descent",
+          "label": "base change to GF(p^3) then descent to a genus-3 cover over GF(p)",
+          "evidence": "proposed",
+          "invariants": {
+            "extension_degree": 3,
+            "genus_lower_bound": 3
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "3",
+            "log2_genus": 1.585,
+            "field_bits": 39.241,
+            "log2_order": 117.722
+          },
+          "transport": "same_group",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 13.298,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 34.33,
+              "log2_leading": 19.621,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  34.33
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  70.374
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  86.458
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 34.33,
+            "ratio_log2": -3.17,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "GF(p) has no proper subfield; any descent must first base-change, and a cover over GF(p) of the Weil restriction has genus >= k (existence for this curve not established)",
+            "priced at the most favourable genus the literature allows, g = k, so the row is a lower bound on the route"
+          ]
+        }
+      ]
+    },
+    {
       "slug": "icv1-fp40-tm1043-a68449f5",
       "icv1": "ICV1:fp-775471435903:-1043:775471436947:245719404051:unk:unk:r:a68449f5360d",
       "standard_names": [],
@@ -97260,6 +97598,175 @@
               "enge_gaudry_hypothesis_holds": false
             },
             "log2_total": 34.204,
+            "ratio_log2": -3.17,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "GF(p) has no proper subfield; any descent must first base-change, and a cover over GF(p) of the Weil restriction has genus >= k (existence for this curve not established)",
+            "priced at the most favourable genus the literature allows, g = k, so the row is a lower bound on the route"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "icv1-fp40-t1502959-42c6aada",
+      "icv1": "ICV1:fp-1099511624389:1502959:1099510121431:0:unk:unk:r:42c6aada3d74",
+      "standard_names": [],
+      "family": "prime",
+      "field": {
+        "kind": "prime",
+        "degree": 1,
+        "log2_size": 40.0,
+        "log2_base": 40.0
+      },
+      "trace": "1502959",
+      "subgroup": {
+        "order": "1099510121431",
+        "bits": 40.0,
+        "status": "registry_representation"
+      },
+      "reference_log2": 31.584,
+      "verdict": "boundary",
+      "best_route": 0,
+      "routes": [
+        {
+          "kind": "same_field_cover",
+          "label": "same-field genus-2 cover H -> E of degree 2 over GF(p) (prime_quadratic_pullback_v1)",
+          "evidence": "construction",
+          "invariants": {
+            "construction": "docs/curves/COVERS.md prime characteristic > 3",
+            "map_degree": 2
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "2",
+            "log2_genus": 1.0,
+            "field_bits": 40.0,
+            "log2_order": 80.0
+          },
+          "transport": "carried_if_coprime_to_degree",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 12.757,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 33.584,
+              "log2_leading": 20.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  33.584
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  56.342
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  87.435
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 33.584,
+            "ratio_log2": -2.0,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "the Jacobian over the same field is larger than E: its best solver is rho or q^(2-2/g) index calculus, both at or above rho on E"
+          ]
+        },
+        {
+          "kind": "base_change_descent",
+          "label": "base change to GF(p^2) then descent to a genus-2 cover over GF(p)",
+          "evidence": "proposed",
+          "invariants": {
+            "extension_degree": 2,
+            "genus_lower_bound": 2
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "2",
+            "log2_genus": 1.0,
+            "field_bits": 40.0,
+            "log2_order": 80.0
+          },
+          "transport": "same_group",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 12.757,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 33.584,
+              "log2_leading": 20.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  33.584
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  56.342
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  87.435
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 33.584,
+            "ratio_log2": -2.0,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "GF(p) has no proper subfield; any descent must first base-change, and a cover over GF(p) of the Weil restriction has genus >= k (existence for this curve not established)",
+            "priced at the most favourable genus the literature allows, g = k, so the row is a lower bound on the route"
+          ]
+        },
+        {
+          "kind": "base_change_descent",
+          "label": "base change to GF(p^3) then descent to a genus-3 cover over GF(p)",
+          "evidence": "proposed",
+          "invariants": {
+            "extension_degree": 3,
+            "genus_lower_bound": 3
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "3",
+            "log2_genus": 1.585,
+            "field_bits": 40.0,
+            "log2_order": 120.0
+          },
+          "transport": "same_group",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 13.342,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 34.753,
+              "log2_leading": 20.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  34.753
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  71.43
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  88.02
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 34.753,
             "ratio_log2": -3.17,
             "exponent_ratio_log2": 0.0
           },
@@ -99131,6 +99638,344 @@
       ]
     },
     {
+      "slug": "icv1-fp44-tm1269095-f56aca35",
+      "icv1": "ICV1:fp-17592186040927:-1269095:17592187310023:0:unk:unk:r:f56aca35a0e1",
+      "standard_names": [],
+      "family": "prime",
+      "field": {
+        "kind": "prime",
+        "degree": 1,
+        "log2_size": 44.0,
+        "log2_base": 44.0
+      },
+      "trace": "-1269095",
+      "subgroup": {
+        "order": "17592187310023",
+        "bits": 44.0,
+        "status": "registry_representation"
+      },
+      "reference_log2": 33.802,
+      "verdict": "boundary",
+      "best_route": 0,
+      "routes": [
+        {
+          "kind": "same_field_cover",
+          "label": "same-field genus-2 cover H -> E of degree 2 over GF(p) (prime_quadratic_pullback_v1)",
+          "evidence": "construction",
+          "invariants": {
+            "construction": "docs/curves/COVERS.md prime characteristic > 3",
+            "map_degree": 2
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "2",
+            "log2_genus": 1.0,
+            "field_bits": 44.0,
+            "log2_order": 88.0
+          },
+          "transport": "carried_if_coprime_to_degree",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 12.975,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 35.802,
+              "log2_leading": 22.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  35.802
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  60.56
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  95.653
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 35.802,
+            "ratio_log2": -2.0,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "the Jacobian over the same field is larger than E: its best solver is rho or q^(2-2/g) index calculus, both at or above rho on E"
+          ]
+        },
+        {
+          "kind": "base_change_descent",
+          "label": "base change to GF(p^2) then descent to a genus-2 cover over GF(p)",
+          "evidence": "proposed",
+          "invariants": {
+            "extension_degree": 2,
+            "genus_lower_bound": 2
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "2",
+            "log2_genus": 1.0,
+            "field_bits": 44.0,
+            "log2_order": 88.0
+          },
+          "transport": "same_group",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 12.975,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 35.802,
+              "log2_leading": 22.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  35.802
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  60.56
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  95.653
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 35.802,
+            "ratio_log2": -2.0,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "GF(p) has no proper subfield; any descent must first base-change, and a cover over GF(p) of the Weil restriction has genus >= k (existence for this curve not established)",
+            "priced at the most favourable genus the literature allows, g = k, so the row is a lower bound on the route"
+          ]
+        },
+        {
+          "kind": "base_change_descent",
+          "label": "base change to GF(p^3) then descent to a genus-3 cover over GF(p)",
+          "evidence": "proposed",
+          "invariants": {
+            "extension_degree": 3,
+            "genus_lower_bound": 3
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "3",
+            "log2_genus": 1.585,
+            "field_bits": 44.0,
+            "log2_order": 132.0
+          },
+          "transport": "same_group",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 13.56,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 36.971,
+              "log2_leading": 22.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  36.971
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  76.982
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  96.238
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 36.971,
+            "ratio_log2": -3.17,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "GF(p) has no proper subfield; any descent must first base-change, and a cover over GF(p) of the Weil restriction has genus >= k (existence for this curve not established)",
+            "priced at the most favourable genus the literature allows, g = k, so the row is a lower bound on the route"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "icv1-fp44-tm6431881-43acc95d",
+      "icv1": "ICV1:fp-17592186044399:-6431881:17592192476281:6470554627570:unk:unk:r:43acc95d260a",
+      "standard_names": [],
+      "family": "prime",
+      "field": {
+        "kind": "prime",
+        "degree": 1,
+        "log2_size": 44.0,
+        "log2_base": 44.0
+      },
+      "trace": "-6431881",
+      "subgroup": {
+        "order": "17592192476281",
+        "bits": 44.0,
+        "status": "registry_representation"
+      },
+      "reference_log2": 33.802,
+      "verdict": "boundary",
+      "best_route": 0,
+      "routes": [
+        {
+          "kind": "same_field_cover",
+          "label": "same-field genus-2 cover H -> E of degree 2 over GF(p) (prime_quadratic_pullback_v1)",
+          "evidence": "construction",
+          "invariants": {
+            "construction": "docs/curves/COVERS.md prime characteristic > 3",
+            "map_degree": 2
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "2",
+            "log2_genus": 1.0,
+            "field_bits": 44.0,
+            "log2_order": 88.0
+          },
+          "transport": "carried_if_coprime_to_degree",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 12.975,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 35.802,
+              "log2_leading": 22.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  35.802
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  60.56
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  95.653
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 35.802,
+            "ratio_log2": -2.0,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "the Jacobian over the same field is larger than E: its best solver is rho or q^(2-2/g) index calculus, both at or above rho on E"
+          ]
+        },
+        {
+          "kind": "base_change_descent",
+          "label": "base change to GF(p^2) then descent to a genus-2 cover over GF(p)",
+          "evidence": "proposed",
+          "invariants": {
+            "extension_degree": 2,
+            "genus_lower_bound": 2
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "2",
+            "log2_genus": 1.0,
+            "field_bits": 44.0,
+            "log2_order": 88.0
+          },
+          "transport": "same_group",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 12.975,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 35.802,
+              "log2_leading": 22.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  35.802
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  60.56
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  95.653
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 35.802,
+            "ratio_log2": -2.0,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "GF(p) has no proper subfield; any descent must first base-change, and a cover over GF(p) of the Weil restriction has genus >= k (existence for this curve not established)",
+            "priced at the most favourable genus the literature allows, g = k, so the row is a lower bound on the route"
+          ]
+        },
+        {
+          "kind": "base_change_descent",
+          "label": "base change to GF(p^3) then descent to a genus-3 cover over GF(p)",
+          "evidence": "proposed",
+          "invariants": {
+            "extension_degree": 3,
+            "genus_lower_bound": 3
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "3",
+            "log2_genus": 1.585,
+            "field_bits": 44.0,
+            "log2_order": 132.0
+          },
+          "transport": "same_group",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 13.56,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 36.971,
+              "log2_leading": 22.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  36.971
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  76.982
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  96.238
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 36.971,
+            "ratio_log2": -3.17,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "GF(p) has no proper subfield; any descent must first base-change, and a cover over GF(p) of the Weil restriction has genus >= k (existence for this curve not established)",
+            "priced at the most favourable genus the literature allows, g = k, so the row is a lower bound on the route"
+          ]
+        }
+      ]
+    },
+    {
       "slug": "icv1-fp45-tm403-3bb5b4de",
       "icv1": "ICV1:fp-19643936473787:-403:19643936474191:19643935589051:unk:unk:r:3bb5b4defed0",
       "standard_names": [],
@@ -100133,6 +100978,682 @@
               "enge_gaudry_hypothesis_holds": false
             },
             "log2_total": 38.16,
+            "ratio_log2": -3.17,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "GF(p) has no proper subfield; any descent must first base-change, and a cover over GF(p) of the Weil restriction has genus >= k (existence for this curve not established)",
+            "priced at the most favourable genus the literature allows, g = k, so the row is a lower bound on the route"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "icv1-fp48-t14984575-af5d5615",
+      "icv1": "ICV1:fp-281474976707983:14984575:281474961723409:0:unk:unk:r:af5d5615f27d",
+      "standard_names": [],
+      "family": "prime",
+      "field": {
+        "kind": "prime",
+        "degree": 1,
+        "log2_size": 48.0,
+        "log2_base": 48.0
+      },
+      "trace": "14984575",
+      "subgroup": {
+        "order": "281474961723409",
+        "bits": 48.0,
+        "status": "registry_representation"
+      },
+      "reference_log2": 36.0,
+      "verdict": "boundary",
+      "best_route": 0,
+      "routes": [
+        {
+          "kind": "same_field_cover",
+          "label": "same-field genus-2 cover H -> E of degree 2 over GF(p) (prime_quadratic_pullback_v1)",
+          "evidence": "construction",
+          "invariants": {
+            "construction": "docs/curves/COVERS.md prime characteristic > 3",
+            "map_degree": 2
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "2",
+            "log2_genus": 1.0,
+            "field_bits": 48.0,
+            "log2_order": 96.0
+          },
+          "transport": "carried_if_coprime_to_degree",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 13.174,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 38.0,
+              "log2_leading": 24.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  38.0
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  64.759
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  103.852
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 38.0,
+            "ratio_log2": -2.0,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "the Jacobian over the same field is larger than E: its best solver is rho or q^(2-2/g) index calculus, both at or above rho on E"
+          ]
+        },
+        {
+          "kind": "base_change_descent",
+          "label": "base change to GF(p^2) then descent to a genus-2 cover over GF(p)",
+          "evidence": "proposed",
+          "invariants": {
+            "extension_degree": 2,
+            "genus_lower_bound": 2
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "2",
+            "log2_genus": 1.0,
+            "field_bits": 48.0,
+            "log2_order": 96.0
+          },
+          "transport": "same_group",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 13.174,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 38.0,
+              "log2_leading": 24.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  38.0
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  64.759
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  103.852
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 38.0,
+            "ratio_log2": -2.0,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "GF(p) has no proper subfield; any descent must first base-change, and a cover over GF(p) of the Weil restriction has genus >= k (existence for this curve not established)",
+            "priced at the most favourable genus the literature allows, g = k, so the row is a lower bound on the route"
+          ]
+        },
+        {
+          "kind": "base_change_descent",
+          "label": "base change to GF(p^3) then descent to a genus-3 cover over GF(p)",
+          "evidence": "proposed",
+          "invariants": {
+            "extension_degree": 3,
+            "genus_lower_bound": 3
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "3",
+            "log2_genus": 1.585,
+            "field_bits": 48.0,
+            "log2_order": 144.0
+          },
+          "transport": "same_group",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 13.759,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 39.17,
+              "log2_leading": 24.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  39.17
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  82.514
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  104.437
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 39.17,
+            "ratio_log2": -3.17,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "GF(p) has no proper subfield; any descent must first base-change, and a cover over GF(p) of the Weil restriction has genus >= k (existence for this curve not established)",
+            "priced at the most favourable genus the literature allows, g = k, so the row is a lower bound on the route"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "icv1-fp48-tm15186475-c683ebfc",
+      "icv1": "ICV1:fp-281474976710591:-15186475:281474991897067:244919784929905:unk:unk:r:c683ebfc9c07",
+      "standard_names": [],
+      "family": "prime",
+      "field": {
+        "kind": "prime",
+        "degree": 1,
+        "log2_size": 48.0,
+        "log2_base": 48.0
+      },
+      "trace": "-15186475",
+      "subgroup": {
+        "order": "281474991897067",
+        "bits": 48.0,
+        "status": "registry_representation"
+      },
+      "reference_log2": 36.0,
+      "verdict": "boundary",
+      "best_route": 0,
+      "routes": [
+        {
+          "kind": "same_field_cover",
+          "label": "same-field genus-2 cover H -> E of degree 2 over GF(p) (prime_quadratic_pullback_v1)",
+          "evidence": "construction",
+          "invariants": {
+            "construction": "docs/curves/COVERS.md prime characteristic > 3",
+            "map_degree": 2
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "2",
+            "log2_genus": 1.0,
+            "field_bits": 48.0,
+            "log2_order": 96.0
+          },
+          "transport": "carried_if_coprime_to_degree",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 13.174,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 38.0,
+              "log2_leading": 24.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  38.0
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  64.759
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  103.852
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 38.0,
+            "ratio_log2": -2.0,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "the Jacobian over the same field is larger than E: its best solver is rho or q^(2-2/g) index calculus, both at or above rho on E"
+          ]
+        },
+        {
+          "kind": "base_change_descent",
+          "label": "base change to GF(p^2) then descent to a genus-2 cover over GF(p)",
+          "evidence": "proposed",
+          "invariants": {
+            "extension_degree": 2,
+            "genus_lower_bound": 2
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "2",
+            "log2_genus": 1.0,
+            "field_bits": 48.0,
+            "log2_order": 96.0
+          },
+          "transport": "same_group",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 13.174,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 38.0,
+              "log2_leading": 24.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  38.0
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  64.759
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  103.852
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 38.0,
+            "ratio_log2": -2.0,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "GF(p) has no proper subfield; any descent must first base-change, and a cover over GF(p) of the Weil restriction has genus >= k (existence for this curve not established)",
+            "priced at the most favourable genus the literature allows, g = k, so the row is a lower bound on the route"
+          ]
+        },
+        {
+          "kind": "base_change_descent",
+          "label": "base change to GF(p^3) then descent to a genus-3 cover over GF(p)",
+          "evidence": "proposed",
+          "invariants": {
+            "extension_degree": 3,
+            "genus_lower_bound": 3
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "3",
+            "log2_genus": 1.585,
+            "field_bits": 48.0,
+            "log2_order": 144.0
+          },
+          "transport": "same_group",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 13.759,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 39.17,
+              "log2_leading": 24.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  39.17
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  82.514
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  104.437
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 39.17,
+            "ratio_log2": -3.17,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "GF(p) has no proper subfield; any descent must first base-change, and a cover over GF(p) of the Weil restriction has genus >= k (existence for this curve not established)",
+            "priced at the most favourable genus the literature allows, g = k, so the row is a lower bound on the route"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "icv1-fp52-tm131765273-051185e0",
+      "icv1": "ICV1:fp-4503599627369383:-131765273:4503599759134657:0:unk:unk:r:051185e0e89a",
+      "standard_names": [],
+      "family": "prime",
+      "field": {
+        "kind": "prime",
+        "degree": 1,
+        "log2_size": 52.0,
+        "log2_base": 52.0
+      },
+      "trace": "-131765273",
+      "subgroup": {
+        "order": "4503599759134657",
+        "bits": 52.0,
+        "status": "registry_representation"
+      },
+      "reference_log2": 38.184,
+      "verdict": "boundary",
+      "best_route": 0,
+      "routes": [
+        {
+          "kind": "same_field_cover",
+          "label": "same-field genus-2 cover H -> E of degree 2 over GF(p) (prime_quadratic_pullback_v1)",
+          "evidence": "construction",
+          "invariants": {
+            "construction": "docs/curves/COVERS.md prime characteristic > 3",
+            "map_degree": 2
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "2",
+            "log2_genus": 1.0,
+            "field_bits": 52.0,
+            "log2_order": 104.0
+          },
+          "transport": "carried_if_coprime_to_degree",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 13.357,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 40.184,
+              "log2_leading": 26.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  40.184
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  68.942
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  112.035
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 40.184,
+            "ratio_log2": -2.0,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "the Jacobian over the same field is larger than E: its best solver is rho or q^(2-2/g) index calculus, both at or above rho on E"
+          ]
+        },
+        {
+          "kind": "base_change_descent",
+          "label": "base change to GF(p^2) then descent to a genus-2 cover over GF(p)",
+          "evidence": "proposed",
+          "invariants": {
+            "extension_degree": 2,
+            "genus_lower_bound": 2
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "2",
+            "log2_genus": 1.0,
+            "field_bits": 52.0,
+            "log2_order": 104.0
+          },
+          "transport": "same_group",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 13.357,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 40.184,
+              "log2_leading": 26.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  40.184
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  68.942
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  112.035
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 40.184,
+            "ratio_log2": -2.0,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "GF(p) has no proper subfield; any descent must first base-change, and a cover over GF(p) of the Weil restriction has genus >= k (existence for this curve not established)",
+            "priced at the most favourable genus the literature allows, g = k, so the row is a lower bound on the route"
+          ]
+        },
+        {
+          "kind": "base_change_descent",
+          "label": "base change to GF(p^3) then descent to a genus-3 cover over GF(p)",
+          "evidence": "proposed",
+          "invariants": {
+            "extension_degree": 3,
+            "genus_lower_bound": 3
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "3",
+            "log2_genus": 1.585,
+            "field_bits": 52.0,
+            "log2_order": 156.0
+          },
+          "transport": "same_group",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 13.942,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 41.353,
+              "log2_leading": 26.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  41.353
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  88.03
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  112.62
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 41.353,
+            "ratio_log2": -3.17,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "GF(p) has no proper subfield; any descent must first base-change, and a cover over GF(p) of the Weil restriction has genus >= k (existence for this curve not established)",
+            "priced at the most favourable genus the literature allows, g = k, so the row is a lower bound on the route"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "icv1-fp52-t113543683-af85fb1e",
+      "icv1": "ICV1:fp-4503599627370323:113543683:4503599513826641:2721144505530546:unk:unk:r:af85fb1eb570",
+      "standard_names": [],
+      "family": "prime",
+      "field": {
+        "kind": "prime",
+        "degree": 1,
+        "log2_size": 52.0,
+        "log2_base": 52.0
+      },
+      "trace": "113543683",
+      "subgroup": {
+        "order": "4503599513826641",
+        "bits": 52.0,
+        "status": "registry_representation"
+      },
+      "reference_log2": 38.184,
+      "verdict": "boundary",
+      "best_route": 0,
+      "routes": [
+        {
+          "kind": "same_field_cover",
+          "label": "same-field genus-2 cover H -> E of degree 2 over GF(p) (prime_quadratic_pullback_v1)",
+          "evidence": "construction",
+          "invariants": {
+            "construction": "docs/curves/COVERS.md prime characteristic > 3",
+            "map_degree": 2
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "2",
+            "log2_genus": 1.0,
+            "field_bits": 52.0,
+            "log2_order": 104.0
+          },
+          "transport": "carried_if_coprime_to_degree",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 13.357,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 40.184,
+              "log2_leading": 26.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  40.184
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  68.942
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  112.035
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 40.184,
+            "ratio_log2": -2.0,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "the Jacobian over the same field is larger than E: its best solver is rho or q^(2-2/g) index calculus, both at or above rho on E"
+          ]
+        },
+        {
+          "kind": "base_change_descent",
+          "label": "base change to GF(p^2) then descent to a genus-2 cover over GF(p)",
+          "evidence": "proposed",
+          "invariants": {
+            "extension_degree": 2,
+            "genus_lower_bound": 2
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "2",
+            "log2_genus": 1.0,
+            "field_bits": 52.0,
+            "log2_order": 104.0
+          },
+          "transport": "same_group",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 13.357,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 40.184,
+              "log2_leading": 26.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  40.184
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  68.942
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  112.035
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 40.184,
+            "ratio_log2": -2.0,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "boundary",
+          "notes": [
+            "GF(p) has no proper subfield; any descent must first base-change, and a cover over GF(p) of the Weil restriction has genus >= k (existence for this curve not established)",
+            "priced at the most favourable genus the literature allows, g = k, so the row is a lower bound on the route"
+          ]
+        },
+        {
+          "kind": "base_change_descent",
+          "label": "base change to GF(p^3) then descent to a genus-3 cover over GF(p)",
+          "evidence": "proposed",
+          "invariants": {
+            "extension_degree": 3,
+            "genus_lower_bound": 3
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "3",
+            "log2_genus": 1.585,
+            "field_bits": 52.0,
+            "log2_order": 156.0
+          },
+          "transport": "same_group",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 13.942,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 41.353,
+              "log2_leading": 26.0,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  41.353
+                ],
+                [
+                  "hyperelliptic_index_calculus",
+                  88.03
+                ],
+                [
+                  "enge_gaudry_smoothness",
+                  112.62
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 41.353,
             "ratio_log2": -3.17,
             "exponent_ratio_log2": 0.0
           },
