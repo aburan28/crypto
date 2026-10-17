@@ -1,0 +1,41 @@
+Working tree: prior head d78eed09a48bec50b8fab3cafc9c0203fb7d5b99 merged with main d22253655de460de5fbf4774959c97d8a03de682
+Native toolchain: existing Rust 1.98.0 installation
+CARGO_HOME=/workspace/pr1963-toolchain/cargo
+RUSTUP_HOME=/workspace/pr1963-toolchain/rustup
+CARGO_TARGET_DIR=/workspace/crypto-pr1963/target
+PATH prefixed by /workspace/pr1963-toolchain/cargo/bin
+Library validation sandbox: networking enabled, including loopback fixtures; 4-CPU execution quota.
+
+git merge-tree --write-tree --messages d78eed09a48bec50b8fab3cafc9c0203fb7d5b99 d22253655de460de5fbf4774959c97d8a03de682
+git merge --no-commit --no-ff d22253655de460de5fbf4774959c97d8a03de682
+/workspace/pr1975-merge-validation/merge_store_index /workspace/pr1975-ci-fix/head-store.json /workspace/pr1975-ci-fix/main-store.json store/index.json
+
+Local reproductions (failed staleness checks are retained):
+python3 scripts/update_curve_standards.py --check
+/workspace/crypto-pr1963/target/release/curve_traits check
+/workspace/crypto-pr1963/target/release/jacobian_transfers check
+
+Regeneration (existing catalog budgets and cost model unchanged):
+python3 scripts/update_curve_standards.py
+/workspace/crypto-pr1963/target/release/curve_traits build --budget 262144
+/workspace/crypto-pr1963/target/release/jacobian_transfers build --budget 200000
+
+Verification:
+python3 scripts/update_curve_standards.py --check
+python3 scripts/build_ic_leaderboard.py --check
+RAYON_NUM_THREADS=2 /workspace/crypto-pr1963/target/release/curve_traits check
+RAYON_NUM_THREADS=2 /workspace/crypto-pr1963/target/release/jacobian_transfers check
+python3 research/factor_base_traces_20261016/validation/catalog-20261016/check_preservation.py
+python3 scripts/check_curve_names.py
+
+cargo test --release --lib -- --test-threads=1
+The first compiler invocation reported E0583 for the tracked hwcost module outside the sparse checkout. It was interrupted (status130) after materializing the committed source, then the unchanged command was retried. Both logs are retained; no assertion or ignore changed.
+cargo build --release --bin factor_base_trace --bin curve_traits --bin jacobian_transfers
+cargo check --all-targets
+cargo clippy --release --bin factor_base_trace -- -D warnings
+cargo test --release --bin factor_base_trace
+/workspace/crypto-pr1963/target/release/factor_base_trace verify /workspace/factor_base_evaluation/results/generic.json /workspace/factor-base-trace-registered
+
+The catalog builder source files are unchanged between the two main parents. Initial catalog verification uses the previously built native binaries with two Rayon workers to leave CPU capacity for the library suite. Both native checks rebuild the entire catalog with the original operation budgets and compare exact output. Production binaries are also rebuilt from the combined source before publication.
+
+Conductor unavailable; attempted check returned command not found. GitHub read of .conductor/WORKFLOW.md at main d22253655de460de5fbf4774959c97d8a03de682 returned404. Neither check passed.

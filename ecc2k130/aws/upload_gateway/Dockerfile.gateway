@@ -1,0 +1,16 @@
+# syntax=docker/dockerfile:1
+FROM python:3.12-slim-bookworm
+
+RUN --mount=type=secret,id=proxy_ca \
+    if [ -f /run/secrets/proxy_ca ]; then \
+      PIP_CERT=/run/secrets/proxy_ca pip install --no-cache-dir boto3==1.35.99; \
+    else \
+      pip install --no-cache-dir boto3==1.35.99; \
+    fi
+WORKDIR /opt/ecc2k130
+COPY upload_gateway ./upload_gateway
+RUN useradd --create-home --uid 10001 gateway
+USER gateway
+ENV PYTHONUNBUFFERED=1 PORT=8080
+EXPOSE 8080
+ENTRYPOINT ["python", "-u", "-m", "upload_gateway.server"]
