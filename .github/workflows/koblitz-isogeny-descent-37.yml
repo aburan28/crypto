@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   exact-isogeny-and-matched-stage:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: ${{ github.event_name == 'pull_request' && 'debian:bookworm-slim' || 'sagemath/sagemath:10.6' }}
       options: --user root

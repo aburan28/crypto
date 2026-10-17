@@ -33,7 +33,7 @@ env:
 
 jobs:
   scope:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
       contents: read
@@ -85,7 +85,7 @@ jobs:
     needs: scope
     name: rustfmt (changed files)
     if: always() && !cancelled() && github.event_name == 'pull_request' && (needs.scope.result != 'success' || needs.scope.outputs.rust_fmt != 'false')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - name: Require successful scope classification
@@ -146,7 +146,7 @@ jobs:
     if: always() && !cancelled()
     needs: scope
     name: clippy (${{ matrix.crate }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     strategy:
       fail-fast: false
