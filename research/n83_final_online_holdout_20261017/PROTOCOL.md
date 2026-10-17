@@ -55,3 +55,26 @@ paired cold-process millisecond differences as a separate supplementary
 factor-base objective. An incomplete or noisy stratum leaves the selection
 unknown. No point from this fixture is used to choose the candidate list or
 tune an implementation before dispatch.
+
+The implementation uses one fresh process per candidate and public point.
+For point index `i`, rotate the deduplicated arm order by `i mod arm_count`.
+Run an exposed-point rho calibration immediately before and after each IC/rho
+pair; alternate IC then rho and rho then IC by parity of `i + fixed_arm_index`.
+The paired rho seed is `2026102900 + arm_count*i + fixed_arm_index`.
+The IC child cap is 480 seconds for `K < 2000` and 900 seconds otherwise;
+each rho or calibration child has a 120-second cap. The producer cap is
+190 minutes per host and the cloud job cap is 260 minutes. A host must pass
+all 6 × `arm_count` same-point IC and rho arithmetic replays, their 12 ×
+`arm_count` before/after calibration replays, exact source and base checks,
+event order, resource telemetry and a ten-percent paired calibration spread
+gate. The provider's distinct runner IDs, matching archived runner names and
+overlapping job windows establish separate Tier 1 allocations. A shared
+workflow job label is not used as a host identity.
+
+`prepare_dispatch.py` writes `dispatch.json` only after both upstream panel
+aggregates and their provider archive provenance have been versioned. A panel
+that is not admitted contributes its prespecified fallback. The dispatch
+file freezes the exact input hashes and arm choice. Only a push containing
+`dispatch.json` to the dedicated
+holdout branch starts the cloud workflow. Source and test commits before then
+cannot start a measurement.
