@@ -835,6 +835,29 @@ closure was measured on its cells. It has 40 unsatisfiable draws at degree
   support grows from N ≤ 32 to N ≤ 42, still about 10× short of the priced
   N.
 
+## Result 13: what sets the closure degree is not N; ℓ = 7 or m·ℓ ≥ 21 remain
+
+`research/dreg_closure_driver_20261016/` was pre-registered before any
+closure measurement on its cells. It has 16 unsatisfiable draws at degree 4.
+
+| cell | N | m·ℓ | closure at 4 |
+|---|--:|--:|---|
+| m = 3 (22, 6), (24, 6) | 40, 42 | 18 | refutes, 8 of 8 |
+| m = 4 (11, 5), (12, 5) | 42, 44 | 20 | refutes, 8 of 8 |
+
+- **N is rejected.** At the same N = 40 and 42 where ℓ = 7 does not
+  refute (Result 12), ℓ = 6 does.
+- **An m·ℓ threshold ≤ 20 is rejected,** because m·ℓ = 20 refutes.
+- **Surviving:** the degree rises at **ℓ = 7**, or once **m·ℓ ≥ 21**.
+  Both fit all 56 draws of Results 12 and 13. They differ first at m = 4,
+  ℓ = 6, which this container cannot reach: there are almost no
+  unsatisfiable draws at surplus ≤ −14 within 155k columns.
+- **Controls.** Q5 (XL never refutes at 4) and Q6 (work ratio 2.18–2.33)
+  hold again. Four satisfiable draws were replayed, and none was refuted.
+- **For ECC2K-130.** `RESEARCH_ECC2K130_DESCENT_DEGREE.md` §8: both
+  survivors put the m = 4 rise at ℓ ≤ 7, so the m = 4 degree-4 row is
+  contradicted.
+
 ## Reproducing
 
 ```sh

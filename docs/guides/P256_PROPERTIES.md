@@ -428,6 +428,19 @@ Verdict: the "NIST-rigged" hypothesis is **unfalsifiable in
 finite probes**, but every measurable property of P-256 falls
 within the expected distribution for a random curve of its size.
 
+**Update 2026-10-16: the seed is explained.** The P-256 seed is block
+1842 of `(int)(drand48() * 256)` output after `srand48(871696354)`
+(1997-08-16 01:52:34 UTC); all the NIST prime-curve seeds come from
+the same procedure (Anthropic Frontier Red Team and F. Valsorda,
+2026-10-16; reproduced in `research/nist_seed_provenance_20261016/` and
+`src/cryptanalysis/nist_seed_provenance.rs`). The "NIST-rigged"
+hypothesis is therefore no longer unfalsifiable on the seed side. The
+generator's remaining freedom was the start time and which accepted
+candidate to publish, about 30 bits, too little to target any weak
+class rarer than about one curve in 2^30. Still unexplained: how `G`
+was chosen (irrelevant to ECDLP in a prime-order group) and why about
+half the valid candidates in each run were skipped.
+
 ---
 
 ## 11.  Cryptanalytic summary — what's open vs closed

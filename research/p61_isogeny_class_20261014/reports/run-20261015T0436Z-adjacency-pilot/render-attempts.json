@@ -1,0 +1,68 @@
+{
+  "schema": "ec-hardness/p61-adjacency-render-attempts/v1",
+  "attempts": [
+    {
+      "sequence": 1,
+      "commands": [
+        "python3 plot_metrics.py",
+        "python3 plot_pipeline.py"
+      ],
+      "execution": "parallel",
+      "status": "render_infrastructure_failure",
+      "observation": "both processes stalled while independently creating temporary Matplotlib font caches because the default user cache directory was not writable",
+      "resolution": "the two task-owned renderer processes were terminated and rerun sequentially with an explicit writable cache and noninteractive backend"
+    },
+    {
+      "sequence": 2,
+      "command": "env MPLCONFIGDIR=/Volumes/SSD990/llm/tmp/p61-adjacency-mpl-cache python3 plot_metrics.py",
+      "exit_code": 134,
+      "status": "render_infrastructure_failure",
+      "observation": "font cache completed, but the default backend aborted in the noninteractive execution environment"
+    },
+    {
+      "sequence": 3,
+      "command": "env MPLBACKEND=Agg MPLCONFIGDIR=/Volumes/SSD990/llm/tmp/p61-adjacency-mpl-cache python3 plot_metrics.py",
+      "exit_code": 0,
+      "status": "pass",
+      "outputs": [
+        "adjacency-calibration.svg",
+        "adjacency-calibration.png"
+      ]
+    },
+    {
+      "sequence": 4,
+      "command": "env MPLBACKEND=Agg MPLCONFIGDIR=/Volumes/SSD990/llm/tmp/p61-adjacency-mpl-cache python3 plot_pipeline.py",
+      "exit_code": 0,
+      "status": "pass",
+      "outputs": [
+        "evidence-pipeline.svg",
+        "evidence-pipeline.png"
+      ]
+    },
+    {
+      "sequence": 5,
+      "command": "/opt/homebrew/bin/typst compile report.typ p61-adjacency-pilot-report.pdf",
+      "exit_code": 0,
+      "status": "pass",
+      "output": "p61-adjacency-pilot-report.pdf",
+      "pages": 4
+    },
+    {
+      "sequence": 6,
+      "command": "pdftoppm -png -r 120 p61-adjacency-pilot-report.pdf <temporary-page-prefix>",
+      "exit_code": 0,
+      "status": "pass",
+      "inspection": "all four rendered pages visually inspected; no clipping, overlap, missing figure, or unreadable table was observed"
+    },
+    {
+      "sequence": 7,
+      "command": "/opt/homebrew/bin/typst compile report.typ p61-adjacency-pilot-report.pdf",
+      "exit_code": 0,
+      "status": "pass",
+      "reason": "final render after recording the persistent-launch failure and corrected wrapper",
+      "pages": 4,
+      "file_bytes": 173149,
+      "inspection": "updated page 4 rendered and visually inspected; no clipping or overlap was observed"
+    }
+  ]
+}
