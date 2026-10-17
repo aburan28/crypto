@@ -2019,3 +2019,58 @@ fold cannot pay for the curve's poorer yield.
 
 Either is a separate build: the symmetrised `S₅` over `F_{p⁴}` and a weighted Macaulay solve.  Each
 would be registered with its own falsifier before any code, as E17 and E18 were.
+
+### 9.5 Addendum and E19 pre-registration: the `C₄` lever was taken elsewhere; the method end to end
+
+*Added 2026-10-17, before any E19 code exists.*
+
+**The lever §9.4 named has been built by other lanes; this note does not rebuild it.**  C8
+(`research/gaudry_quartic_d4_20261013/`, PR #1785) ran the `D₄`-symmetrised `S₅` on E17/E18's
+2-torsion construction: `C₄ = 2.54·10¹⁰`, `48×` below the `S₄` form.  Lane `d4-s5`
+(`research/d4_symmetrised_s5_20261015/`) then built the weighted Macaulay solve that §9.4 called
+for, with four unknowns of weights `(2, 2, 2, 1)`, weighted Bézout 512 and degree 26.  It measured
+**`C_w ≈ 1.2`–`1.4·10⁹`** (`854×` below `S₄` at `p = 269`), past §9.4's `≈ 630×` projection.
+Read in E18's frame (`h = 4`, `106` residuals per relation, `r = 0.341`), it puts the handover at
+**`n* ≈ 2^{118.9}`**, against the `ψ` arm's `2^{146.0}`.  The `ψ`-on-the-system alternative of
+§9.4 stays closed: as at `k = 3` (`RESEARCH_GLV_INDEX_CALCULUS.md`), `S₅` is graded only under
+the simultaneous scaling that also moves the target.
+
+**What no lane has done: run the method.**  Every `k = 4` handover in this repository, C8's,
+`d4-s5`'s and E18's, is §11.16's model.  It is assembled from per-phase constants measured in
+separate harnesses: `C` from solves on planted and uniform targets, the yield and `r` from E18's
+meet-in-the-middle stand-in, and rho from E18's walks.  No run has collected relations with the
+`D₄` solve itself, filtered and solved the matrix, and recovered a logarithm.  C8's decision rule
+names that pipeline as the next step.
+
+**E19 — the first end-to-end `k = 4` index calculus with the `D₄` solve (registered here).**  On
+E18's 2-torsion instances (`quartic_folds::generate_translation_instance`, `h ≤ 4`), with E18's
+`τ_T`-folded base `x ∈ x₀ + F_p`:
+
+1. draw targets `R = aG + bQ`;
+2. decompose each with `d4_weighted_s5::solve_weighted` at weighted degree 26, preceded by
+   `weighted_system` and followed by `lift_back`, every multiplication charged;
+3. map the lifted `Y`-quadruple to base points and signs by a charged group check;
+4. keep one decomposition per target, drawn uniformly (E18's rule 2), as a folded row;
+5. filter and solve by §11.7's Wiedemann until `[d]G = Q` verifies;
+6. price the whole run in `F_p` multiplications against the matched negation walk on the same
+   curve (`16` walks).
+
+The total is the instance's `SymmetrisedD4` precompute, target generation, Weil restriction,
+solves, lift-back, the group checks, and the linear algebra at `16` per mod-`n` multiplication.
+Unsolvable targets (C8's degenerate `5 %`) are charged and counted, never dropped.  Sizes:
+`p = 53, 101, 149, 197, 269`, two curves each (`n ≈ 2^{20.9}`–`2^{30.3}`).
+
+| id | quantity | prediction (from C8, `d4-s5` and E18, before any run) | falsified by |
+|:--|:--|:--|:--|
+| G2.9 | correctness | every curve's logarithm recovered; every relation re-added in the group; every solve's decompositions are base points summing to `R` | any failure |
+| G2.10 | residuals per relation, exact oracle | E18's `106` (`83`–`199` per curve) from the stand-in, now from the solve | pooled `y` outside `[70, 160]` |
+| G2.11 | the solve in the pipeline | per-call `C` within `±30 %` of `d4-s5`'s medians at the same `p` (`1.2`–`1.4·10⁹`); the unsolved share `≤ 10 %` | outside the band at any size, or more than `10 %` unsolved |
+| G2.12 | end to end | `S / rho S ≈ 0.584·C/p` (the relation phase, `y·(p/4)·C` against `90.8·p²/2`): `≈ 3·10⁶×` at `p = 269`, `≈ 1.4·10⁷×` at `p = 53`; fitted slope in `n` `−1/4 ± 0.1`; every phase other than the solves `< 10 %` of the total | a measured ratio outside `×2` of the prediction at any size, or a slope outside `[−0.35, −0.15]` |
+| G2.13 | the handover, re-derived from E19's own constants | within `±3` bits of `d4-s5`'s `2^{118.9}` | outside `[2^{115.9}, 2^{121.9}]` |
+
+**What it would and would not say.**  If G2.9–G2.13 hold, the `2^{118.9}` handover rests on
+constants measured inside one pipeline, and only the exponents (`n^{1/4}`, `n^{1/2}`) remain
+extrapolated.  The measured rows are **`10⁶`–`10⁷×` slower than rho**: the distance remaining,
+reported as such, with no speed claimed.  Under the 2026-10-15 success criterion, E19 is a
+**measurement** of the current `k = 4` baseline, not an improvement of it.  **Class:
+accounting** for the method's first measured `S`, and engineering for nothing.
