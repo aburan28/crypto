@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="410" viewBox="0 0 900 410">
+<style>text{font-family:DejaVu Sans,sans-serif;fill:#17334d}.title{font-size:20px;font-weight:bold}.label{font-size:15px}.small{font-size:12px}.box{fill:#eff5fa;stroke:#416c8d;stroke-width:1.5}.arrow{fill:none;stroke:#416c8d;stroke-width:2}</style>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#416c8d"/></marker></defs>
+<text x="24" y="30" class="title">CM volcano construction and explicit CRT</text>
+<text x="24" y="53" class="small">Implemented data flow - no performance comparison</text>
+<rect x="24" y="75" width="250" height="65" rx="8" class="box"/>
+<text x="40" y="100" class="label">CM order and CRT primes</text><text x="40" y="123" class="small">Certify H_D seed trace and torsion</text>
+<path d="M274,107 L323,107" class="arrow"/>
+<rect x="325" y="75" width="250" height="65" rx="8" class="box"/>
+<text x="342" y="100" class="label">Surface: class group Cl(D)</text><text x="342" y="123" class="small">Paired Frobenius eigenkernels</text>
+<path d="M450,140 L450,184" class="arrow"/>
+<text x="464" y="166" class="small">one descending isogeny</text>
+<rect x="325" y="185" width="250" height="65" rx="8" class="box"/>
+<text x="342" y="210" class="label">Floor: class group Cl(ell^2 D)</text><text x="342" y="233" class="small">Project classes to surface parents</text>
+<path d="M575,107 L610,107 L610,197 L635,197" class="arrow"/>
+<path d="M575,217 L635,217" class="arrow"/>
+<rect x="637" y="175" width="235" height="85" rx="8" class="box"/>
+<text x="652" y="199" class="label">Two horizontal + ell-1 floor</text><text x="652" y="221" class="small">neighbors at each surface point</text><text x="652" y="244" class="small">Interpolate and validate Phi mod p</text>
+<path d="M754,260 L754,302" class="arrow"/>
+<rect x="637" y="305" width="235" height="70" rx="8" class="box"/>
+<text x="653" y="331" class="label">Streaming explicit CRT</text><text x="653" y="353" class="small">Output over Z or modulo any m &gt; 0</text>
+<text x="24" y="310" class="label">Independent validation</text>
+<text x="24" y="334" class="small">Compare complete coefficients with Hecke/Newton q-expansions.</text>
+<text x="24" y="355" class="small">The q-expansion oracle is used only by tests and acceptance runs.</text>
+<text x="24" y="390" class="small">Source: BLS Algorithm 2.1 and section 6.2; implementation: src/find/sutherland/{cm,crt}.rs</text>
+<path d="M317,103 L325,107 L317,111 Z M446,177 L450,185 L454,177 Z M629,193 L637,197 L629,201 Z M629,213 L637,217 L629,221 Z M750,297 L754,305 L758,297 Z" fill="#416c8d"/></svg>

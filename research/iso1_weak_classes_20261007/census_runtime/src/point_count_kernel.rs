@@ -87,3 +87,49 @@ pub fn ell_order(f: &Fq3, ec: &EllE, rng: &mut StdRng) -> u128 {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::certified::certified_order;
+    use rand::SeedableRng;
+
+    /// Exact `#E` for `y² = x³ + a₂x² + a₄x` by Euler's criterion on every x.
+    fn brute_order(f: &Fq3, a2: &E6, a4: &E6) -> u128 {
+        let p = f.f.p;
+        let q = p * p;
+        let e2 = |k: u64| crate::field_kernel::E2([k % p, k / p]);
+        let ec = EllE::from_a2_a4(f, *a2, *a4);
+        let mut n = 1u128;
+        for k in 0..q * q * q {
+            let x = E6([e2(k % q), e2((k / q) % q), e2(k / (q * q))]);
+            let r = ec.rhs(&x);
+            n += if r == E6::ZERO {
+                1
+            } else if f.is_square(&r) {
+                2
+            } else {
+                0
+            };
+        }
+        n
+    }
+
+    #[test]
+    fn certified_order_matches_exhaustive_count_at_p7() {
+        let f = Fq3::new(7);
+        let mut rng = StdRng::seed_from_u64(16);
+        let nonsquare = (0..)
+            .map(|_| f.random(&mut rng))
+            .find(|x| *x != E6::ZERO && !f.is_square(x))
+            .unwrap();
+        for _ in 0..12 {
+            let c = random_curve(&f, &mut rng);
+            let u = f.sub(&c.e[1], &c.e[0]);
+            let v = f.sub(&c.e[2], &c.e[0]);
+            let (a2, a4) = (f.neg(&f.add(&u, &v)), f.mul(&u, &v));
+            let cert = certified_order(&f, a2, a4, &nonsquare, &mut rng, 32).expect("isolated");
+            assert_eq!(cert.order, brute_order(&f, &a2, &a4));
+        }
+    }
+}
