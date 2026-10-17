@@ -375,10 +375,44 @@ fn main() {
         });
     }
     let source = fs::read(file!()).expect("run from source checkout so source is bound");
+    let verified: Vec<_> = rows.iter().filter(|v| v["status"] == "verified").collect();
+    let stats = |values: Vec<u64>| -> Value {
+        if values.is_empty() {
+            return json!({"n":0,"min":null,"max":null,"mean":null});
+        }
+        let sum: u128 = values.iter().map(|v| *v as u128).sum();
+        json!({"n":values.len(),"min":values.iter().min(),"max":values.iter().max(),
+            "sum":sum.to_string(),"mean":sum as f64 / values.len() as f64})
+    };
+    let mut metrics = serde_json::Map::new();
+    for key in [
+        "relation_count",
+        "queries",
+        "candidate_pair_tests",
+        "matrix_entry_ops",
+    ] {
+        metrics.insert(
+            key.into(),
+            stats(
+                verified
+                    .iter()
+                    .map(|v| v["relation_report"][key].as_u64().unwrap())
+                    .collect(),
+            ),
+        );
+    }
+    let times = stats(
+        verified
+            .iter()
+            .map(|v| v["end_to_end_ns"].as_str().unwrap().parse().unwrap())
+            .collect(),
+    );
     fs::write(out,serde_json::to_vec_pretty(&json!({"schema":"volcano-ff-k1-diagnostic/v1",
         "input_sha256":sha256_hex(&raw),"source_sha256":sha256_hex(&source),
         "scope":"Original C source model only; not its full graph or all conductor strata",
         "backend":"Reduced Tate/Miller then projected-prime-subgroup two-summand finite-field relations; no generic solver fallback",
+        "summary":{"requested":2,"verified":verified.len(),"failed":2-verified.len(),
+            "end_to_end_ns":times,"metrics":metrics,"scope":"Present verified observations only; raw failed rows preserved. Two public targets on one original model, not graph-wide or qualified timing."},
         "rows":rows})).unwrap()).unwrap();
 }
 
