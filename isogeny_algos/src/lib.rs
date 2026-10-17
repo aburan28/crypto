@@ -7,6 +7,7 @@ pub mod adx_gen;
 pub mod api;
 pub mod bigint;
 pub mod binary;
+pub mod binary_volcano;
 pub mod cm;
 pub mod curve;
 /// Research-only Eigen-Séta design helpers.  This module is deliberately not
