@@ -143,6 +143,13 @@ pub struct AuditReport {
     /// (the runner was killed before it could mark the session).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub interruption: Option<String>,
+    /// True for a never-finalised session: its records.jsonl was never
+    /// hashed into session.json, so truncated or appended records are
+    /// caught only by the per-record seals, which are unkeyed hashes.  Such
+    /// a session is evidence of the interruption only; claims, bounds and
+    /// challenges already refuse any session that is not `complete`.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub records_unbound: bool,
     pub ok: bool,
     pub problems: Vec<String>,
     pub checks: BTreeMap<String, bool>,
@@ -610,6 +617,7 @@ pub fn audit_with(
             session.status.clone()
         },
         interruption: killed.then(|| NEVER_FINALISED.to_string()),
+        records_unbound: killed,
         session_id: session.session_id,
         ok: problems.is_empty(),
         problems,
@@ -715,11 +723,15 @@ mod tests {
         assert_eq!(strict.checks.get("session_complete"), Some(&false));
         assert_eq!(strict.session_status, "running");
         assert_eq!(strict.interruption, None);
+        assert!(!strict.records_unbound);
 
         let lenient = audit_with(&dir, 0, true).unwrap();
         assert!(lenient.ok, "{:?}", lenient.problems);
         assert_eq!(lenient.session_status, "interrupted");
         assert_eq!(lenient.interruption.as_deref(), Some(NEVER_FINALISED));
+        assert!(lenient.records_unbound);
+        let json = serde_json::to_value(&lenient).unwrap();
+        assert_eq!(json["records_unbound"], json!(true));
         assert_eq!(lenient.records, 4);
         assert_eq!(lenient.checks.get("records"), Some(&true));
         let _ = std::fs::remove_dir_all(&dir);

@@ -51,10 +51,16 @@
 //!   Fiat-Shamir transcript (the prover cannot choose them) and every
 //!   Merkle opening bound to its position.
 //!
-//! A trace with `k` broken transitions survives `q` queries with
-//! probability about `(1 − k/n)^q`, and a prover can grind its
-//! commitment to re-roll the positions, so a single bad row is caught
-//! only with probability about `q/n` per attempt.  That is spot-check
+//! The verifier fixes the query count `q` (a [`verify`] argument) and
+//! the FRI depth (`log₂ n` folds), and the transcript absorbs the
+//! statement (`n`, `q`, the FRI depth, both boundary rows) before the
+//! trace commitment.  A trace with `k` broken transitions then
+//! survives the verifier's `q` queries with probability about
+//! `(1 − k/n)^q` per attempt, so a single bad row is caught with
+//! probability about `1 − (1 − 1/n)^q` per attempt.  The bound is per
+//! attempt: the positions are a hash of the commitment, so a prover
+//! re-rolls them by re-committing (grinding), and one with `2^g` hash
+//! attempts escapes once `(1 − k/n)^q · 2^g ≳ 1`.  That is spot-check
 //! soundness, not succinct soundness.  Use [`super::stark_v2`] (coset
 //! LDE, composition polynomial, degree-bounded FRI) for anything that
 //! needs a proof; neither module is audited, and neither may back a
@@ -151,11 +157,29 @@ pub struct FriQueryOpening {
     pub openings: Vec<(BigUint, BigUint, MerkleProof, MerkleProof)>,
 }
 
-fn scalar_to_bytes(s: &BigUint) -> Vec<u8> {
+/// 32-byte big-endian encoding of `s < 2^256` (the prover's leaves).
+pub(super) fn scalar_to_bytes(s: &BigUint) -> Vec<u8> {
     let mut buf = [0u8; 32];
     let bytes = s.to_bytes_be();
     buf[32 - bytes.len()..].copy_from_slice(&bytes);
     buf.to_vec()
+}
+
+/// The leaf encoding of an opened value, or `None` unless it is a
+/// canonical field element (`< r`): every value has one encoding, and
+/// an oversize value is rejected instead of panicking.
+pub(super) fn canonical_bytes(s: &BigUint) -> Option<Vec<u8>> {
+    (*s < scalar_modulus()).then(|| scalar_to_bytes(s))
+}
+
+/// Transcript encoding of a public field value (reduced mod `r`).
+pub(super) fn field_bytes(s: &BigUint) -> Vec<u8> {
+    scalar_to_bytes(&(s % scalar_modulus()))
+}
+
+/// Absorb `x` as a fixed-width 8-byte big-endian integer.
+pub(super) fn absorb_usize(transcript: &mut Vec<u8>, x: usize) {
+    transcript.extend_from_slice(&(x as u64).to_be_bytes());
 }
 
 /// **FRI commit**: take a polynomial as evaluations on a power-of-2
@@ -235,6 +259,10 @@ pub fn fri_commit_to(
         domains.push(next_domain);
     }
     let final_constant = layers.last().unwrap()[0].clone();
+    // Bind the last layer and the final constant before any query
+    // position is drawn.
+    transcript_state.extend_from_slice(&layer_roots.last().unwrap()[..]);
+    transcript_state.extend_from_slice(&field_bytes(&final_constant));
     FriCommitment {
         layer_roots,
         final_constant,
@@ -274,8 +302,9 @@ pub fn fri_query(commitment: &FriCommitment, mut position: usize) -> FriQueryOpe
 }
 
 /// The transcript state after [`fri_commit_to`] has absorbed `commitment`
-/// (each folded layer's root and its challenge), so a verifier can
-/// derive the query positions exactly as the prover did.
+/// (each folded layer's root and its challenge, then the last root and
+/// the final constant), so a verifier can derive the query positions
+/// exactly as the prover did.
 pub fn fri_transcript_after(
     transcript_state_initial: &[u8],
     commitment: &FriCommitment,
@@ -286,6 +315,10 @@ pub fn fri_transcript_after(
         let alpha_bytes = sha256(&transcript);
         transcript.extend_from_slice(&alpha_bytes);
     }
+    if let Some(last) = commitment.layer_roots.last() {
+        transcript.extend_from_slice(&last[..]);
+    }
+    transcript.extend_from_slice(&field_bytes(&commitment.final_constant));
     transcript
 }
 
@@ -321,6 +354,20 @@ pub fn fri_verify(
         return false;
     }
     let folds = commitment.layer_roots.len() - 1;
+    let size = initial_domain.len();
+    if !size.is_power_of_two() || folds > size.trailing_zeros() as usize {
+        return false;
+    }
+    // The last layer is `final_constant` repeated, so its root is fixed
+    // by the constant rather than chosen by the prover.
+    let Some(final_leaf) = canonical_bytes(&commitment.final_constant) else {
+        return false;
+    };
+    if commitment.layer_roots[folds]
+        != MerkleTree::from_leaves(&vec![final_leaf; size >> folds]).root()
+    {
+        return false;
+    }
     // Recompute the α challenges.
     let mut transcript = transcript_state_initial.to_vec();
     let mut alphas = Vec::new();
@@ -352,14 +399,24 @@ pub fn fri_verify(
             } else {
                 cur_pos - half_here
             };
-            if proof_main.leaf_index != cur_pos || proof_sibling.leaf_index != sibling_pos {
+            let depth = layer_size.trailing_zeros() as usize;
+            if proof_main.leaf_index != cur_pos
+                || proof_sibling.leaf_index != sibling_pos
+                || proof_main.path.len() != depth
+                || proof_sibling.path.len() != depth
+            {
                 return false;
             }
+            let (Some(leaf_main), Some(leaf_sibling)) =
+                (canonical_bytes(eval_main), canonical_bytes(eval_sibling))
+            else {
+                return false;
+            };
             let root = &commitment.layer_roots[layer_idx];
-            if !merkle_verify(&scalar_to_bytes(eval_main), proof_main, root) {
+            if !merkle_verify(&leaf_main, proof_main, root) {
                 return false;
             }
-            if !merkle_verify(&scalar_to_bytes(eval_sibling), proof_sibling, root) {
+            if !merkle_verify(&leaf_sibling, proof_sibling, root) {
                 return false;
             }
             // Verify the folding step produces the next layer's
@@ -422,15 +479,45 @@ pub struct StarkProof {
     pub fri_queries: Vec<(usize, FriQueryOpening)>,
 }
 
+/// The Fiat-Shamir transcript's opening: the domain tag and the whole
+/// statement (`n`, the query count, the FRI layer count and both
+/// boundary rows with their positions), absorbed before the trace
+/// commitment so every challenge depends on the statement.
+pub fn statement_transcript(air: &Air, n_queries: usize) -> Vec<u8> {
+    let mut transcript = FS_TAG.as_bytes().to_vec();
+    absorb_usize(&mut transcript, air.n);
+    absorb_usize(&mut transcript, n_queries);
+    absorb_usize(&mut transcript, air.n.trailing_zeros() as usize + 1);
+    absorb_usize(&mut transcript, 2);
+    for (pos, value) in [
+        (0, &air.boundary_start),
+        (air.n.saturating_sub(1), &air.boundary_end),
+    ] {
+        absorb_usize(&mut transcript, pos);
+        transcript.extend_from_slice(&field_bytes(value));
+    }
+    transcript
+}
+
 /// **Prove** that `air.execute()` produces a trace satisfying the
 /// AIR's constraints, as the spot-check argument of the module docs:
 /// the trace is committed via a Merkle tree, the boundary rows are
 /// opened, and the verifier checks the transition at `n_queries`
 /// Fiat-Shamir positions.  FRI on the trace adds no soundness here.
 pub fn prove(air: &Air, n_queries: usize) -> Option<StarkProof> {
-    let trace = air.execute();
+    prove_trace(air, &air.execute(), n_queries, 1)
+}
+
+/// [`prove`] for a given trace, with FRI folded to `fri_final` values
+/// (the tests build forgeries with it).
+fn prove_trace(
+    air: &Air,
+    trace: &[BigUint],
+    n_queries: usize,
+    fri_final: usize,
+) -> Option<StarkProof> {
     let n = trace.len();
-    if !n.is_power_of_two() {
+    if !n.is_power_of_two() || n != air.n {
         return None;
     }
     let omega = super::plonk::primitive_nth_root(n);
@@ -446,12 +533,12 @@ pub fn prove(air: &Air, n_queries: usize) -> Option<StarkProof> {
     let trace_tree = MerkleTree::from_leaves(&leaves);
     let trace_root = trace_tree.root();
 
-    // Start the Fiat-Shamir transcript with the trace commitment.
-    let mut transcript_state = FS_TAG.as_bytes().to_vec();
+    // The Fiat-Shamir transcript: the statement, then the trace commitment.
+    let mut transcript_state = statement_transcript(air, n_queries);
     transcript_state.extend_from_slice(&trace_root[..]);
 
     // FRI commit on the trace polynomial evaluations.
-    let fri = fri_commit(&trace, &domain, &mut transcript_state);
+    let fri = fri_commit_to(trace, &domain, &mut transcript_state, fri_final);
 
     // Query phase: pick n_queries positions via Fiat-Shamir.
     let query_positions = query_positions(&mut transcript_state, n_queries, n);
@@ -491,36 +578,44 @@ pub fn prove(air: &Air, n_queries: usize) -> Option<StarkProof> {
 
 /// **Verify** the spot-check argument (module docs, "Honest scope").
 ///
-/// Rejects unless: there is at least one query; every query position
-/// is the one the transcript dictates; every opening is a Merkle path
-/// at its own position; both boundary rows hold the public values;
-/// the transition holds between each queried row and its successor;
-/// and the FRI openings (on the committed trace) fold consistently.
-pub fn verify(air: &Air, proof: &StarkProof) -> bool {
+/// Rejects unless: the proof has exactly the verifier's `n_queries`
+/// queries (at least one) and `log₂ n` FRI folds; every query position
+/// is the one the transcript (statement first) dictates; every opening
+/// is a Merkle path at its own position over a canonical field value;
+/// both boundary rows hold the public values; the transition holds
+/// between each queried row and its successor; and the FRI openings
+/// (on the committed trace) fold consistently.
+pub fn verify(air: &Air, proof: &StarkProof, n_queries: usize) -> bool {
     let n = air.n;
-    if !n.is_power_of_two() || n < 2 {
+    let q = n_queries;
+    if !n.is_power_of_two() || n < 2 || q == 0 {
         return false;
     }
-    let q = proof.trace_queries.len();
-    if q == 0
+    if proof.trace_queries.len() != q
         || proof.trace_next.len() != q
         || proof.fri_queries.len() != q
         || proof.boundary_openings.len() != 2
     {
         return false;
     }
-    // FRI runs on the committed trace, so its first layer is the trace.
-    if proof.fri.layer_roots.first() != Some(&proof.trace_commitment_root) {
+    // FRI runs on the committed trace, so its first layer is the trace,
+    // and it folds n values to one: the depth is fixed by n.
+    let depth = n.trailing_zeros() as usize;
+    if proof.fri.layer_roots.first() != Some(&proof.trace_commitment_root)
+        || proof.fri.layer_roots.len() != depth + 1
+    {
         return false;
     }
     let opened = |(pos, val, path): &(usize, BigUint, MerkleProof), at: usize| -> bool {
         *pos == at
             && path.leaf_index == at
-            && merkle_verify(&scalar_to_bytes(val), path, &proof.trace_commitment_root)
+            && path.path.len() == depth
+            && canonical_bytes(val)
+                .is_some_and(|leaf| merkle_verify(&leaf, path, &proof.trace_commitment_root))
     };
 
     // Replay Fiat-Shamir and derive the positions the prover had to use.
-    let mut transcript_state = FS_TAG.as_bytes().to_vec();
+    let mut transcript_state = statement_transcript(air, q);
     transcript_state.extend_from_slice(&proof.trace_commitment_root[..]);
     let fri_transcript_initial = transcript_state.clone();
     let mut after_fri = fri_transcript_after(&transcript_state, &proof.fri);
@@ -644,7 +739,7 @@ mod tests {
     fn stark_prove_verify_doubling() {
         let air = doubling_air(8, 1);
         let proof = prove(&air, 3).unwrap();
-        assert!(verify(&air, &proof));
+        assert!(verify(&air, &proof, 3));
     }
 
     // Negative controls: each builds a proof of a FALSE statement (or
@@ -674,7 +769,7 @@ mod tests {
             ..false_air.clone()
         };
         let forged = prove(&cheat, 64).unwrap();
-        assert!(!verify(&false_air, &forged));
+        assert!(!verify(&false_air, &forged, 64));
     }
 
     /// A proof with no queries proves nothing.
@@ -685,7 +780,8 @@ mod tests {
         proof.trace_queries.clear();
         proof.trace_next.clear();
         proof.fri_queries.clear();
-        assert!(!verify(&air, &proof));
+        assert!(!verify(&air, &proof, 8));
+        assert!(!verify(&air, &proof, 0));
     }
 
     /// An honest proof (output 128) presented for another output.
@@ -696,7 +792,7 @@ mod tests {
             boundary_end: BigUint::from(256u32),
             ..doubling_air(8, 1)
         };
-        assert!(!verify(&other, &proof));
+        assert!(!verify(&other, &proof, 8));
     }
 
     /// The prover may not choose its query positions.
@@ -711,6 +807,134 @@ mod tests {
             air.execute()[moved].clone(),
             proof.trace_queries[0].2.clone(),
         );
-        assert!(!verify(&air, &proof));
+        assert!(!verify(&air, &proof, 8));
+    }
+
+    // Negative controls from the 2026-10-17 sheriff re-audit
+    // (crypto-autoresearcher research/sheriff/SHF-20261017-e4d7f6, V1/V3).
+
+    /// The verifier, not the prover, fixes the query count: a false
+    /// output proved with one query is rejected by a 20-query verifier.
+    #[test]
+    fn rejects_fewer_queries_than_verifier() {
+        let air = doubling_air(8, 1);
+        assert!(verify(&air, &prove(&air, 20).unwrap(), 20));
+        assert!(!verify(&air, &prove(&air, 3).unwrap(), 20));
+        let false_air = Air {
+            boundary_end: BigUint::from(12345u32),
+            ..doubling_air(8, 1)
+        };
+        let cheat = Air {
+            transition: Arc::new(|x: &BigUint| {
+                if *x == BigUint::from(64u32) {
+                    BigUint::from(12345u32)
+                } else {
+                    fr_mul(x, &BigUint::from(2u32))
+                }
+            }),
+            ..false_air.clone()
+        };
+        assert!(!verify(&false_air, &prove(&cheat, 1).unwrap(), 20));
+    }
+
+    /// A prefix of a proof is not a proof: the query count is in the
+    /// transcript, so truncating moves every position.
+    #[test]
+    fn rejects_truncated_proof() {
+        let air = doubling_air(8, 1);
+        let mut proof = prove(&air, 20).unwrap();
+        proof.trace_queries.truncate(3);
+        proof.trace_next.truncate(3);
+        proof.fri_queries.truncate(3);
+        assert!(!verify(&air, &proof, 20));
+        assert!(!verify(&air, &proof, 3));
+    }
+
+    /// FRI folded zero times (transcript re-derived) is rejected: the
+    /// depth is fixed by `n`, not chosen by the prover.
+    #[test]
+    fn rejects_zero_fold_fri() {
+        let air = doubling_air(8, 1);
+        let proof = prove_trace(&air, &air.execute(), 20, 8).unwrap();
+        assert_eq!(proof.fri.layer_roots.len(), 1);
+        assert!(!verify(&air, &proof, 20));
+    }
+
+    /// An honest doubling proof does not verify under another AIR.
+    #[test]
+    fn rejects_wrong_air() {
+        let proof = prove(&doubling_air(8, 1), 20).unwrap();
+        let tripling = Air {
+            transition: Arc::new(|x: &BigUint| fr_mul(x, &BigUint::from(3u32))),
+            ..doubling_air(8, 1)
+        };
+        assert!(!verify(&tripling, &proof, 20));
+        assert!(!verify(&doubling_air(16, 1), &proof, 20));
+    }
+
+    /// One query repeated in place of another is rejected.
+    #[test]
+    fn rejects_duplicated_query() {
+        let air = doubling_air(8, 1);
+        let mut proof = prove(&air, 20).unwrap();
+        let j = (1..20)
+            .find(|&j| proof.trace_queries[j].0 != proof.trace_queries[0].0)
+            .expect("two distinct positions");
+        proof.trace_queries[j] = proof.trace_queries[0].clone();
+        proof.trace_next[j] = proof.trace_next[0].clone();
+        proof.fri_queries[j] = proof.fri_queries[0].clone();
+        assert!(!verify(&air, &proof, 20));
+    }
+
+    /// A table committed with a non-canonical encoding (`v + r`) folds
+    /// like the canonical one but has a fresh root, hence fresh
+    /// challenges and positions for the same field values: opened
+    /// values must be `< r`.
+    #[test]
+    fn fri_rejects_noncanonical_values() {
+        let n = 16;
+        let omega = super::super::plonk::primitive_nth_root(n);
+        let domain: Vec<BigUint> = (0..n)
+            .scan(BigUint::one(), |acc, _| {
+                let x = acc.clone();
+                *acc = fr_mul(acc, &omega);
+                Some(x)
+            })
+            .collect();
+        let p = Poly::from_coeffs(vec![BigUint::from(1u32), BigUint::from(2u32)]);
+        let canonical: Vec<BigUint> = domain.iter().map(|x| p.evaluate(x)).collect();
+        let mut noncanonical = canonical.clone();
+        noncanonical[3] += scalar_modulus();
+        for (evals, expect) in [(canonical, true), (noncanonical, false)] {
+            let mut transcript = b"FRI-TEST".to_vec();
+            let commitment = fri_commit(&evals, &domain, &mut transcript);
+            let queries: Vec<(usize, FriQueryOpening)> =
+                (0..n).map(|p| (p, fri_query(&commitment, p))).collect();
+            assert_eq!(
+                fri_verify(&commitment, &domain, &queries, b"FRI-TEST"),
+                expect
+            );
+        }
+    }
+
+    /// An oversize opened value makes verify return false, not panic.
+    #[test]
+    fn oversize_value_returns_false() {
+        let air = doubling_air(8, 1);
+        let mut proof = prove(&air, 20).unwrap();
+        proof.trace_queries[0].1 = BigUint::one() << 300;
+        assert!(!verify(&air, &proof, 20));
+        let mut proof = prove(&air, 20).unwrap();
+        proof.fri_queries[0].1.openings[0].0 = BigUint::one() << 300;
+        assert!(!verify(&air, &proof, 20));
+    }
+
+    /// The last FRI root is bound to the final constant.
+    #[test]
+    fn rejects_tampered_last_fri_root() {
+        let air = doubling_air(8, 1);
+        let mut proof = prove(&air, 20).unwrap();
+        *proof.fri.layer_roots.last_mut().unwrap() = [0u8; 32];
+        assert!(!verify(&air, &proof, 20));
     }
 }

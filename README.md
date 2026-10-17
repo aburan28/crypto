@@ -481,7 +481,7 @@ another's success condition. The doc explains both.
 | `zk::bulletproofs`    | Bulletproofs range proofs                       |
 | `zk::groth16`         | Groth16 zk-SNARK skeleton                       |
 | `zk::plonk`           | PLONK zk-SNARK skeleton                         |
-| `zk::stark` / `stark_v2` | STARK proof system skeleton                   |
+| `zk::stark` / `stark_v2` | STARK proof systems: unaudited, educational, not for security use |
 
 ---
 

@@ -24,6 +24,13 @@
 //! 3. **Degree-bounded FRI** folds `Comp`'s evaluations `log₂ n` times
 //!    to a final layer of `β` values, which must be constant.
 //!
+//! The Fiat-Shamir transcript absorbs the statement first (domain
+//! tag, [`AirV2::air_id`], `n`, `β`, `q`, the FRI layer count and every
+//! boundary position and value; [`statement_transcript`]), then the
+//! trace commitment, so `α₁, α₂` are drawn only after the statement is
+//! fixed; the FRI layer roots, the last root and the final constant
+//! are absorbed before the query positions.
+//!
 //! The verifier re-derives `α₁, α₂`, the FRI challenges and the query
 //! positions from the transcript; at each of `query_count` positions
 //! it opens `f(x)`, `f(ω·x)` and `Comp(x)` (each Merkle path bound to
@@ -31,14 +38,18 @@
 //! first layer holds that value, and checks the folding down to the
 //! constant final layer.
 //!
-//! **Soundness.**  Under the Reed–Solomon proximity conjecture each
-//! query catches a cheating prover with probability about
-//! `1 − 1/β`, so `q` queries give about `q · log₂ β` bits (240 for
-//! the default `β = 8, q = 80`; 40 for [`StarkConfig::fast`]).  Proven
-//! bounds are weaker (about half that), there is no grinding, no
-//! out-of-domain (DEEP) sample and no zero-knowledge masking, the
-//! transition must be of degree 1, and SHA-256 and the 255-bit field
-//! cap everything.
+//! **Soundness: no concrete level is claimed.**  For an idealized
+//! implementation of this construction (random-oracle hash, every
+//! commitment absorbed), the Reed–Solomon proximity *conjecture* puts
+//! the FRI query-phase term at about `q · log₂ β` bits.  That is a
+//! conjecture, not a proven bound, and it is capped by the hash and
+//! the field: the SHA-256 Merkle commitments give at most about 128
+//! bits (collision resistance), and challenges live in the 255-bit
+//! scalar field.  This module has no out-of-domain (DEEP) sample, no
+//! grinding (proof of work) and no zero-knowledge masking; the
+//! transition must be of degree 1 and is bound to the transcript only
+//! through the caller's [`AirV2::air_id`]; and the code is unaudited.
+//! It is educational and claims no security level.
 //!
 //! ## API
 //!
@@ -50,8 +61,8 @@
 use super::merkle::{merkle_verify, MerkleProof, MerkleTree};
 use super::polynomial::{fr_add, fr_inv, fr_mul, fr_sub, Poly};
 use super::stark::{
-    fri_commit_to, fri_query, fri_transcript_after, fri_verify, query_positions, FriCommitment,
-    FriQueryOpening,
+    absorb_usize, canonical_bytes, field_bytes, fri_commit_to, fri_query, fri_transcript_after,
+    fri_verify, query_positions, scalar_to_bytes, FriCommitment, FriQueryOpening,
 };
 use crate::bls12_381::fq::scalar_modulus;
 use crate::hash::sha256::sha256;
@@ -69,8 +80,8 @@ pub struct StarkConfig {
 }
 
 impl StarkConfig {
-    /// Default: `blow_up = 8`, `query_count = 80`: about 240 bits
-    /// under the proximity conjecture (module docs, "Soundness").
+    /// Default: `blow_up = 8`, `query_count = 80`.  No security level
+    /// is claimed (module docs, "Soundness").
     #[allow(clippy::should_implement_trait)]
     pub fn default() -> Self {
         Self {
@@ -78,8 +89,8 @@ impl StarkConfig {
             query_count: 80,
         }
     }
-    /// Faster: `blow_up = 4`, `query_count = 20`, about 40 bits
-    /// conjectured.  Good for tests.
+    /// Faster: `blow_up = 4`, `query_count = 20`.  For tests; no
+    /// security level is claimed.
     pub fn fast() -> Self {
         Self {
             blow_up: 4,
@@ -92,6 +103,10 @@ impl StarkConfig {
 /// adjacent trace rows (`f(X), f(ω·X)`).
 #[derive(Clone)]
 pub struct AirV2 {
+    /// Identifier of the transition, absorbed with the statement: two
+    /// AIRs whose transitions differ must have different ids (the
+    /// closure itself cannot be hashed).
+    pub air_id: &'static str,
     /// Number of trace rows.  Must be a power of 2.
     pub n: usize,
     /// Boundary constraints: `(position, expected_value)` pairs.
@@ -125,6 +140,7 @@ impl AirV2 {
         let generate_trace = Arc::new(gen);
         let boundary = vec![(0, BigUint::from(s))];
         Self {
+            air_id: "doubling",
             n,
             boundary,
             transition,
@@ -221,13 +237,38 @@ fn composition_at(
     acc
 }
 
-/// Fiat-Shamir state up to FRI: absorbs the trace commitment, draws
-/// `α₁, α₂`, absorbs the composition commitment.
+/// The Fiat-Shamir transcript's opening: the domain tag and the whole
+/// statement (the AIR id, length-prefixed; `n`, `β`, `q`, the FRI layer
+/// count, the number of boundaries and each `(position, value)`), so no
+/// challenge is drawn before the statement is fixed.
+pub fn statement_transcript(air: &AirV2, config: &StarkConfig) -> Vec<u8> {
+    let mut transcript = FS_TAG.as_bytes().to_vec();
+    absorb_usize(&mut transcript, air.air_id.len());
+    transcript.extend_from_slice(air.air_id.as_bytes());
+    for x in [
+        air.n,
+        config.blow_up,
+        config.query_count,
+        air.n.trailing_zeros() as usize + 1,
+        air.boundary.len(),
+    ] {
+        absorb_usize(&mut transcript, x);
+    }
+    for (pos, value) in &air.boundary {
+        absorb_usize(&mut transcript, *pos);
+        transcript.extend_from_slice(&field_bytes(value));
+    }
+    transcript
+}
+
+/// Fiat-Shamir state up to FRI: the statement, then the trace
+/// commitment, draws `α₁, α₂`, absorbs the composition commitment.
 fn transcript_to_fri(
+    statement: &[u8],
     trace_commit: &[u8; 32],
     composition_commit: &[u8; 32],
 ) -> (Vec<u8>, BigUint, BigUint) {
-    let mut transcript = FS_TAG.as_bytes().to_vec();
+    let mut transcript = statement.to_vec();
     transcript.extend_from_slice(&trace_commit[..]);
     let alpha1_bytes = sha256(&transcript);
     transcript.extend_from_slice(&alpha1_bytes);
@@ -254,13 +295,6 @@ pub struct StarkProofV2 {
     pub fri_openings: Vec<(usize, FriQueryOpening)>,
 }
 
-fn scalar_to_bytes(s: &BigUint) -> Vec<u8> {
-    let mut buf = [0u8; 32];
-    let bytes = s.to_bytes_be();
-    buf[32 - bytes.len()..].copy_from_slice(&bytes);
-    buf.to_vec()
-}
-
 /// **Prove** the AIR is satisfied by an executed trace.  The prover
 /// does not check the trace: an invalid one yields a proof that
 /// [`verify`] rejects.
@@ -268,6 +302,9 @@ pub fn prove(air: &AirV2, config: &StarkConfig) -> Option<StarkProofV2> {
     let n = air.n;
     let beta = config.blow_up;
     if !n.is_power_of_two() || n < 2 || !beta.is_power_of_two() || beta < 2 {
+        return None;
+    }
+    if air.boundary.iter().any(|(pos, _)| *pos >= n) {
         return None;
     }
     let trace = (air.generate_trace)();
@@ -286,8 +323,9 @@ pub fn prove(air: &AirV2, config: &StarkConfig) -> Option<StarkProofV2> {
     let trace_tree = MerkleTree::from_leaves(&trace_leaves);
     let trace_commit = trace_tree.root();
 
-    // α₁, α₂ depend only on the trace commitment.
-    let (_, alpha1, alpha2) = transcript_to_fri(&trace_commit, &[0u8; 32]);
+    // α₁, α₂ depend on the statement and the trace commitment.
+    let statement = statement_transcript(air, config);
+    let (_, alpha1, alpha2) = transcript_to_fri(&statement, &trace_commit, &[0u8; 32]);
     let composition_lde: Vec<BigUint> = (0..lde_size)
         .map(|i| {
             composition_at(
@@ -304,7 +342,7 @@ pub fn prove(air: &AirV2, config: &StarkConfig) -> Option<StarkProofV2> {
     let comp_leaves: Vec<Vec<u8>> = composition_lde.iter().map(scalar_to_bytes).collect();
     let comp_tree = MerkleTree::from_leaves(&comp_leaves);
     let composition_commit = comp_tree.root();
-    let (mut transcript, _, _) = transcript_to_fri(&trace_commit, &composition_commit);
+    let (mut transcript, _, _) = transcript_to_fri(&statement, &trace_commit, &composition_commit);
 
     // FRI to a constant final layer of β values: degree < n.
     let fri = fri_commit_to(&composition_lde, &h_lde, &mut transcript, beta);
@@ -359,14 +397,21 @@ pub fn verify(air: &AirV2, config: &StarkConfig, proof: &StarkProofV2) -> bool {
     let h_lde = coset(lde_size, &coset_shift());
     let h_trace = subgroup(n);
 
-    let (fri_transcript_initial, alpha1, alpha2) =
-        transcript_to_fri(&proof.trace_commit, &proof.composition_commit);
+    let (fri_transcript_initial, alpha1, alpha2) = transcript_to_fri(
+        &statement_transcript(air, config),
+        &proof.trace_commit,
+        &proof.composition_commit,
+    );
     let mut after_fri = fri_transcript_after(&fri_transcript_initial, &proof.fri);
     let positions = query_positions(&mut after_fri, q, lde_size);
 
+    let depth = lde_size.trailing_zeros() as usize;
     let opened =
         |(pos, val, path): &(usize, BigUint, MerkleProof), at: usize, root: &[u8; 32]| -> bool {
-            *pos == at && path.leaf_index == at && merkle_verify(&scalar_to_bytes(val), path, root)
+            *pos == at
+                && path.leaf_index == at
+                && path.path.len() == depth
+                && canonical_bytes(val).is_some_and(|leaf| merkle_verify(&leaf, path, root))
         };
     for (i, &p) in positions.iter().enumerate() {
         let (fx, f_wx, comp) = (
@@ -521,6 +566,139 @@ mod tests {
         proof.trace_next_openings.swap(a, b);
         proof.composition_openings.swap(a, b);
         proof.fri_openings.swap(a, b);
+        assert!(!verify(&air, &cfg, &proof));
+    }
+
+    // Negative controls from the 2026-10-17 sheriff re-audit
+    // (crypto-autoresearcher research/sheriff/SHF-20261017-e4d7f6, V1/V3).
+
+    /// Frozen heart: the prover commits to a trace that breaks the
+    /// transition at row 0, computes `α₁, α₂`, and only then picks the
+    /// public input `v` that cancels the composition's pole at `ω⁰`.
+    /// The statement is now in the transcript, so the `α`s the forger
+    /// can compute before choosing `v` are not the verifier's.
+    #[test]
+    fn rejects_frozen_heart_forgery() {
+        let n = 8;
+        let mut cheat: Vec<BigUint> = (0..n).map(|i| BigUint::from(1u64 << i)).collect();
+        cheat[0] = BigUint::from(5u32); // breaks 0 → 1
+        let statement = |v: BigUint| {
+            let trace = cheat.clone();
+            AirV2 {
+                boundary: vec![(0, v), (7, BigUint::from(128u32))],
+                generate_trace: Arc::new(move || trace.clone()),
+                ..AirV2::doubling(n, 1)
+            }
+        };
+        for cfg in [StarkConfig::fast(), StarkConfig::default()] {
+            // The trace commitment does not depend on the statement.
+            let placeholder = statement(BigUint::zero());
+            let trace_commit = prove(&placeholder, &cfg).unwrap().trace_commit;
+            let (_, alpha1, _) = transcript_to_fri(
+                &statement_transcript(&placeholder, &cfg),
+                &trace_commit,
+                &[0u8; 32],
+            );
+            // v = t₀ + α₁ · C(t₀, t₁) / Z'(ω⁰), Z'(ω⁰) = Π_{0<i<n−1} (1 − ωⁱ);
+            // the forged boundary is the first, so its α₂ weight is 1.
+            let h = subgroup(n);
+            let z_prime =
+                (1..n - 1).fold(BigUint::one(), |acc, i| fr_mul(&acc, &fr_sub(&h[0], &h[i])));
+            let c = (placeholder.transition)(&cheat[0], &cheat[1]);
+            let v = fr_add(
+                &cheat[0],
+                &fr_mul(&fr_mul(&alpha1, &c), &fr_inv(&z_prime).unwrap()),
+            );
+            assert_ne!(v, BigUint::one(), "the forged statement is false");
+            let forged_air = statement(v);
+            let forged = prove(&forged_air, &cfg).unwrap();
+            assert_eq!(forged.trace_commit, trace_commit);
+            assert!(!verify(&forged_air, &cfg, &forged));
+        }
+    }
+
+    /// An honest doubling proof does not verify under another AIR,
+    /// including the same transition under another id.
+    #[test]
+    fn rejects_wrong_air() {
+        let cfg = StarkConfig::fast();
+        let proof = prove(&AirV2::doubling(8, 1), &cfg).unwrap();
+        let tripling = AirV2 {
+            air_id: "tripling",
+            transition: Arc::new(|prev: &BigUint, next: &BigUint| {
+                fr_sub(next, &fr_mul(prev, &BigUint::from(3u32)))
+            }),
+            ..AirV2::doubling(8, 1)
+        };
+        assert!(!verify(&tripling, &cfg, &proof));
+        let renamed = AirV2 {
+            air_id: "doubling-renamed",
+            ..AirV2::doubling(8, 1)
+        };
+        assert!(!verify(&renamed, &cfg, &proof));
+        assert!(!verify(&AirV2::doubling(16, 1), &cfg, &proof));
+    }
+
+    /// A proof truncated to its first queries is rejected.
+    #[test]
+    fn rejects_truncated_proof() {
+        let air = AirV2::doubling(8, 1);
+        let cfg = StarkConfig::fast();
+        let mut proof = prove(&air, &cfg).unwrap();
+        proof.trace_openings.truncate(10);
+        proof.trace_next_openings.truncate(10);
+        proof.composition_openings.truncate(10);
+        proof.fri_openings.truncate(10);
+        assert!(!verify(&air, &cfg, &proof));
+        let ten = StarkConfig {
+            query_count: 10,
+            ..cfg
+        };
+        assert!(!verify(&air, &ten, &proof));
+    }
+
+    /// One query repeated in place of another is rejected.
+    #[test]
+    fn rejects_duplicated_query() {
+        let air = AirV2::doubling(8, 1);
+        let cfg = StarkConfig::fast();
+        let mut proof = prove(&air, &cfg).unwrap();
+        let j = (1..cfg.query_count)
+            .find(|&j| proof.trace_openings[j].0 != proof.trace_openings[0].0)
+            .expect("two distinct positions");
+        proof.trace_openings[j] = proof.trace_openings[0].clone();
+        proof.trace_next_openings[j] = proof.trace_next_openings[0].clone();
+        proof.composition_openings[j] = proof.composition_openings[0].clone();
+        proof.fri_openings[j] = proof.fri_openings[0].clone();
+        assert!(!verify(&air, &cfg, &proof));
+    }
+
+    /// Oversize or non-canonical opened values make verify return
+    /// false, never panic.
+    #[test]
+    fn rejects_oversize_and_noncanonical_values() {
+        let air = AirV2::doubling(8, 1);
+        let cfg = StarkConfig::fast();
+        let honest = prove(&air, &cfg).unwrap();
+        let mut proof = honest.clone();
+        proof.trace_openings[0].1 = BigUint::one() << 300;
+        assert!(!verify(&air, &cfg, &proof));
+        let mut proof = honest.clone();
+        proof.composition_openings[0].1 = BigUint::one() << 300;
+        proof.fri_openings[0].1.openings[0].0 = BigUint::one() << 300;
+        assert!(!verify(&air, &cfg, &proof));
+        let mut proof = honest;
+        proof.fri.final_constant += scalar_modulus();
+        assert!(!verify(&air, &cfg, &proof));
+    }
+
+    /// The last FRI root is bound: replacing it is rejected.
+    #[test]
+    fn rejects_tampered_last_fri_root() {
+        let air = AirV2::doubling(8, 1);
+        let cfg = StarkConfig::fast();
+        let mut proof = prove(&air, &cfg).unwrap();
+        *proof.fri.layer_roots.last_mut().unwrap() = [0u8; 32];
         assert!(!verify(&air, &cfg, &proof));
     }
 }
