@@ -3,18 +3,23 @@
 # without the 4 GB of research archives it never reads. docs/sparse-checkout.md.
 #
 #   scripts/sparse-checkout.sh status
-#   scripts/sparse-checkout.sh apply [--path P]...     # the harness profile
+#   scripts/sparse-checkout.sh apply [--profile NAME] [--path P]...  # harness by default
 #   scripts/sparse-checkout.sh add --path P...         # widen the current profile
-#   scripts/sparse-checkout.sh patterns [--path P]...  # print the rules, change nothing
+#   scripts/sparse-checkout.sh patterns [--profile NAME] [--path P]...  # print, change nothing
 #   scripts/sparse-checkout.sh disable                 # full checkout again
-#   scripts/sparse-checkout.sh clone URL DIR [--branch B] [--path P]...
+#   scripts/sparse-checkout.sh clone URL DIR [--branch B] [--profile NAME] [--path P]...
 #
-# The profile is everything except the large research/ directories below,
+# Profile harness: everything except the large research/ directories below,
 # plus every research/ path the Rust code needs: include_str!/include_bytes!
 # targets anywhere (compile time) and research/ string literals in src/ and
 # tests/ (read by cargo test). Those are recomputed from the sources on every
 # apply. New research/<topic>_<date>/ directories, where ecbench sessions land,
 # are included by default, so `git add` accepts them.
+#
+# Profile minimal: the root files, dot-directories and the CORE directories
+# below, plus the Cargo targets declared outside them and the same Rust
+# references (any top-level directory, not only research/). Every other
+# directory, research/ included, is left out until named with --path.
 #
 # Excluded files stay in HEAD and in the index (skip-worktree): `git ls-files`
 # still lists them. Off disk is not absent; `add --path` materializes a path.
@@ -42,7 +47,10 @@ HEAVY=(
   research/rho_parity_20260915
   research/boolean_basis_transport_20260923
 )
+# Directories the minimal profile keeps whole.
+CORE=(src docs scripts tools benches examples tests store)
 STATE="# sparse-checkout.sh"
+PROFILE=harness
 SEG='[A-Za-z0-9_.@+=,-]'
 
 die() { echo "sparse-checkout: $*" >&2; exit 2; }
@@ -60,16 +68,32 @@ normpath() {
   echo "${out[*]}"
 }
 
-# research/ paths the Rust code compiles in or reads, one per line.
+# Paths the Rust code compiles in or reads, one per line.
 candidates() {
-  local roots=() r file target
-  for r in src tests benches examples build.rs; do [ -e "$r" ] && roots+=("$r"); done
+  local roots=() r file line target
+  for r in src tests benches examples build.rs $(cargo_targets); do
+    [ -e "$r" ] && roots+=("$r")
+  done
   [ ${#roots[@]} -gt 0 ] || return 0
-  grep -rnoE --include='*.rs' 'include_(str|bytes)!\([[:space:]]*"[^"]+"' "${roots[@]}" 2>/dev/null |
-    while IFS= read -r line; do
-      file=${line%%:*}
-      target=${line#*\"}; target=${target%\"}
-      normpath "$(dirname "$file")/$target"
+  # Whole files, newlines folded, so include_str!(\n "path" ) is found too.
+  grep -rlE --include='*.rs' 'include_(str|bytes)!' "${roots[@]}" 2>/dev/null |
+    while IFS= read -r file; do
+      { tr '\n' ' ' < "$file" |
+          grep -oE 'include_(str|bytes)!\([[:space:]]*"[^"]+"' || true; } |
+        while IFS= read -r line; do
+          target=${line#*\"}; target=${target%\"}
+          normpath "$(dirname "$file")/$target"
+        done
+    done
+  # #[path = "..."] modules, with their directory (they declare submodules).
+  grep -rlE --include='*.rs' '#\[path[[:space:]]*=' "${roots[@]}" 2>/dev/null |
+    while IFS= read -r file; do
+      { grep -oE '#\[path[[:space:]]*=[[:space:]]*"[^"]+"' "$file" || true; } |
+        while IFS= read -r line; do
+          target=${line#*\"}; target=${target%\"}
+          target=$(normpath "$(dirname "$file")/$target")
+          echo "$(dirname "$target")/"
+        done
     done
   for r in src tests; do
     [ -d "$r" ] && grep -rhoE --include='*.rs' "(\.\./)*research/$SEG+(/$SEG+)*" "$r" 2>/dev/null |
@@ -78,10 +102,22 @@ candidates() {
   return 0
 }
 
+# Directories of the Cargo targets ([[bin]], [[bench]], ...) declared by path
+# in Cargo.toml: a target's sibling modules live beside it.
+cargo_targets() {
+  [ -f Cargo.toml ] || return 0
+  sed -nE 's/^[[:space:]]*path[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' Cargo.toml |
+    while IFS= read -r target; do echo "$(dirname "$target")/"; done | sort -u
+}
+
 # Rule lines for the tracked paths among the candidates: a file, or dir/.
+# Profile harness keeps only research/ ones (the rest is already present).
+# A bare top-level directory ("research/," in prose) is never a reference.
 referenced() {
-  local tracked=$1 cand
-  candidates | sed -E 's/[.,:;]+$//' | grep '^research/' | sort -u |
+  local tracked=$1 cand keep='^research/'
+  [ "$PROFILE" = minimal ] && keep='/'
+  { candidates; if [ "$PROFILE" = minimal ]; then cargo_targets; fi; } |
+    sed -E 's/[.,:;]+$//' | grep -- "$keep" | grep -vE '^[^/]+/?$' | sort -u |
     while IFS= read -r cand; do
       if grep -qxF -- "$cand" "$tracked"; then
         echo "/$cand"
@@ -97,9 +133,24 @@ include() {
   local path=${1#/} h
   echo "/$path"
   case "$path" in */) ;; *) return 0 ;; esac
+  [ "$PROFILE" = harness ] || return 0
   for h in "${HEAVY[@]}"; do
     case "$h/" in "$path"?*) echo "/$h/" ;; esac
   done
+}
+
+# The base rules of the profile, before references and named paths.
+base_rules() {
+  local h
+  if [ "$PROFILE" = minimal ]; then
+    echo "/*"
+    echo "!/*/"
+    echo "/.*/"
+    for h in "${CORE[@]}"; do echo "/$h/"; done
+  else
+    echo "/*"
+    for h in "${HEAVY[@]}"; do echo "!/$h/"; done
+  fi
 }
 
 render() {  # render [paths...]
@@ -107,11 +158,10 @@ render() {  # render [paths...]
   tracked=$(mktemp)
   git ls-files > "$tracked"
   [ -s "$tracked" ] || git ls-tree -r --name-only HEAD > "$tracked"
-  echo "$STATE profile=harness"
+  echo "$STATE profile=$PROFILE"
   for p in "$@"; do echo "$STATE path=$p"; done
-  echo "/*"
-  for h in "${HEAVY[@]}"; do echo "!/$h/"; done
-  echo "# research paths the Rust code compiles in or reads"
+  base_rules
+  echo "# paths the Rust code and Cargo.toml compile in or read"
   referenced "$tracked"
   if [ $# -gt 0 ]; then
     echo "# named paths"
@@ -123,6 +173,11 @@ render() {  # render [paths...]
 rules_file() { git rev-parse --git-path info/sparse-checkout; }
 
 is_sparse() { [ "$(git config --bool core.sparseCheckout 2>/dev/null)" = true ]; }
+
+saved_profile() {
+  is_sparse || return 0
+  sed -n "s/^$STATE profile=//p" "$(rules_file)" 2>/dev/null | head -n 1
+}
 
 saved_paths() {
   is_sparse || return 0
@@ -140,7 +195,7 @@ status() {
   if is_sparse; then
     skipped=$(git ls-files -t | grep -c '^S ' || true)
     if grep -q "^$STATE profile=" "$(rules_file)" 2>/dev/null; then
-      echo "sparse checkout (profile harness): $((total - skipped)) of $total tracked files on disk, $skipped skipped"
+      echo "sparse checkout (profile $(saved_profile)): $((total - skipped)) of $total tracked files on disk, $skipped skipped"
     else
       echo "sparse checkout (rules not set by this script): $((total - skipped)) of $total tracked files on disk"
     fi
@@ -156,6 +211,10 @@ parse_paths() {
   while [ $# -gt 0 ]; do
     case "$1" in
       --path) [ $# -ge 2 ] || die "--path needs a value"; PATHS+=("$2"); shift 2 ;;
+      --profile)
+        [ $# -ge 2 ] || die "--profile needs a value"
+        case "$2" in harness|minimal) PROFILE=$2 ;; *) die "unknown profile '$2' (harness, minimal)" ;; esac
+        shift 2 ;;
       *) die "unexpected argument: $1" ;;
     esac
   done
@@ -165,7 +224,7 @@ cmd=${1:-status}
 [ $# -gt 0 ] && shift
 
 if [ "$cmd" = clone ]; then
-  [ $# -ge 2 ] || die "usage: clone URL DIR [--branch B] [--path P]..."
+  [ $# -ge 2 ] || die "usage: clone URL DIR [--branch B] [--profile NAME] [--path P]..."
   url=$1 dir=$2; shift 2
   branch=()
   if [ "${1:-}" = --branch ]; then
@@ -175,8 +234,7 @@ if [ "$cmd" = clone ]; then
   git clone --filter=blob:none --no-checkout ${branch[@]+"${branch[@]}"} "$url" "$dir"
   cd "$dir"
   # The base rules first, so the sources exist to compute the references from.
-  { echo "/*"; for h in "${HEAVY[@]}"; do echo "!/$h/"; done; } |
-    git sparse-checkout set --no-cone --stdin
+  base_rules | git sparse-checkout set --no-cone --stdin
   git checkout -f -q HEAD
   apply ${PATHS[@]+"${PATHS[@]}"}
   exit 0
@@ -191,6 +249,8 @@ case "$cmd" in
   add)
     { is_sparse && grep -q "^$STATE profile=" "$(rules_file)"; } || die "no profile applied here; run 'apply' first"
     parse_paths "$@"
+    PROFILE=$(saved_profile)
+    case "$PROFILE" in harness|minimal) ;; *) PROFILE=harness ;; esac
     merged=()
     while IFS= read -r p; do
       [ -n "$p" ] && merged+=("$p")
@@ -198,6 +258,6 @@ case "$cmd" in
     apply ${merged[@]+"${merged[@]}"}
     ;;
   disable) git sparse-checkout disable; status ;;
-  -h|--help|help) sed -n '2,21p' "$0" | sed 's/^# \{0,1\}//' ;;
+  -h|--help|help) sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//' ;;
   *) die "unknown command '$cmd' (status, apply, add, patterns, disable, clone)" ;;
 esac

@@ -1,0 +1,16 @@
+[package]
+name = "crypto-analysis-core"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.87"
+publish = false
+description = "Shared avalanche and statistical analysis from the crypto repository"
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+rand = "0.8"
+
+[dev-dependencies]
+sha2 = "0.10"

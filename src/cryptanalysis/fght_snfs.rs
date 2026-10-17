@@ -1390,6 +1390,10 @@ pub mod ecc_implications {
     //!   trapdoored prime field.  FGHT 2017 is evidence that hidden
     //!   structures can be planted undetectably in primes; it is not
     //!   evidence that the same is true for elliptic curves.
+    //!   (Update 2026-10-16: the P-256 seed is now explained as `drand48`
+    //!   output seeded with a 1997 timestamp, which closes the
+    //!   seed-selection route to that worry beyond about 30 bits; see
+    //!   `nist_seed_provenance`.)
 }
 
 // ── Tests ──────────────────────────────────────────────────────────────
