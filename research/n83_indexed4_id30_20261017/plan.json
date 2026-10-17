@@ -1,0 +1,35 @@
+{
+  "arm_names": [
+    "indexed5_id30",
+    "indexed4_id30"
+  ],
+  "binary_path": "/Volumes/SSD990/crypto/artifacts/n83_indexed4_id30_20261017/target/release/examples/koblitz_orbit_dlp_fast",
+  "cap_seconds_per_arm": 2400,
+  "k": 4096,
+  "role": "ordinary_local_candidate_diagnostic",
+  "schema": "n83.indexed4-id30-screen-plan/v1",
+  "sha256": {
+    "answers": "3ceee12fb848cc261433f3cd9e7d297f961effede1974e8c95fa25d9bac68720",
+    "binary": "b3fd21350dc988e3f8980fab870439a1169f2204a990200dba514503c6f69849",
+    "group": "e34d06b3275d86dcb3a659b79adf87dcdc078cebb6f510c4b5c42403d83a1804",
+    "holdout_answers": "05890e113df6df51d1f76b0d7b741b61d0e7e455e74cf386820c6da4871ccd78",
+    "holdout_generator": "b4483a89f78308faad5ce3ca54d9adb7e6c5e4240c9c695adf7b034b98e87eac",
+    "holdout_manifest": "713e2be4b9590566fe4cdd28f37a6346f6475d6ba4fd828086dc846450a1a102",
+    "holdout_protocol": "627071e3e9234b42899f9703c4857a29cb63793bd3e6c4e08477ca62cdcb1aba",
+    "holdout_selector": "ae44ed95ae2c85bebcf4c74ffccbc60ce1a21b0c28e07281e3e307d8955b2732",
+    "holdout_targets": "9382792536e697b8e1799e2b8a9fc7c00f3912fc2d871b409aa93ebbf35d7307",
+    "lean": "d8e9f75f1d8e2dc69f3f70b4e57d83d4ac1006b809252009b8ead064457bfde1",
+    "lean_check": "774c6ff5bdb7292b1d1698b195c3a3f51757aad70be92bd683366ab9057ed2b5",
+    "lean_toolchain": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c",
+    "proof_map": "ca493d0838415762118f7b118cfda84344adbe2cee7f99a4f29f38f3751bcba2",
+    "protocol": "3255bf4f33a3b04a7ae49e120adebe05e4fb6bb1194b28ca08079a88737a24d7",
+    "reference_environment": "aaaed229d7bd2731ee211f3a3cf7f670963ccde1f88f6bfe932dd789079746c3",
+    "runner": "7202237c49a2e1ac8025ae77297094b6c1ac656528972930880a209fed4ea07a",
+    "sealer": "c86c2a0d65536b98cd5c1fb7d1f6e157cea75bba37ca8291703003bfd89ea2a6",
+    "source": "c73985a15892ea1674a3ffee8f3fdb00fdfd4728a41b3edda4645b054d573050",
+    "summarizer": "52a7779918f57318b37a1b99b90df231d242415f8b86a1ab7b06ce08ace32d66",
+    "targets": "72486b7d708023838db1104a4a5e75a04b915d6f6d4013057c934fb31000aa87",
+    "verifier": "094f94e458cabde59ea340c7338b1c195aaca996b6bda10e8612fe1971a9188e"
+  },
+  "target_count": 128
+}
