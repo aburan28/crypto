@@ -1,0 +1,50 @@
+{
+  "trace": -813574577,
+  "frobenius_discriminant": "-8561468444514046875",
+  "frobenius_discriminant_trial_factors": [
+    [3, 4],
+    [5, 6],
+    [11, 1]
+  ],
+  "frobenius_discriminant_trial_bound": 1048576,
+  "frobenius_discriminant_cofactor": 614965185689,
+  "frobenius_discriminant_cofactor_status": "probable_prime",
+  "frobenius_discriminant_fundamental_if_cofactor_prime": false,
+  "order_probable_prime": true,
+  "twist_order": "2305843008400119375",
+  "twist_order_trial_factors": [
+    [3, 4],
+    [5, 4],
+    [11, 1]
+  ],
+  "twist_order_cofactor": 4140683292301,
+  "twist_order_cofactor_status": "probable_prime",
+  "embedding_degree": null,
+  "embedding_degree_searched_to": 1000,
+  "ell": [
+    {
+      "ell": 3,
+      "splitting": "divides_discriminant",
+      "v_ell_discriminant": 4,
+      "volcano_depth": 2,
+      "level_zero_proved": false,
+      "expected_rational_neighbours": null
+    },
+    {
+      "ell": 5,
+      "splitting": "divides_discriminant",
+      "v_ell_discriminant": 6,
+      "volcano_depth": 3,
+      "level_zero_proved": false,
+      "expected_rational_neighbours": null
+    },
+    {
+      "ell": 7,
+      "splitting": "atkin",
+      "v_ell_discriminant": 0,
+      "volcano_depth": 0,
+      "level_zero_proved": true,
+      "expected_rational_neighbours": 0
+    }
+  ]
+}

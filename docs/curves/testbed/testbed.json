@@ -1,0 +1,402 @@
+{
+ "schema": "curve-testbed/v1",
+ "what": "Recommended curves for testing isogeny-class, volcano and ECDLP tooling. Parameters are copied from the cited evidence files; identities resolve in docs/curves/registry.json.",
+ "curves": [
+  {
+   "slug": "icv1-f2m61-t158598901-ab42b6c5",
+   "label": "K-61",
+   "featured": true,
+   "shape": "Koblitz (FIPS K-curve form)",
+   "model": {
+    "field_degree": 61,
+    "modulus": "0x2000000000000027",
+    "a2": 0,
+    "b": "0x1"
+   },
+   "group_order": "2305843009055095052",
+   "prime_subgroup_bits": 48,
+   "cofactor": "14156",
+   "ec1_representations": [
+    "EC1N61Ce0hd8c15448081e"
+   ],
+   "trace": "158598901",
+   "d_K": "-7",
+   "frobenius_conductor": "1951 * 587551",
+   "volcanoes": [
+    {
+     "ell": 1951,
+     "height": 1,
+     "crater": "inert",
+     "kernel_x_field_degree": 975
+    },
+    {
+     "ell": 587551,
+     "height": 1,
+     "crater": "inert",
+     "kernel_x_field_degree": 58755
+    }
+   ],
+   "strata": 4,
+   "class_size": "1147491009",
+   "largest_conductor_prime": 587551,
+   "root_level": "crater",
+   "evidence": "research/isogeny_class_trio_20261017/data/pick-K61.json",
+   "set": "isogeny-class-trio"
+  },
+  {
+   "slug": "icv1-f2m61-tm2657393969-b9ff0fb0",
+   "label": "B-61",
+   "featured": true,
+   "shape": "binary (FIPS B-curve form, seeded b)",
+   "model": {
+    "field_degree": 61,
+    "modulus": "0x2000000000000027",
+    "a2": 1,
+    "b": "0x9c60f836d06fc8"
+   },
+   "group_order": "2305843011871087922",
+   "prime_subgroup_bits": 61,
+   "cofactor": "2",
+   "ec1_representations": [
+    "EC1N61Crbh854aa3d90d2d"
+   ],
+   "trace": "-2657393969",
+   "d_K": "-900303761090047",
+   "frobenius_conductor": "7^2",
+   "volcanoes": [
+    {
+     "ell": 7,
+     "height": 2,
+     "crater": "split",
+     "kernel_x_field_degree": 3
+    }
+   ],
+   "strata": 3,
+   "class_size": "851960648",
+   "largest_conductor_prime": 7,
+   "root_level": "floor",
+   "evidence": "research/isogeny_class_trio_20261017/data/pick-B61.json",
+   "set": "isogeny-class-trio"
+  },
+  {
+   "slug": "icv1-fp61-tm813574577-a3b71255",
+   "label": "P-61",
+   "featured": true,
+   "shape": "prime (FIPS P-curve form, a = -3, seeded b)",
+   "model": {
+    "p": "2305843009213693951",
+    "a": "-3",
+    "b": "0x54aa66b458b77ec"
+   },
+   "group_order": "2305843010027268529",
+   "prime_subgroup_bits": 62,
+   "cofactor": "1",
+   "ec1_representations": [
+    "EC1P61Cfph303b4b060ff9"
+   ],
+   "trace": "-813574577",
+   "d_K": "-6764617042579",
+   "frobenius_conductor": "3^2 * 5^3",
+   "volcanoes": [
+    {
+     "ell": 3,
+     "height": 2,
+     "crater": "inert",
+     "kernel_x_field_degree": 1
+    },
+    {
+     "ell": 5,
+     "height": 3,
+     "crater": "split",
+     "kernel_x_field_degree": 1
+    }
+   ],
+   "strata": 12,
+   "class_size": "920783750",
+   "largest_conductor_prime": 5,
+   "root_level": "floor",
+   "evidence": "research/isogeny_class_trio_20261017/data/pick-P61.json",
+   "set": "isogeny-class-trio"
+  },
+  {
+   "slug": "icv1-f2m41-tm2308219-7f48b14a",
+   "label": "K-41",
+   "featured": false,
+   "shape": "Koblitz (FIPS K-curve form)",
+   "model": {
+    "field_degree": 41,
+    "modulus": "0x20000000009",
+    "a2": 0,
+    "b": "0x1"
+   },
+   "group_order": "2199025563772",
+   "prime_subgroup_bits": 40,
+   "cofactor": "4",
+   "ec1_representations": [
+    "EC1N41Ce0he09550ab560a"
+   ],
+   "trace": "-2308219",
+   "d_K": "-7",
+   "frobenius_conductor": "409 * 1721",
+   "volcanoes": [
+    {
+     "ell": 409,
+     "height": 1,
+     "crater": "inert",
+     "kernel_x_field_degree": 204
+    },
+    {
+     "ell": 1721,
+     "height": 1,
+     "crater": "inert",
+     "kernel_x_field_degree": 215
+    }
+   ],
+   "strata": 4,
+   "class_size": "708153",
+   "largest_conductor_prime": 1721,
+   "root_level": "crater",
+   "evidence": "research/isogeny_class_trio_20261017/data/pick-K41.json",
+   "set": "isogeny-class-trio"
+  },
+  {
+   "slug": "icv1-f2m47-t4276051-826c5755",
+   "label": "B-47",
+   "featured": false,
+   "shape": "binary (FIPS B-curve form, seeded b)",
+   "model": {
+    "field_degree": 47,
+    "modulus": "0x800000000021",
+    "a2": 1,
+    "b": "0x52e3db551eb3"
+   },
+   "group_order": "140737484079278",
+   "prime_subgroup_bits": 46,
+   "cofactor": "2",
+   "ec1_representations": [
+    "EC1N47Crbhba8a6d89475b"
+   ],
+   "trace": "4276051",
+   "d_K": "-589770391",
+   "frobenius_conductor": "31^2",
+   "volcanoes": [
+    {
+     "ell": 31,
+     "height": 2,
+     "crater": "inert",
+     "kernel_x_field_degree": 5
+    }
+   ],
+   "strata": 3,
+   "class_size": "11754700",
+   "largest_conductor_prime": 31,
+   "root_level": "floor",
+   "evidence": "research/isogeny_class_trio_20261017/data/pick-B47.json",
+   "set": "isogeny-class-trio"
+  },
+  {
+   "slug": "icv1-fp47-tm8785349-43e36ce5",
+   "label": "P-47",
+   "featured": false,
+   "shape": "prime (FIPS P-curve form, a = -3, seeded b)",
+   "model": {
+    "p": "140737488355213",
+    "a": "-3",
+    "b": "0xda8a554f2ba"
+   },
+   "group_order": "140737497140563",
+   "prime_subgroup_bits": 48,
+   "cofactor": "1",
+   "ec1_representations": [
+    "EC1P47Cfph7e9290c297bc"
+   ],
+   "trace": "-8785349",
+   "d_K": "-8226516899",
+   "frobenius_conductor": "3^5",
+   "volcanoes": [
+    {
+     "ell": 3,
+     "height": 5,
+     "crater": "split",
+     "kernel_x_field_degree": 1
+    }
+   ],
+   "strata": 6,
+   "class_size": "13461228",
+   "largest_conductor_prime": 3,
+   "root_level": "floor",
+   "evidence": "research/isogeny_class_trio_20261017/data/pick-P47.json",
+   "set": "isogeny-class-trio"
+  },
+  {
+   "slug": "icv1-fp61-t205-983ecb51",
+   "label": "GAP d=-3",
+   "set": "prime-conductor-gap",
+   "featured": true,
+   "shape": "y^2 = x^3 + b (j = 0, secp256k1 form)",
+   "model": {
+    "p": "2305842958741183033",
+    "a": "0",
+    "b": "5"
+   },
+   "group_order": "2305842958741182829",
+   "prime_subgroup_bits": 61,
+   "cofactor": "1",
+   "ec1_representations": [
+    "EC1P61Cfph54bb8886c801"
+   ],
+   "trace": "205",
+   "d_K": "-3",
+   "frobenius_conductor": "1753413037",
+   "volcanoes": [
+    {
+     "ell": 1753413037,
+     "height": 1,
+     "crater": "split",
+     "kernel_x_field_degree": 876706518
+    }
+   ],
+   "strata": 2,
+   "class_size": "584471013",
+   "largest_conductor_prime": 1753413037,
+   "root_level": "crater",
+   "evidence": "research/isogeny_class_trio_20261017/data/cm-gap.jsonl"
+  },
+  {
+   "slug": "icv1-fp61-t7175-7e38f752",
+   "label": "GAP d=-19",
+   "set": "prime-conductor-gap",
+   "featured": true,
+   "shape": "y^2 = x^3 - 3x + b (P-curve form)",
+   "model": {
+    "p": "2305842959800795691",
+    "a": "2305842959800795688",
+    "b": "1507406867695792627"
+   },
+   "group_order": "2305842959800788517",
+   "prime_subgroup_bits": 61,
+   "cofactor": "1",
+   "ec1_representations": [
+    "EC1P61Cfphde4753195a5f"
+   ],
+   "trace": "7175",
+   "d_K": "-19",
+   "frobenius_conductor": "696735691",
+   "volcanoes": [
+    {
+     "ell": 696735691,
+     "height": 1,
+     "crater": "inert",
+     "kernel_x_field_degree": 348367845
+    }
+   ],
+   "strata": 2,
+   "class_size": "696735693",
+   "largest_conductor_prime": 696735691,
+   "root_level": "crater",
+   "evidence": "research/isogeny_class_trio_20261017/data/cm-gap.jsonl"
+  },
+  {
+   "slug": "icv1-fp61-t727-ddf032b6",
+   "label": "GAP d=-43",
+   "set": "prime-conductor-gap",
+   "featured": false,
+   "shape": "y^2 = x^3 - 3x + b (P-curve form)",
+   "model": {
+    "p": "2305842677174433443",
+    "a": "2305842677174433440",
+    "b": "1126842748974135980"
+   },
+   "group_order": "2305842677174432717",
+   "prime_subgroup_bits": 61,
+   "cofactor": "1",
+   "ec1_representations": [
+    "EC1P61Cfph4b4d3888d752"
+   ],
+   "trace": "727",
+   "d_K": "-43",
+   "frobenius_conductor": "463138201",
+   "volcanoes": [
+    {
+     "ell": 463138201,
+     "height": 1,
+     "crater": "split",
+     "kernel_x_field_degree": 77189700
+    }
+   ],
+   "strata": 2,
+   "class_size": "463138201",
+   "largest_conductor_prime": 463138201,
+   "root_level": "crater",
+   "evidence": "research/isogeny_class_trio_20261017/data/cm-gap.jsonl"
+  },
+  {
+   "slug": "icv1-fp61-t2279-df6b5e41",
+   "label": "GAP d=-67",
+   "set": "prime-conductor-gap",
+   "featured": false,
+   "shape": "y^2 = x^3 - 3x + b (P-curve form)",
+   "model": {
+    "p": "2305842976999134887",
+    "a": "2305842976999134884",
+    "b": "399914583043124681"
+   },
+   "group_order": "2305842976999132609",
+   "prime_subgroup_bits": 61,
+   "cofactor": "1",
+   "ec1_representations": [
+    "EC1P61Cfph1646189acdfe"
+   ],
+   "trace": "2279",
+   "d_K": "-67",
+   "frobenius_conductor": "371028661",
+   "volcanoes": [
+    {
+     "ell": 371028661,
+     "height": 1,
+     "crater": "split",
+     "kernel_x_field_degree": 185514330
+    }
+   ],
+   "strata": 2,
+   "class_size": "371028661",
+   "largest_conductor_prime": 371028661,
+   "root_level": "crater",
+   "evidence": "research/isogeny_class_trio_20261017/data/cm-gap.jsonl"
+  },
+  {
+   "slug": "icv1-fp61-t95-4d1bb712",
+   "label": "GAP d=-163",
+   "set": "prime-conductor-gap",
+   "featured": false,
+   "shape": "y^2 = x^3 - 3x + b (P-curve form)",
+   "model": {
+    "p": "2305842838172865227",
+    "a": "2305842838172865224",
+    "b": "1873033291747189733"
+   },
+   "group_order": "2305842838172865133",
+   "prime_subgroup_bits": 61,
+   "cofactor": "1",
+   "ec1_representations": [
+    "EC1P61Cfph4ec3c36833c2"
+   ],
+   "trace": "95",
+   "d_K": "-163",
+   "frobenius_conductor": "237876229",
+   "volcanoes": [
+    {
+     "ell": 237876229,
+     "height": 1,
+     "crater": "split",
+     "kernel_x_field_degree": 59469057
+    }
+   ],
+   "strata": 2,
+   "class_size": "237876229",
+   "largest_conductor_prime": 237876229,
+   "root_level": "crater",
+   "evidence": "research/isogeny_class_trio_20261017/data/cm-gap.jsonl"
+  }
+ ]
+}
