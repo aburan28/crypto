@@ -15,6 +15,6 @@ p,role,observed_zero_rows,predicted,lo95,hi95,dispersion,auc,source
 97,forward,467,434.1,398.7,469.6,1.001,0.9959,model_v2_results.txt
 101,forward,454,453.3,417.1,489.5,0.995,0.9957,model_v2_results.txt
 103,forward,442,460.3,423.8,496.8,1.004,0.9956,model_v2_results.txt
-107,pending,,480.2,443.0,517.5,,,predictions_v2.txt
-109,pending,,488.9,451.3,526.5,,,predictions_v2.txt
+107,forward,488,480.2,443.0,517.5,1.000,0.9961,model_v2_results.txt
+109,forward,516,488.9,451.3,526.5,1.001,0.9952,model_v2_results.txt
 113,pending,,505.8,467.6,544.0,,,predictions_v2.txt

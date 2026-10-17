@@ -1,0 +1,12 @@
+    Blocking waiting for file lock on build directory
+   Compiling crypto v0.1.0 (/workspace/crypto-current)
+warning: unused variable: `m`
+   --> examples/support/isogeny_disk.rs:438:17
+    |
+438 |             let m = model(&self.f, &n);
+    |                 ^ help: if this is intentional, prefix it with an underscore: `_m`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `crypto` (example "isogeny_disk_walk") generated 1 warning (run `cargo fix --example "isogeny_disk_walk" -p crypto` to apply 1 suggestion)
+    Finished `release` profile [optimized] target(s) in 1m 16s
