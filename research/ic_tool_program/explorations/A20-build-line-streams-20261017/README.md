@@ -35,3 +35,7 @@ koblitz_fast`, 207 passed, none failed, 3 ignored. They include the checks
 that the partitioned and scalar builds give the same table.
 
 The binaries are hashed in [`binaries.sha256`](binaries.sha256).
+
+## Graph and report
+
+[`report/build.svg`](report/build.svg) (graph), [`report/report.pdf`](report/report.pdf) (report), copies in [`benchmarks/20261017-ic-a20-build-line-streams/`](../../../../benchmarks/20261017-ic-a20-build-line-streams/).
