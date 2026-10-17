@@ -1,0 +1,47 @@
+{
+  "trace": 205,
+  "frobenius_discriminant": "-9223371834964690107",
+  "frobenius_discriminant_trial_factors": [
+    [3, 1]
+  ],
+  "frobenius_discriminant_trial_bound": 1048576,
+  "frobenius_discriminant_cofactor": "3074457278321563369",
+  "frobenius_discriminant_cofactor_status": "perfect_square",
+  "frobenius_discriminant_fundamental_if_cofactor_prime": false,
+  "order_probable_prime": true,
+  "twist_order": "2305842958741183239",
+  "twist_order_trial_factors": [
+    [3, 1],
+    [7, 1]
+  ],
+  "twist_order_cofactor": "109802045654342059",
+  "twist_order_cofactor_status": "probable_prime",
+  "embedding_degree": null,
+  "embedding_degree_searched_to": 1000,
+  "ell": [
+    {
+      "ell": 3,
+      "splitting": "divides_discriminant",
+      "v_ell_discriminant": 1,
+      "volcano_depth": 0,
+      "level_zero_proved": true,
+      "expected_rational_neighbours": 1
+    },
+    {
+      "ell": 5,
+      "splitting": "atkin",
+      "v_ell_discriminant": 0,
+      "volcano_depth": 0,
+      "level_zero_proved": true,
+      "expected_rational_neighbours": 0
+    },
+    {
+      "ell": 7,
+      "splitting": "elkies",
+      "v_ell_discriminant": 0,
+      "volcano_depth": 0,
+      "level_zero_proved": true,
+      "expected_rational_neighbours": 2
+    }
+  ]
+}

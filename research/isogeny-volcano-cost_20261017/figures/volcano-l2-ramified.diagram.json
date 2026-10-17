@@ -1,0 +1,388 @@
+{
+ "schema": "volcano-diagram/v2",
+ "ell": 2,
+ "depth": 3,
+ "title": "l2-ramified: 2-isogeny volcano over F_16517689 \u00b7 every curve \u00d7 4 isomorphic models \u00d7 16 paired targets",
+ "subtitle": "PROTOCOL v1 (research/isogeny-volcano-cost_20261017) \u00b7 % from the class mean",
+ "metrics": [
+  {
+   "key": "rho",
+   "title": "rho.negation \u00b7 mean S",
+   "label": "% from class mean S"
+  },
+  {
+   "key": "ic",
+   "title": "ic.pipeline mitm \u00b7 relation yield",
+   "label": "% from class mean yield"
+  }
+ ],
+ "vertices": [
+  {
+   "id": 0,
+   "label": "v0",
+   "level": 3,
+   "nbrs": [
+    1
+   ],
+   "values": {
+    "rho": -0.2935472418510887,
+    "ic": -5.577010234788105
+   },
+   "highlight": "root"
+  },
+  {
+   "id": 1,
+   "label": "v1",
+   "level": 2,
+   "nbrs": [
+    0,
+    2,
+    3
+   ],
+   "values": {
+    "rho": 5.704095182383684,
+    "ic": 2.500854761212623
+   },
+   "highlight": null
+  },
+  {
+   "id": 2,
+   "label": "v2",
+   "level": 1,
+   "nbrs": [
+    1,
+    4,
+    5
+   ],
+   "values": {
+    "rho": -7.643270738391161,
+    "ic": 1.836196215327801
+   },
+   "highlight": null
+  },
+  {
+   "id": 3,
+   "label": "v3",
+   "level": 3,
+   "nbrs": [
+    1
+   ],
+   "values": {
+    "rho": -2.1948701880374677,
+    "ic": -7.004149731868603
+   },
+   "highlight": null
+  },
+  {
+   "id": 4,
+   "label": "v4",
+   "level": 2,
+   "nbrs": [
+    2,
+    6,
+    7
+   ],
+   "values": {
+    "rho": 2.2581937128786533,
+    "ic": 7.448346172961839
+   },
+   "highlight": null
+  },
+  {
+   "id": 5,
+   "label": "v5",
+   "level": 0,
+   "nbrs": [
+    2,
+    8,
+    9
+   ],
+   "values": {
+    "rho": -0.1621496643676057,
+    "ic": 5.707073559021625
+   },
+   "highlight": null
+  },
+  {
+   "id": 6,
+   "label": "v6",
+   "level": 3,
+   "nbrs": [
+    4
+   ],
+   "values": {
+    "rho": 9.217666404292713,
+    "ic": -3.4627031134937702
+   },
+   "highlight": null
+  },
+  {
+   "id": 7,
+   "label": "v7",
+   "level": 3,
+   "nbrs": [
+    4
+   ],
+   "values": {
+    "rho": 1.5065995696730061,
+    "ic": -3.4297106491140594
+   },
+   "highlight": null
+  },
+  {
+   "id": 8,
+   "label": "v8",
+   "level": 1,
+   "nbrs": [
+    5,
+    10,
+    11
+   ],
+   "values": {
+    "rho": -6.135483536767894,
+    "ic": -0.6713690260943816
+   },
+   "highlight": null
+  },
+  {
+   "id": 9,
+   "label": "v9",
+   "level": 0,
+   "nbrs": [
+    5,
+    12,
+    13
+   ],
+   "values": {
+    "rho": 1.1551110499046224,
+    "ic": 2.3903329154181474
+   },
+   "highlight": null
+  },
+  {
+   "id": 10,
+   "label": "v10",
+   "level": 2,
+   "nbrs": [
+    8,
+    14,
+    15
+   ],
+   "values": {
+    "rho": -6.01459776548311,
+    "ic": 1.7859893227050172
+   },
+   "highlight": null
+  },
+  {
+   "id": 11,
+   "label": "v11",
+   "level": 2,
+   "nbrs": [
+    8,
+    16,
+    17
+   ],
+   "values": {
+    "rho": 12.735836541413658,
+    "ic": 2.3171822315536827
+   },
+   "highlight": null
+  },
+  {
+   "id": 12,
+   "label": "v12",
+   "level": 1,
+   "nbrs": [
+    9,
+    18,
+    19
+   ],
+   "values": {
+    "rho": -2.363716075103761,
+    "ic": -0.08140054938586827
+   },
+   "highlight": null
+  },
+  {
+   "id": 13,
+   "label": "v13",
+   "level": 1,
+   "nbrs": [
+    9,
+    20,
+    21
+   ],
+   "values": {
+    "rho": -12.215906434817292,
+    "ic": 2.082960757041219
+   },
+   "highlight": null
+  },
+  {
+   "id": 14,
+   "label": "v14",
+   "level": 3,
+   "nbrs": [
+    10
+   ],
+   "values": {
+    "rho": -8.446109936815404,
+    "ic": -0.8369471876328194
+   },
+   "highlight": null
+  },
+  {
+   "id": 15,
+   "label": "v15",
+   "level": 3,
+   "nbrs": [
+    10
+   ],
+   "values": {
+    "rho": 1.7450861728055322,
+    "ic": 1.3232445745760213
+   },
+   "highlight": null
+  },
+  {
+   "id": 16,
+   "label": "v16",
+   "level": 3,
+   "nbrs": [
+    11
+   ],
+   "values": {
+    "rho": 6.855794949026661,
+    "ic": -1.9505327128355288
+   },
+   "highlight": null
+  },
+  {
+   "id": 17,
+   "label": "v17",
+   "level": 3,
+   "nbrs": [
+    11
+   ],
+   "values": {
+    "rho": -5.761657428827316,
+    "ic": -4.325709212447504
+   },
+   "highlight": null
+  },
+  {
+   "id": 18,
+   "label": "v18",
+   "level": 2,
+   "nbrs": [
+    12,
+    22,
+    23
+   ],
+   "values": {
+    "rho": 11.967160713135105,
+    "ic": 5.7794876845269405
+   },
+   "highlight": null
+  },
+  {
+   "id": 19,
+   "label": "v19",
+   "level": 2,
+   "nbrs": [
+    12,
+    24,
+    25
+   ],
+   "values": {
+    "rho": -1.0793047552024704,
+    "ic": 1.2790259338703702
+   },
+   "highlight": null
+  },
+  {
+   "id": 20,
+   "label": "v20",
+   "level": 2,
+   "nbrs": [
+    13,
+    26,
+    27
+   ],
+   "values": {
+    "rho": 8.13035145061669,
+    "ic": 8.219438263250577
+   },
+   "highlight": null
+  },
+  {
+   "id": 21,
+   "label": "v21",
+   "level": 2,
+   "nbrs": [
+    13,
+    28,
+    29
+   ],
+   "values": {
+    "rho": -7.189949096073056,
+    "ic": 1.8227831270134054
+   },
+   "highlight": null
+  },
+  {
+   "id": 22,
+   "label": "v22",
+   "level": 3,
+   "nbrs": [
+    18
+   ],
+   "values": {
+    "rho": -3.6179059521838752,
+    "ic": -0.820881999418277
+   },
+   "highlight": null
+  },
+  {
+   "id": 23,
+   "label": "v23",
+   "level": 3,
+   "nbrs": [
+    18
+   ],
+   "values": {
+    "rho": -7.510559185132825,
+    "ic": -9.512428609624102
+   },
+   "highlight": null
+  },
+  {
+   "id": 24,
+   "label": "v24",
+   "level": 3,
+   "nbrs": [
+    19
+   ],
+   "values": {
+    "rho": -4.864868962502323,
+    "ic": 5.868020580961342
+   },
+   "highlight": null
+  },
+  {
+   "id": 25,
+   "label": "v25",
+   "level": 3,
+   "nbrs": [
+    19
+   ],
+   "values": {
+    "rho": 14.218001215427666,
+    "ic": -6.750502401679093
+   },
+   "highlight": null
+  }
+ ],
+ "footnote": "Colours span each panel's observed range; compare them with the per-curve 95% CIs (about \u00b15.6% rho, \u00b13.5% yield) and the horizontal test in analysis.json before reading a pattern."
+}

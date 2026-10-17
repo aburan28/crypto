@@ -1,0 +1,23 @@
+{
+  "boundary": "Complete independent old-pivot replay in descending pivot and ascending block order, with separate 1,024-line inversions and residual-point set.",
+  "counts": {
+    "direct_quartic_controls": 453,
+    "nonsplit_lines": 684480,
+    "residual_presentations": 1360948,
+    "selected_pairs": 1389414,
+    "source_pair_presentations": 24460,
+    "split_lines": 680474
+  },
+  "distinct_outside_residual_points": 1360948,
+  "elapsed_ns_unisolated": 858238719792,
+  "input_sha256": {
+    "collinearity": "a86cb4516bacddefaf3f8cedf3019697c5240f99d69cb11dafa3023932be549e",
+    "new": "2392f42f5fe8ac9d253c321c03312af4a3a287854b128d0019d7388acb5faad5",
+    "old": "eba1cafb724ce2eec84be550762fb10574980f77f4997143d5c58f0c9467d82c",
+    "quartic": "b16122e364056b30e46971b18084f7bfa6c0f6de2fa63f0cae63a1229dd224b3"
+  },
+  "producer_sha256": "6ca682e11934bd762f9198dea00cb68da8aa06db5cf4a950f9ee1cdad9399e39",
+  "reuse_witnesses_first_100": [],
+  "source_sha256": "931bf05a1955b8b8713e7dbb22e24c0b12564cd98797444f55e5335143e7c9a9",
+  "status": "verified_reverse_old_pivot_residual_reuse_replay"
+}

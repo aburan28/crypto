@@ -13,8 +13,14 @@
 \item \emph{Smaller primes.} Decrypting with two half-chains would shrink
   $2^E$ from about $7d^2f^2$ to its square root and cut $p$ from about $d^5$ to
   about $d^3$, by the derivation of \S\ref{sec:params} with $2^{2E}>\deg\gamma$.
-\item \emph{Speed.} Theta-coordinate $(2,2)$-chains~\cite{DMPR23} instead of
-  Mumford coordinates, stack-only buffers, and SIMD field arithmetic.
+\item \emph{The hidden orientation.} Decide whether the two public
+  $2$-walks, possibly with level structure~\cite{DFP24,Arpin24} or
+  sesquilinear pairings, make the $\Z[f\omega]$-orientation of $\EA$
+  effective. A positive answer breaks every parameter set quantumly
+  (\S\ref{sec:assessment}).
+\item \emph{Speed.} Decapsulation now uses theta-coordinate
+  $(2,2)$-chains~\cite{DMPR23}. Stack-only buffers and SIMD field arithmetic
+  remain, as does repeating the constant-time evidence on the theta build.
 \item \emph{Constant-time key generation}, in particular a constant-time
   norm-equation solver.
 \item \emph{Compression} of public keys and ciphertexts, by encoding the

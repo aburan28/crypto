@@ -1,0 +1,23 @@
+TraceProjection.lean:51:45: error(lean.unknownIdentifier): Unknown identifier `smul_zero`
+TraceProjection.lean:52:52: error: unsolved goals
+K : Type u_1
+inst✝ : AddCommGroup K
+f : K →+ K
+P : K
+r h k u m v : ℕ
+hfix : f (h • P) = h • P
+hrTrace : r • sixTrace f P = 0
+hrQ : r • h • P = 0
+hk : 6 * k = h + r * m
+hu : 6 * u = 1 + r * v
+T : K := sixTrace f P
+Q : K := h • P
+hTrace : h • T = 6 • Q
+hSix : 6 • (k • T - Q) = 0
+hR : r • (k • T - Q) = 0
+⊢ 1 • (k • T - Q) = k • T - Q
+TraceProjection.lean:56:25: error(lean.unknownIdentifier): Unknown identifier `smul_zero`
+'P192ExtensionCover.sixTrace_nsmul' depends on axioms: [propext]
+'P192ExtensionCover.sixTrace_fixed' depends on axioms: [propext]
+'P192ExtensionCover.sixTrace_cofactor_projection' depends on axioms: [propext, sorryAx]
+'P192ExtensionCover.line_partner_from_constant' depends on axioms: [propext]

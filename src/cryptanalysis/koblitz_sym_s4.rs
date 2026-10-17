@@ -369,6 +369,11 @@ pub struct E3Stats {
     pub roots: u64,
     /// Roots whose cubic split with all three roots in `V`.
     pub split: u64,
+    /// `F_{2^n}` multiplications and squarings performed, setup, columns,
+    /// right-hand sides and splitting tests included (counted at each call).
+    pub field_muls: u64,
+    /// One-word XORs in the per-`e₃` eliminations and solution sweeps.
+    pub word_xors: u64,
 }
 
 /// **Exact m = 3 decomposition by enumerating `e₃`.**  With `e₃` fixed,
@@ -399,6 +404,8 @@ pub fn decompose_by_e3(
     let cols = d1 + d2;
     assert!(cols <= 63);
     let x = x_r;
+    let mut muls = 0u64;
+    let mut xors = 0u64;
     let (x2, b2) = (f.sq(x), f.sq(b));
     let (x3, x4) = (f.mul(x2, x), f.sq(x2));
     let xb = f.mul(x, b);
@@ -415,6 +422,9 @@ pub fn decompose_by_e3(
         .map(|&v| f.mul(v, x2b) ^ f.mul(f.sq(v), x4))
         .collect();
     let v2x3: Vec<u64> = v2.iter().map(|&v| f.mul(v, x3)).collect();
+    // The setup above: x², b², x³, x⁴, xb, x²b, x⁴b², x³b; per W₁ vector
+    // u², u⁴, ·b²; per W₂ vector v², v²·x²b, v⁴, v⁴·x⁴, v²·x³.
+    muls += 8 + 3 * d1 as u64 + 5 * d2 as u64;
 
     let mut stats = E3Stats::default();
     let d3 = w3.len();
@@ -431,6 +441,8 @@ pub fn decompose_by_e3(
             x4b2 ^ f.mul(e3, x3b) ^ f.mul(e3sq, x4_b) ^ f.mul(f.mul(e3sq, e3), x) ^ f.sq(e3sq);
         // e1 columns: u²(e3·x·b + e3²·x²) + u⁴b²
         let a1 = f.mul(e3, xb) ^ f.mul(e3sq, x2);
+        // e3², the right-hand side's five products, a1's two, one per column.
+        muls += 1 + 5 + 2 + (d1 + d2) as u64;
         for i in 0..d1 {
             column[i] = f.mul(u2[i], a1) ^ u4b2[i];
         }
@@ -449,6 +461,7 @@ pub fn decompose_by_e3(
                 if v ^ pv < v {
                     v ^= pv;
                     combo ^= pc;
+                    xors += 2;
                 }
             }
             if v == 0 {
@@ -464,6 +477,7 @@ pub fn decompose_by_e3(
             if r ^ pv < r {
                 r ^= pv;
                 sol ^= pc;
+                xors += 2;
             }
         }
         if r != 0 {
@@ -476,6 +490,8 @@ pub fn decompose_by_e3(
                     s ^= k;
                 }
             }
+            // The kernel combination and the two span folds below.
+            xors += u64::from(kmask.count_ones() + s.count_ones());
             stats.roots += 1;
             let span = |ws: &[u64], bits: u64| {
                 ws.iter()
@@ -485,14 +501,18 @@ pub fn decompose_by_e3(
             };
             let e1 = span(&w1, s & ((1u64 << d1) - 1));
             let e2 = span(&w2, s >> d1);
-            if let Some(roots) = split_words(f, [e1, e2, e3], v_values) {
+            if let Some(roots) = split_words_counted(f, [e1, e2, e3], v_values, &mut muls) {
                 stats.split += 1;
                 if accept(roots) {
+                    stats.field_muls = muls;
+                    stats.word_xors = xors;
                     return (true, stats);
                 }
             }
         }
     }
+    stats.field_muls = muls;
+    stats.word_xors = xors;
     (false, stats)
 }
 
@@ -576,17 +596,32 @@ pub fn decompose_pair_linear(
 
 /// [`split_in`] on one-word values.
 pub fn split_words(f: &WordField, e: [u64; 3], v_values: &[u64]) -> Option<[u64; 3]> {
+    let mut ignored = 0u64;
+    split_words_counted(f, e, v_values, &mut ignored)
+}
+
+/// [`split_words`], counting its `F_{2^n}` multiplications on `muls`.
+pub fn split_words_counted(
+    f: &WordField,
+    e: [u64; 3],
+    v_values: &[u64],
+    muls: &mut u64,
+) -> Option<[u64; 3]> {
     let mut poly = vec![e[2], e[1], e[0], 1u64];
     let mut roots = [0u64; 3];
     let mut found = 0;
-    let eval = |p: &[u64], t: u64| p.iter().rev().fold(0u64, |acc, &c| f.mul(acc, t) ^ c);
+    let eval = |p: &[u64], t: u64, muls: &mut u64| {
+        *muls += p.len() as u64;
+        p.iter().rev().fold(0u64, |acc, &c| f.mul(acc, t) ^ c)
+    };
     for &v in v_values {
-        while poly.len() > 1 && eval(&poly, v) == 0 {
+        while poly.len() > 1 && eval(&poly, v, muls) == 0 {
             let deg = poly.len() - 1;
             let mut q = vec![0u64; deg];
             q[deg - 1] = poly[deg];
             for i in (0..deg - 1).rev() {
                 q[i] = poly[i + 1] ^ f.mul(q[i + 1], v);
+                *muls += 1;
             }
             poly = q;
             roots[found] = v;

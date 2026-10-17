@@ -5,7 +5,9 @@
 reasoning over the public record. No weakness in P-256 is claimed or found.
 **Code.** `src/cryptanalysis/p256_backdoor_map.rs` encodes every record below
 (`cargo run --release --example p256_backdoor_map` regenerates the Markdown;
-`--json` gives the machine-readable form). Companion:
+`--json` gives the machine-readable form). Round-2 groundable-locus probes:
+`src/cryptanalysis/p256_trapdoor_round2.rs`
+(`cargo run --release --example p256_trapdoor_round2`). Companion:
 `src/cryptanalysis/p256_speculation.rs` (the public concern vectors and their
 probes; that file is not currently declared in `cryptanalysis/mod.rs`, so the
 new module carries its own copies of its `PublicResearchStatus` /
@@ -164,7 +166,99 @@ Rank 1 is the most compatible with the public record and 1999 compute.
 - **Evidence against.** Not falsifiable by a finite public check.
 - **Verdict.** `NotPubliclyTestable` — the unfalsifiable residual.
 
-## 5. Overall
+## 5. Round 2 (2026-10-12): groundable-locus probes for hypotheses 1–3
+
+Round 1 checked the *public* weak classes. Round 2
+(`src/cryptanalysis/p256_trapdoor_round2.rs`, example
+`p256_trapdoor_round2`) asks what a *secret but cheaply testable*
+class could have been ground into the seed in 1999: every probe is an
+invariant of `(p, a, b)` testable in microseconds, exactly the
+predicate shape a 2^55-seed grind admits. Recorded outcomes
+(`research/p256_trapdoor_round2_20261012/`):
+
+- **Multiplicative orders (H1).** `p − 1` is fully factored:
+  `2 · 3 · 5² · 11 · 101 · 281 · 1531 · 65537 · 490719 · 6602113 · Q`
+  with `Q` a 160-bit prime. The exact orders are `ord(b) = ord(r) =
+  ord(−3)` (253 bits, `Q` included) and `ord(j)` (252 bits, `Q`
+  included). No seed-derived value is a small-order or smooth-order
+  element mod `p`; a "small-order b" grind locus is dead. The order
+  equalities are forced by the shared `Q`-part, not anomalous.
+- **Residuosity (H1).** `b`, `r` are quadratic residues and non-cubes;
+  `j` is a quadratic and cubic residue. Each is a cheap 1–2-bit
+  predicate a grinder *could* have targeted; each is recorded so the
+  locus is covered. The `±b` sign choice in the standard was itself a
+  free 1-bit grind (`−b` flips the QR bit).
+- **Sparse/power forms (H1).** Hamming weights of `b` (z = 0.81),
+  `r` (z = −0.31), `j` (z = −0.12) are binomial-normal; none is a
+  perfect power; the nearest `c·2^k` is ~2^49 bits away. The one
+  near-threshold statistic is `n` (z = 4.88, from the `FF`-run
+  structure shared with `p`), but `n` is order-derived — selecting on
+  it costs a point count per candidate, capping that grind at the
+  §3 budget of ~2^26 candidates.
+- **Continued fractions (H1).** `b/p`, `r/p`, `j/p` show max partial
+  quotients 1275, 62, 107 over 64 terms — normal-height rationals,
+  nowhere near a quadratic irrational.
+- **Field prime (H2).** `p − 1` as above (note the Fermat prime 65537
+  and 2^96 in `p + 1 = 2^96 · 7 · 273921 · (140-bit composite)`);
+  `ord_p(2) = (p−1)/2`; `p ≡ 3 mod 4` with no other notable residue
+  profile. No twist subgroup of order ≥ 2^20 has embedding degree
+  ≤ 100.
+- **Endomorphism/isogeny (H3).** GLS gap `4p − t²` is 258 bits (no GLS
+  structure); the trace has Hamming weight 59 (z ≈ −0.9) and no
+  sparse form. *Corrected 2026-10-13:* the round-2 report recorded
+  "one rational root" for `x³ − 3x + b`; a convention bug in the
+  root counter (fixed in the round-4 PR, regression-pinned by the odd
+  order `n`) gives the true value: **zero** rational roots — the
+  2-division polynomial is irreducible with square discriminant
+  (Galois group C₃), so P-256 has **no** rational 2-isogenies. This is
+  not a free datum: it is *forced* by the cofactor-1 acceptance
+  (prime, hence odd, `n` ⇒ no rational 2-torsion), which is exactly
+  the conditioning the round-4 post-selection simulation applies.
+
+**Round-2 verdict.** No new groundable locus found: every
+microsecond-testable invariant of the seed-derived values measured
+generic. The hypothesis-1 search space is now covered both by round-1
+statistics (`b mod q` uniformity, Solinas micro-correlations) and by
+round-2 algebraic invariants (orders, residuosity, powers, heights).
+What remains for a curve-level trapdoor is either a weak class whose
+membership test is *not* one of these cheap shapes, or hypothesis 4.
+
+### Round 3 (2026-10-12): honest-distribution comparison
+
+Round 3 (`src/cryptanalysis/p256_trapdoor_round3.rs`, example
+`p256_trapdoor_round3`) tests the *distributional* signature of a
+grind: a 1999 grinder who kept only seeds whose `b` satisfied a secret
+predicate shifts `b` off the honest X9.62 A.3.3.1 distribution for
+every statistic correlated with that predicate. We simulated 2^20
+deterministic random seeds, derived `r` and the valid `±√(−27/r)`
+candidates (`p ≡ 3 mod 4`, one exponentiation), pooled 1,048,170
+roots, and placed the published `b` in each empirical distribution
+with Bonferroni correction over the six-probe family
+(`research/p256_trapdoor_round2_20261012/round3_records.json`):
+
+- **QR(b)**: honest pool 0.500; published true. Cubic residuosity:
+  honest pool 0.332; published false.
+- **Hamming weight of b**: honest 128.00 ± 8.00; published 134
+  (z ≈ +0.75). Of `r`: honest 127.50 ± 7.99; published 125.
+- **CF max quotient of b/p**: honest median bucket ≈ 11 bits, 51% of
+  honest samples at or above the published 1275; published 1275 (11
+  bits) — dead center.
+- All corrected p-values: 1.000.
+- **Seed-preimage phrase probe**: SHA-1 over a 1000-phrase curated
+  list (Solinas/NIST-era words and suffixes, ≤ 20 bytes) found no
+  preimage of `c49d360886e704936a6678e1139d26b7819f7e90`; expected,
+  the public bounty remains the reference for this direction.
+
+**Round-3 verdict.** The published `b` is a *median* member of the
+honest X9.62 candidate distribution on every probed statistic — there
+is no distributional residue of a grind on the round-1/2 invariant
+family. Combined with rounds 1–2, a P-256 curve-level trapdoor now
+requires a weak class whose membership predicate is neither a public
+weak class, nor an algebraic invariant of `(p, a, b)` (orders,
+residuosity, powers, heights), nor visible as an outlier in the
+honest-candidate distribution of those invariants — or hypothesis 4.
+
+## 6. Overall
 
 The P-256 curve is almost certainly clean; the documented sabotage was
 Dual_EC_DRBG plus pressure on implementations and standards. The lasting
@@ -182,7 +276,7 @@ in the mundane direction; met on 2026-10-15, see the update at the top); a publi
 prime-field curves (opens hypothesis 4); a non-uniform statistic on `b` or a
 coefficient-level invariant with an attack behind it (opens hypothesis 1).
 
-## 6. References
+## 7. References
 
 - ANSI X9.62-1998, Annex A.3.3 (pseudo-random curve generation and
   verification); FIPS 186-4, Appendix D.1.2.3; SEC 2 v2.0, §2.4.2.

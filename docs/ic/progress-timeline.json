@@ -362,6 +362,17 @@
           "class": "accounting",
           "anchor": "#conductor-gap-ic37-20261012",
           "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_20261012/README.md"
+        },
+        {
+          "date": "2026-10-14",
+          "value": 6.8746893347260745,
+          "reference": "matched",
+          "unit": "counted GAE lower-bound diagnostic",
+          "label": "Prime rootfinding B48 batch-8 buffer reuse, registered 20-bit subgroup",
+          "detail": "Same-session candidate batch-8 IC / rho-negation cold counted-cost ratio 6.8747 [5.6689, 8.4198] over 24 matched measured pairs on eight public targets. The cross-session baseline/candidate counted-cost ratio is exactly 1.000 over 24 pairs. Native field work remains unpriced; wall comparisons are L0 diagnostics and cross-session ecbench wall comparison is refused.",
+          "class": "engineering",
+          "anchor": "#rootfinding-buffers-20261014",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_rootfinding_alloc_20261014/REPORT.md"
         }
       ]
     },
@@ -709,6 +720,24 @@
           "class": "accounting",
           "anchor": "#genus-crossover",
           "source": "https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#genus-crossover"
+        }
+      ]
+    },
+    {
+      "id": "genus3-ghs-2lp",
+      "label": "Not an elliptic curve: genus-3 Jacobian of a GHS cubic cover, double large primes",
+      "role": "context",
+      "note": "Index calculus with double large primes on Jac(C) of hyperelliptic GHS cubic covers (m = 3, r = 5) over prime F_q, q = 2^10-2^20, counted F_q plus mod-ell multiplications, one target cold, 12 paired instances per size. Rho is measured on the same Jac(C)[ell] in the same unit at q <= 2^14 only (4 single walks per size, renormalised to sqrt(pi/2)); it is not rho on the elliptic curve E0(F_q^3). The exponent result (total q^1.383 against GTTD's 4/3) is in the genus-crossover panel.",
+      "points": [
+        {
+          "date": "2026-10-15",
+          "value": 0.252,
+          "reference": "matched",
+          "label": "Genus-3 GHS IC-2LP rebuilt baseline at q = 2^14 (04b)",
+          "detail": "Rebuilt IC-2LP baseline (kappa = 2, tree-cycle elimination + Lanczos) against rho on the same Jac(C)[ell] at q = 2^14: 0.252x with rho renormalised to sqrt(pi/2) (0.162x raw; rho walks 0.49-3.48 steps per sqrt(ell), n = 4). Cost exponent over 2^14-2^20: 1.383 (99% [1.382, 1.384]) against rho's 3/2 and GTTD's 4/3; relation phase 1.332, linear algebra 1.447. Retuning the factor base gives 1.373; structured Gaussian elimination before Lanczos gives 1.419 while cheaper by 9-22%. The original study this follows up is not in the repository; this is a rebuild. Toy sizes; not an ECDLP crossover, since rho on E0(F_q^3) is not measured.",
+          "class": "engineering",
+          "anchor": "#genus-crossover",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ic_improve_20261014/04b-genus3-2lp-rebalance/README.md"
         }
       ]
     },

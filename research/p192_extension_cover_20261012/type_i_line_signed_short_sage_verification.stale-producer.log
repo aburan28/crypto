@@ -1,0 +1,9 @@
+LINE_SIGNED_SAGE_PROGRESS 32/141
+LINE_SIGNED_SAGE_PROGRESS 64/141
+LINE_SIGNED_SAGE_PROGRESS 96/141
+LINE_SIGNED_SAGE_PROGRESS 128/141
+Traceback (most recent call last):
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/verify_line_signed_short_sage.py", line 45, in <module>
+    assert h.hexdigest()==screen["support_sha256_sorted_xy_be24"]
+                          ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'support_sha256_sorted_xy_be24'

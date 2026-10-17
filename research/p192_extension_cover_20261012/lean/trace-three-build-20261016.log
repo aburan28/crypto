@@ -1,0 +1,12 @@
+ℹ [808/810] Replayed TraceProjection
+info: TraceProjection.lean:94:0: 'P192ExtensionCover.sixTrace_nsmul' depends on axioms: [propext]
+info: TraceProjection.lean:95:0: 'P192ExtensionCover.sixTrace_fixed' depends on axioms: [propext]
+info: TraceProjection.lean:96:0: 'P192ExtensionCover.sixTrace_cofactor_projection' depends on axioms: [propext]
+info: TraceProjection.lean:97:0: 'P192ExtensionCover.p192_trace_scalar_certificate' depends on axioms: [propext]
+info: TraceProjection.lean:98:0: 'P192ExtensionCover.line_partner_from_constant' depends on axioms: [propext]
+ℹ [809/810] Replayed TraceThree
+info: TraceThree.lean:76:0: 'P192ExtensionCover.sixTrace_eq_two_threeTrace' depends on axioms: [propext]
+info: TraceThree.lean:77:0: 'P192ExtensionCover.threeTrace_cofactor_projection' depends on axioms: [propext]
+info: TraceThree.lean:78:0: 'P192ExtensionCover.threeTrace_cofactor_projection_from_conditions' depends on axioms: [propext]
+info: TraceThree.lean:79:0: 'P192ExtensionCover.recovered_quotient_image_cube_fixed' depends on axioms: [propext, Classical.choice, Quot.sound]
+Build completed successfully (810 jobs).
