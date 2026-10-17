@@ -1,0 +1,14 @@
+{
+  "native_repository": "aburan28/cryptanalysis",
+  "native_commit": "b7352eec52676b7b82a220ba296661e8ba878915",
+  "source_curve_repository": "aburan28/crypto",
+  "source_curve_commit": "ef18058588077ef805c55c5dc25140b6bde2046b",
+  "pari_version": "2.17.2",
+  "pari_debian_urls": [
+    "https://deb.debian.org/debian/pool/main/p/pari/pari-gp_2.17.2-1_amd64.deb",
+    "https://deb.debian.org/debian/pool/main/p/pari/libpari-gmp-tls9_2.17.2-1_amd64.deb"
+  ],
+  "hash_receipt": "validation/download_hashes.sha256",
+  "json_header": "nlohmann/json v3.11.3",
+  "native_sources_modified": false
+}

@@ -1,0 +1,27 @@
+{
+  "fresh_run": true,
+  "curves_checked": 46,
+  "all_probes": 14720,
+  "target_probes": 4600,
+  "positive_controls": 920,
+  "random_setup_trials": 9200,
+  "random_setup_relations": 0,
+  "target_probes_with_relations": 0,
+  "full_log_recoveries": 0,
+  "full_IC_recovery_complete": false,
+  "positive_controls_are_not_recoveries": true,
+  "dreg_values": [
+    13
+  ],
+  "max_temporary_accumulator_degrees": [
+    23
+  ],
+  "max_processed_pair_sugar_degrees": [
+    26
+  ],
+  "external_GB_replay_status": "verified_all_14720",
+  "oracle_setup_accounting": "one per generator/curve; repeated metadata must not be summed over probes",
+  "max_actual_degree_definition": "Maximum degree seen in temporary polynomial accumulators, including partially assembled S-polynomials before cancellation; not degree of regularity",
+  "dreg_definition": "First zero Hilbert-function degree of (X^12,Y^12,X^2Y^2); not homogenized-ideal CM regularity",
+  "timing_class": "CPU-only L0; GB-stage metrics; not full cold IC cost"
+}

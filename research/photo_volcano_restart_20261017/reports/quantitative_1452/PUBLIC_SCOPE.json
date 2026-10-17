@@ -1,0 +1,32 @@
+{
+  "measured_snapshot": "2026-10-17T14:50:43.503Z",
+  "complete_selected_2_component": true,
+  "rho_verified_cases": 4600,
+  "bsgs_verified_cases": 3297,
+  "requested_cases_per_solver": 4600,
+  "IC_diagnostic_systems": 14720,
+  "IC_full_random_recoveries": 0,
+  "full_experiment_complete": false,
+  "raw_private_data_exported": false,
+  "unresolved": [
+    "BSGS completion",
+    "full random-corpus IC recovery",
+    "rho/BSGS field instrumentation",
+    "per-step event streams",
+    "matched isolated repeated timing",
+    "fastest-tool comparison"
+  ],
+  "public_data_classes": [
+    "exact curves/maps and P/Q fixtures",
+    "public walk seeds",
+    "per-curve/per-generator/per-problem aggregated solver metrics",
+    "polynomial systems and returned ideals",
+    "factor-base point coordinates"
+  ],
+  "excluded": [
+    "expected and recovered scalar witnesses",
+    "known random IC setup coefficients",
+    "raw RNG journals",
+    "raw case records"
+  ]
+}

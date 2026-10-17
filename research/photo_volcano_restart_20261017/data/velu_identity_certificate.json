@@ -1,0 +1,774 @@
+{
+  "id": "IDC1hc2aee7cc7e845781",
+  "independence": "Native C++ issuer/checker is compatibility-checked against the repository's committed worked certificate. Exact F_p identities on all 90 actual maps are separately replayed by PARI; no Lean proof is claimed.",
+  "modulus": 2305843009213693951,
+  "points": 64,
+  "proof": null,
+  "schema": "identity.certificate/v1",
+  "seed": 17,
+  "statement": {
+    "degree_bound": 7,
+    "lhs": {
+      "args": [
+        {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": [
+                        {
+                          "args": "x",
+                          "op": "var"
+                        },
+                        {
+                          "args": {
+                            "args": "r",
+                            "op": "var"
+                          },
+                          "op": "neg"
+                        }
+                      ],
+                      "op": "add"
+                    },
+                    {
+                      "args": [
+                        {
+                          "args": "x",
+                          "op": "var"
+                        },
+                        {
+                          "args": {
+                            "args": "r",
+                            "op": "var"
+                          },
+                          "op": "neg"
+                        }
+                      ],
+                      "op": "add"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": {
+                    "args": [
+                      {
+                        "args": [
+                          {
+                            "args": 3,
+                            "op": "const"
+                          },
+                          {
+                            "args": [
+                              {
+                                "args": "r",
+                                "op": "var"
+                              },
+                              {
+                                "args": "r",
+                                "op": "var"
+                              }
+                            ],
+                            "op": "mul"
+                          }
+                        ],
+                        "op": "mul"
+                      },
+                      {
+                        "args": "a",
+                        "op": "var"
+                      }
+                    ],
+                    "op": "add"
+                  },
+                  "op": "neg"
+                }
+              ],
+              "op": "add"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": [
+                        {
+                          "args": "x",
+                          "op": "var"
+                        },
+                        {
+                          "args": {
+                            "args": "r",
+                            "op": "var"
+                          },
+                          "op": "neg"
+                        }
+                      ],
+                      "op": "add"
+                    },
+                    {
+                      "args": [
+                        {
+                          "args": "x",
+                          "op": "var"
+                        },
+                        {
+                          "args": {
+                            "args": "r",
+                            "op": "var"
+                          },
+                          "op": "neg"
+                        }
+                      ],
+                      "op": "add"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": {
+                    "args": [
+                      {
+                        "args": [
+                          {
+                            "args": 3,
+                            "op": "const"
+                          },
+                          {
+                            "args": [
+                              {
+                                "args": "r",
+                                "op": "var"
+                              },
+                              {
+                                "args": "r",
+                                "op": "var"
+                              }
+                            ],
+                            "op": "mul"
+                          }
+                        ],
+                        "op": "mul"
+                      },
+                      {
+                        "args": "a",
+                        "op": "var"
+                      }
+                    ],
+                    "op": "add"
+                  },
+                  "op": "neg"
+                }
+              ],
+              "op": "add"
+            }
+          ],
+          "op": "mul"
+        },
+        {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": "x",
+                  "op": "var"
+                },
+                {
+                  "args": "x",
+                  "op": "var"
+                },
+                {
+                  "args": "x",
+                  "op": "var"
+                }
+              ],
+              "op": "mul"
+            },
+            {
+              "args": [
+                {
+                  "args": "a",
+                  "op": "var"
+                },
+                {
+                  "args": "x",
+                  "op": "var"
+                }
+              ],
+              "op": "mul"
+            },
+            {
+              "args": {
+                "args": [
+                  {
+                    "args": [
+                      {
+                        "args": "r",
+                        "op": "var"
+                      },
+                      {
+                        "args": "r",
+                        "op": "var"
+                      },
+                      {
+                        "args": "r",
+                        "op": "var"
+                      }
+                    ],
+                    "op": "mul"
+                  },
+                  {
+                    "args": [
+                      {
+                        "args": "a",
+                        "op": "var"
+                      },
+                      {
+                        "args": "r",
+                        "op": "var"
+                      }
+                    ],
+                    "op": "mul"
+                  }
+                ],
+                "op": "add"
+              },
+              "op": "neg"
+            }
+          ],
+          "op": "add"
+        }
+      ],
+      "op": "mul"
+    },
+    "name": "Vélu degree-two curve identity after clearing denominators and substituting b=-r^3-a*r",
+    "rhs": {
+      "args": [
+        {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": [
+                        {
+                          "args": "x",
+                          "op": "var"
+                        },
+                        {
+                          "args": [
+                            {
+                              "args": "x",
+                              "op": "var"
+                            },
+                            {
+                              "args": {
+                                "args": "r",
+                                "op": "var"
+                              },
+                              "op": "neg"
+                            }
+                          ],
+                          "op": "add"
+                        }
+                      ],
+                      "op": "mul"
+                    },
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            {
+                              "args": 3,
+                              "op": "const"
+                            },
+                            {
+                              "args": [
+                                {
+                                  "args": "r",
+                                  "op": "var"
+                                },
+                                {
+                                  "args": "r",
+                                  "op": "var"
+                                }
+                              ],
+                              "op": "mul"
+                            }
+                          ],
+                          "op": "mul"
+                        },
+                        {
+                          "args": "a",
+                          "op": "var"
+                        }
+                      ],
+                      "op": "add"
+                    }
+                  ],
+                  "op": "add"
+                },
+                {
+                  "args": [
+                    {
+                      "args": [
+                        {
+                          "args": "x",
+                          "op": "var"
+                        },
+                        {
+                          "args": [
+                            {
+                              "args": "x",
+                              "op": "var"
+                            },
+                            {
+                              "args": {
+                                "args": "r",
+                                "op": "var"
+                              },
+                              "op": "neg"
+                            }
+                          ],
+                          "op": "add"
+                        }
+                      ],
+                      "op": "mul"
+                    },
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            {
+                              "args": 3,
+                              "op": "const"
+                            },
+                            {
+                              "args": [
+                                {
+                                  "args": "r",
+                                  "op": "var"
+                                },
+                                {
+                                  "args": "r",
+                                  "op": "var"
+                                }
+                              ],
+                              "op": "mul"
+                            }
+                          ],
+                          "op": "mul"
+                        },
+                        {
+                          "args": "a",
+                          "op": "var"
+                        }
+                      ],
+                      "op": "add"
+                    }
+                  ],
+                  "op": "add"
+                },
+                {
+                  "args": [
+                    {
+                      "args": [
+                        {
+                          "args": "x",
+                          "op": "var"
+                        },
+                        {
+                          "args": [
+                            {
+                              "args": "x",
+                              "op": "var"
+                            },
+                            {
+                              "args": {
+                                "args": "r",
+                                "op": "var"
+                              },
+                              "op": "neg"
+                            }
+                          ],
+                          "op": "add"
+                        }
+                      ],
+                      "op": "mul"
+                    },
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            {
+                              "args": 3,
+                              "op": "const"
+                            },
+                            {
+                              "args": [
+                                {
+                                  "args": "r",
+                                  "op": "var"
+                                },
+                                {
+                                  "args": "r",
+                                  "op": "var"
+                                }
+                              ],
+                              "op": "mul"
+                            }
+                          ],
+                          "op": "mul"
+                        },
+                        {
+                          "args": "a",
+                          "op": "var"
+                        }
+                      ],
+                      "op": "add"
+                    }
+                  ],
+                  "op": "add"
+                }
+              ],
+              "op": "mul"
+            },
+            {
+              "args": [
+                {
+                  "args": "x",
+                  "op": "var"
+                },
+                {
+                  "args": {
+                    "args": "r",
+                    "op": "var"
+                  },
+                  "op": "neg"
+                }
+              ],
+              "op": "add"
+            }
+          ],
+          "op": "mul"
+        },
+        {
+          "args": [
+            {
+              "args": {
+                "args": [
+                  {
+                    "args": [
+                      {
+                        "args": 4,
+                        "op": "const"
+                      },
+                      {
+                        "args": "a",
+                        "op": "var"
+                      }
+                    ],
+                    "op": "mul"
+                  },
+                  {
+                    "args": [
+                      {
+                        "args": 15,
+                        "op": "const"
+                      },
+                      {
+                        "args": [
+                          {
+                            "args": "r",
+                            "op": "var"
+                          },
+                          {
+                            "args": "r",
+                            "op": "var"
+                          }
+                        ],
+                        "op": "mul"
+                      }
+                    ],
+                    "op": "mul"
+                  }
+                ],
+                "op": "add"
+              },
+              "op": "neg"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": "x",
+                      "op": "var"
+                    },
+                    {
+                      "args": [
+                        {
+                          "args": "x",
+                          "op": "var"
+                        },
+                        {
+                          "args": {
+                            "args": "r",
+                            "op": "var"
+                          },
+                          "op": "neg"
+                        }
+                      ],
+                      "op": "add"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": [
+                        {
+                          "args": 3,
+                          "op": "const"
+                        },
+                        {
+                          "args": [
+                            {
+                              "args": "r",
+                              "op": "var"
+                            },
+                            {
+                              "args": "r",
+                              "op": "var"
+                            }
+                          ],
+                          "op": "mul"
+                        }
+                      ],
+                      "op": "mul"
+                    },
+                    {
+                      "args": "a",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "add"
+                }
+              ],
+              "op": "add"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": "x",
+                      "op": "var"
+                    },
+                    {
+                      "args": {
+                        "args": "r",
+                        "op": "var"
+                      },
+                      "op": "neg"
+                    }
+                  ],
+                  "op": "add"
+                },
+                {
+                  "args": [
+                    {
+                      "args": "x",
+                      "op": "var"
+                    },
+                    {
+                      "args": {
+                        "args": "r",
+                        "op": "var"
+                      },
+                      "op": "neg"
+                    }
+                  ],
+                  "op": "add"
+                },
+                {
+                  "args": [
+                    {
+                      "args": "x",
+                      "op": "var"
+                    },
+                    {
+                      "args": {
+                        "args": "r",
+                        "op": "var"
+                      },
+                      "op": "neg"
+                    }
+                  ],
+                  "op": "add"
+                }
+              ],
+              "op": "mul"
+            }
+          ],
+          "op": "mul"
+        },
+        {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": 22,
+                      "op": "const"
+                    },
+                    {
+                      "args": {
+                        "args": [
+                          {
+                            "args": [
+                              {
+                                "args": "r",
+                                "op": "var"
+                              },
+                              {
+                                "args": "r",
+                                "op": "var"
+                              },
+                              {
+                                "args": "r",
+                                "op": "var"
+                              }
+                            ],
+                            "op": "mul"
+                          },
+                          {
+                            "args": [
+                              {
+                                "args": "a",
+                                "op": "var"
+                              },
+                              {
+                                "args": "r",
+                                "op": "var"
+                              }
+                            ],
+                            "op": "mul"
+                          }
+                        ],
+                        "op": "add"
+                      },
+                      "op": "neg"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": 14,
+                      "op": "const"
+                    },
+                    {
+                      "args": "a",
+                      "op": "var"
+                    },
+                    {
+                      "args": "r",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                }
+              ],
+              "op": "add"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": "x",
+                      "op": "var"
+                    },
+                    {
+                      "args": {
+                        "args": "r",
+                        "op": "var"
+                      },
+                      "op": "neg"
+                    }
+                  ],
+                  "op": "add"
+                },
+                {
+                  "args": [
+                    {
+                      "args": "x",
+                      "op": "var"
+                    },
+                    {
+                      "args": {
+                        "args": "r",
+                        "op": "var"
+                      },
+                      "op": "neg"
+                    }
+                  ],
+                  "op": "add"
+                },
+                {
+                  "args": [
+                    {
+                      "args": "x",
+                      "op": "var"
+                    },
+                    {
+                      "args": {
+                        "args": "r",
+                        "op": "var"
+                      },
+                      "op": "neg"
+                    }
+                  ],
+                  "op": "add"
+                },
+                {
+                  "args": [
+                    {
+                      "args": "x",
+                      "op": "var"
+                    },
+                    {
+                      "args": {
+                        "args": "r",
+                        "op": "var"
+                      },
+                      "op": "neg"
+                    }
+                  ],
+                  "op": "add"
+                }
+              ],
+              "op": "mul"
+            }
+          ],
+          "op": "mul"
+        }
+      ],
+      "op": "add"
+    },
+    "source": "source/discover.gp and the standard rational degree-2 kernel map; generic variables, not numerical curve-specific coefficients",
+    "variables": [
+      "a",
+      "r",
+      "x"
+    ]
+  },
+  "value_digest": "370f0c5e9ad487350e43d243dfb12d0a9e2d7f82572869ba6d368f7b6f5c8b53"
+}

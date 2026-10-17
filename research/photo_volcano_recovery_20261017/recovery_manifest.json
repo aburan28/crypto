@@ -1,0 +1,73 @@
+{
+  "schema": "photo-volcano-recovery/v1",
+  "status": "blocked_missing_experiment_files",
+  "evidence_status": "unverified_prior_checkpoint_metadata",
+  "full_user_campaign_complete": false,
+  "new_solver_jobs_started": false,
+  "new_measurements_completed": 0,
+  "source": {
+    "repository": "aburan28/crypto",
+    "commit": "ef18058588077ef805c55c5dc25140b6bde2046b",
+    "path": "research/curve_shortlist_20261016/curves.json",
+    "blob_sha": "bf361c12401f9d1768c9bd4a967fb7eb5714fdc5",
+    "row": "shortlist-deep-broad",
+    "icv1_slug": "icv1-fp57-t354478198-afcea726"
+  },
+  "curve": {
+    "p": "72057980207847001",
+    "a": "18456521102804593",
+    "b": "19958176276690439",
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "cofactor": 4,
+    "trace": "354478198"
+  },
+  "reported_scope": {
+    "curves": 46,
+    "directed_maps": 90,
+    "levels": 5,
+    "generators": 10,
+    "paired_scalar_values": 10,
+    "problems_per_curve": 100,
+    "problem_curve_cases_per_algorithm": 4600
+  },
+  "reported_counts_not_revalidated": {
+    "rho_distinct_verified_problem_curve_cases": 46,
+    "bsgs_distinct_verified_problem_curve_cases": 20,
+    "ic_full_log_recoveries": 0,
+    "ic_target_diagnostics": 4600
+  },
+  "archives": [
+    {
+      "name": "photo_curve_20261017_full.tar.gz",
+      "bytes": 249209380,
+      "sha256": "a85fa9b949744e4ca1d8075d7067bd2acb94e34aab791960bc05d2f4447a1f80",
+      "purpose": "Original exact graph, 100 securely generated fixtures, solvers and full evidence",
+      "availability": "not_accessible_in_current_runtime",
+      "digest_basis": "prior_manifest_not_recomputed_here",
+      "durable_locator": null
+    },
+    {
+      "name": "photo_campaign_20261017_full.tar.gz",
+      "bytes": 38645242,
+      "sha256": "0600332f58b0684aada53a6def7de0252268bd067749a2a87dca2b7b240afa9a",
+      "purpose": "Latest resumable BSGS continuation and twenty verified paired cases",
+      "availability": "not_accessible_in_current_runtime",
+      "digest_basis": "prior_manifest_not_recomputed_here",
+      "durable_locator": null
+    }
+  ],
+  "restore_layout": {
+    "parent": "photo_curve_20261017",
+    "continuation": "photo_campaign_20261017",
+    "relationship": "sibling_directories"
+  },
+  "remaining_obligations": [
+    "Restore and verify original archives and extracted manifests",
+    "Verify exact fixture, solver, map and checkpoint identities",
+    "Publish recovered bytes through the authorized immutable store and verify readback",
+    "Complete all requested rho and BSGS problem/curve cases",
+    "Implement and validate a viable full-recovery IC configuration; diagnostics are not recovery",
+    "Complete original accounting, independent verification, report and heatmap requirements"
+  ]
+}
