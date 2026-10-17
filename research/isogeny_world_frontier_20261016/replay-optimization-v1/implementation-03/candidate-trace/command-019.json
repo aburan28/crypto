@@ -1,0 +1,14 @@
+{
+  "args": [
+    "challenge",
+    "judge",
+    "--input",
+    "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-03/candidate-trace/bad-missing-hash",
+    "--out",
+    "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-03/candidate-trace/missing-hash-on"
+  ],
+  "exit_code": 1,
+  "stderr": "",
+  "stdout": "{\n  \"reason\": \"construction bytes differ from receipt hashes\",\n  \"schema\": \"isogeny-challenge-entry/v1\",\n  \"score\": null,\n  \"season\": \"ff4f7c405146fbd26faa63cb6fb9d1513eada31d15f3998368005fd5f05db3e0\",\n  \"status\": \"REJECTED\"\n}\n",
+  "trace": "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-03/candidate-trace/missing-hash.jsonl"
+}

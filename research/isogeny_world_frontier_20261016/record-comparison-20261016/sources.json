@@ -1,0 +1,98 @@
+{
+  "schema": "isogeny-primary-source-comparison/v1",
+  "checked_at_utc": "2026-10-16",
+  "scope": "Lower-bound literature comparison; no external code execution, independent reproduction or record promotion.",
+  "queries": [
+    "\"largest\" \"prime degree\" \"isogeny\" computation",
+    "\"large degree isogenies\" record computed explicit prime",
+    "\"isogeny\" \"degree\" \"10^9\" computation",
+    "isogeny \"record\" \"prime\" \"Lercier\"",
+    "\"large degree isogenies\" \"200\"",
+    "\"isogenies\" \"10000\" Bostan Morain Salvy Schost",
+    "\"isogeny\" \"world record\" degree"
+  ],
+  "sources": [
+    {
+      "id": "JS2010",
+      "url": "https://arxiv.org/pdf/1002.4228v2",
+      "version": "v2, 2010-04-13",
+      "sections": [
+        "5.1",
+        "5.2",
+        "5.3"
+      ],
+      "retrieval": "Read primary PDF text through web tool. Exact paper bytes not archived here.",
+      "replayed": false
+    },
+    {
+      "id": "BDFLS2020",
+      "url": "https://arxiv.org/pdf/2003.10118v1",
+      "version": "v1, 2020-03-23; document date 2020-03-20",
+      "sections": [
+        "Introduction"
+      ],
+      "retrieval": "Read primary PDF text through web tool; version observed on title page.",
+      "replayed": false
+    },
+    {
+      "id": "COSP2024",
+      "url": "https://www.preprints.org/manuscript/202401.1366/v1",
+      "version": "v1, posted 2024-01-18",
+      "sections": [
+        "1",
+        "4"
+      ],
+      "retrieval": "Read author preprint text. Linked journal DOI 10.3390/mca29010014 was not newly inspected.",
+      "replayed": false
+    },
+    {
+      "id": "PRISM2026",
+      "url": "https://link.springer.com/article/10.1007/s00145-026-09585-6",
+      "version": "Journal of Cryptology 39, article 30, published 2026-09-22",
+      "sections": [
+        "3.1",
+        "Remark 7",
+        "5",
+        "5.2",
+        "7"
+      ],
+      "retrieval": "Read primary journal HTML and PDF through web tool. No exact numeric maximum instance extracted.",
+      "replayed": false
+    },
+    {
+      "id": "PRISM-C",
+      "url": "https://github.com/mariascrs/PRISM_v2",
+      "version": null,
+      "sections": [
+        "Repository description",
+        "README"
+      ],
+      "retrieval": "Read primary repository description; branch not pinned, code not built or executed, not accepted instance evidence.",
+      "replayed": false
+    }
+  ],
+  "unsuccessful_retrievals": [
+    {
+      "url": "https://velusqrt.isogeny.org/velusqrt-20200320.pdf",
+      "status": "web internal error; primary arXiv version read instead"
+    },
+    {
+      "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2008/01/largedegree.pdf",
+      "status": "web internal error; no claim drawn from this unavailable paper"
+    },
+    {
+      "url": "https://r98inver.github.io/papers/2603_prism2.pdf",
+      "status": "web internal error; primary journal text read instead"
+    },
+    {
+      "url": "https://www.mdpi.com/2297-8747/29/1/14",
+      "status": "HTTP 429; author preprint used"
+    }
+  ],
+  "world_record_established": false,
+  "scientific_runs": 0,
+  "executable_uploads": 0,
+  "source_snapshot_before_docs": "d873703d4309f37a002c6ad8d105ee1f42a01c04",
+  "frozen_matched_native_source": "015fa7bb504ef63953e0e04e464bb266f4f207bf",
+  "harness_evidence_snapshot": "69928e1372f6497a4631b4661a7990a76bb15896"
+}

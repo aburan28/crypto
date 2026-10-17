@@ -1,0 +1,41 @@
+{
+  "schema": "isogeny-custody-visual-data/v1",
+  "source_receipts": [
+    "verification.json",
+    "../windows-fixture-20261016/verification.json"
+  ],
+  "initial_transfer": {
+    "logical_names": 9,
+    "distinct_objects": 8,
+    "compiled_executables": 4
+  },
+  "focused_native_test_counts": {
+    "reference": {
+      "passed": 1,
+      "failed": 0,
+      "filtered": 19
+    },
+    "candidate": {
+      "passed": 1,
+      "failed": 0,
+      "filtered": 19
+    }
+  },
+  "quantity": "deterministic native test count",
+  "uncertainty": "not applicable; no statistical or performance claim",
+  "current_merged_root_gate": {
+    "passed": 4161,
+    "failed": 1,
+    "ignored": 117,
+    "filtered": 0,
+    "exit_code": 101
+  },
+  "bounded_sqisign_retake": {
+    "passed": 14,
+    "failed": 0,
+    "ignored": 0,
+    "filtered": 4265,
+    "exit_code": 0,
+    "replaces_full_failure": false
+  }
+}

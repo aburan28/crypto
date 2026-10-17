@@ -1,0 +1,19 @@
+{
+  "schema": "isogeny-raw-byte-style-check/v1",
+  "full_staged_diff_check_exit": 2,
+  "all_reported_issues_one_retained_raw_windows_log": true,
+  "trailing_whitespace_diagnostics": 1377,
+  "raw_log_sha256_preserved": true,
+  "other_paths_diff_check_command": [
+    "git",
+    "diff",
+    "--cached",
+    "--check",
+    "--",
+    ".",
+    ":(exclude)research/isogeny_world_frontier_20261016/replay-optimization-v1/windows-fixture-20261016/windows-job-117082574923.log"
+  ],
+  "other_paths_exit": 0,
+  "policy": "Preserve captured raw log bytes; report style failure explicitly; no normalization or gate-success substitution",
+  "sparse_checkout_administration": "Initial git add omitted the new out-of-profile problem file; explicit --sparse staged it. Tracked helper was materialized but refused the existing custom profile. Git sparse-checkout add loads only the reserved index; no profile reset or broad checkout."
+}

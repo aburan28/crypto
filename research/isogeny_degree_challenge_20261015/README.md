@@ -1,5 +1,21 @@
 # Prime Degree Frontier: native challenge and admission evidence
 
+## Current release pointer — 2026-10-16
+
+The dedicated tool is now published as
+[v0.1.2390](https://github.com/aburan28/crypto/releases/tag/v0.1.2390),
+source `bd7eb117f094a336d3e3e8f31facb0c6b86f95bc`.
+Use the [download and installation instructions](../../docs/challenges/isogeny-prime-degree/README.md#run-the-dedicated-executable)
+and [verified publication receipts](../isogeny_world_frontier_20261016/replay-optimization-v1/official-release-v0.1.2390/README.md).
+
+The packet below is the preserved source-`9bb7cbce2` checkpoint. Its season,
+test totals and publication-pending row describe that historical packet.
+The newer release has its own version/policy receipts; its source is not
+substituted into those frozen runs. Newer campaign outcomes and representation
+comparisons are linked in the [dated campaign checkpoint](../isogeny_world_frontier_20261016/record-comparison-20261016/README.md).
+
+## Frozen implementation checkpoint
+
 The dedicated `isogeny` executable now supplies a largest-prime-degree challenge
 for **all 54 registered standard prime models**, ranked separately by exact ICV1.
 The standard roster uses nonempty `standard_names`; registered research descendants

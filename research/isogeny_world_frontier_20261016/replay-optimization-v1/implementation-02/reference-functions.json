@@ -1,0 +1,62 @@
+{
+  "schema": "retained-reference-function-comparison/v1",
+  "base_commit": "1180f89d568c52ac60a022358b6fd70fa9e3bd30",
+  "functions": [
+    {
+      "path": "research/p192_p224_large_degree_isogenies_20261009/verification_poly.rs",
+      "function": "divrem",
+      "base_sha256": "db1d159f2688e94480ed821f907770fb4342feb2b5c4d6ee7d746b71ae28e572",
+      "current_sha256": "db1d159f2688e94480ed821f907770fb4342feb2b5c4d6ee7d746b71ae28e572",
+      "literal_bytes_equal": true
+    },
+    {
+      "path": "research/p192_p224_large_degree_isogenies_20261009/verification_poly.rs",
+      "function": "rem",
+      "base_sha256": "9aff69e58fc0e0211012e368a3a9409986a3f768c2d62d1ae635a19e2c0b79f2",
+      "current_sha256": "9aff69e58fc0e0211012e368a3a9409986a3f768c2d62d1ae635a19e2c0b79f2",
+      "literal_bytes_equal": true
+    },
+    {
+      "path": "research/p192_p224_large_degree_isogenies_20261009/verification_poly.rs",
+      "function": "mulmod",
+      "base_sha256": "4f4be7860ebc3e384e4bc311d199383fa9b8277da836a196f413087e24a47196",
+      "current_sha256": "4f4be7860ebc3e384e4bc311d199383fa9b8277da836a196f413087e24a47196",
+      "literal_bytes_equal": true
+    },
+    {
+      "path": "research/p192_p224_large_degree_isogenies_20261009/verification_poly.rs",
+      "function": "gcd",
+      "base_sha256": "913af5c72dca9e7a14181dce45e9910d99262aa6dfc6d41353d7f02f9d8594c8",
+      "current_sha256": "913af5c72dca9e7a14181dce45e9910d99262aa6dfc6d41353d7f02f9d8594c8",
+      "literal_bytes_equal": true
+    },
+    {
+      "path": "research/p192_p224_large_degree_isogenies_20261009/verification_poly.rs",
+      "function": "invmod",
+      "base_sha256": "4c0ceccb8fa731135a995805bef477693b3cabd6659f5fc2dc4f95c4e11fbae6",
+      "current_sha256": "4c0ceccb8fa731135a995805bef477693b3cabd6659f5fc2dc4f95c4e11fbae6",
+      "literal_bytes_equal": true
+    },
+    {
+      "path": "research/p192_p224_large_degree_isogenies_20261009/verification_kernel.rs",
+      "function": "division_polys_mod",
+      "base_sha256": "74d3bc87888e597be00af04cc5351069faf22b19caa5e11a5596d8ef34695120",
+      "current_sha256": "74d3bc87888e597be00af04cc5351069faf22b19caa5e11a5596d8ef34695120",
+      "literal_bytes_equal": true
+    },
+    {
+      "path": "research/p192_p224_large_degree_isogenies_20261009/verification_kernel.rs",
+      "function": "division_polys_selected",
+      "base_sha256": "de95e55b62d28ebc4108a2048712f9bdf7b31dedd56faba784b38e18a9040924",
+      "current_sha256": "de95e55b62d28ebc4108a2048712f9bdf7b31dedd56faba784b38e18a9040924",
+      "literal_bytes_equal": true
+    },
+    {
+      "path": "research/p192_p224_large_degree_isogenies_20261009/verification_kernel.rs",
+      "function": "compose_mod",
+      "base_sha256": "99df68b04a3e653a1682271e60f14d32d0baaadfa33bb8e87560a5f244ef65e1",
+      "current_sha256": "99df68b04a3e653a1682271e60f14d32d0baaadfa33bb8e87560a5f244ef65e1",
+      "literal_bytes_equal": true
+    }
+  ]
+}

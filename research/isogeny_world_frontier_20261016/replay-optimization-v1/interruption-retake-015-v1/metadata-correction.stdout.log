@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "raw_files": 32,
+  "arms": {
+    "reference": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 85,
+      "selected": [
+        "replay_trace::tests::flushed_begin_survives_bounded_child_interruption"
+      ]
+    },
+    "candidate": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 85,
+      "selected": [
+        "replay_trace::tests::flushed_begin_survives_bounded_child_interruption"
+      ]
+    }
+  },
+  "new_native_invocations": 0
+}

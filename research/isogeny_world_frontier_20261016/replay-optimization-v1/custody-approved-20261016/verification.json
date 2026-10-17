@@ -1,0 +1,110 @@
+{
+  "schema": "isogeny-approved-custody-verification/v1",
+  "status": "VERIFIED_REMOTE_AND_FULL_READBACK",
+  "task_id": "TASK-20261016-de577e",
+  "remote": "s3://crypto-autoresearcher/store",
+  "logical_prefix": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/",
+  "native_source_commit": "015fa7bb504ef63953e0e04e464bb266f4f207bf",
+  "authorization": "Explicit user approval received before this transfer; earlier rejected attempt executed zero upload operations.",
+  "native_transfer_exit": 0,
+  "logical_push_commands": 9,
+  "native_uploads_reported": 8,
+  "native_fresh_fetches_reported": 8,
+  "stderr_classification": "Only expected native fetch/verified progress; complete raw text retained",
+  "logical_names": 9,
+  "distinct_content_objects": 8,
+  "full_readback_hashes": "PASS",
+  "all_readback_bytes_equal_originals": true,
+  "native_head_size_checksum_verification": "PASS",
+  "native_client_sha256": "aab28a781f807f4f3ef364336b04d2ff18a2bb8483e1c6d1494baf5c1c3a561a",
+  "native_client_build_source": "not independently established; transport client hash bound, remote contents independently rehashed",
+  "compiled_scientific_executables_uploaded": 4,
+  "scientific_runs": 0,
+  "started_at_utc": "2026-10-16T18:54:39Z",
+  "ended_at_utc": "2026-10-16T18:57:15Z",
+  "objects": [
+    {
+      "name": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/candidate/fixed-modulus-bench",
+      "sha256": "3a983cffd7465ad2ae2a8fcc7b21dfce257c21b9caad98bacfd95400084553be",
+      "bytes": 1164512,
+      "downloaded_path": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/custody-approved-20261016/readback-cache/sha256/3a/3a983cffd7465ad2ae2a8fcc7b21dfce257c21b9caad98bacfd95400084553be",
+      "byte_equal_to_frozen_input": true,
+      "python_hashlib_sha256_matches_native_store_digest": true,
+      "s3_uri": "s3://crypto-autoresearcher/store/sha256/3a/3a983cffd7465ad2ae2a8fcc7b21dfce257c21b9caad98bacfd95400084553be"
+    },
+    {
+      "name": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/candidate/isogeny",
+      "sha256": "305bdff7db7bc25a2ccdce3f44e71c3d47269e76afa0ecd1703803365ab9b207",
+      "bytes": 32193216,
+      "downloaded_path": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/custody-approved-20261016/readback-cache/sha256/30/305bdff7db7bc25a2ccdce3f44e71c3d47269e76afa0ecd1703803365ab9b207",
+      "byte_equal_to_frozen_input": true,
+      "python_hashlib_sha256_matches_native_store_digest": true,
+      "s3_uri": "s3://crypto-autoresearcher/store/sha256/30/305bdff7db7bc25a2ccdce3f44e71c3d47269e76afa0ecd1703803365ab9b207"
+    },
+    {
+      "name": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/frozen-build-control-evidence.tar.gz",
+      "sha256": "18b8c2aa9da6be25cf7a602903dd798cab10a1b8028b09544cdb7aea5bedbbc4",
+      "bytes": 2308854,
+      "downloaded_path": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/custody-approved-20261016/readback-cache/sha256/18/18b8c2aa9da6be25cf7a602903dd798cab10a1b8028b09544cdb7aea5bedbbc4",
+      "byte_equal_to_frozen_input": true,
+      "python_hashlib_sha256_matches_native_store_digest": true,
+      "s3_uri": "s3://crypto-autoresearcher/store/sha256/18/18b8c2aa9da6be25cf7a602903dd798cab10a1b8028b09544cdb7aea5bedbbc4"
+    },
+    {
+      "name": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/generation/candidate/dataset.json",
+      "sha256": "2b5bb3f2cdd04ddb3ab068e99c7a81e22e3801bcfd0471759ca993ec9e5fd871",
+      "bytes": 10233255,
+      "downloaded_path": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/custody-approved-20261016/readback-cache/sha256/2b/2b5bb3f2cdd04ddb3ab068e99c7a81e22e3801bcfd0471759ca993ec9e5fd871",
+      "byte_equal_to_frozen_input": true,
+      "python_hashlib_sha256_matches_native_store_digest": true,
+      "s3_uri": "s3://crypto-autoresearcher/store/sha256/2b/2b5bb3f2cdd04ddb3ab068e99c7a81e22e3801bcfd0471759ca993ec9e5fd871"
+    },
+    {
+      "name": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/generation/reference/dataset.json",
+      "sha256": "2b5bb3f2cdd04ddb3ab068e99c7a81e22e3801bcfd0471759ca993ec9e5fd871",
+      "bytes": 10233255,
+      "downloaded_path": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/custody-approved-20261016/readback-cache/sha256/2b/2b5bb3f2cdd04ddb3ab068e99c7a81e22e3801bcfd0471759ca993ec9e5fd871",
+      "byte_equal_to_frozen_input": true,
+      "python_hashlib_sha256_matches_native_store_digest": true,
+      "s3_uri": "s3://crypto-autoresearcher/store/sha256/2b/2b5bb3f2cdd04ddb3ab068e99c7a81e22e3801bcfd0471759ca993ec9e5fd871"
+    },
+    {
+      "name": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/inputs.json",
+      "sha256": "14047e524f5aabee461ac6c8e4405d8f394cf0dda666c6f094caf53a814b3464",
+      "bytes": 4303,
+      "downloaded_path": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/custody-approved-20261016/readback-cache/sha256/14/14047e524f5aabee461ac6c8e4405d8f394cf0dda666c6f094caf53a814b3464",
+      "byte_equal_to_frozen_input": true,
+      "python_hashlib_sha256_matches_native_store_digest": true,
+      "s3_uri": "s3://crypto-autoresearcher/store/sha256/14/14047e524f5aabee461ac6c8e4405d8f394cf0dda666c6f094caf53a814b3464"
+    },
+    {
+      "name": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/native-manifest.json",
+      "sha256": "2c8e0ada290d932fbf8348d2daea7220f3ae93e671d4d68ceecbc7be9a1a0632",
+      "bytes": 239967,
+      "downloaded_path": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/custody-approved-20261016/readback-cache/sha256/2c/2c8e0ada290d932fbf8348d2daea7220f3ae93e671d4d68ceecbc7be9a1a0632",
+      "byte_equal_to_frozen_input": true,
+      "python_hashlib_sha256_matches_native_store_digest": true,
+      "s3_uri": "s3://crypto-autoresearcher/store/sha256/2c/2c8e0ada290d932fbf8348d2daea7220f3ae93e671d4d68ceecbc7be9a1a0632"
+    },
+    {
+      "name": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/reference/fixed-modulus-bench",
+      "sha256": "b42863e83b7667ba2b69f1fd77bb15f045cd1af11a325a5abddd35e228b55274",
+      "bytes": 1164224,
+      "downloaded_path": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/custody-approved-20261016/readback-cache/sha256/b4/b42863e83b7667ba2b69f1fd77bb15f045cd1af11a325a5abddd35e228b55274",
+      "byte_equal_to_frozen_input": true,
+      "python_hashlib_sha256_matches_native_store_digest": true,
+      "s3_uri": "s3://crypto-autoresearcher/store/sha256/b4/b42863e83b7667ba2b69f1fd77bb15f045cd1af11a325a5abddd35e228b55274"
+    },
+    {
+      "name": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/reference/isogeny",
+      "sha256": "2ff7d57174cda2d0e90088eb6ce217cbd1826e7697ed12ec7770d3d8f395d379",
+      "bytes": 32176704,
+      "downloaded_path": "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/custody-approved-20261016/readback-cache/sha256/2f/2ff7d57174cda2d0e90088eb6ce217cbd1826e7697ed12ec7770d3d8f395d379",
+      "byte_equal_to_frozen_input": true,
+      "python_hashlib_sha256_matches_native_store_digest": true,
+      "s3_uri": "s3://crypto-autoresearcher/store/sha256/2f/2ff7d57174cda2d0e90088eb6ce217cbd1826e7697ed12ec7770d3d8f395d379"
+    }
+  ],
+  "source_gate_complete": false,
+  "independent_source_review_started": false
+}

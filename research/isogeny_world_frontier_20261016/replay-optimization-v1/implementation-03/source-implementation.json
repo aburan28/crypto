@@ -1,0 +1,84 @@
+{
+  "schema": "fixed-modulus-source-implementation/v1",
+  "base_commit": "1180f89d568c52ac60a022358b6fd70fa9e3bd30",
+  "branch": "codex/isogeny-fixed-modulus-20261016",
+  "source": {
+    "research/p192_p224_large_degree_isogenies_20261009/verification_poly.rs": {
+      "bytes": 18274,
+      "sha256": "474cdc811c6151d67df66753bc5e3396d605648d2fdc37e62286ab94b27c73eb"
+    },
+    "research/p192_p224_large_degree_isogenies_20261009/verification_kernel.rs": {
+      "bytes": 23528,
+      "sha256": "169f1be543f91ef5328ed192cab8491ed1584d9454987012799d49ea5925d898"
+    },
+    "tools/isogeny-cli/src/replay.rs": {
+      "bytes": 14170,
+      "sha256": "70df6528c9a108825b23006980a5e75a8c1bef04d3d77b572a0b4438338c6201"
+    },
+    "tools/isogeny-cli/Cargo.toml": {
+      "bytes": 964,
+      "sha256": "6b24fe009f5a0b956f52215e6db425c083db98a1e5287a00b14cda2a77e9c3ce"
+    },
+    "tools/isogeny-cli/src/main.rs": {
+      "bytes": 23218,
+      "sha256": "0d9b27cc63462d5bb9ddab52acf477623a923c46c81bebb4ecba39173ae6bd70"
+    },
+    "tools/isogeny-cli/src/supervisor.rs": {
+      "bytes": 19995,
+      "sha256": "7c7157ac204092bdc5464e65e7e661e61d1c83dee6d6d998e4f5121556bc3da5"
+    },
+    "tools/isogeny-cli/build.rs": {
+      "bytes": 7442,
+      "sha256": "d4206de30915bd73c7d52340b145897ea2ffccd7c945b2e0ed5e95dc01171b9b"
+    },
+    "tools/isogeny-cli/src/bin/fixed_modulus_bench.rs": {
+      "bytes": 30964,
+      "sha256": "ab2912de339fb6c92216ba3783af46751e6248fb9b4ff3069ef847e4f4c83bf9"
+    },
+    "tools/isogeny-cli/tests/fixed_modulus_replay.rs": {
+      "bytes": 13052,
+      "sha256": "4bbde6f9ff1e972c0aec06d10c85ea4d7255631b57451e106b9a83bfac96e9f1"
+    },
+    "docs/identity-certificates/fixed-modulus-newton.json": {
+      "bytes": 3088,
+      "sha256": "869b84c503202239dcee6974025b422fd88bd95d930133762e64fe22791a359a"
+    },
+    "docs/identity-certificates/fixed-modulus-newton.md": {
+      "bytes": 4227,
+      "sha256": "847c77b46fb25895eff0c82b51a89c25e08ad4a1937ea2a50d89cb09537f81d3"
+    },
+    "tools/isogeny-cli/Cargo.lock": {
+      "bytes": 9529,
+      "sha256": "72bbabb2dc8b964028c9592adf25c1a4f078924d4e1de49e1b3d6aa99cbf8170"
+    }
+  },
+  "native_tests_each_arm": {
+    "passed": 128,
+    "failed": 0,
+    "ignored": 1,
+    "ignored_helper_invoked_by_parent": true
+  },
+  "root_library": {
+    "passed": 4148,
+    "failed": 0,
+    "ignored": 117
+  },
+  "research_tests": {
+    "passed": 12,
+    "failed": 0
+  },
+  "semantic_fields_excluded": [],
+  "reference_bodies_identical": 8,
+  "lean_checked": [
+    "newton_scalar",
+    "residual_square_precision"
+  ],
+  "independent_source_review": "pending",
+  "clean_matched_builds": "pending",
+  "scientific_runs": 0,
+  "pdf": {
+    "pages": 2,
+    "all_pages_visually_inspected": true,
+    "sha256": "a4647335a214e9c32118d98fb520a7964bd54852ef7c5328471b2a56ad0f1a8a"
+  }
+}

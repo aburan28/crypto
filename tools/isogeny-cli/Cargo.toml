@@ -11,6 +11,14 @@ description = "Dedicated public-curve isogeny search and independent certificate
 name = "isogeny"
 path = "src/main.rs"
 
+[features]
+default = []
+cached-fixed-modulus-reduction = []
+
+[[bin]]
+name = "fixed-modulus-bench"
+path = "src/bin/fixed_modulus_bench.rs"
+
 [dependencies]
 isogeny_algos = { path = "../../isogeny_algos" }
 num-bigint = { version = "0.4", features = ["rand"] }

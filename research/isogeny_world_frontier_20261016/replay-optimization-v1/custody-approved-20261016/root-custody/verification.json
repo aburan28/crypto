@@ -1,0 +1,21 @@
+{
+  "schema": "isogeny-control-custody-supplement/v1",
+  "status": "VERIFIED_REMOTE_AND_FULL_READBACK",
+  "remote": "s3://crypto-autoresearcher/store",
+  "logical_name": "evidence/isogeny-fixed-modulus-20261016/015fa7bb504e/merged-root-gate-3ce9694.tar.gz",
+  "sha256": "dd94aa850851429469c8d8bc98d519c3b0e1098cba72281e0ccadca933bba8ab",
+  "bytes": 76106,
+  "physical_uri": "s3://crypto-autoresearcher/store/sha256/dd/dd94aa850851429469c8d8bc98d519c3b0e1098cba72281e0ccadca933bba8ab",
+  "native_transfer_exit": 0,
+  "uploaded": true,
+  "full_readback_sha256_and_byte_equality": "PASS",
+  "remote_head_size_checksum": "PASS",
+  "native_client_sha256": "aab28a781f807f4f3ef364336b04d2ff18a2bb8483e1c6d1494baf5c1c3a561a",
+  "root_source_commit": "3ce9694072773badcedc815ddbb953339888e433",
+  "root_gate_status": "FAIL",
+  "full_suite_exit_code": 101,
+  "bounded_module_retake_exit_code": 0,
+  "frozen_scientific_source_commit": "015fa7bb504ef63953e0e04e464bb266f4f207bf",
+  "source_gate_complete": false,
+  "scientific_runs": 0
+}

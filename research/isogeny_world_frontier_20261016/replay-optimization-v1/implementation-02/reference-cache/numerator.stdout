@@ -1,0 +1,30 @@
+{
+  "reason": "FAIL",
+  "schema": "isogeny-challenge-entry/v1",
+  "score": null,
+  "season": "ff4f7c405146fbd26faa63cb6fb9d1513eada31d15f3998368005fd5f05db3e0",
+  "status": "REJECTED",
+  "verification": {
+    "command": [
+      "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/development/release/isogeny",
+      "challenge",
+      "__judge",
+      "--input",
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-02/reference-cache/numerator-judge/artifact",
+      "--rss-ready",
+      "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-02/reference-cache/numerator-judge/resources-ready"
+    ],
+    "elapsed_ms_operational_only": 10884,
+    "exit_code": 2,
+    "map_count": null,
+    "memory_monitor_grace_ms": 100,
+    "memory_sampling_interval_ms": 25,
+    "resident_memory_limit_bytes": "8589934592",
+    "sampled_peak_resident_bytes": "41615360",
+    "status": "FAIL",
+    "stderr_sha256": "f4c872f68df30281e8c17d81060a60ee2742bf533bb5eab1266e6e05cca083ea",
+    "stdout": "verification.json",
+    "stdout_sha256": "fd244532de587f9c4f2d4b304148550d9c10b67fed6a894571e43d8440d518a9",
+    "unavailable_memory_samples": 0
+  }
+}

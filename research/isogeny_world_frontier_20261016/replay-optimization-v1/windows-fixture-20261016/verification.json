@@ -1,0 +1,101 @@
+{
+  "schema": "isogeny-windows-fixture-repair/v1",
+  "status": "LOCALLY_VERIFIED_WINDOWS_CI_PENDING",
+  "failed_windows_job": {
+    "run": 38933315615,
+    "job": 117082574923,
+    "expected_lf_sha256": "ecf1109dbff2a72000fd84d9939127db68e2287e55e4ec10d143229874c230c8",
+    "observed_crlf_sha256": "854333812fd0dffb0bb3479d545d36f7805ee39c85314da57d6db59607f7fb5c"
+  },
+  "repair": "Three exact public fixture paths marked -text; expected hash, fixture bytes and all acceptance checks unchanged",
+  "checkout_controls": [
+    {
+      "path": "research/p192_p224_large_degree_isogenies_20261009/kernel-p224-1471/search.json",
+      "sha256": "4925150c4e82116c862d9cdd6a4d4f7ee85a4ba28170c30bd09586bb2094624d",
+      "bytes": 893,
+      "after_autocrlf_checkout_equals_git_blob": true
+    },
+    {
+      "path": "research/p192_p224_large_degree_isogenies_20261009/kernel-p224-1471/p224/ell-1471.json",
+      "sha256": "ecf1109dbff2a72000fd84d9939127db68e2287e55e4ec10d143229874c230c8",
+      "bytes": 262012,
+      "after_autocrlf_checkout_equals_git_blob": true
+    },
+    {
+      "path": "research/p192_p224_large_degree_isogenies_20261009/kernel-p224-1471/p224/ell-1471.stderr.txt",
+      "sha256": "487d94e8bfeba3515cd756a0e6c590b1f04c755af8a090c7659d12f5877f16fb",
+      "bytes": 288,
+      "after_autocrlf_checkout_equals_git_blob": true
+    }
+  ],
+  "native_controls": [
+    {
+      "arm": "reference",
+      "native_test_exit": 0,
+      "test_result": "1 passed; 0 failed; 19 filtered",
+      "compiled_feature": false,
+      "public_scalar_transport_checks": 20,
+      "receipts": [
+        {
+          "kind": "valid",
+          "status": "PASS",
+          "exit_code": 0,
+          "unavailable_memory_samples": 0
+        },
+        {
+          "kind": "kernel",
+          "status": "FAIL",
+          "exit_code": 2,
+          "unavailable_memory_samples": 0
+        },
+        {
+          "kind": "numerator",
+          "status": "FAIL",
+          "exit_code": 2,
+          "unavailable_memory_samples": 0
+        }
+      ]
+    },
+    {
+      "arm": "candidate",
+      "native_test_exit": 0,
+      "test_result": "1 passed; 0 failed; 19 filtered",
+      "compiled_feature": true,
+      "public_scalar_transport_checks": 20,
+      "receipts": [
+        {
+          "kind": "valid",
+          "status": "PASS",
+          "exit_code": 0,
+          "unavailable_memory_samples": 0
+        },
+        {
+          "kind": "kernel",
+          "status": "FAIL",
+          "exit_code": 2,
+          "unavailable_memory_samples": 0
+        },
+        {
+          "kind": "numerator",
+          "status": "FAIL",
+          "exit_code": 2,
+          "unavailable_memory_samples": 0
+        }
+      ]
+    }
+  ],
+  "full_mathematical_json_byte_equal": true,
+  "mathematical_exclusions": 0,
+  "frozen_compiled_and_installed_bytes_unchanged": true,
+  "scientific_runs": 0,
+  "performance_claim": false,
+  "isolated_host": false,
+  "raw_archive": {
+    "path": "native-controls.tar.gz",
+    "sha256": "90cb0a9f8d7fedb23e0bd6d2680fa8b1cd6f0cb26feed6428b3378e1e4339b73",
+    "bytes": 1540295,
+    "regular_files": 106,
+    "every_archived_hash_replayed": true
+  },
+  "root_parallel_stability": "not established; prior failed run and complete serial pass preserved"
+}

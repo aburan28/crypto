@@ -1,0 +1,18 @@
+{
+  "schema": "published-release-mathematical-compatibility/v1",
+  "controls": [
+    {
+      "curve": "p192",
+      "release_verification_sha256": "a74e65094cfaf563de1595cb1292d98435ad476f47aa5307315d9f6a50eeb7f8",
+      "literal_equal_to_clean_reference_control": true,
+      "excluded_fields": []
+    },
+    {
+      "curve": "p521",
+      "release_verification_sha256": "e067236f7e8b68262a6556a1184d2a3cd5924873b87eb97d391157ef958d6c2b",
+      "literal_equal_to_clean_reference_control": true,
+      "excluded_fields": []
+    }
+  ],
+  "role": "additional public-release QA; not a substitute for the matched reference executable"
+}

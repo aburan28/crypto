@@ -1,5 +1,22 @@
 # Prime-degree isogeny world-frontier campaign
 
+## Current checkpoint — 2026-10-16
+
+The [dated comparison and campaign checkpoint](record-comparison-20261016/README.md)
+links the terminal expanded-map attempt, the separate compact result, the
+fixed-modulus implementation controls and the remaining record-comparison gaps.
+The [dedicated executable is officially published](https://github.com/aburan28/crypto/releases/tag/v0.1.2390);
+use the [installation guide](../../docs/challenges/isogeny-prime-degree/README.md#run-the-dedicated-executable).
+Publication evidence is retained in
+[the release QA report](replay-optimization-v1/official-release-v0.1.2390/README.md).
+
+The sections below preserve the initial planning and execution checkpoint.
+References there to a running replay, a proposed compact category or pending
+publication describe that earlier time; they are not current run status.
+No frozen map, binary, season or earlier observation has been replaced.
+
+## Initial campaign checkpoint
+
 This active goal pursues the largest independently verified prime-degree
 isogenies, with every registered standard prime-field model ranked separately.
 The main challenge requires an expanded rational map and monic kernel. A second

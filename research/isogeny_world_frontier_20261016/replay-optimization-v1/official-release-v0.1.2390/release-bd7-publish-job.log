@@ -1,0 +1,445 @@
+release	Set up job	﻿2026-10-16T14:43:43.8860836Z Current runner version: '2.337.0'
+release	Set up job	2026-10-16T14:43:43.8881027Z ##[group]Runner Image Provisioner
+release	Set up job	2026-10-16T14:43:43.8881840Z Hosted Compute Agent
+release	Set up job	2026-10-16T14:43:43.8882186Z Version: 20261012.601
+release	Set up job	2026-10-16T14:43:43.8882616Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+release	Set up job	2026-10-16T14:43:43.8883048Z Build Date: 2026-10-12T17:48:21Z
+release	Set up job	2026-10-16T14:43:43.8883539Z Worker ID: {077b67b2-8ea8-4148-86bc-2eb280da6a77}
+release	Set up job	2026-10-16T14:43:43.8883954Z Region: centralus
+release	Set up job	2026-10-16T14:43:43.8884336Z Cloud: Azure
+release	Set up job	2026-10-16T14:43:43.8884700Z ##[endgroup]
+release	Set up job	2026-10-16T14:43:43.8885505Z ##[group]Operating System
+release	Set up job	2026-10-16T14:43:43.8885900Z Ubuntu
+release	Set up job	2026-10-16T14:43:43.8886255Z 24.04.5
+release	Set up job	2026-10-16T14:43:43.8886562Z LTS
+release	Set up job	2026-10-16T14:43:43.8886911Z ##[endgroup]
+release	Set up job	2026-10-16T14:43:43.8887237Z ##[group]Runner Image
+release	Set up job	2026-10-16T14:43:43.8887632Z Image: ubuntu-24.04
+release	Set up job	2026-10-16T14:43:43.8888011Z Version: 20261012.334.1
+release	Set up job	2026-10-16T14:43:43.8888626Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+release	Set up job	2026-10-16T14:43:43.8889671Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+release	Set up job	2026-10-16T14:43:43.8890308Z ##[endgroup]
+release	Set up job	2026-10-16T14:43:43.8890961Z ##[group]GITHUB_TOKEN Permissions
+release	Set up job	2026-10-16T14:43:43.8892431Z Contents: write
+release	Set up job	2026-10-16T14:43:43.8892794Z Metadata: read
+release	Set up job	2026-10-16T14:43:43.8893126Z ##[endgroup]
+release	Set up job	2026-10-16T14:43:43.8894567Z Secret source: Actions
+release	Set up job	2026-10-16T14:43:43.8895122Z Cache mode: write
+release	Set up job	2026-10-16T14:43:43.8895580Z Prepare workflow directory
+release	Set up job	2026-10-16T14:43:43.9950994Z Prepare all required actions
+release	Set up job	2026-10-16T14:43:43.9998577Z Getting action download info
+release	Set up job	2026-10-16T14:43:44.3247493Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+release	Set up job	2026-10-16T14:43:44.5130567Z Download action repository 'actions/download-artifact@v4' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+release	Set up job	2026-10-16T14:43:45.4994059Z Download action repository 'dev-build-deploy/release-me@cede87fd8a4829ef571dff6bde807ebbfcaeb3e9' (SHA:cede87fd8a4829ef571dff6bde807ebbfcaeb3e9)
+release	Set up job	2026-10-16T14:43:46.4541408Z Complete job name: release
+release	Run actions/checkout@v4	﻿2026-10-16T14:43:46.5057125Z ##[group]Run actions/checkout@v4
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5057885Z with:
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5058273Z   repository: aburan28/crypto
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5061433Z   token: ***
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5061992Z   ssh-strict: true
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5062433Z   ssh-user: git
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5062857Z   persist-credentials: true
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5063250Z   clean: true
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5063656Z   sparse-checkout-cone-mode: true
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5064083Z   fetch-depth: 1
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5064465Z   fetch-tags: false
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5064889Z   show-progress: true
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5065297Z   lfs: false
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5065693Z   submodules: false
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5066095Z   set-safe-directory: true
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5066506Z   allow-unsafe-pr-checkout: false
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5067334Z env:
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5067771Z   CARGO_TERM_COLOR: always
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5068270Z   ECC_MARCH: x86-64-v3
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5068667Z   CUDA_PKG_VERSION: 12-8
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5069061Z   CUDA_DIR_VERSION: 12.8
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5069480Z ##[endgroup]
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5770141Z Syncing repository: aburan28/crypto
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5771429Z ##[group]Getting Git version info
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5772114Z Working directory is '/home/runner/work/crypto/crypto'
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5772777Z [command]/usr/bin/git version
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5824493Z git version 2.55.0
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5838025Z ##[endgroup]
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5848520Z Temporarily overriding HOME='/home/runner/work/_temp/fc0fe2c0-6f40-4c04-937d-e6c310f8bce7' before making global git config changes
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5849554Z Adding repository directory to the temporary git global config as a safe directory
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5852644Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/crypto/crypto
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5897829Z Deleting the contents of '/home/runner/work/crypto/crypto'
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5900791Z ##[group]Initializing the repository
+release	Run actions/checkout@v4	2026-10-16T14:43:46.5903771Z [command]/usr/bin/git init /home/runner/work/crypto/crypto
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6205606Z hint: Using 'master' as the name for the initial branch. This default branch name
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6206817Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6207435Z hint: to use in all of your new repositories, which will suppress this warning,
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6208029Z hint: call:
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6208464Z hint:
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6209057Z hint: 	git config --global init.defaultBranch <name>
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6209808Z hint:
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6210415Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6211260Z hint: 'development'. The just-created branch can be renamed via this command:
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6212073Z hint:
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6212514Z hint: 	git branch -m <name>
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6212954Z hint:
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6213556Z hint: Disable this message with "git config set advice.defaultBranchName false"
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6214494Z Initialized empty Git repository in /home/runner/work/crypto/crypto/.git/
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6218975Z [command]/usr/bin/git remote add origin https://github.com/aburan28/crypto
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6264144Z ##[endgroup]
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6264689Z ##[group]Disabling automatic garbage collection
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6267416Z [command]/usr/bin/git config --local gc.auto 0
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6295507Z ##[endgroup]
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6296229Z ##[group]Setting up auth
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6300823Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6327126Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6623266Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6648990Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6828419Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+release	Run actions/checkout@v4	2026-10-16T14:43:46.6855350Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+release	Run actions/checkout@v4	2026-10-16T14:43:46.7033012Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+release	Run actions/checkout@v4	2026-10-16T14:43:46.7066171Z ##[endgroup]
+release	Run actions/checkout@v4	2026-10-16T14:43:46.7066839Z ##[group]Fetching the repository
+release	Run actions/checkout@v4	2026-10-16T14:43:46.7073027Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +bd7eb117f094a336d3e3e8f31facb0c6b86f95bc:refs/remotes/origin/main
+release	Run actions/checkout@v4	2026-10-16T14:44:28.1084372Z From https://github.com/aburan28/crypto
+release	Run actions/checkout@v4	2026-10-16T14:44:28.1084879Z  * [new ref]             bd7eb117f094a336d3e3e8f31facb0c6b86f95bc -> origin/main
+release	Run actions/checkout@v4	2026-10-16T14:44:28.1088422Z ##[endgroup]
+release	Run actions/checkout@v4	2026-10-16T14:44:28.1088818Z ##[group]Determining the checkout info
+release	Run actions/checkout@v4	2026-10-16T14:44:28.1090680Z ##[endgroup]
+release	Run actions/checkout@v4	2026-10-16T14:44:28.1096434Z [command]/usr/bin/git sparse-checkout disable
+release	Run actions/checkout@v4	2026-10-16T14:44:28.1143183Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+release	Run actions/checkout@v4	2026-10-16T14:44:28.1168281Z ##[group]Checking out the ref
+release	Run actions/checkout@v4	2026-10-16T14:44:28.1172051Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+release	Run actions/checkout@v4	2026-10-16T14:44:29.2498447Z Updating files:   8% (8418/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:29.4709805Z Updating files:   9% (8900/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:29.9674867Z Updating files:  10% (9889/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:30.1746333Z Updating files:  11% (10878/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:30.2281814Z Updating files:  11% (11615/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:30.3788934Z Updating files:  12% (11867/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:31.0533824Z Updating files:  13% (12856/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:31.1752891Z Updating files:  14% (13845/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:31.2632403Z Updating files:  14% (14089/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:31.4023475Z Updating files:  15% (14834/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:31.6599153Z Updating files:  16% (15822/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:31.7571077Z Updating files:  17% (16811/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:31.8054408Z Updating files:  18% (17800/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:31.8560042Z Updating files:  19% (18789/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:31.8953943Z Updating files:  20% (19778/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:31.9325149Z Updating files:  21% (20767/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:31.9932046Z Updating files:  22% (21756/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:32.0598723Z Updating files:  23% (22745/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:32.0953695Z Updating files:  24% (23733/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:32.1548483Z Updating files:  25% (24722/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:32.1746066Z Updating files:  26% (25711/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:32.1799673Z Updating files:  26% (26490/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:32.3026284Z Updating files:  27% (26700/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:32.4561944Z Updating files:  28% (27689/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:32.5124993Z Updating files:  29% (28678/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:33.0544351Z Updating files:  30% (29667/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:33.1905576Z Updating files:  31% (30655/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:34.1962938Z Updating files:  31% (30887/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:35.2275746Z Updating files:  31% (30898/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:36.2431468Z Updating files:  31% (30914/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:37.2085754Z Updating files:  31% (30931/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:37.5181498Z Updating files:  31% (31583/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:38.4913670Z Updating files:  32% (31644/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:38.9940248Z Updating files:  32% (31912/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:39.0616275Z Updating files:  33% (32633/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:39.1028301Z Updating files:  34% (33622/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:39.1433324Z Updating files:  35% (34611/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:39.1764508Z Updating files:  36% (35600/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:39.2245831Z Updating files:  36% (36073/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:39.5345491Z Updating files:  37% (36589/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:39.6128977Z Updating files:  38% (37578/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:39.6595594Z Updating files:  39% (38566/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:39.7282808Z Updating files:  40% (39555/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:39.7710459Z Updating files:  41% (40544/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:39.7989489Z Updating files:  42% (41533/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:39.8637289Z Updating files:  43% (42522/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:40.0148882Z Updating files:  44% (43511/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:40.0459344Z Updating files:  45% (44500/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:40.0988426Z Updating files:  46% (45489/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:40.1572348Z Updating files:  47% (46477/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:40.1745602Z Updating files:  48% (47466/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:40.2913179Z Updating files:  48% (47670/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:40.3286487Z Updating files:  49% (48455/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:40.3701822Z Updating files:  50% (49444/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:40.4329452Z Updating files:  51% (50433/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:40.5526752Z Updating files:  52% (51422/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:40.6161459Z Updating files:  53% (52411/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:40.9109882Z Updating files:  54% (53399/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:40.9356494Z Updating files:  55% (54388/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:40.9599850Z Updating files:  56% (55377/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:40.9861097Z Updating files:  57% (56366/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:41.0110479Z Updating files:  58% (57355/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:41.0360891Z Updating files:  59% (58344/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:41.2327766Z Updating files:  60% (59333/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:42.2207457Z Updating files:  60% (59467/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:42.4162212Z Updating files:  60% (59866/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:42.4699029Z Updating files:  61% (60322/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:42.5349770Z Updating files:  62% (61310/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:42.6458568Z Updating files:  63% (62299/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:42.8593607Z Updating files:  64% (63288/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:43.2617707Z Updating files:  65% (64277/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:43.3087675Z Updating files:  65% (64840/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:43.3908328Z Updating files:  66% (65266/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:43.8888186Z Updating files:  67% (66255/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:44.1787057Z Updating files:  68% (67244/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:45.2676260Z Updating files:  68% (67543/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:45.7433963Z Updating files:  68% (68049/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:46.3300435Z Updating files:  69% (68233/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:47.0272583Z Updating files:  69% (68421/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:47.1754866Z Updating files:  70% (69221/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:47.3110373Z Updating files:  70% (69976/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:48.1975187Z Updating files:  71% (70210/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:48.2658529Z Updating files:  71% (70953/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:48.6245608Z Updating files:  72% (71199/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:49.0909218Z Updating files:  73% (72188/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:49.1747306Z Updating files:  74% (73177/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:49.2097882Z Updating files:  74% (73902/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:49.4543025Z Updating files:  75% (74166/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:49.6011893Z Updating files:  76% (75155/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:49.6333887Z Updating files:  77% (76143/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:49.7189719Z Updating files:  78% (77132/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:49.7724077Z Updating files:  79% (78121/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:49.9551967Z Updating files:  80% (79110/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:50.0014437Z Updating files:  81% (80099/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:50.0316537Z Updating files:  82% (81088/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:50.0612790Z Updating files:  83% (82077/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:50.0926762Z Updating files:  84% (83066/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:50.1220515Z Updating files:  85% (84054/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:50.1518889Z Updating files:  86% (85043/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:50.1759166Z Updating files:  87% (86032/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:50.4318163Z Updating files:  87% (86315/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:50.4933571Z Updating files:  88% (87021/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:51.1955456Z Updating files:  89% (88010/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:51.8066434Z Updating files:  89% (88476/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:52.1748746Z Updating files:  90% (88999/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:52.5901364Z Updating files:  90% (89301/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:52.7244089Z Updating files:  91% (89988/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:52.7957981Z Updating files:  92% (90977/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:52.8831026Z Updating files:  93% (91965/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:52.9238376Z Updating files:  94% (92954/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:53.1258132Z Updating files:  95% (93943/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:53.1824478Z Updating files:  96% (94932/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:53.3323037Z Updating files:  96% (95054/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:53.4927638Z Updating files:  97% (95921/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:54.0492342Z Updating files:  98% (96910/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:54.1784268Z Updating files:  99% (97899/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:54.1954307Z Updating files:  99% (98569/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:54.1954545Z Updating files: 100% (98887/98887)
+release	Run actions/checkout@v4	2026-10-16T14:44:54.1954739Z Updating files: 100% (98887/98887), done.
+release	Run actions/checkout@v4	2026-10-16T14:44:54.5404652Z Switched to a new branch 'main'
+release	Run actions/checkout@v4	2026-10-16T14:44:54.5406063Z branch 'main' set up to track 'origin/main'.
+release	Run actions/checkout@v4	2026-10-16T14:44:54.5788722Z ##[endgroup]
+release	Run actions/checkout@v4	2026-10-16T14:44:54.5828701Z [command]/usr/bin/git log -1 --format=%H
+release	Run actions/checkout@v4	2026-10-16T14:44:54.5846946Z bd7eb117f094a336d3e3e8f31facb0c6b86f95bc
+release	Run actions/download-artifact@v4	﻿2026-10-16T14:44:54.6022804Z ##[group]Run actions/download-artifact@v4
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.6023066Z with:
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.6023229Z   path: staging
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.6023408Z   merge-multiple: false
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.6023606Z   repository: aburan28/crypto
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.6023808Z   run-id: 38915842119
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.6023982Z env:
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.6024142Z   CARGO_TERM_COLOR: always
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.6024339Z   ECC_MARCH: x86-64-v3
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.6024521Z   CUDA_PKG_VERSION: 12-8
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.6024709Z   CUDA_DIR_VERSION: 12.8
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.6024896Z ##[endgroup]
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.7480996Z (node:2104) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.7481762Z (Use `node --trace-deprecation ...` to show where the warning was created)
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.9071209Z Found 9 artifact(s)
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.9073049Z No input name, artifact-ids or pattern filtered specified, downloading all artifacts
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.9073502Z An extra directory with the artifact name will be created for each download
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.9073942Z Preparing to download the following artifacts:
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.9074509Z - rust-x86_64-pc-windows-msvc (ID: 12054040060, Size: 15034995, Expected Digest: sha256:e6657a04db316887cf9eb166f33bdeed5c4ded2d9485859f4ab94c4963a34490)
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.9075385Z - isogeny-aarch64-apple-darwin (ID: 12053980331, Size: 7644266, Expected Digest: sha256:7a0095cc53511efb261e543aedbd35b4ae982a015f4d903fddea1efdf29c0db3)
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.9076270Z - isogeny-x86_64-pc-windows-msvc (ID: 12053251976, Size: 7116721, Expected Digest: sha256:682e2e9bf6917ec7856aa37bada64aaf79995fdfb930cc7e37044d37e63c8557)
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.9077079Z - native-linux (ID: 12053191424, Size: 510675, Expected Digest: sha256:531bb2b34f67eeccc248442977b2375a2dee826dac156c2e15e068f88d5c51e0)
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.9077873Z - isogeny-x86_64-unknown-linux-gnu (ID: 12052926329, Size: 7803019, Expected Digest: sha256:c5ee721fe9d0311964105339c7cfe8c760021180aed3b5b0655116d0e2cd3291)
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.9078695Z - rust-aarch64-apple-darwin (ID: 12052667745, Size: 16267542, Expected Digest: sha256:2824b393bae98a16b724b389046f223a89d3d3f986a9c671c305605e8f77f119)
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.9079445Z - native-cuda (ID: 12052651892, Size: 13051986, Expected Digest: sha256:7c65d52d2aea994391a4c6cad7ecc1b394116c857610149b4357f19986524148)
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.9080243Z - isogeny-x86_64-unknown-linux-musl (ID: 12052344203, Size: 7839893, Expected Digest: sha256:ebcc3a8b59dd998cee1612ec26cc014226591ed398875866a2f08a47f041a3ab)
+release	Run actions/download-artifact@v4	2026-10-16T14:44:54.9081135Z - rust-x86_64-unknown-linux-gnu (ID: 12051634717, Size: 20855885, Expected Digest: sha256:ec8f7ba1cb5533c657eb388c14628bcca2e0a03ca5975353fd6e1c8afafa802a)
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.0772754Z Redirecting to blob download url: https://productionresultssa9.blob.core.windows.net/actions-results/6afc48b1-b2c0-8065-860a-2ddae12b6c70/workflow-job-run-2d43d913-b4fa-5c84-8f50-42a0f01597f1/artifacts/7afdb4bd3b51fa9ac642fca315c6adf612dea470615dd3a9ca0f2df89d27c5b4.zip
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.0774038Z Starting download of artifact to: /home/runner/work/crypto/crypto/staging/rust-x86_64-pc-windows-msvc
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.1501902Z Redirecting to blob download url: https://productionresultssa9.blob.core.windows.net/actions-results/6afc48b1-b2c0-8065-860a-2ddae12b6c70/workflow-job-run-c657fc4a-d8e9-5f0c-9b69-0479b12fe155/artifacts/1a3a6188b7213604217f28b2c2e480742b93739b86fd622a71066739dee9c1cc.zip
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.1503105Z Starting download of artifact to: /home/runner/work/crypto/crypto/staging/isogeny-x86_64-unknown-linux-gnu
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.1540210Z Redirecting to blob download url: https://productionresultssa9.blob.core.windows.net/actions-results/6afc48b1-b2c0-8065-860a-2ddae12b6c70/workflow-job-run-a6eee3aa-4428-57c1-86f7-4d47a00c6434/artifacts/5d71119c6fb2b5bbe74d35644e503e3581c6a621c5a421f8d30f007466baba83.zip
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.1541382Z Starting download of artifact to: /home/runner/work/crypto/crypto/staging/native-linux
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.1704839Z Redirecting to blob download url: https://productionresultssa9.blob.core.windows.net/actions-results/6afc48b1-b2c0-8065-860a-2ddae12b6c70/workflow-job-run-d0e42cfd-21c6-5c3d-9f8b-792f8eb611ec/artifacts/e71d7e67e80bb512c18ea4670c16d20b64f8e7485b00363a4b436b96b356e66a.zip
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.1706035Z Starting download of artifact to: /home/runner/work/crypto/crypto/staging/rust-x86_64-unknown-linux-gnu
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.1708176Z Redirecting to blob download url: https://productionresultssa9.blob.core.windows.net/actions-results/6afc48b1-b2c0-8065-860a-2ddae12b6c70/workflow-job-run-effc1c62-4844-5c63-b243-e2b5ee19c7bd/artifacts/59cae0ac9f770b8a902d2a54dc0628d439601feaf5e4270d690cc876960c52e6.zip
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.1709317Z Starting download of artifact to: /home/runner/work/crypto/crypto/staging/isogeny-x86_64-pc-windows-msvc
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.1715077Z Redirecting to blob download url: https://productionresultssa9.blob.core.windows.net/actions-results/6afc48b1-b2c0-8065-860a-2ddae12b6c70/workflow-job-run-6632eb3d-05a1-565e-9187-10cd6aca3b19/artifacts/f890065fd5f2509df2211df2243e91c18b8f9c3b4d71e6619ce7acac1e440a3d.zip
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.1715929Z Starting download of artifact to: /home/runner/work/crypto/crypto/staging/rust-aarch64-apple-darwin
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.1749508Z Redirecting to blob download url: https://productionresultssa9.blob.core.windows.net/actions-results/6afc48b1-b2c0-8065-860a-2ddae12b6c70/workflow-job-run-079afeae-8f7f-5855-886f-b85ebf6822f2/artifacts/a2b1e56ffb5713240f51464fa8da8135008e554ccab7aff14938764775811d72.zip
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.1750226Z Starting download of artifact to: /home/runner/work/crypto/crypto/staging/native-cuda
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.1755279Z Redirecting to blob download url: https://productionresultssa9.blob.core.windows.net/actions-results/6afc48b1-b2c0-8065-860a-2ddae12b6c70/workflow-job-run-16c3fb9a-d20e-59a0-b7a9-19242357f339/artifacts/dd75fc2dde170ad9b3f6750c1c303ac831e0efd7f0938433a2223ba869942476.zip
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.1756097Z Starting download of artifact to: /home/runner/work/crypto/crypto/staging/isogeny-x86_64-unknown-linux-musl
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.1765196Z Redirecting to blob download url: https://productionresultssa9.blob.core.windows.net/actions-results/6afc48b1-b2c0-8065-860a-2ddae12b6c70/workflow-job-run-6aa2c3a1-1ebd-5797-93d4-6682e623d0b7/artifacts/4d17d7f227e2eb0c3a396570b7d5ad5dc32a8671f8970692a4c513212370b96b.zip
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.1765950Z Starting download of artifact to: /home/runner/work/crypto/crypto/staging/isogeny-aarch64-apple-darwin
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.3515553Z (node:2104) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.6749319Z SHA256 digest of downloaded artifact is 531bb2b34f67eeccc248442977b2375a2dee826dac156c2e15e068f88d5c51e0
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.6749747Z Artifact download completed successfully.
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.9757000Z SHA256 digest of downloaded artifact is e6657a04db316887cf9eb166f33bdeed5c4ded2d9485859f4ab94c4963a34490
+release	Run actions/download-artifact@v4	2026-10-16T14:44:55.9757566Z Artifact download completed successfully.
+release	Run actions/download-artifact@v4	2026-10-16T14:44:56.0411145Z SHA256 digest of downloaded artifact is 7a0095cc53511efb261e543aedbd35b4ae982a015f4d903fddea1efdf29c0db3
+release	Run actions/download-artifact@v4	2026-10-16T14:44:56.0411729Z Artifact download completed successfully.
+release	Run actions/download-artifact@v4	2026-10-16T14:44:56.0791305Z SHA256 digest of downloaded artifact is 7c65d52d2aea994391a4c6cad7ecc1b394116c857610149b4357f19986524148
+release	Run actions/download-artifact@v4	2026-10-16T14:44:56.0792105Z Artifact download completed successfully.
+release	Run actions/download-artifact@v4	2026-10-16T14:44:56.1522878Z SHA256 digest of downloaded artifact is c5ee721fe9d0311964105339c7cfe8c760021180aed3b5b0655116d0e2cd3291
+release	Run actions/download-artifact@v4	2026-10-16T14:44:56.1523453Z Artifact download completed successfully.
+release	Run actions/download-artifact@v4	2026-10-16T14:44:56.1809808Z SHA256 digest of downloaded artifact is ec8f7ba1cb5533c657eb388c14628bcca2e0a03ca5975353fd6e1c8afafa802a
+release	Run actions/download-artifact@v4	2026-10-16T14:44:56.1810683Z Artifact download completed successfully.
+release	Run actions/download-artifact@v4	2026-10-16T14:44:56.2522649Z SHA256 digest of downloaded artifact is 2824b393bae98a16b724b389046f223a89d3d3f986a9c671c305605e8f77f119
+release	Run actions/download-artifact@v4	2026-10-16T14:44:56.2523263Z Artifact download completed successfully.
+release	Run actions/download-artifact@v4	2026-10-16T14:44:56.3650006Z SHA256 digest of downloaded artifact is ebcc3a8b59dd998cee1612ec26cc014226591ed398875866a2f08a47f041a3ab
+release	Run actions/download-artifact@v4	2026-10-16T14:44:56.3650421Z Artifact download completed successfully.
+release	Run actions/download-artifact@v4	2026-10-16T14:45:00.7412807Z SHA256 digest of downloaded artifact is 682e2e9bf6917ec7856aa37bada64aaf79995fdfb930cc7e37044d37e63c8557
+release	Run actions/download-artifact@v4	2026-10-16T14:45:00.7413433Z Artifact download completed successfully.
+release	Run actions/download-artifact@v4	2026-10-16T14:45:00.7413921Z Total of 9 artifact(s) downloaded
+release	Run actions/download-artifact@v4	2026-10-16T14:45:00.7419176Z Download artifact has finished successfully
+release	Collect the archives and checksum them	﻿2026-10-16T14:47:55.3713016Z ##[group]Run mkdir -p dist
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3713278Z ^[[36;1mmkdir -p dist^[[0m
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3713534Z ^[[36;1mfind staging -type f \( -name '*.tar.gz' -o -name '*.zip' \) \^[[0m
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3713788Z ^[[36;1m  -exec mv -t dist/ {} +^[[0m
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3714026Z ^[[36;1m# Build the sums outside dist so the glob cannot race the file^[[0m
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3714361Z ^[[36;1m# being written into the directory it is listing.^[[0m
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3714607Z ^[[36;1m( cd dist && sha256sum -- * ) > /tmp/SHA256SUMS^[[0m
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3714877Z ^[[36;1mmv /tmp/SHA256SUMS dist/^[[0m
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3715190Z ^[[36;1mcat dist/SHA256SUMS^[[0m
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3715451Z ^[[36;1m{^[[0m
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3715722Z ^[[36;1m  echo 'files<<RELEASE_ASSETS'^[[0m
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3716078Z ^[[36;1m  for asset in dist/*; do printf '%s\n' "$asset"; done^[[0m
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3716420Z ^[[36;1m  echo 'RELEASE_ASSETS'^[[0m
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3716712Z ^[[36;1m} >> "$GITHUB_OUTPUT"^[[0m
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3945747Z shell: /usr/bin/bash -e {0}
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3946174Z env:
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3946527Z   CARGO_TERM_COLOR: always
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3946812Z   ECC_MARCH: x86-64-v3
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3947094Z   CUDA_PKG_VERSION: 12-8
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3947351Z   CUDA_DIR_VERSION: 12.8
+release	Collect the archives and checksum them	2026-10-16T14:47:55.3947632Z ##[endgroup]
+release	Collect the archives and checksum them	2026-10-16T14:47:55.4896850Z 10e97d1779f8c12b57395fa0bad2b8814f74c1d1f88285138cc88a7e36bc06a8  crypto-v0.1.2390-aarch64-apple-darwin.tar.gz
+release	Collect the archives and checksum them	2026-10-16T14:47:55.4906337Z 7d4610d60e58c0158579c650ce0d6b86be61328091d68332d8b5e08798ce73bf  crypto-v0.1.2390-x86_64-pc-windows-msvc.zip
+release	Collect the archives and checksum them	2026-10-16T14:47:55.4910629Z 2e0998ebb3dc64bebe1f4c85d9ab87ebdabb8d8a863355bf017fe94df07cbb21  crypto-v0.1.2390-x86_64-unknown-linux-gnu.tar.gz
+release	Collect the archives and checksum them	2026-10-16T14:47:55.4912999Z 301065b756de4d2b2f7fb716d2c75387cf646817d4724a9d0ededd52c059adfa  ecc2k130-cpu-v0.1.2390-x86_64-linux.tar.gz
+release	Collect the archives and checksum them	2026-10-16T14:47:55.4914627Z a208bf29a772fdce041c6583e88703cd28a03a75da7b7b856ba4459ac53e3092  ecc2k130-cuda-v0.1.2390-x86_64-linux.tar.gz
+release	Collect the archives and checksum them	2026-10-16T14:47:55.4915374Z cc88bac7575f51ea56dafeed98e40520cab5d5daac818d30e1bb4c293b6ec779  isogeny-v0.1.2390-aarch64-apple-darwin.tar.gz
+release	Collect the archives and checksum them	2026-10-16T14:47:55.4915958Z 342ab3531e93e3f5cd33ec787d5438501c9f94bc0aebe3fabfd7aaa806c77ebb  isogeny-v0.1.2390-x86_64-pc-windows-msvc.zip
+release	Collect the archives and checksum them	2026-10-16T14:47:55.4918105Z 0dba5245855dcdedab8bf51216f5afd4ec0512847efac9a947ff6843ea0cf0a1  isogeny-v0.1.2390-x86_64-unknown-linux-gnu.tar.gz
+release	Collect the archives and checksum them	2026-10-16T14:47:55.4920151Z 9b02dc179b360ceaeb3c6b8c349ea36fa33ad7a890ed4a67cb8a6154e0632767  isogeny-v0.1.2390-x86_64-unknown-linux-musl.tar.gz
+release	Write the release notes	﻿2026-10-16T14:47:55.5039220Z ##[group]Run cat > /tmp/notes.md <<'NOTES'
+release	Write the release notes	2026-10-16T14:47:55.5039472Z ^[[36;1mcat > /tmp/notes.md <<'NOTES'^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5039658Z ^[[36;1mRolling build of `main`.^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5039857Z ^[[36;1m^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5039995Z ^[[36;1m| Artifact | Contents |^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5040175Z ^[[36;1m| --- | --- |^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5040522Z ^[[36;1m| `crypto-*-x86_64-unknown-linux-gnu.tar.gz` | `crypto`, `ic`, `ecbench`, `curve_cover_check`, `hyperelliptic-cover` — glibc |^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5040947Z ^[[36;1m| `crypto-*-x86_64-unknown-linux-musl.tar.gz` | same five executables — static |^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5041313Z ^[[36;1m| `crypto-*-aarch64-apple-darwin.tar.gz` | same five executables — Apple silicon |^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5041832Z ^[[36;1m| `crypto-*-x86_64-pc-windows-msvc.zip` | same five executables (`.exe`) |^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5042219Z ^[[36;1m| `isogeny-*-x86_64-unknown-linux-gnu.tar.gz` | dedicated `isogeny` executable, README, BUILD.json — glibc |^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5042639Z ^[[36;1m| `isogeny-*-x86_64-unknown-linux-musl.tar.gz` | dedicated tool — static |^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5042972Z ^[[36;1m| `isogeny-*-aarch64-apple-darwin.tar.gz` | dedicated tool — Apple silicon |^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5043298Z ^[[36;1m| `isogeny-*-x86_64-pc-windows-msvc.zip` | dedicated `isogeny.exe` tool |^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5043755Z ^[[36;1m| `ecc2k130-cpu-*.tar.gz` | ECC2K-130 client, CPU (`-march=x86-64-v3`) |^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5044070Z ^[[36;1m| `ecc2k130-cuda-*.tar.gz` | ECC2K-130 client, CUDA fatbinary (sm_80–sm_120) |^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5044314Z ^[[36;1m^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5044474Z ^[[36;1mVerify with `sha256sum -c SHA256SUMS`.^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5044661Z ^[[36;1m^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5044858Z ^[[36;1mRun `isogeny --help` after extracting the dedicated tool archive.^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5045162Z ^[[36;1m`isogeny search --curve p224 --ell 1471 --out p224-1471` constructs^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5045452Z ^[[36;1mand independently verifies the recorded one-eigenline map.^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5045675Z ^[[36;1m^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5045876Z ^[[36;1mThe CUDA binary is compiled, not GPU-tested: GitHub runners have no GPU.^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5046117Z ^[[36;1mNOTES^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5046321Z ^[[36;1mprintf '\nBuilt from commit %s.\n' "$GITHUB_SHA" >> /tmp/notes.md^[[0m
+release	Write the release notes	2026-10-16T14:47:55.5096127Z shell: /usr/bin/bash -e {0}
+release	Write the release notes	2026-10-16T14:47:55.5096302Z env:
+release	Write the release notes	2026-10-16T14:47:55.5096442Z   CARGO_TERM_COLOR: always
+release	Write the release notes	2026-10-16T14:47:55.5096605Z   ECC_MARCH: x86-64-v3
+release	Write the release notes	2026-10-16T14:47:55.5096758Z   CUDA_PKG_VERSION: 12-8
+release	Write the release notes	2026-10-16T14:47:55.5096919Z   CUDA_DIR_VERSION: 12.8
+release	Write the release notes	2026-10-16T14:47:55.5097075Z ##[endgroup]
+release	Pin the release tag to the built source commit	﻿2026-10-16T14:47:55.5201042Z ##[group]Run git tag "v0.1.2390" "$GITHUB_SHA"
+release	Pin the release tag to the built source commit	2026-10-16T14:47:55.5201271Z ^[[36;1mgit tag "v0.1.2390" "$GITHUB_SHA"^[[0m
+release	Pin the release tag to the built source commit	2026-10-16T14:47:55.5201499Z ^[[36;1mgit push origin "refs/tags/v0.1.2390"^[[0m
+release	Pin the release tag to the built source commit	2026-10-16T14:47:55.5245073Z shell: /usr/bin/bash -e {0}
+release	Pin the release tag to the built source commit	2026-10-16T14:47:55.5245244Z env:
+release	Pin the release tag to the built source commit	2026-10-16T14:47:55.5245380Z   CARGO_TERM_COLOR: always
+release	Pin the release tag to the built source commit	2026-10-16T14:47:55.5245540Z   ECC_MARCH: x86-64-v3
+release	Pin the release tag to the built source commit	2026-10-16T14:47:55.5245693Z   CUDA_PKG_VERSION: 12-8
+release	Pin the release tag to the built source commit	2026-10-16T14:47:55.5245849Z   CUDA_DIR_VERSION: 12.8
+release	Pin the release tag to the built source commit	2026-10-16T14:47:55.5246015Z ##[endgroup]
+release	Pin the release tag to the built source commit	2026-10-16T14:47:57.4243873Z To https://github.com/aburan28/crypto
+release	Pin the release tag to the built source commit	2026-10-16T14:47:57.4244359Z  * [new tag]             v0.1.2390 -> v0.1.2390
+release	Publish with ReleaseMe	﻿2026-10-16T14:47:57.4348115Z ##[group]Run dev-build-deploy/release-me@cede87fd8a4829ef571dff6bde807ebbfcaeb3e9
+release	Publish with ReleaseMe	2026-10-16T14:47:57.4348402Z with:
+release	Publish with ReleaseMe	2026-10-16T14:47:57.4350077Z   token: ***
+release	Publish with ReleaseMe	2026-10-16T14:47:57.4350221Z   prefix: v
+release	Publish with ReleaseMe	2026-10-16T14:47:57.4350353Z   version: v0.1.2390
+release	Publish with ReleaseMe	2026-10-16T14:47:57.4350503Z   draft: true
+release	Publish with ReleaseMe	2026-10-16T14:47:57.4350654Z   release-notes: /tmp/notes.md
+release	Publish with ReleaseMe	2026-10-16T14:47:57.4350836Z   config: .github/release.yml
+release	Publish with ReleaseMe	2026-10-16T14:47:57.4351004Z   versioning: semver
+release	Publish with ReleaseMe	2026-10-16T14:47:57.4351156Z   create-release: true
+release	Publish with ReleaseMe	2026-10-16T14:47:57.4351306Z env:
+release	Publish with ReleaseMe	2026-10-16T14:47:57.4351440Z   CARGO_TERM_COLOR: always
+release	Publish with ReleaseMe	2026-10-16T14:47:57.4351857Z   ECC_MARCH: x86-64-v3
+release	Publish with ReleaseMe	2026-10-16T14:47:57.4352013Z   CUDA_PKG_VERSION: 12-8
+release	Publish with ReleaseMe	2026-10-16T14:47:57.4352174Z   CUDA_DIR_VERSION: 12.8
+release	Publish with ReleaseMe	2026-10-16T14:47:57.4352329Z ##[endgroup]
+release	Publish with ReleaseMe	2026-10-16T14:47:57.5468982Z 📄 ReleaseMe - GitHub Release Management
+release	Publish with ReleaseMe	2026-10-16T14:47:57.5471389Z ##[group]🔍 Determining increment type
+release	Publish with ReleaseMe	2026-10-16T14:47:57.5471984Z ℹ️ Using version override: v0.1.2390
+release	Publish with ReleaseMe	2026-10-16T14:47:57.5476817Z ##[endgroup]
+release	Publish with ReleaseMe	2026-10-16T14:47:57.5477528Z ##[group]📦 Creating GitHub Release...
+release	Publish with ReleaseMe	2026-10-16T14:47:57.5484580Z (node:2169) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+release	Publish with ReleaseMe	2026-10-16T14:47:57.5485134Z (Use `node --trace-deprecation ...` to show where the warning was created)
+release	Publish with ReleaseMe	2026-10-16T14:47:57.8067970Z No release configuration found, using default configuration
+release	Publish with ReleaseMe	2026-10-16T14:47:57.8071320Z 🎁 Creating GitHub Release v0.1.2390...
+release	Publish with ReleaseMe	2026-10-16T14:47:58.6109634Z ##[endgroup]
+release	Publish with ReleaseMe	2026-10-16T14:47:58.6111124Z ✅ Created GitHub Release v0.1.2390!
+release	Upload archives as bytes and verify published checksums	﻿2026-10-16T14:47:58.6228300Z ##[group]Run bash .github/scripts/publish_release_assets.sh "$GITHUB_REPOSITORY" "v0.1.2390" dist "$RUNNER_TEMP/published-release-assets"
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:47:58.6228869Z ^[[36;1mbash .github/scripts/publish_release_assets.sh "$GITHUB_REPOSITORY" "v0.1.2390" dist "$RUNNER_TEMP/published-release-assets"^[[0m
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:47:58.6282379Z shell: /usr/bin/bash -e {0}
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:47:58.6282559Z env:
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:47:58.6282701Z   CARGO_TERM_COLOR: always
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:47:58.6282871Z   ECC_MARCH: x86-64-v3
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:47:58.6283035Z   CUDA_PKG_VERSION: 12-8
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:47:58.6283200Z   CUDA_DIR_VERSION: 12.8
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:47:58.6284854Z   GH_TOKEN: ***
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:47:58.6285006Z ##[endgroup]
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:47:58.6464134Z crypto-v0.1.2390-aarch64-apple-darwin.tar.gz: OK
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:47:58.6575524Z crypto-v0.1.2390-x86_64-pc-windows-msvc.zip: OK
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:47:58.6754098Z crypto-v0.1.2390-x86_64-unknown-linux-gnu.tar.gz: OK
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:47:58.6757002Z ecc2k130-cpu-v0.1.2390-x86_64-linux.tar.gz: OK
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:47:58.6829906Z ecc2k130-cuda-v0.1.2390-x86_64-linux.tar.gz: OK
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:47:58.6872671Z isogeny-v0.1.2390-aarch64-apple-darwin.tar.gz: OK
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:47:58.6912140Z isogeny-v0.1.2390-x86_64-pc-windows-msvc.zip: OK
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:47:58.6955617Z isogeny-v0.1.2390-x86_64-unknown-linux-gnu.tar.gz: OK
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:47:58.6999191Z isogeny-v0.1.2390-x86_64-unknown-linux-musl.tar.gz: OK
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:48:05.9784919Z crypto-v0.1.2390-aarch64-apple-darwin.tar.gz: OK
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:48:05.9866715Z crypto-v0.1.2390-x86_64-pc-windows-msvc.zip: OK
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:48:05.9980085Z crypto-v0.1.2390-x86_64-unknown-linux-gnu.tar.gz: OK
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:48:05.9982941Z ecc2k130-cpu-v0.1.2390-x86_64-linux.tar.gz: OK
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:48:06.0054094Z ecc2k130-cuda-v0.1.2390-x86_64-linux.tar.gz: OK
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:48:06.0095801Z isogeny-v0.1.2390-aarch64-apple-darwin.tar.gz: OK
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:48:06.0134229Z isogeny-v0.1.2390-x86_64-pc-windows-msvc.zip: OK
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:48:06.0177214Z isogeny-v0.1.2390-x86_64-unknown-linux-gnu.tar.gz: OK
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:48:06.0219766Z isogeny-v0.1.2390-x86_64-unknown-linux-musl.tar.gz: OK
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:48:07.4458494Z https://github.com/aburan28/crypto/releases/tag/v0.1.2390
+release	Upload archives as bytes and verify published checksums	2026-10-16T14:48:07.4478276Z Published release assets match the staged SHA256SUMS.
+release	Post Run actions/checkout@v4	﻿2026-10-16T14:48:07.4557238Z Post job cleanup.
+release	Post Run actions/checkout@v4	2026-10-16T14:48:07.5108820Z [command]/usr/bin/git version
+release	Post Run actions/checkout@v4	2026-10-16T14:48:07.5135385Z git version 2.55.0
+release	Post Run actions/checkout@v4	2026-10-16T14:48:07.5156105Z Temporarily overriding HOME='/home/runner/work/_temp/f8a02470-e830-472b-8b6d-7fb60afb0ff9' before making global git config changes
+release	Post Run actions/checkout@v4	2026-10-16T14:48:07.5156549Z Adding repository directory to the temporary git global config as a safe directory
+release	Post Run actions/checkout@v4	2026-10-16T14:48:07.5159773Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/crypto/crypto
+release	Post Run actions/checkout@v4	2026-10-16T14:48:07.5185840Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+release	Post Run actions/checkout@v4	2026-10-16T14:48:07.5210245Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+release	Post Run actions/checkout@v4	2026-10-16T14:48:07.5431138Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+release	Post Run actions/checkout@v4	2026-10-16T14:48:07.5452458Z http.https://github.com/.extraheader
+release	Post Run actions/checkout@v4	2026-10-16T14:48:07.5459477Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+release	Post Run actions/checkout@v4	2026-10-16T14:48:07.5486130Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+release	Post Run actions/checkout@v4	2026-10-16T14:48:07.5704344Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+release	Post Run actions/checkout@v4	2026-10-16T14:48:07.5736146Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+release	Complete job	﻿2026-10-16T14:48:07.6070875Z Cleaning up orphan processes
+release	Complete job	2026-10-16T14:48:07.6263219Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/download-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

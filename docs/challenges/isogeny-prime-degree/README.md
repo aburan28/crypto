@@ -15,6 +15,10 @@ The [starting leaderboard](leaderboard.json) has all 54 standard prime models.
 Fresh replay admits the historical P192/10453, P224/1471 and P521/7 entries;
 the other rows remain unscored. The [native evidence report](../../../research/isogeny_degree_challenge_20261015/README.md)
 retains the exact source/target identities, rules, raw maps and certificates.
+This starting board is a historical season snapshot. The installed release
+emits its own season through `challenge policy`; replay the raw submissions
+again when building a leaderboard for that season. Scores do not transfer
+between seasons automatically.
 
 This is an open-ended computational challenge. There is no finite largest
 isogeny degree in mathematics. A result here is a record for the pinned
@@ -25,24 +29,60 @@ challenge catalogue and verifier, not a worldwide record or an upper bound.
 The challenge is built into `isogeny`, distributed by the repository's
 ReleaseMe archive workflow. It needs no Cargo, checkout, companion program,
 external catalogue or rules file at runtime. Source builds are maintainer work.
-Actual publication of this new command must be verified after it lands.
+[Release v0.1.2390](https://github.com/aburan28/crypto/releases/tag/v0.1.2390)
+is published from commit `bd7eb117f094a336d3e3e8f31facb0c6b86f95bc`.
+Fresh downloads of all four dedicated archives matched the release checksums;
+the downloaded Apple-silicon binary passed native public-map admission controls
+from outside the checkout. The [publication receipts](../../../research/isogeny_world_frontier_20261016/replay-optimization-v1/official-release-v0.1.2390/README.md)
+retain the exact assets, source and platform coverage.
+
+For Apple silicon, run this in a fresh working directory:
 
 ```sh
-isogeny challenge policy > policy.json
-isogeny challenge plan --curve all --from 10454 --to 65537 > ladder.json
+set -e
+mkdir isogeny-2390
+cd isogeny-2390
+curl -fLO https://github.com/aburan28/crypto/releases/download/v0.1.2390/isogeny-v0.1.2390-aarch64-apple-darwin.tar.gz
+printf '%s  %s\n' \
+  cc88bac7575f51ea56dafeed98e40520cab5d5daac818d30e1bb4c293b6ec779 \
+  isogeny-v0.1.2390-aarch64-apple-darwin.tar.gz | shasum -a 256 -c -
+tar -xzf isogeny-v0.1.2390-aarch64-apple-darwin.tar.gz
+cd isogeny-v0.1.2390-aarch64-apple-darwin
+./isogeny --version
+./isogeny curves
+./isogeny --help
+```
+
+The version JSON reports the CLI package version `0.1.0`; its `git_commit`
+identifies the exact source of rolling repository release `v0.1.2390`.
+The release also provides these dedicated archives and a `SHA256SUMS` file:
+
+| Platform | Archive |
+|---|---|
+| Linux x86-64, glibc | `isogeny-v0.1.2390-x86_64-unknown-linux-gnu.tar.gz` |
+| Linux x86-64, musl | `isogeny-v0.1.2390-x86_64-unknown-linux-musl.tar.gz` |
+| Apple silicon | `isogeny-v0.1.2390-aarch64-apple-darwin.tar.gz` |
+| Windows x86-64, MSVC | `isogeny-v0.1.2390-x86_64-pc-windows-msvc.zip` |
+
+After extracting the matching archive, run its `isogeny` executable
+(`isogeny.exe` on Windows). From that directory:
+
+```sh
+./isogeny challenge policy > policy.json
+./isogeny challenge plan --curve all --from 10454 --to 65537 > ladder.json
 
 # A short end-to-end control; scores only its own source curve.
-isogeny challenge run --curve p192 --ell 13 --out fresh-control
+./isogeny challenge run --curve p192 --ell 13 --out fresh-control
 
 # Attempt the recorded P192 degree before attempting a higher rung.
-isogeny challenge run --curve p192 --ell 10453 --out fresh-p192-10453
+./isogeny challenge run --curve p192 --ell 10453 --out fresh-p192-10453
 
 # Judge a map produced by any algorithm; directory must be fresh.
-isogeny challenge judge --input submission --out fresh-judgement
+./isogeny challenge judge --input submission --out fresh-judgement
 
 # JSON paths are resolved relative to this manifest's directory.
 printf '%s\n' '["fresh-p192-10453/construction", "other-submission"]' > submissions.json
-isogeny challenge leaderboard --input submissions.json --out fresh-board
+./isogeny challenge leaderboard --input submissions.json --out fresh-board
 ```
 
 `policy` pins the rules and exact embedded catalogue by SHA256. Their combined

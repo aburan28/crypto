@@ -1,0 +1,22 @@
+{
+  "schema": "isogeny-trace-retake-visual-data/v1",
+  "source": "control-check-v2.json",
+  "task_id": "TASK-20261016-7b4402",
+  "arms": {
+    "reference": {
+      "parent_passed": 1,
+      "parent_filtered": 85,
+      "trace_begin_count": 2,
+      "trace_end_count": 0
+    },
+    "candidate": {
+      "parent_passed": 1,
+      "parent_filtered": 85,
+      "trace_begin_count": 2,
+      "trace_end_count": 0
+    }
+  },
+  "scientific_runs": 0,
+  "new_scores": 0,
+  "scope": "Pure logging engineering control; diagram conveys the observed execution contract, not isogeny or performance evidence."
+}

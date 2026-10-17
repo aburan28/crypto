@@ -1,0 +1,129 @@
+{
+  "id": "IDC1h41e9973f839c85bf",
+  "independence": "native issuance and same-process checker plus domain-separated extra points; independent source review pending",
+  "modulus": 2305843009213693951,
+  "points": 32,
+  "proof": null,
+  "schema": "identity.certificate/v1",
+  "seed": 20261016,
+  "statement": {
+    "degree_bound": 4,
+    "lhs": {
+      "args": [
+        {
+          "args": [
+            {
+              "args": "B",
+              "op": "var"
+            },
+            {
+              "args": "G",
+              "op": "var"
+            }
+          ],
+          "op": "mul"
+        },
+        {
+          "args": [
+            {
+              "args": 2,
+              "op": "const"
+            },
+            {
+              "args": {
+                "args": [
+                  {
+                    "args": "B",
+                    "op": "var"
+                  },
+                  {
+                    "args": "G",
+                    "op": "var"
+                  }
+                ],
+                "op": "mul"
+              },
+              "op": "neg"
+            }
+          ],
+          "op": "add"
+        }
+      ],
+      "op": "mul"
+    },
+    "name": "Newton reciprocal update residual",
+    "rhs": {
+      "args": [
+        {
+          "args": 1,
+          "op": "const"
+        },
+        {
+          "args": {
+            "args": [
+              {
+                "args": [
+                  {
+                    "args": 1,
+                    "op": "const"
+                  },
+                  {
+                    "args": {
+                      "args": [
+                        {
+                          "args": "B",
+                          "op": "var"
+                        },
+                        {
+                          "args": "G",
+                          "op": "var"
+                        }
+                      ],
+                      "op": "mul"
+                    },
+                    "op": "neg"
+                  }
+                ],
+                "op": "add"
+              },
+              {
+                "args": [
+                  {
+                    "args": 1,
+                    "op": "const"
+                  },
+                  {
+                    "args": {
+                      "args": [
+                        {
+                          "args": "B",
+                          "op": "var"
+                        },
+                        {
+                          "args": "G",
+                          "op": "var"
+                        }
+                      ],
+                      "op": "mul"
+                    },
+                    "op": "neg"
+                  }
+                ],
+                "op": "add"
+              }
+            ],
+            "op": "mul"
+          },
+          "op": "neg"
+        }
+      ],
+      "op": "add"
+    },
+    "source": "fixed-modulus-newton.md; scalar supplement to formal-series reduction proof",
+    "variables": [
+      "B",
+      "G"
+    ]
+  },
+  "value_digest": "19f5d31bf85b13ca1b53fa33a2ce005a95d1415691e013b56e5c3f5952b32ea1"
+}

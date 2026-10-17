@@ -185,6 +185,187 @@ pub fn mulmod(f: &Field, a: &Poly, b: &Poly, m: &Poly) -> Poly {
     rem(f, &mul(f, a, b), m)
 }
 
+/// Exact reduction against one borrowed, trimmed modulus and field.
+///
+/// For B = reverse(m), Newton's update G(2-BG) doubles precision since
+/// B G(2-BG) = 1-(1-BG)^2. Uniqueness of the formal inverse implies that
+/// every stored prefix equals an inverse independently computed to that
+/// precision. Reversing the quotient then gives exactly the reference rem.
+/// See docs/identity-certificates/fixed-modulus-newton.md for the proof map.
+pub struct FixedModulus<'a> {
+    field: &'a Field,
+    modulus: &'a Poly,
+    // Formal series, NOT a trimmed polynomial: precision includes zeroes.
+    inverse: Poly,
+}
+
+impl<'a> FixedModulus<'a> {
+    pub fn new(field: &'a Field, modulus: &'a Poly) -> Result<Self, &'static str> {
+        let lead = modulus.last().ok_or("zero fixed modulus")?;
+        if field.is_zero(lead) {
+            return Err("fixed modulus must be trimmed");
+        }
+        let mut inverse = Vec::new();
+        if modulus.len() >= 128 {
+            let reverse: Poly = modulus.iter().rev().copied().collect();
+            inverse.push(field.inv(lead).ok_or("nonunit fixed modulus lead")?);
+            while inverse.len() < modulus.len() {
+                let next = (2 * inverse.len()).min(modulus.len());
+                let mut t = fast_product(field, &reverse[..next], &inverse);
+                t.resize(next, field.zero());
+                t.truncate(next);
+                for c in &mut t {
+                    *c = field.neg(c);
+                }
+                t[0] = field.add(&t[0], &field.from_u64(2));
+                inverse = fast_product(field, &inverse, &t);
+                inverse.resize(next, field.zero());
+                inverse.truncate(next);
+            }
+        }
+        Ok(Self {
+            field,
+            modulus,
+            inverse,
+        })
+    }
+
+    pub fn field(&self) -> &'a Field {
+        self.field
+    }
+    pub fn modulus(&self) -> &'a Poly {
+        self.modulus
+    }
+    /// Diagnostic property of this context, with no per-operation counters.
+    pub fn has_reciprocal(&self) -> bool {
+        !self.inverse.is_empty()
+    }
+
+    pub fn rem(&self, a: &Poly) -> Poly {
+        let f = self.field;
+        let b = self.modulus;
+        if b.len() >= 128 && a.len() >= b.len() && a.len() < 2 * b.len() {
+            let count = a.len() - b.len() + 1;
+            let reversed_a: Poly = a.iter().rev().copied().take(count).collect();
+            let mut q = trim(f, fast_product(f, &reversed_a, &self.inverse[..count]));
+            q.resize(count, f.zero());
+            q.truncate(count);
+            q.reverse();
+            let result = sub(f, a, &mul(f, &q, b));
+            assert!(
+                result.len() < b.len(),
+                "reciprocal polynomial reduction failed"
+            );
+            return result;
+        }
+        divrem(f, a, b).1
+    }
+
+    pub fn mulmod(&self, a: &Poly, b: &Poly) -> Poly {
+        self.rem(&mul(self.field, a, b))
+    }
+
+    #[cfg(test)]
+    fn inverse_residual_is_one(&self) -> bool {
+        if !self.has_reciprocal() {
+            return self.modulus.len() < 128;
+        }
+        let reverse: Poly = self.modulus.iter().rev().copied().collect();
+        let mut residual = fast_product(self.field, &reverse, &self.inverse);
+        residual.resize(self.modulus.len(), self.field.zero());
+        residual.truncate(self.modulus.len());
+        residual[0] == self.field.one() && residual[1..].iter().all(|c| self.field.is_zero(c))
+    }
+}
+
+/// Shared native controls, called explicitly by the three- and nine-limb
+/// harnesses, rather than registered eleven times by the generated engines.
+#[cfg(test)]
+pub fn fixed_modulus_control_suite(f: &Field) {
+    let dense = |n: usize, salt: u64| -> Poly {
+        (0..n)
+            .map(|i| f.from_u64(1 + ((i as u64 * 17 + salt) % 89)))
+            .collect()
+    };
+    let check = |m: &Poly, a: &Poly| {
+        let original = m.clone();
+        let context = FixedModulus::new(f, m).unwrap();
+        assert!(context.inverse_residual_is_one());
+        let (q, schoolbook) = divrem(f, a, m);
+        assert_eq!(context.rem(a), schoolbook);
+        assert_eq!(context.rem(a), rem(f, a, m));
+        assert_eq!(add(f, &mul(f, &q, m), &schoolbook), *a);
+        assert!(schoolbook.len() < m.len());
+        assert_eq!(*m, original);
+    };
+    assert!(FixedModulus::new(f, &vec![]).is_err());
+    assert!(FixedModulus::new(f, &vec![f.one(), f.zero()]).is_err());
+    check(&vec![f.from_u64(3)], &vec![]);
+    check(&vec![f.from_u64(3)], &dense(49, 5));
+    for length in [127, 128, 129, 130] {
+        let mut monic = dense(length, 7);
+        *monic.last_mut().unwrap() = f.one();
+        let mut sparse = vec![f.zero(); length];
+        sparse[0] = f.from_u64(5);
+        sparse[length - 1] = f.one();
+        let nonmonic = scale(f, &monic, &f.from_u64(3));
+        for m in [&monic, &sparse, &nonmonic] {
+            for n in [
+                0,
+                length - 1,
+                length,
+                2 * length - 1,
+                2 * length,
+                3 * length + 3,
+            ] {
+                check(m, &dense(n, 11));
+            }
+            // Count 1/2/3 and both sides of Newton doubling boundaries.
+            for count in [1, 2, 3, 7, 8, 9, 15, 16, 17, 31, 32, 33, 63, 64, 65, length] {
+                check(m, &dense(length + count - 1, 23));
+            }
+            let c = FixedModulus::new(f, m).unwrap();
+            for n in [47, 48, 49] {
+                for k in [0, 1, 47, 48, 49, length - 1] {
+                    let (a, b) = (dense(n, 17), dense(k, 29));
+                    assert_eq!(c.mulmod(&a, &b), divrem(f, &mul(f, &a, &b), m).1);
+                }
+            }
+            // Deliberate cancellation of a leading coefficient during division.
+            check(m, &add(f, &mul(f, m, &dense(7, 3)), &dense(13, 5)));
+        }
+        let mut repeated = vec![f.one()];
+        for _ in 1..length {
+            repeated = mul(f, &repeated, &vec![f.one(), f.one()]);
+        }
+        check(&repeated, &dense(2 * length - 1, 2));
+        let original = monic.clone();
+        let mut c = FixedModulus::new(f, &monic).unwrap();
+        assert_eq!(c.has_reciprocal(), length >= 128);
+        if c.has_reciprocal() {
+            c.inverse[0] = f.add(&c.inverse[0], &f.one());
+            assert!(!c.inverse_residual_is_one());
+        }
+        assert_eq!(monic, original);
+    }
+    // Same-degree different moduli, and different fields, alive together.
+    let f2 = Field::new(&BigUint::from(103u64)).unwrap();
+    let a = dense(128, 9);
+    let mut b = a.clone();
+    b[0] = f.add(&b[0], &f.one());
+    let m2: Poly = (0..128).map(|i| f2.from_u64(1 + i)).collect();
+    let c1 = FixedModulus::new(f, &a).unwrap();
+    let c2 = FixedModulus::new(f, &b).unwrap();
+    let c3 = FixedModulus::new(&f2, &m2).unwrap();
+    for n in [128, 129, 255, 256, 389] {
+        let v = dense(n, 7);
+        assert_eq!(c1.rem(&v), divrem(f, &v, &a).1);
+        let v2: Poly = (0..n).map(|i| f2.from_u64(3 + i as u64)).collect();
+        assert_eq!(c3.rem(&v2), divrem(&f2, &v2, &m2).1);
+        assert_eq!(c2.rem(&v), divrem(f, &v, &b).1);
+    }
+}
+
 pub fn monic(f: &Field, a: &Poly) -> Poly {
     match a.last() {
         None => Vec::new(),

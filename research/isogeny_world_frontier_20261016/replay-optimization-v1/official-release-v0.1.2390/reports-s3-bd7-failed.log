@@ -1,0 +1,15 @@
+upload	Run aws-actions/configure-aws-credentials@v4	﻿2026-10-16T14:27:11.1586675Z ##[group]Run aws-actions/configure-aws-credentials@v4
+upload	Run aws-actions/configure-aws-credentials@v4	2026-10-16T14:27:11.1587060Z with:
+upload	Run aws-actions/configure-aws-credentials@v4	2026-10-16T14:27:11.1587369Z   aws-access-key-id: ***
+upload	Run aws-actions/configure-aws-credentials@v4	2026-10-16T14:27:11.1587569Z   aws-secret-access-key: ***
+upload	Run aws-actions/configure-aws-credentials@v4	2026-10-16T14:27:11.1587711Z   aws-region: us-west-2
+upload	Run aws-actions/configure-aws-credentials@v4	2026-10-16T14:27:11.1587844Z   audience: sts.amazonaws.com
+upload	Run aws-actions/configure-aws-credentials@v4	2026-10-16T14:27:11.1587990Z   output-env-credentials: true
+upload	Run aws-actions/configure-aws-credentials@v4	2026-10-16T14:27:11.1588137Z env:
+upload	Run aws-actions/configure-aws-credentials@v4	2026-10-16T14:27:11.1588253Z   BUCKET: crypto-autoresearcher
+upload	Run aws-actions/configure-aws-credentials@v4	2026-10-16T14:27:11.1588394Z   AWS_REGION: us-west-2
+upload	Run aws-actions/configure-aws-credentials@v4	2026-10-16T14:27:11.1588514Z   ROLE_ARN: 
+upload	Run aws-actions/configure-aws-credentials@v4	2026-10-16T14:27:11.1588641Z   KEY_ID: ***
+upload	Run aws-actions/configure-aws-credentials@v4	2026-10-16T14:27:11.1588761Z   PREFIX: reports/crypto
+upload	Run aws-actions/configure-aws-credentials@v4	2026-10-16T14:27:11.1588890Z ##[endgroup]
+upload	Run aws-actions/configure-aws-credentials@v4	2026-10-16T14:27:11.4324900Z ##[error]The request signature we calculated does not match the signature you provided. Check your AWS Secret Access Key and signing method. Consult the service documentation for details.

@@ -283,9 +283,11 @@ fn execute(args: &[String]) -> Result<(Value, i32), String> {
         "challenge" => challenge::execute(&args[1..]),
         "compact-cm" => compact_cm::execute(&args[1..]),
         "curves" => Ok((catalog::inventory(), 0)),
-        "version" | "--version" | "-V" => {
-            Ok((json!({"schema":"isogeny-tool/v1","tool":provenance()}), 0))
-        }
+        "version" | "--version" | "-V" => Ok((
+            json!({"schema":"isogeny-tool/v1","tool":provenance(),
+                "compiled_reduction_policy":if cfg!(feature = "cached-fixed-modulus-reduction") { "cached-fixed-modulus-v1" } else { "reference-rem-v1" }}),
+            0,
+        )),
         "screen" => {
             let o = Options::parse(&args[1..], &["curve", "from", "to", "max-order"])?;
             let name = o.curve()?;

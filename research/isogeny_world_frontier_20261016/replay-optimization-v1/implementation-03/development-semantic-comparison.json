@@ -1,0 +1,77 @@
+{
+  "schema": "fixed-modulus-semantic-comparison/v1",
+  "mathematical_outputs": [
+    {
+      "case": "P224/1471",
+      "reference": "research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-02/reference-cache/valid-judge/verification.json",
+      "candidate": "research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-03/candidate-cache/valid-judge/verification.json",
+      "bytes": 1662,
+      "sha256": "8909b01d3dc1365624b700d920e3644d1b41bd7d82bad1ad675c347fe60e5a17",
+      "literal_equal": true,
+      "excluded_fields": [],
+      "schema_keys": [
+        "ell",
+        "fresh_certificate",
+        "map_sha256",
+        "schema",
+        "season",
+        "source_icv1",
+        "status"
+      ]
+    },
+    {
+      "case": "P192/13 trace off",
+      "reference": "research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-02/reference-trace/valid-off/verification.json",
+      "candidate": "research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-03/candidate-trace/valid-off/verification.json",
+      "bytes": 2613,
+      "sha256": "a74e65094cfaf563de1595cb1292d98435ad476f47aa5307315d9f6a50eeb7f8",
+      "literal_equal": true,
+      "excluded_fields": [],
+      "schema_keys": [
+        "ell",
+        "fresh_certificate",
+        "map_sha256",
+        "schema",
+        "season",
+        "source_icv1",
+        "status"
+      ]
+    },
+    {
+      "case": "P192/13 trace on",
+      "reference": "research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-02/reference-trace/valid-on/verification.json",
+      "candidate": "research/isogeny_world_frontier_20261016/replay-optimization-v1/implementation-03/candidate-trace/valid-on/verification.json",
+      "bytes": 2613,
+      "sha256": "a74e65094cfaf563de1595cb1292d98435ad476f47aa5307315d9f6a50eeb7f8",
+      "literal_equal": true,
+      "excluded_fields": [],
+      "schema_keys": [
+        "ell",
+        "fresh_certificate",
+        "map_sha256",
+        "schema",
+        "season",
+        "source_icv1",
+        "status"
+      ]
+    }
+  ],
+  "cache_negatives": [
+    {
+      "case": "kernel",
+      "status": "REJECTED",
+      "reason": "FAIL",
+      "score": null
+    },
+    {
+      "case": "numerator",
+      "status": "REJECTED",
+      "reason": "FAIL",
+      "score": null
+    }
+  ],
+  "adversarial_trace_pairs": 9,
+  "all_rejection_fields_identical": true,
+  "excluded_mathematical_fields": [],
+  "performance_claim": false
+}

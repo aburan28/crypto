@@ -1,0 +1,32 @@
+{
+  "compiled_policy": "reference-rem-v1",
+  "public_admission": false,
+  "resource_receipt": {
+    "command": [
+      "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/clean-retake-v1/reference/install/fixed-modulus-bench",
+      "fixed-modulus-bench",
+      "__worker",
+      "generate",
+      "--input",
+      "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/clean-retake-v1/reference/controls/challenge/p192/construction/p192/ell-13.json",
+      "--out",
+      "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/generation-controls-p192-13/reference",
+      "--rss-ready",
+      "/Volumes/SSD990-2/crypto/isogeny-fixed-modulus-builds-20261016/generation-controls-p192-13/reference/resources-ready"
+    ],
+    "elapsed_ms_operational_only": 2295,
+    "exit_code": 0,
+    "map_count": null,
+    "memory_monitor_grace_ms": 100,
+    "memory_sampling_interval_ms": 25,
+    "resident_memory_limit_bytes": "8589934592",
+    "sampled_peak_resident_bytes": "26656768",
+    "status": "PASS",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout": "native.json",
+    "stdout_sha256": "e55500285a6f6a7f872eadc08e666ef3a2c4076ee660d0b91c41e80d6df585d5",
+    "unavailable_memory_samples": 0
+  },
+  "schema": "fixed-modulus-supervised/v1",
+  "status": "COMPLETED"
+}

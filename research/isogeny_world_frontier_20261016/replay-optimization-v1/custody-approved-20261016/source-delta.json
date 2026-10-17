@@ -1,0 +1,80 @@
+{
+  "schema": "isogeny-current-versus-frozen-source/v1",
+  "frozen_source_commit": "015fa7bb504ef63953e0e04e464bb266f4f207bf",
+  "merged_checkout_commit": "3ce9694072773badcedc815ddbb953339888e433",
+  "root_changes_since_previous_evidence_head": [
+    "src/bin/hwcost.rs",
+    "src/cryptanalysis/hwcost/fit.rs",
+    "src/cryptanalysis/hwcost/kernel.rs",
+    "src/cryptanalysis/hwcost/measure.rs",
+    "src/cryptanalysis/hwcost/mod.rs",
+    "src/cryptanalysis/hwcost/rho.rs",
+    "src/cryptanalysis/inherited_f4.rs",
+    "src/cryptanalysis/koblitz_bench.rs",
+    "src/cryptanalysis/mod.rs"
+  ],
+  "inspection": "Upstream native changes add separate CM/CRT APIs and CLI/tests/docs; previous API function bodies and dedicated tools/isogeny-cli/research replay arithmetic are unchanged. Root-library merge changes require a fresh complete release gate. No new binary is substituted for the frozen 015 comparison.",
+  "changed_manifest_critical_paths": [],
+  "changed_native_dependency_closure_paths": [
+    {
+      "path": "isogeny_algos/README.md",
+      "frozen_sha256": "972ce093c5e0ca9cb8ed1ad88754335840f9b6142ef2493bae6171bd4e836df2",
+      "merged_sha256": "93900279b85baec66bfa5d08e0c72e9f52f9bc39769e02c33c80fb9b1023b82f",
+      "merged_bytes": 27469
+    },
+    {
+      "path": "isogeny_algos/docs/SURVEY.md",
+      "frozen_sha256": "8d79740aa69609e5cf375c7204439d59668ff9bf5da7880b1e684efd06d6834c",
+      "merged_sha256": "188fab52744fece54576735b1de814e902cb08e6597afba8d47361db8d7bc0c4",
+      "merged_bytes": 28416
+    },
+    {
+      "path": "isogeny_algos/docs/USAGE.md",
+      "frozen_sha256": "7dcfe6ad6a5261d30d81311dc3c0be2fdd1ca0ef6294f21c61907048b2bf3383",
+      "merged_sha256": "810edc5c1204377cdccb0dc39a815839d54b8381a513f8dffc39ff668c289ee3",
+      "merged_bytes": 12275
+    },
+    {
+      "path": "isogeny_algos/src/api.rs",
+      "frozen_sha256": "b4f8ffddc50226d62e077d7a144750ec6e1a54980de2c58467346dd10abe16ee",
+      "merged_sha256": "1b44604a1c10ebada2fd96184dc5ed459bcd7a9cccf27577939389fd4ca8e39d",
+      "merged_bytes": 33526
+    },
+    {
+      "path": "isogeny_algos/src/bin/isogeny-algos.rs",
+      "frozen_sha256": "6ae6ac6550a7b9efed2408e45e21f6a40033cfabd215db8a3dd7d611f4067032",
+      "merged_sha256": "bb322f2eef999686270a5a3fd40ed7b86c983b9601d98be9c72fb7903da52e8a",
+      "merged_bytes": 21336
+    },
+    {
+      "path": "isogeny_algos/src/find/sutherland.rs",
+      "frozen_sha256": "a0b58f8e0c57d26d8f00dcd62615cd53984b63a7f1e8f034524b356755c66c75",
+      "merged_sha256": "4c03073cdcf732e3bc3a8b12045acb09c561e844059a60c2316c2b00b3f4f851",
+      "merged_bytes": 16979
+    },
+    {
+      "path": "isogeny_algos/src/find/sutherland/cm.rs",
+      "frozen_sha256": null,
+      "merged_sha256": "912e04ee04472a627536cdb3e69105503535e11378da755b6d63e3c96dc78eec",
+      "merged_bytes": 24052
+    },
+    {
+      "path": "isogeny_algos/src/find/sutherland/crt.rs",
+      "frozen_sha256": null,
+      "merged_sha256": "693ecd5de6a3361e267359870c6b49e158f769f55685a65ed631e4b6ffffa9ed",
+      "merged_bytes": 6072
+    },
+    {
+      "path": "isogeny_algos/tests/api.rs",
+      "frozen_sha256": "d17c537635f67448b475b167c2899ed6bcb37b1eb727b597452734cc5ac515ba",
+      "merged_sha256": "320bdaa5ec8ef4ab7a1099300ccce58fd3946c6e9df7e8ab5deac7c11a726ee7",
+      "merged_bytes": 11101
+    }
+  ],
+  "manifest_critical_paths_checked": 14,
+  "scope_of_no_changes": "The 14 manifest critical paths, dedicated CLI/replay/verification files and existing walker are unchanged. The complete dependency closure is not byte-identical: the 9 listed isogeny_algos paths changed upstream.",
+  "fixture_attribute_addition": "research/p192_p224_large_degree_isogenies_20261009/kernel-p224-1471/.gitattributes",
+  "current_merged_root_gate": "root-gate.json",
+  "current_merged_root_gate_status": "FAIL",
+  "bounded_module_retake_replaces_failure": false
+}
