@@ -91,7 +91,28 @@ fn group<K: Ord + Clone>(runs: &[Run], key: impl Fn(&Run) -> K) -> BTreeMap<K, V
 }
 
 /// Floor/crater ratio of the pooled, class-normalised means.
+/// `--vertical stratified` (PROTOCOL v1.1): the floor/crater ratio within
+/// each class, combined as the equal-weight mean of log ratios. The v1
+/// pooled ratio mixes classes in different floor and crater proportions, so
+/// a shift in one class's mean (a resampled target) moves it even when no
+/// curve differs from another: BSGS, identical on every curve, gets a
+/// spurious interval.
+static STRATIFIED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// Floor/crater ratio: pooled over classes (v1) or stratified by class (v1.1).
 fn vertical(runs: &[Run], floor: &HashMap<u64, u64>) -> Option<f64> {
+    if STRATIFIED.load(std::sync::atomic::Ordering::Relaxed) {
+        let (mut acc, mut k) = (0.0, 0usize);
+        for (c, rs) in group(runs, |r| r.class) {
+            let crater: Vec<&Run> = rs.iter().copied().filter(|r| r.level == 0).collect();
+            let bottom: Vec<&Run> = rs.iter().copied().filter(|r| r.level == floor[&c] && r.level > 0).collect();
+            if !crater.is_empty() && !bottom.is_empty() {
+                acc += (ratio(&bottom) / ratio(&crater)).ln();
+                k += 1;
+            }
+        }
+        return (k > 0).then(|| (acc / k as f64).exp());
+    }
     let crater: Vec<&Run> = runs.iter().filter(|r| r.level == 0).collect();
     let bottom: Vec<&Run> = runs.iter().filter(|r| r.level == floor[&r.class] && r.level > 0).collect();
     (!crater.is_empty() && !bottom.is_empty()).then(|| ratio(&bottom) / ratio(&crater))
@@ -298,6 +319,12 @@ fn main() {
     let perms: usize = get("--perm").map_or(10000, |v| v.parse().unwrap());
     let seed: u64 = get("--seed").map_or(20261017, |v| v.parse().unwrap());
     let mut rng = SmallRng::seed_from_u64(seed);
+    let vmode = get("--vertical").unwrap_or_else(|| "pooled".into());
+    match vmode.as_str() {
+        "pooled" => {}
+        "stratified" => STRATIFIED.store(true, std::sync::atomic::Ordering::Relaxed),
+        _ => die("--vertical takes pooled (PROTOCOL v1) or stratified (v1.1)"),
+    }
     let plant = |k: &str| {
         get(k).map(|v| {
             let (a, b) = v.split_once(':').unwrap_or_else(|| die(&format!("{k} takes INDEX:FACTOR")));
@@ -443,7 +470,7 @@ fn main() {
     }
 
     let out = json!({
-        "schema": "volcano-stats/v1", "margin": margin, "boot": boot, "perm": perms, "seed": seed,
+        "schema": "volcano-stats/v1", "vertical_statistic": vmode, "margin": margin, "boot": boot, "perm": perms, "seed": seed,
         "classes": class_names, "skipped_unmatched_records": skipped, "unverified": unverified,
         "metrics": metrics, "bsgs_exactness": exact, "pairs": pairs,
         "argv": std::env::args().collect::<Vec<_>>(),
@@ -461,10 +488,10 @@ fn main() {
             m["arm"].as_str().unwrap(), m["metric"].as_str().unwrap(),
             v["floor_over_crater"].as_f64().unwrap_or(f64::NAN), v["ci90"][0].as_f64().unwrap_or(f64::NAN), v["ci90"][1].as_f64().unwrap_or(f64::NAN),
             v["perm_p"].as_f64().unwrap_or(f64::NAN), v["equivalent_within_margin"],
-            m["horizontal"]["tau_rel"].as_f64().unwrap(), m["horizontal"]["tau_null_p95"].as_f64().unwrap(), m["horizontal"]["perm_p"].as_f64().unwrap(),
-            m["horizontal"]["max_z_perm_p"].as_f64().unwrap(),
-            m["model"]["tau_rel"].as_f64().unwrap(), m["model"]["tau_null_p95"].as_f64().unwrap(), m["model"]["perm_p"].as_f64().unwrap(),
-            m["model"]["max_z_perm_p"].as_f64().unwrap(),
+            m["horizontal"]["tau_rel"].as_f64().unwrap_or(f64::NAN), m["horizontal"]["tau_null_p95"].as_f64().unwrap_or(f64::NAN), m["horizontal"]["perm_p"].as_f64().unwrap_or(f64::NAN),
+            m["horizontal"]["max_z_perm_p"].as_f64().unwrap_or(f64::NAN),
+            m["model"]["tau_rel"].as_f64().unwrap_or(f64::NAN), m["model"]["tau_null_p95"].as_f64().unwrap_or(f64::NAN), m["model"]["perm_p"].as_f64().unwrap_or(f64::NAN),
+            m["model"]["max_z_perm_p"].as_f64().unwrap_or(f64::NAN),
         );
     }
     for e in &exact {

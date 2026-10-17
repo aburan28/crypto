@@ -2,7 +2,7 @@
 classes/*/curves.jsonl): no computation beyond arranging recorded values
 (AGENTS.md "Implementation language").
 
-usage: python plot.py STUDY_DIR
+usage: python plot.py STUDY_DIR [ANALYSIS_JSON]   (default analysis-v1.1.json)
 """
 import json
 import sys
@@ -17,7 +17,7 @@ study = Path(sys.argv[1])
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "volcano-diagram"))
 from volcano_diagram import render  # noqa: E402
 
-A = json.loads((study / "analysis.json").read_text())
+A = json.loads((study / (sys.argv[2] if len(sys.argv) > 2 else "analysis-v1.1.json")).read_text())
 out = study / "figures"
 out.mkdir(exist_ok=True)
 classes = {c["class"]: Path(c["curves"]).parent.name for c in A["classes"]}
