@@ -140,6 +140,150 @@ impl Field for Big2 {
     }
 }
 
+/// `GF(p^k) = GF(p)[z]/(m)` for `p < 2^63`, `m` monic of degree `k`
+/// given by its `k` low coefficients (the registry's representation).
+/// An element is its `k` coefficients, low to high.
+pub struct FpK {
+    pub p: u64,
+    pub modulus: Vec<u64>,
+}
+
+impl FpK {
+    /// `None` when `p` does not fit or the data is not canonical.
+    pub fn new(p: &BigUint, modulus: &[BigUint]) -> Option<Self> {
+        let p64 = p.to_u64().filter(|&v| v < 1 << 63 && v > 3)?;
+        let modulus = modulus
+            .iter()
+            .map(|c| c.to_u64().filter(|&v| v < p64))
+            .collect::<Option<Vec<_>>>()?;
+        Some(FpK { p: p64, modulus })
+    }
+
+    pub fn k(&self) -> usize {
+        self.modulus.len()
+    }
+
+    /// An element from the registry's coefficient vector.
+    pub fn element(&self, v: &[BigUint]) -> Option<Vec<u64>> {
+        (v.len() == self.k())
+            .then(|| {
+                v.iter()
+                    .map(|c| c.to_u64().filter(|&x| x < self.p))
+                    .collect()
+            })
+            .flatten()
+    }
+
+    fn mulmod(&self, a: u64, b: u64) -> u64 {
+        (u128::from(a) * u128::from(b) % u128::from(self.p)) as u64
+    }
+
+    fn pow(&self, a: &[u64], e: &BigUint) -> Vec<u64> {
+        let mut acc = self.one();
+        for i in (0..e.bits()).rev() {
+            acc = self.mul(&acc, &acc);
+            if e.bit(i) {
+                acc = self.mul(&acc, &a.to_vec());
+            }
+        }
+        acc
+    }
+}
+
+impl Field for FpK {
+    type E = Vec<u64>;
+    fn zero(&self) -> Vec<u64> {
+        vec![0; self.k()]
+    }
+    fn one(&self) -> Vec<u64> {
+        let mut v = self.zero();
+        v[0] = 1;
+        v
+    }
+    fn int(&self, v: u64) -> Vec<u64> {
+        let mut e = self.zero();
+        e[0] = v % self.p;
+        e
+    }
+    fn add(&self, a: &Vec<u64>, b: &Vec<u64>) -> Vec<u64> {
+        a.iter()
+            .zip(b)
+            .map(|(x, y)| {
+                let s = u128::from(*x) + u128::from(*y);
+                (s % u128::from(self.p)) as u64
+            })
+            .collect()
+    }
+    fn neg(&self, a: &Vec<u64>) -> Vec<u64> {
+        a.iter()
+            .map(|&x| if x == 0 { 0 } else { self.p - x })
+            .collect()
+    }
+    fn mul(&self, a: &Vec<u64>, b: &Vec<u64>) -> Vec<u64> {
+        let k = self.k();
+        let p = u128::from(self.p);
+        if self.p < 1 << 40 && k <= 64 {
+            // Products are below 2^80 and no slot sums more than 2k of
+            // them, so u128 holds everything unreduced: one reduction per
+            // coefficient instead of one per product.
+            let mut t = vec![0u128; 2 * k - 1];
+            for (i, &x) in a.iter().enumerate() {
+                if x == 0 {
+                    continue;
+                }
+                for (j, &y) in b.iter().enumerate() {
+                    t[i + j] += u128::from(x) * u128::from(y);
+                }
+            }
+            for i in (k..2 * k - 1).rev() {
+                let c = t[i] % p;
+                if c == 0 {
+                    continue;
+                }
+                for (j, &m) in self.modulus.iter().enumerate() {
+                    // z^k = −Σ m_j z^j.
+                    t[i - k + j] += c * ((p - u128::from(m)) % p);
+                }
+            }
+            return t[..k].iter().map(|&v| (v % p) as u64).collect();
+        }
+        // Schoolbook product, each coefficient reduced mod p.
+        let mut t = vec![0u64; 2 * k - 1];
+        for (i, &x) in a.iter().enumerate() {
+            if x == 0 {
+                continue;
+            }
+            for (j, &y) in b.iter().enumerate() {
+                let s = u128::from(t[i + j]) + u128::from(x) * u128::from(y) % p;
+                t[i + j] = (s % p) as u64;
+            }
+        }
+        // z^k = −Σ m_j z^j.
+        for i in (k..2 * k - 1).rev() {
+            let c = t[i];
+            if c == 0 {
+                continue;
+            }
+            for (j, &m) in self.modulus.iter().enumerate() {
+                let sub = self.mulmod(c, m);
+                let cur = t[i - k + j];
+                t[i - k + j] = if cur >= sub {
+                    cur - sub
+                } else {
+                    cur + self.p - sub
+                };
+            }
+        }
+        t.truncate(k);
+        t
+    }
+    fn inv(&self, a: &Vec<u64>) -> Vec<u64> {
+        // a^(q − 2): one call per monic(), so speed is not a concern.
+        let q = BigUint::from(self.p).pow(self.k() as u32);
+        self.pow(a, &(q - 2u8))
+    }
+}
+
 /// A polynomial, coefficients low to high, no trailing zeros.
 type Poly<E> = Vec<E>;
 
@@ -231,6 +375,186 @@ fn compose<F: Field>(f: &F, g: &Poly<F::E>, h: &Poly<F::E>, m: &Poly<F::E>) -> P
         acc = padd(f, &prem(f, &pmul(f, &acc, h), m), &trim(f, vec![c.clone()]));
     }
     acc
+}
+
+impl FpK {
+    /// A pseudo-random element: every coefficient from splitmix64 seeded
+    /// by `i`, so the sequence is fixed and leaves every subfield.
+    pub fn sample(&self, i: u64) -> Vec<u64> {
+        let mut state = i.wrapping_mul(0x9e37_79b9_7f4a_7c15);
+        (0..self.k())
+            .map(|_| {
+                state = state.wrapping_add(0x9e37_79b9_7f4a_7c15);
+                let mut z = state;
+                z = (z ^ (z >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
+                z = (z ^ (z >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
+                (z ^ (z >> 31)) % self.p
+            })
+            .collect()
+    }
+
+    /// The `i`-th element in base-`p` digit order (`0, 1, …, p − 1, z, …`).
+    pub fn nth(&self, mut i: u64) -> Vec<u64> {
+        (0..self.k())
+            .map(|_| {
+                let d = i % self.p;
+                i /= self.p;
+                d
+            })
+            .collect()
+    }
+
+    /// A square root of `a`, or `None` when `a` is a non-square
+    /// (Tonelli–Shanks; `q = p^k` is odd).
+    pub fn sqrt(&self, a: &[u64]) -> Option<Vec<u64>> {
+        let a = a.to_vec();
+        if self.is_zero(&a) {
+            return Some(a);
+        }
+        let q = BigUint::from(self.p).pow(self.k() as u32);
+        let qm1 = &q - 1u8;
+        let half = &qm1 >> 1;
+        let minus_one = self.neg(&self.one());
+        if self.pow(&a, &half) != self.one() {
+            return None;
+        }
+        let s = qm1.trailing_zeros().expect("q − 1 > 0");
+        let t = &qm1 >> s;
+        // A non-square, found deterministically.  For even k every
+        // element of GF(p) is a square, so search i + z (or i when k = 1).
+        let z = (0..)
+            .map(|i| {
+                let mut z = self.int(i);
+                if self.k() > 1 {
+                    z[1] = 1;
+                }
+                z
+            })
+            .find(|z| self.pow(z, &half) == minus_one)
+            .expect("half of GF(q)* is non-square");
+        let mut m = s;
+        let mut c = self.pow(&z, &t);
+        let mut tt = self.pow(&a, &t);
+        let mut r = self.pow(&a, &((&t + 1u8) >> 1));
+        while tt != self.one() {
+            let mut i = 0;
+            let mut sq = tt.clone();
+            while sq != self.one() {
+                sq = self.mul(&sq, &sq);
+                i += 1;
+            }
+            let mut b = c.clone();
+            for _ in 0..(m - i - 1) {
+                b = self.mul(&b, &b);
+            }
+            m = i;
+            c = self.mul(&b, &b);
+            tt = self.mul(&tt, &c);
+            r = self.mul(&r, &b);
+        }
+        Some(r)
+    }
+}
+
+/// `(x, y)` lies on `y² = x³ + ax + b`.
+pub fn on_curve<F: Field>(f: &F, a: &F::E, b: &F::E, x: &F::E, y: &F::E) -> bool {
+    let rhs = f.add(&f.mul(&f.add(&f.mul(x, x), a), x), b);
+    f.mul(y, y) == rhs
+}
+
+/// A point of `y² = x³ + ax + b` in Jacobian coordinates
+/// `(X : Y : Z) ↦ (X/Z², Y/Z³)`; `Z = 0` is the point at infinity.
+#[derive(Clone)]
+struct Jac<E> {
+    x: E,
+    y: E,
+    z: E,
+}
+
+fn jac_double<F: Field>(f: &F, a: &F::E, p: &Jac<F::E>) -> Jac<F::E> {
+    if f.is_zero(&p.z) || f.is_zero(&p.y) {
+        return Jac {
+            x: f.one(),
+            y: f.one(),
+            z: f.zero(),
+        };
+    }
+    let xx = f.mul(&p.x, &p.x);
+    let yy = f.mul(&p.y, &p.y);
+    let zz = f.mul(&p.z, &p.z);
+    let s = f.mul(&f.int(4), &f.mul(&p.x, &yy));
+    let m = f.add(&f.mul(&f.int(3), &xx), &f.mul(a, &f.mul(&zz, &zz)));
+    let x3 = f.sub(&f.mul(&m, &m), &f.add(&s, &s));
+    let y3 = f.sub(
+        &f.mul(&m, &f.sub(&s, &x3)),
+        &f.mul(&f.int(8), &f.mul(&yy, &yy)),
+    );
+    let z3 = f.mul(&f.int(2), &f.mul(&p.y, &p.z));
+    Jac {
+        x: x3,
+        y: y3,
+        z: z3,
+    }
+}
+
+fn jac_add<F: Field>(f: &F, a: &F::E, p: &Jac<F::E>, q: &Jac<F::E>) -> Jac<F::E> {
+    if f.is_zero(&p.z) {
+        return q.clone();
+    }
+    if f.is_zero(&q.z) {
+        return p.clone();
+    }
+    let z1z1 = f.mul(&p.z, &p.z);
+    let z2z2 = f.mul(&q.z, &q.z);
+    let u1 = f.mul(&p.x, &z2z2);
+    let u2 = f.mul(&q.x, &z1z1);
+    let s1 = f.mul(&p.y, &f.mul(&q.z, &z2z2));
+    let s2 = f.mul(&q.y, &f.mul(&p.z, &z1z1));
+    if u1 == u2 {
+        return if s1 == s2 {
+            jac_double(f, a, p)
+        } else {
+            Jac {
+                x: f.one(),
+                y: f.one(),
+                z: f.zero(),
+            }
+        };
+    }
+    let h = f.sub(&u2, &u1);
+    let r = f.sub(&s2, &s1);
+    let hh = f.mul(&h, &h);
+    let hhh = f.mul(&h, &hh);
+    let v = f.mul(&u1, &hh);
+    let x3 = f.sub(&f.sub(&f.mul(&r, &r), &hhh), &f.add(&v, &v));
+    let y3 = f.sub(&f.mul(&r, &f.sub(&v, &x3)), &f.mul(&s1, &hhh));
+    let z3 = f.mul(&h, &f.mul(&p.z, &q.z));
+    Jac {
+        x: x3,
+        y: y3,
+        z: z3,
+    }
+}
+
+/// Whether `[n](x, y) = O` on `y² = x³ + ax + b`.
+pub fn kills<F: Field>(f: &F, a: &F::E, x: &F::E, y: &F::E, n: &BigUint) -> bool {
+    let g = Jac {
+        x: x.clone(),
+        y: y.clone(),
+        z: f.one(),
+    };
+    let mut acc = Jac {
+        x: f.one(),
+        y: f.one(),
+        z: f.zero(),
+    };
+    for i in (0..n.bits()).rev() {
+        acc = jac_double(f, a, &acc);
+        if n.bit(i) {
+            acc = jac_add(f, a, &acc, &g);
+        }
+    }
+    f.is_zero(&acc.z)
 }
 
 /// The division polynomials `f_0 … f_top` of `y² = x³ + ax + b` (odd
@@ -408,7 +732,12 @@ pub fn frobenius_is_scalar(model: &Model, trace: &BigInt, ell: u64) -> Option<bo
         return None;
     }
     let deg = if ell == 2 { 3 } else { (ell * ell - 1) / 2 };
-    let limbs = q.bits().div_ceil(64);
+    // A field multiplication costs about limbs² word products; over
+    // GF(p^k) with one-word coefficients, k².
+    let limbs = match model {
+        Model::Extension { k: ext, .. } => u64::from(*ext),
+        _ => q.bits().div_ceil(64),
+    };
     if cost(deg, q.bits(), k, limbs) > SCALAR_TEST_COST {
         return None;
     }
@@ -444,7 +773,22 @@ pub fn frobenius_is_scalar(model: &Model, trace: &BigInt, ell: u64) -> Option<bo
                 Some(frobenius_fixes(&f, &q, k, &monic(&f, &psi)))
             }
         }
-        Model::Other { .. } | Model::Extension { .. } => None,
+        Model::Extension {
+            p, modulus, a, b, ..
+        } => {
+            let f = FpK::new(p, modulus)?;
+            if (BigUint::from(ell) % p).is_zero() {
+                return None;
+            }
+            let (a, b) = (f.element(a)?, f.element(b)?);
+            let psi = if ell == 2 {
+                trim(&f, vec![b, a, f.zero(), f.one()])
+            } else {
+                division_prime(&f, &a, &b, ell as usize).pop().expect("ψ_ℓ")
+            };
+            Some(frobenius_fixes(&f, &q, k, &monic(&f, &psi)))
+        }
+        Model::Other { .. } => None,
     }
 }
 
@@ -526,6 +870,142 @@ mod tests {
             }
         }
         assert!(checked[0] > 0 && checked[1] > 0, "{checked:?}");
+    }
+
+    /// The same comparison over `GF(p^k)`, `k > 1`, which also checks the
+    /// field and the Jacobian arithmetic: `[#E]P = O` for every point.
+    #[test]
+    fn the_extension_field_scalar_test_agrees_with_counting_rational_torsion() {
+        let mut checked = [0usize; 2];
+        let mut certified = [0usize; 2];
+        // (p, low coefficients of an irreducible monic modulus)
+        for (p, low) in [
+            (5u64, vec![3u64, 0]),
+            (7, vec![1, 0]),
+            (13, vec![11, 0]),
+            (5, vec![1, 1, 0]),
+        ] {
+            let f = FpK { p, modulus: low };
+            let k = f.k() as u32;
+            let q = p.pow(k);
+            let els: Vec<Vec<u64>> = (0..q)
+                .map(|mut i| {
+                    (0..k)
+                        .map(|_| {
+                            let d = i % p;
+                            i /= p;
+                            d
+                        })
+                        .collect()
+                })
+                .collect();
+            for e in els.iter().skip(1) {
+                assert_eq!(f.mul(e, &f.inv(e)), f.one(), "inverse in GF({p}^{k})");
+            }
+            let mut roots: std::collections::HashMap<Vec<u64>, Vec<Vec<u64>>> = Default::default();
+            for y in &els {
+                roots.entry(f.mul(y, y)).or_default().push(y.clone());
+            }
+            for e in &els {
+                match f.sqrt(e) {
+                    Some(r) => assert_eq!(&f.mul(&r, &r), e, "sqrt in GF({p}^{k})"),
+                    None => assert!(!roots.contains_key(e), "missed a square root"),
+                }
+            }
+            for a in els.iter().take(12) {
+                for b in els.iter().skip(1).take(12) {
+                    let disc = f.add(
+                        &f.mul(&f.int(4), &f.mul(a, &f.mul(a, a))),
+                        &f.mul(&f.int(27), &f.mul(b, b)),
+                    );
+                    if f.is_zero(&disc) {
+                        continue;
+                    }
+                    let mut points = Vec::new();
+                    for x in &els {
+                        let rhs = f.add(&f.mul(&f.add(&f.mul(x, x), a), x), b);
+                        for y in roots.get(&rhs).into_iter().flatten() {
+                            assert!(on_curve(&f, a, b, x, y));
+                            points.push((x.clone(), y.clone()));
+                        }
+                    }
+                    let n = points.len() as u64 + 1;
+                    for (x, y) in &points {
+                        assert!(kills(&f, a, x, y, &BigUint::from(n)), "[#E]P ≠ O");
+                    }
+                    // The point-order certificate accepts #E, and never
+                    // certifies a wrong order.
+                    let model_of = |a: &Vec<u64>, b: &Vec<u64>| Model::Extension {
+                        p: BigUint::from(p),
+                        k,
+                        q: BigUint::from(q),
+                        field_id: String::new(),
+                        modulus: f.modulus.iter().map(|&c| BigUint::from(c)).collect(),
+                        a: a.iter().map(|&c| BigUint::from(c)).collect(),
+                        b: b.iter().map(|&c| BigUint::from(c)).collect(),
+                    };
+                    let cert = |m: u64| {
+                        let m = BigUint::from(m);
+                        let fac = crate::cryptanalysis::curve_traits::arith::factor(&m, 1 << 12);
+                        crate::cryptanalysis::curve_traits::certify::point_order_certificate(
+                            &model_of(a, b),
+                            &m,
+                            &fac,
+                        )
+                    };
+                    let (status, _) = cert(n).unwrap().unwrap();
+                    assert!(status <= crate::cryptanalysis::curve_traits::Status::Bounded);
+                    certified[usize::from(
+                        status == crate::cryptanalysis::curve_traits::Status::Proved,
+                    )] += 1;
+                    for wrong in [n + 1, n + 2, n - 1] {
+                        if let Ok(Some((status, _))) = cert(wrong) {
+                            assert_eq!(
+                                status,
+                                crate::cryptanalysis::curve_traits::Status::Bounded,
+                                "certified a wrong order {wrong} ≠ {n}"
+                            );
+                        }
+                    }
+                    let t = q as i64 + 1 - n as i64;
+                    if t % p as i64 == 0 {
+                        continue;
+                    }
+                    let model = Model::Extension {
+                        p: BigUint::from(p),
+                        k,
+                        q: BigUint::from(q),
+                        field_id: String::new(),
+                        modulus: f.modulus.iter().map(|&c| BigUint::from(c)).collect(),
+                        a: a.iter().map(|&c| BigUint::from(c)).collect(),
+                        b: b.iter().map(|&c| BigUint::from(c)).collect(),
+                    };
+                    for ell in [2u64, 3, 5, 7] {
+                        let l = ell as i64;
+                        let delta = t * t - 4 * q as i64;
+                        if ell == p
+                            || delta % (l * l) != 0
+                            || eigen_order(ell, &BigInt::from(t)) != 1
+                        {
+                            continue;
+                        }
+                        let torsion = 1 + points
+                            .iter()
+                            .filter(|(x, y)| kills(&f, a, x, y, &BigUint::from(ell)))
+                            .count() as u64;
+                        let scalar = frobenius_is_scalar(&model, &BigInt::from(t), ell).unwrap();
+                        assert_eq!(
+                            scalar,
+                            torsion == ell * ell,
+                            "GF({p}^{k}) a={a:?} b={b:?} ℓ={ell}"
+                        );
+                        checked[usize::from(scalar)] += 1;
+                    }
+                }
+            }
+        }
+        assert!(checked[0] > 0 && checked[1] > 0, "{checked:?}");
+        assert!(certified[1] > 0, "{certified:?}");
     }
 
     /// The same comparison over `GF(2^n)`, through the binary division

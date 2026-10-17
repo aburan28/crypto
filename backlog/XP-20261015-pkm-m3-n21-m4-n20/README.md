@@ -31,10 +31,20 @@ depth checks) are worth their cost only if this answer is "bounded".
   disk and one read of `B'` per pass; I/O cost not measured).
 - `pkm_tower_pilot` at `17c5663` (PR #1893), or that PR's merge commit.
 - `PROTOCOL.md` in this directory, frozen before the card is ready: the
-  `--budget`/`--max-nnz` caps, targets per cell, and the cross-check. At this
-  size `pkm_tower_check verify` cannot search exhaustively, so the protocol
-  must name the independent check it relies on (for example a planted target
-  recovered, or the same cell on the split Dickson tower).
+  `--budget`/`--max-nnz` caps (or `--max-dense` and the address-space cap),
+  targets per cell, and the checks. `pkm_tower_check verify` can search
+  exhaustively at both cells:
+  - `m = 3, N = 21` (`t = 7`, `|V| = 128`) is `128³ ≈ 2.1·10⁶` triples per
+    row;
+  - `m = 4, N = 20` (`t = 5`, `|V| = 32`) is `32⁴ ≈ 1.0·10⁶` quadruples per
+    row;
+  - it has already checked finished rows at `m = 4`, `N = 16` (round 3: 2
+    rows, both agree) and at `m = 3`, `N = 18` (round 7).
+
+  No separate independent check is needed for the verdict. The `m = 3` cell's
+  protocol is
+  [`research/pkm_lead1_m3n21_20261016/PROTOCOL.md`](../../research/pkm_lead1_m3n21_20261016/PROTOCOL.md),
+  frozen; the `m = 4` cell has none yet.
 - Resumability: the engine has no checkpoint, so a run that dies loses
   everything and the card is not preemptible. Ready requires either a
   checkpoint or a protocol that accepts that.

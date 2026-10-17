@@ -1213,8 +1213,13 @@ fn endomorphism(
                 }
                 None => {
                     let why = match (&c.model, small) {
-                        (Model::Other { .. } | Model::Extension { .. }, _) => {
+                        (Model::Other { .. }, _) => {
                             "not tested: no field arithmetic for this model"
+                        }
+                        (Model::Extension { p, modulus, .. }, _)
+                            if torsion::FpK::new(p, modulus).is_none() =>
+                        {
+                            "not tested: GF(p^k) arithmetic here needs 3 < p < 2^63"
                         }
                         (_, Some(l)) if l <= torsion::SCALAR_TEST_MAX_ELL => {
                             "not tested: beyond the scalar test's cost limit"
@@ -1275,8 +1280,16 @@ pub fn compute(c: &RegistryCurve, fx: &Factoring) -> Result<CurveTraits, String>
         Model::Binary { .. } => BigUint::from(2u8),
         Model::Prime { p, .. } | Model::Other { p, .. } | Model::Extension { p, .. } => p.clone(),
     };
-    let (status, method) =
+    let (mut status, mut method) =
         certify::check_order(&c.model, &c.order, &c.representations).map_err(ctx)?;
+    if status == Status::NotEvaluated && matches!(c.model, Model::Extension { .. }) {
+        let fac = fx.factor(&c.order);
+        if let Some((s, m)) =
+            certify::point_order_certificate(&c.model, &c.order, &fac).map_err(ctx)?
+        {
+            (status, method) = (s, m);
+        }
+    }
     let (frob, delta) = frobenius(c, fx).map_err(ctx)?;
     let ordinary = !(&c.trace % BigInt::from(characteristic.clone())).is_zero();
     let trace_ratio = {
@@ -1289,7 +1302,7 @@ pub fn compute(c: &RegistryCurve, fx: &Factoring) -> Result<CurveTraits, String>
     let endo = endomorphism(c, &frob, &sub, ordinary).map_err(ctx)?;
     let small = small_primes(&delta, &characteristic);
     let dissect = match &c.model {
-        Model::Prime { .. } | Model::Binary { .. } if ordinary => {
+        Model::Prime { .. } | Model::Binary { .. } | Model::Extension { .. } if ordinary => {
             let scalar = |ell: u64| -> Option<bool> {
                 let depth = small.iter().find(|s| s.ell == ell).map(|s| s.depth)?;
                 if depth == 0 {
@@ -1800,11 +1813,13 @@ mod tests {
                 &rep.generator,
                 GeneratorCoords::Extension(x, y) if x.len() == *k as usize && y.len() == *k as usize
             ));
-            assert_eq!(
-                certify::check_order(&curve.model, &curve.order, &curve.representations)
-                    .unwrap()
-                    .0,
-                Status::NotEvaluated
+            // The generator certificate now runs over GF(p^k).
+            let (status, method) =
+                certify::check_order(&curve.model, &curve.order, &curve.representations).unwrap();
+            assert!(
+                status <= Status::Bounded,
+                "{}: {status:?} {method}",
+                curve.slug
             );
         }
     }
