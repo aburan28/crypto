@@ -507,6 +507,54 @@ fn main() {
             ),
         );
     }
+    for key in ["relations_per_query", "query_hit_yield"] {
+        let values: Vec<f64> = verified
+            .iter()
+            .map(|v| v["relation_report"][key].as_f64().unwrap())
+            .collect();
+        let summary = if values.is_empty() {
+            json!({"n":0,"min":null,"max":null,"mean":null})
+        } else {
+            json!({"n":values.len(),"min":values.iter().copied().reduce(f64::min),
+                "max":values.iter().copied().reduce(f64::max),"mean":values.iter().sum::<f64>()/values.len() as f64})
+        };
+        metrics.insert(key.into(), summary);
+    }
+    let mut phase_statistics = serde_json::Map::new();
+    for phase in [
+        "setup",
+        "pairing",
+        "factor_base_relations_matrix_and_ff_verification",
+        "ec_verification",
+    ] {
+        for field in [
+            "ec_group/adds",
+            "ec_group/doubles",
+            "ec_group/scalar_mults",
+            "ec_field/muls",
+            "ec_field/sqrs",
+            "ec_field/invs",
+            "explicit_fp/multiplications",
+            "explicit_fp/squarings",
+            "explicit_fp/inversions",
+            "explicit_fp/exponentiations",
+            "explicit_fp/additions_subtractions",
+            "sqrt_calls_unexpanded",
+            "shift_candidates",
+            "miller_steps",
+        ] {
+            let pointer = format!("/phases/{phase}/operations/{field}");
+            phase_statistics.insert(
+                format!("{phase}/{field}"),
+                stats(
+                    verified
+                        .iter()
+                        .map(|v| v.pointer(&pointer).unwrap().as_u64().unwrap())
+                        .collect(),
+                ),
+            );
+        }
+    }
     let times = stats(
         verified
             .iter()
@@ -519,7 +567,7 @@ fn main() {
         "prefix":prefix,
         "backend":"Reduced Tate/Miller then projected-prime-subgroup two-summand finite-field relations; no generic solver fallback",
         "summary":{"requested":requested,"verified":verified.len(),"failed":requested-verified.len(),
-            "end_to_end_ns":times,"metrics":metrics,"scope":"Present verified observations only; raw failed rows preserved. Two public target searches per model; not full-class or qualified timing."},
+            "end_to_end_ns":times,"metrics":metrics,"phase_operations":phase_statistics,"scope":"Present verified observations only; raw failed rows preserved. Two public target searches per model; not full-class or qualified timing."},
         "rows":rows})).unwrap()).unwrap();
 }
 
