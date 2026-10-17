@@ -1,0 +1,42 @@
+{
+ "source": "../../factor_base_dor_campaign_20261013/raw/delta_n13_m2.json",
+ "field_degree": 13,
+ "rows": [
+  {
+   "delta": -1,
+   "dim": 7,
+   "complete": true,
+   "decomposable_fraction": 0.375,
+   "fraction_match": true,
+   "d_star_mean": 4,
+   "mean_match": true,
+   "macaulay_rows_mean": 1378,
+   "macaulay_cols_mean": 1471,
+   "d_star": [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+  },
+  {
+   "delta": 1,
+   "dim": 6,
+   "complete": true,
+   "decomposable_fraction": 0.16666666666666663,
+   "fraction_match": true,
+   "d_star_mean": 3.85,
+   "mean_match": true,
+   "macaulay_rows_mean": 898.3,
+   "macaulay_cols_mean": 719.75,
+   "d_star": [4, 4, 4, 4, 4, 4, 4, 3, 4, 4, 3, 4, 4, 4, 4, 4, 4, 4, 4, 3]
+  },
+  {
+   "delta": 3,
+   "dim": 5,
+   "complete": true,
+   "decomposable_fraction": 0.04166666666666663,
+   "fraction_match": true,
+   "d_star_mean": 2.869565217391304,
+   "mean_match": true,
+   "macaulay_rows_mean": 128,
+   "macaulay_cols_mean": 160.34782608695653,
+   "d_star": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 2, 2, 3, 3, 3, 3, 3, 3]
+  }
+ ]
+}
