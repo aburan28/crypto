@@ -999,14 +999,15 @@ pub trait CountedGroup {
     /// One synchronized round of independent lanes.  Each tuple is
     /// `(lane_index, current_point, addend, addend_slot)`; outputs retain
     /// tuple order.  Slots 0..16 are jumps, 16..32 are restart offsets.
-    /// The serial and batched closures must consume the same tuples.
+    /// The serial and batched closures must consume the same tuples.  The
+    /// caller owns the output buffer so repeated rounds can reuse it.
     #[allow(clippy::type_complexity)]
     fn native_lane_walk_adder(
         &self,
         _batched: bool,
     ) -> Option<
         Box<
-            dyn FnMut(&mut GroupOps, &[(usize, Self::Elt, Self::Elt, usize)]) -> Vec<Self::Elt>
+            dyn FnMut(&mut GroupOps, &[(usize, Self::Elt, Self::Elt, usize)], &mut Vec<Self::Elt>)
                 + '_,
         >,
     > {
@@ -3655,8 +3656,11 @@ impl CountedGroup for PrimeCurve {
         batched: bool,
     ) -> Option<
         Box<
-            dyn FnMut(&mut GroupOps, &[(usize, PrimePoint, PrimePoint, usize)]) -> Vec<PrimePoint>
-                + '_,
+            dyn FnMut(
+                    &mut GroupOps,
+                    &[(usize, PrimePoint, PrimePoint, usize)],
+                    &mut Vec<PrimePoint>,
+                ) + '_,
         >,
     > {
         use crate::cryptanalysis::prime_fast::BatchAddScratch;
@@ -3667,9 +3671,15 @@ impl CountedGroup for PrimeCurve {
         let mut previous: Vec<Option<(PrimePoint, Option<FastPrimePoint>)>> = Vec::new();
         let mut addends: Vec<Option<(PrimePoint, Option<FastPrimePoint>)>> = vec![None; 32];
         let mut scratch = BatchAddScratch::default();
-        Some(Box::new(move |ops, requests| {
-            let mut left = Vec::with_capacity(requests.len());
-            let mut right = Vec::with_capacity(requests.len());
+        let mut left = Vec::new();
+        let mut right = Vec::new();
+        Some(Box::new(move |ops, requests, outputs| {
+            left.clear();
+            right.clear();
+            outputs.clear();
+            left.reserve(requests.len());
+            right.reserve(requests.len());
+            outputs.reserve(requests.len());
             for &(lane, p, q, slot) in requests {
                 assert!(slot < addends.len());
                 if previous.len() <= lane {
@@ -3724,25 +3734,22 @@ impl CountedGroup for PrimeCurve {
                     ops.field_ops.muls += 3 * stats.ordinary as u64 + 1;
                 }
             } else {
-                for (p, q) in left.iter_mut().zip(right) {
+                for (p, q) in left.iter_mut().zip(right.iter().copied()) {
                     *p = fast.add(*p, q);
                 }
             }
-            left.into_iter()
-                .zip(requests)
-                .map(|(native, &(lane, _, _, _))| {
-                    let out = match native {
-                        Some(pt) => {
-                            ops.montgomery_reductions += 2; // Montgomery -> canonical.
-                            let (x, y) = fast.canonical(pt);
-                            PrimePoint::affine(x, y)
-                        }
-                        None => PrimePoint::INFINITY,
-                    };
-                    previous[lane] = Some((out, native));
-                    out
-                })
-                .collect()
+            for (&native, &(lane, _, _, _)) in left.iter().zip(requests) {
+                let out = match native {
+                    Some(pt) => {
+                        ops.montgomery_reductions += 2; // Montgomery -> canonical.
+                        let (x, y) = fast.canonical(pt);
+                        PrimePoint::affine(x, y)
+                    }
+                    None => PrimePoint::INFINITY,
+                };
+                previous[lane] = Some((out, native));
+                outputs.push(out);
+            }
         }))
     }
     fn supports_native_lane_walk(&self) -> bool {
@@ -5932,6 +5939,8 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
         g.native_lane_walk_adder(batched)
             .expect("prime lanes required")
     });
+    let mut lane_requests = Vec::with_capacity(lanes.len());
+    let mut lane_outputs = Vec::with_capacity(lanes.len());
     let (mut lane_rounds, mut lane_prepared) = (0u64, 0u64);
     let striding = matches!(targets, TargetSource::Stride | TargetSource::StrideRenew);
     let (mut stride, mut stride_steps, mut stride_restarts, mut stride_renewals) =
@@ -5977,7 +5986,7 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
 
     while trials < max_trials {
         if lane_config.is_some() && lane_queue.is_empty() {
-            let mut requests = Vec::with_capacity(lanes.len());
+            lane_requests.clear();
             for (index, lane) in lanes.iter_mut().enumerate() {
                 if lane.fresh || lane.segment_steps >= segment_cap {
                     if lane.restarts == 0 {
@@ -6002,7 +6011,7 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
                             pool.push(off);
                         }
                         let (offset, oa, ob) = pool[pool_index];
-                        requests.push((index, lane.point, offset, jump_count + pool_index));
+                        lane_requests.push((index, lane.point, offset, jump_count + pool_index));
                         lane.a = addmod(lane.a, oa, r);
                         lane.b = addmod(lane.b, ob, r);
                         for i in (1..jump_count).rev() {
@@ -6017,21 +6026,22 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
                     let j =
                         lane.permutation[((mix(g.key(&lane.point)) >> 24) as usize) % jump_count];
                     let (jump, aj, bj) = jumps[j];
-                    requests.push((index, lane.point, jump, j));
+                    lane_requests.push((index, lane.point, jump, j));
                     lane.a = addmod(lane.a, aj, r);
                     lane.b = addmod(lane.b, bj, r);
                     lane.segment_steps += 1;
                     walk_steps += 1;
                 }
             }
-            if !requests.is_empty() {
-                let outputs = lane_adder.as_mut().expect("prime lanes required")(
+            if !lane_requests.is_empty() {
+                lane_adder.as_mut().expect("prime lanes required")(
                     &mut rel.group_ops,
-                    &requests,
+                    &lane_requests,
+                    &mut lane_outputs,
                 );
-                native_walk_calls += requests.len() as u64;
-                for ((index, _, _, _), point) in requests.iter().zip(outputs) {
-                    lanes[*index].point = point;
+                native_walk_calls += lane_requests.len() as u64;
+                for ((index, _, _, _), point) in lane_requests.iter().zip(&lane_outputs) {
+                    lanes[*index].point = *point;
                 }
             }
             for (index, lane) in lanes.iter_mut().enumerate() {
