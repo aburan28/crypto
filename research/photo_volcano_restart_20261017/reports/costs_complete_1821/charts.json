@@ -1,0 +1,110 @@
+[
+  {
+    "name": "bsgs_setup",
+    "label": "BSGS table setup: all recorded attempts",
+    "unit": "seconds",
+    "boundary": "One setup per attempt, including restart/rebuild attempts; missing interrupted timers excluded",
+    "manifest": {
+      "schema": "isogeny-volcano-diagram/v1",
+      "run_id": "costs_complete_1821",
+      "node_count": 46,
+      "directed_edge_count": 90,
+      "recorded_levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "color_range": [
+        16.5777943706,
+        27.148415038099998
+      ],
+      "source_sha256": "758423271eacfaaf1fe340a866d0facd1d47ee1051e3666e3373d7229c39f03b",
+      "missing_nodes": 0,
+      "all_vertices_and_maps_retained": true,
+      "pdf_inspection_required": true
+    }
+  },
+  {
+    "name": "bsgs_batch",
+    "label": "BSGS successful ten-target batch: measured elapsed",
+    "unit": "seconds",
+    "boundary": "Setup + ten online queries + validation + destruction + recorded worker overhead",
+    "manifest": {
+      "schema": "isogeny-volcano-diagram/v1",
+      "run_id": "costs_complete_1821",
+      "node_count": 46,
+      "directed_edge_count": 90,
+      "recorded_levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "color_range": [
+        125.604085864,
+        173.183670526
+      ],
+      "source_sha256": "e2895d35ed9c99df835fcc146d595f9d49fdc316a09b2b23b7d6104d93ddcdc3",
+      "missing_nodes": 0,
+      "all_vertices_and_maps_retained": true,
+      "pdf_inspection_required": true
+    }
+  },
+  {
+    "name": "bsgs_amortized",
+    "label": "BSGS batch cost divided by ten targets",
+    "unit": "seconds per target (derived)",
+    "boundary": "Measured successful batch elapsed / ten; a derived allocation, not an independent measurement",
+    "manifest": {
+      "schema": "isogeny-volcano-diagram/v1",
+      "run_id": "costs_complete_1821",
+      "node_count": 46,
+      "directed_edge_count": 90,
+      "recorded_levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "color_range": [
+        12.560408586399998,
+        17.318367052600003
+      ],
+      "source_sha256": "4ba980acd255566d2fd17ddbb6e4be6102a748ea4395b7931c0d229eeb40c346",
+      "missing_nodes": 0,
+      "all_vertices_and_maps_retained": true,
+      "pdf_inspection_required": true
+    }
+  },
+  {
+    "name": "bsgs_online",
+    "label": "BSGS online query: generator-batch mean elapsed",
+    "unit": "seconds",
+    "boundary": "Equally weighted mean of available generator-batch query means; setup, validation and destruction excluded",
+    "manifest": {
+      "schema": "isogeny-volcano-diagram/v1",
+      "run_id": "costs_complete_1821",
+      "node_count": 46,
+      "directed_edge_count": 90,
+      "recorded_levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "color_range": [
+        10.7693988587,
+        14.553258904780003
+      ],
+      "source_sha256": "980fe932d3dc2fd95e3929f1a1235a0336457953d9184bd2fcfd2be0504521e6",
+      "missing_nodes": 0,
+      "all_vertices_and_maps_retained": true,
+      "pdf_inspection_required": true
+    }
+  }
+]

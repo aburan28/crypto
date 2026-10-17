@@ -5,6 +5,14 @@ old experiment is not recovered or pooled. This replacement uses the same exact
 photographed source curve with new securely sampled fixtures and a new frozen
 identity. The original complete workload remains required.
 
+## Original native corpus complete, 2026-10-17 18:21 UTC
+
+All **4600 rho and 4600 BSGS cases** are verified: **100 problems on each of 46 curves**. An independent PARI replay verifies all **9200 recovered-log equations**. There are no failed final native cases.
+
+[Complete native min/mean/max report](reports/native_complete_1823_v2_visuals/README.md) · [Full setup/query and retained-attempt ledger](reports/costs_complete_1821/README.md). The ledger retains **5062 attempts across 5060 logical jobs**.
+
+For each paired key, BSGS online operation counts agree over every curve and generator; all 46 curve averages are **71837588.1 counted online group operations**. Table construction is separate. The separately frozen field-counter replay is still running. Full random-corpus IC recovery remains unresolved, so this completes the original generic-solver corpus, not the entire requested experiment. Earlier snapshots remain unchanged.
+
 ## Progress snapshot, 2026-10-17 18:00 UTC
 
 All **4600 rho cases** and **4520/4600 BSGS cases** have verified answers.

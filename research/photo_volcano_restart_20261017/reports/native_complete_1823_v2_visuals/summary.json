@@ -1,0 +1,31 @@
+{
+  "fresh_experiment": true,
+  "fixture_sha256": "980d931ce1a804684b160bdab9b213b87688ab9100f0cdf1cd14c390e809acb8",
+  "graph": {
+    "curves": 46,
+    "directed_maps": 90,
+    "levels": 5,
+    "populations": [
+      1,
+      3,
+      6,
+      12,
+      24
+    ],
+    "center": 6,
+    "complete_selected_2_component": true
+  },
+  "requested_problem_curve_cases_per_algorithm": 4600,
+  "verified_rho": 4600,
+  "verified_bsgs": 4600,
+  "full_ic_recoveries": 0,
+  "ic_diagnostics_status": "14720 actual GB systems independently audited; zero random relations and full recoveries",
+  "full_campaign_complete": false,
+  "local_timing_class": "descriptive L0; concurrent work; not an admitted speed comparison",
+  "field_counters_status": "Separately frozen native arithmetic replay; see arithmetic_replay_coverage and FIELD_PROTOCOL.md",
+  "arithmetic_replay_coverage": {
+    "rho": 2074,
+    "bsgs": 20
+  },
+  "generated_utc": "2026-10-17T18:25:20.093Z"
+}

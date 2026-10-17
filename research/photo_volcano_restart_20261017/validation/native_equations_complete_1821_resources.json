@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/usr/bin/env",
+    "LD_LIBRARY_PATH=/workspace/photo_volcano_restart_20261017/runtime/root/usr/lib/x86_64-linux-gnu",
+    "runtime/root/usr/bin/gp",
+    "-q",
+    "-f",
+    "-s",
+    "256M",
+    "validation/native_equations_complete_1821.gp"
+  ],
+  "child_system_us": 15262,
+  "child_user_us": 1229574,
+  "exit_status": 0,
+  "involuntary_switches": 38,
+  "major_faults": 0,
+  "max_rss_kib": 33892,
+  "minor_faults": 8077,
+  "stderr": "validation/native_equations_complete_1821.err",
+  "stdout": "validation/native_equations_complete_1821.out",
+  "voluntary_switches": 1,
+  "wall_ns": 1537803064
+}
