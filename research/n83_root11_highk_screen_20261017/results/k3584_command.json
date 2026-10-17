@@ -1,0 +1,35 @@
+{
+  "argv": [
+    "/Volumes/SSD990/crypto/artifacts/n83_k_intermediate_screen_20261017/target/release/examples/koblitz_orbit_dlp_fast",
+    "construct:83:1:3584",
+    "/Volumes/SSD990/crypto/worktrees/n83-root11-highk-screen-20261017/research/n83_root11_finegrid_holdout_20261017/local_batch/batch_targets.jsonl",
+    "29",
+    "/Volumes/SSD990/crypto/artifacts/n83_root11_highk_screen_20261017/k3584/targets_result.jsonl"
+  ],
+  "cap_seconds": 1800,
+  "environment": {
+    "KIC_DUMP_BASE": "/Volumes/SSD990/crypto/artifacts/n83_root11_highk_screen_20261017/k3584/base_dump.jsonl",
+    "KIC_INDEXED4_FIXED31": "0",
+    "KIC_INDEXED5_FIXED30": "0",
+    "KIC_INDEXED5_LOAD75": "1",
+    "KIC_INDEXED_ROOT4": "0",
+    "KIC_INDEXED_ROOT5": "1",
+    "KIC_PACKED_ROOT_TABLE": "1",
+    "KIC_PACKED_ROOT_TABLE_DENSE": "0",
+    "KIC_PACKED_ROOT_TABLE_LOAD75": "0",
+    "KIC_RANK_THREADS": "4",
+    "KIC_ROOT_BLOOM": "0",
+    "KIC_ROOT_ONLY11": "1",
+    "KIC_ROOT_ONLY21": "0",
+    "KIC_ROOT_ONLY22": "0",
+    "KIC_SPARSE_CANONICAL": "1",
+    "KIC_STATE26": "0",
+    "KIC_STATE28": "0",
+    "KIC_SYMMETRIC_S3": "1",
+    "KIC_TARGET_THREADS": "1",
+    "PATH": "/Users/adamburan/.elan/bin:/Users/adamburan/.local/bin:/Users/adamburan/.local/share/solana/install/active_release/bin:/Library/Frameworks/Python.framework/Versions/3.13/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/Library/Apple/usr/bin:/Applications/Wireshark.app/Contents/MacOS:/usr/local/go/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Volumes/SSD990-2/.codex/tmp/arg0-macos/codex-arg0CodB9q:/Users/adamburan/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/Users/adamburan/.local/bin:/Users/adamburan/.bun/bin:/Users/adamburan/bin:/Users/adamburan/.opencode/bin:/Users/adamburan/.atuin/bin:/Users/adamburan/.pyenv/shims:/Users/adamburan/.pyenv/bin:/Users/adamburan/.elan/bin:/Users/adamburan/.local/share/solana/install/active_release/bin:/Library/Frameworks/Python.framework/Versions/3.13/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/adamburan/.cargo/bin:/Users/adamburan/.docker/bin:/Users/adamburan/go/bin:/Users/adamburan/istio-1.24.0/bin:/Users/adamburan/.lmstudio/bin:/Users/adamburan/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS:/Users/adamburan/.docker/bin"
+  },
+  "k": 3584,
+  "plan_sha256": "89812f798ad2625af7eb1069013abd21fe6d9b68af76bc0e4800dee753f11bb9",
+  "schema": "n83.root11-highk-screen-command/v1"
+}
