@@ -650,6 +650,9 @@ struct Args {
     max_cofactor: u64,
     /// `any`, `split`, `inert` or `ramified`: the crater shape the search requires.
     crater: String,
+    /// Search j = 0 curves y² = x³ + b only (class D_K = −3, with the
+    /// order-6 automorphism on its crater).
+    j0: bool,
     /// `p,a,b`: measure this curve instead of searching for one.
     curve: Option<(u64, u64, u64)>,
     /// `#E(F_p)` for `--curve`; counted when absent.
@@ -676,6 +679,7 @@ fn parse_args() -> Args {
         dp_bits: None,
         max_cofactor: 64,
         crater: "any".into(),
+        j0: false,
         curve: None,
         order: None,
         engine: "native".into(),
@@ -704,6 +708,11 @@ fn parse_args() -> Args {
             }
             "--max-cofactor" => a.max_cofactor = val.parse().unwrap(),
             "--crater" => a.crater = val.clone(),
+            "--j0" => {
+                a.j0 = true;
+                i += 1; // a flag: no value
+                continue;
+            }
             "--curve" => {
                 let v: Vec<u64> = val
                     .split(',')
@@ -736,7 +745,7 @@ fn parse_args() -> Args {
 Pollard rho measured on each curve.
 
   your curve:   volcano-rho --curve P,A,B [--order N] [options]
-  search one:   volcano-rho [--bits 40] [--depth 3] [--crater any|split|inert|ramified]
+  search one:   volcano-rho [--bits 40] [--depth 3] [--crater any|split|inert|ramified] [--j0]
                             [--max-cofactor 64] [options]
 
 options: [--ell 3] [--seed 1] [--trials 100] [--per-level 10] [--controls 3]
@@ -820,6 +829,13 @@ fn search(args: &Args, rng: &mut SmallRng) -> Found {
             // p ≡ 3 mod 4 caps v₂(t² − 4p) at 3, so a 2-volcano deeper than
             // one level needs p ≡ 1 mod 8; ℓ = 3 keeps p ≡ 3 mod 4.
             let c = if args.ell == 2 { (c & !7) | 1 } else { c | 3 };
+            // An ordinary j = 0 curve needs p ≡ 1 mod 3 (with the above: 1 mod 24
+            // for ℓ = 2, 7 mod 12 for ℓ = 3).
+            let c = if args.j0 {
+                c - c % 24 + if args.ell == 2 { 1 } else { 7 }
+            } else {
+                c
+            };
             if is_prime(c) {
                 break c;
             }
@@ -828,11 +844,12 @@ fn search(args: &Args, rng: &mut SmallRng) -> Found {
         for _ in 0..200 {
             tried += 1;
             let e = Curve {
-                a: rng.gen_range(1..p),
+                a: if args.j0 { 0 } else { rng.gen_range(1..p) },
                 b: rng.gen_range(1..p),
             };
             match e.j(&f) {
-                Some(j) if j != 0 && j != 1728 % p => {}
+                Some(0) if args.j0 => {}
+                Some(j) if !args.j0 && j != 0 && j != 1728 % p => {}
                 _ => continue,
             }
             let Some(order) = group_order(&f, &e, rng) else {
