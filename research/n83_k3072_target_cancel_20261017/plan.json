@@ -1,0 +1,49 @@
+{
+  "binary_path": "/Volumes/SSD990/crypto/artifacts/n83_parallel_target_cancel_20261017/target/release/examples/koblitz_orbit_dlp_fast",
+  "candidate_ids": {
+    "parallel_cancel": {
+      "candidate_id": "IC1N83Ckb1a1fb509952PDP4rootRCguidedLAgaussTDdirectISO0hf5484487a579",
+      "manifest_sha256": "7a812ea563b901f3a2ef2b1b8ef71dc70b07aacc9d52b6b56ab9e9b744d0b2f2"
+    },
+    "serial": {
+      "candidate_id": "IC1N83Ckb1a1fb509952PDP4rootRCguidedLAgaussTDdirectISO0h49e5d0fe6271",
+      "manifest_sha256": "6dc2ea7025e4800e54b582724d8d656a6c52a3728e8029b02a6b7680008fe6c7"
+    }
+  },
+  "cap_seconds": 1200,
+  "k": 3072,
+  "policies": {
+    "parallel_cancel": [
+      2,
+      "1"
+    ],
+    "serial": [
+      1,
+      "0"
+    ]
+  },
+  "schema": "n83.k3072-target-cancel-plan/v1",
+  "sha256": {
+    "answers": "3ceee12fb848cc261433f3cd9e7d297f961effede1974e8c95fa25d9bac68720",
+    "binary": "df8340eb76ac90d2520e0202159505426b9d7879978f10c597731c4bfe73045a",
+    "candidate_ids": "370bd02e523d886d8c3a6268c803aba35f3c05ea432e3ee2d3b8e09d51fc2a50",
+    "candidate_materializer": "02f170d8b933f3ddb9fd8b81aa594b248c3b881cc0f5143a312cfbf87c97394a",
+    "candidate_parallel_cancel": "7a812ea563b901f3a2ef2b1b8ef71dc70b07aacc9d52b6b56ab9e9b744d0b2f2",
+    "candidate_serial": "6dc2ea7025e4800e54b582724d8d656a6c52a3728e8029b02a6b7680008fe6c7",
+    "environment": "aaaed229d7bd2731ee211f3a3cf7f670963ccde1f88f6bfe932dd789079746c3",
+    "group_verifier": "e34d06b3275d86dcb3a659b79adf87dcdc078cebb6f510c4b5c42403d83a1804",
+    "holdout_answers": "5fc1b3a259a4fe964c869e3bf0ba8559094933d07032cd9d36cd64c544ce8471",
+    "holdout_generator": "eda511d965c40fa0eb86f2e372b50aee50f5013bd1a8963e0ec5a826f247d062",
+    "holdout_manifest": "48c9194d85d5cd2c2da931963e57678c5952ce86d1356129fa5455f12930ebe6",
+    "holdout_protocol": "58f92b1e275749017337a25bc2880e7b1d76c9ea2f527f2f59292c48c2c878f2",
+    "holdout_targets": "432d72bc03faba869d09124628a22b3e0ab5acc692c1e2f09a52a90efb22fb9a",
+    "planner": "93fe95cec40ab87bdc29f35e5ef5f6147666bdb65f65a937fd7e25c56d56f1ae",
+    "protocol": "6fe397f936476f69a0242d1e4000726b6a2dcb75ec5afacb2e0104465d31c631",
+    "runner": "351fabaf2474dfac48dcab53ff961cddb471fdfb81f4b71b4557c4de2f52f3b6",
+    "source": "8109fb33374ce2aa66c6a5a0b6e144d3b0143168ac756f9e0bd70af60a911829",
+    "targets": "72486b7d708023838db1104a4a5e75a04b915d6f6d4013057c934fb31000aa87",
+    "verifier": "a3f294a7ae9dc8f30b9039647832d440d8251b86c20bac829064b1f19c1e390c"
+  },
+  "target_count": 128,
+  "workload_role": "ordinary_local_shared_setup_stage_diagnostic"
+}
