@@ -1,0 +1,44 @@
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index b255ce6d8..089b417c0 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -6581,6 +6581,10 @@ impl PairSumTable {
+         const BLOCK: usize = 1024;
+         const LOOKAHEAD: usize = 32;
+         let mut admitted_offsets = Vec::with_capacity(BLOCK / 8);
++        // Each key's filter word and bits, hashed once a block: the
++        // prefetch ahead and the test both read them.
++        let mut slot_words: Vec<usize> = Vec::with_capacity(BLOCK);
++        let mut slot_bits: Vec<u64> = Vec::with_capacity(BLOCK);
+         let count = if fused { x3s.len() } else { rests.len() };
+         for lo in (0..count).step_by(BLOCK) {
+             let hi = (lo + BLOCK).min(count);
+@@ -6589,14 +6593,23 @@ impl PairSumTable {
+                 _ => self.keys_of(&rests[lo..hi], keys),
+             }
+             admitted_offsets.clear();
+-            for &key in keys.iter().take(LOOKAHEAD) {
+-                prefetch(&self.present[self.filter_word(key)]);
++            slot_words.clear();
++            slot_bits.clear();
++            for &key in keys.iter() {
++                let (word, bits) =
++                    filter_slot(pair_filter_hash(key), self.present_mask, self.filter_extra);
++                slot_words.push(word);
++                slot_bits.push(bits);
++            }
++            for &word in slot_words.iter().take(LOOKAHEAD) {
++                prefetch(&self.present[word]);
+             }
+             for within in 0..hi - lo {
+-                if let Some(&ahead) = keys.get(within + LOOKAHEAD) {
+-                    prefetch(&self.present[self.filter_word(ahead)]);
++                if let Some(&ahead) = slot_words.get(within + LOOKAHEAD) {
++                    prefetch(&self.present[ahead]);
+                 }
+-                if !self.admitted(keys[within]) {
++                let bits = slot_bits[within];
++                if self.present[slot_words[within]] & bits != bits {
+                     continue;
+                 }
+                 self.prefetch_bucket(keys[within]);
