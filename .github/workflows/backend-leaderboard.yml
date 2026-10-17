@@ -1,0 +1,49 @@
+name: backend-leaderboard
+
+# Check every PR: an extensible manifest can name sources outside an allowlist.
+# This runs no solver or benchmark.
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  current:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /tools/backend-leaderboard/
+            /src/cryptanalysis/ecbench/band.rs
+            /src/cryptanalysis/ecbench/canonical.rs
+            /src/cryptanalysis/ecbench/stats.rs
+            /src/cryptanalysis/ecbench/methods.rs
+            /src/cryptanalysis/curve_aliases.json
+            /docs/ic/calibration.json
+            /docs/backend-leaderboard/
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: tools/backend-leaderboard
+      - name: Materialize the manifest's sealed inputs
+        run: |
+          jq -r '.sessions[] | "/" + .dir + "/", (select(.replay_receipt != null) | "/" + .replay_receipt)' docs/backend-leaderboard/manifest.json > /tmp/backend-sources.txt
+          git sparse-checkout add --no-cone --stdin < /tmp/backend-sources.txt
+      - name: Format, admission tests and lint
+        run: |
+          cargo fmt --manifest-path tools/backend-leaderboard/Cargo.toml --check
+          cargo test --locked --manifest-path tools/backend-leaderboard/Cargo.toml
+          cargo clippy --locked --manifest-path tools/backend-leaderboard/Cargo.toml --all-targets -- -D warnings
+      - name: All generated views match their sealed sources
+        run: cargo run --locked --manifest-path tools/backend-leaderboard/Cargo.toml -- --check

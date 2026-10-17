@@ -21,6 +21,7 @@ on:
       # scripts/site/test_build.py; an edit to either side must rerun it.
       - "docs/ic-current-state.html"
       - "docs/browser/**"
+      - "docs/backend-leaderboard/**"
       - "scripts/build_lab_browser.py"
       - "docs/ic/progress-timeline.json"
       - "docs/ic-leaderboard.html"
@@ -48,6 +49,7 @@ on:
       # scripts/site/test_build.py; an edit to either side must rerun it.
       - "docs/ic-current-state.html"
       - "docs/browser/**"
+      - "docs/backend-leaderboard/**"
       - "scripts/build_lab_browser.py"
       - "docs/ic/progress-timeline.json"
       - "docs/ic-leaderboard.html"

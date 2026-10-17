@@ -1,0 +1,32 @@
+Base revision: c6d64436a33359320ad9d5b42c4acebee2968b9a
+
+New tool (all pass):
+cargo test --locked --manifest-path tools/backend-leaderboard/Cargo.toml
+cargo clippy --locked --manifest-path tools/backend-leaderboard/Cargo.toml --all-targets -- -D warnings
+cargo fmt --manifest-path tools/backend-leaderboard/Cargo.toml --check
+cargo run --locked --manifest-path tools/backend-leaderboard/Cargo.toml --
+cargo run --locked --manifest-path tools/backend-leaderboard/Cargo.toml -- --check
+
+Publication route (6 pass):
+python3 scripts/site/test_build.py BuildTests.test_publishes_every_expected_path BuildTests.test_internal_links_resolve BuildTests.test_every_page_declares_title_viewport_and_description BuildTests.test_sitemap_and_robots_point_at_the_published_urls BuildTests.test_build_is_idempotent WorkflowTests.test_site_sources_trigger_the_workflow
+
+Browser check (passes; Playwright and /usr/bin/chromium installed):
+NODE_PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules node docs/ecbench/backend-frontier-report/validation/ui-check.cjs /workspace/crypto
+The managed browser disallows file: URL navigation, so this check renders the exact standalone HTML with page.setContent. It checks DOM behavior and desktop/mobile layout, not a deployed URL.
+
+Root validation attempted; existing integration fails before tests:
+cargo build --locked --release --bin ecbench
+cargo test --locked --release --lib
+
+Full existing site suite: 46 pass, 1 failure, 2 errors:
+python3 scripts/site/test_build.py
+One error is an unavailable off-disk lab-browser input through the shallow batch reader. The other error is existing malformed embedded progress JSON; the failure is an existing 303-versus-305 cached panel index. A first run's sparse documentation errors were resolved by materializing their tracked paths before this final attempt.
+
+Report rendering:
+dot -Tsvg flow.dot -o flow.svg
+dot -Tpdf flow.dot -o flow.pdf
+pdflatex -halt-on-error -interaction=nonstopmode -output-directory=/tmp REPORT.tex
+pdftoppm -scale-to 1600 -png /tmp/REPORT.pdf /tmp/crypto-frontier-report
+The one-page PDF and desktop/mobile screenshots were visually inspected.
+
+No solver performance run, external-tool timing, new arithmetic replay or ledger promotion was executed.

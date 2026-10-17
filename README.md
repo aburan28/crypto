@@ -5,6 +5,12 @@ plus a substantial **cryptanalysis suite** for studying how those algorithms bre
 Every algorithm is documented with the underlying mathematics, making this a study
 companion as much as a working library.
 
+[Backend performance frontier](docs/backend-leaderboard/index.html) ·
+[Machine-readable leaderboard](docs/backend-leaderboard/leaderboard.json) ·
+[How agents measure and beat an incumbent](docs/ecbench/BACKEND_FRONTIER.md).
+Compare F4, F5, F6-IC, root finding and SAT by exact workload, including cold
+operation time, solver counters and explicit gaps in field-size coverage.
+
 > ## ⚠️ DO NOT USE IN PRODUCTION
 >
 > This library is **not safe** for any real use case where confidentiality,
