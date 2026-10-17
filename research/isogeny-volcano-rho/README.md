@@ -5,8 +5,10 @@ every level of an ℓ-isogeny volcano, and run Pollard rho on each curve:
 does the level (crater → floor), or the particular curve, change how fast
 rho solves it? Report min, max and mean.
 
-**Answer (measured on two curves: A, `run-20261016T2302Z`, ramified crater;
-B, `run-20261016T2315Z`, split crater).** No measurable effect on either.
+**Answer (measured on three curves: A, `run-20261016T2302Z`, ℓ = 3,
+ramified crater; B, `run-20261016T2315Z`, ℓ = 3, split crater; C,
+`run-20261017T0049Z`, ℓ = 2, a whole depth-3 2-volcano).** No measurable
+effect on any of them.
 Curve A in detail: All
 29 isogenous curves and 3 isomorphic controls took the same work to within
 sampling noise. Pooled over the 2,900 isogenous solves: min 8,477, mean
@@ -140,6 +142,81 @@ the per-op cost is 622–635 ns on every curve. Per-curve rows are in
 ![per curve B](runs/run-20261016T2315Z/per_curve.svg)
 ![per level B](runs/run-20261016T2315Z/per_level.svg)
 
+## Curve C: a whole 2-isogeny volcano (`run-20261017T0049Z`)
+
+Same tool with 2-isogenies: `--ell 2 --bits 48 --depth 3 --max-cofactor 4096
+--seed 20261018`. A 2-volcano deeper than one level needs `p ≡ 1 (mod 8)`;
+with `p ≡ 3 (mod 4)`, `v₂(t² − 4p) ≤ 3`. ℓ = 2 searches draw such primes.
+Depth 3 also puts at least 2⁶ into `#E`, hence the larger cofactor bound.
+The walk reaches the whole volcano, a binary tree under a two-vertex
+crater, and every curve in it is measured.
+
+| | |
+|:--|:--|
+| p | 146833024135393 (48 bits, ≡ 1 mod 8) |
+| root E | a = 14391545271884, b = 141956518099848 |
+| #E | 146833030777920 = 960 · n, n = 152951073727 (prime, 37.2 bits) |
+| trace t | −6642526 |
+| D = t² − 4p | −543208944880896 = 56² · (−173217138036); v₂(f) = 3 |
+| crater | ramified (D_K even), 2 crater vertices joined by one edge |
+| k | 50935020165 |
+| walk | 30 curves = 2 + 4 + 8 + 16 (the whole volcano), 29 edges verified |
+| rho | 30 curves + 3 controls × 100 solves = 3,300, all correct; 310.7 s |
+| cross-check | `ca volcano --ell 2` (aburan28/cryptanalysis) counts the same #E and finds the same 30 curves, 2/4/8/16 |
+
+| level | curves | solves | min | mean ± 95 % CI | median | max | mean ms ± CI |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| 0 crater | 2 | 200 | 36,433 | 519,550 ± 39,163 | 479,542 | 1,313,611 | 394.4 ± 31.3 |
+| 1 | 4 | 400 | 18,197 | 513,250 ± 26,834 | 487,539 | 1,399,367 | 392.0 ± 20.7 |
+| 2 | 8 | 800 | 17,768 | 486,931 ± 18,140 | 465,983 | 1,429,985 | 362.9 ± 14.1 |
+| 3 floor | 16 | 1,600 | 26,502 | 496,402 ± 12,454 | 466,178 | 1,586,151 | 372.3 ± 9.7 |
+| all isogenous | 30 | 3,000 | 17,768 | 497,666 ± 9,336 | 467,154 | 1,586,151 | 373.9 ± 7.3 |
+| isomorphic control | 3 | 300 | 21,764 | 478,319 ± 28,790 | 447,625 | 1,308,949 | 366.9 ± 24.1 |
+
+√(πn/2) = 490,158 (×1.016 for the r = 32 walk: 498,000). Per-curve means
+span 438,599 (v17) to 561,536 (v8). Per-op cost is 736–800 ns on every
+curve. Every level's CI contains √(πn/2) or its r-adding value, and every
+pair of level CIs overlaps.
+
+![volcano C](runs/run-20261017T0049Z/volcano.svg)
+![per curve C](runs/run-20261017T0049Z/per_curve.svg)
+![per level C](runs/run-20261017T0049Z/per_level.svg)
+
+## Why min and max differ so much
+
+Pollard rho is randomized: it walks pseudo-randomly through ⟨P⟩ until the
+walk meets a point it has visited before. The step at which that happens
+is a birthday-problem collision time: `P(no collision after k steps) ≈
+exp(−k²/2n)`. That gives a mean of `√(πn/2) ≈ 1.25√n` and a standard
+deviation of `√((4 − π)n/2) ≈ 0.66√n`, 52 % of the mean. The spread between
+min and max is that distribution's width, not anything about a curve.
+
+**Observed vs the birthday model** (derived from the recorded `trials.csv`,
+all isogenous solves):
+
+| curve | solves | mean (model) | sd (model) | 1st pct (model) | median (model) | 99th pct (model) |
+|:--|--:|--:|--:|--:|--:|--:|
+| A | 2,900 | 659,263 (654,547) | 341,296 (342,147) | 71,551 (74,043) | 622,025 (614,906) | 1,584,239 (1,584,962) |
+| B | 4,100 | 1,090,981 (1,059,102) | 567,779 (553,617) | 124,423 (119,807) | 1,034,344 (994,960) | 2,609,159 (2,564,577) |
+| C | 3,000 | 497,666 (490,158) | 260,902 (256,217) | 59,046 (55,447) | 467,109 (460,473) | 1,190,999 (1,186,900) |
+
+- **One curve, 100 solves:** the model's typical fastest solve is
+  `√(2n·ln(101/100))` and its typical slowest `√(2n·ln 101)`, about 0.14√n
+  and 3.0√n. That is a ~20× spread on every curve, the controls included.
+- **Pooled extremes:** pools of 1,000+ solves reach further into both
+  tails, which is where single minima like 8,477 come from.
+- **Per-curve means:** each mean averages 100 such draws, so it carries
+  about `0.66√n / 10` of noise: model 34,215 / 55,362 / 25,622 for A / B / C.
+  The measured spread of the per-curve means is 36,686 / 62,351 / 26,723,
+  so the curves differ by sampling noise alone.
+- **Why the curve doesn't matter:** an isogenous curve changes the
+  coordinates, so the x-hash that drives the walk takes different paths.
+  The group has the same order, so the collision-time distribution is the
+  same.
+- **What a real effect would need:** a curve effect would have to move the
+  mean by more than this noise. Detecting an x % difference takes roughly
+  `(2 · 0.52 · 100/x)²` solves per arm, about 1,100 for 3 %.
+
 ## Reading it
 
 - **Observed:** level means differ by at most 63,000 iterations (L0 vs L2), and
@@ -171,15 +248,16 @@ the per-op cost is 622–635 ns on every curve. Per-curve rows are in
 
 ## Limits
 
-- One instance per curve, two 40-bit primes, two volcanoes (ℓ = 3, depth 3;
-  one ramified crater with 2 vertices, so A's L0 has only 200 solves; one
-  split crater, truncated at the walk radius).
+- One instance per curve, three curves:
+  - A: 40-bit p, ℓ = 3, depth 3, ramified crater with 2 vertices, so its L0 has only 200 solves;
+  - B: 40-bit p, ℓ = 3, depth 3, split crater, truncated at the walk radius;
+  - C: 48-bit p, ℓ = 2, depth 3, ramified crater, the whole volcano.
 - Not an ecbench session: the counted unit is this tool's group-addition
   count; no isolation (shared 4-vCPU VM, 4 threads, jobs interleaved), so
   wall times are indicative only. Per-op time includes affine inversion by
   `i128` extended Euclid.
 - Curves measured: A 29 of 80 (the whole volcano), B 41 of the 323 walked
-  (root plus up to 10 per level in BFS order).
+  (root plus up to 10 per level in BFS order), C all 30.
 - No negation map and no endomorphism-accelerated rho; a curve at the
   crater with a larger endomorphism ring would only help an algorithm that
   uses that ring (GLV-style speedups exist only for tiny |D_K|, and this
@@ -231,6 +309,8 @@ cargo build --release --bin volcano-rho
     --trials 100 --per-level 10 --controls 3 --out OUT
 ./target/release/volcano-rho --bits 40 --ell 3 --depth 3 --crater split --seed 20261017 \
     --trials 100 --per-level 10 --controls 3 --out OUT_B
+./target/release/volcano-rho --bits 48 --ell 2 --depth 3 --max-cofactor 4096 --seed 20261018 \
+    --trials 100 --per-level 16 --controls 3 --out OUT_C
 python plot.py OUT     # matplotlib, plotting only
 ```
 
@@ -242,6 +322,10 @@ with formatting and lint-only changes), Intel Xeon @
 
 Curve B ran on the committed binary (with `--crater`), on the same host, in
 754.0 s for the rho phase.
+
+Curve C ran on the committed binary (with the `p ≡ 1 mod 8` draw for ℓ = 2)
+in 310.7 s for the rho phase. Replaying its first five seeds reproduces
+165/165 iteration counts, and curve A still replays 160/160 on this binary.
 
 **Replay.** The committed binary (formatting and lint fixes only) re-run
 with `--trials 5` reproduces 160/160 iteration counts of the first five
