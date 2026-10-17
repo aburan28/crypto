@@ -616,8 +616,8 @@ pub fn lazy_dot_rev_rows(
     }
     let step = (lazy_cap(p) - 1).max(1);
     let mut out = Vec::with_capacity(rows.len());
-    let mut quads = rows.chunks_exact(4);
-    for q in quads.by_ref() {
+    let (quads, rest) = rows.as_chunks::<4>();
+    for q in quads {
         let (b0, b1, b2, b3) = (&q[0][..n], &q[1][..n], &q[2][..n], &q[3][..n]);
         let mut s = [0u128; 4];
         let mut i = 0;
@@ -640,7 +640,7 @@ pub fn lazy_dot_rev_rows(
         }
         out.extend(s.iter().map(|&v| fin(v)));
     }
-    for b in quads.remainder() {
+    for b in rest {
         out.push(lazy_dot_rev(a, b, red, &fin));
     }
     out
