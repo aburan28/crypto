@@ -77,3 +77,9 @@ heatmaps, or the user's full workload.
 No original raw evidence, solver implementation or checkpoint was recovered.
 Unresolved. Merging this record does not resolve the experiment or promote any
 reported historical measurement.
+
+2026-10-17 restart update: a fresh replacement campaign was authorized and its
+[new frozen inputs and native sources](../research/photo_volcano_restart_20261017/README.md)
+are preserved separately. Missing old checkpoints no longer block that new
+execution. This record remains open for historical evidence recovery; it is
+not a claim that the old bytes were restored or the full workload completed.

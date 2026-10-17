@@ -1,0 +1,8 @@
+\\ Reconstruct exact rational degree-2 maps, retaining the first model for each j.
+p=72057980207847001; aa=Mod(18456521102804593,p);bb=Mod(19958176276690439,p); nn=72057979853368804;
+jinv(a,b)=1728*4*a^3/(4*a^3+27*b^2);
+nodes=List();edges=List(); seen=Map();listput(nodes,[aa,bb,jinv(aa,bb),-1,-1]);mapput(seen,lift(jinv(aa,bb)),1);
+i=1;while(i<=#nodes, a=nodes[i][1];b=nodes[i][2];rr=polrootsmod(x^3+a*x+b,p); for(z=1,#rr, r=rr[z];v=3*r^2+a;aq=-4*a-15*r^2;bq=22*b+14*a*r;j=jinv(aq,bq);if(!mapisdefined(seen,lift(j),&dest),dest=#nodes+1;listput(nodes,[aq,bq,j,i,#edges]);mapput(seen,lift(j),dest));at=nodes[dest][1];bt=nodes[dest][2];if(aq==0||bq==0||at==0||bt==0,error("exceptional-j needs general isomorphism"));u2=bt*aq/(bq*at);u=sqrt(u2);if(lift(u)>p-lift(u),u=-u);if(at!=u^4*aq||bt!=u^6*bq,error("isomorphism mismatch"));listput(edges,[i-1,dest-1,r,v,aq,bq,u]); );i++);
+if(#nodes!=46||#edges!=90,error("unexpected component size"));
+for(i=1,#nodes, e=ellinit([nodes[i][1],nodes[i][2]]);n=ellcard(e);if(n!=nn,error("point count mismatch"));g=ellgroup(e);printf("{\"type\":\"node\",\"id\":%s,\"a\":\"%s\",\"b\":\"%s\",\"j\":\"%s\",\"order\":\"%s\",\"group_invariant_factors\":[",i-1,lift(nodes[i][1]),lift(nodes[i][2]),lift(nodes[i][3]),n);for(k=1,#g,if(k>1,printf(","));printf("\"%s\"",g[k]));printf("],\"parent\":%s,\"discovery_edge\":%s}\n",nodes[i][4]-1,nodes[i][5]));
+for(i=1,#edges,e=edges[i];printf("{\"type\":\"edge\",\"id\":%s,\"source\":%s,\"target\":%s,\"kernel_x\":\"%s\",\"v\":\"%s\",\"quotient_a\":\"%s\",\"quotient_b\":\"%s\",\"u\":\"%s\"}\n",i-1,e[1],e[2],lift(e[3]),lift(e[4]),lift(e[5]),lift(e[6]),lift(e[7])));

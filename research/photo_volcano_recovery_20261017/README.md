@@ -101,3 +101,12 @@ new graphable measurement or recovered certificate is available. This PR does
 not report timings, a speedup, an IC improvement, a Lean theorem, an external
 solver ranking, or a completed experimental campaign. Historical PDFs and the
 multilevel diagram skill must be restored rather than reconstructed as evidence.
+
+## Fresh replacement authorized, 2026-10-17
+
+A new experiment with fresh secure fixtures is now available in
+[photo_volcano_restart_20261017](../photo_volcano_restart_20261017/README.md).
+This authorizes continuing the full workload without restoring the old random
+fixtures. The old archive gap and historical audit limitations remain; results
+from the two experiments are not pooled. Public replacement inputs omit scalar
+witnesses and raw randomness while publication approval is pending.
