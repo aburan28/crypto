@@ -10,9 +10,9 @@ Research evidence report. Study: `research/iso1_weak_classes_20261007`. Markdown
 
 == Summary
 
-+ *Certified census labels through p = 71.* A new counter returns a group order only when it is the unique Hasse-interval candidate compatible with the tested points on the curve and its quadratic twist. Reruns at p = 7, 13, 37, 41, 43, 47, 53, 59 are byte-identical to the retained CSVs, so their zero labels are exact. p = 61, 67 and 71 are new.
-+ *Exact 8th-power mass (conjecture).* The number $N_8(t)$ of 8th-power Legendre parameters in a class is a closed 2-adic factor times an odd-conductor Hurwitz number. It matches exhaustive censuses at p = 7, 11, 13, 17 and the held-out p = 19 with 0 mismatches.
-+ *Random thinning.* Beyond that structure, the norm-one torus samples each class at random. The parameter-free model predicts the residual zero count at the pristine holdouts p = 53, 59 and at the forward predictions p = 61, 67, 71, with binomial dispersion $1.00 plus.minus 0.01$.
++ *Certified census labels through p = 113.* A new counter returns a group order only when it is the unique Hasse-interval candidate compatible with the tested points on the curve and its quadratic twist. Reruns at p = 7, 13, 37, 41, 43, 47, 53, 59 are byte-identical to the retained CSVs, so their zero labels are exact. p = 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109 and 113 are new.
++ *Exact 8th-power mass (conjecture).* The number $N_8(t)$ of 8th-power Legendre parameters in a class is a closed 2-adic factor times an odd-conductor Hurwitz number. It matches exhaustive censuses at p = 7, 11, 13, 17 and the registered holdouts p = 19 and p = 23 with 0 mismatches.
++ *Random thinning.* Beyond that structure, the norm-one torus samples each class at random. The parameter-free model predicts the residual zero count at the pristine holdouts p = 53, 59 and at the forward predictions p = 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, with binomial dispersion $1.00 plus.minus 0.01$.
 
 Beyond the proved obstruction $v_2(f_pi) >= 2$, whether a class is weak is a draw with probability $1 - (1 - 8/(p^2-1))^(N_8(t)/12)$. The evidence does not support any compact deterministic criterion beyond that.
 
@@ -35,6 +35,16 @@ $Q = p^6$, so the Hasse interval is exactly $[Q+1-2p^3, Q+1+2p^3]$. Every curve 
   [61], [1,154,751], [41], [1,265], [new: 0 / 111,630 depth-1 weak; 546 / 111,630 high-depth zero],
   [67], [1,680,383], [30], [1,448], [new: 0 / 148,138 depth-1 weak; 640 / 148,136 high-depth zero],
   [71], [2,118,901], [34], [resumed], [new: 0 / 176,436 depth-1 weak; 634 / 176,434 high-depth zero],
+  [73], [2,367,853], [27], [resumed], [new: 0 / 191,844 depth-1 weak; 622 / 191,844 high-depth zero],
+  [79], [3,247,401], [35], [resumed], [new: 0 / 243,400 depth-1 weak; 746 / 243,398 high-depth zero],
+  [83], [3,956,583], [33], [resumed], [new: 0 / 282,450 depth-1 weak; 798 / 282,448 high-depth zero],
+  [89], [5,230,501], [53], [resumed], [new: 0 / 348,524 depth-1 weak; 808 / 348,524 high-depth zero],
+  [97], [7,379,793], [39], [resumed], [new: 0 / 451,632 depth-1 weak; 934 / 451,632 high-depth zero],
+  [101], [8,674,251], [66], [resumed], [new: 0 / 510,050 depth-1 weak; 908 / 510,050 high-depth zero],
+  [103], [9,381,893], [37], [resumed], [new: 0 / 541,060 depth-1 weak; 884 / 541,058 high-depth zero],
+  [107], [10,926,163], [55], [resumed], [new: 0 / 606,798 depth-1 weak; 976 / 606,796 high-depth zero],
+  [109], [11,766,151], [47], [resumed], [new: 0 / 641,574 depth-1 weak; 1,032 / 641,574 high-depth zero],
+  [113], [13,590,473], [48], [resumed], [new: 0 / 715,064 depth-1 weak; 934 / 715,064 high-depth zero],
 )
 
 Receipts: `certified_20261016/` (comparison receipt, stderr receipts, CSV hashes, queue script and status).
@@ -58,7 +68,7 @@ $ N_8(t) = H_"odd"(t) dot cases(
   table.header([*test*], [*primes*], [*rows*], [*mismatches*]),
   [derivation (exhaustive 8th-power census)], [7, 11, 13, 17], [4,078], [0],
   [registered exactness holdout], [19], [3,249], [0],
-  [registered exactness holdout], [23], [running], [],
+  [registered exactness holdout], [23], [5,819], [0],
 )
 
 The formula is read off the tables and is not proved.
@@ -85,15 +95,25 @@ V1, which used class size only, was registered and failed on its training primes
   [61], [forward], [55,815], [273], [275.3 [247.0, 303.6]], [0.992], [0.984],
   [67], [forward], [74,068], [320], [301.1 [271.5, 330.8]], [0.996], [0.987],
   [71], [forward, e = 4], [88,217], [317], [317.9 [287.5, 348.3]], [1.000], [0.989],
+  [73], [forward, e = 4], [95,922], [311], [327.1 [296.3, 357.9]], [1.011], [0.989],
+  [79], [forward, e = 5], [121,699], [373], [353.5 [321.5, 385.5]], [0.998], [0.993],
+  [83], [forward, e = 3], [141,224], [399], [372.6 [339.7, 405.4]], [1.001], [0.993],
+  [89], [forward, e = 4], [174,262], [404], [397.8 [363.9, 431.7]], [1.000], [0.995],
+  [97], [forward, e = 6], [225,816], [467], [434.1 [398.7, 469.6]], [1.001], [0.996],
+  [101], [fresh, e = 3], [255,025], [454], [453.3 [417.1, 489.5]], [0.995], [0.996],
+  [103], [fresh, e = 4], [270,529], [442], [460.3 [423.8, 496.8]], [1.004], [0.996],
+  [107], [fresh, e = 3], [303,398], [488], [480.2 [443.0, 517.5]], [1.000], [0.996],
+  [109], [fresh, e = 3], [320,787], [516], [488.9 [451.3, 526.5]], [1.001], [0.995],
+  [113], [fresh, e = 5], [357,532], [467], [505.8 [467.6, 544.0]], [0.999], [0.996],
 )
 
-p = 37 lies 1.5 below its interval; every other prime is inside. $h_K$ alone ranks zero rows with AUC 0.71–0.78.
+p = 37 lies 1.5 below and p = 113 lies 0.6 below its interval; every other prime is inside. After p = 97 the pooled excess over the ten scored primes 53–97 was +95.3 zero rows (sd 49.8, z = 1.91). It was not localized in the tails and not isolated by e = v₂(p²−1), so it was registered as a follow-up test on fresh primes 101, 103, 107, 109 and 113 (PROTOCOL_V2.md, commit ff9e0a3f8, made before p = 101 completed): V2 is rejected as a parameter-free description if their pooled one-sided z exceeds 2.0. Result: p = 101 (454 against 453.3), p = 103 (442 against 460.3), p = 107 (488 against 480.2), p = 109 (516 against 488.9) and p = 113 (467 against 505.8) give a pooled excess of −21.5 with standard deviation 42.4 (z = −0.51). *V2 stands and the hypothesis of an excess is not confirmed.* p = 113 lies 0.6 below its interval [467.6, 544.0] (a deficit; the second miss in 19 primes after p = 37). Over all fifteen scored primes the pooled excess is +73.8 (sd 65.4, z = 1.13), after 1.91, 1.38, 1.44 and 1.80 at 97, 12, 13 and 14 primes. The fresh primes with e = 5 (only p = 113) and the pooled e ≥ 4 fresh primes give z = −1.99 and −2.12; these were not registered, are two-sided readings of noise-level counts, and are not evidence of a deficit. $h_K$ alone ranks zero rows with AUC 0.71–0.78.
 
 == 4. Scope and limits
 
 - *Proved* (`THEOREM.pdf`): no ordinary class with $v_2(f_pi) = 1$ is weak, for every odd $p$.
-- *Exact* for $p <= 71$: the certified class labels.
-- *Conjecture*, exact on five primes: the $N_8$ formula.
-- *Measured*: the binomial thinning model, at two pristine holdouts and three forward predictions. It describes the data statistically and decides no individual class. It does not show that no exotic arithmetic criterion exists.
+- *Exact* for $p <= 113$: the certified class labels.
+- *Conjecture*, exact on six primes: the $N_8$ formula.
+- *Measured*: the binomial thinning model, at two pristine holdouts and thirteen forward predictions (all inside their 95% intervals except p = 113, 0.6 below). It describes the data statistically and decides no individual class. It does not show that no exotic arithmetic criterion exists.
 - Class numbers come from PARI/GP 2.15.4 `quadclassunit`, which is GRH-conditional for large $|D_K|$. This affects the predictions, not the census labels.
-- Pending: the p = 23 exactness check, and the censuses for p = 73–199. p = 71 ran across several container sessions with checkpointing, so it has no single wall time. p = 199 alone needs about 4 days on 4 threads.
+- Pending: the censuses for p = 127–199. The registered follow-up test is complete (z = −0.51). p = 71–113 ran across several container sessions with checkpointing, so it has no single wall time. p = 199 alone needs about 4 days on 4 threads.

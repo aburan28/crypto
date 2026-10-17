@@ -1,0 +1,9 @@
+   Compiling autocfg v1.5.1
+   Compiling num-traits v0.2.19
+error[E0463]: can't find crate for `core`
+  |
+  = note: the `x86_64-unknown-linux-gnu` target may not be installed
+  = help: consider downloading the target with `rustup target add x86_64-unknown-linux-gnu`
+
+For more information about this error, try `rustc --explain E0463`.
+error: could not compile `num-traits` (lib) due to 1 previous error

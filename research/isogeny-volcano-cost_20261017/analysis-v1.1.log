@@ -1,0 +1,17 @@
+bsgs-neg: S over 1600 runs
+ic-mitm: S over 12800 runs
+ic-mitm-plus1: S over 3200 runs
+rho-neg: S over 12800 runs
+rho-neg-aa: S over 12800 runs
+ic-mitm: relation yield over 12800 runs
+ic-mitm-plus1: relation yield over 3200 runs
+        bsgs-neg               S: floor/crater 1.0000 90% [1.0000, 1.0000] p=1.0000 equiv=true | horizontal tau 0.0000 (null p95 NaN) p=1.0000 maxz p=1.0000 | model tau 0.0000 (null p95 0.0000) p=1.0000 maxz p=1.0000
+         ic-mitm               S: floor/crater 1.0390 90% [1.0081, 1.0714] p=0.0609 equiv=false | horizontal tau 0.0287 (null p95 0.0207) p=0.0020 maxz p=0.0415 | model tau 0.0559 (null p95 0.0368) p=0.0005 maxz p=0.0585
+   ic-mitm-plus1               S: floor/crater 1.0315 90% [0.9648, 1.1075] p=0.4491 equiv=false | horizontal tau 0.0639 (null p95 0.0490) p=0.0005 maxz p=0.0110 | model tau 0.0000 (null p95 0.0000) p=1.0000 maxz p=1.0000
+         rho-neg               S: floor/crater 1.0222 90% [0.9828, 1.0622] p=0.2752 equiv=false | horizontal tau 0.0170 (null p95 0.0262) p=0.2824 maxz p=0.7336 | model tau 0.0262 (null p95 0.0458) p=0.6972 maxz p=0.4958
+      rho-neg-aa               S: floor/crater 1.0013 90% [0.9654, 1.0387] p=0.9375 equiv=true | horizontal tau 0.0000 (null p95 0.0266) p=0.8731 maxz p=0.5592 | model tau 0.0255 (null p95 0.0457) p=0.7501 maxz p=0.5672
+         ic-mitm  relation_yield: floor/crater 0.9802 90% [0.9566, 1.0037] p=0.2020 equiv=true | horizontal tau 0.0225 (null p95 0.0141) p=0.0005 maxz p=0.0105 | model tau 0.0467 (null p95 0.0251) p=0.0005 maxz p=0.0005
+   ic-mitm-plus1  relation_yield: floor/crater 0.9691 90% [0.9234, 1.0106] p=0.2940 equiv=false | horizontal tau 0.0472 (null p95 0.0344) p=0.0005 maxz p=0.0450 | model tau 0.0000 (null p95 0.0000) p=1.0000 maxz p=1.0000
+bsgs exactness: {"arm":"bsgs-neg","exact":true,"max_distinct_cost_per_target":1,"paired_targets":12}
+pair: {"a":"ic-mitm-plus1","b":"ic-mitm","ci95":[1.0583070655005018,1.0643713402112427],"classes":6,"excludes_1":true,"matched_workloads":3200,"metric":"relation_yield","ratio":1.0613242259030091}
+pair: {"a":"rho-neg-aa","b":"rho-neg","ci95":[0.9795163244094593,1.0032393826037165],"classes":6,"excludes_1":false,"matched_workloads":12800,"metric":"S","ratio":0.9915255873485475}

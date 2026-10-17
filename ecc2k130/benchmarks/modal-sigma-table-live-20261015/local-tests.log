@@ -1,0 +1,42 @@
+..............................................2026-10-16T00:41:05Z no status header yet at ckpt/curve131-run1.hdr; not re-fetching the 370MB checkpoint
+.............2026-10-16T00:41:06Z REFUSED run 8000: run reports one point per 2^24.26 iterations (1699148 records over 34134016000000 iterations); the campaign's weight-32 cutoff gives 2^28.41, so this run looks like weight 35. Walks stop at their own distinguished point, so its meetings with campaign walks would mostly go unrecorded. Stop it and relaunch at --dp-weight 32, or pass --allow-dp-weight-mismatch to upload anyway.
+2026-10-16T00:41:06Z WARNING run 8000 uploaded anyway (--allow-dp-weight-mismatch): run reports one point per 2^24.26 iterations (1699148 records over 34134016000000 iterations); the campaign's weight-32 cutoff gives 2^28.41, so this run looks like weight 35. Walks stop at their own distinguished point, so its meetings with campaign walks would mostly go unrecorded. Stop it and relaunch at --dp-weight 32, or pass --allow-dp-weight-mismatch to upload anyway.
+2026-10-16T00:41:07Z uploaded 1699148 records to s3://bucket/dp/slot-98000/a61d8e127e97ebb0c768092b4228f26b-0000000000000000-740e4b683d14899438ac99b03db8110d08bdf3aca7a467049535acbdf85518d3.bin
+2026-10-16T00:41:07Z uploaded checkpoint (40 bytes) to s3://bucket/ckpt/slot-98000/8ede82166c496ffada95cff6e0388f393f0d280e09399bcc83e8ec9206896904.ck
+.2026-10-16T00:41:07Z REFUSED run 3: run id 3 is AWS slot 2's (evidence: s3://bucket/ckpt/slot-00002.ck); the run walks that slot's seeds again and every point it reports is a re-report the store drops. Stop the run and relaunch it with a run id in 8000-9999, or pass --allow-aws-seed-overlap to upload anyway.
+.2026-10-16T00:41:07Z dry-run: would upload checkpoint to s3://bucket/ckpt/slot-90001/961189369afa92662054e22db15d751d284331541b492318111362fd389865b4.ck
+.....2026-10-16T00:41:07Z no checkpoint yet at ckpt/curve131-run8000.hdr or ckpt/curve131-run8000.ck on volume volume
+.2026-10-16T00:41:07Z no checkpoint yet at ckpt/curve131-run8000.hdr or ckpt/curve131-run8000.ck on volume volume
+2026-10-16T00:41:07Z run 8000: recovered upload offset 64 from S3 (local cache was 999999)
+2026-10-16T00:41:07Z uploaded 6 records to s3://bucket/dp/slot-98000/a61d8e127e97ebb0c768092b4228f26b-0000000000000064-b867638a20bc0e4b1f6c61d847c9f2eb7401349b645a0ad4b0681c8a6431ab20.bin
+.2026-10-16T00:41:07Z no checkpoint yet at ckpt/curve131-run8000.hdr or ckpt/curve131-run8000.ck on volume volume
+2026-10-16T00:41:07Z uploaded 8 records to s3://bucket/dp/slot-98000/a61d8e127e97ebb0c768092b4228f26b-0000000000000000-db05e55d6193247cd749ccc4bcecd7efa1aaeda3e11093a042c9f97957bc16d7.bin
+2026-10-16T00:41:07Z no checkpoint yet at ckpt/curve131-run8000.hdr or ckpt/curve131-run8000.ck on volume volume
+2026-10-16T00:41:07Z run 8000: recovered upload offset 256 from S3 (local cache was 0)
+2026-10-16T00:41:07Z corpus dp/curve131-run8000.bin: 256 bytes on volume, nothing new after offset 256
+.2026-10-16T00:41:07Z no checkpoint yet at ckpt/curve131-run8000.hdr or ckpt/curve131-run8000.ck on volume volume
+2026-10-16T00:41:07Z run 8000: recovered upload offset 256 from S3 (local cache was 0)
+2026-10-16T00:41:07Z corpus dp/curve131-run8000.bin: 256 bytes on volume, nothing new after offset 256
+.2026-10-16T00:41:07Z no checkpoint yet at ckpt/curve131-run8000.hdr or ckpt/curve131-run8000.ck on volume volume
+2026-10-16T00:41:07Z run 8000: recovered upload offset 128 from S3 (local cache was 0)
+2026-10-16T00:41:07Z dry-run: would upload 4 records to s3://bucket/dp/slot-98000/a61d8e127e97ebb0c768092b4228f26b-0000000000000128-47b1bbbb160792b61bb8192d19897b7e8d22b51d80db92b37c5864ec6fa7b697.bin
+..2026-10-16T00:41:07Z no checkpoint yet at ckpt/curve131-run8000.hdr or ckpt/curve131-run8000.ck on volume volume
+2026-10-16T00:41:07Z run 8000: recovered upload offset 192 from S3 (local cache was 0)
+2026-10-16T00:41:07Z uploaded 2 records to s3://bucket/dp/slot-98000/a61d8e127e97ebb0c768092b4228f26b-0000000000000192-ed58de8420be1a4ba61f3491ec57aa5c4833562ca0330dbb11d1048611a1b829.bin
+2026-10-16T00:41:07Z no checkpoint yet at ckpt/curve131-run8000.hdr or ckpt/curve131-run8000.ck on volume volume
+2026-10-16T00:41:07Z run 8000: recovered upload offset 256 from S3 (local cache was 0)
+2026-10-16T00:41:07Z corpus dp/curve131-run8000.bin: 256 bytes on volume, nothing new after offset 256
+.2026-10-16T00:41:07Z dry-run: cannot ask the bucket about AWS slots (TypeError: UploadRecoveryTests.Store.list_objects_v2() missing 1 required positional argument: 'Prefix'); only the run-id range is checked
+2026-10-16T00:41:07Z syncing curve 131 runs 8000 from volume ecc2k130 to s3://bucket/dp/
+..2026-10-16T00:41:07Z no checkpoint yet at ckpt/curve131-run8000.hdr or ckpt/curve131-run8000.ck on volume volume
+.2026-10-16T00:41:07Z no checkpoint yet at ckpt/curve131-run8000.hdr or ckpt/curve131-run8000.ck on volume volume
+...
+----------------------------------------------------------------------
+Ran 79 tests in 2.451s
+
+OK
+{
+  "8000": {
+    "error": "gap"
+  }
+}

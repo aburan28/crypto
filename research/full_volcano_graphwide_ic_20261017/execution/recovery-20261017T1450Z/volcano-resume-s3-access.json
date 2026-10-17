@@ -1,0 +1,6 @@
+{
+  "target": "s3://crypto-autoresearcher/store",
+  "operation": "HeadBucket with normal SDK discovery; no writes",
+  "credentials_available": false,
+  "exception_type": "NoCredentialsError"
+}

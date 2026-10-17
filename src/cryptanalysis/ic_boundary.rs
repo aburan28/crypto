@@ -999,14 +999,15 @@ pub trait CountedGroup {
     /// One synchronized round of independent lanes.  Each tuple is
     /// `(lane_index, current_point, addend, addend_slot)`; outputs retain
     /// tuple order.  Slots 0..16 are jumps, 16..32 are restart offsets.
-    /// The serial and batched closures must consume the same tuples.
+    /// The serial and batched closures must consume the same tuples.  The
+    /// caller owns the output buffer so repeated rounds can reuse it.
     #[allow(clippy::type_complexity)]
     fn native_lane_walk_adder(
         &self,
         _batched: bool,
     ) -> Option<
         Box<
-            dyn FnMut(&mut GroupOps, &[(usize, Self::Elt, Self::Elt, usize)]) -> Vec<Self::Elt>
+            dyn FnMut(&mut GroupOps, &[(usize, Self::Elt, Self::Elt, usize)], &mut Vec<Self::Elt>)
                 + '_,
         >,
     > {
@@ -3481,6 +3482,42 @@ impl PrimeCurve {
         PrimePoint::affine(x3, y3)
     }
 
+    /// `#E(F_p)` when it is prime, else `None`: the same answer as testing
+    /// [`PrimeCurve::point_count`] for primality, in `O(√p)` group
+    /// operations instead of `O(p)` Legendre symbols.
+    ///
+    /// `N = #E(F_p)` lies in the Hasse interval `[p+1−t, p+1+t]`,
+    /// `t = ⌊2√p⌋`, and kills every point.  Step a fixed point `P` across
+    /// that interval and record each `m` with `[m]P = ∞`.  If `N` is prime
+    /// then `P ≠ ∞` has order `N`, the next multiple `2N` lies above the
+    /// interval (`p > 37`), and `N` is the one hit; so a single prime hit
+    /// is `N`, and anything else (no point, several hits, one composite
+    /// hit) means `N` is not prime.  No randomness is drawn.
+    pub fn prime_order(&self) -> Option<u64> {
+        let p = self.p;
+        debug_assert!(p > 37);
+        let pt = (0..p).find_map(|x| {
+            let y = self.sqrt(self.rhs(x))?;
+            Some(PrimePoint::affine(x, y))
+        })?;
+        let t = (4 * p).isqrt();
+        let lo = p + 1 - t;
+        let mut ops = GroupOps::default();
+        let mut acc = self.mul(&mut ops, pt, lo);
+        let mut tally = FieldOps::default();
+        let mut hit = None;
+        for j in 0..=2 * t {
+            if acc.infinity {
+                if hit.is_some() {
+                    return None;
+                }
+                hit = Some(lo + j);
+            }
+            acc = self.add_raw(&mut tally, acc, pt);
+        }
+        hit.filter(|&m| is_prime_u64(m))
+    }
+
     /// `#E(F_p)` by the Legendre symbol at every abscissa: `O(p)`.
     pub fn point_count(&self) -> u64 {
         let mut count = 1u64;
@@ -3655,8 +3692,11 @@ impl CountedGroup for PrimeCurve {
         batched: bool,
     ) -> Option<
         Box<
-            dyn FnMut(&mut GroupOps, &[(usize, PrimePoint, PrimePoint, usize)]) -> Vec<PrimePoint>
-                + '_,
+            dyn FnMut(
+                    &mut GroupOps,
+                    &[(usize, PrimePoint, PrimePoint, usize)],
+                    &mut Vec<PrimePoint>,
+                ) + '_,
         >,
     > {
         use crate::cryptanalysis::prime_fast::BatchAddScratch;
@@ -3667,9 +3707,15 @@ impl CountedGroup for PrimeCurve {
         let mut previous: Vec<Option<(PrimePoint, Option<FastPrimePoint>)>> = Vec::new();
         let mut addends: Vec<Option<(PrimePoint, Option<FastPrimePoint>)>> = vec![None; 32];
         let mut scratch = BatchAddScratch::default();
-        Some(Box::new(move |ops, requests| {
-            let mut left = Vec::with_capacity(requests.len());
-            let mut right = Vec::with_capacity(requests.len());
+        let mut left = Vec::new();
+        let mut right = Vec::new();
+        Some(Box::new(move |ops, requests, outputs| {
+            left.clear();
+            right.clear();
+            outputs.clear();
+            left.reserve(requests.len());
+            right.reserve(requests.len());
+            outputs.reserve(requests.len());
             for &(lane, p, q, slot) in requests {
                 assert!(slot < addends.len());
                 if previous.len() <= lane {
@@ -3724,25 +3770,22 @@ impl CountedGroup for PrimeCurve {
                     ops.field_ops.muls += 3 * stats.ordinary as u64 + 1;
                 }
             } else {
-                for (p, q) in left.iter_mut().zip(right) {
+                for (p, q) in left.iter_mut().zip(right.iter().copied()) {
                     *p = fast.add(*p, q);
                 }
             }
-            left.into_iter()
-                .zip(requests)
-                .map(|(native, &(lane, _, _, _))| {
-                    let out = match native {
-                        Some(pt) => {
-                            ops.montgomery_reductions += 2; // Montgomery -> canonical.
-                            let (x, y) = fast.canonical(pt);
-                            PrimePoint::affine(x, y)
-                        }
-                        None => PrimePoint::INFINITY,
-                    };
-                    previous[lane] = Some((out, native));
-                    out
-                })
-                .collect()
+            for (&native, &(lane, _, _, _)) in left.iter().zip(requests) {
+                let out = match native {
+                    Some(pt) => {
+                        ops.montgomery_reductions += 2; // Montgomery -> canonical.
+                        let (x, y) = fast.canonical(pt);
+                        PrimePoint::affine(x, y)
+                    }
+                    None => PrimePoint::INFINITY,
+                };
+                previous[lane] = Some((out, native));
+                outputs.push(out);
+            }
         }))
     }
     fn supports_native_lane_walk(&self) -> bool {
@@ -3831,10 +3874,9 @@ pub fn find_prime_order_curve(bits: u32, seed: u64) -> PrimeInstance {
             if disc == 0 {
                 continue;
             }
-            let order = curve.point_count();
-            if !is_prime_u64(order) {
+            let Some(order) = curve.prime_order() else {
                 continue;
-            }
+            };
             // Any point generates.
             let g = loop {
                 let x = rng.gen_range(0..p);
@@ -5932,6 +5974,8 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
         g.native_lane_walk_adder(batched)
             .expect("prime lanes required")
     });
+    let mut lane_requests = Vec::with_capacity(lanes.len());
+    let mut lane_outputs = Vec::with_capacity(lanes.len());
     let (mut lane_rounds, mut lane_prepared) = (0u64, 0u64);
     let striding = matches!(targets, TargetSource::Stride | TargetSource::StrideRenew);
     let (mut stride, mut stride_steps, mut stride_restarts, mut stride_renewals) =
@@ -5977,7 +6021,7 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
 
     while trials < max_trials {
         if lane_config.is_some() && lane_queue.is_empty() {
-            let mut requests = Vec::with_capacity(lanes.len());
+            lane_requests.clear();
             for (index, lane) in lanes.iter_mut().enumerate() {
                 if lane.fresh || lane.segment_steps >= segment_cap {
                     if lane.restarts == 0 {
@@ -6002,7 +6046,7 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
                             pool.push(off);
                         }
                         let (offset, oa, ob) = pool[pool_index];
-                        requests.push((index, lane.point, offset, jump_count + pool_index));
+                        lane_requests.push((index, lane.point, offset, jump_count + pool_index));
                         lane.a = addmod(lane.a, oa, r);
                         lane.b = addmod(lane.b, ob, r);
                         for i in (1..jump_count).rev() {
@@ -6017,21 +6061,22 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
                     let j =
                         lane.permutation[((mix(g.key(&lane.point)) >> 24) as usize) % jump_count];
                     let (jump, aj, bj) = jumps[j];
-                    requests.push((index, lane.point, jump, j));
+                    lane_requests.push((index, lane.point, jump, j));
                     lane.a = addmod(lane.a, aj, r);
                     lane.b = addmod(lane.b, bj, r);
                     lane.segment_steps += 1;
                     walk_steps += 1;
                 }
             }
-            if !requests.is_empty() {
-                let outputs = lane_adder.as_mut().expect("prime lanes required")(
+            if !lane_requests.is_empty() {
+                lane_adder.as_mut().expect("prime lanes required")(
                     &mut rel.group_ops,
-                    &requests,
+                    &lane_requests,
+                    &mut lane_outputs,
                 );
-                native_walk_calls += requests.len() as u64;
-                for ((index, _, _, _), point) in requests.iter().zip(outputs) {
-                    lanes[*index].point = point;
+                native_walk_calls += lane_requests.len() as u64;
+                for ((index, _, _, _), point) in lane_requests.iter().zip(&lane_outputs) {
+                    lanes[*index].point = *point;
                 }
             }
             for (index, lane) in lanes.iter_mut().enumerate() {
@@ -8422,6 +8467,90 @@ mod tests {
         // … and a binary curve does not count: its zeros mean unknown.
         let kob = koblitz_instance(1, 17).unwrap();
         assert!(!BinaryGroup(&kob.fast).counts_field_ops());
+    }
+
+    /// `prime_order` decides exactly what `point_count` + primality did,
+    /// on curves of every kind (prime, composite and smooth orders, points
+    /// of order two), and the curve search it drives is unchanged.
+    #[test]
+    fn prime_order_matches_the_naive_count() {
+        let mut rng = StdRng::seed_from_u64(20261017);
+        let mut prime_orders = 0;
+        for _ in 0..400 {
+            let p = loop {
+                let cand = rng.gen_range(41u64..20_000) | 1;
+                if is_prime_u64(cand) {
+                    break cand;
+                }
+            };
+            let curve = PrimeCurve {
+                p,
+                a: rng.gen_range(0..p),
+                b: rng.gen_range(1..p),
+            };
+            let n = curve.point_count();
+            let naive = is_prime_u64(n).then_some(n);
+            assert_eq!(
+                curve.prime_order(),
+                naive,
+                "p={p} a={} b={}",
+                curve.a,
+                curve.b
+            );
+            prime_orders += usize::from(naive.is_some());
+        }
+        assert!(prime_orders > 10, "{prime_orders} prime orders sampled");
+
+        // The search draws the same random numbers and accepts the same
+        // curves as the naive count did.
+        fn naive_search(bits: u32, seed: u64) -> (u64, u64, u64, u64, (u64, u64)) {
+            let mut rng = StdRng::seed_from_u64(seed ^ (bits as u64) << 40);
+            loop {
+                let p = loop {
+                    let cand = (rng.gen::<u64>() & ((1u64 << bits) - 1)) | (1u64 << (bits - 1)) | 1;
+                    if is_prime_u64(cand) {
+                        break cand;
+                    }
+                };
+                for _ in 0..64 {
+                    let a = rng.gen_range(0..p);
+                    let b = rng.gen_range(1..p);
+                    let curve = PrimeCurve { p, a, b };
+                    let disc = addmod(
+                        mulmod(4, mulmod(mulmod(a, a, p), a, p), p),
+                        mulmod(27, mulmod(b, b, p), p),
+                        p,
+                    );
+                    if disc == 0 {
+                        continue;
+                    }
+                    let order = curve.point_count();
+                    if !is_prime_u64(order) {
+                        continue;
+                    }
+                    let g = loop {
+                        let x = rng.gen_range(0..p);
+                        if let Some(y) = curve.sqrt(curve.rhs(x)) {
+                            if curve.legendre(curve.rhs(x)) >= 0 {
+                                break (x, y);
+                            }
+                        }
+                    };
+                    return (p, a, b, order, g);
+                }
+            }
+        }
+        for bits in 8..=16 {
+            for seed in [1u64, 59297, 20261003] {
+                let inst = find_prime_order_curve(bits, seed);
+                let c = &inst.curve;
+                assert_eq!(
+                    (c.p, c.a, c.b, inst.group_order, inst.generator),
+                    naive_search(bits, seed),
+                    "bits={bits} seed={seed}"
+                );
+            }
+        }
     }
 
     #[test]

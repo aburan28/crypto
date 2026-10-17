@@ -1,0 +1,30 @@
+{
+  "created_ms": "1792205091910",
+  "driver_binary_sha256": "8ec9d8a87d7926fcb3fd1e301540508ba2585505456ca438659f58ea86cad3ae",
+  "driver_source_sha256": "1ff545a8784dea14d92a0a6083dffec68414e3f802564046f05577919fad9256",
+  "ecbench_sha256": "1869ca2e7be271794df8128c08a6dca0201038e2c81a3e0ce6434f7ec0d8379d",
+  "finite_field_ic": "UNIMPLEMENTED_FOR_ACTUAL_EMBEDDING_DEGREES",
+  "inputs": [
+    {
+      "path": "/workspace/volcano_graphwide_ic_inputs_20261017/two-workloads.jsonl",
+      "sha256": "37d9e0adf75fd429be52e3cfff00194a6f3c7bac362177dde272fbf938730e97"
+    },
+    {
+      "path": "/workspace/volcano_graphwide_ic_inputs_20261017/three-workloads.jsonl",
+      "sha256": "a6ac094f7aa3deea7d560cd108a5e198edfc98517c192eb9bfa051f6ca47f9a0"
+    },
+    {
+      "path": "/workspace/volcano_graphwide_ic_inputs_20261017/mixed-workloads.jsonl",
+      "sha256": "d28679bb906a0e9dd3a4c92d5cacb02fcf843f14dd26967559714ad72899c279"
+    }
+  ],
+  "mode": "survey",
+  "protocol_sha256": "0172c80c668be5d25ddfe41d53831763a04f548fd3e8021ff315eee38c9f5198",
+  "queue_sha256": "45e277bede6017c30a49405096afefab3d34a18553ecd6b1a79238f2b9559728",
+  "representation_registration": "SEE_INPUT; NOT_PROMOTED",
+  "schema": "volcano-ic-campaign/v1",
+  "source_head": "ee54ad603fef4768817fbca2f133564e81ce84f1",
+  "source_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "vertices_planned": 24823,
+  "wall_claim": "UNQUALIFIED_DIAGNOSTIC"
+}

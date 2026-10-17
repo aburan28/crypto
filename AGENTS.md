@@ -16,6 +16,14 @@
   asymptotic sub-rho, or deployed-curve-security claims; multi-target and
   amortized results stay secondary; ledger rows promote only with complete
   measurement fields and independent replay.
+- **Beat the fastest external tool, and show it** (owner's rule,
+  2026-10-16; details in §15): our implementations should be faster than
+  every other implementation of the same computation. Every speed result
+  is compared with the fastest external tool for that computation, for
+  example Magma's F4 and F5 or msolve for Gröbner bases, on the same inputs
+  and host, with the outputs checked equal. A result that has not been
+  compared is not yet a claim of being the fastest, and a loss is reported
+  as a loss.
 - **Every big improvement updates the leaderboard** (owner, 2026-10-15).
   A PR that lands a large measured gain, whether a whole pipeline, a phase
   or a component (an engine, filter, oracle, solver or kernel), regenerates
@@ -70,6 +78,8 @@ baseline. Every such improvement is a success and is reported as one.**
 - Autolab runner: `research/sat_factor_base_review_20260908/autolab/`
 - Current ladder frontiers: `RESEARCH_KOBLITZ_INDEX_CALCULUS.md`,
   `RESEARCH_ECC2K130_IC_FEASIBILITY.md`
+- Faster checkouts (blobless clone, sparse profiles, cloud-session
+  settings): [docs/sparse-checkout.md](docs/sparse-checkout.md)
 
 For small-prime or pinned GF(2^83) elliptic-curve surface searches, quartic
 subgroup transfers, genus-2+ Jacobian transfers, hyperelliptic covers, Mumford
@@ -80,7 +90,7 @@ commands, and interpretation limits.
 
 ## Reading discipline
 
-`research/` is 4.5 GB in 52,000 files. Read what the current step needs:
+`research/` is most of a 6.6 GB, 100,000-file checkout. Read what the current step needs:
 
 - **Indexes before archives.** Status comes from the pointers above,
   `docs/bounds/frontier.json`, and the ecbench database views; open a session
@@ -359,6 +369,12 @@ dependencies. Keep the readable mathematical proof in the report.
   concrete missing definition, dependency, proof obligation or failed build.
   Report partial formalization explicitly; keep the full theorem open.
 - Add reproducible proof checks to the relevant CI workflow where practical.
+  Every Lean target is also checked by the repository-wide proof gate
+  (`tools/lean/proof-gate.sh`, workflow `lean-proof-gate.yml`): it builds each
+  Lake project and standalone file and fails any theorem whose transitive
+  axioms include `sorryAx`, an unlisted `native_decide` or a user axiom. A
+  `native_decide` that a study deliberately trusts is recorded with its reason
+  in `tools/lean/trusted-native.txt`. See `tools/lean/README.md`.
   Preserve frozen evidence and attach formalization updates as versioned
   additions rather than rewriting historical verification records.
 
@@ -388,6 +404,35 @@ verifiers, replay tools, and research result generation.
 - Older instructions that name Python scripts describe legacy tooling; they
   do not grant an exception. Preserve their mathematical contracts, fixtures,
   and accounting requirements in the native replacement.
+
+## Model tiers
+
+Owner rule, 2026-10-17: one model-tier topology across the owner's
+repositories. The reference design is
+[`docs/model-tiers.md`](https://github.com/aburan28/crypto-autoresearcher/blob/main/docs/model-tiers.md)
+in aburan28/crypto-autoresearcher.
+
+| tier | does here | Anthropic |
+| --- | --- | --- |
+| frontier | design, interpretation, claims, breakthrough review | Mythos (`claude-mythos-5`), Fable 5.1 (`claude-fable-5-1`) |
+| core | the same when frontier is not needed; coordination and review | Opus 5.5 (`claude-opus-5-5`); OpenAI, GLM 5.3 and Qwen equivalents |
+| director | compiles a decided experiment into a frozen command card, then assesses the run | Sonnet 5.5 (`claude-sonnet-5-5`), [`experiment-director`](.claude/agents/experiment-director.md) |
+| mechanical | runs the card, relays tool output verbatim, computes nothing, refuses anything underspecified | Haiku 5.5 (`claude-haiku-5-5`, effort low), [`executor-mechanical`](.claude/agents/executor-mechanical.md) |
+
+- **Frontier and core keep the reasoning**: the spec and preregistration,
+  analysis (`ecbench compare` and `table` read-outs), the §5a pricing band and
+  every cross-method ranking, success-criterion classification, claims, and
+  every PR decision (open, fix, merge).
+- **The relay.** Subagents do not nest in Claude Code, so the main session
+  does every dispatch: it dispatches `experiment-director` in compile mode,
+  relays the card it returns to `executor-mechanical` verbatim (adding
+  nothing), then dispatches `experiment-director` again in assess mode with
+  the executor's returned text. A card with a `specification_error` is not
+  relayed; the reasoning tier fixes the spec.
+- **The mechanical tier's output is an observation, never a result claim.**
+  The director's assessment says only whether the run executed as specified
+  and the relay was verbatim. What the numbers mean is decided by the
+  frontier or core tier under the measurement rules below.
 
 ## Default workflow: open the PR, check in, and land it
 
@@ -1009,6 +1054,37 @@ existing EC2 key-pair name **`meow34`** when launching the instance.
   accessible, report that access blocker and continue with non-SSH work where
   possible.
 
+### 9a. Experiments that do not run locally go through `ephemeral`
+
+When an experiment, benchmark or build is to run in the cloud rather than on
+the local machine, run it with the ephemeral runner
+([`taskq/deploy/ephemeral/`](taskq/deploy/ephemeral/README.md)). Do not
+launch EC2 instances by hand for it. `conductor/deploy/aws/launch.py`, in the
+Conductor repository, starts the Conductor control plane, not experiments.
+
+```sh
+cargo build --release --manifest-path taskq/deploy/ephemeral/cli/Cargo.toml   # once
+E=taskq/deploy/ephemeral/cli/target/release/ephemeral   # or the bash CLI: taskq/deploy/ephemeral/ephemeral
+$E run --detach --type c7i.4xlarge --ttl 4h -- 'cargo run --release -- ... --out "$EPHEMERAL_OUT"'
+$E status last; $E logs -f last; $E fetch last
+```
+
+- The two CLIs are interchangeable: same flags, S3 layout and runner, and
+  either one can follow, fetch or kill the other's jobs.
+- Agents use `--detach` and check back with `status` or `logs -f` at the
+  check-in cadence of the default workflow, rather than holding a foreground
+  session open on a long job.
+- Each job is a paid instance. Start the jobs the request asks for and no
+  more. Pick the smallest instance type and `--ttl` that fit, and `kill` any
+  `--keep` instance once you are done with it. The runner, the deadline timer
+  and the reaper terminate everything else.
+- Runners use Session Manager (`ephemeral shell`), not SSH. Section 9 applies
+  to hosts launched by hand.
+- A result that lands in the repository still follows section 10, the
+  `benchmarks/` rule and the research-visuals rule. Its provenance is the
+  fetched `job.json`, `host.txt` and `rusage.txt` in
+  `~/.cache/ephemeral/runs/<id>/`.
+
 ### 10. Performance work starts from a clean, recorded baseline
 
 A speedup is a comparison, so it is only as good as the baseline and the
@@ -1165,6 +1241,40 @@ SHA-256; a name is not repointed without `--replace`, which keeps the old
 digest as superseded. Never delete remote objects from an agent session.
 See [docs/store/README.md](docs/store/README.md).
 
+### 13a. Raw run trees land as one archive
+
+A round's or study's raw run tree (per-run reports, stderr, isolation records,
+logs: everything under its `runs/`) lands as one deterministic `runs.tar.xz`
+beside its README, with `runs.tar.xz.sha256` (`sha256sum runs.tar.xz`, so
+`sha256sum -c` checks it in place) and a `.gitignore` there holding `/runs/`. The
+analysis, figures and claims are made from the extracted tree, and the README
+says how to extract and re-check it. Pack it so packing the extracted tree
+again gives the same bytes, as
+`research/ic_tool_program/rounds/R01-baseline-v0/` does:
+
+```sh
+tar --sort=name --mtime='YYYY-MM-DD 00:00:00Z' --owner=0 --group=0 \
+    --numeric-owner --mode='u+rwX,go+rX,go-w' --format=gnu -cf - runs \
+  | xz -6 -T1 > runs.tar.xz
+sha256sum runs.tar.xz > runs.tar.xz.sha256
+```
+
+Use the round's start date for `--mtime`. Raw `.jsonl` and logs compress
+5-20x, and one file costs a checkout one entry instead of thousands.
+
+**Exception: keep it loose when a path must resolve.** When a claim, replay,
+manifest or verifier names individual run records by repository path (the
+`report` fields of `research/ic_tool_program/rule/v*/claims/` point into
+`runs/`; `verify_archive.py`-style checkers hash files in place), those
+records stay committed as loose files. Only the part nothing names goes in the
+archive; say in the README which part is which.
+
+This applies to new run trees. Never re-pack, compress or move a committed
+tree, or rewrite history to slim one: committed evidence stays as it was
+written. A tree too big for Git even compressed goes through the store (§13).
+Checkouts that do not need a research tree leave it off disk instead
+([docs/sparse-checkout.md](docs/sparse-checkout.md)).
+
 ### 14. Experiments to run later go in `backlog/`
 
 An experiment worth running that this session will not run (too big, blocked,
@@ -1172,6 +1282,84 @@ or for another machine) is written as a card in `backlog/<ID>/` and checked
 with `backlog validate`; leases and runs go through cairn, and results return
 to `research/` by PR. The protocol, including funding as priority, is
 [backlog/README.md](backlog/README.md).
+
+### 15. Compare against the fastest external implementations
+
+Owner's rule, 2026-10-16. The goal is for our implementations to be faster
+than everything else that computes the same thing. A before/after speedup
+against our own previous code (§10) shows progress. It does not show where
+we stand. So every performance result also names the fastest external
+implementation of the same computation and measures against it.
+
+**Which tools.** Compare against the fastest available implementation, not a
+convenient one. As a minimum, for the areas this repository works in:
+
+| computation | compare against |
+|:--|:--|
+| Gröbner bases (F4, F5, decomposition and summation-polynomial systems) | Magma `GroebnerBasis` (its F4, and its F5 where Magma offers it), msolve, FGb; also Singular (`std`, `slimgb`, `modStd`) and OpenF4 where relevant |
+| Sparse or dense linear algebra mod p and over GF(2) | Magma, FLINT, M4RI/M4RIE (GF(2)), and the block Lanczos/Wiedemann solvers of CADO-NFS |
+| Polynomial and field arithmetic (products, powers, roots, factoring) | FLINT (`nmod_poly`, `fmpz_mod_poly`, `fq`), NTL, Magma, PARI/GP |
+| Point counting (SEA), modular polynomials, isogenies | PARI/GP (`ellcard`, `ellap`), Magma (`#E`, `ClassicalModularPolynomial`, `Isogeny`), Sutherland's `classpoly`/`modpoly` and his published tables, Sage where it calls a faster library |
+| Isogeny-based protocols (CSIDH, √élu, SQIsign-style quaternion steps) | the authors' reference and optimised implementations, and published cycle counts on named CPUs |
+| ECDLP (rho, kangaroo, index calculus) | the fastest published implementation or record computation for that curve class, with its hardware stated |
+
+If a faster tool exists than the ones listed, use it and add it to this
+table.
+
+**How to compare.**
+
+- **Same inputs, same answer.**
+  - Run the external tool on exactly the inputs our code runs on, exported
+    by a checked-in script. `examples/gb_cas_export.rs` writes msolve,
+    Singular and Magma inputs for the Gröbner workloads; add an equivalent
+    when a workload has none.
+  - Check that the outputs agree: the same reduced basis and order, the same
+    group order, the same j-invariants, the same kernel. A faster run that
+    computes something different is not comparable.
+  - Record the tool's name, version, options, and the algorithm it actually
+    ran (for example whether Magma used F4 or F5, or which msolve flags
+    were set).
+- **Same host, same conditions.**
+  - Run both sides on the same machine, with the same isolation as §10 and
+    the same thread count. Compare single-threaded with single-threaded and
+    many threads with many.
+  - Do not time the external tool's start-up, licence check or
+    parsing/printing as its algorithm. Use its own internal timer
+    (Magma `Cputime`/`Realtime`, msolve `-v`) when it reports one, and say
+    which was used.
+- **Report the ratio, per size.**
+  - Report our time divided by the external tool's time, at each problem
+    size, with the A/A spread (or another uncertainty) for both sides. Also
+    report how the cost grows with size for both, so a constant-factor win
+    at small sizes is not mistaken for a better exponent.
+  - Say plainly who is faster, at which sizes, and on which hardware class.
+  - "Faster than X" holds only over the sizes and hosts that were measured,
+    and only against the fastest configuration of X that was tried. A loss
+    at large sizes is reported even when small sizes win.
+- **Missing tools are named, not skipped.**
+  - If the fastest tool is unavailable (Magma needs a licence; some tools
+    run only on other platforms), use the fastest open tool available. msolve
+    is the open reference for F4.
+  - Cite the missing tool's published timings with their hardware, labelled
+    "published, not reproduced".
+  - List which comparisons are still missing, and ask the owner for access
+    or a host that has the tool instead of quietly dropping the comparison.
+  - Never present a comparison against a slower tool as "fastest".
+- **A loss is a target.** When an external tool is faster, record the gap,
+  as the ratio and the sizes where it holds, in the study and as a
+  `backlog/` card (§14) or the next round's goal. A later performance PR on
+  the same computation reports the ratio against the external tool before
+  and after.
+- **Where it lands.**
+  - The external comparison goes in the same report and `benchmarks/` entry
+    as the speed result, under the rules of "Performance results also land
+    in `benchmarks/`".
+  - The `benchmarks/README.md` row gives the ratio against the fastest
+    external tool next to the before/after ratio, or says "external
+    comparison: not run" with the reason.
+  - Keep the export and run scripts in the repository. Do not commit
+    proprietary binaries, or output that the tool's licence forbids
+    redistributing.
 
 ## Worked example
 

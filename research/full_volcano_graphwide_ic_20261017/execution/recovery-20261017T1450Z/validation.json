@@ -1,0 +1,50 @@
+{
+  "schema": "volcano-recovery-software-validation/v1",
+  "library_source_tree": "f5b64ea4c54c9b4424614bf81a09b20ba21e488a",
+  "library_initial": {
+    "passed": 4260,
+    "failed": 9,
+    "ignored_existing": 117,
+    "cause": "All nine are PermissionDenied at loopback listener creation; standalone loopback bind probe also gives EPERM."
+  },
+  "network_enabled_retry": {
+    "module": "pollard_collab",
+    "passed": 37,
+    "failed": 0,
+    "contains_every_initial_failure": true,
+    "initial_failure_names": [
+      "cryptanalysis::pollard_collab::cairn::tests::a_key_submitter_signs_what_cairn_verifies",
+      "cryptanalysis::pollard_collab::cairn::tests::an_older_node_without_progress_turns_heartbeats_off_quietly",
+      "cryptanalysis::pollard_collab::cairn::tests::generic_artifacts_use_the_persisted_commit_reveal_outbox",
+      "cryptanalysis::pollard_collab::cairn::tests::heartbeats_carry_the_sessions_own_counters_at_the_cadence",
+      "cryptanalysis::pollard_collab::cairn::tests::pending_commitments_survive_a_restart",
+      "cryptanalysis::pollard_collab::cairn::tests::points_travel_through_cairn_as_commit_reveal_claims_and_solve",
+      "cryptanalysis::pollard_collab::cairn::tests::the_client_speaks_enough_http",
+      "cryptanalysis::pollard_collab::net::tests::foreign_job_is_refused",
+      "cryptanalysis::pollard_collab::net::tests::three_nodes_in_a_chain_converge"
+    ]
+  },
+  "standalone_cli": "6 unit tests and 2 integration tests pass; see full log",
+  "site_initial": "48 pass / 1 stale browser-index failure out of 49",
+  "site_repair": "Regenerated with repository builder; failed freshness/consistency test passes, 9 path tests pass, all 216 builder-input paths covered, leaderboard and dashboard checks pass",
+  "browser_counts": {
+    "curves": 2134,
+    "methods": 207,
+    "factor_bases": 672,
+    "sessions": 225
+  },
+  "viewer": "Native lossless population checks; Node all 51 filters; real Chromium desktop/floor/mobile; all 3 final screenshots inspected. Label centering refinement retested separately.",
+  "native_conductor_calibration": "15 cuts pass; generic C byte-identical to prior certificate and extracted binary output",
+  "full_clean_library_rerun": false,
+  "scope": "No tests ignored or weakened; initial failed logs retained. Retry covers failed tests, not a new claim of one clean full-suite invocation. No library source changed for the browser repair.",
+  "log_sha256": {
+    "volcano-recovery-zero-job-stop.log": "0daba99f7efade06ae9d0f6f6660ba05996d6078d583e7f665124ef55f07697a",
+    "volcano-repaired-checkpoint-2935.log": "7d0e99fec27da4b6159bbab029a25dc74dbd95a512ebeb2ecc99857c048e6fee",
+    "volcano-repaired-summary-2935.log": "e2512ca0b3a750d58872aa3180d364db91fea8958fc84e3d09f4e12f6218da68",
+    "combined-cli-site-network-failed-browser.log": "753248d913760d6834555616f733959ad7f9bebaf4804b471812ca6f2c9dfe05",
+    "browser-repair-ui.log": "e96b58e1f9a493227c0b2cd84235817f1bcbade7013adb67396f422553ae48ad",
+    "combined-release-network-denied.log": "b2edf1c8befa8478a192d1d4767b3cb1a9d836f0fedff0bdbce6a8ad84525c43",
+    "volcano-recovery-browser-conductor.log": "8fcfd0a01eb89b2a59a6cdef933bebc784f60be1c4681c07d30969ce40cb2f67",
+    "volcano-recovery-viewer-conductor.log": "8fcfd0a01eb89b2a59a6cdef933bebc784f60be1c4681c07d30969ce40cb2f67"
+  }
+}

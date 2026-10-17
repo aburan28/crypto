@@ -1,0 +1,3 @@
+# Preserve raw command output exactly, including terminal blank lines.
+reports/**/*.pdf binary
+evidence/*.log -whitespace

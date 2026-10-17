@@ -38,3 +38,29 @@ B. Holdouts p = 53, 59 (pristine) and every prime from the certified
    variance for rows with mean >= 5 (reported; near 1 expected); ROC AUC.
 C. A pass is a statistical description beyond the proved obstruction, not
    a criterion that decides an individual class.
+
+## Follow-up registration (2026-10-16, after p = 97 was scored; before p = 101 completes)
+
+Observation. Over the ten scored primes 53-97 the observed number of zero
+rows exceeds the V2 prediction by +95.3 (sd 49.8, z = 1.91), about 1.9% of
+the expected total, spread over the bulk of the predicted-probability range
+rather than the tails. Splitting by e = v2(p^2 - 1) does not isolate it
+(`iso1_residual_model pool`: e = 3 z = 1.62, e = 4 z = -0.39, e = 5 z = 1.19,
+e = 6 z = 1.82, e >= 4 z = 1.12), which rules out the idea that it comes
+from the 8th-power model being inexact at e > 3. This hypothesis was
+suggested by data already scored, so those primes cannot test it.
+
+Registered test, fixed before any of these censuses completes. Hypothesis H:
+V2 under-predicts the number of zero rows. Fresh primes: 101, 103, 107, 109,
+113 (their class data and predictions are committed before each census
+finishes). Statistic: the pooled `obs - exp` over those five primes divided
+by `sqrt(sum(var))`, with each prime's variance `((hi - lo) / 3.92)^2` as in
+`iso1_residual_model pool`. Decision: if the one-sided z exceeds 2.0, V2 is
+rejected as a parameter-free description (it is miscalibrated by about 2%)
+and a V3 is registered with its own holdouts; otherwise V2 stands, and H is
+reported as not confirmed. If fewer than five of these primes complete, the
+test is run on those that do and reported as underpowered.
+
+## Outcome (2026-10-17)
+
+All five fresh primes completed. Observed against predicted zero rows: 101: 454/453.3, 103: 442/460.3, 107: 488/480.2, 109: 516/488.9, 113: 467/505.8. Pooled obs - exp = -21.5, sd = 42.4, one-sided z = -0.51 (threshold 2.0). V2 stands; H is reported as not confirmed. p = 113 lies 0.6 below its 95% interval; the e = 5 and e >= 4 fresh-prime lines of `iso1_residual_model pool` (z = -1.99, -2.12) were not registered and are exploratory. Output: `model_v2_results.txt`.

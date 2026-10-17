@@ -1,0 +1,23 @@
+{
+  "schema": "volcano-pricing-band-delivery/v1",
+  "scope": "Native ecbench band output, profiles kept separate, common weights 0/0.1/1 on every arm. Supplemental files outside the already frozen delivery archives; existing archives unchanged.",
+  "folder": "109DpcQpX7ATz6GeI8iSWAExGMWBoR-H_",
+  "files": [
+    {
+      "path": "survey-99-summary-v2/pricing-band.json",
+      "id": "1NV-4hpuoG23Xf0TitT8yUBPGAnRJCoj2",
+      "bytes": 658148,
+      "local_sha256": "dd7f7ce9e52e68774cdba216b5a83d94ef12947466dfccf4135b5d04f35243ba",
+      "remote_name_size_parent_readback": "PASS",
+      "remote_whole_file_hash": "NOT_CHECKED"
+    },
+    {
+      "path": "release-qa-summary-v2/pricing-band.json",
+      "id": "1Ff0D2ARDdYvmHVwfXhYR7r2GZcCgQeKW",
+      "bytes": 23715,
+      "local_sha256": "eeaf07594cac1d45fcdc95d306da9538f9afe29447711cd34ff5878a2eb5e0b7",
+      "remote_name_size_parent_readback": "PASS",
+      "remote_whole_file_hash": "NOT_CHECKED"
+    }
+  ]
+}

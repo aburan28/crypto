@@ -27,6 +27,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /Cargo.toml
+            /tools/volcano-cli/
+            /isogeny_algos/
             /docs/ic/calibration.json
             /src/*
             /examples/koblitz_base_window.rs
@@ -82,6 +84,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /Cargo.toml
+            /tools/volcano-cli/
+            /isogeny_algos/
             /docs/ic/calibration.json
             /src/*
             /examples/koblitz_base_window.rs

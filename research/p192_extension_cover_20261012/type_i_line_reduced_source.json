@@ -1,0 +1,55 @@
+{
+  "anchor_A": {
+    "coordinates": [
+      6040434036923433478051557904892457894036388092924923603065,
+      5429627687350738504101357916481947853133067363862684321778
+    ],
+    "cover_x": "5612830651861950100822449748792990373900002569736733442986",
+    "quotient_base_pilot_index": 0
+  },
+  "field_prime": "6277101735386680763835789423207666416083908700390324961279",
+  "fixed_B": {
+    "base_index_zero": 0,
+    "coordinates": [
+      5809083153075944169662024635665926370572478023810301680450,
+      2077286546211925267457036235293834231403623424796144342708
+    ]
+  },
+  "fixed_C": {
+    "base_index_zero": 4,
+    "coordinates": [
+      5033489525758224611158655607397186941539128991984485812201,
+      5342742667574316199210040754192546083521908212856431689869
+    ]
+  },
+  "input_sha256": {
+    "anchor": "b9730df07cf9fb48a021161f014f994639fe1bbc3e20a82d40038078c970a99c",
+    "base": "eba1cafb724ce2eec84be550762fb10574980f77f4997143d5c58f0c9467d82c",
+    "new": "2392f42f5fe8ac9d253c321c03312af4a3a287854b128d0019d7388acb5faad5",
+    "pairs": "dadf92a7d40b588ed12e68ca4fdc51588061fdf804e435787a91834c7f135098",
+    "plane": "b16122e364056b30e46971b18084f7bfa6c0f6de2fa63f0cae63a1229dd224b3"
+  },
+  "line_intercept": "1263967190043284480024107795993398749215920779485552102105",
+  "line_point_indices_zero": [
+    0,
+    4
+  ],
+  "line_slope": "588723416366032024518242916203503006886987372136061277441",
+  "nonspecial_rule": "No selected P beyond B,C lies on BC; BC meets B,C simply and has irreducible quadratic residual. Thus no length-three D_P lies in a canonical line section.",
+  "origin_divisor": [
+    "A",
+    "B",
+    "C"
+  ],
+  "projection_boundary": "A is the exact quotient-base cover anchor. The r-torsion quotient key is the cofactor h applied to [P-A]. D_P is a reduced source representative, not a degree-three representative of h[P-A].",
+  "representative_rule": "D_P=P+B+C relative to D_0=A+B+C; [D_P-D_0]=[P-A]",
+  "residual_coefficients_ascending": [
+    "3246598143671751854922681891231596260583707358251713816098",
+    "4839145220727612428522342637442898412062745586625443231871",
+    "5011095466168210992353143283025335136088820704277156079042"
+  ],
+  "residual_discriminant_character": -1,
+  "source_point_count": 9925,
+  "source_sha256": "1fb05f3309d512a77d2c0d63d51a002e3919b83f1e79fb658d5b586e08764e1a",
+  "status": "verified_fixed_origin_degree_three_source_representatives"
+}

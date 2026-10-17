@@ -1,0 +1,22 @@
+info: SeaProofs: no previous manifest, creating one from scratch
+info: toolchain not updated; already up-to-date
+✖ [2/3] Building SeaProofs
+trace: .> LEAN_PATH=././.lake/build/lib/lean /workspace/.sea-elan/toolchains/leanprover--lean4---v4.19.0/bin/lean ././././SeaProofs.lean -R ./././. -o ././.lake/build/lib/lean/SeaProofs.olean -i ././.lake/build/lib/lean/SeaProofs.ilean -c ././.lake/build/ir/SeaProofs.c --json
+error: ././././SeaProofs.lean:26:14: unsolved goals
+case succ
+G : Type
+g : GroupOps G
+p : G
+a b : Nat
+ih : smul g p (a + b) = g.add (smul g p a) (smul g p b)
+⊢ g.add (smul g p (a.add b)) p = g.add (smul g p a) (g.add (smul g p b) p)
+info: ././././SeaProofs.lean:79:0: 'SeaProofs.smul_add' depends on axioms: [propext, sorryAx]
+info: ././././SeaProofs.lean:80:0: 'SeaProofs.subtract_left' does not depend on any axioms
+info: ././././SeaProofs.lean:81:0: 'SeaProofs.bsgs_complete' depends on axioms: [propext, sorryAx]
+info: ././././SeaProofs.lean:82:0: 'SeaProofs.refinement_preserves' does not depend on any axioms
+info: ././././SeaProofs.lean:83:0: 'SeaProofs.direct_equals_full_intersection' depends on axioms: [propext, Quot.sound]
+info: ././././SeaProofs.lean:84:0: 'SeaProofs.unique_sound' does not depend on any axioms
+error: Lean exited with code 1
+Some required builds logged failures:
+- SeaProofs
+error: build failed

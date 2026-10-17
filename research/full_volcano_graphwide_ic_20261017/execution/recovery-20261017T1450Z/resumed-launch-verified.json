@@ -1,0 +1,49 @@
+{
+  "schema": "volcano-recovery-launch-verified/v1",
+  "epoch": "resume-20261017T161406Z",
+  "pid": 8973,
+  "status_checked_utc": "2026-10-17T16:15:21.322908+00:00",
+  "process_readback": "8973       1    8973 Ss   /workspace/volcano_ic_repaired_survey_20261017/volcano-ic-driver run /workspace/volcano_ic_repaired_survey_20261017 24823 86400 2147483648",
+  "native_status": {
+    "campaign": "/workspace/volcano_ic_repaired_survey_20261017",
+    "coverage": [
+      {
+        "graph": "mixed",
+        "state": "audited",
+        "vertices": 992
+      },
+      {
+        "graph": "mixed",
+        "state": "queued",
+        "vertices": 9078
+      },
+      {
+        "graph": "three",
+        "state": "audited",
+        "vertices": 973
+      },
+      {
+        "graph": "three",
+        "state": "queued",
+        "vertices": 5587
+      },
+      {
+        "graph": "three",
+        "state": "running",
+        "vertices": 1
+      },
+      {
+        "graph": "two",
+        "state": "audited",
+        "vertices": 979
+      },
+      {
+        "graph": "two",
+        "state": "queued",
+        "vertices": 7213
+      }
+    ]
+  },
+  "retry_log_prefix": "1792253647145 RUN three-v969 attempt 2\n1792253664515 audited three-v969: {\"exhausted\":10,\"timeout\":2,\"verified\":4}\n1792253664770 RUN mixed-v983 attempt 1\n1792253667971 audited mixed-v983: {\"exhausted\":2,\"verified\":14}\n1792253668069 RUN two-v973 attempt 1\n1792253670394 audited two-v973: {\"exhausted\":4,\"verified\":12}\n1792253670465 RUN three-v970 attempt 1\n1792253688191 audited three-v970: {\"exhausted\":10,\"timeout\":2,\"verified\":4}\n1792253688264 RUN mixed-v984 attempt 1\n1792253690320 audited mixed-v984: {\"exhausted\":2,\"verified\":14}\n1792253690394 RUN two-v974 attempt 1\n1792253693531 audited two-v974: {\"exhausted\":4,\"verified\":12}\n1792253693612 RUN three-v971 attempt 1\n1792253715313 audited three-v971: {\"exhausted\":10,\"timeout\":2,\"verified\":4}\n1792253715386 RUN mixed-v985 attempt 1\n1792253717534 audited mixed-v985: {\"exhausted\":2,\"verified\":14}\n1792253717605 RUN two-v975 attempt 1\n1792253719725 audited two-v975: {\"exhausted\":4,\"verified\":12}\n1792253719801 RUN three-v972 attempt 1\n",
+  "scope": "Actual live non-zombie process in separate session, PPID 1. No full-queue completion or unattended upload claimed. Frozen delivered checkpoint remains 2935 vertices."
+}

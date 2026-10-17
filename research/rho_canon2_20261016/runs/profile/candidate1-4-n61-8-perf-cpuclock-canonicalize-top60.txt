@@ -1,0 +1,60 @@
+    8.80 koblitz_strong_rho.rs:746
+    7.83 bit.rs:613
+    6.93 koblitz_strong_rho.rs:97
+    5.39 koblitz_strong_rho.rs:0
+    4.72 bit.rs:282
+    4.67 bit.rs:386
+    4.38 mod.rs:1864
+    4.04 :   13fe2a: movzbl %cl,%eax // koblitz_strong_rho.rs:97
+    3.85 uint_macros.rs:178
+    3.85 :   13feef: tzcnt  %r10,%r9 // uint_macros.rs:178
+    3.55 :   13fec9: mov    %rbx,%r10 // koblitz_strong_rho.rs:0
+    3.18 koblitz_strong_rho.rs:749
+    3.09 :   13fed5: or     %r12,%rbx // bit.rs:282
+    2.88 bit.rs:490
+    2.51 koblitz_strong_rho.rs:578
+    2.50 koblitz_strong_rho.rs:705
+    2.50 :   13fef4: mov    %r9d,%r8d // koblitz_strong_rho.rs:705
+    2.42 macros.rs:180
+    2.40 cmp.rs:1880
+    2.40 :   13fee6: test   %r10,%r10 // cmp.rs:1880
+    2.36 koblitz_strong_rho.rs:579
+    2.36 :   13ff0a: inc    %r9b // bit.rs:613
+    2.28 :   13ffe7: movzbl %bl,%eax // koblitz_strong_rho.rs:97
+    2.21 :   14013f: mov    0x80(%rsi),%rcx // mod.rs:1864
+    2.17 :   13fdbd: mov    0x68(%rsi),%rcx // mod.rs:1864
+    1.94 :   140061: movsd  -0x4af71(%rip),%xmm2        # f50f8 <anon.01dcaaf22f3a9bc258665221728d7bb2.2.llvm.2850737515861537868+0x448>
+    1.76 :   14005c: cvttsd2si %xmm3,%r9
+    1.74 koblitz_strong_rho.rs:1155
+    1.74 :   13ffee: movzbl %dh,%eax // koblitz_strong_rho.rs:578
+    1.72 koblitz_strong_rho.rs:695
+    1.72 :   13fedb: inc    %r9d // koblitz_strong_rho.rs:695
+    1.67 :   13ffe3: xor    (%r9,%rax,8),%r13 // bit.rs:386
+    1.63 :   140127: or     %rax,%rbx // bit.rs:282
+    1.50 :   13fec3: mov    %r9d,%ecx
+    1.40 :   13fe51: xor    %r10,%r13 // bit.rs:386
+    1.38 :   140050: movsd  0x90(%rsi),%xmm1
+    1.38 :   13fec0: mov    %rdx,%r12 // bit.rs:490
+    1.33 uint_macros.rs:2621
+    1.33 :   140095: sub    %r9,%rax // uint_macros.rs:2621
+    1.32 :   13fe54: shr    $0x10,%rbx // bit.rs:613
+    1.30 koblitz_strong_rho.rs:664
+    1.30 :   14011f: sub    %r8d,%edi // koblitz_strong_rho.rs:664
+    1.28 :   13fe3c: movzbl %ch,%eax // koblitz_strong_rho.rs:579
+    1.19 :   13ff2b: xor    %ebp,%ebp
+    1.14 uint_macros.rs:2660
+    1.14 :   140086: imul   %rbx,%rax // uint_macros.rs:2660
+    1.10 koblitz_strong_rho.rs:1156
+    1.10 :   14004c: mulsd  %xmm0,%xmm3
+    1.10 :   13fc59: jne    13fc95 <<crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::canonicalize+0x55> // koblitz_strong_rho.rs:1156
+    1.08 :   13fff9: movzbl %bh,%eax // koblitz_strong_rho.rs:579
+    1.04 :   1400ac: add    %rax,%r14
+    1.02 koblitz_strong_rho.rs:691
+    1.02 :   14007b: xor    %r8d,%r8d
+    1.02 :   13fede: dec    %r8d // koblitz_strong_rho.rs:691
+    1.02 :   13fc51: mov    %rdi,0x10(%rsp)
+    1.01 non_null.rs:656
+    1.01 :   140004: add    $0x1000,%r9 // non_null.rs:656
+    0.99 koblitz_strong_rho.rs:1173
+    0.99 :   14013c: mov    %r8d,%r8d // koblitz_strong_rho.rs:1173
+    0.92 :   140047: cvtsi2sd %rbx,%xmm0 // koblitz_strong_rho.rs:746

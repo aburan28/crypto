@@ -82,7 +82,19 @@ template<class C> static void group_test(const char*name,const char*xs,const cha
  /* affine_add_with_inv matches add on the generic path */
  auto inv=F::inv(F::sub(G2.x,G.x));
  CHECK(pteq<C>(C::affine_add_with_inv(G,G2,inv,0),C::add(G,G2)),name);
- std::cout<<name<<": group laws (identity, inverse, assoc, distrib) passed\n";
+ /* the inversion-free Jacobian seeding ladder equals an independent affine
+  * double-and-add (same result, one inversion instead of O(bits)) */
+ auto affmul=[&](uint64_t k)->nap<F>{
+  uint32_t kl[F::N]={0}; kl[0]=(uint32_t)k; if(F::N>1)kl[1]=(uint32_t)(k>>32);
+  nap<F> acc=C::infinity();
+  for(int i=63;i>=0;i--){ acc=C::add(acc,acc); if((kl[i>>5]>>(i&31))&1u) acc=C::add(acc,G); }
+  return acc;
+ };
+ for(uint64_t k : {1ull,2ull,3ull,7ull,255ull,65537ull,1234567ull})
+  CHECK(pteq<C>(smul<C>(G,k),affmul(k)),name);     /* scalar_mul == affine ladder */
+ /* double_scalar_mul == [a]G+[b]G composed */
+ CHECK(pteq<C>(C::double_scalar_mul(G,(const uint32_t[]){98765u},G,(const uint32_t[]){0u},20),smul<C>(G,98765)),name);
+ std::cout<<name<<": group laws + Jacobian seeding ladder == affine ladder passed\n";
 }
 
 /* ---- 3. fold ----------------------------------------------------------- */
@@ -142,7 +154,8 @@ struct SmallField {
    x[0]=t;
   }
  };
-struct ToyAP { static SmallField::elt a(){uint32_t v=ToyMod::A;return SmallField::from_limbs(&v);} };
+struct ToyAP { static SmallField::elt a(){uint32_t v=ToyMod::A;return SmallField::from_limbs(&v);}
+ static bool is_a_minus3(){return false;} };
 typedef EcCurve<SmallField,ToyAP> CurveToy;
 
 static nap<SmallField> toyG(){nap<SmallField> G;uint32_t gx=ToyMod::GX,gy=ToyMod::GY;G.x=SmallField::from_limbs(&gx);G.y=SmallField::from_limbs(&gy);G.inf=0;return G;}

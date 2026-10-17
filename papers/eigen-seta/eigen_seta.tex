@@ -43,7 +43,7 @@
 \title{Eigen-S\'eta: an isogeny KEM whose trapdoor is a hidden-degree endomorphism\\[0.3em]
 \large Specification, correctness, heuristic security analysis and a constant-time implementation}
 \author{Anonymous}
-\date{Draft of 2026-10-11 --- research draft, not peer reviewed}
+\date{Revision 2 of 2026-10-17 (first draft 2026-10-11) --- research draft, not peer reviewed}
 
 \begin{document}
 \maketitle
@@ -61,18 +61,27 @@ The masks commute with the eigen-structure, so the holder of $f$ decodes the
 ciphertext with a single $(2^E,2^E)$-isogeny in dimension two (Kani's lemma),
 while to anyone else the ciphertext is a masked-torsion isogeny instance.
 We give the algorithms, prove correctness (including that the kernel used in
-decryption is always cyclic), derive parameters for target classical security
-$\lambda=128,192,256$, and analyse key- and message-recovery attacks. The
-binding attack is guessing the mask ratio modulo $N\approx\sqrt{3^F}$, at
-cost about $2^\lambda$ classically and $2^{\lambda/2}$ Grover iterations;
-under NIST's definitions this is the same structure as AES key search, so we
-conjecture categories 1, 3 and 5. We also describe a Rust implementation with
-constant-time decapsulation. At the level-1 parameters ($p$ of 1341 bits),
-public keys and ciphertexts are 1344 bytes and decapsulation takes about
-14\,s on one core. Instruction counts of the secret phase are identical
-across keys and across accepted and rejected ciphertexts. The security of the
-scheme is a conjecture supported by the analysis in this paper only; it has
-not been reviewed.
+decryption is always cyclic), derive parameters, and analyse key- and
+message-recovery attacks. This second revision adds an assessment. We show
+that a candidate secret degree can be tested on the public key alone with a
+Kani chain of about $2\log_2 f$ steps, half the length of a decapsulation.
+We implemented this test: it accepted the true degree and rejected all
+\PkWrongTested\ wrong candidates at L1, L3 and L5. It lowers the cost of the
+degree search but leaves it far from binding. The binding attack is still
+guessing the mask ratio modulo about $\sqrt{3^F}$, at about $2^\lambda$
+classical and $2^{\lambda/2}$ Grover queries. We therefore withdraw
+revision~1's conjecture of NIST categories 1, 3 and 5 for the sets L1, L3 and
+L5 in its unqualified form. Those sets meet the AES references only in NIST's
+gate count under MAXDEPTH. At least $2^\lambda$ quantum queries is met only by
+L5 (as the level-1 set) and by quantum-hardened sets Q3 and Q5 with
+3904- and 5192-bit primes. Both claims assume that the hidden orientation of
+$\EA$ cannot be made effective. We identify this as the scheme's largest
+risk, because an effective orientation would give subexponential quantum key
+recovery at every set. At level~1, public keys and ciphertexts are
+1344~bytes. The maintained Rust implementation decapsulates with a theta
+chain in about \DecTimeOne\,s on a 4-core cloud VM. The security of the scheme
+is a conjecture supported by the analysis in this paper only; it has not
+been reviewed by others.
 \end{abstract}
 
 \tableofcontents
@@ -85,6 +94,7 @@ not been reviewed.
 \input{sections/security.tex}
 \input{sections/implementation.tex}
 \input{sections/results.tex}
+\input{sections/assessment.tex}
 \input{sections/conclusion.tex}
 
 \bibliographystyle{alpha}

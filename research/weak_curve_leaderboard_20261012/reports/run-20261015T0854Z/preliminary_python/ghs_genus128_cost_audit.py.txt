@@ -1,0 +1,169 @@
+#!/usr/bin/env python3
+"""Replay the conditional GF(4), genus-128 smoothness cost in exact integers.
+
+This counts monic polynomials, not places on a constructed GHS cover. The
+half-splitting factor-base policy and uniform smoothness law remain model
+assumptions; the receipt keeps those stages separate from usable relations.
+"""
+
+import hashlib
+import json
+import math
+import sys
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+TRANSFER = ROOT / "docs/curves/jacobian-transfers.json"
+COST_SOURCE = ROOT / "src/cryptanalysis/jacobian_transfer/cost.rs"
+OUTPUT = HERE / "ghs_genus128_cost_audit.json"
+NAMES = ("c2pnb176w1", "c2pnb272w1")
+Q = 4
+G = 128
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def mobius(value):
+    sign, prime = 1, 2
+    while prime * prime <= value:
+        if value % prime == 0:
+            value //= prime
+            if value % prime == 0:
+                return 0
+            sign = -sign
+        prime += 1
+    return -sign if value > 1 else sign
+
+
+def irreducible_count(degree):
+    numerator = sum(mobius(divisor) * Q ** (degree // divisor)
+                    for divisor in range(1, degree + 1) if degree % divisor == 0)
+    assert numerator % degree == 0
+    return numerator // degree
+
+
+def logadd(left, right):
+    high, low = max(left, right), min(left, right)
+    return high + math.log2(1 + 2 ** (low - high))
+
+
+def smoothness_sweep(model, subgroup_bits):
+    """Exact GF(4)[X] factor counts; float arithmetic only prices phases."""
+    counts = [0] * (G + 1)
+    counts[0] = 1
+    total_irreducibles = 0
+    rows = []
+    exponent = model["karatsuba_exponent"]
+    group_op = (math.log2(model["jacobian_group_op_mults_per_genus_squared"])
+                + 2 * math.log2(G) + exponent * math.log2(math.log2(Q)))
+    linear_op = exponent * math.log2(subgroup_bits)
+    for degree in range(1, G + 1):
+        irreducibles = irreducible_count(degree)
+        total_irreducibles += irreducibles
+        next_counts = [0] * (G + 1)
+        combinations = [math.comb(irreducibles + k - 1, k)
+                        for k in range(G // degree + 1)]
+        for target in range(G + 1):
+            next_counts[target] = sum(counts[target - k * degree] * combinations[k]
+                                      for k in range(target // degree + 1))
+        counts = next_counts
+        if counts[G]:
+            log2_base = math.log2(total_irreducibles) - 1
+            log2_smooth = math.log2(counts[G]) - G * math.log2(Q)
+            log2_relations = log2_base - log2_smooth
+            log2_linear = 2 * log2_base + math.log2(G)
+            total = logadd(log2_relations + group_op,
+                           log2_linear + linear_op)
+            rows.append({"degree_bound": degree,
+                         "log2_nominal_base": round(log2_base, 6),
+                         "log2_smooth_fraction": round(log2_smooth, 6),
+                         "log2_relation_queries": round(log2_relations, 6),
+                         "log2_linear_work": round(log2_linear, 6),
+                         "log2_total": round(total, 6)})
+        # Match the source model's finite search envelope, then prove the
+        # selected minimum by retaining every candidate in that envelope.
+        if degree == G or math.log2(total_irreducibles) - 1 >= 160:
+            break
+    best = min(rows, key=lambda row: row["log2_total"])
+    assert best["degree_bound"] == 15
+    assert sum(irreducible_count(d) for d in range(1, 16)) == 97842104
+    # Recompute the exact numerator for the selected b, independently of the
+    # floating-point sweep and its rounded stage prices.
+    selected = [0] * (G + 1)
+    selected[0] = 1
+    for degree in range(1, 16):
+        irreducibles = irreducible_count(degree)
+        selected = [sum(selected[n - k * degree] *
+                        math.comb(irreducibles + k - 1, k)
+                        for k in range(n // degree + 1)) for n in range(G + 1)]
+    assert selected[G] == 1374288545819365998587940548442445318355469588992205247403709040067002
+    return {"tested_degree_bounds": len(rows),
+            "best": {**best,
+                     "nominal_half_base_places": 48921052,
+                     "smooth_polynomial_count": str(selected[G]),
+                     "all_monic_polynomials": str(Q ** G)},
+            "sweep": rows}
+
+
+def build():
+    source = json.loads(TRANSFER.read_text())
+    model = source["cost_model"]
+    curves = []
+    for name in NAMES:
+        curve = next(item for item in source["curves"]
+                     if name in item.get("standard_names", []))
+        route = next(item for item in curve["routes"]
+                     if item["kind"] == "ghs_weil_descent"
+                     and item["invariants"]["base_degree"] == 2)
+        inv, dest, cost = route["invariants"], route["destination"], route["cost"]
+        assert route["evidence"] == "exact_invariant"
+        assert route["class"] == "formula_advantage"
+        assert route["transport"] == "size_admits"
+        assert inv["magic_number"] == 8 and inv["type_i"] is False
+        assert inv["mmt_condition_8"] is True
+        assert inv["relative_trace_b_zero"] is False
+        assert dest["genus"] == "128" and dest["field_bits"] == 2.0
+        assert cost["destination"]["solver"] == "enge_gaudry_smoothness"
+        assert cost["destination"]["enge_gaudry_hypothesis_holds"] is True
+        sweep = smoothness_sweep(model, curve["subgroup"]["bits"])
+        assert abs(sweep["best"]["log2_total"] - cost["destination"]["log2_cost"]) < 0.001
+        curves.append({"name": name, "curve_id": curve["icv1"],
+                       "subgroup_order": curve["subgroup"]["order"],
+                       "subgroup_bits": curve["subgroup"]["bits"],
+                       "relative_degree": inv["relative_degree"],
+                       "reference_rho_log2": curve["reference_log2"],
+                       "source_formula_log2": cost["destination"]["log2_cost"],
+                       "audit": sweep,
+                       "cover_model": None, "selected_subgroup_image": None,
+                       "actual_usable_base": None, "verified_relation_yield": None,
+                       "useful_rank": None, "target_descent_cost": None})
+    return {"schema": "weakcurves.ghs_genus128_cost_audit.v1",
+            "status": "conditional_cost_model_replayed",
+            "field_size": Q, "genus": G,
+            "model_assumptions": ["half of base irreducibles yield usable places",
+                                  "monic-polynomial smoothness represents divisor smoothness",
+                                  "reported operation prices and sparse linear algebra apply"],
+            "source_sha256": {str(TRANSFER.relative_to(ROOT)): digest(TRANSFER),
+                              str(COST_SOURCE.relative_to(ROOT)): digest(COST_SOURCE),
+                              str(Path(__file__).resolve().relative_to(ROOT)):
+                                  digest(Path(__file__).resolve())},
+            "curves": curves}
+
+
+def main():
+    encoded = json.dumps(build(), sort_keys=True, indent=2) + "\n"
+    if sys.argv[1:] == ["--check"]:
+        assert OUTPUT.read_text() == encoded, "genus-128 cost receipt is stale"
+    elif not sys.argv[1:]:
+        OUTPUT.write_text(encoded)
+    else:
+        raise SystemExit("usage: ghs_genus128_cost_audit.py [--check]")
+    print("GHS genus-128 model OK: two exact-invariant routes; b=15, "
+          "48,921,052 nominal half-base places")
+
+
+if __name__ == "__main__":
+    main()

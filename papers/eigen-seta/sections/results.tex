@@ -1,6 +1,11 @@
 \section{Measurements}\label{sec:results}
 
-All measurements were taken on one host: an Intel Xeon at 2.80\,GHz (shared
+\S\ref{sec:pktest-results} holds the measurements of revision~2. Everything
+before it is the historical measurement of revision~1, made on the
+\art{crypto:eigen_seta/} build with the Mumford decapsulation chain. Those
+numbers do not describe the maintained theta build.
+
+All historical measurements were taken on one host: an Intel Xeon at 2.80\,GHz (shared
 cloud VM, 4 logical cores), using rustc~1.97.0 in release mode. Two runs are
 used. The benchmark run \art{run-20261011T1813Z-bench} used the code at
 commit \art{19c641d12}. The verification run \art{run-20261011T1955Z-verify}
@@ -141,3 +146,58 @@ statistic was \DudectT. The usual threshold for a detected leak is
 $|t|>4.5$. This test is weaker than the instruction counts: it uses one key,
 wall-clock time on a shared VM, and compares ciphertext classes rather than
 keys. Record: \art{run-20261011T1955Z-verify/records/dudect_output.txt}.
+
+\subsection{Revision 2: the public-key degree test}\label{sec:pktest-results}
+Run \art{run-20261017T1623Z-pk-degree-test} executed
+\art{eigenx:examples/pk_degree_test.rs} at \art{eigenx} commit
+\art{94fe2d9} on a shared cloud VM (Intel Xeon at 2.10\,GHz, 4 logical
+cores, rustc~1.97.0, release build, no core pinning). Records:
+\art{crypto:research/eigen_seta_assessment_20261017/records/run-20261017T1623Z-pk-degree-test/}. For each
+set it generates one key with its true $f$ and tests the true degree and a
+number of wrong candidates with the theta chain of Lemma~\ref{lem:pktest}. A
+candidate is accepted when the codomain is $\EA$. The wrong candidates are
+uniform odd values prime to 21 and near misses $f+j2^k$ with
+$k\in\{16,64,\lfloor\tfrac12\log_2f\rfloor\}$, $j\le4$. At L1 the true degree
+and one wrong candidate were also walked with the structural checks of the
+Mumford inspector. The true degree glued, ran all $e-6$ Richelot steps and
+split exactly at the end. The wrong one glued, ran all steps with no early
+split, and did not split.
+
+\begin{table}[h]
+\centering
+\caption[Public-key degree test]{Public-key degree test. $e$ is the chain
+length for the true degree, $e_{\min}=\lfloor\log_2 7f^2\rfloor+2$ is the shortest length the planner tries, and ``excess''
+is the mean of $e-e_{\min}$ over the wrong candidates. The timings are the
+median and range over interleaved repetitions of one test and one full
+decapsulation of an honest ciphertext under the same key, wall time with
+the crate's internal threads. Measured; record as above.}
+\label{tab:pktest}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrr}
+\toprule
+set & $E$ & $e$ (true $f$) & $e_{\min}$ & excess & wrong (accepted) & test (s) & decaps (s)\\
+\midrule
+\PkRows
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.78\textwidth]{figures/pk_test.pdf}
+\caption[Public-key degree test against decapsulation]{Chain length (left)
+and wall time per test (right) of the public-key degree test and of
+decapsulation, every repetition shown. Measured; run \art{run-20261017T1623Z-pk-degree-test}.}
+\label{fig:pktest}
+\end{figure}
+
+The chain is $e/E\approx0.52$ of the decapsulation chain at every set,
+because $e\approx2\log_2f$ and $E\approx4\log_2f$. The ratio of the median
+times is 1.6 at L1 and 2.0 at L3 and L5. Decapsulation also pays for
+ladders, pairings and the re-encryption. The L1 ranges overlap less
+cleanly, and we do not explain the lower ratio there. These timings are on a noisy shared
+VM and support only the factor-of-two reading. The cost model's gate
+columns for the degree search drop by $1.9$ bits as a result. This changes
+no tier, because the degree search is far from binding.
+

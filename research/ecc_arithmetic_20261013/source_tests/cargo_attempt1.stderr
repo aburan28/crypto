@@ -1,0 +1,22 @@
+     Locking 4 packages to latest compatible versions
+      Adding num-bigint v0.4.8 (available: v0.5.1)
+   Compiling autocfg v1.5.1
+   Compiling num-traits v0.2.19
+   Compiling num-integer v0.1.47
+   Compiling num-bigint v0.4.8
+   Compiling ecc-arithmetic-source-tests v0.1.0 (/Volumes/SSD990-2/crypto/wt/codex-ecc-arithmetic-20261013/research/ecc_arithmetic_20261013/source_tests)
+error[E0282]: type annotations needed
+   --> src/../../../../src/ecc/p521_field.rs:213:17
+    |
+213 |             let a_ref = BigUint::from_bytes_le(a_bytes) % &p;
+    |                 ^^^^^
+214 |             let expected = if a_ref.is_zero() {
+    |                               ----- type must be known at this point
+    |
+help: consider giving `a_ref` an explicit type
+    |
+213 |             let a_ref: /* Type */ = BigUint::from_bytes_le(a_bytes) % &p;
+    |                      ++++++++++++
+
+For more information about this error, try `rustc --explain E0282`.
+error: could not compile `ecc-arithmetic-source-tests` (lib test) due to 1 previous error

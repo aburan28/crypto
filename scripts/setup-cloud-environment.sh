@@ -5,6 +5,15 @@
 # binaries. Do not put tokens or credentials in this file.
 set -Eeuo pipefail
 
+case "${WORKSPACE_OFFLINE:-0}" in
+  0|'') ;;
+  1)
+    offline_repo="${CRYPTO_REPO_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
+    exec bash "$offline_repo/scripts/private-workspace.sh" check
+    ;;
+  *) echo "WORKSPACE_OFFLINE must be 0 or 1" >&2; exit 2 ;;
+esac
+
 repo_dir="${CRYPTO_REPO_DIR:-/workspace}"
 bin_dir="$HOME/.local/bin"
 mkdir -p "$bin_dir"
