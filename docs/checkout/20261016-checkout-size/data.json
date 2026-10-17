@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-16",
+  "commit": "f25d5e520",
+  "remote": "https://github.com/aburan28/crypto (through the session's HTTPS proxy)",
+  "host": "Claude Code cloud container; shared network, no isolation; one clone per recipe unless noted",
+  "units": {"bytes": "du -sb, bytes", "clone_seconds": "wall seconds, date +%s before and after, integer"},
+  "tree_stats": {
+    "tracked_files": 100218,
+    "tracked_bytes": 6651988041,
+    "files_over_1MiB": 829,
+    "bytes_in_files_over_1MiB": 4823311258,
+    "source": "git ls-tree -r -l f25d5e520"
+  },
+  "recipes": [
+    {"label": "full clone", "command": "git clone URL", "files": 100218,
+     "worktree_bytes": 6651988041, "git_bytes": 4061787984, "clone_seconds": 190,
+     "cargo_check_all_targets": "not run (full tree)"},
+    {"label": "blobless + harness profile", "command": "scripts/sparse-checkout.sh clone URL DIR --profile minimal, then apply --profile harness",
+     "files": 81435, "worktree_bytes": 2521984680, "git_bytes": 749208026, "clone_seconds": null,
+     "apply_seconds_after_minimal": 46, "cargo_check_all_targets": "pass"},
+    {"label": "blobless + minimal profile", "command": "scripts/sparse-checkout.sh clone URL DIR --profile minimal",
+     "files": 26078, "worktree_bytes": 458328475, "git_bytes": 140696247, "clone_seconds": 33,
+     "cargo_check_all_targets": "pass (30.8 s warm deps, 160 s cold)"},
+    {"label": "blobless + bare cone (7 dirs)", "command": "git clone --filter=blob:none --sparse URL DIR; git sparse-checkout set src docs scripts tools benches examples tests",
+     "files": 3434, "worktree_bytes": 220299783, "git_bytes": 62890969, "clone_seconds": 9, "clone_seconds_repeat": 8,
+     "cargo_check_all_targets": "fail: 4 Cargo targets in experiments/ missing; cargo check (lib and bins) passes"}
+  ]
+}

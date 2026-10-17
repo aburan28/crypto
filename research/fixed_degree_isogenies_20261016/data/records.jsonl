@@ -1,0 +1,53 @@
+{"kind":"strassen","l":1000,"n_bits":61,"reps":50,"naive_ms":0.0438,"strassen_ms":0.0459}
+{"kind":"strassen","l":10000,"n_bits":61,"reps":50,"naive_ms":0.4244,"strassen_ms":0.4326}
+{"kind":"strassen","l":100000,"n_bits":61,"reps":40,"naive_ms":4.0584,"strassen_ms":1.7197}
+{"kind":"strassen","l":1000000,"n_bits":61,"reps":4,"naive_ms":45.0688,"strassen_ms":11.6908}
+{"kind":"strassen","l":4000000,"n_bits":61,"reps":1,"naive_ms":164.8237,"strassen_ms":40.1842}
+{"kind":"csurf","prime":"CSURF-512","key_bound":1,"ms":25.8,"inverse_returns":true}
+{"kind":"steps25","p_bits":61,"solver":"Cornacchia","rep":0,"d_over_sqrtp":6.00,"log_p_d":0.5424,"ok":true,"ms":538.5,"x_max":3}
+{"kind":"steps25","p_bits":61,"solver":"Cornacchia","rep":1,"d_over_sqrtp":6.00,"log_p_d":0.5424,"ok":true,"ms":19.1,"x_max":5}
+{"kind":"steps25","p_bits":61,"solver":"CoppersmithBivariate","rep":0,"d_over_sqrtp":7.00,"log_p_d":0.5460,"ok":true,"ms":182.0,"x_max":3}
+{"kind":"steps25","p_bits":61,"solver":"CoppersmithBivariate","rep":1,"d_over_sqrtp":6.00,"log_p_d":0.5424,"ok":true,"ms":30.0,"x_max":3}
+{"kind":"steps25","p_bits":61,"solver":"Cornacchia","rep":0,"d_over_sqrtp":18.00,"log_p_d":0.5684,"ok":true,"ms":5474.4,"x_max":4}
+{"kind":"steps25","p_bits":61,"solver":"Cornacchia","rep":1,"d_over_sqrtp":22.00,"log_p_d":0.5731,"ok":true,"ms":2134.7,"x_max":5}
+{"kind":"steps25","p_bits":61,"solver":"CoppersmithBivariate","rep":0,"d_over_sqrtp":18.00,"log_p_d":0.5684,"ok":true,"ms":200.3,"x_max":8}
+{"kind":"steps25","p_bits":61,"solver":"CoppersmithBivariate","rep":1,"d_over_sqrtp":23.00,"log_p_d":0.5742,"ok":true,"ms":342.1,"x_max":7}
+{"kind":"steps25","p_bits":61,"solver":"Cornacchia","rep":0,"d_over_sqrtp":88.00,"log_p_d":0.6059,"ok":true,"ms":18669.5,"x_max":11}
+{"kind":"steps25","p_bits":61,"solver":"Cornacchia","rep":1,"d_over_sqrtp":92.00,"log_p_d":0.6069,"ok":true,"ms":29918.7,"x_max":13}
+{"kind":"steps25","p_bits":61,"solver":"CoppersmithBivariate","rep":0,"d_over_sqrtp":89.00,"log_p_d":0.6062,"ok":true,"ms":1619.5,"x_max":17}
+{"kind":"steps25","p_bits":61,"solver":"CoppersmithBivariate","rep":1,"d_over_sqrtp":86.00,"log_p_d":0.6053,"ok":true,"ms":2883.3,"x_max":8}
+{"kind":"steps25","p_bits":61,"solver":"Cornacchia","rep":0,"d_over_sqrtp":362.00,"log_p_d":0.6393,"ok":true,"ms":26639.8,"x_max":27}
+{"kind":"steps25","p_bits":61,"solver":"Cornacchia","rep":1,"d_over_sqrtp":413.00,"log_p_d":0.6425,"ok":true,"ms":71193.4,"x_max":26}
+{"kind":"steps25","p_bits":61,"solver":"CoppersmithBivariate","rep":0,"d_over_sqrtp":376.00,"log_p_d":0.6402,"ok":true,"ms":6535.3,"x_max":20}
+{"kind":"steps25","p_bits":61,"solver":"CoppersmithBivariate","rep":1,"d_over_sqrtp":398.00,"log_p_d":0.6416,"ok":true,"ms":951.4,"x_max":33}
+{"kind":"steps25","p_bits":61,"solver":"CoppersmithTrivariate","rep":0,"d_over_sqrtp":2.00,"log_p_d":0.5164,"ok":true,"ms":1136.2,"x_max":1}
+{"kind":"steps25","p_bits":61,"solver":"CoppersmithTrivariate","rep":1,"d_over_sqrtp":3.00,"log_p_d":0.5260,"ok":false,"ms":110.2,"x_max":null}
+{"kind":"steps25","p_bits":61,"solver":"CoppersmithTrivariate","rep":0,"d_over_sqrtp":5.00,"log_p_d":0.5381,"ok":false,"ms":14074.8,"x_max":null}
+{"kind":"steps25","p_bits":61,"solver":"CoppersmithTrivariate","rep":1,"d_over_sqrtp":4.00,"log_p_d":0.5328,"ok":true,"ms":5524.2,"x_max":3}
+{"kind":"steps25","p_bits":61,"solver":"CoppersmithTrivariate","rep":0,"d_over_sqrtp":9.00,"log_p_d":0.5520,"ok":false,"ms":12807.9,"x_max":null}
+{"kind":"steps25","p_bits":61,"solver":"CoppersmithTrivariate","rep":1,"d_over_sqrtp":9.00,"log_p_d":0.5520,"ok":false,"ms":17680.5,"x_max":null}
+{"kind":"steps25","p_bits":127,"solver":"CoppersmithBivariate","rep":0,"d_over_sqrtp":6.00,"log_p_d":0.5204,"ok":true,"ms":197.7,"x_max":3}
+{"kind":"steps25","p_bits":127,"solver":"CoppersmithBivariate","rep":1,"d_over_sqrtp":5.00,"log_p_d":0.5183,"ok":true,"ms":290.3,"x_max":2}
+{"kind":"steps25","p_bits":127,"solver":"CoppersmithBivariate","rep":0,"d_over_sqrtp":31.00,"log_p_d":0.5390,"ok":true,"ms":3018.7,"x_max":7}
+{"kind":"steps25","p_bits":127,"solver":"CoppersmithBivariate","rep":1,"d_over_sqrtp":23.00,"log_p_d":0.5356,"ok":true,"ms":732.0,"x_max":6}
+{"kind":"steps25","p_bits":127,"solver":"CoppersmithBivariate","rep":0,"d_over_sqrtp":102.00,"log_p_d":0.5525,"ok":true,"ms":4326.9,"x_max":8}
+{"kind":"steps25","p_bits":127,"solver":"CoppersmithBivariate","rep":1,"d_over_sqrtp":83.00,"log_p_d":0.5502,"ok":true,"ms":40.3,"x_max":13}
+{"kind":"baseline","p":4000039,"e":12,"rep":0,"mitm_found":true,"mitm_leaves":192,"mitm_ms":59.8,"vow_found":true,"vow_f_evals":1030,"vow_expected":1663,"vow_w":16,"vow_ms":65.0}
+{"kind":"baseline","p":4000039,"e":12,"rep":1,"mitm_found":true,"mitm_leaves":192,"mitm_ms":62.3,"vow_found":true,"vow_f_evals":1953,"vow_expected":1663,"vow_w":16,"vow_ms":66.3}
+{"kind":"baseline","p":4000039,"e":14,"rep":0,"mitm_found":true,"mitm_leaves":384,"mitm_ms":102.5,"vow_found":true,"vow_f_evals":1056,"vow_expected":4703,"vow_w":16,"vow_ms":92.9}
+{"kind":"baseline","p":4000039,"e":14,"rep":1,"mitm_found":true,"mitm_leaves":384,"mitm_ms":89.1,"vow_found":true,"vow_f_evals":820,"vow_expected":4703,"vow_w":16,"vow_ms":71.0}
+{"kind":"baseline","p":4000039,"e":16,"rep":0,"mitm_found":true,"mitm_leaves":768,"mitm_ms":165.2,"vow_found":true,"vow_f_evals":5933,"vow_expected":13302,"vow_w":16,"vow_ms":197.4}
+{"kind":"baseline","p":4000039,"e":16,"rep":1,"mitm_found":true,"mitm_leaves":768,"mitm_ms":216.1,"vow_found":true,"vow_f_evals":459,"vow_expected":13302,"vow_w":16,"vow_ms":105.8}
+{"kind":"baseline","p":4000039,"e":18,"rep":0,"mitm_found":true,"mitm_leaves":1536,"mitm_ms":315.3,"vow_found":true,"vow_f_evals":64744,"vow_expected":37624,"vow_w":16,"vow_ms":413.5}
+{"kind":"baseline","p":4000039,"e":18,"rep":1,"mitm_found":true,"mitm_leaves":1536,"mitm_ms":312.6,"vow_found":true,"vow_f_evals":1016,"vow_expected":37624,"vow_w":16,"vow_ms":218.8}
+{"kind":"pipeline","case":0,"p":1605631,"solver":"Cornacchia","planted":true,"d":1399,"log_p_d":0.5069,"ok":true,"end_ring_ms":1786.2,"connecting_ms":1.95,"solve_ms":10.19,"isogeny_ms":59.6,"total_ms":1857.9,"path1":18,"path2":17,"graph_vertices":3058,"deuring_evals":75,"n_conn":347931,"x":"[-1, 0, 1, 1]","repr":"torsion","certificate":"kani2_certified","pairing_ok":true,"j_ok":true}
+{"kind":"pipeline","case":1,"p":1605631,"solver":"Cornacchia","planted":true,"d":2179,"log_p_d":0.5379,"ok":true,"end_ring_ms":2423.8,"connecting_ms":2.17,"solve_ms":7.77,"isogeny_ms":23.7,"total_ms":2457.4,"path1":19,"path2":18,"graph_vertices":4298,"deuring_evals":84,"n_conn":234630,"x":"[-1, -1, 2, 0]","repr":"torsion","certificate":"kani2_certified","pairing_ok":true,"j_ok":true}
+{"kind":"pipeline","case":2,"p":1605631,"solver":"Cornacchia","planted":true,"d":2473,"log_p_d":0.5468,"ok":true,"end_ring_ms":3709.4,"connecting_ms":2.68,"solve_ms":174.41,"isogeny_ms":63.2,"total_ms":3949.7,"path1":18,"path2":19,"graph_vertices":4291,"deuring_evals":71,"n_conn":155463,"x":"[1, 1, 2, 1]","repr":"torsion","certificate":"kani2_certified","pairing_ok":true,"j_ok":true}
+{"kind":"pipeline","case":3,"p":1605631,"solver":"Cornacchia","planted":true,"d":3079,"log_p_d":0.5621,"ok":true,"end_ring_ms":2425.2,"connecting_ms":1.29,"solve_ms":4.17,"isogeny_ms":113.7,"total_ms":2544.3,"path1":18,"path2":18,"graph_vertices":3560,"deuring_evals":83,"n_conn":258520,"x":"[2, 0, 1, -1]","repr":"torsion","certificate":"kani2_certified","pairing_ok":true,"j_ok":true}
+{"kind":"pipeline","case":4,"p":1605631,"solver":"Cornacchia","planted":true,"d":3527,"log_p_d":0.5716,"ok":true,"end_ring_ms":2159.0,"connecting_ms":1.31,"solve_ms":5.19,"isogeny_ms":42.7,"total_ms":2208.2,"path1":20,"path2":16,"graph_vertices":4438,"deuring_evals":73,"n_conn":175657,"x":"[0, 3, 1, 0]","repr":"torsion","certificate":"kani2_certified","pairing_ok":true,"j_ok":true}
+{"kind":"pipeline","case":5,"p":1605631,"solver":"Cornacchia","planted":true,"d":3671,"log_p_d":0.5744,"ok":true,"end_ring_ms":1814.0,"connecting_ms":1.84,"solve_ms":7.69,"isogeny_ms":37.9,"total_ms":1861.4,"path1":17,"path2":14,"graph_vertices":1723,"deuring_evals":60,"n_conn":58812,"x":"[-2, -1, 1, 0]","repr":"torsion","certificate":"kani2_certified","pairing_ok":true,"j_ok":true}
+{"kind":"pipeline","case":6,"p":1605631,"solver":"CoppersmithBivariate","planted":true,"d":2111,"log_p_d":0.5357,"ok":false,"error":"no solution of the norm equation in the search box","total_ms":1316.1,"cornacchia_same_instance":"[0, -1, 0, 1]"}
+{"kind":"pipeline","case":7,"p":1605631,"solver":"CoppersmithBivariate","planted":true,"d":2203,"log_p_d":0.5387,"ok":false,"error":"no solution of the norm equation in the search box","total_ms":3270.9,"cornacchia_same_instance":"[-1, 0, 1, -1]"}
+{"kind":"pipeline","case":8,"p":1605631,"solver":"Cornacchia","planted":false,"d":19216781,"log_p_d":1.1737,"ok":true,"end_ring_ms":1994.7,"connecting_ms":1.29,"solve_ms":225.80,"isogeny_ms":66.5,"total_ms":2288.3,"path1":13,"path2":16,"graph_vertices":1212,"deuring_evals":61,"n_conn":183350,"x":"[111, 113, 14, 9]","repr":"torsion","certificate":"None","pairing_ok":true,"j_ok":true}
+{"kind":"pipeline","case":9,"p":1605631,"solver":"Cornacchia","planted":false,"d":15747857,"log_p_d":1.1598,"ok":true,"end_ring_ms":1562.9,"connecting_ms":1.19,"solve_ms":306.91,"isogeny_ms":13.8,"total_ms":1884.7,"path1":17,"path2":16,"graph_vertices":2172,"deuring_evals":66,"n_conn":68391,"x":"[-35, 249, 10, -4]","repr":"torsion","certificate":"None","pairing_ok":true,"j_ok":true}
+{"kind":"pipeline","case":10,"p":1605631,"solver":"Cornacchia","planted":false,"d":13877249,"log_p_d":1.1509,"ok":true,"end_ring_ms":2377.6,"connecting_ms":1.32,"solve_ms":428.12,"isogeny_ms":72.6,"total_ms":2879.7,"path1":16,"path2":18,"graph_vertices":2666,"deuring_evals":63,"n_conn":94815,"x":"[185, -65, 10, 8]","repr":"torsion","certificate":"None","pairing_ok":true,"j_ok":true}
