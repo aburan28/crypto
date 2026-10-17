@@ -1,0 +1,15 @@
+m,arm,n,d,status,log2_cost_ns,lo,hi,log2_counted,counted_unit
+4,floor-mitm,11,3,measured,18.0926,17.8395,18.6937,10.4161,group_adds
+4,floor-mitm,13,4,measured,14.9932,14.9265,15.0659,9.1577,group_adds
+4,floor-mitm,17,5,measured,16.9586,16.7902,17.1559,12.1664,group_adds
+4,floor-mitm,19,5,measured,18.3702,18.1117,18.6733,13.6973,group_adds
+4,floor-mitm,23,6,measured,21.0618,20.5673,21.7293,16.7150,group_adds
+4,floor-mitm,29,8,measured,21.6763,21.5305,21.8330,17.6583,group_adds
+4,floor-mitm,31,8,measured,23.4782,23.1988,23.7944,19.6324,group_adds
+4,wide-chain,11,3,measured,27.1961,26.4539,28.4201,9.8298,search_nodes
+4,wide-chain,13,4,measured,26.0483,25.8062,26.2725,8.4492,search_nodes
+4,wide-chain,17,5,measured,29.8496,29.6185,30.1021,11.9053,search_nodes
+4,wide-chain,19,5,measured,32.2706,31.9870,32.5880,13.7199,search_nodes
+4,wide-chain,23,6,measured,35.9594,35.4530,36.6261,17.2028,search_nodes
+4,wide-chain,29,8,lower_bound,38.5766,38.3836,38.7782,16.4103,search_nodes
+4,wide-chain,31,8,lower_bound,40.5165,40.2347,40.8443,16.1646,search_nodes

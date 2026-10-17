@@ -1,0 +1,87 @@
+    Finished `release` profile [optimized] target(s) in 6m 09s
+     Running tests/lll_degeneracy_probe.rs (target/release/deps/lll_degeneracy_probe-7687123cab133dd9)
+
+running 4 tests
+test probe_384bit_lll_multiseed ... 
+=== 384-bit LLL convergence: P-384 and brainpoolP384r1 (k_bits=288, m=8) ===
+P-384      k_bits=288 m= 8 d_seed=0x00C0FFEE k_seed=0x00C0FFEE  →  ✓ RECOVERED                               (26 ms)
+brainpoolP384r1 k_bits=288 m= 8 d_seed=0x00C0FFEE k_seed=0x00C0FFEE  →  ✓ RECOVERED                               (26 ms)
+P-384      k_bits=288 m= 8 d_seed=0xDEADBEEF k_seed=0x0BADCAFE  →  ✓ RECOVERED                               (27 ms)
+brainpoolP384r1 k_bits=288 m= 8 d_seed=0xDEADBEEF k_seed=0x0BADCAFE  →  ✓ RECOVERED                               (25 ms)
+P-384      k_bits=288 m= 8 d_seed=0x12345678 k_seed=0x9ABCDEF0  →  ✓ RECOVERED                               (27 ms)
+brainpoolP384r1 k_bits=288 m= 8 d_seed=0x12345678 k_seed=0x9ABCDEF0  →  ✓ RECOVERED                               (27 ms)
+
+=== Summary ===
+P-384:           3/3 seeds recovered key
+brainpoolP384r1: 3/3 seeds recovered key
+ok
+test probe_koblitz_lll_degeneracy_hypothesis ... 
+=== Koblitz vs NIST: LLL convergence by group-order shape ===
+curve          n_bits     n-form   passes      total
+secp192k1  k_bits=144 m= 8 d_seed=0x00C0FFEE k_seed=0x00C0FFEE  →  ✓ RECOVERED                               (11 ms)
+secp192k1  k_bits=144 m= 8 d_seed=0xDEADBEEF k_seed=0x0BADCAFE  →  ✓ RECOVERED                               (7 ms)
+secp192k1         192    generic        2          2
+secp224k1  k_bits=168 m= 8 d_seed=0x00C0FFEE k_seed=0x00C0FFEE  →  ✓ RECOVERED                               (10 ms)
+secp224k1  k_bits=168 m= 8 d_seed=0xDEADBEEF k_seed=0x0BADCAFE  →  ✓ RECOVERED                               (10 ms)
+secp224k1         224    generic        2          2
+secp256k1  k_bits=192 m= 8 d_seed=0x00C0FFEE k_seed=0x00C0FFEE  →  ✓ RECOVERED                               (14 ms)
+secp256k1  k_bits=192 m= 8 d_seed=0xDEADBEEF k_seed=0x0BADCAFE  →  ✓ RECOVERED                               (14 ms)
+secp256k1         256    generic        2          2
+P-256      k_bits=192 m= 8 d_seed=0x00C0FFEE k_seed=0x00C0FFEE  →  ✓ RECOVERED                               (14 ms)
+P-256      k_bits=192 m= 8 d_seed=0xDEADBEEF k_seed=0x0BADCAFE  →  ✓ RECOVERED                               (14 ms)
+P-256             256    generic        2          2
+
+=== Hypothesis: near-2^k group orders ⇒ LLL fails ===
+  near-2^k curves: 0/0 LLL successes
+  generic curves:  8/8 LLL successes
+
+✓ Hypothesis confirmed: near-power-of-2 n ⇒ LLL fails uniformly.
+ok
+test probe_lll_degeneracy_head_to_head ... 
+=== LLL convergence: secp256k1 vs P-256 (k_bits=192, m=8) ===
+P-256      k_bits=192 m= 8 d_seed=0x00C0FFEE k_seed=0x00C0FFEE  →  ✓ RECOVERED                               (15 ms)
+secp256k1  k_bits=192 m= 8 d_seed=0x00C0FFEE k_seed=0x00C0FFEE  →  ✓ RECOVERED                               (15 ms)
+P-256      k_bits=192 m= 8 d_seed=0xDEADBEEF k_seed=0x0BADCAFE  →  ✓ RECOVERED                               (14 ms)
+secp256k1  k_bits=192 m= 8 d_seed=0xDEADBEEF k_seed=0x0BADCAFE  →  ✓ RECOVERED                               (15 ms)
+P-256      k_bits=192 m= 8 d_seed=0x12345678 k_seed=0x9ABCDEF0  →  ✓ RECOVERED                               (14 ms)
+secp256k1  k_bits=192 m= 8 d_seed=0x12345678 k_seed=0x9ABCDEF0  →  ✓ RECOVERED                               (13 ms)
+
+=== Summary ===
+P-256:     3/3 probes recovered key
+secp256k1: 3/3 probes recovered key
+ok
+test probe_lll_sweep_by_bit_length ... 
+=== Bit-length sweep: LLL convergence across deployed curves ===
+curve                  n_bits     k_bits    elapsed         outcome
+secp192k1  k_bits=144 m= 8 d_seed=0x00C0FFEE k_seed=0x00C0FFEE  →  ✓ RECOVERED                               (10 ms)
+secp192k1                 192        144         10     ✓ RECOVERED
+secp224k1  k_bits=168 m= 8 d_seed=0x00C0FFEE k_seed=0x00C0FFEE  →  ✓ RECOVERED                               (10 ms)
+secp224k1                 224        168         10     ✓ RECOVERED
+secp256k1  k_bits=192 m= 8 d_seed=0x00C0FFEE k_seed=0x00C0FFEE  →  ✓ RECOVERED                               (15 ms)
+secp256k1                 256        192         15     ✓ RECOVERED
+P-256      k_bits=192 m= 8 d_seed=0x00C0FFEE k_seed=0x00C0FFEE  →  ✓ RECOVERED                               (15 ms)
+P-256                     256        192         15     ✓ RECOVERED
+brainpoolP256r1 k_bits=192 m= 8 d_seed=0x00C0FFEE k_seed=0x00C0FFEE  →  ✓ RECOVERED                               (17 ms)
+brainpoolP256r1           256        192         17     ✓ RECOVERED
+P-384      k_bits=288 m= 8 d_seed=0x00C0FFEE k_seed=0x00C0FFEE  →  ✓ RECOVERED                               (27 ms)
+P-384                     384        288         27     ✓ RECOVERED
+brainpoolP384r1 k_bits=288 m= 8 d_seed=0x00C0FFEE k_seed=0x00C0FFEE  →  ✓ RECOVERED                               (26 ms)
+brainpoolP384r1           384        288         26     ✓ RECOVERED
+P-521      k_bits=384 m= 8 d_seed=0x00C0FFEE k_seed=0x00C0FFEE  →  ✗ LLL did not produce a recoverable short vector — try more signatures or increase bias  (275 ms)
+P-521                     521        384        275 ✗ LLL did not produce a recoverable short vector — try more signatures or increase bias
+
+=== Analysis ===
+Curves that FAILED LLL: 1
+  - P-521 (n_bits = 521)
+
+? Failures restricted to ≥256-bit curves; bit-length
+  hypothesis remains plausible.
+ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 7.47s
+
+
+real	6m16.702s
+user	18m0.780s
+sys	0m28.027s
+exit 0
