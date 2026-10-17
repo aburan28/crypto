@@ -2,8 +2,13 @@
 """Check the million-assignment exact test and non-admission behavior."""
 
 import json
+from importlib.util import module_from_spec, spec_from_file_location
+from pathlib import Path
 
-import select
+spec = spec_from_file_location('n83_finegrid_selector_tested',
+                               Path(__file__).with_name('select.py'))
+select = module_from_spec(spec)
+spec.loader.exec_module(select)
 
 
 assert select.sign_flip_p([0.0] * 24) == 1.0
