@@ -65,7 +65,11 @@ fn parse_label(s: &str) -> Label {
     let f: Vec<&str> = s.split('-').collect();
     let round = f.last().unwrap().trim_start_matches('r').parse().unwrap();
     let arm = f[f.len() - 2].to_string();
-    let kernel = if f.len() == 5 { f[2].to_string() } else { "-".into() };
+    let kernel = if f.len() == 5 {
+        f[2].to_string()
+    } else {
+        "-".into()
+    };
     Label {
         part: f[0].into(),
         bits: f[1].parse().unwrap(),
@@ -108,7 +112,10 @@ fn print_targets(raw: &Path) {
     for v in read_jsonl(&raw.join("bsgs1.jsonl")) {
         assert_eq!(v["targets"], json!(1), "one-target samples only");
         let k = secret_of_digest(v["answers_digest"].as_str().unwrap());
-        seen.entry(("bsgs", v["bits"].as_u64().unwrap())).or_insert(k);
+        // The driver's `bits` is the bit length of `n` (45 for the nominal
+        // 44-bit curve); the label and inputs/curves.json use the nominal.
+        let bits = u64::from(parse_label(v["label"].as_str().unwrap()).bits);
+        seen.entry(("bsgs", bits)).or_insert(k);
     }
     for v in read_jsonl(&raw.join("rho1.jsonl")) {
         seen.entry(("rho", v["bits"].as_u64().unwrap()))
@@ -167,7 +174,10 @@ fn main() {
         for (l, v) in samples {
             for f in &fields {
                 if v[*f] != first[*f] {
-                    mismatches.push(format!("{} {}={} (want {})", v["label"], f, v[*f], first[*f]));
+                    mismatches.push(format!(
+                        "{} {}={} (want {})",
+                        v["label"], f, v[*f], first[*f]
+                    ));
                 }
             }
             if !is_bsgs && v["verified"] != json!(true) {
@@ -198,7 +208,9 @@ fn main() {
         // round's ratio needs both of its arms uncontended.
         let clean = |v: &Value| {
             iso.get(v["label"].as_str().unwrap())
-                .map(|r| r["run"]["contended"] == json!(false) && r["run"]["exit_status"] == json!(0))
+                .map(|r| {
+                    r["run"]["contended"] == json!(false) && r["run"]["exit_status"] == json!(0)
+                })
                 .unwrap_or(false)
         };
         let mut timer_rows = Map::new();
@@ -279,16 +291,28 @@ fn main() {
     // External reference (AGENTS.md §15): PARI/GP `elllog` against the
     // native arms on the same curve and target, both single-threaded.
     let pari = read_jsonl(&raw.join("pari.jsonl"));
+    // As for the native arms, a contended PARI run is reported and left out.
+    let pari_clean = |v: &Value| {
+        iso.get(v["label"].as_str().unwrap())
+            .map(|r| r["run"]["contended"] == json!(false) && r["run"]["exit_status"] == json!(0))
+            .unwrap_or(false)
+    };
+    let pari_contended = pari.iter().filter(|v| !pari_clean(v)).count();
     let mut by_curve: BTreeMap<(String, u64), Vec<&Value>> = BTreeMap::new();
-    for v in &pari {
+    for v in pari.iter().filter(|v| pari_clean(v)) {
         by_curve
-            .entry((v["role"].as_str().unwrap().to_string(), v["bits"].as_u64().unwrap()))
+            .entry((
+                v["role"].as_str().unwrap().to_string(),
+                v["bits"].as_u64().unwrap(),
+            ))
             .or_default()
             .push(v);
     }
     let native = |part: &str, bits: u64, kernel: &str, timer: &str, arm: &str| -> Option<f64> {
         rows.iter()
-            .find(|r| r["part"] == json!(part) && r["bits"] == json!(bits) && r["kernel"] == json!(kernel))
+            .find(|r| {
+                r["part"] == json!(part) && r["bits"] == json!(bits) && r["kernel"] == json!(kernel)
+            })
             .and_then(|r| r["timers"][timer][arm]["median"].as_f64())
     };
     let mut external = Vec::new();
@@ -298,14 +322,20 @@ fn main() {
         println!("|---|---:|---:|---:|---:|---:|---:|---|");
     }
     for ((role, bits), vs) in &by_curve {
-        let secs: Vec<f64> = vs.iter().map(|v| v["elllog_ms"].as_f64().unwrap() / 1e3).collect();
+        let secs: Vec<f64> = vs
+            .iter()
+            .map(|v| v["elllog_ms"].as_f64().unwrap() / 1e3)
+            .collect();
         let verified = vs.iter().all(|v| v["verified"] == json!(true));
         let (part, kernel, timer) = if role == "bsgs" {
             ("bsgs1", "paired", "total_s")
         } else {
             ("rho1", "-", "solve_s")
         };
-        let (a, b) = (native(part, *bits, kernel, timer, "A"), native(part, *bits, kernel, timer, "B"));
+        let (a, b) = (
+            native(part, *bits, kernel, timer, "A"),
+            native(part, *bits, kernel, timer, "B"),
+        );
         let mp = median(&secs);
         println!(
             "| {role} | {bits} | {mp:.3} ({}) | {} | {} | {} | {} | {verified} |",
@@ -328,14 +358,108 @@ fn main() {
             "A_over_pari": a.map(|x| x / mp),
         }));
     }
+    // Growth with size (AGENTS.md §15): per curve role, log2 of the median
+    // time ratio between the largest and smallest size, per bit, for PARI
+    // and both native arms.  √n scaling is 0.5 per bit.
+    let mut growth = Vec::new();
+    for role in ["bsgs", "rho"] {
+        let es: Vec<&Value> = external
+            .iter()
+            .filter(|e| e["role"] == json!(role))
+            .collect();
+        if es.len() < 2 {
+            continue;
+        }
+        let (lo, hi) = (es[0], es[es.len() - 1]);
+        let bits = hi["bits"].as_f64().unwrap() - lo["bits"].as_f64().unwrap();
+        let slope = |f: &dyn Fn(&Value) -> Option<f64>| -> Option<f64> {
+            Some((f(hi)? / f(lo)?).log2() / bits)
+        };
+        let row = json!({
+            "role": role,
+            "from_bits": lo["bits"],
+            "to_bits": hi["bits"],
+            "pari_log2_per_bit": slope(&|e| e["pari_elllog_s"]["median"].as_f64()),
+            "native_A_log2_per_bit": slope(&|e| e["native_A_median_s"].as_f64()),
+            "native_B_log2_per_bit": slope(&|e| e["native_B_median_s"].as_f64()),
+        });
+        println!(
+            "growth {role} {}→{} bits, log2(time ratio)/bit: PARI {:.3}, A {:.3}, B {:.3}",
+            lo["bits"],
+            hi["bits"],
+            row["pari_log2_per_bit"].as_f64().unwrap_or(f64::NAN),
+            row["native_A_log2_per_bit"].as_f64().unwrap_or(f64::NAN),
+            row["native_B_log2_per_bit"].as_f64().unwrap_or(f64::NAN)
+        );
+        growth.push(row);
+    }
+    // Field operations per visited point (lit2026_w11_bsgs_opcount): every
+    // row of arm B must equal arm A's row for the same curve, phase,
+    // kernel and window.
     let opcount = read_jsonl(&raw.join("opcount.jsonl"));
+    let op_key = |v: &Value| {
+        let l = v["label"].as_str().unwrap();
+        let bits = l.split('-').nth(1).unwrap().to_string();
+        (
+            bits,
+            v["phase"].clone().to_string(),
+            v["kernel"].clone().to_string(),
+            v["pair_k"].to_string(),
+        )
+    };
+    let arm_of = |v: &Value| {
+        v["label"]
+            .as_str()
+            .unwrap()
+            .rsplit('-')
+            .next()
+            .unwrap()
+            .to_string()
+    };
+    let mut op_a = BTreeMap::new();
+    for v in opcount.iter().filter(|v| arm_of(v) == "A") {
+        op_a.insert(op_key(v), v);
+    }
+    let mut op_mismatch = Vec::new();
+    let mut op_compared = 0usize;
+    for v in opcount.iter().filter(|v| arm_of(v) == "B") {
+        match op_a.get(&op_key(v)) {
+            Some(a) => {
+                op_compared += 1;
+                for f in [
+                    "visited",
+                    "slow_rounds",
+                    "mul",
+                    "sqr",
+                    "inv",
+                    "add",
+                    "same_points_as_chain",
+                ] {
+                    if a[f] != v[f] {
+                        op_mismatch.push(format!("{:?} {f}: A={} B={}", op_key(v), a[f], v[f]));
+                    }
+                }
+            }
+            None => op_mismatch.push(format!("{:?}: no A row", op_key(v))),
+        }
+    }
+    println!();
+    println!(
+        "field-operation counts: {op_compared} B rows compared with A, {} mismatches",
+        op_mismatch.len()
+    );
     let summary = json!({
         "schema": "generic-dlp-summary/v1",
         "run": run.file_name().map(|s| s.to_string_lossy().to_string()),
         "rule": "improves: every per-round A/B ratio above the largest per-round A/A2 ratio (and above 1); regresses: every one below the smallest (and below 1); otherwise no measurable change",
         "configs": rows,
         "external": external,
+        "external_growth": growth,
+        "pari_contended_left_out": pari_contended,
         "pari": pari,
+        "opcount_rows_compared": op_compared,
+        "opcount_identical": op_mismatch.is_empty() && op_compared > 0,
+        "opcount_mismatches": op_mismatch,
         "opcount": opcount,
     });
     std::fs::write(

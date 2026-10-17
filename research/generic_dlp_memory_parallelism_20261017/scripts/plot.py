@@ -58,6 +58,7 @@ def ratio_panel(ax, series, timer, title):
         for xi, r in zip(x, t):
             aa = r["per_round_A_over_A2"]
             ax.fill_between([xi - 0.25, xi + 0.25], aa["min"], aa["max"], color=BAND, alpha=0.7, lw=0)
+    ax.set_xticks(sorted({c["bits"] for _, cs, _, _ in series for c in cs}))
     ax.axhline(1.0, color=INK2, lw=0.8)
     ax.fill_between([], [], [], color=BAND, label="A/A′ per-round range (noise)")
     ax.set_xlabel("group order (bits)")
@@ -78,6 +79,7 @@ ax1.set_yscale("log")
 ax1.set_xlabel("group order (bits)")
 ax1.set_ylabel("one-target solve, total_s (s, median)")
 ax1.set_title("bsgs_fast, 1 thread, full group, negation map")
+ax1.set_xticks(bits)
 ax1.legend(fontsize=8)
 ratio_panel(ax2, [("chain", rows("bsgs1", "chain"), ARM_A, "s"),
                   ("paired", rows("bsgs1", "paired"), ARM_B, "o")],
@@ -99,7 +101,8 @@ ax1.set_yscale("log")
 ax1.set_xlabel("group order (bits)")
 ax1.set_ylabel("seconds (median)")
 ax1.set_title("prime_fast::rho_parallel, 1 thread, negation map")
-ax1.legend(fontsize=8)
+ax1.set_xticks(bits)
+ax1.legend(fontsize=7.5, loc="upper center", bbox_to_anchor=(0.5, -0.16), ncol=2)
 ratio_panel(ax2, [("1 thread", rows("rho1"), ARM_A, "o"), ("3 threads", rows("rho3"), ARM_B, "s")],
             "solve_s", "speed ratio with per-round range")
 fig.suptitle(f"rho start-up in Jacobian coordinates: {rid}; 7 rounds (5 at 52 bits)", fontsize=9)
@@ -121,6 +124,7 @@ if ext:
         ax.plot(bits, [e["native_A_median_s"] for e in es], color=ARM_A, marker="o", label="baseline A (median)")
         ax.plot(bits, [e["native_B_median_s"] for e in es], color=ARM_B, marker="o", label="candidate B (median)")
         ax.set_yscale("log")
+        ax.set_xticks(bits)
         ax.set_xlabel("group order (bits)")
         ax.set_ylabel("one-target solve (s), single thread")
         ax.set_title(title, fontsize=9)
