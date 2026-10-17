@@ -1,0 +1,3840 @@
+{
+  "schema": "hwcost.measurements.v1",
+  "params": {
+    "reps": 7,
+    "target_ms": 100.0,
+    "batches": [
+      16,
+      64,
+      256,
+      1024,
+      4096,
+      16384,
+      65536,
+      262144,
+      1048576,
+      4194304
+    ],
+    "mem_sizes": [
+      16384,
+      32768,
+      131072,
+      524288,
+      1048576,
+      4194304,
+      16777216,
+      67108864,
+      268435456,
+      1073741824
+    ],
+    "threads": [
+      1,
+      2,
+      4
+    ],
+    "scaling_batch": 1024,
+    "fields": [
+      "fp64",
+      "w1"
+    ],
+    "seed": 20261016,
+    "prime_fast_rho_bits": null,
+    "two_sylow": true
+  },
+  "host": {
+    "build": {
+      "binary_path": "/tmp/claude-0/-home-user/cf3295f2-63d8-5837-9e5f-f789cdc18d92/scratchpad/tsy/hwcost-cand",
+      "binary_sha256": "a7be862e657745ed5b8934263de3343d25a6bf946fe15cf400851c531981fcbe",
+      "build_env": {},
+      "debug_assertions": false,
+      "git_commit": null,
+      "git_dirty": null,
+      "target_arch": "x86_64",
+      "target_os": "linux"
+    },
+    "captured_unix_ms": 1792196520068,
+    "env_class_id": "ECBENV2h55b1cb8b1d10",
+    "env_class_sha256": "55b1cb8b1d106c9fde11ddb67e414003feb812f2d84803f9886ff2c0e55ec470",
+    "process_affinity": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "schema": "ecbench.host/v1",
+    "stable": {
+      "arch": "x86_64",
+      "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+      "cpu_settings": {
+        "0": {
+          "boost": null,
+          "governor": null,
+          "in_isolcpus": false,
+          "in_nohz_full": null,
+          "no_turbo": null,
+          "smt_control": "notsupported"
+        },
+        "1": {
+          "boost": null,
+          "governor": null,
+          "in_isolcpus": false,
+          "in_nohz_full": null,
+          "no_turbo": null,
+          "smt_control": "notsupported"
+        },
+        "2": {
+          "boost": null,
+          "governor": null,
+          "in_isolcpus": false,
+          "in_nohz_full": null,
+          "no_turbo": null,
+          "smt_control": "notsupported"
+        },
+        "3": {
+          "boost": null,
+          "governor": null,
+          "in_isolcpus": false,
+          "in_nohz_full": null,
+          "no_turbo": null,
+          "smt_control": "notsupported"
+        }
+      },
+      "cpu_signature": "6/207/2",
+      "cpu_vendor": "GenuineIntel",
+      "features": [
+        "adx",
+        "aes",
+        "avx",
+        "avx2",
+        "avx512bw",
+        "avx512dq",
+        "avx512f",
+        "avx512ifma",
+        "avx512vbmi",
+        "avx512vl",
+        "bmi1",
+        "bmi2",
+        "fma",
+        "gfni",
+        "pclmulqdq",
+        "popcnt",
+        "sha",
+        "sse4.2",
+        "vaes",
+        "vpclmulqdq"
+      ],
+      "flags_sha256": "c339bde1046924975422ab2524dad009db3ad01bdd093d0d8affe9b1ba0feea1",
+      "kernel_release": "6.18.44-fc-v139",
+      "logical_cpus": 4,
+      "mem_total_kib": 16479424,
+      "microcode": "0x1",
+      "numa_nodes": 1,
+      "os": "linux",
+      "packages": 1,
+      "perf_levels": [],
+      "physical_cores": 4,
+      "rustc_vv": "rustc 1.97.0 (2d8144b78 2026-07-07)\nbinary: rustc\ncommit-hash: 2d8144b7880597b6e6d3dfd63a9a9efae3f533d3\ncommit-date: 2026-07-07\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.0\nLLVM version: 22.1.6",
+      "topology": {
+        "cpus": [
+          {
+            "core_id": 0,
+            "cpu": 0,
+            "node": 0,
+            "package": 0,
+            "siblings": [
+              0
+            ]
+          },
+          {
+            "core_id": 1,
+            "cpu": 1,
+            "node": 0,
+            "package": 0,
+            "siblings": [
+              1
+            ]
+          },
+          {
+            "core_id": 2,
+            "cpu": 2,
+            "node": 0,
+            "package": 0,
+            "siblings": [
+              2
+            ]
+          },
+          {
+            "core_id": 3,
+            "cpu": 3,
+            "node": 0,
+            "package": 0,
+            "siblings": [
+              3
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "cpus": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "distances": [
+              10
+            ],
+            "mem_total_kib": 11108088,
+            "node": 0
+          }
+        ]
+      },
+      "transparent_hugepages": "always [madvise] never",
+      "virtualization": {
+        "cpu_flag": "hypervisor",
+        "systemd_detect_virt_vm": "kvm"
+      }
+    }
+  },
+  "caches": [
+    {
+      "level": 1,
+      "kind": "Data",
+      "size_bytes": 49152,
+      "shared_cpu_list": "0"
+    },
+    {
+      "level": 1,
+      "kind": "Instruction",
+      "size_bytes": 32768,
+      "shared_cpu_list": "0"
+    },
+    {
+      "level": 2,
+      "kind": "Unified",
+      "size_bytes": 2097152,
+      "shared_cpu_list": "0"
+    },
+    {
+      "level": 3,
+      "kind": "Unified",
+      "size_bytes": 272629760,
+      "shared_cpu_list": "0-3"
+    }
+  ],
+  "compiled_features": [],
+  "counts": [
+    {
+      "field": "fp64",
+      "batch": 16,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 0.0625
+    },
+    {
+      "field": "fp64",
+      "batch": 64,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 0.015625
+    },
+    {
+      "field": "fp64",
+      "batch": 256,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 0.00390625
+    },
+    {
+      "field": "fp64",
+      "batch": 1024,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 0.0009765625
+    },
+    {
+      "field": "fp64",
+      "batch": 4096,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 0.000244140625
+    },
+    {
+      "field": "fp64",
+      "batch": 16384,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 0.00006103515625
+    },
+    {
+      "field": "fp64",
+      "batch": 65536,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 0.0000152587890625
+    },
+    {
+      "field": "fp64",
+      "batch": 262144,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 3.814697265625e-6
+    },
+    {
+      "field": "fp64",
+      "batch": 1048576,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 9.5367431640625e-7
+    },
+    {
+      "field": "fp64",
+      "batch": 4194304,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 2.384185791015625e-7
+    },
+    {
+      "field": "w1",
+      "batch": 16,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 0.0625
+    },
+    {
+      "field": "w1",
+      "batch": 64,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 0.015625
+    },
+    {
+      "field": "w1",
+      "batch": 256,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 0.00390625
+    },
+    {
+      "field": "w1",
+      "batch": 1024,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 0.0009765625
+    },
+    {
+      "field": "w1",
+      "batch": 4096,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 0.000244140625
+    },
+    {
+      "field": "w1",
+      "batch": 16384,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 0.00006103515625
+    },
+    {
+      "field": "w1",
+      "batch": 65536,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 0.0000152587890625
+    },
+    {
+      "field": "w1",
+      "batch": 262144,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 3.814697265625e-6
+    },
+    {
+      "field": "w1",
+      "batch": 1048576,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 9.5367431640625e-7
+    },
+    {
+      "field": "w1",
+      "batch": 4194304,
+      "mul": 3.0,
+      "mul_dep": 2.0,
+      "sqr": 1.0,
+      "add": 6.0,
+      "inv": 2.384185791015625e-7
+    }
+  ],
+  "samples": [
+    {
+      "group": "clock",
+      "arm": "clock.add_chain",
+      "rep": 0,
+      "value": 2.834412690442175,
+      "unit": "ghz"
+    },
+    {
+      "group": "clock",
+      "arm": "clock.imul_chain",
+      "rep": 0,
+      "value": 2.836793358992262,
+      "unit": "ghz"
+    },
+    {
+      "group": "clock",
+      "arm": "clock.imul_chain",
+      "rep": 1,
+      "value": 2.836632280608611,
+      "unit": "ghz"
+    },
+    {
+      "group": "clock",
+      "arm": "clock.add_chain",
+      "rep": 1,
+      "value": 2.8320485171236216,
+      "unit": "ghz"
+    },
+    {
+      "group": "clock",
+      "arm": "clock.add_chain",
+      "rep": 2,
+      "value": 2.8150853453177804,
+      "unit": "ghz"
+    },
+    {
+      "group": "clock",
+      "arm": "clock.imul_chain",
+      "rep": 2,
+      "value": 2.821684162076399,
+      "unit": "ghz"
+    },
+    {
+      "group": "clock",
+      "arm": "clock.imul_chain",
+      "rep": 3,
+      "value": 2.83561669998287,
+      "unit": "ghz"
+    },
+    {
+      "group": "clock",
+      "arm": "clock.add_chain",
+      "rep": 3,
+      "value": 2.80329556959755,
+      "unit": "ghz"
+    },
+    {
+      "group": "clock",
+      "arm": "clock.add_chain",
+      "rep": 4,
+      "value": 2.719558667644512,
+      "unit": "ghz"
+    },
+    {
+      "group": "clock",
+      "arm": "clock.imul_chain",
+      "rep": 4,
+      "value": 2.821596289803015,
+      "unit": "ghz"
+    },
+    {
+      "group": "clock",
+      "arm": "clock.imul_chain",
+      "rep": 5,
+      "value": 2.8084582554133743,
+      "unit": "ghz"
+    },
+    {
+      "group": "clock",
+      "arm": "clock.add_chain",
+      "rep": 5,
+      "value": 2.8081038446688686,
+      "unit": "ghz"
+    },
+    {
+      "group": "clock",
+      "arm": "clock.add_chain",
+      "rep": 6,
+      "value": 2.8184500488862865,
+      "unit": "ghz"
+    },
+    {
+      "group": "clock",
+      "arm": "clock.imul_chain",
+      "rep": 6,
+      "value": 2.792771975312343,
+      "unit": "ghz"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.mul.throughput",
+      "rep": 0,
+      "value": 1.3807440444935528,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.mul.latency",
+      "rep": 0,
+      "value": 6.880944396020581,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.sqr.throughput",
+      "rep": 0,
+      "value": 1.3205782470830902,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.sqr.latency",
+      "rep": 0,
+      "value": 5.233076934085467,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.add.throughput",
+      "rep": 0,
+      "value": 0.49648663146212796,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.add.latency",
+      "rep": 0,
+      "value": 1.2449013819469945,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.inv.throughput",
+      "rep": 0,
+      "value": 408.8181070094304,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.inv.latency",
+      "rep": 0,
+      "value": 412.84061133545697,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.mul.throughput",
+      "rep": 0,
+      "value": 2.331275818377074,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.mul.latency",
+      "rep": 0,
+      "value": 8.851877124914378,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.sqr.throughput",
+      "rep": 0,
+      "value": 1.824046487947832,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.sqr.latency",
+      "rep": 0,
+      "value": 6.939479301844858,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.add.throughput",
+      "rep": 0,
+      "value": 0.5403120999619285,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.add.latency",
+      "rep": 0,
+      "value": 1.4342998547772554,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.inv.throughput",
+      "rep": 0,
+      "value": 672.2516849875632,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.inv.latency",
+      "rep": 0,
+      "value": 763.8117469651273,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.mul.latency",
+      "rep": 1,
+      "value": 6.774942448277592,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.sqr.throughput",
+      "rep": 1,
+      "value": 1.2852985811080349,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.sqr.latency",
+      "rep": 1,
+      "value": 4.971871640528279,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.add.throughput",
+      "rep": 1,
+      "value": 0.4632584069380388,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.add.latency",
+      "rep": 1,
+      "value": 1.2275421857649151,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.inv.throughput",
+      "rep": 1,
+      "value": 410.6936933230197,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.inv.latency",
+      "rep": 1,
+      "value": 440.368439974249,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.mul.throughput",
+      "rep": 1,
+      "value": 2.487901498500978,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.mul.latency",
+      "rep": 1,
+      "value": 8.979014800626214,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.sqr.throughput",
+      "rep": 1,
+      "value": 1.8402936052906074,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.sqr.latency",
+      "rep": 1,
+      "value": 6.991115035738583,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.add.throughput",
+      "rep": 1,
+      "value": 0.5356760271544976,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.add.latency",
+      "rep": 1,
+      "value": 1.4207366103805525,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.inv.throughput",
+      "rep": 1,
+      "value": 676.0396573858621,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.inv.latency",
+      "rep": 1,
+      "value": 675.941189397269,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.mul.throughput",
+      "rep": 1,
+      "value": 1.3396658377746615,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.sqr.throughput",
+      "rep": 2,
+      "value": 1.4044890653674942,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.sqr.latency",
+      "rep": 2,
+      "value": 4.951106709435046,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.add.throughput",
+      "rep": 2,
+      "value": 0.46478478694256453,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.add.latency",
+      "rep": 2,
+      "value": 1.3501121663437534,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.inv.throughput",
+      "rep": 2,
+      "value": 437.7305179309096,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.inv.latency",
+      "rep": 2,
+      "value": 426.3088991446989,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.mul.throughput",
+      "rep": 2,
+      "value": 2.3744763750742717,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.mul.latency",
+      "rep": 2,
+      "value": 8.728128703124053,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.sqr.throughput",
+      "rep": 2,
+      "value": 1.8741033428180147,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.sqr.latency",
+      "rep": 2,
+      "value": 6.922003106372243,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.add.throughput",
+      "rep": 2,
+      "value": 0.549149798755869,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.add.latency",
+      "rep": 2,
+      "value": 1.590036483923409,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.inv.throughput",
+      "rep": 2,
+      "value": 679.2655995078767,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.inv.latency",
+      "rep": 2,
+      "value": 674.7888319718716,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.mul.throughput",
+      "rep": 2,
+      "value": 1.507884875749941,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.mul.latency",
+      "rep": 2,
+      "value": 6.780323015495614,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.sqr.latency",
+      "rep": 3,
+      "value": 5.044829967069901,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.add.throughput",
+      "rep": 3,
+      "value": 0.47517618083187535,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.add.latency",
+      "rep": 3,
+      "value": 1.2311434238952603,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.inv.throughput",
+      "rep": 3,
+      "value": 480.07726995934894,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.inv.latency",
+      "rep": 3,
+      "value": 420.2298569481719,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.mul.throughput",
+      "rep": 3,
+      "value": 2.391824128644021,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.mul.latency",
+      "rep": 3,
+      "value": 8.88955110625335,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.sqr.throughput",
+      "rep": 3,
+      "value": 1.9172800310794798,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.sqr.latency",
+      "rep": 3,
+      "value": 7.0205521033617275,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.add.throughput",
+      "rep": 3,
+      "value": 0.5675819435841148,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.add.latency",
+      "rep": 3,
+      "value": 1.4273912088723992,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.inv.throughput",
+      "rep": 3,
+      "value": 673.2459680654738,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.inv.latency",
+      "rep": 3,
+      "value": 694.6917690920388,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.mul.throughput",
+      "rep": 3,
+      "value": 1.4186724314155426,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.mul.latency",
+      "rep": 3,
+      "value": 6.855512625221843,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.sqr.throughput",
+      "rep": 3,
+      "value": 1.311238067715126,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.add.throughput",
+      "rep": 4,
+      "value": 0.4757281450843294,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.add.latency",
+      "rep": 4,
+      "value": 1.2051034112388261,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.inv.throughput",
+      "rep": 4,
+      "value": 421.00604417307153,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.inv.latency",
+      "rep": 4,
+      "value": 418.7825210899028,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.mul.throughput",
+      "rep": 4,
+      "value": 2.4396057230615664,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.mul.latency",
+      "rep": 4,
+      "value": 8.780311386997491,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.sqr.throughput",
+      "rep": 4,
+      "value": 1.8561718134663554,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.sqr.latency",
+      "rep": 4,
+      "value": 7.172926867059298,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.add.throughput",
+      "rep": 4,
+      "value": 0.5728162255898069,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.add.latency",
+      "rep": 4,
+      "value": 1.4201545603926438,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.inv.throughput",
+      "rep": 4,
+      "value": 747.8521690871647,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.inv.latency",
+      "rep": 4,
+      "value": 693.251617840959,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.mul.throughput",
+      "rep": 4,
+      "value": 2.0543733766557093,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.mul.latency",
+      "rep": 4,
+      "value": 6.754069788187859,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.sqr.throughput",
+      "rep": 4,
+      "value": 1.2883115310519333,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.sqr.latency",
+      "rep": 4,
+      "value": 4.992256902804783,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.add.latency",
+      "rep": 5,
+      "value": 1.2721332896067636,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.inv.throughput",
+      "rep": 5,
+      "value": 412.90111255575124,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.inv.latency",
+      "rep": 5,
+      "value": 416.6190983805296,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.mul.throughput",
+      "rep": 5,
+      "value": 2.36007977167897,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.mul.latency",
+      "rep": 5,
+      "value": 8.831606647233494,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.sqr.throughput",
+      "rep": 5,
+      "value": 1.8056725017562034,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.sqr.latency",
+      "rep": 5,
+      "value": 6.885171702412571,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.add.throughput",
+      "rep": 5,
+      "value": 0.5369774512672184,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.add.latency",
+      "rep": 5,
+      "value": 1.4260410059012136,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.inv.throughput",
+      "rep": 5,
+      "value": 678.6297440423654,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.inv.latency",
+      "rep": 5,
+      "value": 677.3147401603443,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.mul.throughput",
+      "rep": 5,
+      "value": 1.358515445139224,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.mul.latency",
+      "rep": 5,
+      "value": 6.696201183447178,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.sqr.throughput",
+      "rep": 5,
+      "value": 1.2833071450622964,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.sqr.latency",
+      "rep": 5,
+      "value": 4.929436176343886,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.add.throughput",
+      "rep": 5,
+      "value": 0.4696727598321343,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.inv.throughput",
+      "rep": 6,
+      "value": 450.7230666052237,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.inv.latency",
+      "rep": 6,
+      "value": 408.9187756569432,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.mul.throughput",
+      "rep": 6,
+      "value": 2.9800554985199588,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.mul.latency",
+      "rep": 6,
+      "value": 8.793361862488728,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.sqr.throughput",
+      "rep": 6,
+      "value": 1.8856345571174138,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.sqr.latency",
+      "rep": 6,
+      "value": 6.894875449322654,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.add.throughput",
+      "rep": 6,
+      "value": 0.5382136453339796,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.add.latency",
+      "rep": 6,
+      "value": 1.4187022035287757,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.inv.throughput",
+      "rep": 6,
+      "value": 670.8578592634198,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "w1.inv.latency",
+      "rep": 6,
+      "value": 671.2439567767456,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.mul.throughput",
+      "rep": 6,
+      "value": 1.599102750054998,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.mul.latency",
+      "rep": 6,
+      "value": 7.2992032779175196,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.sqr.throughput",
+      "rep": 6,
+      "value": 1.271231815358679,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.sqr.latency",
+      "rep": 6,
+      "value": 4.982516921064785,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.add.throughput",
+      "rep": 6,
+      "value": 0.4677816920288292,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "op",
+      "arm": "fp64.add.latency",
+      "rep": 6,
+      "value": 1.1746350296557133,
+      "unit": "ns_per_op"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.16384",
+      "rep": 0,
+      "value": 37.67637515126374,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.32768",
+      "rep": 0,
+      "value": 62.2180046294712,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.131072",
+      "rep": 0,
+      "value": 59.992261561527506,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.524288",
+      "rep": 0,
+      "value": 60.034981580643326,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.1048576",
+      "rep": 0,
+      "value": 56.06771677319188,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.4194304",
+      "rep": 0,
+      "value": 28.164993392539156,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.16777216",
+      "rep": 0,
+      "value": 24.26455082048306,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.67108864",
+      "rep": 0,
+      "value": 18.8506263207579,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.268435456",
+      "rep": 0,
+      "value": 8.30762822561064,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.1073741824",
+      "rep": 0,
+      "value": 8.844419459953288,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.32768",
+      "rep": 1,
+      "value": 63.134137481263046,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.131072",
+      "rep": 1,
+      "value": 59.92047126183173,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.524288",
+      "rep": 1,
+      "value": 59.41233166076256,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.1048576",
+      "rep": 1,
+      "value": 46.969359550784034,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.4194304",
+      "rep": 1,
+      "value": 24.590989386386422,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.16777216",
+      "rep": 1,
+      "value": 24.977351796444363,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.67108864",
+      "rep": 1,
+      "value": 16.45380479347676,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.268435456",
+      "rep": 1,
+      "value": 7.828937959712996,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.1073741824",
+      "rep": 1,
+      "value": 7.873638401068515,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.16384",
+      "rep": 1,
+      "value": 48.10724301769407,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.131072",
+      "rep": 2,
+      "value": 58.37345932776778,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.524288",
+      "rep": 2,
+      "value": 58.57327717841033,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.1048576",
+      "rep": 2,
+      "value": 57.17582791656736,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.4194304",
+      "rep": 2,
+      "value": 28.957092387035694,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.16777216",
+      "rep": 2,
+      "value": 24.994832484476465,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.67108864",
+      "rep": 2,
+      "value": 19.903661974441228,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.268435456",
+      "rep": 2,
+      "value": 8.5634546774464,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.1073741824",
+      "rep": 2,
+      "value": 9.106774111615865,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.16384",
+      "rep": 2,
+      "value": 60.997960220303206,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.32768",
+      "rep": 2,
+      "value": 60.76238380582159,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.524288",
+      "rep": 3,
+      "value": 55.6658251772747,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.1048576",
+      "rep": 3,
+      "value": 56.60402935098596,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.4194304",
+      "rep": 3,
+      "value": 29.278254611756854,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.16777216",
+      "rep": 3,
+      "value": 25.400439863530252,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.67108864",
+      "rep": 3,
+      "value": 20.18021409267386,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.268435456",
+      "rep": 3,
+      "value": 7.9345645097642885,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.1073741824",
+      "rep": 3,
+      "value": 7.718588840433553,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.16384",
+      "rep": 3,
+      "value": 61.26687825512519,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.32768",
+      "rep": 3,
+      "value": 61.1426449263825,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.131072",
+      "rep": 3,
+      "value": 60.24179956085132,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.1048576",
+      "rep": 4,
+      "value": 57.569036750649474,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.4194304",
+      "rep": 4,
+      "value": 29.080327179251626,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.16777216",
+      "rep": 4,
+      "value": 25.133831407132575,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.67108864",
+      "rep": 4,
+      "value": 14.518524168120885,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.268435456",
+      "rep": 4,
+      "value": 8.436797338586024,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.1073741824",
+      "rep": 4,
+      "value": 8.739129855855634,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.16384",
+      "rep": 4,
+      "value": 63.288369623088784,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.32768",
+      "rep": 4,
+      "value": 63.39935685643864,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.131072",
+      "rep": 4,
+      "value": 61.2955261361943,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.524288",
+      "rep": 4,
+      "value": 54.65143148436907,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.4194304",
+      "rep": 5,
+      "value": 29.477667052803344,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.16777216",
+      "rep": 5,
+      "value": 23.422586444657835,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.67108864",
+      "rep": 5,
+      "value": 7.888328175103613,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.268435456",
+      "rep": 5,
+      "value": 7.938542151839432,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.1073741824",
+      "rep": 5,
+      "value": 8.307516706862458,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.16384",
+      "rep": 5,
+      "value": 62.88319498355266,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.32768",
+      "rep": 5,
+      "value": 60.701889428439536,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.131072",
+      "rep": 5,
+      "value": 58.46424727254975,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.524288",
+      "rep": 5,
+      "value": 57.058136524711365,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.1048576",
+      "rep": 5,
+      "value": 56.893907356799836,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.16777216",
+      "rep": 6,
+      "value": 24.771717159437138,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.67108864",
+      "rep": 6,
+      "value": 18.87572627111704,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.268435456",
+      "rep": 6,
+      "value": 8.517958996918463,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.1073741824",
+      "rep": 6,
+      "value": 8.946716251835694,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.16384",
+      "rep": 6,
+      "value": 62.78827979278333,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.32768",
+      "rep": 6,
+      "value": 62.77863258420311,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.131072",
+      "rep": 6,
+      "value": 61.04475155394603,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.524288",
+      "rep": 6,
+      "value": 58.37513971044428,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.1048576",
+      "rep": 6,
+      "value": 56.47097919510742,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.1t.4194304",
+      "rep": 6,
+      "value": 29.75002994948258,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.16384",
+      "rep": 0,
+      "value": 257.3560268929997,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.32768",
+      "rep": 0,
+      "value": 264.46655954195717,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.131072",
+      "rep": 0,
+      "value": 230.0693309968752,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.524288",
+      "rep": 0,
+      "value": 254.17883649214755,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.1048576",
+      "rep": 0,
+      "value": 200.10357376591782,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.4194304",
+      "rep": 0,
+      "value": 75.86325446046257,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.16777216",
+      "rep": 0,
+      "value": 69.02074017263871,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.67108864",
+      "rep": 0,
+      "value": 35.00685531925126,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.268435456",
+      "rep": 0,
+      "value": 35.12943381816193,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.1073741824",
+      "rep": 0,
+      "value": 35.460482232214645,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.32768",
+      "rep": 1,
+      "value": 247.0803331255115,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.131072",
+      "rep": 1,
+      "value": 251.43127225624357,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.524288",
+      "rep": 1,
+      "value": 255.8930266078482,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.1048576",
+      "rep": 1,
+      "value": 240.3588524992447,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.4194304",
+      "rep": 1,
+      "value": 105.21238269441673,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.16777216",
+      "rep": 1,
+      "value": 90.37331133081722,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.67108864",
+      "rep": 1,
+      "value": 39.731063650179465,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.268435456",
+      "rep": 1,
+      "value": 35.795027925251546,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.1073741824",
+      "rep": 1,
+      "value": 29.33559825456301,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.16384",
+      "rep": 1,
+      "value": 181.02503541559017,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.131072",
+      "rep": 2,
+      "value": 169.6495319027318,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.524288",
+      "rep": 2,
+      "value": 225.0062523231421,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.1048576",
+      "rep": 2,
+      "value": 230.24053684235435,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.4194304",
+      "rep": 2,
+      "value": 98.12261861155456,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.16777216",
+      "rep": 2,
+      "value": 86.8871108849112,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.67108864",
+      "rep": 2,
+      "value": 34.68812152876956,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.268435456",
+      "rep": 2,
+      "value": 29.31789514258575,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.1073741824",
+      "rep": 2,
+      "value": 30.239299912984784,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.16384",
+      "rep": 2,
+      "value": 249.50969346074993,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.32768",
+      "rep": 2,
+      "value": 257.3563348131036,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.524288",
+      "rep": 3,
+      "value": 182.56664137191797,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.1048576",
+      "rep": 3,
+      "value": 195.79297466951124,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.4194304",
+      "rep": 3,
+      "value": 109.67561388947024,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.16777216",
+      "rep": 3,
+      "value": 72.13303956897455,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.67108864",
+      "rep": 3,
+      "value": 28.063908097645577,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.268435456",
+      "rep": 3,
+      "value": 30.52140483130016,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.1073741824",
+      "rep": 3,
+      "value": 30.27258421934062,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.16384",
+      "rep": 3,
+      "value": 276.3843284188383,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.32768",
+      "rep": 3,
+      "value": 259.56308634672,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.131072",
+      "rep": 3,
+      "value": 205.63441370661252,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.1048576",
+      "rep": 4,
+      "value": 204.47633102738152,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.4194304",
+      "rep": 4,
+      "value": 107.76707887293371,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.16777216",
+      "rep": 4,
+      "value": 87.38392368969019,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.67108864",
+      "rep": 4,
+      "value": 36.31614643293752,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.268435456",
+      "rep": 4,
+      "value": 34.29848758010365,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.1073741824",
+      "rep": 4,
+      "value": 32.26242933075126,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.16384",
+      "rep": 4,
+      "value": 219.01098590907995,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.32768",
+      "rep": 4,
+      "value": 236.11660031360157,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.131072",
+      "rep": 4,
+      "value": 191.04790473876625,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.524288",
+      "rep": 4,
+      "value": 212.68731770758328,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.4194304",
+      "rep": 5,
+      "value": 112.13904405586084,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.16777216",
+      "rep": 5,
+      "value": 85.87322184546056,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.67108864",
+      "rep": 5,
+      "value": 34.94609399748325,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.268435456",
+      "rep": 5,
+      "value": 34.83324223499278,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.1073741824",
+      "rep": 5,
+      "value": 31.688002231914766,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.16384",
+      "rep": 5,
+      "value": 279.6158399955289,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.32768",
+      "rep": 5,
+      "value": 274.2392052349207,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.131072",
+      "rep": 5,
+      "value": 258.47294237746877,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.524288",
+      "rep": 5,
+      "value": 250.79324533691369,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.1048576",
+      "rep": 5,
+      "value": 172.1256491759951,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.16777216",
+      "rep": 6,
+      "value": 85.84274774726077,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.67108864",
+      "rep": 6,
+      "value": 35.10138902852295,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.268435456",
+      "rep": 6,
+      "value": 31.525976534468125,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.1073741824",
+      "rep": 6,
+      "value": 31.462500655076962,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.16384",
+      "rep": 6,
+      "value": 264.39533974886194,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.32768",
+      "rep": 6,
+      "value": 276.24938282391435,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.131072",
+      "rep": 6,
+      "value": 223.82930012637937,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.524288",
+      "rep": 6,
+      "value": 254.24235003647473,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.1048576",
+      "rep": 6,
+      "value": 187.558908244089,
+      "unit": "gbps"
+    },
+    {
+      "group": "mem",
+      "arm": "mem.4t.4194304",
+      "rep": 6,
+      "value": 108.65504961491955,
+      "unit": "gbps"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.16",
+      "rep": 0,
+      "value": 44.86984743377067,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.64",
+      "rep": 0,
+      "value": 26.113211244586942,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.256",
+      "rep": 0,
+      "value": 22.100941892706246,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.1024",
+      "rep": 0,
+      "value": 20.943107312709337,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.4096",
+      "rep": 0,
+      "value": 19.995106526337338,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.16384",
+      "rep": 0,
+      "value": 19.78679072392451,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.65536",
+      "rep": 0,
+      "value": 20.23596686285895,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.262144",
+      "rep": 0,
+      "value": 19.995263671875,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.1048576",
+      "rep": 0,
+      "value": 21.547777366638183,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.4194304",
+      "rep": 0,
+      "value": 21.708053708076477,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.16",
+      "rep": 0,
+      "value": 72.22258454242966,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.64",
+      "rep": 0,
+      "value": 39.57621619154348,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.256",
+      "rep": 0,
+      "value": 31.99481017770598,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.1024",
+      "rep": 0,
+      "value": 30.834488244432197,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.4096",
+      "rep": 0,
+      "value": 30.301229182260478,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.16384",
+      "rep": 0,
+      "value": 30.153503711407,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.65536",
+      "rep": 0,
+      "value": 29.949971419114334,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.262144",
+      "rep": 0,
+      "value": 31.387371943547176,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.1048576",
+      "rep": 0,
+      "value": 31.278255780537922,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.4194304",
+      "rep": 0,
+      "value": 31.760221481323242,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.64",
+      "rep": 1,
+      "value": 25.683812614506994,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.256",
+      "rep": 1,
+      "value": 20.869514195466117,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.1024",
+      "rep": 1,
+      "value": 19.54195620780563,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.4096",
+      "rep": 1,
+      "value": 19.437312150313865,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.16384",
+      "rep": 1,
+      "value": 19.346312155455223,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.65536",
+      "rep": 1,
+      "value": 19.598146593248522,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.262144",
+      "rep": 1,
+      "value": 19.813886451721192,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.1048576",
+      "rep": 1,
+      "value": 20.812901496887207,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.4194304",
+      "rep": 1,
+      "value": 21.764700174331665,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.16",
+      "rep": 1,
+      "value": 70.689778373209,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.64",
+      "rep": 1,
+      "value": 39.576613220554535,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.256",
+      "rep": 1,
+      "value": 31.730625252423263,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.1024",
+      "rep": 1,
+      "value": 29.880149444645028,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.4096",
+      "rep": 1,
+      "value": 29.7714469498503,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.16384",
+      "rep": 1,
+      "value": 29.554207435021034,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.65536",
+      "rep": 1,
+      "value": 29.496844071608322,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.262144",
+      "rep": 1,
+      "value": 30.51922900860126,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.1048576",
+      "rep": 1,
+      "value": 30.659574190775555,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.4194304",
+      "rep": 1,
+      "value": 31.20772433280945,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.16",
+      "rep": 1,
+      "value": 44.124929982549496,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.256",
+      "rep": 2,
+      "value": 20.81129602608201,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.1024",
+      "rep": 2,
+      "value": 19.543983132065105,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.4096",
+      "rep": 2,
+      "value": 19.312191679175765,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.16384",
+      "rep": 2,
+      "value": 19.606412284818045,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.65536",
+      "rep": 2,
+      "value": 19.769732294855892,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.262144",
+      "rep": 2,
+      "value": 19.945828437805176,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.1048576",
+      "rep": 2,
+      "value": 21.051388931274413,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.4194304",
+      "rep": 2,
+      "value": 21.45047879219055,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.16",
+      "rep": 2,
+      "value": 70.39994892935557,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.64",
+      "rep": 2,
+      "value": 39.679872635926365,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.256",
+      "rep": 2,
+      "value": 33.50396272970517,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.1024",
+      "rep": 2,
+      "value": 30.61790990090073,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.4096",
+      "rep": 2,
+      "value": 30.419029519086827,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.16384",
+      "rep": 2,
+      "value": 30.381219423734226,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.65536",
+      "rep": 2,
+      "value": 30.37798338669997,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.262144",
+      "rep": 2,
+      "value": 30.566221970778244,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.1048576",
+      "rep": 2,
+      "value": 31.308223406473797,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.4194304",
+      "rep": 2,
+      "value": 31.7745578289032,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.16",
+      "rep": 2,
+      "value": 44.653958948230176,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.64",
+      "rep": 2,
+      "value": 26.28575428880746,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.1024",
+      "rep": 3,
+      "value": 23.481342688599018,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.4096",
+      "rep": 3,
+      "value": 19.578614347366265,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.16384",
+      "rep": 3,
+      "value": 19.590121975192776,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.65536",
+      "rep": 3,
+      "value": 20.446757754764043,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.262144",
+      "rep": 3,
+      "value": 20.733046531677246,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.1048576",
+      "rep": 3,
+      "value": 22.076362228393556,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.4194304",
+      "rep": 3,
+      "value": 21.918968558311462,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.16",
+      "rep": 3,
+      "value": 71.14003966816813,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.64",
+      "rep": 3,
+      "value": 39.81487076292528,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.256",
+      "rep": 3,
+      "value": 32.31200398828756,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.1024",
+      "rep": 3,
+      "value": 30.07601866543782,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.4096",
+      "rep": 3,
+      "value": 29.940427348428145,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.16384",
+      "rep": 3,
+      "value": 29.977762369009163,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.65536",
+      "rep": 3,
+      "value": 30.197907081017128,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.262144",
+      "rep": 3,
+      "value": 30.38531494140625,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.1048576",
+      "rep": 3,
+      "value": 31.232561747233074,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.4194304",
+      "rep": 3,
+      "value": 33.577539682388306,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.16",
+      "rep": 3,
+      "value": 44.75965657338188,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.64",
+      "rep": 3,
+      "value": 25.640540160726182,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.256",
+      "rep": 3,
+      "value": 21.049944181314665,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.4096",
+      "rep": 4,
+      "value": 19.465466361899562,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.16384",
+      "rep": 4,
+      "value": 19.53155147668087,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.65536",
+      "rep": 4,
+      "value": 19.951357042467272,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.262144",
+      "rep": 4,
+      "value": 20.109646606445313,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.1048576",
+      "rep": 4,
+      "value": 21.859805488586424,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.4194304",
+      "rep": 4,
+      "value": 21.533815622329712,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.16",
+      "rep": 4,
+      "value": 70.94703436587518,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.64",
+      "rep": 4,
+      "value": 40.022476406482156,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.256",
+      "rep": 4,
+      "value": 32.33423238085622,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.1024",
+      "rep": 4,
+      "value": 30.297399950592887,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.4096",
+      "rep": 4,
+      "value": 30.523373467907934,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.16384",
+      "rep": 4,
+      "value": 34.93137594369742,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.65536",
+      "rep": 4,
+      "value": 29.90157259427584,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.262144",
+      "rep": 4,
+      "value": 29.892434633695164,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.1048576",
+      "rep": 4,
+      "value": 30.841795285542805,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.4194304",
+      "rep": 4,
+      "value": 31.230889797210693,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.16",
+      "rep": 4,
+      "value": 44.11851844870055,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.64",
+      "rep": 4,
+      "value": 25.670085567954697,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.256",
+      "rep": 4,
+      "value": 20.983486302204646,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.1024",
+      "rep": 4,
+      "value": 21.555981542416788,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.16384",
+      "rep": 5,
+      "value": 20.469259418966452,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.65536",
+      "rep": 5,
+      "value": 20.37803010682802,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.262144",
+      "rep": 5,
+      "value": 23.669030570983885,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.1048576",
+      "rep": 5,
+      "value": 24.91801357269287,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.4194304",
+      "rep": 5,
+      "value": 21.97625207901001,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.16",
+      "rep": 5,
+      "value": 71.90915225559655,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.64",
+      "rep": 5,
+      "value": 40.608318879221336,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.256",
+      "rep": 5,
+      "value": 33.776358037156704,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.1024",
+      "rep": 5,
+      "value": 31.175507491828824,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.4096",
+      "rep": 5,
+      "value": 32.85957294395584,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.16384",
+      "rep": 5,
+      "value": 30.205314342792217,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.65536",
+      "rep": 5,
+      "value": 31.163404904879055,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.262144",
+      "rep": 5,
+      "value": 34.87104885394756,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.1048576",
+      "rep": 5,
+      "value": 32.04506905873617,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.4194304",
+      "rep": 5,
+      "value": 35.8513126373291,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.16",
+      "rep": 5,
+      "value": 45.55633397605762,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.64",
+      "rep": 5,
+      "value": 27.46854935251499,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.256",
+      "rep": 5,
+      "value": 27.592872728319158,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.1024",
+      "rep": 5,
+      "value": 21.07918129023184,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.4096",
+      "rep": 5,
+      "value": 19.76939713257369,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.65536",
+      "rep": 6,
+      "value": 24.03442485912426,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.262144",
+      "rep": 6,
+      "value": 25.44719696044922,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.1048576",
+      "rep": 6,
+      "value": 21.318561935424803,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.4194304",
+      "rep": 6,
+      "value": 22.53619873523712,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.16",
+      "rep": 6,
+      "value": 71.10340885941284,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.64",
+      "rep": 6,
+      "value": 39.773941754388176,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.256",
+      "rep": 6,
+      "value": 32.165808322394994,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.1024",
+      "rep": 6,
+      "value": 30.355950350600487,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.4096",
+      "rep": 6,
+      "value": 29.896674716972306,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.16384",
+      "rep": 6,
+      "value": 29.800047947810246,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.65536",
+      "rep": 6,
+      "value": 29.858358529897835,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.262144",
+      "rep": 6,
+      "value": 30.15014413686899,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.1048576",
+      "rep": 6,
+      "value": 31.83048407236735,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.w1.4194304",
+      "rep": 6,
+      "value": 32.10788583755493,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.16",
+      "rep": 6,
+      "value": 44.708959450919565,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.64",
+      "rep": 6,
+      "value": 26.57642769403731,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.256",
+      "rep": 6,
+      "value": 21.553622332213855,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.1024",
+      "rep": 6,
+      "value": 20.09310338765177,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.4096",
+      "rep": 6,
+      "value": 20.49065762315775,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "kernel",
+      "arm": "kernel.fp64.16384",
+      "rep": 6,
+      "value": 21.194747066084958,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.1t",
+      "rep": 0,
+      "value": 23.585055150890305,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.2t",
+      "rep": 0,
+      "value": 11.236643033120925,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.4t",
+      "rep": 0,
+      "value": 5.552085305430406,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.1t",
+      "rep": 0,
+      "value": 33.059356636563045,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.2t",
+      "rep": 0,
+      "value": 16.886216388303396,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.4t",
+      "rep": 0,
+      "value": 9.299981402535725,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.2t",
+      "rep": 1,
+      "value": 11.045394092462582,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.4t",
+      "rep": 1,
+      "value": 5.573187293304256,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.1t",
+      "rep": 1,
+      "value": 35.51991036611785,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.2t",
+      "rep": 1,
+      "value": 16.211779224324903,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.4t",
+      "rep": 1,
+      "value": 8.283297807742388,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.1t",
+      "rep": 1,
+      "value": 21.59497640245355,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.4t",
+      "rep": 2,
+      "value": 6.609946259106595,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.1t",
+      "rep": 2,
+      "value": 32.20009291729853,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.2t",
+      "rep": 2,
+      "value": 16.50353466940066,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.4t",
+      "rep": 2,
+      "value": 8.479685726328793,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.1t",
+      "rep": 2,
+      "value": 21.430437717737615,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.2t",
+      "rep": 2,
+      "value": 13.56184862065612,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.1t",
+      "rep": 3,
+      "value": 33.32171726061525,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.2t",
+      "rep": 3,
+      "value": 18.282984758751834,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.4t",
+      "rep": 3,
+      "value": 10.201688587156116,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.1t",
+      "rep": 3,
+      "value": 21.42646354104633,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.2t",
+      "rep": 3,
+      "value": 11.552114833793347,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.4t",
+      "rep": 3,
+      "value": 5.392297812619824,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.2t",
+      "rep": 4,
+      "value": 16.014099538734115,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.4t",
+      "rep": 4,
+      "value": 8.218105087932358,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.1t",
+      "rep": 4,
+      "value": 20.60803670460636,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.2t",
+      "rep": 4,
+      "value": 10.563315056312982,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.4t",
+      "rep": 4,
+      "value": 5.336069979989455,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.1t",
+      "rep": 4,
+      "value": 32.59657729229853,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.4t",
+      "rep": 5,
+      "value": 9.548367622571114,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.1t",
+      "rep": 5,
+      "value": 21.102070321805027,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.2t",
+      "rep": 5,
+      "value": 11.164888844379817,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.4t",
+      "rep": 5,
+      "value": 5.727039922234471,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.1t",
+      "rep": 5,
+      "value": 31.526687489845106,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.2t",
+      "rep": 5,
+      "value": 16.322534108092007,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.1t",
+      "rep": 6,
+      "value": 20.899552474764768,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.2t",
+      "rep": 6,
+      "value": 10.76608578467694,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.fp64.4t",
+      "rep": 6,
+      "value": 6.679308557802914,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.1t",
+      "rep": 6,
+      "value": 32.65002081753683,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.2t",
+      "rep": 6,
+      "value": 18.49691256376772,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "scaling",
+      "arm": "scaling.w1.4t",
+      "rep": 6,
+      "value": 10.898401896158854,
+      "unit": "ns_per_iter"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.baseline",
+      "rep": 0,
+      "value": 6089.909546805349,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.fast-chi",
+      "rep": 0,
+      "value": 4278.0949578013415,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.fast",
+      "rep": 0,
+      "value": 3530.240137597892,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.baseline",
+      "rep": 0,
+      "value": 6768.877554993187,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.fast-chi",
+      "rep": 0,
+      "value": 3095.67944317315,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.fast",
+      "rep": 0,
+      "value": 2493.1661655642415,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.fast-chi",
+      "rep": 1,
+      "value": 4681.29578013417,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.fast",
+      "rep": 1,
+      "value": 4168.275195784235,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.baseline",
+      "rep": 1,
+      "value": 8141.393030951917,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.fast-chi",
+      "rep": 1,
+      "value": 3532.686435291126,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.fast",
+      "rep": 1,
+      "value": 2894.4591601523352,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.baseline",
+      "rep": 1,
+      "value": 6510.243994551758,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.fast",
+      "rep": 2,
+      "value": 3886.555954036449,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.baseline",
+      "rep": 2,
+      "value": 6987.508662643566,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.fast-chi",
+      "rep": 2,
+      "value": 3276.486905669972,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.fast",
+      "rep": 2,
+      "value": 2807.426162557627,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.baseline",
+      "rep": 2,
+      "value": 7672.086367013373,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.fast-chi",
+      "rep": 2,
+      "value": 4454.061934646181,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.baseline",
+      "rep": 3,
+      "value": 6951.73467004088,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.fast-chi",
+      "rep": 3,
+      "value": 3433.1518243071446,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.fast",
+      "rep": 3,
+      "value": 2877.986770895971,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.baseline",
+      "rep": 3,
+      "value": 7143.485264982664,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.fast-chi",
+      "rep": 3,
+      "value": 5118.363211426098,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.fast",
+      "rep": 3,
+      "value": 3710.354680524043,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.fast-chi",
+      "rep": 4,
+      "value": 3104.832888380371,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.fast",
+      "rep": 4,
+      "value": 2468.5200691521345,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.baseline",
+      "rep": 4,
+      "value": 6167.061726102031,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.fast-chi",
+      "rep": 4,
+      "value": 4635.364336723653,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.fast",
+      "rep": 4,
+      "value": 3622.271682646564,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.baseline",
+      "rep": 4,
+      "value": 6839.243722016741,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.fast",
+      "rep": 5,
+      "value": 2540.0445730607335,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.baseline",
+      "rep": 5,
+      "value": 6728.05770183259,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.fast-chi",
+      "rep": 5,
+      "value": 4462.993854144124,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.fast",
+      "rep": 5,
+      "value": 4075.8879821415503,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.baseline",
+      "rep": 5,
+      "value": 6951.2524819933815,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.fast-chi",
+      "rep": 5,
+      "value": 3112.749555047038,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.baseline",
+      "rep": 6,
+      "value": 6179.410165923725,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.fast-chi",
+      "rep": 6,
+      "value": 5154.998052369617,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz2.fast",
+      "rep": 6,
+      "value": 4109.413269413745,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.baseline",
+      "rep": 6,
+      "value": 7414.300564531828,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.fast-chi",
+      "rep": 6,
+      "value": 3481.809083396898,
+      "unit": "ns_per_draw"
+    },
+    {
+      "group": "tsy",
+      "arm": "tsy.z2xz8.fast",
+      "rep": 6,
+      "value": 2561.5508618961717,
+      "unit": "ns_per_draw"
+    }
+  ]
+}

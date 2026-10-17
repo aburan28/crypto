@@ -49,9 +49,13 @@ in [`lean/TreeSplit/Leak.lean`](lean/TreeSplit/Leak.lean), by kernel evaluation
 trusts the compiler and is not a kernel proof, sheriff case SHF-20261016-3caa6f, finding L3).
 For such a `V`, `F ⊂ E(GF(2^7))` and `T2 ⊆ GF(2^7)`, which is a 7-dimensional linear subspace.
 
-- **They are exactly the gap −1 cells.** These are `ℓ = 4` for both seeds and `ℓ = 6` for
-  seed 20261012 (`|T2|` = 29, 28, 70, 29, 35). The sixth subfield cell, `a = 0`, seed
-  20261012, `ℓ = 4`, is degenerate: `|F| = 2`, `|T2| = 1`, gap 0.
+- **The gap −1 cells are exactly the five non-degenerate subfield cells.** Six `frob` cells
+  have `g` dividing `t^7 − 1`, and five of them are at gap −1: `ℓ = 4` for both seeds and
+  `ℓ = 6` for seed 20261012 (`|T2|` = 29, 28, 70, 29, 35). The sixth subfield cell, `a = 0`,
+  seed 20261012, `ℓ = 4`, is degenerate: `|F| = 2`, `|T2| = 1`, gap 0. (Corrected
+  2026-10-17, sheriff case SHF-20261017-e4d7f6, finding P-N7: this bullet used to begin
+  ~~"They are exactly the gap −1 cells"~~, which the sixth, gap-0 cell contradicts. Checked
+  against `runs/registered/cells.jsonl` `v_info.g` and `runs/registered/readout.txt`.)
 - **Every `frob` cell whose `V` is not inside a subfield has gap 0.**
 - **Why it is not a lever.** Inside a subfield, decompositions exist only for targets in
   `E(GF(2^7))`, which is the positive control's effect at smaller size, not a new
@@ -81,7 +85,7 @@ reproduced by a second implementation.
 | `Verdict.lean`: `report cells = ⟨gate := true, poly := closed, frob := closed, rand := closed⟩` and `cells.length = 64` | proved | kernel `decide`. Changing `frob := .closed` to `.alive` fails the build |
 | `Replay.lean`: an independent implementation recomputes `|T2|`, `D_s(curve)` and `D_s(R)` for the 12 `poly` cells with `ℓ ≤ 5` | all 12 match the records exactly | `native_decide`, which trusts the Lean compiler. Changing one recorded `D_s` fails the build (checked during development) |
 | `Leak.lean`: which `g` divide `t^7 − 1` | `[23, 29, 127]` | kernel, `decide +kernel` (2026-10-16; first ~~`native_decide`~~) |
-| [`lean/AxiomAudit.lean`](lean/AxiomAudit.lean) (added 2026-10-16) | every theorem above depends only on `propext`, `Classical.choice` and `Quot.sound`, except `replay_ok`, which adds its own `native_decide` compiler-trust axiom and nothing else | the audit fails the run on any other axiom (`sorryAx` included) |
+| [`lean/AxiomAudit.lean`](lean/AxiomAudit.lean) (added 2026-10-16) | every theorem above depends only on `propext`, `Classical.choice` and `Quot.sound`, except `replay_ok`, which adds its own `native_decide` compiler-trust axiom and nothing else. Output of a green run: [`lean/axiom-audit.log`](lean/axiom-audit.log) (run 38981755356, job 117243990692, PR #2033 head 22bd479da, 2026-10-17; committed 2026-10-17, sheriff case SHF-20261017-e4d7f6, L-N7) | the audit fails the run on any other axiom (`sorryAx` included) |
 | cairn objective `sha256:2fb64f9a…` (result): the same theorem as `Verdict.lean`, over `Rule.lean` and `Data.lean` | **accepted** by cairn's Lean jail, kernel | `cairn audit` re-verifies it |
 | cairn objective `sha256:d1fd6832…` (replay) | **rejected**: cairn accepts kernel proofs only, and refuses `native_decide`. Recorded as is | — |
 | CI: [`.github/workflows/tree-split-structured-v-lean.yml`](../../.github/workflows/tree-split-structured-v-lean.yml) | Regenerates `Data.lean` and the readout from the records and diffs them, checks the rule hash, and runs `lake build` (all of the above) on every change to the study; since 2026-10-16 also the axiom audit (log kept as an artifact), `leanchecker --fresh`, and a check that `native_decide` closes `replay_ok` only | — |

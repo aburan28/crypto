@@ -1,0 +1,1623 @@
+# callgrind format
+version: 1
+creator: callgrind-3.19.0
+pid: 401
+cmd:  /baseline exec
+part: 3
+
+
+desc: I1 cache: 
+desc: D1 cache: 
+desc: LL cache: 
+
+desc: Timerange: Basic block 34810651 - 253737880
+desc: Trigger: Client Request: generic_ic_rho_solve
+
+positions: line
+events: Ir
+summary: 1986242185
+
+
+ob=(3) /usr/lib/x86_64-linux-gnu/libc.so.6
+fl=(205) ./string/../sysdeps/x86_64/multiarch/memset-vec-unaligned-erms.S
+fn=(1068) __memset_avx2_unaligned_erms
+167 22514
++5 11257
++1 11257
++1 547
++1 547
++1 547
++2 532
++1 532
++1 1064
++9 1
++1 1
++2 2
++53 15
++1 15
++6 8
++1 8
++12 8
++3 8
++1 8
++12 7
++1 7
++13 7
++1 7
++2 7
++3 5
++3 5
++3 5
++1 5
++1 5
++1 5
++1 5
++1 5
++1 5
+-6 8
++1 8
++1 8
++1 8
++1 8
++1 8
++1 13
++3 5
++1 5
++1 5
++1 5
++3 10
+-6 2
++1 2
++1 2
++1 2
++3 4
++11 7
++1 7
++1 7
++1 260215
++1 7
++1 14
++7 10710
++9 10710
++1 10710
++5 6281
++1 6281
++25 4429
++1 4429
++1 4429
++9 6281
++1 6281
++5 6281
+
+fl=(153) ./csu/../csu/libc-start.c
+fn=(848) __libc_start_main@@GLIBC_2.34
+cfi=(155) ./csu/../sysdeps/nptl/libc_start_call_main.h
+cfn=(874) (below main)
+calls=0 29 
+360 1986242185
+
+fl=(193) ./string/../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S
+fn=(1002) __memcpy_avx_unaligned_erms
+264 10
++6 10
++1 10
++2 9
++1 9
++1 9
++3 1
++1 1
++1 1
++3 2
++30 1
++1 1
++36 1
++1 1
++1 1
++1 1
++2 1
++28 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 2
++5 8
++1 8
++5 6
++1 6
++2 3
++1 3
++1 3
++2 2
++1 2
++1 2
++1 2
++1 2
++1 2
++1 2
++1 2
++1 2
++1 2
++1 2
++1 2
++1 2
++1 2
++1 4
++4 3
++1 3
++4 3
++2 3
++4 3
++1 3
++11 3
++3 3
++2 3
++2 3
++4 3
++1 3
++9 3
++1 3
++2 3
++2 3
++1 3
++1 3
++3 3
++2 3
++2 3
++2 6
++6 3
++1 3
++1 3
++1 3
++1 3
++1 3
++1 3
++1 3
++1 3
++1 3
++1 3
++1 3
+-11 8
++1 8
++1 8
++1 8
++1 8
++1 8
++1 8
++1 8
++1 8
++1 8
++1 8
++1 8
++2 3
++1 3
++1 3
++1 3
++2 3
++4 6
++58 2
++7 2
++1 2
++30 2
++1 2
++4 2
++2 2
++3 2
++4 2
++1 2
++3 2
++1 2
++24 2
++2 2
++2 2
++2 2
++3 2
++1 2
++2 393234
++3 2
++2 2
++2 4
+
+fl=(213) ./misc/../sysdeps/unix/syscall-template.S
+fn=(1526) munmap
+117 8
++5 2
+
+fl=(175) ./stdlib/../sysdeps/unix/sysv/linux/getrandom.c
+fn=(926) getrandom
+29 6
++1 1
+
+fl=(212) ./misc/../sysdeps/unix/sysv/linux/mmap64.c
+fn=(1090) mmap
+47 2
++3 4
++8 8
++2 2
+
+fl=(173) ./malloc/./malloc/malloc.c
+fn=(932) _int_malloc
+1338 52
+3766 208
+1357 26
+3766 26
+1357 78
+3807 52
++27 52
++2 12
++3 2
++2 4
++56 48
++62 316
++1 54
++20 21
+-1 21
+-1 21
++1 42
++1 84
++4 21
++6 102
+-1 18
++1 18
++3 36
++1 18
++2 36
+-3 52
++1 26
++2 52
++1 132
++2 44
++1 176
++2 176
+-10 44
++12 88
++1 88
++2 88
++11 124
++31 44
++1 44
++4 88
++29 86
++8 373
++1 18
++1 6
+-1 6
++4 12
+-4 54
++1 18
+-1 18
++4 36
++5 20
+-2 20
++2 60
++1 40
++7 6
+-1 24
++2 18
+3900 8
++2 8
+-2 8
++2 16
++2 5
++1 10
++6 5
+-4 5
++1 5
++1 5
++2 10
++7 20
+-1 10
++1 10
++5 22
++1 6
++2 2
+-2 16
+1999 4
+3940 4
+1999 9
+3940 1
+1999 2
+3841 24
+3961 6
+cfn=(1368) malloc_consolidate
+calls=3 4711 
+* 992
+* 3
++95 1
++1 1
+-1 1
++1 2
+-16 1
++21 2
++1 7
+4409 234
+4085 38
++1 57
++1 19
+-1 19
++57 38
++9 19
+-9 38
++9 19
+-9 38
++1 19
++1 19
++1 19
++1 19
++6 38
+-10 48
++9 24
+-9 48
++9 24
+-9 48
++1 24
++1 24
++1 24
++1 24
++6 48
+3990 146
+4168 34
++11 40
++2 36
++3 18
+-3 18
++3 36
++1 32
++67 8
++1 8
++1 8
+-1 8
++1 8
++1 16
++1 24
++5 28
++16 5
++2 10
+-4 22
++8 6
++3 12
+4162 129
+3175 1
++2 1
++2 1
+-4 1
++2 4
++1 1
++1 1
+3990 2
++29 6
++72 8
+3928 1
++1 1
++1 2
++2 1
+3177 1
++2 1
+3933 1
+3175 2
++2 4
+-6 1
++8 1
++1 1
+3899 18
+4140 24
+4265 6
+4365 2
++1 4
++2 4
++3 8
++17 6
+4114 70
++3 33
++1 99
+-3 94
++6 28
++7 11
+-1 44
++2 22
++2 11
++1 33
++2 11
++1 22
+-1 3
++1 6
+-11 6
+4295 12
++3 12
++2 6
++3 6
+-3 12
++3 6
+cfn=(1158) unlink_chunk.constprop.0
+calls=6 1620 
+* 159
++3 18
++15 10
+-5 5
++5 10
++1 10
++3 5
++1 5
++1 5
++3 10
++1 1
++1 10
++2 2
++3 8
++2 3
++1 1
+1999 1
+4343 1
+1999 2
+4337 32
++2 12
++1 4
+1999 4
+4343 4
+1999 9
+4343 1
+1999 2
+4309 1
+-1 1
++1 2
+3187 2
++1 2
++3 1
+-1 4
++1 1
++1 2
+4170 1
++18 12
++1 12
++2 8
+-2 100
++6 24
++2 5
+-1 10
++4 5
++1 5
+-1 10
++1 5
+cfn=(1158)
+calls=5 1620 
+* 142
+-1 7
++1 7
+-1 14
++1 7
+cfn=(1158)
+calls=7 1620 
+* 224
++3 36
++13 20
+-4 10
++4 20
++1 20
++3 10
++1 10
++1 10
++1 20
++2 14
++3 56
++2 21
++1 7
++3 7
+4405 28
+cfn=(944) alloc_perturb
+calls=7 1999 
+* 28
+4229 24
++2 9
++1 3
++3 3
+4405 12
+cfn=(944)
+calls=3 1999 
+* 12
+4235 2
+4405 8
+cfn=(944)
+calls=2 1999 
+* 8
+* 8
+cfn=(944)
+calls=2 1999 
+* 8
+* 28
+-2 6
+cfn=(934) sysmalloc
+calls=2 2542 
+* 202
+* 2
++1 4
+4207 2
+-1 2
++1 4
+
+fn=(1078) calloc
+3619 2
++10 2
+-10 8
++10 16
++8 4
++3 6
++2 4
++34 8
+fi=(174) ./malloc/./malloc/arena.c
+162 4
+fe=(173)
+3652 2
++1 2
++21 4
+-21 4
++21 2
+cfn=(932)
+calls=2 1338 
+* 138
++2 4
++40 2
+-12 2
++12 14
++11 2
++2 4
++2 4
+-55 6
++3 4
++78 2
+-25 4
++25 8
+-25 2
+cfi=(205)
+cfn=(1068)
+calls=2 167 
+* 70
+* 2
+
+fn=(944)
+1999 42
++2 14
+
+fn=(1368)
+4711 3
++17 3
+-17 12
++28 3
+-28 9
++15 3
++2 3
++13 6
++1 6
+-1 54
++1 54
++62 90
++1 24
+-31 24
++4 18
++2 9
++1 18
++1 18
++2 18
+-4 3
++1 6
++1 6
++2 6
++1 4
++4 2
++2 2
+-2 4
++3 2
++9 4
+-12 10
++2 10
+-2 20
++3 10
++9 27
+-56 24
++4 36
++1 48
++8 12
+-3 24
++3 12
+-3 12
++4 12
+-4 12
++5 12
+-5 12
++5 24
++2 24
++1 3
++2 3
+-1 3
++2 12
++2 18
+cfn=(1158)
+calls=3 1620 
+* 84
+* 12
++3 24
++5 6
+-1 3
++1 3
+cfn=(1158)
+calls=3 1620 
+* 60
+* 6
+
+fn=(1158)
+1620 39
++2 195
++3 39
++1 78
++2 156
+-3 39
++6 39
++1 39
++1 159
++2 46
++1 69
++3 46
++14 23
++1 23
++3 78
+
+fn=(1524) munmap_chunk
+3038 2
++2 2
+-1 2
++1 2
+-1 2
++1 2
++2 4
++3 4
++7 2
+-8 2
++9 2
+-8 2
++1 2
++6 6
++1 8
++3 2
++1 6
++5 2
++1 2
+-1 2
+cfi=(213)
+cfn=(1526)
+calls=2 117 
+* 10
+
+fn=(920) malloc
+3281 105
++7 42
+1338 42
++19 105
+3298 42
++2 84
++3 42
++10 30
++28 75
+-36 21
+3187 12
++1 12
++2 6
++1 6
+-1 18
++1 6
++1 6
+3341 30
+-26 60
+cfn=(932)
+calls=15 1338 
+* 6436
++1 75
+fi=(174)
+162 26
+fe=(173)
+
+fn=(1030) realloc
+3394 207
++6 46
++4 46
++7 46
++11 23
+-2 23
++5 23
+-3 46
++2 46
++4 69
+fi=(174)
+162 69
+fe=(173)
+3436 92
++1 46
+1338 46
++19 138
+3447 46
++31 46
++2 138
+cfn=(1034) _int_realloc
+calls=23 4814 
+* 398070
+* 23
++1 115
+fi=(174)
+162 92
+fe=(173)
+3481 46
++29 207
+
+fn=(1034)
+4814 161
++11 92
++1 92
++6 46
++2 46
++1 92
++2 92
++3 46
++14 1
++53 2
+-53 2
++57 1
+-57 1
++57 2
+-2 2
++19 1
++1 207
+-79 46
++12 18
++12 27
+cfn=(932)
+calls=9 1338 
+* 2001
+* 9
++1 18
++3 9
++1 9
++5 18
++8 9
+-1 9
++4 9
+-3 54
++3 9
+cfi=(193)
+cfn=(1002)
+calls=9 264 
+* 393617
+* 9
++1 36
+cfn=(1036) _int_free
+calls=9 4417 
+* 840
++2 9
++22 1
+-4 1
++3 1
++5 1
+-4 1
+-1 1
++1 1
++4 1
+-1 1
++1 1
+cfn=(1036)
+calls=1 4417 
+* 102
+* 1
+-60 4
+-1 8
++5 3
+cfn=(1158)
+calls=1 1620 
+* 32
++44 4
+-61 14
++1 14
+-2 28
++4 52
++2 13
+-2 13
++2 13
+-2 26
++1 13
+-1 26
++4 13
+-3 13
++1 13
++2 13
+
+fn=(1036)
+4417 232
++10 29
+-10 87
++10 58
++6 145
++1 58
++4 145
++8 145
+-1 58
++1 58
++9 14
++9 14
+-15 14
++6 28
++20 56
++14 44
++11 8
++2 6
+2006 6
+4523 2
++1 2
++4 4
++2 2
+-2 2
++2 2
++4 4
++2 8
++1 2
++19 4
+4698 319
+4565 40
++6 60
++7 20
+-4 20
++4 40
++3 40
++5 60
++3 40
++1 40
++1 40
+2006 60
+4597 40
++1 1
++2 1
+-1 1
++2 4
++2 2
+cfn=(1158)
+calls=1 1620 
+* 20
++3 40
++5 38
++4 6
++9 6
+-1 6
++1 18
++1 12
+-1 13
+-1 13
++1 39
++1 26
++12 19
+-10 19
++11 19
+-1 19
+-8 38
++2 30
++3 15
++1 15
++2 15
++1 15
++30 32
++1 21
++3 21
+3177 7
++2 7
+-4 7
++2 21
++1 7
++1 7
+4478 7
+4634 4
++1 4
++2 4
++1 4
++50 60
+-39 1
++1 3
++1 2
+-39 13
++1 13
+-1 13
+cfn=(1158)
+calls=13 1620 
+* 347
++1 13
++61 35
+
+fn=(934)
+2542 18
++20 8
++11 4
++1 4
+2958 22
+2575 6
++4 6
++9 8
+cfn=(1502) sysmalloc_mmap.constprop.0
+calls=2 2414 
+* 122
++1 4
+
+fn=(1040) free
+3350 42
+-4 21
++14 21
+-14 42
++12 21
++4 21
+-4 21
++4 42
++17 57
+fi=(174)
+162 57
+fe=(173)
+3385 38
+cfn=(1036)
+calls=19 4417 
+* 2217
++3 19
++1 76
+-23 6
++2 8
++2 4
++1 4
++4 4
+cfn=(1524)
+calls=2 3038 
+* 68
++13 2
++1 8
+
+fn=(1502)
+2414 6
++13 6
++5 4
++3 18
+cfi=(212)
+cfn=(1090)
+calls=2 47 
+* 16
+* 2
++3 4
++4 4
++18 6
++19 2
+-1 2
++5 2
+-4 4
++4 4
++1 8
++3 6
++1 10
++5 10
+2022 8
+
+fl=(155)
+fn=(874)
+cob=(7) /baseline
+cfi=(152) ???
+cfn=(882) main
+calls=0 0 
+58 1986242185
+
+fl=(266) ./time/../sysdeps/unix/sysv/linux/clock_gettime.c
+fn=(1986) clock_gettime@@GLIBC_2.17
+38 2
++2 2
++28 2
++1 2
+-25 1
++42 1
+
+ob=(1) /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+fl=(1) ???
+fn=(0) 0x000000000001ab70
+cob=(7)
+cfi=(152)
+cfn=(846) (below main)
+calls=0 0 
+0 1986242185
+
+ob=(7)
+fl=(152)
+fn=(1098) __rustc::__rust_no_alloc_shim_is_unstable_v2
+0 23
+
+fn=(1606) __umodti3
+0 23775472
+
+fn=(1660) __rustc::__rust_alloc_zeroed
+0 2
+cfn=(1662) __rustc::__rdl_alloc_zeroed
+calls=2 0 
+0 374
+
+fn=(1856) <crypto_lib::cryptanalysis::semaev_decomp::Gf2>::inv
+0 901952
+cfn=(1858) <crypto_lib::cryptanalysis::semaev_decomp::Gf2>::inv_clmul
+calls=53056 0 
+0 41489792
+
+fn=(1990) crypto_lib::cryptanalysis::ecbench::methods::solve_inner
+cfn=(2028) crypto_lib::cryptanalysis::ic_measurement::begin_online
+calls=0 0 
+0 143
+0 19
+cfn=(2036) <crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::solve
+calls=1 0 
+0 1986241988
+0 2
+cfn=(2066) crypto_lib::cryptanalysis::ic_measurement::end_online
+calls=1 0 
+0 33
+
+fn=(2018) rand_chacha::guts::refill_wide
+0 17
+cfn=(2020) rand_chacha::guts::refill_wide::impl_avx2
+calls=1 0 
+0 589
+
+fn=(2020)
+0 589
+
+fn=(2024) <crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::add
+0 3512958
+cfn=(2026) <crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::inv
+calls=106451 0 
+0 119970277
+0 1064510
+cfn=(1686) <crypto_lib::cryptanalysis::semaev_decomp::Gf2>::mul_fold
+calls=106451 0 
+0 1596765
+0 532255
+cfn=(1686)
+calls=106451 0 
+0 1596765
+0 851608
+cfn=(1686)
+calls=106451 0 
+0 1596765
+0 1170961
+
+fn=(2028)
+cfn=(2030) <crypto_lib::cryptanalysis::ic_measurement::Trace>::boundary
+calls=0 0 
+0 129
+0 14
+
+fn=(2060) __divti3
+0 550
+cfn=(2062) compiler_builtins::int::specialized_div_rem::u128_div_rem
+calls=22 0 
+0 462
+0 308
+
+fn=(1662)
+0 38
+cob=(3)
+cfi=(173)
+cfn=(1078)
+calls=2 3619 
+0 336
+
+fn=(1976) crypto_lib::cryptanalysis::ic_measurement::dump
+0 9
+
+fn=(2044) <crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::canonicalize
+0 1070864152
+
+fn=(2052) <hashbrown::raw::RawTable<((u8, u64, u64), (u64, u64))>>::reserve_rehash::<hashbrown::map::make_hasher<(u8, u64, u64), (u64, u64), std::hash::random::RandomState>::{closure#0}>
+0 528
+cfn=(2054) <hashbrown::raw::RawTableInner>::fallible_with_capacity::<alloc::alloc::Global>
+calls=16 0 
+0 267414
+0 1442040
+cfn=(2048) <std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&(u8, u64, u64)>
+calls=114684 0 
+0 35437356
+0 4014552
+cfn=(1264) __rustc::__rust_dealloc
+calls=15 0 
+0 2091
+0 15
+
+fn=(2056) <crypto_lib::cryptanalysis::semaev_decomp::Gf2>::batch_inv
+0 106112
+cfn=(2058) <crypto_lib::cryptanalysis::semaev_decomp::Gf2>::batch_inv_clmul
+calls=53056 0 
+0 148661459
+
+fn=(1106) std::rt::lang_start::<std::process::ExitCode>::{closure#0}
+cfn=(1108) std::sys::backtrace::__rust_begin_short_backtrace::<fn() -> std::process::ExitCode, std::process::ExitCode>
+calls=0 0 
+0 1986242185
+
+fn=(1266) __rustc::__rdl_dealloc
+0 21
+cob=(3)
+cfi=(173)
+cfn=(1040)
+calls=21 3350 
+0 2799
+
+fn=(1360) ecbench::run
+cfn=(1382) crypto_lib::cryptanalysis::ecbench::record::child_main
+calls=0 0 
+0 1986242185
+
+fn=(2034) <std::sys::pal::unix::time::Timespec>::sub_timespec
+0 37
+
+fn=(2038) std::sys::random::linux::hashmap_random_keys
+0 9
+cfn=(2040) std::sys::random::linux::getrandom
+calls=1 0 
+0 56
+0 5
+
+fn=(2046) <hashbrown::map::HashMap<(u8, u64, u64), (u64, u64), std::hash::random::RandomState>>::insert
+0 1694848
+cfn=(2048)
+calls=105928 0 
+0 32731752
+0 7802588
+cfn=(2052)
+calls=16 0 
+0 41163996
+0 64
+
+fn=(1110) ecbench::main
+cfn=(1360)
+calls=0 0 
+0 1986242185
+
+fn=(1156) __rustc::__rdl_realloc
+0 506
+cob=(3)
+cfi=(173)
+cfn=(1030)
+calls=23 3394 
+0 399749
+
+fn=(1382)
+cfn=(1978) crypto_lib::cryptanalysis::ecbench::methods::solve
+calls=0 0 
+0 1986242185
+
+fn=(1748) ceil
+0 23
+
+fn=(2062)
+0 483
+
+fn=(1520) <alloc::raw_vec::RawVec<u32>>::grow_one
+0 360
+cfn=(1126) <alloc::raw_vec::RawVecInner>::finish_grow
+calls=24 0 
+0 401037
+0 216
+
+fn=(1858)
+0 41489792
+
+fn=(2030)
+0 12
+cfn=(1976)
+calls=2 0 
+0 9
+0 1
+cfn=(1982) <std::time::Instant>::now
+calls=1 0 
+0 28
+0 8
+cfn=(2032) <std::time::Instant>::duration_since
+calls=1 0 
+0 55
+0 28
+
+fn=(2036)
+0 44
+cfn=(2018)
+calls=1 0 
+0 606
+0 576
+cfn=(2022) <crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::double
+calls=47 0 
+0 57413
+0 286
+cfn=(2024)
+calls=29 0 
+0 34717
+0 640
+cfn=(2022)
+calls=45 0 
+0 54917
+0 250
+cfn=(2024)
+calls=23 0 
+0 27283
+0 120
+cfn=(2024)
+calls=1 0 
+0 1239
+0 30
+cfn=(1748)
+calls=1 0 
+0 23
+0 46
+cfn=(1098)
+calls=1 0 
+0 1
+0 4
+cfn=(1100) __rustc::__rust_alloc
+calls=1 0 
+0 1793
+0 21
+cfn=(2042) <alloc::vec::Vec<crypto_lib::cryptanalysis::koblitz_strong_rho::Lane<u64, u64>>>::extend_with
+calls=1 0 
+0 903
+0 8
+cfn=(1098)
+calls=1 0 
+0 1
+0 3
+cfn=(1660)
+calls=1 0 
+0 188
+0 4
+cfn=(1098)
+calls=1 0 
+0 1
+0 3
+cfn=(1660)
+calls=1 0 
+0 188
+0 4
+cfn=(1098)
+calls=1 0 
+0 1
+0 4
+cfn=(1100)
+calls=1 0 
+0 51
+0 12153867
+cfn=(2024)
+calls=106382 0 
+0 131807298
+0 1276584
+cfn=(1606)
+calls=106382 0 
+0 1489348
+0 1595730
+cfn=(2044)
+calls=106382 0 
+0 67090944
+0 50353226
+cfn=(1520)
+calls=16 0 
+0 397445
+0 2118577
+cfn=(2048)
+calls=105928 0 
+0 32731752
+0 2595802
+cfn=(2060)
+calls=22 0 
+0 1320
+0 693
+cfn=(2064) __modti3
+calls=1 0 
+0 58
+0 15
+cfn=(1606)
+calls=1 0 
+0 14
+0 544
+cfn=(2022)
+calls=46 0 
+0 56165
+0 187
+cfn=(2024)
+calls=19 0 
+0 22327
+0 2012651
+cfn=(2046)
+calls=105928 0 
+0 83393248
+0 89248716
+cfn=(2056)
+calls=53056 0 
+0 148767571
+0 129403387
+cfn=(1686)
+calls=1591865 0 
+0 23877975
+0 7959325
+cfn=(1686)
+calls=1591865 0 
+0 23877975
+0 12734920
+cfn=(1686)
+calls=1591865 0 
+0 23877975
+0 42980355
+cfn=(1606)
+calls=1591865 0 
+0 22286110
+0 15918650
+cfn=(2044)
+calls=1591865 0 
+0 1003773208
+0 52248064
+cfn=(1520)
+calls=8 0 
+0 4168
+0 3552
+cfn=(1264)
+calls=1 0 
+0 90
+0 7
+cfn=(1264)
+calls=1 0 
+0 201
+0 6
+cfn=(1264)
+calls=1 0 
+0 133
+0 4
+cfn=(1264)
+calls=1 0 
+0 133
+0 7
+cfn=(1264)
+calls=1 0 
+0 128
+0 13
+cfn=(1264)
+calls=1 0 
+0 65
+0 11
+cfn=(2038)
+calls=1 0 
+0 70
+0 6
+
+fn=(2054)
+0 826
+cfn=(1098)
+calls=16 0 
+0 16
+0 48
+cfn=(1100)
+calls=16 0 
+0 5494
+0 272
+cob=(3)
+cfi=(205)
+cfn=(1068)
+calls=16 167 
+0 260566
+0 192
+
+fn=(884) std::rt::lang_start_internal
+cfn=(1106)
+calls=0 0 
+0 1986242185
+
+fn=(1100)
+0 21
+cfn=(1102) __rustc::__rdl_alloc
+calls=21 0 
+0 7470
+
+fn=(1102)
+0 189
+cob=(3)
+cfi=(173)
+cfn=(920)
+calls=21 3281 
+0 7281
+
+fn=(1108)
+cfn=(1110)
+calls=0 0 
+0 1986242185
+
+fn=(1126)
+0 48
+cfn=(1154) __rustc::__rust_realloc
+calls=1 0 
+0 305
+0 5
+cfn=(1098)
+calls=1 0 
+0 1
+0 3
+cfn=(1100)
+calls=1 0 
+0 51
+0 660
+cfn=(1154)
+calls=22 0 
+0 399973
+0 50
+cfn=(1098)
+calls=2 0 
+0 2
+0 6
+cfn=(1100)
+calls=2 0 
+0 102
+0 268
+
+fn=(1978)
+cfn=(1990)
+calls=0 0 
+0 1986242185
+
+fn=(2022)
+0 2436
+cfn=(2026)
+calls=135 0 
+0 152145
+0 1080
+cfn=(1686)
+calls=135 0 
+0 2025
+0 810
+cfn=(1686)
+calls=135 0 
+0 2025
+0 945
+cfn=(1686)
+calls=135 0 
+0 2025
+0 810
+cfn=(1686)
+calls=135 0 
+0 2025
+0 2169
+
+fn=(2040)
+0 32
+cob=(3)
+cfi=(175)
+cfn=(926)
+calls=1 29 
+0 7
+0 17
+
+fn=(2064)
+0 24
+cfn=(2062)
+calls=1 0 
+0 21
+0 13
+
+fn=(1138) <alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global>
+0 54
+cfn=(1126)
+calls=2 0 
+0 437
+0 18
+
+fn=(1264)
+0 21
+cfn=(1266)
+calls=21 0 
+0 2820
+
+fn=(2048)
+0 7183880
+cfn=(2050) <core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::write
+calls=326540 0 
+0 10775820
+0 1959240
+cfn=(2050)
+calls=326540 0 
+0 28082440
+0 1959240
+cfn=(2050)
+calls=326540 0 
+0 28082440
+0 22857800
+
+fn=(846)
+cob=(3)
+cfi=(153)
+cfn=(848)
+calls=0 242 
+0 1986242185
+
+fn=(1982)
+0 2
+cfn=(1984) <std::sys::pal::unix::time::Timespec>::now
+calls=1 0 
+0 26
+
+fn=(2032)
+0 10
+cfn=(2034)
+calls=1 0 
+0 37
+0 8
+
+fn=(2058)
+0 1403212
+cob=(3)
+cfi=(205)
+cfn=(1068)
+calls=11239 167 
+0 125497
+0 46759319
+cfn=(1856)
+calls=53056 0 
+0 42391744
+0 57981162
+cfn=(1138)
+calls=2 0 
+0 509
+0 16
+
+fn=(882)
+cfn=(884)
+calls=0 0 
+0 1986242185
+
+fn=(1154)
+0 23
+cfn=(1156)
+calls=23 0 
+0 400255
+
+fn=(1686)
+0 95617800
+
+fn=(1984)
+0 6
+cob=(3)
+cfi=(266)
+cfn=(1986)
+calls=1 38 
+0 10
+0 10
+
+fn=(2026)
+0 94222024
+cfn=(1686)
+calls=532930 0 
+0 7993950
+0 3410752
+cfn=(1686)
+calls=319758 0 
+0 4796370
+0 1279032
+cfn=(1686)
+calls=319758 0 
+0 4796370
+0 2025134
+cfn=(1686)
+calls=106586 0 
+0 1598790
+
+fn=(2042)
+0 864
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=1 264 
+0 29
+0 10
+
+fn=(2050)
+0 66940700
+
+fn=(2066)
+0 21
+cfn=(2030)
+calls=1 0 
+0 12
+
+totals: 1986242185

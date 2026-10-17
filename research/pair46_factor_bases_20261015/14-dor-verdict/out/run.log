@@ -1,0 +1,77 @@
+warning: method `obj` is never used
+  --> src/json.rs:29:12
+   |
+13 | impl V {
+   | ------ method in this implementation
+...
+29 |     pub fn obj(&self) -> Option<&Vec<(String, V)>> {
+   |            ^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+[R1] m2_n9_d3_s2
+[R1] m2_n9_d3_s3
+[R1] m2_n11_d2_s1
+[R1] m2_n11_d2_s2
+[R1] m2_n11_d2_s3
+[R1] m2_n11_d3_s2
+[R1] m2_n11_d3_s3
+[R1] m2_n11_d4_s1
+[R1] m2_n11_d4_s2
+[R1] m2_n11_d4_s3
+[R1] m2_n11_d5_s1
+[R1] m2_n11_d5_s2
+[R1] m2_n11_d5_s3
+[R1] m2_n13_d2_s1
+[R1] m2_n13_d2_s2
+[R1] m2_n13_d2_s3
+[R1] m2_n13_d3_s1
+[R1] m2_n13_d3_s2
+[R1] m2_n13_d3_s3
+[R1] m2_n13_d4_s1
+[R1] m2_n13_d4_s2
+[R1] m2_n13_d4_s3
+[R1] m2_n13_d5_s1
+[R1] m2_n13_d5_s3
+[R1] m2_n13_d6_s1
+[R1] m2_n13_d6_s2
+[R1] m2_n13_d6_s3
+[R1] m2_n15_d3_s1
+[R1] m2_n15_d3_s2
+[R1] m2_n15_d3_s3
+[R1] m2_n15_d5_s1
+[R1] m2_n15_d5_s2
+[R1] m2_n15_d5_s3
+[R3] m2_n17_d2_s1
+[R3] m2_n17_d2_s2
+[R3] m2_n17_d3_s1
+[R3] m2_n17_d3_s2
+[R3] m2_n17_d4_s1
+[R3] m2_n17_d4_s2
+[R3] m2_n17_d5_s1
+[R3] m2_n17_d5_s2
+[R3] m2_n17_d6_s1
+[R3] m2_n17_d6_s2
+[R3] m2_n17_d7_s1
+[R3] m2_n17_d7_s2
+[R3] m2_n17_d8_s1
+[R3] m2_n17_d8_s2
+[R4] m2_n19_d2_s1
+[R4] m2_n19_d2_s2
+[R4] m2_n19_d3_s1
+[R4] m2_n19_d3_s2
+[R4] m2_n19_d4_s1
+[R4] m2_n19_d4_s2
+[R4] m2_n19_d5_s1
+[R4] m2_n19_d5_s2
+[R4] m2_n19_d6_s1
+[R4] m2_n19_d6_s2
+[R4] m2_n19_d7_s1
+[R4] m2_n19_d7_s2
+e2 done in 34.6s
+Terminated
+analyze done in 1.3s
+
+real	10m54.753s
+user	8m29.500s
+sys	0m2.549s
