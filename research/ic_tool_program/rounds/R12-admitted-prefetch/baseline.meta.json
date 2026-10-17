@@ -1,0 +1,14 @@
+{
+ "baseline": "v8",
+ "previous": "v7",
+ "round": "R12",
+ "class": "engineering",
+ "commit": "92246530 + R06 candidate-v4.patch + R08 candidate-v5.patch + R11 candidate-v6.patch + R12 candidate-v7.patch",
+ "built_from": "23138d20b1d64cbb7f54a27e41cd08e1d1a38b0c (local; v7, tree bdd975b7, plus research/ic_tool_program/rounds/R12-admitted-prefetch/candidate-v7.patch)",
+ "base": "v7 (binary 85116c2a…)",
+ "src_tree": "f7aa66d6c2efa5355278bc3151e04628d7802e7b",
+ "binary_sha256": "3ba2f76565c3f9ae54aa63d8f24a26d18cc26f18a2d68de9fd4496280e48e3db",
+ "source": "research/ic_tool_program/rounds/R12-admitted-prefetch/analysis.json",
+ "what_changed": "the collection scan's admitted keys: a second pass between the filter pass and the lookups reads each admitted key's bucket entry and prefetches its run's first and last words, so the runs' misses overlap; every lookup, match and order unchanged; a prefetch is a hint, so it runs on every x86 host, measured on the reference class; it costs 1-5% at the suite's smaller sizes",
+ "measured": "R12's comparison: M1's two rows at the eight smaller sizes and all eight at the three target sizes, five rounds each, paired with v6 in the same runs; s_cold is the candidate's median in v0's unit"
+}

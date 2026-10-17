@@ -729,6 +729,25 @@ nothing missing. R09's class excludes it.
 - **Next:** R12, the admitted keys' runs prefetched (A13), declared on v7
   ([protocol](../../ic_tool_program/rounds/R12-admitted-prefetch/PROTOCOL.md)).
 
+**R12 accepted: v8 is v7 plus the admitted-run prefetch (2026-10-17).**
+- **The gain.** Cold time, v7 over the candidate: 1.055 [1.036, 1.075],
+  1.055 [1.038, 1.072] and 1.063 [1.053, 1.073] at the three target sizes,
+  and 1.065, 1.057 and 1.061 on fresh holdouts. Every interval lies above
+  the declared 1.03, and collection ran 1.08–1.11× faster.
+- **Smaller than predicted** (1.06–1.11, 1.10–1.17 and 1.06–1.12): the
+  exploration's few pairs had overstated it.
+- **It costs at the smaller sizes.** From `2^24.8` to `2^38.0` v8 is 1–5%
+  slower than v7; at `2^27.8` the interval lies wholly below 1
+  (0.971 [0.950, 0.992]). That is inside the A/A rule, but it is real: the
+  second pass pays only where the table outgrows the cache.
+- **Chained,** R06, R08, R11 and R12 make cold time 1.90–1.98× faster than
+  v4 at the three target sizes (a product of paired ratios)
+  ([results](../../ic_tool_program/rounds/R12-admitted-prefetch/README.md)).
+- **Next:**
+  - a size-gated pass, to give the smaller sizes their time back;
+  - R04's stage probes at v8, to see where a scanned summand's time now
+    goes before the next lever is chosen.
+
 ## 9. Track B: generality and robustness
 
 **Where the tool stands (at `0bf67f16`).**
