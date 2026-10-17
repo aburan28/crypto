@@ -1,0 +1,38 @@
+{
+  "ok": true,
+  "records_sha256": "72caabe3200b096e046641334a3f425b2b5dc5d757bad64d3d14d1458dd1a6c5",
+  "replayer_binary_sha256": "8ec9d8a87d7926fcb3fd1e301540508ba2585505456ca438659f58ea86cad3ae",
+  "replays": [
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1h87b7367954f2",
+      "reproduced": true,
+      "seq": 3
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1haefd01b98206",
+      "reproduced": true,
+      "seq": 4
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1h418fe1f5a23b",
+      "reproduced": true,
+      "seq": 7
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1h683ee4fc5eb1",
+      "reproduced": true,
+      "seq": 15
+    }
+  ],
+  "schema": "volcano-exhaustion-replay/v1",
+  "scope": "Measured deterministic exhausted records; successful records replayed by ecbench verify; timeouts have no deterministic final report.",
+  "session": "/workspace/volcano_ic_survey_20261017/sessions/two-v10-attempt-001"
+}

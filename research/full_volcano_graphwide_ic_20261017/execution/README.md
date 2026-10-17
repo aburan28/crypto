@@ -4,6 +4,24 @@ The control and pilot have run. The frozen [execution addendum](PROTOCOL.md)
 defines a separate bounded survey over all 24,823 vertices of the three
 additional complete graphs. It preserves the original full matrix and A--E.
 
+The stopped dev-build checkpoint now covers **99 vertices and all 51 strata**:
+**1,584 attempts, 1,065 verified, 422 exhausted, 97 timed out**. The native
+[summary v2](survey-99-summary-v2/summary.json) contains per-stratum/arm/status
+min/max/mean with explicit sample counts. The
+[three-page inspected report](../reports/run-20261017T0337Z-all-strata/report.pdf)
+plots every stratum. [Download the self-contained checkpoint](https://drive.google.com/file/d/1hLVWVad2SrgHaBn6U5iSyqnKbx5cAkeY/view)
+or inspect its [delivery receipt](delivery-99.json). This covers every stratum,
+not every vertex. The original dev campaign is paused, not running.
+
+An optimized build passed the same control and three-root pilot. All **56
+completed deterministic pairs** match the dev build exactly; **four censored
+pairs** have no completed baseline report to compare. The
+[native receipts](evidence/release-pilot-match.json), separate
+[release QA summary](release-qa-summary-v2/summary.json) and frozen
+[optimized continuation](optimized-continuation/optimization.json) retain that
+distinction. No optimized speedup is claimed. The new full-queue campaign uses
+a separate binary, ledger and output directory; planning alone is not execution.
+
 Observed pilot: **48 attempts, 30 verified, 14 exhausted, 4 timed out**.
 Small control: **12 attempts, 8 verified, 4 exhausted**. Both projected-base
 oracles solve both control targets. All four sessions pass the standard audit,
@@ -82,6 +100,40 @@ min/max/arithmetic mean with explicit n and separate outcomes. Timeout
 counters stay missing. GAE totals are lower bounds wherever work is unpriced;
 native `ecbench band` retains common 0/0.1/1 GAE sensitivity for all arms.
 No speed ranking or admitted runtime claim follows from this diagnostic.
+The [99-node native pricing band](survey-99-summary-v2/pricing-band.json)
+contains all 792 curve/arm rows, using common weights 0/0.1/1 on every arm.
+The [release QA band](release-qa-summary-v2/pricing-band.json) stays separate.
+These are supplemental [uploads](delivery-pricing-bands.json) outside the frozen
+archives; unavailable counts and incomplete pairs remain unrankable.
+
+Yield accounting correction: `targets_tried` includes repeated source queries
+skipped before the oracle. The 99-vertex checkpoint has **2,223,204 source
+trials**, **2,075,145 actual decomposition calls** and **57,176 relations**.
+Summary v2 reports yields per trial and per actual call separately; it checks
+all 594 completed MITM call denominators against native lookup counts. Earlier
+reports' "decompositions" label refers to source trials, not actual calls.
+Those reports and sealed records remain unchanged. These pooled counts span
+different subgroups/arms and are not a common success probability. Cross-binary
+pooling and duplicate workload/arm/round/seed observations are refused.
+
+For the projected size-64 MITM arm, native graph-aggregate rows show:
+
+| Source model | Completed attempts / outcome | Actual-call yield min / mean / max |
+| --- | --- | --- |
+| `icv1-fp57-t536870914-6cabb0c9` | 60 verified | 0.101992 / 0.125942 / 0.156250 |
+| `icv1-fp57-tm536870941-e6d0c766` | 50 exhausted | 0 / 0 / 0 |
+| `icv1-fp59-t1073741954-4dd0b1ef` | 88 verified | 0.787709 / 0.860825 / 0.930380 |
+
+These are arithmetic means over completed recorded attempts, separated by
+outcome. The 45-bit prime subgroup has no relation in these 50 bounded attempts.
+Different subgroup sizes and source models prevent attributing the differences
+to conductor alone. See the native per-stratum rows for the actual populations;
+these graph aggregates do not stand in for unmeasured vertices.
+
+New sealed capsules and replay receipts stay loose where the verifier and
+browser name their paths. Auxiliary logs are a deterministic
+[archive](supplemental-run-logs/README.md), as required by AGENTS.md §13a.
+The original first 12 capsules are not duplicated in the new 87-node increment.
 
 ## Open requirements
 
@@ -96,9 +148,13 @@ Original A/C/D/E full graphs remain storage-blocked.
 
 [Measured data and inspected reports on Drive](https://drive.google.com/drive/folders/109DpcQpX7ATz6GeI8iSWAExGMWBoR-H_).
 The measured archive is separate from the earlier inputs/NOT_RUN upload.
-Its frozen survey snapshot has 12 of 24,823 vertices audited, with 192
+The earlier frozen survey snapshot has 12 of 24,823 vertices audited, with 192
 attempts: 119 verified, 58 exhausted and 15 timed out. The full queue and
 per-stratum completion ledger are included; queued rows are not solved rows.
+The new 99-node archive preserves that earlier upload and includes the complete
+three graphs, frozen dev binaries, queue, ledger, raw sessions, receipt-binding
+inventory and corrected native statistics. Remote name, size and parent were
+read back; a remote whole-file hash was not checked.
 
 Conductor reservation was attempted for implementation/report scopes but the
 tool is unavailable (127). Full-root historical test/catalogue obstructions

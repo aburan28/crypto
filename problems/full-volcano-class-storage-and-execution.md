@@ -31,8 +31,9 @@ Those are separate acceptance conditions; merging tooling cannot discharge them.
   nonzero generator at every vertex; see
   [the full-graph IC protocol](../research/full_volcano_graphwide_ic_20261017/PROTOCOL.md)
   and its `evidence/inventory.json`. A separate bounded native IC campaign
-  has now executed controls, a three-root pilot and a 12-vertex survey prefix.
-  The prefix has 192 attempts (119 verified, 58 exhausted, 15 timed out),
+  has now executed controls, a three-root pilot and a 99-vertex checkpoint
+  covering all 51 strata. The checkpoint has 1,584 attempts
+  (1,065 verified, 422 exhausted, 97 timed out),
   with standard audits and successful/exhausted deterministic replays;
   [reports and source](../research/full_volcano_graphwide_ic_20261017/execution/README.md).
   Its full queue covers every vertex; current completion comes from its ledger.
@@ -40,7 +41,9 @@ Those are separate acceptance conditions; merging tooling cannot discharge them.
   representation registration and qualified full-matrix execution remain open.
   A checked cofactor-projected subgroup base and resumable bounded driver now
   exist; two focused tests pass and exhausted records have supplemental replay.
-  L0/debug measurements do not establish qualified runtimes. The full matrix and its storage/core
+  L0/debug measurements do not establish qualified runtimes. Separate release
+  gates match 56 completed deterministic records exactly; four timeout pairs
+  remain incomparable. A separate optimized full-queue campaign is frozen. The full matrix and its storage/core
   cost have not been provisioned or estimated from a qualified pilot. The
   available MOV implementation supports a supersingular k=2 teaching path
   with BSGS/PH, not finite-field IC for the exact embedding degrees 30875,

@@ -239,8 +239,14 @@ def ecbench_sessions(curves_by_slug: dict) -> tuple[list[dict], list[dict], list
                 if fb:
                     f = fbs.setdefault(
                         fb["fb_id"],
-                        {**{k: fb.get(k) for k in ("fb_id", "fb_sha256", "family", "params", "description", "signed_points", "abscissae", "columns", "dimension", "points_sha256")}, "curve": slug, "sessions": set(), "methods": set()},
+                        {**{k: fb.get(k) for k in ("fb_id", "fb_sha256", "family", "params", "description", "signed_points", "abscissae", "columns", "dimension", "points_sha256")}, "curve": slug if slug in curves_by_slug else None, "sessions": set(), "methods": set()},
                     )
+                    if slug and slug not in curves_by_slug:
+                        # A frozen record can name a model whose exact subgroup
+                        # representation is still pending registration. Preserve
+                        # that identity without emitting a broken registry link.
+                        f["recorded_curve"] = slug
+                        f["registration_status"] = "pending"
                     f["sessions"].add(s["session_id"])
                     f["methods"].add(m["method_id"])
                 if r.get("warmup") or not slug:

@@ -13,9 +13,13 @@ vertices and 51 strata**. This is workload preparation, not a solver benchmark.
 **Execution update:** [native control and pilot measurements](execution/README.md)
 now exist: 60 attempts total, 38 verified, 18 exhausted, 4 timed out. All
 successful and exhausted deterministic reports reproduce on replay. A separate
-checkpointed bounded survey is executing the complete 24,823-vertex queue,
-with the 51 stratum representatives first. Consult its ledger for current
-coverage. The original full matrix and A--E remain open. The preparation
+checkpointed bounded survey has a stopped, audited checkpoint of **99 vertices
+across all 51 strata**, with 1,584 attempts (1,065 verified, 422 exhausted,
+97 timed out). [Download the complete measured checkpoint and graphs](https://drive.google.com/file/d/1hLVWVad2SrgHaBn6U5iSyqnKbx5cAkeY/view).
+The separate optimized continuation has frozen the complete 24,823-vertex queue
+after 56 exact completed deterministic profile comparisons, with four censored
+pairs excluded. Consult its launch receipt and ledger for execution status;
+planning alone is not execution. The original full matrix and A--E remain open. The preparation
 archive below is an unchanged historical NOT_RUN snapshot.
 
 [Download the certified inputs and preparation report](https://drive.google.com/file/d/1SPpdcNjm7q6ChcMkaty0NgED8lyHofHq/view?usp=drivesdk).
@@ -68,6 +72,6 @@ workspace temporary directory succeeded. All prior datasets were preserved.
 Next acceptance gate: registered exact representations and an audited native
 control/pilot with subgroup-correct relations, complete cold costs and matched
 references; then cost/provision and execute the complete frozen matrix.
-The original full matrix has not launched. A separate bounded survey is now
-running; current coverage is recorded in its execution ledger. The workload
+The original full matrix has not launched. The dev bounded survey is paused;
+optimized continuation and current coverage are recorded separately. The workload
 archive is labeled inputs/NOT_RUN and is not a set of benchmark results.
