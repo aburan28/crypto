@@ -1,0 +1,16 @@
+# REDTEAM — 12-model-small-x (2026-10-15)
+
+Verdict: **not refuted.** The headline (exact obstruction for pair 46; null on 240 toy curves with working positive controls) holds up. There are wording issues only (below).
+
+## Checks done
+- **Preregistration.** The PROTOCOL.md mtime (16:41:58) is earlier than src/main.rs (16:44:29) and the run (16:45:28). sha256 of PROTOCOL.md (aedc3b41…9a3f) and of main.rs (1dccee3b…a484) match run.log. The arms, sizes, curve counts, metric, margin, Bonferroni level (0.05/21) and 20000 resamples in the code match the protocol. The smoke run is disclosed.
+- **Re-run.** I copied the sources to a scratch directory and ran `model_small_x 16 2100` there (27 s, 1 core). All 1020 b=16 records, all b=16 summaries and part_a are **bit-identical** to the committed results.json. b=20/22 were not re-run.
+- **Numbers.** All 21 preregistered tests (7 arms x 3 sizes) are `indistinguishable` in results.json. The largest b=22 test-arm Bonferroni bound is 0.098%. R-sym2 is indistinguishable in all 6 cells. PC1 is -98.02 / -99.50 / -99.75%, and PC2 is -19.6 to -20.4% with Bonferroni half-widths ≤ ~0.75%. Semaev: 312000 checked, 0 disagreements, 0 degenerate (= 13 negation-closed arms x 120 curves x 200 targets). failures = []. Every arm has exactly K distinct points (asserted in code).
+- **Instrument.** One `coverage()` function is used for every arm. The controls are the right null: random sets of the same size and the same negation symmetry. E-x and H-x are compared with R-asym.
+- **Part A, checked independently in Python.** t = 34489701, and the twist order p+1+t = 5947698065141045 = 5(t+2)^2. N and the twist order are both odd and both ≡ 2 mod 3. gcd(x^p - x, x^3+ax+b) has degree 0 for both the crater and the floor curve. Each discriminant is a nonzero square, which is consistent with an irreducible cubic (Stickelberger). The cited model theorems are standard and correctly stated: 4 | #E for Montgomery/twisted Edwards, rational 2-torsion for Jacobi quartic/Huff, rational 3-torsion for (twisted/generalized) Hessian.
+
+## Issues (minor, no claim reversed)
+1. **A4 is labelled "exact" but is a first-order heuristic.** Removing K/2 of the ~K^2/2 pairs changes C = 1-e^{-λ} by about e^{-λ}·(K/2)/N, a relative change of about 0.77/K. That gives 0.30%, 0.075% and 0.038% at K = 256/1024/2048, not "1/K = 0.39/0.10/0.05%". The measured gaps fit either figure within noise, so "exactly explains" is overstated. The mechanism (P+(-P)=O and P+σ(P)=T wasting pairs) is right.
+2. **The coverage metric is nearly forced by A3.** Any set without additive structure gives C ≈ 1-e^{-K^2/2N}. The null is therefore the expected outcome, and the experiment does not test where curve models are known to matter: the degree and symmetry of summation polynomials, and Groebner/solving cost (e.g. 2-torsion symmetries in Edwards/Jacobi models). The headline is correctly scoped to m=2 coverage, but it should not be read as "models never help index calculus".
+3. **PC1 is trivial.** Its coverage is exactly (2K+1)/N, so it does not exercise the detector's resolution. PC2 (~20%, ~20x the margin) is the informative control. Neither control has the kind of structure a model change could plausibly induce, but both show adequate power.
+4. "PC2 ± 0.7%" is approximate: H b=22 Bonferroni is [-21.03, -19.86]%.

@@ -4,15 +4,30 @@
 A *generic* algorithm for the discrete logarithm sees group elements only
 through handles: it may ask the oracle to multiply or invert the elements
 behind handles (getting a new handle), or to test two handles for equality
-(getting a `Bool`). It never sees a representation. This is the
-Nechaev–Shoup model; Pollard rho, baby-step giant-step and the kangaroo are
-instances of it.
+(getting a `Bool`). It never sees a representation. This is Nechaev's
+model: the algorithm's control flow depends only on group-operation
+outcomes (equality answers) and its random tape. Baby-step giant-step is an
+instance of it.
+
+**Scope (correction, 2026-10-16, sheriff case SHF-20261016-3caa6f, L5).**
+An earlier version of this comment said Pollard rho and the kangaroo are
+instances of this model. The implementations that ecbench measures are
+not. They choose each step by hashing the point's representation:
+`mix(g.key(&pos))` in the kangaroo (`src/cryptanalysis/ecbench/generic.rs`,
+line 275) and `mix(self.g.key(x))` in the rho walk
+(`src/cryptanalysis/ic_boundary.rs`, `TunedWalker::index`). Here `Alg.next`
+never receives an element or a representation, so the theorem below says
+nothing about those walks. The sheriff case ran a toy demonstration, not
+on ecbench itself: on `Z_1019` and its isomorphic image in `F_2039^*`, a
+representation-hashing r-adding walk had a different cost on 197 of 200
+transported instances, and BSGS had a different transcript on 0 of 200.
+No theorem in this file is changed.
 
 The theorem: a generic algorithm's whole transcript, hence its operation
 count and its answer, is the same on two groups joined by an injective
 homomorphism, for every random tape and every step bound. In particular
 its cost distribution is the same on two isomorphic groups, so no generic
-algorithm can see any invariant of an elliptic curve that is not an
+algorithm in this model can see any invariant of an elliptic curve that is not an
 invariant of its group of points: not the j-invariant, not the
 endomorphism ring, not its conductor.
 
