@@ -1,0 +1,5487 @@
+{
+  "arms": {
+    "ic-d4-lp1": {
+      "crossover_relations_slope_sensitivity": [
+        {
+          "h": 2.0,
+          "log2_group_star": 72.4944264874695,
+          "relations_slope": 0.42557813228230135,
+          "relations_slope_at": "low"
+        },
+        {
+          "h": 4.0,
+          "log2_group_star": 73.76548119884474,
+          "relations_slope": 0.42557813228230135,
+          "relations_slope_at": "low"
+        },
+        {
+          "h": 16.0,
+          "log2_group_star": 76.30815011147945,
+          "relations_slope": 0.42557813228230135,
+          "relations_slope_at": "low"
+        },
+        {
+          "h": 2.0,
+          "log2_group_star": null,
+          "relations_slope": 2.5545287924297857,
+          "relations_slope_at": "high"
+        },
+        {
+          "h": 4.0,
+          "log2_group_star": null,
+          "relations_slope": 2.5545287924297857,
+          "relations_slope_at": "high"
+        },
+        {
+          "h": 16.0,
+          "log2_group_star": null,
+          "relations_slope": 2.5545287924297857,
+          "relations_slope_at": "high"
+        }
+      ],
+      "crossovers": [
+        {
+          "log2_group_star": 174.26433264084076,
+          "log2_group_star_boot95": [
+            150.20942703040353,
+            209.61452383338533
+          ],
+          "log2_p_back_above": null,
+          "log2_p_star": 43.56608316021019,
+          "log2_p_star_boot95": [
+            37.55235675760088,
+            52.403630958346334
+          ],
+          "log2_reach_beyond_top_rung": 36.34691463974803,
+          "replicates_without_crossing": 0,
+          "rho": "h=2",
+          "top_rung_p": 149,
+          "variant": "wiedemann"
+        },
+        {
+          "log2_group_star": 178.18631271763456,
+          "log2_group_star_boot95": [
+            153.5158453418774,
+            214.43684106344514
+          ],
+          "log2_p_back_above": null,
+          "log2_p_star": 44.54657817940864,
+          "log2_p_star_boot95": [
+            38.37896133546935,
+            53.609210265861286
+          ],
+          "log2_reach_beyond_top_rung": 37.32740965894648,
+          "replicates_without_crossing": 0,
+          "rho": "h=4",
+          "top_rung_p": 149,
+          "variant": "wiedemann"
+        },
+        {
+          "log2_group_star": 186.03027296565412,
+          "log2_group_star_boot95": [
+            160.0988085368629,
+            224.08147552525736
+          ],
+          "log2_p_back_above": null,
+          "log2_p_star": 46.50756824141353,
+          "log2_p_star_boot95": [
+            40.02470213421572,
+            56.02036888131434
+          ],
+          "log2_reach_beyond_top_rung": 39.28839972095137,
+          "replicates_without_crossing": 0,
+          "rho": "h=16",
+          "top_rung_p": 149,
+          "variant": "wiedemann"
+        },
+        {
+          "log2_group_star": 206.94355849038828,
+          "log2_group_star_boot95": null,
+          "log2_p_back_above": null,
+          "log2_p_star": 51.73588962259707,
+          "log2_p_star_boot95": null,
+          "log2_reach_beyond_top_rung": 44.51672110213491,
+          "replicates_without_crossing": 518,
+          "rho": "rho_power_law",
+          "top_rung_p": 149,
+          "variant": "wiedemann"
+        },
+        {
+          "log2_group_star": 174.26432968407173,
+          "log2_group_star_boot95": [
+            150.20941399620224,
+            209.82740011156775
+          ],
+          "log2_p_back_above": null,
+          "log2_p_star": 43.56608242101793,
+          "log2_p_star_boot95": [
+            37.55235349905056,
+            52.45685002789194
+          ],
+          "log2_reach_beyond_top_rung": 36.34691390055577,
+          "replicates_without_crossing": 0,
+          "rho": "h=2",
+          "top_rung_p": 149,
+          "variant": "dense_gauss"
+        },
+        {
+          "log2_group_star": 178.18630947527527,
+          "log2_group_star_boot95": [
+            153.51583046854037,
+            214.95523698698963
+          ],
+          "log2_p_back_above": null,
+          "log2_p_star": 44.54657736881882,
+          "log2_p_star_boot95": [
+            38.37895761713509,
+            53.73880924674741
+          ],
+          "log2_reach_beyond_top_rung": 37.327408848356654,
+          "replicates_without_crossing": 0,
+          "rho": "h=4",
+          "top_rung_p": 149,
+          "variant": "dense_gauss"
+        },
+        {
+          "log2_group_star": 186.03026906683382,
+          "log2_group_star_boot95": [
+            160.09880762436558,
+            225.87403976301798
+          ],
+          "log2_p_back_above": null,
+          "log2_p_star": 46.507567266708456,
+          "log2_p_star_boot95": [
+            40.024701906091394,
+            56.468509940754494
+          ],
+          "log2_reach_beyond_top_rung": 39.288398746246294,
+          "replicates_without_crossing": 0,
+          "rho": "h=16",
+          "top_rung_p": 149,
+          "variant": "dense_gauss"
+        },
+        {
+          "log2_group_star": 206.94355109414144,
+          "log2_group_star_boot95": null,
+          "log2_p_back_above": null,
+          "log2_p_star": 51.73588777353536,
+          "log2_p_star_boot95": null,
+          "log2_reach_beyond_top_rung": 44.5167192530732,
+          "replicates_without_crossing": 659,
+          "rho": "rho_power_law",
+          "top_rung_p": 149,
+          "variant": "dense_gauss"
+        }
+      ],
+      "fits": {
+        "linear_algebra": {
+          "const_ln": -3.9533249720442707,
+          "df": 4,
+          "local_slopes": [
+            {
+              "p": [
+                29.0,
+                37.0
+              ],
+              "slope": 0.8646214065820855
+            },
+            {
+              "p": [
+                37.0,
+                53.0
+              ],
+              "slope": 0.7376931824324856
+            },
+            {
+              "p": [
+                53.0,
+                61.0
+              ],
+              "slope": 6.0131403225419175
+            },
+            {
+              "p": [
+                61.0,
+                101.0
+              ],
+              "slope": 1.507408913825202
+            },
+            {
+              "p": [
+                101.0,
+                149.0
+              ],
+              "slope": 0.9290552720121592
+            }
+          ],
+          "slope": 1.624025465542207,
+          "slope_boot95": [
+            1.4517043025711354,
+            1.8791263913647562
+          ],
+          "slope_ci95_union": [
+            1.1072384357260607,
+            2.1408124953583534
+          ],
+          "slope_se": 0.18616247471763203,
+          "slope_t95": [
+            1.1072384357260607,
+            2.1408124953583534
+          ]
+        },
+        "other": {
+          "const_ln": 2.0295539892599663,
+          "df": 4,
+          "local_slopes": [
+            {
+              "p": [
+                29.0,
+                37.0
+              ],
+              "slope": 1.3775436564349732
+            },
+            {
+              "p": [
+                37.0,
+                53.0
+              ],
+              "slope": 1.3384454080744266
+            },
+            {
+              "p": [
+                53.0,
+                61.0
+              ],
+              "slope": 0.8032145600891094
+            },
+            {
+              "p": [
+                61.0,
+                101.0
+              ],
+              "slope": 1.3789768755505964
+            },
+            {
+              "p": [
+                101.0,
+                149.0
+              ],
+              "slope": 0.9967303060588266
+            }
+          ],
+          "slope": 1.2384481733746489,
+          "slope_boot95": [
+            1.2362036179433467,
+            1.2406901450989192
+          ],
+          "slope_ci95_union": [
+            1.1513233565916332,
+            1.3255729901576645
+          ],
+          "slope_se": 0.03138502045497686,
+          "slope_t95": [
+            1.1513233565916332,
+            1.3255729901576645
+          ]
+        },
+        "relations": {
+          "const_ln": 15.131582223191117,
+          "df": 4,
+          "local_slopes": [
+            {
+              "p": [
+                29.0,
+                37.0
+              ],
+              "slope": 6.347657433444739
+            },
+            {
+              "p": [
+                37.0,
+                53.0
+              ],
+              "slope": 0.9052090129564502
+            },
+            {
+              "p": [
+                53.0,
+                61.0
+              ],
+              "slope": -2.4452804236902748
+            },
+            {
+              "p": [
+                61.0,
+                101.0
+              ],
+              "slope": 0.9331197788025849
+            },
+            {
+              "p": [
+                101.0,
+                149.0
+              ],
+              "slope": 3.0498136732265144
+            }
+          ],
+          "slope": 1.4900534623560435,
+          "slope_boot95": [
+            1.3933095238919058,
+            1.586099219766731
+          ],
+          "slope_ci95_union": [
+            0.42557813228230135,
+            2.5545287924297857
+          ],
+          "slope_se": 0.38345653100639127,
+          "slope_t95": [
+            0.42557813228230135,
+            2.5545287924297857
+          ]
+        },
+        "shadow_gauss": {
+          "const_ln": -5.735835578619315,
+          "df": 4,
+          "local_slopes": [
+            {
+              "p": [
+                29.0,
+                37.0
+              ],
+              "slope": -0.5924845036790694
+            },
+            {
+              "p": [
+                37.0,
+                53.0
+              ],
+              "slope": 1.4591976603391792
+            },
+            {
+              "p": [
+                53.0,
+                61.0
+              ],
+              "slope": 5.3863674098880665
+            },
+            {
+              "p": [
+                61.0,
+                101.0
+              ],
+              "slope": 1.5495969534878007
+            },
+            {
+              "p": [
+                101.0,
+                149.0
+              ],
+              "slope": 0.9539937968463591
+            }
+          ],
+          "slope": 1.6104578434458365,
+          "slope_boot95": [
+            1.3382959290922702,
+            2.076107397791019
+          ],
+          "slope_ci95_union": [
+            1.0289837036431257,
+            2.1919319832485473
+          ],
+          "slope_se": 0.20946474776754717,
+          "slope_t95": [
+            1.0289837036431257,
+            2.1919319832485473
+          ]
+        },
+        "total": {
+          "const_ln": 15.13158411463084,
+          "df": 4,
+          "local_slopes": [
+            {
+              "p": [
+                29.0,
+                37.0
+              ],
+              "slope": 6.3476530263231
+            },
+            {
+              "p": [
+                37.0,
+                53.0
+              ],
+              "slope": 0.9052092234849017
+            },
+            {
+              "p": [
+                53.0,
+                61.0
+              ],
+              "slope": -2.4452781905344447
+            },
+            {
+              "p": [
+                61.0,
+                101.0
+              ],
+              "slope": 0.9331202031879892
+            },
+            {
+              "p": [
+                101.0,
+                149.0
+              ],
+              "slope": 3.0498121757655667
+            }
+          ],
+          "slope": 1.4900532007660794,
+          "slope_boot95": [
+            1.3933093638546148,
+            1.5860988755019017
+          ],
+          "slope_ci95_union": [
+            0.42557875047608373,
+            2.554527651056075
+          ],
+          "slope_se": 0.38345621408141056,
+          "slope_t95": [
+            0.42557875047608373,
+            2.554527651056075
+          ]
+        },
+        "trials": {
+          "const_ln": 1.983627338200157,
+          "df": 4,
+          "local_slopes": [
+            {
+              "p": [
+                29.0,
+                37.0
+              ],
+              "slope": 6.404244480337075
+            },
+            {
+              "p": [
+                37.0,
+                53.0
+              ],
+              "slope": 0.8733933871914575
+            },
+            {
+              "p": [
+                53.0,
+                61.0
+              ],
+              "slope": -2.4056012130758333
+            },
+            {
+              "p": [
+                61.0,
+                101.0
+              ],
+              "slope": 0.8272036286278627
+            },
+            {
+              "p": [
+                101.0,
+                149.0
+              ],
+              "slope": 3.0130586253467624
+            }
+          ],
+          "slope": 1.4455846646058863,
+          "slope_boot95": [
+            1.3392672400450603,
+            1.5530421941814612
+          ],
+          "slope_ci95_union": [
+            0.36347162328189686,
+            2.5276977059298757
+          ],
+          "slope_se": 0.38981017338760426,
+          "slope_t95": [
+            0.36347162328189686,
+            2.5276977059298757
+          ]
+        }
+      },
+      "per_rung": [
+        {
+          "linear_algebra": 5.144329896907216,
+          "linear_algebra.columns": [
+            9.0,
+            9.0
+          ],
+          "linear_algebra.row_ops": [
+            711.0,
+            287.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            7.0,
+            4.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            144.0,
+            42.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            7.0,
+            5.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            25.0,
+            14.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            6.0,
+            4.0
+          ],
+          "linear_algebra_values": [
+            7.329896907216495,
+            2.9587628865979383
+          ],
+          "n": 2,
+          "other": 478.28930414583266,
+          "other_values": [
+            478.7893041568933,
+            477.789304134772
+          ],
+          "p": 29,
+          "relations": 316273710.6391753,
+          "relations.lp_discarded": [
+            1.0,
+            1.0
+          ],
+          "relations.lp_full_direct": [
+            3.0,
+            1.0
+          ],
+          "relations.lp_merge_row_ops": [
+            36.0,
+            34.0
+          ],
+          "relations.lp_merged_full": [
+            4.0,
+            4.0
+          ],
+          "relations.lp_partials_one_large": [
+            6.0,
+            6.0
+          ],
+          "relations.lp_partials_two_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_small_columns": [
+            6.0,
+            6.0
+          ],
+          "relations.relations": [
+            7.0,
+            5.0
+          ],
+          "relations.solver_calls": [
+            579.0,
+            455.0
+          ],
+          "relations.solver_ops": [
+            33263486426.0,
+            28092847870.0
+          ],
+          "relations_values": [
+            342927409.85567015,
+            289620011.42268044
+          ],
+          "s": 1503291.9606147087,
+          "s_values": [
+            1629980.43707247,
+            1376603.4841569471
+          ],
+          "shadow_gauss": 0.9587628865979382,
+          "shadow_gauss_values": [
+            1.4845360824742269,
+            0.4329896907216495
+          ],
+          "total": 316274194.07280934,
+          "total_values": [
+            342927895.9748712,
+            289620492.17074746
+          ],
+          "trials": 520.5,
+          "trials_values": [
+            583.0,
+            458.0
+          ],
+          "workloads": [
+            "W6e1af4a6b35f",
+            "W5660250b2ffb"
+          ]
+        },
+        {
+          "linear_algebra": 6.350515463917525,
+          "linear_algebra.columns": [
+            8.0,
+            8.0
+          ],
+          "linear_algebra.row_ops": [
+            664.0,
+            568.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            7.0,
+            5.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            114.0,
+            47.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            7.0,
+            7.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            23.0,
+            21.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            6.0,
+            6.0
+          ],
+          "linear_algebra_values": [
+            6.845360824742268,
+            5.855670103092783
+          ],
+          "n": 2,
+          "other": 669.0212629050325,
+          "other_values": [
+            665.0212628153182,
+            673.0212629947466
+          ],
+          "p": 37,
+          "relations": 1484803227.1958761,
+          "relations.lp_discarded": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_full_direct": [
+            2.0,
+            5.0
+          ],
+          "relations.lp_merge_row_ops": [
+            36.0,
+            18.0
+          ],
+          "relations.lp_merged_full": [
+            5.0,
+            2.0
+          ],
+          "relations.lp_partials_one_large": [
+            6.0,
+            3.0
+          ],
+          "relations.lp_partials_two_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_small_columns": [
+            6.0,
+            6.0
+          ],
+          "relations.relations": [
+            7.0,
+            7.0
+          ],
+          "relations.solver_calls": [
+            2826.0,
+            2110.0
+          ],
+          "relations.solver_ops": [
+            165779796986.0,
+            122270974347.0
+          ],
+          "relations_values": [
+            1709076144.6494844,
+            1260530309.742268
+          ],
+          "s": 3068189.2600546107,
+          "s_values": [
+            3531625.3708486706,
+            2604753.1492605503
+          ],
+          "shadow_gauss": 0.8298969072164948,
+          "shadow_gauss_values": [
+            1.175257731958763,
+            0.48453608247422675
+          ],
+          "total": 1484803902.5676546,
+          "total_values": [
+            1709076816.516108,
+            1260530988.6192012
+          ],
+          "trials": 2477.5,
+          "trials_values": [
+            2838.0,
+            2117.0
+          ],
+          "workloads": [
+            "W0bb5a2ca97f9",
+            "W0e179a9a6dde"
+          ]
+        },
+        {
+          "linear_algebra": 8.278350515463917,
+          "linear_algebra.columns": [
+            10.0,
+            10.0
+          ],
+          "linear_algebra.row_ops": [
+            932.0,
+            674.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            8.0,
+            7.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            127.0,
+            145.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            8.0,
+            7.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            27.0,
+            23.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            7.0,
+            6.0
+          ],
+          "linear_algebra_values": [
+            9.608247422680412,
+            6.948453608247423
+          ],
+          "n": 2,
+          "other": 1082.2725518511743,
+          "other_values": [
+            1074.2725518708376,
+            1090.2725518315108
+          ],
+          "p": 53,
+          "relations": 2055647413.0515459,
+          "relations.lp_discarded": [
+            1.0,
+            0.0
+          ],
+          "relations.lp_full_direct": [
+            5.0,
+            7.0
+          ],
+          "relations.lp_merge_row_ops": [
+            30.0,
+            6.0
+          ],
+          "relations.lp_merged_full": [
+            3.0,
+            0.0
+          ],
+          "relations.lp_partials_one_large": [
+            5.0,
+            1.0
+          ],
+          "relations.lp_partials_two_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_small_columns": [
+            7.0,
+            7.0
+          ],
+          "relations.relations": [
+            8.0,
+            7.0
+          ],
+          "relations.solver_calls": [
+            3085.0,
+            3683.0
+          ],
+          "relations.solver_ops": [
+            180486560524.0,
+            218307768820.0
+          ],
+          "relations_values": [
+            1860692597.1443295,
+            2250602228.958762
+          ],
+          "s": 2069562.3785060681,
+          "s_values": [
+            1873287.9835366572,
+            2265836.7734754793
+          ],
+          "shadow_gauss": 1.402061855670103,
+          "shadow_gauss_values": [
+            1.3092783505154637,
+            1.4948453608247423
+          ],
+          "total": 2055648503.6024482,
+          "total_values": [
+            1860693681.0251288,
+            2250603326.1797676
+          ],
+          "trials": 3391.0,
+          "trials_values": [
+            3091.0,
+            3691.0
+          ],
+          "workloads": [
+            "W4860011261ac",
+            "Wd5f278c57858"
+          ]
+        },
+        {
+          "linear_algebra": 19.27835051546392,
+          "linear_algebra.columns": [
+            17.0,
+            17.0
+          ],
+          "linear_algebra.row_ops": [
+            1938.0,
+            1802.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            11.0,
+            11.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            320.0,
+            260.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            11.0,
+            11.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            44.0,
+            39.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            10.0,
+            10.0
+          ],
+          "linear_algebra_values": [
+            19.97938144329897,
+            18.577319587628867
+          ],
+          "n": 2,
+          "other": 1211.646907405755,
+          "other_values": [
+            1207.6469074475397,
+            1215.6469073639703
+          ],
+          "p": 61,
+          "relations": 1457654372.2319589,
+          "relations.lp_discarded": [
+            13.0,
+            20.0
+          ],
+          "relations.lp_full_direct": [
+            5.0,
+            4.0
+          ],
+          "relations.lp_merge_row_ops": [
+            64.0,
+            68.0
+          ],
+          "relations.lp_merged_full": [
+            6.0,
+            7.0
+          ],
+          "relations.lp_partials_one_large": [
+            12.0,
+            13.0
+          ],
+          "relations.lp_partials_two_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_small_columns": [
+            10.0,
+            10.0
+          ],
+          "relations.relations": [
+            11.0,
+            11.0
+          ],
+          "relations.solver_calls": [
+            1933.0,
+            2897.0
+          ],
+          "relations.solver_ops": [
+            110386114138.0,
+            172396737884.0
+          ],
+          "relations_values": [
+            1138010607.3092782,
+            1777298137.1546392
+          ],
+          "s": 1567071.783286953,
+          "s_values": [
+            1223434.5559482563,
+            1910709.01062565
+          ],
+          "shadow_gauss": 2.9896907216494846,
+          "shadow_gauss_values": [
+            3.2989690721649483,
+            2.680412371134021
+          ],
+          "total": 1457655603.1572165,
+          "total_values": [
+            1138011834.9355671,
+            1777299371.3788662
+          ],
+          "trials": 2418.0,
+          "trials_values": [
+            1937.0,
+            2899.0
+          ],
+          "workloads": [
+            "W1af61f439b2f",
+            "W2d48c621f851"
+          ]
+        },
+        {
+          "linear_algebra": 41.22680412371134,
+          "linear_algebra.columns": [
+            30.0,
+            30.0
+          ],
+          "linear_algebra.row_ops": [
+            4246.0,
+            3752.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            16.0,
+            15.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            606.0,
+            661.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            16.0,
+            15.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            65.0,
+            62.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            15.0,
+            14.0
+          ],
+          "linear_algebra_values": [
+            43.77319587628866,
+            38.68041237113402
+          ],
+          "n": 2,
+          "other": 2428.6243556873087,
+          "other_values": [
+            2427.1243556602712,
+            2430.1243557143457
+          ],
+          "p": 101,
+          "relations": 2333457502.670103,
+          "relations.lp_discarded": [
+            40.0,
+            42.0
+          ],
+          "relations.lp_full_direct": [
+            8.0,
+            6.0
+          ],
+          "relations.lp_merge_row_ops": [
+            98.0,
+            106.0
+          ],
+          "relations.lp_merged_full": [
+            8.0,
+            9.0
+          ],
+          "relations.lp_partials_one_large": [
+            17.0,
+            19.0
+          ],
+          "relations.lp_partials_two_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_small_columns": [
+            15.0,
+            15.0
+          ],
+          "relations.relations": [
+            16.0,
+            15.0
+          ],
+          "relations.solver_calls": [
+            3187.0,
+            4152.0
+          ],
+          "relations.solver_ops": [
+            195301061416.0,
+            257385347167.0
+          ],
+          "relations_values": [
+            2013435615.1546392,
+            2653479390.185567
+          ],
+          "s": 914988.1394698308,
+          "s_values": [
+            789502.2798715712,
+            1040473.9990680903
+          ],
+          "shadow_gauss": 6.530927835051546,
+          "shadow_gauss_values": [
+            6.247422680412371,
+            6.8144329896907205
+          ],
+          "total": 2333459972.521263,
+          "total_values": [
+            2013438086.0521908,
+            2653481858.990335
+          ],
+          "trials": 3669.5,
+          "trials_values": [
+            3187.0,
+            4152.0
+          ],
+          "workloads": [
+            "W65d9cadb8539",
+            "We9027f8cdea6"
+          ]
+        },
+        {
+          "linear_algebra": 59.16494845360825,
+          "linear_algebra.columns": [
+            37.0,
+            37.0
+          ],
+          "linear_algebra.row_ops": [
+            5564.0,
+            5914.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            18.0,
+            18.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            818.0,
+            1018.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            18.0,
+            18.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            77.0,
+            83.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            17.0,
+            17.0
+          ],
+          "linear_algebra_values": [
+            57.36082474226804,
+            60.96907216494845
+          ],
+          "n": 2,
+          "other": 3578.2699737647145,
+          "other_values": [
+            3578.7699735975757,
+            3577.769973931853
+          ],
+          "p": 149,
+          "relations": 7638469703.407217,
+          "relations.lp_discarded": [
+            81.0,
+            81.0
+          ],
+          "relations.lp_full_direct": [
+            4.0,
+            3.0
+          ],
+          "relations.lp_merge_row_ops": [
+            151.0,
+            180.0
+          ],
+          "relations.lp_merged_full": [
+            14.0,
+            15.0
+          ],
+          "relations.lp_partials_one_large": [
+            27.0,
+            31.0
+          ],
+          "relations.lp_partials_two_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_small_columns": [
+            17.0,
+            17.0
+          ],
+          "relations.relations": [
+            18.0,
+            18.0
+          ],
+          "relations.solver_calls": [
+            12464.0,
+            11217.0
+          ],
+          "relations.solver_ops": [
+            779388793695.0,
+            702466258214.0
+          ],
+          "relations_values": [
+            8034976896.536082,
+            7241962510.278351
+          ],
+          "s": 688099.1194027457,
+          "s_values": [
+            723817.8078574965,
+            652380.4309479948
+          ],
+          "shadow_gauss": 9.463917525773196,
+          "shadow_gauss_values": [
+            8.43298969072165,
+            10.494845360824742
+          ],
+          "total": 7638473340.842138,
+          "total_values": [
+            8034980532.666881,
+            7241966149.017397
+          ],
+          "trials": 11841.5,
+          "trials_values": [
+            12465.0,
+            11218.0
+          ],
+          "workloads": [
+            "W2e585005bd91",
+            "Wcfe820b85af4"
+          ]
+        }
+      ]
+    },
+    "ic-d4-lp2": {
+      "crossover_relations_slope_sensitivity": [
+        {
+          "h": 2.0,
+          "log2_group_star": 76.60220687534569,
+          "relations_slope": 0.5519928128293883,
+          "relations_slope_at": "low"
+        },
+        {
+          "h": 4.0,
+          "log2_group_star": 77.98379559401617,
+          "relations_slope": 0.5519928128293883,
+          "relations_slope_at": "low"
+        },
+        {
+          "h": 16.0,
+          "log2_group_star": 80.74722480937615,
+          "relations_slope": 0.5519928128293883,
+          "relations_slope_at": "low"
+        },
+        {
+          "h": 2.0,
+          "log2_group_star": null,
+          "relations_slope": 1.906423878909062,
+          "relations_slope_at": "high"
+        },
+        {
+          "h": 4.0,
+          "log2_group_star": null,
+          "relations_slope": 1.906423878909062,
+          "relations_slope_at": "high"
+        },
+        {
+          "h": 16.0,
+          "log2_group_star": null,
+          "relations_slope": 1.906423878909062,
+          "relations_slope_at": "high"
+        }
+      ],
+      "crossovers": [
+        {
+          "log2_group_star": 121.31226625891782,
+          "log2_group_star_boot95": [
+            120.78092317297876,
+            121.84571039110057
+          ],
+          "log2_p_back_above": null,
+          "log2_p_star": 30.328066564729454,
+          "log2_p_star_boot95": [
+            30.19523079324469,
+            30.461427597775142
+          ],
+          "log2_reach_beyond_top_rung": 22.133309710307206,
+          "replicates_without_crossing": 0,
+          "rho": "h=2",
+          "top_rung_p": 293,
+          "variant": "wiedemann"
+        },
+        {
+          "log2_group_star": 123.90700561274463,
+          "log2_group_star_boot95": [
+            123.37111274604787,
+            124.44359773850196
+          ],
+          "log2_p_back_above": null,
+          "log2_p_star": 30.976751403186157,
+          "log2_p_star_boot95": [
+            30.842778186511968,
+            31.11089943462549
+          ],
+          "log2_reach_beyond_top_rung": 22.781994548763908,
+          "replicates_without_crossing": 0,
+          "rho": "h=4",
+          "top_rung_p": 293,
+          "variant": "wiedemann"
+        },
+        {
+          "log2_group_star": 129.09648663637196,
+          "log2_group_star_boot95": [
+            128.55244240461892,
+            129.6385988262714
+          ],
+          "log2_p_back_above": null,
+          "log2_p_star": 32.27412165909299,
+          "log2_p_star_boot95": [
+            32.13811060115473,
+            32.40964970656785
+          ],
+          "log2_reach_beyond_top_rung": 24.079364804670742,
+          "replicates_without_crossing": 0,
+          "rho": "h=16",
+          "top_rung_p": 293,
+          "variant": "wiedemann"
+        },
+        {
+          "log2_group_star": 136.48103838043224,
+          "log2_group_star_boot95": [
+            129.3540514784061,
+            145.140072223427
+          ],
+          "log2_p_back_above": null,
+          "log2_p_star": 34.12025959510806,
+          "log2_p_star_boot95": [
+            32.33851286960152,
+            36.28501805585675
+          ],
+          "log2_reach_beyond_top_rung": 25.92550274068581,
+          "replicates_without_crossing": 0,
+          "rho": "rho_power_law",
+          "top_rung_p": 293,
+          "variant": "wiedemann"
+        },
+        {
+          "log2_group_star": 121.3122406170632,
+          "log2_group_star_boot95": [
+            120.78089800736483,
+            121.84568392509905
+          ],
+          "log2_p_back_above": null,
+          "log2_p_star": 30.3280601542658,
+          "log2_p_star_boot95": [
+            30.195224501841206,
+            30.461420981274763
+          ],
+          "log2_reach_beyond_top_rung": 22.13330329984355,
+          "replicates_without_crossing": 0,
+          "rho": "h=2",
+          "top_rung_p": 293,
+          "variant": "dense_gauss"
+        },
+        {
+          "log2_group_star": 123.90697570609345,
+          "log2_group_star_boot95": [
+            123.37108339285773,
+            124.44356724411566
+          ],
+          "log2_p_back_above": null,
+          "log2_p_star": 30.976743926523362,
+          "log2_p_star_boot95": [
+            30.842770848214432,
+            31.110891811028914
+          ],
+          "log2_reach_beyond_top_rung": 22.781987072101114,
+          "replicates_without_crossing": 0,
+          "rho": "h=4",
+          "top_rung_p": 293,
+          "variant": "dense_gauss"
+        },
+        {
+          "log2_group_star": 129.0964459605982,
+          "log2_group_star_boot95": [
+            128.55240247396583,
+            129.63855736387714
+          ],
+          "log2_p_back_above": null,
+          "log2_p_star": 32.27411149014955,
+          "log2_p_star_boot95": [
+            32.13810061849146,
+            32.409639340969285
+          ],
+          "log2_reach_beyond_top_rung": 24.079354635727302,
+          "replicates_without_crossing": 0,
+          "rho": "h=16",
+          "top_rung_p": 293,
+          "variant": "dense_gauss"
+        },
+        {
+          "log2_group_star": 136.48096904486468,
+          "log2_group_star_boot95": [
+            129.35400817529205,
+            145.13994723090514
+          ],
+          "log2_p_back_above": null,
+          "log2_p_star": 34.12024226121617,
+          "log2_p_star_boot95": [
+            32.33850204382301,
+            36.284986807726284
+          ],
+          "log2_reach_beyond_top_rung": 25.92548540679392,
+          "replicates_without_crossing": 0,
+          "rho": "rho_power_law",
+          "top_rung_p": 293,
+          "variant": "dense_gauss"
+        }
+      ],
+      "fits": {
+        "linear_algebra": {
+          "const_ln": -3.707545477625194,
+          "df": 6,
+          "local_slopes": [
+            {
+              "p": [
+                29.0,
+                37.0
+              ],
+              "slope": -1.861658994932293
+            },
+            {
+              "p": [
+                37.0,
+                53.0
+              ],
+              "slope": 1.037409577013464
+            },
+            {
+              "p": [
+                53.0,
+                61.0
+              ],
+              "slope": 6.621990075920793
+            },
+            {
+              "p": [
+                61.0,
+                101.0
+              ],
+              "slope": 1.9387862069775208
+            },
+            {
+              "p": [
+                101.0,
+                149.0
+              ],
+              "slope": 0.9897485095938562
+            },
+            {
+              "p": [
+                149.0,
+                197.0
+              ],
+              "slope": 1.9645869607345139
+            },
+            {
+              "p": [
+                197.0,
+                293.0
+              ],
+              "slope": 0.3331257858261974
+            }
+          ],
+          "slope": 1.5676229017935435,
+          "slope_boot95": [
+            1.5668729816740554,
+            1.5683564351035901
+          ],
+          "slope_ci95_union": [
+            1.1246341699898397,
+            2.010611633597247
+          ],
+          "slope_se": 0.18103340081884092,
+          "slope_t95": [
+            1.1246341699898397,
+            2.010611633597247
+          ]
+        },
+        "other": {
+          "const_ln": 2.0549537453089926,
+          "df": 6,
+          "local_slopes": [
+            {
+              "p": [
+                29.0,
+                37.0
+              ],
+              "slope": 1.3486395670615046
+            },
+            {
+              "p": [
+                37.0,
+                53.0
+              ],
+              "slope": 1.3344871903048432
+            },
+            {
+              "p": [
+                53.0,
+                61.0
+              ],
+              "slope": 0.8324683543851735
+            },
+            {
+              "p": [
+                61.0,
+                101.0
+              ],
+              "slope": 1.3855346843515879
+            },
+            {
+              "p": [
+                101.0,
+                149.0
+              ],
+              "slope": 0.9970896515939197
+            },
+            {
+              "p": [
+                149.0,
+                197.0
+              ],
+              "slope": 1.4799161605035471
+            },
+            {
+              "p": [
+                197.0,
+                293.0
+              ],
+              "slope": 1.0538393714765988
+            }
+          ],
+          "slope": 1.2315750038028077,
+          "slope_boot95": [
+            1.2315542631157617,
+            1.2315957316836637
+          ],
+          "slope_ci95_union": [
+            1.186983713040564,
+            1.2761662945650514
+          ],
+          "slope_se": 0.01822284052400641,
+          "slope_t95": [
+            1.186983713040564,
+            1.2761662945650514
+          ]
+        },
+        "relations": {
+          "const_ln": 15.93580007860273,
+          "df": 6,
+          "local_slopes": [
+            {
+              "p": [
+                29.0,
+                37.0
+              ],
+              "slope": 6.799552585582729
+            },
+            {
+              "p": [
+                37.0,
+                53.0
+              ],
+              "slope": 0.23651077721059852
+            },
+            {
+              "p": [
+                53.0,
+                61.0
+              ],
+              "slope": -6.37692142312264
+            },
+            {
+              "p": [
+                61.0,
+                101.0
+              ],
+              "slope": 1.241041124334831
+            },
+            {
+              "p": [
+                101.0,
+                149.0
+              ],
+              "slope": 1.7877288060337067
+            },
+            {
+              "p": [
+                149.0,
+                197.0
+              ],
+              "slope": 2.301349825080285
+            },
+            {
+              "p": [
+                197.0,
+                293.0
+              ],
+              "slope": 2.4661280308780795
+            }
+          ],
+          "slope": 1.2292083458692251,
+          "slope_boot95": [
+            1.2277314006710278,
+            1.2306230414936925
+          ],
+          "slope_ci95_union": [
+            0.5519928128293883,
+            1.906423878909062
+          ],
+          "slope_se": 0.27675338497745683,
+          "slope_t95": [
+            0.5519928128293883,
+            1.906423878909062
+          ]
+        },
+        "shadow_gauss": {
+          "const_ln": -5.214757895669678,
+          "df": 6,
+          "local_slopes": [
+            {
+              "p": [
+                29.0,
+                37.0
+              ],
+              "slope": -2.456424403279719
+            },
+            {
+              "p": [
+                37.0,
+                53.0
+              ],
+              "slope": 0.6806237671549207
+            },
+            {
+              "p": [
+                53.0,
+                61.0
+              ],
+              "slope": 6.755412114283611
+            },
+            {
+              "p": [
+                61.0,
+                101.0
+              ],
+              "slope": 1.6017574303064053
+            },
+            {
+              "p": [
+                101.0,
+                149.0
+              ],
+              "slope": 1.2753940331221802
+            },
+            {
+              "p": [
+                149.0,
+                197.0
+              ],
+              "slope": 2.5939121745725844
+            },
+            {
+              "p": [
+                197.0,
+                293.0
+              ],
+              "slope": 0.041995790572376096
+            }
+          ],
+          "slope": 1.5001877690382044,
+          "slope_boot95": [
+            1.4994420336257355,
+            1.500917298045403
+          ],
+          "slope_ci95_union": [
+            1.014414972552158,
+            1.9859605655242507
+          ],
+          "slope_se": 0.19851769370087713,
+          "slope_t95": [
+            1.014414972552158,
+            1.9859605655242507
+          ]
+        },
+        "total": {
+          "const_ln": 15.935801401868378,
+          "df": 6,
+          "local_slopes": [
+            {
+              "p": [
+                29.0,
+                37.0
+              ],
+              "slope": 6.7995480721969095
+            },
+            {
+              "p": [
+                37.0,
+                53.0
+              ],
+              "slope": 0.23651130362258327
+            },
+            {
+              "p": [
+                53.0,
+                61.0
+              ],
+              "slope": -6.376914075112299
+            },
+            {
+              "p": [
+                61.0,
+                101.0
+              ],
+              "slope": 1.2410413823003974
+            },
+            {
+              "p": [
+                101.0,
+                149.0
+              ],
+              "slope": 1.7877276186561777
+            },
+            {
+              "p": [
+                149.0,
+                197.0
+              ],
+              "slope": 2.301348893736361
+            },
+            {
+              "p": [
+                197.0,
+                293.0
+              ],
+              "slope": 2.466126917640328
+            }
+          ],
+          "slope": 1.229208293181057,
+          "slope_boot95": [
+            1.227731350553623,
+            1.2306229864469285
+          ],
+          "slope_ci95_union": [
+            0.5519933821666929,
+            1.9064232041954212
+          ],
+          "slope_se": 0.2767531307782444,
+          "slope_t95": [
+            0.5519933821666929,
+            1.9064232041954212
+          ]
+        },
+        "trials": {
+          "const_ln": 2.938352618636487,
+          "df": 6,
+          "local_slopes": [
+            {
+              "p": [
+                29.0,
+                37.0
+              ],
+              "slope": 6.7206830907157356
+            },
+            {
+              "p": [
+                37.0,
+                53.0
+              ],
+              "slope": 0.23762176505921917
+            },
+            {
+              "p": [
+                53.0,
+                61.0
+              ],
+              "slope": -6.199441389945377
+            },
+            {
+              "p": [
+                61.0,
+                101.0
+              ],
+              "slope": 1.0835587508165332
+            },
+            {
+              "p": [
+                101.0,
+                149.0
+              ],
+              "slope": 1.7472973901637325
+            },
+            {
+              "p": [
+                149.0,
+                197.0
+              ],
+              "slope": 2.2373719063745603
+            },
+            {
+              "p": [
+                197.0,
+                293.0
+              ],
+              "slope": 2.2130007726721903
+            }
+          ],
+          "slope": 1.1494709003281982,
+          "slope_boot95": [
+            1.1481680687420979,
+            1.1507250538451474
+          ],
+          "slope_ci95_union": [
+            0.4897295802364361,
+            1.8092122204199603
+          ],
+          "slope_se": 0.2696123089872342,
+          "slope_t95": [
+            0.4897295802364361,
+            1.8092122204199603
+          ]
+        }
+      },
+      "per_rung": [
+        {
+          "linear_algebra": 7.577319587628866,
+          "linear_algebra.columns": [
+            9.0
+          ],
+          "linear_algebra.row_ops": [
+            735.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            7.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            151.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            7.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            26.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            6.0
+          ],
+          "linear_algebra_values": [
+            7.577319587628866
+          ],
+          "n": 1,
+          "other": 478.7893041120362,
+          "other_values": [
+            478.7893041120362
+          ],
+          "p": 29,
+          "relations": 326094453.8969072,
+          "relations.lp_discarded": [
+            0.0
+          ],
+          "relations.lp_full_direct": [
+            2.0
+          ],
+          "relations.lp_merge_row_ops": [
+            48.0
+          ],
+          "relations.lp_merged_full": [
+            5.0
+          ],
+          "relations.lp_partials_one_large": [
+            6.0
+          ],
+          "relations.lp_partials_two_large": [
+            1.0
+          ],
+          "relations.lp_small_columns": [
+            6.0
+          ],
+          "relations.relations": [
+            7.0
+          ],
+          "relations.solver_calls": [
+            549.0
+          ],
+          "relations.solver_ops": [
+            31630704170.0
+          ],
+          "relations_values": [
+            326094453.8969072
+          ],
+          "s": 1549971.2315524777,
+          "s_values": [
+            1549971.2315524777
+          ],
+          "shadow_gauss": 1.556701030927835,
+          "shadow_gauss_values": [
+            1.556701030927835
+          ],
+          "total": 326094940.2635309,
+          "total_values": [
+            326094940.2635309
+          ],
+          "trials": 552.0,
+          "trials_values": [
+            552.0
+          ],
+          "workloads": [
+            "W6e1af4a6b35f"
+          ]
+        },
+        {
+          "linear_algebra": 4.814432989690721,
+          "linear_algebra.columns": [
+            8.0
+          ],
+          "linear_algebra.row_ops": [
+            467.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            6.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            83.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            6.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            19.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            5.0
+          ],
+          "linear_algebra_values": [
+            4.814432989690721
+          ],
+          "n": 1,
+          "other": 665.0212629922886,
+          "other_values": [
+            665.0212629922886
+          ],
+          "p": 37,
+          "relations": 1709076144.8350515,
+          "relations.lp_discarded": [
+            0.0
+          ],
+          "relations.lp_full_direct": [
+            1.0
+          ],
+          "relations.lp_merge_row_ops": [
+            54.0
+          ],
+          "relations.lp_merged_full": [
+            5.0
+          ],
+          "relations.lp_partials_one_large": [
+            5.0
+          ],
+          "relations.lp_partials_two_large": [
+            2.0
+          ],
+          "relations.lp_small_columns": [
+            5.0
+          ],
+          "relations.relations": [
+            6.0
+          ],
+          "relations.solver_calls": [
+            2826.0
+          ],
+          "relations.solver_ops": [
+            165779796986.0
+          ],
+          "relations_values": [
+            1709076144.8350515
+          ],
+          "s": 3531625.3670354295,
+          "s_values": [
+            3531625.3670354295
+          ],
+          "shadow_gauss": 0.8556701030927835,
+          "shadow_gauss_values": [
+            0.8556701030927835
+          ],
+          "total": 1709076814.6707475,
+          "total_values": [
+            1709076814.6707475
+          ],
+          "trials": 2838.0,
+          "trials_values": [
+            2838.0
+          ],
+          "workloads": [
+            "W0bb5a2ca97f9"
+          ]
+        },
+        {
+          "linear_algebra": 6.989690721649485,
+          "linear_algebra.columns": [
+            10.0
+          ],
+          "linear_algebra.row_ops": [
+            678.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            7.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            106.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            7.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            22.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            6.0
+          ],
+          "linear_algebra_values": [
+            6.989690721649485
+          ],
+          "n": 1,
+          "other": 1074.27255159555,
+          "other_values": [
+            1074.27255159555
+          ],
+          "p": 53,
+          "relations": 1860692597.3917525,
+          "relations.lp_discarded": [
+            1.0
+          ],
+          "relations.lp_full_direct": [
+            3.0
+          ],
+          "relations.lp_merge_row_ops": [
+            54.0
+          ],
+          "relations.lp_merged_full": [
+            4.0
+          ],
+          "relations.lp_partials_one_large": [
+            6.0
+          ],
+          "relations.lp_partials_two_large": [
+            1.0
+          ],
+          "relations.lp_small_columns": [
+            6.0
+          ],
+          "relations.relations": [
+            7.0
+          ],
+          "relations.solver_calls": [
+            3085.0
+          ],
+          "relations.solver_ops": [
+            180486560524.0
+          ],
+          "relations_values": [
+            1860692597.3917525
+          ],
+          "s": 1873287.981149474,
+          "s_values": [
+            1873287.981149474
+          ],
+          "shadow_gauss": 1.092783505154639,
+          "shadow_gauss_values": [
+            1.092783505154639
+          ],
+          "total": 1860693678.6539948,
+          "total_values": [
+            1860693678.6539948
+          ],
+          "trials": 3091.0,
+          "trials_values": [
+            3091.0
+          ],
+          "workloads": [
+            "W4860011261ac"
+          ]
+        },
+        {
+          "linear_algebra": 17.7319587628866,
+          "linear_algebra.columns": [
+            17.0
+          ],
+          "linear_algebra.row_ops": [
+            1720.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            10.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            274.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            10.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            45.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            9.0
+          ],
+          "linear_algebra_values": [
+            17.7319587628866
+          ],
+          "n": 1,
+          "other": 1207.6469071943736,
+          "other_values": [
+            1207.6469071943736
+          ],
+          "p": 61,
+          "relations": 759168692.5051547,
+          "relations.lp_discarded": [
+            4.0
+          ],
+          "relations.lp_full_direct": [
+            3.0
+          ],
+          "relations.lp_merge_row_ops": [
+            143.0
+          ],
+          "relations.lp_merged_full": [
+            7.0
+          ],
+          "relations.lp_partials_one_large": [
+            6.0
+          ],
+          "relations.lp_partials_two_large": [
+            8.0
+          ],
+          "relations.lp_small_columns": [
+            9.0
+          ],
+          "relations.relations": [
+            10.0
+          ],
+          "relations.solver_calls": [
+            1290.0
+          ],
+          "relations.solver_ops": [
+            73638706114.0
+          ],
+          "relations_values": [
+            759168692.5051547
+          ],
+          "s": 816155.5819217805,
+          "s_values": [
+            816155.5819217805
+          ],
+          "shadow_gauss": 2.8247422680412373,
+          "shadow_gauss_values": [
+            2.8247422680412373
+          ],
+          "total": 759169917.8840207,
+          "total_values": [
+            759169917.8840207
+          ],
+          "trials": 1293.0,
+          "trials_values": [
+            1293.0
+          ],
+          "workloads": [
+            "W1af61f439b2f"
+          ]
+        },
+        {
+          "linear_algebra": 47.134020618556704,
+          "linear_algebra.columns": [
+            30.0,
+            30.0
+          ],
+          "linear_algebra.row_ops": [
+            4471.0,
+            4673.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            15.0,
+            15.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            601.0,
+            628.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            15.0,
+            15.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            78.0,
+            82.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            14.0,
+            14.0
+          ],
+          "linear_algebra_values": [
+            46.09278350515464,
+            48.175257731958766
+          ],
+          "n": 2,
+          "other": 2428.624355383755,
+          "other_values": [
+            2427.124355500506,
+            2430.1243552670035
+          ],
+          "p": 101,
+          "relations": 1419435933.4793816,
+          "relations.lp_discarded": [
+            14.0,
+            6.0
+          ],
+          "relations.lp_full_direct": [
+            2.0,
+            4.0
+          ],
+          "relations.lp_merge_row_ops": [
+            242.0,
+            277.0
+          ],
+          "relations.lp_merged_full": [
+            13.0,
+            11.0
+          ],
+          "relations.lp_partials_one_large": [
+            13.0,
+            9.0
+          ],
+          "relations.lp_partials_two_large": [
+            15.0,
+            16.0
+          ],
+          "relations.lp_small_columns": [
+            14.0,
+            14.0
+          ],
+          "relations.relations": [
+            15.0,
+            15.0
+          ],
+          "relations.solver_calls": [
+            2148.0,
+            2318.0
+          ],
+          "relations.solver_ops": [
+            131757582501.0,
+            143610313878.0
+          ],
+          "relations_values": [
+            1358341219.4329896,
+            1480530647.5257733
+          ],
+          "s": 556585.2101406198,
+          "s_values": [
+            532628.9641710131,
+            580541.4561102265
+          ],
+          "shadow_gauss": 6.335051546391753,
+          "shadow_gauss_values": [
+            6.195876288659794,
+            6.474226804123711
+          ],
+          "total": 1419438409.2377574,
+          "total_values": [
+            1358343692.6501286,
+            1480533125.8253863
+          ],
+          "trials": 2233.0,
+          "trials_values": [
+            2148.0,
+            2318.0
+          ],
+          "workloads": [
+            "W65d9cadb8539",
+            "We9027f8cdea6"
+          ]
+        },
+        {
+          "linear_algebra": 69.25773195876289,
+          "linear_algebra.columns": [
+            37.0
+          ],
+          "linear_algebra.row_ops": [
+            6718.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            17.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            1009.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            17.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            110.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            16.0
+          ],
+          "linear_algebra_values": [
+            69.25773195876289
+          ],
+          "n": 1,
+          "other": 3578.769974187477,
+          "other_values": [
+            3578.769974187477
+          ],
+          "p": 149,
+          "relations": 2844463935.5360823,
+          "relations.lp_discarded": [
+            10.0
+          ],
+          "relations.lp_full_direct": [
+            2.0
+          ],
+          "relations.lp_merge_row_ops": [
+            534.0
+          ],
+          "relations.lp_merged_full": [
+            15.0
+          ],
+          "relations.lp_partials_one_large": [
+            8.0
+          ],
+          "relations.lp_partials_two_large": [
+            26.0
+          ],
+          "relations.lp_small_columns": [
+            16.0
+          ],
+          "relations.relations": [
+            17.0
+          ],
+          "relations.solver_calls": [
+            4405.0
+          ],
+          "relations.solver_ops": [
+            275911417454.0
+          ],
+          "relations_values": [
+            2844463935.5360823
+          ],
+          "s": 256239.11377088208,
+          "s_values": [
+            256239.11377088208
+          ],
+          "shadow_gauss": 10.402061855670103,
+          "shadow_gauss_values": [
+            10.402061855670103
+          ],
+          "total": 2844467583.5637884,
+          "total_values": [
+            2844467583.5637884
+          ],
+          "trials": 4405.0,
+          "trials_values": [
+            4405.0
+          ],
+          "workloads": [
+            "W2e585005bd91"
+          ]
+        },
+        {
+          "linear_algebra": 119.8762886597938,
+          "linear_algebra.columns": [
+            52.0
+          ],
+          "linear_algebra.row_ops": [
+            11628.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            21.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            2082.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            21.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            159.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            20.0
+          ],
+          "linear_algebra_values": [
+            119.8762886597938
+          ],
+          "n": 1,
+          "other": 5410.257732145565,
+          "other_values": [
+            5410.257732145565
+          ],
+          "p": 197,
+          "relations": 5408888655.092783,
+          "relations.lp_discarded": [
+            45.0
+          ],
+          "relations.lp_full_direct": [
+            5.0
+          ],
+          "relations.lp_merge_row_ops": [
+            811.0
+          ],
+          "relations.lp_merged_full": [
+            16.0
+          ],
+          "relations.lp_partials_one_large": [
+            15.0
+          ],
+          "relations.lp_partials_two_large": [
+            30.0
+          ],
+          "relations.lp_small_columns": [
+            20.0
+          ],
+          "relations.relations": [
+            21.0
+          ],
+          "relations.solver_calls": [
+            8228.0
+          ],
+          "relations.solver_ops": [
+            524658786193.0
+          ],
+          "relations_values": [
+            5408888655.092783
+          ],
+          "s": 278749.04357592633,
+          "s_values": [
+            278749.04357592633
+          ],
+          "shadow_gauss": 21.463917525773194,
+          "shadow_gauss_values": [
+            21.463917525773194
+          ],
+          "total": 5408894185.226804,
+          "total_values": [
+            5408894185.226804
+          ],
+          "trials": 8228.0,
+          "trials_values": [
+            8228.0
+          ],
+          "workloads": [
+            "W62c6564fb72b"
+          ]
+        },
+        {
+          "linear_algebra": 136.82474226804123,
+          "linear_algebra.columns": [
+            65.0
+          ],
+          "linear_algebra.row_ops": [
+            13272.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            25.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            2117.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            25.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            139.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            24.0
+          ],
+          "linear_algebra_values": [
+            136.82474226804123
+          ],
+          "n": 1,
+          "other": 8220.558632899805,
+          "other_values": [
+            8220.558632899805
+          ],
+          "p": 293,
+          "relations": 14396998258.783504,
+          "relations.lp_discarded": [
+            40.0
+          ],
+          "relations.lp_full_direct": [
+            6.0
+          ],
+          "relations.lp_merge_row_ops": [
+            659.0
+          ],
+          "relations.lp_merged_full": [
+            19.0
+          ],
+          "relations.lp_partials_one_large": [
+            22.0
+          ],
+          "relations.lp_partials_two_large": [
+            33.0
+          ],
+          "relations.lp_small_columns": [
+            24.0
+          ],
+          "relations.relations": [
+            25.0
+          ],
+          "relations.solver_calls": [
+            19807.0
+          ],
+          "relations.solver_ops": [
+            1396504301106.0
+          ],
+          "relations_values": [
+            14396998258.783504
+          ],
+          "s": 474327.06073999754,
+          "s_values": [
+            474327.06073999754
+          ],
+          "shadow_gauss": 21.824742268041238,
+          "shadow_gauss_values": [
+            21.824742268041238
+          ],
+          "total": 14397006616.16688,
+          "total_values": [
+            14397006616.16688
+          ],
+          "trials": 19807.0,
+          "trials_values": [
+            19807.0
+          ],
+          "workloads": [
+            "Wcc7e864ed81d"
+          ]
+        }
+      ]
+    },
+    "ic-d4-w": {
+      "crossover_relations_slope_sensitivity": [
+        {
+          "h": 2.0,
+          "log2_group_star": 84.3204159837519,
+          "relations_slope": 0.7419303703443664,
+          "relations_slope_at": "low"
+        },
+        {
+          "h": 4.0,
+          "log2_group_star": 85.94664536675693,
+          "relations_slope": 0.7419303703443664,
+          "relations_slope_at": "low"
+        },
+        {
+          "h": 16.0,
+          "log2_group_star": 89.25508574724611,
+          "relations_slope": 0.7419303703443664,
+          "relations_slope_at": "low"
+        },
+        {
+          "h": 2.0,
+          "log2_group_star": 122.1334011835181,
+          "relations_slope": 1.2551537450144905,
+          "relations_slope_at": "high"
+        },
+        {
+          "h": 4.0,
+          "log2_group_star": 124.89901621367993,
+          "relations_slope": 1.2551537450144905,
+          "relations_slope_at": "high"
+        },
+        {
+          "h": 16.0,
+          "log2_group_star": 130.5590797116556,
+          "relations_slope": 1.2551537450144905,
+          "relations_slope_at": "high"
+        }
+      ],
+      "crossovers": [
+        {
+          "log2_group_star": 98.37766935898493,
+          "log2_group_star_boot95": [
+            96.01523203203236,
+            101.41793625297437
+          ],
+          "log2_p_back_above": null,
+          "log2_p_star": 24.594417339746233,
+          "log2_p_star_boot95": [
+            24.00380800800809,
+            25.354484063243593
+          ],
+          "log2_reach_beyond_top_rung": 14.615706880639875,
+          "replicates_without_crossing": 0,
+          "rho": "h=2",
+          "top_rung_p": 1009,
+          "variant": "wiedemann"
+        },
+        {
+          "log2_group_star": 100.42533210744764,
+          "log2_group_star_boot95": [
+            97.98888978825696,
+            103.55821906077115
+          ],
+          "log2_p_back_above": null,
+          "log2_p_star": 25.10633302686191,
+          "log2_p_star_boot95": [
+            24.49722244706424,
+            25.889554765192788
+          ],
+          "log2_reach_beyond_top_rung": 15.127622567755553,
+          "replicates_without_crossing": 0,
+          "rho": "h=4",
+          "top_rung_p": 1009,
+          "variant": "wiedemann"
+        },
+        {
+          "log2_group_star": 104.59947952200818,
+          "log2_group_star_boot95": [
+            102.01596242092751,
+            107.92686292087086
+          ],
+          "log2_p_back_above": null,
+          "log2_p_star": 26.149869880502045,
+          "log2_p_star_boot95": [
+            25.503990605231877,
+            26.981715730217715
+          ],
+          "log2_reach_beyond_top_rung": 16.171159421395686,
+          "replicates_without_crossing": 0,
+          "rho": "h=16",
+          "top_rung_p": 1009,
+          "variant": "wiedemann"
+        },
+        {
+          "log2_group_star": 108.67566220887367,
+          "log2_group_star_boot95": [
+            103.46274637462737,
+            116.07149763905198
+          ],
+          "log2_p_back_above": 56.45099019397864,
+          "log2_p_star": 27.16891555221842,
+          "log2_p_star_boot95": [
+            25.865686593656843,
+            29.017874409762996
+          ],
+          "log2_reach_beyond_top_rung": 17.190205093112063,
+          "replicates_without_crossing": 4,
+          "rho": "rho_power_law",
+          "top_rung_p": 1009,
+          "variant": "wiedemann"
+        },
+        {
+          "log2_group_star": 99.1397947995543,
+          "log2_group_star_boot95": [
+            96.51795246111976,
+            103.65248177392681
+          ],
+          "log2_p_back_above": 33.020845312153284,
+          "log2_p_star": 24.784948699888574,
+          "log2_p_star_boot95": [
+            24.12948811527994,
+            25.913120443481702
+          ],
+          "log2_reach_beyond_top_rung": 14.806238240782216,
+          "replicates_without_crossing": 108,
+          "rho": "h=2",
+          "top_rung_p": 1009,
+          "variant": "dense_gauss"
+        },
+        {
+          "log2_group_star": 101.79409557145615,
+          "log2_group_star_boot95": null,
+          "log2_p_back_above": 31.52455947814,
+          "log2_p_star": 25.44852389286404,
+          "log2_p_star_boot95": null,
+          "log2_reach_beyond_top_rung": 15.46981343375768,
+          "replicates_without_crossing": 784,
+          "rho": "h=4",
+          "top_rung_p": 1009,
+          "variant": "dense_gauss"
+        },
+        {
+          "log2_group_star": null,
+          "log2_group_star_boot95": null,
+          "log2_p_back_above": null,
+          "log2_p_star": null,
+          "log2_p_star_boot95": null,
+          "log2_reach_beyond_top_rung": null,
+          "replicates_without_crossing": 6526,
+          "rho": "h=16",
+          "top_rung_p": 1009,
+          "variant": "dense_gauss"
+        },
+        {
+          "log2_group_star": null,
+          "log2_group_star_boot95": null,
+          "log2_p_back_above": null,
+          "log2_p_star": null,
+          "log2_p_star_boot95": null,
+          "log2_reach_beyond_top_rung": null,
+          "replicates_without_crossing": 9480,
+          "rho": "rho_power_law",
+          "top_rung_p": 1009,
+          "variant": "dense_gauss"
+        }
+      ],
+      "fits": {
+        "linear_algebra": {
+          "const_ln": -4.810375553832205,
+          "df": 10,
+          "local_slopes": [
+            {
+              "p": [
+                29.0,
+                37.0
+              ],
+              "slope": -0.9748349222593561
+            },
+            {
+              "p": [
+                37.0,
+                53.0
+              ],
+              "slope": 0.9305665919125059
+            },
+            {
+              "p": [
+                53.0,
+                61.0
+              ],
+              "slope": 8.905244442473766
+            },
+            {
+              "p": [
+                61.0,
+                101.0
+              ],
+              "slope": 2.3002909961849207
+            },
+            {
+              "p": [
+                101.0,
+                149.0
+              ],
+              "slope": 1.067414356649619
+            },
+            {
+              "p": [
+                149.0,
+                197.0
+              ],
+              "slope": 2.484102372751807
+            },
+            {
+              "p": [
+                197.0,
+                293.0
+              ],
+              "slope": 1.1374877756662367
+            },
+            {
+              "p": [
+                293.0,
+                401.0
+              ],
+              "slope": 2.568651756110566
+            },
+            {
+              "p": [
+                401.0,
+                509.0
+              ],
+              "slope": 2.4632973555679674
+            },
+            {
+              "p": [
+                509.0,
+                701.0
+              ],
+              "slope": 1.546313388018286
+            },
+            {
+              "p": [
+                701.0,
+                1009.0
+              ],
+              "slope": 2.5667157667584015
+            }
+          ],
+          "slope": 2.0364009523075763,
+          "slope_boot95": [
+            2.020656251876429,
+            2.05309284591271
+          ],
+          "slope_ci95_union": [
+            1.8503292908764386,
+            2.222472613738714
+          ],
+          "slope_se": 0.08351510836227007,
+          "slope_t95": [
+            1.8503292908764386,
+            2.222472613738714
+          ]
+        },
+        "other": {
+          "const_ln": 2.2324165106604807,
+          "df": 10,
+          "local_slopes": [
+            {
+              "p": [
+                29.0,
+                37.0
+              ],
+              "slope": 1.377543656766231
+            },
+            {
+              "p": [
+                37.0,
+                53.0
+              ],
+              "slope": 1.338445406921666
+            },
+            {
+              "p": [
+                53.0,
+                61.0
+              ],
+              "slope": 0.8032145611062043
+            },
+            {
+              "p": [
+                61.0,
+                101.0
+              ],
+              "slope": 1.3761167983477867
+            },
+            {
+              "p": [
+                101.0,
+                149.0
+              ],
+              "slope": 0.9996007159623409
+            },
+            {
+              "p": [
+                149.0,
+                197.0
+              ],
+              "slope": 1.4822460353274252
+            },
+            {
+              "p": [
+                197.0,
+                293.0
+              ],
+              "slope": 1.0544971559696152
+            },
+            {
+              "p": [
+                293.0,
+                401.0
+              ],
+              "slope": 0.9683712816667062
+            },
+            {
+              "p": [
+                401.0,
+                509.0
+              ],
+              "slope": 1.3668865306095457
+            },
+            {
+              "p": [
+                509.0,
+                701.0
+              ],
+              "slope": 1.0448672237480712
+            },
+            {
+              "p": [
+                701.0,
+                1009.0
+              ],
+              "slope": 1.2823353470711623
+            }
+          ],
+          "slope": 1.1893100632244842,
+          "slope_boot95": [
+            1.1881740573468749,
+            1.190452725579828
+          ],
+          "slope_ci95_union": [
+            1.162241910729413,
+            1.2163782157195553
+          ],
+          "slope_se": 0.012149081012150384,
+          "slope_t95": [
+            1.162241910729413,
+            1.2163782157195553
+          ]
+        },
+        "relations": {
+          "const_ln": 16.784762839609932,
+          "df": 10,
+          "local_slopes": [
+            {
+              "p": [
+                29.0,
+                37.0
+              ],
+              "slope": 6.217324158253192
+            },
+            {
+              "p": [
+                37.0,
+                53.0
+              ],
+              "slope": 0.925794359663795
+            },
+            {
+              "p": [
+                53.0,
+                61.0
+              ],
+              "slope": -6.94119832079294
+            },
+            {
+              "p": [
+                61.0,
+                101.0
+              ],
+              "slope": 0.8986525571287088
+            },
+            {
+              "p": [
+                101.0,
+                149.0
+              ],
+              "slope": 1.6837861910627254
+            },
+            {
+              "p": [
+                149.0,
+                197.0
+              ],
+              "slope": 0.464884362698566
+            },
+            {
+              "p": [
+                197.0,
+                293.0
+              ],
+              "slope": 2.835384608344989
+            },
+            {
+              "p": [
+                293.0,
+                401.0
+              ],
+              "slope": 0.19385072523745092
+            },
+            {
+              "p": [
+                401.0,
+                509.0
+              ],
+              "slope": 0.3286976341700651
+            },
+            {
+              "p": [
+                509.0,
+                701.0
+              ],
+              "slope": 1.6005529845392272
+            },
+            {
+              "p": [
+                701.0,
+                1009.0
+              ],
+              "slope": 0.2599805086477284
+            }
+          ],
+          "slope": 0.9985420576794284,
+          "slope_boot95": [
+            0.960871717153431,
+            1.043184746198596
+          ],
+          "slope_ci95_union": [
+            0.7419303703443664,
+            1.2551537450144905
+          ],
+          "slope_se": 0.11517580221501886,
+          "slope_t95": [
+            0.7419303703443664,
+            1.2551537450144905
+          ]
+        },
+        "shadow_gauss": {
+          "const_ln": -8.10693038880577,
+          "df": 10,
+          "local_slopes": [
+            {
+              "p": [
+                29.0,
+                37.0
+              ],
+              "slope": -0.8096442032626854
+            },
+            {
+              "p": [
+                37.0,
+                53.0
+              ],
+              "slope": 0.5914769611788061
+            },
+            {
+              "p": [
+                53.0,
+                61.0
+              ],
+              "slope": 9.067069782874238
+            },
+            {
+              "p": [
+                61.0,
+                101.0
+              ],
+              "slope": 1.7796142445334375
+            },
+            {
+              "p": [
+                101.0,
+                149.0
+              ],
+              "slope": 1.7076533628746802
+            },
+            {
+              "p": [
+                149.0,
+                197.0
+              ],
+              "slope": 2.628373993394688
+            },
+            {
+              "p": [
+                197.0,
+                293.0
+              ],
+              "slope": 1.5060693773947396
+            },
+            {
+              "p": [
+                293.0,
+                401.0
+              ],
+              "slope": 3.584177000352102
+            },
+            {
+              "p": [
+                401.0,
+                509.0
+              ],
+              "slope": 3.8353706016561344
+            },
+            {
+              "p": [
+                509.0,
+                701.0
+              ],
+              "slope": 1.6771914412648217
+            },
+            {
+              "p": [
+                701.0,
+                1009.0
+              ],
+              "slope": 3.496537554004227
+            }
+          ],
+          "slope": 2.342378656600799,
+          "slope_boot95": [
+            2.2799527303738185,
+            2.4274918086621557
+          ],
+          "slope_ci95_union": [
+            2.111135524850689,
+            2.573621788350909
+          ],
+          "slope_se": 0.10378955644080332,
+          "slope_t95": [
+            2.111135524850689,
+            2.573621788350909
+          ]
+        },
+        "total": {
+          "const_ln": 16.784762823204893,
+          "df": 10,
+          "local_slopes": [
+            {
+              "p": [
+                29.0,
+                37.0
+              ],
+              "slope": 6.217319871184003
+            },
+            {
+              "p": [
+                37.0,
+                53.0
+              ],
+              "slope": 0.9257945601196833
+            },
+            {
+              "p": [
+                53.0,
+                61.0
+              ],
+              "slope": -6.941190624336375
+            },
+            {
+              "p": [
+                61.0,
+                101.0
+              ],
+              "slope": 0.8986535143793852
+            },
+            {
+              "p": [
+                101.0,
+                149.0
+              ],
+              "slope": 1.6837849396106173
+            },
+            {
+              "p": [
+                149.0,
+                197.0
+              ],
+              "slope": 0.4648863968188607
+            },
+            {
+              "p": [
+                197.0,
+                293.0
+              ],
+              "slope": 2.8353818380500506
+            },
+            {
+              "p": [
+                293.0,
+                401.0
+              ],
+              "slope": 0.19385188959653718
+            },
+            {
+              "p": [
+                401.0,
+                509.0
+              ],
+              "slope": 0.32869961400856523
+            },
+            {
+              "p": [
+                509.0,
+                701.0
+              ],
+              "slope": 1.6005521441802866
+            },
+            {
+              "p": [
+                701.0,
+                1009.0
+              ],
+              "slope": 0.25998322928336415
+            }
+          ],
+          "slope": 0.9985423654503371,
+          "slope_boot95": [
+            0.9608720548682246,
+            1.0431849941009486
+          ],
+          "slope_ci95_union": [
+            0.7419309635920001,
+            1.2551537673086743
+          ],
+          "slope_se": 0.11517567408363422,
+          "slope_t95": [
+            0.7419309635920001,
+            1.2551537673086743
+          ]
+        },
+        "trials": {
+          "const_ln": 3.8685647683220994,
+          "df": 10,
+          "local_slopes": [
+            {
+              "p": [
+                29.0,
+                37.0
+              ],
+              "slope": 6.287625323638164
+            },
+            {
+              "p": [
+                37.0,
+                53.0
+              ],
+              "slope": 0.8942401153250124
+            },
+            {
+              "p": [
+                53.0,
+                61.0
+              ],
+              "slope": -6.9336775238536585
+            },
+            {
+              "p": [
+                61.0,
+                101.0
+              ],
+              "slope": 0.809393033045712
+            },
+            {
+              "p": [
+                101.0,
+                149.0
+              ],
+              "slope": 1.6095996054824704
+            },
+            {
+              "p": [
+                149.0,
+                197.0
+              ],
+              "slope": 0.3694756835061127
+            },
+            {
+              "p": [
+                197.0,
+                293.0
+              ],
+              "slope": 2.599769735774033
+            },
+            {
+              "p": [
+                293.0,
+                401.0
+              ],
+              "slope": 0.11191218914900206
+            },
+            {
+              "p": [
+                401.0,
+                509.0
+              ],
+              "slope": -0.02989429903337266
+            },
+            {
+              "p": [
+                509.0,
+                701.0
+              ],
+              "slope": 1.7120350669429627
+            },
+            {
+              "p": [
+                701.0,
+                1009.0
+              ],
+              "slope": 0.12596566679114563
+            }
+          ],
+          "slope": 0.895904809519137,
+          "slope_boot95": [
+            0.8597355407596371,
+            0.9381977033365607
+          ],
+          "slope_ci95_union": [
+            0.6412512664922283,
+            1.1505583525460457
+          ],
+          "slope_se": 0.11429692236396258,
+          "slope_t95": [
+            0.6412512664922283,
+            1.1505583525460457
+          ]
+        }
+      },
+      "per_rung": [
+        {
+          "linear_algebra": 11.850515463917526,
+          "linear_algebra.columns": [
+            9.0,
+            9.0
+          ],
+          "linear_algebra.row_ops": [
+            1225.0,
+            1074.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            9.0,
+            7.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            216.0,
+            108.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            9.0,
+            9.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            33.0,
+            29.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            8.0,
+            8.0
+          ],
+          "linear_algebra_values": [
+            12.628865979381445,
+            11.072164948453608
+          ],
+          "n": 2,
+          "other": 478.28930412831994,
+          "other_values": [
+            478.7893041151086,
+            477.78930414153126
+          ],
+          "p": 29,
+          "relations": 326477187.13917524,
+          "relations.lp_discarded": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_full_direct": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_merge_row_ops": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_merged_full": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_one_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_two_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_small_columns": [
+            0.0,
+            0.0
+          ],
+          "relations.relations": [
+            9.0,
+            9.0
+          ],
+          "relations.solver_calls": [
+            549.0,
+            516.0
+          ],
+          "relations.solver_ops": [
+            31630704170.0,
+            31705099951.0
+          ],
+          "relations_values": [
+            326094453.4020618,
+            326859920.87628865
+          ],
+          "s": 1551790.4298593877,
+          "s_values": [
+            1549971.2532110643,
+            1553609.606507711
+          ],
+          "shadow_gauss": 1.6701030927835054,
+          "shadow_gauss_values": [
+            2.2268041237113407,
+            1.1134020618556701
+          ],
+          "total": 326477677.2789948,
+          "total_values": [
+            326094944.8202319,
+            326860409.73775774
+          ],
+          "trials": 535.5,
+          "trials_values": [
+            552.0,
+            519.0
+          ],
+          "workloads": [
+            "W6e1af4a6b35f",
+            "W5660250b2ffb"
+          ]
+        },
+        {
+          "linear_algebra": 9.345360824742269,
+          "linear_algebra.columns": [
+            8.0,
+            8.0
+          ],
+          "linear_algebra.row_ops": [
+            953.0,
+            860.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            8.0,
+            6.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            176.0,
+            90.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            8.0,
+            8.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            29.0,
+            27.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            7.0,
+            7.0
+          ],
+          "linear_algebra_values": [
+            9.824742268041238,
+            8.8659793814433
+          ],
+          "n": 2,
+          "other": 669.0212629345274,
+          "other_values": [
+            665.0212629332984,
+            673.0212629357565
+          ],
+          "p": 37,
+          "relations": 1484803226.9175258,
+          "relations.lp_discarded": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_full_direct": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_merge_row_ops": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_merged_full": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_one_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_two_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_small_columns": [
+            0.0,
+            0.0
+          ],
+          "relations.relations": [
+            8.0,
+            8.0
+          ],
+          "relations.solver_calls": [
+            2826.0,
+            2110.0
+          ],
+          "relations.solver_ops": [
+            165779796986.0,
+            122270974347.0
+          ],
+          "relations_values": [
+            1709076144.2783504,
+            1260530309.5567012
+          ],
+          "s": 3068189.265667958,
+          "s_values": [
+            3531625.3762383363,
+            2604753.1550975796
+          ],
+          "shadow_gauss": 1.371134020618557,
+          "shadow_gauss_values": [
+            1.8144329896907219,
+            0.9278350515463919
+          ],
+          "total": 1484803905.2841496,
+          "total_values": [
+            1709076819.1243556,
+            1260530991.4439435
+          ],
+          "trials": 2477.5,
+          "trials_values": [
+            2838.0,
+            2117.0
+          ],
+          "workloads": [
+            "W0bb5a2ca97f9",
+            "W0e179a9a6dde"
+          ]
+        },
+        {
+          "linear_algebra": 13.056701030927837,
+          "linear_algebra.columns": [
+            10.0,
+            10.0
+          ],
+          "linear_algebra.row_ops": [
+            1386.0,
+            1147.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            10.0,
+            8.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            169.0,
+            160.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            10.0,
+            9.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            32.0,
+            31.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            9.0,
+            8.0
+          ],
+          "linear_algebra_values": [
+            14.288659793814434,
+            11.824742268041238
+          ],
+          "n": 2,
+          "other": 1082.2725514505328,
+          "other_values": [
+            1074.2725513153468,
+            1090.2725515857185
+          ],
+          "p": 53,
+          "relations": 2070911149.7628865,
+          "relations.lp_discarded": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_full_direct": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_merge_row_ops": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_merged_full": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_one_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_two_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_small_columns": [
+            0.0,
+            0.0
+          ],
+          "relations.relations": [
+            10.0,
+            9.0
+          ],
+          "relations.solver_calls": [
+            2768.0,
+            4049.0
+          ],
+          "relations.solver_ops": [
+            161820672654.0,
+            239934798899.0
+          ],
+          "relations_values": [
+            1668260294.85567,
+            2473562004.670103
+          ],
+          "s": 2084929.4342487922,
+          "s_values": [
+            1679553.1875140914,
+            2490305.680983493
+          ],
+          "shadow_gauss": 1.695876288659794,
+          "shadow_gauss_values": [
+            1.7422680412371137,
+            1.6494845360824741
+          ],
+          "total": 2070912245.092139,
+          "total_values": [
+            1668261383.416881,
+            2473563106.767397
+          ],
+          "trials": 3416.5,
+          "trials_values": [
+            2774.0,
+            4059.0
+          ],
+          "workloads": [
+            "W4860011261ac",
+            "Wd5f278c57858"
+          ]
+        },
+        {
+          "linear_algebra": 45.65979381443299,
+          "linear_algebra.columns": [
+            17.0,
+            17.0
+          ],
+          "linear_algebra.row_ops": [
+            4371.0,
+            4487.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            17.0,
+            17.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            620.0,
+            557.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            17.0,
+            17.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            61.0,
+            63.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            16.0,
+            16.0
+          ],
+          "linear_algebra_values": [
+            45.06185567010309,
+            46.25773195876289
+          ],
+          "n": 2,
+          "other": 1211.6469071304675,
+          "other_values": [
+            1207.646907214037,
+            1215.6469070468981
+          ],
+          "p": 61,
+          "relations": 780501575.7061856,
+          "relations.lp_discarded": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_full_direct": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_merge_row_ops": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_merged_full": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_one_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_two_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_small_columns": [
+            0.0,
+            0.0
+          ],
+          "relations.relations": [
+            17.0,
+            17.0
+          ],
+          "relations.solver_calls": [
+            949.0,
+            1627.0
+          ],
+          "relations.solver_ops": [
+            54327513484.0,
+            97088615440.0
+          ],
+          "relations_values": [
+            560082972.3917526,
+            1000920179.0206186
+          ],
+          "s": 839089.8122580084,
+          "s_values": [
+            602125.8955257429,
+            1076053.728990274
+          ],
+          "shadow_gauss": 6.06701030927835,
+          "shadow_gauss_values": [
+            6.391752577319587,
+            5.742268041237113
+          ],
+          "total": 780502833.0128865,
+          "total_values": [
+            560084225.1005155,
+            1000921440.9252576
+          ],
+          "trials": 1289.0,
+          "trials_values": [
+            950.0,
+            1628.0
+          ],
+          "workloads": [
+            "W1af61f439b2f",
+            "W2d48c621f851"
+          ]
+        },
+        {
+          "linear_algebra": 145.63917525773198,
+          "linear_algebra.columns": [
+            30.0,
+            30.0,
+            30.0
+          ],
+          "linear_algebra.row_ops": [
+            14680.0,
+            14108.0,
+            13593.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            30.0,
+            29.0,
+            28.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            1324.0,
+            1324.0,
+            1683.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            30.0,
+            30.0,
+            29.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            117.0,
+            112.0,
+            112.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            29.0,
+            29.0,
+            28.0
+          ],
+          "linear_algebra_values": [
+            151.340206185567,
+            145.44329896907217,
+            140.1340206185567
+          ],
+          "n": 3,
+          "other": 2425.1243555132055,
+          "other_values": [
+            2427.1243556344634,
+            2430.1243554021894,
+            2418.124355502964
+          ],
+          "p": 101,
+          "relations": 1227922876.5704467,
+          "relations.lp_discarded": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.lp_full_direct": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.lp_merge_row_ops": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.lp_merged_full": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_one_large": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_two_large": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.lp_small_columns": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.relations": [
+            30.0,
+            30.0,
+            29.0
+          ],
+          "relations.solver_calls": [
+            1627.0,
+            2118.0,
+            2071.0
+          ],
+          "relations.solver_ops": [
+            100022843394.0,
+            131249856446.0,
+            126049616767.0
+          ],
+          "relations_values": [
+            1031174603.7319587,
+            1353102246.402062,
+            1299491779.5773194
+          ],
+          "s": 481489.8192788854,
+          "s_values": [
+            404341.5796767603,
+            530574.7165759219,
+            509553.1615839741
+          ],
+          "shadow_gauss": 14.883161512027492,
+          "shadow_gauss_values": [
+            13.649484536082474,
+            13.649484536082475,
+            17.350515463917525
+          ],
+          "total": 1227925447.3339775,
+          "total_values": [
+            1031177182.1965206,
+            1353104821.9697163,
+            1299494337.8356955
+          ],
+          "trials": 1938.6666666666667,
+          "trials_values": [
+            1627.0,
+            2118.0,
+            2071.0
+          ],
+          "workloads": [
+            "W65d9cadb8539",
+            "We9027f8cdea6",
+            "W9743b3f78ae3"
+          ]
+        },
+        {
+          "linear_algebra": 220.56013745704468,
+          "linear_algebra.columns": [
+            37.0,
+            37.0,
+            37.0
+          ],
+          "linear_algebra.row_ops": [
+            21779.0,
+            22548.0,
+            19856.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            37.0,
+            37.0,
+            35.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            3162.0,
+            2686.0,
+            2565.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            37.0,
+            37.0,
+            35.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            138.0,
+            145.0,
+            134.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            36.0,
+            36.0,
+            34.0
+          ],
+          "linear_algebra_values": [
+            224.5257731958763,
+            232.4536082474227,
+            204.70103092783503
+          ],
+          "n": 3,
+          "other": 3577.10330737989,
+          "other_values": [
+            3578.7699740842445,
+            3577.7699740203384,
+            3574.7699740350863
+          ],
+          "p": 149,
+          "relations": 2363216271.3608246,
+          "relations.lp_discarded": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.lp_full_direct": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.lp_merge_row_ops": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.lp_merged_full": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_one_large": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_two_large": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.lp_small_columns": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.relations": [
+            37.0,
+            37.0,
+            35.0
+          ],
+          "relations.solver_calls": [
+            3603.0,
+            3873.0,
+            3398.0
+          ],
+          "relations.solver_ops": [
+            225642539938.0,
+            243162666171.0,
+            218886635543.0
+          ],
+          "relations_values": [
+            2326225209.082474,
+            2506846898.9484534,
+            2256576706.051546
+          ],
+          "s": 212886.73480808607,
+          "s_values": [
+            209554.45722222014,
+            225825.4612518226,
+            203280.28595021548
+          ],
+          "shadow_gauss": 28.910652920962203,
+          "shadow_gauss_values": [
+            32.5979381443299,
+            27.69072164948454,
+            26.443298969072163
+          ],
+          "total": 2363220069.024269,
+          "total_values": [
+            2326229012.3782215,
+            2506850709.1720357,
+            2256580485.522551
+          ],
+          "trials": 3625.0,
+          "trials_values": [
+            3603.0,
+            3874.0,
+            3398.0
+          ],
+          "workloads": [
+            "W2e585005bd91",
+            "Wcfe820b85af4",
+            "W16b44ab77a95"
+          ]
+        },
+        {
+          "linear_algebra": 441.3659793814433,
+          "linear_algebra.columns": [
+            52.0,
+            52.0
+          ],
+          "linear_algebra.row_ops": [
+            42719.0,
+            42906.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            50.0,
+            51.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            6350.0,
+            5335.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            51.0,
+            51.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            200.0,
+            199.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            50.0,
+            50.0
+          ],
+          "linear_algebra_values": [
+            440.4020618556701,
+            442.3298969072165
+          ],
+          "n": 2,
+          "other": 5411.257731966137,
+          "other_values": [
+            5410.25773199809,
+            5412.2577319341835
+          ],
+          "p": 197,
+          "relations": 2690819858.0,
+          "relations.lp_discarded": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_full_direct": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_merge_row_ops": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_merged_full": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_one_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_two_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_small_columns": [
+            0.0,
+            0.0
+          ],
+          "relations.relations": [
+            51.0,
+            51.0
+          ],
+          "relations.solver_calls": [
+            4571.0,
+            3467.0
+          ],
+          "relations.solver_ops": [
+            291667669960.0,
+            230347676426.0
+          ],
+          "relations_values": [
+            3006903329.587629,
+            2374736386.412371
+          ],
+          "s": 138672.53963194703,
+          "s_values": [
+            154961.9995160796,
+            122383.07974781447
+          ],
+          "shadow_gauss": 60.2319587628866,
+          "shadow_gauss_values": [
+            65.4639175257732,
+            55.0
+          ],
+          "total": 2690825710.6237116,
+          "total_values": [
+            3006909180.2474227,
+            2374742241.0
+          ],
+          "trials": 4019.0,
+          "trials_values": [
+            4571.0,
+            3467.0
+          ],
+          "workloads": [
+            "W62c6564fb72b",
+            "Wec291d21da95"
+          ]
+        },
+        {
+          "linear_algebra": 693.2714776632301,
+          "linear_algebra.columns": [
+            65.0,
+            65.0,
+            65.0
+          ],
+          "linear_algebra.row_ops": [
+            62519.0,
+            70374.0,
+            68849.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            62.0,
+            65.0,
+            65.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            10280.0,
+            12512.0,
+            9077.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            62.0,
+            65.0,
+            65.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            236.0,
+            256.0,
+            249.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            61.0,
+            64.0,
+            64.0
+          ],
+          "linear_algebra_values": [
+            644.5257731958762,
+            725.5051546391752,
+            709.7835051546392
+          ],
+          "n": 3,
+          "other": 8224.22530114282,
+          "other_values": [
+            8220.55863651787,
+            8226.558633774826,
+            8225.558633135766
+          ],
+          "p": 293,
+          "relations": 8292946881.594501,
+          "relations.lp_discarded": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.lp_full_direct": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.lp_merge_row_ops": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.lp_merged_full": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_one_large": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_two_large": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.lp_small_columns": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "relations.relations": [
+            62.0,
+            65.0,
+            65.0
+          ],
+          "relations.solver_calls": [
+            13740.0,
+            8220.0,
+            11881.0
+          ],
+          "relations.solver_ops": [
+            968892577368.0,
+            588279246747.0,
+            856067287007.0
+          ],
+          "relations_values": [
+            9988613848.484535,
+            6064761552.288659,
+            8825465244.01031
+          ],
+          "s": 273221.61154059233,
+          "s_values": [
+            329087.4401104754,
+            199811.31106530182,
+            290766.08344599965
+          ],
+          "shadow_gauss": 109.51546391752576,
+          "shadow_gauss_values": [
+            105.97938144329896,
+            128.98969072164948,
+            93.57731958762886
+          ],
+          "total": 8292955799.091281,
+          "total_values": [
+            9988622713.568945,
+            6064770504.3524475,
+            8825474179.352448
+          ],
+          "trials": 11280.333333333334,
+          "trials_values": [
+            13740.0,
+            8220.0,
+            11881.0
+          ],
+          "workloads": [
+            "Wcc7e864ed81d",
+            "W6884ec0c38c7",
+            "Wdb2a95c5b8f4"
+          ]
+        },
+        {
+          "linear_algebra": 1552.2113402061855,
+          "linear_algebra.columns": [
+            96.0,
+            96.0
+          ],
+          "linear_algebra.row_ops": [
+            147720.0,
+            153409.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            94.0,
+            96.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            31118.0,
+            34303.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            94.0,
+            96.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            371.0,
+            376.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            93.0,
+            95.0
+          ],
+          "linear_algebra_values": [
+            1522.8865979381444,
+            1581.5360824742268
+          ],
+          "n": 2,
+          "other": 11144.523195964774,
+          "other_values": [
+            11141.023195915615,
+            11148.023196013932
+          ],
+          "p": 401,
+          "relations": 8813049935.639175,
+          "relations.lp_discarded": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_full_direct": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_merge_row_ops": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_merged_full": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_one_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_two_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_small_columns": [
+            0.0,
+            0.0
+          ],
+          "relations.relations": [
+            94.0,
+            96.0
+          ],
+          "relations.solver_calls": [
+            11460.0,
+            11907.0
+          ],
+          "relations.solver_ops": [
+            859310557180.0,
+            850413742533.0
+          ],
+          "relations_values": [
+            8858909821.649485,
+            8767190049.628866
+          ],
+          "s": 109615.0105637566,
+          "s_values": [
+            110185.4057261514,
+            109044.61540136182
+          ],
+          "shadow_gauss": 337.2216494845361,
+          "shadow_gauss_values": [
+            320.8041237113402,
+            353.63917525773195
+          ],
+          "total": 8813062632.37371,
+          "total_values": [
+            8858922485.559278,
+            8767202779.188145
+          ],
+          "trials": 11683.5,
+          "trials_values": [
+            11460.0,
+            11907.0
+          ],
+          "workloads": [
+            "W5aee66e7a2de",
+            "W7cc52989d545"
+          ]
+        },
+        {
+          "linear_algebra": 2793.077319587629,
+          "linear_algebra.columns": [
+            130.0,
+            130.0
+          ],
+          "linear_algebra.row_ops": [
+            275652.0,
+            266205.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            128.0,
+            126.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            70888.0,
+            92402.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            128.0,
+            126.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            508.0,
+            498.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            127.0,
+            125.0
+          ],
+          "linear_algebra_values": [
+            2841.773195876289,
+            2744.381443298969
+          ],
+          "n": 2,
+          "other": 15439.54832509621,
+          "other_values": [
+            15441.048325882744,
+            15438.048324309673
+          ],
+          "p": 509,
+          "relations": 9531704404.536083,
+          "relations.lp_discarded": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_full_direct": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_merge_row_ops": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_merged_full": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_one_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_two_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_small_columns": [
+            0.0,
+            0.0
+          ],
+          "relations.relations": [
+            128.0,
+            126.0
+          ],
+          "relations.solver_calls": [
+            12634.0,
+            10567.0
+          ],
+          "relations.solver_ops": [
+            994955136811.0,
+            854186342421.0
+          ],
+          "relations_values": [
+            10257318303.907215,
+            8806090505.16495
+          ],
+          "s": 73580.99900443142,
+          "s_values": [
+            79182.44182154954,
+            67979.55618731331
+          ],
+          "shadow_gauss": 841.7010309278351,
+          "shadow_gauss_values": [
+            730.8041237113403,
+            952.5979381443298
+          ],
+          "total": 9531722637.161728,
+          "total_values": [
+            10257336586.728737,
+            8806108687.594717
+          ],
+          "trials": 11600.5,
+          "trials_values": [
+            12634.0,
+            10567.0
+          ],
+          "workloads": [
+            "W5d4e4ca52732",
+            "W96ff82523961"
+          ]
+        },
+        {
+          "linear_algebra": 4581.639175257732,
+          "linear_algebra.columns": [
+            167.0,
+            167.0
+          ],
+          "linear_algebra.row_ops": [
+            434768.0,
+            454070.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            159.0,
+            164.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            139772.0,
+            139540.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            161.0,
+            164.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            640.0,
+            653.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            160.0,
+            163.0
+          ],
+          "linear_algebra_values": [
+            4482.144329896907,
+            4681.134020618557
+          ],
+          "n": 2,
+          "other": 21571.054766812274,
+          "other_values": [
+            21569.55476678278,
+            21572.55476684177
+          ],
+          "p": 701,
+          "relations": 15909180441.103092,
+          "relations.lp_discarded": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_full_direct": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_merge_row_ops": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_merged_full": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_one_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_two_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_small_columns": [
+            0.0,
+            0.0
+          ],
+          "relations.relations": [
+            161.0,
+            164.0
+          ],
+          "relations.solver_calls": [
+            20468.0,
+            19663.0
+          ],
+          "relations.solver_ops": [
+            1635232394928.0,
+            1451135977781.0
+          ],
+          "relations_values": [
+            16858131062.103092,
+            14960229820.103092
+          ],
+          "s": 91570.8810387615,
+          "s_values": [
+            97032.89038955736,
+            86108.87168796561
+          ],
+          "shadow_gauss": 1439.7525773195875,
+          "shadow_gauss_values": [
+            1440.9484536082473,
+            1438.556701030928
+          ],
+          "total": 15909206593.797035,
+          "total_values": [
+            16858157113.802189,
+            14960256073.79188
+          ],
+          "trials": 20065.5,
+          "trials_values": [
+            20468.0,
+            19663.0
+          ],
+          "workloads": [
+            "W16a3e90f3dba",
+            "W7f0d655cafef"
+          ]
+        },
+        {
+          "linear_algebra": 11668.268041237112,
+          "linear_algebra.columns": [
+            267.0,
+            267.0
+          ],
+          "linear_algebra.row_ops": [
+            1113842.0,
+            1149802.0
+          ],
+          "linear_algebra.shadow_gauss_agrees": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.shadow_gauss_pin_rank": [
+            257.0,
+            260.0
+          ],
+          "linear_algebra.shadow_gauss_row_ops": [
+            468569.0,
+            529471.0
+          ],
+          "linear_algebra.wiedemann_attempts": [
+            1.0,
+            1.0
+          ],
+          "linear_algebra.wiedemann_dimension": [
+            257.0,
+            262.0
+          ],
+          "linear_algebra.wiedemann_nonzeros": [
+            1020.0,
+            1035.0
+          ],
+          "linear_algebra.wiedemann_touched_columns": [
+            256.0,
+            261.0
+          ],
+          "linear_algebra_values": [
+            11482.907216494845,
+            11853.62886597938
+          ],
+          "n": 2,
+          "other": 34411.40463866401,
+          "other_values": [
+            34413.90463882132,
+            34408.904638506705
+          ],
+          "p": 1009,
+          "relations": 17489191903.340206,
+          "relations.lp_discarded": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_full_direct": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_merge_row_ops": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_merged_full": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_one_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_partials_two_large": [
+            0.0,
+            0.0
+          ],
+          "relations.lp_small_columns": [
+            0.0,
+            0.0
+          ],
+          "relations.relations": [
+            257.0,
+            262.0
+          ],
+          "relations.solver_calls": [
+            20706.0,
+            21309.0
+          ],
+          "relations.solver_ops": [
+            1676385059650.0,
+            1716500261638.0
+          ],
+          "relations_values": [
+            17282411298.041237,
+            17695972508.639175
+          ],
+          "s": 68714.50333066744,
+          "s_values": [
+            67902.07004051923,
+            69526.93662081564
+          ],
+          "shadow_gauss": 5144.5360824742265,
+          "shadow_gauss_values": [
+            4830.6082474226805,
+            5458.463917525773
+          ],
+          "total": 17489237983.012886,
+          "total_values": [
+            17282457194.853092,
+            17696018771.17268
+          ],
+          "trials": 21007.5,
+          "trials_values": [
+            20706.0,
+            21309.0
+          ],
+          "workloads": [
+            "W3eaa26ced822",
+            "W74266d15bd7d"
+          ]
+        }
+      ]
+    }
+  },
+  "model_11_16_from_pr1863": {
+    "formula": "S/rho = sqrt(h) (181 (p/4) C4 / (126 p^2) + r_inf/4), C4 = 8.34e7",
+    "log2_group_star": {
+      "h=1": [
+        100.7,
+        101.2
+      ],
+      "h=2": [
+        103.0,
+        103.7
+      ],
+      "h=4": [
+        105.4,
+        106.5
+      ]
+    },
+    "source": "research/gaudry_quartic_d4_cost_20261014/raw/summary.json (phi = 0.73 .. 1)"
+  },
+  "paired_large_prime": [
+    {
+      "arm": "ic-d4-lp2",
+      "la_lp": 46.09278350515464,
+      "la_plain": 151.340206185567,
+      "p": 101,
+      "ratio": 1.3172747769269948,
+      "s_lp": 532628.9641710131,
+      "s_plain": 404341.5796767603,
+      "trials_lp": 2148.0,
+      "trials_plain": 1627.0,
+      "workload": "W65d9cadb8539"
+    },
+    {
+      "arm": "ic-d4-lp2",
+      "la_lp": 48.175257731958766,
+      "la_plain": 145.44329896907217,
+      "p": 101,
+      "ratio": 1.0941747466912224,
+      "s_lp": 580541.4561102265,
+      "s_plain": 530574.7165759219,
+      "trials_lp": 2318.0,
+      "trials_plain": 2118.0,
+      "workload": "We9027f8cdea6"
+    },
+    {
+      "arm": "ic-d4-lp2",
+      "la_lp": 69.25773195876289,
+      "la_plain": 224.5257731958763,
+      "p": 149,
+      "ratio": 1.2227805467251676,
+      "s_lp": 256239.11377088208,
+      "s_plain": 209554.45722222014,
+      "trials_lp": 4405.0,
+      "trials_plain": 3603.0,
+      "workload": "W2e585005bd91"
+    },
+    {
+      "arm": "ic-d4-lp2",
+      "la_lp": 119.8762886597938,
+      "la_plain": 440.4020618556701,
+      "p": 197,
+      "ratio": 1.798821933418599,
+      "s_lp": 278749.04357592633,
+      "s_plain": 154961.9995160796,
+      "trials_lp": 8228.0,
+      "trials_plain": 4571.0,
+      "workload": "W62c6564fb72b"
+    },
+    {
+      "arm": "ic-d4-lp2",
+      "la_lp": 7.577319587628866,
+      "la_plain": 12.628865979381445,
+      "p": 29,
+      "ratio": 0.9999999860264592,
+      "s_lp": 1549971.2315524777,
+      "s_plain": 1549971.2532110643,
+      "trials_lp": 552.0,
+      "trials_plain": 552.0,
+      "workload": "W6e1af4a6b35f"
+    },
+    {
+      "arm": "ic-d4-lp2",
+      "la_lp": 136.82474226804123,
+      "la_plain": 644.5257731958762,
+      "p": 293,
+      "ratio": 1.4413405160062167,
+      "s_lp": 474327.06073999754,
+      "s_plain": 329087.4401104754,
+      "trials_lp": 19807.0,
+      "trials_plain": 13740.0,
+      "workload": "Wcc7e864ed81d"
+    },
+    {
+      "arm": "ic-d4-lp2",
+      "la_lp": 4.814432989690721,
+      "la_plain": 9.824742268041238,
+      "p": 37,
+      "ratio": 0.9999999973941441,
+      "s_lp": 3531625.3670354295,
+      "s_plain": 3531625.3762383363,
+      "trials_lp": 2838.0,
+      "trials_plain": 2838.0,
+      "workload": "W0bb5a2ca97f9"
+    },
+    {
+      "arm": "ic-d4-lp2",
+      "la_lp": 6.989690721649485,
+      "la_plain": 14.288659793814434,
+      "p": 53,
+      "ratio": 1.115349007745405,
+      "s_lp": 1873287.981149474,
+      "s_plain": 1679553.1875140914,
+      "trials_lp": 3091.0,
+      "trials_plain": 2774.0,
+      "workload": "W4860011261ac"
+    },
+    {
+      "arm": "ic-d4-lp2",
+      "la_lp": 17.7319587628866,
+      "la_plain": 45.06185567010309,
+      "p": 61,
+      "ratio": 1.3554567042979586,
+      "s_lp": 816155.5819217805,
+      "s_plain": 602125.8955257429,
+      "trials_lp": 1293.0,
+      "trials_plain": 950.0,
+      "workload": "W1af61f439b2f"
+    },
+    {
+      "arm": "ic-d4-lp1",
+      "la_lp": 43.77319587628866,
+      "la_plain": 151.340206185567,
+      "p": 101,
+      "ratio": 1.952562683518022,
+      "s_lp": 789502.2798715712,
+      "s_plain": 404341.5796767603,
+      "trials_lp": 3187.0,
+      "trials_plain": 1627.0,
+      "workload": "W65d9cadb8539"
+    },
+    {
+      "arm": "ic-d4-lp1",
+      "la_lp": 38.68041237113402,
+      "la_plain": 145.44329896907217,
+      "p": 101,
+      "ratio": 1.96103200277393,
+      "s_lp": 1040473.9990680903,
+      "s_plain": 530574.7165759219,
+      "trials_lp": 4152.0,
+      "trials_plain": 2118.0,
+      "workload": "We9027f8cdea6"
+    },
+    {
+      "arm": "ic-d4-lp1",
+      "la_lp": 57.36082474226804,
+      "la_plain": 224.5257731958763,
+      "p": 149,
+      "ratio": 3.4540797530731138,
+      "s_lp": 723817.8078574965,
+      "s_plain": 209554.45722222014,
+      "trials_lp": 12465.0,
+      "trials_plain": 3603.0,
+      "workload": "W2e585005bd91"
+    },
+    {
+      "arm": "ic-d4-lp1",
+      "la_lp": 60.96907216494845,
+      "la_plain": 232.4536082474227,
+      "p": 149,
+      "ratio": 2.888870135952084,
+      "s_lp": 652380.4309479948,
+      "s_plain": 225825.4612518226,
+      "trials_lp": 11218.0,
+      "trials_plain": 3874.0,
+      "workload": "Wcfe820b85af4"
+    },
+    {
+      "arm": "ic-d4-lp1",
+      "la_lp": 7.329896907216495,
+      "la_plain": 12.628865979381445,
+      "p": 29,
+      "ratio": 1.051619785654509,
+      "s_lp": 1629980.43707247,
+      "s_plain": 1549971.2532110643,
+      "trials_lp": 583.0,
+      "trials_plain": 552.0,
+      "workload": "W6e1af4a6b35f"
+    },
+    {
+      "arm": "ic-d4-lp1",
+      "la_lp": 2.9587628865979383,
+      "la_plain": 11.072164948453608,
+      "p": 29,
+      "ratio": 0.8860678244976561,
+      "s_lp": 1376603.4841569471,
+      "s_plain": 1553609.606507711,
+      "trials_lp": 458.0,
+      "trials_plain": 519.0,
+      "workload": "W5660250b2ffb"
+    },
+    {
+      "arm": "ic-d4-lp1",
+      "la_lp": 6.845360824742268,
+      "la_plain": 9.824742268041238,
+      "p": 37,
+      "ratio": 0.9999999984738852,
+      "s_lp": 3531625.3708486706,
+      "s_plain": 3531625.3762383363,
+      "trials_lp": 2838.0,
+      "trials_plain": 2838.0,
+      "workload": "W0bb5a2ca97f9"
+    },
+    {
+      "arm": "ic-d4-lp1",
+      "la_lp": 5.855670103092783,
+      "la_plain": 8.8659793814433,
+      "p": 37,
+      "ratio": 0.9999999977590854,
+      "s_lp": 2604753.1492605503,
+      "s_plain": 2604753.1550975796,
+      "trials_lp": 2117.0,
+      "trials_plain": 2117.0,
+      "workload": "W0e179a9a6dde"
+    },
+    {
+      "arm": "ic-d4-lp1",
+      "la_lp": 9.608247422680412,
+      "la_plain": 14.288659793814434,
+      "p": 53,
+      "ratio": 1.1153490091667253,
+      "s_lp": 1873287.9835366572,
+      "s_plain": 1679553.1875140914,
+      "trials_lp": 3091.0,
+      "trials_plain": 2774.0,
+      "workload": "W4860011261ac"
+    },
+    {
+      "arm": "ic-d4-lp1",
+      "la_lp": 6.948453608247423,
+      "la_plain": 11.824742268041238,
+      "p": 53,
+      "ratio": 0.9098629099141899,
+      "s_lp": 2265836.7734754793,
+      "s_plain": 2490305.680983493,
+      "trials_lp": 3691.0,
+      "trials_plain": 4059.0,
+      "workload": "Wd5f278c57858"
+    },
+    {
+      "arm": "ic-d4-lp1",
+      "la_lp": 19.97938144329897,
+      "la_plain": 45.06185567010309,
+      "p": 61,
+      "ratio": 2.031858395460672,
+      "s_lp": 1223434.5559482563,
+      "s_plain": 602125.8955257429,
+      "trials_lp": 1937.0,
+      "trials_plain": 950.0,
+      "workload": "W1af61f439b2f"
+    },
+    {
+      "arm": "ic-d4-lp1",
+      "la_lp": 18.577319587628867,
+      "la_plain": 46.25773195876289,
+      "p": 61,
+      "ratio": 1.7756632026344847,
+      "s_lp": 1910709.01062565,
+      "s_plain": 1076053.728990274,
+      "trials_lp": 2899.0,
+      "trials_plain": 1628.0,
+      "workload": "W2d48c621f851"
+    }
+  ],
+  "records": {
+    "sessions": [
+      {
+        "dir": "lp1-p101-t0",
+        "session_id": "ECBS1h1069073f92d6"
+      },
+      {
+        "dir": "lp1-p101-t1",
+        "session_id": "ECBS1h196d20e6ae07"
+      },
+      {
+        "dir": "lp1-p149-t0",
+        "session_id": "ECBS1h9c5487dfb184"
+      },
+      {
+        "dir": "lp1-p149-t1",
+        "session_id": "ECBS1h75bb2698ae80"
+      },
+      {
+        "dir": "lp1-p29-t0",
+        "session_id": "ECBS1h2cb9ccf6ab7a"
+      },
+      {
+        "dir": "lp1-p29-t1",
+        "session_id": "ECBS1h8de8328b7051"
+      },
+      {
+        "dir": "lp1-p37-t0",
+        "session_id": "ECBS1hff5ab0a44a7a"
+      },
+      {
+        "dir": "lp1-p37-t1",
+        "session_id": "ECBS1hcd46e190cc3f"
+      },
+      {
+        "dir": "lp1-p53-t0",
+        "session_id": "ECBS1hfacb6bb78b3e"
+      },
+      {
+        "dir": "lp1-p53-t1",
+        "session_id": "ECBS1ha5ee1295e3f2"
+      },
+      {
+        "dir": "lp1-p61-t0",
+        "session_id": "ECBS1h36fcf7375005"
+      },
+      {
+        "dir": "lp1-p61-t1",
+        "session_id": "ECBS1hc5f03470ecd0"
+      },
+      {
+        "dir": "lp2-p101-t0",
+        "session_id": "ECBS1h99f39559aaf1"
+      },
+      {
+        "dir": "lp2-p101-t1",
+        "session_id": "ECBS1hcb323db9312b"
+      },
+      {
+        "dir": "lp2-p149-t0",
+        "session_id": "ECBS1hb0c914fd1eff"
+      },
+      {
+        "dir": "lp2-p197-t0",
+        "session_id": "ECBS1h72c6c3c2e245"
+      },
+      {
+        "dir": "lp2-p29-t0",
+        "session_id": "ECBS1ha6d51db65c5c"
+      },
+      {
+        "dir": "lp2-p293-t0",
+        "session_id": "ECBS1h5fe5a6d9d5c8"
+      },
+      {
+        "dir": "lp2-p37-t0",
+        "session_id": "ECBS1ha0f90a001534"
+      },
+      {
+        "dir": "lp2-p53-t0",
+        "session_id": "ECBS1hfb8b21de58d4"
+      },
+      {
+        "dir": "lp2-p61-t0",
+        "session_id": "ECBS1h64cbd25116d1"
+      },
+      {
+        "dir": "main-p1009-t0",
+        "session_id": "ECBS1h2230dd3464c1"
+      },
+      {
+        "dir": "main-p1009-t1",
+        "session_id": "ECBS1h42ae79ebb072"
+      },
+      {
+        "dir": "main-p101-t0",
+        "session_id": "ECBS1h42b956952e13"
+      },
+      {
+        "dir": "main-p101-t1",
+        "session_id": "ECBS1hc254ec885a58"
+      },
+      {
+        "dir": "main-p101-t2",
+        "session_id": "ECBS1hc83e6a264932"
+      },
+      {
+        "dir": "main-p149-t0",
+        "session_id": "ECBS1h115fbf5af388"
+      },
+      {
+        "dir": "main-p149-t1",
+        "session_id": "ECBS1h90a74928121f"
+      },
+      {
+        "dir": "main-p149-t2",
+        "session_id": "ECBS1hd04149f28196"
+      },
+      {
+        "dir": "main-p197-t0",
+        "session_id": "ECBS1h9633c4c38036"
+      },
+      {
+        "dir": "main-p197-t1",
+        "session_id": "ECBS1hd7e6a1231d7d"
+      },
+      {
+        "dir": "main-p29-t0",
+        "session_id": "ECBS1haa8537be5e1d"
+      },
+      {
+        "dir": "main-p29-t1",
+        "session_id": "ECBS1h6496916a1557"
+      },
+      {
+        "dir": "main-p293-t0",
+        "session_id": "ECBS1hc78cfddf9b92"
+      },
+      {
+        "dir": "main-p293-t1",
+        "session_id": "ECBS1h5781b96b077a"
+      },
+      {
+        "dir": "main-p293-t2",
+        "session_id": "ECBS1h8d1fbccfafa1"
+      },
+      {
+        "dir": "main-p37-t0",
+        "session_id": "ECBS1h0d05ba4c3421"
+      },
+      {
+        "dir": "main-p37-t1",
+        "session_id": "ECBS1h46cdd5fca268"
+      },
+      {
+        "dir": "main-p401-t0",
+        "session_id": "ECBS1h314ee3e4d1b6"
+      },
+      {
+        "dir": "main-p401-t1",
+        "session_id": "ECBS1h090397f11941"
+      },
+      {
+        "dir": "main-p509-t0",
+        "session_id": "ECBS1h81d7b143eb33"
+      },
+      {
+        "dir": "main-p509-t1",
+        "session_id": "ECBS1h1776f19fa6c1"
+      },
+      {
+        "dir": "main-p53-t0",
+        "session_id": "ECBS1h4d82bfb5ff7e"
+      },
+      {
+        "dir": "main-p53-t1",
+        "session_id": "ECBS1h015925fe2fbb"
+      },
+      {
+        "dir": "main-p61-t0",
+        "session_id": "ECBS1hc95d970f0c12"
+      },
+      {
+        "dir": "main-p61-t1",
+        "session_id": "ECBS1h75ab119f7681"
+      },
+      {
+        "dir": "main-p701-t0",
+        "session_id": "ECBS1h91593b9e3baf"
+      },
+      {
+        "dir": "main-p701-t1",
+        "session_id": "ECBS1h5de606f542d8"
+      },
+      {
+        "dir": "rho-p1009",
+        "session_id": "ECBS1h2c6ec641d33d"
+      },
+      {
+        "dir": "rho-p101",
+        "session_id": "ECBS1h90d3e011b380"
+      },
+      {
+        "dir": "rho-p149",
+        "session_id": "ECBS1hba36f79c96fa"
+      },
+      {
+        "dir": "rho-p197",
+        "session_id": "ECBS1hbe6bbb5f44bd"
+      },
+      {
+        "dir": "rho-p29",
+        "session_id": "ECBS1h5ec05ec7d4f8"
+      },
+      {
+        "dir": "rho-p293",
+        "session_id": "ECBS1hbf191feda8e5"
+      },
+      {
+        "dir": "rho-p37",
+        "session_id": "ECBS1hbddc213a4661"
+      },
+      {
+        "dir": "rho-p401",
+        "session_id": "ECBS1h29bc0ef3640b"
+      },
+      {
+        "dir": "rho-p509",
+        "session_id": "ECBS1h9baa4fd1864c"
+      },
+      {
+        "dir": "rho-p53",
+        "session_id": "ECBS1h82e6dabd1f60"
+      },
+      {
+        "dir": "rho-p61",
+        "session_id": "ECBS1hba7540052475"
+      },
+      {
+        "dir": "rho-p701",
+        "session_id": "ECBS1hb0ca0fb2f18c"
+      }
+    ],
+    "status": {
+      "ic-d4-lp1": {
+        "verified": 12
+      },
+      "ic-d4-lp2": {
+        "verified": 9
+      },
+      "ic-d4-w": {
+        "verified": 27
+      },
+      "rho-neg": {
+        "verified": 240
+      }
+    }
+  },
+  "replicates": 10000,
+  "rho": {
+    "fit_gae": {
+      "const_ln": -0.6246240693146667,
+      "slope": 1.929427400906836,
+      "slope_boot95": [
+        1.8778599106243943,
+        1.9793940214074808
+      ],
+      "slope_t95": [
+        1.7748821896756188,
+        2.083972612138053
+      ]
+    },
+    "per_rung": [
+      {
+        "gae": 341.55555555555554,
+        "n": 18,
+        "p": 29,
+        "s": 1.6234575263884927
+      },
+      {
+        "gae": 674.8333333333334,
+        "n": 18,
+        "p": 37,
+        "s": 1.394471271310417
+      },
+      {
+        "gae": 1353.2777777777778,
+        "n": 18,
+        "p": 53,
+        "s": 1.3624375819353716
+      },
+      {
+        "gae": 1050.1666666666667,
+        "n": 18,
+        "p": 61,
+        "s": 1.1289954551111836
+      },
+      {
+        "gae": 2870.0526315789475,
+        "n": 19,
+        "p": 101,
+        "s": 1.1253949707615925
+      },
+      {
+        "gae": 11625.105263157895,
+        "n": 19,
+        "p": 149,
+        "s": 1.0472282009249323
+      },
+      {
+        "gae": 15564.666666666666,
+        "n": 18,
+        "p": 197,
+        "s": 0.8021299360526329
+      },
+      {
+        "gae": 21527.052631578947,
+        "n": 19,
+        "p": 293,
+        "s": 0.7092351815457216
+      },
+      {
+        "gae": 72973.38888888889,
+        "n": 18,
+        "p": 401,
+        "s": 0.907627589590184
+      },
+      {
+        "gae": 120901.44444444444,
+        "n": 18,
+        "p": 509,
+        "s": 0.9333096861859566
+      },
+      {
+        "gae": 164504.61111111112,
+        "n": 18,
+        "p": 701,
+        "s": 0.9468625657458387
+      },
+      {
+        "gae": 260825.05555555556,
+        "n": 18,
+        "p": 1009,
+        "s": 1.024771014386198
+      }
+    ],
+    "records": 219,
+    "s_rho_boot95": [
+      1.0196530724491248,
+      1.1458991896591915
+    ],
+    "s_rho_mean": 1.0821389771329943,
+    "s_rho_slope": -0.14844977256335584,
+    "s_rho_slope_t95": [
+      -0.24247913243992086,
+      -0.054420412686790806
+    ]
+  },
+  "schema": "gaudry_quartic_d4_exponent_fit/v1"
+}

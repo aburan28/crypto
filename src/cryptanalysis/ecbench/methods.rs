@@ -58,6 +58,7 @@ use crate::cryptanalysis::ic_framework::solvers::solver_by_name;
 use crate::cryptanalysis::ic_framework::stages::{
     DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, Targets,
 };
+use crate::cryptanalysis::ic_framework::summand_large_prime::{SmallBase, SummandLargePrime};
 use crate::cryptanalysis::ic_framework::{run_pipeline, PipelineSpec, RunReport};
 use crate::cryptanalysis::ic_measurement::{self as measurement, Phase, Snapshot};
 use crate::cryptanalysis::koblitz_fast::FastPoint;
@@ -1986,11 +1987,47 @@ fn solve_ic_fp4(
         ],
         ..Default::default()
     };
-    let t = Instant::now();
-    let rep = run_pipeline(&ctx, &spec, &base, &mut oracle, u64::MAX, &calib, None)?;
-    let wall = t.elapsed().as_nanos() as u64;
+    // `large_primes=1|2`: the summand large-prime wrapper
+    // (`ic_framework::summand_large_prime`) over the same oracle, with
+    // the first ⌈lp_small_scale·N^lp_small_exp⌉ Y-line columns small
+    // (and the Y = 0 column, whose logarithm is 0).  Defaults: the
+    // exponents of the analyses, 1 − 1/(n + 1/2) = 7/9 with one large
+    // prime and 1 − 1/n = 3/4 with two, at scale 1.
+    let large_primes = spec.oracle_params.u64_or("large_primes", 0)?;
     let mut scratch = GroupOps::default();
     let fb = base.build(&ctx, &spec.factor_base_params, &mut scratch)?;
+    let t = Instant::now();
+    let rep = if large_primes == 0 {
+        run_pipeline(&ctx, &spec, &base, &mut oracle, u64::MAX, &calib, None)?
+    } else {
+        let real = |k: &str, default: f64| -> Result<f64, String> {
+            match spec.oracle_params.get(k) {
+                None => Ok(default),
+                Some(v) => v
+                    .parse::<f64>()
+                    .map_err(|_| format!("gaudry-d4: {k} is a number, not {v}")),
+            }
+        };
+        let exp = real(
+            "lp_small_exp",
+            if large_primes == 1 { 7.0 / 9.0 } else { 0.75 },
+        )?;
+        let scale = real("lp_small_scale", 1.0)?;
+        let zero_col: Vec<usize> = (spec.factor_base_params.u64_or("zero", 0)? == 1)
+            .then_some(fb.columns - 1)
+            .into_iter()
+            .collect();
+        let small = SmallBase::first_columns(
+            fb.columns,
+            &zero_col,
+            u32::try_from(large_primes).map_err(|_| "large_primes is 0, 1 or 2")?,
+            exp,
+            scale,
+        )?;
+        let mut wrapped = SummandLargePrime::new(&mut oracle, small, inst.r);
+        run_pipeline(&ctx, &spec, &base, &mut wrapped, u64::MAX, &calib, None)?
+    };
+    let wall = t.elapsed().as_nanos() as u64;
     let facts = factor_base_facts(
         &curve.slug,
         &m.params["factor_base"],
