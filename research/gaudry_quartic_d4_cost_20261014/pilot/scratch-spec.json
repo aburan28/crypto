@@ -1,0 +1,46 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "scratch plumbing",
+  "description": "scratch, not cited",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "fp4_torsion",
+        "p": 29,
+        "seed": 1,
+        "max_cofactor": 16
+      }
+    ],
+    "targets_per_curve": 1,
+    "target_seed": 202610134029
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "ic-new",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "fghr-y-line:zero=1",
+          "oracle": "gaudry-d4:macaulay=26,weighted=1,chains=1,sparsest=1,replay=1,charge_unsolved=1",
+          "max_trials": "20"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 202610134030,
+    "isolation_required": "L0",
+    "timeout_seconds": 86400
+  }
+}

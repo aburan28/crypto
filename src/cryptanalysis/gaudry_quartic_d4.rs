@@ -442,6 +442,7 @@ pub fn solve_d4(
 /// [`solve_d4`], with a system the degree-`macaulay` matrix does not solve
 /// (a degenerate one) returned as `Err` carrying what the attempt cost,
 /// phases summed into `total_muls`: work done whether or not it solved.
+#[allow(clippy::result_large_err)]
 pub fn solve_d4_or_cost(
     inst: &D4Instance,
     pre: &SymmetrisedD4,
@@ -532,6 +533,7 @@ fn solve_traced<const N: usize>(
 /// four equations in the weighted grading [`WEIGHTS`] at weighted Macaulay
 /// degree `macaulay` (26 for a regular system), the multiplication matrix
 /// being that of `π`.
+#[allow(clippy::result_large_err)]
 pub fn solve_d4_form(
     inst: &D4Instance,
     pre: &SymmetrisedD4,
@@ -547,6 +549,7 @@ pub fn solve_d4_form(
 /// [`solve_d4_form`] with a [`D4Trace`] carried from solve to solve
 /// (`None`: no replay, the same arithmetic as [`solve_d4_form`]).
 #[allow(clippy::too_many_arguments)]
+#[allow(clippy::result_large_err)]
 pub fn solve_d4_traced(
     inst: &D4Instance,
     pre: &SymmetrisedD4,
@@ -1343,7 +1346,7 @@ mod tests {
                 let b: BTreeSet<[u64; 4]> = b.decompositions.into_iter().collect();
                 assert_eq!(a, mitm);
                 assert_eq!(b, mitm);
-                assert!(b.len() > 0);
+                assert!(!b.is_empty());
                 agree += 1;
             }
         }

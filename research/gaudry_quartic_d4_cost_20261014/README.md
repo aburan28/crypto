@@ -2,7 +2,8 @@
 
 2026-10-14. Protocol: [`PROTOCOL.md`](PROTOCOL.md), registered (commit
 `2be9ad3d7`) before the ladder and the session. Code frozen at `2b49f38d1`.
-Report: [`REPORT.pdf`](REPORT.pdf). Run reports:
+Report: [`REPORT.pdf`](REPORT.pdf). Every run, pilots and failures included:
+[`EXPERIMENTS.md`](EXPERIMENTS.md). Run reports:
 [`reports/run-20261014T2008Z`](reports/run-20261014T2008Z/) (ladder) and
 [`reports/run-20261014T2007Z`](reports/run-20261014T2007Z/) (ecbench session).
 **Class: engineering.** This is a constant in the cost of one
