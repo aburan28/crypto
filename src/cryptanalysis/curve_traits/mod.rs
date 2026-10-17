@@ -41,6 +41,7 @@
 pub mod arith;
 pub mod certify;
 pub mod dissect;
+pub mod points;
 pub mod query;
 pub mod sources;
 pub mod subfield;
@@ -1243,21 +1244,50 @@ fn endomorphism(
                     )
                 }
                 None => {
-                    let why = match (&c.model, small) {
-                        (Model::Other { .. }, _) => {
-                            "not tested: no field arithmetic for this model"
-                        }
-                        (Model::Extension { p, modulus, .. }, _)
-                            if torsion::FpK::new(p, modulus).is_none() =>
-                        {
-                            "not tested: GF(p^k) arithmetic here needs 3 < p < 2^63"
-                        }
-                        (_, Some(l)) if l <= torsion::SCALAR_TEST_MAX_ELL => {
-                            "not tested: beyond the scalar test's cost limit"
-                        }
-                        _ => "not tested: ℓ above the scalar test's range",
+                    // Depth 1, beyond the division polynomial: decide it
+                    // from points over GF(q^k) (points.rs).
+                    let by_points = if *depth == 1 {
+                        small.and_then(|l| points::scalar_by_points(&c.model, &c.trace, l))
+                    } else {
+                        None
                     };
-                    (None, e, why.into())
+                    match by_points {
+                        Some(true) => (
+                            Some(0),
+                            0,
+                            "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater".into(),
+                        ),
+                        Some(false) => {
+                            if e < 1 {
+                                return Err(format!(
+                                    "the ℓ-part of E(GF(q^k)) is cyclic at ℓ = {ell}, so End(E) \
+                                     is on the floor, but ℓ ∤ f₀"
+                                ));
+                            }
+                            (
+                                Some(1),
+                                1,
+                                "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor".into(),
+                            )
+                        }
+                        None => {
+                            let why = match (&c.model, small) {
+                                (Model::Other { .. }, _) => {
+                                    "not tested: no field arithmetic for this model"
+                                }
+                                (Model::Extension { p, modulus, .. }, _)
+                                    if torsion::FpK::new(p, modulus).is_none() =>
+                                {
+                                    "not tested: GF(p^k) arithmetic here needs 3 < p < 2^63"
+                                }
+                                (_, Some(l)) if l <= torsion::SCALAR_TEST_MAX_ELL => {
+                                    "not tested: beyond the cost limits of the division-polynomial and point tests"
+                                }
+                                _ => "not tested: ℓ above the scalar test's range",
+                            };
+                            (None, e, why.into())
+                        }
+                    }
                 }
             }
         };

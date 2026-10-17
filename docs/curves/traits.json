@@ -2,11 +2,11 @@
   "schema": "curve-traits/2",
   "generated_by": "cargo run --release --bin curve_traits -- build",
   "what_this_is": "Traits derived from each curve's model and order (the registry, then the sources in docs/curves/trait-sources.json), with the status of each value; see docs/curves/TRAITS.md.",
-  "registry_sha256": "60f6f3e28389ef03d9fe570598739078311254a85e007967ff7c99ea44a99866",
+  "registry_sha256": "7d0f9fe51ce10911caf3f6b19c8d149eb24a2f6d1ee42ac0bfd083cfa8c7f5ef",
   "inputs": [
     {
       "path": "docs/curves/registry.json",
-      "sha256": "60f6f3e28389ef03d9fe570598739078311254a85e007967ff7c99ea44a99866"
+      "sha256": "7d0f9fe51ce10911caf3f6b19c8d149eb24a2f6d1ee42ac0bfd083cfa8c7f5ef"
     },
     {
       "path": "docs/curves/factor-hints.txt",
@@ -14099,7 +14099,7 @@
         "bits": 57,
         "cofactor": "109796",
         "status": "proved",
-        "source": "largest prime factor of the order"
+        "source": "registry representation"
       },
       "embedding": {
         "degree": "589183138014083",
@@ -26616,7 +26616,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -28641,18 +28641,18 @@
       },
       "endomorphism": {
         "conductor_divides": "457",
-        "conductor": null,
+        "conductor": "457",
         "levels": [
           {
             "ell": "457",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]"
         ]
@@ -28879,7 +28879,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "binary",
         "isogenies": "2:-,3:0,5:0,7:1",
         "jfield": "full",
@@ -29521,18 +29521,18 @@
       },
       "endomorphism": {
         "conductor_divides": "41",
-        "conductor": null,
+        "conductor": "41",
         "levels": [
           {
             "ell": "41",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]"
         ]
@@ -29759,7 +29759,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "binary",
         "isogenies": "2:-,3:0,5:0,7:2",
         "jfield": "full",
@@ -29822,19 +29822,19 @@
         "class_number_status": "proved"
       },
       "endomorphism": {
-        "conductor_divides": "41",
-        "conductor": null,
+        "conductor_divides": "1",
+        "conductor": "1",
         "levels": [
           {
             "ell": "41",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": true,
+        "status": "proved",
         "contains": [
           "Z[π]"
         ]
@@ -30061,7 +30061,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "maximal",
         "family": "binary",
         "isogenies": "2:-,3:0,5:0,7:2",
         "jfield": "full",
@@ -30703,18 +30703,18 @@
       },
       "endomorphism": {
         "conductor_divides": "457",
-        "conductor": null,
+        "conductor": "457",
         "levels": [
           {
             "ell": "457",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]"
         ]
@@ -30941,7 +30941,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "binary",
         "isogenies": "2:-,3:0,5:0,7:1",
         "jfield": "full",
@@ -32783,18 +32783,18 @@
       },
       "endomorphism": {
         "conductor_divides": "967",
-        "conductor": null,
+        "conductor": "967",
         "levels": [
           {
             "ell": "967",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]"
         ]
@@ -33021,7 +33021,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "binary",
         "isogenies": "2:-,3:0,5:0,7:1",
         "jfield": "full",
@@ -33667,18 +33667,18 @@
       },
       "endomorphism": {
         "conductor_divides": "967",
-        "conductor": null,
+        "conductor": "967",
         "levels": [
           {
             "ell": "967",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]"
         ]
@@ -33905,7 +33905,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "binary",
         "isogenies": "2:-,3:0,5:0,7:1",
         "jfield": "full",
@@ -36265,6 +36265,611 @@
         "source": "registry",
         "split": "3i5i7i11s13i",
         "twist_cofactor": "4"
+      }
+    },
+    {
+      "slug": "icv1-f2m59-tm247403969-f6f9b926",
+      "family": "binary",
+      "source": {
+        "kind": "registry",
+        "path": null,
+        "curve_uid": null,
+        "registered": true
+      },
+      "field": {
+        "kind": "binary",
+        "degree": 59,
+        "size_bits": 59
+      },
+      "trace": "-247403969",
+      "order": "576460752550827458",
+      "order_check": {
+        "status": "proved",
+        "method": "generator certificate: r prime, [r]G = O, r > 4√q"
+      },
+      "ordinary": true,
+      "anomalous": false,
+      "trace_ratio": -0.162927,
+      "frobenius": {
+        "disc": "-2244634285336740991",
+        "disc_primes": [
+          [
+            "2244634285336740991",
+            1
+          ]
+        ],
+        "disc_unfactored": [],
+        "disc_status": "proved",
+        "cm_disc": "-2244634285336740991",
+        "conductor": "1",
+        "conductor_bits": 1,
+        "conductor_primes": [],
+        "conductor_unfactored": [],
+        "conductor_fraction": 0.0,
+        "status": "proved",
+        "class_number": null,
+        "class_number_status": "not_evaluated"
+      },
+      "endomorphism": {
+        "conductor_divides": "1",
+        "conductor": "1",
+        "levels": [],
+        "maximal": true,
+        "status": "proved",
+        "contains": [
+          "Z[π]"
+        ]
+      },
+      "small_primes": [
+        {
+          "ell": 2,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": null
+        },
+        {
+          "ell": 3,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 5,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 7,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 11,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 13,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 17,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 19,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 23,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 29,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 31,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        }
+      ],
+      "subfield": {
+        "j_field_degree": 59,
+        "definition_degree": 59,
+        "base_trace": null,
+        "base_trace_sign_free": false,
+        "status": "not_applicable",
+        "method": "no proper subfield of definition"
+      },
+      "subgroup": {
+        "order": "288230376275413729",
+        "bits": 59,
+        "cofactor": "2",
+        "status": "proved",
+        "source": "registry representation"
+      },
+      "embedding": {
+        "degree": "144115188137706864",
+        "lower_bound": null,
+        "complement_bits": 2,
+        "status": "proved"
+      },
+      "twist": {
+        "order": "576460752056019520",
+        "largest_prime_bits": 41,
+        "cofactor": "464960",
+        "status": "proved"
+      },
+      "dissect": {
+        "status": "proved",
+        "torsion": [
+          {
+            "ell": 3,
+            "frobenius": "inert",
+            "point_degree": 8,
+            "full_degree": 8,
+            "isogeny_degree": 4,
+            "all_isogenies_degree": 4,
+            "rational_isogenies": 0,
+            "psi_degrees": "4"
+          },
+          {
+            "ell": 5,
+            "frobenius": "split",
+            "point_degree": 2,
+            "full_degree": 4,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 4,
+            "rational_isogenies": 2,
+            "psi_degrees": "1^2 2 4^2"
+          },
+          {
+            "ell": 7,
+            "frobenius": "inert",
+            "point_degree": 24,
+            "full_degree": 24,
+            "isogeny_degree": 4,
+            "all_isogenies_degree": 4,
+            "rational_isogenies": 0
+          },
+          {
+            "ell": 11,
+            "frobenius": "inert",
+            "point_degree": 40,
+            "full_degree": 40,
+            "isogeny_degree": 4,
+            "all_isogenies_degree": 4,
+            "rational_isogenies": 0
+          },
+          {
+            "ell": 13,
+            "frobenius": "inert",
+            "point_degree": 168,
+            "full_degree": 168,
+            "isogeny_degree": 14,
+            "all_isogenies_degree": 14,
+            "rational_isogenies": 0
+          },
+          {
+            "ell": 17,
+            "frobenius": "split",
+            "point_degree": 4,
+            "full_degree": 8,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 8,
+            "rational_isogenies": 2
+          },
+          {
+            "ell": 19,
+            "frobenius": "inert",
+            "point_degree": 360,
+            "full_degree": 360,
+            "isogeny_degree": 20,
+            "all_isogenies_degree": 20,
+            "rational_isogenies": 0
+          }
+        ],
+        "conductor_ratio": {
+          "2": "247403969",
+          "3": "515252028426470527",
+          "4": "270094074960602496260345535"
+        },
+        "kn_factorization": {
+          "1n+1": "2·5·p55",
+          "1n-1": "2^5·3·13·34351·p33",
+          "2n+1": "3·7·34337·p40",
+          "2n-1": "23·p55",
+          "3n+1": "2^2·257·443·43159·43993933",
+          "3n-1": "2·41^2·p48",
+          "4n+1": "1447·494213·1612193047",
+          "4n-1": "3^2·5·11·97·283·463·183254809",
+          "5n+1": "2·3^4·17·45587·p34",
+          "5n-1": "2^2·7·641·p47",
+          "6n+1": "5^3·29·59·p43",
+          "6n-1": "298861·2396651·2414443",
+          "7n+1": "2^3·11·39671·p40",
+          "7n-1": "2·3·p59",
+          "8n+1": "3·31·c55",
+          "8n-1": "19·1483·p47"
+        },
+        "trace_factorization": {
+          "1": "-3391·72959",
+          "2": "-3^2·5·7·11·89·c42"
+        },
+        "twist_order": {
+          "1": "2^6·5·1453·p41",
+          "2": "2·5·17·73·397·c96"
+        },
+        "small_prime_order_index": {
+          "11": "2",
+          "13": "6",
+          "2": "2",
+          "3": "96",
+          "5": "2",
+          "7": "1"
+        },
+        "pow_distance": {
+          "order": "2^59+28",
+          "subgroup": "2^58+27"
+        },
+        "x962_invariant": null,
+        "hamming_x": {
+          "1": 25
+        }
+      },
+      "keys": {
+        "char": "2",
+        "cm": "large",
+        "cofactor": "2",
+        "conductor": "1",
+        "depth": "2:0,3:0,5:0,7:0",
+        "descent": "none",
+        "descent_signed": "none",
+        "embedding": "large",
+        "end_order": "maximal",
+        "family": "binary",
+        "isogenies": "2:-,3:0,5:2,7:0",
+        "jfield": "full",
+        "ordinary": "yes",
+        "source": "registry",
+        "split": "3i5s7i11i13i",
+        "twist_cofactor": "464960"
+      }
+    },
+    {
+      "slug": "icv1-f2m61-tm1864788689-c4a45971",
+      "family": "binary",
+      "source": {
+        "kind": "registry",
+        "path": null,
+        "curve_uid": null,
+        "registered": true
+      },
+      "field": {
+        "kind": "binary",
+        "degree": 61,
+        "size_bits": 61
+      },
+      "trace": "-1864788689",
+      "order": "2305843011078482642",
+      "order_check": {
+        "status": "proved",
+        "method": "generator certificate: r prime, [r]G = O, r > 4√q"
+      },
+      "ordinary": true,
+      "anomalous": false,
+      "trace_ratio": -0.614023,
+      "frobenius": {
+        "disc": "-5745935182232437087",
+        "disc_primes": [
+          [
+            "7",
+            6
+          ],
+          [
+            "191",
+            1
+          ],
+          [
+            "257",
+            1
+          ],
+          [
+            "31543",
+            2
+          ]
+        ],
+        "disc_unfactored": [],
+        "disc_status": "proved",
+        "cm_disc": "-49087",
+        "conductor": "10819249",
+        "conductor_bits": 24,
+        "conductor_primes": [
+          [
+            "7",
+            3
+          ],
+          [
+            "31543",
+            1
+          ]
+        ],
+        "conductor_unfactored": [],
+        "conductor_fraction": 0.74994,
+        "status": "proved",
+        "class_number": 122,
+        "class_number_status": "proved"
+      },
+      "endomorphism": {
+        "conductor_divides": "10819249",
+        "conductor": null,
+        "levels": [
+          {
+            "ell": "7",
+            "depth": 3,
+            "level": 3,
+            "level_at_most": 3,
+            "method": "Frobenius is not a scalar on E[ℓ]: the floor"
+          },
+          {
+            "ell": "31543",
+            "depth": 1,
+            "level": null,
+            "level_at_most": 1,
+            "method": "not tested: ℓ above the scalar test's range"
+          }
+        ],
+        "maximal": null,
+        "status": "bounded",
+        "contains": [
+          "Z[π]",
+          "the levels the scalar test on E[ℓ] resolves"
+        ]
+      },
+      "small_primes": [
+        {
+          "ell": 2,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": null
+        },
+        {
+          "ell": 3,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 5,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 7,
+          "depth": 3,
+          "splitting": "split",
+          "rational_isogenies": null
+        },
+        {
+          "ell": 11,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 13,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 17,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 19,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 23,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 29,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 31,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        }
+      ],
+      "subfield": {
+        "j_field_degree": 61,
+        "definition_degree": 61,
+        "base_trace": null,
+        "base_trace_sign_free": false,
+        "status": "not_applicable",
+        "method": "no proper subfield of definition"
+      },
+      "subgroup": {
+        "order": "88686269656864717",
+        "bits": 57,
+        "cofactor": "26",
+        "status": "proved",
+        "source": "registry representation"
+      },
+      "embedding": {
+        "degree": "484624424354452",
+        "lower_bound": null,
+        "complement_bits": 8,
+        "status": "proved"
+      },
+      "twist": {
+        "order": "2305843007348905264",
+        "largest_prime_bits": 39,
+        "cofactor": "7618096",
+        "status": "proved"
+      },
+      "dissect": {
+        "status": "proved",
+        "torsion": [
+          {
+            "ell": 3,
+            "frobenius": "inert",
+            "point_degree": 8,
+            "full_degree": 8,
+            "isogeny_degree": 4,
+            "all_isogenies_degree": 4,
+            "rational_isogenies": 0,
+            "psi_degrees": "4"
+          },
+          {
+            "ell": 5,
+            "frobenius": "inert",
+            "point_degree": 24,
+            "full_degree": 24,
+            "isogeny_degree": 6,
+            "all_isogenies_degree": 6,
+            "rational_isogenies": 0,
+            "psi_degrees": "12"
+          },
+          {
+            "ell": 7,
+            "frobenius": "jordan",
+            "point_degree": 6,
+            "full_degree": 42,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 7,
+            "rational_isogenies": 1
+          },
+          {
+            "ell": 11,
+            "frobenius": "inert",
+            "point_degree": 120,
+            "full_degree": 120,
+            "isogeny_degree": 12,
+            "all_isogenies_degree": 12,
+            "rational_isogenies": 0
+          },
+          {
+            "ell": 13,
+            "frobenius": "split",
+            "point_degree": 1,
+            "full_degree": 12,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 12,
+            "rational_isogenies": 2
+          },
+          {
+            "ell": 17,
+            "frobenius": "split",
+            "point_degree": 4,
+            "full_degree": 8,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 8,
+            "rational_isogenies": 2
+          },
+          {
+            "ell": 19,
+            "frobenius": "split",
+            "point_degree": 9,
+            "full_degree": 18,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 6,
+            "rational_isogenies": 2
+          }
+        ],
+        "conductor_ratio": {
+          "2": "1864788689",
+          "3": "1171593845408644769",
+          "4": "2115135011171363917547091087"
+        },
+        "kn_factorization": {
+          "1n+1": "2·c56",
+          "1n-1": "2^2·3·61·463·673·2141·181607",
+          "2n+1": "3^3·5·13·17·p43",
+          "2n-1": "163·1021·p40",
+          "3n+1": "2^3·c55",
+          "3n-1": "2·5^2·7·389·p41",
+          "4n+1": "7·c56",
+          "4n-1": "3·79·p51",
+          "5n+1": "2·3·11·p53",
+          "5n-1": "2^8·29·2311·p35",
+          "6n+1": "441247·p41",
+          "6n-1": "11·19·p52",
+          "7n+1": "2^2·5·191·2207·69557·1058639",
+          "7n-1": "2·3^2·3529·p44",
+          "8n+1": "3·71·157·p45",
+          "8n-1": "5·199·467·p41"
+        },
+        "trace_factorization": {
+          "1": "-67·2713·10259",
+          "2": "-3^2·41·43·307·303937·766111"
+        },
+        "twist_order": {
+          "1": "2^4·193·2467·p39",
+          "2": "2·17·53·1669·6977·149333·c71"
+        },
+        "small_prime_order_index": {
+          "11": "1",
+          "13": "1",
+          "2": "3",
+          "3": "4",
+          "5": "3",
+          "7": "1"
+        },
+        "pow_distance": {
+          "order": "2^61+31",
+          "subgroup": "2^56+54"
+        },
+        "x962_invariant": null,
+        "hamming_x": {
+          "1": 32
+        }
+      },
+      "keys": {
+        "char": "2",
+        "cm": "-49087",
+        "cofactor": "26",
+        "conductor": "smooth",
+        "depth": "2:0,3:0,5:0,7:3",
+        "descent": "none",
+        "descent_signed": "none",
+        "embedding": "large",
+        "end_order": "unresolved",
+        "family": "binary",
+        "isogenies": "2:-,3:0,5:0,7:1",
+        "jfield": "full",
+        "ordinary": "yes",
+        "source": "registry",
+        "split": "3i5i7s11i13s",
+        "twist_cofactor": "7618096"
       }
     },
     {
@@ -49465,14 +50070,14 @@
             "depth": 1,
             "level": 0,
             "level_at_most": 0,
-            "method": "Frobenius is a scalar on E[ℓ]: above the floor"
+            "method": "Frobenius is a scalar on E[ℓ]: the crater"
           },
           {
             "ell": "3",
             "depth": 1,
             "level": 0,
             "level_at_most": 0,
-            "method": "Frobenius is a scalar on E[ℓ]: above the floor"
+            "method": "Frobenius is a scalar on E[ℓ]: the crater"
           }
         ],
         "maximal": true,
@@ -49771,21 +50376,22 @@
         "class_number_status": "proved"
       },
       "endomorphism": {
-        "conductor_divides": "4",
-        "conductor": null,
+        "conductor_divides": "1",
+        "conductor": "1",
         "levels": [
           {
             "ell": "2",
             "depth": 3,
-            "level": null,
-            "level_at_most": 2,
-            "method": "Frobenius is a scalar on E[ℓ]: above the floor"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "Frobenius is a scalar on E[ℓ^3]: the crater"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": true,
+        "status": "proved",
         "contains": [
-          "Z[π]"
+          "Z[π]",
+          "the levels the scalar test on E[ℓ] resolves"
         ]
       },
       "small_primes": [
@@ -50014,7 +50620,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "k=1",
-        "end_order": "unresolved",
+        "end_order": "maximal",
         "family": "prime",
         "isogenies": "2:3,3:0,5:0,7:1",
         "jfield": "full",
@@ -50077,21 +50683,22 @@
         "class_number_status": "proved"
       },
       "endomorphism": {
-        "conductor_divides": "3",
-        "conductor": null,
+        "conductor_divides": "1",
+        "conductor": "1",
         "levels": [
           {
             "ell": "3",
             "depth": 2,
-            "level": null,
-            "level_at_most": 1,
-            "method": "Frobenius is a scalar on E[ℓ]: above the floor"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "Frobenius is a scalar on E[ℓ^2]: the crater"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": true,
+        "status": "proved",
         "contains": [
-          "Z[π]"
+          "Z[π]",
+          "the levels the scalar test on E[ℓ] resolves"
         ]
       },
       "small_primes": [
@@ -50320,7 +50927,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "k=4",
-        "end_order": "unresolved",
+        "end_order": "maximal",
         "family": "prime",
         "isogenies": "2:0,3:4,5:2,7:0",
         "jfield": "full",
@@ -55041,7 +55648,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -55353,7 +55960,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -55665,7 +56272,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -55977,7 +56584,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -56289,7 +56896,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -150642,6 +151249,318 @@
       }
     },
     {
+      "slug": "icv1-fp36-t276049-fe2b595b",
+      "family": "prime",
+      "source": {
+        "kind": "registry",
+        "path": null,
+        "curve_uid": null,
+        "registered": true
+      },
+      "field": {
+        "kind": "prime",
+        "degree": 1,
+        "size_bits": 36
+      },
+      "trace": "276049",
+      "order": "39615274243",
+      "order_check": {
+        "status": "unknown",
+        "method": "recorded order; no usable generator and the field is too large to count"
+      },
+      "ordinary": true,
+      "anomalous": false,
+      "trace_ratio": 0.693463,
+      "frobenius": {
+        "disc": "-82259150763",
+        "disc_primes": [
+          [
+            "3",
+            1
+          ],
+          [
+            "165589",
+            2
+          ]
+        ],
+        "disc_unfactored": [],
+        "disc_status": "proved",
+        "cm_disc": "-3",
+        "conductor": "165589",
+        "conductor_bits": 18,
+        "conductor_primes": [
+          [
+            "165589",
+            1
+          ]
+        ],
+        "conductor_unfactored": [],
+        "conductor_fraction": 0.956288,
+        "status": "proved",
+        "class_number": 1,
+        "class_number_status": "proved"
+      },
+      "endomorphism": {
+        "conductor_divides": "1",
+        "conductor": "1",
+        "levels": [
+          {
+            "ell": "165589",
+            "depth": 1,
+            "level": 0,
+            "level_at_most": 0,
+            "method": "f₀ is prime to ℓ"
+          }
+        ],
+        "maximal": true,
+        "status": "proved",
+        "contains": [
+          "Z[π]",
+          "Z[ζ₃] (j = 0)"
+        ]
+      },
+      "small_primes": [
+        {
+          "ell": 2,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 3,
+          "depth": 0,
+          "splitting": "ramified",
+          "rational_isogenies": 1
+        },
+        {
+          "ell": 5,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 7,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 11,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 13,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 17,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 19,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 23,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 29,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 31,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        }
+      ],
+      "subfield": {
+        "j_field_degree": null,
+        "definition_degree": null,
+        "base_trace": null,
+        "base_trace_sign_free": false,
+        "status": "not_applicable",
+        "method": "a prime field has no proper subfield"
+      },
+      "subgroup": {
+        "order": "39615274243",
+        "bits": 36,
+        "cofactor": "1",
+        "status": "proved",
+        "source": "largest prime factor of the order"
+      },
+      "embedding": {
+        "degree": "19807637121",
+        "lower_bound": null,
+        "complement_bits": 2,
+        "status": "proved"
+      },
+      "twist": {
+        "order": "39615826341",
+        "largest_prime_bits": 22,
+        "cofactor": "11739",
+        "status": "proved"
+      },
+      "dissect": {
+        "status": "unknown",
+        "torsion": [
+          {
+            "ell": 2,
+            "frobenius": "inert",
+            "point_degree": 3,
+            "full_degree": 3,
+            "isogeny_degree": 3,
+            "all_isogenies_degree": 3,
+            "rational_isogenies": 0,
+            "psi_degrees": "3"
+          },
+          {
+            "ell": 3,
+            "frobenius": "jordan",
+            "point_degree": 2,
+            "full_degree": 6,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 3,
+            "rational_isogenies": 1,
+            "psi_degrees": "1 3"
+          },
+          {
+            "ell": 5,
+            "frobenius": "inert",
+            "point_degree": 3,
+            "full_degree": 3,
+            "isogeny_degree": 3,
+            "all_isogenies_degree": 3,
+            "rational_isogenies": 0,
+            "psi_degrees": "3^4"
+          },
+          {
+            "ell": 7,
+            "frobenius": "split",
+            "point_degree": 2,
+            "full_degree": 6,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 3,
+            "rational_isogenies": 2
+          },
+          {
+            "ell": 11,
+            "frobenius": "inert",
+            "point_degree": 60,
+            "full_degree": 60,
+            "isogeny_degree": 6,
+            "all_isogenies_degree": 6,
+            "rational_isogenies": 0
+          },
+          {
+            "ell": 13,
+            "frobenius": "split",
+            "point_degree": 2,
+            "full_degree": 4,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 4,
+            "rational_isogenies": 2
+          },
+          {
+            "ell": 17,
+            "frobenius": "inert",
+            "point_degree": 288,
+            "full_degree": 288,
+            "isogeny_degree": 18,
+            "all_isogenies_degree": 18,
+            "rational_isogenies": 0
+          },
+          {
+            "ell": 19,
+            "frobenius": "split",
+            "point_degree": 3,
+            "full_degree": 18,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 18,
+            "rational_isogenies": 2
+          }
+        ],
+        "conductor_ratio": {
+          "2": "276049",
+          "3": "36587500110",
+          "4": "835890224414869"
+        },
+        "kn_factorization": {
+          "1n+1": "2^2·7·13·23·571·8287",
+          "1n-1": "2·3^2·2200848569",
+          "2n+1": "3·21911·1205339",
+          "2n-1": "5·11·43·33501289",
+          "3n+1": "2·5·p34",
+          "3n-1": "2^3·51349·289309",
+          "4n+1": "3967·39944819",
+          "4n-1": "3·127·415908391",
+          "5n+1": "2^4·3·17·242740651",
+          "5n-1": "2·p37",
+          "6n+1": "p38",
+          "6n-1": "7·19·113·15815533",
+          "7n+1": "2·p38",
+          "7n-1": "2^2·3·5^2·137·6747127",
+          "8n+1": "3^3·5·7·18047·18583",
+          "8n-1": "155891·2032973"
+        },
+        "trace_factorization": {
+          "1": "276049",
+          "2": "-13·373·624469"
+        },
+        "twist_order": {
+          "1": "3·7·13·43·3374719",
+          "2": "13^2·97·c57"
+        },
+        "small_prime_order_index": {
+          "11": "2",
+          "13": "6",
+          "2": "3",
+          "3": "1",
+          "5": "3",
+          "7": "2"
+        },
+        "pow_distance": {
+          "order": "2^35+33",
+          "subgroup": "2^35+33"
+        },
+        "x962_invariant": "0",
+        "hamming_x": {
+          "1": 18
+        }
+      },
+      "keys": {
+        "char": "p",
+        "cm": "-3",
+        "cofactor": "1",
+        "conductor": "rough",
+        "depth": "2:0,3:0,5:0,7:0",
+        "descent": "none",
+        "descent_signed": "none",
+        "embedding": "large",
+        "end_order": "maximal",
+        "family": "prime",
+        "isogenies": "2:0,3:1,5:0,7:2",
+        "jfield": "full",
+        "ordinary": "yes",
+        "source": "registry",
+        "split": "3r5i7s11i13s",
+        "twist_cofactor": "11739"
+      }
+    },
+    {
       "slug": "icv1-fp36-tm47184-1daf0972",
       "family": "prime",
       "source": {
@@ -152196,6 +153115,304 @@
         "source": "registry",
         "split": "3i5s7s11s13i",
         "twist_cofactor": "447755"
+      }
+    },
+    {
+      "slug": "icv1-fp40-tm506303-75549727",
+      "family": "prime",
+      "source": {
+        "kind": "registry",
+        "path": null,
+        "curve_uid": null,
+        "registered": true
+      },
+      "field": {
+        "kind": "prime",
+        "degree": 1,
+        "size_bits": 40
+      },
+      "trace": "-506303",
+      "order": "649523094257",
+      "order_check": {
+        "status": "unknown",
+        "method": "recorded order; no usable generator and the field is too large to count"
+      },
+      "ordinary": true,
+      "anomalous": false,
+      "trace_ratio": -0.314111,
+      "frobenius": {
+        "disc": "-2341747624003",
+        "disc_primes": [
+          [
+            "340481",
+            1
+          ],
+          [
+            "6877763",
+            1
+          ]
+        ],
+        "disc_unfactored": [],
+        "disc_status": "proved",
+        "cm_disc": "-2341747624003",
+        "conductor": "1",
+        "conductor_bits": 1,
+        "conductor_primes": [],
+        "conductor_unfactored": [],
+        "conductor_fraction": 0.0,
+        "status": "proved",
+        "class_number": null,
+        "class_number_status": "not_evaluated"
+      },
+      "endomorphism": {
+        "conductor_divides": "1",
+        "conductor": "1",
+        "levels": [],
+        "maximal": true,
+        "status": "proved",
+        "contains": [
+          "Z[π]"
+        ]
+      },
+      "small_primes": [
+        {
+          "ell": 2,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 3,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 5,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 7,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 11,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 13,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 17,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 19,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 23,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 29,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 31,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        }
+      ],
+      "subfield": {
+        "j_field_degree": null,
+        "definition_degree": null,
+        "base_trace": null,
+        "base_trace_sign_free": false,
+        "status": "not_applicable",
+        "method": "a prime field has no proper subfield"
+      },
+      "subgroup": {
+        "order": "649523094257",
+        "bits": 40,
+        "cofactor": "1",
+        "status": "proved",
+        "source": "largest prime factor of the order"
+      },
+      "embedding": {
+        "degree": "649523094256",
+        "lower_bound": null,
+        "complement_bits": 1,
+        "status": "proved"
+      },
+      "twist": {
+        "order": "649522081651",
+        "largest_prime_bits": 28,
+        "cofactor": "2753",
+        "status": "proved"
+      },
+      "dissect": {
+        "status": "unknown",
+        "torsion": [
+          {
+            "ell": 2,
+            "frobenius": "inert",
+            "point_degree": 3,
+            "full_degree": 3,
+            "isogeny_degree": 3,
+            "all_isogenies_degree": 3,
+            "rational_isogenies": 0,
+            "psi_degrees": "3"
+          },
+          {
+            "ell": 3,
+            "frobenius": "inert",
+            "point_degree": 8,
+            "full_degree": 8,
+            "isogeny_degree": 4,
+            "all_isogenies_degree": 4,
+            "rational_isogenies": 0,
+            "psi_degrees": "4"
+          },
+          {
+            "ell": 5,
+            "frobenius": "inert",
+            "point_degree": 24,
+            "full_degree": 24,
+            "isogeny_degree": 6,
+            "all_isogenies_degree": 6,
+            "rational_isogenies": 0,
+            "psi_degrees": "12"
+          },
+          {
+            "ell": 7,
+            "frobenius": "inert",
+            "point_degree": 4,
+            "full_degree": 4,
+            "isogeny_degree": 2,
+            "all_isogenies_degree": 2,
+            "rational_isogenies": 0
+          },
+          {
+            "ell": 11,
+            "frobenius": "split",
+            "point_degree": 5,
+            "full_degree": 10,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 10,
+            "rational_isogenies": 2
+          },
+          {
+            "ell": 13,
+            "frobenius": "inert",
+            "point_degree": 56,
+            "full_degree": 56,
+            "isogeny_degree": 14,
+            "all_isogenies_degree": 14,
+            "rational_isogenies": 0
+          },
+          {
+            "ell": 17,
+            "frobenius": "split",
+            "point_degree": 16,
+            "full_degree": 16,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 8,
+            "rational_isogenies": 2
+          },
+          {
+            "ell": 19,
+            "frobenius": "split",
+            "point_degree": 9,
+            "full_degree": 18,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 18,
+            "rational_isogenies": 2
+          }
+        ],
+        "conductor_ratio": {
+          "2": "506303",
+          "3": "393179860144",
+          "4": "527923377578855391"
+        },
+        "kn_factorization": {
+          "1n+1": "2·3·61·1747·1015829",
+          "1n-1": "2^4·p36",
+          "2n+1": "5·113011·2298973",
+          "2n-1": "3·19·223·1009·101287",
+          "3n+1": "2^2·7·17·4093632947",
+          "3n-1": "2·5·11^2·47·34263571",
+          "4n+1": "3^2·109·26849·98641",
+          "4n-1": "7·31·523·547·41851",
+          "5n+1": "2·41·317·1123·111253",
+          "5n-1": "2^2·3^4·353·28395197",
+          "6n+1": "29·37·53·68528347",
+          "6n-1": "13·71·4222251967",
+          "7n+1": "2^3·3·5^2·13·7321·79621",
+          "7n-1": "2·96787·23487977",
+          "8n+1": "11·p39",
+          "8n-1": "3·5·503·688692479"
+        },
+        "trace_factorization": {
+          "1": "-7·151·479",
+          "2": "-3·p39"
+        },
+        "twist_order": {
+          "1": "2753·235932467",
+          "2": "7^2·5569·1025417·p41"
+        },
+        "small_prime_order_index": {
+          "11": "8",
+          "13": "1",
+          "2": "8",
+          "3": "1",
+          "5": "1",
+          "7": "4"
+        },
+        "pow_distance": {
+          "order": "2^39+37",
+          "subgroup": "2^39+37"
+        },
+        "x962_invariant": "377954568973",
+        "hamming_x": {
+          "1": 19
+        }
+      },
+      "keys": {
+        "char": "p",
+        "cm": "large",
+        "cofactor": "1",
+        "conductor": "1",
+        "depth": "2:0,3:0,5:0,7:0",
+        "descent": "none",
+        "descent_signed": "none",
+        "embedding": "large",
+        "end_order": "maximal",
+        "family": "prime",
+        "isogenies": "2:0,3:0,5:0,7:0",
+        "jfield": "full",
+        "ordinary": "yes",
+        "source": "registry",
+        "split": "3i5i7i11s13i",
+        "twist_cofactor": "2753"
       }
     },
     {
@@ -159030,6 +160247,675 @@
       }
     },
     {
+      "slug": "icv1-fp56-tm300120038-865aea25",
+      "family": "prime",
+      "source": {
+        "kind": "registry",
+        "path": null,
+        "curve_uid": null,
+        "registered": true
+      },
+      "field": {
+        "kind": "prime",
+        "degree": 1,
+        "size_bits": 56
+      },
+      "trace": "-300120038",
+      "order": "36028808484511888",
+      "order_check": {
+        "status": "proved",
+        "method": "generator certificate: r prime, [r]G = O, r > 4√q"
+      },
+      "ordinary": true,
+      "anomalous": false,
+      "trace_ratio": -0.790569,
+      "frobenius": {
+        "disc": "-54043195528445952",
+        "disc_primes": [
+          [
+            "2",
+            54
+          ],
+          [
+            "3",
+            1
+          ]
+        ],
+        "disc_unfactored": [],
+        "disc_status": "proved",
+        "cm_disc": "-3",
+        "conductor": "134217728",
+        "conductor_bits": 28,
+        "conductor_primes": [
+          [
+            "2",
+            27
+          ]
+        ],
+        "conductor_unfactored": [],
+        "conductor_fraction": 0.971486,
+        "status": "proved",
+        "class_number": 1,
+        "class_number_status": "proved"
+      },
+      "endomorphism": {
+        "conductor_divides": "134217728",
+        "conductor": "134217728",
+        "levels": [
+          {
+            "ell": "2",
+            "depth": 27,
+            "level": 27,
+            "level_at_most": 27,
+            "method": "Frobenius is not a scalar on E[ℓ]: the floor"
+          }
+        ],
+        "maximal": false,
+        "status": "proved",
+        "contains": [
+          "Z[π]",
+          "the levels the scalar test on E[ℓ] resolves"
+        ]
+      },
+      "small_primes": [
+        {
+          "ell": 2,
+          "depth": 27,
+          "splitting": "inert",
+          "rational_isogenies": null
+        },
+        {
+          "ell": 3,
+          "depth": 0,
+          "splitting": "ramified",
+          "rational_isogenies": 1
+        },
+        {
+          "ell": 5,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 7,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 11,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 13,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 17,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 19,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 23,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 29,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 31,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        }
+      ],
+      "subfield": {
+        "j_field_degree": null,
+        "definition_degree": null,
+        "base_trace": null,
+        "base_trace_sign_free": false,
+        "status": "not_applicable",
+        "method": "a prime field has no proper subfield"
+      },
+      "subgroup": {
+        "order": "2251800530281993",
+        "bits": 52,
+        "cofactor": "16",
+        "status": "proved",
+        "source": "registry representation"
+      },
+      "embedding": {
+        "degree": "2251800530281992",
+        "lower_bound": null,
+        "complement_bits": 1,
+        "status": "proved"
+      },
+      "twist": {
+        "order": "36028807884271812",
+        "largest_prime_bits": 52,
+        "cofactor": "12",
+        "status": "proved"
+      },
+      "dissect": {
+        "status": "proved",
+        "torsion": [
+          {
+            "ell": 2,
+            "frobenius": "jordan",
+            "point_degree": 1,
+            "full_degree": 2,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 2,
+            "rational_isogenies": 1,
+            "psi_degrees": "1 2"
+          },
+          {
+            "ell": 3,
+            "frobenius": "jordan",
+            "point_degree": 2,
+            "full_degree": 6,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 3,
+            "rational_isogenies": 1,
+            "psi_degrees": "1 3"
+          },
+          {
+            "ell": 5,
+            "frobenius": "inert",
+            "point_degree": 12,
+            "full_degree": 12,
+            "isogeny_degree": 3,
+            "all_isogenies_degree": 3,
+            "rational_isogenies": 0,
+            "psi_degrees": "6^2"
+          },
+          {
+            "ell": 7,
+            "frobenius": "split",
+            "point_degree": 3,
+            "full_degree": 3,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 3,
+            "rational_isogenies": 2
+          },
+          {
+            "ell": 11,
+            "frobenius": "inert",
+            "point_degree": 40,
+            "full_degree": 40,
+            "isogeny_degree": 4,
+            "all_isogenies_degree": 4,
+            "rational_isogenies": 0
+          },
+          {
+            "ell": 13,
+            "frobenius": "split",
+            "point_degree": 6,
+            "full_degree": 12,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 12,
+            "rational_isogenies": 2
+          },
+          {
+            "ell": 17,
+            "frobenius": "inert",
+            "point_degree": 144,
+            "full_degree": 144,
+            "isogeny_degree": 9,
+            "all_isogenies_degree": 9,
+            "rational_isogenies": 0
+          },
+          {
+            "ell": 19,
+            "frobenius": "split",
+            "point_degree": 3,
+            "full_degree": 18,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 18,
+            "rational_isogenies": 2
+          }
+        ],
+        "conductor_ratio": {
+          "2": "300120038",
+          "3": "54043229024729595",
+          "4": "5406488667150156262354348"
+        },
+        "kn_factorization": {
+          "1n+1": "2·4013·p39",
+          "1n-1": "2^3·3·p47",
+          "2n+1": "3^2·43·383·p35",
+          "2n-1": "5·547·59149·27839099",
+          "3n+1": "2^2·5·607·937·593872061",
+          "3n-1": "2·7·41·p44",
+          "4n+1": "7·379·1093·39043·79559",
+          "4n-1": "3·105529·p35",
+          "5n+1": "2·3·19·317·3373·92367559",
+          "5n-1": "2^2·11·9127·p35",
+          "6n+1": "11·13·c47",
+          "6n-1": "17·p50",
+          "7n+1": "2^6·1063·5741·40357771",
+          "7n-1": "2·3^2·5^2·13^2·24527·8450537",
+          "8n+1": "3·5·769·p41",
+          "8n-1": "p55"
+        },
+        "trace_factorization": {
+          "1": "-2·2239·67021",
+          "2": "2·11·467·21839·80287511"
+        },
+        "twist_order": {
+          "1": "2^2·3·p52",
+          "2": "2^2·109·c102"
+        },
+        "small_prime_order_index": {
+          "11": "8",
+          "13": "1",
+          "2": "2",
+          "3": "6",
+          "5": "1",
+          "7": "3"
+        },
+        "pow_distance": {
+          "order": "2^55+34",
+          "subgroup": "2^51+30"
+        },
+        "x962_invariant": "25602782645235519",
+        "hamming_x": {
+          "1": 27
+        }
+      },
+      "keys": {
+        "char": "p",
+        "cm": "-3",
+        "cofactor": "16",
+        "conductor": "smooth",
+        "depth": "2:27,3:0,5:0,7:0",
+        "descent": "none",
+        "descent_signed": "none",
+        "embedding": "large",
+        "end_order": "non-maximal",
+        "family": "prime",
+        "isogenies": "2:1,3:1,5:0,7:2",
+        "jfield": "full",
+        "ordinary": "yes",
+        "source": "registry",
+        "split": "3r5i7s11i13s",
+        "twist_cofactor": "12"
+      }
+    },
+    {
+      "slug": "icv1-fp56-t379549678-9040a9fd",
+      "family": "prime",
+      "source": {
+        "kind": "registry",
+        "path": null,
+        "curve_uid": null,
+        "registered": true
+      },
+      "field": {
+        "kind": "prime",
+        "degree": 1,
+        "size_bits": 56
+      },
+      "trace": "379549678",
+      "order": "36029097598086244",
+      "order_check": {
+        "status": "proved",
+        "method": "generator certificate: r prime, [r]G = O, r > 4√q"
+      },
+      "ordinary": true,
+      "anomalous": false,
+      "trace_ratio": 0.999797,
+      "frobenius": {
+        "disc": "-58433840640000",
+        "disc_primes": [
+          [
+            "2",
+            12
+          ],
+          [
+            "3",
+            8
+          ],
+          [
+            "5",
+            4
+          ],
+          [
+            "7",
+            2
+          ],
+          [
+            "71",
+            1
+          ]
+        ],
+        "disc_unfactored": [],
+        "disc_status": "proved",
+        "cm_disc": "-71",
+        "conductor": "907200",
+        "conductor_bits": 20,
+        "conductor_primes": [
+          [
+            "2",
+            6
+          ],
+          [
+            "3",
+            4
+          ],
+          [
+            "5",
+            2
+          ],
+          [
+            "7",
+            1
+          ]
+        ],
+        "conductor_unfactored": [],
+        "conductor_fraction": 0.865526,
+        "status": "proved",
+        "class_number": 7,
+        "class_number_status": "proved"
+      },
+      "endomorphism": {
+        "conductor_divides": "907200",
+        "conductor": "907200",
+        "levels": [
+          {
+            "ell": "2",
+            "depth": 6,
+            "level": 6,
+            "level_at_most": 6,
+            "method": "Frobenius is not a scalar on E[ℓ]: the floor"
+          },
+          {
+            "ell": "3",
+            "depth": 4,
+            "level": 4,
+            "level_at_most": 4,
+            "method": "Frobenius is not a scalar on E[ℓ]: the floor"
+          },
+          {
+            "ell": "5",
+            "depth": 2,
+            "level": 2,
+            "level_at_most": 2,
+            "method": "Frobenius is not a scalar on E[ℓ]: the floor"
+          },
+          {
+            "ell": "7",
+            "depth": 1,
+            "level": 1,
+            "level_at_most": 1,
+            "method": "Frobenius is not a scalar on E[ℓ]: the floor"
+          }
+        ],
+        "maximal": false,
+        "status": "proved",
+        "contains": [
+          "Z[π]",
+          "the levels the scalar test on E[ℓ] resolves"
+        ]
+      },
+      "small_primes": [
+        {
+          "ell": 2,
+          "depth": 6,
+          "splitting": "split",
+          "rational_isogenies": null
+        },
+        {
+          "ell": 3,
+          "depth": 4,
+          "splitting": "split",
+          "rational_isogenies": null
+        },
+        {
+          "ell": 5,
+          "depth": 2,
+          "splitting": "split",
+          "rational_isogenies": null
+        },
+        {
+          "ell": 7,
+          "depth": 1,
+          "splitting": "inert",
+          "rational_isogenies": null
+        },
+        {
+          "ell": 11,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 13,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 17,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 19,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 23,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 29,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 31,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        }
+      ],
+      "subfield": {
+        "j_field_degree": null,
+        "definition_degree": null,
+        "base_trace": null,
+        "base_trace_sign_free": false,
+        "status": "not_applicable",
+        "method": "a prime field has no proper subfield"
+      },
+      "subgroup": {
+        "order": "9007274399521561",
+        "bits": 54,
+        "cofactor": "4",
+        "status": "proved",
+        "source": "registry representation"
+      },
+      "embedding": {
+        "degree": "450363719976078",
+        "lower_bound": null,
+        "complement_bits": 5,
+        "status": "proved"
+      },
+      "twist": {
+        "order": "36029098357185600",
+        "largest_prime_bits": 26,
+        "cofactor": "572385600",
+        "status": "proved"
+      },
+      "dissect": {
+        "status": "proved",
+        "torsion": [
+          {
+            "ell": 2,
+            "frobenius": "jordan",
+            "point_degree": 1,
+            "full_degree": 2,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 2,
+            "rational_isogenies": 1,
+            "psi_degrees": "1 2"
+          },
+          {
+            "ell": 3,
+            "frobenius": "jordan",
+            "point_degree": 2,
+            "full_degree": 6,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 3,
+            "rational_isogenies": 1,
+            "psi_degrees": "1 3"
+          },
+          {
+            "ell": 5,
+            "frobenius": "jordan",
+            "point_degree": 2,
+            "full_degree": 10,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 5,
+            "rational_isogenies": 1,
+            "psi_degrees": "1^2 5^2"
+          },
+          {
+            "ell": 7,
+            "frobenius": "jordan",
+            "point_degree": 3,
+            "full_degree": 21,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 7,
+            "rational_isogenies": 1
+          },
+          {
+            "ell": 11,
+            "frobenius": "inert",
+            "point_degree": 15,
+            "full_degree": 15,
+            "isogeny_degree": 3,
+            "all_isogenies_degree": 3,
+            "rational_isogenies": 0
+          },
+          {
+            "ell": 13,
+            "frobenius": "inert",
+            "point_degree": 168,
+            "full_degree": 168,
+            "isogeny_degree": 14,
+            "all_isogenies_degree": 14,
+            "rational_isogenies": 0
+          },
+          {
+            "ell": 17,
+            "frobenius": "inert",
+            "point_degree": 144,
+            "full_degree": 144,
+            "isogeny_degree": 9,
+            "all_isogenies_degree": 9,
+            "rational_isogenies": 0
+          },
+          {
+            "ell": 19,
+            "frobenius": "split",
+            "point_degree": 3,
+            "full_degree": 9,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 9,
+            "rational_isogenies": 2
+          }
+        ],
+        "conductor_ratio": {
+          "2": "379549678",
+          "3": "108028860092267763",
+          "4": "27327486526685114719646876"
+        },
+        "kn_factorization": {
+          "1n+1": "2·c53",
+          "1n-1": "2^3·3·5·113·2719·244300579",
+          "2n+1": "3·167·229·1049·149683763",
+          "2n-1": "13·19·53·61·379·59522549",
+          "3n+1": "2^2·7·p50",
+          "3n-1": "2·29^2·97879·164134219",
+          "4n+1": "5·73·409·15773·15301109",
+          "4n-1": "3^2·7·3459847·165293563",
+          "5n+1": "2·3^3·p50",
+          "5n-1": "2^2·11·3259·p39",
+          "6n+1": "11·17·23·433·569·51000571",
+          "6n-1": "5·117539·160453·573119",
+          "7n+1": "2^4·115727·166429·204601",
+          "7n-1": "2·3·79·p47",
+          "8n+1": "3·c55",
+          "8n-1": "41·367·25763·185881867"
+        },
+        "trace_factorization": {
+          "1": "2·31·1451·4219",
+          "2": "2·3853711·p34"
+        },
+        "twist_order": {
+          "1": "2^6·3^2·5^2·39749·62945501",
+          "2": "2^2·697897·c89"
+        },
+        "small_prime_order_index": {
+          "11": "4",
+          "13": "15",
+          "2": "2",
+          "3": "20",
+          "5": "6",
+          "7": "8"
+        },
+        "pow_distance": {
+          "order": "2^55+39",
+          "subgroup": "2^53+37"
+        },
+        "x962_invariant": "8541281072459339",
+        "hamming_x": {
+          "1": 26
+        }
+      },
+      "keys": {
+        "char": "p",
+        "cm": "-71",
+        "cofactor": "4",
+        "conductor": "smooth",
+        "depth": "2:6,3:4,5:2,7:1",
+        "descent": "none",
+        "descent_signed": "none",
+        "embedding": "large",
+        "end_order": "non-maximal",
+        "family": "prime",
+        "isogenies": "2:1,3:1,5:1,7:1",
+        "jfield": "full",
+        "ordinary": "yes",
+        "source": "registry",
+        "split": "3s5s7i11i13i",
+        "twist_cofactor": "572385600"
+      }
+    },
+    {
       "slug": "icv1-fp56-t5-80dc66ed",
       "family": "prime",
       "source": {
@@ -159342,6 +161228,312 @@
       }
     },
     {
+      "slug": "icv1-fp56-tm252854635-0150ced1",
+      "family": "prime",
+      "source": {
+        "kind": "registry",
+        "path": null,
+        "curve_uid": null,
+        "registered": true
+      },
+      "field": {
+        "kind": "prime",
+        "degree": 1,
+        "size_bits": 56
+      },
+      "trace": "-252854635",
+      "order": "72057594290782567",
+      "order_check": {
+        "status": "proved",
+        "method": "generator certificate: r prime, [r]G = O, r > 4√q"
+      },
+      "ordinary": true,
+      "anomalous": false,
+      "trace_ratio": -0.470978,
+      "frobenius": {
+        "disc": "-224294909710728499",
+        "disc_primes": [
+          [
+            "17",
+            1
+          ],
+          [
+            "29",
+            1
+          ],
+          [
+            "321983",
+            1
+          ],
+          [
+            "1412991521",
+            1
+          ]
+        ],
+        "disc_unfactored": [],
+        "disc_status": "proved",
+        "cm_disc": "-224294909710728499",
+        "conductor": "1",
+        "conductor_bits": 1,
+        "conductor_primes": [],
+        "conductor_unfactored": [],
+        "conductor_fraction": 0.0,
+        "status": "proved",
+        "class_number": null,
+        "class_number_status": "not_evaluated"
+      },
+      "endomorphism": {
+        "conductor_divides": "1",
+        "conductor": "1",
+        "levels": [],
+        "maximal": true,
+        "status": "proved",
+        "contains": [
+          "Z[π]"
+        ]
+      },
+      "small_primes": [
+        {
+          "ell": 2,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 3,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 5,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 7,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        },
+        {
+          "ell": 11,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 13,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 17,
+          "depth": 0,
+          "splitting": "ramified",
+          "rational_isogenies": 1
+        },
+        {
+          "ell": 19,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 23,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 29,
+          "depth": 0,
+          "splitting": "ramified",
+          "rational_isogenies": 1
+        },
+        {
+          "ell": 31,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        }
+      ],
+      "subfield": {
+        "j_field_degree": null,
+        "definition_degree": null,
+        "base_trace": null,
+        "base_trace_sign_free": false,
+        "status": "not_applicable",
+        "method": "a prime field has no proper subfield"
+      },
+      "subgroup": {
+        "order": "72057594290782567",
+        "bits": 57,
+        "cofactor": "1",
+        "status": "proved",
+        "source": "registry representation"
+      },
+      "embedding": {
+        "degree": "72057594290782566",
+        "lower_bound": null,
+        "complement_bits": 1,
+        "status": "proved"
+      },
+      "twist": {
+        "order": "72057593785073297",
+        "largest_prime_bits": 42,
+        "cofactor": "20567",
+        "status": "proved"
+      },
+      "dissect": {
+        "status": "proved",
+        "torsion": [
+          {
+            "ell": 2,
+            "frobenius": "inert",
+            "point_degree": 3,
+            "full_degree": 3,
+            "isogeny_degree": 3,
+            "all_isogenies_degree": 3,
+            "rational_isogenies": 0,
+            "psi_degrees": "3"
+          },
+          {
+            "ell": 3,
+            "frobenius": "inert",
+            "point_degree": 8,
+            "full_degree": 8,
+            "isogeny_degree": 4,
+            "all_isogenies_degree": 4,
+            "rational_isogenies": 0,
+            "psi_degrees": "4"
+          },
+          {
+            "ell": 5,
+            "frobenius": "split",
+            "point_degree": 4,
+            "full_degree": 4,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 2,
+            "rational_isogenies": 2,
+            "psi_degrees": "2^6"
+          },
+          {
+            "ell": 7,
+            "frobenius": "split",
+            "point_degree": 3,
+            "full_degree": 6,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 6,
+            "rational_isogenies": 2
+          },
+          {
+            "ell": 11,
+            "frobenius": "inert",
+            "point_degree": 20,
+            "full_degree": 20,
+            "isogeny_degree": 2,
+            "all_isogenies_degree": 2,
+            "rational_isogenies": 0
+          },
+          {
+            "ell": 13,
+            "frobenius": "inert",
+            "point_degree": 84,
+            "full_degree": 84,
+            "isogeny_degree": 7,
+            "all_isogenies_degree": 7,
+            "rational_isogenies": 0
+          },
+          {
+            "ell": 17,
+            "frobenius": "jordan",
+            "point_degree": 8,
+            "full_degree": 136,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
+          },
+          {
+            "ell": 19,
+            "frobenius": "inert",
+            "point_degree": 8,
+            "full_degree": 8,
+            "isogeny_degree": 4,
+            "all_isogenies_degree": 4,
+            "rational_isogenies": 0
+          }
+        ],
+        "conductor_ratio": {
+          "2": "252854635",
+          "3": "8122127596944706",
+          "4": "20273814248387323900122495"
+        },
+        "kn_factorization": {
+          "1n+1": "2^3·13·3061·p38",
+          "1n-1": "2·3·c54",
+          "2n+1": "3^3·5·11·641·p38",
+          "2n-1": "2239·c46",
+          "3n+1": "2·14593·p43",
+          "3n-1": "2^2·5^2·7·19·79·p38",
+          "4n+1": "7·29·349·p42",
+          "4n-1": "3·2591·p46",
+          "5n+1": "2^2·3·53·9479·47657·1254017",
+          "5n-1": "2·25819·c43",
+          "6n+1": "p59",
+          "6n-1": "37·5801·p41",
+          "7n+1": "2·5·311·p48",
+          "7n-1": "2^4·3^2·61·p46",
+          "8n+1": "3·73·1303·1601·1261798141",
+          "8n-1": "5·17·p53"
+        },
+        "trace_factorization": {
+          "1": "-5·11·4597357",
+          "2": "-3^2·19·3011·p38"
+        },
+        "twist_order": {
+          "1": "131·157·p42",
+          "2": "5^4·3001·78857·95569·c59"
+        },
+        "small_prime_order_index": {
+          "11": "3",
+          "13": "2",
+          "2": "2",
+          "3": "1",
+          "5": "1",
+          "7": "2"
+        },
+        "pow_distance": {
+          "order": "2^56+28",
+          "subgroup": "2^56+28"
+        },
+        "x962_invariant": "47425304583354771",
+        "hamming_x": {
+          "1": 30
+        }
+      },
+      "keys": {
+        "char": "p",
+        "cm": "large",
+        "cofactor": "1",
+        "conductor": "1",
+        "depth": "2:0,3:0,5:0,7:0",
+        "descent": "none",
+        "descent_signed": "none",
+        "embedding": "large",
+        "end_order": "maximal",
+        "family": "prime",
+        "isogenies": "2:0,3:0,5:2,7:2",
+        "jfield": "full",
+        "ordinary": "yes",
+        "source": "registry",
+        "split": "3i5s7s11i13i",
+        "twist_cofactor": "20567"
+      }
+    },
+    {
       "slug": "icv1-fp57-t536870914-6cabb0c9",
       "family": "prime",
       "source": {
@@ -159394,15 +161586,15 @@
         "class_number_status": "proved"
       },
       "endomorphism": {
-        "conductor_divides": "4096",
+        "conductor_divides": "512",
         "conductor": null,
         "levels": [
           {
             "ell": "2",
             "depth": 13,
             "level": null,
-            "level_at_most": 12,
-            "method": "Frobenius is a scalar on E[ℓ]: above the floor"
+            "level_at_most": 9,
+            "method": "Frobenius is a scalar on E[ℓ^4]: level at most 9"
           }
         ],
         "maximal": null,
@@ -160329,15 +162521,15 @@
         "class_number_status": "proved"
       },
       "endomorphism": {
-        "conductor_divides": "2187",
+        "conductor_divides": "243",
         "conductor": null,
         "levels": [
           {
             "ell": "3",
             "depth": 8,
             "level": null,
-            "level_at_most": 7,
-            "method": "Frobenius is a scalar on E[ℓ]: above the floor"
+            "level_at_most": 5,
+            "method": "Frobenius is a scalar on E[ℓ^3]: level at most 5"
           }
         ],
         "maximal": null,
@@ -160585,6 +162777,419 @@
         "source": "registry",
         "split": "3s5s7i11r13i",
         "twist_cofactor": "7864971367"
+      }
+    },
+    {
+      "slug": "icv1-fp57-t354478198-afcea726",
+      "family": "prime",
+      "source": {
+        "kind": "registry",
+        "path": null,
+        "curve_uid": null,
+        "registered": true
+      },
+      "field": {
+        "kind": "prime",
+        "degree": 1,
+        "size_bits": 57
+      },
+      "trace": "354478198",
+      "order": "72057979853368804",
+      "order_check": {
+        "status": "proved",
+        "method": "generator certificate: r prime, [r]G = O, r > 4√q"
+      },
+      "ordinary": true,
+      "anomalous": false,
+      "trace_ratio": 0.660265,
+      "frobenius": {
+        "disc": "-162577127974060800",
+        "disc_primes": [
+          [
+            "2",
+            8
+          ],
+          [
+            "3",
+            5
+          ],
+          [
+            "5",
+            2
+          ],
+          [
+            "7",
+            2
+          ],
+          [
+            "11",
+            2
+          ],
+          [
+            "13",
+            2
+          ],
+          [
+            "17",
+            2
+          ],
+          [
+            "19",
+            2
+          ]
+        ],
+        "disc_unfactored": [],
+        "disc_status": "proved",
+        "cm_disc": "-3",
+        "conductor": "232792560",
+        "conductor_bits": 28,
+        "conductor_primes": [
+          [
+            "2",
+            4
+          ],
+          [
+            "3",
+            2
+          ],
+          [
+            "5",
+            1
+          ],
+          [
+            "7",
+            1
+          ],
+          [
+            "11",
+            1
+          ],
+          [
+            "13",
+            1
+          ],
+          [
+            "17",
+            1
+          ],
+          [
+            "19",
+            1
+          ]
+        ],
+        "conductor_unfactored": [],
+        "conductor_fraction": 0.972278,
+        "status": "proved",
+        "class_number": 1,
+        "class_number_status": "proved"
+      },
+      "endomorphism": {
+        "conductor_divides": "232792560",
+        "conductor": "232792560",
+        "levels": [
+          {
+            "ell": "2",
+            "depth": 4,
+            "level": 4,
+            "level_at_most": 4,
+            "method": "Frobenius is not a scalar on E[ℓ]: the floor"
+          },
+          {
+            "ell": "3",
+            "depth": 2,
+            "level": 2,
+            "level_at_most": 2,
+            "method": "Frobenius is not a scalar on E[ℓ]: the floor"
+          },
+          {
+            "ell": "5",
+            "depth": 1,
+            "level": 1,
+            "level_at_most": 1,
+            "method": "Frobenius is not a scalar on E[ℓ]: the floor"
+          },
+          {
+            "ell": "7",
+            "depth": 1,
+            "level": 1,
+            "level_at_most": 1,
+            "method": "Frobenius is not a scalar on E[ℓ]: the floor"
+          },
+          {
+            "ell": "11",
+            "depth": 1,
+            "level": 1,
+            "level_at_most": 1,
+            "method": "Frobenius is not a scalar on E[ℓ]: the floor"
+          },
+          {
+            "ell": "13",
+            "depth": 1,
+            "level": 1,
+            "level_at_most": 1,
+            "method": "Frobenius is not a scalar on E[ℓ]: the floor"
+          },
+          {
+            "ell": "17",
+            "depth": 1,
+            "level": 1,
+            "level_at_most": 1,
+            "method": "Frobenius is not a scalar on E[ℓ]: the floor"
+          },
+          {
+            "ell": "19",
+            "depth": 1,
+            "level": 1,
+            "level_at_most": 1,
+            "method": "Frobenius is not a scalar on E[ℓ]: the floor"
+          }
+        ],
+        "maximal": false,
+        "status": "proved",
+        "contains": [
+          "Z[π]",
+          "the levels the scalar test on E[ℓ] resolves"
+        ]
+      },
+      "small_primes": [
+        {
+          "ell": 2,
+          "depth": 4,
+          "splitting": "inert",
+          "rational_isogenies": null
+        },
+        {
+          "ell": 3,
+          "depth": 2,
+          "splitting": "ramified",
+          "rational_isogenies": null
+        },
+        {
+          "ell": 5,
+          "depth": 1,
+          "splitting": "inert",
+          "rational_isogenies": null
+        },
+        {
+          "ell": 7,
+          "depth": 1,
+          "splitting": "split",
+          "rational_isogenies": null
+        },
+        {
+          "ell": 11,
+          "depth": 1,
+          "splitting": "inert",
+          "rational_isogenies": null
+        },
+        {
+          "ell": 13,
+          "depth": 1,
+          "splitting": "split",
+          "rational_isogenies": null
+        },
+        {
+          "ell": 17,
+          "depth": 1,
+          "splitting": "inert",
+          "rational_isogenies": null
+        },
+        {
+          "ell": 19,
+          "depth": 1,
+          "splitting": "split",
+          "rational_isogenies": null
+        },
+        {
+          "ell": 23,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 29,
+          "depth": 0,
+          "splitting": "inert",
+          "rational_isogenies": 0
+        },
+        {
+          "ell": 31,
+          "depth": 0,
+          "splitting": "split",
+          "rational_isogenies": 2
+        }
+      ],
+      "subfield": {
+        "j_field_degree": null,
+        "definition_degree": null,
+        "base_trace": null,
+        "base_trace_sign_free": false,
+        "status": "not_applicable",
+        "method": "a prime field has no proper subfield"
+      },
+      "subgroup": {
+        "order": "18014494963342201",
+        "bits": 55,
+        "cofactor": "4",
+        "status": "proved",
+        "source": "registry representation"
+      },
+      "embedding": {
+        "degree": "2251811870417775",
+        "lower_bound": null,
+        "complement_bits": 4,
+        "status": "proved"
+      },
+      "twist": {
+        "order": "72057980562325200",
+        "largest_prime_bits": 33,
+        "cofactor": "12445200",
+        "status": "proved"
+      },
+      "dissect": {
+        "status": "proved",
+        "torsion": [
+          {
+            "ell": 2,
+            "frobenius": "jordan",
+            "point_degree": 1,
+            "full_degree": 2,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 2,
+            "rational_isogenies": 1,
+            "psi_degrees": "1 2"
+          },
+          {
+            "ell": 3,
+            "frobenius": "jordan",
+            "point_degree": 2,
+            "full_degree": 6,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 3,
+            "rational_isogenies": 1,
+            "psi_degrees": "1 3"
+          },
+          {
+            "ell": 5,
+            "frobenius": "jordan",
+            "point_degree": 2,
+            "full_degree": 10,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 5,
+            "rational_isogenies": 1,
+            "psi_degrees": "1^2 5^2"
+          },
+          {
+            "ell": 7,
+            "frobenius": "jordan",
+            "point_degree": 3,
+            "full_degree": 21,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 7,
+            "rational_isogenies": 1
+          },
+          {
+            "ell": 11,
+            "frobenius": "jordan",
+            "point_degree": 5,
+            "full_degree": 55,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
+          },
+          {
+            "ell": 13,
+            "frobenius": "jordan",
+            "point_degree": 12,
+            "full_degree": 156,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
+          },
+          {
+            "ell": 17,
+            "frobenius": "jordan",
+            "point_degree": 16,
+            "full_degree": 272,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
+          },
+          {
+            "ell": 19,
+            "frobenius": "jordan",
+            "point_degree": 6,
+            "full_degree": 114,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 19,
+            "rational_isogenies": 1
+          }
+        ],
+        "conductor_ratio": {
+          "2": "354478198",
+          "3": "53596812649480203",
+          "4": "6544081409065922378070004"
+        },
+        "kn_factorization": {
+          "1n+1": "2·13·13441·p36",
+          "1n-1": "2^3·3·5^2·691·709·1307·46889",
+          "2n+1": "3·11·2689·98639·4116221",
+          "2n-1": "449·p47",
+          "3n+1": "2^2·7·29·p46",
+          "3n-1": "2·449951·p36",
+          "4n+1": "5·p54",
+          "4n-1": "3^6·7·p44",
+          "5n+1": "2·3^2·40351·p37",
+          "5n-1": "2^2·167·4289·p35",
+          "6n+1": "821·p47",
+          "6n-1": "5·19^2·p46",
+          "7n+1": "2^4·p53",
+          "7n-1": "2·3·p55",
+          "8n+1": "3·17·p52",
+          "8n-1": "950959·p38"
+        },
+        "trace_factorization": {
+          "1": "2·61·2905559",
+          "2": "-2·23·37·p44"
+        },
+        "twist_order": {
+          "1": "2^4·3^2·5^2·3457·p33",
+          "2": "2^2·14341·c97"
+        },
+        "small_prime_order_index": {
+          "11": "6",
+          "13": "24",
+          "2": "12",
+          "3": "6",
+          "5": "24",
+          "7": "24"
+        },
+        "pow_distance": {
+          "order": "2^56+39",
+          "subgroup": "2^54+37"
+        },
+        "x962_invariant": "44663917220678034",
+        "hamming_x": {
+          "1": 24
+        }
+      },
+      "keys": {
+        "char": "p",
+        "cm": "-3",
+        "cofactor": "4",
+        "conductor": "smooth",
+        "depth": "2:4,3:2,5:1,7:1",
+        "descent": "none",
+        "descent_signed": "none",
+        "embedding": "large",
+        "end_order": "non-maximal",
+        "family": "prime",
+        "isogenies": "2:1,3:1,5:1,7:1",
+        "jfield": "full",
+        "ordinary": "yes",
+        "source": "registry",
+        "split": "3r5i7s11i13s",
+        "twist_cofactor": "12445200"
       }
     },
     {
@@ -160960,28 +163565,29 @@
         "class_number_status": "proved"
       },
       "endomorphism": {
-        "conductor_divides": "288",
+        "conductor_divides": "4",
         "conductor": null,
         "levels": [
           {
             "ell": "2",
             "depth": 6,
             "level": null,
-            "level_at_most": 5,
-            "method": "Frobenius is a scalar on E[ℓ]: above the floor"
+            "level_at_most": 2,
+            "method": "Frobenius is a scalar on E[ℓ^4]: level at most 2"
           },
           {
             "ell": "3",
             "depth": 3,
-            "level": null,
-            "level_at_most": 2,
-            "method": "Frobenius is a scalar on E[ℓ]: above the floor"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "Frobenius is a scalar on E[ℓ^3]: the crater"
           }
         ],
         "maximal": null,
         "status": "bounded",
         "contains": [
-          "Z[π]"
+          "Z[π]",
+          "the levels the scalar test on E[ℓ] resolves"
         ]
       },
       "small_primes": [
@@ -164557,7 +167163,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "2437",
@@ -164933,7 +167539,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "2437",
@@ -168637,15 +171243,15 @@
         "class_number_status": "proved"
       },
       "endomorphism": {
-        "conductor_divides": "6915889423298038776451801",
+        "conductor_divides": "147146583474426356945783",
         "conductor": null,
         "levels": [
           {
             "ell": "47",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           },
           {
             "ell": "4243",
@@ -217138,7 +219744,7 @@
         "class_number_status": "proved"
       },
       "endomorphism": {
-        "conductor_divides": "33230699894622896822595176507007187",
+        "conductor_divides": "1145886203262858511123971603689903",
         "conductor": null,
         "levels": [
           {
@@ -217151,16 +219757,16 @@
           {
             "ell": "29",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           },
           {
             "ell": "149",
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "44189",
@@ -217525,7 +220131,7 @@
         "class_number_status": "proved"
       },
       "endomorphism": {
-        "conductor_divides": "33230699894622896822595176507007187",
+        "conductor_divides": "1145886203262858511123971603689903",
         "conductor": null,
         "levels": [
           {
@@ -217538,16 +220144,16 @@
           {
             "ell": "29",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           },
           {
             "ell": "149",
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "44189",
@@ -217912,7 +220518,7 @@
         "class_number_status": "proved"
       },
       "endomorphism": {
-        "conductor_divides": "33230699894622896822595176507007187",
+        "conductor_divides": "1145886203262858511123971603689903",
         "conductor": null,
         "levels": [
           {
@@ -217925,16 +220531,16 @@
           {
             "ell": "29",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           },
           {
             "ell": "149",
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "44189",
@@ -221767,7 +224373,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "24382431923",
@@ -223641,7 +226247,7 @@
         "class_number_status": "probable"
       },
       "endomorphism": {
-        "conductor_divides": "1938079668771844977015311015268777949",
+        "conductor_divides": "4097420018545126801300868954056613",
         "conductor": null,
         "levels": [
           {
@@ -223654,16 +226260,16 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           },
           {
             "ell": "43",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           },
           {
             "ell": "130729",
@@ -223826,12 +226432,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "scalar",
+            "point_degree": 10,
+            "full_degree": 10,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 1,
+            "rational_isogenies": 12
           },
           {
             "ell": 13,
@@ -224021,7 +226627,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "6217",
@@ -227536,18 +230142,18 @@
       },
       "endomorphism": {
         "conductor_divides": "11",
-        "conductor": null,
+        "conductor": "11",
         "levels": [
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]"
         ]
@@ -227691,12 +230297,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 10,
+            "full_degree": 110,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -227783,7 +230389,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "prime",
         "isogenies": "2:0,3:0,5:0,7:0",
         "jfield": "full",
@@ -228207,14 +230813,14 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "233",
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "6209263566433",
@@ -238529,7 +241135,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "10254042011",
@@ -239740,18 +242346,18 @@
       },
       "endomorphism": {
         "conductor_divides": "17",
-        "conductor": null,
+        "conductor": "17",
         "levels": [
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]"
         ]
@@ -239913,12 +242519,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 68,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -239980,7 +242586,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "prime",
         "isogenies": "2:0,3:0,5:1,7:0",
         "jfield": "full",
@@ -251316,21 +253922,21 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "271",
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "293",
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "3853",
@@ -366511,8 +369117,8 @@
         "class_number_status": "not_evaluated"
       },
       "endomorphism": {
-        "conductor_divides": "11",
-        "conductor": null,
+        "conductor_divides": "1",
+        "conductor": "1",
         "levels": [
           {
             "ell": "2",
@@ -366531,13 +369137,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": true,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -366682,12 +369288,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "scalar",
+            "point_degree": 10,
+            "full_degree": 10,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 1,
+            "rational_isogenies": 12
           },
           {
             "ell": 17,
@@ -366763,7 +369369,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "maximal",
         "family": "extension",
         "isogenies": "2:3,3:4,5:2,7:1",
         "jfield": "full",
@@ -366862,8 +369468,8 @@
         "class_number_status": "not_evaluated"
       },
       "endomorphism": {
-        "conductor_divides": "11",
-        "conductor": null,
+        "conductor_divides": "1",
+        "conductor": "1",
         "levels": [
           {
             "ell": "2",
@@ -366882,13 +369488,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": true,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -367033,12 +369639,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "scalar",
+            "point_degree": 10,
+            "full_degree": 10,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 1,
+            "rational_isogenies": 12
           },
           {
             "ell": 17,
@@ -367114,7 +369720,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "maximal",
         "family": "extension",
         "isogenies": "2:3,3:4,5:2,7:1",
         "jfield": "full",
@@ -404543,7 +407149,7 @@
       },
       "endomorphism": {
         "conductor_divides": "21",
-        "conductor": null,
+        "conductor": "21",
         "levels": [
           {
             "ell": "2",
@@ -404562,13 +407168,13 @@
           {
             "ell": "7",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -404704,12 +407310,12 @@
           },
           {
             "ell": 7,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 6,
+            "full_degree": 42,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 7,
+            "rational_isogenies": 1
           },
           {
             "ell": 11,
@@ -404803,9 +407409,9 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
-        "isogenies": "2:3,3:1,5:0,7:?",
+        "isogenies": "2:3,3:1,5:0,7:1",
         "jfield": "full",
         "ordinary": "yes",
         "source": "registry",
@@ -404903,7 +407509,7 @@
       },
       "endomorphism": {
         "conductor_divides": "28",
-        "conductor": null,
+        "conductor": "28",
         "levels": [
           {
             "ell": "2",
@@ -404915,13 +407521,13 @@
           {
             "ell": "7",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -405057,12 +407663,12 @@
           },
           {
             "ell": 7,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 6,
+            "full_degree": 42,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 7,
+            "rational_isogenies": 1
           },
           {
             "ell": 11,
@@ -405156,9 +407762,9 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
-        "isogenies": "2:3,3:1,5:1,7:?",
+        "isogenies": "2:3,3:1,5:1,7:1",
         "jfield": "full",
         "ordinary": "yes",
         "source": "registry",
@@ -405268,9 +407874,9 @@
           {
             "ell": "7",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
         "maximal": null,
@@ -405409,12 +408015,12 @@
           },
           {
             "ell": 7,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 6,
+            "full_degree": 42,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 7,
+            "rational_isogenies": 1
           },
           {
             "ell": 11,
@@ -405510,7 +408116,7 @@
         "embedding": "large",
         "end_order": "unresolved",
         "family": "extension",
-        "isogenies": "2:3,3:1,5:1,7:?",
+        "isogenies": "2:3,3:1,5:1,7:1",
         "jfield": "full",
         "ordinary": "yes",
         "source": "registry",
@@ -416997,7 +419603,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -417366,7 +419972,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -418019,7 +420625,7 @@
       },
       "endomorphism": {
         "conductor_divides": "7",
-        "conductor": null,
+        "conductor": "7",
         "levels": [
           {
             "ell": "2",
@@ -418031,13 +420637,13 @@
           {
             "ell": "7",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -418173,12 +420779,12 @@
           },
           {
             "ell": 7,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 6,
+            "full_degree": 42,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 7,
+            "rational_isogenies": 1
           },
           {
             "ell": 11,
@@ -418272,9 +420878,9 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
-        "isogenies": "2:3,3:0,5:1,7:?",
+        "isogenies": "2:3,3:0,5:1,7:1",
         "jfield": "full",
         "ordinary": "yes",
         "source": "registry",
@@ -428917,7 +431523,7 @@
       },
       "endomorphism": {
         "conductor_divides": "33",
-        "conductor": null,
+        "conductor": "33",
         "levels": [
           {
             "ell": "2",
@@ -428936,13 +431542,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -429087,12 +431693,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 1,
+            "full_degree": 11,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -429177,7 +431783,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:0,7:2",
         "jfield": "full",
@@ -430675,7 +433281,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -436120,7 +438726,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -436484,7 +439090,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -436848,7 +439454,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -440673,9 +443279,9 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
         "maximal": null,
@@ -440841,12 +443447,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 68,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -444428,7 +447034,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -444777,7 +447383,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -449572,7 +452178,7 @@
       },
       "endomorphism": {
         "conductor_divides": "13",
-        "conductor": null,
+        "conductor": "13",
         "levels": [
           {
             "ell": "2",
@@ -449584,13 +452190,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -449744,12 +452350,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 6,
+            "full_degree": 78,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -449825,7 +452431,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:1",
         "jfield": "full",
@@ -449921,7 +452527,7 @@
       },
       "endomorphism": {
         "conductor_divides": "26",
-        "conductor": null,
+        "conductor": "26",
         "levels": [
           {
             "ell": "2",
@@ -449933,13 +452539,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -450093,12 +452699,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 6,
+            "full_degree": 78,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -450174,7 +452780,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:1",
         "jfield": "full",
@@ -450270,7 +452876,7 @@
       },
       "endomorphism": {
         "conductor_divides": "26",
-        "conductor": null,
+        "conductor": "26",
         "levels": [
           {
             "ell": "2",
@@ -450282,13 +452888,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -450442,12 +453048,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 6,
+            "full_degree": 78,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -450523,7 +453129,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:1",
         "jfield": "full",
@@ -452703,7 +455309,7 @@
       },
       "endomorphism": {
         "conductor_divides": "88",
-        "conductor": null,
+        "conductor": "88",
         "levels": [
           {
             "ell": "2",
@@ -452715,13 +455321,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -452866,12 +455472,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 2,
+            "full_degree": 22,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -452956,7 +455562,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:1,3:0,5:2,7:0",
         "jfield": "full",
@@ -453072,9 +455678,9 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
         "maximal": null,
@@ -453240,12 +455846,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 68,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -465469,7 +468075,7 @@
       },
       "endomorphism": {
         "conductor_divides": "13",
-        "conductor": null,
+        "conductor": "13",
         "levels": [
           {
             "ell": "2",
@@ -465481,13 +468087,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -465641,12 +468247,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 1,
+            "full_degree": 13,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -465722,7 +468328,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -478494,7 +481100,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -479529,7 +482135,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -479886,7 +482492,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -487435,8 +490041,8 @@
         "class_number_status": "not_evaluated"
       },
       "endomorphism": {
-        "conductor_divides": "429",
-        "conductor": null,
+        "conductor_divides": "39",
+        "conductor": "39",
         "levels": [
           {
             "ell": "2",
@@ -487455,20 +490061,20 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           },
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -487613,21 +490219,21 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "scalar",
+            "point_degree": 2,
+            "full_degree": 2,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 1,
+            "rational_isogenies": 12
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 1,
+            "full_degree": 13,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -487703,7 +490309,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:0,7:2",
         "jfield": "full",
@@ -492209,7 +494815,7 @@
       },
       "endomorphism": {
         "conductor_divides": "13",
-        "conductor": null,
+        "conductor": "13",
         "levels": [
           {
             "ell": "2",
@@ -492228,13 +494834,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -492388,12 +494994,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 1,
+            "full_degree": 13,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -492469,7 +495075,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:4,5:0,7:0",
         "jfield": "full",
@@ -496665,7 +499271,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -497021,7 +499627,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -499400,7 +502006,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -517607,9 +520213,9 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
         "maximal": null,
@@ -517766,12 +520372,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 52,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -519992,7 +522598,7 @@
       },
       "endomorphism": {
         "conductor_divides": "13",
-        "conductor": null,
+        "conductor": "13",
         "levels": [
           {
             "ell": "2",
@@ -520004,13 +522610,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -520164,12 +522770,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 52,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -520245,7 +522851,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -522433,7 +525039,7 @@
       },
       "endomorphism": {
         "conductor_divides": "110",
-        "conductor": null,
+        "conductor": "110",
         "levels": [
           {
             "ell": "2",
@@ -522452,13 +525058,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -522603,12 +525209,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 5,
+            "full_degree": 55,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -522693,7 +525299,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:2",
         "jfield": "full",
@@ -523126,8 +525732,8 @@
         "class_number_status": "not_evaluated"
       },
       "endomorphism": {
-        "conductor_divides": "11",
-        "conductor": null,
+        "conductor_divides": "1",
+        "conductor": "1",
         "levels": [
           {
             "ell": "2",
@@ -523139,13 +525745,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": true,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -523290,12 +525896,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "scalar",
+            "point_degree": 5,
+            "full_degree": 5,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 1,
+            "rational_isogenies": 12
           },
           {
             "ell": 13,
@@ -523380,7 +525986,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -529241,7 +531847,7 @@
       },
       "endomorphism": {
         "conductor_divides": "13",
-        "conductor": null,
+        "conductor": "13",
         "levels": [
           {
             "ell": "2",
@@ -529253,13 +531859,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -529413,12 +532019,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 52,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -529494,7 +532100,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -534353,7 +536959,7 @@
       },
       "endomorphism": {
         "conductor_divides": "23",
-        "conductor": null,
+        "conductor": "23",
         "levels": [
           {
             "ell": "2",
@@ -534365,13 +536971,13 @@
           {
             "ell": "23",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -534606,7 +537212,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:0,7:0",
         "jfield": "full",
@@ -539884,7 +542490,7 @@
       },
       "endomorphism": {
         "conductor_divides": "110",
-        "conductor": null,
+        "conductor": "110",
         "levels": [
           {
             "ell": "2",
@@ -539903,13 +542509,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -540054,12 +542660,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 10,
+            "full_degree": 110,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -540137,7 +542743,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:2",
         "jfield": "full",
@@ -540229,7 +542835,7 @@
       },
       "endomorphism": {
         "conductor_divides": "55",
-        "conductor": null,
+        "conductor": "55",
         "levels": [
           {
             "ell": "2",
@@ -540248,13 +542854,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -540399,12 +543005,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 10,
+            "full_degree": 110,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -540482,7 +543088,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:2",
         "jfield": "full",
@@ -546439,7 +549045,7 @@
       },
       "endomorphism": {
         "conductor_divides": "528",
-        "conductor": null,
+        "conductor": "528",
         "levels": [
           {
             "ell": "2",
@@ -546458,13 +549064,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -546609,12 +549215,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 10,
+            "full_degree": 110,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -546692,7 +549298,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -546800,7 +549406,7 @@
       },
       "endomorphism": {
         "conductor_divides": "264",
-        "conductor": null,
+        "conductor": "264",
         "levels": [
           {
             "ell": "2",
@@ -546819,13 +549425,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -546970,12 +549576,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 10,
+            "full_degree": 110,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -547053,7 +549659,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -556572,7 +559178,7 @@
       },
       "endomorphism": {
         "conductor_divides": "13",
-        "conductor": null,
+        "conductor": "13",
         "levels": [
           {
             "ell": "2",
@@ -556584,13 +559190,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -556744,12 +559350,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 1,
+            "full_degree": 13,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -556825,7 +559431,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:0",
         "jfield": "full",
@@ -567316,7 +569922,7 @@
       },
       "endomorphism": {
         "conductor_divides": "528",
-        "conductor": null,
+        "conductor": "528",
         "levels": [
           {
             "ell": "2",
@@ -567335,13 +569941,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -567486,12 +570092,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 5,
+            "full_degree": 55,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -567576,7 +570182,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -574579,7 +577185,7 @@
       },
       "endomorphism": {
         "conductor_divides": "34",
-        "conductor": null,
+        "conductor": "34",
         "levels": [
           {
             "ell": "2",
@@ -574591,13 +577197,13 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -574760,12 +577366,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 16,
+            "full_degree": 272,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -574832,7 +577438,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:0,5:0,7:2",
         "jfield": "full",
@@ -574936,7 +577542,7 @@
       },
       "endomorphism": {
         "conductor_divides": "68",
-        "conductor": null,
+        "conductor": "68",
         "levels": [
           {
             "ell": "2",
@@ -574948,13 +577554,13 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -575117,12 +577723,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 16,
+            "full_degree": 272,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -575189,7 +577795,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:0,5:0,7:2",
         "jfield": "full",
@@ -582552,7 +585158,7 @@
       },
       "endomorphism": {
         "conductor_divides": "34",
-        "conductor": null,
+        "conductor": "34",
         "levels": [
           {
             "ell": "2",
@@ -582564,13 +585170,13 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -582733,12 +585339,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 8,
+            "full_degree": 136,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -582805,7 +585411,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:2",
         "jfield": "full",
@@ -582901,7 +585507,7 @@
       },
       "endomorphism": {
         "conductor_divides": "17",
-        "conductor": null,
+        "conductor": "17",
         "levels": [
           {
             "ell": "2",
@@ -582913,13 +585519,13 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -583082,12 +585688,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 8,
+            "full_degree": 136,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -583154,7 +585760,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:2",
         "jfield": "full",
@@ -583254,7 +585860,7 @@
       },
       "endomorphism": {
         "conductor_divides": "22",
-        "conductor": null,
+        "conductor": "22",
         "levels": [
           {
             "ell": "2",
@@ -583266,13 +585872,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -583417,12 +586023,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 10,
+            "full_degree": 110,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -583507,7 +586113,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -583607,7 +586213,7 @@
       },
       "endomorphism": {
         "conductor_divides": "44",
-        "conductor": null,
+        "conductor": "44",
         "levels": [
           {
             "ell": "2",
@@ -583619,13 +586225,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -583770,12 +586376,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 10,
+            "full_degree": 110,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -583860,7 +586466,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -587059,7 +589665,7 @@
       },
       "endomorphism": {
         "conductor_divides": "34",
-        "conductor": null,
+        "conductor": "34",
         "levels": [
           {
             "ell": "2",
@@ -587071,13 +589677,13 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -587240,12 +589846,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 8,
+            "full_degree": 136,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -587312,7 +589918,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:0,7:2",
         "jfield": "full",
@@ -587420,7 +590026,7 @@
       },
       "endomorphism": {
         "conductor_divides": "68",
-        "conductor": null,
+        "conductor": "68",
         "levels": [
           {
             "ell": "2",
@@ -587432,13 +590038,13 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -587601,12 +590207,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 8,
+            "full_degree": 136,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -587673,7 +590279,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:0,7:2",
         "jfield": "full",
@@ -595299,7 +597905,7 @@
       },
       "endomorphism": {
         "conductor_divides": "33",
-        "conductor": null,
+        "conductor": "33",
         "levels": [
           {
             "ell": "2",
@@ -595318,13 +597924,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -595469,12 +598075,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 10,
+            "full_degree": 110,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -595559,7 +598165,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:0",
         "jfield": "full",
@@ -597706,7 +600312,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -602956,7 +605562,7 @@
       },
       "endomorphism": {
         "conductor_divides": "13",
-        "conductor": null,
+        "conductor": "13",
         "levels": [
           {
             "ell": "2",
@@ -602968,13 +605574,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -603128,12 +605734,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 52,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -603209,7 +605815,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:0",
         "jfield": "full",
@@ -603305,7 +605911,7 @@
       },
       "endomorphism": {
         "conductor_divides": "39",
-        "conductor": null,
+        "conductor": "39",
         "levels": [
           {
             "ell": "2",
@@ -603324,13 +605930,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -603484,12 +606090,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 52,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -603565,7 +606171,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:0",
         "jfield": "full",
@@ -603661,7 +606267,7 @@
       },
       "endomorphism": {
         "conductor_divides": "34",
-        "conductor": null,
+        "conductor": "34",
         "levels": [
           {
             "ell": "2",
@@ -603673,13 +606279,13 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -603842,12 +606448,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 8,
+            "full_degree": 136,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -603914,7 +606520,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:2",
         "jfield": "full",
@@ -604014,7 +606620,7 @@
       },
       "endomorphism": {
         "conductor_divides": "44",
-        "conductor": null,
+        "conductor": "44",
         "levels": [
           {
             "ell": "2",
@@ -604026,13 +606632,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -604177,12 +606783,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 5,
+            "full_degree": 55,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -604260,7 +606866,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -605012,7 +607618,7 @@
       },
       "endomorphism": {
         "conductor_divides": "13",
-        "conductor": null,
+        "conductor": "13",
         "levels": [
           {
             "ell": "2",
@@ -605024,13 +607630,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -605184,12 +607790,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 52,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -605258,7 +607864,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:0,5:1,7:2",
         "jfield": "full",
@@ -605717,7 +608323,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -609914,7 +612520,7 @@
       },
       "endomorphism": {
         "conductor_divides": "68",
-        "conductor": null,
+        "conductor": "68",
         "levels": [
           {
             "ell": "2",
@@ -609926,13 +612532,13 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -610095,12 +612701,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 8,
+            "full_degree": 136,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -610167,7 +612773,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:0,7:2",
         "jfield": "full",
@@ -618149,7 +620755,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -618486,7 +621092,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -620548,7 +623154,7 @@
       },
       "endomorphism": {
         "conductor_divides": "3082",
-        "conductor": null,
+        "conductor": "3082",
         "levels": [
           {
             "ell": "2",
@@ -620560,20 +623166,20 @@
           {
             "ell": "23",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           },
           {
             "ell": "67",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -620808,7 +623414,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:0",
         "jfield": "full",
@@ -625096,7 +627702,7 @@
       },
       "endomorphism": {
         "conductor_divides": "19",
-        "conductor": null,
+        "conductor": "19",
         "levels": [
           {
             "ell": "2",
@@ -625108,13 +627714,13 @@
           {
             "ell": "19",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -625286,12 +627892,12 @@
           },
           {
             "ell": 19,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 6,
+            "full_degree": 114,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 19,
+            "rational_isogenies": 1
           }
         ],
         "conductor_ratio": {
@@ -625349,7 +627955,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:1",
         "jfield": "full",
@@ -635405,7 +638011,7 @@
       },
       "endomorphism": {
         "conductor_divides": "3082",
-        "conductor": null,
+        "conductor": "3082",
         "levels": [
           {
             "ell": "2",
@@ -635417,20 +638023,20 @@
           {
             "ell": "23",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           },
           {
             "ell": "67",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -635665,7 +638271,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:0",
         "jfield": "full",
@@ -635769,7 +638375,7 @@
       },
       "endomorphism": {
         "conductor_divides": "1541",
-        "conductor": null,
+        "conductor": "1541",
         "levels": [
           {
             "ell": "2",
@@ -635781,20 +638387,20 @@
           {
             "ell": "23",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           },
           {
             "ell": "67",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -636029,7 +638635,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:0",
         "jfield": "full",
@@ -639204,7 +641810,7 @@
       },
       "endomorphism": {
         "conductor_divides": "663",
-        "conductor": null,
+        "conductor": "663",
         "levels": [
           {
             "ell": "2",
@@ -639223,20 +641829,20 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           },
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -639390,21 +641996,21 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 52,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 2,
+            "full_degree": 34,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -639471,7 +642077,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:0,7:1",
         "jfield": "full",
@@ -642043,7 +644649,7 @@
       },
       "endomorphism": {
         "conductor_divides": "19",
-        "conductor": null,
+        "conductor": "19",
         "levels": [
           {
             "ell": "2",
@@ -642055,13 +644661,13 @@
           {
             "ell": "19",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -642233,12 +644839,12 @@
           },
           {
             "ell": 19,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 3,
+            "full_degree": 57,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 19,
+            "rational_isogenies": 1
           }
         ],
         "conductor_ratio": {
@@ -642296,7 +644902,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:1",
         "jfield": "full",
@@ -645929,7 +648535,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -659831,8 +662437,8 @@
         "class_number_status": "not_evaluated"
       },
       "endomorphism": {
-        "conductor_divides": "22",
-        "conductor": null,
+        "conductor_divides": "2",
+        "conductor": "2",
         "levels": [
           {
             "ell": "2",
@@ -659844,13 +662450,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -659995,12 +662601,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "scalar",
+            "point_degree": 5,
+            "full_degree": 5,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 1,
+            "rational_isogenies": 12
           },
           {
             "ell": 13,
@@ -660078,7 +662684,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:0",
         "jfield": "full",
@@ -660181,8 +662787,8 @@
         "class_number_status": "not_evaluated"
       },
       "endomorphism": {
-        "conductor_divides": "11",
-        "conductor": null,
+        "conductor_divides": "1",
+        "conductor": "1",
         "levels": [
           {
             "ell": "2",
@@ -660194,13 +662800,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": true,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -660345,12 +662951,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "scalar",
+            "point_degree": 5,
+            "full_degree": 5,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 1,
+            "rational_isogenies": 12
           },
           {
             "ell": 13,
@@ -660428,7 +663034,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:0",
         "jfield": "full",

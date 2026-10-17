@@ -116,6 +116,19 @@ secp256k1.
   `E[n]` outside `E[2]`, which on a basis and its sum forces `π = ±λ`.
   It runs for `ℓ^j ≤ 64` within the same cost budget; where it stops
   early the level keeps the bound it reached.
+- at depth 1 with `ψ_ℓ` too large, the **point test**
+  ([`points.rs`](../../src/cryptanalysis/curve_traits/points.rs)): the
+  scalar case is exactly `E[ℓ] ⊆ E(GF(q^k))`, `k = ord(λ)`, i.e. an
+  `ℓ`-part of rank 2 in a group of known order
+  `N = q^k + 1 − V_k(t, q)`. Seeded random points over `GF(q^k)` (built
+  as `F[w]/(m)` with `m` certified irreducible by Rabin's test) find a
+  certificate either way: a point whose `ℓ`-part has order `ℓ^{v_ℓ(N)}`
+  (cyclic, the floor) or two independent points of order `ℓ` (rank 2,
+  the crater). Binary curves use the char-2 group law in affine
+  coordinates, with points sampled by solving `z² + z = x + a + b/x²`
+  (`y = xz`; the half-trace in odd degree, a trace-1 element otherwise). The search is bounded by `POINT_TEST_COST` scalar-
+  multiplication work, `ℓ ≤ 1000` and `k ≤ 64`; a test agrees with the
+  division-polynomial test on every small curve where both run.
   The test runs over `GF(p)`, `GF(2^n)` and `GF(p^k)` for `ℓ ≤ 1000`
   within a fixed cost budget (`SCALAR_TEST_COST`), and is compared with a
   brute-force count of rational `ℓ`-torsion over small prime, binary and
@@ -208,17 +221,19 @@ certify its coordinates or group order.
 
 In the current file (2112 registry curves and 176 from the sources: 175
 walked curves of the P-256 and P-224 isogeny classes and the ECC2K-130
-degree-263 descendant), `End(E)` is established for 1934 curves (874
-maximal, 1060 non-maximal) and unresolved for 319; 35 have a `Δ` that did
+degree-263 descendant), `End(E)` is established for 1989 curves (879
+maximal, 1110 non-maximal) and unresolved for 264; 35 have a `Δ` that did
 not factor. Of the 1324 curves over `GF(p^k)`, `k > 1`, 1319 have a
 certified order (9 by generator, 1310 by point orders: 484 proved, 826
 probable). The levels behind it: 1246 decided by the scalar test on `E[ℓ]`
 (730 floors, 516 craters at depth 1), 982 by the prime-power test (459 one
-above the floor, 319 craters, 204 in between), 13 walker certificates (each agreeing with the
-test), 111 from a certified `End(E)`, 228 where `f₀` is already prime to
-`ℓ`. What stays open: 202 levels the tests only bound (beyond the cost
-limit or `ℓ^j > 64`), 108 primes beyond the cost limit at `j = 1`, and 72
-primes of `v` above the test's range. P-256's `Δ` factors with
+above the floor, 319 craters, 204 in between), 70 by the point test (57
+floors, 13 craters; 6 of them on binary curves), 13 walker certificates (each agreeing with the test),
+111 from a certified `End(E)`, 228 where `f₀` is already prime to `ℓ`.
+What stays open: 202 levels the tests only bound (beyond the cost limit or
+`ℓ^j > 64`), 38 depth-1 primes beyond both tests' budgets (`k > 64` or the cost
+limit), and 72 primes of `v`
+above the test's range. P-256's `Δ` factors with
 the committed hints as `−3·5·456597257999·p81·p136` (squarefree), so
 `v = 1`, `d_K = Δ` and `End(E) = O_K`, probable through its 136-bit prime
 (the 81-bit one is below the Miller–Rabin proof bound); every walked curve

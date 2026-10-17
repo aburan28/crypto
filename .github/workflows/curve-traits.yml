@@ -58,9 +58,16 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
+  # The trait build takes several minutes, and both `check` and the
+  # altered-file rejection rebuild it, so each runs in its own job to stay
+  # within the 25-minute PR budget (.github/scripts/check-pr-budgets.py).
   traits:
     runs-on: ubuntu-latest
     timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 45 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        task: [tests, check, altered]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -96,16 +103,21 @@ jobs:
           toolchain: '1.98'
       - uses: Swatinem/rust-cache@v2
       - name: Module tests
+        if: matrix.task == 'tests'
         run: cargo test --release --lib curve_traits
-      - run: cargo build --release --bin curve_traits
+      - if: matrix.task != 'tests'
+        run: cargo build --release --bin curve_traits
       - name: traits.json is current with registry.json
+        if: matrix.task == 'check'
         run: ./target/release/curve_traits check
       - name: Queries run on the committed file
+        if: matrix.task == 'check'
         run: |
           ./target/release/curve_traits show ECC2K-130
           ./target/release/curve_traits group --by cm,descent --min-sizes 2
           ./target/release/curve_traits similar ECC2K-130 --other-sizes --top 5
       - name: Reject an altered file
+        if: matrix.task == 'altered'
         run: |
           cp docs/curves/traits.json /tmp/altered.json
           sed -i '0,/"conductor": "7"/s//"conductor": "11"/' /tmp/altered.json

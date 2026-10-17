@@ -1,0 +1,30 @@
+# Axiom audit of research/ic_tree_split_structured_v_20261011/lean (TreeSplit), copied from a green CI run.
+# Source: workflow "Tree-split structured-V Lean checks" (.github/workflows/tree-split-structured-v-lean.yml), job `lean`
+#   run  https://github.com/aburan28/crypto/actions/runs/38981755356
+#   job  https://github.com/aburan28/crypto/actions/runs/38981755356/job/117243990692 (conclusion: success)
+#   PR   https://github.com/aburan28/crypto/pull/2033, checkout ref = PR head 22bd479dad938d1d090e3f643bd891f5d2f9b2b1
+#   date 2026-10-17T00:07:58Z (audit step), Lean v4.34.1 (lean/lean-toolchain)
+#   artifact tree-split-axiom-audit, id 12083120333, zip sha256 8d0a8ce3f6f0f1158a2f6477560086742c1dd4fd316f0648db1e796c64d3c689
+# The lean/ sources are identical at 22bd479da and at the commit that adds this log.
+# Committed for finding L-N7 of sheriff case SHF-20261017-e4d7f6.
+# Steps (all success): forbidden-construct grep (native_decide only in replay_ok); lake build;
+#   lake env lean AxiomAudit.lean (5 kernel lines with standard axioms only, 1 compiler line);
+#   lake env leanchecker --fresh TreeSplit.Verdict; lake env leanchecker --fresh TreeSplit.Leak (both exit 0, no output).
+# `kernel` lines: kernel-checked, standard axioms only. `compiler` line: replay_ok, the one registered
+# native_decide use (PREREGISTRATION.md §7), carrying its own compiler-trust axiom.
+# Lines below are the job's stdout of the audit step, timestamps stripped.
+AXIOM_AUDIT|kernel|TreeSplit.cells_count|
+AXIOM_AUDIT|kernel|TreeSplit.registered_report|propext
+AXIOM_AUDIT|kernel|TreeSplit.Replay.targets_count|
+AXIOM_AUDIT|kernel|TreeSplit.Leak.in_gf2_7|propext, Quot.sound
+AXIOM_AUDIT|kernel|TreeSplit.Leak.not_in_gf2_3|propext, Quot.sound
+AXIOM_AUDIT|compiler|TreeSplit.Replay.replay_ok|propext, Classical.choice, Quot.sound, TreeSplit.Replay.replay_ok._native.native_decide.ax_1_1
+'TreeSplit.cells_count' does not depend on any axioms
+'TreeSplit.registered_report' depends on axioms: [propext]
+'TreeSplit.Replay.targets_count' does not depend on any axioms
+'TreeSplit.Leak.in_gf2_7' depends on axioms: [propext, Quot.sound]
+'TreeSplit.Leak.not_in_gf2_3' depends on axioms: [propext, Quot.sound]
+'TreeSplit.Replay.replay_ok' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ TreeSplit.Replay.replay_ok._native.native_decide.ax_1_1]
