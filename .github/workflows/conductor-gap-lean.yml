@@ -1,0 +1,72 @@
+name: Conductor-gap Lean proofs
+# Builds research/conductor_gap_cm_pairs_20261010/lean (GenericInvariance,
+# TransferBound; Lean core only, no dependencies). It refuses sorry, admit,
+# native_decide and custom axioms, audits every main theorem's axioms
+# (AxiomAudit.lean; only propext, Classical.choice and Quot.sound are
+# allowed), keeps the audit log as an artifact, and re-checks the environment
+# with leanchecker. Sheriff case SHF-20261016-3caa6f, finding L6.
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/conductor-gap-lean.yml'
+      - 'research/conductor_gap_cm_pairs_20261010/lean/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/conductor-gap-lean.yml'
+      - 'research/conductor_gap_cm_pairs_20261010/lean/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lean:
+    runs-on: ubuntu-24.04
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 60 }}
+    defaults:
+      run:
+        working-directory: research/conductor_gap_cm_pairs_20261010/lean
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          sparse-checkout: |
+            research/conductor_gap_cm_pairs_20261010/lean
+      - name: Cache the pinned Lean toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan/toolchains
+          key: ${{ runner.os }}-lean-${{ hashFiles('research/conductor_gap_cm_pairs_20261010/lean/lean-toolchain') }}
+      - name: Install Lean (toolchain pinned by lean-toolchain)
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: No sorry, admit, native_decide or custom axioms
+        run: |
+          if grep -nE '\bsorry\b|\badmit\b|native_decide|^axiom ' GenericInvariance.lean TransferBound.lean AxiomAudit.lean; then
+            echo "forbidden construct found"; exit 1; fi
+      - name: lake build
+        run: lake build
+      - name: Axiom audit (standard axioms only)
+        run: |
+          set -o pipefail
+          lake env lean AxiomAudit.lean | tee /tmp/axioms.txt
+          test "$(grep -cE "depends on axioms|does not depend on any axioms" /tmp/axioms.txt)" -eq 9
+          if grep -vE "^AXIOM_AUDIT\||does not depend on any axioms|depends on axioms: \[(propext|Classical.choice|Quot.sound)(, (propext|Classical.choice|Quot.sound))*\]" /tmp/axioms.txt; then
+            echo "unexpected axiom"; exit 1; fi
+      - name: Keep the audit log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: conductor-gap-axiom-audit
+          path: /tmp/axioms.txt
+          if-no-files-found: ignore
+      - name: leanchecker --fresh
+        run: |
+          lake env leanchecker --fresh GenericInvariance
+          lake env leanchecker --fresh TransferBound

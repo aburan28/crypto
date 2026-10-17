@@ -34,6 +34,12 @@
 #   WITH_RUST_BUILD=1   also `cargo build --release` the crypto workspace (slow)
 set -uo pipefail   # no -e: one failed component warns and the rest still run
 
+case "${WORKSPACE_OFFLINE:-0}" in
+  0|'') ;;
+  1) exec bash "$(cd "$(dirname "$0")/.." && pwd)/scripts/private-workspace.sh" check ;;
+  *) echo "WORKSPACE_OFFLINE must be 0 or 1" >&2; exit 2 ;;
+esac
+
 ALL_COMPONENTS=(system rust go node python conductor cairn sage agents repos control-plane)
 
 WORKSPACE="${WORKSPACE:-$HOME/src}"
