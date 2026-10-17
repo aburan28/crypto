@@ -1,0 +1,106 @@
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded num-integer v0.1.47
+  Downloaded opaque-debug v0.3.1
+  Downloaded cpufeatures v0.2.17
+  Downloaded chacha20poly1305 v0.10.1
+  Downloaded cipher v0.4.4
+  Downloaded universal-hash v0.5.1
+  Downloaded zeroize v1.9.1
+  Downloaded num-bigint v0.4.8
+  Downloaded chacha20 v0.9.1
+  Downloaded unicode-ident v1.0.27
+  Downloaded cfg-if v1.0.5
+  Downloaded inout v0.1.4
+  Downloaded libc v0.2.190
+  Downloaded aead v0.5.2
+  Downloaded smallvec v1.16.3
+  Downloaded poly1305 v0.8.0
+   Compiling version_check v0.9.5
+   Compiling libc v0.2.190
+   Compiling typenum v1.20.1
+   Compiling cfg-if v1.0.5
+   Compiling proc-macro2 v1.0.107
+   Compiling generic-array v0.14.7
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling autocfg v1.5.1
+   Compiling num-traits v0.2.19
+   Compiling syn v2.0.119
+   Compiling subtle v2.6.1
+   Compiling getrandom v0.2.17
+   Compiling inout v0.1.4
+   Compiling cpufeatures v0.2.17
+   Compiling rand_core v0.6.4
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling opaque-debug v0.3.1
+   Compiling keccak v0.1.6
+   Compiling universal-hash v0.5.1
+   Compiling poly1305 v0.8.0
+   Compiling aead v0.5.2
+   Compiling digest v0.10.7
+   Compiling sha3 v0.10.9
+   Compiling num-integer v0.1.47
+   Compiling smallvec v1.16.3
+   Compiling num-bigint v0.4.8
+   Compiling zeroize_derive v1.5.0
+   Compiling zeroize v1.9.1
+   Compiling cipher v0.4.4
+   Compiling chacha20 v0.9.1
+   Compiling chacha20poly1305 v0.10.1
+   Compiling eigen_seta v0.1.0 (/home/user/eigenx)
+    Finished `release` profile [optimized] target(s) in 12.62s
+     Running `/tmp/eigenx-target/release/examples/security_estimate`
+Eigen-Seta attack cost model (log2; see docs/SECURITY.md for the formulas)
+
+L1 (lambda 128, p 1341 bits, E 1076, F3 162 [log2 d 256.8], f 277 bits)
+  attack                   target   classical q-queries   MD2^40   MD2^64   MD2^96
+  sender isogeny MITM      message      128.4      85.6    175.3    151.3    119.3
+  mask guess + Kani        message      129.0      64.5    151.2    127.2     97.6
+  secret degree search     key          265.5     132.7    293.7    269.7    237.7
+  End(E_A) generic         key          447.0     335.2        -        -        -
+  hidden orientation       key          138.5         -        -        -        -
+  floor: classical 2^128.4, quantum queries 2^64.5, quantum gates 2^151.2/2^127.2/2^97.6
+  reference AES-128 Grover gates: 2^130/2^106/2^74
+
+L3 (lambda 192, p 1991 bits, E 1594, F3 243 [log2 d 385.1], f 409 bits)
+  attack                   target   classical q-queries   MD2^40   MD2^64   MD2^96
+  sender isogeny MITM      message      192.6     128.4    262.7    238.7    206.7
+  mask guess + Kani        message      193.0      96.5    218.1    194.1    162.1
+  secret degree search     key          396.9     198.4    428.1    404.1    372.1
+  End(E_A) generic         key          663.7     497.8        -        -        -
+  hidden orientation       key          204.5         -        -        -        -
+  floor: classical 2^192.6, quantum queries 2^96.5, quantum gates 2^218.1/2^194.1/2^162.1
+  reference AES-192 Grover gates: 2^193/2^169/2^137
+
+L5 (lambda 256, p 2630 bits, E 2106, F3 324 [log2 d 513.5], f 536 bits)
+  attack                   target   classical q-queries   MD2^40   MD2^64   MD2^96
+  sender isogeny MITM      message      256.8     171.2    349.5    325.5    293.5
+  mask guess + Kani        message      257.0     128.5    284.2    260.2    228.2
+  secret degree search     key          523.5     261.7    556.8    532.8    500.8
+  End(E_A) generic         key          876.7     657.5        -        -        -
+  hidden orientation       key          268.0         -        -        -        -
+  floor: classical 2^256.8, quantum queries 2^128.5, quantum gates 2^284.2/2^260.2/2^228.2
+  reference AES-256 Grover gates: 2^258/2^234/2^202
+
+Q3 (lambda 192, p 3904 bits, E 3125, F3 485 [log2 d 768.7], f 791 bits)
+  attack                   target   classical q-queries   MD2^40   MD2^64   MD2^96
+  sender isogeny MITM      message      384.4     256.2    521.5    497.5    465.5
+  mask guess + Kani        message      385.0     192.5    415.2    391.2    359.2
+  secret degree search     key          777.9     389.0    814.1    790.1    758.1
+  End(E_A) generic         key         1301.3     976.0        -        -        -
+  hidden orientation       key          395.5         -        -        -        -
+  floor: classical 2^384.4, quantum queries 2^192.5, quantum gates 2^415.2/2^391.2/2^359.2
+  reference AES-192 Grover gates: 2^193/2^169/2^137
+
+Q5 (lambda 256, p 5192 bits, E 4155, F3 647 [log2 d 1025.5], f 1049 bits)
+  attack                   target   classical q-queries   MD2^40   MD2^64   MD2^96
+  sender isogeny MITM      message      512.7     341.8    693.9    669.9    637.9
+  mask guess + Kani        message      513.0     256.5    545.3    521.3    489.3
+  secret degree search     key         1035.5     517.8   1073.8   1049.8   1017.8
+  End(E_A) generic         key         1730.7    1298.0        -        -        -
+  hidden orientation       key          524.5         -        -        -        -
+  floor: classical 2^512.7, quantum queries 2^256.5, quantum gates 2^545.3/2^521.3/2^489.3
+  reference AES-256 Grover gates: 2^258/2^234/2^202
+
