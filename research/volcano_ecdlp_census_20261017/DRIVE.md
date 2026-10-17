@@ -12,3 +12,4 @@ Staged but NOT uploaded (the only upload path in the executor is a base64 argume
 |:--|--:|:--|
 | census-phaseA.tar.xz (census/, checks/, FROZEN.json; no PNG) | 971516 | 6d9be453cad9c63fc3cabee6e28257367486d7cbd569c26296b16001d98a9708 |
 | specs-phaseA.tar.xz (specs/, runs/) | 93708 | 23ab2d128912d092063477f4a8398a11b7f7032f96e107b5199281f247c04a0d |
+| A | phaseA-calibration-summary.md (= calibration/summary.md) | 1flai8c2P756HeyJFo33-dKShIHHlAfV2 | 2854 | 52ec924c415d454662a3713a4737ffffbc944a8616c8a402d89c05b3d913a6f3 | size matches |
