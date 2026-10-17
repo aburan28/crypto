@@ -134,9 +134,15 @@ pub struct AuditReport {
     pub schema: String,
     pub session_id: String,
     /// The session's own status: `complete`, or `interrupted` when that
-    /// was accepted.
+    /// was accepted (including a session that was never finalised, see
+    /// [`never_finalised`]).
     #[serde(default)]
     pub session_status: String,
+    /// Why an accepted interruption is one: `never_finalised` when the
+    /// session still reads `running` exactly as the runner first wrote it
+    /// (the runner was killed before it could mark the session).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interruption: Option<String>,
     pub ok: bool,
     pub problems: Vec<String>,
     pub checks: BTreeMap<String, bool>,
@@ -173,11 +179,37 @@ pub fn audit(dir: &Path, replay: usize) -> Result<AuditReport, String> {
     audit_with(dir, replay, false)
 }
 
+/// The interruption [`audit_with`] reports for a session that was never
+/// finalised.
+pub const NEVER_FINALISED: &str = "never_finalised";
+
+/// A session whose `session.json` is still exactly in the state the runner
+/// writes before its first execution: status `running`, no finish time, no
+/// record count, no records hash, no status counts.  The runner rewrites
+/// `session.json` only when the session ends (`complete`, or `interrupted`
+/// on a signal or an error), so a session left in this state was killed
+/// outright (SIGKILL, host loss) or is still being written by a live
+/// runner; the files cannot tell those apart, and a committed session has
+/// no live runner.  Its records are still sealed line by line as they are
+/// written, so every per-record check applies; only the whole-file hash,
+/// which the runner never got to write, does not.
+pub fn never_finalised(session: &crate::cryptanalysis::ecbench::runner::Session) -> bool {
+    session.status == "running"
+        && session.finished_unix_ms.is_none()
+        && session.records_written == 0
+        && session.records_sha256.is_none()
+        && session.status_counts.is_empty()
+}
+
 /// [`audit`], optionally accepting an `interrupted` session: it is held
 /// to every integrity check (hashes, seals, plan, answers, derived
 /// figures), with "every planned execution recorded" replaced by "every
-/// record it says it wrote".  A session that claims `complete` gets no
-/// such relaxation.
+/// record it says it wrote".  A session that was never finalised
+/// ([`never_finalised`]) is accepted as interrupted too, held to every
+/// per-record check (seals, sequence, plan, answers, derived figures,
+/// grading) with no records hash or count to compare against; it is
+/// reported as `interrupted` with `interruption: never_finalised`.  A
+/// session that claims `complete` gets no such relaxation.
 pub fn audit_with(
     dir: &Path,
     replay: usize,
@@ -214,10 +246,11 @@ pub fn audit_with(
     );
     let rec_sha = file_sha(dir, "records.jsonl", &mut files);
     let complete = session.status == "complete";
-    let accepted_interruption = allow_interrupted && session.status == "interrupted";
+    let killed = allow_interrupted && never_finalised(&session);
+    let accepted_interruption = allow_interrupted && (session.status == "interrupted" || killed);
     check(
         "records_hash",
-        !(complete || accepted_interruption) || rec_sha == session.records_sha256,
+        !(complete || accepted_interruption) || killed || rec_sha == session.records_sha256,
         "records.jsonl does not hash to session.records_sha256".into(),
         &mut problems,
     );
@@ -295,6 +328,8 @@ pub fn audit_with(
         "record_count",
         if complete {
             records.len() as u64 == session.records_written && records.len() == p.executions.len()
+        } else if killed {
+            records.len() <= p.executions.len()
         } else {
             records.len() as u64 == session.records_written && records.len() <= p.executions.len()
         },
@@ -569,7 +604,12 @@ pub fn audit_with(
     let auditor_host = host::capture().ok();
     Ok(AuditReport {
         schema: AUDIT_SCHEMA.into(),
-        session_status: session.status.clone(),
+        session_status: if killed {
+            "interrupted".into()
+        } else {
+            session.status.clone()
+        },
+        interruption: killed.then(|| NEVER_FINALISED.to_string()),
         session_id: session.session_id,
         ok: problems.is_empty(),
         problems,
@@ -622,6 +662,94 @@ mod tests {
         let w2 = 29295605.0;
         assert_ne!((x + w).to_bits(), x.to_bits());
         assert_ne!(((x + w) - w).to_bits(), ((x + w2) - w2).to_bits());
+    }
+
+    /// A committed session whose runner was killed
+    /// (`research/f6_ic_ecbench_ladder_20261005/sessions/n31-killed-02`):
+    /// `session.json` still reads `running`, as first written, and
+    /// `records.jsonl` holds the four sealed records written before the
+    /// kill.  Embedded, so every lane that builds the tests has it.
+    const KILLED: [(&str, &str); 5] = [
+        (
+            "session.json",
+            include_str!("../../../research/f6_ic_ecbench_ladder_20261005/sessions/n31-killed-02/session.json"),
+        ),
+        (
+            "spec.json",
+            include_str!("../../../research/f6_ic_ecbench_ladder_20261005/sessions/n31-killed-02/spec.json"),
+        ),
+        (
+            "plan.json",
+            include_str!("../../../research/f6_ic_ecbench_ladder_20261005/sessions/n31-killed-02/plan.json"),
+        ),
+        (
+            "host.json",
+            include_str!("../../../research/f6_ic_ecbench_ladder_20261005/sessions/n31-killed-02/host.json"),
+        ),
+        (
+            "records.jsonl",
+            include_str!("../../../research/f6_ic_ecbench_ladder_20261005/sessions/n31-killed-02/records.jsonl"),
+        ),
+    ];
+
+    /// A scratch copy of the killed session, byte for byte, to audit or
+    /// mutate.
+    fn killed_copy(tag: &str) -> std::path::PathBuf {
+        let dir = std::env::temp_dir().join(format!("ecbench-audit-{}-{tag}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        for (name, text) in KILLED {
+            std::fs::write(dir.join(name), text).unwrap();
+        }
+        dir
+    }
+
+    #[test]
+    fn a_killed_session_is_interrupted_only_when_interruptions_are_allowed() {
+        let dir = killed_copy("as-committed");
+        let session = read_session(&dir).unwrap();
+        assert!(never_finalised(&session));
+
+        let strict = audit_with(&dir, 0, false).unwrap();
+        assert!(!strict.ok);
+        assert_eq!(strict.checks.get("session_complete"), Some(&false));
+        assert_eq!(strict.session_status, "running");
+        assert_eq!(strict.interruption, None);
+
+        let lenient = audit_with(&dir, 0, true).unwrap();
+        assert!(lenient.ok, "{:?}", lenient.problems);
+        assert_eq!(lenient.session_status, "interrupted");
+        assert_eq!(lenient.interruption.as_deref(), Some(NEVER_FINALISED));
+        assert_eq!(lenient.records, 4);
+        assert_eq!(lenient.checks.get("records"), Some(&true));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_killed_session_keeps_every_record_check() {
+        // A session the runner did mark (a finish time) is not a killed
+        // one, so it gets no relaxation for still reading `running`.
+        let dir = killed_copy("finished");
+        let text = std::fs::read_to_string(dir.join("session.json")).unwrap();
+        let mut v: serde_json::Value = serde_json::from_str(&text).unwrap();
+        v["finished_unix_ms"] = json!(1791170600000u64);
+        std::fs::write(dir.join("session.json"), v.to_string()).unwrap();
+        assert!(!never_finalised(&read_session(&dir).unwrap()));
+        let rep = audit_with(&dir, 0, true).unwrap();
+        assert!(!rep.ok);
+        assert_eq!(rep.checks.get("session_complete"), Some(&false));
+        let _ = std::fs::remove_dir_all(&dir);
+
+        // Dropping a sealed record is still caught: the rest are out of
+        // sequence against the plan.
+        let dir = killed_copy("dropped");
+        let text = std::fs::read_to_string(dir.join("records.jsonl")).unwrap();
+        let rest: String = text.lines().skip(1).map(|l| format!("{l}\n")).collect();
+        std::fs::write(dir.join("records.jsonl"), rest).unwrap();
+        let rep = audit_with(&dir, 0, true).unwrap();
+        assert!(!rep.ok);
+        assert_eq!(rep.checks.get("records"), Some(&false));
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]

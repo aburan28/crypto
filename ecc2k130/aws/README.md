@@ -16,6 +16,13 @@ each slot's checkpoint and points in S3, an EC2 Fleet that keeps N GPUs
 running on spot capacity, and an external merge that finds the collision
 across the whole corpus.
 
+RunPod and other external workers should use the authenticated quarantine
+gateway in [`upload_gateway/`](upload_gateway/README.md). Those pods carry a
+revocable campaign token, not an AWS access key: the canonical bucket stays
+private, every upload is validated before it reaches `dp/`, and the existing
+ingester continues to consume the same canonical keys. EC2 workers may keep
+using their instance profile while they are migrated.
+
 Nothing in the C++/CUDA client changes. The binary is the audited RTX PRO
 6000 preset (`make audit-rtx-pro6000`: CUDA 13.3.1, batch 16, 256-thread
 blocks, minBlocks 2, 385,024 workers, and every packed arithmetic option —

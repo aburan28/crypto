@@ -1,0 +1,35 @@
+{
+  "schema": "crypto.ecbench_build_manifest/v1",
+  "image": {
+    "tag": "rust:1.98-bookworm",
+    "id": "sha256:26d41993b1f2f78dbd010160b83b06b0a38e17b57a269e9bf0be7f2078073f98",
+    "digest": "rust@sha256:93ce27a88655056a51dbdd8f5f2d7ddc071c7b0070fb288a37b5a285fc83971e"
+  },
+  "toolchain": {
+    "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "rustc_commit": "48a229ceaefd4985c50990b14116b6d856af0985",
+    "llvm": "22.1.8",
+    "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+    "cc": "cc (Debian 12.2.0-14+deb12u1) 12.2.0",
+    "host": "x86_64-unknown-linux-gnu"
+  },
+  "dependency_lock": {
+    "path": "Cargo.lock",
+    "sha256": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90"
+  },
+  "profile": "Cargo.toml default release profile",
+  "command": "cargo build --release --bin ecbench",
+  "baseline": {
+    "revision": "7badd44a3",
+    "source_worktree": "/tmp/ecbench-rho-baseline-src",
+    "dirty": false,
+    "binary_sha256": "77e1d4accc239c9aad55b8e8629161601d7e239f6e70ea56c04b861274b219a3"
+  },
+  "candidate": {
+    "revision": "2fd065a6c32533a81c1936121e17daa03c4448e8",
+    "source_worktree": "/workspace/crypto",
+    "dirty": false,
+    "binary_sha256": "8778c2a8face12fa50fa9495e96f861ff7f34417a24101b2a1472d324ae31b22"
+  },
+  "binary_retention": "Binaries were measured from /tmp and are identified by SHA-256; raw Callgrind parts and the exact source revisions are retained in the repository."
+}
