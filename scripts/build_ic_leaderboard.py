@@ -71,7 +71,7 @@ SOURCES = {
     "f4_f5_f6_cross_family": "research/f4_f5_f6_cross_family_20261011/ANALYSIS.json",
     "n41_n53_counted": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
     "conductor_gap_counts": "research/ecbench_conductor_gap_20261012/analysis.json",
-    "conductor_gap_instructions": "research/ecbench_conductor_gap_ir_20261014/analysis.json",
+    "la_engines": "research/la_engines_20261014/summary.json",
     "frontier_audit": "research/ecbench_frontier_20261013/frontier-data.json",
     "n83_tier1_cold_holdout": "research/n83_e2e_holdout_20261016/ic1_rows_38955665283.json",
     "rho_optimization": "research/ecbench_rho_optimized_20261014/RESULT.json",
@@ -583,6 +583,40 @@ def families(board: list[dict]) -> dict:
     return out
 
 
+# Sizes the linear-algebra component panel shows, a subset of the study's
+# frozen amendment-5 grid (research/la_engines_20261014/PROTOCOL_AMENDMENT_5.md).
+LA_COLUMNS = (16384, 65536, 131072, 262144)
+
+
+def la_component() -> dict:
+    """The linear-algebra phase on its own: the amendment-5 session of
+    research/la_engines_20261014, copied from its summary.json (medians and
+    per-seed ratio ranges computed there from raw/grid_amend5.jsonl). A
+    component speed-up on synthetic relation matrices: it moves no row of
+    tables A-C, which keep the solver each was measured with."""
+    sm = load(SOURCES["la_engines"])
+
+    def cell(key: str, d: int):
+        return (sm.get(key) or {}).get(str(d))
+
+    rows = []
+    for d in LA_COLUMNS:
+        rows.append({
+            "columns": d,
+            "legacy_s": cell("amend5_solve_s|legacy-bw", d),
+            "cado_style_s": cell("amend5_solve_s|cado-bw", d),
+            "legacy_over_cado_style": cell("amend5_ratio|legacy-bw/cado-bw", d),
+            "cado_nfs_s": cell("amend5_solve_s|cado-nfs", d),
+            "cado_nfs_over_ours": cell("amend5_ratio|cado-nfs/cado-bw-pos", d),
+            "core_legacy": cell("amend5_core_dim|legacy-bw", d),
+            "core_cado_style": cell("amend5_core_dim|cado-bw", d),
+            "core_cado_nfs": cell("amend5_core_dim|cado-nfs", d),
+        })
+    return {"rows": rows, "study": "research/la_engines_20261014/",
+            "report": "research/la_engines_20261014/REPORT.pdf",
+            "class": "engineering"}
+
+
 def latest_frontier_audit() -> dict:
     """Copy the latest performance handoff into the generated board.
 
@@ -1034,7 +1068,7 @@ def build() -> dict:
         # Native analysis computes these observations; this view only copies
         # and renders them, outside the fully priced rankings.
         "conductor_gap_count_diagnostic": load(SOURCES["conductor_gap_counts"]),
-        "conductor_gap_instruction_diagnostic": load(SOURCES["conductor_gap_instructions"]),
+        "linear_algebra_component": la_component(),
         "phases": [{"id": i, "name": n, "what": w} for i, n, w in PHASES],
     }
 

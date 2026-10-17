@@ -7,6 +7,7 @@ and **36 published odd-characteristic covering cases**. The named roster
 includes Oakley Groups 3 and 4, with exact GHS invariant candidates and
 separate WID1 finding IDs. It adds three exhaustively checked prime-field
 examples and a twenty-eight-criterion
+examples and a twenty-four-criterion
 registry for anomalous, smooth-order, MOV, Frey–Rück, supersingular,
 binary-GHS, odd-characteristic GHS, cubic norm-one, quadratic-torus and
 proper-subfield mechanisms, plus direct extension-field decomposition,
@@ -38,6 +39,7 @@ conditions, geometry, explicit maps, candidates and structural screens.
 
 The [WAM1 attack map](attack_map.json) adds 38 source-linked research checks
 to the 26 existing criteria, giving the website 64 searchable checks across
+to the 24 existing criteria, giving the website 62 searchable checks across
 curve structure, selected subgroups, auxiliary inputs, pairings, index calculus,
 hyperelliptic divisor and Jacobian decomposition, endomorphisms,
 implementations and isogeny protocols. Each WAM1 row states an

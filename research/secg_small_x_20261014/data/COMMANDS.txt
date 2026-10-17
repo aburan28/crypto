@@ -1,0 +1,21 @@
+# Every run, as executed (release `ic`, 4 vCPU, seed 7, 32 planted controls). Output of `ic --json prime ...` is the JSON file named.
+# SECG curves, 1 000 000 Monte Carlo trials:
+#   <curve>_<B>.json   ic --json prime --curve <curve> --size B --trials 1000000 --controls 32 --seed 7
+#   B in {256, 1024, 4096} for every curve below; B = 8192 also for sect113r1, sect163r2, secp160r1
+#   binary: sect113r1 sect113r2 sect131r1 sect131r2 sect163k1 sect163r1 sect163r2 sect193r1 sect193r2 sect233k1 sect233r1 sect239k1
+#   prime:  secp112r1 secp112r2 secp128r1 secp128r2 secp160k1 secp160r1 secp160r2 secp192k1 secp192r1
+# Toy binary curves (method check, 3 000 000 trials):
+#   toyb<degree>_<B>.json   ic --json prime --curve toy-binary:<degree> --size B --trials 3000000 --controls 32 --seed 7
+#   degree 13: B in 8 16 32 64;  degree 17: B in 16 32 64 128 256;  degree 19: B in 32 64 128 256 512 1024
+#
+# Second sweep (resumable script, release `ic`, seed 7, 32 planted controls):
+#   toyb<degree>h4_<B>.json   ic --json prime --curve toy-binary:<degree>,7,4 --size B --trials 3000000   (degree 13: B 8 16 32 64; 17: 16..256; 19: 32..1024)
+#   toyp<bits>h<h>_<B>.json   ic --json prime --curve toy:<bits>,7,<h> --size B --trials 3000000          (h = 2, 4; bits 16: B 16..256; bits 20: B 32..1024)
+#   raw_<curve>_64.json       ic --json prime --curve <curve> --size 64 --trials 1000 --controls 8 --seed 7 --raw-samples 4000
+#                             (sect113r1 sect113r2 sect163k1 sect163r1 sect163r2 sect233k1 sect239k1 sect283k1 secp112r2 secp128r2)
+#   <curve>_<B>.json          wide curves secp224k1 secp224r1 secp256k1 secp256r1 sect283k1 sect283r1 secp384r1 sect409k1 sect409r1 secp521r1 sect571k1 sect571r1, B in 256 1024 4096;
+#                             --trials 500000 (secp224*, secp256*) or 100000 (the rest)
+#   <curve>_8192.json         every curve whose pair-sum keys fit (30 curves; secp521r1, sect571k1, sect571r1 are refused by the memory guard);
+#                             --trials 1000000 (<= 192 bits), 500000 (sect233*, sect239*), 100000 (secp224/256, sect283, secp384r1, sect409)
+# S3 cost (one run per curve and size, 20 targets, one thread):
+#   s3_<curve>_<B>.json       ic --json prime --curve <curve> --size B --trials 1000 --controls 4 --seed 7 --s3-trials 20      (B = 1024, 4096; every SECG curve)

@@ -226,7 +226,7 @@ stopwatch, and the table should say which is which.
 
 | field | meaning |
 |:--|:--|
-| `name` | the matrix: `incremental-gauss` or `structured-gauss` |
+| `name` | the matrix: `incremental-gauss`, `structured-gauss` or `sparse-cado` |
 | `rows`, `rank`, `dependent` | relations added, rank reached, and the ones that added nothing |
 | `work`, `work_unit` | the method's own count (`row_ops` for an elimination) |
 | `recovered`, `verified` | the logarithm found, and whether it is the planted one |
@@ -463,12 +463,13 @@ incremental elimination, structured Gaussian elimination and an
 iterative method (Wiedemann, Lanczos) is a real lever and the one most
 often left unpriced.
 
-Two ship, chosen with `--linalg` (or the `linalg` key of a sweep):
+Three ship, chosen with `--linalg` (or the `linalg` key of a sweep):
 
 | name | what it is | pivot | storage |
 |:--|:--|:--|:--|
 | `incremental-gauss` | dense reduced row echelon, maintained as rows arrive | leftmost non-zero | `rank × columns` |
 | `structured-gauss` | sparse reduced row echelon, maintained as rows arrive | lightest column (Markowitz) | the non-zeros |
+| `sparse-cado` | batch: CADO-style filter (clique purge, spanning-tree merge), then block Wiedemann, re-solved as relations arrive; full-rank stop rule | — | the non-zeros |
 
 Both charge one `row_op` per non-zero multiply-subtract, so their
 `work` columns compare directly; on the two- or three-non-zero rows an
@@ -480,7 +481,12 @@ reduces the new row against the pivots held so far and answers
 `Independent`, `Dependent` or `Inconsistent`; `pinned` says whether one
 column is determined on its own. The loop calls them after every
 relation, so an implementation must answer incrementally; a batch
-method would re-solve on every call.
+method would re-solve on every call. `sparse-cado` is that batch method,
+made workable by re-solving only once every column is covered, then every
+`max(1, columns / 32)` relations; it answers only at full column rank,
+certified by two independently seeded solves agreeing, and charges the
+same `row_ops` (entry multiply-subtracts in merges, sparse products,
+checks and reconstruction) summed over every solve it tried.
 
 ---
 
@@ -773,7 +779,7 @@ worse than none:
 | targets | `Targets` | `random`, `walk` |
 | point decomposition | `DecompositionOracle` | `subtract`, `mitm`, `mitm-frobenius`, `descent-algebraic`, `symmetrised`; `line-resultant` (library and `examples/glv_invariant_experiments.rs`: the `O(log p)` Weil-descent oracle for a line base over `F_{p^k}`, `line_oracle.rs`) |
 | polynomial solver | `SystemSolver` | `f4-f2`, `buchberger-f2`, `matrix-f4`, `matrix-f5`, `inherited-f4`, `crossbred-f2`, `xl-f2`, `sat-cdcl`, `fes-f2`, `fes-f2-wide`, `exhaustive` |
-| relation matrix | `RelationSolver` | `incremental-gauss`, `structured-gauss` |
+| relation matrix | `RelationSolver` | `incremental-gauss`, `structured-gauss`, `sparse-cado` |
 
 `ic bench --list` prints this with every parameter each plug-in reads.
 A parameter that takes several values (`divisor` on `koblitz-orbit`,

@@ -1,0 +1,54 @@
+{
+  "schema_version": "ecdlp-source-claim-manifest/draft-2",
+  "manifest_id": "WS6-MANIFEST-FIXTURE-INVALID-COMPLETENESS",
+  "title": "Invalid completeness claim fixture",
+  "created_at": "2026-10-14T00:00:00Z",
+  "repository_revision": "1e447956d3616092a223264f1c6c31eff8ac9979",
+  "protocol": {
+    "protocol_id": "ws6-corpus-protocol-draft-2026-10-13",
+    "path": "docs/ecdlp-audit/corpus/PROTOCOL.md",
+    "revision_status": "draft",
+    "frozen": false,
+    "frozen_at": null,
+    "reviewer_ids": []
+  },
+  "route_registry_binding": {
+    "registry_path": "docs/ecdlp-audit/routes/route-registry.seed.json",
+    "schema_path": "docs/ecdlp-audit/routes/ws5-routes.schema.json",
+    "schema_version": "ecdlp-ws5-routes/v0-draft",
+    "record_state": "draft_non_authoritative",
+    "binding_status": "path_only_unverified",
+    "content_sha256": null,
+    "digest_scope": "none",
+    "reviewer_ids": [],
+    "reviewed_at": null,
+    "semantic_join_required": true,
+    "authoritative_mapping": false,
+    "limitations": ["Fixture binds only a mutable draft registry path; no route mapping is authoritative."]
+  },
+  "authority": {
+    "authoritative": false,
+    "promotion_allowed": false,
+    "status": "draft_non_authoritative",
+    "non_claims": ["Expected schema rejection: completeness claimed must be false."]
+  },
+  "completeness": {
+    "claimed": true,
+    "denominator_status": "unfrozen",
+    "evidence_cutoff": null,
+    "statement": "Negative validator fixture.",
+    "known_gaps": ["No search has been executed."]
+  },
+  "counts": {"sources": 0, "claims": 0, "source_claim_links": 0, "search_runs": 0},
+  "sources": [],
+  "claims": [],
+  "source_claim_links": [],
+  "search_runs": [],
+  "review": {
+    "status": "not_started",
+    "reviewer_ids": [],
+    "reviewed_at": null,
+    "all_critical_claims_second_person_verified": false,
+    "notes": "Negative validator fixture."
+  }
+}

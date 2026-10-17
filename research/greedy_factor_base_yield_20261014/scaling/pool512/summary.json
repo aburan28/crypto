@@ -1,0 +1,62 @@
+[
+  {
+    "a": 1,
+    "n": 17,
+    "subgroup_bits": 16.001122266128682,
+    "columns": 16,
+    "pool": 512,
+    "points": 544,
+    "seeds": 6,
+    "greedy_mean_coverage": 0.9521340936581995,
+    "random_mean_coverage": 0.8957145325730086,
+    "random_sd_coverage": 0.0086461012197283,
+    "ratio": 1.0629883283495707,
+    "ratio_ci95": [
+      1.0559071729957805,
+      1.0711439401302363
+    ],
+    "greedy_build_ms_mean": 1795.0607479999999,
+    "random_build_ms_mean": 0.3462191666666667,
+    "all_models_match": true
+  },
+  {
+    "a": 0,
+    "n": 23,
+    "subgroup_bits": 20.999106101271966,
+    "columns": 16,
+    "pool": 512,
+    "points": 736,
+    "seeds": 6,
+    "greedy_mean_coverage": 0.12519936204146728,
+    "random_mean_coverage": 0.11983304800784278,
+    "random_sd_coverage": 0.0007685497278499911,
+    "ratio": 1.0447815867395218,
+    "ratio_ci95": [
+      1.039743160585496,
+      1.0496534380175429
+    ],
+    "greedy_build_ms_mean": 4625.829284166667,
+    "random_build_ms_mean": 0.40545916666666665,
+    "all_models_match": true
+  },
+  {
+    "a": 1,
+    "n": 23,
+    "subgroup_bits": 22.00089368896064,
+    "columns": 16,
+    "pool": 512,
+    "points": 736,
+    "seeds": 6,
+    "greedy_mean_coverage": 0.06366386444096145,
+    "random_mean_coverage": 0.06225361786702033,
+    "random_sd_coverage": 0.0002650000933964881,
+    "ratio": 1.0226532468675722,
+    "ratio_ci95": [
+      1.0197225961257095,
+      1.0259369387935346
+    ],
+    "greedy_build_ms_mean": 4732.067624333334,
+    "random_build_ms_mean": 0.42225916666666663,
+    "all_models_match": true
+  }
+]

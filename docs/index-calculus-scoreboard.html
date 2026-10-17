@@ -4083,16 +4083,17 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         2<sup>70.19</sup>&times; rho, the same row as the bigger field. Over F<sub>2</sub>, the only
         proper subfield, index calculus would be cheap: genus 130 would cost 2<sup>37.17</sup>,
         2<sup>23.64</sup>&times; <em>below</em> the reference, and it pays up to genus 290&ndash;300. No
-        construction lands there. Because 2 is a primitive root mod 131, GHS descent gives
-        <em>every</em> curve over F<sub>2</sub><sup>131</sup> genus 1, 2<sup>129</sup> or
-        2<sup>130</sup>, and at genus 1 the transfer is exactly the zero map on the target subgroup. The
+        construction lands there. Because 2 is a primitive root mod 131, the ordinary GHS/MMT
+        model has magic number 1 or 131: genus 1, 2<sup>130</sup> &minus; 1, or
+        2<sup>130</sup>. At genus 1 the transfer is exactly the zero map on the target subgroup. The
         best explicit curve carrying the subgroup is the modular curve X<sub>H</sub>(3&sup2;&middot;7&sup2;&middot;263&sup2;)
         mod 2, at genus 508,799,809 &asymp; 2<sup>28.92</sup> &mdash; 2<sup>20.69</sup> above the window,
         with index calculus on it astronomically above rho. Every geometrically cyclic degree-131 cover of
         a curve of genus &le; 1 needs genus &ge; 1300 (2<sup>148.92</sup> under the exact model,
-        2<sup>88.11</sup>&times; rho). <em>Correction, accounting:</em> this paragraph said the nearest
-        available genus was 2<sup>120.77</sup> away; that is the gap to GHS descent, not to every
-        construction (<code>experiments/ecc2k130_hyperelliptic_cover_boundary.json</code>,
+        2<sup>88.11</sup>&times; rho). <em>Correction, accounting:</em> the nearest nontrivial GHS
+        branch is 2<sup>121.77</sup> away; that is not the gap to every construction
+        (<code>docs/audits/GHS_MAGIC_NUMBER_MMT_CORRECTION_20261013.md</code>,
+        <code>experiments/ecc2k130_hyperelliptic_cover_boundary.json</code>,
         <code>research/notes/ecc2k130/curve_construction_20261006/results/curve_construction.json</code>).</p>
       <p><strong>Homogeneous relations do not exist to be found.</strong> Complete three-point
         sweeps over the weight-two support and its variants, every pair of every base, found

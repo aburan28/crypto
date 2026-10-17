@@ -1,0 +1,144 @@
+{
+  "schema_version": "ecdlp-audit.governance/v1-draft",
+  "record_kind": "ownership_matrix",
+  "record_id": "gov.ownership.ws8.v1-draft",
+  "status": "draft",
+  "authoritative": false,
+  "promotion_allowed": false,
+  "self_promotion_allowed": false,
+  "synthetic_only": true,
+  "created_at": "2026-10-14T00:00:00Z",
+  "source_plan": "research/notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.md#workstream-8--add-independent-governance",
+  "draft_notice": "This ownership matrix proposes responsibilities but installs no CODEOWNERS rule, protected approval, reviewer identity, or authoritative transition right.",
+  "ownership_matrix": {
+    "matrix_version": "ws8-ownership/v1-draft",
+    "policy_record_id": "gov.policy.ws8.v1-draft",
+    "role_ownership": [
+      {
+        "role": "author",
+        "owns": ["request completeness", "revision bindings", "conflict disclosure", "response to review"],
+        "must_not": ["approve the request", "hold a required reviewer role", "finalize a transition", "rewrite frozen evidence"],
+        "minimum_independence": "originator"
+      },
+      {
+        "role": "mathematical_reviewer",
+        "owns": ["hypotheses", "algebraic identities", "exceptional cases", "subgroup and recovery obligations", "bounded negative language"],
+        "must_not": ["review a revision they authored", "substitute tests for a required proof", "infer nonexistence from bounded failure"],
+        "minimum_independence": "distinct_person"
+      },
+      {
+        "role": "implementation_reviewer",
+        "owns": ["implementation-to-claim correspondence", "test adequacy", "artifact and build identity", "malformed-input behavior"],
+        "must_not": ["review a revision they authored", "treat passing tests as mathematical proof", "approve an unbound artifact"],
+        "minimum_independence": "distinct_person"
+      },
+      {
+        "role": "evidence_replay_reviewer",
+        "owns": ["fresh replay", "receipt integrity", "provenance", "failure retention", "accounting and comparator checks"],
+        "must_not": ["reuse the author's unverified conclusion", "drop failures", "approve stale evidence", "finalize a transition"],
+        "minimum_independence": "distinct_person_and_fresh_replay"
+      },
+      {
+        "role": "authorization_privacy_reviewer",
+        "owns": ["execution authorization", "sensitive-data handling", "privacy", "publication and disclosure constraints"],
+        "must_not": ["infer mathematical validity", "approve unauthorized execution", "waive a required review without a recorded rationale"],
+        "minimum_independence": "distinct_person"
+      },
+      {
+        "role": "release_approver",
+        "owns": ["gate aggregation", "role and conflict completeness", "append-only final decision", "release checklist"],
+        "must_not": ["override a veto", "act as author", "supply a missing specialist review", "promote from this draft"],
+        "minimum_independence": "distinct_person"
+      }
+    ],
+    "action_ownership": [
+      {
+        "transition_kind": "promotion",
+        "requester": "author",
+        "accountable": "release_approver",
+        "required_reviewers": ["mathematical_reviewer", "implementation_reviewer", "evidence_replay_reviewer"],
+        "conditional_reviewers": ["authorization_privacy_reviewer"],
+        "finalizer": "release_approver",
+        "veto_roles": ["mathematical_reviewer", "implementation_reviewer", "evidence_replay_reviewer", "authorization_privacy_reviewer", "release_approver"],
+        "protected": true
+      },
+      {
+        "transition_kind": "demotion",
+        "requester": "author",
+        "accountable": "release_approver",
+        "required_reviewers": ["mathematical_reviewer", "evidence_replay_reviewer"],
+        "conditional_reviewers": ["implementation_reviewer", "authorization_privacy_reviewer"],
+        "finalizer": "release_approver",
+        "veto_roles": ["mathematical_reviewer", "implementation_reviewer", "evidence_replay_reviewer", "authorization_privacy_reviewer", "release_approver"],
+        "protected": true
+      },
+      {
+        "transition_kind": "additive_correction",
+        "requester": "author",
+        "accountable": "release_approver",
+        "required_reviewers": ["mathematical_reviewer", "implementation_reviewer", "evidence_replay_reviewer"],
+        "conditional_reviewers": ["authorization_privacy_reviewer"],
+        "finalizer": "release_approver",
+        "veto_roles": ["mathematical_reviewer", "implementation_reviewer", "evidence_replay_reviewer", "authorization_privacy_reviewer", "release_approver"],
+        "protected": true
+      },
+      {
+        "transition_kind": "staleness_recheck",
+        "requester": "author",
+        "accountable": "release_approver",
+        "required_reviewers": ["evidence_replay_reviewer"],
+        "conditional_reviewers": ["mathematical_reviewer", "implementation_reviewer", "authorization_privacy_reviewer"],
+        "finalizer": "release_approver",
+        "veto_roles": ["mathematical_reviewer", "implementation_reviewer", "evidence_replay_reviewer", "authorization_privacy_reviewer", "release_approver"],
+        "protected": true
+      },
+      {
+        "transition_kind": "external_replication_registration",
+        "requester": "author",
+        "accountable": "release_approver",
+        "required_reviewers": ["evidence_replay_reviewer"],
+        "conditional_reviewers": ["authorization_privacy_reviewer"],
+        "finalizer": "release_approver",
+        "veto_roles": ["evidence_replay_reviewer", "authorization_privacy_reviewer", "release_approver"],
+        "protected": true
+      }
+    ],
+    "path_ownership": [
+      {
+        "path_pattern": "docs/ecdlp-audit/governance/**",
+        "required_roles": ["evidence_replay_reviewer", "release_approver"],
+        "conditional_roles": [],
+        "purpose": "Governance contracts and decision fixtures require evidence and release review."
+      },
+      {
+        "path_pattern": "docs/ecdlp-audit/evidence/**",
+        "required_roles": ["mathematical_reviewer", "evidence_replay_reviewer", "release_approver"],
+        "conditional_roles": ["authorization_privacy_reviewer"],
+        "purpose": "Evidence profiles and transitions require domain, replay, and release review."
+      },
+      {
+        "path_pattern": "docs/ecdlp-audit/accounting/**",
+        "required_roles": ["implementation_reviewer", "evidence_replay_reviewer", "release_approver"],
+        "conditional_roles": ["authorization_privacy_reviewer"],
+        "purpose": "Accounting contracts require implementation, replay, and release review."
+      },
+      {
+        "path_pattern": "docs/ecdlp-audit/**/authoritative-*",
+        "required_roles": ["mathematical_reviewer", "implementation_reviewer", "evidence_replay_reviewer", "release_approver"],
+        "conditional_roles": ["authorization_privacy_reviewer"],
+        "purpose": "Any future authoritative artifact needs the required specialist reviews, authorization/privacy review when an adopted trigger applies, and a protected final decision."
+      }
+    ],
+    "enforcement": {
+      "codeowners_installed": false,
+      "protected_approvals_installed": false,
+      "semantic_validator_installed": false,
+      "draft_can_change_authoritative_state": false
+    },
+    "non_claims": [
+      "This matrix is a proposal, not an installed access-control or branch-protection configuration.",
+      "A path review under ordinary pull-request rules does not establish the independence required here.",
+      "No named person or organization has been assigned a governance role by this synthetic draft."
+    ]
+  }
+}

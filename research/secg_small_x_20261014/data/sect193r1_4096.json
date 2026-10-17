@@ -1,0 +1,73 @@
+{
+  "arguments": {
+    "controls": 32,
+    "curve": "sect193r1",
+    "factor_base": "small_x",
+    "seed": 7,
+    "size": 4096,
+    "trials": 1000000
+  },
+  "elapsed_seconds": 40.684942036,
+  "evidence_scope": "exact_pair_sum_yield_with_monte_carlo",
+  "limitations": [
+    "Two-point sums only: a relation is a signed sum of two base points of the small-x base.",
+    "The yield is exact for the base built. The Monte Carlo rate agrees with it only where the yield is large enough to produce hits; at P-192 it is a null result and bounds the rate from above.",
+    "The cost of each trial, deciding by a Semaev S₃ solve whether a target decomposes, is not part of this measurement, and neither is any linear algebra or descent: a relation yield is not a discrete logarithm.",
+    "The base is capped at 8192 abscissae by the memory of the pair-sum set.",
+    "With a cofactor h > 1 (every SECG binary curve, secp112r2, secp128r2) each small-x point enters the base as [h]P and targets are [h] times a uniform point, so base and targets lie in the prime-order subgroup and the yield is over that subgroup; keeping raw small-x points and counting only the pairs that sum into it would give about 1/h of this yield."
+  ],
+  "operation": "prime",
+  "report": {
+    "base_abscissae": 4096,
+    "base_points": 8192,
+    "cofactor": 2,
+    "collisions": 0,
+    "controls": 32,
+    "controls_detected": 32,
+    "controls_recovered": 32,
+    "covered_targets": "33554432",
+    "curve": "sect193r1",
+    "distinct_sums": 16777216,
+    "exact_yield": 5.345529420184391e-51,
+    "exact_yield_log2": -167.0,
+    "expected_trials_log2": 167.0,
+    "field_bits": 193,
+    "field_kind": "binary",
+    "largest_small_x": 8262,
+    "mc_ci95": [
+      0.0,
+      3.688872650231545e-6
+    ],
+    "mc_hits": 0,
+    "mc_hits_verified": 0,
+    "mc_over_exact": null,
+    "mc_rate": 0.0,
+    "mc_trials": 1000000,
+    "model_yield": 5.345529420184391e-51,
+    "model_yield_log2": -167.0,
+    "order": "6277101735386680763835789423269548053691575186051040197193",
+    "order_bits": 192.0,
+    "rho_log2": 96.0,
+    "sums": 16777216,
+    "threads": 4,
+    "timing_ms": {
+      "base": 711.432033,
+      "controls": 2005.026726,
+      "monte_carlo": 29935.837458,
+      "pair_sums": 8010.673366000001,
+      "us_per_trial_wall": 29.935837458
+    },
+    "trials_for_full_system_log2": 179.0003521774803
+  },
+  "schema_version": 1,
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "5e48cb2e593fa0c9a80b4efd4a6f9f237e522374da4d2968de646fc339940bd3",
+    "git_commit": null,
+    "git_commit_source": null,
+    "git_dirty": null,
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "status": "complete"
+}

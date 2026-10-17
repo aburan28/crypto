@@ -372,6 +372,34 @@ both scalar multiplications and records checked, missing and failing
 columns in the verification phase. The existing full-rank mode keeps its
 historical accounting and replay identity.
 
+`linalg=sparse-cado` runs the large-matrix pipeline from
+`koblitz_sparse_la`: CADO-NFS-style filtering (duplicates, singletons,
+clique purge, then a Markowitz merge that combines rows along a spanning
+tree) followed by block Wiedemann on the core. That pipeline was measured
+1.93× faster than CADO-NFS 3.0's own `purge`/`merge-dl`/`replay-dl`/`bwc`
+at 262,144 columns
+([`research/la_engines_20261014`](../../research/la_engines_20261014/REPORT.pdf);
+the leaderboard's linear-algebra section). It is a batch solver: it
+buffers the relations and re-solves once every column appears and the rows
+number at least the columns, then again every `max(1, columns / 32)`
+relations. It answers only at full column rank, so it runs under the
+full-rank stop rule and its trials compare with
+`incremental-gauss-full-rank`, not with the target-pinned default. A
+solution is accepted when two independently seeded solves return the
+same vector. `solve_sparse_system` checks every row but does not certify
+rank, and in a rank-deficient system two seeded solves differ by a random
+kernel element. Work is charged in the same `row_ops` unit as the
+eliminations: one per entry multiply-subtract in merges, folding, sparse
+products (non-zeros × block lanes), checks and reconstruction, summed
+over every solve tried. The `block × block` arithmetic of the approximant
+basis is not counted, just as the dense matrix's column scans are not.
+The recorded `S` prices those `row_ops` with the calibrated
+`ns_per_row_op`. The same plug-in is selectable as
+`ic bench --linalg sparse-cado`, and
+[`specs/smoke-prime-sparse-cado.json`](specs/smoke-prime-sparse-cado.json)
+runs it beside `incremental-gauss-full-rank` on one relation stream (a
+plumbing check, not a performance claim).
+
 `compact-orbit-scan:columns=N,raw_x_cap=M` builds a Koblitz factor base
 from a bounded raw-abscissa scan. Its cofactor projections, subgroup checks
 and Frobenius eigenvalue checks are counted group operations. The factor-base
