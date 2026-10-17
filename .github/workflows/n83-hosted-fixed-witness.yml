@@ -2,6 +2,11 @@ name: N83 hosted fixed-witness SAT access
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - codex/n83-hosted-regenerate-20261016
+    paths:
+      - .github/workflows/n83-hosted-fixed-witness.yml
 
 permissions:
   contents: read
