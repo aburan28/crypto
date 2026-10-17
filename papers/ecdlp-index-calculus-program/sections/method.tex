@@ -1,0 +1,205 @@
+\section{Measuring index calculus against rho}\label{sec:method}
+
+The programme's first lesson was that index-calculus numbers from
+different studies did not compose: one study timed a decomposition, another
+a relation, a third a whole multi-target batch with shared tables, each on
+a different host and in a different unit. Four mechanisms, built in this
+order, fixed that.
+
+\subsection{The boundary ledger (10 September)}
+
+\art{docs/ic/BOUNDARY_TARGETS.md} and its machine twin
+\art{docs/ic/boundary_targets.json} give each regime (Koblitz, binary,
+prime) and each pipeline stage (\texttt{factor\_base},
+\texttt{decomposition}, \texttt{relation\_yield}, \texttt{rank},
+\texttt{end\_to\_end\_dlp}, \texttt{vs\_rho}) a current record, a next
+target and acceptance gates. A row promotes only when its evidence JSON
+carries every field the measurement schema requires for that stage---for
+example, a \texttt{decomposition} claim that beats an algebraic frontier
+must report the first-fall degree, and a \texttt{vs\_rho} claim needs one
+target, the identical public point for both methods, verified scalars,
+five exclusive IC online phases, the automorphism discount, matched
+resources and a host-isolation receipt. Missing fields fail closed. The
+primary \texttt{vs\_rho} question is the online cost of \emph{one}
+previously unseen target after reusable IC preparation; multi-target and
+amortised results are secondary and must be declared as such.
+
+\subsection{ecbench (from 2 October)}\label{sec:ecbench}
+
+\emph{ecbench} (\art{src/cryptanalysis/ecbench/}, \art{src/bin/ecbench.rs},
+documented in \art{docs/ecbench/README.md}) runs every ECDLP method behind
+one interface, on the same single-target workloads, in one unit, into
+sealed records.
+
+\paragraph{Unit.}
+\[
+  S \;=\; \frac{\text{total group-addition equivalents (GAE)}}{\sqrt r},
+  \qquad
+  S_{\text{floor}}=\sqrt{\pi/(2A)}.
+\]
+An addition or doubling is one GAE; a scalar multiplication is charged as
+the additions it performs; native work (lookups, row operations, square
+roots, Artin--Schreier solves, word XORs) is priced at a pinned conversion
+where the repository has one and is otherwise recorded as
+\emph{uncharged}, which marks the record's $S$ as a \emph{lower bound}.
+Plain rho has $S\approx1.25$.
+
+\paragraph{What a measurement is.} One workload is one curve, subgroup,
+generator and target; nothing survives between executions, so every table
+a method builds is inside its cost (\emph{cold}). Beside the cold $S$
+every record carries the one-target \emph{online window}, split for index
+calculus into the five exclusive phases \texttt{target\_query},
+\texttt{target\_PDP}, \texttt{target\_relation\_check},
+\texttt{target\_descent}, \texttt{target\_recovery\_check}. Targets are
+either planted or \emph{public}---hashed to the subgroup so that nobody
+knows the logarithm---and the runner verifies $[k]G=Q$ in its own process;
+\texttt{ecbench verify} checks it again from the files. Failed, exhausted
+and timed-out runs are rows, never dropped.
+
+\paragraph{Identity, sealing and replay.} Every object (curve, factor
+base, method parameters, spec, session, host environment class) is named by
+a hash of what it is (\texttt{ECBS1h\ldots} for sessions,
+\texttt{ECBND1h\ldots} for bounds). Each execution appends one sealed
+record; \texttt{ecbench verify} replays measured records and emits an audit
+receipt whose SHA-256 is the replay certificate. Operation counts are
+deterministic, so a replay must match to the last digit; a mismatch is
+preserved as a failed audit (\S\ref{sec:corrections}).
+
+\paragraph{Isolation.} A run earns L0 (recorded under a host capsule), L1
+(pinned, affinity read back, no foreign SMT sibling, CPU/wall $\le1.05$),
+L2 (quiet: zero steal, foreign busy time $\le1\%$, run-queue delay
+$\le0.5\%$, $\le50$ preemptions/s) or L3 (isolated cores, fixed governor,
+bare metal). Wall time is admitted only at the spec's required level
+(default L2) with at least five admitted pairs and an A/A interval;
+otherwise it is printed as \emph{descriptive}. Operation counts need no
+isolation. macOS hosts earn L0; a GitHub-hosted runner earned L1 on 72/72
+runs and matched a macOS session's operation counts to the last digit.
+\emph{isolab} prepares lab hosts for L3 and cross-host replay.
+
+\paragraph{Statistics.} The comparable statistic is the mean $S$ (the
+floor is an expectation). Comparisons are paired by (workload, round) with
+shared seeds, reported as a ratio of totals $\sum S_B/\sum S_A$, never a
+mean of ratios, with a two-stage cluster bootstrap that resamples
+workloads, then pairs. An operations A/A is exactly 1 by construction and
+checks determinism. A claim about scaling fits exponents over at least
+four sizes.
+
+\paragraph{Bounds and the frontier.} \texttt{ecbench} also records sealed
+\emph{bounds}---constant and exponent with intervals, per phase---and a
+challenge protocol whose verdict says whether a candidate advances,
+trades, matches or regresses an incumbent and at which level (exponent,
+constant, primitive). The incumbent for cold one-target Koblitz operations
+is \texttt{rho.signed\_frobenius\_strong} (bound
+\texttt{ECBND1h05a2ea918f3c}): $1.089\times$ the floor $[0.927,1.261]$,
+fitted exponent $\alpha=0.451$ $[0.399,0.512]$, 144 runs at six sizes
+(\art{research/ecbench_frontier_20261013/}).
+
+\begin{definition}[comparability]\label{def:domain}
+A performance point is keyed by the tuple
+\begin{align*}
+D=\bigl(&\text{curve and subgroup},\ \text{target law},\
+  \text{cold}\mid\text{online}\mid\text{stage},\ \text{unit and unpriced work},\\
+  &\text{set-up amortisation }q,\ \text{memory envelope},\
+  \text{correctness/replay/isolation class}\bigr).
+\end{align*}
+Two points are ratio-comparable only when every component of $D$ except
+the method matches; a method is on the frontier of a domain when no admitted point is
+no worse on every axis and strictly better on one.
+\end{definition}
+\noindent This rules out the four collapses we saw most often: online wall
+as cold cost; word XORs, probes, field operations and GAE as
+interchangeable; a lower bound as a complete cost; an L0 wall ratio as an
+admitted speed-up.
+
+\subsection{The pricing band}\label{sec:band}
+
+Almost no cost in a record is complete, and the rho baselines are no
+exception. Rho, BSGS and the kangaroo leave canonicalisations, partition
+hashes and table inserts and lookups unpriced. An index-calculus arm is
+complete only on curves that have a pinned timing calibration
+(\art{docs/ic/calibration.json}), which converts lookups, row operations,
+Artin--Schreier solves, Frobenius maps and solver word XORs to GAE at
+measured ratios of roughly $10^{-3}$ to $10^{-1}$. A ``complete'' index
+calculus set against a lower-bound rho is therefore lopsided, and several
+earlier comparisons in this repository were of that kind.
+
+Since 15 October every cross-method comparison uses a \emph{pricing band}
+(repository rule, \texttt{AGENTS.md} \S5a; native implementation
+\texttt{ecbench band}). For a record with charged cost $G$, calibration-priced
+native cost $C$ over $n_C$ operations, and $U$ operations behind its
+unpriced counters,
+\[
+  S(w)=\frac{G-C+w\,(U+n_C)}{\sqrt r},\qquad w\in\{0,\ 0.1,\ 1\}
+  \text{ GAE per native operation},
+\]
+applied alike to every arm, references included. Two arms are ranked only
+if their order is the same at every weight; otherwise the pair is reported
+as unresolved. An arm that names an unpriced counter without counting it is
+a lower bound and cannot be ranked. The band brackets the pinned
+calibrations from below and above, so a ranking that survives it does not
+depend on the host the calibration came from.
+
+\subsection{Claim hygiene and change classes}
+
+Every study directory states a protocol before it runs (frozen inputs are
+committed first), keeps failures, and closes with a decision in one of the
+four classes of \S\ref{sec:intro}. A controlled-experiment rule requires a
+negative control from the right null population, a positive control that
+proves the detector can see the effect, and the same instrument on every
+arm before any comparative statement. Blockers are recorded as named
+problems (\art{problems/}) with exit criteria rather than silently dropped.
+Measurement code is native (Rust); Python only lays out recorded values.
+
+\subsection{Corrections the accounting forced}\label{sec:corrections}
+
+Building the harness and the ledger exposed errors in earlier claims,
+including our own. We list them because they change how earlier numbers
+must be read.
+\begin{enumerate}
+\item \emph{Online Koblitz ratios relabelled} (7--8 October,
+  \art{docs/ic/PLAN_IC_ACCOUNTING_FIXES_20261007.md}). Same-point online
+  ratios of $124.85\times$ ($n=61$), $2{,}864.1\times$ ($n=71$),
+  $1{,}189.7\times$ ($n=73$) and $8.2\times$ ($n=83$) had verified answers
+  but no host-isolation receipt; they are \emph{exploratory}. Only the
+  later 64-target pinned panel at $n=61$ is admitted (\S\ref{sec:koblitz}).
+\item \emph{ECC2K-130 extrapolation constants corrected}
+  (\art{RESEARCH_ECC2K130_IC_FEASIBILITY.md}): the structural model
+  predicts $C=0.25$ in $\text{probes/relation}\approx C\,r/(n^2K^2)$; the
+  fitted $C$ is $0.27$ at $n=61$ but $1.2$--$1.5$ at $n=71,73$, an
+  unexplained gap now stated rather than absorbed.
+\item \emph{``F4'' that was Buchberger}
+  (\art{research/ecbench_rootfinding_assessment_20261012/REPORT.md}): the
+  NIST benchmark of the root-finding manuscript printed its baseline as F4
+  but called \texttt{groebner\_f4::buchberger}; its $3{,}021$--$5{,}802\times$
+  are ratios to Buchberger. The manuscript's claim that no implementation
+  can use fewer than linear field operations per ideal is too broad once a
+  reusable pair table is allowed.
+\item \emph{Unpriced word XORs} (\art{research/ecbench_rootfind_faster_20261014/}).
+  Inherited F4's Boolean word XORs were counted but not charged, so its
+  $S=16.7$ at Koblitz $n=13$ was a lower bound that looked competitive
+  with rho ($14.4$). Pricing them gives $S=421.4$.
+\item \emph{Cross-host counter drift}
+  (\art{research/ecbench_frontier_20261013/audits/}): a replay-all audit
+  of the root-finder session on x86\_64 matched 120/168 records; all 48
+  inherited-F4 rows differed in solver word-XOR counts (e.g.\ 301{,}961
+  versus 300{,}531), with every scalar, trial count and charged GAE
+  unchanged. The failed receipt is kept; the F4 stage comparison is
+  historical until the drift is explained.
+\item \emph{A soundness bug} (\art{docs/ic/GROEBNER_F4F5F6_AUDIT_20261010.md}
+  \S2.1): a degree-bounded \texttt{f4\_fp::solve} could certify solutions
+  of an inconsistent system (over $\FF_5$, $\{x^3+1,xy-1,x+y\}$ returned
+  two ``solutions''). Fixed by evaluating every candidate on the input.
+\item \emph{F6-IC charged cost} (\S\ref{sec:groebner}): a stage win in
+  word XORs became a $64.6$--$1{,}353\times$ loss in charged $S$ once its
+  batched geometry was counted---recorded as an accounting result, not an
+  advance.
+\item \emph{Lopsided pricing} (\S\ref{sec:band}): comparisons of a
+  calibration-priced index calculus with a lower-bound rho. On the
+  frontier campaign's train panel at Koblitz $n=13$ the compact-orbit arm,
+  earlier quoted at $1.08\times$ rho as a lower bound, is $0.93\times$,
+  $1.53\times$ and $5.7\times$ the strong rho at $w=0$, $0.1$ and $1$
+  (columns 2, four train targets,
+  \art{research/ic_frontier_campaign_20261015/select/SELECTION.md}): below
+  rho with native work free, above it otherwise, so the pair is unresolved
+  inside the band rather than a win for either side.
+\end{enumerate}

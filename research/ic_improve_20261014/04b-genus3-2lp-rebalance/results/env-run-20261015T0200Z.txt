@@ -1,0 +1,12 @@
+run_id: run-20261015T0200Z
+protocol_commit: 9752513ea
+protocol_sha256: 633e69bb5f7194fc069635c0409d6fede7ee199d25481937c95d136b06994e4e
+tool: examples/ic_improve_04b_genus3_2lp.rs sha256 595e3efa067d2aa34553353e032a6eb7ac4fc6aa6b195812a16bac2bc2bf9832
+binary: target/release/examples/ic_improve_04b_genus3_2lp sha256 8077f4d8d92144ea6dca00834d4dca84e48729925bd5f0cfa5765e919e88931a (cargo build --release --example ic_improve_04b_genus3_2lp)
+rustc: rustc 1.97.0 (2d8144b78 2026-07-07)
+cargo: cargo 1.97.0 (c980f4866 2026-06-30)
+host: 4 vCPU, Intel(R) Xeon(R) Processor @ 2.80GHz, 15 GiB RAM, Linux 6.18.44-fc-v114; shared cloud container, no isolation
+limits: timeout 3600 s, prlimit --as=3221225472, PAR=4
+seed: 20261016
+start_utc: 2026-10-15T01:55:02Z
+end_utc: 2026-10-15T04:39:38Z

@@ -1,0 +1,74 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "Frobenius-orbit IC, fully priced, vs rho: Koblitz a=0 n=41",
+  "description": "Frozen in research/ecbench_frobenius_orbit_vs_rho_20261014/PROTOCOL.md before any of its data. Every arm is a *_full method: all native counters priced from docs/ecbench/full_prices.json. Engineering; no security claim.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 41
+      }
+    ],
+    "targets_per_curve": 16,
+    "target_seed": 202610142015,
+    "target_kind": "public"
+  },
+  "arms": [
+    {
+      "name": "rho-frob",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius_full"
+      }
+    },
+    {
+      "name": "rho-strong",
+      "role": "baseline",
+      "method": {
+        "id": "rho.signed_frobenius_strong_full"
+      }
+    },
+    {
+      "name": "ic-orbit-c90-renew",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline_full",
+        "params": {
+          "factor_base": "compact-orbit-scan:columns=90,raw_x_cap=100000000",
+          "oracle": "mitm-frobenius-counted:m=2",
+          "max_trials": "1000000000",
+          "targets": "stride-renew"
+        }
+      }
+    },
+    {
+      "name": "ic-orbit-c90-walk",
+      "role": "baseline",
+      "method": {
+        "id": "ic.pipeline_full",
+        "params": {
+          "factor_base": "compact-orbit-scan:columns=90,raw_x_cap=100000000",
+          "oracle": "mitm-frobenius-counted:m=2",
+          "max_trials": "1000000000",
+          "targets": "walk"
+        }
+      }
+    },
+    {
+      "name": "rho-frob-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.signed_frobenius_full"
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 3,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 202610143015,
+    "isolation_required": "L0",
+    "timeout_seconds": 3600
+  }
+}

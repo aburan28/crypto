@@ -1,6 +1,19 @@
 //! Installed isogeny construction, screening, and independent certificate replay.
 #![allow(dead_code)]
 mod catalog;
+mod compact_cm;
+mod compact_cm_verify;
+#[path = "../../../src/cryptanalysis/identity_certificate.rs"]
+mod identity_certificate;
+mod hash {
+    pub mod sha256 {
+        pub fn sha256(bytes: &[u8]) -> [u8; 32] {
+            use sha2::Digest;
+            sha2::Sha256::digest(bytes).into()
+        }
+    }
+}
+mod challenge;
 mod constructor;
 #[path = "../../../src/cryptanalysis/isogeny_walk/curve.rs"]
 mod curve;
@@ -24,6 +37,7 @@ mod verification_field;
 mod replay {
     include!(concat!(env!("OUT_DIR"), "/verification_engines.rs"));
 }
+mod replay_trace;
 mod supervisor;
 mod walk;
 #[cfg(test)]
@@ -55,14 +69,28 @@ const GENERAL_PROTOCOL: &[u8] =
     include_bytes!("../../../research/p192_p224_large_degree_isogenies_20261009/PROTOCOL.md");
 const HELP: &str = "isogeny — public-curve isogeny search and independent verification
 
+  isogeny class plan --curve curve.json [--degrees auto|2,3,5]
+  isogeny class build --curve curve.json --out graph.sqlite --steps all
+  isogeny class resume --input graph.sqlite --steps all
+  isogeny class verify --input graph.sqlite
+  isogeny class --help           full class-command scope, budgets and solve options
+
   isogeny search --curve p224 --ell 1471 --out RESULTS [--timeout 1800]
   isogeny search --curve p192 --ell 10453 --out RESULTS [--timeout 1800]
   isogeny verify --input RESULTS
   isogeny walk --curve p224 --ell 1117 --count 50 --out RESULTS
   isogeny verify-walk --input RESULTS
   isogeny screen --curve p192 --from 1010 --to 65537 [--max-order 8]
+  isogeny compact-cm construct --exponent 3 --out FRESH_COMPACT
+  isogeny compact-cm verify --input FRESH_COMPACT/certificate.json --out FRESH_REPLAY
+  isogeny compact-cm evaluate --input CERTIFICATE --x X --y Y --mode geometric|subgroup
   isogeny version
   isogeny curves                 full pinned catalogue and operation capabilities
+  isogeny challenge policy       frozen largest-prime-degree rules and curve roster
+  isogeny challenge plan --curve all --from 10454 --to 65537
+  isogeny challenge run --curve p192 --ell 10453 --out ATTEMPT
+  isogeny challenge judge --input RESULTS --out FRESH_JUDGEMENT
+  isogeny challenge leaderboard --input submissions.json --out FRESH_BOARD
 
 search options:
   --method auto|kernel|modpoly  auto selects the validated kernel route for
@@ -258,6 +286,9 @@ fn general_worker(name: &str, ell: u64) -> Result<Json, String> {
 fn execute(args: &[String]) -> Result<(Value, i32), String> {
     let command = args.first().map(String::as_str).unwrap_or("help");
     match command {
+        "class" => volcano_cli::run(&args[1..]),
+        "challenge" => challenge::execute(&args[1..]),
+        "compact-cm" => compact_cm::execute(&args[1..]),
         "curves" => Ok((catalog::inventory(), 0)),
         "version" | "--version" | "-V" => {
             Ok((json!({"schema":"isogeny-tool/v1","tool":provenance()}), 0))
@@ -456,7 +487,8 @@ fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     if args.is_empty()
         || args.first().is_some_and(|a| a == "help")
-        || args.iter().any(|a| matches!(a.as_str(), "--help" | "-h"))
+        || (args.first().is_none_or(|a| a != "class")
+            && args.iter().any(|a| matches!(a.as_str(), "--help" | "-h")))
     {
         println!("{HELP}");
         return;

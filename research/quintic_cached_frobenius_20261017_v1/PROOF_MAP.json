@@ -1,0 +1,39 @@
+{
+  "schema": "quintic-frobenius-proof-map/v1",
+  "formal_status": "not_formalized_or_executed_executor_offline",
+  "claims": [
+    {
+      "id": "C1",
+      "statement": "Exact semilinear cached square for all monic quintics in characteristic2, including repeated roots",
+      "source": "CONTRACT.md#c1-cached-square-in-characteristic-two",
+      "Lean_declaration": null,
+      "remaining": "Define the monic polynomial quotient; prove coefficient-square expansion and equality of basis coordinates."
+    },
+    {
+      "id": "C2",
+      "statement": "Three exact companion steps compute C6 and C8",
+      "source": "CONTRACT.md#c2-exact-setup",
+      "Lean_declaration": null,
+      "remaining": "Bridge the monic H relation to the companion step and iterate."
+    },
+    {
+      "id": "C3",
+      "statement": "Support recurrence and repeated-root nilpotence preserved",
+      "source": "CONTRACT.md#c3-domain-support",
+      "Lean_declaration": null,
+      "remaining": "Linearized annihilator construction, domain completeness, multiplicities and quotient nilpotence."
+    },
+    {
+      "id": "C4",
+      "statement": "The specified dense-model ratio is at most34/21",
+      "source": "CONTRACT.md#c4-conditional-dense-operation-model",
+      "Lean_declaration": null,
+      "remaining": "Formalize the exact operation-count model and elementary inequality; no runtime bound."
+    }
+  ],
+  "identity_certificate": {
+    "status": "not_issued",
+    "schema_limitation": "v1 uses an odd modulus; direct certification of a characteristic2-only identity is invalid",
+    "required_bridge": "Integer square expansion with2cross-terms plus a faithful characteristic2/quotient proof"
+  }
+}

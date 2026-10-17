@@ -1,0 +1,7 @@
+{
+  "reason": "The frozen gate requests eight positive and eight negative uniform targets, while a 64-target batch can contain fewer than eight of either label.",
+  "timing": "Fixed before running the algebraic gate or inspecting the generic comparison results.",
+  "sampling": "Use an independent seeded uniform finite-point stream outside the four-base union; label using the exact join until eight positives and eight negatives are collected. Labels remain unavailable to the structured solver.",
+  "unchanged": "Fields, curves, cosets, solver, CPU caps, gate thresholds, fresh inputs and primary endpoints.",
+  "accounting": "Oracle labeling is research work, reported separately; never included in the structured solver or used to answer its targets."
+}

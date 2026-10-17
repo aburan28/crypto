@@ -6,12 +6,21 @@ and the pinned pairing roster,
 and **36 published odd-characteristic covering cases**. The named roster
 includes Oakley Groups 3 and 4, with exact GHS invariant candidates and
 separate WID1 finding IDs. It adds three exhaustively checked prime-field
+examples and a twenty-eight-criterion
 examples and a twenty-four-criterion
 registry for anomalous, smooth-order, MOV, Frey–Rück, supersingular,
 binary-GHS, odd-characteristic GHS, cubic norm-one, quadratic-torus and
 proper-subfield mechanisms, plus direct extension-field decomposition,
 cover-and-decomposition, relation-support capacity and useful-rank checks, and cubic Jacobian-isogeny routes. The first [WeakCurves site](../../website/weakcurves/)
 uses this exact export.
+
+The [P-192 Type I line-section certificate](../p192_extension_cover_20261012/reports/run-20261015T2201Z/REPORT.md)
+adds the plane-quartic line relation graph criterion. It checks 9,870 pair
+lines, 9,784 new rational points, and 9,925 distinct projected first-quotient
+classes. A fixed-origin rule gives nonspecial degree-three source divisors
+for those points. The frozen known-scalar collector compares uniform and
+geometry-conditioned 64-query laws on 141 line-derived classes, with exact
+three-sum lookup and independent prime-field replay.
 
 The new [pairing roster](pairing_curves.json) contains the exact Ethereum
 BN_SNARK1 variant and BLS12-381, with separate G1, G2, and GT parameters.
@@ -29,6 +38,7 @@ power the site's vulnerability filters; check stages distinguish exact
 conditions, geometry, explicit maps, candidates and structural screens.
 
 The [WAM1 attack map](attack_map.json) adds 38 source-linked research checks
+to the 26 existing criteria, giving the website 64 searchable checks across
 to the 24 existing criteria, giving the website 62 searchable checks across
 curve structure, selected subgroups, auxiliary inputs, pairings, index calculus,
 hyperelliptic divisor and Jacobian decomposition, endomorphisms,
@@ -51,6 +61,40 @@ accepted-query law, verified relation yield, and useful rank as separate gates.
 The generic support and conditioning bounds are checked in
 [Lean](lean/RelationSupport.lean); the [proof map](PROOF_MAP.md) states their
 exact hypotheses and the remaining curve-specific bridge.
+
+The `ic_scalar_anchor_overlap` criterion now tests whether a geometrically
+accepted relation has an independently known scalar equation. It separates
+nonzero unknown-log rows from known-scalar anchors, counts their exact target
+intersection, and distinguishes repeated target keys from distinct formal
+signed-point equations. The [P-192 Type I collision census](../p192_extension_cover_20261012/reports/run-20261015T1857Z/REPORT.md)
+finds zero anchor overlap and zero new formal equations among repeated
+rank-bearing targets in the frozen 160-point signed base. This is a
+curve-and-base-specific screening result; a different base or query law
+requires a new census.
+
+The `ic_adaptive_base_rank_balance` criterion handles a collector that creates
+new factor-base points from known-scalar queries. The [P-192 adaptive-base audit](../p192_extension_cover_20261012/reports/run-20261015T1926Z/REPORT.md)
+constructs 64 exact new points and 64 equations, but each equation brings a
+private logarithm column. The augmented 64-row matrix has 80 unknown columns
+and leaves the original 16 free. All 8,704 points from the 64 targets and
+136 old-unknown pairs are distinct and outside old three-sum support.
+Counting row rank without the new columns
+would misidentify this construction as relation progress.
+
+The `ic_divisor_support_geometry` criterion records a factor-base policy's
+actual reduced-divisor support: squarefreeness, rational splitting types,
+shared residual points, and the accepted rank-bearing target set after any
+splitting filter. In the [P-192 Type I support audit](../p192_extension_cover_20261012/reports/run-20261015T2042Z/REPORT.md),
+the 160 degree-three residual supports are pairwise disjoint by their
+\(x\)-polynomials. The [nonspeciality certificate](../p192_extension_cover_20261012/reports/run-20261015T2117Z/REPORT.md)
+also checks all 160 interpolation quadratics have nonzero leading coefficient.
+Consequently each residual triple is noncollinear and is the unique effective
+degree-three divisor in its fixed-origin class. Restricting to the 20 fully
+split classes leaves 143
+accepted rank-bearing three-sum targets and zero hits in 64 frozen fresh
+known-scalar queries. This is evidence about the specified reduction and
+collector policy; the registry requires relation rank and complete cost
+before a curve-level weakness verdict.
 
 The [genus-128 GHS cost audit](ghs_genus128_cost_audit.json) resolves the
 nominal factor-base and relation-query stages behind the two exact-invariant

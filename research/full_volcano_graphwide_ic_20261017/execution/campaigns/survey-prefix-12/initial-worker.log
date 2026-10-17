@@ -1,0 +1,59 @@
+1792205118702 RUN two-v0 attempt 1
+1792205135349 audited two-v0: {"exhausted":2,"verified":14}
+1792205135354 RUN three-v0 attempt 1
+1792205169148 audited three-v0: {"exhausted":10,"timeout":4,"verified":2}
+1792205169152 RUN mixed-v0 attempt 1
+1792205184888 audited mixed-v0: {"exhausted":2,"verified":14}
+1792205184894 RUN two-v1 attempt 1
+1792205202192 audited two-v1: {"exhausted":2,"verified":14}
+1792205202198 RUN three-v1 attempt 1
+1792205236589 audited three-v1: {"exhausted":10,"timeout":6}
+1792205236594 RUN mixed-v1 attempt 1
+1792205252836 audited mixed-v1: {"exhausted":2,"verified":14}
+1792205252841 RUN two-v2 attempt 1
+1792205269705 audited two-v2: {"exhausted":2,"verified":14}
+1792205269710 RUN three-v3 attempt 1
+1792205300196 audited three-v3: {"exhausted":10,"timeout":2,"verified":4}
+1792205300201 RUN mixed-v4 attempt 1
+1792205317219 audited mixed-v4: {"exhausted":2,"verified":14}
+1792205317227 RUN two-v4 attempt 1
+1792205338924 audited two-v4: {"exhausted":4,"verified":12}
+1792205338930 RUN three-v9 attempt 1
+1792205375358 audited three-v9: {"exhausted":10,"timeout":3,"verified":3}
+1792205375365 RUN mixed-v8 attempt 1
+1792205391317 audited mixed-v8: {"exhausted":2,"verified":14}
+{
+  "campaign": "/workspace/volcano_ic_survey_20261017",
+  "coverage": [
+    {
+      "graph": "mixed",
+      "state": "audited",
+      "vertices": 4
+    },
+    {
+      "graph": "mixed",
+      "state": "queued",
+      "vertices": 10066
+    },
+    {
+      "graph": "three",
+      "state": "audited",
+      "vertices": 4
+    },
+    {
+      "graph": "three",
+      "state": "queued",
+      "vertices": 6557
+    },
+    {
+      "graph": "two",
+      "state": "audited",
+      "vertices": 4
+    },
+    {
+      "graph": "two",
+      "state": "queued",
+      "vertices": 8188
+    }
+  ]
+}

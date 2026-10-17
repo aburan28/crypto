@@ -1,0 +1,60 @@
+{
+  "schema": "generic-dlp-curves/v1",
+  "what_this_is": "Frozen inputs of research/generic_dlp_correctness_20261017 (PROTOCOL.md). collab: pollard_collab::job::demo_curve(\"demo-small\" | \"demo-mid\" | \"demo-32\"). Pohlig-Hellman: ph_curve() of tests/ec_vartime_walks_pinned.rs, whose group order 3 * 19^4 * 151 * 181 * 13171 is composite, so no prime subgroup is recorded for it. For every curve PARI/GP 2.15.4 ellcard(E) == group_order, ellisoncurve(E, G) and ellorder(E, G) == group_order were checked; isprime(group_order) holds for the three collab curves.",
+  "curves": [
+    {
+      "name": "demo-10007",
+      "role": "collab demo-small",
+      "p": 10007,
+      "a": 3,
+      "b": 6,
+      "group_order": 10039,
+      "subgroup_order": 10039,
+      "cofactor": 1,
+      "generator": {
+        "x": 0,
+        "y": 1973
+      }
+    },
+    {
+      "name": "demo-99013",
+      "role": "collab demo-mid",
+      "p": 99013,
+      "a": 6,
+      "b": 4,
+      "group_order": 98893,
+      "subgroup_order": 98893,
+      "cofactor": 1,
+      "generator": {
+        "x": 0,
+        "y": 2
+      }
+    },
+    {
+      "name": "demo-32",
+      "role": "collab demo-32",
+      "p": 3094378543,
+      "a": 608760208,
+      "b": 2109595922,
+      "group_order": 3094479959,
+      "subgroup_order": 3094479959,
+      "cofactor": 1,
+      "generator": {
+        "x": 2393424548,
+        "y": 1694129567
+      }
+    },
+    {
+      "name": "pinned-j0-smooth47",
+      "role": "Pohlig-Hellman",
+      "p": 140737529461027,
+      "a": 0,
+      "b": 4,
+      "group_order": 140737531856763,
+      "generator_of_full_group": {
+        "x": 16535943672630,
+        "y": 38148592391465
+      }
+    }
+  ]
+}

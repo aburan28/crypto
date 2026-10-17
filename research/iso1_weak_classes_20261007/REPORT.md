@@ -19,6 +19,18 @@ high-depth zero rows. All 5,000 independent GP controls agree with its
 positive set. The sequential worker has started p = 59 and retains
 the remaining requested primes through p = 199.
 
+> **Update 2026-10-16** ([continuation report](residual_model_20261016/REPORT.md)):
+> a certifying point counter reproduces every retained census from p = 37 to 59
+> byte for byte, so those zero labels are now exact rather than probabilistic.
+> The certified census continues past p = 59; p = 61 through 113 are complete. Inside the
+> high-depth classes, the residual zeros follow a parameter-free random
+> thinning of an exactly computed 8th-power mass. The registered predictions
+> pass at the pristine holdouts p = 53 and 59 and at the forward predictions
+> p = 61, 67, 71, 73, 79, 83, 89 and 97, though the excess of zero rows over the
+> predictions was borderline at p = 97 (pooled z = 1.91) and has a registered
+> follow-up test, which came out negative at all five fresh primes (pooled z = −0.51); p = 113 itself lies 0.6 below its interval. Beyond the proved obstruction, no compact deterministic criterion is
+> needed to explain the data.
+
 ## Requested question and scope
 
 The requested base primes are **p = 37 through about 200**, with

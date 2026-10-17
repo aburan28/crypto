@@ -1,0 +1,36 @@
+--------------------------------------------------------------------------------
+Profile data file 'baseline.cg' (creator: callgrind-3.22.0)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 0 - 334105846
+Trigger: Program termination
+Profiled target:  koblitz_rho_fixture-baseline 53 0 signed_frobenius 4 strong (PID 4093, part 1)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       99.5
+Include dirs:     
+User annotated:   
+Auto-annotation:  on
+
+--------------------------------------------------------------------------------
+Ir                     
+--------------------------------------------------------------------------------
+2,847,169,163 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                      file:function
+--------------------------------------------------------------------------------
+1,387,005,149 (48.72%)  ???:<crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::canonicalize 
+  813,422,158 (28.57%)  ???:<crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::solve 
+  202,328,052 ( 7.11%)  ???:<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::batch_inv_clmul 
+  178,012,155 ( 6.25%)  ???:<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::mul_fold 
+  132,154,498 ( 4.64%)  ???:<crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::inv 
+   70,301,335 ( 2.47%)  ???:<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::inv_clmul 
+   20,181,813 ( 0.71%)  ???:<hashbrown::map::HashMap<(u8, u64, u64), (u64, u64), core::hash::BuildHasherDefault<crypto_lib::cryptanalysis::koblitz_strong_rho::KeyHasher>>>::insert 
+   13,816,019 ( 0.49%)  ???:<crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::add 
+   12,750,520 ( 0.45%)  ???:<hashbrown::raw::RawTable<((u8, u64, u64), (u64, u64))>>::reserve_rehash::<hashbrown::map::make_hasher<(u8, u64, u64), (u64, u64), core::hash::BuildHasherDefault<crypto_lib::cryptanalysis::koblitz_strong_rho::KeyHasher>>::{closure#0}> 
+    3,529,085 ( 0.12%)  ???:crypto_lib::binary_ecc::f2m::reduce_words 
+

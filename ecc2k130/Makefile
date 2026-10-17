@@ -130,6 +130,11 @@ UNROLL_SLOTS ?= 1
 PACKED_SLOT_PREFETCH ?= 0
 PACKED_SLOT_PIPELINE ?= 0
 SIGMA_FUSED ?= 0
+# R + sigma^j(R) or R - sigma^j(R) (benchmarks/best-of-two): sixteen
+# branches, no extra field product.  1: the sign is bit 4 of the normal-basis
+# weight; 2: the parity of popcount(x AND sigma^j(x)) in normal coordinates.
+# A different walk: its distinguished points never collide with sigma's.
+SIGMA_SIGN ?= 0
 SIGMA_FUSED_LATE_Y ?= 0
 SIGMA_FUSED_SHARED_SLOTS ?= 0
 SIGMA_SQUARE_TABLE ?= 0
@@ -320,6 +325,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_SQUARE_TABLE=$(PACKED_SQUARE_TABLE) \
        -DECC_PACKED_INV_POLY=$(PACKED_INV_POLY) \
        -DECC_WITNESS=$(WITNESS) \
+       -DECC_SIGMA_SIGN=$(SIGMA_SIGN) \
        -DECC_PACKED_NATIVE_PRODUCT=$(PACKED_NATIVE_PRODUCT) \
        -DECC_PACKED_NATIVE_REDUCE=$(PACKED_NATIVE_REDUCE) \
        -DECC_PACKED_FUSED_SIGMA=$(PACKED_FUSED_SIGMA) \

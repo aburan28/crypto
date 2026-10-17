@@ -1,0 +1,99 @@
+[
+  {
+    "curve": "P-224",
+    "trace": "4733100108545601916421827343930821",
+    "delta": "-85437550031088170535288062946642707984656696913911429425696631461483",
+    "delta_bits": 225.6640526349952,
+    "factorization": {
+      "factors": [
+        {
+          "prime": "3",
+          "exponent": 3,
+          "bits": 1.584962500721156,
+          "certainty": "proved"
+        },
+        {
+          "prime": "29",
+          "exponent": 1,
+          "bits": 4.857980995127572,
+          "certainty": "proved"
+        },
+        {
+          "prime": "79",
+          "exponent": 1,
+          "bits": 6.303780748177103,
+          "certainty": "proved"
+        },
+        {
+          "prime": "7523",
+          "exponent": 1,
+          "bits": 12.877092375027413,
+          "certainty": "proved"
+        },
+        {
+          "prime": "40927",
+          "exponent": 1,
+          "bits": 15.320765298865366,
+          "certainty": "proved"
+        },
+        {
+          "prime": "11549194661",
+          "exponent": 1,
+          "bits": 33.42707320319119,
+          "certainty": "proved"
+        },
+        {
+          "prime": "388425074903852603481408727235725774844022299",
+          "exponent": 1,
+          "bits": 148.12247251244304,
+          "certainty": "probable"
+        }
+      ],
+      "unfactored": [],
+      "complete": true,
+      "rho_iterations": 438270
+    },
+    "conductor": "3",
+    "fundamental": "-9493061114565352281698673660738078664961855212656825491744070162387",
+    "fundamental_bits": 222.49412763355286
+  },
+  {
+    "curve": "P-256",
+    "trace": "89188191154553853111372247798585809583",
+    "delta": "-455213823400003756884736869668539463648899917731097708475249543966132856781915",
+    "delta_bits": 257.97500767470916,
+    "factorization": {
+      "factors": [
+        {
+          "prime": "3",
+          "exponent": 1,
+          "bits": 1.584962500721156,
+          "certainty": "proved"
+        },
+        {
+          "prime": "5",
+          "exponent": 1,
+          "bits": 2.321928094887362,
+          "certainty": "proved"
+        },
+        {
+          "prime": "456597257999",
+          "exponent": 1,
+          "bits": 38.732131239541026,
+          "certainty": "proved"
+        }
+      ],
+      "unfactored": [
+        {
+          "value": "66464674710625138708913906318899119369902626458851292221606276539",
+          "bits": 215.3359858395596
+        }
+      ],
+      "complete": false,
+      "rho_iterations": 67982588
+    },
+    "conductor": null,
+    "fundamental": null,
+    "fundamental_bits": null
+  }
+]

@@ -1,0 +1,37 @@
+{
+  "constructed_target": [
+    "9514371141132905715239429",
+    "8498984158189132285468930"
+  ],
+  "controls": {
+    "correct_relation": "PASS",
+    "residual_outside_suffix": "residual point outside pinned envelope suffix",
+    "wrong_domain_clause_count": "event K600 domain-clause count mismatch",
+    "wrong_small_index": "partial point equation failed independent replay"
+  },
+  "domain_clauses": 415686,
+  "envelope_object_sha256": "aacb62784dee0c9f5e06328dbb85a4b6a1c7243e778328da82900e7284f3a74a",
+  "fixture_sha256": "fc203db28eed0164e47b0c755c3d9a09f80df1acd5e4c7e09dfe172fa5f0a538",
+  "replay_source_sha256": "d4b3c516339e82558b68185c8ca47e50b0cb4e0311ffeb893ecaa7c1c3b0fafe",
+  "residual_columns": [
+    1182,
+    1183
+  ],
+  "schema": "n83.k600-real-archive-replay/v1",
+  "scope": "constructed_known_answer_auditor_control_only",
+  "selected_best_total_runtime": null,
+  "small_indices": [
+    0,
+    166,
+    332
+  ],
+  "small_object_sha256": "3e85c9e419fcddd3c9faed3c84470bf96fcad9178e48e1d73629369335841ecf",
+  "solver_search_executed": false,
+  "status": "PASS_constructed_replay",
+  "supervisor_source_sha256": "da76cfe4bb3d61313df0360ad885bb7a9e95fc1aceb46cf19cd98f4a6640bf2b",
+  "total_index_calculus_runtime_ms": null,
+  "trial_coefficients": {
+    "a": "1833078656608906180176350",
+    "b": "163089659398503559150141"
+  }
+}

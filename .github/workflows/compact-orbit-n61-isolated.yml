@@ -43,6 +43,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            tools/volcano-cli/
+            isogeny_algos/
             Cargo.lock
             docs/ic/calibration.json
             docs/ic/boundary_targets.json
@@ -60,6 +62,7 @@ jobs:
             examples/koblitz_rho_batch_ks_strong_online.rs
             examples/koblitz_rank_fixture.rs
             examples/koblitz_rho_fixture.rs
+            examples/ic_next10_09_equal_advice.rs
             research/sat_factor_base_review_20260908/autolab
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_n61_L65536_20260930_rho_replay.py
@@ -91,6 +94,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            tools/volcano-cli/
+            isogeny_algos/
             Cargo.lock
             docs/ic/calibration.json
             docs/ic/boundary_targets.json
@@ -104,6 +109,7 @@ jobs:
             examples/koblitz_rho_batch_ks_strong_online.rs
             examples/koblitz_rank_fixture.rs
             examples/koblitz_rho_fixture.rs
+            examples/ic_next10_09_equal_advice.rs
             research/sat_factor_base_review_20260908/autolab
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_n61_L65536_20260930_rho_replay.py

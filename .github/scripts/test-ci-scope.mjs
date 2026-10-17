@@ -50,6 +50,9 @@ test('dependencies, workflow edits and frozen evidence remain applicable', () =>
   assert.equal(classify(['docs/bounds/records/record.json']).ecbench_replay, true);
   assert.equal(classify(['research/ecbench_example/sessions/one/records.jsonl']).ecbench_replay, true);
   assert.equal(classify(['research/ecbench_example/sessions/one/README.md']).ecbench_replay, true);
+  assert.equal(classify(['research/pkm_example_ecbench_20261016/sessions/one/session.json']).ecbench_replay, true);
+  assert.equal(classify(['research/isogeny_example/interrupted/run1/records.jsonl']).ecbench_replay, true);
+  assert.equal(classify(['research/isogeny_example/README.md']).ecbench_replay, false);
   assert.equal(classify(['research/fixture.json'], new Set(['research/fixture.json'])).rust_root, true);
 });
 
@@ -78,6 +81,20 @@ test('isogeny release inputs select the Rust package lane', () => {
   }
   // Unrelated isogeny research reports do not invoke the release builder.
   assert.equal(classify(['research/p192_p224_large_degree_isogenies_20261008/PROTOCOL.md']).release_rust, false);
+});
+
+test('volcano-cli, a path dependency of the root crate, selects the root lanes', () => {
+  for (const file of ['tools/volcano-cli/Cargo.toml', 'tools/volcano-cli/Cargo.lock', 'tools/volcano-cli/src/main.rs']) {
+    const result = classify([file]);
+    assert.equal(result.rust_root, true, file);
+    assert.equal(result.release_rust, true, file);
+    assert.equal(result.ecbench_replay, true, file);
+    assert.equal(result.release_native, false, file);
+    assert.equal(result.release_cuda, false, file);
+  }
+  assert.equal(classify(['isogeny_algos/src/lib.rs']).rust_root, true);
+  assert.equal(classify(['tools/volcano-cli/README.md']).rust_root, false);
+  assert.equal(classify(['tools/volcano-cli/README.md']).release_rust, true);
 });
 
 test('real git diffs include renames, deletes, unusual names and over 300 files', () => {

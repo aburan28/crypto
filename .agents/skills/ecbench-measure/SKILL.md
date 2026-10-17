@@ -44,6 +44,18 @@ Copy `docs/ecbench/specs/smoke-prime.json` and edit it. Rules:
 - `isolation_required: L2` (default) is what a wall-clock figure needs. Operation
   counts need no level.
 
+## 2a. Under Claude Code: card, relay, assess
+
+Once the spec is frozen, steps 3 and 4 go through the model tiers (AGENTS.md
+"Model tiers"). The main session dispatches `experiment-director` in compile
+mode to write the command card (build, `ecbench run`, `ecbench verify`: exact
+argv, spec sha256, `OUT_DIR`, timeouts, stop conditions), relays the card
+verbatim to `executor-mechanical`, then dispatches `experiment-director` in
+assess mode with the executor's returned text. Only an assessment of
+`executed_as_specified` with a verbatim relay goes on to step 5. The
+measurement, audit, compare, tabulate and land steps stay as written; compare,
+the §5a band and the decision stay with the reasoning tier.
+
 ## 3. Run
 
 ```bash
@@ -97,6 +109,13 @@ Read it honestly:
   `S` on these curves. `incomplete` (a measured run did not verify) is not
   admissible. `partial` (runs without a partner) needs explaining. `bounded` means
   unpriced work: say so.
+- **Pricing band (AGENTS.md §5a).** Every arm, the rho reference included,
+  usually leaves native work unpriced. List each arm's `*_uncharged` counters
+  with their counts, price them at 0, 0.1 and 1 GAE per operation on every
+  arm alike, and rank two arms only if the order holds across the band. An
+  arm that names a counter without emitting its count is a lower bound and
+  cannot be ranked. Never set a calibrated IC cost against an uncalibrated
+  rho cost.
 - For a baseline binary against a candidate binary, run the same spec into two
   sessions and pass `--b-dir`. Pairs then share seeds (`same_seeds: true`), and
   wall time is refused across sessions by design.

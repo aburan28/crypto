@@ -1,0 +1,1035 @@
+{
+  "argv": [
+    "./target/release/volcano-stats",
+    "--records",
+    "research/isogeny-volcano-cost_20261017/sessions/l2-inert/spec/records.jsonl,research/isogeny-volcano-cost_20261017/sessions/l2-inert/spec-aa/records.jsonl",
+    "--curves",
+    "research/isogeny-volcano-cost_20261017/classes/l2-inert/curves.jsonl",
+    "--vertical",
+    "stratified",
+    "--boot",
+    "2000",
+    "--perm",
+    "5000",
+    "--out",
+    "research/isogeny-volcano-cost_20261017/analysis-exploratory/l2-inert.json"
+  ],
+  "boot": 2000,
+  "bsgs_exactness": [],
+  "classes": [
+    {
+      "class": 0,
+      "curves": "research/isogeny-volcano-cost_20261017/classes/l2-inert/curves.jsonl"
+    }
+  ],
+  "margin": 0.05,
+  "metrics": [
+    {
+      "arm": "ic-mitm",
+      "curve_means": 22,
+      "curves": [
+        {
+          "ci95_half": 0.08904527806387777,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 1.0038305097816351,
+          "runs": 64,
+          "vertex": 0
+        },
+        {
+          "ci95_half": 0.08000898576466235,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9389723701160786,
+          "runs": 64,
+          "vertex": 1
+        },
+        {
+          "ci95_half": 0.1049335581050907,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.074119024390015,
+          "runs": 64,
+          "vertex": 2
+        },
+        {
+          "ci95_half": 0.08932129265594724,
+          "class": 0,
+          "level": 1,
+          "rel_mean": 0.9955485014736091,
+          "runs": 64,
+          "vertex": 3
+        },
+        {
+          "ci95_half": 0.10468611369328014,
+          "class": 0,
+          "level": 0,
+          "rel_mean": 1.0463544303792527,
+          "runs": 64,
+          "vertex": 4
+        },
+        {
+          "ci95_half": 0.09515937526300816,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 1.0415464289236736,
+          "runs": 64,
+          "vertex": 5
+        },
+        {
+          "ci95_half": 0.08535135515536615,
+          "class": 0,
+          "level": 1,
+          "rel_mean": 0.9003901482710093,
+          "runs": 64,
+          "vertex": 6
+        },
+        {
+          "ci95_half": 0.08281978888656572,
+          "class": 0,
+          "level": 1,
+          "rel_mean": 0.9592880051986739,
+          "runs": 64,
+          "vertex": 7
+        },
+        {
+          "ci95_half": 0.0887459252304099,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.0408637703795818,
+          "runs": 64,
+          "vertex": 8
+        },
+        {
+          "ci95_half": 0.09785423050812896,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.0294342813989037,
+          "runs": 64,
+          "vertex": 9
+        },
+        {
+          "ci95_half": 0.09244611231678056,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 0.8616176316023664,
+          "runs": 64,
+          "vertex": 10
+        },
+        {
+          "ci95_half": 0.08543697323367422,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 1.0018516152465293,
+          "runs": 64,
+          "vertex": 11
+        },
+        {
+          "ci95_half": 0.08812838019035905,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 0.9535422600296357,
+          "runs": 64,
+          "vertex": 12
+        },
+        {
+          "ci95_half": 0.10366260159983871,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 0.9470883263458115,
+          "runs": 64,
+          "vertex": 13
+        },
+        {
+          "ci95_half": 0.09179939849473201,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.065459644498376,
+          "runs": 64,
+          "vertex": 14
+        },
+        {
+          "ci95_half": 0.10725544809193144,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.0718331265938796,
+          "runs": 64,
+          "vertex": 15
+        },
+        {
+          "ci95_half": 0.0956736373210549,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.0519785327467506,
+          "runs": 64,
+          "vertex": 16
+        },
+        {
+          "ci95_half": 0.09389421693002374,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.0048036521939552,
+          "runs": 64,
+          "vertex": 17
+        },
+        {
+          "ci95_half": 0.10707951156547872,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.0222129468312904,
+          "runs": 64,
+          "vertex": 18
+        },
+        {
+          "ci95_half": 0.1118142099941061,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.0989386611931236,
+          "runs": 64,
+          "vertex": 19
+        },
+        {
+          "ci95_half": 0.08668213575843561,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9021774607571287,
+          "runs": 64,
+          "vertex": 20
+        },
+        {
+          "ci95_half": 0.09129825657348399,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9881486716487096,
+          "runs": 64,
+          "vertex": 21
+        }
+      ],
+      "horizontal": {
+        "df": 18,
+        "max_abs_z": 2.571540534301872,
+        "max_z_perm_p": 0.13193403298350825,
+        "perm_p": 0.08345827086456771,
+        "q": 28.180579361114496,
+        "q_null_p95": 30.281255778111305,
+        "tau_null_p95": 0.036959941347464054,
+        "tau_rel": 0.033741708824048686
+      },
+      "levels": [
+        {
+          "ci95_half": 0.10468611369328014,
+          "curves": 1,
+          "level": 0,
+          "rel_mean": 1.0463544303792527,
+          "runs": 64
+        },
+        {
+          "ci95_half": 0.04963081561048229,
+          "curves": 3,
+          "level": 1,
+          "rel_mean": 0.9517422183144298,
+          "runs": 192
+        },
+        {
+          "ci95_half": 0.0379561601970798,
+          "curves": 6,
+          "level": 2,
+          "rel_mean": 0.9682461286549419,
+          "runs": 384
+        },
+        {
+          "ci95_half": 0.02803625494121367,
+          "curves": 12,
+          "level": 3,
+          "rel_mean": 1.0240785118956504,
+          "runs": 768
+        }
+      ],
+      "metric": "S",
+      "model": {
+        "df": 66,
+        "max_abs_z": 2.673994224674427,
+        "max_z_perm_p": 0.30434782608695654,
+        "perm_p": 0.14642678660669664,
+        "q": 87.46100125030631,
+        "q_null_p95": 97.75352658137629,
+        "tau_null_p95": 0.05363128911353266,
+        "tau_rel": 0.044297201754838304
+      },
+      "runs": 1408,
+      "vertical": {
+        "boot": 2000,
+        "ci90": [
+          0.9056912573246899,
+          1.0623736501265424
+        ],
+        "ci95": [
+          0.8922946385193526,
+          1.0853247500799885
+        ],
+        "equivalent_within_margin": false,
+        "floor_over_crater": 0.9787109244851877,
+        "margin": 0.05,
+        "perm_p": 0.7614477104579084,
+        "perms": 5000
+      }
+    },
+    {
+      "arm": "rho-neg",
+      "curve_means": 22,
+      "curves": [
+        {
+          "ci95_half": 0.11123896162688314,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 0.9914478943843056,
+          "runs": 64,
+          "vertex": 0
+        },
+        {
+          "ci95_half": 0.12280093442557205,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.108454873490202,
+          "runs": 64,
+          "vertex": 1
+        },
+        {
+          "ci95_half": 0.11816834441758477,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9334197618893292,
+          "runs": 64,
+          "vertex": 2
+        },
+        {
+          "ci95_half": 0.12702798324143635,
+          "class": 0,
+          "level": 1,
+          "rel_mean": 1.0724573799183263,
+          "runs": 64,
+          "vertex": 3
+        },
+        {
+          "ci95_half": 0.1111263118680545,
+          "class": 0,
+          "level": 0,
+          "rel_mean": 0.9315096908018421,
+          "runs": 64,
+          "vertex": 4
+        },
+        {
+          "ci95_half": 0.11166120243522548,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 0.9518204014606438,
+          "runs": 64,
+          "vertex": 5
+        },
+        {
+          "ci95_half": 0.10595906955356955,
+          "class": 0,
+          "level": 1,
+          "rel_mean": 0.9635573993647513,
+          "runs": 64,
+          "vertex": 6
+        },
+        {
+          "ci95_half": 0.10869810817038132,
+          "class": 0,
+          "level": 1,
+          "rel_mean": 0.9656489704198277,
+          "runs": 64,
+          "vertex": 7
+        },
+        {
+          "ci95_half": 0.11233540684136792,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9327110477301711,
+          "runs": 64,
+          "vertex": 8
+        },
+        {
+          "ci95_half": 0.1287816138058912,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.022579460253669,
+          "runs": 64,
+          "vertex": 9
+        },
+        {
+          "ci95_half": 0.11420692565297977,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 1.0570471683844351,
+          "runs": 64,
+          "vertex": 10
+        },
+        {
+          "ci95_half": 0.10709512658173678,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 1.0066247488170104,
+          "runs": 64,
+          "vertex": 11
+        },
+        {
+          "ci95_half": 0.11769319254829769,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 0.9899786089323922,
+          "runs": 64,
+          "vertex": 12
+        },
+        {
+          "ci95_half": 0.12719718086355875,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 1.0647911670015786,
+          "runs": 64,
+          "vertex": 13
+        },
+        {
+          "ci95_half": 0.13314562146988437,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.0756984507681349,
+          "runs": 64,
+          "vertex": 14
+        },
+        {
+          "ci95_half": 0.12084076500067199,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.0168233184244089,
+          "runs": 64,
+          "vertex": 15
+        },
+        {
+          "ci95_half": 0.12114141889239283,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9174218361746729,
+          "runs": 64,
+          "vertex": 16
+        },
+        {
+          "ci95_half": 0.10199146210261525,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9372831183423015,
+          "runs": 64,
+          "vertex": 17
+        },
+        {
+          "ci95_half": 0.11949278687638107,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9984486074198925,
+          "runs": 64,
+          "vertex": 18
+        },
+        {
+          "ci95_half": 0.13777321836397433,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.0959400185821406,
+          "runs": 64,
+          "vertex": 19
+        },
+        {
+          "ci95_half": 0.11694249367381612,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9551651865776463,
+          "runs": 64,
+          "vertex": 20
+        },
+        {
+          "ci95_half": 0.10541056221438015,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.011170890862342,
+          "runs": 64,
+          "vertex": 21
+        }
+      ],
+      "horizontal": {
+        "df": 18,
+        "max_abs_z": 1.8266688278005956,
+        "max_z_perm_p": 0.6666666666666666,
+        "perm_p": 0.545727136431784,
+        "q": 17.285564923031547,
+        "q_null_p95": 30.777542723382847,
+        "tau_null_p95": 0.04691285569521029,
+        "tau_rel": 0.0
+      },
+      "levels": [
+        {
+          "ci95_half": 0.1111263118680545,
+          "curves": 1,
+          "level": 0,
+          "rel_mean": 0.9315096908018421,
+          "runs": 64
+        },
+        {
+          "ci95_half": 0.06602737435389408,
+          "curves": 3,
+          "level": 1,
+          "rel_mean": 1.0005545832343012,
+          "runs": 192
+        },
+        {
+          "ci95_half": 0.04681893048817173,
+          "curves": 6,
+          "level": 2,
+          "rel_mean": 1.0102849981633941,
+          "runs": 384
+        },
+        {
+          "ci95_half": 0.03477873308437122,
+          "curves": 12,
+          "level": 3,
+          "rel_mean": 1.0004263808762432,
+          "runs": 768
+        }
+      ],
+      "metric": "S",
+      "model": {
+        "df": 66,
+        "max_abs_z": 2.3180352951241923,
+        "max_z_perm_p": 0.6326836581709145,
+        "perm_p": 0.8160919540229885,
+        "q": 61.83809913722346,
+        "q_null_p95": 100.03847499991785,
+        "tau_null_p95": 0.06829704868476756,
+        "tau_rel": 0.0
+      },
+      "runs": 1408,
+      "vertical": {
+        "boot": 2000,
+        "ci90": [
+          0.9507560899349089,
+          1.199206395784836
+        ],
+        "ci95": [
+          0.9314469678268739,
+          1.224543513855208
+        ],
+        "equivalent_within_margin": false,
+        "floor_over_crater": 1.0739838680744993,
+        "margin": 0.05,
+        "perm_p": 0.3205358928214357,
+        "perms": 5000
+      }
+    },
+    {
+      "arm": "rho-neg-aa",
+      "curve_means": 22,
+      "curves": [
+        {
+          "ci95_half": 0.12199247467581069,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 1.0140341848235894,
+          "runs": 64,
+          "vertex": 0
+        },
+        {
+          "ci95_half": 0.12018486501169816,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9657897953151198,
+          "runs": 64,
+          "vertex": 1
+        },
+        {
+          "ci95_half": 0.11528682626727316,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.04334505679704,
+          "runs": 64,
+          "vertex": 2
+        },
+        {
+          "ci95_half": 0.1098535257411895,
+          "class": 0,
+          "level": 1,
+          "rel_mean": 0.9641833671032098,
+          "runs": 64,
+          "vertex": 3
+        },
+        {
+          "ci95_half": 0.11947767427962061,
+          "class": 0,
+          "level": 0,
+          "rel_mean": 0.9698702947838742,
+          "runs": 64,
+          "vertex": 4
+        },
+        {
+          "ci95_half": 0.11911502430557763,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 1.088995107695902,
+          "runs": 64,
+          "vertex": 5
+        },
+        {
+          "ci95_half": 0.11557276290302448,
+          "class": 0,
+          "level": 1,
+          "rel_mean": 0.9381884378559473,
+          "runs": 64,
+          "vertex": 6
+        },
+        {
+          "ci95_half": 0.14110034640774674,
+          "class": 0,
+          "level": 1,
+          "rel_mean": 1.0139225079960232,
+          "runs": 64,
+          "vertex": 7
+        },
+        {
+          "ci95_half": 0.11624169825440295,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9881938850298793,
+          "runs": 64,
+          "vertex": 8
+        },
+        {
+          "ci95_half": 0.12327461420848103,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.071616475221608,
+          "runs": 64,
+          "vertex": 9
+        },
+        {
+          "ci95_half": 0.1047100011350723,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 0.9528009212166856,
+          "runs": 64,
+          "vertex": 10
+        },
+        {
+          "ci95_half": 0.12158375485743744,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 1.004593197631672,
+          "runs": 64,
+          "vertex": 11
+        },
+        {
+          "ci95_half": 0.12477868970119495,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 1.0517723620156672,
+          "runs": 64,
+          "vertex": 12
+        },
+        {
+          "ci95_half": 0.11450157653591865,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 0.9786412210103956,
+          "runs": 64,
+          "vertex": 13
+        },
+        {
+          "ci95_half": 0.1051047576555711,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9331629806154812,
+          "runs": 64,
+          "vertex": 14
+        },
+        {
+          "ci95_half": 0.10615754693637901,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9239882997046829,
+          "runs": 64,
+          "vertex": 15
+        },
+        {
+          "ci95_half": 0.11143346183939622,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.0214478080689262,
+          "runs": 64,
+          "vertex": 16
+        },
+        {
+          "ci95_half": 0.1349826079783791,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9830567509618479,
+          "runs": 64,
+          "vertex": 17
+        },
+        {
+          "ci95_half": 0.11553690501714721,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9808232144105297,
+          "runs": 64,
+          "vertex": 18
+        },
+        {
+          "ci95_half": 0.11253867721197701,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.004481520804106,
+          "runs": 64,
+          "vertex": 19
+        },
+        {
+          "ci95_half": 0.1307990373953118,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9756688992921034,
+          "runs": 64,
+          "vertex": 20
+        },
+        {
+          "ci95_half": 0.11424704865885811,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.1314237116457473,
+          "runs": 64,
+          "vertex": 21
+        }
+      ],
+      "horizontal": {
+        "df": 18,
+        "max_abs_z": 2.248923619436738,
+        "max_z_perm_p": 0.2938530734632684,
+        "perm_p": 0.6596701649175413,
+        "q": 15.474262960918042,
+        "q_null_p95": 29.37301713602644,
+        "tau_null_p95": 0.04444490456637114,
+        "tau_rel": 0.0
+      },
+      "levels": [
+        {
+          "ci95_half": 0.11947767427962061,
+          "curves": 1,
+          "level": 0,
+          "rel_mean": 0.9698702947838742,
+          "runs": 64
+        },
+        {
+          "ci95_half": 0.07074066664770147,
+          "curves": 3,
+          "level": 1,
+          "rel_mean": 0.9720981043183937,
+          "runs": 192
+        },
+        {
+          "ci95_half": 0.04805594889453658,
+          "curves": 6,
+          "level": 2,
+          "rel_mean": 1.0151394990656513,
+          "runs": 384
+        },
+        {
+          "ci95_half": 0.03389661784263588,
+          "curves": 12,
+          "level": 3,
+          "rel_mean": 1.0019165331555888,
+          "runs": 768
+        }
+      ],
+      "metric": "S",
+      "model": {
+        "df": 66,
+        "max_abs_z": 2.4414015291290143,
+        "max_z_perm_p": 0.4962518740629685,
+        "perm_p": 0.9120439780109945,
+        "q": 56.386803257497434,
+        "q_null_p95": 99.25323253544137,
+        "tau_null_p95": 0.06829264630742761,
+        "tau_rel": 0.0
+      },
+      "runs": 1408,
+      "vertical": {
+        "boot": 2000,
+        "ci90": [
+          0.9268608842609674,
+          1.1559397524819803
+        ],
+        "ci95": [
+          0.9052774332718513,
+          1.176629575523007
+        ],
+        "equivalent_within_margin": false,
+        "floor_over_crater": 1.0330417773841147,
+        "margin": 0.05,
+        "perm_p": 0.5176964607078585,
+        "perms": 5000
+      }
+    },
+    {
+      "arm": "ic-mitm",
+      "curve_means": 22,
+      "curves": [
+        {
+          "ci95_half": 0.05797243114715277,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 0.956840038411428,
+          "runs": 64,
+          "vertex": 0
+        },
+        {
+          "ci95_half": 0.07157553191140838,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.1259740444312318,
+          "runs": 64,
+          "vertex": 1
+        },
+        {
+          "ci95_half": 0.06371793374841656,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9038153669935977,
+          "runs": 64,
+          "vertex": 2
+        },
+        {
+          "ci95_half": 0.06703220486495887,
+          "class": 0,
+          "level": 1,
+          "rel_mean": 1.0290280969515353,
+          "runs": 64,
+          "vertex": 3
+        },
+        {
+          "ci95_half": 0.06770187295728299,
+          "class": 0,
+          "level": 0,
+          "rel_mean": 0.9913841658526086,
+          "runs": 64,
+          "vertex": 4
+        },
+        {
+          "ci95_half": 0.05993761891692169,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 1.022956791992528,
+          "runs": 64,
+          "vertex": 5
+        },
+        {
+          "ci95_half": 0.05685701003063292,
+          "class": 0,
+          "level": 1,
+          "rel_mean": 1.106549001026845,
+          "runs": 64,
+          "vertex": 6
+        },
+        {
+          "ci95_half": 0.0671144670831957,
+          "class": 0,
+          "level": 1,
+          "rel_mean": 1.0221134340593512,
+          "runs": 64,
+          "vertex": 7
+        },
+        {
+          "ci95_half": 0.05482089841528278,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9310154328991113,
+          "runs": 64,
+          "vertex": 8
+        },
+        {
+          "ci95_half": 0.06044436220004576,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.995679360676334,
+          "runs": 64,
+          "vertex": 9
+        },
+        {
+          "ci95_half": 0.07049577448941807,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 1.0539954120931534,
+          "runs": 64,
+          "vertex": 10
+        },
+        {
+          "ci95_half": 0.0601763571971954,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 1.0373445075920351,
+          "runs": 64,
+          "vertex": 11
+        },
+        {
+          "ci95_half": 0.06213181987376218,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 1.0484253394586442,
+          "runs": 64,
+          "vertex": 12
+        },
+        {
+          "ci95_half": 0.05765641001362392,
+          "class": 0,
+          "level": 2,
+          "rel_mean": 1.0081823207326306,
+          "runs": 64,
+          "vertex": 13
+        },
+        {
+          "ci95_half": 0.05862241001702911,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9729439972651761,
+          "runs": 64,
+          "vertex": 14
+        },
+        {
+          "ci95_half": 0.06632985971969303,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9528308482281909,
+          "runs": 64,
+          "vertex": 15
+        },
+        {
+          "ci95_half": 0.05019492605465157,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9538118264295943,
+          "runs": 64,
+          "vertex": 16
+        },
+        {
+          "ci95_half": 0.05775016522730622,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.027268298865746,
+          "runs": 64,
+          "vertex": 17
+        },
+        {
+          "ci95_half": 0.06225668483865112,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9642587855956292,
+          "runs": 64,
+          "vertex": 18
+        },
+        {
+          "ci95_half": 0.061900647014420995,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9284481924199269,
+          "runs": 64,
+          "vertex": 19
+        },
+        {
+          "ci95_half": 0.07687983399787995,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 1.080928976610453,
+          "runs": 64,
+          "vertex": 20
+        },
+        {
+          "ci95_half": 0.06502268409474127,
+          "class": 0,
+          "level": 3,
+          "rel_mean": 0.9506092854835022,
+          "runs": 64,
+          "vertex": 21
+        }
+      ],
+      "horizontal": {
+        "df": 18,
+        "max_abs_z": 4.118593859174315,
+        "max_z_perm_p": 0.0014992503748125937,
+        "perm_p": 0.0009995002498750624,
+        "q": 50.53815163621442,
+        "q_null_p95": 29.968999041968992,
+        "tau_null_p95": 0.024483315342180616,
+        "tau_rel": 0.04004944614313539
+      },
+      "levels": [
+        {
+          "ci95_half": 0.06770187295728299,
+          "curves": 1,
+          "level": 0,
+          "rel_mean": 0.9913841658526086,
+          "runs": 64
+        },
+        {
+          "ci95_half": 0.03740563503588583,
+          "curves": 3,
+          "level": 1,
+          "rel_mean": 1.051086294057706,
+          "runs": 192
+        },
+        {
+          "ci95_half": 0.025022404030330268,
+          "curves": 6,
+          "level": 2,
+          "rel_mean": 1.0203477761231203,
+          "runs": 384
+        },
+        {
+          "ci95_half": 0.01843363171341849,
+          "curves": 12,
+          "level": 3,
+          "rel_mean": 0.9793067054727898,
+          "runs": 768
+        }
+      ],
+      "metric": "relation_yield",
+      "model": {
+        "df": 66,
+        "max_abs_z": 2.909285381715253,
+        "max_z_perm_p": 0.18340829585207397,
+        "perm_p": 0.015992003998001,
+        "q": 108.63352397820826,
+        "q_null_p95": 99.26870911974777,
+        "tau_null_p95": 0.0360896308175999,
+        "tau_rel": 0.041298965971131966
+      },
+      "runs": 1408,
+      "vertical": {
+        "boot": 2000,
+        "ci90": [
+          0.9189881612215396,
+          1.0660027804979566
+        ],
+        "ci95": [
+          0.9058176059154326,
+          1.0858927876868922
+        ],
+        "equivalent_within_margin": false,
+        "floor_over_crater": 0.9878175778917833,
+        "margin": 0.05,
+        "perm_p": 0.8868226354729054,
+        "perms": 5000
+      }
+    }
+  ],
+  "pairs": [],
+  "perm": 5000,
+  "schema": "volcano-stats/v1",
+  "seed": 20261017,
+  "skipped_unmatched_records": 0,
+  "unverified": 0,
+  "vertical_statistic": "stratified"
+}

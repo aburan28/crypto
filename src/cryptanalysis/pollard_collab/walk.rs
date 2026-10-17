@@ -112,19 +112,43 @@ pub fn step(
     let mut na = add_mod(a, &br.u, n);
     let mut nb = add_mod(b, &br.v, n);
     if ctx.spec.negation_map {
-        if last == Some(&np) {
-            // Fruitless 2-cycle A→B→A: break symmetry by doubling.
-            np = r.double_vartime(&ctx.a);
-            na = (a << 1) % n;
-            nb = (b << 1) % n;
-        }
         if needs_flip(&np, &ctx.half_p) {
             np = np.neg_vartime();
             na = neg_mod(&na, n);
             nb = neg_mod(&nb, n);
         }
+        // Fruitless 2-cycle A→B→A: the normalised step lands back on the
+        // previous point, so `(na, nb)` now name it.  The comparison has to
+        // follow the flip: `last` is normalised, and the unflipped sum is
+        // `−last`, which never equals it.  Leave by doubling the member
+        // with the smaller x, so a walk entering the cycle at either member
+        // leaves it at the same point.
+        if last == Some(&np) {
+            let (c, ca, cb) = if x_le(r, &np) {
+                (r.clone(), a.clone(), b.clone())
+            } else {
+                (np, na, nb)
+            };
+            np = c.double_vartime(&ctx.a);
+            na = (ca << 1) % n;
+            nb = (cb << 1) % n;
+            if needs_flip(&np, &ctx.half_p) {
+                np = np.neg_vartime();
+                na = neg_mod(&na, n);
+                nb = neg_mod(&nb, n);
+            }
+        }
     }
     (np, na, nb)
+}
+
+/// `x(p) ≤ x(q)`, with `O` first: the 2-cycle escape's choice of member.
+fn x_le(p: &Point, q: &Point) -> bool {
+    match (p, q) {
+        (Point::Affine { x: xp, .. }, Point::Affine { x: xq, .. }) => xp.value <= xq.value,
+        (Point::Infinity, _) => true,
+        (_, Point::Infinity) => false,
+    }
 }
 
 /// Run walker `i` from its derived start until a DP or the step cap.
@@ -227,6 +251,45 @@ mod tests {
         for i in 0..16u64 {
             assert_eq!(run_walker(&c1, i), run_walker(&c2, i));
         }
+    }
+
+    /// A fruitless 2-cycle under the negation map (`R → −(R + M) → R`, the
+    /// second step taking the same branch) is left at once, at the doubling
+    /// of its smaller-x member, whichever member the walk entered it by.
+    #[test]
+    fn fruitless_two_cycles_are_escaped_deterministically() {
+        let c = ctx(true);
+        let mut cycles = 0;
+        for i in 0..1024u64 {
+            let (mut a, mut b, mut r) = c.walker_start(i);
+            if needs_flip(&r, &c.half_p) {
+                r = r.neg();
+                a = neg_mod(&a, &c.n);
+                b = neg_mod(&b, &c.n);
+            }
+            let (r1, a1, b1) = step(&c, &r, &a, &b, None);
+            // Would the walk without an escape step straight back to `r`?
+            let br = &c.branches[branch_index(&r1, c.branches.len())];
+            let back = r1.add_vartime(&br.point, &c.a);
+            let back = if needs_flip(&back, &c.half_p) {
+                back.neg_vartime()
+            } else {
+                back
+            };
+            if back != r {
+                continue;
+            }
+            cycles += 1;
+            let (r2, a2, b2) = step(&c, &r1, &a1, &b1, Some(&r));
+            assert_ne!(r2, r, "walker {i}: the 2-cycle was not left");
+            assert_eq!(c.combine(&a2, &b2), r2, "walker {i}: a·P + b·Q drifted");
+            // From `r` with `r1` behind it the next step would be `r1`: the
+            // same cycle entered at the other member.
+            let (r2_other, a3, b3) = step(&c, &r, &a, &b, Some(&r1));
+            assert_eq!(r2_other, r2, "walker {i}: the exit depends on the entry");
+            assert_eq!(c.combine(&a3, &b3), r2_other);
+        }
+        assert!(cycles >= 4, "only {cycles} 2-cycles among 1024 starts");
     }
 
     #[test]

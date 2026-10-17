@@ -1,0 +1,15 @@
+{
+  "boundary": "Integer-curve replay of exact support, character cells, collision rank, and known-scalar query hits for the frozen bases.",
+  "cases_replayed": [
+    "old16",
+    "old16_fan000_16",
+    "old16_two_fans_16_each"
+  ],
+  "producer_sha256": "66eb67a259ea825d951af75f9f274fd566c6b8a74f0c221409c8f227a3c72aa6",
+  "query_laws_replayed": [
+    "character_guided",
+    "uniform"
+  ],
+  "source_sha256": "a1ea10691877c5bc50dbcad1d42127561bd1dee02050f10f20ec7d873835d60b",
+  "status": "independent_two_pivot_coverage_replay_pass"
+}

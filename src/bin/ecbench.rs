@@ -22,6 +22,7 @@
 //! ecbench challenge spec --challenge C --candidate '{"id":"..."}' --epoch N --out spec.json
 //! ecbench challenge verdict --challenge C --dir D --epoch N --replay-all --out V.json
 //! ecbench gpu-stage --binary gpu/ecc/bench --out D --mode rho -- --iters 256
+//! ecbench gpu-match --binary gpu/ecc/bench --workload W.json --out D
 //! ```
 //!
 //! Bounds, frontiers and challenges are `docs/bounds/README.md`.
@@ -40,8 +41,9 @@ use std::process::ExitCode;
 use clap::{Parser, Subcommand};
 
 use crypto_lib::cryptanalysis::ecbench::{
-    audit, bounds, callgrind, canonical, challenge, claim, compare, db, frontier, gpu, host,
-    isolab, isolation, methods, record, resources, runner, signals, spec, stats, workload,
+    audit, bounds, calibration, callgrind, canonical, challenge, claim, compare, db, frontier,
+    full_price, gpu, host, isolab, isolation, methods, record, resources, runner, signals, spec,
+    stats, trend, workload,
 };
 
 #[derive(Parser)]
@@ -77,10 +79,66 @@ enum Cmd {
         #[arg(last = true)]
         gpu_args: Vec<String>,
     },
+    /// Run CUDA BSGS on a frozen EC Bench workload and verify its scalar here.
+    GpuMatch {
+        #[arg(long)]
+        binary: PathBuf,
+        /// One workload JSON exported from `ecbench plan --json` or a session.
+        #[arg(long)]
+        workload: PathBuf,
+        /// A new directory for the binary snapshot, raw streams and receipt.
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long, default_value_t = 600)]
+        timeout_seconds: u64,
+        #[arg(long, default_value = "nvidia-smi")]
+        telemetry_binary: PathBuf,
+        /// Optional verified CPU record for an exact workload identity link.
+        #[arg(long)]
+        cpu_record: Option<PathBuf>,
+        /// CUDA BSGS tuning arguments after `--`.
+        #[arg(last = true)]
+        gpu_args: Vec<String>,
+    },
+    /// Recheck a GPU receipt, raw streams, workload and scalar without a GPU.
+    GpuMatchVerify {
+        #[arg(long)]
+        dir: PathBuf,
+    },
+    /// Check A/A interval coverage and false admissions across quiet and contended sessions.
+    Calibrate {
+        #[arg(long, num_args = 1..)]
+        quiet: Vec<PathBuf>,
+        #[arg(long, num_args = 1..)]
+        contended: Vec<PathBuf>,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// List every method with its parameters.
     Methods {
         #[arg(long)]
         json: bool,
+    },
+    /// Measure the full-pricing units (src/cryptanalysis/ecbench/full_prices.json) on
+    /// this host for Koblitz curves `a:n`, median of `reps` passes each.
+    PriceUnits {
+        /// Curves as `a:n`, e.g. `0:13 0:19 1:29`.
+        #[arg(long, num_args = 1.., required = true)]
+        curve: Vec<String>,
+        #[arg(long, default_value_t = 9)]
+        reps: usize,
+    },
+    /// Fit how a paired ratio moves across curves (ln ratio against ln r
+    /// and ln n) from `compare --save` files; JSON to stdout.
+    Trend {
+        #[arg(long, num_args = 1.., required = true)]
+        compare: Vec<PathBuf>,
+        /// Fixed exponent of r in the `model` fit.
+        #[arg(long, allow_hyphen_values = true, default_value_t = 1.0 / 6.0)]
+        beta: f64,
+        /// Fixed exponent of n in the `model` fit.
+        #[arg(long, allow_hyphen_values = true, default_value_t = -0.5)]
+        gamma: f64,
     },
     /// Print the host capsule.
     Host {
@@ -196,6 +254,23 @@ enum Cmd {
         #[arg(long)]
         reference: Option<String>,
     },
+    /// The pricing band of AGENTS.md §5a: every arm's unpriced native work,
+    /// and any calibration-priced native work, charged alike at each weight
+    /// (GAE per native operation); pairs ranked only where the order holds
+    /// at every weight.
+    Band {
+        #[arg(long, num_args = 1..)]
+        dir: Vec<PathBuf>,
+        /// Comma-separated weights in GAE per native operation.
+        #[arg(long, default_value = "0,0.1,1")]
+        weights: String,
+        /// Also write the report (`ecbench.band/v1`) as JSON here.
+        #[arg(long)]
+        json: Option<PathBuf>,
+        /// Print the pairwise verdicts after the table.
+        #[arg(long)]
+        ranks: bool,
+    },
     /// Resource vectors for all measured attempts; no invented SAT/GAE conversion.
     Resources {
         #[arg(long)]
@@ -269,6 +344,8 @@ enum Cmd {
     },
 }
 
+// Parsed once per process; boxing the fit options would only add noise.
+#[allow(clippy::large_enum_variant)]
 #[derive(Subcommand)]
 enum BoundCmd {
     /// Fit the bound of one arm from one or more sessions of it.
@@ -297,6 +374,14 @@ enum BoundCmd {
         resamples: usize,
         #[arg(long, default_value_t = bounds::SEED)]
         seed: u64,
+        /// Fit the band-priced cost at this weight in GAE per native
+        /// operation (AGENTS.md §5a) instead of the charged cost.
+        #[arg(long)]
+        weight: Option<f64>,
+        /// Fit an arm whose parameters follow a declared per-size rule;
+        /// the rule text enters the bound's method identity.
+        #[arg(long)]
+        param_rule: Option<String>,
         #[arg(long)]
         out: Option<PathBuf>,
     },
@@ -603,6 +688,54 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 }
             }
         }
+        Cmd::PriceUnits { curve, reps } => {
+            let mut rows = serde_json::Map::new();
+            for c in &curve {
+                let (a, n) = c
+                    .split_once(':')
+                    .ok_or_else(|| format!("curve `{c}` is not a:n"))?;
+                let a: u8 = a.parse().map_err(|_| format!("bad a in `{c}`"))?;
+                let n: u32 = n.parse().map_err(|_| format!("bad n in `{c}`"))?;
+                let cs = workload::CurveSpec::Koblitz { a, n };
+                let inst = cs.build()?;
+                let slug = inst.facts(&cs).slug;
+                let workload::Instance::Binary(bi) = &inst else {
+                    return Err(format!("{c}: not a one-word binary instance"));
+                };
+                eprintln!("measuring {slug}");
+                rows.insert(slug, full_price::measure(bi, reps)?);
+            }
+            print_json(&serde_json::json!({
+                "host": host::capture()?.stable,
+                "curves": rows,
+            }))?;
+        }
+        Cmd::Trend {
+            compare,
+            beta,
+            gamma,
+        } => {
+            let mut docs = Vec::new();
+            let mut inputs = Vec::new();
+            for p in &compare {
+                let text = read(p)?;
+                inputs.push(serde_json::json!({
+                    "path": p.display().to_string(),
+                    "sha256": canonical::sha256_hex(text.as_bytes()),
+                }));
+                docs.push(
+                    serde_json::from_str(&text).map_err(|e| format!("{}: {e}", p.display()))?,
+                );
+            }
+            let pts = trend::points(&docs)?;
+            let fits = trend::fits(&pts, beta, gamma);
+            print_json(&serde_json::json!({
+                "schema": "ecbench.trend/v1",
+                "inputs": inputs,
+                "points": pts,
+                "fits": fits,
+            }))?;
+        }
         Cmd::Host { json } => {
             let c = host::capture()?;
             if json {
@@ -841,6 +974,13 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 rep.replays.iter().filter(|r| r.reproduced).count(),
                 rep.problems.len()
             );
+            if rep.records_bound == Some(false) && rep.interruption.is_some() {
+                eprintln!(
+                    "warning: interruption {}: records_bound false (no records hash binds \
+                     records.jsonl); this session must not be cited as complete",
+                    rep.interruption.as_deref().unwrap_or("")
+                );
+            }
             if exit_code && !rep.ok {
                 return Ok(ExitCode::from(1));
             }
@@ -864,6 +1004,50 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 eprintln!("GPU stage {}: see {}", receipt.status, out.display());
                 return Ok(ExitCode::from(1));
             }
+        }
+        Cmd::GpuMatch {
+            binary,
+            workload,
+            out,
+            timeout_seconds,
+            telemetry_binary,
+            cpu_record,
+            gpu_args,
+        } => {
+            let receipt = gpu::run_match(&gpu::GpuMatchOptions {
+                binary,
+                workload,
+                out,
+                timeout_seconds,
+                telemetry_binary,
+                cpu_record,
+                args: gpu_args,
+            })?;
+            print_json(&receipt)?;
+            if receipt.status != "verified" {
+                return Ok(ExitCode::from(1));
+            }
+        }
+        Cmd::GpuMatchVerify { dir } => {
+            let issues = gpu::audit_match(&dir)?;
+            print_json(&serde_json::json!({
+                "schema": "ecbench.gpu_match_audit/v1",
+                "valid": issues.is_empty(),
+                "issues": issues,
+            }))?;
+            if !issues.is_empty() {
+                return Ok(ExitCode::from(1));
+            }
+        }
+        Cmd::Calibrate {
+            quiet,
+            contended,
+            out,
+        } => {
+            let report = calibration::evaluate(&quiet, &contended)?;
+            let bytes = serde_json::to_vec_pretty(&report).map_err(|e| e.to_string())?;
+            std::fs::write(&out, bytes).map_err(|e| e.to_string())?;
+            print_json(&report)?;
         }
         Cmd::Compare {
             dir,
@@ -941,6 +1125,12 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
             }
         }
         Cmd::Table { dir, reference } => table(&dir, reference.as_deref())?,
+        Cmd::Band {
+            dir,
+            weights,
+            json,
+            ranks,
+        } => band_cmd(&dir, &weights, json.as_deref(), ranks)?,
         Cmd::Resources { dir, out } => {
             let report = resources::session(&dir)?;
             if let Some(path) = out {
@@ -1088,6 +1278,8 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 root,
                 resamples,
                 seed,
+                weight,
+                param_rule,
                 out,
             } => {
                 let b = bounds::bound_from_sessions(&bounds::FitInputs {
@@ -1102,6 +1294,8 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                         curves: curve,
                         resamples,
                         seed,
+                        weight,
+                        param_rule,
                     },
                 })?;
                 let mut b = b;
@@ -1372,6 +1566,47 @@ fn write_or_print(out: Option<&Path>, text: &str) -> Result<(), String> {
 /// Median `solve_wall_ms` is descriptive host timing (L0 unless isolation
 /// says otherwise); it is not an admitted cost unit.  Kept on the table so
 /// oracle-time wins vs Gröbner are visible beside S without a second tool.
+fn band_cmd(
+    dirs: &[PathBuf],
+    weights: &str,
+    json: Option<&std::path::Path>,
+    ranks: bool,
+) -> Result<(), String> {
+    let weights: Vec<f64> = weights
+        .split(',')
+        .map(|w| {
+            w.trim()
+                .parse::<f64>()
+                .map_err(|e| format!("weight {w:?}: {e}"))
+        })
+        .collect::<Result<_, _>>()?;
+    let mut recs = Vec::new();
+    for d in dirs {
+        recs.extend(runner::read_records(d)?);
+    }
+    let rep = crypto_lib::cryptanalysis::ecbench::band::band(&recs, &weights)?;
+    print!(
+        "{}",
+        crypto_lib::cryptanalysis::ecbench::band::markdown(&rep)
+    );
+    if ranks {
+        println!();
+        println!("| curve | pair | verdict across the band |");
+        println!("|:--|:--|:--|");
+        for r in &rep.ranks {
+            println!("| {} | {} vs {} | {} |", r.curve, r.a, r.b, r.verdict);
+        }
+    }
+    if let Some(p) = json {
+        std::fs::write(
+            p,
+            serde_json::to_string_pretty(&rep).map_err(|e| e.to_string())?,
+        )
+        .map_err(|e| format!("{}: {e}", p.display()))?;
+    }
+    Ok(())
+}
+
 fn table(dirs: &[PathBuf], reference: Option<&str>) -> Result<(), String> {
     println!("| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | med wall ms | levels |");
     println!("|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---:|---|");

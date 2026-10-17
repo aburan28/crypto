@@ -22,11 +22,13 @@ Control per cell: uniform random subset of `GF(2)^n∖{0}` of size `|T2|`. Metri
 #table(columns: 6, inset: 4pt,
   [*arm*], [*series*], [*cells*], [*gaps D_s(curve) − D_s(R)*], [*slopes of D_s(curve) on ℓ*], [*registered verdict*],
   [poly], [6], [30], [all 0], [0.7 – 1.0], [*CLOSED*],
-  [frob (n = 21)], [4], [20], [14 × 0, 6 × −1], [0.9 – 1.1], [*CLOSED*],
+  [frob (n = 21)], [4], [20], [#strike[14 × 0, 6 × −1] 15 × 0, 5 × −1 (corrected 2026-10-16)], [0.9 – 1.1], [*CLOSED*],
   [rand (n = 21)], [2], [10], [all 0], [0.7, 0.8], [*CLOSED*],
   [subfield gate], [2], [2], [T2 ⊆ GF(2^7); deg-1 deficit 14, 14 (≥ 14 needed)], [—], [*PASS*],
 )
-Gaps and slopes are derived from the recorded `D_s` by the registered rule (ALIVE needs gap ≤ −2 at top ℓ in every series and lower-median slope ≤ 0.15). The six `frob` cells at −1 are exactly those whose `g` divides `t^7 − 1` (g = 23, 29, 127), so `V ⊂ GF(2^7)` — subfield leakage, identified post hoc (`lean/TreeSplit/Leak.lean`); every other `frob` cell has gap 0.
+Gaps and slopes are derived from the recorded `D_s` by the registered rule (ALIVE needs gap ≤ −2 at top ℓ in every series and lower-median slope ≤ 0.15). #strike[The five `frob` cells at −1 are exactly those whose `g` divides `t^7 − 1`.] Six `frob` cells have a `g` dividing `t^7 − 1` (g = 23, 29, 127), so `V ⊂ GF(2^7)` — subfield leakage, identified post hoc (`lean/TreeSplit/Leak.lean`). The five `frob` cells at −1 are exactly the five non-degenerate ones among them; the sixth (a = 0, seed 20261012, ℓ = 4, |T2| = 1) is degenerate at gap 0, and every other `frob` cell has gap 0 (corrected 2026-10-17, sheriff case SHF-20261017-e4d7f6, P-N7).
+
+#block(stroke: 0.6pt, inset: 6pt, width: 100%)[*Correction (2026-10-16, sheriff case SHF-20261016-3caa6f, finding L4).* The registered readout (`runs/registered/readout.txt`, lines 19, 26, 51, 56, 58) has *five* `frob` (n = 21) cells at gap −1 and *fifteen* at gap 0, not six and fourteen as this report first said. Six `frob` cells have `V ⊂ GF(2^7)`; one of them (a = 0, seed 20261012, ℓ = 4, |T2| = 1) is degenerate at gap 0, so five are at −1. The miscount was in the prose only: the records, `Data.lean`, the figure and the registered verdict (CLOSED) are unchanged. The original wording is kept, struck through.]
 
 == Checks on the result
 - *Lean, kernel* (`Verdict.lean`, `decide`): the registered rule (`Rule.lean`, sha256 `714601c1…760d`) applied to the 64 recorded cells gives gate = true, poly = frob = rand = CLOSED. Mutating the claimed verdict fails the build.

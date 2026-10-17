@@ -1,0 +1,45 @@
+{
+  "scope": "Stopped RELEASE checkpoint: accepted 70 vertices, all 51 strata; not pooled with dev99. Failed capsule retained, excluded from accepted means.",
+  "folder_id": "109DpcQpX7ATz6GeI8iSWAExGMWBoR-H_",
+  "files": [
+    {
+      "name": "volcano_IC_RELEASE_STOPPED_70vertices_all51strata_20261017.tar.xz",
+      "bytes": 20025660,
+      "sha256": "f3b0acf2de5aca7af99d4ccd60c51dd6ff8b94623ba60bad1880d2e40de3a52e",
+      "drive_file_id": "1vVW3fCYqdnl3Ue2ef1FckbSTODbg-MTs",
+      "url": "https://drive.google.com/file/d/1vVW3fCYqdnl3Ue2ef1FckbSTODbg-MTs/view",
+      "metadata_readback": "name, size and parent verified; remote content hash not verified"
+    },
+    {
+      "name": "report.pdf",
+      "bytes": 135239,
+      "sha256": "43abae5964f744919ecfa801a327e1731eebb81a705555a33b1c37990a1ab326",
+      "drive_file_id": "1l4bJXMhAxJmayAm6nAVr8kLq7xfgBOuh",
+      "url": "https://drive.google.com/file/d/1l4bJXMhAxJmayAm6nAVr8kLq7xfgBOuh/view",
+      "metadata_readback": "name, size and parent verified; remote content hash not verified"
+    },
+    {
+      "name": "statistics.csv",
+      "bytes": 2207279,
+      "sha256": "dfe08c34a82f1009c36c24c5dc9ad933ec580e6325eb44c90c0e5957758f9b38",
+      "drive_file_id": "1NAgd73Ds1aIYNb4_FcRW3tSZlHPvBfiZ",
+      "url": "https://drive.google.com/file/d/1NAgd73Ds1aIYNb4_FcRW3tSZlHPvBfiZ/view",
+      "metadata_readback": "name, size and parent verified; remote content hash not verified"
+    }
+  ],
+  "local_validation": {
+    "manifest_check": "all entries passed",
+    "extracted_native_inventory": true,
+    "deterministic_repack": {
+      "byte_identical": true,
+      "sha256": "f3b0acf2de5aca7af99d4ccd60c51dd6ff8b94623ba60bad1880d2e40de3a52e",
+      "note": "First post-inventory repack included SDK-created SQLite zero-length WAL and SHM sidecars. Removed only those newly created inspection files before this exact repack; packaged DB bytes unchanged."
+    }
+  },
+  "s3": {
+    "target": "s3://crypto-autoresearcher/store",
+    "operation": "HeadBucket; normal SDK credential discovery; no writes",
+    "credentials_available": false,
+    "exception_type": "NoCredentialsError"
+  }
+}

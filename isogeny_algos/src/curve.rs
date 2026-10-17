@@ -153,26 +153,46 @@ pub fn order(fp: &Zp, c: &Curve<u64>, rng: &mut Rng) -> u64 {
     let mut cands: Option<Vec<u64>> = None;
     loop {
         let pt = c.random_point(fp, rng);
+        // Intersect by scalar tests when that costs less than rebuilding BSGS.
+        if cands.as_ref().is_some_and(|cs| {
+            (cs.len() as u128) * (2 * (64 - (mid + w).leading_zeros()) as u128)
+                <= m as u128 + ((2 * w) / (2 * m + 1) + 2) as u128
+        }) {
+            let cs: Vec<u64> = cands
+                .take()
+                .unwrap()
+                .into_iter()
+                .filter(|&n| pmul(fp, c, &pt, n as u128) == Pt::Inf)
+                .collect();
+            if cs.len() == 1 {
+                return cs[0];
+            }
+            if !cs.is_empty() {
+                cands = Some(cs);
+            }
+            continue;
+        }
         let mut baby: HashMap<u64, Vec<(u64, bool)>> = HashMap::new();
         let mut cur = Pt::Inf;
         for j in 0..=m {
             if let Pt::Aff(x, y) = cur {
                 baby.entry(x).or_default().push((j, y == 0 || y < fp.p / 2));
             } else {
-                baby.entry(u64::MAX).or_default().push((0, true));
+                baby.entry(u64::MAX).or_default().push((j, true));
             }
             cur = padd(fp, c, &cur, &pt);
         }
         let step = pmul(fp, c, &pt, (2 * m + 1) as u128);
         let lo = mid - w;
         let mut r = pmul(fp, c, &pt, lo as u128);
+        let m_point = pmul(fp, c, &pt, m as u128);
         let mut found = vec![];
         let reps = (2 * w) / (2 * m + 1) + 2;
         for a in 0..reps {
             let base = lo + a * (2 * m + 1);
             // need base + b' = N with R_a + b' P = O, b' in [0, 2m]; use b' = m + b, b in [-m, m]
             // equivalently (base + m) P = -b P.
-            let rm = padd(fp, c, &r, &pmul(fp, c, &pt, m as u128));
+            let rm = padd(fp, c, &r, &m_point);
             let key = match rm {
                 Pt::Inf => u64::MAX,
                 Pt::Aff(x, _) => x,
@@ -197,7 +217,10 @@ pub fn order(fp: &Zp, c: &Curve<u64>, rng: &mut Rng) -> u64 {
         found.dedup();
         let cs: Vec<u64> = match cands.take() {
             None => found,
-            Some(old) => old.into_iter().filter(|n| found.contains(n)).collect(),
+            Some(old) => old
+                .into_iter()
+                .filter(|n| found.binary_search(n).is_ok())
+                .collect(),
         };
         if cs.len() == 1 {
             return cs[0];

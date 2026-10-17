@@ -1,0 +1,9 @@
+ℹ [2/3] Built SeaProofs
+info: ././././SeaProofs.lean:100:0: 'SeaProofs.smul_add' depends on axioms: [propext]
+info: ././././SeaProofs.lean:101:0: 'SeaProofs.subtract_left' does not depend on any axioms
+info: ././././SeaProofs.lean:102:0: 'SeaProofs.bsgs_complete' depends on axioms: [propext]
+info: ././././SeaProofs.lean:103:0: 'SeaProofs.refinement_preserves' does not depend on any axioms
+info: ././././SeaProofs.lean:104:0: 'SeaProofs.direct_equals_full_intersection' depends on axioms: [propext, Quot.sound]
+info: ././././SeaProofs.lean:105:0: 'SeaProofs.unique_sound' does not depend on any axioms
+info: ././././SeaProofs.lean:106:0: 'SeaProofs.interval_unique' depends on axioms: [propext, Quot.sound]
+Build completed successfully.
