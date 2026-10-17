@@ -2,7 +2,7 @@
 use crypto_lib::cryptanalysis::ecbench::canonical::sha256_hex;
 use rusqlite::Connection;
 use serde_json::{json, Value};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs::{self, File};
 use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
@@ -44,9 +44,23 @@ fn main() -> Result<()> {
     let mut trials = 0u64;
     let mut relations = 0u64;
     let mut measured_yield = 0u64;
+    let mut decomposition_calls = 0u64;
+    let mut call_observations = 0u64;
+    let mut mitm_checks = 0u64;
+    let mut binaries = BTreeSet::new();
+    let mut unique_work = BTreeSet::new();
     for path in &a[2..] {
         let root = Path::new(path);
         let manifest: Value = serde_json::from_slice(&fs::read(root.join("campaign.json"))?)?;
+        binaries.insert(
+            manifest["ecbench_sha256"]
+                .as_str()
+                .ok_or("missing binary identity")?
+                .to_string(),
+        );
+        if binaries.len() > 1 {
+            return Err("cross-binary summary refused: keep compiler profiles separate and use matched-profile comparison".into());
+        }
         let c = Connection::open_with_flags(
             root.join("ledger.sqlite"),
             rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
@@ -82,6 +96,17 @@ fn main() -> Result<()> {
                 let v: Value = serde_json::from_str(&line?)?;
                 if v["warmup"] == true {
                     continue;
+                }
+                if !unique_work.insert((
+                    v["workload"]["workload_id"]
+                        .as_str()
+                        .ok_or("workload id")?
+                        .to_string(),
+                    v["arm"].as_str().ok_or("arm")?.to_string(),
+                    v["round"].as_u64().ok_or("round")?,
+                    v["algorithm_seed"].as_str().ok_or("seed")?.to_string(),
+                )) {
+                    return Err("duplicate workload/arm/round/seed across inputs: do not pool repeated snapshots or repeated pilot targets".into());
                 }
                 let arm = v["arm"].as_str().unwrap().to_string();
                 let status = v["outcome"]["status"].as_str().unwrap().to_string();
@@ -122,6 +147,35 @@ fn main() -> Result<()> {
                     measured_yield += 1;
                     if t > 0 {
                         m.insert("relation_yield".into(), r as f64 / t as f64);
+                        m.insert("trial_relation_yield".into(), r as f64 / t as f64);
+                    }
+                    if let Some(rel) = v["phases"]
+                        .as_array()
+                        .and_then(|ps| ps.iter().find(|p| p["name"] == "relations"))
+                    {
+                        if let Some(skipped) = rel["native"]["repeated_targets_skipped"].as_u64() {
+                            let calls = t
+                                .checked_sub(skipped)
+                                .ok_or("repeated queries exceed trials")?;
+                            decomposition_calls += calls;
+                            call_observations += 1;
+                            m.insert("decomposition_calls".into(), calls as f64);
+                            if calls > 0 {
+                                m.insert(
+                                    "oracle_call_relation_yield".into(),
+                                    r as f64 / calls as f64,
+                                );
+                            }
+                            if v["method"]["params"]["oracle"] == "mitm" {
+                                let lookups = rel["native"]["lookups"]
+                                    .as_u64()
+                                    .ok_or("missing MITM lookup count")?;
+                                if lookups != calls {
+                                    return Err("two-summand MITM lookup/call discrepancy".into());
+                                }
+                                mitm_checks += 1;
+                            }
+                        }
                     }
                 }
                 let mut native = BTreeMap::new();
@@ -200,7 +254,7 @@ fn main() -> Result<()> {
         let n = statuses[&(graph.clone(), conductor, arm.clone(), status.clone())];
         summaries.push(json!({"graph":graph,"conductor_0_means_all":conductor,"arm":arm,"status":status,"records":n,"metrics":output}));
     }
-    let summary = json!({"schema":"volcano-ic-summary/v1","wall_claim":"UNQUALIFIED; L0/debug diagnostic; raw observations only","aggregation":"Each status separate. Means over present values only; n explicit. Conductor 0 denotes graph aggregate, not a stratum. Timeout counts are unknown, not zero.","campaigns":campaigns,"measured_records":total,"verified_records":verified,"outcome_totals":outcome_totals,"relation_observations":measured_yield,"relation_trials":trials,"relations_found":relations,"weighted_relation_yield":if trials>0{Some(relations as f64/trials as f64)}else{None},"groups":summaries});
+    let summary = json!({"schema":"volcano-ic-summary/v2","wall_claim":"RAW_DESCRIPTIVE_ONLY; profile/isolation are in sealed records; no admitted runtime comparison","aggregation":"Each status separate. Means over present values only; n explicit. Conductor 0 denotes graph aggregate, not a stratum. Timeout counters are unknown, not zero. Duplicate workload/arm/round/seed and cross-binary pooling are refused.","yield_definitions":{"relation_yield":"Legacy alias: relations per nonidentity source trial, including duplicate queries skipped before the oracle. Not relations per oracle call.","trial_relation_yield":"relations_found / targets_tried","decomposition_calls":"targets_tried - repeated_targets_skipped for these classic guarded walk arms; identity skips occur before trial increment","oracle_call_relation_yield":"relations_found / decomposition_calls; absent when calls are zero or unknown"},"binary_sha256":binaries.iter().next(),"campaigns":campaigns,"measured_records":total,"verified_records":verified,"outcome_totals":outcome_totals,"relation_observations":measured_yield,"relation_trials":trials,"relations_found":relations,"decomposition_calls":decomposition_calls,"call_observations":call_observations,"mitm_call_lookup_checks":mitm_checks,"weighted_relation_yield":if trials>0{Some(relations as f64/trials as f64)}else{None},"weighted_oracle_call_yield":if decomposition_calls>0{Some(relations as f64/decomposition_calls as f64)}else{None},"groups":summaries});
     serde_json::to_writer_pretty(File::create(out.join("summary.json"))?, &summary)?;
     println!(
         "{}",
