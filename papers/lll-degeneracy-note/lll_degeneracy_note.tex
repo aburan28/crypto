@@ -30,12 +30,14 @@ undersized iteration cap. \textbf{Both were bugs in our floating-point
 Gram--Schmidt orthogonalisation, not properties of the curves or of
 LLL.} For secp256k1, and for every 384-bit curve, the squared
 Gram--Schmidt norms overflow IEEE double precision ($n^4 >$
-\texttt{f64::MAX}); P-521 additionally suffers catastrophic
-cancellation. Both had been diagnosed and fixed in the companion code
-before that version was built. With the fixes, a re-run on 2026-10-16
-recovers the key in every probe at 256 and 384 bits, secp256k1
-included (6/6), and on P-521 with 2048-bit fixed-point Gram--Schmidt
-(3/3). We withdraw the curve-specificity claim and every conclusion
+\texttt{f64::MAX}). P-521 still fails on the scaled \texttt{f64}
+path, for a reason we have not isolated. Both fixes (scaling, and a
+2048-bit fixed-point Gram--Schmidt) were in the companion code before
+that version was built. With them, a re-run on 2026-10-16 recovers the
+key for every distinct seed pair at 256 and 384 bits, secp256k1
+included (3 of 3 distinct seed pairs, 6 probe runs), and on P-521 with
+2048-bit fixed-point Gram--Schmidt (3 of 3; at
+$k_{\text{bits}} = 384$). We withdraw the curve-specificity claim and every conclusion
 drawn from it. What remains is a numerical lesson: an
 $\texttt{f64}$ Gram--Schmidt step silently fails once the group order
 passes about $2^{256}$ (basis entries about $2^{512}$).
@@ -63,6 +65,26 @@ following claims of the earlier version are \textbf{withdrawn}:
 \end{itemize}
 The pre-fix measurements are kept below (Section~\ref{sec:prefix}) as
 the record of what the buggy code did.
+
+\section*{Correction (2026-10-17)}
+
+A re-audit (\texttt{sheriff} case \texttt{SHF-20261017-e4d7f6},
+findings P-N1 and P-N2) found two defects in the 2026-10-16 version.
+(i) It asserted a mechanism for the P-521 failure on the scaled
+\texttt{f64} path: ``catastrophic cancellation'', in which
+orthogonalising a row ``subtracts nearly equal 53-bit quantities, and
+the residual swamps the true component''. That mechanism is
+unsupported. With our scaling, the P-521 diagonal $n^2/2^{542}$ rounds
+to exactly $2^{500}$ in \texttt{f64}, so the subtraction described is
+exact on the initial basis, and the residual-dominates condition also
+holds for P-256, brainpoolP256r1 and brainpoolP384r1, which recover.
+The sentence is withdrawn; the measured result (scaled \texttt{f64}
+0 of 3 distinct seed pairs at P-521, 2048-bit fixed point 3 of 3)
+stands. (ii) Table~\ref{tab:rerun} counted probe runs of deterministic,
+overlapping test functions as if they were distinct instances, and
+said $k_{\text{bits}} = 3n_{\text{bits}}/4$ throughout, whereas every
+P-521 probe ran at $k_{\text{bits}} = 384$ ($3/4$ of 512, not of 521).
+The table now gives distinct seed pairs, runs and $k_{\text{bits}}$.
 
 \section{Setting and notation}
 
@@ -138,15 +160,17 @@ near-power-of-two hypothesis seemed refuted. Scaling the basis by
 $2^{-(\text{max\_bits} - 500)}$ before orthogonalising removes the
 overflow (\texttt{src/cryptanalysis/lattice.rs}).
 
-\paragraph{Failure B: overflow, then cancellation.} At 384 bits, $n^4$
-overflows for every curve, which explains the ``uniform'' failure
-there; the same scaling fixes P-384 and brainpoolP384r1, so the
-iteration cap was not the cause. P-521 still fails after scaling:
-orthogonalising a row against rows of size about $n^2$ subtracts
-nearly equal 53-bit quantities, and the residual swamps the true
-component by many orders of magnitude (\S10.2 of the analysis). A
-2048-bit fixed-point Gram--Schmidt (\texttt{lll\_reduce\_hp}) removes
-it.
+\paragraph{Failure B: overflow, and an unexplained P-521 failure.} At
+384 bits, $n^4$ overflows for every curve, which explains the
+``uniform'' failure there; the same scaling fixes P-384 and
+brainpoolP384r1, so the iteration cap was not the cause. P-521 still
+fails after scaling (0 of 3 distinct seed pairs), and a 2048-bit
+fixed-point Gram--Schmidt (\texttt{lll\_reduce\_hp}) recovers it
+(3 of 3). We have not isolated where the scaled \texttt{f64} path
+loses precision at P-521; the cancellation argument of \S10.2 of the
+analysis does not apply to the initial basis (correction of
+2026-10-17 above), and locating the failing step would need the
+Gram--Schmidt instrumented during the probe.
 
 \section{Re-run with the fixes (2026-10-16)}
 \label{sec:rerun}
@@ -157,24 +181,31 @@ on the fixed code. Commands, logs, parsed results and the host are in
 
 \begin{table}[h]
 \centering
-\begin{tabular}{llr}
+\begin{tabular}{llrrr}
 \toprule
-Curve & Gram--Schmidt & Recovered / probes \\
+Curve & Gram--Schmidt & $k_{\text{bits}}$ & Recovered / distinct & Runs \\
 \midrule
-secp192k1        & scaled \texttt{f64} & 3 / 3 \\
-secp224k1        & scaled \texttt{f64} & 3 / 3 \\
-secp256k1        & scaled \texttt{f64} & 6 / 6 \\
-P-256            & scaled \texttt{f64} & 6 / 6 \\
-brainpoolP256r1  & scaled \texttt{f64} & 1 / 1 \\
-P-384            & scaled \texttt{f64} & 4 / 4 \\
-brainpoolP384r1  & scaled \texttt{f64} & 4 / 4 \\
-P-521            & scaled \texttt{f64} & 0 / 4 \\
-P-521            & 2048-bit fixed point & 3 / 3 \\
+secp192k1        & scaled \texttt{f64}  & 144 & 2 / 2 & 3 / 3 \\
+secp224k1        & scaled \texttt{f64}  & 168 & 2 / 2 & 3 / 3 \\
+secp256k1        & scaled \texttt{f64}  & 192 & 3 / 3 & 6 / 6 \\
+P-256            & scaled \texttt{f64}  & 192 & 3 / 3 & 6 / 6 \\
+brainpoolP256r1  & scaled \texttt{f64}  & 192 & 1 / 1 & 1 / 1 \\
+P-384            & scaled \texttt{f64}  & 288 & 3 / 3 & 4 / 4 \\
+brainpoolP384r1  & scaled \texttt{f64}  & 288 & 3 / 3 & 4 / 4 \\
+P-521            & scaled \texttt{f64}  & 384 & 0 / 3 & 0 / 4 \\
+P-521            & 2048-bit fixed point & 384 & 3 / 3 & 3 / 3 \\
 \bottomrule
 \end{tabular}
-\caption{Re-run, $m = 8$, $k_{\text{bits}} = 3 n_{\text{bits}}/4$,
-$\delta = 0.75$; each recovered probe returned the planted key.
-Source: \texttt{results.json} in the re-run directory.}
+\caption{Re-run, $m = 8$, $\delta = 0.75$. ``Distinct'' counts
+distinct $(d_{\text{seed}}, k_{\text{seed}})$ pairs; the probes are
+deterministic, and overlapping test functions repeat pairs, so
+``Runs'' counts probe executions (the 2026-10-16 version reported
+runs only). $k_{\text{bits}} = 3 n_{\text{bits}}/4$ except at P-521,
+where the probes use $384 = 3/4 \cdot 512$, not
+$\lfloor 3 \cdot 521/4 \rfloor = 390$. Each recovered probe returned
+the planted key. Source: \texttt{logs/probes.log} and
+\texttt{logs/p521\_hp.log} in the re-run directory (corrected
+2026-10-17).}
 \label{tab:rerun}
 \end{table}
 
@@ -189,14 +220,15 @@ No curve-specific LLL behaviour remains at these parameters. The
 lesson is about implementations: an \texttt{f64} Gram--Schmidt step
 fails silently, by overflow, once the squared norms pass $2^{1024}$,
 that is once $n$ passes about $2^{256}$ and the basis entries about
-$2^{512}$, and loses the
-small components to cancellation at larger dynamic ranges. An HNP
+$2^{512}$. At P-521 the scaled \texttt{f64} path fails for a
+reason we have not isolated, while 2048-bit fixed point succeeds. An HNP
 experiment that reports an LLL failure should state its arithmetic
 and rule this out before attributing the failure to the curve.
 
 This note makes no security claim about any curve. It reports a small
-number of probes at one parameter set ($m = 8$, $k_{\text{bits}} = 3
-n_{\text{bits}}/4$).
+number of probes, one to three distinct seed pairs per curve, at one
+parameter set ($m = 8$, $k_{\text{bits}} = 3 n_{\text{bits}}/4$, except
+$k_{\text{bits}} = 384$ at P-521).
 
 \begin{thebibliography}{99}
 
