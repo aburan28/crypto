@@ -530,6 +530,10 @@ fn linear_algebra<F: Field>(
     let mut rhs = vec![f.zero(); unk];
     // residual coefficient of Z^t (t = 1..=2l-1) of: Z^0 V^l [n_l] - V~ V^{l-1} [d_{l-1}]  + sum unknown terms
     let vt_vl1 = series::mul(f, &vt, &vp[ell - 1], n);
+    // V~ V^i for the d_i columns (independent of the row t)
+    let vt_vp: Vec<Vec<F::E>> = (0..ell - 1)
+        .map(|i| series::mul(f, &vt, &vp[i], n))
+        .collect();
     for t in 1..=unk {
         let row = t - 1;
         // known part: V^l - V~ V^{l-1}
@@ -540,9 +544,8 @@ fn linear_algebra<F: Field>(
                 mat[row][i] = vp[i][t + i - ell];
             }
         }
-        for i in 0..ell - 1 {
+        for (i, prod) in vt_vp.iter().enumerate() {
             // - d_i V~ Z^{l-1-i} V^i
-            let prod = series::mul(f, &vt, &vp[i], n);
             if t + 1 + i >= ell {
                 mat[row][ell + i] = f.neg(prod[t + 1 + i - ell]);
             }
