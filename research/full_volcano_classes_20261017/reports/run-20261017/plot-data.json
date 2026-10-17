@@ -1,0 +1,72 @@
+[
+  {
+    "case": "two",
+    "degrees": [
+      2
+    ],
+    "directed_maps": 16384,
+    "dlp_measurements": "NOT_RUN",
+    "field_p": 72057594692239361,
+    "fundamental_discriminant": -7,
+    "independent_implementation_replay": "NOT_RUN",
+    "maximum_conductor": 8192,
+    "source_identity": {
+      "curve_uid": null,
+      "ec1": null,
+      "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+      "icv1": "ICV1:fp-72057594692239361:536870914:72057594155368448:72057594692235986:unk:unk:r:6cabb0c957ab",
+      "model_json": "{\"a\":\"72057594640571486\",\"b\":\"72057418918128611\",\"field\":\"fp-72057594692239361\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"72057594692239361\",\"v\":\"1\"}",
+      "slug": "icv1-fp57-t536870914-6cabb0c9"
+    },
+    "status": "COMPLETE_SELECTED_DEGREE_CLASS",
+    "strata": 14,
+    "vertices": 8192
+  },
+  {
+    "case": "three",
+    "degrees": [
+      3
+    ],
+    "directed_maps": 13122,
+    "dlp_measurements": "NOT_RUN",
+    "field_p": 72057601940934853,
+    "fundamental_discriminant": -11,
+    "independent_implementation_replay": "NOT_RUN",
+    "maximum_conductor": 6561,
+    "source_identity": {
+      "curve_uid": null,
+      "ec1": null,
+      "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+      "icv1": "ICV1:fp-72057601940934853:-536870941:72057602477805795:72057601940902085:unk:unk:r:e6d0c766a344",
+      "model_json": "{\"a\":\"72057598549840069\",\"b\":\"71979615803822277\",\"field\":\"fp-72057601940934853\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"72057601940934853\",\"v\":\"1\"}",
+      "slug": "icv1-fp57-tm536870941-e6d0c766"
+    },
+    "status": "COMPLETE_SELECTED_DEGREE_CLASS",
+    "strata": 9,
+    "vertices": 6561
+  },
+  {
+    "case": "mixed",
+    "degrees": [
+      2,
+      3
+    ],
+    "directed_maps": 39794,
+    "dlp_measurements": "NOT_RUN",
+    "field_p": 288230445959117953,
+    "fundamental_discriminant": -19,
+    "independent_implementation_replay": "NOT_RUN",
+    "maximum_conductor": 1728,
+    "source_identity": {
+      "curve_uid": null,
+      "ec1": null,
+      "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+      "icv1": "ICV1:fp-288230445959117953:1073741954:288230444885376000:288230445958233217:unk:unk:r:4dd0b1ef0285",
+      "model_json": "{\"a\":\"288228093099277441\",\"b\":\"50668532689170053\",\"field\":\"fp-288230445959117953\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"288230445959117953\",\"v\":\"1\"}",
+      "slug": "icv1-fp59-t1073741954-4dd0b1ef"
+    },
+    "status": "COMPLETE_SELECTED_DEGREE_CLASS",
+    "strata": 28,
+    "vertices": 10070
+  }
+]

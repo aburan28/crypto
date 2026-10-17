@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/scholten_twist.py", line 54, in <module>
+    cs = c.polynomial().list()
+         ^^^^^^^^^^^^
+  File "sage/structure/element.pyx", line 494, in sage.structure.element.Element.__getattr__
+    return self.getattr_from_category(name)
+  File "sage/structure/element.pyx", line 507, in sage.structure.element.Element.getattr_from_category
+    return getattr_from_other_class(self, cls, name)
+  File "sage/cpython/getattr.pyx", line 357, in sage.cpython.getattr.getattr_from_other_class
+    raise AttributeError(dummy_error_message)
+AttributeError: 'PolynomialQuotientRing_field_with_category.element_class' object has no attribute 'polynomial'

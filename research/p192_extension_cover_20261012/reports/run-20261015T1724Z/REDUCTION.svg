@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="300" viewBox="0 0 780 300" role="img" aria-label="Swap the original divisor pair and use two cubic cuts to reduce each negative class at the common origin">
+  <rect width="780" height="300" fill="#f8fafc"/>
+  <text x="28" y="37" font-family="Arial,sans-serif" font-size="21" font-weight="700" fill="#172554">One fixed origin for both signs</text>
+  <text x="28" y="66" font-family="Arial,sans-serif" font-size="15" fill="#334155">Existing class: [B − A] = +Bᵢ</text>
+  <text x="420" y="66" font-family="Arial,sans-serif" font-size="15" fill="#334155">Swapped pair: [A − B] = −Bᵢ</text>
+  <line x1="250" y1="60" x2="395" y2="60" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="28" y="99" width="216" height="91" rx="8" fill="#dbeafe"/>
+  <text x="45" y="132" font-family="Arial,sans-serif" font-size="16" fill="#1e3a8a">Cubic G cuts A + T + U</text>
+  <text x="45" y="160" font-family="Arial,sans-serif" font-size="14" fill="#475569">degree 3 + 3 + 6 = 12</text>
+  <rect x="282" y="99" width="216" height="91" rx="8" fill="#e0e7ff"/>
+  <text x="299" y="132" font-family="Arial,sans-serif" font-size="16" fill="#312e81">Cubic F cuts B + U + D₋</text>
+  <text x="299" y="160" font-family="Arial,sans-serif" font-size="14" fill="#475569">degree 3 + 6 + 3 = 12</text>
+  <rect x="536" y="99" width="216" height="91" rx="8" fill="#dcfce7"/>
+  <text x="553" y="132" font-family="Arial,sans-serif" font-size="16" fill="#14532d">[D₋ − T] = −Bᵢ</text>
+  <text x="553" y="160" font-family="Arial,sans-serif" font-size="14" fill="#475569">degree-three positive D₋</text>
+  <line x1="244" y1="145" x2="280" y2="145" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="498" y1="145" x2="534" y2="145" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="28" y1="225" x2="752" y2="225" stroke="#cbd5e1"/>
+  <text x="28" y="256" font-family="Arial,sans-serif" font-size="15" fill="#172554">16 classes · 32 cubic cuts · one origin T · all native candidate checks replayed</text>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2563eb"/></marker></defs>
+</svg>

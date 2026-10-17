@@ -18,27 +18,31 @@ Cryptanalysis; Volcano-Floor Class-Group-Augmented Pollard rho),
 finding all directions structurally null at the prime-field level.
 
 The main result is a structural-completeness theorem: for every
-prime-order ordinary elliptic curve E over a prime field F_p, no
-algorithm in the family
+ordinary elliptic curve E over a prime field F_p with #E(F_p) = h*r,
+r prime and h in {1,2,4,8}, no algorithm in the family
 {F_p-isogeny transport, Cl(End)-orbit walking, (N,N)-cover via
 Howe-gluing, higher-genus cover, supersingular-reduction attack,
-volcano-floor rho} reduces ECDLP cost below sqrt(n / |Aut(E)|)
-(plain Pollard rho with full automorphism folding).
+volcano-floor rho} reduces ECDLP cost below sqrt(r / |Aut(E)|)
+(plain Pollard rho with full automorphism folding). The theorem
+says nothing about algorithms outside this family.
 
-The theorem is proven via seven independent structural blocks and
-empirically verified across all four deployed curves via an
-automated Rust integration test that runs the full audit on every
-curve definition in the codebase. A surprising auxiliary finding:
-the Howe-gluing genus-2 cover exists for every such curve (we
-verify the three Howe (1996) conditions hold uniformly), but the
-cover does not yield a DLP speedup because genus-2 prime-field DLP
-costs O(p) while ECDLP costs O(sqrt(p)).
-
-The proof is unconditional in the sense that it depends only on
-established theorems (Tate, Howe, Gaudry, Diem-Thome) plus
-mechanically verifiable arithmetic conditions; it is conditional
-only on the standing assumption that no sub-exponential DLP
-algorithm is known for prime-field hyperelliptic Jacobians.
+The theorem is argued by case analysis over seven structural blocks
+(proof sketches in Section 8, not yet independently reviewed) under
+standing assumptions: Tate's isogeny theorem, Howe's gluing
+theorem, Gaudry's and Diem-Thome's complexity bounds for
+hyperelliptic index calculus, and the assumption that prime-field
+hyperelliptic DLP is not sub-exponentially solvable. The empirical
+checks are bounded: the structural conditions are computed for the
+four deployed curves only; the twist l-rank lemma is checked
+numerically for l in {3,5,7,11,13} on j = 0 curves over F_p with
+p < 500; the split-Jacobian toy sweep covers primes p = 1 (mod 6)
+with p <= 1000, and the CM-73 sweep those with p <= 5000. A
+surprising auxiliary finding: the Howe-gluing genus-2 cover exists
+for every such curve, but does not yield a DLP speedup because
+genus-2 prime-field DLP costs O(p) while ECDLP costs O(sqrt(p)).
+For secp256k1 specifically, x^3 + 7 is irreducible over F_p, so the
+cover's field of definition is F_{p^3} and the cover-based attack
+costs O(p^{3/2}), about 2^384.
 
 A companion documentation note covers Mestre's algorithm for the
 actual explicit construction of the Howe-glued cover (open

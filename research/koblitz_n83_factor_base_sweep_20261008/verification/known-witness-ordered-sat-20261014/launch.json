@@ -1,0 +1,18 @@
+{
+  "schema": "n83.fixed-witness-control-launch/v1",
+  "scope": "known_answer_encoding_control_only",
+  "user_approval_reference": "Current user reply 'yes approvef' to the pending additional 1200-second fixed-witness first-pattern SAT control",
+  "source_commit": "55d5ed6771ad53ff6dcfe6e537ac3ec4598984bb",
+  "binary_sha256": "64ce185bfb1a4db69dcc576fb0749108b56e804efd57f14da561f07d41f51752",
+  "domains_sha256": "63accc5b9dc9de6327c5b07e93b3e62717f8376a96c3f91f7bb70b77095f23bb",
+  "prior_charged_seconds": 21000,
+  "conservative_new_charge_seconds": 1200,
+  "cumulative_charged_seconds": 22200,
+  "wall_cap_seconds": 840,
+  "conflict_cap": 5000,
+  "execution_platform": "local macOS arm64 release binary",
+  "command": "gtimeout --signal=TERM --kill-after=5 840 /usr/bin/time -l target/release/examples/koblitz_n83_fixed_witness_control research/koblitz_n83_factor_base_sweep_20261008/verification/known-witness-ordered-sat-20261014/domains.json 5000",
+  "natural_relations": null,
+  "total_index_calculus_runtime_ms": null,
+  "selected_best_total_runtime": null
+}

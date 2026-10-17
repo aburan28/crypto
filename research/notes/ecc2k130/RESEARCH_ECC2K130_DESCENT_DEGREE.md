@@ -13,6 +13,16 @@ version, plus the new rows of §2's table. The cost model is now native
 (`examples/descent_degree_cost`), and its first 16 rows reproduce the
 2026-09-30 table exactly.
 
+**Updated 2026-10-16** with the MutantXL closure study
+(`research/dreg_closure_mutantxl_20261016/`). It adds §6 and point 6 of the
+short version. The model's output with the new rows is
+`descent_degree_cost-output-20261016.txt`, and every earlier row reproduces
+unchanged.
+
+**Updated again 2026-10-16** with the closure-at-scale study
+(`research/dreg_closure_scale_20261016/`). It adds §7 and point 7, and the
+model output is `descent_degree_cost-output-20261016-scale.txt`.
+
 ## The short version
 
 1. **Measured.** The system is the `m = 3` chained `S₃` system over
@@ -63,6 +73,28 @@ version, plus the new rows of §2's table. The cost model is now native
      `2^158.12` to `2^170.90`, with target counts at or past the subgroup's
      `2^129`. So every `ℓ` is above exhaustive search.
    - These are extrapolations of three-rung fits.
+6. **The growth in points 1 and 5 is XL's, not the ideal's (2026-10-16,
+   §6).**
+   - Saturating each degree under MutantXL's fall closure refutes the same
+     92 committed draws at **3–4**, flat in `ℓ` (1 to 5), in `m` (3 and 4),
+     and in the unknowns (11 to 32). XL needs 5 to 7 on those draws.
+   - Held at 4 to `n = 131`, the best `m = 4` row is `2^68.43` at `w = 1`,
+     `2^+7.62` over rho in unconverted units, against `2^173.13` under the
+     XL fit.
+   - It is still above rho, and point 3 stands.
+   - The constant-degree case point 4 called removed is back on the table
+     as an **open extrapolation** from `N ≤ 32`.
+7. **The closure degree does grow, slowly (2026-10-16, §7).**
+   - **m = 3.** It refutes at 4 for ℓ ≤ 6. At ℓ = 7 (N = 40, 42), on 8 of
+     8 draws, it does not refute at 4.
+   - **m = 4.** It still refutes at 4 at ℓ = 3, 4 (N = 36–42).
+   - **Rows.** The m = 3 degree-4 row is withdrawn. The m = 4 degree-4 row
+     (`2^68.43`) keeps measured support to ℓ = 4 only. Held at 5, m = 4
+     prices `2^71.13`, `2^+10.32` over rho.
+8. **N does not set the closure degree; ℓ = 7 or m·ℓ ≥ 21 does (§8).**
+   - Both surviving explanations put m = 4's rise at ℓ ≤ 7. So the m = 4
+     degree-4 row (`2^68.43`) is contradicted.
+   - The degree-5 rows are now the optimistic case: m = 4 at `2^71.13`.
 
 ## 1. What is measured
 
@@ -330,6 +362,126 @@ held.
 - **Unchanged:** the verdict against rho, which never depended on the
   degree (§2, "What the table says").
 
+## 6. The MutantXL closure degree (2026-10-16)
+
+Every degree in §1–§5 is XL's: the first degree whose plain Macaulay row
+space contains `1`. `research/dreg_closure_mutantxl_20261016/` replays the
+same 92 unsatisfiable draws and saturates each degree under MutantXL's step:
+degree falls times monomials, repeated to saturation.
+
+| | XL | closure |
+|---|---|---|
+| `m = 3`, `ℓ = 2..5` (N = 11–25) | 5, 5–6, 6–7, 7 | 3–4, 4, 4, 4 |
+| `m = 4`, `ℓ = 1..3` (N = 12–32) | 5, 6, ≥7 | 3–4, 3–4, 4 |
+
+- **Refutation degree.** Every draw refutes under the closure below XL.
+  58 of the 84 resolved draws refute two or more degrees below.
+- **Growth with `ℓ`.** None appears: the m = 3 closure median is 4 at
+  every `ℓ`.
+- **Soundness.** The closure never refuted a committed satisfiable draw.
+  This control was disclosed as added after measurement.
+- **Instrument checks.** XL identity held on every degree built.
+
+**Priced as a constant degree 4** (`descent_degree_cost`, derived):
+
+| m | w | ℓ | N | total | vs rho |
+|--:|--:|--:|--:|--:|--:|
+| 3 | 1 | 40 | 251 | `2^82.27` | `2^+21.46` |
+| 3 | 2 | 45 | 266 | `2^100.25` | `2^+39.44` |
+| 4 | 1 | 33 | 394 | `2^68.43` | `2^+7.62` |
+| 4 | 2 | 34 | 398 | `2^93.91` | `2^+33.10` |
+
+- **The closure's counted work.** It grows roughly as its column count to
+  the power 2.2. So the `w = 2` rows are the ones the measured closure
+  tracks.
+- **The extrapolation.** These rows assume the closure stays at 4 from
+  `N = 32` to `N ≈ 400`, and nothing here measures that.
+  - The successor lead is a sparse closure at degree 4 for `N ≈ 40` to 50.
+- **The free-oracle floor still binds.** At `m = 4` it is `2^56.46`, which
+  leaves `2^5.71` an oracle call. So **no row beats rho**.
+- **Units are unconverted, as in §2.** Touches against group operations,
+  with `K` unmeasured. So `+7.62` is a distance, not a separation.
+
+## 7. The closure at scale (2026-10-16)
+
+`research/dreg_closure_scale_20261016/` measured degree 4 on 40
+unsatisfiable draws at N = 26–42. It was pre-registered, and every draw
+ran to completion.
+
+| | refutes at 4 | does not refute at 4 (degree 4 saturated) |
+|---|---|---|
+| m = 3 | ℓ = 5 (12/12), ℓ = 6 (8/8) | **ℓ = 7 (8/8)**, N = 40, 42 |
+| m = 4 | ℓ = 3 (8/8), ℓ = 4 (4/4), up to N = 42 | — |
+
+- **The rise follows ℓ, not N.** At N = 40 and 42, m = 4 holds and m = 3
+  rises. A descriptive reading is that the closure degree is set by
+  `m·ℓ`: the refuting cells have `m·ℓ ≤ 18` and the rising cells 21. It
+  was not registered.
+- **What it does to §6:**
+  - The m = 3 "4, constant" row (`2^82.27`) is **withdrawn**, because
+    m = 3 exceeds 4 from ℓ = 7, far below its priced ℓ = 40.
+  - The m = 4 row (`2^68.43`) keeps its status as an open extrapolation.
+    Its measured support is now ℓ ≤ 4 and N ≤ 42, against a priced ℓ = 33
+    and N = 394.
+- **Degree held at 5** (`descent_degree_cost`, derived):
+
+| m | w | ℓ | N | total | vs rho |
+|--:|--:|--:|--:|--:|--:|
+| 3 | 1 | 41 | 254 | `2^85.18` | `2^+24.37` |
+| 4 | 1 | 34 | 398 | `2^71.13` | `2^+10.32` |
+| 4 | 2 | 34 | 398 | `2^106.52` | `2^+45.71` |
+
+- **Degree 5 is unmeasured above N = 25.** At N = 40 it is 760k columns,
+  past the dense engine. A sparse closure would be needed.
+- **No row beats rho.** The free-oracle floor (§2) still binds, and the
+  units are unconverted.
+
+## 8. What sets the closure degree (2026-10-16)
+
+`research/dreg_closure_driver_20261016/` was pre-registered, with 16 draws.
+
+- **Cells.**
+  - m = 3, ℓ = 6 at N = 40 and 42: it refutes at 4 on 8 of 8, at the same
+    N where ℓ = 7 does not (§7).
+  - m = 4, ℓ = 5 (`m·ℓ = 20`) at N = 42 and 44: it refutes at 4 on 8 of 8.
+- **Rejected:**
+  - N as the driver;
+  - an `m·ℓ` threshold ≤ 20.
+- **Surviving:**
+  - the closure degree exceeds 4 from **ℓ = 7**;
+  - it exceeds 4 from **m·ℓ ≥ 21**.
+- **What this does to §6–§7.** Under either survivor, m = 4 exceeds
+  degree 4 by ℓ = 7 at the latest, against the priced ℓ = 33.
+  - So the m = 4 "4, constant" row (`2^68.43`) is **contradicted**, not
+    merely extrapolated. It is unmeasured at m = 4, ℓ ≥ 6.
+  - The optimistic case is now the degree-5 row:
+
+| m | w | ℓ | total | vs rho |
+|--:|--:|--:|--:|--:|
+| 4 | 1 | 34 | `2^71.13` | `2^+10.32` |
+| 3 | 1 | 41 | `2^85.18` | `2^+24.37` |
+
+- **Degree 5 is unmeasured past ℓ = 7.** Whether it holds there decides
+  even these rows, and testing that needs a sparse closure.
+- **No row beats rho.** The free-oracle floor binds, and the units are
+  unconverted.
+
+## 9. Guess-then-degree-4 (2026-10-17)
+
+`research/dreg_closure_specialise_20261017/` fixed single variables in the 8
+m = 3, ℓ = 7 draws that do not refute at degree 4.
+
+- **Single fixes.** Any one fixed variable lets degree 4 refute on 6 of 8.
+- **Both branches.** On 5 of 8, both values of one guess refute.
+- **That names a third oracle model.** Alongside "degree 4" (contradicted,
+  §8) and "degree 5" (optimistic, §8), there is **guess k variables, then
+  degree 4**, at `2^k · C(N−k, ≤4)^w` per target.
+  - It is measured only at ℓ = 7, where k = 1 often suffices.
+  - If k grows like `m·(ℓ−6)`, it is about 108 at m = 4, ℓ = 33. That is
+    far worse than degree 5, so no row is added.
+  - The measurement that would decide it is k at ℓ = 8 and 9.
+- **No row beats rho.**
+
 ## Scope and disclosures
 
 - **System.** `m = 3`, the chained `S₃`, with `b = 1`.
@@ -373,5 +525,8 @@ held.
 cargo run --release --example dreg_score -- semireg 3 10:5 13:5 15:5     # the reference column
 cargo run --release --example dreg_score -- score research/dreg_degree7_ell5_20260930/runs/cell-10-5-7.u*.jsonl
 cargo run --release --example dreg_score -- score research/dreg_m4_chain_20261006/runs/cell-*.jsonl  # §5
-cargo run --release --example descent_degree_cost                        # §2's table
+cargo run --release --example descent_degree_cost                        # §2's table + §6's rows
+cargo run --release --example dreg_score -- closure research/dreg_closure_mutantxl_20261016/runs/*.jsonl  # §6
+cargo run --release --example dreg_score -- scale research/dreg_closure_scale_20261016/runs/*.d*.jsonl  # §7
+cargo run --release --example dreg_score -- scale research/dreg_closure_driver_20261016/runs/*.d*.jsonl  # §8
 ```

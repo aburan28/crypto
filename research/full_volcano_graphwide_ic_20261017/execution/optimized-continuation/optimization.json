@@ -1,0 +1,27 @@
+{
+  "schema": "volcano-optimized-continuation/v1",
+  "campaign_manifest_sha256": "8b1e834f21bd5ef9e6e9d1ceb52acf596d62726611463ca2b32f06ad87c8e56f",
+  "optimized_protocol_sha256": "8cd03de321fac143730ef270571290e9cb3fce1e10ec7b57e4690b3f9ec7089a",
+  "driver_sha256": "b8b489c7225c64ed492ffce39286c995f5ca820960956cf706c0d3110f5bdd2d",
+  "ecbench_sha256": "62023d1469010a6d6b9a85b080f261f2fce28c3c55bb26be71dc243bc01b1aee",
+  "source_head": "9bca26ae25f480f4b2162fc03f0d4d0ff20ed3cf",
+  "profile": "release opt-level=3; debug=0; incremental=0; no added target-cpu flags",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "historical_protocol_override": "Only the historical dev-build statement is superseded by optimized-protocol.md. All survey mathematics, budgets and target identities are unchanged. Frozen campaign.json and execution-protocol.md remain byte-preserved.",
+  "control_gate": {
+    "receipt": "release-control-match.json",
+    "sha256": "1a31e7eababde2b804f8c093e942a14f668e999dc885fad43719aab23c891917"
+  },
+  "pilot_gate": {
+    "receipt": "release-pilot-match.json",
+    "sha256": "cf4b15d7b3119bb5d923be6d34ec10af2c2194ba0d119e05f2696f2f66499d76"
+  },
+  "runtime_claim": "RAW_DESCRIPTIVE_ONLY; no optimized runtime speedup admitted",
+  "limits": {
+    "vertices": 24823,
+    "elapsed_seconds": 86400,
+    "spool_bytes": 2147483648,
+    "headroom_bytes": 67108864
+  },
+  "durability": "Local checkpoint only until explicitly archived/uploaded; workspace lifetime is not guaranteed."
+}

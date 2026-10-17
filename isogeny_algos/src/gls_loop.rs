@@ -292,14 +292,29 @@ pub fn find_instance(
     None
 }
 
-/// A curve over F_p with `j` a root of `H_d mod p` and trace exactly `t` (checked on random
-/// points), and the set of all roots of `H_d mod p` (the crater, when it is F_p-rational).
+/// Evidence for the generated curve's order, conditional on the field/point
+/// arithmetic. Hasse certificates additionally rely on probable-prime checks.
+#[derive(Clone, Debug)]
+pub enum CmOrderVerification {
+    Exhaustive {
+        order: Int,
+    },
+    Hasse {
+        curve: Box<api::OrderCertificate>,
+        twist: Box<api::OrderCertificate>,
+    },
+}
+
+/// A curve over F_p with `j` a root of the computed `H_d mod p` and verified
+/// trace `t`, plus the roots of that polynomial. This does not certify the
+/// analytic Hilbert coefficients or the full endomorphism ring.
 pub struct CmCurve {
     pub curve: PrimeCurve,
     pub crater: HashSet<Int>,
     pub hilbert_degree: usize,
     pub hilbert_precision: usize,
     pub hilbert_error_log2: f64,
+    pub order_verification: CmOrderVerification,
 }
 
 struct RootsTask<'a> {
@@ -335,12 +350,50 @@ impl api::FieldTask for OrderCheck<'_> {
     }
 }
 
-/// `[order]P = O` for eight random points.
+/// `[order]P = O` for eight random points. This is only a sampled
+/// annihilation test: a wrong multiple of the group exponent may pass.
+/// It does not certify the curve order or select the correct CM twist.
 pub fn order_kills(curve: &PrimeCurve, order: &Int, seed: u64) -> bool {
     api::with_field(&curve.p, OrderCheck { curve, order, seed })
 }
 
+fn verify_cm_order(curve: &PrimeCurve, order: &Int, seed: u64) -> Option<CmOrderVerification> {
+    if curve.p.bits() <= 22 {
+        // curve::order enumerates all x using a square table below 2^22.
+        // Point-order certificates alone can be inconclusive in these fields.
+        let f = crate::field::Zp::new(curve.p.to_i128().unwrap() as u64);
+        let e = crate::curve::Curve::new(f.elem(&curve.a), f.elem(&curve.b));
+        let actual = Int::from(crate::curve::order(&f, &e, &mut Rng::new(seed)));
+        return (actual == *order).then_some(CmOrderVerification::Exhaustive { order: actual });
+    }
+    let checked = api::check_order(curve, order, seed);
+    (checked.certificate.certified && checked.twist_certificate.certified).then(|| {
+        CmOrderVerification::Hasse {
+            curve: Box::new(checked.certificate),
+            twist: Box::new(checked.twist_certificate),
+        }
+    })
+}
+
+/// Build a verified base-field curve from ordinary CM norm data. Returns an
+/// error if the norm data is invalid or neither twist's order can be verified;
+/// incomplete factorisation is an indeterminate certificate, not proof that
+/// the requested curve does not exist. `h` and `r` are GLS search metadata and
+/// are not certified by this base-field constructor.
 pub fn build_curve(inst: &Instance, seed: u64) -> Result<CmCurve, String> {
+    if inst.d >= 0 || inst.d == i64::MIN || !matches!(inst.d.rem_euclid(4), 0 | 1) {
+        return Err("invalid negative CM discriminant".into());
+    }
+    if inst.p <= Int::from(3i64) || inst.p.bits() > 640 || !inst.p.is_probable_prime() {
+        return Err("CM requires a probable prime above 3, at most 640 bits".into());
+    }
+    let norm = &(&inst.t * &inst.t) - &(&Int::from(inst.d) * &(&inst.v * &inst.v));
+    if inst.v.is_zero() || norm != &Int::from(4i64) * &inst.p {
+        return Err("invalid CM norm: expected t^2 - D*v^2 = 4p with v nonzero".into());
+    }
+    if inst.t.modulo(&inst.p).is_zero() {
+        return Err("CM constructor requires ordinary trace (t not divisible by p)".into());
+    }
     let hp = hilbert_class_poly(inst.d)?;
     let roots = api::with_field(
         &inst.p,
@@ -357,9 +410,10 @@ pub fn build_curve(inst: &Instance, seed: u64) -> Result<CmCurve, String> {
         ));
     }
     let p = &inst.p;
+    let special_j = Int::from(1728i64).modulo(p);
     let j0 = roots
         .iter()
-        .find(|j| !j.is_zero() && **j != Int::from(1728i64))
+        .find(|j| !j.is_zero() && **j != special_j)
         .ok_or("only j = 0, 1728")?;
     // y^2 = x^3 + 3 j (1728 - j) x + 2 j (1728 - j)^2
     let k = (&Int::from(1728i64) - j0).modulo(p);
@@ -367,18 +421,22 @@ pub fn build_curve(inst: &Instance, seed: u64) -> Result<CmCurve, String> {
     let b = (&(&(&Int::from(2i64) * j0) * &k) * &k).modulo(p);
     let mut e = PrimeCurve::new(p.clone(), a, b)?;
     let order = &(p + &Int::one()) - &inst.t;
-    if !order_kills(&e, &order, seed) {
-        e = e.twist();
-        if !order_kills(&e, &order, seed ^ 1) {
-            return Err("neither the curve nor its twist has trace t".into());
+    let order_verification = match verify_cm_order(&e, &order, seed) {
+        Some(proof) => proof,
+        None => {
+            e = e.twist();
+            verify_cm_order(&e, &order, seed ^ 1).ok_or(
+                "CM order could not be verified on either twist: insufficient certificate or inconsistent CM data",
+            )?
         }
-    }
+    };
     Ok(CmCurve {
         curve: e,
         crater: roots.into_iter().collect(),
         hilbert_degree: degree,
         hilbert_precision: hp.precision,
         hilbert_error_log2: hp.worst_error_log2,
+        order_verification,
     })
 }
 
@@ -772,6 +830,83 @@ mod tests {
     use super::*;
 
     #[test]
+    fn cm_generated_curve_has_requested_order_by_exhaustive_count() {
+        // Both norm signs. At p=11, the wrong order 16 annihilates every
+        // point of the order-8 curve, so sampling cannot select its twist.
+        for (p, d, t, r) in [(11i64, -7i64, 4i64, 29i64), (59, -23, 12, 877)] {
+            for sign in [1, -1] {
+                let inst = Instance {
+                    d,
+                    p: Int::from(p),
+                    t: Int::from(sign * t),
+                    v: Int::from(2i64),
+                    h: 4,
+                    r: Int::from(r),
+                    tries: 0,
+                };
+                for seed in 1..=8 {
+                    let cm = build_curve(&inst, seed).expect("CM curve");
+                    let (a, b) = (cm.curve.a.mod_u64(p as u64), cm.curve.b.mod_u64(p as u64));
+                    let mut n = 1;
+                    for x in 0u64..p as u64 {
+                        for y in 0u64..p as u64 {
+                            if y * y % p as u64 == (x * x % p as u64 * x + a * x + b) % p as u64 {
+                                n += 1;
+                            }
+                        }
+                    }
+                    assert_eq!(
+                        n,
+                        p + 1 - sign * t,
+                        "wrong CM trace, p={p}, sign={sign}, seed={seed}"
+                    );
+                    assert!(matches!(
+                        cm.order_verification,
+                        CmOrderVerification::Exhaustive { .. }
+                    ));
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn invalid_cm_norm_and_unsupported_inputs_are_rejected() {
+        let inst = Instance {
+            d: -23,
+            p: Int::from(59i64),
+            t: Int::from(12i64),
+            v: Int::from(2i64),
+            h: 4,
+            r: Int::from(877i64),
+            tries: 0,
+        };
+        for bad in [
+            Instance {
+                t: Int::from(-36i64),
+                ..inst.clone()
+            }, // wrong order 96 used to pass
+            Instance {
+                v: Int::zero(),
+                ..inst.clone()
+            },
+            Instance {
+                p: Int::from(9i64),
+                ..inst.clone()
+            },
+            Instance {
+                d: 0,
+                ..inst.clone()
+            },
+            Instance {
+                d: i64::MIN,
+                ..inst
+            },
+        ] {
+            assert!(build_curve(&bad, 1).is_err());
+        }
+    }
+
+    #[test]
     fn cheapest_loops_reproduce_known_values() {
         // values certified natively in research/isogeny_loop_glv_20261011 and in the paper
         for (d, cost, norm) in [
@@ -795,6 +930,23 @@ mod tests {
         let inst = find_instance(d, 40, &[3], 64, 7, 2_000_000).expect("instance");
         let cm = build_curve(&inst, 11).expect("curve");
         assert_eq!(cm.hilbert_degree, 3);
+        assert!(matches!(
+            cm.order_verification,
+            CmOrderVerification::Hasse { .. }
+        ));
+        let opposite = Instance {
+            t: -&inst.t,
+            ..inst.clone()
+        };
+        let other = build_curve(&opposite, 11).expect("opposite trace");
+        let expected = &(&inst.p + &Int::one()) - &opposite.t;
+        match other.order_verification {
+            CmOrderVerification::Hasse { curve, twist } => {
+                assert_eq!(curve.order, expected);
+                assert!(curve.certified && twist.certified);
+            }
+            _ => panic!("40-bit curve must use Hasse certificates"),
+        }
         let chains = closing_loops(&cm.curve, &cm.crater, &l.degree_sequence(), 3).expect("walk");
         assert!(!chains.is_empty(), "no closing loop");
     }

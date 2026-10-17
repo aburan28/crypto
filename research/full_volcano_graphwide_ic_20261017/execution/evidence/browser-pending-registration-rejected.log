@@ -1,0 +1,13 @@
+..................F..............................
+======================================================================
+FAIL: test_lab_browser_index_is_current_and_self_consistent (__main__.BuildTests.test_lab_browser_index_is_current_and_self_consistent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/repos/crypto/scripts/site/test_build.py", line 890, in test_lab_browser_index_is_current_and_self_consistent
+    self.assertTrue(f["curve"] is None or f["curve"] in slugs, f["fb_id"])
+AssertionError: False is not true : FB1h238b64322eb5
+
+----------------------------------------------------------------------
+Ran 49 tests in 8.180s
+
+FAILED (failures=1)

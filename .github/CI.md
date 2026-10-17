@@ -120,9 +120,23 @@ workloads.
 | Scope / syntax / changed-file format | Five minutes |
 | Each clippy crate | 15 minutes |
 | Root all-target compile / CodeQL language | 25 minutes |
+| Rust CodeQL: database build, cache warming | 25 minutes each |
+| Rust CodeQL queries (`analyze`, named exception) | 60 minutes |
 | Each PR or merge-group packaging component | 25 minutes |
 | ecbench PR harness | 25 minutes, including a 12-minute historical integrity step |
 | ecbench weekly/manual exhaustive audit | Existing 300-minute scientific budget |
+
+The PR Rust CodeQL lane runs in three jobs that hand one database forward:
+build the complete database, evaluate the type-inference diagnostic query to
+completion and bundle the trimmed evaluation cache, then run the full retained
+query configuration against that cache. Type inference is about two thirds of
+query evaluation and every query depends on it, so splitting the query suite
+does not shorten a job; and an interrupted evaluation leaves no reusable cache,
+so each phase must finish in its own budget. Measured on a 4-core x86 host
+(CodeQL 2.27.2): the warming query took 2,111 s cold, and the full 37-query
+suite then took 438 s with identical results, against about 2,700 s cold.
+The query job keeps its 60-minute named exception; with the warmed cache it
+runs far below it. Main, scheduled and manual scans keep the single job.
 
 The ecbench PR lane keeps unit/integration tests, session immutability,
 hash/seal/answer validation, bounds/frontier validation, fresh pinned smoke

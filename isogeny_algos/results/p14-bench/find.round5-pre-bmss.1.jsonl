@@ -1,0 +1,64 @@
+{"group":"find","algo":"phi_setup","p_bits":"30","ell":"3","median_ns":60050,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"30","ell":"3","kernels_found":"1","median_ns":15746,"min_ns":7738,"reps":200,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"30","ell":"3","kernels_found":"1","median_ns":42884,"min_ns":21511,"reps":200,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"30","ell":"3","kernels_found":"1","median_ns":5042,"min_ns":4897,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"30","ell":"5","median_ns":46030,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"30","ell":"5","kernels_found":"2","median_ns":73748,"min_ns":70831,"reps":200,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"30","ell":"5","kernels_found":"2","median_ns":138653,"min_ns":134412,"reps":200,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"30","ell":"5","kernels_found":"2","median_ns":20263,"min_ns":19930,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"30","ell":"7","median_ns":67172,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"30","ell":"7","kernels_found":"1","median_ns":446300,"min_ns":410430,"reps":200,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"30","ell":"7","kernels_found":"1","median_ns":176887,"min_ns":170826,"reps":200,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"30","ell":"7","kernels_found":"1","median_ns":10101,"min_ns":9778,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"30","ell":"11","median_ns":334285,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"30","ell":"11","kernels_found":"2","median_ns":2978018,"min_ns":2824411,"reps":147,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"30","ell":"11","kernels_found":"2","median_ns":1559842,"min_ns":1445854,"reps":200,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"30","ell":"11","kernels_found":"2","median_ns":50226,"min_ns":47395,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"30","ell":"13","median_ns":940859,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"30","ell":"13","kernels_found":"2","median_ns":5299722,"min_ns":4955860,"reps":73,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"30","ell":"13","kernels_found":"2","median_ns":2723154,"min_ns":2570398,"reps":160,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"30","ell":"13","kernels_found":"2","median_ns":24625,"min_ns":24015,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"30","ell":"17","median_ns":1268971,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"30","ell":"17","kernels_found":"2","median_ns":18363460,"min_ns":16865388,"reps":27,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"30","ell":"17","kernels_found":"2","median_ns":7514515,"min_ns":6872920,"reps":53,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"30","ell":"17","kernels_found":"2","median_ns":46878,"min_ns":44780,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"30","ell":"19","median_ns":1742225,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"30","ell":"19","kernels_found":"2","median_ns":754267770,"min_ns":736143810,"reps":3,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"30","ell":"19","kernels_found":"2","median_ns":10824092,"min_ns":10293912,"reps":43,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"30","ell":"19","kernels_found":"2","median_ns":75956,"min_ns":49450,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"30","ell":"23","median_ns":4075205,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"30","ell":"23","kernels_found":"1","median_ns":170752313,"min_ns":153973775,"reps":4,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"30","ell":"23","kernels_found":"1","median_ns":11249515,"min_ns":10452496,"reps":40,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"30","ell":"23","kernels_found":"1","median_ns":66844,"min_ns":63505,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"61","ell":"3","median_ns":22189,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"61","ell":"3","kernels_found":"1","median_ns":13479,"min_ns":13152,"reps":200,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"61","ell":"3","kernels_found":"1","median_ns":27828,"min_ns":27262,"reps":200,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"61","ell":"3","kernels_found":"1","median_ns":9970,"min_ns":9688,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"61","ell":"5","median_ns":34921,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"61","ell":"5","kernels_found":"2","median_ns":213627,"min_ns":206244,"reps":200,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"61","ell":"5","kernels_found":"2","median_ns":150994,"min_ns":146496,"reps":200,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"61","ell":"5","kernels_found":"2","median_ns":30591,"min_ns":30077,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"61","ell":"7","median_ns":69359,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"61","ell":"7","kernels_found":"2","median_ns":974021,"min_ns":936099,"reps":200,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"61","ell":"7","kernels_found":"2","median_ns":375690,"min_ns":349781,"reps":200,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"61","ell":"7","kernels_found":"2","median_ns":32433,"min_ns":31900,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"61","ell":"11","median_ns":339046,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"61","ell":"11","kernels_found":"1","median_ns":4781062,"min_ns":4539758,"reps":98,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"61","ell":"11","kernels_found":"1","median_ns":762322,"min_ns":732053,"reps":200,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"61","ell":"11","kernels_found":"1","median_ns":39229,"min_ns":38164,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"61","ell":"13","median_ns":552328,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"61","ell":"13","kernels_found":"2","median_ns":8178670,"min_ns":8041250,"reps":61,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"61","ell":"13","kernels_found":"2","median_ns":2666207,"min_ns":2590734,"reps":186,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"61","ell":"13","kernels_found":"2","median_ns":60285,"min_ns":58445,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"61","ell":"17","median_ns":1224163,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"61","ell":"17","kernels_found":"2","median_ns":23729707,"min_ns":23283467,"reps":20,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"61","ell":"17","kernels_found":"2","median_ns":6968731,"min_ns":6887266,"reps":72,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"61","ell":"17","kernels_found":"2","median_ns":80327,"min_ns":76957,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"61","ell":"19","median_ns":1709423,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"61","ell":"19","kernels_found":"2","median_ns":70407227,"min_ns":67426235,"reps":8,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"61","ell":"19","kernels_found":"2","median_ns":10970742,"min_ns":10528415,"reps":44,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"61","ell":"19","kernels_found":"2","median_ns":110227,"min_ns":105416,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"61","ell":"23","median_ns":3206890,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"61","ell":"23","kernels_found":"2","median_ns":180884601,"min_ns":173626302,"reps":3,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"61","ell":"23","kernels_found":"2","median_ns":22944905,"min_ns":21101048,"reps":20,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"61","ell":"23","kernels_found":"2","median_ns":154855,"min_ns":148591,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}

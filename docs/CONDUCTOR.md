@@ -17,6 +17,13 @@ Without them the hooks print one warning and let the edit through, the MCP
 server fails to start (`ENOENT: conductor-mcp`), and the `conductor check`
 that `CLAUDE.md` asks for cannot run. This page is how to install them.
 
+For an isolated enterprise installation, use the
+[private workspace path](PRIVATE_NETWORK.md): preinstalled compatible binaries,
+an internal Conductor endpoint, native Cairn private discovery, and optional
+WireGuard/internal DNS. `WORKSPACE_OFFLINE=1` makes the session hook and setup
+entrypoints validate local prerequisites and stop before online installers or
+public node startup. It does not run the online recipes below.
+
 ## On your own machine
 
 `scripts/setup-workstation.sh` does all of this and the rest of the stack in
@@ -78,10 +85,18 @@ it does three things.
   so the release download is refused with HTTP 403. The Go module proxy is
   reachable directly; the image's Go 1.24.7 fetches go1.26.8 by itself.
   `CONDUCTOR_VERSION` overrides `main`.
-- **Installs cairn.** It runs
-  `cargo install --locked --root /usr/local --git https://github.com/aburan28/cairn cairn`,
-  without the `ui` feature, so `cairn mcp` works and `cairn run` does not.
-  `CAIRN_REV` pins a commit. `.mcp.json` starts `cairn mcp` for every session,
+- **Installs cairn and starts a node.** It runs `scripts/cairn-node.sh ensure`,
+  which builds cairn from `https://github.com/aburan28/cairn` with the `ui`
+  feature (`npm ci && npm run build` in `ui/`, then
+  `cargo install --locked --features ui`), so both `cairn mcp` and `cairn run`
+  work, and starts one supervised `cairn run --no-mcp` per container on
+  `127.0.0.1:9100` (P2P) and `127.0.0.1:9180` (HTTP). That node dials the seed
+  list compiled into cairn, refreshed from
+  `https://aburan28.github.io/cairn/seeds.json` at start, so a newly published
+  seed needs no change here. `scripts/cairn-node.sh status` shows it;
+  `CAIRN_NODE=off` in the environment skips it; `CAIRN_REV` pins a commit.
+  The same script runs in `cryptanalysis`, `crypto-autoresearcher` and
+  `ml-cryptanalysis`; whichever hook runs first starts the node. `.mcp.json` starts `cairn mcp` for every session,
   on a ledger at `~/.cairn/cairn.jsonl` rather than in the repository; it can
   post only unfunded objectives.
 - **Brings up a control plane.** If `CONDUCTOR_ENDPOINT` and `CONDUCTOR_TOKEN`

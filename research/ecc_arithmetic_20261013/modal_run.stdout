@@ -1,0 +1,54 @@
+✓ Initialized. View run at 
+https://modal.com/apps/a-buran28/main/ap-GeBeeD0sP7OMr6452nNpJQ
+Building image im-rUckdaPB2cGXC7OztBd9tF
+
+=> Step 0: FROM rust:1.93-slim-bookworm
+Getting image source signatures
+Copying blob sha256:f6c4f6cdd766a45ec80c8f2c23964c76836d266913d18d0446b37714434eac94
+Copying blob sha256:84a2afebaf4de2e8eb885634a69abd0087b79c947c53fa4f0481235d6dfadc6c
+Copying config sha256:ca24ddd4508c1d5a0101533b558d8b5e1911b64ae356187b4bebf763c18967c1
+Writing manifest to image destination
+Unpacking OCI image
+   • unpacking rootfs ...     
+   • ... done                 
+   • unpacked image rootfs: /tmp/task-data/ta-01M4VYT01PHHV0ADFG0S0PF5BB/registry-unpacksaL1hu
+Copied image in 731.68ms
+
+=> Step 1: COPY /python/. /usr/local
+
+=> Step 2: RUN ln -s /usr/local/bin/python3 /usr/local/bin/python
+
+=> Step 3: ENV TERMINFO_DIRS=/etc/terminfo:/lib/terminfo:/usr/share/terminfo:/usr/lib/terminfo
+Saving image...
+Image saved, took 6.96s
+
+Built image im-rUckdaPB2cGXC7OztBd9tF in 16.93s
+
+
+✓ Created objects.
+├── 🔨 Created mount 
+│   /Volumes/SSD990-2/crypto/wt/codex-ecc-arithmetic-20261013/research/ecc_arith
+│   metic_20261013/modal_panel.py
+├── 🔨 Created mount 
+│   /Volumes/SSD990-2/crypto/wt/codex-ecc-arithmetic-20261013/research/ecc_arith
+│   metic_20261013/candidate_src/f2m.rs
+├── 🔨 Created mount 
+│   /Volumes/SSD990-2/crypto/wt/codex-ecc-arithmetic-20261013/research/ecc_arith
+│   metic_20261013/src/bin/compare.rs
+├── 🔨 Created mount 
+│   /Volumes/SSD990-2/crypto/wt/codex-ecc-arithmetic-20261013/research/ecc_arith
+│   metic_20261013/baseline_src/f2m.rs
+├── 🔨 Created mount 
+│   /Volumes/SSD990-2/crypto/wt/codex-ecc-arithmetic-20261013/research/ecc_arith
+│   metic_20261013/src/main.rs
+├── 🔨 Created mount 
+│   /Volumes/SSD990-2/crypto/wt/codex-ecc-arithmetic-20261013/research/ecc_arith
+│   metic_20261013/Cargo.toml
+├── 🔨 Created mount 
+│   /Volumes/SSD990-2/crypto/wt/codex-ecc-arithmetic-20261013/research/ecc_arith
+│   metic_20261013/Cargo.lock
+└── 🔨 Created function run_panel.
+test_exit=101 bench_exit=None cpu=unknown
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/a-buran28/main/ap-GeBeeD0sP7OMr6452nNpJQ

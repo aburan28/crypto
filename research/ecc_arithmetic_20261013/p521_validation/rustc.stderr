@@ -1,0 +1,14 @@
+warning: associated constants `ZERO` and `ONE` are never used
+  --> research/ecc_arithmetic_20261013/p521_validation/../../../src/ecc/p521_field.rs:23:15
+   |
+22 | impl P521Fe {
+   | ----------- associated constants in this implementation
+23 |     pub const ZERO: Self = Self([0; 9]);
+   |               ^^^^
+24 |     pub const ONE: Self = Self([1, 0, 0, 0, 0, 0, 0, 0, 0]);
+   |               ^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: 1 warning emitted
+

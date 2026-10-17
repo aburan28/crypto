@@ -1,0 +1,9 @@
+{"bits":16,"curve":0,"kappa":2.4006,"arm":"sched:lpsgebw2@16","correct":true,"cost":430608199,"la_cost":144077758,"cols":2081,"nnz":37495,"checks":1,"la_wall":0.8,"wall":3.4}
+{"bits":16,"curve":0,"arm":"sched:lpsgebw2@16+R1","cost":281528809,"rel_cost":137451051}
+JOB 4s --bits 16 --curve 0 --kappa 2.4006 --cx 16 --streams sched --las lpsgebw2@16 --out results/repro/b16_c0_sched.jsonl
+{"bits":17,"curve":1,"kappa":1.7322,"arm":"r2:lpsgebw2@16","correct":true,"cost":1269895533,"la_cost":313259480,"cols":3037,"nnz":56273,"checks":1,"la_wall":2.0,"wall":13.9}
+{"bits":17,"curve":1,"arm":"r2:lpsgebw2@16+R1","cost":771464438,"rel_cost":458204958}
+JOB 14s --bits 17 --curve 1 --kappa 1.7322 --cx 16 --streams r2 --las lpsgebw2@16 --out results/repro/b17_c1_r2.jsonl
+{"bits":17,"curve":1,"kappa":1.7319,"arm":"r2:lpsgebw2@16","correct":true,"cost":1269667442,"la_cost":312633465,"cols":3035,"nnz":56189,"checks":1,"la_wall":2.1,"wall":14.3}
+{"bits":17,"curve":1,"arm":"r2:lpsgebw2@16+R1","cost":771029774,"rel_cost":458396309}
+JOB 15s --bits 17 --curve 1 --kappa 1.7319 --cx 16 --streams r2 --las lpsgebw2@16 --out results/repro/b17_c1_r2.jsonl

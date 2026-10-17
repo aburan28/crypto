@@ -43,9 +43,9 @@ use crate::cryptanalysis::ic_framework::fiber::{
 use crate::cryptanalysis::ic_framework::plugins::{
     BinarySubspaceBase, CompactOrbitScanBase, CyclotomicBase, DescentAlgebraicOracle,
     FrobeniusMitmOracle, GlvOrbitBase, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase,
-    PrimeBatchMitmOracle, RootfindSubtractOracle, SubtractOracle,
+    PrimeBatchMitmOracle, PrimeProjectedAbscissaBase, RootfindSubtractOracle, SubtractOracle,
 };
-use crate::cryptanalysis::ic_framework::prime_tower::PrimeKummerBase;
+use crate::cryptanalysis::ic_framework::prime_tower::{PrimeIsogenyBase, PrimeKummerBase};
 use crate::cryptanalysis::ic_framework::rootfind::{RootfindMitmOracle, RootfindPairsOracle};
 use crate::cryptanalysis::ic_framework::shared_rank::{
     run_shared_rank_targets, SharedRankSpec, SharedTargetSpec,
@@ -126,7 +126,7 @@ const IC_PIPELINE_PARAMS: &[ParamDecl] = &[
         ParamDecl {
             name: "factor_base",
             default: None,
-            help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M, cyclotomic:w=W[,columns=N], koblitz-standard-subspace:dimension=D",
+            help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, prime-kummer:t=T[,g=G], prime-isogeny:t=T[,seed=S] (auxiliary-curve search charged to the factor-base phase), binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M, cyclotomic:w=W[,columns=N], koblitz-standard-subspace:dimension=D",
         },
         ParamDecl {
             name: "oracle",
@@ -291,6 +291,30 @@ pub fn registry() -> &'static [MethodDecl] {
             entry: "koblitz_strong_rho::StrongRho::solve",
             applies: Applies::KoblitzOnly,
             params: STRONG_PARAMS,
+        },
+        MethodDecl {
+            id: "rho.signed_frobenius_strong_legacy",
+            family: "rho",
+            summary: "the literal pre-2026-10-14 implementation of the strong single-target reference, retained only as a trajectory-identical within-binary performance control",
+            entry: "koblitz_strong_rho::StrongRho::solve_legacy",
+            applies: Applies::KoblitzOnly,
+            params: &[
+                ParamDecl {
+                    name: "lanes",
+                    default: Some("32"),
+                    help: "walks advanced in lockstep (batch-inversion width); the reference measured 32",
+                },
+                ParamDecl {
+                    name: "dp_bits",
+                    default: Some("4"),
+                    help: "distinguished-point bits; the reference measured 4",
+                },
+                ParamDecl {
+                    name: "step_cap_factor",
+                    default: Some("2000"),
+                    help: "give up after this multiple of the ideal step count",
+                },
+            ],
         },
         MethodDecl {
             id: "rho.signed_frobenius_strong_escape",
@@ -1044,7 +1068,9 @@ fn solve_wide(
     seed: u64,
 ) -> Result<SolveReport, String> {
     match m.id.as_str() {
-        "rho.signed_frobenius_strong" | "rho.signed_frobenius_strong_escape" => {
+        "rho.signed_frobenius_strong"
+        | "rho.signed_frobenius_strong_legacy"
+        | "rho.signed_frobenius_strong_escape" => {
             solve_strong_wide(m, wi, tx, ty, seed)
         }
         "claw.pair_table" => solve_claw_wide(m, wi, tx, ty, seed),
@@ -1162,6 +1188,7 @@ fn solve_inner(
         }
         (Instance::Binary(i), _)
             if m.id == "rho.signed_frobenius_strong"
+                || m.id == "rho.signed_frobenius_strong_legacy"
                 || m.id == "rho.signed_frobenius_strong_escape" =>
         {
             solve_strong(m, i, FastPoint::affine(tx, ty), seed)
@@ -1704,7 +1731,11 @@ fn strong_run<F: RhoField, S: RhoScalar>(
         measurement::callgrind_dump(b"ecbench_before_online\0");
     }
     measurement::begin_online(Phase::RhoSolve);
-    let outcome = rho.solve(q, &jumps, &mut start_rng, &params, charges);
+    let outcome = if m.id == "rho.signed_frobenius_strong_legacy" {
+        rho.solve_legacy(q, &jumps, &mut start_rng, &params, charges)
+    } else {
+        rho.solve(q, &jumps, &mut start_rng, &params, charges)
+    };
     measurement::end_online();
     if profile_online {
         measurement::callgrind_dump(b"ecbench_online\0");
@@ -1812,7 +1843,7 @@ fn pinned_only_calibration(regime: &str, slug: &str) -> Calibration {
 
 /// Native counters the calibration prices, with the unit field that
 /// prices each (`price_phase`'s table).
-const PRICED_NATIVE: &[(&str, &str)] = &[
+pub const PRICED_NATIVE: &[(&str, &str)] = &[
     ("sqrt_solves", "ns_per_sqrt"),
     ("as_solves", "ns_per_as_solve"),
     ("s4_pairs", "ns_per_s4_pair"),
@@ -2031,14 +2062,16 @@ fn solve_ic_prime(
 ) -> Result<SolveReport, String> {
     let (spec, fb_name, or_name) = pipeline_spec(m, seed)?;
     let abscissa = PrimeAbscissaBase { instance: inst };
+    let projected = PrimeProjectedAbscissaBase { instance: inst };
     let orbit = GlvOrbitBase { instance: inst };
     let kummer = PrimeKummerBase { instance: inst };
-    let cm_orbit = CmOrbitBase { instance: inst };
+    let isogeny = PrimeIsogenyBase { instance: inst };
     let base: &dyn FactorBaseBuilder<_> = match fb_name.as_str() {
         "prime-abscissa" => &abscissa,
+        "prime-projected-abscissa" => &projected,
         "glv-orbit" => &orbit,
         "prime-kummer" => &kummer,
-        "cm-scalar-orbit" => &cm_orbit,
+        "prime-isogeny" => &isogeny,
         other => {
             return Err(format!(
                 "factor base `{other}` does not run on a prime curve"
@@ -2543,12 +2576,16 @@ pub fn dump_factor_base(
     match &inst {
         Instance::Prime(i) => {
             let abscissa = PrimeAbscissaBase { instance: i };
+            let projected = PrimeProjectedAbscissaBase { instance: i };
             let orbit = GlvOrbitBase { instance: i };
             let kummer = PrimeKummerBase { instance: i };
+            let isogeny = PrimeIsogenyBase { instance: i };
             let base: &dyn FactorBaseBuilder<_> = match name.as_str() {
                 "prime-abscissa" => &abscissa,
+                "prime-projected-abscissa" => &projected,
                 "glv-orbit" => &orbit,
                 "prime-kummer" => &kummer,
+                "prime-isogeny" => &isogeny,
                 other => {
                     return Err(format!(
                         "factor base `{other}` does not run on a prime curve"
@@ -2894,6 +2931,54 @@ mod tests {
             .phases
             .iter()
             .any(|p| p.name == "oracle_setup" && p.adds > 0));
+    }
+
+    /// `prime-isogeny` runs end to end: the answer is right, the
+    /// auxiliary-curve search is charged in the factor-base phase and
+    /// recorded apart, and the dump's id is the run's.
+    #[test]
+    fn prime_isogeny_base_charges_its_search_and_keeps_its_id() {
+        use crate::cryptanalysis::ecbench::workload::CurveSpec;
+        let spec = CurveSpec::PrimeSearch {
+            bits: 20,
+            seed: 59297,
+        };
+        let inst = spec.build().unwrap();
+        let facts = inst.facts(&spec);
+        let Instance::Prime(prime) = &inst else {
+            unreachable!()
+        };
+        let mut scratch = GroupOps::default();
+        let target = prime
+            .curve
+            .mul(&mut scratch, prime.generator_point(), 77_777);
+        let coords = [format!("0x{:x}", target.x), format!("0x{:x}", target.y)];
+        let fb_spec = "prime-isogeny:t=7,seed=1";
+        let m = resolve(&MethodSpec {
+            id: "ic.pipeline".into(),
+            params: [
+                ("factor_base".to_string(), fb_spec.to_string()),
+                ("oracle".to_string(), "rootfind-mitm:m=3".to_string()),
+            ]
+            .into_iter()
+            .collect(),
+        })
+        .unwrap();
+        let rep = solve(&m, &inst, &facts, &coords, 5).unwrap();
+        assert_eq!(rep.recovered, Some(77_777 % u128::from(prime.r)));
+        let fbp = rep.phases.iter().find(|p| p.name == "factor_base").unwrap();
+        let charged = fbp.native["aux_search_gae"] + fbp.native["aux_tower_build_gae"];
+        assert!(charged > 0 && fbp.native["aux_curves_tried"] >= 1);
+        assert_eq!((fbp.adds + fbp.doubles) as u64, charged);
+        assert_eq!(fbp.gae, charged as f64);
+        let fb = rep.factor_base.as_ref().unwrap();
+        assert_eq!(fb.family, "prime-isogeny");
+        let dump = dump_factor_base(&spec, fb_spec).unwrap();
+        assert_eq!(dump.factor_base.fb_id, fb.fb_id);
+        assert_eq!(dump.build_adds + dump.build_doubles, charged);
+        let again = solve(&m, &inst, &facts, &coords, 5).unwrap();
+        assert_eq!(again.total_gae, rep.total_gae);
+        assert_eq!(again.factor_base.unwrap().fb_id, fb.fb_id);
     }
 
     #[test]

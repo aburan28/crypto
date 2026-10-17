@@ -1,0 +1,40 @@
+id,description,baseline,candidate,baseline_median_ns,candidate_median_ns,ratio_median,ratio_min,ratio_max,n_pairs,threshold,verdict
+C1a,"Fp32 dense row kernel, p31, 1e4: no regression vs f4_fp_tower",f4_fp_tower/p31/axpy_dense_1e4,Fp32/p31/axpy_dense_1e4,0.4018,0.3107,1.3078,1.2449,1.3434,9,0.95,PASS
+C1b,"Fp32 dense row kernel, p31, 1e5: no regression vs f4_fp_tower",f4_fp_tower/p31/axpy_dense_1e5,Fp32/p31/axpy_dense_1e5,0.4368,0.3357,1.2868,1.1760,1.4756,9,0.95,PASS
+C2a,"Fp32 sparse scatter, p31: no regression vs f4_fp_tower",f4_fp_tower/p31/scatter_sparse,Fp32/p31/scatter_sparse,2.0268,1.9167,1.0683,1.0318,1.2525,9,0.95,PASS
+C2b,"Fp32 sparse scatter, p32: no regression vs f4_fp_tower",f4_fp_tower/p32/scatter_sparse,Fp32/p32/scatter_sparse,2.0014,1.8604,1.0673,0.8304,1.1088,9,0.95,PASS
+C3a,"Fp32 dense row kernel, p32, 1e4: >= 2x f4_fp_tower (eager above 2^31)",f4_fp_tower/p32/axpy_dense_1e4,Fp32/p32/axpy_dense_1e4,1.2573,0.4982,2.6497,2.4022,2.7007,9,2,PASS
+C3b,"Fp32 dense row kernel, p32, 1e5: >= 2x f4_fp_tower",f4_fp_tower/p32/axpy_dense_1e5,Fp32/p32/axpy_dense_1e5,1.3332,0.5101,2.6570,2.2639,3.0574,9,2,PASS
+C4,"Fp32 mul throughput, p31: no regression vs f4_fp_tower Fp::mul",f4_fp_tower/p31/mul_tp,Fp32/p31/mul_tp,1.8845,1.6240,1.1653,1.0244,1.4993,9,0.95,PASS
+C5a,"Fp64 mul throughput, p61: no regression vs prime_fast::Fp64",prime_fast::Fp64/p61/mul_tp,Fp64/p61/mul_tp,2.2154,2.1227,1.0855,0.8622,1.3536,9,0.95,PASS
+C5b,"Fp64 mul latency, p61: no regression vs prime_fast::Fp64",prime_fast::Fp64/p61/mul_lat,Fp64/p61/mul_lat,5.3545,4.9881,1.0787,1.0651,1.1108,9,0.95,PASS
+C5c,"Fp64 inverse, p61: >= 1.4x prime_fast::Fp64",prime_fast::Fp64/p61/inv,Fp64/p61/inv,455.3434,245.6684,1.8710,1.5055,2.9449,9,1.4,PASS
+C6a,"FpP192 mul throughput >= 1.5x ct_bignum<3>, P-192",ct_bignum/P-192/mul_tp,FpP192/P-192/mul_tp,18.8578,9.9366,1.9513,1.5097,3.2734,9,1.5,PASS
+C6b,"FpP192 mul latency >= 2x ct_bignum<3>, P-192",ct_bignum/P-192/mul_lat,FpP192/P-192/mul_lat,30.2949,11.1535,2.7095,2.5454,2.9390,9,2,PASS
+C6c,"FpWide<3> mul throughput >= 1.0x ct_bignum<3>, P-192",ct_bignum/P-192/mul_tp,FpWide<3>/P-192/mul_tp,18.8578,18.6281,1.0348,0.6599,1.6682,9,1,PASS
+C6d,"FpWide<3> mul latency >= 1.25x ct_bignum<3>, P-192",ct_bignum/P-192/mul_lat,FpWide<3>/P-192/mul_lat,30.2949,21.9335,1.3762,1.2756,1.5005,9,1.25,PASS
+C6e,"FpWide<4+spare> mul throughput >= 1.3x ct_bignum<4>, P-224",ct_bignum/P-224/mul_tp,FpWide<4+spare>/P-224/mul_tp,34.2555,21.0614,1.5618,1.5024,2.0651,9,1.3,PASS
+C6f,"FpWide<4+spare> mul latency >= 1.8x ct_bignum<4>, P-224",ct_bignum/P-224/mul_lat,FpWide<4+spare>/P-224/mul_lat,45.1658,21.3895,2.0989,1.3557,2.1713,9,1.8,PASS
+C6g,"FpWide<4> mul throughput >= 1.1x ct_bignum<4>, P-256",ct_bignum/P-256/mul_tp,FpWide<4>/P-256/mul_tp,33.9817,28.6762,1.2559,0.9153,1.4504,9,1.1,PASS
+C6h,"FpWide<4> mul latency >= 1.3x ct_bignum<4>, P-256",ct_bignum/P-256/mul_lat,FpWide<4>/P-256/mul_lat,44.2658,29.9613,1.4771,1.1656,1.7154,9,1.3,PASS
+C7a,"FpWide<3> mul >= 5x BigUint (a*b) % p, P-192",BigUint/P-192/mul_tp,FpWide<3>/P-192/mul_tp,152.8063,18.6281,8.2030,7.9217,9.9277,9,5,PASS
+C7b,"FpWide<4+spare> mul >= 5x BigUint, P-224",BigUint/P-224/mul_tp,FpWide<4+spare>/P-224/mul_tp,356.7672,21.0614,16.9113,16.2226,18.2546,9,5,PASS
+C7c,"FpWide<4> mul >= 4x BigUint, P-256",BigUint/P-256/mul_tp,FpWide<4>/P-256/mul_tp,164.4148,28.6762,5.4195,4.2485,9.7897,9,4,PASS
+C7d,"FpWide<3> inverse >= 5x BigUint modpow(p-2), P-192",BigUint/P-192/inv,FpWide<3>/P-192/inv,16781.6809,2402.2454,7.6336,6.7463,9.7341,9,5,PASS
+C7e,"FpWide<4+spare> inverse >= 5x BigUint modpow(p-2), P-224",BigUint/P-224/inv,FpWide<4+spare>/P-224/inv,23205.7978,2603.4036,8.8828,6.6599,9.1382,9,5,PASS
+C8a,"Fp32 lazy row update >= 5x eager, p31, 1e4",Fp32/p31/axpy_eager_1e4,Fp32/p31/axpy_lazy_1e4,2.9856,0.3136,9.4531,6.3727,11.3934,9,5,PASS
+C8b,"Fp64 lazy row update >= 2x eager, p61, 1e4",Fp64/p61/axpy_eager_1e4,Fp64/p61/axpy_lazy_1e4,7.3684,1.8746,3.9687,3.6410,5.0780,9,2,PASS
+C8c,"FpWide<3> lazy row update >= 1.5x eager, P-192, 1e4",FpWide<3>/P-192/axpy_eager_1e4,FpWide<3>/P-192/axpy_lazy_1e4,20.2075,10.4615,1.8775,1.7614,2.3011,9,1.5,PASS
+C8d,"FpWide<3> lazy row update >= 1.5x eager, P-192, 1e5",FpWide<3>/P-192/axpy_eager_1e5,FpWide<3>/P-192/axpy_lazy_1e5,20.0204,10.8764,1.8232,1.7451,2.1765,9,1.5,PASS
+C8e,"FpWide<4+spare> lazy row update >= 1.5x eager, P-224, 1e4",FpWide<4+spare>/P-224/axpy_eager_1e4,FpWide<4+spare>/P-224/axpy_lazy_1e4,24.7229,16.2199,1.5569,1.3703,1.7944,9,1.5,PASS
+C8f,"FpWide<4+spare> lazy row update >= 1.5x eager, P-224, 1e5",FpWide<4+spare>/P-224/axpy_eager_1e5,FpWide<4+spare>/P-224/axpy_lazy_1e5,29.7571,16.5413,1.7335,1.5228,2.2557,9,1.5,PASS
+C8g,"FpWide<4> lazy row update >= 1.5x eager, P-256, 1e4",FpWide<4>/P-256/axpy_eager_1e4,FpWide<4>/P-256/axpy_lazy_1e4,31.7563,16.0397,1.9920,1.9593,2.2921,9,1.5,PASS
+C9a,"FpWide<3> lazy dot >= 1.5x eager, P-192",FpWide<3>/P-192/dot_eager_1e4,FpWide<3>/P-192/dot_lazy_1e4,19.1860,7.6795,2.5752,2.1255,3.1040,9,1.5,PASS
+C9b,"FpWide<4+spare> lazy dot >= 1.5x eager, P-224",FpWide<4+spare>/P-224/dot_eager_1e4,FpWide<4+spare>/P-224/dot_lazy_1e4,25.5392,12.4131,2.0929,1.3965,2.3880,9,1.5,PASS
+C10a,"binary-GCD (Pornin) inverse >= 1.3x plain binary, FpWide<4>, P-224",FpWide<4>/P-224/inv_plain_binary,FpWide<4>/P-224/inv,4221.2158,2630.0676,1.5761,1.3966,1.8402,9,1.3,PASS
+C10b,"binary-GCD (Pornin) inverse >= 2.5x Fermat, FpWide<4>, P-224",FpWide<4>/P-224/inv_fermat,FpWide<4>/P-224/inv,8484.1399,2630.0676,3.2897,2.8958,4.1483,9,2.5,PASS
+C11a,"binary Jacobi >= 3x Euler, FpWide<3>, P-192",FpWide<3>/P-192/legendre_euler,FpWide<3>/P-192/legendre,5206.5722,1205.7246,4.4009,3.0998,4.9218,9,3,PASS
+C11b,"binary Jacobi >= 3x Euler, FpWide<4>, P-224",FpWide<4>/P-224/legendre_euler,FpWide<4>/P-224/legendre,8073.4997,2187.3765,3.6085,3.1777,5.0995,9,3,PASS
+C12,"windowed Tonelli-Shanks >= 3x plain, FpWide<4>, P-224 (s = 96)",FpWide<4>/P-224/sqrt_ts_plain,FpWide<4>/P-224/sqrt,77575.2098,21013.2987,3.6842,2.6800,5.4426,9,3,PASS
+C13,"Solinas FpP192 mul >= 1.3x Montgomery FpWide<3>, P-192",FpWide<3>/P-192/mul_tp,FpP192/P-192/mul_tp,18.6281,9.9366,1.9190,1.2797,2.5870,9,1.3,PASS
+C14,"spare-bit FpWide<4+spare> mul >= 1.15x FpWide<4>, P-224",FpWide<4>/P-224/mul_tp,FpWide<4+spare>/P-224/mul_tp,28.6500,21.0614,1.3425,1.2792,1.6686,9,1.15,PASS

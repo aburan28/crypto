@@ -1,0 +1,18 @@
+   Compiling crypto v0.1.0 (/Volumes/SSD990-2/crypto-worktrees/rootfind-faster-e2e-20261015)
+warning: function `contains_key_hash_matches_contains_key` is never used
+     --> src/cryptanalysis/koblitz_index_calculus.rs:16425:8
+      |
+16425 |     fn contains_key_hash_matches_contains_key() {
+      |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `crypto` (lib test) generated 1 warning
+    Finished `release` profile [optimized] target(s) in 7m 03s
+     Running unittests src/lib.rs (/Volumes/SSD990-2/cargo-target-rootfind-faster-e2e-20261015/release/deps/crypto_lib-e89b2f0dbc9b5389)
+
+running 1 test
+test cryptanalysis::koblitz_index_calculus::tests::decompose_fast_m2_known_matches_decompose_fast ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4221 filtered out; finished in 0.41s
+

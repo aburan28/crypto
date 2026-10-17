@@ -55,6 +55,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            tools/volcano-cli/
+            isogeny_algos/
             Cargo.lock
             docs/curves/registry.json
             docs/ecbench/schema.sql
@@ -71,6 +73,7 @@ jobs:
             examples/koblitz_rho_batch_ks_strong_online.rs
             examples/koblitz_rank_fixture.rs
             examples/koblitz_rho_fixture.rs
+            examples/ic_next10_09_equal_advice.rs
             research/sat_factor_base_review_20260908/autolab
             experiments/koblitz-single-target-n61-20260925
             experiments/koblitz-single-target-n71-20261002
@@ -107,6 +110,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            tools/volcano-cli/
+            isogeny_algos/
             Cargo.lock
             docs/curves/registry.json
             docs/ecbench/schema.sql
@@ -119,6 +124,7 @@ jobs:
             examples/koblitz_rho_batch_ks_strong_online.rs
             examples/koblitz_rank_fixture.rs
             examples/koblitz_rho_fixture.rs
+            examples/ic_next10_09_equal_advice.rs
             research/sat_factor_base_review_20260908/autolab
             experiments/koblitz-single-target-n61-20260925
             experiments/koblitz-single-target-n71-20261002

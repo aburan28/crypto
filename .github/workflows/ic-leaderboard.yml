@@ -52,11 +52,15 @@ on:
       - 'research/f4_f5_f6_cross_family_20261011/ANALYSIS.json'
       - 'research/ecbench_n41_n53_shared_rank_20261005/DECISION.json'
       - 'research/ecbench_conductor_gap_20261012/analysis.json'
+      - 'research/n83_e2e_holdout_20261016/ic1_rows_38955665283.json'
       - 'research/ecbench_frontier_20261013/frontier-data.json'
+      - 'research/ecbench_rho_optimized_20261014/RESULT.json'
+      - 'research/n83_e2e_holdout_20261016/ic1_rows_38955665283.json'
       - '.github/workflows/ic-leaderboard.yml'
       - 'scripts/build_lab_browser.py'
       - 'docs/browser/**'
       - 'research/ecbench_*/sessions/**'
+      - 'research/full_volcano_graphwide_ic_*/execution/campaigns/**'
       - 'research/ic_candidate_tournament_20260915/runs/**'
       - 'docs/ic/**'
       - 'research/notes/ecc2k130/**'
@@ -99,11 +103,15 @@ on:
       - 'research/f4_f5_f6_cross_family_20261011/ANALYSIS.json'
       - 'research/ecbench_n41_n53_shared_rank_20261005/DECISION.json'
       - 'research/ecbench_conductor_gap_20261012/analysis.json'
+      - 'research/n83_e2e_holdout_20261016/ic1_rows_38955665283.json'
       - 'research/ecbench_frontier_20261013/frontier-data.json'
+      - 'research/ecbench_rho_optimized_20261014/RESULT.json'
+      - 'research/n83_e2e_holdout_20261016/ic1_rows_38955665283.json'
       - '.github/workflows/ic-leaderboard.yml'
       - 'scripts/build_lab_browser.py'
       - 'docs/browser/**'
       - 'research/ecbench_*/sessions/**'
+      - 'research/full_volcano_graphwide_ic_*/execution/campaigns/**'
       - 'research/ic_candidate_tournament_20260915/runs/**'
       - 'docs/ic/**'
       - 'research/notes/ecc2k130/**'
@@ -120,7 +128,7 @@ concurrency:
 
 jobs:
   current:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4

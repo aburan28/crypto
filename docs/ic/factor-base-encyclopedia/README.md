@@ -12,6 +12,20 @@ they hold a family that is not mirrored here.
 already recorded and runs nothing new. Every number below is quoted from the
 file cited next to it. Numbers marked *derived here* are this note's own
 arithmetic on quoted numbers, and the working is shown.
+**Updated:** 2026-10-15, with the outcomes of the five lead studies that
+merged to `main` at `b906df024` (PRs #1887, #1889, #1892, #1893, #1895). They
+were chased from §8 of the first version; each verdict below is quoted from
+the study's README on `main`, and the earlier text is corrected where a study
+superseded it.
+**Updated again:** 2026-10-16, at `main` `05e414f3f`. This round adds the
+studies merged since PR #1916: the P-192 auxiliary-curve search (PR #1925),
+the supersingular auxiliary curve (PR #1947), the generic-field F4 engine at
+NIST primes (PR #1942), the frontier campaign's band-priced ratios (PR #1837)
+and the binary MITM oracle ladder (PRs #1919, #1944, #1964). It also adds
+entries that the first two versions missed: the N83 Koblitz programme (D8),
+the large-prime domain (D9), solver-cost selection (D10), the controlled
+coset comparison (A13) and the genus-3 cover after cubic GHS (E6). Every
+number added in this round was checked against the cited study on `main`.
 **Report PDF:** [`REPORT.pdf`](REPORT.pdf), built from this file.
 **Figures:** [`figures/taxonomy.svg`](figures/taxonomy.svg) and
 [`figures/cost_vs_rho.svg`](figures/cost_vs_rho.svg) map the families;
@@ -31,6 +45,16 @@ Path conventions:
 "× rho" always means the ratio the cited source recorded against its own
 matched rho arm. These ratios come from different curve sizes and different
 accounting, so two rows are not comparable unless the text says they are.
+
+**Pricing weight (AGENTS.md §5a).** Since 2026-10-15 a cross-method ratio or
+ranking must price every arm's unpriced native work (lookups, row operations,
+canonicalisations and the like) at 0, 0.1 and 1 group-addition equivalents
+per operation, and a ranking stands only if it holds at every weight. Every
+"× rho" in this note that does not say otherwise was recorded before that
+rule, at weight 0 with the unpriced work left out on both sides. Read it as a
+**lower-bound comparison**, not a verdict. Ratios that were priced across the
+band say "band" and give the weights. Wall-clock ratios (the N83 rows, D8)
+say "wall"; they are not in the `S` unit and were not band-priced.
 
 ---
 
@@ -70,22 +94,34 @@ attach to NIST curves:
 | step map | `y ↦ y²`, with `y_0 = x/g` and `y_{t−1}² = 1` | the x-map of a 2-isogeny (Vélu): `y_{j+1}(y_j − ξ_j) = y_j² − ξ_j y_j + τ_j` |
 | existence | `2^t \| p − 1` | none on `p`: `E'` is searched for |
 | build cost | one exponentiation for `ζ`, then `2^t` multiplications | an auxiliary-curve search, about `2^t` point counts, charged to the factor-base phase |
-| implementation | `prime-kummer:t=T[,g=G]` in `src/cryptanalysis/ic_framework/prime_tower.rs` (an `ic.pipeline` plug-in), and `examples/pkm_tower_pilot.rs` | `examples/pkm_tower_pilot.rs` only (lines 497–590); no plug-in |
-| largest instance run | `t = 11` (`N = m·t ≤ 22`) at `p₁ = 2013265921` | `t = 10` (`N ≤ 20`) at `p₀ = 786433` |
-| run at NIST size? | **No** | **No** |
+| implementation | `prime-kummer:t=T[,g=G]` in `src/cryptanalysis/ic_framework/prime_tower.rs` (an `ic.pipeline` plug-in), and `examples/pkm_tower_pilot.rs` | `prime-isogeny:t=T[,seed=S]` in the same file since PR #1889 (`u64`, `t ≤ 20`, search charged), with `aux=supersingular` since PR #1947; `examples/pkm_tower_pilot.rs` (lines 497–590) for the solver runs; `pkm-aux-search` and `src/cryptanalysis/two_sylow_search.rs` for the P-192 auxiliary curve (PR #1925) |
+| largest instance run | solver: `t = 11` (`N = m·t ≤ 22`) at `p₁ = 2013265921`; Kummer at `v₂(p − 1) = 40, 48, 56` and at the P-224 prime up to `m = 2, N = 20` and `m = 4, N = 12` (PR #1942) | solver: `t = 10` (`N ≤ 20`) at `p₀ = 786433`, and with a supersingular `E'` up to `N = 20` at 24–31-bit primes (PR #1947); ecbench: `t = 8…11` at 20–28 bits (PRs #1889, #1947); construction: `E'` with a point of order `2^38` (ordinary) and `2^48`, `2^64` (supersingular) at the P-192 prime, and `V` built there for `T ≤ 16` (PR #1925) |
+| run at NIST size? | **F4 solver only**: `D`, width and steps at the P-224 prime equal the 31–32-bit values (PR #1942). No `S`, no relation phase | **Construction only**: the auxiliary curve and the tower `V` at the P-192 prime (PR #1925). No F4 run and no relation phase at P-192 |
 
-**Neither family has been run on a NIST prime.** Every tower run used a
-generated prime of 20–32 bits. The NIST primes enter only through the 2-adic
-valuation table of the PKM note §10.10 (lines 1142–1162), which the note calls
-"properties of the primes, not measurements", and through PKM's own slide
-remark, quoted in
+**What has run on a NIST prime** (since 2026-10-16). Until PR #1942 every
+tower run used a generated prime of 20–32 bits, because the F4 tower engines
+stored coefficients in 32-bit words and asserted `p < 2³²` (PR #1893). The
+generic-field engine `f4_tower_generic`
+([`research/f4_generic_field_20261015/README.md`](../../../research/f4_generic_field_20261015/README.md))
+now runs the Kummer tower at the P-224 prime and the Dickson torus tower at
+the P-192 and P-256 primes. It gives the recorded small-prime `D`, width and
+step count in all 82 cells run (§0.1). The isogeny tower has an auxiliary
+curve and a built `V` at the P-192 prime (PR #1925, §0.2), but **no F4 run at
+P-192 yet**: its system builder is still `u64`. Both are stage diagnostics of
+the solver or of the construction. Neither family has a priced relation phase
+(`S`, ratio to rho) at a NIST size; the `prime-kummer` and `prime-isogeny`
+plug-ins work in `u64` (`prime_tower.rs`, and `primitive_two_power_root`
+refuses `t ≥ 63`). The NIST primes' 2-adic valuations are in the PKM note
+§10.10 (lines 1142–1162), "properties of the primes, not measurements", and
+PKM's slide remark is quoted in
 [`research/pdp_root_finder_requirements_20261012/README.md`](../../../research/pdp_root_finder_requirements_20261012/README.md)
-lines 104–119: "NIST P-224 has `p − 1 = 2^{96}·N'`". The code cannot hold a
-NIST prime either. `prime_tower.rs` works in `u64`, and
-`primitive_two_power_root` refuses `t ≥ 63` (lines 27–36). The pilot counts
-points naively in `O(p)`. The autoresearcher ledger has no P-224 coset base and
-no P-192 isogeny-chain base. Its only P-192 factor-base object is a class-group
-base, entry E3 below.
+lines 104–119: "NIST P-224 has `p − 1 = 2^{96}·N'`". The autoresearcher ledger
+has no P-224 coset base and no P-192 isogeny-chain base. Its only P-192
+factor-base object is a class-group base, entry E3 below.
+[`research/elliptic_snfs_survey_20261016/README.md`](../../../research/elliptic_snfs_survey_20261016/README.md)
+(PR #1951) places both towers as shape C of an "elliptic SNFS": the only
+prime-field analogue of a special factor base, with open asymptotic cost, and
+one whose isogeny variant works for every prime.
 
 ### 0.1 Kummer tower: `g·μ_{2^t}` (the P-224 shape)
 
@@ -221,9 +257,79 @@ The `prime-kummer:t=8…11` base was run on five curves of 20–28 bits with
   `x^B − c^B`, and a cost `Õ(B^m)`, "still worse than MITM at theta =
   ceil(m/2)".
 
+**Deeper 2-adicity, the torus variant, and the cost of the next cells
+(2026-10-15, PR #1893,
+[`research/pkm_dickson_torus_20261015/README.md`](../../../research/pkm_dickson_torus_20261015/README.md)).**
+
+- *Deeper 2-adicity* (measured). At `p₂ = 3·2^30 + 1` (`v₂(p − 1) = 30`),
+  Kummer `D` and width equal the recorded values at `p₀` (`v₂ = 18`) and `p₁`
+  (`v₂ = 27`) in every `(m, N)` cell run (`m = 2`, `N = 2…18`; `m = 3`,
+  `N = 6…12`), and so do the steps wherever the recorded targets were also
+  random. The study derives why: `ζ` enters only through `V`, which the system
+  never contains. `v₂ ≥ 40` could not be run there: both F4 engines held
+  32-bit coefficients, and no prime below `2³²` has `v₂(p − 1) > 30`. PR #1942
+  (below) removed that limit.
+- *The Dickson torus tower* (`2^t | p + 1`) gives the split `D` in all 16
+  cells; see 0.2 and A5c.
+- *The next cells, derived and not run.* `m = 3, N = 21` projects to about
+  130–150 GB peak memory and 2.5–7.4·10¹⁵ multiply-adds; `m = 4, N = 20` to
+  about 240–380 GB and 0.85–2·10¹⁶. Each needs a 192–256 GB or a 512 GB host,
+  or a disk-backed reducer block. A value at `m = 3, N = 21` could extend the
+  `D = 7` plateau to `L = 6` or show a rise; neither gives H1a, which needs
+  `N ≥ 27` at `m = 3`.
+
+**The tower at NIST primes: a generic-field F4 engine (2026-10-15, PR #1942,
+[`research/f4_generic_field_20261015/README.md`](../../../research/f4_generic_field_20261015/README.md)).**
+
+- *Built.* `f4_tower_generic<F: PrimeField>`, the `u32` engine's algorithm
+  over any field backend (`Fp32`, the AVX-512 IFMA `Fp52`, `Fp64`, `FpP192`,
+  `Fp224`, `FpWide<N>`), with a wide system builder above `2^63`. At `Fp32` it
+  reproduces `f4_fp_tower` field for field on 182 rows (0 differences). The 5
+  pre-registered speed claims pass: 1.091× and 1.058× at `p < 2³¹`, 2.18× and
+  2.24× above `2³¹`, and `Fp52` 2.57× `Fp64` at 45 bits (engineering).
+- *Measured, H_same in all 82 cells.* Kummer at `v₂(p − 1) = 40, 48, 56`
+  (`27·2^40 + 1`, `15·2^48 + 1`, `27·2^56 + 1`) and at the P-224 prime
+  (`v₂ = 96`), for `m = 2, N = 2…18`, `m = 3, N = 6, 9, 12` and `m = 4, N = 8`,
+  and the Dickson torus at P-192 (`m = 2, N ≤ 18`; `m = 3, N ≤ 12`) and P-256
+  (`m = 2, N ≤ 16`; `m = 3, N ≤ 9`): 74 cells, each with the recorded
+  31–32-bit `D`, width and step count. Eight extension cells (one target
+  each) agree as well. The key ones:
+  - Kummer `m = 2, N = 20` at P-224: `D = 6`, width 33,446, 24 steps, as
+    `K1`; 3,690 s;
+  - Kummer `m = 4, N = 12` at P-224: `D = 7`, width 9,452, 29 steps, as `M4`;
+  - Kummer `m = 3, N = 15` at `v₂ = 40`: `D = 7`, width 31,397, as `M3`;
+  - torus `m = 2, N = 20` at P-192: `D = 6`, width 33,426, as T31.
+  On the fixed binary the multiply-add count of a Kummer cell is the same at
+  45, 52, 61 and 224 bits (481,961,879,776 at `m = 2, N = 20`): "the
+  computation does not see the prime at all at these sizes". Every finished
+  P-192, P-224 and P-256 row passed the wide builder's `BigUint` re-check
+  (`--verify`, 82/82), and every `u64`-builder row an exhaustive recount
+  (97/97).
+- *Cost per multiply-add* (descriptive, shared host): 14.47 ns at P-224
+  (`Fp224`) and 8.51 ns at P-192, against 0.479 ns for `Fp32` at `p₁`.
+- *What it settles.* Lead 4 (§8): `D` does not depend on `v₂(p − 1)` or on the
+  size of the prime, up to P-224, wherever it was measured. *What it does not
+  settle.* Whether `D` stays bounded as `N` grows (lead 1); every cell is at
+  `N ≤ 20`, and the P-224 statement is a solver-stage diagnostic with no `S`.
+
+**Priced across the §5a band (2026-10-15, PR #1837,
+[`research/ic_frontier_campaign_20261015/README.md`](../../../research/ic_frontier_campaign_20261015/README.md)).**
+The frontier campaign re-ran the `prime-kummer` tower in ecbench at 20–28 bits
+(log₂ r 18.9–26.2) and priced every arm's unpriced work at 0, 0.1 and
+1 GAE per native operation. The tower arm's mean `S` over the negation-map
+rho rises from **30.3 to 141.3×** across the sizes at `w = 0`, 30.4 → 158.7×
+at `w = 0.1` and **31.0 → 238.7×** at `w = 1`. Pricing the unpriced work
+widens the gap, so the ranking (rho first) holds at every weight. The
+campaign's verdict covers every family it ran: "No index-calculus arm beats
+generic rho on any curve at any band weight; no index-calculus arm has a
+fitted cost exponent below rho's."
+
 **Status.** Open, and inconclusive on the solver axis: at `m ≥ 4` there is no
-data past `N = 16`. End to end it is engineering: a tower base costs the same
-as a plain base in a table oracle. It is not run at P-224 size.
+data past `N = 16` at a small prime or `N = 12` at P-224, and the next cells
+need a large-memory host (above). 2-adicity up to `v₂ = 96` (the P-224 prime)
+changes nothing in `D`. End to end it is engineering: a tower base costs the
+same as a plain base in a table oracle, and 30–239× rho across the band at
+20–28 bits. No relation phase has run at P-224 size.
 
 ### 0.2 Isogeny tower: `x(R' + ⟨Q⟩)` on an auxiliary curve (the P-192 shape)
 
@@ -241,8 +347,12 @@ as a plain base in a table oracle. It is not run at P-224 size.
 
 **Why it is the generic family.** It places no condition on `p`. So on P-192
 (`v₂(p − 1) = 1`) it is the route that remains. A Dickson torus tower
-(`2^t | p + 1`, `t ≤ 64`) would also exist there, but the torus case was never
-measured at a P-192-like prime (§10.10). The PKM note §4.5 (lines 600–603)
+(`2^t | p + 1`, `t ≤ 64`) also exists there. It was first measured as a tower
+in PR #1893, at two primes with `v₂(p − 1) = 1` (`T24`, `T31`): it gives the
+same `D`, width and steps as the split Dickson tower in all 16 cells, and it is
+degenerate at infinity like the split towers (A5c). So on a P-192-shape prime
+the torus tower is the split computation on different numbers, and the
+isogeny tower stays the only non-degenerate family. The PKM note §4.5 (lines 600–603)
 makes this the only family that can support a statement about generic primes:
 "Conclusions about generic primes come only from `kind = isogeny`." It is also
 the one tower that is not degenerate at infinity (§3.4).
@@ -276,15 +386,116 @@ The `E'` found had order 786,688 at `t = 8` and 787,456 at `t = 10`. The pilot
 lists "charging the auxiliary-curve search as free" as inadmissible, so any
 priced run must add it.
 
-*Derived here:* at P-192 size with `m = 4`, `t ≈ 48`, so the note's own
-estimate (line 246) is about `2^48` SEA point counts per factor base. PKM's
-cheaper alternative builds `E'` by CM through `x² − Dy² = 4N` (requirements
-README lines 110–119). It was not implemented.
+*Derived in the first version of this note:* at P-192 size with `m = 4`,
+`t ≈ 48`, so the note's own estimate (line 246) is about `2^48` SEA point
+counts per factor base. PKM's cheaper alternative builds `E'` by CM through
+`x² − Dy² = 4N` (requirements README lines 110–119). It was not implemented.
 
-**Status.** Open on the solver axis, and measured only at a 20-bit prime. It is
-not wired into `ic_framework` or ecbench, never priced end to end, and not run
-at P-192 size. The autoresearcher program cites the construction (`AR:KN-LIT-025`)
-but never built it: `AR:H-RELN-96e3ba` calls the PKM arm "unmaterialised".
+**Charged end to end in ecbench (2026-10-15, PR #1889,
+[`research/pkm_isogeny_tower_ecbench_20261015/README.md`](../../../research/pkm_isogeny_tower_ecbench_20261015/README.md)).**
+The base is now the `ic.pipeline` plug-in and `ecbench fb` family
+`prime-isogeny:t=T[,seed=S]`, with the auxiliary-curve search charged to the
+factor-base phase in group-addition equivalents. 1,080 runs on eight curves of
+20–28 bits, three of them with `v₂(p − 1) = 1` (the P-192 shape); every run
+verified and 720/720 replays identical.
+
+- *Measured.* Index calculus on the isogeny base costs **1.002–1.331× the same
+  index calculus on a plain base of equal size** (paired `S` ratios; p24 is
+  unresolved at 1.002 [0.979, 1.028]). The excess is the search's share of
+  `S`, **0.8% to 25%**, set by how many curves the seed happened to try (3 to
+  744), not by curve size; it is 13–25% on the three `v₂(p − 1) = 1` curves.
+  Every IC arm stays far above rho (isogeny ÷ rho 21.0–136.5).
+- *Measured.* Curves tried ≈ `C·2^t` with pooled `C = 1.05` over 224 builds
+  (`t = 8…14`), with a spread of two to three orders of magnitude between
+  seeds at fixed `t`.
+- *Derived, not measured.* At P-192 size (`t = 48`, `m = 4`) the search costs
+  about **`2^74` GAE** with a `2^25`-entry baby-step table (`2^82` at
+  `t = 64`), against rho's `√(πr/4) ≈ 2^95.8`. So the search would not
+  dominate; the relation and linear-algebra phases, which the solving-degree
+  question decides, would.
+- *Verdict* (class: accounting). The isogeny tower buys a table oracle nothing
+  over a plain base of the same size, as the Kummer tower did not; the price
+  of its construction is now inside `S`. No exponent claim.
+
+**The auxiliary curve at the P-192 prime: 2-Sylow halving (2026-10-15,
+PR #1925,
+[`research/pkm_isogeny_tower_p192_20261015/README.md`](../../../research/pkm_isogeny_tower_p192_20261015/README.md)).**
+
+- *Built.* `src/cryptanalysis/two_sylow_search.rs` and the binary
+  `pkm-aux-search` search for `E'/F_p` at `p = 2^192 − 2^64 − 1` without
+  counting points. Each draw is a curve with full rational 2-torsion, whose
+  2-Sylow is `Z/2 × Z/2^b`; x-only point halving computes `b`.
+- *Measured, cost per draw* (P-192, 65,536 draws × 7 interleaved
+  repetitions): on the `Z/2 × Z/8` family (`z2xz8`), the median is 30.83 µs
+  for the baseline and **10.06 µs** for the `fast` arm, **0.326×** the
+  baseline. All four pre-registered speed claims pass. Shared host, so the
+  timings are noisy.
+- *Measured, depth distribution.* `2^28` `z2xz8` draws (45.6 min on one core)
+  and `2^25` `z2xz2` draws match the pre-registered Haar model
+  (`P(b ≥ t) = 2^(3−t)` for `z2xz8`) at every tested `t`; draws to success
+  were 8,161 ± 45 at `t = 16` (model 8,192).
+- *Found and checked.* Ordinary curves with points of order `2^16`, `2^24`,
+  `2^28` and `2^38` (the deepest of the `2^28` draws). `backlog_check_aux2t`
+  accepts each and rejects `t + 1`. On the `2^38` curve the **Vélu tower `V`
+  is built at P-192** for `T = 8, 12, 16` (`|V| = 2^T` distinct abscissae;
+  `L(x) = c` holds on all of `V`, in the field backend and over `BigUint`).
+- *Derived: `t = 48`.* About `2^45` `z2xz8` draws × 10.06 µs, i.e.
+  **98,352 core-hours ≈ 11.2 core-years** (range 95,617–99,624). It
+  extrapolates the Haar model 17 bits past the deepest tested `t`.
+- *The shortcut (measured).* Over this prime `y² = x³ + x` is supersingular,
+  with cyclic group of order `p + 1` and `v₂(p + 1) = 64`. `pkm-aux-search
+  --family supersingular-j1728 --t 48` returns a point of order exactly
+  `2^48` from the first draw, in 7 ms (also `2^64`); the checker accepts both
+  and the tower builds on that curve (`T = 8, 16`). Whether PKM's relation
+  phase may use a supersingular `E'` was left open, and PR #1947 tested it
+  (next block).
+
+**A supersingular auxiliary curve (2026-10-15, PR #1947,
+[`research/pkm_supersingular_aux_20261015/README.md`](../../../research/pkm_supersingular_aux_20261015/README.md)).**
+The plug-in takes `prime-isogeny:…,aux=supersingular` (families `ss-j1728`,
+its twist, `ss-j0`, `ss-j0-twist`). Three pre-registered questions:
+
+- *Q1, structure of `V` (exact): not Möbius-equivalent to the torus; formally
+  "partial".* Over 103 primes `p ≡ 3 mod 4` (103–2999) and `t = 3, 4, 5`, no
+  `y² = x³ + x` set and no `j = 0` set is `PGL₂(F_p)`-equivalent to a Dickson
+  torus set. Two of 12,969 `y² = x³ − x` sets match one torus set, at one
+  cell (`p = 383, t = 3`), which the frozen rule counts as *partial*. Ordinary
+  curves: 0 of 24,580. So the supersingular route does not inherit the
+  torus verdict.
+- *Q2, F4 solving degree (measured): supersingular `D` = ordinary `D`, and
+  both ≠ torus.* In every one of the study's 14 `(m, N)` cells, at each of up to three
+  primes (24–31 bits), for all four supersingular curves: `D = 3, 5, 5, 5, 5, 5, 5, 5, 5`
+  at `m = 2, N = 2…18` and 6 at `N = 20`, with widths equal to the ordinary
+  tower's within one column. The torus gives 4 at `N = 4…10` and 5 against 6
+  at `m = 3, N = 6`. H2a holds, H2b fails, so H_same fails, as the protocol
+  predicted.
+- *Q3, charged relation phase (measured, ecbench at 20–24 bits, 504/504
+  verified).* The auxiliary work is **0.9–1.9% of `S`** with
+  `aux=supersingular` (the build alone), against **10–27%** for the searched
+  ordinary curve, with unchanged yield. Under the §5a band (0, 0.1, 1 GAE):
+  - supersingular ÷ ordinary on s22 **0.82 / 0.84 / 0.92** and on s24
+    **0.74 / 0.76 / 0.88**: cheaper at every weight, so this ranking holds;
+  - on s20 **1.11 / 1.10 / 1.07**: dearer at every weight (its base is 15%
+    larger), so H3c fails there;
+  - supersingular ÷ plain base of the same size: unresolved under §5a on s20
+    and s24 (the order flips inside the band, point ratios 0.98–1.02) and
+    1.01–1.07× dearer on s22, so "costs the same as a plain base" is not
+    held;
+  - every IC arm is 29–94× rho at `w = 0` and 36–85× at `w = 1`
+    (lower-bound comparisons on both sides; rho is cheaper at every weight).
+- *Conclusion, as the study states it.* "The 11-core-year ordinary search
+  buys nothing these experiments can see": a supersingular `E'` (one draw) is
+  a sufficient input for the relation phase. It does not touch lead 1,
+  whether `D` stays bounded as `N` grows, which remains the gate.
+
+**Status.** Open on the solver axis; the solver measured at 20–31-bit primes
+only, `N ≤ 20`. Priced end to end in ecbench at 20–28 bits (PRs #1889, #1947;
+accounting: no gain over a plain base for a table oracle). At P-192 the
+auxiliary curve and `V` are built (PR #1925), and the supersingular curve
+makes the auxiliary search free (PR #1947); no F4 run or relation phase has
+run at P-192, because the plug-in and the isogeny system builder are `u64`.
+The autoresearcher program cites the construction (`AR:KN-LIT-025`) but never
+built it: `AR:H-RELN-96e3ba` calls the PKM arm "unmaterialised".
 
 ---
 
@@ -447,7 +658,8 @@ without the *presentation*.
   Cyclic-norm folding in `O(log B)` products still yields a degree-`2B` output,
   so the per-target cost is `Õ(B)`.
 - **Verdict.** Refuted: no exponent change. The tower presentation of the same
-  `V` (0.1) is the only open form.
+  `V` (0.1) is the only open form. A13 compares the coset set with low-x,
+  low-digit-weight and random bases of matched size under one instrument.
 
 ### A5. Dickson bases
 
@@ -488,6 +700,24 @@ without the *presentation*.
   - **Verdict.** A degree fall appears only after splitting into components,
     and the branch frontier grows exponentially. End to end it is refuted at
     16–144 bits above rho.
+- **A5c. The Dickson torus *tower*** (2026-10-15, PR #1893,
+  [`research/pkm_dickson_torus_20261015/README.md`](../../../research/pkm_dickson_torus_20261015/README.md)).
+  The A5b rounds built the torus *set*; this is the first run of it as a PKM
+  tower, `y_{j+1} = y_j² − 2`, `y_{t−1}² = 2 + c`, with `V` and `c` from
+  `F_{p²}` and `2^t | p + 1`. Such a tower exists on P-192 (`t ≤ 64`) and
+  P-256 (`t ≤ 96`).
+  - *Measured* at `T24 = 7·2^21 − 1` and `T31 = 61·2^25 − 1` (both
+    `v₂(p − 1) = 1`): **H_same**. The torus `D` equals the split Dickson `D` in
+    all 16 cells (`m = 2`, `N = 2…20`; `m = 3`, `N = 6…15`; `m = 4`,
+    `N = 8, 12`), with the same width and step count: it is the same F4
+    computation on different numbers. The positive control (isogeny at `p₀`)
+    separated, and an exhaustive recount agreed on 127 of 127 rows.
+  - *Derived.* The torus equations are the split ones with a different `c`, so
+    their top forms are `y_{i,j}²` and the tower is degenerate at infinity
+    (BFS degree of regularity `N + 1`).
+  - **Verdict.** It inherits every open question of the split tower (0.1). It
+    is not evidence that `D` is bounded: the `m = 2` line rises to 6 at
+    `N = 20` exactly as Kummer's does.
 
 ### A6. P-256 affine bit-box `x = offset + Σ_{i<18} 2^i·b_i`, with `b_i² = b_i`
 
@@ -599,6 +829,33 @@ without the *presentation*.
   An audit score, not a base: P-224 and P-192 both score 0.647, and P-521
   scores 0.001. The PKM note §1.3 says it is "neither … PKM's construction".
 
+### A13. Controlled comparison: multiplicative coset, low-x, low digit weight and random bases (PR #1898)
+
+- **Definition.** Four point bases on the same prime-order curve, matched on
+  the actual number of canonical `±` point classes: a multiplicative coset
+  (the PKM-style set, A4 and 0.1), low abscissae (A1), low digit weight, and
+  random points. A separate quadratic-algebra norm solver after PKM §§3.3–3.4
+  was tried as a decomposition oracle.
+- **Measured** (`research/factor_base_evaluation_20261015/README.md`, browsing
+  copy in `benchmarks/20261015-factor-base-evaluation/`; 48 admitted curves
+  over 24 fields at 16, 20 and 24 bits). At 24 bits, independent rows per
+  total CPU second with the exact join: **low-x 1,352, coset 1,167, random
+  1,144, low digit weight 859**.
+  - Coset ÷ random throughput **1.020**, with a descriptive 95% whole-field
+    bootstrap interval of **[0.959, 1.083]**: "This does not establish a
+    coset throughput advantage."
+  - The norm solver passed its 24-bit positive-case gate, then produced 90
+    independent rows in **229.9 CPU s** on fresh inputs, against 115 rows in
+    0.268 CPU s for the exact join.
+- **Caveats, as recorded.** A historical import: the run used Sage, Python and
+  C, has no full-DLP solve, no matched rho, no counted end-to-end cost and no
+  isolation receipt, and the repository requires a native rerun before it is
+  extended. Stage throughput only, no ratio to rho, no §5a band.
+- **Verdict.** Stage diagnostic. At matched size the coset set gives no
+  measurable throughput advantage over random, consistent with yield
+  conservation (A2, §7 item 1). The low-x ordering is descriptive and not
+  band-checked.
+
 ---
 
 ## 3. Odd-characteristic extension fields `E(F_{p^k})`
@@ -642,10 +899,57 @@ equations that `F_p` lacks.
   and a degree-16 resultant oracle; the best arm is **267×** rho.
 - **E18, `k = 4` ψ fold.** `r∞ = 0.138 ± 0.008`, against 1.232 plain; handover
   at `2^146.0`.
+- **`D₄`-symmetrised `S₅` on the `τ_T` line, `k = 4`.** On a curve over
+  `F_{p⁴}` with a rational 2-torsion point `T`, FGHR's coordinate `Y` has
+  `Y(P + T) = −Y(P)`. With the base `{P : Y(P) ∈ F_p}`, `S₅` is invariant
+  under the Weyl group `D₄` (order 192), and the Bézout count falls from
+  4,096 to 512.
+  - **C8, unweighted** (2026-10-13, PR #1785,
+    [`research/gaudry_quartic_d4_20261013/README.md`](../../../research/gaudry_quartic_d4_20261013/README.md)).
+    Five unknowns `(σ₁, σ₂, σ₃, σ₄, π)` with `π² = σ₄`, Macaulay degree 14,
+    a 13,412 × 11,628 matrix: `C₄ = 2.535–2.552·10¹⁰` at `p = 269`, **48×
+    below** the plain form's `1.213·10¹²`, not the ≈ 630× projected. Handover
+    `2^135` in C8's own model.
+  - **Weighted, four unknowns** (2026-10-15, PR #1895,
+    [`research/d4_symmetrised_s5_20261015/README.md`](../../../research/d4_symmetrised_s5_20261015/README.md)).
+    `(σ₁, σ₂, σ₃, π)` with weights `(2, 2, 2, 1)`, weighted degree 8, a
+    3,979 × 4,200 matrix. *Measured:* about **1.41·10⁹** `F_p`
+    multiplications per solve, flat in `p` (medians 1.411, 1.406 and
+    1.437·10⁹ at `p = 269`, 1033, 4093); **18× below C8** (paired medians
+    17.8–18.5, at least 7.7× on each of 47 paired targets); **≈ 850× below the quoted plain `C₄`**
+    (medians 860, 863, 844), so the registered 630× projection is met. The
+    lift-back costs at most `2·10⁻⁴` of a solve. 101 of 102 targets closed
+    and matched brute force or meet-in-the-middle; the one degenerate target
+    (`p = 17`, quotient dimension 514) is unsolved by both arms, reported as
+    unsolved rather than wrong, and the verdict carries that caveat.
+    *Derived:* the handover in E18's `τ_T` frame moves to **`2^118.9`**, 39
+    bits before the plain `S₄` form's `2^157.9` and 17 bits before C8's
+    `2^135.6`. No relation collection, linear algebra or rho was run. The
+    gap between C8's 48× and the projection was the presentation, not the
+    symmetry.
+- **The `k = 4` bases in ecbench.** `ic.k4_gaudry` takes `base = xline`
+  (`{P : x(P) ∈ F_p}`), `yline-d4` (`{P : Y(P) ∈ F_p}`, columns
+  `{±P, ±(P + T)}`), `yline-d4-lp` (with large primes) and `yline-d4-ed`
+  (`src/cryptanalysis/ecbench/methods.rs`).
+  - *D₄ plus tuned double large primes* (2026-10-14,
+    [`research/ic_improve_20261014/01-d4-2lp/README.md`](../../../research/ic_improve_20261014/01-d4-2lp/README.md),
+    PR #1862): the whole solve **regresses, 1.025× [1.016, 1.037]** over 24
+    held-out curves (`p = 101–1301`), exponent +0.0055; the linear algebra
+    alone falls to 0.827×, but it is a negligible share of the D₄ cost.
+    ecbench (`yline-d4-lp`): 1.011× [1.001, 1.026]; untuned Gaudry-α 1.58×.
+  - *First-dependency stop* (`yline-d4-ed`, 2026-10-15,
+    [`research/ic_improve_20261015/04-d4-2lp-fix/README.md`](../../../research/ic_improve_20261015/04-d4-2lp-fix/README.md),
+    PR #1862): **0.979× [0.973, 0.986]** of D₄ over 27 held-out curves
+    (`p = 101–1601`), never worse on any curve, exponent unchanged;
+    ecbench 0.990× [0.977, 0.998].
+  - Both are paired ratios between two IC arms. The ecbench sessions label
+    them "diagnostic only (unpriced work)", and neither was band-priced.
 - **Q-curves (E14) and type-C CM endomorphisms (E4).** Base points survive only
   at chance rates, or the base has zero invariant points.
 - **Verdict.** Engineering or accounting throughout: a fold divides by the
-  group order and nothing more.
+  group order and nothing more. The weighted `D₄` solve is engineering too: a
+  constant of one phase (the per-decomposition solve), with no exponent
+  change.
 
 ### B3. Exotic coordinates (Möbius frames, 2- and 3-torsion; `RESEARCH_EXOTIC_COORDINATES.md`)
 
@@ -683,6 +987,23 @@ with the closure sweep in `examples/factor_base_closure_sweep.rs`.
     Geometric progressions are optimal (`dim V^{(2)} = 2l − 1`).
   - `CA:` linearized-half (Courtois 2016): `3l − 1 ≤ n` makes `S₃` `F₂`-linear;
     on ECC2K-130 it costs `2^91.0` and up, +30 bits over rho.
+  - **Binary MITM pair-table oracle** (2026-10-15/16; PR #1919
+    [`research/binary_mitm_oracle_l8_20261015/REPORT.typ`](../../../research/binary_mitm_oracle_l8_20261015/REPORT.typ),
+    PR #1944 [`research/binary_mitm_oracle_l9_l10_20261015/REPORT.typ`](../../../research/binary_mitm_oracle_l9_l10_20261015/REPORT.typ),
+    PR #1964 [`research/binary_mitm_oracle_l11_l12_20261016/REPORT.typ`](../../../research/binary_mitm_oracle_l11_l12_20261016/REPORT.typ)).
+    On a non-Koblitz curve (`a = z`, `b = 1`) with the base over
+    `⟨1, z, …, z^{l−1}⟩`, all `P_i + P_j` are tabled once (charged to the
+    factor-base stage), and a query looks up `R − P_k`. Against Gaudry
+    pairs-and-solve over the same subspace, median per-target wall ratios:
+    **94–277×** at `l = 8` (`n = 25`, three runs), **2,473.9×** at `l = 9`,
+    **4,244.2×** at `l = 10`, 928.0× at `l = 11` and 2,187.2× at `l = 12`
+    (`n = 37`; 259 MB table). The counted gap is the design's `2^l`: at most
+    16,092 point additions and lookups against 8,390,656 quartic solves at
+    `l = 12`. Zero disagreements with pairs-and-solve on every target.
+    *Class: engineering*, a stage `decomposition` record: the `2^{2l}` table
+    replaces the `2^{2l}` per-target scan, so relation collection stays
+    `Θ(2^n)`, and there is **no ratio to rho**. Wall times are from a shared,
+    unpinned host.
 - **Verdict.** Refuted at deployed size. "No engine here beats exhaustive
   search, and nothing beats rho" (`CA:suite/docs/ic/FRAMEWORK.md` §8).
 
@@ -692,14 +1013,41 @@ with the closure sweep in `examples/factor_base_closure_sweep.rs`.
 |:--|:--|:--|:--|
 | C2 random subspace | random `F₂`-subspace | `D*` about 4.0 at `2l = n`, rising with `l` (DREG measurement note) | the hard baseline |
 | C3 subfield `F_{2^l}` | `V = F_{2^l} ⊂ F_{2^n}` | `D*` about 2.0; unavailable at prime `n`; on `b = 1` the points lie in `E(F_{2^l})` and the yield collapses | structurally empty at prime `n` |
-| C4 EXP-H shapes | gp, gpscaled, gpsym, Frobenius progression, mixed, trace-zero variants | "No shape beats the coordinate window on class-0 targets" | negative; G1–G6 still open |
-| C5 trace-zero | `V ⊂ ker Tr` (`koblitz-trace-zero`) | doubles the yield; class-1 targets have zero decompositions (`AR:H-SEMBIN-83a856`, 79,751 targets) | engineering |
-| C6 Hamming ball | `{wt_NB(x) ≤ w}` in a normal basis | MultiSolve calls grow as `\|F_w\|^{1.9–2.5}`; `CA:` N53 weight-3: 3 DLPs, rho/IC 0.256–0.319 | rejected (it saves storage only) |
+| C4 EXP-H shapes | gp, gpscaled, gpsym, Frobenius progression, mixed, trace-zero variants | "No shape beats the coordinate window on class-0 targets"; at `m = 3` (PR #1892) shape, modulus and Frobenius twist move the refutation degree by exactly zero at `l ≤ 4` | negative; G1, G3, G5 killed; G2 survives at `n ≤ 9`; G4 not built; G6 not run (below) |
+| C5 trace-zero | `V ⊂ ker Tr` (`koblitz-trace-zero`) | doubles the yield; class-1 targets have zero decompositions (`AR:H-SEMBIN-83a856`, 79,751 targets). As a pre-filter in the compact-orbit pipeline: **1.00003×**, because odd-order IC targets lie in `2E` and it never fires (0 rejections in 29,624 checks; [`ic_improve_20261014/03`](../../../research/ic_improve_20261014/03-tracezero-freerel/README.md), PR #1862) | engineering |
+| C6 Hamming ball | `{wt_NB(x) ≤ w}` in a normal basis | MultiSolve calls grow as `\|F_w\|^{1.9–2.5}` ([`hamming_ideal_pdp_20260930/RESULT.md`](../../../research/hamming_ideal_pdp_20260930/RESULT.md): H1 refuted at `n = 11…19`; class accounting); `CA:` N53 weight-3: 3 DLPs, rho/IC 0.256–0.319 | rejected (it saves storage only) |
 | C7 quasi-subfield | `X^{2^{n₀}} − λ(X)` | "barren" at `n = 131`; `AR:KN-FIND-617d78`: `β > 1/2` | closed |
-| C8 Galbraith–Gebregiyorgis / Shantz–Teske | special subspace; δ shift | GG "buys variables, not degree" (`D* = 4` at `n = 9`, ≥ 5 at `n = 15`); δ lowers `D*` by about 1 | constant factor |
+| C8 Galbraith–Gebregiyorgis / Shantz–Teske | special subspace; δ shift | GG "buys variables, not degree" (`D* = 4` at `n = 9`, ≥ 5 at `n = 15`); δ lowers `D*` by about 1. The DoR campaign ([`factor_base_dor_campaign_20261013/REPORT.typ`](../../../research/factor_base_dor_campaign_20261013/REPORT.typ), PR #1826; Koblitz `n = 9…19`): F1, the subfield base (closed under products) refutes at `D* = 2` against 2.35–3.00 for standard and random bases; F10, shrinking `l` from 3 to 2 at `n = 15` (δ +6 → +9) drops `D*` from 5 to 3. At `n = 131` there is no proper subfield, so only the δ lever exists there | constant factor |
 | C9 affine plane at N19 | `12009 + span{257473, 353192}`, 152 points | coverage 99.44% of the best; SAT 1.23× slower (AR admissible-affine study, 2026-09-21) | negative |
 | C10 curve-adapted full-density subspaces | subspaces dense in `x(E)` | `CA:` density 0.079–0.994 of random at dimension 5; about dimension 10 at `n = 131`, against the 33 needed | negative |
 | C11 orbit-valued quotient | Frobenius-orbit invariants as the base | full degree (`n = 19`: 18); missing entropy at `n = 131` | negative |
+
+**Shape search G1–G6 at `m = 3`** (2026-10-15, PR #1892,
+[`research/shape_search_g1_g6_20261015/README.md`](../../../research/shape_search_g1_g6_20261015/README.md)).
+A stage diagnostic: refutation degrees of descended Semaev systems on toy
+binary fields (`n ≤ 13`), with no `S` and no ratio to rho. The goals are the
+ones frozen in `RESEARCH_FACTOR_BASE_SHAPE_SEARCH.md` §7.
+
+- **G1** (shape gap at `m = 3`): **killed on the scaled cells** `(5,2)`,
+  `(7,3)`, `(11,4)`: `gp`, `fp` and `coord` sit exactly at random (gap
+  0.000). **Untestable on the frozen cells** `(13,5)`, `(17,6)`, `(19,7)`:
+  a single `(13,5)` probe did not finish in 60 minutes on the shared host.
+- **G2** (τ-twisted chains): **survives at `n ≤ 9`**: rise 0.000 in every arm
+  at `(5,2)`, `(7,3)`, `(9,3)`. It survives a kill condition about degree,
+  not about shape.
+- **G3** (coordinate window across moduli): **killed**, panel spread 0.000.
+- **G4** (trace-form, non-subspace Frobenius-stable sets): **not built**.
+- **G5** (Möbius pole, `m = 2`): **killed**, the expected null (`β`-spread
+  0.06–0.19, under the 0.3 threshold).
+- **G6**: **not run**; no survivor of G1 or G3 to carry to `n = 31`.
+- The positive control (the subfield `F_8 ⊂ F_{2^9}`) refutes at 5 where
+  random reads 6, so the instrument sees a one-degree shape effect.
+
+At these sizes the refutation degree is set by `l` alone: 5 at `l = 2`, 6 at
+`l = 3, 4`. The open question is `l ≥ 5`, where the ladder reads `≥ 7` and
+could separate shapes; this host could not reach it. The study also found that
+the shape-search note's frozen scale-8 `m = 2` run never landed: its evidence
+file is missing on `main`.
 
 ---
 
@@ -734,7 +1082,30 @@ with the closure sweep in `examples/factor_base_closure_sweep.rs`.
   - ECC2K-130 total-work verdict: a materialised union bottoms out at
     `2^124.99`, i.e. `2^64.18`× rho.
   - ecbench `n = 17`: 9.985× rho-frob.
-- **Verdict.** It wins online after precomputation only.
+  - **Across the §5a band** (2026-10-15, PR #1837,
+    [`research/ic_frontier_campaign_20261015/README.md`](../../../research/ic_frontier_campaign_20261015/README.md);
+    16 targets × 2 rounds per curve, every run verified, L0 counts). Mean `S`
+    over signed-Frobenius rho at `w = 0` / 0.1 / 1 GAE per native operation:
+    **3.8–15.0×** at `w = 0` and **11.8–30.3×** at `w = 1` over Koblitz
+    `n = 13…47` (log₂ r 11–39); for example 3.8 / 4.9 / 11.8 at `n = 17` and
+    15.0 / 17.8 / 30.3 at `n = 41`. Fitted exponent at `n = 37–47`: 0.589
+    [0.518, 0.743] against rho's 0.436 [0.358, 0.508] at `w = 0`, separated
+    there and overlapping at `w = 0.1` and 1. Rho is cheaper on every curve at
+    every weight. `ic-shared` leaves three categories uncounted, so the IC
+    side is still a lower bound.
+  - **Free relations** harvested from the root table (constant, paired
+    against the same pipeline without them). Complete solve **0.957×
+    [0.944, 0.970]** counted (`n = 41, 53, 61`;
+    [`ic_improve_20261014/03`](../../../research/ic_improve_20261014/03-tracezero-freerel/README.md))
+    and, tuned against tuned on held-out curves, **0.960× [0.946, 0.976]**
+    ([`ic_improve_20261015/02`](../../../research/ic_improve_20261015/02-freerel-production/README.md));
+    both PR #1862. **Default on** in
+    `examples/koblitz_orbit_dlp_fast_online.rs`; `KIC_FREE_RELATIONS=0`
+    restores the old pipeline byte for byte. The trace-zero pre-filter tried
+    with it never fires (C5). These are IC-against-IC ratios, not ratios to
+    rho, and were not band-priced.
+- **Verdict.** It wins online after precomputation only. Priced across the
+  band, it stays 3.8–30.3× rho.
 
 ### D3. `Z[τ]`-multiplier closure (`compact-orbit-scan:norm=N`)
 
@@ -754,7 +1125,29 @@ with the closure sweep in `examples/factor_base_closure_sweep.rs`.
   131).
 - **Measured.** ecbench `n = 23`, `a = 1`: `S = 3.427`, 9.9× rho. The solver
   cells timed out.
-- **Verdict.** An open engineering lead; the falsifier is not established.
+- **The falsifier's yield clause, settled** (2026-10-15, PR #1887,
+  [`research/cyclotomic_falsifier_20261015/README.md`](../../../research/cyclotomic_falsifier_20261015/README.md)).
+  An exact count over all `r` targets at `n = 23` (`K_1` and `K_0`) of
+  `|B+B|`, `|B+B+B|` and additive energy, against 1999 random
+  Frobenius-stable bases with the same columns.
+  - *Measured.* **Yield-neutral**: all 15 tests (10 coverage, 5 energy) lie
+    in the null (smallest two-sided p 0.363 against a critical 0.00333;
+    largest deviation 0.65%). The positive control, a λ-progression base, is
+    detected on every `n = 23` cell (p = 0.001). The `n = 11` cells cannot
+    separate structure from chance and do not count.
+  - *Measured, cost (ecbench, operations only, L0).* Against
+    compact-orbit-scan at equal columns, cyclotomic is **costlier** by
+    **1.022** [1.021, 1.023] (`K_1`, `w = 2`) and **1.122** [1.120, 1.125]
+    (`K_0`, `w = 2`), both from the factor-base build phase, and unresolved
+    in the other two pairs. Every IC arm is 2.7–30× rho-frob.
+  - *Not tested.* The solver clause (a membership system of lower solving
+    degree) is untested; the only record, at `n = 11`, went the wrong way
+    (F4 degree 4 against 3 for ONB). `n = 83` was not run: the plug-in is
+    single-word and no exact cheap cell exists.
+- **Verdict.** In yield, `C_w` behaves like a random Frobenius-stable base of
+  the same size, and it costs slightly more to build. The lead survives only
+  in the narrow sense that its yield is not lower; any value it has must come
+  from the untested solver clause.
 
 ### D5–D7. Other Koblitz bases
 
@@ -771,6 +1164,121 @@ with the closure sweep in `examples/factor_base_closure_sweep.rs`.
   - Floor-curve twins are level-blind.
   - `CA:` volcano descendants: E0 needs 0.996× the attempts (CI 0.976–1.017).
   - Negative.
+
+### D8. The N83 Koblitz programme: signed-Frobenius orbit bases at `n = 83`
+
+- **Instances.** Two different workloads share the degree and must not be
+  merged ([`research/n83_evaluation_20261012/README.md`](../../../research/n83_evaluation_20261012/README.md)
+  "Exact fixture and identity correction"):
+  - the **evaluation and tournament curve** `EC1N83Ckb1a1haacb69ee9f37`,
+    `y² + xy = x³ + x² + 1` over `F_2[z]/(z^83 + z^7 + z^4 + z² + 1)`, with
+    a prime subgroup of order 8,569,786,107,849,059 (about 52.9 bits) and
+    cofactor 1,128,547,018;
+  - the sweep's **primary** model `icv1-f2m83-tm6151469093347-debefd74`,
+    `y² + xy = x³ + 1` (`a = 0`), with an 81-bit subgroup
+    ([`research/koblitz_n83_factor_base_sweep_20261008/README.md`](../../../research/koblitz_n83_factor_base_sweep_20261008/README.md)).
+- **Definition.** `K` signed Frobenius orbits (166 points each) of subgroup
+  points, folded to `K` relation columns: `K = 600` (99,600 points) in the
+  evaluation, `K = 3,240–3,596` (537,840–596,936 points) in the tournaments.
+  The oracle is a precomputed table of the `S₃` roots over pairs of base
+  points, queried so that each target gives a four-point relation. The
+  variants are storage layouts of that table: `root4`, `root5`, `root11`,
+  `root21`, `root22` (bytes per root slot or state), a Bloom filter, a
+  sparse linear-map canonical selector (`sparse-canonical`) and the `wide3`
+  layout. The sweep's mixed-orbit supervisor and hosted paired gate landed in
+  PRs #1739 and #1931.
+- **Measured** (all wall clock, not the `S` unit; one cloud or local host per
+  study; none band-priced):
+  - *Cold, K600 against strong rho* (PRs #1719, #1722,
+    [`n83_evaluation_20261012`](../../../research/n83_evaluation_20261012/README.md);
+    five paired repeats of one public target). Fresh-process **IC/rho
+    218.03 [172.36, 285.57]**; prepared-online IC/rho 1.382 [1.036, 1.882].
+    IC took 1,054.6 s per fresh process (1,047.9 s of it reusable
+    preparation; 5.8 GB peak) against 5.07 s for rho.
+  - *Online, Tier 1, K3240 `root21`*
+    ([`n83_tier1_final_results_20261014/RESULT.md`](../../../research/n83_tier1_final_results_20261014/RESULT.md),
+    PR #1824; five unseen public points, one GitHub Actions allocation):
+    median **rho/IC 54.10**, bootstrap interval **[17.18, 58.90]**, every
+    relation and scalar replayed. The IC clock starts after base, index and
+    factor logs are ready: setup, 580–640 s per process and rebuilt for each
+    point, is excluded, against rho's 1.2–5.0 s per solve.
+  - *Selection panels* (PRs #1868, #1872, #1904, #1906, #1910, #1912, with
+    results in #1917;
+    1,000–20,000 fresh points each): the sparse canonical selector cut
+    K3300/`root11` online time from 39.722 to 31.963 ms; K3300 beat K3250
+    (+2.534 ms [+1.796, +3.263]); K3300/`root11`/`wide3` led the `root4`,
+    `root21` and `root22` challengers; K3425/`root4`/Bloom and
+    K3450/`root11`/`wide3` entered the final as `BOUNDED_UNKNOWN`.
+  - *Final tournament* (PR #1917,
+    [`n83_final_tournament_results_20261015/RESULT.md`](../../../research/n83_final_tournament_results_20261015/RESULT.md);
+    4,000 fresh points, mirrored order): K3425/`root4`/standard 28.69 ms,
+    K3450/`root11`/`wide3` 28.81 ms, K3300/`root11`/`wide3` 30.67 ms,
+    K3596/`root4`/off 35.38 ms. Decision **`BOUNDED_UNKNOWN`** between the
+    first two. A same-point Tier 1 pair for each finalist
+    ([`n83_unresolved_tier1_results_20261015/RESULT.md`](../../../research/n83_unresolved_tier1_results_20261015/RESULT.md))
+    gave rho/IC 413.3× and 63.9× online, one point each; "a single point
+    cannot resolve the factor-base population ranking".
+  - *High-K confirmation* (PR #1945,
+    [`n83_root4_highk_confirm_results_20261016/RESULT.md`](../../../research/n83_root4_highk_confirm_results_20261016/RESULT.md);
+    8,000 points): K3500/`root4` 27.56 ms against K3596 29.74 ms,
+    `PANEL_SELECTED` for K3500, with a K3596 timing drift between its two
+    processes (+6.43 ms) that the study flags for an A/A replication.
+- **Verdict.** Engineering, online only. After a 10-minute, 10–15 GiB setup
+  the prepared base answers a 53-bit-subgroup target in tens of
+  milliseconds, 17–59× faster than strong rho in wall time, but the cold
+  cost is 218× rho at K600, and the sweep's own requirement stands: "the
+  requested minimum **complete cold index-calculus runtime remains
+  unresolved**". The ratios are wall-clock on shared or cloud hosts, not
+  priced across the §5a band, and are not evidence about ECC2K-130
+  (AGENTS.md §8a: the subgroup is 53 bits). It is the D2 trade at a larger
+  degree.
+
+### D9. Large-prime domain extension (one and two large primes)
+
+- **Definition.** Beside the base `F`, a domain `D` of the next
+  `lp_domain_factor·|F|` signed points from the compact-orbit scan. A
+  partial relation leaves one or two summands in `D`; partials are merged
+  exactly (`±λ^t` orbit coefficients mod `r`) and every merged row is
+  replayed in the counted group before it reaches the matrix. Plug-in
+  `mitm-frobenius:m=3,large_primes=2,lp_domain_factor=10`
+  (`ic_framework::large_prime`); in ecbench, the method `ic.large_prime` on
+  the `binary-nested-large-prime` family
+  (`src/cryptanalysis/ecbench/methods.rs`), under
+  [`ECBENCH_LARGE_PRIME_PROTOCOL.md`](../ECBENCH_LARGE_PRIME_PROTOCOL.md).
+- **Measured** ([`research/ic_techniques_20261012/double_large_prime/README.md`](../../../research/ic_techniques_20261012/double_large_prime/README.md),
+  PR #1737; `K_0` at `n = 23, 31, 41`; 51 cells, 260 targets, every
+  logarithm verified).
+  - At `n = 23` and 31 (`r ≈ 2^21`) the plain table already decomposes almost
+    every trial, and every large-prime cell is worse end to end (2.2–750×).
+  - At `n = 41` (`r = 2^39`, 10 columns), trials per relation fall **8.7×,
+    36× and 138×** below the plain oracle with two large primes at
+    `|D|/|F| = 3, 10, 30` (4.1×, 6.9×, 10.3× with one).
+  - The best cell, two large primes at `|D| = 10|F|`, costs **17.7× the
+    counted signed-Frobenius rho** for one cold target, against **420×** for
+    the plain oracle on the same base. The equal-envelope control (a plain
+    base as large as `F ∪ D`, 110 columns) reads 36.7×.
+- **Verdict.** Engineering: a constant on a toy rung inside the pair-table
+  family, and still above rho. The ratios are weight-0 counts, recorded before
+  §5a: hash probes, canonicalisations and row operations are named but
+  unpriced, so read them as lower-bound comparisons.
+
+### D10. Choosing among invariant subspaces by solver cost
+
+- **Definition.** Not a new base: a selection rule among the admissible
+  Frobenius-invariant subspaces of D1 (`koblitz-orbit:divisor=i;j`), scoring
+  measured F4 cost instead of expected trials.
+- **Measured**
+  ([`RESEARCH_FACTOR_BASE_SOLVE_COST.md`](../../../research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md),
+  evidence in [`research/groebner_base_sweep_20260915/`](../../../research/groebner_base_sweep_20260915/summary.json);
+  `icv1-f2m15-t275-b7f03703`, five bases, 60 verified logarithms). The
+  trials-optimal selector ranks the bases almost backwards: **Spearman −0.90**
+  against measured F4 word XORs, and the trials-optimal base (`2·3`) costs
+  **12.12×** the cheapest. After a later change to the system builder, the
+  matched re-run reads 11.48× and `ρ = −0.83` (§6 of the note).
+- **Verdict.** A stage diagnostic (the Gröbner stage only, no `S`, no ratio to
+  rho). The selector now scores solver cost when asked. At `n = 131` the
+  question does not arise: the invariant lattice has dimensions
+  `{0, 1, 130, 131}` only.
 
 ---
 
@@ -806,6 +1314,43 @@ with the closure sweep in `examples/factor_base_closure_sweep.rs`.
 - **E5. Smith plane-quartic codomain** (`ML:experiments/smith-codomain/report.md`).
   Diem line relations yield like a generic quartic: `f²/2`, and 10–30× the
   hyperelliptic yield.
+- **E6. Genus-3 cover base after cubic GHS, with double large primes
+  (IC-2LP).** Transfer the ECDLP on `E0(F_{q³})` (a structured class:
+  `#E0(F_{q³}) ≡ 0 mod 4`, split arm) to the Jacobian of a genus-3
+  hyperelliptic curve over `F_q`, and run index calculus there with the
+  degree-1 places as base and two large primes.
+  - *First run* (2026-10-14,
+    [`research/ic_next10_20261014/07-cubic-ghs-genus3/README.md`](../../../research/ic_next10_20261014/07-cubic-ghs-genus3/README.md),
+    PR #1862; a Python tool with explicit counters, `q = 2^8…2^15`, 24/24
+    solves verified). Fitted exponent in `q`: **1.300 [1.292, 1.308]** over
+    all sizes and **1.377 [1.363, 1.392]** over `q = 2^11…2^15`, against
+    rho's 1.5. Against the strongest rho the instrument supports (measured
+    cost per step × `√(πℓ/2)`), IC-2LP is **still 1.62× more expensive at
+    `q = 2^15`**, and 2.29× against an ideal negation-map rho; a crossover is
+    only extrapolated (`q ≈ 2^17.2…2^19.2`, about `2^25` once linear algebra
+    mod `ℓ` is priced). Measured at weight 0 in `F_q`-multiplication
+    equivalents, before §5a.
+  - *Rust port and improvement rounds* (IC against IC, paired, held-out
+    curves): on a common range `2^10…2^18` IC-2LP has `q^1.385` against the
+    full base's `q^1.910`
+    ([`ic_improve_20261014/04`](../../../research/ic_improve_20261014/04-genus3-2lp/README.md));
+    structured Gaussian elimination and Wiedemann give 0.653× at `2^20`
+    ([`ic_improve_20261015/01`](../../../research/ic_improve_20261015/01-genus3-linalg/README.md));
+    block Wiedemann 0.945× at `2^21`
+    ([`ic_improve_20261015/06`](../../../research/ic_improve_20261015/06-genus3-kappa-bw/README.md))
+    (all PR #1862); cheaper per-trial primitives and a re-tuned κ 0.617× at
+    `2^22` ([`ic_improve3_20261015/01`](../../../research/ic_improve3_20261015/01-genus3-relations/README.md),
+    PR #1891); a Lucas splitting test plus lockstep walks 0.715× at `2^22`,
+    with the **local exponent at `2^21…2^22` down to 1.356** against the
+    incumbent's 1.408
+    ([`ic_improve4_20261015/01`](../../../research/ic_improve4_20261015/01-genus3-relations/README.md),
+    PR #1956).
+  - *Verdict.* Open. The exponent is below rho's 1.5 on this structured class
+    but has not settled at the theoretical 4/3; linear algebra (about
+    `q^1.52–1.54` locally) is the remaining excess. No size measured is below
+    rho, and no ratio to rho was recorded after the first run or priced across
+    the band. Like E2 it applies to a weak class only, not to a generic
+    curve.
 
 ---
 
@@ -840,6 +1385,20 @@ with the closure sweep in `examples/factor_base_closure_sweep.rs`.
 7. **"Index calculus is priced by the ambient field; rho is priced by the
    subgroup"** (`RESEARCH_ECC2K130_DECOMPOSITION.md` §5.2), and "Prime `p` and
    prime `n` are one obstruction" (leads note §7(d)).
+8. **The band-priced frontier** (2026-10-15, PR #1837,
+   [`research/ic_frontier_campaign_20261015/README.md`](../../../research/ic_frontier_campaign_20261015/README.md)).
+   One campaign ran every family on fixed curve ladders and priced every
+   arm's unpriced work at 0, 0.1 and 1 GAE per operation (AGENTS.md §5a).
+   Mean `S` over the cheapest generic arm on the same curve, at `w = 0` and at
+   `w = 1`: Koblitz compact orbit 3.8–15.0× and 11.8–30.3× (`n = 13…47`);
+   prime pair table 9.8 → 95.2× and 13.5 → 131.4× from 20 to 40 bits; PKM
+   Kummer tower 30.3 → 141.3× and 31.0 → 238.7× from 20 to 28 bits. Fitted exponents: prime pair table 0.620
+   [0.557, 0.663] against rho's 0.435 [0.331, 0.501] at `w = 0`; compact
+   orbit 0.589 [0.518, 0.743] against 0.436 [0.358, 0.508]; every other IC
+   and rho pair overlaps. "No index-calculus arm beats generic rho on any
+   curve at any band weight; no index-calculus arm has a fitted cost exponent
+   below rho's." L0 counts only, and `ic-shared` leaves three categories
+   uncounted, so the IC side is still a lower bound.
 
 ![Recorded cost of the best row of each family relative to its matched rho (log scale; sizes differ by row)](figures/cost_vs_rho.svg)
 
@@ -849,23 +1408,140 @@ with the closure sweep in `examples/factor_base_closure_sweep.rs`.
 
 ## 8. Open lines, by how directly they test the two flagship families
 
+The first version of this note listed five leads. All five were chased on
+2026-10-15, and each item below gives its verdict and the merged study; items
+2 and 4 were extended on 2026-10-16 (PRs #1925, #1942, #1947). The parts that
+are still open stay open. Item 6 lists the open lines of the entries added in
+this round.
+
 1. **The `m ≥ 4` PKM solving degree past `N = 16`.** This decides whether
-   either tower family is subexponential at all. It is memory-bound on this
-   host: `N = 21` at `m = 3` needs more than 14 GB.
-2. **An isogeny-tower plug-in that is wide-integer and charged.** Port
-   `isogeny()` from `examples/pkm_tower_pilot.rs` into `prime_tower.rs`,
-   beyond `u64`, with SEA or CM construction of `E'` and the search charged to
-   the factor-base phase. Without it, no P-192-shape statement can be priced.
-3. **The Dickson torus case** (`2^t | p + 1`). It is unmeasured as a tower,
-   because the pilot prime splits, although P-256 rounds 1–24 built the
-   torus *set*. It is relevant to P-192 (`t ≤ 64`) and P-256 (`t ≤ 96`).
-4. **A tower at a prime whose `v₂(p − 1)` is P-224-like**, to check that
-   nothing about very deep 2-adicity changes the degree. *Derived here:* this
-   needs `t` well past the `t ≤ 11` run so far, so it is blocked on item 1
-   first.
-5. **Binary shape-search G1–G6** (G4: trace-form, non-subspace
-   Frobenius-stable sets), **the cyclotomic base falsifier** (D4), and **the
-   `D₄`-symmetrised `S₅`** (Bézout count 4096 → 512, never run).
+   either tower family is subexponential at all. **Still open; costed, not
+   run** (PR #1893,
+   [`research/pkm_dickson_torus_20261015/`](../../../research/pkm_dickson_torus_20261015/README.md)
+   §5). *Derived:* `m = 3, N = 21` needs about 130–150 GB peak memory and
+   `m = 4, N = 20` about 240–380 GB on the current engine, so a 192–256 GB and
+   a 512 GB host, or a disk-backed reducer block that is not built. This
+   container has about 14 GB.
+2. **An isogeny-tower plug-in that is charged** — **done at toy size; verdict
+   accounting** (PR #1889,
+   [`research/pkm_isogeny_tower_ecbench_20261015/`](../../../research/pkm_isogeny_tower_ecbench_20261015/README.md)).
+   `prime-isogeny` is in ecbench with the auxiliary search charged: 1.002–1.331×
+   a plain base of equal size, search share 0.8–25%, curves tried ≈ 1.05·2^t.
+   It buys a table oracle nothing over a plain base. *Derived:* the P-192
+   `t = 48` search costs about `2^74` GAE against rho's `2^95.8`.
+   - *The P-192 auxiliary curve* — **search built and measured; `t = 48`
+     derived at 11.2 core-years** (PR #1925,
+     [`research/pkm_isogeny_tower_p192_20261015/`](../../../research/pkm_isogeny_tower_p192_20261015/README.md);
+     §0.2). 2-Sylow halving at the real P-192 prime: `fast` arm 10.06 µs per
+     `z2xz8` draw, 0.326× the baseline; the Haar model holds; ordinary
+     curves with points of order `2^16`, `2^24`, `2^28` and `2^38` found; the
+     Vélu tower `V` built at `T = 8, 12, 16`. `t = 48` needs about `2^45`
+     draws, **98,352 core-hours ≈ 11.2 core-years** (derived). The
+     supersingular `y² = x³ + x` gives a point of order `2^48` in one draw.
+   - *A supersingular `E'`* — **sufficient for the relation phase at the sizes
+     tested** (PR #1947,
+     [`research/pkm_supersingular_aux_20261015/`](../../../research/pkm_supersingular_aux_20261015/README.md);
+     §0.2). `aux=supersingular`: its `V` is not Möbius-equivalent to the
+     torus set (formally "partial": 2 of 12,969 `y² = x³ − x` sets match one
+     torus set, at `p = 383, t = 3`); its F4 `D` equals the ordinary tower's
+     in every cell, and both differ from the torus; its auxiliary work is
+     0.9–1.9% of `S` against 10–27%. Across the §5a band it is cheaper than
+     the ordinary arm on s22 (0.82 / 0.84 / 0.92 at `w = 0, 0.1, 1`) and s24
+     (0.74 / 0.76 / 0.88), dearer on s20 (1.11 / 1.10 / 1.07), and against a
+     plain base of its size unresolved on two curves and not held on the
+     third. "The 11-core-year ordinary search buys nothing these experiments
+     can see."
+   - **Still open:** an F4 run and a relation phase at P-192 (the isogeny
+     system builder and the plug-in are `u64`), and the decision the backlog
+     card records: whether a supersingular `E'` is acceptable. Lead 1 remains
+     the gate for all of it.
+3. **The Dickson torus case** (`2^t | p + 1`) — **measured; H_same** (PR #1893,
+   [`research/pkm_dickson_torus_20261015/`](../../../research/pkm_dickson_torus_20261015/README.md);
+   A5c). The torus tower, which exists on P-192 (`t ≤ 64`) and P-256
+   (`t ≤ 96`), gives the same `D`, width and steps as the split Dickson tower
+   in all 16 cells at two 24- and 31-bit primes, and is degenerate at
+   infinity. It is closed as a separate question and inherits item 1.
+4. **A tower at a prime whose `v₂(p − 1)` is P-224-like** — **measured;
+   H_same, including the P-224 prime** (PR #1893 for `v₂ = 30`; PR #1942,
+   [`research/f4_generic_field_20261015/`](../../../research/f4_generic_field_20261015/README.md),
+   §0.1, for the rest). The generic-field F4 engine runs Kummer towers at
+   `v₂(p − 1) = 40, 48, 56` and at the P-224 prime (`v₂ = 96`), and the
+   Dickson torus at P-192 and P-256. In all 82 cells (74 grid cells and 8
+   extension cells, among them Kummer `m = 2, N = 20` and `m = 4, N = 12` at
+   P-224 and torus `m = 2, N = 20` at P-192) `D`, width and steps equal the
+   recorded 31–32-bit values. **Still open:** the second target in the
+   one-target extension cells and `m = 3, N = 15` at P-224 (the
+   `kummer-p224-depth` card), and lead 1. The isogeny tower still has no F4
+   run at P-192.
+5. **The three smaller leads.**
+   - *Binary shape-search G1–G6* — **G1 killed on the scaled cells, G3 and
+     G5 killed, G2 survives at `n ≤ 9`, G4 not built, G6 not run** (PR #1892,
+     [`research/shape_search_g1_g6_20261015/`](../../../research/shape_search_g1_g6_20261015/README.md);
+     §4). G1's frozen cells `(13,5)`, `(17,6)`, `(19,7)` were not testable
+     on this host. The refutation degree is set by `l` alone at `l ≤ 4`.
+     **Still open:** `l ≥ 5`, the frozen G1 cells, and G4 (trace-form,
+     non-subspace Frobenius-stable sets).
+   - *The cyclotomic base falsifier* (D4) — **yield-neutral at `n = 23`**
+     (PR #1887,
+     [`research/cyclotomic_falsifier_20261015/`](../../../research/cyclotomic_falsifier_20261015/README.md)).
+     All 15 yield tests sit in the null and the positive control is
+     detected; cost against compact-orbit-scan is 1.022× (`K_1`) and 1.122×
+     (`K_0`). **Still open:** the solver-degree clause, untested, and
+     `n = 83`, not run.
+   - *The `D₄`-symmetrised `S₅`* (Bézout count 4096 → 512). **Correction:**
+     the first version said "never run". C8 ran it in PR #1785
+     ([`research/gaudry_quartic_d4_20261013/`](../../../research/gaudry_quartic_d4_20261013/README.md)),
+     unweighted, 48× below the plain form. The **weighted** four-unknown
+     solve (PR #1895,
+     [`research/d4_symmetrised_s5_20261015/`](../../../research/d4_symmetrised_s5_20261015/README.md);
+     B2) costs about 1.41·10⁹ `F_p` multiplications, 18× below C8 and
+     ≈ 850× below the quoted plain `C₄`: the 630× projection is met. One
+     degenerate target in 102 is unsolved by both arms. *Derived:* handover
+     `2^118.9`. Engineering; no `k = 4` run below rho exists.
+6. **Open lines of the entries added in this round.**
+   - *N83 complete cold runtime* (D8). The online tournaments are
+     `BOUNDED_UNKNOWN` between K3425/`root4` and K3450/`root11`/`wide3`; the
+     high-K confirmation asks for an A/A replication of K3596's timing
+     drift; the minimum complete cold IC runtime is unresolved, and no N83
+     ratio has been priced across the §5a band.
+   - *Genus-3 cover linear algebra* (E6). The local exponent is 1.356 at
+     `q = 2^22` against the theoretical 4/3; linear algebra, at about
+     `q^1.52–1.54`, is the remaining excess, and `2^23` is out of the current
+     memory cap. No ratio to rho after the first run.
+   - *Binary MITM oracle* (C1). An FFD-logged algebraic control on the same
+     systems and an `l = 13` probe (a table of about 1 GiB) are the study's
+     next rungs; no ratio to rho exists.
+   - *Large primes at larger `n`* (D9). Only the `n = 41` rung has headroom;
+     its 5- and 20-column sweeps were not run, and the ratios are not
+     band-priced.
+
+**The experiment backlog.** [`backlog/README.md`](../../../backlog/README.md)
+(PR #1903) holds runnable cards for the heavy runs that are still open. Their
+`status` on `main` at `05e414f3f` (from each `card.json`):
+
+- [`XP-20261015-pkm-m3-n21-m4-n20`](../../../backlog/XP-20261015-pkm-m3-n21-m4-n20/README.md):
+  item 1's cells. **Blocked** on hardware (192–256 GB for `m = 3, N = 21`,
+  about 512 GB for `m = 4, N = 20`) or a disk-backed reducer that is not
+  built;
+- [`XP-20261015-kummer-p224-depth`](../../../backlog/XP-20261015-kummer-p224-depth/README.md):
+  item 4's remaining cells. **Draft**, with no blocker: the generic-field
+  engine exists, and the card waits for a frozen `PROTOCOL.md`. Its status
+  note prices `m = 3, N = 15` at P-224 at about 3.2·10¹² multiply-adds, about
+  13 h of one core;
+- [`XP-20261015-shape-g1-frozen-cells`](../../../backlog/XP-20261015-shape-g1-frozen-cells/README.md):
+  G1's frozen cells. **Blocked** on memory (47–50 GB at `(13,5)`, more
+  beyond) and on the merge commit of PR #1892 being pinned;
+- [`XP-20261015-p192-isogeny-aux-search-t48`](../../../backlog/XP-20261015-p192-isogeny-aux-search-t48/README.md):
+  item 2's ordinary auxiliary curve at `t = 48`. **Blocked** on a decision:
+  whether PKM's relation phase may use the supersingular `E'` (then the
+  search is unnecessary) or the checker must require an ordinary curve (then
+  the card runs at about 98,000 core-hours). PR #1947's answer, at the sizes
+  it tested, is that the supersingular curve is sufficient. The card also
+  names lead 1 as its gate.
+
+Two cards still name PR #1892 or PR #1893 as "open, unmerged" in their
+`blocked_on` text; both PRs have since merged. The cards' remaining
+blockers are hardware and, for the shape card, pinning the merge commit.
 
 ## 9. Method and limits of this note
 
@@ -887,14 +1563,39 @@ with the closure sweep in `examples/factor_base_closure_sweep.rs`.
   - the `EXP-FB3-001` definitions and ratios;
   - `ALPF-022`;
   - the AR engine's subgroup exponents.
+- **Update round** (2026-10-15, at `main` `b906df024`). The five lead
+  verdicts in §0.1, §0.2, A5c, B2, C4, D4 and §8 were checked number by
+  number against the study READMEs on `main` (PRs #1887, #1889, #1892,
+  #1893, #1895), against the C8 README (PR #1785), and against the backlog
+  cards' `status` and `blocked_on` fields (PR #1903). The figures were
+  redrawn: the taxonomy labels for C4 and D4 and two `cost_vs_rho` rows (the
+  charged isogeny tower; the cyclotomic falsifier's cost leg) changed.
+- **Second update round** (2026-10-16, at `main` `05e414f3f`). An audit of
+  the second version found stale text in §0, §0.1, §0.2 and §8 and families
+  that were missing. Every number added was checked against the cited study
+  on `main`: the READMEs of PRs #1925, #1942, #1947, #1837 and #1898; the
+  binary MITM reports (PRs #1919, #1944, #1964); the N83 RESULT files (PRs
+  #1719, #1824, #1868, #1872, #1917, #1945); the `ic_next10` and
+  `ic_improve` rounds (PRs #1862, #1891, #1956); the double-large-prime
+  README (PR #1737); the solve-cost note; the DoR campaign report (PR #1826);
+  the Hamming-ideal RESULT; and the backlog cards' `status`, `status_note`
+  and `blocked_on`. Ratios are now labelled by pricing weight (§5a; see the
+  conventions at the top). The figures changed: the taxonomy gained A13, D8,
+  D9, D10 and E6, and `cost_vs_rho` gained band-priced rows (frontier
+  campaign, supersingular auxiliary curve) and weight-0 or wall-clock rows
+  (N83 cold, large primes, genus-3 cover), each labelled with its pricing.
 - **What is not re-derived.** Entries condensed from long notes keep their
   source's status label and are not re-derived here. If a source and this page
   disagree, the source wins.
 - **Nothing here is a new measurement**, and nothing here is a statement about
-  a deployed curve: no factor base in the inventory has been run at P-192 or
-  P-224 size.
+  a deployed curve. At P-192 and P-224 size only the F4 solving degree (P-224
+  Kummer, P-192 and P-256 torus) and the isogeny tower's construction (P-192)
+  have run; no factor base has a priced relation phase there. The P-192
+  numbers `2^74`, `2^95.8` and 11.2 core-years, and the `k = 4` handover
+  `2^118.9`, are derived by their studies, not measured.
 - **Renderer.** Pandoc 3.1.3 converts this file to Typst, and Typst (Python wheel 0.15.0)
   compiles the PDF. The figures are drawn by
   `figures/plot.py` from `figures/data.json`, which holds only quoted values.
-- **Conductor.** The control plane was not reachable in the authoring container
-  (`connection refused` on `localhost:8080`), so no task was reserved.
+- **Conductor.** The control plane was not reachable in the authoring
+  container, in the first version and again in both updates (`connection
+  refused` on `localhost:8080`), so no task was reserved.

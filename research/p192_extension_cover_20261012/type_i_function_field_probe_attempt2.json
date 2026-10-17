@@ -1,0 +1,25 @@
+{
+  "construction": "direct FunctionField_global constructor after independently checked smooth plane quartic; skips unsupported large-prime factory factorization",
+  "p": "6277101735386680763835789423207666416083908700390324961279",
+  "plane_receipt_sha256": "b16122e364056b30e46971b18084f7bfa6c0f6de2fa63f0cae63a1229dd224b3",
+  "source_sha256": "648a7b45add6b8b4acc87bfefe5035406104020570efc3ea43a9d2d4f8f08aad",
+  "stages": [
+    {
+      "degree_y": 4,
+      "elapsed_ns": 287761750,
+      "stage": "affine_function_polynomial",
+      "term_count": 14
+    },
+    {
+      "elapsed_ns": 11043625,
+      "relative_degree": 4,
+      "stage": "function_field_constructed"
+    },
+    {
+      "message": "Factorization of multivariate polynomials over prime fields with characteristic > 2^29 is not implemented.",
+      "stage": "error",
+      "type": "NotImplementedError"
+    }
+  ],
+  "status": "bounded_function_field_probe_error"
+}

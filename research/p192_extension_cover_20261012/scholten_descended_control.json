@@ -1,0 +1,267 @@
+{
+  "anchor_w_coefficients": [
+    "19",
+    "9",
+    "6"
+  ],
+  "anchor_x": 0,
+  "base_classes": 8,
+  "base_logs": [
+    11,
+    24,
+    27,
+    22,
+    17,
+    5,
+    12,
+    10
+  ],
+  "base_ns": 288340625,
+  "base_selection": [
+    [
+      1,
+      [
+        "18",
+        "13",
+        "6"
+      ]
+    ],
+    [
+      2,
+      [
+        "21",
+        "17",
+        "8"
+      ]
+    ],
+    [
+      2,
+      [
+        "2",
+        "6",
+        "15"
+      ]
+    ],
+    [
+      3,
+      [
+        "9",
+        "20",
+        "21"
+      ]
+    ],
+    [
+      5,
+      [
+        "0",
+        "14",
+        "12"
+      ]
+    ],
+    [
+      5,
+      [
+        "0",
+        "9",
+        "11"
+      ]
+    ],
+    [
+      7,
+      [
+        "0",
+        "15",
+        "10"
+      ]
+    ],
+    [
+      7,
+      [
+        "0",
+        "8",
+        "13"
+      ]
+    ]
+  ],
+  "cover_field_degree": 3,
+  "cover_genus": 2,
+  "cover_polynomial_coefficients_Fp3": [
+    [
+      "21",
+      "21",
+      "20"
+    ],
+    [
+      "13",
+      "21",
+      "2"
+    ],
+    [
+      "14",
+      "20",
+      "5"
+    ],
+    [
+      "1",
+      "14",
+      "9"
+    ],
+    [
+      "3",
+      "1",
+      "6"
+    ],
+    [
+      "4",
+      "10",
+      "13"
+    ],
+    [
+      "12",
+      "12",
+      "18"
+    ]
+  ],
+  "eligible_affine_sign_choices": 26,
+  "elliptic_coefficients": [
+    1,
+    4
+  ],
+  "elliptic_generator": [
+    0,
+    2
+  ],
+  "elliptic_order_r": 29,
+  "extension_order": 148011824,
+  "field_p": 23,
+  "final_la_and_replay_ns": 24451250,
+  "final_rank": 8,
+  "independent_rows": 8,
+  "norm_class_nonzero": true,
+  "norm_u_coefficients_Fp3": [
+    [
+      "14",
+      "3",
+      "20"
+    ],
+    [
+      "11",
+      "3",
+      "20"
+    ],
+    [
+      "1"
+    ]
+  ],
+  "norm_v_coefficients_Fp3": [
+    [
+      "8",
+      "2",
+      "22"
+    ],
+    [
+      "20",
+      "3",
+      "10"
+    ]
+  ],
+  "ordinary_queries": 12,
+  "ordinary_query_scalars": [
+    15,
+    15,
+    4,
+    25,
+    8,
+    5,
+    11,
+    25,
+    14,
+    23,
+    15,
+    19
+  ],
+  "ordinary_query_seed": 150863220757,
+  "pair_index_entries": 36,
+  "pair_index_ns": 8215416,
+  "projection_cofactor": 5103856,
+  "r_times_norm_zero": true,
+  "recovered_scalar": 15,
+  "relation_collection_ns": 132984708,
+  "relation_witnesses": [
+    {
+      "indices": [
+        0,
+        3,
+        0
+      ],
+      "scalar": 15
+    },
+    {
+      "indices": [
+        0,
+        0,
+        0
+      ],
+      "scalar": 4
+    },
+    {
+      "indices": [
+        3,
+        5,
+        2
+      ],
+      "scalar": 25
+    },
+    {
+      "indices": [
+        2,
+        6,
+        2
+      ],
+      "scalar": 8
+    },
+    {
+      "indices": [
+        0,
+        6,
+        0
+      ],
+      "scalar": 5
+    },
+    {
+      "indices": [
+        1,
+        5,
+        0
+      ],
+      "scalar": 11
+    },
+    {
+      "indices": [
+        1,
+        4,
+        0
+      ],
+      "scalar": 23
+    },
+    {
+      "indices": [
+        2,
+        7,
+        0
+      ],
+      "scalar": 19
+    }
+  ],
+  "rho_online_ns": 10745583,
+  "rho_recovered_scalar": 15,
+  "rho_walk_steps": 7,
+  "source_sha256": "1670a2d3c1788a1db70803f7a69546fe38b15f303cc7c66f328c298440e1e3c7",
+  "status": "verified_one_target_descended_scholten_control",
+  "target_offset_queries": 1,
+  "target_online_ns": 2575917,
+  "target_point_sha256": "06706cec553724526d003656200d7d80e775fc413acc6326225980d27d0d6d6e",
+  "target_scalar_fixture": 15,
+  "timing_boundary": "same-point target-dependent intervals only; shared-host diagnostics, not isolated CPU speedup",
+  "verified_relations": 12
+}

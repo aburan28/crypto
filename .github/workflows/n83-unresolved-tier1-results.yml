@@ -1,0 +1,159 @@
+name: N83 same-point Tier 1 sealed result replay
+
+on:
+  push:
+    branches: [codex/n83-final-tournament-20261015]
+    paths:
+      - research/n83_unresolved_tier1_results_20261015/records_index.json
+      - research/n83_unresolved_tier1_results_20261015/result.json
+      - research/n83_unresolved_tier1_results_20261015/measurements.json.gz
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: n83-unresolved-tier1-results-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  two-pair-sealed-replay:
+    if: github.repository == 'aburan28/crypto'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read sealed same-point result index
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          root = Path('research/n83_unresolved_tier1_results_20261015')
+          index = json.loads((root / 'records_index.json').read_text())
+          result = json.loads((root / 'result.json').read_text())
+          if (index['schema'] != 'n83.unresolved-tier1-compressed-records/v1'
+                  or index['artifact_run_id'] != 38818664674
+                  or index['artifact_id'] <= 0
+                  or result['artifact_id'] != index['artifact_id']
+                  or result['artifact_sha256'] != index['artifact_sha256']
+                  or result['analysis_sha256'] != index['analysis_sha256']
+                  or result['source_commit'] !=
+                     'e1a77618587533364cf2236f09cc41b5bc816429'):
+              raise SystemExit('sealed Tier 1 index or result differs')
+          values = {
+              'N83_ARTIFACT_ID': str(index['artifact_id']),
+              'N83_ARTIFACT_SHA': index['artifact_sha256'],
+              'N83_ANALYSIS_SHA': index['analysis_sha256'],
+          }
+          for key, value in values.items():
+              if key.endswith('SHA') and (len(value) != 64 or
+                  any(ch not in '0123456789abcdef' for ch in value)):
+                  raise SystemExit(f'invalid {key}')
+          with open(os.environ['GITHUB_ENV'], 'a') as output:
+              for key, value in values.items():
+                  output.write(f'{key}={value}\n')
+          PY
+
+      - name: Restore exact executed source and public fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          frozen=e1a77618587533364cf2236f09cc41b5bc816429
+          git fetch --no-tags --depth=1 origin "$frozen"
+          test "$(git rev-parse FETCH_HEAD)" = "$frozen"
+          git worktree add --detach "$RUNNER_TEMP/n83-tier1-frozen-source" "$frozen"
+          cd "$RUNNER_TEMP/n83-tier1-frozen-source"
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 research/n83_k3250_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k3350_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k_abba_20261015/generate.py > /dev/null
+          python3 research/n83_root4_highk_20261015/generate.py > /dev/null
+          python3 research/n83_best_e2e_20261015/generate.py > /dev/null
+          python3 research/n83_legacy_challenger_20261015/generate.py > /dev/null
+          python3 research/n83_root4_bloom_20261015/generate.py > /dev/null
+          python3 research/n83_root11_highk_20261015/generate.py > /dev/null
+          python3 research/n83_final_tournament_20261015/generate.py > /dev/null
+          python3 research/n83_edge_confirmation_20261015/generate.py > /dev/null
+          python3 research/n83_final_tier1_20261015/generate.py > /dev/null
+          python3 research/n83_unresolved_tier1_20261015/generate.py > /dev/null
+          test "$(sha256sum research/n83_unresolved_tier1_20261015/targets.jsonl | cut -d' ' -f1)" = \
+            dfea95ee4e423dd627adbd116828e9f478779c51476f0fa172cf4c160e645d12
+
+      - name: Download and hash exact raw artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/n83-tier1-sealed"
+          gh api "repos/aburan28/crypto/actions/artifacts/$N83_ARTIFACT_ID/zip" > \
+            "$RUNNER_TEMP/n83-tier1-sealed/raw.zip"
+          test "$(sha256sum "$RUNNER_TEMP/n83-tier1-sealed/raw.zip" | cut -d' ' -f1)" = \
+            "$N83_ARTIFACT_SHA"
+          unzip -q "$RUNNER_TEMP/n83-tier1-sealed/raw.zip" -d \
+            "$RUNNER_TEMP/n83-tier1-sealed/raw"
+          test "$(sha256sum "$RUNNER_TEMP/n83-tier1-sealed/raw/results/analysis.json" | cut -d' ' -f1)" = \
+            "$N83_ANALYSIS_SHA"
+
+      - name: Independently replay both same-point IC rho pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          set +e
+          python3 "$RUNNER_TEMP/n83-tier1-frozen-source/research/n83_unresolved_tier1_20261015/verify.py" \
+            "$RUNNER_TEMP/n83-tier1-sealed/raw/results" > \
+            "$RUNNER_TEMP/n83-tier1-sealed/local-replay.json"
+          replay_status=$?
+          set -e
+          test "$(sha256sum "$RUNNER_TEMP/n83-tier1-sealed/raw/results/analysis.json" | cut -d' ' -f1)" = \
+            "$N83_ANALYSIS_SHA"
+          python3 - "$RUNNER_TEMP/n83-tier1-sealed/raw/results/analysis.json" "$replay_status" <<'PY'
+          import json
+          import sys
+          status = json.load(open(sys.argv[1]))['status']
+          code = int(sys.argv[2])
+          if (status, code) not in {('PASS_TIER1_SAME_POINT_PAIR_SET', 0),
+                                    ('TIER1_GATE_INCOMPLETE', 1)}:
+              raise SystemExit(f'unexpected replay status: {status}, exit {code}')
+          PY
+
+      - name: Reproduce current-head same-point records
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 research/n83_k3250_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k3350_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k_abba_20261015/generate.py > /dev/null
+          python3 research/n83_root4_highk_20261015/generate.py > /dev/null
+          python3 research/n83_best_e2e_20261015/generate.py > /dev/null
+          python3 research/n83_legacy_challenger_20261015/generate.py > /dev/null
+          python3 research/n83_root4_bloom_20261015/generate.py > /dev/null
+          python3 research/n83_root11_highk_20261015/generate.py > /dev/null
+          python3 research/n83_final_tournament_20261015/generate.py > /dev/null
+          python3 research/n83_edge_confirmation_20261015/generate.py > /dev/null
+          python3 research/n83_final_tier1_20261015/generate.py > /dev/null
+          python3 research/n83_unresolved_tier1_20261015/generate.py > /dev/null
+          python3 research/n83_unresolved_tier1_results_20261015/materialize.py \
+            --artifact-zip "$RUNNER_TEMP/n83-tier1-sealed/raw.zip" \
+            --artifact-sha256 "$N83_ARTIFACT_SHA" \
+            --analysis-sha256 "$N83_ANALYSIS_SHA" \
+            --artifact-id "$N83_ARTIFACT_ID" \
+            "$RUNNER_TEMP/n83-tier1-sealed/raw/results"
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+
+      - name: Preserve replay output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-unresolved-tier1-sealed-replay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-tier1-sealed/local-replay.json
+          if-no-files-found: ignore
+          retention-days: 14

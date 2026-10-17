@@ -1,0 +1,97 @@
+{
+  "schema": "ecbench.audit/v1",
+  "session_id": "ECBS1h3e230f1318fd",
+  "session_status": "complete",
+  "ok": true,
+  "problems": [],
+  "checks": {
+    "arms": true,
+    "env_class": true,
+    "executions": true,
+    "host_hash": true,
+    "plan_hash": true,
+    "record_count": true,
+    "records": true,
+    "records_hash": true,
+    "replays": true,
+    "session_complete": true,
+    "spec_id": true,
+    "workloads": true
+  },
+  "records": 16,
+  "verified_records": 10,
+  "regraded": true,
+  "replays": [
+    {
+      "seq": 0,
+      "record_id": "ECR1hdb19c4eb9f6a",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 1,
+      "record_id": "ECR1hced496213c05",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 2,
+      "record_id": "ECR1hf9a5e27990fa",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 5,
+      "record_id": "ECR1h345224ea3c9f",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 6,
+      "record_id": "ECR1h918731074bed",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 8,
+      "record_id": "ECR1he2e89dc6c74f",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 9,
+      "record_id": "ECR1hac3a672fce3b",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 10,
+      "record_id": "ECR1h147775e04813",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 13,
+      "record_id": "ECR1hd71f8154fa03",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 14,
+      "record_id": "ECR1h0ae5266b2e2a",
+      "reproduced": true,
+      "detail": "identical"
+    }
+  ],
+  "files": {
+    "host.json": "dbc745e3ed9c8e7f4a6826d1b5a89aa6f45b19986ddac70dd5a277e801663884",
+    "plan.json": "db7765b6de34e3beef72559060bc9be2fbd3221d361ed588d74a25d01eaecb5d",
+    "records.jsonl": "4e65831a4e115f94695d2915335b77ef1d341f0a5d752aa6db90f908d9aa2a03",
+    "session.json": "d2e126fd3bb3ba7c6e36b1c1d535efe4a80f202a85b9e9e383ec451c9c5fd4ff",
+    "spec.json": "ee954f29446bebc8dffaa577393a88d65a7669094657faf40a5f86e81761963f"
+  },
+  "auditor_binary_sha256": "1869ca2e7be271794df8128c08a6dca0201038e2c81a3e0ce6434f7ec0d8379d",
+  "auditor_env_class_id": "ECBENV2h0f05eeca4197",
+  "auditor_hardware_class_id": "ECBHW1h8a5c64c6cc6c",
+  "audited_unix_ms": 1792207312323
+}

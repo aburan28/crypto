@@ -1,4 +1,7 @@
 # Preserve solver output byte-for-byte; upstream tools intentionally pad fields.
+research/weak_curve_leaderboard_20261012/validation/ghs128_*.log -whitespace
+research/weak_curve_leaderboard_20261012/reports/run-*/*.svg -whitespace
+research/weak_curve_leaderboard_20261012/reports/run-*/*.log -whitespace
 # Canonical catalog data is rebuilt by the repository's metadata tools.
 docs/browser/data.json linguist-generated=true
 docs/curves/registry.json linguist-generated=true
@@ -103,3 +106,17 @@ research/ecbench_frontier_20261013/*.pdf binary
 research/ecbench_frontier_20261013/reports/**/*.pdf binary
 research/ecbench_frontier_20261013/reports/**/*.png binary
 research/ecbench_frontier_20261013/reports/**/*.svg -diff -whitespace
+
+# Frozen volcano IC capsules and rendered media must retain their exact bytes.
+research/full_volcano_graphwide_ic_20261017/execution/campaigns/** -text -diff
+research/full_volcano_graphwide_ic_20261017/reports/**/*.pdf binary
+research/full_volcano_graphwide_ic_20261017/reports/**/*.png binary
+benchmarks/20261017-volcano-ic-campaign/*.pdf binary
+benchmarks/20261017-volcano-ic-campaign/*.png binary
+# N83 sixteen-point precision report media.
+benchmarks/20261017-n83-e2e-precision/*.pdf binary
+benchmarks/20261017-n83-e2e-precision/*.png binary
+benchmarks/20261017-n83-e2e-precision/*.svg -diff -whitespace
+research/n83_e2e_precision_20261016/*.pdf binary
+research/n83_e2e_precision_20261016/*.png binary
+research/n83_e2e_precision_20261016/*.svg -diff -whitespace

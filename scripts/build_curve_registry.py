@@ -701,6 +701,19 @@ def carry_forward(reg: Registry) -> None:
             reg.alias_text.setdefault(cid.normalise_alias(a), a)
 
 
+def harvest_native_factor_base_history(reg: Registry) -> None:
+    """Assemble already computed native identities; do no curve arithmetic."""
+    path = REPO / "docs/curves/sources/factor-base-evaluation-20261015.json"
+    if not path.exists():
+        return
+    doc = json.loads(path.read_text())
+    if doc.get("schema") != "ecbench.historical_curve_registry/v1":
+        raise ValueError("unsupported native historical curve registry")
+    for row in doc["curves"]:
+        ident = dict(row, model_sha256=hashlib.sha256(row["model_json"].encode()).hexdigest())
+        reg.add(ident, row["family"], row["params"], str(path.relative_to(REPO)), [])
+
+
 def build() -> tuple[dict, list[str], list[str]]:
     reg, problems, fatal = Registry(), [], []
     harvest_standards(reg)
@@ -709,6 +722,7 @@ def build() -> tuple[dict, list[str], list[str]]:
     harvest_curve_records(reg)
     harvest_text_koblitz(reg)
     harvest_native_standards(reg)
+    harvest_native_factor_base_history(reg)
     harvest_programme_extensions(reg)
     carry_forward(reg)
     ambiguous = sorted(f"{reg.alias_text[k]!r} -> {len(v)} models"

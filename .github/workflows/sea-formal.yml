@@ -1,0 +1,53 @@
+name: SEA formal verification
+on:
+  pull_request:
+    paths:
+      - 'isogeny_algos/src/find/sea.rs'
+      - 'isogeny_algos/src/curve.rs'
+      - 'isogeny_algos/src/api.rs'
+      - 'isogeny_algos/src/gls_loop.rs'
+      - 'research/sea_point_count_20261016/**'
+      - '.github/workflows/sea-formal.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'isogeny_algos/src/find/sea.rs'
+      - 'isogeny_algos/src/curve.rs'
+      - 'isogeny_algos/src/api.rs'
+      - 'isogeny_algos/src/gls_loop.rs'
+      - 'research/sea_point_count_20261016/**'
+      - '.github/workflows/sea-formal.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  model-and-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            research/sea_point_count_20261016/formal
+            research/sea_point_count_20261016/lean
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install pinned Lean toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --proto '=https' --tlsv1.2 -fsSL https://raw.githubusercontent.com/leanprover/elan/v4.1.2/elan-init.sh -o "$RUNNER_TEMP/elan-init.sh"
+          printf '4bacca9502cb89736fe63d2685abc2947cfbf34dc87673504f1bb4c43eda9264  %s\n' "$RUNNER_TEMP/elan-init.sh" | sha256sum -c -
+          export ELAN_HOME="$RUNNER_TEMP/sea-elan"
+          sh "$RUNNER_TEMP/elan-init.sh" -y --no-modify-path --default-toolchain leanprover/lean4:v4.19.0
+          echo "ELAN_HOME=$ELAN_HOME" >> "$GITHUB_ENV"
+          echo "$ELAN_HOME/bin" >> "$GITHUB_PATH"
+      - name: Check TLA+ models, negative controls, and Lean proofs
+        run: bash research/sea_point_count_20261016/formal/verify.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sea-formal-checks
+          path: ${{ runner.temp }}/sea-formal-replay

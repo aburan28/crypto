@@ -308,6 +308,7 @@ fn ic_event_json(event: &KoblitzIcEvent) -> Value {
         KoblitzIcEvent::FactorBaseReady { points, orbits } => {
             json!({"event":"factor_base_ready","points":points,"orbits":orbits})
         }
+        KoblitzIcEvent::PairTableStarted => json!({"event":"pair_table_started"}),
         KoblitzIcEvent::PairTableReady { entries } => {
             json!({"event":"pair_table_ready","entries":entries})
         }
@@ -320,6 +321,12 @@ fn ic_event_json(event: &KoblitzIcEvent) -> Value {
             trials,
         } => json!({
             "event":"relation_progress","collected":collected,"wanted":wanted,"trials":trials
+        }),
+        KoblitzIcEvent::RelationBatchStarted {
+            first_trial,
+            trials,
+        } => json!({
+            "event":"relation_batch_started","first_trial":first_trial,"trials":trials
         }),
         KoblitzIcEvent::RelationAttemptFinished {
             trial,

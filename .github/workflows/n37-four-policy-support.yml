@@ -19,7 +19,6 @@ on:
       - 'src/cryptanalysis/binary_velu.rs'
       - 'src/cryptanalysis/koblitz_fast.rs'
       - 'src/cryptanalysis/koblitz_index_calculus.rs'
-      - 'docs/index-calculus-scoreboard.html'
   workflow_dispatch:
 
 permissions:
@@ -41,6 +40,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            tools/volcano-cli/
+            isogeny_algos/
             src
             examples/n37_four_policy_support.rs
             examples/n37_four_policy_support_replay.rs

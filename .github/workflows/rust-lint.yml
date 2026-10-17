@@ -33,7 +33,7 @@ env:
 
 jobs:
   scope:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
       contents: read
@@ -53,6 +53,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 2
           filter: blob:none
           sparse-checkout-cone-mode: false
           sparse-checkout: |
@@ -71,13 +72,20 @@ jobs:
         env:
           CI_EVENT: ${{ github.event_name }}
           CI_BASE: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
-        run: node .github/scripts/ci-scope.mjs
+          CI_PR_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$CI_EVENT" = pull_request ]; then
+            test "$(git rev-parse HEAD^2)" = "$CI_PR_HEAD"
+            CI_BASE="$(git rev-parse HEAD^1)"
+            export CI_BASE
+          fi
+          node .github/scripts/ci-scope.mjs
 
   fmt:
     needs: scope
     name: rustfmt (changed files)
     if: always() && !cancelled() && github.event_name == 'pull_request' && (needs.scope.result != 'success' || needs.scope.outputs.rust_fmt != 'false')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - name: Require successful scope classification
@@ -87,6 +95,7 @@ jobs:
           exit 1
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 2
           filter: blob:none
           sparse-checkout-cone-mode: false
           sparse-checkout: |
@@ -106,9 +115,10 @@ jobs:
           components: rustfmt
       - name: Changed Rust files are formatted
         env:
-          BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
         run: |
-          git fetch --no-tags --depth=1 origin "$BASE"
+          test "$(git rev-parse HEAD^2)" = "$PR_HEAD"
+          BASE="$(git rev-parse HEAD^1)"
           git diff --name-only -z --diff-filter=AMR "$BASE" HEAD -- \
             'src/**.rs' 'tests/**.rs' 'examples/**.rs' 'benches/**.rs' 'cd_attack/**.rs' 'build.rs' \
             > "$RUNNER_TEMP/changed-rust-files"
@@ -136,7 +146,7 @@ jobs:
     if: always() && !cancelled()
     needs: scope
     name: clippy (${{ matrix.crate }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     strategy:
       fail-fast: false
@@ -166,6 +176,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /Cargo.toml
+            /tools/volcano-cli/
+            /isogeny_algos/
             /Cargo.lock
             /.cargo/
             /rust-toolchain*
