@@ -1,0 +1,231 @@
+04:24:32 r1 off k0n53/M1-T01 cold_ms=391.947517 scalar=518509155375
+machine is busy: other processes used 0.01 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.17 (limit 5.0); top: {"conductord[295]": 0.01}
+REFUSED filter k0n53 M1-T01 r1 try 1
+04:24:53 r1 filter k0n53/M1-T01 cold_ms=379.658651 scalar=518509155375
+machine is busy: other processes used 0.09 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.27 (limit 5.0); top: {"claude[1326]": 0.07, "migration/1[21]": 0.01, "conductord[295]": 0.01}
+REFUSED all k0n53 M1-T01 r1 try 1
+04:25:15 r1 all k0n53/M1-T01 cold_ms=402.498794 scalar=518509155375
+04:25:20 r1 off k0n53/M1-T02 cold_ms=416.927592 scalar=14868793722243
+machine is busy: other processes used 0.10 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.1 (limit 5.0); top: {"claude[1326]": 0.07, "process_api[1]": 0.01, "bash[173]": 0.01, "postgres[280]": 0.01}
+REFUSED filter k0n53 M1-T02 r1 try 1
+04:25:41 r1 filter k0n53/M1-T02 cold_ms=371.279118 scalar=14868793722243
+machine is busy: other processes used 0.06 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.13 (limit 5.0); top: {"claude[1326]": 0.06}
+REFUSED all k0n53 M1-T02 r1 try 1
+04:26:02 r1 all k0n53/M1-T02 cold_ms=389.239421 scalar=14868793722243
+04:26:07 r1 off k1n59/M1-T01 cold_ms=423.652138 scalar=22924121815368
+machine is busy: other processes used 0.03 CPU s in 2.0 s (limit 0.20), PSI some avg10 6.5 (limit 5.0); top: {"claude[1326]": 0.03}
+REFUSED filter k1n59 M1-T01 r1 try 1
+04:26:29 r1 filter k1n59/M1-T01 cold_ms=419.829265 scalar=22924121815368
+04:26:33 r1 all k1n59/M1-T01 cold_ms=407.091014 scalar=22924121815368
+machine is busy: other processes used 0.06 CPU s in 2.0 s (limit 0.20), PSI some avg10 6.97 (limit 5.0); top: {"claude[1326]": 0.06}
+REFUSED off k1n59 M1-T02 r1 try 1
+04:26:55 r1 off k1n59/M1-T02 cold_ms=433.770171 scalar=13711702643079
+04:27:00 r1 filter k1n59/M1-T02 cold_ms=427.754426 scalar=13711702643079
+machine is busy: other processes used 0.04 CPU s in 2.0 s (limit 0.20), PSI some avg10 6.98 (limit 5.0); top: {"claude[1326]": 0.02, "environment-man[1224]": 0.01, "kworker/2:1-mm_percpu_wq[30499]": 0.01}
+REFUSED all k1n59 M1-T02 r1 try 1
+04:27:21 r1 all k1n59/M1-T02 cold_ms=419.031418 scalar=13711702643079
+04:27:30 r1 off k0n61/M1-T01 cold_ms=1587.339399 scalar=153752017445515
+machine is busy: other processes used 0.03 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.32 (limit 5.0); top: {"bash[173]": 0.01, "conductord[295]": 0.01, "claude[1326]": 0.01}
+REFUSED filter k0n61 M1-T01 r1 try 1
+04:27:55 r1 filter k0n61/M1-T01 cold_ms=1565.966308 scalar=153752017445515
+04:28:03 r1 all k0n61/M1-T01 cold_ms=1639.513207 scalar=153752017445515
+04:28:12 r1 off k0n61/M1-T02 cold_ms=1593.896068 scalar=106251430450189
+machine is busy: other processes used 0.06 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.53 (limit 5.0); top: {"claude[1326]": 0.03, "process_api[1]": 0.01, "postgres[23726]": 0.01, "kworker/2:1-events[30499]": 0.01}
+REFUSED filter k0n61 M1-T02 r1 try 1
+04:28:37 r1 filter k0n61/M1-T02 cold_ms=1534.968128 scalar=106251430450189
+04:28:46 r1 all k0n61/M1-T02 cold_ms=1650.582149 scalar=106251430450189
+04:28:51 r2 filter k0n53/M1-T01 cold_ms=396.300208 scalar=518509155375
+machine is busy: other processes used 0.04 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.57 (limit 5.0); top: {"claude[1326]": 0.02, "environment-man[1224]": 0.01, "postgres[23726]": 0.01}
+REFUSED all k0n53 M1-T01 r2 try 1
+04:29:12 r2 all k0n53/M1-T01 cold_ms=462.176931 scalar=518509155375
+04:29:17 r2 off k0n53/M1-T01 cold_ms=382.572605 scalar=518509155375
+machine is busy: other processes used 0.03 CPU s in 2.0 s (limit 0.20), PSI some avg10 6.48 (limit 5.0); top: {"claude[1326]": 0.02, "conductord[295]": 0.01}
+REFUSED filter k0n53 M1-T02 r2 try 1
+04:29:38 r2 filter k0n53/M1-T02 cold_ms=391.304326 scalar=14868793722243
+machine is busy: other processes used 0.02 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.24 (limit 5.0); top: {"claude[1326]": 0.02}
+REFUSED all k0n53 M1-T02 r2 try 1
+machine is busy: other processes used 0.22 CPU s in 2.0 s (limit 0.20), PSI some avg10 0.86 (limit 5.0); top: {"claude[1326]": 0.22}
+REFUSED all k0n53 M1-T02 r2 try 2
+04:30:17 r2 all k0n53/M1-T02 cold_ms=391.206731 scalar=14868793722243
+machine is busy: other processes used 1.23 CPU s in 2.0 s (limit 0.20), PSI some avg10 4.74 (limit 5.0); top: {"git[24150]": 0.88, "claude[1326]": 0.23, "git[24146]": 0.11, "postgres[22322]": 0.01}
+REFUSED off k0n53 M1-T02 r2 try 1
+machine is busy: other processes used 0.38 CPU s in 2.0 s (limit 0.20), PSI some avg10 1.63 (limit 5.0); top: {"claude[1326]": 0.37, "process_api[1]": 0.01}
+REFUSED off k0n53 M1-T02 r2 try 2
+machine is busy: other processes used 0.23 CPU s in 2.0 s (limit 0.20), PSI some avg10 6.03 (limit 5.0); top: {"claude[1326]": 0.22, "kworker/1:1-events_freezable[21053]": 0.01}
+REFUSED off k0n53 M1-T02 r2 try 3
+04:32:34 r2 off k0n53/M1-T02 cold_ms=402.402364 scalar=14868793722243
+machine is busy: other processes used 0.18 CPU s in 2.0 s (limit 0.20), PSI some avg10 6.21 (limit 5.0); top: {"claude[1326]": 0.18}
+REFUSED filter k1n59 M1-T01 r2 try 1
+04:32:56 r2 filter k1n59/M1-T01 cold_ms=413.568556 scalar=22924121815368
+04:33:00 r2 all k1n59/M1-T01 cold_ms=448.026757 scalar=22924121815368
+machine is busy: other processes used 0.05 CPU s in 2.0 s (limit 0.20), PSI some avg10 6.13 (limit 5.0); top: {"claude[1326]": 0.04, "environment-man[1224]": 0.01}
+REFUSED off k1n59 M1-T01 r2 try 1
+04:33:22 r2 off k1n59/M1-T01 cold_ms=405.273611 scalar=22924121815368
+machine is busy: other processes used 0.07 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.16 (limit 5.0); top: {"claude[1326]": 0.07}
+REFUSED filter k1n59 M1-T02 r2 try 1
+04:33:43 r2 filter k1n59/M1-T02 cold_ms=415.528464 scalar=13711702643079
+machine is busy: other processes used 0.21 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.6 (limit 5.0); top: {"claude[1326]": 0.19, "6[81]": 0.01, "postgres[22322]": 0.01}
+REFUSED all k1n59 M1-T02 r2 try 1
+04:34:05 r2 all k1n59/M1-T02 cold_ms=451.270094 scalar=13711702643079
+04:34:09 r2 off k1n59/M1-T02 cold_ms=403.220389 scalar=13711702643079
+machine is busy: other processes used 0.15 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.4 (limit 5.0); top: {"claude[1326]": 0.14, "conductord[295]": 0.01}
+REFUSED filter k0n61 M1-T01 r2 try 1
+04:34:35 r2 filter k0n61/M1-T01 cold_ms=1588.586966 scalar=153752017445515
+04:34:43 r2 all k0n61/M1-T01 cold_ms=1594.423551 scalar=153752017445515
+machine is busy: other processes used 0.22 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.24 (limit 5.0); top: {"claude[1326]": 0.22}
+REFUSED off k0n61 M1-T01 r2 try 1
+04:35:09 r2 off k0n61/M1-T01 cold_ms=1639.338079 scalar=153752017445515
+04:35:17 r2 filter k0n61/M1-T02 cold_ms=1586.749 scalar=106251430450189
+machine is busy: other processes used 0.10 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.55 (limit 5.0); top: {"claude[1326]": 0.08, "process_api[1]": 0.01, "conductord[295]": 0.01}
+REFUSED all k0n61 M1-T02 r2 try 1
+04:35:43 r2 all k0n61/M1-T02 cold_ms=1668.622294 scalar=106251430450189
+04:35:51 r2 off k0n61/M1-T02 cold_ms=1594.78971 scalar=106251430450189
+machine is busy: other processes used 0.03 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.08 (limit 5.0); top: {"claude[1326]": 0.02, "postgres[23726]": 0.01}
+REFUSED all k0n53 M1-T01 r3 try 1
+04:36:13 r3 all k0n53/M1-T01 cold_ms=378.210021 scalar=518509155375
+04:36:18 r3 off k0n53/M1-T01 cold_ms=421.876414 scalar=518509155375
+machine is busy: other processes used 0.04 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.49 (limit 5.0); top: {"claude[1326]": 0.02, "conductord[295]": 0.01, "postgres[22322]": 0.01}
+REFUSED filter k0n53 M1-T01 r3 try 1
+04:36:39 r3 filter k0n53/M1-T01 cold_ms=377.92053 scalar=518509155375
+machine is busy: other processes used 0.02 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.03 (limit 5.0); top: {"claude[1326]": 0.02}
+REFUSED all k0n53 M1-T02 r3 try 1
+04:37:01 r3 all k0n53/M1-T02 cold_ms=376.324635 scalar=14868793722243
+04:37:05 r3 off k0n53/M1-T02 cold_ms=393.352231 scalar=14868793722243
+machine is busy: other processes used 0.02 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.19 (limit 5.0); top: {"claude[1326]": 0.02}
+REFUSED filter k0n53 M1-T02 r3 try 1
+04:37:27 r3 filter k0n53/M1-T02 cold_ms=381.311052 scalar=14868793722243
+04:37:31 r3 all k1n59/M1-T01 cold_ms=438.211447 scalar=22924121815368
+machine is busy: other processes used 0.03 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.35 (limit 5.0); top: {"claude[1326]": 0.03}
+REFUSED off k1n59 M1-T01 r3 try 1
+04:37:53 r3 off k1n59/M1-T01 cold_ms=437.349299 scalar=22924121815368
+04:37:57 r3 filter k1n59/M1-T01 cold_ms=395.055012 scalar=22924121815368
+machine is busy: other processes used 0.04 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.41 (limit 5.0); top: {"claude[1326]": 0.02, "conductord[295]": 0.01, "postgres[22322]": 0.01}
+REFUSED all k1n59 M1-T02 r3 try 1
+04:38:19 r3 all k1n59/M1-T02 cold_ms=401.167005 scalar=13711702643079
+04:38:23 r3 off k1n59/M1-T02 cold_ms=400.357566 scalar=13711702643079
+machine is busy: other processes used 0.04 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.12 (limit 5.0); top: {"claude[1326]": 0.03, "postgres[22322]": 0.01}
+REFUSED filter k1n59 M1-T02 r3 try 1
+04:38:45 r3 filter k1n59/M1-T02 cold_ms=416.976944 scalar=13711702643079
+04:38:53 r3 all k0n61/M1-T01 cold_ms=1553.345583 scalar=153752017445515
+machine is busy: other processes used 0.03 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.48 (limit 5.0); top: {"conductord[295]": 0.01, "environment-man[1224]": 0.01, "claude[1326]": 0.01}
+REFUSED off k0n61 M1-T01 r3 try 1
+04:39:19 r3 off k0n61/M1-T01 cold_ms=1655.172876 scalar=153752017445515
+04:39:27 r3 filter k0n61/M1-T01 cold_ms=1514.207507 scalar=153752017445515
+04:39:36 r3 all k0n61/M1-T02 cold_ms=1671.611973 scalar=106251430450189
+machine is busy: other processes used 0.02 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.65 (limit 5.0); top: {"conductord[295]": 0.01, "claude[1326]": 0.01}
+REFUSED off k0n61 M1-T02 r3 try 1
+04:40:02 r3 off k0n61/M1-T02 cold_ms=1701.014713 scalar=106251430450189
+04:40:10 r3 filter k0n61/M1-T02 cold_ms=1568.836742 scalar=106251430450189
+machine is busy: other processes used 0.03 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.1 (limit 5.0); top: {"claude[1326]": 0.02, "environment-man[1224]": 0.01}
+REFUSED off k0n53 M1-T01 r4 try 1
+04:40:32 r4 off k0n53/M1-T01 cold_ms=391.629547 scalar=518509155375
+04:40:36 r4 filter k0n53/M1-T01 cold_ms=416.717471 scalar=518509155375
+machine is busy: other processes used 0.03 CPU s in 2.0 s (limit 0.20), PSI some avg10 6.14 (limit 5.0); top: {"claude[1326]": 0.03}
+REFUSED all k0n53 M1-T01 r4 try 1
+04:40:58 r4 all k0n53/M1-T01 cold_ms=394.083139 scalar=518509155375
+machine is busy: other processes used 0.03 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.05 (limit 5.0); top: {"claude[1326]": 0.02, "environment-man[1224]": 0.01}
+REFUSED off k0n53 M1-T02 r4 try 1
+04:41:20 r4 off k0n53/M1-T02 cold_ms=438.430989 scalar=14868793722243
+machine is busy: other processes used 0.04 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.88 (limit 5.0); top: {"claude[1326]": 0.03, "postgres[280]": 0.01}
+REFUSED filter k0n53 M1-T02 r4 try 1
+04:41:41 r4 filter k0n53/M1-T02 cold_ms=406.64437 scalar=14868793722243
+04:41:46 r4 all k0n53/M1-T02 cold_ms=472.556528 scalar=14868793722243
+machine is busy: other processes used 0.06 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.29 (limit 5.0); top: {"claude[1326]": 0.03, "process_api[1]": 0.01, "bash[173]": 0.01, "postgres[23726]": 0.01}
+REFUSED off k1n59 M1-T01 r4 try 1
+04:42:08 r4 off k1n59/M1-T01 cold_ms=439.753886 scalar=22924121815368
+04:42:12 r4 filter k1n59/M1-T01 cold_ms=428.375947 scalar=22924121815368
+machine is busy: other processes used 0.03 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.41 (limit 5.0); top: {"claude[1326]": 0.03}
+REFUSED all k1n59 M1-T01 r4 try 1
+04:42:34 r4 all k1n59/M1-T01 cold_ms=400.256185 scalar=22924121815368
+04:42:39 r4 off k1n59/M1-T02 cold_ms=410.677526 scalar=13711702643079
+machine is busy: other processes used 0.03 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.82 (limit 5.0); top: {"claude[1326]": 0.02, "process_api[1]": 0.01}
+REFUSED filter k1n59 M1-T02 r4 try 1
+04:43:00 r4 filter k1n59/M1-T02 cold_ms=445.491693 scalar=13711702643079
+machine is busy: other processes used 0.04 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.08 (limit 5.0); top: {"process_api[1]": 0.01, "conductord[295]": 0.01, "claude[1326]": 0.01, "postgres[22322]": 0.01}
+REFUSED all k1n59 M1-T02 r4 try 1
+04:43:22 r4 all k1n59/M1-T02 cold_ms=455.987751 scalar=13711702643079
+04:43:30 r4 off k0n61/M1-T01 cold_ms=1688.70804 scalar=153752017445515
+machine is busy: other processes used 0.04 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.58 (limit 5.0); top: {"claude[1326]": 0.02, "conductord[295]": 0.01, "postgres[23726]": 0.01}
+REFUSED filter k0n61 M1-T01 r4 try 1
+04:43:56 r4 filter k0n61/M1-T01 cold_ms=1592.438542 scalar=153752017445515
+04:44:05 r4 all k0n61/M1-T01 cold_ms=1639.33843 scalar=153752017445515
+machine is busy: other processes used 0.02 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.09 (limit 5.0); top: {"claude[1326]": 0.02}
+REFUSED off k0n61 M1-T02 r4 try 1
+04:44:30 r4 off k0n61/M1-T02 cold_ms=1655.992467 scalar=106251430450189
+04:44:39 r4 filter k0n61/M1-T02 cold_ms=1527.361979 scalar=106251430450189
+04:44:47 r4 all k0n61/M1-T02 cold_ms=1582.56787 scalar=106251430450189
+04:44:52 r5 filter k0n53/M1-T01 cold_ms=398.746403 scalar=518509155375
+machine is busy: other processes used 0.03 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.26 (limit 5.0); top: {"claude[1326]": 0.02, "conductord[295]": 0.01}
+REFUSED all k0n53 M1-T01 r5 try 1
+04:45:14 r5 all k0n53/M1-T01 cold_ms=427.079141 scalar=518509155375
+04:45:18 r5 off k0n53/M1-T01 cold_ms=382.998047 scalar=518509155375
+machine is busy: other processes used 0.03 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.19 (limit 5.0); top: {"claude[1326]": 0.02, "kworker/2:1-mm_percpu_wq[30499]": 0.01}
+REFUSED filter k0n53 M1-T02 r5 try 1
+04:45:40 r5 filter k0n53/M1-T02 cold_ms=430.177994 scalar=14868793722243
+04:45:45 r5 all k0n53/M1-T02 cold_ms=467.121296 scalar=14868793722243
+machine is busy: other processes used 0.01 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.58 (limit 5.0); top: {"claude[1326]": 0.01}
+REFUSED off k0n53 M1-T02 r5 try 1
+04:46:06 r5 off k0n53/M1-T02 cold_ms=393.582714 scalar=14868793722243
+04:46:11 r5 filter k1n59/M1-T01 cold_ms=426.93058 scalar=22924121815368
+machine is busy: other processes used 0.03 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.47 (limit 5.0); top: {"claude[1326]": 0.02, "postgres[22322]": 0.01}
+REFUSED all k1n59 M1-T01 r5 try 1
+04:46:33 r5 all k1n59/M1-T01 cold_ms=480.415027 scalar=22924121815368
+machine is busy: other processes used 0.02 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.04 (limit 5.0); top: {"claude[1326]": 0.02}
+REFUSED off k1n59 M1-T01 r5 try 1
+04:46:55 r5 off k1n59/M1-T01 cold_ms=465.747593 scalar=22924121815368
+machine is busy: other processes used 0.40 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.17 (limit 5.0); top: {"claude[1326]": 0.39, "conductord[295]": 0.01}
+REFUSED filter k1n59 M1-T02 r5 try 1
+04:47:16 r5 filter k1n59/M1-T02 cold_ms=454.733831 scalar=13711702643079
+04:47:21 r5 all k1n59/M1-T02 cold_ms=442.099017 scalar=13711702643079
+machine is busy: other processes used 0.21 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.05 (limit 5.0); top: {"claude[1326]": 0.19, "conductord[295]": 0.01, "environment-man[1224]": 0.01}
+REFUSED off k1n59 M1-T02 r5 try 1
+04:47:43 r5 off k1n59/M1-T02 cold_ms=417.358858 scalar=13711702643079
+machine is busy: other processes used 0.07 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.05 (limit 5.0); top: {"claude[1326]": 0.04, "conductord[295]": 0.01, "postgres[27553]": 0.01, "kworker/2:1-mm_percpu_wq[30499]": 0.01}
+REFUSED filter k0n61 M1-T01 r5 try 1
+04:48:08 r5 filter k0n61/M1-T01 cold_ms=1656.357183 scalar=153752017445515
+04:48:17 r5 all k0n61/M1-T01 cold_ms=1578.685585 scalar=153752017445515
+machine is busy: other processes used 0.06 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.17 (limit 5.0); top: {"claude[1326]": 0.06}
+REFUSED off k0n61 M1-T01 r5 try 1
+04:48:43 r5 off k0n61/M1-T01 cold_ms=1771.786098 scalar=153752017445515
+04:48:51 r5 filter k0n61/M1-T02 cold_ms=1548.442871 scalar=106251430450189
+machine is busy: other processes used 0.02 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.14 (limit 5.0); top: {"claude[1326]": 0.02}
+REFUSED all k0n61 M1-T02 r5 try 1
+04:49:17 r5 all k0n61/M1-T02 cold_ms=1751.731479 scalar=106251430450189
+04:49:26 r5 off k0n61/M1-T02 cold_ms=1631.11335 scalar=106251430450189
+04:49:30 r6 all k0n53/M1-T01 cold_ms=406.082635 scalar=518509155375
+machine is busy: other processes used 0.03 CPU s in 2.0 s (limit 0.20), PSI some avg10 6.88 (limit 5.0); top: {"claude[1326]": 0.02, "environment-man[1224]": 0.01}
+REFUSED off k0n53 M1-T01 r6 try 1
+04:49:52 r6 off k0n53/M1-T01 cold_ms=413.112264 scalar=518509155375
+04:49:57 r6 filter k0n53/M1-T01 cold_ms=418.834818 scalar=518509155375
+machine is busy: other processes used 0.03 CPU s in 2.0 s (limit 0.20), PSI some avg10 6.9 (limit 5.0); top: {"claude[1326]": 0.02, "conductord[295]": 0.01}
+REFUSED all k0n53 M1-T02 r6 try 1
+04:50:18 r6 all k0n53/M1-T02 cold_ms=417.125981 scalar=14868793722243
+04:50:23 r6 off k0n53/M1-T02 cold_ms=435.71024 scalar=14868793722243
+machine is busy: other processes used 0.03 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.33 (limit 5.0); top: {"conductord[295]": 0.02, "claude[1326]": 0.01}
+REFUSED filter k0n53 M1-T02 r6 try 1
+04:50:44 r6 filter k0n53/M1-T02 cold_ms=376.112782 scalar=14868793722243
+04:50:49 r6 all k1n59/M1-T01 cold_ms=419.515432 scalar=22924121815368
+machine is busy: other processes used 0.02 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.18 (limit 5.0); top: {"process_api[1]": 0.01, "claude[1326]": 0.01}
+REFUSED off k1n59 M1-T01 r6 try 1
+04:51:11 r6 off k1n59/M1-T01 cold_ms=419.439373 scalar=22924121815368
+04:51:15 r6 filter k1n59/M1-T01 cold_ms=436.104849 scalar=22924121815368
+machine is busy: other processes used 0.03 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.38 (limit 5.0); top: {"claude[1326]": 0.03}
+REFUSED all k1n59 M1-T02 r6 try 1
+04:51:37 r6 all k1n59/M1-T02 cold_ms=411.083068 scalar=13711702643079
+04:51:41 r6 off k1n59/M1-T02 cold_ms=407.18299 scalar=13711702643079
+machine is busy: other processes used 0.05 CPU s in 2.0 s (limit 0.20), PSI some avg10 7.51 (limit 5.0); top: {"claude[1326]": 0.05}
+REFUSED filter k1n59 M1-T02 r6 try 1
+04:52:03 r6 filter k1n59/M1-T02 cold_ms=481.226518 scalar=13711702643079
+04:52:11 r6 all k0n61/M1-T01 cold_ms=1666.638758 scalar=153752017445515
+machine is busy: other processes used 0.02 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.65 (limit 5.0); top: {"claude[1326]": 0.02}
+REFUSED off k0n61 M1-T01 r6 try 1
+04:52:37 r6 off k0n61/M1-T01 cold_ms=1595.906069 scalar=153752017445515
+04:52:45 r6 filter k0n61/M1-T01 cold_ms=1560.368812 scalar=153752017445515
+machine is busy: other processes used 0.05 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.03 (limit 5.0); top: {"claude[1326]": 0.04, "process_api[1]": 0.01}
+REFUSED all k0n61 M1-T02 r6 try 1
+04:53:11 r6 all k0n61/M1-T02 cold_ms=1497.180505 scalar=106251430450189
+04:53:19 r6 off k0n61/M1-T02 cold_ms=1601.203763 scalar=106251430450189
+machine is busy: other processes used 0.02 CPU s in 2.0 s (limit 0.20), PSI some avg10 5.19 (limit 5.0); top: {"conductord[295]": 0.01, "claude[1326]": 0.01}
+REFUSED filter k0n61 M1-T02 r6 try 1
+04:53:45 r6 filter k0n61/M1-T02 cold_ms=1600.483434 scalar=106251430450189
+== A16 exploration done Sat Oct 17 04:53:45 UTC 2026
