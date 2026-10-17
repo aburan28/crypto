@@ -280,7 +280,7 @@ pub fn prime_with_verified_j(
 /// whole group: `extension_id` of `scripts/curve_id.py`, for a prime that
 /// fits a word (`p < 2^31`).  The caller has checked that `f` is
 /// irreducible.  `None` for `p < 5`, `k < 2`, a singular curve or an
-/// order outside the Hasse interval.
+///   order outside the Hasse interval.
 pub fn extension(
     p: u64,
     modulus: &[u64],
@@ -289,7 +289,7 @@ pub fn extension(
     order: &BigUint,
 ) -> Option<CurveId> {
     let k = modulus.len();
-    if p < 5 || p >= 1 << 31 || k < 2 || a.len() != k || b.len() != k {
+    if !(5..1 << 31).contains(&p) || k < 2 || a.len() != k || b.len() != k {
         return None;
     }
     let md: Vec<u64> = modulus.iter().map(|c| c % p).collect();
