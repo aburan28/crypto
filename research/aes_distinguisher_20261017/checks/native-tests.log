@@ -1,0 +1,72 @@
+   Compiling cfg-if v1.0.5
+   Compiling typenum v1.20.1
+   Compiling libc v0.2.191
+   Compiling generic-array v0.14.7
+   Compiling utf8parse v0.2.2
+   Compiling anstyle-parse v1.0.0
+   Compiling getrandom v0.2.17
+   Compiling zerocopy v0.8.63
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling colorchoice v1.0.5
+   Compiling anstyle-query v1.1.5
+   Compiling anstyle v1.0.14
+   Compiling anstream v1.0.0
+   Compiling rand_core v0.6.4
+   Compiling serde_core v1.0.229
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling ppv-lite86 v0.2.21
+   Compiling strsim v0.11.1
+   Compiling clap_lex v1.1.1
+   Compiling clap_builder v4.6.7
+   Compiling rand_chacha v0.3.1
+   Compiling digest v0.10.7
+   Compiling zmij v1.0.23
+   Compiling memchr v2.8.3
+   Compiling cpufeatures v0.2.17
+   Compiling itoa v1.0.18
+   Compiling serde_json v1.0.154
+   Compiling sha2 v0.10.9
+   Compiling clap v4.6.7
+   Compiling serde v1.0.229
+   Compiling rand v0.8.8
+   Compiling aes-discover v0.1.0 (/workspace/crypto/tools/aes-discover)
+    Finished `release` profile [optimized] target(s) in 24.00s
+     Running unittests src/lib.rs (/workspace/aes-build/crypto-native/release/deps/aes_discover-c08f6037b1a6b82b)
+
+running 12 tests
+test cipher::tests::fips_128_192_256 ... ok
+test cipher::tests::column_xor_is_preserved_and_two_byte_cancellation_exists ... ok
+test cipher::tests::round_trips_and_linear_inverse ... ok
+test diagnostics::tests::integral_positive_null_and_nonvacuity_mutant ... ok
+test search::tests::duplicate_bytes_zero_differences_and_reused_seed_rejected ... ok
+test search::tests::library_rejects_a_forged_frozen_byte_binding ... ok
+test search::tests::permutation_is_bijective_and_query_order_consistent ... ok
+test stats::tests::sparse_and_boundary_cases ... ok
+test trail::tests::one_active_byte_forces_one_four_sixteen ... ok
+test diagnostics::tests::cross_ratio_is_component_scoped ... ok
+test search::tests::known_signal_survives_fresh_keys_and_random_winner_does_not ... ok
+test diagnostics::tests::exact_aes_component_constants_including_bct_diagonal ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running unittests src/main.rs (/workspace/aes-build/crypto-native/release/deps/aes_discover-b33a22609b14fb4f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/interop.rs (/workspace/aes-build/crypto-native/release/deps/interop-819220673f14e52d)
+
+running 2 tests
+test cli_rejects_bad_keys_and_round_counts ... ok
+test openssl_differential_reference_all_key_sizes ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+   Doc-tests aes_discover
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -1,0 +1,5 @@
+    Updating crates.io index
+error: no matching package named `isogeny_algos` found
+location searched: /workspace/crypto/isogeny_algos
+required by package `volcano-cli v0.1.0 (/workspace/crypto/tools/volcano-cli)`
+    ... which satisfies path dependency `volcano-cli` (locked to 0.1.0) of package `crypto v0.1.0 (/workspace/crypto)`
