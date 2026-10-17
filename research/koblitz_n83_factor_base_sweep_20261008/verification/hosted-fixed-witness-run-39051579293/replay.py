@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import importlib.util
 import json
@@ -99,6 +100,11 @@ def replay(artifact: Path, s3_tar: Path) -> dict:
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     protocol = module.replay(artifact, SOURCE_COMMIT)
+    container = json.loads((artifact / "container-inspect.json").read_text())[0]
+    require(container["State"]["Status"] == "exited"
+            and container["State"]["ExitCode"] == 0
+            and container["State"]["OOMKilled"] is False,
+            "worker container exit or OOM differs")
     saved_protocol = json.loads((HERE / "protocol-audit.json").read_text())
     require(protocol == saved_protocol
             and protocol["status"] == "SAT_verified_witness_x"
@@ -131,6 +137,7 @@ def replay(artifact: Path, s3_tar: Path) -> dict:
     receipt = json.loads((HERE / "s3-roundtrip.json").read_text())
     require(receipt["status"] == "PASS_CONTENT_ADDRESSED_GET_AND_IDENTICAL_AUDIT"
             and receipt["run_id"] == RUN_ID
+            and receipt["github_artifact_id"] == 12107379138
             and receipt["source_commit"] == SOURCE_COMMIT
             and receipt["byte_identical_replay"] is True
             and receipt["protocol_audit_sha256"] == digest((HERE / "protocol-audit.json").read_bytes())
@@ -138,6 +145,9 @@ def replay(artifact: Path, s3_tar: Path) -> dict:
             and receipt["archive_bytes"] == s3_tar.stat().st_size
             and receipt["archive_sha256"] == digest(s3_tar.read_bytes())
             and receipt["s3_get_sha256"] == receipt["archive_sha256"]
+            and receipt["s3_checksum_sha256_base64"]
+                == base64.b64encode(hashlib.sha256(s3_tar.read_bytes()).digest()).decode()
+            and receipt["s3_put_etag"] == '"' + hashlib.md5(s3_tar.read_bytes()).hexdigest() + '"'
             and receipt["s3_uri"].endswith(receipt["archive_sha256"] + ".tar.gz"),
             "S3 roundtrip receipt differs")
     seen = {}
