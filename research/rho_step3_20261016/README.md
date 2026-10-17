@@ -81,6 +81,27 @@ instruction share. The instruction count is the result of this round.
 **IPC.** `tools/perf_ipc.sh` recorded `unsupported` for this host
 (`runs/perf/final-n53.jsonl`): the VM exposes no hardware PMU.
 
+## Merged with main's parallel optimization (2026-10-17)
+
+`main` gained a separate strong-rho canonicalization change while this PR
+was open (`2fd065a6c`, "perf: optimize strong rho canonicalization"): paired,
+unrolled normal-basis table lookups (`apply_pair`), a paired multiply, and the
+original canonicalization kept as `canonicalize_legacy`/`solve_legacy`, a
+performance control that ecbench runs as a method arm.
+
+- **How they were combined.** `canonicalize` is this PR's round-2 body with
+  main's `apply_pair` for both basis conversions. `canonicalize_legacy` is
+  main's original body, unchanged. `solve` and `solve_legacy` both take the
+  target-feature walk and the batched starts, so the two arms still differ
+  only in canonicalization. Shared helpers (`MulMod::mul`, `rotate`) carry
+  the round-2 changes in both arms.
+- **Identity.** The merged build's fixture outputs at n = 41, 53 and 61 match
+  this round's final build (digests `81d42835…`, `50acd175…`, `cf6d8810…`),
+  and main's `optimized_and_legacy_solvers_follow_the_same_trajectory` test
+  passes with the other 102 strong-rho and ecbench unit tests.
+- **Count.** Callgrind, n53, 4 fixtures: **2,145,912,235 instructions, 707
+  per walk step**, against this round's 718 (`runs/merge/`). Not timed.
+
 ## Where it stands
 
 The step is now 718 instructions. What remains, by function in the final

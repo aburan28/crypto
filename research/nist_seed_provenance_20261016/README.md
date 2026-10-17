@@ -1,7 +1,8 @@
 # NIST curve seed provenance: independent reproduction (2026-10-16)
 
 **Status.** Verified provenance, not an attack. Nothing here changes the ECDLP
-on any curve.
+on any curve. Independently validated on 2026-10-17; one derived sentence was
+corrected (see "Independent validation").
 
 **Source claim.** Anthropic Frontier Red Team, *Claude reveals ECDSA curve
 origins* (anthropic.com/research/ecdsa-curve-origins), and F. Valsorda, *NIST
@@ -85,7 +86,13 @@ Derived observations:
 - On every curve with `p ≡ 3 (mod 4)` (nine published curves), `b` is the
   `(p+1)/4` root (2^−9 by chance). That is the root exponentiation returns,
   so the 1997 code never tried `−b`, which would have given the twist. In the
-  four `p ≡ 3 mod 4` runs, 31 seeds were lost this way.
+  five `p ≡ 3 mod 4` runs, 31 candidates have a prime twist order but a
+  composite curve order. 26 of them would pass the criteria on the twist, so
+  26 seeds were lost this way. The other five fail `bitlen(n) ≤ bitlen(p)` on
+  the twist: p192 candidates 774, 1477, 3506 and 4492, and p384 candidate
+  1432. *(Corrected 2026-10-17. This sentence used to say "In the four
+  `p ≡ 3 mod 4` runs, 31 seeds were lost". There are five such runs; p521
+  has no twist-only candidates. CORR-20261016-10d498.)*
 - P-224's `b` is the negative of the Tonelli–Shanks root taken with the
   smallest non-residue (11). The sign is irrelevant there (`p ≡ 1 mod 4`).
 
@@ -132,7 +139,11 @@ These ran in a standalone session with Python 3 (`gmpy2`, `fpylll`) and
 PARI/GP. Under `AGENTS.md` ("Implementation language: no Python") they are
 reported here as observations with their provenance, not as repository
 evidence. The skip-filter protocol was frozen before any curve order was seen:
-`PREREGISTRATION.md`, verbatim.
+`PREREGISTRATION.md`, verbatim. *(Note 2026-10-17: that timing comes only
+from the file's own dates. The file was first committed in the same commit as
+the census data, so the repository history cannot confirm it. The independent
+validator therefore ruled it inconclusive, not refuted (VAL-20261016-cd9156,
+joint J7).)*
 
 **Why about half the valid candidates were skipped (10 published vs 11
 skipped).** Not explained:
@@ -163,6 +174,68 @@ seeds. Results:
 - The sign of `Gy` on the six FreeLIP base points is not the fixed root (3 of
   6), and no single bit of the next generator outputs predicts it.
 
+## Independent validation (2026-10-17)
+
+A blind validator in `aburan28/crypto-autoresearcher` checked this bundle
+(VAL-20261016-cd9156, merged in crypto-autoresearcher #2305). It built its
+own drand48, lrand48 and X9.62 code from the public specifications. It never
+opened this repository's sources. Its sample rows were drawn from a nonce
+derived from the freeze commit.
+
+- **Verdict.** Joints J1–J6 hold; J7 is inconclusive. Of 30 checks, 28
+  passed, 1 raised a concern and 1 was not run. The concern (J4-3) is the
+  31-versus-26 sentence corrected above. The check not run (J6-4) was running
+  this repository's native Rust tests, which the blind plan excluded.
+- **Seeds.** All ten prime seeds were re-derived from `(t, block)`, and all
+  ten satisfy the X9.62 relation. All four binary seeds were re-derived as
+  `lrand48` words.
+- **Walk-back.** Each of the ten seeds walks back to exactly one
+  block-aligned `srand48` state, and that state is the claimed `t`. Random
+  strings give none. Positive controls: 10 of 10.
+- **Census.** All 11,042 rows were re-counted independently, with 0
+  mismatches. In 466 rows, the twist count recorded here is composite where
+  the validator's count aborted early; each of those equals `2(p+1) − N0`.
+  Full point counts on 289 rows (85 named, 204 sampled) also gave 0
+  mismatches. 21 of 21 accepted candidates agree with the posts.
+- **Root choice.** The `(p+1)/4` root holds on 9 of 9 curves. P-224's `b`
+  is the negated Tonelli–Shanks root with `z = 11`.
+- **Files.** 14 of 14 bundle hashes match.
+
+The validator shares PARI/GP's SEA with this census, so the composite rows
+are empirical only. There was one reviewer and no red team.
+
+Records in `aburan28/crypto-autoresearcher`:
+
+- **Evidence: EV-SCURVE-e9d71b.**
+  - Generator facts: replicated.
+  - Native-test description: preliminary (the tests were not run).
+  - Walk-back attribution: strong.
+  - Census: strong, with this one sentence corrected.
+  - Root choice: replicated.
+  - External analyses: no strength assigned.
+- **Decision: DEC-20261016-82753f,** `support`, scoped to provenance.
+- **Correction: CORR-20261016-10d498.**
+- **Finding: KN-FIND-cee88d.**
+
+![Twist bookkeeping per run (VAL-20261016-cd9156, EV-SCURVE-e9d71b)](validation_twist_bookkeeping.svg)
+
+*Figure: in each run, the candidates with only a prime twist order (light)
+and those that would pass the criteria on the twist (dark). P-224 has
+`p ≡ 1 (mod 4)`, so `−b` gives an isomorphic curve and cannot reach the
+twist. Values below (recorded by the validator in `out/j4_lost_criteria.json`).
+The figure was drawn by `render_figures.py` beside crypto-autoresearcher's
+`review-DEC-20261016-82753f/report.md`.*
+
+| run | field | p mod 4 | twist-only | pass on twist | fail bitlen |
+|---|---|---:|---:|---:|---|
+| 863711343 | p239 | 3 | 9 | 9 | – |
+| 863966734 | p192 | 3 | 14 | 10 | 774, 1477, 3506, 4492 |
+| 871002724 | p521 | 3 | 0 | 0 | – |
+| 871696354 | p256 | 3 | 4 | 4 | – |
+| 872952608 | p384 | 3 | 4 | 3 | 1432 |
+| 891607927 | p224 | 1 | 16 | (9; not reachable) | 546, 2497, 3848, 4700, 5119, 6406, 6912 |
+| **p ≡ 3 mod 4 total** | | | **31** | **26** | **5** |
+
 ## Open
 
 - The skip filter.
@@ -179,5 +252,6 @@ None of these bears on ECDLP hardness.
 | `streams.svg`, `streams.png`, `plot_streams.py` | figure, its 150 dpi render, its plotting-only source |
 | `census.sh`, `sea_census.gp`, `classify.gp` | census driver (shell), point counting and classification (GP) |
 | `census/orders_<run>.txt`, `census/summary.json` | recorded point counts (11,042 lines) and classifier output |
-| `PREREGISTRATION.md` | skip-filter protocol, frozen before the census was read |
+| `PREREGISTRATION.md` | skip-filter protocol, frozen before the census was read (self-dated; see the 2026-10-17 note) |
+| `validation_twist_bookkeeping.svg`, `.png` | the validation figure, copied from crypto-autoresearcher `review-DEC-20261016-82753f/fig3-twist-bookkeeping.*` |
 | `../../examples/nist_seed_candidates.rs`, `../../src/cryptanalysis/nist_seed_provenance.rs` | native enumeration and tests |

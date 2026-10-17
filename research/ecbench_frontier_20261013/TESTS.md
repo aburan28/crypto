@@ -17,6 +17,9 @@ Repository commit: `759978250c1ce53d7b87bd8a1c2304781fcc4fc4`.
 | benchmark copies byte-equal to study PDF/SVG/PNG | pass by SHA-256 |
 | generated leaderboard and dependent lab-browser freshness checks | pass after publishing the accounting-only frontier audit; ranked rows unchanged |
 | `cargo test --release --lib --locked` under Rust 1.94.1 | pass; 4059 passed, 0 failed, 114 ignored; 310.28 s; pre-existing warnings only |
+| `bash scripts/clippy-maintained.sh` under Rust 1.98.1 | pass; all maintained library, binary, test, benchmark, and example targets warning-free |
+| `cargo test --release --test ecbench` under Rust 1.98.1 | pass; 15 passed, 0 failed; 77.98 s |
+| `cargo test --release --lib --locked` under Rust 1.98.1 | pass; 4059 passed, 0 failed, 114 ignored; 301.99 s |
 
 The failed replay is an evidence result, not a waived test. It is described in
 the README and PDF and blocks promotion of the affected F4 stage counts.
