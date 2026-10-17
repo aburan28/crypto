@@ -1,0 +1,29 @@
+{
+  "accepted_nonzero_scalar_lower_bound": "1569275433846670190958947353987675545133315652035359680560",
+  "accepted_support_targets": 224,
+  "base_classes": 16,
+  "base_fixture_sha256": "3984b55b793305b30beaf18918209282bce80d444c96217cd6143c7d9470d409",
+  "base_source_receipt_sha256": "f7de9791a007214b8506bf054ed24d55a803c4d1c8da50815aee04c5410339c7",
+  "base_source_verifier_sha256": "3ba691792475bcba3523d9cb31e49ac675ead85ef9e8890e83f7170bf8e9dbb6",
+  "boundary": "Native arithmetic on frozen, Sage-verified quotient-point inputs; cubic residuals and original Fp3-character derivation have separate certificates.",
+  "collector_receipt_sha256": "961a9995114189ed1ee86febde46979900317417a2744f34274833390fb5ff49",
+  "conditioned_hit_probability_upper_bound": "224/1569275433846670190958947353987675545133315652035359680560",
+  "counts_by_character_pair": {
+    "++": 224,
+    "+-": 211,
+    "-+": 203,
+    "--": 178
+  },
+  "density_receipt_sha256": "fd0a47cf4aecf736b1852d133fd384e30d9584114761bac6495f803d4210ca29",
+  "distinct_three_sum_targets": 816,
+  "ec_source_sha256": "776d74d3f5ef53f8427d29e519237a692136322259c23b8ba90b078df93fa382",
+  "field_prime": "6277101735386680763835789423207666416083908700390324961279",
+  "frozen_known_scalar_queries_replayed": 64,
+  "frozen_known_scalar_three_sum_hits": 0,
+  "query_equation": "q=-2P, P=aG for seeded known-scalar queries",
+  "source_sha256": "b6c36d2ef6f14f646b3ead9a17d1e7d262c56f5976948860cdd3cdf4b6c7931a",
+  "status": "native_exact_type_i_fixed_base_character_support_partition",
+  "subgroup_order": "6277101735386680763835789423176059013767194773182842284081",
+  "target_cell_sha256": "9c7d8ffd5f7b8e25369d8b0bdaef4e1118c2dba7155e7a9f806bb52eaab65f02",
+  "unordered_triples": 816
+}

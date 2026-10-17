@@ -1,0 +1,14 @@
+digraph G {
+  rankdir=LR;
+  graph [bgcolor="white", pad="0.2", nodesep="0.35", ranksep="0.35"];
+  node [shape=box, style="rounded,filled", fillcolor="#eef5fb", color="#2c5272", fontname="DejaVu Sans", fontsize=12];
+  edge [color="#526678"];
+  source [label="Frozen #1898 archive\npoints + source + protocol\nunchanged"];
+  check [label="Native import validation\nsource hash + curve checks\nexact archived columns"];
+  record [label="Per-base trace\nICV1 + FB1 + recipe\nordered point Merkle root"];
+  cache [label="Reusable signed cache\npoint → (column, sign)\nno point logarithms"];
+  catalog [label="Catalog\nsource, trace and cache hashes\n384 bases"];
+  source -> check -> record -> cache;
+  record -> catalog;
+  cache -> catalog;
+}

@@ -1,0 +1,169 @@
+"""Fixed-origin degree-three representatives for the 16 P-192 Type I classes.
+
+Two cubic sections of the plane quartic give
+  G_cut = B + T + U, F_cut = A + U + D,
+so [D-T] = [B-A]. All divisors are represented by triangular x/y polynomials.
+"""
+
+import hashlib
+import json
+import time
+from pathlib import Path
+
+from sage.all import GF, PolynomialRing, matrix
+
+
+HERE = Path(__file__).resolve().parent
+source_path = HERE / "type_i_cubic_reduction.json"
+guided_path = HERE / "type_i_guided_reduced_queries.json"
+plane_path = HERE / "type_i_plane_quartic.json"
+source = json.loads(source_path.read_text())
+guided = json.loads(guided_path.read_text())
+plane = json.loads(plane_path.read_text())
+p = int(source["field_prime"])
+K = GF(p)
+R = PolynomialRing(K, "x")
+x = R.gen()
+S = PolynomialRing(R, "y")
+y = S.gen()
+exponents = [tuple(e) for e in source["cubic_monomial_exponents"]]
+f = sum(S(K(int(c)) * x ** a) * y ** b
+        for key, c in plane["quartic_coefficients"].items()
+        for a, b, _ in [tuple(map(int, key.split(",")))])
+assert len(exponents) == 10 and f.degree() == 4
+
+
+def poly(encoded):
+    assert all(len(c) == 1 for c in encoded)
+    return R([K(int(c[0])) for c in encoded])
+
+
+def encode_poly(value):
+    return [[str(int(c))] for c in value.list()]
+
+
+def section(coefficients):
+    return sum(S(coefficients[i] * x ** e[0]) * y ** e[1]
+               for i, e in enumerate(exponents))
+
+
+def evaluation_rows(h, y_value):
+    assert h.is_monic() and y_value.degree() < h.degree()
+    columns = [(x ** e[0] * y_value ** e[1]) % h for e in exponents]
+    return [[c[j] for c in columns] for j in range(h.degree())]
+
+
+def normalized(coefficients):
+    first = next(c for c in coefficients if c != 0)
+    return [c / first for c in coefficients]
+
+
+def divide_section(cubic, known, residual_degree):
+    resultant = f.resultant(cubic)
+    if resultant == 0 or resultant.degree() != 12:
+        return None
+    quotient, remainder = resultant.quo_rem(known)
+    if remainder != 0 or quotient.degree() != residual_degree:
+        return None
+    h = quotient.monic()
+    if h.gcd(h.derivative()).degree() != 0 or h.gcd(known).degree() != 0:
+        return None
+    linear = next((item for item in f.subresultants(cubic) if item.degree() == 1), None)
+    if linear is None or linear[1].gcd(h).degree() != 0:
+        return None
+    y_value = (-linear[0] * linear[1].inverse_mod(h)) % h
+    assert f(y_value) % h == 0 and cubic(y_value) % h == 0
+    return h, y_value
+
+
+anchor_points = [item["coordinates_Fp_decimal"]
+                 for item in plane["known_points_verified"]
+                 if item["source"] == "base"][:3]
+assert len(anchor_points) == 3
+origin_coordinates = [(K(int(c[0])) / K(int(c[2])),
+                       K(int(c[1])) / K(int(c[2]))) for c in anchor_points]
+assert len(set(origin_coordinates)) == 3
+origin_h = R.prod(x - xx for xx, _ in origin_coordinates)
+origin_y = R.lagrange_polynomial(origin_coordinates)
+assert origin_h.degree() == 3 and f(origin_y) % origin_h == 0
+
+start = time.monotonic_ns()
+representatives = []
+cases = [("base", item) for item in source["classes"]] + [
+    ("guided_query", item) for item in guided["results"]
+]
+assert len(cases) == 80 and guided["three_sum_matches"] == 0
+for kind, item in cases:
+    # [B-A] is the class from the half-fiber divisor construction.
+    A = item["positive_input_residual"]
+    B = item["negative_input_residual"]
+    h_a, y_a = poly(A["residual_x_polynomial"]), poly(A["residual_y_polynomial"])
+    h_b, y_b = poly(B["residual_x_polynomial"]), poly(B["residual_y_polynomial"])
+    assert all(h.degree() == 3 and f(v) % h == 0
+               for h, v in ((h_a, y_a), (h_b, y_b)))
+    known_g = h_b * origin_h
+    assert h_b.gcd(origin_h).degree() == 0
+    denominator_rows = matrix(K, evaluation_rows(h_b, y_b) +
+                              evaluation_rows(origin_h, origin_y))
+    assert denominator_rows.rank() == 6
+    basis = [list(v) for v in denominator_rows.right_kernel().basis()]
+    selected = None
+    for trial in ([1, 1, 1, 1], [1, 2, 3, 5], [1, 3, 7, 11],
+                  [2, 5, 11, 17], [1, 0, 0, 0], [0, 1, 0, 0]):
+        coefficients = normalized([sum(K(trial[j]) * basis[j][i] for j in range(4))
+                                   for i in range(10)])
+        g = section(coefficients)
+        intermediate = divide_section(g, known_g, 6)
+        if intermediate is None:
+            continue
+        h_u, y_u = intermediate
+        if h_u.gcd(h_a).degree() != 0:
+            continue
+        numerator_rows = matrix(K, evaluation_rows(h_a, y_a) +
+                                evaluation_rows(h_u, y_u))
+        if numerator_rows.rank() != 9:
+            continue
+        numerator_coefficients = normalized(list(numerator_rows.right_kernel().basis()[0]))
+        numerator = section(numerator_coefficients)
+        final = divide_section(numerator, h_a * h_u, 3)
+        if final is None:
+            continue
+        h_d, y_d = final
+        selected = {
+            "kind": kind,
+            "index": item["base_index"] if kind == "base" else item["query_index"],
+            "denominator_cubic_coefficients": [str(int(c)) for c in coefficients],
+            "intermediate_x_polynomial": encode_poly(h_u),
+            "intermediate_y_polynomial": encode_poly(y_u),
+            "numerator_cubic_coefficients": [str(int(c)) for c in numerator_coefficients],
+            "representative_x_polynomial": encode_poly(h_d),
+            "representative_y_polynomial": encode_poly(y_d),
+            "denominator_trial": trial,
+        }
+        break
+    assert selected is not None, f"fixed-origin reduction failed for {kind} {item}"
+    representatives.append(selected)
+    print(f"fixed-origin representative {len(representatives)}/{len(cases)}", flush=True)
+
+out = {
+    "status": "verified_fixed_origin_degree_three_representatives",
+    "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+    "input_receipt_sha256": hashlib.sha256(source_path.read_bytes()).hexdigest(),
+    "guided_receipt_sha256": hashlib.sha256(guided_path.read_bytes()).hexdigest(),
+    "plane_receipt_sha256": hashlib.sha256(plane_path.read_bytes()).hexdigest(),
+    "field_prime": str(p),
+    "origin_base_indices": [0, 1, 2],
+    "origin_x_polynomial": encode_poly(origin_h),
+    "origin_y_polynomial": encode_poly(origin_y),
+    "representatives": representatives,
+    "base_classes_reduced": len(source["classes"]),
+    "guided_queries_reduced": len(guided["results"]),
+    "guided_three_sum_matches": guided["three_sum_matches"],
+    "elapsed_ns": time.monotonic_ns() - start,
+    "class_identity": "G_cut=B+T+U and F_cut=A+U+D imply [D-T]=[B-A]",
+    "boundary": "Fixed-origin degree-three representatives for 16 exact base classes and 64 accepted guided queries; generic Jacobian arithmetic and scalable relation collection are separate.",
+}
+(HERE / "type_i_fixed_origin_reduction.json").write_text(
+    json.dumps(out, indent=2, sort_keys=True) + "\n"
+)
+print(json.dumps({k: v for k, v in out.items() if k != "representatives"}, sort_keys=True))

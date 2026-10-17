@@ -133,10 +133,22 @@ pub trait RhoField: Send + Sync {
     fn mul(&self, a: Self::E, b: Self::E) -> Self::E;
     fn sqr(&self, a: Self::E) -> Self::E;
     fn batch_inv(&self, xs: &mut [Self::E], scratch: &mut Vec<Self::E>);
+    /// Whether this field's products are `pclmulqdq` target-feature
+    /// functions, which inline only into code compiled with that feature
+    /// (true for [`Gf2`] on a folding field, which implies the CPU has it).
+    /// [`StrongRhoG::solve`] then runs its walk compiled with it.
+    #[inline(always)]
+    fn clmul_walk(&self) -> bool {
+        false
+    }
 }
 
 impl RhoField for Gf2 {
     type E = u64;
+    #[inline(always)]
+    fn clmul_walk(&self) -> bool {
+        cfg!(target_arch = "x86_64") && self.folds()
+    }
     #[inline(always)]
     fn degree(&self) -> u32 {
         self.n
@@ -190,6 +202,12 @@ pub trait RhoScalar:
     fn bit(self, i: u32) -> bool;
     fn mul_ctx(m: Self) -> Self::MulCtx;
     fn mul_in(ctx: &Self::MulCtx, a: Self, b: Self) -> Self;
+    /// A multiplier fixed in advance, for many products `a·w mod m` with one
+    /// `w` (the orbit multipliers `±λ^k`).
+    type Fixed: Copy + Send + Sync;
+    fn fixed(ctx: &Self::MulCtx, w: Self) -> Self::Fixed;
+    /// `a·w mod m` for `a < m`: the same value as `mul_in(ctx, a, w)`.
+    fn mul_fixed(ctx: &Self::MulCtx, a: Self, w: Self::Fixed) -> Self;
     fn mul_pair_in(ctx: &Self::MulCtx, a: Self, b: Self, multiplier: Self) -> (Self, Self);
     fn mul_mod(a: Self, b: Self, m: Self) -> Self;
     fn add_mod(a: Self, b: Self, m: Self) -> Self;
@@ -231,6 +249,34 @@ impl RhoScalar for u64 {
     #[inline(always)]
     fn mul_in(ctx: &MulMod, a: Self, b: Self) -> Self {
         ctx.mul(a, b)
+    }
+    /// `w` with Shoup's `w' = ⌊w·2^64 / m⌋` when `m < 2^63` (else 0, unused).
+    type Fixed = (u64, u64);
+    fn fixed(ctx: &MulMod, w: Self) -> (u64, u64) {
+        debug_assert!(w < ctx.m);
+        let shoup = if ctx.m < 1 << 63 {
+            ((u128::from(w) << 64) / u128::from(ctx.m)) as u64
+        } else {
+            0
+        };
+        (w, shoup)
+    }
+    /// Shoup's fixed-operand product: `q = ⌊a·w' / 2^64⌋` undercounts `⌊a·w / m⌋`
+    /// by at most one, so `a·w − q·m` lies in `[0, 2m)` and one conditional
+    /// subtraction finishes it.  Exact, for `a, w < m < 2^63`.
+    #[inline(always)]
+    fn mul_fixed(ctx: &MulMod, a: Self, (w, shoup): (u64, u64)) -> Self {
+        debug_assert!(a < ctx.m && w < ctx.m);
+        if ctx.m >= 1 << 63 {
+            return ctx.mul(a, w);
+        }
+        let q = ((u128::from(a) * u128::from(shoup)) >> 64) as u64;
+        let r = a.wrapping_mul(w).wrapping_sub(q.wrapping_mul(ctx.m));
+        if r >= ctx.m {
+            r - ctx.m
+        } else {
+            r
+        }
     }
     #[inline(always)]
     fn mul_pair_in(ctx: &MulMod, a: Self, b: Self, multiplier: Self) -> (Self, Self) {
@@ -329,6 +375,14 @@ impl RhoScalar for u128 {
     #[inline(always)]
     fn mul_in(m: &u128, a: Self, b: Self) -> Self {
         mul_mod_u128(a, b, *m)
+    }
+    type Fixed = u128;
+    fn fixed(_: &u128, w: Self) -> u128 {
+        w
+    }
+    #[inline(always)]
+    fn mul_fixed(m: &u128, a: Self, w: u128) -> Self {
+        mul_mod_u128(a, w, *m)
     }
     #[inline(always)]
     fn mul_pair_in(m: &u128, a: Self, b: Self, multiplier: Self) -> (Self, Self) {
@@ -701,11 +755,12 @@ impl<E: FieldWord> NormalBasis<E> {
         unreachable!("every finite field has a normal basis")
     }
 
+    /// `v` rotated left by `k` within `n` bits, for `v < 2^n` and `k ≤ n`:
+    /// at `k = 0` the right shift by `n < BITS` contributes nothing, so no
+    /// branch is needed.
     #[inline(always)]
     fn rotate(&self, v: E, k: u32) -> E {
-        if k == 0 {
-            return v;
-        }
+        debug_assert!(k <= self.n && v & self.mask == v);
         ((v << k) | (v >> (self.n - k))) & self.mask
     }
 
@@ -785,7 +840,10 @@ impl MulMod {
         if !self.fast {
             return ((a as u128 * b as u128) % self.m as u128) as u64;
         }
-        let q = ((a as f64) * (b as f64) * self.inv) as u64;
+        // Every operand and the quotient are below 2^50, so they convert
+        // through `i64` exactly, and that is one instruction each way on
+        // baseline x86-64 where `u64` <-> `f64` is a branchy sequence.
+        let q = ((a as i64 as f64) * (b as i64 as f64) * self.inv) as i64 as u64;
         let r = a.wrapping_mul(b).wrapping_sub(q.wrapping_mul(self.m)) as i64;
         let m = self.m as i64;
         (if r < 0 {
@@ -961,7 +1019,12 @@ pub struct StrongRhoG<F: RhoField, S: RhoScalar> {
     lambda: S,
     automorphisms: usize,
     generator: RawPointG<F::E>,
+    /// `λ^k`, as [`Self::canonicalize_legacy`] uses it.
     lam_pow: Vec<S>,
+    /// `λ^k` and `−λ^k`, the orbit multipliers, prepared for
+    /// [`RhoScalar::mul_fixed`].
+    lam_fixed: Vec<S::Fixed>,
+    neg_lam_fixed: Vec<S::Fixed>,
     mm: S::MulCtx,
 }
 
@@ -1004,6 +1067,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
     ) -> Self {
         let n = gf.degree();
         let nb = NormalBasis::new(&gf);
+        let mm = S::mul_ctx(modulus);
         let mut lam_pow = Vec::with_capacity(n as usize);
         let mut cur = S::one();
         let mut orbit = BTreeSet::new();
@@ -1023,8 +1087,13 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
             lambda,
             automorphisms: orbit.len(),
             generator,
+            lam_fixed: lam_pow.iter().map(|&l| S::fixed(&mm, l)).collect(),
+            neg_lam_fixed: lam_pow
+                .iter()
+                .map(|&l| S::fixed(&mm, S::sub_mod(S::zero(), l, modulus)))
+                .collect(),
             lam_pow,
-            mm: S::mul_ctx(modulus),
+            mm,
         }
     }
 
@@ -1039,6 +1108,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
     ) -> Self {
         let n = gf.degree();
         let nb = NormalBasis::new(&gf);
+        let mm = S::mul_ctx(modulus);
         Self {
             n,
             curve_a,
@@ -1048,8 +1118,13 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
             lambda: S::one(),
             automorphisms: 2,
             generator,
+            lam_fixed: vec![S::fixed(&mm, S::one()); n as usize],
+            neg_lam_fixed: vec![
+                S::fixed(&mm, S::sub_mod(S::zero(), S::one(), modulus));
+                n as usize
+            ],
             lam_pow: vec![S::one(); n as usize],
-            mm: S::mul_ctx(modulus),
+            mm,
         }
     }
 
@@ -1172,6 +1247,37 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
         }
     }
 
+    /// `ahead[j] = base + multiples[j]` for every `j`, with one batched
+    /// inversion; the group law's special cases fall back to [`Self::add`].
+    #[inline(always)]
+    fn starts_ahead(
+        &self,
+        base: RawPointG<F::E>,
+        multiples: &[RawPointG<F::E>],
+        ahead: &mut [RawPointG<F::E>],
+        inverses: &mut [F::E],
+        scratch: &mut Vec<F::E>,
+    ) {
+        let zero = F::E::default();
+        for (inverse, &m) in inverses.iter_mut().zip(multiples) {
+            *inverse = match (base, m) {
+                (RawPointG::Affine { x: x1, .. }, RawPointG::Affine { x: x2, .. }) => x1 ^ x2,
+                _ => zero,
+            };
+        }
+        self.gf.batch_inv(inverses, scratch);
+        for ((out, &inverse), &m) in ahead.iter_mut().zip(inverses.iter()).zip(multiples) {
+            *out = match (base, m) {
+                (RawPointG::Affine { x: x1, y: y1 }, RawPointG::Affine { x: x2, y: y2 })
+                    if inverse != zero =>
+                {
+                    self.add_with_slope(x1, y1, x2, self.mul(y1 ^ y2, inverse))
+                }
+                _ => self.add(base, m),
+            };
+        }
+    }
+
     #[inline(always)]
     fn add_with_slope(&self, x1: F::E, y1: F::E, x2: F::E, lambda: F::E) -> RawPointG<F::E> {
         let x3 = self.sqr(lambda) ^ lambda ^ x1 ^ x2 ^ self.curve_a;
@@ -1262,6 +1368,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
 
     /// Canonical representative of the signed-Frobenius orbit of the state's
     /// point, with `a, b` multiplied by the orbit multiplier `±λ^k`.
+    #[inline(always)]
     pub fn canonicalize(&self, state: WalkStateG<F::E, S>) -> WalkStateG<F::E, S> {
         let RawPointG::Affine { x, y } = state.point else {
             return state;
@@ -1269,27 +1376,26 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
         let nb = &self.nb;
         let (xc, yc) = nb.to_normal.apply_pair(x, y);
         let (best, best_k, tie) = nb.least_rotation(xc);
-        let (k, negated) = if tie {
-            self.choice_exhaustive(xc, yc)
+        // Outside a tie the least rotation is `x_k` itself and the sign test
+        // has already rotated `y`, so neither is computed twice.
+        let (k, negated, xk, yk) = if tie {
+            let (k, negated) = self.choice_exhaustive(xc, yc);
+            (k, negated, nb.rotate(xc, k), nb.rotate(yc, k))
         } else {
             let yk = nb.rotate(yc, best_k);
-            (best_k, (yk ^ best) < yk)
+            (best_k, (yk ^ best) < yk, best, yk)
         };
-        let xk = nb.rotate(xc, k);
-        let yk = nb.rotate(yc, k);
         let yk = if negated { yk ^ xk } else { yk };
-        let lam = self.lam_pow[k as usize];
         let multiplier = if negated {
-            S::sub_mod(S::zero(), lam, self.modulus)
+            self.neg_lam_fixed[k as usize]
         } else {
-            lam
+            self.lam_fixed[k as usize]
         };
-        let (a, b) = S::mul_pair_in(&self.mm, state.a, state.b, multiplier);
         let (x, y) = nb.to_poly.apply_pair(xk, yk);
         WalkStateG {
             point: RawPointG::Affine { x, y },
-            a,
-            b,
+            a: S::mul_fixed(&self.mm, state.a, multiplier),
+            b: S::mul_fixed(&self.mm, state.b, multiplier),
         }
     }
 
@@ -1333,7 +1439,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
         params: &StrongRhoParams,
         charges: StrongRhoCharges,
     ) -> Option<StrongRhoOutcomeG<S>> {
-        self.solve_impl::<false>(q, jumps, start_rng, params, charges)
+        self.solve_dispatch::<false>(q, jumps, start_rng, params, charges)
     }
 
     /// The same walk through the literal pre-optimization canonicalization.
@@ -1347,9 +1453,50 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
         params: &StrongRhoParams,
         charges: StrongRhoCharges,
     ) -> Option<StrongRhoOutcomeG<S>> {
-        self.solve_impl::<true>(q, jumps, start_rng, params, charges)
+        self.solve_dispatch::<true>(q, jumps, start_rng, params, charges)
     }
 
+    #[inline(always)]
+    fn solve_dispatch<const LEGACY: bool>(
+        &self,
+        q: RawPointG<F::E>,
+        jumps: &[JumpG<F::E, S>],
+        start_rng: &mut StdRng,
+        params: &StrongRhoParams,
+        charges: StrongRhoCharges,
+    ) -> Option<StrongRhoOutcomeG<S>> {
+        #[cfg(target_arch = "x86_64")]
+        if self.gf.clmul_walk() {
+            // SAFETY: `clmul_walk` holds only for a field built after
+            // `pclmulqdq` was detected.
+            return unsafe { self.solve_clmul::<LEGACY>(q, jumps, start_rng, params, charges) };
+        }
+        self.solve_impl::<LEGACY>(q, jumps, start_rng, params, charges)
+    }
+
+    /// [`Self::solve_impl`] compiled with `pclmulqdq`: the walk inlines into
+    /// it, and with it every field product, which is a target-feature
+    /// function that inlines only into code compiled with the feature.
+    ///
+    /// # Safety
+    ///
+    /// The CPU must support `pclmulqdq`.
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "pclmulqdq")]
+    unsafe fn solve_clmul<const LEGACY: bool>(
+        &self,
+        q: RawPointG<F::E>,
+        jumps: &[JumpG<F::E, S>],
+        start_rng: &mut StdRng,
+        params: &StrongRhoParams,
+        charges: StrongRhoCharges,
+    ) -> Option<StrongRhoOutcomeG<S>> {
+        self.solve_impl::<LEGACY>(q, jumps, start_rng, params, charges)
+    }
+
+    /// The walk, always inlined into [`Self::solve_clmul`] or
+    /// [`Self::solve_dispatch`].
+    #[inline(always)]
     fn solve_impl<const LEGACY: bool>(
         &self,
         q: RawPointG<F::E>,
@@ -1395,6 +1542,17 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
         let mut jump_index = vec![0usize; lanes_n];
         let mut active: Vec<usize> = Vec::with_capacity(lanes_n);
         let mut scratch: Vec<F::E> = Vec::new();
+        // Walk starts are cursor, cursor + stride, cursor + 2·stride, …; they
+        // are formed `lanes_n` at a time as `base + (j+1)·stride` with one
+        // batched inversion, instead of one inversion per start.  `ahead[j]`
+        // holds `base + (j+1)·stride`; the last becomes the next base.
+        let multiples: Vec<RawPointG<F::E>> =
+            std::iter::successors(Some(stride), |&m| Some(self.add(m, stride)))
+                .take(lanes_n)
+                .collect();
+        let mut ahead = vec![RawPointG::Infinity; lanes_n];
+        let mut ahead_inv = vec![zero; lanes_n];
+        let mut ahead_used = lanes_n;
         let (mut steps, mut walks, mut fruitless, mut capped, mut wasted) = (0u64, 0u64, 0, 0, 0);
         let mut escapes = 0u64;
         let mut dp_trail_lengths: Vec<u32> = Vec::new();
@@ -1405,9 +1563,20 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
             for lane in lanes.iter_mut().filter(|lane| !lane.live) {
                 loop {
                     walks += 1;
+                    if ahead_used == lanes_n {
+                        self.starts_ahead(
+                            cursor,
+                            &multiples,
+                            &mut ahead,
+                            &mut ahead_inv,
+                            &mut scratch,
+                        );
+                        ahead_used = 0;
+                    }
                     let start = cursor;
                     let start_a = cursor_a;
-                    cursor = self.add(cursor, stride);
+                    cursor = ahead[ahead_used];
+                    ahead_used += 1;
                     cursor_a = S::add_mod(cursor_a, stride_a, modulus);
                     charges.group_additions += 1;
                     if start == RawPointG::Infinity {
@@ -1879,6 +2048,33 @@ mod tests {
     }
 
     #[test]
+    fn batched_starts_match_the_sequential_chain() {
+        for curve in curves() {
+            let rho = StrongRho::new(&curve);
+            let g = rho.generator();
+            let r = rho.modulus();
+            let stride = rho.scalar_mul(g, 5);
+            let multiples: Vec<_> =
+                std::iter::successors(Some(stride), |&m| Some(rho.add(m, stride)))
+                    .take(8)
+                    .collect();
+            // Bases where a sum is infinity (−3·stride), a doubling
+            // (2·stride), infinity itself, and a generic point.
+            for base_k in [r - 15, 10, 0, 1234] {
+                let base = rho.scalar_mul(g, base_k);
+                let mut ahead = vec![RawPointG::Infinity; 8];
+                let mut inverses = vec![0u64; 8];
+                rho.starts_ahead(base, &multiples, &mut ahead, &mut inverses, &mut Vec::new());
+                let mut cursor = base;
+                for (j, &point) in ahead.iter().enumerate() {
+                    cursor = rho.add(cursor, stride);
+                    assert_eq!(point, cursor, "n={} base={base_k} j={j}", curve.n);
+                }
+            }
+        }
+    }
+
+    #[test]
     fn inverse_is_an_inverse() {
         for curve in curves() {
             let rho = StrongRho::new(&curve);
@@ -1912,6 +2108,51 @@ mod tests {
                 );
             }
             assert_eq!(mm.mul(m - 1, m - 1), mul_mod(m - 1, m - 1, m));
+        }
+    }
+
+    /// Shoup's fixed-operand product equals the plain product, on both sides
+    /// of the `2^63` bound where it hands over to [`MulMod`] and at the
+    /// extreme operands; the wide scalar's `Fixed` is the plain product.
+    #[test]
+    fn fixed_multipliers_match_the_plain_product() {
+        let mut rng = StdRng::seed_from_u64(11);
+        for m in [
+            3u64,
+            97,
+            1 << 20,
+            (1 << 50) - 3,
+            (1 << 62) + 7,
+            (1 << 63) - 25,
+            (1 << 63) + 29,
+            u64::MAX - 58,
+        ] {
+            let mm = <u64 as RhoScalar>::mul_ctx(m);
+            let extremes = [0, 1, m / 2, m - 2, m - 1];
+            let mut ws: Vec<u64> = extremes.to_vec();
+            ws.extend((0..40).map(|_| rng.gen_range(0..m)));
+            for &w in &ws {
+                let fw = <u64 as RhoScalar>::fixed(&mm, w);
+                let mut avs: Vec<u64> = extremes.to_vec();
+                avs.extend((0..500).map(|_| rng.gen_range(0..m)));
+                for a in avs {
+                    assert_eq!(
+                        <u64 as RhoScalar>::mul_fixed(&mm, a, fw),
+                        mul_mod(a, w, m),
+                        "m={m} a={a} w={w}"
+                    );
+                }
+            }
+        }
+        let m: u128 = (1 << 100) + 277;
+        let ctx = <u128 as RhoScalar>::mul_ctx(m);
+        for _ in 0..2_000 {
+            let (a, w) = (rng.gen_range(0..m), rng.gen_range(0..m));
+            let fw = <u128 as RhoScalar>::fixed(&ctx, w);
+            assert_eq!(
+                <u128 as RhoScalar>::mul_fixed(&ctx, a, fw),
+                mul_mod_u128(a, w, m)
+            );
         }
     }
 

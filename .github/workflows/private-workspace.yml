@@ -5,6 +5,7 @@ on:
       - '.claude/hooks/session-start.sh'
       - 'scripts/private-workspace.sh'
       - 'scripts/test-private-workspace.sh'
+      - 'scripts/test-private-workspace-native.sh'
       - 'scripts/setup-cloud-environment.sh'
       - 'scripts/setup-workstation.sh'
       - '.github/workflows/private-workspace.yml'
@@ -14,6 +15,7 @@ on:
       - '.claude/hooks/session-start.sh'
       - 'scripts/private-workspace.sh'
       - 'scripts/test-private-workspace.sh'
+      - 'scripts/test-private-workspace-native.sh'
       - 'scripts/setup-cloud-environment.sh'
       - 'scripts/setup-workstation.sh'
       - '.github/workflows/private-workspace.yml'
@@ -22,6 +24,8 @@ permissions:
 jobs:
   private-startup:
     runs-on: ubuntu-latest
+    # Syntax check and offline contract tests; about one second locally.
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,6 +33,6 @@ jobs:
             .claude/hooks
             scripts
       - name: Shell syntax
-        run: bash -n scripts/private-workspace.sh scripts/test-private-workspace.sh scripts/setup-cloud-environment.sh scripts/setup-workstation.sh .claude/hooks/session-start.sh
+        run: bash -n scripts/private-workspace.sh scripts/test-private-workspace.sh scripts/test-private-workspace-native.sh scripts/setup-cloud-environment.sh scripts/setup-workstation.sh .claude/hooks/session-start.sh
       - name: Fail-closed offline contracts
         run: bash scripts/test-private-workspace.sh

@@ -1,0 +1,16 @@
+  ***   sorry, embedded braces (in parser) is not yet implemented.
+... skipping file 'research/p192_extension_cover_20261012/type_i_signed_base_independent.gp'
+  ***   at top-level: ...ut(T,elladd(E,elladd(E,V[i],V[j]),V[k]))
+  ***                                             ^---------------
+  ***   incorrect type in gtos [integer expected] (t_POL).
+  ***   unexpected closing brace.
+  ***   at top-level: ...5984||cancellations!=512,error("signed triple 
+  ***                                             ^---------------------
+  ***   user error: signed triple count
+  ***   at top-level: if(#U!=5504,error("signed support count"))
+  ***                             ^------------------------------
+  ***   user error: signed support count
+  ***   at top-level: ...92,1352]||accepted!=1344,error("character part
+  ***                                             ^---------------------
+  ***   user error: character partition
+SIGNED_BASE_INDEPENDENT_PASS triples=5984 distinct=5504 accepted=1344 cancel=512 queries=64 hits=0

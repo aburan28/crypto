@@ -1,0 +1,7 @@
+{
+  "schema": "volcano-census.seeds/v1",
+  "recorded_before": "any calibration search or run",
+  "calibration": {"search_seed": 20261017, "ca_seed": 20261017, "ecbench_target_seed": 20261017, "ecbench_measurement_seed": 20261017,
+    "search_command": "volcano-rho --bits B --ell 2 --depth 4 --seed 20261017 --min-n 2^(B-8) --crater any",
+    "note": "volcano-rho refuses n < 2^20 and bits < 20; a --min-n flag and a lower bit bound of 16 were added in a scratch worktree (volcano-rho-min-n.patch) because b = 18..22 cannot satisfy n >= 2^20."}
+}

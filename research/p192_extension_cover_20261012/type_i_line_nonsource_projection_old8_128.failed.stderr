@@ -1,0 +1,95 @@
+Traceback (most recent call last):
+  File "sage/structure/category_object.pyx", line 858, in sage.structure.category_object.CategoryObject.getattr_from_category
+    return self._cached_methods[name]
+KeyError: 'point_homset'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/schemes/projective/projective_subscheme.py", line 120, in point
+    return self._point(self.point_homset(), v, check=check)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/schemes/elliptic_curves/ell_point.py", line 593, in __init__
+    point_homset = curve.point_homset()
+                   ^^^^^^^^^^^^^^^^^^
+  File "sage/structure/category_object.pyx", line 852, in sage.structure.category_object.CategoryObject.__getattr__
+    return self.getattr_from_category(name)
+  File "sage/structure/category_object.pyx", line 867, in sage.structure.category_object.CategoryObject.getattr_from_category
+    attr = getattr_from_other_class(self, cls, name)
+  File "sage/cpython/getattr.pyx", line 357, in sage.cpython.getattr.getattr_from_other_class
+    raise AttributeError(dummy_error_message)
+AttributeError: 'sage.rings.finite_rings.hom_prime_finite_field.FiniteFieldHomomorphism_prime' object has no attribute '_SageObject__custom_name'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "sage/rings/finite_rings/integer_mod.pyx", line 368, in sage.rings.finite_rings.integer_mod.IntegerMod_abstract.__init__
+    z = integer_ring.Z(value)
+  File "sage/structure/parent.pyx", line 899, in sage.structure.parent.Parent.__call__
+    return mor._call_(x)
+  File "sage/structure/coerce_maps.pyx", line 227, in sage.structure.coerce_maps.NamedConvertMap._call_
+    cdef Element e = method(C)
+  File "sage/rings/finite_rings/element_pari_ffelt.pyx", line 1271, in sage.rings.finite_rings.element_pari_ffelt.FiniteFieldElement_pari_ffelt._integer_
+    return self.lift()
+  File "sage/rings/finite_rings/element_pari_ffelt.pyx", line 1254, in sage.rings.finite_rings.element_pari_ffelt.FiniteFieldElement_pari_ffelt.lift
+    raise ValueError("element is not in the prime field")
+ValueError: element is not in the prime field
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "sage/rings/finite_rings/hom_prime_finite_field.pyx", line 40, in sage.rings.finite_rings.hom_prime_finite_field.SectionFiniteFieldHomomorphism_prime._call_
+    return self._codomain._element_constructor_(x)
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/rings/finite_rings/integer_mod_ring.py", line 1180, in _element_constructor_
+    return integer_mod.IntegerMod(self, x)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "sage/rings/finite_rings/integer_mod.pyx", line 205, in sage.rings.finite_rings.integer_mod.IntegerMod
+    return t(parent, value)
+  File "sage/rings/finite_rings/integer_mod.pyx", line 376, in sage.rings.finite_rings.integer_mod.IntegerMod_abstract.__init__
+    value = sage.rings.rational_field.QQ(value)
+  File "sage/structure/parent.pyx", line 899, in sage.structure.parent.Parent.__call__
+    return mor._call_(x)
+  File "sage/structure/coerce_maps.pyx", line 92, in sage.structure.coerce_maps.DefaultConvertMap_unique._call_
+    raise
+  File "sage/structure/coerce_maps.pyx", line 87, in sage.structure.coerce_maps.DefaultConvertMap_unique._call_
+    return C._element_constructor(x)
+  File "sage/rings/rational.pyx", line 532, in sage.rings.rational.Rational.__init__
+    self.__set_value(x, base)
+  File "sage/rings/rational.pyx", line 678, in sage.rings.rational.Rational._Rational__set_value
+    raise TypeError("unable to convert {!r} to a rational".format(x))
+TypeError: unable to convert 1573583833666413100437821394243682560725072533511128937482*k^5 + 3261268279427315881751356650798282646158932389856647763811*k^4 + 3261268279427315881751356650798282646158932389856647763811*k^3 + 1573583833666413100437821394243682560725072533511128937482*k^2 + 5061956638346020000127031485086433680075390482915177923647 to a rational
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/line_nonsource_projection_controls.py", line 59, in <module>
+    anchor = dt.quotient_image(cover_from_x(anchor_x))
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/type_i_divisor_transfer.py", line 69, in quotient_image
+    return E(c0+d0/(X-inf), kappa*y0/(X-inf)**2)
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/schemes/elliptic_curves/ell_generic.py", line 601, in __call__
+    return plane_curve.ProjectivePlaneCurve.__call__(self, *args, **kwds)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/schemes/generic/scheme.py", line 242, in __call__
+    return self.point(args)
+           ~~~~~~~~~~^^^^^^
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/schemes/projective/projective_subscheme.py", line 122, in point
+    return self._point(self, v, check=check)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/schemes/elliptic_curves/ell_point.py", line 600, in __init__
+    SchemeMorphism_point_abelian_variety_field.__init__(self, point_homset, v, check=check)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/schemes/projective/projective_point.py", line 1153, in __init__
+    v = Sequence(v, R)
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/structure/sequence.py", line 310, in Sequence
+    return Sequence_generic(x, universe, check, immutable, cr, cr_str, use_sage_types)
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/structure/sequence.py", line 484, in __init__
+    x[i] = universe(x[i])
+           ~~~~~~~~^^^^^^
+  File "sage/structure/parent.pyx", line 899, in sage.structure.parent.Parent.__call__
+    return mor._call_(x)
+  File "sage/rings/finite_rings/hom_prime_finite_field.pyx", line 42, in sage.rings.finite_rings.hom_prime_finite_field.SectionFiniteFieldHomomorphism_prime._call_
+    raise ValueError("%s is not in the image of %s" % (x, self._inverse))
+ValueError: 1573583833666413100437821394243682560725072533511128937482*k^5 + 3261268279427315881751356650798282646158932389856647763811*k^4 + 3261268279427315881751356650798282646158932389856647763811*k^3 + 1573583833666413100437821394243682560725072533511128937482*k^2 + 5061956638346020000127031485086433680075390482915177923647 is not in the image of (map internal to coercion system -- copy before use)
+Ring morphism:
+  From: Finite Field of size 6277101735386680763835789423207666416083908700390324961279
+  To:   Finite Field in k of size 6277101735386680763835789423207666416083908700390324961279^6

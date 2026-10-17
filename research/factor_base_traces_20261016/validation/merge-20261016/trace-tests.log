@@ -1,0 +1,12 @@
+   Compiling crypto v0.1.0 (/workspace/crypto-factor-traces)
+    Finished `release` profile [optimized] target(s) in 6m 11s
+     Running unittests src/bin/factor_base_trace.rs (/workspace/crypto-pr1963/target/release/deps/factor_base_trace-22b56391ac49b2c6)
+
+running 4 tests
+test tests::rejects_duplicate_or_invalid_points ... ok
+test tests::fb1_matches_the_existing_native_dump_identity ... ok
+test tests::order_commitment_is_separate_from_set_identity ... ok
+test tests::exact_order_signs_and_corruption ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+

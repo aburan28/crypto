@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/type_i_gate.py", line 62, in <module>
+    beta_roots = fixed_poly.roots(multiplicities=False)
+  File "sage/rings/polynomial/polynomial_element.pyx", line 8841, in sage.rings.polynomial.polynomial_element.Polynomial.roots
+    return K._roots_univariate_polynomial(self, ring=ring, multiplicities=multiplicities, algorithm=algorithm, **kwds)
+  File "sage/rings/finite_rings/finite_field_base.pyx", line 2269, in sage.rings.finite_rings.finite_field_base.FiniteField._roots_univariate_polynomial
+    return g._roots_from_factorization(g.factor(), False)
+  File "sage/rings/polynomial/polynomial_element.pyx", line 5020, in sage.rings.polynomial.polynomial_element.Polynomial.factor
+    v = [x.__pari__("a") for x in self.list()]
+  File "sage/rings/finite_rings/element_pari_ffelt.pyx", line 1323, in sage.rings.finite_rings.element_pari_ffelt.FiniteFieldElement_pari_ffelt.__pari__
+    raise ValueError("variable name illegal in PARI")
+ValueError: variable name illegal in PARI
