@@ -1,0 +1,22 @@
+{
+  "actual_usable_points": 467456,
+  "base_hash": "9208460bf63be634f0aee6091abaaed855e05004fc2894e28a9c1fd394c35ec4",
+  "binary_sha256": "d71a9662c9d4e2dde58443bfc646a05737c6b9ca6b3d5e831b632ce09384c906",
+  "candidate_id": "IC1N83Ckb1a1fb467456PDP4rootRCguidedLAgaussTDdirectISO0hf693b1b33c8b",
+  "cold_process_seconds": 431.02379683300023,
+  "effective_columns": 2816,
+  "one_target_online_ms": 25.30125,
+  "online_phases_ms": {
+    "target_descent_ms": 0.000625,
+    "target_pdp_ms": 25.183458,
+    "target_query_ms": 0.0,
+    "target_recovery_check_ms": 0.105083,
+    "target_relation_check_ms": 0.012
+  },
+  "receipt_sha256": "b45ac0b17325ef5cecdf65ab23e9354e59ff99b81f70a366d862359f07218fcd",
+  "root_table_entries": 658165181,
+  "schema": "n83.k2816-current-source-replay/v1",
+  "source_commit": "416489e09c3d8885b6c12f262935e6ba29373460",
+  "source_sha256": "8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12",
+  "status": "PASS_INDEPENDENT_ARITHMETIC_REPLAY"
+}

@@ -1,0 +1,122 @@
+name: N83 high-K K2543 tie-break Tier 1
+
+on:
+  push:
+    branches: [codex/n83-k3072-current-source-20261017]
+    paths:
+      - research/n83_highk_k2543_tiebreak_20261017/dispatch.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: n83-highk-k2543-tiebreak-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  highk-k2543-half:
+    if: github.repository == 'aburan28/crypto' && github.ref == 'refs/heads/codex/n83-k3072-current-source-20261017'
+    strategy:
+      fail-fast: false
+      matrix:
+        half: [0, 1]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 290
+    env:
+      PRIOR_RESULT_DIR: research/n83_k2543_challenge_20261017
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Replay sealed inputs final selection and frozen schedule
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          mkdir -p "$RUNNER_TEMP/n83-highk-k2543-half-${{ matrix.half }}"
+          python3 research/n83_k3250_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k3350_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k_abba_20261015/generate.py > /dev/null
+          python3 research/n83_root4_highk_20261015/generate.py > /dev/null
+          python3 research/n83_best_e2e_20261015/generate.py > /dev/null
+          python3 research/n83_legacy_challenger_20261015/generate.py > /dev/null
+          python3 research/n83_root4_bloom_20261015/generate.py > /dev/null
+          python3 research/n83_root11_highk_20261015/generate.py > /dev/null
+          python3 research/n83_compact4_crosslayout_20261016/generate.py > /dev/null
+          python3 research/n83_cold_factor_base_20261016/generate.py > /dev/null
+          python3 research/n83_e2e_precision_20261016/generate.py --verify-sealed > /dev/null
+          python3 research/n83_e2e_final_holdout_20261016/generate.py --verify-sealed > /dev/null
+          python3 research/n83_k3072_current_source_20261017/generate.py --verify-sealed > /dev/null
+          python3 research/n83_k2543_challenge_20261017/generate.py --verify-sealed > /dev/null
+          python3 research/n83_highk_tiebreak_20261017/generate.py --verify-sealed > /dev/null
+          python3 research/n83_highk_k2543_tiebreak_20261017/generate.py --verify-sealed > \
+            "$RUNNER_TEMP/n83-highk-k2543-half-${{ matrix.half }}/fixture-check.json"
+          python3 research/n83_highk_k2543_tiebreak_20261017/scan_prior.py > \
+            "$RUNNER_TEMP/n83-highk-k2543-half-${{ matrix.half }}/prior-point-scan.json"
+          python3 -c 'import hashlib,json,sys; from pathlib import Path; root=Path(sys.argv[1]); d=json.loads(Path(sys.argv[2]).read_text()); h=lambda p: hashlib.sha256(p.read_bytes()).hexdigest(); assert d["schema"] == "n83.highk-k2543-tiebreak-dispatch/v1" and d["predecessor_validated_sha256"] == h(root/"validated_rows.json") and d["predecessor_selection_sha256"] == h(root/"selection.json") and d["predecessor_rows_sha256"] == h(root/("ic1_rows_"+str(d["predecessor_run_id"])+".json"))' \
+            "$PRIOR_RESULT_DIR" \
+            research/n83_highk_k2543_tiebreak_20261017/dispatch.json
+          python3 research/n83_highk_k2543_tiebreak_20261017/run.py \
+            --preflight --half "${{ matrix.half }}" \
+            --validated "$PRIOR_RESULT_DIR/validated_rows.json" \
+            --selection "$PRIOR_RESULT_DIR/selection.json" > \
+            "$RUNNER_TEMP/n83-highk-k2543-half-${{ matrix.half }}/schedule-preflight.json"
+          python3 -c 'import collections,json,sys; x=json.load(open(sys.argv[1])); c=collections.Counter(v["kind"] for v in x["events"]); assert len(x["arms"]) == 3 and c == {"ic":15,"rho":15,"calibration":30}' \
+            "$RUNNER_TEMP/n83-highk-k2543-half-${{ matrix.half }}/schedule-preflight.json"
+          python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); p=json.load(open(sys.argv[2])); assert d["candidate_ids"] == [arm[3] for arm in p["arms"]] and d["anchor_candidate_id"] == p["choice"]["anchor_candidate_id"] and d["fallback_used"] is p["choice"]["fallback_used"]' \
+            research/n83_highk_k2543_tiebreak_20261017/dispatch.json \
+            "$RUNNER_TEMP/n83-highk-k2543-half-${{ matrix.half }}/schedule-preflight.json"
+          rustc --version > "$RUNNER_TEMP/n83-highk-k2543-half-${{ matrix.half }}/rustc-version.txt"
+          cargo --version > "$RUNNER_TEMP/n83-highk-k2543-half-${{ matrix.half }}/cargo-version.txt"
+
+      - name: Build and test exact IC and same-point rho producers
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-highk-k2543-half-${{ matrix.half }}-target"
+          export CARGO_BUILD_JOBS=2
+          cargo test --release --locked --example koblitz_orbit_dlp_fast > \
+            "$RUNNER_TEMP/n83-highk-k2543-half-${{ matrix.half }}/ic-example-tests.log" 2>&1
+          cargo test --release --locked --example n83_rho_optimization_eval > \
+            "$RUNNER_TEMP/n83-highk-k2543-half-${{ matrix.half }}/rho-example-tests.log" 2>&1
+          cargo build --release --locked --example koblitz_orbit_dlp_fast > \
+            "$RUNNER_TEMP/n83-highk-k2543-half-${{ matrix.half }}/ic-build.log" 2>&1
+          cargo build --release --locked --example n83_rho_optimization_eval > \
+            "$RUNNER_TEMP/n83-highk-k2543-half-${{ matrix.half }}/rho-build.log" 2>&1
+
+      - name: Run fifteen high-K calibrated same-point pairs on five public points
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-highk-k2543-half-${{ matrix.half }}-target"
+          python3 research/n83_highk_k2543_tiebreak_20261017/run.py \
+            --half "${{ matrix.half }}" \
+            --validated "$PRIOR_RESULT_DIR/validated_rows.json" \
+            --selection "$PRIOR_RESULT_DIR/selection.json" \
+            --binary "$CARGO_TARGET_DIR/release/examples/koblitz_orbit_dlp_fast" \
+            --rho-binary "$CARGO_TARGET_DIR/release/examples/n83_rho_optimization_eval" \
+            --output "$RUNNER_TEMP/n83-highk-k2543-half-${{ matrix.half }}/results" \
+            2>&1 | tee "$RUNNER_TEMP/n83-highk-k2543-half-${{ matrix.half }}/run.log"
+
+      - name: Independently replay bases relations scalars and resources
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -d "$RUNNER_TEMP/n83-highk-k2543-half-${{ matrix.half }}/results" ]; then
+            python3 research/n83_highk_k2543_tiebreak_20261017/verify.py \
+              "$RUNNER_TEMP/n83-highk-k2543-half-${{ matrix.half }}/results" \
+              --half "${{ matrix.half }}" \
+              --validated "$PRIOR_RESULT_DIR/validated_rows.json" \
+              --selection "$PRIOR_RESULT_DIR/selection.json" \
+              2>&1 | tee "$RUNNER_TEMP/n83-highk-k2543-half-${{ matrix.half }}/verify.log"
+          fi
+
+      - name: Preserve all raw receipts and failed pairs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-highk-k2543-half-${{ matrix.half }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-highk-k2543-half-${{ matrix.half }}/
+          if-no-files-found: error
+          retention-days: 14

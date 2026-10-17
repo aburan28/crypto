@@ -1,0 +1,105 @@
+{
+  "rows": [
+    {
+      "actual_usable_points": 207168,
+      "binary_sha256": "d71a9662c9d4e2dde58443bfc646a05737c6b9ca6b3d5e831b632ce09384c906",
+      "candidate_id": "IC1N83Ckb1a1fb207168PDP4rootRCguidedLAgaussTDdirectISO0hc9eda193920f",
+      "candidate_manifest_sha256": "79a1f11b696fabc11725f1492263deddf938e40c37e7af382843eb2ef898662c",
+      "cold_receipt_wall_ms": 143223.6702079972,
+      "effective_columns": 1248,
+      "hardware_tier": "shared_host_exploratory_l0",
+      "one_target_online_ms": 18.725167000000003,
+      "online_phases_ms": {
+        "target_descent_ms": 0.0012079999999999999,
+        "target_pdp_ms": 18.493792,
+        "target_query_ms": 0.0,
+        "target_recovery_check_ms": 0.170292,
+        "target_relation_check_ms": 0.059583
+      },
+      "raw_archive_sha256": "f2b9cbc454705add4b8691785fefc8a4498764cc8066e0e6e294ce931f16f685",
+      "receipt_sha256": "d52d95355d5ccb28869d76444b7d4d5e796cfb5b43f0f197e42e201502dcfded",
+      "replay_sha256": "dfda3252dc990bf531aba8c5f85390fda88ef27e824bd0f1b22587e909ad8f9f",
+      "run_id": "IC1N83Ckb1a1fb207168PDP4rootRCguidedLAgaussTDdirectISO0hc9eda193920fWeebf98ee1031R1",
+      "source_sha256": "8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12",
+      "status": "PASS_INDEPENDENT_ARITHMETIC_REPLAY",
+      "study": "research/n83_smallk_current_source_20261017",
+      "target_sha256": "2c068d2f659588edcdbaa685fc73bb146e2bfee3be123d377d537658f8021c6d",
+      "workload_id": "eebf98ee1031"
+    },
+    {
+      "actual_usable_points": 212480,
+      "binary_sha256": "d71a9662c9d4e2dde58443bfc646a05737c6b9ca6b3d5e831b632ce09384c906",
+      "candidate_id": "IC1N83Ckb1a1fb212480PDP4rootRCguidedLAgaussTDdirectISO0h69261fd42dac",
+      "candidate_manifest_sha256": "aa71b645753a151e6db9312ef069fafff940b73ad4cdc9e1c25476b701d9fc7c",
+      "cold_receipt_wall_ms": 146959.61945800082,
+      "effective_columns": 1280,
+      "hardware_tier": "shared_host_exploratory_l0",
+      "one_target_online_ms": 4.73325,
+      "online_phases_ms": {
+        "target_descent_ms": 0.000791,
+        "target_pdp_ms": 4.609583,
+        "target_query_ms": 4.2e-05,
+        "target_recovery_check_ms": 0.10500000000000001,
+        "target_relation_check_ms": 0.01775
+      },
+      "raw_archive_sha256": "f2b9cbc454705add4b8691785fefc8a4498764cc8066e0e6e294ce931f16f685",
+      "receipt_sha256": "f61c5e7edbb2a03d6bf093ee155137e8ae5589ea47de887f607f3e53e6c1fbf9",
+      "replay_sha256": "e7ea5aa04870b62ac555830f572919df3c90c114e45f7a79cab0729d41fcbc41",
+      "run_id": "IC1N83Ckb1a1fb212480PDP4rootRCguidedLAgaussTDdirectISO0h69261fd42dacWeebf98ee1031R1",
+      "source_sha256": "8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12",
+      "status": "PASS_INDEPENDENT_ARITHMETIC_REPLAY",
+      "study": "research/n83_smallk_current_source_20261017",
+      "target_sha256": "2c068d2f659588edcdbaa685fc73bb146e2bfee3be123d377d537658f8021c6d",
+      "workload_id": "eebf98ee1031"
+    },
+    {
+      "actual_usable_points": 467456,
+      "binary_sha256": "d71a9662c9d4e2dde58443bfc646a05737c6b9ca6b3d5e831b632ce09384c906",
+      "candidate_id": "IC1N83Ckb1a1fb467456PDP4rootRCguidedLAgaussTDdirectISO0hf693b1b33c8b",
+      "candidate_manifest_sha256": "257bdf475bf2caf7abd488849f9948b0bae89762ff56a197afd0c9a0af709e0f",
+      "cold_receipt_wall_ms": 431023.79683300026,
+      "effective_columns": 2816,
+      "hardware_tier": "shared_host_exploratory_l0",
+      "one_target_online_ms": 25.30125,
+      "online_phases_ms": {
+        "target_descent_ms": 0.000625,
+        "target_pdp_ms": 25.183458,
+        "target_query_ms": 0.0,
+        "target_recovery_check_ms": 0.105083,
+        "target_relation_check_ms": 0.012
+      },
+      "raw_archive_sha256": "61daed9917be546f46bf72cc8d634525fefbce5a27a01cf72fd56fc5f6cfde63",
+      "receipt_sha256": "b45ac0b17325ef5cecdf65ab23e9354e59ff99b81f70a366d862359f07218fcd",
+      "replay_sha256": "6d96dce43293c26e7e97d6cc79b39ddeb721fefe02e1e8b9a53d3c3bbed6584a",
+      "run_id": "IC1N83Ckb1a1fb467456PDP4rootRCguidedLAgaussTDdirectISO0hf693b1b33c8bWeebf98ee1031R1",
+      "source_sha256": "8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12",
+      "status": "PASS_INDEPENDENT_ARITHMETIC_REPLAY",
+      "study": "research/n83_k2816_current_source_20261017",
+      "target_sha256": "2c068d2f659588edcdbaa685fc73bb146e2bfee3be123d377d537658f8021c6d",
+      "workload_id": "eebf98ee1031"
+    }
+  ],
+  "schema": "n83.current-source-local-ic1-rows/v1",
+  "workload": {
+    "cold_or_warm": "one_public_point_per_fresh_process_empty_base_index_and_logs",
+    "curve_id": "EC1N83Ckb1a1haacb69ee9f37",
+    "input_law": {
+      "answer_sidecar_sha256": "b71c5a8bfdae603931fa6c03fc6f6faa3b261288cf787ac682bf8a3e3afe262d",
+      "domain": "n83-cold-factor-base-one-plus-four-20261016-v1",
+      "fixture_index": 0,
+      "generator_sha256": "1807dadb4dc423850f32742faa03beb5774dacb4d3c17618502b6debb623ca58",
+      "scalar_rule": "1+(little_endian(SHA256(domain||u32_le(index))) mod (r-1))",
+      "seed_sha256": "77e724f4d6656a0c6710a6fa1877da77ebf4d4ea8dd189f45ceb45819d88ad30"
+    },
+    "public_targets": [
+      [
+        "2975338143493000733320472",
+        "7892490597757834798312085"
+      ]
+    ],
+    "schema_version": 1,
+    "target_count": 1,
+    "target_sha256": "2c068d2f659588edcdbaa685fc73bb146e2bfee3be123d377d537658f8021c6d",
+    "workload_id": "eebf98ee1031"
+  }
+}

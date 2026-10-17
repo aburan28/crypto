@@ -1,0 +1,23 @@
+{
+  "actual_usable_points": 581000,
+  "base_hash": "3387d0c40335c49256ad2048542455572980bef501c3735fd8a26f42ac035e67",
+  "binary_sha256": "d71a9662c9d4e2dde58443bfc646a05737c6b9ca6b3d5e831b632ce09384c906",
+  "candidate_id": "IC1N83Ckb1a1fb581000PDP4rootRCguidedLAgaussTDdirectISO0hb3a616c4e22f",
+  "cold_process_seconds": 924.7853423339984,
+  "effective_columns": 3500,
+  "one_target_online_ms": 36.8975,
+  "online_phases_ms": {
+    "target_descent_ms": 0.000958,
+    "target_pdp_ms": 36.743041,
+    "target_query_ms": 4.2e-05,
+    "target_recovery_check_ms": 0.105125,
+    "target_relation_check_ms": 0.048209
+  },
+  "receipt_sha256": "bcdb004b5ed1f285b7ea5e57cb95495c92f3624e73599bbe38ee9856eb50e91f",
+  "root_bloom_bytes": 1073741824,
+  "root_table_entries": 1016729255,
+  "schema": "n83.k3500-root4-current-source-replay/v1",
+  "source_commit": "416489e09c3d8885b6c12f262935e6ba29373460",
+  "source_sha256": "8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12",
+  "status": "PASS_INDEPENDENT_ARITHMETIC_REPLAY"
+}
