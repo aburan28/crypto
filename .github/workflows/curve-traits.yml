@@ -15,6 +15,11 @@ on:
       - 'docs/curves/registry.json'
       - 'docs/curves/traits.json'
       - 'docs/curves/TRAITS.md'
+      - 'docs/curves/factor-hints.txt'
+      - 'docs/curves/factor-hints.gp'
+      - 'docs/curves/trait-sources.json'
+      - 'docs/curves/ic/curves.yaml'
+      - 'research/isogeny_walk_20261004/runs/*/isogeny_routes.json'
       - '.github/workflows/curve-traits.yml'
       - 'Cargo.toml'
       - 'Cargo.lock'
@@ -36,6 +41,11 @@ on:
       - 'docs/curves/registry.json'
       - 'docs/curves/traits.json'
       - 'docs/curves/TRAITS.md'
+      - 'docs/curves/factor-hints.txt'
+      - 'docs/curves/factor-hints.gp'
+      - 'docs/curves/trait-sources.json'
+      - 'docs/curves/ic/curves.yaml'
+      - 'research/isogeny_walk_20261004/runs/*/isogeny_routes.json'
       - '.github/workflows/curve-traits.yml'
       - 'Cargo.toml'
       - 'Cargo.lock'
@@ -58,6 +68,8 @@ jobs:
           sparse-checkout: |
             /.github/scripts/
             /Cargo.toml
+            /tools/volcano-cli/
+            /isogeny_algos/
             /Cargo.lock
             /build.rs
             /.cargo/
@@ -72,6 +84,11 @@ jobs:
             /experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs
             /docs/curves/registry.json
             /docs/curves/traits.json
+            /docs/curves/factor-hints.txt
+            /docs/curves/trait-sources.json
+            /docs/curves/ic/curves.yaml
+            /research/isogeny_walk_20261004/runs/p256-ell31-radius2/isogeny_routes.json
+            /research/isogeny_walk_20261004/runs/p224-ell61-radius2/isogeny_routes.json
       - name: Materialize compile-time fixture inputs
         run: node .github/scripts/ci-scope.mjs --materialize
       - uses: dtolnay/rust-toolchain@master

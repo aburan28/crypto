@@ -21,6 +21,7 @@ on:
       - 'tests/fixtures/ecbench_manifest_small.json'
       - 'ecc2k130/Makefile'
       - 'tools/isogeny-cli/**'
+      - 'tools/volcano-cli/**'
       - 'isogeny_algos/**'
       - 'research/p192_p224_large_degree_isogenies_20261009/**'
       - 'docs/curves/registry.json'
@@ -145,6 +146,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /Cargo.toml
+            /tools/volcano-cli/
+            /isogeny_algos/
             /Cargo.lock
             /.cargo/
             /rust-toolchain*

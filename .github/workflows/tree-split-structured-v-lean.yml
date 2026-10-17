@@ -47,6 +47,8 @@ jobs:
           sparse-checkout: |
             /.github/scripts/
             /Cargo.toml
+            /tools/volcano-cli/
+            /isogeny_algos/
             /Cargo.lock
             /build.rs
             /.cargo/
