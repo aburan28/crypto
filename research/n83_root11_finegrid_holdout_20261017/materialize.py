@@ -114,6 +114,9 @@ def materialize(validated_path, selection_path, stratum_dirs):
                 'producer_target_file_status': ('PRESENT_MATCHING' if
                                                 point_file.exists() else 'NOT_WRITTEN'),
                 'status': arm['status'],
+                'rho_status': rho['status'],
+                'pair_status': 'PASS_INDEPENDENT_REPLAY' if passed else
+                               'CENSORED_OR_FAILED_PAIR',
                 'hardware_tier': 'cloud_instance_tier1' if tier_qualified else
                                  'cloud_instance_exploratory',
                 'candidate_manifest_sha256':
@@ -142,6 +145,7 @@ def materialize(validated_path, selection_path, stratum_dirs):
                 'pair_calibration': point['calibration_by_candidate'].get(
                     candidate, {'status': 'NOT_RUN'}),
                 'raw_evidence': raw,
+                'rho_evidence': rho,
             })
     expected = 24 * len(validated['candidate_ids'])
     if (len(workloads) != 24 or len({x['workload_id'] for x in workloads}) != 24 or
