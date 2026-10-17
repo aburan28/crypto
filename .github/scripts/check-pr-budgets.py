@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Check CI metadata: routine PR jobs must have a proven budget <=25 minutes.
 
-Manual-only, disabled and explicit label experiments keep their full budgets.
+Manual-only, disabled and explicit label experiments keep their full budgets;
+sealed Lean proof jobs and the jobs in NAMED_BUDGET_EXCEPTIONS keep theirs.
 Unknown conditions are treated as applicable; unknown budgets fail closed.
 This reads YAML/expressions only and never executes a workflow command.
 """
@@ -38,6 +39,23 @@ FROZEN_BUDGET_EXCEPTIONS = {
     },
 }
 REPO_ROOT = Path(__file__).resolve().parents[2]
+
+# Named jobs whose routine PR budget is longer than 25 minutes, each with the
+# reason. Exact on workflow path, job name and timeout; nothing else matches.
+NAMED_BUDGET_EXCEPTIONS = {
+    (".github/workflows/codeql.yml", "analyze"): {
+        "timeout": 60,
+        # CodeQL's Rust queries cover every Rust source in the repository and
+        # were cancelled at the 25-minute cap on several PRs (2026-10-17).
+        "reason": "CodeQL Rust queries over the whole repository",
+    },
+}
+
+
+def named_budget_exception(label, job_name, budget):
+    """Allow the listed jobs exactly their listed timeout on routine PR events."""
+    exception = NAMED_BUDGET_EXCEPTIONS.get((Path(label).as_posix(), job_name))
+    return exception is not None and budget == exception["timeout"]
 
 
 def frozen_proof_budget_exception(label, job_name, budget, event, root=REPO_ROOT):
@@ -184,6 +202,8 @@ def job_problems(jobs, event, action, label):
         budget = expression(job.get("timeout-minutes", UNKNOWN), event, action)
         if isinstance(budget, bool) or not isinstance(budget, (int, float)) or not 0 < budget <= 25:
             if frozen_proof_budget_exception(label, name, budget, event):
+                continue
+            if named_budget_exception(label, name, budget):
                 continue
             found.append(f"{label}: {name} can run on {event}/{action} without a proven 1–25 minute timeout")
     return found
