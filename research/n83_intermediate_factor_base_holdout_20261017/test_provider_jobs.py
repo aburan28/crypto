@@ -36,6 +36,16 @@ with tempfile.TemporaryDirectory() as directory:
                                     'intermediate-stratum')
 
     assert check()['status'] == 'PASS_FOUR_DISTINCT_CONCURRENT_RUNNERS'
+    jobs[0]['conclusion'] = 'failure'
+    try:
+        check()
+        raise AssertionError('unexplained provider failure was admitted')
+    except ValueError:
+        pass
+    strata[0].update({'archived_verifier_failure': True,
+                      'archived_verifier_log_sha256': 'a' * 64,
+                      'local_replay_exit': 0})
+    assert check()['jobs'][0]['provider_job_conclusion'] == 'failure'
     jobs[3]['runner_id'] = jobs[2]['runner_id']
     try:
         check()
@@ -52,4 +62,4 @@ with tempfile.TemporaryDirectory() as directory:
     except ValueError:
         pass
 
-print(json.dumps({'status': 'PASS', 'cases': 3}))
+print(json.dumps({'status': 'PASS', 'cases': 5}))

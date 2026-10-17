@@ -77,6 +77,10 @@ def bind_stratum(stratum, results, archive, provider_sha, run_id, attempt,
         raise ValueError(f'stratum {stratum}: independent local replay differs')
     if (status == 0) != (analysis['status'] == 'HALF_ADMITTED'):
         raise ValueError(f'stratum {stratum}: replay exit and admission differ')
+    original_verifier_log = log / 'verify.log'
+    original_failure = (original_verifier_log.is_file() and
+                        "AttributeError: module 'n83_intermediate_choice' has no attribute 'five_run'"
+                        in original_verifier_log.read_text())
     host, source = read(results / 'host.json'), read(results / 'source.json')
     arms, choice = runner.choice_module.choose()
     if (analysis['schema'] != 'n83.intermediate-stratum-analysis/v1' or
@@ -100,6 +104,9 @@ def bind_stratum(stratum, results, archive, provider_sha, run_id, attempt,
             'bound_result_members': member_count,
             'analysis_sha256': hashlib.sha256(cloud_analysis).hexdigest(),
             'local_replay_exit': status,
+            'archived_verifier_failure': original_failure,
+            'archived_verifier_log_sha256': sha256(original_verifier_log)
+            if original_failure else None,
             'local_replay_stdout_sha256': sha256(stdout_path)}
 
 
