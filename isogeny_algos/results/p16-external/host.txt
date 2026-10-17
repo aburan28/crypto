@@ -3,5 +3,5 @@ rustc: rustc 1.97.0 (2d8144b78 2026-07-07)
 cc: cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
 flint: #define FLINT_VERSION "3.0.1"
 pari: [2, 15, 4]
-head: 1de102eb988a2bb805e1027f813f7d9f373c6f8d
+head: 04f75a816b8f475212a4eb5cb0684143c0835fe5
 isolation: tools/isolated_bench.py run --cpus 3 --max-other-cpu 0.5
