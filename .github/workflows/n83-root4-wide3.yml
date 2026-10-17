@@ -1,0 +1,65 @@
+name: N83 root4 wide3 source and fixture preflight
+
+on:
+  push:
+    branches: [codex/n83-root4-wide3-20261016]
+    paths:
+      - .github/workflows/n83-root4-wide3.yml
+      - research/n83_root4_wide3_20261016/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  n83-root4-wide3-preflight:
+    if: github.repository == 'aburan28/crypto'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Regenerate and verify fresh public fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          mkdir -p "$RUNNER_TEMP/n83-root4-wide3"
+          python3 research/n83_k3250_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k3350_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k_abba_20261015/generate.py > /dev/null
+          python3 research/n83_root4_highk_20261015/generate.py > /dev/null
+          python3 research/n83_best_e2e_20261015/generate.py > /dev/null
+          python3 research/n83_legacy_challenger_20261015/generate.py > /dev/null
+          python3 research/n83_root4_bloom_20261015/generate.py > /dev/null
+          python3 research/n83_root11_highk_20261015/generate.py > /dev/null
+          python3 research/n83_root11_edgek_20261015/generate.py > /dev/null
+          python3 research/n83_final_tournament_20261015/generate.py > /dev/null
+          python3 research/n83_edge_confirmation_20261015/generate.py > /dev/null
+          python3 research/n83_final_tier1_20261015/generate.py > /dev/null
+          python3 research/n83_unresolved_tier1_20261015/generate.py > /dev/null
+          python3 research/n83_root4_wide3_20261016/generate.py > \
+            "$RUNNER_TEMP/n83-root4-wide3/fixture-check.json"
+          python3 research/n83_root4_wide3_20261016/run.py --preflight > \
+            "$RUNNER_TEMP/n83-root4-wide3/preflight.json"
+          test "$(sha256sum research/n83_root4_wide3_20261016/targets.jsonl | cut -d' ' -f1)" = \
+            976173bb1372e2c1cba6ef0e453df278afbea1acda0501cceb62af4ac6f35a2a
+      - name: Build and test exact N83 producer
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-root4-wide3-target"
+          export CARGO_BUILD_JOBS=2
+          rustc --version > "$RUNNER_TEMP/n83-root4-wide3/rustc-version.txt"
+          cargo --version > "$RUNNER_TEMP/n83-root4-wide3/cargo-version.txt"
+          cargo test --release --locked --example koblitz_orbit_dlp_fast > \
+            "$RUNNER_TEMP/n83-root4-wide3/example-tests.log" 2>&1
+          cargo build --release --locked --example koblitz_orbit_dlp_fast > \
+            "$RUNNER_TEMP/n83-root4-wide3/build.log" 2>&1
+      - name: Preserve preflight receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-root4-wide3-preflight-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-root4-wide3/
+          if-no-files-found: ignore
+          retention-days: 14
