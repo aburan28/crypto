@@ -20,7 +20,9 @@ with tempfile.TemporaryDirectory() as directory:
                 'recorded_utc': '2026-10-17T12:30:00Z',
                 'parent_instance_id': 'shared-matrix-label'}
         (results / 'host.json').write_text(json.dumps(host))
-        strata.append({'stratum': number, 'host': host, 'results': str(results)})
+        strata.append({'stratum': number, 'host': host, 'results': str(results),
+                       'analysis': {'status': 'STRATUM_ADMITTED'},
+                       'local_replay_exit': 0})
         jobs.append({'name': f'finalists-stratum ({number})',
                      'run_id': run_id, 'run_attempt': attempt,
                      'status': 'completed', 'conclusion': 'success',
@@ -42,6 +44,11 @@ with tempfile.TemporaryDirectory() as directory:
         raise AssertionError('failed provider job was admitted')
     except ValueError:
         pass
+    strata[0]['analysis']['status'] = 'BOUNDED_UNKNOWN'
+    strata[0]['local_replay_exit'] = 2
+    assert check()['jobs'][0]['locally_replayed_censored_stratum'] is True
+    strata[0]['analysis']['status'] = 'STRATUM_ADMITTED'
+    strata[0]['local_replay_exit'] = 0
     jobs[0]['conclusion'] = 'success'
     jobs[3]['runner_id'] = jobs[2]['runner_id']
     try:
@@ -59,4 +66,4 @@ with tempfile.TemporaryDirectory() as directory:
     except ValueError:
         pass
 
-print(json.dumps({'status': 'PASS', 'cases': 4}))
+print(json.dumps({'status': 'PASS', 'cases': 5}))

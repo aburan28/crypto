@@ -32,10 +32,13 @@ def verify(jobs_path, strata, run_id, attempt, job_stem):
     for number, item in enumerate(strata):
         job = by_name[f'{job_stem} ({number})']
         host = item['host']
+        censored = (job.get('conclusion') == 'failure' and
+                    item.get('local_replay_exit') == 2 and
+                    item.get('analysis', {}).get('status') == 'BOUNDED_UNKNOWN')
         if (item['stratum'] != number or job.get('run_id') != run_id or
                 job.get('run_attempt') != attempt or
                 job.get('status') != 'completed' or
-                job.get('conclusion') != 'success' or
+                (job.get('conclusion') != 'success' and not censored) or
                 not isinstance(job.get('id'), int) or job['id'] <= 0 or
                 not isinstance(job.get('runner_id'), int) or
                 job['runner_id'] <= 0 or
@@ -47,6 +50,8 @@ def verify(jobs_path, strata, run_id, attempt, job_stem):
         if not start <= instant(host['recorded_utc']) <= end:
             raise ValueError(f'stratum {number}: host receipt outside job interval')
         rows.append({'stratum': number, 'job_id': job['id'],
+                     'provider_job_conclusion': job['conclusion'],
+                     'locally_replayed_censored_stratum': censored,
                      'runner_id': job['runner_id'],
                      'runner_name': job['runner_name'],
                      'started_at': job['started_at'],
