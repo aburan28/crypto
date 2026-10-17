@@ -1,0 +1,242 @@
+{
+  "baseline_source_sha256": "19c602ea584ea0a9f6ad1f2834b6cb464dac3c2acaeb8adf4019f8ea06b76813",
+  "boundary": "Exact same-input cubic coefficients and degree-three residuals. Sequential shared-host stage times include fiber lifts and are not isolated wall-time speedups.",
+  "classes": 16,
+  "fast_total_ns_unisolated": 24466895955,
+  "field_prime": "6277101735386680763835789423207666416083908700390324961279",
+  "frozen_sha256": "019f65f32c8fef6ca8daa2240f53ee19230a18cd97b312c721387bcd4744c7b7",
+  "hybrid_total_ns_unisolated": 26531561460,
+  "original_total_ns_unisolated": 24322213500,
+  "pairs": [
+    {
+      "index": 0,
+      "negative_input_residual_fast_ns": 455307166,
+      "negative_input_residual_hybrid_ns": 838336333,
+      "negative_input_residual_original_ns": 1259897667,
+      "order": [
+        "fast",
+        "hybrid",
+        "original"
+      ],
+      "positive_input_residual_fast_ns": 1533431541,
+      "positive_input_residual_hybrid_ns": 1138855292,
+      "positive_input_residual_original_ns": 693785833
+    },
+    {
+      "index": 1,
+      "negative_input_residual_fast_ns": 1580864459,
+      "negative_input_residual_hybrid_ns": 1307940708,
+      "negative_input_residual_original_ns": 1250888666,
+      "order": [
+        "original",
+        "fast",
+        "hybrid"
+      ],
+      "positive_input_residual_fast_ns": 1389321292,
+      "positive_input_residual_hybrid_ns": 1109003083,
+      "positive_input_residual_original_ns": 1754706792
+    },
+    {
+      "index": 2,
+      "negative_input_residual_fast_ns": 1003735333,
+      "negative_input_residual_hybrid_ns": 322152416,
+      "negative_input_residual_original_ns": 378708250,
+      "order": [
+        "hybrid",
+        "original",
+        "fast"
+      ],
+      "positive_input_residual_fast_ns": 392580000,
+      "positive_input_residual_hybrid_ns": 574252917,
+      "positive_input_residual_original_ns": 515593792
+    },
+    {
+      "index": 3,
+      "negative_input_residual_fast_ns": 260570166,
+      "negative_input_residual_hybrid_ns": 272915667,
+      "negative_input_residual_original_ns": 1227716875,
+      "order": [
+        "fast",
+        "hybrid",
+        "original"
+      ],
+      "positive_input_residual_fast_ns": 704511750,
+      "positive_input_residual_hybrid_ns": 596009750,
+      "positive_input_residual_original_ns": 143553041
+    },
+    {
+      "index": 4,
+      "negative_input_residual_fast_ns": 1414775583,
+      "negative_input_residual_hybrid_ns": 554567792,
+      "negative_input_residual_original_ns": 507172792,
+      "order": [
+        "original",
+        "fast",
+        "hybrid"
+      ],
+      "positive_input_residual_fast_ns": 526153667,
+      "positive_input_residual_hybrid_ns": 693697000,
+      "positive_input_residual_original_ns": 600329625
+    },
+    {
+      "index": 5,
+      "negative_input_residual_fast_ns": 450777750,
+      "negative_input_residual_hybrid_ns": 585796458,
+      "negative_input_residual_original_ns": 333035792,
+      "order": [
+        "hybrid",
+        "original",
+        "fast"
+      ],
+      "positive_input_residual_fast_ns": 1228165958,
+      "positive_input_residual_hybrid_ns": 897543875,
+      "positive_input_residual_original_ns": 667516500
+    },
+    {
+      "index": 6,
+      "negative_input_residual_fast_ns": 997687375,
+      "negative_input_residual_hybrid_ns": 1510288083,
+      "negative_input_residual_original_ns": 574386208,
+      "order": [
+        "fast",
+        "hybrid",
+        "original"
+      ],
+      "positive_input_residual_fast_ns": 137369625,
+      "positive_input_residual_hybrid_ns": 335182375,
+      "positive_input_residual_original_ns": 360560375
+    },
+    {
+      "index": 7,
+      "negative_input_residual_fast_ns": 534727833,
+      "negative_input_residual_hybrid_ns": 1019477417,
+      "negative_input_residual_original_ns": 989355167,
+      "order": [
+        "original",
+        "fast",
+        "hybrid"
+      ],
+      "positive_input_residual_fast_ns": 751433583,
+      "positive_input_residual_hybrid_ns": 1587864375,
+      "positive_input_residual_original_ns": 546510625
+    },
+    {
+      "index": 8,
+      "negative_input_residual_fast_ns": 717721958,
+      "negative_input_residual_hybrid_ns": 322560417,
+      "negative_input_residual_original_ns": 689110291,
+      "order": [
+        "hybrid",
+        "original",
+        "fast"
+      ],
+      "positive_input_residual_fast_ns": 740111708,
+      "positive_input_residual_hybrid_ns": 1522397542,
+      "positive_input_residual_original_ns": 935048167
+    },
+    {
+      "index": 9,
+      "negative_input_residual_fast_ns": 742527542,
+      "negative_input_residual_hybrid_ns": 1316120834,
+      "negative_input_residual_original_ns": 1088056625,
+      "order": [
+        "fast",
+        "hybrid",
+        "original"
+      ],
+      "positive_input_residual_fast_ns": 431543333,
+      "positive_input_residual_hybrid_ns": 481234625,
+      "positive_input_residual_original_ns": 915498500
+    },
+    {
+      "index": 10,
+      "negative_input_residual_fast_ns": 577403750,
+      "negative_input_residual_hybrid_ns": 969004167,
+      "negative_input_residual_original_ns": 574598250,
+      "order": [
+        "original",
+        "fast",
+        "hybrid"
+      ],
+      "positive_input_residual_fast_ns": 983055208,
+      "positive_input_residual_hybrid_ns": 1558518042,
+      "positive_input_residual_original_ns": 1436659083
+    },
+    {
+      "index": 11,
+      "negative_input_residual_fast_ns": 361719125,
+      "negative_input_residual_hybrid_ns": 865876667,
+      "negative_input_residual_original_ns": 479646584,
+      "order": [
+        "hybrid",
+        "original",
+        "fast"
+      ],
+      "positive_input_residual_fast_ns": 879473875,
+      "positive_input_residual_hybrid_ns": 426864542,
+      "positive_input_residual_original_ns": 378380375
+    },
+    {
+      "index": 12,
+      "negative_input_residual_fast_ns": 751078709,
+      "negative_input_residual_hybrid_ns": 481086250,
+      "negative_input_residual_original_ns": 987278500,
+      "order": [
+        "fast",
+        "hybrid",
+        "original"
+      ],
+      "positive_input_residual_fast_ns": 217593791,
+      "positive_input_residual_hybrid_ns": 367389667,
+      "positive_input_residual_original_ns": 363175125
+    },
+    {
+      "index": 13,
+      "negative_input_residual_fast_ns": 1001571875,
+      "negative_input_residual_hybrid_ns": 901993583,
+      "negative_input_residual_original_ns": 559891500,
+      "order": [
+        "original",
+        "fast",
+        "hybrid"
+      ],
+      "positive_input_residual_fast_ns": 490255917,
+      "positive_input_residual_hybrid_ns": 724609833,
+      "positive_input_residual_original_ns": 675875291
+    },
+    {
+      "index": 14,
+      "negative_input_residual_fast_ns": 587490667,
+      "negative_input_residual_hybrid_ns": 990262458,
+      "negative_input_residual_original_ns": 1278114583,
+      "order": [
+        "hybrid",
+        "original",
+        "fast"
+      ],
+      "positive_input_residual_fast_ns": 925215958,
+      "positive_input_residual_hybrid_ns": 968674792,
+      "positive_input_residual_original_ns": 988547042
+    },
+    {
+      "index": 15,
+      "negative_input_residual_fast_ns": 920806875,
+      "negative_input_residual_hybrid_ns": 631970000,
+      "negative_input_residual_original_ns": 433414917,
+      "order": [
+        "fast",
+        "hybrid",
+        "original"
+      ],
+      "positive_input_residual_fast_ns": 777912583,
+      "positive_input_residual_hybrid_ns": 659114500,
+      "positive_input_residual_original_ns": 735200667
+    }
+  ],
+  "plane_sha256": "b16122e364056b30e46971b18084f7bfa6c0f6de2fa63f0cae63a1229dd224b3",
+  "residual_cuts": 32,
+  "runtime_info_sha256": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+  "source_sha256": "473afe8af5cbcdc67f2c95f81e053e8cc3775b1c22ee26f2590da1e10c4ef454",
+  "status": "matched_prime_field_cubic_reduction_probe",
+  "subgroup_order": "6277101735386680763835789423176059013767194773182842284081"
+}

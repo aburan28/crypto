@@ -1,0 +1,74 @@
+CrossRatio.lean:127:54: warning: This simp argument is unused:
+  zsmul_add
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [mul_zsmul]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+CrossRatio.lean:129:42: warning: This simp argument is unused:
+  zsmul_add
+
+Hint: Omit it from the simp argument list.
+  [apply] simp
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+CrossRatio.lean:185:8: warning: This simp argument is unused:
+  zsmul_add
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [hD, hσD]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+CrossRatio.lean:326:13: warning: This simp argument is unused:
+  nsmul_add
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [N, hrD, hσD, hσ2D]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+CrossRatio.lean:446:31: warning: This simp argument is unused:
+  pow_two
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [pow_succ, smul_smul, mul_assoc]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+'P192ExtensionCover.cyclic_cross_ratio_product' depends on axioms: [propext, Classical.choice, Quot.sound]
+'P192ExtensionCover.cyclic_cross_ratio_not_norm_one' depends on axioms: [propext, Classical.choice, Quot.sound]
+'P192ExtensionCover.type_i_discriminant_factor_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'P192ExtensionCover.pullback_injective_of_push_pull_two' does not depend on any axioms
+'P192ExtensionCover.legendre_j_difference_factor' depends on axioms: [propext, Quot.sound]
+'P192ExtensionCover.scholten_palindromic_identity' depends on axioms: [propext]
+'P192ExtensionCover.scholten_reciprocal_identity' depends on axioms: [propext, Classical.choice, Quot.sound]
+'P192ExtensionCover.quartic_projection_identity' depends on axioms: [propext]
+'P192ExtensionCover.projected_three_point_relation' depends on axioms: [propext]
+'P192ExtensionCover.projected_target_scalar' depends on axioms: [propext, Classical.choice, Quot.sound]
+'P192ExtensionCover.odd_power_pair_square' depends on axioms: [propext, Quot.sound]
+'P192ExtensionCover.type_i_subfield_rhs_square' depends on axioms: [propext, Quot.sound]
+'P192ExtensionCover.involution_norm_fixed' does not depend on any axioms
+'P192ExtensionCover.involution_norm_torsion' depends on axioms: [propext]
+'P192ExtensionCover.conorm_preserves_torsion' depends on axioms: [propext]
+'P192ExtensionCover.conorm_nonzero_torsion_of_push_pull_two' depends on axioms: [propext]
+'P192ExtensionCover.conorm_exact_prime_order_of_push_pull_two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'P192ExtensionCover.cyclic_three_norm_exact_prime_order' depends on axioms: [propext, Classical.choice, Quot.sound]
+'P192ExtensionCover.three_quotients_faithful_on_odd_torsion' depends on axioms: [propext, Classical.choice, Quot.sound]
+'P192ExtensionCover.three_quotients_inverse_on_odd_torsion' depends on axioms: [propext, Quot.sound]
+'P192ExtensionCover.mobius_quartic_clear' depends on axioms: [propext, Classical.choice, Quot.sound]
+'P192ExtensionCover.canonicalTriples16_card' depends on axioms: [propext, Classical.choice, Quot.sound]
+'P192ExtensionCover.three_sum_support_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'P192ExtensionCover.conditioned_three_sum_support_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'P192ExtensionCover.character_filter_acceptance_lower_bound' depends on axioms: [propext, Quot.sound]
+'P192ExtensionCover.p192_character_filter_integer_certificate' depends on axioms: [propext]
+'P192ExtensionCover.p192_conditioned_support_integer_certificate' depends on axioms: [propext]
+'P192ExtensionCover.shifted_three_sum_support_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'P192ExtensionCover.shifted_three_point_relation' depends on axioms: [propext]
+'P192ExtensionCover.six_periodic_eigenvector_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'P192ExtensionCover.type_i_primitive_quartic_identity' depends on axioms: [propext]
+'P192ExtensionCover.type_i_ciani_resultant_factor' depends on axioms: [propext, Quot.sound]
+'P192ExtensionCover.p192_conditioned_half_coverage_threshold_certificate' depends on axioms: [propext]
+'P192ExtensionCover.p192_threshold_pair_index_entries' depends on axioms: [propext]
+'P192ExtensionCover.odd_torsion_half_point' depends on axioms: [propext, Quot.sound]
+'P192ExtensionCover.cubic_residual_class_identity' depends on axioms: [propext]
+'P192ExtensionCover.fixed_origin_cubic_class_identity' depends on axioms: [propext]

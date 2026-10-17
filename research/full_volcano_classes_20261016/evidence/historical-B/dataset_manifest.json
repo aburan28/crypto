@@ -1,0 +1,21 @@
+{
+  "graph_complete": true,
+  "vertices": 129140163,
+  "levels": 18,
+  "directed_kernel_maps": 258280326,
+  "max_conductor": 129140163,
+  "field_prime": 45862249674083071,
+  "raw_file": "vertices.bin",
+  "raw_bytes": 9298091736,
+  "raw_sha256": "cc97902e8a62dd04969ad2bcab9802631ddc35fdc55e3e51d5dd49bbec3c799b",
+  "compressed_file": "vertices.bin.zst",
+  "compressed_bytes": 7904902167,
+  "compressed_sha256": "af801afb70eb23ba9909978a4287b0e67790e82619fc40814f1a8d804d85712f",
+  "compressed_roundtrip_sha256_verified": true,
+  "record_bytes": 72,
+  "format": "<8QIHH",
+  "schema": "configuration.json",
+  "explicit_map_access": "../access.py",
+  "raw_data_note": "The complete graph is distributed separately from the smaller software/benchmark archive.",
+  "measurement_scope": "Graph exhaustive; runtime benchmarks are stratified. Exact inferred BSGS/PH operation counts have their own certificate."
+}

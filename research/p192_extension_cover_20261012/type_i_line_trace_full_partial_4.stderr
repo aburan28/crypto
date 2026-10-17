@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/aggregate_line_trace_projected_chunks.py", line 58, in <module>
+    assert not missing, "chunks must form a contiguous prefix"
+           ^^^^^^^^^^^
+AssertionError: chunks must form a contiguous prefix

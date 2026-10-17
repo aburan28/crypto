@@ -1,0 +1,18 @@
+E.........
+======================================================================
+ERROR: test_build (unittest.loader._FailedTest.test_build)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_build
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 137, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/repos/crypto/scripts/site/test_build.py", line 11, in <module>
+    from build import BASE_URL, build
+ModuleNotFoundError: No module named 'build'
+
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.002s
+
+FAILED (errors=1)

@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="480" viewBox="0 0 840 480" font-family="sans-serif" font-size="12">
+<rect width="100%" height="100%" fill="white"/>
+<text x="70" y="24" font-size="15" font-weight="bold">Polynomial product mod p: our time / fastest of FLINT 3.0.1 and PARI 2.15.4</text>
+<line x1="70" x2="610" y1="418.0" y2="418.0" stroke="#e5e5e5"/><text x="64" y="422.0" text-anchor="end">0.25×</text>
+<line x1="70" x2="610" y1="325.0" y2="325.0" stroke="#e5e5e5"/><text x="64" y="329.0" text-anchor="end">0.5×</text>
+<line x1="70" x2="610" y1="232.0" y2="232.0" stroke="#555"/><text x="64" y="236.0" text-anchor="end">1×</text>
+<line x1="70" x2="610" y1="139.0" y2="139.0" stroke="#e5e5e5"/><text x="64" y="143.0" text-anchor="end">2×</text>
+<line x1="70" x2="610" y1="46.0" y2="46.0" stroke="#e5e5e5"/><text x="64" y="50.0" text-anchor="end">4×</text>
+<text x="606" y="248.0" fill="#555" text-anchor="end">below: ours faster</text><text x="606" y="226.0" fill="#555" text-anchor="end">above: external faster</text>
+<line x1="70.0" x2="70.0" y1="46" y2="418" stroke="#eee"/><text x="70.0" y="434" text-anchor="middle">16</text>
+<line x1="178.0" x2="178.0" y1="46" y2="418" stroke="#eee"/><text x="178.0" y="434" text-anchor="middle">64</text>
+<line x1="286.0" x2="286.0" y1="46" y2="418" stroke="#eee"/><text x="286.0" y="434" text-anchor="middle">256</text>
+<line x1="394.0" x2="394.0" y1="46" y2="418" stroke="#eee"/><text x="394.0" y="434" text-anchor="middle">1024</text>
+<line x1="502.0" x2="502.0" y1="46" y2="418" stroke="#eee"/><text x="502.0" y="434" text-anchor="middle">4096</text>
+<line x1="610.0" x2="610.0" y1="46" y2="418" stroke="#eee"/><text x="610.0" y="434" text-anchor="middle">16384</text>
+<text x="340" y="462" text-anchor="middle">operand length n (log scale)</text>
+<text transform="translate(18,232) rotate(-90)" text-anchor="middle">ours / best external (log scale)</text>
+<polyline fill="none" stroke="#6e7781" stroke-width="2" points="70.0,258.7 124.0,205.4 178.0,186.4 232.0,172.5 286.0,156.2 340.0,110.7 394.0,184.9 448.0,218.7 502.0,237.4 556.0,260.3 610.0,290.3 "/>
+<circle cx="70.0" cy="258.7" r="3" fill="#6e7781"/>
+<circle cx="124.0" cy="205.4" r="3" fill="#6e7781"/>
+<circle cx="178.0" cy="186.4" r="3" fill="#6e7781"/>
+<circle cx="232.0" cy="172.5" r="3" fill="#6e7781"/>
+<circle cx="286.0" cy="156.2" r="3" fill="#6e7781"/>
+<circle cx="340.0" cy="110.7" r="3" fill="#6e7781"/>
+<circle cx="394.0" cy="184.9" r="3" fill="#6e7781"/>
+<circle cx="448.0" cy="218.7" r="3" fill="#6e7781"/>
+<circle cx="502.0" cy="237.4" r="3" fill="#6e7781"/>
+<circle cx="556.0" cy="260.3" r="3" fill="#6e7781"/>
+<circle cx="610.0" cy="290.3" r="3" fill="#6e7781"/>
+<line x1="620" x2="645" y1="58" y2="58" stroke="#6e7781" stroke-width="2"/><text x="650" y="62" font-size="11">p = 2^61 - 1</text>
+<polyline fill="none" stroke="#1f6feb" stroke-width="2" points="70.0,348.6 124.0,311.0 178.0,273.9 232.0,238.2 286.0,263.5 340.0,272.7 394.0,287.7 448.0,313.2 502.0,311.8 556.0,305.0 610.0,314.6 "/>
+<circle cx="70.0" cy="348.6" r="3" fill="#1f6feb"/>
+<circle cx="124.0" cy="311.0" r="3" fill="#1f6feb"/>
+<circle cx="178.0" cy="273.9" r="3" fill="#1f6feb"/>
+<circle cx="232.0" cy="238.2" r="3" fill="#1f6feb"/>
+<circle cx="286.0" cy="263.5" r="3" fill="#1f6feb"/>
+<circle cx="340.0" cy="272.7" r="3" fill="#1f6feb"/>
+<circle cx="394.0" cy="287.7" r="3" fill="#1f6feb"/>
+<circle cx="448.0" cy="313.2" r="3" fill="#1f6feb"/>
+<circle cx="502.0" cy="311.8" r="3" fill="#1f6feb"/>
+<circle cx="556.0" cy="305.0" r="3" fill="#1f6feb"/>
+<circle cx="610.0" cy="314.6" r="3" fill="#1f6feb"/>
+<line x1="620" x2="645" y1="78" y2="78" stroke="#1f6feb" stroke-width="2"/><text x="650" y="82" font-size="11">p = 2^127 - 1</text>
+<polyline fill="none" stroke="#d4580d" stroke-width="2" points="70.0,302.5 124.0,269.2 178.0,237.5 232.0,222.6 286.0,235.0 340.0,246.8 394.0,278.2 448.0,279.1 502.0,279.6 556.0,282.4 610.0,284.3 "/>
+<circle cx="70.0" cy="302.5" r="3" fill="#d4580d"/>
+<circle cx="124.0" cy="269.2" r="3" fill="#d4580d"/>
+<circle cx="178.0" cy="237.5" r="3" fill="#d4580d"/>
+<circle cx="232.0" cy="222.6" r="3" fill="#d4580d"/>
+<circle cx="286.0" cy="235.0" r="3" fill="#d4580d"/>
+<circle cx="340.0" cy="246.8" r="3" fill="#d4580d"/>
+<circle cx="394.0" cy="278.2" r="3" fill="#d4580d"/>
+<circle cx="448.0" cy="279.1" r="3" fill="#d4580d"/>
+<circle cx="502.0" cy="279.6" r="3" fill="#d4580d"/>
+<circle cx="556.0" cy="282.4" r="3" fill="#d4580d"/>
+<circle cx="610.0" cy="284.3" r="3" fill="#d4580d"/>
+<line x1="620" x2="645" y1="98" y2="98" stroke="#d4580d" stroke-width="2"/><text x="650" y="102" font-size="11">p = 2^255 - 19</text>
+<polyline fill="none" stroke="#8250df" stroke-width="2" points="70.0,271.3 124.0,222.4 178.0,175.6 232.0,127.4 286.0,119.2 340.0,144.4 394.0,173.0 448.0,203.0 502.0,221.1 556.0,237.6 "/>
+<circle cx="70.0" cy="271.3" r="3" fill="#8250df"/>
+<circle cx="124.0" cy="222.4" r="3" fill="#8250df"/>
+<circle cx="178.0" cy="175.6" r="3" fill="#8250df"/>
+<circle cx="232.0" cy="127.4" r="3" fill="#8250df"/>
+<circle cx="286.0" cy="119.2" r="3" fill="#8250df"/>
+<circle cx="340.0" cy="144.4" r="3" fill="#8250df"/>
+<circle cx="394.0" cy="173.0" r="3" fill="#8250df"/>
+<circle cx="448.0" cy="203.0" r="3" fill="#8250df"/>
+<circle cx="502.0" cy="221.1" r="3" fill="#8250df"/>
+<circle cx="556.0" cy="237.6" r="3" fill="#8250df"/>
+<line x1="620" x2="645" y1="118" y2="118" stroke="#8250df" stroke-width="2"/><text x="650" y="122" font-size="11">p = CSIDH-512 prime</text>
+<text x="620" y="150" font-size="10" fill="#555">best of 2 rounds per tool, same inputs,</text>
+<text x="620" y="164" font-size="10" fill="#555">identical outputs; 1 isolated CPU,</text>
+<text x="620" y="178" font-size="10" fill="#555">4-vCPU Xeon VM, single-threaded</text>
+<text x="620" y="192" font-size="10" fill="#555">data: results/p15-external/</text>
+</svg>

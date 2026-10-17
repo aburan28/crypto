@@ -1,0 +1,62 @@
+{
+  "schema": "volcano-ic-checkpoint-delivery/v1",
+  "date": "2026-10-17",
+  "folder": "https://drive.google.com/drive/folders/109DpcQpX7ATz6GeI8iSWAExGMWBoR-H_",
+  "archive": {
+    "name": "volcano_IC_MEASURED_99vertices_all51strata_20261017.tar.xz",
+    "id": "1hLVWVad2SrgHaBn6U5iSyqnKbx5cAkeY",
+    "url": "https://drive.google.com/file/d/1hLVWVad2SrgHaBn6U5iSyqnKbx5cAkeY/view?usp=drivesdk",
+    "bytes": 17245788,
+    "local_sha256": "ab623e25d8e86a0b402a78154c71a9457400883466595824655f6b74e66c4e54",
+    "extracted_manifest_hashes": "PASS",
+    "byte_identical_extraction_repack": "PASS",
+    "remote_name_size_parent_readback": "PASS",
+    "remote_whole_file_hash": "NOT_CHECKED",
+    "contents": "Complete byte-preserving stopped campaign, all 99 sealed capsules and replay receipts, full queue and ledger, exact frozen dev binaries, complete three graph SQLite files, native summary v2, inventory, source and inspected report",
+    "native_extracted_receipt_inventory": "PASS_99_VERTICES_ALL_51_STRATA"
+  },
+  "report": {
+    "id": "1h_G5uJZYYqVzBL3_kynRdYZvE8vjJu9z",
+    "bytes": 134471,
+    "pages_visually_inspected": 3,
+    "remote_name_size_parent_readback": "PASS"
+  },
+  "statistics_csv": {
+    "id": "1OWEkYFgWuK_wgMu0auEHsYxJ2VDugFIA",
+    "bytes": 2213931,
+    "remote_name_size_parent_readback": "PASS"
+  },
+  "native_summary": "survey-99-summary-v2/summary.json",
+  "native_inventory": "campaigns/survey-vertices-13-99/inventory.json",
+  "vertices_audited": 99,
+  "vertices_planned": 24823,
+  "strata_audited": 51,
+  "strata_planned": 51,
+  "attempts": 1584,
+  "verified": 1065,
+  "exhausted": 422,
+  "timeouts": 97,
+  "relation_trials": 2223204,
+  "actual_decomposition_calls": 2075145,
+  "relations_found": 57176,
+  "mitm_call_lookup_checks": 594,
+  "yield_correction": "Earlier decomposition_trials counts source trials including repeated queries skipped before the oracle. Summary v2 exposes both trial and actual-call denominators; historical sealed evidence and reports remain unchanged.",
+  "replay_scope": "Previously issued standard successful and supplemental exhausted deterministic replay receipts, bound to exact files and identities by native checkpoint inventory. Not a fresh or independent solver replay.",
+  "optimized_gate": {
+    "control_compared": 12,
+    "pilot_compared": 44,
+    "pilot_censored_pairs": 4,
+    "completed_count_comparisons": "ALL_IDENTICAL",
+    "receipts": [
+      "evidence/release-control-match.json",
+      "evidence/release-pilot-match.json"
+    ],
+    "release_qa_summary": "release-qa-summary-v2/summary.json",
+    "optimized_survey": "Separate frozen campaign; see optimized-continuation/. Execution status is not inferred from planning."
+  },
+  "runtime_qualification": "UNQUALIFIED_DESCRIPTIVE; NO_SPEEDUP_CLAIM",
+  "original_full_matrix": "NOT_LAUNCHED",
+  "original_A_to_E": "STILL_OPEN",
+  "finite_field_ic": "UNIMPLEMENTED_FOR_ACTUAL_EMBEDDING_DEGREES",
+  "prior_uploads": "PRESERVED_UNCHANGED"
+}

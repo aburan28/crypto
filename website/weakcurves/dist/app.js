@@ -1,0 +1,408 @@
+const $ = (selector) => document.querySelector(selector);
+const table = $('#atlas-table');
+const tbody = table.querySelector('tbody');
+const thead = table.querySelector('thead');
+const search = $('#search');
+const fieldFilter = $('#field-filter');
+const evidenceFilter = $('#evidence-filter');
+const criterionFilter = $('#criterion-filter');
+const checkFilter = $('#check-filter');
+const propertyFilter = $('#property-filter');
+const propertyState = $('#property-state');
+const more = $('#more');
+const tabs = [...document.querySelectorAll('[data-tab]')];
+let snapshot = null;
+let graphData = null;
+let graphNodes = new Map();
+let criteriaById = new Map();
+let decomposition = null;
+let tab = 'signals';
+let shown = 50;
+
+const kind = {
+  anomalous_prime_field: {label:'Trace-one',grade:'Exact DLP criterion',badge:'verified',rank:0},
+  smooth_selected_group: {label:'Smooth subgroup',grade:'Exact DLP criterion',badge:'verified',rank:0},
+  exact_covering_model: {label:'GHS cover model',grade:'Covering geometry',badge:'geometry',rank:1},
+  low_embedding_degree_candidate: {label:'MOV / FR candidate',grade:'Candidate',badge:'candidate',rank:2},
+  binary_ghs_invariant: {label:'Binary GHS',grade:'Exact invariant · route open',badge:'candidate',rank:2},
+  pairing_friendly_catalog: {label:'Pairing groups',grade:'Group-specific screen',badge:'open',rank:3},
+  named_curve_unassessed: {label:'Named curve',grade:'Unassessed',badge:'open',rank:3},
+  unclassified_covering_model: {label:'Covering open',grade:'Open',badge:'open',rank:3},
+  outside_covering_index: {label:'Outside index',grade:'Open',badge:'open',rank:3},
+  no_indexed_covering_model: {label:'No indexed cover',grade:'Open',badge:'open',rank:4}
+};
+
+function textCell(row, value, className='') {
+  const cell = document.createElement('td');
+  cell.textContent = value;
+  if (className) cell.className = className;
+  row.append(cell);
+  return cell;
+}
+
+function curveRecords() {
+  return [...snapshot.prime_examples,...snapshot.models,...snapshot.named_curves].sort((a,b) => {
+    const priority = kind[a.signal].rank - kind[b.signal].rank;
+    if (priority) return priority;
+    return b.bits-a.bits || String(a.id).localeCompare(String(b.id));
+  });
+}
+
+function labelFor(record) {
+  if (record.name) return record.name;
+  if (record.a !== undefined) return `E / F${record.p}: y² = x³ + ${record.a}x + ${record.b}`;
+  return record.slug;
+}
+
+function fieldFor(record) {
+  return record.degree === 1 ? `F${record.p}` : `F(${record.p}^${record.degree})`;
+}
+
+const propertyLabels = {
+  verified_geometry:'Checked cover certificate',formula_replayed:'Formula replay',
+  positive_model_label:'Positive model label',necessary_screen_passed:'Necessary screen passed',
+  no_recorded_model:'No recorded model',excluded_by_screen:'Excluded by branch screen',
+  outside_recorded_domain:'Outside recorded domain',exact_invariant:'Exact GHS invariant',
+  heuristic_projection:'Heuristic projection',genus_projection_only:'Genus projection only',
+  cover_geometry_only:'Cover geometry only',weil_polynomial_open:'Weil polynomial open',
+  formula_only:'Formula cost only',unmeasured:'Unmeasured',unverified:'Unverified',
+  unassessed:'Unassessed',cubic_model_label:'Cubic model label',
+  tower_screen_only:'Field tower screen only',outside_screened_towers:'Outside screened towers'
+};
+
+function propertyBadge(status) {
+  if (status==='verified_geometry' || status==='positive_model_label') return 'geometry';
+  if (['formula_replayed','necessary_screen_passed','exact_invariant','heuristic_projection',
+    'genus_projection_only','cover_geometry_only','formula_only','cubic_model_label',
+    'tower_screen_only'].includes(status)) return 'candidate';
+  return 'open';
+}
+
+function propertyDescription(key, value) {
+  const state=propertyLabels[value.status]||value.status;
+  if (key==='same_field_cover') return `${state}; genus ${value.genus}, degree ${value.degree} over the source field; ${value.certificate.construction}. Subfield descent: ${value.subfield_descent}.`;
+  if (key==='cubic_cover' || key==='quadratic_cover') return `${state}; model label ${value.label||'—'}; screen ${value.screen||'—'}.`;
+  if (key==='ghs_descent') return `${state}; ${value.routes.length} recorded routes${value.routes.length?': '+value.routes.map(r=>`base degree ${r.base_degree}, relative degree ${r.relative_degree}, m=${r.magic_number||'?'}, ${r.type_i===true?'Type I':r.type_i===false?'Type II':'type open'}, genus ${r.genus_projection}, ${r.transport_screen}, ${r.formula_class}`).join(' | '):'.'}`;
+  if (key==='jv_intermediate_field_cover') return `${state}; ${value.towers.length?value.towers.map(r=>`H/F(p^${r.intermediate_degree}), relative degree ${r.relative_degree}, genus ${r.destination_genus}: ${r.model_status}`).join(' | '):'no sextic tower screened'}. Lower-field cover and norm–pullback subgroup kernel: open.`;
+  if (key==='jv_quadratic_sieve') return `${state}; ${value.intermediate_degree===2?'H/F(p²), eight-point relations; saturated ideal, natural sieve yield, rank and descent open':'requires an assessed odd-characteristic quadratic intermediate field'}.`;
+  if (key==='hyperelliptic_high_genus') return `${state}; ${value.candidate_routes.length} size-admissible exact-invariant genus projections. Smoothness measurements: open.`;
+  if (key==='elliptic_quotient_prym') return `${state}; elliptic factor dimension 1, complement dimension ${value.complement_dimension}; explicit Jacobian projection open.`;
+  if (key==='subgroup_transport') return `${state}; selected order ${value.selected_order||'not fixed'}; gcd(degree, selected order) ${value.gcd_degree_selected_order??'open'}; generator, target and kernel images open.`;
+  if (key==='route_cost') return `${state}; same-field formula class ${value.same_field_formula_class||'not calculated'}; complete measured cost open.`;
+  return `${state}; ${decomposition.definitions[key].test}`;
+}
+
+function renderPropertyDetails(record, dialog) {
+  dialog.querySelector('.property-details')?.remove();
+  const values=decomposition.records[record.id];
+  if (!values) return;
+  const details=document.createElement('details');details.className='property-details';
+  const summary=document.createElement('summary');summary.textContent=`Hyperelliptic properties · all ${Object.keys(decomposition.definitions).length} checks`;details.append(summary);
+  const dl=document.createElement('dl');
+  for (const [key,definition] of Object.entries(decomposition.definitions)) {
+    const dt=document.createElement('dt');dt.textContent=definition.label;
+    const dd=document.createElement('dd');dd.textContent=propertyDescription(key,values[key]);
+    dl.append(dt,dd);
+  }
+  details.append(dl);
+  const certificate=document.createElement('details');certificate.className='cover-certificate';
+  const certificateLabel=document.createElement('summary');certificateLabel.textContent='Exact cover polynomial and map coefficients';certificate.append(certificateLabel);
+  const pre=document.createElement('pre');pre.textContent=JSON.stringify(values.same_field_cover.certificate,null,2);certificate.append(pre);
+  details.append(certificate);
+  const link=document.createElement('a');link.href='decomposition_properties.json';link.textContent='Download all curve properties ↗';link.className='source-ref';details.append(link);
+  dialog.append(details);
+}
+
+function openRecord(record) {
+  const dialog = $('#record-dialog');
+  const spec = kind[record.signal];
+  $('#dialog-title').textContent = labelFor(record);
+  $('#dialog-grade').textContent = spec.grade;
+  $('#dialog-grade').className = `badge ${spec.badge}`;
+  const facts = [
+    ['Identity',record.id],['Field',fieldFor(record)],['Field bits',String(record.bits)],
+    ['Trace',String(record.trace)],['Curve order',String(record.order)],
+    ['Criterion',spec.label]
+  ];
+  if (record.legacy_id) facts.push(['Previous alias',record.legacy_id]);
+  if (record.generator) facts.push(['Selected point',`(${record.generator.join(', ')})`]);
+  if (record.generator_order) facts.push(['Point order',String(record.generator_order)]);
+  if (record.group_exponent) facts.push(['Group exponent',String(record.group_exponent)]);
+  if (record.group_structure) facts.push(['Group structure',record.group_structure.join(' × ')]);
+  if (record.embedding_degree) facts.push(['Embedding degree',String(record.embedding_degree)]);
+  if (record.g1_cofactor) facts.push(['G1 cofactor',String(record.g1_cofactor)]);
+  if (record.g1_generator) facts.push(['G1 generator',record.g1_generator.join(', ')]);
+  if (record.g2_twist) facts.push(['G2 twist',record.g2_twist]);
+  if (record.g2_generator) facts.push(['G2 generator',JSON.stringify(record.g2_generator)]);
+  if (record.g2_cofactor) facts.push(['G2 cofactor',String(record.g2_cofactor)]);
+  if (record.gt_field_degree) facts.push(['GT field',`F_(p^${record.gt_field_degree}), order r`]);
+  if (record.field_modulus) facts.push(['Field polynomial',String(record.field_modulus)]);
+  if (record.model_b) facts.push(['Model coefficient b',String(record.model_b)]);
+  if (record.r) facts.push(['Largest prime factor r',String(record.r)]);
+  if (record.published_generator) facts.push(['RFC generator',`(${record.published_generator.join(', ')})`]);
+  if (record.full_order_cofactor) facts.push(['Full order / r',String(record.full_order_cofactor)]);
+  if (record.published_generator_order_multiplier) facts.push(['Published generator order',`${record.published_generator_order_multiplier} × r`]);
+  if (record.extension_factorization) facts.push(['Extension degree split',record.extension_factorization.join(' × ')]);
+  if (record.ghs_magic_number) facts.push(['GHS magic number',String(record.ghs_magic_number)]);
+  if (record.ghs_genus_formula) facts.push(['Formula genus',String(record.ghs_genus_formula)]);
+  if (record.projection?.status==='formula_only') facts.push(['Formula cost (log₂ bit ops)',String(record.projection.log2_total)],['Rho reference (log₂ bit ops)',String(record.projection.log2_rho_reference)]);
+  if (record.cubic) facts.push(['Cubic model',record.cubic],['Quadratic model',record.quadratic]);
+  if (record.cubic_screen) facts.push(['Cubic screen',record.cubic_screen]);
+  if (record.quadratic_screen) facts.push(['Quadratic screen',record.quadratic_screen]);
+  facts.push(['Subgroup route',record.subgroup_advantage]);
+  if (record.sha256) facts.push(['Model SHA-256',record.sha256]);
+  if (record.proof) facts.push(['Evidence',record.proof]);
+  if (record.source_note) facts.push(['Source note',record.source_note]);
+  if (record.source) facts.push(['Source',record.source]);
+  if (record.findings?.length) facts.push(['Weakness IDs',record.findings.map(f=>f.id).join(' · ')]);
+  const corrected=record.findings?.map(f=>f.corrects).filter(Boolean);
+  if (corrected?.length) facts.push(['Corrects finding',corrected.join(' · ')]);
+  const property=decomposition.records[record.id];
+  if (property) facts.push(['Hyperelliptic cover',`${propertyLabels[property.same_field_cover.status]} · genus ${property.same_field_cover.genus} · degree ${property.same_field_cover.degree}`]);
+  const node = graphNodes.get(record.id);
+  if (node) facts.push(['Isogeny class',`${node.class_id} · ${node.class_size} indexed model${node.class_size===1?'':'s'}`]);
+  const dl = $('#dialog-facts');
+  dl.replaceChildren();
+  for (const [key,value] of facts) {
+    const dt = document.createElement('dt');dt.textContent=key;
+    const dd = document.createElement('dd');dd.textContent=value;
+    dl.append(dt,dd);
+  }
+  $('#dialog-explain').textContent = record.signal === 'binary_ghs_invariant'
+    ? 'The composite field tower admits an exact GHS magic-number calculation. The listed genus and cost are formula projections; the cover, selected-subgroup transport, and cost hypotheses still need verification. The small cofactor is recorded separately from the large prime subgroup.'
+    : record.signal === 'exact_covering_model'
+    ? 'This exact model has a positive genus-three covering-model label. A selected subgroup map and comparative cost remain separate gates.'
+    : record.signal === 'low_embedding_degree_candidate'
+      ? 'The selected order and embedding degree are exact. The pairing image and destination-field cost remain to be certified.'
+      : record.signal === 'pairing_friendly_catalog'
+      ? 'This pairing-friendly variant deliberately has G1, G2 and GT groups. Inspect each group and the protocol input rules separately; pairing availability alone is not a finding of broken DLP or CDH.'
+      : record.attack_ready
+        ? 'The model and selected order satisfy a published discrete-log criterion. This snapshot reports no measured attack cost.'
+        : 'This catalog record retains its exact identity and current classification status.';
+  const selectedCheck=graphNodes.get(record.id)?.checks?.[criterionFilter.value];
+  if(selectedCheck) {
+    const labels={condition:'Exact condition',geometry:'Covering geometry',map:'Verified map',candidate:'Candidate',screen:'Structural screen'};
+    const styles={condition:'verified',geometry:'geometry',map:'geometry',candidate:'candidate',screen:'candidate'};
+    $('#dialog-grade').textContent=labels[selectedCheck.status];
+    $('#dialog-grade').className=`badge ${styles[selectedCheck.status]}`;
+    $('#dialog-explain').textContent=selectedCheck.detail;
+  }
+  if (propertyFilter.value!=='all') {
+    const selectedProperty=decomposition.records[record.id]?.[propertyFilter.value];
+    if (selectedProperty) {
+      $('#dialog-grade').textContent=propertyLabels[selectedProperty.status]||selectedProperty.status;
+      $('#dialog-grade').className=`badge ${propertyBadge(selectedProperty.status)}`;
+      $('#dialog-explain').textContent=propertyDescription(propertyFilter.value,selectedProperty);
+    }
+  }
+  const oldEvidence=dialog.querySelector('.finding-evidence');
+  if(oldEvidence)oldEvidence.remove();
+  const evidence=document.createElement('div');evidence.className='finding-evidence';
+  for(const f of record.findings||[]) {
+    const p=document.createElement('p');p.textContent=`${f.id} · ${f.grade}: ${f.statement}`;evidence.append(p);
+  }
+  for(const [id,check] of Object.entries(node?.checks||{})) {
+    const p=document.createElement('p');p.textContent=`${criteriaById.get(id)?.name||id} · ${check.status}: ${check.detail}`;evidence.append(p);
+  }
+  if (node?.class_size>1 || node?.checks?.isogeny_transfer) {
+    const a=document.createElement('a');a.href='#graph';a.textContent='Explore isogeny class ↗';
+    a.addEventListener('click',()=>{dialog.close();window.dispatchEvent(new CustomEvent('weakcurves-focus-graph',{detail:{id:record.id}}));});evidence.append(a);
+  }
+  const urls=record.source_urls||[record.source_url].filter(Boolean);
+  for(const url of urls) {
+    const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener noreferrer';
+    a.textContent=url.includes('rfc2412')?'RFC 2412':url.includes('rfc2409')?'RFC 2409':url.includes('JACOBIAN')?'Transfer analysis':'Source record';
+    evidence.append(a);
+  }
+  if (record.name==='c2pnb176w1' || record.name==='c2pnb272w1') {
+    const a=document.createElement('a');a.href='ghs_genus128_cost_audit.json';
+    a.textContent='Genus-128 cost-stage audit ↗';a.className='source-ref';evidence.append(a);
+  }
+  dialog.append(evidence);
+  renderPropertyDetails(record,dialog);
+  dialog.showModal();
+}
+
+function filteredCurves() {
+  let rows = curveRecords();
+  if (tab === 'signals' && criterionFilter.value === 'all' && checkFilter.value === 'all' && propertyFilter.value === 'all') rows = rows.filter(r => kind[r.signal].rank <= 2);
+  const q = search.value.trim().toLowerCase();
+  if (q) rows = rows.filter(r => [r.id,r.slug,r.legacy_id,labelFor(r),fieldFor(r),kind[r.signal].label,r.trace,
+    ...(r.aliases||[]),...(r.findings||[]).flatMap(f=>[f.id,f.corrects,f.mechanism,f.criterion_id]),
+    ...Object.keys(graphNodes.get(r.id)?.checks||{}),
+    ...Object.entries(decomposition.records[r.id]||{}).flatMap(([key,value])=>[key,value?.status])]
+    .some(x => String(x||'').toLowerCase().includes(q)));
+  const field = fieldFilter.value;
+  if (field === 'prime') rows = rows.filter(r => r.degree === 1);
+  if (field === 'extension') rows = rows.filter(r => r.degree > 1);
+  if (field === 'large') rows = rows.filter(r => r.bits >= 192 && r.bits <= 252);
+  const grade = evidenceFilter.value;
+  if (grade === 'dlp') rows = rows.filter(r => kind[r.signal].rank === 0);
+  if (grade === 'cover') rows = rows.filter(r => kind[r.signal].rank === 1);
+  if (grade === 'candidate') rows = rows.filter(r => kind[r.signal].rank === 2);
+  if (grade === 'open') rows = rows.filter(r => kind[r.signal].rank >= 3);
+  const criterion = criterionFilter.value, stage = checkFilter.value;
+  if (criterion !== 'all' || stage !== 'all') rows = rows.filter(r => {
+    const checks = graphNodes.get(r.id)?.checks||{};
+    return Object.entries(checks).some(([id,check]) => (criterion==='all'||criterion===id) && (stage==='all'||stage===check.status));
+  });
+  if (propertyFilter.value !== 'all') rows=rows.filter(r=>{
+    const value=decomposition.records[r.id]?.[propertyFilter.value];
+    return value && (propertyState.value==='all'||value.status===propertyState.value);
+  });
+  return rows;
+}
+
+function renderCurves() {
+  thead.replaceChildren();tbody.replaceChildren();
+  const head = document.createElement('tr');
+  ['#','Curve / identity','Field','Method','Weakness ID','Evidence','Trace','Order'].forEach(v => {const th=document.createElement('th');th.textContent=v;head.append(th)});
+  thead.append(head);
+  const records = filteredCurves();
+  records.slice(0,shown).forEach((r,i) => {
+    const row = document.createElement('tr');
+    textCell(row,String(i+1).padStart(2,'0'),'rank');
+    const name = textCell(row,'','curve-name');
+    const button = document.createElement('button');button.type='button';button.className='curve-button';
+    button.textContent=labelFor(r);button.title='Open curve evidence';button.addEventListener('click',()=>openRecord(r));
+    name.append(button);const small=document.createElement('small');small.textContent=r.id;name.append(small);
+    textCell(row,fieldFor(r),'mono');
+    const selected=criterionFilter.value, check=graphNodes.get(r.id)?.checks?.[selected];
+    const property=propertyFilter.value==='all'?null:decomposition.records[r.id]?.[propertyFilter.value];
+    textCell(row,property?`${decomposition.definitions[propertyFilter.value].label} · ${propertyLabels[property.status]||property.status}`:selected==='all'?kind[r.signal].label:`${criteriaById.get(selected)?.name||selected} · ${check?.status||'—'}`);
+    textCell(row,r.findings?.map(f=>f.id).join(' · ')||'—','mono');
+    const grade=textCell(row,'');const badge=document.createElement('span');
+    const stageStyle={condition:'verified',geometry:'geometry',map:'geometry',candidate:'candidate',screen:'candidate'};
+    badge.className=`badge ${property?propertyBadge(property.status):check?stageStyle[check.status]:kind[r.signal].badge}`;
+    badge.textContent=property?propertyLabels[property.status]||property.status:check?{condition:'Exact condition',geometry:'Covering geometry',map:'Verified map',candidate:'Candidate',screen:'Structural screen'}[check.status]:kind[r.signal].grade;
+    grade.append(badge);
+    textCell(row,String(r.trace),'mono');textCell(row,String(r.order),'mono');
+    tbody.append(row);
+  });
+  $('#result-count').textContent=`Showing ${Math.min(shown,records.length).toLocaleString()} of ${records.length.toLocaleString()} records`;
+  more.hidden=shown>=records.length;
+}
+
+function renderCases() {
+  thead.replaceChildren();tbody.replaceChildren();
+  const head=document.createElement('tr');
+  ['Case','Extension degree d','Cover rank n','Excess genus e','Cover genus','Coefficient'].forEach(v=>{const th=document.createElement('th');th.textContent=v;head.append(th)});
+  thead.append(head);
+  const q=search.value.trim().toLowerCase();
+  const cases=snapshot.published_cases.filter(c=>!q||[`case ${c.case_no}`,c.degree,c.cover_genus,c.coefficient].some(v=>String(v).toLowerCase().includes(q)));
+  cases.slice(0,shown).forEach(c=>{
+    const tr=document.createElement('tr');
+    const td=textCell(tr,'');const link=document.createElement('a');link.href=c.source_url;link.target='_blank';link.rel='noopener noreferrer';link.className='case-link';link.textContent=`Case ${String(c.case_no).padStart(2,'0')} ↗`;td.append(link);
+    [c.degree,c.rank,c.excess_genus,c.cover_genus,c.coefficient==='eta'?'1 or nonsquare':'1 only'].forEach(v=>textCell(tr,String(v),'mono'));
+    tbody.append(tr);
+  });
+  $('#result-count').textContent=`Showing ${Math.min(shown,cases.length)} of ${cases.length} published parameter cases`;
+  more.hidden=shown>=cases.length;
+}
+
+function renderProtocols() {
+  thead.replaceChildren();tbody.replaceChildren();
+  const head=document.createElement('tr');
+  ['Protocol case','Field and curve','Security goal','Mechanism','Evidence and prerequisites'].forEach(v=>{const th=document.createElement('th');th.textContent=v;head.append(th)});
+  thead.append(head);
+  const q=search.value.trim().toLowerCase();
+  const cases=(snapshot.protocol_cases||[]).filter(c=>!q||[c.name,c.id,c.security_goal,c.mechanism,c.prerequisites].some(v=>String(v).toLowerCase().includes(q)));
+  cases.slice(0,shown).forEach(c=>{
+    const row=document.createElement('tr');
+    const name=textCell(row,'');const link=document.createElement('a');link.href=c.source_urls[1];link.target='_blank';link.rel='noopener noreferrer';link.textContent=c.name+' ↗';name.append(link);
+    [c.field+' · '+c.curve,c.security_goal,c.mechanism,c.result+'; requires '+c.prerequisites].forEach(v=>textCell(row,v));
+    tbody.append(row);
+  });
+  $('#result-count').textContent=`Showing ${Math.min(shown,cases.length)} of ${cases.length} protocol cases`;
+  more.hidden=shown>=cases.length;
+}
+
+function render() {
+  if (!snapshot) return;
+  $('#model-controls').style.display=['families','protocols'].includes(tab)?'none':'flex';
+  $('#criterion-controls').style.display=['families','protocols'].includes(tab)?'none':'flex';
+  $('#property-controls').style.display=['families','protocols'].includes(tab)?'none':'flex';
+  if (tab==='families') renderCases();else if(tab==='protocols') renderProtocols();else renderCurves();
+}
+
+function setTab(next) {
+  tab=next;shown=50;search.value='';fieldFilter.value='all';evidenceFilter.value='all';criterionFilter.value='all';checkFilter.value='all';propertyFilter.value='all';propertyState.value='all';
+  tabs.forEach(t=>{const active=t.dataset.tab===next;t.classList.toggle('active',active);t.setAttribute('aria-selected',String(active));});
+  render();
+}
+
+function renderCriteria(criteria) {
+  const grid=$('#criteria-grid');grid.replaceChildren();
+  $('#criterion-count').textContent=criteria.length;
+  criteriaById=new Map(criteria.map(c=>[c.id,c]));
+  for (const c of criteria) {
+    const option=document.createElement('option');option.value=c.id;
+    option.textContent=c.id==='sidh_auxiliary_torsion'
+      ? `${c.name} (${snapshot.counts.protocol_cases} protocol case)`
+      : `${c.name} (${graphData.counts.atlas_checks[c.id]||0})`;
+    criterionFilter.append(option);
+  }
+  criteria.forEach((c,i)=>{
+    const article=document.createElement('article');article.className='criterion';article.id=`criterion-${c.id}`;
+    const top=document.createElement('div');top.className='criterion-top';
+    const index=document.createElement('span');index.className='criterion-index';index.textContent=String(i+1).padStart(2,'0')+' / '+String(criteria.length).padStart(2,'0');
+    const method=document.createElement('span');method.className='criterion-method';method.textContent=c.method;top.append(index,method);
+    const h=document.createElement('h3');h.textContent=c.name;
+    const domain=document.createElement('p');domain.className='domain';domain.textContent=c.domain;
+    const recognition=document.createElement('p');recognition.textContent=c.recognition;
+    const details=document.createElement('details');
+    const summary=document.createElement('summary');summary.textContent='Witness & construction ↓';details.append(summary);
+    const witness=document.createElement('p');witness.textContent='Witness: '+c.witness;
+    const construction=document.createElement('p');construction.textContent='Construction: '+c.construction;
+    const source=document.createElement('a');source.href=c.url;source.target='_blank';source.rel='noopener noreferrer';source.className='source-ref';source.textContent=c.source+' ↗';
+    details.append(witness,construction,source);article.append(top,h,domain,recognition,details);grid.append(article);
+  });
+}
+
+function renderPropertyFilters() {
+  for (const [key,definition] of Object.entries(decomposition.definitions)) {
+    const option=document.createElement('option');option.value=key;
+    option.textContent=definition.label;propertyFilter.append(option);
+  }
+  updatePropertyStates();
+}
+
+function updatePropertyStates() {
+  propertyState.replaceChildren();
+  const option=document.createElement('option');option.value='all';option.textContent='Any recorded state';propertyState.append(option);
+  const selected=propertyFilter.value;
+  for (const [state,count] of Object.entries(decomposition.counts[selected]||{})) {
+    const item=document.createElement('option');item.value=state;
+    item.textContent=`${propertyLabels[state]||state} (${count})`;propertyState.append(item);
+  }
+}
+
+function initDialog() {
+  const dialog=document.createElement('dialog');dialog.id='record-dialog';dialog.innerHTML='<div class="dialog-head"><div><p class="eyebrow">Curve evidence</p><h2 id="dialog-title"></h2></div><button type="button" class="close-dialog" aria-label="Close details">×</button></div><span id="dialog-grade"></span><p id="dialog-explain"></p><dl id="dialog-facts"></dl>';
+  document.body.append(dialog);
+  dialog.querySelector('.close-dialog').addEventListener('click',()=>dialog.close());
+  dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
+}
+
+Promise.all([fetch('snapshot.json').then(r=>{if(!r.ok)throw Error('snapshot unavailable');return r.json()}),fetch('criteria.json').then(r=>{if(!r.ok)throw Error('criteria unavailable');return r.json()}),fetch('isogeny_graph.json').then(r=>{if(!r.ok)throw Error('isogeny graph unavailable');return r.json()}),fetch('decomposition_properties.json').then(r=>{if(!r.ok)throw Error('decomposition properties unavailable');return r.json()})])
+  .then(([data,criteria,graph,properties])=>{
+    snapshot=data;graphData=graph;decomposition=properties;graphNodes=new Map(graph.nodes.map(n=>[n.id,n]));initDialog();renderCriteria(criteria);renderPropertyFilters();
+    $('#stat-models').textContent=data.counts.exact_models.toLocaleString();
+    $('#stat-covers').textContent=data.counts.exact_covering_models.toLocaleString();
+    $('#stat-cases').textContent=data.counts.published_cases.toLocaleString();
+    $('#stat-large').textContent=data.counts.large_models.toLocaleString();
+    $('#signal-count').textContent=data.counts.findings;
+    $('#corpus-count').textContent=data.counts.exact_models+data.counts.prime_field_examples+data.counts.named_curves;
+    $('#case-count').textContent=data.counts.published_cases;
+    $('#protocol-count').textContent=data.counts.protocol_cases||0;
+    render();
+    window.dispatchEvent(new CustomEvent('weakcurves-ready',{detail:{graph,criteria,records:curveRecords(),openRecord}}));
+  })
+  .catch(error=>{$('#result-count').textContent=`Could not load atlas data: ${error.message}`;});
+
+tabs.forEach(t=>t.addEventListener('click',()=>setTab(t.dataset.tab)));
+[search,fieldFilter,evidenceFilter,criterionFilter,checkFilter].forEach(el=>el.addEventListener('input',()=>{shown=50;render()}));
+propertyFilter.addEventListener('change',()=>{shown=50;updatePropertyStates();render()});
+propertyState.addEventListener('change',()=>{shown=50;render()});
+criterionFilter.addEventListener('change',()=>{if(criterionFilter.value==='sidh_auxiliary_torsion')setTab('protocols')});
+more.addEventListener('click',()=>{shown+=50;render()});

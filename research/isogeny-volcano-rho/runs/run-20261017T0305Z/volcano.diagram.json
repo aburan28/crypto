@@ -1,0 +1,437 @@
+{
+ "schema": "volcano-diagram/v2",
+ "ell": 2,
+ "depth": 5,
+ "title": "Measured 2-isogeny volcano heat map \u00b7 p = 213656134960913 \u00b7 j = 1728 crater \u00b7 one instance, 400 paired walk seeds per curve",
+ "subtitle": "run-20261017T0305Z",
+ "vertices": [
+  {
+   "id": 0,
+   "label": "v0",
+   "level": 0,
+   "nbrs": [
+    1
+   ],
+   "highlight": "root, j = 1728 (order-4 automorphism)",
+   "values": {
+    "ops": 1360140.0,
+    "time": 78.1973
+   }
+  },
+  {
+   "id": 1,
+   "label": "v1",
+   "level": 1,
+   "nbrs": [
+    0,
+    2,
+    3
+   ],
+   "values": {
+    "ops": 1333500.0,
+    "time": 77.024
+   }
+  },
+  {
+   "id": 2,
+   "label": "v2",
+   "level": 2,
+   "nbrs": [
+    1,
+    4,
+    5
+   ],
+   "values": {
+    "ops": 1364940.0,
+    "time": 78.747
+   }
+  },
+  {
+   "id": 3,
+   "label": "v3",
+   "level": 2,
+   "nbrs": [
+    1,
+    6,
+    7
+   ],
+   "values": {
+    "ops": 1341810.0,
+    "time": 77.3819
+   }
+  },
+  {
+   "id": 4,
+   "label": "v4",
+   "level": 3,
+   "nbrs": [
+    2,
+    8,
+    9
+   ],
+   "values": {
+    "ops": 1352210.0,
+    "time": 77.9357
+   }
+  },
+  {
+   "id": 5,
+   "label": "v5",
+   "level": 3,
+   "nbrs": [
+    2,
+    10,
+    11
+   ],
+   "values": {
+    "ops": 1310060.0,
+    "time": 75.2196
+   }
+  },
+  {
+   "id": 6,
+   "label": "v6",
+   "level": 3,
+   "nbrs": [
+    3,
+    12,
+    13
+   ],
+   "values": {
+    "ops": 1379460.0,
+    "time": 79.8861
+   }
+  },
+  {
+   "id": 7,
+   "label": "v7",
+   "level": 3,
+   "nbrs": [
+    3,
+    14,
+    15
+   ],
+   "values": {
+    "ops": 1286870.0,
+    "time": 74.1044
+   }
+  },
+  {
+   "id": 8,
+   "label": "v8",
+   "level": 4,
+   "nbrs": [
+    4,
+    16,
+    17
+   ],
+   "values": {
+    "ops": 1354980.0,
+    "time": 78.14
+   }
+  },
+  {
+   "id": 9,
+   "label": "v9",
+   "level": 4,
+   "nbrs": [
+    4,
+    18,
+    19
+   ],
+   "values": {
+    "ops": 1337330.0,
+    "time": 76.94040000000001
+   }
+  },
+  {
+   "id": 10,
+   "label": "v10",
+   "level": 4,
+   "nbrs": [
+    5,
+    20,
+    21
+   ],
+   "values": {
+    "ops": 1404420.0,
+    "time": 80.49770000000001
+   }
+  },
+  {
+   "id": 11,
+   "label": "v11",
+   "level": 4,
+   "nbrs": [
+    5,
+    22,
+    23
+   ],
+   "values": {
+    "ops": 1311530.0,
+    "time": 75.0143
+   }
+  },
+  {
+   "id": 12,
+   "label": "v12",
+   "level": 4,
+   "nbrs": [
+    6,
+    24,
+    25
+   ],
+   "values": {
+    "ops": 1337050.0,
+    "time": 76.1848
+   }
+  },
+  {
+   "id": 13,
+   "label": "v13",
+   "level": 4,
+   "nbrs": [
+    6,
+    26,
+    27
+   ],
+   "values": {
+    "ops": 1354690.0,
+    "time": 77.3484
+   }
+  },
+  {
+   "id": 14,
+   "label": "v14",
+   "level": 4,
+   "nbrs": [
+    7,
+    28,
+    29
+   ],
+   "values": {
+    "ops": 1374570.0,
+    "time": 79.0792
+   }
+  },
+  {
+   "id": 15,
+   "label": "v15",
+   "level": 4,
+   "nbrs": [
+    7,
+    30,
+    31
+   ],
+   "values": {
+    "ops": 1308850.0,
+    "time": 75.7001
+   }
+  },
+  {
+   "id": 16,
+   "label": "v16",
+   "level": 5,
+   "nbrs": [
+    8
+   ],
+   "values": {
+    "ops": 1287970.0,
+    "time": 73.86529999999999
+   }
+  },
+  {
+   "id": 17,
+   "label": "v17",
+   "level": 5,
+   "nbrs": [
+    8
+   ],
+   "values": {
+    "ops": 1341460.0,
+    "time": 77.28309999999999
+   }
+  },
+  {
+   "id": 18,
+   "label": "v18",
+   "level": 5,
+   "nbrs": [
+    9
+   ],
+   "values": {
+    "ops": 1329260.0,
+    "time": 76.4529
+   }
+  },
+  {
+   "id": 19,
+   "label": "v19",
+   "level": 5,
+   "nbrs": [
+    9
+   ],
+   "values": {
+    "ops": 1350410.0,
+    "time": 78.89200000000001
+   }
+  },
+  {
+   "id": 20,
+   "label": "v20",
+   "level": 5,
+   "nbrs": [
+    10
+   ],
+   "values": {
+    "ops": 1343670.0,
+    "time": 77.279
+   }
+  },
+  {
+   "id": 21,
+   "label": "v21",
+   "level": 5,
+   "nbrs": [
+    10
+   ],
+   "values": {
+    "ops": 1353930.0,
+    "time": 77.4663
+   }
+  },
+  {
+   "id": 22,
+   "label": "v22",
+   "level": 5,
+   "nbrs": [
+    11
+   ],
+   "values": {
+    "ops": 1330680.0,
+    "time": 76.0961
+   }
+  },
+  {
+   "id": 23,
+   "label": "v23",
+   "level": 5,
+   "nbrs": [
+    11
+   ],
+   "values": {
+    "ops": 1337620.0,
+    "time": 77.0053
+   }
+  },
+  {
+   "id": 24,
+   "label": "v24",
+   "level": 5,
+   "nbrs": [
+    12
+   ],
+   "values": {
+    "ops": 1359840.0,
+    "time": 77.9438
+   }
+  },
+  {
+   "id": 25,
+   "label": "v25",
+   "level": 5,
+   "nbrs": [
+    12
+   ],
+   "values": {
+    "ops": 1326570.0,
+    "time": 76.3987
+   }
+  },
+  {
+   "id": 26,
+   "label": "v26",
+   "level": 5,
+   "nbrs": [
+    13
+   ],
+   "values": {
+    "ops": 1331140.0,
+    "time": 76.3356
+   }
+  },
+  {
+   "id": 27,
+   "label": "v27",
+   "level": 5,
+   "nbrs": [
+    13
+   ],
+   "values": {
+    "ops": 1346230.0,
+    "time": 76.7409
+   }
+  },
+  {
+   "id": 28,
+   "label": "v28",
+   "level": 5,
+   "nbrs": [
+    14
+   ],
+   "values": {
+    "ops": 1288220.0,
+    "time": 73.64020000000001
+   }
+  },
+  {
+   "id": 29,
+   "label": "v29",
+   "level": 5,
+   "nbrs": [
+    14
+   ],
+   "values": {
+    "ops": 1291260.0,
+    "time": 73.945
+   }
+  },
+  {
+   "id": 30,
+   "label": "v30",
+   "level": 5,
+   "nbrs": [
+    15
+   ],
+   "values": {
+    "ops": 1351590.0,
+    "time": 77.7964
+   }
+  },
+  {
+   "id": 31,
+   "label": "v31",
+   "level": 5,
+   "nbrs": [
+    15
+   ],
+   "values": {
+    "ops": 1375410.0,
+    "time": 79.2077
+   }
+  }
+ ],
+ "metrics": [
+  {
+   "key": "ops",
+   "title": "ca negation-map rho \u00b7 mean operations",
+   "label": "group operations per solve"
+  },
+  {
+   "key": "time",
+   "title": "ca negation-map rho \u00b7 mean time",
+   "label": "ms per solve"
+  }
+ ],
+ "footnote": "Plain rho on every curve. The order-4-automorphism-folded rho on the crater takes 1,018,110 operations, 1.32 \u00b1 0.06x fewer (predicted 1.41); see per_level. Grey: not measured. Each panel has its own scale."
+}

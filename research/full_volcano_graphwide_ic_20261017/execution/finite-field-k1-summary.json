@@ -1,0 +1,900 @@
+{
+  "root": {
+    "end_to_end_ns": {
+      "max": 878893,
+      "mean": 506354.0,
+      "min": 133815,
+      "n": 2,
+      "sum": "1012708"
+    },
+    "failed": 0,
+    "metrics": {
+      "candidate_pair_tests": {
+        "max": 39,
+        "mean": 37.0,
+        "min": 35,
+        "n": 2,
+        "sum": "74"
+      },
+      "matrix_entry_ops": {
+        "max": 30,
+        "mean": 28.5,
+        "min": 27,
+        "n": 2,
+        "sum": "57"
+      },
+      "queries": {
+        "max": 3,
+        "mean": 3.0,
+        "min": 3,
+        "n": 2,
+        "sum": "6"
+      },
+      "query_hit_yield": {
+        "max": 1.0,
+        "mean": 1.0,
+        "min": 1.0,
+        "n": 2
+      },
+      "relation_count": {
+        "max": 4,
+        "mean": 4.0,
+        "min": 4,
+        "n": 2,
+        "sum": "8"
+      },
+      "relations_per_query": {
+        "max": 1.3333333333333333,
+        "mean": 1.3333333333333333,
+        "min": 1.3333333333333333,
+        "n": 2
+      }
+    },
+    "phase_operations": {
+      "ec_verification/ec_field/invs": {
+        "max": 3,
+        "mean": 1.5,
+        "min": 0,
+        "n": 2,
+        "sum": "3"
+      },
+      "ec_verification/ec_field/muls": {
+        "max": 12,
+        "mean": 6.0,
+        "min": 0,
+        "n": 2,
+        "sum": "12"
+      },
+      "ec_verification/ec_field/sqrs": {
+        "max": 5,
+        "mean": 2.5,
+        "min": 0,
+        "n": 2,
+        "sum": "5"
+      },
+      "ec_verification/ec_group/adds": {
+        "max": 1,
+        "mean": 0.5,
+        "min": 0,
+        "n": 2,
+        "sum": "1"
+      },
+      "ec_verification/ec_group/doubles": {
+        "max": 2,
+        "mean": 1.0,
+        "min": 0,
+        "n": 2,
+        "sum": "2"
+      },
+      "ec_verification/ec_group/scalar_mults": {
+        "max": 1,
+        "mean": 1.0,
+        "min": 1,
+        "n": 2,
+        "sum": "2"
+      },
+      "ec_verification/explicit_fp/additions_subtractions": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "ec_verification/explicit_fp/exponentiations": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "ec_verification/explicit_fp/inversions": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "ec_verification/explicit_fp/multiplications": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "ec_verification/explicit_fp/squarings": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "ec_verification/miller_steps": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "ec_verification/shift_candidates": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "ec_verification/sqrt_calls_unexpanded": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/ec_field/invs": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/ec_field/muls": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/ec_field/sqrs": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/ec_group/adds": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/ec_group/doubles": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/ec_group/scalar_mults": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/explicit_fp/additions_subtractions": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/explicit_fp/exponentiations": {
+        "max": 14,
+        "mean": 14.0,
+        "min": 14,
+        "n": 2,
+        "sum": "28"
+      },
+      "factor_base_relations_matrix_and_ff_verification/explicit_fp/inversions": {
+        "max": 5,
+        "mean": 5.0,
+        "min": 5,
+        "n": 2,
+        "sum": "10"
+      },
+      "factor_base_relations_matrix_and_ff_verification/explicit_fp/multiplications": {
+        "max": 345,
+        "mean": 342.0,
+        "min": 339,
+        "n": 2,
+        "sum": "684"
+      },
+      "factor_base_relations_matrix_and_ff_verification/explicit_fp/squarings": {
+        "max": 535,
+        "mean": 534.0,
+        "min": 533,
+        "n": 2,
+        "sum": "1068"
+      },
+      "factor_base_relations_matrix_and_ff_verification/miller_steps": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/shift_candidates": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/sqrt_calls_unexpanded": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "pairing/ec_field/invs": {
+        "max": 14,
+        "mean": 14.0,
+        "min": 14,
+        "n": 2,
+        "sum": "28"
+      },
+      "pairing/ec_field/muls": {
+        "max": 52,
+        "mean": 52.0,
+        "min": 52,
+        "n": 2,
+        "sum": "104"
+      },
+      "pairing/ec_field/sqrs": {
+        "max": 22,
+        "mean": 22.0,
+        "min": 22,
+        "n": 2,
+        "sum": "44"
+      },
+      "pairing/ec_group/adds": {
+        "max": 6,
+        "mean": 6.0,
+        "min": 6,
+        "n": 2,
+        "sum": "12"
+      },
+      "pairing/ec_group/doubles": {
+        "max": 8,
+        "mean": 8.0,
+        "min": 8,
+        "n": 2,
+        "sum": "16"
+      },
+      "pairing/ec_group/scalar_mults": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "pairing/explicit_fp/additions_subtractions": {
+        "max": 80,
+        "mean": 80.0,
+        "min": 80,
+        "n": 2,
+        "sum": "160"
+      },
+      "pairing/explicit_fp/exponentiations": {
+        "max": 28,
+        "mean": 28.0,
+        "min": 28,
+        "n": 2,
+        "sum": "56"
+      },
+      "pairing/explicit_fp/inversions": {
+        "max": 26,
+        "mean": 26.0,
+        "min": 26,
+        "n": 2,
+        "sum": "52"
+      },
+      "pairing/explicit_fp/multiplications": {
+        "max": 1270,
+        "mean": 1270.0,
+        "min": 1270,
+        "n": 2,
+        "sum": "2540"
+      },
+      "pairing/explicit_fp/squarings": {
+        "max": 1692,
+        "mean": 1692.0,
+        "min": 1692,
+        "n": 2,
+        "sum": "3384"
+      },
+      "pairing/miller_steps": {
+        "max": 8,
+        "mean": 8.0,
+        "min": 8,
+        "n": 2,
+        "sum": "16"
+      },
+      "pairing/shift_candidates": {
+        "max": 2,
+        "mean": 2.0,
+        "min": 2,
+        "n": 2,
+        "sum": "4"
+      },
+      "pairing/sqrt_calls_unexpanded": {
+        "max": 2,
+        "mean": 2.0,
+        "min": 2,
+        "n": 2,
+        "sum": "4"
+      },
+      "setup/ec_field/invs": {
+        "max": 152,
+        "mean": 152.0,
+        "min": 152,
+        "n": 2,
+        "sum": "304"
+      },
+      "setup/ec_field/muls": {
+        "max": 658,
+        "mean": 658.0,
+        "min": 658,
+        "n": 2,
+        "sum": "1316"
+      },
+      "setup/ec_field/sqrs": {
+        "max": 270,
+        "mean": 270.0,
+        "min": 270,
+        "n": 2,
+        "sum": "540"
+      },
+      "setup/ec_group/adds": {
+        "max": 36,
+        "mean": 36.0,
+        "min": 36,
+        "n": 2,
+        "sum": "72"
+      },
+      "setup/ec_group/doubles": {
+        "max": 118,
+        "mean": 118.0,
+        "min": 118,
+        "n": 2,
+        "sum": "236"
+      },
+      "setup/ec_group/scalar_mults": {
+        "max": 4,
+        "mean": 4.0,
+        "min": 4,
+        "n": 2,
+        "sum": "8"
+      },
+      "setup/explicit_fp/additions_subtractions": {
+        "max": 6,
+        "mean": 5.0,
+        "min": 4,
+        "n": 2,
+        "sum": "10"
+      },
+      "setup/explicit_fp/exponentiations": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "setup/explicit_fp/inversions": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "setup/explicit_fp/multiplications": {
+        "max": 6,
+        "mean": 5.0,
+        "min": 4,
+        "n": 2,
+        "sum": "10"
+      },
+      "setup/explicit_fp/squarings": {
+        "max": 3,
+        "mean": 2.5,
+        "min": 2,
+        "n": 2,
+        "sum": "5"
+      },
+      "setup/miller_steps": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "setup/shift_candidates": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 2,
+        "sum": "0"
+      },
+      "setup/sqrt_calls_unexpanded": {
+        "max": 3,
+        "mean": 2.5,
+        "min": 2,
+        "n": 2,
+        "sum": "5"
+      }
+    },
+    "requested": 2,
+    "scope": "Present verified observations only; raw failed rows preserved. Two public target searches per model; not full-class or qualified timing.",
+    "verified": 2
+  },
+  "prefix": {
+    "end_to_end_ns": {
+      "max": 3620010,
+      "mean": 211175.2902621723,
+      "min": 121110,
+      "n": 3738,
+      "sum": "789373235"
+    },
+    "failed": 0,
+    "metrics": {
+      "candidate_pair_tests": {
+        "max": 40,
+        "mean": 30.096308186195827,
+        "min": 17,
+        "n": 3738,
+        "sum": "112500"
+      },
+      "matrix_entry_ops": {
+        "max": 30,
+        "mean": 25.278223649010165,
+        "min": 16,
+        "n": 3738,
+        "sum": "94490"
+      },
+      "queries": {
+        "max": 3,
+        "mean": 2.4534510433386836,
+        "min": 2,
+        "n": 3738,
+        "sum": "9171"
+      },
+      "query_hit_yield": {
+        "max": 1.0,
+        "mean": 1.0,
+        "min": 1.0,
+        "n": 3738
+      },
+      "relation_count": {
+        "max": 5,
+        "mean": 4.024077046548957,
+        "min": 3,
+        "n": 3738,
+        "sum": "15042"
+      },
+      "relations_per_query": {
+        "max": 2.5,
+        "mean": 1.7082664526484677,
+        "min": 1.0,
+        "n": 3738
+      }
+    },
+    "phase_operations": {
+      "ec_verification/ec_field/invs": {
+        "max": 3,
+        "mean": 1.8485821294810059,
+        "min": 0,
+        "n": 3738,
+        "sum": "6910"
+      },
+      "ec_verification/ec_field/muls": {
+        "max": 12,
+        "mean": 7.715623327982879,
+        "min": 0,
+        "n": 3738,
+        "sum": "28841"
+      },
+      "ec_verification/ec_field/sqrs": {
+        "max": 5,
+        "mean": 3.1880684858212947,
+        "min": 0,
+        "n": 3738,
+        "sum": "11917"
+      },
+      "ec_verification/ec_group/adds": {
+        "max": 1,
+        "mean": 0.509095773140717,
+        "min": 0,
+        "n": 3738,
+        "sum": "1903"
+      },
+      "ec_verification/ec_group/doubles": {
+        "max": 2,
+        "mean": 1.339486356340289,
+        "min": 0,
+        "n": 3738,
+        "sum": "5007"
+      },
+      "ec_verification/ec_group/scalar_mults": {
+        "max": 1,
+        "mean": 1.0,
+        "min": 1,
+        "n": 3738,
+        "sum": "3738"
+      },
+      "ec_verification/explicit_fp/additions_subtractions": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "ec_verification/explicit_fp/exponentiations": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "ec_verification/explicit_fp/inversions": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "ec_verification/explicit_fp/multiplications": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "ec_verification/explicit_fp/squarings": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "ec_verification/miller_steps": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "ec_verification/shift_candidates": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "ec_verification/sqrt_calls_unexpanded": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/ec_field/invs": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/ec_field/muls": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/ec_field/sqrs": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/ec_group/adds": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/ec_group/doubles": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/ec_group/scalar_mults": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/explicit_fp/additions_subtractions": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/explicit_fp/exponentiations": {
+        "max": 14,
+        "mean": 14.0,
+        "min": 14,
+        "n": 3738,
+        "sum": "52332"
+      },
+      "factor_base_relations_matrix_and_ff_verification/explicit_fp/inversions": {
+        "max": 5,
+        "mean": 5.0,
+        "min": 5,
+        "n": 3738,
+        "sum": "18690"
+      },
+      "factor_base_relations_matrix_and_ff_verification/explicit_fp/multiplications": {
+        "max": 347,
+        "mean": 334.9242910647405,
+        "min": 322,
+        "n": 3738,
+        "sum": "1251947"
+      },
+      "factor_base_relations_matrix_and_ff_verification/explicit_fp/squarings": {
+        "max": 538,
+        "mean": 535.7701979668271,
+        "min": 533,
+        "n": 3738,
+        "sum": "2002709"
+      },
+      "factor_base_relations_matrix_and_ff_verification/miller_steps": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/shift_candidates": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "factor_base_relations_matrix_and_ff_verification/sqrt_calls_unexpanded": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "pairing/ec_field/invs": {
+        "max": 14,
+        "mean": 14.0,
+        "min": 14,
+        "n": 3738,
+        "sum": "52332"
+      },
+      "pairing/ec_field/muls": {
+        "max": 52,
+        "mean": 52.0,
+        "min": 52,
+        "n": 3738,
+        "sum": "194376"
+      },
+      "pairing/ec_field/sqrs": {
+        "max": 22,
+        "mean": 22.0,
+        "min": 22,
+        "n": 3738,
+        "sum": "82236"
+      },
+      "pairing/ec_group/adds": {
+        "max": 6,
+        "mean": 6.0,
+        "min": 6,
+        "n": 3738,
+        "sum": "22428"
+      },
+      "pairing/ec_group/doubles": {
+        "max": 8,
+        "mean": 8.0,
+        "min": 8,
+        "n": 3738,
+        "sum": "29904"
+      },
+      "pairing/ec_group/scalar_mults": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "pairing/explicit_fp/additions_subtractions": {
+        "max": 120,
+        "mean": 84.19475655430712,
+        "min": 80,
+        "n": 3738,
+        "sum": "314720"
+      },
+      "pairing/explicit_fp/exponentiations": {
+        "max": 28,
+        "mean": 28.0,
+        "min": 28,
+        "n": 3738,
+        "sum": "104664"
+      },
+      "pairing/explicit_fp/inversions": {
+        "max": 26,
+        "mean": 26.0,
+        "min": 26,
+        "n": 3738,
+        "sum": "97188"
+      },
+      "pairing/explicit_fp/multiplications": {
+        "max": 1310,
+        "mean": 1274.194756554307,
+        "min": 1270,
+        "n": 3738,
+        "sum": "4762940"
+      },
+      "pairing/explicit_fp/squarings": {
+        "max": 1712,
+        "mean": 1694.0973782771537,
+        "min": 1692,
+        "n": 3738,
+        "sum": "6332536"
+      },
+      "pairing/miller_steps": {
+        "max": 8,
+        "mean": 8.0,
+        "min": 8,
+        "n": 3738,
+        "sum": "29904"
+      },
+      "pairing/shift_candidates": {
+        "max": 22,
+        "mean": 4.097378277153558,
+        "min": 2,
+        "n": 3738,
+        "sum": "15316"
+      },
+      "pairing/sqrt_calls_unexpanded": {
+        "max": 22,
+        "mean": 4.097378277153558,
+        "min": 2,
+        "n": 3738,
+        "sum": "15316"
+      },
+      "setup/ec_field/invs": {
+        "max": 511,
+        "mean": 174.29186730872124,
+        "min": 152,
+        "n": 3738,
+        "sum": "651503"
+      },
+      "setup/ec_field/muls": {
+        "max": 2213,
+        "mean": 754.1270733012306,
+        "min": 658,
+        "n": 3738,
+        "sum": "2818927"
+      },
+      "setup/ec_field/sqrs": {
+        "max": 908,
+        "mean": 309.47298020331726,
+        "min": 270,
+        "n": 3738,
+        "sum": "1156810"
+      },
+      "setup/ec_group/adds": {
+        "max": 116,
+        "mean": 41.1107544141252,
+        "min": 36,
+        "n": 3738,
+        "sum": "153672"
+      },
+      "setup/ec_group/doubles": {
+        "max": 403,
+        "mean": 136.20706260032102,
+        "min": 118,
+        "n": 3738,
+        "sum": "509142"
+      },
+      "setup/ec_group/scalar_mults": {
+        "max": 9,
+        "mean": 4.319422150882825,
+        "min": 4,
+        "n": 3738,
+        "sum": "16146"
+      },
+      "setup/explicit_fp/additions_subtractions": {
+        "max": 42,
+        "mean": 9.330658105939005,
+        "min": 4,
+        "n": 3738,
+        "sum": "34878"
+      },
+      "setup/explicit_fp/exponentiations": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "setup/explicit_fp/inversions": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "setup/explicit_fp/multiplications": {
+        "max": 42,
+        "mean": 9.330658105939005,
+        "min": 4,
+        "n": 3738,
+        "sum": "34878"
+      },
+      "setup/explicit_fp/squarings": {
+        "max": 21,
+        "mean": 4.665329052969502,
+        "min": 2,
+        "n": 3738,
+        "sum": "17439"
+      },
+      "setup/miller_steps": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "setup/shift_candidates": {
+        "max": 0,
+        "mean": 0.0,
+        "min": 0,
+        "n": 3738,
+        "sum": "0"
+      },
+      "setup/sqrt_calls_unexpanded": {
+        "max": 21,
+        "mean": 4.665329052969502,
+        "min": 2,
+        "n": 3738,
+        "sum": "17439"
+      }
+    },
+    "requested": 3738,
+    "scope": "Present verified observations only; raw failed rows preserved. Two public target searches per model; not full-class or qualified timing.",
+    "verified": 3738
+  }
+}

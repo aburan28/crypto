@@ -22,7 +22,6 @@ on:
       - 'src/cryptanalysis/binary_velu.rs'
       - 'src/cryptanalysis/koblitz_fast.rs'
       - 'src/cryptanalysis/koblitz_relation_solver.rs'
-      - 'docs/index-calculus-scoreboard.html'
   workflow_dispatch:
 
 permissions:
@@ -44,6 +43,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            tools/volcano-cli/
+            isogeny_algos/
             Cargo.lock
             src
             examples/n37_four_policy_pdp.rs

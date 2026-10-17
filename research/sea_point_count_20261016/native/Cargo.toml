@@ -1,0 +1,14 @@
+[package]
+name = "sea-validation"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+isogeny_algos = { path = "../../../isogeny_algos" }
+
+[profile.release]
+opt-level = 3
+debug = false
+

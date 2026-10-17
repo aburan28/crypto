@@ -1,0 +1,21 @@
+End-to-end DLP: root-finding vs F4 decomposition (baseline given every advantage)
+All times are CPU time (process + reaped children, getrusage), not wall-clock.
+
+=== Binary Koblitz K_0/F_2^n: complete DLP, root finding vs matrix-F4 ===
+
+Single-DLP CPU time includes the pair-table build (no amortisation). F4 at its best max_degree per n.
+  n   |F| rbits       d |   root (min)  root (mean) |     F4 (min)    F4 (mean) |     single  per-extra-DLP
+  9    55     7      42 |     328.0 µs     543.7 µs |     458.0 µs     738.7 µs |         1×             3×
+      table build 249.0 µs (deg 2 best for F4)
+
+=== Binary multi-target amortization (shared FB logs + PairSumTable) ===
+
+Setup once (factor-base logs + pair table), then N individual logs via IndividualLogSolver.
+  n   |F|   N |        setup   per-target  batch total |       cold×N      speedup
+  9    55  16 |      1.50 ms      18.0 µs      1.79 ms |      7.89 ms           4×
+      cold single 493.0 µs (extrapolated ×16; measured 2 cold check)
+ 13  4005  16 |       1.45 s     133.9 µs       1.45 s |      10.90 s           8×
+      cold single 681.35 ms (extrapolated ×16; measured 2 cold check)
+
+Every solve above recovered and verified the planted logarithm. Not a security claim.
+wrote research/rootfind_faster_e2e_20261015/sessions/cycle2-e2e/results.json

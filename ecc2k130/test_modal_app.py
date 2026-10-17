@@ -5,6 +5,7 @@
 identity functions and the image/volume builders accept anything.
 """
 import os
+import subprocess
 import sys
 import tempfile
 import types
@@ -45,6 +46,30 @@ import modal_sync  # noqa: E402
 
 
 class CampaignRules(unittest.TestCase):
+    def test_selected_sigma_table_image_matches_resume_geometry(self):
+        env = os.environ.copy()
+        env.update(ECC_GPU="RTX-PRO-6000", ECC_PACKED_STATE_TILE="256",
+                   ECC_PACKED_POLY_STATE="1", ECC_PACKED_CACHE_DENOM="1",
+                   ECC_PACKED_POLY_CHAIN="1", ECC_PACKED_PAIR_PRODUCTS="1",
+                   ECC_PACKED_WEIGHTED_PREFIX="2", ECC_PACKED_PERM_SIGMA="3",
+                   ECC_PACKED_COMPACT_STATE="1", ECC_PACKED_SHARED_SIGMA="1",
+                   ECC_PACKED_INLINE_POLY="3", ECC_SIGMA_FUSED="1",
+                   ECC_PACKED_SIGMA_TABLE="1")
+        script = """import test_modal_app
+import importlib
+import modal_app
+importlib.reload(modal_app)
+assert (modal_app.BAKED['batch'], modal_app.BAKED['threads'],
+        modal_app.BAKED['minBlocks']) == (16, 512, 1)
+assert modal_app.BAKED['packedInlinePoly'] == 3
+assert modal_app.BAKED['sigmaFused'] and modal_app.BAKED['packedSigmaTable']
+with test_modal_app.patch.object(modal_app, 'computeCapability', return_value='120'):
+    assert modal_app.buildFor(16, 512, 0, minBlocks=1) == (True, 'baked into the image')
+"""
+        result = subprocess.run([sys.executable, "-c", script], env=env,
+                                cwd=Path(__file__).parent, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_campaign_search_guards_gpu_and_cpu_ids_before_starting(self):
         with patch('aws.seed_registry.modal_guard', side_effect=lambda *a: nullcontext()) as guard, \
                 patch.object(modal_app, '_runSearch', return_value={'checkpoint': 'saved'}) as search:

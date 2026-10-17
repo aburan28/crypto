@@ -107,6 +107,11 @@ revealed about the target.
 - Run the positive control first. If it fails, stop and fix the instrument.
   A negative result from a blind detector is reported as *invalid*, not as
   "no effect".
+- Under Claude Code, a frozen protocol's run commands may go through the
+  model tiers (AGENTS.md "Model tiers"): `experiment-director` writes the
+  command card, the main session relays it verbatim to `executor-mechanical`,
+  and `experiment-director` assesses the run. The report (§5) stays with the
+  reasoning tier.
 
 ## 5. Report
 
