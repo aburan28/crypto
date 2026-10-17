@@ -1,0 +1,43 @@
+✖ [2/3] Building OrderScreen (3.6s)
+trace: .> LEAN_PATH=/Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/lean/.lake/build/lib/lean /Users/adamburan/.elan/toolchains/leanprover--lean4---v4.34.1/bin/lean /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/lean/OrderScreen.lean -o /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/lean/.lake/build/lib/lean/OrderScreen.olean -i /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/lean/.lake/build/lib/lean/OrderScreen.ilean -c /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/lean/.lake/build/ir/OrderScreen.c --setup /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/lean/.lake/build/ir/OrderScreen.setup.json --json
+error: OrderScreen.lean:21:59: failed to synthesize
+  Decidable (JCertificate 211 190 37 112 77)
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+error: OrderScreen.lean:22:65: failed to synthesize
+  Decidable (JCertificate 211 130 179 90 160)
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+error: OrderScreen.lean:23:59: failed to synthesize
+  Decidable (JCertificate 223 202 37 11 183)
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+error: OrderScreen.lean:24:66: failed to synthesize
+  Decidable (JCertificate 223 142 203 216 222)
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+error: OrderScreen.lean:25:59: failed to synthesize
+  Decidable (JCertificate 241 220 37 119 33)
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+error: OrderScreen.lean:26:65: failed to synthesize
+  Decidable (JCertificate 241 160 239 87 164)
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+info: OrderScreen.lean:39:0: 'OrderScreen.destinationA' does not depend on any axioms
+info: OrderScreen.lean:40:0: 'OrderScreen.destinationB' does not depend on any axioms
+info: OrderScreen.lean:41:0: 'OrderScreen.p211SourceJ' depends on axioms: [sorryAx]
+info: OrderScreen.lean:42:0: 'OrderScreen.p211DestinationJ' depends on axioms: [sorryAx]
+info: OrderScreen.lean:43:0: 'OrderScreen.p223SourceJ' depends on axioms: [sorryAx]
+info: OrderScreen.lean:44:0: 'OrderScreen.p223DestinationJ' depends on axioms: [sorryAx]
+info: OrderScreen.lean:45:0: 'OrderScreen.p241SourceJ' depends on axioms: [sorryAx]
+info: OrderScreen.lean:46:0: 'OrderScreen.p241DestinationJ' depends on axioms: [sorryAx]
+info: OrderScreen.lean:47:0: 'OrderScreen.p211DifferentJ' does not depend on any axioms
+info: OrderScreen.lean:48:0: 'OrderScreen.p223DifferentJ' does not depend on any axioms
+info: OrderScreen.lean:49:0: 'OrderScreen.p241DifferentJ' does not depend on any axioms
+info: OrderScreen.lean:50:0: 'OrderScreen.p211OrderFactor' does not depend on any axioms
+info: OrderScreen.lean:51:0: 'OrderScreen.p223OrderFactor' does not depend on any axioms
+info: OrderScreen.lean:52:0: 'OrderScreen.p241OrderFactor' does not depend on any axioms
+info: OrderScreen.lean:53:0: 'OrderScreen.p211DistinctCapacity' does not depend on any axioms
+Some required targets logged failures:
+- OrderScreen

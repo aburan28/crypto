@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="440" viewBox="0 0 1000 440">
+<rect width="1000" height="440" fill="#f8fafc"/>
+<text x="48" y="37" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#0f172a">p=211 full rational isogeny-fiber audit</text>
+<text x="48" y="61" font-family="Arial,sans-serif" font-size="13" fill="#475569">Direct enumeration and independent replay · points over F₂₁₁² · run FIBER_V1</text>
+<text x="48" y="113" font-family="Arial,sans-serif" font-size="16" fill="#0f172a">Source curve, enumerated</text>
+<rect x="294" y="87" width="660" height="38" rx="4" fill="#0e7490"/>
+<text x="316" y="113" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="white">44655 points</text>
+<text x="48" y="176" font-family="Arial,sans-serif" font-size="16" fill="#0f172a">Distinct image points</text>
+<rect x="294" y="150" width="220.0" height="38" rx="4" fill="#ea580c"/>
+<text x="316" y="176" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="white">14885 points</text>
+<text x="48" y="228" font-family="Arial,sans-serif" font-size="14" fill="#334155">Every image point has exactly 3 rational preimages: 14885 × 3 = 44655.</text>
+<line x1="48" y1="249" x2="954" y2="249" stroke="#cbd5e1"/>
+<rect x="48" y="273" width="392" height="123" rx="9" fill="#e0f2fe" stroke="#0e7490"/>
+<text x="68" y="303" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#0c4a6e">Kernel fiber</text>
+<text x="68" y="334" font-family="Arial,sans-serif" font-size="15" fill="#0f172a">φ⁻¹(O) = &#123;O, (3,1), (3,−1)&#125;</text>
+<text x="68" y="363" font-family="Arial,sans-serif" font-size="13" fill="#334155">Full map digest checked independently.</text>
+<rect x="460" y="273" width="494" height="123" rx="9" fill="#ffedd5" stroke="#ea580c"/>
+<text x="480" y="303" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#9a3412">Order-229 subgroup transport</text>
+<text x="480" y="334" font-family="Arial,sans-serif" font-size="15" fill="#0f172a">229 source and 229 image points</text>
+<text x="480" y="363" font-family="Arial,sans-serif" font-size="13" fill="#334155">52441 / 52441 ordered-pair homomorphism checks</text>
+<text x="48" y="426" font-family="Arial,sans-serif" font-size="12" fill="#64748b">Map/fiber correctness audit; relation yield, DLP cost and speed are outside this run.</text>
+</svg>

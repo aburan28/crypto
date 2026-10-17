@@ -1,0 +1,41 @@
+{
+  "schema": "different_j_trend_batch_run_spec/v1",
+  "status": "all_public_targets_and_binaries_frozen_before_measurement",
+  "parent_commit": "8c50f457c",
+  "protocol": "PANEL_PROTOCOL_V2.md",
+  "host": "Darwin arm64, shared L0",
+  "run_command": "zsh research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/run_batch_v1.zsh",
+  "runner_source_sha256": "b851819e76f638e1514a0e1702159e99fc7ec671e886f3ffed3b08852cb46df2",
+  "runner_binary_sha256": "74290fc586084f6afdaaef00c5850a4f8e4a0eb7bead6831d0faaa3eb3fa59f7",
+  "checker_source_sha256": "4845a2ca0126312ed048648ee606fec96d47299e92cc1e99aa339d417b794660",
+  "checker_binary_sha256": "238eaff955f73fdd7c1a65ce01f19662296670a8394d9d3d4c9757013ffd1498",
+  "meter_binary_sha256": "798bd10f25edd2832b09de4f6a4551e46e58894966dae867dc6cfe6e24b1c42a",
+  "script_sha256": "61540f1847dc42ef9e598d635fc34ebca8ac68d86cbbbb5f5c2ac20666b9ef45",
+  "public_sha256": {
+    "409:433": "8e11564fdb87da55d0fde02ff18a1eab62054259b9f5f58b8259d1cf287269c6",
+    "421:457": "8f8882825073a74b2dcaa6e4f6940ecae51a2287fdeb06f79daf47f62d8d32f2",
+    "457:421": "c089375bd505de4728ede1c20d752dcd574d1d796f5ac977da15d906a6e21788"
+  },
+  "checker_sha256": {
+    "409:433": "96790467f2ddb8d3abd8252811f85e94a4dba37446b9582607378f1844130030",
+    "421:457": "3c44bd8984aae3e9ee929fd7a13587c7ab4c7d6efb3612b3e5d87042748ad379",
+    "457:421": "f5b60c7d1cf8335c7fe8940a533351c8416752af3b541b1d689589d7ff90828a"
+  },
+  "fiber_sha256": {
+    "409:433": "538f939b431f1a314f45736ba37a6c9749a2f83ba91abb8c269c7139936f1733",
+    "421:457": "281ecdbd77790b481994a91302b6184070821bb0d60ad415813248baffa3868d",
+    "457:421": "2098992e0a687befd4e8c6a3a8d63a53e4c450b1e2fcc8e9902e083ca21bccff"
+  },
+  "cells": [[409,433,387],[421,457,387],[457,421,495]],
+  "arms": ["source","isogeny-image","destination-direct","full-image","source-bsgs","rho-negation","rho-negation-aa"],
+  "rounds": 3,
+  "prefixes": [1,4,16,64],
+  "expected_child_processes": 252,
+  "expected_scalar_outputs": 5355,
+  "relation_trials_per_target": "8*r",
+  "rho_restarts_max": 32,
+  "rho_steps_per_restart": "20*r",
+  "bsgs_baby_size": "ceil(sqrt(r))",
+  "per_child_wall_ceiling_seconds": 300,
+  "per_child_rss_ceiling_bytes": 536870912
+}

@@ -1,0 +1,11 @@
+{
+  "schema": "different_j_chi_resultant_checker_spec/v1",
+  "status": "frozen_before_independent_replay",
+  "raw_sha256": "afed9483298b47d07cc2a7e548ff56724925f2520f199d4401861d4de33f3574",
+  "public_sha256": "f6c3126b4d95e3c457c9e552471bc2cdff322de0e0a9de9fbba701d7c05897ba",
+  "source": "examples/different_j_chi_resultant_check.rs",
+  "source_sha256": "3645331a24e63d5683e719d4ba7a72d50772ef2eb7f36ce7dd7683a92f813fdd",
+  "binary_sha256_darwin": "6867f4db3e4c768cf1867e1b4ce9bcd6bf0ba6b7bb1639bf501306687c29833c",
+  "command": "target/release/examples/different_j_chi_resultant_check research/isogeny_torsion_fibers_20261012/different_j_order_batch_20261015/PUBLIC_V1.json research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/EXHAUSTIVE_V1.jsonl",
+  "checks": ["independent field and point arithmetic", "all 231 exact pair sets", "all zero cases", "summary totals", "public and raw SHA-256"]
+}

@@ -1,0 +1,69 @@
+name: Isogeny full-image larger-order Linux hard-cap probe
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/isogeny-fiber-trend-full-image-linux.yml'
+      - 'research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/trend_four_cell_v1/RUN_FULL_IMAGE_LINUX_V1.sh'
+      - 'research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/frozen_linux_sources_v1/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-image-probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .github/workflows/isogeny-fiber-trend-full-image-linux.yml
+            Cargo.toml
+            Cargo.lock
+            src
+            docs/ic/calibration.json
+            docs/ic/boundary_targets.json
+            docs/ecbench/schema.sql
+            docs/curves/registry.json
+            docs/curves/traits.json
+            examples/different_j_inverse_velu_oracle.rs
+            examples/different_j_inverse_velu_check.rs
+            examples/different_j_order_process_meter.rs
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/FROZEN_INVERSE_TREND_V1.rs
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/frozen_linux_sources_v1
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/trend_four_cell_v1/P2473_PUBLIC.json
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/trend_four_cell_v1/P2473_CHECKER.json
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/trend_four_cell_v1/FULL_IMAGE_LINUX_SPEC_V1.json
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/trend_four_cell_v1/RUN_FULL_IMAGE_LINUX_V1.sh
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Restore frozen four-order solver and record host
+        run: |
+          mkdir -p "${RUNNER_TEMP}/isogeny-full-image-p2473-linux-v1"
+          cp research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/FROZEN_INVERSE_TREND_V1.rs examples/different_j_inverse_velu_oracle.rs
+          cp research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/frozen_linux_sources_v1/different_j_inverse_velu_check.rs.txt examples/different_j_inverse_velu_check.rs
+          uname -a > "${RUNNER_TEMP}/isogeny-full-image-p2473-linux-v1/host.txt"
+          lscpu >> "${RUNNER_TEMP}/isogeny-full-image-p2473-linux-v1/host.txt"
+          git rev-parse HEAD > "${RUNNER_TEMP}/isogeny-full-image-p2473-linux-v1/head.txt"
+          sha256sum examples/different_j_inverse_velu_oracle.rs examples/different_j_inverse_velu_check.rs examples/different_j_order_process_meter.rs > "${RUNNER_TEMP}/isogeny-full-image-p2473-linux-v1/sources.sha256"
+          test "$(sha256sum examples/different_j_inverse_velu_oracle.rs | cut -d' ' -f1)" = e0256820c1e1412e1b91d3fcad04bfc7d4afe5155581bc3c48c97379dbf8484a
+          test "$(sha256sum examples/different_j_inverse_velu_check.rs | cut -d' ' -f1)" = 73181e2140ceba594b9eea3423752b8b8eca9a8cefa5be8a8628422e84ede263
+      - name: Build native solver, meter, and independent checker
+        run: cargo build --release --locked --example different_j_inverse_velu_oracle --example different_j_inverse_velu_check --example different_j_order_process_meter
+      - name: Run hard-capped p2473 full-image child and replay if complete
+        run: |
+          output="${RUNNER_TEMP}/isogeny-full-image-p2473-linux-v1"
+          sha256sum target/release/examples/different_j_inverse_velu_oracle target/release/examples/different_j_inverse_velu_check target/release/examples/different_j_order_process_meter > "$output/binaries.sha256"
+          bash research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/trend_four_cell_v1/RUN_FULL_IMAGE_LINUX_V1.sh "$output/child"
+      - name: Retain resource outcome, host, raw child and checker output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: isogeny-full-image-p2473-linux-v1
+          path: ${{ runner.temp }}/isogeny-full-image-p2473-linux-v1
+          if-no-files-found: warn
+          retention-days: 90

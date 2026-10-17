@@ -1,0 +1,16 @@
+{
+  "schema": "different_j_inverse_trend_freeze_spec/v1",
+  "protocol": "../FOUR_GATE_PROTOCOL_V1.md",
+  "source_sha256": "b1d6abe02433b93112e0ddd41e37adc51a23db5f21e9c386c69ef9bd9fef5643",
+  "binary_sha256": "1ef53add687c8ea1a9a45bd5546caee52942732eb3ed41bd1abd5262b729b749",
+  "screen_v1_sha256": "ef232a54b22938239819fd6b14182d1e49de5778e9c00542ce257c54097608a5",
+  "screen_v2_sha256": "71c1926fee540df9566537ae60b063fc276f93b6b6d6c5f24ce8d69225305afa",
+  "cells": [[2473, 2437, 2511, "SCREEN_V1.jsonl"], [5521, 5569, 5475, "SCREEN_V1.jsonl"], [9619, 9679, 9561, "SCREEN_V1.jsonl"], [19213, 19249, 19179, "SCREEN_V2.jsonl"]],
+  "generator_seed_rule": "0x20261015 XOR p XOR (r << 16)",
+  "generator_trial_cap": 4096,
+  "target_order_domain": "different-j-inverse-trend-target-v1:17",
+  "targets_per_cell": 64,
+  "solver_public_contains_scalars": false,
+  "source_image_replay_all_nonzero_subgroup_points": true,
+  "three_point_fiber_replay_each_selected_target": true
+}

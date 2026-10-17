@@ -1,0 +1,829 @@
+{
+  "cofactor": 195,
+  "destination_a": [
+    130,
+    0
+  ],
+  "destination_b": [
+    179,
+    0
+  ],
+  "destination_base_projected": [
+    {
+      "infinity": false,
+      "x": [
+        187,
+        0
+      ],
+      "y": [
+        0,
+        116
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        92,
+        0
+      ],
+      "y": [
+        0,
+        59
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        38,
+        0
+      ],
+      "y": [
+        0,
+        136
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        67,
+        0
+      ],
+      "y": [
+        0,
+        116
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        94,
+        0
+      ],
+      "y": [
+        0,
+        21
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        95,
+        0
+      ],
+      "y": [
+        0,
+        202
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        15,
+        0
+      ],
+      "y": [
+        0,
+        3
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        65,
+        0
+      ],
+      "y": [
+        0,
+        62
+      ]
+    }
+  ],
+  "destination_base_raw": [
+    {
+      "infinity": false,
+      "x": [
+        0,
+        2
+      ],
+      "y": [
+        23,
+        6
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        3
+      ],
+      "y": [
+        179,
+        59
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        6
+      ],
+      "y": [
+        25,
+        58
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        9
+      ],
+      "y": [
+        142,
+        36
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        11
+      ],
+      "y": [
+        152,
+        44
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        13
+      ],
+      "y": [
+        141,
+        53
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        15
+      ],
+      "y": [
+        204,
+        102
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        16
+      ],
+      "y": [
+        58,
+        74
+      ]
+    }
+  ],
+  "destination_identity": {
+    "ec1": "EC1P8Cfpk2hbd8c8cc831fe",
+    "ec1_curve_record": "{\"a\":[130,0],\"b\":[179,0],\"cofactor\":\"195\",\"generator\":[[76,0],[0,69]],\"model\":\"short Weierstrass\",\"subgroup_order\":\"229\",\"target_group\":\"prime-order subgroup\"}",
+    "ec1_field_record": "{\"characteristic\":211,\"degree\":2,\"modulus\":[209,0,1],\"representation\":\"polynomial basis\"}",
+    "ec1_status": "self-contained extension record, not checked against registry",
+    "ec1_uid": "urn:ec-record:1:sha256:bd8c8cc831fe4c48b5089849dd9c86b2caf873b94d325d5ffb7b92cf0d973b19",
+    "icv1": "ICV1:fpk-211-2-7e5f9ffe:-133:44655:160,0:unk:unk:r:88739686085c",
+    "model": "{\"a\":[\"130\",\"0\"],\"b\":[\"179\",\"0\"],\"field\":\"fpk-211-2-7e5f9ffe\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"2\",\"modulus\":[\"209\",\"0\"],\"p\":\"211\",\"v\":\"1\"}",
+    "model_sha256": "88739686085c94a4d6cc1dd9b22e78d2942daaee1f2b393000e89585390ebffb"
+  },
+  "destination_j": 160,
+  "destination_line": [
+    0,
+    1
+  ],
+  "destination_scan_count": 15,
+  "fiber_receipt_sha256": "286dd1ef375ee218c9645b6ef3ca007fe911f1c3f23ef04ed96d245fb59eb143",
+  "field": "F_211[s]/(s^2-2)",
+  "full_base_projected": [
+    {
+      "infinity": false,
+      "x": [
+        160,
+        0
+      ],
+      "y": [
+        0,
+        76
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        134,
+        0
+      ],
+      "y": [
+        0,
+        87
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        154,
+        0
+      ],
+      "y": [
+        0,
+        2
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        72,
+        0
+      ],
+      "y": [
+        0,
+        132
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        165,
+        0
+      ],
+      "y": [
+        0,
+        134
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        60,
+        0
+      ],
+      "y": [
+        0,
+        73
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        20,
+        0
+      ],
+      "y": [
+        0,
+        3
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        75,
+        0
+      ],
+      "y": [
+        0,
+        204
+      ]
+    }
+  ],
+  "full_base_raw": [
+    {
+      "infinity": false,
+      "x": [
+        3,
+        0
+      ],
+      "y": [
+        0,
+        64
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        4,
+        0
+      ],
+      "y": [
+        0,
+        102
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        5,
+        0
+      ],
+      "y": [
+        0,
+        104
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        7,
+        0
+      ],
+      "y": [
+        0,
+        100
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        10,
+        0
+      ],
+      "y": [
+        0,
+        76
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        11,
+        0
+      ],
+      "y": [
+        0,
+        41
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        12,
+        0
+      ],
+      "y": [
+        0,
+        28
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        13,
+        0
+      ],
+      "y": [
+        0,
+        61
+      ]
+    }
+  ],
+  "full_base_witness_source": [
+    {
+      "infinity": false,
+      "x": [
+        60,
+        76
+      ],
+      "y": [
+        171,
+        86
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        25,
+        61
+      ],
+      "y": [
+        199,
+        75
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        39,
+        77
+      ],
+      "y": [
+        114,
+        60
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        107,
+        0
+      ],
+      "y": [
+        0,
+        172
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        31,
+        51
+      ],
+      "y": [
+        97,
+        73
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        132,
+        60
+      ],
+      "y": [
+        138,
+        99
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        5,
+        0
+      ],
+      "y": [
+        0,
+        61
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        17,
+        85
+      ],
+      "y": [
+        18,
+        58
+      ]
+    }
+  ],
+  "full_candidate_count": 21,
+  "full_image_points": 14885,
+  "full_source_points": 44655,
+  "generator": {
+    "infinity": false,
+    "x": [
+      170,
+      0
+    ],
+    "y": [
+      0,
+      109
+    ]
+  },
+  "kernel": {
+    "infinity": false,
+    "x": [
+      3,
+      0
+    ],
+    "y": [
+      1,
+      0
+    ]
+  },
+  "mapped_generator": {
+    "infinity": false,
+    "x": [
+      76,
+      0
+    ],
+    "y": [
+      0,
+      69
+    ]
+  },
+  "p": 211,
+  "parent_public_sha256": "f6c3126b4d95e3c457c9e552471bc2cdff322de0e0a9de9fbba701d7c05897ba",
+  "r": 229,
+  "schema": "different_j_chi_heldout_public/v1",
+  "selection_positions_zero_indexed": [
+    64,
+    65,
+    66,
+    67
+  ],
+  "source_a": [
+    190,
+    0
+  ],
+  "source_b": [
+    37,
+    0
+  ],
+  "source_base_projected": [
+    {
+      "infinity": false,
+      "x": [
+        170,
+        0
+      ],
+      "y": [
+        0,
+        109
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        51,
+        0
+      ],
+      "y": [
+        0,
+        121
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        5,
+        0
+      ],
+      "y": [
+        0,
+        61
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        81,
+        0
+      ],
+      "y": [
+        0,
+        191
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        195,
+        0
+      ],
+      "y": [
+        0,
+        96
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        196,
+        0
+      ],
+      "y": [
+        0,
+        156
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        89,
+        0
+      ],
+      "y": [
+        0,
+        123
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        189,
+        0
+      ],
+      "y": [
+        0,
+        99
+      ]
+    }
+  ],
+  "source_base_raw": [
+    {
+      "infinity": false,
+      "x": [
+        0,
+        1
+      ],
+      "y": [
+        86,
+        60
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        6
+      ],
+      "y": [
+        112,
+        56
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        10
+      ],
+      "y": [
+        189,
+        84
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        15
+      ],
+      "y": [
+        2,
+        79
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        16
+      ],
+      "y": [
+        145,
+        30
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        18
+      ],
+      "y": [
+        180,
+        63
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        21
+      ],
+      "y": [
+        121,
+        100
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        22
+      ],
+      "y": [
+        192,
+        7
+      ]
+    }
+  ],
+  "source_identity": {
+    "ec1": "EC1P8Cfpk2h14c006cc2d2d",
+    "ec1_curve_record": "{\"a\":[190,0],\"b\":[37,0],\"cofactor\":\"195\",\"generator\":[[170,0],[0,109]],\"model\":\"short Weierstrass\",\"subgroup_order\":\"229\",\"target_group\":\"prime-order subgroup\"}",
+    "ec1_field_record": "{\"characteristic\":211,\"degree\":2,\"modulus\":[209,0,1],\"representation\":\"polynomial basis\"}",
+    "ec1_status": "self-contained extension record, not checked against registry",
+    "ec1_uid": "urn:ec-record:1:sha256:14c006cc2d2d29fb9e98e11acbe975ea90a49b01718c5a9473aaa1ac98a6780d",
+    "icv1": "ICV1:fpk-211-2-7e5f9ffe:-133:44655:77,0:unk:unk:r:5f3119f14911",
+    "model": "{\"a\":[\"190\",\"0\"],\"b\":[\"37\",\"0\"],\"field\":\"fpk-211-2-7e5f9ffe\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"2\",\"modulus\":[\"209\",\"0\"],\"p\":\"211\",\"v\":\"1\"}",
+    "model_sha256": "5f3119f149116f7cb6c24415ba334df1716b3ed64206c726f877ee7d26c54152"
+  },
+  "source_j": 77,
+  "source_line": [
+    0,
+    1
+  ],
+  "source_scan_count": 15,
+  "target_count": 4,
+  "target_order_domain": "different-j-order-batch-target-v1:13",
+  "targets": [
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          37,
+          0
+        ],
+        "y": [
+          0,
+          32
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          205,
+          0
+        ],
+        "y": [
+          0,
+          76
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          141,
+          0
+        ],
+        "y": [
+          0,
+          69
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          51,
+          0
+        ],
+        "y": [
+          0,
+          121
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          24,
+          0
+        ],
+        "y": [
+          0,
+          4
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          81,
+          0
+        ],
+        "y": [
+          0,
+          191
+        ]
+      }
+    },
+    {
+      "destination": {
+        "infinity": false,
+        "x": [
+          201,
+          0
+        ],
+        "y": [
+          0,
+          10
+        ]
+      },
+      "source": {
+        "infinity": false,
+        "x": [
+          28,
+          0
+        ],
+        "y": [
+          0,
+          195
+        ]
+      }
+    }
+  ]
+}

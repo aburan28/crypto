@@ -1,0 +1,10 @@
+{
+  "schema": "different_j_inverse_trend_checker_freeze/v1",
+  "input_checker_source_sha256": "180770a51c54c0b2b91fea55405b88d9af1aa7eab9370f6e76ab0caa52d08199",
+  "input_checker_binary_sha256": "a6b2471cfad4254bd4736bccf54d8363b2bfa8f49e0c6732e7f939a6c0a35698",
+  "panel_checker_source_sha256": "75a4cb75b24378dd7c38bfad1257b68bef089afce90f66b9b05391c69725d2d6",
+  "panel_checker_binary_sha256": "2138ae6a3e0261b26e8804cb08f11455c36c0f07ccbd6bab179d11b74085e917",
+  "separate_arithmetic": true,
+  "panel_scope": "all 96 Darwin children, all target scalars, relation witnesses and trial streams; direct inverse construction polynomial counters checked for internal consistency",
+  "limits": "does not independently recompute the exact primitive count or each failed inverse polynomial root"
+}

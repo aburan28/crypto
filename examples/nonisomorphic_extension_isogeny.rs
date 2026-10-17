@@ -339,7 +339,12 @@ fn points(v: &Value) -> Vec<Point> {
     v.as_array().unwrap().iter().map(parse_point).collect()
 }
 
-fn scan_base(curve: &Curve, h: u64, columns: usize) -> ([u64; 2], Vec<Point>, Vec<Point>, u64) {
+fn scan_base_with_ops(
+    curve: &Curve,
+    h: u64,
+    columns: usize,
+    ops: &mut GroupOps,
+) -> ([u64; 2], Vec<Point>, Vec<Point>, u64) {
     let f = &curve.f;
     let mut scanned = 0;
     for a in 0..f.p {
@@ -347,13 +352,12 @@ fn scan_base(curve: &Curve, h: u64, columns: usize) -> ([u64; 2], Vec<Point>, Ve
         let mut raw = Vec::new();
         let mut projected = Vec::new();
         let mut seen = BTreeSet::new();
-        let mut ops = GroupOps::default();
         for t in 1..f.p {
             let mut lifts = curve.lift_x(f.scale(line, t));
             lifts.sort_by_key(|point| f.pack(point.y));
             for point in lifts {
                 scanned += 1;
-                let q = curve.mul(&mut ops, point, h);
+                let q = curve.mul(ops, point, h);
                 if q.infinity {
                     continue;
                 }
@@ -375,6 +379,10 @@ fn scan_base(curve: &Curve, h: u64, columns: usize) -> ([u64; 2], Vec<Point>, Ve
         }
     }
     panic!("eight distinct projected columns absent");
+}
+
+fn scan_base(curve: &Curve, h: u64, columns: usize) -> ([u64; 2], Vec<Point>, Vec<Point>, u64) {
+    scan_base_with_ops(curve, h, columns, &mut GroupOps::default())
 }
 
 /// Enumerate the entire rational image before choosing any subgroup columns.
@@ -498,6 +506,484 @@ fn freeze_full_image(public_v1_path: &str, public_v2_path: &str) {
         "source_points":source_points,"image_points":image_points,
         "selection_candidates":image_candidates,"columns":projected.len(),"group_ops":ops})
     );
+}
+
+fn assert_no_answer_fields(value: &Value) {
+    match value {
+        Value::Object(map) => {
+            for (key, child) in map {
+                assert!(
+                    !["answer_scalar", "scalars", "answers", "private_answers"]
+                        .contains(&key.as_str()),
+                    "answer-bearing public batch input: {key}"
+                );
+                assert_no_answer_fields(child);
+            }
+        }
+        Value::Array(items) => items.iter().for_each(assert_no_answer_fields),
+        _ => {}
+    }
+}
+
+fn freeze_batch(parent_path: &str, public_path: &str, checker_path: &str) {
+    let parent = read_public(parent_path);
+    assert_eq!(parent["schema"], "different_j_public/v2");
+    let src = source(67);
+    let t = parse_point(&parent["kernel"][0]);
+    let dst = destination(&src, t);
+    let g = parse_point(&parent["generator"]);
+    let mapped_g = parse_point(&parent["mapped_generator"]);
+    let mut ops = GroupOps::default();
+    let mut entries = Vec::new();
+    let mut source_keys = BTreeSet::new();
+    let mut destination_keys = BTreeSet::new();
+    for scalar in 1..61u64 {
+        let point = src.mul(&mut ops, g, scalar);
+        let mapped = dst.mul(&mut ops, mapped_g, scalar);
+        assert!(!point.infinity && !mapped.infinity);
+        assert_eq!(velu(&src, t, point, &mut ops), mapped);
+        assert!(source_keys.insert(src.key(&point)));
+        assert!(destination_keys.insert(dst.key(&mapped)));
+        let key = src.key(&point);
+        let digest = sha256_hex(format!("different-j-reuse-target-order-v1:13:{key}").as_bytes());
+        entries.push((digest, key, point, mapped, scalar));
+    }
+    entries.sort_by(|left, right| (&left.0, left.1).cmp(&(&right.0, right.1)));
+    let targets: Vec<Value> = entries
+        .iter()
+        .map(|(_, _, point, mapped, _)| json!({"source":point,"destination":mapped}))
+        .collect();
+    let scalars: Vec<u64> = entries.iter().map(|entry| entry.4).collect();
+    let public = json!({"schema":"different_j_batch_public/v1",
+        "parent_public":parent,"parent_public_sha256":sha256_hex(&fs::read(parent_path).unwrap()),
+        "target_order_seed":13,"target_count":60,"targets":targets});
+    assert_no_answer_fields(&public);
+    fs::write(public_path, serde_json::to_vec_pretty(&public).unwrap()).unwrap();
+    let public_hash = sha256_hex(&fs::read(public_path).unwrap());
+    let checker = json!({"schema":"different_j_batch_checker/v1",
+        "public_sha256":public_hash,"target_count":60,"scalars":scalars});
+    fs::write(checker_path, serde_json::to_vec_pretty(&checker).unwrap()).unwrap();
+    println!(
+        "{}",
+        json!({"schema":"different_j_batch_freeze/v1",
+        "public_sha256":public_hash,
+        "checker_sha256":sha256_hex(&fs::read(checker_path).unwrap()),
+        "target_count":entries.len(),"source_keys":source_keys.len(),
+        "destination_keys":destination_keys.len(),"group_ops":ops})
+    );
+}
+
+fn read_batch_public(path: &str) -> Value {
+    let public: Value = serde_json::from_str(&fs::read_to_string(path).unwrap()).unwrap();
+    assert_no_answer_fields(&public);
+    assert_eq!(public["schema"], "different_j_batch_public/v1");
+    assert_eq!(public["target_count"], 60);
+    assert_eq!(public["target_order_seed"], 13);
+    assert_eq!(public["targets"].as_array().unwrap().len(), 60);
+    assert_eq!(public["parent_public"]["schema"], "different_j_public/v2");
+    public
+}
+
+struct BatchRelationSetup {
+    signed: Vec<Point>,
+    table_points: Vec<Point>,
+    table: BTreeMap<u64, Vec<(usize, usize)>>,
+    pair_entries: u64,
+    scan_count: u64,
+    image_points: u64,
+    selection_candidates: u64,
+}
+
+fn prepare_batch_relation(
+    parent: &Value,
+    src: &Curve,
+    dst: &Curve,
+    t: Point,
+    arm: &str,
+    ops: &mut GroupOps,
+) -> BatchRelationSetup {
+    let h = 75;
+    let (raw, base, scan_count, image_points, candidates) = match arm {
+        "full-image" => {
+            let (raw, base, witnesses, scan, images, candidates) =
+                scan_full_image(src, dst, t, h, 8, ops);
+            assert_eq!(raw, points(&parent["full_base_raw"]));
+            assert_eq!(base, points(&parent["full_base_projected"]));
+            assert_eq!(witnesses, points(&parent["full_base_witness_source"]));
+            (raw, base, scan, images, candidates)
+        }
+        "destination-direct" => {
+            let (line, raw, base, scan) = scan_base_with_ops(dst, h, 8, ops);
+            assert_eq!(parent["direct_line"], json!(line));
+            assert_eq!(raw, points(&parent["direct_base_raw"]));
+            assert_eq!(base, points(&parent["direct_base_projected"]));
+            (raw, base, scan, 0, 0)
+        }
+        "source" | "isogeny-image" => {
+            let (line, raw, base, scan) = scan_base_with_ops(src, h, 8, ops);
+            assert_eq!(parent["line"], json!(line));
+            assert_eq!(raw, points(&parent["base_raw"]));
+            assert_eq!(base, points(&parent["base_projected"]));
+            (raw, base, scan, 0, 0)
+        }
+        _ => panic!("unknown batch relation arm"),
+    };
+    assert_eq!(raw.len(), 8);
+    let signed = signed_base(
+        if arm == "source" || arm == "isogeny-image" {
+            src
+        } else {
+            dst
+        },
+        &base,
+    );
+    let table_curve = if arm == "source" { src } else { dst };
+    let table_points: Vec<Point> = if arm == "isogeny-image" {
+        signed
+            .iter()
+            .map(|&point| velu(src, t, point, ops))
+            .collect()
+    } else {
+        signed.clone()
+    };
+    let mut table = BTreeMap::<u64, Vec<(usize, usize)>>::new();
+    let mut pair_entries = 0;
+    for i in 0..table_points.len() {
+        for j in i..table_points.len() {
+            let sum = table_curve.add(ops, table_points[i], table_points[j]);
+            if !sum.infinity {
+                table.entry(table_curve.key(&sum)).or_default().push((i, j));
+                pair_entries += 1;
+            }
+        }
+    }
+    BatchRelationSetup {
+        signed,
+        table_points,
+        table,
+        pair_entries,
+        scan_count,
+        image_points,
+        selection_candidates: candidates,
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn solve_batch_relation_target(
+    src: &Curve,
+    dst: &Curve,
+    t: Point,
+    g: Point,
+    q: Point,
+    mapped_g: Point,
+    mapped_q: Point,
+    arm: &str,
+    setup: &BatchRelationSetup,
+    seed: u64,
+) -> Value {
+    let direct = arm == "destination-direct" || arm == "full-image";
+    let query_curve = if direct { dst } else { src };
+    let table_curve = if arm == "source" { src } else { dst };
+    let query_g = if direct { mapped_g } else { g };
+    let query_q = if direct { mapped_q } else { q };
+    let mut rng = StdRng::seed_from_u64(seed);
+    let mut pivots: [Option<Vec<u64>>; 9] = std::array::from_fn(|_| None);
+    let mut witnesses = Vec::new();
+    let mut trials = 0u64;
+    let mut relations = 0u64;
+    let mut rank = 0u64;
+    let mut invalid_candidates = 0u64;
+    let mut map_queries = 0u64;
+    let mut la_cpu_ns = 0u64;
+    let mut query_ops = GroupOps::default();
+    for _ in 0..1220 {
+        trials += 1;
+        let a = rand::Rng::gen_range(&mut rng, 0..61);
+        let b = rand::Rng::gen_range(&mut rng, 0..61);
+        let a_g = query_curve.mul(&mut query_ops, query_g, a);
+        let b_q = query_curve.mul(&mut query_ops, query_q, b);
+        let candidate = query_curve.add(&mut query_ops, a_g, b_q);
+        let projected = query_curve.mul(&mut query_ops, candidate, 75);
+        let searched = if arm == "isogeny-image" {
+            map_queries += 1;
+            velu(src, t, projected, &mut query_ops)
+        } else {
+            projected
+        };
+        if searched.infinity {
+            continue;
+        }
+        let Some(pairs) = setup.table.get(&table_curve.key(&searched)) else {
+            continue;
+        };
+        let &(i, j) = pairs.first().unwrap();
+        let actual = table_curve.add(&mut query_ops, setup.table_points[i], setup.table_points[j]);
+        if actual != searched {
+            invalid_candidates += 1;
+            continue;
+        }
+        if arm == "isogeny-image"
+            && src.add(&mut query_ops, setup.signed[i], setup.signed[j]) != projected
+        {
+            invalid_candidates += 1;
+            continue;
+        }
+        let mut row = vec![0u64; 10];
+        for index in [i, j] {
+            let col = index / 2;
+            let coeff = if index % 2 == 0 { 1 } else { 60 };
+            row[col] = (row[col] + coeff) % 61;
+        }
+        row[8] = (61 - modmul(75 % 61, b, 61)) % 61;
+        row[9] = modmul(75 % 61, a, 61);
+        witnesses.push(json!({"a":a,"b":b,"i":i,"j":j}));
+        relations += 1;
+        let la_start = thread_cpu_ns();
+        if insert_relation(&mut pivots, row, 61) {
+            rank += 1;
+        }
+        la_cpu_ns += thread_cpu_ns() - la_start;
+        if rank == 9 {
+            break;
+        }
+    }
+    let recovered = recover(&pivots, 61).map(|solved| solved[8]);
+    let mut verify_ops = GroupOps::default();
+    let verified = recovered.is_some_and(|k| {
+        src.mul(&mut verify_ops, g, k) == q && dst.mul(&mut verify_ops, mapped_g, k) == mapped_q
+    });
+    json!({"recovered":recovered,"verified":verified,"seed":seed,
+        "trials":trials,"relations":relations,"rank":rank,
+        "failed_queries":trials-relations,"invalid_candidates":invalid_candidates,
+        "map_queries":map_queries,"la_cpu_ns_included":la_cpu_ns,
+        "relation_witnesses":witnesses,"query_group_ops":query_ops,
+        "verify_group_ops":verify_ops})
+}
+
+#[allow(clippy::too_many_arguments)]
+fn solve_batch_bsgs_target(
+    src: &Curve,
+    dst: &Curve,
+    g: Point,
+    q: Point,
+    mapped_g: Point,
+    mapped_q: Point,
+    baby: &BTreeMap<u64, u64>,
+    giant_step: Point,
+) -> Value {
+    let mut query_ops = GroupOps::default();
+    let mut current = q;
+    let mut lookups = 0u64;
+    let mut recovered = None;
+    for giant in 0..8u64 {
+        lookups += 1;
+        if let Some(&small) = baby.get(&src.key(&current)) {
+            recovered = Some((giant * 8 + small) % 61);
+            break;
+        }
+        current = src.add(&mut query_ops, current, giant_step);
+    }
+    let mut verify_ops = GroupOps::default();
+    let verified = recovered.is_some_and(|k| {
+        src.mul(&mut verify_ops, g, k) == q && dst.mul(&mut verify_ops, mapped_g, k) == mapped_q
+    });
+    json!({"recovered":recovered,"verified":verified,
+        "giant_lookups":lookups,"query_group_ops":query_ops,
+        "verify_group_ops":verify_ops})
+}
+
+fn solve_batch_rho_target(
+    src: &Curve,
+    dst: &Curve,
+    g: Point,
+    q: Point,
+    mapped_g: Point,
+    mapped_q: Point,
+    seed: u64,
+) -> Value {
+    let mut attempts = Vec::new();
+    let mut recovered = None;
+    let mut rho_ops = GroupOps::default();
+    for retry in 0..32u64 {
+        let try_seed = seed.wrapping_add(retry * 0x0100_0000);
+        let result = rho_reference_negation(src, g, q, 61, try_seed, 1220);
+        rho_ops.merge(result.group_ops);
+        attempts.push(json!({"retry":retry,"seed":try_seed,
+            "steps":result.steps,"walks":result.walks,
+            "group_ops":result.group_ops,"recovered":result.recovered,
+            "verified":result.verified}));
+        if result.verified {
+            recovered = result.recovered;
+            break;
+        }
+    }
+    let mut verify_ops = GroupOps::default();
+    let verified = recovered.is_some_and(|k| {
+        src.mul(&mut verify_ops, g, k) == q && dst.mul(&mut verify_ops, mapped_g, k) == mapped_q
+    });
+    json!({"recovered":recovered,"verified":verified,"seed":seed,
+        "attempts":attempts,"rho_group_ops":rho_ops,
+        "verify_group_ops":verify_ops})
+}
+
+fn batch_run(path: &str, round: u64, arm: &str) {
+    const ARMS: [&str; 7] = [
+        "source",
+        "isogeny-image",
+        "destination-direct",
+        "full-image",
+        "source-bsgs",
+        "rho-negation",
+        "rho-negation-aa",
+    ];
+    assert!(round < 3 && ARMS.contains(&arm));
+    let wall = Instant::now();
+    let cpu = thread_cpu_ns();
+    take_field_counters();
+    let public = read_batch_public(path);
+    assert_eq!(
+        public["parent_public_sha256"],
+        "75fded656d5fba32418e8a6231fb81e46412b8ae088b496dc4a1427e9fd14967"
+    );
+    let parent = &public["parent_public"];
+    let src = source(67);
+    let t = parse_point(&parent["kernel"][0]);
+    let dst = destination(&src, t);
+    let g = parse_point(&parent["generator"]);
+    let mapped_g = parse_point(&parent["mapped_generator"]);
+    let mut common_ops = GroupOps::default();
+    assert!(src.is_on_curve(g) && dst.is_on_curve(mapped_g));
+    assert!(src.mul(&mut common_ops, g, 61).infinity);
+    assert!(dst.mul(&mut common_ops, mapped_g, 61).infinity);
+    assert_eq!(velu(&src, t, g, &mut common_ops), mapped_g);
+    let mut source_keys = BTreeSet::new();
+    let mut destination_keys = BTreeSet::new();
+    let targets: Vec<(Point, Point)> = public["targets"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|row| {
+            let q = parse_point(&row["source"]);
+            let mapped_q = parse_point(&row["destination"]);
+            assert!(!q.infinity && !mapped_q.infinity);
+            assert!(src.is_on_curve(q) && dst.is_on_curve(mapped_q));
+            assert!(src.mul(&mut common_ops, q, 61).infinity);
+            assert!(dst.mul(&mut common_ops, mapped_q, 61).infinity);
+            assert_eq!(velu(&src, t, q, &mut common_ops), mapped_q);
+            assert!(source_keys.insert(src.key(&q)));
+            assert!(destination_keys.insert(dst.key(&mapped_q)));
+            (q, mapped_q)
+        })
+        .collect();
+    assert_eq!(source_keys.len(), 60);
+    assert_eq!(destination_keys.len(), 60);
+    let common_cpu_ns = thread_cpu_ns() - cpu;
+    let common_fp = take_field_counters();
+
+    let setup_start = thread_cpu_ns();
+    let mut setup_ops = GroupOps::default();
+    let relation_setup = if [
+        "source",
+        "isogeny-image",
+        "destination-direct",
+        "full-image",
+    ]
+    .contains(&arm)
+    {
+        Some(prepare_batch_relation(
+            parent,
+            &src,
+            &dst,
+            t,
+            arm,
+            &mut setup_ops,
+        ))
+    } else {
+        None
+    };
+    let mut baby = BTreeMap::<u64, u64>::new();
+    let mut giant_step = src.identity();
+    if arm == "source-bsgs" {
+        let mut current = src.identity();
+        for j in 0..8u64 {
+            assert!(baby.insert(src.key(&current), j).is_none());
+            current = src.add(&mut setup_ops, current, g);
+        }
+        giant_step = src.neg(src.mul(&mut setup_ops, g, 8));
+    }
+    let setup_cpu_ns = thread_cpu_ns() - setup_start;
+    let setup_fp = take_field_counters();
+    let mut total_fp_muls = common_fp.0 + setup_fp.0;
+    let mut total_fp_invs = common_fp.1 + setup_fp.1;
+    let mut target_records = Vec::new();
+    let mut prefixes = Vec::new();
+    let mut all_verified = true;
+    for (index, &(q, mapped_q)) in targets.iter().enumerate() {
+        let target_start = thread_cpu_ns();
+        let base_seed = (0x2026_1015u64 ^ 67)
+            .wrapping_add(round.wrapping_mul(0x9e37_79b9))
+            .wrapping_add((index as u64).wrapping_mul(0x0123_4567));
+        let seed = base_seed.wrapping_add(if arm == "rho-negation-aa" {
+            0x00aa_0000
+        } else {
+            0
+        });
+        let mut result = if let Some(setup) = &relation_setup {
+            solve_batch_relation_target(&src, &dst, t, g, q, mapped_g, mapped_q, arm, setup, seed)
+        } else if arm == "source-bsgs" {
+            solve_batch_bsgs_target(&src, &dst, g, q, mapped_g, mapped_q, &baby, giant_step)
+        } else {
+            solve_batch_rho_target(&src, &dst, g, q, mapped_g, mapped_q, seed)
+        };
+        let fp = take_field_counters();
+        total_fp_muls += fp.0;
+        total_fp_invs += fp.1;
+        let target_cpu_ns = thread_cpu_ns() - target_start;
+        all_verified &= result["verified"] == true;
+        result["position"] = json!(index);
+        result["target_cpu_ns"] = json!(target_cpu_ns);
+        result["target_fp_muls"] = json!(fp.0);
+        result["target_fp_invs"] = json!(fp.1);
+        target_records.push(result);
+        let count = index + 1;
+        if [1, 4, 16, 60].contains(&count) {
+            prefixes.push(json!({"targets":count,
+                "total_cpu_ns":thread_cpu_ns()-cpu,
+                "total_wall_ns":wall.elapsed().as_nanos() as u64,
+                "total_fp_muls":total_fp_muls,"total_fp_invs":total_fp_invs,
+                "peak_rss_bytes":peak_rss_bytes(),
+                "verified":target_records.iter().all(|row| row["verified"] == true)}));
+        }
+    }
+    let total_cpu_ns = thread_cpu_ns() - cpu;
+    let total_wall_ns = wall.elapsed().as_nanos() as u64;
+    let peak_rss = peak_rss_bytes();
+    let relation_metadata = relation_setup.as_ref().map(|setup| {
+        json!({
+            "pair_entries":setup.pair_entries,"pair_keys":setup.table.len(),
+            "scan_count":setup.scan_count,"image_points":setup.image_points,
+            "selection_candidates":setup.selection_candidates
+        })
+    });
+    println!(
+        "{}",
+        json!({"schema":"different_j_batch_run/v1",
+        "round":round,"arm":arm,"target_count":targets.len(),
+        "public_sha256":sha256_hex(&fs::read(path).unwrap()),
+        "source_icv1":parent["source"]["icv1"],
+        "destination_icv1":parent["destination"]["icv1"],
+        "common_cpu_ns":common_cpu_ns,"common_fp_muls":common_fp.0,
+        "common_fp_invs":common_fp.1,"common_group_ops":common_ops,
+        "setup_cpu_ns":setup_cpu_ns,"setup_fp_muls":setup_fp.0,
+        "setup_fp_invs":setup_fp.1,"setup_group_ops":setup_ops,
+        "relation_setup":relation_metadata,"baby_entries":baby.len(),
+        "prefixes":prefixes,"target_records":target_records,
+        "total_cpu_ns":total_cpu_ns,"total_wall_ns":total_wall_ns,
+        "total_fp_muls":total_fp_muls,"total_fp_invs":total_fp_invs,
+        "peak_rss_bytes":peak_rss,"all_verified":all_verified})
+    );
+    assert!(all_verified, "batch arm has unrecovered or invalid targets");
+    assert!(peak_rss <= 512 * 1024 * 1024, "batch RSS ceiling");
 }
 
 fn read_public(path: &str) -> Value {
@@ -1154,6 +1640,169 @@ fn replay(public_path: &str, fixture_path: &str, records_path: &str, old_public:
     );
 }
 
+fn replay_batch(public_path: &str, parent_path: &str, checker_path: &str, records_path: &str) {
+    let public = read_batch_public(public_path);
+    let parent = read_public(parent_path);
+    assert_eq!(public["parent_public"], parent);
+    assert_eq!(
+        public["parent_public_sha256"],
+        sha256_hex(&fs::read(parent_path).unwrap())
+    );
+    let answers: Value = serde_json::from_str(&fs::read_to_string(checker_path).unwrap()).unwrap();
+    assert_eq!(answers["schema"], "different_j_batch_checker/v1");
+    assert_eq!(
+        answers["public_sha256"],
+        sha256_hex(&fs::read(public_path).unwrap())
+    );
+    let scalars: Vec<u64> = answers["scalars"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|v| v.as_u64().unwrap())
+        .collect();
+    assert_eq!(scalars.len(), 60);
+    assert_eq!(
+        scalars.iter().copied().collect::<BTreeSet<_>>(),
+        (1..61).collect()
+    );
+    let arithmetic = Replay::new();
+    let g = parse_point(&parent["generator"]);
+    let mapped_g = parse_point(&parent["mapped_generator"]);
+    let t = parse_point(&parent["kernel"][0]);
+    assert!(arithmetic.on_curve(g, 46, 37) && arithmetic.on_curve(mapped_g, 53, 25));
+    assert!(arithmetic.scalar_mul(g, 61, 46).infinity);
+    assert!(arithmetic.scalar_mul(mapped_g, 61, 53).infinity);
+    assert_eq!(arithmetic.velu(g, t), mapped_g);
+    let mut targets = Vec::new();
+    let mut source_keys = BTreeSet::new();
+    let mut destination_keys = BTreeSet::new();
+    let mut ordering = Vec::new();
+    for (index, row) in public["targets"].as_array().unwrap().iter().enumerate() {
+        let q = parse_point(&row["source"]);
+        let mapped_q = parse_point(&row["destination"]);
+        let k = scalars[index];
+        assert!(arithmetic.on_curve(q, 46, 37));
+        assert!(arithmetic.on_curve(mapped_q, 53, 25));
+        assert_eq!(arithmetic.scalar_mul(g, k, 46), q);
+        assert_eq!(arithmetic.scalar_mul(mapped_g, k, 53), mapped_q);
+        assert_eq!(arithmetic.velu(q, t), mapped_q);
+        assert!(arithmetic.scalar_mul(q, 61, 46).infinity);
+        assert!(arithmetic.scalar_mul(mapped_q, 61, 53).infinity);
+        let key = arithmetic.key(q);
+        assert!(source_keys.insert(key));
+        assert!(destination_keys.insert(arithmetic.key(mapped_q)));
+        ordering.push((
+            sha256_hex(format!("different-j-reuse-target-order-v1:13:{key}").as_bytes()),
+            key,
+        ));
+        targets.push((q, mapped_q));
+    }
+    assert_eq!(source_keys.len(), 60);
+    assert_eq!(destination_keys.len(), 60);
+    assert!(ordering.windows(2).all(|pair| pair[0] <= pair[1]));
+    let raw_base = points(&parent["full_base_raw"]);
+    let projected_base = points(&parent["full_base_projected"]);
+    let preimages = points(&parent["full_base_witness_source"]);
+    assert_eq!(
+        (raw_base.len(), projected_base.len(), preimages.len()),
+        (8, 8, 8)
+    );
+    for ((&raw, &projected), &preimage) in raw_base.iter().zip(&projected_base).zip(&preimages) {
+        assert!(arithmetic.on_curve(preimage, 46, 37));
+        assert_eq!(arithmetic.velu(preimage, t), raw);
+        assert_eq!(arithmetic.scalar_mul(raw, 75, 53), projected);
+    }
+    let mut seen = BTreeSet::new();
+    let mut scalar_checks = 0u64;
+    let mut relation_witness_checks = 0u64;
+    for line in fs::read_to_string(records_path).unwrap().lines() {
+        let record: Value = serde_json::from_str(line).unwrap();
+        assert_eq!(record["schema"], "different_j_batch_run/v1");
+        assert_eq!(
+            record["public_sha256"],
+            sha256_hex(&fs::read(public_path).unwrap())
+        );
+        let round = record["round"].as_u64().unwrap();
+        let arm = record["arm"].as_str().unwrap();
+        assert!(round < 3);
+        assert!([
+            "source",
+            "isogeny-image",
+            "destination-direct",
+            "full-image",
+            "source-bsgs",
+            "rho-negation",
+            "rho-negation-aa"
+        ]
+        .contains(&arm));
+        assert!(seen.insert((round, arm.to_string())));
+        assert_eq!(record["target_count"], 60);
+        assert_eq!(record["all_verified"], true);
+        let prefix = record["prefixes"].as_array().unwrap();
+        assert_eq!(prefix.len(), 4);
+        let mut last_cpu = 0u64;
+        for (entry, expected) in prefix.iter().zip([1, 4, 16, 60]) {
+            assert_eq!(entry["targets"], expected);
+            assert_eq!(entry["verified"], true);
+            let cpu = entry["total_cpu_ns"].as_u64().unwrap();
+            assert!(cpu >= last_cpu);
+            last_cpu = cpu;
+        }
+        let rows = record["target_records"].as_array().unwrap();
+        assert_eq!(rows.len(), 60);
+        for (index, row) in rows.iter().enumerate() {
+            assert_eq!(row["position"], index);
+            assert_eq!(row["verified"], true);
+            let k = row["recovered"].as_u64().unwrap();
+            assert_eq!(k, scalars[index]);
+            let (q, mapped_q) = targets[index];
+            assert_eq!(arithmetic.scalar_mul(g, k, 46), q);
+            assert_eq!(arithmetic.scalar_mul(mapped_g, k, 53), mapped_q);
+            if [
+                "source",
+                "isogeny-image",
+                "destination-direct",
+                "full-image",
+            ]
+            .contains(&arm)
+            {
+                let setup = &record["relation_setup"];
+                let mut relation_row = row.clone();
+                relation_row["arm"] = json!(arm);
+                relation_row["pair_entries"] = setup["pair_entries"].clone();
+                relation_row["pair_keys"] = setup["pair_keys"].clone();
+                assert_eq!(row["rank"], 9);
+                relation_witness_checks += replay_relation_row(
+                    &arithmetic,
+                    &parent,
+                    &relation_row,
+                    g,
+                    q,
+                    mapped_g,
+                    mapped_q,
+                    t,
+                );
+            }
+            scalar_checks += 1;
+        }
+    }
+    assert_eq!(seen.len(), 21);
+    assert_eq!(scalar_checks, 1260);
+    println!(
+        "{}",
+        json!({"schema":"different_j_batch_replay/v1",
+        "records_sha256":sha256_hex(&fs::read(records_path).unwrap()),
+        "public_sha256":sha256_hex(&fs::read(public_path).unwrap()),
+        "checker_sha256":sha256_hex(&fs::read(checker_path).unwrap()),
+        "arm_rounds":seen.len(),"distinct_targets":targets.len(),
+        "scalar_checks":scalar_checks,"base_witness_checks":8,
+        "relation_witness_checks":relation_witness_checks,
+        "independent_fp_muls":arithmetic.muls.get(),
+        "independent_fp_invs":arithmetic.inversions.get(),
+        "independent_group_adds":arithmetic.group_adds.get()})
+    );
+}
+
 fn audit_fibers(public_path: &str) {
     let public = read_public(public_path);
     let src = source(67);
@@ -1230,13 +1879,16 @@ fn main() {
         Some("freeze") => freeze(),
         Some("freeze-public") => freeze_public(&args[2], &args[3]),
         Some("freeze-full-image") => freeze_full_image(&args[2], &args[3]),
+        Some("freeze-batch") => freeze_batch(&args[2], &args[3], &args[4]),
         Some("run") => relation_run(&args[2], args[3].parse().unwrap(), &args[4]),
         Some("rho") => rho_run(&args[2], args[3].parse().unwrap(), args[4] == "aa"),
+        Some("batch-run") => batch_run(&args[2], args[3].parse().unwrap(), &args[4]),
         Some("replay") => replay(&args[2], &args[3], &args[4], None),
         Some("replay-full-image") => replay(&args[2], &args[4], &args[5], Some(&args[3])),
+        Some("batch-replay") => replay_batch(&args[2], &args[3], &args[4], &args[5]),
         Some("audit-fibers") => audit_fibers(&args[2]),
         _ => panic!(
-            "usage: nonisomorphic_extension_isogeny screen|freeze|freeze-public|freeze-full-image|run|rho|replay|replay-full-image|audit-fibers"
+            "usage: nonisomorphic_extension_isogeny screen|freeze|freeze-public|freeze-full-image|freeze-batch|run|rho|batch-run|replay|replay-full-image|batch-replay|audit-fibers"
         ),
     }
 }

@@ -130,3 +130,36 @@ research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/reports
 research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/reports/**/*.png binary
 research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/reports/**/*.svg -diff -whitespace
 research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/validation_*.stdout whitespace=-blank-at-eof
+
+# Different-j distinct-target setup-reuse reports and exact validation logs.
+benchmarks/20261015-different-j-reuse/*.pdf binary
+benchmarks/20261015-different-j-reuse/*.png binary
+benchmarks/20261015-different-j-reuse/*.svg -diff -whitespace
+research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/*.pdf binary
+research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/*.png binary
+research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/*.svg -diff -whitespace
+research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/reports/**/*.pdf binary
+research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/reports/**/*.png binary
+research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/reports/**/*.svg -diff -whitespace
+research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/VALIDATION_*.stdout whitespace=-blank-at-eof
+
+# Bounded larger-order different-j screen visuals and exact test logs.
+research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/*.pdf binary
+research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/*.png binary
+research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/*.svg -diff -whitespace
+research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/VALIDATION_*.stdout -diff -whitespace
+research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/VALIDATION_*.stderr -diff -whitespace
+
+# Order-229 target-count comparison, raw metered children and visual copies.
+benchmarks/20261015-different-j-order-batch/*.pdf binary
+benchmarks/20261015-different-j-order-batch/*.png binary
+benchmarks/20261015-different-j-order-batch/*.svg -diff -whitespace
+research/isogeny_torsion_fibers_20261012/different_j_order_batch_20261015/*.pdf binary
+research/isogeny_torsion_fibers_20261012/different_j_order_batch_20261015/*.png binary
+research/isogeny_torsion_fibers_20261012/different_j_order_batch_20261015/*.svg -diff -whitespace
+research/isogeny_torsion_fibers_20261012/different_j_order_batch_20261015/reports/**/*.pdf binary
+research/isogeny_torsion_fibers_20261012/different_j_order_batch_20261015/RUN_V1.jsonl -diff -whitespace
+research/isogeny_torsion_fibers_20261012/different_j_order_batch_20261015/METERS_V1.jsonl -diff -whitespace
+research/isogeny_torsion_fibers_20261012/different_j_order_batch_20261015/raw-v1/** -diff -whitespace
+research/isogeny_torsion_fibers_20261012/different_j_order_batch_20261015/VALIDATION_*.stdout -diff -whitespace
+research/isogeny_torsion_fibers_20261012/different_j_order_batch_20261015/VALIDATION_*.stderr -diff -whitespace

@@ -1,0 +1,247 @@
+{
+  "arm_rounds": 21,
+  "arms": {
+    "destination-direct": {
+      "child_cpu_us": [
+        14024.0,
+        14021.0,
+        12026.0
+      ],
+      "child_peak_rss_bytes": [
+        9338880,
+        9175040,
+        9256960
+      ],
+      "median_child_cpu_us": 14021.0,
+      "median_native_timer_us": 6931.208,
+      "median_process_over_native_cpu_us": 6471.625,
+      "median_wall_us": 19210.458,
+      "native_timer_us": [
+        7552.375,
+        6931.208,
+        5935.0
+      ],
+      "process_over_native_cpu_us": [
+        6471.625,
+        7089.792,
+        6091.0
+      ],
+      "wall_us": [
+        20273.167,
+        19210.458,
+        16564.792
+      ]
+    },
+    "full-image": {
+      "child_cpu_us": [
+        15351.0,
+        15264.0,
+        18525.0
+      ],
+      "child_peak_rss_bytes": [
+        9764864,
+        9453568,
+        9535488
+      ],
+      "median_child_cpu_us": 15351.0,
+      "median_native_timer_us": 9300.125,
+      "median_process_over_native_cpu_us": 6330.0830000000005,
+      "median_wall_us": 26344.292,
+      "native_timer_us": [
+        9300.125,
+        8933.917,
+        11736.125
+      ],
+      "process_over_native_cpu_us": [
+        6050.875,
+        6330.0830000000005,
+        6788.875
+      ],
+      "wall_us": [
+        26344.292,
+        22924.166,
+        26366.334
+      ]
+    },
+    "isogeny-image": {
+      "child_cpu_us": [
+        12542.0,
+        13639.0,
+        12735.0
+      ],
+      "child_peak_rss_bytes": [
+        9273344,
+        9240576,
+        9142272
+      ],
+      "median_child_cpu_us": 12735.0,
+      "median_native_timer_us": 5664.958,
+      "median_process_over_native_cpu_us": 7061.625,
+      "median_wall_us": 18217.083,
+      "native_timer_us": [
+        5480.375,
+        8037.833,
+        5664.958
+      ],
+      "process_over_native_cpu_us": [
+        7061.625,
+        5601.167,
+        7070.042
+      ],
+      "wall_us": [
+        18217.083,
+        18758.125,
+        16918.459
+      ]
+    },
+    "rho-negation": {
+      "child_cpu_us": [
+        6908.0,
+        7048.0,
+        6375.0
+      ],
+      "child_peak_rss_bytes": [
+        7831552,
+        7602176,
+        7684096
+      ],
+      "median_child_cpu_us": 6908.0,
+      "median_native_timer_us": 1899.875,
+      "median_process_over_native_cpu_us": 4788.666,
+      "median_wall_us": 10620.958,
+      "native_timer_us": [
+        2119.334,
+        1709.208,
+        1899.875
+      ],
+      "process_over_native_cpu_us": [
+        4788.666,
+        5338.7919999999995,
+        4475.125
+      ],
+      "wall_us": [
+        10620.958,
+        12768.833,
+        10369.209
+      ]
+    },
+    "rho-negation-aa": {
+      "child_cpu_us": [
+        9319.0,
+        8028.0,
+        7353.0
+      ],
+      "child_peak_rss_bytes": [
+        7634944,
+        7700480,
+        7684096
+      ],
+      "median_child_cpu_us": 8028.0,
+      "median_native_timer_us": 2726.709,
+      "median_process_over_native_cpu_us": 5619.625,
+      "median_wall_us": 12813.208,
+      "native_timer_us": [
+        3173.333,
+        2408.375,
+        2726.709
+      ],
+      "process_over_native_cpu_us": [
+        6145.6669999999995,
+        5619.625,
+        4626.291
+      ],
+      "wall_us": [
+        13612.042,
+        12813.208,
+        9908.416
+      ]
+    },
+    "source": {
+      "child_cpu_us": [
+        12695.0,
+        15199.0,
+        15463.0
+      ],
+      "child_peak_rss_bytes": [
+        9273344,
+        9109504,
+        9076736
+      ],
+      "median_child_cpu_us": 15199.0,
+      "median_native_timer_us": 8189.5,
+      "median_process_over_native_cpu_us": 6904.540999999999,
+      "median_wall_us": 21777.25,
+      "native_timer_us": [
+        6039.334,
+        8189.5,
+        8558.459
+      ],
+      "process_over_native_cpu_us": [
+        6655.666,
+        7009.5,
+        6904.540999999999
+      ],
+      "wall_us": [
+        25011.333,
+        21421.583,
+        21777.25
+      ]
+    },
+    "source-bsgs": {
+      "child_cpu_us": [
+        6992.0,
+        6148.0,
+        5334.0
+      ],
+      "child_peak_rss_bytes": [
+        7307264,
+        7405568,
+        7340032
+      ],
+      "median_child_cpu_us": 6148.0,
+      "median_native_timer_us": 1027.75,
+      "median_process_over_native_cpu_us": 5120.25,
+      "median_wall_us": 10821.917,
+      "native_timer_us": [
+        1209.375,
+        1027.75,
+        952.333
+      ],
+      "process_over_native_cpu_us": [
+        5782.625,
+        5120.25,
+        4381.667
+      ],
+      "wall_us": [
+        10821.917,
+        14454.542,
+        8895.209
+      ]
+    }
+  },
+  "full_over_bsgs": {
+    "median": 2.4827586206896552,
+    "rounds": [
+      2.1955091533180777,
+      2.4827586206896552,
+      3.4730033745781776
+    ]
+  },
+  "full_over_rho": {
+    "median": 2.2222061378112334,
+    "rounds": [
+      2.2222061378112334,
+      2.1657207718501703,
+      2.9058823529411764
+    ]
+  },
+  "isolation": "shared_L0",
+  "meters_sha256": "72890c5526949f069eb6afbb0857ff20d63b0ec9fde680e13ae7ceb0adbd7a0e",
+  "portable_counted_S": null,
+  "relation_witness_checks": 10960,
+  "replay_sha256": "1b81efec41a26c6d6791fb3f32e9fd6f12ee2b106f7169da7a409ed8efdaa09a",
+  "run_sha256": "7d5a055d348cb6fa8edb5fc85b648a4850236adef10292506533a3ef902ff421",
+  "scalar_checks": 1260,
+  "schema": "different_j_process_summary/v1",
+  "unit": "child_user_plus_system_cpu_microseconds_for_complete_60_target_process"
+}

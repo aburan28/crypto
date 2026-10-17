@@ -1,0 +1,22 @@
+{
+  "schema": "different_j_inverse_trend_screen_freeze/v1",
+  "status": "frozen_before_screen",
+  "protocol": "FOUR_GATE_PROTOCOL_V1.md",
+  "protocol_commit": "899a101901",
+  "source": "examples/different_j_inverse_trend_screen.rs",
+  "source_sha256": "7b3ae9d1c2be4404979f0e3225958e447888e23971b302191faf95c8ec9c01d0",
+  "binary_sha256_darwin": "bb66031d3d5e53740c7b12d4bfbc3471777e1c7ffaea01635d601f2086801c67",
+  "checker": "examples/different_j_inverse_trend_check.rs",
+  "checker_source_sha256": "6f112de275ee6e6458f473809d283bfce54483239b8b3fd63c5d523ffde3791f",
+  "checker_binary_sha256_darwin": "205b8b374695d610475be52bea2ce8912d9734b14fdaaad4d0e566f13ee28354",
+  "command": "target/release/examples/different_j_inverse_trend_screen screen-inverse-trend",
+  "checker_command": "target/release/examples/different_j_inverse_trend_check SCREEN_V1.jsonl",
+  "range": {"min_p": 1238, "max_p": 10007, "p_mod_3": 1},
+  "order_bins": [[2400, 4800], [4800, 9600], [9600, 19200], [19200, 38400]],
+  "selection": "first eligible prime p in each bin, ascending p, then ascending prime factor",
+  "screen_wall_ceiling_seconds": 3600,
+  "screen_rss_ceiling_bytes": 536870912,
+  "map_samples_per_accepted_row": 64,
+  "output": "SCREEN_V1.jsonl",
+  "failed_stderr": "SCREEN_V1.stderr"
+}

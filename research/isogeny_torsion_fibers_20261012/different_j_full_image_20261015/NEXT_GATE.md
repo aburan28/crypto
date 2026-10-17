@@ -1,6 +1,8 @@
-# Pending full-image setup-reuse gate
+# Full-image setup-reuse gate and execution
 
-This is a follow-on hypothesis, not an executed result. The frozen
+The protocol below preceded the executed [60-target study](../different_j_reuse_20261015/RESULTS.md).
+Its V1 target-order leak was corrected before measurement, and the V2
+wrapper failure was preserved. The frozen
 [one-target run](reports/run-20261015T1916Z/REPORT.md) changed exact
 support membership by four subgroup points relative to each comparator,
 while image construction took a median 98.532% of full-image CPU. The
@@ -33,6 +35,10 @@ distinct public targets changes the total method cost.
   effect without a lower cold total than direct BSGS/rho is reported as
   a phase effect.
 
-The next acceptance test is a native Rust public-target generator and
-batch runner whose exact inputs are committed before execution. This
-protocol does not pre-select a winning prefix or claim a speedup.
+The native Rust public-target generator and batch runner committed their
+exact inputs before execution. Three V3 and three V4 rounds covered all
+60 distinct targets in seven arms; each version passed 1,260/1,260 separate
+scalar replays and 10,960 relation-witness checks. The V4 whole-process
+child CPU paired full-image/BSGS ratio median was 2.483 at `N=60` on a
+shared host. The next larger-order and direct χ-coordinate gates are
+specified in the [execution study](../different_j_reuse_20261015/NEXT_GATE.md).
