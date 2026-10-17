@@ -603,6 +603,142 @@ fn cmd_tally(args: &[String]) {
     );
 }
 
+/// j-invariants of the class-number-one discriminants.
+const CM1: [(i128, i128); 9] = [
+    (-3, 0),
+    (-4, 1728),
+    (-7, -3375),
+    (-8, 8000),
+    (-11, -32768),
+    (-19, -884736),
+    (-43, -884736000),
+    (-67, -147197952000),
+    (-163, -262537412640768000),
+];
+
+/// n P = O for a point P != O with n prime and n > 4 sqrt(p) proves #E = n.
+fn order_is(c: &PCurve, n: u128, seed: &str) -> bool {
+    let pt = prime_point(c, seed);
+    pt != Pt::Inf && c.mul(pt, n) == Pt::Inf
+}
+
+fn non_residue(k: &Fp) -> u64 {
+    (2..).find(|&z| !k.is_square(z)).unwrap()
+}
+
+/// One class-number-one CM curve with f = l prime (see ../PROTOCOL-gap.md).
+fn cm_gap_for(d: i128, j: i128) -> Option<String> {
+    let lo: u128 = 1 << 60;
+    let hi: u128 = 1 << 61;
+    let big_l = isqrt((1u128 << 63) / d.unsigned_abs());
+    let mut l = big_l;
+    let mut tried = 0u64;
+    if d % 4 == 0 || d.rem_euclid(8) == 1 {
+        // d = 0 (mod 4): t even, so n = p + 1 - t is even (no prime order).
+        // d = 1 (mod 8): t, l odd give t^2 + |d| l^2 = 0 (mod 8), so p is even.
+        return None;
+    }
+    let floor_l = big_l / 2;
+    let mut primes_seen = 0u32;
+    while l > floor_l {
+        if !is_prime(l) {
+            l -= 1;
+            continue;
+        }
+        let dl2 = d.unsigned_abs() * l * l;
+        primes_seen += 1;
+        if primes_seen > 2000 {
+            return None;
+        }
+        for t in 1u128..200_000 {
+            let num = t * t + dl2;
+            if num % 4 != 0 {
+                continue;
+            }
+            let p = num / 4;
+            if p <= lo || p >= hi || !is_prime(p) {
+                continue;
+            }
+            let n = p + 1 - t;
+            if !is_prime(n) || n <= isqrt(16 * p) {
+                continue;
+            }
+            if d != -3 && d != -4 && p % 4 != 3 {
+                continue;
+            }
+            tried += 1;
+            let k = Fp { p: p as u64 };
+            let seed = format!("isogeny-class-trio/2026-10-17/cm-gap/d{d}/l{l}/t{t}");
+            let (a, b, form) = if d == -3 {
+                let found = (1u64..200).find(|&b| order_is(&PCurve { k: k.clone(), a: 0, b }, n, &seed));
+                match found {
+                    Some(b) => (0u64, b, "y^2 = x^3 + b (j = 0, secp256k1 form)"),
+                    None => continue,
+                }
+            } else if d == -4 {
+                let found = (1u64..200).find(|&a| order_is(&PCurve { k: k.clone(), a, b: 0 }, n, &seed));
+                match found {
+                    Some(a) => (a, 0u64, "y^2 = x^3 + a x (j = 1728)"),
+                    None => continue,
+                }
+            } else {
+                let jm = j.rem_euclid(p as i128) as u64;
+                let s1728 = k.sub(1728 % k.p, jm);
+                let a0 = k.mul(3, k.mul(jm, s1728));
+                let b0 = k.mul(2, k.mul(jm, k.mul(s1728, s1728)));
+                let c = non_residue(&k);
+                let tw = (k.mul(k.mul(c, c), a0), k.mul(k.mul(c, k.mul(c, c)), b0));
+                let (a1, b1) = if order_is(&PCurve { k: k.clone(), a: a0, b: b0 }, n, &seed) {
+                    (a0, b0)
+                } else if order_is(&PCurve { k: k.clone(), a: tw.0, b: tw.1 }, n, &seed) {
+                    tw
+                } else {
+                    continue;
+                };
+                // a = -3 form: u^4 = -3 / a1; p = 3 (mod 4) so fourth powers = squares
+                let target = k.mul(k.sub(0, 3), k.inv(a1));
+                let Some(sq) = k.sqrt(target) else { continue };
+                let sq = if k.is_square(sq) { sq } else { k.sub(0, sq) };
+                let u = k.sqrt(sq).unwrap();
+                let u2 = k.mul(u, u);
+                let a3 = k.mul(k.mul(u2, u2), a1);
+                assert_eq!(a3, k.sub(0, 3));
+                let b3 = k.mul(k.mul(u2, k.mul(u2, u2)), b1);
+                (a3, b3, "y^2 = x^3 - 3x + b (P-curve form)")
+            };
+            let c = PCurve { k: k.clone(), a, b };
+            assert!(order_is(&c, n, &format!("{seed}:check")));
+            let fd = frob_disc(t as i128, p);
+            assert_eq!((fd.d_k, fd.f), (if d == -4 || d == -8 { d } else { d }, l));
+            let jj = j.rem_euclid(p as i128);
+            let h_k = 1u64;
+            let (strata, total) = strata_json(&fd, h_k);
+            let g = prime_point(&c, &format!("{seed}:G0"));
+            let Pt::A(gx, gy) = g else { unreachable!() };
+            return Some(format!(
+                "{{\"family\":\"prime-cm-gap\",\"d\":{d},\"j\":\"{jj}\",\"form\":\"{form}\",\"p\":\"{p}\",\"p_hex\":\"0x{p:x}\",\"a\":\"{a}\",\"b\":\"{b}\",\"t\":\"{t}\",\"order\":\"{n}\",\"r\":\"{n}\",\"r_bits\":{},\"cofactor\":\"1\",\"gap_l\":\"{l}\",\"gap_l_bits\":{},\"generator\":[\"0x{gx:x}\",\"0x{gy:x}\"],\"generator_seed\":\"{seed}:G0\",\"order_certificate\":{{\"nP=O\":true,\"n_prime\":true,\"n_gt_4sqrt_p\":true}},\"candidates_tried\":{tried},{},\"h_dK\":\"1\",\"strata\":{strata},\"class_size\":\"{total}\",\"root_level\":\"crater (End = O_K: j = j(O_K), h(d) = 1)\"}}",
+                128 - n.leading_zeros(),
+                128 - l.leading_zeros(),
+                disc_json(&fd)
+            ));
+        }
+        l -= 1;
+    }
+    None
+}
+
+fn cmd_cm_gap(_args: &[String]) {
+    for (d, j) in CM1 {
+        match cm_gap_for(d, j) {
+            Some(line) => println!("{line}"),
+            None => println!(
+                "{{\"family\":\"prime-cm-gap\",\"d\":{d},\"found\":false,\"reason\":\"{}\"}}",
+                if d % 4 == 0 { "t even, so n = p + 1 - t is even: prime order impossible" } else if d.rem_euclid(8) == 1 { "d = 1 (mod 8): odd t and odd l make t^2 + |d| l^2 = 0 (mod 8), so 4p would force p even" } else if d == -11 { "3 splits and 3 does not divide l: p prime forces t = 0 (mod 3), then 3 | n" } else { "none in the first 2000 primes l below L, t < 200000" }
+            ),
+        }
+    }
+}
+
 fn cmd_classno(args: &[String]) {
     let d: i128 = arg(args, "--d").expect("--d").parse().unwrap();
     assert!(classno::is_fundamental(d));
@@ -620,6 +756,7 @@ fn main() {
         Some("classno") => cmd_classno(&args),
         Some("check-point") => cmd_check_point(&args),
         Some("tally") => cmd_tally(&args),
+        Some("cm-gap") => cmd_cm_gap(&args),
         Some("modulus") => {
             let m = arg_u(&args, "--m", 53) as u32;
             println!("{:?}", standard_modulus(m));

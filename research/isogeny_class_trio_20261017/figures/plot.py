@@ -142,7 +142,32 @@ def volcanoes():
     save(fig, "volcanoes")
 
 
+def gap_set():
+    rows = [json.loads(line) for line in (DATA / "cm-gap.jsonl").read_text().splitlines()]
+    fig, ax = plt.subplots(figsize=(7.5, 3.4))
+    for i, r in enumerate(rows):
+        if r.get("p"):
+            feat = r["d"] in (-3, -19)
+            ax.bar(i, int(r["gap_l"]), color=COL["P"] if feat else "#a9dcc6", width=0.6)
+            label = f"l = {int(r['gap_l']):,}" + (f"\n{r['form'].split(' (')[0]}" if feat else "")
+            ax.annotate(label, (i, int(r["gap_l"])),
+                        textcoords="offset points", xytext=(0, 3), ha="center", fontsize=5.5, color=INK)
+        else:
+            ax.annotate("impossible\n(prime order)" if r["d"] != -7 else "impossible\n(p even)",
+                        (i, 0), textcoords="offset points", xytext=(0, 4), ha="center",
+                        fontsize=6, color=INK2)
+    ax.set_xticks(range(len(rows)))
+    ax.set_xticklabels([f"d = {r['d']}" for r in rows], fontsize=7)
+    ax.set_ylabel("prime conductor gap l")
+    ax.set_ylim(0, 2.1e9)
+    ax.set_title("Class-number-one CM curves near 2^61 with f = l prime (dark = featured)", fontsize=9)
+    ax.grid(axis="y", color=GRID, linewidth=0.6)
+    ax.set_axisbelow(True)
+    save(fig, "gap-set")
+
+
 if __name__ == "__main__":
+    gap_set()
     strata()
     search()
     koblitz()

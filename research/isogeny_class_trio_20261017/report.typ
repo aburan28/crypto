@@ -111,6 +111,79 @@ Their stratum sizes: K-41 1 / 410 / 1,722 / 706,020; B-47 11,468 /
 366,976 / 11,376,256; P-47 55,396 / 110,792 / 332,376 / 997,128 /
 2,991,384 / 8,974,152.
 
+== Prime-conductor-gap set (61 bits, class-number-one CM)
+<prime-conductor-gap-set-61-bits-class-number-one-cm>
+The user added a criterion: a #strong[large prime conductor gap], the
+Frobenius conductor being a single large prime `f = l`, so the class is
+a crater (`End = O_K`) and a floor (`End = Z[π]`) at index `l`. Seeded
+random coefficients essentially never give a large `l` (the largest
+conductor prime among 1,526 seeded 61-bit prime-subgroup curves was
+109), so the user approved a CM construction
+(#link("PROTOCOL-gap.md")[`PROTOCOL-gap.md`], frozen before it ran).
+Every curve below has prime order, sits on the crater, and has exactly
+two strata. The order is certified by `n·P = O` with `n` prime and
+`n > 4√p`\; `src/bin/isogeny_walk.rs` reproduces each trace, `Δ = d·l^2`
+and the prime order (`data/walker-class-cm-gap-d*.txt`).
+
+#figure(
+  align(center)[#table(
+    columns: 7,
+    align: (left,left,left,left,left,left,left,),
+    table.header([], [`d`], [Form], [`p`], [Gap `l`], [Floor
+      `h(d l^2)`], [Class size],),
+    table.hline(),
+    [★ `icv1-fp61-t205-983ecb51`], [−3], [`y^2 = x^3 + 5` (secp256k1
+    form,
+    `j = 0`)], [`0x1ffffff43f9a9a39`], [1,753,413,037], [584,471,012], [584,471,013],
+    [★
+    `icv1-fp61-t7175-7e38f752`], [−19], [`y^2 = x^3 − 3x + 0x14eb628f40fdf1f3`
+    (P-curve
+    form)], [`2305842959800795691`], [696,735,691], [696,735,692], [696,735,693],
+    [`icv1-fp61-t727-ddf032b6`], [−43], [P-curve
+    form], [`2305842677174433443`], [463,138,201], [463,138,200], [463,138,201],
+    [`icv1-fp61-t2279-df6b5e41`], [−67], [P-curve
+    form], [`2305842976999134887`], [371,028,661], [371,028,660], [371,028,661],
+    [`icv1-fp61-t95-4d1bb712`], [−163], [P-curve
+    form], [`2305842838172865227`], [237,876,229], [237,876,228], [237,876,229],
+  )]
+  , kind: table
+  )
+
+Full parameters, generators and strata are in
+#link("data/cm-gap.jsonl")[`data/cm-gap.jsonl`].
+
+#strong[Impossible discriminants] (derived, recorded in the protocol
+notes):
+
+- `d = −4, −8`: `t` must be even, so `n = p + 1 − t` is even and prime
+  order is impossible.
+- `d = −7`: odd `t` and odd `l` make `t^2 + 7 l^2 ≡ 0 (mod 8)`, so `p`
+  would be even.
+- `d = −11`: `p ≡ t^2 + 2 l^2 (mod 3)`, so `p` prime forces `3 | t` and
+  then `3 | n`.
+
+#strong[Binary member: the Koblitz pick.] Over `GF(2^m)` with `m` prime,
+`(π) = 𝔭^m`. So either `𝔭` is principal, which gives
+`8 = a^2 + |d| b^2`, `d = −7` and a Koblitz class; or `m | h(d_K)`.
+Class-number-one CM therefore gives nothing new in characteristic 2, and
+the binary large-gap curve is `icv1-f2m61-t158598901-ab42b6c5` (prime
+gaps 1951 and 587551). A binary CM curve outside the Koblitz classes
+needs a Hilbert class polynomial of degree at least 61, which this study
+does not build.
+
+#strong[What a whole-class pass needs here.] The vertical step has
+degree `l` (about `2^28` to `2^31`), and its kernel x-coordinates lie in
+extensions of degree about `l/2` to `l/8` (`kernel_x_field_degree` in
+the data). The crater curve\'s small-`l` isogeny graph is a single
+vertex with loops. As with K-61, the floor (essentially the whole class)
+is not reachable from the crater by any isogeny this repository can
+compute. It has to be constructed directly (a ring class polynomial of
+degree about `l`) or reached by a new large-degree isogeny method. This
+is the price of a large prime gap, and the experiment design has to plan
+around it.
+
+#image("figures/gap-set.svg", width: 100%)
+
 == Findings
 <findings>
 + #strong[No prime-degree Koblitz curve has the standard cofactor
@@ -265,6 +338,7 @@ $B analyze-binary --m 61 --a2 1 --b 0x9c60f836d06fc8 --seed isogeny-class-trio/2
 $B analyze-prime --p 2305843009213693951 --b 0x54aa66b458b77ec --seed isogeny-class-trio/2026-10-17/P-61/b/11526 > ../data/pick-P61.json
 $B check-point --m 61 --a2 0 --b 1 --r 162888033982417 --gx 0x5cc1d6ba365013e --gy 0x171d9a59a2d31eb9
 $B tally --in ../data/search-B61.jsonl             > ../data/tally-B61.json
+$B cm-gap                                         > ../data/cm-gap.jsonl
 # (41/47-bit trio: same commands with --m 41 / 47, --p 140737488355213 and the seeds in the table)
 ```
 

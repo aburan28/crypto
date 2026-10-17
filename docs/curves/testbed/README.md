@@ -23,6 +23,27 @@ highlights a few curves from it. Machine-readable list:
 | Where it sits | crater; the only curve with `End = Z[τ]` | floor (`End = Z[π]`) | floor of both volcanoes |
 | What it is good for | Frobenius (τ) endomorphism; large prime conductor gaps; the class is reachable only through degree-1951 and degree-587551 steps | char-2 7-isogeny volcanoes; a near-prime order like B-163 | the P-521 prime form; many strata reachable with 3- and 5-isogenies (the repository walker supports both) |
 
+## ★ Featured: large prime conductor gap (61 bits)
+
+These curves have Frobenius conductor `f = l`, a single large prime, so the
+class is a crater (`End = O_K`) and a floor (`End = Z[π]`) at index `l`.
+They were built by class-number-one CM, and each has prime order.
+
+| Curve | EC1 | Form | Gap `l` | Class size | Good for |
+|:--|:--|:--|:--|:--|:--|
+| `icv1-fp61-t205-983ecb51` | `EC1P61Cfph54bb8886c801` | `y^2 = x^3 + 5` over `p = 0x1ffffff43f9a9a39` (secp256k1 form, `j = 0`, order-6 automorphisms on the crater) | 1,753,413,037 | 584,471,013 | crater-vs-floor gaps with the `sqrt(3)` automorphism mechanism of `research/drastic_prime_conductor_gap_round2_20261012/` |
+| `icv1-fp61-t7175-7e38f752` | `EC1P61Cfphde4753195a5f` | `y^2 = x^3 − 3x + 0x14eb628f40fdf1f3` over `p = 2305842959800795691` (P-curve form, `d = −19`) | 696,735,691 | 696,735,693 | the largest prime gap with an `a = −3` model |
+| `icv1-f2m61-t158598901-ab42b6c5` | `EC1N61Ce0hd8c15448081e` | the Koblitz curve above | 1951 and 587551 | 1,147,491,009 | binary: for prime `m`, class-number-one CM gives only Koblitz classes |
+
+Also built: `icv1-fp61-t727-ddf032b6` (`d = −43`, `l = 463,138,201`),
+`icv1-fp61-t2279-df6b5e41` (`d = −67`, `l = 371,028,661`),
+`icv1-fp61-t95-4d1bb712` (`d = −163`, `l = 237,876,229`). No prime-order
+curve exists for `d = −4, −7, −8, −11`; the report gives the reasons.
+
+Caution: from the crater, the floor is reachable only by a degree-`l`
+isogeny, which no tool here computes. The floor curves have to be
+constructed directly.
+
 ## Also useful: the 41/47-bit trio (smaller classes)
 
 | Curve | Shape | `f` | Strata / class size | Root |

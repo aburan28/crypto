@@ -2,7 +2,7 @@
 
 **Start here for testing:** the [curve testbed](testbed/README.md) highlights
 recommended curves with standardized shapes, proved orders and exactly counted
-multi-level isogeny classes; the 61-bit Koblitz, binary and prime trio is featured.
+multi-level isogeny classes; the 61-bit Koblitz, binary and prime trio and a 61-bit large-prime-conductor-gap set are featured.
 
 The [SEC 2 v1.0/v2.0 curve inventory](../../research/sec2_curve_inventory_20261012/REPORT.md)
 lists all 33 historical SECG names, identifies the 20 retained in 2010, and
