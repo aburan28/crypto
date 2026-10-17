@@ -2068,12 +2068,12 @@ fn bench_sea(o: &mut Out) {
     use isogeny_algos::find::sea::sea_opts;
     fn prefill<F: Field>(f: &F, max_ell: usize) -> (std::collections::HashMap<usize, Phi<F>>, f64) {
         let t0 = Instant::now();
-        let mut m = std::collections::HashMap::new();
-        for l in 3..=max_ell {
-            if is_prime(l as u64) {
-                m.insert(l, Phi::compute(f, l));
-            }
-        }
+        let ells: Vec<usize> = (3..=max_ell).filter(|&l| is_prime(l as u64)).collect();
+        let m = ells
+            .iter()
+            .copied()
+            .zip(Phi::compute_many(f, &ells))
+            .collect();
         (m, t0.elapsed().as_nanos() as f64)
     }
     let degrees: &[usize] = &[0, 20, 40, 80];
