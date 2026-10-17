@@ -1,0 +1,77 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "k = 4 IC in characteristic 2 on E(F_(2^6)^4): three forms of the D4 system, paired, with rho",
+  "description": "PROTOCOL.md Part B1. f2m4_torsion(6, 1, 16), two targets. Arms: rho with the negation map (reference); ic.pipeline + bin-t-line with gaudry-d4-bin in its unweighted five-unknown form (degree 14), the weighted (2,2,2,1) form (degree 26) and the Frobenius-reduced (2,2,1,1) form (degree 11), each with sparsest pivots, shape replay and unsolved systems charged; rho A/A.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "f2m4_torsion",
+        "m": 6,
+        "seed": 1,
+        "max_cofactor": 16
+      }
+    ],
+    "targets_per_curve": 2,
+    "target_seed": 202610150001
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "ic-plain",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "bin-t-line",
+          "oracle": "gaudry-d4-bin:macaulay=14,sparsest=1,replay=1,charge_unsolved=1",
+          "max_trials": "5000000"
+        }
+      }
+    },
+    {
+      "name": "ic-weighted",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "bin-t-line",
+          "oracle": "gaudry-d4-bin:macaulay=26,weighted=1,sparsest=1,replay=1,charge_unsolved=1",
+          "max_trials": "5000000"
+        }
+      }
+    },
+    {
+      "name": "ic-frobenius",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "bin-t-line",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1",
+          "max_trials": "5000000"
+        }
+      }
+    },
+    {
+      "name": "rho-neg-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.negation"
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 202610150002,
+    "isolation_required": "L2",
+    "timeout_seconds": 86400
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "schema_version": "ecdlp-audit.governance/v1-draft",
+  "record_kind": "workflow_fixture",
+  "record_id": "gov.fixture.promotion.eligible-draft",
+  "status": "draft",
+  "authoritative": false,
+  "promotion_allowed": false,
+  "self_promotion_allowed": false,
+  "synthetic_only": true,
+  "created_at": "2026-10-14T00:00:00Z",
+  "source_plan": "research/notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.md#workstream-8--add-independent-governance",
+  "draft_notice": "This positive workflow drill can only report eligibility for later authoritative review; it cannot promote its synthetic subject.",
+  "fixture": {
+    "fixture_version": "ws8-workflow-fixture/v1-draft",
+    "scenario_kind": "promotion",
+    "synthetic_scope": {
+      "fixture_only": true,
+      "public_synthetic": true,
+      "contains_real_target": false,
+      "contains_secret": false,
+      "operational_execution": false,
+      "scientific_evidence": false
+    },
+    "subject": {
+      "subject_id": "synthetic.claim.promotion-candidate",
+      "description": "Synthetic claim used only to exercise the role-separated promotion path.",
+      "claim_status_before": "unknown",
+      "maturity_before": "E4",
+      "authoritative_state_before": "unchanged_fixture_baseline"
+    },
+    "request": {
+      "transition_kind": "promotion",
+      "requested_by": "author",
+      "author_identity": "synthetic:actor:author-a",
+      "source_assessment_id": "synthetic.assessment.promotion.base",
+      "proposed_assessment_id": "synthetic.assessment.promotion.proposed",
+      "review_binding": {
+        "aggregate_revision_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+      },
+      "exact_revisions": [
+        {"component": "source_assessment", "revision_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+        {"component": "proposed_aggregate", "revision_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"},
+        {"component": "evidence_bundle", "revision_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+        {"component": "evidence_profile", "revision_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"},
+        {"component": "accounting_receipt", "revision_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"},
+        {"component": "implementation", "revision_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"},
+        {"component": "authorization_record", "revision_digest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"},
+        {"component": "governance_schema", "revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777"},
+        {"component": "dependency_lock", "revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}
+      ],
+      "conditional_roles_invoked": ["authorization_privacy_reviewer"],
+      "evidence_receipt_ids": ["synthetic.receipt.promotion.replay", "synthetic.receipt.promotion.accounting"],
+      "requested_claim_status": "supported",
+      "requested_maturity": "E5",
+      "justification": "All synthetic gates are modeled as fresh and all required roles are assigned to distinct eligible actors."
+    },
+    "assignments": [
+      {"role": "author", "actor_id": "synthetic:actor:author-a", "relationship_to_author": "same_person", "contributed_to_subject": true, "conflict_disclosed": false, "conflict_description": null, "eligible": true},
+      {"role": "mathematical_reviewer", "actor_id": "synthetic:actor:math-b", "relationship_to_author": "different_team", "contributed_to_subject": false, "conflict_disclosed": false, "conflict_description": null, "eligible": true},
+      {"role": "implementation_reviewer", "actor_id": "synthetic:actor:impl-c", "relationship_to_author": "different_team", "contributed_to_subject": false, "conflict_disclosed": false, "conflict_description": null, "eligible": true},
+      {"role": "evidence_replay_reviewer", "actor_id": "synthetic:actor:replay-d", "relationship_to_author": "external", "contributed_to_subject": false, "conflict_disclosed": false, "conflict_description": null, "eligible": true},
+      {"role": "authorization_privacy_reviewer", "actor_id": "synthetic:actor:authorization-e", "relationship_to_author": "different_team", "contributed_to_subject": false, "conflict_disclosed": false, "conflict_description": null, "eligible": true},
+      {"role": "release_approver", "actor_id": "synthetic:actor:release-f", "relationship_to_author": "different_team", "contributed_to_subject": false, "conflict_disclosed": false, "conflict_description": null, "eligible": true}
+    ],
+    "decisions": [
+      {"role": "mathematical_reviewer", "actor_id": "synthetic:actor:math-b", "review_binding": {"aggregate_revision_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111", "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}, "decision": "approve", "rationale": "Synthetic hypotheses and scope are internally consistent for this drill.", "evidence_receipt_ids": ["synthetic.receipt.promotion.math"], "decided_at": "2026-10-14T00:10:00Z"},
+      {"role": "implementation_reviewer", "actor_id": "synthetic:actor:impl-c", "review_binding": {"aggregate_revision_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111", "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}, "decision": "approve", "rationale": "Synthetic artifact binding and negative cases are marked complete for this drill.", "evidence_receipt_ids": ["synthetic.receipt.promotion.implementation"], "decided_at": "2026-10-14T00:11:00Z"},
+      {"role": "evidence_replay_reviewer", "actor_id": "synthetic:actor:replay-d", "review_binding": {"aggregate_revision_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111", "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}, "decision": "approve", "rationale": "The synthetic replay receipt matches the frozen synthetic inputs.", "evidence_receipt_ids": ["synthetic.receipt.promotion.replay"], "decided_at": "2026-10-14T00:12:00Z"},
+      {"role": "authorization_privacy_reviewer", "actor_id": "synthetic:actor:authorization-e", "review_binding": {"aggregate_revision_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111", "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}, "decision": "approve", "rationale": "The drill contains only public synthetic records and no operational execution.", "evidence_receipt_ids": ["synthetic.receipt.promotion.authorization"], "decided_at": "2026-10-14T00:13:00Z"},
+      {"role": "release_approver", "actor_id": "synthetic:actor:release-f", "review_binding": {"aggregate_revision_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111", "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}, "decision": "approve", "rationale": "The synthetic request would be eligible for authoritative review, but this draft has no state-transition authority.", "evidence_receipt_ids": ["synthetic.receipt.promotion.release"], "decided_at": "2026-10-14T00:14:00Z"}
+    ],
+    "preflight_checks": [
+      {"check": "schema", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.promotion.schema", "rationale": "All synthetic records match their pinned draft structures."},
+      {"check": "identity", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.promotion.identity", "rationale": "Synthetic identifiers are unique within the fixture."},
+      {"check": "revision_binding", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.promotion.revisions", "rationale": "The request binds each modeled component by digest."},
+      {"check": "evidence_profile", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.promotion.profile", "rationale": "The modeled gates form a contiguous synthetic E0-E5 prefix."},
+      {"check": "accounting", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.promotion.accounting", "rationale": "The synthetic accounting receipt has no missing modeled phases."},
+      {"check": "authorization", "checker": "reviewer", "result": "pass", "receipt_id": "synthetic.receipt.promotion.authorization", "rationale": "Only synthetic non-operational material is in scope."},
+      {"check": "staleness", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.promotion.freshness", "rationale": "No synthetic expiry or invalidating event is present."},
+      {"check": "conflicts", "checker": "reviewer", "result": "pass", "receipt_id": "synthetic.receipt.promotion.conflicts", "rationale": "Required roles are modeled as conflict-free."},
+      {"check": "history", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.promotion.history", "rationale": "The modeled transition would append and preserve the prior record."},
+      {"check": "required_roles", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.promotion.roles", "rationale": "All modeled required roles are distinct and have decisions."}
+    ],
+    "history_snapshot": {
+      "prior_record_ids": ["synthetic.assessment.promotion.base"],
+      "prior_record_digests": ["sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
+      "append_only": true,
+      "records_deleted": false,
+      "records_rewritten": false
+    },
+    "identity_checks": {
+      "author_not_reviewer": true,
+      "required_roles_distinct": true,
+      "release_approver_not_author": true,
+      "conflicts_clear": true,
+      "every_decision_matches_requested_aggregate": true,
+      "every_decision_matches_governance_schema": true,
+      "every_decision_matches_dependency_revision": true,
+      "no_self_promotion_effect": true,
+      "draft_cannot_promote": true
+    },
+    "expected_outcome": {
+      "workflow_disposition": "eligible_for_authoritative_review",
+      "state_effect": "none_draft_only",
+      "authoritative_status_after": "unchanged",
+      "simulated_claim_status_after": "supported",
+      "simulated_maturity_after": "E5",
+      "history_effect": "would_append_assessment",
+      "reasons": ["All synthetic preflight and role gates pass.", "The fixture remains non-authoritative and therefore performs no promotion."]
+    },
+    "semantic_validator_required": true
+  }
+}

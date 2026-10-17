@@ -58,6 +58,7 @@ Supported plug-in families (binary / Koblitz unless noted):
 | `binary-subspace` | `binary-subspace:dimension=4` | abscissa subspace |
 | `compact-orbit-scan` | `compact-orbit-scan:columns=10,raw_x_cap=10000` | raw-x scan + fold |
 | `cyclotomic` | `cyclotomic:w=1` | needs `2n+1` prime, `ord(2)=n` (e.g. n=11,23) |
+| `onb-weight` | `onb-weight:w=1[,columns=N]` | ONB Hamming-weight-`w` abscissae; same fold as cyclotomic; odd `n<64` |
 | `koblitz-standard-subspace` | `koblitz-standard-subspace:dimension=4` | PDP / standard basis (binary plug-in) |
 | `prime-abscissa` | `prime-abscissa:size=32` | prime curves |
 | `glv-orbit` | `glv-orbit:size=16` | prime curves with automorphism fold |
@@ -140,12 +141,60 @@ jq -r 'select(.arm=="ic-orbit") | .factor_base.fb_id' OUT_DIR/records.jsonl | so
 A mismatch means the constructor or curve slug drifted; do not cite the
 session against that dump.
 
+## FBM1 — measurement identity
+
+FB1 names a point set. **FBM1** names the measurement configuration that
+produced yield / DoR / cost numbers against that set:
+
+```
+curve (ICV1 slug) × FB1 × oracle × solver × linalg × instrument
+```
+
+Results (S, yield, solving degree, Sage D\*, …) attach to an FBM1 id; they
+are never part of the hash (same rule as ICV1). Schema:
+`ecbench.factor_base_measurement/v1`. Short id: `FBM1h` + 12 hex.
+
+```bash
+./target/release/ecbench fbm \
+  --curve '{"kind":"koblitz","a":1,"n":17}' \
+  --factor-base 'binary-subspace:dimension=4' \
+  --oracle 'descent-algebraic:m=2' \
+  --solver 'f4-f2' \
+  --out /tmp/fbm.json
+```
+
+IC records written by `ecbench run` carry `fbm_id` next to `factor_base`
+when the run used a factor base. The database tables
+`factor_base_measurements` / `factor_base_measurement_cells` and the view
+`fb_measurement_ledger` index them (`docs/ecbench/schema.sql` v3).
+
+**Cite yield or DoR only with both `fb_id` and `fbm_id`.** Orphan Sage DoR
+JSON (no matching FB1 dump / catalog entry) is refused by
+`research/ecbench_factor_bases_20261013/join_sage_dor.py`.
+
+Instrument tags:
+
+| tag | meaning |
+|:--|:--|
+| `ecbench.ic_pipeline/v1` | native `ic.pipeline` session |
+| `sage.factor_base_dor/v1` | Sage `factor_base_dor.sage` cell joined by FB1 |
+
+## Algebraic panel
+
+Table oracles (`mitm`, `mitm-frobenius`) fill yield and S. Algebraic
+oracles (`descent-algebraic` / counted) fill `run_solver` (DoR proxies).
+Keep mitm arms as yield/cost controls next to algebraic arms on the same
+FB1. Specs live under `research/ecbench_factor_bases_20261013/specs/`
+(`*-algebraic.json`, `*-onb.json`).
+
 ## Catalog
 
 A research round that freezes several bases keeps a catalog JSON (schema
 `ecbench.factor_base_catalog/v1`) listing for each entry: plug-in string,
 curve constructor, `fb_id`, store name, optional Git relative path, and
-the oracle used in the companion ecbench spec. The worked example is
+the oracle used in the companion ecbench spec. Grow the catalog with
+every new family. CI runs `check_fb_ids.py` (and `check_fbm_ids.py` when
+sessions carry `fbm_id`). The worked example is
 `research/ecbench_factor_bases_20261013/`.
 
 ## Git vs S3 decision

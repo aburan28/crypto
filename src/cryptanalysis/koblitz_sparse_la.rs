@@ -1306,6 +1306,10 @@ pub struct FilterReport {
     pub rows_out: usize,
     pub columns_out: usize,
     pub nonzeros_out: usize,
+    /// Multiply-subtracts on a row entry (right-hand side included) the
+    /// merges performed: one per entry of the pivot row per combination.
+    #[serde(default, skip_serializing_if = "is_default")]
+    pub row_ops: u64,
 }
 
 /// The reduced system plus everything needed to undo the reduction.
@@ -1422,6 +1426,7 @@ impl<W: ModWord> Workspace<W> {
             let row = self.detach(r).expect("active");
             let factor = row.coefficient(c).expect("member").mul(inv, &m);
             let reduced = row.axpy(factor, &pivot, m);
+            self.report.row_ops += pivot.weight() as u64 + 1;
             debug_assert!(reduced.coefficient(c).is_none());
             if reduced.entries.is_empty() {
                 if !reduced.rhs.is_zero() {
@@ -1555,6 +1560,7 @@ impl<W: ModWord> Workspace<W> {
                 .ok_or(Inconsistent)?;
             let factor = originals[k].coefficient(c).expect("member").mul(inv, &m);
             let reduced = originals[k].axpy(factor, p, m);
+            self.report.row_ops += p.weight() as u64 + 1;
             debug_assert!(reduced.coefficient(c).is_none());
             if reduced.entries.is_empty() {
                 if !reduced.rhs.is_zero() {
@@ -2018,6 +2024,18 @@ impl<W: ModWord> FilteredSystem<W> {
         core_solution: &[W],
         original_rows: &[SparseRow<W>],
     ) -> Option<Vec<W>> {
+        self.reconstruct_counted(core_solution, original_rows, &mut 0)
+    }
+
+    /// [`Self::reconstruct`], adding to `ops` one per row entry a
+    /// back-substitution reads and, for the residual dense solve, the
+    /// Gauss–Jordan bound `rows × unknowns²`.
+    fn reconstruct_counted(
+        &self,
+        core_solution: &[W],
+        original_rows: &[SparseRow<W>],
+        ops: &mut u64,
+    ) -> Option<Vec<W>> {
         let m = &self.modulus;
         assert_eq!(
             core_solution.len(),
@@ -2028,7 +2046,8 @@ impl<W: ModWord> FilteredSystem<W> {
         for (&c, &v) in self.core_columns.iter().zip(core_solution) {
             value[c as usize] = Some(v);
         }
-        let solve_row = |row: &SparseRow<W>, col: u32, value: &[Option<W>]| -> Option<W> {
+        let mut solve_row = |row: &SparseRow<W>, col: u32, value: &[Option<W>]| -> Option<W> {
+            *ops += row.weight() as u64;
             let mut acc = row.rhs;
             let mut pivot = None;
             for &(c, v) in &row.entries {
@@ -2107,6 +2126,7 @@ impl<W: ModWord> FilteredSystem<W> {
                 rows.push(dense);
                 rhs.push(b);
             }
+            *ops += (rows.len() * unknown.len() * unknown.len()) as u64;
             let solved = dense_solve_unique(rows, rhs, self.modulus)?;
             for (&c, v) in unknown.iter().zip(solved) {
                 value[c as usize] = Some(v);
@@ -3329,6 +3349,15 @@ pub struct SparseSolveReport {
     /// Columns recovered by back-substitution, propagation and the
     /// residual dense solve after the core.
     pub reconstructed_columns: usize,
+    /// Multiply-subtracts on a matrix entry over the whole solve, in the
+    /// unit the incremental plug-ins report as `row_ops`: the filter's
+    /// merges, the folding, the sparse products of every Krylov run that
+    /// returned (`non-zeros × lanes`, the homogenising column included),
+    /// the core and final checks and the reconstruction.  The `block × block` arithmetic of the
+    /// approximant basis or the Lanczos recurrences is not counted, as
+    /// the dense plug-in does not count its column scans.
+    #[serde(default, skip_serializing_if = "is_default")]
+    pub row_ops: u64,
 }
 
 /// Outcome of [`solve_sparse_system`].
@@ -3405,6 +3434,7 @@ pub fn solve_sparse_system<W: ModWord>(
         Err(Inconsistent) => return (SparseSolveOutcome::Inconsistent, report),
     };
     report.filter = filtered.report.clone();
+    report.row_ops = filtered.report.row_ops;
     let core_cols = filtered.core_columns.len();
     if filtered.core_rows.len() < core_cols {
         return (SparseSolveOutcome::Undetermined, report);
@@ -3436,6 +3466,11 @@ pub fn solve_sparse_system<W: ModWord>(
         for attempt in 0..opts.attempts.max(1) {
             report.attempts = attempt + 1;
             let square = fold_square(&core, core_cols, modulus, opts.fold, &mut rng);
+            report.row_ops += core[core_cols.min(core.len())..]
+                .iter()
+                .map(|r| (r.weight() as u64 + 1) * opts.fold.max(1) as u64)
+                .sum::<u64>();
+            let square_nonzeros: u64 = square.iter().map(|r| r.weight() as u64).sum();
             let a = CsrMatrix::from_rows(&square, core_cols, modulus).with_spmv(opts.spmv);
             let b: Vec<W> = square.iter().map(|r| r.rhs).collect();
             let x = match opts.solver {
@@ -3445,6 +3480,8 @@ pub fn solve_sparse_system<W: ModWord>(
                     else {
                         continue;
                     };
+                    report.row_ops +=
+                        (wr.products * wr.block_n) as u64 * (square_nonzeros + square.len() as u64);
                     report.wiedemann = Some(wr);
                     let t = z[core_cols];
                     let Some(inv) = (!t.is_zero()).then(|| t.inv(m)).flatten() else {
@@ -3457,10 +3494,12 @@ pub fn solve_sparse_system<W: ModWord>(
                     else {
                         continue;
                     };
+                    report.row_ops += (lr.sparse_products * lr.block_size) as u64 * square_nonzeros;
                     report.lanczos = Some(lr);
                     x
                 }
             };
+            report.row_ops += report.core_nonzeros as u64;
             if core.iter().all(|row| row.evaluate(&x, modulus) == row.rhs) {
                 core_solution = Some(x);
                 break;
@@ -3470,10 +3509,11 @@ pub fn solve_sparse_system<W: ModWord>(
     let Some(core_solution) = core_solution else {
         return (SparseSolveOutcome::Undetermined, report);
     };
-    let Some(full) = filtered.reconstruct(&core_solution, rows) else {
+    let Some(full) = filtered.reconstruct_counted(&core_solution, rows, &mut report.row_ops) else {
         return (SparseSolveOutcome::Undetermined, report);
     };
     report.reconstructed_columns = columns - core_cols;
+    report.row_ops += rows.iter().map(|r| r.weight() as u64).sum::<u64>();
     if rows
         .iter()
         .all(|row| row.evaluate(&full, modulus) == row.rhs)

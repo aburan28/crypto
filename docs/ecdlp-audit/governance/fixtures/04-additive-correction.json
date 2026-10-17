@@ -1,0 +1,123 @@
+{
+  "schema_version": "ecdlp-audit.governance/v1-draft",
+  "record_kind": "workflow_fixture",
+  "record_id": "gov.fixture.correction.additive",
+  "status": "draft",
+  "authoritative": false,
+  "promotion_allowed": false,
+  "self_promotion_allowed": false,
+  "synthetic_only": true,
+  "created_at": "2026-10-14T00:00:00Z",
+  "source_plan": "research/notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.md#workstream-8--add-independent-governance",
+  "draft_notice": "This drill models an additive supersession that retains the prior record and performs no authoritative correction.",
+  "fixture": {
+    "fixture_version": "ws8-workflow-fixture/v1-draft",
+    "scenario_kind": "additive_correction",
+    "synthetic_scope": {
+      "fixture_only": true,
+      "public_synthetic": true,
+      "contains_real_target": false,
+      "contains_secret": false,
+      "operational_execution": false,
+      "scientific_evidence": false
+    },
+    "subject": {
+      "subject_id": "synthetic.claim.corrected-receipt",
+      "description": "Synthetic claim whose evidence receipt referenced the wrong synthetic implementation digest.",
+      "claim_status_before": "supported",
+      "maturity_before": "E5",
+      "authoritative_state_before": "unchanged_fixture_baseline"
+    },
+    "request": {
+      "transition_kind": "additive_correction",
+      "requested_by": "author",
+      "author_identity": "synthetic:actor:author-a",
+      "source_assessment_id": "synthetic.assessment.correction.base",
+      "proposed_assessment_id": "synthetic.assessment.correction.replacement",
+      "review_binding": {
+        "aggregate_revision_digest": "sha256:5858585858585858585858585858585858585858585858585858585858585858",
+        "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+      },
+      "exact_revisions": [
+        {"component": "source_assessment", "revision_digest": "sha256:1414141414141414141414141414141414141414141414141414141414141414"},
+        {"component": "evidence_bundle", "revision_digest": "sha256:2525252525252525252525252525252525252525252525252525252525252525"},
+        {"component": "implementation", "revision_digest": "sha256:3636363636363636363636363636363636363636363636363636363636363636"},
+        {"component": "evidence_profile", "revision_digest": "sha256:4747474747474747474747474747474747474747474747474747474747474747"},
+        {"component": "proposed_aggregate", "revision_digest": "sha256:5858585858585858585858585858585858585858585858585858585858585858"},
+        {"component": "governance_schema", "revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777"},
+        {"component": "dependency_lock", "revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}
+      ],
+      "conditional_roles_invoked": [],
+      "evidence_receipt_ids": ["synthetic.receipt.correction.discovery", "synthetic.receipt.correction.replay"],
+      "requested_claim_status": "supported",
+      "requested_maturity": "E5",
+      "justification": "Append a replacement assessment with the correct synthetic implementation digest while retaining the erroneous prior record."
+    },
+    "assignments": [
+      {"role": "author", "actor_id": "synthetic:actor:author-a", "relationship_to_author": "same_person", "contributed_to_subject": true, "conflict_disclosed": false, "conflict_description": null, "eligible": true},
+      {"role": "mathematical_reviewer", "actor_id": "synthetic:actor:math-b", "relationship_to_author": "different_team", "contributed_to_subject": false, "conflict_disclosed": false, "conflict_description": null, "eligible": true},
+      {"role": "implementation_reviewer", "actor_id": "synthetic:actor:impl-c", "relationship_to_author": "different_team", "contributed_to_subject": false, "conflict_disclosed": false, "conflict_description": null, "eligible": true},
+      {"role": "evidence_replay_reviewer", "actor_id": "synthetic:actor:replay-d", "relationship_to_author": "external", "contributed_to_subject": false, "conflict_disclosed": false, "conflict_description": null, "eligible": true},
+      {"role": "release_approver", "actor_id": "synthetic:actor:release-f", "relationship_to_author": "different_team", "contributed_to_subject": false, "conflict_disclosed": false, "conflict_description": null, "eligible": true}
+    ],
+    "decisions": [
+      {"role": "mathematical_reviewer", "actor_id": "synthetic:actor:math-b", "review_binding": {"aggregate_revision_digest": "sha256:5858585858585858585858585858585858585858585858585858585858585858", "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}, "decision": "approve", "rationale": "The correction changes provenance binding but not the synthetic mathematical statement.", "evidence_receipt_ids": ["synthetic.receipt.correction.impact"], "decided_at": "2026-10-14T03:00:00Z"},
+      {"role": "implementation_reviewer", "actor_id": "synthetic:actor:impl-c", "review_binding": {"aggregate_revision_digest": "sha256:5858585858585858585858585858585858585858585858585858585858585858", "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}, "decision": "approve", "rationale": "The replacement binds the intended synthetic implementation digest.", "evidence_receipt_ids": ["synthetic.receipt.correction.implementation"], "decided_at": "2026-10-14T03:01:00Z"},
+      {"role": "evidence_replay_reviewer", "actor_id": "synthetic:actor:replay-d", "review_binding": {"aggregate_revision_digest": "sha256:5858585858585858585858585858585858585858585858585858585858585858", "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}, "decision": "approve", "rationale": "Replay against the corrected synthetic digest matches the preserved output receipt.", "evidence_receipt_ids": ["synthetic.receipt.correction.replay"], "decided_at": "2026-10-14T03:02:00Z"},
+      {"role": "release_approver", "actor_id": "synthetic:actor:release-f", "review_binding": {"aggregate_revision_digest": "sha256:5858585858585858585858585858585858585858585858585858585858585858", "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}, "decision": "approve", "rationale": "An authoritative system would append the replacement and supersedes edge without deleting the prior record.", "evidence_receipt_ids": ["synthetic.receipt.correction.release"], "decided_at": "2026-10-14T03:03:00Z"}
+    ],
+    "preflight_checks": [
+      {"check": "schema", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.correction.schema", "rationale": "The prior and replacement synthetic records match their schemas."},
+      {"check": "identity", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.correction.identity", "rationale": "The replacement has a new identity and a single supersedes target."},
+      {"check": "revision_binding", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.correction.revisions", "rationale": "The replacement binds the corrected implementation digest."},
+      {"check": "evidence_profile", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.correction.profile", "rationale": "The synthetic E0-E5 evidence remains contiguous after replay."},
+      {"check": "conflicts", "checker": "reviewer", "result": "pass", "receipt_id": "synthetic.receipt.correction.conflicts", "rationale": "Required actors are distinct and conflict-free."},
+      {"check": "history", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.correction.history", "rationale": "The prior digest remains addressable and no record is rewritten."},
+      {"check": "required_roles", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.correction.roles", "rationale": "All domain, implementation, replay, and release decisions are present."}
+    ],
+    "event": {
+      "event_kind": "correction_required",
+      "detected_at": "2026-10-14T02:50:00Z",
+      "evidence_receipt_id": "synthetic.receipt.correction.discovery",
+      "description": "A synthetic receipt is found to reference a different implementation digest than the one replayed."
+    },
+    "correction": {
+      "supersedes": "synthetic.assessment.correction.base",
+      "replacement_id": "synthetic.assessment.correction.replacement",
+      "reason": "Correct the implementation digest and document the impact without changing history.",
+      "prior_record_digest": "sha256:1414141414141414141414141414141414141414141414141414141414141414",
+      "replacement_digest": "sha256:5858585858585858585858585858585858585858585858585858585858585858",
+      "prior_record_preserved": true,
+      "destructive_rewrite": false
+    },
+    "history_snapshot": {
+      "prior_record_ids": ["synthetic.assessment.correction.base"],
+      "prior_record_digests": ["sha256:1414141414141414141414141414141414141414141414141414141414141414"],
+      "append_only": true,
+      "records_deleted": false,
+      "records_rewritten": false
+    },
+    "identity_checks": {
+      "author_not_reviewer": true,
+      "required_roles_distinct": true,
+      "release_approver_not_author": true,
+      "conflicts_clear": true,
+      "every_decision_matches_requested_aggregate": true,
+      "every_decision_matches_governance_schema": true,
+      "every_decision_matches_dependency_revision": true,
+      "no_self_promotion_effect": true,
+      "draft_cannot_promote": true
+    },
+    "expected_outcome": {
+      "workflow_disposition": "would_append_correction",
+      "state_effect": "none_draft_only",
+      "authoritative_status_after": "unchanged",
+      "simulated_claim_status_after": "supported",
+      "simulated_maturity_after": "E5",
+      "history_effect": "would_append_supersession",
+      "reasons": ["The correction is additive and digest-bound.", "The prior record and decisions remain immutable.", "The draft fixture performs no authoritative supersession."]
+    },
+    "semantic_validator_required": true
+  }
+}

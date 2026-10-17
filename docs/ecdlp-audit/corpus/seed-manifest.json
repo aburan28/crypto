@@ -1,0 +1,678 @@
+{
+  "schema_version": "ecdlp-source-claim-manifest/draft-2",
+  "manifest_id": "WS6-MANIFEST-SEED-20261014",
+  "title": "Non-authoritative WS6 bibliographic discovery seed",
+  "created_at": "2026-10-14T00:00:00Z",
+  "repository_revision": "1e447956d3616092a223264f1c6c31eff8ac9979",
+  "protocol": {
+    "protocol_id": "ws6-corpus-protocol-draft-2026-10-13",
+    "path": "docs/ecdlp-audit/corpus/PROTOCOL.md",
+    "revision_status": "draft",
+    "frozen": false,
+    "frozen_at": null,
+    "reviewer_ids": []
+  },
+  "route_registry_binding": {
+    "registry_path": "docs/ecdlp-audit/routes/route-registry.seed.json",
+    "schema_path": "docs/ecdlp-audit/routes/ws5-routes.schema.json",
+    "schema_version": "ecdlp-ws5-routes/v0-draft",
+    "record_state": "draft_non_authoritative",
+    "binding_status": "path_only_unverified",
+    "content_sha256": null,
+    "digest_scope": "none",
+    "reviewer_ids": [],
+    "reviewed_at": null,
+    "semantic_join_required": true,
+    "authoritative_mapping": false,
+    "limitations": [
+      "The WS5 registry is referenced by mutable repository path only; no content digest or reviewed revision is bound.",
+      "Every seed source and claim remains unresolved at route-family granularity."
+    ]
+  },
+  "authority": {
+    "authoritative": false,
+    "promotion_allowed": false,
+    "status": "draft_non_authoritative",
+    "non_claims": [
+      "No source bytes were acquired or screened under the WS6 protocol.",
+      "No substantive claim is supported or refuted by this seed.",
+      "No source or claim is mapped to a WS5 route-family identifier.",
+      "No search was executed and no search denominator is frozen.",
+      "No literature, incident, or historical completeness is claimed."
+    ]
+  },
+  "completeness": {
+    "claimed": false,
+    "denominator_status": "unfrozen",
+    "evidence_cutoff": null,
+    "statement": "This is a five-record schema and discovery fixture assembled from checked-in bibliographic pointers, not a corpus or coverage result.",
+    "known_gaps": [
+      "The planned databases and advisory sources have not been queried.",
+      "The five referenced sources have not been acquired or authenticated under this protocol.",
+      "No backward or forward citation pass has been run.",
+      "No comparator version or denominator has been frozen.",
+      "The WS5 route registry is path-bound only, and all per-record route joins are unresolved.",
+      "No critical claim has received first-person or second-person review."
+    ]
+  },
+  "counts": {
+    "sources": 5,
+    "claims": 5,
+    "source_claim_links": 5,
+    "search_runs": 0
+  },
+  "sources": [
+    {
+      "source_id": "SRC-GHS-WEIL-DESCENT-2002",
+      "source_type": "paper",
+      "source_role": "primary_candidate",
+      "title": "Constructive and destructive facets of Weil descent on elliptic curves",
+      "creators": ["Pierrick Gaudry", "Florian Hess", "Nigel Smart"],
+      "issuer": "Journal of Cryptology",
+      "issued_date": "2002",
+      "version_label": null,
+      "publication_status": "unknown",
+      "identifiers": [
+        {
+          "scheme": "bibliographic_citation",
+          "value": "P. Gaudry, F. Hess, N. Smart, Constructive and destructive facets of Weil descent on elliptic curves, Journal of Cryptology 15 (2002).",
+          "version": null
+        }
+      ],
+      "canonical_url": null,
+      "repository_pointers": [
+        {
+          "path": "research/notes/ecc2k130/RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md",
+          "locator": "lines 331-332",
+          "pointer_kind": "bibliographic_entry",
+          "revision": "1e447956d3616092a223264f1c6c31eff8ac9979",
+          "blob_oid": "df1857387cf4ed2103fa05a364fd96d711add654"
+        }
+      ],
+      "relations": [],
+      "access": {
+        "status": "unknown",
+        "license": null,
+        "archive_status": "not_attempted",
+        "archive_locator": null
+      },
+      "acquisition": {
+        "status": "pointer_only",
+        "retrieval_locator": null,
+        "retrieved_at": null,
+        "content_sha256": null,
+        "byte_count": null,
+        "media_type": null,
+        "lawful_basis": "not_applicable",
+        "normalization": "metadata_only"
+      },
+      "custody_events": [
+        {
+          "event_id": "CST-GHS-SEED-DISCOVERY",
+          "event_type": "discovery",
+          "actor_id": "ws6-seed-generation",
+          "at": "2026-10-14T00:00:00Z",
+          "method": "checked_in_bibliographic_pointer",
+          "locator": "research/notes/ecc2k130/RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md:331",
+          "content_sha256": null,
+          "notes": "The event records discovery of a repository pointer only; source bytes were not acquired."
+        }
+      ],
+      "route_lanes": ["B", "C"],
+      "route_registry_join": {
+        "status": "unresolved",
+        "route_ids": [],
+        "basis": "Lane tags are discovery metadata only; no WS5 route-family mapping has been proposed or reviewed.",
+        "reviewer_ids": [],
+        "reviewed_at": null,
+        "semantic_resolution_required": true,
+        "authoritative": false
+      },
+      "topics": ["Weil descent", "elliptic-curve transfer"],
+      "record_limitations": ["Bibliographic metadata was copied from a pinned repository blob and has not been checked against the primary source."]
+    },
+    {
+      "source_id": "SRC-KANI-ROSEN-JACOBIAN-1989",
+      "source_type": "paper",
+      "source_role": "primary_candidate",
+      "title": "Idempotent relations and factors of Jacobians",
+      "creators": ["Ernst Kani", "Michael Rosen"],
+      "issuer": "Mathematische Annalen",
+      "issued_date": "1989",
+      "version_label": null,
+      "publication_status": "unknown",
+      "identifiers": [
+        {
+          "scheme": "bibliographic_citation",
+          "value": "E. Kani, M. Rosen, Idempotent relations and factors of Jacobians, Mathematische Annalen 284 (1989).",
+          "version": null
+        }
+      ],
+      "canonical_url": null,
+      "repository_pointers": [
+        {
+          "path": "research/notes/ecc2k130/RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md",
+          "locator": "lines 341-342",
+          "pointer_kind": "bibliographic_entry",
+          "revision": "1e447956d3616092a223264f1c6c31eff8ac9979",
+          "blob_oid": "df1857387cf4ed2103fa05a364fd96d711add654"
+        }
+      ],
+      "relations": [],
+      "access": {
+        "status": "unknown",
+        "license": null,
+        "archive_status": "not_attempted",
+        "archive_locator": null
+      },
+      "acquisition": {
+        "status": "pointer_only",
+        "retrieval_locator": null,
+        "retrieved_at": null,
+        "content_sha256": null,
+        "byte_count": null,
+        "media_type": null,
+        "lawful_basis": "not_applicable",
+        "normalization": "metadata_only"
+      },
+      "custody_events": [
+        {
+          "event_id": "CST-KANI-ROSEN-SEED-DISCOVERY",
+          "event_type": "discovery",
+          "actor_id": "ws6-seed-generation",
+          "at": "2026-10-14T00:00:00Z",
+          "method": "checked_in_bibliographic_pointer",
+          "locator": "research/notes/ecc2k130/RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md:341",
+          "content_sha256": null,
+          "notes": "The event records discovery of a repository pointer only; source bytes were not acquired."
+        }
+      ],
+      "route_lanes": ["B"],
+      "route_registry_join": {
+        "status": "unresolved",
+        "route_ids": [],
+        "basis": "Lane tags are discovery metadata only; no WS5 route-family mapping has been proposed or reviewed.",
+        "reviewer_ids": [],
+        "reviewed_at": null,
+        "semantic_resolution_required": true,
+        "authoritative": false
+      },
+      "topics": ["Jacobian decomposition", "idempotent relations"],
+      "record_limitations": ["Bibliographic metadata was copied from a pinned repository blob and has not been checked against the primary source."]
+    },
+    {
+      "source_id": "SRC-GALBRAITH-ISOGENIES-1999",
+      "source_type": "paper",
+      "source_role": "primary_candidate",
+      "title": "Constructing isogenies between elliptic curves over finite fields",
+      "creators": ["Steven Galbraith"],
+      "issuer": "LMS Journal of Computation and Mathematics",
+      "issued_date": "1999",
+      "version_label": null,
+      "publication_status": "unknown",
+      "identifiers": [
+        {
+          "scheme": "bibliographic_citation",
+          "value": "S. Galbraith, Constructing isogenies between elliptic curves over finite fields, LMS Journal of Computation and Mathematics 2 (1999).",
+          "version": null
+        }
+      ],
+      "canonical_url": null,
+      "repository_pointers": [
+        {
+          "path": "RESEARCH_ISOGENY_FIBERS_ECDLP.md",
+          "locator": "line 1810",
+          "pointer_kind": "bibliographic_entry",
+          "revision": "1e447956d3616092a223264f1c6c31eff8ac9979",
+          "blob_oid": "e838d0eaeffa9c3f2d30aa8bb88c6f54333fd055"
+        }
+      ],
+      "relations": [],
+      "access": {
+        "status": "unknown",
+        "license": null,
+        "archive_status": "not_attempted",
+        "archive_locator": null
+      },
+      "acquisition": {
+        "status": "pointer_only",
+        "retrieval_locator": null,
+        "retrieved_at": null,
+        "content_sha256": null,
+        "byte_count": null,
+        "media_type": null,
+        "lawful_basis": "not_applicable",
+        "normalization": "metadata_only"
+      },
+      "custody_events": [
+        {
+          "event_id": "CST-GALBRAITH-ISOGENIES-SEED-DISCOVERY",
+          "event_type": "discovery",
+          "actor_id": "ws6-seed-generation",
+          "at": "2026-10-14T00:00:00Z",
+          "method": "checked_in_bibliographic_pointer",
+          "locator": "RESEARCH_ISOGENY_FIBERS_ECDLP.md:1810",
+          "content_sha256": null,
+          "notes": "The event records discovery of a repository pointer only; source bytes were not acquired."
+        }
+      ],
+      "route_lanes": ["B"],
+      "route_registry_join": {
+        "status": "unresolved",
+        "route_ids": [],
+        "basis": "Lane tags are discovery metadata only; no WS5 route-family mapping has been proposed or reviewed.",
+        "reviewer_ids": [],
+        "reviewed_at": null,
+        "semantic_resolution_required": true,
+        "authoritative": false
+      },
+      "topics": ["isogeny construction", "finite fields"],
+      "record_limitations": ["Bibliographic metadata was copied from a pinned repository blob and has not been checked against the primary source."]
+    },
+    {
+      "source_id": "SRC-GAUDRY-ABELIAN-IC-2009",
+      "source_type": "paper",
+      "source_role": "primary_candidate",
+      "title": "Index calculus for abelian varieties of small dimension and the elliptic curve discrete logarithm problem",
+      "creators": ["Pierrick Gaudry"],
+      "issuer": "Journal of Symbolic Computation",
+      "issued_date": "2009",
+      "version_label": null,
+      "publication_status": "unknown",
+      "identifiers": [
+        {
+          "scheme": "bibliographic_citation",
+          "value": "P. Gaudry, Index calculus for abelian varieties of small dimension and the elliptic curve discrete logarithm problem, Journal of Symbolic Computation 44 (2009).",
+          "version": null
+        }
+      ],
+      "canonical_url": null,
+      "repository_pointers": [
+        {
+          "path": "RESEARCH_ISOGENY_FIBERS_ECDLP.md",
+          "locator": "line 1817",
+          "pointer_kind": "bibliographic_entry",
+          "revision": "1e447956d3616092a223264f1c6c31eff8ac9979",
+          "blob_oid": "e838d0eaeffa9c3f2d30aa8bb88c6f54333fd055"
+        }
+      ],
+      "relations": [],
+      "access": {
+        "status": "unknown",
+        "license": null,
+        "archive_status": "not_attempted",
+        "archive_locator": null
+      },
+      "acquisition": {
+        "status": "pointer_only",
+        "retrieval_locator": null,
+        "retrieved_at": null,
+        "content_sha256": null,
+        "byte_count": null,
+        "media_type": null,
+        "lawful_basis": "not_applicable",
+        "normalization": "metadata_only"
+      },
+      "custody_events": [
+        {
+          "event_id": "CST-GAUDRY-ABELIAN-IC-SEED-DISCOVERY",
+          "event_type": "discovery",
+          "actor_id": "ws6-seed-generation",
+          "at": "2026-10-14T00:00:00Z",
+          "method": "checked_in_bibliographic_pointer",
+          "locator": "RESEARCH_ISOGENY_FIBERS_ECDLP.md:1817",
+          "content_sha256": null,
+          "notes": "The event records discovery of a repository pointer only; source bytes were not acquired."
+        }
+      ],
+      "route_lanes": ["A", "B"],
+      "route_registry_join": {
+        "status": "unresolved",
+        "route_ids": [],
+        "basis": "Lane tags are discovery metadata only; no WS5 route-family mapping has been proposed or reviewed.",
+        "reviewer_ids": [],
+        "reviewed_at": null,
+        "semantic_resolution_required": true,
+        "authoritative": false
+      },
+      "topics": ["index calculus", "abelian varieties"],
+      "record_limitations": ["Bibliographic metadata was copied from a pinned repository blob and has not been checked against the primary source."]
+    },
+    {
+      "source_id": "SRC-GGMP-SUBFIELD-IC-2020",
+      "source_type": "paper",
+      "source_role": "primary_candidate",
+      "title": "On index calculus algorithms for subfield curves",
+      "creators": ["Steven Galbraith", "Robert Granger", "Sophie-Paloma Merz", "Christophe Petit"],
+      "issuer": "Selected Areas in Cryptography",
+      "issued_date": "2020",
+      "version_label": "IACR ePrint 2020/1315",
+      "publication_status": "unknown",
+      "identifiers": [
+        {
+          "scheme": "iacr_eprint",
+          "value": "2020/1315",
+          "version": null
+        }
+      ],
+      "canonical_url": null,
+      "repository_pointers": [
+        {
+          "path": "RESEARCH_KOBLITZ_INDEX_CALCULUS.md",
+          "locator": "lines 963-964",
+          "pointer_kind": "bibliographic_entry",
+          "revision": "1e447956d3616092a223264f1c6c31eff8ac9979",
+          "blob_oid": "e57dca5ea84d95347e9b61c19888307f77ee765b"
+        }
+      ],
+      "relations": [],
+      "access": {
+        "status": "unknown",
+        "license": null,
+        "archive_status": "not_attempted",
+        "archive_locator": null
+      },
+      "acquisition": {
+        "status": "pointer_only",
+        "retrieval_locator": null,
+        "retrieved_at": null,
+        "content_sha256": null,
+        "byte_count": null,
+        "media_type": null,
+        "lawful_basis": "not_applicable",
+        "normalization": "metadata_only"
+      },
+      "custody_events": [
+        {
+          "event_id": "CST-GGMP-SUBFIELD-IC-SEED-DISCOVERY",
+          "event_type": "discovery",
+          "actor_id": "ws6-seed-generation",
+          "at": "2026-10-14T00:00:00Z",
+          "method": "checked_in_bibliographic_pointer",
+          "locator": "RESEARCH_KOBLITZ_INDEX_CALCULUS.md:963",
+          "content_sha256": null,
+          "notes": "The event records discovery of a repository pointer only; source bytes were not acquired."
+        }
+      ],
+      "route_lanes": ["A", "C"],
+      "route_registry_join": {
+        "status": "unresolved",
+        "route_ids": [],
+        "basis": "Lane tags are discovery metadata only; no WS5 route-family mapping has been proposed or reviewed.",
+        "reviewer_ids": [],
+        "reviewed_at": null,
+        "semantic_resolution_required": true,
+        "authoritative": false
+      },
+      "topics": ["index calculus", "subfield curves"],
+      "record_limitations": ["Bibliographic metadata was copied from a pinned repository blob and has not been checked against the primary source."]
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "CLM-GHS-WEIL-DESCENT-SCOPE",
+      "statement": "The full source states a result about constructive and destructive uses of Weil descent on elliptic curves.",
+      "claim_kind": "algorithm",
+      "classification": "mathematical_transfer",
+      "critical": true,
+      "route_lanes": ["B", "C"],
+      "route_registry_join": {
+        "status": "unresolved",
+        "route_ids": [],
+        "basis": "The claim has only coarse lane classification; no WS5 route-family mapping has been proposed or reviewed.",
+        "reviewer_ids": [],
+        "reviewed_at": null,
+        "semantic_resolution_required": true,
+        "authoritative": false
+      },
+      "hypotheses": ["The exact field, curve, and applicability hypotheses are unknown until full-source screening."],
+      "affected_identities": [
+        {
+          "identity_id": "ID-GHS-UNRESOLVED-SCOPE",
+          "kind": "generic_scope",
+          "value": "Unresolved scope described by the cited title",
+          "precision": "unknown",
+          "repository_ref": null
+        }
+      ],
+      "status": "unknown",
+      "evidence_level": "E0",
+      "limitations": ["Only a checked-in bibliographic pointer is available; no theorem, formula, or cost claim has been extracted."],
+      "verification": {
+        "status": "not_started",
+        "reviewer_ids": [],
+        "reviewed_at": null,
+        "notes": "Discovery queue item only."
+      }
+    },
+    {
+      "claim_id": "CLM-KANI-ROSEN-JACOBIAN-FACTORS",
+      "statement": "The full source states a result about idempotent relations and factors of Jacobians.",
+      "claim_kind": "theorem",
+      "classification": "mathematical_transfer",
+      "critical": true,
+      "route_lanes": ["B"],
+      "route_registry_join": {
+        "status": "unresolved",
+        "route_ids": [],
+        "basis": "The claim has only coarse lane classification; no WS5 route-family mapping has been proposed or reviewed.",
+        "reviewer_ids": [],
+        "reviewed_at": null,
+        "semantic_resolution_required": true,
+        "authoritative": false
+      },
+      "hypotheses": ["The exact category, base field, and decomposition hypotheses are unknown until full-source screening."],
+      "affected_identities": [
+        {
+          "identity_id": "ID-KANI-ROSEN-UNRESOLVED-SCOPE",
+          "kind": "generic_scope",
+          "value": "Unresolved scope described by the cited title",
+          "precision": "unknown",
+          "repository_ref": null
+        }
+      ],
+      "status": "unknown",
+      "evidence_level": "E0",
+      "limitations": ["Only a checked-in bibliographic pointer is available; no decomposition or transfer theorem has been extracted."],
+      "verification": {
+        "status": "not_started",
+        "reviewer_ids": [],
+        "reviewed_at": null,
+        "notes": "Discovery queue item only."
+      }
+    },
+    {
+      "claim_id": "CLM-GALBRAITH-ISOGENY-CONSTRUCTION-SCOPE",
+      "statement": "The full source states a result about constructing isogenies between elliptic curves over finite fields.",
+      "claim_kind": "algorithm",
+      "classification": "mathematical_transfer",
+      "critical": true,
+      "route_lanes": ["B"],
+      "route_registry_join": {
+        "status": "unresolved",
+        "route_ids": [],
+        "basis": "The claim has only coarse lane classification; no WS5 route-family mapping has been proposed or reviewed.",
+        "reviewer_ids": [],
+        "reviewed_at": null,
+        "semantic_resolution_required": true,
+        "authoritative": false
+      },
+      "hypotheses": ["The exact input models, isogeny degrees, and complexity assumptions are unknown until full-source screening."],
+      "affected_identities": [
+        {
+          "identity_id": "ID-GALBRAITH-ISOGENY-UNRESOLVED-SCOPE",
+          "kind": "generic_scope",
+          "value": "Unresolved finite-field elliptic-curve scope described by the cited title",
+          "precision": "unknown",
+          "repository_ref": null
+        }
+      ],
+      "status": "unknown",
+      "evidence_level": "E0",
+      "limitations": ["Only a checked-in bibliographic pointer is available; no construction, map, or cost claim has been extracted."],
+      "verification": {
+        "status": "not_started",
+        "reviewer_ids": [],
+        "reviewed_at": null,
+        "notes": "Discovery queue item only."
+      }
+    },
+    {
+      "claim_id": "CLM-GAUDRY-ABELIAN-IC-SCOPE",
+      "statement": "The full source states a result about index calculus for small-dimensional abelian varieties and the elliptic-curve discrete-logarithm problem.",
+      "claim_kind": "algorithm",
+      "classification": "original_ecdlp",
+      "critical": true,
+      "route_lanes": ["A", "B"],
+      "route_registry_join": {
+        "status": "unresolved",
+        "route_ids": [],
+        "basis": "The claim has only coarse lane classification; no WS5 route-family mapping has been proposed or reviewed.",
+        "reviewer_ids": [],
+        "reviewed_at": null,
+        "semantic_resolution_required": true,
+        "authoritative": false
+      },
+      "hypotheses": ["The exact field, dimension, asymptotic regime, and cost model are unknown until full-source screening."],
+      "affected_identities": [
+        {
+          "identity_id": "ID-GAUDRY-ABELIAN-IC-UNRESOLVED-SCOPE",
+          "kind": "generic_scope",
+          "value": "Unresolved abelian-variety and ECDLP scope described by the cited title",
+          "precision": "unknown",
+          "repository_ref": null
+        }
+      ],
+      "status": "unknown",
+      "evidence_level": "E0",
+      "limitations": ["Only a checked-in bibliographic pointer is available; no algorithm, exponent, or end-to-end cost claim has been extracted."],
+      "verification": {
+        "status": "not_started",
+        "reviewer_ids": [],
+        "reviewed_at": null,
+        "notes": "Discovery queue item only."
+      }
+    },
+    {
+      "claim_id": "CLM-GGMP-SUBFIELD-IC-SCOPE",
+      "statement": "The full source states a result about index-calculus algorithms for subfield curves.",
+      "claim_kind": "algorithm",
+      "classification": "structural_precondition",
+      "critical": true,
+      "route_lanes": ["A", "C"],
+      "route_registry_join": {
+        "status": "unresolved",
+        "route_ids": [],
+        "basis": "The claim has only coarse lane classification; no WS5 route-family mapping has been proposed or reviewed.",
+        "reviewer_ids": [],
+        "reviewed_at": null,
+        "semantic_resolution_required": true,
+        "authoritative": false
+      },
+      "hypotheses": ["The exact field tower, curve family, relation model, and cost scope are unknown until full-source screening."],
+      "affected_identities": [
+        {
+          "identity_id": "ID-GGMP-SUBFIELD-IC-UNRESOLVED-SCOPE",
+          "kind": "generic_scope",
+          "value": "Unresolved subfield-curve scope described by the cited title",
+          "precision": "unknown",
+          "repository_ref": null
+        }
+      ],
+      "status": "unknown",
+      "evidence_level": "E0",
+      "limitations": ["Only a checked-in bibliographic pointer and ePrint identifier are available; no algorithm or cost claim has been extracted."],
+      "verification": {
+        "status": "not_started",
+        "reviewer_ids": [],
+        "reviewed_at": null,
+        "notes": "Discovery queue item only."
+      }
+    }
+  ],
+  "source_claim_links": [
+    {
+      "link_id": "LNK-GHS-WEIL-DESCENT-SEED",
+      "source_id": "SRC-GHS-WEIL-DESCENT-2002",
+      "claim_id": "CLM-GHS-WEIL-DESCENT-SCOPE",
+      "relation": "discovery_pointer",
+      "locator": {
+        "kind": "bibliographic_pointer_only",
+        "value": "research/notes/ecc2k130/RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md:331-332 at revision 1e447956d3616092a223264f1c6c31eff8ac9979"
+      },
+      "evidence_form": "metadata_only",
+      "excerpt": null,
+      "verification_status": "not_started",
+      "reviewer_ids": [],
+      "notes": "This link locates a bibliography entry; it does not support the substantive claim."
+    },
+    {
+      "link_id": "LNK-KANI-ROSEN-JACOBIAN-SEED",
+      "source_id": "SRC-KANI-ROSEN-JACOBIAN-1989",
+      "claim_id": "CLM-KANI-ROSEN-JACOBIAN-FACTORS",
+      "relation": "discovery_pointer",
+      "locator": {
+        "kind": "bibliographic_pointer_only",
+        "value": "research/notes/ecc2k130/RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md:341-342 at revision 1e447956d3616092a223264f1c6c31eff8ac9979"
+      },
+      "evidence_form": "metadata_only",
+      "excerpt": null,
+      "verification_status": "not_started",
+      "reviewer_ids": [],
+      "notes": "This link locates a bibliography entry; it does not support the substantive claim."
+    },
+    {
+      "link_id": "LNK-GALBRAITH-ISOGENIES-SEED",
+      "source_id": "SRC-GALBRAITH-ISOGENIES-1999",
+      "claim_id": "CLM-GALBRAITH-ISOGENY-CONSTRUCTION-SCOPE",
+      "relation": "discovery_pointer",
+      "locator": {
+        "kind": "bibliographic_pointer_only",
+        "value": "RESEARCH_ISOGENY_FIBERS_ECDLP.md:1810 at revision 1e447956d3616092a223264f1c6c31eff8ac9979"
+      },
+      "evidence_form": "metadata_only",
+      "excerpt": null,
+      "verification_status": "not_started",
+      "reviewer_ids": [],
+      "notes": "This link locates a bibliography entry; it does not support the substantive claim."
+    },
+    {
+      "link_id": "LNK-GAUDRY-ABELIAN-IC-SEED",
+      "source_id": "SRC-GAUDRY-ABELIAN-IC-2009",
+      "claim_id": "CLM-GAUDRY-ABELIAN-IC-SCOPE",
+      "relation": "discovery_pointer",
+      "locator": {
+        "kind": "bibliographic_pointer_only",
+        "value": "RESEARCH_ISOGENY_FIBERS_ECDLP.md:1817 at revision 1e447956d3616092a223264f1c6c31eff8ac9979"
+      },
+      "evidence_form": "metadata_only",
+      "excerpt": null,
+      "verification_status": "not_started",
+      "reviewer_ids": [],
+      "notes": "This link locates a bibliography entry; it does not support the substantive claim."
+    },
+    {
+      "link_id": "LNK-GGMP-SUBFIELD-IC-SEED",
+      "source_id": "SRC-GGMP-SUBFIELD-IC-2020",
+      "claim_id": "CLM-GGMP-SUBFIELD-IC-SCOPE",
+      "relation": "discovery_pointer",
+      "locator": {
+        "kind": "bibliographic_pointer_only",
+        "value": "RESEARCH_KOBLITZ_INDEX_CALCULUS.md:963-964 at revision 1e447956d3616092a223264f1c6c31eff8ac9979"
+      },
+      "evidence_form": "metadata_only",
+      "excerpt": null,
+      "verification_status": "not_started",
+      "reviewer_ids": [],
+      "notes": "This link locates a bibliography entry; it does not support the substantive claim."
+    }
+  ],
+  "search_runs": [],
+  "review": {
+    "status": "not_started",
+    "reviewer_ids": [],
+    "reviewed_at": null,
+    "all_critical_claims_second_person_verified": false,
+    "notes": "The seed has not undergone substantive source or claim review."
+  }
+}

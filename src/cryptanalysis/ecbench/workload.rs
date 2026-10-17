@@ -21,12 +21,16 @@ use crate::cryptanalysis::ecbench::canonical::{bare_id, compat_u128, derive_u128
 use crate::cryptanalysis::ecbench::conductor_gap::{self, GapLevel};
 use crate::cryptanalysis::ecbench::fp4::Fp4Instance;
 use crate::cryptanalysis::ecbench_large_prime::binary_explicit_instance;
+use crate::cryptanalysis::gaudry_quartic::Pt4;
+use crate::cryptanalysis::gaudry_quartic_bin::{find_bin_curve, BinCurve, PtB, TowerBasis};
+use crate::cryptanalysis::gaudry_quartic_d4::{find_d4_curve, pack_e4, unpack_e4, D4Curve};
 use crate::cryptanalysis::ic_boundary::{
     find_prime_order_curve, koblitz_instance, random_binary_instance, roster_prime_instance,
     BinaryGroup, BinaryInstance, CountedGroup, GroupOps, PrimeCurve, PrimeInstance, PrimePoint,
 };
 use crate::cryptanalysis::koblitz_strong_rho::{RawPointG, WideStrongRho};
 use crate::cryptanalysis::koblitz_wide::WideKoblitz;
+use crate::cryptanalysis::residual_walk::is_prime_u64;
 
 /// How to build the curve.  Each variant is a constructor the repository
 /// already has, so the registry's `generator_call` names the same curve.
@@ -74,19 +78,26 @@ pub enum CurveSpec {
         gx: u64,
         gy: u64,
     },
-    /// An externally supplied public point, with no logarithm in the fixture.
-    /// Restricted to cofactor-one prime-order regression cohorts. Primality
-    /// and point-count certificates accompany the input catalog.
-    PrimePublicFixture {
+    /// `gaudry_quartic_d4::find_d4_curve(p, seed, max_cofactor)`: a curve
+    /// over `F_{p⁴} = F_p[t]/(t⁴ − c)` with a rational 2-torsion point
+    /// `T = (x₀, 0)`, `f'(x₀)` a square in `F_p`, `#E = h·r`, `r` prime,
+    /// `h ≤ max_cofactor` (even), `p` a prime `≡ 1 (mod 4)` up to 1021.  A point is
+    /// written as two packed words `x₀ + p x₁ + p² x₂ + p³ x₃`.
+    Fp4Torsion {
         p: u64,
-        a: u64,
-        b: u64,
-        group_order: u64,
-        r: u64,
-        gx: u64,
-        gy: u64,
-        qx: u64,
-        qy: u64,
+        seed: u64,
+        max_cofactor: u64,
+    },
+    /// `gaudry_quartic_bin::find_bin_curve(m, seed, max_cofactor)`: an
+    /// ordinary curve `y² + xy = x³ + ax² + b` over the tower
+    /// `F_{q⁴} = F_q[z]/(quartic)`, `q = 2^m`, `4 ≤ m ≤ 15`, `b ∉ F_{q²}`,
+    /// `#E = h·r`, `r` prime, `h ≤ max_cofactor` (even: `T = (0, √b)`).  A
+    /// point is written as two packed words (coefficient `i` of the tower
+    /// basis in bits `[im, (i + 1)m)`).
+    F2m4Torsion {
+        m: u32,
+        seed: u64,
+        max_cofactor: u64,
     },
     /// A binary curve given outright in polynomial basis. `modulus` is
     /// the complete integer bitmask, including its degree-`n` leading bit.
@@ -362,6 +373,10 @@ impl CurveSpec {
 /// A built curve instance.
 pub enum Instance {
     Prime(PrimeInstance),
+    /// A curve over `F_{p⁴}` with rational 2-torsion (`fp4_torsion`).
+    Fp4(Box<D4Curve>),
+    /// A curve over the tower `F_{(2^m)⁴}` (`f2m4_torsion`).
+    F2m4(Box<BinCurve>),
     Binary(Box<BinaryInstance>),
     /// A Koblitz curve past one word (`64 ≤ n ≤ 127`).
     Wide(Box<WideInstance>),
@@ -545,6 +560,59 @@ impl Instance {
                 i.kc.generator.1,
                 2 * i.kc.n,
             ),
+            Instance::Fp4(i) => {
+                let f = &i.inst.curve.f;
+                let p = f.p;
+                let id = crate::cryptanalysis::curve_id::extension(
+                    p,
+                    &[(p - f.c % p) % p, 0, 0, 0],
+                    &i.inst.curve.a.0,
+                    &i.inst.curve.b.0,
+                    &num_bigint::BigUint::from(i.group_order),
+                )
+                .expect("a found curve is non-singular and inside the Hasse interval");
+                (
+                    id,
+                    "extension",
+                    None,
+                    Some(64 - p.leading_zeros()),
+                    u128::from(i.group_order),
+                    u128::from(i.r),
+                    u128::from(i.cofactor),
+                    u128::from(pack_e4(p, &i.generator.x)),
+                    u128::from(pack_e4(p, &i.generator.y)),
+                    2,
+                )
+            }
+            Instance::F2m4(i) => {
+                // The identity of the curve over F_{2^{4m}} in the polynomial
+                // basis of the tower's canonical generator θ.
+                let c = &i.curve;
+                let f = &c.f;
+                let tb = TowerBasis::new(f);
+                let big = num_bigint::BigUint::from;
+                let id = crate::cryptanalysis::curve_id::binary(
+                    4 * f.f.m,
+                    &big(tb.modulus),
+                    &big(tb.coords(f, &c.a)),
+                    &big(tb.coords(f, &c.b)),
+                    &big(i.group_order),
+                    None,
+                )
+                .expect("a found curve is non-singular and inside the Hasse interval");
+                (
+                    id,
+                    "extension",
+                    None,
+                    Some(f.f.m),
+                    u128::from(i.group_order),
+                    u128::from(i.r),
+                    u128::from(i.cofactor),
+                    u128::from(f.pack(&i.generator.x)),
+                    u128::from(f.pack(&i.generator.y)),
+                    2,
+                )
+            }
         };
         let entry = registry_entry(&id.slug);
         let rep = entry

@@ -36,6 +36,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 use crate::cryptanalysis::ecbench::canonical::{sha256_hex, short_id};
+use crate::cryptanalysis::ecbench::fbm::{self, INSTRUMENT_IC_PIPELINE};
 use crate::cryptanalysis::ecbench::host::{capture, HostCapsule};
 use crate::cryptanalysis::ecbench::isolation::{
     allowed_cpus, conditions, evict, leave_reserved, plan_cpus, preflight, ticks_per_second,
@@ -809,6 +810,13 @@ fn assemble(
             .map(|r| r.counters.clone())
             .unwrap_or_default(),
         factor_base: report.as_ref().and_then(|r| r.factor_base.clone()),
+        fbm_id: report.as_ref().and_then(|r| {
+            let fb = r.factor_base.as_ref()?;
+            fbm::config_from_ic_method(&w.curve.slug, fb, &arm.method, INSTRUMENT_IC_PIPELINE)
+                .seal()
+                .ok()
+                .map(|id| id.fbm_id)
+        }),
         detail: report
             .as_ref()
             .map(|r| r.detail.clone())

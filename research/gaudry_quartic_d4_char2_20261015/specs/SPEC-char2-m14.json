@@ -1,0 +1,53 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "k = 4 IC in characteristic 2: the Frobenius-reduced D4 oracle against rho on E(F_(2^14)^4)",
+  "description": "PROTOCOL.md Part B3. f2m4_torsion(14, 1, 16), one target. Arms: rho with the negation map (reference); ic.pipeline + bin-t-line + gaudry-d4-bin Frobenius-reduced form; rho A/A.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "f2m4_torsion",
+        "m": 14,
+        "seed": 1,
+        "max_cofactor": 16
+      }
+    ],
+    "targets_per_curve": 1,
+    "target_seed": 202610150001
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "ic-frobenius",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "bin-t-line",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1",
+          "max_trials": "5000000"
+        }
+      }
+    },
+    {
+      "name": "rho-neg-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.negation"
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 202610150002,
+    "isolation_required": "L2",
+    "timeout_seconds": 86400
+  }
+}
