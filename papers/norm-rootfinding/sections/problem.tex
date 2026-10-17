@@ -1,0 +1,58 @@
+\section{Problem, scope, and contribution}
+Let $K$ be a finite field, $D_i\subseteq K$ finite constrained domains, and
+$f_1,\ldots,f_s\in K[X_1,\ldots,X_m]$. The generalized root-finding task is to
+return the entire ordered set
+\[
+ {\cal Z}=\{(x_1,\ldots,x_m)\in D_1\times\cdots\times D_m:
+                    f_j(x_1,\ldots,x_m)=0\text{ for every }j\}.
+\]
+An exact all-roots implementation must establish both membership and coverage.
+If auxiliary variables occur in the input system, the requested projection and
+whether auxiliary fibers must be returned are part of the input contract.
+Finding a witness, completing a relaxation, and enumerating a projected norm
+chart are different tasks.
+
+The motivating application is the constrained polynomial-system stage of
+elliptic-curve index calculus. Semaev's summation polynomials provide an algebraic
+connection to point relations \cite{semaev}. The implementation considered here
+instead searches a structured norm identity before reconstructing original
+chain solutions. This manuscript documents that narrower implemented stage.
+It is distinct from the repository's earlier \texttt{rootfinding-decomposition}
+manuscript about direct subtraction and pair tables at smaller decomposition
+orders. Its measurements and reported ratios are not imported here.
+
+There are three concrete contributions. First, Theorem~\ref{thm:chart} gives
+an exact binary norm-chart contract and a short coefficient proof that avoids
+generic-position divisions. Second, Theorem~\ref{thm:compiler} explains why
+bounded affine substitution changes representation without changing primary
+models. Third, the measured native-coordinate profile and the subsequent
+negative search result demonstrate that fewer declared variables need not
+produce a hard-instance solution. These are mathematical exposition and
+engineering results assembled from versioned artifacts, with no priority claim
+for the underlying algebra or SAT techniques.
+
+\subsection{Related work and the novelty boundary}
+F4 organizes Gr\"obner-basis reductions using linear algebra
+\cite{f4}; F5 introduces signature-based avoidance of reductions to zero
+\cite{f5}. A comparison must identify an actual implementation, field backend,
+input ideal, and final all-roots output, rather than compare algorithm labels.
+The program also requires the repository-specific F6 baseline. This draft
+does not identify a canonical F6 publication or establish that its available
+interface matches the full root contract.
+
+SAT with XOR reasoning and coordinated changes to representation are established
+techniques \cite{cms}. Particularly close prior work is
+Trimoska--Ionica--Dequen's WDSat approach to index-calculus systems
+\cite{wdsat}, including ANF-aware parity reasoning and branching intended to
+expose linear structure. Consequently, neither using SAT instead of Gr\"obner
+bases nor branching on primary variables is a novelty claim here.
+A full comparison of their mathematical model, preprocessing, and branching
+against this norm parametrization remains necessary before submission.
+
+Finite-field factorization and Frobenius computation are classical
+\cite{cz,frobenius}. The support criterion below is an elementary consequence
+of multiplicities in a quotient ring. Factoring an already supplied quintic
+does not solve the search over its unknown coefficients. Our candidate research
+advance would have to be a demonstrably useful structural reduction or pruning
+rule beyond these ingredients. That advance, and its qualified end-to-end
+performance, remain open.

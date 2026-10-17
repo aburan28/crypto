@@ -1,0 +1,133 @@
+\section{Exact algebraic contracts}
+\subsection{Repeated-root-safe domain support}
+Let $D\subseteq K$ be finite and let
+$L_D(X)=\prod_{d\in D}(X-d)$. The empty product is one.
+
+\begin{theorem}[Support by nilpotence]\label{thm:support}
+For a monic $H\in K[X]$ of degree $m\geq1$ and an integer $k\geq m$,
+every root of $H$ in an algebraic closure lies in $D$ if and only if
+\[
+          (L_D\bmod H)^k=0\quad\text{in }K[X]/(H).
+\]
+\end{theorem}
+\begin{proof}
+Write $H=\prod_\alpha(X-\alpha)^{e_\alpha}$ over an algebraic closure.
+The displayed equality is equivalent to $H\mid L_D^k$. The roots of $L_D$
+are precisely the elements of $D$, each with multiplicity one. Divisibility
+therefore holds exactly when every $\alpha\in D$ and every $e_\alpha\leq k$.
+The second condition follows from $e_\alpha\leq m\leq k$.
+Divisibility over the algebraic closure is equivalent to divisibility over
+$K$ by the remainder theorem for monic division.
+\end{proof}
+
+The nonconstant hypothesis matters: a constant monic $H=1$ has no roots and
+must be handled as a separate trivial case. If $D$ is empty, the criterion
+rejects every nonconstant $H$. Squarefreeness of $H$ is not assumed.
+In characteristic $p$ one may take $k=p^{\lceil\log_p m\rceil}$.
+For a binary quintic, $k=8$ suffices, as in the compact support oracle \ev{E1}.
+This supplies an exact predicate, not a bound on how many coefficient
+candidates must be searched.
+
+For a binary linear space $V$ and $v\notin V$,
+\[
+ L_{V+\F_2v}(X)=L_V(X)L_V(X+v)
+              =L_V(X)^2+L_V(v)L_V(X).
+\]
+Indeed the two cosets are disjoint, and induction starting at $L_{\{0\}}=X$
+shows that $L_V$ is additive. For an affine space $a+V$, substitute $X-a$.
+These formulas can represent an exponentially large binary domain implicitly.
+They do not give a proper nonzero $\F_p$-linear subspace of the prime field
+$\F_p$; an interval or another domain representation is required there.
+
+In an extension field, Frobenius acts on coefficients too:
+$(\sum c_iX^i)^p=\sum c_i^pX^{ip}$. It is $\F_p$-linear, generally not
+$K$-linear. For example, in $\F_4$ with $\omega^2=\omega+1$,
+the square of the constant $\omega$ is $\omega+1$, not $\omega$.
+In odd characteristic an ordinary square also contains cross terms.
+Neither binary shortcut can be transplanted unchanged to an odd-field backend.
+
+\subsection{A binary elliptic-curve norm chart}
+Throughout this subsection $K=\F_{2^n}$ and
+\[
+ E:\quad Y^2+XY=C(X),\qquad C(X)=X^3+aX^2+b,\qquad b\ne0.
+\]
+Fix $T=(z,y_T)\in E(K)$ with $z\ne0$. For $r,s,h,k\in K$ set
+\begin{equation}
+ \begin{split}
+ P&=X^3+rX^2+sX+t,\qquad Q=hX+k,\\
+ t&=z^3+rz^2+sz+(hz+k)y_T,\\
+ N&=P^2+XPQ+Q^2C .
+ \end{split}
+\end{equation}
+Conjugation in the quadratic function-field equation sends $Y$ to $Y+X$,
+so $N$ is the norm of $P+QY$. The chosen $t$ makes $(P+QY)(T)=0$;
+hence $N(z)=0$. Its leading coefficient is one and its degree is six.
+Thus $H=N/(X+z)$ is a monic quintic.
+
+Given ordered source values $x_1,\ldots,x_5\in K$, write
+\[
+ H_x=\prod_{i=1}^5(X+x_i)
+     =X^5+e_1X^4+e_2X^3+e_3X^2+e_4X+e_5.
+\]
+Let $\beta=\sqrt b$, $c=(y_T+\beta)/z$, and $w=\sqrt{e_5/z}$.
+Square roots are unique because Frobenius is an automorphism of $K$.
+
+\begin{theorem}[Exact norm-chart parametrization]\label{thm:chart}
+The identity $N=(X+z)H_x$ is equivalent to the following conditions:
+\begin{align}
+ h^2+h&=e_1+z,                                             \label{eq:as}\\
+ k&=e_2+r^2+hr+ah^2+ze_1,                                 \label{eq:k}\\
+ s&=zr+ck+y_Th+z^2+w,                                     \label{eq:s}\\
+ 0&=R_3:=e_3+hs+kr+k^2+ze_2,                              \label{eq:r3}\\
+ 0&=R_4:=\beta k^2+(zw)k+e_5+ze_4.                        \label{eq:r4}
+\end{align}
+No hypothesis excludes $h=0$, $k=0$, zero sources, or repeated sources.
+\end{theorem}
+\begin{proof}
+The coefficients of $N$, in descending order, are
+\[
+\begin{array}{c|l}
+6&1\\
+5&h+h^2\\
+4&r^2+k+hr+ah^2\\
+3&kr+hs+k^2\\
+2&s^2+ks+ht+bh^2+ak^2\\
+1&kt\\
+0&t^2+bk^2 .
+\end{array}
+\]
+Comparison at degrees five, four, and three gives
+\eqref{eq:as}, \eqref{eq:k}, and \eqref{eq:r3}.
+The constant coefficient identity is $t^2+bk^2=ze_5$, or
+$t=\beta k+zw$; substituting the definition of $t$ and dividing by the
+nonzero $z$ gives \eqref{eq:s}. The coefficient at degree one becomes
+\eqref{eq:r4}. This proves necessity.
+
+Conversely these equations match every coefficient except possibly degree two.
+The difference $N+(X+z)H_x$ is therefore $AX^2$ for some $A\in K$.
+Both polynomials vanish at $z$, giving $Az^2=0$. Since $z\ne0$, $A=0$.
+This proves sufficiency without another division or a generic-position
+assumption.
+\end{proof}
+
+The map $\AS(h)=h^2+h$ is $\F_2$-linear with kernel $\{0,1\}$ and
+image dimension $n-1$. Choose any fixed linear section $S$ on this image.
+For arbitrary inputs $e_1$, extend the section linearly to $K$ and check
+the explicit residual \eqref{eq:as}. Then
+\[
+                  h=S(e_1+z)+\eta,\qquad \eta\in\F_2
+\]
+enumerates each valid $h$ exactly once. This works for even as well as odd
+$n$; an odd-degree half-trace formula is not an all-extension implementation.
+Once the sources, $r$, and $\eta$ are fixed, \eqref{eq:k} and
+\eqref{eq:s} determine $k,s$ uniquely. The explicit residuals then accept
+exactly the norm identities. For a $d$-dimensional binary source space,
+the primary description has $5d+n+1$ bits \ev{E1--E3}; the actual
+$n=83,d=18$ fixture uses 174.
+
+This bijection concerns norm witnesses with the specified target and degree
+chart. The target branch $z=0$ is outside the theorem. A norm factor can
+correspond to the conjugate point above a source coordinate, and special
+divisors and chain auxiliary fibers require separate analysis. The theorem
+does not imply that these 174-bit models are in bijection with the original
+339-variable chain solutions.

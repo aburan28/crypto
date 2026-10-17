@@ -1,0 +1,98 @@
+\section{Artifact map and reproduction}\label{app:artifacts}
+\small
+The evidence snapshot is repository commit
+\path{4619bb97f63d960d40ffce127154b4f54195135d}.
+Published source paths below have repository prefix \texttt{crypto:}; hyperlinks resolve to
+that immutable snapshot. The accompanying \texttt{data/evidence\_map.json}
+records exact SHA-256 hashes and sizes, and four unmodified JSON records and one previously unpublished proof note
+are copied under \texttt{data/}. No frozen input or worker was modified.
+
+\newcommand{\artifact}[2]{\paragraph{#1}\url{https://github.com/aburan28/crypto/blob/4619bb97f63d960d40ffce127154b4f54195135d/#2}}
+\paragraph{E0: actual input.}
+The full chain file is
+\path{crypto:research/advance/instances/n83-d18-m5-T001-offset0.json},
+SHA-256
+\path{5c9be468c207cc2b013123b4265ee0963e96490c16aad1b1650a3528c0ce0c25}.
+The publication excluded this bulk input; a full chain replay requires
+that exact file or an independently checked export. This paper includes
+its parameter metadata, not its complete equations.
+The norm target is the negative of the input affine point:
+\[
+ z=\mathtt{0x622425e96ba633969263b},\qquad
+ y_T=\mathtt{0x507c02b90217be9ec635f}.
+\]
+The field, basis, target, and curve are recorded in
+\path{data/fixture_metadata.json}; this suffices to specify the mathematical
+norm predicate, without implying a byte-identical original-chain export.
+
+\artifact{E1: binary norm chart and earlier support work}{research/full_binary_norm_circuit_20261017_v1/PROOF.md}
+The adjacent \path{CONTROLS_REVIEWED.json} records the original norm oracle.
+The compact support proof is copied unchanged at \path{data/support_predicate_proof.md} from the previously unpublished local \path{research/support_cost_20261016_v1/PROOF.md}; the $2^{73}$ affine-family accounting is in \path{research/actual_norm_u_rank_20261017_v1/PROOF.md}. The earlier support accounting is in
+\path{research/autolab_cycle_20261017_v4/REPORT.md}; earlier divisor
+and support studies are historical evidence, not newly benchmarked results.
+
+\artifact{E2: native-coordinate profile}{lab/ledger/attempts/native-cut-aware-hybrid-norm-profile-n83-20261017-v1/0001/scientific_result.json}
+Compiler proof, controls, input freezes, and source manifests are under
+\path{research/hybrid_norm_xor_20261017_v1/}.
+
+\artifact{E3: hard native search}{lab/ledger/attempts/native-hybrid-limit2-norm-search-n83-20261017-v2/0001/scientific_result.json}
+The adjacent \path{process.json} gives the cold lifetime and RSS.
+The driver proof and controls are under
+\path{research/hybrid_norm_search_20261017_v2/}.
+
+\artifact{E4: exact symmetry controls}{research/norm_source_symmetry_20261017_v1/PREPARATION_CONTROLS.json}
+The adjacent proof and \path{SORTED_COMPARATOR_NEXT.md} separate implemented
+restoration from the unrun comparator search.
+
+\artifact{E5: wide odd-field supplied quintics}{lab/ledger/attempts/native-odd-interval-roots-NIST-panel-20261017-v2/0001/scientific_result.json}
+The proof and small controls are under
+\path{research/odd_interval_roots_20261017_v2/}.
+
+\artifact{E6: preserved correction}{research/actual_norm_u_rank_20261017_v1/ERRATUM.md}
+\artifact{E7: immutable release floor}{performance/GATE.md}
+
+\paragraph{Build.}
+From \path{papers/norm-rootfinding/}, run \texttt{make check}.
+The build uses the shared \path{papers/paper.mk}, resolves bibliography and
+cross-references, and rejects LaTeX errors and overfull boxes.
+The presentation-only \path{figures/render_figures.py} reads the copied
+profile JSON; it performs no field arithmetic, oracle evaluation, or timing.
+Run it from the paper directory to recreate the PDF/SVG/PNG figures.
+The committed visual record also appears in
+\path{benchmarks/20261017-rootfinding-paper-synthesis/}.
+No new solver experiment is required to reproduce these manuscript figures.
+
+\paragraph{Native experiment replay.}
+Use the source/input freezes belonging to each experiment, not a newly
+compiled binary described as the old worker. The preserved scheduler entry is
+\texttt{python -m lab.runner resume --ledger lab/ledger}
+followed by \texttt{--manifest lab/research\_program.json}; scheduling
+\texttt{run-ready} is a distinct action and can launch queued work.
+The Python scheduler is legacy orchestration, not a new mathematical
+implementation introduced by this manuscript. Shared-library and third-party
+source availability, the original input, and the pinned native build must be
+resolved before claiming a reproducible fresh hard run. Merely building this
+paper does not replay those experiments.
+
+\begin{table}[!t]
+\centering\small
+\begin{tabular}{p{0.2\linewidth}p{0.43\linewidth}p{0.26\linewidth}}
+\toprule
+Statement & Exact scope and evidence & Formal proof status\\
+\midrule
+Theorem~\ref{thm:support}& Finite $K,D$, monic nonconstant $H$,
+$k\geq\deg H$; written multiplicity proof & No Lean declaration\\
+Theorem~\ref{thm:chart}& Characteristic two, finite field, $b\ne0$,
+valid target, $z\ne0$; coefficient proof and literal norm controls &
+No Lean declaration\\
+Theorem~\ref{thm:compiler}& Acyclic exact parity/AND definitions with
+constants; complete small projections \ev{E2}& No Lean declaration\\
+Proposition~\ref{prop:symmetry}& Identical domains and symmetric predicate;
+full orbit restoration \ev{E4}& No Lean declaration\\
+Algorithm 1 coverage & Norm chart only; solver UNSAT trusted, budgets
+clear exact counts & No independent large UNSAT proof\\
+\bottomrule
+\end{tabular}
+\caption{Proof obligations are not substituted by a weaker theorem or by
+the earlier decomposition manuscript's formalization.}
+\end{table}

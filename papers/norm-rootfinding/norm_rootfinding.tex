@@ -1,0 +1,46 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,amsmath,amssymb,amsthm,booktabs,array,graphicx,xcolor}
+\usepackage{xurl}
+\usepackage[colorlinks=true,linkcolor=blue!45!black,citecolor=blue!45!black,urlcolor=blue!45!black]{hyperref}
+\usepackage{microtype}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newcommand{\F}{\mathbb F}
+\newcommand{\ev}[1]{\textup{[#1]}}
+\newcommand{\AS}{\operatorname{AS}}
+\title{Exact Norm-Based Search for Constrained Roots over Finite Fields:\\
+Predicates, Circuit Representations, and Bounded Evidence}
+\author{Anonymous}
+\date{Research draft --- October 17, 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+We study a search architecture for constrained finite-field roots that separates
+exact algebraic predicates, representation cost, and complete solution enumeration.
+For a binary elliptic-curve norm chart with five source coordinates, we give an
+explicit parametrization using the sources, one field parameter, and one
+Artin--Schreier kernel bit. We prove its coefficient-identity contract, including
+zero and repeated sources. A bounded affine-cone compiler preserves primary
+assignments by a unique functional extension, while exposing the cost of a native
+solver's internal XOR decomposition. On one fixed $\F_{2^{83}}$ instance, a
+representation change reduces post-flush native coordinates from 58,176 to
+45,427. A subsequent bounded search returns UNKNOWN with no verified witness.
+A characteristic-independent nilpotence criterion and existing supplied-polynomial
+tests explain which components extend to odd fields. These results establish
+exact component contracts and a representation improvement; they do not establish
+a complete replacement for Gr\"obner-basis solving, a speedup over F4/F5/F6, or a
+new asymptotic bound. We give the missing completeness bridges, an explicit
+performance gate, and a reproducible next experimental queue.
+\end{abstract}
+\input{sections/problem}
+\input{sections/algebra}
+\input{sections/algorithm}
+\input{sections/evidence}
+\input{sections/discussion}
+\bibliographystyle{plain}
+\bibliography{references}
+\appendix
+\input{sections/artifacts}
+\end{document}
