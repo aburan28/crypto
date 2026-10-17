@@ -818,6 +818,23 @@ advised, so the filter and the table sat on 4 KiB pages.
   time at `2^44.3`–`2^44.5`. A cheaper build is also what would let a wider
   base pay at `2^47.2`.
 
+**A19: the huge-page filter with the build's 64 partitions; `2^44.5` still
+does not move (2026-10-17).**
+- **Where the build goes:** step timers in a diagnostic build split its cost per stored pair:
+  - the addition and the key, about 8 ns;
+  - the append into the partition streams, 12–13 ns;
+  - the place step, 9.5–11.6 ns.
+
+  With 64 partitions (not 256), the append costs about 30% less.
+- **The combination, cold time v8 over the candidate:** 1.067 [1.010, 1.126], 1.014 [0.978, 1.051] and
+  1.054 [1.012, 1.097] at the three target sizes.
+- **At `2^44.5` collection did not move,** the third exploration in a row to see that.
+- **No round:** `icprog` accepts only if every target size's lower end is above 1.03
+  ([record](../../ic_tool_program/explorations/A19-filter-pages-build-parts-20261017/README.md)).
+- **Next:** the append itself (12 bytes a pair through memory) and the
+  `2^44.5` anomaly, which needs a measurement this VM cannot take (no
+  performance counters).
+
 ## 9. Track B: generality and robustness
 
 **Where the tool stands (at `0bf67f16`).**
