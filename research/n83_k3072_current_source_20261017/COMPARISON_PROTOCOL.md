@@ -2,10 +2,16 @@
 
 The exact K3072/root11 candidate is
 `IC1N83Ckb1a1fb509952PDP4rootRCguidedLAgaussTDdirectISO0hec7ae07d8b9a`.
-Its local arithmetic and candidate identity replay is recorded in
+The exact K3450/root11 dynamic candidate is
+`IC1N83Ckb1a1fb572700PDP4rootRCguidedLAgaussTDdirectISO0h1b83e4f732b2`.
+Their local arithmetic and candidate identity replays are recorded in
 `RESULT.md`. The same IC source SHA-256
 `8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12`
-must execute both comparison candidates. The second candidate is the frozen
+must execute all three comparison candidates. The earlier high-K screen
+motivates the K3450 base size. This comparison tests it with the current
+root11 dynamic index and sparse selector, an exact configuration whose
+arithmetic control and candidate ID are recorded in `RESULT.md`. The third
+candidate is the frozen
 N83 finalist protocol's selected **online** candidate if its two Tier 1
 host strata are admitted and `online.status == SELECTED`. Otherwise use the
 fixed fallback K1120/root11,
@@ -14,7 +20,8 @@ A fallback measurement preserves the finalist panel's null selection.
 Commit and independently replay the finalist selection and its provider
 artifact binding before dispatching this comparison.
 The branch workflow is armed only by a later committed `dispatch.json` with
-the SHA-256 digests of those two versioned finalist files. No dispatch file
+the SHA-256 digests of those two versioned finalist files and their bound
+IC1 run rows. No dispatch file
 is present in the frozen fixture commit.
 
 The ten sealed public points are in `targets.jsonl`, SHA-256
@@ -24,23 +31,24 @@ The answer sidecar, SHA-256
 is used only for independent replay. `generate.py --verify-sealed` must
 pass before measurement. Each point is a previously unused, one-target
 workload. Run points 0–4 and 5–9 on separate dedicated Tier 1 cloud
-allocations. Within each allocation, run both candidates on every point in
+allocations. Within each allocation, run all three candidates on every point in
 fresh processes with empty base, index and log caches. Each candidate-point
-arm has its own strong rho solve of the **same** public point. Run the two
-candidates in opposite orders on successive local point indices. Alternate
-`IC,rho` and `rho,IC` for each candidate across the five points. Run a fixed
+arm has its own strong rho solve of the **same** public point. Rotate the three
+candidates in cyclic order by global point index. Alternate
+`IC,rho` and `rho,IC` by global point and fixed candidate index. Run a fixed
 exposed-point rho calibration before and after each IC–rho pair, using the
 same seed `2026101601` and public point as the earlier Tier 1 online panel.
-The paired rho seed is `2026101900 + 2*point_index + candidate_index`, where
-candidate index 0 is K3072 and 1 is the selected finalist or fallback.
+The paired rho seed is `2026101900 + 3*point_index + candidate_index`, where
+candidate indices 0, 1 and 2 are K3072, K3450 and the selected finalist or
+fallback, respectively.
 
 Archive the exact binaries, source and input hashes, commands, timestamps,
 cgroup limits, affinity, topology, CPU frequency, steal time, throttling,
-OOM events and peak memory. Cap K3072 IC processes at 900 seconds, finalist
-IC processes at 480 seconds, and every rho or calibration process at 120
-seconds. Cap the producer at 130 minutes and the entire cloud job at 180
+OOM events and peak memory. Cap K3072 IC processes at 900 seconds, K3450 at
+1,200 seconds, finalist IC processes at 480 seconds, and every rho or calibration process at 120
+seconds. Cap the producer at 150 minutes and the entire cloud job at 210
 minutes. Preserve every timeout, failed replay, noisy calibration and
-global-cap stop. A host stratum is admitted only if all ten IC–rho pairs,
+global-cap stop. A host stratum is admitted only if all fifteen IC–rho pairs,
 their before/after calibrations, source and candidate IDs, relation/base
 replay, scalar replay, resource envelope and event order pass. A calibration
 pair passes when its two online times differ by at most 10% of their mean.
@@ -51,12 +59,11 @@ admission, provided the required pairs and calibrations are complete.
 For each candidate, report all ten `rho_online_ms / IC_online_ms` values,
 their median and host-specific means, and the paired 95% interval for rho
 minus IC online time. A Tier 1 speedup for a host requires IC online time
-below rho on all five of that host's public points. To choose between the two
-IC candidates, calculate ten matched-point log time ratios
-`log(finalist_online_ms / K3072_online_ms)`, their mean and descriptive 95%
-paired interval, and the exact two-sided sign-flip p-value over all `2^10`
-sign assignments. Select K3072 only if its mean log ratio is positive and
-the exact p-value is at most 0.05; select the finalist only if the mean is
-negative and the same gate passes. Otherwise record a null selected
-candidate. Report complete cold-process costs and paired differences as a
-supplementary objective, with no substitution for online selection.
+below rho on all five of that host's public points. For the three IC
+candidates, calculate ten matched-point log time ratios for each of the three
+unordered pairs, their means and descriptive 95% paired intervals, and exact
+two-sided sign-flip p-values over all `2^10` sign assignments. Select a
+candidate only if it is faster in the observed direction than both
+alternatives and both p-values are at most `0.05/3`. Otherwise record a null
+selected candidate. Apply the same three-pair gate to supplementary complete
+cold-process costs without substituting that selection for the online result.

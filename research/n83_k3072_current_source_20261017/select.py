@@ -1,15 +1,21 @@
 #!/usr/bin/env python3
-"""Apply frozen paired N83 K3072 versus finalist selection gates."""
+"""Apply frozen paired N83 K3072, K3450 and finalist selection gates."""
 
 import argparse
 import json
 import math
 import statistics
+import importlib.util
 from pathlib import Path
 
 SOURCE_SHA256 = '8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12'
 TARGETS_SHA256 = '9bf9bfca72d4e82a5780759d52ac000b812ca25e831af04238983c8b72d2d777'
 K3072_ID = 'IC1N83Ckb1a1fb509952PDP4rootRCguidedLAgaussTDdirectISO0hec7ae07d8b9a'
+K3450_ID = 'IC1N83Ckb1a1fb572700PDP4rootRCguidedLAgaussTDdirectISO0h1b83e4f732b2'
+FINALIST_SELECT = Path(__file__).resolve().parents[1] / 'n83_e2e_final_holdout_20261016/select.py'
+spec = importlib.util.spec_from_file_location('n83_k3450_finalist_ids', FINALIST_SELECT)
+finalist = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(finalist)
 T_975_DF9 = 2.2621571628540993
 T_975_DF4 = 2.7764451051977987
 
@@ -41,15 +47,15 @@ def summary(differences):
 
 
 def admitted_matrix(data):
-    if (data.get('schema') != 'n83.k3072-current-source-validated/v1' or
+    if (data.get('schema') != 'n83.k3072-current-source-validated/v2' or
             data.get('source_sha256') != SOURCE_SHA256 or
             data.get('targets_sha256') != TARGETS_SHA256 or
             data.get('evidence_status') != 'PASS_INDEPENDENT_REPLAY'):
         return None, 'SOURCE_TARGET_OR_REPLAY_GATE'
     ids = data.get('candidate_ids')
-    if (not isinstance(ids, list) or len(ids) != 2 or
-            ids[0] != K3072_ID or ids[1] == K3072_ID or
-            any(not isinstance(item, str) for item in ids)):
+    if (not isinstance(ids, list) or len(ids) != 3 or
+            ids[0] != K3072_ID or ids[1] != K3450_ID or
+            ids[2] not in finalist.IDS):
         return None, 'CANDIDATE_ID_GATE'
     hosts = data.get('host_strata')
     if (not isinstance(hosts, list) or len(hosts) != 2 or
@@ -68,12 +74,12 @@ def admitted_matrix(data):
         arms = point.get('arms')
         rho = point.get('rho_by_candidate')
         cal = point.get('calibration_by_candidate')
-        if (not isinstance(arms, list) or len(arms) != 2 or
+        if (not isinstance(arms, list) or len(arms) != 3 or
                 not isinstance(rho, dict) or set(rho) != set(ids) or
                 not isinstance(cal, dict) or set(cal) != set(ids)):
             return None, 'PAIR_COVERAGE_GATE'
         by_id = {arm.get('candidate_id'): arm for arm in arms}
-        if set(by_id) != set(ids) or len(by_id) != 2:
+        if set(by_id) != set(ids) or len(by_id) != 3:
             return None, 'IC_CANDIDATE_ID_GATE'
         if any(arm.get('status') != 'PASS_INDEPENDENT_REPLAY' or
                arm.get('resource_status') != 'PASS' or
@@ -93,30 +99,35 @@ def admitted_matrix(data):
 
 
 def metric_selection(matrix, ids, metric):
-    first, second = ids
-    differences = ([math.log(row['arms'][second][metric] /
-                             row['arms'][first][metric]) for row in matrix]
-                   if metric == 'one_target_online_ms' else
-                   [row['arms'][second][metric] - row['arms'][first][metric]
-                    for row in matrix])
-    record = summary(differences)
-    winner = (first if record['mean'] > 0 else second if record['mean'] < 0
-              else None)
-    if record['two_sided_sign_flip_p'] > 0.05:
-        winner = None
-    return {'status': 'SELECTED' if winner else 'BOUNDED_UNKNOWN',
-            'selected_candidate_id': winner,
-            'first': first, 'second': second,
-            'difference_definition': ('log_second_over_first' if
-                                      metric == 'one_target_online_ms' else
-                                      'second_minus_first'),
-            **record}
+    comparisons = []
+    for i, first in enumerate(ids):
+        for second in ids[i + 1:]:
+            differences = ([math.log(row['arms'][second][metric] /
+                                     row['arms'][first][metric]) for row in matrix]
+                           if metric == 'one_target_online_ms' else
+                           [row['arms'][second][metric] -
+                            row['arms'][first][metric] for row in matrix])
+            comparisons.append({'first': first, 'second': second,
+                                'difference_definition':
+                                'log_second_over_first' if
+                                metric == 'one_target_online_ms' else
+                                'second_minus_first', **summary(differences)})
+    alpha = 0.05 / len(comparisons)
+    winners = [candidate for candidate in ids if all(
+        (item['mean'] > 0 if item['first'] == candidate else item['mean'] < 0)
+        and item['two_sided_sign_flip_p'] <= alpha
+        for item in comparisons
+        if candidate in (item['first'], item['second']))]
+    return {'status': 'SELECTED' if len(winners) == 1 else 'BOUNDED_UNKNOWN',
+            'selected_candidate_id': winners[0] if len(winners) == 1 else None,
+            'bonferroni_alpha_per_pair': alpha,
+            'comparisons': comparisons}
 
 
 def select(data):
     matrix, admission = admitted_matrix(data)
     if matrix is None:
-        return {'schema': 'n83.k3072-current-source-selection/v1',
+        return {'schema': 'n83.k3072-current-source-selection/v2',
                 'admission_status': admission,
                 'online': {'status': 'BOUNDED_UNKNOWN',
                            'selected_candidate_id': None},
@@ -149,7 +160,7 @@ def select(data):
                 'paired_difference_lower_95_ms': mean - halfwidth,
                 'paired_difference_upper_95_ms': mean + halfwidth,
             }
-    return {'schema': 'n83.k3072-current-source-selection/v1',
+    return {'schema': 'n83.k3072-current-source-selection/v2',
             'admission_status': admission,
             'candidate_ids': ids, 'point_count': len(matrix),
             'online': metric_selection(matrix, ids, 'one_target_online_ms'),

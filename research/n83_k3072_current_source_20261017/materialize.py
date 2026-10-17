@@ -106,7 +106,7 @@ def row(item, candidate_id, workload_id, index, half, artifact_sha, run_id,
 def materialize(validated_path, selection_path, finalist_validated,
                 finalist_selection, half_dirs):
     validated, selected = read(validated_path), read(selection_path)
-    if (validated['schema'] != 'n83.k3072-current-source-validated/v1' or
+    if (validated['schema'] != 'n83.k3072-current-source-validated/v2' or
             validated['source_sha256'] != runner.SOURCE_SHA256 or
             validated['targets_sha256'] != runner.TARGETS_SHA256 or
             validated['answers_sha256'] != runner.ANSWERS_SHA256 or
@@ -131,7 +131,7 @@ def materialize(validated_path, selection_path, finalist_validated,
         analysis, host, source = (read(directory / name) for name in
                                   ('analysis.json', 'host.json', 'source.json'))
         stratum = validated['host_strata'][half]
-        if (analysis['schema'] != 'n83.k3072-current-source-half-analysis/v1' or
+        if (analysis['schema'] != 'n83.k3072-current-source-half-analysis/v2' or
                 analysis['half'] != half or stratum['half'] != half or
                 stratum['analysis_sha256'] != sha256(analysis_path) or
                 host['instance_id'] != stratum['instance_id'] or
@@ -171,7 +171,7 @@ def materialize(validated_path, selection_path, finalist_validated,
                 if item['status'] == 'PASS_INDEPENDENT_REPLAY':
                     folder = raw_point / 'runs' / name
                     original_commit = finegrid.panel.SOURCE_COMMIT
-                    if candidate_id == runner.K3072[3]:
+                    if candidate_id in (runner.K3072[3], runner.K3450[3]):
                         finegrid.panel.SOURCE_COMMIT = K3072_SOURCE_COMMIT
                     try:
                         manifest = finegrid.dynamic.candidate(
@@ -188,14 +188,14 @@ def materialize(validated_path, selection_path, finalist_validated,
                                 stratum['raw_artifact_sha256'], validated['run_id'],
                                 source, host, analysis_path, stratum['tier_status'],
                                 rho, calibration))
-    if (len(rows) != 20 or len(rho_rows) != 20 or len(workloads) != 10 or
+    if (len(rows) != 30 or len(rho_rows) != 30 or len(workloads) != 10 or
             len({item['workload_id'] for item in workloads}) != 10):
         raise ValueError('comparison run or workload count differs')
     if (validated['evidence_status'] == 'PASS_INDEPENDENT_REPLAY' and
             set(manifests) != set(validated['candidate_ids'])):
         raise ValueError('admitted evidence lacks exact candidate manifests')
     output = {
-        'schema': 'n83.k3072-current-source-ic1/v1',
+        'schema': 'n83.k3072-current-source-ic1/v2',
         'run_id': validated['run_id'],
         'run_attempt': validated['run_attempt'],
         'run_head_sha': validated['head_sha'],

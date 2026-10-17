@@ -78,7 +78,7 @@ def bind_half(half, results, archive, provider_sha, run_id, attempt,
     if (status == 0) != (analysis['status'] == 'HALF_ADMITTED'):
         raise ValueError(f'half {half}: replay exit and admission differ')
     host, source = read(results / 'host.json'), read(results / 'source.json')
-    if (analysis['schema'] != 'n83.k3072-current-source-half-analysis/v1' or
+    if (analysis['schema'] != 'n83.k3072-current-source-half-analysis/v2' or
             analysis['half'] != half or
             analysis['point_indices'] != list(range(half * 5, half * 5 + 5)) or
             source['source_sha256'] != runner.SOURCE_SHA256 or
@@ -136,7 +136,7 @@ def aggregate(halves, run_id, attempt, head_sha):
                     'PASS_INDEPENDENT_REPLAY' for item in halves) else
                 'VERIFICATION_FAILED')
     validated = {
-        'schema': 'n83.k3072-current-source-validated/v1',
+        'schema': 'n83.k3072-current-source-validated/v2',
         'source_sha256': runner.SOURCE_SHA256,
         'targets_sha256': runner.TARGETS_SHA256,
         'answers_sha256': runner.ANSWERS_SHA256,

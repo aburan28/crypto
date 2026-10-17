@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run one five-point same-source K3072 versus finalist Tier 1 stratum."""
+"""Run one five-point same-source K3072, K3450 and finalist Tier 1 stratum."""
 
 import argparse
 import importlib.util
@@ -16,12 +16,15 @@ TARGETS_SHA256 = '9bf9bfca72d4e82a5780759d52ac000b812ca25e831af04238983c8b72d2d7
 ANSWERS_SHA256 = '3f7a75dc0134f883a77fa2b87eb6839b6df804c53950d8dc77e7f29b2500284c'
 K3072 = ('k3072root11', 3072, 'root11_dynamic',
          'IC1N83Ckb1a1fb509952PDP4rootRCguidedLAgaussTDdirectISO0hec7ae07d8b9a')
+K3450 = ('k3450root11', 3450, 'root11_dynamic',
+         'IC1N83Ckb1a1fb572700PDP4rootRCguidedLAgaussTDdirectISO0h1b83e4f732b2')
 FALLBACK_ID = 'IC1N83Ckb1a1fb185920PDP4rootRCguidedLAgaussTDdirectISO0hc922b499a234'
 PAIR_RHO_SEED_BASE = 2026101900
 IC_CAP_K3072 = 900
+IC_CAP_K3450 = 1200
 IC_CAP_FINALIST = 480
 RHO_CAP_SECONDS = 120
-GLOBAL_PRODUCER_CAP_SECONDS = 130 * 60
+GLOBAL_PRODUCER_CAP_SECONDS = 150 * 60
 
 
 def module(name, path):
@@ -79,7 +82,7 @@ def choose_second(validated_path, selection_path):
     if len(matches) != 1:
         raise ValueError('selected finalist candidate is unknown')
     arm = matches[0]
-    return (K3072, arm), {
+    return (K3072, K3450, arm), {
         'selection_status': selection.get('admission_status'),
         'online_selection_status': online.get('status'),
         'selected_candidate_id': selected_id,
@@ -91,18 +94,18 @@ def choose_second(validated_path, selection_path):
 
 
 def schedule(half, arms):
-    if half not in (0, 1) or len(arms) != 2 or arms[0] != K3072:
-        raise ValueError('two frozen candidates and half 0 or 1 required')
+    if half not in (0, 1) or len(arms) != 3 or arms[:2] != (K3072, K3450):
+        raise ValueError('three frozen candidates and half 0 or 1 required')
     events = []
     for local in range(5):
         index = half * 5 + local
-        ordered = arms if local % 2 == 0 else arms[::-1]
+        ordered = arms[index % 3:] + arms[:index % 3]
         for arm in ordered:
             name = arm[0]
-            fixed = 0 if arm == K3072 else 1
+            fixed = arms.index(arm)
             events.append({'point_index': index, 'candidate': name,
                            'name': f'cal_before_{name}', 'kind': 'calibration'})
-            pair = ('ic', 'rho') if (local + fixed) % 2 == 0 else ('rho', 'ic')
+            pair = ('ic', 'rho') if (index + fixed) % 2 == 0 else ('rho', 'ic')
             for kind in pair:
                 events.append({'point_index': index, 'candidate': name,
                                'name': name if kind == 'ic' else f'rho_{name}',
@@ -121,7 +124,7 @@ def run(binary, rho_binary, output, half, validated_path, selection_path):
     events = schedule(half, arms)
     group = parent.cgroup_root()
     host = parent.host_receipt(group)
-    host['schema'] = 'n83.k3072-current-source-host/v1'
+    host['schema'] = 'n83.k3072-current-source-host/v2'
     host['parent_instance_id'] = host['instance_id']
     host['instance_id'] = f"{host['instance_id']}-k3072-half{half}"
     host['stratum_half'] = half
@@ -149,7 +152,7 @@ def run(binary, rho_binary, output, half, validated_path, selection_path):
     ic_copy.chmod(0o755)
     rho_copy.chmod(0o755)
     parent.write_json(output / 'source.json', {
-        'schema': 'n83.k3072-current-source-source/v1',
+        'schema': 'n83.k3072-current-source-source/v2',
         'hashes': hashes, 'source_sha256': SOURCE_SHA256,
         'binary_sha256': parent.digest(ic_copy),
         'rho_binary_sha256': parent.digest(rho_copy),
@@ -158,7 +161,7 @@ def run(binary, rho_binary, output, half, validated_path, selection_path):
         'answers_sha256': ANSWERS_SHA256,
         'fixture_manifest_sha256': parent.digest(HERE / 'fixture_manifest.json'),
         'half': half, 'arms': arms, 'choice': choice, 'events': events,
-        'rho_seed_rule': '2026101900+2*point_index+fixed_candidate_index',
+        'rho_seed_rule': '2026101900+3*point_index+fixed_candidate_index',
         'calibration_seed': int(cold.RHO_SEED),
         'calibration_target_sha256': parent.digest(cold.TARGETS),
         'calibration_answer_sha256': parent.digest(cold.ANSWERS),
@@ -181,8 +184,8 @@ def run(binary, rho_binary, output, half, validated_path, selection_path):
         if kind in ('rho', 'calibration'):
             rho_target = cold.TARGETS if kind == 'calibration' else target
             seed = (int(cold.RHO_SEED) if kind == 'calibration' else
-                    PAIR_RHO_SEED_BASE + 2 * index +
-                    (0 if candidate == K3072[0] else 1))
+                    PAIR_RHO_SEED_BASE + 3 * index +
+                    next(i for i, arm in enumerate(arms) if arm[0] == candidate))
             command = [str(rho_copy), str(rho_target), str(seed),
                        str(cold.RHO_CONFIG), str(folder / 'receipt.json')]
             environment = {'PATH': os.environ.get('PATH', '/usr/bin:/bin')}
@@ -192,7 +195,8 @@ def run(binary, rho_binary, output, half, validated_path, selection_path):
             command = [str(ic_copy), f'construct:83:1:{k}', str(target), '29',
                        str(folder / 'targets_result.jsonl')]
             environment = dynamic.environment(folder, layout)
-            cap = IC_CAP_K3072 if candidate == K3072[0] else IC_CAP_FINALIST
+            cap = (IC_CAP_K3072 if candidate == K3072[0] else
+                   IC_CAP_K3450 if candidate == K3450[0] else IC_CAP_FINALIST)
         elapsed = time.monotonic() - started
         if elapsed + cap + 30 > GLOBAL_PRODUCER_CAP_SECONDS:
             parent.write_json(output / 'producer_stop.json', {
@@ -224,8 +228,8 @@ def main():
     hashes, _ = fixture()
     if args.fixture_preflight:
         print(json.dumps({'hashes': hashes, 'events': schedule(
-            args.half, (K3072, next(arm for arm in finalist.ARMS
-                                    if arm[3] == FALLBACK_ID)))}, sort_keys=True))
+            args.half, (K3072, K3450, next(arm for arm in finalist.ARMS
+                                           if arm[3] == FALLBACK_ID)))}, sort_keys=True))
         return 0
     if not args.validated or not args.selection:
         parser.error('--validated and --selection are required')

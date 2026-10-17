@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Independently replay one K3072 versus finalist Tier 1 host stratum."""
+"""Independently replay one K3072, K3450 and finalist Tier 1 stratum."""
 
 import argparse
 import hashlib
@@ -61,7 +61,7 @@ def folder(output, event):
 
 def replay_ic(output, event, point, scalar, by_name, field, curve):
     old_commit = prior.finegrid.panel.SOURCE_COMMIT
-    if event['candidate'] == runner.K3072[0]:
+    if event['candidate'] in (runner.K3072[0], runner.K3450[0]):
         prior.finegrid.panel.SOURCE_COMMIT = SOURCE_COMMIT
     try:
         return prior.replay_ic(output, event, point, scalar, by_name,
@@ -86,12 +86,12 @@ def main():
     events = runner.schedule(args.half, arms)
     host, source, preflight = (read(output / name) for name in
                                ('host.json', 'source.json', 'preflight.json'))
-    if (host['schema'] != 'n83.k3072-current-source-host/v1' or
+    if (host['schema'] != 'n83.k3072-current-source-host/v2' or
             host['git_sha'] is None or host['stratum_half'] != args.half or
             host['instance_id'] !=
             f"{host['parent_instance_id']}-k3072-half{args.half}" or
             preflight['status'] != 'PASS_CAPACITY_PREFLIGHT' or
-            source['schema'] != 'n83.k3072-current-source-source/v1' or
+            source['schema'] != 'n83.k3072-current-source-source/v2' or
             source['hashes'] != hashes or
             source['source_sha256'] != runner.SOURCE_SHA256 or
             source['runner_sha256'] != runner.parent.digest(HERE / 'run.py') or
@@ -103,7 +103,7 @@ def main():
             source['arms'] != [list(arm) for arm in arms] or
             source['choice'] != choice or source['events'] != events or
             source['rho_seed_rule'] !=
-            '2026101900+2*point_index+fixed_candidate_index' or
+            '2026101900+3*point_index+fixed_candidate_index' or
             source['calibration_seed'] != int(runner.cold.RHO_SEED) or
             source['calibration_target_sha256'] !=
             runner.parent.digest(runner.cold.TARGETS) or
@@ -139,8 +139,9 @@ def main():
                                    event['kind'] == 'calibration' else target)
                 seed = (int(runner.cold.RHO_SEED) if
                         event['kind'] == 'calibration' else
-                        runner.PAIR_RHO_SEED_BASE + 2 * event['point_index'] +
-                        (0 if event['candidate'] == runner.K3072[0] else 1))
+                        runner.PAIR_RHO_SEED_BASE + 3 * event['point_index'] +
+                        next(i for i, arm in enumerate(arms)
+                             if arm[0] == event['candidate']))
                 valid = (prior.suffix(command[1], 3) ==
                          prior.suffix(expected_target, 3) and
                          command[2] == str(seed) and
@@ -162,6 +163,7 @@ def main():
                 observed_dump = observed.pop('KIC_DUMP_BASE', '')
                 expected_dump = flags.pop('KIC_DUMP_BASE')
                 cap = (runner.IC_CAP_K3072 if arm == runner.K3072 else
+                       runner.IC_CAP_K3450 if arm == runner.K3450 else
                        runner.IC_CAP_FINALIST)
                 valid = (command[1] == f'construct:83:1:{k}' and
                          prior.suffix(command[2], 3) == prior.suffix(target, 3) and
@@ -207,8 +209,8 @@ def main():
                 output, event, points[index], scalars[index], by_name,
                 field, curve))
         elif kind == 'rho':
-            seed = (runner.PAIR_RHO_SEED_BASE + 2 * index +
-                    (0 if candidate == runner.K3072[0] else 1))
+            seed = (runner.PAIR_RHO_SEED_BASE + 3 * index +
+                    next(i for i, arm in enumerate(arms) if arm[0] == candidate))
             point_rows[index]['rho_by_candidate'][candidate_id] = prior.replay_rho(
                 output, event, points[index], scalars[index], seed,
                 output / 'points' / f'p{index:02d}' / 'target.jsonl', hashes)
@@ -232,7 +234,7 @@ def main():
                                  for _, _, _, candidate_id in arms) else 'MISMATCH')
     replay_status = ('PASS_INDEPENDENT_REPLAY' if binaries_match and
                      all(target_checks) and all(launch_checks) and
-                     len(ic) == 10 and len(rho) == 10 and len(cal) == 20 and
+                     len(ic) == 15 and len(rho) == 15 and len(cal) == 30 and
                      all(item['status'] == 'PASS_INDEPENDENT_REPLAY'
                          for item in ic + rho + cal) and base_status == 'PASS'
                      else 'VERIFICATION_FAILED')
@@ -241,7 +243,7 @@ def main():
                            for item in ic + rho + cal) else
                        'FAILED_OR_INCOMPLETE')
     calibration_status = ('PASS_10_PERCENT_PER_PAIR' if all(
-        len(point['calibration_by_candidate']) == 2 and
+        len(point['calibration_by_candidate']) == 3 and
         all(item['status'] == 'PASS_10_PERCENT' for item in
             point['calibration_by_candidate'].values())
         for point in point_rows.values()) else 'NOISY_OR_INCOMPLETE')
@@ -270,7 +272,7 @@ def main():
             'calibration_by_candidate': point['calibration_by_candidate'],
         })
     analysis = {
-        'schema': 'n83.k3072-current-source-half-analysis/v1',
+        'schema': 'n83.k3072-current-source-half-analysis/v2',
         'half': args.half,
         'point_indices': list(sorted(point_rows)),
         'source_sha256': runner.SOURCE_SHA256,

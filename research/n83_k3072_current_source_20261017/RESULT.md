@@ -1,4 +1,4 @@
-# N83 K3072/root11 works on the current IC source
+# N83 K3072 and K3450/root11 work on the current IC source
 
 The current finalist source, SHA-256
 `8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12`,
@@ -40,11 +40,39 @@ tar -xzf /Volumes/SSD990/crypto/artifacts/n83_k3072_current_source_20261017/raw.
 python3 research/n83_k3072_current_source_20261017/verify_archive.py /Volumes/SSD990/crypto/artifacts/n83_k3072_current_source_20261017/raw.tar.gz /path/to/extracted
 ```
 
-The next comparison should pair this current-source K3072 candidate with
-the winner of the frozen K1104–K1120 finalist panel on fresh public points,
+The same binary completed a K3450/root11 dynamic process on that exposed
+point under a 1,200-second cap. It enumerated **572,700** usable base points,
+reached rank **3,450**, and built **987,887,478** packed root entries.
+Independent arithmetic replay checked the full base, four-point witness,
+scalar, and target phase sum, then reproduced exact candidate
+`IC1N83Ckb1a1fb572700PDP4rootRCguidedLAgaussTDdirectISO0h1b83e4f732b2`.
+
+| Current-source K3450 control | Value |
+| --- | ---: |
+| Base hash | `ae75c86565f5fa12fb6f30a5539f6f4638bcf1ca8b347a5cefa20f5073a9f572` |
+| Local cold process | 813.551 s |
+| One-target online | 57.333 ms |
+| Packed root allocation | 10,737,418,240 bytes |
+| Replay | `PASS_INDEPENDENT_ARITHMETIC_REPLAY` |
+
+The prior K3450 high-K result used a fixed-capacity wide3 Bloom layout;
+this dynamic-index layout is a new exact candidate with the same factor-base
+size. The [candidate manifest](candidate_IC1N83Ckb1a1fb572700PDP4rootRCguidedLAgaussTDdirectISO0h1b83e4f732b2.json)
+is versioned here. The raw archive at
+`/Volumes/SSD990/crypto/artifacts/n83_k3450_current_source_20261017/raw.tar.gz`
+has SHA-256
+`9f9cd7fc6a02ceb2a4728791bf06ab0f230771135d4f1c2005893ed6a2d5c039`.
+The [K3450 archive verifier](verify_k3450_archive.py) checked that digest,
+the archived source receipt, base, witness, scalar, phase accounting, and
+candidate identity against the current source. Its [producer receipt](receipt_K3450.json)
+and [replay summary](replay_K3450.json) are also versioned and checked against
+the archive. Both exposed-point local
+timings are feasibility diagnostics.
+
+The next comparison pairs both current-source high-K candidates with the
+winner of the frozen K1104–K1120 finalist panel on fresh public points,
 with each IC arm paired to a same-point strong rho run and per-pair Tier 1
-calibration. The present point was exposed before that panel and has no role
-in its selection.
+calibration. The exposed control point has no role in that selection.
 
 Ten new public points for that followup are sealed before the finalist result
 is inspected. `generate.py --verify-sealed` replays the earlier exclusion sets
@@ -56,14 +84,15 @@ An independent read-only inventory scanned 490 `research/n83*/**/*.jsonl`
 files containing 32,366 earlier two-string point rows and found no overlap
 with these ten points.
 The answer sidecar is for independent replay, not a producer input. A run
-protocol should choose its second candidate by the preregistered finalist
+protocol chooses its third candidate by the preregistered finalist
 online selection output. If that selection is null or the panel is
 unadmitted, the fixed fallback is K1120/root11
 (`IC1N83Ckb1a1fb185920PDP4rootRCguidedLAgaussTDdirectISO0hc922b499a234`),
 chosen from the earlier exposed-point screen before the ten points above
 are used. The fallback does not turn a null finalist result into a selected
-winner. Use two dedicated Tier 1 host strata of five same-point IC/rho pairs.
-The versioned runner, independent verifier, two-metric paired selector,
+winner. Use two Tier 1 host strata of five public points and fifteen
+same-point IC/rho pairs per stratum. The versioned runner, independent
+verifier, three-pair online and cold selectors,
 provider-archive binder, IC1 row materializer and cloud workflow implement
 that preregistered next step. The workflow waits for a later `dispatch.json`
 bound to the independently replayed finalist result; the ten-point fixture
