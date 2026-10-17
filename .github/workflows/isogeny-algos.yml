@@ -63,3 +63,17 @@ jobs:
           # a wrong order must fail with exit code 1
           set +e; $B count --curve p256 --order 1 > /dev/null; code=$?; set -e
           test "$code" -eq 1
+          # one run per family: each must exit 0 with every check PASS
+          P=2305843009213693951
+          for args in \
+            "chain --p $P --a 4 --b 7 --ell 3 --n 3" \
+            "velu --p $P --a 7 --b 7 --ell 73 --kernel-x 2302858932999476951 --method sqrtvelu" \
+            "isogenies --p $P --a 7 --b 7 --ell 73 --method elkies1998" \
+            "dual --p $P --a 7 --b 7 --ell 73" \
+            "csidh --primes 3,5,7,11,13,17,19,23,29,31,37,59 --exps 1,-1,2,0,0,1,-3,0,1,0,0,2" \
+            "path --p 1000003 --j1 499965 --j2 620467 --method ghs" \
+            "klpt --p 1152921504606847067 --norm 1000003" \
+            "richelot --p 211 --roots 1,2,3,4,5,6 --lc 3"; do
+            $B $args > /tmp/family.json
+            grep -q '"status":"PASS"' /tmp/family.json
+          done
