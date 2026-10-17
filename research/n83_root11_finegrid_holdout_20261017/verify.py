@@ -61,9 +61,9 @@ def folder(output, event):
 
 def replay_ic(output, event, point, scalar, by_name, field, curve):
     old_commit = prior.finegrid.panel.SOURCE_COMMIT
-    finalist_ids = {arm[3] for arm in runner.choice_module.five_run.finalist.ARMS}
-    if by_name[event['candidate']][3] not in finalist_ids:
-        prior.finegrid.panel.SOURCE_COMMIT = SOURCE_COMMIT
+    # Every selected manifest pins this source commit. The arm resolver
+    # exposes its manifests directly and has no nested finalist module.
+    prior.finegrid.panel.SOURCE_COMMIT = SOURCE_COMMIT
     try:
         return prior.replay_ic(output, event, point, scalar, by_name,
                                field, curve)
