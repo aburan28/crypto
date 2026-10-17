@@ -1,0 +1,32 @@
+{
+  "binary_path": "/Volumes/SSD990/crypto/artifacts/n83_parallel_target_cancel_20261017/target/release/examples/koblitz_orbit_dlp_fast",
+  "cap_seconds": 1200,
+  "k": 992,
+  "policies": {
+    "parallel_cancel": [
+      2,
+      "1"
+    ],
+    "parallel_join": [
+      2,
+      "0"
+    ],
+    "serial": [
+      1,
+      "0"
+    ]
+  },
+  "schema": "n83.parallel-target-cancel-plan/v1",
+  "sha256": {
+    "answers": "3ceee12fb848cc261433f3cd9e7d297f961effede1974e8c95fa25d9bac68720",
+    "binary": "df8340eb76ac90d2520e0202159505426b9d7879978f10c597731c4bfe73045a",
+    "environment": "aaaed229d7bd2731ee211f3a3cf7f670963ccde1f88f6bfe932dd789079746c3",
+    "protocol": "5b8e2d44a730093534caa83a7d2706aad227918d62df123e101082e59ec3df34",
+    "runner": "1be6f293e3c42047b50b5a3ed829da8765172fed615bab76c74008f1a9153cb8",
+    "source": "8109fb33374ce2aa66c6a5a0b6e144d3b0143168ac756f9e0bd70af60a911829",
+    "targets": "72486b7d708023838db1104a4a5e75a04b915d6f6d4013057c934fb31000aa87",
+    "verifier": "438f112079f7929046cb65d5964b5f0e3e91bcb145fd196e14d0069845f157f0"
+  },
+  "target_count": 128,
+  "workload_role": "ordinary_local_shared_setup_stage_diagnostic"
+}

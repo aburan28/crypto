@@ -1,0 +1,25 @@
+# Cooperative target cancellation reduces N83 indexed-search work
+
+The opt-in `KIC_TARGET_CANCEL=1` policy stopped redundant target workers after the first complete four-point relation. On the frozen 128-point K992/root11 screen it cut total reported target probes from 86,474,156 to 49,728,736 (42.49%) relative to the existing two-worker join policy. The independently replayed geometric mean target interval fell from 225.884 to 76.656 ms, a paired 2.947× speedup; cancellation was faster on 118 of 128 identical public points. Every policy recovered all 128 scalars, and the checker replayed the same exact 164,672-point base, all four-point relations, and each scalar multiplication.
+
+## Method and measured result
+
+The exact field, curve, generator and subgroup are the N83 canonical record used in the [protocol](PROTOCOL.md). The same sealed [128 public points](../n83_root11_finegrid_holdout_20261017/local_batch/batch_targets.jsonl) were passed to three fresh processes in serial order. Each process built its base and root index, collected rank 992 of 992, then solved the 128 points. All three base dumps were byte-identical with SHA-256 `0b700b7bbc6264d732d28c60b8e3ee139ecb826653d1063bc16c49b80822c146`. The source, binary, runner, checker, fixture and environment are frozen in [plan.json](plan.json). The host was an ordinary macOS machine; the measurements below are an algorithmic stage screen.
+
+| Policy | Workers | Full independent replay | Geometric mean target (ms) | Median target (ms) | Probes across 128 targets | Cold process (s) |
+| --- | ---: | --- | ---: | ---: | ---: | ---: |
+| serial | 1 | PASS, 128/128 | 116.040 | 148.832 | 86,474,156 | 157.183 |
+| parallel_join | 2 | PASS, 128/128 | 225.884 | 228.679 | 86,474,156 | 118.994 |
+| parallel_cancel | 2 | PASS, 128/128 | **76.656** | **90.422** | **49,728,736** | **100.504** |
+
+The [independent analysis](results/analysis.json) records all 384 target intervals, base hashes, scalar and relation checks, and raw receipt digests. Paired log-ratio comparison of cancellation to joined workers gives 2.947× geometric speedup with a descriptive 95% interval of 2.504–3.468; 118/128 paired intervals improved, with two-sided binomial sign `p=1.45e-24`. Relative to serial, cancellation gives 1.514× geometric speedup with descriptive interval 1.310–1.749; 74/128 intervals improved, with two-sided sign `p=0.0927`. The joined policy gave 0.514× versus serial, reflecting duplicate work and two-worker overhead for this workload. The run order was fixed rather than alternated and host isolation was not measured, so these intervals describe this screen. A fresh-point Tier 1 alternating-order comparison is the next performance gate.
+
+The cold process times combine setup, rank collection and target work. Their phase mix changed notably between sequential runs: serial index build and rank stage were 48.948 and 82.123 s; joined workers were 29.588 and 51.531 s; cancellation was recorded in its raw summary. The target-phase result and probe reduction give the direct evidence for the cancellation mechanism; the process totals remain separate in the table.
+
+## Replay and archived inputs
+
+The [runner](run.py) retained command, exact environment, stdout, target rows, base dump, stderr and SHA-256 receipt for each policy at `/Volumes/SSD990/crypto/artifacts/n83_parallel_target_cancel_20261017/{serial,parallel_join,parallel_cancel}/`. All producer statuses were `EXIT_0` and all stderr files were empty. The [checker](verify.py) returned `PASS_FULL_INDEPENDENT_REPLAY` after reconstructing the base and verifying every relation and scalar. Its versioned [analysis](results/analysis.json) can be compared against the [serial](results/serial_run_receipt.json), [joined](results/parallel_join_run_receipt.json) and [cancellation](results/parallel_cancel_run_receipt.json) producer receipts. The three target output files, summaries and command receipts are also versioned in `results/`.
+
+The identical raw base dump is stored once as [compressed JSONL](results/base_dump.jsonl.zst), SHA-256 `1e652e37c97f471048030e6123cc7e68e079e87c4654108c705fbbd0f9695a5a`; decompression yields the base SHA-256 above. The command receipts bind absolute output paths, so direct checker replay uses the exact durable artifact root named above. Its three policy directories already contain the original filenames and empty stderr files. The versioned files preserve the substantive arithmetic inputs and outputs independently of that local directory.
+
+The cancellation branch changes the target extraction policy only when `KIC_TARGET_CANCEL=1` and at least two target threads are requested. Each worker still checks candidate relations against the group law. The first worker to complete a valid relation sets the shared atomic flag; other workers stop at a state boundary. The returned witness can differ from the order-preserving serial or joined witness, and the independent checker accepts it only after exact relation and scalar replay. Default one-worker behavior and the existing join policy remain available for matched comparisons.
