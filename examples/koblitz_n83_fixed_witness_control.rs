@@ -97,6 +97,10 @@ fn run(path: &str, conflicts: u64) -> Result<Value> {
     let curve = KoblitzCurve::known_n83_k0().ok_or("pinned N83 curve")?;
     let target = F2mElement::from_biguint(&target_x, 83);
     let started = Instant::now();
+    eprintln!(
+        "{}",
+        json!({"phase":"build_started","elapsed_wall_ms_L0":0.0})
+    );
     let mut enc = ChainedS3Encoding::build(
         5,
         &curve.curve.irreducible,
@@ -106,6 +110,14 @@ fn run(path: &str, conflicts: u64) -> Result<Value> {
         150_000,
     )
     .map_err(|error| format!("circuit build: {error:?}"))?;
+    eprintln!(
+        "{}",
+        json!({
+            "phase":"circuit_built", "elapsed_wall_ms_L0":started.elapsed().as_secs_f64()*1000.0,
+            "variables":enc.solver.n_vars(), "clauses":enc.solver.n_clauses(),
+            "xors":enc.solver.n_xors(),
+        })
+    );
     let size = enc
         .constrain_frobenius_orbit_domains(&domains, 150_000, 12_000_000)
         .map_err(|error| format!("domain build: {error:?}"))?;
@@ -114,6 +126,14 @@ fn run(path: &str, conflicts: u64) -> Result<Value> {
     }
     enc.order_first_pair(150_000)
         .map_err(|error| format!("first-pair order: {error:?}"))?;
+    eprintln!(
+        "{}",
+        json!({
+            "phase":"domains_built", "elapsed_wall_ms_L0":started.elapsed().as_secs_f64()*1000.0,
+            "variables":enc.solver.n_vars(), "clauses":enc.solver.n_clauses(),
+            "xors":enc.solver.n_xors(),
+        })
+    );
     let before_units = json!({
         "variables":enc.solver.n_vars(), "clauses":enc.solver.n_clauses(),
         "xors":enc.solver.n_xors(), "domain_clauses":size.clauses,
@@ -126,6 +146,13 @@ fn run(path: &str, conflicts: u64) -> Result<Value> {
     }
     let variables = enc.solver.n_vars();
     let clauses = enc.solver.n_clauses();
+    eprintln!(
+        "{}",
+        json!({
+            "phase":"fixed_units_installed", "elapsed_wall_ms_L0":started.elapsed().as_secs_f64()*1000.0,
+            "variables":variables, "clauses":clauses, "xors":enc.solver.n_xors(),
+        })
+    );
     enc.solver.conflict_budget = conflicts;
     let outcome = enc.solver.solve();
     let model_verified = if outcome == SolveResult::Sat {
