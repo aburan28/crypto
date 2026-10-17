@@ -11022,6 +11022,61 @@
    ]
   },
   {
+   "slug": "icv1-fp14-tm31-68b86b70",
+   "icv1": "ICV1:fp-10007:-31:10039:6177:unk:unk:r:68b86b706924",
+   "family": "prime",
+   "params": {
+    "p": "10007",
+    "a": "3",
+    "b": "6"
+   },
+   "model_json": "{\"a\":\"3\",\"b\":\"6\",\"field\":\"fp-10007\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"10007\",\"v\":\"1\"}",
+   "trace": -31,
+   "order": "10039",
+   "j": "6177",
+   "end": "unk",
+   "aliases": [
+    "demo-10007"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/generic_dlp_correctness_20261017/inputs/curves.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1P14Cfph5bd49abc11ae",
+     "curve_uid": "urn:ec-record:1:sha256:5bd49abc11ae7787f73c0329fdfa565385127c4347dda11a9d98203d8e3e9359",
+     "field_sha256": "0944fd8b5bcb220c6b3242587c34e7b9dd52274053081d4d3eb767ed92e216f8",
+     "field": {
+      "characteristic": 10007,
+      "degree": 1,
+      "representation": "prime",
+      "element_encoding": "hex integer modulo the characteristic"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       0,
+       0,
+       0,
+       3,
+       6
+      ],
+      "subgroup_order": "10039",
+      "cofactor": 1,
+      "generator": [
+       "0x0",
+       "0x7b5"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/generic_dlp_correctness_20261017/inputs/curves.json"
+     ]
+    }
+   ]
+  },
+  {
    "slug": "icv1-fp14-tm63-1a762b57",
    "icv1": "ICV1:fp-11617:-63:11681:9935:unk:unk:r:1a762b57ab66",
    "family": "prime",
@@ -11306,6 +11361,61 @@
       "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
       "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
       "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp17-t121-95219f0d",
+   "icv1": "ICV1:fp-99013:121:98893:1152:unk:unk:r:95219f0d1db6",
+   "family": "prime",
+   "params": {
+    "p": "99013",
+    "a": "6",
+    "b": "4"
+   },
+   "model_json": "{\"a\":\"6\",\"b\":\"4\",\"field\":\"fp-99013\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"99013\",\"v\":\"1\"}",
+   "trace": 121,
+   "order": "98893",
+   "j": "1152",
+   "end": "unk",
+   "aliases": [
+    "demo-99013"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/generic_dlp_correctness_20261017/inputs/curves.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1P17Cfph80ecfa7de129",
+     "curve_uid": "urn:ec-record:1:sha256:80ecfa7de1292d69d65cd26a0ade47dfd65e9cb1c271d8bf889ef50110a0e36b",
+     "field_sha256": "2e53ec115256cb66fe06efd7506c39b625eccc2d7d04e72d97e33b79568ee082",
+     "field": {
+      "characteristic": 99013,
+      "degree": 1,
+      "representation": "prime",
+      "element_encoding": "hex integer modulo the characteristic"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       0,
+       0,
+       0,
+       6,
+       4
+      ],
+      "subgroup_order": "98893",
+      "cofactor": 1,
+      "generator": [
+       "0x0",
+       "0x2"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/generic_dlp_correctness_20261017/inputs/curves.json"
      ]
     }
    ]
@@ -27946,6 +28056,61 @@
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
+   "slug": "icv1-fp32-tm101415-9b187f52",
+   "icv1": "ICV1:fp-3094378543:-101415:3094479959:3042964895:unk:unk:r:9b187f52394e",
+   "family": "prime",
+   "params": {
+    "p": "3094378543",
+    "a": "608760208",
+    "b": "2109595922"
+   },
+   "model_json": "{\"a\":\"608760208\",\"b\":\"2109595922\",\"field\":\"fp-3094378543\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"3094378543\",\"v\":\"1\"}",
+   "trace": -101415,
+   "order": "3094479959",
+   "j": "3042964895",
+   "end": "unk",
+   "aliases": [
+    "demo-32"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/generic_dlp_correctness_20261017/inputs/curves.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1P32Cfphf694d17166d1",
+     "curve_uid": "urn:ec-record:1:sha256:f694d17166d110acb52affa6d904fb720762828c7480ebefeab8d0f467e66fa3",
+     "field_sha256": "83e8bca05bd697dff86364e4139769cda2c18334686f5133ed84754d43485ad1",
+     "field": {
+      "characteristic": 3094378543,
+      "degree": 1,
+      "representation": "prime",
+      "element_encoding": "hex integer modulo the characteristic"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       0,
+       0,
+       0,
+       608760208,
+       2109595922
+      ],
+      "subgroup_order": "3094479959",
+      "cofactor": 1,
+      "generator": [
+       "0x8ea8c2a4",
+       "0x64fa5d9f"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/generic_dlp_correctness_20261017/inputs/curves.json"
+     ]
+    }
+   ]
+  },
+  {
    "slug": "icv1-fp32-t7319-90da43e9",
    "icv1": "ICV1:fp-4294967291:7319:4294959973:228885397:unk:unk:r:90da43e918ff",
    "family": "prime",
@@ -28004,6 +28169,28 @@
      ]
     }
    ]
+  },
+  {
+   "slug": "icv1-fp36-t276049-fe2b595b",
+   "icv1": "ICV1:fp-39615550291:276049:39615274243:0:unk:unk:r:fe2b595b2c60",
+   "family": "prime",
+   "params": {
+    "p": "39615550291",
+    "a": "0",
+    "b": "22620405809"
+   },
+   "model_json": "{\"a\":\"0\",\"b\":\"22620405809\",\"field\":\"fp-39615550291\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"39615550291\",\"v\":\"1\"}",
+   "trace": 276049,
+   "order": "39615274243",
+   "j": "0",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "gpu/ecc/specs/ecbench-toy36j0.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
    "slug": "icv1-fp36-tm47184-1daf0972",
@@ -28159,6 +28346,28 @@
     "research/ecbench_conductor_gap_20261012/plan-ell131101-q37.json",
     "research/ecbench_conductor_gap_20261012/sessions/ell131101-q37/plan.json",
     "research/ecbench_conductor_gap_20261012/sessions/ell131101-q37/spec.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp40-tm506303-75549727",
+   "icv1": "ICV1:fp-649522587953:-506303:649523094257:420771848988:unk:unk:r:755497276237",
+   "family": "prime",
+   "params": {
+    "p": "649522587953",
+    "a": "552810359288",
+    "b": "555863716954"
+   },
+   "model_json": "{\"a\":\"552810359288\",\"b\":\"555863716954\",\"field\":\"fp-649522587953\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"649522587953\",\"v\":\"1\"}",
+   "trace": -506303,
+   "order": "649523094257",
+   "j": "420771848988",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "gpu/ecc/specs/ecbench-toy40.json"
    ],
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
@@ -28755,6 +28964,30 @@
     "research/drastic_prime_conductor_gap_round3_20261012/sessions/d19-ell4067213-rho/plan.json",
     "research/drastic_prime_conductor_gap_round3_20261012/sessions/d19-ell4067213-rho/spec.json",
     "research/drastic_prime_conductor_gap_round3_20261012/specs/d19-ell4067213-rho.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp48-tm2395735-7a78ff24",
+   "icv1": "ICV1:fp-140737529461027:-2395735:140737531856763:0:unk:unk:r:7a78ff243e18",
+   "family": "prime",
+   "params": {
+    "p": "140737529461027",
+    "a": "0",
+    "b": "4"
+   },
+   "model_json": "{\"a\":\"0\",\"b\":\"4\",\"field\":\"fp-140737529461027\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"140737529461027\",\"v\":\"1\"}",
+   "trace": -2395735,
+   "order": "140737531856763",
+   "j": "0",
+   "end": "unk",
+   "aliases": [
+    "pinned-j0-smooth47"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/generic_dlp_correctness_20261017/inputs/curves.json"
    ],
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"

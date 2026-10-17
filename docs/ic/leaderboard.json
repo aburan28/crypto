@@ -112,7 +112,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "22b2ffef99720f2b2c7396a267412d2241a868e038a835c4fb1fd12209b102bf"
+   "sha256": "053b604c0744156bada633508c517b4514ec346f5a10c653e6ea81949d53794c"
   },
   "curves_schema": {
    "path": "docs/curves/ic/curves.schema.json",
@@ -9853,6 +9853,24 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp14-tm31-68b86b70",
+   "family": "prime",
+   "field": "GF(p), p = 10007",
+   "coefficients": "a = 3, b = 6",
+   "order_bits": 14,
+   "standard": [],
+   "ec1": [
+    "EC1P14Cfph5bd49abc11ae"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "demo-10007"
+   ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp14-tm63-1a762b57",
    "family": "prime",
    "field": "GF(p), p = 11617",
@@ -9949,6 +9967,24 @@
     "bench-16bit"
    ],
    "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp17-t121-95219f0d",
+   "family": "prime",
+   "field": "GF(p), p = 99013",
+   "coefficients": "a = 6, b = 4",
+   "order_bits": 17,
+   "standard": [],
+   "ec1": [
+    "EC1P17Cfph80ecfa7de129"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "demo-99013"
+   ],
+   "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
   },
@@ -15359,6 +15395,24 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp32-tm101415-9b187f52",
+   "family": "prime",
+   "field": "GF(p), p = 3094378543",
+   "coefficients": "a = 608760208, b = 2109595922",
+   "order_bits": 32,
+   "standard": [],
+   "ec1": [
+    "EC1P32Cfphf694d17166d1"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "demo-32"
+   ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp32-t7319-90da43e9",
    "family": "prime",
    "field": "GF(p), p = 4294967291",
@@ -15372,6 +15426,20 @@
    "legacy": [
     "ic-frontier-fp32"
    ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp36-t276049-fe2b595b",
+   "family": "prime",
+   "field": "GF(p), p = 39615550291",
+   "coefficients": "a = 0, b = 22620405809",
+   "order_bits": 36,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
@@ -15442,6 +15510,20 @@
    "field": "GF(p), p = 81640512137",
    "coefficients": "a = 6206588639, b = 31351229805",
    "order_bits": 37,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp40-tm506303-75549727",
+   "family": "prime",
+   "field": "GF(p), p = 649522587953",
+   "coefficients": "a = 552810359288, b = 555863716954",
+   "order_bits": 40,
    "standard": [],
    "ec1": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
@@ -15758,6 +15840,22 @@
    "ec1": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
    "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp48-tm2395735-7a78ff24",
+   "family": "prime",
+   "field": "GF(p), p = 140737529461027",
+   "coefficients": "a = 0, b = 4",
+   "order_bits": 48,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "pinned-j0-smooth47"
+   ],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"

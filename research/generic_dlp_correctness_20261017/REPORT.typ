@@ -53,8 +53,9 @@
   identical.
 - *With it*, walkers that used to die at the step cap in fruitless 2-cycles
   now leave the cycle and reach distinguished points.
-- *What still dies* consists of longer fruitless cycles, which the
-  `20·2^dp_bits` step cap still handles; that is outside this fix.
+- *What still dies* was not classified walker by walker. Longer fruitless
+  cycles, which this fix does not handle, are the expected cause, and the
+  `20·2^dp_bits` step cap still bounds them.
 
 = Pohlig–Hellman
 
