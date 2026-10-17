@@ -27,6 +27,10 @@ name = "crypto"
 path = "src/main.rs"
 
 [[bin]]
+name = "ecdlp-audit"
+path = "src/bin/ecdlp_audit.rs"
+
+[[bin]]
 name = "ic"
 path = "src/bin/ic.rs"
 

@@ -1,0 +1,77 @@
+{
+  "$schema": "../ws4-evidence.schema.json",
+  "schema_version": "ecdlp-ws4-evidence/v0-draft",
+  "record_kind": "evidence_transition_fixture",
+  "record_state": "draft_non_authoritative",
+  "authoritative": false,
+  "promotion_allowed": false,
+  "registry_ref": "../evidence-profile-registry.draft.json",
+  "fixture_id": "fixture.demotion.weakest_link_retraction",
+  "title": "Retracted transfer evidence demotes the composed route",
+  "scenario_kind": "demotion",
+  "profile_id": "profile.B.mathematical_transfer",
+  "claim_kind": "cost_advantage",
+  "purpose": "Golden case for append-only demotion when a required transfer-map component falls from E5 to E3 after retraction.",
+  "before": {
+    "assessment_id": "assessment.transfer.004.r2",
+    "revision": 2,
+    "supersedes": "assessment.transfer.004.r1",
+    "claim_status": "unknown",
+    "derived_maturity": "E5",
+    "evaluated_at": "2026-10-14T09:00:00Z",
+    "history_count": 2,
+    "identity_binding": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+    "blocking_gates": [],
+    "component_maturities": [
+      {"component_id": "source_curve_identity", "required": true, "maturity": "E5", "status": "present"},
+      {"component_id": "transfer_construction", "required": true, "maturity": "E5", "status": "present"},
+      {"component_id": "destination_arithmetic", "required": true, "maturity": "E5", "status": "present"},
+      {"component_id": "transfer_maps", "required": true, "maturity": "E5", "status": "present"},
+      {"component_id": "destination_solver", "required": true, "maturity": "E5", "status": "present"}
+    ],
+    "evidence_revision_refs": ["fixture-evidence:transfer-004:r2"]
+  },
+  "event": {
+    "event_id": "event.demotion.transfer.004.r3",
+    "event_type": "demotion_request",
+    "occurred_at": "2026-10-14T10:15:00Z",
+    "requested_maturity": "E3",
+    "gate_changes": [
+      {
+        "gate_id": "G.B.E4.subgroup_composition",
+        "level": "E4",
+        "before_outcome": "supported",
+        "before_freshness": "fresh",
+        "after_outcome": "refuted",
+        "after_freshness": "retracted",
+        "evidence_refs": ["fixture-retraction:transfer-004:subgroup-composition"]
+      }
+    ],
+    "component_maturities_after": [
+      {"component_id": "source_curve_identity", "required": true, "maturity": "E5", "status": "present"},
+      {"component_id": "transfer_construction", "required": true, "maturity": "E5", "status": "present"},
+      {"component_id": "destination_arithmetic", "required": true, "maturity": "E5", "status": "present"},
+      {"component_id": "transfer_maps", "required": true, "maturity": "E3", "status": "retracted"},
+      {"component_id": "destination_solver", "required": true, "maturity": "E5", "status": "present"}
+    ],
+    "correction": null,
+    "reviewer_decision": "approved",
+    "reviewer_role": "mathematical",
+    "review_receipt_refs": ["fixture-review:transfer-004:r3"]
+  },
+  "expected": {
+    "decision": "accept",
+    "resulting_maturity": "E3",
+    "reason_codes": ["demotion_recomputed_contiguously", "evidence_retracted", "weakest_required_component"],
+    "weakest_component_ids": ["transfer_maps"],
+    "history_count_after": 3,
+    "new_assessment_id": "assessment.transfer.004.r3",
+    "prior_assessment_preserved": true,
+    "claim_status_derived_from_maturity": false,
+    "required_actions": ["Resolve the refuted subgroup-composition gate before any new E4 promotion request."]
+  },
+  "notes": [
+    "The E5 historical assessment remains immutable but is no longer the current maturity.",
+    "The route is bounded by the E3 transfer-map component even though its other components remain at E5."
+  ]
+}

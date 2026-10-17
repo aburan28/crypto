@@ -31,6 +31,13 @@ use crate::cryptanalysis::ecbench::workload::{CurveFacts, Instance, WideInstance
 use crate::cryptanalysis::ecbench_large_prime::{
     self as large_prime, SolveConfig as LargePrimeConfig,
 };
+use crate::cryptanalysis::gaudry_quartic::Pt4;
+use crate::cryptanalysis::gaudry_quartic_bin::{
+    fq_muls_per_add, BinCurve, BinD4Oracle, BinOptions, PtB, TLineBase,
+};
+use crate::cryptanalysis::gaudry_quartic_d4::{
+    fp_muls_per_add, unpack_e4, D4Curve, D4Options, D4Oracle, YLineBase,
+};
 use crate::cryptanalysis::ic_boundary::{
     price_phase, rho_cap, rho_reference, rho_walk_with, signed_frobenius_rho_tuned, BinaryGroup,
     BinaryInstance, Calibration, CountedGroup, CubicClasses, FieldOps, GroupOps, NegationClasses,
@@ -1127,6 +1134,32 @@ fn solve_inner(
             solve_shared_rank(m, i, curve, FastPoint::affine(tx, ty), seed)
         }
         (Instance::Prime(i), "ic") => solve_ic_prime(m, i, curve, PrimePoint::affine(tx, ty), seed),
+        (Instance::Fp4(i), "ic") if m.id == "ic.pipeline" => {
+            let p = i.p();
+            let target = Pt4 {
+                x: unpack_e4(p, tx),
+                y: unpack_e4(p, ty),
+                inf: false,
+            };
+            solve_ic_fp4(m, i, curve, target, seed)
+        }
+        (Instance::Fp4(_), "ic") => Err(format!(
+            "`{}` does not run on a curve over F_(p^4); ic.pipeline does",
+            m.id
+        )),
+        (Instance::F2m4(i), "ic") if m.id == "ic.pipeline" => {
+            let f = &i.curve.f;
+            let target = PtB {
+                x: f.unpack(tx),
+                y: f.unpack(ty),
+                inf: false,
+            };
+            solve_ic_f2m4(m, i, curve, target, seed)
+        }
+        (Instance::F2m4(_), "ic") => Err(format!(
+            "`{}` does not run on a curve over F_(2^m)^4; ic.pipeline does",
+            m.id
+        )),
         (Instance::Binary(i), "ic") => {
             solve_ic_binary(m, i, curve, FastPoint::affine(tx, ty), seed)
         }
@@ -1837,8 +1870,11 @@ fn ic_report(
     // (`audit::legacy_solver_rounding` reproduces those records).
     let mut total = rep.total_gae;
     if let Some(s) = &rep.decomposition.solver {
+        // `counted` (field multiplications priced at the curve's own
+        // multiplications per addition, `gaudry-d4`) is a count, like
+        // `pinned`, and stays in the total.
         if (s.gae > 0.0 || (m.id == "ic.pipeline_counted" && s.calls > 0))
-            && s.priced_by != "pinned"
+            && !matches!(s.priced_by.as_str(), "pinned" | "counted")
         {
             phases[2].gae = rep.decomposition.gae_before_solver;
             total = phases.iter().fold(0.0, |acc, p| acc + p.gae);
@@ -2068,6 +2104,219 @@ fn solve_ic_prime(
     Ok(ic_report(m, rep, &calib, facts, wall, 2))
 }
 
+/// `ic.pipeline` on a curve over `F_{p⁴}` with rational 2-torsion: the
+/// `fghr-y-line` base and the `gaudry-d4` oracle
+/// (`gaudry_quartic_d4`), the only pair that runs there.  Everything is
+/// priced in one unit: the oracle's `F_p` multiplications at the curve's
+/// own multiplications per addition, and the pipeline's square roots and
+/// row operations at the calibration below, also in `F_p` multiplications
+/// (a square root by its measured count, a modular multiply-subtract as
+/// one word multiplication).
+fn solve_ic_fp4(
+    m: &ResolvedMethod,
+    inst: &D4Curve,
+    curve: &CurveFacts,
+    target: Pt4,
+    seed: u64,
+) -> Result<SolveReport, String> {
+    let (spec, fb_name, or_name) = pipeline_spec(m, seed)?;
+    if fb_name != "fghr-y-line" {
+        return Err(format!(
+            "factor base `{fb_name}` does not run on a curve over F_(p^4); fghr-y-line does"
+        ));
+    }
+    if or_name != "gaudry-d4" {
+        return Err(format!(
+            "oracle `{or_name}` does not run on a curve over F_(p^4); gaudry-d4 does"
+        ));
+    }
+    let base = YLineBase { curve: inst };
+    let macaulay = spec.oracle_params.u64("macaulay")?;
+    let macaulay = u8::try_from(macaulay)
+        .ok()
+        .filter(|&d| d >= 2)
+        .ok_or_else(|| format!("gaudry-d4: macaulay is a degree from 2 to 255, not {macaulay}"))?;
+    let mut oracle = D4Oracle::new(inst, macaulay, seed);
+    oracle.charge_unsolved = match spec.oracle_params.u64_or("charge_unsolved", 0)? {
+        0 => false,
+        1 => true,
+        v => return Err(format!("gaudry-d4: charge_unsolved is 0 or 1, not {v}")),
+    };
+    let flag = |k: &str| -> Result<bool, String> {
+        match spec.oracle_params.u64_or(k, 0)? {
+            0 => Ok(false),
+            1 => Ok(true),
+            v => Err(format!("gaudry-d4: {k} is 0 or 1, not {v}")),
+        }
+    };
+    oracle.opts = D4Options {
+        weighted: flag("weighted")?,
+        chains: flag("chains")?,
+        sparsest: flag("sparsest")?,
+    };
+    oracle.replay = flag("replay")?;
+    let c = &inst.inst.curve;
+    let ctx = InstanceCtx {
+        group: c,
+        generator: inst.generator,
+        target,
+        r: inst.r,
+        cofactor: inst.cofactor,
+        group_order: inst.group_order,
+        name: curve.slug.clone(),
+        field_degree: None,
+    };
+    let per_add = fp_muls_per_add(c) as f64;
+    let calib = Calibration {
+        ns_per_add: per_add,
+        ns_per_double: per_add,
+        ns_per_row_op: 1.0,
+        ns_per_lookup: 1.0,
+        ns_per_sqrt: Some(fp4_sqrt_muls(inst)),
+        pinned_units: vec![
+            "ns_per_double".into(),
+            "ns_per_row_op".into(),
+            "ns_per_lookup".into(),
+            "ns_per_sqrt".into(),
+        ],
+        ..Default::default()
+    };
+    let t = Instant::now();
+    let rep = run_pipeline(&ctx, &spec, &base, &mut oracle, u64::MAX, &calib, None)?;
+    let wall = t.elapsed().as_nanos() as u64;
+    let mut scratch = GroupOps::default();
+    let fb = base.build(&ctx, &spec.factor_base_params, &mut scratch)?;
+    let facts = factor_base_facts(
+        &curve.slug,
+        &m.params["factor_base"],
+        &spec.factor_base_params,
+        &fb,
+        |q| CountedGroup::key(c, q),
+    )?;
+    Ok(ic_report(m, rep, &calib, facts, wall, 2))
+}
+
+/// `ic.pipeline` on a curve over `F_{(2^m)⁴}` with `bin-t-line` and
+/// `gaudry-d4-bin`, priced as [`solve_ic_fp4`] prices its curve: the
+/// oracle's `F_q` multiplications at the curve's own multiplications per
+/// addition, lifts at their measured count, row operations at one each.
+fn solve_ic_f2m4(
+    m: &ResolvedMethod,
+    inst: &BinCurve,
+    curve: &CurveFacts,
+    target: PtB,
+    seed: u64,
+) -> Result<SolveReport, String> {
+    let (spec, fb_name, or_name) = pipeline_spec(m, seed)?;
+    if fb_name != "bin-t-line" {
+        return Err(format!(
+            "factor base `{fb_name}` does not run on a curve over F_(2^m)^4; bin-t-line does"
+        ));
+    }
+    if or_name != "gaudry-d4-bin" {
+        return Err(format!(
+            "oracle `{or_name}` does not run on a curve over F_(2^m)^4; gaudry-d4-bin does"
+        ));
+    }
+    let base = TLineBase { curve: inst };
+    let macaulay = spec.oracle_params.u64("macaulay")?;
+    let macaulay = u8::try_from(macaulay)
+        .ok()
+        .filter(|&d| d >= 2)
+        .ok_or_else(|| {
+            format!("gaudry-d4-bin: macaulay is a degree from 2 to 255, not {macaulay}")
+        })?;
+    let flag = |k: &str| -> Result<bool, String> {
+        match spec.oracle_params.u64_or(k, 0)? {
+            0 => Ok(false),
+            1 => Ok(true),
+            v => Err(format!("gaudry-d4-bin: {k} is 0 or 1, not {v}")),
+        }
+    };
+    let frobenius = flag("frobenius")?;
+    let opts = BinOptions {
+        weighted: flag("weighted")? || frobenius,
+        frobenius,
+        sparsest: flag("sparsest")?,
+        replay: flag("replay")?,
+    };
+    let mut oracle = BinD4Oracle::new(inst, macaulay, seed, opts);
+    oracle.charge_unsolved = flag("charge_unsolved")?;
+    let c = &inst.curve;
+    let ctx = InstanceCtx {
+        group: c,
+        generator: inst.generator,
+        target,
+        r: inst.r,
+        cofactor: inst.cofactor,
+        group_order: inst.group_order,
+        name: curve.slug.clone(),
+        field_degree: None,
+    };
+    let per_add = fq_muls_per_add(c) as f64;
+    let calib = Calibration {
+        ns_per_add: per_add,
+        ns_per_double: per_add,
+        ns_per_row_op: 1.0,
+        ns_per_lookup: 1.0,
+        ns_per_sqrt: Some(f2m4_lift_muls(inst)),
+        pinned_units: vec![
+            "ns_per_double".into(),
+            "ns_per_row_op".into(),
+            "ns_per_lookup".into(),
+            "ns_per_sqrt".into(),
+        ],
+        ..Default::default()
+    };
+    let t = Instant::now();
+    let rep = run_pipeline(&ctx, &spec, &base, &mut oracle, u64::MAX, &calib, None)?;
+    let wall = t.elapsed().as_nanos() as u64;
+    let mut scratch = GroupOps::default();
+    let fb = base.build(&ctx, &spec.factor_base_params, &mut scratch)?;
+    let facts = factor_base_facts(
+        &curve.slug,
+        &m.params["factor_base"],
+        &spec.factor_base_params,
+        &fb,
+        |q| CountedGroup::key(c, q),
+    )?;
+    Ok(ic_report(m, rep, &calib, facts, wall, 2))
+}
+
+/// `F_q` multiplications in one lift (`lift_x`) of a random abscissa
+/// that lifts, averaged over 32.
+fn f2m4_lift_muls(inst: &BinCurve) -> f64 {
+    let c = &inst.curve;
+    let mut rng = <rand::rngs::StdRng as rand::SeedableRng>::seed_from_u64(0x5e);
+    let (mut muls, mut n) = (0u64, 0u64);
+    while n < 32 {
+        let x = c.f.random(&mut rng);
+        let before = c.f.f.muls();
+        if c.lift_x(&x, &mut rng).is_some() {
+            muls += c.f.f.muls() - before;
+            n += 1;
+        }
+    }
+    muls as f64 / n as f64
+}
+
+/// `F_p` multiplications of one square root in `F_{p⁴}`, the mean over a
+/// fixed sample (the sampler is seeded): the price of a base lift.
+fn fp4_sqrt_muls(inst: &D4Curve) -> f64 {
+    let c = &inst.inst.curve;
+    let mut rng = <rand::rngs::StdRng as rand::SeedableRng>::seed_from_u64(0x5e);
+    let (mut muls, mut n) = (0u64, 0u64);
+    while n < 32 {
+        let x = c.f.random(&mut rng);
+        let before = c.f.muls();
+        if c.lift_x(&x, &mut rng).is_some() {
+            muls += c.f.muls() - before;
+            n += 1;
+        }
+    }
+    muls as f64 / n as f64
+}
+
 /// A binary-curve factor base that a linking binary adds to `ic.pipeline`
 /// by name, or `None` when the name is not its.
 pub type BinaryBasePlugin = for<'i> fn(
@@ -2123,12 +2372,14 @@ fn solve_ic_binary(
     let orbit = KoblitzOrbitBase { instance: inst };
     let compact = CompactOrbitScanBase { instance: inst };
     let cyclotomic = CyclotomicBase { instance: inst };
+    let onb_weight = OnbWeightBase { instance: inst };
     let plugin_base = binary_plugins().and_then(|p| (p.base)(fb_name.as_str(), inst));
     let base: &dyn FactorBaseBuilder<BinaryGroup> = match fb_name.as_str() {
         "binary-subspace" => &subspace,
         "koblitz-orbit" => &orbit,
         "compact-orbit-scan" => &compact,
         "cyclotomic" => &cyclotomic,
+        "onb-weight" => &onb_weight,
         other => match plugin_base.as_deref() {
             Some(b) => b,
             None => {
@@ -2569,12 +2820,14 @@ pub fn dump_factor_base(
             let orbit = KoblitzOrbitBase { instance: i };
             let compact = CompactOrbitScanBase { instance: i };
             let cyclotomic = CyclotomicBase { instance: i };
+            let onb_weight = OnbWeightBase { instance: i };
             let plugin_base = binary_plugins().and_then(|p| (p.base)(name.as_str(), i));
             let base: &dyn FactorBaseBuilder<BinaryGroup> = match name.as_str() {
                 "binary-subspace" => &subspace,
                 "koblitz-orbit" => &orbit,
                 "compact-orbit-scan" => &compact,
                 "cyclotomic" => &cyclotomic,
+                "onb-weight" => &onb_weight,
                 other => match plugin_base.as_deref() {
                     Some(b) => b,
                     None => {

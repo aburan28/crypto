@@ -1,0 +1,11 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "scratch plumbing, char 2",
+  "description": "scratch, not cited",
+  "workloads": {"curves": [{"kind": "f2m4_torsion", "m": 8, "seed": 1, "max_cofactor": 16}], "targets_per_curve": 1, "target_seed": 7},
+  "arms": [
+    {"name": "rho-neg", "role": "reference", "method": {"id": "rho.negation"}},
+    {"name": "ic-frob", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "bin-t-line", "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1", "max_trials": "20000"}}}
+  ],
+  "measurement": {"rounds": 1, "warmup": 0, "order": "alternate", "seed": 8, "isolation_required": "L0", "timeout_seconds": 3600}
+}

@@ -324,7 +324,7 @@ pub fn run(cfg: &RunConfig) -> Report {
         ConstructionRow {
             route: 0,
             construction: "GHS / Hess descent to F_2, ECC2K-130 itself (magic number 1)".into(),
-            genus: format!("{m1_genus} (2^(m-1) - 1, type I; 2^(m-1) = 1 in the generic formula)"),
+            genus: format!("{m1_genus} (m = 1, type II)"),
             log2_genus: 0.0,
             carries_a: "no: the transfer is the zero map on <G>".into(),
             cost_model: "none".into(),
@@ -333,13 +333,13 @@ pub fn run(cfg: &RunConfig) -> Report {
         },
         ConstructionRow {
             route: 0,
-            construction: "GHS / Hess descent to F_2, any curve over F_2^131 (magic 130 or 131)".into(),
-            genus: "2^129 or 2^130".into(),
-            log2_genus: 129.0,
+            construction: "GHS / Hess descent to F_2, ordinary nontrivial branch over F_2^131 (magic 131)".into(),
+            genus: "2^130 - 1 (type I) or 2^130 (type II)".into(),
+            log2_genus: 130.0,
             carries_a: "not established".into(),
             cost_model: "floor: bits to write one divisor".into(),
-            log2_ic_cost: Some(129.0),
-            log2_ratio_to_rho: ratio(129.0),
+            log2_ic_cost: Some(130.0),
+            log2_ratio_to_rho: ratio(130.0),
         },
         ConstructionRow {
             route: 1,

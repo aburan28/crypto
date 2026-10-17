@@ -1,0 +1,91 @@
+{
+  "schema_version": "ecdlp-source-claim-manifest/draft-2",
+  "manifest_id": "WS6-MANIFEST-FIXTURE-INVALID-REVIEW",
+  "title": "Invalid supported claim review fixture",
+  "created_at": "2026-10-14T00:00:00Z",
+  "repository_revision": "1e447956d3616092a223264f1c6c31eff8ac9979",
+  "protocol": {
+    "protocol_id": "ws6-corpus-protocol-draft-2026-10-13",
+    "path": "docs/ecdlp-audit/corpus/PROTOCOL.md",
+    "revision_status": "draft",
+    "frozen": false,
+    "frozen_at": null,
+    "reviewer_ids": []
+  },
+  "route_registry_binding": {
+    "registry_path": "docs/ecdlp-audit/routes/route-registry.seed.json",
+    "schema_path": "docs/ecdlp-audit/routes/ws5-routes.schema.json",
+    "schema_version": "ecdlp-ws5-routes/v0-draft",
+    "record_state": "draft_non_authoritative",
+    "binding_status": "content_hash_verified",
+    "content_sha256": "b19664ca7557a3bd943ad472f8ea645b114a058f1a1557b8822c8177e0140b1b",
+    "digest_scope": "raw_file_bytes",
+    "reviewer_ids": ["fixture-route-reviewer"],
+    "reviewed_at": "2026-10-14T00:00:00Z",
+    "semantic_join_required": true,
+    "authoritative_mapping": false,
+    "limitations": ["Synthetic fixture-only binding isolates the missing claim-review failure; no route mapping is authoritative."]
+  },
+  "authority": {
+    "authoritative": false,
+    "promotion_allowed": false,
+    "status": "draft_non_authoritative",
+    "non_claims": ["Expected schema rejection: supported claim lacks second-person verification."]
+  },
+  "completeness": {
+    "claimed": false,
+    "denominator_status": "unfrozen",
+    "evidence_cutoff": null,
+    "statement": "Negative validator fixture.",
+    "known_gaps": ["No search has been executed."]
+  },
+  "counts": {"sources": 0, "claims": 1, "source_claim_links": 0, "search_runs": 0},
+  "sources": [],
+  "claims": [
+    {
+      "claim_id": "CLM-INVALID-UNREVIEWED-SUPPORT",
+      "statement": "This fixture improperly marks an unreviewed claim as supported.",
+      "claim_kind": "provenance",
+      "classification": "evidence_provenance",
+      "critical": true,
+      "route_lanes": ["E"],
+      "route_registry_join": {
+        "status": "reviewed_non_authoritative",
+        "route_ids": ["route.e.primary-source-provenance"],
+        "basis": "Synthetic fixture-only reviewed join isolates the missing second-person claim-verification failure.",
+        "reviewer_ids": ["fixture-route-reviewer"],
+        "reviewed_at": "2026-10-14T00:00:00Z",
+        "semantic_resolution_required": true,
+        "authoritative": false
+      },
+      "hypotheses": ["Fixture hypothesis."],
+      "affected_identities": [
+        {
+          "identity_id": "ID-INVALID-FIXTURE-SCOPE",
+          "kind": "generic_scope",
+          "value": "schema fixture",
+          "precision": "exact",
+          "repository_ref": null
+        }
+      ],
+      "status": "supported",
+      "evidence_level": "E0",
+      "limitations": ["No evidence or review exists."],
+      "verification": {
+        "status": "not_started",
+        "reviewer_ids": [],
+        "reviewed_at": null,
+        "notes": "Expected schema rejection."
+      }
+    }
+  ],
+  "source_claim_links": [],
+  "search_runs": [],
+  "review": {
+    "status": "not_started",
+    "reviewer_ids": [],
+    "reviewed_at": null,
+    "all_critical_claims_second_person_verified": false,
+    "notes": "Negative validator fixture."
+  }
+}

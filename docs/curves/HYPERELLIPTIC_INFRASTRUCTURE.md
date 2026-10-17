@@ -36,14 +36,29 @@ are:
 ./hyperelliptic-cover catalog-export --registry REGISTRY.json [--output covers.json]
 ```
 
+The catalog-wide assessment distinguishes current source from the executable
+that has actually been published. Current-source tests accept all 2,100 catalog
+map inputs (2,098 distinct cover models). The pinned
+`v0.1.0-main.1371` source allowlist and the current model-profile partition
+imply a 746-row syntactic support boundary: 160 binary and 586 direct
+prime-field inputs are within that allowlist, while 1,324 odd-characteristic
+extension-field and 30 normalized-target inputs are outside it. That
+746/1,354 split is a static source/applicability classification, not a direct
+2,100-command replay of the published executable. The artifact was directly
+replayed only against its own bundled 592-row registry. A new release and
+direct replay of all 2,100 current commands remain open obligations.
+
 For the first three commands, `--input -` reads standard input. Omitting
 `--output` writes JSON to standard output. Successful `catalog-export` writes
 the existing deterministic `curve-covers/v1` catalog shape; it does not
-silently claim enriched Jacobian or transfer evidence. `--registry` is
-required: release archives contain the executable, not a registry or catalog.
-All input paths, including the catalog registry, are capped at 32 MiB. A
-larger file or standard-input stream returns `invalid_input` rather than being
-partially parsed.
+silently claim enriched Jacobian or transfer evidence. `--registry` is always
+required because the executable does not embed a registry. The repository's
+release workflow stages `docs/curves/registry.json`, `covers.json`, and
+`cover-links.yaml` beside the executables, and the pinned published archive
+replay confirmed those files were present. Callers may use that bundled
+registry or supply another explicit path. All input paths, including the
+catalog registry, are capped at 32 MiB. A larger file or standard-input stream
+returns `invalid_input` rather than being partially parsed.
 
 Command response status and process exit status are distinct and stable:
 
@@ -319,17 +334,52 @@ The library feature snapshot has a bounded binary transfer for rational
 elliptic point classes, rational source-point divisors, and its own typed
 pullback fibers. It checks infinity, the exceptional ramified two-torsion
 fiber, the degree-three composition, and the exact F2^7/order-29 catalog
-subgroup. It does not expose a CLI transfer subcommand and does not implement
-the norm of an arbitrary Mumford class. That operation returns a typed
+subgroup. It does not expose a CLI transfer subcommand. The arbitrary-class
+pushforward is implemented only for the exact polynomial-basis F8 fixture
+`a=1`, `b=3`, `d=7`: its checked table covers 486 reduced classes. Every
+other binary model returns a typed
 `Unsupported(ArbitraryJacobianPushforward)` result in the library API.
+The fixture is a norm-mechanics test, not an injective full-group ECDLP
+transfer: its target has order 6, the six norm fibers each have size 81, and
+the map degree 3 is not coprime to 6. The generic degree-coprime subgroup
+argument therefore does not resolve its full target-group kernel.
+The standalone construction receipt's
+`implemented_in_library_only_for_exact_fixed_f8_fixture` field is a compiled
+capability declaration: that command replays the geometry certificate but
+does not initialize or execute the 486-class norm. It is not a per-invocation
+transfer proof; the CLI still has no transfer subcommand.
+
+The fixed fixture's Jacobian cardinality has a separate machine-readable
+[order certificate](fixed-f8-genus3-order-certificate.json). Its
+[implementation-separated native replay](../../src/bin/ecdlp_audit/fixed_f8_order.rs)
+exhaustively counts `6`, `104`, and `558` points over `GF(8)`, `GF(8^2)`, and
+`GF(8^3)`, reconstructs the genus-three zeta numerator
+`1-3T+24T^2-48T^3+192T^4-192T^5+512T^6`, and verifies
+`#Jac(H)(GF(8))=P(1)=486`:
+
+```sh
+cargo run --locked --bin ecdlp-audit -- verify-fixed-f8-order \
+  --input docs/curves/fixed-f8-genus3-order-certificate.json --repo-root .
+cargo test --locked --bin ecdlp-audit fixed_f8_order
+```
+
+That replay is a separate Rust module which does not import the production
+binary-curve, Mumford, Jacobian, or transfer arithmetic. It
+certifies the order through a separate implementation only; it does not
+certify the group structure, reduced-divisor enumeration, `A/B` presentation,
+arithmetic law, norm map, homomorphism, pull-push composition, or subgroup
+preservation. The adjacent 12-test suite includes the checked-in positive
+replay plus fail-closed mutations of claims, equations, counts, encodings,
+keys, and the certificate UID.
 
 The generic subgroup classifier proves only the conditional statement
 “pullback is injective if the supplied integer is independently known to be
 the exact subgroup order and is coprime to 3.” The CLI accepts no subgroup
 order and makes no unconditional subgroup claim. The F2^7 evidence fixture is
-stronger because it independently checks the named generator is nonidentity,
-is killed by the prime 29, and therefore has exact order 29 before applying
-the degree-inverse argument.
+stronger because the same native stack directly checks, independently of the
+catalog declaration, that the named generator is nonidentity and is killed by
+the prime 29, and therefore has exact order 29 before applying the
+degree-inverse argument. This is not an independent implementation or oracle.
 
 The conforming machine-readable envelope is
 [`../../research/hyperelliptic_cover_infrastructure_20261006/evidence.json`](../../research/hyperelliptic_cover_infrastructure_20261006/evidence.json).
@@ -342,6 +392,53 @@ Its F2^7 record binds all of the following:
 - the supported degree-three composition and exact order-29 subgroup check;
 - content hashes and local test receipts; and
 - a structured refutation of arbitrary-class pushforward support.
+
+That last item describes the immutable October 6 snapshot, not the newer
+fixed-F8 exception. The current-catalog
+crosswalk is the generated v2
+[`cover-transfer-assessments.json`](cover-transfer-assessments.json), with
+structural contract
+[`cover-transfer-assessment.schema.json`](cover-transfer-assessment.schema.json)
+and a dated
+[transfer report](../../research/cover_transfer_assessment_20261013/README.md).
+It classifies all 2,100 map rows, representing 2,098 distinct cover models, and
+all 664 exact EC1 representations. Its map profiles contain 160 binary cubic
+covers, 586 direct prime-field quadratic covers, 30 normalized-target
+prime-field covers, and 1,324 odd-characteristic extension-field covers. Its
+subgroup profiles contain 134 binary and 530 odd-characteristic
+representations. “Assessed” means that every declared claim has an explicit
+status; it does not mean that every capability is supported.
+
+The binary profile has checked one-infinity Jacobian arithmetic and a bounded
+typed transfer domain. The odd-characteristic covers are even-degree sextics
+with two rational infinity points, so their balanced Jacobian arithmetic and
+induced maps remain unavailable. Numeric exact-order evidence also remains
+open catalog-wide except for the order-29 overlay and the
+implementation-separated cardinality-486 certificate for the separate fixed
+F8 source fixture. The
+latter is not an EC1 subgroup-order certificate. All computational-advantage
+and end-to-end solver costs for these 2,100 assessed cover paths remain
+unknown. The retained cryptanalysis parity receipt predates the fixed-F8 norm,
+so current mirror/integration evidence is also open. The assessment does not change
+the geometry semantics or browser status fields in `covers.json` and
+`cover-links.yaml`.
+
+Regenerate and check the assessment deterministically with:
+
+```text
+node scripts/build_cover_transfer_assessments.mjs --write
+node scripts/build_cover_transfer_assessments.mjs --check
+python -m jsonschema -i docs/curves/cover-transfer-assessments.json \
+  docs/curves/cover-transfer-assessment.schema.json
+node research/cover_transfer_assessment_20261013/verify_assessment.mjs
+```
+
+The verifier replays membership partitions, claim/evidence bindings, source
+pins, and all 2,100 cover formulas. The accompanying Lean package formalizes
+only the conditional group-theoretic injectivity step under an already-proved
+push-pull identity, exact finite subgroup cardinality, and coprimality. It does
+not construct the maps or certify catalog subgroup orders. A full Jacobian
+index-calculus solver remains a separate deliverable.
 
 The same envelope records the prime F827 cover as an explicit verified
 construction while marking use of one-infinity arithmetic on its even sextic
@@ -367,10 +464,12 @@ domain boundary.
 
 The exported catalog identifies its wrapper with
 `generated_by = "hyperelliptic-cover catalog-export"`. Its
-`producer_source_sha256` is SHA-256 of the exact UTF-8 checker source followed
-immediately by the exact UTF-8 `hyperelliptic-cover` wrapper source, in that
-order. For the documented feature snapshot it is
-`3927efaddd7e7e966bb284affc56ac22a823f98f498017509e266b603b244e37`.
-Thus changing either producer changes the provenance digest. Both
+`producer_source_sha256` is SHA-256 of the exact UTF-8 checker source, model
+normalization source, and `hyperelliptic-cover` wrapper source concatenated in
+that order. For the current source it is
+`ee99172cff9253467a949d8986b84afa9fd35662951b6ad0ba744f2d600d38c2`.
+Thus changing any of the three producer inputs changes the provenance digest.
+Both
 `hyperelliptic-cover catalog-export` and `curve_cover_check` require callers
-to supply an external registry; packaged executables do not embed one.
+to supply a registry path; the release archive bundles one, but neither
+executable embeds it.

@@ -101,6 +101,7 @@ jobs:
   p192-lean-proof:
     runs-on: ubuntu-latest
     timeout-minutes: ${{ github.event_name == 'workflow_dispatch' && 35 || 25 }}
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: research/p192_extension_cover_20261012/lean
@@ -114,6 +115,7 @@ jobs:
           use-mathlib-cache: true
           build: true
           build-args: 'CrossRatio SignedBase ScalarAnchor AdaptiveBase ShortSums DivisorSupport NonspecialSupport'
+          build-args: 'CrossRatio'
           test: false
           lint: false
           leanchecker: true

@@ -1,0 +1,1147 @@
+{
+  "$schema": "./ws4-evidence.schema.json",
+  "schema_version": "ecdlp-ws4-evidence/v0-draft",
+  "record_kind": "evidence_profile_registry",
+  "record_state": "draft_non_authoritative",
+  "authoritative": false,
+  "promotion_allowed": false,
+  "registry_id": "urn:ecdlp-audit:ws4:registry:2026-10-14-draft",
+  "as_of": "2026-10-14",
+  "title": "Draft ECDLP audit evidence profiles",
+  "scope": {
+    "purpose": "Define fail-closed evidence maturity profiles and transition semantics for the five audit lanes.",
+    "claim_boundary": "This draft classifies evidence obligations only; it does not establish, refute, or authorize any scientific or operational claim.",
+    "default_fixture_classes": [
+      "passive_public",
+      "public_synthetic",
+      "known_answer"
+    ],
+    "live_target_execution": false,
+    "secret_material": false,
+    "production_exploitation": false
+  },
+  "level_order": [
+    "E0",
+    "E1",
+    "E2",
+    "E3",
+    "E4",
+    "E5",
+    "E6",
+    "E7"
+  ],
+  "levels": [
+    {
+      "id": "E0",
+      "rank": 0,
+      "title": "Registered",
+      "promotion_gate": "The subject is registered with exact identity, owner, scope, and authorization tier.",
+      "evidence_classes": ["identity_record", "scope_record", "authorization_record"],
+      "independence_requirement": {
+        "required_all": ["R0"],
+        "required_any_groups": [],
+        "preferred": []
+      },
+      "freshness_note": "Registration is revision-bound and must be recomputed after any subject, scope, owner, or authorization change."
+    },
+    {
+      "id": "E1",
+      "rank": 1,
+      "title": "Claim and provenance pinned",
+      "promotion_gate": "The primary source, falsifiable claim, hypotheses, threat model, and provenance are pinned.",
+      "evidence_classes": ["primary_source", "claim_contract", "threat_model", "provenance_record"],
+      "independence_requirement": {
+        "required_all": ["R0"],
+        "required_any_groups": [],
+        "preferred": ["R1"]
+      },
+      "freshness_note": "The source, claim, threat model, and provenance are revision-bound to the assessed subject and route."
+    },
+    {
+      "id": "E2",
+      "rank": 2,
+      "title": "Applicability independently checked",
+      "promotion_gate": "Applicability and exact invariants are independently checked, and negative language is bounded.",
+      "evidence_classes": ["applicability_check", "invariant_certificate", "bounded_negative_statement"],
+      "independence_requirement": {
+        "required_all": [],
+        "required_any_groups": [["R2", "R3"]],
+        "preferred": ["R3"]
+      },
+      "freshness_note": "Applicability and invariant checks are revision-bound; a bounded search failure remains bounded negative evidence."
+    },
+    {
+      "id": "E3",
+      "rank": 3,
+      "title": "Mechanism reproduced",
+      "promotion_gate": "The mechanism or construction is reproduced on public synthetic or known-answer fixtures with exact hashes and negative tests.",
+      "evidence_classes": ["reproduction_receipt", "known_answer_result", "negative_test", "content_digest"],
+      "independence_requirement": {
+        "required_all": ["R1"],
+        "required_any_groups": [],
+        "preferred": ["R2"]
+      },
+      "freshness_note": "Reproduction must be repeated when code, construction, inputs, identities, dependencies, or fixture hashes change."
+    },
+    {
+      "id": "E4",
+      "rank": 4,
+      "title": "Effect certified on its domain",
+      "promotion_gate": "The claimed mathematical or protocol effect is certified on its domain, including exceptional cases and subgroup or recovery obligations where applicable.",
+      "evidence_classes": ["effect_certificate", "proof_certificate", "composition_certificate", "exceptional_case_check"],
+      "independence_requirement": {
+        "required_all": ["R2"],
+        "required_any_groups": [],
+        "preferred": ["R3"]
+      },
+      "freshness_note": "Certification is invalidated by a changed domain, exceptional case, subgroup, recovery condition, or required component identity."
+    },
+    {
+      "id": "E5",
+      "rank": 5,
+      "title": "Independently replayed",
+      "promotion_gate": "An independent replay and a separate implementation or oracle where feasible reproduce the artifact-bound result.",
+      "evidence_classes": ["independent_replay", "differential_oracle", "reproducible_artifact"],
+      "independence_requirement": {
+        "required_all": ["R2", "R3"],
+        "required_any_groups": [],
+        "preferred": ["R4"]
+      },
+      "freshness_note": "Independent replay is revision-bound and may be event- or time-bound by profile; a same-author rerun is isolation, not independent review."
+    },
+    {
+      "id": "E6",
+      "rank": 6,
+      "title": "Complete matched costs",
+      "promotion_gate": "Complete costs and matched controls or baseline are recorded on the identical workload, with cold, online, and amortized boundaries separate.",
+      "evidence_classes": ["complete_accounting", "matched_comparison", "negative_control", "uncertainty_record"],
+      "independence_requirement": {
+        "required_all": ["R3", "R4"],
+        "required_any_groups": [],
+        "preferred": ["R5"]
+      },
+      "freshness_note": "Cost evidence is workload-, protocol-, implementation-, environment-, and reference-bound and may expire."
+    },
+    {
+      "id": "E7",
+      "rank": 7,
+      "title": "Independently replicated end to end",
+      "promotion_gate": "An independent end-to-end replication verifies outputs using a second host, toolchain, or implementation, with holdouts or scaling appropriate to the claim and exact non-claims.",
+      "evidence_classes": ["independent_replication", "output_verification", "second_environment_receipt", "holdout_result", "scaling_evidence", "non_claims_record"],
+      "independence_requirement": {
+        "required_all": ["R4"],
+        "required_any_groups": [],
+        "preferred": ["R5"]
+      },
+      "freshness_note": "End-to-end replication is invalidated by a superseded artifact, changed claim scope, failed holdout, or withdrawn replication."
+    }
+  ],
+  "independence_levels": [
+    {
+      "id": "R0",
+      "rank": 0,
+      "title": "Self-check",
+      "definition": "The author checks the claim or artifact in the originating process or workflow."
+    },
+    {
+      "id": "R1",
+      "rank": 1,
+      "title": "Fresh-process replay",
+      "definition": "The same artifact is replayed in a fresh process; this is isolation, not independent review."
+    },
+    {
+      "id": "R2",
+      "rank": 2,
+      "title": "Independent oracle",
+      "definition": "A differential implementation or independent oracle checks the relevant result."
+    },
+    {
+      "id": "R3",
+      "rank": 3,
+      "title": "Separate reviewer reconstruction",
+      "definition": "A separate reviewer reconstructs the claim and checks its hypotheses, evidence, and boundary."
+    },
+    {
+      "id": "R4",
+      "rank": 4,
+      "title": "Second host or toolchain",
+      "definition": "The evidence is reproduced with a second host class, toolchain, or implementation as the claim requires."
+    },
+    {
+      "id": "R5",
+      "rank": 5,
+      "title": "External public replication",
+      "definition": "An external party publicly replicates the exact scoped result with auditable artifacts."
+    }
+  ],
+  "gate_catalog": [
+    {
+      "id": "G.COMMON.E0.subject_identity",
+      "level": "E0",
+      "scope": "common",
+      "profiles": [
+        "profile.A.native_dlp",
+        "profile.B.mathematical_transfer",
+        "profile.C.parameter_provenance",
+        "profile.D.protocol_implementation_bypass",
+        "profile.E.evidence_supply_chain"
+      ],
+      "title": "Exact subject identity",
+      "proposition": "The assessed subject, revision, owner, route, scope, authorization tier, field, curve representation, subgroup, and permitted fixture class are unambiguous where applicable.",
+      "verification_mode": "documentary",
+      "acceptable_evidence_classes": ["identity_record", "scope_record", "authorization_record"],
+      "freshness_class": "revision_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["subject_revision_changed", "identity_alias_changed", "scope_changed"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.COMMON.E1.claim_contract",
+      "level": "E1",
+      "scope": "common",
+      "profiles": [
+        "profile.A.native_dlp",
+        "profile.B.mathematical_transfer",
+        "profile.C.parameter_provenance",
+        "profile.D.protocol_implementation_bypass",
+        "profile.E.evidence_supply_chain"
+      ],
+      "title": "Claim contract",
+      "proposition": "The primary source, falsifiable claim, hypotheses, threat model, provenance, controls, success criteria, exclusions, and unresolved obligations are pinned before evaluation.",
+      "verification_mode": "documentary",
+      "acceptable_evidence_classes": ["primary_source", "claim_contract", "threat_model", "provenance_record", "requirement_map"],
+      "freshness_class": "revision_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["claim_changed", "acceptance_gate_changed", "route_changed"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.A.E2.native_applicability",
+      "level": "E2",
+      "scope": "route_specific",
+      "profiles": ["profile.A.native_dlp"],
+      "title": "Native-method applicability",
+      "proposition": "The method's preconditions and exact curve, field, subgroup, order, workload, and algorithmic invariants are independently checked, and every negative conclusion is bounded to the checked domain.",
+      "verification_mode": "computational_certificate",
+      "acceptable_evidence_classes": ["applicability_check", "invariant_certificate", "bounded_negative_statement"],
+      "freshness_class": "revision_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["implementation_changed", "workload_changed", "curve_identity_changed", "invariant_changed"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.A.E3.known_answer_correctness",
+      "level": "E3",
+      "scope": "route_specific",
+      "profiles": ["profile.A.native_dlp"],
+      "title": "Known-answer reproduction",
+      "proposition": "The mechanism is reproduced on public synthetic or known-answer fixtures with exact input and output hashes, independent result checks, recorded failures, and negative tests.",
+      "verification_mode": "experimental_reproduction",
+      "acceptable_evidence_classes": ["reproduction_receipt", "known_answer_result", "negative_test", "content_digest"],
+      "freshness_class": "revision_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["implementation_changed", "fixture_changed", "verifier_changed"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.A.E4.native_effect_certification",
+      "level": "E4",
+      "scope": "route_specific",
+      "profiles": ["profile.A.native_dlp"],
+      "title": "Native effect certification",
+      "proposition": "Correctness and the claimed algorithmic effect are certified on the exact domain, including exceptional states, failure behavior, subgroup membership, target decomposition, recovery, and output verification where applicable.",
+      "verification_mode": "computational_certificate",
+      "acceptable_evidence_classes": ["effect_certificate", "proof_certificate", "exceptional_case_check", "output_verification"],
+      "freshness_class": "revision_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["domain_changed", "exceptional_case_found", "recovery_changed", "verifier_changed"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.A.E5.independent_native_replay",
+      "level": "E5",
+      "scope": "route_specific",
+      "profiles": ["profile.A.native_dlp"],
+      "title": "Independent native replay",
+      "proposition": "A separate reviewer replays the artifact-bound result and checks it with an independent oracle or differential implementation where feasible.",
+      "verification_mode": "independent_replication",
+      "acceptable_evidence_classes": ["independent_replay", "differential_oracle", "reproducible_artifact", "review_receipt"],
+      "freshness_class": "event_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["evidence_bundle_superseded", "replay_invalidated", "oracle_invalidated", "independence_conflict_found"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.A.E6.complete_native_accounting",
+      "level": "E6",
+      "scope": "route_specific",
+      "profiles": ["profile.A.native_dlp"],
+      "title": "Complete matched native costs",
+      "proposition": "Candidate and control solve and verify the identical one-target workload with cold, online, and amortized boundaries separated and setup, failures, duplicates, memory, uncertainty, verification, and recovery fully charged.",
+      "verification_mode": "matched_measurement",
+      "acceptable_evidence_classes": ["complete_accounting", "matched_comparison", "negative_control", "uncertainty_record"],
+      "freshness_class": "time_bound",
+      "stale_after_days": 365,
+      "invalidation_triggers": ["reference_superseded", "hardware_class_changed", "measurement_protocol_changed", "accounting_interval_changed"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.B.E2.transfer_applicability",
+      "level": "E2",
+      "scope": "route_specific",
+      "profiles": ["profile.B.mathematical_transfer"],
+      "title": "Transfer applicability and invariants",
+      "proposition": "The theorem or family applies under the exact source and target identities, fields, genus, separability, rational-point, degree, and subgroup preconditions, and any failed search is bounded rather than universalized.",
+      "verification_mode": "mathematical_proof",
+      "acceptable_evidence_classes": ["applicability_check", "invariant_certificate", "proof_certificate", "bounded_negative_statement"],
+      "freshness_class": "revision_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["theorem_hypothesis_changed", "model_changed", "field_changed", "subgroup_changed"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.B.E3.construction_reproduction",
+      "level": "E3",
+      "scope": "route_specific",
+      "profiles": ["profile.B.mathematical_transfer"],
+      "title": "Construction reproduction",
+      "proposition": "The explicit source and target objects, formulas, degrees, exceptional loci, and field of definition are reproduced on public synthetic or known-answer fixtures with exact hashes and negative tests.",
+      "verification_mode": "experimental_reproduction",
+      "acceptable_evidence_classes": ["construction_record", "reproduction_receipt", "known_answer_result", "negative_test", "content_digest"],
+      "freshness_class": "revision_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["construction_changed", "fixture_changed", "reproduction_invalidated", "content_digest_changed"],
+      "not_applicable_policy": "explicit_precondition_failure",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.B.E4.subgroup_composition",
+      "level": "E4",
+      "scope": "route_specific",
+      "profiles": ["profile.B.mathematical_transfer"],
+      "title": "Subgroup-preserving composition",
+      "proposition": "Defining-equation identities, smoothness, genus, separability, infinity behavior, map domains, pullback, pushforward, exceptional kernels, image membership, recovery, and the applicable composition identity are certified on the named domain and subgroup.",
+      "verification_mode": "mathematical_proof",
+      "acceptable_evidence_classes": ["effect_certificate", "composition_certificate", "proof_certificate", "exceptional_case_check", "output_verification"],
+      "freshness_class": "revision_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["subgroup_changed", "map_changed", "kernel_assumption_changed"],
+      "not_applicable_policy": "explicit_precondition_failure",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.B.E5.independent_transfer_replay",
+      "level": "E5",
+      "scope": "route_specific",
+      "profiles": ["profile.B.mathematical_transfer"],
+      "title": "Independent transfer replay",
+      "proposition": "A separate reviewer reproduces the construction, map identities, subgroup composition, and recovery checks with an independent divisor-class or transfer oracle where feasible.",
+      "verification_mode": "independent_replication",
+      "acceptable_evidence_classes": ["independent_replay", "differential_oracle", "reproducible_artifact", "review_receipt"],
+      "freshness_class": "event_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["construction_superseded", "replay_invalidated", "oracle_invalidated", "independence_conflict_found"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.B.E6.complete_transfer_accounting",
+      "level": "E6",
+      "scope": "route_specific",
+      "profiles": ["profile.B.mathematical_transfer"],
+      "title": "Complete matched transfer costs",
+      "proposition": "Route reconstruction, parameter validation, construction or search, transfer, destination solving, target decomposition, recovery, verification, failures, duplicates, memory, and uncertainty are charged against an identical-workload source reference with cold, online, and amortized boundaries separate.",
+      "verification_mode": "matched_measurement",
+      "acceptable_evidence_classes": ["complete_accounting", "matched_comparison", "negative_control", "uncertainty_record"],
+      "freshness_class": "time_bound",
+      "stale_after_days": 365,
+      "invalidation_triggers": ["destination_solver_changed", "reference_superseded", "cost_model_changed", "accounting_interval_changed"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.C.E2.source_chain",
+      "level": "E2",
+      "scope": "route_specific",
+      "profiles": ["profile.C.parameter_provenance"],
+      "title": "Parameter applicability and source invariants",
+      "proposition": "The exact parameters, publication source, revisions, seeds, transformations, identity joins, and route preconditions are independently checked, with every negative provenance statement bounded to the searched corpus.",
+      "verification_mode": "computational_certificate",
+      "acceptable_evidence_classes": ["applicability_check", "invariant_certificate", "identity_record", "bounded_negative_statement"],
+      "freshness_class": "revision_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["source_revision_changed", "identity_mapping_changed", "new_primary_source_found"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.C.E3.generation_replay",
+      "level": "E3",
+      "scope": "route_specific",
+      "profiles": ["profile.C.parameter_provenance"],
+      "title": "Generation reproduction",
+      "proposition": "The published generation procedure is reproduced on public synthetic or known-answer inputs with exact hashes and negative tests, or the precise missing step is recorded without claiming reproduction.",
+      "verification_mode": "experimental_reproduction",
+      "acceptable_evidence_classes": ["reproduction_receipt", "construction_record", "negative_test", "content_digest"],
+      "freshness_class": "revision_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["generation_code_changed", "source_changed", "seed_interpretation_changed"],
+      "not_applicable_policy": "explicit_precondition_failure",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.C.E4.choice_analysis",
+      "level": "E4",
+      "scope": "route_specific",
+      "profiles": ["profile.C.parameter_provenance"],
+      "title": "Choice and asymmetry certification",
+      "proposition": "The claimed provenance or access-asymmetry effect is certified on its exact domain, with discretionary choices, entropy sources, rejection loops, retained witnesses, exceptional paths, and cheaper equivalent reconstructions bounded explicitly.",
+      "verification_mode": "mathematical_proof",
+      "acceptable_evidence_classes": ["effect_certificate", "proof_certificate", "boundary_check", "exceptional_case_check"],
+      "freshness_class": "revision_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["generation_model_changed", "new_equivalent_route_found", "source_assumption_changed"],
+      "not_applicable_policy": "explicit_precondition_failure",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.C.E5.independent_provenance_replay",
+      "level": "E5",
+      "scope": "route_specific",
+      "profiles": ["profile.C.parameter_provenance"],
+      "title": "Independent provenance replay",
+      "proposition": "A separate reviewer reconstructs the source chain, generation result, choice analysis, and claimed boundary from primary materials using a separate oracle or implementation where feasible.",
+      "verification_mode": "independent_replication",
+      "acceptable_evidence_classes": ["independent_replay", "differential_oracle", "reproducible_artifact", "review_receipt"],
+      "freshness_class": "time_bound",
+      "stale_after_days": 365,
+      "invalidation_triggers": ["primary_source_changed", "replay_withdrawn", "new_equivalent_route_found", "independence_conflict_found"],
+      "not_applicable_policy": "explicit_precondition_failure",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.C.E6.complete_reconstruction_accounting",
+      "level": "E6",
+      "scope": "route_specific",
+      "profiles": ["profile.C.parameter_provenance"],
+      "title": "Complete matched reconstruction costs",
+      "proposition": "Public reconstruction and any stipulated privileged construction are compared on an identical workload and declared unit with search, failures, success probability, memory, parallelism, reusable setup, uncertainty, and cold, online, and amortized boundaries separated.",
+      "verification_mode": "matched_measurement",
+      "acceptable_evidence_classes": ["complete_accounting", "matched_comparison", "negative_control", "uncertainty_record"],
+      "freshness_class": "time_bound",
+      "stale_after_days": 365,
+      "invalidation_triggers": ["reconstruction_method_changed", "hardware_class_changed", "cost_model_changed", "accounting_interval_changed"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.D.E2.threat_model",
+      "level": "E2",
+      "scope": "route_specific",
+      "profiles": ["profile.D.protocol_implementation_bypass"],
+      "title": "Bypass applicability and invariants",
+      "proposition": "The implementation or protocol surface, attacker access, preconditions, affected versions, state invariants, mitigations, and non-target boundaries are independently checked and negative findings are bounded to tested versions.",
+      "verification_mode": "computational_certificate",
+      "acceptable_evidence_classes": ["applicability_check", "invariant_certificate", "threat_model", "bounded_negative_statement"],
+      "freshness_class": "revision_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["implementation_version_changed", "protocol_changed", "access_model_changed"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.D.E3.synthetic_reproduction",
+      "level": "E3",
+      "scope": "route_specific",
+      "profiles": ["profile.D.protocol_implementation_bypass"],
+      "title": "Safe mechanism reproduction",
+      "proposition": "The claimed behavior is reproduced only on an authorized public synthetic or known-answer fixture with exact input and output hashes, failures, and negative tests.",
+      "verification_mode": "experimental_reproduction",
+      "acceptable_evidence_classes": ["reproduction_receipt", "known_answer_result", "negative_test", "content_digest"],
+      "freshness_class": "revision_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["implementation_changed", "fixture_changed", "reproduction_invalidated"],
+      "not_applicable_policy": "explicit_precondition_failure",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.D.E4.exploitability_boundary",
+      "level": "E4",
+      "scope": "route_specific",
+      "profiles": ["profile.D.protocol_implementation_bypass"],
+      "title": "Bounded effect certification",
+      "proposition": "The claimed protocol or implementation effect is certified on its exact version and access domain, including necessary conditions, exceptional states, mitigations, failure modes, privilege assumptions, recovery, and negative controls.",
+      "verification_mode": "computational_certificate",
+      "acceptable_evidence_classes": ["effect_certificate", "boundary_check", "negative_control", "exceptional_case_check", "output_verification"],
+      "freshness_class": "revision_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["mitigation_changed", "version_scope_changed", "new_negative_control_failed"],
+      "not_applicable_policy": "explicit_precondition_failure",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.D.E5.independent_bypass_replay",
+      "level": "E5",
+      "scope": "route_specific",
+      "profiles": ["profile.D.protocol_implementation_bypass"],
+      "title": "Independent safe replay",
+      "proposition": "A separate reviewer reproduces the bounded behavior, recovery or impact check, and negative controls with a separate implementation or oracle where feasible and without expanding authorization scope.",
+      "verification_mode": "independent_replication",
+      "acceptable_evidence_classes": ["independent_replay", "differential_oracle", "reproducible_artifact", "review_receipt"],
+      "freshness_class": "event_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["implementation_patched", "replay_withdrawn", "scope_violation_found", "independence_conflict_found"],
+      "not_applicable_policy": "explicit_precondition_failure",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.D.E6.complete_bypass_accounting",
+      "level": "E6",
+      "scope": "route_specific",
+      "profiles": ["profile.D.protocol_implementation_bypass"],
+      "title": "Complete matched bypass costs",
+      "proposition": "The identical safe workload and matched control include setup, access, attempts, failures, memory, verification, recovery, mitigations, uncertainty, and separate cold, online, and amortized boundaries without extrapolating beyond tested versions.",
+      "verification_mode": "matched_measurement",
+      "acceptable_evidence_classes": ["complete_accounting", "matched_comparison", "negative_control", "uncertainty_record"],
+      "freshness_class": "time_bound",
+      "stale_after_days": 180,
+      "invalidation_triggers": ["implementation_patched", "deployment_changed", "measurement_protocol_changed", "accounting_interval_changed"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.E.E2.artifact_inventory",
+      "level": "E2",
+      "scope": "route_specific",
+      "profiles": ["profile.E.evidence_supply_chain"],
+      "title": "Evidence-route applicability and invariants",
+      "proposition": "Every in-scope source, input, output, dependency, command, receipt, identity join, custody boundary, and content digest is independently checked, and missing-artifact conclusions are bounded to the searched stores.",
+      "verification_mode": "computational_certificate",
+      "acceptable_evidence_classes": ["applicability_check", "invariant_certificate", "identity_record", "bounded_negative_statement"],
+      "freshness_class": "immutable_content",
+      "stale_after_days": null,
+      "invalidation_triggers": ["digest_mismatch", "artifact_missing", "manifest_superseded"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.E.E3.artifact_reproduction",
+      "level": "E3",
+      "scope": "route_specific",
+      "profiles": ["profile.E.evidence_supply_chain"],
+      "title": "Artifact and provenance reproduction",
+      "proposition": "The recorded production and provenance path is reproduced on a public synthetic or known-answer bundle with exact hashes, negative tests, and no unresolved mutable aliases.",
+      "verification_mode": "experimental_reproduction",
+      "acceptable_evidence_classes": ["reproduction_receipt", "content_digest", "negative_test", "known_answer_result"],
+      "freshness_class": "revision_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["producer_revision_changed", "custody_gap_found", "alias_retargeted"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.E.E4.integrity_certification",
+      "level": "E4",
+      "scope": "route_specific",
+      "profiles": ["profile.E.evidence_supply_chain"],
+      "title": "Evidence-integrity effect certification",
+      "proposition": "Artifact identity, producer revisions, transformations, custody, replay semantics, correction links, exceptional cases, and bounded nondeterminism are certified for the claimed integrity domain.",
+      "verification_mode": "computational_certificate",
+      "acceptable_evidence_classes": ["effect_certificate", "composition_certificate", "exceptional_case_check", "boundary_check"],
+      "freshness_class": "revision_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["toolchain_changed", "dependency_changed", "replay_mismatch"],
+      "not_applicable_policy": "explicit_precondition_failure",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.E.E5.independent_host",
+      "level": "E5",
+      "scope": "route_specific",
+      "profiles": ["profile.E.evidence_supply_chain"],
+      "title": "Independent evidence replay",
+      "proposition": "A separate reviewer replays the artifact-bound bundle with an independent checker and, where feasible, a separate host or toolchain, recording output equivalence, environment differences, failures, and excluded claims.",
+      "verification_mode": "independent_replication",
+      "acceptable_evidence_classes": ["independent_replay", "differential_oracle", "reproducible_artifact", "review_receipt"],
+      "freshness_class": "time_bound",
+      "stale_after_days": 365,
+      "invalidation_triggers": ["bundle_superseded", "replay_receipt_withdrawn", "host_independence_invalidated"],
+      "not_applicable_policy": "explicit_precondition_failure",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.E.E6.complete_evidence_accounting",
+      "level": "E6",
+      "scope": "route_specific",
+      "profiles": ["profile.E.evidence_supply_chain"],
+      "title": "Complete matched evidence costs",
+      "proposition": "Production, retrieval, verification, replay, failure handling, storage, correction, review, memory, and uncertainty costs are recorded against matched controls on the identical bundle with cold, online, and amortized boundaries separate.",
+      "verification_mode": "matched_measurement",
+      "acceptable_evidence_classes": ["complete_accounting", "matched_comparison", "negative_control", "uncertainty_record"],
+      "freshness_class": "time_bound",
+      "stale_after_days": 365,
+      "invalidation_triggers": ["bundle_superseded", "storage_changed", "measurement_protocol_changed", "accounting_interval_changed"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.A.E7.independent_end_to_end",
+      "level": "E7",
+      "scope": "route_specific",
+      "profiles": ["profile.A.native_dlp"],
+      "title": "Independent native end-to-end replication",
+      "proposition": "An independent replication solves and verifies the exact end-to-end workload using a second host, toolchain, or implementation, with appropriate holdouts or scaling and exact non-claims.",
+      "verification_mode": "independent_replication",
+      "acceptable_evidence_classes": ["independent_replication", "output_verification", "second_environment_receipt", "holdout_result", "scaling_evidence", "non_claims_record"],
+      "freshness_class": "event_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["artifact_superseded", "replication_withdrawn", "holdout_failed", "claim_scope_changed"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.B.E7.independent_end_to_end",
+      "level": "E7",
+      "scope": "route_specific",
+      "profiles": ["profile.B.mathematical_transfer"],
+      "title": "Independent transfer end-to-end replication",
+      "proposition": "An independent replication reconstructs the route, transfers a permitted known-answer target, completes destination solving and recovery, and verifies the source output using a second host, toolchain, or implementation with appropriate holdouts or scaling and exact non-claims.",
+      "verification_mode": "independent_replication",
+      "acceptable_evidence_classes": ["independent_replication", "output_verification", "second_environment_receipt", "holdout_result", "scaling_evidence", "non_claims_record"],
+      "freshness_class": "event_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["construction_superseded", "replication_withdrawn", "holdout_failed", "claim_scope_changed"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.C.E7.independent_end_to_end",
+      "level": "E7",
+      "scope": "route_specific",
+      "profiles": ["profile.C.parameter_provenance"],
+      "title": "Independent provenance end-to-end replication",
+      "proposition": "An independent replication reconstructs the complete source and generation chain, verifies the exact output and claimed boundary using a second host, toolchain, or implementation, and records appropriate holdouts or scaling and exact non-claims.",
+      "verification_mode": "independent_replication",
+      "acceptable_evidence_classes": ["independent_replication", "output_verification", "second_environment_receipt", "holdout_result", "scaling_evidence", "non_claims_record"],
+      "freshness_class": "event_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["primary_source_changed", "replication_withdrawn", "equivalent_route_found", "claim_scope_changed"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.D.E7.independent_end_to_end",
+      "level": "E7",
+      "scope": "route_specific",
+      "profiles": ["profile.D.protocol_implementation_bypass"],
+      "title": "Independent safe end-to-end replication",
+      "proposition": "An independent replication reproduces and verifies the complete bounded effect on an authorized fixture using a second host, toolchain, or implementation, with appropriate holdouts or scaling and exact version, access, mitigation, and non-claim boundaries.",
+      "verification_mode": "independent_replication",
+      "acceptable_evidence_classes": ["independent_replication", "output_verification", "second_environment_receipt", "holdout_result", "scaling_evidence", "non_claims_record"],
+      "freshness_class": "event_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["implementation_patched", "replication_withdrawn", "holdout_failed", "claim_scope_changed"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    },
+    {
+      "id": "G.E.E7.independent_end_to_end",
+      "level": "E7",
+      "scope": "route_specific",
+      "profiles": ["profile.E.evidence_supply_chain"],
+      "title": "Independent evidence-bundle end-to-end replication",
+      "proposition": "An independent replication reconstructs and verifies the complete frozen evidence bundle using a second host, toolchain, or implementation, exercises corrections and negative controls, and records exact output, holdout or scaling, and non-claim boundaries.",
+      "verification_mode": "independent_replication",
+      "acceptable_evidence_classes": ["independent_replication", "output_verification", "second_environment_receipt", "holdout_result", "scaling_evidence", "non_claims_record"],
+      "freshness_class": "event_bound",
+      "stale_after_days": null,
+      "invalidation_triggers": ["bundle_superseded", "replication_withdrawn", "correction_added", "claim_scope_changed"],
+      "not_applicable_policy": "forbidden",
+      "mandatory": true,
+      "failure_effect": "break_contiguous_maturity"
+    }
+  ],
+  "route_profiles": [
+    {
+      "id": "profile.A.native_dlp",
+      "lane": "A",
+      "title": "Native ECDLP method evidence",
+      "description": "Evidence for a method that directly solves a discrete logarithm on a named curve and subgroup.",
+      "route_families": ["pollard_rho", "baby_step_giant_step", "kangaroo", "index_calculus"],
+      "claim_kinds": ["correctness", "operation_count", "runtime", "memory", "end_to_end_advantage"],
+      "required_components": ["method_implementation", "target_workload", "matched_reference", "verification_path", "cost_ledger"],
+      "claim_obligations": [
+        {
+          "claim_kind": "correctness",
+          "obligation_scope": "The named method returns a result that verifies on the exact curve, subgroup, and permitted workload.",
+          "required_components": ["method_implementation", "target_workload", "verification_path"],
+          "formal_proof_requirement": "conditional",
+          "computational_certification_requirement": "required",
+          "non_claims": ["Correctness alone establishes no operation-count, runtime, memory, or end-to-end advantage."]
+        },
+        {
+          "claim_kind": "operation_count",
+          "obligation_scope": "The full declared algorithmic interval is charged in one stable counted unit.",
+          "required_components": ["method_implementation", "target_workload", "verification_path", "cost_ledger"],
+          "formal_proof_requirement": "conditional",
+          "computational_certification_requirement": "required",
+          "non_claims": ["An operation count does not establish a runtime result or advantage without a matched reference."]
+        },
+        {
+          "claim_kind": "runtime",
+          "obligation_scope": "Runtime is measured on an identical workload against a matched reference under a recorded environment and uncertainty protocol.",
+          "required_components": ["method_implementation", "target_workload", "matched_reference", "verification_path", "cost_ledger"],
+          "formal_proof_requirement": "not_applicable",
+          "computational_certification_requirement": "required",
+          "non_claims": ["Runtime on one host class is not a portable operation-count or security claim."]
+        },
+        {
+          "claim_kind": "memory",
+          "obligation_scope": "Peak, retained, transferred, and external memory are measured for the exact workload and matched reference.",
+          "required_components": ["method_implementation", "target_workload", "matched_reference", "verification_path", "cost_ledger"],
+          "formal_proof_requirement": "not_applicable",
+          "computational_certification_requirement": "required",
+          "non_claims": ["A memory reduction alone establishes no end-to-end speed or asymptotic advantage."]
+        },
+        {
+          "claim_kind": "end_to_end_advantage",
+          "obligation_scope": "The candidate and reference complete and verify the same one-target workload with every phase and failure charged.",
+          "required_components": ["method_implementation", "target_workload", "matched_reference", "verification_path", "cost_ledger"],
+          "formal_proof_requirement": "conditional",
+          "computational_certification_requirement": "required",
+          "non_claims": ["A stage improvement, batch average, or unverified output is not an end-to-end advantage."]
+        }
+      ],
+      "level_gates": [
+        {"level": "E0", "gate_ids": ["G.COMMON.E0.subject_identity"]},
+        {"level": "E1", "gate_ids": ["G.COMMON.E1.claim_contract"]},
+        {"level": "E2", "gate_ids": ["G.A.E2.native_applicability"]},
+        {"level": "E3", "gate_ids": ["G.A.E3.known_answer_correctness"]},
+        {"level": "E4", "gate_ids": ["G.A.E4.native_effect_certification"]},
+        {"level": "E5", "gate_ids": ["G.A.E5.independent_native_replay"]},
+        {"level": "E6", "gate_ids": ["G.A.E6.complete_native_accounting"]},
+        {"level": "E7", "gate_ids": ["G.A.E7.independent_end_to_end"]}
+      ],
+      "proof_policy": "Mathematical bounds and group identities must state exact hypotheses; a bounded failed search is not a proof of nonexistence or security.",
+      "computational_policy": "Only public synthetic or known-answer one-target fixtures are eligible; every completed scalar or relation is independently verified and every phase is charged.",
+      "non_claims": ["A passing stage benchmark does not establish an end-to-end advantage.", "A result on one curve, field, or size does not establish support elsewhere."]
+    },
+    {
+      "id": "profile.B.mathematical_transfer",
+      "lane": "B",
+      "title": "Mathematical transfer evidence",
+      "description": "Evidence for lifts, descents, isogenies, covers, Jacobian correspondences, and related representation changes.",
+      "route_families": ["isogeny", "curve_cover", "jacobian_correspondence", "field_lift", "field_descent"],
+      "claim_kinds": ["existence", "explicit_construction", "arithmetic_validity", "map_validity", "subgroup_preservation", "end_to_end_recovery", "cost_advantage", "scaling"],
+      "required_components": ["source_curve_identity", "transfer_construction", "destination_arithmetic", "transfer_maps", "destination_solver"],
+      "claim_obligations": [
+        {
+          "claim_kind": "existence",
+          "obligation_scope": "The exact theorem establishes an object or route under its stated field, model, genus, separability, and rationality hypotheses.",
+          "required_components": ["source_curve_identity", "transfer_construction"],
+          "formal_proof_requirement": "required",
+          "computational_certification_requirement": "conditional",
+          "non_claims": ["Existence does not establish an explicit construction, executable map, subgroup preservation, recovery, or advantage."]
+        },
+        {
+          "claim_kind": "explicit_construction",
+          "obligation_scope": "Exact source and target objects, formulas, degree, field of definition, exceptional loci, and infinity behavior are constructively available.",
+          "required_components": ["source_curve_identity", "transfer_construction"],
+          "formal_proof_requirement": "conditional",
+          "computational_certification_requirement": "required",
+          "non_claims": ["An explicit construction does not establish divisor arithmetic, transfer composition, or solver advantage."]
+        },
+        {
+          "claim_kind": "arithmetic_validity",
+          "obligation_scope": "Canonical destination representations, validity, reduction, equality, addition, negation, scalar multiplication, and supported infinity cases are certified.",
+          "required_components": ["source_curve_identity", "transfer_construction", "destination_arithmetic"],
+          "formal_proof_requirement": "required",
+          "computational_certification_requirement": "required",
+          "non_claims": ["Passing generic cases does not establish shared-support, exceptional-divisor, or unsupported-infinity behavior."]
+        },
+        {
+          "claim_kind": "map_validity",
+          "obligation_scope": "The named pullback, pushforward, or correspondence is well-defined on its exact domain and satisfies the defining identities.",
+          "required_components": ["source_curve_identity", "transfer_construction", "destination_arithmetic", "transfer_maps"],
+          "formal_proof_requirement": "required",
+          "computational_certification_requirement": "required",
+          "non_claims": ["A valid map does not by itself preserve the target subgroup or enable scalar recovery."]
+        },
+        {
+          "claim_kind": "subgroup_preservation",
+          "obligation_scope": "Kernel intersection, image order, membership, composition, and recovery conditions are certified for the exact named subgroup.",
+          "required_components": ["source_curve_identity", "transfer_construction", "destination_arithmetic", "transfer_maps"],
+          "formal_proof_requirement": "required",
+          "computational_certification_requirement": "required",
+          "non_claims": ["Cover existence, a shared invariant, or a norm projection alone does not establish subgroup preservation."]
+        },
+        {
+          "claim_kind": "end_to_end_recovery",
+          "obligation_scope": "A permitted known-answer target is transferred, decomposed or solved at the destination, recovered at the source, and independently verified.",
+          "required_components": ["source_curve_identity", "transfer_construction", "destination_arithmetic", "transfer_maps", "destination_solver"],
+          "formal_proof_requirement": "required",
+          "computational_certification_requirement": "required",
+          "non_claims": ["Elliptic norm projection is not a full Jacobian relation, linear-algebra, target-decomposition, and recovery solver."]
+        },
+        {
+          "claim_kind": "cost_advantage",
+          "obligation_scope": "The full transfer-and-destination route is compared with a matched source reference, including reconstruction, setup, failures, duplicates, memory, recovery, and verification.",
+          "required_components": ["source_curve_identity", "transfer_construction", "destination_arithmetic", "transfer_maps", "destination_solver"],
+          "formal_proof_requirement": "conditional",
+          "computational_certification_requirement": "required",
+          "non_claims": ["A cheaper map evaluation, arithmetic kernel, or relation stage does not establish an end-to-end cost advantage."]
+        },
+        {
+          "claim_kind": "scaling",
+          "obligation_scope": "The claimed scaling law is supported over the specified family and sizes with complete phase costs, controls, uncertainty, and stated extrapolation boundaries.",
+          "required_components": ["source_curve_identity", "transfer_construction", "destination_arithmetic", "transfer_maps", "destination_solver"],
+          "formal_proof_requirement": "conditional",
+          "computational_certification_requirement": "required",
+          "non_claims": ["A toy fixture, one field, or a fitted stage exponent does not establish general or end-to-end scaling."]
+        }
+      ],
+      "level_gates": [
+        {"level": "E0", "gate_ids": ["G.COMMON.E0.subject_identity"]},
+        {"level": "E1", "gate_ids": ["G.COMMON.E1.claim_contract"]},
+        {"level": "E2", "gate_ids": ["G.B.E2.transfer_applicability"]},
+        {"level": "E3", "gate_ids": ["G.B.E3.construction_reproduction"]},
+        {"level": "E4", "gate_ids": ["G.B.E4.subgroup_composition"]},
+        {"level": "E5", "gate_ids": ["G.B.E5.independent_transfer_replay"]},
+        {"level": "E6", "gate_ids": ["G.B.E6.complete_transfer_accounting"]},
+        {"level": "E7", "gate_ids": ["G.B.E7.independent_end_to_end"]}
+      ],
+      "proof_policy": "Existence, explicit construction, map validity, subgroup composition, and solver advantage are separate propositions and require separately checkable hypotheses and certificates.",
+      "computational_policy": "Map and arithmetic tests use permitted fixtures, cover exceptional supports and infinity configurations, and never convert a failed bounded search into nonexistence.",
+      "non_claims": ["The existence of a cover or isogeny alone does not make an ECDLP easier.", "An elliptic norm projection is not a full Jacobian index-calculus solver."]
+    },
+    {
+      "id": "profile.C.parameter_provenance",
+      "lane": "C",
+      "title": "Parameter and provenance evidence",
+      "description": "Evidence for how public parameters were selected, generated, transformed, and published.",
+      "route_families": ["published_seed", "generation_transcript", "parameter_reconstruction", "withheld_witness_hypothesis"],
+      "claim_kinds": ["source_attribution", "reproducibility", "choice_space", "public_reconstruction_cost", "access_asymmetry"],
+      "required_components": ["primary_sources", "identity_crosswalk", "generation_procedure", "choice_analysis", "reconstruction_control"],
+      "claim_obligations": [
+        {
+          "claim_kind": "source_attribution",
+          "obligation_scope": "The exact parameter identity and every attribution statement trace to primary sources without inferred joins.",
+          "required_components": ["primary_sources", "identity_crosswalk"],
+          "formal_proof_requirement": "not_applicable",
+          "computational_certification_requirement": "conditional",
+          "non_claims": ["Missing or ambiguous provenance is not evidence of malicious selection or a trapdoor."]
+        },
+        {
+          "claim_kind": "reproducibility",
+          "obligation_scope": "The published procedure, seed, transformations, and rejection rules reproduce the exact named parameters.",
+          "required_components": ["primary_sources", "identity_crosswalk", "generation_procedure"],
+          "formal_proof_requirement": "conditional",
+          "computational_certification_requirement": "required",
+          "non_claims": ["Parameter reproduction does not establish unbiased selection, access asymmetry, or security."]
+        },
+        {
+          "claim_kind": "choice_space",
+          "obligation_scope": "Discretionary choices, entropy, filtering, retained witnesses, and equivalent public routes are explicitly bounded.",
+          "required_components": ["primary_sources", "identity_crosswalk", "generation_procedure", "choice_analysis"],
+          "formal_proof_requirement": "required",
+          "computational_certification_requirement": "conditional",
+          "non_claims": ["A large or unexplained choice space alone does not establish deliberate weakness or secret capability."]
+        },
+        {
+          "claim_kind": "public_reconstruction_cost",
+          "obligation_scope": "Public reconstruction cost, success probability, memory, failures, parallelism, and reusable setup are measured against a matched control.",
+          "required_components": ["primary_sources", "identity_crosswalk", "generation_procedure", "choice_analysis", "reconstruction_control"],
+          "formal_proof_requirement": "conditional",
+          "computational_certification_requirement": "required",
+          "non_claims": ["A stipulated or extrapolated reconstruction cost is not a measured public-discovery bound."]
+        },
+        {
+          "claim_kind": "access_asymmetry",
+          "obligation_scope": "The withheld information, privileged path, public reconstruction, cheaper equivalent routes, setup reuse, and exact affected population are assessed separately.",
+          "required_components": ["primary_sources", "identity_crosswalk", "generation_procedure", "choice_analysis", "reconstruction_control"],
+          "formal_proof_requirement": "required",
+          "computational_certification_requirement": "required",
+          "non_claims": ["A game-theoretic or agency-capability hypothesis is not evidence that a retained witness or privileged route exists."]
+        }
+      ],
+      "level_gates": [
+        {"level": "E0", "gate_ids": ["G.COMMON.E0.subject_identity"]},
+        {"level": "E1", "gate_ids": ["G.COMMON.E1.claim_contract"]},
+        {"level": "E2", "gate_ids": ["G.C.E2.source_chain"]},
+        {"level": "E3", "gate_ids": ["G.C.E3.generation_replay"]},
+        {"level": "E4", "gate_ids": ["G.C.E4.choice_analysis"]},
+        {"level": "E5", "gate_ids": ["G.C.E5.independent_provenance_replay"]},
+        {"level": "E6", "gate_ids": ["G.C.E6.complete_reconstruction_accounting"]},
+        {"level": "E7", "gate_ids": ["G.C.E7.independent_end_to_end"]}
+      ],
+      "proof_policy": "A secrecy or agency-capability hypothesis remains a hypothesis; provenance conclusions require primary sources and exact identity joins.",
+      "computational_policy": "Reconstruction experiments record algorithm, operation unit, success probability, failures, memory, parallelism, setup reuse, and cheaper equivalent routes.",
+      "non_claims": ["An unexplained parameter is not evidence of a trapdoor.", "A stipulated privileged cost is not a measured public or private capability."]
+    },
+    {
+      "id": "profile.D.protocol_implementation_bypass",
+      "lane": "D",
+      "title": "Protocol and implementation bypass evidence",
+      "description": "Evidence for non-algebraic routes whose applicability depends on a bounded protocol or implementation behavior.",
+      "route_families": ["side_channel", "fault", "validation_bypass", "nonce_failure", "protocol_composition"],
+      "claim_kinds": ["behavior_exists", "version_scope", "preconditions", "mitigation", "bounded_impact"],
+      "required_components": ["threat_model", "version_identity", "safe_fixture", "reproduction", "negative_controls", "mitigation_check"],
+      "claim_obligations": [
+        {
+          "claim_kind": "behavior_exists",
+          "obligation_scope": "The exact bounded behavior is reproducible on an authorized public synthetic or known-answer fixture.",
+          "required_components": ["threat_model", "version_identity", "safe_fixture", "reproduction"],
+          "formal_proof_requirement": "not_applicable",
+          "computational_certification_requirement": "required",
+          "non_claims": ["A synthetic reproduction does not establish exposure in an untested product, version, or deployment."]
+        },
+        {
+          "claim_kind": "version_scope",
+          "obligation_scope": "Affected and unaffected versions, configurations, parsers, arithmetic paths, and mitigations are distinguished by exact identity and controls.",
+          "required_components": ["threat_model", "version_identity", "safe_fixture", "reproduction", "negative_controls"],
+          "formal_proof_requirement": "not_applicable",
+          "computational_certification_requirement": "required",
+          "non_claims": ["A result on one build or configuration does not apply to a family by name alone."]
+        },
+        {
+          "claim_kind": "preconditions",
+          "obligation_scope": "Access, privilege, state, timing, input, and environmental preconditions are necessary and tested with negative controls.",
+          "required_components": ["threat_model", "version_identity", "safe_fixture", "reproduction", "negative_controls"],
+          "formal_proof_requirement": "conditional",
+          "computational_certification_requirement": "required",
+          "non_claims": ["A missing negative control cannot be replaced by an assumed precondition."]
+        },
+        {
+          "claim_kind": "mitigation",
+          "obligation_scope": "The exact mitigation or patch is tested against the reproduced behavior and regression controls.",
+          "required_components": ["threat_model", "version_identity", "safe_fixture", "reproduction", "negative_controls", "mitigation_check"],
+          "formal_proof_requirement": "conditional",
+          "computational_certification_requirement": "required",
+          "non_claims": ["A mitigation observed on one version is not a proof for untested implementations or configurations."]
+        },
+        {
+          "claim_kind": "bounded_impact",
+          "obligation_scope": "The complete authorized fixture impact, recovery, failures, controls, mitigations, and accounting are verified without expanding target scope.",
+          "required_components": ["threat_model", "version_identity", "safe_fixture", "reproduction", "negative_controls", "mitigation_check"],
+          "formal_proof_requirement": "conditional",
+          "computational_certification_requirement": "required",
+          "non_claims": ["A protocol or implementation bypass does not establish an algebraic weakness or authorize live-target exploitation."]
+        }
+      ],
+      "level_gates": [
+        {"level": "E0", "gate_ids": ["G.COMMON.E0.subject_identity"]},
+        {"level": "E1", "gate_ids": ["G.COMMON.E1.claim_contract"]},
+        {"level": "E2", "gate_ids": ["G.D.E2.threat_model"]},
+        {"level": "E3", "gate_ids": ["G.D.E3.synthetic_reproduction"]},
+        {"level": "E4", "gate_ids": ["G.D.E4.exploitability_boundary"]},
+        {"level": "E5", "gate_ids": ["G.D.E5.independent_bypass_replay"]},
+        {"level": "E6", "gate_ids": ["G.D.E6.complete_bypass_accounting"]},
+        {"level": "E7", "gate_ids": ["G.D.E7.independent_end_to_end"]}
+      ],
+      "proof_policy": "A protocol or implementation issue is not evidence for an algebraic weakness and does not discharge a requested algebraic workstream.",
+      "computational_policy": "Testing stays on authorized public synthetic or known-answer fixtures and records version, access, controls, failures, and mitigations without live-target exploitation.",
+      "non_claims": ["A bounded implementation result does not apply to untested versions or deployments.", "This profile does not authorize secret acquisition or production exploitation."]
+    },
+    {
+      "id": "profile.E.evidence_supply_chain",
+      "lane": "E",
+      "title": "Evidence and supply-chain integrity",
+      "description": "Evidence for artifact identity, custody, reproducibility, corrections, and review independence.",
+      "route_families": ["artifact_provenance", "reproducible_build", "independent_replay", "correction_history", "release_bundle"],
+      "claim_kinds": ["artifact_integrity", "replayability", "custody", "history_integrity", "release_readiness"],
+      "required_components": ["artifact_manifest", "content_digests", "producer_revisions", "replay_receipts", "correction_history"],
+      "claim_obligations": [
+        {
+          "claim_kind": "artifact_integrity",
+          "obligation_scope": "The exact bytes, producer revision, dependencies, and declared transformations match their durable identities and digests.",
+          "required_components": ["artifact_manifest", "content_digests", "producer_revisions"],
+          "formal_proof_requirement": "not_applicable",
+          "computational_certification_requirement": "required",
+          "non_claims": ["A matching digest establishes byte identity only, not correctness, authorship, completeness, or scientific validity."]
+        },
+        {
+          "claim_kind": "replayability",
+          "obligation_scope": "The recorded commands, inputs, environment, and dependencies reproduce the declared deterministic outputs or bound nondeterminism.",
+          "required_components": ["artifact_manifest", "content_digests", "producer_revisions", "replay_receipts"],
+          "formal_proof_requirement": "not_applicable",
+          "computational_certification_requirement": "required",
+          "non_claims": ["Reproducibility alone does not establish the truth or significance of the reproduced claim."]
+        },
+        {
+          "claim_kind": "custody",
+          "obligation_scope": "Every acquisition, transformation, storage, transfer, and review boundary is linked without gaps or mutable aliases.",
+          "required_components": ["artifact_manifest", "content_digests", "producer_revisions", "replay_receipts"],
+          "formal_proof_requirement": "conditional",
+          "computational_certification_requirement": "required",
+          "non_claims": ["A complete custody chain does not establish that the originating source was correct or honest."]
+        },
+        {
+          "claim_kind": "history_integrity",
+          "obligation_scope": "Assessments, retractions, staleness events, reviewer decisions, and corrections form an append-only supersession history.",
+          "required_components": ["artifact_manifest", "content_digests", "producer_revisions", "replay_receipts", "correction_history"],
+          "formal_proof_requirement": "conditional",
+          "computational_certification_requirement": "required",
+          "non_claims": ["A corrected history does not retroactively make the superseded assessment valid."]
+        },
+        {
+          "claim_kind": "release_readiness",
+          "obligation_scope": "The frozen bundle, replays, corrections, role reviews, privacy checks, and release decision all bind the same exact artifact set.",
+          "required_components": ["artifact_manifest", "content_digests", "producer_revisions", "replay_receipts", "correction_history"],
+          "formal_proof_requirement": "conditional",
+          "computational_certification_requirement": "required",
+          "non_claims": ["This draft profile cannot authorize release or promote an authoritative assessment."]
+        }
+      ],
+      "level_gates": [
+        {"level": "E0", "gate_ids": ["G.COMMON.E0.subject_identity"]},
+        {"level": "E1", "gate_ids": ["G.COMMON.E1.claim_contract"]},
+        {"level": "E2", "gate_ids": ["G.E.E2.artifact_inventory"]},
+        {"level": "E3", "gate_ids": ["G.E.E3.artifact_reproduction"]},
+        {"level": "E4", "gate_ids": ["G.E.E4.integrity_certification"]},
+        {"level": "E5", "gate_ids": ["G.E.E5.independent_host"]},
+        {"level": "E6", "gate_ids": ["G.E.E6.complete_evidence_accounting"]},
+        {"level": "E7", "gate_ids": ["G.E.E7.independent_end_to_end"]}
+      ],
+      "proof_policy": "A digest proves byte identity only; it does not prove correctness, authorship, completeness, or scientific validity without the corresponding evidence.",
+      "computational_policy": "Replay preserves exact commands, revisions, inputs, outputs, exit status, failures, environment, and declared nondeterminism; earlier records remain immutable.",
+      "non_claims": ["Reproducibility does not by itself establish the truth or significance of a scientific claim.", "This draft registry is not an authoritative ledger or release decision."]
+    }
+  ],
+  "maturity_policy": {
+    "derivation": "highest_contiguous_supported_and_fresh_level",
+    "gap_behavior": "stop_before_first_unsatisfied_required_gate",
+    "supported_gate_outcome": "supported",
+    "not_applicable_behavior": "allowed_only_for_explicit_failed_precondition",
+    "missing_evidence_behavior": "unknown_and_not_promotable",
+    "maturity_changes_claim_status": false,
+    "semantic_validator_required": true
+  },
+  "composition_policy": {
+    "rule": "weakest_required_component",
+    "formula": "min(rank(component.maturity))",
+    "component_source": "route_profile.claim_obligations[claim_kind].required_components",
+    "missing_required_component_result": null,
+    "ties": "retain_all_weakest_component_ids",
+    "claim_status_is_separate": true,
+    "semantic_validator_required": true
+  },
+  "transition_policy": {
+    "promotion": {
+      "adjacent_only": true,
+      "append_new_assessment": true,
+      "requires_fresh_gates": true,
+      "requires_exact_revision_binding": true,
+      "requires_profile_independence": true,
+      "requires_review": true
+    },
+    "demotion": {
+      "recompute_contiguous_prefix": true,
+      "append_new_assessment": true,
+      "preserve_history": true,
+      "triggers": [
+        "evidence_retracted",
+        "evidence_stale",
+        "identity_revision_changed",
+        "gate_refuted"
+      ]
+    },
+    "staleness": {
+      "classes": [
+        "immutable_content",
+        "revision_bound",
+        "time_bound",
+        "event_bound"
+      ],
+      "time_comparison_required": true,
+      "event_recheck_required": true,
+      "stale_gate_is_supported_for_promotion": false
+    },
+    "correction": {
+      "mode": "additive_supersession",
+      "supersedes_required": true,
+      "prior_record_immutable": true,
+      "destructive_rewrite_allowed": false,
+      "reason_and_evidence_required": true
+    }
+  },
+  "open_relationships": [
+    {
+      "id": "WS3.authoritative_assessment_identity",
+      "plan_workstream_id": "WS3",
+      "plan_obligation_id": "authoritative-ledger-identity",
+      "relationship": "plan_execution_dependency",
+      "blocks_ws4_plan_execution": true,
+      "blocks_ws4_gate_closure": true,
+      "downstream_scope": "none",
+      "status": "open",
+      "requirement": "Define canonical assessment identifiers, immutable storage, and a native semantic validator."
+    },
+    {
+      "id": "WS5.frozen_route_population",
+      "plan_workstream_id": "WS5",
+      "plan_obligation_id": "attack-route-registry-freeze",
+      "relationship": "non_blocking_validation_prerequisite",
+      "blocks_ws4_plan_execution": false,
+      "blocks_ws4_gate_closure": false,
+      "downstream_scope": "population_coverage_claims",
+      "status": "open",
+      "requirement": "Freeze route identities before making population-coverage claims with these profiles; this downstream validation input does not block WS4-G1 or WS4-G2 and is not a WS4-to-WS5 plan dependency edge."
+    },
+    {
+      "id": "WS8.governance_roles",
+      "plan_workstream_id": "WS8",
+      "plan_obligation_id": "independent-review-policy",
+      "relationship": "non_blocking_adoption_prerequisite",
+      "blocks_ws4_plan_execution": false,
+      "blocks_ws4_gate_closure": false,
+      "downstream_scope": "authoritative_claim_transitions",
+      "status": "open",
+      "requirement": "Approve reviewer roles, conflicts, expiry rules, corrections, and release authority before applying the profiles to an authoritative claim transition; this downstream adoption input does not block WS4-G1 or WS4-G2 and is not a WS4-to-WS8 plan dependency edge."
+    }
+  ],
+  "non_claims": [
+    "No transition in this draft changes an authoritative assessment.",
+    "Schema validity alone does not establish cross-file consistency or scientific correctness.",
+    "The presence of an E0-E7 profile does not establish that any route has reached any maturity level.",
+    "These profiles do not authorize live-target execution, secret handling, production exploitation, or claim promotion."
+  ]
+}

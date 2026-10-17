@@ -1,0 +1,83 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "factor-base algebraic panel: Koblitz n=17 subspace DoR + mitm controls",
+  "description": "descent-algebraic arms populate run_solver; mitm arms are yield/cost controls on the same FB1. Not a performance claim. Catalog: research/ecbench_factor_bases_20261013/catalog.json.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "koblitz",
+        "a": 1,
+        "n": 17
+      }
+    ],
+    "targets_per_curve": 1,
+    "target_seed": 20261013
+  },
+  "arms": [
+    {
+      "name": "rho-frob",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius"
+      }
+    },
+    {
+      "name": "mitm-subspace",
+      "role": "control",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=4",
+          "oracle": "mitm:m=2",
+          "max_trials": "50000"
+        }
+      }
+    },
+    {
+      "name": "alg-subspace",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=4",
+          "oracle": "descent-algebraic:m=2",
+          "solver": "f4-f2",
+          "max_trials": "200"
+        }
+      }
+    },
+    {
+      "name": "mitm-std",
+      "role": "control",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=4",
+          "oracle": "mitm:m=2",
+          "max_trials": "50000"
+        }
+      }
+    },
+    {
+      "name": "alg-std",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=4",
+          "oracle": "descent-algebraic:m=2",
+          "solver": "f4-f2",
+          "max_trials": "200"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 17,
+    "isolation_required": "L0",
+    "timeout_seconds": 300
+  }
+}
