@@ -135,6 +135,17 @@
           "class": "accounting",
           "anchor": "#lab-ecbench-all",
           "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_frobenius_orbit_vs_rho_20261014/README.md"
+        },
+        {
+          "date": "2026-10-16",
+          "value": 55.36777360324759,
+          "reference": "matched",
+          "unit": "Tier 1 cloud-instance cold IC / same-point rho online wall",
+          "label": "n83 K1120 five-point cold factor-base holdout, selected ID null",
+          "detail": "On five sealed public points, 25/25 IC and 5/5 same-point rho arms replayed. K1120 mean cold process 119.826 s divided by mean rho online 2.164 s gives 55.368. K1120 saves 2.645 s [2.085, 3.205] against K1152; its 0.401 s advantage over K1104 has interval [-0.236, 1.038], so the frozen selection remains BOUNDED_UNKNOWN. Tier 1 GitHub cloud instance, A/A and topology gates passed.",
+          "class": "engineering",
+          "anchor": "#n83-tier1-cold-20261016",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/n83_e2e_holdout_20261016/RESULT.md"
         }
       ]
     },

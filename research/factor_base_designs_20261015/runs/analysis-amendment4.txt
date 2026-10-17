@@ -1,0 +1,263 @@
+Factor-base designs, Amendment 4 (C1–C4): rows from research/factor_base_designs_20261015/runs
+(field_ops = F_p multiplications in F4's row reduction; κ = least-squares slope of log₂ of a cell's mean
+ field_ops on b; σ as before. A replayed system counts only if its trace matched the committed row.)
+
+════ C1: cost score κ against m − 1 (replayed systems: 192, trace matched: 192)
+
+── A0 m = 2 p1 (first run; F3's t = 5 cell where completed)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [4, 4]         [37, 37]              [2131, 2131]                ok,ok
+  3   3.000  [4, 4]         [127, 127]            [40982, 40982]              ok,ok
+  4   4.000  [4, 4]         [280, 280]            [664069, 664069]            ok,ok
+  5   5.000  [4, 4]         [606, 606]            [8015100, 8002504]          ok,ok
+  6   6.000  [5, 5]         [2451, 2451]          [110327643, 110282270]      ok,ok
+  7   7.000  [5, 5]         [5031, 5031]          [989258594, 989967759]      ok,ok
+  8   8.000  [5, 5]         [9119, 9119]          [9985165942, 9985425108]    ok,ok
+  9   9.000  [5, 5]         [14922, 14922]        [86782829176, 86781522381]  ok,ok
+  completed cells 8: κ = Δlog₂ field_ops/Δb = 3.593 against m − 1 = 1  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.1905  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── A0 m = 3 p1 (first run; F3's t = 5 cell where completed)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [5, 5]         [368, 368]            [508104, 508104]            ok,ok
+  3   3.000  [6, 6]         [3285, 3285]          [238512767, 238511843]      ok,ok
+  4   4.000  [6, 6]         [12314, 12314]        [15920614779, 15920625600]  ok,ok
+  completed cells 3: κ = Δlog₂ field_ops/Δb = 7.468 against m − 1 = 2  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.5000  →  no middle ground at this arity (σ ≥ 0.5)
+
+── N m = 2 p1 (first run; F3's t = 5 cell where completed)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [4, 4]         [37, 37]              [2119, 2119]                ok,ok
+  3   3.000  [4, 4]         [127, 127]            [39959, 39959]              ok,ok
+  4   4.000  [4, 4]         [280, 280]            [662439, 662439]            ok,ok
+  5   5.000  [4, 4]         [606, 606]            [7994964, 7994964]          ok,ok
+  6   6.000  [5, 5]         [2451, 2451]          [110273420, 110274667]      ok,ok
+  7   7.000  [5, 5]         [5031, 5031]          [988899248, 988899879]      ok,ok
+  8   8.000  [5, 5]         [9119, 9119]          [9983345757, 9983324258]    ok,ok
+  9   9.000  [5, 5]         [14922, 14922]        [86780070044, 86783552832]  ok,ok
+  completed cells 8: κ = Δlog₂ field_ops/Δb = 3.596 against m − 1 = 1  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.1905  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── N m = 3 p1 (first run; F3's t = 5 cell where completed)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [5, 5]         [368, 368]            [567154, 567154]            ok,ok
+  3   3.000  [6, 6]         [3292, 3292]          [344214296, 344214482]      ok,ok
+  4   4.000  [6, 6]         [12437, 12437]        [27099735251, 27099735677]  ok,ok
+  completed cells 3: κ = Δlog₂ field_ops/Δb = 7.772 against m − 1 = 2  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.5000  →  no middle ground at this arity (σ ≥ 0.5)
+
+── A1z m = 2 p1 (first run; F3's t = 5 cell where completed)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [8, 8]         [45, 45]              [3760, 3760]                ok,ok
+  3   3.000  [8, 8]         [253, 253]            [251434, 251434]            ok,ok
+  4   4.000  [8, 8]         [1466, 1466]          [8819575, 8823122]          ok,ok
+  5   5.000  [8, 8]         [5843, 5843]          [603475911, 603481686]      ok,ok
+  6   6.000  [8, 8]         [42652, 42652]        [97925115345, 97926400244]  ok,ok
+  completed cells 5: κ = Δlog₂ field_ops/Δb = 6.050 against m − 1 = 1  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.0000  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── A1z m = 3 p1 (first run; F3's t = 5 cell where completed)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [8, 8]         [406, 406]            [1052559, 1052559]          ok,ok
+  3   3.000  [8, 8]         [3822, 3822]          [447590148, 448341491]      ok,ok
+  4   4.000  [8, 8]         [39648, 39648]        [241932987084, 241934948964] ok,ok
+  completed cells 3: κ = Δlog₂ field_ops/Δb = 8.905 against m − 1 = 2  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.0000  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── A1g m = 2 p1 (first run; F3's t = 5 cell where completed)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [8, 8]         [48, 48]              [4604, 4508]                ok,ok
+  3   3.000  [8, 8]         [320, 320]            [219220, 218469]            ok,ok
+  4   4.000  [8, 8]         [1602, 1602]          [18466347, 18466347]        ok,ok
+  5   5.000  [8, 8]         [5894, 5894]          [398392750, 398437025]      ok,ok
+  6   6.000  [8, 8]         [33174, 33174]        [59075259036, 59075340918]  ok,ok
+  completed cells 5: κ = Δlog₂ field_ops/Δb = 5.809 against m − 1 = 1  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.0000  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── A1g m = 3 p1 (first run; F3's t = 5 cell where completed)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [8, 8]         [406, 406]            [768282, 767049]            ok,ok
+  3   3.000  [8, 8]         [5288, 5783]          [377929335, 377914420]      ok,ok
+  4   4.000  [8, 8]         [41629, 41629]        [261549115437, 261415909721] ok,ok
+  completed cells 3: κ = Δlog₂ field_ops/Δb = 9.189 against m − 1 = 2  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.0000  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── A4 m = 2 p1 (first run; F3's t = 5 cell where completed)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [5, 5]         [58, 58]              [3057, 3057]                ok,ok
+  3   3.000  [5, 5]         [161, 161]            [83529, 82721]              ok,ok
+  4   4.000  [5, 5]         [627, 627]            [1802086, 1802087]          ok,ok
+  5   5.000  [5, 5]         [1639, 1639]          [95344509, 95346361]        ok,ok
+  6   6.000  [6, 6]         [8747, 8747]          [1483372503, 1483287038]    ok,ok
+  7   7.000  [6, 6]         [18483, 18483]        [82928133234, 82928357573]  ok,ok
+  completed cells 6: κ = Δlog₂ field_ops/Δb = 4.902 against m − 1 = 1  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.2286  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── A4 m = 3 p1 (first run; F3's t = 5 cell where completed)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [6, 6]         [398, 398]            [1024091, 1024091]          ok,ok
+  3   3.000  [6, 6]         [3252, 3252]          [152631518, 152552230]      ok,ok
+  4   4.000  [7, 7]         [25162, 25162]        [69746507424, 69749456379]  ok,ok
+  completed cells 3: κ = Δlog₂ field_ops/Δb = 8.028 against m − 1 = 2  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.5000  →  no middle ground at this arity (σ ≥ 0.5)
+
+── A11 m = 2 p1 (first run; F3's t = 5 cell where completed)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [3, 3]         [31, 31]              [306, 306]                  ok,ok
+  3   3.000  [3, 3]         [78, 78]              [12445, 12256]              ok,ok
+  4   4.000  [3, 3]         [208, 208]            [348934, 348934]            ok,ok
+  5   5.000  [4, 4]         [1431, 1431]          [11187689, 11184783]        ok,ok
+  6   6.000  [4, 4]         [2673, 2673]          [254291665, 254071049]      ok,ok
+  7   7.000  [4, 4]         [5282, 5282]          [2080268927, 2080135234]    ok,ok
+  8   8.000  [4, 4]         [8763, 8763]          [11560423444, 11562780624]  ok,ok
+  9   9.000  [4, 4]         [13579, 13579]        [69065276624, 69063687288]  ok,ok
+  completed cells 8: κ = Δlog₂ field_ops/Δb = 3.995 against m − 1 = 1  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.1786  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── A11 m = 3 p1 (first run; F3's t = 5 cell where completed)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [4, 4]         [62, 62]              [4663, 4663]                ok,ok
+  3   3.000  [4, 4]         [781, 781]            [4788601, 4788007]          ok,ok
+  4   4.000  [4, 4]         [3096, 3096]          [855071386, 855070797]      ok,ok
+  5   5.000  [5, 5]         [40486, 40486]        [521554947369, 521553645613] ok,ok
+  completed cells 4: κ = Δlog₂ field_ops/Δb = 8.769 against m − 1 = 2  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.3000  →  weak (0.25 < σ < 0.5)
+
+── A0 m = 2 p2 (F1)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [4, 4]         [37, 37]              [2131, 2131]                ok,ok
+  3   3.000  [4, 4]         [127, 127]            [39618, 40982]              ok,ok
+  4   4.000  [4, 4]         [280, 280]            [664069, 662349]            ok,ok
+  5   5.000  [4, 4]         [606, 606]            [8002504, 8015100]          ok,ok
+  6   6.000  [5, 5]         [2451, 2451]          [110327650, 110294365]      ok,ok
+  7   7.000  [5, 5]         [5031, 5031]          [989969898, 989969898]      ok,ok
+  8   8.000  [5, 5]         [9119, 9119]          [9985419071, 9985349077]    ok,ok
+  9   9.000  [5, 5]         [14922, 14922]        [86782417211, 86782985290]  ok,ok
+  completed cells 8: κ = Δlog₂ field_ops/Δb = 3.595 against m − 1 = 1  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.1905  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── A0 m = 3 p2 (F1)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [5, 5]         [368, 368]            [508104, 508104]            ok,ok
+  3   3.000  [6, 6]         [3285, 3285]          [238610601, 238610601]      ok,ok
+  4   4.000  [6, 6]         [12314, 12314]        [15918970234, 15917722506]  ok,ok
+  completed cells 3: κ = Δlog₂ field_ops/Δb = 7.468 against m − 1 = 2  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.5000  →  no middle ground at this arity (σ ≥ 0.5)
+
+── A11 m = 2 p2 (F1)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [3, 3]         [31, 31]              [306, 306]                  ok,ok
+  3   3.000  [3, 3]         [78, 78]              [12445, 12445]              ok,ok
+  4   4.000  [3, 3]         [208, 208]            [345353, 345725]            ok,ok
+  5   5.000  [4, 4]         [1431, 1431]          [11185365, 11186179]        ok,ok
+  6   6.000  [4, 4]         [2673, 2673]          [254291886, 254071807]      ok,ok
+  7   7.000  [4, 4]         [5282, 5282]          [2080157482, 2080265858]    ok,ok
+  8   8.000  [4, 4]         [8763, 8763]          [11562836405, 11562836405]  ok,ok
+  9   9.000  [4, 4]         [13579, 13579]        [69065400249, 69073666574]  ok,ok
+  completed cells 8: κ = Δlog₂ field_ops/Δb = 3.995 against m − 1 = 1  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.1786  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── A11 m = 3 p2 (F1)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [4, 4]         [62, 62]              [4663, 4663]                ok,ok
+  3   3.000  [4, 4]         [781, 781]            [4788601, 4788601]          ok,ok
+  4   4.000  [4, 4]         [3096, 3096]          [855073810, 855073810]      ok,ok
+  completed cells 3: κ = Δlog₂ field_ops/Δb = 8.742 against m − 1 = 2  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.0000  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── N11 m = 2 p1 (F2)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [3, 3]         [31, 31]              [260, 260]                  ok,ok
+  3   3.000  [3, 3]         [78, 78]              [12445, 12445]              ok,ok
+  4   4.000  [3, 3]         [208, 208]            [348934, 345019]            ok,ok
+  5   5.000  [4, 4]         [1431, 1431]          [11186179, 11187689]        ok,ok
+  6   6.000  [4, 4]         [2673, 2673]          [253987553, 254069859]      ok,ok
+  7   7.000  [4, 4]         [5282, 5282]          [2080262648, 2080140445]    ok,ok
+  8   8.000  [4, 4]         [8763, 8763]          [11560781381, 11560176227]  ok,ok
+  9   9.000  [4, 4]         [13579, 13579]        [69065178910, 69073467648]  ok,ok
+  completed cells 8: κ = Δlog₂ field_ops/Δb = 4.014 against m − 1 = 1  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.1786  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── N11 m = 3 p1 (F2)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [4, 4]         [62, 62]              [5561, 5561]                ok,ok
+  3   3.000  [4, 4]         [745, 745]            [3632648, 3631275]          ok,ok
+  4   4.000  [4, 4]         [3300, 3300]          [817297546, 816988094]      ok,ok
+  completed cells 3: κ = Δlog₂ field_ops/Δb = 8.582 against m − 1 = 2  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.0000  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── A0 m = 4 p1 (F4, with C2's t = 4 cell)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [6, 6]         [1911, 1911]          [63703685, 63704352]        ok,ok
+  3   3.000  [7, 7]         [21619, 21619]        [111465267887, 111465240139] ok,ok
+  4   4.000  []             []                    []                          aborted,aborted
+  completed cells 2: κ = Δlog₂ field_ops/Δb = 10.773 against m − 1 = 3  →  inconclusive (fewer than 3 completed cells);  σ = 1.0000  →  inconclusive (fewer than 3 completed cells)
+
+── A11 m = 4 p1 (F4, with C2's t = 4 cell)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [3, 3]         [34, 34]              [941, 941]                  ok,ok
+  3   3.000  [5, 5]         [2159, 2159]          [33417634, 33402245]        ok,ok
+  4   4.000  [6, 6]         [88740, 88740]        [863032546892, 863026754688] ok,ok
+  completed cells 3: κ = Δlog₂ field_ops/Δb = 14.886 against m − 1 = 3  →  cost-unfavourable (κ ≥ m − 1);  σ = 1.5000  →  no middle ground at this arity (σ ≥ 0.5)
+
+── H1 m = 2 p1 (C4)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [3, 3]         [43, 43]              [2381, 2381]                ok,ok
+  3   3.000  [4, 4]         [165, 165]            [55449, 54874]              ok,ok
+  4   4.000  [4, 4]         [327, 327]            [640490, 639779]            ok,ok
+  5   5.000  [4, 4]         [703, 703]            [7627071, 7627071]          ok,ok
+  6   6.000  [4, 4]         [1395, 1395]          [41821387, 41764167]        ok,ok
+  7   7.000  [5, 5]         [6153, 6153]          [1331539651, 1331239417]    ok,ok
+  8   8.000  [5, 5]         [9357, 9357]          [11306927103, 11306944778]  ok,ok
+  9   9.000  [5, 5]         [16445, 16445]        [66794977337, 66794117069]  ok,ok
+  10  10.000 []             []                    []                          timeout,timeout
+  completed cells 8: κ = Δlog₂ field_ops/Δb = 3.535 against m − 1 = 1  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.2619  →  weak (0.25 < σ < 0.5)
+
+── H1 m = 3 p1 (C4)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [5, 5]         [710, 710]            [2366638, 2366638]          ok,ok
+  3   3.000  [5, 5]         [2939, 2939]          [496395457, 496663740]      ok,ok
+  4   4.000  [6, 6]         [23053, 23053]        [96825749272, 96822390186]  ok,ok
+  5   5.000  []             []                    []                          timeout,timeout
+  completed cells 3: κ = Δlog₂ field_ops/Δb = 7.660 against m − 1 = 2  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.5000  →  no middle ground at this arity (σ ≥ 0.5)
+
+── H2 m = 2 p1 (C4)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [4, 4]         [45, 45]              [418, 418]                  ok,ok
+  3   3.000  [4, 4]         [128, 128]            [13947, 13947]              ok,ok
+  4   4.000  [4, 4]         [216, 216]            [289441, 289441]            ok,ok
+  5   5.000  [4, 4]         [1441, 1441]          [15408469, 15395064]        ok,ok
+  6   6.000  [4, 4]         [2711, 2711]          [117010714, 117000820]      ok,ok
+  7   7.000  [4, 4]         [5167, 5167]          [1553650186, 1554869120]    ok,ok
+  8   8.000  [4, 4]         [8550, 8550]          [11595281974, 11595280105]  ok,ok
+  9   9.000  [4, 4]         [13553, 13553]        [69021520143, 68997755121]  ok,ok
+  10  10.000 []             []                    []                          timeout,timeout
+  completed cells 8: κ = Δlog₂ field_ops/Δb = 3.923 against m − 1 = 1  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.0000  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+── H2 m = 3 p1 (C4)
+  t   b      D per system   max_cols per system   field_ops per system        status
+  2   2.000  [6, 6]         [160, 160]            [16913, 16913]              ok,ok
+  3   3.000  [6, 6]         [2853, 2853]          [72120590, 72121260]        ok,ok
+  4   4.000  [6, 6]         [24842, 24842]        [5522076348, 5522074982]    ok,ok
+  5   5.000  []             []                    []                          timeout,timeout
+  completed cells 3: κ = Δlog₂ field_ops/Δb = 9.158 against m − 1 = 2  →  cost-unfavourable (κ ≥ m − 1);  σ = 0.0000  →  candidate (σ ≤ 0.25 on ≥ 3 cells)
+
+════ C2: m = 4, t = 4 on p1, budget 3600 s, hard kill 3900 s (isolab unavailable: run here)
+  A0 target 0: D null, max_cols null, field_ops null, time 536.9 s, aborted memory allocation failed under ulimit -v 13000000 (signal: 6 (SIGABRT))
+  A0 target 1: D null, max_cols null, field_ops null, time 512.8 s, aborted memory allocation failed under ulimit -v 13000000 (signal: 6 (SIGABRT))
+  A0 m = 4 σ with F4's cells only (C2's cell not completed): 1.0000 on 2 cells  →  inconclusive (fewer than 3 completed cells)
+  A11 target 0: D 6, max_cols 88740, field_ops 863032546892, time 1019.3 s, ok 
+  A11 target 1: D 6, max_cols 88740, field_ops 863026754688, time 1044.1 s, ok 
+  A11 m = 4 σ with C2's cell: 1.5000 on 3 cells  →  no middle ground at this arity (σ ≥ 0.5)
+
+════ C3: p3 = 40961 as an instrument (F4's narrow path)
+  trace check: 192 of 194 systems match their p1 row on D, max_cols, max_rows and steps  →  p3 NOT ADMITTED
+    mismatch: "A1g-m3.jsonl" "A1g" m=3 t=3 target 0: p3 D 8 max_cols 5808 max_rows 5830 steps 26 (ok) vs p1 {"D":8,"max_cols":5288,"max_rows":5127,"steps":26}
+    mismatch: "A1g-m3.jsonl" "A1g" m=3 t=3 target 1: p3 D 8 max_cols 5808 max_rows 5830 steps 26 (ok) vs p1 {"D":8,"max_cols":5783,"max_rows":5805,"steps":26}
+  extension: no rows
+
+════ C4: which part of A11 makes it cheaper (m = 3 rule; D and log₂ field_ops)
+  m = 2:  t   A0 (D, log₂ ops, cols)       A11                       H1                        H2
+        2   4.0, 11.06, 37             3.0, 8.26, 31             3.0, 11.22, 43            4.0, 8.71, 45
+        3   4.0, 15.32, 127            3.0, 13.59, 78            4.0, 15.75, 165           4.0, 13.77, 128
+        4   4.0, 19.34, 280            3.0, 18.41, 208           4.0, 19.29, 327           4.0, 18.14, 216
+        5   4.0, 22.93, 606            4.0, 23.42, 1431          4.0, 22.86, 703           4.0, 23.88, 1441
+        6   5.0, 26.72, 2451           4.0, 27.92, 2673          4.0, 25.32, 1395          4.0, 26.80, 2711
+        7   5.0, 29.88, 5031           4.0, 30.95, 5282          5.0, 30.31, 6153          4.0, 30.53, 5167
+        8   5.0, 33.22, 9119           4.0, 33.43, 8763          5.0, 33.40, 9357          4.0, 33.43, 8550
+        9   5.0, 36.34, 14922          4.0, 36.01, 13579         5.0, 35.96, 16445         4.0, 36.01, 13553
+  m = 3:  t   A0 (D, log₂ ops, cols)       A11                       H1                        H2
+        2   5.0, 18.95, 368            4.0, 12.19, 62            5.0, 21.17, 710           6.0, 14.05, 160
+        3   6.0, 27.83, 3285           4.0, 22.19, 781           5.0, 28.89, 2939          6.0, 26.10, 2853
+        4   6.0, 33.89, 12314          4.0, 29.67, 3096          6.0, 36.49, 23053         6.0, 32.36, 24842
+  m = 3 rule on D, 3 shared t: MIXED (cell by cell above)
+  m = 3 rule on log₂ field_ops, 3 shared t: MIXED (cell by cell above)
+
+════ Predictions scorecard (Amendment 4)
+  C1: every arm cost-unfavourable at m ∈ {2, 3}: 22 of 22 decided series unfavourable  →  held
+  C2: A11's cell completes and A0's does not: A11 true, A0 false  →  held
+  C3: p3 admitted: false  →  did not hold
+  C4 (D): the curve relation carries it: MIXED (cell by cell above)  →  did not hold
+  C4 (log₂ field_ops): the curve relation carries it: MIXED (cell by cell above)  →  did not hold
