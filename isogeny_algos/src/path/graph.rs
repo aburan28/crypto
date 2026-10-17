@@ -10,7 +10,7 @@ pub struct PhiCache<F: Field> {
 impl<F: Field> PhiCache<F> {
     pub fn new(f: &F, ells: &[usize]) -> Self {
         PhiCache {
-            phis: ells.iter().map(|&l| Phi::compute(f, l)).collect(),
+            phis: Phi::compute_many(f, ells),
         }
     }
     /// The cache over another field through an embedding (e.g. F_p into F_{p^2}).
