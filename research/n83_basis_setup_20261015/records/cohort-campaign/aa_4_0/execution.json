@@ -1,0 +1,202 @@
+{
+  "accounting": "Whole-process wall/CPU include launch, load, preparation, online, replay. Producer online interval is separate.",
+  "argv": [
+    "/workspace/n83_basis_setup/frozen_binaries/rho",
+    "/workspace/n83_basis_setup/holdout-plan/AA_training_target_00.jsonl",
+    "/workspace/n83_basis_setup/holdout-plan/aa_4_0.seeds.json",
+    "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/provenance/rho_config.json",
+    "/workspace/n83_basis_setup/cohort-campaign/aa_4_0/answers.jsonl"
+  ],
+  "argv_existing_file_sha256": {
+    "/workspace/n83_basis_setup/holdout-plan/AA_training_target_00.jsonl": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c",
+    "/workspace/n83_basis_setup/holdout-plan/aa_4_0.seeds.json": "c699fc045856ae566efe36aa331389f2615a61debf682715f7f941fff5a047bd",
+    "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/provenance/rho_config.json": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949"
+  },
+  "arm": "rho",
+  "binary_sha256": "ec4ccd60152ff53c39825898595cf4a23e6cb4afdde38db3b163e8623430ecb6",
+  "cpu_system_s": 0.012251,
+  "cpu_total_s": 1.574619,
+  "cpu_user_s": 1.562368,
+  "cwd": "/workspace/repos/crypto-n83-basis",
+  "elapsed_process_wall_s": 1.5826265419999999,
+  "environment": {
+    "KIC_RANK_THREADS": "1",
+    "KIC_RHO_THREADS": "1",
+    "KIC_TARGET_THREADS": "1",
+    "KIC_THREADS": "1",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "exit_observation_delay_note": "Nominal 0-5 ms plus scheduling and poll-body delays; no strict bound under arbitrary scheduling",
+  "exit_observation_poll_ms": 5,
+  "finished_epoch_ms": 1792111134052,
+  "interrupted_signal": 0,
+  "known_answer_environment_present": false,
+  "memory_limit_hit": null,
+  "memory_limit_note": "RLIMIT_AS allocation refusal may appear as nonzero/abort; no inference from exit code alone",
+  "peak_rss_bytes": 19464192,
+  "peak_rss_native_kib": 19008,
+  "peak_rss_source": "Linux wait4(2) ru_maxrss KiB multiplied by 1024; exact child process",
+  "pid": 44452,
+  "raw_wait_status": 0,
+  "resource_envelope": {
+    "address_space_limit_bytes": 12884901888,
+    "address_space_limit_mechanism": "RLIMIT_AS soft=hard",
+    "cpu_affinity": [
+      3
+    ],
+    "cpu_count": 1,
+    "online_target_threads": 1,
+    "rank_threads": 1,
+    "threads": 1,
+    "timeout_s": 2100.0
+  },
+  "return_code": 0,
+  "schema": "n83.process-receipt/v1",
+  "semantic": {
+    "exit_code_field_ok": true,
+    "group_verified": true,
+    "independent_replay_required": true,
+    "online_boundary_qualified": true,
+    "producer_online_ms": 1363.12378,
+    "producer_phase_gap_ms": 0.00018099999988407944,
+    "producer_phase_sum_ms": 1363.123599,
+    "producer_phases_ms": {
+      "generic_scalar_replay": 0.264679,
+      "target_query_and_validation": 0.283849,
+      "walk_and_collision": 1362.575071
+    },
+    "producer_preparation_ms": 195.972212,
+    "public_target_match": true,
+    "recovered_scalar": "4870099557372074",
+    "scalar_is_verified_by_producer_group_replay_only": true,
+    "scalar_present": true,
+    "selected_row": {
+      "cohort_target_count": 1,
+      "cross_target_collision_sharing": false,
+      "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+      "exit_code": 0,
+      "field_modulus_low_terms": [
+        0,
+        2,
+        4,
+        7
+      ],
+      "fixture_index": 0,
+      "fresh_target_dependent_DP_walk_and_rng_state": true,
+      "generator": [
+        "6614244651398184860292015",
+        "8868260410029249391539529"
+      ],
+      "group_verified": true,
+      "jump_seed": 1073662125758767667,
+      "kind": "n83_rho_matched_target",
+      "known_answer_input": false,
+      "online_interval": {
+        "excluded": [
+          "public_input_loading",
+          "shared_curve_normal_basis",
+          "G_only_jumps",
+          "receipt_hashing_serialization_and_IO"
+        ],
+        "start_event": "before_public_target_membership_and_subgroup_validation",
+        "stop_event": "after_generic_scalar_replay"
+      },
+      "online_interval_ns": 1363123780,
+      "online_phase_ns": {
+        "generic_scalar_replay": 264679,
+        "target_query_and_validation": 283849,
+        "walk_and_collision": 1362575071
+      },
+      "online_phase_sum_ns": 1363123599,
+      "online_timer_boundary_residual_ns": 181,
+      "online_total_ms": 1363.12378,
+      "optimization_config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 256,
+        "scalar_kernel": "reference",
+        "step_cap_factor": 2000
+      },
+      "outcome": {
+        "automorphism_size": 166,
+        "capped_walks": 20,
+        "charges_jump_preparation_and_solve": {
+          "canonicalizations": 5651267,
+          "failed_collisions": 0,
+          "group_additions": 5651268,
+          "partition_hashes": 5561325,
+          "scalar_multiplications": 35,
+          "table_inserts": 88595,
+          "table_queries": 88596
+        },
+        "fruitless_cycles": 1071,
+        "fruitless_escapes": 0,
+        "ideal_steps": 9005148.640969077,
+        "table_entries": 88595,
+        "walk_steps": 5561325,
+        "walks": 89942,
+        "wasted_merges": 0
+      },
+      "preparation_charges_for_this_seed_only": {
+        "canonicalizations": 0,
+        "failed_collisions": 0,
+        "group_additions": 0,
+        "partition_hashes": 0,
+        "scalar_multiplications": 32,
+        "table_inserts": 0,
+        "table_queries": 0
+      },
+      "provenance": {
+        "compiled_source_revision": null,
+        "compiled_source_sha256": {
+          "examples/n83_basis_rho.rs": "8d22c22cf6f9be692608412f4ea92bfc1f87c9450d4a061b8cffdf7bd0542edc",
+          "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+          "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+        },
+        "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+        "executable_sha256": "ec4ccd60152ff53c39825898595cf4a23e6cb4afdde38db3b163e8623430ecb6",
+        "public_input_sha256": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c",
+        "seed_input_sha256": "c699fc045856ae566efe36aa331389f2615a61debf682715f7f941fff5a047bd",
+        "worker_source_sha256": "8d22c22cf6f9be692608412f4ea92bfc1f87c9450d4a061b8cffdf7bd0542edc"
+      },
+      "published_q": [
+        "1094220047023211712495116",
+        "6395846881179286403442189"
+      ],
+      "recovered_scalar": "4870099557372074",
+      "schema": "n83-rho-matched-target/v1",
+      "status": "PASS_VERIFIED_PUBLIC_TARGET",
+      "subgroup_order": "8569786107849059",
+      "target": [
+        "1094220047023211712495116",
+        "6395846881179286403442189"
+      ],
+      "target_count": 1,
+      "target_in_subgroup": true,
+      "target_ms": 1363.12378,
+      "target_on_curve": true,
+      "validation_sidecar_opened": false,
+      "verified": true,
+      "walk_seed": 202610156415
+    },
+    "valid": true,
+    "verified_flag_ok": true
+  },
+  "semantic_path": "/workspace/n83_basis_setup/cohort-campaign/aa_4_0/answers.jsonl",
+  "semantic_sha256": "7fd37b42baf8cd47f62012fd759f6380b056f70a6ee6264c1edefac8a27c8b79",
+  "started_epoch_ms": 1792111132468,
+  "status": "COMPLETED_VERIFIED",
+  "stderr_path": "/workspace/n83_basis_setup/cohort-campaign/aa_4_0/stderr.txt",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_path": "/workspace/n83_basis_setup/cohort-campaign/aa_4_0/stdout.jsonl",
+  "stdout_sha256": "913a7fca0b9a84b5de27fc6982cc825d93db18533660e63044c9430444e65588",
+  "target_sha256": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c",
+  "termination_signal": null,
+  "timeout": false
+}

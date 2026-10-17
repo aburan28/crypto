@@ -1,0 +1,319 @@
+{
+  "answers": 18,
+  "config": {
+    "candidate_manifest": "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/provenance/candidates.json",
+    "candidates": [
+      {
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "columns": 600,
+        "dense": false,
+        "id": "C0"
+      },
+      {
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "columns": 600,
+        "dense": true,
+        "id": "C1"
+      },
+      {
+        "base_hash": "2f4b86a1c110d310ca3097a1aab22aee1b823f1dbe6251e279f91cdcece5b6ec",
+        "base_spec": "construct:83:1:600:600",
+        "columns": 600,
+        "dense": true,
+        "id": "C2"
+      },
+      {
+        "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+        "base_spec": "construct:83:1:1271",
+        "columns": 1271,
+        "dense": true,
+        "id": "C3"
+      },
+      {
+        "base_hash": "e8e34092664026af82eb730ec5c0ccc3e4f249e26d49aae12783f1da8d68cd75",
+        "base_spec": "construct:83:1:1798",
+        "columns": 1798,
+        "dense": true,
+        "id": "C4"
+      }
+    ],
+    "cwd": "/workspace/repos/crypto-n83-basis",
+    "generator": [
+      "6614244651398184860292015",
+      "8868260410029249391539529"
+    ],
+    "ic_binary": "/workspace/n83_basis_setup/frozen_binaries/ic",
+    "kind": "n83_basis_training_configuration",
+    "protocol": "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/PROTOCOL.md",
+    "rho_binary": "/workspace/n83_basis_setup/frozen_binaries/rho",
+    "rho_config": "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/provenance/rho_config.json",
+    "training_fixtures": "/workspace/n83_basis_setup/training-fixtures"
+  },
+  "config_sha256": "fdc27fcbcef4403ee5ff12a311391cbef515a6e42e6958d5bad3776347769176",
+  "controller_sha256": "253c376061fad16b04566b6a1cf64345f8a4afa9826eaa4dd9a30bc638b11a08",
+  "holdouts_generated": false,
+  "ic_binary_sha256": "5a6e39c34f59a8eb3186d2e43bac17b4c9d3e83b4a94bbeda24fc2b0b0def0a1",
+  "input_bindings": {
+    "/workspace/n83_basis_setup/training-fixtures/generator_receipt.json": "d5825ded439d903276088e87e6ecce281d36e35c9d7fb8a4d2229876affdf3c7",
+    "/workspace/n83_basis_setup/training-fixtures/targets.jsonl": "fc122fe2c03e077bb6859674144aee04a1afe4bd8e47c13075f3a52e54e4f535",
+    "/workspace/n83_basis_setup/training-plan/aa_0_0.seeds.json": "7639c8b7ae370d0bf435ef59eacd084d04d2d339fd437c9629c572cfde76af3f",
+    "/workspace/n83_basis_setup/training-plan/aa_0_1.seeds.json": "7639c8b7ae370d0bf435ef59eacd084d04d2d339fd437c9629c572cfde76af3f",
+    "/workspace/n83_basis_setup/training-plan/aa_1_0.seeds.json": "fd20fc7a08b4bed8ab2450b6fdb21f31d2f00e62950370b87ac73c44f283f6f9",
+    "/workspace/n83_basis_setup/training-plan/aa_1_1.seeds.json": "fd20fc7a08b4bed8ab2450b6fdb21f31d2f00e62950370b87ac73c44f283f6f9",
+    "/workspace/n83_basis_setup/training-plan/aa_2_0.seeds.json": "14a9be40b709f24ecf4922ac9dc4dc6a81bc2b527ab1516d71cb4cde06fd7dd4",
+    "/workspace/n83_basis_setup/training-plan/aa_2_1.seeds.json": "14a9be40b709f24ecf4922ac9dc4dc6a81bc2b527ab1516d71cb4cde06fd7dd4",
+    "/workspace/n83_basis_setup/training-plan/train_0_rho.seeds.json": "ec9f25ecb57b6438ab06bb48192639b27244a22046a90eed3779cfef41435e15",
+    "/workspace/n83_basis_setup/training-plan/train_1_rho.seeds.json": "7418568b392156602e2bed7593e2b21e849f5a3433ea0b7e7cb2580d4d14bbec",
+    "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/PROTOCOL.md": "116ade8c11f0143e603ac08b748c25c6a2b68ca7b21379a3603a91534f106ff9",
+    "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/provenance/candidates.json": "29512fc063fb731156b70d3b0865157e359f1851f6ad0367f241cdd08d7eca3b",
+    "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/provenance/rho_config.json": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+    "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl": "0d290b14a350db6271c9a49f0cd6ba246edd8c9bc6754387ad1ceebf08ec0c09"
+  },
+  "kind": "n83_basis_training_matrix",
+  "processes": 18,
+  "rho_binary_sha256": "ec4ccd60152ff53c39825898595cf4a23e6cb4afdde38db3b163e8623430ecb6",
+  "rows": [
+    {
+      "candidate": null,
+      "id": "aa_0_0",
+      "method": "rho",
+      "rank_seed": null,
+      "seed_file": "/workspace/n83_basis_setup/training-plan/aa_0_0.seeds.json",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/training-fixtures/target_00.jsonl",
+      "target_sha256": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c"
+    },
+    {
+      "candidate": null,
+      "id": "aa_0_1",
+      "method": "rho",
+      "rank_seed": null,
+      "seed_file": "/workspace/n83_basis_setup/training-plan/aa_0_1.seeds.json",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/training-fixtures/target_00.jsonl",
+      "target_sha256": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c"
+    },
+    {
+      "candidate": null,
+      "id": "aa_1_0",
+      "method": "rho",
+      "rank_seed": null,
+      "seed_file": "/workspace/n83_basis_setup/training-plan/aa_1_0.seeds.json",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/training-fixtures/target_00.jsonl",
+      "target_sha256": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c"
+    },
+    {
+      "candidate": null,
+      "id": "aa_1_1",
+      "method": "rho",
+      "rank_seed": null,
+      "seed_file": "/workspace/n83_basis_setup/training-plan/aa_1_1.seeds.json",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/training-fixtures/target_00.jsonl",
+      "target_sha256": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c"
+    },
+    {
+      "candidate": {
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "columns": 600,
+        "dense": false,
+        "id": "C0"
+      },
+      "id": "train_0_C0",
+      "method": "ic",
+      "rank_seed": 29,
+      "seed_file": null,
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/training-fixtures/target_00.jsonl",
+      "target_sha256": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c"
+    },
+    {
+      "candidate": {
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "columns": 600,
+        "dense": true,
+        "id": "C1"
+      },
+      "id": "train_0_C1",
+      "method": "ic",
+      "rank_seed": 29,
+      "seed_file": null,
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/training-fixtures/target_00.jsonl",
+      "target_sha256": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c"
+    },
+    {
+      "candidate": {
+        "base_hash": "2f4b86a1c110d310ca3097a1aab22aee1b823f1dbe6251e279f91cdcece5b6ec",
+        "base_spec": "construct:83:1:600:600",
+        "columns": 600,
+        "dense": true,
+        "id": "C2"
+      },
+      "id": "train_0_C2",
+      "method": "ic",
+      "rank_seed": 29,
+      "seed_file": null,
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/training-fixtures/target_00.jsonl",
+      "target_sha256": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c"
+    },
+    {
+      "candidate": {
+        "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+        "base_spec": "construct:83:1:1271",
+        "columns": 1271,
+        "dense": true,
+        "id": "C3"
+      },
+      "id": "train_0_C3",
+      "method": "ic",
+      "rank_seed": 29,
+      "seed_file": null,
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/training-fixtures/target_00.jsonl",
+      "target_sha256": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c"
+    },
+    {
+      "candidate": {
+        "base_hash": "e8e34092664026af82eb730ec5c0ccc3e4f249e26d49aae12783f1da8d68cd75",
+        "base_spec": "construct:83:1:1798",
+        "columns": 1798,
+        "dense": true,
+        "id": "C4"
+      },
+      "id": "train_0_C4",
+      "method": "ic",
+      "rank_seed": 29,
+      "seed_file": null,
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/training-fixtures/target_00.jsonl",
+      "target_sha256": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c"
+    },
+    {
+      "candidate": null,
+      "id": "train_0_rho",
+      "method": "rho",
+      "rank_seed": null,
+      "seed_file": "/workspace/n83_basis_setup/training-plan/train_0_rho.seeds.json",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/training-fixtures/target_00.jsonl",
+      "target_sha256": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c"
+    },
+    {
+      "candidate": {
+        "base_hash": "e8e34092664026af82eb730ec5c0ccc3e4f249e26d49aae12783f1da8d68cd75",
+        "base_spec": "construct:83:1:1798",
+        "columns": 1798,
+        "dense": true,
+        "id": "C4"
+      },
+      "id": "train_1_C4",
+      "method": "ic",
+      "rank_seed": 43,
+      "seed_file": null,
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/training-fixtures/target_01.jsonl",
+      "target_sha256": "de7b9b9507845cb31fcfabd6181e2da8074c37068c8d97df8c8e0fc949f08f56"
+    },
+    {
+      "candidate": {
+        "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+        "base_spec": "construct:83:1:1271",
+        "columns": 1271,
+        "dense": true,
+        "id": "C3"
+      },
+      "id": "train_1_C3",
+      "method": "ic",
+      "rank_seed": 43,
+      "seed_file": null,
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/training-fixtures/target_01.jsonl",
+      "target_sha256": "de7b9b9507845cb31fcfabd6181e2da8074c37068c8d97df8c8e0fc949f08f56"
+    },
+    {
+      "candidate": {
+        "base_hash": "2f4b86a1c110d310ca3097a1aab22aee1b823f1dbe6251e279f91cdcece5b6ec",
+        "base_spec": "construct:83:1:600:600",
+        "columns": 600,
+        "dense": true,
+        "id": "C2"
+      },
+      "id": "train_1_C2",
+      "method": "ic",
+      "rank_seed": 43,
+      "seed_file": null,
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/training-fixtures/target_01.jsonl",
+      "target_sha256": "de7b9b9507845cb31fcfabd6181e2da8074c37068c8d97df8c8e0fc949f08f56"
+    },
+    {
+      "candidate": {
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "columns": 600,
+        "dense": true,
+        "id": "C1"
+      },
+      "id": "train_1_C1",
+      "method": "ic",
+      "rank_seed": 43,
+      "seed_file": null,
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/training-fixtures/target_01.jsonl",
+      "target_sha256": "de7b9b9507845cb31fcfabd6181e2da8074c37068c8d97df8c8e0fc949f08f56"
+    },
+    {
+      "candidate": {
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "columns": 600,
+        "dense": false,
+        "id": "C0"
+      },
+      "id": "train_1_C0",
+      "method": "ic",
+      "rank_seed": 43,
+      "seed_file": null,
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/training-fixtures/target_01.jsonl",
+      "target_sha256": "de7b9b9507845cb31fcfabd6181e2da8074c37068c8d97df8c8e0fc949f08f56"
+    },
+    {
+      "candidate": null,
+      "id": "train_1_rho",
+      "method": "rho",
+      "rank_seed": null,
+      "seed_file": "/workspace/n83_basis_setup/training-plan/train_1_rho.seeds.json",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/training-fixtures/target_01.jsonl",
+      "target_sha256": "de7b9b9507845cb31fcfabd6181e2da8074c37068c8d97df8c8e0fc949f08f56"
+    },
+    {
+      "candidate": null,
+      "id": "aa_2_0",
+      "method": "rho",
+      "rank_seed": null,
+      "seed_file": "/workspace/n83_basis_setup/training-plan/aa_2_0.seeds.json",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/training-fixtures/target_00.jsonl",
+      "target_sha256": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c"
+    },
+    {
+      "candidate": null,
+      "id": "aa_2_1",
+      "method": "rho",
+      "rank_seed": null,
+      "seed_file": "/workspace/n83_basis_setup/training-plan/aa_2_1.seeds.json",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/training-fixtures/target_00.jsonl",
+      "target_sha256": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c"
+    }
+  ]
+}

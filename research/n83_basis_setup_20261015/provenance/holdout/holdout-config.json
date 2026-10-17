@@ -1,0 +1,54 @@
+{
+  "kind": "n83_basis_training_configuration",
+  "cwd": "/workspace/repos/crypto-n83-basis",
+  "training_fixtures": "/workspace/n83_basis_setup/training-fixtures",
+  "ic_binary": "/workspace/n83_basis_setup/frozen_binaries/ic",
+  "rho_binary": "/workspace/n83_basis_setup/frozen_binaries/rho",
+  "rho_config": "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/provenance/rho_config.json",
+  "protocol": "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/PROTOCOL.md",
+  "candidate_manifest": "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/provenance/candidates.json",
+  "generator": [
+    "6614244651398184860292015",
+    "8868260410029249391539529"
+  ],
+  "candidates": [
+    {
+      "id": "C0",
+      "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+      "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+      "columns": 600,
+      "dense": false
+    },
+    {
+      "id": "C1",
+      "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+      "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+      "columns": 600,
+      "dense": true
+    },
+    {
+      "id": "C2",
+      "base_spec": "construct:83:1:600:600",
+      "base_hash": "2f4b86a1c110d310ca3097a1aab22aee1b823f1dbe6251e279f91cdcece5b6ec",
+      "columns": 600,
+      "dense": true
+    },
+    {
+      "id": "C3",
+      "base_spec": "construct:83:1:1271",
+      "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+      "columns": 1271,
+      "dense": true
+    },
+    {
+      "id": "C4",
+      "base_spec": "construct:83:1:1798",
+      "base_hash": "e8e34092664026af82eb730ec5c0ccc3e4f249e26d49aae12783f1da8d68cd75",
+      "columns": 1798,
+      "dense": true
+    }
+  ],
+  "holdout_fixtures": "/workspace/n83_basis_setup/holdout-fixtures",
+  "selection_receipt": "/workspace/n83_basis_setup/training-fixtures/selection_freeze.json",
+  "selection_git_binding": "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/selection/FREEZE.json"
+}

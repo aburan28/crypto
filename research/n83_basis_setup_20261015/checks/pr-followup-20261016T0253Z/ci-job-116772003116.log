@@ -1,0 +1,811 @@
+﻿2026-10-16T02:11:31.4444203Z Current runner version: '2.337.0'
+2026-10-16T02:11:31.4466170Z ##[group]Runner Image Provisioner
+2026-10-16T02:11:31.4466976Z Hosted Compute Agent
+2026-10-16T02:11:31.4467492Z Version: 20261012.601
+2026-10-16T02:11:31.4468055Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-16T02:11:31.4468708Z Build Date: 2026-10-12T17:48:21Z
+2026-10-16T02:11:31.4469383Z Worker ID: {c55c85ea-ceb0-4a45-a737-b37dfe39a5b7}
+2026-10-16T02:11:31.4470024Z Region: westus3
+2026-10-16T02:11:31.4470486Z Cloud: Azure
+2026-10-16T02:11:31.4470922Z ##[endgroup]
+2026-10-16T02:11:31.4472059Z ##[group]Operating System
+2026-10-16T02:11:31.4472561Z Ubuntu
+2026-10-16T02:11:31.4473007Z 24.04.5
+2026-10-16T02:11:31.4473497Z LTS
+2026-10-16T02:11:31.4473963Z ##[endgroup]
+2026-10-16T02:11:31.4474456Z ##[group]Runner Image
+2026-10-16T02:11:31.4474952Z Image: ubuntu-24.04
+2026-10-16T02:11:31.4475434Z Version: 20261012.334.1
+2026-10-16T02:11:31.4476524Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-16T02:11:31.4477779Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-16T02:11:31.4478546Z ##[endgroup]
+2026-10-16T02:11:31.4479813Z ##[group]GITHUB_TOKEN Permissions
+2026-10-16T02:11:31.4481406Z Contents: read
+2026-10-16T02:11:31.4481864Z Metadata: read
+2026-10-16T02:11:31.4482408Z ##[endgroup]
+2026-10-16T02:11:31.4484129Z Secret source: Actions
+2026-10-16T02:11:31.4484984Z Cache mode: write
+2026-10-16T02:11:31.4485546Z Prepare workflow directory
+2026-10-16T02:11:31.4746278Z Prepare all required actions
+2026-10-16T02:11:31.4787072Z Getting action download info
+2026-10-16T02:11:31.7666827Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-16T02:11:31.8763148Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-16T02:11:31.9927224Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-16T02:11:32.2623367Z Complete job name: overview
+2026-10-16T02:11:32.3214255Z ##[group]Run actions/checkout@v4
+2026-10-16T02:11:32.3214900Z with:
+2026-10-16T02:11:32.3215251Z   repository: aburan28/crypto
+2026-10-16T02:11:32.3218488Z   token: ***
+2026-10-16T02:11:32.3218835Z   ssh-strict: true
+2026-10-16T02:11:32.3219374Z   ssh-user: git
+2026-10-16T02:11:32.3219734Z   persist-credentials: true
+2026-10-16T02:11:32.3220125Z   clean: true
+2026-10-16T02:11:32.3220487Z   sparse-checkout-cone-mode: true
+2026-10-16T02:11:32.3220889Z   fetch-depth: 1
+2026-10-16T02:11:32.3221224Z   fetch-tags: false
+2026-10-16T02:11:32.3221568Z   show-progress: true
+2026-10-16T02:11:32.3221918Z   lfs: false
+2026-10-16T02:11:32.3222239Z   submodules: false
+2026-10-16T02:11:32.3222589Z   set-safe-directory: true
+2026-10-16T02:11:32.3222977Z   allow-unsafe-pr-checkout: false
+2026-10-16T02:11:32.3223528Z ##[endgroup]
+2026-10-16T02:11:32.3999977Z Syncing repository: aburan28/crypto
+2026-10-16T02:11:32.4001559Z ##[group]Getting Git version info
+2026-10-16T02:11:32.4002192Z Working directory is '/home/runner/work/crypto/crypto'
+2026-10-16T02:11:32.4002990Z [command]/usr/bin/git version
+2026-10-16T02:11:32.4050804Z git version 2.55.0
+2026-10-16T02:11:32.4066258Z ##[endgroup]
+2026-10-16T02:11:32.4077895Z Temporarily overriding HOME='/home/runner/work/_temp/4aa1f382-86e2-4dd8-866e-55e0111c05a6' before making global git config changes
+2026-10-16T02:11:32.4079786Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-16T02:11:32.4082456Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/crypto/crypto
+2026-10-16T02:11:32.4126371Z Deleting the contents of '/home/runner/work/crypto/crypto'
+2026-10-16T02:11:32.4130059Z ##[group]Initializing the repository
+2026-10-16T02:11:32.4133546Z [command]/usr/bin/git init /home/runner/work/crypto/crypto
+2026-10-16T02:11:32.4206991Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-16T02:11:32.4208591Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-16T02:11:32.4210095Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-16T02:11:32.4211258Z hint: call:
+2026-10-16T02:11:32.4211702Z hint:
+2026-10-16T02:11:32.4212314Z hint: 	git config --global init.defaultBranch <name>
+2026-10-16T02:11:32.4213171Z hint:
+2026-10-16T02:11:32.4213719Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-16T02:11:32.4214544Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-16T02:11:32.4215216Z hint:
+2026-10-16T02:11:32.4215624Z hint: 	git branch -m <name>
+2026-10-16T02:11:32.4216073Z hint:
+2026-10-16T02:11:32.4216649Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-16T02:11:32.4217602Z Initialized empty Git repository in /home/runner/work/crypto/crypto/.git/
+2026-10-16T02:11:32.4219506Z [command]/usr/bin/git remote add origin https://github.com/aburan28/crypto
+2026-10-16T02:11:32.4257307Z ##[endgroup]
+2026-10-16T02:11:32.4258001Z ##[group]Disabling automatic garbage collection
+2026-10-16T02:11:32.4261850Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-16T02:11:32.4286164Z ##[endgroup]
+2026-10-16T02:11:32.4287062Z ##[group]Setting up auth
+2026-10-16T02:11:32.4291645Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-16T02:11:32.4316080Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-16T02:11:32.4575976Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-16T02:11:32.4601664Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-16T02:11:32.4786282Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-16T02:11:32.4813871Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-16T02:11:32.5014892Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-16T02:11:32.5051971Z ##[endgroup]
+2026-10-16T02:11:32.5052866Z ##[group]Fetching the repository
+2026-10-16T02:11:32.5062127Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +7a2c21035ea1caa6d994db8fe68cf47020293b10:refs/remotes/pull/1899/merge
+2026-10-16T02:12:19.1650735Z From https://github.com/aburan28/crypto
+2026-10-16T02:12:19.1656660Z  * [new ref]             7a2c21035ea1caa6d994db8fe68cf47020293b10 -> pull/1899/merge
+2026-10-16T02:12:19.1659713Z ##[endgroup]
+2026-10-16T02:12:19.1660146Z ##[group]Determining the checkout info
+2026-10-16T02:12:19.1660667Z ##[endgroup]
+2026-10-16T02:12:19.1661739Z [command]/usr/bin/git sparse-checkout disable
+2026-10-16T02:12:19.1706414Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-16T02:12:19.1756194Z ##[group]Checking out the ref
+2026-10-16T02:12:19.1759709Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/1899/merge
+2026-10-16T02:12:20.2519296Z Updating files:   8% (7904/88614)
+2026-10-16T02:12:20.4735055Z Updating files:   9% (7976/88614)
+2026-10-16T02:12:20.9777549Z Updating files:  10% (8862/88614)
+2026-10-16T02:12:21.2100622Z Updating files:  11% (9748/88614)
+2026-10-16T02:12:21.2368961Z Updating files:  12% (10634/88614)
+2026-10-16T02:12:21.3815341Z Updating files:  12% (10763/88614)
+2026-10-16T02:12:21.7531196Z Updating files:  13% (11520/88614)
+2026-10-16T02:12:22.2693575Z Updating files:  14% (12406/88614)
+2026-10-16T02:12:22.3235413Z Updating files:  14% (13199/88614)
+2026-10-16T02:12:22.4495381Z Updating files:  15% (13293/88614)
+2026-10-16T02:12:22.5538199Z Updating files:  16% (14179/88614)
+2026-10-16T02:12:22.7186630Z Updating files:  17% (15065/88614)
+2026-10-16T02:12:22.7970248Z Updating files:  18% (15951/88614)
+2026-10-16T02:12:22.8385197Z Updating files:  19% (16837/88614)
+2026-10-16T02:12:22.8929574Z Updating files:  20% (17723/88614)
+2026-10-16T02:12:22.9299605Z Updating files:  21% (18609/88614)
+2026-10-16T02:12:22.9630427Z Updating files:  22% (19496/88614)
+2026-10-16T02:12:23.0002622Z Updating files:  23% (20382/88614)
+2026-10-16T02:12:23.0526792Z Updating files:  24% (21268/88614)
+2026-10-16T02:12:23.0916812Z Updating files:  25% (22154/88614)
+2026-10-16T02:12:23.1360239Z Updating files:  26% (23040/88614)
+2026-10-16T02:12:23.1636252Z Updating files:  27% (23926/88614)
+2026-10-16T02:12:23.2385599Z Updating files:  28% (24812/88614)
+2026-10-16T02:12:23.2613446Z Updating files:  28% (25461/88614)
+2026-10-16T02:12:23.3292620Z Updating files:  29% (25699/88614)
+2026-10-16T02:12:23.3868076Z Updating files:  30% (26585/88614)
+2026-10-16T02:12:23.4234838Z Updating files:  31% (27471/88614)
+2026-10-16T02:12:24.2516688Z Updating files:  32% (28357/88614)
+2026-10-16T02:12:25.2904110Z Updating files:  32% (29203/88614)
+2026-10-16T02:12:26.2615185Z Updating files:  32% (29217/88614)
+2026-10-16T02:12:26.9551729Z Updating files:  32% (29233/88614)
+2026-10-16T02:12:27.3138141Z Updating files:  33% (29243/88614)
+2026-10-16T02:12:28.4247327Z Updating files:  33% (29372/88614)
+2026-10-16T02:12:28.6517854Z Updating files:  33% (30011/88614)
+2026-10-16T02:12:29.2507231Z Updating files:  34% (30129/88614)
+2026-10-16T02:12:29.7701391Z Updating files:  34% (30223/88614)
+2026-10-16T02:12:29.8183745Z Updating files:  35% (31015/88614)
+2026-10-16T02:12:29.8522863Z Updating files:  36% (31902/88614)
+2026-10-16T02:12:29.8868047Z Updating files:  37% (32788/88614)
+2026-10-16T02:12:29.9304359Z Updating files:  38% (33674/88614)
+2026-10-16T02:12:29.9974671Z Updating files:  39% (34560/88614)
+2026-10-16T02:12:30.0726246Z Updating files:  40% (35446/88614)
+2026-10-16T02:12:30.1029363Z Updating files:  41% (36332/88614)
+2026-10-16T02:12:30.1444228Z Updating files:  42% (37218/88614)
+2026-10-16T02:12:30.1954337Z Updating files:  43% (38105/88614)
+2026-10-16T02:12:30.2366288Z Updating files:  44% (38991/88614)
+2026-10-16T02:12:30.3123894Z Updating files:  44% (39543/88614)
+2026-10-16T02:12:30.3421608Z Updating files:  45% (39877/88614)
+2026-10-16T02:12:30.3740862Z Updating files:  46% (40763/88614)
+2026-10-16T02:12:30.4229915Z Updating files:  47% (41649/88614)
+2026-10-16T02:12:30.4741345Z Updating files:  48% (42535/88614)
+2026-10-16T02:12:30.5182017Z Updating files:  49% (43421/88614)
+2026-10-16T02:12:30.5441515Z Updating files:  50% (44307/88614)
+2026-10-16T02:12:30.6815917Z Updating files:  51% (45194/88614)
+2026-10-16T02:12:30.7055493Z Updating files:  52% (46080/88614)
+2026-10-16T02:12:30.7287006Z Updating files:  53% (46966/88614)
+2026-10-16T02:12:30.7524954Z Updating files:  54% (47852/88614)
+2026-10-16T02:12:30.7766508Z Updating files:  55% (48738/88614)
+2026-10-16T02:12:30.8005778Z Updating files:  56% (49624/88614)
+2026-10-16T02:12:31.2860911Z Updating files:  57% (50510/88614)
+2026-10-16T02:12:32.0454755Z Updating files:  57% (50818/88614)
+2026-10-16T02:12:32.1877117Z Updating files:  58% (51397/88614)
+2026-10-16T02:12:32.2457431Z Updating files:  59% (52283/88614)
+2026-10-16T02:12:32.3808374Z Updating files:  59% (52701/88614)
+2026-10-16T02:12:33.1796725Z Updating files:  60% (53169/88614)
+2026-10-16T02:12:33.2676708Z Updating files:  61% (54055/88614)
+2026-10-16T02:12:34.2676893Z Updating files:  61% (54062/88614)
+2026-10-16T02:12:35.2513901Z Updating files:  61% (54194/88614)
+2026-10-16T02:12:35.7112538Z Updating files:  61% (54362/88614)
+2026-10-16T02:12:35.7506155Z Updating files:  62% (54941/88614)
+2026-10-16T02:12:35.9815459Z Updating files:  63% (55827/88614)
+2026-10-16T02:12:36.4000415Z Updating files:  64% (56713/88614)
+2026-10-16T02:12:36.4850014Z Updating files:  64% (56849/88614)
+2026-10-16T02:12:36.8370471Z Updating files:  65% (57600/88614)
+2026-10-16T02:12:37.2493642Z Updating files:  66% (58486/88614)
+2026-10-16T02:12:38.3133767Z Updating files:  66% (59079/88614)
+2026-10-16T02:12:38.3243357Z Updating files:  66% (59351/88614)
+2026-10-16T02:12:39.2892898Z Updating files:  67% (59372/88614)
+2026-10-16T02:12:39.6264267Z Updating files:  67% (59760/88614)
+2026-10-16T02:12:39.8427933Z Updating files:  68% (60258/88614)
+2026-10-16T02:12:40.2883576Z Updating files:  69% (61144/88614)
+2026-10-16T02:12:40.5744475Z Updating files:  69% (61777/88614)
+2026-10-16T02:12:40.9791142Z Updating files:  70% (62030/88614)
+2026-10-16T02:12:41.2423602Z Updating files:  71% (62916/88614)
+2026-10-16T02:12:41.4917021Z Updating files:  71% (63475/88614)
+2026-10-16T02:12:41.7347118Z Updating files:  72% (63803/88614)
+2026-10-16T02:12:41.8308483Z Updating files:  73% (64689/88614)
+2026-10-16T02:12:42.0518115Z Updating files:  74% (65575/88614)
+2026-10-16T02:12:42.0768642Z Updating files:  75% (66461/88614)
+2026-10-16T02:12:42.1418325Z Updating files:  76% (67347/88614)
+2026-10-16T02:12:42.1889947Z Updating files:  77% (68233/88614)
+2026-10-16T02:12:42.2258164Z Updating files:  78% (69119/88614)
+2026-10-16T02:12:42.2511438Z Updating files:  79% (70006/88614)
+2026-10-16T02:12:42.3986299Z Updating files:  79% (70225/88614)
+2026-10-16T02:12:42.4413544Z Updating files:  80% (70892/88614)
+2026-10-16T02:12:42.4708279Z Updating files:  81% (71778/88614)
+2026-10-16T02:12:42.4998667Z Updating files:  82% (72664/88614)
+2026-10-16T02:12:42.5297622Z Updating files:  83% (73550/88614)
+2026-10-16T02:12:42.5579652Z Updating files:  84% (74436/88614)
+2026-10-16T02:12:42.5855939Z Updating files:  85% (75322/88614)
+2026-10-16T02:12:42.6486762Z Updating files:  86% (76209/88614)
+2026-10-16T02:12:42.7354525Z Updating files:  87% (77095/88614)
+2026-10-16T02:12:43.2375922Z Updating files:  88% (77981/88614)
+2026-10-16T02:12:44.0186071Z Updating files:  88% (78235/88614)
+2026-10-16T02:12:44.3055313Z Updating files:  89% (78867/88614)
+2026-10-16T02:12:44.8255771Z Updating files:  89% (79237/88614)
+2026-10-16T02:12:44.9539326Z Updating files:  90% (79753/88614)
+2026-10-16T02:12:45.0272897Z Updating files:  91% (80639/88614)
+2026-10-16T02:12:45.1203564Z Updating files:  92% (81525/88614)
+2026-10-16T02:12:45.1544903Z Updating files:  93% (82412/88614)
+2026-10-16T02:12:45.2579386Z Updating files:  94% (83298/88614)
+2026-10-16T02:12:45.2584576Z Updating files:  94% (84172/88614)
+2026-10-16T02:12:45.3877056Z Updating files:  95% (84184/88614)
+2026-10-16T02:12:45.4296463Z Updating files:  96% (85070/88614)
+2026-10-16T02:12:46.0500200Z Updating files:  97% (85956/88614)
+2026-10-16T02:12:46.1882298Z Updating files:  98% (86842/88614)
+2026-10-16T02:12:46.2406289Z Updating files:  99% (87728/88614)
+2026-10-16T02:12:46.3171562Z Updating files:  99% (87956/88614)
+2026-10-16T02:12:46.3171865Z Updating files: 100% (88614/88614)
+2026-10-16T02:12:46.3172099Z Updating files: 100% (88614/88614), done.
+2026-10-16T02:12:46.5069010Z Note: switching to 'refs/remotes/pull/1899/merge'.
+2026-10-16T02:12:46.5069613Z 
+2026-10-16T02:12:46.5070019Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-16T02:12:46.5070833Z changes and commit them, and you can discard any commits you make in this
+2026-10-16T02:12:46.5071573Z state without impacting any branches by switching back to a branch.
+2026-10-16T02:12:46.5072053Z 
+2026-10-16T02:12:46.5072405Z If you want to create a new branch to retain commits you create, you may
+2026-10-16T02:12:46.5073091Z do so (now or later) by using -c with the switch command. Example:
+2026-10-16T02:12:46.5073540Z 
+2026-10-16T02:12:46.5073799Z   git switch -c <new-branch-name>
+2026-10-16T02:12:46.5074138Z 
+2026-10-16T02:12:46.5074409Z Or undo this operation with:
+2026-10-16T02:12:46.5074740Z 
+2026-10-16T02:12:46.5074965Z   git switch -
+2026-10-16T02:12:46.5075236Z 
+2026-10-16T02:12:46.5075613Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-16T02:12:46.5076072Z 
+2026-10-16T02:12:46.5076564Z HEAD is now at 7a2c21035 Merge 14e56ddb0902161eaa289425c5131a58fefd5243 into 59e9c695b4df32bcdb0702b83cff86db1a761e4c
+2026-10-16T02:12:46.5390268Z ##[endgroup]
+2026-10-16T02:12:46.5425204Z [command]/usr/bin/git log -1 --format=%H
+2026-10-16T02:12:46.5444723Z 7a2c21035ea1caa6d994db8fe68cf47020293b10
+2026-10-16T02:12:46.7095177Z ##[group]Run actions/setup-node@v4
+2026-10-16T02:12:46.7095411Z with:
+2026-10-16T02:12:46.7095581Z   node-version: 22
+2026-10-16T02:12:46.7095761Z   always-auth: false
+2026-10-16T02:12:46.7095941Z   check-latest: false
+2026-10-16T02:12:46.7098001Z   token: ***
+2026-10-16T02:12:46.7098170Z ##[endgroup]
+2026-10-16T02:12:46.8318288Z Found in cache @ /opt/hostedtoolcache/node/22.23.3/x64
+2026-10-16T02:12:46.8322047Z (node:2093) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-16T02:12:46.8322725Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-16T02:12:46.8324205Z ##[group]Environment details
+2026-10-16T02:12:47.3298770Z node: v22.23.3
+2026-10-16T02:12:47.3299125Z npm: 10.9.9
+2026-10-16T02:12:47.3299559Z yarn: 1.22.22
+2026-10-16T02:12:47.3301082Z ##[endgroup]
+2026-10-16T02:12:47.3856137Z ##[group]Run node tools/render_ic_dashboard.mjs --check
+2026-10-16T02:12:47.3856532Z [36;1mnode tools/render_ic_dashboard.mjs --check[0m
+2026-10-16T02:12:47.7115221Z shell: /usr/bin/bash -e {0}
+2026-10-16T02:12:47.7115479Z ##[endgroup]
+2026-10-16T02:12:47.9801121Z node:internal/modules/run_main:123
+2026-10-16T02:12:47.9801595Z     triggerUncaughtException(
+2026-10-16T02:12:47.9801826Z     ^
+2026-10-16T02:12:47.9801920Z 
+2026-10-16T02:12:47.9802260Z AssertionError [ERR_ASSERTION]: Dashboard is stale; run node tools/render_ic_dashboard.mjs
+2026-10-16T02:12:47.9802662Z + actual - expected
+2026-10-16T02:12:47.9802856Z ... Skipped lines
+2026-10-16T02:12:47.9802969Z 
+2026-10-16T02:12:47.9803051Z   '<!doctype html>\n' +
+2026-10-16T02:12:47.9803246Z     '<html lang="en">\n' +
+2026-10-16T02:12:47.9803442Z     '<head>\n' +
+2026-10-16T02:12:47.9803640Z     '<meta charset="utf-8">\n' +
+2026-10-16T02:12:47.9804089Z     '<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+2026-10-16T02:12:47.9804399Z ...
+2026-10-16T02:12:47.9804728Z     '    background: var(--surface-sunk); font-family: var(--mono); font-size: 10.5px;\n' +
+2026-10-16T02:12:47.9805639Z +   '    letter-spacing: .09em; text-transform: uppercase; color: var('... 1782309 more characters
+2026-10-16T02:12:47.9806450Z -   '    letter-spacing: .09em; text-transform: uppercase; color: var('... 1774350 more characters
+2026-10-16T02:12:47.9806842Z 
+2026-10-16T02:12:47.9807193Z     at file:///home/runner/work/crypto/crypto/tools/render_ic_dashboard.mjs:438:10
+2026-10-16T02:12:47.9807806Z     at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+2026-10-16T02:12:47.9808458Z     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
+2026-10-16T02:12:47.9809312Z     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+2026-10-16T02:12:47.9809822Z   generatedMessage: false,
+2026-10-16T02:12:47.9810099Z   code: 'ERR_ASSERTION',
+2026-10-16T02:12:47.9810399Z   actual: '<!doctype html>\n' +
+2026-10-16T02:12:47.9810675Z     '<html lang="en">\n' +
+2026-10-16T02:12:47.9810939Z     '<head>\n' +
+2026-10-16T02:12:47.9811203Z     '<meta charset="utf-8">\n' +
+2026-10-16T02:12:47.9811677Z     '<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+2026-10-16T02:12:47.9812994Z     '<meta name="description" content="Understand the IC tournament decision, solver readiness, one-target pipeline and evidence. Frozen toy-panel measurements, visible uncertainty and preserved failures.">\n' +
+2026-10-16T02:12:47.9813986Z     '<!--\n' +
+2026-10-16T02:12:47.9814316Z     '  Standalone build of the cost ledgers in\n' +
+2026-10-16T02:12:47.9814974Z     '  research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md (three regimes on one\n' +
+2026-10-16T02:12:47.9815888Z     '  axis, frozen run in docs/ic/runs/) and research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md\n' +
+2026-10-16T02:12:47.9817580Z     '  §§9-11 (experiments/).  Open it directly in a browser; its overview needs no network requests\n' +
+2026-10-16T02:12:47.9818297Z     '  or installed dependencies.  Every figure on the page\n' +
+2026-10-16T02:12:47.9818956Z     '  is taken from the frozen experiment JSON; see the footer for the conversion\n' +
+2026-10-16T02:12:47.9819822Z     '  factors and for which numbers are extrapolations rather than measurements.\n' +
+2026-10-16T02:12:47.9820312Z     '-->\n' +
+2026-10-16T02:12:47.9820549Z     '<style>\n' +
+2026-10-16T02:12:47.9820865Z     '  html { color-scheme: light dark; }\n' +
+2026-10-16T02:12:47.9821252Z     '  img { max-width: 100%; }\n' +
+2026-10-16T02:12:47.9821650Z     '  [hidden] { display: none !important; }\n' +
+2026-10-16T02:12:47.9825216Z     '.gain-overview{display:flex;gap:28px;justify-content:space-between;border:1px solid #486e68;border-radius:12px;padding:24px;margin:24px 0 32px}.gain-overview h2{font-size:23px;margin:12px 0}.gain-overview p{max-width:720px;line-height:1.65}.gain-overview nav{display:flex;flex-direction:column;justify-content:center;gap:10px;min-width:215px}.gain-overview a{display:block;padding:10px;border:1px solid #486e68;border-radius:6px;text-decoration:none}.gain-overview a:focus-visible{outline:3px solid #ae8739;outline-offset:3px}@media(max-width:740px){.gain-overview{flex-direction:column;padding:18px}.gain-overview nav{min-width:0}}\n' +
+2026-10-16T02:12:47.9828207Z     '</style>\n' +
+2026-10-16T02:12:47.9828847Z     '<title>IC Research Lab — Decisions, Pipeline &amp; Evidence</title>\n' +
+2026-10-16T02:12:47.9829416Z     '\n' +
+2026-10-16T02:12:47.9829636Z     '<style>\n' +
+2026-10-16T02:12:47.9829877Z     '  :root {\n' +
+2026-10-16T02:12:47.9830161Z     '    --ground: #e7ebef;\n' +
+2026-10-16T02:12:47.9830483Z     '    --surface: #fbfcfd;\n' +
+2026-10-16T02:12:47.9830840Z     '    --surface-sunk: #f0f3f6;\n' +
+2026-10-16T02:12:47.9831169Z     '    --ink: #0e1922;\n' +
+2026-10-16T02:12:47.9831486Z     '    --ink-2: #354855;\n' +
+2026-10-16T02:12:47.9831819Z     '    --muted: #576976;\n' +
+2026-10-16T02:12:47.9832152Z     '    --rule: #ccd5dc;\n' +
+2026-10-16T02:12:47.9832474Z     '    --rule-soft: #dde4e9;\n' +
+2026-10-16T02:12:47.9832811Z     '    --data: #1f6fd0;\n' +
+2026-10-16T02:12:47.9833124Z     '    --data-soft: #d7e4f6;\n' +
+2026-10-16T02:12:47.9833456Z     '    --bound: #b3372a;\n' +
+2026-10-16T02:12:47.9833773Z     '    --bound-soft: #f3dcd8;\n' +
+2026-10-16T02:12:47.9834323Z     '    --shadow: 0 1px 2px rgba(14, 25, 34, .06), 0 8px 24px -16px rgba(14, 25, 34, .18);\n' +
+2026-10-16T02:12:47.9834789Z     '\n' +
+2026-10-16T02:12:47.9835156Z     '    --serif: "Newsreader", "Iowan Old Style", Georgia, serif;\n' +
+2026-10-16T02:12:47.9835803Z     '    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;\n' +
+2026-10-16T02:12:47.9836463Z     '    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;\n' +
+2026-10-16T02:12:47.9836940Z     '  }\n' +
+2026-10-16T02:12:47.9837244Z     '\n' +
+2026-10-16T02:12:47.9837567Z     '  @media (prefers-color-scheme: dark) {\n' +
+2026-10-16T02:12:47.9837982Z     '    :root:not([data-theme="light"]) {\n' +
+2026-10-16T02:12:47.9838377Z     '      --ground: #0d1318;\n' +
+2026-10-16T02:12:47.9838705Z     '      --surface: #151d24;\n' +
+2026-10-16T02:12:47.9839047Z     '      --surface-sunk: #101820;\n' +
+2026-10-16T02:12:47.9839584Z     '      --ink: #e3eaef;\n' +
+2026-10-16T02:12:47.9839912Z     '      --ink-2: #b6c5cf;\n' +
+2026-10-16T02:12:47.9840258Z     '      --muted: #8799a6;\n' +
+2026-10-16T02:12:47.9840571Z     '      --rule: #25323a;\n' +
+2026-10-16T02:12:47.9840888Z     '      --rule-soft: #1d272e;\n' +
+2026-10-16T02:12:47.9841217Z     '      --data: #4e92de;\n' +
+2026-10-16T02:12:47.9841588Z     '      --data-soft: #1c2e42;\n' +
+2026-10-16T02:12:47.9841941Z     '      --bound: #d9604e;\n' +
+2026-10-16T02:12:47.9842311Z     '      --bound-soft: #38221f;\n' +
+2026-10-16T02:12:47.9842855Z     '      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .7);\n' +
+2026-10-16T02:12:47.9843477Z     '    }\n' +
+2026-10-16T02:12:47.9843725Z     '  }\n' +
+2026-10-16T02:12:47.9843955Z     '\n' +
+2026-10-16T02:12:47.9844241Z     '  :root[data-theme="dark"] {\n' +
+2026-10-16T02:12:47.9844606Z     '    --ground: #0d1318;\n' +
+2026-10-16T02:12:47.9844937Z     '    --surface: #151d24;\n' +
+2026-10-16T02:12:47.9845285Z     '    --surface-sunk: #101820;\n' +
+2026-10-16T02:12:47.9845615Z     '    --ink: #e3eaef;\n' +
+2026-10-16T02:12:47.9845946Z     '    --ink-2: #b6c5cf;\n' +
+2026-10-16T02:12:47.9846269Z     '    --muted: #8799a6;\n' +
+2026-10-16T02:12:47.9846595Z     '    --rule: #25323a;\n' +
+2026-10-16T02:12:47.9846927Z     '    --rule-soft: #1d272e;\n' +
+2026-10-16T02:12:47.9847265Z     '    --data: #4e92de;\n' +
+2026-10-16T02:12:47.9847611Z     '    --data-soft: #1c2e42;\n' +
+2026-10-16T02:12:47.9847956Z     '    --bound: #d9604e;\n' +
+2026-10-16T02:12:47.9848301Z     '    --bound-soft: #38221f;\n' +
+2026-10-16T02:12:47.9848829Z     '    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .7);\n' +
+2026-10-16T02:12:47.9849538Z     '  }\n' +
+2026-10-16T02:12:47.9849776Z     '\n' +
+2026-10-16T02:12:47.9850067Z     '  * { box-sizing: border-box; }\n' +
+2026-10-16T02:12:47.9850411Z     '\n' +
+2026-10-16T02:12:47.9850641Z     '  body {\n' +
+2026-10-16T02:12:47.9850901Z     '    margin: 0;\n' +
+2026-10-16T02:12:47.9851229Z     '    padding-inline: 20px;\n' +
+2026-10-16T02:12:47.9851599Z     '    padding-block: 40px 64px;\n' +
+2026-10-16T02:12:47.9851981Z     '    background: var(--ground);\n' +
+2026-10-16T02:12:47.9852352Z     '    color: var(--ink);\n' +
+2026-10-16T02:12:47.9852698Z     '    font-family: var(--sans);\n' +
+2026-10-16T02:12:47.9853060Z     '    font-size: 15px;\n' +
+2026-10-16T02:12:47.9853398Z     '    line-height: 1.55;\n' +
+2026-10-16T02:12:47.9853797Z     '    -webkit-font-smoothing: antialiased;\n' +
+2026-10-16T02:12:47.9854163Z     '  }\n' +
+2026-10-16T02:12:47.9854402Z     '\n' +
+2026-10-16T02:12:47.9854970Z     '  .wrap { max-width: 1020px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }\n' +
+2026-10-16T02:12:47.9855541Z     '\n' +
+2026-10-16T02:12:47.9855840Z     '  /* ---------- header ---------- */\n' +
+2026-10-16T02:12:47.9856356Z     '  header { display: flex; flex-direction: column; gap: 14px; }\n' +
+2026-10-16T02:12:47.9856793Z     '\n' +
+2026-10-16T02:12:47.9857039Z     '  .eyebrow {\n' +
+2026-10-16T02:12:47.9857363Z     '    font-family: var(--mono);\n' +
+2026-10-16T02:12:47.9857728Z     '    font-size: 11px;\n' +
+2026-10-16T02:12:47.9858055Z     '    font-weight: 500;\n' +
+2026-10-16T02:12:47.9858401Z     '    letter-spacing: .13em;\n' +
+2026-10-16T02:12:47.9858776Z     '    text-transform: uppercase;\n' +
+2026-10-16T02:12:47.9859257Z     '    color: var(--muted);\n' +
+2026-10-16T02:12:47.9859553Z     '  }\n' +
+2026-10-16T02:12:47.9859773Z     '\n' +
+2026-10-16T02:12:47.9859984Z     '  h1 {\n' +
+2026-10-16T02:12:47.9860275Z     '    font-family: var(--serif);\n' +
+2026-10-16T02:12:47.9860618Z     '    font-weight: 500;\n' +
+2026-10-16T02:12:47.9860993Z     '    font-size: clamp(30px, 5.4vw, 45px);\n' +
+2026-10-16T02:12:47.9861367Z     '    line-height: 1.08;\n' +
+2026-10-16T02:12:47.9861714Z     '    letter-spacing: -.012em;\n' +
+2026-10-16T02:12:47.9862025Z     '    margin: 0;\n' +
+2026-10-16T02:12:47.9862331Z     '    text-wrap: balance;\n' +
+2026-10-16T02:12:47.9862622Z     '  }\n' +
+2026-10-16T02:12:47.9862851Z     '\n' +
+2026-10-16T02:12:47.9863074Z     '  .verdict {\n' +
+2026-10-16T02:12:47.9863377Z     '    font-family: var(--serif);\n' +
+2026-10-16T02:12:47.9863761Z     '    font-size: clamp(17px, 2.3vw, 20px);\n' +
+2026-10-16T02:12:47.9864132Z     '    line-height: 1.45;\n' +
+2026-10-16T02:12:47.9864462Z     '    color: var(--ink-2);\n' +
+2026-10-16T02:12:47.9864800Z     '    max-width: 62ch;\n' +
+2026-10-16T02:12:47.9865074Z     '    margin: 0;\n' +
+2026-10-16T02:12:47.9865359Z     '    text-wrap: pretty;\n' +
+2026-10-16T02:12:47.9865635Z     '  }\n' +
+2026-10-16T02:12:47.9865855Z     '\n' +
+2026-10-16T02:12:47.9866210Z     '  .facts {\n' +
+2026-10-16T02:12:47.9866491Z     '    display: grid;\n' +
+2026-10-16T02:12:47.9866968Z     '    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));\n' +
+2026-10-16T02:12:47.9867421Z     '    gap: 1px;\n' +
+2026-10-16T02:12:47.9867739Z     '    background: var(--rule);\n' +
+2026-10-16T02:12:47.9868129Z     '    border: 1px solid var(--rule);\n' +
+2026-10-16T02:12:47.9868490Z     '    border-radius: 3px;\n' +
+2026-10-16T02:12:47.9868805Z     '    overflow: hidden;\n' +
+2026-10-16T02:12:47.9869129Z     '    margin-top: 4px;\n' +
+2026-10-16T02:12:47.9869500Z     '  }\n' +
+2026-10-16T02:12:47.9870091Z     '  .fact { background: var(--surface); padding: 14px 16px; display: flex; flex-direction: column; gap: 3px; }\n' +
+2026-10-16T02:12:47.9870711Z     '  .fact dt {\n' +
+2026-10-16T02:12:47.9871196Z     '    font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em;\n' +
+2026-10-16T02:12:47.9871811Z     '    text-transform: uppercase; color: var(--muted);\n' +
+2026-10-16T02:12:47.9872217Z     '  }\n' +
+2026-10-16T02:12:47.9872579Z     '  .fact dd {\n' +
+2026-10-16T02:12:47.9873069Z     '    margin: 0; font-family: var(--mono); font-size: 19px; font-weight: 500;\n' +
+2026-10-16T02:12:47.9873755Z     '    font-variant-numeric: tabular-nums; letter-spacing: -.01em;\n' +
+2026-10-16T02:12:47.9874205Z     '  }\n' +
+2026-10-16T02:12:47.9874723Z     '  .fact p { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.4; }\n' +
+2026-10-16T02:12:47.9875238Z     '\n' +
+2026-10-16T02:12:47.9875537Z     '  /* ---------- panels ---------- */\n' +
+2026-10-16T02:12:47.9876047Z     '  section { display: flex; flex-direction: column; gap: 0; }\n' +
+2026-10-16T02:12:47.9876491Z     '\n' +
+2026-10-16T02:12:47.9876729Z     '  .panel {\n' +
+2026-10-16T02:12:47.9877048Z     '    background: var(--surface);\n' +
+2026-10-16T02:12:47.9877442Z     '    border: 1px solid var(--rule);\n' +
+2026-10-16T02:12:47.9877825Z     '    border-radius: 4px;\n' +
+2026-10-16T02:12:47.9878201Z     '    box-shadow: var(--shadow);\n' +
+2026-10-16T02:12:47.9878531Z     '  }\n' +
+2026-10-16T02:12:47.9879080Z     '  .panel-head { padding: 18px 20px 0; display: flex; flex-direction: column; gap: 5px; }\n' +
+2026-10-16T02:12:47.9879776Z     '  .panel-head h2 {\n' +
+2026-10-16T02:12:47.9880270Z     '    font-family: var(--serif); font-weight: 500; font-size: 21px;\n' +
+2026-10-16T02:12:47.9880803Z     '    letter-spacing: -.008em; margin: 0;\n' +
+2026-10-16T02:12:47.9881162Z     '  }\n' +
+2026-10-16T02:12:47.9881767Z     '  .panel-head p { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 66ch; line-height: 1.5; }\n' +
+2026-10-16T02:12:47.9882573Z     '  #joint-dimension-length .panel-body { padding: 16px 20px 20px; }\n' +
+2026-10-16T02:12:47.9883319Z     '  #ic-tournament-reference-history .panel-body { padding: 16px 20px 20px; }\n' +
+2026-10-16T02:12:47.9884145Z     '  #joint-dimension-length .panel-body > p { font-size: 13.5px; line-height: 1.55; }\n' +
+2026-10-16T02:12:47.9884683Z     '\n' +
+2026-10-16T02:12:47.9885090Z     '  .chart-scroll { overflow-x: auto; padding: 10px 8px 4px; }\n' +
+2026-10-16T02:12:47.9885771Z     '  .chart-scroll svg { display: block; width: 100%; min-width: 840px; height: auto; }\n' +
+2026-10-16T02:12:47.9886233Z     '\n' +
+2026-10-16T02:12:47.9886458Z     '  .legend {\n' +
+2026-10-16T02:12:47.9886752Z     '    display: flex; flex-wrap: wrap; gap: 6px 20px;\n' +
+2026-10-16T02:12:47.9887034Z     '    padding: 4px 20px 18px;\n' +
+2026-10-16T02:12:47.9887381Z     '    font-family: var(--mono); font-size: 11.5px; color: var(--muted);\n' +
+2026-10-16T02:12:47.9887661Z     '  }\n' +
+2026-10-16T02:12:47.9887974Z     '  .legend span { display: inline-flex; align-items: center; gap: 7px; }\n' +
+2026-10-16T02:12:47.9888435Z     '  /* A legend line that is prose, not a swatch key: one block of text, so the\n' +
+2026-10-16T02:12:47.9889477Z     '     <b>, <code> and <sup> inside it stay inline instead of becoming flex items. */\n' +
+2026-10-16T02:12:47.9890082Z     '  .legend > span:not(:has(> .swatch)) { display: block; }\n' +
+2026-10-16T02:12:47.9890703Z     '  .swatch { width: 18px; height: 9px; border-radius: 2px; background: var(--data); flex: none; }\n' +
+2026-10-16T02:12:47.9891323Z     '  .swatch.ghost { background: none; border-top: 1.5px dashed var(--muted); height: 0; border-radius: 0; }\n' +
+2026-10-16T02:12:47.9891855Z     '  .swatch.bound { background: var(--bound); width: 3px; height: 14px; }\n' +
+2026-10-16T02:12:47.9892150Z     '\n' +
+2026-10-16T02:12:47.9892376Z     '  /* ---------- two-up ---------- */\n' +
+2026-10-16T02:12:47.9892837Z     '  .duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }\n' +
+2026-10-16T02:12:47.9893195Z     '\n' +
+2026-10-16T02:12:47.9893413Z     '  /* ---------- ledger rows ---------- */\n' +
+2026-10-16T02:12:47.9893808Z     '  .ledger { padding: 14px 20px 20px; display: flex; flex-direction: column; }\n' +
+2026-10-16T02:12:47.9894455Z     '  .lrow { display: grid; grid-template-columns: 1fr 96px; gap: 4px 14px; padding: 9px 0; border-bottom: 1px solid var(--rule-soft); }\n' +
+2026-10-16T02:12:47.9895057Z     '  .lrow:last-child { border-bottom: 0; }\n' +
+2026-10-16T02:12:47.9895407Z     '  .lrow .name { font-size: 13.5px; line-height: 1.35; }\n' +
+2026-10-16T02:12:47.9895670Z     '  .lrow .num {\n' +
+2026-10-16T02:12:47.9895993Z     '    font-family: var(--mono); font-size: 13.5px; font-weight: 500;\n' +
+2026-10-16T02:12:47.9896466Z     '    font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap;\n' +
+2026-10-16T02:12:47.9896790Z     '  }\n' +
+2026-10-16T02:12:47.9897209Z     '  .lbar { grid-column: 1 / -1; height: 8px; background: var(--surface-sunk); border-radius: 0 4px 4px 0; }\n' +
+2026-10-16T02:12:47.9897792Z     '  .lbar i { display: block; height: 100%; background: var(--data); border-radius: 0 4px 4px 0; }\n' +
+2026-10-16T02:12:47.9898131Z     '\n' +
+2026-10-16T02:12:47.9898366Z     '  /* ---------- exponent track ---------- */\n' +
+2026-10-16T02:12:47.9898649Z     '  .exp { padding: 14px 20px 8px; }\n' +
+2026-10-16T02:12:47.9899423Z     '  .erow { display: grid; grid-template-columns: minmax(118px, 1.2fr) minmax(120px, 2fr) 44px; align-items: stretch; gap: 12px; }\n' +
+2026-10-16T02:12:47.9900101Z     '  .erow .name { font-size: 13px; line-height: 1.3; align-self: center; }\n' +
+2026-10-16T02:12:47.9900411Z     '  .erow .num {\n' +
+2026-10-16T02:12:47.9900724Z     '    font-family: var(--mono); font-size: 13px; font-weight: 500;\n' +
+2026-10-16T02:12:47.9901178Z     '    font-variant-numeric: tabular-nums; text-align: right; align-self: center;\n' +
+2026-10-16T02:12:47.9901493Z     '  }\n' +
+2026-10-16T02:12:47.9901750Z     '  .track { position: relative; min-height: 38px; }\n' +
+2026-10-16T02:12:47.9902054Z     '  .track::before {\n' +
+2026-10-16T02:12:47.9902382Z     '    content: ""; position: absolute; left: 0; right: 0; top: 50%;\n' +
+2026-10-16T02:12:47.9902726Z     '    height: 1px; background: var(--rule);\n' +
+2026-10-16T02:12:47.9902952Z     '  }\n' +
+2026-10-16T02:12:47.9903131Z     '  .track::after {\n' +
+2026-10-16T02:12:47.9903453Z     '    content: ""; position: absolute; left: 38.5%; top: 0; bottom: 0;\n' +
+2026-10-16T02:12:47.9903854Z     '    width: 2px; margin-left: -1px; background: var(--bound);\n' +
+2026-10-16T02:12:47.9904113Z     '  }\n' +
+2026-10-16T02:12:47.9904275Z     '  .dot {\n' +
+2026-10-16T02:12:47.9904639Z     '    position: absolute; top: 50%; width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px;\n' +
+2026-10-16T02:12:47.9905147Z     '    border-radius: 50%; background: var(--data); box-shadow: 0 0 0 2px var(--surface);\n' +
+2026-10-16T02:12:47.9905467Z     '  }\n' +
+2026-10-16T02:12:47.9905632Z     '  .exp-axis {\n' +
+2026-10-16T02:12:47.9906051Z     '    display: grid; grid-template-columns: minmax(118px, 1.2fr) minmax(120px, 2fr) 44px; gap: 12px;\n' +
+2026-10-16T02:12:47.9906614Z     '    font-family: var(--mono); font-size: 10.5px; color: var(--muted); padding-bottom: 12px;\n' +
+2026-10-16T02:12:47.9906938Z     '  }\n' +
+2026-10-16T02:12:47.9907334Z     '  .exp-axis .ticks { position: relative; height: 14px; }\n' +
+2026-10-16T02:12:47.9907893Z     '  .exp-axis .ticks b { position: absolute; top: 0; font-weight: 400; transform: translateX(-50%); white-space: nowrap; }\n' +
+2026-10-16T02:12:47.9908304Z     '  .rho-flag {\n' +
+2026-10-16T02:12:47.9908634Z     '    position: absolute; top: 0; left: 38.5%; transform: translateX(-50%);\n' +
+2026-10-16T02:12:47.9909062Z     '    color: var(--bound); font-weight: 500; white-space: nowrap;\n' +
+2026-10-16T02:12:47.9909492Z     '  }\n' +
+2026-10-16T02:12:47.9909650Z     '\n' +
+2026-10-16T02:12:47.9909857Z     '  /* ---------- table ---------- */\n' +
+2026-10-16T02:12:47.9910184Z     '  .table-scroll { overflow-x: auto; padding: 4px 0 0; }\n' +
+2026-10-16T02:12:47.9910890Z     '  table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 13.5px; }\n' +
+2026-10-16T02:12:47.9927730Z     '  caption { text-align: left; padding: 0 20px 12px; font-size: 13.5px; color: var(--muted); }\n' +
+2026-10-16T02:12:47.9928513Z     '  th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--rule-soft); }\n' +
+2026-10-16T02:12:47.9929017Z     '  th:first-child, td:first-child { padding-left: 20px; }\n' +
+2026-10-16T02:12:47.9929573Z     '  th:last-child, td:last-child { padding-right: 20px; }\n' +
+2026-10-16T02:12:47.9929844Z     '  thead th {\n' +
+2026-10-16T02:12:47.9930179Z     '    font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em;\n' +
+2026-10-16T02:12:47.9930633Z     '    text-transform: uppercase; color: var(--muted); font-weight: 500;\n' +
+2026-10-16T02:12:47.9931054Z     '    border-bottom: 1px solid var(--rule); white-space: nowrap;\n' +
+2026-10-16T02:12:47.9931339Z     '  }\n' +
+2026-10-16T02:12:47.9931814Z     '  td.n, th.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }\n' +
+2026-10-16T02:12:47.9932255Z     '  tbody tr.group td {\n' +
+2026-10-16T02:12:47.9932643Z     '    background: var(--surface-sunk); font-family: var(--mono); font-size: 10.5px;\n' +
+2026-10-16T02:12:47.9933184Z     '    letter-spacing: .09em; text-transform: uppercase; color: var('... 1782309 more characters,
+2026-10-16T02:12:47.9933583Z   expected: '<!doctype html>\n' +
+2026-10-16T02:12:47.9933804Z     '<html lang="en">\n' +
+2026-10-16T02:12:47.9933989Z     '<head>\n' +
+2026-10-16T02:12:47.9934200Z     '<meta charset="utf-8">\n' +
+2026-10-16T02:12:47.9934552Z     '<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+2026-10-16T02:12:47.9935440Z     '<meta name="description" content="Understand the IC tournament decision, solver readiness, one-target pipeline and evidence. Frozen toy-panel measurements, visible uncertainty and preserved failures.">\n' +
+2026-10-16T02:12:47.9936055Z     '<!--\n' +
+2026-10-16T02:12:47.9936289Z     '  Standalone build of the cost ledgers in\n' +
+2026-10-16T02:12:47.9936742Z     '  research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md (three regimes on one\n' +
+2026-10-16T02:12:47.9937320Z     '  axis, frozen run in docs/ic/runs/) and research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md\n' +
+2026-10-16T02:12:47.9938036Z     '  §§9-11 (experiments/).  Open it directly in a browser; its overview needs no network requests\n' +
+2026-10-16T02:12:47.9938504Z     '  or installed dependencies.  Every figure on the page\n' +
+2026-10-16T02:12:47.9938941Z     '  is taken from the frozen experiment JSON; see the footer for the conversion\n' +
+2026-10-16T02:12:47.9939556Z     '  factors and for which numbers are extrapolations rather than measurements.\n' +
+2026-10-16T02:12:47.9939878Z     '-->\n' +
+2026-10-16T02:12:47.9940046Z     '<style>\n' +
+2026-10-16T02:12:47.9940274Z     '  html { color-scheme: light dark; }\n' +
+2026-10-16T02:12:47.9940539Z     '  img { max-width: 100%; }\n' +
+2026-10-16T02:12:47.9940828Z     '  [hidden] { display: none !important; }\n' +
+2026-10-16T02:12:47.9943216Z     '.gain-overview{display:flex;gap:28px;justify-content:space-between;border:1px solid #486e68;border-radius:12px;padding:24px;margin:24px 0 32px}.gain-overview h2{font-size:23px;margin:12px 0}.gain-overview p{max-width:720px;line-height:1.65}.gain-overview nav{display:flex;flex-direction:column;justify-content:center;gap:10px;min-width:215px}.gain-overview a{display:block;padding:10px;border:1px solid #486e68;border-radius:6px;text-decoration:none}.gain-overview a:focus-visible{outline:3px solid #ae8739;outline-offset:3px}@media(max-width:740px){.gain-overview{flex-direction:column;padding:18px}.gain-overview nav{min-width:0}}\n' +
+2026-10-16T02:12:47.9945036Z     '</style>\n' +
+2026-10-16T02:12:47.9945418Z     '<title>IC Research Lab — Decisions, Pipeline &amp; Evidence</title>\n' +
+2026-10-16T02:12:47.9945717Z     '\n' +
+2026-10-16T02:12:47.9945877Z     '<style>\n' +
+2026-10-16T02:12:47.9946043Z     '  :root {\n' +
+2026-10-16T02:12:47.9946248Z     '    --ground: #e7ebef;\n' +
+2026-10-16T02:12:47.9946487Z     '    --surface: #fbfcfd;\n' +
+2026-10-16T02:12:47.9946731Z     '    --surface-sunk: #f0f3f6;\n' +
+2026-10-16T02:12:47.9946954Z     '    --ink: #0e1922;\n' +
+2026-10-16T02:12:47.9947268Z     '    --ink-2: #354855;\n' +
+2026-10-16T02:12:47.9947489Z     '    --muted: #576976;\n' +
+2026-10-16T02:12:47.9947707Z     '    --rule: #ccd5dc;\n' +
+2026-10-16T02:12:47.9947946Z     '    --rule-soft: #dde4e9;\n' +
+2026-10-16T02:12:47.9948181Z     '    --data: #1f6fd0;\n' +
+2026-10-16T02:12:47.9948402Z     '    --data-soft: #d7e4f6;\n' +
+2026-10-16T02:12:47.9948627Z     '    --bound: #b3372a;\n' +
+2026-10-16T02:12:47.9948850Z     '    --bound-soft: #f3dcd8;\n' +
+2026-10-16T02:12:47.9949381Z     '    --shadow: 0 1px 2px rgba(14, 25, 34, .06), 0 8px 24px -16px rgba(14, 25, 34, .18);\n' +
+2026-10-16T02:12:47.9949698Z     '\n' +
+2026-10-16T02:12:47.9949978Z     '    --serif: "Newsreader", "Iowan Old Style", Georgia, serif;\n' +
+2026-10-16T02:12:47.9950426Z     '    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;\n' +
+2026-10-16T02:12:47.9950871Z     '    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;\n' +
+2026-10-16T02:12:47.9951165Z     '  }\n' +
+2026-10-16T02:12:47.9951330Z     '\n' +
+2026-10-16T02:12:47.9951554Z     '  @media (prefers-color-scheme: dark) {\n' +
+2026-10-16T02:12:47.9951840Z     '    :root:not([data-theme="light"]) {\n' +
+2026-10-16T02:12:47.9952097Z     '      --ground: #0d1318;\n' +
+2026-10-16T02:12:47.9952332Z     '      --surface: #151d24;\n' +
+2026-10-16T02:12:47.9952581Z     '      --surface-sunk: #101820;\n' +
+2026-10-16T02:12:47.9952818Z     '      --ink: #e3eaef;\n' +
+2026-10-16T02:12:47.9953044Z     '      --ink-2: #b6c5cf;\n' +
+2026-10-16T02:12:47.9953270Z     '      --muted: #8799a6;\n' +
+2026-10-16T02:12:47.9953490Z     '      --rule: #25323a;\n' +
+2026-10-16T02:12:47.9953725Z     '      --rule-soft: #1d272e;\n' +
+2026-10-16T02:12:47.9953961Z     '      --data: #4e92de;\n' +
+2026-10-16T02:12:47.9954185Z     '      --data-soft: #1c2e42;\n' +
+2026-10-16T02:12:47.9954416Z     '      --bound: #d9604e;\n' +
+2026-10-16T02:12:47.9954648Z     '      --bound-soft: #38221f;\n' +
+2026-10-16T02:12:47.9955018Z     '      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .7);\n' +
+2026-10-16T02:12:47.9955307Z     '    }\n' +
+2026-10-16T02:12:47.9955475Z     '  }\n' +
+2026-10-16T02:12:47.9955629Z     '\n' +
+2026-10-16T02:12:47.9955823Z     '  :root[data-theme="dark"] {\n' +
+2026-10-16T02:12:47.9956061Z     '    --ground: #0d1318;\n' +
+2026-10-16T02:12:47.9956280Z     '    --surface: #151d24;\n' +
+2026-10-16T02:12:47.9956510Z     '    --surface-sunk: #101820;\n' +
+2026-10-16T02:12:47.9956725Z     '    --ink: #e3eaef;\n' +
+2026-10-16T02:12:47.9956944Z     '    --ink-2: #b6c5cf;\n' +
+2026-10-16T02:12:47.9957160Z     '    --muted: #8799a6;\n' +
+2026-10-16T02:12:47.9957375Z     '    --rule: #25323a;\n' +
+2026-10-16T02:12:47.9957596Z     '    --rule-soft: #1d272e;\n' +
+2026-10-16T02:12:47.9957822Z     '    --data: #4e92de;\n' +
+2026-10-16T02:12:47.9958055Z     '    --data-soft: #1c2e42;\n' +
+2026-10-16T02:12:47.9958281Z     '    --bound: #d9604e;\n' +
+2026-10-16T02:12:47.9958620Z     '    --bound-soft: #38221f;\n' +
+2026-10-16T02:12:47.9958966Z     '    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .7);\n' +
+2026-10-16T02:12:47.9959418Z     '  }\n' +
+2026-10-16T02:12:47.9959590Z     '\n' +
+2026-10-16T02:12:47.9959791Z     '  * { box-sizing: border-box; }\n' +
+2026-10-16T02:12:47.9960008Z     '\n' +
+2026-10-16T02:12:47.9960162Z     '  body {\n' +
+2026-10-16T02:12:47.9960329Z     '    margin: 0;\n' +
+2026-10-16T02:12:47.9960550Z     '    padding-inline: 20px;\n' +
+2026-10-16T02:12:47.9960799Z     '    padding-block: 40px 64px;\n' +
+2026-10-16T02:12:47.9961049Z     '    background: var(--ground);\n' +
+2026-10-16T02:12:47.9961288Z     '    color: var(--ink);\n' +
+2026-10-16T02:12:47.9961520Z     '    font-family: var(--sans);\n' +
+2026-10-16T02:12:47.9961751Z     '    font-size: 15px;\n' +
+2026-10-16T02:12:47.9961968Z     '    line-height: 1.55;\n' +
+2026-10-16T02:12:47.9962227Z     '    -webkit-font-smoothing: antialiased;\n' +
+2026-10-16T02:12:47.9962465Z     '  }\n' +
+2026-10-16T02:12:47.9962625Z     '\n' +
+2026-10-16T02:12:47.9963107Z     '  .wrap { max-width: 1020px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }\n' +
+2026-10-16T02:12:47.9963462Z     '\n' +
+2026-10-16T02:12:47.9963678Z     '  /* ---------- header ---------- */\n' +
+2026-10-16T02:12:47.9964033Z     '  header { display: flex; flex-direction: column; gap: 14px; }\n' +
+2026-10-16T02:12:47.9964311Z     '\n' +
+2026-10-16T02:12:47.9964475Z     '  .eyebrow {\n' +
+2026-10-16T02:12:47.9964695Z     '    font-family: var(--mono);\n' +
+2026-10-16T02:12:47.9964936Z     '    font-size: 11px;\n' +
+2026-10-16T02:12:47.9965158Z     '    font-weight: 500;\n' +
+2026-10-16T02:12:47.9965396Z     '    letter-spacing: .13em;\n' +
+2026-10-16T02:12:47.9965646Z     '    text-transform: uppercase;\n' +
+2026-10-16T02:12:47.9965890Z     '    color: var(--muted);\n' +
+2026-10-16T02:12:47.9966088Z     '  }\n' +
+2026-10-16T02:12:47.9966245Z     '\n' +
+2026-10-16T02:12:47.9966404Z     '  h1 {\n' +
+2026-10-16T02:12:47.9966622Z     '    font-family: var(--serif);\n' +
+2026-10-16T02:12:47.9966853Z     '    font-weight: 500;\n' +
+2026-10-16T02:12:47.9967103Z     '    font-size: clamp(30px, 5.4vw, 45px);\n' +
+2026-10-16T02:12:47.9967362Z     '    line-height: 1.08;\n' +
+2026-10-16T02:12:47.9967597Z     '    letter-spacing: -.012em;\n' +
+2026-10-16T02:12:47.9967807Z     '    margin: 0;\n' +
+2026-10-16T02:12:47.9968032Z     '    text-wrap: balance;\n' +
+2026-10-16T02:12:47.9968227Z     '  }\n' +
+2026-10-16T02:12:47.9968381Z     '\n' +
+2026-10-16T02:12:47.9968533Z     '  .verdict {\n' +
+2026-10-16T02:12:47.9968745Z     '    font-family: var(--serif);\n' +
+2026-10-16T02:12:47.9968996Z     '    font-size: clamp(17px, 2.3vw, 20px);\n' +
+2026-10-16T02:12:47.9969410Z     '    line-height: 1.45;\n' +
+2026-10-16T02:12:47.9969634Z     '    color: var(--ink-2);\n' +
+2026-10-16T02:12:47.9969856Z     '    max-width: 62ch;\n' +
+2026-10-16T02:12:47.9970046Z     '    margin: 0;\n' +
+2026-10-16T02:12:47.9970259Z     '    text-wrap: pretty;\n' +
+2026-10-16T02:12:47.9970448Z     '  }\n' +
+2026-10-16T02:12:47.9970613Z     '\n' +
+2026-10-16T02:12:47.9970768Z     '  .facts {\n' +
+2026-10-16T02:12:47.9970947Z     '    display: grid;\n' +
+2026-10-16T02:12:47.9971269Z     '    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));\n' +
+2026-10-16T02:12:47.9971554Z     '    gap: 1px;\n' +
+2026-10-16T02:12:47.9971770Z     '    background: var(--rule);\n' +
+2026-10-16T02:12:47.9972028Z     '    border: 1px solid var(--rule);\n' +
+2026-10-16T02:12:47.9972278Z     '    border-radius: 3px;\n' +
+2026-10-16T02:12:47.9972511Z     '    overflow: hidden;\n' +
+2026-10-16T02:12:47.9972725Z     '    margin-top: 4px;\n' +
+2026-10-16T02:12:47.9972906Z     '  }\n' +
+2026-10-16T02:12:47.9973316Z     '  .fact { background: var(--surface); padding: 14px 16px; display: flex; flex-direction: column; gap: 3px; }\n' +
+2026-10-16T02:12:47.9973686Z     '  .fact dt {\n' +
+2026-10-16T02:12:47.9974004Z     '    font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em;\n' +
+2026-10-16T02:12:47.9974501Z     '    text-transform: uppercase; color: var(--muted);\n' +
+2026-10-16T02:12:47.9974745Z     '  }\n' +
+2026-10-16T02:12:47.9974903Z     '  .fact dd {\n' +
+2026-10-16T02:12:47.9975220Z     '    margin: 0; font-family: var(--mono); font-size: 19px; font-weight: 500;\n' +
+2026-10-16T02:12:47.9975641Z     '    font-variant-numeric: tabular-nums; letter-spacing: -.01em;\n' +
+2026-10-16T02:12:47.9975917Z     '  }\n' +
+2026-10-16T02:12:47.9976247Z     '  .fact p { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.4; }\n' +
+2026-10-16T02:12:47.9976559Z     '\n' +
+2026-10-16T02:12:47.9976755Z     '  /* ---------- panels ---------- */\n' +
+2026-10-16T02:12:47.9977098Z     '  section { display: flex; flex-direction: column; gap: 0; }\n' +
+2026-10-16T02:12:47.9977365Z     '\n' +
+2026-10-16T02:12:47.9977518Z     '  .panel {\n' +
+2026-10-16T02:12:47.9977734Z     '    background: var(--surface);\n' +
+2026-10-16T02:12:47.9977995Z     '    border: 1px solid var(--rule);\n' +
+2026-10-16T02:12:47.9978345Z     '    border-radius: 4px;\n' +
+2026-10-16T02:12:47.9978592Z     '    box-shadow: var(--shadow);\n' +
+2026-10-16T02:12:47.9978806Z     '  }\n' +
+2026-10-16T02:12:47.9979289Z     '  .panel-head { padding: 18px 20px 0; display: flex; flex-direction: column; gap: 5px; }\n' +
+2026-10-16T02:12:47.9979677Z     '  .panel-head h2 {\n' +
+2026-10-16T02:12:47.9979993Z     '    font-family: var(--serif); font-weight: 500; font-size: 21px;\n' +
+2026-10-16T02:12:47.9980332Z     '    letter-spacing: -.008em; margin: 0;\n' +
+2026-10-16T02:12:47.9980566Z     '  }\n' +
+2026-10-16T02:12:47.9980971Z     '  .panel-head p { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 66ch; line-height: 1.5; }\n' +
+2026-10-16T02:12:47.9981480Z     '  #joint-dimension-length .panel-body { padding: 16px 20px 20px; }\n' +
+2026-10-16T02:12:47.9981939Z     '  #ic-tournament-reference-history .panel-body { padding: 16px 20px 20px; }\n' +
+2026-10-16T02:12:47.9982455Z     '  #joint-dimension-length .panel-body > p { font-size: 13.5px; line-height: 1.55; }\n' +
+2026-10-16T02:12:47.9982783Z     '\n' +
+2026-10-16T02:12:47.9983049Z     '  .chart-scroll { overflow-x: auto; padding: 10px 8px 4px; }\n' +
+2026-10-16T02:12:47.9983494Z     '  .chart-scroll svg { display: block; width: 100%; min-width: 840px; height: auto; }\n' +
+2026-10-16T02:12:47.9983801Z     '\n' +
+2026-10-16T02:12:47.9983955Z     '  .legend {\n' +
+2026-10-16T02:12:47.9984215Z     '    display: flex; flex-wrap: wrap; gap: 6px 20px;\n' +
+2026-10-16T02:12:47.9984498Z     '    padding: 4px 20px 18px;\n' +
+2026-10-16T02:12:47.9984832Z     '    font-family: var(--mono); font-size: 11.5px; color: var(--muted);\n' +
+2026-10-16T02:12:47.9985114Z     '  }\n' +
+2026-10-16T02:12:47.9985409Z     '  .legend span { display: inline-flex; align-items: center; gap: 7px; }\n' +
+2026-10-16T02:12:47.9985854Z     '  /* A legend line that is prose, not a swatch key: one block of text, so the\n' +
+2026-10-16T02:12:47.9986319Z     '     <b>, <code> and <sup> inside it stay inline instead of becoming flex items. */\n' +
+2026-10-16T02:12:47.9986716Z     '  .legend > span:not(:has(> .swatch)) { display: block; }\n' +
+2026-10-16T02:12:47.9987182Z     '  .swatch { width: 18px; height: 9px; border-radius: 2px; background: var(--data); flex: none; }\n' +
+2026-10-16T02:12:47.9987765Z     '  .swatch.ghost { background: none; border-top: 1.5px dashed var(--muted); height: 0; border-radius: 0; }\n' +
+2026-10-16T02:12:47.9988299Z     '  .swatch.bound { background: var(--bound); width: 3px; height: 14px; }\n' +
+2026-10-16T02:12:47.9988625Z     '\n' +
+2026-10-16T02:12:47.9988834Z     '  /* ---------- two-up ---------- */\n' +
+2026-10-16T02:12:47.9989375Z     '  .duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }\n' +
+2026-10-16T02:12:47.9989727Z     '\n' +
+2026-10-16T02:12:47.9989949Z     '  /* ---------- ledger rows ---------- */\n' +
+2026-10-16T02:12:47.9990325Z     '  .ledger { padding: 14px 20px 20px; display: flex; flex-direction: column; }\n' +
+2026-10-16T02:12:47.9991086Z     '  .lrow { display: grid; grid-template-columns: 1fr 96px; gap: 4px 14px; padding: 9px 0; border-bottom: 1px solid var(--rule-soft); }\n' +
+2026-10-16T02:12:47.9991578Z     '  .lrow:last-child { border-bottom: 0; }\n' +
+2026-10-16T02:12:47.9991903Z     '  .lrow .name { font-size: 13.5px; line-height: 1.35; }\n' +
+2026-10-16T02:12:47.9992163Z     '  .lrow .num {\n' +
+2026-10-16T02:12:47.9992468Z     '    font-family: var(--mono); font-size: 13.5px; font-weight: 500;\n' +
+2026-10-16T02:12:47.9992914Z     '    font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap;\n' +
+2026-10-16T02:12:47.9993227Z     '  }\n' +
+2026-10-16T02:12:47.9993620Z     '  .lbar { grid-column: 1 / -1; height: 8px; background: var(--surface-sunk); border-radius: 0 4px 4px 0; }\n' +
+2026-10-16T02:12:47.9994185Z     '  .lbar i { display: block; height: 100%; background: var(--data); border-radius: 0 4px 4px 0; }\n' +
+2026-10-16T02:12:47.9994536Z     '\n' +
+2026-10-16T02:12:47.9994856Z     '  /* ---------- exponent track ---------- */\n' +
+2026-10-16T02:12:47.9995137Z     '  .exp { padding: 14px 20px 8px; }\n' +
+2026-10-16T02:12:47.9995661Z     '  .erow { display: grid; grid-template-columns: minmax(118px, 1.2fr) minmax(120px, 2fr) 44px; align-items: stretch; gap: 12px; }\n' +
+2026-10-16T02:12:47.9996223Z     '  .erow .name { font-size: 13px; line-height: 1.3; align-self: center; }\n' +
+2026-10-16T02:12:47.9996521Z     '  .erow .num {\n' +
+2026-10-16T02:12:47.9996824Z     '    font-family: var(--mono); font-size: 13px; font-weight: 500;\n' +
+2026-10-16T02:12:47.9997264Z     '    font-variant-numeric: tabular-nums; text-align: right; align-self: center;\n' +
+2026-10-16T02:12:47.9997582Z     '  }\n' +
+2026-10-16T02:12:47.9997835Z     '  .track { position: relative; min-height: 38px; }\n' +
+2026-10-16T02:12:47.9998110Z     '  .track::before {\n' +
+2026-10-16T02:12:47.9998417Z     '    content: ""; position: absolute; left: 0; right: 0; top: 50%;\n' +
+2026-10-16T02:12:47.9998751Z     '    height: 1px; background: var(--rule);\n' +
+2026-10-16T02:12:47.9998977Z     '  }\n' +
+2026-10-16T02:12:47.9999285Z     '  .track::after {\n' +
+2026-10-16T02:12:47.9999641Z     '    content: ""; position: absolute; left: 38.5%; top: 0; bottom: 0;\n' +
+2026-10-16T02:12:48.0000027Z     '    width: 2px; margin-left: -1px; background: var(--bound);\n' +
+2026-10-16T02:12:48.0000290Z     '  }\n' +
+2026-10-16T02:12:48.0000445Z     '  .dot {\n' +
+2026-10-16T02:12:48.0000795Z     '    position: absolute; top: 50%; width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px;\n' +
+2026-10-16T02:12:48.0001292Z     '    border-radius: 50%; background: var(--data); box-shadow: 0 0 0 2px var(--surface);\n' +
+2026-10-16T02:12:48.0001602Z     '  }\n' +
+2026-10-16T02:12:48.0001759Z     '  .exp-axis {\n' +
+2026-10-16T02:12:48.0002163Z     '    display: grid; grid-template-columns: minmax(118px, 1.2fr) minmax(120px, 2fr) 44px; gap: 12px;\n' +
+2026-10-16T02:12:48.0002714Z     '    font-family: var(--mono); font-size: 10.5px; color: var(--muted); padding-bottom: 12px;\n' +
+2026-10-16T02:12:48.0003046Z     '  }\n' +
+2026-10-16T02:12:48.0003301Z     '  .exp-axis .ticks { position: relative; height: 14px; }\n' +
+2026-10-16T02:12:48.0003829Z     '  .exp-axis .ticks b { position: absolute; top: 0; font-weight: 400; transform: translateX(-50%); white-space: nowrap; }\n' +
+2026-10-16T02:12:48.0004224Z     '  .rho-flag {\n' +
+2026-10-16T02:12:48.0004539Z     '    position: absolute; top: 0; left: 38.5%; transform: translateX(-50%);\n' +
+2026-10-16T02:12:48.0004943Z     '    color: var(--bound); font-weight: 500; white-space: nowrap;\n' +
+2026-10-16T02:12:48.0005210Z     '  }\n' +
+2026-10-16T02:12:48.0005357Z     '\n' +
+2026-10-16T02:12:48.0005546Z     '  /* ---------- table ---------- */\n' +
+2026-10-16T02:12:48.0005854Z     '  .table-scroll { overflow-x: auto; padding: 4px 0 0; }\n' +
+2026-10-16T02:12:48.0006301Z     '  table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 13.5px; }\n' +
+2026-10-16T02:12:48.0006988Z     '  caption { text-align: left; padding: 0 20px 12px; font-size: 13.5px; color: var(--muted); }\n' +
+2026-10-16T02:12:48.0007519Z     '  th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--rule-soft); }\n' +
+2026-10-16T02:12:48.0007946Z     '  th:first-child, td:first-child { padding-left: 20px; }\n' +
+2026-10-16T02:12:48.0008303Z     '  th:last-child, td:last-child { padding-right: 20px; }\n' +
+2026-10-16T02:12:48.0008556Z     '  thead th {\n' +
+2026-10-16T02:12:48.0008865Z     '    font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em;\n' +
+2026-10-16T02:12:48.0009398Z     '    text-transform: uppercase; color: var(--muted); font-weight: 500;\n' +
+2026-10-16T02:12:48.0009808Z     '    border-bottom: 1px solid var(--rule); white-space: nowrap;\n' +
+2026-10-16T02:12:48.0010083Z     '  }\n' +
+2026-10-16T02:12:48.0010522Z     '  td.n, th.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }\n' +
+2026-10-16T02:12:48.0010960Z     '  tbody tr.group td {\n' +
+2026-10-16T02:12:48.0011431Z     '    background: var(--surface-sunk); font-family: var(--mono); font-size: 10.5px;\n' +
+2026-10-16T02:12:48.0011947Z     '    letter-spacing: .09em; text-transform: uppercase; color: var('... 1774350 more characters,
+2026-10-16T02:12:48.0012304Z   operator: 'strictEqual',
+2026-10-16T02:12:48.0012493Z   diff: 'simple'
+2026-10-16T02:12:48.0012656Z }
+2026-10-16T02:12:48.0012745Z 
+2026-10-16T02:12:48.0012819Z Node.js v22.23.3
+2026-10-16T02:12:48.0023268Z ##[error]Process completed with exit code 1.
+2026-10-16T02:12:48.0690948Z ##[group]Run actions/upload-artifact@v4
+2026-10-16T02:12:48.0691193Z with:
+2026-10-16T02:12:48.0691365Z   name: ic-dashboard-browser
+2026-10-16T02:12:48.0691588Z   path: /tmp/ic-dashboard-screenshots
+2026-10-16T02:12:48.0691821Z   if-no-files-found: warn
+2026-10-16T02:12:48.0692012Z   compression-level: 6
+2026-10-16T02:12:48.0692194Z   overwrite: false
+2026-10-16T02:12:48.0692374Z   include-hidden-files: false
+2026-10-16T02:12:48.0692591Z ##[endgroup]
+2026-10-16T02:12:48.2001952Z (node:2132) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-16T02:12:48.2002634Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-16T02:12:48.2026541Z ##[warning]No files were found with the provided path: /tmp/ic-dashboard-screenshots. No artifacts will be uploaded.
+2026-10-16T02:12:48.4544499Z Post job cleanup.
+2026-10-16T02:12:48.5197015Z [command]/usr/bin/git version
+2026-10-16T02:12:48.5226069Z git version 2.55.0
+2026-10-16T02:12:48.5252233Z Temporarily overriding HOME='/home/runner/work/_temp/cc82eb77-7451-4aa8-8732-407b0b74b456' before making global git config changes
+2026-10-16T02:12:48.5252954Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-16T02:12:48.5255722Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/crypto/crypto
+2026-10-16T02:12:48.5288528Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-16T02:12:48.5315408Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-16T02:12:48.5566126Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-16T02:12:48.5586089Z http.https://github.com/.extraheader
+2026-10-16T02:12:48.5594013Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-16T02:12:48.5728733Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-16T02:12:48.5975334Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-16T02:12:48.6002755Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-16T02:12:48.6362289Z Cleaning up orphan processes
+2026-10-16T02:12:48.6619793Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+

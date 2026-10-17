@@ -1,6 +1,6 @@
 {
   "schema_version": "ic-progress-timeline/1",
-  "updated": "2026-10-15",
+  "updated": "2026-10-16",
   "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
   "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Direction against 1 is meaningful only for fully priced ratios; a quotient of incomplete lower bounds is diagnostic even when paired. No value on this page is computed from another.",
   "series": [
@@ -874,6 +874,83 @@
           "class": "accounting",
           "anchor": "#n83-matched-20261014",
           "source": "https://github.com/aburan28/crypto/blob/main/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json"
+        }
+      ]
+    },
+    {
+      "id": "n83-basis-cold-c3",
+      "label": "Training-selected C3, eight actual cold singleton blocks",
+      "short_label": "n83-basis-cold-c3",
+      "role": "context",
+      "barrier_test": false,
+      "note": "Native IC/rho values in local measured units, outside admitted best/floor tables. Historical prior-study values remain separate.",
+      "points": [
+        {
+          "date": "2026-10-16",
+          "measurement_date": "2026-10-15",
+          "publication_status": "PR1899 unmerged; date provisional and must refresh on actual merge.",
+          "value": 289.95217199587677,
+          "reference": "matched",
+          "unit": "actual complete-process wall including preparation",
+          "label": "Training-selected C3, eight actual cold singleton blocks",
+          "detail": "Native IC/rho; below1 favors IC. CPU3/oneOSthread/12GiB/2100s,one guest. C3 selected before holdouts; old K600 construction and OS-cache flushing unpriced. Three cohort rho input-contract failures are not replaced. No calibrated S/L2/independent-host or ledger admission; provisional publication date pending PR1899 merge.",
+          "class": "engineering",
+          "anchor": "#n83-basis-setup-20261015",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/n83_basis_setup_20261015/reports/run-20261015T1842Z/native_statistics.json",
+          "interval_95": [
+            245.96728993096033,
+            375.39678030183126
+          ]
+        }
+      ]
+    },
+    {
+      "id": "n83-basis-cold-c0",
+      "label": "Retained K600 control, eight fresh cold singleton blocks",
+      "short_label": "n83-basis-cold-c0",
+      "role": "context",
+      "barrier_test": false,
+      "note": "Native IC/rho values in local measured units, outside admitted best/floor tables. Historical prior-study values remain separate.",
+      "points": [
+        {
+          "date": "2026-10-16",
+          "measurement_date": "2026-10-15",
+          "publication_status": "PR1899 unmerged; date provisional and must refresh on actual merge.",
+          "value": 580.617776186712,
+          "reference": "matched",
+          "unit": "actual complete-process wall including preparation",
+          "label": "Retained K600 control, eight fresh cold singleton blocks",
+          "detail": "Native IC/rho; below1 favors IC. CPU3/oneOSthread/12GiB/2100s,one guest. C3 selected before holdouts; old K600 construction and OS-cache flushing unpriced. Three cohort rho input-contract failures are not replaced. No calibrated S/L2/independent-host or ledger admission; provisional publication date pending PR1899 merge.",
+          "class": "engineering",
+          "anchor": "#n83-basis-setup-20261015",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/n83_basis_setup_20261015/reports/run-20261015T1842Z/native_statistics.json",
+          "interval_95": [
+            489.1802266078212,
+            758.6102917675073
+          ]
+        }
+      ]
+    },
+    {
+      "id": "n83-basis-online-c3",
+      "label": "C3 aligned online query mean, secondary diagnostic",
+      "short_label": "n83-basis-online-c3",
+      "role": "context",
+      "barrier_test": false,
+      "note": "Native IC/rho values in local measured units, outside admitted best/floor tables. Historical prior-study values remain separate.",
+      "points": [
+        {
+          "date": "2026-10-16",
+          "measurement_date": "2026-10-15",
+          "publication_status": "PR1899 unmerged; date provisional and must refresh on actual merge.",
+          "value": 0.1155785234636542,
+          "reference": "matched",
+          "unit": "aligned validation/solve/replay/output clocks; secondary",
+          "label": "C3 aligned online query mean, secondary diagnostic",
+          "detail": "Native IC/rho; below1 favors IC. CPU3/oneOSthread/12GiB/2100s,one guest. C3 selected before holdouts; old K600 construction and OS-cache flushing unpriced. Three cohort rho input-contract failures are not replaced. No calibrated S/L2/independent-host or ledger admission; provisional publication date pending PR1899 merge.",
+          "class": "engineering",
+          "anchor": "#n83-basis-setup-20261015",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/n83_basis_setup_20261015/reports/final-20261016/native_final.json"
         }
       ]
     }

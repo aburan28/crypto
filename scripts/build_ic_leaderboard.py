@@ -49,6 +49,8 @@ LEDGER = "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
 LEDGER_COVERED_THROUGH = 23
 
 SOURCES = {
+    "n83_basis_cold": "research/n83_basis_setup_20261015/reports/run-20261015T1842Z/native_statistics.json",
+    "n83_basis_final": "research/n83_basis_setup_20261015/reports/final-20261016/native_final.json",
     "round5": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
     "matched_rho": "research/ic_rho_reference_20260923/reprice/ic-boundary-ledger-round5-2026-09-22.json",
     "matched_rho_analysis": "research/ic_rho_reference_20260923/analysis.json",
@@ -698,6 +700,36 @@ def matched_n83_diagnostic() -> dict:
     }
 
 
+def basis_n83_diagnostic() -> dict:
+    """Copy native recorded diagnostics; no scientific arithmetic or admission."""
+    cold, final = load(SOURCES["n83_basis_cold"]), load(SOURCES["n83_basis_final"])
+    if (cold.get("stage") != "cold" or cold.get("stage_failures") != 0
+            or final.get("status") != "COMPLETE_ACCOUNTING_WITH_UNRESOLVED_COHORT_REFERENCE"
+            or (final.get("attempted"), final.get("completed"), final.get("canonical_answers"),
+                final.get("rank_log_audits"), final.get("AA_pairs")) != (55, 50, 92, 30, 5)
+            or final.get("cohort_IC_over_rho") is not None):
+        raise SystemExit("N83 basis diagnostic requires bound actual evidence and unavailable cohort reference")
+    return {"source": SOURCES["n83_basis_final"], "cold_source": SOURCES["n83_basis_cold"],
+            "curve": "icv1-f2m83-t6151469093347-9eba6cd5", "measurement_date": "2026-10-15",
+            "class": "engineering", "admission": "local diagnostic only; no ranked or ledger promotion",
+            "S": None, "ratio_to_floor": None, "cohort_IC_over_rho": None,
+            "counts": {k: final[k] for k in ("attempted", "completed", "failed", "canonical_answers", "ic_answers", "rho_answers", "rank_log_audits", "AA_pairs")},
+            "cold": cold["comparisons"], "cold_processes": cold["process_summary"],
+            "cohort_selected_over_control": final["cohort_selected_over_control"],
+            "limits": "C3 selected before fresh holdouts. Eight actual cold blocks; three cohort rho workers rejected8-point input. Fifty complete and five failed processes,92answers. Cohort IC/rho unavailable; no replacement or projected timing. One guest/three prep clusters, no calibrated S/L2/independent-host or security claim. Original retained K600 construction and OS-cache flushing unpriced."}
+
+def basis_n83_markdown(doc):
+    b = doc["n83_basis_setup_diagnostic"]
+    lines = ["## Bounded legacy degree-83 basis/setup diagnostic (measured2026-10-15)", "",
+             "Training-selected C3 prefix1271dense, exact legacy a=1/tail149. Native complete-process ratios; below1 favors IC. Outside admitted tables.", "",
+             "| Cold comparison (8 target blocks) | Mean-cost ratio | Conditional95% interval |", "|:--|--:|:--|"]
+    for key, label in (("selected_over_rho", "C3/rho"), ("control_over_rho", "K600/rho"), ("selected_over_control", "C3/K600")):
+        row = b["cold"][key]
+        lines.append(f"| {label} | {row['mean_cost_ratio']:.9f} | [{row['conditional_95_percent_interval'][0]:.9f}, {row['conditional_95_percent_interval'][1]:.9f}] |")
+    lines += ["", b["limits"], "", f"[Native full accounting](../../{b['source']}); [cold statistics](../../{b['cold_source']}).", ""]
+    return lines
+
+
 def build() -> dict:
     names = Names()
     frontier_audit = latest_frontier_audit()
@@ -1008,6 +1040,7 @@ def build() -> dict:
         "f4_f5_f6_cross_family_diagnostic": cross_diagnostic,
         "latest_frontier_audit": frontier_audit,
         "n83_matched_process_diagnostic": matched_n83_diagnostic(),
+        "n83_basis_setup_diagnostic": basis_n83_diagnostic(),
         "curve_records": {
             "registry": SOURCES["registry"], "schema": SOURCES["curves_schema"], "yaml": SOURCES["curves_yaml"],
             "yaml_records": n_records,
@@ -1085,6 +1118,7 @@ def markdown(doc: dict) -> str:
          "`× reference` and `× floor` are comparable within a table and nowhere else.  The same slug "
          "can appear in two tables with different `S`, because the unit, the reference and the number "
          "of targets differ.", ""]
+    L += basis_n83_markdown(doc)
     matched = doc["n83_matched_process_diagnostic"]
     L += ["## Matched legacy degree-83 local process diagnostic (measured 2026-10-14)", "",
           f"`{matched['curve']}`; accounting only, outside tables A–C. "
@@ -1518,6 +1552,12 @@ def page(doc: dict, standalone: bool) -> str:
                  f'{unit_ref("B")}</p></div>')
     P.append(f'<div class="fact"><dt>Curves</dt><dd>{len({r["slug"] for r in board})} priced</dd>'
              f'<p>of {len(doc["roster"])} named in the repository; every one by its ICV1 slug</p></div></dl></header>')
+    basis = doc["n83_basis_setup_diagnostic"]
+    P.append('<section class="panel" id="n83-basis-setup-diagnostic"><h2>Bounded degree-83 basis/setup · measured2026-10-15 <span class="chip">engineering diagnostic</span></h2><p>Training-selected C3 prefix1271dense. Native complete-process cold comparison,8 matched target blocks. No ranked/ledger promotion.</p><div class="scroll"><table><thead><tr><th>Cold comparison</th><th>Mean cost ratio</th><th>Conditional95% interval</th></tr></thead><tbody>')
+    for key, label in (("selected_over_rho", "C3/rho"), ("control_over_rho", "K600/rho"), ("selected_over_control", "C3/K600")):
+        row = basis["cold"][key]
+        P.append(f'<tr><td>{label}</td><td>{row["mean_cost_ratio"]:.9f}</td><td>[{row["conditional_95_percent_interval"][0]:.9f}, {row["conditional_95_percent_interval"][1]:.9f}]</td></tr>')
+    P.append('</tbody></table></div><p>' + esc(basis["limits"]) + '</p><p>' + gh(basis["source"], "Native final evidence") + ' · ' + gh(basis["cold_source"], "Native cold statistics") + '</p></section>')
     matched = doc["n83_matched_process_diagnostic"]
     P.append('<section class="panel" id="n83-matched-process-diagnostic">'
              '<h2>Matched legacy degree-83 local process diagnostic · measured 2026-10-14 '
@@ -2017,6 +2057,7 @@ def main() -> int:
     # This diagnostic copies native results without Python-derived arithmetic;
     # preserve their full binary64 values instead of rounding their evidence.
     serialized["n83_matched_process_diagnostic"] = doc["n83_matched_process_diagnostic"]
+    serialized["n83_basis_setup_diagnostic"] = doc["n83_basis_setup_diagnostic"]
     outs = {OUT_JSON: json.dumps(serialized, indent=1, ensure_ascii=False) + "\n",
             OUT_MD: markdown(doc), OUT_HTML: page(doc, standalone=True)}
     if args.check:

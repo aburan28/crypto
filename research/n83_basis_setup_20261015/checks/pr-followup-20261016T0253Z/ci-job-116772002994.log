@@ -1,0 +1,285 @@
+﻿2026-10-16T02:03:42.9420976Z Current runner version: '2.337.0'
+2026-10-16T02:03:42.9444571Z ##[group]Runner Image Provisioner
+2026-10-16T02:03:42.9445484Z Hosted Compute Agent
+2026-10-16T02:03:42.9446169Z Version: 20261012.601
+2026-10-16T02:03:42.9446782Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-16T02:03:42.9447646Z Build Date: 2026-10-12T17:48:21Z
+2026-10-16T02:03:42.9448331Z Worker ID: {f986fcd4-c100-47be-8253-736140d47673}
+2026-10-16T02:03:42.9449070Z Region: westus3
+2026-10-16T02:03:42.9449653Z Cloud: Azure
+2026-10-16T02:03:42.9450194Z ##[endgroup]
+2026-10-16T02:03:42.9452093Z ##[group]Operating System
+2026-10-16T02:03:42.9452741Z Ubuntu
+2026-10-16T02:03:42.9453243Z 24.04.5
+2026-10-16T02:03:42.9453922Z LTS
+2026-10-16T02:03:42.9454429Z ##[endgroup]
+2026-10-16T02:03:42.9455029Z ##[group]Runner Image
+2026-10-16T02:03:42.9455641Z Image: ubuntu-24.04
+2026-10-16T02:03:42.9456189Z Version: 20261012.334.1
+2026-10-16T02:03:42.9457523Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-16T02:03:42.9459126Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-16T02:03:42.9460124Z ##[endgroup]
+2026-10-16T02:03:42.9463607Z ##[group]GITHUB_TOKEN Permissions
+2026-10-16T02:03:42.9465767Z Actions: write
+2026-10-16T02:03:42.9466454Z ArtifactMetadata: write
+2026-10-16T02:03:42.9467089Z Attestations: write
+2026-10-16T02:03:42.9467651Z Checks: write
+2026-10-16T02:03:42.9468273Z CodeQuality: write
+2026-10-16T02:03:42.9468852Z Contents: write
+2026-10-16T02:03:42.9469398Z CopilotRequests: write
+2026-10-16T02:03:42.9470037Z Deployments: write
+2026-10-16T02:03:42.9470591Z Discussions: write
+2026-10-16T02:03:42.9471432Z Drives: write
+2026-10-16T02:03:42.9472112Z Issues: write
+2026-10-16T02:03:42.9472738Z Metadata: read
+2026-10-16T02:03:42.9473353Z Models: read
+2026-10-16T02:03:42.9473885Z Packages: write
+2026-10-16T02:03:42.9474457Z Pages: write
+2026-10-16T02:03:42.9475068Z PullRequests: write
+2026-10-16T02:03:42.9475665Z RepositoryProjects: write
+2026-10-16T02:03:42.9476331Z SecurityEvents: write
+2026-10-16T02:03:42.9476905Z Statuses: write
+2026-10-16T02:03:42.9477563Z VulnerabilityAlerts: read
+2026-10-16T02:03:42.9478178Z ##[endgroup]
+2026-10-16T02:03:42.9480187Z Secret source: Actions
+2026-10-16T02:03:42.9481478Z Cache mode: write
+2026-10-16T02:03:42.9482169Z Prepare workflow directory
+2026-10-16T02:03:42.9865459Z Prepare all required actions
+2026-10-16T02:03:42.9913095Z Getting action download info
+2026-10-16T02:03:43.2938724Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-16T02:03:43.4787415Z Complete job name: replay
+2026-10-16T02:03:43.5580976Z ##[group]Run actions/checkout@v4
+2026-10-16T02:03:43.5581901Z with:
+2026-10-16T02:03:43.5582381Z   ref: 14e56ddb0902161eaa289425c5131a58fefd5243
+2026-10-16T02:03:43.5583007Z   sparse-checkout-cone-mode: false
+2026-10-16T02:03:43.5586567Z   sparse-checkout: research/notes/ecc2k130/leaf_m10_support_20260930
+research/notes/ecc2k130/leaf_m10_support_outcome_20260930
+research/notes/ecc2k130/m10_export_capacity_20260925/INPUT.json
+research/notes/ecc2k130/dual_all_lines_20260930/RESULT.json
+research/notes/ecc2k130/rotated_subspace_support_20260925/gate.py
+research/notes/ecc2k130/rotated_unequal_arity_20260925/verify.py
+research/ecc2k130_relations/fastfield.py
+research/ecc2k130_relations/relations.py
+.github/workflows/ecc2k130-leaf-m10-support.yml
+.github/workflows/ecc2k130-leaf-m10-outcome.yml
+
+2026-10-16T02:03:43.5590124Z   repository: aburan28/crypto
+2026-10-16T02:03:43.5594328Z   token: ***
+2026-10-16T02:03:43.5594774Z   ssh-strict: true
+2026-10-16T02:03:43.5595220Z   ssh-user: git
+2026-10-16T02:03:43.5595700Z   persist-credentials: true
+2026-10-16T02:03:43.5596218Z   clean: true
+2026-10-16T02:03:43.5596638Z   fetch-depth: 1
+2026-10-16T02:03:43.5597066Z   fetch-tags: false
+2026-10-16T02:03:43.5597509Z   show-progress: true
+2026-10-16T02:03:43.5597958Z   lfs: false
+2026-10-16T02:03:43.5598371Z   submodules: false
+2026-10-16T02:03:43.5599069Z   set-safe-directory: true
+2026-10-16T02:03:43.5599585Z   allow-unsafe-pr-checkout: false
+2026-10-16T02:03:43.5600431Z ##[endgroup]
+2026-10-16T02:03:43.6639963Z Syncing repository: aburan28/crypto
+2026-10-16T02:03:43.6642320Z ##[group]Getting Git version info
+2026-10-16T02:03:43.6643047Z Working directory is '/home/runner/work/crypto/crypto'
+2026-10-16T02:03:43.6644036Z [command]/usr/bin/git version
+2026-10-16T02:03:43.6717171Z git version 2.55.0
+2026-10-16T02:03:43.6739030Z ##[endgroup]
+2026-10-16T02:03:43.6756254Z Temporarily overriding HOME='/home/runner/work/_temp/df235723-8abc-46f3-97ca-a74d70ce2c68' before making global git config changes
+2026-10-16T02:03:43.6758707Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-16T02:03:43.6762649Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/crypto/crypto
+2026-10-16T02:03:43.6814484Z Deleting the contents of '/home/runner/work/crypto/crypto'
+2026-10-16T02:03:43.6819689Z ##[group]Initializing the repository
+2026-10-16T02:03:43.6825104Z [command]/usr/bin/git init /home/runner/work/crypto/crypto
+2026-10-16T02:03:43.6931364Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-16T02:03:43.6932805Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-16T02:03:43.6934502Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-16T02:03:43.6936172Z hint: call:
+2026-10-16T02:03:43.6937187Z hint:
+2026-10-16T02:03:43.6938407Z hint: 	git config --global init.defaultBranch <name>
+2026-10-16T02:03:43.6939800Z hint:
+2026-10-16T02:03:43.6941450Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-16T02:03:43.6943341Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-16T02:03:43.6944761Z hint:
+2026-10-16T02:03:43.6945561Z hint: 	git branch -m <name>
+2026-10-16T02:03:43.6946485Z hint:
+2026-10-16T02:03:43.6947693Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-16T02:03:43.6949513Z Initialized empty Git repository in /home/runner/work/crypto/crypto/.git/
+2026-10-16T02:03:43.6952577Z [command]/usr/bin/git remote add origin https://github.com/aburan28/crypto
+2026-10-16T02:03:43.6999901Z ##[endgroup]
+2026-10-16T02:03:43.7001528Z ##[group]Disabling automatic garbage collection
+2026-10-16T02:03:43.7005017Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-16T02:03:43.7037365Z ##[endgroup]
+2026-10-16T02:03:43.7038709Z ##[group]Setting up auth
+2026-10-16T02:03:43.7045047Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-16T02:03:43.7076945Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-16T02:03:43.7413539Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-16T02:03:43.7448556Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-16T02:03:43.7671648Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-16T02:03:43.7706164Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-16T02:03:43.7945275Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-16T02:03:43.7989699Z ##[endgroup]
+2026-10-16T02:03:43.7992059Z ##[group]Fetching the repository
+2026-10-16T02:03:43.7999823Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --filter=blob:none --depth=1 origin 14e56ddb0902161eaa289425c5131a58fefd5243
+2026-10-16T02:03:44.9146807Z From https://github.com/aburan28/crypto
+2026-10-16T02:03:44.9148320Z  * branch            14e56ddb0902161eaa289425c5131a58fefd5243 -> FETCH_HEAD
+2026-10-16T02:03:44.9152134Z ##[endgroup]
+2026-10-16T02:03:44.9153361Z ##[group]Determining the checkout info
+2026-10-16T02:03:44.9155542Z ##[endgroup]
+2026-10-16T02:03:44.9156435Z ##[group]Setting up sparse checkout
+2026-10-16T02:03:44.9163598Z [command]/usr/bin/git config core.sparseCheckout true
+2026-10-16T02:03:44.9197882Z [command]/usr/bin/git rev-parse --git-path info/sparse-checkout
+2026-10-16T02:03:44.9248426Z .git/info/sparse-checkout
+2026-10-16T02:03:44.9256512Z ##[endgroup]
+2026-10-16T02:03:44.9257438Z ##[group]Checking out the ref
+2026-10-16T02:03:44.9261933Z [command]/usr/bin/git checkout --progress --force 14e56ddb0902161eaa289425c5131a58fefd5243
+2026-10-16T02:03:46.6974305Z Updating files:   0% (1/228)
+2026-10-16T02:03:46.6991785Z Updating files:   1% (3/228)
+2026-10-16T02:03:46.6993239Z Updating files:   2% (5/228)
+2026-10-16T02:03:46.6997848Z Updating files:   3% (7/228)
+2026-10-16T02:03:46.7006351Z Updating files:   4% (10/228)
+2026-10-16T02:03:46.7011178Z Updating files:   5% (12/228)
+2026-10-16T02:03:46.7012788Z Updating files:   6% (14/228)
+2026-10-16T02:03:46.7018157Z Updating files:   7% (16/228)
+2026-10-16T02:03:46.7022292Z Updating files:   8% (19/228)
+2026-10-16T02:03:46.7026612Z Updating files:   9% (21/228)
+2026-10-16T02:03:46.7032490Z Updating files:  10% (23/228)
+2026-10-16T02:03:46.7042899Z Updating files:  11% (26/228)
+2026-10-16T02:03:46.7043492Z Updating files:  12% (28/228)
+2026-10-16T02:03:46.7044020Z Updating files:  13% (30/228)
+2026-10-16T02:03:46.7048984Z Updating files:  14% (32/228)
+2026-10-16T02:03:46.7051265Z Updating files:  15% (35/228)
+2026-10-16T02:03:46.7056132Z Updating files:  16% (37/228)
+2026-10-16T02:03:46.7061923Z Updating files:  17% (39/228)
+2026-10-16T02:03:46.7069165Z Updating files:  18% (42/228)
+2026-10-16T02:03:46.7071624Z Updating files:  19% (44/228)
+2026-10-16T02:03:46.7075411Z Updating files:  20% (46/228)
+2026-10-16T02:03:46.7080221Z Updating files:  21% (48/228)
+2026-10-16T02:03:46.7084811Z Updating files:  22% (51/228)
+2026-10-16T02:03:46.7087020Z Updating files:  23% (53/228)
+2026-10-16T02:03:46.7091190Z Updating files:  24% (55/228)
+2026-10-16T02:03:46.7096308Z Updating files:  25% (57/228)
+2026-10-16T02:03:46.7100559Z Updating files:  26% (60/228)
+2026-10-16T02:03:46.7103012Z Updating files:  27% (62/228)
+2026-10-16T02:03:46.7108749Z Updating files:  28% (64/228)
+2026-10-16T02:03:46.7113498Z Updating files:  29% (67/228)
+2026-10-16T02:03:46.7118626Z Updating files:  30% (69/228)
+2026-10-16T02:03:46.7120967Z Updating files:  31% (71/228)
+2026-10-16T02:03:46.7126291Z Updating files:  32% (73/228)
+2026-10-16T02:03:46.7130637Z Updating files:  33% (76/228)
+2026-10-16T02:03:46.7132833Z Updating files:  34% (78/228)
+2026-10-16T02:03:46.7141618Z Updating files:  35% (80/228)
+2026-10-16T02:03:46.7144018Z Updating files:  36% (83/228)
+2026-10-16T02:03:46.7147640Z Updating files:  37% (85/228)
+2026-10-16T02:03:46.7152246Z Updating files:  38% (87/228)
+2026-10-16T02:03:46.7156948Z Updating files:  39% (89/228)
+2026-10-16T02:03:46.7159120Z Updating files:  40% (92/228)
+2026-10-16T02:03:46.7163080Z Updating files:  41% (94/228)
+2026-10-16T02:03:46.7168041Z Updating files:  42% (96/228)
+2026-10-16T02:03:46.7172710Z Updating files:  43% (99/228)
+2026-10-16T02:03:46.7174991Z Updating files:  44% (101/228)
+2026-10-16T02:03:46.7179168Z Updating files:  45% (103/228)
+2026-10-16T02:03:46.7184990Z Updating files:  46% (105/228)
+2026-10-16T02:03:46.7189803Z Updating files:  47% (108/228)
+2026-10-16T02:03:46.7192428Z Updating files:  48% (110/228)
+2026-10-16T02:03:46.7196636Z Updating files:  49% (112/228)
+2026-10-16T02:03:46.7204626Z Updating files:  50% (114/228)
+2026-10-16T02:03:46.7208607Z Updating files:  51% (117/228)
+2026-10-16T02:03:46.7210972Z Updating files:  52% (119/228)
+2026-10-16T02:03:46.7215944Z Updating files:  53% (121/228)
+2026-10-16T02:03:46.7219525Z Updating files:  54% (124/228)
+2026-10-16T02:03:46.7224055Z Updating files:  55% (126/228)
+2026-10-16T02:03:46.7225948Z Updating files:  56% (128/228)
+2026-10-16T02:03:46.7230878Z Updating files:  57% (130/228)
+2026-10-16T02:03:46.7234990Z Updating files:  58% (133/228)
+2026-10-16T02:03:46.7239554Z Updating files:  59% (135/228)
+2026-10-16T02:03:46.7245554Z Updating files:  60% (137/228)
+2026-10-16T02:03:46.7247906Z Updating files:  61% (140/228)
+2026-10-16T02:03:46.7252367Z Updating files:  62% (142/228)
+2026-10-16T02:03:46.7257129Z Updating files:  63% (144/228)
+2026-10-16T02:03:46.7262113Z Updating files:  64% (146/228)
+2026-10-16T02:03:46.7264753Z Updating files:  65% (149/228)
+2026-10-16T02:03:46.7270695Z Updating files:  66% (151/228)
+2026-10-16T02:03:46.7276388Z Updating files:  67% (153/228)
+2026-10-16T02:03:46.7280561Z Updating files:  68% (156/228)
+2026-10-16T02:03:46.7283716Z Updating files:  69% (158/228)
+2026-10-16T02:03:46.7287699Z Updating files:  70% (160/228)
+2026-10-16T02:03:46.7292491Z Updating files:  71% (162/228)
+2026-10-16T02:03:46.7296725Z Updating files:  72% (165/228)
+2026-10-16T02:03:46.7299081Z Updating files:  73% (167/228)
+2026-10-16T02:03:46.7303572Z Updating files:  74% (169/228)
+2026-10-16T02:03:46.7309078Z Updating files:  75% (171/228)
+2026-10-16T02:03:46.7314188Z Updating files:  76% (174/228)
+2026-10-16T02:03:46.7316283Z Updating files:  77% (176/228)
+2026-10-16T02:03:46.7321910Z Updating files:  78% (178/228)
+2026-10-16T02:03:46.7326524Z Updating files:  79% (181/228)
+2026-10-16T02:03:46.7333355Z Updating files:  80% (183/228)
+2026-10-16T02:03:46.7335512Z Updating files:  81% (185/228)
+2026-10-16T02:03:46.7340364Z Updating files:  82% (187/228)
+2026-10-16T02:03:46.7344093Z Updating files:  83% (190/228)
+2026-10-16T02:03:46.7348473Z Updating files:  84% (192/228)
+2026-10-16T02:03:46.7352996Z Updating files:  85% (194/228)
+2026-10-16T02:03:46.7354735Z Updating files:  86% (197/228)
+2026-10-16T02:03:46.7358012Z Updating files:  87% (199/228)
+2026-10-16T02:03:46.7362348Z Updating files:  88% (201/228)
+2026-10-16T02:03:46.7367517Z Updating files:  89% (203/228)
+2026-10-16T02:03:46.7372003Z Updating files:  90% (206/228)
+2026-10-16T02:03:46.7375085Z Updating files:  91% (208/228)
+2026-10-16T02:03:46.7380895Z Updating files:  92% (210/228)
+2026-10-16T02:03:46.7385574Z Updating files:  93% (213/228)
+2026-10-16T02:03:46.7388014Z Updating files:  94% (215/228)
+2026-10-16T02:03:46.7391990Z Updating files:  95% (217/228)
+2026-10-16T02:03:46.7393766Z Updating files:  96% (219/228)
+2026-10-16T02:03:46.7396666Z Updating files:  97% (222/228)
+2026-10-16T02:03:46.7399041Z Updating files:  98% (224/228)
+2026-10-16T02:03:46.7412254Z Updating files:  99% (226/228)
+2026-10-16T02:03:46.7412937Z Updating files: 100% (228/228)
+2026-10-16T02:03:46.7413739Z Updating files: 100% (228/228), done.
+2026-10-16T02:03:46.8270658Z Note: switching to '14e56ddb0902161eaa289425c5131a58fefd5243'.
+2026-10-16T02:03:46.8271474Z 
+2026-10-16T02:03:46.8271838Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-16T02:03:46.8272715Z changes and commit them, and you can discard any commits you make in this
+2026-10-16T02:03:46.8273643Z state without impacting any branches by switching back to a branch.
+2026-10-16T02:03:46.8274137Z 
+2026-10-16T02:03:46.8274445Z If you want to create a new branch to retain commits you create, you may
+2026-10-16T02:03:46.8275209Z do so (now or later) by using -c with the switch command. Example:
+2026-10-16T02:03:46.8275637Z 
+2026-10-16T02:03:46.8275798Z   git switch -c <new-branch-name>
+2026-10-16T02:03:46.8276082Z 
+2026-10-16T02:03:46.8276243Z Or undo this operation with:
+2026-10-16T02:03:46.8276517Z 
+2026-10-16T02:03:46.8276750Z   git switch -
+2026-10-16T02:03:46.8276950Z 
+2026-10-16T02:03:46.8277321Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-16T02:03:46.8277847Z 
+2026-10-16T02:03:46.8278421Z HEAD is now at 14e56dd Publish audited N83 basis/setup study and preserve failed cohort reference
+2026-10-16T02:03:46.8299022Z ##[endgroup]
+2026-10-16T02:03:46.8341349Z [command]/usr/bin/git log -1 --format=%H
+2026-10-16T02:03:46.8363758Z 14e56ddb0902161eaa289425c5131a58fefd5243
+2026-10-16T02:03:46.8595032Z ##[group]Run python3 research/notes/ecc2k130/leaf_m10_support_outcome_20260930/verify_archive.py
+2026-10-16T02:03:46.8595774Z [36;1mpython3 research/notes/ecc2k130/leaf_m10_support_outcome_20260930/verify_archive.py[0m
+2026-10-16T02:03:46.8842575Z shell: /usr/bin/bash -e {0}
+2026-10-16T02:03:46.8842896Z ##[endgroup]
+2026-10-16T02:03:47.0443895Z Traceback (most recent call last):
+2026-10-16T02:03:47.0444898Z   File "/home/runner/work/crypto/crypto/research/notes/ecc2k130/leaf_m10_support_outcome_20260930/verify_archive.py", line 56, in <module>
+2026-10-16T02:03:47.0445825Z     main()
+2026-10-16T02:03:47.0446411Z   File "/home/runner/work/crypto/crypto/research/notes/ecc2k130/leaf_m10_support_outcome_20260930/verify_archive.py", line 48, in main
+2026-10-16T02:03:47.0447145Z     assert paths == {path.relative_to(EVIDENCE).as_posix()
+2026-10-16T02:03:47.0447529Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-16T02:03:47.0447862Z AssertionError
+2026-10-16T02:03:47.0595082Z ##[error]Process completed with exit code 1.
+2026-10-16T02:03:47.0755249Z Post job cleanup.
+2026-10-16T02:03:47.1571372Z [command]/usr/bin/git version
+2026-10-16T02:03:47.1607350Z git version 2.55.0
+2026-10-16T02:03:47.1646018Z Temporarily overriding HOME='/home/runner/work/_temp/021cb8fc-9bf0-4e86-ae39-a82b54a050f3' before making global git config changes
+2026-10-16T02:03:47.1646927Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-16T02:03:47.1652729Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/crypto/crypto
+2026-10-16T02:03:47.1687848Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-16T02:03:47.1721246Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-16T02:03:47.2018206Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-16T02:03:47.2053109Z http.https://github.com/.extraheader
+2026-10-16T02:03:47.2063360Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-16T02:03:47.2095285Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-16T02:03:47.2383760Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-16T02:03:47.2417066Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-16T02:03:47.2841528Z Cleaning up orphan processes
+2026-10-16T02:03:47.3104529Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+

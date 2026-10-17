@@ -1,0 +1,47 @@
+{
+  "argv": [
+    "/workspace/n83_basis_setup/frozen_binaries/ic",
+    "construct:83:1:1271",
+    "/workspace/n83_basis_setup/training-fixtures/target_00.jsonl",
+    "29",
+    "/workspace/n83_basis_setup/training-campaign/train_0_C3/answers.jsonl"
+  ],
+  "argv_existing_file_sha256": {
+    "/workspace/n83_basis_setup/training-fixtures/target_00.jsonl": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c"
+  },
+  "arm": "ic",
+  "binary_sha256": "5a6e39c34f59a8eb3186d2e43bac17b4c9d3e83b4a94bbeda24fc2b0b0def0a1",
+  "cwd": "/workspace/repos/crypto-n83-basis",
+  "environment": {
+    "KIC_DUMP_BASE": "/workspace/n83_basis_setup/training-campaign/train_0_C3/base.jsonl",
+    "KIC_DUMP_RANK": "/workspace/n83_basis_setup/training-campaign/train_0_C3/rank.jsonl",
+    "KIC_PACKED_ROOT_TABLE": "1",
+    "KIC_PACKED_ROOT_TABLE_DENSE": "1",
+    "KIC_RANK_THREADS": "1",
+    "KIC_RHO_THREADS": "1",
+    "KIC_TARGET_THREADS": "1",
+    "KIC_THREADS": "1",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "resource_envelope": {
+    "address_space_limit_bytes": 12884901888,
+    "address_space_limit_mechanism": "RLIMIT_AS soft=hard",
+    "cpu_affinity": [
+      3
+    ],
+    "cpu_count": 1,
+    "online_target_threads": 1,
+    "rank_threads": 1,
+    "threads": 1,
+    "timeout_s": 2100.0
+  },
+  "schema": "n83.process-start/v1",
+  "started_epoch_ms": 1792081067467,
+  "target_file": "/workspace/n83_basis_setup/training-fixtures/target_00.jsonl",
+  "target_sha256": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c"
+}

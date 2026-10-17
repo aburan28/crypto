@@ -1,0 +1,75 @@
+{
+  "accounting": "Whole-process wall/CPU include launch, load, preparation, online, replay. Producer online interval is separate.",
+  "argv": [
+    "/workspace/n83_basis_setup/frozen_binaries/rho",
+    "/workspace/n83_basis_setup/holdout-plan/cohort_1.points.jsonl",
+    "/workspace/n83_basis_setup/holdout-plan/cohort_1_rho.seeds.json",
+    "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/provenance/rho_config.json",
+    "/workspace/n83_basis_setup/cohort-campaign/cohort_1_rho/answers.jsonl"
+  ],
+  "argv_existing_file_sha256": {
+    "/workspace/n83_basis_setup/holdout-plan/cohort_1.points.jsonl": "c4ee13ca9ee09d753cd8e481f02d0ba337db6118255b4e5d6c2fe706a571b0c5",
+    "/workspace/n83_basis_setup/holdout-plan/cohort_1_rho.seeds.json": "059e77f846a6d323493df99513c413478dda2e0fd40d9242dfd14cbaf0fb0013",
+    "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/provenance/rho_config.json": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949"
+  },
+  "arm": "rho_batch",
+  "binary_sha256": "ec4ccd60152ff53c39825898595cf4a23e6cb4afdde38db3b163e8623430ecb6",
+  "cpu_system_s": 0.0,
+  "cpu_total_s": 0.000923,
+  "cpu_user_s": 0.000923,
+  "cwd": "/workspace/repos/crypto-n83-basis",
+  "elapsed_process_wall_s": 0.005604952,
+  "environment": {
+    "KIC_RANK_THREADS": "1",
+    "KIC_RHO_THREADS": "1",
+    "KIC_TARGET_THREADS": "1",
+    "KIC_THREADS": "1",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "exit_observation_delay_note": "Nominal 0-5 ms plus scheduling and poll-body delays; no strict bound under arbitrary scheduling",
+  "exit_observation_poll_ms": 5,
+  "finished_epoch_ms": 1792108245328,
+  "interrupted_signal": 0,
+  "known_answer_environment_present": false,
+  "memory_limit_hit": null,
+  "memory_limit_note": "RLIMIT_AS allocation refusal may appear as nonzero/abort; no inference from exit code alone",
+  "peak_rss_bytes": 1900544,
+  "peak_rss_native_kib": 1856,
+  "peak_rss_source": "Linux wait4(2) ru_maxrss KiB multiplied by 1024; exact child process",
+  "pid": 44302,
+  "raw_wait_status": 512,
+  "resource_envelope": {
+    "address_space_limit_bytes": 12884901888,
+    "address_space_limit_mechanism": "RLIMIT_AS soft=hard",
+    "cpu_affinity": [
+      3
+    ],
+    "cpu_count": 1,
+    "online_target_threads": 1,
+    "rank_threads": 1,
+    "threads": 1,
+    "timeout_s": 2100.0
+  },
+  "return_code": 2,
+  "schema": "n83.process-receipt/v1",
+  "semantic": {
+    "reason": "No such file or directory (os error 2)",
+    "valid": false
+  },
+  "semantic_path": "/workspace/n83_basis_setup/cohort-campaign/cohort_1_rho/answers.jsonl",
+  "semantic_sha256": null,
+  "started_epoch_ms": 1792108245321,
+  "status": "PROCESS_FAILED",
+  "stderr_path": "/workspace/n83_basis_setup/cohort-campaign/cohort_1_rho/stderr.txt",
+  "stderr_sha256": "b9276e3b2902276cbe312ff9088e397cd5cd75ffaf8e02675e61663c9ab77e9a",
+  "stdout_path": "/workspace/n83_basis_setup/cohort-campaign/cohort_1_rho/stdout.jsonl",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "target_sha256": "c4ee13ca9ee09d753cd8e481f02d0ba337db6118255b4e5d6c2fe706a571b0c5",
+  "termination_signal": null,
+  "timeout": false
+}
