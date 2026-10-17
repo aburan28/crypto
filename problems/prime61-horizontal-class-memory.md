@@ -4,7 +4,7 @@
 - **Kind:** resource limit and implementation gap; full class-count certification gap
 - **Affected work:** [prime61 experiment](../research/prime61_isogeny_20261016/README.md), [follow-up card](../backlog/XP-20261016-prime61-horizontal-class/card.json)
 - **Next action owner:** unassigned native isogeny-walker lane
-- **Last updated:** 2026-10-16
+- **Last updated:** 2026-10-17
 
 ## Problem
 
@@ -43,7 +43,7 @@ one-hop panel does not establish exhaustive class coverage.
 
 - [ ] Produce a certified complete class structure or independent exhaustive
   coverage certificate for this exact discriminant and trace.
-- [ ] Implement bounded-memory, checkpointed enumeration with exact model
+- [x] Implement bounded-memory, checkpointed enumeration with exact model
   deduplication, ordered kernel routes and generator/target transport.
 - [ ] Freeze resources and protocol, then retain a verified workload row
   for every class vertex, including caps and failures, with independent replay.
@@ -62,8 +62,27 @@ exhaustive run. A passing prefix enables sizing, not full coverage; a
 set mismatch blocks rollout. A timeout remains a bounded failure. Recheck
 when that backend or a certified full class structure becomes available.
 
+Update, 2026-10-17: implementation and small-class/restore controls below
+are complete. Next certify that the chosen prime-degree set generates the
+entire class and freeze a full-run disk/compute envelope from the recorded
+footprint. Extend the existing checkpoint with exact progress and retained
+capped workloads. A passing prefix still does not certify full coverage.
+
 ## Resolution and history
 
 2026-10-16: unresolved. The first node-only lower bound did not exceed
 16 GiB; adding the mandatory connecting Edge headers does. Both records
 are preserved. No exhaustive traversal or paid remote run was started.
+
+2026-10-17: [the disk-backed worker](../research/prime61_disk_walk_20261017/README.md)
+removes the retained-vector requirement for the validated execution path.
+It uses a bounded SQLite cache and durable per-source/per-stream
+transactions. Complete three-curve controls match independent point counts
+and the old walker; interrupted recovery and a real Drive restore/resume
+reproduce uninterrupted logical records exactly. The pilot has 250 curves,
+480 verified maps and 768 capped streams. Peak worker RSS across the frozen
+pilot phases is 18,464 KiB. Its 218 pending sources, complete class
+certification, chosen-prime coverage and full disk/compute provisioning
+remain open. Disk use still grows; this is not an empirical full-class RSS
+measurement or completed enumeration. The old header bound remains valid
+for the old backend.
