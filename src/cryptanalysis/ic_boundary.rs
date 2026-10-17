@@ -3481,6 +3481,42 @@ impl PrimeCurve {
         PrimePoint::affine(x3, y3)
     }
 
+    /// `#E(F_p)` when it is prime, else `None`: the same answer as testing
+    /// [`PrimeCurve::point_count`] for primality, in `O(√p)` group
+    /// operations instead of `O(p)` Legendre symbols.
+    ///
+    /// `N = #E(F_p)` lies in the Hasse interval `[p+1−t, p+1+t]`,
+    /// `t = ⌊2√p⌋`, and kills every point.  Step a fixed point `P` across
+    /// that interval and record each `m` with `[m]P = ∞`.  If `N` is prime
+    /// then `P ≠ ∞` has order `N`, the next multiple `2N` lies above the
+    /// interval (`p > 37`), and `N` is the one hit; so a single prime hit
+    /// is `N`, and anything else (no point, several hits, one composite
+    /// hit) means `N` is not prime.  No randomness is drawn.
+    pub fn prime_order(&self) -> Option<u64> {
+        let p = self.p;
+        debug_assert!(p > 37);
+        let pt = (0..p).find_map(|x| {
+            let y = self.sqrt(self.rhs(x))?;
+            Some(PrimePoint::affine(x, y))
+        })?;
+        let t = (4 * p).isqrt();
+        let lo = p + 1 - t;
+        let mut ops = GroupOps::default();
+        let mut acc = self.mul(&mut ops, pt, lo);
+        let mut tally = FieldOps::default();
+        let mut hit = None;
+        for j in 0..=2 * t {
+            if acc.infinity {
+                if hit.is_some() {
+                    return None;
+                }
+                hit = Some(lo + j);
+            }
+            acc = self.add_raw(&mut tally, acc, pt);
+        }
+        hit.filter(|&m| is_prime_u64(m))
+    }
+
     /// `#E(F_p)` by the Legendre symbol at every abscissa: `O(p)`.
     pub fn point_count(&self) -> u64 {
         let mut count = 1u64;
@@ -3831,10 +3867,9 @@ pub fn find_prime_order_curve(bits: u32, seed: u64) -> PrimeInstance {
             if disc == 0 {
                 continue;
             }
-            let order = curve.point_count();
-            if !is_prime_u64(order) {
+            let Some(order) = curve.prime_order() else {
                 continue;
-            }
+            };
             // Any point generates.
             let g = loop {
                 let x = rng.gen_range(0..p);
@@ -8422,6 +8457,90 @@ mod tests {
         // … and a binary curve does not count: its zeros mean unknown.
         let kob = koblitz_instance(1, 17).unwrap();
         assert!(!BinaryGroup(&kob.fast).counts_field_ops());
+    }
+
+    /// `prime_order` decides exactly what `point_count` + primality did,
+    /// on curves of every kind (prime, composite and smooth orders, points
+    /// of order two), and the curve search it drives is unchanged.
+    #[test]
+    fn prime_order_matches_the_naive_count() {
+        let mut rng = StdRng::seed_from_u64(20261017);
+        let mut prime_orders = 0;
+        for _ in 0..400 {
+            let p = loop {
+                let cand = rng.gen_range(41u64..20_000) | 1;
+                if is_prime_u64(cand) {
+                    break cand;
+                }
+            };
+            let curve = PrimeCurve {
+                p,
+                a: rng.gen_range(0..p),
+                b: rng.gen_range(1..p),
+            };
+            let n = curve.point_count();
+            let naive = is_prime_u64(n).then_some(n);
+            assert_eq!(
+                curve.prime_order(),
+                naive,
+                "p={p} a={} b={}",
+                curve.a,
+                curve.b
+            );
+            prime_orders += usize::from(naive.is_some());
+        }
+        assert!(prime_orders > 10, "{prime_orders} prime orders sampled");
+
+        // The search draws the same random numbers and accepts the same
+        // curves as the naive count did.
+        fn naive_search(bits: u32, seed: u64) -> (u64, u64, u64, u64, (u64, u64)) {
+            let mut rng = StdRng::seed_from_u64(seed ^ (bits as u64) << 40);
+            loop {
+                let p = loop {
+                    let cand = (rng.gen::<u64>() & ((1u64 << bits) - 1)) | (1u64 << (bits - 1)) | 1;
+                    if is_prime_u64(cand) {
+                        break cand;
+                    }
+                };
+                for _ in 0..64 {
+                    let a = rng.gen_range(0..p);
+                    let b = rng.gen_range(1..p);
+                    let curve = PrimeCurve { p, a, b };
+                    let disc = addmod(
+                        mulmod(4, mulmod(mulmod(a, a, p), a, p), p),
+                        mulmod(27, mulmod(b, b, p), p),
+                        p,
+                    );
+                    if disc == 0 {
+                        continue;
+                    }
+                    let order = curve.point_count();
+                    if !is_prime_u64(order) {
+                        continue;
+                    }
+                    let g = loop {
+                        let x = rng.gen_range(0..p);
+                        if let Some(y) = curve.sqrt(curve.rhs(x)) {
+                            if curve.legendre(curve.rhs(x)) >= 0 {
+                                break (x, y);
+                            }
+                        }
+                    };
+                    return (p, a, b, order, g);
+                }
+            }
+        }
+        for bits in 8..=16 {
+            for seed in [1u64, 59297, 20261003] {
+                let inst = find_prime_order_curve(bits, seed);
+                let c = &inst.curve;
+                assert_eq!(
+                    (c.p, c.a, c.b, inst.group_order, inst.generator),
+                    naive_search(bits, seed),
+                    "bits={bits} seed={seed}"
+                );
+            }
+        }
     }
 
     #[test]
