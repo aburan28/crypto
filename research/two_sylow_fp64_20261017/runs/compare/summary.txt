@@ -1,0 +1,16 @@
+clock    no detected effect   2
+fp64     candidate slower     1
+fp64     no detected effect   7
+kernel   candidate faster     10
+kernel   no detected effect   10
+mem      candidate faster     1
+mem      candidate slower     4
+mem      no detected effect   15
+scaling  candidate faster     3
+scaling  no detected effect   3
+tsy      candidate slower     1
+tsy      no detected effect   5
+w1       no detected effect   8
+S1 PASS: 1.0832 (threshold 1.1) max(r1, r2) over 6 arms tsy.* (batch ≥ 0)
+K1 PASS: 0.4415 (threshold 0.85) max(r1, r2) over 6 arms kernel.fp64.* (batch ≥ 4096)
+C1 PASS: 0.0445 (threshold 0.1) max |r_k − 1| over 6 arms kernel.w1.* (batch ≥ 4096)
