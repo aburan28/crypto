@@ -230,3 +230,6 @@ retain explicit unpriced work. The two source-model targets stay separate
 from the prefix population. Exact representation registration, independent
 implementation replay, transported targets and full composite-order work
 remain open. Canonical fastest-method claims are unchanged.
+
+
+[Repaired local survey actually launched](repaired-continuation/README.md): PID 79776, 2026-10-17 06:58:03 UTC, 24-hour/2-GiB guards. The native receipt has audited progress in all three classes; consult the ledger for current coverage. This does not imply all 24,823 vertices are finished.

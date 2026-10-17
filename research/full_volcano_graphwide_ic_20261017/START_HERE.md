@@ -77,3 +77,11 @@ work. This runtime's S3 probe found no AWS identity, so no S3 upload is claimed.
 The repository's reports-to-S3 workflow runs after merge to main; it does not
 provide a larger random-access SQLite working volume. A connected existing
 worker/volume and S3 identity remain required for those large runs.
+
+
+Repaired local worker **PID 79776 launched 2026-10-17 06:58:03 UTC**, with
+24-hour / 2-GiB guards. At 06:59:13 UTC it has audited vertices in all three
+classes and an active job. This is an actual launch, not full-queue completion.
+Later progress is in its local ledger and `execution/repaired-continuation/`.
+It will pause on guards/failures; no unattended upload is assumed. The frozen
+Drive snapshots do not track live progress.
