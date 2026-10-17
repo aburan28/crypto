@@ -1,0 +1,38 @@
+{
+  "schema": "ec-hardness/p61-producer-build-attempts/v1",
+  "attempts": [
+    {
+      "started_from_commit": "d064729541f9c9cea2dc50b4a36572971cd2b099",
+      "command": "cargo build --release --bin p61_isogeny_class",
+      "target_directory": "/private/tmp/crypto-p61-class-20261014/target",
+      "completed_utc": "2026-10-14T15:31:44Z",
+      "exit_code": 101,
+      "status": "infrastructure_failure",
+      "error": "failed to build archive libcrypto_lib-2f648d1af79d9c46.rlib: No space left on device (os error 28)",
+      "filesystem_observation": {
+        "mount": "/System/Volumes/Data",
+        "size": "460 GiB",
+        "used": "429 GiB",
+        "available": "187 MiB",
+        "capacity": "100%"
+      },
+      "failed_target_bytes_human": "4.7 GiB",
+      "failure_receipt_preserved": true,
+      "partial_target_retained": false,
+      "cleanup": "After the target was copied to SSD990-2 and the corrected build passed, the generated /private/tmp target was deleted to restore system-volume headroom."
+    },
+    {
+      "started_from_commit": "d064729541f9c9cea2dc50b4a36572971cd2b099",
+      "command": "env CARGO_TARGET_DIR=/Volumes/SSD990-2/crypto/target-p61-d064-20261014 cargo build --release --bin p61_isogeny_class",
+      "target_directory": "/Volumes/SSD990-2/crypto/target-p61-d064-20261014",
+      "completed_utc": "2026-10-14T15:48:46Z",
+      "elapsed_human": "12m 50s",
+      "exit_code": 0,
+      "status": "pass",
+      "binary": "/Volumes/SSD990-2/crypto/target-p61-d064-20261014/release/p61_isogeny_class",
+      "binary_sha256": "81c1a5b8897bcc39fd20c6427e17eb73d9160d838bb001f82810de4272579e82",
+      "binary_bytes": 2093568,
+      "warnings": 9
+    }
+  ]
+}
