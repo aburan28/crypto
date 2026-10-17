@@ -33,3 +33,10 @@ was moved intact to the external SSD, increasing free system space from
 about 102 MiB to about 2.2 GiB. Docker daemon access still timed out after
 20 seconds outside the sandbox. These are infrastructure and verification
 outcomes; they do not describe the N83 solver's behavior.
+
+During final audit validation, another `cargo test --release --lib` attempt
+remained at `Compiling crypto` without reaching test execution. It was stopped
+when system-volume free space fell to 1.5 GiB, before an `ENOSPC` failure.
+The focused Python evidence tests, 63-test N83 suite, 46-test boundary suite,
+frozen-plan tests, workflow lint and independent hosted artifact replay passed.
+This release-library attempt supplies no current-head pass or test failure.

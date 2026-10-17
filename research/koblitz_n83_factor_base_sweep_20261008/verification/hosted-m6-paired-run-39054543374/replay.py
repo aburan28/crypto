@@ -88,6 +88,36 @@ def audit_mounts(command: list, inspected: dict, arm: dict, stage: str) -> None:
                 f"{stage} inspected bind differs: {target}")
 
 
+def audit_s3_bases(directory: Path, expected: dict) -> None:
+    import blake3
+
+    receipt = read_json(HERE / "factor-bases-s3-check.json")
+    same(receipt, {"schema": "n83.hosted-m6-s3-base-replay/v1",
+                   "status": "PASS_3_FROZEN_S3_OBJECTS",
+                   "source_plan_sha256": PLAN_SHA256,
+                   "selected_best_total_runtime": None}, "S3 base replay")
+    rows = receipt.get("objects")
+    require(isinstance(rows, list) and len(rows) == 3,
+            "S3 base replay object count differs")
+    by_digest = {row.get("compressed_blake3"): row for row in rows}
+    require(len(by_digest) == 3, "S3 base replay object identity differs")
+    for arm in expected["arms"]:
+        for role in ("base", "pool"):
+            digest = arm[f"{role}_object_blake3"]
+            row = by_digest[digest]
+            path = directory / f"{digest}.jsonl.gz"
+            data = path.read_bytes()
+            same(row, {"s3_uri": arm[f"{role}_s3_uri"],
+                       "compressed_blake3": digest,
+                       "compressed_sha256": arm[f"{role}_compressed_sha256"],
+                       "bytes": len(data),
+                       "etag": '"' + hashlib.md5(data).hexdigest() + '"'},
+                 "S3 base")
+            require(hashlib.sha256(data).hexdigest() == row["compressed_sha256"]
+                    and blake3.blake3(data).hexdigest() == digest,
+                    "fresh S3 base bytes differ")
+
+
 def audit_search(config: dict, result: dict, arm: dict,
                  base_points: list, residual: set) -> str:
     import blake3
@@ -183,7 +213,7 @@ def audit_search(config: dict, result: dict, arm: dict,
     return status
 
 
-def audit_artifact(root: Path) -> dict:
+def audit_artifact(root: Path, s3_bases: Path) -> dict:
     require(root.is_dir(), "artifact directory missing")
     expected = plan.build()
     require(sha256(plan.SAVED) == PLAN_SHA256
@@ -192,6 +222,7 @@ def audit_artifact(root: Path) -> dict:
             and expected["first_trial_a"] == "1833078656608906180176350"
             and expected["first_trial_b"] == "163089659398503559150141",
             "public target or first-trial coefficients differ")
+    audit_s3_bases(s3_bases, expected)
     require((root / SETUP_DIR / "source-commit.txt").read_text().strip() == SOURCE_COMMIT,
             "artifact source commit differs")
     require((root / SETUP_DIR / "source-status.txt").read_text() == "",
@@ -336,6 +367,7 @@ def audit_artifact(root: Path) -> dict:
             "status": "PASS_MATCHED_4_PLUS_2_ONE_QUERY_REPLAY",
             "source_commit": SOURCE_COMMIT, "plan_sha256": PLAN_SHA256,
             "archives_sha256": archive_hashes, "outcomes": outcomes,
+            "s3_factor_bases_status": "PASS_3_FROZEN_S3_OBJECTS",
             "conservative_full_charge_seconds": 7500,
             "selected_best_total_runtime": None}
 
@@ -343,8 +375,9 @@ def audit_artifact(root: Path) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--artifact", required=True, type=Path)
+    parser.add_argument("--s3-bases", required=True, type=Path)
     args = parser.parse_args()
-    print(json.dumps(audit_artifact(args.artifact), sort_keys=True, indent=2))
+    print(json.dumps(audit_artifact(args.artifact, args.s3_bases), sort_keys=True, indent=2))
 
 
 if __name__ == "__main__":
