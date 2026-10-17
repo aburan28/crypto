@@ -279,12 +279,56 @@ fn predict(p: i128, lev: &str) {
     );
 }
 
+/// Pooled observed-minus-predicted zero rows over scored primes, overall and
+/// grouped by e = v2(p^2 - 1). Reads figures/zero_rows.csv; a row is scored
+/// when its observed column is non-empty and its role is pristine or forward.
+/// Each prime's variance is ((hi - lo) / 3.92)^2, its 95% interval half-width.
+fn pool(path: &str) {
+    let text = fs::read_to_string(path).expect("zero_rows csv");
+    let mut groups: BTreeMap<u32, Vec<(i128, f64, f64)>> = BTreeMap::new();
+    for l in text.lines().skip(1) {
+        let c: Vec<&str> = l.split(',').collect();
+        if c[2].is_empty() || !(c[1] == "pristine" || c[1] == "forward") {
+            continue;
+        }
+        let p: i128 = c[0].parse().unwrap();
+        let (obs, exp): (f64, f64) = (c[2].parse().unwrap(), c[3].parse().unwrap());
+        let (lo, hi): (f64, f64) = (c[4].parse().unwrap(), c[5].parse().unwrap());
+        let sd = (hi - lo) / 3.92;
+        groups
+            .entry(v2(p * p - 1))
+            .or_default()
+            .push((p, obs - exp, sd));
+    }
+    let summarize = |label: String, rows: Vec<&(i128, f64, f64)>| {
+        let d: f64 = rows.iter().map(|r| r.1).sum();
+        let sd = rows.iter().map(|r| r.2 * r.2).sum::<f64>().sqrt();
+        let ps: Vec<String> = rows.iter().map(|r| r.0.to_string()).collect();
+        println!(
+            "{label}: primes [{}] obs-exp = {d:+.1}, sd = {sd:.1}, z = {:.2}",
+            ps.join(","),
+            d / sd
+        );
+    };
+    summarize("all".into(), groups.values().flatten().collect());
+    for (e, rows) in &groups {
+        summarize(format!("e = {e}"), rows.iter().collect());
+    }
+    let hi: Vec<_> = groups
+        .iter()
+        .filter(|(e, _)| **e >= 4)
+        .flat_map(|(_, r)| r)
+        .collect();
+    summarize("e >= 4".into(), hi);
+}
+
 fn main() {
     let a: Vec<String> = std::env::args().skip(1).collect();
     match a.first().map(String::as_str) {
         Some("exact") if a.len() == 3 => exact(&a[1], &a[2]),
         Some("holdout") if a.len() == 4 => holdout(a[1].parse().unwrap(), &a[2], &a[3]),
         Some("predict") if a.len() == 3 => predict(a[1].parse().unwrap(), &a[2]),
+        Some("pool") if a.len() == 2 => pool(&a[1]),
         _ => panic!("usage: iso1_residual_model exact OMEGA8 LEVELS | holdout P CENSUS LEVELS | predict P LEVELS"),
     }
 }
