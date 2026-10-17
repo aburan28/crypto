@@ -1,0 +1,114 @@
+{
+  "schema": "backlog.card/v1",
+  "id": "XP-20261015-conductor-96-point-maps",
+  "title": "Certify fast point evaluation and dual maps on the new 96-bit pair",
+  "created": "2026-10-15",
+  "authors": [
+    "conductor-gap research lane"
+  ],
+  "status": "blocked",
+  "status_note": "Prospective experiment only; not runnable or published to cairn. Implementation, independent verification and a frozen protocol must land before ready promotion.",
+  "blocked_on": [
+    "pr:1888 verified conductor-gap baseline and inputs must merge",
+    "note:Implement square-root Velu point evaluation and the independent dual-map checker; the current constructor outputs codomains only."
+  ],
+  "links": {
+    "lead": "research/conductor_gap_cm_orbits_20261015/REPORT.md",
+    "notes": [
+      "research/conductor_gap_cm_orbits_20261015/REVIEW.md",
+      "research/conductor_gap_cm_orbits_20261015/results/replication-metrics.json",
+      "research/conductor_gap_cm_orbits_20261015/results/upper-96-floor-certificate.jsonl"
+    ],
+    "prs": [
+      1888
+    ]
+  },
+  "question": "Can the certified 96-bit codomain construction be extended to independently verified point transport and dual composition?",
+  "decision_value": "A verified transport permits comparisons on the same hidden scalar and prices the actual bridge between strata. A codomain without point transport cannot support that end-to-end comparison.",
+  "protocol": {
+    "path": null,
+    "blob": null
+  },
+  "code": {
+    "repo": "crypto",
+    "commit": null,
+    "branch": "research/conductor-gap-cm-orbits-20261015",
+    "build": [
+      [
+        "cargo",
+        "build",
+        "--release",
+        "--example",
+        "conductor_gap_study",
+        "--bin",
+        "conductor_gap_check"
+      ]
+    ]
+  },
+  "resources": {
+    "cpus": 2,
+    "ram_gb": 16,
+    "disk_gb": 32,
+    "gpu": null,
+    "est_core_hours": 8,
+    "est_wall_hours": 8,
+    "notes": "Planning estimate only: the recorded codomain process took 2697.60 wall seconds and 9362772 KiB maximum RSS. Point and dual evaluation have not been measured. Eight core/wall hours is a provisional allowance for small-reference checks and sequential large-map evaluations, not a bound."
+  },
+  "run": {
+    "argv": [
+      "target/release/examples/conductor_gap_study",
+      "conductor-96-point-maps",
+      "--out",
+      "{out}"
+    ],
+    "env": {
+      "RAYON_NUM_THREADS": "1"
+    },
+    "timeout_per_shard_s": 28800
+  },
+  "shards": {
+    "count": 1,
+    "scheme": "single",
+    "params": {},
+    "stop": "all"
+  },
+  "checkpoint": {
+    "file": null,
+    "resume_flag": null
+  },
+  "outputs": {
+    "result_schema": "conductor-gap.followup-bundle/v1",
+    "verify": [
+      "target/release/conductor_gap_check",
+      "--protocol",
+      "backlog/XP-20261015-conductor-96-point-maps/PROTOCOL.md",
+      "{out}/result.json"
+    ],
+    "land": "research/conductor_gap_followups_20261015/conductor-96-point-maps"
+  },
+  "cairn": {
+    "mode": "lab-task",
+    "space": "TBD",
+    "tasks": [
+      "XP-20261015-conductor-96-point-maps"
+    ],
+    "ttl_s": 86400,
+    "env": {
+      "name": "crypto-conductor-review",
+      "recipe": "Build from the reviewed merged code commit with Rust 1.98 and the declared native dependencies. No environment or task has been published by this card."
+    },
+    "exec": {
+      "cpus": 2,
+      "memory_mb": 16384,
+      "timeout_s": 28800,
+      "sandbox": "auto",
+      "publish": "runs/XP-20261015-conductor-96-point-maps"
+    },
+    "notes": "Funding is a priority proposal for review, not a remote funding action. Select the lab, implement resumable execution and independently verify the driver before ready promotion.",
+    "funding": {
+      "units": 131072,
+      "rationale": "At the lower seed-card funding level: the largest-gap endpoints exist, but point evaluation remains new implementation work."
+    }
+  },
+  "owner_hint": "native cryptanalysis research"
+}

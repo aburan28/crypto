@@ -1,0 +1,18 @@
+test	Site build tests	﻿2026-10-15T16:26:50.6263339Z ##[group]Run python3 scripts/site/test_build.py
+test	Site build tests	2026-10-15T16:26:50.6263766Z [36;1mpython3 scripts/site/test_build.py[0m
+test	Site build tests	2026-10-15T16:26:50.6332228Z shell: /usr/bin/bash -e {0}
+test	Site build tests	2026-10-15T16:26:50.6332500Z ##[endgroup]
+test	Site build tests	2026-10-15T16:26:56.6096423Z ............F...................................
+test	Site build tests	2026-10-15T16:26:56.6097107Z ======================================================================
+test	Site build tests	2026-10-15T16:26:56.6098290Z FAIL: test_every_scoreboard_panel_has_a_summary_and_the_index_cites_them_all (__main__.BuildTests.test_every_scoreboard_panel_has_a_summary_and_the_index_cites_them_all)
+test	Site build tests	2026-10-15T16:26:56.6099676Z ----------------------------------------------------------------------
+test	Site build tests	2026-10-15T16:26:56.6100182Z Traceback (most recent call last):
+test	Site build tests	2026-10-15T16:26:56.6101060Z   File "/home/runner/work/crypto/crypto/scripts/site/test_build.py", line 215, in test_every_scoreboard_panel_has_a_summary_and_the_index_cites_them_all
+test	Site build tests	2026-10-15T16:26:56.6102176Z     self.assertEqual(panel_index.splice(page, panel_index.render(items)), page)
+test	Site build tests	2026-10-15T16:26:56.6106256Z AssertionError: '<!do[21805 chars]ll 303 panels, one line each</summary>\n    <o[106916 chars]l>\n' != '<!do[21805 chars]ll 302 panels, one line each</summary>\n    <o[106516 chars]l>\n'
+test	Site build tests	2026-10-15T16:26:56.6107085Z 
+test	Site build tests	2026-10-15T16:26:56.6107311Z ----------------------------------------------------------------------
+test	Site build tests	2026-10-15T16:26:56.6107764Z Ran 48 tests in 5.877s
+test	Site build tests	2026-10-15T16:26:56.6107942Z 
+test	Site build tests	2026-10-15T16:26:56.6108059Z FAILED (failures=1)
+test	Site build tests	2026-10-15T16:26:56.6281737Z ##[error]Process completed with exit code 1.

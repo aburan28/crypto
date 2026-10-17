@@ -1,0 +1,114 @@
+{
+  "schema": "backlog.card/v1",
+  "id": "XP-20261015-conductor-coordinate-seeds",
+  "title": "Transport all four geometric seeds in the coordinate control",
+  "created": "2026-10-15",
+  "authors": [
+    "conductor-gap research lane"
+  ],
+  "status": "blocked",
+  "status_note": "Prospective experiment only; not runnable or published to cairn. Implementation, independent verification and a frozen protocol must land before ready promotion.",
+  "blocked_on": [
+    "pr:1888 verified conductor-gap baseline and inputs must merge",
+    "note:Implement explicit public seed inputs and an independent pullback/sign-normalization audit."
+  ],
+  "links": {
+    "lead": "research/conductor_gap_cm_orbits_20261015/REPORT.md",
+    "notes": [
+      "research/conductor_gap_cm_orbits_20261015/REVIEW.md",
+      "research/conductor_gap_cm_orbits_20261015/results/replication-metrics.json",
+      "research/conductor_gap_cm_orbits_20261015/results/upper-96-floor-certificate.jsonl"
+    ],
+    "prs": [
+      1888
+    ]
+  },
+  "question": "Do isomorphic models produce identical folded relation work when G, Q and all four geometric seed points are transported?",
+  "decision_value": "This removes the known seed-selection confound in the completed coordinate experiment and determines whether any remaining difference belongs to arithmetic or to point-set selection. The result decides whether to retain coordinate models as a separate source of relation-yield variation in the next replication protocol.",
+  "protocol": {
+    "path": null,
+    "blob": null
+  },
+  "code": {
+    "repo": "crypto",
+    "commit": null,
+    "branch": "research/conductor-gap-cm-orbits-20261015",
+    "build": [
+      [
+        "cargo",
+        "build",
+        "--release",
+        "--example",
+        "conductor_gap_study",
+        "--bin",
+        "conductor_gap_check"
+      ]
+    ]
+  },
+  "resources": {
+    "cpus": 1,
+    "ram_gb": 4,
+    "disk_gb": 32,
+    "gpu": null,
+    "est_core_hours": 3,
+    "est_wall_hours": 3,
+    "notes": "Planning estimate only: ten gaps, both endpoints and two coordinate models give 40 IC attempts plus 40 rho controls. Three core-hours is a provisional allowance based on the existing isomorphic cohort, including cold setup and replay; rho remains diagnostic because its coordinate-hash partition changes."
+  },
+  "run": {
+    "argv": [
+      "target/release/examples/conductor_gap_study",
+      "conductor-coordinate-seeds",
+      "--out",
+      "{out}"
+    ],
+    "env": {
+      "RAYON_NUM_THREADS": "1"
+    },
+    "timeout_per_shard_s": 14400
+  },
+  "shards": {
+    "count": 1,
+    "scheme": "single",
+    "params": {},
+    "stop": "all"
+  },
+  "checkpoint": {
+    "file": null,
+    "resume_flag": null
+  },
+  "outputs": {
+    "result_schema": "conductor-gap.followup-bundle/v1",
+    "verify": [
+      "target/release/conductor_gap_check",
+      "--protocol",
+      "backlog/XP-20261015-conductor-coordinate-seeds/PROTOCOL.md",
+      "{out}/result.json"
+    ],
+    "land": "research/conductor_gap_followups_20261015/conductor-coordinate-seeds"
+  },
+  "cairn": {
+    "mode": "lab-task",
+    "space": "TBD",
+    "tasks": [
+      "XP-20261015-conductor-coordinate-seeds"
+    ],
+    "ttl_s": 86400,
+    "env": {
+      "name": "crypto-conductor-review",
+      "recipe": "Build from the reviewed merged code commit with Rust 1.98 and the declared native dependencies. No environment or task has been published by this card."
+    },
+    "exec": {
+      "cpus": 1,
+      "memory_mb": 4096,
+      "timeout_s": 14400,
+      "sandbox": "auto",
+      "publish": "runs/XP-20261015-conductor-coordinate-seeds"
+    },
+    "notes": "Funding is a priority proposal for review, not a remote funding action. Select the lab, implement resumable execution and independently verify the driver before ready promotion.",
+    "funding": {
+      "units": 160000,
+      "rationale": "Below D=-43 replication and the existing 250000-unit card; this resolves a specific interpretation gap with a small cohort."
+    }
+  },
+  "owner_hint": "native cryptanalysis research"
+}

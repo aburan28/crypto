@@ -1,0 +1,235 @@
+{
+  "id": "IDC1hd41ecc586e59b223",
+  "independence": "native issuer; domain-separated checker uses an additional seed and 64 unseen points",
+  "modulus": 2305843009213693951,
+  "points": 64,
+  "proof": null,
+  "schema": "identity.certificate/v1",
+  "seed": 20261015,
+  "statement": {
+    "degree_bound": 4,
+    "lhs": {
+      "args": [
+        {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": 4,
+                  "op": "const"
+                },
+                {
+                  "args": [
+                    {
+                      "args": "a",
+                      "op": "var"
+                    },
+                    {
+                      "args": "a",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                }
+              ],
+              "op": "mul"
+            },
+            {
+              "args": [
+                {
+                  "args": 4,
+                  "op": "const"
+                },
+                {
+                  "args": [
+                    {
+                      "args": "a",
+                      "op": "var"
+                    },
+                    {
+                      "args": [
+                        {
+                          "args": "b",
+                          "op": "var"
+                        },
+                        {
+                          "args": "ell",
+                          "op": "var"
+                        }
+                      ],
+                      "op": "mul"
+                    }
+                  ],
+                  "op": "mul"
+                }
+              ],
+              "op": "mul"
+            }
+          ],
+          "op": "add"
+        },
+        {
+          "args": [
+            {
+              "args": 20,
+              "op": "const"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": "b",
+                      "op": "var"
+                    },
+                    {
+                      "args": "ell",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": "b",
+                      "op": "var"
+                    },
+                    {
+                      "args": "ell",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                }
+              ],
+              "op": "mul"
+            }
+          ],
+          "op": "mul"
+        }
+      ],
+      "op": "add"
+    },
+    "name": "cm-norm-numerator",
+    "rhs": {
+      "args": [
+        {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": 2,
+                      "op": "const"
+                    },
+                    {
+                      "args": "a",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": "b",
+                      "op": "var"
+                    },
+                    {
+                      "args": "ell",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                }
+              ],
+              "op": "add"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": 2,
+                      "op": "const"
+                    },
+                    {
+                      "args": "a",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": "b",
+                      "op": "var"
+                    },
+                    {
+                      "args": "ell",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                }
+              ],
+              "op": "add"
+            }
+          ],
+          "op": "mul"
+        },
+        {
+          "args": [
+            {
+              "args": 19,
+              "op": "const"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": "b",
+                      "op": "var"
+                    },
+                    {
+                      "args": "ell",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": "b",
+                      "op": "var"
+                    },
+                    {
+                      "args": "ell",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                }
+              ],
+              "op": "mul"
+            }
+          ],
+          "op": "mul"
+        }
+      ],
+      "op": "add"
+    },
+    "source": "research/conductor_gap_cm_orbits_20261015/native/sqrt_velu.cpp; lean/README.md specifies formalization limits",
+    "variables": [
+      "a",
+      "b",
+      "ell"
+    ]
+  },
+  "value_digest": "fd77dc9ba598d3e50962e1ecd5548bd89742465dccfaee890d101a9d7d1c076d"
+}

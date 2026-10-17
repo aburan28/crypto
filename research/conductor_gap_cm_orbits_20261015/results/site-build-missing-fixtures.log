@@ -1,0 +1,167 @@
+..E....E.....EE....E.....E.............E.EEEEE..
+======================================================================
+ERROR: test_dashboard_coordinate_table_cites_the_priced_note (__main__.BuildTests.test_dashboard_coordinate_table_cites_the_priced_note)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/crypto/scripts/site/test_build.py", line 459, in test_dashboard_coordinate_table_cites_the_priced_note
+    note = read(os.path.join(ROOT, "ecc2k130", "LAMBDA-PROJECTIVE.md")).replace("*", "")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/site/test_build.py", line 25, in read
+    with open(path, mode, **kwargs) as fh:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/crypto/ecc2k130/LAMBDA-PROJECTIVE.md'
+
+======================================================================
+ERROR: test_dashboard_iteration_total_matches_the_landing_page (__main__.BuildTests.test_dashboard_iteration_total_matches_the_landing_page)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/crypto/scripts/site/test_build.py", line 303, in test_dashboard_iteration_total_matches_the_landing_page
+    campaign = read(os.path.join(ROOT, "ecc2k130", "aws", "README.md"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/site/test_build.py", line 25, in read
+    with open(path, mode, **kwargs) as fh:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/crypto/ecc2k130/aws/README.md'
+
+======================================================================
+ERROR: test_gf2_23_trails_agree_with_the_clients_own_records (__main__.BuildTests.test_gf2_23_trails_agree_with_the_clients_own_records)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/crypto/scripts/site/test_build.py", line 759, in test_gf2_23_trails_agree_with_the_clients_own_records
+    forest = walk_forest.read_trails(os.path.join(small, "trails.txt"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/site/walk_forest.py", line 98, in read_trails
+    with open(path, encoding="utf-8") as fh:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/crypto/docs/ecc2k130-status/walk-forest/gf2-23/trails.txt'
+
+======================================================================
+ERROR: test_gf2_23_trails_end_on_their_corpus_records (__main__.BuildTests.test_gf2_23_trails_end_on_their_corpus_records)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/crypto/scripts/site/test_build.py", line 745, in test_gf2_23_trails_end_on_their_corpus_records
+    forest = walk_forest.read_trails(os.path.join(small, "trails.txt"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/site/walk_forest.py", line 98, in read_trails
+    with open(path, encoding="utf-8") as fh:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/crypto/docs/ecc2k130-status/walk-forest/gf2-23/trails.txt'
+
+======================================================================
+ERROR: test_landing_page_operations_total_cites_the_campaign_constants (__main__.BuildTests.test_landing_page_operations_total_cites_the_campaign_constants)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/crypto/scripts/site/test_build.py", line 290, in test_landing_page_operations_total_cites_the_campaign_constants
+    campaign = read(os.path.join(ROOT, "ecc2k130", "aws", "README.md"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/site/test_build.py", line 25, in read
+    with open(path, mode, **kwargs) as fh:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/crypto/ecc2k130/aws/README.md'
+
+======================================================================
+ERROR: test_pages_prefer_the_counted_iteration_total_over_the_derived_one (__main__.BuildTests.test_pages_prefer_the_counted_iteration_total_over_the_derived_one)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/crypto/scripts/site/test_build.py", line 431, in test_pages_prefer_the_counted_iteration_total_over_the_derived_one
+    campaign = read(os.path.join(ROOT, "ecc2k130", "aws", "README.md"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/site/test_build.py", line 25, in read
+    with open(path, mode, **kwargs) as fh:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/crypto/ecc2k130/aws/README.md'
+
+======================================================================
+ERROR: test_walk_forest_caption_states_the_counts_it_draws (__main__.BuildTests.test_walk_forest_caption_states_the_counts_it_draws)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/crypto/scripts/site/test_build.py", line 668, in test_walk_forest_caption_states_the_counts_it_draws
+    walk_forest, forest, corpus = self._forest()
+                                  ^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/site/test_build.py", line 610, in _forest
+    forest = walk_forest.read_trails(os.path.join(FOREST_DIR, "trails.txt"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/site/walk_forest.py", line 98, in read_trails
+    with open(path, encoding="utf-8") as fh:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/crypto/docs/ecc2k130-status/walk-forest/trails.txt'
+
+======================================================================
+ERROR: test_walk_forest_figure_is_what_the_trails_render_to (__main__.BuildTests.test_walk_forest_figure_is_what_the_trails_render_to)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/crypto/scripts/site/test_build.py", line 654, in test_walk_forest_figure_is_what_the_trails_render_to
+    walk_forest, forest, corpus = self._forest()
+                                  ^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/site/test_build.py", line 610, in _forest
+    forest = walk_forest.read_trails(os.path.join(FOREST_DIR, "trails.txt"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/site/walk_forest.py", line 98, in read_trails
+    with open(path, encoding="utf-8") as fh:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/crypto/docs/ecc2k130-status/walk-forest/trails.txt'
+
+======================================================================
+ERROR: test_walk_forest_graphs_are_what_the_trails_export_to (__main__.BuildTests.test_walk_forest_graphs_are_what_the_trails_export_to)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/crypto/scripts/site/test_build.py", line 702, in test_walk_forest_graphs_are_what_the_trails_export_to
+    text, forest = walk_forest.build_graph(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/site/walk_forest.py", line 519, in build_graph
+    forest = read_trails(trails_path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/site/walk_forest.py", line 98, in read_trails
+    with open(path, encoding="utf-8") as fh:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/crypto/docs/ecc2k130-status/walk-forest/trails.txt'
+
+======================================================================
+ERROR: test_walk_forest_is_sampled_from_the_challenge_curve (__main__.BuildTests.test_walk_forest_is_sampled_from_the_challenge_curve)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/crypto/scripts/site/test_build.py", line 615, in test_walk_forest_is_sampled_from_the_challenge_curve
+    walk_forest, forest, corpus = self._forest()
+                                  ^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/site/test_build.py", line 610, in _forest
+    forest = walk_forest.read_trails(os.path.join(FOREST_DIR, "trails.txt"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/site/walk_forest.py", line 98, in read_trails
+    with open(path, encoding="utf-8") as fh:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/crypto/docs/ecc2k130-status/walk-forest/trails.txt'
+
+======================================================================
+ERROR: test_walk_forest_kernel_replay_agrees_with_the_scalar_reference (__main__.BuildTests.test_walk_forest_kernel_replay_agrees_with_the_scalar_reference)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/crypto/scripts/site/test_build.py", line 643, in test_walk_forest_kernel_replay_agrees_with_the_scalar_reference
+    walk_forest, forest, corpus = self._forest()
+                                  ^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/site/test_build.py", line 610, in _forest
+    forest = walk_forest.read_trails(os.path.join(FOREST_DIR, "trails.txt"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/site/walk_forest.py", line 98, in read_trails
+    with open(path, encoding="utf-8") as fh:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/crypto/docs/ecc2k130-status/walk-forest/trails.txt'
+
+======================================================================
+ERROR: test_walk_forest_trails_end_on_their_recorded_endpoints (__main__.BuildTests.test_walk_forest_trails_end_on_their_recorded_endpoints)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/crypto/scripts/site/test_build.py", line 634, in test_walk_forest_trails_end_on_their_recorded_endpoints
+    walk_forest, forest, corpus = self._forest()
+                                  ^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/site/test_build.py", line 610, in _forest
+    forest = walk_forest.read_trails(os.path.join(FOREST_DIR, "trails.txt"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/site/walk_forest.py", line 98, in read_trails
+    with open(path, encoding="utf-8") as fh:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/crypto/docs/ecc2k130-status/walk-forest/trails.txt'
+
+----------------------------------------------------------------------
+Ran 48 tests in 5.971s
+
+FAILED (errors=12)

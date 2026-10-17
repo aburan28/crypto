@@ -1,0 +1,1722 @@
+{
+  "all_100_pairs_verified": true,
+  "bootstrap_unit": "whole conductor-gap pair; 10000 resamples; ratio of arithmetic means",
+  "floor_over_crater_cpu": {
+    "paired_percentile_95": [
+      0.8660229235647342,
+      1.111362541311321
+    ],
+    "ratio_of_means": 0.9797018571025766
+  },
+  "floor_over_crater_queries": {
+    "paired_percentile_95": [
+      0.7642626477936582,
+      1.009139689609802
+    ],
+    "ratio_of_means": 0.878395576106883
+  },
+  "paired": [
+    {
+      "crater": {
+        "a": 5620419248410339,
+        "arm": "velu",
+        "cpu": 69.488119898,
+        "queries": 174872858,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2539833775737119,
+        "arm": "scalar",
+        "cpu": 150.995322586,
+        "queries": 294116822,
+        "status": "verified"
+      },
+      "p": 5629830687772387
+    },
+    {
+      "crater": {
+        "a": 5624857491376555,
+        "arm": "velu",
+        "cpu": 60.471076513,
+        "queries": 138118929,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 326717498270691,
+        "arm": "scalar",
+        "cpu": 51.901962314,
+        "queries": 90485760,
+        "status": "verified"
+      },
+      "p": 5634268930738603
+    },
+    {
+      "crater": {
+        "a": 5607249297351971,
+        "arm": "velu",
+        "cpu": 81.226713912,
+        "queries": 184241088,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 1156448602856873,
+        "arm": "scalar",
+        "cpu": 95.329357319,
+        "queries": 187159580,
+        "status": "verified"
+      },
+      "p": 5644895054800163
+    },
+    {
+      "crater": {
+        "a": 5462244514327855,
+        "arm": "velu",
+        "cpu": 133.76103155,
+        "queries": 348380145,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 4079745124860532,
+        "arm": "scalar",
+        "cpu": 85.687714991,
+        "queries": 156428906,
+        "status": "verified"
+      },
+      "p": 5652826161409327
+    },
+    {
+      "crater": {
+        "a": 5635581573272315,
+        "arm": "velu",
+        "cpu": 112.463953681,
+        "queries": 276261183,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2927477144939010,
+        "arm": "scalar",
+        "cpu": 95.453136314,
+        "queries": 174855484,
+        "status": "verified"
+      },
+      "p": 5673227330720507
+    },
+    {
+      "crater": {
+        "a": 5670819037483115,
+        "arm": "velu",
+        "cpu": 57.250215369,
+        "queries": 142456450,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 5261580888864426,
+        "arm": "scalar",
+        "cpu": 159.498232466,
+        "queries": 344480415,
+        "status": "verified"
+      },
+      "p": 5680230476845163
+    },
+    {
+      "crater": {
+        "a": 4226948435727167,
+        "arm": "velu",
+        "cpu": 136.605220693,
+        "queries": 341071101,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 4432361817156577,
+        "arm": "scalar",
+        "cpu": 43.662668979,
+        "queries": 78926826,
+        "status": "verified"
+      },
+      "p": 5697485836047167
+    },
+    {
+      "crater": {
+        "a": 5697747693437315,
+        "arm": "velu",
+        "cpu": 78.61080874,
+        "queries": 197512556,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2852449256394690,
+        "arm": "scalar",
+        "cpu": 96.736745282,
+        "queries": 197124858,
+        "status": "verified"
+      },
+      "p": 5707159132799363
+    },
+    {
+      "crater": {
+        "a": 5722104290259859,
+        "arm": "velu",
+        "cpu": 30.790345143,
+        "queries": 56515311,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2320023958153715,
+        "arm": "scalar",
+        "cpu": 120.778185654,
+        "queries": 232025062,
+        "status": "verified"
+      },
+      "p": 5731515729621907
+    },
+    {
+      "crater": {
+        "a": 5713016550846251,
+        "arm": "velu",
+        "cpu": 72.542127326,
+        "queries": 182412424,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 4758811099330590,
+        "arm": "scalar",
+        "cpu": 125.495493315,
+        "queries": 270710226,
+        "status": "verified"
+      },
+      "p": 5750662308294443
+    },
+    {
+      "crater": {
+        "a": 5742675328454195,
+        "arm": "velu",
+        "cpu": 45.668075963,
+        "queries": 94185471,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 1826350335617616,
+        "arm": "scalar",
+        "cpu": 58.545798894,
+        "queries": 120219612,
+        "status": "verified"
+      },
+      "p": 5752086767816243
+    },
+    {
+      "crater": {
+        "a": 4288531769015063,
+        "arm": "velu",
+        "cpu": 47.897738084,
+        "queries": 108242809,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 433682226906970,
+        "arm": "scalar",
+        "cpu": 105.042331287,
+        "queries": 220331124,
+        "status": "verified"
+      },
+      "p": 5759069169335063
+    },
+    {
+      "crater": {
+        "a": 5728238896866755,
+        "arm": "velu",
+        "cpu": 31.220482115,
+        "queries": 48494005,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 3016542981067879,
+        "arm": "scalar",
+        "cpu": 134.788206587,
+        "queries": 278360398,
+        "status": "verified"
+      },
+      "p": 5765884654314947
+    },
+    {
+      "crater": {
+        "a": 5760638632380875,
+        "arm": "velu",
+        "cpu": 99.20781459,
+        "queries": 238682901,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2563889280410168,
+        "arm": "scalar",
+        "cpu": 47.59092632,
+        "queries": 92194141,
+        "status": "verified"
+      },
+      "p": 5770050071742923
+    },
+    {
+      "crater": {
+        "a": 5764558160371099,
+        "arm": "velu",
+        "cpu": 42.344573005,
+        "queries": 72577929,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 1335844752865418,
+        "arm": "scalar",
+        "cpu": 91.62105951,
+        "queries": 184472509,
+        "status": "verified"
+      },
+      "p": 5773969599733147
+    },
+    {
+      "crater": {
+        "a": 5771030195073659,
+        "arm": "velu",
+        "cpu": 23.599080889,
+        "queries": 36699970,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 5434949413087212,
+        "arm": "scalar",
+        "cpu": 134.536600679,
+        "queries": 287535018,
+        "status": "verified"
+      },
+      "p": 5780441634435707
+    },
+    {
+      "crater": {
+        "a": 5597697901802431,
+        "arm": "velu",
+        "cpu": 85.712452302,
+        "queries": 174033888,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2439878177553567,
+        "arm": "scalar",
+        "cpu": 75.820067925,
+        "queries": 152497427,
+        "status": "verified"
+      },
+      "p": 5788279548883903
+    },
+    {
+      "crater": {
+        "a": 5734908674191247,
+        "arm": "velu",
+        "cpu": 175.324005331,
+        "queries": 367610913,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 5789099298148805,
+        "arm": "scalar",
+        "cpu": 57.628238741,
+        "queries": 113152782,
+        "status": "verified"
+      },
+      "p": 5793730170204047
+    },
+    {
+      "crater": {
+        "a": 5735480566332767,
+        "arm": "velu",
+        "cpu": 88.800374383,
+        "queries": 189091012,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2655354174370391,
+        "arm": "scalar",
+        "cpu": 76.206770136,
+        "queries": 149382781,
+        "status": "verified"
+      },
+      "p": 5794302062345567
+    },
+    {
+      "crater": {
+        "a": 4326224119846583,
+        "arm": "velu",
+        "cpu": 109.292644216,
+        "queries": 197269236,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 5640036140799756,
+        "arm": "scalar",
+        "cpu": 129.225535023,
+        "queries": 259865813,
+        "status": "verified"
+      },
+      "p": 5796761520166583
+    },
+    {
+      "crater": {
+        "a": 5787661976247979,
+        "arm": "velu",
+        "cpu": 70.867447844,
+        "queries": 124589156,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 3640282454719008,
+        "arm": "scalar",
+        "cpu": 135.31765685,
+        "queries": 276849726,
+        "status": "verified"
+      },
+      "p": 5797073415610027
+    },
+    {
+      "crater": {
+        "a": 5778615199723639,
+        "arm": "velu",
+        "cpu": 133.162840146,
+        "queries": 285814516,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 800674443502145,
+        "arm": "scalar",
+        "cpu": 79.616101519,
+        "queries": 152800259,
+        "status": "verified"
+      },
+      "p": 5799790938288247
+    },
+    {
+      "crater": {
+        "a": 5802430079302075,
+        "arm": "velu",
+        "cpu": 63.641643256,
+        "queries": 127460484,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 5699693875033611,
+        "arm": "scalar",
+        "cpu": 139.030876816,
+        "queries": 301748164,
+        "status": "verified"
+      },
+      "p": 5811841518664123
+    },
+    {
+      "crater": {
+        "a": 5778552365832515,
+        "arm": "velu",
+        "cpu": 90.757811941,
+        "queries": 186190021,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 1406228222764903,
+        "arm": "scalar",
+        "cpu": 91.843773311,
+        "queries": 152295325,
+        "status": "verified"
+      },
+      "p": 5816198123280707
+    },
+    {
+      "crater": {
+        "a": 5814483609718499,
+        "arm": "velu",
+        "cpu": 156.0238535,
+        "queries": 325350520,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 4487336127195788,
+        "arm": "scalar",
+        "cpu": 108.405307159,
+        "queries": 213436768,
+        "status": "verified"
+      },
+      "p": 5823895049080547
+    },
+    {
+      "crater": {
+        "a": 5836141404061099,
+        "arm": "velu",
+        "cpu": 209.118098046,
+        "queries": 504823792,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 5164091065620813,
+        "arm": "scalar",
+        "cpu": 122.811035165,
+        "queries": 234348362,
+        "status": "verified"
+      },
+      "p": 5845552843423147
+    },
+    {
+      "crater": {
+        "a": 5816370679844851,
+        "arm": "velu",
+        "cpu": 87.196336722,
+        "queries": 192866182,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 1228490561045313,
+        "arm": "scalar",
+        "cpu": 146.214752065,
+        "queries": 304375516,
+        "status": "verified"
+      },
+      "p": 5854016437293043
+    },
+    {
+      "crater": {
+        "a": 5667184205218975,
+        "arm": "velu",
+        "cpu": 224.517793601,
+        "queries": 491203898,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 3799622024962084,
+        "arm": "scalar",
+        "cpu": 80.543791538,
+        "queries": 122221547,
+        "status": "verified"
+      },
+      "p": 5857765852300447
+    },
+    {
+      "crater": {
+        "a": 5836836557631919,
+        "arm": "velu",
+        "cpu": 122.602072016,
+        "queries": 258901444,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 4488071533086212,
+        "arm": "scalar",
+        "cpu": 135.671747093,
+        "queries": 280243364,
+        "status": "verified"
+      },
+      "p": 5858012296196527
+    },
+    {
+      "crater": {
+        "a": 5849492205537115,
+        "arm": "velu",
+        "cpu": 52.197697991,
+        "queries": 102596038,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 5454203326119051,
+        "arm": "scalar",
+        "cpu": 115.874588871,
+        "queries": 219855869,
+        "status": "verified"
+      },
+      "p": 5858903644899163
+    },
+    {
+      "crater": {
+        "a": 5681239780959535,
+        "arm": "velu",
+        "cpu": 144.302652767,
+        "queries": 298915640,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 1853306119381420,
+        "arm": "scalar",
+        "cpu": 131.030806699,
+        "queries": 270023644,
+        "status": "verified"
+      },
+      "p": 5871821428041007
+    },
+    {
+      "crater": {
+        "a": 5813117817976103,
+        "arm": "velu",
+        "cpu": 29.96121854,
+        "queries": 47582201,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 1967804276857424,
+        "arm": "scalar",
+        "cpu": 103.868200422,
+        "queries": 187017587,
+        "status": "verified"
+      },
+      "p": 5871939313988903
+    },
+    {
+      "crater": {
+        "a": 5864800452414319,
+        "arm": "velu",
+        "cpu": 146.503713273,
+        "queries": 346450088,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 5290294982658022,
+        "arm": "scalar",
+        "cpu": 63.629209164,
+        "queries": 121221586,
+        "status": "verified"
+      },
+      "p": 5885976190978927
+    },
+    {
+      "crater": {
+        "a": 4423258640156783,
+        "arm": "velu",
+        "cpu": 125.240685153,
+        "queries": 280321396,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 4126408134513381,
+        "arm": "scalar",
+        "cpu": 100.270626416,
+        "queries": 192764563,
+        "status": "verified"
+      },
+      "p": 5893796040476783
+    },
+    {
+      "crater": {
+        "a": 5708618282281735,
+        "arm": "velu",
+        "cpu": 132.414094241,
+        "queries": 287815942,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 461581273446032,
+        "arm": "scalar",
+        "cpu": 93.905253132,
+        "queries": 185777540,
+        "status": "verified"
+      },
+      "p": 5899199929363207
+    },
+    {
+      "crater": {
+        "a": 5891163896069195,
+        "arm": "velu",
+        "cpu": 63.268447993,
+        "queries": 122266936,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2412551057837086,
+        "arm": "scalar",
+        "cpu": 140.495966778,
+        "queries": 247473915,
+        "status": "verified"
+      },
+      "p": 5900575335431243
+    },
+    {
+      "crater": {
+        "a": 5896185969878339,
+        "arm": "velu",
+        "cpu": 39.962216387,
+        "queries": 76348644,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 897408254482593,
+        "arm": "scalar",
+        "cpu": 238.906564531,
+        "queries": 528569221,
+        "status": "verified"
+      },
+      "p": 5905597409240387
+    },
+    {
+      "crater": {
+        "a": 5902808364963715,
+        "arm": "velu",
+        "cpu": 172.772745242,
+        "queries": 408571438,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 1577830749223186,
+        "arm": "scalar",
+        "cpu": 176.847946492,
+        "queries": 350357129,
+        "status": "verified"
+      },
+      "p": 5912219804325763
+    },
+    {
+      "crater": {
+        "a": 5865047371640903,
+        "arm": "velu",
+        "cpu": 97.561403655,
+        "queries": 234426573,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 3828736718256435,
+        "arm": "scalar",
+        "cpu": 137.02497407,
+        "queries": 273928123,
+        "status": "verified"
+      },
+      "p": 5923868867653703
+    },
+    {
+      "crater": {
+        "a": 5917548796246075,
+        "arm": "velu",
+        "cpu": 104.423504648,
+        "queries": 225936193,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 1477229896715247,
+        "arm": "scalar",
+        "cpu": 111.882292938,
+        "queries": 192752168,
+        "status": "verified"
+      },
+      "p": 5926960235608123
+    },
+    {
+      "crater": {
+        "a": 5898013187791235,
+        "arm": "velu",
+        "cpu": 74.709014108,
+        "queries": 165850165,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 3294502918364985,
+        "arm": "scalar",
+        "cpu": 205.589863999,
+        "queries": 429435898,
+        "status": "verified"
+      },
+      "p": 5935658945239427
+    },
+    {
+      "crater": {
+        "a": 5898807052439171,
+        "arm": "velu",
+        "cpu": 87.522235372,
+        "queries": 206062855,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2956648104111277,
+        "arm": "scalar",
+        "cpu": 68.240127884,
+        "queries": 102746738,
+        "status": "verified"
+      },
+      "p": 5936452809887363
+    },
+    {
+      "crater": {
+        "a": 5928273619748699,
+        "arm": "velu",
+        "cpu": 85.265627117,
+        "queries": 178892360,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 4045697297715862,
+        "arm": "scalar",
+        "cpu": 61.842645848,
+        "queries": 96854717,
+        "status": "verified"
+      },
+      "p": 5937685059110747
+    },
+    {
+      "crater": {
+        "a": 4468781206360607,
+        "arm": "velu",
+        "cpu": 57.350103315,
+        "queries": 126348088,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2816433297225085,
+        "arm": "scalar",
+        "cpu": 70.491009575,
+        "queries": 112440285,
+        "status": "verified"
+      },
+      "p": 5939318606680607
+    },
+    {
+      "crater": {
+        "a": 4475905271393783,
+        "arm": "velu",
+        "cpu": 85.798231529,
+        "queries": 193693180,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2810219975388841,
+        "arm": "scalar",
+        "cpu": 130.634635289,
+        "queries": 224327000,
+        "status": "verified"
+      },
+      "p": 5946442671713783
+    },
+    {
+      "crater": {
+        "a": 5926307078287519,
+        "arm": "velu",
+        "cpu": 118.486895562,
+        "queries": 274597285,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2043992405108463,
+        "arm": "scalar",
+        "cpu": 147.136842409,
+        "queries": 266212744,
+        "status": "verified"
+      },
+      "p": 5947482816852127
+    },
+    {
+      "crater": {
+        "a": 5757116383569871,
+        "arm": "velu",
+        "cpu": 232.860931078,
+        "queries": 517547546,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2087370704375809,
+        "arm": "scalar",
+        "cpu": 65.707654434,
+        "queries": 97507280,
+        "status": "verified"
+      },
+      "p": 5947698030651343
+    },
+    {
+      "crater": {
+        "a": 5891925815102903,
+        "arm": "velu",
+        "cpu": 122.185886722,
+        "queries": 278370027,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 4816767024365946,
+        "arm": "scalar",
+        "cpu": 64.577793693,
+        "queries": 100607302,
+        "status": "verified"
+      },
+      "p": 5950747311115703
+    },
+    {
+      "crater": {
+        "a": 5948244484044235,
+        "arm": "velu",
+        "cpu": 130.871726249,
+        "queries": 298000873,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 3179899638358211,
+        "arm": "scalar",
+        "cpu": 106.970488841,
+        "queries": 193995903,
+        "status": "verified"
+      },
+      "p": 5957655923406283
+    },
+    {
+      "crater": {
+        "a": 5951495195232179,
+        "arm": "velu",
+        "cpu": 53.936827234,
+        "queries": 118978438,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 5233127542523414,
+        "arm": "scalar",
+        "cpu": 201.450869672,
+        "queries": 373953832,
+        "status": "verified"
+      },
+      "p": 5960906634594227
+    },
+    {
+      "crater": {
+        "a": 5927302716714571,
+        "arm": "velu",
+        "cpu": 98.778077082,
+        "queries": 206253772,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2122424040578547,
+        "arm": "scalar",
+        "cpu": 97.505117762,
+        "queries": 174632793,
+        "status": "verified"
+      },
+      "p": 5964948474162763
+    },
+    {
+      "crater": {
+        "a": 5935116768816515,
+        "arm": "velu",
+        "cpu": 123.583515844,
+        "queries": 280759434,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 5064398521114874,
+        "arm": "scalar",
+        "cpu": 118.483471931,
+        "queries": 221163709,
+        "status": "verified"
+      },
+      "p": 5972762526264707
+    },
+    {
+      "crater": {
+        "a": 5914127668123967,
+        "arm": "velu",
+        "cpu": 90.537908995,
+        "queries": 203891858,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 1598240785864582,
+        "arm": "scalar",
+        "cpu": 102.386600499,
+        "queries": 172750739,
+        "status": "verified"
+      },
+      "p": 5972949164136767
+    },
+    {
+      "crater": {
+        "a": 5935678073737531,
+        "arm": "velu",
+        "cpu": 113.71954597,
+        "queries": 250096528,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 5286280665334025,
+        "arm": "scalar",
+        "cpu": 92.164038183,
+        "queries": 160914483,
+        "status": "verified"
+      },
+      "p": 5973323831185723
+    },
+    {
+      "crater": {
+        "a": 5914666860578807,
+        "arm": "velu",
+        "cpu": 32.968475856,
+        "queries": 50088551,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 1860003042860362,
+        "arm": "scalar",
+        "cpu": 74.507697884,
+        "queries": 161641182,
+        "status": "verified"
+      },
+      "p": 5973488356591607
+    },
+    {
+      "crater": {
+        "a": 4504983515798927,
+        "arm": "velu",
+        "cpu": 72.92796427,
+        "queries": 150917445,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 3254164977180627,
+        "arm": "scalar",
+        "cpu": 69.592388208,
+        "queries": 114422014,
+        "status": "verified"
+      },
+      "p": 5975520916118927
+    },
+    {
+      "crater": {
+        "a": 5944798132508515,
+        "arm": "velu",
+        "cpu": 186.717248465,
+        "queries": 409987470,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2722820228519207,
+        "arm": "scalar",
+        "cpu": 69.198800416,
+        "queries": 109473799,
+        "status": "verified"
+      },
+      "p": 5982443889956707
+    },
+    {
+      "crater": {
+        "a": 5978188899388795,
+        "arm": "velu",
+        "cpu": 106.998499385,
+        "queries": 230571116,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 5493001614037070,
+        "arm": "scalar",
+        "cpu": 105.551065009,
+        "queries": 184381473,
+        "status": "verified"
+      },
+      "p": 5987600338750843
+    },
+    {
+      "crater": {
+        "a": 4518681187043327,
+        "arm": "velu",
+        "cpu": 81.966588061,
+        "queries": 158524876,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 3732346070275066,
+        "arm": "scalar",
+        "cpu": 131.008662643,
+        "queries": 230210717,
+        "status": "verified"
+      },
+      "p": 5989218587363327
+    },
+    {
+      "crater": {
+        "a": 4520309346384863,
+        "arm": "velu",
+        "cpu": 94.367755584,
+        "queries": 219633111,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 4626579682090019,
+        "arm": "scalar",
+        "cpu": 52.321227243,
+        "queries": 97253161,
+        "status": "verified"
+      },
+      "p": 5990846746704863
+    },
+    {
+      "crater": {
+        "a": 5984447154505115,
+        "arm": "velu",
+        "cpu": 73.35049698,
+        "queries": 138185275,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 248217149852775,
+        "arm": "scalar",
+        "cpu": 98.754671892,
+        "queries": 168351946,
+        "status": "verified"
+      },
+      "p": 5993858593867163
+    },
+    {
+      "crater": {
+        "a": 5990944242065155,
+        "arm": "velu",
+        "cpu": 193.124168049,
+        "queries": 429186259,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 3470153720276657,
+        "arm": "scalar",
+        "cpu": 102.922148935,
+        "queries": 179934078,
+        "status": "verified"
+      },
+      "p": 6000355681427203
+    },
+    {
+      "crater": {
+        "a": 4534681623295127,
+        "arm": "velu",
+        "cpu": 160.960951429,
+        "queries": 336102857,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 5285743455039257,
+        "arm": "scalar",
+        "cpu": 184.015075533,
+        "queries": 366923290,
+        "status": "verified"
+      },
+      "p": 6005219023615127
+    },
+    {
+      "crater": {
+        "a": 6000592462136515,
+        "arm": "velu",
+        "cpu": 249.044724412,
+        "queries": 533248904,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 4119946212421716,
+        "arm": "scalar",
+        "cpu": 105.822739862,
+        "queries": 207344208,
+        "status": "verified"
+      },
+      "p": 6010003901498563
+    },
+    {
+      "crater": {
+        "a": 5990097147626095,
+        "arm": "velu",
+        "cpu": 77.561174955,
+        "queries": 151009788,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2716039263251052,
+        "arm": "scalar",
+        "cpu": 40.13024374,
+        "queries": 52317779,
+        "status": "verified"
+      },
+      "p": 6011272886190703
+    },
+    {
+      "crater": {
+        "a": 5987122702980611,
+        "arm": "velu",
+        "cpu": 95.205615751,
+        "queries": 201148158,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 1079774323455235,
+        "arm": "scalar",
+        "cpu": 171.475151316,
+        "queries": 344633261,
+        "status": "verified"
+      },
+      "p": 6024768460428803
+    },
+    {
+      "crater": {
+        "a": 5967959065574567,
+        "arm": "velu",
+        "cpu": 77.866610329,
+        "queries": 157647678,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 3420631485940149,
+        "arm": "scalar",
+        "cpu": 162.227598857,
+        "queries": 330990350,
+        "status": "verified"
+      },
+      "p": 6026780561587367
+    },
+    {
+      "crater": {
+        "a": 4561743784837127,
+        "arm": "velu",
+        "cpu": 110.995756868,
+        "queries": 220994821,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2979645232716191,
+        "arm": "scalar",
+        "cpu": 97.314728262,
+        "queries": 180802841,
+        "status": "verified"
+      },
+      "p": 6032281185157127
+    },
+    {
+      "crater": {
+        "a": 5976260970407303,
+        "arm": "velu",
+        "cpu": 49.768517289,
+        "queries": 82954939,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 509881686913950,
+        "arm": "scalar",
+        "cpu": 71.90731263,
+        "queries": 117794342,
+        "status": "verified"
+      },
+      "p": 6035082466420103
+    },
+    {
+      "crater": {
+        "a": 6005386938138595,
+        "arm": "velu",
+        "cpu": 88.970312367,
+        "queries": 188331045,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 4591142274964411,
+        "arm": "scalar",
+        "cpu": 90.239743965,
+        "queries": 164202143,
+        "status": "verified"
+      },
+      "p": 6043032695586787
+    },
+    {
+      "crater": {
+        "a": 6023504931256039,
+        "arm": "velu",
+        "cpu": 80.522265711,
+        "queries": 166198445,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 4136954594528976,
+        "arm": "scalar",
+        "cpu": 95.180288999,
+        "queries": 178678010,
+        "status": "verified"
+      },
+      "p": 6044680669820647
+    },
+    {
+      "crater": {
+        "a": 6008502285240035,
+        "arm": "velu",
+        "cpu": 117.72086421,
+        "queries": 237394698,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 768604254297552,
+        "arm": "scalar",
+        "cpu": 74.992924133,
+        "queries": 129102463,
+        "status": "verified"
+      },
+      "p": 6046148042688227
+    },
+    {
+      "crater": {
+        "a": 5992364258710583,
+        "arm": "velu",
+        "cpu": 56.662863548,
+        "queries": 100483923,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 786993010444847,
+        "arm": "scalar",
+        "cpu": 55.265148258,
+        "queries": 106534885,
+        "status": "verified"
+      },
+      "p": 6051185754723383
+    },
+    {
+      "crater": {
+        "a": 5860776659647975,
+        "arm": "velu",
+        "cpu": 71.164849215,
+        "queries": 141289660,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 915677022520954,
+        "arm": "scalar",
+        "cpu": 35.74573588,
+        "queries": 50264454,
+        "status": "verified"
+      },
+      "p": 6051358306729447
+    },
+    {
+      "crater": {
+        "a": 6050941065467195,
+        "arm": "velu",
+        "cpu": 82.345956968,
+        "queries": 166378160,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 3083498213786416,
+        "arm": "scalar",
+        "cpu": 144.386700041,
+        "queries": 263252489,
+        "status": "verified"
+      },
+      "p": 6060352504829243
+    },
+    {
+      "crater": {
+        "a": 4593630014484647,
+        "arm": "velu",
+        "cpu": 103.626904083,
+        "queries": 221744997,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 5533136734354160,
+        "arm": "scalar",
+        "cpu": 119.085742787,
+        "queries": 211810013,
+        "status": "verified"
+      },
+      "p": 6064167414804647
+    },
+    {
+      "crater": {
+        "a": 6056169983671939,
+        "arm": "velu",
+        "cpu": 171.379450392,
+        "queries": 357162575,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 4080808670982973,
+        "arm": "scalar",
+        "cpu": 160.402449874,
+        "queries": 306183413,
+        "status": "verified"
+      },
+      "p": 6065581423033987
+    },
+    {
+      "crater": {
+        "a": 5879786337007375,
+        "arm": "velu",
+        "cpu": 79.846023153,
+        "queries": 164770036,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 4269895842258760,
+        "arm": "scalar",
+        "cpu": 43.038892754,
+        "queries": 57501049,
+        "status": "verified"
+      },
+      "p": 6070367984088847
+    },
+    {
+      "crater": {
+        "a": 6033161263420795,
+        "arm": "velu",
+        "cpu": 84.986153209,
+        "queries": 173077124,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 5755547933778354,
+        "arm": "scalar",
+        "cpu": 132.35998336,
+        "queries": 239785151,
+        "status": "verified"
+      },
+      "p": 6070807020868987
+    },
+    {
+      "crater": {
+        "a": 4604416862048087,
+        "arm": "velu",
+        "cpu": 104.703673321,
+        "queries": 219312581,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 502542696145577,
+        "arm": "scalar",
+        "cpu": 131.918603625,
+        "queries": 244856275,
+        "status": "verified"
+      },
+      "p": 6074954262368087
+    },
+    {
+      "crater": {
+        "a": 6066023855248859,
+        "arm": "velu",
+        "cpu": 104.352232744,
+        "queries": 210423505,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 1283889765737386,
+        "arm": "scalar",
+        "cpu": 128.317292707,
+        "queries": 241933276,
+        "status": "verified"
+      },
+      "p": 6075435294610907
+    },
+    {
+      "crater": {
+        "a": 5885231515196791,
+        "arm": "velu",
+        "cpu": 183.506521218,
+        "queries": 411789140,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 3338141206416232,
+        "arm": "scalar",
+        "cpu": 86.284873672,
+        "queries": 143403422,
+        "status": "verified"
+      },
+      "p": 6075813162278263
+    },
+    {
+      "crater": {
+        "a": 6069446250965359,
+        "arm": "velu",
+        "cpu": 89.773155611,
+        "queries": 178683219,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2458586103616185,
+        "arm": "scalar",
+        "cpu": 48.79316228,
+        "queries": 70578893,
+        "status": "verified"
+      },
+      "p": 6090621989529967
+    },
+    {
+      "crater": {
+        "a": 6060161107049395,
+        "arm": "velu",
+        "cpu": 79.432768486,
+        "queries": 160684145,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 4779992105363460,
+        "arm": "scalar",
+        "cpu": 125.921852062,
+        "queries": 288905355,
+        "status": "verified"
+      },
+      "p": 6097806864497587
+    },
+    {
+      "crater": {
+        "a": 6048852788608583,
+        "arm": "velu",
+        "cpu": 71.338069808,
+        "queries": 134101678,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 1015358878628895,
+        "arm": "scalar",
+        "cpu": 146.391580046,
+        "queries": 281500042,
+        "status": "verified"
+      },
+      "p": 6107674284621383
+    },
+    {
+      "crater": {
+        "a": 6099254080601659,
+        "arm": "velu",
+        "cpu": 95.122674419,
+        "queries": 172540947,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2961282513423691,
+        "arm": "scalar",
+        "cpu": 119.742820567,
+        "queries": 244435569,
+        "status": "verified"
+      },
+      "p": 6108665519963707
+    },
+    {
+      "crater": {
+        "a": 6100562310849919,
+        "arm": "velu",
+        "cpu": 153.761113664,
+        "queries": 317302967,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 3065391229004756,
+        "arm": "scalar",
+        "cpu": 113.420025484,
+        "queries": 231271937,
+        "status": "verified"
+      },
+      "p": 6121738049414527
+    },
+    {
+      "crater": {
+        "a": 6105517993510159,
+        "arm": "velu",
+        "cpu": 176.873410961,
+        "queries": 352729429,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 3092553550952000,
+        "arm": "scalar",
+        "cpu": 64.959241368,
+        "queries": 129842330,
+        "status": "verified"
+      },
+      "p": 6126693732074767
+    },
+    {
+      "crater": {
+        "a": 5945113032262231,
+        "arm": "velu",
+        "cpu": 68.145174499,
+        "queries": 127470174,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 5447045021339621,
+        "arm": "scalar",
+        "cpu": 102.904083916,
+        "queries": 208212669,
+        "status": "verified"
+      },
+      "p": 6135694679343703
+    },
+    {
+      "crater": {
+        "a": 6118210313815519,
+        "arm": "velu",
+        "cpu": 93.540831977,
+        "queries": 161052952,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2893590630605887,
+        "arm": "scalar",
+        "cpu": 78.174345395,
+        "queries": 150088694,
+        "status": "verified"
+      },
+      "p": 6139386052380127
+    },
+    {
+      "crater": {
+        "a": 5956047428847031,
+        "arm": "velu",
+        "cpu": 138.812556892,
+        "queries": 271739994,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 4721121180895191,
+        "arm": "scalar",
+        "cpu": 117.279755147,
+        "queries": 238542670,
+        "status": "verified"
+      },
+      "p": 6146629075928503
+    },
+    {
+      "crater": {
+        "a": 5960583852609055,
+        "arm": "velu",
+        "cpu": 153.951252864,
+        "queries": 285675848,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 1841658204722870,
+        "arm": "scalar",
+        "cpu": 61.815315714,
+        "queries": 111108467,
+        "status": "verified"
+      },
+      "p": 6151165499690527
+    },
+    {
+      "crater": {
+        "a": 6133955241730855,
+        "arm": "velu",
+        "cpu": 109.252753015,
+        "queries": 230372422,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 278132372547068,
+        "arm": "scalar",
+        "cpu": 126.660598334,
+        "queries": 237409086,
+        "status": "verified"
+      },
+      "p": 6155130980295463
+    },
+    {
+      "crater": {
+        "a": 6156796252603019,
+        "arm": "velu",
+        "cpu": 200.684237998,
+        "queries": 411992180,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 4916287511507591,
+        "arm": "scalar",
+        "cpu": 97.486564044,
+        "queries": 201740893,
+        "status": "verified"
+      },
+      "p": 6166207691965067
+    },
+    {
+      "crater": {
+        "a": 5977094045371615,
+        "arm": "velu",
+        "cpu": 81.544806185,
+        "queries": 146595925,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 4794230532447703,
+        "arm": "scalar",
+        "cpu": 30.221975199,
+        "queries": 43751947,
+        "status": "verified"
+      },
+      "p": 6167675692453087
+    },
+    {
+      "crater": {
+        "a": 6151910469294691,
+        "arm": "velu",
+        "cpu": 65.750415338,
+        "queries": 99170533,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 2471924124441882,
+        "arm": "scalar",
+        "cpu": 46.807440786,
+        "queries": 89699576,
+        "status": "verified"
+      },
+      "p": 6189556226742883
+    },
+    {
+      "crater": {
+        "a": 6149671127419703,
+        "arm": "velu",
+        "cpu": 172.528544404,
+        "queries": 354935370,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 3768636372565341,
+        "arm": "scalar",
+        "cpu": 65.314577227,
+        "queries": 126681089,
+        "status": "verified"
+      },
+      "p": 6208492623432503
+    },
+    {
+      "crater": {
+        "a": 6172277600764051,
+        "arm": "velu",
+        "cpu": 163.511443111,
+        "queries": 334057388,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 46527939807502,
+        "arm": "scalar",
+        "cpu": 31.184281413,
+        "queries": 40511271,
+        "status": "verified"
+      },
+      "p": 6209923358212243
+    },
+    {
+      "crater": {
+        "a": 6182761524422875,
+        "arm": "velu",
+        "cpu": 111.426132621,
+        "queries": 213858221,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 4192984241939922,
+        "arm": "scalar",
+        "cpu": 31.143606343,
+        "queries": 47891486,
+        "status": "verified"
+      },
+      "p": 6220407281871067
+    },
+    {
+      "crater": {
+        "a": 6186791597565691,
+        "arm": "velu",
+        "cpu": 123.947520199,
+        "queries": 252097305,
+        "status": "verified"
+      },
+      "floor": {
+        "a": 3980914898976681,
+        "arm": "scalar",
+        "cpu": 89.814473076,
+        "queries": 180757602,
+        "status": "verified"
+      },
+      "p": 6224437355013883
+    }
+  ],
+  "paired_endpoints_observed": 100,
+  "scope": "L0 native CPU/query diagnostics, no common-price IC/rho comparison"
+}

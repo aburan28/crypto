@@ -1,0 +1,83 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "ic.cm_folded_native_v1",
+        "params": {
+          "backend": "/workspace/native-deps/cm-folded",
+          "backend_sha256": "577002d0898b1d39c61f5f6daa01c549403832379c7ada2e9098f0f5fbf0a730",
+          "mode": "scalar"
+        }
+      },
+      "name": "scalar",
+      "role": "baseline"
+    },
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "ic.cm_folded_native_v1",
+        "params": {
+          "backend": "/workspace/native-deps/cm-folded",
+          "backend_sha256": "577002d0898b1d39c61f5f6daa01c549403832379c7ada2e9098f0f5fbf0a730",
+          "mode": "velu"
+        }
+      },
+      "name": "velu",
+      "role": "candidate"
+    }
+  ],
+  "description": "Fresh public hash-to-subgroup targets; no logarithm supplied or computed during preparation",
+  "label": "Conductor-gap replication fresh-crater-1",
+  "measurement": {
+    "isolation_required": "L0",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261017,
+    "timeout_seconds": 1900,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 4604416862048087,
+        "b": 707834596776538,
+        "group_order": 6074954227511371,
+        "gx": 1,
+        "gy": 258565826685987,
+        "kind": "prime_explicit",
+        "p": 6074954262368087,
+        "r": 6074954227511371
+      },
+      {
+        "a": 5984447154505115,
+        "b": 731973366096832,
+        "group_order": 5993858559243883,
+        "gx": 0,
+        "gy": 2221983714239517,
+        "kind": "prime_explicit",
+        "p": 5993858593867163,
+        "r": 5993858559243883
+      },
+      {
+        "a": 5708618282281735,
+        "b": 2807871829251969,
+        "group_order": 5899199895014411,
+        "gx": 0,
+        "gy": 2573772567238830,
+        "kind": "prime_explicit",
+        "p": 5899199929363207,
+        "r": 5899199895014411
+      }
+    ],
+    "target_kind": "public",
+    "target_seed": 20261016,
+    "targets_per_curve": 2
+  }
+}

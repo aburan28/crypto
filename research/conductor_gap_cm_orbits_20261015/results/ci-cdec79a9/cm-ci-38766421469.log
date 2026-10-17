@@ -1,0 +1,12 @@
+replay	Verify every archived byte and source receipt	﻿2026-10-15T16:12:12.3269768Z ##[group]Run python3 research/notes/ecc2k130/leaf_m10_support_outcome_20260930/verify_archive.py
+replay	Verify every archived byte and source receipt	2026-10-15T16:12:12.3273221Z [36;1mpython3 research/notes/ecc2k130/leaf_m10_support_outcome_20260930/verify_archive.py[0m
+replay	Verify every archived byte and source receipt	2026-10-15T16:12:12.3556860Z shell: /usr/bin/bash -e {0}
+replay	Verify every archived byte and source receipt	2026-10-15T16:12:12.3558338Z ##[endgroup]
+replay	Verify every archived byte and source receipt	2026-10-15T16:12:12.5567081Z Traceback (most recent call last):
+replay	Verify every archived byte and source receipt	2026-10-15T16:12:12.5571287Z   File "/home/runner/work/crypto/crypto/research/notes/ecc2k130/leaf_m10_support_outcome_20260930/verify_archive.py", line 56, in <module>
+replay	Verify every archived byte and source receipt	2026-10-15T16:12:12.5575376Z     main()
+replay	Verify every archived byte and source receipt	2026-10-15T16:12:12.5578217Z   File "/home/runner/work/crypto/crypto/research/notes/ecc2k130/leaf_m10_support_outcome_20260930/verify_archive.py", line 48, in main
+replay	Verify every archived byte and source receipt	2026-10-15T16:12:12.5581634Z     assert paths == {path.relative_to(EVIDENCE).as_posix()
+replay	Verify every archived byte and source receipt	2026-10-15T16:12:12.5583285Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+replay	Verify every archived byte and source receipt	2026-10-15T16:12:12.5584581Z AssertionError
+replay	Verify every archived byte and source receipt	2026-10-15T16:12:12.5741015Z ##[error]Process completed with exit code 1.

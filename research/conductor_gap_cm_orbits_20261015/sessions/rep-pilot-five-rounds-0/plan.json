@@ -1,0 +1,225 @@
+{
+  "schema": "ecbench.plan/v1",
+  "spec_id": "ECS1h400ac45140cc",
+  "arms": [
+    {
+      "name": "scalar",
+      "role": "baseline",
+      "method": {
+        "id": "ic.cm_folded_native_v1",
+        "family": "ic",
+        "params": {
+          "backend": "/workspace/native-deps/cm-folded",
+          "backend_sha256": "577002d0898b1d39c61f5f6daa01c549403832379c7ada2e9098f0f5fbf0a730",
+          "mode": "scalar",
+          "query_limit": "1000000000",
+          "seconds": "1800",
+          "size": "8192"
+        },
+        "method_id": "ECM1h6fe516db08be",
+        "method_sha256": "6fe516db08bea97debc7dca350eecf191b02356c9fe3c050b3f2f5e01ad5325d",
+        "entry": "ecbench::cm_folded::solve"
+      }
+    },
+    {
+      "name": "rho",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation",
+        "family": "rho",
+        "params": {
+          "cap_multiple": "64"
+        },
+        "method_id": "ECM1hefea4e0ebe79",
+        "method_sha256": "efea4e0ebe79dadfedeb75106dab92e25fc26bfe282155ee0326380d4184e995",
+        "entry": "ic_boundary::rho_walk_with(NegationClasses, RhoWalk::negation())"
+      }
+    },
+    {
+      "name": "velu",
+      "role": "candidate",
+      "method": {
+        "id": "ic.cm_folded_native_v1",
+        "family": "ic",
+        "params": {
+          "backend": "/workspace/native-deps/cm-folded",
+          "backend_sha256": "577002d0898b1d39c61f5f6daa01c549403832379c7ada2e9098f0f5fbf0a730",
+          "mode": "velu",
+          "query_limit": "1000000000",
+          "seconds": "1800",
+          "size": "8192"
+        },
+        "method_id": "ECM1hb09203c602df",
+        "method_sha256": "b09203c602df6f52760a0638b794f347c75bac354d91afca110b6be137e3538c",
+        "entry": "ecbench::cm_folded::solve"
+      }
+    }
+  ],
+  "workloads": [
+    {
+      "workload_id": "Wfd1fdf22c4c5",
+      "workload_sha256": "fd1fdf22c4c5117960bee46719ae2aa2a2aefd83243ac6a5a01c99f7148c8ca6",
+      "curve_spec": {
+        "kind": "prime_public_fixture",
+        "p": 5947698030651343,
+        "a": 5757116383569871,
+        "b": 3560173328417442,
+        "group_order": 5947697996161643,
+        "r": 5947697996161643,
+        "gx": 0,
+        "gy": 988599222119848,
+        "qx": 3924412611670433,
+        "qy": 4993797191265495
+      },
+      "curve": {
+        "slug": "icv1-fp53-t34489701-4c02ceed",
+        "icv1": "ICV1:fp-5947698030651343:34489701:5947697996161643:5947698029766607:unk:unk:r:4c02ceed67dd",
+        "family": "prime",
+        "construction": "PrimeCurve { p: 5947698030651343, a: 5757116383569871, b: 3560173328417442 } (explicit)",
+        "field_degree": null,
+        "field_bits": 53,
+        "group_order": 5947697996161643,
+        "r": 5947697996161643,
+        "cofactor": 1,
+        "generator": [
+          "0x0",
+          "0x383203175ada8"
+        ],
+        "automorphisms_available": 2,
+        "registered": true,
+        "ec1": "EC1P53Cfph715d300521e1",
+        "curve_uid": "urn:ec-record:1:sha256:715d300521e1ffe3085a19215bd750887f4a74248372f0dfd77ac3c452029d77"
+      },
+      "target_law": "ecbench.public-fixture/v1",
+      "target_seed": 20261016,
+      "target_index": 0,
+      "target": [
+        "0xdf13b83abb1a1",
+        "0x11bdd503aa6cd7"
+      ],
+      "planted": null
+    }
+  ],
+  "executions": [
+    {
+      "seq": 0,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 14730007063272910935
+    },
+    {
+      "seq": 1,
+      "round": 0,
+      "warmup": false,
+      "arm": 1,
+      "workload": 0,
+      "algorithm_seed": 14730007063272910935
+    },
+    {
+      "seq": 2,
+      "round": 0,
+      "warmup": false,
+      "arm": 2,
+      "workload": 0,
+      "algorithm_seed": 14730007063272910935
+    },
+    {
+      "seq": 3,
+      "round": 1,
+      "warmup": false,
+      "arm": 2,
+      "workload": 0,
+      "algorithm_seed": 13907107281752344151
+    },
+    {
+      "seq": 4,
+      "round": 1,
+      "warmup": false,
+      "arm": 1,
+      "workload": 0,
+      "algorithm_seed": 13907107281752344151
+    },
+    {
+      "seq": 5,
+      "round": 1,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 13907107281752344151
+    },
+    {
+      "seq": 6,
+      "round": 2,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 6477629554238464168
+    },
+    {
+      "seq": 7,
+      "round": 2,
+      "warmup": false,
+      "arm": 1,
+      "workload": 0,
+      "algorithm_seed": 6477629554238464168
+    },
+    {
+      "seq": 8,
+      "round": 2,
+      "warmup": false,
+      "arm": 2,
+      "workload": 0,
+      "algorithm_seed": 6477629554238464168
+    },
+    {
+      "seq": 9,
+      "round": 3,
+      "warmup": false,
+      "arm": 2,
+      "workload": 0,
+      "algorithm_seed": 7908261434515652094
+    },
+    {
+      "seq": 10,
+      "round": 3,
+      "warmup": false,
+      "arm": 1,
+      "workload": 0,
+      "algorithm_seed": 7908261434515652094
+    },
+    {
+      "seq": 11,
+      "round": 3,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 7908261434515652094
+    },
+    {
+      "seq": 12,
+      "round": 4,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 8764158158171111503
+    },
+    {
+      "seq": 13,
+      "round": 4,
+      "warmup": false,
+      "arm": 1,
+      "workload": 0,
+      "algorithm_seed": 8764158158171111503
+    },
+    {
+      "seq": 14,
+      "round": 4,
+      "warmup": false,
+      "arm": 2,
+      "workload": 0,
+      "algorithm_seed": 8764158158171111503
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+# Conductor-gap native campaigns
+
+All 500 primary and 265 replication attempts verified. The 100-pair primary
+floor/crater native-backend CPU ratio is 0.980 [0.866, 1.111], descriptive L0.
+Endpoint-specific queue waves confound causal timing interpretation.
+The posthoc within-rho CPU ratio is 1.174 [0.99897, 1.38318]; its charged
+work interval also includes one. See the standalone `rho-controls` plot and
+the native `paired-rho.json` diagnostic in the study; common prices are incomplete.
+
+The orbit controls total 44,000 constructions. A generic recurrence gives
+either endpoint a cheap linked orbit; pinned means are 5.464 ms for the crater
+CM map and 6.857 ms for floor recurrence, versus 42.141 ms for a direct floor
+scalar loop. Native operation prices remain incomplete.
+
+A separate 96-bit crater/floor pair now has independent prime/order/conductor
+and torsion-module certificates: prime gap 125000000302579. The bounded
+codomain process completed in 2697.60 wall seconds. The historical timing
+panels remain at 53 bits; full point transport and dual maps remain future work.
+
+The [research report](../../research/conductor_gap_cm_orbits_20261015/REPORT.md)
+contains raw-data links, independent certificates and the requirement ledger.
+This folder mirrors its PDF, standalone SVG/150-dpi PNG figures and
+per-session reports under `runs/`. No complete-price IC/rho claim is admitted.

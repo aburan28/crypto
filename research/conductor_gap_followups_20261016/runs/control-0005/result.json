@@ -1,0 +1,55 @@
+{
+  "driver_wall_seconds": 0.000275336,
+  "input_sha256": "32df538b473247c837d46ec25b357800fb769f3b315c47d0508da21bf7001d91",
+  "result": {
+    "explicit_neg_calls": 0,
+    "field_ops": {
+      "invs": 1175,
+      "muls": 2692,
+      "sqrs": 1289
+    },
+    "hash_canonicalization_cost": "included in process CPU; key calls and canonicalizations counted, not assigned field-operation equivalents",
+    "key_calls": 4057,
+    "result": {
+      "automorphisms": 2,
+      "counters": {
+        "canonicalisations_uncharged": 996,
+        "cycle_escape_doublings": 9,
+        "cycles_length_2": 1,
+        "cycles_length_4": 6,
+        "cycles_other_length": 2,
+        "distinguished_point_bits": 5,
+        "jump_coefficient_bits": 9,
+        "jumps": 8,
+        "look_ahead_additions": 74,
+        "setup_additions": 63,
+        "setup_doublings": 84,
+        "start_additions": 25,
+        "useless_collisions": 0,
+        "verification_operations": 33,
+        "walk_operations": 970,
+        "walks_abandoned_in_a_cycle": 0,
+        "walks_capped": 0
+      },
+      "distinguished_points": 26,
+      "expected_steps": 1113.7221212039833,
+      "gae": 1175.0,
+      "group_ops": {
+        "adds": 1062,
+        "doubles": 113,
+        "scalar_mults": 10
+      },
+      "method": "fixed-canonical-negation/salted-partition",
+      "recovered": 1457823,
+      "s": 0.9349878372544858,
+      "s_walk": 0.7718622996909372,
+      "steps": 887,
+      "steps_over_expected": 0.8709533388376867,
+      "verified": true,
+      "walks": 26,
+      "wall_ns": 186291
+    },
+    "sqrt_r": 1256.7008394999982
+  },
+  "schema": "conductor-followup.run/v1"
+}

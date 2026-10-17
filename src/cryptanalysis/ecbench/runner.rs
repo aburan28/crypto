@@ -50,7 +50,7 @@ use crate::cryptanalysis::ecbench::record::{
 };
 use crate::cryptanalysis::ecbench::signals;
 use crate::cryptanalysis::ecbench::spec::{plan, Execution, Plan, Spec};
-use crate::cryptanalysis::ecbench::workload::{CurveSpec, Workload};
+use crate::cryptanalysis::ecbench::workload::Workload;
 
 pub const SESSION_SCHEMA: &str = "ecbench.session/v1";
 
@@ -561,7 +561,7 @@ fn execute_session(
             let inst = p.instance(ex.workload);
             let input = ChildInput {
                 schema: CHILD_INPUT_SCHEMA.into(),
-                curve: CurveSpec::explicit(inst).unwrap_or_else(|| w.curve_spec.clone()),
+                curve: w.curve_spec.for_child(inst),
                 target_seed: w.target_seed,
                 target_index: w.target_index,
                 target_kind: w.kind(),

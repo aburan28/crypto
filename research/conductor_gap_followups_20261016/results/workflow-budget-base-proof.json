@@ -1,0 +1,18 @@
+{
+  "base": "addb6a0212821de9e810d49dac3a2edd883081a1",
+  "violations": [
+    {
+      "path": ".github/workflows/weak-curve-conjectures.yml",
+      "unchanged_from_origin_main": true,
+      "base_sha256": "9143053691c37f6b8513a3f2162b4b903c58c3221cedc1eaa60aa816e150f872",
+      "head_sha256": "9143053691c37f6b8513a3f2162b4b903c58c3221cedc1eaa60aa816e150f872"
+    },
+    {
+      "path": ".github/workflows/weak-curve-lean.yml",
+      "unchanged_from_origin_main": true,
+      "base_sha256": "6b6898086ca73664b910487d379787a5dcd94fc0d6f2d980dcd79820970f1e11",
+      "head_sha256": "6b6898086ca73664b910487d379787a5dcd94fc0d6f2d980dcd79820970f1e11"
+    }
+  ],
+  "own_workflow_timeout_minutes": 25
+}

@@ -1,0 +1,40 @@
+  ***   Warning: new maximum stack size = 2000003072 (1907.352 Mbytes).
+  ***   syntax error, unexpected end of file, expecting )-> or ',' or ')': 
+  ***   for(ci=1,4,
+  ***             ^-
+... skipping file 'research/conductor_gap_followups_20261016/native/dose.gp'
+  ***   at top-level: f=[35,55,65,77][ci];t=134217729+2*ci
+  ***                                 ^--------------------
+  ***   incorrect type in gtos [integer expected] (t_POL).
+  ***   at top-level: ...t^2+19*f^2)/4;N=p+1-t;if(isprime(p)&&isprime(N
+  ***                                             ^---------------------
+  *** isprime: incorrect type in BPSW_psp (t_POL).
+  ***   syntax error, unexpected end of file, expecting )-> or ',' or ')': 
+  ***   for(si=1,4,
+  ***             ^-
+  ***   at top-level: ...,factor(f)[1,1],factor(f)[2,1],f][si]
+  ***                                             ^------------
+  ***   nonexistent component: index > 1
+  ***   at top-level: H=polclass(-19*c^2);js=polrootsmod(H,p);if(#js
+  ***                   ^--------------------------------------------
+  *** polclass: incorrect type in polclass (t_POL).
+  ***   syntax error, unexpected end of file, expecting )-> or ',' or ')': 
+  ***   for(tr=0,1,
+  ***             ^-
+  ***   at top-level: if(tr,E=ellinit(elltwist(E)));G=0
+  ***                                 ^-----------------
+  *** elltwist: incorrect type in elltwist [missing P] (t_VEC).
+  ***   at top-level: for(x=0,1000,ys=ellordinate(E,Mod(x,p));if(#ys
+  ***                                 ^------------------------------
+  *** ellordinate: domain error in sqrtn: valuation != Mod(0, 2)
+  ***   syntax error, unexpected ')', expecting end of file: 
+  ***   if(G!=0,tw=tr;break));
+  ***                       ^--
+  ***   at top-level: if(ellmul(E,G,N)!=[0]||N<=4*sqrtint(p),error("
+  ***                    ^-------------------------------------------
+  *** ellmul: incorrect type in checkellpt (t_POL).
+  ***   at top-level: ...t(E.a6),",\"Gx\":",lift(G[1]),",\"Gy\":",lift(
+  ***                                             ^---------------------
+  ***   incorrect type in _[_] OCcompo1 [not a vector] (t_POL).
+  ***   syntax error, unexpected ')', expecting end of file: ));quit
+  ***                                                        ^-------

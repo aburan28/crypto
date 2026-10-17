@@ -43,6 +43,7 @@ use crate::cryptanalysis::ic_boundary::{
     BinaryInstance, Calibration, CountedGroup, CubicClasses, FieldOps, GroupOps, NegationClasses,
     PhaseCost, PointClasses, PrimeInstance, PrimePoint, QuarticClasses, RhoResult, RhoWalk,
 };
+use crate::cryptanalysis::ic_framework::cm_orbit::CmOrbitBase;
 use crate::cryptanalysis::ic_framework::fiber::{
     FiberDescentOracle, FiberFrobeniusMitmOracle, FiberMitmOracle,
 };
@@ -400,6 +401,51 @@ pub fn registry() -> &'static [MethodDecl] {
                     default: Some("64"),
                     help: "charged-addition budget as a multiple of √r before the run counts as exhausted",
                 },
+            ],
+        },
+        MethodDecl {
+            id: "ic.cm_folded_native_v1",
+            family: "ic",
+            summary: "CM scalar-orbit signed MITM2, native backend with independent Rust point/relation replay; unpriced native work retained",
+            entry: "ecbench::cm_folded::solve",
+            applies: Applies::Any,
+            params: &[
+                ParamDecl { name: "backend", default: None, help: "compiled native/folded.cpp executable" },
+                ParamDecl { name: "backend_sha256", default: None, help: "required content hash of native backend" },
+                ParamDecl { name: "mode", default: Some("scalar"), help: "scalar or velu (crater only)" },
+                ParamDecl { name: "size", default: Some("8192"), help: "abscissae, four seed columns" },
+                ParamDecl { name: "query_limit", default: Some("1000000000"), help: "injective point query cap below r" },
+                ParamDecl { name: "seconds", default: Some("1800"), help: "cold wall watchdog; failures are censored" },
+            ],
+        },
+        MethodDecl {
+            id: "ic.cm_folded_recurrence_v1",
+            family: "ic",
+            summary: "Generic quadratic-recurrence scalar-orbit signed MITM2, native backend with independent Rust point/relation replay; unpriced native work retained",
+            entry: "ecbench::cm_folded::solve",
+            applies: Applies::Any,
+            params: &[
+                ParamDecl { name: "backend", default: None, help: "compiled native/folded.cpp executable" },
+                ParamDecl { name: "backend_sha256", default: None, help: "required content hash of native backend" },
+                ParamDecl { name: "mode", default: Some("scalar"), help: "scalar or velu (crater only)" },
+                ParamDecl { name: "size", default: Some("8192"), help: "abscissae, four seed columns" },
+                ParamDecl { name: "query_limit", default: Some("1000000000"), help: "injective point query cap below r" },
+                ParamDecl { name: "seconds", default: Some("1800"), help: "cold wall watchdog; failures are censored" },
+            ],
+        },
+        MethodDecl {
+            id: "ic.cm_folded_native_d43_v1",
+            family: "ic",
+            summary: "D=-43 degree-11 CM scalar-orbit signed MITM2, native backend with independent Rust point/relation replay; unpriced native work retained",
+            entry: "ecbench::cm_folded::solve",
+            applies: Applies::Any,
+            params: &[
+                ParamDecl { name: "backend", default: None, help: "compiled native/folded.cpp executable" },
+                ParamDecl { name: "backend_sha256", default: None, help: "required content hash of native backend" },
+                ParamDecl { name: "mode", default: Some("scalar"), help: "scalar or velu (crater only)" },
+                ParamDecl { name: "size", default: Some("8192"), help: "abscissae, four seed columns" },
+                ParamDecl { name: "query_limit", default: Some("1000000000"), help: "injective point query cap below r" },
+                ParamDecl { name: "seconds", default: Some("1800"), help: "cold wall watchdog; failures are censored" },
             ],
         },
         MethodDecl {
@@ -1056,6 +1102,9 @@ pub fn solve(
     seed: u64,
 ) -> Result<SolveReport, String> {
     let d = decl(&m.id).ok_or("unregistered method")?;
+    if m.id.starts_with("ic.cm_folded_") && !matches!(inst, Instance::Prime(_)) {
+        return Err("CM folded controls require a prime-field instance".into());
+    }
     // A `*_full` method runs its base unchanged and is repriced after.
     let full = full_price::base_of(&m.id);
     let base_m;
@@ -1132,6 +1181,13 @@ fn solve_inner(
         }
         (Instance::Binary(i), _) if m.id == "ic.shared_rank" => {
             solve_shared_rank(m, i, curve, FastPoint::affine(tx, ty), seed)
+        }
+        (Instance::Prime(i), _)
+            if m.id == "ic.cm_folded_native_v1"
+                || m.id == "ic.cm_folded_native_d43_v1"
+                || m.id == "ic.cm_folded_recurrence_v1" =>
+        {
+            super::cm_folded::solve(m, i, PrimePoint::affine(tx, ty), seed)
         }
         (Instance::Prime(i), "ic") => solve_ic_prime(m, i, curve, PrimePoint::affine(tx, ty), seed),
         (Instance::Fp4(i), "ic") if m.id == "ic.pipeline" => {

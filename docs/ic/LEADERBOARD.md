@@ -217,17 +217,6 @@ Copied from native analysis: eight independent one-target workloads per fixed cu
 | 8209 | 0.975242 | 0.603463 to 1.450934 |
 | 131101 | 1.127134 | 0.922471 to 1.341694 |
 
-## Linear-algebra engine, outside tables A–C
-
-The linear-algebra phase alone, on synthetic m = 3 relation matrices over a 62-bit prime (class: engineering). Whole solve from relation rows to verified logarithms, median of 3 seeds in one session; ratios are per-seed medians [min, max]. `legacy` is the filter tables A–C were measured with; `CADO-style` is `FilterOptions::cado()` (CADO-NFS's purge and merge, ported), the `ic logs` default since #1861; CADO-NFS ran its own purge + merge-dl + bwc on the same matrices (+1 coefficients). Its share of S in every row above is in the phase table, and no row moves. Study: [research/la_engines_20261014/](../../research/la_engines_20261014/).
-
-| columns | legacy | CADO-style | legacy / CADO-style | CADO-NFS | CADO-NFS / ours | core: legacy → CADO-style (CADO-NFS) |
-|--:|--:|--:|:--|--:|:--|:--|
-| 16,384 | 0.384 s | 0.151 s | 2.48× [2.01, 2.53] | 3.71 s | 20.57× [17.73, 23.09] | 1,675 → 234 (271) |
-| 65,536 | 4.47 s | 1.29 s | 3.49× [3.46, 3.50] | 5.48 s | 4.26× [4.24, 4.50] | 6,743 → 852 (921) |
-| 131,072 | 18.2 s | 3.80 s | 4.72× [4.70, 5.07] | 8.00 s | 2.09× [2.09, 2.19] | 13,369 → 1,652 (1,660) |
-| 262,144 | 86.6 s | 8.35 s | 10.40× [9.99, 11.06] | 14.7 s | 1.93× [1.74, 1.96] | 26,750 → 3,424 (3,512) |
-
 ## Sources
 
 - `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json` — sha256 `28aadc91af9e4c0b…`
@@ -252,8 +241,7 @@ The linear-algebra phase alone, on synthetic m = 3 relation matrices over a 62-b
 - `research/f4_f5_f6_cross_family_20261011/ANALYSIS.json` — sha256 `143247c6b81d3539…`
 - `research/ecbench_n41_n53_shared_rank_20261005/DECISION.json` — sha256 `fe55908f837840ee…`
 - `research/ecbench_conductor_gap_20261012/analysis.json` — sha256 `0ff9b20fd773ea67…`
-- `research/la_engines_20261014/summary.json` — sha256 `b34650a95c5f106c…`
 - `research/ecbench_frontier_20261013/frontier-data.json` — sha256 `765f6e8d05ebbf75…`
-- `docs/curves/registry.json` — sha256 `22b2ffef99720f2b…`
+- `docs/curves/registry.json` — sha256 `b2ef8d0684b676a5…`
 - `docs/curves/ic/curves.schema.json` — sha256 `42cd9793dd299384…`
 - `docs/curves/ic/curves.yaml` — sha256 `ab4891397fe07fca…`

@@ -608,7 +608,7 @@ fn binary_plugins() -> crypto_lib::cryptanalysis::ecbench::methods::BinaryPlugin
     }
 }
 
-fn main() -> ExitCode {
+pub fn main() -> ExitCode {
     // Oracles this binary links that the library cannot name (see
     // `pdp3_koblitz`); registered before any run, child or replay.
     crypto_lib::cryptanalysis::ecbench::methods::register_binary_plugins(binary_plugins());
@@ -945,8 +945,7 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
             let w = &p.workloads[ex.workload];
             let input = record::ChildInput {
                 schema: record::CHILD_INPUT_SCHEMA.into(),
-                curve: workload::CurveSpec::explicit(p.instance(ex.workload))
-                    .unwrap_or_else(|| w.curve_spec.clone()),
+                curve: w.curve_spec.for_child(p.instance(ex.workload)),
                 target_seed: w.target_seed,
                 target_index: w.target_index,
                 target_kind: w.kind(),

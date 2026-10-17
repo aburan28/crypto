@@ -1,0 +1,52 @@
+{
+  "schema": "ecbench.session/v1",
+  "session_id": "ECBS1h58fe4527e9bd",
+  "label": "Conductor-gap replication fresh-floor-0",
+  "spec_id": "ECS1h3c1902bbe3ef",
+  "spec_sha256": "3c1902bbe3eff1d8cc4376a27d5874ac53e7ccaac8300ee891cfd3f3090d18e0",
+  "env_class_id": "ECBENV2h217559836c7c",
+  "host_sha256": "ba5be8bfffecfcdf77731745c07476eb7cdd9edfcbf404c36101c7f431b4385c",
+  "plan_sha256": "934f503b24dd48c76adb10be4726c4fa73b7801c47afc82b47c6c3ef12727199",
+  "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+  "git_commit": "c1d154134ac71dccf24f38f030b3136ed4a7a43e",
+  "git_dirty": true,
+  "options": {
+    "cpus": "none",
+    "lock_path": "/tmp/cm-rep-fresh-floor-0.lock",
+    "wait_for_lock": false,
+    "allow_busy": true,
+    "thresholds": {
+      "settle_seconds": 0.1,
+      "max_other_cpu": 0.1,
+      "max_psi": 5.0,
+      "max_preemptions_per_second": 50.0
+    },
+    "exe": "/proc/self/exe"
+  },
+  "cpu_plan": null,
+  "preflight": null,
+  "eviction": null,
+  "runner_on_run_cpu": false,
+  "runner_cpus": null,
+  "ticks_per_second": 100,
+  "grading_version": 2,
+  "child_env_sha256": "5fcca52408a68c08609b1aebe24bb4f03f94c8f0ec0e418fdf510c73a93a4e98",
+  "child_env": {
+    "HOME": "/home/agent",
+    "LC_ALL": "C",
+    "OMP_NUM_THREADS": "1",
+    "PATH": "/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/opt/codex/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback",
+    "RAYON_NUM_THREADS": "1",
+    "RUST_BACKTRACE": "0",
+    "RUST_MIN_STACK": "8388608"
+  },
+  "started_unix_ms": 1792065147358,
+  "finished_unix_ms": 1792065798600,
+  "status": "complete",
+  "executions_planned": 12,
+  "records_written": 12,
+  "records_sha256": "85009a74013e62715589e5c433a71c129e8712a71f8d9f332a50139d20a88725",
+  "status_counts": {
+    "verified": 12
+  }
+}

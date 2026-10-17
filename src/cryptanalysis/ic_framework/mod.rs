@@ -62,6 +62,7 @@
 //! worked example of adding a solver, how to run a sweep, and how to
 //! report what comes out.
 
+pub mod cm_orbit;
 pub mod fiber;
 pub mod large_prime;
 pub mod linalg;

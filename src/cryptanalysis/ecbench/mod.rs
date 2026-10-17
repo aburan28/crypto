@@ -45,6 +45,7 @@ pub mod canonical;
 pub mod challenge;
 pub mod claim;
 pub mod claw;
+pub mod cm_folded;
 pub mod compare;
 pub mod conductor_gap;
 pub mod db;

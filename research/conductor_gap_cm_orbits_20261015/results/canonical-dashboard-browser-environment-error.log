@@ -1,0 +1,20 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Chrome launch deadline exceeded: chrome_crashpad_handler: --database is required
+Try 'chrome_crashpad_handler --help' for more information.
+[47299:47299:1015/165200.620729:ERROR:third_party/crashpad/crashpad/util/file/filesystem_posix.cc:63] mkdir : No such file or directory (2)
+[47299:47299:1015/165200.628986:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:172] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /usr/lib/chromium/chrome-sandbox is owned by root and has mode 4755.
+[47317:47317:0100/000000.687731:ERROR:content/zygote/zygote_linux.cc:662] write: Broken pipe (32)
+
+    at file:///workspace/crypto/tools/check_ic_dashboard_browser.mjs:32:12 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

@@ -465,6 +465,10 @@ def ecbench_sessions(
                     agg["verified"] += 1
                     agg["s_sum"] += float(r["cost"]["s"])
                     agg["floor_sum"] += float(r["boundaries"]["floor_s"])
+                    # A zero charged lower bound with unpriced native work is
+                    # not a complete zero-cost solve or a sortable S=0 result.
+                    if r["cost"].get("unpriced") and r["cost"].get("total_gae") == 0:
+                        agg["unpriced_zero_runs"] += 1
         sessions.append(
             {
                 "session_id": s["session_id"],
@@ -492,8 +496,9 @@ def ecbench_sessions(
                     "method_id": agg["method_id"],
                     "runs": agg["n"],
                     "verified": agg["verified"],
-                    "mean_s": round(agg["s_sum"] / agg["verified"], 4) if agg["verified"] else None,
-                    "mean_ratio_to_floor": round(agg["s_sum"] / agg["floor_sum"], 3) if agg["floor_sum"] else None,
+                    "mean_s": round(agg["s_sum"] / agg["verified"], 4) if agg["verified"] and not agg["unpriced_zero_runs"] else None,
+                    "mean_ratio_to_floor": round(agg["s_sum"] / agg["floor_sum"], 3) if agg["floor_sum"] and not agg["unpriced_zero_runs"] else None,
+                    **({"unpriced_zero_runs": agg["unpriced_zero_runs"], "score_status": "unknown complete price; zero charged lower bound"} if agg["unpriced_zero_runs"] else {}),
                 }
             )
     for f in fbs.values():
@@ -534,6 +539,8 @@ def yield_row(r: dict, session_id: str) -> dict:
     workload = r["workload"]
     curve = workload.get("curve") or {}
     phase_gae = {p["name"]: p.get("gae") for p in r.get("phases", [])}
+    cost = r.get("cost") or {}
+    uninformative_zero = bool(cost.get("unpriced")) and cost.get("total_gae") == 0
     return {
         "run_id": r["run_id"],
         "record_id": r["record_id"],
@@ -569,8 +576,9 @@ def yield_row(r: dict, session_id: str) -> dict:
         "matrix_rank": la.get("rank"),
         "row_ops": la.get("row_ops"),
         "gae": {k: phase_gae.get(k) for k in ("factor_base", "oracle_setup", "relations", "linear_algebra", "verify")},
-        "total_gae": (r.get("cost") or {}).get("total_gae"),
-        "s": (r.get("cost") or {}).get("s"),
+        "total_gae": None if uninformative_zero else cost.get("total_gae"),
+        "s": None if uninformative_zero else cost.get("s"),
+        **({"charged_gae_lower_bound": 0, "charged_s_lower_bound": 0, "score_status": "unknown complete price; zero charged lower bound", "unpriced": cost["unpriced"]} if uninformative_zero else {}),
         "deterministic": (r.get("cost") or {}).get("deterministic"),
         "solver": r.get("solver"),
     }

@@ -1,0 +1,524 @@
+overview	Check frozen evidence pins and generated overview	﻿2026-10-15T16:20:44.2117483Z ##[group]Run node tools/render_ic_dashboard.mjs --check
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.2117974Z [36;1mnode tools/render_ic_dashboard.mjs --check[0m
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.2387174Z shell: /usr/bin/bash -e {0}
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.2387494Z ##[endgroup]
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4332707Z node:internal/modules/run_main:123
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4333453Z     triggerUncaughtException(
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4333896Z     ^
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4334091Z 
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4334768Z AssertionError [ERR_ASSERTION]: Dashboard is stale; run node tools/render_ic_dashboard.mjs
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4335655Z + actual - expected
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4336097Z ... Skipped lines
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4336317Z 
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4336487Z   '<!doctype html>\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4336887Z     '<html lang="en">\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4337277Z     '<head>\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4337695Z     '<meta charset="utf-8">\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4338423Z     '<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4339148Z ...
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4339663Z     '    background: var(--surface-sunk); font-family: var(--mono); font-size: 10.5px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4340791Z +   '    letter-spacing: .09em; text-transform: uppercase; color: var('... 1764833 more characters
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4341564Z -   '    letter-spacing: .09em; text-transform: uppercase; color: var('... 1761880 more characters
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4341940Z 
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4342233Z     at file:///home/runner/work/crypto/crypto/tools/render_ic_dashboard.mjs:438:10
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4342797Z     at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4343368Z     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4343992Z     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4344428Z   generatedMessage: false,
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4344679Z   code: 'ERR_ASSERTION',
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4344942Z   actual: '<!doctype html>\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4345203Z     '<html lang="en">\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4345426Z     '<head>\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4345662Z     '<meta charset="utf-8">\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4346072Z     '<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4347198Z     '<meta name="description" content="Understand the IC tournament decision, solver readiness, one-target pipeline and evidence. Frozen toy-panel measurements, visible uncertainty and preserved failures.">\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4348037Z     '<!--\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4348312Z     '  Standalone build of the cost ledgers in\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4348851Z     '  research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md (three regimes on one\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4349570Z     '  axis, frozen run in docs/ic/runs/) and research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4351335Z     '  §§9-11 (experiments/).  Open it directly in a browser; its overview needs no network requests\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4352017Z     '  or installed dependencies.  Every figure on the page\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4352588Z     '  is taken from the frozen experiment JSON; see the footer for the conversion\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4353200Z     '  factors and for which numbers are extrapolations rather than measurements.\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4353621Z     '-->\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4353825Z     '<style>\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4354095Z     '  html { color-scheme: light dark; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4354422Z     '  img { max-width: 100%; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4355043Z     '  [hidden] { display: none !important; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4358880Z     '.gain-overview{display:flex;gap:28px;justify-content:space-between;border:1px solid #486e68;border-radius:12px;padding:24px;margin:24px 0 32px}.gain-overview h2{font-size:23px;margin:12px 0}.gain-overview p{max-width:720px;line-height:1.65}.gain-overview nav{display:flex;flex-direction:column;justify-content:center;gap:10px;min-width:215px}.gain-overview a{display:block;padding:10px;border:1px solid #486e68;border-radius:6px;text-decoration:none}.gain-overview a:focus-visible{outline:3px solid #ae8739;outline-offset:3px}@media(max-width:740px){.gain-overview{flex-direction:column;padding:18px}.gain-overview nav{min-width:0}}\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4363322Z     '</style>\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4364107Z     '<title>IC Research Lab — Decisions, Pipeline &amp; Evidence</title>\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4364749Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4365070Z     '<style>\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4365409Z     '  :root {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4365810Z     '    --ground: #e7ebef;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4366268Z     '    --surface: #fbfcfd;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4366763Z     '    --surface-sunk: #f0f3f6;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4367215Z     '    --ink: #0e1922;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4367649Z     '    --ink-2: #354855;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4368089Z     '    --muted: #576976;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4368530Z     '    --rule: #ccd5dc;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4369007Z     '    --rule-soft: #dde4e9;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4369480Z     '    --data: #1f6fd0;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4369921Z     '    --data-soft: #d7e4f6;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4370558Z     '    --bound: #b3372a;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4371017Z     '    --bound-soft: #f3dcd8;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4371774Z     '    --shadow: 0 1px 2px rgba(14, 25, 34, .06), 0 8px 24px -16px rgba(14, 25, 34, .18);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4372433Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4372972Z     '    --serif: "Newsreader", "Iowan Old Style", Georgia, serif;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4373964Z     '    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4374956Z     '    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4375595Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4375916Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4376364Z     '  @media (prefers-color-scheme: dark) {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4376961Z     '    :root:not([data-theme="light"]) {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4377479Z     '      --ground: #0d1318;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4377933Z     '      --surface: #151d24;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4378398Z     '      --surface-sunk: #101820;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4378893Z     '      --ink: #e3eaef;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4379355Z     '      --ink-2: #b6c5cf;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4379884Z     '      --muted: #8799a6;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4380585Z     '      --rule: #25323a;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4381052Z     '      --rule-soft: #1d272e;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4381517Z     '      --data: #4e92de;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4382007Z     '      --data-soft: #1c2e42;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4382468Z     '      --bound: #d9604e;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4382915Z     '      --bound-soft: #38221f;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4383630Z     '      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .7);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4384290Z     '    }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4384616Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4384923Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4385291Z     '  :root[data-theme="dark"] {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4385764Z     '    --ground: #0d1318;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4386217Z     '    --surface: #151d24;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4386692Z     '    --surface-sunk: #101820;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4387136Z     '    --ink: #e3eaef;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4387560Z     '    --ink-2: #b6c5cf;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4388133Z     '    --muted: #8799a6;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4388578Z     '    --rule: #25323a;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4389007Z     '    --rule-soft: #1d272e;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4389677Z     '    --data: #4e92de;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4390348Z     '    --data-soft: #1c2e42;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4390844Z     '    --bound: #d9604e;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4391302Z     '    --bound-soft: #38221f;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4392049Z     '    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .7);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4392709Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4393233Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4393646Z     '  * { box-sizing: border-box; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4394108Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4394431Z     '  body {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4394792Z     '    margin: 0;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4395256Z     '    padding-inline: 20px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4395771Z     '    padding-block: 40px 64px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4396459Z     '    background: var(--ground);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4396972Z     '    color: var(--ink);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4397455Z     '    font-family: var(--sans);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4397960Z     '    font-size: 15px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4398414Z     '    line-height: 1.55;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4398960Z     '    -webkit-font-smoothing: antialiased;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4399462Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4399780Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4400760Z     '  .wrap { max-width: 1020px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4401554Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4401976Z     '  /* ---------- header ---------- */\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4402695Z     '  header { display: flex; flex-direction: column; gap: 14px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4403305Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4403625Z     '  .eyebrow {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4404069Z     '    font-family: var(--mono);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4404573Z     '    font-size: 11px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4405022Z     '    font-weight: 500;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4405494Z     '    letter-spacing: .13em;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4406013Z     '    text-transform: uppercase;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4406540Z     '    color: var(--muted);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4406960Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4407289Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4407600Z     '  h1 {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4408010Z     '    font-family: var(--serif);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4408515Z     '    font-weight: 500;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4409042Z     '    font-size: clamp(30px, 5.4vw, 45px);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4409594Z     '    line-height: 1.08;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4410262Z     '    letter-spacing: -.012em;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4410724Z     '    margin: 0;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4411155Z     '    text-wrap: balance;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4411570Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4411885Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4412196Z     '  .verdict {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4412622Z     '    font-family: var(--serif);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4413180Z     '    font-size: clamp(17px, 2.3vw, 20px);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4413717Z     '    line-height: 1.45;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4414178Z     '    color: var(--ink-2);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4414640Z     '    max-width: 62ch;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4415040Z     '    margin: 0;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4415464Z     '    text-wrap: pretty;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4415851Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4416148Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4416454Z     '  .facts {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4416809Z     '    display: grid;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4417464Z     '    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4418093Z     '    gap: 1px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4418522Z     '    background: var(--rule);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4419026Z     '    border: 1px solid var(--rule);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4419536Z     '    border-radius: 3px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4420178Z     '    overflow: hidden;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4420655Z     '    margin-top: 4px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4421053Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4421904Z     '  .fact { background: var(--surface); padding: 14px 16px; display: flex; flex-direction: column; gap: 3px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4422932Z     '  .fact dt {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4423558Z     '    font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4424329Z     '    text-transform: uppercase; color: var(--muted);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4424838Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4425150Z     '  .fact dd {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4426062Z     '    margin: 0; font-family: var(--mono); font-size: 19px; font-weight: 500;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4427025Z     '    font-variant-numeric: tabular-nums; letter-spacing: -.01em;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4427658Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4428369Z     '  .fact p { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.4; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4429097Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4429502Z     '  /* ---------- panels ---------- */\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4430429Z     '  section { display: flex; flex-direction: column; gap: 0; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4431042Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4431369Z     '  .panel {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4431817Z     '    background: var(--surface);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4432364Z     '    border: 1px solid var(--rule);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4432894Z     '    border-radius: 4px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4433394Z     '    box-shadow: var(--shadow);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4433835Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4434584Z     '  .panel-head { padding: 18px 20px 0; display: flex; flex-direction: column; gap: 5px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4435372Z     '  .panel-head h2 {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4436035Z     '    font-family: var(--serif); font-weight: 500; font-size: 21px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4436773Z     '    letter-spacing: -.008em; margin: 0;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4437255Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4438083Z     '  .panel-head p { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 66ch; line-height: 1.5; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4439208Z     '  #joint-dimension-length .panel-body { padding: 16px 20px 20px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4440442Z     '  #ic-tournament-reference-history .panel-body { padding: 16px 20px 20px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4441538Z     '  #joint-dimension-length .panel-body > p { font-size: 13.5px; line-height: 1.55; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4442263Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4442736Z     '  .chart-scroll { overflow-x: auto; padding: 10px 8px 4px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4443356Z     '  .chart-scroll svg { display: block; width: 100%; min-width: 840px; height: auto; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4443807Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4444013Z     '  .legend {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4444340Z     '    display: flex; flex-wrap: wrap; gap: 6px 20px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4444707Z     '    padding: 4px 20px 18px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4445469Z     '    font-family: var(--mono); font-size: 11.5px; color: var(--muted);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4446119Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4446594Z     '  .legend span { display: inline-flex; align-items: center; gap: 7px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4447191Z     '  /* A legend line that is prose, not a swatch key: one block of text, so the\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4447794Z     '     <b>, <code> and <sup> inside it stay inline instead of becoming flex items. */\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4448330Z     '  .legend > span:not(:has(> .swatch)) { display: block; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4448938Z     '  .swatch { width: 18px; height: 9px; border-radius: 2px; background: var(--data); flex: none; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4449723Z     '  .swatch.ghost { background: none; border-top: 1.5px dashed var(--muted); height: 0; border-radius: 0; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4450951Z     '  .swatch.bound { background: var(--bound); width: 3px; height: 14px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4451591Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4452022Z     '  /* ---------- two-up ---------- */\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4452796Z     '  .duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4453515Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4453783Z     '  /* ---------- ledger rows ---------- */\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4454269Z     '  .ledger { padding: 14px 20px 20px; display: flex; flex-direction: column; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4455107Z     '  .lrow { display: grid; grid-template-columns: 1fr 96px; gap: 4px 14px; padding: 9px 0; border-bottom: 1px solid var(--rule-soft); }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4455783Z     '  .lrow:last-child { border-bottom: 0; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4456337Z     '  .lrow .name { font-size: 13.5px; line-height: 1.35; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4456677Z     '  .lrow .num {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4457065Z     '    font-family: var(--mono); font-size: 13.5px; font-weight: 500;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4457659Z     '    font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4458087Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4458624Z     '  .lbar { grid-column: 1 / -1; height: 8px; background: var(--surface-sunk); border-radius: 0 4px 4px 0; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4459383Z     '  .lbar i { display: block; height: 100%; background: var(--data); border-radius: 0 4px 4px 0; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4459836Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4460405Z     '  /* ---------- exponent track ---------- */\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4460762Z     '  .exp { padding: 14px 20px 8px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4461441Z     '  .erow { display: grid; grid-template-columns: minmax(118px, 1.2fr) minmax(120px, 2fr) 44px; align-items: stretch; gap: 12px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4462186Z     '  .erow .name { font-size: 13px; line-height: 1.3; align-self: center; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4462577Z     '  .erow .num {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4462953Z     '    font-family: var(--mono); font-size: 13px; font-weight: 500;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4463523Z     '    font-variant-numeric: tabular-nums; text-align: right; align-self: center;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4463942Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4464246Z     '  .track { position: relative; min-height: 38px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4464620Z     '  .track::before {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4465002Z     '    content: ""; position: absolute; left: 0; right: 0; top: 50%;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4465430Z     '    height: 1px; background: var(--rule);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4465717Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4465922Z     '  .track::after {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4466302Z     '    content: ""; position: absolute; left: 38.5%; top: 0; bottom: 0;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4466796Z     '    width: 2px; margin-left: -1px; background: var(--bound);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4467136Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4467332Z     '  .dot {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4467770Z     '    position: absolute; top: 50%; width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4468415Z     '    border-radius: 50%; background: var(--data); box-shadow: 0 0 0 2px var(--surface);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4468837Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4469036Z     '  .exp-axis {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4469551Z     '    display: grid; grid-template-columns: minmax(118px, 1.2fr) minmax(120px, 2fr) 44px; gap: 12px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4470536Z     '    font-family: var(--mono); font-size: 10.5px; color: var(--muted); padding-bottom: 12px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4470972Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4471296Z     '  .exp-axis .ticks { position: relative; height: 14px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4471996Z     '  .exp-axis .ticks b { position: absolute; top: 0; font-weight: 400; transform: translateX(-50%); white-space: nowrap; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4472555Z     '  .rho-flag {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4472954Z     '    position: absolute; top: 0; left: 38.5%; transform: translateX(-50%);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4473482Z     '    color: var(--bound); font-weight: 500; white-space: nowrap;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4473832Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4474025Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4474260Z     '  /* ---------- table ---------- */\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4474659Z     '  .table-scroll { overflow-x: auto; padding: 4px 0 0; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4475387Z     '  table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 13.5px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4496629Z     '  caption { text-align: left; padding: 0 20px 12px; font-size: 13.5px; color: var(--muted); }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4497693Z     '  th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--rule-soft); }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4498522Z     '  th:first-child, td:first-child { padding-left: 20px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4499022Z     '  th:last-child, td:last-child { padding-right: 20px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4499377Z     '  thead th {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4499794Z     '    font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4502369Z     '    text-transform: uppercase; color: var(--muted); font-weight: 500;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4502937Z     '    border-bottom: 1px solid var(--rule); white-space: nowrap;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4503313Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4503899Z     '  td.n, th.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4504479Z     '  tbody tr.group td {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4504948Z     '    background: var(--surface-sunk); font-family: var(--mono); font-size: 10.5px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4505616Z     '    letter-spacing: .09em; text-transform: uppercase; color: var('... 1764833 more characters,
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4506134Z   expected: '<!doctype html>\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4506407Z     '<html lang="en">\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4506635Z     '<head>\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4506877Z     '<meta charset="utf-8">\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4507293Z     '<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4508415Z     '<meta name="description" content="Understand the IC tournament decision, solver readiness, one-target pipeline and evidence. Frozen toy-panel measurements, visible uncertainty and preserved failures.">\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4509265Z     '<!--\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4509544Z     '  Standalone build of the cost ledgers in\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4510372Z     '  research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md (three regimes on one\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4511123Z     '  axis, frozen run in docs/ic/runs/) and research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4512070Z     '  §§9-11 (experiments/).  Open it directly in a browser; its overview needs no network requests\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4512674Z     '  or installed dependencies.  Every figure on the page\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4513207Z     '  is taken from the frozen experiment JSON; see the footer for the conversion\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4513809Z     '  factors and for which numbers are extrapolations rather than measurements.\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4514221Z     '-->\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4514418Z     '<style>\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4514695Z     '  html { color-scheme: light dark; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4515021Z     '  img { max-width: 100%; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4515345Z     '  [hidden] { display: none !important; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4518082Z     '.gain-overview{display:flex;gap:28px;justify-content:space-between;border:1px solid #486e68;border-radius:12px;padding:24px;margin:24px 0 32px}.gain-overview h2{font-size:23px;margin:12px 0}.gain-overview p{max-width:720px;line-height:1.65}.gain-overview nav{display:flex;flex-direction:column;justify-content:center;gap:10px;min-width:215px}.gain-overview a{display:block;padding:10px;border:1px solid #486e68;border-radius:6px;text-decoration:none}.gain-overview a:focus-visible{outline:3px solid #ae8739;outline-offset:3px}@media(max-width:740px){.gain-overview{flex-direction:column;padding:18px}.gain-overview nav{min-width:0}}\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4520519Z     '</style>\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4520969Z     '<title>IC Research Lab — Decisions, Pipeline &amp; Evidence</title>\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4521512Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4521712Z     '<style>\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4521916Z     '  :root {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4522160Z     '    --ground: #e7ebef;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4522446Z     '    --surface: #fbfcfd;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4522739Z     '    --surface-sunk: #f0f3f6;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4523011Z     '    --ink: #0e1922;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4523285Z     '    --ink-2: #354855;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4523674Z     '    --muted: #576976;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4523935Z     '    --rule: #ccd5dc;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4524206Z     '    --rule-soft: #dde4e9;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4524482Z     '    --data: #1f6fd0;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4524746Z     '    --data-soft: #d7e4f6;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4525028Z     '    --bound: #b3372a;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4525301Z     '    --bound-soft: #f3dcd8;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4525756Z     '    --shadow: 0 1px 2px rgba(14, 25, 34, .06), 0 8px 24px -16px rgba(14, 25, 34, .18);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4526156Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4526481Z     '    --serif: "Newsreader", "Iowan Old Style", Georgia, serif;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4527030Z     '    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4527591Z     '    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4527960Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4528151Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4528414Z     '  @media (prefers-color-scheme: dark) {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4528769Z     '    :root:not([data-theme="light"]) {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4529088Z     '      --ground: #0d1318;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4529370Z     '      --surface: #151d24;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4529661Z     '      --surface-sunk: #101820;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4530194Z     '      --ink: #e3eaef;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4530498Z     '      --ink-2: #b6c5cf;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4530772Z     '      --muted: #8799a6;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4531038Z     '      --rule: #25323a;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4531319Z     '      --rule-soft: #1d272e;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4531597Z     '      --data: #4e92de;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4531866Z     '      --data-soft: #1c2e42;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4532145Z     '      --bound: #d9604e;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4532424Z     '      --bound-soft: #38221f;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4532857Z     '      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .7);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4533238Z     '    }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4533436Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4533621Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4533852Z     '  :root[data-theme="dark"] {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4534206Z     '    --ground: #0d1318;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4534482Z     '    --surface: #151d24;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4534766Z     '    --surface-sunk: #101820;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4535025Z     '    --ink: #e3eaef;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4535292Z     '    --ink-2: #b6c5cf;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4535553Z     '    --muted: #8799a6;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4535817Z     '    --rule: #25323a;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4536083Z     '    --rule-soft: #1d272e;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4536366Z     '    --data: #4e92de;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4536629Z     '    --data-soft: #1c2e42;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4536899Z     '    --bound: #d9604e;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4537168Z     '    --bound-soft: #38221f;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4537585Z     '    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .7);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4537964Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4538163Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4538398Z     '  * { box-sizing: border-box; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4538662Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4538850Z     '  body {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4539062Z     '    margin: 0;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4539326Z     '    padding-inline: 20px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4539631Z     '    padding-block: 40px 64px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4540145Z     '    background: var(--ground);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4540678Z     '    color: var(--ink);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4540977Z     '    font-family: var(--sans);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4541276Z     '    font-size: 15px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4541548Z     '    line-height: 1.55;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4541870Z     '    -webkit-font-smoothing: antialiased;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4542165Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4542356Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4542821Z     '  .wrap { max-width: 1020px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4543393Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4543635Z     '  /* ---------- header ---------- */\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4544069Z     '  header { display: flex; flex-direction: column; gap: 14px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4544429Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4544619Z     '  .eyebrow {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4544882Z     '    font-family: var(--mono);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4545182Z     '    font-size: 11px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4545460Z     '    font-weight: 500;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4545744Z     '    letter-spacing: .13em;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4546048Z     '    text-transform: uppercase;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4546346Z     '    color: var(--muted);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4546589Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4546777Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4546965Z     '  h1 {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4547211Z     '    font-family: var(--serif);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4547509Z     '    font-weight: 500;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4547815Z     '    font-size: clamp(30px, 5.4vw, 45px);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4548134Z     '    line-height: 1.08;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4548418Z     '    letter-spacing: -.012em;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4548688Z     '    margin: 0;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4548948Z     '    text-wrap: balance;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4549189Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4549377Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4549571Z     '  .verdict {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4549828Z     '    font-family: var(--serif);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4550334Z     '    font-size: clamp(17px, 2.3vw, 20px);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4550649Z     '    line-height: 1.45;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4550924Z     '    color: var(--ink-2);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4551200Z     '    max-width: 62ch;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4551439Z     '    margin: 0;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4551693Z     '    text-wrap: pretty;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4551937Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4552122Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4552318Z     '  .facts {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4552538Z     '    display: grid;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4552929Z     '    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4553296Z     '    gap: 1px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4553557Z     '    background: var(--rule);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4553864Z     '    border: 1px solid var(--rule);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4554171Z     '    border-radius: 3px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4554453Z     '    overflow: hidden;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4554722Z     '    margin-top: 4px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4554962Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4555472Z     '  .fact { background: var(--surface); padding: 14px 16px; display: flex; flex-direction: column; gap: 3px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4555977Z     '  .fact dt {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4556362Z     '    font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4556848Z     '    text-transform: uppercase; color: var(--muted);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4557179Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4557377Z     '  .fact dd {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4557765Z     '    margin: 0; font-family: var(--mono); font-size: 19px; font-weight: 500;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4558300Z     '    font-variant-numeric: tabular-nums; letter-spacing: -.01em;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4558659Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4559092Z     '  .fact p { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.4; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4559505Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4559746Z     '  /* ---------- panels ---------- */\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4560433Z     '  section { display: flex; flex-direction: column; gap: 0; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4560780Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4560969Z     '  .panel {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4561231Z     '    background: var(--surface);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4561548Z     '    border: 1px solid var(--rule);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4561857Z     '    border-radius: 4px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4562272Z     '    box-shadow: var(--shadow);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4562531Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4562952Z     '  .panel-head { padding: 18px 20px 0; display: flex; flex-direction: column; gap: 5px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4563398Z     '  .panel-head h2 {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4563791Z     '    font-family: var(--serif); font-weight: 500; font-size: 21px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4564220Z     '    letter-spacing: -.008em; margin: 0;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4564503Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4564983Z     '  .panel-head p { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 66ch; line-height: 1.5; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4565641Z     '  #joint-dimension-length .panel-body { padding: 16px 20px 20px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4566222Z     '  #ic-tournament-reference-history .panel-body { padding: 16px 20px 20px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4566858Z     '  #joint-dimension-length .panel-body > p { font-size: 13.5px; line-height: 1.55; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4567287Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4567609Z     '  .chart-scroll { overflow-x: auto; padding: 10px 8px 4px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4568177Z     '  .chart-scroll svg { display: block; width: 100%; min-width: 840px; height: auto; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4568585Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4568778Z     '  .legend {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4569086Z     '    display: flex; flex-wrap: wrap; gap: 6px 20px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4569439Z     '    padding: 4px 20px 18px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4569859Z     '    font-family: var(--mono); font-size: 11.5px; color: var(--muted);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4570502Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4570880Z     '  .legend span { display: inline-flex; align-items: center; gap: 7px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4571449Z     '  /* A legend line that is prose, not a swatch key: one block of text, so the\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4572027Z     '     <b>, <code> and <sup> inside it stay inline instead of becoming flex items. */\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4572561Z     '  .legend > span:not(:has(> .swatch)) { display: block; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4573158Z     '  .swatch { width: 18px; height: 9px; border-radius: 2px; background: var(--data); flex: none; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4573938Z     '  .swatch.ghost { background: none; border-top: 1.5px dashed var(--muted); height: 0; border-radius: 0; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4574598Z     '  .swatch.bound { background: var(--bound); width: 3px; height: 14px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4574982Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4575221Z     '  /* ---------- two-up ---------- */\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4575775Z     '  .duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4576241Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4576492Z     '  /* ---------- ledger rows ---------- */\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4576957Z     '  .ledger { padding: 14px 20px 20px; display: flex; flex-direction: column; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4577757Z     '  .lrow { display: grid; grid-template-columns: 1fr 96px; gap: 4px 14px; padding: 9px 0; border-bottom: 1px solid var(--rule-soft); }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4578406Z     '  .lrow:last-child { border-bottom: 0; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4578801Z     '  .lrow .name { font-size: 13.5px; line-height: 1.35; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4579132Z     '  .lrow .num {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4579547Z     '    font-family: var(--mono); font-size: 13.5px; font-weight: 500;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4580396Z     '    font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4581043Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4581536Z     '  .lbar { grid-column: 1 / -1; height: 8px; background: var(--surface-sunk); border-radius: 0 4px 4px 0; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4582270Z     '  .lbar i { display: block; height: 100%; background: var(--data); border-radius: 0 4px 4px 0; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4582727Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4582986Z     '  /* ---------- exponent track ---------- */\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4583439Z     '  .exp { padding: 14px 20px 8px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4584091Z     '  .erow { display: grid; grid-template-columns: minmax(118px, 1.2fr) minmax(120px, 2fr) 44px; align-items: stretch; gap: 12px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4584823Z     '  .erow .name { font-size: 13px; line-height: 1.3; align-self: center; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4585211Z     '  .erow .num {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4585574Z     '    font-family: var(--mono); font-size: 13px; font-weight: 500;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4586139Z     '    font-variant-numeric: tabular-nums; text-align: right; align-self: center;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4586558Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4586853Z     '  .track { position: relative; min-height: 38px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4587217Z     '  .track::before {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4587589Z     '    content: ""; position: absolute; left: 0; right: 0; top: 50%;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4588009Z     '    height: 1px; background: var(--rule);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4588297Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4588504Z     '  .track::after {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4588879Z     '    content: ""; position: absolute; left: 38.5%; top: 0; bottom: 0;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4589368Z     '    width: 2px; margin-left: -1px; background: var(--bound);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4589706Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4589902Z     '  .dot {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4590619Z     '    position: absolute; top: 50%; width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4591260Z     '    border-radius: 50%; background: var(--data); box-shadow: 0 0 0 2px var(--surface);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4591688Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4591889Z     '  .exp-axis {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4592388Z     '    display: grid; grid-template-columns: minmax(118px, 1.2fr) minmax(120px, 2fr) 44px; gap: 12px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4593099Z     '    font-family: var(--mono); font-size: 10.5px; color: var(--muted); padding-bottom: 12px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4593534Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4593860Z     '  .exp-axis .ticks { position: relative; height: 14px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4594543Z     '  .exp-axis .ticks b { position: absolute; top: 0; font-weight: 400; transform: translateX(-50%); white-space: nowrap; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4595086Z     '  .rho-flag {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4595471Z     '    position: absolute; top: 0; left: 38.5%; transform: translateX(-50%);\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4595993Z     '    color: var(--bound); font-weight: 500; white-space: nowrap;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4596340Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4596531Z     '\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4596762Z     '  /* ---------- table ---------- */\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4597144Z     '  .table-scroll { overflow-x: auto; padding: 4px 0 0; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4597699Z     '  table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 13.5px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4598383Z     '  caption { text-align: left; padding: 0 20px 12px; font-size: 13.5px; color: var(--muted); }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4599072Z     '  th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--rule-soft); }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4599632Z     '  th:first-child, td:first-child { padding-left: 20px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4600198Z     '  th:last-child, td:last-child { padding-right: 20px; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4600526Z     '  thead th {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4600918Z     '    font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4601466Z     '    text-transform: uppercase; color: var(--muted); font-weight: 500;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4602121Z     '    border-bottom: 1px solid var(--rule); white-space: nowrap;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4602470Z     '  }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4603020Z     '  td.n, th.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4603589Z     '  tbody tr.group td {\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4604038Z     '    background: var(--surface-sunk); font-family: var(--mono); font-size: 10.5px;\n' +
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4604799Z     '    letter-spacing: .09em; text-transform: uppercase; color: var('... 1761880 more characters,
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4605258Z   operator: 'strictEqual',
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4605498Z   diff: 'simple'
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4605710Z }
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4605811Z 
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4605905Z Node.js v22.23.3
+overview	Check frozen evidence pins and generated overview	2026-10-15T16:20:44.4618431Z ##[error]Process completed with exit code 1.

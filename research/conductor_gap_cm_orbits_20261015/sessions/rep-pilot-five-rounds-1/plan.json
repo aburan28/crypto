@@ -1,0 +1,166 @@
+{
+  "schema": "ecbench.plan/v1",
+  "spec_id": "ECS1h81297be41b8b",
+  "arms": [
+    {
+      "name": "scalar",
+      "role": "baseline",
+      "method": {
+        "id": "ic.cm_folded_native_v1",
+        "family": "ic",
+        "params": {
+          "backend": "/workspace/native-deps/cm-folded",
+          "backend_sha256": "577002d0898b1d39c61f5f6daa01c549403832379c7ada2e9098f0f5fbf0a730",
+          "mode": "scalar",
+          "query_limit": "1000000000",
+          "seconds": "1800",
+          "size": "8192"
+        },
+        "method_id": "ECM1h6fe516db08be",
+        "method_sha256": "6fe516db08bea97debc7dca350eecf191b02356c9fe3c050b3f2f5e01ad5325d",
+        "entry": "ecbench::cm_folded::solve"
+      }
+    },
+    {
+      "name": "rho",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation",
+        "family": "rho",
+        "params": {
+          "cap_multiple": "64"
+        },
+        "method_id": "ECM1hefea4e0ebe79",
+        "method_sha256": "efea4e0ebe79dadfedeb75106dab92e25fc26bfe282155ee0326380d4184e995",
+        "entry": "ic_boundary::rho_walk_with(NegationClasses, RhoWalk::negation())"
+      }
+    }
+  ],
+  "workloads": [
+    {
+      "workload_id": "W759a186ccfc1",
+      "workload_sha256": "759a186ccfc14ec5695bb4c69ceae0fe5fc6e6aaa2045d60ed2465281408e127",
+      "curve_spec": {
+        "kind": "prime_public_fixture",
+        "p": 5947698030651343,
+        "a": 2087370704375809,
+        "b": 1402887937802154,
+        "group_order": 5947697996161643,
+        "r": 5947697996161643,
+        "gx": 0,
+        "gy": 1789653625547868,
+        "qx": 1152820452555926,
+        "qy": 4742550619855044
+      },
+      "curve": {
+        "slug": "icv1-fp53-t34489701-58e7ac6e",
+        "icv1": "ICV1:fp-5947698030651343:34489701:5947697996161643:5672709719068824:unk:unk:r:58e7ac6e5b4f",
+        "family": "prime",
+        "construction": "PrimeCurve { p: 5947698030651343, a: 2087370704375809, b: 1402887937802154 } (explicit)",
+        "field_degree": null,
+        "field_bits": 53,
+        "group_order": 5947697996161643,
+        "r": 5947697996161643,
+        "cofactor": 1,
+        "generator": [
+          "0x0",
+          "0x65bae349f2c5c"
+        ],
+        "automorphisms_available": 2,
+        "registered": true,
+        "ec1": "EC1P53Cfphe3ca0e2b312a",
+        "curve_uid": "urn:ec-record:1:sha256:e3ca0e2b312a4f32e45cdff94233f0598b8e3f8940fe5a52ea983959d2020617"
+      },
+      "target_law": "ecbench.public-fixture/v1",
+      "target_seed": 20261016,
+      "target_index": 0,
+      "target": [
+        "0x4187bed907c96",
+        "0x10d9531d0698c4"
+      ],
+      "planted": null
+    }
+  ],
+  "executions": [
+    {
+      "seq": 0,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 12089787642973392373
+    },
+    {
+      "seq": 1,
+      "round": 0,
+      "warmup": false,
+      "arm": 1,
+      "workload": 0,
+      "algorithm_seed": 12089787642973392373
+    },
+    {
+      "seq": 2,
+      "round": 1,
+      "warmup": false,
+      "arm": 1,
+      "workload": 0,
+      "algorithm_seed": 2560402131965463918
+    },
+    {
+      "seq": 3,
+      "round": 1,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 2560402131965463918
+    },
+    {
+      "seq": 4,
+      "round": 2,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 12743142298014200850
+    },
+    {
+      "seq": 5,
+      "round": 2,
+      "warmup": false,
+      "arm": 1,
+      "workload": 0,
+      "algorithm_seed": 12743142298014200850
+    },
+    {
+      "seq": 6,
+      "round": 3,
+      "warmup": false,
+      "arm": 1,
+      "workload": 0,
+      "algorithm_seed": 14512899589692344700
+    },
+    {
+      "seq": 7,
+      "round": 3,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 14512899589692344700
+    },
+    {
+      "seq": 8,
+      "round": 4,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 11928210767866862121
+    },
+    {
+      "seq": 9,
+      "round": 4,
+      "warmup": false,
+      "arm": 1,
+      "workload": 0,
+      "algorithm_seed": 11928210767866862121
+    }
+  ]
+}

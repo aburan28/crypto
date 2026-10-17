@@ -1,0 +1,10 @@
+
+running 5 tests
+test ecc::cryptopro_b_chain_set::tests::a_step_that_does_not_compose_is_refused - should panic ... ok
+test ecc::cryptopro_b_chain_set::tests::frozen_chains_are_multiplication_by_lambda_and_orderings_agree ... ok
+test ecc::cryptopro_b_chain_set::tests::frozen_set_loads_and_every_chain_prepares ... ok
+test ecc::cryptopro_b_chain_set::tests::frozen_set_reproduces_its_test_vectors ... ok
+test ecc::cryptopro_b_chain_set::tests::tampered_sets_are_refused ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 4228 filtered out; finished in 0.07s
+

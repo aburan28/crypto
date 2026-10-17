@@ -1,0 +1,3467 @@
+{
+  "schema": "conductor-gap.session-summaries/v1",
+  "sessions": [
+    {
+      "binary_sha256": "9eeda831793b21d72aa9962a21424f404a1ecd38a9acca2a7448fbaef0be7ddc",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 0.029618,
+          "online_phases": [],
+          "statuses": {
+            "error": 2
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 0.031209,
+          "online_phases": [],
+          "statuses": {
+            "error": 2
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 0.026261,
+          "online_phases": [],
+          "statuses": {
+            "error": 2
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "313377ab312468f1bb08aba2e999d6353bd300995e0254ffb9e772f84aa8949b",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "control"
+    },
+    {
+      "binary_sha256": "94a474ce9eccd8a90f15d422df220bf66ba2a5865e5d34adea5563d1015a615a",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 0.033387,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 0.0078440345,
+              "observations": 2,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 0.039812,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 0.0000141695,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 8.472e-6,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 0.000041864,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.0005780655,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0000174805,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 0.043166,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 0.0000129015,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 8.0565e-6,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 0.0000431175,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.000490455,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0000167745,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "2b15fa4961847ef5a76d929db5a9aa64ceafa7f481d79334a122de974b02d1d8",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "control-fixture-fix"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 0.0348905,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 0.0158777455,
+              "observations": 2,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 0.039932,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 0.0000326995,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000010179,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 0.0000813875,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.0005110945,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.000018952,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 0.039111,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 0.000030633,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 9.013e-6,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 0.000073193,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.0004700045,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0000168045,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "cb398d8478cd9fbf6a8c5ae72d5e9a7bd8dedb810d51ff2c6d5cd8bdaabb8296",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "control-q11-crater"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 0.040095,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 0.0137604895,
+              "observations": 2,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 0.0393535,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 0.0000264845,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000010405,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 0.000060551,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.00065236,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0000202645,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "e5ba4ea8aa8c7399d6eb322b829b4391c5de0ed5cbd4648801241e73eaf39abe",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "control-q11-floor"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 0.0369085,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 0.0090240605,
+              "observations": 2,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 0.0400775,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 0.000014747,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 9.3045e-6,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 0.0000442005,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.000485088,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.000019239,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "12e2b458dc4d5b39079e84c585504b0bfcce4cf002252d37a021be5374818925",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "control-q5-floor"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "recurrence",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 0.0349,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 0.0000128985,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 8.912e-6,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 0.000037896,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.0022100125,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0000164295,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "rho",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 0.039075,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 0.0119136675,
+              "observations": 2,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "b14d7463dfd212ee6b93c7447331ff1876e054902990db30e7925aeca2f6ade6",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "control-recurrence-0"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "recurrence",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 0.0368175,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 0.000014728,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 9.384e-6,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 0.000043746,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.002219562,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0000191725,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "rho",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 0.037294,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 0.0223820495,
+              "observations": 2,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "000695ba34b31fff80a26dc94c44c354f3a37486eb851ade0d0f8cc7948784a8",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "control-recurrence-1"
+    },
+    {
+      "binary_sha256": "f9315057f86236e2d0b84e84d6a8bd2824783b86762145ba29ed1706953cc45c",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 13.75525984,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 15.905451680479999,
+              "observations": 25,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 95.36015524,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 81.97648347552,
+              "observations": 25,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00006439172,
+              "observations": 25,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 15.987806165639999,
+              "observations": 25,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.17770185444,
+              "observations": 25,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00017860220000000002,
+              "observations": 25,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 95.75336624,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 80.9863855076,
+              "observations": 25,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00006180188,
+              "observations": 25,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 15.8994569414,
+              "observations": 25,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.18890205256,
+              "observations": 25,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00011673636,
+              "observations": 25,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "5e18f9a136af807150515646499e20e62c12d4b6023f2ef22095fefa0316533e",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "primary-0"
+    },
+    {
+      "binary_sha256": "f9315057f86236e2d0b84e84d6a8bd2824783b86762145ba29ed1706953cc45c",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 15.50370536,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 18.62766488624,
+              "observations": 25,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 116.28309064,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 100.55718282788,
+              "observations": 25,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00007513096000000001,
+              "observations": 25,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 19.97640173496,
+              "observations": 25,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.18082356156,
+              "observations": 25,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00014096632000000001,
+              "observations": 25,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 116.30182504,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 102.06566201016,
+              "observations": 25,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00008088892,
+              "observations": 25,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 20.34365788812,
+              "observations": 25,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.1809713076,
+              "observations": 25,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00014309379999999998,
+              "observations": 25,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "6e2fd67a3ad4b4032e0d4adfe80aa90e6a29f9633fea7218de0d5903a920b75b",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "primary-1"
+    },
+    {
+      "binary_sha256": "f9315057f86236e2d0b84e84d6a8bd2824783b86762145ba29ed1706953cc45c",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 16.1131098,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 18.26336557088,
+              "observations": 25,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 101.4522892,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 91.79808763944,
+              "observations": 25,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000066515,
+              "observations": 25,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 17.6908211784,
+              "observations": 25,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.19795781824,
+              "observations": 25,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00012395732,
+              "observations": 25,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 100.761506,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 82.83386486008,
+              "observations": 25,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00007139992,
+              "observations": 25,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 16.148043304959998,
+              "observations": 25,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.19586295943999998,
+              "observations": 25,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00016013512,
+              "observations": 25,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "4af31abb25fc8f8431cd98321a6c0318c589363e675991928b6817a09ee966bc",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "primary-2"
+    },
+    {
+      "binary_sha256": "f9315057f86236e2d0b84e84d6a8bd2824783b86762145ba29ed1706953cc45c",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 11.96708424,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 12.80573675656,
+              "observations": 25,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 106.60226084,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 91.55861737792,
+              "observations": 25,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.0000744238,
+              "observations": 25,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 17.636226978240003,
+              "observations": 25,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.18829850044,
+              "observations": 25,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00038118864,
+              "observations": 25,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 106.71142336,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 96.3615349534,
+              "observations": 25,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.0000914446,
+              "observations": 25,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 18.48403331468,
+              "observations": 25,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.21380417476,
+              "observations": 25,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00013498864000000002,
+              "observations": 25,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "cb37e55ee3ae2db496ef8c1cec4a2418de7400176c5e5b0823a4c182139e26c1",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "primary-3"
+    },
+    {
+      "binary_sha256": "f9315057f86236e2d0b84e84d6a8bd2824783b86762145ba29ed1706953cc45c",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 17.52793192,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 28.939178135360002,
+              "observations": 25,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 115.0232086,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 132.15280173964,
+              "observations": 25,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00007133567999999999,
+              "observations": 25,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 23.45686039352,
+              "observations": 25,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.2677091362,
+              "observations": 25,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0002781088,
+              "observations": 25,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "29ab0d7cc8918dd6c80f5b8f2320368c257babf09195ccabbce2f92390c670ac",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "primary-4"
+    },
+    {
+      "binary_sha256": "f9315057f86236e2d0b84e84d6a8bd2824783b86762145ba29ed1706953cc45c",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 17.17970564,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 23.73432596852,
+              "observations": 25,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 100.53039424,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 120.94643758164,
+              "observations": 25,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00006506724,
+              "observations": 25,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 21.30081887604,
+              "observations": 25,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.25975539504,
+              "observations": 25,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0001134736,
+              "observations": 25,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "4a6bb9c84435d88d112f4bdf7afc2e3f1551f7b9c4e306549e588e501c100490",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "primary-5"
+    },
+    {
+      "binary_sha256": "f9315057f86236e2d0b84e84d6a8bd2824783b86762145ba29ed1706953cc45c",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 17.72425184,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 29.066787135040002,
+              "observations": 25,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 100.28911364,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 115.75943591344,
+              "observations": 25,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00006085008,
+              "observations": 25,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 20.974517814080002,
+              "observations": 25,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.260512318,
+              "observations": 25,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00012481016,
+              "observations": 25,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "17137868b17c8a39bb2dd850f69ba97c16d304f01b5c396d247eea9694ceac72",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "primary-6"
+    },
+    {
+      "binary_sha256": "f9315057f86236e2d0b84e84d6a8bd2824783b86762145ba29ed1706953cc45c",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 14.90325276,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 22.40992576064,
+              "observations": 25,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 25,
+          "mean_recorded_process_cpu_seconds": 95.1657892,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 111.99939661968,
+              "observations": 25,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00007354004,
+              "observations": 25,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 19.653857814680002,
+              "observations": 25,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.2694030746,
+              "observations": 25,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00010377603999999999,
+              "observations": 25,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 25
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "8444c240bbea4bb778376598acb2c66c19d963325a343c0e7400f9cd5cc0ef67",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "primary-7"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "recurrence",
+          "attempts": 1,
+          "mean_recorded_process_cpu_seconds": 275.39462,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 460.215578319,
+              "observations": 1,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000104237,
+              "observations": 1,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 74.91874043,
+              "observations": 1,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.37446941,
+              "observations": 1,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.000134753,
+              "observations": 1,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 1
+          }
+        },
+        {
+          "arm": "rho",
+          "attempts": 1,
+          "mean_recorded_process_cpu_seconds": 15.906527,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 42.527015405,
+              "observations": 1,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 1
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "a25ac5a9135574d0334a9a45ba463ec09c2dffa0962b370b2ebdec4947321d29",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "recurrence-pilot-0"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "recurrence",
+          "attempts": 1,
+          "mean_recorded_process_cpu_seconds": 65.274017,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 90.992126629,
+              "observations": 1,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000033501,
+              "observations": 1,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 15.185657853,
+              "observations": 1,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.42001234,
+              "observations": 1,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.000064898,
+              "observations": 1,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 1
+          }
+        },
+        {
+          "arm": "rho",
+          "attempts": 1,
+          "mean_recorded_process_cpu_seconds": 22.541673,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 49.744180921,
+              "observations": 1,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 1
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "0b331eeb4fdffebad4813ec1599cd8510b21794abd8e1839de61a77e3f84910c",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "recurrence-pilot-1"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 5,
+          "mean_recorded_process_cpu_seconds": 18.045217,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 22.541969888,
+              "observations": 5,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 5
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 5,
+          "mean_recorded_process_cpu_seconds": 93.3638518,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 87.57692854860001,
+              "observations": 5,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.0000585138,
+              "observations": 5,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 15.5954790092,
+              "observations": 5,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.1883965324,
+              "observations": 5,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0001090738,
+              "observations": 5,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 5
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "2041cf1d2a3e0f9b4c9d943f7889c6056a8155d20fd6f7e5e1de38837133e09f",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-additional-floor-0"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 5,
+          "mean_recorded_process_cpu_seconds": 19.5872908,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 37.4311059812,
+              "observations": 5,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 5
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 5,
+          "mean_recorded_process_cpu_seconds": 132.2022446,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 209.19281554539998,
+              "observations": 5,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000044790800000000005,
+              "observations": 5,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 35.2916898612,
+              "observations": 5,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.36606260739999996,
+              "observations": 5,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0000859472,
+              "observations": 5,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 5
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "be1285d3ec5e2af871d64c04f499a909cba2ee33fb0080797826a42fad70686c",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-additional-floor-1"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 5,
+          "mean_recorded_process_cpu_seconds": 7.2438846,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 15.8721655572,
+              "observations": 5,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 5
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 5,
+          "mean_recorded_process_cpu_seconds": 118.7004292,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 157.0261166638,
+              "observations": 5,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.0000713618,
+              "observations": 5,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 26.2027975574,
+              "observations": 5,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.3517138158,
+              "observations": 5,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0001295846,
+              "observations": 5,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 5
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "aa22d65c8c9ccaf48ebc2b48726032e138c42c50eb5fc2cf2e7d08b2760eb303",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-additional-floor-2"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 5,
+          "mean_recorded_process_cpu_seconds": 13.092607,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 15.515374485799999,
+              "observations": 5,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 5
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 5,
+          "mean_recorded_process_cpu_seconds": 113.6130834,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 107.9315212322,
+              "observations": 5,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00006730939999999999,
+              "observations": 5,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 19.193328108,
+              "observations": 5,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.2225310956,
+              "observations": 5,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00011151539999999999,
+              "observations": 5,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 5
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "7c42280b43eb6ddaf62097220d71edcf8f53f9599a73168aa5f8cbb57ff7dba3",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-additional-floor-3"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 7.499425333333333,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 7.472944444,
+              "observations": 3,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 73.815926,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 54.22852579533333,
+              "observations": 3,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000059319,
+              "observations": 3,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 10.003737117333333,
+              "observations": 3,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.158620111,
+              "observations": 3,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00012164266666666667,
+              "observations": 3,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 72.062762,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 52.034133776,
+              "observations": 3,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000056912,
+              "observations": 3,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 9.842006745333334,
+              "observations": 3,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.16350474633333334,
+              "observations": 3,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.000116609,
+              "observations": 3,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "3707ef95e0c2793af99d9d6c5bdde724052c424a7a4792d41a1262af41e9ca97",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-d43-crater-0"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 13.685687333333334,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 13.659421322333333,
+              "observations": 3,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 61.365124333333334,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 43.24470070933334,
+              "observations": 3,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00005049633333333333,
+              "observations": 3,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 8.189263042666667,
+              "observations": 3,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.15148144566666666,
+              "observations": 3,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00008720766666666668,
+              "observations": 3,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 58.51579,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 41.022169702666666,
+              "observations": 3,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000058722,
+              "observations": 3,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 8.053380646666668,
+              "observations": 3,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.168225134,
+              "observations": 3,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00009529633333333332,
+              "observations": 3,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "69b4dc288fd70530f57b8514147c10d701bc7d11aa0fb145ae556ab13a6b0258",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-d43-crater-1"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 15.223042,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 15.1997120625,
+              "observations": 2,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 83.7102085,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 62.5988056955,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000077416,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 11.753180187,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.1765784025,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.000116887,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 85.993234,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 64.900922664,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000100917,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 11.8003837835,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.1811771165,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.000108409,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "dc8c432972ff9930435081b24976bc8de66cf9a095d965f753526e4872fdc84c",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-d43-crater-2"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 17.473664,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 17.448533056,
+              "observations": 2,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 80.017309,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 59.4576412055,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.0000711365,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 11.00731275,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.1743653735,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0001207165,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 77.698308,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 58.0342046765,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.0000608705,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 11.0010610825,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.172490957,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.000104386,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "9baac86e15875568ec5310a0f0f2469c7e8f8343f659092563e1b293186b0668",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-d43-crater-3"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 15.732909666666666,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 15.707257345333334,
+              "observations": 3,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 73.225776,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 53.503764651666664,
+              "observations": 3,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000060640666666666664,
+              "observations": 3,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 10.066995025,
+              "observations": 3,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.17498849733333335,
+              "observations": 3,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00010559233333333332,
+              "observations": 3,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "468a7bfc1a0acbd4a58deb7e4278d252970f822673ae90beaf5d9b83bc931248",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-d43-floor-0"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 14.297943666666667,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 14.274160050666666,
+              "observations": 3,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 94.099349,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 70.88657685366667,
+              "observations": 3,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00007468233333333333,
+              "observations": 3,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 13.386912379333333,
+              "observations": 3,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.179351025,
+              "observations": 3,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00012145733333333333,
+              "observations": 3,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "d69dff71f961f3ff94cb363b45f338bc8ac08afc642be5b962a304304d41e426",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-d43-floor-1"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 8.312797,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 8.289022778,
+              "observations": 2,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 106.228648,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 81.495531538,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.0000868955,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 15.1892888155,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.1767257695,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00013909,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "a92a24c39b3a9c5673913c20452b721b5be3329ded2da94504556017cf0cc4ca",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-d43-floor-2"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 9.8108605,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 9.7858123635,
+              "observations": 2,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 124.00724,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 96.6085367605,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.0000796085,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 17.758420331,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.1748416035,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0001079425,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "11d4b113047aa92a280b59ba32f1b8645ac4c7223597ba33ba35363fb66a05db",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-d43-floor-3"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 6,
+          "mean_recorded_process_cpu_seconds": 13.358928333333335,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 13.334636007833334,
+              "observations": 6,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 6
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 6,
+          "mean_recorded_process_cpu_seconds": 93.229812,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 70.747637258,
+              "observations": 6,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00006115016666666667,
+              "observations": 6,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 13.163589087166667,
+              "observations": 6,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.19046436,
+              "observations": 6,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00011666933333333332,
+              "observations": 6,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 6
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 6,
+          "mean_recorded_process_cpu_seconds": 95.48641966666668,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 72.18994907,
+              "observations": 6,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000060684,
+              "observations": 6,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 13.1979927,
+              "observations": 6,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.18306940716666667,
+              "observations": 6,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.000106447,
+              "observations": 6,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 6
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "f2e65a025768db41c2ce05cdd2298914151f494b244131de6de9ad9ec765d74d",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-fresh-crater-0"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 6,
+          "mean_recorded_process_cpu_seconds": 14.102868166666665,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 14.076043358833333,
+              "observations": 6,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 6
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 6,
+          "mean_recorded_process_cpu_seconds": 79.86358666666668,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 59.077775773666666,
+              "observations": 6,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00007300966666666667,
+              "observations": 6,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 10.618318307666666,
+              "observations": 6,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.19942051683333334,
+              "observations": 6,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00012607483333333333,
+              "observations": 6,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 6
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 6,
+          "mean_recorded_process_cpu_seconds": 79.1933945,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 58.61102514266666,
+              "observations": 6,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00006911233333333333,
+              "observations": 6,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 10.634416067333333,
+              "observations": 6,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.18768956066666664,
+              "observations": 6,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00010812566666666667,
+              "observations": 6,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 6
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "c1ef2d79aca44350bb386d6bf3e6368e21915d43d3216ee323f08306fab40455",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-fresh-crater-1"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 4,
+          "mean_recorded_process_cpu_seconds": 14.6474965,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 14.622696626,
+              "observations": 4,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 4
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 4,
+          "mean_recorded_process_cpu_seconds": 87.46050925,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 65.82634519425,
+              "observations": 4,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00006886975,
+              "observations": 4,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 11.93551600275,
+              "observations": 4,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.1777058455,
+              "observations": 4,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.000099037,
+              "observations": 4,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 4
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 4,
+          "mean_recorded_process_cpu_seconds": 88.67851675,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 67.207875728,
+              "observations": 4,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.0000695295,
+              "observations": 4,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 11.91878358375,
+              "observations": 4,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.1856262865,
+              "observations": 4,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00010242425,
+              "observations": 4,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 4
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "8e886f807056424a8113d02965492798118a4d351f0e8cdcbfb9453ef6c716dd",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-fresh-crater-2"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 4,
+          "mean_recorded_process_cpu_seconds": 12.1908995,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 12.16355375375,
+              "observations": 4,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 4
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 4,
+          "mean_recorded_process_cpu_seconds": 98.06814025,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 74.50355030225,
+              "observations": 4,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000063143,
+              "observations": 4,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 13.05910073475,
+              "observations": 4,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.1806325655,
+              "observations": 4,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.000148924,
+              "observations": 4,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 4
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 4,
+          "mean_recorded_process_cpu_seconds": 94.91853725,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 72.2561998065,
+              "observations": 4,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000120123,
+              "observations": 4,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 13.0132141475,
+              "observations": 4,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.201337495,
+              "observations": 4,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00011987575,
+              "observations": 4,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 4
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "eec11bcbb54fe3ecf0cbba7a37b710b48cfc8045c01c3822fa363d0b62c8605d",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-fresh-crater-3"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 6,
+          "mean_recorded_process_cpu_seconds": 16.4572145,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 16.430607705,
+              "observations": 6,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 6
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 6,
+          "mean_recorded_process_cpu_seconds": 92.0534405,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 69.59942102183332,
+              "observations": 6,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00009668683333333333,
+              "observations": 6,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 12.1869072925,
+              "observations": 6,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.1831616635,
+              "observations": 6,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00025675133333333337,
+              "observations": 6,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 6
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "85009a74013e62715589e5c433a71c129e8712a71f8d9f332a50139d20a88725",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-fresh-floor-0"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 6,
+          "mean_recorded_process_cpu_seconds": 16.686859333333334,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 16.661952452666664,
+              "observations": 6,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 6
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 6,
+          "mean_recorded_process_cpu_seconds": 102.00615183333333,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 78.22828573716667,
+              "observations": 6,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000060898166666666666,
+              "observations": 6,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 13.446177146666667,
+              "observations": 6,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.18987628733333334,
+              "observations": 6,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00019449083333333334,
+              "observations": 6,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 6
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "5404c98ed52d0b2cb05321fc5f2495c9a73193ce425cd1ce49fe860c2caaa243",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-fresh-floor-1"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 4,
+          "mean_recorded_process_cpu_seconds": 13.70813375,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 13.678238009,
+              "observations": 4,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 4
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 4,
+          "mean_recorded_process_cpu_seconds": 94.34048875,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 71.2602740235,
+              "observations": 4,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00007608175,
+              "observations": 4,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 11.9282311025,
+              "observations": 4,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.1919633,
+              "observations": 4,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00012394925,
+              "observations": 4,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 4
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "371639218263b9700eea468be926d7d6d4d4c60b9f75ff0aae1c33158c2b7e52",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-fresh-floor-2"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 4,
+          "mean_recorded_process_cpu_seconds": 12.06417625,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 12.032886223,
+              "observations": 4,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 4
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 4,
+          "mean_recorded_process_cpu_seconds": 86.367023,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 64.15115603075,
+              "observations": 4,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00006101175,
+              "observations": 4,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 11.039418925,
+              "observations": 4,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.210274485,
+              "observations": 4,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00019934225,
+              "observations": 4,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 4
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "a04718a5003c1c910a1d9dfad83f833a55144069a4c0f8983397da4d2d4e0e8d",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-fresh-floor-3"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 17.116442666666668,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 17.088010013666665,
+              "observations": 3,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 71.69706366666666,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 52.124017331666664,
+              "observations": 3,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00006423566666666667,
+              "observations": 3,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 8.970900640666667,
+              "observations": 3,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.18014623,
+              "observations": 3,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00011034333333333333,
+              "observations": 3,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 73.98274733333332,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 54.283383546,
+              "observations": 3,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00009849166666666667,
+              "observations": 3,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 9.062165305333334,
+              "observations": 3,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.18963809466666665,
+              "observations": 3,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.000474362,
+              "observations": 3,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "f19b3676e72461f43f379d7274cc099778ead5d35370fb2f823dd5c0815839bf",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-isomorphic-crater-0"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 19.483041333333333,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 19.457967464333333,
+              "observations": 3,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 99.05268566666668,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 76.228587735,
+              "observations": 3,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00013598066666666665,
+              "observations": 3,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 12.759976776666665,
+              "observations": 3,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.20652873866666666,
+              "observations": 3,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00015681266666666666,
+              "observations": 3,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 95.32983533333334,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 72.59968928766668,
+              "observations": 3,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000081982,
+              "observations": 3,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 12.556411516666666,
+              "observations": 3,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.19507964266666666,
+              "observations": 3,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00011837466666666667,
+              "observations": 3,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "a1eed1da13b1a86f7bbcf6e052add7598892943db0d27590067a2c227ef7df59",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-isomorphic-crater-1"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 11.5355245,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 11.503333361,
+              "observations": 2,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 116.7038755,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 91.4254776245,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.0000938415,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 15.252707388,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.192679857,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.000107517,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 115.6282835,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 89.9973358105,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000078663,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 15.303270292,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.194975556,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0001094245,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "3ec5cdd2460dd769b50a6ac309d86a53a1a31c599add7953fb9f8a47d0badfa0",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-isomorphic-crater-2"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 11.1145515,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 11.0874848305,
+              "observations": 2,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 85.6292775,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 64.6146108425,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.0000602605,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 11.1767568435,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.173472311,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0001058845,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 87.099408,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 65.6562405705,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000059665,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 11.321185389,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.1871685955,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0000982625,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "379176506ea01a248cc855e5ef0f6398720f81b402376e7bee9e52d151c4c898",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-isomorphic-crater-3"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 10.974682,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 10.941641324666666,
+              "observations": 3,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 196.78487766666666,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 159.09337344533336,
+              "observations": 3,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00009248766666666667,
+              "observations": 3,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 26.281478691666667,
+              "observations": 3,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.22811429,
+              "observations": 3,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.000111852,
+              "observations": 3,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "e062cd914e5b7718a36a95d4ac74b9c407630f70fced1288eb2b4a89c93da649",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-isomorphic-floor-0"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 17.299731,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 17.275672158333332,
+              "observations": 3,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 3,
+          "mean_recorded_process_cpu_seconds": 142.07765666666666,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 112.92978369466667,
+              "observations": 3,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.000090002,
+              "observations": 3,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 17.595993101666668,
+              "observations": 3,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.19408378833333334,
+              "observations": 3,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.00009710566666666667,
+              "observations": 3,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 3
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "1446f87d65c0ff034ca7d61151094b34b2c5e21c25b154bc9c411e59801a40cb",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-isomorphic-floor-1"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 12.956255,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 12.926768742,
+              "observations": 2,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 65.488159,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 45.96169365,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.0000667395,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 7.508696998,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.2143602865,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0001081875,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "22303472275bd37d8e946879efd359d5eeb9a55d1e67f4de5a9a5686c49516aa",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-isomorphic-floor-2"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 22.2546995,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 22.233774644,
+              "observations": 2,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 2,
+          "mean_recorded_process_cpu_seconds": 95.0220615,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 72.448057686,
+              "observations": 2,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.0000864795,
+              "observations": 2,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 11.5811911905,
+              "observations": 2,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.2516535065,
+              "observations": 2,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.000105128,
+              "observations": 2,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 2
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "5f85c045840b057c4d3449a06b7e19b5dd9b689ef7fcb0702c6ddefa924a59a5",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-isomorphic-floor-3"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 5,
+          "mean_recorded_process_cpu_seconds": 10.4463634,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 10.414833139799999,
+              "observations": 5,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 5
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 5,
+          "mean_recorded_process_cpu_seconds": 128.1956334,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 100.8616015888,
+              "observations": 5,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00009380360000000001,
+              "observations": 5,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 15.7434664104,
+              "observations": 5,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.2026544868,
+              "observations": 5,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0001009218,
+              "observations": 5,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 5
+          }
+        },
+        {
+          "arm": "velu",
+          "attempts": 5,
+          "mean_recorded_process_cpu_seconds": 127.2998968,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 100.1936026074,
+              "observations": 5,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.00013268,
+              "observations": 5,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 15.6275137244,
+              "observations": 5,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.1952831332,
+              "observations": 5,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0001282162,
+              "observations": 5,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 5
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "fb119a3a1017909c97412790d9815b1e597cbc461be16ea4952bbc48c6dc1a5f",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-pilot-five-rounds-0"
+    },
+    {
+      "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+      "cells": [
+        {
+          "arm": "rho",
+          "attempts": 5,
+          "mean_recorded_process_cpu_seconds": 16.7632168,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 16.7299490254,
+              "observations": 5,
+              "phase": "rho_solve"
+            }
+          ],
+          "statuses": {
+            "verified": 5
+          }
+        },
+        {
+          "arm": "scalar",
+          "attempts": 5,
+          "mean_recorded_process_cpu_seconds": 121.108203,
+          "online_phases": [
+            {
+              "mean_wall_seconds": 94.797634877,
+              "observations": 5,
+              "phase": "target_PDP"
+            },
+            {
+              "mean_wall_seconds": 0.0000650258,
+              "observations": 5,
+              "phase": "target_descent"
+            },
+            {
+              "mean_wall_seconds": 14.9502763022,
+              "observations": 5,
+              "phase": "target_query"
+            },
+            {
+              "mean_wall_seconds": 0.1921341778,
+              "observations": 5,
+              "phase": "target_recovery_check"
+            },
+            {
+              "mean_wall_seconds": 0.0001634424,
+              "observations": 5,
+              "phase": "target_relation_check"
+            }
+          ],
+          "statuses": {
+            "verified": 5
+          }
+        }
+      ],
+      "common_price": "incomplete; no admitted IC/rho ratio",
+      "isolation": "L0",
+      "records_sha256": "5465924ded00619e27cce30a48969147a6a099bfaa02d102e3dbbe56e21d0220",
+      "scope": "All attempts retained; process CPU means include every status. Phase means include only available online receipts; their observation counts are explicit.",
+      "session": "rep-pilot-five-rounds-1"
+    }
+  ]
+}

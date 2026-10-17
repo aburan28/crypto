@@ -1,0 +1,91 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "ic.cm_folded_native_v1",
+        "params": {
+          "backend": "/workspace/native-deps/cm-folded",
+          "backend_sha256": "577002d0898b1d39c61f5f6daa01c549403832379c7ada2e9098f0f5fbf0a730",
+          "mode": "scalar"
+        }
+      },
+      "name": "scalar",
+      "role": "baseline"
+    },
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho",
+      "role": "reference"
+    }
+  ],
+  "description": "Fresh public hash-to-subgroup targets; no logarithm supplied or computed during preparation",
+  "label": "Conductor-gap replication additional-floor-2",
+  "measurement": {
+    "isolation_required": "L0",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261017,
+    "timeout_seconds": 1900,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 4934552098915560,
+        "b": 4674816533168691,
+        "group_order": 6074954227511371,
+        "gx": 0,
+        "gy": 1923100244799381,
+        "kind": "prime_explicit",
+        "p": 6074954262368087,
+        "r": 6074954227511371
+      },
+      {
+        "a": 1092707766131304,
+        "b": 1207189563279564,
+        "group_order": 5957655888887723,
+        "gx": 0,
+        "gy": 2783511122797745,
+        "kind": "prime_explicit",
+        "p": 5957655923406283,
+        "r": 5957655888887723
+      },
+      {
+        "a": 5793740566280130,
+        "b": 1566118739248157,
+        "group_order": 5993858559243883,
+        "gx": 0,
+        "gy": 641718929457512,
+        "kind": "prime_explicit",
+        "p": 5993858593867163,
+        "r": 5993858559243883
+      },
+      {
+        "a": 613898897587558,
+        "b": 2381022848621861,
+        "group_order": 5912219769939083,
+        "gx": 0,
+        "gy": 1008557264309357,
+        "kind": "prime_explicit",
+        "p": 5912219804325763,
+        "r": 5912219769939083
+      },
+      {
+        "a": 1812891686704348,
+        "b": 5380416474185621,
+        "group_order": 5899199895014411,
+        "gx": 0,
+        "gy": 871858814785434,
+        "kind": "prime_explicit",
+        "p": 5899199929363207,
+        "r": 5899199895014411
+      }
+    ],
+    "target_kind": "public",
+    "target_seed": 20261016,
+    "targets_per_curve": 1
+  }
+}

@@ -1,0 +1,11 @@
+certificates	Run python3 scripts/update_curve_standards.py --check	﻿2026-10-15T16:18:12.9953634Z ##[group]Run python3 scripts/update_curve_standards.py --check
+certificates	Run python3 scripts/update_curve_standards.py --check	2026-10-15T16:18:12.9954549Z [36;1mpython3 scripts/update_curve_standards.py --check[0m
+certificates	Run python3 scripts/update_curve_standards.py --check	2026-10-15T16:18:13.0031127Z shell: /usr/bin/bash -e {0}
+certificates	Run python3 scripts/update_curve_standards.py --check	2026-10-15T16:18:13.0031427Z env:
+certificates	Run python3 scripts/update_curve_standards.py --check	2026-10-15T16:18:13.0031632Z   CARGO_HOME: /home/runner/.cargo
+certificates	Run python3 scripts/update_curve_standards.py --check	2026-10-15T16:18:13.0031890Z   CARGO_INCREMENTAL: 0
+certificates	Run python3 scripts/update_curve_standards.py --check	2026-10-15T16:18:13.0032109Z   CARGO_TERM_COLOR: always
+certificates	Run python3 scripts/update_curve_standards.py --check	2026-10-15T16:18:13.0032333Z   CACHE_ON_FAILURE: false
+certificates	Run python3 scripts/update_curve_standards.py --check	2026-10-15T16:18:13.0032558Z ##[endgroup]
+certificates	Run python3 scripts/update_curve_standards.py --check	2026-10-15T16:18:13.3917359Z stale catalog display: docs/ic/leaderboard.json
+certificates	Run python3 scripts/update_curve_standards.py --check	2026-10-15T16:18:13.4034031Z ##[error]Process completed with exit code 1.

@@ -1,0 +1,52 @@
+{
+  "schema": "ecbench.session/v1",
+  "session_id": "ECBS1hca07b4c42896",
+  "label": "Conductor-gap replication control-d43-1",
+  "spec_id": "ECS1haced0c3122ba",
+  "spec_sha256": "aced0c3122bafa2c86b6ff4ad00c61e73b86c795aef13530792ff50277a47d8c",
+  "env_class_id": "ECBENV2h217559836c7c",
+  "host_sha256": "d5f9b86ee241fcb5cbe31f1d0ebfd8ffb7ea11b3859c4406db7a117043f3b321",
+  "plan_sha256": "ef93d6d8e3c09fbf17b1184dd015c6844e336fdba7e2e7f09f5658d9b82e7419",
+  "binary_sha256": "4bdca2fb89c9002f8f03ae2f586bff017d6b74452584ffc707d9c4454ca7fb93",
+  "git_commit": "c1d154134ac71dccf24f38f030b3136ed4a7a43e",
+  "git_dirty": true,
+  "options": {
+    "cpus": "none",
+    "lock_path": "/tmp/cm-control-q11-floor.lock",
+    "wait_for_lock": false,
+    "allow_busy": true,
+    "thresholds": {
+      "settle_seconds": 0.1,
+      "max_other_cpu": 0.1,
+      "max_psi": 5.0,
+      "max_preemptions_per_second": 50.0
+    },
+    "exe": "/proc/self/exe"
+  },
+  "cpu_plan": null,
+  "preflight": null,
+  "eviction": null,
+  "runner_on_run_cpu": false,
+  "runner_cpus": null,
+  "ticks_per_second": 100,
+  "grading_version": 2,
+  "child_env_sha256": "5fcca52408a68c08609b1aebe24bb4f03f94c8f0ec0e418fdf510c73a93a4e98",
+  "child_env": {
+    "HOME": "/home/agent",
+    "LC_ALL": "C",
+    "OMP_NUM_THREADS": "1",
+    "PATH": "/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/opt/codex/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback",
+    "RAYON_NUM_THREADS": "1",
+    "RUST_BACKTRACE": "0",
+    "RUST_MIN_STACK": "8388608"
+  },
+  "started_unix_ms": 1792053962576,
+  "finished_unix_ms": 1792053962976,
+  "status": "complete",
+  "executions_planned": 4,
+  "records_written": 4,
+  "records_sha256": "e5ba4ea8aa8c7399d6eb322b829b4391c5de0ed5cbd4648801241e73eaf39abe",
+  "status_counts": {
+    "verified": 4
+  }
+}

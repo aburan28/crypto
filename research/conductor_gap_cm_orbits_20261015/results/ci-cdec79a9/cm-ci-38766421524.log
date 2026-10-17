@@ -1,0 +1,14 @@
+current	The leaderboard is current with its sources and the ledger	﻿2026-10-15T16:17:43.2791862Z ##[group]Run python3 scripts/build_ic_leaderboard.py --check
+current	The leaderboard is current with its sources and the ledger	2026-10-15T16:17:43.2792339Z [36;1mpython3 scripts/build_ic_leaderboard.py --check[0m
+current	The leaderboard is current with its sources and the ledger	2026-10-15T16:17:43.2864442Z shell: /usr/bin/bash -e {0}
+current	The leaderboard is current with its sources and the ledger	2026-10-15T16:17:43.2864728Z env:
+current	The leaderboard is current with its sources and the ledger	2026-10-15T16:17:43.2865012Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+current	The leaderboard is current with its sources and the ledger	2026-10-15T16:17:43.2865461Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+current	The leaderboard is current with its sources and the ledger	2026-10-15T16:17:43.2865903Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+current	The leaderboard is current with its sources and the ledger	2026-10-15T16:17:43.2866297Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+current	The leaderboard is current with its sources and the ledger	2026-10-15T16:17:43.2866675Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+current	The leaderboard is current with its sources and the ledger	2026-10-15T16:17:43.2867049Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+current	The leaderboard is current with its sources and the ledger	2026-10-15T16:17:43.2867372Z ##[endgroup]
+current	The leaderboard is current with its sources and the ledger	2026-10-15T16:17:43.5723513Z docs/ic/leaderboard.json is stale; run scripts/build_ic_leaderboard.py
+current	The leaderboard is current with its sources and the ledger	2026-10-15T16:17:43.5724629Z docs/ic-leaderboard.html is stale; run scripts/build_ic_leaderboard.py
+current	The leaderboard is current with its sources and the ledger	2026-10-15T16:17:43.5842820Z ##[error]Process completed with exit code 1.

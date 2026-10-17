@@ -231,3 +231,19 @@ harness = false
 name = "pqc_split"
 path = "benches/pqc_split.rs"
 harness = false
+
+[[example]]
+name = "conductor_gap_study"
+path = "research/conductor_gap_cm_orbits_20261015/native/study.rs"
+
+[[example]]
+name = "conductor_gap_ecbench"
+path = "research/conductor_gap_cm_orbits_20261015/native/ecbench_next.rs"
+
+[[example]]
+name = "conductor_gap_followups"
+path = "research/conductor_gap_followups_20261016/native/followups.rs"
+
+[[example]]
+name = "conductor_gap_followup_posthoc"
+path = "research/conductor_gap_followups_20261016/native/posthoc.rs"

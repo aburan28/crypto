@@ -36,7 +36,7 @@ use crate::cryptanalysis::ecbench::record::{
 };
 use crate::cryptanalysis::ecbench::runner::{read_record_lines, read_session, PlanDoc};
 use crate::cryptanalysis::ecbench::spec::{plan, Arm, Spec};
-use crate::cryptanalysis::ecbench::workload::{CurveSpec, Workload};
+use crate::cryptanalysis::ecbench::workload::Workload;
 
 /// Replay every measured deterministic run.
 pub const REPLAY_ALL: usize = usize::MAX;
@@ -501,8 +501,7 @@ pub fn audit_with(
             let w = &p.workloads[ex.workload];
             let input = ChildInput {
                 schema: CHILD_INPUT_SCHEMA.into(),
-                curve: CurveSpec::explicit(p.instance(ex.workload))
-                    .unwrap_or_else(|| w.curve_spec.clone()),
+                curve: w.curve_spec.for_child(p.instance(ex.workload)),
                 target_seed: w.target_seed,
                 target_index: w.target_index,
                 target_kind: w.kind(),

@@ -1,0 +1,77 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "ic.cm_folded_native_v1",
+        "params": {
+          "backend": "/workspace/native-deps/cm-folded",
+          "backend_sha256": "577002d0898b1d39c61f5f6daa01c549403832379c7ada2e9098f0f5fbf0a730",
+          "mode": "scalar"
+        }
+      },
+      "name": "scalar",
+      "role": "baseline"
+    },
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho",
+      "role": "reference"
+    }
+  ],
+  "description": "Matched explicit public regression point; validation scalar excluded",
+  "label": "Conductor-gap replication isomorphic-floor-1",
+  "measurement": {
+    "isolation_required": "L0",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261017,
+    "timeout_seconds": 1900,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 1965728875961145,
+        "b": 3598974751658187,
+        "group_order": 6074954227511371,
+        "gx": 4,
+        "gy": 1278735334472379,
+        "kind": "prime_public_fixture",
+        "p": 6074954262368087,
+        "qx": 5524408364269903,
+        "qy": 5709577224670067,
+        "r": 6074954227511371
+      },
+      {
+        "a": 3971474397644400,
+        "b": 4417856330466225,
+        "group_order": 5993858559243883,
+        "gx": 8,
+        "gy": 5019136978655648,
+        "kind": "prime_public_fixture",
+        "p": 5993858593867163,
+        "qx": 531843339162325,
+        "qy": 1934386913574016,
+        "r": 5993858559243883
+      },
+      {
+        "a": 1486100445773305,
+        "b": 4265999732282802,
+        "group_order": 5899199895014411,
+        "gx": 8,
+        "gy": 3095323061843794,
+        "kind": "prime_public_fixture",
+        "p": 5899199929363207,
+        "qx": 5123103044754165,
+        "qy": 3886514230560555,
+        "r": 5899199895014411
+      }
+    ],
+    "target_kind": "public",
+    "target_seed": 20261016,
+    "targets_per_curve": 1
+  }
+}

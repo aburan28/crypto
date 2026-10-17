@@ -1,0 +1,114 @@
+{
+  "schema": "backlog.card/v1",
+  "id": "XP-20261015-conductor-complete-cost",
+  "title": "Complete the native cold-cost ledger under an earned reservation",
+  "created": "2026-10-15",
+  "authors": [
+    "conductor-gap research lane"
+  ],
+  "status": "blocked",
+  "status_note": "Prospective experiment only; not runnable or published to cairn. Implementation, independent verification and a frozen protocol must land before ready promotion.",
+  "blocked_on": [
+    "pr:1888 verified conductor-gap baseline and inputs must merge",
+    "note:Implement missing operation/instruction accounting and preregister its unit; obtain a host with the required reservation and measurement access."
+  ],
+  "links": {
+    "lead": "research/conductor_gap_cm_orbits_20261015/REPORT.md",
+    "notes": [
+      "research/conductor_gap_cm_orbits_20261015/REVIEW.md",
+      "research/conductor_gap_cm_orbits_20261015/results/replication-metrics.json",
+      "research/conductor_gap_cm_orbits_20261015/results/upper-96-floor-certificate.jsonl"
+    ],
+    "prs": [
+      1888
+    ]
+  },
+  "question": "Can every native IC and matched-rho component receive a complete auditable cold-cost receipt in a declared common unit?",
+  "decision_value": "Complete accounting determines whether an eligible cross-method work comparison is possible. Failure to obtain complete receipts preserves the current descriptive CPU interpretation instead of manufacturing a zero-cost result.",
+  "protocol": {
+    "path": null,
+    "blob": null
+  },
+  "code": {
+    "repo": "crypto",
+    "commit": null,
+    "branch": "research/conductor-gap-cm-orbits-20261015",
+    "build": [
+      [
+        "cargo",
+        "build",
+        "--release",
+        "--example",
+        "conductor_gap_study",
+        "--bin",
+        "conductor_gap_check"
+      ]
+    ]
+  },
+  "resources": {
+    "cpus": 1,
+    "ram_gb": 8,
+    "disk_gb": 32,
+    "gpu": null,
+    "est_core_hours": null,
+    "est_wall_hours": null,
+    "notes": "No reliable runtime estimate exists before the instrumentation probe. The current per-session process CPU and native phase receipts are the sizing inputs. A four-hour pilot cap is an admission limit, not an estimate; begin with pair 46 and small correctness controls."
+  },
+  "run": {
+    "argv": [
+      "target/release/examples/conductor_gap_study",
+      "conductor-complete-cost",
+      "--out",
+      "{out}"
+    ],
+    "env": {
+      "RAYON_NUM_THREADS": "1"
+    },
+    "timeout_per_shard_s": 14400
+  },
+  "shards": {
+    "count": 1,
+    "scheme": "single",
+    "params": {},
+    "stop": "all"
+  },
+  "checkpoint": {
+    "file": null,
+    "resume_flag": null
+  },
+  "outputs": {
+    "result_schema": "conductor-gap.followup-bundle/v1",
+    "verify": [
+      "target/release/conductor_gap_check",
+      "--protocol",
+      "backlog/XP-20261015-conductor-complete-cost/PROTOCOL.md",
+      "{out}/result.json"
+    ],
+    "land": "research/conductor_gap_followups_20261015/conductor-complete-cost"
+  },
+  "cairn": {
+    "mode": "lab-task",
+    "space": "TBD",
+    "tasks": [
+      "XP-20261015-conductor-complete-cost"
+    ],
+    "ttl_s": 86400,
+    "env": {
+      "name": "crypto-conductor-review",
+      "recipe": "Build from the reviewed merged code commit with Rust 1.98 and the declared native dependencies. No environment or task has been published by this card."
+    },
+    "exec": {
+      "cpus": 1,
+      "memory_mb": 8192,
+      "timeout_s": 14400,
+      "sandbox": "auto",
+      "publish": "runs/XP-20261015-conductor-complete-cost"
+    },
+    "notes": "Funding is a priority proposal for review, not a remote funding action. Select the lab, implement resumable execution and independently verify the driver before ready promotion.",
+    "funding": {
+      "units": 140000,
+      "rationale": "Below the two focused replication/control cards: this is important infrastructure, but its resource estimate and host eligibility are not yet established."
+    }
+  },
+  "owner_hint": "native cryptanalysis research"
+}
