@@ -80,6 +80,10 @@ pub struct Constants {
     pub reference_check: bool,
     /// Whether the comparison's runs are frozen.
     pub frozen: bool,
+    /// Whether its claims carry the ledger's newer `vs_rho` stage fields
+    /// (`e2b865e4`, 2026-10-13); the comparisons before it reproduce
+    /// their frozen claims without them.
+    pub stage_fields: bool,
 }
 
 const S23_IC_SOURCES: &[&str] = &[
@@ -126,6 +130,7 @@ pub const S23: Constants = Constants {
     earlier: None,
     reference_check: false,
     frozen: true,
+    stage_fields: false,
 };
 
 /// The rule's comparison at baseline v2 (`research/ic_tool_program/rule/v2`):
@@ -151,6 +156,7 @@ pub const V2: Constants = Constants {
     )),
     reference_check: true,
     frozen: false,
+    stage_fields: false,
 };
 
 /// The rule's comparison at baseline v3 (`research/ic_tool_program/rule/v3`):
@@ -176,6 +182,7 @@ pub const V3: Constants = Constants {
     )),
     reference_check: true,
     frozen: false,
+    stage_fields: false,
 };
 
 /// The rule's comparison at baseline v6 (`research/ic_tool_program/rule/v6`):
@@ -201,6 +208,7 @@ pub const V6: Constants = Constants {
     )),
     reference_check: true,
     frozen: false,
+    stage_fields: true,
 };
 
 /// The rule's comparison at baseline v7 (`research/ic_tool_program/rule/v7`):
@@ -654,7 +662,7 @@ impl Comparison {
         };
         let target_hash = rep.at("target")?.at("sha256")?.clone();
         let curve = rep.at("curve")?;
-        Ok(J::Obj(vec![
+        let fields: Vec<(String, J)> = vec![
             ("n".into(), J::Int(n.into())),
             ("a".into(), J::Int(a.into())),
             ("log2_r".into(), rep.at("log2_r")?.clone()),
@@ -838,7 +846,23 @@ impl Comparison {
             ),
             ("report".into(), J::Str(self.rel(report_path))),
             ("attempts".into(), J::Arr(tried)),
-        ]))
+        ];
+        // The ledger's newer stage fields (e2b865e4, 2026-10-13) are written
+        // only by the comparisons declared after it, so the earlier ones
+        // still reproduce their frozen claims byte for byte.
+        const NEWER: [&str; 5] = [
+            "rho_online_phase_ms",
+            "ic_online_interval",
+            "rho_online_interval",
+            "operation_accounting",
+            "record_class",
+        ];
+        Ok(J::Obj(
+            fields
+                .into_iter()
+                .filter(|(key, _)| self.constants.stage_fields || !NEWER.contains(&key.as_str()))
+                .collect(),
+        ))
     }
 }
 
