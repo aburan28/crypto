@@ -65,21 +65,34 @@ def write_once(path, value):
     path.write_text(blob)
 
 
-def frozen(binary):
-    plan = json.loads((HERE / 'plan.json').read_text())
-    paths = {'source': SOURCE, 'binary': binary, 'targets': FIXTURE,
+def frozen_paths(binary):
+    return {'source': SOURCE, 'binary': binary, 'targets': FIXTURE,
              'answers': ANSWERS,
              'reference_environment': REFERENCE_ENV,
              'group': GROUP, 'protocol': HERE / 'PROTOCOL.md',
              'runner': HERE / 'run.py', 'verifier': HERE / 'verify.py',
              'summarizer': HERE / 'summarize.py',
+             'sealer': HERE / 'seal.py',
              'lean': HERE / 'FourByteId30.lean',
              'lean_check': HERE / 'lean_check.txt',
              'lean_toolchain': HERE / 'lean-toolchain',
-             'proof_map': HERE / 'PROOF_MAP.md'}
+             'proof_map': HERE / 'PROOF_MAP.md',
+             'holdout_generator': ROOT / 'research/n83_indexed4_id30_holdout_20261017/generate.py',
+             'holdout_manifest': ROOT / 'research/n83_indexed4_id30_holdout_20261017/manifest.json',
+             'holdout_targets': ROOT / 'research/n83_indexed4_id30_holdout_20261017/targets.jsonl',
+             'holdout_answers': ROOT / 'research/n83_indexed4_id30_holdout_20261017/answers.jsonl',
+             'holdout_protocol': ROOT / 'research/n83_indexed4_id30_holdout_20261017/PROTOCOL.md',
+             'holdout_selector': ROOT / 'research/n83_indexed4_id30_holdout_20261017/choose.py'}
+
+
+def frozen(binary):
+    plan = json.loads((HERE / 'plan.json').read_text())
+    paths = frozen_paths(binary)
     if (plan['schema'] != 'n83.indexed4-id30-screen-plan/v1' or
             plan['binary_path'] != str(binary) or
             plan['arm_names'] != list(ARMS) or plan['k'] != K or
+            plan['target_count'] != 128 or
+            plan['role'] != 'ordinary_local_candidate_diagnostic' or
             plan['cap_seconds_per_arm'] != CAP or
             any(digest(path) != plan['sha256'][name]
                 for name, path in paths.items())):

@@ -21,6 +21,8 @@ def frozen_plan():
     plan = json.loads((HERE / 'selection_plan.json').read_text())
     if (plan['schema'] != 'n83.indexed4-id30-holdout-selection-plan/v1' or
             plan['arm_names'] != list(ARMS) or plan['k'] != 4096 or
+            plan['screen_plan_sha256'] !=
+            digest(ROOT / 'research/n83_indexed4_id30_20261017/plan.json') or
             plan['choice_rule'] != 'dispatch_only_if_both_complete_and_four_byte_geometric_online_lower' or
             any(digest(ROOT / path) != value
                 for path, value in plan['sha256'].items())):
