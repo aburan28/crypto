@@ -5,6 +5,10 @@ every level of an ℓ-isogeny volcano, and run Pollard rho on each curve:
 does the level (crater → floor), or the particular curve, change how fast
 rho solves it? Report min, max and mean.
 
+**Update:** a fourth curve, D (j = 0 crater, `run-20261017T0140Z`), shows
+the one place the curve matters: there, rho folded by the order-6
+automorphism needs 1.89 ± 0.09× fewer operations (√3 predicted).
+
 **Answer (measured on three curves: A, `run-20261016T2302Z`, ℓ = 3,
 ramified crater; B, `run-20261016T2315Z`, ℓ = 3, split crater; C,
 `run-20261017T0049Z`, ℓ = 2, a whole depth-3 2-volcano).** No measurable
@@ -258,6 +262,77 @@ dearer and saves no steps: whichever walk a curve runs, its collision
 time follows the same birthday distribution.
 
 ![pull-back per curve](runs/run-20261017T0111Z/per_curve.svg)
+
+## Where the curve does matter: the j = 0 crater (`run-20261017T0140Z`)
+
+On a prime field, the one property that can differ between isogenous curves
+and change rho's step count is the automorphism group. A curve with j = 0
+has six automorphisms; every other curve has two (±1). Rho can walk on
+classes of six points instead of two, which predicts √(6/2) = √3 ≈ 1.73×
+fewer steps than the negation-map walk. Such curves exist only in classes
+with D_K = −3, where j = 0 sits on the crater. For a D_K = −3 class with a
+2-volcano, (−3/2) = −1, so the crater is the single j = 0 vertex, and its
+three 2-isogenies are permuted by the order-3 automorphism and land on one
+curve.
+
+**Curve D.** It was found by `volcano-rho --j0 --ell 2 --bits 48 --depth 5
+--max-cofactor 100000 --seed 20261015`, which searches y² = x³ + b with
+p ≡ 1 (mod 24). It was measured by `ca volcano … --automorphisms` from
+aburan28/cryptanalysis at `e4f9e25`; exact commands are in
+`runs/run-20261017T0140Z/command.txt`. Every curve runs `ca`'s plain
+negation-map rho. The j = 0 crater curve also runs `ca_curve_solve`'s
+automorphism-folded rho on the same instance with the same seeds.
+
+| | |
+|:--|:--|
+| p | 173805494607697 (48 bits, ≡ 1 mod 24) |
+| root E | y² = x³ + 26953713445357, j = 0 |
+| #E | 173805517224804 = 10524 · n, n = 16515157471 (prime, 33.9 bits) |
+| trace t | −22617106; D_K = −3, 2-volcano depth 5, inert crater |
+| walk | 32 curves = 1 + 1 + 2 + 4 + 8 + 16, 31 edges verified (the whole volcano) |
+| rho | 32 curves + 3 controls (plain) + the crater curve (folded), 400 seeds each: 14,400 solves, all correct; 124.0 s |
+
+| arm | curves | solves | min | mean ± 95 % CI | max |
+|:--|--:|--:|--:|--:|--:|
+| L0, the j = 0 crater, plain | 1 | 400 | 32,500 | 138,688 ± 5,881 | 323,112 |
+| L1 | 1 | 400 | 29,091 | 140,115 ± 5,964 | 345,705 |
+| L2 | 2 | 800 | 27,442 | 141,521 ± 4,151 | 351,803 |
+| L3 | 4 | 1,600 | 24,572 | 141,185 ± 2,972 | 360,062 |
+| L4 | 8 | 3,200 | 24,150 | 140,314 ± 2,092 | 370,427 |
+| L5, the floor | 16 | 6,400 | 26,545 | 139,916 ± 1,498 | 416,873 |
+| all isogenous, plain | 32 | 12,800 | 24,150 | 140,242 ± 1,053 | 416,873 |
+| isomorphic controls, plain | 3 | 1,200 | 23,098 | 142,544 ± 3,447 | 390,953 |
+| **j = 0 crater, automorphism-folded** | 1 | 400 | 10,573 | **74,024 ± 3,560** | 231,754 |
+
+- **Operations (measured):** the folded walk needs **1.89 ± 0.09×** fewer
+  group operations than the plain walks, 140,242 against 74,024. On the
+  crater curve alone, same instance and seeds, it's 138,688 against 74,024
+  (1.87×). Every plain level is flat at about 140k, as on curves A to C.
+- **Against the √3 prediction:** the interval excludes 1.73. Both arms sit
+  above their ideal values: plain at 1.23× √(πn/4) = 113,890, folded at
+  1.13× √(πn/12) = 65,755. The extra is `ca`'s walk overhead (its
+  r = 1024 negation walk with fruitless-cycle handling), which falls more
+  on the plain walk. The algorithmic factor is √3; this implementation's
+  measured factor is 1.89.
+- **Wall time (shared host, indicative):** 6.52 ms against 8.65 ms per
+  solve, **1.33×**. A folded step costs 88 ns against 62 ns, because it
+  picks a canonical representative among six points.
+- **What this means for the volcano (derived):** an instance on any of the
+  31 lower curves can be carried up to the j = 0 crater by at most five
+  2-isogeny evaluations, which costs nothing next to 10⁵ group operations,
+  and solved there about 1.9× cheaper in operations (1.3× in time). This
+  is the one place in a prime-field volcano where the curves are not
+  interchangeable. It exists only for D_K = −3 (or −4, j = 1728: 2×
+  fewer, √2 beyond negation) classes, and a random curve's class has
+  |D_K| ≈ p, so there is nothing to climb to.
+- **A recorded-output note:** the `ca` build that ran wrote the folded
+  arm's mean into the crater vertex of `volcano.diagram.json`, giving a
+  duplicate key. `plot_ca.py` takes vertex values from `results.json`'s
+  plain arms, and `ca` is fixed (`31b72d2`).
+
+![volcano D](runs/run-20261017T0140Z/volcano.svg)
+![per level D](runs/run-20261017T0140Z/per_level.svg)
+![crater cdf D](runs/run-20261017T0140Z/crater_cdf.svg)
 
 ## Reading it
 
