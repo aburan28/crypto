@@ -1,0 +1,37 @@
+diff --git a/src/bin/volcano_rho.rs b/src/bin/volcano_rho.rs
+index 0cbfb2b4c..f48fa33f9 100644
+--- a/src/bin/volcano_rho.rs
++++ b/src/bin/volcano_rho.rs
+@@ -952,6 +952,7 @@ struct Args {
+     /// Distinguished-point bits; `None` picks `min(8, log2(n)/2 − 6)`.
+     dp_bits: Option<u32>,
+     max_cofactor: u64,
++    min_n: u64,
+     /// `any`, `split`, `inert` or `ramified`: the crater shape the search requires.
+     crater: String,
+     /// Search j = 0 curves y² = x³ + b only (class D_K = −3, with the
+@@ -998,6 +999,7 @@ fn parse_args() -> Args {
+         per_level: 10,
+         dp_bits: None,
+         max_cofactor: 64,
++        min_n: 1 << 20,
+         crater: "any".into(),
+         j0: false,
+         j1728: false,
+@@ -1033,6 +1035,7 @@ fn parse_args() -> Args {
+                 )
+             }
+             "--max-cofactor" => a.max_cofactor = val.parse().unwrap(),
++            "--min-n" => a.min_n = val.parse().unwrap(),
+             "--crater" => a.crater = val.clone(),
+             "--j1728" => {
+                 a.j1728 = true;
+@@ -1226,7 +1229,7 @@ fn search(args: &Args, rng: &mut SmallRng) -> Found {
+                 continue;
+             }
+             let n = factor(order).last().unwrap().0;
+-            if order / n > args.max_cofactor || n.is_multiple_of(args.ell) || n < (1 << 20) {
++            if order / n > args.max_cofactor || n.is_multiple_of(args.ell) || n < args.min_n {
+                 continue;
+             }
+             if args.crater != "any" && !kind.starts_with(args.crater.as_str()) {
