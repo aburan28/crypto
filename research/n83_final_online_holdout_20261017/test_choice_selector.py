@@ -40,6 +40,10 @@ def main():
             arms.K992_ID, arms.K1107_ID, arms.K1280_ID, arms.K1024_ID]
         assert choice['five_arm_fallback_used']
         assert choice['k992_fallback_used']
+        repeated = arms.unique_names((arms.k992_run.K1107,
+                                      arms.five_run.finalist.ARMS[2]))
+        assert repeated[0][0] != repeated[1][0]
+        assert repeated[0][3] != repeated[1][3]
         for half in (0, 1):
             events = run.schedule(half, chosen)
             assert len(events) == 96

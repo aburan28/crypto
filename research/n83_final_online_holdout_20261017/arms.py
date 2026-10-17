@@ -60,6 +60,20 @@ def panel(validated_path, selection_path, selector, schema, targets_sha):
     }
 
 
+def unique_names(chosen):
+    """Keep candidate IDs intact when two exact configurations share a K label."""
+    used = set()
+    result = []
+    for name, k, layout, candidate_id in chosen:
+        if name in used:
+            name = f'{name}_h{candidate_id[-12:]}'
+        if name in used:
+            raise ValueError('candidate run labels still collide')
+        used.add(name)
+        result.append((name, k, layout, candidate_id))
+    return tuple(result)
+
+
 def choose(five_validated, five_selection, k992_validated, k992_selection):
     f, _, f_selected, f_record = panel(
         five_validated, five_selection, five_select,
@@ -81,7 +95,7 @@ def choose(five_validated, five_selection, k992_validated, k992_selection):
     requested = (K992_ID, K1107_ID, f_arm_id, k_arm_id)
     if any(item not in by_id for item in requested):
         raise ValueError('chosen candidate ID has no exact arm configuration')
-    arms = tuple(by_id[item] for item in dict.fromkeys(requested))
+    arms = unique_names(tuple(by_id[item] for item in dict.fromkeys(requested)))
     if len(arms) < 3 or len(arms) > 4:
         raise ValueError('deduplicated holdout arm count differs')
     return arms, {

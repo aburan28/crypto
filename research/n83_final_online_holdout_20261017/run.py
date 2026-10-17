@@ -60,7 +60,8 @@ def fixture():
 
 def schedule(half, arms):
     if (half not in (0, 1) or len(arms) not in (3, 4) or
-            len({arm[3] for arm in arms}) != len(arms)):
+            len({arm[3] for arm in arms}) != len(arms) or
+            len({arm[0] for arm in arms}) != len(arms)):
         raise ValueError('three or four distinct frozen arms and half 0 or 1 required')
     events = []
     for local in range(6):
