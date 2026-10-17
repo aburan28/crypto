@@ -1,0 +1,13 @@
+[
+  {"section":"prime_e2e","bits":16,"p":65519,"n":65447,"fb":8,"log":13054,"root_wall_s":0.031706,"root_oracle_s":0.005209,"root_targets":6544,"root_relations":13,"buchberger_decide_order":null,"buchberger_wall_s":null,"buchberger_measured":null,"buchberger_per_target_s":null,"msolve_net_wall_s":1.721550,"msolve_measured":true,"msolve_resolvable":true,"msolve_net_per_target_s":0.000256,"msolve_floor_s":0.004834,"msolve_floor_std_s":0.000831,"all_logs_verified":true},
+  {"section":"best_fb_16bit","fb":4,"reps":2000,"msolve_net_per_decide_s":0.000134,"msolve_se_s":0.000025,"msolve_resolvable":true,"root_per_decide_s":0.000000582,"expected_targets":18407,"msolve_composed_s":2.460077},
+  {"section":"best_fb_16bit","fb":6,"reps":2000,"msolve_net_per_decide_s":0.000207,"msolve_se_s":0.000024,"msolve_resolvable":true,"root_per_decide_s":0.000000701,"expected_targets":9999,"msolve_composed_s":2.073913},
+  {"section":"best_fb_16bit","fb":8,"reps":2000,"msolve_net_per_decide_s":0.000297,"msolve_se_s":0.000025,"msolve_resolvable":true,"root_per_decide_s":0.000000785,"expected_targets":6647,"msolve_composed_s":1.972776},
+  {"section":"best_fb_16bit","fb":12,"reps":500,"msolve_net_per_decide_s":0.000357,"msolve_se_s":0.000045,"msolve_resolvable":true,"root_per_decide_s":0.000000762,"expected_targets":3864,"msolve_composed_s":1.381140},
+  {"section":"best_fb_16bit","fb":16,"reps":500,"msolve_net_per_decide_s":0.000564,"msolve_se_s":0.000048,"msolve_resolvable":true,"root_per_decide_s":0.000001044,"expected_targets":2685,"msolve_composed_s":1.514512},
+  {"section":"best_fb_16bit","fb":24,"reps":500,"msolve_net_per_decide_s":0.001129,"msolve_se_s":0.000046,"msolve_resolvable":true,"root_per_decide_s":0.000000828,"expected_targets":1648,"msolve_composed_s":1.859834},
+  {"section":"best_fb_16bit","fb":32,"reps":500,"msolve_net_per_decide_s":0.001688,"msolve_se_s":0.000049,"msolve_resolvable":true,"root_per_decide_s":0.000001688,"expected_targets":1183,"msolve_composed_s":1.996643},
+  {"section":"best_fb_16bit","fb":64,"reps":100,"msolve_net_per_decide_s":0.005966,"msolve_se_s":0.000141,"msolve_resolvable":true,"root_per_decide_s":0.000003230,"expected_targets":552,"msolve_composed_s":3.293006},
+  {"section":"best_fb_16bit","fb":120,"reps":40,"msolve_net_per_decide_s":0.017630,"msolve_se_s":0.000335,"msolve_resolvable":true,"root_per_decide_s":0.000004700,"expected_targets":285,"msolve_composed_s":5.024600},
+  {"section":"best_vs_best_16bit","f4_best_fb":12,"f4_best_composed_s":1.381140,"f4_bound_best_fb":12,"f4_bound_best_composed_s":1.381140,"root_best_fb":120,"root_best_wall_s":0.008601,"root_best_targets":829}
+]
