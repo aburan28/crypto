@@ -112,7 +112,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "3171318fb7615ff71cee443f332aef17348fcab74f467f52cf3b87ba027a3bc8"
+   "sha256": "b8ccb7235cf5e0605a45d5a73a22eef61ed90f4361dfb13cc5d0099cbbb9512a"
   },
   "curves_schema": {
    "path": "docs/curves/ic/curves.schema.json",
@@ -15966,6 +15966,22 @@
    "legacy": [
     "shortlist-deep-broad"
    ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp61-tm1604388101-9105e769",
+   "family": "prime",
+   "field": "GF(p), p = 2305843009213693951",
+   "coefficients": "a = 2305843009213693948, b = 111",
+   "order_bits": 62,
+   "standard": [],
+   "ec1": [
+    "EC1P61Cfph21ad10f63efd"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"

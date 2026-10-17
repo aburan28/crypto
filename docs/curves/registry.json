@@ -29379,6 +29379,59 @@
    ]
   },
   {
+   "slug": "icv1-fp61-tm1604388101-9105e769",
+   "icv1": "ICV1:fp-2305843009213693951:-1604388101:2305843010818082053:1616729741622916372:unk:unk:r:9105e7695e01",
+   "family": "prime",
+   "params": {
+    "p": "2305843009213693951",
+    "a": "2305843009213693948",
+    "b": "111"
+   },
+   "model_json": "{\"a\":\"2305843009213693948\",\"b\":\"111\",\"field\":\"fp-2305843009213693951\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"2305843009213693951\",\"v\":\"1\"}",
+   "trace": -1604388101,
+   "order": "2305843010818082053",
+   "j": "1616729741622916372",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/prime61_isogeny_20261016/PROTOCOL.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1P61Cfph21ad10f63efd",
+     "curve_uid": "urn:ec-record:1:sha256:21ad10f63efdfb9cece7b48145b24c48a2ee16c9cac75581333f3938db42e6c9",
+     "field_sha256": "0b7ce6fa873845e1354c16922f024f105157a815232621c26a65cef133e18102",
+     "field": {
+      "characteristic": 2305843009213693951,
+      "degree": 1,
+      "representation": "prime",
+      "element_encoding": "hex integer modulo the characteristic"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       0,
+       0,
+       0,
+       2305843009213693948,
+       111
+      ],
+      "subgroup_order": "2305843010818082053",
+      "cofactor": 1,
+      "generator": [
+       "0x1",
+       "0x18edf7d1ab07e459"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/prime61_isogeny_20261016/PROTOCOL.json"
+     ]
+    }
+   ]
+  },
+  {
    "slug": "icv1-fp112-t72213667414400864-3ecbdc5f",
    "icv1": "ICV1:fp-4451685225093714772084598273548427:72213667414400864:4451685225093714699870930859147564:1815128745141690948653052996943564:unk:unk:r:3ecbdc5f694e",
    "family": "prime",

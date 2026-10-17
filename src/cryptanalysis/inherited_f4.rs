@@ -167,6 +167,124 @@ pub fn f4_root_elimination_thread() -> u64 {
     ROOT_ELIMINATION.with(|c| c.get())
 }
 
+// ── Root shape replay (`KIC_F4_ROOT_REPLAY=1`, off by default) ─────────
+//
+// F4Remake's idea applied to the roots: the rows of a root that are
+// dependent on earlier rows (in build order) are recorded on the first
+// root of a given shape (column layout, row count, degree, multiplier
+// policy) and dropped from later roots of the same shape before the
+// elimination.  On another target the dropped rows may be independent, so
+// a replayed root spans a *subspace* of the from-scratch row space: every
+// row it yields is still in the ideal, so every refutation and forced
+// variable it reads is sound, and the splitting tree still decides every
+// target exactly (as with `support_local`).  It may read a weaker tail and
+// split more; that cost, and the recording's (an incremental basis in
+// build order, charged in the stage unit), is in the counts.
+
+fn root_replay() -> bool {
+    static ROOT_REPLAY: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ROOT_REPLAY.get_or_init(|| std::env::var("KIC_F4_ROOT_REPLAY").as_deref() == Ok("1"))
+}
+
+thread_local! {
+    /// Recorded dependent rows by root shape.
+    static ROOT_SHAPES: std::cell::RefCell<std::collections::HashMap<u64, std::rc::Rc<Vec<u32>>>> =
+        std::cell::RefCell::new(std::collections::HashMap::new());
+}
+
+/// Roots recorded, roots replayed and rows dropped by root shape replay,
+/// over all threads (a diagnostic; all zero unless `KIC_F4_ROOT_REPLAY=1`).
+static ROOT_REPLAY_COUNTS: [std::sync::atomic::AtomicU64; 3] = [
+    std::sync::atomic::AtomicU64::new(0),
+    std::sync::atomic::AtomicU64::new(0),
+    std::sync::atomic::AtomicU64::new(0),
+];
+
+/// `(roots recorded, roots replayed, rows dropped)` since the start.
+pub fn root_replay_counts() -> (u64, u64, u64) {
+    use std::sync::atomic::Ordering::Relaxed;
+    (
+        ROOT_REPLAY_COUNTS[0].load(Relaxed),
+        ROOT_REPLAY_COUNTS[1].load(Relaxed),
+        ROOT_REPLAY_COUNTS[2].load(Relaxed),
+    )
+}
+
+fn root_shape_key(columns: &[u64], rows: usize, degree: u32, support_local: bool) -> u64 {
+    use std::hash::{Hash, Hasher};
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    columns.hash(&mut h);
+    rows.hash(&mut h);
+    degree.hash(&mut h);
+    support_local.hash(&mut h);
+    h.finish()
+}
+
+/// The rows dependent on earlier rows, in build order, by an incremental
+/// basis keyed by leading bit; one word operation per word XORed.
+fn dependent_rows(matrix: &[Vec<u64>], word_ops: &mut u64) -> Vec<u32> {
+    let mut basis: std::collections::HashMap<usize, Vec<u64>> = std::collections::HashMap::new();
+    let mut dependent = Vec::new();
+    for (i, row) in matrix.iter().enumerate() {
+        let mut v = row.clone();
+        loop {
+            let Some(w) = v.iter().position(|&x| x != 0) else {
+                dependent.push(i as u32);
+                break;
+            };
+            let lead = w * 64 + v[w].trailing_zeros() as usize;
+            match basis.get(&lead) {
+                Some(b) => {
+                    for k in w..v.len() {
+                        v[k] ^= b[k];
+                    }
+                    *word_ops += (v.len() - w) as u64;
+                }
+                None => {
+                    basis.insert(lead, v);
+                    break;
+                }
+            }
+        }
+    }
+    dependent
+}
+
+/// Apply root shape replay to a freshly built root: record its dependent
+/// rows, or drop the recorded ones.
+fn replay_root(
+    columns: &[u64],
+    matrix: &mut Vec<Vec<u64>>,
+    degree: u32,
+    support_local: bool,
+    word_ops: &mut u64,
+) {
+    let key = root_shape_key(columns, matrix.len(), degree, support_local);
+    let known = ROOT_SHAPES.with(|m| m.borrow().get(&key).cloned());
+    match known {
+        Some(drop) => {
+            let mut keep = vec![true; matrix.len()];
+            for &i in drop.iter() {
+                keep[i as usize] = false;
+            }
+            let mut i = 0;
+            matrix.retain(|_| {
+                let k = keep[i];
+                i += 1;
+                k
+            });
+            ROOT_REPLAY_COUNTS[1].fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            ROOT_REPLAY_COUNTS[2]
+                .fetch_add(drop.len() as u64, std::sync::atomic::Ordering::Relaxed);
+        }
+        None => {
+            let dep = dependent_rows(matrix, word_ops);
+            ROOT_SHAPES.with(|m| m.borrow_mut().insert(key, std::rc::Rc::new(dep)));
+            ROOT_REPLAY_COUNTS[0].fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        }
+    }
+}
+
 /// Whether a root is reduced fully (`KIC_F4_INHERIT_ROOT=rref`) rather
 /// than to echelon form; read once.
 fn root_rref() -> bool {
@@ -1399,6 +1517,15 @@ impl ReducedBasis {
         // `D`, was tried and costs what it saves.
         // `KIC_F4_INHERIT_ROOT=rref` restores the fully reduced root as a
         // control.
+        if root_replay() {
+            replay_root(
+                &columns,
+                &mut matrix,
+                degree,
+                support_local,
+                &mut cost.reduce_word_ops,
+            );
+        }
         let rank = if root_rref() {
             rref_f2_counted(&mut matrix, columns.len(), &mut cost.reduce_word_ops)
         } else {
