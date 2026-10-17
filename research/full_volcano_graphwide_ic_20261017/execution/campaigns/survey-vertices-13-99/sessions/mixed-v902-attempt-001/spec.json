@@ -1,0 +1,126 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.negation",
+        "params": {}
+      },
+      "name": "rho",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "bsgs.textbook",
+        "params": {}
+      },
+      "name": "bsgs",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "rho.negation",
+        "params": {}
+      },
+      "name": "rho-aa",
+      "role": "control"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "prime-projected-abscissa:size=16,scan_cap=20000",
+          "linalg": "incremental-gauss-full-rank-checked",
+          "max_trials": "4096",
+          "oracle": "mitm",
+          "targets": "walk"
+        }
+      },
+      "name": "projected-16-mitm",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "prime-projected-abscissa:size=16,scan_cap=20000",
+          "linalg": "incremental-gauss-full-rank-checked",
+          "max_trials": "4096",
+          "oracle": "subtract",
+          "targets": "walk"
+        }
+      },
+      "name": "projected-16-subtract",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "prime-projected-abscissa:size=64,scan_cap=20000",
+          "linalg": "incremental-gauss-full-rank-checked",
+          "max_trials": "4096",
+          "oracle": "mitm",
+          "targets": "walk"
+        }
+      },
+      "name": "projected-64-mitm",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "prime-projected-abscissa:size=64,scan_cap=20000",
+          "linalg": "incremental-gauss-full-rank-checked",
+          "max_trials": "4096",
+          "oracle": "subtract",
+          "targets": "walk"
+        }
+      },
+      "name": "projected-64-subtract",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "prime-abscissa:size=64",
+          "linalg": "incremental-gauss-full-rank-checked",
+          "max_trials": "4096",
+          "oracle": "mitm",
+          "targets": "walk"
+        }
+      },
+      "name": "raw-control",
+      "role": "baseline"
+    }
+  ],
+  "description": "Execution addendum: bounded diagnostic unless full. Public one-target workloads; no runtime promotion.",
+  "label": "volcano-survey-mixed-v902",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 1,
+    "timeout_seconds": 3,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 274606756173313775,
+        "b": 131604100811040217,
+        "group_order": 288230444885376000,
+        "gx": 104815453032999869,
+        "gy": 106006558530429201,
+        "kind": "prime_explicit",
+        "p": 288230445959117953,
+        "r": 4253
+      }
+    ],
+    "target_kind": "public",
+    "target_seed": 20261017,
+    "targets_per_curve": 2
+  }
+}

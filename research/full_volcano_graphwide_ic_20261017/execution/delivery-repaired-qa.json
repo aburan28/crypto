@@ -1,0 +1,28 @@
+{
+  "scope": "New repaired control and three-root pilot; 60 attempts, 40 verified, 18 exhausted, 2 timeouts; 58 exact completed baseline pairs, 2 censored pairs not compared. Not the whole-queue survey.",
+  "folder_id": "109DpcQpX7ATz6GeI8iSWAExGMWBoR-H_",
+  "files": [
+    {
+      "name": "volcano_REPAIRED_RUNNER_CONTROL_PILOT_60attempts_20261017.tar.xz",
+      "bytes": 15458016,
+      "sha256": "83f4724628503d64e5ff612c9585f88ff897c92739df6a4b4b026af963d839b3",
+      "drive_file_id": "12Q0z7VUCWJuCgY5ofbW5Dof3V15FZ4Th",
+      "url": "https://drive.google.com/file/d/12Q0z7VUCWJuCgY5ofbW5Dof3V15FZ4Th/view",
+      "metadata_readback": "name, byte count and parent folder checked; remote whole-file hash not checked"
+    },
+    {
+      "name": "report.pdf",
+      "bytes": 81660,
+      "sha256": "194719b335f7a2c449bd6a48104df2133584ae1095a318858e7dcb2f6531e7cd",
+      "drive_file_id": "1UYCFUZjivhK5VKdwj3MAU6YWPIL4WTBC",
+      "url": "https://drive.google.com/file/d/1UYCFUZjivhK5VKdwj3MAU6YWPIL4WTBC/view",
+      "metadata_readback": "name, byte count and parent folder checked; remote whole-file hash not checked"
+    }
+  ],
+  "local_validation": {
+    "manifest_check": "all entries passed",
+    "standard_audit": "all four capsules pass",
+    "exhausted_replay": "all deterministic exhausted reports match"
+  },
+  "independent_implementation_replay": "NOT_RUN"
+}
