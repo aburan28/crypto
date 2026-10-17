@@ -106,6 +106,10 @@
    "path": "research/n83_e2e_holdout_20261016/ic1_rows_38955665283.json",
    "sha256": "4c296ed1a4e145cfaeff850b0a8882c5721971f607f2be2b4119d7e210c85600"
   },
+  "rho_optimization": {
+   "path": "research/ecbench_rho_optimized_20261014/RESULT.json",
+   "sha256": "195f3c4e3565dc2669769893b86741cc58d95c982190f77a0052c70b7f847cf9"
+  },
   "registry": {
    "path": "docs/curves/registry.json",
    "sha256": "1dd8f41e6ca463adac11951600097a78b1053d5439b72a4e5feb63d892dfeac9"
@@ -5842,11 +5846,34 @@
   "fully_priced_cold_speedup": null
  },
  "latest_frontier_audit": {
-  "date": "2026-10-13",
-  "source": "research/ecbench_frontier_20261013/frontier-data.json",
-  "classification": "evidence synthesis; no new bound or challenge verdict",
+  "date": "2026-10-14",
+  "source": "research/ecbench_rho_optimized_20261014/RESULT.json",
+  "previous_source": "research/ecbench_frontier_20261013/frontier-data.json",
+  "classification": "engineering improvement; deterministic instruction result; native wall not admitted",
   "ranked_rows_changed": false,
-  "reason": "No new admitted whole-pipeline measurement, re-matched reference, or newly priced curve; retain every ranked row and publish this synthesis as an accounting audit.",
+  "reason": "The standing strong-rho method, recovered answers, trajectories, charged GAE and every counter are unchanged. Existing operation ratios and bounds therefore stay fixed. Historical wall ratios remain attached to their measured binaries; this L0 study cannot reprice or promote them.",
+  "rho_optimization": {
+   "method": "rho.signed_frobenius_strong",
+   "archived_baseline_ir": 1989285300,
+   "optimized_ir": 1600543701,
+   "optimized_over_archived_baseline": 0.804582279,
+   "optimized_over_same_binary_legacy": 0.802154915,
+   "same_binary_speedup": 1.246642,
+   "ops_ratio": 1.0,
+   "ops_ci95": [
+    1.0,
+    1.0
+   ],
+   "ops_pairs": 240,
+   "session_id": "ECBS1hffaa276d8a5c",
+   "replays_identical": 720,
+   "measured_replays": 720,
+   "wall_status": "descriptive only; not a result",
+   "wall_level": "L0",
+   "wall_median_ratio": 0.958583652556,
+   "aa_median_ratio": 0.999686314167,
+   "admitted_wall_pairs": 0
+  },
   "cold": {
    "method": "rho.signed_frobenius_strong",
    "bound_id": "ECBND1h05a2ea918f3c",
