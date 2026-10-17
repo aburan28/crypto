@@ -1,0 +1,29 @@
+    Finished `release` profile [optimized] target(s) in 0.13s
+     Running tests/lll_degeneracy_probe.rs (target/release/deps/lll_degeneracy_probe-7687123cab133dd9)
+
+running 1 test
+
+=== P-521 LLL-HP probe (k_bits=384, tests the bigfloat-GS fix) ===
+P-521[f64] k_bits=384 m= 8 reduction=LLL      d_seed=0x00C0FFEE  →  ✗ LLL did not produce a recoverable short vector — try more signatures or increase bias  (223 ms)
+P-521[HP]  k_bits=384 m= 8 reduction=LLL-HP   d_seed=0x00C0FFEE  →  ✓ RECOVERED                               (223 ms)
+  seed=0x00C0FFEE | f64=✗ LLL did not produce a recoverable short vector — try more signatures or increase bias (223 ms) | HP=✓ RECOVERED                              (223 ms)
+P-521[f64] k_bits=384 m= 8 reduction=LLL      d_seed=0xDEADBEEF  →  ✗ LLL did not produce a recoverable short vector — try more signatures or increase bias  (240 ms)
+P-521[HP]  k_bits=384 m= 8 reduction=LLL-HP   d_seed=0xDEADBEEF  →  ✓ RECOVERED                               (214 ms)
+  seed=0xDEADBEEF | f64=✗ LLL did not produce a recoverable short vector — try more signatures or increase bias (240 ms) | HP=✓ RECOVERED                              (214 ms)
+P-521[f64] k_bits=384 m= 8 reduction=LLL      d_seed=0x12345678  →  ✗ LLL did not produce a recoverable short vector — try more signatures or increase bias  (245 ms)
+P-521[HP]  k_bits=384 m= 8 reduction=LLL-HP   d_seed=0x12345678  →  ✓ RECOVERED                               (245 ms)
+  seed=0x12345678 | f64=✗ LLL did not produce a recoverable short vector — try more signatures or increase bias (245 ms) | HP=✓ RECOVERED                              (245 ms)
+
+f64 LLL: 0/3 recovered
+HP  LLL: 3/3 recovered
+✓ HP GS fix improves P-521 recovery vs f64 GS.
+✓ P-521 HNP fully resolved: HP GS + LLL recovers key 3/3.
+test probe_p521_lll_hp ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 11.95s
+
+
+real	0m12.145s
+user	0m11.961s
+sys	0m0.052s
+exit 0
