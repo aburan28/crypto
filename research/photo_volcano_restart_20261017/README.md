@@ -89,3 +89,53 @@ Historical recovery metadata remains in
 [the earlier handoff](../photo_volcano_recovery_20261017/README.md). Its missing
 archive problem remains open for that old evidence, but no longer prevents
 this newly authorized replacement run.
+
+## Audited diagnostic and visualization update
+
+The [source-linked topology report](reports/topology_restart/REPORT.md),
+[inspected two-page PDF](reports/topology_restart/REPORT.pdf) and
+[vector volcano](reports/topology_restart/volcano.svg) retain all 46 vertices
+and 90 directed maps. Its colors indicate level only.
+The reusable [diagram skill](../../.agents/skills/isogeny-volcano-diagrams/SKILL.md)
+supports arbitrary recorded depth, surface cycles, loops and parallel maps.
+Its native Node tests passed at depths 0, 1, 4, 8 and 20; this verifies the
+renderer, not mathematical discovery of those test graphs.
+
+Actual Semaev/factor-base Gröbner probes ran on every curve: 9200 random
+setup trials, 4600 target trials and 920 deliberately planted positive
+controls. Singular independently verified equality of the returned ideals
+for **all 14720 systems**. Random setup and target relation yields were both
+zero under the frozen B=12, strict signed two-sum configuration; setup rank
+remained zero and **no random-corpus full IC recovery occurred**. A separate
+planted full-rank control passes GB → relations → linear algebra → verified
+point equation and is explicitly excluded from those recoveries. See
+[protocol](IC_PROTOCOL.md), [audit](validation/singular_audit.json), and
+[diagnostic summary](reports/ic_audited_snapshot/summary.json).
+
+The measured target top-forms Hilbert cutoff is 13; maximum temporary
+accumulator degree is 23 and processed-pair sugar degree is 26. These are
+separate quantities. None is presented as the CM regularity of the
+homogenized ideal. The exact support audit has 288 nonzero points per
+factor base out of r−1 possible nonzero subgroup points. Paired transports
+across curves preserve relations, so repeated curve copies are not
+independent yield samples. No bounded zero-yield run proves impossibility.
+
+For answer-free independent replay, compile the added wrapper against the
+extracted public native source snapshot and library:
+
+```
+g++ -std=c++17 -O3 -Wall -Wextra -Wpedantic -Werror source/replay_public.cpp -Lnative -lcryptanalysis -Wl,-rpath,'$ORIGIN/native' -pthread -o replay_public
+./replay_public "$PWD" 0 0 rho
+```
+
+It reads only the public P/Q inputs and public walk seed, checks the returned
+point equation independently, and exports no recovered scalar. Its BSGS mode
+is an independent cold setup+query solve, not a retained-table query timing.
+For a private resumed campaign use `source/resume.sh` only after checking
+that no campaign worker is active; its lock and process preflight reject a
+competing launcher and its logs have a new per-launch namespace.
+
+Full 4600-case rho/BSGS completion, full random-corpus IC recovery, rho/BSGS
+field-level counters and complete per-step event streams remain unresolved.
+Raw records, failed attempts and private randomness remain preserved locally.
+The new sources do not modify the already frozen running workers or fixtures.

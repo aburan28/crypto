@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "independent_systems_checked": 14720,
+  "failed": 0,
+  "method": "Singular std of both original and returned ideals, plus both ideal containments",
+  "actual_prime_field": "72057980207847001",
+  "runtime": "Singular 4.4.1",
+  "source_sha256": "5109dbaf233a1c775e4fc5360e23e9430913e7023fe0d51b76f36f171049d6d4",
+  "input_script_sha256": "8cdd6424441df494b896e5cb791ffb5c31f309a6807e999a7955aa3208c5a8af",
+  "output_sha256": "8fc67bde2971519b0b0f40cd5f37930887297f8b0b99fcc4c428dd1ca570f220",
+  "ic_frozen_sha256": "137363bed0703c2922776b06e5284588bf62accf76fed33e420eb9cf6d162482",
+  "warning": "Optional p_Procs_FieldGeneral module was initially unavailable; Singular used its documented slower valid fallback. No correctness failure occurred.",
+  "scalar_witnesses_exported": false,
+  "full_IC_recovery_complete": false
+}
