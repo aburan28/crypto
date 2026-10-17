@@ -51,6 +51,9 @@ enum Cmd {
         /// Also time `prime_fast::rho_parallel` on a curve of this many bits.
         #[arg(long)]
         prime_fast_rho_bits: Option<u32>,
+        /// Also time `two_sylow_search`'s halving draws on `fp_backend::Fp64`.
+        #[arg(long)]
+        two_sylow: bool,
     },
     /// Fit a hardware profile from a measurement run and validate the model
     /// against the measured kernel.
@@ -219,9 +222,11 @@ fn run() -> Result<(), String> {
             target_ms,
             fields,
             prime_fast_rho_bits,
+            two_sylow,
         } => {
             let mut params = measure::default_params(quick);
             params.prime_fast_rho_bits = prime_fast_rho_bits;
+            params.two_sylow = two_sylow;
             if let Some(r) = reps {
                 params.reps = r;
             }
