@@ -2,12 +2,14 @@
 //! candidate-to-baseline ratios `r_k = B_k / A_k`, the same-build drift
 //! `d = |A2 / A1 − 1|`, and a classification that calls an effect only when
 //! both ratios clear `max(2d, floor)` on the same side.  Also the
-//! `fp64bf / fp64` kernel ratio inside each run (round-2 claim F1).
+//! `fp64bf / fp64` kernel ratio inside each run (round-2 claim F1), and
+//! threshold claims over a set of arms ([`ratio_claim`]).
 
 use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
 
+use super::fit::Claim;
 use super::measure::Measurements;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -78,6 +80,58 @@ pub fn compare(
     out
 }
 
+/// The arms named `prefix…` whose batch size (the last dotted field, where
+/// it is a number) is at least `min_batch`; arms without one always count.
+fn select<'a>(rows: &'a [ArmCompare], prefix: &str, min_batch: usize) -> Vec<&'a ArmCompare> {
+    rows.iter()
+        .filter(|r| {
+            r.arm.starts_with(prefix)
+                && r.arm
+                    .rsplit('.')
+                    .next()
+                    .and_then(|b| b.parse::<usize>().ok())
+                    .is_none_or(|b| b >= min_batch)
+        })
+        .collect()
+}
+
+/// A claim over a set of arms from `ID:PREFIX:MIN_BATCH:T`: the largest
+/// ratio max(r1, r2) is at most `T`, or with `dev`, the largest deviation
+/// |r_k − 1| is.  No matching arm is an error, not a pass.
+pub fn ratio_claim(rows: &[ArmCompare], spec: &str, dev: bool) -> Result<Claim, String> {
+    let parts: Vec<&str> = spec.split(':').collect();
+    let [id, prefix, min_batch, t] = parts[..] else {
+        return Err(format!("claim {spec:?}: want ID:PREFIX:MIN_BATCH:T"));
+    };
+    let min_batch: usize = min_batch.parse().map_err(|e| format!("{spec}: {e}"))?;
+    let t: f64 = t.parse().map_err(|e| format!("{spec}: {e}"))?;
+    let arms = select(rows, prefix, min_batch);
+    if arms.is_empty() {
+        return Err(format!(
+            "claim {id}: no arm matches {prefix:?} at batch ≥ {min_batch}"
+        ));
+    }
+    let value = arms
+        .iter()
+        .flat_map(|r| [r.r1, r.r2])
+        .map(|r| if dev { (r - 1.0).abs() } else { r })
+        .fold(f64::MIN, f64::max);
+    let what = if dev {
+        "max |r_k − 1|"
+    } else {
+        "max(r1, r2)"
+    };
+    Ok(Claim::at_most(
+        id,
+        &format!(
+            "{what} over {} arms {prefix}* (batch ≥ {min_batch})",
+            arms.len()
+        ),
+        value,
+        t,
+    ))
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PairRow {
     pub run: String,
@@ -135,4 +189,44 @@ pub fn pairs_csv(rows: &[PairRow], a: &str, b: &str) -> String {
         ));
     }
     s
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn row(arm: &str, r1: f64, r2: f64) -> ArmCompare {
+        ArmCompare {
+            arm: arm.into(),
+            a1: 1.0,
+            a2: 1.0,
+            b1: r1,
+            b2: r2,
+            r1,
+            r2,
+            drift: 0.0,
+            margin: 0.02,
+            class: String::new(),
+        }
+    }
+
+    #[test]
+    fn ratio_claims_select_by_prefix_and_batch() {
+        let rows = [
+            row("kernel.fp64.16", 0.9, 0.95),
+            row("kernel.fp64.4096", 0.5, 0.45),
+            row("kernel.fp64.65536", 0.4, 0.6),
+            row("kernel.fp64cm.4096", 1.03, 0.92),
+            row("fp64.mul.latency", 1.04, 1.02),
+        ];
+        // B = 16 is below the cut; `kernel.fp64cm.` does not match `kernel.fp64.`.
+        let c = ratio_claim(&rows, "P1:kernel.fp64.:4096:0.85", false).unwrap();
+        assert_eq!((c.value, c.verdict.as_str()), (0.6, "PASS"));
+        let c = ratio_claim(&rows, "P2:fp64.mul.latency:0:1.03", false).unwrap();
+        assert_eq!((c.value, c.verdict.as_str()), (1.04, "FAIL"));
+        let c = ratio_claim(&rows, "C1:kernel.fp64cm.:4096:0.10", true).unwrap();
+        assert!((c.value - 0.08).abs() < 1e-12 && c.verdict == "PASS");
+        assert!(ratio_claim(&rows, "X:kernel.w1.:0:1", false).is_err());
+        assert!(ratio_claim(&rows, "X:kernel.fp64.:0", false).is_err());
+    }
 }

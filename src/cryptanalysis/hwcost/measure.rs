@@ -34,7 +34,8 @@ pub const DP_MASK: u64 = (1 << 16) - 1;
 /// can be fitted against the limb count; `fp64` is the dedicated one-word
 /// backend and `fp64bf` the same field and representation through
 /// [`kernel::Fp64Bf`] (no data-dependent branch in subtraction or
-/// reduction).
+/// reduction); `pf64` is the production prime-field rho engine's
+/// arithmetic ([`kernel::PrimeFast`], `p < 2⁶²`).
 #[derive(Clone, Copy, Debug)]
 pub struct FieldSpec {
     pub name: &'static str,
@@ -44,7 +45,7 @@ pub struct FieldSpec {
     pub prime_label: &'static str,
 }
 
-pub const FIELDS: [FieldSpec; 7] = [
+pub const FIELDS: [FieldSpec; 8] = [
     FieldSpec {
         name: "fp64",
         backend: "Fp64",
@@ -65,6 +66,13 @@ pub const FIELDS: [FieldSpec; 7] = [
         limbs: 1,
         prime_hex: "7fffffffffffffe7",
         prime_label: "2^63-25",
+    },
+    FieldSpec {
+        name: "pf64",
+        backend: "prime_fast::Fp64",
+        limbs: 1,
+        prime_hex: "3fffffffffffffc7",
+        prime_label: "2^62-57",
     },
     FieldSpec {
         name: "w1",
@@ -102,7 +110,7 @@ pub fn field_spec(name: &str) -> Result<FieldSpec, String> {
         .copied()
         .find(|f| f.name == name)
         .ok_or_else(|| {
-            format!("unknown field `{name}` (have fp64, fp64bf, fp64cm, w1, w2, w3, w4)")
+            format!("unknown field `{name}` (have fp64, fp64bf, fp64cm, pf64, w1, w2, w3, w4)")
         })
 }
 
@@ -146,6 +154,14 @@ macro_rules! hwcost_with_field {
             "fp64cm" => {
                 let $f = Fp64::new(num_traits::ToPrimitive::to_u64(&p).unwrap());
                 let $a = $crate::cryptanalysis::hwcost::kernel::Fp64Cm::new(&$f);
+                $body
+            }
+            "pf64" => {
+                let p = num_traits::ToPrimitive::to_u64(&p).unwrap();
+                let $f = Fp64::new(p);
+                let $a = $crate::cryptanalysis::hwcost::kernel::PrimeFast(
+                    $crate::cryptanalysis::prime_fast::Fp64::new(p),
+                );
                 $body
             }
             "w1" => {
@@ -217,6 +233,10 @@ pub struct Params {
     pub scaling_batch: usize,
     pub fields: Vec<String>,
     pub seed: u64,
+    /// When set, also time `prime_fast::rho_parallel` end to end on a
+    /// prime-order `a = −3` curve of this many bits (arm `pfrho.<bits>`).
+    #[serde(default)]
+    pub prime_fast_rho_bits: Option<u32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -554,6 +574,54 @@ where
     arms
 }
 
+/// The production prime-field rho, `prime_fast::rho_parallel`, end to end:
+/// one known-answer solve per call on the prime-order `a = −3` curve of
+/// `bits` bits that [`prime_fast::find_a3_curve`] returns, one thread with
+/// 1024 lock-step walkers, the negation map, a 2¹⁰-entry r-adding table and
+/// 6 distinguished bits; wall time (table set-up included) per walk step.
+///
+/// [`prime_fast::find_a3_curve`]: crate::cryptanalysis::prime_fast::find_a3_curve
+fn prime_fast_rho_arm(bits: u32, seed: u64) -> Result<Arm, String> {
+    use crate::cryptanalysis::prime_fast::{find_a3_curve, rho_parallel, RhoConfig};
+    use rand::Rng;
+    let (curve, g) =
+        find_a3_curve(bits, 3).ok_or_else(|| format!("no {bits}-bit a = -3 prime-order curve"))?;
+    let cfg = RhoConfig {
+        threads: 1,
+        walkers: 1024,
+        table_bits: 10,
+        dp_bits: 6,
+        negation: true,
+        seed,
+        max_steps: 0,
+    };
+    let mut rng = StdRng::seed_from_u64(seed ^ u64::from(bits));
+    Ok(Arm {
+        group: "pfrho",
+        name: format!("pfrho.{bits}"),
+        unit: "ns_per_step",
+        run: Box::new(move |n: u64| {
+            let (mut ns, mut steps) = (0.0, 0.0);
+            for _ in 0..n {
+                let x = rng.gen_range(1..curve.n);
+                let q = curve.mul(Some(g), x).expect("x < n gives a finite point");
+                let cfg = RhoConfig {
+                    seed: rng.gen(),
+                    ..cfg.clone()
+                };
+                let t = Instant::now();
+                let r = rho_parallel(&curve, g, q, &cfg).expect("unlimited rho solves");
+                ns += t.elapsed().as_nanos() as f64;
+                assert_eq!(r.log, x, "pfrho: wrong logarithm");
+                steps += r.total_steps as f64;
+            }
+            (ns, steps)
+        }),
+        value: ns_per_unit,
+        n: 0,
+    })
+}
+
 fn read_sum(buf: &[u64]) -> u64 {
     buf.iter().fold(0u64, |a, &x| a.wrapping_add(x))
 }
@@ -775,6 +843,7 @@ pub fn default_params(quick: bool) -> Params {
             scaling_batch: 256,
             fields: vec!["fp64".into(), "w2".into()],
             seed: 20261016,
+            prime_fast_rho_bits: None,
         }
     } else {
         Params {
@@ -808,6 +877,7 @@ pub fn default_params(quick: bool) -> Params {
             scaling_batch: 1024,
             fields: FIELDS.iter().map(|f| f.name.to_string()).collect(),
             seed: 20261016,
+            prime_fast_rho_bits: None,
         }
     }
 }
@@ -892,6 +962,15 @@ pub fn run(params: Params, log: &mut dyn FnMut(String)) -> Result<Measurements, 
         }
     }
     run_group(&mut arms, reps, target, &mut samples, log);
+    drop(arms);
+
+    if let Some(bits) = params.prime_fast_rho_bits {
+        log(format!(
+            "prime_fast::rho_parallel, {bits}-bit curve, one thread"
+        ));
+        let mut arms = vec![prime_fast_rho_arm(bits, params.seed)?];
+        run_group(&mut arms, reps, target, &mut samples, log);
+    }
 
     Ok(Measurements {
         schema: MEASUREMENTS_SCHEMA.into(),
