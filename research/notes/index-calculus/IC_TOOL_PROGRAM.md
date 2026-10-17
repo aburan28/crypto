@@ -808,6 +808,16 @@ advised, so the filter and the table sat on 4 KiB pages.
   round's 1.03. The lever should grow with the table, beyond `2^47.2`, where the
   distance to rho is largest. It is kept to pair with the next lever.
 
+**A18: a wider base at `2^47.2` buys little; the build is the next lever
+(2026-10-17).** It widened the factor base from 320 to 400 and 470 orbits, crossed with A17's filter, over 48 processes. This is a recipe change, so it falls under A12.
+- **The wider base on v8:** 1.020 and 1.023 cold. Collection falls 27%, but the build rises 2.28× for 2.17× the stored pairs.
+- **On top of A17:** nothing.
+- **A17 replicates:** 1.065 [1.040, 1.090]
+  ([record](../../ic_tool_program/explorations/A18-wider-base-2p47-20261017/README.md)).
+- **Next:** the build. It costs about 31–35 ns per stored pair, and it is 30% of cold
+  time at `2^44.3`–`2^44.5`. A cheaper build is also what would let a wider
+  base pay at `2^47.2`.
+
 ## 9. Track B: generality and robustness
 
 **Where the tool stands (at `0bf67f16`).**
