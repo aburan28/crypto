@@ -219,17 +219,17 @@ certify its coordinates or group order.
 
 In the current file (2112 registry curves and 176 from the sources: 175
 walked curves of the P-256 and P-224 isogeny classes and the ECC2K-130
-degree-263 descendant), `End(E)` is established for 1979 curves (878
-maximal, 1101 non-maximal) and unresolved for 274; 35 have a `Δ` that did
+degree-263 descendant), `End(E)` is established for 1983 curves (878
+maximal, 1105 non-maximal) and unresolved for 270; 35 have a `Δ` that did
 not factor. Of the 1324 curves over `GF(p^k)`, `k > 1`, 1319 have a
 certified order (9 by generator, 1310 by point orders: 484 proved, 826
 probable). The levels behind it: 1246 decided by the scalar test on `E[ℓ]`
 (730 floors, 516 craters at depth 1), 982 by the prime-power test (459 one
-above the floor, 319 craters, 204 in between), 59 by the point test (48
-floors, 11 craters), 13 walker certificates (each agreeing with the test),
+above the floor, 319 craters, 204 in between), 64 by the point test (52
+floors, 12 craters), 13 walker certificates (each agreeing with the test),
 111 from a certified `End(E)`, 228 where `f₀` is already prime to `ℓ`.
 What stays open: 202 levels the tests only bound (beyond the cost limit or
-`ℓ^j > 64`), 49 depth-1 primes beyond both tests' budgets (large `k`, or
+`ℓ^j > 64`), 44 depth-1 primes beyond both tests' budgets (large `k`, or
 binary curves, which the point test does not cover), and 72 primes of `v`
 above the test's range. P-256's `Δ` factors with
 the committed hints as `−3·5·456597257999·p81·p136` (squarefree), so

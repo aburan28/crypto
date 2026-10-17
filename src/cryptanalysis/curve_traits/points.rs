@@ -40,7 +40,7 @@ pub const MAX_DEGREE: u64 = 64;
 /// Work allowed for one test, in base-field word products: a guard on
 /// build time.  The search stops once the scalar multiplications it has
 /// made would exceed it, so the bound holds whatever the points do.
-pub const POINT_TEST_COST: u64 = 6_000_000_000;
+pub const POINT_TEST_COST: u64 = 20_000_000_000;
 
 /// A test is not started unless the budget covers this many scalar
 /// multiplications (a typical certificate needs two or three points).
