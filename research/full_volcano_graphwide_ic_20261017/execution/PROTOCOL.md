@@ -19,7 +19,8 @@ Modes are separate immutable campaigns:
 * `pilot`: the first vertex of each complete graph, two public targets,
   one round, no warmup. Projected sizes 16 and 64, scan cap 20,000,
   4,096 relation trials. Each child has a 3-second watchdog.
-* `survey`: all 24,823 vertices in round-robin graph order, with precisely
+* `survey`: all 24,823 vertices, with one representative per stratum first,
+  then every remaining vertex (round-robin graph order within each phase), with precisely
   the pilot's parameters. It measures bounded attempts, including exhaustion
   and watchdog censoring; it does not replace the full million-trial matrix.
 * `full`: the original grid 16/32/64/128, 8 public targets, 5 rounds and
@@ -43,8 +44,12 @@ comparisons. Retain raw wall observations without calling them admitted.
 The native driver freezes an immutable queue, binary hashes and exact input
 file hashes. It uses SQLite checkpoints and an advisory single-writer lock.
 Each attempt receives a new session directory; no sealed file is overwritten.
-Run and replay are sequential. Every deterministic measured record is
-replayed. Failed attempts remain visible and are retried into new directories
+Run and replay are sequential. The standard ecbench audit replays successful
+deterministic measured records; an additional native receipt replays exhausted
+deterministic records through the same measured-child implementation and
+compares outcomes, exact phase counts, counters, field operations and factor
+base identities. Timeouts have no final deterministic report to replay.
+Failed attempts remain visible and are retried into new directories
 on resume. Finite-field IC is explicitly unsupported for these actual
 embedding degrees; the exact per-vertex applicability records are preserved.
 Exact representation registration remains pending where indicated by inputs;

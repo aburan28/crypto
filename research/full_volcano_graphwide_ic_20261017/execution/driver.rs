@@ -1,8 +1,14 @@
 //! Native checkpointed orchestration; ecbench owns solving, counts and audits.
 use crypto_lib::cryptanalysis::ecbench::canonical::{canonical, sha256_hex};
+use crypto_lib::cryptanalysis::ecbench::{
+    methods::MethodSpec,
+    record::{self, ChildInput, CHILD_INPUT_SCHEMA},
+    runner,
+};
 use crypto_lib::cryptanalysis::ic_boundary::{CountedGroup, GroupOps, PrimeCurve, PrimePoint};
 use rusqlite::{params, Connection};
 use serde_json::{json, Value};
+use std::collections::{BTreeSet, VecDeque};
 use std::fs::{self, File, OpenOptions};
 use std::io::{BufRead, BufReader, Write};
 use std::os::fd::AsRawFd;
@@ -141,25 +147,47 @@ fn plan(root: &Path, input: &Path, binary: &Path, mode: &str) -> Result<()> {
     if mode == "control" {
         emit(control())?;
     } else {
-        let mut readers = Vec::new();
+        let mut priority = Vec::new();
+        let mut remainder = Vec::new();
         for graph in ["two", "three", "mixed"] {
             let path = fs::canonicalize(input.join(format!("{graph}-workloads.jsonl")))?;
             sources.push(json!({"path":path,"sha256":hash(&path)?}));
-            readers.push((graph, BufReader::new(File::open(&path)?).lines()));
-        }
-        loop {
-            let mut any = false;
-            for (graph, reader) in &mut readers {
-                if let Some(line) = reader.next() {
-                    any = true;
-                    let mut row: Value = serde_json::from_str(&line?)?;
-                    row["graph"] = json!(graph);
-                    row["id"] = json!(format!("{graph}-v{}", row["input"]["vertex"]));
-                    emit(row)?;
+            let mut seen = BTreeSet::new();
+            let mut first = VecDeque::new();
+            let mut rest = VecDeque::new();
+            for line in BufReader::new(File::open(&path)?).lines() {
+                let mut row: Value = serde_json::from_str(&line?)?;
+                row["graph"] = json!(graph);
+                row["id"] = json!(format!("{graph}-v{}", row["input"]["vertex"]));
+                let conductor = row["input"]["conductor"]
+                    .as_u64()
+                    .ok_or("missing conductor")?;
+                if seen.insert(conductor) {
+                    first.push_back(row);
+                } else {
+                    rest.push_back(row);
+                }
+                if mode == "pilot" {
+                    break;
                 }
             }
-            if !any || mode == "pilot" {
-                break;
+            priority.push(first);
+            remainder.push(rest);
+        }
+        // Representatives of all 51 strata first, then every other vertex.
+        // Each phase preserves round-robin graph order; no vertex is omitted.
+        for mut phase in [priority, remainder] {
+            loop {
+                let mut any = false;
+                for queue in &mut phase {
+                    if let Some(row) = queue.pop_front() {
+                        any = true;
+                        emit(row)?;
+                    }
+                }
+                if !any {
+                    break;
+                }
             }
         }
     }
@@ -200,6 +228,85 @@ fn command(bin: &Path, args: &[&str], log: &Path) -> Result<i32> {
         }
         std::thread::sleep(Duration::from_millis(100));
     }
+}
+fn replay_exhausted(session: &Path, out: &Path) -> Result<bool> {
+    if out.exists() {
+        return Err("exhaustion replay receipt already exists".into());
+    }
+    let mut checks = Vec::new();
+    for r in runner::read_records(session)? {
+        if r.warmup || !r.cost.deterministic || r.outcome.status != "exhausted" {
+            continue;
+        }
+        let input = ChildInput {
+            schema: CHILD_INPUT_SCHEMA.into(),
+            curve: r.workload.curve_spec.clone(),
+            target_seed: r.workload.target_seed,
+            target_index: r.workload.target_index,
+            target_kind: r.workload.kind(),
+            expected_workload_id: r.workload.workload_id.clone(),
+            method: MethodSpec {
+                id: r.method.id.clone(),
+                params: r.method.params.clone(),
+            },
+            expected_method_id: r.method.method_id.clone(),
+            algorithm_seed: r.algorithm_seed.parse()?,
+        };
+        let output = record::child_main(&serde_json::to_string(&input)?);
+        let mut diffs = Vec::new();
+        if let Some(rep) = output.report {
+            if !rep.exhausted || rep.recovered.map(|k| k.to_string()) != r.outcome.recovered {
+                diffs.push("outcome");
+            }
+            let shape = |phases: &[crypto_lib::cryptanalysis::ecbench::methods::PhaseRecord]| {
+                phases
+                    .iter()
+                    .map(|p| {
+                        (
+                            p.name.clone(),
+                            p.adds,
+                            p.doubles,
+                            p.scalar_mults,
+                            record::json_roundtrip(p.gae).to_bits(),
+                            p.native.clone(),
+                        )
+                    })
+                    .collect::<Vec<_>>()
+            };
+            if shape(&rep.phases) != shape(&r.phases) {
+                diffs.push("phases");
+            }
+            if Some(record::json_roundtrip(rep.total_gae).to_bits())
+                != r.cost.total_gae.map(f64::to_bits)
+            {
+                diffs.push("total_gae");
+            }
+            if rep.counters != r.counters {
+                diffs.push("counters");
+            }
+            if rep.factor_base != r.factor_base {
+                diffs.push("factor_base");
+            }
+            if rep.field_ops != r.field_ops {
+                diffs.push("field_ops");
+            }
+            if rep.unpriced != r.cost.unpriced
+                || rep.deterministic != r.cost.deterministic
+                || Some(rep.automorphisms_used) != r.boundaries.automorphisms_used
+            {
+                diffs.push("accounting_identity");
+            }
+        } else {
+            diffs.push("missing_report");
+        }
+        checks.push(json!({"record_id":r.record_id,"seq":r.seq,"reproduced":diffs.is_empty(),"differences":diffs,"error":output.error}));
+    }
+    let ok = checks.iter().all(|v| v["reproduced"] == true);
+    write_json(
+        out,
+        &json!({"schema":"volcano-exhaustion-replay/v1","session":session,"records_sha256":hash(&session.join("records.jsonl"))?,"replayer_binary_sha256":hash(&std::env::current_exe()?)?,"ok":ok,"replays":checks,"scope":"Measured deterministic exhausted records; successful records replayed by ecbench verify; timeouts have no deterministic final report."}),
+    )?;
+    Ok(ok)
 }
 fn run(root: &Path, max_jobs: u64, max_seconds: u64, max_bytes: u64) -> Result<()> {
     let lock = OpenOptions::new()
@@ -321,6 +428,9 @@ fn run(root: &Path, max_jobs: u64, max_seconds: u64, max_bytes: u64) -> Result<(
                 &prefix.with_extension("audit.log"),
             )?;
             ok = code == 0 && read_json(&audit).map(|v| v["ok"] == true).unwrap_or(false);
+            if ok {
+                ok = replay_exhausted(&session, &prefix.with_extension("exhaustion-replay.json"))?;
+            }
         }
         let summary = if session.join("session.json").exists() {
             read_json(&session.join("session.json"))?
@@ -389,9 +499,10 @@ fn status(root: &Path) -> Result<()> {
 fn main() -> Result<()> {
     let a: Vec<String> = std::env::args().collect();
     match a.get(1).map(String::as_str) {
-        Some("plan") if a.len()==7=>plan(Path::new(&a[2]),Path::new(&a[3]),Path::new(&a[4]),&a[5]).and_then(|_|if a[6]=="freeze" {Ok(())}else{Err("final argument must be freeze".into())}),
+        Some("plan") if a.len()==7 && a[6]=="freeze"=>plan(Path::new(&a[2]),Path::new(&a[3]),Path::new(&a[4]),&a[5]),
         Some("run") if a.len()==6=>run(Path::new(&a[2]),a[3].parse()?,a[4].parse()?,a[5].parse()?),
         Some("status") if a.len()==3=>status(Path::new(&a[2])),
-        _=>Err("usage: driver plan OUT INPUTS ECBENCH control|pilot|survey|full freeze | driver run CAMPAIGN MAX_JOBS MAX_SECONDS MAX_BYTES | driver status CAMPAIGN".into())
+        Some("replay-exhausted") if a.len()==4=>if replay_exhausted(Path::new(&a[2]),Path::new(&a[3]))? {Ok(())}else{Err("exhaustion replay mismatch".into())},
+        _=>Err("usage: driver plan OUT INPUTS ECBENCH control|pilot|survey|full freeze | driver run CAMPAIGN MAX_JOBS MAX_SECONDS MAX_BYTES | driver status CAMPAIGN | driver replay-exhausted SESSION FRESH_RECEIPT".into())
     }
 }
