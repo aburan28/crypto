@@ -10,7 +10,11 @@ crater, `run-20261017T0305Z`) show the one place the curve matters. Rho
 folded by the crater's automorphisms needs 1.89 ± 0.09× (j = 0, √3
 predicted) and 1.32 ± 0.06× (j = 1728, √2 predicted) fewer operations.
 In wall time that is 1.33× faster on j = 0 and 2.3× slower on j = 1728,
-because `ca` has a tuned walk only for j = 0.
+because `ca` has a tuned walk only for j = 0. A separate control
+(`run-20261017T0415Z-instance`, 5,000 solves) shows that the generator
+and the secret k do not change rho's cost either: redrawing k, P, both,
+or using k ≤ 2^16 all match the walk-seed spread (every |z| < 0.8, KS p >
+0.6).
 
 **Answer (measured on three curves: A, `run-20261016T2302Z`, ℓ = 3,
 ramified crater; B, `run-20261016T2315Z`, ℓ = 3, split crater; C,
@@ -413,6 +417,51 @@ curve below.
 ![per level E](runs/run-20261017T0305Z/per_level.svg)
 ![crater cdf E](runs/run-20261017T0305Z/crater_cdf.svg)
 
+## Generator and k: does the instance itself matter? (`run-20261017T0415Z-instance`)
+
+Every volcano run above solved one fixed (P, k) per curve and varied only
+the walk's seed. This run isolates the instance. On the root of curve C it
+runs five arms of 1,000 solves each, all with the same binary
+(`volcano-rho --instance-study`, native 32-adding DP walk, no negation map),
+and redraws a different part of the problem per trial. The protocol and the
+decision rule were frozen before the run ([`PROTOCOL.md`](runs/run-20261017T0415Z-instance/PROTOCOL.md)).
+An arm counts as different from `walk` only if |z| > 2.58 or KS p < 0.0125.
+
+| arm | varies per trial | min | mean ± 95 % CI | median | max | sd/mean | vs `walk`: Δ mean ± 95 % CI | z | KS p |
+|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| `walk` | walk seed (P, k fixed) | 17,176 | 487,658 ± 16,110 | 454,066 | 1,567,146 | 0.53 | | | |
+| `k` | k uniform in [1, n) | 22,331 | 480,254 ± 16,127 | 451,165 | 1,468,003 | 0.54 | −7,404 ± 22,795 | −0.64 | 0.75 |
+| `generator` | P, a fresh point of order n | 30,819 | 492,522 ± 16,136 | 460,232 | 1,530,409 | 0.53 | +4,864 ± 22,802 | +0.42 | 0.68 |
+| `all` | walk seed, k and P | 23,729 | 496,427 ± 16,165 | 461,552 | 1,561,929 | 0.53 | +8,769 ± 22,822 | +0.75 | 0.64 |
+| `small_k` | k uniform in [1, 2^16] | 10,099 | 487,206 ± 15,362 | 459,656 | 1,528,969 | 0.51 | −452 ± 22,260 | −0.04 | 0.68 |
+
+Reference: √(πn/2) / √(1 − 1/32) = 498,001 iterations.
+
+- **Measured:** no arm differs from `walk` in mean or in shape. Every |z| is
+  below 0.8 and every KS p is above 0.6. Each interval on the mean
+  difference excludes an effect larger than about ±4.7 % of the mean. All
+  5,000 solves returned their own k, and replaying the first five trials of
+  every arm matches 25/25 iteration counts.
+- **Measured:** a small secret is not cheaper. k ≤ 2^16, about 2^−21 of the
+  group, costs the same as a uniform k, and cost shows no trend against k
+  ([`instance_vs_k`](runs/run-20261017T0415Z-instance/instance_vs_k.png)).
+- **Derived:** the generator doesn't matter because any other generator is
+  P′ = mP: solving against P′ is the same problem up to a known factor m.
+  The walk mixes P and Q = kP with random coefficients, so the size of k
+  never enters; only the collision time of a pseudo-random walk does. That
+  differs from kangaroo/lambda, whose cost grows with the interval known to
+  hold k.
+- **Derived:** with the walk seed fixed, a new k or P still changes every
+  walk point, so each trial is a fresh draw from the same collision-time
+  distribution. The four arms with redraws cannot be told apart from the
+  walk-seed arm.
+
+![every solve per arm](runs/run-20261017T0415Z-instance/instance_arms.png)
+
+![cumulative distributions](runs/run-20261017T0415Z-instance/instance_cdf.png)
+
+![iterations against k](runs/run-20261017T0415Z-instance/instance_vs_k.png)
+
 ## Reading it
 
 - **Observed:** level means differ by at most 63,000 iterations (L0 vs L2), and
@@ -496,6 +545,11 @@ only. Outputs go to `--out`:
   so per solve on the native engine. Choose `--trials` with that in mind.
 - **Determinism.** The same command and seed give the same curves, instance
   and iteration counts; wall times vary.
+- **Instance study.** `--instance-study` skips the walk and measures the
+  root curve alone, `--trials` solves per arm. The five arms redraw the walk
+  seed, k, the generator, all three, or k from [1, 2^16]. It writes
+  `instance_study.json` and `instance_trials.csv`; `plot_instance.py OUT`
+  draws them.
 
 ## Reproduce
 

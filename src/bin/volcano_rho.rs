@@ -636,6 +636,158 @@ fn stats(v: &[f64]) -> serde_json::Value {
     })
 }
 
+// ---------------------------------------------------------------- instance study
+
+/// Two-sample Kolmogorov–Smirnov statistic and its asymptotic p-value.
+fn ks(a: &[f64], b: &[f64]) -> (f64, f64) {
+    let (mut x, mut y) = (a.to_vec(), b.to_vec());
+    x.sort_by(|p, q| p.partial_cmp(q).unwrap());
+    y.sort_by(|p, q| p.partial_cmp(q).unwrap());
+    let (n1, n2) = (x.len() as f64, y.len() as f64);
+    let (mut i, mut j, mut d) = (0, 0, 0f64);
+    while i < x.len() && j < y.len() {
+        let v = x[i].min(y[j]);
+        while i < x.len() && x[i] <= v {
+            i += 1;
+        }
+        while j < y.len() && y[j] <= v {
+            j += 1;
+        }
+        d = d.max((i as f64 / n1 - j as f64 / n2).abs());
+    }
+    let lam = ((n1 * n2 / (n1 + n2)).sqrt() + 0.12 + 0.11 / (n1 * n2 / (n1 + n2)).sqrt()) * d;
+    let p = (1..=100)
+        .map(|j| {
+            let j = j as f64;
+            2.0 * (-1f64).powf(j - 1.0) * (-2.0 * j * j * lam * lam).exp()
+        })
+        .sum::<f64>()
+        .clamp(0.0, 1.0);
+    (d, p)
+}
+
+/// Pollard rho on one curve, five arms of `--trials` solves each. Trial t of
+/// an arm draws what it varies from its own seed, so every arm replays alone.
+#[allow(clippy::too_many_arguments)]
+fn instance_study(
+    args: &Args,
+    f: &Fp,
+    e0: Curve,
+    n: u64,
+    cof: u64,
+    p0: (u64, u64),
+    k0: u64,
+    dp_bits: u32,
+) {
+    // (name, walk seed varies, k varies, generator varies, small k)
+    let arms: [(&str, bool, bool, bool, bool); 5] = [
+        ("walk", true, false, false, false),
+        ("k", false, true, false, false),
+        ("generator", false, false, true, false),
+        ("all", true, true, true, false),
+        ("small_k", false, true, false, true),
+    ];
+    let fixed_walk = args.seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0x5eed;
+    let lens = Lens::native();
+    let mut out_arms = Vec::new();
+    let mut rows = String::from("arm,trial,walk_seed,k,px,py,iters,restarts,ns\n");
+    let mut samples: Vec<Vec<f64>> = Vec::new();
+    let t0 = Instant::now();
+    for (ai, &(name, vw, vk, vg, small)) in arms.iter().enumerate() {
+        let res: Vec<(u64, u64, (u64, u64), Solve)> = (0..args.trials)
+            .into_par_iter()
+            .map(|t| {
+                let mut r = SmallRng::seed_from_u64(
+                    args.seed ^ ((ai as u64 + 1) << 48) ^ t.wrapping_mul(0x9E37_79B9_7F4A_7C15),
+                );
+                let walk = if vw { r.gen::<u64>() } else { fixed_walk };
+                let k = match (vk, small) {
+                    (true, true) => r.gen_range(1..=(1u64 << 16).min(n - 1)),
+                    (true, false) => r.gen_range(1..n),
+                    _ => k0,
+                };
+                let p = if vg {
+                    loop {
+                        if let Some(pt) = e0.mul(f, Some(e0.random_point(f, &mut r)), cof) {
+                            break pt;
+                        }
+                    }
+                } else {
+                    p0
+                };
+                let q = e0.mul(f, Some(p), k).expect("1 <= k < n");
+                let inst = Instance { curve: e0, p, q };
+                let s = rho(f, &inst, n, walk, dp_bits, &lens);
+                (walk, k, p, s)
+            })
+            .collect();
+        let wrong = res.iter().filter(|r| r.3.k != Some(r.1)).count();
+        if wrong > 0 {
+            die(&format!("arm {name}: {wrong} solves returned the wrong k"));
+        }
+        for (t, (w, k, p, s)) in res.iter().enumerate() {
+            rows += &format!(
+                "{name},{t},{w},{k},{},{},{},{},{}\n",
+                p.0, p.1, s.iters, s.restarts, s.ns
+            );
+        }
+        let it: Vec<f64> = res.iter().map(|r| r.3.iters as f64).collect();
+        let ns: Vec<f64> = res
+            .iter()
+            .map(|r| r.3.ns as f64 / r.3.iters as f64)
+            .collect();
+        let distinct_k = res.iter().map(|r| r.1).collect::<HashSet<_>>().len();
+        let distinct_p = res.iter().map(|r| r.2).collect::<HashSet<_>>().len();
+        let distinct_w = res.iter().map(|r| r.0).collect::<HashSet<_>>().len();
+        eprintln!(
+            "{name:>10}: mean {:>10.0} iters  ({} solves, {distinct_w} walk seeds, {distinct_k} k, {distinct_p} generators)",
+            it.iter().sum::<f64>() / it.len() as f64,
+            it.len()
+        );
+        out_arms.push(json!({
+            "arm": name, "varies": {"walk_seed": vw, "k": vk, "generator": vg, "small_k": small},
+            "distinct": {"walk_seeds": distinct_w, "k": distinct_k, "generators": distinct_p},
+            "iters": stats(&it), "ns_per_iter": stats(&ns), "wrong": 0,
+        }));
+        samples.push(it);
+    }
+    let base = &samples[0];
+    let bm = base.iter().sum::<f64>() / base.len() as f64;
+    let bsd =
+        (base.iter().map(|x| (x - bm).powi(2)).sum::<f64>() / (base.len() as f64 - 1.0)).sqrt();
+    for (i, a) in out_arms.iter_mut().enumerate().skip(1) {
+        let s = &samples[i];
+        let m = s.iter().sum::<f64>() / s.len() as f64;
+        let sd = (s.iter().map(|x| (x - m).powi(2)).sum::<f64>() / (s.len() as f64 - 1.0)).sqrt();
+        let se = (bsd * bsd / base.len() as f64 + sd * sd / s.len() as f64).sqrt();
+        let (d, p) = ks(base, s);
+        a["vs_walk"] = json!({
+            "mean_ratio": m / bm, "diff": m - bm, "diff_ci95_half": 1.96 * se,
+            "welch_z": (m - bm) / se, "ks_d": d, "ks_p": p,
+        });
+    }
+    let expected = (std::f64::consts::PI * n as f64 / 2.0).sqrt();
+    let result = json!({
+        "schema": "volcano-rho.instance-study/v1",
+        "curve": {"p": f.p, "a": e0.a, "b": e0.b, "order": n * cof, "n": n},
+        "P": [p0.0, p0.1], "k": k0, "seed": args.seed, "trials_per_arm": args.trials,
+        "fixed_walk_seed": fixed_walk, "dp_bits": dp_bits,
+        "rho": {"walk": "native single-walker 32-adding DP, no negation map",
+                "expected_iters": expected,
+                "expected_iters_r32": expected / (1.0 - 1.0 / 32.0f64).sqrt()},
+        "arms": out_arms, "seconds": t0.elapsed().as_secs_f64(),
+        "argv": std::env::args().collect::<Vec<_>>(),
+    });
+    fs::create_dir_all(&args.out).unwrap();
+    fs::write(
+        args.out.join("instance_study.json"),
+        serde_json::to_string_pretty(&result).unwrap(),
+    )
+    .unwrap();
+    fs::write(args.out.join("instance_trials.csv"), rows).unwrap();
+    eprintln!("wrote {}", args.out.display());
+}
+
 // ---------------------------------------------------------------- main
 
 struct Args {
@@ -668,6 +820,9 @@ struct Args {
     ca: String,
     ca_args: Vec<String>,
     controls: usize,
+    /// Measure rho on the root curve only, redrawing the walk seed, k, the
+    /// generator, or all three per trial (`instance_study`).
+    instance_study: bool,
     out: PathBuf,
 }
 
@@ -691,6 +846,7 @@ fn parse_args() -> Args {
         ca: "ca".into(),
         ca_args: Vec::new(),
         controls: 3,
+        instance_study: false,
         out: PathBuf::from("volcano-rho-out"),
     };
     let v: Vec<String> = std::env::args().skip(1).collect();
@@ -714,6 +870,11 @@ fn parse_args() -> Args {
             "--crater" => a.crater = val.clone(),
             "--j1728" => {
                 a.j1728 = true;
+                i += 1; // a flag: no value
+                continue;
+            }
+            "--instance-study" => {
+                a.instance_study = true;
                 i += 1; // a flag: no value
                 continue;
             }
@@ -759,12 +920,18 @@ Pollard rho measured on each curve.
 
 options: [--ell 3] [--seed 1] [--trials 100] [--per-level 10] [--controls 3]
          [--dp-bits auto] [--engine native|ca] [--walk native|pullback] [--ca PATH] [--ca-arg ARG]... [--out DIR]
+         [--instance-study]
 
 --curve takes y^2 = x^3 + Ax + B over F_P, P prime < 2^62, in decimal. The
 generator (cofactor times a seeded random point) and the secret k are drawn
 from --seed. --engine ca runs `ca solve --alg rho` from the cryptanalysis
 repository on every curve (--ca-arg passes extra options, e.g. --no-negation).
-Writes results.json, trials.csv and instances.jsonl to --out."
+Writes results.json, trials.csv and instances.jsonl to --out.
+
+--instance-study skips the walk and measures the root curve alone, --trials
+solves per arm: the walk seed redrawn (P, k fixed), k redrawn, the generator
+redrawn, all three redrawn, and k drawn from [1, 2^16]. Writes
+instance_study.json and instance_trials.csv."
                 );
                 std::process::exit(0);
             }
@@ -1059,6 +1226,10 @@ fn main() {
     assert!(e0.mul(&f, Some(p0), n).is_none());
     let k_secret = rng.gen_range(1..n);
     let q0 = e0.mul(&f, Some(p0), k_secret).unwrap();
+    if args.instance_study {
+        instance_study(&args, &f, e0, n, cof, p0, k_secret, dp_bits);
+        return;
+    }
 
     // 2. Breadth-first walk with explicit Vélu maps.
     let r_meas = 2 * depth + 2;

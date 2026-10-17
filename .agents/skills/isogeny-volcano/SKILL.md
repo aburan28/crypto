@@ -97,6 +97,11 @@ Write down, in the note or PR:
   and level against level and against the control.
 - **Many intervals:** with several levels you are looking at several
   intervals. One CI just missing the reference is not a finding.
+- **The instance:** each run fixes one (P, k) per curve, so its spread is
+  the walk's own. `volcano-rho --instance-study` separates the instance from
+  the walk: it redraws k, the generator, both, or a small k. On curve C,
+  5,000 solves found no difference (`run-20261017T0415Z-instance`). Cite
+  that run rather than re-asking whether P or k matters.
 - **Replay:** re-run the same command with `--trials 5` and compare
   iteration counts with the recorded `trials.csv`; they must be
   identical. Cite the match (e.g. 160/160).
