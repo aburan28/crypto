@@ -274,6 +274,14 @@ the full incidence and distinctness are frozen. Even at the combined
 giving a uniform 64-query union bound of approximately (2^{-148.754}).
 The private-column implication has a checked Lean proof.
 
+The [second-generation line-closure census](reports/run-20261015T2357Z/REPORT.md)
+tests all 11,040 pair lines containing one of the first 64 new points
+against the full 9,925-point coordinate set. It finds 160 closed cuts,
+all alternate presentations of the 32 original quartets, and zero new
+closed quartets. Independent GP and prime-field implementations agree;
+a fresh-checked Lean theorem shows duplicate rows cannot enlarge the
+relation span.
+
 ## Reproduction
 
 From this repository's root:
