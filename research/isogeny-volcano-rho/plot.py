@@ -35,20 +35,31 @@ def save(fig, name):
 
 # 1. The volcano, in the repository's standard diagram (tools/volcano-diagram).
 arms = {a["vertex"]: a for a in R["arms"] if a["vertex"] is not None}
+engine = "ca rho" if R["params"].get("engine") == "ca" else "native rho"
+walk = R["params"].get("walk", "native")
 spec = {
-    "schema": "volcano-diagram/v1",
+    "schema": "volcano-diagram/v2",
     "ell": ell,
     "depth": depth,
-    "title": f"{ell}-isogeny volcano, depth {depth}, p = {R['problem']['p']}",
-    "subtitle": rid,
-    "value_label": "mean rho iterations (measured curves)",
+    "title": f"Measured {ell}-isogeny volcano heat map · p = {R['problem']['p']} · "
+    f"one instance, {R['params']['trials']} paired walk seeds per curve",
+    "subtitle": rid + (" · pull-back walk" if walk == "pullback" else ""),
+    "metrics": [
+        {"key": "ops", "title": f"{engine} · mean iterations", "label": "group operations per solve"},
+        {"key": "time", "title": f"{engine} · mean time", "label": "ms per solve"},
+    ],
     "vertices": [
         {
             "id": v["id"],
             "label": f"v{v['id']}",
             "level": v["level"],
             "nbrs": v["nbrs"],
-            "value": arms[v["id"]]["summary"]["iters"]["mean"] if v["id"] in arms else None,
+            "values": {
+                "ops": arms[v["id"]]["summary"]["iters"]["mean"],
+                "time": arms[v["id"]]["summary"]["ms"]["mean"],
+            }
+            if v["id"] in arms
+            else {},
             "highlight": "root" if v["id"] == 0 else None,
         }
         for v in R["vertices"]
@@ -56,6 +67,8 @@ spec = {
 }
 (run / "volcano.diagram.json").write_text(json.dumps(spec, indent=1))
 render(spec, str(run / "volcano"))
+if "--volcano-only" in sys.argv:
+    sys.exit(0)
 
 # 2. Per-curve min / mean / max (and every trial) by level.
 order = sorted(R["arms"], key=lambda a: (a["kind"] != "isogenous", a["level"] if a["level"] is not None else 9, a["arm"]))

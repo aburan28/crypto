@@ -18,7 +18,7 @@ draws recorded values.
 | curve | `--curve P,A,B [--order N]`, or a search: `--bits --depth --crater any\|split\|inert\|ramified --max-cofactor` | `--p P --a A --b B [--order N]` |
 | rho | built-in single-walker 32-adding DP walk, no negation map; or `--engine ca --ca PATH [--ca-arg ...]` | `ca_rho_solve` in-process (negation map on; `--no-negation`, `--threads`, `--dp-bits`, `--r`) |
 | output | `--out DIR`: `results.json`, `trials.csv`, `instances.jsonl` | JSON on stdout, table on stderr, `--trials-out CSV`, `--diagram FILE` |
-| graphs | `research/isogeny-volcano-rho/plot.py DIR` (writes `volcano.diagram.json` and the SVG/PNGs) | `--diagram` writes the `volcano-diagram/v1` input |
+| graphs | `research/isogeny-volcano-rho/plot.py DIR` (writes `volcano.diagram.json` and the SVG/PNGs) | `--diagram` writes `volcano-diagram/v1` input (`plot_ca.py` turns it into v2) |
 
 The two walks were written independently and agree: both find curve A of
 `research/isogeny-volcano-rho/` as 80 curves, 2 / 6 / 18 / 54 from crater to
@@ -111,8 +111,10 @@ Write down, in the note or PR:
 - **Run directory:** put each run in
   `research/<study>/runs/run-<YYYYMMDDTHHMMZ>/`. Write-once: a new run gets
   a new directory.
-- **Volcano diagram:** draw it with the standard renderer,
-  `tools/volcano-diagram/volcano_diagram.py`, from `volcano.diagram.json`.
+- **Volcano heat map:** draw it with the standard renderer,
+  `tools/volcano-diagram/volcano_diagram.py`, from `volcano.diagram.json`
+  (`volcano-diagram/v2`): banded strata, rings in perspective, and a mean
+  operations panel beside a mean time panel.
   Measured curves are coloured by mean operations; keep the input beside
   the SVG and PNG.
 - **Graphs:** also add per-curve (min–max bar, mean ± CI, every trial) and

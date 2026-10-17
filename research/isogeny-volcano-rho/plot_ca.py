@@ -37,12 +37,31 @@ def save(fig, name):
 spec = json.loads((run / "volcano.diagram.json").read_text())
 # Vertex values from results.json's plain (isogenous) arms: a ca build
 # before 31b72d2 wrote the folded arm's mean over the crater's plain one.
-plain = {c["vertex"]: c["ops"]["mean"] for c in R["curves"] if c["kind"] == "isogenous"}
+plain = {c["vertex"]: c for c in R["curves"] if c["kind"] == "isogenous"}
+spec["schema"] = "volcano-diagram/v2"
+spec["title"] = (f"Measured {R['ell']}-isogeny volcano heat map · p = {R['p']} · {jname} crater · "
+                 f"one instance, {R['rho']['trials']} paired walk seeds per curve")
+spec["subtitle"] = rid
+spec["metrics"] = [
+    {"key": "ops", "title": "ca negation-map rho · mean operations", "label": "group operations per solve"},
+    {"key": "time", "title": "ca negation-map rho · mean time", "label": "ms per solve"},
+]
 for v in spec["vertices"]:
-    v["value"] = plain.get(v["id"])
-spec["subtitle"] = f"{rid}  (colour: mean plain negation-map rho operations, ca)"
+    c = plain.get(v["id"])
+    v["values"] = {"ops": c["ops"]["mean"], "time": c["seconds"]["mean"] * 1e3} if c else {}
+    v.pop("value", None)
+spec.pop("value_label", None)
+a = R["automorphism"]
 spec["vertices"][0]["highlight"] = f"root, {jname} (order-{aut} automorphism)"
+spec["footnote"] = (
+    f"Plain rho on every curve. The order-{aut}-automorphism-folded rho on the crater takes "
+    f"{a['ops']['mean']:,.0f} operations, {a['ops_speedup_vs_isogenous']:.2f} ± {a['ops_speedup_ci95_half']:.2f}x fewer "
+    f"(predicted {a['predicted']:.2f}); see per_level. Grey: not measured. Each panel has its own scale."
+)
+(run / "volcano.diagram.json").write_text(json.dumps(spec, indent=1))
 render(spec, str(run / "volcano"))
+if "--volcano-only" in sys.argv:
+    sys.exit(0)
 
 # 2. Mean ± 95% CI by level, the controls, and the folded crater arm.
 fig, ax = plt.subplots(figsize=(8, 4))

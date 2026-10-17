@@ -1,10 +1,21 @@
 {
- "schema": "volcano-diagram/v1",
+ "schema": "volcano-diagram/v2",
  "ell": 2,
  "depth": 3,
- "title": "2-isogeny volcano, depth 3, p = 146833024135393",
- "subtitle": "run-20261017T0111Z",
- "value_label": "mean rho iterations (measured curves)",
+ "title": "Measured 2-isogeny volcano heat map \u00b7 p = 146833024135393 \u00b7 one instance, 20 paired walk seeds per curve",
+ "subtitle": "run-20261017T0111Z \u00b7 pull-back walk",
+ "metrics": [
+  {
+   "key": "ops",
+   "title": "native rho \u00b7 mean iterations",
+   "label": "group operations per solve"
+  },
+  {
+   "key": "time",
+   "title": "native rho \u00b7 mean time",
+   "label": "ms per solve"
+  }
+ ],
  "vertices": [
   {
    "id": 0,
@@ -13,7 +24,10 @@
    "nbrs": [
     1
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 3502.7641420499995
+   },
    "highlight": "root"
   },
   {
@@ -25,7 +39,10 @@
     2,
     3
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 3660.3640925499994
+   },
    "highlight": null
   },
   {
@@ -37,7 +54,10 @@
     4,
     5
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 3723.12868855
+   },
    "highlight": null
   },
   {
@@ -47,7 +67,10 @@
    "nbrs": [
     1
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 3647.2807610000004
+   },
    "highlight": null
   },
   {
@@ -59,7 +82,10 @@
     6,
     7
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 3757.7655503500005
+   },
    "highlight": null
   },
   {
@@ -71,7 +97,10 @@
     8,
     9
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 3767.2567757000006
+   },
    "highlight": null
   },
   {
@@ -81,7 +110,10 @@
    "nbrs": [
     4
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 3825.7069088000003
+   },
    "highlight": null
   },
   {
@@ -91,7 +123,10 @@
    "nbrs": [
     4
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 3924.8275395499995
+   },
    "highlight": null
   },
   {
@@ -103,7 +138,10 @@
     10,
     11
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 3859.5621769499994
+   },
    "highlight": null
   },
   {
@@ -115,7 +153,10 @@
     12,
     13
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 3819.0689598000004
+   },
    "highlight": null
   },
   {
@@ -127,7 +168,10 @@
     14,
     15
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 3899.0279992000005
+   },
    "highlight": null
   },
   {
@@ -139,7 +183,10 @@
     16,
     17
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 3978.2273416000003
+   },
    "highlight": null
   },
   {
@@ -151,7 +198,10 @@
     18,
     19
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 4009.03052925
+   },
    "highlight": null
   },
   {
@@ -163,7 +213,10 @@
     20,
     21
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 3934.782464849999
+   },
    "highlight": null
   },
   {
@@ -175,7 +228,10 @@
     22,
     23
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 4024.2648907499997
+   },
    "highlight": null
   },
   {
@@ -187,7 +243,10 @@
     24,
     25
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 4027.3671616
+   },
    "highlight": null
   },
   {
@@ -199,7 +258,10 @@
     26,
     27
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 4028.623366399999
+   },
    "highlight": null
   },
   {
@@ -211,7 +273,10 @@
     28,
     29
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 4051.7639936499995
+   },
    "highlight": null
   },
   {
@@ -221,7 +286,10 @@
    "nbrs": [
     12
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 4038.8397394999993
+   },
    "highlight": null
   },
   {
@@ -231,7 +299,10 @@
    "nbrs": [
     12
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 4031.7208299
+   },
    "highlight": null
   },
   {
@@ -241,7 +312,10 @@
    "nbrs": [
     13
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 4012.1360459999996
+   },
    "highlight": null
   },
   {
@@ -251,7 +325,10 @@
    "nbrs": [
     13
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 4029.5460795499994
+   },
    "highlight": null
   },
   {
@@ -261,7 +338,10 @@
    "nbrs": [
     14
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 4068.67944165
+   },
    "highlight": null
   },
   {
@@ -271,7 +351,10 @@
    "nbrs": [
     14
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 4091.8222859499997
+   },
    "highlight": null
   },
   {
@@ -281,7 +364,10 @@
    "nbrs": [
     15
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 4132.58121705
+   },
    "highlight": null
   },
   {
@@ -291,7 +377,10 @@
    "nbrs": [
     15
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 4090.1450314000003
+   },
    "highlight": null
   },
   {
@@ -301,7 +390,10 @@
    "nbrs": [
     16
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 4108.47828525
+   },
    "highlight": null
   },
   {
@@ -311,7 +403,10 @@
    "nbrs": [
     16
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 4146.076412599999
+   },
    "highlight": null
   },
   {
@@ -321,7 +416,10 @@
    "nbrs": [
     17
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 4100.1832187
+   },
    "highlight": null
   },
   {
@@ -331,7 +429,10 @@
    "nbrs": [
     17
    ],
-   "value": 543700.2,
+   "values": {
+    "ops": 543700.2,
+    "time": 4125.3522738500005
+   },
    "highlight": null
   }
  ]

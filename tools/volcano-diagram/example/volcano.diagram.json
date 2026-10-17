@@ -1,10 +1,21 @@
 {
- "schema": "volcano-diagram/v1",
- "ell": 3,
+ "schema": "volcano-diagram/v2",
+ "ell": 2,
  "depth": 3,
- "title": "3-isogeny volcano, depth 3, p = 1090993606999",
- "subtitle": "run-20261016T2302Z",
- "value_label": "mean rho iterations (measured curves)",
+ "title": "Measured 2-isogeny volcano heat map \u00b7 p = 146833024135393 \u00b7 one instance, 100 paired walk seeds per curve",
+ "subtitle": "run-20261017T0049Z",
+ "metrics": [
+  {
+   "key": "ops",
+   "title": "native rho \u00b7 mean iterations",
+   "label": "group operations per solve"
+  },
+  {
+   "key": "time",
+   "title": "native rho \u00b7 mean time",
+   "label": "ms per solve"
+  }
+ ],
  "vertices": [
   {
    "id": 0,
@@ -13,7 +24,10 @@
    "nbrs": [
     1
    ],
-   "value": 658723.43,
+   "values": {
+    "ops": 518706.45,
+    "time": 384.54241752999985
+   },
    "highlight": "root"
   },
   {
@@ -23,20 +37,27 @@
    "nbrs": [
     0,
     2,
-    3,
-    4
+    3
    ],
-   "value": 572845.85,
+   "values": {
+    "ops": 521120.87,
+    "time": 389.3736840200001
+   },
    "highlight": null
   },
   {
    "id": 2,
    "label": "v2",
-   "level": 3,
+   "level": 1,
    "nbrs": [
-    1
+    1,
+    4,
+    5
    ],
-   "value": 659816.87,
+   "values": {
+    "ops": 535977.71,
+    "time": 398.4781398
+   },
    "highlight": null
   },
   {
@@ -46,20 +67,25 @@
    "nbrs": [
     1
    ],
-   "value": 629575.34,
+   "values": {
+    "ops": 455942.67,
+    "time": 348.25151495999984
+   },
    "highlight": null
   },
   {
    "id": 4,
    "label": "v4",
-   "level": 1,
+   "level": 2,
    "nbrs": [
-    1,
-    5,
+    2,
     6,
     7
    ],
-   "value": 695082.32,
+   "values": {
+    "ops": 481747.2,
+    "time": 353.2741557699999
+   },
    "highlight": null
   },
   {
@@ -67,51 +93,55 @@
    "label": "v5",
    "level": 0,
    "nbrs": [
-    4,
+    2,
     8,
-    9,
-    10
+    9
    ],
-   "value": 732044.43,
+   "values": {
+    "ops": 477565.21,
+    "time": 364.81101154000004
+   },
    "highlight": null
   },
   {
    "id": 6,
    "label": "v6",
-   "level": 2,
+   "level": 3,
    "nbrs": [
-    4,
-    11,
-    12,
-    13
+    4
    ],
-   "value": 628344.55,
+   "values": {
+    "ops": 466621.9,
+    "time": 352.28234743999997
+   },
    "highlight": null
   },
   {
    "id": 7,
    "label": "v7",
-   "level": 2,
+   "level": 3,
    "nbrs": [
-    4,
-    14,
-    15,
-    16
+    4
    ],
-   "value": 616239.84,
+   "values": {
+    "ops": 515340.71,
+    "time": 387.19625286
+   },
    "highlight": null
   },
   {
    "id": 8,
    "label": "v8",
-   "level": 1,
+   "level": 0,
    "nbrs": [
     5,
-    17,
-    18,
-    19
+    10,
+    11
    ],
-   "value": 665553.02,
+   "values": {
+    "ops": 561535.77,
+    "time": 423.9608330600001
+   },
    "highlight": null
   },
   {
@@ -120,84 +150,118 @@
    "level": 1,
    "nbrs": [
     5,
-    20,
-    21,
-    22
+    12,
+    13
    ],
-   "value": 618079.95,
+   "values": {
+    "ops": 488821.09,
+    "time": 369.45112091000004
+   },
    "highlight": null
   },
   {
    "id": 10,
    "label": "v10",
-   "level": 0,
+   "level": 1,
    "nbrs": [
-    5,
-    23,
-    24,
-    25
+    8,
+    14,
+    15
    ],
-   "value": 668921.29,
+   "values": {
+    "ops": 515712.3,
+    "time": 399.9212667
+   },
    "highlight": null
   },
   {
    "id": 11,
    "label": "v11",
-   "level": 3,
+   "level": 1,
    "nbrs": [
-    6
+    8,
+    16,
+    17
    ],
-   "value": 678053.06,
+   "values": {
+    "ops": 512489.33,
+    "time": 400.30925762
+   },
    "highlight": null
   },
   {
    "id": 12,
    "label": "v12",
-   "level": 3,
+   "level": 2,
    "nbrs": [
-    6
+    9,
+    18,
+    19
    ],
-   "value": 634612.39,
+   "values": {
+    "ops": 490572.44,
+    "time": 364.12009203999986
+   },
    "highlight": null
   },
   {
    "id": 13,
    "label": "v13",
-   "level": 3,
+   "level": 2,
    "nbrs": [
-    6
+    9,
+    20,
+    21
    ],
-   "value": 704738.47,
+   "values": {
+    "ops": 455910.45,
+    "time": 337.7347664999999
+   },
    "highlight": null
   },
   {
    "id": 14,
    "label": "v14",
-   "level": 3,
+   "level": 2,
    "nbrs": [
-    7
+    10,
+    22,
+    23
    ],
-   "value": 676654.07,
+   "values": {
+    "ops": 528028.86,
+    "time": 394.5633381500001
+   },
    "highlight": null
   },
   {
    "id": 15,
    "label": "v15",
-   "level": 3,
+   "level": 2,
    "nbrs": [
-    7
+    10,
+    24,
+    25
    ],
-   "value": 663487.86,
+   "values": {
+    "ops": 479298.8,
+    "time": 358.34607582999996
+   },
    "highlight": null
   },
   {
    "id": 16,
    "label": "v16",
-   "level": 3,
+   "level": 2,
    "nbrs": [
-    7
+    11,
+    26,
+    27
    ],
-   "value": 659945.6,
+   "values": {
+    "ops": 500168.77,
+    "time": 380.68359614
+   },
    "highlight": null
   },
   {
@@ -205,116 +269,118 @@
    "label": "v17",
    "level": 2,
    "nbrs": [
-    8,
-    26,
-    27,
-    28
+    11,
+    28,
+    29
    ],
-   "value": 626949.77,
+   "values": {
+    "ops": 438598.92,
+    "time": 325.23858730999996
+   },
    "highlight": null
   },
   {
    "id": 18,
    "label": "v18",
-   "level": 2,
+   "level": 3,
    "nbrs": [
-    8,
-    29,
-    30,
-    31
+    12
    ],
-   "value": 649444.44,
+   "values": {
+    "ops": 488879.12,
+    "time": 366.85645747
+   },
    "highlight": null
   },
   {
    "id": 19,
    "label": "v19",
-   "level": 2,
+   "level": 3,
    "nbrs": [
-    8,
-    32,
-    33,
-    34
+    12
    ],
-   "value": 621994.84,
+   "values": {
+    "ops": 487112.82,
+    "time": 372.94769045
+   },
    "highlight": null
   },
   {
    "id": 20,
    "label": "v20",
-   "level": 2,
+   "level": 3,
    "nbrs": [
-    9,
-    35,
-    36,
-    37
+    13
    ],
-   "value": 667889.77,
+   "values": {
+    "ops": 484555.77,
+    "time": 360.91590527
+   },
    "highlight": null
   },
   {
    "id": 21,
    "label": "v21",
-   "level": 2,
+   "level": 3,
    "nbrs": [
-    9,
-    38,
-    39,
-    40
+    13
    ],
-   "value": 692313.09,
+   "values": {
+    "ops": 482311.02,
+    "time": 359.29998384
+   },
    "highlight": null
   },
   {
    "id": 22,
    "label": "v22",
-   "level": 2,
+   "level": 3,
    "nbrs": [
-    9,
-    41,
-    42,
-    43
+    14
    ],
-   "value": 620647.3,
+   "values": {
+    "ops": 488296.61,
+    "time": 370.54219934
+   },
    "highlight": null
   },
   {
    "id": 23,
    "label": "v23",
-   "level": 1,
+   "level": 3,
    "nbrs": [
-    10,
-    44,
-    45,
-    46
+    14
    ],
-   "value": 716324.42,
+   "values": {
+    "ops": 472360.52,
+    "time": 350.0198030100001
+   },
    "highlight": null
   },
   {
    "id": 24,
    "label": "v24",
-   "level": 1,
+   "level": 3,
    "nbrs": [
-    10,
-    47,
-    48,
-    49
+    15
    ],
-   "value": 733140.96,
+   "values": {
+    "ops": 509386.76,
+    "time": 380.5691478600001
+   },
    "highlight": null
   },
   {
    "id": 25,
    "label": "v25",
-   "level": 1,
+   "level": 3,
    "nbrs": [
-    10,
-    50,
-    51,
-    52
+    15
    ],
-   "value": 662412.52,
+   "values": {
+    "ops": 508239.96,
+    "time": 372.9829149600001
+   },
    "highlight": null
   },
   {
@@ -322,9 +388,12 @@
    "label": "v26",
    "level": 3,
    "nbrs": [
-    17
+    16
    ],
-   "value": 655014.68,
+   "values": {
+    "ops": 499807.98,
+    "time": 371.92069768999994
+   },
    "highlight": null
   },
   {
@@ -332,9 +401,12 @@
    "label": "v27",
    "level": 3,
    "nbrs": [
-    17
+    16
    ],
-   "value": 634860.61,
+   "values": {
+    "ops": 525485.0,
+    "time": 388.9191065499999
+   },
    "highlight": null
   },
   {
@@ -344,7 +416,10 @@
    "nbrs": [
     17
    ],
-   "value": null,
+   "values": {
+    "ops": 520153.09,
+    "time": 397.92387642
+   },
    "highlight": null
   },
   {
@@ -352,536 +427,12 @@
    "label": "v29",
    "level": 3,
    "nbrs": [
-    18
+    17
    ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 30,
-   "label": "v30",
-   "level": 3,
-   "nbrs": [
-    18
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 31,
-   "label": "v31",
-   "level": 3,
-   "nbrs": [
-    18
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 32,
-   "label": "v32",
-   "level": 3,
-   "nbrs": [
-    19
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 33,
-   "label": "v33",
-   "level": 3,
-   "nbrs": [
-    19
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 34,
-   "label": "v34",
-   "level": 3,
-   "nbrs": [
-    19
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 35,
-   "label": "v35",
-   "level": 3,
-   "nbrs": [
-    20
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 36,
-   "label": "v36",
-   "level": 3,
-   "nbrs": [
-    20
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 37,
-   "label": "v37",
-   "level": 3,
-   "nbrs": [
-    20
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 38,
-   "label": "v38",
-   "level": 3,
-   "nbrs": [
-    21
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 39,
-   "label": "v39",
-   "level": 3,
-   "nbrs": [
-    21
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 40,
-   "label": "v40",
-   "level": 3,
-   "nbrs": [
-    21
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 41,
-   "label": "v41",
-   "level": 3,
-   "nbrs": [
-    22
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 42,
-   "label": "v42",
-   "level": 3,
-   "nbrs": [
-    22
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 43,
-   "label": "v43",
-   "level": 3,
-   "nbrs": [
-    22
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 44,
-   "label": "v44",
-   "level": 2,
-   "nbrs": [
-    23,
-    53,
-    54,
-    55
-   ],
-   "value": 674911.46,
-   "highlight": null
-  },
-  {
-   "id": 45,
-   "label": "v45",
-   "level": 2,
-   "nbrs": [
-    23,
-    56,
-    57,
-    58
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 46,
-   "label": "v46",
-   "level": 2,
-   "nbrs": [
-    23,
-    59,
-    60,
-    61
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 47,
-   "label": "v47",
-   "level": 2,
-   "nbrs": [
-    24,
-    62,
-    63,
-    64
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 48,
-   "label": "v48",
-   "level": 2,
-   "nbrs": [
-    24,
-    65,
-    66,
-    67
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 49,
-   "label": "v49",
-   "level": 2,
-   "nbrs": [
-    24,
-    68,
-    69,
-    70
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 50,
-   "label": "v50",
-   "level": 2,
-   "nbrs": [
-    25,
-    71,
-    72,
-    73
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 51,
-   "label": "v51",
-   "level": 2,
-   "nbrs": [
-    25,
-    74,
-    75,
-    76
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 52,
-   "label": "v52",
-   "level": 2,
-   "nbrs": [
-    25,
-    77,
-    78,
-    79
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 53,
-   "label": "v53",
-   "level": 3,
-   "nbrs": [
-    44
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 54,
-   "label": "v54",
-   "level": 3,
-   "nbrs": [
-    44
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 55,
-   "label": "v55",
-   "level": 3,
-   "nbrs": [
-    44
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 56,
-   "label": "v56",
-   "level": 3,
-   "nbrs": [
-    45
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 57,
-   "label": "v57",
-   "level": 3,
-   "nbrs": [
-    45
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 58,
-   "label": "v58",
-   "level": 3,
-   "nbrs": [
-    45
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 59,
-   "label": "v59",
-   "level": 3,
-   "nbrs": [
-    46
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 60,
-   "label": "v60",
-   "level": 3,
-   "nbrs": [
-    46
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 61,
-   "label": "v61",
-   "level": 3,
-   "nbrs": [
-    46
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 62,
-   "label": "v62",
-   "level": 3,
-   "nbrs": [
-    47
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 63,
-   "label": "v63",
-   "level": 3,
-   "nbrs": [
-    47
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 64,
-   "label": "v64",
-   "level": 3,
-   "nbrs": [
-    47
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 65,
-   "label": "v65",
-   "level": 3,
-   "nbrs": [
-    48
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 66,
-   "label": "v66",
-   "level": 3,
-   "nbrs": [
-    48
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 67,
-   "label": "v67",
-   "level": 3,
-   "nbrs": [
-    48
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 68,
-   "label": "v68",
-   "level": 3,
-   "nbrs": [
-    49
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 69,
-   "label": "v69",
-   "level": 3,
-   "nbrs": [
-    49
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 70,
-   "label": "v70",
-   "level": 3,
-   "nbrs": [
-    49
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 71,
-   "label": "v71",
-   "level": 3,
-   "nbrs": [
-    50
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 72,
-   "label": "v72",
-   "level": 3,
-   "nbrs": [
-    50
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 73,
-   "label": "v73",
-   "level": 3,
-   "nbrs": [
-    50
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 74,
-   "label": "v74",
-   "level": 3,
-   "nbrs": [
-    51
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 75,
-   "label": "v75",
-   "level": 3,
-   "nbrs": [
-    51
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 76,
-   "label": "v76",
-   "level": 3,
-   "nbrs": [
-    51
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 77,
-   "label": "v77",
-   "level": 3,
-   "nbrs": [
-    52
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 78,
-   "label": "v78",
-   "level": 3,
-   "nbrs": [
-    52
-   ],
-   "value": null,
-   "highlight": null
-  },
-  {
-   "id": 79,
-   "label": "v79",
-   "level": 3,
-   "nbrs": [
-    52
-   ],
-   "value": null,
+   "values": {
+    "ops": 519236.22,
+    "time": 391.72166479000015
+   },
    "highlight": null
   }
  ]

@@ -1,10 +1,21 @@
 {
- "schema": "volcano-diagram/v1",
+ "schema": "volcano-diagram/v2",
  "ell": 2,
  "depth": 3,
- "title": "2-isogeny volcano, depth 3, p = 146833024135393",
+ "title": "Measured 2-isogeny volcano heat map \u00b7 p = 146833024135393 \u00b7 one instance, 100 paired walk seeds per curve",
  "subtitle": "run-20261017T0049Z",
- "value_label": "mean rho iterations (measured curves)",
+ "metrics": [
+  {
+   "key": "ops",
+   "title": "native rho \u00b7 mean iterations",
+   "label": "group operations per solve"
+  },
+  {
+   "key": "time",
+   "title": "native rho \u00b7 mean time",
+   "label": "ms per solve"
+  }
+ ],
  "vertices": [
   {
    "id": 0,
@@ -13,7 +24,10 @@
    "nbrs": [
     1
    ],
-   "value": 518706.45,
+   "values": {
+    "ops": 518706.45,
+    "time": 384.54241752999985
+   },
    "highlight": "root"
   },
   {
@@ -25,7 +39,10 @@
     2,
     3
    ],
-   "value": 521120.87,
+   "values": {
+    "ops": 521120.87,
+    "time": 389.3736840200001
+   },
    "highlight": null
   },
   {
@@ -37,7 +54,10 @@
     4,
     5
    ],
-   "value": 535977.71,
+   "values": {
+    "ops": 535977.71,
+    "time": 398.4781398
+   },
    "highlight": null
   },
   {
@@ -47,7 +67,10 @@
    "nbrs": [
     1
    ],
-   "value": 455942.67,
+   "values": {
+    "ops": 455942.67,
+    "time": 348.25151495999984
+   },
    "highlight": null
   },
   {
@@ -59,7 +82,10 @@
     6,
     7
    ],
-   "value": 481747.2,
+   "values": {
+    "ops": 481747.2,
+    "time": 353.2741557699999
+   },
    "highlight": null
   },
   {
@@ -71,7 +97,10 @@
     8,
     9
    ],
-   "value": 477565.21,
+   "values": {
+    "ops": 477565.21,
+    "time": 364.81101154000004
+   },
    "highlight": null
   },
   {
@@ -81,7 +110,10 @@
    "nbrs": [
     4
    ],
-   "value": 466621.9,
+   "values": {
+    "ops": 466621.9,
+    "time": 352.28234743999997
+   },
    "highlight": null
   },
   {
@@ -91,7 +123,10 @@
    "nbrs": [
     4
    ],
-   "value": 515340.71,
+   "values": {
+    "ops": 515340.71,
+    "time": 387.19625286
+   },
    "highlight": null
   },
   {
@@ -103,7 +138,10 @@
     10,
     11
    ],
-   "value": 561535.77,
+   "values": {
+    "ops": 561535.77,
+    "time": 423.9608330600001
+   },
    "highlight": null
   },
   {
@@ -115,7 +153,10 @@
     12,
     13
    ],
-   "value": 488821.09,
+   "values": {
+    "ops": 488821.09,
+    "time": 369.45112091000004
+   },
    "highlight": null
   },
   {
@@ -127,7 +168,10 @@
     14,
     15
    ],
-   "value": 515712.3,
+   "values": {
+    "ops": 515712.3,
+    "time": 399.9212667
+   },
    "highlight": null
   },
   {
@@ -139,7 +183,10 @@
     16,
     17
    ],
-   "value": 512489.33,
+   "values": {
+    "ops": 512489.33,
+    "time": 400.30925762
+   },
    "highlight": null
   },
   {
@@ -151,7 +198,10 @@
     18,
     19
    ],
-   "value": 490572.44,
+   "values": {
+    "ops": 490572.44,
+    "time": 364.12009203999986
+   },
    "highlight": null
   },
   {
@@ -163,7 +213,10 @@
     20,
     21
    ],
-   "value": 455910.45,
+   "values": {
+    "ops": 455910.45,
+    "time": 337.7347664999999
+   },
    "highlight": null
   },
   {
@@ -175,7 +228,10 @@
     22,
     23
    ],
-   "value": 528028.86,
+   "values": {
+    "ops": 528028.86,
+    "time": 394.5633381500001
+   },
    "highlight": null
   },
   {
@@ -187,7 +243,10 @@
     24,
     25
    ],
-   "value": 479298.8,
+   "values": {
+    "ops": 479298.8,
+    "time": 358.34607582999996
+   },
    "highlight": null
   },
   {
@@ -199,7 +258,10 @@
     26,
     27
    ],
-   "value": 500168.77,
+   "values": {
+    "ops": 500168.77,
+    "time": 380.68359614
+   },
    "highlight": null
   },
   {
@@ -211,7 +273,10 @@
     28,
     29
    ],
-   "value": 438598.92,
+   "values": {
+    "ops": 438598.92,
+    "time": 325.23858730999996
+   },
    "highlight": null
   },
   {
@@ -221,7 +286,10 @@
    "nbrs": [
     12
    ],
-   "value": 488879.12,
+   "values": {
+    "ops": 488879.12,
+    "time": 366.85645747
+   },
    "highlight": null
   },
   {
@@ -231,7 +299,10 @@
    "nbrs": [
     12
    ],
-   "value": 487112.82,
+   "values": {
+    "ops": 487112.82,
+    "time": 372.94769045
+   },
    "highlight": null
   },
   {
@@ -241,7 +312,10 @@
    "nbrs": [
     13
    ],
-   "value": 484555.77,
+   "values": {
+    "ops": 484555.77,
+    "time": 360.91590527
+   },
    "highlight": null
   },
   {
@@ -251,7 +325,10 @@
    "nbrs": [
     13
    ],
-   "value": 482311.02,
+   "values": {
+    "ops": 482311.02,
+    "time": 359.29998384
+   },
    "highlight": null
   },
   {
@@ -261,7 +338,10 @@
    "nbrs": [
     14
    ],
-   "value": 488296.61,
+   "values": {
+    "ops": 488296.61,
+    "time": 370.54219934
+   },
    "highlight": null
   },
   {
@@ -271,7 +351,10 @@
    "nbrs": [
     14
    ],
-   "value": 472360.52,
+   "values": {
+    "ops": 472360.52,
+    "time": 350.0198030100001
+   },
    "highlight": null
   },
   {
@@ -281,7 +364,10 @@
    "nbrs": [
     15
    ],
-   "value": 509386.76,
+   "values": {
+    "ops": 509386.76,
+    "time": 380.5691478600001
+   },
    "highlight": null
   },
   {
@@ -291,7 +377,10 @@
    "nbrs": [
     15
    ],
-   "value": 508239.96,
+   "values": {
+    "ops": 508239.96,
+    "time": 372.9829149600001
+   },
    "highlight": null
   },
   {
@@ -301,7 +390,10 @@
    "nbrs": [
     16
    ],
-   "value": 499807.98,
+   "values": {
+    "ops": 499807.98,
+    "time": 371.92069768999994
+   },
    "highlight": null
   },
   {
@@ -311,7 +403,10 @@
    "nbrs": [
     16
    ],
-   "value": 525485.0,
+   "values": {
+    "ops": 525485.0,
+    "time": 388.9191065499999
+   },
    "highlight": null
   },
   {
@@ -321,7 +416,10 @@
    "nbrs": [
     17
    ],
-   "value": 520153.09,
+   "values": {
+    "ops": 520153.09,
+    "time": 397.92387642
+   },
    "highlight": null
   },
   {
@@ -331,7 +429,10 @@
    "nbrs": [
     17
    ],
-   "value": 519236.22,
+   "values": {
+    "ops": 519236.22,
+    "time": 391.72166479000015
+   },
    "highlight": null
   }
  ]

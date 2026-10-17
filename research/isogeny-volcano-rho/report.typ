@@ -360,6 +360,13 @@ Full per-curve rows (with times, ns/op, medians, p10/p90) are in
 `runs/run-20261016T2302Z/results.json`; every solve is a row of
 `trials.csv`.
 
+Each volcano figure in this study is the standard heat map
+(`tools/volcano-diagram`): mean iterations on the left, mean time on the
+right, each on a colour scale spanning only the observed range. The
+spread across curves is within sampling noise (see the tables), so the
+colour differences are noise. Grey vertices were walked but not
+measured.
+
 #image("runs/run-20261016T2302Z/volcano.svg")
 #image("runs/run-20261016T2302Z/per_curve.svg")
 #image("runs/run-20261016T2302Z/per_level.svg")
