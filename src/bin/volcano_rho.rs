@@ -648,7 +648,7 @@ fn group_structure(f: &Fp, e: &Curve, order: u64, rng: &mut SmallRng) -> (u64, u
         let pt = e.random_point(f, rng);
         let mut ord = order;
         for &q in &primes {
-            while ord % q == 0 && e.mul(f, Some(pt), ord / q).is_none() {
+            while ord.is_multiple_of(q) && e.mul(f, Some(pt), ord / q).is_none() {
                 ord /= q;
             }
         }
@@ -769,8 +769,8 @@ fn write_ecbench(
         .find(|&&v| levels[v] == Some(0))
         .map(|&v| vs[v].j);
     let aut = match crater_j.unwrap_or(u64::MAX) {
-        0 if f.p % 3 == 1 && (n - 1) % 3 == 0 => Some(("rho-cubic", "rho.cubic")),
-        1728 if f.p % 4 == 1 && (n - 1) % 4 == 0 => Some(("rho-quartic", "rho.quartic")),
+        0 if f.p % 3 == 1 && (n - 1).is_multiple_of(3) => Some(("rho-cubic", "rho.cubic")),
+        1728 if f.p % 4 == 1 && (n - 1).is_multiple_of(4) => Some(("rho-quartic", "rho.quartic")),
         _ => None,
     };
     if let Some((name, id)) = aut {
