@@ -4,7 +4,6 @@ on:
     paths:
       - 'research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/**'
       - '.github/workflows/ecc2k130-n13-oaware-sat-benchmark.yml'
-      - 'docs/index-calculus-scoreboard.html'
   workflow_dispatch:
 permissions:
   contents: read
