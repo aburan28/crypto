@@ -93,13 +93,13 @@ use crate::cryptanalysis::ec_index_calculus::{
     find_one_relation, gaussian_eliminate_mod_n_particular, semaev_s3, semaev_s3_in_x3, sqrt_mod_p,
     FactorBaseEntry,
 };
-use rayon::prelude::*;
 use crate::ecc::curve::CurveParams;
 use crate::ecc::field::FieldElement;
 use crate::ecc::point::Point;
 use crate::utils::{mod_inverse, random::random_scalar};
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
+use rayon::prelude::*;
 use std::collections::HashMap;
 
 // ── j=0 curve detection and ζ extraction ─────────────────────────────
@@ -686,8 +686,7 @@ pub fn j0_index_calculus_dlp_staged(
     let found: Vec<Option<(Vec<OrbitRelation>, usize, usize)>> = (0..target_raw_relations)
         .into_par_iter()
         .map(|_| {
-            let mut exhausted = 0usize;
-            for _ in 0..max_relation_attempts {
+            for (exhausted, _) in (0..max_relation_attempts).enumerate() {
                 if let Some((batch, trials)) = find_relation_with_psi_counted_with_index(
                     curve,
                     g,
@@ -700,7 +699,6 @@ pub fn j0_index_calculus_dlp_staged(
                 ) {
                     return Some((batch, trials, exhausted));
                 }
-                exhausted += 1;
             }
             None
         })
