@@ -1,0 +1,94 @@
+name: N83 root11 finalists Tier 1 holdout
+
+on:
+  push:
+    branches: [codex/n83-root11-finalists-tier1-20261017]
+    paths:
+      - research/n83_root11_finalists_tier1_20261017/dispatch.json
+
+permissions:
+  contents: read
+
+concurrency:
+  group: n83-root11-finalists-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  finalists-stratum:
+    if: github.repository == 'aburan28/crypto' && github.ref == 'refs/heads/codex/n83-root11-finalists-tier1-20261017'
+    strategy:
+      fail-fast: false
+      matrix:
+        stratum: [0, 1, 2, 3]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Replay sealed inputs and dispatch
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          mkdir -p "$RUNNER_TEMP/n83-finalists-stratum-${{ matrix.stratum }}"
+          python3 research/n83_root11_finalists_tier1_20261017/generate.py > \
+            "$RUNNER_TEMP/n83-finalists-stratum-${{ matrix.stratum }}/fixture-check.json"
+          python3 research/n83_root11_finalists_tier1_20261017/check_dispatch.py > \
+            "$RUNNER_TEMP/n83-finalists-stratum-${{ matrix.stratum }}/dispatch-check.json"
+          python3 research/n83_root11_finalists_tier1_20261017/test_select.py > \
+            "$RUNNER_TEMP/n83-finalists-stratum-${{ matrix.stratum }}/holdout-selector-test.json"
+          python3 research/n83_root11_finalists_tier1_20261017/test_provider_jobs.py > \
+            "$RUNNER_TEMP/n83-finalists-stratum-${{ matrix.stratum }}/provider-identity-test.json"
+          python3 research/n83_root11_finalists_tier1_20261017/run.py \
+            --preflight --stratum "${{ matrix.stratum }}" > \
+            "$RUNNER_TEMP/n83-finalists-stratum-${{ matrix.stratum }}/schedule-preflight.json"
+          rustc --version > "$RUNNER_TEMP/n83-finalists-stratum-${{ matrix.stratum }}/rustc-version.txt"
+          cargo --version > "$RUNNER_TEMP/n83-finalists-stratum-${{ matrix.stratum }}/cargo-version.txt"
+
+      - name: Build and test exact IC and same-point rho producers
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-finalists-stratum-${{ matrix.stratum }}-target"
+          export CARGO_BUILD_JOBS=2
+          cargo test --release --locked --example koblitz_orbit_dlp_fast > \
+            "$RUNNER_TEMP/n83-finalists-stratum-${{ matrix.stratum }}/ic-example-tests.log" 2>&1
+          cargo test --release --locked --example n83_rho_optimization_eval > \
+            "$RUNNER_TEMP/n83-finalists-stratum-${{ matrix.stratum }}/rho-example-tests.log" 2>&1
+          cargo build --release --locked --example koblitz_orbit_dlp_fast > \
+            "$RUNNER_TEMP/n83-finalists-stratum-${{ matrix.stratum }}/ic-build.log" 2>&1
+          cargo build --release --locked --example n83_rho_optimization_eval > \
+            "$RUNNER_TEMP/n83-finalists-stratum-${{ matrix.stratum }}/rho-build.log" 2>&1
+
+      - name: Run calibrated same-point pairs on eight public points
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-finalists-stratum-${{ matrix.stratum }}-target"
+          python3 research/n83_root11_finalists_tier1_20261017/run.py \
+            --stratum "${{ matrix.stratum }}" \
+            --binary "$CARGO_TARGET_DIR/release/examples/koblitz_orbit_dlp_fast" \
+            --rho-binary "$CARGO_TARGET_DIR/release/examples/n83_rho_optimization_eval" \
+            --output "$RUNNER_TEMP/n83-finalists-stratum-${{ matrix.stratum }}/results" \
+            2>&1 | tee "$RUNNER_TEMP/n83-finalists-stratum-${{ matrix.stratum }}/run.log"
+
+      - name: Independently replay bases relations scalars and resources
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -d "$RUNNER_TEMP/n83-finalists-stratum-${{ matrix.stratum }}/results" ]; then
+            python3 research/n83_root11_finalists_tier1_20261017/verify.py \
+              "$RUNNER_TEMP/n83-finalists-stratum-${{ matrix.stratum }}/results" \
+              --stratum "${{ matrix.stratum }}" \
+              2>&1 | tee "$RUNNER_TEMP/n83-finalists-stratum-${{ matrix.stratum }}/verify.log"
+          fi
+
+      - name: Preserve all raw receipts and failed pairs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-finalists-stratum-${{ matrix.stratum }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-finalists-stratum-${{ matrix.stratum }}/
+          if-no-files-found: error
+          retention-days: 14
