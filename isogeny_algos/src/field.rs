@@ -299,6 +299,8 @@ pub struct Red128 {
     bar: u64,
     /// 2^128 mod p
     r2: u64,
+    /// 2^64 mod p
+    r1: u64,
 }
 
 impl Red128 {
@@ -314,6 +316,7 @@ impl Red128 {
             ninv: inv.wrapping_neg(),
             bar: u64::MAX / p,
             r2: ((r1 as u128 * r1 as u128) % p as u128) as u64,
+            r1,
         }
     }
     /// x mod p for one word (Barrett; the quotient estimate is short by at most 2).
@@ -341,6 +344,32 @@ impl Red128 {
             s -= self.p;
         }
         s
+    }
+    /// A value congruent to x below 2^64 p (one multiplication): hi (2^64 mod p) + lo.
+    #[inline(always)]
+    pub fn fold(&self, x: u128) -> u128 {
+        (x >> 64) * self.r1 as u128 + (x as u64) as u128
+    }
+    /// How a lazy accumulator whose final value must stay at most `limit` runs, keeping six
+    /// products spare: (fold, step) — reduce with `fold` (below 2^64 p) or `reduce` (below p)
+    /// after every `step` products, whichever leaves the longer steps.
+    pub fn lazy_plan(&self, limit: u128) -> (bool, usize) {
+        let pm = (self.p - 1) as u128;
+        let pm2 = (pm * pm).max(1);
+        let base = (u64::MAX as u128) * self.r1 as u128 + u64::MAX as u128;
+        let room = |b: u128| {
+            if limit > b {
+                ((limit - b) / pm2).min(1 << 30) as usize
+            } else {
+                0
+            }
+        };
+        let (f, r) = (room(base), room(self.p as u128));
+        if f >= 16 || f >= r {
+            (true, f.saturating_sub(6).max(1))
+        } else {
+            (false, r.saturating_sub(6).max(1))
+        }
     }
     /// x mod p: redc(redc(x) 2^128 mod p) = x.
     #[inline(always)]
@@ -617,6 +646,65 @@ pub fn lazy_dot_rev_rows(
     out
 }
 
+/// Four consecutive coefficients k0..k0+3 of a lazily accumulated convolution: sums of
+/// a[i] b[k0 + r - i] over i in [lo[r], hi[r]) for r < 4 (callers keep k0 + r - i inside b).
+/// The common range is run four outputs at a time sharing the loads of a, folded or reduced
+/// as `plan` (`Red128::lazy_plan`) says, so that each sum, with the few edge terms per output
+/// (at most six), stays within the plan's limit.
+#[inline(always)]
+fn conv_block4(
+    a: &[u64],
+    b: &[u64],
+    k0: usize,
+    lo: [usize; 4],
+    hi: [usize; 4],
+    red: &Red128,
+    plan: (bool, usize),
+) -> [u128; 4] {
+    let ilo = lo.iter().copied().max().unwrap();
+    let ihi = hi.iter().copied().min().unwrap();
+    let mut s = [0u128; 4];
+    if ilo < ihi {
+        let (fold, step) = plan;
+        let mut i = ilo;
+        while i < ihi {
+            let e = (i + step).min(ihi);
+            debug_assert!(e <= a.len() && k0 + 3 - i < b.len() && k0 >= e - 1);
+            for j in i..e {
+                // SAFETY: j < ihi <= a.len(), and k0 - j .. k0 - j + 3 lie in b: the common
+                // range keeps every b index of the four outputs (k0 + r - j) in range
+                let (x, w) = unsafe {
+                    (
+                        *a.get_unchecked(j) as u128,
+                        b.get_unchecked(k0 - j..k0 - j + 4),
+                    )
+                };
+                s[0] += x * w[0] as u128;
+                s[1] += x * w[1] as u128;
+                s[2] += x * w[2] as u128;
+                s[3] += x * w[3] as u128;
+            }
+            i = e;
+            for v in s.iter_mut() {
+                *v = if fold {
+                    red.fold(*v)
+                } else {
+                    red.reduce(*v) as u128
+                };
+            }
+        }
+    }
+    // at most three edge terms on each side of the common range (the six kept spare)
+    for r in 0..4 {
+        let (l, h) = (lo[r], hi[r]);
+        let (cl, ch) = if ilo < ihi { (ilo, ihi) } else { (h, h) };
+        for j in (l..cl.min(h)).chain(ch.max(l)..h) {
+            s[r] += a[j] as u128 * b[k0 + r - j] as u128;
+        }
+    }
+    s
+}
+
 /// Convolution with lazy accumulation (p < 2^62): each output coefficient is summed in a u64
 /// when that cannot overflow, otherwise by `dot_core`; `fin` maps the unreduced sum (< 2^128)
 /// to the output representation.
@@ -635,7 +723,20 @@ pub fn lazy_conv(
     let p = red.p;
     let small = fits_u64(p, n.min(m));
     let cap = lazy_cap(p);
-    for k in 0..nout {
+    let last = nout.min(n + m - 1);
+    let mut k = 0;
+    // four outputs at a time once the ranges are long enough to pay
+    if !small && n.min(m) >= 8 {
+        let range = |k: usize| (k.saturating_sub(m - 1), k.min(n - 1) + 1);
+        let plan = red.lazy_plan(u128::MAX);
+        while k + 4 <= last {
+            let rs: [(usize, usize); 4] = std::array::from_fn(|r| range(k + r));
+            let s = conv_block4(a, b, k, rs.map(|x| x.0), rs.map(|x| x.1), red, plan);
+            r.extend(s.iter().map(|&v| fin(v)));
+            k += 4;
+        }
+    }
+    for k in k..nout {
         if k > n + m - 2 {
             r.push(fin(0));
             continue;
@@ -668,7 +769,24 @@ pub fn lazy_sq(a: &[u64], red: &Red128, fin: impl Fn(u128) -> u64) -> Vec<u64> {
     let small = fits_u64(p, n + 1);
     let cap = lazy_cap(p);
     let mut r = Vec::with_capacity(2 * n - 1);
-    for k in 0..2 * n - 1 {
+    let mut k = 0;
+    if !small && n >= 16 {
+        // four outputs at a time
+        let range = |k: usize| (k.saturating_sub(n - 1), k.div_ceil(2));
+        // room to double the sum and add the square term
+        let pm = (p - 1) as u128;
+        let plan = red.lazy_plan((u128::MAX - pm * pm) / 2);
+        while k + 4 < 2 * n {
+            let rs: [(usize, usize); 4] = std::array::from_fn(|r| range(k + r));
+            let s = conv_block4(a, a, k, rs.map(|x| x.0), rs.map(|x| x.1), red, plan);
+            for (j, &v) in s.iter().enumerate() {
+                let sq = if (k + j) % 2 == 0 { a[(k + j) / 2] } else { 0 };
+                r.push(fin(2 * v + sq as u128 * sq as u128));
+            }
+            k += 4;
+        }
+    }
+    for k in k..2 * n - 1 {
         let lo = k.saturating_sub(n - 1);
         let hi = k.div_ceil(2); // i < k - i
         let sq = if k % 2 == 0 { a[k / 2] } else { 0 };

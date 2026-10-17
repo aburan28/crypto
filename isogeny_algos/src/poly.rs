@@ -296,9 +296,17 @@ impl<F: Field> PolyModulus<F> {
         let rev_a: Vec<F::E> = a.iter().rev().take(k).copied().collect();
         // full-length input (the usual case in powering): the prepared operands
         let prep = self.prep.as_ref().filter(|_| k == n - 1);
+        // short: only the k low coefficients (a truncated schoolbook product)
+        let short = k < f.karatsuba_threshold();
         let mut qr = prep
             .and_then(|(q, _)| f.conv_prepared(&rev_a, q))
-            .unwrap_or_else(|| mul_raw(f, &rev_a, &self.rinv[..k]));
+            .unwrap_or_else(|| {
+                if short {
+                    f.conv_trunc(&rev_a, &self.rinv[..k], k)
+                } else {
+                    mul_raw(f, &rev_a, &self.rinv[..k])
+                }
+            });
         qr.truncate(k);
         let q: Vec<F::E> = qr.into_iter().rev().collect();
         // only q m mod x^n is needed: mod x^L - 1 (L >= n a power of two) coefficient i < n is
@@ -318,7 +326,11 @@ impl<F: Field> PolyModulus<F> {
             trim(f, &mut r);
             return r;
         }
-        let qm = mul_raw(f, &q, &self.m);
+        let qm = if short {
+            f.conv_trunc(&q, &self.m, n)
+        } else {
+            mul_raw(f, &q, &self.m)
+        };
         let mut r: Vec<F::E> = (0..n).map(|i| f.sub(a[i], qm[i])).collect();
         trim(f, &mut r);
         r

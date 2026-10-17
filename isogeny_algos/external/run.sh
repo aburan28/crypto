@@ -6,6 +6,7 @@
 # isolation records to results/p15-external/isolation.jsonl.
 #
 #   external/run.sh            (from isogeny_algos/; needs gp, libflint-dev, a C compiler)
+#   OUT=results/p16-external external/run.sh   (another output directory)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 CPU=${CPU:-3}
@@ -16,7 +17,7 @@ MAX_OTHER=${MAX_OTHER:-0.5}
 OPS=${OPS:-all}
 # appended to every isolation-record label (to tell reruns apart in isolation.jsonl)
 TAGSFX=${TAGSFX:-}
-OUT=results/p15-external
+OUT=${OUT:-results/p15-external}
 ISO="python3 ../tools/isolated_bench.py"
 mkdir -p "$OUT"
 cargo build --release -q --example ext_compare

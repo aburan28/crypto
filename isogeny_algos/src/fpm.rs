@@ -1510,7 +1510,7 @@ impl<const N: usize> Field for FpM<N> {
         // shorter modulus with the IFMA transforms
         if crate::ntt::simd_active() {
             match N {
-                1 => 84,
+                1 => 44,
                 2 => 60,
                 3 | 4 => 52,
                 _ => 40,
@@ -1534,9 +1534,12 @@ impl<const N: usize> Field for FpM<N> {
         }
     }
     fn karatsuba_threshold(&self) -> usize {
-        KARATSUBA_N
-            .with(|k| k.get())
-            .unwrap_or(if N == 1 { 32 } else { 16 })
+        // one limb below 2^62: the four-output lazy kernel stays ahead of Karatsuba to ~72
+        KARATSUBA_N.with(|k| k.get()).unwrap_or(match N {
+            1 if self.red1.is_some() => 72,
+            1 => 32,
+            _ => 16,
+        })
     }
     fn size(&self) -> u128 {
         self.pbig
