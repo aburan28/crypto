@@ -1,7 +1,7 @@
 //! `volcano-rho` — one fixed ECDLP instance carried down every stratum of
 //! an `ℓ`-isogeny volcano, and Pollard rho timed on each curve.
 //!
-//! 1. Search a random prime-field curve `E/F_p` (`p ≡ 3 mod 4`) whose
+//! 1. Search a random prime-field curve `E/F_p` (`p ≡ 3 mod 4` for ℓ = 3, `p ≡ 1 mod 8` for ℓ = 2) whose
 //!    Frobenius discriminant `D = t² − 4p = f²·D_K` has `v_ℓ(f) ≥ depth`,
 //!    with `#E = h·n`, `n` prime and `h` small.  The `ℓ`-volcano of `E`
 //!    then has `v_ℓ(f)` levels below its crater.
@@ -745,7 +745,10 @@ fn search(args: &Args, rng: &mut SmallRng) -> Found {
     let mut tried = 0u64;
     loop {
         let p = loop {
-            let c = rng.gen_range((1u64 << (args.bits - 1))..(1u64 << args.bits)) | 3;
+            let c = rng.gen_range((1u64 << (args.bits - 1))..(1u64 << args.bits));
+            // p ≡ 3 mod 4 caps v₂(t² − 4p) at 3, so a 2-volcano deeper than
+            // one level needs p ≡ 1 mod 8; ℓ = 3 keeps p ≡ 3 mod 4.
+            let c = if args.ell == 2 { (c & !7) | 1 } else { c | 3 };
             if is_prime(c) {
                 break c;
             }
