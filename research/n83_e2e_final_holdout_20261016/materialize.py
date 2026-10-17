@@ -110,7 +110,7 @@ def materialize(validated_path, selection_path, half_dirs):
             or validated["source_sha256"] != runner.SOURCE_SHA256
             or validated["targets_sha256"] != runner.TARGETS_SHA256
             or validated["answers_sha256"] != runner.ANSWERS_SHA256
-            or selected != selector.select(validated)):
+            or selected != json.loads(json.dumps(selector.select(validated)))):
         raise ValueError("validated rows or selection differ from frozen rule")
     if (len(half_dirs) != 2 or len(validated["host_strata"]) != 2
             or len(validated["points"]) != 16):

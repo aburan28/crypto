@@ -46,7 +46,7 @@ OUT_HTML = REPO / "docs/ic-leaderboard.html"
 # changes nothing on it, and then raise this number; `--check` fails until it
 # does, because it cannot otherwise see evidence the builder does not read.
 LEDGER = "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
-LEDGER_COVERED_THROUGH = 23
+LEDGER_COVERED_THROUGH = 24
 
 SOURCES = {
     "round5": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
@@ -73,6 +73,10 @@ SOURCES = {
     "conductor_gap_counts": "research/ecbench_conductor_gap_20261012/analysis.json",
     "frontier_audit": "research/ecbench_frontier_20261013/frontier-data.json",
     "n83_tier1_cold_holdout": "research/n83_e2e_holdout_20261016/ic1_rows_38955665283.json",
+    "n83_tier1_finalist_rows": "research/n83_e2e_final_holdout_20261016/ic1_rows_39005111289.json",
+    "n83_tier1_finalist_validated": "research/n83_e2e_final_holdout_20261016/validated_rows.json",
+    "n83_tier1_finalist_selection": "research/n83_e2e_final_holdout_20261016/selection.json",
+    "n83_tier1_finalist_plot": "research/n83_e2e_finalist_results_20261017/plot_data.json",
     "registry": "docs/curves/registry.json",
     "curves_schema": "docs/curves/ic/curves.schema.json",
     "curves_yaml": "docs/curves/ic/curves.yaml",
@@ -653,6 +657,25 @@ def build() -> dict:
             or set(n83_holdout["pipeline_summaries"]) !=
             {"k1104", "k1108", "k1120", "k1152"}):
         raise ValueError("N83 cold holdout source is incomplete")
+    n83_finalist_rows = load(SOURCES["n83_tier1_finalist_rows"])
+    n83_finalist_validated = load(SOURCES["n83_tier1_finalist_validated"])
+    n83_finalist_selection = load(SOURCES["n83_tier1_finalist_selection"])
+    n83_finalist_plot = load(SOURCES["n83_tier1_finalist_plot"])
+    if (n83_finalist_rows["schema"] != "n83.e2e-finalist-ic1/v1"
+            or n83_finalist_rows["evidence_status"] != "PASS_INDEPENDENT_REPLAY"
+            or len(n83_finalist_rows["rows"]) != 132
+            or len(n83_finalist_rows["rho_rows"]) != 128
+            or len(n83_finalist_rows["workloads"]) != 16
+            or n83_finalist_validated["evidence_status"] != "PASS_INDEPENDENT_REPLAY"
+            or n83_finalist_plot["schema"] != "n83.finalist-plot-data/v1"
+            or n83_finalist_plot["validated_rows_sha256"] !=
+            sha256(SOURCES["n83_tier1_finalist_validated"])
+            or n83_finalist_plot["selection_sha256"] !=
+            sha256(SOURCES["n83_tier1_finalist_selection"])
+            or n83_finalist_selection["admission_status"] != "PASS"
+            or {item["candidate_id"] for item in n83_finalist_plot["candidates"]}
+            != set(n83_finalist_rows["candidates"])):
+        raise ValueError("N83 finalist source is incomplete")
     small_rows = [json.loads(line) for line in (REPO / SOURCES["f6_small_cold_rows"]).read_text().splitlines() if line]
     small_replay = load(SOURCES["f6_small_cold_replay"])
     small_by_arm = {row["arm"]: row for row in small_rows}
@@ -968,6 +991,29 @@ def build() -> dict:
             "pipelines": n83_holdout["pipeline_summaries"],
             "paired_intervals": n83_holdout["paired_intervals"],
             "aa_controls": n83_holdout["aa_controls"],
+        },
+        "n83_tier1_finalist": {
+            "source": SOURCES["n83_tier1_finalist_rows"],
+            "report": "research/n83_e2e_finalist_results_20261017/RESULT.md",
+            "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+            "run_id": n83_finalist_rows["run_id"],
+            "point_count": n83_finalist_plot["points"],
+            "online_selection_status": n83_finalist_selection["online"]["status"],
+            "cold_selection_status": n83_finalist_selection["cold"]["status"],
+            "online_selected_candidate_id": n83_finalist_selection["online"]["selected_candidate_id"],
+            "cold_selected_candidate_id": n83_finalist_selection["cold"]["selected_candidate_id"],
+            "candidates": [{
+                "label": item["label"],
+                "candidate_id": item["candidate_id"],
+                "actual_usable_points": item["actual_usable_points"],
+                "effective_columns": item["effective_columns"],
+                "online_median_ms": item["online_quartiles_ms"][1],
+                "cold_mean_s": item["cold_mean_s"],
+                "rho_over_ic_online_median": item["ratio_quartiles"][1],
+                "median_paired_ic_over_rho_online": item["median_paired_ic_over_rho_online"],
+                "cold_mean_over_rho_mean_online": item["cold_mean_over_rho_mean_online"],
+                "ic_faster_points": item["ic_faster_points"],
+            } for item in n83_finalist_plot["candidates"]],
         },
         "curve_records": {
             "registry": SOURCES["registry"], "schema": SOURCES["curves_schema"], "yaml": SOURCES["curves_yaml"],
@@ -1316,6 +1362,28 @@ def markdown(doc: dict) -> str:
           "its target-dependent walk and ends with scalar verification. "
           "This wall-time panel is kept separate from Tables A–C and their "
           "operation-unit S rankings.", ""]
+    finalist = doc["n83_tier1_finalist"]
+    L += ["", "## N83 Tier 1 sixteen-point factor-base frontier", "",
+          "Eight exact packed-root configurations ran on sixteen sealed public points "
+          "across two admitted cloud hosts, one fresh IC process and a same-point rho "
+          "solve for every candidate-point pair. All 128 pairs passed independent "
+          "replay. The frozen online and cold selectors both report `" +
+          finalist["online_selection_status"] + "`; the cold K1107 factor-base "
+          "size lowers process cost against K1120, while its root11 and root22 "
+          "layouts remain unresolved.", "",
+          "| Configuration | Actual usable points | Folded columns | Online median ms | Cold mean s | Paired rho/IC median | IC faster / 16 |",
+          "|:--|--:|--:|--:|--:|--:|--:|"]
+    for item in finalist["candidates"]:
+        L.append(f"| {item['label']} | {item['actual_usable_points']:,} | "
+                 f"{item['effective_columns']:,} | {item['online_median_ms']:.3f} | "
+                 f"{item['cold_mean_s']:.3f} | "
+                 f"{item['rho_over_ic_online_median']:.3f} | "
+                 f"{item['ic_faster_points']}/16 |")
+    L += ["", f"[Frozen 132 IC1 rows](../../{finalist['source']}) and "
+          f"[provider-bound result and graph](../../{finalist['report']}). "
+          "The online interval excludes reusable preparation; the separate cold "
+          "column charges it. This Tier 1 wall-time panel is separate from "
+          "Tables A–C and their operation-unit S rankings.", ""]
     L += ["", "## Sources", ""]
     for k, v in doc["sources"].items():
         L.append(f"- `{v['path']}` — sha256 `{v['sha256'][:16]}…`")
@@ -1959,6 +2027,33 @@ def page(doc: dict, standalone: bool) -> str:
              'This Tier 1 wall-time panel uses its own unit and sits outside the '
              'operation-unit S rankings.</p>' +
              gh(n83["source"], 'Frozen IC1 rows and candidate identities') + '</section>')
+
+    finalist = doc["n83_tier1_finalist"]
+    P.append('<section id="n83-tier1-finalist-20261017"><h2>N83 sixteen-point Tier 1 factor-base frontier</h2>'
+             '<p>Eight exact configurations, each with a fresh one-target IC process and '
+             'a same-point rho solve on each of sixteen sealed public points. Two cloud '
+             'hosts and all 128 pairs passed independent replay. The frozen online and '
+             'cold configuration selectors both report <code>' +
+             esc(finalist["online_selection_status"]) + '</code>. K1107 lowers '
+             'cold process cost against the K1120 reference within both root layouts.</p>'
+             '<div class="scroll"><table><thead><tr><th>Configuration</th>'
+             '<th>Usable points</th><th>Columns</th><th>Online median ms</th>'
+             '<th>Cold mean s</th><th>Median rho / IC online</th>'
+             '<th>IC faster / 16</th></tr></thead><tbody>')
+    for item in finalist["candidates"]:
+        P.append(f'<tr><td>{esc(item["label"])}</td>'
+                 f'<td>{item["actual_usable_points"]:,}</td>'
+                 f'<td>{item["effective_columns"]:,}</td>'
+                 f'<td>{item["online_median_ms"]:.3f}</td>'
+                 f'<td>{item["cold_mean_s"]:.3f}</td>'
+                 f'<td>{item["rho_over_ic_online_median"]:.3f}</td>'
+                 f'<td>{item["ic_faster_points"]}/16</td></tr>')
+    P.append('</tbody></table></div><p>The online interval starts after reusable '
+             'preparation; the cold interval charges it. All 28 candidate pairs use '
+             'the frozen exact sign-flip and Bonferroni rule. These Tier 1 wall times '
+             'remain separate from operation-unit S rankings.</p>' +
+             gh(finalist["source"], 'Frozen 132 IC1 rows') + ' · ' +
+             gh(finalist["report"], 'Provider-bound result and graph') + '</section>')
 
     # Footer.
     P.append('<footer><p><strong>What this is not.</strong> A view of frozen measurements, class accounting: no row '

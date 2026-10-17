@@ -6000,6 +6000,66 @@ python3 render_rows.py                                 # the table above and the
   rows are part of its baseline v0. Its plan is
   [`IC_TOOL_PROGRAM.md`](IC_TOOL_PROGRAM.md).
 
+## 24. N83 packed-root factor-base frontier, Tier 1 cloud instance (2026-10-17)
+
+The K1107 base lowers one-target cold process cost against K1120 on the
+same sixteen sealed public points by 3.949 seconds in root11 layout
+(paired 95% interval [3.404, 4.494] seconds, exact sign-flip
+`p = 0.000030518`) and 4.332 seconds in root22 layout
+([3.318, 5.346] seconds, the same `p`). Both K1107 layouts beat every
+other tested K in cold paired mean at the frozen `0.05/28` threshold.
+Their mutual cold comparison has `p = 0.617950`, leaving the exact
+eight-configuration cold selector `BOUNDED_UNKNOWN`; the online selector
+is also `BOUNDED_UNKNOWN`.
+
+| Exact factor-base arm | Actual usable points | Folded columns | Online median ms | Cold mean s | Median paired rho/IC online | Faster online than paired rho |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| K1104/root11 | 183,264 | 1,104 | 113.394 | 108.382 | 16.247 | 16/16 |
+| K1104/root22 | 183,264 | 1,104 | 111.651 | 108.112 | 11.334 | 16/16 |
+| K1107/root11 | 183,762 | 1,107 | 79.820 | 104.826 | 18.507 | 16/16 |
+| K1107/root22 | 183,762 | 1,107 | 82.929 | 104.635 | 23.910 | 16/16 |
+| K1112/root11 | 184,592 | 1,112 | 195.899 | 106.596 | 12.457 | 15/16 |
+| K1112/root22 | 184,592 | 1,112 | 191.117 | 106.699 | 15.636 | 16/16 |
+| K1120/root11 | 185,920 | 1,120 | 73.487 | 108.775 | 22.355 | 16/16 |
+| K1120/root22 | 185,920 | 1,120 | 71.913 | 108.966 | 19.394 | 16/16 |
+
+The curve is `EC1N83Ckb1a1haacb69ee9f37` over polynomial-basis
+`GF(2^83)`, with prime subgroup order `8569786107849059`. Each of the
+eight configurations solved one public point per fresh process on each
+of sixteen previously unused points. Two separate GitHub-hosted AMD
+EPYC 9V74 four-vCPU allocations passed Tier 1 topology, affinity,
+cgroup, resource and before/after same-point rho calibration gates.
+The 128 IC processes, 128 paired rho solves and four repeat controls
+passed provider and independent local arithmetic replay. The executed
+source SHA-256 is
+`8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12`;
+the target file SHA-256 is
+`407cd248797100214ff039193bb04bf89b5c2708a8cd339ca98f7aca98174062`.
+
+The primary interval begins with target-dependent work after reusable
+base, index and log preparation and ends with verified scalar recovery.
+The separate cold process interval charges preparation and one target.
+For the progress chart, the K1120/root11 median paired IC/rho online
+ratio is `0.0450834882`; K1107/root11 mean cold process divided by mean
+paired rho online is `47.06115645`, explicitly a supplementary hybrid
+timing ratio.
+Online candidate comparisons use paired log time ratios; cold
+comparisons use paired process milliseconds. The 28 pairwise tests use
+all `2^16` exact sign flips and Bonferroni alpha `0.05/28`. The
+smallest online `p` is 0.045258. These wall times form a Tier 1
+instance result, with operation-unit `S` left to its own separately
+specified accounting boundary.
+
+**Class: engineering.** The measured cold factor-base improvement is
+on this frozen N83 implementation and resource envelope. The
+[versioned report, plot, PDF, provider bindings and reconstructable raw
+archive](../../../research/n83_e2e_finalist_results_20261017/RESULT.md)
+contain the exact candidate IDs, all 132 IC1 rows and 128 paired rho
+rows. [GitHub Actions run 39005111289](https://github.com/aburan28/crypto/actions/runs/39005111289)
+is the original two-host execution. The next sealed ten-point comparison
+tests K1248 and K1280 against K2543, K3072 and the predeclared K1120
+fallback on this same source.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the
