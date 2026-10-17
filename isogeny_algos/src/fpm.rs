@@ -1526,11 +1526,17 @@ impl<const N: usize> Field for FpM<N> {
     }
     fn sqr_threshold(&self) -> usize {
         // schoolbook squares form each cross product once, so they stay ahead of Karatsuba
-        // much longer than general products (examples/profile_sqr.rs)
-        match N {
+        // much longer than general products (examples/profile_sqr.rs); with the IFMA
+        // transforms a multi-limb square goes to the NTT (one transform) from its threshold
+        let school = match N {
             1 if self.pbits <= 62 => 72,
             2..=4 => 96,
             _ => 64,
+        };
+        if N > 1 && crate::ntt::simd_active() {
+            school.min(self.ntt_threshold())
+        } else {
+            school
         }
     }
     fn karatsuba_threshold(&self) -> usize {
