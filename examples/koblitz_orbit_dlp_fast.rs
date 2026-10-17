@@ -3157,6 +3157,7 @@ mod wide {
         target: FastPoint128,
         start: usize,
         threads: usize,
+        cancel_early: bool,
     ) -> (Option<Relation128>, u128) {
         let n_states = index.states.len();
         if threads <= 1 || n_states == 0 {
@@ -3181,10 +3182,12 @@ mod wide {
         let n_u32 = gf.n;
         let chunk = n_states.div_ceil(threads);
         let (sender, receiver) = std::sync::mpsc::channel::<(usize, Relation128, u128)>();
+        let cancelled = std::sync::atomic::AtomicBool::new(false);
         std::thread::scope(|scope| {
             let mut handles = Vec::with_capacity(threads);
             for thread in 0..threads {
                 let sender = sender.clone();
+                let cancelled = &cancelled;
                 handles.push(scope.spawn(move || {
                     let pos_lo = thread * chunk;
                     let pos_hi = ((thread + 1) * chunk).min(n_states);
@@ -3199,6 +3202,9 @@ mod wide {
                     let mut probes = 0u64;
                     let mut scan = StateScan128::new(n_u32);
                     for offset in 0..length {
+                        if cancel_early && cancelled.load(std::sync::atomic::Ordering::Acquire) {
+                            break;
+                        }
                         let state = index.states.get((state_lo + offset) % n_states);
                         if let Some(relation) = scan_state128(
                             gf,
@@ -3215,9 +3221,13 @@ mod wide {
                             &mut relation_check_ns,
                         ) {
                             let position = pos_lo + offset;
-                            sender
-                                .send((position, relation, relation_check_ns))
-                                .expect("target receiver is alive");
+                            if !cancel_early
+                                || !cancelled.swap(true, std::sync::atomic::Ordering::AcqRel)
+                            {
+                                sender
+                                    .send((position, relation, relation_check_ns))
+                                    .expect("target receiver is alive");
+                            }
                             break;
                         }
                     }
@@ -4266,6 +4276,7 @@ mod wide {
             .and_then(|value| value.trim().parse::<usize>().ok())
             .filter(|&threads| threads > 0)
             .unwrap_or(1);
+        let target_cancel = std::env::var("KIC_TARGET_CANCEL").as_deref() == Ok("1");
         let mut solved = 0usize;
         let mut failed = 0usize;
         let mut target_query_ms = Vec::with_capacity(target_inputs.len());
@@ -4302,6 +4313,7 @@ mod wide {
                 target,
                 start,
                 target_threads,
+                target_cancel,
             );
             let target_decomposition_total_ms = target_pdp_started.elapsed().as_secs_f64() * 1000.0;
             let target_relation_check_ms = target_relation_check_ns as f64 / 1_000_000.0;
@@ -4418,6 +4430,7 @@ mod wide {
             "target_threads":target_threads,
             "scope":"public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
         });
+        summary["target_cancel"] = json!(target_cancel);
         summary["root_bloom_profile"] = json!(index
             .table
             .bloom
