@@ -9,13 +9,26 @@ for the discrete logarithm on `E₂` solves it on `E₁` at the cost of two
 evaluations of `φ`: `φ(h) = φ([x]g) = [x]φ(g)`, so the logarithm of `φ(h)`
 to base `φ(g)` is a logarithm of `h` to base `g`.
 
-Nothing about the solver is assumed: it may be generic or structural, it may
-read the curve equation, the endomorphism ring, anything. The only things
-used are that `φ` is injective and preserves `one` and `mul`. The algorithm
-model of `GenericInvariance.lean` is not needed here; the two files are
-independent, and together they say: generic methods cannot see the
-conductor at all (that file), and no method can see it by more than the
-cost of the isogeny between the levels (this file).
+The solver need not be generic: it may be structural, it may read the curve
+equation, the endomorphism ring, anything. It must be a `Solver`: a
+deterministic `run` that is correct on every instance (`Solver.correct`),
+with a self-reported cost. Beyond that, the only things used are that `φ`
+is injective and preserves `one` and `mul`. The algorithm model of
+`GenericInvariance.lean` is not needed here; the two files are independent,
+and together they say: methods in Nechaev's model (BSGS-type) cannot see
+the conductor at all (that file), and for always-correct solvers the best
+cost on the two levels differs by at most the cost of the isogeny between
+them (this file).
+
+**Scope (correction, 2026-10-17, sheriff case SHF-20261017-e4d7f6, L-N2).**
+An earlier version of this comment said "generic methods cannot see the
+conductor at all (that file)", unqualified; in this study's vocabulary
+generic methods include `rho.*` and `kangaroo.*`, which hash the point
+representation and are not instances of the first file's model. This file
+bounds the best cost across levels over always-correct solvers. It says
+nothing about the measured `S` of a given method, and a step-capped
+randomized walk is a `Solver` only once its tape is fixed and only if it
+never fails. No theorem in this file is changed.
 
 Costs are abstract naturals; `Isogeny.cost` is the price of one evaluation
 in whatever unit the solver's cost is in. For the pairs of
