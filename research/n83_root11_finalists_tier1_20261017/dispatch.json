@@ -1,0 +1,78 @@
+{
+  "answers_sha256": "016da838827c59e79b0b0f2c5296004bc94b73c5f3f3d9a78b4222f826e84139",
+  "candidate_manifests": {
+    "IC1N83Ckb1a1fb467456PDP4rootRCguidedLAgaussTDdirectISO0hf693b1b33c8b": {
+      "path": "research/n83_intermediate_factor_base_holdout_20261017/candidate_IC1N83Ckb1a1fb467456PDP4rootRCguidedLAgaussTDdirectISO0hf693b1b33c8b.json",
+      "sha256": "257bdf475bf2caf7abd488849f9948b0bae89762ff56a197afd0c9a0af709e0f"
+    },
+    "IC1N83Ckb1a1fb509952PDP4rootRCguidedLAgaussTDdirectISO0hec7ae07d8b9a": {
+      "path": "research/n83_smallk_challenge_20261017/candidate_IC1N83Ckb1a1fb509952PDP4rootRCguidedLAgaussTDdirectISO0hec7ae07d8b9a.json",
+      "sha256": "3259e58a238ca9e802d789ec840d0e2bf8c052271ae58b78384bec39b2216e1a"
+    }
+  },
+  "choice": {
+    "ordered_candidate_ids": [
+      "IC1N83Ckb1a1fb467456PDP4rootRCguidedLAgaussTDdirectISO0hf693b1b33c8b",
+      "IC1N83Ckb1a1fb509952PDP4rootRCguidedLAgaussTDdirectISO0hec7ae07d8b9a"
+    ],
+    "policy": "fresh_pairwise_K2816_vs_K3072_after_intermediate_screen",
+    "schema": "n83.root11-finalists-choice/v1"
+  },
+  "frozen_source_hashes": {
+    "Cargo.lock": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+    "examples/koblitz_orbit_dlp_fast.rs": "8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12",
+    "examples/n83_rho_optimization_eval.rs": "fb14072f4fa5d08e18d8b79130b6d58a220adae0f76369cc9be949691c83eaa0",
+    "research/n83_cold_factor_base_20261016/answers.jsonl": "b71c5a8bfdae603931fa6c03fc6f6faa3b261288cf787ac682bf8a3e3afe262d",
+    "research/n83_cold_factor_base_20261016/generate.py": "1807dadb4dc423850f32742faa03beb5774dacb4d3c17618502b6debb623ca58",
+    "research/n83_cold_factor_base_20261016/prior_manifest.json": "f0b29cb6e7d0081711ccb4b5ff54455f06198a2a3562d4654fbe7e81d07b1c8b",
+    "research/n83_cold_factor_base_20261016/reserve_answers.jsonl": "b21d3a1d54c701255a079a3f1d88940f46563a2f857303b4e3bb98ac40483f39",
+    "research/n83_cold_factor_base_20261016/reserve_targets.jsonl": "6ab08db41c5e86c96162f538a0c45d53331c2f9f823a66eea9bf0b458dd3554d",
+    "research/n83_cold_factor_base_20261016/targets.jsonl": "2c068d2f659588edcdbaa685fc73bb146e2bfee3be123d377d537658f8021c6d",
+    "research/n83_compact4_crosslayout_results_20261016/selection.json": "75a8f9f7638839d1d3d37e91576a490597f97fb0dfa5cab8b7526d38176415be",
+    "research/n83_dense_root_20261013/rho_config.json": "cf76ebb5372acfc1355b88374f875980be66cdffba1a82cb6e4c2f28bcfa723b",
+    "research/n83_indexed5_20261013/answer.jsonl": "651eb7d0ef08a1655036746311b19b6989e340ca4752b6d675606055e59c12a1",
+    "research/n83_indexed5_20261013/primary_target.jsonl": "21c8dfc7d488909e5c4a42c839fcc01bdefa9821c11ba001626a1d15697240e8"
+  },
+  "host_strata": 4,
+  "ic_cap_seconds": 900,
+  "input_sha256": {
+    "../../.github/workflows/n83-root11-finalists-tier1.yml": "0682192a17c2f69cf18e699c667da5b57d513db72507921f8dc1fdbe083d7f06",
+    "PROTOCOL.md": "bc2e6d9b9d173d92ffc8a2abf6d42f54386bf67f544f8907ebb691689918a6ac",
+    "RESULT.md": "62f97d8d7c2f122d2f6c4af7056e85b8e2639a27d5bbe4b0c21752f5a6401414",
+    "aggregate.py": "7fbb539f4d71b1dc6719565c7dad090b219aec2b33114e262a32bf7682eb194b",
+    "answers.jsonl": "016da838827c59e79b0b0f2c5296004bc94b73c5f3f3d9a78b4222f826e84139",
+    "arms.py": "c8f2e4160cc75c3b0f5d22dda71ca1538113f29586e9c1a1c36c5409cd80a996",
+    "check_dispatch.py": "815e212a0ac2f31cd9b9171d736cee569c05464ad8bd8d1d19266f24a7486f00",
+    "generate.py": "d34cc5b2857fa837594b72fa066ef78b15209abb48a890f386f2e578af183653",
+    "manifest.json": "2b8a25d9b11694be2e86d8f445a2b2b50a1496269ee50613bb7788bcf6891de1",
+    "prepare_dispatch.py": "13c5378916683a1bb302c74caf784920fb74f2f649ce1f7757061e482fb05efc",
+    "provider_jobs.py": "643e86bdef28c26be7dd7cc703d3d7bcc9ffd9cf2cd41b472eb700fb35d27a0a",
+    "run.py": "73ddabd8e213673a5d23da9d5ac57e090b5140d282ae564a8560d9fa051b8d14",
+    "select.py": "d6ae768124a47d5100b6777c8655d30042ca3cf6fb92a749005ddb72f68a1fe2",
+    "targets.jsonl": "4eb139e73c99f0921041a911d30698997913d1e71155a8e09035ffa647e02a58",
+    "test_provider_jobs.py": "1de4821732c55dd21afb3823f52aaa4d76fa4373d601e47a34412089b2b064b5",
+    "test_select.py": "4d350f28b29b10c2f9bc17e9c391e200556320c06f3355682ff598d40e85530c",
+    "verify.py": "7ad0c28e589627b368ad915811a23f72020123117385333c38f3eb21746ab5e2"
+  },
+  "ordered_arms": [
+    [
+      "k2816root11",
+      2816,
+      "root11_dynamic",
+      "IC1N83Ckb1a1fb467456PDP4rootRCguidedLAgaussTDdirectISO0hf693b1b33c8b"
+    ],
+    [
+      "k3072root11",
+      3072,
+      "root11_dynamic",
+      "IC1N83Ckb1a1fb509952PDP4rootRCguidedLAgaussTDdirectISO0hec7ae07d8b9a"
+    ]
+  ],
+  "pair_rho_seed_base": 2026110600,
+  "points_per_host": 8,
+  "producer_cap_seconds": 16200,
+  "rho_cap_seconds": 120,
+  "schema": "n83.root11-finalists-dispatch/v1",
+  "source_sha256": "8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12",
+  "targets_sha256": "4eb139e73c99f0921041a911d30698997913d1e71155a8e09035ffa647e02a58"
+}
