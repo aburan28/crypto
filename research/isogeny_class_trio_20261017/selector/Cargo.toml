@@ -1,0 +1,12 @@
+[package]
+name = "isogeny-class-trio-selector"
+version = "0.1.0"
+edition = "2021"
+description = "Deterministic selector for three 41-64-bit curves (B-, K- and P-shape) with Frobenius conductor f > 1"
+publish = false
+
+[dependencies]
+
+[profile.release]
+opt-level = 3
+debug = false
