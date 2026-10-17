@@ -59,6 +59,28 @@ def archive_analysis(archive, provider_sha):
         return saved.read("results/analysis.json"), expected
 
 
+def bind_extraction(archive, results):
+    count = 0
+    with zipfile.ZipFile(archive) as saved:
+        for info in saved.infolist():
+            if info.is_dir() or not info.filename.startswith("results/"):
+                continue
+            relative = Path(info.filename).relative_to("results")
+            local = results / relative
+            if not local.is_file():
+                raise ValueError(f"missing extracted ZIP member: {relative}")
+            digest = hashlib.sha256()
+            with saved.open(info) as stream:
+                for block in iter(lambda: stream.read(1024 * 1024), b""):
+                    digest.update(block)
+            if digest.hexdigest() != sha256(local):
+                raise ValueError(f"extracted ZIP member differs: {relative}")
+            count += 1
+    if count < 20:
+        raise ValueError("precision ZIP lacks complete result members")
+    return count
+
+
 def workload(index, point, answer, input_path):
     record = {
         "schema_version": 1,
@@ -115,6 +137,7 @@ def main():
         args.artifact_zip.resolve(), args.provider_sha256)
     if (results / "analysis.json").read_bytes() != cloud_analysis:
         raise ValueError("extracted analysis differs from provider ZIP")
+    raw_member_count = bind_extraction(args.artifact_zip.resolve(), results)
     replay(results, cloud_analysis, args.reuse_local_replay)
     analysis = json.loads(cloud_analysis)
     source = panel.read(results / "source.json")
@@ -256,6 +279,7 @@ def main():
         "run_head_sha": args.head_sha,
         "raw_artifact_run_id": args.run_id,
         "raw_artifact_sha256": archive_sha,
+        "bound_result_members": raw_member_count,
         "analysis_sha256": hashlib.sha256(cloud_analysis).hexdigest(),
         "workloads": [workloads[key] for key in sorted(workloads)],
         "candidates": sorted(manifests), "rows": rows,
