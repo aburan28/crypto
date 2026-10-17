@@ -1,0 +1,18 @@
+{
+  "batch_plan_sha256": "7ef53fa2aa70a231210dcd82a70ad861acee010f1ed9fa27f75b6badd76fe1bc",
+  "candidate_ks": [
+    2752,
+    2816,
+    2880,
+    2944,
+    3072
+  ],
+  "incomplete_result": "BOUNDED_UNKNOWN",
+  "require_all_128_independently_replayed_for_every_arm": true,
+  "role": "secondary_arm_selection_only",
+  "rule": "minimum_geometric_mean_128_target_online_ms_then_lower_k",
+  "schema": "n83.root11-finegrid-selection-plan/v1",
+  "status": "FROZEN_BEFORE_BATCH_OUTCOMES",
+  "tier1_confirmation": "separate_fresh_points_required",
+  "verifier_plan_sha256": "a353386a3c699a70b98d0a0df7dcf8690b785839f5fd8cbc6f5ff63939ba0377"
+}

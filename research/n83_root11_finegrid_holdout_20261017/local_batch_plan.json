@@ -1,0 +1,24 @@
+{
+  "answers_sha256": "3ceee12fb848cc261433f3cd9e7d297f961effede1974e8c95fa25d9bac68720",
+  "batch_script_sha256": "ec9f733be98c82725aec81512fbb9cd9bea9136d15de6874f5abed734a1504ca",
+  "binary_sha256": "faaac22aa6228c8d486875d6947fa654417d1122191fbe0eb9bde59bb45eb98f",
+  "cap_seconds_per_arm": 1200,
+  "hardware_tier": "ordinary_local_exploratory",
+  "k_values": [
+    2752,
+    2816,
+    2880,
+    2944,
+    3072
+  ],
+  "required_single_target_k": [
+    2752,
+    2880,
+    2944
+  ],
+  "role": "secondary_shared_setup_after_single_target",
+  "schema": "n83.root11-finegrid-secondary-batch-plan/v1",
+  "source_sha256": "8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12",
+  "target_count": 128,
+  "targets_sha256": "72486b7d708023838db1104a4a5e75a04b915d6f6d4013057c934fb31000aa87"
+}
