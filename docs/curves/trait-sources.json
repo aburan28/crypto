@@ -1,0 +1,20 @@
+{
+  "what_this_is": "Curves outside docs/curves/registry.json that curve_traits also records; see docs/curves/TRAITS.md, 'Sources'.",
+  "sources": [
+    {
+      "kind": "isogeny-walk",
+      "path": "research/isogeny_walk_20261004/runs/p256-ell31-radius2/isogeny_routes.json",
+      "family": "isogeny-walk-p256"
+    },
+    {
+      "kind": "isogeny-walk",
+      "path": "research/isogeny_walk_20261004/runs/p224-ell61-radius2/isogeny_routes.json",
+      "family": "isogeny-walk-p224"
+    },
+    {
+      "kind": "ic-crosswalk",
+      "path": "docs/curves/ic/curves.yaml",
+      "family": "ic-crosswalk"
+    }
+  ]
+}

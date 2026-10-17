@@ -1507,6 +1507,18 @@ fn reduce_pairs_fl(
             bprime[k] = acc.iter().map(|&x| fp.reduce(x) as u32).collect();
         }
     }
+    if fl_blocked_pairs() {
+        return reduce_pairs_blocked(
+            pair_rows,
+            &bprime,
+            &bstart,
+            reducer_at,
+            &free_index,
+            n_free,
+            fp,
+            deadline,
+        );
+    }
     let reduce_pair = |r: &Vec<(u32, u64)>| -> Option<Vec<u32>> {
         if deadline.is_some_and(|d| Instant::now() > d) {
             return None;
@@ -1533,6 +1545,128 @@ fn reduce_pairs_fl(
         pair_rows.par_iter().map(reduce_pair).collect()
     } else {
         pair_rows.iter().map(reduce_pair).collect()
+    }
+}
+
+/// `F4_FP_FL_BLOCKED=0` reduces each pair row on its own against `B'`, as
+/// before the blocked product; a same-binary control.
+fn fl_blocked_pairs() -> bool {
+    static ON: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ON.get_or_init(|| std::env::var("F4_FP_FL_BLOCKED").as_deref() != Ok("0"))
+}
+
+/// Pair rows reduced together in [`reduce_pairs_blocked`].
+const FL_PAIR_BLOCK: usize = 64;
+
+/// Free columns per tile in [`reduce_pairs_blocked`]: a block's
+/// accumulators over one tile (64 × 256 × 8 bytes) stay in L2.
+const FL_PAIR_TILE: usize = 256;
+
+/// `D − C·B'` for the pair rows `C | D`, a block of rows and a tile of
+/// free columns at a time.
+///
+/// Each pair row is one dense update per entry at a reducer column, by
+/// that reducer's row of `B'`.  Row by row, every update streams its `B'`
+/// row from memory; here the block's updates are grouped by reducer, so a
+/// tile of a `B'` row is read once and added into every row of the block
+/// that needs it, while the block's accumulators over the tile stay in
+/// cache.  The updates and their sum are unchanged; only their order is,
+/// and the sum is exact (below): every reduced row is the same.
+///
+/// With `p ≤ 2¹⁶` (the only arithmetic this runs under) every product is
+/// below `2³²` and an entry receives at most one per reducer, so the
+/// 64-bit accumulators cannot overflow without four billion reducers;
+/// they are reduced once, at the end.
+#[allow(clippy::too_many_arguments)]
+fn reduce_pairs_blocked(
+    pair_rows: &[Vec<(u32, u64)>],
+    bprime: &[Vec<u32>],
+    bstart: &[usize],
+    reducer_at: &[u32],
+    free_index: &[u32],
+    n_free: usize,
+    fp: Barrett,
+    deadline: Option<Instant>,
+) -> Option<Vec<Vec<u32>>> {
+    const NONE: u32 = u32::MAX;
+    assert!(
+        fp.p <= 1 << 16 && bprime.len() < 1 << 31,
+        "accumulator bound"
+    );
+    let simd = lazy_simd_kind();
+    let block = |rows: &[Vec<(u32, u64)>]| -> Option<Vec<Vec<u32>>> {
+        if deadline.is_some_and(|d| Instant::now() > d) {
+            return None;
+        }
+        let mut acc: Vec<Vec<u64>> = vec![vec![0u64; n_free]; rows.len()];
+        // (reducer, row of the block, factor), grouped by reducer
+        let mut hits: Vec<(u32, u32, u64)> = Vec::new();
+        for (i, r) in rows.iter().enumerate() {
+            for &(c, v) in r {
+                let fi = free_index[c as usize];
+                if fi != NONE {
+                    acc[i][fi as usize] += v;
+                } else {
+                    hits.push((reducer_at[c as usize], i as u32, fp.p - v));
+                }
+            }
+        }
+        hits.sort_unstable_by_key(|&(j, i, _)| (j, i));
+        let mut from = 0;
+        while from < n_free {
+            let to = (from + FL_PAIR_TILE).min(n_free);
+            for &(j, i, factor) in &hits {
+                let j = j as usize;
+                let start = bstart[j].max(from);
+                if start >= to {
+                    continue;
+                }
+                add_lazy_range(&mut acc[i as usize], &bprime[j], start, to, factor, simd);
+            }
+            from = to;
+        }
+        count_ops(
+            hits.iter()
+                .map(|&(j, _, _)| n_free - bstart[j as usize])
+                .sum(),
+        );
+        Some(
+            acc.into_iter()
+                .map(|a| a.into_iter().map(|x| fp.reduce(x) as u32).collect())
+                .collect(),
+        )
+    };
+    let blocks: Vec<Option<Vec<Vec<u32>>>> = if pair_rows.len() * n_free > PAR_WORK {
+        pair_rows.par_chunks(FL_PAIR_BLOCK).map(block).collect()
+    } else {
+        pair_rows.chunks(FL_PAIR_BLOCK).map(block).collect()
+    };
+    let mut out = Vec::with_capacity(pair_rows.len());
+    for b in blocks {
+        out.extend(b?);
+    }
+    Some(out)
+}
+
+/// [`add_lazy`] over the columns `from..to` only, uncounted (the caller
+/// counts the whole update once).
+#[inline]
+fn add_lazy_range(acc: &mut [u64], pivot: &[u32], from: usize, to: usize, factor: u64, simd: u8) {
+    let (acc, pivot) = (&mut acc[..to], &pivot[..to]);
+    #[cfg(target_arch = "x86_64")]
+    if simd == 0 {
+        add_lazy_scalar(acc, pivot, from, factor);
+    } else if simd == 2 {
+        // SAFETY: `lazy_simd_kind` verified AVX-512F and AVX2.
+        unsafe { add_lazy_avx512(acc, pivot, from, factor) };
+    } else {
+        // SAFETY: `lazy_simd_kind` verified AVX2 before this call.
+        unsafe { add_lazy_avx2(acc, pivot, from, factor) };
+    }
+    #[cfg(not(target_arch = "x86_64"))]
+    {
+        let _ = simd;
+        add_lazy_scalar(acc, pivot, from, factor);
     }
 }
 
@@ -3294,6 +3428,83 @@ mod tests {
                 x ^= x >> 7;
                 x ^= x << 17;
                 assert_eq!(fp.reduce(x), x % p, "{x} mod {p}");
+            }
+        }
+    }
+
+    /// The blocked `D − C·B'` equals the product computed entry by entry,
+    /// across tile boundaries, late-starting `B'` rows and several blocks.
+    #[test]
+    fn blocked_pair_reduction_matches_direct_product() {
+        let mut x = 0x9e37_79b9_7f4a_7c15u64;
+        let mut next = || {
+            x ^= x << 13;
+            x ^= x >> 7;
+            x ^= x << 17;
+            x
+        };
+        for p in [31u64, 65_521] {
+            let fp = Barrett::new(p);
+            for (n_red, n_free, n_pairs) in [(3, 5, 2), (40, 300, 70), (90, 600, 130)] {
+                // reducers lead columns 0..n_red; the free columns follow
+                let n_cols = n_red + n_free;
+                let reducer_at: Vec<u32> = (0..n_cols)
+                    .map(|c| if c < n_red { c as u32 } else { u32::MAX })
+                    .collect();
+                let free_index: Vec<u32> = (0..n_cols)
+                    .map(|c| {
+                        if c < n_red {
+                            u32::MAX
+                        } else {
+                            (c - n_red) as u32
+                        }
+                    })
+                    .collect();
+                let bstart: Vec<usize> = (0..n_red).map(|_| next() as usize % n_free).collect();
+                let bprime: Vec<Vec<u32>> = bstart
+                    .iter()
+                    .map(|&b| {
+                        (0..n_free)
+                            .map(|i| if i < b { 0 } else { (next() % p) as u32 })
+                            .collect()
+                    })
+                    .collect();
+                let mut pair_rows: Vec<Vec<(u32, u64)>> = Vec::new();
+                for _ in 0..n_pairs {
+                    let mut row = Vec::new();
+                    for c in 0..n_cols {
+                        if next() % 3 == 0 {
+                            row.push((c as u32, 1 + next() % (p - 1)));
+                        }
+                    }
+                    pair_rows.push(row);
+                }
+                let got = reduce_pairs_blocked(
+                    &pair_rows,
+                    &bprime,
+                    &bstart,
+                    &reducer_at,
+                    &free_index,
+                    n_free,
+                    fp,
+                    None,
+                )
+                .unwrap();
+                for (r, row) in pair_rows.iter().zip(&got) {
+                    let mut want = vec![0u64; n_free];
+                    for &(c, v) in r {
+                        let c = c as usize;
+                        if c >= n_red {
+                            want[c - n_red] = (want[c - n_red] + v) % p;
+                        } else {
+                            for (w, &b) in want.iter_mut().zip(&bprime[c]) {
+                                *w = (*w + (p - v) * u64::from(b)) % p;
+                            }
+                        }
+                    }
+                    let row: Vec<u64> = row.iter().map(|&v| u64::from(v)).collect();
+                    assert_eq!(row, want, "p={p} n_red={n_red} n_free={n_free}");
+                }
             }
         }
     }

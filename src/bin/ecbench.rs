@@ -22,6 +22,7 @@
 //! ecbench challenge spec --challenge C --candidate '{"id":"..."}' --epoch N --out spec.json
 //! ecbench challenge verdict --challenge C --dir D --epoch N --replay-all --out V.json
 //! ecbench gpu-stage --binary gpu/ecc/bench --out D --mode rho -- --iters 256
+//! ecbench gpu-match --binary gpu/ecc/bench --workload W.json --out D
 //! ```
 //!
 //! Bounds, frontiers and challenges are `docs/bounds/README.md`.
@@ -40,9 +41,9 @@ use std::process::ExitCode;
 use clap::{Parser, Subcommand};
 
 use crypto_lib::cryptanalysis::ecbench::{
-    audit, bounds, callgrind, canonical, challenge, claim, compare, db, frontier, full_price, gpu,
-    host, isolab, isolation, methods, record, resources, runner, signals, spec, stats, trend,
-    workload,
+    audit, bounds, calibration, callgrind, canonical, challenge, claim, compare, db, frontier,
+    full_price, gpu, host, isolab, isolation, methods, record, resources, runner, signals, spec,
+    stats, trend, workload,
 };
 
 #[derive(Parser)]
@@ -77,6 +78,41 @@ enum Cmd {
         /// Options forwarded to the CUDA binary after `--`.
         #[arg(last = true)]
         gpu_args: Vec<String>,
+    },
+    /// Run CUDA BSGS on a frozen EC Bench workload and verify its scalar here.
+    GpuMatch {
+        #[arg(long)]
+        binary: PathBuf,
+        /// One workload JSON exported from `ecbench plan --json` or a session.
+        #[arg(long)]
+        workload: PathBuf,
+        /// A new directory for the binary snapshot, raw streams and receipt.
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long, default_value_t = 600)]
+        timeout_seconds: u64,
+        #[arg(long, default_value = "nvidia-smi")]
+        telemetry_binary: PathBuf,
+        /// Optional verified CPU record for an exact workload identity link.
+        #[arg(long)]
+        cpu_record: Option<PathBuf>,
+        /// CUDA BSGS tuning arguments after `--`.
+        #[arg(last = true)]
+        gpu_args: Vec<String>,
+    },
+    /// Recheck a GPU receipt, raw streams, workload and scalar without a GPU.
+    GpuMatchVerify {
+        #[arg(long)]
+        dir: PathBuf,
+    },
+    /// Check A/A interval coverage and false admissions across quiet and contended sessions.
+    Calibrate {
+        #[arg(long, num_args = 1..)]
+        quiet: Vec<PathBuf>,
+        #[arg(long, num_args = 1..)]
+        contended: Vec<PathBuf>,
+        #[arg(long)]
+        out: PathBuf,
     },
     /// List every method with its parameters.
     Methods {
@@ -961,6 +997,50 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 eprintln!("GPU stage {}: see {}", receipt.status, out.display());
                 return Ok(ExitCode::from(1));
             }
+        }
+        Cmd::GpuMatch {
+            binary,
+            workload,
+            out,
+            timeout_seconds,
+            telemetry_binary,
+            cpu_record,
+            gpu_args,
+        } => {
+            let receipt = gpu::run_match(&gpu::GpuMatchOptions {
+                binary,
+                workload,
+                out,
+                timeout_seconds,
+                telemetry_binary,
+                cpu_record,
+                args: gpu_args,
+            })?;
+            print_json(&receipt)?;
+            if receipt.status != "verified" {
+                return Ok(ExitCode::from(1));
+            }
+        }
+        Cmd::GpuMatchVerify { dir } => {
+            let issues = gpu::audit_match(&dir)?;
+            print_json(&serde_json::json!({
+                "schema": "ecbench.gpu_match_audit/v1",
+                "valid": issues.is_empty(),
+                "issues": issues,
+            }))?;
+            if !issues.is_empty() {
+                return Ok(ExitCode::from(1));
+            }
+        }
+        Cmd::Calibrate {
+            quiet,
+            contended,
+            out,
+        } => {
+            let report = calibration::evaluate(&quiet, &contended)?;
+            let bytes = serde_json::to_vec_pretty(&report).map_err(|e| e.to_string())?;
+            std::fs::write(&out, bytes).map_err(|e| e.to_string())?;
+            print_json(&report)?;
         }
         Cmd::Compare {
             dir,

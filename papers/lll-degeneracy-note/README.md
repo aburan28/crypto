@@ -1,23 +1,46 @@
-# An Empirical Note on LLL Degeneracy of the Boneh–Venkatesan Lattice for secp256k1
+# LLL Failures on the Boneh–Venkatesan Lattice Were Floating-Point Artifacts: A Corrected Note
 
-`lll_degeneracy_note.tex` is a short empirical note on how the Boneh–Venkatesan
-hidden-number-problem lattice degenerates under LLL and BKZ on secp256k1 and
-comparison curves, with the probe tables it reports.
+`lll_degeneracy_note.tex` corrects this directory's earlier note, "An Empirical
+Note on LLL Degeneracy of the Boneh–Venkatesan Lattice for secp256k1" (PDF of
+2026-10-11).
 
-**Status**: research note, not peer-reviewed, not submitted, not posted.
-Anonymized; restore authors with `make deanonymize` after creating an `AUTHORS`
-file (see `../AUTHORS.example`).
+**Status**: corrected 2026-10-16. Research note, not peer-reviewed, not
+submitted, not posted. Anonymized; restore the authors with `make deanonymize`
+after creating an `AUTHORS` file (see `../AUTHORS.example`).
+
+## Correction
+
+The earlier version reported two failure modes as curve properties:
+
+- secp256k1 failing LLL at 256 bits where P-256 and brainpoolP256r1 succeed;
+- a uniform failure at 384 bits and above, blamed on the iteration cap.
+
+Both were bugs in the `f64` Gram–Schmidt step, which
+`research/notes/lattice-hnp/RESEARCH_LLL_GS_ANALYSIS.md` §10 had already
+diagnosed and fixed in May 2026:
+
+- the squared norms overflow (`n⁴ > f64::MAX`) for secp256k1 and for every
+  384-bit curve;
+- P-521 additionally suffers catastrophic cancellation.
+
+A sheriff audit found the stale claim: crypto-autoresearcher
+`research/sheriff/SHF-20261016-3caa6f`, blocker P1. The curve-specificity
+claim and everything built on it are withdrawn. The pre-fix tables are kept,
+labelled as superseded.
 
 ## What it says
 
-Measured LLL/BKZ behaviour of the Boneh–Venkatesan lattice at the parameters in
-its tables, on secp256k1 against comparison curves. Read the tables for the
-exact probes; the note claims nothing beyond them.
+- The two failure modes and their numerical causes.
+- A 2026-10-16 re-run of the committed probes on the fixed code
+  (`research/lll_degeneracy_rerun_20261016/`). Every probe at 256 and 384 bits
+  recovers the key, secp256k1 included (6/6). P-521 recovers 3/3 with 2048-bit
+  fixed-point Gram–Schmidt.
 
 ## What it does not say
 
-No key-recovery claim against any deployed system, no new lattice algorithm,
-and no statement about parameters it did not probe.
+- No security claim about any curve.
+- No LLL cost comparison between curves.
+- No statement beyond `m = 8`, `k_bits = 3/4 · n_bits`.
 
 ## Building
 
@@ -31,8 +54,10 @@ The rules are the shared `../paper.mk`. The built PDF is committed.
 
 ## Before submission
 
-1. Re-run every probe in the tables from the companion scripts under
-   `../../` named in the note and confirm the numbers.
-2. Resolve the citation of the companion audit (the structural-completeness
-   paper in `../structural-completeness/`) with its ePrint number once it has one.
-3. Independent read of the interpretation of the degeneracy pattern.
+1. Decide whether a correction note is worth posting at all. The earlier
+   version was never posted.
+2. Novelty audit: the `f64` overflow of LLL Gram–Schmidt at large entries is a
+   known numerical hazard. Cite the standard treatments (Nguyen–Stehlé's
+   floating-point LLL) before claiming any lesson as ours.
+3. Measurements owed: more seeds and larger `m` if a cost statement is ever
+   wanted.

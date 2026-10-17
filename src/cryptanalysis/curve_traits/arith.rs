@@ -193,6 +193,15 @@ fn rho(n: &BigUint, budget: u64) -> Option<BigUint> {
 /// rho cannot split is kept in [`Factored::composites`], never reported
 /// as a prime.
 pub fn factor(n: &BigUint, budget: u64) -> Factored {
+    factor_hinted(n, budget, &[])
+}
+
+/// [`factor`], dividing out each prime of `hints` after trial division
+/// and before rho.  A hint is only ever a candidate divisor: the result
+/// is the same factorisation a larger budget would find, and a hint that
+/// does not divide `n` changes nothing.  Callers pass primes (checked by
+/// [`is_prime`] when the hint list is read).
+pub fn factor_hinted(n: &BigUint, budget: u64, hints: &[BigUint]) -> Factored {
     assert!(!n.is_zero(), "factor(0)");
     let mut primes: BTreeMap<BigUint, u32> = BTreeMap::new();
     let mut rest = n.clone();
@@ -208,6 +217,18 @@ pub fn factor(n: &BigUint, budget: u64) -> Factored {
         }
         if e > 0 {
             primes.insert(bp, e);
+        }
+    }
+    for h in hints {
+        if h > &BigUint::from(TRIAL_BOUND) && h <= &rest {
+            let mut e = 0;
+            while (&rest % h).is_zero() {
+                rest /= h;
+                e += 1;
+            }
+            if e > 0 {
+                *primes.entry(h.clone()).or_default() += e;
+            }
         }
     }
     let mut composites: BTreeMap<BigUint, u32> = BTreeMap::new();

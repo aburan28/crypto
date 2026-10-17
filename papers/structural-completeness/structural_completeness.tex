@@ -62,16 +62,28 @@ Cryptanalysis; Volcano-Floor Class-Group-Augmented Pollard~$\rho$),
 finding all directions structurally null at the prime-field level.
 
 The main result is a \emph{structural-completeness theorem}: for
-every prime-order ordinary elliptic curve $E$ over a prime field
-$\FF_p$, no algorithm in the family $\{$$\FF_p$-isogeny transport,
+every ordinary elliptic curve $E$ over a prime field $\FF_p$ with
+$\#E(\FF_p) = h \cdot r$, $r$ prime and $h \in \{1,2,4,8\}$, no
+algorithm in the family $\{$$\FF_p$-isogeny transport,
 $\Cl(\End)$-orbit walking, $(N,N)$-cover via Howe-gluing,
 higher-genus cover, supersingular-reduction attack, volcano-floor
-$\rho\}$ reduces ECDLP cost below $\sqrt{n / |\Aut(E)|}$ (plain
-Pollard~$\rho$ with full automorphism folding).
+$\rho\}$ reduces ECDLP cost below $\sqrt{r / |\Aut(E)|}$ (plain
+Pollard~$\rho$ with full automorphism folding).  The theorem says
+nothing about algorithms outside this family.
 
-The theorem is proven via seven independent structural blocks
-(Section~\ref{sec:blocks}) and empirically verified across all
-four deployed curves (Section~\ref{sec:empirical}). A surprising
+The theorem is proven by case analysis over seven structural blocks
+(Section~\ref{sec:blocks}) under standing assumptions: Tate's
+isogeny theorem, Howe's gluing theorem, Gaudry's and Diem--Thom\'e's
+complexity bounds for hyperelliptic index calculus, and the
+assumption that prime-field hyperelliptic DLP is not
+sub-exponentially solvable (Section~\ref{sec:theorem}).
+The empirical checks are bounded: the structural conditions are
+computed for the four deployed curves only
+(Section~\ref{sec:empirical}); the twist $\ell$-rank lemma is
+checked numerically for $\ell \in \{3,5,7,11,13\}$ on $j = 0$ curves over
+$\FF_p$ with $p < 500$; the split-Jacobian toy sweep covers primes
+$p \equiv 1 \pmod 6$ with $p \le 1000$, and the CM-73 sweep those with
+$p \le 5000$. A surprising
 auxiliary finding: the Howe-gluing genus-2 cover \emph{exists} for
 every such curve, but does not yield a DLP speedup because
 genus-2 prime-field DLP costs $O(p)$ while ECDLP costs
@@ -348,15 +360,32 @@ The $(3,3)$-isogeny graph from $E \times E^t$ was walked to depth~5
 across 25 kernel-curve pairs (Exp~U--Y, script
 \texttt{hesse\_33\_walk\_depth2.py}),
 confirming $\#\Jac \approx p^2$ at every node.
-The Enhanced Lemma was numerically verified for $\ell \in \{3,5,7\}$
-over all nonzero residue classes with $p < 500$ (16\,562 ordinary curve instances,
-scripts \texttt{exp\_zprime\_l\_residue.py},
-\texttt{exp\_zprime2\_generalized\_lemma.py}),
-and extended to $\ell \in \{11,13\}$ with $p < 500$ (1\,802 additional instances,
-script \texttt{exp\_zdoubleprime\_lemma\_extended.py}).
-For $\ell = 13$, all 11 valid residue classes $r \in \{1,\ldots,11\}$
-are represented with $0$ failures; $r = 12 = \ell{-}1$ yields 94 failures
-as predicted.  Total: 18\,364 curve instances, $0$ spurious violations.
+Lemma~\ref{lem:ell-rank} was checked numerically on the curves
+$y^2 = x^3 + b$ ($j = 0$; $b = 1,\ldots,p{-}1$) over $\FF_p$, $5 \le p < 500$,
+counting every instance $(\ell, p, b)$ with $\ell \mid \#E$.
+For $\ell \in \{3,5,7\}$
+(script \texttt{exp\_zprime2\_generalized\_lemma.py}; the $\ell \in \{3,5\}$
+rows also in \texttt{exp\_zprime\_l\_residue.py}) there are 24\,476
+instances: 8\,734 on ordinary curves ($p \equiv 1 \pmod 3$) and 15\,742 on
+supersingular ones ($p \equiv 2 \pmod 3$).  All 8\,156 instances in the
+lemma's hypothesis classes $r = p \bmod \ell \notin \{0, \ell{-}1\}$ are
+ordinary, and none has $\ell \mid \#E^t$.  The residue classes that contain
+any instance are $r = 1$ for $\ell \in \{3,5\}$ and $r \in \{1,\ldots,5\}$
+for $\ell = 7$; for $\ell = 5$ the classes $r \in \{2,3\}$ contain none, so
+they are not tested.  All 16\,320 instances in the excluded class
+$r = \ell{-}1$ (578 ordinary, 15\,742 supersingular) have $\ell \mid \#E^t$,
+as the tightness remark predicts.
+The check was extended to $\ell \in \{11,13\}$ on ordinary curves only
+(1\,802 instances, script \texttt{exp\_zdoubleprime\_lemma\_extended.py}).
+For $\ell = 11$ only $r = 1$ contains instances (198); for $\ell = 13$, all
+11 valid residue classes $r \in \{1,\ldots,11\}$ are represented
+(1\,510 instances) with $0$ failures, and $r = 12 = \ell{-}1$ yields 94
+failures as predicted.  Total for $\ell \in \{3,5,7,11,13\}$: 26\,278
+instances, of which 10\,536 are ordinary; the 9\,864 ordinary instances that
+satisfy the lemma's hypothesis give $0$ violations.  The counts and the
+re-run outputs are committed in
+\texttt{papers/structural-completeness/recount/}
+(\texttt{count.txt}, \texttt{exp\_*.txt}).
 The secp256k1 prime satisfies $p \not\equiv \ell{-}1 \pmod{\ell}$ for every
 odd prime $\ell \leq 29$, so Lemma~\ref{lem:ell-rank} applies uniformly
 across the first nine primes $\{3,5,7,11,13,17,19,23,29\}$.
@@ -401,7 +430,9 @@ is not itself a key recovery, so no such polynomial-time cover exists.
 The primes giving $a_2 - 2p = -73$ (the ``CM-73'' cluster identified in
 Threads~9--10) are confirmed to be $\{19, 37, 79, 109\}$ in $[7, 5000]$:
 an extended PARI sweep (\texttt{thread12\_cm73\_sweep.gp}, 32\,MB stack) over
-all 621 primes $p \equiv 1 \pmod{6}$ with $p \le 5000$ finds no CM-73 prime
+all 330 primes $p \equiv 1 \pmod{6}$ with $7 \le p \le 5000$ (of the 669 primes
+$p \le 5000$; \texttt{recount/count.txt},
+\texttt{recount/thread12\_cm73\_sweep.txt}) finds no CM-73 prime
 beyond $p = 109$.  Among the 11 primes satisfying the necessary norm form
 $4p = 73 + 3k^2$ in this range (with $k \in \{1,5,9,11,21,25,31,35,41,55,65\}$),
 only $k \le 11$ produce a CM-73 Weil polynomial; the seven with $k \ge 21$
@@ -764,7 +795,7 @@ Script: \texttt{secp256k1\_cm\_audit/igusa\_f43\_howe.gp}.
 The companion script \texttt{multi\_curve\_audit.gp} runs the full
 audit on four deployed curves; results in Table~\ref{tab:curves}.
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \small
 \begin{tabular}{lcccc}

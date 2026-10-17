@@ -1,0 +1,450 @@
+{
+ "rows": [
+  {
+   "log": "probes.log",
+   "test": "probe_384bit_lll_multiseed",
+   "curve": "P-384",
+   "gs": "f64",
+   "k_bits": 288,
+   "m": 8,
+   "d_seed": "0x00C0FFEE",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 26
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_384bit_lll_multiseed",
+   "curve": "brainpoolP384r1",
+   "gs": "f64",
+   "k_bits": 288,
+   "m": 8,
+   "d_seed": "0x00C0FFEE",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 26
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_384bit_lll_multiseed",
+   "curve": "P-384",
+   "gs": "f64",
+   "k_bits": 288,
+   "m": 8,
+   "d_seed": "0xDEADBEEF",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 27
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_384bit_lll_multiseed",
+   "curve": "brainpoolP384r1",
+   "gs": "f64",
+   "k_bits": 288,
+   "m": 8,
+   "d_seed": "0xDEADBEEF",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 25
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_384bit_lll_multiseed",
+   "curve": "P-384",
+   "gs": "f64",
+   "k_bits": 288,
+   "m": 8,
+   "d_seed": "0x12345678",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 27
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_384bit_lll_multiseed",
+   "curve": "brainpoolP384r1",
+   "gs": "f64",
+   "k_bits": 288,
+   "m": 8,
+   "d_seed": "0x12345678",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 27
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_koblitz_lll_degeneracy_hypothesis",
+   "curve": "secp192k1",
+   "gs": "f64",
+   "k_bits": 144,
+   "m": 8,
+   "d_seed": "0x00C0FFEE",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 11
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_koblitz_lll_degeneracy_hypothesis",
+   "curve": "secp192k1",
+   "gs": "f64",
+   "k_bits": 144,
+   "m": 8,
+   "d_seed": "0xDEADBEEF",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 7
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_koblitz_lll_degeneracy_hypothesis",
+   "curve": "secp224k1",
+   "gs": "f64",
+   "k_bits": 168,
+   "m": 8,
+   "d_seed": "0x00C0FFEE",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 10
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_koblitz_lll_degeneracy_hypothesis",
+   "curve": "secp224k1",
+   "gs": "f64",
+   "k_bits": 168,
+   "m": 8,
+   "d_seed": "0xDEADBEEF",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 10
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_koblitz_lll_degeneracy_hypothesis",
+   "curve": "secp256k1",
+   "gs": "f64",
+   "k_bits": 192,
+   "m": 8,
+   "d_seed": "0x00C0FFEE",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 14
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_koblitz_lll_degeneracy_hypothesis",
+   "curve": "secp256k1",
+   "gs": "f64",
+   "k_bits": 192,
+   "m": 8,
+   "d_seed": "0xDEADBEEF",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 14
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_koblitz_lll_degeneracy_hypothesis",
+   "curve": "P-256",
+   "gs": "f64",
+   "k_bits": 192,
+   "m": 8,
+   "d_seed": "0x00C0FFEE",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 14
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_koblitz_lll_degeneracy_hypothesis",
+   "curve": "P-256",
+   "gs": "f64",
+   "k_bits": 192,
+   "m": 8,
+   "d_seed": "0xDEADBEEF",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 14
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_lll_degeneracy_head_to_head",
+   "curve": "P-256",
+   "gs": "f64",
+   "k_bits": 192,
+   "m": 8,
+   "d_seed": "0x00C0FFEE",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 15
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_lll_degeneracy_head_to_head",
+   "curve": "secp256k1",
+   "gs": "f64",
+   "k_bits": 192,
+   "m": 8,
+   "d_seed": "0x00C0FFEE",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 15
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_lll_degeneracy_head_to_head",
+   "curve": "P-256",
+   "gs": "f64",
+   "k_bits": 192,
+   "m": 8,
+   "d_seed": "0xDEADBEEF",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 14
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_lll_degeneracy_head_to_head",
+   "curve": "secp256k1",
+   "gs": "f64",
+   "k_bits": 192,
+   "m": 8,
+   "d_seed": "0xDEADBEEF",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 15
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_lll_degeneracy_head_to_head",
+   "curve": "P-256",
+   "gs": "f64",
+   "k_bits": 192,
+   "m": 8,
+   "d_seed": "0x12345678",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 14
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_lll_degeneracy_head_to_head",
+   "curve": "secp256k1",
+   "gs": "f64",
+   "k_bits": 192,
+   "m": 8,
+   "d_seed": "0x12345678",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 13
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_lll_sweep_by_bit_length",
+   "curve": "secp192k1",
+   "gs": "f64",
+   "k_bits": 144,
+   "m": 8,
+   "d_seed": "0x00C0FFEE",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 10
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_lll_sweep_by_bit_length",
+   "curve": "secp224k1",
+   "gs": "f64",
+   "k_bits": 168,
+   "m": 8,
+   "d_seed": "0x00C0FFEE",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 10
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_lll_sweep_by_bit_length",
+   "curve": "secp256k1",
+   "gs": "f64",
+   "k_bits": 192,
+   "m": 8,
+   "d_seed": "0x00C0FFEE",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 15
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_lll_sweep_by_bit_length",
+   "curve": "P-256",
+   "gs": "f64",
+   "k_bits": 192,
+   "m": 8,
+   "d_seed": "0x00C0FFEE",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 15
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_lll_sweep_by_bit_length",
+   "curve": "brainpoolP256r1",
+   "gs": "f64",
+   "k_bits": 192,
+   "m": 8,
+   "d_seed": "0x00C0FFEE",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 17
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_lll_sweep_by_bit_length",
+   "curve": "P-384",
+   "gs": "f64",
+   "k_bits": 288,
+   "m": 8,
+   "d_seed": "0x00C0FFEE",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 27
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_lll_sweep_by_bit_length",
+   "curve": "brainpoolP384r1",
+   "gs": "f64",
+   "k_bits": 288,
+   "m": 8,
+   "d_seed": "0x00C0FFEE",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 26
+  },
+  {
+   "log": "probes.log",
+   "test": "probe_lll_sweep_by_bit_length",
+   "curve": "P-521",
+   "gs": "f64",
+   "k_bits": 384,
+   "m": 8,
+   "d_seed": "0x00C0FFEE",
+   "recovered": false,
+   "outcome": "✗ LLL did not produce a recoverable short vector — try more signatures or increase bias",
+   "ms": 275
+  },
+  {
+   "log": "p521_hp.log",
+   "test": null,
+   "curve": "P-521",
+   "gs": "f64",
+   "k_bits": 384,
+   "m": 8,
+   "d_seed": "0x00C0FFEE",
+   "recovered": false,
+   "outcome": "✗ LLL did not produce a recoverable short vector — try more signatures or increase bias",
+   "ms": 223
+  },
+  {
+   "log": "p521_hp.log",
+   "test": null,
+   "curve": "P-521",
+   "gs": "HP",
+   "k_bits": 384,
+   "m": 8,
+   "d_seed": "0x00C0FFEE",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 223
+  },
+  {
+   "log": "p521_hp.log",
+   "test": null,
+   "curve": "P-521",
+   "gs": "f64",
+   "k_bits": 384,
+   "m": 8,
+   "d_seed": "0xDEADBEEF",
+   "recovered": false,
+   "outcome": "✗ LLL did not produce a recoverable short vector — try more signatures or increase bias",
+   "ms": 240
+  },
+  {
+   "log": "p521_hp.log",
+   "test": null,
+   "curve": "P-521",
+   "gs": "HP",
+   "k_bits": 384,
+   "m": 8,
+   "d_seed": "0xDEADBEEF",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 214
+  },
+  {
+   "log": "p521_hp.log",
+   "test": null,
+   "curve": "P-521",
+   "gs": "f64",
+   "k_bits": 384,
+   "m": 8,
+   "d_seed": "0x12345678",
+   "recovered": false,
+   "outcome": "✗ LLL did not produce a recoverable short vector — try more signatures or increase bias",
+   "ms": 245
+  },
+  {
+   "log": "p521_hp.log",
+   "test": null,
+   "curve": "P-521",
+   "gs": "HP",
+   "k_bits": 384,
+   "m": 8,
+   "d_seed": "0x12345678",
+   "recovered": true,
+   "outcome": "✓ RECOVERED",
+   "ms": 245
+  }
+ ],
+ "summary": {
+  "P-384 (f64)": {
+   "recovered": 4,
+   "probes": 4
+  },
+  "brainpoolP384r1 (f64)": {
+   "recovered": 4,
+   "probes": 4
+  },
+  "secp192k1 (f64)": {
+   "recovered": 3,
+   "probes": 3
+  },
+  "secp224k1 (f64)": {
+   "recovered": 3,
+   "probes": 3
+  },
+  "secp256k1 (f64)": {
+   "recovered": 6,
+   "probes": 6
+  },
+  "P-256 (f64)": {
+   "recovered": 6,
+   "probes": 6
+  },
+  "brainpoolP256r1 (f64)": {
+   "recovered": 1,
+   "probes": 1
+  },
+  "P-521 (f64)": {
+   "recovered": 0,
+   "probes": 4
+  },
+  "P-521 (HP)": {
+   "recovered": 3,
+   "probes": 3
+  }
+ }
+}

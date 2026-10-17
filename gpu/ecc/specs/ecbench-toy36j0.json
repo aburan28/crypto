@@ -1,0 +1,52 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "CUDA matched control: toy36j0",
+  "description": "Frozen CPU controls and workload export for one-target CUDA BSGS receipts",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "prime_explicit",
+        "p": 39615550291,
+        "a": 0,
+        "b": 22620405809,
+        "group_order": 39615274243,
+        "r": 39615274243,
+        "gx": 8268100702,
+        "gy": 26481280733
+      }
+    ],
+    "targets_per_curve": 2,
+    "target_seed": 20261013
+  },
+  "arms": [
+    {
+      "name": "rho",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "bsgs",
+      "role": "candidate",
+      "method": {
+        "id": "bsgs.negation"
+      }
+    },
+    {
+      "name": "bsgs-aa",
+      "role": "control",
+      "method": {
+        "id": "bsgs.negation"
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 5,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 20261013,
+    "isolation_required": "L2",
+    "timeout_seconds": 600
+  }
+}
