@@ -1,0 +1,40 @@
+{
+  "baseline_k3072_geometric_target_ms": 16.405335631063423,
+  "baseline_k3072_sha256": "b6c3cc7c092fd5a712c79acd199ee863899ea81f1167066cc3f37dc47ab57838",
+  "hardware_tier": "ordinary_local_exploratory",
+  "lowest_observed_target_ms_k": 4096,
+  "plan_sha256": "ce79d7c6ebadb7a5d38a4d4b9609dabda3e3a224c4a7409862533159f0f07938",
+  "role": "descriptive_candidate_discovery",
+  "rows": [
+    {
+      "actual_usable_points": 679936,
+      "analysis_sha256": "24eed8c9dc775a93bcc9e4f314fa7b7e839dc8e72c4cb9aed5d0ef2482ceb890",
+      "cold_process_seconds": 1500.009714625,
+      "descriptive_95_interval_vs_k3072": [
+        0.54415449767734,
+        0.9799307113265187
+      ],
+      "effective_columns": 4096,
+      "faster_point_count_vs_k3072": 56,
+      "geometric_target_ms": 22.46602945317516,
+      "index_allocated_gib": 17.13283348083496,
+      "k": 4096,
+      "mean_probes": 36347.2421875,
+      "median_target_ms": 25.334771,
+      "paired_geometric_speedup_vs_k3072": 0.7302285285994242,
+      "status": "PASS_INDEPENDENT_BASE_RELATION_SCALAR_REPLAY"
+    },
+    {
+      "k": 4608,
+      "outer_wall_seconds": 1800.7335887910012,
+      "producer_status": "TIMEOUT",
+      "status": "CENSORED_PRODUCER"
+    },
+    {
+      "k": 5086,
+      "status": "NOT_RUN_AFTER_STOP_RULE"
+    }
+  ],
+  "schema": "n83.root11-id30-screen-summary/v1",
+  "status": "PARTIAL_OR_CENSORED"
+}
