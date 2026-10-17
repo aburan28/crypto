@@ -28,6 +28,8 @@ levers are crossed here.
 - **The rows:** `M1`'s two rows at `icv1-f2m61-t158598901-ab42b6c5` (2^47.2).
 - **The recipes** ([`params/`](params/)): the suite's file with only the factor base's
   `points` changed:
+  The files are named by the curve's ICV1 slug. They were renamed from the suite's retired curve stem after the runs, for the
+  curve-names check, and `explore.sh` was updated to match. Their contents are the bytes the runs read.
   - 39,040 points (320 signed-Frobenius orbits of 122). This file equals the suite's, apart from its name.
   - 48,800 points (400 orbits).
   - 57,340 points (470 orbits).

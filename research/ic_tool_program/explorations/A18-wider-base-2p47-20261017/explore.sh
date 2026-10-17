@@ -30,7 +30,7 @@ for round in 1 2 3 4; do
       for try in 1 2 3 4 5 6 7 8 9 10; do
         RAYON_NUM_THREADS=1 $SP/bin/isolated_bench run --wait --cpus 2 --out $d/r$round.isolation.jsonl \
           --label "$arm/$t/r$round" -- \
-          ${BIN[$b]} price --params $HERE/params/k0n61-$t-$c.json --json --out $d/r$round.price.json --single-target --rho-seed $seed \
+          ${BIN[$b]} price --params $HERE/params/icv1-f2m61-t158598901-ab42b6c5-$t-$c.json --json --out $d/r$round.price.json --single-target --rho-seed $seed \
           > /dev/null && break
         echo "REFUSED $arm $t r$round try $try"; sleep 15
       done
