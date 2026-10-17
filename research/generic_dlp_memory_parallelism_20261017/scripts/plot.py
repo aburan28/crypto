@@ -100,7 +100,7 @@ ax1.set_xlabel("group order (bits)")
 ax1.set_ylabel("seconds (median)")
 ax1.set_title("prime_fast::rho_parallel, 1 thread, negation map")
 ax1.legend(fontsize=8)
-ratio_panel(ax2, [("1 thread", rows("rho1"), ARM_A, "o"), ("4 threads", rows("rho4"), ARM_B, "s")],
+ratio_panel(ax2, [("1 thread", rows("rho1"), ARM_A, "o"), ("3 threads", rows("rho3"), ARM_B, "s")],
             "solve_s", "speed ratio with per-round range")
 fig.suptitle(f"rho start-up in Jacobian coordinates: {rid}; 7 rounds (5 at 52 bits)", fontsize=9)
 fig.tight_layout()

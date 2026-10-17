@@ -3,8 +3,8 @@
 #
 #   run_arms.sh <raw_dir> <baseline_bin_dir> <candidate_bin_dir> <part>
 #
-# <part> is one of: bsgs1 (BSGS, 1 thread), bsgs4 (BSGS, 4 threads, 48 bits),
-# rho1 (rho, 1 thread), rho4 (rho, 4 threads).  Every timed process runs under
+# <part> is one of: bsgs1 (BSGS, 1 thread), bsgs3 (BSGS, 3 threads, 48 bits),
+# rho1 (rho, 1 thread), rho3 (rho, 3 threads).  Every timed process runs under
 # tools/isolated_bench.py; its isolation record goes to <raw_dir>/isolation.jsonl
 # and the binary's own JSON line, tagged by --label, to <raw_dir>/<part>.jsonl.
 # Arms per round are rotated A B A2 / B A2 A / A2 A B; A and A2 are the
@@ -55,8 +55,8 @@ bin_for() { # bin_for <arm> <name>
 rounds_for() { if [ "$1" -ge 52 ]; then echo 5; else echo 7; fi; }
 
 case $part in
-  bsgs1|bsgs4)
-    if [ "$part" = bsgs1 ]; then threads=1; cpus=3; sizes="40 44 48 52"; else threads=4; cpus=0-3; sizes=48; fi
+  bsgs1|bsgs3)
+    if [ "$part" = bsgs1 ]; then threads=1; cpus=3; sizes="40 44 48 52"; else threads=3; cpus=1-3; sizes=48; fi
     for bits in $sizes; do
       c=$(jq -c ".curves[] | select(.role == \"bsgs\" and .bits == $bits)" "$curves")
       p=$(echo "$c" | jq -r .p); a=$(echo "$c" | jq -r .a); b=$(echo "$c" | jq -r .b)
@@ -75,8 +75,8 @@ case $part in
       done
     done
     ;;
-  rho1|rho4)
-    if [ "$part" = rho1 ]; then threads=1; cpus=3; else threads=4; cpus=0-3; fi
+  rho1|rho3)
+    if [ "$part" = rho1 ]; then threads=1; cpus=3; else threads=3; cpus=1-3; fi
     for bits in 32 36 40 44 48 52; do
       r=1; R=$(rounds_for "$bits")
       while [ "$r" -le "$R" ]; do

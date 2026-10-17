@@ -141,3 +141,14 @@ reported and never pooled with uncontended ones.
   counted-unit comparison, so §5a's pricing band does not apply.
 - Results hold for this host class (x86-64, a Sapphire/Emerald Rapids–class
   Xeon under KVM) only. Arm64, GPUs and other x86 parts were not measured.
+
+## Amendment 1 (2026-10-17, before any multi-thread arm ran)
+
+`tools/isolated_bench.py run` refuses to reserve every CPU of the host
+("reserving every CPU leaves nowhere to move other work; leave at least one
+free"), so the 4-thread arms on `--cpus 0-3` cannot run under the required
+isolation on this 4-vCPU guest. The multi-thread arms are therefore
+**3 threads on `--cpus 1-3`** (parts `bsgs3` at 48 bits and `rho3`), with
+every other rule unchanged. The one-thread arms (`bsgs1`, `rho1`) had
+completed under the original text when this was found; they are not
+affected. "One thread and many" (AGENTS.md §10) is met with one and three.

@@ -13,7 +13,7 @@
 //! ratio lies above the largest per-round A/A2 ratio, **regresses** when
 //! every one lies below the smallest, otherwise **no measurable change**.
 //! It checks the pinned outputs (every counted field identical across the
-//! three arms at one thread; the answer at four) and counts contended runs
+//! three arms at one thread; the answer at three) and counts contended runs
 //! from the isolation records.  PARI/GP rows are joined by curve and size.
 
 use std::collections::BTreeMap;
@@ -133,7 +133,7 @@ fn main() {
         .collect();
 
     let mut configs: BTreeMap<(String, u32, String), Vec<(Label, Value)>> = BTreeMap::new();
-    for part in ["bsgs1", "bsgs4", "rho1", "rho4"] {
+    for part in ["bsgs1", "bsgs3", "rho1", "rho3"] {
         for v in read_jsonl(&raw.join(format!("{part}.jsonl"))) {
             let l = parse_label(v["label"].as_str().unwrap());
             configs
@@ -155,7 +155,7 @@ fn main() {
             &["solve_s", "setup_s"]
         };
         // Pinned outputs: every counted field identical across all samples
-        // at one thread; the answer at four.
+        // at one thread; the answer at three.
         let fields: Vec<&str> = match (is_bsgs, one_thread) {
             (true, true) => BSGS_PINNED.to_vec(),
             (true, false) => vec!["answers_digest"],
@@ -264,7 +264,7 @@ fn main() {
             "part": part,
             "bits": bits,
             "kernel": kernel,
-            "threads": if one_thread { 1 } else { 4 },
+            "threads": if one_thread { 1 } else { 3 },
             "samples": samples.len(),
             "pinned_fields": fields,
             "pinned_values": counted,
