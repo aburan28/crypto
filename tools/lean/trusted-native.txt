@@ -4,5 +4,3 @@
 # theorem of a paper or result (AGENTS.md "Mathematical results should include
 # Lean proofs"). Format: fully qualified name  # reason and where it is recorded.
 TreeSplit.Replay.replay_ok      # registered compiler-trusted replay: research/ic_tree_split_structured_v_20261011/PREREGISTRATION.md §7
-TreeSplit.Leak.in_gf2_7         # post-hoc data check built on Replay's compiled polyMod; same study, not a reported theorem
-TreeSplit.Leak.not_in_gf2_3     # post-hoc data check built on Replay's compiled polyMod; same study, not a reported theorem
