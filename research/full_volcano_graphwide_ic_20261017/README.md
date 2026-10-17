@@ -10,6 +10,12 @@ graphs provide an immediately available corpus.
 Native input certification has completed over **every one of the 24,823
 vertices and 51 strata**. This is workload preparation, not a solver benchmark.
 
+[Download the certified inputs and preparation report](https://drive.google.com/file/d/1SPpdcNjm7q6ChcMkaty0NgED8lyHofHq/view?usp=drivesdk).
+The filename explicitly states NOT_RUN. Local ZIP CRC passed; Drive metadata
+readback verified the archive name, 3,210,305-byte size and parent folder.
+Local SHA-256: `8acb83dca7a6bca8736429e515e6e31a141d3dbadba8d40438ac707be8bf8f37`.
+No remote whole-file hash was checked.
+
 | Source model | Vertices | Strata | Largest prime subgroup r | Exact embedding degree |
 | --- | ---: | ---: | ---: | ---: |
 | icv1-fp57-t536870914-6cabb0c9 | 8192 | 14 | 61751 | 30875 |
