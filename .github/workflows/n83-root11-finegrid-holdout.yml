@@ -37,6 +37,8 @@ jobs:
             "$RUNNER_TEMP/n83-finegrid-stratum-${{ matrix.stratum }}/dispatch-check.json"
           python3 research/n83_root11_finegrid_holdout_20261017/test_select_local.py > \
             "$RUNNER_TEMP/n83-finegrid-stratum-${{ matrix.stratum }}/batch-selector-test.json"
+          python3 research/n83_root11_finegrid_holdout_20261017/test_choice.py > \
+            "$RUNNER_TEMP/n83-finegrid-stratum-${{ matrix.stratum }}/arm-choice-test.json"
           python3 research/n83_root11_finegrid_holdout_20261017/test_select.py > \
             "$RUNNER_TEMP/n83-finegrid-stratum-${{ matrix.stratum }}/holdout-selector-test.json"
           python3 research/n83_root11_finegrid_holdout_20261017/test_provider_jobs.py > \

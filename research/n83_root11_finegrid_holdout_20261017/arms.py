@@ -72,6 +72,16 @@ def choose():
                 manifest['factor_base']['effective_columns'] != k):
             raise ValueError(f'K{k} exact batch candidate differs')
         by_k[k] = row['candidate_id']
+    if any(by_k[k] != candidate_id for k, candidate_id in FIXED
+           if k in by_k):
+        raise ValueError('fixed and batch current-source identities differ')
+    fixed_k, fixed_id = FIXED[0]
+    fixed_manifest = json.loads(manifest_path(fixed_k, fixed_id).read_text())
+    if (fixed_manifest['candidate_id'] != fixed_id or
+            fixed_manifest['factor_base']['actual_usable_points'] !=
+            166 * fixed_k or
+            fixed_manifest['factor_base']['effective_columns'] != fixed_k):
+        raise ValueError('K2543 fixed candidate manifest differs')
     selected = min(choice['rows'], key=lambda row: (
         row['geometric_mean_online_ms'], row['k']))['k']
     if selected != choice['selected_k']:

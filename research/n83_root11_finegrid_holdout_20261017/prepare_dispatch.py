@@ -13,7 +13,7 @@ ROOT = HERE.parents[1]
 FILES = (
     'generate.py', 'manifest.json', 'targets.jsonl', 'answers.jsonl',
     'seal.json', 'PROTOCOL.md', 'arms.py', 'select_local.py',
-    'test_select_local.py', 'selection_code_receipt.json',
+    'test_select_local.py', 'test_choice.py', 'selection_code_receipt.json',
     'local_batch_plan.json', 'local_verify_plan.json',
     'local_selection_plan.json', 'run.py', 'verify.py', 'select.py',
     'test_select.py', 'provider_jobs.py', 'test_provider_jobs.py', 'aggregate.py',
