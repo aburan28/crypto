@@ -1,0 +1,18 @@
+{
+  "schema": "generic-dlp-correctness-manifest/v1",
+  "before": {
+    "commit": "b1bf5b8935f68257dfdd3fc542cb2fef41db741c",
+    "note": "main with this branch's examples/generic_dlp_correctness_counts.rs added (it uses only API present on main)",
+    "binary_sha256": "a42897caf9b6994649e3d67f64680d6ef076b9a2f5f628fdee54975afab2747a"
+  },
+  "after": {
+    "branch": "claude/generic-dlp-correctness-fixes",
+    "note": "commit recorded in the PR",
+    "binary_sha256": "0c1e37d557ddd3ad3f4f8e35caaeac60acca5a138cdfcd0cf7dd020d05cbf402"
+  },
+  "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+  "build": "cargo build --release (default profile)",
+  "command": "generic_dlp_correctness_counts <label>",
+  "transcripts": "tests/ec_vartime_walks_pinned.rs collab and Pohlig-Hellman/Cheon transcripts, printed by the test on a digest mismatch: before = main sources with the expected digests zeroed (reproduces the pinned digests exactly), after = this branch",
+  "deterministic": "every value is a count; nothing is timed"
+}
