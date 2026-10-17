@@ -1,5 +1,10 @@
 # isogeny
 
+`isogeny class plan|build|resume|status|verify|vertex|solve` adds disk-backed
+ordinary prime-field class enumeration from exact curve JSON. See the
+[class-command contract](../volcano-cli/README.md) for supported inputs,
+finite degree sets, completeness certificates, checkpoints and DLP scope.
+
 `isogeny` is one executable for catalogue-wide prime-degree screening, bounded
 isogeny construction, and independent exact verification. Its algorithms and standard
 curve data are compiled into the binary. Running it requires no checkout, Cargo,

@@ -153,6 +153,8 @@ jobs:
           /*.rs
           /**/*.rs
           /Cargo.toml
+          /tools/volcano-cli/
+          /isogeny_algos/
           /Cargo.lock
           /**/Cargo.toml
           /**/Cargo.lock
@@ -290,6 +292,8 @@ jobs:
             /*.rs
             /**/*.rs
             /Cargo.toml
+            /tools/volcano-cli/
+            /isogeny_algos/
             /Cargo.lock
             /**/Cargo.toml
             /**/Cargo.lock

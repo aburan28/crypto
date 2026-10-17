@@ -1,0 +1,116 @@
+{
+  "auto_degrees": [
+    2
+  ],
+  "conductor_factors": [
+    [
+      2,
+      13
+    ]
+  ],
+  "degrees": [
+    2
+  ],
+  "discriminant": -469762048,
+  "expected_vertices": 8192,
+  "frobenius_conductor": 8192,
+  "fundamental_discriminant": -7,
+  "input": {
+    "a": 68729085115388107,
+    "b": 48675709858211155,
+    "order": 72057594155368448,
+    "p": 72057594692239361
+  },
+  "maximal_class_number": 1,
+  "order": 72057594155368448,
+  "order_evidence": {
+    "certified": true,
+    "divisor": "36028797077684224",
+    "exact_small_field_enumeration": null,
+    "factor_primality": "native deterministic u64 Miller-Rabin rechecked for discriminant; order certificate uses isogeny_algos certificate backend",
+    "order_method": "Given",
+    "point_samples": [
+      [
+        "44278928679595845",
+        "58790081813191289"
+      ]
+    ],
+    "twist_divisor": "72057595229110276",
+    "via_twist": false
+  },
+  "schema": "ordinary-isogeny-class/v1",
+  "source_code_sha256": "d3c77f50dc2e737de38561203ce3693f7899fe3db502b8e863c7ac69e5818bed",
+  "source_identity": {
+    "curve_uid": null,
+    "ec1": null,
+    "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+    "icv1": "ICV1:fp-72057594692239361:536870914:72057594155368448:61246377931557386:unk:unk:r:f06621c18b5f",
+    "model_json": "{\"a\":\"68729085115388107\",\"b\":\"48675709858211155\",\"field\":\"fp-72057594692239361\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"72057594692239361\",\"v\":\"1\"}",
+    "slug": "icv1-fp57-t536870914-f06621c1"
+  },
+  "storage": {
+    "bounded_ram": "SQLite pages and one vertex's outgoing kernels; no whole-class HashMap",
+    "fixed_u64_vertex_payload_bytes": 196608,
+    "layout_includes": "a,b,j only (3 u64); excludes indexes, maps, journals, free space and DLP evidence; compressed or generative encodings can be smaller",
+    "sqlite_bytes": "not predicted; depends on degree set and SQLite layout"
+  },
+  "strata": [
+    {
+      "conductor": 1,
+      "expected_vertices": 1
+    },
+    {
+      "conductor": 2,
+      "expected_vertices": 1
+    },
+    {
+      "conductor": 4,
+      "expected_vertices": 2
+    },
+    {
+      "conductor": 8,
+      "expected_vertices": 4
+    },
+    {
+      "conductor": 16,
+      "expected_vertices": 8
+    },
+    {
+      "conductor": 32,
+      "expected_vertices": 16
+    },
+    {
+      "conductor": 64,
+      "expected_vertices": 32
+    },
+    {
+      "conductor": 128,
+      "expected_vertices": 64
+    },
+    {
+      "conductor": 256,
+      "expected_vertices": 128
+    },
+    {
+      "conductor": 512,
+      "expected_vertices": 256
+    },
+    {
+      "conductor": 1024,
+      "expected_vertices": 512
+    },
+    {
+      "conductor": 2048,
+      "expected_vertices": 1024
+    },
+    {
+      "conductor": 4096,
+      "expected_vertices": 2048
+    },
+    {
+      "conductor": 8192,
+      "expected_vertices": 4096
+    }
+  ],
+  "trace": 536870914
+}

@@ -1,0 +1,37 @@
+{
+  "schema": "volcano-ic-measured-delivery/v1",
+  "date": "2026-10-17",
+  "folder": "https://drive.google.com/drive/folders/109DpcQpX7ATz6GeI8iSWAExGMWBoR-H_",
+  "archive": {
+    "name": "volcano_IC_MEASURED_control_pilot_12vertices_20261017.zip",
+    "id": "1HnlsGg9fsZm1nl1sEw3ZZeJcU_z5DpSn",
+    "url": "https://drive.google.com/file/d/1HnlsGg9fsZm1nl1sEw3ZZeJcU_z5DpSn/view?usp=drivesdk",
+    "bytes": 25465685,
+    "local_sha256": "6ea8d7c9e30fddaed3e8653abcd6c8d10a348110ea6f6fb11f187f7e0fd4f88e",
+    "local_zip_crc": "PASS",
+    "remote_name_size_parent_readback": "PASS",
+    "remote_whole_file_hash": "NOT_CHECKED"
+  },
+  "reports": [
+    {"kind": "control-pilot", "id": "14LuyoYOv7ZLsLtFnhlYfncLsZbKNkXK8", "bytes": 56521, "pages_inspected": 2, "remote_name_size_parent_readback": "PASS"},
+    {"kind": "survey-prefix-12", "id": "1foet4FWR5ii6k5TF7n-res81kWWqggH6", "bytes": 50954, "pages_inspected": 1, "remote_name_size_parent_readback": "PASS"}
+  ],
+  "csv": {"id": "1oVwWnsRAU6iCguzMc76mkSNHO-bBn-j0", "bytes": 577370, "remote_name_size_parent_readback": "PASS"},
+  "control": {"attempts": 12, "verified": 8, "exhausted": 4, "timeouts": 0},
+  "pilot": {"vertices": 3, "attempts": 48, "verified": 30, "exhausted": 14, "timeouts": 4},
+  "survey_frozen_snapshot": {
+    "vertices_planned": 24823, "strata_planned": 51,
+    "vertices_audited": 12, "strata_audited": 12, "vertices_queued": 24811,
+    "attempts": 192, "verified": 119, "exhausted": 58, "timeouts": 15,
+    "relation_observations": 120, "decomposition_trials": 301715, "relations_found": 6368,
+    "source": "survey-prefix-summary-v2/summary.json"
+  },
+  "standard_audits": "PASS_ALL_16_SESSIONS",
+  "successful_deterministic_replays": "IDENTICAL",
+  "exhausted_deterministic_replays": "IDENTICAL_SUPPLEMENTAL_NATIVE_RECEIPTS",
+  "independent_implementation_replay": "NOT_RUN",
+  "runtime_qualification": "L0_DEBUG_UNQUALIFIED",
+  "original_full_matrix": "NOT_LAUNCHED", "original_A_to_E": "STILL_OPEN",
+  "finite_field_ic": "UNIMPLEMENTED_FOR_ACTUAL_EMBEDDING_DEGREES",
+  "old_graph_and_NOT_RUN_input_uploads": "PRESERVED_UNCHANGED"
+}

@@ -1,0 +1,121 @@
+{
+  "schema": "ecbench.session/v1",
+  "session_id": "ECBS1h3b49bc4ceba3",
+  "label": "volcano-survey-two-v128",
+  "spec_id": "ECS1h28dee1a12fd5",
+  "spec_sha256": "28dee1a12fd5dacf7d300f44eb80be3e6f2239ba960284ca57cb4cd93f615723",
+  "env_class_id": "ECBENV2h0f05eeca4197",
+  "host_sha256": "7f4fed0e654d56b78f073a2ea84f71a830bbe8e55ea32fcd88f7189da3b4239f",
+  "plan_sha256": "2803717362c9c7ffc406f8c009c0c4327ae29c13740f58c37c860da6baee559b",
+  "binary_sha256": "1869ca2e7be271794df8128c08a6dca0201038e2c81a3e0ce6434f7ec0d8379d",
+  "git_commit": null,
+  "git_dirty": null,
+  "options": {
+    "cpus": "auto",
+    "lock_path": "/tmp/crypto-bench.lock",
+    "wait_for_lock": true,
+    "allow_busy": true,
+    "thresholds": {
+      "settle_seconds": 0.1,
+      "max_other_cpu": 0.1,
+      "max_psi": 5.0,
+      "max_preemptions_per_second": 50.0
+    },
+    "exe": "/proc/self/exe"
+  },
+  "cpu_plan": {
+    "run_cpu": 4,
+    "reserved": [
+      4
+    ],
+    "node": 0,
+    "request": "auto",
+    "unreserved_siblings": [],
+    "observed": [
+      4
+    ]
+  },
+  "preflight": {
+    "quiet": false,
+    "reasons": [
+      "PSI cpu unavailable",
+      "PSI memory unavailable"
+    ],
+    "settle_seconds": 0.1,
+    "reserved_busy_seconds": {
+      "4": 0.0
+    },
+    "before": {
+      "unix_ms": 1792206600335,
+      "loadavg": [
+        0.99658203125,
+        0.82958984375,
+        0.619140625
+      ],
+      "psi_cpu_some_avg10": null,
+      "psi_cpu_some_total_us": null,
+      "psi_memory_some_avg10": null,
+      "psi_memory_some_total_us": null,
+      "reserved_ticks": {
+        "4": {
+          "busy": 301038,
+          "idle": 6775171,
+          "steal": 161594
+        }
+      }
+    },
+    "after": {
+      "unix_ms": 1792206600435,
+      "loadavg": [
+        0.99658203125,
+        0.82958984375,
+        0.619140625
+      ],
+      "psi_cpu_some_avg10": null,
+      "psi_cpu_some_total_us": null,
+      "psi_memory_some_avg10": null,
+      "psi_memory_some_total_us": null,
+      "reserved_ticks": {
+        "4": {
+          "busy": 301038,
+          "idle": 6775181,
+          "steal": 161594
+        }
+      }
+    }
+  },
+  "eviction": {
+    "moved_count": 81,
+    "failed_user_threads": 22,
+    "failed_kernel_threads": 0
+  },
+  "runner_on_run_cpu": false,
+  "runner_cpus": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "ticks_per_second": 100,
+  "grading_version": 2,
+  "child_env_sha256": "5fcca52408a68c08609b1aebe24bb4f03f94c8f0ec0e418fdf510c73a93a4e98",
+  "child_env": {
+    "HOME": "/home/agent",
+    "LC_ALL": "C",
+    "OMP_NUM_THREADS": "1",
+    "PATH": "/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/opt/codex/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback",
+    "RAYON_NUM_THREADS": "1",
+    "RUST_BACKTRACE": "0",
+    "RUST_MIN_STACK": "8388608"
+  },
+  "started_unix_ms": 1792206600437,
+  "finished_unix_ms": 1792206603374,
+  "status": "complete",
+  "executions_planned": 16,
+  "records_written": 16,
+  "records_sha256": "455b921c0c9d756928309ae6553620b0f53ad581d4f517345e47a594504d8e7f",
+  "status_counts": {
+    "exhausted": 2,
+    "verified": 14
+  }
+}

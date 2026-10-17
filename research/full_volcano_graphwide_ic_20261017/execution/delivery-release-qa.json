@@ -1,0 +1,31 @@
+{
+  "schema": "volcano-release-qa-delivery/v1",
+  "date": "2026-10-17",
+  "archive": {
+    "name": "volcano_IC_RELEASE_QA_20261017.tar.xz",
+    "id": "1lJt6NhNwXVpvdSBoXqCXhoi-flqEzwmF",
+    "url": "https://drive.google.com/file/d/1lJt6NhNwXVpvdSBoXqCXhoi-flqEzwmF/view?usp=drivesdk",
+    "parent": "109DpcQpX7ATz6GeI8iSWAExGMWBoR-H_",
+    "bytes": 10480504,
+    "local_sha256": "64d6d9e970e199933070d2bdda7280993daf9aba2a57dccd0673bb16481c9ea5",
+    "extracted_manifest_hashes": "PASS",
+    "byte_identical_extraction_repack": "PASS",
+    "native_extracted_profile_comparisons": "PASS_CONTROL_12_PILOT_44_CENSORED_4",
+    "remote_name_size_parent_readback": "PASS",
+    "remote_whole_file_hash": "NOT_CHECKED"
+  },
+  "native_summary": "release-qa-summary-v2/summary.json",
+  "attempts": 60,
+  "verified": 40,
+  "exhausted": 18,
+  "timeouts": 2,
+  "profile_comparison": {
+    "completed_pairs": 56,
+    "identical_completed_pairs": 56,
+    "censored_pairs_not_compared": 4,
+    "wall_times_compared": false,
+    "optimized_speedup_claim": false
+  },
+  "scope": "Separate optimized small control and three-root pilot with exact dev baseline capsules, manifests, ledgers, replay receipts, supplied Linux x86-64 release binaries and native comparator. Not the whole optimized survey.",
+  "previous_uploads": "PRESERVED_UNCHANGED"
+}

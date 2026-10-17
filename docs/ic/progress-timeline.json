@@ -1,6 +1,6 @@
 {
   "schema_version": "ic-progress-timeline/1",
-  "updated": "2026-10-16",
+  "updated": "2026-10-17",
   "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
   "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Direction against 1 is meaningful only for fully priced ratios; a quotient of incomplete lower bounds is diagnostic even when paired. No value on this page is computed from another.",
   "series": [
@@ -146,6 +146,17 @@
           "class": "engineering",
           "anchor": "#n83-tier1-cold-20261016",
           "source": "https://github.com/aburan28/crypto/blob/main/research/n83_e2e_holdout_20261016/RESULT.md"
+        },
+        {
+          "date": "2026-10-17",
+          "value": 19.214979195561725,
+          "reference": "matched",
+          "unit": "quotient of incomplete cold GAE lower bounds; diagnostic",
+          "label": "Volcano projected-base control/pilot; best bounded IC cell",
+          "detail": "Projected size-16 MITM on icv1-fp57-t536870914-6cabb0c9, two public one-target attempts, one round, L0/debug. Both IC and rho have unpriced work. The ratio is a quotient of incomplete lower bounds, not a direction-of-cost or speedup claim. Full graph-wide completion and exact representations remain open.",
+          "class": "accounting",
+          "anchor": "#lab-volcano-ic",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/full_volcano_graphwide_ic_20261017/execution/pilot-summary/two-comparison.json"
         }
       ]
     },

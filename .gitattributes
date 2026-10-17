@@ -99,6 +99,12 @@ research/ecbench_frontier_20261013/reports/**/*.pdf binary
 research/ecbench_frontier_20261013/reports/**/*.png binary
 research/ecbench_frontier_20261013/reports/**/*.svg -diff -whitespace
 
+# Frozen volcano IC capsules and rendered media must retain their exact bytes.
+research/full_volcano_graphwide_ic_20261017/execution/campaigns/** -text -diff
+research/full_volcano_graphwide_ic_20261017/reports/**/*.pdf binary
+research/full_volcano_graphwide_ic_20261017/reports/**/*.png binary
+benchmarks/20261017-volcano-ic-campaign/*.pdf binary
+benchmarks/20261017-volcano-ic-campaign/*.png binary
 # N83 sixteen-point precision report media.
 benchmarks/20261017-n83-e2e-precision/*.pdf binary
 benchmarks/20261017-n83-e2e-precision/*.png binary

@@ -1,0 +1,178 @@
+{
+  "endomorphism_conductor": 1,
+  "identity": {
+    "curve_uid": null,
+    "ec1": null,
+    "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+    "icv1": "ICV1:fp-223:-1:225:13:unk:unk:r:1ed3feb75d9f",
+    "model_json": "{\"a\":\"208\",\"b\":\"21\",\"field\":\"fp-223\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"223\",\"v\":\"1\"}",
+    "slug": "icv1-fp8-tm1-1ed3feb7"
+  },
+  "j": 13,
+  "model": {
+    "a": 208,
+    "b": 21,
+    "order": 225,
+    "p": 223
+  },
+  "outgoing_isogenies": [
+    {
+      "degree": 3,
+      "exceptional_inputs": "infinity and kernel map to infinity",
+      "field_p": 223,
+      "formula": "X=u^2*N(x)/D(x); Y=u^3*y*(N'(x)D(x)-N(x)D'(x))/D(x)^2",
+      "kernel_polynomial_ascending": [
+        146,
+        1
+      ],
+      "normalized_quotient": {
+        "a": 219,
+        "b": 149
+      },
+      "target_identity": {
+        "curve_uid": null,
+        "ec1": null,
+        "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+        "icv1": "ICV1:fp-223:-1:225:206:unk:unk:r:0415dde39a76",
+        "model_json": "{\"a\":\"219\",\"b\":\"149\",\"field\":\"fp-223\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"223\",\"v\":\"1\"}",
+        "slug": "icv1-fp8-tm1-0415dde3"
+      },
+      "target_isomorphism_u": 1,
+      "target_model": {
+        "a": 219,
+        "b": 149
+      },
+      "target_vertex": 1,
+      "x_denominator_ascending": [
+        131,
+        69,
+        1
+      ],
+      "x_numerator_ascending": [
+        123,
+        218,
+        69,
+        1
+      ]
+    },
+    {
+      "degree": 3,
+      "exceptional_inputs": "infinity and kernel map to infinity",
+      "field_p": 223,
+      "formula": "X=u^2*N(x)/D(x); Y=u^3*y*(N'(x)D(x)-N(x)D'(x))/D(x)^2",
+      "kernel_polynomial_ascending": [
+        153,
+        1
+      ],
+      "normalized_quotient": {
+        "a": 92,
+        "b": 12
+      },
+      "target_identity": {
+        "curve_uid": null,
+        "ec1": null,
+        "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+        "icv1": "ICV1:fp-223:-1:225:13:unk:unk:r:1ed3feb75d9f",
+        "model_json": "{\"a\":\"208\",\"b\":\"21\",\"field\":\"fp-223\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"223\",\"v\":\"1\"}",
+        "slug": "icv1-fp8-tm1-1ed3feb7"
+      },
+      "target_isomorphism_u": 58,
+      "target_model": {
+        "a": 208,
+        "b": 21
+      },
+      "target_vertex": 0,
+      "x_denominator_ascending": [
+        217,
+        83,
+        1
+      ],
+      "x_numerator_ascending": [
+        162,
+        151,
+        83,
+        1
+      ]
+    },
+    {
+      "degree": 3,
+      "exceptional_inputs": "infinity and kernel map to infinity",
+      "field_p": 223,
+      "formula": "X=u^2*N(x)/D(x); Y=u^3*y*(N'(x)D(x)-N(x)D'(x))/D(x)^2",
+      "kernel_polynomial_ascending": [
+        171,
+        1
+      ],
+      "normalized_quotient": {
+        "a": 187,
+        "b": 72
+      },
+      "target_identity": {
+        "curve_uid": null,
+        "ec1": null,
+        "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+        "icv1": "ICV1:fp-223:-1:225:222:unk:unk:r:916db079083f",
+        "model_json": "{\"a\":\"187\",\"b\":\"72\",\"field\":\"fp-223\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"223\",\"v\":\"1\"}",
+        "slug": "icv1-fp8-tm1-916db079"
+      },
+      "target_isomorphism_u": 1,
+      "target_model": {
+        "a": 187,
+        "b": 72
+      },
+      "target_vertex": 2,
+      "x_denominator_ascending": [
+        28,
+        119,
+        1
+      ],
+      "x_numerator_ascending": [
+        72,
+        166,
+        119,
+        1
+      ]
+    },
+    {
+      "degree": 3,
+      "exceptional_inputs": "infinity and kernel map to infinity",
+      "field_p": 223,
+      "formula": "X=u^2*N(x)/D(x); Y=u^3*y*(N'(x)D(x)-N(x)D'(x))/D(x)^2",
+      "kernel_polynomial_ascending": [
+        199,
+        1
+      ],
+      "normalized_quotient": {
+        "a": 26,
+        "b": 198
+      },
+      "target_identity": {
+        "curve_uid": null,
+        "ec1": null,
+        "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+        "icv1": "ICV1:fp-223:-1:225:13:unk:unk:r:1ed3feb75d9f",
+        "model_json": "{\"a\":\"208\",\"b\":\"21\",\"field\":\"fp-223\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"223\",\"v\":\"1\"}",
+        "slug": "icv1-fp8-tm1-1ed3feb7"
+      },
+      "target_isomorphism_u": 91,
+      "target_model": {
+        "a": 208,
+        "b": 21
+      },
+      "target_vertex": 0,
+      "x_denominator_ascending": [
+        130,
+        175,
+        1
+      ],
+      "x_numerator_ascending": [
+        37,
+        211,
+        175,
+        1
+      ]
+    }
+  ],
+  "status": "STORED_RECORD; use verify for whole-database replay",
+  "vertex": 0
+}
