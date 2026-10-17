@@ -71,6 +71,15 @@ machine can therefore check them:
   of the same class (`env_class_id`) at the required level and compare the two
   intervals.
 
+## Under Claude Code
+
+The `isolab-job`, fetch and `ecbench verify --replay` commands above may run
+as a command card: `experiment-director` writes it from the frozen spec or
+session path, the main session relays it verbatim to `executor-mechanical`,
+and `experiment-director` assesses the returned text against the receipt on
+disk (AGENTS.md "Model tiers"). Comparing levels, blockers and
+disagreements stays with the reasoning tier.
+
 ## When results disagree
 
 Do not average them away. Record both sessions. Compare `host.json` stable facts
