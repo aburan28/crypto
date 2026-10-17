@@ -96,10 +96,14 @@ Provable now, with Mathlib and no curve-specific library:
   (Corrected 2026-10-16. Earlier text said the theorem covers rho and the
   kangaroo.)
 - **The transfer bound** (the formal shape of Jao–Miller–Venkatesan), in
-  `lean/TransferBound.lean`: any solver on one curve in the isogeny class,
-  generic or not, solves the ECDLP on any other at two evaluations of the
-  isogeny, returning the same logarithm; with maps both ways the best costs
-  on the two levels differ by at most that. For these pairs the isogeny has
+  `lean/TransferBound.lean`: any always-correct solver on one curve in the
+  isogeny class, generic or not, solves the ECDLP on any other at two
+  evaluations of the isogeny, returning the same logarithm; with maps both
+  ways the best costs on the two levels differ by at most that. This bounds
+  the best cost across levels, not the measured `S` of a given method; a
+  rho or kangaroo walk is such a solver only with a fixed tape and only if
+  it never fails (corrected 2026-10-17, sheriff case SHF-20261017-e4d7f6,
+  L-N2). For these pairs the isogeny has
   degree ℓ, which is what the construction makes large.
 
 Not formalizable today: anything that mentions endomorphism rings,
@@ -143,9 +147,14 @@ Reading, by the decision rule of `PROTOCOL.md`:
   control for this question. The ic lead was followed up first.
 - The follow-up with 16 targets per curve and a fresh target seed puts
   `ic.pipeline` at 0.998 [0.970, 1.026] at ℓ = 263 and 0.96 [0.87, 1.07] at
-  ℓ = 8209, with the control arm at 1 in both. **No implemented method sees
-  the conductor gap**, at gaps of 2^8, 2^13 and 2^17, on curves that share
-  q, N, t and the Frobenius discriminant and differ only in `End(E)`.
+  ℓ = 8209, with the control arm at 1 in both. **No implemented method
+  shows a reproducible conductor effect**, at gaps of 2^8, 2^13 and 2^17,
+  on curves that share q, N, t and the Frobenius discriminant and differ
+  only in `End(E)`, pending the rho re-test at ℓ = 8209 under a fresh
+  measurement seed (above). Correction (2026-10-17, sheriff case
+  SHF-20261017-e4d7f6, L-N2): this line used to read "No implemented method
+  sees the conductor gap", which the still-unexplained ℓ = 8209 rho
+  interval does not yet allow.
 - This is the honest negative the falsifiers section predicted: it extends
   the small-gap negative of the volcano probe to the largest gaps the
   construction gives at these sizes, at no isogeny cost.
@@ -185,8 +194,14 @@ endomorphisms it uses.
 
 ## 6. Falsifiers
 
-- A BSGS-type arm with `log₂ S` excluding 0: harness fault (check the
-  control arm first). A rho or kangaroo arm with `log₂ S` excluding 0:
+- A BSGS-type arm with `log₂ S` excluding 0: re-sample, then check the
+  harness against the control arm before calling it a harness fault. The
+  theorem gives `E[S] = 1` for BSGS-type arms, not `S = 1` on every finite
+  sample: `S` is a bootstrap statistic over independently drawn workloads,
+  and the recorded BSGS ratios are 0.84, 0.98 and 1.25 (§5), so a 95%
+  interval can exclude 1 by chance (corrected 2026-10-17, sheriff case
+  SHF-20261017-e4d7f6, L-N2; earlier text said "harness fault (check the
+  control arm first)"). A rho or kangaroo arm with `log₂ S` excluding 0:
   unexplained until re-tested under a fresh measurement seed. These
   methods hash the representation, so generic invariance does not rule out
   a real effect (§4, correction of 2026-10-16).

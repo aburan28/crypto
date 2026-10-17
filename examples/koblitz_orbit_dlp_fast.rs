@@ -583,6 +583,64 @@ fn root_bloom_enabled() -> bool {
     std::env::var("KIC_ROOT_BLOOM").as_deref() != Ok("0")
 }
 
+fn root_table_hugepage_requested() -> bool {
+    // Opt in with KIC_ROOT_TABLE_HUGEPAGE=1: the root slots are advised as
+    // transparent huge pages before they are first written. Off by default;
+    // contents and probe order are unchanged either way.
+    std::env::var("KIC_ROOT_TABLE_HUGEPAGE").as_deref() == Ok("1")
+}
+
+/// A root-slot vector of `len` copies of `fill`. With the huge-page request
+/// on Linux, the allocation is advised `MADV_HUGEPAGE` before it is filled,
+/// so the first-touch faults can map 2 MiB pages; otherwise it is `vec!`.
+fn root_slot_vec<T: Clone>(len: usize, fill: T) -> Vec<T> {
+    if !root_table_hugepage_requested() {
+        return vec![fill; len];
+    }
+    let mut slots: Vec<T> = Vec::with_capacity(len);
+    advise_hugepage(
+        slots.as_mut_ptr() as *mut u8,
+        len * std::mem::size_of::<T>(),
+    );
+    slots.resize(len, fill);
+    slots
+}
+
+#[cfg(target_os = "linux")]
+fn advise_hugepage(ptr: *mut u8, bytes: usize) {
+    const PAGE: usize = 4096;
+    let start = (ptr as usize).div_ceil(PAGE) * PAGE;
+    let end = (ptr as usize + bytes) / PAGE * PAGE;
+    if end > start {
+        // SAFETY: [start, end) lies inside the vector's live allocation;
+        // madvise only changes the kernel's paging policy for that range.
+        let rc =
+            unsafe { libc::madvise(start as *mut libc::c_void, end - start, libc::MADV_HUGEPAGE) };
+        assert_eq!(rc, 0, "madvise(MADV_HUGEPAGE) failed on the root table");
+    }
+}
+
+#[cfg(not(target_os = "linux"))]
+fn advise_hugepage(_ptr: *mut u8, _bytes: usize) {
+    panic!("KIC_ROOT_TABLE_HUGEPAGE=1 is supported on Linux only");
+}
+
+/// Peak resident set (`VmHWM`) of this process in bytes, from `/proc/self/status`.
+fn vm_hwm_bytes() -> Option<u64> {
+    let text = std::fs::read_to_string("/proc/self/status").ok()?;
+    let line = text.lines().find(|l| l.starts_with("VmHWM:"))?;
+    let kib: u64 = line.split_whitespace().nth(1)?.parse().ok()?;
+    Some(kib * 1024)
+}
+
+/// `AnonHugePages` of this process in bytes, from `/proc/self/smaps_rollup`.
+fn anon_huge_pages_bytes() -> Option<u64> {
+    let text = std::fs::read_to_string("/proc/self/smaps_rollup").ok()?;
+    let line = text.lines().find(|l| l.starts_with("AnonHugePages:"))?;
+    let kib: u64 = line.split_whitespace().nth(1)?.parse().ok()?;
+    Some(kib * 1024)
+}
+
 /// Open-addressing u64 -> u64 table; keys are < 2^63 so u64::MAX marks empty.
 /// Key and value share a slot so a probe touches one cache line.
 struct RootTable {
@@ -1748,7 +1806,7 @@ mod wide {
                 .next_power_of_two()
                 .max(16);
             Self {
-                slots: RootSlots128::Indexed83(vec![[0u8; 5]; slots]),
+                slots: RootSlots128::Indexed83(crate::root_slot_vec(slots, [0u8; 5])),
                 shift: 128 - slots.trailing_zeros(),
                 len: 0,
                 bloom: root_bloom_enabled().then(|| RootBloom::with_capacity(entries)),
@@ -1764,7 +1822,7 @@ mod wide {
                 .next_power_of_two()
                 .max(16);
             Self {
-                slots: RootSlots128::Indexed83Four(vec![0u32; slots]),
+                slots: RootSlots128::Indexed83Four(crate::root_slot_vec(slots, 0u32)),
                 shift: 128 - slots.trailing_zeros(),
                 len: 0,
                 bloom: root_bloom_enabled().then(|| RootBloom::with_capacity(entries)),
@@ -1869,9 +1927,9 @@ mod wide {
             let packed_layout = packed.then(|| PackedRootLayout::new(degree, representatives));
             Self {
                 slots: if packed {
-                    RootSlots128::Packed(vec![u128::MAX; slots])
+                    RootSlots128::Packed(crate::root_slot_vec(slots, u128::MAX))
                 } else {
-                    RootSlots128::Wide(vec![(u128::MAX, 0); slots])
+                    RootSlots128::Wide(crate::root_slot_vec(slots, (u128::MAX, 0)))
                 },
                 shift: 128 - slots.trailing_zeros(),
                 len: 0,
@@ -4757,6 +4815,9 @@ mod wide {
             .bloom
             .as_ref()
             .map_or(0, |bloom| bloom.profile.bits_per_request()));
+        summary["root_table_hugepage_requested"] = json!(crate::root_table_hugepage_requested());
+        summary["anon_huge_pages_bytes"] = json!(crate::anon_huge_pages_bytes());
+        summary["vm_hwm_bytes"] = json!(crate::vm_hwm_bytes());
         summary["symmetric_s3_states_enabled"] = json!(index.symmetric_states);
         summary["root_table_indexed4_enabled"] = json!(index.indexed4_table);
         summary["root_table_indexed5_id30_enabled"] = json!(index.indexed5_id30);
