@@ -1,0 +1,37 @@
+# N83 factor-base holdout: verified same-point Tier 1 speedups
+
+Four frozen four-summand root-index factor bases each solved all twelve sealed public N83 points faster online than an independently replayed rho solve of the same point. Two distinct cloud runners each admitted all six of their points under the Tier 1 instance gate. K1280 had the lowest geometric mean one-target online interval, 24.706 ms, and a geometric paired rho/IC ratio of 108.397. The preregistered exact selector returned `BOUNDED_UNKNOWN` for a unique online winner: K1280's comparisons with K1107 and K1024 did not pass the six-comparison Bonferroni threshold. The supplementary cold-process selector chose K1107, with mean 116.201 s, faster than each other frozen arm at exact two-sided sign-flip `p=0.00048828125`.
+
+## Measured comparison
+
+The curve is `EC1N83Ckb1a1haacb69ee9f37`, over polynomial-basis `GF(2^83)` with modulus integer `9671406556917033397649557`, equation `y² + xy = x³ + x² + 1`, subgroup order `8569786107849059`, and cofactor `1128547018`. Each row below uses twelve distinct one-target workloads and a fresh process per candidate-point pair. `B` is the actual usable point count before orbit folding. Online IC and rho intervals exclude process launch and target-independent setup; cold process is supplementary. Geometric paired ratio is the geometric mean of the twelve individual `rho_online_ms / IC_online_ms` ratios, not a ratio formed from unpaired medians.
+
+| Base | Actual B | Candidate ID | Geometric IC online (ms) | Median IC online (ms) | Geometric paired rho online (ms) | Geometric paired rho/IC | Smallest individual rho/IC | Mean cold process (s) |
+| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| K992/root11 | 164,672 | `IC1N83Ckb1a1fb164672PDP4rootRCguidedLAgaussTDdirectISO0h829ed476f094` | 155.134 | 217.216 | 2,283.000 | 14.716 | 1.786 | 123.127 |
+| K1107/root11 | 183,762 | `IC1N83Ckb1a1fb183762PDP4rootRCguidedLAgaussTDdirectISO0h82329aa062fa` | 89.700 | 146.692 | 3,190.703 | 35.571 | 7.558 | **116.201** |
+| K1280/root11 | 212,480 | `IC1N83Ckb1a1fb212480PDP4rootRCguidedLAgaussTDdirectISO0h69261fd42dac` | **24.706** | **46.322** | 2,678.109 | **108.397** | 7.558 | 129.861 |
+| K1024/root11 | 169,984 | `IC1N83Ckb1a1fb169984PDP4rootRCguidedLAgaussTDdirectISO0h3eb055926289` | 144.910 | 182.141 | 2,371.699 | 16.367 | 2.687 | 120.936 |
+
+All 48 IC1 run rows have `PASS_INDEPENDENT_REPLAY`; each has a paired rho replay and a recorded five-phase online IC interval. The [canonical workload and run records](results/ic1_rows_39032441586.json) carry each point, candidate manifest digest, source and executed binary digest, setup, rank, base, target probes, timing, resource and scalar verification receipts. The [validated point records](results/validated_rows_39032441586.json) retain all paired raw replay fields and host strata.
+
+The online selector compared paired log intervals over the same twelve points with all `2^12` sign flips. Its six-comparison two-sided threshold was `0.05/6 = 0.008333...`. K1280 was faster than K992 at `p=0.0029296875`; comparisons with K1107 (`p=0.033203125`) and K1024 (`p=0.021484375`) did not pass that threshold. The [frozen selector output](results/selection_39032441586.json) therefore records `online.status=BOUNDED_UNKNOWN` and `online.selected_candidate_id=null`. For cold process time, K1107 beat K992 by a paired mean 6.927 s, K1280 by 13.660 s, and K1024 by 4.736 s; every corresponding exact sign-flip test was `p=0.00048828125`.
+
+Each host independently passed all six same-point IC/rho pairs for every candidate. K1280's median paired rho/IC ratios were 84.597 and 83.715 on halves 0 and 1, respectively. The host-level mean paired rho-minus-IC lower 95% bounds for K1280 were 1,128.911 and 2,249.750 ms; all other candidate-host bounds were also positive. The record's other candidates and points remain in the run rows rather than being omitted from this summary.
+
+## Frozen execution and replay
+
+The [protocol](PROTOCOL.md) fixed twelve unused points, arm selection, input hashes, independent rho seeds, per-point order, calibration, resource caps, and selector before dispatch. [Dispatch](dispatch.json) binds the four exact manifests and parent selection records. [GitHub Actions run 39032441586](https://github.com/aburan28/crypto/actions/runs/39032441586) executed commit `9068debbbc4461ce55e09c0d7b78512c5b5f0406` in two concurrently allocated runner jobs. Half 0, runner `GitHub Actions 1000330132`, and half 1, runner `GitHub Actions 1000330088`, exposed AMD EPYC 7763 CPUs with four logical CPUs in their affinity masks. Both admitted the cloud-instance Tier 1 topology, cgroup, telemetry, before/after calibration, and resource gates. These are cloud-instance measurements with the observed envelope; physical-host exclusivity was not inferred from affinity.
+
+The two provider archives were downloaded with provider SHA-256 digests and retained intact at `/Volumes/SSD990/crypto/artifacts/n83_final_online_holdout_20261017/half0/raw.zip` and `/Volumes/SSD990/crypto/artifacts/n83_final_online_holdout_20261017/half1/raw.zip`. Their digests are `ece16b80e78b32bb59c9b45151bb30b1309d9b615a565efc6013daee43180f4e` (107,451,349 bytes) and `b9382e0494699d4461a6df47e443f2b0a185711c6e44141c6168b77c06221099` (107,451,918 bytes). The [provider snapshot](results/provider_jobs_39032441586.json), [half 0 provider receipt](results/half0_provider_39032441586.json), and [half 1 provider receipt](results/half1_provider_39032441586.json) bind archive IDs, run attempt, job identities, conclusion and commit. The [half 0 host and analysis receipts](results/half0_host_39032441586.json) and [half 1 host and analysis receipts](results/half1_host_39032441586.json) are also versioned; matching analysis files sit beside each host file.
+
+The independent local verifier replayed both raw archives with exit code 0 and empty stderr. Its [half 0 log](results/half0_local_replay_39032441586.txt) and [half 1 log](results/half1_local_replay_39032441586.txt) are versioned. The aggregator then checked provider digests, distinct concurrently occupied runners, exact cloud analysis bytes, base hashes across strata, target identities, and all twelve point records before running the frozen selector. `materialize.py` emitted twelve canonical workload IDs and 48 candidate-workload-run IDs. The materialization can be repeated from the retained archive root with:
+
+```sh
+python3 research/n83_final_online_holdout_20261017/check_dispatch.py
+python3 research/n83_final_online_holdout_20261017/materialize.py research/n83_final_online_holdout_20261017/results/validated_rows_39032441586.json research/n83_final_online_holdout_20261017/results/selection_39032441586.json /Volumes/SSD990/crypto/artifacts/n83_final_online_holdout_20261017/half0/results /Volumes/SSD990/crypto/artifacts/n83_final_online_holdout_20261017/half1/results
+```
+
+`aggregate.py --help` lists the required provider archive, upstream panel, run identity and output arguments for a full replay from raw ZIPs.
+
+The next factor-base comparison is the frozen K2543/K2816/K3072 fresh-point Tier 1 holdout, selected from the local fine-grid screen. Its independent points can test whether the larger base improves online time under the same one-target rho comparison. The K992 target-worker cancellation experiment separately tests whether stopping redundant workers improves the target phase without changing the factor base.
