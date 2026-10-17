@@ -1,0 +1,3 @@
+# Mirror source bytes exactly, including their existing final blank lines.
+.gitignore whitespace=-blank-at-eof
+Cargo.toml whitespace=-blank-at-eof

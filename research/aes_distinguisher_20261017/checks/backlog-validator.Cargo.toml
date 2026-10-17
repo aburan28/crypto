@@ -1,0 +1,15 @@
+[package]
+name = "aes-backlog-validator-build"
+version = "0.0.0"
+edition = "2021"
+[lib]
+name = "crypto_lib"
+path = "hashes.rs"
+[[bin]]
+name = "backlog"
+path = "/workspace/crypto/src/bin/backlog.rs"
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+hex = "0.4"
+libc = "0.2"
+serde_json = { version = "1", features = ["arbitrary_precision", "raw_value"] }

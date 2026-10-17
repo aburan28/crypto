@@ -1,0 +1,113 @@
+{
+  "schema": "backlog.card/v1",
+  "id": "XP-20261017-aes-schedule-isolating-panel",
+  "title": "AES: schedule isolating panel",
+  "created": "2026-10-17",
+  "authors": [
+    "AES native research lane"
+  ],
+  "status": "blocked",
+  "status_note": "Prospective extension only. No trial, lease, funding transfer or official AES campaign admission is created. The larger driver, independent checker and frozen protocol must land before ready promotion.",
+  "blocked_on": [
+    "problem:problems/aes-integration-root-library-baseline.md root-linked follow-up builds also require a repaired base library",
+    "note:Implement and independently verify the exact mechanism and controls for schedule-isolating-panel. Current scope: one-bit diffusion diagnostic implemented; matched statistic panel pending.",
+    "note:Freeze an executable protocol, merged code commit, full sampling/alpha plan, resource estimates and independent checker before admission."
+  ],
+  "links": {
+    "lead": "research/aes_distinguisher_20261017/INTEGRATION.md",
+    "notes": [
+      "research/aes_distinguisher_20261017/hypotheses.json",
+      "research/aes_distinguisher_20261017/sources.json"
+    ],
+    "prs": []
+  },
+  "question": "a frozen statistic's key population reveals whether expansion contributes beyond the data path?",
+  "decision_value": "If this prediction survives the specified independent controls, extend the exact constraint model for this mechanism. If its falsification condition holds, revise the observable before attempting larger AES variants. Retain per-key replication and complete costs separately from any claim of scientific novelty. Acceptance: per-key counts and identical cost/observable conventions across schedules.",
+  "protocol": {
+    "path": null,
+    "blob": null
+  },
+  "code": {
+    "repo": "crypto",
+    "commit": null,
+    "branch": "codex/aes-distinguisher-research",
+    "build": [
+      [
+        "cargo",
+        "build",
+        "--release",
+        "--bin",
+        "aes-followup",
+        "--bin",
+        "aes-followup-check"
+      ]
+    ]
+  },
+  "resources": {
+    "cpus": 1,
+    "ram_gb": 1,
+    "disk_gb": 1,
+    "gpu": null,
+    "est_core_hours": null,
+    "est_wall_hours": null,
+    "notes": "Unmeasured planning envelope, not an admission or funding cap. related-key and ordinary single-key panels never pooled. The named follow-up binaries are proposed and do not yet exist; derive measured cost estimates before ready promotion."
+  },
+  "run": {
+    "argv": [
+      "target/release/aes-followup",
+      "--idea",
+      "schedule-isolating-panel",
+      "--out",
+      "{out}"
+    ],
+    "env": {
+      "RAYON_NUM_THREADS": "1"
+    },
+    "timeout_per_shard_s": 3600
+  },
+  "shards": {
+    "count": 1,
+    "scheme": "single",
+    "params": {},
+    "stop": "all"
+  },
+  "checkpoint": {
+    "file": null,
+    "resume_flag": null
+  },
+  "outputs": {
+    "result_schema": "aes-followup.result/v1",
+    "verify": [
+      "target/release/aes-followup-check",
+      "--idea",
+      "schedule-isolating-panel",
+      "--artifact",
+      "{out}/result.json"
+    ],
+    "land": "research/aes_followups_20261017/schedule-isolating-panel"
+  },
+  "cairn": {
+    "mode": "lab-task",
+    "space": "TBD",
+    "tasks": [
+      "XP-20261017-aes-schedule-isolating-panel"
+    ],
+    "ttl_s": 7200,
+    "env": {
+      "name": "aes-native-followup",
+      "recipe": "Proposed native Rust environment from a reviewed merged source commit. Driver, checker and frozen protocol remain implementation obligations; no environment or task is published."
+    },
+    "exec": {
+      "cpus": 1,
+      "memory_mb": 1024,
+      "timeout_s": 3600,
+      "sandbox": "auto",
+      "publish": "runs/XP-20261017-aes-schedule-isolating-panel"
+    },
+    "funding": {
+      "units": 8,
+      "rationale": "Advisory ordering among the nine AES follow-ups, below existing larger campaign proposals. This is a priority proposal only; no remote funding or spending authorization is performed."
+    }
+  },
+  "owner_hint": "native AES research"
+}
