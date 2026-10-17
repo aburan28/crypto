@@ -1,0 +1,240 @@
+{
+  "schema": "identity.certificate/v1",
+  "id": "IDC1h9003f11809fd7a8f",
+  "statement": {
+    "name": "inverse-Velu cubic for kernel (3,1)",
+    "source": "research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/PROTOCOL_V2.md; Lean cubicIdentity",
+    "variables": [
+      "x",
+      "u"
+    ],
+    "degree_bound": 3,
+    "lhs": {
+      "op": "add",
+      "args": [
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "args": "x"
+            },
+            {
+              "op": "var",
+              "args": "x"
+            },
+            {
+              "op": "var",
+              "args": "x"
+            }
+          ]
+        },
+        {
+          "op": "neg",
+          "args": {
+            "op": "mul",
+            "args": [
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "u"
+                  },
+                  {
+                    "op": "const",
+                    "args": 6
+                  }
+                ]
+              },
+              {
+                "op": "var",
+                "args": "x"
+              },
+              {
+                "op": "var",
+                "args": "x"
+              }
+            ]
+          }
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "const",
+                      "args": 6
+                    },
+                    {
+                      "op": "var",
+                      "args": "u"
+                    }
+                  ]
+                },
+                {
+                  "op": "const",
+                  "args": 21
+                }
+              ]
+            },
+            {
+              "op": "var",
+              "args": "x"
+            }
+          ]
+        },
+        {
+          "op": "neg",
+          "args": {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "const",
+                    "args": 9
+                  },
+                  {
+                    "op": "var",
+                    "args": "u"
+                  }
+                ]
+              },
+              {
+                "op": "const",
+                "args": 32
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "rhs": {
+      "op": "neg",
+      "args": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "u"
+                  },
+                  {
+                    "op": "var",
+                    "args": "x"
+                  },
+                  {
+                    "op": "const",
+                    "args": 12
+                  }
+                ]
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "x"
+                  },
+                  {
+                    "op": "const",
+                    "args": -3
+                  }
+                ]
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "x"
+                  },
+                  {
+                    "op": "const",
+                    "args": -3
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "neg",
+            "args": {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": 2
+                },
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "x"
+                        },
+                        {
+                          "op": "var",
+                          "args": "x"
+                        },
+                        {
+                          "op": "var",
+                          "args": "x"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "neg",
+                      "args": {
+                        "op": "mul",
+                        "args": [
+                          {
+                            "op": "const",
+                            "args": 21
+                          },
+                          {
+                            "op": "var",
+                            "args": "x"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "op": "const",
+                      "args": 38
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "modulus": 2305843009213693951,
+  "points": 32,
+  "seed": 2316556745306079234,
+  "value_digest": "4ca7d4009e515f7c1831de153cc19ae5f5f6d6ef965faf2c5851ab990a71a56f",
+  "independence": "issued by native inverse-Velu example; checked by identity_certificate::check_with_extra on a separate 32-point stream; integer algebra proved by Lean cubicIdentity; finite-field curve bridge separately checked by Rust and remains unformalized",
+  "proof": {
+    "kind": "lean4",
+    "path": "research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/inverse_velu/lean/InverseVelu.lean",
+    "sha256": "cac8b9f311f48353df1476f374dd75e50a2d0cbbbaf69ba7a0c0c7dee8d3be20"
+  }
+}

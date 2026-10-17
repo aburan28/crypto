@@ -1,0 +1,13 @@
+{
+  "schema": "different_j_order_freeze_spec/v1",
+  "protocol_v1_commit": "868ce83a3",
+  "prefix_correction_commit": "dff7d94cc",
+  "map_audit_commit": "28083acd0",
+  "command": "gtimeout 120 target/order-batch-check/release/examples/different_j_order_batch freeze research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/FIBER_V1.json research/isogeny_torsion_fibers_20261012/different_j_order_batch_20261015/PUBLIC_V1.json research/isogeny_torsion_fibers_20261012/different_j_order_batch_20261015/CHECKER_V1.json",
+  "wall_seconds": 120,
+  "public_target_count": 64,
+  "runner_source_sha256": "2f7c8bed4ae4e60aa27da58e86feea54ee8e37159e608ee846a429175c65471e",
+  "runner_binary_sha256": "b1615fe93fb2088d3f4fec4f76a49d4f04b8ba0310d2234d4f794c23ba5b5bd8",
+  "fiber_receipt_sha256": "286dd1ef375ee218c9645b6ef3ca007fe911f1c3f23ef04ed96d245fb59eb143",
+  "script_sha256": "71024c3ce663a2f0604c5a8f0a05f9ed0ea5ec106af30be3f84e939a853f9058"
+}

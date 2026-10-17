@@ -1,0 +1,79 @@
+{
+  "schema": "different_j_inverse_trend_meter_summary/v1",
+  "p": 19213,
+  "children": 24,
+  "arms": [
+    {
+      "arm": "inverse-velu",
+      "prefix": 1,
+      "n": 3,
+      "mean_whole_child_cpu_ms": 26.463,
+      "min_whole_child_cpu_ms": 18.728,
+      "max_whole_child_cpu_ms": 31.592,
+      "max_peak_rss_bytes": 7110656
+    },
+    {
+      "arm": "inverse-velu",
+      "prefix": 64,
+      "n": 3,
+      "mean_whole_child_cpu_ms": 1371.7013333333332,
+      "min_whole_child_cpu_ms": 1328.275,
+      "max_whole_child_cpu_ms": 1430.768,
+      "max_peak_rss_bytes": 9043968
+    },
+    {
+      "arm": "rho-negation",
+      "prefix": 1,
+      "n": 3,
+      "mean_whole_child_cpu_ms": 5.362666666666667,
+      "min_whole_child_cpu_ms": 4.87,
+      "max_whole_child_cpu_ms": 6.189,
+      "max_peak_rss_bytes": 6914048
+    },
+    {
+      "arm": "rho-negation",
+      "prefix": 64,
+      "n": 3,
+      "mean_whole_child_cpu_ms": 13.976333333333335,
+      "min_whole_child_cpu_ms": 12.801,
+      "max_whole_child_cpu_ms": 15.699,
+      "max_peak_rss_bytes": 7766016
+    },
+    {
+      "arm": "rho-negation-aa",
+      "prefix": 1,
+      "n": 3,
+      "mean_whole_child_cpu_ms": 5.587666666666667,
+      "min_whole_child_cpu_ms": 4.32,
+      "max_whole_child_cpu_ms": 7.875,
+      "max_peak_rss_bytes": 6914048
+    },
+    {
+      "arm": "rho-negation-aa",
+      "prefix": 64,
+      "n": 3,
+      "mean_whole_child_cpu_ms": 13.4,
+      "min_whole_child_cpu_ms": 12.461,
+      "max_whole_child_cpu_ms": 14.628,
+      "max_peak_rss_bytes": 7684096
+    },
+    {
+      "arm": "source-bsgs",
+      "prefix": 1,
+      "n": 3,
+      "mean_whole_child_cpu_ms": 5.277,
+      "min_whole_child_cpu_ms": 3.951,
+      "max_whole_child_cpu_ms": 6.593,
+      "max_peak_rss_bytes": 6815744
+    },
+    {
+      "arm": "source-bsgs",
+      "prefix": 64,
+      "n": 3,
+      "mean_whole_child_cpu_ms": 7.942666666666667,
+      "min_whole_child_cpu_ms": 6.312,
+      "max_whole_child_cpu_ms": 9.567,
+      "max_peak_rss_bytes": 7208960
+    }
+  ]
+}

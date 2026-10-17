@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="240" viewBox="0 0 1120 240">
+  <rect width="1120" height="240" fill="white"/>
+  <text x="28" y="34" font-family="Arial,sans-serif" font-size="22" fill="#142b45">Verified inverse-Vélu construction, p=1237, r=1201</text>
+  <text x="28" y="58" font-family="Arial,sans-serif" font-size="14" fill="#41576b">The cubic constructs a factor-base witness; the matched relation collector then sees the same rows as the source census.</text>
+  <g font-family="Arial,sans-serif" font-size="15" text-anchor="middle">
+    <rect x="28" y="83" width="192" height="100" rx="8" fill="#e6f0fa" stroke="#4b78a6"/>
+    <text x="124" y="113" fill="#142b45">Destination E′(Fp²)</text>
+    <text x="124" y="137" fill="#142b45">29 points scanned</text>
+    <text x="124" y="161" fill="#41576b">different j = 727</text>
+    <rect x="251" y="83" width="210" height="100" rx="8" fill="#f6eafd" stroke="#9565a9"/>
+    <text x="356" y="112" fill="#142b45">Inverse cubic Gᵤ(X)</text>
+    <text x="356" y="137" fill="#142b45">root and y lift</text>
+    <text x="356" y="161" fill="#41576b">22 split attempts</text>
+    <rect x="492" y="83" width="190" height="100" rx="8" fill="#e8f6ec" stroke="#4e9266"/>
+    <text x="587" y="112" fill="#142b45">Exact Vélu map</text>
+    <text x="587" y="137" fill="#142b45">28 checks</text>
+    <text x="587" y="161" fill="#41576b">source j = 1066</text>
+    <rect x="713" y="83" width="180" height="100" rx="8" fill="#fff0df" stroke="#be7b38"/>
+    <text x="803" y="112" fill="#142b45">Eight image columns</text>
+    <text x="803" y="137" fill="#142b45">same witnesses</text>
+    <text x="803" y="161" fill="#41576b">as full census</text>
+    <rect x="924" y="83" width="168" height="100" rx="8" fill="#e9eff8" stroke="#5478a8"/>
+    <text x="1008" y="112" fill="#142b45">Relation solve</text>
+    <text x="1008" y="137" fill="#142b45">255 paired rows</text>
+    <text x="1008" y="161" fill="#41576b">all matched</text>
+  </g>
+  <g stroke="#536d86" stroke-width="3" fill="none" marker-end="url(#arrow)">
+    <path d="M220 133 H246"/><path d="M461 133 H487"/><path d="M682 133 H708"/><path d="M893 133 H919"/>
+  </g>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#536d86"/></marker></defs>
+  <text x="28" y="215" font-family="Arial,sans-serif" font-size="13" fill="#41576b">Source: RUN_V2/replay.json, ANALYSIS_V1.json and frozen full-image comparison. This is a construction and correctness diagram, not a cost claim.</text>
+</svg>

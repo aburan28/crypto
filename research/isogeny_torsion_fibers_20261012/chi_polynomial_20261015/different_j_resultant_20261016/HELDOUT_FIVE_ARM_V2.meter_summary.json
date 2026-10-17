@@ -1,0 +1,51 @@
+{
+  "schema": "different_j_chi_heldout_meter_summary/v2",
+  "children": 60,
+  "arms": [
+    {
+      "arm": "chi-resultant",
+      "n": 12,
+      "mean_whole_child_cpu_ms": 14.30375,
+      "min_whole_child_cpu_ms": 9.698,
+      "max_whole_child_cpu_ms": 17.002,
+      "mean_whole_wall_ms": 841.1792673333334,
+      "max_peak_rss_bytes": 6963200
+    },
+    {
+      "arm": "direct-pair",
+      "n": 12,
+      "mean_whole_child_cpu_ms": 6.538166666666667,
+      "min_whole_child_cpu_ms": 5.016,
+      "max_whole_child_cpu_ms": 7.682,
+      "mean_whole_wall_ms": 23.6186525,
+      "max_peak_rss_bytes": 6766592
+    },
+    {
+      "arm": "rho-negation",
+      "n": 12,
+      "mean_whole_child_cpu_ms": 6.428416666666667,
+      "min_whole_child_cpu_ms": 5.482,
+      "max_whole_child_cpu_ms": 8.073,
+      "mean_whole_wall_ms": 15.50983675,
+      "max_peak_rss_bytes": 6701056
+    },
+    {
+      "arm": "rho-negation-aa",
+      "n": 12,
+      "mean_whole_child_cpu_ms": 6.405166666666667,
+      "min_whole_child_cpu_ms": 5.011,
+      "max_whole_child_cpu_ms": 7.977,
+      "mean_whole_wall_ms": 18.812722166666667,
+      "max_peak_rss_bytes": 6717440
+    },
+    {
+      "arm": "source-bsgs",
+      "n": 12,
+      "mean_whole_child_cpu_ms": 5.898583333333333,
+      "min_whole_child_cpu_ms": 4.718,
+      "max_whole_child_cpu_ms": 7.909,
+      "mean_whole_wall_ms": 24.924479166666668,
+      "max_peak_rss_bytes": 6619136
+    }
+  ]
+}

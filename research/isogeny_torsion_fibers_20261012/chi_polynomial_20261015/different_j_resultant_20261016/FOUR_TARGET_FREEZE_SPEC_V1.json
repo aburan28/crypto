@@ -1,0 +1,12 @@
+{
+  "schema": "different_j_chi_heldout_freeze_spec/v1",
+  "protocol": "FOUR_TARGET_PROTOCOL_V1.md",
+  "parent_public_sha256": "f6c3126b4d95e3c457c9e552471bc2cdff322de0e0a9de9fbba701d7c05897ba",
+  "source": "examples/different_j_chi_resultant.rs",
+  "source_sha256": "aaf65879dffffcb4a5bddd810ff3f9af93f08634c248ba7b59568507936664de",
+  "binary_sha256": "5f816dfb2e51a3a4d0d64267c9ad645d7286b1aa5fc41d1697ff46e93a69e1cc",
+  "command": "target/release/examples/different_j_chi_resultant freeze-targets research/isogeny_torsion_fibers_20261012/different_j_order_batch_20261015/PUBLIC_V1.json research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/FOUR_TARGET_PUBLIC_V1.json research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/different_j_resultant_20261016/FOUR_TARGET_CHECKER_V1.json",
+  "target_positions_zero_indexed": [64, 65, 66, 67],
+  "target_count": 4,
+  "solver_answer_field_allowed": false
+}

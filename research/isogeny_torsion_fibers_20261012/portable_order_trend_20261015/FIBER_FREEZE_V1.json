@@ -1,0 +1,24 @@
+{
+  "schema": "different_j_trend_fiber_freeze/v1",
+  "status": "source_and_binary_frozen_before_three_cell_execution",
+  "parent_commit": "a26fcb2a8",
+  "host": "Darwin arm64",
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "protocol": "PANEL_PROTOCOL_V2.md",
+  "screen_sha256": "b40ee47324ebf320844b7f1e0320aa69c530ff1e85460d9a6eb1bb43aa8eea62",
+  "screen_checker_sha256": "80078e16d18cc12b913f714a950e98b3c96052c87bc77da6d97c4fdc047fc12f",
+  "runner_source_sha256": "9b3a2281129e497f1e740dcba40815f3837c2adbe9af767eea8856f1b8b92a37",
+  "runner_binary_sha256": "a772b12b5b6759d68accb46b124d63ba7f71292ab65cb52212e31ce54d5f48a4",
+  "checker_source_sha256": "bd209b02fb70ae9d4783d9ad7cf58d2136082b374198b0d13ce9bef3ad6a958a",
+  "checker_binary_sha256": "58dbfc91b484c46d7bf2ca87b168bc23f10d4fcd707714404144ea09ec58292d",
+  "runner_command": "target/order-batch-check/release/examples/different_j_trend_fiber audit P R H",
+  "checker_command": "target/order-batch-check/release/examples/different_j_trend_fiber_check FIBER_P_R_V1.json",
+  "cells": [
+    {"p":409,"r":433,"h":387},
+    {"p":421,"r":457,"h":387},
+    {"p":457,"r":421,"h":495}
+  ],
+  "per_process_wall_ceiling_seconds": 300,
+  "per_process_rss_ceiling_bytes": 536870912,
+  "required_audit": ["all_source_points", "exact_three_point_fibers", "identity_kernel", "generator_order", "image_order", "all_r_squared_subgroup_pairs", "independent_field_and_curve_replay"]
+}

@@ -1,0 +1,22 @@
+{
+  "schema": "different_j_chi_heldout_five_arm_spec/v1",
+  "scope": "first five-arm executable subset of FOUR_TARGET_PROTOCOL_V1.md; source S3, quotient S3, direct inverse-Velu and full image remain separately owed",
+  "source_sha256": "f7a9e440a982ed9419381440880205799578a49dcab30a2fdf4336a8c084761a",
+  "binary_sha256": "60030dcd6effb76f905db99f62724d59840a65f98e5edd1947d948f89387894e",
+  "meter_source_sha256": "3e478aa3edea464e97326cd4a4c6e34010a49bc18a3217ce5a809702bf0c2d7a",
+  "meter_binary_sha256": "6489ceb68135d6be91ab9706307ca16cdd9fbc778cda1e92b57a3435d78799dd",
+  "orchestration_sha256": "6187a4e813107d28aa8c61087479a2cc2fab1ea67a9f4df00419ff293737b2d7",
+  "public_sha256": "e1969305462131722556dead399593b77a919a8017f0e035e3019986b645958e",
+  "checker_sha256": "16612e5a002fe85c62648ce62ec4cc2432868c02b83dff20174f5ff46493ebf9",
+  "arms": ["chi-resultant", "direct-pair", "source-bsgs", "rho-negation", "rho-negation-aa"],
+  "rounds": 3,
+  "target_positions_zero_indexed": [64, 65, 66, 67],
+  "relation_trials_per_target": 1832,
+  "rho_restarts": 32,
+  "rho_steps_per_restart": 4580,
+  "child_wall_seconds": 300,
+  "child_peak_rss_bytes": 536870912,
+  "darwin_memory_enforcement": "observed peak only; RLIMIT_AS and RLIMIT_DATA both returned EINVAL, preserved as meter failed attempts",
+  "independent_replay_required": true,
+  "ranking": "cold same-target complete work only; incomplete rows censored"
+}

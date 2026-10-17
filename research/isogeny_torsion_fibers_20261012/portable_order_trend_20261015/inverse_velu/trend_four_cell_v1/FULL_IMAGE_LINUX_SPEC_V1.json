@@ -1,0 +1,22 @@
+{
+  "schema": "different_j_inverse_trend_full_image_linux_spec/v1",
+  "protocol": "../FOUR_GATE_PROTOCOL_V1.md",
+  "workflow": ".github/workflows/isogeny-fiber-trend-full-image-linux.yml",
+  "orchestration_sha256": "d444fac672cda7d7583920cd34c17632faf1a14831836ad6bdeb248e72a1a727",
+  "frozen_solver_source_sha256": "e0256820c1e1412e1b91d3fcad04bfc7d4afe5155581bc3c48c97379dbf8484a",
+  "checker_source_sha256": "73181e2140ceba594b9eea3423752b8b8eca9a8cefa5be8a8628422e84ede263",
+  "meter_source_sha256": "be2539c5dde00df38def5a19866615dce3508eb38ac4150995f724e12d0711c2",
+  "public_sha256": "5009b0a804b7f91cb36eea8123c9d39b28bf6bb09891eb7b44d5d516c7327623",
+  "checker_input_sha256": "e1b66ce453934710a9f883e37d0da4973f582ceb17121567aeb5f530817da33c",
+  "p": 2473,
+  "r": 2437,
+  "cofactor": 2511,
+  "arm": "full-image",
+  "round": 0,
+  "targets": 1,
+  "child_wall_cap_seconds": 300,
+  "linux_rlimit_as_bytes": 536870912,
+  "acceptance_if_complete": "separate Rust checker replays scalar and every relation witness, row rank, exact random stream, source and quotient identities, and 512 MiB RSS bound",
+  "censored_outcomes": "preserve timeout, signal, allocation failure, panic, missing meter, and stderr as distinct statuses; none implies mathematical nonexistence",
+  "scope": "one cold full-image resource and correctness probe at the smallest new order, not a four-order trend or isolated wall result"
+}

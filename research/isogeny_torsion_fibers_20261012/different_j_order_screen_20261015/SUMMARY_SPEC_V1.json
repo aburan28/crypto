@@ -1,0 +1,13 @@
+{
+  "schema": "different_j_order_summary_spec/v1",
+  "status": "frozen_before_summary_generation",
+  "raw_sha256": "31238914df3663805efb88c3c89c420b4ca42b875668da0cfc954cd1084171b4",
+  "replay_sha256": "ac2c13d5496755d57947b977db0e4c9829267615120b3fdb05fa906e89e73fd4",
+  "source": "examples/different_j_order_summary.rs",
+  "source_sha256": "e7c4f79307f12f4fb9108c1a9ac1b2f5fea86012936be8b3f64ac20c8927a959",
+  "binary": "target/release/examples/different_j_order_summary",
+  "binary_sha256": "73ff7b9a19643551c282bed6ea9cfb794ecad475328a6e43a5964fd18e27808c",
+  "command": "target/release/examples/different_j_order_summary research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/RAW_V1.jsonl research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/REPLAY_V1.json research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/SUMMARY_V1.json research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/GRAPH_V1.svg",
+  "outputs": ["SUMMARY_V1.json", "GRAPH_V1.svg"],
+  "overwrite": "refused"
+}
