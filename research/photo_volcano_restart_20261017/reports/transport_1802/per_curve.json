@@ -1,0 +1,1982 @@
+[
+  {
+    "curve": 0,
+    "level": 4,
+    "path": [],
+    "steps": 0,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 372,
+      "mean": 459.544,
+      "max": 24353
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 174,
+      "mean": 234.786,
+      "max": 20978
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 0,
+      "mean": 0,
+      "max": 0
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 0,
+      "mean": 0,
+      "max": 0
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 0,
+      "mean": 0,
+      "max": 0
+    }
+  },
+  {
+    "curve": 1,
+    "level": 3,
+    "path": [
+      0
+    ],
+    "steps": 1,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 1384,
+      "mean": 1813.724,
+      "max": 142926
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 1188,
+      "mean": 1316.946,
+      "max": 18592
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 6,
+      "mean": 6,
+      "max": 6
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 2,
+      "mean": 2,
+      "max": 2
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 174,
+      "mean": 174,
+      "max": 174
+    }
+  },
+  {
+    "curve": 2,
+    "level": 2,
+    "path": [
+      0,
+      1
+    ],
+    "steps": 2,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 2547,
+      "mean": 3320.796,
+      "max": 165192
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 2338,
+      "mean": 2773.55,
+      "max": 122944
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 12,
+      "mean": 12,
+      "max": 12
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 4,
+      "mean": 4,
+      "max": 4
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 348,
+      "mean": 348,
+      "max": 348
+    }
+  },
+  {
+    "curve": 3,
+    "level": 4,
+    "path": [
+      0,
+      3
+    ],
+    "steps": 2,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 2551,
+      "mean": 3216.898,
+      "max": 102842
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 2340,
+      "mean": 2984.72,
+      "max": 102312
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 12,
+      "mean": 12,
+      "max": 12
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 4,
+      "mean": 4,
+      "max": 4
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 348,
+      "mean": 348,
+      "max": 348
+    }
+  },
+  {
+    "curve": 4,
+    "level": 1,
+    "path": [
+      0,
+      1,
+      4
+    ],
+    "steps": 3,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 3636,
+      "mean": 19376.098,
+      "max": 5705426
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 3424,
+      "mean": 17882.958,
+      "max": 5076146
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 18,
+      "mean": 18,
+      "max": 18
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 6,
+      "mean": 6,
+      "max": 6
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 522,
+      "mean": 522,
+      "max": 522
+    }
+  },
+  {
+    "curve": 5,
+    "level": 3,
+    "path": [
+      0,
+      1,
+      5
+    ],
+    "steps": 3,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 3537,
+      "mean": 7334.902,
+      "max": 1048281
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 3332,
+      "mean": 7107.46,
+      "max": 1047485
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 18,
+      "mean": 18,
+      "max": 18
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 6,
+      "mean": 6,
+      "max": 6
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 522,
+      "mean": 522,
+      "max": 522
+    }
+  },
+  {
+    "curve": 6,
+    "level": 0,
+    "path": [
+      0,
+      1,
+      4,
+      8
+    ],
+    "steps": 4,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 4717,
+      "mean": 11192.814,
+      "max": 1665320
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 4501,
+      "mean": 10959.94,
+      "max": 1664570
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 24,
+      "mean": 24,
+      "max": 24
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 8,
+      "mean": 8,
+      "max": 8
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 696,
+      "mean": 696,
+      "max": 696
+    }
+  },
+  {
+    "curve": 7,
+    "level": 2,
+    "path": [
+      0,
+      1,
+      4,
+      9
+    ],
+    "steps": 4,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 4753,
+      "mean": 5205.042,
+      "max": 57635
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 4535,
+      "mean": 4977.424,
+      "max": 57199
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 24,
+      "mean": 24,
+      "max": 24
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 8,
+      "mean": 8,
+      "max": 8
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 696,
+      "mean": 696,
+      "max": 696
+    }
+  },
+  {
+    "curve": 8,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      5,
+      11
+    ],
+    "steps": 4,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 4705,
+      "mean": 5247.102,
+      "max": 68414
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 4493,
+      "mean": 5024.168,
+      "max": 67781
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 24,
+      "mean": 24,
+      "max": 24
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 8,
+      "mean": 8,
+      "max": 8
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 696,
+      "mean": 696,
+      "max": 696
+    }
+  },
+  {
+    "curve": 9,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      5,
+      12
+    ],
+    "steps": 4,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 4433,
+      "mean": 5032.108,
+      "max": 73611
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 4235,
+      "mean": 4792.974,
+      "max": 73195
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 24,
+      "mean": 24,
+      "max": 24
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 8,
+      "mean": 8,
+      "max": 8
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 696,
+      "mean": 696,
+      "max": 696
+    }
+  },
+  {
+    "curve": 10,
+    "level": 1,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      14
+    ],
+    "steps": 5,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 5615,
+      "mean": 6953.066,
+      "max": 324373
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 5407,
+      "mean": 6730.274,
+      "max": 323968
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 30,
+      "mean": 30,
+      "max": 30
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 10,
+      "mean": 10,
+      "max": 10
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 870,
+      "mean": 870,
+      "max": 870
+    }
+  },
+  {
+    "curve": 11,
+    "level": 1,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      16
+    ],
+    "steps": 5,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 5476,
+      "mean": 6251.954,
+      "max": 77366
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 5265,
+      "mean": 5847.166,
+      "max": 76688
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 30,
+      "mean": 30,
+      "max": 30
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 10,
+      "mean": 10,
+      "max": 10
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 870,
+      "mean": 870,
+      "max": 870
+    }
+  },
+  {
+    "curve": 12,
+    "level": 3,
+    "path": [
+      0,
+      1,
+      4,
+      9,
+      17
+    ],
+    "steps": 5,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 5652,
+      "mean": 6104.612,
+      "max": 95084
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 5443,
+      "mean": 5884.026,
+      "max": 94465
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 30,
+      "mean": 30,
+      "max": 30
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 10,
+      "mean": 10,
+      "max": 10
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 870,
+      "mean": 870,
+      "max": 870
+    }
+  },
+  {
+    "curve": 13,
+    "level": 3,
+    "path": [
+      0,
+      1,
+      4,
+      9,
+      19
+    ],
+    "steps": 5,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 5473,
+      "mean": 5812.84,
+      "max": 27040
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 5267,
+      "mean": 5595.858,
+      "max": 26505
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 30,
+      "mean": 30,
+      "max": 30
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 10,
+      "mean": 10,
+      "max": 10
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 870,
+      "mean": 870,
+      "max": 870
+    }
+  },
+  {
+    "curve": 14,
+    "level": 2,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      14,
+      23
+    ],
+    "steps": 6,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 6644,
+      "mean": 8206.26,
+      "max": 251959
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 6438,
+      "mean": 7975.514,
+      "max": 251162
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 36,
+      "mean": 36,
+      "max": 36
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 12,
+      "mean": 12,
+      "max": 12
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1044,
+      "mean": 1044,
+      "max": 1044
+    }
+  },
+  {
+    "curve": 15,
+    "level": 2,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      14,
+      24
+    ],
+    "steps": 6,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 6899,
+      "mean": 7591.242,
+      "max": 106972
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 6678,
+      "mean": 7342.682,
+      "max": 106333
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 36,
+      "mean": 36,
+      "max": 36
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 12,
+      "mean": 12,
+      "max": 12
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1044,
+      "mean": 1044,
+      "max": 1044
+    }
+  },
+  {
+    "curve": 16,
+    "level": 2,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      16,
+      26
+    ],
+    "steps": 6,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 6905,
+      "mean": 7916.164,
+      "max": 122628
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 6693,
+      "mean": 7689.592,
+      "max": 121938
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 36,
+      "mean": 36,
+      "max": 36
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 12,
+      "mean": 12,
+      "max": 12
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1044,
+      "mean": 1044,
+      "max": 1044
+    }
+  },
+  {
+    "curve": 17,
+    "level": 2,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      16,
+      27
+    ],
+    "steps": 6,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 6921,
+      "mean": 14022.548,
+      "max": 3310961
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 6707,
+      "mean": 13793.812,
+      "max": 3310002
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 36,
+      "mean": 36,
+      "max": 36
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 12,
+      "mean": 12,
+      "max": 12
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1044,
+      "mean": 1044,
+      "max": 1044
+    }
+  },
+  {
+    "curve": 18,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      9,
+      17,
+      28
+    ],
+    "steps": 6,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 6912,
+      "mean": 10827.71,
+      "max": 1356853
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 6698,
+      "mean": 10590.824,
+      "max": 1354604
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 36,
+      "mean": 36,
+      "max": 36
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 12,
+      "mean": 12,
+      "max": 12
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1044,
+      "mean": 1044,
+      "max": 1044
+    }
+  },
+  {
+    "curve": 19,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      9,
+      17,
+      29
+    ],
+    "steps": 6,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 6912,
+      "mean": 7267.514,
+      "max": 30560
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 6697,
+      "mean": 6996.482,
+      "max": 29043
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 36,
+      "mean": 36,
+      "max": 36
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 12,
+      "mean": 12,
+      "max": 12
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1044,
+      "mean": 1044,
+      "max": 1044
+    }
+  },
+  {
+    "curve": 20,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      9,
+      19,
+      31
+    ],
+    "steps": 6,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 6908,
+      "mean": 7317.478,
+      "max": 77310
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 6694,
+      "mean": 7092.562,
+      "max": 76658
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 36,
+      "mean": 36,
+      "max": 36
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 12,
+      "mean": 12,
+      "max": 12
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1044,
+      "mean": 1044,
+      "max": 1044
+    }
+  },
+  {
+    "curve": 21,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      9,
+      19,
+      33
+    ],
+    "steps": 6,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 6769,
+      "mean": 14073.75,
+      "max": 3260230
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 6540,
+      "mean": 13741.27,
+      "max": 3259251
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 36,
+      "mean": 36,
+      "max": 36
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 12,
+      "mean": 12,
+      "max": 12
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1044,
+      "mean": 1044,
+      "max": 1044
+    }
+  },
+  {
+    "curve": 22,
+    "level": 3,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      14,
+      23,
+      34
+    ],
+    "steps": 7,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 7511,
+      "mean": 20481.848,
+      "max": 2385330
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 7309,
+      "mean": 20214.604,
+      "max": 2384539
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 42,
+      "mean": 42,
+      "max": 42
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 14,
+      "mean": 14,
+      "max": 14
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1218,
+      "mean": 1218,
+      "max": 1218
+    }
+  },
+  {
+    "curve": 23,
+    "level": 3,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      14,
+      23,
+      36
+    ],
+    "steps": 7,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 7996,
+      "mean": 13357.734,
+      "max": 1635467
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 7776,
+      "mean": 13118.25,
+      "max": 1634434
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 42,
+      "mean": 42,
+      "max": 42
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 14,
+      "mean": 14,
+      "max": 14
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1218,
+      "mean": 1218,
+      "max": 1218
+    }
+  },
+  {
+    "curve": 24,
+    "level": 3,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      14,
+      24,
+      37
+    ],
+    "steps": 7,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 7988,
+      "mean": 11741.94,
+      "max": 776818
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 7769,
+      "mean": 11498.79,
+      "max": 775952
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 42,
+      "mean": 42,
+      "max": 42
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 14,
+      "mean": 14,
+      "max": 14
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1218,
+      "mean": 1218,
+      "max": 1218
+    }
+  },
+  {
+    "curve": 25,
+    "level": 3,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      14,
+      24,
+      39
+    ],
+    "steps": 7,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 8000,
+      "mean": 13660.95,
+      "max": 814131
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 7787,
+      "mean": 13417.572,
+      "max": 812963
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 42,
+      "mean": 42,
+      "max": 42
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 14,
+      "mean": 14,
+      "max": 14
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1218,
+      "mean": 1218,
+      "max": 1218
+    }
+  },
+  {
+    "curve": 26,
+    "level": 3,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      16,
+      26,
+      40
+    ],
+    "steps": 7,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 7973,
+      "mean": 8530.472,
+      "max": 87732
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 7756,
+      "mean": 8298.518,
+      "max": 87031
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 42,
+      "mean": 42,
+      "max": 42
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 14,
+      "mean": 14,
+      "max": 14
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1218,
+      "mean": 1218,
+      "max": 1218
+    }
+  },
+  {
+    "curve": 27,
+    "level": 3,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      16,
+      26,
+      42
+    ],
+    "steps": 7,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 7997,
+      "mean": 8827.514,
+      "max": 189178
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 7781,
+      "mean": 8601.93,
+      "max": 188481
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 42,
+      "mean": 42,
+      "max": 42
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 14,
+      "mean": 14,
+      "max": 14
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1218,
+      "mean": 1218,
+      "max": 1218
+    }
+  },
+  {
+    "curve": 28,
+    "level": 3,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      16,
+      27,
+      43
+    ],
+    "steps": 7,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 8005,
+      "mean": 8328.754,
+      "max": 74984
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 7793,
+      "mean": 8106.714,
+      "max": 74380
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 42,
+      "mean": 42,
+      "max": 42
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 14,
+      "mean": 14,
+      "max": 14
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1218,
+      "mean": 1218,
+      "max": 1218
+    }
+  },
+  {
+    "curve": 29,
+    "level": 3,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      16,
+      27,
+      45
+    ],
+    "steps": 7,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 7815,
+      "mean": 8721.79,
+      "max": 106574
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 7614,
+      "mean": 8388.04,
+      "max": 106157
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 42,
+      "mean": 42,
+      "max": 42
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 14,
+      "mean": 14,
+      "max": 14
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1218,
+      "mean": 1218,
+      "max": 1218
+    }
+  },
+  {
+    "curve": 30,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      14,
+      23,
+      34,
+      51
+    ],
+    "steps": 8,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 9049,
+      "mean": 9800.616,
+      "max": 103589
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 8832,
+      "mean": 9569.186,
+      "max": 102816
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 48,
+      "mean": 48,
+      "max": 48
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 16,
+      "mean": 16,
+      "max": 16
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1392,
+      "mean": 1392,
+      "max": 1392
+    }
+  },
+  {
+    "curve": 31,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      14,
+      23,
+      34,
+      52
+    ],
+    "steps": 8,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 9079,
+      "mean": 10068.866,
+      "max": 144264
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 8860,
+      "mean": 9591.506,
+      "max": 143624
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 48,
+      "mean": 48,
+      "max": 48
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 16,
+      "mean": 16,
+      "max": 16
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1392,
+      "mean": 1392,
+      "max": 1392
+    }
+  },
+  {
+    "curve": 32,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      14,
+      23,
+      36,
+      54
+    ],
+    "steps": 8,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 8784,
+      "mean": 9241.96,
+      "max": 27245
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 8575,
+      "mean": 9022.808,
+      "max": 26777
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 48,
+      "mean": 48,
+      "max": 48
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 16,
+      "mean": 16,
+      "max": 16
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1392,
+      "mean": 1392,
+      "max": 1392
+    }
+  },
+  {
+    "curve": 33,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      14,
+      23,
+      36,
+      55
+    ],
+    "steps": 8,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 9099,
+      "mean": 9624.004,
+      "max": 50773
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 8887,
+      "mean": 9358.784,
+      "max": 50100
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 48,
+      "mean": 48,
+      "max": 48
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 16,
+      "mean": 16,
+      "max": 16
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1392,
+      "mean": 1392,
+      "max": 1392
+    }
+  },
+  {
+    "curve": 34,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      14,
+      24,
+      37,
+      56
+    ],
+    "steps": 8,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 8581,
+      "mean": 10009.776,
+      "max": 198796
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 8372,
+      "mean": 9773.616,
+      "max": 198006
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 48,
+      "mean": 48,
+      "max": 48
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 16,
+      "mean": 16,
+      "max": 16
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1392,
+      "mean": 1392,
+      "max": 1392
+    }
+  },
+  {
+    "curve": 35,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      14,
+      24,
+      37,
+      58
+    ],
+    "steps": 8,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 9058,
+      "mean": 10302.254,
+      "max": 315366
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 8842,
+      "mean": 9911.862,
+      "max": 314890
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 48,
+      "mean": 48,
+      "max": 48
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 16,
+      "mean": 16,
+      "max": 16
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1392,
+      "mean": 1392,
+      "max": 1392
+    }
+  },
+  {
+    "curve": 36,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      14,
+      24,
+      39,
+      60
+    ],
+    "steps": 8,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 9085,
+      "mean": 10459.16,
+      "max": 176525
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 8870,
+      "mean": 10209.66,
+      "max": 175789
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 48,
+      "mean": 48,
+      "max": 48
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 16,
+      "mean": 16,
+      "max": 16
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1392,
+      "mean": 1392,
+      "max": 1392
+    }
+  },
+  {
+    "curve": 37,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      14,
+      24,
+      39,
+      61
+    ],
+    "steps": 8,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 9090,
+      "mean": 10094.352,
+      "max": 157723
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 8875,
+      "mean": 9866.8,
+      "max": 156982
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 48,
+      "mean": 48,
+      "max": 48
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 16,
+      "mean": 16,
+      "max": 16
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1392,
+      "mean": 1392,
+      "max": 1392
+    }
+  },
+  {
+    "curve": 38,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      16,
+      26,
+      40,
+      63
+    ],
+    "steps": 8,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 9094,
+      "mean": 9427.176,
+      "max": 33256
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 8878,
+      "mean": 9201.096,
+      "max": 32919
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 48,
+      "mean": 48,
+      "max": 48
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 16,
+      "mean": 16,
+      "max": 16
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1392,
+      "mean": 1392,
+      "max": 1392
+    }
+  },
+  {
+    "curve": 39,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      16,
+      26,
+      40,
+      64
+    ],
+    "steps": 8,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 9089,
+      "mean": 9475.236,
+      "max": 46210
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 8873,
+      "mean": 9215.804,
+      "max": 45771
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 48,
+      "mean": 48,
+      "max": 48
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 16,
+      "mean": 16,
+      "max": 16
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1392,
+      "mean": 1392,
+      "max": 1392
+    }
+  },
+  {
+    "curve": 40,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      16,
+      26,
+      42,
+      65
+    ],
+    "steps": 8,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 9096,
+      "mean": 9748.792,
+      "max": 111299
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 8880,
+      "mean": 9512.944,
+      "max": 110677
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 48,
+      "mean": 48,
+      "max": 48
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 16,
+      "mean": 16,
+      "max": 16
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1392,
+      "mean": 1392,
+      "max": 1392
+    }
+  },
+  {
+    "curve": 41,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      16,
+      26,
+      42,
+      67
+    ],
+    "steps": 8,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 9108,
+      "mean": 9354.606,
+      "max": 36745
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 8893,
+      "mean": 9126.434,
+      "max": 36393
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 48,
+      "mean": 48,
+      "max": 48
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 16,
+      "mean": 16,
+      "max": 16
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1392,
+      "mean": 1392,
+      "max": 1392
+    }
+  },
+  {
+    "curve": 42,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      16,
+      27,
+      43,
+      68
+    ],
+    "steps": 8,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 9082,
+      "mean": 9532.258,
+      "max": 60673
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 8866,
+      "mean": 9306.194,
+      "max": 60240
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 48,
+      "mean": 48,
+      "max": 48
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 16,
+      "mean": 16,
+      "max": 16
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1392,
+      "mean": 1392,
+      "max": 1392
+    }
+  },
+  {
+    "curve": 43,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      16,
+      27,
+      43,
+      69
+    ],
+    "steps": 8,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 8571,
+      "mean": 9264.038,
+      "max": 27930
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 8367,
+      "mean": 9044.418,
+      "max": 27400
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 48,
+      "mean": 48,
+      "max": 48
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 16,
+      "mean": 16,
+      "max": 16
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1392,
+      "mean": 1392,
+      "max": 1392
+    }
+  },
+  {
+    "curve": 44,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      16,
+      27,
+      45,
+      71
+    ],
+    "steps": 8,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 8871,
+      "mean": 9631.204,
+      "max": 57683
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 8649,
+      "mean": 9402.11,
+      "max": 56932
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 48,
+      "mean": 48,
+      "max": 48
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 16,
+      "mean": 16,
+      "max": 16
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1392,
+      "mean": 1392,
+      "max": 1392
+    }
+  },
+  {
+    "curve": 45,
+    "level": 4,
+    "path": [
+      0,
+      1,
+      4,
+      8,
+      16,
+      27,
+      45,
+      73
+    ],
+    "steps": 8,
+    "pair_wall_ns": {
+      "n": 500,
+      "min": 9141,
+      "mean": 9440.624,
+      "max": 31196
+    },
+    "pair_process_cpu_ns": {
+      "n": 500,
+      "min": 8923,
+      "mean": 9209.522,
+      "max": 30846
+    },
+    "field_add_sub": {
+      "n": 500,
+      "min": 48,
+      "mean": 48,
+      "max": 48
+    },
+    "field_inverse": {
+      "n": 500,
+      "min": 16,
+      "mean": 16,
+      "max": 16
+    },
+    "field_multiply_including_inverse_power": {
+      "n": 500,
+      "min": 1392,
+      "mean": 1392,
+      "max": 1392
+    }
+  }
+]

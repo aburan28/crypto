@@ -5,6 +5,20 @@ old experiment is not recovered or pooled. This replacement uses the same exact
 photographed source curve with new securely sampled fixtures and a new frozen
 identity. The original complete workload remains required.
 
+## Progress snapshot, 2026-10-17 18:00 UTC
+
+All **4600 rho cases** and **4520/4600 BSGS cases** have verified answers.
+The separately frozen native arithmetic replay is still running; its timings
+do not replace the original measurements. All **46 curve cardinalities** and
+**9200 point orders** match independent PARI checks. The full-path transport
+phase verifies **23000 actual P/Q pair evaluations**. Full random-corpus IC
+recovery remains unresolved; see [the precise gap](IC_RECOVERY_GAP.md).
+
+New reports: [transport](reports/transport_1802/README.md),
+[setup/query cost ledger](reports/costs_1801/README.md), and
+[orders](reports/orders_1525_v2/README.md). Older dated snapshots below retain
+their historical counts. The full experiment is not complete.
+
 ## Reconstructed and validated
 
 - Complete selected rational 2-isogeny component: **46 curves, 90 directed maps,

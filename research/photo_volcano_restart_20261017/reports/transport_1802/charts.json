@@ -1,0 +1,110 @@
+[
+  {
+    "name": "transport_operations",
+    "label": "Full-path P/Q transport: field multiplications",
+    "unit": "F_p multiplications including inverse exponentiation",
+    "boundary": "Actual reference operations; path preparation and image validation excluded",
+    "manifest": {
+      "schema": "isogeny-volcano-diagram/v1",
+      "run_id": "transport_1802",
+      "node_count": 46,
+      "directed_edge_count": 90,
+      "recorded_levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "color_range": [
+        0,
+        1392
+      ],
+      "source_sha256": "e3278047fdb81f2fbd083196a2918cfa2a39315ceab6730814597079d8bfbb3b",
+      "missing_nodes": 0,
+      "all_vertices_and_maps_retained": true,
+      "pdf_inspection_required": true
+    }
+  },
+  {
+    "name": "transport_wall",
+    "label": "Full-path P/Q transport: elapsed time",
+    "unit": "microseconds",
+    "boundary": "500 observed pair transports per curve, 100 paired targets × five repetitions",
+    "manifest": {
+      "schema": "isogeny-volcano-diagram/v1",
+      "run_id": "transport_1802",
+      "node_count": 46,
+      "directed_edge_count": 90,
+      "recorded_levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "color_range": [
+        0.459544,
+        20.481848000000003
+      ],
+      "source_sha256": "fafff27bba04b3e968a0962d52b43aefb0adcf3948646912a1c3e4e665ba9988",
+      "missing_nodes": 0,
+      "all_vertices_and_maps_retained": true,
+      "pdf_inspection_required": true
+    }
+  },
+  {
+    "name": "transport_cpu",
+    "label": "Full-path P/Q transport: process CPU time",
+    "unit": "microseconds",
+    "boundary": "Same actual evaluations; concurrent L0; no isolated speed claim",
+    "manifest": {
+      "schema": "isogeny-volcano-diagram/v1",
+      "run_id": "transport_1802",
+      "node_count": 46,
+      "directed_edge_count": 90,
+      "recorded_levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "color_range": [
+        0.234786,
+        20.214603999999998
+      ],
+      "source_sha256": "db27a1110c2284e781206a096c02ae55f238401c1fa0da211bc1104501a14a17",
+      "missing_nodes": 0,
+      "all_vertices_and_maps_retained": true,
+      "pdf_inspection_required": true
+    }
+  },
+  {
+    "name": "transport_steps",
+    "label": "Frozen source-to-vertex path length",
+    "unit": "degree-2 maps",
+    "boundary": "First-discovery route from source C0, including exact codomain isomorphisms",
+    "manifest": {
+      "schema": "isogeny-volcano-diagram/v1",
+      "run_id": "transport_1802",
+      "node_count": 46,
+      "directed_edge_count": 90,
+      "recorded_levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "color_range": [
+        0,
+        8
+      ],
+      "source_sha256": "7dbb854dd3c38fe18d9d225788a7b2e3efb1072ed6779b567304e748af286258",
+      "missing_nodes": 0,
+      "all_vertices_and_maps_retained": true,
+      "pdf_inspection_required": true
+    }
+  }
+]

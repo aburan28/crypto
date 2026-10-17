@@ -1,0 +1,26 @@
+{
+  "curves": 46,
+  "problems_per_curve": 100,
+  "repeats": 5,
+  "actual_pair_transports": 23000,
+  "maximum_path_steps": 8,
+  "all_images_verified": true,
+  "all_orders": "18014494963342201",
+  "source_identity_has_zero_field_operations": true,
+  "wall_ns": {
+    "n": 23000,
+    "min": 372,
+    "mean": 8992.828043478261,
+    "max": 5705426
+  },
+  "process_cpu_ns": {
+    "n": 23000,
+    "min": 174,
+    "mean": 8702.220652173914,
+    "max": 5076146
+  },
+  "timing_class": "CPU-only L0; concurrent BSGS; instrumented reference maps",
+  "raw_input_sha256": "f1a8677eaee8898c0b75694b399a05a80cef9844251432610f7ed8e5ec6f0a6d",
+  "protocol": "TRANSPORT_PROTOCOL.md",
+  "not_measured_end_to_end_solves": true
+}
