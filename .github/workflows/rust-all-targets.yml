@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   scope:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
       contents: read
@@ -63,7 +63,7 @@ jobs:
   check:
     needs: scope
     if: always() && !cancelled() && (needs.scope.result != 'success' || needs.scope.outputs.rust_root != 'false')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     permissions:
       contents: read
@@ -79,6 +79,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /Cargo.toml
+            /tools/volcano-cli/
+            /isogeny_algos/
             /Cargo.lock
             /.cargo/
             /rust-toolchain*
@@ -86,6 +88,7 @@ jobs:
             /build.rs
             /rustfmt.toml
             /clippy.toml
+            /crates/crypto-analysis-core/
             /src/
             /tests/
             /examples/
@@ -99,3 +102,4 @@ jobs:
       # Warnings stay out of the gate: this job answers "does it compile",
       # and the examples carry dead code on purpose.
       - run: RUSTFLAGS=-Awarnings cargo check --workspace --all-targets
+      - run: cargo test --manifest-path crates/crypto-analysis-core/Cargo.toml --lib

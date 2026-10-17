@@ -1,0 +1,40 @@
+{
+  "scope": "Original C prefix only, not its full class; largest prime subgroup 7; all 3738 targets verified; 517 vertices in 24 local strata; 1352 unknown conductor. Separate source-model two-target run not pooled.",
+  "folder_id": "109DpcQpX7ATz6GeI8iSWAExGMWBoR-H_",
+  "files": [
+    {
+      "name": "volcano_ORIGINAL_C_PARTIAL_1869vertices_24localstrata_FF_relations_20261017.tar.xz",
+      "bytes": 5345192,
+      "sha256": "3ee0361aaa94bdab37926b4c6f9e2dcf4837cce6f832775f45d4e36ff573bc8f",
+      "drive_file_id": "1Xi7mjLCskYEauXlwzAfQQtOoHw6waop-",
+      "url": "https://drive.google.com/file/d/1Xi7mjLCskYEauXlwzAfQQtOoHw6waop-/view",
+      "metadata_readback": "name, byte count and parent folder checked; remote whole-file hash not checked"
+    },
+    {
+      "name": "report.pdf",
+      "bytes": 141060,
+      "sha256": "a23136412171339f0af7809d65bb4b14df40ca8f20715fb9f6b41317ebe1616e",
+      "drive_file_id": "1jqNQUqu2uxOU3n7NOn1jOYFQaAD9We4L",
+      "url": "https://drive.google.com/file/d/1jqNQUqu2uxOU3n7NOn1jOYFQaAD9We4L/view",
+      "metadata_readback": "name, byte count and parent folder checked; remote whole-file hash not checked"
+    },
+    {
+      "name": "prefix-observations.csv",
+      "bytes": 7020092,
+      "sha256": "c8184c70f62d9e3d64977219de8df6004b8340bf79e1d327eea1e17fd7e0b657",
+      "drive_file_id": "1B4XZNFrlzgIzZT1vI7gq6kJs1MfWFFQf",
+      "url": "https://drive.google.com/file/d/1B4XZNFrlzgIzZT1vI7gq6kJs1MfWFFQf/view",
+      "metadata_readback": "name, byte count and parent folder checked; remote whole-file hash not checked"
+    }
+  ],
+  "local_validation": {
+    "manifest_check": "all entries passed",
+    "native_extracted_reexecution_match": true,
+    "deterministic_repack": {
+      "outer_byte_identical": true,
+      "raw_tree_byte_identical": true,
+      "sha256": "3ee0361aaa94bdab37926b4c6f9e2dcf4837cce6f832775f45d4e36ff573bc8f"
+    }
+  },
+  "s3_status": "NOT_UPLOADED: no runtime AWS identity; existing reports workflow runs on main"
+}

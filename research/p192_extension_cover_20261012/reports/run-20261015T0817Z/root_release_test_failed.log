@@ -1,0 +1,72 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.26
+   Compiling libc v0.2.190
+   Compiling stable_deref_trait v1.2.1
+   Compiling cfg-if v1.0.5
+   Compiling writeable v0.6.4
+   Compiling litemap v0.8.3
+   Compiling utf8_iter v1.0.4
+   Compiling autocfg v1.5.1
+   Compiling icu_normalizer_data v2.3.0
+   Compiling icu_properties_data v2.3.0
+   Compiling zerocopy v0.8.60
+   Compiling crossbeam-utils v0.8.23
+error: failed to create file encoder: No space left on device (os error 28)
+
+error: couldn't create a temp dir: No space left on device (os error 28) at path "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/target/release/deps/rmetao5pyuH"
+
+error: failed to write /Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/target/release/deps/libunicode_ident-164e1b031d078a12.rmeta: No space left on device (os error 28)
+
+error: could not compile `writeable` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not write output to /Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/target/release/build/crossbeam-utils-c9a9ca1e11962081/build_script_build-c9a9ca1e11962081.d7mitdstvpd0fwzmcds9vfccm.rcgu.o: No space left on device
+
+error: could not write output to /Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/target/release/build/proc-macro2-98a4feb77563bc8e/build_script_build-98a4feb77563bc8e.4oj6psasruah06k8az6b6u07o.rcgu.o: No space left on device
+
+error: could not compile `litemap` (lib) due to 1 previous error
+rustc-LLVM ERROR: IO failure on output stream: No space left on device
+error: could not compile `unicode-ident` (lib) due to 1 previous error
+error: failed to build archive at `/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/target/release/deps/libcfg_if-c5f14d0ed0f66f0a.rlib`: No space left on device (os error 28)
+
+error: failed to build archive at `/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/target/release/deps/libstable_deref_trait-da72cac5fa52f526.rlib`: No space left on device (os error 28)
+
+error: could not compile `proc-macro2` (build script) due to 1 previous error
+error: could not compile `crossbeam-utils` (build script) due to 1 previous error
+error: could not compile `autocfg` (lib) due to 1 previous error
+error: could not write output to /Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/target/release/build/icu_properties_data-7928405a16cda5f3/build_script_build-7928405a16cda5f3.build_script_build.a0d9f032409e8ba5-cgu.0.rcgu.o: No space left on device
+
+error: could not compile `cfg-if` (lib) due to 1 previous error
+error: could not compile `icu_normalizer_data` (build script)
+
+Caused by:
+  process didn't exit successfully: `rustc --crate-name build_script_build --edition=2024 /Users/adamburan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/icu_normalizer_data-2.3.0/build.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --crate-type bin --emit=dep-info,link -C embed-bitcode=no --warn=unexpected_cfgs --check-cfg 'cfg(icu4x_custom_data)' -C debug-assertions=off --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values())' -C metadata=2f908a3653cc9711 -C extra-filename=-ac7253a9e3effdd7 --out-dir /Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/target/release/build/icu_normalizer_data-ac7253a9e3effdd7 -C strip=debuginfo -L dependency=/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/target/release/deps --cap-lints allow` (exit status: 101)
+error: could not compile `stable_deref_trait` (lib) due to 1 previous error
+error: could not compile `icu_properties_data` (build script) due to 1 previous error
+rustc-LLVM ERROR: IO failure on output stream: No space left on device
+rustc-LLVM ERROR: IO failure on output stream: No space left on device
+error: could not compile `utf8_iter` (lib)
+
+Caused by:
+  failed to create file `/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/target/release/.fingerprint/utf8_iter-961fa4073939e6e7/output-lib-utf8_iter`
+
+Caused by:
+  failed to parse process output: `rustc --crate-name utf8_iter --edition=2021 /Users/adamburan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/utf8_iter-1.0.4/src/lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --crate-type lib --emit=dep-info,metadata,link -C opt-level=3 -C embed-bitcode=no --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values())' -C metadata=827b4581cf960413 -C extra-filename=-961fa4073939e6e7 --out-dir /Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/target/release/deps -C strip=debuginfo -L dependency=/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/target/release/deps --cap-lints allow` (exit status: 101)
+error: couldn't create a temp dir: No space left on device (os error 28) at path "/Volumes/SSD990/llm/tmp/rustcfdxY54"
+
+error: could not compile `quote` (build script) due to 1 previous error
+rustc-LLVM ERROR: IO failure on output stream: No space left on device
+error: could not compile `libc` (build script)
+
+Caused by:
+  No space left on device (os error 28)
+
+Caused by:
+  failed to parse process output: `rustc --crate-name build_script_build --edition=2021 /Users/adamburan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.190/build.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --crate-type bin --emit=dep-info,link -C embed-bitcode=no --allow=unused_qualifications '--warn=clippy::unnecessary_semicolon' '--allow=clippy::unnecessary_cast' '--warn=clippy::ptr_as_ptr' '--allow=clippy::non_minimal_cfg' '--allow=clippy::missing_safety_doc' '--warn=clippy::map_unwrap_or' '--warn=clippy::manual_assert' '--allow=clippy::identity_op' '--warn=clippy::explicit_iter_loop' -C debug-assertions=off --cfg 'feature="default"' --cfg 'feature="std"' --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values("align", "const-extern-fn", "default", "extra_traits", "rustc-dep-of-std", "rustc-std-workspace-core", "std", "use_std"))' -C metadata=9b49db3fd594c128 -C extra-filename=-dc08aa4787c2df22 --out-dir /Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/target/release/build/libc-dc08aa4787c2df22 -C strip=debuginfo -L dependency=/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/target/release/deps --cap-lints allow` (exit status: 101)
+error: could not compile `zerocopy` (build script)
+
+Caused by:
+  failed to create file `/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/target/release/.fingerprint/zerocopy-b83b895f2a438767/output-build-script-build-script-build`
+
+Caused by:
+  failed to parse process output: `rustc --crate-name build_script_build --edition=2021 /Users/adamburan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerocopy-0.8.60/build.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --crate-type bin --emit=dep-info,link -C embed-bitcode=no -C debug-assertions=off --cfg 'feature="simd"' --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values("__internal_use_only_features_that_work_on_stable", "alloc", "derive", "float-nightly", "simd", "simd-nightly", "std", "zerocopy-derive"))' -C metadata=f0dc1fb3434d702b -C extra-filename=-b83b895f2a438767 --out-dir /Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/target/release/build/zerocopy-b83b895f2a438767 -C strip=debuginfo -L dependency=/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/target/release/deps --cap-lints allow` (exit status: 101)

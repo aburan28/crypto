@@ -1,0 +1,41 @@
+{
+  "schema": "ecc2k130-local-release-test-v1",
+  "tested_commit": "6e1a88fca",
+  "full_suite": {
+    "command": "cargo test --release --lib",
+    "environment": "workspace sandbox; default parallel test threads",
+    "exit_code": 101,
+    "passed": 4116,
+    "failed": 13,
+    "ignored": 117,
+    "failure_groups": {
+      "local_socket_permission_denied": 9,
+      "isogeny_cover_internal_timeout_under_parallel_load": 4
+    },
+    "log": "release-suite.log",
+    "sha256": "ca386818256b7c34601eb566db4eaac66eb0a3f76f167c38f4e082e0c6ee0d9c"
+  },
+  "targeted_reruns": [
+    {
+      "command": "cargo test --release --lib cryptanalysis::jv_cover::tests:: -- --test-threads 1",
+      "environment": "workspace sandbox; one test thread",
+      "exit_code": 0,
+      "passed": 14,
+      "failed": 0,
+      "ignored": 1,
+      "log": "release-jv-cover-rerun.log",
+      "sha256": "61002df483da6483e68ef9c8b33f17f6fd8f1a3b3885bba25ca8887740934086"
+    },
+    {
+      "command": "cargo test --release --lib cryptanalysis::pollard_collab:: -- --test-threads 1",
+      "environment": "loopback access; one test thread",
+      "exit_code": 0,
+      "passed": 37,
+      "failed": 0,
+      "ignored": 0,
+      "log": "release-pollard-collab-rerun.log",
+      "sha256": "57eab89e64a0a94a4932dc585e97e21e4fb986c5741049234574c10eaa18427f"
+    }
+  ],
+  "conclusion": "Original full-suite run failed; all 13 failed tests passed in scoped reruns under conditions addressing the observed timeout and socket errors."
+}

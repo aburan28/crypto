@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/type_i_larger_norm.py", line 197, in <module>
+    rows = [run(name, params) for name, params in CURVES.items()]
+            ~~~^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/type_i_larger_norm.py", line 162, in run
+    assert row == expected, (name, j, row, expected)
+           ^^^^^^^^^^^^^^^
+AssertionError: ('P-224', 1, [(0 : 1 : 0), (11838696407187388799350957250141035264678915751356546206913969278886 : 23993322654861246157589806010403703828974757621570282970594538100550 : 1), (0 : 1 : 0)], [(0 : 1 : 0), (0 : 1 : 0), (11838696407187388799350957250141035264678915751356546206913969278886 : 23993322654861246157589806010403703828974757621570282970594538100550 : 1)])

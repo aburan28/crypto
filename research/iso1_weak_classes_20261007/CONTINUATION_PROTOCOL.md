@@ -107,7 +107,7 @@ pending.
 
 A certifying counter (`--certified`: unique Hasse candidate across curve and
 twist points) reran p = 7, 13, 37, 41, 43, 47, 53 and 59 in a 4-core
-container, with byte-identical output in every case. It completed p = 61 through 89 and
+container, with byte-identical output in every case. It completed p = 61 through 113 and
 runs the remaining primes through 199 sequentially. The live queue is outside
 the repository; completed primes are added under `certified_20261016/` with
 stderr receipts and CSV hashes. The queue's GP controls are replaced by the

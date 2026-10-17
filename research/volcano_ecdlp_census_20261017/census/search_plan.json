@@ -1,0 +1,15 @@
+{
+  "schema": "volcano-census.search-plan/v1",
+  "recorded_before": "any V1..V4 search",
+  "b": 26,
+  "min_n": 262144,
+  "seed_streams": {"V1": "20261101 + i", "V2": "20261201 + i", "V3": "20261301 + i"},
+  "rule": "for i = 0,1,2,...: run volcano-rho search with seed = stream + i; walk the hit with ca volcano (--radius 40 --max-vertices 20000, --seed 20261017); take the FIRST hit that satisfies the volcano's criteria; every rejected seed and its reason is logged in census/search_log.jsonl. Size limits are budget rules, not outcome rules.",
+  "criteria": {
+    "common": "walk complete (no vertex with level -1, count < max-vertices), prime-order subgroup n >= 2^18 with cofactor <= 64, n not divisible by ell",
+    "V1": "ell=2, depth=4, crater split, p = 1 mod 8, special_j_skipped = 0, total vertices <= 400",
+    "V2": "ell=3, depth=3, crater split, special_j_skipped = 0, total vertices <= 400",
+    "V3": "ell=2, depth=4, j=0 root (D_K=-3, inert crater, one vertex) found with --j0, p = 1 mod 24, r = 1 mod 3 (rho.cubic needs 3 | r-1), walk complete (special_j_skipped may be > 0 only because child->root edges return to j=0)",
+    "V4": "the quadratic twist of the V1 root by the least quadratic non-residue d: (a d^2, b d^3); same walk checks; r = largest prime factor of p+1+t, accepted whatever the cofactor if r >= 2^16 (stretch; reported if not)"
+  }
+}

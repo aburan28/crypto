@@ -1,0 +1,39 @@
+   Compiling p192-type-i-conditioned-support v0.1.0 (/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/native_support)
+    Finished `release` profile [optimized] target(s) in 2.82s
+     Running unittests src/bin/adaptive_private_columns.rs (/private/tmp/p192-adaptive-cargo/release/deps/adaptive_private_columns-22dcc62fc396fdcf)
+
+running 1 test
+test ec::tests::p192_generator_and_order ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/bin/formal_collision.rs (/private/tmp/p192-adaptive-cargo/release/deps/formal_collision-8c9ae6efc50f8c18)
+
+running 1 test
+test ec::tests::p192_generator_and_order ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/bin/mixed_known_log.rs (/private/tmp/p192-adaptive-cargo/release/deps/mixed_known_log-adb5ede68fb1fcb1)
+
+running 1 test
+test ec::tests::p192_generator_and_order ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/main.rs (/private/tmp/p192-adaptive-cargo/release/deps/p192_type_i_conditioned_support-d82922ca1f31f4ce)
+
+running 2 tests
+test ec::tests::p192_generator_and_order ... ok
+test tests::frozen_base_and_character_partition ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.48s
+
+     Running unittests src/bin/signed_base.rs (/private/tmp/p192-adaptive-cargo/release/deps/signed_base-2c9d76a30a2cb7ed)
+
+running 2 tests
+test ec::tests::p192_generator_and_order ... ok
+test tests::frozen_signed_support_and_collector ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.04s
+

@@ -8,7 +8,7 @@ on:
 
 jobs:
   replay:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -17,6 +17,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /Cargo.toml
+            /tools/volcano-cli/
+            /isogeny_algos/
             /src/*
             /examples/koblitz_orbit_dlp_s3_batch.rs
             /docs/ic/calibration.json

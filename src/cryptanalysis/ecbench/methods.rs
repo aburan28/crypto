@@ -42,7 +42,7 @@ use crate::cryptanalysis::ic_framework::fiber::{
 use crate::cryptanalysis::ic_framework::plugins::{
     BinarySubspaceBase, CompactOrbitScanBase, CyclotomicBase, DescentAlgebraicOracle,
     FrobeniusMitmOracle, GlvOrbitBase, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase,
-    PrimeBatchMitmOracle, RootfindSubtractOracle, SubtractOracle,
+    PrimeBatchMitmOracle, PrimeProjectedAbscissaBase, RootfindSubtractOracle, SubtractOracle,
 };
 use crate::cryptanalysis::ic_framework::prime_tower::{PrimeIsogenyBase, PrimeKummerBase};
 use crate::cryptanalysis::ic_framework::rootfind::{RootfindMitmOracle, RootfindPairsOracle};
@@ -290,6 +290,30 @@ pub fn registry() -> &'static [MethodDecl] {
             entry: "koblitz_strong_rho::StrongRho::solve",
             applies: Applies::KoblitzOnly,
             params: STRONG_PARAMS,
+        },
+        MethodDecl {
+            id: "rho.signed_frobenius_strong_legacy",
+            family: "rho",
+            summary: "the literal pre-2026-10-14 implementation of the strong single-target reference, retained only as a trajectory-identical within-binary performance control",
+            entry: "koblitz_strong_rho::StrongRho::solve_legacy",
+            applies: Applies::KoblitzOnly,
+            params: &[
+                ParamDecl {
+                    name: "lanes",
+                    default: Some("32"),
+                    help: "walks advanced in lockstep (batch-inversion width); the reference measured 32",
+                },
+                ParamDecl {
+                    name: "dp_bits",
+                    default: Some("4"),
+                    help: "distinguished-point bits; the reference measured 4",
+                },
+                ParamDecl {
+                    name: "step_cap_factor",
+                    default: Some("2000"),
+                    help: "give up after this multiple of the ideal step count",
+                },
+            ],
         },
         MethodDecl {
             id: "rho.signed_frobenius_strong_escape",
@@ -998,7 +1022,9 @@ fn solve_wide(
     seed: u64,
 ) -> Result<SolveReport, String> {
     match m.id.as_str() {
-        "rho.signed_frobenius_strong" | "rho.signed_frobenius_strong_escape" => {
+        "rho.signed_frobenius_strong"
+        | "rho.signed_frobenius_strong_legacy"
+        | "rho.signed_frobenius_strong_escape" => {
             solve_strong_wide(m, wi, tx, ty, seed)
         }
         "claw.pair_table" => solve_claw_wide(m, wi, tx, ty, seed),
@@ -1106,6 +1132,7 @@ fn solve_inner(
         }
         (Instance::Binary(i), _)
             if m.id == "rho.signed_frobenius_strong"
+                || m.id == "rho.signed_frobenius_strong_legacy"
                 || m.id == "rho.signed_frobenius_strong_escape" =>
         {
             solve_strong(m, i, FastPoint::affine(tx, ty), seed)
@@ -1648,7 +1675,11 @@ fn strong_run<F: RhoField, S: RhoScalar>(
         measurement::callgrind_dump(b"ecbench_before_online\0");
     }
     measurement::begin_online(Phase::RhoSolve);
-    let outcome = rho.solve(q, &jumps, &mut start_rng, &params, charges);
+    let outcome = if m.id == "rho.signed_frobenius_strong_legacy" {
+        rho.solve_legacy(q, &jumps, &mut start_rng, &params, charges)
+    } else {
+        rho.solve(q, &jumps, &mut start_rng, &params, charges)
+    };
     measurement::end_online();
     if profile_online {
         measurement::callgrind_dump(b"ecbench_online\0");
@@ -1975,11 +2006,13 @@ fn solve_ic_prime(
 ) -> Result<SolveReport, String> {
     let (spec, fb_name, or_name) = pipeline_spec(m, seed)?;
     let abscissa = PrimeAbscissaBase { instance: inst };
+    let projected = PrimeProjectedAbscissaBase { instance: inst };
     let orbit = GlvOrbitBase { instance: inst };
     let kummer = PrimeKummerBase { instance: inst };
     let isogeny = PrimeIsogenyBase { instance: inst };
     let base: &dyn FactorBaseBuilder<_> = match fb_name.as_str() {
         "prime-abscissa" => &abscissa,
+        "prime-projected-abscissa" => &projected,
         "glv-orbit" => &orbit,
         "prime-kummer" => &kummer,
         "prime-isogeny" => &isogeny,
@@ -2487,11 +2520,13 @@ pub fn dump_factor_base(
     match &inst {
         Instance::Prime(i) => {
             let abscissa = PrimeAbscissaBase { instance: i };
+            let projected = PrimeProjectedAbscissaBase { instance: i };
             let orbit = GlvOrbitBase { instance: i };
             let kummer = PrimeKummerBase { instance: i };
             let isogeny = PrimeIsogenyBase { instance: i };
             let base: &dyn FactorBaseBuilder<_> = match name.as_str() {
                 "prime-abscissa" => &abscissa,
+                "prime-projected-abscissa" => &projected,
                 "glv-orbit" => &orbit,
                 "prime-kummer" => &kummer,
                 "prime-isogeny" => &isogeny,

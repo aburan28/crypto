@@ -1,0 +1,76 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg-crater",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "rho.cubic"
+      },
+      "name": "rho-cubic",
+      "role": "control"
+    }
+  ],
+  "description": "volcano-rho --ecbench: every curve of an 2-isogeny volcano over F_13151689 (8 curves x 4 models), isogeny-transported generators, planted_shared targets; written by ./target/release/volcano-rho --bits 24 --depth 3 --max-cofactor 4096 --ell 2 --j0 --seed 11 --controls 0 --per-level 12 --ecbench research/isogeny-volcano-cost_20261017/classes/j0 --models 4 --targets 16 --out /tmp/claude-0/-home-user/bb846e50-c603-501b-84aa-3c771ffd768e/scratchpad/vr-j0",
+  "label": "isogeny volcano: automorphism positive control on the crater",
+  "measurement": {
+    "isolation_required": "L0",
+    "order": "shuffle",
+    "rounds": 1,
+    "seed": 11,
+    "timeout_seconds": 600,
+    "warmup": 1
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 0,
+        "b": 9554511,
+        "group_order": 13155924,
+        "gx": 11359379,
+        "gy": 1041035,
+        "kind": "prime_explicit",
+        "p": 13151689,
+        "r": 1096327
+      },
+      {
+        "a": 0,
+        "b": 629801,
+        "group_order": 13155924,
+        "gx": 6231466,
+        "gy": 12399517,
+        "kind": "prime_explicit",
+        "p": 13151689,
+        "r": 1096327
+      },
+      {
+        "a": 0,
+        "b": 12414207,
+        "group_order": 13155924,
+        "gx": 323952,
+        "gy": 9981038,
+        "kind": "prime_explicit",
+        "p": 13151689,
+        "r": 1096327
+      },
+      {
+        "a": 0,
+        "b": 1956787,
+        "group_order": 13155924,
+        "gx": 6672903,
+        "gy": 4178992,
+        "kind": "prime_explicit",
+        "p": 13151689,
+        "r": 1096327
+      }
+    ],
+    "target_kind": "planted_shared",
+    "target_seed": 11,
+    "targets_per_curve": 16
+  }
+}

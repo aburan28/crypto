@@ -1,0 +1,97 @@
+[
+  {
+    "cold_or_warm": "one_fresh_process_with_empty_index_and_logs; one_target_online_after_reusable_preparation",
+    "curve_id": "EC1N83Ckb1a1haacb69ee9f37",
+    "input_law": {
+      "domain": "n83-root11-bloom-tier1-fresh-20261015-v1",
+      "five_point_fixture_sha256": "ef616c5254a9d883e962024b9f4bd7f794cfe5576c73a93b099ac5be6fe45668",
+      "fixture_index": 0,
+      "scalar_rule": "1+(little_endian(SHA256(domain||u32_le(index))) mod (r-1))"
+    },
+    "public_targets": [
+      [
+        "6156366173578153812136735",
+        "5799568391659637965846395"
+      ]
+    ],
+    "schema_version": 1,
+    "target_count": 1,
+    "workload_id": "8842705e739a"
+  },
+  {
+    "cold_or_warm": "one_fresh_process_with_empty_index_and_logs; one_target_online_after_reusable_preparation",
+    "curve_id": "EC1N83Ckb1a1haacb69ee9f37",
+    "input_law": {
+      "domain": "n83-root11-bloom-tier1-fresh-20261015-v1",
+      "five_point_fixture_sha256": "ef616c5254a9d883e962024b9f4bd7f794cfe5576c73a93b099ac5be6fe45668",
+      "fixture_index": 1,
+      "scalar_rule": "1+(little_endian(SHA256(domain||u32_le(index))) mod (r-1))"
+    },
+    "public_targets": [
+      [
+        "4335245134853434568261339",
+        "2441008219071920639537779"
+      ]
+    ],
+    "schema_version": 1,
+    "target_count": 1,
+    "workload_id": "80cb8cb9bd57"
+  },
+  {
+    "cold_or_warm": "one_fresh_process_with_empty_index_and_logs; one_target_online_after_reusable_preparation",
+    "curve_id": "EC1N83Ckb1a1haacb69ee9f37",
+    "input_law": {
+      "domain": "n83-root11-bloom-tier1-fresh-20261015-v1",
+      "five_point_fixture_sha256": "ef616c5254a9d883e962024b9f4bd7f794cfe5576c73a93b099ac5be6fe45668",
+      "fixture_index": 2,
+      "scalar_rule": "1+(little_endian(SHA256(domain||u32_le(index))) mod (r-1))"
+    },
+    "public_targets": [
+      [
+        "7426424134564793656394654",
+        "103601237232010135439337"
+      ]
+    ],
+    "schema_version": 1,
+    "target_count": 1,
+    "workload_id": "c655c491a44c"
+  },
+  {
+    "cold_or_warm": "one_fresh_process_with_empty_index_and_logs; one_target_online_after_reusable_preparation",
+    "curve_id": "EC1N83Ckb1a1haacb69ee9f37",
+    "input_law": {
+      "domain": "n83-root11-bloom-tier1-fresh-20261015-v1",
+      "five_point_fixture_sha256": "ef616c5254a9d883e962024b9f4bd7f794cfe5576c73a93b099ac5be6fe45668",
+      "fixture_index": 3,
+      "scalar_rule": "1+(little_endian(SHA256(domain||u32_le(index))) mod (r-1))"
+    },
+    "public_targets": [
+      [
+        "1214648671777518718473743",
+        "2674579176683740238758428"
+      ]
+    ],
+    "schema_version": 1,
+    "target_count": 1,
+    "workload_id": "78968fb94a5d"
+  },
+  {
+    "cold_or_warm": "one_fresh_process_with_empty_index_and_logs; one_target_online_after_reusable_preparation",
+    "curve_id": "EC1N83Ckb1a1haacb69ee9f37",
+    "input_law": {
+      "domain": "n83-root11-bloom-tier1-fresh-20261015-v1",
+      "five_point_fixture_sha256": "ef616c5254a9d883e962024b9f4bd7f794cfe5576c73a93b099ac5be6fe45668",
+      "fixture_index": 4,
+      "scalar_rule": "1+(little_endian(SHA256(domain||u32_le(index))) mod (r-1))"
+    },
+    "public_targets": [
+      [
+        "5455845552518789328259888",
+        "7623311022038138373875956"
+      ]
+    ],
+    "schema_version": 1,
+    "target_count": 1,
+    "workload_id": "923521b44df2"
+  }
+]

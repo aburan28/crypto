@@ -1,0 +1,8 @@
+ℹ [934/935] Built UnorderedSupport (17s)
+info: UnorderedSupport.lean:53:0: 'P192ExtensionCover.unordered_policy_support_card_le_multichoose' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: UnorderedSupport.lean:54:0: 'P192ExtensionCover.all_pivot_three_sum_capacity' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: UnorderedSupport.lean:55:0: 'P192ExtensionCover.all_pivot_three_sum_hit_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: UnorderedSupport.lean:56:0: 'P192ExtensionCover.all_pivot_arity_capacity_threshold' depends on axioms: [propext, Classical.choice, Quot.sound]
+Build completed successfully (935 jobs).

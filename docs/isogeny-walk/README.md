@@ -1,5 +1,11 @@
 # Isogeny walk: user guide
 
+For a resumable **complete-class census** on supported ordinary prime-field
+inputs, use [`crypto isogeny class`](../../tools/volcano-cli/README.md). It
+computes exact expected populations, preserves every selected-degree kernel,
+and distinguishes a complete component from the entire vertex class. The
+bounded walker documented below remains useful for other fields and sizes.
+
 `isogeny_walk` explores the isogeny class of a prime-field elliptic curve
 (P-256, P-224, P-192, or any short Weierstrass curve you give it).
 

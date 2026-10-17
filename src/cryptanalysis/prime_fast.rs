@@ -104,16 +104,22 @@ impl Fp64 {
         f
     }
 
+    /// `u mod p` for `u < 2p`.  A select, not a branch: on field data the
+    /// comparison is a coin flip a branch predictor cannot learn (see
+    /// [`crate::cryptanalysis::fp_backend::Fp64`] and
+    /// `research/hwcost_round2_20261016`, addendum 1).
+    #[inline(always)]
+    fn csub(&self, u: u64) -> u64 {
+        let (d, borrow) = u.overflowing_sub(self.p);
+        std::hint::select_unpredictable(borrow, u, d)
+    }
+
     /// Montgomery reduction of `t < p·2^64`: returns `t·R⁻¹ mod p`.
     #[inline(always)]
     pub fn reduce(&self, t: u128) -> u64 {
         let m = (t as u64).wrapping_mul(self.n_inv);
         let u = ((t + (m as u128) * (self.p as u128)) >> 64) as u64;
-        if u >= self.p {
-            u - self.p
-        } else {
-            u
-        }
+        self.csub(u)
     }
 
     #[inline(always)]
@@ -128,25 +134,18 @@ impl Fp64 {
 
     #[inline(always)]
     pub fn add(&self, a: u64, b: u64) -> u64 {
-        let s = a + b;
-        if s >= self.p {
-            s - self.p
-        } else {
-            s
-        }
+        self.csub(a + b)
     }
 
     #[inline(always)]
     pub fn sub(&self, a: u64, b: u64) -> u64 {
-        if a >= b {
-            a - b
-        } else {
-            a + self.p - b
-        }
+        let (d, borrow) = a.overflowing_sub(b);
+        std::hint::select_unpredictable(borrow, d.wrapping_add(self.p), d)
     }
 
     #[inline(always)]
     pub fn neg(&self, a: u64) -> u64 {
+        // a == 0 is rare on data, so this branch predicts: kept.
         if a == 0 {
             0
         } else {
@@ -329,6 +328,17 @@ pub struct Pt {
     pub x: u64,
     pub y: u64,
 }
+
+/// A Jacobian point `(X : Y : Z)`, `x = X/Z²`, `y = Y/Z³`, Montgomery
+/// coordinates; `Z = 0` is `O`.  Only the scalar multiplications use it.
+#[derive(Clone, Copy, Debug)]
+struct Jac {
+    x: u64,
+    y: u64,
+    z: u64,
+}
+
+const JAC_INFINITY: Jac = Jac { x: 0, y: 0, z: 0 };
 
 /// Short-Weierstrass curve `y² = x³ + ax + b` over `F_p`, `p < 2^62`,
 /// with a prime-order generator subgroup of order `n`.
@@ -537,22 +547,128 @@ impl FastCurve {
     }
 
     /// `[k]P` by double-and-add (variable time; everything here is public).
-    pub fn mul(&self, p: Option<Pt>, mut k: u64) -> Option<Pt> {
-        let mut acc: Option<Pt> = None;
-        let mut base = p;
-        while k > 0 {
-            if k & 1 == 1 {
-                acc = self.add(acc, base);
-            }
-            base = self.add(base, base);
-            k >>= 1;
+    ///
+    /// The running sum is kept in Jacobian coordinates, so the whole
+    /// multiplication pays one inversion instead of one per group
+    /// operation (about 93 at 62 bits).  The result is the same affine
+    /// point the affine ladder gives, for any point and any `k`.
+    pub fn mul(&self, p: Option<Pt>, k: u64) -> Option<Pt> {
+        let p = p?;
+        if k == 0 {
+            return None;
         }
-        acc
+        let mut acc = self.jac(p);
+        for i in (0..63 - k.leading_zeros()).rev() {
+            acc = self.jac_double(acc);
+            if (k >> i) & 1 == 1 {
+                acc = self.jac_add_affine(acc, p);
+            }
+        }
+        self.jac_to_affine(acc)
     }
 
-    /// `[u]G + [v]Q`.
+    /// `[u]G + [v]Q` by Straus–Shamir: one doubling chain over both
+    /// scalars, adding `G`, `Q` or the precomputed `G + Q` per bit, in
+    /// Jacobian coordinates (two inversions in all).  Rho calls this for
+    /// every walk start and every `r`-adding table entry.
     pub fn combine(&self, g: Pt, q: Pt, u: u64, v: u64) -> Option<Pt> {
-        self.add(self.mul(Some(g), u), self.mul(Some(q), v))
+        let gq = self.add(Some(g), Some(q));
+        let mut acc = JAC_INFINITY;
+        for i in (0..64 - (u | v).leading_zeros()).rev() {
+            acc = self.jac_double(acc);
+            match ((u >> i) & 1 == 1, (v >> i) & 1 == 1) {
+                (true, false) => acc = self.jac_add_affine(acc, g),
+                (false, true) => acc = self.jac_add_affine(acc, q),
+                (true, true) => {
+                    // G + Q = O adds nothing.
+                    if let Some(s) = gq {
+                        acc = self.jac_add_affine(acc, s);
+                    }
+                }
+                (false, false) => {}
+            }
+        }
+        self.jac_to_affine(acc)
+    }
+
+    #[inline]
+    fn jac(&self, p: Pt) -> Jac {
+        Jac {
+            x: p.x,
+            y: p.y,
+            z: self.f.one,
+        }
+    }
+
+    /// `2P` (dbl-2007-bl, general `a`).  `O` and the points with `y = 0`
+    /// come out with `Z = 0` without a branch.
+    #[inline]
+    fn jac_double(&self, p: Jac) -> Jac {
+        let f = &self.f;
+        let xx = f.sqr(p.x);
+        let yy = f.sqr(p.y);
+        let yyyy = f.sqr(yy);
+        let zz = f.sqr(p.z);
+        let s = f.sub(f.sub(f.sqr(f.add(p.x, yy)), xx), yyyy);
+        let s = f.add(s, s);
+        let m = f.add(f.add(f.add(xx, xx), xx), f.mul(self.a, f.sqr(zz)));
+        let t = f.sub(f.sqr(m), f.add(s, s));
+        let y8 = f.add(yyyy, yyyy);
+        let y8 = f.add(y8, y8);
+        let y8 = f.add(y8, y8);
+        Jac {
+            x: t,
+            y: f.sub(f.mul(m, f.sub(s, t)), y8),
+            z: f.sub(f.sub(f.sqr(f.add(p.y, p.z)), yy), zz),
+        }
+    }
+
+    /// `P + A` with `A` affine (madd-2007-bl), including `P = O`,
+    /// `P = A` (a doubling) and `P = −A` (giving `O`).
+    #[inline]
+    fn jac_add_affine(&self, p: Jac, a: Pt) -> Jac {
+        let f = &self.f;
+        if p.z == 0 {
+            return self.jac(a);
+        }
+        let z1z1 = f.sqr(p.z);
+        let u2 = f.mul(a.x, z1z1);
+        let s2 = f.mul(a.y, f.mul(p.z, z1z1));
+        let h = f.sub(u2, p.x);
+        let r = f.sub(s2, p.y);
+        if h == 0 {
+            return if r == 0 {
+                self.jac_double(p)
+            } else {
+                JAC_INFINITY
+            };
+        }
+        let r = f.add(r, r);
+        let hh = f.sqr(h);
+        let i = f.add(hh, hh);
+        let i = f.add(i, i);
+        let j = f.mul(h, i);
+        let v = f.mul(p.x, i);
+        let x3 = f.sub(f.sub(f.sqr(r), j), f.add(v, v));
+        let y1j = f.mul(p.y, j);
+        Jac {
+            x: x3,
+            y: f.sub(f.mul(r, f.sub(v, x3)), f.add(y1j, y1j)),
+            z: f.sub(f.sub(f.sqr(f.add(p.z, h)), z1z1), hh),
+        }
+    }
+
+    fn jac_to_affine(&self, p: Jac) -> Option<Pt> {
+        if p.z == 0 {
+            return None;
+        }
+        let f = &self.f;
+        let zi = f.inv(p.z);
+        let zi2 = f.sqr(zi);
+        Some(Pt {
+            x: f.mul(p.x, zi2),
+            y: f.mul(p.y, f.mul(zi2, zi)),
+        })
     }
 
     /// Lift a canonical x-coordinate to the curve point whose
@@ -1513,6 +1629,58 @@ mod tests {
     use super::*;
     use crate::cryptanalysis::research_bench::bench_curves_a_minus_3;
 
+    /// The branch-free selections of [`Fp64`] (`reduce`, `add`, `sub`)
+    /// against the branchy formulas they replaced, bit for bit.
+    #[test]
+    fn fp64_selects_match_branchy_formulas() {
+        for p in [
+            5u64,
+            7,
+            13,
+            1_000_000_007,
+            2_147_483_647,
+            (1 << 61) - 1,
+            (1 << 62) - 57,
+        ] {
+            assert!(is_prime_u64(p), "{p}");
+            let f = Fp64::new(p);
+            let reduce = |t: u128| {
+                let m = (t as u64).wrapping_mul(f.n_inv);
+                let u = ((t + (m as u128) * (p as u128)) >> 64) as u64;
+                if u >= p {
+                    u - p
+                } else {
+                    u
+                }
+            };
+            let add = |a: u64, b: u64| if a + b >= p { a + b - p } else { a + b };
+            let sub = |a: u64, b: u64| if a >= b { a - b } else { a + p - b };
+            let check = |a: u64, b: u64| {
+                let t = a as u128 * b as u128;
+                assert_eq!(f.reduce(t), reduce(t), "reduce p={p} a={a} b={b}");
+                assert_eq!(f.mul(a, b), reduce(t), "mul p={p} a={a} b={b}");
+                assert_eq!(f.sqr(a), reduce(a as u128 * a as u128), "sqr p={p}");
+                assert_eq!(f.add(a, b), add(a, b), "add p={p} a={a} b={b}");
+                assert_eq!(f.sub(a, b), sub(a, b), "sub p={p} a={a} b={b}");
+            };
+            let edges = [0, 1, 2, p - 2, p - 1, p / 2, p / 2 + 1];
+            for &a in &edges {
+                for &b in &edges {
+                    check(a, b);
+                }
+            }
+            let mut rng = StdRng::seed_from_u64(p);
+            for _ in 0..20_000 {
+                check(rng.gen_range(0..p), rng.gen_range(0..p));
+            }
+            // reduce's whole input range, t < p·2^64, not only products.
+            for _ in 0..20_000 {
+                let t = rng.gen_range(0..(p as u128) << 64);
+                assert_eq!(f.reduce(t), reduce(t), "reduce p={p} t={t}");
+            }
+        }
+    }
+
     fn ladder(bits: u32) -> (FastCurve, Pt) {
         let (_, c) = bench_curves_a_minus_3()
             .into_iter()
@@ -1595,6 +1763,98 @@ mod tests {
                     .scalar_mul(&BigUint::from(k), &a_fe)
                     .add(&tg.scalar_mul(&BigUint::from(l), &a_fe), &a_fe);
                 assert_eq!(fc.to_textbook(sum), textbook);
+            }
+            assert_eq!(fc.mul(Some(g), fc.n), None);
+        }
+    }
+
+    /// The affine ladder `mul` used before it moved to Jacobian
+    /// coordinates, kept as the reference the new one must reproduce.
+    fn mul_affine_reference(fc: &FastCurve, p: Option<Pt>, mut k: u64) -> Option<Pt> {
+        let mut acc: Option<Pt> = None;
+        let mut base = p;
+        while k > 0 {
+            if k & 1 == 1 {
+                acc = fc.add(acc, base);
+            }
+            base = fc.add(base, base);
+            k >>= 1;
+        }
+        acc
+    }
+
+    /// Jacobian `mul` and Straus–Shamir `combine` give exactly the affine
+    /// ladder's points on every point of small curves (2-torsion and
+    /// points of every order included), for scalars below, at and past
+    /// the group order, and on the rho ladder curves at random scalars.
+    #[test]
+    fn jacobian_mul_and_combine_match_the_affine_ladder() {
+        for (p, a, b) in [
+            (1009u64, 3u64, 7u64),
+            (1013, 0, 5),
+            (1019, 1018, 0),
+            (2003, 5, 0),
+        ] {
+            let fc = FastCurve::new("tiny", p, a, b, 3);
+            let mut pts = Vec::new();
+            for x in 0..p {
+                let rhs = (x * x % p * x + a * x + b) % p;
+                for y in 0..p {
+                    if y * y % p == rhs {
+                        pts.push(fc.point(x, y));
+                    }
+                }
+            }
+            let order = pts.len() as u64 + 1;
+            assert!(pts.iter().all(|&q| fc.is_on_curve(q)));
+            assert!(
+                pts.iter().any(|q| q.y == 0) || b != 0,
+                "y = 0 cases present"
+            );
+            for (i, &q) in pts.iter().enumerate().step_by(7) {
+                for k in (0..2 * order + 3).chain([u64::MAX >> 2, (1 << 40) + 17]) {
+                    assert_eq!(
+                        fc.mul(Some(q), k),
+                        mul_affine_reference(&fc, Some(q), k),
+                        "p={p} point={i} k={k}"
+                    );
+                }
+                for &r in pts.iter().step_by(37).chain([q, fc.neg(q)].iter()) {
+                    for (u, v) in [
+                        (0u64, 0u64),
+                        (1, 0),
+                        (0, 1),
+                        (1, 1),
+                        (5, 9),
+                        (order, 3),
+                        (123_457, 98_765),
+                    ] {
+                        let want = fc.add(
+                            mul_affine_reference(&fc, Some(q), u),
+                            mul_affine_reference(&fc, Some(r), v),
+                        );
+                        assert_eq!(fc.combine(q, r, u, v), want, "p={p} u={u} v={v}");
+                    }
+                }
+            }
+            assert_eq!(fc.mul(None, 5), None);
+        }
+        for bits in [24u32, 40, 56] {
+            let (fc, g) = if bits <= 28 {
+                ladder(bits)
+            } else {
+                find_a3_curve(bits, 3).expect("ladder curve")
+            };
+            let mut rng = StdRng::seed_from_u64(0x5eed + bits as u64);
+            let q = fc.mul(Some(g), rng.gen_range(1..fc.n)).unwrap();
+            for _ in 0..50 {
+                let (u, v) = (rng.gen_range(0..fc.n), rng.gen_range(0..fc.n));
+                assert_eq!(fc.mul(Some(g), u), mul_affine_reference(&fc, Some(g), u));
+                let want = fc.add(
+                    mul_affine_reference(&fc, Some(g), u),
+                    mul_affine_reference(&fc, Some(q), v),
+                );
+                assert_eq!(fc.combine(g, q, u, v), want, "bits={bits}");
             }
             assert_eq!(fc.mul(Some(g), fc.n), None);
         }

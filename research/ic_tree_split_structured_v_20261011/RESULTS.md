@@ -20,7 +20,7 @@ size, and it climbs with `ℓ` at the random sets' rate.
 | arm | series | uncensored cells | gaps (`D_s(curve) − D_s(R)`) | OLS slopes of `D_s(curve)` on `ℓ` | verdict |
 |:--|--:|--:|:--|:--|:--|
 | `poly` | 6 | 30/30 | all 0 | 1.0, 1.0, 0.9, 0.7, 0.7, 0.8 | **CLOSED** |
-| `frob` (`n = 21`) | 4 | 20/20 | 14 × 0, 6 × −1 | 0.9, 0.9, 1.1, 1.0 | **CLOSED** |
+| `frob` (`n = 21`) | 4 | 20/20 | ~~14 × 0, 6 × −1~~ 15 × 0, 5 × −1 (corrected 2026-10-16) | 0.9, 0.9, 1.1, 1.0 | **CLOSED** |
 | `rand` (`n = 21`) | 2 | 10/10 | all 0 | 0.7, 0.8 | **CLOSED** (replicates the predecessor) |
 | `frob`, `n = 17`, supplementary | 2 | 2/2 | 0, 0 | — | not in the verdict |
 | `subfield` gate | 2 | 2/2 | `T2 ⊆ GF(2^7)`; degree-1 rank 8, deficit 14 in both (gate needs ≥ 14) | — | **PASS** |
@@ -28,17 +28,34 @@ size, and it climbs with `ℓ` at the random sets' rate.
 The ALIVE threshold was a slope of `≤ 0.15` together with a gap of `≤ −2` at the top `ℓ`.
 No series comes near either. No cell was censored and none failed (`cells.log`: 64 `ok`).
 
-### The six `frob` cells at gap −1 are subfield leakage (post hoc)
+> **Correction (2026-10-16, sheriff case SHF-20261016-3caa6f, finding L4).** The registered
+> readout has **five** `frob` (`n = 21`) cells at gap −1 and **fifteen** at gap 0, not six
+> and fourteen as first written here and in the run report
+> ([`runs/registered/readout.txt`](runs/registered/readout.txt), lines 19, 26, 51, 56, 58:
+> `a = 0` seed 20261011 `ℓ = 4`; `a = 0` seed 20261012 `ℓ = 6`; `a = 1` seed 20261011
+> `ℓ = 4`; `a = 1` seed 20261012 `ℓ = 4` and `ℓ = 6`). Six `frob` cells have `V` inside
+> `GF(2^7)`; one of them (`a = 0`, seed 20261012, `ℓ = 4`, `|T2| = 1`) is degenerate at gap 0,
+> as the section below already says, so five, not six, are at −1. The miscount is in the
+> prose only: the records, `Data.lean` and the registered verdict (`Verdict.lean`, CLOSED)
+> are unchanged. The original wording is kept, struck through, where it was wrong.
+
+### The ~~six~~ five `frob` cells at gap −1 are subfield leakage (post hoc; count corrected 2026-10-16)
 
 The registered `frob` arm excluded `g = t^d − 1`, which is a subfield itself. It did not
 exclude a proper Frobenius-stable subspace of a subfield. Three of the ten `g` the run used
 divide `t^7 − 1`: `23`, `29` and `127`. So their `V` lies inside `GF(2^7)`. This is proved
-in [`lean/TreeSplit/Leak.lean`](lean/TreeSplit/Leak.lean), with `native_decide`. For such
-a `V`, `F ⊂ E(GF(2^7))` and `T2 ⊆ GF(2^7)`, which is a 7-dimensional linear subspace.
+in [`lean/TreeSplit/Leak.lean`](lean/TreeSplit/Leak.lean), by kernel evaluation
+(`decide +kernel`; corrected 2026-10-16: it was first closed ~~with `native_decide`~~, which
+trusts the compiler and is not a kernel proof, sheriff case SHF-20261016-3caa6f, finding L3).
+For such a `V`, `F ⊂ E(GF(2^7))` and `T2 ⊆ GF(2^7)`, which is a 7-dimensional linear subspace.
 
-- **They are exactly the gap −1 cells.** These are `ℓ = 4` for both seeds and `ℓ = 6` for
-  seed 20261012 (`|T2|` = 29, 28, 70, 29, 35). The sixth subfield cell, `a = 0`, seed
-  20261012, `ℓ = 4`, is degenerate: `|F| = 2`, `|T2| = 1`, gap 0.
+- **The gap −1 cells are exactly the five non-degenerate subfield cells.** Six `frob` cells
+  have `g` dividing `t^7 − 1`, and five of them are at gap −1: `ℓ = 4` for both seeds and
+  `ℓ = 6` for seed 20261012 (`|T2|` = 29, 28, 70, 29, 35). The sixth subfield cell, `a = 0`,
+  seed 20261012, `ℓ = 4`, is degenerate: `|F| = 2`, `|T2| = 1`, gap 0. (Corrected
+  2026-10-17, sheriff case SHF-20261017-e4d7f6, finding P-N7: this bullet used to begin
+  ~~"They are exactly the gap −1 cells"~~, which the sixth, gap-0 cell contradicts. Checked
+  against `runs/registered/cells.jsonl` `v_info.g` and `runs/registered/readout.txt`.)
 - **Every `frob` cell whose `V` is not inside a subfield has gap 0.**
 - **Why it is not a lever.** Inside a subfield, decompositions exist only for targets in
   `E(GF(2^7))`, which is the positive control's effect at smaller size, not a new
@@ -67,10 +84,11 @@ reproduced by a second implementation.
 | `Rule.lean` is the registered rule | sha256 `714601c1…760d`, the same as in §7 of the registration and in cairn objective `sha256:f236a122…` (posted before the run) | hash |
 | `Verdict.lean`: `report cells = ⟨gate := true, poly := closed, frob := closed, rand := closed⟩` and `cells.length = 64` | proved | kernel `decide`. Changing `frob := .closed` to `.alive` fails the build |
 | `Replay.lean`: an independent implementation recomputes `|T2|`, `D_s(curve)` and `D_s(R)` for the 12 `poly` cells with `ℓ ≤ 5` | all 12 match the records exactly | `native_decide`, which trusts the Lean compiler. Changing one recorded `D_s` fails the build (checked during development) |
-| `Leak.lean`: which `g` divide `t^7 − 1` | `[23, 29, 127]` | `native_decide` |
+| `Leak.lean`: which `g` divide `t^7 − 1` | `[23, 29, 127]` | kernel, `decide +kernel` (2026-10-16; first ~~`native_decide`~~) |
+| [`lean/AxiomAudit.lean`](lean/AxiomAudit.lean) (added 2026-10-16) | every theorem above depends only on `propext`, `Classical.choice` and `Quot.sound`, except `replay_ok`, which adds its own `native_decide` compiler-trust axiom and nothing else. Output of a green run: [`lean/axiom-audit.log`](lean/axiom-audit.log) (run 38981755356, job 117243990692, PR #2033 head 22bd479da, 2026-10-17; committed 2026-10-17, sheriff case SHF-20261017-e4d7f6, L-N7) | the audit fails the run on any other axiom (`sorryAx` included) |
 | cairn objective `sha256:2fb64f9a…` (result): the same theorem as `Verdict.lean`, over `Rule.lean` and `Data.lean` | **accepted** by cairn's Lean jail, kernel | `cairn audit` re-verifies it |
 | cairn objective `sha256:d1fd6832…` (replay) | **rejected**: cairn accepts kernel proofs only, and refuses `native_decide`. Recorded as is | — |
-| CI: [`.github/workflows/tree-split-structured-v-lean.yml`](../../.github/workflows/tree-split-structured-v-lean.yml) | Regenerates `Data.lean` and the readout from the records and diffs them, checks the rule hash, and runs `lake build` (all of the above) on every change to the study | — |
+| CI: [`.github/workflows/tree-split-structured-v-lean.yml`](../../.github/workflows/tree-split-structured-v-lean.yml) | Regenerates `Data.lean` and the readout from the records and diffs them, checks the rule hash, and runs `lake build` (all of the above) on every change to the study; since 2026-10-16 also the axiom audit (log kept as an artifact), `leanchecker --fresh`, and a check that `native_decide` closes `replay_ok` only | — |
 
 **cairn log** (`cairn/log.jsonl`, 19 entries, cairn 6.1.0):
 - It was built locally with `CAIRN_EPOCH_SECONDS=5`, so it audits with that setting.

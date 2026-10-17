@@ -1,0 +1,42 @@
+Traceback (most recent call last):
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/type_i_larger_norm.py", line 200, in <module>
+    rows = [run(name, params) for name, params in CURVES.items()]
+            ~~~^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/type_i_larger_norm.py", line 66, in run
+    root = disc.sqrt()
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/categories/finite_fields.py", line 469, in sqrt
+    square_root = self._tonelli()
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/categories/finite_fields.py", line 332, in _tonelli
+    g = self.parent().quadratic_nonresidue()
+  File "sage/misc/cachefunc.pyx", line 2350, in sage.misc.cachefunc.CachedMethodCallerNoArgs.__call__
+    self.cache = f(self._instance)
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/categories/finite_fields.py", line 274, in quadratic_nonresidue
+    if not element.is_square():
+           ~~~~~~~~~~~~~~~~~^^
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/categories/finite_fields.py", line 303, in is_square
+    character = self**((q-1)//2)
+                ~~~~^^~~~~~~~~~~
+  File "sage/structure/element.pyx", line 2048, in sage.structure.element.Element.__pow__
+    return coercion_model.bin_op(left, right, pow)
+  File "sage/structure/coerce.pyx", line 1245, in sage.structure.coerce.CoercionModel.bin_op
+    return (<Action>action)._act_(y, x)
+  File "sage/structure/coerce_actions.pyx", line 922, in sage.structure.coerce_actions.IntegerPowAction._act_
+    return e._pow_int(n)
+  File "sage/structure/element.pyx", line 2731, in sage.structure.element.RingElement._pow_int
+    return arith_generic_power(self, n)
+  File "sage/arith/power.pyx", line 88, in sage.arith.power.generic_power
+    return generic_power_pos(a, n)
+  File "sage/arith/power.pyx", line 121, in sage.arith.power.generic_power_pos
+    apow *= apow
+  File "sage/structure/element.pyx", line 1500, in sage.structure.element.Element.__mul__
+    return (<Element>left)._mul_(right)
+  File "sage/structure/element.pyx", line 2652, in sage.structure.element.RingElement._mul_
+    cpdef _mul_(self, other):
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/rings/polynomial/polynomial_quotient_ring_element.py", line 247, in _mul_
+    return self.__class__(R, prod, check=False)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/rings/polynomial/polynomial_quotient_ring_element.py", line 125, in __init__
+    CommutativeRingElement.__init__(self, parent)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "cysignals/signals.pyx", line 357, in cysignals.signals.python_check_interrupt
+KeyboardInterrupt

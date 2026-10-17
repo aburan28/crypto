@@ -1,0 +1,14 @@
+{
+  "schema": "volcano-watchdog-build/v1",
+  "binary_sha256": "35d89073f4d666b094c213a1d31b0c819b63600123e067c111af3c947d7609a9",
+  "matching_source_commit": "2bf7700b73b3a84810aa86cb29837d1359b28322",
+  "build_checkout_head_at_start": "910441ca4fffcecc08458479771c986351a812f7",
+  "build_checkout_patch": "runner repair subsequently committed as 2bf7700b7; no mathematical method changed",
+  "runner_source_sha256": "4c1537065d434106db9fc1e591609d19ba97646de4053b4167a87559cd59d3ca",
+  "profile": "Cargo release, opt-level 3, debug symbols disabled, incremental off, one build job; no target-cpu override",
+  "toolchain": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "build_log": "release-build.log",
+  "measurement_status": "New control/pilot/survey planned and frozen; not yet executed",
+  "old_binary_sha256": "62023d1469010a6d6b9a85b080f261f2fce28c3c55bb26be71dc243bc01b1aee",
+  "no_binary_replacement": "Each new campaign has separate binaries and ledger; historical campaigns preserved"
+}

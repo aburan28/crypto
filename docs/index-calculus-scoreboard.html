@@ -794,6 +794,8 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 <tr><td>A/A control (reference repeated)</td><td class="n">1.000</td><td class="n">1.000</td><td class="n">1.000</td><td class="n">1.000</td></tr>
 </tbody></table></div>
 <p class="dash-footnote">The orbit base has no invariant subspace on <code>icv1-f2m19-t797-b6cf2467</code> and <code>icv1-f2m29-tm40309-30c52b96</code> (192 error records, kept). A preregistered follow-up ran those two curves with the <code>binary-subspace</code> base: dimension 8 verifies everywhere at 37.0&times; (n = 19) and 103.5&times; (n = 29) the reference under MITM, 204&times; and 8 081&times; under <code>subtract</code>; dimension 6 solves n = 19 at 6.98&times; and exhausts its 10<sup>6</sup>-trial budget on every n = 29 target. Read the Koblitz column with care: at r &le; 2<sup>21</sup> the strong reference&rsquo;s fixed setup is three to four times its search, so it sits above the lean walk and every BSGS, and every IC ratio against it is flattering by 1.4&ndash;4.3&times;. Host: 4-vCPU Intel Xeon VM, Linux x86-64; counts stand at every isolation level, wall time admitted only on the L2 pairs and descriptive at these sizes. Three complete sessions, 3 136 of 3 392 executions verified, the rest errors or exhaustions with their own status; 36 of 36 audit replays identical. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_all_candidates_20261003/README.md">Protocols, sessions, audit receipts, tables, saved comparisons and the scored predictions</a>. Class: none (AGENTS.md &sect;3); nothing here is a method change, and the best-of table above is unchanged by it. <strong>Yield ledger:</strong> what each of these runs yielded on its target (relations per trial, lookups per relation, matrix rank, and the decomposition solver&rsquo;s own statistics for the algebraic arms) is the <a href="../browser/#yield">Yield view of the lab browser</a>, fed by every committed <code>ecbench</code> session including the <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_yield_sweep_20261004/README.md">4 October yield sweep</a>, which ran every subspace base, oracle and solver on the same Koblitz targets. A yield is a stage diagnostic and never a speed.</p>
+<h3 id="lab-volcano-ic">Volcano subgroup IC: audited controls and bounded survey, 17 October 2026</h3>
+<p>The projected-abscissa base charges cofactor projection and checks membership and recovered base logs. The root-vertex pilot has 48 attempts (30 verified, 14 exhausted, 4 timed out); the separate all-vertex survey's stopped checkpoint covers 99 vertices and all 51 strata, with 1,584 attempts (1,065 verified, 422 exhausted, 97 timeouts). Its 57,176 relations came from 2,223,204 source trials and 2,075,145 actual oracle calls; both yields are explicit in summary v2. Separate release control/pilot checks matched 56 completed deterministic pairs exactly, with four censored pairs left incomparable. All successful and exhausted deterministic reports replay. The queue covers 24,823 vertices and 51 strata, but queue coverage is not completed execution. Exact registration, qualified full-matrix timing, finite-field IC and the original A–E scope remain open. L0/debug counts only; every arm has unpriced native work. <a href="https://github.com/aburan28/crypto/blob/main/research/full_volcano_graphwide_ic_20261017/execution/README.md">Protocol, raw records, per-stratum min/max/mean and inspected reports</a>. No fastest-method or scaling claim; the best-of table and qualified frontier are unchanged.</p>
 <h3>Binary GHS curve panel: exact model and subgroup differences</h3>
 <p>On 9 October 2026 a separate native <code>ecbench</code> session compared five registered binary-curve models at field degrees 13 and 15. Each cell below is eight independently verified one-target runs, cold and counted in <code>S = group-addition equivalents / &radic;r</code>. All 80 records passed exact replay. The generic matched reference is <code>rho.negation</code> on every model; <code>bsgs.negation</code> is a memory tradeoff with hash work unpriced. Mac isolation was L0, so these are counted diagnostics, not wall-time speedups. An earlier four-size Koblitz panel preserved 13 signed-Frobenius rho exhaustions alongside 107 verified records; it is excluded from this complete-reference table.</p>
 <div class="dash-detail-body" style="padding:0"><table>
@@ -806,6 +808,10 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 <tr><td><code>icv1-f2m15-tm185-565c1669</code></td><td class="n">16,477</td><td class="n">1.844</td><td class="n">1.134</td><td class="n">0.615</td><td>3 / 3</td><td>higher-genus map pending</td></tr>
 </tbody></table></div>
 <p class="dash-footnote">The two degree-15 genus-three rows are structural leads only. Neither has a verified smooth Jacobian model, point transport or complete GHS solver cost. <a href="https://github.com/aburan28/crypto/blob/main/research/ghs_curve_comparison_20261009/RESULT.md">Protocols, sealed sessions, audits, standard-curve screens, figures and PDF</a>. Class: accounting; no index-calculus cell, progress-chart point, best-of row or index-calculus leaderboard recipe changes.</p>
+<h3 id="rootfinding-buffers-20261014">Prime rootfinding lane buffer reuse, registered 20-bit subgroup</h3>
+<p>Three sealed baseline-candidate-baseline ecbench sessions used the same eight public targets, B48, serial and batch width eight, rho-negation and rho A/A. All 384 executions verified and all 288 measured replays were identical. The batch-8 candidate has mean cold counted S = 10.6041 against same-session rho-negation S = 1.5425. The native same-target comparison gives IC / rho 6.8747 [5.6689, 8.4198] over 24 measured pairs; this is a lower-bound diagnostic because native field work is unpriced.</p>
+<div class="dash-detail-body" style="padding:0"><table><caption>Buffer-reuse follow-up, 24 measured executions per arm in the candidate session. The cross-session operation comparison uses the identical public workloads and algorithm seeds.</caption><thead><tr><th>Arm</th><th>Mean cold S</th><th>Matched ratio</th><th>Interpretation</th></tr></thead><tbody><tr><td><code>rho.negation</code></td><td class="n">1.5425</td><td class="n">1.000</td><td>Reference</td></tr><tr class="ic-row"><td>B48 serial-8</td><td class="n">10.6041</td><td class="n">same counted cost as batch-8</td><td>Exact stream control</td></tr><tr class="ic-row"><td>B48 batch-8, reused buffers</td><td class="n">10.6041</td><td class="n">6.8747 [5.6689, 8.4198] vs rho</td><td>Engineering; counted lower bound</td></tr><tr><td>Rho A/A</td><td class="n">1.5425</td><td class="n">1.000 counted</td><td>Wall-noise control</td></tr></tbody></table></div>
+<p class="dash-footnote">The native cross-session batch-8 operation comparison is 1.000 [1.000, 1.000] over 24 pairs; it refuses a wall comparison because the arms ran in different sessions. A separate L0 shared-host diagnostic gave candidate/baseline relation-phase wall ratio 0.937 [0.786, 1.122] and whole-solve ratio 0.993 [0.803, 1.251]; repeat-baseline and A/A variation leave no resolved wall gain. Source-level buffer reuse removes recurrent allocation, while cold counted cost and the leaderboard best remain unchanged. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_rootfinding_alloc_20261014/REPORT.md">Protocol, sealed sessions, audits, graph and PDF</a>. Class: engineering.</p>
 </section></div></details>
 <details class="dash-details"><summary>Pair claw of cryptanalysis#175 · same-target strong rho</summary><div class="dash-detail-body"><section class="dash-section" id="lab-pair-claw" aria-labelledby="pair-claw-title" data-collapse="open"><div class="dash-section-head"><div><p class="dash-kicker">External candidate, same targets / 3 October 2026</p><h2 id="pair-claw-title">The pair claw of cryptanalysis#175 costs 2.2&times; strong rho at best and 33&times; at the shape it ran.</h2>
 <p class="panel-summary">Prices the four-point signed-Frobenius pair claw of aburan28/cryptanalysis#175, ported into ecbench, against strong rho on the same 48 Koblitz targets: 2.20&times; at its cost-minimising shape, 32.6&times; at the PR&rsquo;s own, flat in r, as a generic method should be.</p></div><span class="status neutral">Accounting &middot; not an advance</span></div>
@@ -890,6 +896,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 <tr><td>2026-10-03</td><td>Elliptic curve, n61 batch of L &ge; 1,024 targets vs frozen KS v2 rho (historical diagnostic)</td><td>n61 L = 16,384, K = 700, hosted isolated</td><td class="n">0.323&times; <small>isolated wall time</small></td><td>unmatched</td><td><span class="chip">accounting</span></td><td><a href="#n61-compact-orbit-hosted-20261003">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab/evidence/20261003-koblitz-n61-hosted-isolated/README.md">source</a></td></tr>
 <tr><td>2026-09-19</td><td>Not an elliptic curve: hyperelliptic Jacobian, genus 4, toy size</td><td>Genus-4 crossover exponent</td><td class="n">0.21&times;</td><td>matched</td><td><span class="chip">advance, exponent</span></td><td><a href="#genus-crossover">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#genus-crossover">source</a></td></tr>
 <tr><td>2026-09-30</td><td>Not an elliptic curve: hyperelliptic Jacobian, genus 4, toy size</td><td>Round seven: sparse solve priced, genus-3 claim withdrawn</td><td class="n">0.24&times;</td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#genus-crossover">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#genus-crossover">source</a></td></tr>
+<tr><td>2026-10-15</td><td>Not an elliptic curve: genus-3 Jacobian of a GHS cubic cover, double large primes</td><td>Genus-3 GHS IC-2LP rebuilt baseline at q = 2^14 (04b)</td><td class="n">0.252&times; <small>rho renormalised to &radic;(&pi;/2); 0.162&times; raw; rho n = 4, on Jac(C), not E0</small></td><td>matched</td><td><span class="chip">engineering</span></td><td><a href="#genus-crossover">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_improve_20261014/04b-genus3-2lp-rebalance/README.md">source</a></td></tr>
 <tr><td>2026-10-03</td><td>Weak elliptic class: cover and decomposition on E(F_p^6)</td><td>Cover and decomposition, p = 1009 (subgroup 2^57.9), best of two seeds</td><td class="n">8.1&times;</td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md">source</a></td></tr>
 <tr><td>2026-10-03</td><td>Weak elliptic class: cover and decomposition on E(F_p^6)</td><td>Cover and decomposition, F4 stopped at the B&eacute;zout staircase, p = 1009 (subgroup 2^57.9), best of two seeds</td><td class="n">5.1&times;</td><td>matched</td><td><span class="chip">engineering</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md">source</a> (&sect;10)</td></tr>
 <tr><td>2026-10-04</td><td>Weak elliptic class: cover and decomposition on E(F_p^6)</td><td>Sieving variant of the cover route (Joux&ndash;Vitse &sect;3.2), p = 1511 (subgroup 2^61.4), best of two seeds</td><td class="n">0.012&times;</td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md">source</a> (&sect;11)</td></tr>
@@ -906,12 +913,15 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 <tr><td>2026-10-15</td><td>Elliptic curve, complete method-solve simulated instructions</td><td>Conductor gap ell131101-q37, icv1-fp37-t277-91fd6e29, archived eight-target IC/rho census</td><td class="n">47.77148&times; <small>simulated instruction diagnostic</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#conductor-gap-ir-20261014">panel</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md">source</a></td></tr>
 <tr><td>2026-10-15</td><td>Elliptic curve, complete method-solve simulated instructions</td><td>Conductor gap ell131101-q37, icv1-fp37-t277-090dc414, archived eight-target IC/rho census</td><td class="n">47.07830&times; <small>simulated instruction diagnostic</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#conductor-gap-ir-20261014">panel</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md">source</a></td></tr>
 <tr><td>2026-10-14</td><td>Elliptic curve, whole method, cold, one target</td><td>Frobenius-orbit IC, fully priced, stride-renew, vs rho-frob: best cell <code>icv1-f2m29-tm40309-30c52b96</code> (r = 2<sup>15.4</sup>)</td><td class="n">1.566&times; <small>S; [0.992, 2.347]; 18.2&times; at r = 2<sup>39</sup></small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#lab-ecbench-all">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_frobenius_orbit_vs_rho_20261014/README.md">source</a></td></tr>
+<tr><td>2026-10-14</td><td>Elliptic curve, cold counted-work diagnostics with unpriced native work</td><td>Prime rootfinding B48 batch-8 buffer reuse, registered 20-bit subgroup</td><td class="n">6.8747&times; <small>counted GAE lower-bound diagnostic; not a speed bound</small></td><td>matched</td><td><span class="chip">engineering</span></td><td><a href="#rootfinding-buffers-20261014">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_rootfinding_alloc_20261014/REPORT.md">source</a></td></tr>
+<tr><td>2026-10-17</td><td>Elliptic curve, whole method, cold, one target</td><td>Volcano projected size-16 MITM, two targets; <code>icv1-fp57-t536870914-6cabb0c9</code></td><td class="n">19.215&times; <small>quotient of incomplete GAE lower bounds; diagnostic, no cost-direction claim</small></td><td>matched; L0/debug</td><td><span class="chip">accounting</span></td><td><a href="#lab-volcano-ic">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/full_volcano_graphwide_ic_20261017/execution/pilot-summary/two-comparison.json">native comparison</a></td></tr>
+<tr><td>2026-10-15</td><td>Elliptic curve, whole method, cold, one target</td><td>Joux&ndash;Vitse (n &minus; 1)-decomposition at n = 5 on E(F<sub>p&#8309;</sub>), complete DLP, p = 31 (&#8467; = 2<sup>24.8</sup>), F4 replaying a recorded trace; p = 11: 4.5&middot;10<sup>7</sup>&times; and 1.8&middot;10<sup>8</sup>&times;</td><td class="n">6.8&middot;10<sup>7</sup>&times; <small>F<sub>p</sub> multiplications against rho on the same target; extrapolated parity q &asymp; 2<sup>58.2</sup> (group 2<sup>291</sup>)</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/joux_vitse_n1_20261015/README.md">source</a></td></tr>
 </tbody><tr><td>2026-10-16</td><td>Binary decomposition-oracle stage (non-Koblitz, l=8..12)</td><td>MITM oracle ladder to l=12: 8,068 ops at l=11, 16,092 at l=12 vs 2,098,176 / 8,390,656 quartic solves, 128 targets, 0 disagreements</td><td class="n">0.0019&times;</td><td>stage</td><td><span class="chip">engineering</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/binary_mitm_oracle_l11_l12_20261016/REPORT.typ">source</a></td></tr><tr><td>2026-10-15</td><td>Binary decomposition-oracle stage (non-Koblitz, l=8..10)</td><td>MITM oracle ladder to l=10: 2,076 ops at l=9, 4,212 at l=10 vs 134,912 / 525,312 quartic solves, 128 targets, 0 disagreements</td><td class="n">0.0080&times;</td><td>stage</td><td><span class="chip">engineering</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/binary_mitm_oracle_l9_l10_20261015/REPORT.typ">source</a></td></tr><tr><td>2026-10-15</td><td>Binary decomposition-oracle stage (non-Koblitz, l=8)</td><td>First sub-2<sup>2&ell;</sup> oracle at &ell;=8: MITM pair table vs pairs-and-solve, 64 targets, 0 disagreements</td><td class="n">0.0325&times;</td><td>stage</td><td><span class="chip">engineering</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/binary_mitm_oracle_l8_20261015/REPORT.typ">source</a></td></tr></table></div></details>
 <noscript><div class="dash-detail-body"><p>The chart needs JavaScript; the table above lists every plotted point.</p></div></noscript>
 <p class="dash-footnote">What would move the heavy series below the line for good: a cold, one-target, every-phase-priced <code>S</code> below a matched rho&rsquo;s at growing size (AGENTS.md &sect;2, &sect;8). The nearest measured approaches are 1.36&times; (round 0025) and 1.314&times; in CPU time (n41). The exponent story is in the <a href="#boundary-ledger">boundary ledger</a>: no fitted exponent on an elliptic curve sits below rho&rsquo;s one half; the cover route&rsquo;s ratio falls with size but on a weak class.</p>
 <script type="application/json" id="progress-data">{
   "schema_version": "ic-progress-timeline/1",
-  "updated": "2026-10-16",
+  "updated": "2026-10-17",
   "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
   "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Direction against 1 is meaningful only for fully priced ratios; a quotient of incomplete lower bounds is diagnostic even when paired. No value on this page is computed from another.",
   "series": [
@@ -1057,6 +1067,26 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           "class": "engineering",
           "anchor": "#n83-tier1-cold-20261016",
           "source": "https://github.com/aburan28/crypto/blob/main/research/n83_e2e_holdout_20261016/RESULT.md"
+        },
+        {
+          "date": "2026-10-17",
+          "value": 19.214979195561725,
+          "reference": "matched",
+          "unit": "quotient of incomplete cold GAE lower bounds; diagnostic",
+          "label": "Volcano projected-base control/pilot; best bounded IC cell",
+          "detail": "Projected size-16 MITM on icv1-fp57-t536870914-6cabb0c9, two public one-target attempts, one round, L0/debug. Both IC and rho have unpriced work. The ratio is a quotient of incomplete lower bounds, not a direction-of-cost or speedup claim. Full graph-wide completion and exact representations remain open.",
+          "class": "accounting",
+          "anchor": "#lab-volcano-ic",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/full_volcano_graphwide_ic_20261017/execution/pilot-summary/two-comparison.json"
+          "date": "2026-10-15",
+          "value": 68183174.19,
+          "reference": "matched",
+          "unit": "F_p multiplications",
+          "label": "Joux-Vitse (n - 1)-decomposition at n = 5, E(F_{p^5}), complete DLP at p = 31 (ell = 2^24.8), F4 trace replay",
+          "detail": "Native complete DLPs paired with rho on the same target in F_p multiplications: 6.8e7x at p = 31 (6,688 trials, 19 relations), 4.5e7x and 1.8e8x at p = 11; one trial 5.9-9.2e9 flat in p over a 12-rung ladder (p = 11-241), about 25p trials per relation; every trial agrees with a meet-in-the-middle oracle and every answer verified; parity extrapolated at q = 2^58.2 (group 2^291). A reproduction of a published route; no ecbench session (no F_{p^k} instance on main).",
+          "class": "accounting",
+          "anchor": "#rho-parity-ledger",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/joux_vitse_n1_20261015/README.md"
         }
       ]
     },
@@ -1273,6 +1303,17 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           "class": "accounting",
           "anchor": "#conductor-gap-ic37-20261012",
           "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_20261012/README.md"
+        },
+        {
+          "date": "2026-10-14",
+          "value": 6.8746893347260745,
+          "reference": "matched",
+          "unit": "counted GAE lower-bound diagnostic",
+          "label": "Prime rootfinding B48 batch-8 buffer reuse, registered 20-bit subgroup",
+          "detail": "Same-session candidate batch-8 IC / rho-negation cold counted-cost ratio 6.8747 [5.6689, 8.4198] over 24 matched measured pairs on eight public targets. The cross-session baseline/candidate counted-cost ratio is exactly 1.000 over 24 pairs. Native field work remains unpriced; wall comparisons are L0 diagnostics and cross-session ecbench wall comparison is refused.",
+          "class": "engineering",
+          "anchor": "#rootfinding-buffers-20261014",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_rootfinding_alloc_20261014/REPORT.md"
         }
       ]
     },
@@ -1668,6 +1709,24 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
       ]
     },
     {
+      "id": "genus3-ghs-2lp",
+      "label": "Not an elliptic curve: genus-3 Jacobian of a GHS cubic cover, double large primes",
+      "role": "context",
+      "note": "Index calculus with double large primes on Jac(C) of hyperelliptic GHS cubic covers (m = 3, r = 5) over prime F_q, q = 2^10-2^20, counted F_q plus mod-ell multiplications, one target cold, 12 paired instances per size. Rho is measured on the same Jac(C)[ell] in the same unit at q <= 2^14 only (4 single walks per size, renormalised to sqrt(pi/2)); it is not rho on the elliptic curve E0(F_q^3). The exponent result (total q^1.383 against GTTD's 4/3) is in the genus-crossover panel.",
+      "points": [
+        {
+          "date": "2026-10-15",
+          "value": 0.252,
+          "reference": "matched",
+          "label": "Genus-3 GHS IC-2LP rebuilt baseline at q = 2^14 (04b)",
+          "detail": "Rebuilt IC-2LP baseline (kappa = 2, tree-cycle elimination + Lanczos) against rho on the same Jac(C)[ell] at q = 2^14: 0.252x with rho renormalised to sqrt(pi/2) (0.162x raw; rho walks 0.49-3.48 steps per sqrt(ell), n = 4). Cost exponent over 2^14-2^20: 1.383 (99% [1.382, 1.384]) against rho's 3/2 and GTTD's 4/3; relation phase 1.332, linear algebra 1.447. Retuning the factor base gives 1.373; structured Gaussian elimination before Lanczos gives 1.419 while cheaper by 9-22%. The original study this follows up is not in the repository; this is a rebuild. Toy sizes; not an ECDLP crossover, since rho on E0(F_q^3) is not measured.",
+          "class": "engineering",
+          "anchor": "#genus-crossover",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ic_improve_20261014/04b-genus3-2lp-rebalance/README.md"
+        }
+      ]
+    },
+    {
       "id": "cover-fp6",
       "label": "Weak elliptic class: cover and decomposition on E(F_p^6)",
       "role": "context",
@@ -1872,7 +1931,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
     var last = pts[pts.length - 1];
     var lx = X(day(last.date)), flip = lx > W - R - 110;
     var lab = mk('text', { x: flip ? lx - 10 : lx + 9, y: Y(last.value) + 4, 'class': 'dlabel ' + cls, 'text-anchor': flip ? 'end' : 'start' }, svg);
-    lab.textContent = ser.role === 'emphasis' ? 'whole method, cold' : ser.id === 'ec-cold-unisolated' ? 'unisolated cold' : ser.id === 'ec-batch' ? '32 targets together' : ser.id === 'ec-batch-n61' ? 'n61 batch vs KS v2' : ser.id === 'ec-online' ? 'online only' : ser.id === 'genus4' ? 'genus-4 Jacobian' : 'E(F_p^6) cover';
+    lab.textContent = ser.role === 'emphasis' ? 'whole method, cold' : ser.id === 'ec-cold-unisolated' ? 'unisolated cold' : ser.id === 'ec-batch' ? '32 targets together' : ser.id === 'ec-batch-n61' ? 'n61 batch vs KS v2' : ser.id === 'ec-online' ? 'online only' : ser.id === 'genus4' ? 'genus-4 Jacobian' : ser.id === 'genus3-ghs-2lp' ? 'genus-3 GHS cover, 2LP' : 'E(F_p^6) cover';
     var li = document.createElement('span'); li.className = 'lg ' + cls; var sw = document.createElement('i'); li.appendChild(sw); li.appendChild(document.createTextNode(ser.label)); legend.appendChild(li);
   });
   var hol = document.createElement('span'); hol.className = 'lg emph hollow'; var sw2 = document.createElement('i'); hol.appendChild(sw2); hol.appendChild(document.createTextNode('hollow: later shown measured against an unmatched rho')); legend.appendChild(hol);
@@ -3694,7 +3753,8 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           <tr><td>Full four-point decompositions, <code>&tau;<sub>T</sub></code>-folded base on curves with rational <code>T</code> (<code>h = 4</code>), against the negation walk (E18; <code>experiments/26_quartic_folds_tau*.json</code>)</td><td>2<sup>30.3</sup>&ndash;2<sup>38.1</sup></td><td class="n">&mdash;</td><td class="n">&mdash; (LA alone: 0.341&times;)</td><td class="n">1/4 (derived)</td><td class="n">1/2 (derived; r fitted n<sup>+0.03</sup>)</td><td class="n">&rarr; 0.341</td><td>2<sup>157.9</sup> (extrapolated): the fold quarters the linear algebra, but a relation costs 106 residuals against 22.5 and the cofactor costs &radic;4, so these curves hand over later than a plain prime-order one</td></tr>
           <tr><td><strong>Joux&ndash;Vitse three-point decompositions</strong> (this round)</td><td>2<sup>32.3</sup>&ndash;2<sup>40.1</sup></td><td class="n"><strong>8,126</strong></td><td class="n"><strong>6,945&times;</strong> (4,583–9,832× over the eight runs)</td><td class="n">0.496 (1/2 derived)</td><td class="n">1/2 (derived), r = 9.97 over every attempt, 0.514 on the last</td><td class="n">-0.003</td><td><strong>never</strong>: constant 6C&prime;/(S<sub>rho</sub>c<sub>add</sub>) + r needs C&prime; &lt; 10; measured C&prime; = 1.6&middot;10<sup>5</sup>, of which the Weil restriction alone is 3,401</td></tr>
           <tr class="group"><td colspan="8">k = 5, E(F<sub>p&#8309;</sub>): Joux&ndash;Vitse four-point decompositions, C&Prime; only (<code>experiments/27_jv_quintic{,_edwards}_csecond.json</code>, <code>experiments/28_jv_quintic_edwards4_csecond.json</code>, <code>experiments/28_jv_quintic_edwards_rate_census.json</code>, <code>RESEARCH_K5_TORSION_JOUX_VITSE.md</code>)</td></tr>
-          <tr><td>Plain symmetrisation, Weierstrass <code>x</code>: five octics in four unknowns</td><td>2<sup>40.4</sup>&ndash;2<sup>50.0</sup></td><td class="n">&mdash;</td><td class="n">C&Prime; = 3.0&middot;10<sup>10</sup> per test (8,826 &times; 8,444 at degree 19)</td><td class="n">2/5 (derived)</td><td class="n">2/5 (derived)</td><td class="n">&minus;1/10 (derived)</td><td>2<sup>302</sup> (extrapolated on C&Prime;; a stage diagnostic)</td></tr>
+          <tr><td>Plain symmetrisation, Weierstrass <code>x</code>: five octics in four unknowns</td><td>2<sup>40.4</sup>&ndash;2<sup>50.0</sup></td><td class="n">&mdash;</td><td class="n">C&Prime; = 1.1&middot;10<sup>10</sup> per test on the 2026-10-15 engine (2,019 &times; 3,679; <small>was 3.0&middot;10<sup>10</sup>, 8,826 &times; 8,444 at degree 19, 2026-09-29</small>)</td><td class="n">2/5 (derived)</td><td class="n">2/5 (derived)</td><td class="n">&minus;1/10 (derived)</td><td>2<sup>291</sup> on the 2026-10-15 constant (<small>was 2<sup>302</sup></small>; extrapolated on C&Prime;; a stage diagnostic)</td></tr>
+          <tr><td>Plain symmetrisation, <b>end to end</b>: complete DLPs, F4 replaying a recorded trace, paired with rho on the same target (<code>research/joux_vitse_n1_20261015/</code>)</td><td>2<sup>12.1</sup>&ndash;2<sup>24.8</sup></td><td class="n">&asymp; 5.2&middot;10<sup>7</sup> (p = 31)</td><td class="n">6.8&middot;10<sup>7</sup>&times; at p = 31 (4.2&middot;10<sup>7</sup>&times; the expected walk); 4.5&middot;10<sup>7</sup>&times; and 1.8&middot;10<sup>8</sup>&times; at p = 11; every logarithm verified</td><td class="n">2/5 (derived); trials per relation p<sup>0.87 &plusmn; 0.09</sup>, &asymp; 25p</td><td class="n">2/5 (derived), negligible</td><td class="n">&minus;1/10 (derived)</td><td>2<sup>291</sup> (q &asymp; 2<sup>58.2</sup>, extrapolated on the measured trial, 7.5&middot;10<sup>9</sup> mean, flat in p over p = 11&ndash;241); Vitse 2011 &sect;7.3.3 states 2<sup>60</sup> for q. Reproduction of a published route, accounting; no advance</td></tr>
           <tr><td>2-torsion symmetry, Edwards <code>y</code>: e(y&sup2;) and &pi;, degrees 4 and 3</td><td>2<sup>38.4</sup>&ndash;2<sup>48.0</sup></td><td class="n">&mdash;</td><td class="n">C&Prime; = 7.3&middot;10<sup>7</sup> per test (1,513 &times; 1,633 at degree 9), 416&times; cheaper</td><td class="n">2/5 (derived)</td><td class="n">2/5 (derived)</td><td class="n">&minus;1/10 (derived)</td><td>2<sup>233</sup> in the subgroup's order (extrapolated; residuals 48p&sup2; at the rate 1/(192p) the census counts exactly, not the 6p&sup2; at 1/(24p) of the first round's 2<sup>203</sup>); parity at 2<sup>128</sup> needs C&Prime; &lt; 5.0&middot;10<sup>4</sup>, 1,450&times; below &mdash; the registered line C&Prime; &gt; 10<sup>7</sup> is crossed</td></tr>
           <tr><td>Residual saturated by the rational 4-torsion point Q&#8324; = (1, 0): F4 at y<sub>R</sub> and at x<sub>R</sub>, t<sub>q</sub> &isin; Z/4 resolved (this round)</td><td>2<sup>38.4</sup>&ndash;2<sup>48.0</sup></td><td class="n">&mdash;</td><td class="n">C&Prime; = 1.46&middot;10<sup>8</sup> per test (2.01&times; the 2-torsion test), rate 1/(96p), residuals 24p&sup2; (2&times;)</td><td class="n">2/5 (derived)</td><td class="n">2/5 (derived)</td><td class="n">&minus;1/10 (derived)</td><td>2<sup>233</sup>: a wash (0.99&times; on S; engineering). Q&#8324; swaps the coordinates and is a symmetry of no polynomial in y; the degree-halving involution y &rarr; &minus;1/(&radic;d&middot;y) needs &radic;d &isin; F<sub>p</sub>. The &ldquo;4-torsion, 4&ndash;10&times;&rdquo; lever is retracted</td></tr>
           <tr class="group"><td colspan="8">Cover and decomposition, E(F<sub>p&#8310;</sub>) of the form y&sup2; = h(x)(x &minus; &alpha;)(x &minus; &sigma;&alpha;): genus-3 cover over F<sub>p&sup2;</sub>, Nagao six-point decompositions (<code>experiments/30_jv_cover_*.json</code>, <code>RESEARCH_COVER_DECOMPOSITION_LEDGER.md</code>) &mdash; a weak class, not a generic curve</td></tr>
@@ -4599,7 +4659,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
   <div class="panel" id="ecc2k130-descent-degree-20260930">
     <div class="panel-head">
       <h2>ECC2K-130 descent route: XL's refutation degree grows with &ell;; the MutantXL closure refutes at 3&ndash;4 much longer, but rises past 4 at m&thinsp;=&thinsp;3, &ell;&thinsp;=&thinsp;7</h2>
-  <p class="panel-summary">Finds XL's refutation degree rises with &ell; at m = 3 and m = 4; MutantXL closure refutes at 3&ndash;4 to &ell; = 6 (m = 3) and &ell; = 4, N = 42 (m = 4), then exceeds 4 at m = 3, &ell; = 7 (2026-10-16); no derived row beats rho; n = 131 prices derived not measured.</p>
+  <p class="panel-summary">Finds XL's refutation degree rises with &ell;; MutantXL closure refutes at 3&ndash;4 to &ell; = 6 (m = 3) and &ell; = 5 (m = 4) up to N = 44, exceeds 4 at m = 3, &ell; = 7, and N is not the driver (2026-10-16); no derived row beats rho; n = 131 prices derived not measured.</p>
       <p>Class <span class="chip">accounting</span>. There is no new <code>S</code> and no cost moves: the ECC2K-130
         verdict was already set by the product law and the oracle budget above. This panel adds what the
         refutation degree of the <code>m</code>&thinsp;=&thinsp;3 chained S<sub>3</sub> system does as &ell; grows,
@@ -4631,11 +4691,13 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <tr><td>5</td><td>(11,5) (13,5) (15,5)</td><td class="n">26&ndash;30</td><td>&ge;7 in every draw; degree 7 needs hosts of about 24, 64 and 128 GB</td><td>7; 7; 8</td><td>4 in all 12 draws (scale study)</td></tr>
         <tr><td>6</td><td>(16,6) (18,6), fresh draws</td><td class="n">34, 36</td><td>&ge;4 (XL built to 3 only)</td><td>&mdash;</td><td>4 in all 8 draws</td></tr>
         <tr><td>7</td><td>(19,7) (21,7), fresh draws</td><td class="n">40, 42</td><td>&ge;4 (XL built to 3 only); not at 4</td><td>&mdash;</td><td><b>&gt;4 in all 8 draws</b>: degree 4 saturated without 1</td></tr>
+        <tr><td>6</td><td>(22,6) (24,6), fresh draws</td><td class="n">40, 42</td><td>&ge;4 (XL built to 3 only); not at 4</td><td>&mdash;</td><td>4 in all 8 draws: ℓ&thinsp;=&thinsp;6 refutes where ℓ&thinsp;=&thinsp;7 does not (driver study)</td></tr>
         <tr class="group"><td colspan="6">m&thinsp;=&thinsp;4, two intermediate points (2026-10-06)</td></tr>
         <tr><td>1</td><td>(4,1) (5,1) (6,1)</td><td class="n">12&ndash;16</td><td>5 in every draw</td><td>5</td><td>4 3 4 4; 4 4 4 3; 3 4 4 3</td></tr>
         <tr><td>2</td><td>(5,2) (6,2) (7,2) (8,2)</td><td class="n">18&ndash;24</td><td><b>6 in every draw</b>: one above m&thinsp;=&thinsp;3</td><td>6; 7; 7; 7</td><td>3&ndash;4 in every draw</td></tr>
         <tr><td>3</td><td>(9,3) (10,3)</td><td class="n">30, 32</td><td><b>&ge;7 &ge;7 &ge;7 &ge;7; &ge;7 &ge;7 &ge;7 &ge;7</b> (degree 6 in full)</td><td>8; 9</td><td><b>4 in all eight draws</b></td></tr>
         <tr><td>3, 4</td><td>(12,3) (14,3) (13,4), fresh draws</td><td class="n">36&ndash;42</td><td>&ge;4 (XL built to 3 only); not at 4</td><td>&mdash;</td><td><b>4 in all 12 draws</b> (scale study)</td></tr>
+        <tr><td>5</td><td>(11,5) (12,5), fresh draws, m&middot;&ell;&thinsp;=&thinsp;20</td><td class="n">42, 44</td><td>&ge;4 (XL built to 3 only); not at 4</td><td>&mdash;</td><td>4 in all 8 draws (driver study)</td></tr>
       </tbody>
     </table></div>
     <div class="table-scroll"><table>
@@ -4661,7 +4723,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <tr><td>4</td><td>semi-regular D<sub>reg</sub>(N) of the m&thinsp;=&thinsp;4 shape (55 at &ell;&thinsp;=&thinsp;27) &mdash; 2026-10-06</td><td class="n">1</td><td class="n">275.14</td><td class="n">+214.33</td><td><span class="chip">extrapolation</span></td></tr>
         <tr><td>3</td><td>D&thinsp;=&thinsp;4, constant (&ell;&thinsp;=&thinsp;40) &mdash; <b>withdrawn</b>: the closure exceeds 4 at &ell;&thinsp;=&thinsp;7</td><td class="n">1</td><td class="n">82.27</td><td class="n">+21.46</td><td><span class="chip">withdrawn</span></td></tr>
         <tr><td>3</td><td>D&thinsp;=&thinsp;5, constant: the closure's next degree (&ell;&thinsp;=&thinsp;41) &mdash; 2026-10-16</td><td class="n">1</td><td class="n">85.18</td><td class="n">+24.37</td><td><span class="chip">extrapolation</span></td></tr>
-        <tr><td>4</td><td>D&thinsp;=&thinsp;4, constant: the measured MutantXL closure degree (&ell;&thinsp;=&thinsp;33) &mdash; 2026-10-16</td><td class="n">1</td><td class="n">68.43</td><td class="n">+7.62</td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>4</td><td>D&thinsp;=&thinsp;4, constant: the measured MutantXL closure degree (&ell;&thinsp;=&thinsp;33) &mdash; 2026-10-16</td><td class="n">1</td><td class="n">68.43</td><td class="n">+7.62</td><td><span class="chip">contradicted</span></td></tr>
         <tr><td>4</td><td>D&thinsp;=&thinsp;4, constant: the closure (&ell;&thinsp;=&thinsp;34), w&thinsp;=&thinsp;2, which its counted work tracks &mdash; 2026-10-16</td><td class="n">2</td><td class="n">93.91</td><td class="n">+33.10</td><td><span class="chip">extrapolation</span></td></tr>
         <tr><td>4</td><td>D&thinsp;=&thinsp;5, constant: the closure's next degree (&ell;&thinsp;=&thinsp;34) &mdash; 2026-10-16</td><td class="n">1</td><td class="n">71.13</td><td class="n">+10.32</td><td><span class="chip">extrapolation</span></td></tr>
       </tbody>
@@ -4704,6 +4766,15 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         descriptive, unregistered reading is that it is set by m&middot;&ell;. The m&thinsp;=&thinsp;3 degree-4 row is withdrawn; the
         m&thinsp;=&thinsp;4 one keeps measured support to &ell;&thinsp;=&thinsp;4 only. Held at 5, the best m&thinsp;=&thinsp;4 row is
         2<sup>71.13</sup>, 10.32 bits over rho in unconverted units. XL refuted at degree 4 on none of the 40 draws.</p>
+      <p><b>What sets it (2026-10-16).</b> A pre-registered follow-up (<code>research/dreg_closure_driver_20261016/</code>, 16 draws)
+        found m&thinsp;=&thinsp;3, &ell;&thinsp;=&thinsp;6 refutes at 4 at N&thinsp;=&thinsp;40, 42 and m&thinsp;=&thinsp;4 at m&middot;&ell;&thinsp;=&thinsp;20 refutes at 4 at
+        N&thinsp;=&thinsp;42, 44. N is rejected as the driver, and so is an m&middot;&ell; threshold &le;&thinsp;20; the degree rises at
+        &ell;&thinsp;=&thinsp;7 or at m&middot;&ell;&thinsp;&ge;&thinsp;21. Under either, m&thinsp;=&thinsp;4 exceeds 4 by &ell;&thinsp;=&thinsp;7, far below the priced
+        &ell;&thinsp;=&thinsp;33, so the m&thinsp;=&thinsp;4 degree-4 row is marked contradicted and the degree-5 rows are the optimistic case.</p>
+      <p><b>One guess (2026-10-17).</b> Fixing any single variable in the eight m&thinsp;=&thinsp;3, &ell;&thinsp;=&thinsp;7 draws lets degree 4 refute on
+        6 of 8, and both values of one guessed summand coordinate refute on 5 of 8 (<code>research/dreg_closure_specialise_20261017/</code>,
+        pre-registered; its max-&ell; vs &Sigma;&ell; test was uninformative because the null control also refuted). The &ell;&thinsp;=&thinsp;7
+        failure is marginal, and guess-then-degree-4 is a candidate oracle whose guess count at larger &ell; is unmeasured; no row moves.</p>
     </div>
   </div>
 
@@ -5700,7 +5771,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 
   <section aria-labelledby="genus-crossover" style="margin:3rem 0;overflow-x:auto">
     <h2 id="genus-crossover">Hyperelliptic: one exponent survives the priced linear algebra</h2>
-  <p class="panel-summary">Genus 4 retains an exponent advance, the genus 3 claim is withdrawn as accounting once the solve was priced, and the reduced factor base remedy does not pay.</p>
+  <p class="panel-summary">Genus 4 retains an exponent advance, the genus 3 claim is withdrawn as accounting once the solve was priced, and the reduced factor base remedy does not pay. Genus-3 double large primes on GHS covers (04b, 2026-10-15) grow as q<sup>1.383</sup>, above GTTD&rsquo;s 4/3, and neither retuning the factor base nor structured elimination removes it.</p>
     <p>The one family in this ledger that measures below a real rho. With <code>N</code> the
     subgroup order and <code>m &asymp; p/2</code> the full degree-1 factor base, rho costs
     <code>&radic;N</code> at any genus. The relation stage alone gives
@@ -5743,6 +5814,20 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     <code>N</code> = 3.2&middot;10<sup>7</sup> reads 0.23 raw, 0.46 renormalised &mdash; a single row,
     not a refit. Frozen source:
     <a href="https://github.com/aburan28/crypto/blob/main/experiments/hyperelliptic_large_prime_r8/manifest.json">round eight</a>.</p>
+    <p><strong>04b, 2026-10-15: genus-3 double large primes on GHS cubic covers depart from 4/3 through the linear algebra.</strong>
+    Index calculus with double large primes (Gaudry&ndash;Thom&eacute;&ndash;Th&eacute;riault&ndash;Diem), reduced factor base
+    <code>F = &lceil;2q<sup>2/3</sup>&rceil;</code>, on <code>Jac(C)</code> of hyperelliptic GHS cubic covers (<code>m = 3, r = 5</code>)
+    over prime <code>F<sub>q</sub></code>, <code>q &asymp; 2<sup>10</sup>&ndash;2<sup>20</sup></code>; counted <code>F<sub>q</sub></code>
+    plus mod-&ell; multiplications over the whole method, 12 paired one-target instances per size, all 360 logarithms verified,
+    protocol frozen before data. The rebuilt baseline fits <code>q<sup>1.383</sup></code> over 2<sup>14</sup>&ndash;2<sup>20</sup>
+    (99% [1.382, 1.384]) against GTTD&rsquo;s <code>q<sup>4/3</sup></code>: the relation phase sits at <code>q<sup>1.332</sup></code> and the
+    linear algebra at <code>q<sup>1.447</sup></code>, because the Lanczos row weight grows 7.8 &rarr; 14.4. Retuning the factor base per size
+    gives <code>q<sup>1.373</sup></code> (paired ratio 0.961 at 2<sup>20</sup>); structured Gaussian elimination before Lanczos is 9&ndash;22%
+    cheaper at every size but fits <code>q<sup>1.419</sup></code>, since its saving shrinks as the baseline&rsquo;s weight catches up.
+    <span class="chip">engineering</span> Against rho on the same <code>Jac(C)[&ell;]</code> at <code>q = 2<sup>14</sup></code>: 0.25&times;
+    renormalised (0.16&times; raw, 4 walks); rho on <code>E0(F<sub>q&sup3;</sub>)</code> is not measured, so this is no ECDLP crossover.
+    The study it follows up is not in the repository; this is a rebuild. Frozen source:
+    <a href="https://github.com/aburan28/crypto/blob/main/research/ic_improve_20261014/04b-genus3-2lp-rebalance/README.md">04b study</a>.</p>
     <p><strong>Superseded corrections, kept.</strong> Round five fitted against
     <code>log&#8322; p</code> and genus 4 missed at &minus;1.611 against &minus;1.0; restated against
     <code>N</code>, which the harness measures as <code>p<sup>1.91</sup></code>,
@@ -13446,6 +13531,17 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-negation-cross-colour-round24-20261006 -->
+<!-- BEGIN historical-generalized-rootfinding-20261016 -->
+<div class="panel" id="historical-generalized-rootfinding-20261016">
+<div class="panel-head"><h2>Generalized rootfinding: historical Python checkpoint <span class="chip">diagnostic</span></h2>
+<p class="panel-summary">20 fields / 38 curve contexts; three cold pairs; tiny source domains. Recorded whole-cold prior/candidate ratio 1.3830; qualified isolation and matched F4/F5/F6 are absent.</p></div>
+<div class="table-scroll"><table><caption>Historical calibration only; no IC/rho cost, exponent, or pipeline claim. See the <a href="https://github.com/aburan28/crypto/blob/main/research/generalized_rootfinding_20261016/README.md">source-linked checkpoint</a> and <a href="https://github.com/aburan28/crypto/blob/main/research/generalized_rootfinding_20261016/RESULTS.pdf">report</a>.</caption>
+<thead><tr><th>Variant</th><th>Recorded prior/candidate ratio</th><th>Contract</th><th>Qualification</th></tr></thead><tbody>
+<tr><td>Shared complete separator</td><td>1.3830038111</td><td>All original eight-coordinate outputs agree; source domain at most four; 20 fields / 38 contexts</td><td>Historical Python, unqualified wall; not a Groebner baseline</td></tr>
+<tr><td>Squarefree support shortcut, actual GF83</td><td>1.1408942780</td><td>16 supplied relaxed quintics rejected by both criteria; three internal rounds</td><td>Verification only; original root count unknown</td></tr>
+<tr><td>Squarefree support shortcut, five NIST prime fields</td><td>0.5948–0.7034</td><td>Repeated-root mixture; three internal rounds</td><td>Regression retained; blanket shortcut rejected</td></tr>
+</tbody></table></div><p>The immutable hard all-roots gate and requested 5x target remain unmet. No progress-timeline or best-of IC/rho point is inferred from these component diagnostics.</p></div>
+<!-- END historical-generalized-rootfinding-20261016 -->
 <!-- BEGIN ecbench-sat-pdp-20261009 -->
 <div class="panel" id="ecbench-sat-pdp-20261009">
   <div class="panel-head">

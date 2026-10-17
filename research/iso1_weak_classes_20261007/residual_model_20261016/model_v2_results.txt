@@ -71,7 +71,62 @@ p=89 rows=174262 zeros obs=404 exp=397.8 [363.9,431.7] PASS dispersion=1.000 (n=
    P(zero) in [1.13e-4,1.20e-3]: exp=4.0 obs=3
    P(zero) in [1.20e-3,9.45e-1]: exp=393.2 obs=401
    P(zero) <= 1e-6: obs=0
-## Pooled check over scored primes 53-89: obs-exp = +62.4, sd = 46.4, z = 1.34 (not significant)
+p=97 rows=225816 zeros obs=467 exp=434.1 [398.7,469.6] PASS dispersion=1.001 (n=220320) auc=0.9959 weak_total obs=88538690 pred=88538691
+   P(zero) in [1.00e-6,3.95e-6]: exp=0.0 obs=0
+   P(zero) in [3.95e-6,1.72e-5]: exp=0.1 obs=0
+   P(zero) in [1.72e-5,9.56e-5]: exp=0.5 obs=0
+   P(zero) in [9.56e-5,1.11e-3]: exp=4.0 obs=0
+   P(zero) in [1.11e-3,9.22e-1]: exp=429.6 obs=467
+   P(zero) <= 1e-6: obs=0
+p=101 rows=255025 zeros obs=454 exp=453.3 [417.1,489.5] PASS dispersion=0.995 (n=249283) auc=0.9957 weak_total obs=104070602 pred=104070603
+   P(zero) in [1.00e-6,3.76e-6]: exp=0.0 obs=0
+   P(zero) in [3.76e-6,1.59e-5]: exp=0.1 obs=0
+   P(zero) in [1.59e-5,9.12e-5]: exp=0.5 obs=1
+   P(zero) in [9.12e-5,1.14e-3]: exp=4.1 obs=4
+   P(zero) in [1.14e-3,9.30e-1]: exp=448.7 obs=449
+   P(zero) <= 1e-6: obs=0
+p=103 rows=270529 zeros obs=442 exp=460.3 [423.8,496.8] PASS dispersion=1.004 (n=264683) auc=0.9956 weak_total obs=112561490 pred=112561491
+   P(zero) in [1.00e-6,3.75e-6]: exp=0.0 obs=0
+   P(zero) in [3.75e-6,1.58e-5]: exp=0.1 obs=0
+   P(zero) in [1.58e-5,9.08e-5]: exp=0.5 obs=0
+   P(zero) in [9.08e-5,1.10e-3]: exp=4.1 obs=3
+   P(zero) in [1.10e-3,9.54e-1]: exp=455.6 obs=439
+   P(zero) <= 1e-6: obs=0
+p=107 rows=303398 zeros obs=488 exp=480.2 [443.0,517.5] PASS dispersion=1.000 (n=297328) auc=0.9961 weak_total obs=131091050 pred=131091051
+   P(zero) in [1.00e-6,3.63e-6]: exp=0.0 obs=0
+   P(zero) in [3.63e-6,1.54e-5]: exp=0.1 obs=0
+   P(zero) in [1.54e-5,8.89e-5]: exp=0.5 obs=1
+   P(zero) in [8.89e-5,1.12e-3]: exp=4.2 obs=5
+   P(zero) in [1.12e-3,9.48e-1]: exp=475.4 obs=482
+   P(zero) <= 1e-6: obs=0
+p=109 rows=320787 zeros obs=516 exp=488.9 [451.3,526.5] PASS dispersion=1.001 (n=314584) auc=0.9952 weak_total obs=141170042 pred=141170043
+   P(zero) in [1.00e-6,3.56e-6]: exp=0.0 obs=0
+   P(zero) in [3.56e-6,1.50e-5]: exp=0.1 obs=0
+   P(zero) in [1.50e-5,9.03e-5]: exp=0.5 obs=1
+   P(zero) in [9.03e-5,1.12e-3]: exp=4.4 obs=3
+   P(zero) in [1.12e-3,9.48e-1]: exp=483.9 obs=512
+   P(zero) <= 1e-6: obs=0
+p=113 rows=357532 zeros obs=467 exp=505.8 [467.6,544.0] FAIL dispersion=0.999 (n=351143) auc=0.9964 weak_total obs=163060130 pred=163060131
+   P(zero) in [1.00e-6,3.52e-6]: exp=0.0 obs=0
+   P(zero) in [3.52e-6,1.49e-5]: exp=0.1 obs=0
+   P(zero) in [1.49e-5,8.73e-5]: exp=0.5 obs=0
+   P(zero) in [8.73e-5,1.16e-3]: exp=4.6 obs=4
+   P(zero) in [1.16e-3,9.40e-1]: exp=500.7 obs=463
+   P(zero) <= 1e-6: obs=0
+## Pooled check (iso1_residual_model pool figures/zero_rows.csv), all scored primes, overall and by e = v2(p^2-1)
+all: primes [53,59,61,67,83,101,107,109,71,73,89,103,79,113,97] obs-exp = +73.8, sd = 65.4, z = 1.13
+e = 3: primes [53,59,61,67,83,101,107,109] obs-exp = +89.3, sd = 46.6, z = 1.91
+e = 4: primes [71,73,89,103] obs-exp = -29.1, sd = 33.7, z = -0.86
+e = 5: primes [79,113] obs-exp = -19.3, sd = 25.4, z = -0.76
+e = 6: primes [97] obs-exp = +32.9, sd = 18.1, z = 1.82
+e >= 4: primes [71,73,89,103,79,113,97] obs-exp = -15.5, sd = 45.9, z = -0.34
+## Registered follow-up test (PROTOCOL_V2.md): pooled over the five fresh primes 101, 103, 107, 109, 113
+all: primes [101,107,109,103,113] obs-exp = -21.5, sd = 42.4, z = -0.51
+e = 3: primes [101,107,109] obs-exp = +35.6, sd = 32.7, z = 1.09
+e = 4: primes [103] obs-exp = -18.3, sd = 18.6, z = -0.98
+e = 5: primes [113] obs-exp = -38.8, sd = 19.5, z = -1.99
+e >= 4: primes [103,113] obs-exp = -57.1, sd = 27.0, z = -2.12
+## Decision: pooled one-sided z = -0.51 <= 2.0 -> V2 stands; hypothesis H (excess) not confirmed. (e = 5 and e >= 4 lines above are unregistered, exploratory.)
 ## Non-pristine (seen during V1 diagnosis)
 p=37 rows=12321 zeros obs=145 exp=168.8 [146.5,191.1] FAIL dispersion=0.981 (n=9870) auc=0.9590 weak_total obs=1875530 pred=1875531
    P(zero) in [1.02e-6,4.79e-5]: exp=0.0 obs=0
