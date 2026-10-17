@@ -1191,12 +1191,43 @@ fn endomorphism(
         } else {
             match small.and_then(|l| torsion::frobenius_is_scalar(&c.model, &c.trace, l)) {
                 Some(true) => {
-                    let m = e.min(depth - 1);
-                    (
-                        (m == 0).then_some(0),
-                        m,
-                        "Frobenius is a scalar on E[ℓ]: above the floor".into(),
-                    )
+                    // Scalar on E[ℓ^s] for every s up to the largest j
+                    // with j ≤ v_ℓ([End(E) : Z[π]]) = depth − level; the
+                    // bound level ≤ e already gives s ≥ depth − e.
+                    let mut s = 1u32.max(depth.saturating_sub(e));
+                    let mut stopped = false;
+                    while s < *depth {
+                        match small
+                            .and_then(|l| torsion::scalar_on_power(&c.model, &c.trace, l, s + 1))
+                        {
+                            Some(true) => s += 1,
+                            Some(false) => {
+                                stopped = true;
+                                break;
+                            }
+                            None => break,
+                        }
+                    }
+                    let at_most = depth - s;
+                    let exact = s == *depth || stopped;
+                    let method = match (s, stopped) {
+                        (1, true) => {
+                            "Frobenius is a scalar on E[ℓ], not on E[ℓ²]: one above the floor"
+                                .to_string()
+                        }
+                        (_, true) => {
+                            format!("Frobenius is a scalar on E[ℓ^{s}], not on E[ℓ^{}]", s + 1)
+                        }
+                        (1, false) if s < *depth => {
+                            "Frobenius is a scalar on E[ℓ]: above the floor".to_string()
+                        }
+                        (1, false) => "Frobenius is a scalar on E[ℓ]: the crater".to_string(),
+                        _ if s == *depth => {
+                            format!("Frobenius is a scalar on E[ℓ^{s}]: the crater")
+                        }
+                        _ => format!("Frobenius is a scalar on E[ℓ^{s}]: level at most {at_most}"),
+                    };
+                    (exact.then_some(at_most), at_most, method)
                 }
                 Some(false) => {
                     if *depth > e {
@@ -1213,8 +1244,13 @@ fn endomorphism(
                 }
                 None => {
                     let why = match (&c.model, small) {
-                        (Model::Other { .. } | Model::Extension { .. }, _) => {
+                        (Model::Other { .. }, _) => {
                             "not tested: no field arithmetic for this model"
+                        }
+                        (Model::Extension { p, modulus, .. }, _)
+                            if torsion::FpK::new(p, modulus).is_none() =>
+                        {
+                            "not tested: GF(p^k) arithmetic here needs 3 < p < 2^63"
                         }
                         (_, Some(l)) if l <= torsion::SCALAR_TEST_MAX_ELL => {
                             "not tested: beyond the scalar test's cost limit"
@@ -1275,8 +1311,16 @@ pub fn compute(c: &RegistryCurve, fx: &Factoring) -> Result<CurveTraits, String>
         Model::Binary { .. } => BigUint::from(2u8),
         Model::Prime { p, .. } | Model::Other { p, .. } | Model::Extension { p, .. } => p.clone(),
     };
-    let (status, method) =
+    let (mut status, mut method) =
         certify::check_order(&c.model, &c.order, &c.representations).map_err(ctx)?;
+    if status == Status::NotEvaluated && matches!(c.model, Model::Extension { .. }) {
+        let fac = fx.factor(&c.order);
+        if let Some((s, m)) =
+            certify::point_order_certificate(&c.model, &c.order, &fac).map_err(ctx)?
+        {
+            (status, method) = (s, m);
+        }
+    }
     let (frob, delta) = frobenius(c, fx).map_err(ctx)?;
     let ordinary = !(&c.trace % BigInt::from(characteristic.clone())).is_zero();
     let trace_ratio = {
@@ -1289,7 +1333,7 @@ pub fn compute(c: &RegistryCurve, fx: &Factoring) -> Result<CurveTraits, String>
     let endo = endomorphism(c, &frob, &sub, ordinary).map_err(ctx)?;
     let small = small_primes(&delta, &characteristic);
     let dissect = match &c.model {
-        Model::Prime { .. } | Model::Binary { .. } if ordinary => {
+        Model::Prime { .. } | Model::Binary { .. } | Model::Extension { .. } if ordinary => {
             let scalar = |ell: u64| -> Option<bool> {
                 let depth = small.iter().find(|s| s.ell == ell).map(|s| s.depth)?;
                 if depth == 0 {
@@ -1800,11 +1844,13 @@ mod tests {
                 &rep.generator,
                 GeneratorCoords::Extension(x, y) if x.len() == *k as usize && y.len() == *k as usize
             ));
-            assert_eq!(
-                certify::check_order(&curve.model, &curve.order, &curve.representations)
-                    .unwrap()
-                    .0,
-                Status::NotEvaluated
+            // The generator certificate now runs over GF(p^k).
+            let (status, method) =
+                certify::check_order(&curve.model, &curve.order, &curve.representations).unwrap();
+            assert!(
+                status <= Status::Bounded,
+                "{}: {status:?} {method}",
+                curve.slug
             );
         }
     }
