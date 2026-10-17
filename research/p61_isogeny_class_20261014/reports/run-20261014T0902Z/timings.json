@@ -1,0 +1,76 @@
+{
+  "schema": "ec-hardness/p61-pilot-timings/v1",
+  "run_id": "p61-class-pilot-v2-20261014T0902Z",
+  "population": "contiguous x=0..16704 prefix: two 32-column pilot segments, one 256-column certified segment, and one 16384-column certified segment",
+  "host": "macOS 26.6 arm64 shared interactive host",
+  "isolation": "unisolated; other research and desktop processes were active",
+  "producer_threads": 8,
+  "generation_audit_points": 1,
+  "verification_audit_points": 2,
+  "verification_audit_seed_x": 7,
+  "parallel_replay_candidate": {
+    "source_commit": "d064729541f9c9cea2dc50b4a36572971cd2b099",
+    "binary_sha256": "81c1a5b8897bcc39fd20c6427e17eb73d9160d838bb001f82810de4272579e82",
+    "threads": 8,
+    "audit_points": 2,
+    "audit_seed_x": 7,
+    "isolation": "unisolated; concurrent compilation and other research workloads were observed",
+    "interpretation": "correctness passes throughout; the candidate is slower on both 576-vertex segments and faster in the first sequential comparison on the 4608-vertex segment, but gross host contention and a 215.940-second c9 repeat preclude a general speedup claim. The 294912-vertex segment has a d064 replay but no matched c9 replay."
+  },
+  "segments": [
+    {
+      "label": "x=0..32",
+      "vertices": 576,
+      "generation_elapsed_ms": 13415,
+      "verification_elapsed_ms": 14778,
+      "parallel_verification_elapsed_ms": 23204,
+      "uncompressed_bytes": 316537,
+      "stored_bytes": 77983,
+      "generation_receipt_sha256": "d65e52ee8319dd7d0db285a563814dc5418754ab9bdd9e9c1073faf8fbecec4d",
+      "verification_receipt_sha256": "99d3c89c0936b5a4b4a4c8be73ee1d0f81467161ca6835119c6755cb7471b071",
+      "parallel_verification_receipt_sha256": "b24697c9e8fbb53e594864406c3f4c98a6aeb5cd2d349b9c3b3951e0e06f79a3"
+    },
+    {
+      "label": "x=32..64",
+      "vertices": 576,
+      "generation_elapsed_ms": 13421,
+      "verification_elapsed_ms": 14672,
+      "parallel_verification_elapsed_ms": 22693,
+      "uncompressed_bytes": 313438,
+      "stored_bytes": 75992,
+      "generation_receipt_sha256": "05789dd4abc48ef8e329978d32ad38c9c112d90a6fc1568c05ac6fc9c621bff4",
+      "verification_receipt_sha256": "c027f0f5a5384b07f6012bb18c003aa4d6b514417cad498bd4160f18cdc03513",
+      "parallel_verification_receipt_sha256": "696d05717de484db6fe2dd92abbf6cf5fd2563e565555d7f560351cb7f5a0a8d"
+    },
+    {
+      "label": "x=64..320",
+      "vertices": 4608,
+      "generation_elapsed_ms": 21266,
+      "verification_elapsed_ms": 46939,
+      "parallel_verification_elapsed_ms": 33460,
+      "uncompressed_bytes": 2504089,
+      "stored_bytes": 585586,
+      "generation_receipt_sha256": "d188864b5b69a3b51e3a66856a1db421941ac757a33304dbcfedbd6f1516116f",
+      "verification_receipt_sha256": "974955853c973cfad89101f4b2452060885ad88771ca78914895dc160e769b30",
+      "parallel_verification_receipt_sha256": "2b11175e2cd775cac030fa5e38ef11f67b536a42a69a56bd01c646500f0da8a6",
+      "contended_control_repeat": {
+        "verification_elapsed_ms": 215940,
+        "receipt_sha256": "82fd5c5e200d7d90323d0490a87e36310158ac9b610c624aaa143187480489e8",
+        "classification": "valid correctness replay; timing excluded because concurrent release-test compilation caused gross contention"
+      }
+    },
+    {
+      "label": "x=320..16704",
+      "vertices": 294912,
+      "generation_elapsed_ms": 858472,
+      "verification_elapsed_ms": null,
+      "parallel_verification_elapsed_ms": 735772,
+      "uncompressed_bytes": 161082807,
+      "stored_bytes": 37455603,
+      "generation_receipt_sha256": "99f09bdad81ff06641063e1cdbc4d3b106622c97d9685b30c218bf873889ea0f",
+      "verification_receipt_sha256": null,
+      "parallel_verification_receipt_sha256": "93a36eeccdf6b821d4ffd8bebd552975ea2e0daa826672b2eb0dc88f95751dd8",
+      "c9_control_status": "not_run"
+    }
+  ]
+}

@@ -3437,6 +3437,7 @@ mod wide {
                     let mut relation_check_ns = 0u128;
                     let mut probes = 0u64;
                     let mut scan = StateScan128::new(n_u32);
+                    let mut lift_scratch = LiftScratch128::default();
                     for offset in 0..length {
                         let state = index.states.get((state_lo + offset) % n_states);
                         if let Some(relation) = scan_state128(
@@ -3450,6 +3451,7 @@ mod wide {
                             target_x,
                             &state,
                             &mut scan,
+                            &mut lift_scratch,
                             &mut probes,
                             &mut relation_check_ns,
                         ) {
@@ -3958,24 +3960,107 @@ mod wide {
         }
     }
 
+    /// Reusable scratch for batched affine adds in [`lift128`]: result
+    /// slots, Montgomery-batch denominators/prefixes, all reused across
+    /// calls so the hot lift loop performs no allocations.  The u128 twin
+    /// of the u64 pipeline's `LiftScratch`.
+    #[derive(Default)]
+    struct LiftScratch128 {
+        results: Vec<FastPoint128>,
+        denominators: Vec<u128>,
+        prefixes: Vec<u128>,
+        regular: Vec<usize>,
+    }
+
+    impl LiftScratch128 {
+        /// Affine batch addition of one fixed point against a list of points
+        /// with a single shared field inversion (Montgomery's trick).
+        /// `results[i]` equals `fast.add(base, points[i])`, in order; the
+        /// exceptional same-x paths (doubling, the point at infinity) fall
+        /// back to the scalar `add`.
+        fn batch_adds(
+            &mut self,
+            fast: &FastBinaryCurve128,
+            base: FastPoint128,
+            points: &[FastPoint128],
+        ) {
+            let gf = &fast.gf;
+            self.results.clear();
+            self.results.extend(std::iter::repeat_n(None, points.len()));
+            self.denominators.clear();
+            self.prefixes.clear();
+            self.prefixes.resize(points.len(), 0);
+            self.regular.clear();
+            self.regular.reserve(points.len());
+            for (i, &q) in points.iter().enumerate() {
+                match (base, q) {
+                    (None, r) | (r, None) => self.results[i] = r,
+                    (Some((x1, _)), Some((x2, _))) => {
+                        if x1 == x2 {
+                            self.results[i] = fast.add(base, q);
+                        } else {
+                            self.denominators.push(x1 ^ x2);
+                            self.regular.push(i);
+                        }
+                    }
+                }
+            }
+            if self.regular.is_empty() {
+                return;
+            }
+            let mut product = 1u128;
+            for (k, &d) in self.denominators.iter().enumerate() {
+                self.prefixes[k] = product;
+                product = gf.mul(product, d);
+            }
+            let mut inverse_product = gf.inv(product);
+            for k in (0..self.denominators.len()).rev() {
+                let inverse = gf.mul(inverse_product, self.prefixes[k]);
+                inverse_product = gf.mul(inverse_product, self.denominators[k]);
+                let i = self.regular[k];
+                let (Some((x1, y1)), Some((x2, y2))) = (base, points[i]) else {
+                    unreachable!("regular slots hold affine pairs");
+                };
+                let dy = y1 ^ y2;
+                let lambda = gf.mul(dy, inverse);
+                let lambda_sq = gf.sqr(lambda);
+                let x3 = lambda_sq ^ lambda ^ x1 ^ x2 ^ fast.a;
+                let y3 = gf.mul(lambda, x1 ^ x3) ^ x3 ^ y1;
+                self.results[i] = Some((x3, y3));
+            }
+        }
+    }
+
     fn lift128(
         fast: &FastBinaryCurve128,
         base: &Base128,
         codes: &[u128; 4],
         target: FastPoint128,
+        scratch: &mut LiftScratch128,
     ) -> Option<[usize; 4]> {
         let choices: Vec<&Vec<usize>> = codes
             .iter()
             .map(|code| base.by_x.get(code))
             .collect::<Option<_>>()?;
+        let b_points: Vec<FastPoint128> = choices[1].iter().map(|&i| base.points[i]).collect();
+        let c_points: Vec<FastPoint128> = choices[2].iter().map(|&i| base.points[i]).collect();
+        let d_points: Vec<FastPoint128> = choices[3].iter().map(|&i| base.points[i]).collect();
+        // Batched affine adds level by level: for each fixed left point, the
+        // next level's adds against the choice points share one field
+        // inversion (Montgomery's trick). The iteration order and the first
+        // lifted match are exactly those of the per-candidate add loop this
+        // replaces.
         for &a in choices[0] {
-            for &b in choices[1] {
-                let ab = fast.add(base.points[a], base.points[b]);
-                for &c in choices[2] {
-                    let abc = fast.add(ab, base.points[c]);
-                    for &d in choices[3] {
-                        if fast.add(abc, base.points[d]) == target {
-                            return Some([a, b, c, d]);
+            scratch.batch_adds(fast, base.points[a], &b_points);
+            let abs = scratch.results.clone();
+            for (bi, &ab) in abs.iter().enumerate() {
+                scratch.batch_adds(fast, ab, &c_points);
+                let abcs = scratch.results.clone();
+                for (ci, &abc) in abcs.iter().enumerate() {
+                    scratch.batch_adds(fast, abc, &d_points);
+                    for (di, &result) in scratch.results.iter().enumerate() {
+                        if result == target {
+                            return Some([a, choices[1][bi], choices[2][ci], choices[3][di]]);
                         }
                     }
                 }
@@ -4018,6 +4103,7 @@ mod wide {
         target_x: u128,
         state: &State128,
         scan: &mut StateScan128,
+        lift_scratch: &mut LiftScratch128,
         probes: &mut u64,
         relation_check_ns: &mut u128,
     ) -> Option<Relation128> {
@@ -4064,7 +4150,7 @@ mod wide {
                     // Time the whole lift once per candidate instead of one
                     // Instant::now() per innermost add.
                     let lift_started = Instant::now();
-                    let lifted = lift128(fast, base, &codes, target);
+                    let lifted = lift128(fast, base, &codes, target, lift_scratch);
                     *relation_check_ns += lift_started.elapsed().as_nanos();
                     if let Some(point_indices) = lifted {
                         return Some(Relation128 {
@@ -4094,6 +4180,7 @@ mod wide {
         let (target_x, _) = target?;
         let mut probes = 0u64;
         let mut scan = StateScan128::new(gf.n);
+        let mut lift_scratch = LiftScratch128::default();
         let start = start % index.states.len().max(1);
         for offset in 0..index.states.len() {
             let state = index.states.get((start + offset) % index.states.len());
@@ -4108,6 +4195,7 @@ mod wide {
                 target_x,
                 &state,
                 &mut scan,
+                &mut lift_scratch,
                 &mut probes,
                 relation_check_ns,
             ) {

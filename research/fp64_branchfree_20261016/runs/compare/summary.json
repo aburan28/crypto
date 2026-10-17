@@ -1,0 +1,139 @@
+{
+  "claims": [
+    {
+      "id": "P1",
+      "statement": "max(r1, r2) over 6 arms kernel.fp64.* (batch ≥ 4096)",
+      "threshold": 0.85,
+      "value": 0.4363292002591265,
+      "verdict": "PASS"
+    },
+    {
+      "id": "P1pf",
+      "statement": "max(r1, r2) over 6 arms kernel.pf64.* (batch ≥ 4096)",
+      "threshold": 0.85,
+      "value": 0.4655441442880143,
+      "verdict": "PASS"
+    },
+    {
+      "id": "P4",
+      "statement": "max(r1, r2) over 1 arms pfrho.44* (batch ≥ 0)",
+      "threshold": 0.95,
+      "value": 0.7212394970393845,
+      "verdict": "PASS"
+    },
+    {
+      "id": "P2a",
+      "statement": "max(r1, r2) over 1 arms fp64.mul.latency* (batch ≥ 0)",
+      "threshold": 1.1,
+      "value": 1.0009695599555566,
+      "verdict": "PASS"
+    },
+    {
+      "id": "P2b",
+      "statement": "max(r1, r2) over 1 arms fp64.sqr.latency* (batch ≥ 0)",
+      "threshold": 1.1,
+      "value": 0.9967967799319544,
+      "verdict": "PASS"
+    },
+    {
+      "id": "P2c",
+      "statement": "max(r1, r2) over 1 arms pf64.mul.latency* (batch ≥ 0)",
+      "threshold": 1.1,
+      "value": 1.0184136279492761,
+      "verdict": "PASS"
+    },
+    {
+      "id": "P2d",
+      "statement": "max(r1, r2) over 1 arms pf64.sqr.latency* (batch ≥ 0)",
+      "threshold": 1.1,
+      "value": 0.9977636920394612,
+      "verdict": "PASS"
+    },
+    {
+      "id": "C1a",
+      "statement": "max |r_k − 1| over 6 arms kernel.fp64cm.* (batch ≥ 4096)",
+      "threshold": 0.1,
+      "value": 0.024688045182994278,
+      "verdict": "PASS"
+    },
+    {
+      "id": "C1b",
+      "statement": "max |r_k − 1| over 6 arms kernel.w1.* (batch ≥ 4096)",
+      "threshold": 0.1,
+      "value": 0.029910769773978663,
+      "verdict": "PASS"
+    }
+  ],
+  "classes": [
+    {
+      "arms": 2,
+      "class": "no detected effect",
+      "group": "clock"
+    },
+    {
+      "arms": 8,
+      "class": "no detected effect",
+      "group": "fp64"
+    },
+    {
+      "arms": 2,
+      "class": "candidate faster",
+      "group": "fp64cm"
+    },
+    {
+      "arms": 6,
+      "class": "no detected effect",
+      "group": "fp64cm"
+    },
+    {
+      "arms": 21,
+      "class": "candidate faster",
+      "group": "kernel"
+    },
+    {
+      "arms": 19,
+      "class": "no detected effect",
+      "group": "kernel"
+    },
+    {
+      "arms": 20,
+      "class": "no detected effect",
+      "group": "mem"
+    },
+    {
+      "arms": 1,
+      "class": "candidate slower",
+      "group": "pf64"
+    },
+    {
+      "arms": 7,
+      "class": "no detected effect",
+      "group": "pf64"
+    },
+    {
+      "arms": 1,
+      "class": "candidate faster",
+      "group": "pfrho"
+    },
+    {
+      "arms": 6,
+      "class": "candidate faster",
+      "group": "scaling"
+    },
+    {
+      "arms": 6,
+      "class": "no detected effect",
+      "group": "scaling"
+    },
+    {
+      "arms": 1,
+      "class": "candidate faster",
+      "group": "w1"
+    },
+    {
+      "arms": 7,
+      "class": "no detected effect",
+      "group": "w1"
+    }
+  ]
+}
