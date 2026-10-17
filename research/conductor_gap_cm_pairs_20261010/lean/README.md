@@ -50,11 +50,24 @@ artifact `conductor-gap-axiom-audit`. That job also refuses `sorry`,
 `admit`, `native_decide` and custom axioms, and re-checks both modules
 with `leanchecker --fresh`. An earlier version of this README said the
 audit printed only `propext`. No audit output had been kept, so read the
-CI log for the actual axiom sets.
+CI log for the actual axiom sets. The output of a green run is now
+committed as [`axiom-audit.log`](axiom-audit.log) (run 38984047520, job
+117251254820, PR #2026 head e5a884227, 2026-10-17): all nine declarations
+depend on `propext` only, and `leanchecker --fresh` passed on both modules
+(added 2026-10-17, sheriff case SHF-20261017-e4d7f6, L-N7).
 
 Not here, and not formalizable with today's Mathlib: endomorphism rings,
 conductors, isogenies as maps of curves. The two theorems bracket the
 experiment from both sides. Methods in Nechaev's model (BSGS-type) see
-nothing. No method sees more than the ℓ-isogeny costs. Representation-hashing
-walks such as ecbench's rho and kangaroo fall under the second statement
-but not the first.
+nothing. For always-correct solvers, the best cost on the two levels differs
+by at most two ℓ-isogeny evaluations.
+
+**Scope of the second statement** (corrected 2026-10-17, sheriff case
+SHF-20261017-e4d7f6, finding L-N2). An earlier version of this paragraph
+said representation-hashing walks such as ecbench's rho and kangaroo "fall
+under the second statement". `TransferBound`'s `Solver` is a deterministic
+`run` that is correct on every instance. A rho or kangaroo walk is such a
+solver only with a fixed tape and only if it never fails, and then the
+theorem bounds the best cost across levels. It says nothing about the
+measured `S` of rho, kangaroo or any other given method. Their
+conductor-blindness stays an empirical question (`../README.md` §5).
