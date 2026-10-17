@@ -36,10 +36,12 @@ problems, different algorithms; they are benchmarked per problem, not against ea
 | supersingular, endomorphism side (V3) | **B_{p,∞}, O₀, ideals, LLL, Fincke–Pohst** `quat/mod.rs` · **KLPT (ℓ = 2)** `quat/klpt.rs` · **class sets, Brandt matrices, Mestre's graph, Eichler mass formula** `quat/brandt.rs` · **Deuring correspondence ideal ↔ kernel over F_{p⁴}** `quat/deuring.rs` |
 | genus 2 (V3) | **Richelot (2,2)-isogenies (codomain, points), splitting J(C) → E₁ × E₂, gluing E₁ × E₂ → J(C), Igusa–Clebsch invariants, superspecial Richelot graph** `genus2.rs` · **theta-model (2,2)-isogenies, theta gluing, split detection, theta doubling, Kani-lemma (2ᵃ, 2ᵃ)-chains** `theta.rs` |
 | higher dimension (V3) | **general-dimension theta (2,…,2)-chains and dimension-4 Kani embeddings** (auxiliary α ∈ M₂(ℤ[i]) of any degree via four squares; split decision) `theta_g.rs` |
+| (E₁, E₂, d) → isogeny of degree d (V4) | **Benčina–Kutas–Merz–Petit–Stopar–Weitkämper end to end**: End(E) from a 2-graph path translated to an O₀-ideal `fixed_degree/endring.rs` · Kirschmer–Voight connecting ideal and normalised norm form `fixed_degree/connecting.rs` · norm equation by Cornacchia with guessing `fixed_degree/{cornacchia,factor}.rs`, Coron's bivariate and a trivariate integer Coppersmith method `fixed_degree/coppersmith.rs` (exact integer LLL `lattice.rs`, multivariate integer polynomials `mpoly.rs`) · ideal → isogeny: kernel/Vélu chain for smooth d, torsion images (Robert-style) with a Kani certificate for d < 2ᵃ `fixed_degree/represent.rs` · hybrid guessing `fixed_degree/hybrid.rs` · baselines: exhaustive, MITM, van Oorschot–Wiener claw `fixed_degree/baselines.rs` |
+| √élu paper, remaining parts (V4) | **Strassen's modular factorial and deterministic factoring** `strassen.rs` · **Algorithm 1 (multiplicative h_S, cyclotomic case)** `kernel/sqrt_mult.rs` · **irrational generators (§4.14)** `kernel/sqrt_velu_irr.rs` · **Appendix A.5 fused evaluations, reciprocal remainder trees** `kernel/sqrt_velu_mont.rs` · **CSURF action** `path/csurf.rs` |
 | auxiliary | dual isogeny `find/dual.rs`, Kohel's End(E) conductor `path/endo.rs` (V2) |
 | arithmetic (V3) | `fpm.rs` Montgomery F_p (1–8 limbs, MULX/ADCX/ADOX assembly for 512 bits, Pornin inversion) · `fp2.rs` F_{p²} over any of them · `gf2n.rs` GF(2ⁿ) · `gf3n.rs` GF(3ⁿ) · `ext.rs` F_{p⁴} · `int.rs`, `bigint.rs` big integers · `poly.rs`, `series.rs` Karatsuba, Newton |
 
-## Correctness checks (`cargo test --release`: 110 tests, all pass)
+## Correctness checks (`cargo test --release`: 178 tests, all pass)
 
 Each algorithm is checked against an independent computation, not only against itself. From V1/V2:
 Vélu = Kohel = √élu = x-only = Montgomery on common kernels; all eight BMSS methods reproduce Kohel's
@@ -84,6 +86,26 @@ Added in V3:
   exponentiation (61 and 127 bits, degree 5–90); distinct-degree factorisation with composition steps =
   the exponentiation version; the SEA Atkin degree (equality at the divisors of ℓ + 1) = the gcd
   definition on 60 Atkin cases.
+
+Added in V4 (`tests/fixed_degree_pipeline.rs`, `tests/fixed_degree_solvers.rs`, `tests/coppersmith.rs`,
+`tests/sqrt_velu_gaps.rs`; study and measurements: `research/fixed_degree_isogenies_20261016/`):
+
+* End(E): the Deuring image of the computed ideal is j(E); the l + 1 sub-ideals of an ideal have exactly
+  the Φ_l neighbours as Deuring images (l = 2, 3); Kirschmer–Voight ideals have left order O₁ and right
+  order O₂, and I₁·I lands on E₂;
+* fixed degree, p = 1605631: planted prime d in (√p, 2ᵃ) found by Cornacchia and by Coron's method, the
+  torsion representation Kani-certified (the (2ᵃ, 2ᵃ) split, twisted control does not split) with a
+  matching Weil pairing; random E₁, E₂ with prime d ≈ 8p (nothing planted) found; planted smooth d
+  (p = 1477631) as a Vélu chain from the caller's curve onto j(E₂); hybrid 3⁷ composite certified;
+* steps 2–5 at 61 and 127 bits: N(J) = d, O_L(J) = O₁, O_R(J) = β⁻¹O₂β exactly, for Cornacchia, Coron
+  and the trivariate method (61 bits) and Coron (127 bits);
+* Cornacchia: all solutions = brute force (x² + dy² = m, every m ≤ 2500, 12 d; 300 binary quadratics);
+  square roots modulo composites = brute force; MITM and vOW find planted 2ᵉ paths, cyclic;
+* exact integer LLL = `lll_gram` on 4×4 and passes exact reducedness checks to dimension 40; Coron recovers
+  planted roots up to its bound; integer roots of univariate polynomials are complete;
+* Strassen ℓ! mod n = naive on 528 pairs; Algorithm 1 = direct products, Φ_n for 11 n; irrational
+  generators = Vélu over F_{q^e} (e = 2, 3, 4); CSURF 2-steps = Vélu from the kernel point and Φ₂, odd
+  steps = Vélu/√élu and Φ_ℓ, actions commute and invert (62, 111 bits, CSURF-512).
 
 The command line and `api` (`tests/api.rs`, `tests/icv1.rs`): SHA-256 against the FIPS 180-4
 vectors; ICV1 strings and slugs equal the crypto crate's `curve_id::prime` vectors and the P-256 and
