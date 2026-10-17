@@ -184,6 +184,48 @@ underneath (`kernel::*`, `find::*`, `path::*`, `quat::*`, `theta*`, …) are doc
 [`docs/SURVEY.md`](SURVEY.md). They are research code: their signatures may change between
 commits, so pin a commit.
 
+### CM curve generation from Rust
+
+CM generation already exists in `gls_loop`, alongside the standalone
+`cm::hilbert_class_poly` implementation. The constructor reduces the Hilbert class
+polynomial modulo p, finds its j-invariants, builds a curve and verifies the
+curve or its quadratic twist against the requested trace. For example:
+
+```rust
+use isogeny_algos::{api, gls_loop, int::Int};
+
+// This search targets GLS instances: p = 3 mod 4 and a small-cofactor
+// quadratic twist over F_(p^2). It is not an unrestricted prime search.
+let inst = gls_loop::find_instance(-23, 40, &[3], 64, 7, 2_000_000)
+    .ok_or("no instance within the search bound")?;
+let generated = gls_loop::build_curve(&inst, 11)?;
+let order = &(&inst.p + &Int::one()) - &inst.t;
+let checked = api::check_order(&generated.curve, &order, 1);
+assert!(checked.certificate.certified || checked.twist_certificate.certified);
+# Ok::<(), String>(())
+```
+
+`build_curve` expects `H_D mod p` to split completely and rejects j = 0 and
+1728; it is a specialized research constructor, not a `generate-cm` CLI command.
+The constructor validates the ordinary CM norm data and returns
+`order_verification`: exhaustive counting below 2^22, or curve/twist order
+certificates from `api::check_order` above that threshold. It returns an error
+when neither twist can be verified, including when factorisation is insufficient
+to complete a certificate. Sampled annihilation alone cannot select the correct
+twist: a wrong multiple can annihilate every point. The certificates retain the
+API's probable-prime assumptions. They do not certify the full endomorphism
+ring. Hilbert coefficients come from fixed-point complex evaluation with a
+rounding check, not certified interval arithmetic.
+
+### Point-count recombination
+
+SEA keeps every matching baby-step index, including repeats from low-order
+points. After the first pass, both SEA and small-field BSGS can test just the
+surviving orders on a new point; a point-addition estimate keeps the full search
+when the survivor set is large. Sorted candidate intersections use binary search.
+These changes preserve the public order-certification checks. No end-to-end
+timing improvement is implied by this algorithm description.
+
 ## Cost (one run each on the 4-vCPU development VM)
 
 | task | time |

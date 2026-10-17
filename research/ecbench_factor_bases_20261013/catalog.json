@@ -127,6 +127,40 @@
       "bytes": 5587
     },
     {
+      "id": "k23-onb-w2",
+      "curve": {
+        "kind": "koblitz",
+        "a": 1,
+        "n": 23
+      },
+      "plug_in": "onb-weight:w=2,columns=8",
+      "oracle": "mitm-frobenius:m=2",
+      "fb_id": "FB1ha5d7f603afe2",
+      "slug": "icv1-f2m23-tm5197-1f85e9e1",
+      "store": "store:factor-bases/icv1-f2m23-tm5197-1f85e9e1/FB1ha5d7f603afe2.json",
+      "git": "dumps/FB1ha5d7f603afe2.json",
+      "columns": 4,
+      "points": 184,
+      "bytes": 18898
+    },
+    {
+      "id": "k23-onb-w1",
+      "curve": {
+        "kind": "koblitz",
+        "a": 1,
+        "n": 23
+      },
+      "plug_in": "onb-weight:w=1",
+      "oracle": "mitm-frobenius:m=2",
+      "fb_id": "FB1h190e12c73911",
+      "slug": "icv1-f2m23-tm5197-1f85e9e1",
+      "store": "store:factor-bases/icv1-f2m23-tm5197-1f85e9e1/FB1h190e12c73911.json",
+      "git": "dumps/FB1h190e12c73911.json",
+      "columns": 1,
+      "points": 46,
+      "bytes": 5586
+    },
+    {
       "id": "k11-cyc-w1",
       "curve": {
         "kind": "koblitz",
@@ -178,5 +212,5 @@
       "bytes": 3992
     }
   ],
-  "note": "fb_id check 48/48; store verify --remote 10/10"
+  "note": "fb_id check includes onb-weight; cite yield/DoR only with FB1+FBM1"
 }

@@ -24,6 +24,12 @@ class CoverCatalogTests(unittest.TestCase):
         catalog = browser.load(browser.REGISTRY)
         imported = browser.load("docs/curves/standards/registry.json")
         self.assertEqual(standards.merge(copy.deepcopy(catalog), imported), catalog)
+        by_model = {row["model_json"]: row for row in catalog["curves"]}
+        for source_row in imported["curves"]:
+            merged = by_model[source_row["model_json"]]
+            self.assertIn("docs/curves/standards/registry.json", merged["sources"])
+            for provenance in source_row["standards_provenance"]:
+                self.assertIn(provenance, merged["standards_provenance"])
         coverage = browser.load(browser.STANDARDS_COVERAGE)
         records = coverage["records"]
         source_rows = sum((browser.load("docs/curves/standards/" + name)["curves"]

@@ -6,9 +6,10 @@ name: Release
 on:
   push:
     branches: [main]
-  # Dry run on pull requests that touch what the build consumes, so the
-  # macOS and Windows legs are proven before a merge can turn a release
-  # red. The `release` job is skipped for these; nothing is published.
+  # Start the dry run for every pull request. The scope job then selects only
+  # affected build/package lanes, including compile-time inputs discovered
+  # recursively; an event-level path list cannot safely anticipate that set.
+  # The `release` job is skipped for pull requests, so nothing is published.
   pull_request:
     paths:
       - '.github/workflows/release.yml'
@@ -21,6 +22,7 @@ on:
       - 'tests/fixtures/ecbench_manifest_small.json'
       - 'ecc2k130/Makefile'
       - 'tools/isogeny-cli/**'
+      - 'tools/volcano-cli/**'
       - 'isogeny_algos/**'
       - 'research/p192_p224_large_degree_isogenies_20261009/**'
       - 'docs/curves/registry.json'
@@ -145,7 +147,10 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /Cargo.toml
+            /tools/volcano-cli/
+            /isogeny_algos/
             /Cargo.lock
+            /.gitattributes
             /.cargo/
             /rust-toolchain*
             /.github/scripts/
@@ -159,6 +164,7 @@ jobs:
             /experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs
             /experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs
             /docs/curves/
+            /docs/ecdlp-audit/
             /README.md
             /LICENSE*
       - name: Materialize compile-time inputs without research archives
@@ -182,7 +188,7 @@ jobs:
         run: >-
           cargo build --locked --release
           --bin crypto --bin ic --bin ecbench --bin curve_cover_check
-          --bin curve_standards --bin hyperelliptic-cover
+          --bin curve_standards --bin hyperelliptic-cover --bin ecdlp-audit
           --target ${{ matrix.target }}
       - name: Smoke-test the binaries
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.scope.outputs.release_rust != 'false'
@@ -192,12 +198,10 @@ jobs:
         run: |
           ext=""
           [ "${{ runner.os }}" = "Windows" ] && ext=".exe"
-          for bin in crypto curve_cover_check hyperelliptic-cover; do
+          for bin in crypto curve_cover_check curve_standards hyperelliptic-cover ecdlp-audit; do
             "./target/${{ matrix.target }}/release/$bin$ext" --help > /dev/null
           done
           "./target/${{ matrix.target }}/release/ic$ext" --help > /dev/null
-          "./target/${{ matrix.target }}/release/curve_cover_check$ext" --help > /dev/null
-          "./target/${{ matrix.target }}/release/curve_standards$ext" --help > /dev/null
           "./target/${{ matrix.target }}/release/ic$ext" --version > /dev/null
           "./target/${{ matrix.target }}/release/ic$ext" --json > ic-smoke.json
           grep -Fq '"git_commit": "'"$GITHUB_SHA"'"' ic-smoke.json
@@ -227,9 +231,18 @@ jobs:
           mkdir -p "dist/$name/docs/curves"
           cp docs/curves/registry.json docs/curves/covers.json docs/curves/cover-links.yaml \
              docs/curves/cover-links.schema.json docs/curves/COVERS.md docs/curves/ICV1.md \
+             docs/curves/HYPERELLIPTIC_INFRASTRUCTURE.md \
+             docs/curves/hyperelliptic-infrastructure.schema.json \
+             docs/curves/cover-transfer-assessments.json \
+             docs/curves/cover-transfer-assessment.schema.json \
+             docs/curves/fixed-f8-genus3-order-certificate.json \
              "dist/$name/docs/curves/"
           cp -R docs/curves/standards "dist/$name/docs/curves/"
-          for bin in crypto ic ecbench curve_cover_check hyperelliptic-cover; do
+          # These are non-authoritative examples, not a self-contained
+          # verification checkout. The mock binds repository source/report
+          # paths and pinned Git objects that are intentionally not staged.
+          cp -R docs/ecdlp-audit "dist/$name/docs/"
+          for bin in crypto ic ecbench curve_cover_check hyperelliptic-cover ecdlp-audit; do
             cp "target/${{ matrix.target }}/release/$bin$ext" "dist/$name/"
           done
           # `[ -f ] && cp` leaves the loop's exit status at 1 when the last
@@ -237,6 +250,47 @@ jobs:
           for extra in README.md LICENSE LICENSE.md; do
             [ -f "$extra" ] && cp "$extra" "dist/$name/" || true
           done
+          # Exercise the installed layout, not just binaries in target/. The
+          # generated verification request reuses the constructor's exact
+          # certificate, while native catalog checking consumes the staged
+          # registry, report, and link graph without repository fallbacks.
+          (
+            cd "dist/$name"
+            for required in \
+              docs/curves/HYPERELLIPTIC_INFRASTRUCTURE.md \
+              docs/curves/hyperelliptic-infrastructure.schema.json \
+              docs/curves/cover-transfer-assessments.json \
+              docs/curves/cover-transfer-assessment.schema.json \
+              docs/curves/fixed-f8-genus3-order-certificate.json; do
+              test -f "$required"
+            done
+            "./hyperelliptic-cover$ext" --help > /dev/null
+            "./ecdlp-audit$ext" --help > /dev/null
+            "./curve_cover_check$ext" \
+              --registry docs/curves/registry.json \
+              --output docs/curves/covers.json \
+              --links docs/curves/cover-links.yaml --check \
+              > curve-cover-check-smoke.json
+            printf '%s\n' \
+              '{"a":"0x0","b":"0x1","field":"f2m-7-e1a6f45a","form":"y^2+xy=x^3+a*x^2+b","modulus":"0x83","v":"1"}' \
+              | "./hyperelliptic-cover$ext" construct --input - > construct-smoke.json
+            node -e 'const fs=require("fs"); const r=JSON.parse(fs.readFileSync("construct-smoke.json")); if(r.status!=="ok") process.exit(1); fs.writeFileSync("verify-smoke.json",JSON.stringify({model:r.result.model,certificate:r.result.certificate}));'
+            "./hyperelliptic-cover$ext" verify --input verify-smoke.json > verified-smoke.json
+            printf '%s\n' \
+              '{"schema":"hyperelliptic-jacobian-operation/v1","model":{"a":"0x0","b":"0x1","field":"f2m-7-e1a6f45a","form":"y^2+xy=x^3+a*x^2+b","modulus":"0x83","v":"1"},"operation":"identity"}' \
+              | "./hyperelliptic-cover$ext" arithmetic --input - > arithmetic-smoke.json
+            "./hyperelliptic-cover$ext" catalog-export \
+              --registry docs/curves/registry.json --output catalog-smoke.json
+            node -e 'const fs=require("fs"); for(const file of ["verified-smoke.json","arithmetic-smoke.json"]){const r=JSON.parse(fs.readFileSync(file)); if(r.status!=="ok") process.exit(1)} const c=JSON.parse(fs.readFileSync("catalog-smoke.json")); if(c.schema_version!=="curve-covers/v1") process.exit(1);'
+            "./ecdlp-audit$ext" verify-fixed-f8-order \
+              --input docs/curves/fixed-f8-genus3-order-certificate.json \
+              --repo-root . \
+              > fixed-f8-order-smoke.json
+            node -e 'const fs=require("fs"); const r=JSON.parse(fs.readFileSync("fixed-f8-order-smoke.json")); if(r.status!=="verified"||r.jacobian_order_over_f8!==486) process.exit(1);'
+            rm construct-smoke.json verify-smoke.json verified-smoke.json \
+               arithmetic-smoke.json catalog-smoke.json fixed-f8-order-smoke.json \
+               curve-cover-check-smoke.json
+          )
           cd dist
           if [ "${{ runner.os }}" = "Windows" ]; then
             7z a -tzip "$name.zip" "$name" > /dev/null
@@ -435,6 +489,7 @@ jobs:
           filter: blob:none
           sparse-checkout-cone-mode: false
           sparse-checkout: |
+            /.gitattributes
             /ecc2k130/Makefile
             /ecc2k130/README.md
             /ecc2k130/src/
@@ -533,10 +588,9 @@ jobs:
 
           | Artifact | Contents |
           | --- | --- |
-          | `crypto-*-x86_64-unknown-linux-gnu.tar.gz` | `crypto`, `ic`, `ecbench`, `curve_cover_check`, `hyperelliptic-cover` — glibc |
-          | `crypto-*-x86_64-unknown-linux-musl.tar.gz` | same five executables — static |
-          | `crypto-*-aarch64-apple-darwin.tar.gz` | same five executables — Apple silicon |
-          | `crypto-*-x86_64-pc-windows-msvc.zip` | same five executables (`.exe`) |
+          | `crypto-*-x86_64-unknown-linux-gnu.tar.gz` | `crypto`, `ic`, `ecbench`, `curve_cover_check`, `curve_standards`, `hyperelliptic-cover`, `ecdlp-audit` — glibc |
+          | `crypto-*-aarch64-apple-darwin.tar.gz` | same seven executables — Apple silicon |
+          | `crypto-*-x86_64-pc-windows-msvc.zip` | same seven executables (`.exe`) |
           | `isogeny-*-x86_64-unknown-linux-gnu.tar.gz` | dedicated `isogeny` executable, README, BUILD.json — glibc |
           | `isogeny-*-x86_64-unknown-linux-musl.tar.gz` | dedicated tool — static |
           | `isogeny-*-aarch64-apple-darwin.tar.gz` | dedicated tool — Apple silicon |
@@ -549,6 +603,12 @@ jobs:
           Run `isogeny --help` after extracting the dedicated tool archive.
           `isogeny search --curve p224 --ell 1471 --out p224-1471` constructs
           and independently verifies the recorded one-eigenline map.
+
+          The Rust archives also include the `docs/curves` catalog snapshot,
+          hyperelliptic command contract and transfer-assessment records, plus
+          non-authoritative `docs/ecdlp-audit` examples. Run `ecdlp-audit --help`
+          to inspect the audit CLI. Its packaged mock is not self-validating:
+          `verify-plan` requires the matching repository paths and Git objects.
 
           The CUDA binary is compiled, not GPU-tested: GitHub runners have no GPU.
           NOTES

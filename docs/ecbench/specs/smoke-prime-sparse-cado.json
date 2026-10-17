@@ -1,0 +1,20 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "smoke: ic.pipeline with the sparse-cado relation matrix beside the dense full-rank matrix",
+  "description": "Plumbing check of linalg=sparse-cado (CADO-style filter + block Wiedemann behind the incremental contract) against linalg=incremental-gauss-full-rank on the same relation stream. Not a performance claim.",
+  "workloads": {
+    "curves": [{"kind": "prime_search", "bits": 20, "seed": 59297}],
+    "targets_per_curve": 2,
+    "target_seed": 20261002
+  },
+  "arms": [
+    {"name": "rho-neg", "role": "reference", "method": {"id": "rho.negation"}},
+    {"name": "ic-dense-full-rank", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "prime-abscissa:size=32", "oracle": "mitm:negation_folded=1",
+      "linalg": "incremental-gauss-full-rank"}}},
+    {"name": "ic-sparse-cado", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "prime-abscissa:size=32", "oracle": "mitm:negation_folded=1",
+      "linalg": "sparse-cado"}}}
+  ],
+  "measurement": {"rounds": 3, "warmup": 1, "order": "alternate", "seed": 1, "isolation_required": "L2", "timeout_seconds": 120}
+}

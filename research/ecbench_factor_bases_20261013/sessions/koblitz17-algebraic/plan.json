@@ -1,0 +1,180 @@
+{
+  "schema": "ecbench.plan/v1",
+  "spec_id": "ECS1h733905b151e5",
+  "arms": [
+    {
+      "name": "rho-frob",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius",
+        "family": "rho",
+        "params": {
+          "cap_multiple": "64"
+        },
+        "method_id": "ECM1h64b303e4183b",
+        "method_sha256": "64b303e4183b1e91151aee11d494fe3879d37e491c5564fdc94b71805cde992b",
+        "entry": "ic_boundary::signed_frobenius_rho_tuned"
+      }
+    },
+    {
+      "name": "mitm-subspace",
+      "role": "control",
+      "method": {
+        "id": "ic.pipeline",
+        "family": "ic",
+        "params": {
+          "factor_base": "binary-subspace:dimension=4",
+          "linalg": "incremental-gauss",
+          "max_trials": "50000",
+          "oracle": "mitm:m=2",
+          "solver": "",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        },
+        "method_id": "ECM1h0c3ddeb8d942",
+        "method_sha256": "0c3ddeb8d94242f61f6b5faef6e23b430f0499133b645e77f8d5af8e6a0f4398",
+        "entry": "ic_framework::run_pipeline"
+      }
+    },
+    {
+      "name": "alg-subspace",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "family": "ic",
+        "params": {
+          "factor_base": "binary-subspace:dimension=4",
+          "linalg": "incremental-gauss",
+          "max_trials": "200",
+          "oracle": "descent-algebraic:m=2",
+          "solver": "f4-f2",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        },
+        "method_id": "ECM1hf8d6297b0065",
+        "method_sha256": "f8d6297b00654c14f389c8640fb1f6a78bd9e223d42769fd8145b0928057d659",
+        "entry": "ic_framework::run_pipeline"
+      }
+    },
+    {
+      "name": "mitm-std",
+      "role": "control",
+      "method": {
+        "id": "ic.pipeline",
+        "family": "ic",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=4",
+          "linalg": "incremental-gauss",
+          "max_trials": "50000",
+          "oracle": "mitm:m=2",
+          "solver": "",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        },
+        "method_id": "ECM1hd06a0df98efa",
+        "method_sha256": "d06a0df98efacc5cae12ab32d0e39010855ea92889bca08d6db9869e1add5b60",
+        "entry": "ic_framework::run_pipeline"
+      }
+    },
+    {
+      "name": "alg-std",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "family": "ic",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=4",
+          "linalg": "incremental-gauss",
+          "max_trials": "200",
+          "oracle": "descent-algebraic:m=2",
+          "solver": "f4-f2",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        },
+        "method_id": "ECM1h75b19641eeab",
+        "method_sha256": "75b19641eeabe809c8f933b359e5b50a048e3e8ebfc19155a1076cb13be94e47",
+        "entry": "ic_framework::run_pipeline"
+      }
+    }
+  ],
+  "workloads": [
+    {
+      "workload_id": "Wc7be7b5ab2ea",
+      "workload_sha256": "c7be7b5ab2ea7fbe7dcb130b8d112d9d9078adc4b8948c1fe5c1372a8bf4c2c0",
+      "curve_spec": {
+        "kind": "koblitz",
+        "a": 1,
+        "n": 17
+      },
+      "curve": {
+        "slug": "icv1-f2m17-tm101-00378d4e",
+        "icv1": "ICV1:f2m-17-237ceae1:-101:131174:0x1:-7:unk:r:00378d4e488b",
+        "family": "koblitz",
+        "construction": "KoblitzCurve::new(1, 17)",
+        "field_degree": 17,
+        "field_bits": null,
+        "group_order": 131174,
+        "r": 65587,
+        "cofactor": 2,
+        "generator": [
+          "0xaaad",
+          "0x5b2b"
+        ],
+        "automorphisms_available": 34,
+        "registered": true,
+        "ec1": "EC1N17Ce1hdfbf24105ef5",
+        "curve_uid": "urn:ec-record:1:sha256:dfbf24105ef5c3f3743c8d5c0917e98d601a89714ebcf54c1d886b722329161d"
+      },
+      "target_law": "uniform_scalar_sha256_v1",
+      "target_seed": 20261013,
+      "target_index": 0,
+      "target": [
+        "0x1f7df",
+        "0x129ae"
+      ],
+      "planted": 8633
+    }
+  ],
+  "executions": [
+    {
+      "seq": 0,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 9180769804471753247
+    },
+    {
+      "seq": 1,
+      "round": 0,
+      "warmup": false,
+      "arm": 1,
+      "workload": 0,
+      "algorithm_seed": 9180769804471753247
+    },
+    {
+      "seq": 2,
+      "round": 0,
+      "warmup": false,
+      "arm": 2,
+      "workload": 0,
+      "algorithm_seed": 9180769804471753247
+    },
+    {
+      "seq": 3,
+      "round": 0,
+      "warmup": false,
+      "arm": 3,
+      "workload": 0,
+      "algorithm_seed": 9180769804471753247
+    },
+    {
+      "seq": 4,
+      "round": 0,
+      "warmup": false,
+      "arm": 4,
+      "workload": 0,
+      "algorithm_seed": 9180769804471753247
+    }
+  ]
+}

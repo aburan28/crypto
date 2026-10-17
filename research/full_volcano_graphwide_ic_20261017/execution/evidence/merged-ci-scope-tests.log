@@ -1,0 +1,25 @@
+::warning::CI scope comparison unavailable; running all checks (Command failed: git fetch --no-tags --depth=1 origin ffffffffffffffffffffffffffffffffffffffff)
+::warning::CI scope comparison unavailable; running all checks (Command failed: git diff --name-only -z --no-renames 3d3d1dc3c94062f7b4eb347dcd444cfd558be964 missing-ref --)
+materialized 2 compile-time inputs
+materialized 1 compile-time inputs
+materialized 1 compile-time inputs
+::warning::CI scope comparison unavailable; running all checks (missing Rust source dependency in examples/check.rs: research/study/reference.rs)
+::warning::CI scope comparison unavailable; running all checks (missing Rust source dependency in research/study/reference.rs: research/study/render.inc)
+::warning::CI scope comparison unavailable; running all checks (missing Rust source dependency in research/study/reference.rs: research/study/arithmetic.rs)
+✔ prose does not run compilers, profiling or CodeQL (4.623643ms)
+✔ crates and languages select their own checks (0.515402ms)
+✔ dependencies, workflow edits and frozen evidence remain applicable (0.498229ms)
+✔ isogeny release inputs select the Rust package lane (0.411777ms)
+✔ volcano-cli, a path dependency of the root crate, selects the root lanes (0.299818ms)
+✔ real git diffs include renames, deletes, unusual names and over 300 files (153.493659ms)
+✔ sparse compilation restores only embedded inputs, preserving archived files off disk (42.359028ms)
+✔ new Cargo targets and source modules survive sparse checkouts without loading archives (85.034788ms)
+✔ external Rust path modules and includes are followed recursively (208.619056ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 506.348482

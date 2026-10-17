@@ -1,0 +1,42 @@
+{
+  "boundary": "Two frozen residual-pivot fans and their independently replayed old-family intersections; other pivot families remain outside this certificate.",
+  "distinct_signed_projected_columns": 20014,
+  "fan_receipt_sha256": [
+    "998911e3bafdb522ccefea7394047f1bbea8600f8aa5923e73a3bfa287644621",
+    "3c182b4bbd5d0b27e17d44fa394894658c8d293ce70d46002237438826aea0fd"
+  ],
+  "field_prime": "6277101735386680763835789423207666416083908700390324961279",
+  "independent_replay_sha256": [
+    "0492d87c08fbb24c5d49ff4ad7c951bb83cdbe55e2122e15db73233cbac8fe6f",
+    "a31c958e50706efa7b4ddef919f31c15dc51e21176c3bfc2f7277e26d9251c08"
+  ],
+  "non_source_rows_with_two_private_signed_columns": 10004,
+  "pivot_count": 2,
+  "proof_map": "P192ExtensionCover.line_private_pairs_extend in lean/LineSupport.lean",
+  "selected_classes": 9925,
+  "source_line_restatements": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      151,
+      285
+    ],
+    [
+      1,
+      1,
+      1
+    ],
+    [
+      1,
+      79,
+      143
+    ]
+  ],
+  "source_sha256": "018b1996a672eef6ed3eb4e074a0cce83fa5adfd5dc74fd06ec95e3807c592bf",
+  "split_rows": 10008,
+  "status": "verified_two_pivot_private_residual_core"
+}

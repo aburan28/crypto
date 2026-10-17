@@ -1,0 +1,111 @@
+{
+  "schema": "ecbench.comparison/v1",
+  "comparison_id": "ECC1hb5c1f427be18",
+  "a": {
+    "session_id": "ECBS1hb9229e3a0f30",
+    "arm": "rho-neg",
+    "method_id": "ECM1hefea4e0ebe79",
+    "method": "rho.negation",
+    "measured": 1,
+    "verified": 1,
+    "statuses": {
+      "verified": 1
+    },
+    "mean_s": 1.2580963957846858,
+    "mean_ratio_to_floor": 1.4196097632013902,
+    "lower_bound": true,
+    "deterministic": true
+  },
+  "b": {
+    "session_id": "ECBS1hb9229e3a0f30",
+    "arm": "ic-frobenius",
+    "method_id": "ECM1he2d2aef75c06",
+    "method": "ic.pipeline",
+    "measured": 1,
+    "verified": 1,
+    "statuses": {
+      "verified": 1
+    },
+    "mean_s": 5.370113483774137,
+    "mean_ratio_to_floor": 6.059524180029443,
+    "lower_bound": false,
+    "deterministic": true
+  },
+  "workloads": [
+    {
+      "workload_id": "Wc066172da07a",
+      "slug": "icv1-f2m56-tm338854401-5d597dcf",
+      "r": 36028797188391169,
+      "floor_s": 0.8862269254527579,
+      "pairs": 1,
+      "a_mean_s": 1.2580963957846858,
+      "b_mean_s": 5.370113483774137,
+      "ratio_b_over_a": 4.268443580131831
+    }
+  ],
+  "curves": [
+    {
+      "slug": "icv1-f2m56-tm338854401-5d597dcf",
+      "log2_r": 55.00000000678435,
+      "workloads": 1,
+      "pairs": 1,
+      "ratio_b_over_a": 4.268443580131831,
+      "ci95": [
+        4.268443580131831,
+        4.268443580131831
+      ],
+      "ci_method": "within"
+    }
+  ],
+  "ops": {
+    "status": "ok",
+    "unit": "ecbench.gae",
+    "ratio_b_over_a": 4.268443580131831,
+    "ci95": [
+      4.268443580131831,
+      4.268443580131831
+    ],
+    "ci_method": "within",
+    "pairs": 1,
+    "unpaired_runs": 0,
+    "same_seeds": true,
+    "same_session": true,
+    "pooled_curves": 1,
+    "bounded": true,
+    "resamples": 4000
+  },
+  "wall": {
+    "status": "descriptive",
+    "reasons": [
+      "1 of 1 pairs did not reach L2",
+      "0 admitted pairs; at least 5 are needed"
+    ],
+    "required_level": "L2",
+    "pairs": 1,
+    "pairs_below_level": 1,
+    "median_ratio": 17.316428037767576,
+    "ci95": null,
+    "aa_arms": null,
+    "aa_pairs": 0,
+    "aa_median_ratio": null,
+    "aa_ci95": null,
+    "outside_noise": null
+  },
+  "quality": {
+    "score": 40,
+    "rubric": "average paired isolation points (L0=0, L1=40, L2=75, L3=90); +10 only for an L2-or-higher A/A 95% interval containing 1 within [0.9,1.1]",
+    "paired_attempts": 1,
+    "verified_pairs": 1,
+    "admitted_pairs": 0,
+    "levels": {
+      "L1": 1
+    },
+    "p95_foreign_busy_percent": 0.011077581912697053,
+    "p95_run_queue_percent": 0.115513700881572,
+    "contention_observed_runs": 2,
+    "notes": [
+      "no admitted A/A interval; calibration bonus unavailable"
+    ]
+  },
+  "verdict": "ops (ok): ic-frobenius / rho-neg = 4.2684 [4.268, 4.268] (within) over 1 pairs on 1 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 17.3164, not a result: 1 of 1 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)"
+}

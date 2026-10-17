@@ -1,0 +1,36 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "Gaudry k = 4 index calculus with the D4 oracle vs rho, E(F_29^4)",
+  "description": "Preregistered end-to-end run (PROTOCOL.md): ic.pipeline on a curve over F_{29^4} with rational 2-torsion (fp4_torsion p=29, #E = 16 * 44263), FGHR's Y-line base fghr-y-line (columns {+-P, +-(P+T)}) and the gaudry-d4 oracle (S5 in the D4 invariants, Macaulay degree 14), every phase charged: base lifts, relation trials (the oracle's counted F_p multiplications at the curve's 97 per addition, the additions that check a decomposition), linear algebra, verification. Reference: rho with the negation map on the same target; A/A rho control.",
+  "workloads": {
+    "curves": [
+      { "kind": "fp4_torsion", "p": 29, "seed": 1, "max_cofactor": 16 }
+    ],
+    "targets_per_curve": 1,
+    "target_seed": 202610134029
+  },
+  "arms": [
+    { "name": "rho-neg", "role": "reference", "method": { "id": "rho.negation" } },
+    {
+      "name": "ic-k4-d4",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "fghr-y-line",
+          "oracle": "gaudry-d4:macaulay=14",
+          "max_trials": "20000"
+        }
+      }
+    },
+    { "name": "rho-neg-aa", "role": "control", "method": { "id": "rho.negation" } }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 202610134030,
+    "isolation_required": "L2",
+    "timeout_seconds": 86400
+  }
+}

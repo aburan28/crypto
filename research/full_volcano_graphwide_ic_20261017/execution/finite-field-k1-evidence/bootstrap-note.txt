@@ -1,0 +1,2 @@
+The first launch exited 1 before measurement: its prerequisite directory-creation command was still finishing. No data file was written. The prerequisite completed before this rerun. No solver failure or measurement was omitted.
+The second launch exited 127 because /usr/bin/time is absent. No native solver ran and no result JSON was written. Preserve missing-time-launch-stderr.log. This execution uses Bash time -p; process peak RSS was not measured.

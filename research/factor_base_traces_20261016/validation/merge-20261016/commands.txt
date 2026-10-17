@@ -1,0 +1,41 @@
+Working directory: /workspace/crypto-factor-traces
+Merged working tree: head 0b4a7451c7bb080642f03fccb641066dd11f795d + main 1e03f1d0b9c77d72ee281561fd7f58405c4ae0b0
+Toolchain: Rust 1.98.0, existing /workspace/pr1963-toolchain installation
+Execution sandbox: networking enabled, including local TCP fixture listeners
+CARGO_HOME=/workspace/pr1963-toolchain/cargo
+RUSTUP_HOME=/workspace/pr1963-toolchain/rustup
+CARGO_TARGET_DIR=/workspace/crypto-pr1963/target
+PATH prefixed by /workspace/pr1963-toolchain/cargo/bin
+
+cargo check --all-targets
+cargo test --release --bin factor_base_trace
+cargo clippy --release --bin factor_base_trace -- -D warnings
+cargo build --release --bin factor_base_trace
+/workspace/crypto-pr1963/target/release/factor_base_trace verify /workspace/factor_base_evaluation/results/generic.json /workspace/factor-base-trace-registered
+
+cargo test --release --test store_cli
+The preceding optional integration Cargo invocation was interrupted (exit 130) during compilation of unrelated binary targets, after the required crypto and ic production binaries were rebuilt. No test ran in that invocation.
+
+env CARGO_BIN_EXE_crypto=/workspace/crypto-pr1963/target/release/crypto CARGO_BIN_EXE_ic=/workspace/crypto-pr1963/target/release/ic rustc --edition=2021 --test -C opt-level=3 tests/store_cli.rs -o /workspace/pr1975-merge-validation/store_cli
+/workspace/pr1975-merge-validation/store_cli --test-threads=1
+Unchanged integration source Git blob: c6acbf09ca83b44da78358b166b8c26889d6b8aa
+
+cargo test --release --lib -- --test-threads=1
+python3 scripts/check_curve_names.py
+python3 tests/test_curve_identity.py
+python3 scripts/test_prime_model_normalization.py
+python3 scripts/test_curve_names_archived_labels.py
+rustfmt --check --edition 2021 src/bin/factor_base_trace.rs
+python3 research/factor_base_traces_20261016/validation/merge-20261016/check_metadata.py
+env CRYPTO_STORE_CACHE=/workspace/factor-base-trace-store-cache /workspace/crypto-pr1963/target/release/ecbench store verify factor-base-traces/historical-20261015/all-384.zip factor-base-traces/historical-20261015/registered-20261016.zip
+sha256sum /workspace/factor-base-traces-registered-20261016.zip
+
+Native metadata merge helper (repository API; no remote write):
+rustc --edition=2021 research/factor_base_traces_20261016/validation/merge-20261016/merge_store_index.rs -L dependency=/workspace/crypto-pr1963/target/release/deps --extern crypto_lib=/workspace/crypto-pr1963/target/release/deps/libcrypto_lib-6c2aa64029d1fa5a.rlib -o /workspace/pr1975-merge-validation/merge_store_index
+git show 0b4a7451c7bb080642f03fccb641066dd11f795d:store/index.json > /workspace/pr1975-merge-validation/head-store.json
+git show 1e03f1d0b9c77d72ee281561fd7f58405c4ae0b0:store/index.json > /workspace/pr1975-merge-validation/main-store.json
+/workspace/pr1975-merge-validation/merge_store_index /workspace/pr1975-merge-validation/head-store.json /workspace/pr1975-merge-validation/main-store.json store/index.json
+
+Unavailable, not passed:
+conductor check --summary 'Merge main into historical factor-base trace PR preserving evidence and metadata' --scope path:docs/curves/registry.json --scope path:src/cryptanalysis/curve_aliases.json --scope path:store/index.json --scope path:scripts/build_curve_registry.py
+GitHub read of .conductor/WORKFLOW.md at merged main: HTTP 404.

@@ -41,10 +41,13 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            tools/volcano-cli/
+            isogeny_algos/
             src
             examples/n37_frobenius_fold_gate.rs
             examples/n37_frobenius_fold_replay.rs
             docs/curves/registry.json
+            docs/curves/standards/parameters.json
             docs/ecbench/schema.sql
             docs/ic/calibration.json
             docs/ic/boundary_targets.json

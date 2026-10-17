@@ -21,7 +21,6 @@ on:
       - 'src/cryptanalysis/ic_boundary.rs'
       - 'src/cryptanalysis/binary_velu.rs'
       - 'src/cryptanalysis/koblitz_fast.rs'
-      - 'docs/index-calculus-scoreboard.html'
   workflow_dispatch:
 
 permissions:
@@ -43,11 +42,14 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            tools/volcano-cli/
+            isogeny_algos/
             src
             examples/n37_complete_table_floor.rs
             examples/n37_complete_table_floor_analyze.rs
             examples/support/n37_policy_common.rs
             docs/curves/registry.json
+            docs/curves/standards/parameters.json
             docs/ecbench/schema.sql
             docs/ic/calibration.json
             docs/ic/boundary_targets.json

@@ -1,0 +1,4 @@
+'P192ExtensionCover.line_private_pairs_extend' depends on axioms: [propext, Quot.sound]
+'P192ExtensionCover.fixed_origin_point_divisor_identity' depends on axioms: [propext]
+'P192ExtensionCover.p192_line_point_three_sum_capacity' depends on axioms: [propext]
+'P192ExtensionCover.p192_line_point_hit_bound_certificate' depends on axioms: [propext, Classical.choice, Quot.sound]

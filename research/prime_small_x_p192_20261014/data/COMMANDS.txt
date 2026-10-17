@@ -1,0 +1,6 @@
+# Every run, as executed (release `ic`, 4 vCPU, seed 7). Output of `ic --json prime ...` is the JSON file named.
+toy16_{16,32,64,128,256}.json   ic --json prime --curve toy:16 --size B --trials 3000000 --controls 32 --seed 7
+toy20_{32,64,128,256,512,1024}.json  ... --curve toy:20 ...
+toy24_{128,256,512,1024,2048,4096}.json ... --curve toy:24 ...
+p192_{256,1024,2048,4096}.json  ic --json prime --size B --trials 2000000 --controls 32 --seed 7
+p192_8192.json                  ic --json prime --size 8192 --trials 2000000 --controls 32 --seed 7

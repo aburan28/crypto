@@ -1,0 +1,98 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.negation",
+        "params": {}
+      },
+      "name": "rho",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "bsgs.textbook",
+        "params": {}
+      },
+      "name": "bsgs",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "rho.negation",
+        "params": {}
+      },
+      "name": "rho-aa",
+      "role": "control"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "prime-projected-abscissa:size=2,scan_cap=64",
+          "linalg": "incremental-gauss-full-rank-checked",
+          "max_trials": "1000",
+          "oracle": "mitm",
+          "targets": "walk"
+        }
+      },
+      "name": "projected-2-mitm",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "prime-projected-abscissa:size=2,scan_cap=64",
+          "linalg": "incremental-gauss-full-rank-checked",
+          "max_trials": "1000",
+          "oracle": "subtract",
+          "targets": "walk"
+        }
+      },
+      "name": "projected-2-subtract",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "prime-abscissa:size=2",
+          "linalg": "incremental-gauss-full-rank-checked",
+          "max_trials": "1000",
+          "oracle": "mitm",
+          "targets": "walk"
+        }
+      },
+      "name": "raw-control",
+      "role": "baseline"
+    }
+  ],
+  "description": "Execution addendum: bounded diagnostic unless full. Public one-target workloads; no runtime promotion.",
+  "label": "volcano-control-control-v0",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 1,
+    "timeout_seconds": 10,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 19,
+        "b": 2,
+        "group_order": 112,
+        "gx": 52,
+        "gy": 110,
+        "kind": "prime_explicit",
+        "p": 113,
+        "r": 7
+      }
+    ],
+    "target_kind": "public",
+    "target_seed": 20261017,
+    "targets_per_curve": 2
+  }
+}

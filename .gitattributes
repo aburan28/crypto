@@ -1,4 +1,7 @@
 # Preserve solver output byte-for-byte; upstream tools intentionally pad fields.
+research/weak_curve_leaderboard_20261012/validation/ghs128_*.log -whitespace
+research/weak_curve_leaderboard_20261012/reports/run-*/*.svg -whitespace
+research/weak_curve_leaderboard_20261012/reports/run-*/*.log -whitespace
 research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/**/*.stdout -whitespace
 research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/**/*.stderr -whitespace
 research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-wdsat-correction-20260909/**/*.stdout -whitespace
@@ -75,6 +78,80 @@ ecc2k130/benchmarks/sigma-fused/shared-scratch/results/** -whitespace
 research/boolean_f5_graded_batch_20261002/qualified_discovery_01/cpuinfo.txt whitespace=-blank-at-eof
 research/boolean_f5_graded_batch_20261002/qualified_discovery_01/test.stdout whitespace=-blank-at-eof
 
+# Release archives carry these files verbatim, and several records bind raw
+# bytes by SHA-256 or byte-identical regeneration. Keep their checkout form
+# stable on Windows as well as Unix runners.
+/README.md text eol=lf
+/LICENSE text eol=lf
+/LICENSE.md text eol=lf
+tools/isogeny-cli/README.md text eol=lf
+ecc2k130/README.md text eol=lf
+docs/curves/registry.json text eol=lf
+docs/curves/covers.json text eol=lf
+docs/curves/cover-links.yaml text eol=lf
+docs/curves/cover-links.schema.json text eol=lf
+docs/curves/COVERS.md text eol=lf
+docs/curves/ICV1.md text eol=lf
+docs/curves/HYPERELLIPTIC_INFRASTRUCTURE.md text eol=lf
+docs/curves/hyperelliptic-infrastructure.schema.json text eol=lf
+docs/curves/cover-transfer-assessments.json text eol=lf
+docs/curves/cover-transfer-assessment.schema.json text eol=lf
+docs/curves/fixed-f8-genus3-order-certificate.json text eol=lf
+src/bin/ecdlp_audit/fixed_f8_order.rs text eol=lf
+docs/curves/standards/** text eol=lf
+# The native catalog records hash these compile-time source strings. The
+# staged transfer-assessment ledger also binds the remaining paths in this
+# block by raw SHA-256, so every text input needs a platform-stable checkout.
+.github/workflows/curve-covers.yml text eol=lf
+.github/workflows/release.yml text eol=lf
+Cargo.lock text eol=lf
+Cargo.toml text eol=lf
+docs/curves/JACOBIAN_TRANSFERS.md text eol=lf
+docs/curves/jacobian-transfers.json text eol=lf
+research/cover_transfer_assessment_20261013/lean/CoverTransfer.lean text eol=lf
+research/cover_transfer_assessment_20261013/release_replay.txt text eol=lf
+research/cover_transfer_assessment_20261013/typed_correspondence.dot text eol=lf
+research/cover_transfer_assessment_20261013/typed_correspondence.svg text eol=lf
+research/cover_transfer_assessment_20261013/typed_transfer_context.dot text eol=lf
+research/cover_transfer_assessment_20261013/typed_transfer_context.svg text eol=lf
+research/cover_transfer_assessment_20261013/verify_assessment.mjs text eol=lf
+research/hyperelliptic_cover_infrastructure_20261006/evidence.json text eol=lf
+scripts/build_cover_transfer_assessments.mjs text eol=lf
+src/bin/curve_cover_check.rs text eol=lf
+src/bin/curve_cover_check/checker.rs text eol=lf
+src/bin/curve_cover_check/links.rs text eol=lf
+src/bin/curve_cover_check/models.rs text eol=lf
+src/bin/hyperelliptic_cover.rs text eol=lf
+src/binary_ecc/curve.rs text eol=lf
+src/binary_ecc/f2m.rs text eol=lf
+src/binary_ecc/hyperelliptic.rs text eol=lf
+src/binary_ecc/mod.rs text eol=lf
+src/binary_ecc/poly_f2m.rs text eol=lf
+src/cryptanalysis/ecc2k130_guard.rs text eol=lf
+src/cryptanalysis/mod.rs text eol=lf
+src/hash/mod.rs text eol=lf
+src/hash/sha256.rs text eol=lf
+src/lib.rs text eol=lf
+src/prime_hyperelliptic/curve.rs text eol=lf
+src/prime_hyperelliptic/fp2.rs text eol=lf
+src/prime_hyperelliptic/fp_poly.rs text eol=lf
+src/prime_hyperelliptic/mod.rs text eol=lf
+src/utils/mod.rs text eol=lf
+docs/ecdlp-audit/*.json text eol=lf
+docs/ecdlp-audit/**/*.json text eol=lf
+docs/ecdlp-audit/*.md text eol=lf
+docs/ecdlp-audit/**/*.md text eol=lf
+docs/ecdlp-audit/*.dot text eol=lf
+docs/ecdlp-audit/**/*.dot text eol=lf
+docs/ecdlp-audit/*.svg text eol=lf
+docs/ecdlp-audit/**/*.svg text eol=lf
+# The planning mock binds these non-docs-tree deliverables by raw SHA-256.
+docs/ECDLP_ATTACK_MATRIX.md text eol=lf
+docs/ic/boundary_targets.json text eol=lf
+research/cover_transfer_assessment_20261013/README.md text eol=lf
+src/binary_ecc/cover_transfer.rs text eol=lf
+problems/catalog-cover-subgroup-certificates-incomplete.md text eol=lf
+
 # N83 dense-root benchmark media and immutable raw archives.
 benchmarks/20261013-n83-dense-root/*.pdf binary
 benchmarks/20261013-n83-dense-root/*.png binary
@@ -95,3 +172,32 @@ research/ecbench_frontier_20261013/*.pdf binary
 research/ecbench_frontier_20261013/reports/**/*.pdf binary
 research/ecbench_frontier_20261013/reports/**/*.png binary
 research/ecbench_frontier_20261013/reports/**/*.svg -diff -whitespace
+
+# Frozen volcano IC capsules and rendered media must retain their exact bytes.
+research/full_volcano_graphwide_ic_20261017/execution/campaigns/** -text -diff
+research/full_volcano_graphwide_ic_20261017/reports/**/*.pdf binary
+research/full_volcano_graphwide_ic_20261017/reports/**/*.png binary
+benchmarks/20261017-volcano-ic-campaign/*.pdf binary
+benchmarks/20261017-volcano-ic-campaign/*.png binary
+# N83 sixteen-point precision report media.
+benchmarks/20261017-n83-e2e-precision/*.pdf binary
+benchmarks/20261017-n83-e2e-precision/*.png binary
+benchmarks/20261017-n83-e2e-precision/*.svg -diff -whitespace
+research/n83_e2e_precision_20261016/*.pdf binary
+research/n83_e2e_precision_20261016/*.png binary
+research/n83_e2e_precision_20261016/*.svg -diff -whitespace
+research/greedy_factor_base_yield_20261014/REPORT.pdf binary
+research/greedy_factor_base_yield_20261014/graphs/*.png binary
+research/greedy_factor_base_yield_20261014/graphs/*.svg -diff -whitespace
+benchmarks/20261014-greedy-factor-base-yield/*.pdf binary
+benchmarks/20261014-greedy-factor-base-yield/*.png binary
+benchmarks/20261014-greedy-factor-base-yield/*.svg -diff -whitespace
+research/prime_small_x_p192_20261014/REPORT.pdf binary
+research/prime_small_x_p192_20261014/graphs/*.png binary
+research/prime_small_x_p192_20261014/graphs/*.svg -diff -whitespace
+research/secg_small_x_20261014/REPORT.pdf binary
+research/secg_small_x_20261014/graphs/*.png binary
+research/secg_small_x_20261014/graphs/*.svg -diff -whitespace
+benchmarks/20261014-secg-small-x-s3-cost/*.pdf binary
+benchmarks/20261014-secg-small-x-s3-cost/*.png binary
+benchmarks/20261014-secg-small-x-s3-cost/*.svg -diff -whitespace

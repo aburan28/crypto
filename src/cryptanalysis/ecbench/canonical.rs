@@ -1,10 +1,11 @@
 //! Canonical JSON and the identities hashed from it.
 //!
-//! The repository's identity convention (`docs/curve-identities.md`,
-//! `research/ic_candidate_tournament_20260915/identity.py`) hashes
-//! sorted-key, compact JSON with no floats.  This is the same rule in
-//! Rust, written out rather than left to `serde_json`'s map order, so an
-//! identity cannot change because a dependency enabled `preserve_order`.
+//! The historical ecbench identity codec hashes sorted-key, compact JSON with
+//! no floats and escapes non-ASCII scalars as lowercase `\uXXXX` sequences.
+//! That last rule differs from the raw-UTF-8 EC1 convention documented in
+//! `docs/curve-identities.md`; existing ecbench identities therefore retain
+//! this codec, while cross-domain adapters must record the distinction. The
+//! writer is explicit so dependency map-order settings cannot change an ID.
 
 use serde_json::Value;
 

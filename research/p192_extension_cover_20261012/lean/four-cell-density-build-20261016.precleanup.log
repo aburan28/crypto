@@ -1,0 +1,13 @@
+⚠ [805/806] Built FourCellDensity (20s)
+warning: FourCellDensity.lean:24:20: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: FourCellDensity.lean:24:32: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+info: FourCellDensity.lean:63:0: 'P192ExtensionCover.four_cell_character_lower_bound' depends on axioms: [propext, Quot.sound]
+info: FourCellDensity.lean:64:0: 'P192ExtensionCover.p192_four_cell_nonzero_scalar_lower_bound' depends on axioms: [propext, Quot.sound]
+info: FourCellDensity.lean:65:0: 'P192ExtensionCover.p192_205_class_four_cell_hit_integer_certificate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+Build completed successfully (806 jobs).

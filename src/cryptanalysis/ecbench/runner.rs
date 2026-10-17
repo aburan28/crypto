@@ -36,6 +36,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 use crate::cryptanalysis::ecbench::canonical::{sha256_hex, short_id};
+use crate::cryptanalysis::ecbench::fbm::{self, INSTRUMENT_IC_PIPELINE};
 use crate::cryptanalysis::ecbench::host::{capture, HostCapsule};
 use crate::cryptanalysis::ecbench::isolation::{
     allowed_cpus, conditions, evict, leave_reserved, plan_cpus, preflight, ticks_per_second,
@@ -329,7 +330,7 @@ fn run_child(
         Err(e) if !timed_out => (None, Some(format!("child output: {e}"))),
         Err(_) => (None, None),
     };
-    if let Some(o) = &output {
+    if let Some(o) = output.as_ref().filter(|_| !timed_out) {
         timing.schedstat_solve = o.schedstat_solve;
         timing.hw_solve = o.hw_solve.clone();
         timing.solve_wall_ns = o.report.as_ref().map(|r| r.solve_wall_ns);
@@ -686,12 +687,31 @@ fn assemble(
     after: crate::cryptanalysis::ecbench::isolation::Conditions,
     ctx: &GradeContext,
 ) -> Record {
-    let report = reaped.output.as_ref().and_then(|o| o.report.clone());
-    let child_error = reaped
+    // The watchdog can fire after stdout was written but before the runner
+    // acknowledges completion. Keep its decision authoritative: a censored
+    // execution must not also carry an accepted scalar or final cost. Preserve
+    // the parsed late protocol message inside the sealed diagnostic instead.
+    // Do not change historical records or weaken the auditor's status check.
+    let report = reaped
         .output
         .as_ref()
-        .and_then(|o| o.error.clone())
-        .or_else(|| reaped.parse_error.clone());
+        .filter(|_| !reaped.timed_out)
+        .and_then(|o| o.report.clone());
+    let child_error = if reaped.timed_out {
+        Some(match &reaped.output {
+            Some(output) => format!(
+                "watchdog expired; unaccepted parsed child output: {}",
+                serde_json::to_string(output).expect("child protocol serializes")
+            ),
+            None => "watchdog expired".to_string(),
+        })
+    } else {
+        reaped
+            .output
+            .as_ref()
+            .and_then(|o| o.error.clone())
+            .or_else(|| reaped.parse_error.clone())
+    };
     let exited_cleanly = reaped.exit.as_deref() == Some("exit 0");
     let recovered = report.as_ref().and_then(|r| r.recovered);
     // Verification in the runner's own process: [k]G against the target.
@@ -790,6 +810,13 @@ fn assemble(
             .map(|r| r.counters.clone())
             .unwrap_or_default(),
         factor_base: report.as_ref().and_then(|r| r.factor_base.clone()),
+        fbm_id: report.as_ref().and_then(|r| {
+            let fb = r.factor_base.as_ref()?;
+            fbm::config_from_ic_method(&w.curve.slug, fb, &arm.method, INSTRUMENT_IC_PIPELINE)
+                .seal()
+                .ok()
+                .map(|id| id.fbm_id)
+        }),
         detail: report
             .as_ref()
             .map(|r| r.detail.clone())
@@ -898,5 +925,108 @@ mod exact_record_reader_tests {
         assert!(from_str_exact_floats::<Record>(record_line).is_ok());
         let duplicate = record_line.replacen("{", r#"{"schema":"ecbench.record/v1","#, 1);
         assert!(from_str_exact_floats::<Record>(&duplicate).is_err());
+    }
+}
+
+#[cfg(test)]
+mod watchdog_record_tests {
+    use super::*;
+
+    #[test]
+    fn late_checked_scalar_is_preserved_but_timeout_has_no_accepted_result() {
+        let spec = Spec::from_json(r#"{
+          "schema":"ecbench.spec/v1","label":"watchdog regression",
+          "workloads":{"curves":[{"kind":"prime_explicit","p":113,"a":19,"b":2,"group_order":112,"r":7,"gx":52,"gy":110}],"targets_per_curve":1,"target_seed":20261017,"target_kind":"public"},
+          "arms":[{"name":"bsgs","role":"reference","method":{"id":"bsgs.textbook"}}],
+          "measurement":{"rounds":1,"warmup":0,"seed":1,"isolation_required":"L0"}
+        }"#).unwrap();
+        let p = plan(spec).unwrap();
+        let ex = &p.executions[0];
+        let arm = &p.arms[ex.arm];
+        let w = &p.workloads[ex.workload];
+        let input = ChildInput {
+            schema: CHILD_INPUT_SCHEMA.into(),
+            curve: w.curve_spec.clone(),
+            target_seed: w.target_seed,
+            target_index: w.target_index,
+            target_kind: w.kind(),
+            expected_workload_id: w.workload_id.clone(),
+            method: MethodSpec {
+                id: arm.method.id.clone(),
+                params: arm.method.params.clone(),
+            },
+            expected_method_id: arm.method.method_id.clone(),
+            algorithm_seed: ex.algorithm_seed,
+        };
+        let output = crate::cryptanalysis::ecbench::record::child_main(
+            &serde_json::to_string(&input).unwrap(),
+        );
+        assert!(output.report.as_ref().unwrap().recovered.is_some());
+        let capsule = capture().unwrap();
+        let thresholds = Thresholds::default();
+        let ctx = GradeContext {
+            plan: None,
+            preflight: None,
+            eviction: None,
+            runner_on_run_cpu: false,
+            thresholds: &thresholds,
+            hz: 100.0,
+        };
+        let mut reaped = Reaped {
+            output: Some(output.clone()),
+            parse_error: None,
+            stderr: vec![],
+            timing: Timing::default(),
+            exit: Some("exit 0".into()),
+            timed_out: false,
+        };
+        let make = |r: &Reaped| {
+            assemble(
+                "watchdog-test",
+                ex,
+                1,
+                arm,
+                w,
+                p.instance(ex.workload),
+                &capsule,
+                r,
+                conditions(&[]),
+                conditions(&[]),
+                &ctx,
+            )
+        };
+        let completed = make(&reaped);
+        assert_eq!(completed.outcome.status, "verified");
+        assert_eq!(completed.outcome.matches_target, Some(true));
+        assert_eq!(
+            completed.cost.total_gae,
+            output.report.as_ref().map(|r| r.total_gae)
+        );
+        reaped.timed_out = true;
+        let censored = make(&reaped);
+        assert_eq!(censored.outcome.status, "timeout");
+        assert_eq!(censored.outcome.exit.as_deref(), Some("exit 0"));
+        assert_eq!(censored.outcome.recovered, None);
+        assert_eq!(censored.outcome.matches_target, None);
+        assert_eq!(censored.cost.total_gae, None);
+        assert_eq!(censored.cost.s, None);
+        assert!(!censored.cost.deterministic);
+        assert!(censored.phases.is_empty());
+        assert!(censored.counters.is_empty());
+        let diagnostic = censored.outcome.error.unwrap();
+        let retained: ChildOutput = serde_json::from_str(
+            diagnostic
+                .strip_prefix("watchdog expired; unaccepted parsed child output: ")
+                .unwrap(),
+        )
+        .unwrap();
+        assert_eq!(retained, output);
+        // A completed exhaustion arriving after the deadline is censored too.
+        let late = reaped.output.as_mut().unwrap().report.as_mut().unwrap();
+        late.recovered = None;
+        late.exhausted = true;
+        let exhausted_late = make(&reaped);
+        assert_eq!(exhausted_late.outcome.status, "timeout");
+        assert!(exhausted_late.cost.total_gae.is_none());
     }
 }

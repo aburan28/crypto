@@ -1,0 +1,86 @@
+{
+  "schema": "quintic-frobenius-counterexamples/v1",
+  "status": "derived_not_executed",
+  "examples": [
+    {
+      "claim_refuted": "Treat the cached characteristic-two square as K-linear",
+      "field": {
+        "characteristic": 2,
+        "degree": 2,
+        "modulus_coefficients": [
+          1,
+          1,
+          1
+        ],
+        "representation": "binary coefficient bits"
+      },
+      "H": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "r": [
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "correct_square": [
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "incorrect_linear_cache": [
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "derivation": "omega^2=omega+1 in GF4; constant quotient vectors embed K injectively."
+    },
+    {
+      "claim_refuted": "Use ordinary characteristic-two square-additivity in odd characteristic",
+      "field": {
+        "characteristic": 3,
+        "degree": 1
+      },
+      "H": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "r": [
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      "correct_square": [
+        1,
+        2,
+        1,
+        0,
+        0
+      ],
+      "incorrect_square": [
+        1,
+        0,
+        1,
+        0,
+        0
+      ],
+      "derivation": "The missing cross term is2X; its degree is below5, so it does not vanish in the monic quotient."
+    }
+  ]
+}

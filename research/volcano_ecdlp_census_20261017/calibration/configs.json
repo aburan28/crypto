@@ -1,0 +1,15 @@
+{
+  "schema": "volcano-census.calibration-configs/v1",
+  "note": "Pre-listed before any calibration run (PLAN 4 A.2). Selection rule: among these configs, at the largest b where the chosen IC config has mean wall <= 0.5 s per solve and every IC run verifies, pick the verified config with the lowest mean S. Ties (within 1 percent of the lowest) go to the earlier id.",
+  "bits": [18, 20, 22, 24, 26],
+  "configs": [
+    {"id": "ic-fb32-mitm", "factor_base": "prime-abscissa:size=32", "oracle": "mitm:negation_folded=1"},
+    {"id": "ic-fb16-mitm", "factor_base": "prime-abscissa:size=16", "oracle": "mitm:negation_folded=1"},
+    {"id": "ic-fb64-mitm", "factor_base": "prime-abscissa:size=64", "oracle": "mitm:negation_folded=1"},
+    {"id": "ic-fb32-subtract", "factor_base": "prime-abscissa:size=32", "oracle": "subtract"}
+  ],
+  "arms_other": ["rho.negation", "rho.plain", "bsgs.textbook", "bsgs.negation", "rho.negation (A/A control)"],
+  "targets_per_curve": 8,
+  "rounds": 3,
+  "warmup": 1
+}

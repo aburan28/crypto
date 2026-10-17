@@ -1,0 +1,491 @@
+{
+  "rows": [
+    {
+      "db_sha256": "02153114c3942b680ec26f1f497be8015d0d6b35d44a159cdf23bf8d40d64ce9",
+      "vertices": 1538,
+      "vertices_exact": 512,
+      "vertices_unknown": 1026,
+      "strata_exact_observed": 10,
+      "exact_populations": [
+        {
+          "conductor": 524288,
+          "vertices": 1
+        },
+        {
+          "conductor": 1048576,
+          "vertices": 1
+        },
+        {
+          "conductor": 2097152,
+          "vertices": 2
+        },
+        {
+          "conductor": 4194304,
+          "vertices": 4
+        },
+        {
+          "conductor": 8388608,
+          "vertices": 8
+        },
+        {
+          "conductor": 16777216,
+          "vertices": 16
+        },
+        {
+          "conductor": 33554432,
+          "vertices": 32
+        },
+        {
+          "conductor": 67108864,
+          "vertices": 64
+        },
+        {
+          "conductor": 134217728,
+          "vertices": 128
+        },
+        {
+          "conductor": 268435456,
+          "vertices": 256
+        }
+      ],
+      "case": "A",
+      "source_identity": {
+        "curve_uid": null,
+        "ec1": null,
+        "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+        "icv1": "ICV1:fp-126100789566376697:106:126100789566376592:30289789144510153:unk:unk:r:c1aa2a2301d3",
+        "model_json": "{\"a\":\"7079035723263497\",\"b\":\"123501395685118050\",\"field\":\"fp-126100789566376697\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"126100789566376697\",\"v\":\"1\"}",
+        "slug": "icv1-fp57-t106-c1aa2a23"
+      },
+      "source_input": {
+        "a": 7079035723263497,
+        "b": 123501395685118050,
+        "order": 126100789566376592,
+        "p": 126100789566376697
+      },
+      "source_conductor": 268435456,
+      "certificate_sha256": "0265b099e647ab1036479fde1f22c991ad7695accb244143b60a7fd8c5669b3a"
+    },
+    {
+      "db_sha256": "d861b6331b06ef5f4c5bf43ffba6721807ed07aeefb69042a8696320b551e447",
+      "vertices": 1616,
+      "vertices_exact": 729,
+      "vertices_unknown": 887,
+      "strata_exact_observed": 7,
+      "exact_populations": [
+        {
+          "conductor": 177147,
+          "vertices": 1
+        },
+        {
+          "conductor": 531441,
+          "vertices": 2
+        },
+        {
+          "conductor": 1594323,
+          "vertices": 6
+        },
+        {
+          "conductor": 4782969,
+          "vertices": 18
+        },
+        {
+          "conductor": 14348907,
+          "vertices": 54
+        },
+        {
+          "conductor": 43046721,
+          "vertices": 162
+        },
+        {
+          "conductor": 129140163,
+          "vertices": 486
+        }
+      ],
+      "case": "B",
+      "source_identity": {
+        "curve_uid": null,
+        "ec1": null,
+        "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+        "icv1": "ICV1:fp-45862249674083071:5:45862249674083067:18034452475090495:unk:unk:r:80dc66ed4945",
+        "model_json": "{\"a\":\"43891474518286963\",\"b\":\"10362796447069720\",\"field\":\"fp-45862249674083071\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"45862249674083071\",\"v\":\"1\"}",
+        "slug": "icv1-fp56-t5-80dc66ed"
+      },
+      "source_input": {
+        "a": 43891474518286963,
+        "b": 10362796447069720,
+        "order": 45862249674083067,
+        "p": 45862249674083071
+      },
+      "source_conductor": 129140163,
+      "certificate_sha256": "e689d3ddb892d946549b04a10f58a1ef374f794e3eae56a09b5eabd373639cd9"
+    },
+    {
+      "db_sha256": "468ce8320b6b7deae37198ca3afc07534fa4fe0e950f621e45ad322f23a2c881",
+      "vertices": 1869,
+      "vertices_exact": 517,
+      "vertices_unknown": 1352,
+      "strata_exact_observed": 24,
+      "exact_populations": [
+        {
+          "conductor": 2985984,
+          "vertices": 1
+        },
+        {
+          "conductor": 3981312,
+          "vertices": 1
+        },
+        {
+          "conductor": 4478976,
+          "vertices": 1
+        },
+        {
+          "conductor": 5971968,
+          "vertices": 1
+        },
+        {
+          "conductor": 6718464,
+          "vertices": 1
+        },
+        {
+          "conductor": 8957952,
+          "vertices": 2
+        },
+        {
+          "conductor": 11943936,
+          "vertices": 2
+        },
+        {
+          "conductor": 13436928,
+          "vertices": 3
+        },
+        {
+          "conductor": 17915904,
+          "vertices": 4
+        },
+        {
+          "conductor": 20155392,
+          "vertices": 1
+        },
+        {
+          "conductor": 26873856,
+          "vertices": 4
+        },
+        {
+          "conductor": 30233088,
+          "vertices": 1
+        },
+        {
+          "conductor": 35831808,
+          "vertices": 8
+        },
+        {
+          "conductor": 40310784,
+          "vertices": 4
+        },
+        {
+          "conductor": 53747712,
+          "vertices": 14
+        },
+        {
+          "conductor": 60466176,
+          "vertices": 3
+        },
+        {
+          "conductor": 80621568,
+          "vertices": 14
+        },
+        {
+          "conductor": 107495424,
+          "vertices": 22
+        },
+        {
+          "conductor": 120932352,
+          "vertices": 10
+        },
+        {
+          "conductor": 161243136,
+          "vertices": 46
+        },
+        {
+          "conductor": 241864704,
+          "vertices": 32
+        },
+        {
+          "conductor": 322486272,
+          "vertices": 65
+        },
+        {
+          "conductor": 483729408,
+          "vertices": 100
+        },
+        {
+          "conductor": 967458816,
+          "vertices": 177
+        }
+      ],
+      "case": "C",
+      "source_identity": {
+        "curve_uid": null,
+        "ec1": null,
+        "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+        "icv1": "ICV1:fp-1637958981148213249:2:1637958981148213248:913494765004474322:unk:unk:r:fefb1f9ce2be",
+        "model_json": "{\"a\":\"571607911220311176\",\"b\":\"29329524900995129\",\"field\":\"fp-1637958981148213249\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1637958981148213249\",\"v\":\"1\"}",
+        "slug": "icv1-fp61-t2-fefb1f9c"
+      },
+      "source_input": {
+        "a": 571607911220311176,
+        "b": 29329524900995129,
+        "order": 1637958981148213248,
+        "p": 1637958981148213249
+      },
+      "source_conductor": 967458816,
+      "certificate_sha256": "6f6cc0f4b0271c787a8f72e4264931f6c843496bc3b99d87bd3f238e775d54dd"
+    },
+    {
+      "db_sha256": "4f32fe7012da099e5cd8c11a88e06fb2b43d46b9605070018999f6b55905feb6",
+      "vertices": 1881,
+      "vertices_exact": 509,
+      "vertices_unknown": 1372,
+      "strata_exact_observed": 24,
+      "exact_populations": [
+        {
+          "conductor": 1679616,
+          "vertices": 1
+        },
+        {
+          "conductor": 2239488,
+          "vertices": 1
+        },
+        {
+          "conductor": 2519424,
+          "vertices": 1
+        },
+        {
+          "conductor": 3359232,
+          "vertices": 1
+        },
+        {
+          "conductor": 3779136,
+          "vertices": 1
+        },
+        {
+          "conductor": 5038848,
+          "vertices": 2
+        },
+        {
+          "conductor": 6718464,
+          "vertices": 2
+        },
+        {
+          "conductor": 7558272,
+          "vertices": 3
+        },
+        {
+          "conductor": 10077696,
+          "vertices": 4
+        },
+        {
+          "conductor": 11337408,
+          "vertices": 1
+        },
+        {
+          "conductor": 15116544,
+          "vertices": 4
+        },
+        {
+          "conductor": 17006112,
+          "vertices": 1
+        },
+        {
+          "conductor": 20155392,
+          "vertices": 7
+        },
+        {
+          "conductor": 22674816,
+          "vertices": 4
+        },
+        {
+          "conductor": 30233088,
+          "vertices": 14
+        },
+        {
+          "conductor": 34012224,
+          "vertices": 3
+        },
+        {
+          "conductor": 45349632,
+          "vertices": 14
+        },
+        {
+          "conductor": 60466176,
+          "vertices": 21
+        },
+        {
+          "conductor": 68024448,
+          "vertices": 10
+        },
+        {
+          "conductor": 90699264,
+          "vertices": 46
+        },
+        {
+          "conductor": 136048896,
+          "vertices": 32
+        },
+        {
+          "conductor": 181398528,
+          "vertices": 63
+        },
+        {
+          "conductor": 272097792,
+          "vertices": 100
+        },
+        {
+          "conductor": 544195584,
+          "vertices": 173
+        }
+      ],
+      "case": "D",
+      "source_identity": {
+        "curve_uid": null,
+        "ec1": null,
+        "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+        "icv1": "ICV1:fp-814409292524040673:-226:814409292524040900:355790128770897316:unk:unk:r:f2aa35d3d001",
+        "model_json": "{\"a\":\"23803279393343871\",\"b\":\"223081513837153681\",\"field\":\"fp-814409292524040673\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"814409292524040673\",\"v\":\"1\"}",
+        "slug": "icv1-fp60-tm226-f2aa35d3"
+      },
+      "source_input": {
+        "a": 23803279393343871,
+        "b": 223081513837153681,
+        "order": 814409292524040900,
+        "p": 814409292524040673
+      },
+      "source_conductor": 544195584,
+      "certificate_sha256": "33ed783e0609c63b81f0903fda4c0d2960be7857a1c0256c185a40e8dcf3d78d"
+    },
+    {
+      "db_sha256": "ed6d30f1325cdcf920b29dc2d6b6ae58f4ed283c9173064da34104f761e091a4",
+      "vertices": 1881,
+      "vertices_exact": 509,
+      "vertices_unknown": 1372,
+      "strata_exact_observed": 24,
+      "exact_populations": [
+        {
+          "conductor": 1990656,
+          "vertices": 1
+        },
+        {
+          "conductor": 2654208,
+          "vertices": 1
+        },
+        {
+          "conductor": 2985984,
+          "vertices": 1
+        },
+        {
+          "conductor": 3981312,
+          "vertices": 1
+        },
+        {
+          "conductor": 4478976,
+          "vertices": 1
+        },
+        {
+          "conductor": 5971968,
+          "vertices": 2
+        },
+        {
+          "conductor": 7962624,
+          "vertices": 2
+        },
+        {
+          "conductor": 8957952,
+          "vertices": 3
+        },
+        {
+          "conductor": 11943936,
+          "vertices": 4
+        },
+        {
+          "conductor": 13436928,
+          "vertices": 1
+        },
+        {
+          "conductor": 17915904,
+          "vertices": 4
+        },
+        {
+          "conductor": 20155392,
+          "vertices": 1
+        },
+        {
+          "conductor": 23887872,
+          "vertices": 7
+        },
+        {
+          "conductor": 26873856,
+          "vertices": 4
+        },
+        {
+          "conductor": 35831808,
+          "vertices": 14
+        },
+        {
+          "conductor": 40310784,
+          "vertices": 3
+        },
+        {
+          "conductor": 53747712,
+          "vertices": 14
+        },
+        {
+          "conductor": 71663616,
+          "vertices": 21
+        },
+        {
+          "conductor": 80621568,
+          "vertices": 10
+        },
+        {
+          "conductor": 107495424,
+          "vertices": 46
+        },
+        {
+          "conductor": 161243136,
+          "vertices": 32
+        },
+        {
+          "conductor": 214990848,
+          "vertices": 63
+        },
+        {
+          "conductor": 322486272,
+          "vertices": 100
+        },
+        {
+          "conductor": 644972544,
+          "vertices": 173
+        }
+      ],
+      "case": "E",
+      "source_identity": {
+        "curve_uid": null,
+        "ec1": null,
+        "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+        "icv1": "ICV1:fp-1975950516940704721:110:1975950516940704612:276911164075148878:unk:unk:r:a96b94baa377",
+        "model_json": "{\"a\":\"110339798349916108\",\"b\":\"405987076462987577\",\"field\":\"fp-1975950516940704721\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1975950516940704721\",\"v\":\"1\"}",
+        "slug": "icv1-fp61-t110-a96b94ba"
+      },
+      "source_input": {
+        "a": 110339798349916108,
+        "b": 405987076462987577,
+        "order": 1975950516940704612,
+        "p": 1975950516940704721
+      },
+      "source_conductor": 644972544,
+      "certificate_sha256": "b2cd17eec75c8da73006423a48340bdeacb9edfa4cfa52e70064125ce80c2d4a"
+    }
+  ],
+  "scope": "Local prefix labels only, no new DLP benchmark or complete population"
+}

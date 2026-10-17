@@ -1,0 +1,27 @@
+{
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "-m",
+    "research.support_cost_20261016_v1.worker",
+    "--experiment-id",
+    "support-squarefree-cost-actual83-20261016-v1",
+    "--mode",
+    "actual"
+  ],
+  "effective_timeout_seconds": 75.03285677699023,
+  "ended_unix": 1792114044.7560046,
+  "exit_code": 0,
+  "measurement_scope": "development diagnostic; isolation must be established separately",
+  "memory_limit_scope": "per-process address space inherited by descendants",
+  "peak_process_rss_kib": 1464236,
+  "pid": 7647,
+  "process_group": 7647,
+  "started_unix": 1792114043.2835298,
+  "status": "ok",
+  "stderr": "",
+  "stdout": "{\"evidence\": {\"auxiliary_root_count_exact\": null, \"mode\": \"actual\", \"original_root_count_exact\": null, \"release_gate_claim\": false, \"rows\": [{\"accepted\": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false], \"auxiliary_root_count_exact\": null, \"candidates\": 16, \"case\": \"actual83-fixedh-k-relaxed16\", \"degree\": 83, \"gcd_shortcut_seconds\": [0.21947511199687142, 0.1376285539881792, 0.13931217999197543], \"median_old_over_shortcut\": 1.1408942779538267, \"old_power_seconds\": [0.15211460400314536, 0.15894046900211833, 0.17281084498972632], \"order\": \"9671406556917033397649408\", \"original_root_count_exact\": null, \"squarefree_candidates\": 16}], \"scope\": \"exact support verification of suppliedquintics, not search or enumeration\"}, \"experiment_id\": \"support-squarefree-cost-actual83-20261016-v1\", \"next_actions\": [\"Use measured inversion/GCDoverhead to selectshortcut; ifslower refuseblanketpromotion. Compactverificationstillneedsconditional search acrossrelaxation.\"], \"schema\": \"scientific_result_v1\", \"status\": \"passed\", \"summary\": \"Exact nilpotence and squarefree-shortcut support criteria compared with all repeated roots retained.\"}\n",
+  "stdout_sha256": "9ea82f0f33fb720cc582ed07f0fabf23018f2c8a594a8eaf58c75e8adf83607f",
+  "system_seconds": 0.070217,
+  "user_seconds": 1.386865,
+  "wall_seconds": 1.472474295005668
+}
