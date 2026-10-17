@@ -683,8 +683,18 @@ fn write_ecbench(
         let (n1, n2) = group_structure(f, &e, order, rng);
         *structures.entry(format!("{n1}x{n2}")).or_insert(0usize) += 1;
         let lv = levels[v].expect("walked curves have a level");
-        let horizontal: Vec<usize> = vs[v].nbrs.iter().copied().filter(|&w| levels[w] == Some(lv)).collect();
-        let models = if lv == 0 { args.crater_models.unwrap_or(args.models) } else { args.models }.max(1);
+        let horizontal: Vec<usize> = vs[v]
+            .nbrs
+            .iter()
+            .copied()
+            .filter(|&w| levels[w] == Some(lv))
+            .collect();
+        let models = if lv == 0 {
+            args.crater_models.unwrap_or(args.models)
+        } else {
+            args.models
+        }
+        .max(1);
         for m in 0..models {
             // Model 0 is the walked model; others are (u⁴a, u⁶b) with the generator mapped.
             let u = if m == 0 { 1 } else { rng.gen_range(2..f.p) };
@@ -711,24 +721,33 @@ fn write_ecbench(
             side.push('\n');
         }
     }
-    let ic = |size: u32| json!({"id": "ic.pipeline", "params": {
-        "factor_base": format!("prime-abscissa:size={size}"), "oracle": "mitm:negation_folded=1"}});
-    let spec = |label: &str, arms: serde_json::Value, seed: u64| json!({
-        "schema": "ecbench.spec/v1",
-        "label": label,
-        "description": format!(
-            "volcano-rho --ecbench: every curve of an {}-isogeny volcano over F_{} ({} curves x {} models), \
-             isogeny-transported generators, planted_shared targets; written by {}",
-            args.ell, f.p, walked.len(), args.models.max(1),
-            std::env::args().collect::<Vec<_>>().join(" ")),
-        "workloads": {"curves": curves, "targets_per_curve": args.targets,
-                      "target_seed": args.seed, "target_kind": "planted_shared"},
-        "arms": arms,
-        "measurement": {"rounds": 1, "warmup": 1, "order": "shuffle", "seed": seed,
-                        "isolation_required": "L0", "timeout_seconds": 600},
-    });
+    let ic = |size: u32| {
+        json!({"id": "ic.pipeline", "params": {
+        "factor_base": format!("prime-abscissa:size={size}"), "oracle": "mitm:negation_folded=1"}})
+    };
+    let spec = |label: &str, arms: serde_json::Value, seed: u64| {
+        json!({
+            "schema": "ecbench.spec/v1",
+            "label": label,
+            "description": format!(
+                "volcano-rho --ecbench: every curve of an {}-isogeny volcano over F_{} ({} curves x {} models), \
+                 isogeny-transported generators, planted_shared targets; written by {}",
+                args.ell, f.p, walked.len(), args.models.max(1),
+                std::env::args().collect::<Vec<_>>().join(" ")),
+            "workloads": {"curves": curves, "targets_per_curve": args.targets,
+                          "target_seed": args.seed, "target_kind": "planted_shared"},
+            "arms": arms,
+            "measurement": {"rounds": 1, "warmup": 1, "order": "shuffle", "seed": seed,
+                            "isolation_required": "L0", "timeout_seconds": 600},
+        })
+    };
     let pick = |keep: &dyn Fn(&(usize, usize, u32)) -> bool| -> Vec<serde_json::Value> {
-        curves.iter().zip(&owners).filter(|(_, o)| keep(o)).map(|(c, _)| c.clone()).collect()
+        curves
+            .iter()
+            .zip(&owners)
+            .filter(|(_, o)| keep(o))
+            .map(|(c, _)| c.clone())
+            .collect()
     };
     let main = spec(
         "isogeny volcano: rho and IC on every curve",
@@ -764,7 +783,10 @@ fn write_ecbench(
     }
     // Positive control on a j = 0 / j = 1728 crater: the automorphism-folded
     // walk (which refuses every other curve) beside rho.negation, crater only.
-    let crater_j = walked.iter().find(|&&v| levels[v] == Some(0)).map(|&v| vs[v].j);
+    let crater_j = walked
+        .iter()
+        .find(|&&v| levels[v] == Some(0))
+        .map(|&v| vs[v].j);
     let aut = match crater_j.unwrap_or(u64::MAX) {
         0 if f.p % 3 == 1 && (n - 1) % 3 == 0 => Some(("rho-cubic", "rho.cubic")),
         1728 if f.p % 4 == 1 && (n - 1) % 4 == 0 => Some(("rho-quartic", "rho.quartic")),
@@ -783,12 +805,32 @@ fn write_ecbench(
         );
         let crater_curves = pick(&|o| o.2 == 0);
         crater["workloads"]["curves"] = json!(crater_curves);
-        fs::write(dir.join("spec-crater-aut.json"), serde_json::to_string_pretty(&crater).unwrap()).unwrap();
+        fs::write(
+            dir.join("spec-crater-aut.json"),
+            serde_json::to_string_pretty(&crater).unwrap(),
+        )
+        .unwrap();
     }
-    fs::write(dir.join("spec.json"), serde_json::to_string_pretty(&main).unwrap()).unwrap();
-    fs::write(dir.join("spec-aa.json"), serde_json::to_string_pretty(&aa).unwrap()).unwrap();
-    fs::write(dir.join("spec-bsgs.json"), serde_json::to_string_pretty(&bsgs).unwrap()).unwrap();
-    fs::write(dir.join("spec-icctl.json"), serde_json::to_string_pretty(&icctl).unwrap()).unwrap();
+    fs::write(
+        dir.join("spec.json"),
+        serde_json::to_string_pretty(&main).unwrap(),
+    )
+    .unwrap();
+    fs::write(
+        dir.join("spec-aa.json"),
+        serde_json::to_string_pretty(&aa).unwrap(),
+    )
+    .unwrap();
+    fs::write(
+        dir.join("spec-bsgs.json"),
+        serde_json::to_string_pretty(&bsgs).unwrap(),
+    )
+    .unwrap();
+    fs::write(
+        dir.join("spec-icctl.json"),
+        serde_json::to_string_pretty(&icctl).unwrap(),
+    )
+    .unwrap();
     fs::write(dir.join("curves.jsonl"), side).unwrap();
     (curves.len(), structures)
 }
@@ -1056,14 +1098,25 @@ fn parse_args() -> Args {
                 continue;
             }
             "--ecbench" => a.ecbench = Some(PathBuf::from(val)),
-            "--models" => a.models = val.parse().unwrap_or_else(|_| die("--models takes an integer")),
+            "--models" => {
+                a.models = val
+                    .parse()
+                    .unwrap_or_else(|_| die("--models takes an integer"))
+            }
             "--crater-models" => {
-                a.crater_models = Some(val.parse().unwrap_or_else(|_| die("--crater-models takes an integer")))
+                a.crater_models = Some(
+                    val.parse()
+                        .unwrap_or_else(|_| die("--crater-models takes an integer")),
+                )
             }
             "--level-caps" => {
                 a.level_caps = val
                     .split(',')
-                    .map(|x| x.trim().parse().unwrap_or_else(|_| die("--level-caps takes N,N,...")))
+                    .map(|x| {
+                        x.trim()
+                            .parse()
+                            .unwrap_or_else(|_| die("--level-caps takes N,N,..."))
+                    })
                     .collect()
             }
             "--aa-model0" => {
@@ -1071,8 +1124,16 @@ fn parse_args() -> Args {
                 i += 1; // a flag: no value
                 continue;
             }
-            "--targets" => a.targets = val.parse().unwrap_or_else(|_| die("--targets takes an integer")),
-            "--ic-size" => a.ic_size = val.parse().unwrap_or_else(|_| die("--ic-size takes an integer")),
+            "--targets" => {
+                a.targets = val
+                    .parse()
+                    .unwrap_or_else(|_| die("--targets takes an integer"))
+            }
+            "--ic-size" => {
+                a.ic_size = val
+                    .parse()
+                    .unwrap_or_else(|_| die("--ic-size takes an integer"))
+            }
             "--instance-study" => {
                 a.instance_study = true;
                 i += 1; // a flag: no value
@@ -1698,7 +1759,11 @@ fn main() {
         let walked: Vec<usize> = (0..vs.len())
             .filter(|&v| {
                 let Some(l) = levels[v] else { return false };
-                let cap = args.level_caps.get(l as usize).copied().unwrap_or(args.per_level);
+                let cap = args
+                    .level_caps
+                    .get(l as usize)
+                    .copied()
+                    .unwrap_or(args.per_level);
                 let keep = v == 0 || taken[l as usize] < cap;
                 if keep {
                     taken[l as usize] += 1;
@@ -1706,7 +1771,17 @@ fn main() {
                 keep
             })
             .collect();
-        let (curves, n1n2) = write_ecbench(&args, dir, &f, &vs, &levels, &walked, found.order, n, &mut rng);
+        let (curves, n1n2) = write_ecbench(
+            &args,
+            dir,
+            &f,
+            &vs,
+            &levels,
+            &walked,
+            found.order,
+            n,
+            &mut rng,
+        );
         eprintln!(
             "ecbench: {} curves x {} models = {} workload curves, {} targets each; group structures {:?} -> {}",
             walked.len(),
