@@ -748,6 +748,25 @@ nothing missing. R09's class excludes it.
   - R04's stage probes at v8, to see where a scanned summand's time now
     goes before the next lever is chosen.
 
+**A14: the size gate gives nothing back (2026-10-17).**
+- **What was tried:** v8 with R12's pass skipped below 2^20 stored pairs,
+  timed against v8. 72 isolated processes at `2^27.8`, `2^38.0` and
+  `2^44.3`.
+- **Below the gate the gated arm is no faster.** Cold time, v8 over the gate:
+  - 0.992 [0.964, 1.022] at `2^27.8`;
+  - 0.961 [0.854, 1.083] at `2^38.0`;
+  - 1.011 [0.978, 1.046] at `2^44.3`, where both arms run the same code.
+- **The pass's cost is not measurable here.** Collection at `2^38.0` runs 2.9%
+  faster without the pass, about 1% of cold time, which this exploration
+  cannot resolve. R12's 0.971 at `2^27.8` is not recovered. So the
+  attribution above ("it is real") is not supported: R12's small-size
+  readings are inside its A/A rule, and removing the pass does not move
+  them.
+- **No round is declared, and the gate is not landed.** It cannot reach the
+  1.03 line at the target sizes
+  ([record](../../ic_tool_program/explorations/A14-prefetch-size-gate-20261017/README.md)).
+- **Next:** R04's stage probes at v8.
+
 ## 9. Track B: generality and robustness
 
 **Where the tool stands (at `0bf67f16`).**
