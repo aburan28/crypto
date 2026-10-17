@@ -1,0 +1,35 @@
+
+running 8 tests
+test cryptanalysis::ic_framework::plugins::tests::compact_orbit_scan_matches_archived_n37_source42 ... ok
+test cryptanalysis::jv_cover::tests::nagao_finds_planted_six_sums_and_agrees_with_the_oracle ... trial 0: NagaoCost { weil_muls: 2730, f4_muls: 715704, lin_muls: 712369, post_muls: 5000, delta: 64, degree_reached: 8, max_rows: 231, max_cols: 255, f4_ms: 23.276006, lin_ms: 3.748663, total_ms: 27.671793, inconsistent: false, incomplete: false, timed_out: false, degenerate: false, nonseparating: 0, stopped_at: None, replayed: false, trace_mismatch: false, fp_solutions: 3, split: 1, decompositions: 1 }
+trial 1: NagaoCost { weil_muls: 2730, f4_muls: 720404, lin_muls: 966189, post_muls: 6292, delta: 64, degree_reached: 8, max_rows: 231, max_cols: 255, f4_ms: 26.473933000000002, lin_ms: 9.713346, total_ms: 36.443695, inconsistent: false, incomplete: false, timed_out: false, degenerate: false, nonseparating: 0, stopped_at: None, replayed: false, trace_mismatch: false, fp_solutions: 5, split: 1, decompositions: 1 }
+trial 2: NagaoCost { weil_muls: 2730, f4_muls: 725077, lin_muls: 575066, post_muls: 3288, delta: 64, degree_reached: 8, max_rows: 231, max_cols: 255, f4_ms: 10.382073, lin_ms: 2.356993, total_ms: 12.938642, inconsistent: false, incomplete: false, timed_out: false, degenerate: false, nonseparating: 0, stopped_at: None, replayed: false, trace_mismatch: false, fp_solutions: 2, split: 1, decompositions: 1 }
+trial 3: NagaoCost { weil_muls: 2730, f4_muls: 722863, lin_muls: 455261, post_muls: 2471, delta: 64, degree_reached: 8, max_rows: 231, max_cols: 255, f4_ms: 12.300253000000001, lin_ms: 2.065136, total_ms: 14.584273, inconsistent: false, incomplete: false, timed_out: false, degenerate: false, nonseparating: 0, stopped_at: None, replayed: false, trace_mismatch: false, fp_solutions: 1, split: 1, decompositions: 1 }
+trial 4: NagaoCost { weil_muls: 2730, f4_muls: 719441, lin_muls: 581070, post_muls: 3676, delta: 64, degree_reached: 8, max_rows: 231, max_cols: 255, f4_ms: 16.938655, lin_ms: 2.977932, total_ms: 20.156685, inconsistent: false, incomplete: false, timed_out: false, degenerate: false, nonseparating: 0, stopped_at: None, replayed: false, trace_mismatch: false, fp_solutions: 2, split: 1, decompositions: 1 }
+trial 5: NagaoCost { weil_muls: 2730, f4_muls: 723486, lin_muls: 581359, post_muls: 3659, delta: 64, degree_reached: 8, max_rows: 231, max_cols: 255, f4_ms: 21.961732, lin_ms: 2.99587, total_ms: 25.173315000000002, inconsistent: false, incomplete: false, timed_out: false, degenerate: false, nonseparating: 0, stopped_at: None, replayed: false, trace_mismatch: false, fp_solutions: 2, split: 1, decompositions: 1 }
+ok
+test cryptanalysis::jv_cover::tests::replayed_f4_agrees_with_the_full_solver_and_the_oracle ... full f4 680566 (231 × 255, degree 7) vs replay 296036 (197 × 252, degree 7)
+full f4 692379 (231 × 255, degree 7) vs replay 301797 (197 × 252, degree 7)
+full f4 696269 (231 × 255, degree 7) vs replay 303599 (197 × 252, degree 7)
+replayed 31 of 40, cheaper 31, mismatches 8
+  trace step 0: degree 2 useful rows 3 new lms 2
+  trace step 1: degree 3 useful rows 17 new lms 9
+  trace step 2: degree 4 useful rows 34 new lms 10
+  trace step 3: degree 5 useful rows 31 new lms 9
+  trace step 4: degree 6 useful rows 28 new lms 5
+  trace step 5: degree 7 useful rows 13 new lms 1
+ok
+test ecc::cryptopro_b_chain_set::tests::a_step_that_does_not_compose_is_refused - should panic ... 
+thread 'ecc::cryptopro_b_chain_set::tests::a_step_that_does_not_compose_is_refused' (20088) panicked at src/ecc/cryptopro_b_point.rs:601:13:
+assertion `left == right` failed: step 1: domain a does not compose
+  left: [3222, 0, 0, 9223372036854775808]
+ right: [4489424403059221815, 13107566178433889240, 9589934799479419441, 4053450176749327814]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+ok
+test ecc::cryptopro_b_chain_set::tests::frozen_chains_are_multiplication_by_lambda_and_orderings_agree ... ok
+test ecc::cryptopro_b_chain_set::tests::frozen_set_loads_and_every_chain_prepares ... ok
+test ecc::cryptopro_b_chain_set::tests::frozen_set_reproduces_its_test_vectors ... ok
+test ecc::cryptopro_b_chain_set::tests::tampered_sets_are_refused ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 4263 filtered out; finished in 17.60s
+

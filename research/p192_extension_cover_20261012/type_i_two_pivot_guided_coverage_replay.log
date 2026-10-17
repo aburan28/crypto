@@ -1,0 +1,5 @@
+PIVOT_COVERAGE_REPLAY old16 816 {'--': 178, '+-': 211, '++': 224, '-+': 203}
+PIVOT_COVERAGE_REPLAY old16_fan000_16 5984 {'--': 1489, '+-': 1477, '++': 1535, '-+': 1483}
+PIVOT_COVERAGE_REPLAY old16_two_fans_16_each 19600 {'--': 4867, '+-': 4921, '++': 4926, '-+': 4886}
+PIVOT_QUERY_REPLAY character_guided {'++': 64} {'old16': 0, 'old16_fan000_16': 0, 'old16_two_fans_16_each': 0}
+PIVOT_QUERY_REPLAY uniform {'+-': 19, '-+': 20, '--': 14, '++': 11} {'old16': 0, 'old16_fan000_16': 0, 'old16_two_fans_16_each': 0}

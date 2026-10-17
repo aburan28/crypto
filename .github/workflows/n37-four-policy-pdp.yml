@@ -22,7 +22,6 @@ on:
       - 'src/cryptanalysis/binary_velu.rs'
       - 'src/cryptanalysis/koblitz_fast.rs'
       - 'src/cryptanalysis/koblitz_relation_solver.rs'
-      - 'docs/index-calculus-scoreboard.html'
   workflow_dispatch:
 
 permissions:

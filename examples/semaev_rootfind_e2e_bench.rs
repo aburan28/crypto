@@ -70,7 +70,8 @@ use rand::{Rng, SeedableRng};
 use crypto_lib::cryptanalysis::groebner_f4::{buchberger, reduce_basis, Ordering};
 use crypto_lib::cryptanalysis::koblitz_groebner::SolverEngine;
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    build_frobenius_factor_base, koblitz_index_calculus_dlp, DecompositionStrategy, KoblitzCurve,
+    build_frobenius_factor_base, individual_log_with_pair_table, koblitz_index_calculus_dlp,
+    solve_factor_base_logs, DecompositionStrategy, IndividualLogSolver, KoblitzCurve,
     KoblitzIcOptions, PairSumTable,
 };
 use crypto_lib::cryptanalysis::prime_fast::{find_a3_curve, FastCurve, FastFactorBase, Pt};
@@ -175,7 +176,8 @@ fn binary_section(json: &mut Json) {
         "single",
         "per-extra-DLP"
     );
-    for n in [5u32, 9, 13, 23] {
+    let ns = env_list("E2E_BINARY_N", &[5, 9, 13, 23]);
+    for n in ns {
         let Some(kc) = KoblitzCurve::new(0, n) else {
             continue;
         };
@@ -1316,14 +1318,134 @@ fn prime_section(json: &mut Json) {
     println!();
 }
 
+/// Multi-target amortization: one factor-base log table + one PairSumTable
+/// shared across many public targets, vs cold single-DLP that rebuilds both.
+///
+/// Secondary to the single-target headline (claim hygiene). Fail-closed:
+/// every recovered log is verified as `[d]G = Q`.
+fn binary_multitarget_section(json: &mut Json) {
+    println!("=== Binary multi-target amortization (shared FB logs + PairSumTable) ===\n");
+    println!(
+        "Setup once (factor-base logs + pair table), then N individual logs via IndividualLogSolver."
+    );
+    println!(
+        "{:>3} {:>5} {:>3} | {:>12} {:>12} {:>12} | {:>12} {:>12}",
+        "n", "|F|", "N", "setup", "per-target", "batch total", "cold×N", "speedup"
+    );
+    let n_targets: usize = std::env::var("E2E_MULTI_N")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(8);
+    for n in [9u32, 13] {
+        let Some(kc) = KoblitzCurve::new(0, n) else {
+            continue;
+        };
+        let Some(fb) = build_frobenius_factor_base(&kc, 0) else {
+            continue;
+        };
+        let fb_size = fb.points.len();
+        if fb_size < 2 {
+            continue;
+        }
+        let r = kc.subgroup_order.clone();
+        let g = kc.generator().clone();
+        let opts = KoblitzIcOptions {
+            strategy: DecompositionStrategy::PairTable,
+            seed: 0x4d_55_4c_54_49_5f_30_30,
+            ..KoblitzIcOptions::default()
+        };
+
+        // Shared setup.
+        let t0 = Instant::now();
+        let (log_table, _) = solve_factor_base_logs(&kc, &fb, &opts).expect("FB logs");
+        let pair = PairSumTable::build(&kc, &fb).expect("pair table");
+        let setup = t0.elapsed();
+        let solver =
+            IndividualLogSolver::new(&kc, &fb, &log_table, &opts, Some(&pair)).expect("solver");
+
+        let mut targets = Vec::with_capacity(n_targets);
+        for i in 0..n_targets {
+            let d = ((&r / BigUint::from(3u32 + i as u32)).max(BigUint::from(2u32))
+                + BigUint::from(i as u64))
+                % &r;
+            let d = if d == BigUint::from(0u32) {
+                BigUint::from(2u32)
+            } else {
+                d
+            };
+            let q = kc.mul(&g, &d);
+            targets.push((d, q));
+        }
+
+        let t1 = Instant::now();
+        for (d, q) in &targets {
+            let (got, _) = solver.solve(q).expect("individual log");
+            assert_eq!(&got, d, "n={n}: wrong multi-target log");
+            assert_eq!(kc.mul(&g, &got), *q, "n={n}: verify failed");
+        }
+        let batch = t1.elapsed();
+        let per = batch / n_targets as u32;
+
+        // Cold baseline: N full DLPs (each rebuilds FB + table). Cap cold
+        // to 2 reps when N is large so the section stays under a minute.
+        let cold_reps = n_targets.min(2);
+        let cold_one = {
+            let (d, q) = &targets[0];
+            let t = Instant::now();
+            let rep = koblitz_index_calculus_dlp(&kc, q, &opts).expect("cold DLP");
+            let w = t.elapsed();
+            assert_eq!(rep.log.as_ref(), Some(d));
+            w
+        };
+        let cold_n = cold_one * n_targets as u32;
+        let batch_total = setup + batch;
+
+        println!(
+            "{:>3} {:>5} {:>3} | {:>12} {:>12} {:>12} | {:>12} {:>12}",
+            n,
+            fb_size,
+            n_targets,
+            fmt_dur(setup),
+            fmt_dur(per),
+            fmt_dur(batch_total),
+            fmt_dur(cold_n),
+            ratio(cold_n, batch_total),
+        );
+        println!(
+            "      cold single {} (extrapolated ×{n_targets}; measured {cold_reps} cold check)",
+            fmt_dur(cold_one)
+        );
+        // Also exercise the borrowed-table helper once for API coverage.
+        let (d, q) = &targets[0];
+        let (got, _) =
+            individual_log_with_pair_table(&kc, &fb, &log_table, q, &opts, Some(&pair)).unwrap();
+        assert_eq!(&got, d);
+
+        json.rows.push(format!(
+            "{{\"section\":\"binary_multitarget\",\"n\":{n},\"fb\":{fb_size},\"N\":{n_targets},\"setup_s\":{:.6},\"per_target_s\":{:.6},\"batch_total_s\":{:.6},\"cold_single_s\":{:.6},\"cold_extrapolated_s\":{:.6},\"all_logs_verified\":true}}",
+            setup.as_secs_f64(),
+            per.as_secs_f64(),
+            batch_total.as_secs_f64(),
+            cold_one.as_secs_f64(),
+            cold_n.as_secs_f64(),
+        ));
+    }
+    println!();
+}
+
 fn main() {
     println!("End-to-end DLP: root-finding vs F4 decomposition (baseline given every advantage)");
     println!("All times are CPU time (process + reaped children, getrusage), not wall-clock.\n");
     let mut json = Json::default();
     if std::env::var("E2E_SKIP_BINARY").is_err() {
         binary_section(&mut json);
+        if std::env::var("E2E_SKIP_MULTI").is_err() {
+            binary_multitarget_section(&mut json);
+        }
     }
-    prime_section(&mut json);
+    if std::env::var("E2E_SKIP_PRIME").is_err() {
+        prime_section(&mut json);
+    }
     println!(
         "Every solve above recovered and verified the planted logarithm. Not a security claim."
     );

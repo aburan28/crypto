@@ -119,6 +119,56 @@ between independent Conductor databases.
 
 ## Verification and remaining enterprise work
 
+### Repeatable startup acceptance
+
+The fixture contract suite runs on every matching PR in
+`.github/workflows/private-workspace.yml`. It includes 32 rejection cases plus
+successful launches and exact argument checks. Run it with:
+
+```sh
+bash scripts/test-private-workspace.sh
+```
+
+For a Linux release bundle already installed on `PATH`, run the separate real
+process acceptance test:
+
+```sh
+PATH=/opt/approved-cairn/bin:/opt/approved-conductor/bin:$PATH \
+  bash scripts/test-private-workspace-native.sh
+```
+
+This test requires Python 3 and readable Linux `/proc`. It installs nothing,
+uses temporary state and loopback ports, records the tested Cairn binary digest,
+starts and stops only its own process group, and removes its state afterward.
+It uses a dummy loopback Conductor origin and sentinel credential: it does **not**
+authenticate to a control plane. Native acceptance is opt-in; the GitHub workflow
+runs fixture contracts and shell syntax, not a cross-repository release build.
+
+| Behavior | Executable check | Boundary |
+| --- | --- | --- |
+| All three offline entrypoints avoid installers and service/auth startup | Fixture tripwires and no state/process artifact | Commands intercepted by the fixture, not an OS firewall |
+| Missing/old/headless/failed capability probes refuse startup | Fixture rejection cases, including nonzero probes that print valid markers | Approved real release is checked separately |
+| Origins, ports, bootstrap and verifier paths fail closed | Fixture invalid/boundary inputs; no launch/state before rejection | Local syntax/path checks, not service health/authentication |
+| Public environment cannot weaken launch | Fixture child assertions; real `/network` and empty seeds | Does not prove physical network isolation |
+| Least authority, exact arguments, permissions and exit status | Fixture relay/spend limits, default/custom argv, reused state mode 0700, native failure exit 37 | Host service-manager policy remains external |
+| Bearer credential isolation | Both fixture probes/child and real `/proc` assertion | Caller credential remains available to Conductor |
+| Packaged reader, private health and identity survive restart | Two real launches, HTML and local JavaScript fetches, identity equality | Same Linux host and supplied binary; browser interaction covered in Cairn |
+| Real startup failures reach the supervisor | Occupied HTTP port causes nonzero exit with bind diagnostic; identity preserved | Tests failure, not an automatic recovery service |
+
+These are behavior coverage obligations, not a whole-project line-coverage
+percentage. Conductor's native WireGuard/team tests and Cairn's peer/browser
+tests live in their respective repositories; passing shell contracts alone does
+not establish either of those layers.
+
+Local Linux validation on 2026-10-17 passed shell syntax, the 32 rejection cases
+and successful fixture launches, and the complete native acceptance script on the
+fresh Cairn reader/recovery candidate (binary SHA-256
+`0c24a34d932fd58a9760270a4129c31eadbfd9b32a3929a3ca0ba021ed3d2888`).
+The unchanged Rust library at base `b952011cfd9a871c2861d8d11d2c5c3fae65844a`
+also passed `cargo test --release --lib -- --test-threads=1`: 4,268 passed,
+zero failed, 117 existing ignored, 926.77 seconds. These are local results;
+GitHub checks and customer acceptance remain separate gates.
+
 Run `bash scripts/test-private-workspace.sh`. It exercises all three entrypoints
 with install/network commands replaced by failing tripwires, rejects legacy
 profile support and invalid configuration, and checks the private environment and
@@ -144,10 +194,13 @@ isolation, automatic revocation propagation, or production availability.
 | Physically isolated deployment | Requires customer OS/network acceptance with outbound denial and supplied CA/time/model/package services |
 | Automatic mesh, gateways/exits, federation | Not implemented by this change; do not infer them from private reachability |
 
-Production acceptance must exercise real gateways, denied cross-workspace routes,
-restarts, key rotation/revocation, outage recovery, signed offline updates, customer
-identity/secret-provider configuration, and the intended workload scale. Private
-mode is not a claim of production readiness or additional cryptographic security.
+Production acceptance must repeat the local routing, authorization, restart and
+revocation checks on the intended customer topology. It must also exercise kernel
+gateways, denied cross-workspace packet routes, key rotation, signed offline
+updates, customer identity/secret-provider configuration, and workload scale.
+Private mode is not a claim of production readiness or additional cryptographic
+security. Application authorization tests do not establish firewall isolation
+between workspaces or automatic reconciliation of WireGuard membership.
 
 Coordination during development: `conductor check` was attempted before edits;
 the CLI was initially unavailable. Work proceeded on an isolated feature branch.

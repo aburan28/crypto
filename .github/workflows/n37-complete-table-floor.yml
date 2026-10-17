@@ -21,7 +21,6 @@ on:
       - 'src/cryptanalysis/ic_boundary.rs'
       - 'src/cryptanalysis/binary_velu.rs'
       - 'src/cryptanalysis/koblitz_fast.rs'
-      - 'docs/index-calculus-scoreboard.html'
   workflow_dispatch:
 
 permissions:

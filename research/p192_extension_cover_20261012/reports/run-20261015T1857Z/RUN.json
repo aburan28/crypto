@@ -1,0 +1,64 @@
+{
+  "artifact_sha256": {
+    "REPORT.md": "2e259517e1e3201233293cb5b4bd45f8518fb8014a1ddce8673655e575faad4d",
+    "lean/ScalarAnchor.lean": "cb08b3fd423460fd91caad5f0211a3b01e5a3c30840d18e985591586af2bcdf1",
+    "lean/lake-manifest.json": "fc1b089030173d9aad95d8dafe3e47168f93fccc14274413e9645acadabbf1b9",
+    "lean/lakefile.toml": "eae1de1407287f98004455f6d220857e1f6a313f5f385bb05bb5d83df85dba96",
+    "lean/lean-toolchain": "d5edba4e4b8faad9c1baeadb265716d20d03be4d1a2647dc5e35b0c0325bea7b",
+    "lean/scalar-anchor-axioms-20261015.log": "3508773f1f083833057607c7a27ae22dc871ef03bf7860a2431ca7583b5ee5b3",
+    "lean/scalar-anchor-build-20261015.log": "e47b0dcb9ba3e656d15f2d5d725c35aa8aee6f6d2e484f2f0b627fb5dc1436ff",
+    "lean/scalar-anchor-fresh-20261015.log": "02660f8c1cff577378d14c3d742e3cb03d0b499d25a2cc03d1beb557b40b1c5e",
+    "native_support/src/bin/formal_collision.rs": "581850e5e9ee33b0c0ec73f30d0eaeb5a4d3311e944d9d22b7894c07309719b4",
+    "native_support/src/ec.rs": "776d74d3f5ef53f8427d29e519237a692136322259c23b8ba90b078df93fa382",
+    "native_support_tests_20261015.log": "485d9c181bbe547322461bb6b12766e695b9d899917232b474b31d33e3312da1",
+    "reports/run-20261015T1857Z/REPORT.md": "447d1dc4b7b7f879b8fafd0c6b211e28138af0a77bec4ebc2c5ec42cb12ead7c",
+    "type_i_base_points_legacy_fixture.json": "3984b55b793305b30beaf18918209282bce80d444c96217cd6143c7d9470d409",
+    "type_i_formal_collision_independent.log": "799ba115089dfdbabffbc34738d13ae554da641606cc7c0b1def5aafd91aa007",
+    "type_i_formal_collision_support.json": "3ad55e1a388b8967b112bf6355ce95484d94f7f60af02fe9c70cbc1f4b37a6d0",
+    "type_i_formal_collision_support.log": "26131be9c82a1bb724681bd2cd35028c7140073e4580de283d094bfda4b5aad4",
+    "type_i_geom_character_collector.json": "961a9995114189ed1ee86febde46979900317417a2744f34274833390fb5ff49",
+    "verify_formal_collision_counts.py": "317a8de8cfb2880797d86f90bbe8bedc93a628f3112e7a427375e3848d122157"
+  },
+  "checks": {
+    "independent_exit": 0,
+    "lean_axioms_exit": 0,
+    "lean_build_exit": 0,
+    "lean_fresh_exit": 0,
+    "native_exit": 0,
+    "native_support_tests_exit": 0,
+    "registry_validator_exit": 0
+  },
+  "counts": {
+    "all_unordered_triples": 695520,
+    "anchored_targets": 349696,
+    "bearing_anchored_target_overlap": 0,
+    "bearing_targets": 333184,
+    "bearing_targets_with_distinct_formal_vectors": 0,
+    "bearing_triples": 335712,
+    "known_only_targets": 349696,
+    "known_only_triples": 357760,
+    "repeated_bearing_triples": 2528,
+    "zero_unknown_distinct_targets": 128,
+    "zero_unknown_targets_in_anchored_support": 128,
+    "zero_unknown_triples": 2048
+  },
+  "independent_command": "python3 research/p192_extension_cover_20261012/verify_formal_collision_counts.py research/p192_extension_cover_20261012/type_i_formal_collision_support.json",
+  "lean_build_workdir": "/private/tmp/p192-formal-lean (byte-identical copied project source, toolchain and manifest; package cache kept off the near-full workspace volume)",
+  "lean_commands": [
+    "lake build ScalarAnchor",
+    "lake env lean ScalarAnchor.lean",
+    "lake env leanchecker --fresh --verbose ScalarAnchor"
+  ],
+  "native_binary_sha256": "06e477c9f978dcd326c6d6d61a564c750de3e1906df06bdaa283413a9ac8b6d6",
+  "native_command": "/private/tmp/p192-formal-cargo/release/formal_collision research/p192_extension_cover_20261012/type_i_base_points_legacy_fixture.json research/p192_extension_cover_20261012/type_i_geom_character_collector.json research/p192_extension_cover_20261012/type_i_formal_collision_support.json",
+  "parent_commit": "6afbd091f6fd9c7435b02d4bd21a237a2e454d55",
+  "prior_receipt_four_counts_match": true,
+  "prior_receipt_input_hashes_match": true,
+  "scope": "frozen standard P-192 Type I signed 160-point quotient base, unordered three-sums with repetition",
+  "status": "verified_exact_formal_collision_census",
+  "toolchain": {
+    "lean": "4.34.1",
+    "mathlib_revision": "d13f23b723b8a846827a245b89c10fc7d3f11612",
+    "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)"
+  }
+}

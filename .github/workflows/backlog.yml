@@ -59,7 +59,7 @@ env:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
@@ -99,7 +99,7 @@ jobs:
         run: cargo test --release --bin backlog --bin backlog_check_aux2t --test backlog_cli -- --nocapture
 
   lab:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4

@@ -1,0 +1,111 @@
+receipt sha256 652881c0f31d9769073d4752e249f4deb2577a1d05283e0a5f3d71f823f88573
+{
+  "schema": "ecbench.audit/v1",
+  "session_id": "ECBS1h668da61e6251",
+  "session_status": "complete",
+  "ok": true,
+  "problems": [],
+  "checks": {
+    "arms": true,
+    "env_class": true,
+    "executions": true,
+    "host_hash": true,
+    "plan_hash": true,
+    "record_count": true,
+    "records": true,
+    "records_hash": true,
+    "replays": true,
+    "session_complete": true,
+    "spec_id": true,
+    "workloads": true
+  },
+  "records": 3600,
+  "verified_records": 3600,
+  "regraded": true,
+  "replays": [
+    {
+      "seq": 1200,
+      "record_id": "ECR1h2fe3a882d0b9",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 1400,
+      "record_id": "ECR1hff4887e116fd",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 1600,
+      "record_id": "ECR1h4630e21f0803",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 1800,
+      "record_id": "ECR1h52d5024f4118",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 2000,
+      "record_id": "ECR1ha6cf106a80bd",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 2200,
+      "record_id": "ECR1h120efb32e55f",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 2400,
+      "record_id": "ECR1ha10a1fa8d55d",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 2600,
+      "record_id": "ECR1ha7ac38d09295",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 2800,
+      "record_id": "ECR1h990a338db5c5",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 3000,
+      "record_id": "ECR1ha17d320c7db5",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 3200,
+      "record_id": "ECR1h407e8466f943",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 3400,
+      "record_id": "ECR1hbe2dce9394b5",
+      "reproduced": true,
+      "detail": "identical"
+    }
+  ],
+  "files": {
+    "host.json": "4e59599a11c7f4b15eca705ed3c0fe68276fd411a5501c6cca4d8756d5cc94fe",
+    "plan.json": "d16cc851ebaeea4126bc2e60c798716d73b94a6f4ee25e0beb900f4450672c4b",
+    "records.jsonl": "093959d9838e68bfae4dbf35733895ffeb961d8295281e671bd2c01e22351ec5",
+    "session.json": "c304357c358260b4ea75ad9b5dac83062724488fd5b5bd2d60645e2be1db2ae9",
+    "spec.json": "d9e29faeee836d5f545bdf4d2d2c600a2566dbcd9bb2a3bc3d8513d99e04432d"
+  },
+  "auditor_binary_sha256": "ac4bc5b26f858a4d8a374208297157840af25fb1dc25ea1c19dd41360735fb35",
+  "auditor_env_class_id": "ECBENV2h6639ae09b95e",
+  "auditor_hardware_class_id": "ECBHW1hc00b2367431c",
+  "audited_unix_ms": 1792230417853
+}
+audit OK: 3600 records, 3600 verified, 12 replays reproduced, 0 problems

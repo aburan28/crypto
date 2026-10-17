@@ -1,0 +1,29 @@
+2026-10-15 17:31:19-07:00 campaign run: curve 131, run id 8011 (campaign slot 98011), dp weight 32 from aws/campaign.json, WITNESS=0
+2026-10-15 17:31:20-07:00 6160384 parallel walks, distinguished-point weight 32, 2.03e+14 iterations planned this pass
+2026-10-15 17:31:20-07:00 NVIDIA RTX PRO 6000 Blackwell Server Edition: collecting into /data/dp/curve131-run8011.bin for 4.0 h at ~14126.57 M it/s
+2026-10-15 17:31:20-07:00 progress every 15 s; status header every 15 s; checkpoint every 60 s; corpus /data/dp/curve131-run8011.bin, checkpoint /data/ckpt/curve131-run8011.ck
+2026-10-15 17:31:20-07:00   packed sigma table: 1 (68352 dynamic shared bytes)
+2026-10-15 17:31:20-07:00   packed inline polynomial: 3
+2026-10-15 17:31:20-07:00   packed sigma fused: 1
+2026-10-15 17:31:26-07:00   no checkpoint at /data/ckpt/curve131-run8011.ck, starting fresh
+2026-10-15 17:31:35-07:00 [0m15s] 16422.6 M it/s  132.47G iters (0.000% of 2^60.9)  393 dp  2.00M distinct  corpus 12.0 kB  3h59m left
+2026-10-15 17:31:50-07:00 [0m30s] 16385.4 M it/s  364.30G iters (0.000% of 2^60.9)  1.03k dp  2.00M distinct  corpus 32.0 kB  3h59m left
+2026-10-15 17:32:05-07:00 [0m45s] 16328.8 M it/s  629.25G iters (0.000% of 2^60.9)  1.72k dp  2.00M distinct  corpus 52.0 kB  3h59m left
+2026-10-15 17:32:20-07:00 [1m00s] 16286.5 M it/s  861.07G iters (0.000% of 2^60.9)  2.36k dp  2.00M distinct  corpus 72.0 kB  3h58m left
+2026-10-15 17:32:35-07:00 [1m15s] 16074.1 M it/s  1.01T iters (0.000% of 2^60.9)  2.81k dp  2.00M distinct  corpus 92.5 kB  3h58m left
+2026-10-15 17:32:50-07:00 [1m30s] 16081.8 M it/s  1.35T iters (0.000% of 2^60.9)  3.77k dp  2.00M distinct  corpus 116.5 kB  3h58m left
+2026-10-15 17:33:05-07:00 [1m45s] 16080.4 M it/s  1.58T iters (0.000% of 2^60.9)  4.38k dp  2.00M distinct  corpus 136.5 kB  3h58m left
+2026-10-15 17:33:20-07:00 [2m00s] 16077.0 M it/s  1.81T iters (0.000% of 2^60.9)  5.04k dp  2.00M distinct  corpus 156.5 kB  3h57m left
+2026-10-15 17:33:35-07:00 [2m15s] 15980.7 M it/s  2.06T iters (0.000% of 2^60.9)  5.74k dp  2.01M distinct  corpus 179.4 kB  3h57m left
+2026-10-15 17:33:50-07:00 [2m30s] 15987.1 M it/s  2.30T iters (0.000% of 2^60.9)  6.38k dp  2.01M distinct  corpus 199.4 kB  3h57m left
+2026-10-15 17:34:05-07:00 [2m45s] 15991.3 M it/s  2.53T iters (0.000% of 2^60.9)  7.07k dp  2.01M distinct  corpus 219.4 kB  3h57m left
+2026-10-15 17:34:20-07:00 [3m00s] 15994.5 M it/s  2.76T iters (0.000% of 2^60.9)  7.77k dp  2.01M distinct  corpus 243.4 kB  3h56m left
+2026-10-15 17:34:35-07:00 [3m15s] 15938.3 M it/s  3.02T iters (0.000% of 2^60.9)  8.48k dp  2.01M distinct  corpus 261.5 kB  3h56m left
+2026-10-15 17:34:50-07:00 [3m30s] 15944.9 M it/s  3.25T iters (0.000% of 2^60.9)  9.15k dp  2.01M distinct  corpus 285.5 kB  3h56m left
+2026-10-15 17:35:05-07:00 [3m45s] 15950.1 M it/s  3.48T iters (0.000% of 2^60.9)  9.81k dp  2.01M distinct  corpus 305.5 kB  3h56m left
+2026-10-15 17:35:20-07:00 [4m00s] 15954.6 M it/s  3.71T iters (0.000% of 2^60.9)  10.46k dp  2.01M distinct  corpus 325.5 kB  3h55m left
+2026-10-15 17:35:35-07:00 [4m15s] 15911.5 M it/s  3.97T iters (0.000% of 2^60.9)  11.16k dp  2.01M distinct  corpus 345.0 kB  3h55m left
+2026-10-15 17:35:50-07:00 [4m30s] 15918.1 M it/s  4.20T iters (0.000% of 2^60.9)  11.82k dp  2.01M distinct  corpus 369.0 kB  3h55m left
+2026-10-15 17:36:05-07:00 [4m45s] 15923.7 M it/s  4.43T iters (0.000% of 2^60.9)  12.46k dp  2.01M distinct  corpus 389.0 kB  3h55m left
+2026-10-15 17:36:20-07:00 [5m00s] 15928.7 M it/s  4.66T iters (0.000% of 2^60.9)  13.13k dp  2.01M distinct  corpus 409.0 kB  3h54m left
+2026-10-15 17:36:35-07:00 [5m15s] 15893.1 M it/s  4.82T iters (0.000% of 2^60.9)  13.58k dp  2.01M distinct  corpus 429.8 kB  3h54m left

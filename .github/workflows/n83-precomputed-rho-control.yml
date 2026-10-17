@@ -1,0 +1,144 @@
+name: N83 precomputed-table rho control against IC K3300 and K600
+
+on:
+  push:
+    branches: [research/n83-precomputed-rho-control]
+    paths:
+      - .github/workflows/n83-precomputed-rho-control.yml
+      - examples/n83_precomputed_rho.rs
+      - examples/n83_precomputed_rho_analyze.rs
+      - research/20261016-n83-precomputed-rho-control/run_job.sh
+      - research/20261016-n83-precomputed-rho-control/configs/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: n83-precomputed-rho-control-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  tests:
+    if: github.repository == 'aburan28/crypto'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - name: Library and example tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/tests"
+          export CARGO_BUILD_JOBS=4
+          cargo test --release --locked --example n83_precomputed_rho \
+            --example n83_precomputed_rho_analyze --example n83_rho_optimization_eval \
+            2>&1 | tee "$RUNNER_TEMP/tests/example-tests.log" | tail -40
+          cargo test --release --locked --lib 2>&1 | tee "$RUNNER_TEMP/tests/lib-tests.log" | tail -40
+      - name: Preserve test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-precomputed-rho-tests-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/tests
+          if-no-files-found: ignore
+          retention-days: 30
+
+  control:
+    if: github.repository == 'aburan28/crypto'
+    strategy:
+      fail-fast: false
+      matrix:
+        ic: [k3300, k600]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the frozen producers that made the claims
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Everything the library and the three examples include at compile time.
+          g=research/ic_candidate_tournament_20260915/goal_20260924
+          paths="Cargo.toml Cargo.lock src examples experiments benches tests
+            docs/curves/registry.json docs/curves/traits.json docs/ecbench/schema.sql
+            docs/ic/boundary_targets.json docs/ic/calibration.json
+            docs/identity-certificates/schoenhage-10mult.json
+            $g/prepared-f5-runtime-v1/mathematics.json
+            $g/prepared-f5-v3-control-v1/controls/pipeline.stdout
+            $g/prepared-ic-state-v1/f5-preparation.json $g/prepared-ic-state-v1/sat-preparation.json
+            $g/prepared-report-contract-v1/sat-source-check"
+          frozen() {  # <commit> <dir>
+            git fetch --no-tags --depth=1 origin "$1"
+            test "$(git rev-parse FETCH_HEAD)" = "$1"
+            mkdir -p "$2"
+            # shellcheck disable=SC2086
+            git archive "$1" $paths | tar -xf - -C "$2"
+          }
+          # K3300 Tier 1 IC and the Tier 1 fold rho worker (d0e4aa13).
+          T=d0e4aa13074c9fea910592c6e26b60b5e97fc439
+          frozen "$T" "$RUNNER_TEMP/src-tier1"
+          test "$(sha256sum "$RUNNER_TEMP/src-tier1/examples/koblitz_orbit_dlp_fast.rs" | cut -d' ' -f1)" = \
+            5e9fd826d22816b429a82e658c517d9387916aabe7660f708e4c29901cce647e
+          test "$(sha256sum "$RUNNER_TEMP/src-tier1/examples/n83_rho_optimization_eval.rs" | cut -d' ' -f1)" = \
+            fb14072f4fa5d08e18d8b79130b6d58a220adae0f76369cc9be949691c83eaa0
+          (cd "$RUNNER_TEMP/src-tier1" && CARGO_TARGET_DIR="$RUNNER_TEMP/t-tier1" N83_SOURCE_COMMIT=$T \
+            cargo build --release --locked --example koblitz_orbit_dlp_fast --example n83_rho_optimization_eval)
+          echo "IC_BIN=$RUNNER_TEMP/t-tier1/release/examples/koblitz_orbit_dlp_fast" >> "$GITHUB_ENV"
+          echo "RHO_BIN=$RUNNER_TEMP/t-tier1/release/examples/n83_rho_optimization_eval" >> "$GITHUB_ENV"
+          if [ "${{ matrix.ic }}" = k600 ]; then
+            # K600 hosted single-target IC (gha-38597929540-1 git_head eaa75494).
+            H=eaa754944c432b773db968f909dcf0dd36b57036
+            frozen "$H" "$RUNNER_TEMP/src-hosted"
+            test "$(sha256sum "$RUNNER_TEMP/src-hosted/examples/koblitz_orbit_dlp_fast_online.rs" | cut -d' ' -f1)" = \
+              4729f3b9aac5d20e36a2560aabae76c40ab4baf2c88cf6da9bd7bcb3c17550e2
+            (cd "$RUNNER_TEMP/src-hosted" && CARGO_TARGET_DIR="$RUNNER_TEMP/t-hosted" \
+              cargo build --release --locked --example koblitz_orbit_dlp_fast_online)
+            echo "IC_BIN=$RUNNER_TEMP/t-hosted/release/examples/koblitz_orbit_dlp_fast_online" >> "$GITHUB_ENV"
+          fi
+
+      - name: Build the precomputed-table rho and analyzer
+        shell: bash
+        run: |
+          set -euo pipefail
+          CARGO_TARGET_DIR="$RUNNER_TEMP/t-branch" N83_SOURCE_COMMIT=${{ github.sha }} \
+            cargo build --release --locked --example n83_precomputed_rho --example n83_precomputed_rho_analyze
+          echo "BL_BIN=$RUNNER_TEMP/t-branch/release/examples/n83_precomputed_rho" >> "$GITHUB_ENV"
+          echo "AN_BIN=$RUNNER_TEMP/t-branch/release/examples/n83_precomputed_rho_analyze" >> "$GITHUB_ENV"
+          rm -rf "$RUNNER_TEMP/t-branch/release/deps" "$RUNNER_TEMP/t-tier1/release/deps" \
+            "$RUNNER_TEMP/t-hosted/release/deps" "$RUNNER_TEMP/t-branch/release/build" \
+            "$RUNNER_TEMP/t-tier1/release/build" "$RUNNER_TEMP/t-hosted/release/build" || true
+          df -h "$RUNNER_TEMP" | tail -1
+
+      - name: Re-analyze run 1 (38855595549) with the fixed analyzer
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/out/run1-reanalysis"
+          gh run download 38855595549 -R aburan28/crypto \
+            -n "n83-precomputed-rho-${{ matrix.ic }}-38855595549-1" -D "$RUNNER_TEMP/run1"
+          set +e
+          "$AN_BIN" "$RUNNER_TEMP/run1/${{ matrix.ic }}" ${{ matrix.ic }} \
+            "$RUNNER_TEMP/out/run1-reanalysis/analysis.json" > "$RUNNER_TEMP/out/run1-reanalysis/analysis.log" 2>&1
+          echo "$?" > "$RUNNER_TEMP/out/run1-reanalysis/analysis_exit.txt"
+          cat "$RUNNER_TEMP/out/run1-reanalysis/analysis.log"
+
+      - name: Run IC, plain rho and both precomputed arms on this runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          research/20261016-n83-precomputed-rho-control/run_job.sh ${{ matrix.ic }} \
+            "$IC_BIN" "$RHO_BIN" "$BL_BIN" "$AN_BIN" "$RUNNER_TEMP/out/${{ matrix.ic }}"
+
+      - name: Preserve raw records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-precomputed-rho-${{ matrix.ic }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/out
+          if-no-files-found: warn
+          retention-days: 90

@@ -1,0 +1,22 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "volcano census calibration b=26",
+  "description": "Phase A calibration, one V1-shaped root, PLAN 4 A.2; known-answer synthetic curve, no security claim.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "prime_explicit",
+        "p": 50704601,
+        "a": 9927454,
+        "b": 99967,
+        "group_order": 50698212,
+        "r": 4224851,
+        "gx": 22659420,
+        "gy": 27299051
+      }
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 20261017,
+    "target_kind": "planted_shared"
+  }
+}

@@ -5605,21 +5605,27 @@ pub fn prebuild_inherited_roots_lanes(
     (total, placed)
 }
 
-/// `KIC_F6_GATE_FIRST=1`: when a node's reduction forces variables, assign
+/// Gate-first order: when a node's reduction forces variables, assign
 /// them and ask the node oracle (the F6-IC geometry gate) **before**
 /// specialising the node's bases by them, instead of after.  The oracle
 /// reads only the assignment and the defined variables, so it decides the
 /// same way either way; a refuted node then never pays for the
 /// specialisations, and a continuing one specialises exactly as before
 /// and is not asked again.  Every verdict, root, counter of the solve and
-/// call of the oracle is unchanged; only the stage unit drops.  Off by
-/// default; [`set_gate_first`] overrides it on the calling thread.
+/// call of the oracle is unchanged; only the stage unit drops.
+///
+/// On by default (`research/f6_gate_first_x86_20261016`: F6-IC with the
+/// pair index 1.34–1.73× fewer word XORs and 1.56–2.12× less CPU on nine
+/// cells, x86 with the eager rewrite; 1.57–1.78× on aarch64 in
+/// `research/lit2026_w5_lane_batched_f4_20261011`).  `KIC_F6_GATE_FIRST=0`
+/// restores the specialise-then-ask order as a same-binary control;
+/// [`set_gate_first`] overrides it on the calling thread.
 fn gate_first() -> bool {
     static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     if let Some(v) = GATE_FIRST_OVERRIDE.with(|c| c.get()) {
         return v;
     }
-    *ENABLED.get_or_init(|| std::env::var("KIC_F6_GATE_FIRST").as_deref() == Ok("1"))
+    *ENABLED.get_or_init(|| std::env::var("KIC_F6_GATE_FIRST").as_deref() != Ok("0"))
 }
 
 thread_local! {

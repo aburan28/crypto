@@ -1,0 +1,34 @@
+{
+  "axiom_command": "lake env lean TraceThree.lean",
+  "axiom_exit_code": 0,
+  "axiom_log_sha256": "d6a0d01af986a9e69dfa65274df1019b2ca66f7d9435b481ae1806f44a57f11d",
+  "axiom_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "axioms": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "build_command": "lake build TraceThree",
+  "build_exit_code": 0,
+  "build_log_sha256": "2acf8072272de47fef4f893b26af076d3bb7d1ff10d21dc0d66b792b5a189785",
+  "build_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "declarations_audited": [
+    "sixTrace_eq_two_threeTrace",
+    "threeTrace_cofactor_projection",
+    "threeTrace_cofactor_projection_from_conditions",
+    "recovered_quotient_image_cube_fixed"
+  ],
+  "dependency_repair": "Replaced a dangling local .lake/packages symlink, ran lake update at pinned manifest revisions, then repeated build, axiom audit, and fresh check.",
+  "dependency_update_log_sha256": "158dd8d5b494dc702c4b555634dd7ad78c60551ab73cadff7629d02939195d1c",
+  "dependency_update_stderr_sha256": "c065bcdcc2f1653e6b4fbe164f27dccb94332008958c77d6b16efffa29dd6bb2",
+  "fresh_command": "lake env leanchecker --fresh TraceThree",
+  "fresh_exit_code": 0,
+  "fresh_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "fresh_stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "lake_manifest_sha256": "fc1b089030173d9aad95d8dafe3e47168f93fccc14274413e9645acadabbf1b9",
+  "module": "TraceThree",
+  "module_sha256": "311d143bac7dee89174e464c12ed3effde44c76fd8f8d652c3e17d7700fef5f0",
+  "scope": "Abstract additive Frobenius trace identity and field-expression closure; elliptic-curve coordinate-to-point and P-192 model-constant bridge validated computationally but not formalized in Lean.",
+  "status": "checked_p192_three_trace_lean",
+  "toolchain_sha256": "d5edba4e4b8faad9c1baeadb265716d20d03be4d1a2647dc5e35b0c0325bea7b"
+}

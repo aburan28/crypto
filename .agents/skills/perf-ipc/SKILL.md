@@ -80,6 +80,15 @@ tools/perf_ipc.sh --isolate --repeat 5 --label "strong rho n53 4 fixtures" \
   counted units) are identical across repeats and arms before reading any
   counter.
 
+### Under Claude Code
+
+With the host checked (step 1) and the command, repeats, `--steps` and
+`--out` fixed, the main session may dispatch `experiment-director` to write a
+command card for the `tools/perf_ipc.sh` invocations, relay it verbatim to
+`executor-mechanical`, and dispatch `experiment-director` again to assess the
+run against the JSON lines on disk (AGENTS.md "Model tiers"). Reading the
+numbers (step 4) stays with the reasoning tier.
+
 ## 3. Compare two builds
 
 Same as AGENTS.md §10, with counters as the measure:

@@ -1,0 +1,126 @@
+"""Independent plane-section replay of fixed-origin Type I representatives."""
+
+import hashlib
+import json
+from pathlib import Path
+
+from sage.all import GF, PolynomialRing, matrix
+
+
+HERE = Path(__file__).resolve().parent
+receipt_path = HERE / "type_i_fixed_origin_reduction.json"
+base_path = HERE / "type_i_cubic_reduction.json"
+guided_path = HERE / "type_i_guided_reduced_queries.json"
+plane_path = HERE / "type_i_plane_quartic.json"
+receipt = json.loads(receipt_path.read_text())
+base = json.loads(base_path.read_text())
+guided = json.loads(guided_path.read_text())
+plane = json.loads(plane_path.read_text())
+assert receipt["source_sha256"] == hashlib.sha256(
+    (HERE / "type_i_fixed_origin_reduction.py").read_bytes()).hexdigest()
+assert receipt["input_receipt_sha256"] == hashlib.sha256(base_path.read_bytes()).hexdigest()
+assert receipt["guided_receipt_sha256"] == hashlib.sha256(guided_path.read_bytes()).hexdigest()
+assert receipt["plane_receipt_sha256"] == hashlib.sha256(plane_path.read_bytes()).hexdigest()
+assert receipt["field_prime"] == base["field_prime"]
+p = int(receipt["field_prime"])
+K = GF(p)
+R = PolynomialRing(K, "x")
+x = R.gen()
+S = PolynomialRing(R, "y")
+y = S.gen()
+exponents = [tuple(e) for e in base["cubic_monomial_exponents"]]
+assert len(exponents) == 10
+curve = sum(S(K(int(c)) * x ** e[0]) * y ** e[1]
+            for key, c in plane["quartic_coefficients"].items()
+            for e in [tuple(map(int, key.split(",")))])
+
+
+def poly(encoded):
+    assert all(len(c) == 1 for c in encoded)
+    return R([K(int(c[0])) for c in encoded])
+
+
+def section(encoded):
+    assert len(encoded) == len(exponents)
+    coefficients = [K(int(c)) for c in encoded]
+    return sum(S(coefficients[i] * x ** e[0]) * y ** e[1]
+               for i, e in enumerate(exponents))
+
+
+def vanishes_on(cubic, h, y_value):
+    assert h.is_monic() and h.gcd(h.derivative()).degree() == 0
+    assert y_value.degree() < h.degree() and curve(y_value) % h == 0
+    assert cubic(y_value) % h == 0
+
+
+def check_intersection(cubic, known, h, y_value):
+    vanishes_on(cubic, h, y_value)
+    assert h.gcd(known).degree() == 0
+    resultant = curve.resultant(cubic)
+    assert resultant.degree() == 12
+    quotient, remainder = resultant.quo_rem(known)
+    assert remainder == 0 and quotient.monic() == h
+    linear = next(z for z in curve.subresultants(cubic) if z.degree() == 1)
+    assert linear[1].gcd(h).degree() == 0
+    assert (linear[1] * y_value + linear[0]) % h == 0
+
+
+anchor_points = [item["coordinates_Fp_decimal"]
+                 for item in plane["known_points_verified"]
+                 if item["source"] == "base"][:3]
+assert receipt["origin_base_indices"] == [0, 1, 2] and len(anchor_points) == 3
+origin_h = poly(receipt["origin_x_polynomial"])
+origin_y = poly(receipt["origin_y_polynomial"])
+assert origin_h.degree() == 3 and origin_y.degree() < 3
+for c in anchor_points:
+    xx = K(int(c[0])) / K(int(c[2]))
+    yy = K(int(c[1])) / K(int(c[2]))
+    assert origin_h(xx) == 0 and origin_y(xx) == yy
+assert curve(origin_y) % origin_h == 0
+
+cases = [("base", i, item) for i, item in enumerate(base["classes"])] + [
+    ("guided_query", i, item) for i, item in enumerate(guided["results"])
+]
+assert len(cases) == len(receipt["representatives"]) == 80
+assert receipt["base_classes_reduced"] == 16
+assert receipt["guided_queries_reduced"] == 64
+assert receipt["guided_three_sum_matches"] == guided["three_sum_matches"] == 0
+for kind, index, item in cases:
+    rep = receipt["representatives"][len(base["classes"]) * (kind == "guided_query") + index]
+    assert rep["kind"] == kind and rep["index"] == index
+    A = item["positive_input_residual"]
+    B = item["negative_input_residual"]
+    h_a, y_a = poly(A["residual_x_polynomial"]), poly(A["residual_y_polynomial"])
+    h_b, y_b = poly(B["residual_x_polynomial"]), poly(B["residual_y_polynomial"])
+    h_u = poly(rep["intermediate_x_polynomial"])
+    y_u = poly(rep["intermediate_y_polynomial"])
+    h_d = poly(rep["representative_x_polynomial"])
+    y_d = poly(rep["representative_y_polynomial"])
+    assert (h_a.degree(), h_b.degree(), h_u.degree(), h_d.degree()) == (3, 3, 6, 3)
+    assert h_b.gcd(origin_h).degree() == 0
+    assert h_a.gcd(h_u).degree() == 0
+    denominator = section(rep["denominator_cubic_coefficients"])
+    numerator = section(rep["numerator_cubic_coefficients"])
+    for cubic, h, value in ((denominator, h_b, y_b),
+                            (denominator, origin_h, origin_y),
+                            (numerator, h_a, y_a),
+                            (numerator, h_u, y_u)):
+        vanishes_on(cubic, h, value)
+    check_intersection(denominator, h_b * origin_h, h_u, y_u)
+    check_intersection(numerator, h_a * h_u, h_d, y_d)
+    print(f"replayed fixed-origin representative {len(base['classes']) * (kind == 'guided_query') + index + 1}/80", flush=True)
+
+out = {
+    "status": "independently_verified_fixed_origin_degree_three_representatives",
+    "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+    "producer_receipt_sha256": hashlib.sha256(receipt_path.read_bytes()).hexdigest(),
+    "base_classes_replayed": 16,
+    "guided_queries_replayed": 64,
+    "plane_section_intersections_replayed": 160,
+    "class_identity": "Two cubic sections of the same line bundle give [D-T]=[B-A].",
+    "boundary": "Exact fixed-origin representatives and frozen guided-law coverage; no generic genus-three group law or useful relation row for this fixed base.",
+}
+(HERE / "type_i_fixed_origin_verification.json").write_text(
+    json.dumps(out, indent=2, sort_keys=True) + "\n"
+)
+print(json.dumps(out, sort_keys=True))

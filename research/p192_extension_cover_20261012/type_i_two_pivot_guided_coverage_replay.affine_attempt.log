@@ -1,0 +1,11 @@
+PIVOT_COVERAGE_REPLAY old16 816 {'--': 178, '+-': 211, '++': 224, '-+': 203}
+Traceback (most recent call last):
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/verify_two_pivot_guided_coverage.py", line 76, in <module>
+    pre = neg(mul(inv2, target, p), p)
+              ~~~^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/verify_adaptive_private_columns.py", line 40, in mul
+    point = add(point, point, modulus)
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/verify_adaptive_private_columns.py", line 24, in add
+    slope = ((3 * x1 * x1 - 3) * pow(2 * y1, -1, modulus)) % modulus
+                                 ~~~^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

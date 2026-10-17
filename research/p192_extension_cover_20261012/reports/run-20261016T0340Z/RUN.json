@@ -1,0 +1,50 @@
+{
+  "artifact_sha256": {
+    ".github/workflows/weak-curve-database.yml": "c483a5c378dfbae96105dc15fb6062eecc30dd2ae8941039868543e4c80c1dcd",
+    "research/p192_extension_cover_20261012/REPORT.md": "0c93e14a163fd5bddb87faced36a720b446962f76ea9b85e2561591d86ed5069",
+    "research/p192_extension_cover_20261012/lean/ResidualDiscriminant.lean": "8eeb19d01d77d71e3e9eccd0c0df02d09631f7d2ef13f87da2e7b397ccca3c09",
+    "research/p192_extension_cover_20261012/lean/lake-manifest.json": "fc1b089030173d9aad95d8dafe3e47168f93fccc14274413e9645acadabbf1b9",
+    "research/p192_extension_cover_20261012/lean/lakefile.toml": "ef1f5a4e450a9fca86e3805f1e2e5d44bcf5f9529bf6512dcedebb7877160a67",
+    "research/p192_extension_cover_20261012/lean/lean-toolchain": "d5edba4e4b8faad9c1baeadb265716d20d03be4d1a2647dc5e35b0c0325bea7b",
+    "research/p192_extension_cover_20261012/lean/residual-discriminant-axioms-20261016.log": "365af30939d796d27ddf453001a848cb4b8a0bc96c2115a340979a6db1a0049f",
+    "research/p192_extension_cover_20261012/lean/residual-discriminant-build-20261016.log": "1a00c36b2d70457dddd49ba35fd4af1a335b405df056f774fbea60239c655960",
+    "research/p192_extension_cover_20261012/lean/residual-discriminant-fresh-20261016.log": "b779e1555a46a110a4ec9123c3041bdb267e3d8b0e0ee628723c23c47a1cc4ec",
+    "research/p192_extension_cover_20261012/line_full_residual_discriminant.py": "cffbf69a5301be8c90016b90c0664558c09a66598f9ba2ac860d30a06a9d0d22",
+    "research/p192_extension_cover_20261012/reports/run-20261016T0340Z/REPORT.md": "bd61a5100223dd0b9373be260e86b91955ee3107bdaf2e04f0ab79b24f4085d9",
+    "research/p192_extension_cover_20261012/type_i_line_base_points.tsv": "eba1cafb724ce2eec84be550762fb10574980f77f4997143d5c58f0c9467d82c",
+    "research/p192_extension_cover_20261012/type_i_line_full_residual_discriminant.json": "86d9a6580b1819b1b44b4890e62188c46c652c8428a8519d24b7afef6032339d",
+    "research/p192_extension_cover_20261012/type_i_line_full_residual_discriminant.log": "291f1e62b32547715b152b6d860ef6f417bcdd4692991f12180e4efa7356b9bb",
+    "research/p192_extension_cover_20261012/type_i_line_full_residual_discriminant_verification.json": "ae75b224df6bddf6043d830e4ed5c944d8f6f3f9f12ff1d14cb6a95e84b6b4f2",
+    "research/p192_extension_cover_20261012/type_i_line_full_residual_discriminant_verification.log": "59c672f16d9634915b88e2093e4501f3112a02acd347a11e709d39c96bf25b51",
+    "research/p192_extension_cover_20261012/type_i_line_new_points.tsv": "2392f42f5fe8ac9d253c321c03312af4a3a287854b128d0019d7388acb5faad5",
+    "research/p192_extension_cover_20261012/type_i_plane_quartic.json": "b16122e364056b30e46971b18084f7bfa6c0f6de2fa63f0cae63a1229dd224b3",
+    "research/p192_extension_cover_20261012/verify_line_full_residual_discriminant.py": "81a9397a38db675999cc09fe27136a38a265ac918ad23d12ea98b04479a0a8f3",
+    "research/weak_curve_leaderboard_20261012/criteria.json": "4da80949cbc8da0bd22210992d308f369945c2404915146880b77ba75697f218",
+    "website/weakcurves/dist/criteria.json": "4da80949cbc8da0bd22210992d308f369945c2404915146880b77ba75697f218"
+  },
+  "boundary": "Residual rational splitting, projected point reuse, relation rank, known-scalar query yield and target cost require separate measurements.",
+  "counts": {
+    "degree_below_four": 0,
+    "pairs": 49247850,
+    "residual_double_root": 0,
+    "tangent_at_first": 0,
+    "tangent_at_second": 0,
+    "vertical_pairs": 0
+  },
+  "direct_substitution_controls": 11040,
+  "field_prime": "6277101735386680763835789423207666416083908700390324961279",
+  "parent_commit": "4b3b2678b556f55ba80dfae2340fc35600cfb15c",
+  "proof_status": "abstract_quartic_factor_and_quadratic_simplicity_fresh_checked; concrete_all_pair_census_independently_replayed",
+  "publication_state": "local_uncommitted_pending_git_approval",
+  "replay_commands": [
+    "python3 -B research/p192_extension_cover_20261012/line_full_residual_discriminant.py",
+    "python3 -B research/p192_extension_cover_20261012/verify_line_full_residual_discriminant.py",
+    "cd research/p192_extension_cover_20261012/lean && lake build ResidualDiscriminant",
+    "cd research/p192_extension_cover_20261012/lean && lake env lean ResidualDiscriminant.lean",
+    "cd research/p192_extension_cover_20261012/lean && lake env leanchecker --fresh --verbose ResidualDiscriminant"
+  ],
+  "schema_version": 1,
+  "selected_points": 9925,
+  "status": "verified_full_p192_selected_pair_transversality",
+  "unordered_pairs": 49247850
+}

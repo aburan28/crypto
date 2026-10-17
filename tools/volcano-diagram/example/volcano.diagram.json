@@ -1,0 +1,439 @@
+{
+ "schema": "volcano-diagram/v2",
+ "ell": 2,
+ "depth": 3,
+ "title": "Measured 2-isogeny volcano heat map \u00b7 p = 146833024135393 \u00b7 one instance, 100 paired walk seeds per curve",
+ "subtitle": "run-20261017T0049Z",
+ "metrics": [
+  {
+   "key": "ops",
+   "title": "native rho \u00b7 mean iterations",
+   "label": "group operations per solve"
+  },
+  {
+   "key": "time",
+   "title": "native rho \u00b7 mean time",
+   "label": "ms per solve"
+  }
+ ],
+ "vertices": [
+  {
+   "id": 0,
+   "label": "v0",
+   "level": 3,
+   "nbrs": [
+    1
+   ],
+   "values": {
+    "ops": 518706.45,
+    "time": 384.54241752999985
+   },
+   "highlight": "root"
+  },
+  {
+   "id": 1,
+   "label": "v1",
+   "level": 2,
+   "nbrs": [
+    0,
+    2,
+    3
+   ],
+   "values": {
+    "ops": 521120.87,
+    "time": 389.3736840200001
+   },
+   "highlight": null
+  },
+  {
+   "id": 2,
+   "label": "v2",
+   "level": 1,
+   "nbrs": [
+    1,
+    4,
+    5
+   ],
+   "values": {
+    "ops": 535977.71,
+    "time": 398.4781398
+   },
+   "highlight": null
+  },
+  {
+   "id": 3,
+   "label": "v3",
+   "level": 3,
+   "nbrs": [
+    1
+   ],
+   "values": {
+    "ops": 455942.67,
+    "time": 348.25151495999984
+   },
+   "highlight": null
+  },
+  {
+   "id": 4,
+   "label": "v4",
+   "level": 2,
+   "nbrs": [
+    2,
+    6,
+    7
+   ],
+   "values": {
+    "ops": 481747.2,
+    "time": 353.2741557699999
+   },
+   "highlight": null
+  },
+  {
+   "id": 5,
+   "label": "v5",
+   "level": 0,
+   "nbrs": [
+    2,
+    8,
+    9
+   ],
+   "values": {
+    "ops": 477565.21,
+    "time": 364.81101154000004
+   },
+   "highlight": null
+  },
+  {
+   "id": 6,
+   "label": "v6",
+   "level": 3,
+   "nbrs": [
+    4
+   ],
+   "values": {
+    "ops": 466621.9,
+    "time": 352.28234743999997
+   },
+   "highlight": null
+  },
+  {
+   "id": 7,
+   "label": "v7",
+   "level": 3,
+   "nbrs": [
+    4
+   ],
+   "values": {
+    "ops": 515340.71,
+    "time": 387.19625286
+   },
+   "highlight": null
+  },
+  {
+   "id": 8,
+   "label": "v8",
+   "level": 0,
+   "nbrs": [
+    5,
+    10,
+    11
+   ],
+   "values": {
+    "ops": 561535.77,
+    "time": 423.9608330600001
+   },
+   "highlight": null
+  },
+  {
+   "id": 9,
+   "label": "v9",
+   "level": 1,
+   "nbrs": [
+    5,
+    12,
+    13
+   ],
+   "values": {
+    "ops": 488821.09,
+    "time": 369.45112091000004
+   },
+   "highlight": null
+  },
+  {
+   "id": 10,
+   "label": "v10",
+   "level": 1,
+   "nbrs": [
+    8,
+    14,
+    15
+   ],
+   "values": {
+    "ops": 515712.3,
+    "time": 399.9212667
+   },
+   "highlight": null
+  },
+  {
+   "id": 11,
+   "label": "v11",
+   "level": 1,
+   "nbrs": [
+    8,
+    16,
+    17
+   ],
+   "values": {
+    "ops": 512489.33,
+    "time": 400.30925762
+   },
+   "highlight": null
+  },
+  {
+   "id": 12,
+   "label": "v12",
+   "level": 2,
+   "nbrs": [
+    9,
+    18,
+    19
+   ],
+   "values": {
+    "ops": 490572.44,
+    "time": 364.12009203999986
+   },
+   "highlight": null
+  },
+  {
+   "id": 13,
+   "label": "v13",
+   "level": 2,
+   "nbrs": [
+    9,
+    20,
+    21
+   ],
+   "values": {
+    "ops": 455910.45,
+    "time": 337.7347664999999
+   },
+   "highlight": null
+  },
+  {
+   "id": 14,
+   "label": "v14",
+   "level": 2,
+   "nbrs": [
+    10,
+    22,
+    23
+   ],
+   "values": {
+    "ops": 528028.86,
+    "time": 394.5633381500001
+   },
+   "highlight": null
+  },
+  {
+   "id": 15,
+   "label": "v15",
+   "level": 2,
+   "nbrs": [
+    10,
+    24,
+    25
+   ],
+   "values": {
+    "ops": 479298.8,
+    "time": 358.34607582999996
+   },
+   "highlight": null
+  },
+  {
+   "id": 16,
+   "label": "v16",
+   "level": 2,
+   "nbrs": [
+    11,
+    26,
+    27
+   ],
+   "values": {
+    "ops": 500168.77,
+    "time": 380.68359614
+   },
+   "highlight": null
+  },
+  {
+   "id": 17,
+   "label": "v17",
+   "level": 2,
+   "nbrs": [
+    11,
+    28,
+    29
+   ],
+   "values": {
+    "ops": 438598.92,
+    "time": 325.23858730999996
+   },
+   "highlight": null
+  },
+  {
+   "id": 18,
+   "label": "v18",
+   "level": 3,
+   "nbrs": [
+    12
+   ],
+   "values": {
+    "ops": 488879.12,
+    "time": 366.85645747
+   },
+   "highlight": null
+  },
+  {
+   "id": 19,
+   "label": "v19",
+   "level": 3,
+   "nbrs": [
+    12
+   ],
+   "values": {
+    "ops": 487112.82,
+    "time": 372.94769045
+   },
+   "highlight": null
+  },
+  {
+   "id": 20,
+   "label": "v20",
+   "level": 3,
+   "nbrs": [
+    13
+   ],
+   "values": {
+    "ops": 484555.77,
+    "time": 360.91590527
+   },
+   "highlight": null
+  },
+  {
+   "id": 21,
+   "label": "v21",
+   "level": 3,
+   "nbrs": [
+    13
+   ],
+   "values": {
+    "ops": 482311.02,
+    "time": 359.29998384
+   },
+   "highlight": null
+  },
+  {
+   "id": 22,
+   "label": "v22",
+   "level": 3,
+   "nbrs": [
+    14
+   ],
+   "values": {
+    "ops": 488296.61,
+    "time": 370.54219934
+   },
+   "highlight": null
+  },
+  {
+   "id": 23,
+   "label": "v23",
+   "level": 3,
+   "nbrs": [
+    14
+   ],
+   "values": {
+    "ops": 472360.52,
+    "time": 350.0198030100001
+   },
+   "highlight": null
+  },
+  {
+   "id": 24,
+   "label": "v24",
+   "level": 3,
+   "nbrs": [
+    15
+   ],
+   "values": {
+    "ops": 509386.76,
+    "time": 380.5691478600001
+   },
+   "highlight": null
+  },
+  {
+   "id": 25,
+   "label": "v25",
+   "level": 3,
+   "nbrs": [
+    15
+   ],
+   "values": {
+    "ops": 508239.96,
+    "time": 372.9829149600001
+   },
+   "highlight": null
+  },
+  {
+   "id": 26,
+   "label": "v26",
+   "level": 3,
+   "nbrs": [
+    16
+   ],
+   "values": {
+    "ops": 499807.98,
+    "time": 371.92069768999994
+   },
+   "highlight": null
+  },
+  {
+   "id": 27,
+   "label": "v27",
+   "level": 3,
+   "nbrs": [
+    16
+   ],
+   "values": {
+    "ops": 525485.0,
+    "time": 388.9191065499999
+   },
+   "highlight": null
+  },
+  {
+   "id": 28,
+   "label": "v28",
+   "level": 3,
+   "nbrs": [
+    17
+   ],
+   "values": {
+    "ops": 520153.09,
+    "time": 397.92387642
+   },
+   "highlight": null
+  },
+  {
+   "id": 29,
+   "label": "v29",
+   "level": 3,
+   "nbrs": [
+    17
+   ],
+   "values": {
+    "ops": 519236.22,
+    "time": 391.72166479000015
+   },
+   "highlight": null
+  }
+ ]
+}

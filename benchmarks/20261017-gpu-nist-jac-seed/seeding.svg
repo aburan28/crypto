@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="300" viewBox="0 0 560 300" font-family="sans-serif">
+  <rect width="560" height="300" fill="#ffffff"/>
+  <text x="280" y="28" text-anchor="middle" font-size="17" font-weight="bold" fill="#111">gpu/nist P-256 walk seeding: ms per a·G + b·Q</text>
+  <text x="280" y="48" text-anchor="middle" font-size="12" fill="#555">double_scalar_mul, random 256-bit scalars, g++ -O3, L0 shared VM (400 seeds)</text>
+  <!-- axes -->
+  <line x1="90" y1="240" x2="520" y2="240" stroke="#333" stroke-width="1.5"/>
+  <line x1="90" y1="70" x2="90" y2="240" stroke="#333" stroke-width="1.5"/>
+  <!-- scale: 11.53 ms -> 160 px; px per ms = 160/11.53 = 13.88 -->
+  <!-- affine bar: 11.53 ms -->
+  <rect x="150" y="80" width="90" height="160" fill="#c0504d"/>
+  <text x="195" y="74" text-anchor="middle" font-size="13" fill="#111">11.53 ms</text>
+  <text x="195" y="258" text-anchor="middle" font-size="13" fill="#111">affine (old)</text>
+  <text x="195" y="274" text-anchor="middle" font-size="11" fill="#777">~750 inversions</text>
+  <!-- jacobian bar: 0.66 ms -> 9 px -->
+  <rect x="360" y="231" width="90" height="9" fill="#4f81bd"/>
+  <text x="405" y="224" text-anchor="middle" font-size="13" fill="#111">0.66 ms</text>
+  <text x="405" y="258" text-anchor="middle" font-size="13" fill="#111">Jacobian (new)</text>
+  <text x="405" y="274" text-anchor="middle" font-size="11" fill="#777">1 inversion</text>
+  <!-- speedup annotation -->
+  <text x="300" y="150" text-anchor="middle" font-size="15" font-weight="bold" fill="#2a7">17.4× faster · bit-identical (0 mismatches)</text>
+  <text x="70" y="84" text-anchor="end" font-size="11" fill="#555">12</text>
+  <text x="70" y="244" text-anchor="end" font-size="11" fill="#555">0</text>
+</svg>
