@@ -8,7 +8,7 @@
 
 ## Problem
 
-The full release library suite cannot be called green: the unchanged
+The parallel release library suite still fails: the unchanged
 `cryptanalysis::jv_cover::tests::nagao_finds_planted_six_sums_and_agrees_with_the_oracle`
 times out in a parallel full run while passing in isolation. Do not present
 the isolated pass as a passing full suite or patch the scientific assertions
@@ -43,9 +43,16 @@ volcano control/pilot/audits. The planned serial restart was not launched:
 automatic permission review of stopping/restarting the active run timed out;
 the current run was allowed to finish instead.
 
+A subsequent full serial run with local networking permitted passes all
+4,236 tests, with zero failures and 117 existing ignored tests. The Joux–Vitse
+assertion and solver budgets are unchanged. The full receipt is
+[`watchdog-repair/release-full-serial.log`](../research/full_volcano_graphwide_ic_20261017/execution/watchdog-repair/release-full-serial.log).
+This establishes the serial validation configuration; it does not explain or
+resolve the parallel failure or qualify a runtime comparison.
+
 ## What would unblock it
 
-- [ ] Run the complete unchanged release suite serially on an otherwise idle
+- [x] Run the complete unchanged release suite serially on an otherwise idle
   host with local networking permitted, retaining all tests and existing
   solver budgets, and obtain a full passing receipt.
 - [ ] Reproduce the parallel timeout on the base branch and instrument waiting
@@ -66,4 +73,4 @@ Do not run this heavy suite alongside measured campaign sessions.
 ## Resolution and history
 
 2026-10-17: recorded both the full-run timeout and passing isolated control.
-Unresolved; no all-suite pass or qualified runtime conclusion is asserted.
+The full serial suite now passes; the parallel cause and any qualified runtime conclusion remain unresolved.

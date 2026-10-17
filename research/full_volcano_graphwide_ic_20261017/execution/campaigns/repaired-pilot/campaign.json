@@ -1,0 +1,30 @@
+{
+  "created_ms": "1792217092937",
+  "driver_binary_sha256": "b8b489c7225c64ed492ffce39286c995f5ca820960956cf706c0d3110f5bdd2d",
+  "driver_source_sha256": "4be4a900afee3f7256c634b9af45bc0c9f65ad134073dbdcaaff99634cf4ec8d",
+  "ecbench_sha256": "35d89073f4d666b094c213a1d31b0c819b63600123e067c111af3c947d7609a9",
+  "finite_field_ic": "UNIMPLEMENTED_FOR_ACTUAL_EMBEDDING_DEGREES",
+  "inputs": [
+    {
+      "path": "/workspace/volcano_graphwide_ic_inputs_20261017/two-workloads.jsonl",
+      "sha256": "37d9e0adf75fd429be52e3cfff00194a6f3c7bac362177dde272fbf938730e97"
+    },
+    {
+      "path": "/workspace/volcano_graphwide_ic_inputs_20261017/three-workloads.jsonl",
+      "sha256": "a6ac094f7aa3deea7d560cd108a5e198edfc98517c192eb9bfa051f6ca47f9a0"
+    },
+    {
+      "path": "/workspace/volcano_graphwide_ic_inputs_20261017/mixed-workloads.jsonl",
+      "sha256": "d28679bb906a0e9dd3a4c92d5cacb02fcf843f14dd26967559714ad72899c279"
+    }
+  ],
+  "mode": "pilot",
+  "protocol_sha256": "0172c80c668be5d25ddfe41d53831763a04f548fd3e8021ff315eee38c9f5198",
+  "queue_sha256": "8d4df58971dbdf4d0a629947eea9880908caca222fbcf4402866ab16829588a3",
+  "representation_registration": "SEE_INPUT; NOT_PROMOTED",
+  "schema": "volcano-ic-campaign/v1",
+  "source_head": "2bf7700b73b3a84810aa86cb29837d1359b28322",
+  "source_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "vertices_planned": 3,
+  "wall_claim": "UNQUALIFIED_DIAGNOSTIC"
+}

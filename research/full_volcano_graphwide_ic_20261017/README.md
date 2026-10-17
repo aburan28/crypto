@@ -82,3 +82,13 @@ references; then cost/provision and execute the complete frozen matrix.
 The original full matrix has not launched. The dev bounded survey is paused;
 optimized continuation and current coverage are recorded separately. The workload
 archive is labeled inputs/NOT_RUN and is not a set of benchmark results.
+
+
+Original C progress is now measured separately: [3,738 verified prefix targets](execution/finite-field-k1-evidence/README.md)
+using a genuine k=1 Tate/Miller and projected-prime finite-field relation
+method, with largest prime order 7. Conservative local certificates identify
+517 vertices across 24 conductor strata, 2,985,984–967,458,816, and leave
+1,352 vertices unknown. Source conductor is 967,458,816. This does not complete
+C's 1,934,901,248 vertices or all 165 strata. The [Drive dataset](https://drive.google.com/file/d/1Xi7mjLCskYEauXlwzAfQQtOoHw6waop-/view)
+retains all raw/re-executed data, native min/max/means, exact binaries and report.
+The other large-extension finite-field backends remain unimplemented.

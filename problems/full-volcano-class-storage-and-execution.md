@@ -99,15 +99,18 @@ completely factors the five orders and computes exact largest-prime embedding
 degrees. For A/B/C/D/E those degrees are 238827252966622 / 341460 / 1 /
 101139959082 / 17426350368. These are model-specific, not the three additional
 classes' degrees. Original C has largest prime subgroup 7, not a 61-bit prime
-subgroup. A scoped k=1 diagnostic is implemented separately; its eventual
-execution would not establish all C vertices or the other prime-power parts.
+subgroup. The scoped k=1 diagnostic now verifies all 3,738 public targets over C's
+1,869 known prefix vertices; all counters/outcomes reproduce. Native local
+bounds certify 517 vertices / 24 strata, with source conductor 967,458,816,
+and leave 1,352 conductors unknown. Its projected-prime two-summand relation
+method is not NFS/integer-smoothness IC. This establishes neither all C
+vertices nor other prime-power parts or large-extension backends.
 The byte counts in that inventory refer only to specified dense extension-field
 representations, not universal lower bounds or impossibility results.
 
 The first optimized survey stopped after 70 audited vertices because a late
 child report and watchdog status were combined inconsistently. Its failed audit
-is preserved; the runner repair does not weaken the auditor. A new campaign
-requires fresh control/pilot gates. This is a recording defect, separate from
+is preserved; the runner repair does not weaken the auditor. Fresh repaired control/pilot gates now pass: 58 completed pairs match and two censored pairs remain incomparable. The separate whole queue has its own launch receipt/ledger. This is a recording defect, separate from
 resource and finite-field implementation gaps.
 
 ## What would unblock it

@@ -180,12 +180,53 @@ Validation follow-up: the restricted full release suite has 4,225 passes, ten
 failures and 117 existing ignored tests. All 37 networking tests pass with
 local networking permitted; the exact Joux–Vitse test passes alone in 2.55 s.
 Its parallel whole-suite timeout is a separate [open validation problem](../../../problems/release-suite-jv-nagao-wall-budget.md).
-The full suite is not reported green. Frozen campaign controls/audits are
+That historical parallel result was not green. Frozen campaign controls/audits are
 separate evidence; no solver assertion or sealed record was weakened.
 
 The permitted full parallel release rerun finished with **4,234 passed, one
 Joux–Vitse wall-budget failure and 117 existing ignored tests**; its full log
 is `evidence/merged-release-tests-permitted.log`. All networking failures
 were resolved by the appropriate permissions. The isolated exact Joux–Vitse
-test passes; the whole-suite failure remains open and prevents an all-green
-validation statement. No further heavy validation runs alongside the worker.
+test passes. The later full **serial** release suite passes **4,236 tests,
+zero failures and 117 existing ignored tests**; see
+[the full serial receipt](watchdog-repair/release-full-serial.log). The parallel
+cause remains open; no assertion or solver budget was changed. Heavy checks
+finished before the repaired campaign's measured runs.
+
+
+## Repaired runner and original C progress
+
+Fresh repaired control/pilot: **60 attempts, 40 verified, 18 exhausted,
+2 timeouts**. All four capsules pass audits and successful/exhausted replay.
+**58 completed baseline pairs match exactly; 2 censored pairs are not compared**.
+[QA archive](https://drive.google.com/file/d/12Q0z7VUCWJuCgY5ofbW5Dof3V15FZ4Th/view),
+[inspected report](../reports/run-20261017T0628Z-repaired-gates/report.pdf),
+[delivery receipt](delivery-repaired-qa.json). These gates permit the separately
+frozen repaired whole queue; actual launch and progress have their own receipt.
+
+Original C now has a genuine k=1 Tate/Miller plus finite-field projected-prime
+relation diagnostic at **all 1,869 known prefix vertices**: **3,738/3,738
+public targets verified**, **15,042 equations / 9,171 queries**. Re-execution
+matches every outcome, equation and operation counter after excluding elapsed
+fields. The largest prime subgroup is **7**, not 61 bits. This is not NFS or
+integer-smoothness IC and establishes no scaling or fastest-method claim.
+
+[Local floor-distance bounds](LOCAL_STRATA_PROTOCOL.md), calibrated against
+all three complete graphs at five visibility cuts, identify **517 vertices
+across 24 conductor strata**, **2,985,984–967,458,816**. Source conductor is
+**967,458,816**. The other **1,352 vertices** retain unknown conductor. Native
+per-stratum summaries preserve that null bucket, all statuses and present n.
+This is not C's full **1,934,901,248-vertex / 165-stratum** class.
+[Dataset and binaries](https://drive.google.com/file/d/1Xi7mjLCskYEauXlwzAfQQtOoHw6waop-/view),
+[report](../reports/run-20261017T0626Z-finite-field-C-prefix/report.pdf),
+[evidence and reproduction](finite-field-k1-evidence/README.md),
+[delivery receipt](delivery-finite-field-C.json).
+
+All C timing observations are unqualified. Per-target intervals include
+setup/projection/pairing/base/relations/matrix/verification; process startup,
+input loading and result serialization/I/O are outside that interval. Bash
+process time is separate; peak RSS was not measured. Native operation counts
+retain explicit unpriced work. The two source-model targets stay separate
+from the prefix population. Exact representation registration, independent
+implementation replay, transported targets and full composite-order work
+remain open. Canonical fastest-method claims are unchanged.

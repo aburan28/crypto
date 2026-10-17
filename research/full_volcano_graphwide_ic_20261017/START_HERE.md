@@ -6,6 +6,11 @@ measurements have different coverage.
 
 | Artifact | What it contains |
 | --- | --- |
+| [Original C prefix dataset](https://drive.google.com/file/d/1Xi7mjLCskYEauXlwzAfQQtOoHw6waop-/view) | 1,869 known C vertices; 3,738 verified finite-field relation targets, exact re-execution, binaries, native statistics, local certificates, calibration graphs and report. Largest prime subgroup 7. NOT full C class. |
+| [Original C report](https://drive.google.com/file/d/1jqNQUqu2uxOU3n7NOn1jOYFQaAD9We4L/view) | Four inspected pages. Local exact conductors: 517 vertices / 24 strata, 2,985,984–967,458,816; 1,352 unknown. Source conductor 967,458,816. |
+| [C per-target operations CSV](https://drive.google.com/file/d/1B4XZNFrlzgIzZT1vI7gq6kJs1MfWFFQf/view) | All 3,738 observations with phase/native counters, unqualified elapsed intervals and local conductor annotations. |
+| [Repaired runner QA](https://drive.google.com/file/d/12Q0z7VUCWJuCgY5ofbW5Dof3V15FZ4Th/view) | New control and pilot: 60 attempts (40 verified, 18 exhausted, 2 timeouts); 58 completed baseline matches, two censored comparisons. Whole-queue execution is separate. |
+| [Stopped release checkpoint](https://drive.google.com/file/d/1vVW3fCYqdnl3Ue2ef1FckbSTODbg-MTs/view) | 70 audited vertices / all 51 strata, 1,120 accepted attempts; extra failed 16-record capsule preserved and excluded from accepted means. Do not resume its old runner. |
 | [Interactive graph explorer](https://drive.google.com/file/d/13AQHFuLnePIfbbS9XbaXNueJY-JMyKCE/view) | All 24,823 vertices, 51 conductor strata and 69,300 recorded directed kernel maps. Download the HTML and open it; Drive preview does not run it. |
 | [99-vertex measured archive](https://drive.google.com/file/d/1hLVWVad2SrgHaBn6U5iSyqnKbx5cAkeY/view) | Complete three graph databases, exact frozen dev binaries/source, full 24,823-row queue, execution ledger, 99 sealed sessions, replay receipts, native statistics and report. |
 | [Three-page report](https://drive.google.com/file/d/1h_G5uJZYYqVzBL3_kynRdYZvE8vjJu9z/view) | Measured coverage and yield/cost summaries over all 51 strata; every page inspected. |
@@ -37,9 +42,11 @@ subgroups, build profiles or repeated control/pilot targets as one population.
 The optimized control/pilot have 60 attempts: 40 verified, 18 exhausted and
 two timeouts. All 56 comparable completed deterministic profile pairs match
 exactly; four baseline-censored pairs have no final counts to compare.
-The optimized full-queue survey has its own binary/ledger and 24-hour/2-GiB
-guard; its execution status is in `execution/optimized-continuation/` and the
-local ledger. Its results are separate from this dev snapshot. No runtime
+The first optimized survey halted on a failed audit after 70 accepted vertices;
+its late-message watchdog recording defect is repaired without relabeling old
+records or weakening the auditor. A separately frozen repaired whole queue
+uses a new binary/ledger and 24-hour/2-GiB guard; actual launch/progress require
+its separate launch receipt and local ledger. Its results are separate from this dev snapshot. No runtime
 speedup, fastest-method or asymptotic claim is established by these runs.
 
 The graph CLI is `crypto isogeny class`. For a supported ordinary prime-field
@@ -54,9 +61,19 @@ Graph completeness is for Fp-isomorphism vertices and the declared finite
 degree sets, not other primes or infinitely many compositions. The original
 A–E graphs/campaign, full eight-target/five-round/million-trial matrix, exact
 per-vertex representation registration, transported targets, composite PH and
-independent replay remain open. Finite-field IC for the actual embedding
-degrees is not implemented; the k=2 MOV teaching example is not that backend.
+independent replay remain open. The C k=1 diagnostic above is implemented and measured; finite-field IC for
+the other actual embedding degrees remains unimplemented. The k=2 MOV teaching
+example is not those backends. The C method is projected-prime subgroup
+relations, not NFS or integer-smoothness IC.
 
 Local extraction/hash checks and deterministic archive repacking pass. Drive
 metadata confirms names, sizes and parent folder; remote whole-file hashes
 were not checked. Delivery JSON files retain exact byte counts and SHA-256s.
+
+
+Original A–E total 7,833,658,967 expected vertices and 515 strata. Historical
+B is separately complete; A/C/D/E remain incomplete. Google Drive deliveries
+work. This runtime's S3 probe found no AWS identity, so no S3 upload is claimed.
+The repository's reports-to-S3 workflow runs after merge to main; it does not
+provide a larger random-access SQLite working volume. A connected existing
+worker/volume and S3 identity remain required for those large runs.

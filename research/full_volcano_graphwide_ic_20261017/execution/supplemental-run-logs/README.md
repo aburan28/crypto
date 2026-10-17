@@ -18,3 +18,10 @@ binaries and source, is separately delivered on Drive; see
 [`../delivery-99.json`](../delivery-99.json). The optimized control/pilot have
 separate capsules and a separate native summary. No debug/release pooling is
 performed.
+
+The repaired control and pilot have four new byte-preserved loose capsules
+under `../campaigns/repaired-control/` and `../campaigns/repaired-pilot/`.
+The native verifier and browser resolve those paths, so the same exception
+applies. Their actual native counts are in `../repaired-qa-summary-v2/`; they
+are not pooled with earlier repeated workloads. C's standalone diagnostic
+raw tree is separately archived at `../finite-field-k1-evidence/runs.tar.xz`.

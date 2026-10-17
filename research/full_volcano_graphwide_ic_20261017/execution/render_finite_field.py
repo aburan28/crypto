@@ -166,8 +166,8 @@ the checked destination equation before matrix insertion. Full rank is three.
 Native per-target end-to-end elapsed interval: setup/order factorization,
 point search/projection, pairing, cold factor base, collection/matrix and
 destination/EC verification. Input file loading, batch serialization and
-output I/O are outside that per-target interval; complete process resource
-logs are separate. All observations are unqualified; there is no external
+output I/O are outside that per-target interval. Bash process elapsed/user/system
+logs are separate; peak RSS was not measured because GNU time is absent. All observations are unqualified; there is no external
 reference or fastest-method claim.
 #table(columns: (.5fr,1fr,1fr,1fr), inset: 4pt,
  [n], [Min ns], [Mean ns], [Max ns],
@@ -187,9 +187,9 @@ multiplication/square counts: pricing those inversions again would double count.
 Native EC field counts are separate from the explicit Miller/destination work.
 There is no common-cost conversion or complete end-to-end GAE claim.
 
-The three complete additional classes, full A--E graphs, all requested strata,
-full benchmark matrix, exact representation registration and large-extension
-finite-field backends remain separate obligations. The original graph explorer
+The three complete additional classes are separate datasets. Full A--E graph
+completion, all-vertex/full-matrix benchmarks, all requested strata, exact
+representation registration and large-extension finite-field backends remain open. The original graph explorer
 and fastest-method scoreboards are unchanged: this diagnostic establishes no
 new complete graph, general algebraic identity or admitted speed comparison.
 
