@@ -169,7 +169,7 @@ pub fn check_order(
 pub const POINT_ORDER_TRIES: u64 = 16;
 
 /// For a GF(p^k) model with no usable generator: take points at fixed
-/// pseudo-random x-coordinates ([`FpK::sample`]), check
+/// pseudo-random x-coordinates ([`Field::sample`]), check
 /// `[N]P = O`, and compute each point's exact order from the
 /// factorisation of `N`.  Once the lcm `L` of those orders exceeds
 /// `4√q`, `N` is the only multiple of `L` in the Hasse interval, so it is
